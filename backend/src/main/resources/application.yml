@@ -1,0 +1,27 @@
+server:
+  port: 8443
+  ssl:
+    enabled: true
+    client-auth:  need
+  error:
+    whitelabel:
+      enabled: false
+#skills:
+#  vue:
+#    entry:
+#      blackliss: /api,/admin,/app,/server,/static,/favicon.ico,/icons,/performLogin,/createAccount
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+  profiles:
+    active: default
+logging:
+  level:
+    org.hibernate: INFO
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+---
+spring:
+  profiles: default
+---

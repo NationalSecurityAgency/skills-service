@@ -1,0 +1,30 @@
+package skills.service.icons
+
+import groovy.transform.CompileStatic
+import org.springframework.stereotype.Component
+import skills.storage.model.CustomIcon
+/**
+ * Created with IntelliJ IDEA.
+ * Date: 11/30/18
+ * Time: 11:47 AM
+ */
+@Component
+@CompileStatic
+class CssGenerator {
+    String cssify(Collection<CustomIcon> customIcons) {
+
+        String css = ""
+
+        customIcons?.each{
+            String cssClassName = IconCssNameUtil.getCssClass(it.projectId, it.filename)
+            List<String> lines = []
+            String cssClass = ".${cssClassName} {"
+            lines.add(cssClass)
+            lines.add("\tbackground-image: url(\"${it.dataUri}\");".toString())
+            lines.add("}".toString())
+            css += "\n${lines.join('\n')}\n"
+        }
+
+        return css
+    }
+}

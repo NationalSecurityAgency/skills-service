@@ -1,0 +1,41 @@
+/target/
+!.mvn/wrapper/maven-wrapper.jar
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+/build/
+
+.idea
+*.iml
+target
+*.swp
+target/**
+target
+*.jar
+.idea
+*.class
+*.log
+/node_modules
+rebel.xml
+rebel.xml.lock
+package-lock.json
+backend/src/main/resources/public/**

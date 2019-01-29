@@ -1,0 +1,8 @@
+import axios from 'axios';
+
+export default {
+  getUserUniqueSkillsCount(projectId, userId) {
+    return axios.get(`/admin/projects/${projectId}/users/${userId}/skillsCount`)
+      .then(response => response.data);
+  },
+};
