@@ -4,19 +4,19 @@
 const url = require('url');
 const path = require('path')
 const fs = require ('fs')
-const proxySslKeyLocation = process.env.WEBPACK_DEV_SERVER_PROXY_TABLE_SSL_KEY_PATH
-const proxySslCertLocation = process.env.WEBPACK_DEV_SERVER_PROXY_TABLE_SSL_CERT_PATH
+// const proxySslKeyLocation = process.env.WEBPACK_DEV_SERVER_PROXY_TABLE_SSL_KEY_PATH
+// const proxySslCertLocation = process.env.WEBPACK_DEV_SERVER_PROXY_TABLE_SSL_CERT_PATH
 const redirectRegex = /^201|30(1|2|7|8)$/;
 
 const proxyConf = {
   target: {
     host: 'localhost',
-    port: 8443,
-    protocol: 'https:',
-    key: fs.existsSync(proxySslKeyLocation) ? fs.readFileSync(proxySslKeyLocation) : '',
-    cert: fs.existsSync(proxySslCertLocation) ?fs.readFileSync(proxySslCertLocation) : ''
+    port: 8080,
+    protocol: 'http:',
+    // key: fs.existsSync(proxySslKeyLocation) ? fs.readFileSync(proxySslKeyLocation) : '',
+    // cert: fs.existsSync(proxySslCertLocation) ?fs.readFileSync(proxySslCertLocation) : ''
   },
-  changeOrigin: true,
+  changeOrigin: false,
   secure: false, // do not verify  the SSL Cert
   onProxyRes(proxyRes, req, res) {
     if (proxyRes.headers['location'] && redirectRegex.test(proxyRes.statusCode)) {
@@ -46,7 +46,7 @@ module.exports = {
 
     // Various Dev Server settings
     host: 'localhost', // can be overwritten by process.env.HOST
-    port: 8080, // can be overwritten by process.env.PORT, if port is in use, a free one will be determined
+    port: 8082, // can be overwritten by process.env.PORT, if port is in use, a free one will be determined
     autoOpenBrowser: false,
     errorOverlay: true,
     notifyOnErrors: true,
