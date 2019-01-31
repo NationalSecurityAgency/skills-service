@@ -1,7 +1,7 @@
 <template>
   <div>
     <loading-container v-bind:is-loading="isLoading">
-      <skills-table :skills-prop="skills" :is-top-level="true" :project-id="projectId" :subject-id="subjectId">
+      <skills-table :skills-prop="skills" :is-top-level="true" :project-id="projectId" :subject-id="subjectId" v-on:skills-change="skillsChanged">
         <div slot="skillsTableTitle">
           <h1 class="title is-2">Skills</h1>
         </div>
@@ -44,6 +44,9 @@
           .catch((e) => {
             this.serverErrors.push(e);
         });
+      },
+      skillsChanged(skillId) {
+        this.$emit('skills-change', skillId);
       },
     },
   };

@@ -55,7 +55,7 @@
           {name: 'Stats', iconClass: 'fa-chart-bar'},
         ]">
         <template slot="Skills">
-          <skills :project-id="projectId" :subject-id="subjectId"/>
+          <skills :project-id="projectId" :subject-id="subjectId" v-on:skills-change="loadSubject"/>
         </template>
         <template slot="Level Definitions">
           <levels :project-id="projectId" :subject-id="subjectId"/>
@@ -121,10 +121,10 @@
       this.subjectId = this.$route.params.subjectId;
     },
     mounted() {
-      this.loadBadge();
+      this.loadSubject();
     },
     methods: {
-      loadBadge() {
+      loadSubject() {
         this.isLoading = true;
         axios.get(`/admin/projects/${this.projectId}/subjects/${this.subjectId}`)
           .then((response) => {
