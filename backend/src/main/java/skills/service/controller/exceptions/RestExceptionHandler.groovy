@@ -17,13 +17,14 @@ class RestExceptionHandler extends ResponseEntityExceptionHandler{
         String projectId
         String skillId
         String errorMsg
+        String errCode
     }
 
     @ExceptionHandler(SkillException)
     protected ResponseEntity<Object> handleSkillException(SkillException ex, WebRequest webRequest){
         Object body
         if(ex instanceof SkillException){
-            body = new ErrBody(projectId: ex.projectId, skillId: ex.skillId, errorMsg: ex.message)
+            body = new ErrBody(projectId: ex.projectId, skillId: ex.skillId, errorMsg: ex.message, errCode: ex.errorCode.name())
             log.error("Exception for: projectId=[${ex.projectId}], skillId=${ex.skillId}", ex)
         } else {
             log.error("Unexpected exception type [${ex?.class?.simpleName}]", ex)

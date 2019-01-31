@@ -134,6 +134,17 @@
     mounted() {
       this.loadSkill();
     },
+    watch: {
+      // Vue caches components and when re-directed to the same component the path will be pushed
+      // to the url but the component will NOT be re-mounted therefore we must listen for events and re-load
+      // the data; alternatively could update
+      //    <router-view :key="$route.fullPath"/>
+      // but components will never get cached - caching maybe important for components that want to update
+      // the url so the state can be re-build later (example include browsing a map or dependency graph in our case)
+      '$route.params.skillId': function skillChange() {
+        this.loadSkill();
+      },
+    },
     methods: {
       loadSkill() {
         this.isLoading = false;
@@ -155,3 +166,4 @@
 <style scoped>
 
 </style>
+

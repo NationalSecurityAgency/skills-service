@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestBody
 import skills.service.auth.UserInfoService
+import skills.service.controller.exceptions.ErrorCode
 import skills.service.controller.exceptions.SkillException
 import skills.service.controller.request.model.*
 import skills.service.controller.result.model.DependencyCheckResult
@@ -668,7 +669,7 @@ class AdminProjService {
 
         DependencyCheckResult dependencyCheckResult = checkForCircularGraph(skill1, skill2, type)
         if (!dependencyCheckResult.possible) {
-            throw new SkillException(dependencyCheckResult.reason, skill1.projectId, skill1.skillId)
+            throw new SkillException(dependencyCheckResult.reason, skill1.projectId, skill1.skillId, ErrorCode.FailedToAssignDependency)
         }
     }
 

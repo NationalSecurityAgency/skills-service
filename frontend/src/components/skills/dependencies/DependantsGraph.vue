@@ -1,15 +1,9 @@
 <template>
-  <div>
-    <div v-if="!this.dependentSkills || this.dependentSkills.length === 0" class="columns is-centered skills-pad-top-1-rem">
-      <div class="column is-half">
-        <article class="message is-info">
-          <div class="message-header">
-            <p><i class="fa fa-info-circle"></i> No Dependencies Yet..</p>
-          </div>
-          <div class="message-body">
-            You can manage and visualize skill's dependencies on this page. Please use the dropdown above to start adding dependent skills.
-          </div>
-        </article>
+  <div class="skills-bordered-component">
+    <div v-if="!this.dependentSkills || this.dependentSkills.length === 0" class="columns is-centered">
+      <div class="column is-half has-text-centered">
+        <no-dependenies message="You can manage and visualize skill's dependencies on this page. Please use the dropdown above to start adding
+      dependent skills."></no-dependenies>
       </div>
     </div>
     <div id="dependent-skills-network" style="height: 500px"></div>
@@ -19,9 +13,11 @@
 <script>
   import vis from 'vis';
   import 'vis/dist/vis.css';
+  import NoDependenies from './NoDependenies';
 
   export default {
     name: 'DependantsGraph',
+    components: { NoDependenies },
     props: ['skill', 'dependentSkills', 'graph'],
     data() {
       return {
@@ -31,17 +27,21 @@
       };
     },
     mounted() {
-      if (this.dependentSkills && this.dependentSkills.length > 0) {
+      if (this.graph && this.graph.nodes && this.graph.nodes.length > 0) {
         this.createGraph();
       }
     },
     watch: {
-      dependentSkills: function watchSkills() {
-        if (!this.network && this.dependentSkills && this.dependentSkills.length > 0) {
-          this.createGraph();
-        } else {
-          this.updateNodes();
+      graph: function watchGraph() {
+        if (this.network) {
+          this.network.destroy();
+          this.network = null;
         }
+
+        this.nodes.clear();
+        this.edges.clear();
+
+        this.createGraph();
       },
     },
     methods: {
@@ -91,6 +91,7 @@
           },
           interaction: {
             selectConnectedEdges: false,
+            navigationButtons: true,
           },
           physics: {
             enabled: false,

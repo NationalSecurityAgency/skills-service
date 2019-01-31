@@ -237,10 +237,11 @@
         // }
         SkillsService.saveSkill(skill)
           .then((skillRes) => {
-            const createdSkill = skillRes;
+            let createdSkill = skillRes;
             // this hack is required because vue-tables-2 doesn't run its toMomentFormat
             // if object is added to the collection after the fact, sounds like a bug to me?
             createdSkill.created = window.moment(createdSkill.created);
+            createdSkill = Object.assign({ subjectId: this.subjectId }, createdSkill);
             if (item1Index >= 0) {
               this.skills.splice(item1Index, 1, createdSkill);
             } else {

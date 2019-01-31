@@ -1,6 +1,6 @@
 .skills-underline-container {
   border-color: #E8E8E8;
-  border-width: 0px 0px 1px 0px;
+  border-width: 0 0 1px 0px;
   border-style: inset;
 }
 
@@ -9,7 +9,7 @@
 }
 
 .skills-remove-bottom-margin {
-  margin-bottom: 0px;
+  margin-bottom: 0;
 }
 .skills-justify-content-right {
   justify-content: flex-end;
@@ -21,6 +21,9 @@
 
 .skills-pad-top-1-rem {
   padding-top: 1rem;
+}
+.skills-pad-top-2-rem {
+  padding-top: 2rem;
 }
 
 .skills-pad-right-2-rem {
