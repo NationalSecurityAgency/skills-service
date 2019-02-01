@@ -1,10 +1,14 @@
 <template>
-  <div class="skills-bordered-component">
+  <div id="dependent-skills-graph" class="skills-bordered-component">
     <div v-if="!this.dependentSkills || this.dependentSkills.length === 0" class="columns is-centered">
       <div class="column is-half has-text-centered">
         <no-dependenies message="You can manage and visualize skill's dependencies on this page. Please use the dropdown above to start adding
       dependent skills."></no-dependenies>
       </div>
+
+    </div>
+    <div v-else>
+      <graph-legend style="position: absolute; z-index: 10;"></graph-legend>
     </div>
     <div id="dependent-skills-network" style="height: 500px"></div>
   </div>
@@ -14,10 +18,11 @@
   import vis from 'vis';
   import 'vis/dist/vis.css';
   import NoDependenies from './NoDependenies';
+  import GraphLegend from './GraphLegend';
 
   export default {
     name: 'DependantsGraph',
-    components: { NoDependenies },
+    components: { GraphLegend, NoDependenies },
     props: ['skill', 'dependentSkills', 'graph'],
     data() {
       return {
@@ -96,13 +101,15 @@
           physics: {
             enabled: false,
           },
+          nodes: {
+            color: {
+              border: '#3273dc',
+              background: 'lightblue',
+            },
+          },
         };
 
         this.network = new vis.Network(container, data, options);
-        // const self = this;
-        // this.network.on('selectEdge', (params) => {
-        //   self.selected = JSON.stringify(params.edges);
-        // });
       },
       buildData() {
         this.graph.nodes.forEach((node) => {
@@ -115,9 +122,16 @@
             title: this.getTitle(node),
           };
           if (newNode.id === this.skill.id) {
-            newNode.color = 'lightgreen';
+            newNode.color = {
+              border: 'green',
+              background: 'lightgreen',
+            };
+            newNode.shape = 'circle';
           } else if (!this.dependentSkills.find(elem => elem.id === newNode.id)) {
-            newNode.color = 'lightgray';
+            newNode.color = {
+              border: 'darkgray',
+              background: 'lightgray',
+            };
           }
           this.nodes.add(newNode);
         });
@@ -129,20 +143,6 @@
           });
         });
 
-        // this.nodes.add({
-        //   id: this.skill.id,
-        //   label: this.skill.name,
-        //   color: 'lightgreen',
-        //   shape: 'box',
-        //   margin: 10,
-        //   chosen: false,
-        //   title: this.getTitle(this.skill),
-        // });
-        // this.dependentSkills.forEach((skillItem) => {
-        //   const nodeEdgeDate = this.buildNodeEdgeData(skillItem);
-        //   this.nodes.add(nodeEdgeDate.node);
-        //   this.edges.add(nodeEdgeDate.edge);
-        // });
         const data = { nodes: this.nodes, edges: this.edges };
         return data;
       },
@@ -171,5 +171,60 @@
   };
 </script>
 
-<style scoped>
+<style>
+  #dependent-skills-graph div.vis-network div.vis-navigation div.vis-button.vis-up,
+  #dependent-skills-graph div.vis-network div.vis-navigation div.vis-button.vis-down,
+  #dependent-skills-graph div.vis-network div.vis-navigation div.vis-button.vis-left,
+  #dependent-skills-graph div.vis-network div.vis-navigation div.vis-button.vis-right,
+  #dependent-skills-graph div.vis-network div.vis-navigation div.vis-button.vis-zoomIn,
+  #dependent-skills-graph div.vis-network div.vis-navigation div.vis-button.vis-zoomOut,
+  #dependent-skills-graph div.vis-network div.vis-navigation div.vis-button.vis-zoomExtends {
+    background-image: none !important;
+  }
+
+  #dependent-skills-graph div.vis-network div.vis-navigation div.vis-button:hover {
+    box-shadow: none !important;
+  }
+
+  #dependent-skills-graph .vis-button:after {
+    font-size: 2em;
+    color: gray;
+    font-family: "Font Awesome 5 Free";
+  }
+
+  #dependent-skills-graph .vis-button:hover:after {
+    font-size: 2em;
+    color: #3273dc;
+  }
+
+  #dependent-skills-graph .vis-button.vis-up:after {
+    content: '\f35b';
+  }
+
+  #dependent-skills-graph .vis-button.vis-down:after {
+    content: '\f358';
+  }
+
+  #dependent-skills-graph .vis-button.vis-left:after {
+    content: '\f359';
+  }
+
+  #dependent-skills-graph .vis-button.vis-right:after {
+    content: '\f35a';
+  }
+
+  #dependent-skills-graph .vis-button.vis-zoomIn:after {
+    content: '\f0fe';
+  }
+
+  #dependent-skills-graph .vis-button.vis-zoomOut:after {
+    content: '\f146';
+  }
+
+  #dependent-skills-graph .vis-button.vis-zoomExtends:after {
+    content: "\f78c";
+    font-weight: 900;
+    font-size: 30px;
+  }
+
 </style>

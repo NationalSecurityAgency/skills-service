@@ -20,7 +20,7 @@
             </span>
           </b-notification>
 
-            <dependants-graph :skill="skill" :dependent-skills="skills" :graph="graph" style="border: 1px solid black;"></dependants-graph>
+            <dependants-graph :skill="skill" :dependent-skills="skills" :graph="graph"></dependants-graph>
 
             <dependents-table :skills="skills" v-on:skill-removed="skillDeleted"></dependents-table>
         </loading-container>

@@ -60,17 +60,13 @@
 
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
 <style>
+  #skills-selector .multiselect{
+    z-index: 99;
+  }
+
   #skills-selector .multiselect__tag {
-    background-color: lightgreen;
+    background-color: lightblue;
     color: black;
     /*margin: 10px;*/
   }
-
-  /*.selected-item {*/
-    /*background-color: lightgreen;*/
-    /*padding: 5px;*/
-    /*margin: 5px;*/
-    /*border: 1px solid #ddd;*/
-    /*border-radius: 5px;*/
-  /*}*/
 </style>
