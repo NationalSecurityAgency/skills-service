@@ -1,13 +1,17 @@
 <template>
-  <div class="skills-bordered-component">
+  <div id="full-dependent-skills-graph" class="skills-bordered-component">
     <loading-container :is-loading="!isLoading">
       <div v-if="!this.graph.nodes || this.graph.nodes.length === 0" class="columns is-centered skills-pad-top-1-rem">
         <div class="column is-half">
           <no-dependenies message="You can manage and visualize skill's dependencies. Please add dependencies to get started."></no-dependenies>
         </div>
       </div>
+      <div v-else>
+        <graph-node-sort-method-selector class="sort-method-selector"
+                                         v-on:value-changed="onSortNodeStrategyChange"></graph-node-sort-method-selector>
+      </div>
     </loading-container>
-    <div id="dependency-graph" style="height: 500px"></div>
+    <div id="dependency-graph" style="height: 800px"></div>
   </div>
 </template>
 
@@ -18,11 +22,12 @@
   import SkillsService from '../SkillsService';
   import LoadingContainer from '../../utils/LoadingContainer';
   import NoDependenies from './NoDependenies';
+  import GraphNodeSortMethodSelector from './GraphNodeSortMethodSelector';
 
   export default {
     name: 'FullDependencyGraph',
     props: ['projectId'],
-    components: { NoDependenies, LoadingContainer },
+    components: { GraphNodeSortMethodSelector, NoDependenies, LoadingContainer },
     data() {
       return {
         isLoading: false,
@@ -31,20 +36,36 @@
         nodes: new vis.DataSet(),
         edges: new vis.DataSet(),
         serverErrors: [],
+        displayOptions: {
+          layout: {
+            hierarchical: {
+              enabled: true,
+              sortMethod: 'directed',
+              nodeSpacing: 350,
+            },
+          },
+          interaction: {
+            selectConnectedEdges: false,
+            navigationButtons: true,
+          },
+          physics: {
+            enabled: false,
+          },
+          nodes: {
+            font: {
+              size: 18,
+            },
+            color: {
+              border: 'green',
+              background: 'lightgreen',
+            },
+          },
+        },
       };
     },
     mounted() {
       this.loadGraphDataAndCreateGraph();
     },
-    // watch: {
-    //   dependentSkills: function watchSkills() {
-    //     if (!this.network && this.dependentSkills && this.dependentSkills.length > 0) {
-    //       this.createGraph();
-    //     } else {
-    //       this.updateNodes();
-    //     }
-    //   },
-    // },
     methods: {
       loadGraphDataAndCreateGraph() {
         SkillsService.getDependentSkillsGraphForProject(this.projectId)
@@ -60,69 +81,21 @@
         });
       },
 
-      // updateNodes() {
-      //   const newItems = this.dependentSkills.filter(item => !this.nodes.get().find(item1 => item1.id === item.id));
-      //   newItems.forEach((newItem) => {
-      //     const nodeEdgeData = this.buildNodeEdgeData(newItem);
-      //     this.edges.add(nodeEdgeData.edge);
-      //     this.nodes.add(nodeEdgeData.node);
-      //   });
-      //
-      //   const removeItems = this.nodes.get().filter(item => !this.dependentSkills.find(item1 => item1.id === item.id) && item.id !== this.skill.id);
-      //   removeItems.forEach((item) => {
-      //     this.nodes.remove(item.id);
-      //     const edgeToRemove = this.edges.get().find(edgeItem => edgeItem.to === item.id);
-      //     this.edges.remove(edgeToRemove);
-      //   });
-      //
-      //   if (this.nodes.get().length <= 1) {
-      //     if (this.network) {
-      //       this.network.destroy();
-      //       this.network = null;
-      //     }
-      //
-      //     this.nodes.clear();
-      //     this.edges.clear();
-      //   }
-      // },
+      onSortNodeStrategyChange(newStrategy) {
+        this.displayOptions.layout.hierarchical.sortMethod = newStrategy;
+        this.createGraph();
+      },
       createGraph() {
+        if (this.network) {
+          this.network.destroy();
+          this.network = null;
+          this.nodes.clear();
+          this.edges.clear();
+        }
+
         const data = this.buildData();
         const container = document.getElementById('dependency-graph');
-
-        const options = {
-          layout: {
-            // randomSeed: 419465,
-            hierarchical: {
-              enabled: true,
-              // sortMethod: 'directed',
-              nodeSpacing: 350,
-              // treeSpacing: 1000,
-              // blockShifting: false,
-              // edgeMinimization: false,
-              // parentCentralization: false,
-              // levelSeparation: 1000,
-              // direction: 'UP',
-            },
-          },
-          interaction: {
-            selectConnectedEdges: false,
-          },
-          physics: {
-            enabled: false,
-            //   barnesHut: {
-            //     gravitationalConstant: -30000,
-            //   },
-            //   stabilization: {
-            //     iterations: 2500,
-            //   },
-          },
-        };
-
-        this.network = new vis.Network(container, data, options);
-        // const self = this;
-        // this.network.on('selectEdge', (params) => {
-        //   self.selected = JSON.stringify(params.edges);
-        // });
+        this.network = new vis.Network(container, data, this.displayOptions);
       },
       buildData() {
         this.graph.nodes.forEach((node) => {
@@ -154,5 +127,67 @@
     },
   };
 </script>
+<style>
+  #full-dependent-skills-graph div.vis-network div.vis-navigation div.vis-button.vis-up,
+  #full-dependent-skills-graph div.vis-network div.vis-navigation div.vis-button.vis-down,
+  #full-dependent-skills-graph div.vis-network div.vis-navigation div.vis-button.vis-left,
+  #full-dependent-skills-graph div.vis-network div.vis-navigation div.vis-button.vis-right,
+  #full-dependent-skills-graph div.vis-network div.vis-navigation div.vis-button.vis-zoomIn,
+  #full-dependent-skills-graph div.vis-network div.vis-navigation div.vis-button.vis-zoomOut,
+  #full-dependent-skills-graph div.vis-network div.vis-navigation div.vis-button.vis-zoomExtends {
+    background-image: none !important;
+  }
+
+  #full-dependent-skills-graph div.vis-network div.vis-navigation div.vis-button:hover {
+    box-shadow: none !important;
+  }
+
+  #full-dependent-skills-graph .vis-button:after {
+    font-size: 2em;
+    color: gray;
+    font-family: "Font Awesome 5 Free";
+  }
+
+  #full-dependent-skills-graph .vis-button:hover:after {
+    font-size: 2em;
+    color: #3273dc;
+  }
+
+  #full-dependent-skills-graph .vis-button.vis-up:after {
+    content: '\f35b';
+  }
+
+  #full-dependent-skills-graph .vis-button.vis-down:after {
+    content: '\f358';
+  }
+
+  #full-dependent-skills-graph .vis-button.vis-left:after {
+    content: '\f359';
+  }
+
+  #full-dependent-skills-graph .vis-button.vis-right:after {
+    content: '\f35a';
+  }
+
+  #full-dependent-skills-graph .vis-button.vis-zoomIn:after {
+    content: '\f0fe';
+  }
+
+  #full-dependent-skills-graph .vis-button.vis-zoomOut:after {
+    content: '\f146';
+  }
+
+  #full-dependent-skills-graph .vis-button.vis-zoomExtends:after {
+    content: "\f78c";
+    font-weight: 900;
+    font-size: 30px;
+  }
+</style>
+
 <style scoped>
+  .sort-method-selector {
+    position: absolute;
+    z-index: 10;
+    right: 40px;
+  }
 </style>

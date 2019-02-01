@@ -8,7 +8,8 @@
 
     </div>
     <div v-else>
-      <graph-legend style="position: absolute; z-index: 10;"></graph-legend>
+      <graph-node-sort-method-selector class="sort-method-selector" v-on:value-changed="onSortNodeStrategyChange"></graph-node-sort-method-selector>
+      <graph-legend class="graph-legend"></graph-legend>
     </div>
     <div id="dependent-skills-network" style="height: 500px"></div>
   </div>
@@ -19,16 +20,50 @@
   import 'vis/dist/vis.css';
   import NoDependenies from './NoDependenies';
   import GraphLegend from './GraphLegend';
+  import GraphNodeSortMethodSelector from './GraphNodeSortMethodSelector';
 
   export default {
     name: 'DependantsGraph',
-    components: { GraphLegend, NoDependenies },
+    components: { GraphNodeSortMethodSelector, GraphLegend, NoDependenies },
     props: ['skill', 'dependentSkills', 'graph'],
     data() {
       return {
         network: null,
         nodes: new vis.DataSet(),
         edges: new vis.DataSet(),
+        displayOptions: {
+          layout: {
+            randomSeed: 419465,
+            hierarchical: {
+              enabled: true,
+              sortMethod: 'directed',
+              nodeSpacing: 350,
+              // treeSpacing: 1000,
+              // blockShifting: false,
+              // edgeMinimization: false,
+              // parentCentralization: false,
+              // levelSeparation: 1000,
+              // direction: 'UP',
+            },
+          },
+          interaction: {
+            selectConnectedEdges: false,
+            navigationButtons: true,
+          },
+          physics: {
+            enabled: false,
+          },
+          nodes: {
+            font: {
+              size: 18,
+            },
+            color: {
+              border: '#3273dc',
+              background: 'lightblue',
+            },
+            mass: 20,
+          },
+        },
       };
     },
     mounted() {
@@ -64,52 +99,23 @@
           const edgeToRemove = this.edges.get().find(edgeItem => edgeItem.to === item.id);
           this.edges.remove(edgeToRemove);
         });
-
-        if (this.nodes.get().length <= 1) {
-          if (this.network) {
-            this.network.destroy();
-            this.network = null;
-          }
+      },
+      onSortNodeStrategyChange(newStrategy) {
+        this.displayOptions.layout.hierarchical.sortMethod = newStrategy;
+        this.createGraph();
+      },
+      createGraph() {
+        if (this.network) {
+          this.network.destroy();
+          this.network = null;
 
           this.nodes.clear();
           this.edges.clear();
         }
-      },
-      createGraph() {
+
         const data = this.buildData();
         const container = document.getElementById('dependent-skills-network');
-
-        const options = {
-          layout: {
-            randomSeed: 419465,
-            hierarchical: {
-              enabled: true,
-              sortMethod: 'directed',
-              nodeSpacing: 350,
-              // treeSpacing: 1000,
-              // blockShifting: false,
-              // edgeMinimization: false,
-              // parentCentralization: false,
-              // levelSeparation: 1000,
-              // direction: 'UP',
-            },
-          },
-          interaction: {
-            selectConnectedEdges: false,
-            navigationButtons: true,
-          },
-          physics: {
-            enabled: false,
-          },
-          nodes: {
-            color: {
-              border: '#3273dc',
-              background: 'lightblue',
-            },
-          },
-        };
-
-        this.network = new vis.Network(container, data, options);
+        this.network = new vis.Network(container, data, this.displayOptions);
       },
       buildData() {
         this.graph.nodes.forEach((node) => {
@@ -170,6 +176,18 @@
     },
   };
 </script>
+
+<style scoped>
+  .sort-method-selector {
+    position: absolute;
+    z-index: 10;
+    right: 40px;
+  }
+  .graph-legend {
+    position: absolute;
+    z-index: 10;
+  }
+</style>
 
 <style>
   #dependent-skills-graph div.vis-network div.vis-navigation div.vis-button.vis-up,
