@@ -631,39 +631,6 @@ class AdminProjService {
         skillRelDefRepo.delete(relDef)
     }
 
-
-    @Transactional()
-    List<DependencyCheckResult> checkSkillsGraph(String projectId, String skillId, GraphCheckType graphCheckType, List<String> dependentSkillIds) {
-        SkillDef skill1 = skillDefRepo.findByProjectIdAndSkillId(projectId, skillId)
-        assert skill1
-
-        SkillRelDef.RelationshipType relationshipType
-        switch (graphCheckType) {
-            case GraphCheckType.Recommendation:
-                relationshipType = SkillRelDef.RelationshipType.Recommendation
-                break;
-            case GraphCheckType.Dependency:
-                relationshipType = SkillRelDef.RelationshipType.Dependence
-                break;
-            default:
-                throw new SkillException("Unknown type [$graphCheckType]", projectId, skillId)
-        }
-
-        List<DependencyCheckResult> finalRes = dependentSkillIds.collect{
-            SkillDef skill2 = skillDefRepo.findByProjectIdAndSkillId(projectId, it)
-            if(!skill2) {
-                throw new SkillException("Failed to located skill id [${skill2}]", projectId, skillId)
-            }
-
-            DependencyCheckResult res = checkForCircularGraph(skill1, skill2, relationshipType)
-            return res
-        }
-
-        return finalRes
-    }
-
-
-
     private void checkForCircularGraphAndThrowException(SkillDef skill1, SkillDef skill2, SkillRelDef.RelationshipType type) {
         assert skill1.skillId != skill2.skillId
 
@@ -709,7 +676,7 @@ class AdminProjService {
     SkillDefRes saveSkill(SkillRequest skillRequest) {
         try {
             IdFormatValidator.validate(skillRequest.skillId)
-            boolean shouldRebuildScores = false
+            boolean shouldRebuildScores
 
             boolean isEdit = skillRequest.id
 
@@ -747,9 +714,6 @@ class AdminProjService {
 
             SkillDef savedSkill = skillDefRepo.save(skillDefinition)
 
-            handleGraphRelationships(skillRequest.dependentSkillsIds, isEdit, savedSkill, savedSkill, SkillRelDef.RelationshipType.Dependence)
-            handleGraphRelationships(skillRequest.skillRecommendationIds, isEdit, savedSkill, savedSkill, SkillRelDef.RelationshipType.Recommendation)
-
             if (!isEdit) {
                 assignToParent(skillRequest, savedSkill)
             }
@@ -757,60 +721,15 @@ class AdminProjService {
             if (shouldRebuildScores) {
                 log.info("Rebuilding scores")
                 ruleSetDefinitionScoreUpdater.updateFromLeaf(savedSkill)
-
-//                log.info("Rebuilding scores")
-//                userPointsManagement.rebuildUserPointsOverallAndSubject(skillRequest.projectId, skillRequest.activityId)
-//            }
             }
 
-            // skillDefinitionRepository.findByProjectIdAndSkillId(skillRequest.projectId, skillRequest.skillId)
             log.info("Saved [{}]", savedSkill)
             SkillDefRes skillDefRes = convertToSkillDefRes(savedSkill)
             return skillDefRes
         } catch (DataIntegrityViolationException dve) {
-//            log.error("Integration violation for project=[${skillRequest.projectId}], skilId=[${skillRequest.skillId}]", dve)
             throw new SkillException("Failed to save due to Data Integrity violation", dve, skillRequest.projectId, skillRequest.skillId)
         } catch (Throwable t) {
             throw new SkillException(t.message, t, skillRequest.projectId, skillRequest.skillId)
-        }
-    }
-
-    private void handleGraphRelationships(List<String> related, boolean isEdit, SkillDef savedSkill, SkillDef skillDefinition, SkillRelDef.RelationshipType relationshipType) {
-        List<SkillRelDef> existingRelationships = !isEdit ? [] : skillRelDefRepo.findAllByParentAndType(savedSkill, relationshipType)
-
-        if (related) {
-            List<String> toAddIds = related
-            if (existingRelationships) {
-                toAddIds = related.findAll { String relatedSkillId ->
-                    !existingRelationships.find { it.child.skillId == relatedSkillId }
-                }
-            }
-            if (toAddIds) {
-                List<SkillDef> toAdd = toAddIds.collect {
-                    SkillDef loaded = skillDefRepo.findByProjectIdAndSkillId(skillDefinition.projectId, it)
-                    if (!loaded) {
-                        throw new IllegalArgumentException("Failed to find skill. Project id=[${skillDefinition.projectId}], skill id=[${it}]");
-                    }
-                    return loaded
-                }
-                toAdd.each {
-                    checkForCircularGraphAndThrowException(savedSkill, it, relationshipType)
-                    SkillRelDef relDef = new SkillRelDef(parent: savedSkill, child: it, type: relationshipType)
-                    skillRelDefRepo.save(relDef)
-                }
-            }
-        }
-
-        if (existingRelationships) {
-            List<SkillDef> toRemove = existingRelationships.findAll { SkillRelDef existing ->
-                !related || !related.find { it == existing.child.skillId }
-            }
-            if (toRemove) {
-                toRemove.each { removeMe ->
-                    assert removeMe
-                    skillDefRepo.delete(removeMe)
-                }
-            }
         }
     }
 

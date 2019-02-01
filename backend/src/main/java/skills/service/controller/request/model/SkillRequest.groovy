@@ -9,7 +9,6 @@ class SkillRequest {
 
     String skillId
 
-
     // optional
     String subjectId
 
@@ -25,7 +24,4 @@ class SkillRequest {
     String description
 
     String helpUrl
-
-    List<String> dependentSkillsIds
-    List<String> skillRecommendationIds
 }

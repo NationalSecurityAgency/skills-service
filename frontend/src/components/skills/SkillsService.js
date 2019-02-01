@@ -13,11 +13,6 @@ export default {
     return axios.get(`/admin/projects/${projectId}/skills`)
       .then(response => response.data);
   },
-  checkSkillsGraph(projectId, skillId, type, skillsToCheck) {
-    const params = skillsToCheck.join('&checkSkillId=');
-    return axios.get(`/admin/projects/${projectId}/skills/${skillId}/graphCheck?type=${type}&checkSkillId=${params}`)
-      .then(response => response.data);
-  },
   saveSkill(skill) {
     return axios.put(`/admin/projects/${skill.projectId}/subjects/${skill.subjectId}/skills/${skill.skillId}`, skill)
       .then(createdRuleResult => createdRuleResult.data);

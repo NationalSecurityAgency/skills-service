@@ -232,29 +232,16 @@ class AdminController {
 
     @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/dependency/graph", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
-    SkillsGraphRes getDependentSkills(@PathVariable("projectId") String projectId,
-                         @PathVariable("skillId") String skillId) {
+    SkillsGraphRes getDependencyForSkill(@PathVariable("projectId") String projectId,
+                                         @PathVariable("skillId") String skillId) {
         return projectAdminStorageService.getDependentSkillsGraph(projectId, skillId)
     }
 
     @RequestMapping(value = "/projects/{projectId}/dependency/graph", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
-    SkillsGraphRes getDependentSkillsGraph(@PathVariable("projectId") String projectId) {
+    SkillsGraphRes getDependencyForProject(@PathVariable("projectId") String projectId) {
         return projectAdminStorageService.getDependentSkillsGraph(projectId)
     }
-
-    @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/graphCheck", method = RequestMethod.GET, produces = "application/json")
-    @ResponseBody
-    List<DependencyCheckResult> checkIfDependenciesPossible(@PathVariable("projectId") String projectId,
-                                                            @PathVariable("skillId") String skillId,
-                                                            @RequestParam("type") String typeOfCheck,
-                                                            @RequestParam("checkSkillId") List<String> dependentSkillIds) {
-
-        GraphCheckType graphCheckType = GraphCheckType.valueOf(typeOfCheck)
-        List<DependencyCheckResult> res = projectAdminStorageService.checkSkillsGraph(projectId, skillId, graphCheckType, dependentSkillIds)
-        return res
-    }
-
 
     @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/skills/{skillId}", method = RequestMethod.PATCH)
     @ResponseBody
