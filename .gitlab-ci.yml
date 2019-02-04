@@ -9,7 +9,6 @@ build:
     - export NEXUS_SERVER="10.113.80.244"
     - echo "@skills:registry=http://${NEXUS_SERVER}/repository/skills-registry/" > ~/.npmrc
     - cat ~/.npmrc
-    - mkdir ~/.m2
     - echo "<settings><mirrors><mirror><id>central</id><name>central</name><url>http://${NEXUS_SERVER}/repository/maven-public/</url><mirrorOf>*</mirrorOf></mirror></mirrors></settings>" > ~/.m2/settings.xml
     - cat ~/.m2/settings.xml
     - cd backend
