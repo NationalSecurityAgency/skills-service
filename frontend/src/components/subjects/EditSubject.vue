@@ -45,7 +45,7 @@
       </p>
 
       <div class="field">
-        <label class="label">Description <span @click="showMarkdownInfo" class="markdown-info"><i class="fas fa-info-circle"></i></span></label>
+        <label class="label">Description</label>
         <div class="control">
           <markdown-editor :value="subject.description" @value-updated="updateDescription"></markdown-editor>
         </div>
@@ -77,7 +77,6 @@
   import SubjectsService from './SubjectsService';
   import IconPicker from '../utils/iconPicker/IconPicker';
   import MarkdownEditor from '../utils/MarkdownEditor';
-  import GFMDescription from '../utils/GFMDescription';
 
   let self = null;
 
@@ -136,18 +135,6 @@
       self = this;
     },
     methods: {
-      showMarkdownInfo() {
-        this.$modal.open({
-          parent: this,
-          component: GFMDescription,
-          hasModalCard: true,
-          width: 1110,
-          props: {
-            subject: this.subject,
-            isEdit: true,
-          },
-        });
-      },
       updateDescription(value) {
         this.subjectInternal.description = value.value;
       },

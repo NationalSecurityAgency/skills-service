@@ -111,7 +111,7 @@
       </div>
 
       <div class="field skills-pad-top-1-rem">
-        <label class="label">Description <span @click="showMarkdownInfo" class="markdown-info"><i class="fas fa-info-circle"></i></span></label>
+        <label class="label">Description</label>
         <div class="control">
           <markdown-editor :value="skill.description" @value-updated="updateDescription"></markdown-editor>
         </div>
@@ -158,7 +158,6 @@
   import SearchAllSkillsCheckbox from './SearchAllSkillsCheckbox';
   import SkillsService from './SkillsService';
   import MarkdownEditor from '../utils/MarkdownEditor';
-  import GFMDescription from '../utils/GFMDescription';
 
   export default {
     name: 'EditSkill',
@@ -239,18 +238,6 @@
     methods: {
       updateDescription(value) {
         this.skillInternal.description = value.value;
-      },
-      showMarkdownInfo() {
-        this.$modal.open({
-          parent: this,
-          component: GFMDescription,
-          hasModalCard: true,
-          width: 1110,
-          props: {
-            subject: this.subject,
-            isEdit: true,
-          },
-        });
       },
       saveSkill() {
         this.$validator.validateAll().then((res) => {

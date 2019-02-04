@@ -65,7 +65,7 @@
       </div>
 
       <div class="field">
-        <label class="label">Description <span @click="showMarkdownInfo" class="markdown-info"><i class="fas fa-info-circle"></i></span></label>
+        <label class="label">Description</label>
         <div class="control">
           <markdown-editor :value="badge.description" @value-updated="updateDescription"></markdown-editor>
         </div>
@@ -154,7 +154,6 @@
   import IconPicker from '../utils/iconPicker/IconPicker';
   import SkillsSelector from '../skills/SkillsSelector';
   import SkillsService from '../skills/SkillsService';
-  import GFMDescription from '../utils/GFMDescription';
 
   let self;
   const dictionary = {
@@ -213,18 +212,6 @@
       this.loadAvailableBadgeSkills();
     },
     methods: {
-      showMarkdownInfo() {
-        this.$modal.open({
-          parent: this,
-          component: GFMDescription,
-          hasModalCard: true,
-          width: 1110,
-          props: {
-            subject: this.subject,
-            isEdit: true,
-          },
-        });
-      },
       updateDescription(event) {
         this.badgeInternal.description = event.value;
       },

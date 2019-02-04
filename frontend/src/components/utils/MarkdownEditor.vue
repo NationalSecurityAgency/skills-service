@@ -1,4 +1,6 @@
 <template>
+  <div id="markdown-editor">
+    <span class="markdown-syntax-label"><a @click="showMarkdownInfo">Markdown</a> is supported</span>
   <b-tabs type="is-boxed">
     <b-tab-item>
       <template slot="header">
@@ -17,11 +19,13 @@
       </div>
     </b-tab-item>
   </b-tabs>
+  </div>
 </template>
 
 <script>
   import marked from 'marked';
   import debounce from 'lodash.debounce';
+  import GFMDescription from './GFMDescription';
 
   export default {
     name: 'MarkdownEditor',
@@ -42,6 +46,18 @@
       },
     },
     methods: {
+      showMarkdownInfo() {
+        this.$modal.open({
+          parent: this,
+          component: GFMDescription,
+          hasModalCard: true,
+          width: 1110,
+          props: {
+            subject: this.subject,
+            isEdit: true,
+          },
+        });
+      },
       updateValue: debounce(function handleInputEvent(e) {
         this.valueInternal = e.target.value;
         const event = { value: this.valueInternal, markedDown: this.compiledMarkdown };
@@ -127,6 +143,13 @@
 
   .markdown-preview table td {
     border: 1px solid #dddddd !important;
+  }
+
+  #markdown-editor .markdown-syntax-label {
+    position: absolute;
+    right: 10px;
+    top:10px;
+    font-size: 0.8rem;
   }
 
 </style>

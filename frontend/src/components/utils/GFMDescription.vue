@@ -1,16 +1,14 @@
 <template>
     <div id="gfmDescription" class="modal-card" style="width: 1110px;">
       <header class="modal-card-head">
-        <p class="modal-card-title">Markdown Syntax</p>
+        <p class="modal-card-title"><i class="fab fa-markdown"></i> Markdown Syntax</p>
         <button class="delete" aria-label="close" v-on:click="$parent.close()"></button>
       </header>
 
-      <section class="modal-card-body">
+      <section class="modal-card-body content">
         <p>Descriptions support GFM (Git Flavored Markdown). Some limited examples of the supported formatting are:</p>
 
-        <p>
-        Headers
-        </p>
+        <h3>Headers</h3>
         <pre>
         # H1
         ## H2
@@ -20,9 +18,7 @@
         ###### H6
         </pre>
 
-        <p>
-        Emphasis
-        </p>
+        <h3>Emphasis</h3>
         <pre>
         italics: *italicized* or _italicized_
         bold: **bolded** or __bolded__
@@ -30,45 +26,53 @@
         strikethrough: ~~struck~~
         </pre>
 
-        <p>
-        Lists
-        </p>
+        <h3>Inline</h3>
         <pre>
-        Ordered Lists:
+          Inline `code` hs `back-ticks around` it.
+        </pre>
+
+        <h3>Lists</h3>
+        <p>Ordered Lists:</p>
+        <pre>
         1. Item one
         1. Item two
         1. Item three (actual number does not matter)
-
-If  List item has multiple lines of text, subsequent lines must be idented four spaces,
-otherwise list item numbers will reset, e.g.,
+        </pre>
+        <p>
+        If  List item has multiple lines of text, subsequent lines must be idented four spaces,
+        otherwise list item numbers will reset, e.g.,
+        </p>
+        <pre>
         1. item one
             paragrah one
         1. item two
         1. item three
-
-        Unordered Lists
+        </pre>
+        <p>Unordered Lists</p>
+        <pre>
         * Item
         * Item
         * Item
         </pre>
 
-        <p>
+        <h3>
         Links
+        </h3>
         <pre>
         [in line link](https://www.somewebsite.com)
         </pre>
 
 
-        <p>
+        <h3>
         Blockquotes
-        </p>
+        </h3>
         <pre>
         > This is a block quote
         </pre>
 
-        <p>
+        <h3>
         Horizontal rule
-        </p>
+        </h3>
         <pre>
         Use three or more dashes, asterisks, or underscores to generate a horizontal rule line
 
