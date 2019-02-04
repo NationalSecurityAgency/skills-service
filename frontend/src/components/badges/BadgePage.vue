@@ -12,28 +12,21 @@
           </div>
           <div class="column">
             <div class="columns has-text-centered">
-              <div class="column is-one-quarter">
+              <div class="column is-one-third">
                 <div>
                   <p class="heading">Skills</p>
                   <p class="title">{{ badge.numSkills | number}}</p>
                 </div>
               </div>
 
-              <div class="column is-one-quarter">
-                <div>
-                  <p class="heading">Num Disabled Skills</p>
-                  <p class="title">0</p>
-                </div>
-              </div>
-
-              <div class="column is-one-quarter">
+              <div class="column is-one-third">
                 <div>
                   <p class="heading">Total Points</p>
                   <p class="title">{{ badge.totalPoints | number }}</p>
                 </div>
               </div>
 
-              <div class="column is-one-quarter">
+              <div class="column is-one-third">
                 <div>
                   <p class="heading">Users</p>
                   <p class="title">{{ badge.numUsers | number}}</p>
@@ -54,7 +47,7 @@
           {name: 'Stats', iconClass: 'fa-chart-bar'},
         ]">
         <template slot="Skills">
-          <badge-skills :project-id="projectId" :badge-id="badgeId"></badge-skills>
+          <badge-skills :project-id="projectId" :badge-id="badgeId" v-on:skills-changed="loadBadge"></badge-skills>
         </template>
         <template slot="Users">
           <users :project-id="projectId" :badge-id="this.badgeId" />

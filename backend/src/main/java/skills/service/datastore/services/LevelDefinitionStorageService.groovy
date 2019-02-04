@@ -169,24 +169,6 @@ class LevelDefinitionStorageService {
         return res
     }
 
-    private List<LevelDefinitionRes> convertAndCalculateScores(LevelDefRes levelDefRes) {
-        Integer totalScore = levelDefRes.skillId ? skillDefRepo.calculateTotalScore(levelDefRes.projectId, levelDefRes.skillId) : skillDefRepo.calculateTotalScore(levelDefRes.projectId)
-        List<Integer> levelScores = levelDefRes.levels.sort({ it.level }).collect {
-            if (totalScore == null) {
-                return 0
-            }
-            return (int) (totalScore * (it.percent / 100d))
-        }
-
-        List<LevelDefinitionRes> finalRes = []
-        levelDefRes.levels.eachWithIndex { LevelDef entry, int i ->
-            Integer fromPts = levelScores.get(i)
-            Integer toPts = (i != levelScores.size() - 1) ? levelScores.get(i + 1) : null
-            finalRes << new LevelDefinitionRes(projectId: levelDefRes.projectId, skillId: levelDefRes.skillId, level: entry.level, percent: entry.percent, pointsFrom: fromPts, pointsTo: toPts)
-        }
-        finalRes
-    }
-
     /**
      * deletes the highest level and returns its definition
      * @param projectId

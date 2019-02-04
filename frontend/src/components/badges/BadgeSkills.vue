@@ -67,6 +67,7 @@
           .then(() => {
             this.badgeSkills = this.badgeSkills.filter(entry => entry.id !== deletedItem.id);
             this.loading.skillOp = false;
+            this.$emit('skills-changed', deletedItem);
         });
       },
       skillAdded(newItem) {
@@ -75,6 +76,7 @@
           .then(() => {
             this.badgeSkills.push(newItem);
             this.loading.skillOp = false;
+            this.$emit('skills-changed', newItem);
         });
       },
     },

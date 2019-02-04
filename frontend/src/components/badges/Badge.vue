@@ -34,16 +34,10 @@
     </div>
 
     <div class="columns has-text-centered">
-      <div class="column is-half">
+      <div class="column is-full">
         <div>
           <p class="heading">Total Points</p>
           <p class="title">{{ badgeInternal.totalPoints | number }}</p>
-        </div>
-      </div>
-      <div class="column is-half">
-        <div>
-          <p class="heading">Points %</p>
-          <p class="title">{{ badgeInternal.pointsPercentage }}</p>
         </div>
       </div>
     </div>

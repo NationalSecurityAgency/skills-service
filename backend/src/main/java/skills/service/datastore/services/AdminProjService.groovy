@@ -301,7 +301,6 @@ class AdminProjService {
     List<BadgeResult> getBadges(String projectId) {
         ProjDef projDef = getProjDef(projectId)
         List<BadgeResult> res = projDef.badges.collect { convertToBadge(it) }
-        calculatePercentages(res)
         return res?.sort({ it.displayOrder })
     }
 
@@ -480,7 +479,6 @@ class AdminProjService {
                 name: skillDef.name,
                 description: skillDef.description,
                 displayOrder: skillDef.displayOrder,
-                totalPoints: skillDef.totalPoints,
                 iconClass: skillDef.iconClass,
                 startDate: skillDef.startDate,
                 endDate: skillDef.endDate,
@@ -489,8 +487,8 @@ class AdminProjService {
         List<SkillRelDef> dependentSkillsRels = skillRelDefRepo.findAllByParentAndType(skillDef, SkillRelDef.RelationshipType.BadgeDependence)
         res.requiredSkills = dependentSkillsRels?.collect { convertToSkillDefRes(it.child, false) }
 
-        // need an easy way to count ALL of the skills under a particular badge, will need to modify DB to support that
-        res.numSkills = -1 //
+        res.totalPoints = skillDefRepo.sumChildSkillsTotalPointsBySkillAndRelationshipType(skillDef, SkillRelDef.RelationshipType.BadgeDependence)
+        res.numSkills = skillDefRepo.countChildSkillsByIdAndRelationshipType(skillDef, SkillRelDef.RelationshipType.BadgeDependence)
         res.numUsers = skillDefRepo.calculateDistinctUsers(skillDef.projectId, skillDef.skillId)
         return res
     }

@@ -20,7 +20,6 @@ class BadgeResult {
 
     int numSkills
     int numUsers
-    int pointsPercentage
 
     int displayOrder
 
