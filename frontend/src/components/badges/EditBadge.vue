@@ -6,14 +6,8 @@
       <button class="delete" aria-label="close" v-on:click="$parent.close()"></button>
     </header>
 
-    <b-loading :is-full-page="true" :active.sync="isLoadingAvailableBadgeSkills" :can-cancel="false">
 
-    </b-loading>
-    <div v-if="isLoadingAvailableBadgeSkills" class="modal-card-body" style="height: 400px;">
-    </div>
-
-
-    <section class="modal-card-body" v-if="!isLoadingAvailableBadgeSkills">
+    <section class="modal-card-body">
       <div class="field is-horizontal">
         <div class="field-body">
           <div class="field is-narrow">
@@ -49,20 +43,6 @@
           <a class="is-info" v-if="canEditBadgeId">Disable</a>
         </span>
       </p>
-
-      <div class="field">
-        <label class="label">Required Skills
-          <b-tooltip label="Users must complete all listed skills in order to earn this badge."
-                     position="is-right" animanted="true" type="is-light">
-            <span><i class="fas fa-question-circle"></i></span>
-          </b-tooltip>
-        </label>
-        <div class="control is-expanded">
-          <skills-selector v-model="badgeInternal.requiredSkills" :available-to-select="availableBadgeSkills"
-                           v-validate="'required'" name="requiredSkills"></skills-selector>
-        </div>
-        <p class="help is-danger" v-show="errors.has('requiredSkills')">{{ errors.first('requiredSkills')}}</p>
-      </div>
 
       <div class="field">
         <label class="label">Description</label>
@@ -153,7 +133,6 @@
   import MarkdownEditor from '../utils/MarkdownEditor';
   import IconPicker from '../utils/iconPicker/IconPicker';
   import SkillsSelector from '../skills/SkillsSelector';
-  import SkillsService from '../skills/SkillsService';
 
   let self;
   const dictionary = {
@@ -201,15 +180,12 @@
       return {
         canEditBadgeId: false,
         limitTimeframe: this.badge.startDate && this.badge.endDate,
-        isLoadingAvailableBadgeSkills: true,
         badgeInternal: Object.assign({}, this.badge),
         overallErrMsg: '',
-        availableBadgeSkills: [],
       };
     },
     mounted() {
       self = this;
-      this.loadAvailableBadgeSkills();
     },
     methods: {
       updateDescription(event) {
@@ -245,18 +221,6 @@
           dateVal = new Date(Date.parse(value));
         }
         return dateVal;
-      },
-      loadAvailableBadgeSkills() {
-        SkillsService.getProjectSkills(this.badgeInternal.projectId)
-          .then((loadedSkills) => {
-            this.availableBadgeSkills = loadedSkills.filter(item => item.type === 'Skill');
-            this.isLoadingAvailableBadgeSkills = false;
-          })
-          .catch((e) => {
-            this.serverErrors.push(e);
-            this.isLoadingAvailableBadgeSkills = false;
-            throw e;
-        });
       },
       toggleEditId() {
         this.canEditBadgeId = !this.canEditBadgeId && !this.isEdit;

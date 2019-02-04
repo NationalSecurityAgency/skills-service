@@ -20,9 +20,10 @@
             </span>
           </b-notification>
 
-            <dependants-graph :skill="skill" :dependent-skills="skills" :graph="graph"></dependants-graph>
+          <dependants-graph :skill="skill" :dependent-skills="skills" :graph="graph"></dependants-graph>
 
-            <dependents-table :skills="skills" v-on:skill-removed="skillDeleted"></dependents-table>
+          <simple-skills-table :skills="skills" v-on:skill-removed="skillDeleted"></simple-skills-table>
+
         </loading-container>
       </div>
     </div>
@@ -33,13 +34,13 @@
   import SkillsTable from '../SkillsTable';
   import SkillsSelector from '../SkillsSelector';
   import LoadingContainer from '../../utils/LoadingContainer';
-  import DependentsTable from './DependentsTable';
   import DependantsGraph from './DependantsGraph';
   import SkillsSelector2 from '../SkillsSelector2';
+  import SimpleSkillsTable from '../SimpleSkillsTable';
 
   export default {
     name: 'SkillDependencies',
-    components: { SkillsSelector2, DependantsGraph, DependentsTable, LoadingContainer, SkillsTable, SkillsSelector },
+    components: { SimpleSkillsTable, SkillsSelector2, DependantsGraph, LoadingContainer, SkillsTable, SkillsSelector },
     props: ['skill'],
     data() {
       return {

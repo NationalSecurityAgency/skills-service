@@ -12,6 +12,4 @@ class BadgeRequest {
 
     Date startDate
     Date endDate
-
-    List<String> requiredSkillsIds
 }

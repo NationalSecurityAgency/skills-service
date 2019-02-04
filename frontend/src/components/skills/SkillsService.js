@@ -35,6 +35,18 @@ export default {
     return axios.get(`/admin/projects/${projectId}/dependency/graph`)
       .then(res => res.data);
   },
+  assignSkillToBadge(projectId, badgeId, skillId) {
+    return axios.post(`/admin/projects/${projectId}/badge/${badgeId}/skills/${skillId}`)
+      .then(res => res.data);
+  },
+  removeSkillFromBadge(projectId, badgeId, skillId) {
+    return axios.delete(`/admin/projects/${projectId}/badge/${badgeId}/skills/${skillId}`)
+      .then(res => res.data);
+  },
+  getBadgeSkills(projectId, badgeId) {
+    return axios.get(`/admin/projects/${projectId}/badge/${badgeId}/skills`)
+      .then(res => res.data);
+  },
   assignDependency(projectId, skillId, dependentSkillId) {
     return axios.post(`/admin/projects/${projectId}/skills/${skillId}/dependency/${dependentSkillId}`)
       .then(createdRuleResult => createdRuleResult.data);

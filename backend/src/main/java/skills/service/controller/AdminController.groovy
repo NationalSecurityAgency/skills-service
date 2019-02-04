@@ -143,11 +143,28 @@ class AdminController {
                           @RequestBody BadgeRequest badgeRequest) {
         assert badgeRequest.name
         assert badgeId == badgeRequest.badgeId
-        assert badgeRequest.requiredSkillsIds
         if (badgeRequest.startDate) { assert badgeRequest.endDate }
         if (badgeRequest.endDate) { assert badgeRequest.startDate }
 
         return projectAdminStorageService.saveBadge(projectId, badgeRequest)
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/badge/{badgeId}/skills/{skillId}", method = RequestMethod.POST, produces = "application/json")
+    @ResponseBody
+    def assignSkillToBadge(@PathVariable("projectId") String projectId,
+                           @PathVariable("badgeId") String badgeId,
+                           @PathVariable("skillId") String skillId) {
+        projectAdminStorageService.addSkillToBadge(projectId, badgeId, skillId)
+        return [status: 'success']
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/badge/{badgeId}/skills/{skillId}", method = RequestMethod.DELETE, produces = "application/json")
+    @ResponseBody
+    def removeSkillFromBadge(@PathVariable("projectId") String projectId,
+                           @PathVariable("badgeId") String badgeId,
+                           @PathVariable("skillId") String skillId) {
+        projectAdminStorageService.removeSkillFromBadge(projectId, badgeId, skillId)
+        return [status: 'success']
     }
 
     @RequestMapping(value = "/projects/{projectId}/badges/{badgeId}", method = RequestMethod.DELETE)
@@ -428,7 +445,9 @@ class AdminController {
         return adminUsersService.loadUsersPage(projectId, skillIds, query, pageRequest)
     }
 
-    List<SkillDefRes> getBadgeSkills(String projectId, String badgeId) {
+    @RequestMapping(value = "/projects/{projectId}/badge/{badgeId}/skills", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    List<SkillDefRes> getBadgeSkills(@PathVariable("projectId") String projectId, @PathVariable("badgeId") String badgeId) {
         return projectAdminStorageService.getSkillsForBadge(projectId, badgeId)
     }
 

@@ -54,8 +54,7 @@
           {name: 'Stats', iconClass: 'fa-chart-bar'},
         ]">
         <template slot="Skills">
-          <!--<skills :project-id="this.$route.query.projectId" :subject-id="this.$route.query.subjectId" v-on:skills-change="loadBadge"/>-->
-          <span>TODO: Skills Display</span>
+          <badge-skills :project-id="projectId" :badge-id="badgeId"></badge-skills>
         </template>
         <template slot="Users">
           <users :project-id="projectId" :badge-id="this.badgeId" />
@@ -75,10 +74,11 @@
   import LoadingContainer from '../utils/LoadingContainer';
   import ProjectStats from '../stats/ProjectStats';
   import Users from '../users/Users';
+  import BadgeSkills from './BadgeSkills';
 
   export default {
     name: 'BadgePage',
-    components: { ProjectStats, LoadingContainer, Navigation, Users },
+    components: { BadgeSkills, ProjectStats, LoadingContainer, Navigation, Users },
     breadcrumb() {
       return {
         label: `BADGE: ${this.badgeId}`,

@@ -195,10 +195,24 @@ class AdminProjService {
         }
 
         SkillDef savedSkill = skillDefRepo.save(skillDefinition)
-        handleGraphRelationships(badgeRequest.requiredSkillsIds, isEdit, savedSkill, savedSkill, SkillRelDef.RelationshipType.BadgeDependence)
 
         log.info("Saved [{}]", savedSkill)
         return convertToBadge(savedSkill)
+    }
+
+    @Transactional()
+    void addSkillToBadge(String projectId, String badgeId, String skillid) {
+        assignGraphRelationship(projectId, badgeId, skillid, SkillRelDef.RelationshipType.BadgeDependence)
+    }
+
+    @Transactional()
+    void removeSkillFromBadge(String projectId, String badgeId, String skillid) {
+        removeGraphRelationship(projectId, badgeId, skillid, SkillRelDef.RelationshipType.BadgeDependence)
+    }
+
+    @Transactional()
+    void getSkillsFroBadge(String projectId, String badgeId) {
+
     }
 
     @Transactional
@@ -622,14 +636,27 @@ class AdminProjService {
 
     @Transactional()
     void removeSkillDependency(String projectId, String skillId, String dependentSkillId) {
+        removeGraphRelationship(projectId, skillId, dependentSkillId, SkillRelDef.RelationshipType.Dependence)
+    }
+
+
+    void assignGraphRelationship(String projectId, String skillId, String relationshipSkillId, SkillRelDef.RelationshipType relationshipType) {
         SkillDef skill1 = getSkillDef(projectId, skillId)
-        SkillDef skill2 = getSkillDef(projectId, dependentSkillId)
-        SkillRelDef relDef = skillRelDefRepo.findByChildAndParentAndType(skill2, skill1, SkillRelDef.RelationshipType.Dependence)
+        SkillDef skill2 = getSkillDef(projectId, relationshipSkillId)
+        skillRelDefRepo.save(new SkillRelDef(parent: skill1, child: skill2, type: relationshipType))
+    }
+
+    void removeGraphRelationship(String projectId, String skillId, String relationshipSkillId, SkillRelDef.RelationshipType relationshipType){
+        SkillDef skill1 = getSkillDef(projectId, skillId)
+        SkillDef skill2 = getSkillDef(projectId, relationshipSkillId)
+        SkillRelDef relDef = skillRelDefRepo.findByChildAndParentAndType(skill2, skill1, relationshipType)
         if (!relDef) {
-            throw new SkillException("Failed to find dependence relationship between [$skillId] and [$dependentSkillId] for [$projectId]", projectId, skillId)
+            throw new SkillException("Failed to find relationship [$relationshipType] between [$skillId] and [$relationshipSkillId] for [$projectId]", projectId, skillId)
         }
         skillRelDefRepo.delete(relDef)
     }
+
+
 
     private void checkForCircularGraphAndThrowException(SkillDef skill1, SkillDef skill2, SkillRelDef.RelationshipType type) {
         assert skill1.skillId != skill2.skillId

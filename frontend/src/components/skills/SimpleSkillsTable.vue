@@ -1,21 +1,20 @@
 <template>
-    <div id="dependents-table" v-if="this.skills && this.skills.length">
+    <div id="simple-skills-table" v-if="this.skills && this.skills.length">
       <v-client-table :data="skills" :columns="columns" :options="options">
         <div slot="edit" slot-scope="props">
-          <div class="field has-addons">
+          <div class="field has-addons has-text-right">
           <span class="field has-addons">
             <p class="">
               <a v-on:click="onDeleteEvent(props.row)" class="button is-outlined is-info">
                     <span class="icon is-small">
                       <i class="fas fa-trash"/>
                     </span>
-                <!--<span>Remove</span>-->
               </a>
             </p>
             <p class="skills-pad-left-1-rem">
               <router-link :to="{ name:'SkillPage',
               params: { projectId: props.row.projectId, subjectId: props.row.subjectId, skillId: props.row.skillId }}"
-                           class="button is-outlined is-info">
+                           class="button is-outlined is-info"  v-bind:class="{ active: !props.row.subjectId }">
                 <span>Manage</span>
                 <span class="icon is-small">
                   <i class="fas fa-arrow-circle-right"/>
@@ -31,7 +30,7 @@
 
 <script>
   export default {
-    name: 'DependentsTable',
+    name: 'SimpleSkillsTable',
     props: ['skills'],
     data() {
       return {
@@ -44,7 +43,7 @@
             totalPoints: 'Total Points',
             edit: '',
           },
-          perPage: 5,
+          perPage: 15,
           columnsClasses: {
             edit: 'control-column',
           },
@@ -68,13 +67,21 @@
 </script>
 
 <style>
-  #dependents-table .VueTables__limit-field {
+  #simple-skills-table .VueTables__limit-field {
     display:none;
   }
 
-  #dependents-table .control-column{
+  #simple-skills-table .control-column{
     width: 11rem;
     /*background: yellow;*/
+  }
+
+  #simple-skills-table .active {
+    cursor: not-allowed;
+    pointer-events: none;
+    color: #c0c0c0;
+    background-color: #ffffff;
+    border-color: gray;
   }
 
 </style>
