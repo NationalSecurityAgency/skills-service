@@ -5,7 +5,10 @@ stages:
 build:
   image: maven:3.6.0-jdk-11
   stage: build
-  script: mvn install
+  script:
+    - echo "@skills:registry=http://10.113.80.244/repository/skills-registry/" > ~/.npmrc
+    - cat ~/.npmrc
+    - mvn install
   artifacts:
     paths:
       - backend/target/backend-*.jar
