@@ -467,7 +467,7 @@ class AdminProjService {
         )
 
         res.numSkills = skillDefRepo.countChildSkillsByIdAndRelationshipType(skillDef, SkillRelDef.RelationshipType.RuleSetDefinition)
-        res.numUsers = skillDefRepo.calculateDistinctUsers(skillDef.projectId, skillDef.skillId)
+        res.numUsers = skillDefRepo.calculateDistinctUsersForChildSkills(skillDef.projectId, skillDef, SkillRelDef.RelationshipType.RuleSetDefinition)
         return res
     }
 
@@ -485,11 +485,11 @@ class AdminProjService {
         )
 
         List<SkillRelDef> dependentSkillsRels = skillRelDefRepo.findAllByParentAndType(skillDef, SkillRelDef.RelationshipType.BadgeDependence)
-        res.requiredSkills = dependentSkillsRels?.collect { convertToSkillDefRes(it.child, false) }
+        res.requiredSkills = dependentSkillsRels?.collect { convertToSkillDefRes(it.child) }
 
         res.totalPoints = skillDefRepo.sumChildSkillsTotalPointsBySkillAndRelationshipType(skillDef, SkillRelDef.RelationshipType.BadgeDependence)
         res.numSkills = skillDefRepo.countChildSkillsByIdAndRelationshipType(skillDef, SkillRelDef.RelationshipType.BadgeDependence)
-        res.numUsers = skillDefRepo.calculateDistinctUsers(skillDef.projectId, skillDef.skillId)
+        res.numUsers = skillDefRepo.calculateDistinctUsersForChildSkills(skillDef.projectId, skillDef, RelationshipType.BadgeDependence)
         return res
     }
 
@@ -811,19 +811,14 @@ class AdminProjService {
 
 
 
-    private SkillDefRes convertToSkillDefRes(SkillDef skillDef, boolean loadGraph = false) {
+    private SkillDefRes convertToSkillDefRes(SkillDef skillDef, boolean loadNumUsers = false) {
         SkillDefRes res = new SkillDefRes()
         Props.copy(skillDef, res)
         res.maxSkillAchievedCount = res.totalPoints / res.pointIncrement
 
-        if (loadGraph) {
-            List<SkillRelDef> dependentSkillsRels = skillRelDefRepo.findAllByParentAndType(skillDef, SkillRelDef.RelationshipType.Dependence)
-            res.dependentSkills = dependentSkillsRels?.collect { convertToSkillDefRes(it.child, false) }
-
-            List<SkillRelDef> skillRecommendationsRels = skillRelDefRepo.findAllByParentAndType(skillDef, SkillRelDef.RelationshipType.Recommendation)
-            res.skillRecommendations = skillRecommendationsRels?.collect { convertToSkillDefRes(it.child, false) }
+        if (loadNumUsers) {
+            res.numUsers = skillDefRepo.calculateDistinctUsersForASingleSkill(skillDef.projectId, skillDef.skillId)
         }
-
         return res
     }
 

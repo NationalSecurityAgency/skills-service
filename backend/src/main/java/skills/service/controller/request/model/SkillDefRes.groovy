@@ -32,6 +32,5 @@ class SkillDefRes {
 
     Date updated
 
-    List<SkillDefRes> dependentSkills
-    List<SkillDefRes> skillRecommendations
+    int numUsers
 }

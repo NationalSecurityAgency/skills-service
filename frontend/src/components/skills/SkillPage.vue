@@ -29,14 +29,14 @@
               <div class="column is-one-quarter">
                 <div>
                   <p class="heading">Total Points</p>
-                  <p class="title">{{ 0 | number }}</p>
+                  <p class="title">{{ this.skill.totalPoints | number }}</p>
                 </div>
               </div>
 
               <div class="column is-one-quarter">
                 <div>
                   <p class="heading">Users</p>
-                  <p class="title">0</p>
+                  <p class="title">{{ this.skill.numUsers | number }}</p>
                 </div>
               </div>
             </div>
@@ -147,7 +147,7 @@
     },
     methods: {
       loadSkill() {
-        this.isLoading = false;
+        this.isLoading = true;
         SkillsService.getSkillDetails(this.$route.params.projectId, this.$route.params.subjectId, this.$route.params.skillId)
           .then((response) => {
             this.skill = Object.assign(response, { subjectId: this.$route.params.subjectId });
