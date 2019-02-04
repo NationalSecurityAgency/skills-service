@@ -1,0 +1,21 @@
+stages:
+  - build
+#  - deploy
+
+build:
+  image: maven:3.6.0-jdk-11
+  stage: build
+  script: mvn install
+  artifacts:
+    paths:
+      - backend/target/backend-*.jar
+
+#deploy:
+#  image: alpine:latest
+#  stage: deploy
+#  before_script:
+#    - apk --update --no-cache add sshpass openssh
+#  script:
+#    - sshpass -p $CI_PASSWORD ssh -o StrictHostKeyChecking=no -o PreferredAuthentications=password -o PubkeyAuthentication=no $CI_USERNAME@$CI_IP "mkdir ~/test-worked"
+#  only:
+#    - master
