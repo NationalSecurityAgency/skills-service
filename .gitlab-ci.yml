@@ -6,9 +6,9 @@ build:
   image: maven:3.6.0-jdk-11
   stage: build
   script:
-    - echo "@skills:registry=http://${NEXUS_SERVER}/repository/skills-registry/" > ~/.npmrc
+    - echo "@skills:registry=http://$NEXUS_SERVER/repository/skills-registry/" > ~/.npmrc
     - cat ~/.npmrc
-    - echo "<settings><mirrors><mirror><id>central</id><name>central</name><url>http://${NEXUS_SERVER}/repository/maven-public/</url><mirrorOf>*</mirrorOf></mirror></mirrors></settings>" > ~/.m2/settings.xml
+    - echo "<settings><mirrors><mirror><id>central</id><name>central</name><url>http://$NEXUS_SERVER/repository/maven-public/</url><mirrorOf>*</mirrorOf></mirror></mirrors></settings>" > ~/.m2/settings.xml
     - cat ~/.m2/settings.xml
     - mvn install
   artifacts:
