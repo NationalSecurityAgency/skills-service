@@ -5,7 +5,6 @@ import Buefy from 'buefy';
 import { ClientTable, ServerTable } from 'vue-tables-2';
 import Vue2Crumbs from 'vue-2-crumbs';
 import VeeValidate from 'vee-validate';
-import vSelect from 'vue-select';
 import VueApexCharts from 'vue-apexcharts';
 import Vuex from 'vuex';
 import 'babel-polyfill';
@@ -24,7 +23,6 @@ Vue.use(VeeValidate);
 Vue.use(Vuex);
 Vue.use(VueApexCharts);
 
-Vue.component('v-select', vSelect);
 Vue.component('apexchart', VueApexCharts);
 
 Vue.config.productionTip = false;

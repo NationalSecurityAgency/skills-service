@@ -32,7 +32,6 @@
 <script>
   import SkillsService from '../SkillsService';
   import SkillsTable from '../SkillsTable';
-  import SkillsSelector from '../SkillsSelector';
   import LoadingContainer from '../../utils/LoadingContainer';
   import DependantsGraph from './DependantsGraph';
   import SkillsSelector2 from '../SkillsSelector2';
@@ -40,7 +39,7 @@
 
   export default {
     name: 'SkillDependencies',
-    components: { SimpleSkillsTable, SkillsSelector2, DependantsGraph, LoadingContainer, SkillsTable, SkillsSelector },
+    components: { SimpleSkillsTable, SkillsSelector2, DependantsGraph, LoadingContainer, SkillsTable },
     props: ['skill'],
     data() {
       return {

@@ -1,9 +1,6 @@
 <template>
   <div id="skills-selector">
 
-    <!--<multiselect v-model="value" tag-placeholder="Add this as new tag" placeholder="Search or add a tag"-->
-                 <!--label="name" track-by="code" :options="options" :multiple="true" :taggable="true" @tag="addTag"></multiselect>-->
-
     <multiselect v-model="selectedInternal" placeholder="Search to add a skill..."
                  :options="options" :multiple="true" :taggable="true"
                  :hide-selected="true" label="name" track-by="id" v-on:remove="removed" v-on:select="added">

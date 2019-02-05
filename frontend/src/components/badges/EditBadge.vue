@@ -132,7 +132,6 @@
   import { Validator } from 'vee-validate';
   import MarkdownEditor from '../utils/MarkdownEditor';
   import IconPicker from '../utils/iconPicker/IconPicker';
-  import SkillsSelector from '../skills/SkillsSelector';
 
   let self;
   const dictionary = {
@@ -170,7 +169,7 @@
   export default {
     name: 'EditBadge',
     components: {
-      IconPicker, SkillsSelector, MarkdownEditor,
+      IconPicker, MarkdownEditor,
     },
     props: ['badge', 'isEdit'],
     data() {
