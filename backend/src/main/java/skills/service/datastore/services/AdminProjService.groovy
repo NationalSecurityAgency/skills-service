@@ -487,8 +487,12 @@ class AdminProjService {
         List<SkillRelDef> dependentSkillsRels = skillRelDefRepo.findAllByParentAndType(skillDef, SkillRelDef.RelationshipType.BadgeDependence)
         res.requiredSkills = dependentSkillsRels?.collect { convertToSkillDefRes(it.child) }
 
-        res.totalPoints = skillDefRepo.sumChildSkillsTotalPointsBySkillAndRelationshipType(skillDef, SkillRelDef.RelationshipType.BadgeDependence)
         res.numSkills = skillDefRepo.countChildSkillsByIdAndRelationshipType(skillDef, SkillRelDef.RelationshipType.BadgeDependence)
+        if (res.numSkills > 0) {
+            res.totalPoints = skillDefRepo.sumChildSkillsTotalPointsBySkillAndRelationshipType(skillDef, SkillRelDef.RelationshipType.BadgeDependence)
+        } else {
+            res.totalPoints = 0
+        }
         res.numUsers = skillDefRepo.calculateDistinctUsersForChildSkills(skillDef.projectId, skillDef, RelationshipType.BadgeDependence)
         return res
     }
