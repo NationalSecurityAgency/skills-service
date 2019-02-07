@@ -53,11 +53,11 @@
 </template>
 
 <script>
-  import axios from 'axios';
   import MyProject from './MyProject';
   import EditProject from './EditProject';
   import LoadingContainer from '../utils/LoadingContainer';
   import NoContent from '../utils/NoContent';
+  import ProjectService from './ProjectService';
 
   // EditProject.
 
@@ -67,7 +67,6 @@
       return {
         isLoading: true,
         projects: [],
-        serverErrors: [],
       };
     },
     components: { NoContent, LoadingContainer, MyProject },
@@ -76,35 +75,24 @@
     },
     methods: {
       loadProjects() {
-        axios.get('/app/projects')
+        ProjectService.getProjects()
           .then((response) => {
             this.isLoading = false;
-            this.projects = response.data;
-          })
-          .catch((e) => {
-            this.serverErrors.push(e);
+            this.projects = response;
         });
       },
       projectRemoved(project) {
         this.isLoading = true;
-        axios.delete(`/admin/projects/${project.projectId}`)
+        ProjectService.deleteProject(project.projectId)
           .then(() => {
             this.loadProjects();
-          })
-          .catch((e) => {
-            this.isLoading = false;
-            throw e;
         });
       },
       projectAdded(project) {
         this.isLoading = true;
-        axios.put(`/app/projects/${project.projectId}`, project)
+        ProjectService.saveProject(project)
           .then(() => {
             this.loadProjects();
-          })
-          .catch((e) => {
-            this.isLoading = false;
-            throw e;
         });
       },
       newProject() {
@@ -129,15 +117,9 @@
       },
       moveProject(project, actionToSubmit) {
         this.isLoading = true;
-        axios.patch(`/admin/projects/${project.projectId}`, {
-          action: actionToSubmit,
-        })
+        ProjectService.changeProjectOrder(project.projectId, actionToSubmit)
           .then(() => {
             this.loadProjects();
-          })
-          .catch((e) => {
-            this.isLoading = false;
-            throw e;
         });
       },
 

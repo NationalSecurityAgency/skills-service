@@ -1,17 +1,24 @@
 <template>
-  <div id="full-dependent-skills-graph" class="skills-bordered-component">
-    <loading-container :is-loading="!isLoading">
-      <div v-if="!this.graph.nodes || this.graph.nodes.length === 0" class="columns is-centered skills-pad-top-1-rem">
-        <div class="column is-half">
-          <no-dependenies message="You can manage and visualize skill's dependencies. Please add dependencies to get started."></no-dependenies>
+  <div>
+    <div class="columns">
+      <div class="column is-full">
+        <span class="title is-3">Skill Dependencies</span>
+      </div>
+    </div>
+    <div id="full-dependent-skills-graph" class="skills-bordered-component">
+      <loading-container :is-loading="!isLoading">
+        <div v-if="!this.graph.nodes || this.graph.nodes.length === 0" class="columns is-centered skills-pad-top-1-rem">
+          <div class="column is-half">
+            <no-dependenies message="You can manage and visualize skill's dependencies. Please add dependencies to get started."></no-dependenies>
+          </div>
         </div>
-      </div>
-      <div v-else>
-        <graph-node-sort-method-selector class="sort-method-selector"
-                                         v-on:value-changed="onSortNodeStrategyChange"></graph-node-sort-method-selector>
-      </div>
-    </loading-container>
-    <div id="dependency-graph" style="height: 800px"></div>
+        <div v-else>
+          <graph-node-sort-method-selector class="sort-method-selector"
+                                           v-on:value-changed="onSortNodeStrategyChange"></graph-node-sort-method-selector>
+        </div>
+      </loading-container>
+      <div id="dependency-graph" style="height: 800px"></div>
+    </div>
   </div>
 </template>
 

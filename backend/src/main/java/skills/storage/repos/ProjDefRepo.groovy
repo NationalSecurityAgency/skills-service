@@ -17,4 +17,6 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
     @Query(value = "SELECT COUNT(DISTINCT s.userId) from UserPoints s where s.projectId=?1")
     int calculateDistinctUsers(String projectId)
 
+    @Query("select p from ProjDef p where lower(p.name) LIKE %?1%" )
+    List<ProjDef> queryProjectsByNameQuery(String nameQuery)
 }

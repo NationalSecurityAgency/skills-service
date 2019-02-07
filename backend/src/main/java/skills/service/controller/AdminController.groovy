@@ -11,8 +11,10 @@ import org.springframework.web.multipart.MultipartFile
 import skills.service.controller.exceptions.InvalidContentTypeException
 import skills.service.controller.exceptions.MaxIconSizeExceeded
 import skills.service.controller.request.model.*
-import skills.service.controller.result.model.DependencyCheckResult
 import skills.service.controller.result.model.LevelDefinitionRes
+import skills.service.controller.result.model.ProjectResult
+import skills.service.controller.result.model.SharedSkillResult
+import skills.service.controller.result.model.SimpleProjectResult
 import skills.service.controller.result.model.SkillsGraphRes
 import skills.service.controller.result.model.TableResult
 import skills.service.datastore.services.AdminProjService
@@ -67,6 +69,11 @@ class AdminController {
     @ResponseBody
     ProjectResult getProject(@PathVariable("id") String projectId) {
         return projectAdminStorageService.getProject(projectId)
+    }
+
+    @RequestMapping(value = "/projects/{id}/projectSearch", method = RequestMethod.GET, produces = "application/json")
+    List<SimpleProjectResult> searchProjects(@PathVariable("id") String projectId, @RequestParam("nameQuery") nameQuery) {
+        return projectAdminStorageService.searchProjects(nameQuery)
     }
 
     @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
@@ -469,6 +476,26 @@ class AdminController {
     @RequestMapping(value = "/validExistingUserId/{userId}", method = RequestMethod.GET, produces = "application/json")
     Boolean isValidExistingUserId(@PathVariable("userId") String userId) {
         return userAdminService.isValidExistingUserId(userId)
+    }
+
+
+    @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/shared/projects/{sharedProjectId}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
+    void shareSkillToAnotherProject(@PathVariable("projectId") String projectId,
+                                       @PathVariable("skillId") String skillId,
+                                       @PathVariable("sharedProjectId") String sharedProjectId) {
+        projectAdminStorageService.shareSkillToExternalProject(projectId, skillId, sharedProjectId)
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/shared/projects/{sharedProjectId}", method = RequestMethod.DELETE, produces = "application/json")
+    void deleteSkillShare(@PathVariable("projectId") String projectId,
+                                    @PathVariable("skillId") String skillId,
+                                    @PathVariable("sharedProjectId") String sharedProjectId) {
+        projectAdminStorageService.deleteSkillShare(projectId, skillId, sharedProjectId)
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/shared", method = RequestMethod.GET, produces = "application/json")
+    List<SharedSkillResult>  getSharedSkills(@PathVariable("projectId") String projectId) {
+        return projectAdminStorageService.getSharedSkills(projectId)
     }
 
 }

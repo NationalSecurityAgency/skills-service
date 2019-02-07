@@ -52,9 +52,10 @@
           {name: 'Subjects', iconClass: 'fa-cubes'},
           {name: 'Badges', iconClass: 'fa-award'},
           {name: 'Dependencies', iconClass: 'fa-vector-square'},
+          {name: 'Cross Projects', iconClass: 'fa-handshake'},
+          {name: 'Levels', iconClass: 'fa-trophy'},
           {name: 'Users', iconClass: 'fa-users'},
           {name: 'Stats', iconClass: 'fa-chart-bar'},
-          {name: 'Levels', iconClass: 'fa-trophy'},
           {name: 'Access', iconClass: 'fa-shield-alt'},
         ]">
         <template slot="Subjects">
@@ -84,13 +85,10 @@
           </section>
         </template>
         <template slot="Dependencies">
-          <div class="columns">
-            <div class="column is-full">
-              <span class="title is-3">Skill Dependencies</span>
-            </div>
-          </div>
-
           <full-dependency-graph :project-id="project.projectId"></full-dependency-graph>
+        </template>
+        <template slot="Cross Projects">
+          <cross-projects-skills :project-id="project.projectId"></cross-projects-skills>
         </template>
       </navigation>
     </section>
@@ -99,8 +97,8 @@
 </template>
 
 <script>
-  import axios from 'axios';
   import MyProject from './MyProject';
+  import ProjectService from './ProjectService';
   import Subjects from '../subjects/Subjects';
   import Levels from '../levels/Levels';
   import Badges from '../badges/Badges';
@@ -110,10 +108,11 @@
   import LoadingContainer from '../utils/LoadingContainer';
   import ProjectStats from '../stats/ProjectStats';
   import FullDependencyGraph from '../skills/dependencies/FullDependencyGraph';
+  import CrossProjectsSkills from '../skills/crossProjects/CrossProjectsSkills';
 
   export default {
     name: 'ProjectPage',
-    components: { FullDependencyGraph, ProjectStats, LoadingContainer, Navigation, Levels, Subjects, Badges, AccessSettings, MyProject, Users },
+    components: { CrossProjectsSkills, FullDependencyGraph, ProjectStats, LoadingContainer, Navigation, Levels, Subjects, Badges, AccessSettings, MyProject, Users },
     breadcrumb() {
       return {
         label: `PROJECT: ${this.$route.params.projectId}`,
@@ -136,14 +135,11 @@
     methods: {
       loadProjects() {
         this.isLoading = true;
-        axios.get(`/admin/projects/${this.$route.params.projectId}`)
+        ProjectService.getProjectDetails(this.$route.params.projectId)
           .then((response) => {
             this.isLoading = false;
-            this.project = response.data;
+            this.project = response;
             this.$store.commit('currentProjectId', this.project.projectId);
-          })
-          .catch((e) => {
-            this.serverErrors.push(e);
         });
       },
     },

@@ -2,6 +2,7 @@ package skills.service.datastore.services
 
 import groovy.util.logging.Slf4j
 import org.apache.commons.collections.CollectionUtils
+import org.hibernate.exception.ConstraintViolationException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.data.domain.PageRequest
@@ -14,6 +15,9 @@ import skills.service.controller.exceptions.ErrorCode
 import skills.service.controller.exceptions.SkillException
 import skills.service.controller.request.model.*
 import skills.service.controller.result.model.DependencyCheckResult
+import skills.service.controller.result.model.ProjectResult
+import skills.service.controller.result.model.SharedSkillResult
+import skills.service.controller.result.model.SimpleProjectResult
 import skills.service.controller.result.model.SkillsGraphRes
 import skills.service.skillsManagement.UserAchievementsAndPointsManagement
 import skills.storage.model.LevelDef
@@ -21,11 +25,15 @@ import skills.storage.model.ProjDef
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillRelDef
 import skills.storage.model.SkillRelDef.RelationshipType
+import skills.storage.model.SkillShareDef
 import skills.storage.model.auth.RoleName
 import skills.storage.repos.ProjDefRepo
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.SkillRelDefRepo
+import skills.storage.repos.SkillShareDefRepo
 import skills.utils.Props
+
+import java.sql.SQLIntegrityConstraintViolationException
 
 @Service
 @Slf4j
@@ -57,6 +65,9 @@ class AdminProjService {
 
     @Autowired
     RuleSetDefGraphService ruleSetDefGraphService
+
+    @Autowired
+    SkillShareDefRepo skillShareDefRepo
 
     @Transactional()
     ProjectResult saveProject(ProjectRequest projectRequest) {
@@ -210,10 +221,6 @@ class AdminProjService {
         removeGraphRelationship(projectId, badgeId, skillid, SkillRelDef.RelationshipType.BadgeDependence)
     }
 
-    @Transactional()
-    void getSkillsFroBadge(String projectId, String badgeId) {
-
-    }
 
     @Transactional
     void deleteSubject(String projectId, String subjectId) {
@@ -376,6 +383,40 @@ class AdminProjService {
         log.info("Switched order of [{}] and [{}]", toUpdate.skillId, switchWith.skillId)
     }
 
+    @Transactional()
+    void shareSkillToExternalProject(String projectId, String skillId, String sharedToProjectId) {
+        SkillDef skill = getSkillDef(projectId, skillId)
+        ProjDef sharedToProject = getProjDef(sharedToProjectId)
+
+        SkillShareDef skillShareDef = new SkillShareDef(skill: skill, sharedToProject: sharedToProject)
+        skillShareDefRepo.save(skillShareDef)
+    }
+
+    @Transactional()
+    void deleteSkillShare(String projectId, String skillId, String sharedToProjectId) {
+        SkillDef skill = getSkillDef(projectId, skillId)
+        ProjDef sharedToProject = getProjDef(sharedToProjectId)
+        SkillShareDef skillShareDef = skillShareDefRepo.findBySkillAndSharedToProject(skill, sharedToProject)
+        if (!skillShareDef){
+            throw new SkillException("Failed to find skill share definition for project [$projectId] skill [$skillId] => [$sharedToProjectId] project", projectId, skillId)
+        }
+        skillShareDefRepo.delete(skillShareDef)
+    }
+
+
+    @Transactional(readOnly = true)
+    List<SharedSkillResult> getSharedSkills(String projectId) {
+        List<SkillShareDef> shareDefs = skillShareDefRepo.getSkillShareDefsByProjectId(projectId)
+        return shareDefs.collect { convertToSharedSkill(it) }
+    }
+
+    private SharedSkillResult convertToSharedSkill(SkillShareDef shareDef) {
+        new SharedSkillResult(
+                skillName: shareDef.skill.name, skillId: shareDef.skill.skillId,
+                projectName: shareDef.sharedToProject.name, projectId: shareDef.sharedToProject.projectId
+        )
+    }
+
 
     @Transactional()
     void deleteProject(String projectId) {
@@ -385,6 +426,14 @@ class AdminProjService {
 
         projDefRepo.deleteById(projectDefinition.id)
         log.info("Deleted project with id [{}]", projectId)
+    }
+
+    @Transactional()
+    List<SimpleProjectResult> searchProjects(String nameQuery) {
+        List<ProjDef> projDefs = projDefRepo.queryProjectsByNameQuery(nameQuery)
+        return projDefs.collect {
+            new SimpleProjectResult(id: it.id, name: it.name, projectId: it.projectId)
+        }
     }
 
     @Transactional()

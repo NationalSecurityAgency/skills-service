@@ -4,7 +4,7 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
 import skills.service.controller.request.model.ProjectRequest
-import skills.service.controller.request.model.ProjectResult
+import skills.service.controller.result.model.ProjectResult
 import skills.service.datastore.services.AdminProjService
 
 @RestController

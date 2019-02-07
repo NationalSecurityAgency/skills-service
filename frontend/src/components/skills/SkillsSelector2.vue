@@ -1,8 +1,8 @@
 <template>
   <div id="skills-selector">
 
-    <multiselect v-model="selectedInternal" placeholder="Search to add a skill..."
-                 :options="options" :multiple="true" :taggable="true"
+    <multiselect v-model="selectedInternal" placeholder="Select skill(s)..."
+                 :options="options" :multiple="true" :taggable="multipleSelection"
                  :hide-selected="true" label="name" track-by="id" v-on:remove="removed" v-on:select="added">
       <template slot="option" slot-scope="props">
         <div class="columns">
@@ -25,14 +25,18 @@
   export default {
     name: 'SkillsSelector2',
     components: { Multiselect },
-    props: ['options', 'selected'],
+    props: ['options', 'selected', 'onlySingleSelectedValue'],
     data() {
       return {
         selectedInternal: null,
+        multipleSelection: true,
       };
     },
     mounted() {
       this.selectedInternal = this.selected.map(entry => entry);
+      if (this.onlySingleSelectedValue) {
+        this.multipleSelection = false;
+      }
     },
     watch: {
       selected: function watchUpdatesToSelected() {
@@ -44,18 +48,15 @@
         this.selectedInternal = this.selected.map(entry => entry);
       },
       removed(removedItem) {
-        // this.$toast.open(`Removed! removedOption=${removedOption.name}, id=${id}`);
         this.$emit('removed', removedItem);
       },
       added(addedItem) {
-        // this.$toast.open(`Added! selectedOption=${selectedOption}, id=${id}`);
         this.$emit('added', addedItem);
       },
     },
   };
 </script>
 
-<style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
 <style>
   #skills-selector .multiselect{
     z-index: 99;

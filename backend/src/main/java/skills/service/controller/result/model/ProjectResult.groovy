@@ -1,12 +1,6 @@
-package skills.service.controller.request.model
+package skills.service.controller.result.model
 
-class ProjectResult {
-
-    Integer id
-
-    String projectId
-
-    String name
+class ProjectResult extends SimpleProjectResult{
 
     int totalPoints
 

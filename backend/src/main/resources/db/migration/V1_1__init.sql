@@ -86,6 +86,24 @@ create table skills.skill_relationship_definition
 ) engine=InnoDB;
 
 
+create table skills.skill_share_definition
+(
+  id int not null AUTO_INCREMENT PRIMARY KEY,
+  skill_id int not null,
+  shared_to_project_id int not null,
+
+  INDEX (skill_id),
+  INDEX (shared_to_project_id),
+
+  FOREIGN KEY (skill_id) REFERENCES skills.skill_definition(id) ON UPDATE CASCADE ON DELETE CASCADE,
+  FOREIGN KEY (shared_to_project_id) REFERENCES skills.project_definition(id) ON UPDATE CASCADE ON DELETE CASCADE,
+
+  CONSTRAINT UNIQUE (skill_id, shared_to_project_id),
+
+  created DATETIME default CURRENT_TIMESTAMP,
+  updated DATETIME default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP
+) engine=InnoDB;
+
 create table skills.level_definition
 (
   id int not null AUTO_INCREMENT PRIMARY KEY,

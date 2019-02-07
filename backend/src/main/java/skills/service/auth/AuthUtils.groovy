@@ -6,7 +6,7 @@ import javax.servlet.http.HttpServletRequest
 
 @Slf4j
 class AuthUtils {
-    static final String PROJECT_ID_PATTERN = /\/\S+\/projects\/([^\/]+).*$/
+    static final String PROJECT_ID_PATTERN = /\/\S+?\/projects\/([^\/]+).*$/
 
     static String getProjectIdFromRequest(HttpServletRequest servletRequest) {
         String projectId
