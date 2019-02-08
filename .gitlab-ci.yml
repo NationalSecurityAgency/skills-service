@@ -26,6 +26,6 @@ deploy:
     - TIMESTAMP=`date +%s`
     - TMP_DIR="deploy_${TIMESTAMP}"
     - sshpass -p $CI_PASSWORD ssh -o StrictHostKeyChecking=no -o PreferredAuthentications=password -o PubkeyAuthentication=no $CI_USERNAME@$CI_IP "mkdir -p /home/${CI_USERNAME}/$TMP_DIR"
-    - sshpass -p $CI_PASSWORD scp -r -o StrictHostKeyChecking=no -o PreferredAuthentications=password -o PubkeyAuthentication=no $CI_USERNAME@$CI_IP skills-deploy /home/${CI_USERNAME}/$TMP_DIR/
+    - sshpass -p $CI_PASSWORD scp -r -o StrictHostKeyChecking=no -o PreferredAuthentications=password -o PubkeyAuthentication=no $CI_USERNAME@$CI_IP skills-deploy ${CI_USERNAME}@$CI_IP:/home/${CI_USERNAME}/$TMP_DIR/
   only:
     - master
