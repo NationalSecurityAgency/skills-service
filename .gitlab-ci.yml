@@ -25,7 +25,8 @@ deploy:
     - git clone https://${GITLAB_DEPLOY_USERNAME}:${GITLAB_DEPLOY_PASSWORD}@gitlab.evoforge.org/skills/skills-deploy.git
     - TIMESTAMP=`date +%s`
     - TMP_DIR="deploy_${TIMESTAMP}"
-    - sshpass -p $CI_PASSWORD ssh $CI_USERNAME@$CI_IP "mkdir -p /home/${CI_USERNAME}/$TMP_DIR"
-    - sshpass -p $CI_PASSWORD scp -r skills-deploy ${CI_USERNAME}@${CI_IP}:/home/${CI_USERNAME}/$TMP_DIR/
+    - DEST_PATH="/home/${CI_USERNAME}/$TMP_DIR"
+    - sshpass -p $CI_PASSWORD ssh -o StrictHostKeyChecking=no -o PreferredAuthentications=password -o PubkeyAuthentication=no $CI_USERNAME@$CI_IP "rm -rf ${DEST_PATH}/deploy_* && mkdir -p ${DEST_PATH}"
+    - sshpass -p $CI_PASSWORD scp -r skills-deploy ${CI_USERNAME}@${CI_IP}:${DEST_PATH}
   only:
     - master
