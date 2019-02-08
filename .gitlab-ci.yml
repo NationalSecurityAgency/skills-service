@@ -1,19 +1,19 @@
 stages:
-#  - build
+  - build
   - deploy
 
-#build:
-#  image: maven:3.6.0-jdk-11
-#  stage: build
-#  script:
-#    - echo "@skills:registry=http://$NEXUS_SERVER/repository/skills-registry/" > ~/.npmrc
-#    - cat ~/.npmrc
-#    - echo "<settings><mirrors><mirror><id>central</id><name>central</name><url>http://$NEXUS_SERVER/repository/maven-public/</url><mirrorOf>*</mirrorOf></mirror></mirrors></settings>" > ~/.m2/settings.xml
-#    - cat ~/.m2/settings.xml
-#    - mvn install
-#  artifacts:
-#    paths:
-#      - backend/target/backend-*.jar
+build:
+  image: maven:3.6.0-jdk-11
+  stage: build
+  script:
+    - echo "@skills:registry=http://$NEXUS_SERVER/repository/skills-registry/" > ~/.npmrc
+    - cat ~/.npmrc
+    - echo "<settings><mirrors><mirror><id>central</id><name>central</name><url>http://$NEXUS_SERVER/repository/maven-public/</url><mirrorOf>*</mirrorOf></mirror></mirrors></settings>" > ~/.m2/settings.xml
+    - cat ~/.m2/settings.xml
+    - mvn install
+  artifacts:
+    paths:
+      - backend/target/backend-*.jar
 
 
 deploy:
@@ -27,6 +27,8 @@ deploy:
     - TMP_DIR="deploy_${TIMESTAMP}"
     - DEST_PATH="/home/${CI_USERNAME}/$TMP_DIR"
     - sshpass -p $CI_PASSWORD ssh -o StrictHostKeyChecking=no -o PreferredAuthentications=password -o PubkeyAuthentication=no $CI_USERNAME@$CI_IP "rm -rf ${DEST_PATH}/deploy_* && mkdir -p ${DEST_PATH}"
+    - cp backend/target/backend-*.jar backend.jar
+    - sshpass -p $CI_PASSWORD scp -r backend.jar ${CI_USERNAME}@${CI_IP}:${DEST_PATH}
     - sshpass -p $CI_PASSWORD scp -r skills-deploy ${CI_USERNAME}@${CI_IP}:${DEST_PATH}
   only:
     - master
