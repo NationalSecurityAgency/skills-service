@@ -23,7 +23,7 @@ deploy:
     - apk --update --no-cache add sshpass openssh git
   script:
 #    - - apk --update --no-cache add git
-    - git fetch git@gitlab.evoforge.org:skills/skills-test.git
+    - git clone https://gitlab+deploy-token-5:GmTgEZd_CQpWxQKaFh-x@gitlab.evoforge.org/skills/skills-test.git
     - sshpass -p $CI_PASSWORD ssh -o StrictHostKeyChecking=no -o PreferredAuthentications=password -o PubkeyAuthentication=no $CI_USERNAME@$CI_IP "mkdir -p ~/test-worked1"
   only:
     - master
