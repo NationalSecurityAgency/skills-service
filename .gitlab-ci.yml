@@ -17,7 +17,7 @@ stages:
 
 
 deploy:
-  image: alpine:latest
+  image: alpine/git:latest
   stage: deploy
   before_script:
     - apk --update --no-cache add sshpass openssh
