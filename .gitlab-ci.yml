@@ -30,5 +30,6 @@ deploy:
     - cp backend/target/backend-*.jar backend.jar
     - sshpass -p $CI_PASSWORD scp -r skills-deploy ${CI_USERNAME}@${CI_IP}:${DEST_PATH}
     - sshpass -p $CI_PASSWORD scp -r backend.jar ${CI_USERNAME}@${CI_IP}:${DEST_PATH}/skills-deploy
+    - sshpass -p $CI_PASSWORD ssh -o StrictHostKeyChecking=no -o PreferredAuthentications=password -o PubkeyAuthentication=no $CI_USERNAME@$CI_IP "cd ${DEST_PATH}/skills-deploy && ./runDeploy.sh"
   only:
     - master
