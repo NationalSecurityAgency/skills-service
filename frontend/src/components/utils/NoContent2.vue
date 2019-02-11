@@ -3,10 +3,10 @@
 
     <div class="columns is-centered">
       <div class="column is-narrow box icon-container">
-        <i class="fa fa-vector-square icon-style"></i>
+        <i class="icon-style" :class="icon"></i>
       </div>
     </div>
-    <h1 class="title skills-pad-top-1-rem has-text-grey">No Dependencies Yet...</h1>
+    <h1 class="title skills-pad-top-1-rem has-text-grey">{{ title }}</h1>
     <p>
       {{ message }}
     </p>
@@ -15,8 +15,8 @@
 
 <script>
   export default {
-    name: 'NoDependenies',
-    props: ['message'],
+    name: 'NoContent2',
+    props: ['title', 'message', 'icon'],
   };
 </script>
 

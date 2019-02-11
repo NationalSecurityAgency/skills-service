@@ -11,7 +11,9 @@ interface SkillShareDefRepo extends CrudRepository<SkillShareDef, Long> {
 
     @Query('''select share from SkillShareDef share, SkillDef skill
         where share.skill = skill and skill.projectId=?1''')
-    List<SkillShareDef> getSkillShareDefsByProjectId(String projectId)
+    List<SkillShareDef> getSkillShareDefsWithOtherProjectsByProjectId(String projectId)
+
+    List<SkillShareDef> findAllBySharedToProject(ProjDef sharedToProject)
 
     SkillShareDef findBySkillAndSharedToProject(SkillDef skill, ProjDef sharedToProject)
 }

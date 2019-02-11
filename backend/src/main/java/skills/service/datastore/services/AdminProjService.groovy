@@ -2,7 +2,6 @@ package skills.service.datastore.services
 
 import groovy.util.logging.Slf4j
 import org.apache.commons.collections.CollectionUtils
-import org.hibernate.exception.ConstraintViolationException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.data.domain.PageRequest
@@ -32,8 +31,6 @@ import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.SkillRelDefRepo
 import skills.storage.repos.SkillShareDefRepo
 import skills.utils.Props
-
-import java.sql.SQLIntegrityConstraintViolationException
 
 @Service
 @Slf4j
@@ -385,6 +382,9 @@ class AdminProjService {
 
     @Transactional()
     void shareSkillToExternalProject(String projectId, String skillId, String sharedToProjectId) {
+        if (projectId?.equalsIgnoreCase(sharedToProjectId)) {
+            throw new SkillException("Can not share skill to itself. Requested project [$sharedToProjectId] is itself!", projectId, skillId)
+        }
         SkillDef skill = getSkillDef(projectId, skillId)
         ProjDef sharedToProject = getProjDef(sharedToProjectId)
 
@@ -405,16 +405,28 @@ class AdminProjService {
 
 
     @Transactional(readOnly = true)
-    List<SharedSkillResult> getSharedSkills(String projectId) {
-        List<SkillShareDef> shareDefs = skillShareDefRepo.getSkillShareDefsByProjectId(projectId)
-        return shareDefs.collect { convertToSharedSkill(it) }
+    List<SharedSkillResult> getSharedSkillsWithOtherProjects(String projectId) {
+        List<SkillShareDef> shareDefs = skillShareDefRepo.getSkillShareDefsWithOtherProjectsByProjectId(projectId)
+        return shareDefs.collect { SkillShareDef shareDef ->
+            new SharedSkillResult(
+                    skillName: shareDef.skill.name, skillId: shareDef.skill.skillId,
+                    projectName: shareDef.sharedToProject.name, projectId: shareDef.sharedToProject.projectId
+            )
+        }
     }
 
-    private SharedSkillResult convertToSharedSkill(SkillShareDef shareDef) {
-        new SharedSkillResult(
-                skillName: shareDef.skill.name, skillId: shareDef.skill.skillId,
-                projectName: shareDef.sharedToProject.name, projectId: shareDef.sharedToProject.projectId
-        )
+    @Transactional(readOnly = true)
+    List<SharedSkillResult> getSharedSkillsFromOtherProjects(String projectId) {
+        ProjDef projDef = getProjDef(projectId)
+        List<SkillShareDef> shareDefs = skillShareDefRepo.findAllBySharedToProject(projDef)
+        return shareDefs.collect { SkillShareDef shareDef ->
+            // can def. improve performance if that's ever actually needed
+            String projectName = getProjDef(shareDef.skill.projectId).name
+            new SharedSkillResult(
+                    skillName: shareDef.skill.name, skillId: shareDef.skill.skillId,
+                    projectName: projectName, projectId: shareDef.skill.projectId
+            )
+        }
     }
 
 
