@@ -124,7 +124,7 @@ class CustomIconFacade {
         try {
             String dataUri = "data:${contentType};base64,${Base64.getEncoder().encodeToString(file)}"
 
-            CustomIcon customIcon = new CustomIcon(projectId: projectId, filename: iconFilename, contentType: contentType, imageContent: file, dataUri: dataUri)
+            CustomIcon customIcon = new CustomIcon(projectId: projectId, filename: iconFilename, contentType: contentType, dataUri: dataUri)
 
             iconService.saveIcon(customIcon)
 

@@ -36,4 +36,8 @@ class ProjDef implements Serializable {
     @JoinColumn(name="projRefId")
     @Where(clause = "type = 'Badge'")
     List<SkillDef> badges
+
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinColumn(name="projRefId")
+    List<CustomIcon> customIcons
 }
