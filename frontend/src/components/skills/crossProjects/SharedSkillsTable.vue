@@ -4,7 +4,7 @@
         <div slot="edit" slot-scope="props">
           <div class="field has-addons has-text-right">
           <span class="field has-addons">
-            <p class="">
+            <p class="" v-if="isDeleteEnabled">
               <a v-on:click="onDeleteEvent(props.row)" class="button is-outlined is-info">
                     <span class="icon is-small">
                       <i class="fas fa-trash"/>
@@ -39,14 +39,14 @@
 <script>
   export default {
     name: 'SharedSkillsTable',
-    props: ['sharedSkills'],
+    props: ['sharedSkills', 'disableDelete'],
     data() {
       return {
         columns: ['skill', 'project', 'edit'],
         options: {
           headings: {
             skill: 'Shared Skill',
-            project: 'Share to Project',
+            project: 'Project',
             edit: '',
           },
           perPage: 15,
@@ -62,7 +62,13 @@
           skin: 'table is-striped is-fullwidth',
           filterable: false,
         },
+        isDeleteEnabled: true,
       };
+    },
+    mounted() {
+      if (this.disableDelete) {
+        this.isDeleteEnabled = false;
+      }
     },
     methods: {
       onDeleteEvent(skill) {

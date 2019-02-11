@@ -9,7 +9,8 @@
       <loading-container :is-loading="!isLoading">
         <div v-if="!this.graph.nodes || this.graph.nodes.length === 0" class="columns is-centered skills-pad-top-1-rem">
           <div class="column is-half">
-            <no-dependenies message="You can manage and visualize skill's dependencies. Please add dependencies to get started."></no-dependenies>
+            <no-content2 icon="fa fa-vector-square" title="No Dependencies Yet..."
+              message="You can manage and visualize skill's dependencies. Please add dependencies to get started."></no-content2>
           </div>
         </div>
         <div v-else>
@@ -28,13 +29,13 @@
   import 'vis/dist/vis.css';
   import SkillsService from '../SkillsService';
   import LoadingContainer from '../../utils/LoadingContainer';
-  import NoDependenies from './NoDependenies';
   import GraphNodeSortMethodSelector from './GraphNodeSortMethodSelector';
+  import NoContent2 from '../../utils/NoContent2';
 
   export default {
     name: 'FullDependencyGraph',
     props: ['projectId'],
-    components: { GraphNodeSortMethodSelector, NoDependenies, LoadingContainer },
+    components: { NoContent2, GraphNodeSortMethodSelector, LoadingContainer },
     data() {
       return {
         isLoading: false,

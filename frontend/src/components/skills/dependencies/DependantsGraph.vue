@@ -2,8 +2,8 @@
   <div id="dependent-skills-graph" class="skills-bordered-component">
     <div v-if="!this.dependentSkills || this.dependentSkills.length === 0" class="columns is-centered">
       <div class="column is-half has-text-centered">
-        <no-dependenies message="You can manage and visualize skill's dependencies on this page. Please use the dropdown above to start adding
-      dependent skills."></no-dependenies>
+        <no-content2 icon="fa fa-vector-square" title="No Dependencies Yet..."
+                     message="You can manage and visualize skill's dependencies on this page. Please use the dropdown above to start adding dependent skills."></no-content2>
       </div>
 
     </div>
@@ -18,13 +18,13 @@
 <script>
   import vis from 'vis';
   import 'vis/dist/vis.css';
-  import NoDependenies from './NoDependenies';
   import GraphLegend from './GraphLegend';
   import GraphNodeSortMethodSelector from './GraphNodeSortMethodSelector';
+  import NoContent2 from '../../utils/NoContent2';
 
   export default {
     name: 'DependantsGraph',
-    components: { GraphNodeSortMethodSelector, GraphLegend, NoDependenies },
+    components: { NoContent2, GraphNodeSortMethodSelector, GraphLegend },
     props: ['skill', 'dependentSkills', 'graph'],
     data() {
       return {

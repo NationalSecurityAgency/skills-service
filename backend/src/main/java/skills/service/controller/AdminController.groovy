@@ -495,7 +495,12 @@ class AdminController {
 
     @RequestMapping(value = "/projects/{projectId}/shared", method = RequestMethod.GET, produces = "application/json")
     List<SharedSkillResult>  getSharedSkills(@PathVariable("projectId") String projectId) {
-        return projectAdminStorageService.getSharedSkills(projectId)
+        return projectAdminStorageService.getSharedSkillsWithOtherProjects(projectId)
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/sharedWithMe", method = RequestMethod.GET, produces = "application/json")
+    List<SharedSkillResult>  getSharedWithmeSkills(@PathVariable("projectId") String projectId) {
+        return projectAdminStorageService.getSharedSkillsFromOtherProjects(projectId)
     }
 
 }
