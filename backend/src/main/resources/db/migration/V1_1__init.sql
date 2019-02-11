@@ -18,16 +18,18 @@ create table skills.custom_icons
 (
 	id int not null AUTO_INCREMENT PRIMARY KEY,
   project_id varchar(255),
+  proj_ref_id int,
   filename varchar(255),
   content_type varchar(255),
   data_uri text,
-  image_content longblob,
   url varchar (255),
 
   INDEX project_id_ind (project_id),
   INDEX filename_ind (filename),
   CONSTRAINT UNIQUE(project_id, filename),
+
   FOREIGN KEY (project_id) REFERENCES skills.project_definition(project_id) ON UPDATE CASCADE ON DELETE CASCADE,
+  FOREIGN KEY (proj_ref_id) REFERENCES skills.project_definition(id) ON UPDATE CASCADE ON DELETE CASCADE,
 
   created DATETIME default CURRENT_TIMESTAMP,
 	updated DATETIME default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP
