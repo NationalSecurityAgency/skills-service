@@ -30,17 +30,6 @@ class CustomIconController {
 
     ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json().build();
 
-
-    @RequestMapping(value = "/icon/{projectId}/{filename:.+}", method = RequestMethod.GET)
-    public void getIcon(@PathVariable("projectId") String projectId, @PathVariable("filename") String filename, HttpServletResponse response){
-        CacheControl cacheControl = CacheControl.maxAge(30, TimeUnit.DAYS).cachePublic()
-        setCaching(response, cacheControl)
-
-        byte[] icon = iconFacade.getIcon(projectId, filename)
-        response.setContentLength(icon?.length)
-        writeContentToOutput(response, icon)
-    }
-
     //TODO: Will need to be housed under api/?
     /**
      * Generate the icon css for a specific project-id, this would be used by external clients

@@ -138,26 +138,6 @@ class CustomIconFacade {
         }
     }
 
-    /**
-     * retrieves the byte[] array for a given icon or null if none can be found
-     *
-     * @param projectId
-     * @param filename
-     * @return
-     */
-    byte[] getIcon(String projectId, String filename) {
-        Validate.notNull(projectId, "projectId is required")
-        Validate.notNull(filename, "filename is required")
-
-        CustomIcon icon = iconService.loadIcon(filename, projectId)
-        if (icon && icon.imageContent) {
-            return icon.imageContent
-        }else{
-            log.info("unable to find icon for ${projectId}, ${filename}")
-            return null
-        }
-    }
-
     void deleteIcon(String projectId, String filename){
         Validate.notNull(projectId, "projectId is required")
         Validate.notNull(filename, "filename is required")
