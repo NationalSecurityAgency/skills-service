@@ -8,7 +8,6 @@ import skills.storage.model.CustomIcon
  * Time: 1:52 PM
  */
 class IconManifestGenerator {
-
     public static IconManifest generateIconManifiest(Collection<CustomIcon> customIcons){
         List<IconCss> icons = []
 

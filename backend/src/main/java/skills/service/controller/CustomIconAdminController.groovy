@@ -28,7 +28,6 @@ class CustomIconAdminController {
     UploadedIcon addCustomIcon(
             @PathVariable("projectId") String projectId,
             @RequestParam("customIcon") MultipartFile icon) {
-
         String iconFilename = icon.originalFilename
         byte[] file = icon.bytes
         icon.contentType
@@ -41,14 +40,13 @@ class CustomIconAdminController {
             throw new MaxIconSizeExceeded("[${file.length}] exceeds the maximum icon size of [${FileUtils.byteCountToDisplaySize(maxIconFileSize)}]")
         }
 
-
         UploadedIcon result = iconFacade.saveIcon(projectId, iconFilename, icon.contentType, file)
 
         return result
     }
 
     @RequestMapping(value = "/projects/{projectId}/icons/{filename}", method = RequestMethod.DELETE)
-    ResponseEntity<Boolean> delete(@PathVariable("projectId") String projectId, @PathVariable("filename") String filename, HttpServletResponse response) {
+    ResponseEntity<Boolean> delete(@PathVariable("projectId") String projectId, @PathVariable("filename") String filename) {
         iconFacade.deleteIcon(projectId, filename)
         return ResponseEntity.ok(true)
     }

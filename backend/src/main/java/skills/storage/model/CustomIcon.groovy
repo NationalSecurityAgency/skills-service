@@ -27,8 +27,6 @@ class CustomIcon {
 
     String contentType;
 
-    String url;
-
     @Temporal(TemporalType.TIMESTAMP)
     @CreatedDate
     Date created
