@@ -26,6 +26,7 @@
   import GraphLegend from './GraphLegend';
   import GraphNodeSortMethodSelector from './GraphNodeSortMethodSelector';
   import NoContent2 from '../../utils/NoContent2';
+  import GraphUtils from './GraphUtils';
 
   export default {
     name: 'DependantsGraph',
@@ -127,18 +128,18 @@
           const isCrossProject = node.projectId !== this.skill.projectId;
           const newNode = {
             id: node.id,
-            label: isCrossProject ? `${node.projectId} : ${node.name} ` : node.name,
+            label: GraphUtils.getLabel(node, isCrossProject),
             margin: 10,
             shape: 'box',
             chosen: false,
-            title: this.getTitle(node),
+            title: GraphUtils.getTitle(node, isCrossProject),
           };
           if (newNode.id === this.skill.id) {
             newNode.color = {
               border: 'green',
               background: 'lightgreen',
             };
-            newNode.shape = 'circle';
+            // newNode.shape = 'circle';
           } else if (!this.dependentSkills.find(elem => elem.id === newNode.id)) {
             newNode.color = {
               border: 'darkgray',
@@ -170,7 +171,7 @@
           margin: 10,
           shape: 'box',
           chosen: false,
-          title: this.getTitle(skillItem),
+          title: GraphUtils.getTitle(skillItem, skillItem.projectId !== this.skill.projectId),
         };
         const edge = {
           from: this.skill.id,
@@ -178,16 +179,6 @@
           arrows: 'to',
         };
         return { node, edge };
-      },
-      getTitle(skillItem) {
-        let crossProjInfo = '';
-        if (skillItem.projectId !== this.skill.projectId) {
-          crossProjInfo = `<span style="border-bottom: 1px dotted black; font-weight: bold;"><i class="fas fa-handshake"></i> Cross Project Dependency</span><br/>
-                           <span>Project ID: ${skillItem.projectId}</span><br/>`;
-        }
-        return `${crossProjInfo}<span style="font-style: italic; color: #444444">ID:</span> ${skillItem.skillId}<br/>
-                <span style="font-style: italic; color: #444444">Point Increment:</span> ${skillItem.pointIncrement}<br/>
-                <span style="font-style: italic; color: #444444">Total Points:</span> ${skillItem.totalPoints}`;
       },
     },
   };

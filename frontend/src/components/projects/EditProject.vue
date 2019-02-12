@@ -60,8 +60,8 @@
 </template>
 
 <script>
-  import axios from 'axios';
   import { Validator } from 'vee-validate';
+  import ProjectService from './ProjectService';
 
   export default {
     name: 'EditProject',
@@ -92,8 +92,8 @@
         Validator.extend('uniqueName', {
           getMessage: field => `The value for the ${field} is already taken.`,
           validate(value) {
-            return axios.get(`/app/projectExist?projectName=${value}`)
-              .then(remoteRes => !remoteRes.data)
+            return ProjectService.checkIfProjectNameExist(value)
+              .then(remoteRes => !remoteRes)
               .catch(e => this.serverErrors.push(e));
           },
         }, {
@@ -103,8 +103,8 @@
         Validator.extend('uniqueId', {
           getMessage: field => `The value for the ${field} is already taken.`,
           validate(value) {
-            return axios.get(`/app/projectExist?projectId=${value}`)
-              .then(remoteRes => !remoteRes.data)
+            return ProjectService.checkIfProjectIdExist(value)
+              .then(remoteRes => !remoteRes)
               .catch(e => this.serverErrors.push(e));
           },
         }, {

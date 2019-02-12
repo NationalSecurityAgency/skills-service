@@ -17,7 +17,7 @@
         <label class="label">Skill Name *</label>
         <div class="control">
           <input class="input" type="text" v-model="skillInternal.name" v-on:input="updateSkillId"
-                 v-validate="'required|min:3|max:250|uniqueName'" data-vv-delay="500" name="name" v-focus/>
+                 v-validate="'required|min:3|max:50|uniqueName'" data-vv-delay="500" name="name" v-focus/>
         </div>
         <p class="help is-danger" v-show="errors.has('name')">{{ errors.first('name')}}</p>
       </div>

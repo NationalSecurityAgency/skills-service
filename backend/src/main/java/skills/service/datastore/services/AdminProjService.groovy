@@ -744,7 +744,7 @@ class AdminProjService {
 
 
     private void checkForCircularGraphAndThrowException(SkillDef skill1, SkillDef skill2, SkillRelDef.RelationshipType type) {
-        assert skill1.skillId != skill2.skillId
+        assert skill1.skillId != skill2.skillId || skill1.projectId != skill2.projectId
 
         DependencyCheckResult dependencyCheckResult = checkForCircularGraph(skill1, skill2, type)
         if (!dependencyCheckResult.possible) {
@@ -754,12 +754,15 @@ class AdminProjService {
 
     private DependencyCheckResult checkForCircularGraph(SkillDef proposedParent, SkillDef proposedChild, SkillRelDef.RelationshipType type) {
         try {
-            recursiveCircularDependenceCheck(proposedChild, proposedParent, [proposedParent.skillId, proposedChild.skillId], type)
+            recursiveCircularDependenceCheck(proposedChild, proposedParent, [getDependencyCheckId(proposedParent), getDependencyCheckId(proposedChild)], type)
         } catch (Throwable t) {
             throw new SkillException(t.message, t, proposedParent.projectId, proposedParent.skillId)
         }
     }
 
+    private String getDependencyCheckId(SkillDef skill) {
+        return skill.projectId + ":" + skill.skillId
+    }
 
     private DependencyCheckResult recursiveCircularDependenceCheck(SkillDef parent, SkillDef originalParent, List<String> idPath, SkillRelDef.RelationshipType type, int currentIter = 0, int maxIter = 100) {
         if (currentIter > maxIter) {
@@ -769,11 +772,11 @@ class AdminProjService {
         List<SkillRelDef> relationships = skillRelDefRepo.findAllByParentAndType(parent, type)
         if (relationships) {
             if (relationships.find { it.child.skillId == originalParent.skillId }) {
-                return new DependencyCheckResult(skillId: originalParent.skillId, dependentSkillId: idPath.last(), possible: false, reason: "Discovered circular dependency [${idPath.join(" -> ")} -> ${originalParent.skillId}]".toString())
+                return new DependencyCheckResult(skillId: originalParent.skillId, dependentSkillId: idPath.last(), possible: false, reason: "Discovered circular dependency [${idPath.join(" -> ")} -> ${getDependencyCheckId(originalParent)}]".toString())
             }
             for ( SkillRelDef skillRelDef : relationships ) {
                 List<String> idPathCopy = new ArrayList<>(idPath)
-                idPathCopy.add(skillRelDef.child.skillId)
+                idPathCopy.add(getDependencyCheckId(skillRelDef.child))
                 DependencyCheckResult res = recursiveCircularDependenceCheck(skillRelDef.child, originalParent, idPathCopy, type, currentIter++, maxIter)
                 if (!res.possible) {
                     return res
