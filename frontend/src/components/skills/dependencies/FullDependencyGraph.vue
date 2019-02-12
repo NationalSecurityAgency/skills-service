@@ -14,6 +14,10 @@
           </div>
         </div>
         <div v-else>
+          <graph-legend class="graph-legend" :items="[
+            {label: 'Skill Dependencies', color: 'lightgreen'},
+            {label: 'Cross Project Skill Dependencies', color: '#ffb87f'}
+            ]"></graph-legend>
           <graph-node-sort-method-selector class="sort-method-selector"
                                            v-on:value-changed="onSortNodeStrategyChange"></graph-node-sort-method-selector>
         </div>
@@ -31,11 +35,13 @@
   import LoadingContainer from '../../utils/LoadingContainer';
   import GraphNodeSortMethodSelector from './GraphNodeSortMethodSelector';
   import NoContent2 from '../../utils/NoContent2';
+  import GraphUtils from './GraphUtils';
+  import GraphLegend from './GraphLegend';
 
   export default {
     name: 'FullDependencyGraph',
     props: ['projectId'],
-    components: { NoContent2, GraphNodeSortMethodSelector, LoadingContainer },
+    components: { GraphLegend, NoContent2, GraphNodeSortMethodSelector, LoadingContainer },
     data() {
       return {
         isLoading: false,
@@ -107,14 +113,22 @@
       },
       buildData() {
         this.graph.nodes.forEach((node) => {
-          this.nodes.add({
+          const isCrossProject = node.projectId !== this.projectId;
+          const newNode = {
             id: node.id,
-            label: node.name,
+            label: isCrossProject ? `${node.projectId} : ${node.name} ` : node.name,
             margin: 10,
             shape: 'box',
             chosen: false,
-            title: this.getTitle(node),
-          });
+            title: GraphUtils.getTitle(node, isCrossProject),
+          };
+          if (isCrossProject) {
+            newNode.color = {
+              border: 'orange',
+              background: '#ffb87f',
+            };
+          }
+          this.nodes.add(newNode);
         });
         this.graph.edges.forEach((edge) => {
           this.edges.add({
@@ -126,11 +140,6 @@
 
         const data = { nodes: this.nodes, edges: this.edges };
         return data;
-      },
-      getTitle(skillItem) {
-        return `<span style="font-style: italic; color: #444444">ID:</span> ${skillItem.skillId}<br/>
-                <span style="font-style: italic; color: #444444">Point Increment:</span> ${skillItem.pointIncrement}<br/>
-                <span style="font-style: italic; color: #444444">Total Points:</span> ${skillItem.totalPoints}`;
       },
     },
   };

@@ -10,7 +10,30 @@
         <loading-container :is-loading="!loading.finishedAllSkills || !loading.finishedDependents">
             <div class="columns">
               <div class="column is-full">
-                <skills-selector2 :options="allSkills" :selected="skills" v-on:added="skillAdded" v-on:removed="skillDeleted"></skills-selector2>
+                <skills-selector2 :options="allSkills" :selected="skills" v-on:added="skillAdded" v-on:removed="skillDeleted">
+                  <template slot="dropdown-item" slot-scope="{ props }">
+                    <div class="columns">
+                      <div class="column is-narrow" style="width: 40px;">
+                        <i v-if="props.option.otherProjectId" class="fas fa-w-16 fa-handshake"></i>
+                        <i v-else class="fas fa-w-16 fa-list-alt"></i>
+                      </div>
+                      <div class="column handle-overflow" style="flex:none; width:45%;" :title="props.option.name">
+                        <span class="selector-skill-name">
+                          <span v-if="props.option.otherProjectId" class="has-text-weight-bold">{{props.option.otherProjectName}} : </span>
+                          {{ props.option.name }}</span>
+                      </div>
+                      <div class="column is-one-fifth handle-overflow" style="flex:none; width:30%;" :title="props.option.skillId">
+                        <span class="selector-other-label">ID:</span> <span class="selector-other-value">{{props.option.skillId}}</span>
+                      </div>
+                      <div class="column is-one-fifth" style="flex:none; width:20%;">
+                        <span v-if="props.option.otherProjectId" class="has-text-warning">** Shared Skill **</span>
+                        <span v-else>
+                          <span class="selector-other-label">Total Points:</span> <span class="selector-other-value">{{ props.option.totalPoints}}</span>
+                        </span>
+                      </div>
+                    </div>
+                  </template>
+                </skills-selector2>
               </div>
             </div>
 
@@ -79,7 +102,8 @@
         this.loadAllSkills();
       },
       skillDeleted(deletedItem) {
-        SkillsService.removeDependency(this.skill.projectId, this.skill.skillId, deletedItem.skillId)
+        this.loading.finishedDependents = false;
+        SkillsService.removeDependency(this.skill.projectId, this.skill.skillId, deletedItem.skillId, deletedItem.projectId)
           .then(() => {
             this.errNotification.enable = false;
             this.loadDependentSkills();
@@ -90,7 +114,8 @@
         });
       },
       skillAdded(newItem) {
-        SkillsService.assignDependency(this.skill.projectId, this.skill.skillId, newItem.skillId)
+        this.loading.finishedDependents = false;
+        SkillsService.assignDependency(this.skill.projectId, this.skill.skillId, newItem.skillId, newItem.otherProjectId)
           .then(() => {
             this.errNotification.enable = false;
             this.loadDependentSkills();
@@ -99,6 +124,7 @@
             if (e.response.data && e.response.data.errCode && e.response.data.errCode === 'FailedToAssignDependency') {
               this.errNotification.msg = e.response.data.errorMsg;
               this.errNotification.enable = true;
+              this.loading.finishedDependents = true;
 
               // force reactivity on children - copy the data trick
               // specifically so the select component removes failed item from its list
@@ -129,9 +155,9 @@
       },
       loadAllSkills() {
         this.loading.finishedAllSkills = false;
-        SkillsService.getProjectSkills(this.skill.projectId)
+        SkillsService.getSkillsFroDependency(this.skill.projectId)
           .then((skills) => {
-            this.allSkills = skills.filter(item => item.id !== this.skill.id);
+            this.allSkills = skills.filter(item => item.skillId !== this.skill.skillId);
             this.loading.finishedAllSkills = true;
           })
           .catch((e) => {

@@ -15,7 +15,14 @@
           </div>
         </div>
 
-        <simple-skills-table :skills="badgeSkills" v-on:skill-removed="skillDeleted"></simple-skills-table>
+        <simple-skills-table v-if="badgeSkills && badgeSkills.length > 0"
+                             :skills="badgeSkills" v-on:skill-removed="skillDeleted"></simple-skills-table>
+        <div v-else class="columns is-centered">
+          <div class="column is-half">
+            <no-content2 title="No Skills Selected Yet..." icon="fas fa-award"
+                         message="Please use drop-down above to start adding skills to this badge!"></no-content2>
+          </div>
+        </div>
       </loading-container>
     </div>
   </div>
@@ -26,10 +33,11 @@
   import SkillsSelector2 from '../skills/SkillsSelector2';
   import LoadingContainer from '../utils/LoadingContainer';
   import SimpleSkillsTable from '../skills/SimpleSkillsTable';
+  import NoContent2 from '../utils/NoContent2';
 
   export default {
     name: 'BadgeSkills',
-    components: { SimpleSkillsTable, LoadingContainer, SkillsSelector2 },
+    components: { NoContent2, SimpleSkillsTable, LoadingContainer, SkillsSelector2 },
     props: ['projectId', 'badgeId'],
     data() {
       return {

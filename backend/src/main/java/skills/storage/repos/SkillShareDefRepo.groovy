@@ -13,7 +13,18 @@ interface SkillShareDefRepo extends CrudRepository<SkillShareDef, Long> {
         where share.skill = skill and skill.projectId=?1''')
     List<SkillShareDef> getSkillShareDefsWithOtherProjectsByProjectId(String projectId)
 
-    List<SkillShareDef> findAllBySharedToProject(ProjDef sharedToProject)
+    @Query('''select skill.id as id, skill.skillId as skillId, skill.name as skillName, proj.projectId as projectId, proj.name as projectName
+        from SkillShareDef share, SkillDef skill, ProjDef proj
+        where share.skill = skill and skill.projectId=proj.projectId and share.sharedToProject=?1''')
+    List<SkillSharedMeta> getSkillDefsSharedFromOtherProjectsByProjectId(ProjDef sharedToProject)
+
+    static interface SkillSharedMeta {
+        Integer getId()
+        String getSkillId()
+        String getSkillName()
+        String getProjectId()
+        String getProjectName()
+    }
 
     SkillShareDef findBySkillAndSharedToProject(SkillDef skill, ProjDef sharedToProject)
 }

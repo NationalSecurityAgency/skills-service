@@ -158,10 +158,10 @@ class AdminProjService {
         return projDef
     }
 
-    private SkillDef getSkillDef(String projectId, String skillId) {
-        SkillDef skillDef = skillDefRepo.findByProjectIdAndSkillId(projectId, skillId)
+    private SkillDef getSkillDef(String projectId, String skillId, SkillDef.ContainerType containerType = SkillDef.ContainerType.Skill) {
+        SkillDef skillDef = skillDefRepo.findByProjectIdAndSkillIdAndType(projectId, skillId, containerType)
         if (!skillDef) {
-            throw new SkillException("Failed to find skillId [$skillId] for [$projectId]", projectId, skillId)
+            throw new SkillException("Failed to find skillId [$skillId] for [$projectId] with type [${containerType}]", projectId, skillId)
         }
         return skillDef
     }
@@ -210,12 +210,13 @@ class AdminProjService {
 
     @Transactional()
     void addSkillToBadge(String projectId, String badgeId, String skillid) {
-        assignGraphRelationship(projectId, badgeId, skillid, SkillRelDef.RelationshipType.BadgeDependence)
+        assignGraphRelationship(projectId, badgeId, SkillDef.ContainerType.Badge, skillid, SkillRelDef.RelationshipType.BadgeDependence)
     }
 
     @Transactional()
     void removeSkillFromBadge(String projectId, String badgeId, String skillid) {
-        removeGraphRelationship(projectId, badgeId, skillid, SkillRelDef.RelationshipType.BadgeDependence)
+        removeGraphRelationship(projectId, badgeId, SkillDef.ContainerType.Badge,
+                projectId, skillid, SkillRelDef.RelationshipType.BadgeDependence)
     }
 
 
@@ -309,7 +310,7 @@ class AdminProjService {
     }
 
     BadgeResult getBadge(String projectId, String badgeId) {
-        SkillDef skillDef = skillDefRepo.findByProjectIdAndSkillId(projectId, badgeId)
+        SkillDef skillDef = skillDefRepo.findByProjectIdAndSkillIdAndType(projectId, badgeId, SkillDef.ContainerType.Badge)
         return convertToBadge(skillDef)
     }
 
@@ -418,13 +419,11 @@ class AdminProjService {
     @Transactional(readOnly = true)
     List<SharedSkillResult> getSharedSkillsFromOtherProjects(String projectId) {
         ProjDef projDef = getProjDef(projectId)
-        List<SkillShareDef> shareDefs = skillShareDefRepo.findAllBySharedToProject(projDef)
-        return shareDefs.collect { SkillShareDef shareDef ->
-            // can def. improve performance if that's ever actually needed
-            String projectName = getProjDef(shareDef.skill.projectId).name
+        List<SkillShareDefRepo.SkillSharedMeta> sharedMetas = skillShareDefRepo.getSkillDefsSharedFromOtherProjectsByProjectId(projDef)
+        return sharedMetas.collect { SkillShareDefRepo.SkillSharedMeta meta ->
             new SharedSkillResult(
-                    skillName: shareDef.skill.name, skillId: shareDef.skill.skillId,
-                    projectName: projectName, projectId: shareDef.skill.projectId
+                    id: meta.getId(), skillName: meta.skillName, skillId: meta.skillId,
+                    projectName: meta.projectName, projectId: meta.projectId
             )
         }
     }
@@ -688,37 +687,60 @@ class AdminProjService {
         return edges.collect({ new GraphSkillDefEdge(from: it[0], to: it[1])})
     }
 
+    @Transactional(readOnly = true)
+    List<SkillDefForDependencyRes> getSkillsAvailableForDependency(String projectId) {
+        List<SkillDef> res = skillDefRepo.findAllByProjectIdAndType(projectId, SkillDef.ContainerType.Skill)
+        List<SkillDefForDependencyRes> finalRes = res.collect {
+            new SkillDefForDependencyRes(
+                    id: it.id, skillId: it.skillId, name: it.name, projectId: it.projectId, totalPoints: it.totalPoints
+            )
+        }
+        List<SharedSkillResult> sharedSkills = getSharedSkillsFromOtherProjects(projectId)
+        sharedSkills.each {
+            finalRes.add(
+                    new SkillDefForDependencyRes(
+                            id: it.id, skillId: it.skillId, name: it.skillName, projectId: projectId, otherProjectId: it.projectId, otherProjectName: it.projectName
+                    )
+            )
+        }
+
+        return finalRes
+    }
+
+
     @Transactional()
-    void assignSkillDependency(String projectId, String skillId, String dependentSkillId) {
+    void assignSkillDependency(String projectId, String skillId, String dependentSkillId, String dependentProjectId = null) {
         SkillDef skill1 = getSkillDef(projectId, skillId)
-        SkillDef skill2 = getSkillDef(projectId, dependentSkillId)
+        SkillDef skill2 = getSkillDef(dependentProjectId ?: projectId, dependentSkillId)
 
         checkForCircularGraphAndThrowException(skill1, skill2, SkillRelDef.RelationshipType.Dependence)
         skillRelDefRepo.save(new SkillRelDef(parent: skill1, child: skill2, type: SkillRelDef.RelationshipType.Dependence))
     }
 
     @Transactional()
-    void removeSkillDependency(String projectId, String skillId, String dependentSkillId) {
-        removeGraphRelationship(projectId, skillId, dependentSkillId, SkillRelDef.RelationshipType.Dependence)
+    void removeSkillDependency(String projectId, String skillId, String dependentSkillId, String dependentProjectId = null) {
+        removeGraphRelationship(projectId, skillId, SkillDef.ContainerType.Skill,
+                dependentProjectId ?: projectId, dependentSkillId, SkillRelDef.RelationshipType.Dependence)
     }
 
 
-    void assignGraphRelationship(String projectId, String skillId, String relationshipSkillId, SkillRelDef.RelationshipType relationshipType) {
-        SkillDef skill1 = getSkillDef(projectId, skillId)
+    void assignGraphRelationship(String projectId, String skillId, SkillDef.ContainerType skillType,
+                                 String relationshipSkillId, SkillRelDef.RelationshipType relationshipType) {
+        SkillDef skill1 = getSkillDef(projectId, skillId, skillType)
         SkillDef skill2 = getSkillDef(projectId, relationshipSkillId)
         skillRelDefRepo.save(new SkillRelDef(parent: skill1, child: skill2, type: relationshipType))
     }
 
-    void removeGraphRelationship(String projectId, String skillId, String relationshipSkillId, SkillRelDef.RelationshipType relationshipType){
-        SkillDef skill1 = getSkillDef(projectId, skillId)
-        SkillDef skill2 = getSkillDef(projectId, relationshipSkillId)
+    void removeGraphRelationship(String projectId, String skillId, SkillDef.ContainerType skillType,
+                                 String relationshipProjectId, String relationshipSkillId, SkillRelDef.RelationshipType relationshipType){
+        SkillDef skill1 = getSkillDef(projectId, skillId, skillType)
+        SkillDef skill2 = getSkillDef(relationshipProjectId, relationshipSkillId)
         SkillRelDef relDef = skillRelDefRepo.findByChildAndParentAndType(skill2, skill1, relationshipType)
         if (!relDef) {
             throw new SkillException("Failed to find relationship [$relationshipType] between [$skillId] and [$relationshipSkillId] for [$projectId]", projectId, skillId)
         }
         skillRelDefRepo.delete(relDef)
     }
-
 
 
     private void checkForCircularGraphAndThrowException(SkillDef skill1, SkillDef skill2, SkillRelDef.RelationshipType type) {
@@ -841,7 +863,7 @@ class AdminProjService {
                                      @PathVariable("subjectId") String subjectId,
                                      @PathVariable("skillId") String skillId,
                                      @RequestBody ActionPatchRequest patchRequest) {
-        SkillDef moveMe = skillDefRepo.findByProjectIdAndSkillId(projectId, skillId)
+        SkillDef moveMe = getSkillDef(projectId, skillId)
         if (!moveMe) {
             assert moveMe, "Failed to find skill for id [$skillId], projectId=[$projectId], subjectId=[$subjectId]"
         }

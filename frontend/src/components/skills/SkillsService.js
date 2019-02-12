@@ -47,11 +47,23 @@ export default {
     return axios.get(`/admin/projects/${projectId}/badge/${badgeId}/skills`)
       .then(res => res.data);
   },
-  assignDependency(projectId, skillId, dependentSkillId) {
+  getSkillsFroDependency(projectId) {
+    return axios.get(`/admin/projects/${projectId}/dependency/availableSkills`)
+      .then(res => res.data);
+  },
+  assignDependency(projectId, skillId, dependentSkillId, dependentProjectId) {
+    if (dependentProjectId) {
+      return axios.post(`/admin/projects/${projectId}/skills/${skillId}/dependency/projects/${dependentProjectId}/skills/${dependentSkillId}`)
+        .then(createdRuleResult => createdRuleResult.data);
+    }
     return axios.post(`/admin/projects/${projectId}/skills/${skillId}/dependency/${dependentSkillId}`)
       .then(createdRuleResult => createdRuleResult.data);
   },
-  removeDependency(projectId, skillId, dependentSkillId) {
+  removeDependency(projectId, skillId, dependentSkillId, dependentProjectId) {
+    if (dependentProjectId) {
+      return axios.delete(`/admin/projects/${projectId}/skills/${skillId}/dependency/projects/${dependentProjectId}/skills/${dependentSkillId}`)
+        .then(createdRuleResult => createdRuleResult.data);
+    }
     return axios.delete(`/admin/projects/${projectId}/skills/${skillId}/dependency/${dependentSkillId}`)
       .then(createdRuleResult => createdRuleResult.data);
   },

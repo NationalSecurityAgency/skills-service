@@ -2,18 +2,20 @@
   <div id="skills-selector">
 
     <multiselect v-model="selectedInternal" placeholder="Select skill(s)..."
-                 :options="options" :multiple="true" :taggable="multipleSelection"
+                 :options="options" :multiple="multipleSelection" :taggable="false"
                  :hide-selected="true" label="name" track-by="id" v-on:remove="removed" v-on:select="added">
       <template slot="option" slot-scope="props">
-        <div class="columns">
-          <div class="column handle-overflow" style="flex:none; width:45%;" :title="props.option.name"><span class="selector-skill-name">{{ props.option.name }}</span></div>
-          <div class="column is-one-fifth handle-overflow" style="flex:none; width:30%;" :title="props.option.skillId">
-            <span class="selector-other-label">ID:</span> <span class="selector-other-value">{{props.option.skillId}},</span>
+        <slot name="dropdown-item" v-bind:props="props">
+          <div class="columns">
+            <div class="column handle-overflow" style="flex:none; width:45%;" :title="props.option.name"><span class="selector-skill-name">{{ props.option.name }}</span></div>
+            <div class="column is-one-fifth handle-overflow" style="flex:none; width:30%;" :title="props.option.skillId">
+              <span class="selector-other-label">ID:</span> <span class="selector-other-value">{{props.option.skillId}}</span>
+            </div>
+            <div class="column is-one-fifth" style="flex:none; width:20%;">
+              <span class="selector-other-label">Total Points:</span> <span class="selector-other-value">{{ props.option.totalPoints}}</span>
+            </div>
           </div>
-          <div class="column is-one-fifth" style="flex:none; width:20%;">
-            <span class="selector-other-label">Total Points:</span> <span class="selector-other-value">{{ props.option.totalPoints}}</span>
-          </div>
-        </div>
+        </slot>
       </template>
     </multiselect>
   </div>
