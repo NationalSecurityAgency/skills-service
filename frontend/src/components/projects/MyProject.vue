@@ -3,11 +3,11 @@
     <div class="columns">
       <div class="column is-full">
         <span  class="title is-3">
-          {{ project.name }}
+          {{ projectInternal.name }}
         </span>
-        <span class="has-text-grey"><span class="is-uppercase">Id:</span> {{ project.projectId }}</span>
+        <span class="has-text-grey"><span class="is-uppercase">Id:</span> {{ projectInternal.projectId }}</span>
         <edit-and-delete-dropdown v-on:deleted="deleteProject" v-on:edited="editProject" v-on:move-up="moveUp" v-on:move-down="moveDown"
-                                  :is-first="project.isFirst" :is-last="project.isLast" :is-loading="isLoading"
+                                  :is-first="projectInternal.isFirst" :is-last="projectInternal.isLast" :is-loading="isLoading"
                                   class="project-settings"></edit-and-delete-dropdown>
       </div>
     </div>
@@ -15,33 +15,33 @@
       <div class="column is-one-quarter">
         <div>
           <p class="heading">Subjects</p>
-          <p class="title">{{ project.numSubjects | number}}</p>
+          <p class="title">{{ projectInternal.numSubjects | number}}</p>
         </div>
       </div>
       <div class="column is-one-quarter">
         <div>
           <p class="heading">Skills</p>
-          <p class="title">{{ project.numSkills | number}}</p>
+          <p class="title">{{ projectInternal.numSkills | number}}</p>
         </div>
       </div>
 
       <div class="column is-one-quarter">
         <div>
           <p class="heading">Total Points</p>
-          <p class="title">{{ project.totalPoints | number }}</p>
+          <p class="title">{{ projectInternal.totalPoints | number }}</p>
         </div>
       </div>
       <div class="column is-one-quarter">
         <div>
           <p class="heading">Users</p>
-          <p class="title">{{ project.numUsers | number }}</p>
+          <p class="title">{{ projectInternal.numUsers | number }}</p>
         </div>
       </div>
     </div>
     <div class="columns has-text-centered">
       <div class="column is-full">
         <router-link :to="{ name:'ProjectPage',
-              params: { projectId: this.project.projectId}}"
+              params: { projectId: this.projectInternal.projectId}}"
                      class="button is-outlined is-info">
           <span>Manage</span>
           <span class="icon is-small">
@@ -54,9 +54,9 @@
 </template>
 
 <script>
-  import axios from 'axios';
   import EditAndDeleteDropdown from '../utils/EditAndDeleteDropdown';
   import EditProject from './EditProject';
+  import ProjectService from './ProjectService';
 
   export default {
     name: 'MyProject',
@@ -66,13 +66,17 @@
       return {
         isLoading: false,
         serverErrors: [],
+        projectInternal: {},
       };
+    },
+    mounted() {
+      this.projectInternal = this.project;
     },
     methods: {
       deleteProject() {
         this.$dialog.confirm({
           title: 'WARNING: Delete Project Action',
-          message: `Project ID: <b>${this.project.projectId}</b> <br/><br/>Delete Action can not be undone and <b>permanently</b> removes its skill subject definitions, skill definitions and users' performed skills.`,
+          message: `Project ID: <b>${this.projectInternal.projectId}</b> <br/><br/>Delete Action can not be undone and <b>permanently</b> removes its skill subject definitions, skill definitions and users' performed skills.`,
           confirmText: 'Delete',
           type: 'is-danger',
           hasIcon: true,
@@ -84,7 +88,7 @@
       },
       sendDeleteProjectEvent() {
         this.isLoading = true;
-        this.$emit('project-deleted', this.project);
+        this.$emit('project-deleted', this.projectInternal);
       },
       editProject() {
         this.$modal.open({
@@ -92,7 +96,7 @@
           component: EditProject,
           hasModalCard: true,
           props: {
-            project: this.project,
+            project: this.projectInternal,
             isEdit: true,
           },
           events: {
@@ -102,10 +106,10 @@
       },
       projectSaved(project) {
         this.isLoading = true;
-        axios.put(`/admin/projects/${project.projectId}`, project)
+        ProjectService.saveProject(project)
           .then((res) => {
             this.isLoading = false;
-            this.project = res.data;
+            this.projectInternal = res;
           })
           .catch((e) => {
             this.isLoading = false;
@@ -114,10 +118,10 @@
         });
       },
       moveUp() {
-        this.$emit('move-project-up', this.project);
+        this.$emit('move-project-up', this.projectInternal);
       },
       moveDown() {
-        this.$emit('move-project-down', this.project);
+        this.$emit('move-project-down', this.projectInternal);
       },
     },
   };

@@ -14,7 +14,8 @@ export default {
       .then(response => response.data);
   },
   saveProject(project) {
-    return axios.put(`/app/projects/${project.projectId}`, project);
+    return axios.post(`/app/projects/${project.projectId}`, project)
+      .then(response => response.data);
   },
   deleteProject(projectId) {
     return axios.delete(`/admin/projects/${projectId}`);
@@ -23,4 +24,14 @@ export default {
     return axios.get(`/admin/projects/${projectId}/projectSearch?nameQuery=${nameQuery}`)
       .then(response => response.data);
   },
+  checkIfProjectIdExist(projectId) {
+    return axios.get(`/app/projectExist?projectId=${projectId}`)
+      .then(response => response.data);
+  },
+  checkIfProjectNameExist(projectName) {
+    return axios.get(`/app/projectExist?projectName=${projectName}`)
+      .then(response => response.data);
+  },
+
+
 };

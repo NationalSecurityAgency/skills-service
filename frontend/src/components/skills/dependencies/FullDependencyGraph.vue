@@ -116,7 +116,7 @@
           const isCrossProject = node.projectId !== this.projectId;
           const newNode = {
             id: node.id,
-            label: isCrossProject ? `${node.projectId} : ${node.name} ` : node.name,
+            label: GraphUtils.getLabel(node, isCrossProject),
             margin: 10,
             shape: 'box',
             chosen: false,

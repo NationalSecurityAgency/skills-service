@@ -6,9 +6,7 @@
 
       <div class="columns">
         <div class="column">
-          <skills-selector2 :options="allSkills" v-on:added="onSelectedSkill" v-on:removed="onDeselectedSkill"
-                            :selected="selectedSkills"
-                            :only-single-selected-value="true"></skills-selector2>
+          <skills-selector2 :options="allSkills" v-on:added="onSelectedSkill" v-on:removed="onDeselectedSkill" :selected="selectedSkills"></skills-selector2>
         </div>
         <div class="column">
           <project-selector :project-id="projectId" :selected="selectedProject"

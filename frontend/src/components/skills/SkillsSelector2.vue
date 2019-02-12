@@ -67,6 +67,11 @@
   #skills-selector .multiselect__tag {
     background-color: lightblue;
     color: black;
-    /*margin: 10px;*/
   }
+
+  #skills-selector .multiselect__single {
+    background-color: lightblue;
+    color: black;
+  }
+
 </style>

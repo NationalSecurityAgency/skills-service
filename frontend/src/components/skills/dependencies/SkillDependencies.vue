@@ -157,7 +157,7 @@
         this.loading.finishedAllSkills = false;
         SkillsService.getSkillsFroDependency(this.skill.projectId)
           .then((skills) => {
-            this.allSkills = skills.filter(item => item.skillId !== this.skill.skillId);
+            this.allSkills = skills.filter(item => (item.skillId !== this.skill.skillId || item.otherProjectId));
             this.loading.finishedAllSkills = true;
           })
           .catch((e) => {

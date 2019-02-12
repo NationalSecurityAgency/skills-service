@@ -6,23 +6,25 @@
       </div>
     </div>
 
-    <v-server-table ref="table" :columns="columns" :url="getUrl()" :options="options"
-                    v-on:loaded="emit('loaded', $event)" v-on:error="emit('error', $event)">
-      <div slot="lastUpdated" slot-scope="props" class="field has-addons">
-        {{ getDate(props) }}
-      </div>
+    <div class="skills-bordered-component">
+      <v-server-table ref="table" :columns="columns" :url="getUrl()" :options="options" class="skills-pad-bottom-1-rem"
+                      v-on:loaded="emit('loaded', $event)" v-on:error="emit('error', $event)">
+        <div slot="lastUpdated" slot-scope="props" class="field has-addons">
+          {{ getDate(props) }}
+        </div>
 
-      <div slot="viewDetail" slot-scope="props" class="">
-        <router-link :to="{ name:'UserPage',
-                params: { projectId: projectId, userId: props.row.userId, totalPoints: props.row.totalPoints }}"
-                     class="button is-outlined is-info">
-          <span>View Details</span>
-          <span class="icon is-small">
-                    <i class="fas fa-edit"/>
-                  </span>
-        </router-link>
-      </div>
-    </v-server-table>
+        <div slot="viewDetail" slot-scope="props" class="">
+          <router-link :to="{ name:'UserPage',
+                  params: { projectId: projectId, userId: props.row.userId, totalPoints: props.row.totalPoints }}"
+                       class="button is-outlined is-info">
+            <span>View Details</span>
+            <span class="icon is-small">
+                      <i class="fas fa-edit"/>
+                    </span>
+          </router-link>
+        </div>
+      </v-server-table>
+    </div>
   </div>
 </template>
 
