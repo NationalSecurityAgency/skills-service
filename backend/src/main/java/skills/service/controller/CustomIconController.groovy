@@ -6,6 +6,7 @@ import org.apache.commons.io.IOUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.CacheControl
 import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder
 import org.springframework.util.DigestUtils
 import org.springframework.web.bind.annotation.*
@@ -52,39 +53,13 @@ class CustomIconController {
     }
 
     /**
-     * This generates the custom-icon-index.js for users of the admin interface, in that case,
-     * it is necessary to generate css based on all the project-ids that the user has access to
-     * as we won't know which one they will be viewing/working with in the admin interface
-     * @param response
-     */
-    @RequestMapping(value = "/custom-icon-index", method = RequestMethod.GET, produces = "application/json")
-    public void getIconManifestForUser(HttpServletResponse response){
-        CacheControl cacheControl = CacheControl.maxAge(36, TimeUnit.HOURS).cachePublic()
-
-        setCaching(response, cacheControl)
-
-        IconManifest manifest = iconFacade.generateJsIconIndexForUser(userInfoService.getCurrentUser())
-        String json = objectMapper.writer().writeValueAsString(manifest)
-        response.setContentLength(json?.bytes?.length)
-        response.setContentType("application/json")
-
-        if (json){
-            response.addHeader("Etag", DigestUtils.md5DigestAsHex(json.bytes))
-        }
-        writeContentToOutput(response, json?.bytes)
-    }
-
-    /**
      * This generates the custom-icon.css for users of the admin interface, in that case,
      * it is necessary to generate css based on all the project-ids that the user has access to
      * as we won't know which one they will be viewing/working with in the admin interface
      * @param response
      */
-    @RequestMapping(value = "/custom-icon", method = RequestMethod.GET, produces = "text/css")
-    public void getIconCssForUser(HttpServletResponse response){
-        CacheControl cacheControl = CacheControl.maxAge(36, TimeUnit.HOURS).cachePublic()
-
-        setCaching(response, cacheControl)
+    @RequestMapping(value = "/customIcons", method = RequestMethod.GET, produces = "text/css")
+    ResponseEntity<String> getIconCssForUser(HttpServletResponse response){
         response.setContentType("text/css")
 
         UserInfo currentUser = userInfoService.getCurrentUser()
@@ -93,10 +68,10 @@ class CustomIconController {
             css = iconFacade.generateCssForUser(currentUser)
             if (css) {
                 response.setContentLength(css?.bytes?.length)
-                response.addHeader("Etag", DigestUtils.md5DigestAsHex(css.bytes))
             }
         }
         writeContentToOutput(response, css?.bytes)
+        return ResponseEntity.ok(css)
     }
 
     private static void setCaching(HttpServletResponse response, CacheControl cacheControl) {

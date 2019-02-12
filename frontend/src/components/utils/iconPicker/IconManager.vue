@@ -66,24 +66,23 @@
                        @upload-success="handleUploadedIcon($event)" validate-images="true"
                        :image-height="customIconHeight" :image-width="customIconWidth"/>
           <span>* custom icons must be 48px X 48px</span><br />
-
           <div class="columns is-multiline">
-            <div class="column" v-for="{cssClass, name} in customIconList" :key="cssClass">
+            <div class="column" v-for="{cssClassname, filename} in customIconList" :key="cssClassname">
               <div class="icon-item">
                 <a
                   href="#"
-                  @click.stop.prevent="getIcon(name, cssClass, 'Custom Icons')"
-                  :class="`item ${selectedCss === cssClass ? 'selected' : ''}`"
+                  @click.stop.prevent="getIcon(name, cssClassname, 'Custom Icons')"
+                  :class="`item ${selectedCss === cssClassname ? 'selected' : ''}`"
                 >
                     <span class="icon is-large">
-                      <i :class="cssClass"></i>
+                      <i :class="cssClassname"></i>
                     </span>
                 </a><br/>
                 <span class="iconName">
-                  <a class="delete-icon" ref="#" @click="deleteIcon(name, activeProjectId)">
+                  <a class="delete-icon" ref="#" @click="deleteIcon(filename, activeProjectId)">
                     <span class="icon is-tiny"><i style="font-size:1rem;height:1rem;width:1rem;" class="fas fa-trash"></i></span>
                   </a>
-                  <span>{{ name }}</span>
+                  <span>{{ filename }}</span>
                 </span>
               </div>
             </div>
@@ -171,10 +170,10 @@
       },
     },
     mounted() {
-      IconManagerService.getIconIndex().then((response) => {
-        if (response && response.icons) {
-          definitiveCustomIconList = response.icons.slice();
-          this.customIconList = response.icons;
+      IconManagerService.getIconIndex(this.activeProjectId).then((response) => {
+        if (response) {
+          definitiveCustomIconList = response.slice();
+          this.customIconList = response;
         }
       }).catch((err) => {
         this.$toast.open(ToastHelper.defaultConf(`Error Loading Custom Icons [${err.response.status} - ${err.response.statusText}]`, true));
@@ -216,10 +215,7 @@
         }
       }, 250),
       handleUploadedIcon(response) {
-        const style = document.createElement('style');
-        style.type = 'text/css';
-        style.innerHTML = response.cssDefinition;
-        document.getElementsByTagName('head')[0].appendChild(style);
+        IconManagerService.addCustomIconCSS(response.cssDefinition);
         const newIcon = { name: response.name, cssClass: response.cssClassName };
         definitiveCustomIconList.push(newIcon);
         this.customIconList = definitiveCustomIconList;
@@ -227,7 +223,7 @@
       },
       deleteIcon(iconName, projectId) {
         IconManagerService.deleteIcon(iconName, projectId).then(() => {
-          definitiveCustomIconList = definitiveCustomIconList.filter(element => element.name !== iconName);
+          definitiveCustomIconList = definitiveCustomIconList.filter(element => element.filename !== iconName);
           this.customIconList = definitiveCustomIconList;
         });
       },

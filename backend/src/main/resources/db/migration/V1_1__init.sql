@@ -17,12 +17,11 @@ create table skills.project_definition
 create table skills.custom_icons
 (
 	id int not null AUTO_INCREMENT PRIMARY KEY,
-  project_id varchar(255),
-  proj_ref_id int,
-  filename varchar(255),
-  content_type varchar(255),
-  data_uri text,
-  url varchar (255),
+  project_id varchar(255) not null,
+  proj_ref_id int not null,
+  filename varchar(255) not null,
+  content_type varchar(255) not null,
+  data_uri text not null,
 
   INDEX project_id_ind (project_id),
   INDEX filename_ind (filename),
