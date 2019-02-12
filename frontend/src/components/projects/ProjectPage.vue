@@ -129,9 +129,6 @@
     mounted() {
       this.loadProjects();
     },
-    destroyed() {
-      this.$store.commit('currentProjectId', '');
-    },
     methods: {
       loadProjects() {
         this.isLoading = true;
@@ -139,7 +136,6 @@
           .then((response) => {
             this.isLoading = false;
             this.project = response;
-            this.$store.commit('currentProjectId', this.project.projectId);
         });
       },
     },
