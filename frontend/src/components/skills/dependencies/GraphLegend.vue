@@ -3,9 +3,9 @@
     <div class='legend-title'>Color Legend</div>
     <div class='legend-scale'>
       <ul class='legend-labels'>
-        <li><span style='background:lightgreen;'></span>This Skill</li>
-        <li><span style='background:lightblue;'></span>My Dependencies</li>
-        <li><span style='background:lightgray;'></span>Transitive Dependencies</li>
+        <li v-for="item in items" v-bind:key="item.label">
+          <span v-bind:style=' {background: item.color }'></span>{{ item.label }}
+        </li>
       </ul>
     </div>
   </div>
@@ -14,6 +14,7 @@
 <script>
   export default {
     name: 'GraphLegend',
+    props: ['items'],
   };
 </script>
 

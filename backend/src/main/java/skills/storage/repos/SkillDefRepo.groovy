@@ -8,20 +8,13 @@ import skills.storage.model.SkillRelDef.RelationshipType
 
 interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
 
-    List<SkillDef> findAllByProjectId(String id)
     List<SkillDef> findAllByProjectIdAndType(String id, SkillDef.ContainerType type)
-
-    SkillDef findByProjectIdAndSkillId(String projectId, String skillId)
     SkillDef findByProjectIdAndSkillIdAndType(String id, String skillId, SkillDef.ContainerType type)
 
     @Query(value = '''SELECT max(sdChild.displayOrder) from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
       where srd.parent=sdParent.id and srd.child=sdChild.id and 
       sdParent.projectId=?1 and sdParent.skillId=?2 and srd.type='RuleSetDefinition' ''' )
     Integer calculateChildSkillsHighestDisplayOrder(String projectId, String skillId)
-
-    @Query(value = '''SELECT max(child.displayOrder) from ProjDef proj, SkillDef child
-      where proj.id = child.projDef and proj.projectId=?1 ''' )
-    Integer calculateProjectsHighestDisplayOrder(String projectId)
 
     @Query(value='''SELECT c 
         from SkillDef s, SkillRelDef r, SkillDef c 

@@ -63,7 +63,6 @@
 <script>
   import BadgesService from './BadgesService';
   import Navigation from '../utils/Navigation';
-  // import Skills from '../skills/Skills';
   import LoadingContainer from '../utils/LoadingContainer';
   import ProjectStats from '../stats/ProjectStats';
   import Users from '../users/Users';

@@ -236,7 +236,14 @@ class AdminController {
         return projectAdminStorageService.saveSkill(skillRequest)
     }
 
-    @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/dependency/{dependentSkillId}", method = RequestMethod.POST, produces = "application/json")
+
+    @RequestMapping(value = "/projects/{projectId}/dependency/availableSkills", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    List<SkillDefForDependencyRes> getSkillsAvailableForDependency(@PathVariable("projectId") String projectId) {
+        return projectAdminStorageService.getSkillsAvailableForDependency(projectId)
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/dependency/{dependentSkillId}", method = [RequestMethod.POST, RequestMethod.PUT], produces = "application/json")
     @ResponseBody
     def assignDependency(@PathVariable("projectId") String projectId,
                          @PathVariable("skillId") String skillId,
@@ -245,12 +252,34 @@ class AdminController {
         return [status: 'success']
     }
 
+
+    @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/dependency/projects/{dependentProjectId}/skills/{dependentSkillId}", method = [RequestMethod.POST, RequestMethod.PUT], produces = "application/json")
+    @ResponseBody
+    def assignDependencyFromAnotherProject(@PathVariable("projectId") String projectId,
+                                           @PathVariable("skillId") String skillId,
+                                           @PathVariable("dependentProjectId") String dependentProjectId,
+                                           @PathVariable("dependentSkillId") String dependentSkillId) {
+        projectAdminStorageService.assignSkillDependency(projectId, skillId, dependentSkillId, dependentProjectId)
+        return [status: 'success']
+    }
+
+
     @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/dependency/{dependentSkillId}", method = RequestMethod.DELETE, produces = "application/json")
     @ResponseBody
     def removeDependency(@PathVariable("projectId") String projectId,
                          @PathVariable("skillId") String skillId,
                          @PathVariable("dependentSkillId") String dependentSkillId) {
         projectAdminStorageService.removeSkillDependency(projectId, skillId, dependentSkillId)
+        return [status: 'success']
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/dependency/projects/{dependentProjectId}/skills/{dependentSkillId}", method = RequestMethod.DELETE, produces = "application/json")
+    @ResponseBody
+    def removeDependencyFromAnotherProject(@PathVariable("projectId") String projectId,
+                         @PathVariable("skillId") String skillId,
+                         @PathVariable("dependentProjectId") String dependentProjectId,
+                         @PathVariable("dependentSkillId") String dependentSkillId) {
+        projectAdminStorageService.removeSkillDependency(projectId, skillId, dependentSkillId, dependentProjectId)
         return [status: 'success']
     }
 
@@ -286,13 +315,6 @@ class AdminController {
         projectAdminStorageService.deleteSkill(projectId, subjectId, skillId)
     }
 
-
-    @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/skills/availableForDependence", method = RequestMethod.GET, produces = "application/json")
-    List<SkillDefRes> getSkillsAvailableForDependence(
-            @PathVariable("projectId") String projectId, @PathVariable("subjectId") String subjectId) {
-        List<SkillDefRes> res = projectAdminStorageService.getSkills(projectId)
-        return res
-    }
 
     @RequestMapping(value = "/projects/{projectId}/skills", method = RequestMethod.GET, produces = "application/json")
     List<SkillDefRes> getAllSkillsForProject(
@@ -449,6 +471,9 @@ class AdminController {
         PageRequest pageRequest = new PageRequest(page-1, limit, ascending ? ASC : DESC, orderBy)
         List<SkillDefRes> badgeSkills = getBadgeSkills(projectId, badgeId)
         List<String> skillIds = badgeSkills.collect {it.skillId}
+        if(!skillIds) {
+            return new TableResult()
+        }
         return adminUsersService.loadUsersPage(projectId, skillIds, query, pageRequest)
     }
 
@@ -499,7 +524,7 @@ class AdminController {
     }
 
     @RequestMapping(value = "/projects/{projectId}/sharedWithMe", method = RequestMethod.GET, produces = "application/json")
-    List<SharedSkillResult>  getSharedWithmeSkills(@PathVariable("projectId") String projectId) {
+    List<SharedSkillResult>  getSharedWithMeSkills(@PathVariable("projectId") String projectId) {
         return projectAdminStorageService.getSharedSkillsFromOtherProjects(projectId)
     }
 
