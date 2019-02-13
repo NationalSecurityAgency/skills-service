@@ -19,15 +19,7 @@ class CssGeneratorSpec extends Specification {
         String css = new CssGenerator().cssify(icons)
 
         then:
-        css == '''
-.proj-filepng {
-\tbackground-image: url("''' + mockDataUri1 + '''");
-}
-
-.proj-file2jpg {
-\tbackground-image: url("''' + mockDataUri2 + '''");
-}
-'''
+        css == '''.proj-filepng {\tbackground-image: url("''' + mockDataUri1 + '''");}.proj-file2jpg {\tbackground-image: url("''' + mockDataUri2 + '''");}'''
     }
 
     def "generates css no host"(){
@@ -44,15 +36,7 @@ class CssGeneratorSpec extends Specification {
         String css = new CssGenerator().cssify(icons)
 
         then:
-        css == '''
-.proj-filepng {
-\tbackground-image: url("''' + mockDataUri1 + '''");
-}
-
-.proj-file2jpg {
-\tbackground-image: url("''' + mockDataUri2 + '''");
-}
-'''
+        css == '''.proj-filepng {\tbackground-image: url("''' + mockDataUri1 + '''");}.proj-file2jpg {\tbackground-image: url("''' + mockDataUri2 + '''");}'''
     }
 
     def "generates empty css when empty icons"(){
