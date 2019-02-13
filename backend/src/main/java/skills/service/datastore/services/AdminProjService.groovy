@@ -150,7 +150,8 @@ class AdminProjService {
         return convertToSubject(res)
     }
 
-    private ProjDef getProjDef(String projectId) {
+    @Transactional()
+    ProjDef getProjDef(String projectId) {
         ProjDef projDef = projDefRepo.findByProjectId(projectId)
         if (!projDef) {
             throw new SkillException("Failed to find project [$projectId]", projectId, null)

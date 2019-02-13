@@ -14,7 +14,6 @@ import javax.persistence.*
 @Table(name='custom_icons')
 @ToString(includeNames = true)
 class CustomIcon {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id
@@ -23,15 +22,10 @@ class CustomIcon {
 
     String filename;
 
-    @Lob
-    byte[] imageContent;
-
     @Column(columnDefinition = 'TEXT')
     String dataUri;
 
     String contentType;
-
-    String url;
 
     @Temporal(TemporalType.TIMESTAMP)
     @CreatedDate
@@ -40,4 +34,13 @@ class CustomIcon {
     @Temporal(TemporalType.TIMESTAMP)
     @LastModifiedDate
     Date updated
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="projRefId")
+    ProjDef projDef
+
+    void setProjDef(ProjDef project) {
+        this.projDef = project;
+        this.projDef.customIcons.add(this);
+    }
 }

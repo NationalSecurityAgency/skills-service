@@ -12,7 +12,6 @@ import skills.storage.model.CustomIcon
 @CompileStatic
 class CssGenerator {
     String cssify(Collection<CustomIcon> customIcons) {
-
         String css = ""
 
         customIcons?.each{
@@ -22,7 +21,7 @@ class CssGenerator {
             lines.add(cssClass)
             lines.add("\tbackground-image: url(\"${it.dataUri}\");".toString())
             lines.add("}".toString())
-            css += "\n${lines.join('\n')}\n"
+            css += "${lines.join('')}"
         }
 
         return css
