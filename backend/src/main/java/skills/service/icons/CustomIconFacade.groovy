@@ -5,16 +5,13 @@ import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.Validate
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import skills.service.auth.UserInfo
-import skills.service.auth.UserSkillsGrantedAuthority
+import skills.service.datastore.services.AdminProjService
 import skills.service.datastore.services.IconService
 import skills.storage.model.CustomIcon
-import skills.storage.model.auth.RoleName
-/**
- * Created with IntelliJ IDEA.
- * Date: 11/30/18
- * Time: 11:46 AM
- */
+import skills.storage.model.ProjDef
+
+import javax.transaction.Transactional
+
 @Service
 @CompileStatic
 @Slf4j
@@ -24,39 +21,10 @@ class CustomIconFacade {
     IconService iconService
 
     @Autowired
+    AdminProjService projectAdminStorageService
+
+    @Autowired
     CssGenerator cssGenerator
-
-    IconManifest generateJsIconIndexForUser(UserInfo userInfo){
-        Validate.notNull(userInfo, "userInfo is required")
-
-        List<String> projectIds = []
-        boolean isSuperDuperUser = false
-
-        userInfo.authorities.each{
-            if (it instanceof UserSkillsGrantedAuthority){
-                if (it.role.roleName == RoleName.ROLE_SUPER_DUPER_USER){
-                    isSuperDuperUser = true
-                }
-                projectIds.add(it.role.projectId)
-            }
-        }
-
-        Collection<CustomIcon> allIcons = []
-        if (!isSuperDuperUser) {
-            projectIds.each {
-                Collection<CustomIcon> icons = iconService.getIconsForProject(it)
-                if (icons) {
-                    allIcons.addAll(icons)
-                }
-            }
-        }else{
-            iconService.getAllIcons()?.each{
-                allIcons.add(it)
-            }
-        }
-
-        return IconManifestGenerator.generateIconManifiest(allIcons)
-    }
 
     /**
      * Generates a css style sheet containing all the custom icons fore the specified project id
@@ -71,45 +39,6 @@ class CustomIconFacade {
     }
 
     /**
-     * Generates a css style sheet containing all the custom icons for all the projectIds that
-     * the current user can see
-     *
-     * @param userInfo
-     * @return
-     */
-    String generateCssForUser(UserInfo userInfo) {
-        Validate.notNull(userInfo, "userInfo is required")
-
-        List<String> projectIds = []
-        boolean isSuperDuperUser = false
-        userInfo.authorities.each{
-            if (it instanceof UserSkillsGrantedAuthority){
-                if (it.role.roleName == RoleName.ROLE_SUPER_DUPER_USER){
-                    isSuperDuperUser = true
-                }
-                projectIds.add(it.role.projectId)
-            }
-        }
-
-        Collection<CustomIcon> allIcons = []
-        if (!isSuperDuperUser) {
-            projectIds.each {
-                Collection<CustomIcon> icons = iconService.getIconsForProject(it)
-                if (icons) {
-                    allIcons.addAll(icons)
-                }
-            }
-        }else{
-            iconService.getAllIcons()?.each{
-                allIcons.add(it)
-            }
-        }
-
-        return cssGenerator.cssify(allIcons)
-
-    }
-
-    /**
      * Stores an icon and returns the css class to be used for that icon
      * @param projectId
      * @param iconFilename
@@ -117,6 +46,7 @@ class CustomIconFacade {
      * @param file
      * @return
      */
+    @Transactional
     UploadedIcon saveIcon(String projectId, String iconFilename, String contentType, byte[] file){
         Validate.notNull(iconFilename, "iconFilename is required")
         Validate.notNull(file, "file is required")
@@ -124,7 +54,10 @@ class CustomIconFacade {
         try {
             String dataUri = "data:${contentType};base64,${Base64.getEncoder().encodeToString(file)}"
 
-            CustomIcon customIcon = new CustomIcon(projectId: projectId, filename: iconFilename, contentType: contentType, imageContent: file, dataUri: dataUri)
+            ProjDef project = projectAdminStorageService.getProjDef(projectId)
+
+            CustomIcon customIcon = new CustomIcon(projectId: projectId, filename: iconFilename, contentType: contentType, dataUri: dataUri)
+            customIcon.setProjDef(project)
 
             iconService.saveIcon(customIcon)
 
@@ -138,31 +71,9 @@ class CustomIconFacade {
         }
     }
 
-    /**
-     * retrieves the byte[] array for a given icon or null if none can be found
-     *
-     * @param projectId
-     * @param filename
-     * @return
-     */
-    byte[] getIcon(String projectId, String filename) {
-        Validate.notNull(projectId, "projectId is required")
-        Validate.notNull(filename, "filename is required")
-
-        CustomIcon icon = iconService.loadIcon(filename, projectId)
-        if (icon && icon.imageContent) {
-            return icon.imageContent
-        }else{
-            log.info("unable to find icon for ${projectId}, ${filename}")
-            return null
-        }
-    }
-
     void deleteIcon(String projectId, String filename){
         Validate.notNull(projectId, "projectId is required")
         Validate.notNull(filename, "filename is required")
         iconService.deleteIcon(projectId, filename)
     }
-
-
 }

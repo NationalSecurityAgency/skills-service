@@ -6,10 +6,11 @@ import SubjectPage from '@/components/subjects/SubjectPage';
 import BadgePage from '@/components/badges/BadgePage';
 import SkillPage from '@/components/skills/SkillPage';
 import UserPage from '@/components/users/UserPage';
+import store from '@/store/store';
 
 Vue.use(Router);
 
-export default new Router({
+const router = new Router({
   mode: 'history',
   routes: [
     {
@@ -52,3 +53,14 @@ export default new Router({
     },
   ],
 });
+
+const isActiveProjectIdChange = (to, from) => to.params.projectId !== from.params.projectId;
+
+router.beforeEach((to, from, next) => {
+  if (isActiveProjectIdChange(to, from)) {
+    store.commit('currentProjectId', to.params.projectId);
+  }
+  next();
+});
+
+export default router;

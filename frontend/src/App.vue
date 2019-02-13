@@ -30,6 +30,7 @@
   import LoadingContainer from './components/utils/LoadingContainer';
   import CustomizableHeader from './components/customization/CustomizableHeader';
   import CustomizableFooter from './components/customization/CustomizableFooter';
+  import IconManagerService from './components/utils/iconPicker/IconManagerService';
 
   export default {
     name: 'App',
@@ -54,12 +55,30 @@
       requestAccount() {
         return this.$route.query.requestAccount;
       },
+      activeProjectId() {
+        return this.$store.state.projectId;
+      },
+    },
+    watch: {
+      activeProjectId(projectId) {
+        if (projectId) {
+          this.addCustomIconCSS();
+        }
+      },
     },
     created() {
       this.$store.dispatch('restoreSessionIfAvailable')
         .then(() => {
           this.isLoading = false;
+          if (this.activeProjectId) {
+            this.addCustomIconCSS();
+          }
       });
+    },
+    methods: {
+      addCustomIconCSS() { // This must be done here AFTER authentication
+        IconManagerService.refreshCustomIconCss(this.activeProjectId);
+      },
     },
   };
 </script>

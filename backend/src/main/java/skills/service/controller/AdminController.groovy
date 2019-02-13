@@ -2,30 +2,16 @@ package skills.service.controller
 
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
-import org.apache.commons.io.FileUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
-import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
-import org.springframework.web.multipart.MultipartFile
-import skills.service.controller.exceptions.InvalidContentTypeException
-import skills.service.controller.exceptions.MaxIconSizeExceeded
 import skills.service.controller.request.model.*
-import skills.service.controller.result.model.LevelDefinitionRes
-import skills.service.controller.result.model.ProjectResult
-import skills.service.controller.result.model.SharedSkillResult
-import skills.service.controller.result.model.SimpleProjectResult
-import skills.service.controller.result.model.SkillsGraphRes
-import skills.service.controller.result.model.TableResult
+import skills.service.controller.result.model.*
 import skills.service.datastore.services.AdminProjService
 import skills.service.datastore.services.AdminUsersService
 import skills.service.datastore.services.LevelDefinitionStorageService
 import skills.service.datastore.services.UserAdminService
-import skills.service.icons.CustomIconFacade
-import skills.service.icons.UploadedIcon
 import skills.storage.model.SkillDef
-
-import javax.servlet.http.HttpServletResponse
 
 import static org.springframework.data.domain.Sort.Direction.ASC
 import static org.springframework.data.domain.Sort.Direction.DESC
@@ -34,17 +20,11 @@ import static org.springframework.data.domain.Sort.Direction.DESC
 @RequestMapping("/admin")
 @Slf4j
 class AdminController {
-
-    private static final long maxIconFileSize = 1024*1024
-
     @Autowired
     LevelDefinitionStorageService levelDefinitionStorageService
 
     @Autowired
     AdminProjService projectAdminStorageService
-
-    @Autowired
-    CustomIconFacade iconFacade
 
     @Autowired
     AdminUsersService adminUsersService
@@ -360,40 +340,6 @@ class AdminController {
             @PathVariable("subjectId") String subjectId, @RequestBody NextLevelRequest nextLevelRequest) {
         assert nextLevelRequest.percent
         levelDefinitionStorageService.addNextLevel(projectId, nextLevelRequest.percent, subjectId)
-    }
-
-    @RequestMapping(value = "/projects/{projectId}/icons/upload", method = RequestMethod.POST, produces = "application/json")
-    @ResponseBody
-    UploadedIcon addCustomIcon(
-            @PathVariable("projectId") String projectId,
-            @RequestParam("customIcon") MultipartFile icon) {
-
-        String iconFilename = icon.originalFilename
-        byte[] file = icon.bytes
-        icon.contentType
-
-        if (!icon.contentType?.toLowerCase()?.startsWith("image/")){
-            throw new InvalidContentTypeException("content-type [${icon.contentType}] is unacceptable, only image/ content-types are allowed")
-        }
-
-        if (file.length > maxIconFileSize){
-            throw new MaxIconSizeExceeded("[${file.length}] exceeds the maximum icon size of [${FileUtils.byteCountToDisplaySize(maxIconFileSize)}]")
-        }
-
-
-        UploadedIcon result = iconFacade.saveIcon(projectId, iconFilename, icon.contentType, file)
-
-        return result
-    }
-
-    @RequestMapping(value = "/projects/{projectId}/icons/{filename}", method =  RequestMethod.DELETE)
-    void delete(@PathVariable("projectId") String projectId, @PathVariable("filename") filename, HttpServletResponse response){
-        iconFacade.deleteIcon(projectId, filename)
-        response.setStatus(HttpStatus.OK.value())
-        response.setContentLength(0)
-        response.setContentType("application/json")
-        response.getWriter().println("{}")
-        response.getWriter().flush()
     }
 
     @RequestMapping(value = "/projects/{projectId}/performedSkills/{userId}", method = RequestMethod.GET, produces = "application/json")
