@@ -5,21 +5,13 @@ import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.Validate
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import skills.service.auth.UserInfo
-import skills.service.auth.UserSkillsGrantedAuthority
 import skills.service.datastore.services.AdminProjService
 import skills.service.datastore.services.IconService
 import skills.storage.model.CustomIcon
 import skills.storage.model.ProjDef
-import skills.storage.model.auth.RoleName
 
 import javax.transaction.Transactional
 
-/**
- * Created with IntelliJ IDEA.
- * Date: 11/30/18
- * Time: 11:46 AM
- */
 @Service
 @CompileStatic
 @Slf4j
