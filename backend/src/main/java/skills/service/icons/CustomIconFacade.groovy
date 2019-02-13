@@ -34,38 +34,6 @@ class CustomIconFacade {
     @Autowired
     CssGenerator cssGenerator
 
-    IconManifest generateJsIconIndexForUser(UserInfo userInfo){
-        Validate.notNull(userInfo, "userInfo is required")
-
-        List<String> projectIds = []
-        boolean isSuperDuperUser = false
-
-        userInfo.authorities.each{
-            if (it instanceof UserSkillsGrantedAuthority){
-                if (it.role.roleName == RoleName.ROLE_SUPER_DUPER_USER){
-                    isSuperDuperUser = true
-                }
-                projectIds.add(it.role.projectId)
-            }
-        }
-
-        Collection<CustomIcon> allIcons = []
-        if (!isSuperDuperUser) {
-            projectIds.each {
-                Collection<CustomIcon> icons = iconService.getIconsForProject(it)
-                if (icons) {
-                    allIcons.addAll(icons)
-                }
-            }
-        }else{
-            iconService.getAllIcons()?.each{
-                allIcons.add(it)
-            }
-        }
-
-        return IconManifestGenerator.generateIconManifiest(allIcons)
-    }
-
     /**
      * Generates a css style sheet containing all the custom icons fore the specified project id
      *
@@ -76,44 +44,6 @@ class CustomIconFacade {
         Validate.notNull(projectId, "projectId is required")
         Collection<CustomIcon> icons = iconService.getIconsForProject(projectId)
         return cssGenerator.cssify(icons)
-    }
-
-    /**
-     * Generates a css style sheet containing all the custom icons for all the projectIds that
-     * the current user can see
-     *
-     * @param userInfo
-     * @return
-     */
-    String generateCssForUser(UserInfo userInfo) {
-        Validate.notNull(userInfo, "userInfo is required")
-
-        List<String> projectIds = []
-        boolean isSuperDuperUser = false
-        userInfo.authorities.each{
-            if (it instanceof UserSkillsGrantedAuthority){
-                if (it.role.roleName == RoleName.ROLE_SUPER_DUPER_USER){
-                    isSuperDuperUser = true
-                }
-                projectIds.add(it.role.projectId)
-            }
-        }
-
-        Collection<CustomIcon> allIcons = []
-        if (!isSuperDuperUser) {
-            projectIds.each {
-                Collection<CustomIcon> icons = iconService.getIconsForProject(it)
-                if (icons) {
-                    allIcons.addAll(icons)
-                }
-            }
-        }else{
-            iconService.getAllIcons()?.each{
-                allIcons.add(it)
-            }
-        }
-
-        return cssGenerator.cssify(allIcons)
     }
 
     /**
@@ -154,6 +84,4 @@ class CustomIconFacade {
         Validate.notNull(filename, "filename is required")
         iconService.deleteIcon(projectId, filename)
     }
-
-
 }
