@@ -7,6 +7,7 @@ const fs = require ('fs')
 // const proxySslKeyLocation = process.env.WEBPACK_DEV_SERVER_PROXY_TABLE_SSL_KEY_PATH
 // const proxySslCertLocation = process.env.WEBPACK_DEV_SERVER_PROXY_TABLE_SSL_CERT_PATH
 const redirectRegex = /^201|30(1|2|7|8)$/;
+const proxyHost = 'localhost'
 
 const proxyConf = {
   target: {
@@ -21,9 +22,12 @@ const proxyConf = {
   onProxyRes(proxyRes, req, res) {
     if (proxyRes.headers['location'] && redirectRegex.test(proxyRes.statusCode)) {
       var u = url.parse(proxyRes.headers['location']);
-      u.host = req.headers['host'];
-      u.protocol = 'http';
-      proxyRes.headers['location'] = u.format();
+      console.log('u.host:', u.host);
+      if (u.host === proxyHost) {
+        u.host = req.headers['host'];
+        u.protocol = 'http';
+        proxyRes.headers['location'] = u.format();
+      }
     }
   },
 };
@@ -42,6 +46,8 @@ module.exports = {
       '/icons' : proxyConf,
       '/performLogin' : proxyConf,
       '/createAccount' : proxyConf,
+      '/oauth2' : proxyConf,
+      '/login' : proxyConf,
     },
 
     // Various Dev Server settings

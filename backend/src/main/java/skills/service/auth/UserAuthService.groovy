@@ -5,6 +5,7 @@ import org.apache.commons.collections.CollectionUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.stereotype.Component
+import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
@@ -50,12 +51,17 @@ class UserAuthService {
         return userInfo
     }
 
-    @Transactional()
+    @Transactional
     UserInfo createUser(UserInfo userInfo) {
-        accessSettingsStorageService.createAppUser(userInfo)
+        accessSettingsStorageService.createAppUser(userInfo, false)
         return loadByUserId(userInfo.username)
     }
 
+    @Transactional
+    UserInfo createOrUpdateUser(UserInfo userInfo) {
+        accessSettingsStorageService.createAppUser(userInfo, true)
+        return loadByUserId(userInfo.username)
+    }
     private Collection<GrantedAuthority> convertRoles(List<UserRole> roles) {
         Collection<GrantedAuthority> grantedAuthorities = EMPTY_ROLES
         if (!CollectionUtils.isEmpty(roles)) {

@@ -7,6 +7,7 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 import skills.service.auth.AuthMode
+import skills.service.auth.SkillsAuthorizationException
 
 //import skills.service.auth.DistinguishedNameLoader
 import skills.service.auth.UserInfo
@@ -45,7 +46,7 @@ class UserInfoController {
         if (currentUser) {
             res  = new UserInfoRes(userId: currentUser.username, first: currentUser.firstName, last: currentUser.lastName)
         } else if (authMode == AuthMode.PKI) {
-            throw new UnauthenticatedPkiUserException()
+            throw new SkillsAuthorizationException('Unauthenticated user while using PKI Authorization Mode')
         }
         return res
     }
@@ -69,6 +70,12 @@ class UserInfoController {
             }
         }
         return foundRole
+    }
+
+    @RequestMapping(value = "/test", method = RequestMethod.GET, produces = "application/json")
+    String test() {
+
+        "Successful TEST!!!!"
     }
 
     @RequestMapping(value = "/users/suggestDns/{dnPrefix}", method = RequestMethod.GET, produces = "application/json")
@@ -96,7 +103,4 @@ class UserInfoController {
     Boolean isValidExistingPortalUserId(@PathVariable("userId") String userId){
         return userRepo.findByUserId(userId)
     }
-
-    @ResponseStatus(value = HttpStatus.FORBIDDEN)
-    static class UnauthenticatedPkiUserException extends RuntimeException { }
 }

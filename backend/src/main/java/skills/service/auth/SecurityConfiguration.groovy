@@ -5,8 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.context.annotation.*
-import org.springframework.core.annotation.Order
 import org.springframework.core.type.AnnotatedTypeMetadata
+import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
@@ -14,13 +14,17 @@ import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
-import skills.service.auth.jwt.JwtAuthenticationFilter
-import skills.service.auth.jwt.JwtAuthorizationFilter
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository
+import org.springframework.security.web.context.SecurityContextPersistenceFilter
+import org.springframework.stereotype.Component
 import skills.service.auth.jwt.JwtUserDetailsService
+import skills.service.auth.jwt.OAuth2UserConverterService
+import skills.service.auth.jwt.SkillsHttpSessionSecurityContextRepository
 import skills.service.auth.pki.PkiUserDetailsService
 
+@Component
 @Configuration('securityConfig')
-@ConfigurationProperties(prefix="skills.authorization")
+@ConfigurationProperties(prefix = "skills.authorization")
 @Slf4j
 class SecurityConfiguration {
 
@@ -55,24 +59,16 @@ class SecurityConfiguration {
         new JwtUserDetailsService()
     }
 
-    @Configuration
-    @Order(1)
-    class CorsHttpSecurityConfiguration extends WebSecurityConfigurerAdapter {
-
-        @Override
-        protected void configure(HttpSecurity http) throws Exception {
-            // CORS endpoints config
+    @Component
+    static class PortalWebSecurityHelper {
+        HttpSecurity configureHttpSecurity(HttpSecurity http) {
             http
-                .antMatcher("/api/**")
-                .csrf().disable()
-                .cors().configurationSource(corsConfig())
-                .and()
-                .authorizeRequests().anyRequest().permitAll()
-        }
-
-        @Bean
-        SkillsCorsConfigurationSource corsConfig() {
-            return new SkillsCorsConfigurationSource()
+                    .cors().and().csrf().disable()
+                    .authorizeRequests()
+                    .antMatchers("/", "/icons/**", "/static/**", "/login*", "/performLogin", "/createAccount", "/app/userInfo", "/oauth/**", "/app/oAuthProviders", "index.html").permitAll()
+                    .antMatchers('/admin/**').hasRole('PROJECT_ADMIN')
+                    .anyRequest().authenticated()
+            return http
         }
     }
 
@@ -85,37 +81,36 @@ class SecurityConfiguration {
         @Autowired
         UserDetailsService userDetailsService
 
+        @Autowired
+        PortalWebSecurityHelper portalWebSecurityHelper
+
         @Override
         protected void configure(HttpSecurity http) throws Exception {
-            log.info("Configuting authorization mode [${authMode}]")
+            log.info("Configuring authorization mode [${authMode}]")
+
             // Portal endpoints config
+            portalWebSecurityHelper.configureHttpSecurity(http)
+
             switch (authMode) {
                 case AuthMode.PKI:
                     http
-                            .cors().and().csrf().disable()
-                            .authorizeRequests()
-                            .antMatchers("/", "/api/**", "/icons/**", "/static/**", "/login*", "/performLogin", "/createAccount", "/app/userInfo", "index.html").permitAll()
-                            .antMatchers('/admin/**').hasRole('PROJECT_ADMIN')
-                            .anyRequest().authenticated()
-                            .and()
                             .x509()
                             .subjectPrincipalRegex(/(.*)/)
-                            .userDetailsService(userDetailsService)
                             .and()
                             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                     break
 
                 case AuthMode.JWT:
                     http
-                            .cors().and().csrf().disable()
-                            .authorizeRequests()
-                            .antMatchers("/", "/api/**", "/icons/**", "/static/**", "/login*", "/performLogin", "/createAccount", "/app/userInfo", "index.html").permitAll()
-                            .antMatchers('/admin/**').hasRole('PROJECT_ADMIN')
-                            .anyRequest().authenticated()
+                            .addFilter(securityContextPersistenceFilter())
+                            .formLogin()
+                            .loginPage("/")
+                            .loginProcessingUrl("/performLogin")
+                            .failureUrl("/")
                             .and()
-                            .addFilter(jwtAuthenticationFilter())
-                            .addFilter(jwtAuthorizationFilter())
-                            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                            .oauth2Login()
+                            .loginPage("/")
+                            .failureUrl("/")
                     break
 
                 default:
@@ -125,19 +120,32 @@ class SecurityConfiguration {
 
         @Bean
         @Conditional(JwtCondition)
-        JwtAuthenticationFilter jwtAuthenticationFilter() {
-            JwtAuthenticationFilter filter = new JwtAuthenticationFilter(authenticationManager())
-            filter.setFilterProcessesUrl('/performLogin')
-            return filter
+        SecurityContextPersistenceFilter securityContextPersistenceFilter() {
+            return new SecurityContextPersistenceFilter(httpSessionSecurityContextRepository())
         }
 
         @Bean
         @Conditional(JwtCondition)
-        JwtAuthorizationFilter jwtAuthorizationFilter() {
-            JwtAuthorizationFilter filter = new JwtAuthorizationFilter(authenticationManager())
-            return filter
+        HttpSessionSecurityContextRepository httpSessionSecurityContextRepository() {
+            return new SkillsHttpSessionSecurityContextRepository()
         }
 
+        @Override
+        @Conditional(JwtCondition)
+        @Bean
+        AuthenticationManager authenticationManagerBean() throws Exception {
+            // provides the default AuthenticationManager as a Bean
+            return super.authenticationManagerBean()
+        }
+
+        @Conditional(JwtCondition)
+        @Bean(name = 'oauth2UserConverters')
+        Map<String, OAuth2UserConverterService.OAuth2UserConverter> oAuth2UserConverterMap() {
+            return [
+                    google : new OAuth2UserConverterService.GoogleUserConverter(),
+                    github : new OAuth2UserConverterService.GitHubUserConverter(),
+            ]
+        }
     }
 
     static class PkiCondition implements Condition {
@@ -147,6 +155,7 @@ class SecurityConfiguration {
             return authMode == AuthMode.PKI
         }
     }
+
     static class JwtCondition implements Condition {
         @Override
         boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
@@ -154,4 +163,5 @@ class SecurityConfiguration {
             return authMode == AuthMode.JWT
         }
     }
+
 }
