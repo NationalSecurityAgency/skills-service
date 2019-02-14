@@ -24,7 +24,8 @@
 
         <spock.myVersion>1.1-groovy-2.4-rc-4</spock.myVersion>
         <java.version>1.8</java.version>
-        <springboot.version>2.1.0.RELEASE</springboot.version>
+        <!-- when changing the springboot.version property, make sure you also change it in the parent definition -->
+        <springboot.version>2.1.2.RELEASE</springboot.version>
 
         <flywaydb.version>5.2.1</flywaydb.version>
 
@@ -36,7 +37,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.1.0.RELEASE</version>
+        <version>2.1.2.RELEASE</version>
         <relativePath/>
     </parent>
 

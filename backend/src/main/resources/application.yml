@@ -13,6 +13,22 @@ spring:
     hibernate:
       ddl-auto: validate
 #    show-sql: true
+
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ***REMOVED***
+            client-secret: ***REMOVED***
+            redirectUriTemplate: 'http://localhost:8080/{action}/oauth2/code/{registrationId}'
+            iconClass: fab fa-google
+          github:
+            client-id: ***REMOVED***
+            client-secret: ***REMOVED***
+            redirectUriTemplate: 'http://localhost:8082/{action}/oauth2/code/{registrationId}'
+            iconClass: fab fa-github
+
   profiles:
     active: default
 #logging:
