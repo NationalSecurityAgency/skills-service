@@ -1,4 +1,4 @@
-package skills.service.auth.jwt
+package skills.service.auth.form
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.core.userdetails.UserDetails
@@ -20,7 +20,7 @@ class JwtUserDetailsService implements UserDetailsService {
     UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         UserInfo userInfo = userAuthService.loadByUserId(username)
         if (!userInfo) {
-            throw new RuntimeException("Unknown user [$username]")
+            throw new UsernameNotFoundException("Unknown user [$username]")
         }
         return userInfo
     }

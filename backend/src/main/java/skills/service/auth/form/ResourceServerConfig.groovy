@@ -1,4 +1,4 @@
-package skills.service.auth.jwt
+package skills.service.auth.form
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -11,15 +11,12 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Res
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices
 import org.springframework.security.oauth2.provider.token.TokenStore
 import org.springframework.security.web.util.matcher.RequestMatcher
-import org.springframework.web.servlet.config.annotation.InterceptorRegistry
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
-import skills.service.auth.SecurityConfiguration
 
 import javax.servlet.http.HttpServletRequest
 
 import static skills.service.auth.SecurityConfiguration.*
 
-@Conditional(JwtCondition)
+@Conditional(FormAuth)
 @Configuration
 @EnableResourceServer
 class ResourceServerConfig extends ResourceServerConfigurerAdapter {

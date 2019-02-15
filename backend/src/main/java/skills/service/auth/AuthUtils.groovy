@@ -10,13 +10,15 @@ class AuthUtils {
 
     static String getProjectIdFromRequest(HttpServletRequest servletRequest) {
         String projectId
-        String servletPath = servletRequest.getServletPath()
-        def matcher = (servletPath =~ PROJECT_ID_PATTERN)
-        if (matcher.matches()) {
-            if (matcher.hasGroup()) {
-                projectId = matcher.group(1)
-            } else {
-                log.warn("no projectId found for endpoint [$servletPath]?")
+        if (servletRequest) {
+            String servletPath = servletRequest.getServletPath()
+            def matcher = (servletPath =~ PROJECT_ID_PATTERN)
+            if (matcher.matches()) {
+                if (matcher.hasGroup()) {
+                    projectId = matcher.group(1)
+                } else {
+                    log.warn("no projectId found for endpoint [$servletPath]?")
+                }
             }
         }
         return projectId

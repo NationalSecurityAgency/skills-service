@@ -15,7 +15,7 @@ import javax.servlet.http.HttpServletRequest
 @Slf4j
 class VueEntryPointFilter implements Filter {
 
-    @Value('#{"${skills.vue.entry.blacklist:/api,/admin,/app,/server,/static,/favicon.ico,/icons,/performLogin,/createAccount,/oauth,/test}".split(",")}')
+    @Value('#{"${skills.vue.entry.blacklist:/api,/admin,/app,/server,/static,/favicon.ico,/icons,/performLogin,/logout,/createAccount,/oauth,/test}".split(",")}')
     private List<String> urlBlacklist
 
     @Override

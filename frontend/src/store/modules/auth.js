@@ -133,7 +133,7 @@ const actions = {
   },
   logout({ commit }) {
     commit('clearAuthData');
-    router.replace('/');
+    window.location = '/logout';
   },
   setLogoutTimer({ dispatch }, expirationDate) {
     const expiresInMillis = expirationDate.getTime() - new Date().getTime();
