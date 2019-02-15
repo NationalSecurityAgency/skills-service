@@ -41,3 +41,9 @@
   margin-bottom: 2rem;
   border-radius: 5px;
 }
+
+.skills-handle-overflow {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: none;
+}

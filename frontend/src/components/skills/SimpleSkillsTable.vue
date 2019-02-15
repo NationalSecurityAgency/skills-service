@@ -12,17 +12,29 @@
               </a>
             </p>
             <p class="skills-pad-left-1-rem">
-              <router-link :to="{ name:'SkillPage',
-              params: { projectId: props.row.projectId, subjectId: props.row.subjectId, skillId: props.row.skillId }}"
-                           class="button is-outlined is-info"  v-bind:class="{ active: !props.row.subjectId }">
-                <span>Manage</span>
-                <span class="icon is-small">
-                  <i class="fas fa-arrow-circle-right"/>
-                </span>
-              </router-link>
+              <b-tooltip :label="getManagedBtnDisabledMsg(props.row)" :active="isManagedBtnDisabled(props.row)"
+                         position="is-left" animanted="true" type="is-light">
+                <router-link :to="{ name:'SkillPage',
+                params: { projectId: props.row.projectId, subjectId: props.row.subjectId, skillId: props.row.skillId }}"
+                             class="button is-outlined is-info"
+                             v-bind:class="{ notactive: isManagedBtnDisabled(props.row) }">
+                  <span>Manage</span>
+                  <span class="icon is-small">
+                    <i class="fas fa-arrow-circle-right"/>
+                  </span>
+                </router-link>
+              </b-tooltip>
             </p>
           </span>
           </div>
+        </div>
+
+
+        <div slot="name" slot-scope="props">
+          <!-- allow to override how name field is rendered-->
+          <slot name="name-cell" v-bind:props="props.row">
+            {{ props.row.name }}
+          </slot>
         </div>
       </v-client-table>
     </div>
@@ -59,6 +71,16 @@
       };
     },
     methods: {
+      isManagedBtnDisabled(row) {
+        return row && row.disabledStatus && row.disabledStatus.manageBtn && row.disabledStatus.manageBtn.disable;
+      },
+      getManagedBtnDisabledMsg(row) {
+        let msg = '';
+        if (this.isManagedBtnDisabled(row)) {
+          msg = row.disabledStatus.manageBtn.msg;
+        }
+        return msg;
+      },
       onDeleteEvent(skill) {
         this.$emit('skill-removed', skill);
       },
@@ -76,7 +98,7 @@
     /*background: yellow;*/
   }
 
-  #simple-skills-table .active {
+  #simple-skills-table .notactive {
     cursor: not-allowed;
     pointer-events: none;
     color: #c0c0c0;

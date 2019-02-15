@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div id="skill-dependencies-display">
       <div class="columns">
         <div class="column is-full">
           <span class="title is-3">Dependencies</span>
@@ -17,15 +17,15 @@
                         <i v-if="props.option.otherProjectId" class="fas fa-w-16 fa-handshake"></i>
                         <i v-else class="fas fa-w-16 fa-list-alt"></i>
                       </div>
-                      <div class="column handle-overflow" style="flex:none; width:45%;" :title="props.option.name">
+                      <div class="column skills-handle-overflow" style="width:45%;" :title="props.option.name">
                         <span class="selector-skill-name">
                           <span v-if="props.option.otherProjectId" class="has-text-weight-bold">{{props.option.otherProjectName}} : </span>
                           {{ props.option.name }}</span>
                       </div>
-                      <div class="column is-one-fifth handle-overflow" style="flex:none; width:30%;" :title="props.option.skillId">
+                      <div class="column is-one-fifth skills-handle-overflow" style="width:30%;" :title="props.option.skillId">
                         <span class="selector-other-label">ID:</span> <span class="selector-other-value">{{props.option.skillId}}</span>
                       </div>
-                      <div class="column is-one-fifth" style="flex:none; width:20%;">
+                      <div class="column is-one-fifth" style="width:20%;">
                         <span v-if="props.option.otherProjectId" class="has-text-warning">** Shared Skill **</span>
                         <span v-else>
                           <span class="selector-other-label">Total Points:</span> <span class="selector-other-value">{{ props.option.totalPoints}}</span>
@@ -33,6 +33,18 @@
                       </div>
                     </div>
                   </template>
+
+                  <template slot="selected-item" slot-scope="{ props }">
+                    <span class="tag has-text-weight-bold" style="margin-right: 7px;" v-bind:style="{'background-color': props.option.isFromAnotherProject ? '#ffb87f' : 'lightblue'}">
+                      <span class="skills-handle-overflow" style="width: 15rem;" :title="props.option.isFromAnotherProject ? props.option.projectId + ' : ' + props.option.name : props.option.name" >
+                        <span v-if="props.option.isFromAnotherProject">{{ props.option.projectId | truncate(10)}} : </span>
+                        {{ props.option.name }}
+                      </span>
+                      <button class="delete is-small" v-on:click="props.remove(props.option)"></button>
+                    </span>
+
+                  </template>
+
                 </skills-selector2>
               </div>
             </div>
@@ -45,7 +57,20 @@
 
           <dependants-graph :skill="skill" :dependent-skills="skills" :graph="graph"></dependants-graph>
 
-          <simple-skills-table :skills="skills" v-on:skill-removed="skillDeleted"></simple-skills-table>
+          <simple-skills-table :skills="skills" v-on:skill-removed="skillDeleted">
+            <span slot="name-cell" slot-scope="row">
+              <i v-if="row.props.isFromAnotherProject" class="fas fa-w-16 fa-handshake"></i>
+              <i v-else class="fas fa-w-16 fa-list-alt"></i>
+              <span v-if="row.props.isFromAnotherProject" class=""><span class="has-text-weight-bold">Cross Project Dependency </span> {{row.props.projectId}} : </span>
+              {{ row.props.name }}
+            </span>
+
+            <!--<b-tooltip label="By default only skills under current subject will be considered."-->
+                       <!--position="is-left" animanted="true" type="is-light">-->
+              <!--<span><i class="fas fa-question-circle"></i></span>-->
+            <!--</b-tooltip>-->
+
+          </simple-skills-table>
 
         </loading-container>
       </div>
@@ -142,7 +167,16 @@
             this.graph = Object.assign(response, { subjectId: this.skill.subjectId });
             const myEdges = this.graph.edges.filter(entry => entry.fromId === this.skill.id);
             const myChildren = this.graph.nodes.filter(item => myEdges.find(item1 => item1.toId === item.id));
-            this.skills = myChildren.map(entry => Object.assign(entry, { subjectId: this.skill.subjectId }));
+            this.skills = myChildren.map((entry) => {
+              const externalProject = entry.projectId !== this.skill.projectId;
+              const disableInfo = {
+                manageBtn: {
+                  disable: externalProject,
+                  msg: 'Cannot manage skills from external projects.',
+                },
+              };
+              return Object.assign(entry, { subjectId: this.skill.subjectId, disabledStatus: disableInfo, isFromAnotherProject: externalProject });
+            });
 
             // this.previousSkills = this.skills.map(entry => entry);
             this.loading.finishedDependents = true;
@@ -174,5 +208,4 @@
   .dependencies-container {
     min-height: 800px;
   }
-
 </style>

@@ -69,9 +69,9 @@
 </template>
 
 <script>
-  import axios from 'axios';
   import EditAndDeleteDropdown from '@/components/utils/EditAndDeleteDropdown';
   import EditSubject from './EditSubject';
+  import SubjectsService from './SubjectsService';
 
 
   export default {
@@ -100,7 +100,7 @@
       },
       deleteSubjectAjax() {
         this.isLoading = true;
-        axios.delete(`/admin/projects/${this.subject.projectId}/subjects/${this.subject.subjectId}`)
+        SubjectsService.deleteSubject(this.subject)
           .then(() => {
             this.isLoading = false;
             this.$emit('subject-deleted', this.subject);
@@ -128,7 +128,7 @@
       },
       subjectEdited(subject) {
         this.isLoading = true;
-        axios.put(`/admin/projects/${subject.projectId}/subjects/${subject.subjectId}`, subject)
+        SubjectsService.saveSubject(subject)
           .then(() => {
             this.subject = subject;
             this.isLoading = false;

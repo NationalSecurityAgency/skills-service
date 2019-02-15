@@ -74,13 +74,13 @@
 </template>
 
 <script>
-  import axios from 'axios';
   import Navigation from '../utils/Navigation';
   import Levels from '../levels/Levels';
   import Skills from '../skills/Skills';
   import LoadingContainer from '../utils/LoadingContainer';
   import ProjectStats from '../stats/ProjectStats';
   import Users from '../users/Users';
+  import SubjectsService from './SubjectsService';
 
   export default {
     name: 'SubjectPage',
@@ -126,9 +126,9 @@
     methods: {
       loadSubject() {
         this.isLoading = true;
-        axios.get(`/admin/projects/${this.projectId}/subjects/${this.subjectId}`)
+        SubjectsService.getSubjectDetails(this.projectId, this.subjectId)
           .then((response) => {
-            this.subject = response.data;
+            this.subject = response;
             this.isLoading = false;
           })
           .catch((e) => {

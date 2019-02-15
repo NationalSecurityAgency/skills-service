@@ -93,8 +93,7 @@
           getMessage: field => `The value for the ${field} is already taken.`,
           validate(value) {
             return ProjectService.checkIfProjectNameExist(value)
-              .then(remoteRes => !remoteRes)
-              .catch(e => this.serverErrors.push(e));
+              .then(remoteRes => !remoteRes);
           },
         }, {
           immediate: false,
@@ -104,8 +103,7 @@
           getMessage: field => `The value for the ${field} is already taken.`,
           validate(value) {
             return ProjectService.checkIfProjectIdExist(value)
-              .then(remoteRes => !remoteRes)
-              .catch(e => this.serverErrors.push(e));
+              .then(remoteRes => !remoteRes);
           },
         }, {
           immediate: false,

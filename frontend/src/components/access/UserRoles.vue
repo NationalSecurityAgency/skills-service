@@ -117,7 +117,7 @@
         });
       },
       deleteUserRoleAjax(row) {
-        axios.delete(`/admin/projects/${row.projectId}/users/${row.userId}/roles/${row.roleName}`)
+        axios.delete(`/admin/projects/${row.projectId}/users/${row.userId}/roles/${encodeURIComponent(row.roleName)}`)
           .then(() => {
             this.data = this.data.filter(item => item.id !== row.id);
             this.$toast.open(ToastHelper.defaultConf(`Removed '${row.roleName}' role`));
