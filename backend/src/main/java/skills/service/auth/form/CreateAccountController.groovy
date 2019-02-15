@@ -1,4 +1,4 @@
-package skills.service.auth.jwt
+package skills.service.auth.form
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
@@ -17,7 +17,7 @@ import skills.service.controller.result.model.OAuth2Provider
 
 import javax.servlet.http.HttpServletResponse
 
-@Conditional(SecurityConfiguration.JwtCondition)
+@Conditional(SecurityConfiguration.FormAuth)
 @RestController
 @RequestMapping("/")
 @Slf4j
@@ -40,10 +40,12 @@ class CreateAccountController {
 
     @PutMapping("createAccount")
     void createAppUser(@RequestBody UserInfo userInfo, HttpServletResponse response) {
-        userInfo.password = passwordEncoder.encode(userInfo.password)
+        String password = userInfo.password
+        userInfo.password = passwordEncoder.encode(password)
         userInfo.username = userInfo.email
         userInfo = userAuthService.createUser(userInfo)
-        jwtHelper.addToken(response, userInfo)
+        userAuthService.autologin(userInfo, password)
+//        jwtHelper.addToken(response, userInfo)
     }
 
     @GetMapping("/app/oAuthProviders")

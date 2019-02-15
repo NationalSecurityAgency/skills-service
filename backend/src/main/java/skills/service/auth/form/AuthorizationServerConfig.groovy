@@ -1,4 +1,4 @@
-package skills.service.auth.jwt
+package skills.service.auth.form
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
@@ -29,7 +29,7 @@ import org.springframework.security.oauth2.provider.token.store.KeyStoreKeyFacto
 import skills.service.auth.SecurityConfiguration
 
 @Configuration
-@Conditional(SecurityConfiguration.JwtCondition)
+@Conditional(SecurityConfiguration.FormAuth)
 @EnableAuthorizationServer
 class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
     private int accessTokenValiditySeconds = 10000

@@ -1,10 +1,7 @@
-package skills.service.auth.jwt
+package skills.service.auth.form
 
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.context.properties.ConfigurationProperties
-import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Conditional
-import org.springframework.context.annotation.Configuration
 import org.springframework.security.oauth2.core.user.OAuth2User
 import org.springframework.stereotype.Component
 import skills.service.auth.SecurityConfiguration
@@ -12,11 +9,10 @@ import skills.service.auth.SkillsAuthorizationException
 import skills.service.auth.UserAuthService
 import skills.service.auth.UserInfo
 
-import javax.annotation.PostConstruct
 import javax.annotation.Resource
 
 @Component
-@Conditional(SecurityConfiguration.JwtCondition)
+@Conditional(SecurityConfiguration.FormAuth)
 class OAuth2UserConverterService {
 
     @Autowired

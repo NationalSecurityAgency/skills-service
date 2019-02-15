@@ -1,9 +1,14 @@
 package skills.service.auth
 
-
+import groovy.util.logging.Slf4j
 import org.apache.commons.collections.CollectionUtils
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Conditional
+import org.springframework.security.authentication.AuthenticationManager
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.GrantedAuthority
+import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
@@ -18,6 +23,7 @@ import skills.storage.repos.UserRepo
 import javax.servlet.http.HttpServletRequest
 
 @Component
+@Slf4j
 class UserAuthService {
 
     private static Collection<GrantedAuthority> EMPTY_ROLES = new ArrayList<>()
@@ -27,6 +33,13 @@ class UserAuthService {
 
     @Autowired
     AccessSettingsStorageService accessSettingsStorageService
+
+    @Autowired
+    private AuthenticationManager authenticationManager
+
+    @Autowired
+    PasswordEncoder passwordEncoder
+
 
     @Transactional(readOnly = true)
     Collection<GrantedAuthority> loadAuthorities(String userId) {
@@ -62,6 +75,17 @@ class UserAuthService {
         accessSettingsStorageService.createAppUser(userInfo, true)
         return loadByUserId(userInfo.username)
     }
+
+    void autologin(UserInfo userInfo, String password) {
+        UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(userInfo, password, userInfo.getAuthorities())
+        authenticationManager.authenticate(usernamePasswordAuthenticationToken)
+
+        if (usernamePasswordAuthenticationToken.isAuthenticated()) {
+            SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken)
+//            logger.debug(String.format("Auto login %s successfully!", username));
+        }
+    }
+
     private Collection<GrantedAuthority> convertRoles(List<UserRole> roles) {
         Collection<GrantedAuthority> grantedAuthorities = EMPTY_ROLES
         if (!CollectionUtils.isEmpty(roles)) {
@@ -89,8 +113,14 @@ class UserAuthService {
     }
 
     HttpServletRequest getServletRequest() {
-        ServletRequestAttributes currentRequestAttributes = RequestContextHolder.currentRequestAttributes() as ServletRequestAttributes
-        HttpServletRequest httpServletRequest = currentRequestAttributes.getRequest()
+        HttpServletRequest httpServletRequest
+
+        try {
+            ServletRequestAttributes currentRequestAttributes = RequestContextHolder.currentRequestAttributes() as ServletRequestAttributes
+            httpServletRequest = currentRequestAttributes.getRequest()
+        } catch (Exception e) {
+            log.warn("Unable to current request attributes. Error Recievedd [$e]")
+        }
         return httpServletRequest
     }
 }

@@ -14,12 +14,13 @@ import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository
 import org.springframework.security.web.context.SecurityContextPersistenceFilter
 import org.springframework.stereotype.Component
-import skills.service.auth.jwt.JwtUserDetailsService
-import skills.service.auth.jwt.OAuth2UserConverterService
-import skills.service.auth.jwt.SkillsHttpSessionSecurityContextRepository
+import skills.service.auth.form.JwtUserDetailsService
+import skills.service.auth.form.OAuth2UserConverterService
+import skills.service.auth.form.SkillsHttpSessionSecurityContextRepository
 import skills.service.auth.pki.PkiUserDetailsService
 
 @Component
@@ -36,25 +37,25 @@ class SecurityConfiguration {
 
     @Autowired
     void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-        if (authMode == AuthMode.JWT) {
+        if (authMode == AuthMode.FORM) {
             auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder())
         }
     }
 
     @Bean
-    @Conditional(JwtCondition)
+    @Conditional(FormAuth)
     PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder()
     }
 
     @Bean
-    @Conditional(PkiCondition)
+    @Conditional(PkiAuth)
     UserDetailsService pkiUserDetailsService() {
         new PkiUserDetailsService()
     }
 
     @Bean
-    @Conditional(JwtCondition)
+    @Conditional(FormAuth)
     UserDetailsService jwtUserDetailsService() {
         new JwtUserDetailsService()
     }
@@ -100,17 +101,18 @@ class SecurityConfiguration {
                             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                     break
 
-                case AuthMode.JWT:
+                case AuthMode.FORM:
                     http
                             .addFilter(securityContextPersistenceFilter())
                             .formLogin()
                             .loginPage("/")
-                            .loginProcessingUrl("/performLogin")
-                            .failureUrl("/")
+                                .loginProcessingUrl("/performLogin")
+                                .failureHandler(new SimpleUrlAuthenticationFailureHandler())
                             .and()
                             .oauth2Login()
-                            .loginPage("/")
-                            .failureUrl("/")
+                                .loginPage("/")
+                                .failureHandler(new SimpleUrlAuthenticationFailureHandler())
+                            .and().logout()
                     break
 
                 default:
@@ -119,26 +121,25 @@ class SecurityConfiguration {
         }
 
         @Bean
-        @Conditional(JwtCondition)
+        @Conditional(FormAuth)
         SecurityContextPersistenceFilter securityContextPersistenceFilter() {
             return new SecurityContextPersistenceFilter(httpSessionSecurityContextRepository())
         }
 
         @Bean
-        @Conditional(JwtCondition)
+        @Conditional(FormAuth)
         HttpSessionSecurityContextRepository httpSessionSecurityContextRepository() {
             return new SkillsHttpSessionSecurityContextRepository()
         }
 
         @Override
-        @Conditional(JwtCondition)
         @Bean
         AuthenticationManager authenticationManagerBean() throws Exception {
             // provides the default AuthenticationManager as a Bean
             return super.authenticationManagerBean()
         }
 
-        @Conditional(JwtCondition)
+        @Conditional(FormAuth)
         @Bean(name = 'oauth2UserConverters')
         Map<String, OAuth2UserConverterService.OAuth2UserConverter> oAuth2UserConverterMap() {
             return [
@@ -148,7 +149,7 @@ class SecurityConfiguration {
         }
     }
 
-    static class PkiCondition implements Condition {
+    static class PkiAuth implements Condition {
         @Override
         boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
             AuthMode authMode = AuthMode.getFromContext(context)
@@ -156,11 +157,11 @@ class SecurityConfiguration {
         }
     }
 
-    static class JwtCondition implements Condition {
+    static class FormAuth implements Condition {
         @Override
         boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
             AuthMode authMode = AuthMode.getFromContext(context)
-            return authMode == AuthMode.JWT
+            return authMode == AuthMode.FORM
         }
     }
 

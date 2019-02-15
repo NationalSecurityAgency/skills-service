@@ -1,4 +1,4 @@
-package skills.service.auth.jwt
+package skills.service.auth.form
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
@@ -12,16 +12,12 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication
 import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetails
 import org.springframework.security.web.context.HttpRequestResponseHolder
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository
-import org.springframework.web.servlet.HandlerInterceptor
 import skills.service.auth.SkillsAuthorizationException
 import skills.service.auth.UserAuthService
 import skills.service.auth.UserInfo
 
-import javax.annotation.PostConstruct
 import javax.persistence.EntityManager
 import javax.persistence.PersistenceContext
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
 import javax.transaction.Transactional
 
 /**
@@ -89,10 +85,12 @@ class SkillsHttpSessionSecurityContextRepository extends HttpSessionSecurityCont
             // reload the granted_authorities for this skills user
             UserInfo userInfo = auth.principal
             userInfo.authorities = userAuthService.loadAuthorities(userInfo.username)
+            auth = new UsernamePasswordAuthenticationToken(userInfo, auth.credentials, userInfo.authorities)
         }
 
-//        SecurityContextHolder.getContext().setAuthentication(auth)
+        SecurityContextHolder.getContext().setAuthentication(auth)
         context.setAuthentication(auth)
+        super.saveContext(context, requestResponseHolder.getRequest(), requestResponseHolder.getResponse())
 
         return context
     }

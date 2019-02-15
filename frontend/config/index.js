@@ -22,8 +22,7 @@ const proxyConf = {
   onProxyRes(proxyRes, req, res) {
     if (proxyRes.headers['location'] && redirectRegex.test(proxyRes.statusCode)) {
       var u = url.parse(proxyRes.headers['location']);
-      console.log('u.host:', u.host);
-      if (u.host === proxyHost) {
+      if (u.hostname === proxyHost) {
         u.host = req.headers['host'];
         u.protocol = 'http';
         proxyRes.headers['location'] = u.format();
@@ -45,6 +44,7 @@ module.exports = {
       '/server' : proxyConf,
       '/icons' : proxyConf,
       '/performLogin' : proxyConf,
+      '/logout' : proxyConf,
       '/createAccount' : proxyConf,
       '/oauth2' : proxyConf,
       '/login' : proxyConf,
