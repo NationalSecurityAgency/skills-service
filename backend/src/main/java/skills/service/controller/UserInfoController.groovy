@@ -72,12 +72,6 @@ class UserInfoController {
         return foundRole
     }
 
-    @RequestMapping(value = "/test", method = RequestMethod.GET, produces = "application/json")
-    String test() {
-
-        "Successful TEST!!!!"
-    }
-
     @RequestMapping(value = "/users/suggestDns/{dnPrefix}", method = RequestMethod.GET, produces = "application/json")
     List<String> suggestDns(@PathVariable("dnPrefix") String dnPrefix) {
 

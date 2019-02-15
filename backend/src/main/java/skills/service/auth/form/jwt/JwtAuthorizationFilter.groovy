@@ -1,4 +1,4 @@
-package skills.service.auth.form
+package skills.service.auth.form.jwt
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.authentication.AuthenticationManager

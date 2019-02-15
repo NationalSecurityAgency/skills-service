@@ -8,7 +8,7 @@ import org.springframework.security.crypto.password.PasswordEncoder
 import skills.service.auth.UserAuthService
 import skills.service.auth.UserInfo
 
-class JwtUserDetailsService implements UserDetailsService {
+class LocalUserDetailsService implements UserDetailsService {
 
     @Autowired
     UserAuthService userAuthService
