@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*
 import skills.service.auth.SecurityConfiguration
 import skills.service.auth.UserAuthService
 import skills.service.auth.UserInfo
+import skills.service.auth.form.jwt.JwtHelper
 import skills.service.controller.result.model.OAuth2Provider
 
 import javax.servlet.http.HttpServletResponse
@@ -30,9 +31,6 @@ class CreateAccountController {
     PasswordEncoder passwordEncoder
 
     @Autowired
-    JwtHelper jwtHelper
-
-    @Autowired
     private ClientRegistrationRepository clientRegistrationRepository;
 
     @Autowired
@@ -45,7 +43,6 @@ class CreateAccountController {
         userInfo.username = userInfo.email
         userInfo = userAuthService.createUser(userInfo)
         userAuthService.autologin(userInfo, password)
-//        jwtHelper.addToken(response, userInfo)
     }
 
     @GetMapping("/app/oAuthProviders")
@@ -58,11 +55,6 @@ class CreateAccountController {
             providers.add(oAuth2Provider)
         }
         return providers
-    }
-
-    @GetMapping("/test")
-    String testEndpoint() {
-        return "TEST ENDPOINT!!!"
     }
 
     @Component

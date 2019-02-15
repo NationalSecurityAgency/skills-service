@@ -1,4 +1,4 @@
-package skills.service.auth.form
+package skills.service.auth.form.jwt
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
