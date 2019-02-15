@@ -1,28 +1,19 @@
 <template>
   <div id="project-selector">
-
-
-    <!--<multiselect v-model="selectedInternal" placeholder="Select skill(s)..."-->
-                 <!--:options="options" :multiple="true" :taggable="multipleSelection"-->
-                 <!--:hide-selected="true" label="name" track-by="id" v-on:remove="removed" v-on:select="added">-->
-
+    <!-- see https://github.com/shentao/vue-multiselect/issues/421 for explanation of :blockKeys-->
     <multiselect v-model="selectedValue" placeholder="Type to search for a project..."
-                 :options="projects" :multiple="true" :taggable="false"
+                 :options="projects" :multiple="true" :taggable="false" :blockKeys="['Delete']"
                  :hide-selected="true" label="name" track-by="id" v-on:select="onSelected" v-on:remove="onRemoved"
                  @search-change="search" :loading="isLoading" :internal-search="false"
                  :clear-on-select="false">
       <template slot="option" slot-scope="props">
         <div class="columns">
-          <div class="column handle-overflow" style="flex:none; width:45%;" :title="props.option.name"><span class="selector-skill-name">{{ props.option.name }}</span></div>
-          <div class="column is-one-fifth handle-overflow" style="flex:none; width:30%;" :title="props.option.projectId">
+          <div class="column skills-handle-overflow" style="flex:none; width:45%;" :title="props.option.name"><span class="selector-skill-name">{{ props.option.name }}</span></div>
+          <div class="column is-one-fifth skills-handle-overflow" style="flex:none; width:30%;" :title="props.option.projectId">
             <span class="selector-other-label">ID:</span> <span class="selector-other-value">{{props.option.projectId}}</span>
           </div>
         </div>
       </template>
-
-      <!--<template slot="noResult">-->
-        <!--dljalj lajlkdjalj dlkajl-->
-      <!--</template>-->
     </multiselect>
   </div>
 </template>

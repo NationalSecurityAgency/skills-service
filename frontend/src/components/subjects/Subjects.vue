@@ -48,11 +48,11 @@
 </template>
 
 <script>
-  import axios from 'axios';
   import Subject from './Subject';
   import EditSubject from './EditSubject';
   import LoadingContainer from '../utils/LoadingContainer';
   import NoContent from '../utils/NoContent';
+  import SubjectsService from './SubjectsService';
 
   export default {
     name: 'Subjects',
@@ -70,10 +70,10 @@
     },
     methods: {
       loadSubjects() {
-        axios.get(`/admin/projects/${this.project.projectId}/subjects`)
+        SubjectsService.getSubjects(this.project.projectId)
           .then((response) => {
             this.isLoading = false;
-            this.subjects = response.data;
+            this.subjects = response;
             this.subjects[0].isFirst = true;
             this.subjects[this.subjects.length - 1].isLast = true;
           })
@@ -88,8 +88,7 @@
       },
       subjectAdded(subject) {
         this.isLoading = true;
-
-        axios.put(`/admin/projects/${subject.projectId}/subjects/${subject.subjectId}`, subject)
+        SubjectsService.saveSubject(subject)
           .then(() => {
             this.loadSubjects();
             this.$emit('subjects-changed', subject.subjectId);
@@ -128,9 +127,7 @@
       },
       moveSubject(subject, actionToSubmit) {
         this.isLoading = true;
-        axios.patch(`/admin/projects/${subject.projectId}/subjects/${subject.subjectId}`, {
-          action: actionToSubmit,
-        })
+        SubjectsService.patchSubject(subject, actionToSubmit)
           .then(() => {
             this.loadSubjects();
           })

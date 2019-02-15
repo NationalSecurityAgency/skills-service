@@ -1,3 +1,5 @@
+import TruncateFilter from '../../../filters/TruncateFilter';
+
 export default {
   getTitle(skillItem, isCrossProject) {
     let crossProjInfo = '';
@@ -11,20 +13,12 @@ export default {
                 <span style="font-style: italic; color: #444444">Total Points:</span> ${skillItem.totalPoints}`;
   },
   getLabel(skillItem, isCrossProject) {
-    let res = isCrossProject ? `${skillItem.projectId} : ${skillItem.name} ` : skillItem.name;
+    let res = isCrossProject ? `${this.truncate(skillItem.projectId, 10)} : ${skillItem.name} ` : skillItem.name;
     res = this.truncate(res);
     return res;
   },
-  truncate(strValue) {
-    let re = strValue.match(/^.{0,30}[\S]*/);
-    const l = re[0].length;
-    re = re[0].replace(/\s$/, '');
-    if (l < strValue.length) {
-      re = `${re}...`;
-    }
-
-    re = re.replace(/(.{35})..+/, '$1...');
-    return re;
+  truncate(strValue, truncateTo = 35) {
+    return TruncateFilter(strValue, truncateTo);
   },
 
 };

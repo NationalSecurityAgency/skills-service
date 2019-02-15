@@ -138,7 +138,7 @@
         });
       },
       deleteAllowedOriginAjax(row) {
-        axios.delete(`/admin/projects/${row.projectId}/allowedOrigins/${row.id}`)
+        axios.delete(`/admin/projects/${row.projectId}/allowedOrigins/${encodeURIComponent(row.id)}`)
           .then(() => {
             this.data = this.data.filter(item => item.id !== row.id);
             this.$toast.open(ToastHelper.defaultConf(`Removed allowed origin: '${row.allowedOrigin}'`));

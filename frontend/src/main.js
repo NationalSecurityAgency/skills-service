@@ -11,6 +11,7 @@ import 'babel-polyfill';
 import 'buefy/dist/buefy.css';
 import 'animate.css/animate.css';
 import './filters/NumberFilter';
+import './filters/TruncateFilter';
 import App from './App';
 import router from './router';
 import store from './store/store';

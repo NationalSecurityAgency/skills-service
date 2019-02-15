@@ -64,7 +64,7 @@
             if (!res) {
               this.isSaving = false;
             } else {
-              axios.put(`/admin/users/${this.$refs.userDn.$data.userDn}`)
+              axios.put(`/admin/users/${encodeURIComponent(this.$refs.userDn.$data.userDn)}`)
                 .then((result) => {
                   this.isSaving = false;
                   this.$emit('user-role-created', result.data);

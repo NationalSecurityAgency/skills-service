@@ -60,7 +60,7 @@
         }
 
         this.isFetching = true;
-        axios.get(`/app/users/suggestDns/${this.userDn}`)
+        axios.get(`/app/users/suggestDns/${encodeURIComponent(this.userDn)}`)
           .then((response) => {
             this.suggestions = response.data;
             this.isFetching = false;
@@ -89,7 +89,7 @@
       return new Promise((resolve) => {
         let isValid = false;
 
-        axios.get(`/app/users/validDn/${value}`)
+        axios.get(`/app/users/validDn/${encodeURIComponent(value)}`)
           .then((response) => {
             isValid = response.data;
             resolve({

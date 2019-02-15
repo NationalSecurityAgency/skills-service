@@ -21,15 +21,15 @@ export default {
     return axios.delete(`/admin/projects/${projectId}`);
   },
   queryOtherProjectsByName(projectId, nameQuery) {
-    return axios.get(`/admin/projects/${projectId}/projectSearch?nameQuery=${nameQuery}`)
+    return axios.get(`/admin/projects/${projectId}/projectSearch?nameQuery=${encodeURIComponent(nameQuery)}`)
       .then(response => response.data);
   },
   checkIfProjectIdExist(projectId) {
-    return axios.get(`/app/projectExist?projectId=${projectId}`)
+    return axios.get(`/app/projectExist?projectId=${encodeURIComponent(projectId)}`)
       .then(response => response.data);
   },
   checkIfProjectNameExist(projectName) {
-    return axios.get(`/app/projectExist?projectName=${projectName}`)
+    return axios.get(`/app/projectExist?projectName=${encodeURIComponent(projectName)}`)
       .then(response => response.data);
   },
 
