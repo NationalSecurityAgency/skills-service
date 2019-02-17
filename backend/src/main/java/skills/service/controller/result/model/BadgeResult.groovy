@@ -1,4 +1,4 @@
-package skills.service.controller.request.model
+package skills.service.controller.result.model
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import groovy.transform.Canonical

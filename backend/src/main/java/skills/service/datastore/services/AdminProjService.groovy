@@ -13,11 +13,18 @@ import skills.service.auth.UserInfoService
 import skills.service.controller.exceptions.ErrorCode
 import skills.service.controller.exceptions.SkillException
 import skills.service.controller.request.model.*
+import skills.service.controller.result.model.BadgeResult
 import skills.service.controller.result.model.DependencyCheckResult
+import skills.service.controller.result.model.ProjectResult
+import skills.service.controller.result.model.SettingsResult
+import skills.service.controller.result.model.SkillDefRes
 import skills.service.controller.result.model.ProjectResult
 import skills.service.controller.result.model.SharedSkillResult
 import skills.service.controller.result.model.SimpleProjectResult
 import skills.service.controller.result.model.SkillsGraphRes
+import skills.service.controller.result.model.SubjectResult
+import skills.service.datastore.services.settings.Settings
+import skills.service.datastore.services.settings.SettingsService
 import skills.service.skillsManagement.UserAchievementsAndPointsManagement
 import skills.storage.model.LevelDef
 import skills.storage.model.ProjDef
@@ -66,6 +73,9 @@ class AdminProjService {
     @Autowired
     SkillShareDefRepo skillShareDefRepo
 
+    @Autowired
+    SettingsService settingsService
+
     @Transactional()
     ProjectResult saveProject(ProjectRequest projectRequest) {
         assert projectRequest?.projectId
@@ -97,7 +107,7 @@ class AdminProjService {
             projectDefinition = new ProjDef(projectId: projectRequest.projectId, name: projectRequest.name, displayOrder: displayOrder)
             log.info("Created project [{}]", projectDefinition)
 
-            List<LevelDef> levelDefinitions = levelDefService.crateDefault()
+            List<LevelDef> levelDefinitions = levelDefService.createDefault()
             projectDefinition.levelDefinitions = levelDefinitions
 
             projectDefinition = projDefRepo.save(projectDefinition)
@@ -142,7 +152,7 @@ class AdminProjService {
                     displayOrder: displayOrder
             )
 
-            skillDef.levelDefinitions = levelDefService.crateDefault()
+            skillDef.levelDefinitions = levelDefService.createDefault()
 
             res = skillDefRepo.save(skillDef)
             log.info("Created [{}]", res)
@@ -512,6 +522,14 @@ class AdminProjService {
         )
         res.numUsers = projDefRepo.calculateDistinctUsers(definition.projectId)
         res.numSkills = skillDefRepo.countByProjectIdAndType(definition.projectId, SkillDef.ContainerType.Skill)
+        SettingsResult result = settingsService.getSetting(definition.projectId, Settings.LEVEL_AS_POINTS.settingName)
+
+        if(result == null || result.value == "false"){
+            res.levelsArePoints = false
+        }else if(result?.value == "true"){
+            res.levelsArePoints = true
+        }
+
         res
     }
 

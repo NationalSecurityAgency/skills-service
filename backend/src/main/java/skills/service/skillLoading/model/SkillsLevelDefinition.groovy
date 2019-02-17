@@ -6,4 +6,8 @@ class SkillsLevelDefinition {
 
     Integer pointsFrom
     Integer pointsTo
+
+    String iconClass
+
+    String name
 }

@@ -49,21 +49,24 @@
 <script>
   import axios from 'axios';
   import NewLevel from './NewLevel';
+  import SettingService from '../settings/SettingsService';
 
   export default {
     name: 'Levels',
     props: ['projectId', 'subjectId'],
     data() {
       return {
+        levelsAsPoints: false,
         isLoading: true,
         serverErrors: [],
         levels: [],
-        levelsColumns: ['level', 'percent', 'pointsFrom', 'pointsTo', 'edit'],
+        levelsColumns: ['level', 'name', 'percent', 'pointsFrom', 'pointsTo', 'edit'],
         options: {
           filterable: false,
           footerHeadings: false,
           headings: {
             level: 'Level',
+            name: 'Name',
             percent: 'Percent',
             pointsFrom: 'From Points',
             pointsTo: 'To Points',
@@ -79,6 +82,34 @@
           skin: 'table is-striped is-fullwidth',
         },
       };
+    },
+    created() {
+      SettingService.getSetting(this.projectId, 'level.points.enabled').then((data) => {
+        if (data) {
+          const pointsEnabled = (data.value === true || data.value === 'true');
+          if (pointsEnabled) {
+            this.levelsAsPoints = true;
+            this.levelsColumns = ['level', 'name', 'pointsFrom', 'pointsTo', 'edit'];
+            this.options.headings = {
+              level: 'Level',
+              name: 'Name',
+              pointsFrom: 'From Points',
+              pointsTo: 'To Points',
+              edit: '',
+            };
+          } else {
+            this.levelsColumns = ['level', 'name', 'percent', 'pointsFrom', 'pointsTo', 'edit'];
+            this.options.headings = {
+              level: 'Level',
+              name: 'Name',
+              percent: 'Percent',
+              pointsFrom: 'From Points',
+              pointsTo: 'To Points',
+              edit: '',
+            };
+          }
+        }
+      });
     },
     mounted() {
       this.loadLevels();
@@ -134,19 +165,17 @@
           component: NewLevel,
           hasModalCard: true,
           props: {
-            project: { name: '', projectId: '' },
+            levelAsPoints: this.levelsAsPoints,
           },
           events: {
             'new-level': this.doCreateNewLevel,
           },
         });
       },
-      doCreateNewLevel(levelPercent) {
+      doCreateNewLevel(nextLevelObj) {
         this.loading = true;
         const url = `${this.getLevelsUrl()}/next`;
-        axios.put(url, {
-          percent: levelPercent,
-        })
+        axios.put(url, nextLevelObj)
           .then(() => {
             this.loadLevels();
           })

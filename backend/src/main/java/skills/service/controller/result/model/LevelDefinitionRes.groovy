@@ -6,8 +6,11 @@ class LevelDefinitionRes {
     String skillId
 
     int level
-    int percent
+    Integer percent
 
     Integer pointsFrom
     Integer pointsTo
+
+    String iconClass
+    String name
 }

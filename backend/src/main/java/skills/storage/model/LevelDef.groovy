@@ -2,6 +2,7 @@ package skills.storage.model
 
 import groovy.transform.ToString
 
+import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.FetchType
 import javax.persistence.GeneratedValue
@@ -21,13 +22,21 @@ class LevelDef implements Serializable{
     Integer id
 
     int level
-    int percent
+    Integer percent
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name="id", insertable = false, updatable = false)
     ProjDef projDef
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name="id", insertable = false, updatable = false)
     SkillDef skillDef
+
+    Integer pointsFrom
+    Integer pointsTo
+
+    @Column(name="logical_name")
+    String name
+
+    String iconClass
 }
