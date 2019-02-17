@@ -352,6 +352,21 @@ class AdminController {
         levelDefinitionStorageService.addNextLevel(projectId, nextLevelRequest, subjectId)
     }
 
+    //Need new methods to edit existing level methods for project and subject
+    @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/levels/edit/{levelId}", method = RequestMethod.PUT, produces = "application/json")
+    void editLevel(@PathVariable("projectId") String projectId,
+                   @PathVariable("subjectId") String subjectId,
+                   @PathVariable("levelId")   String levelId, @RequestBody EditLevelRequest editLevelRequest){
+        levelDefinitionStorageService.editLevel(projectId, editLevelRequest, levelId, subjectId)
+    }
+
+    //Need new methods to edit existing level methods for project and subject
+    @RequestMapping(value = "/projects/{projectId}/levels/edit/{levelId}", method = RequestMethod.PUT, produces = "application/json")
+    void editLevel(@PathVariable("projectId") String projectId,
+                   @PathVariable("levelId")   String levelId, @RequestBody EditLevelRequest editLevelRequest){
+        levelDefinitionStorageService.editLevel(projectId, editLevelRequest, levelId)
+    }
+
     @RequestMapping(value = "/projects/{projectId}/performedSkills/{userId}", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     @CompileStatic
