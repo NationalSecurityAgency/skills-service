@@ -6,10 +6,19 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.web.bind.annotation.*
 import skills.service.controller.request.model.*
+import skills.service.controller.result.model.BadgeResult
+import skills.service.controller.result.model.LevelDefinitionRes
+import skills.service.controller.result.model.ProjectResult
+import skills.service.controller.result.model.SettingsResult
+import skills.service.controller.result.model.SkillDefRes
+import skills.service.controller.result.model.SkillsGraphRes
+import skills.service.controller.result.model.SubjectResult
+import skills.service.controller.result.model.TableResult
 import skills.service.controller.result.model.*
 import skills.service.datastore.services.AdminProjService
 import skills.service.datastore.services.AdminUsersService
 import skills.service.datastore.services.LevelDefinitionStorageService
+import skills.service.datastore.services.settings.SettingsService
 import skills.service.datastore.services.UserAdminService
 import skills.storage.model.SkillDef
 
@@ -31,6 +40,9 @@ class AdminController {
 
     @Autowired
     UserAdminService userAdminService
+
+    @Autowired
+    SettingsService settingsService
 
     @RequestMapping(value = "/projects/{id}", method = RequestMethod.DELETE)
     void deleteProject(@PathVariable("id") String projectId) {
@@ -325,8 +337,7 @@ class AdminController {
 
     @RequestMapping(value = "/projects/{projectId}/levels/next", method = RequestMethod.PUT, produces = "application/json")
     void addNextLevel(@PathVariable("projectId") String projectId, @RequestBody NextLevelRequest nextLevelRequest) {
-        assert nextLevelRequest.percent
-        levelDefinitionStorageService.addNextLevel(projectId, nextLevelRequest.percent)
+        levelDefinitionStorageService.addNextLevel(projectId, nextLevelRequest)
     }
 
     @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/levels/last", method = RequestMethod.DELETE, produces = "application/json")
@@ -338,8 +349,7 @@ class AdminController {
     void addNextLevel(
             @PathVariable("projectId") String projectId,
             @PathVariable("subjectId") String subjectId, @RequestBody NextLevelRequest nextLevelRequest) {
-        assert nextLevelRequest.percent
-        levelDefinitionStorageService.addNextLevel(projectId, nextLevelRequest.percent, subjectId)
+        levelDefinitionStorageService.addNextLevel(projectId, nextLevelRequest, subjectId)
     }
 
     @RequestMapping(value = "/projects/{projectId}/performedSkills/{userId}", method = RequestMethod.GET, produces = "application/json")
@@ -472,6 +482,21 @@ class AdminController {
     @RequestMapping(value = "/projects/{projectId}/sharedWithMe", method = RequestMethod.GET, produces = "application/json")
     List<SharedSkillResult>  getSharedWithMeSkills(@PathVariable("projectId") String projectId) {
         return projectAdminStorageService.getSharedSkillsFromOtherProjects(projectId)
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/settings", method = RequestMethod.GET, produces = "application/json")
+    List<SettingsResult> getProjectSettings(@PathVariable("projectId") String projectId) {
+        return settingsService.loadSettingsForProject(projectId)
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/settings/{setting}", method = RequestMethod.GET, produces = "application/json")
+    SettingsResult getProjectSetting(@PathVariable("projectId") String projectId, @PathVariable("setting") String setting) {
+        return settingsService.getSetting(projectId, setting)
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/settings/{setting}", method = RequestMethod.POST)
+    SettingsResult saveProjectSetting(@PathVariable("projectId") String projectId, @PathVariable("setting") String setting, @RequestBody SettingsRequest value){
+        settingsService.saveSetting(value)
     }
 
 }

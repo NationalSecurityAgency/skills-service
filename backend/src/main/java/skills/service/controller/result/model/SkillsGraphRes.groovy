@@ -1,7 +1,5 @@
 package skills.service.controller.result.model
 
-import skills.service.controller.request.model.SkillDefRes
-
 class SkillsGraphRes {
     static class Edge {
         Integer fromId

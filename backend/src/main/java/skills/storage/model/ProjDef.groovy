@@ -40,4 +40,15 @@ class ProjDef implements Serializable {
     @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name="projRefId")
     List<CustomIcon> customIcons
+
+    public void addLevel(LevelDef level){
+        if (level == null) {
+            throw new IllegalArgumentException("cannot add null level")
+        }
+        if (level.getProjDef() != null) {
+            level.getProjDef().getLevelDefinitions().remove(level)
+        }
+        levelDefinitions.add(level)
+        level.setProjDef(this)
+    }
 }

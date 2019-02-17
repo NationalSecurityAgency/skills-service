@@ -5,8 +5,14 @@
     </header>
 
     <section class="modal-card-body">
-      <b-field label="Percent">
-        <b-input v-model="percent" required></b-input>
+      <b-field v-if="!this.levelAsPoints" label="Percent">
+        <b-input v-model="percentInternal" required></b-input>
+      </b-field>
+      <b-field v-else label="Points">
+        <b-input v-model="pointsInternal" required></b-input>
+      </b-field>
+      <b-field label="Name">
+        <b-input v-model="nameInternal"></b-input>
       </b-field>
     </section>
 
@@ -31,9 +37,18 @@
 <script>
   export default {
     name: 'NewLevel',
+    props: ['levelAsPoints', 'percent', 'points', 'name'],
+    data() {
+      return {
+        percentInternal: this.percent,
+        pointsInternal: this.points,
+        nameInternal: this.name,
+      };
+    },
     methods: {
       createNewLevel() {
-        this.$emit('new-level', this.percent);
+        console.log(`this.levelAsPoints: ${this.levelAsPoints}`);
+        this.$emit('new-level', { percent: this.percentInternal, points: this.pointsInternal, name: this.nameInternal });
         this.$parent.close();
       },
     },

@@ -57,6 +57,7 @@
           {name: 'Users', iconClass: 'fa-users'},
           {name: 'Stats', iconClass: 'fa-chart-bar'},
           {name: 'Access', iconClass: 'fa-shield-alt'},
+          {name: 'Settings', iconClass: 'fa-cogs'}
         ]">
         <template slot="Subjects">
           <section v-if="project.projectId" class="">
@@ -90,6 +91,11 @@
         <template slot="Cross Projects">
           <cross-projects-skills :project-id="project.projectId"></cross-projects-skills>
         </template>
+        <template slot="Settings">
+          <section v-if="project.projectId" class="">
+            <project-settings :project-id="project.projectId"/>
+          </section>
+        </template>
       </navigation>
     </section>
   </div>
@@ -108,11 +114,12 @@
   import LoadingContainer from '../utils/LoadingContainer';
   import ProjectStats from '../stats/ProjectStats';
   import FullDependencyGraph from '../skills/dependencies/FullDependencyGraph';
+  import ProjectSettings from './ProjectSettings';
   import CrossProjectsSkills from '../skills/crossProjects/CrossProjectsSkills';
 
   export default {
     name: 'ProjectPage',
-    components: { CrossProjectsSkills, FullDependencyGraph, ProjectStats, LoadingContainer, Navigation, Levels, Subjects, Badges, AccessSettings, MyProject, Users },
+    components: { ProjectSettings, CrossProjectsSkills, FullDependencyGraph, ProjectStats, LoadingContainer, Navigation, Levels, Subjects, Badges, AccessSettings, MyProject, Users },
     breadcrumb() {
       return {
         label: `PROJECT: ${this.$route.params.projectId}`,
