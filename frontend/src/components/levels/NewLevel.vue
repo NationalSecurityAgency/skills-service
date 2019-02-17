@@ -1,19 +1,45 @@
 <template>
   <div class="modal-card" style="width: auto">
     <header class="modal-card-head">
-      New Level
+      <icon-picker :startIcon="iconClassInternal"
+                   v-on:on-icon-selected="onSelectedIcons"
+                   custom-icon-height="24px"
+                   custom-icon-width="24px"></icon-picker>
+      <span v-if="isEdit" class="level-title">Edit Level</span>
+      <span v-else class="level-title">New Level</span>
     </header>
 
     <section class="modal-card-body">
-      <b-field v-if="!this.levelAsPoints" label="Percent">
-        <b-input v-model="percentInternal" required></b-input>
-      </b-field>
-      <b-field v-else label="Points">
-        <b-input v-model="pointsInternal" required></b-input>
-      </b-field>
-      <b-field label="Name">
-        <b-input v-model="nameInternal"></b-input>
-      </b-field>
+      <template v-if="isEdit">
+        <b-field label="Level">
+          <b-input v-model="levelInternal" type="number" min="0" required></b-input>
+        </b-field>
+        <b-field v-if="!this.levelAsPoints" label="Percent">
+          <b-input v-model="percentInternal" type="number" min="0" required></b-input>
+        </b-field>
+        <template v-else>
+          <b-field label="Points From">
+            <b-input v-model="pointsFromInternal" type="number" min="0" required></b-input>
+          </b-field>
+          <b-field label="Points To">
+            <b-input v-model="pointsToInternal" type="number" min="0" required></b-input>
+          </b-field>
+        </template>
+        <b-field label="Name">
+          <b-input v-model="nameInternal"></b-input>
+        </b-field>
+      </template>
+      <template v-else>
+        <b-field v-if="!this.levelAsPoints" label="Percent">
+          <b-input v-model="percentInternal" type="number" min="0" required></b-input>
+        </b-field>
+        <b-field v-else label="Points">
+          <b-input v-model="pointsInternal" type="number" min="0" required></b-input>
+        </b-field>
+        <b-field label="Name">
+          <b-input v-model="nameInternal"></b-input>
+        </b-field>
+      </template>
     </section>
 
     <footer class="modal-card-foot">
@@ -24,7 +50,7 @@
             </span>
       </button>
 
-      <button class="button is-primary is-outlined" v-on:click="createNewLevel">
+      <button class="button is-primary is-outlined" v-on:click="saveLevel">
         <span>Save</span>
         <span class="icon is-small">
               <i class="fas fa-arrow-circle-right"/>
@@ -35,26 +61,54 @@
 </template>
 
 <script>
+  import IconPicker from '../utils/iconPicker/IconPicker';
+
   export default {
     name: 'NewLevel',
-    props: ['levelAsPoints', 'percent', 'points', 'name'],
+    components: { IconPicker },
+    props: ['levelAsPoints', 'percent', 'points', 'pointsFrom', 'pointsTo', 'name', 'iconClass', 'isEdit', 'levelId', 'level'],
     data() {
       return {
         percentInternal: this.percent,
         pointsInternal: this.points,
         nameInternal: this.name,
+        iconClassInternal: this.iconClass,
+        pointsFromInternal: this.pointsFrom,
+        pointsToInternal: this.pointsTo,
+        levelInternal: this.level,
       };
     },
     methods: {
-      createNewLevel() {
-        console.log(`this.levelAsPoints: ${this.levelAsPoints}`);
-        this.$emit('new-level', { percent: this.percentInternal, points: this.pointsInternal, name: this.nameInternal });
+      saveLevel() {
+        if (this.isEdit === true) {
+          this.$emit('edited-level', {
+            percent: this.percentInternal,
+            pointsFrom: this.pointsFromInternal,
+            pointsTo: this.pointsToInternal,
+            name: this.nameInternal,
+            iconClass: this.iconClassInternal,
+            id: this.levelId,
+            level: this.levelInternal,
+          });
+        } else {
+          this.$emit('new-level', {
+            percent: this.percentInternal,
+            points: this.pointsInternal,
+            name: this.nameInternal,
+            iconClass: this.iconClassInternal,
+          });
+        }
         this.$parent.close();
+      },
+      onSelectedIcons(selectedIconCss) {
+        this.iconClassInternal = selectedIconCss;
       },
     },
   };
 </script>
 
 <style scoped>
-
+  .level-title{
+    padding-left: 1rem;
+  }
 </style>

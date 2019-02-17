@@ -1,6 +1,6 @@
 <template>
     <div class="icon-box has-text-centered has-text-info" v-on:click="selectIcon">
-      <div class="columns is-vcentered" style="height: 100%">
+      <div class="columns is-centered" style="height: 100%">
         <div class="column">
           <i
             :class="[selectedIconClass]"

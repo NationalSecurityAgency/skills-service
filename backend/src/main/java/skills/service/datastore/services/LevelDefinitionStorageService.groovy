@@ -3,11 +3,13 @@ package skills.service.datastore.services
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import groovy.util.logging.Slf4j
+import org.apache.commons.lang3.Validate
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Isolation
 import org.springframework.transaction.annotation.Transactional
 import skills.service.controller.exceptions.SkillException
+import skills.service.controller.request.model.EditLevelRequest
 import skills.service.controller.request.model.NextLevelRequest
 import skills.service.controller.result.model.LevelDefinitionRes
 import skills.service.controller.result.model.SettingsResult
@@ -156,6 +158,7 @@ class LevelDefinitionStorageService {
                 toPts = (i != levelScores.size() - 1) ? levelScores.get(i + 1) : null
             }
             finalRes << new LevelDefinitionRes(projectId: projectId,
+                    id: entry.id,
                     skillId: skillId,
                     level: entry.level,
                     percent: entry.percent,
@@ -221,6 +224,71 @@ class LevelDefinitionStorageService {
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
+    LevelDef editLevel(String projectId, EditLevelRequest editLevelRequest, String levelId, String skillId = null) {
+        SettingsResult setting = settingsService.getSetting(projectId, Settings.LEVEL_AS_POINTS.settingName)
+        boolean asPoints = false
+        if(setting?.isEnabled()){
+            asPoints = true
+            assert editLevelRequest?.pointsFrom > 0
+            Validate.isTrue(editLevelRequest.pointsTo >= 0)
+            Validate.isTrue(editLevelRequest.pointsTo >= 0)
+        }else {
+            Validate.isTrue(editLevelRequest.percent >= 0)
+        }
+        Validate.isTrue(editLevelRequest.level >= 0)
+
+        LevelDefRes existingDefinitions = getLevelDefs(projectId, skillId)
+        existingDefinitions.levels.sort({it.level})
+        LevelDef previous = null
+        int lastIdx = existingDefinitions.levels.size()-1
+        LevelDef toEdit = null
+
+        //validate that the edit doesn't break the consistency of the other levels.
+        for(int i=0; i < existingDefinitions.levels.size(); i++){
+            LevelDef current = existingDefinitions.levels.get(i)
+            if(current.id == editLevelRequest.id){
+                toEdit = current
+                if(previous != null){
+                    if(asPoints && editLevelRequest.pointsFrom < previous.pointsTo) {
+                        throw new SkillException("Edited Level's points from overlaps with previous level")
+                    }else if(editLevelRequest.percent <= previous.percent){
+                        throw new SkillException("Edited Level's percent overlaps with previous level")
+                    }
+                }
+
+                if(i != lastIdx){
+                    LevelDef next = existingDefinitions.levels.get(i+1)
+                    if(asPoints && editLevelRequest.pointsTo > next.pointsFrom){
+                        throw new SkillException("Edited Level's points to overlaps with next level")
+                    }else if(editLevelRequest.percent >= next.percent){
+                        throw new SkillException("Edited Level's percent overlaps with next level")
+                    }
+                }
+
+                break
+            }
+
+            previous = current
+        }
+
+        assert toEdit != null
+        if(asPoints){
+            toEdit.pointsFrom = editLevelRequest.pointsFrom
+            toEdit.pointsTo = editLevelRequest.pointsTo
+        }else{
+            toEdit.percent = editLevelRequest.percent
+        }
+
+        toEdit.level = editLevelRequest.level
+        toEdit.name = editLevelRequest.name
+        toEdit.iconClass = editLevelRequest.iconClass
+        toEdit = levelDefinitionRepository.save(toEdit)
+
+
+        return toEdit
+    }
+
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     LevelDef addNextLevel(String projectId, NextLevelRequest nextLevelRequest, String skillId = null) {
         SettingsResult setting = settingsService.getSetting(projectId, Settings.LEVEL_AS_POINTS.settingName)
 
@@ -243,7 +311,7 @@ class LevelDefinitionStorageService {
             SkillDef skill = null
             ProjDef project = null
             if(skillId) {
-                skill = skillDefRepo.findByProjectIdAndSkillId(projectId, skillId)
+                skill = skillDefRepo.findByProjectIdAndSkillIdAndType(projectId, skillId, SkillDef.ContainerType.Subject)
                 assert skill
             }else{
                 project = projDefRepo.findByProjectId(projectId)
@@ -262,7 +330,8 @@ class LevelDefinitionStorageService {
                     percent: nextLevelRequest.percent,
                     skillDef: skill,
                     name: nextLevelRequest.name,
-                    pointsFrom: nextLevelRequest.points
+                    pointsFrom: nextLevelRequest.points,
+                    iconClass: nextLevelRequest.iconClass
             )
 
             created = levelDefinitionRepository.save(created)
