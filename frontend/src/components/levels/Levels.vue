@@ -12,7 +12,7 @@
             </span>
         </a>
 
-        <a v-on:click="createNevLevel" class="button is-outlined is-info">
+        <a v-on:click="editLevel()" class="button is-outlined is-info">
           <span>Add Next Level</span>
           <span class="icon is-small">
               <i class="fas fa-plus-circle"/>
@@ -24,6 +24,11 @@
     <b-loading :is-full-page="false" :active.sync="isLoading" :can-cancel="false"></b-loading>
     <v-client-table v-if="levels && levels.length && !isLoading" :data="levels" :columns="levelsColumns"
                     :options="options">
+      <span slot="iconClass" slot-scope="props">
+        <div class="">
+            <i class="has-text-info subject-icon skills-icon level-icon" v-bind:class="`${props.row.iconClass}`"></i>
+          </div>
+      </span>
       <span slot="pointsFrom" slot-scope="props">
         <span v-if="props.row.pointsFrom !== null">{{ props.row.pointsFrom | number }}</span>
         <span v-else>N/A - Please create more rules first</span>
@@ -35,7 +40,7 @@
       </span>
 
       <div slot="edit" slot-scope="props" class="">
-        <a class="button is-outlined is-info">
+        <a v-on:click="editLevel(props.row)" class="button is-outlined is-info">
                   <span class="icon is-small">
                     <i class="fas fa-edit"/>
                   </span>
@@ -49,25 +54,29 @@
 <script>
   import axios from 'axios';
   import NewLevel from './NewLevel';
+  import SettingService from '../settings/SettingsService';
 
   export default {
     name: 'Levels',
     props: ['projectId', 'subjectId'],
     data() {
       return {
+        levelsAsPoints: false,
         isLoading: true,
         serverErrors: [],
         levels: [],
-        levelsColumns: ['level', 'percent', 'pointsFrom', 'pointsTo', 'edit'],
+        levelsColumns: ['iconClass', 'level', 'name', 'percent', 'pointsFrom', 'pointsTo', 'edit'],
         options: {
           filterable: false,
           footerHeadings: false,
           headings: {
             level: 'Level',
+            name: 'Name',
             percent: 'Percent',
             pointsFrom: 'From Points',
             pointsTo: 'To Points',
             edit: '',
+            iconClass: '',
           },
           columnsClasses: {
             edit: 'control-column',
@@ -79,6 +88,36 @@
           skin: 'table is-striped is-fullwidth',
         },
       };
+    },
+    created() {
+      SettingService.getSetting(this.projectId, 'level.points.enabled').then((data) => {
+        if (data) {
+          const pointsEnabled = (data.value === true || data.value === 'true');
+          if (pointsEnabled) {
+            this.levelsAsPoints = true;
+            this.levelsColumns = ['iconClass', 'level', 'name', 'pointsFrom', 'pointsTo', 'edit'];
+            this.options.headings = {
+              level: 'Level',
+              name: 'Name',
+              pointsFrom: 'From Points',
+              pointsTo: 'To Points',
+              edit: '',
+              iconClass: '',
+            };
+          } else {
+            this.levelsColumns = ['iconClass', 'level', 'name', 'percent', 'pointsFrom', 'pointsTo', 'edit'];
+            this.options.headings = {
+              level: 'Level',
+              name: 'Name',
+              percent: 'Percent',
+              pointsFrom: 'From Points',
+              pointsTo: 'To Points',
+              edit: '',
+              iconClass: '',
+            };
+          }
+        }
+      });
     },
     mounted() {
       this.loadLevels();
@@ -128,25 +167,54 @@
             this.serverErrors.push(e);
         });
       },
-      createNevLevel() {
+      editLevel(existingLevel) {
+        let editProps = null;
+
+        if (existingLevel) {
+          editProps = {
+            isEdit: true,
+            percent: existingLevel.percent,
+            pointsFrom: existingLevel.pointsFrom,
+            pointsTo: existingLevel.pointsTo,
+            name: existingLevel.name,
+            iconClass: existingLevel.iconClass,
+            level: existingLevel.level,
+            levelId: existingLevel.id,
+          };
+        } else {
+          editProps = {
+            levelAsPoints: this.levelsAsPoints,
+            iconClass: 'fas fa-arrow-circle-up',
+            isEdit: false,
+          };
+        }
+
         this.$modal.open({
           parent: this,
           component: NewLevel,
           hasModalCard: true,
-          props: {
-            project: { name: '', projectId: '' },
-          },
+          props: editProps,
           events: {
             'new-level': this.doCreateNewLevel,
+            'edited-level': this.doEditLevel,
           },
         });
       },
-      doCreateNewLevel(levelPercent) {
+      doCreateNewLevel(nextLevelObj) {
         this.loading = true;
         const url = `${this.getLevelsUrl()}/next`;
-        axios.put(url, {
-          percent: levelPercent,
-        })
+        axios.put(url, nextLevelObj)
+          .then(() => {
+            this.loadLevels();
+          })
+          .catch((e) => {
+            this.serverErrors.push(e);
+        });
+      },
+      doEditLevel(editedLevelObj) {
+        this.loading = true;
+        const url = `${this.getLevelsUrl()}/edit/${editedLevelObj.id}`;
+        axios.put(url, editedLevelObj)
           .then(() => {
             this.loadLevels();
           })
@@ -162,6 +230,12 @@
   .control-column{
     width: 4rem;
     /*background: yellow;*/
+  }
+
+  .level-icon {
+    font-size: 1.5rem;
+    height: 24px;
+    width: 24px;
   }
 </style>
 

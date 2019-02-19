@@ -4,5 +4,8 @@ import groovy.transform.Canonical
 
 @Canonical
 class NextLevelRequest {
-    int percent
+    Integer percent = null
+    Integer points = null
+    String name
+    String iconClass
 }

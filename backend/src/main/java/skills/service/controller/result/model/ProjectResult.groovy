@@ -12,4 +12,6 @@ class ProjectResult extends SimpleProjectResult{
 
     boolean isFirst
     boolean isLast
+
+    boolean levelsArePoints
 }
