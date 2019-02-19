@@ -95,6 +95,6 @@ class UserInfoController {
 
     @RequestMapping(value="/users/validExistingUserId/{userId}", method =  RequestMethod.GET, produces = "application/json")
     Boolean isValidExistingPortalUserId(@PathVariable("userId") String userId){
-        return userRepo.findByUserId(userId)
+        return userRepo.findByUserId(userId) != null
     }
 }

@@ -25,7 +25,7 @@ class SecurityConfiguration {
             http
                     .cors().and().csrf().disable()
                     .authorizeRequests()
-                    .antMatchers("/", "/icons/**", "/static/**", "/login*", "/performLogin", "/createAccount", "/app/userInfo", "/oauth/**", "/app/oAuthProviders", "index.html").permitAll()
+                    .antMatchers("/", "/icons/**", "/static/**", "/login*", "/performLogin", "/createAccount", "/app/userInfo", "/app/users/validExistingUserId/*", "/oauth/**", "/app/oAuthProviders", "index.html").permitAll()
                     .antMatchers('/admin/**').hasRole('PROJECT_ADMIN')
                     .anyRequest().authenticated()
             return http
