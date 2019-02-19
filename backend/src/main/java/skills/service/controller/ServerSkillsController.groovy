@@ -5,8 +5,10 @@ import groovy.util.logging.Slf4j
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.web.bind.annotation.*
+import skills.service.auth.AuthMode
 import skills.service.auth.UserInfoService
 import skills.service.controller.exceptions.SkillException
 import skills.service.controller.request.model.AddSkillRequest
@@ -33,6 +35,9 @@ class ServerSkillsController {
     @Autowired
     UserDetailsService userDetailsService
 
+    @Value('#{securityConfig.authMode}}')
+    AuthMode authMode = AuthMode.DEFAULT_AUTH_MODE
+
     @RequestMapping(value = "/projects/{projectId}/skills/{skillId}", method = RequestMethod.POST, produces = "application/json")
     @ResponseBody
     def addSkill(
@@ -53,12 +58,10 @@ class ServerSkillsController {
     private String lookupUserId(String userId) {
         String retVal
         if (userId) {
-            if (userAdminService.isValidExistingUserId(userId)) {
+            if (authMode == AuthMode.FORM) {
                 retVal = userId
             } else {
-                // TODO - fix me, check if PKI authMode, and if so lookup user,
-                // otherwise just add the skill for the passed in userId
-                throw new RuntimeException("Unknown user")
+                // we are in PKI auth mode so we need to lookup the user to convert from DN to username
                 retVal = userDetailsService.loadUserByUsername(userId).username
             }
         } else {
