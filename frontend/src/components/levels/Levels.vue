@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div id="level-def-panel">
     <div class="columns">
       <div class="column">
         <div class="title">Level Defintions</div>
@@ -21,33 +21,35 @@
       </div>
     </div>
 
-    <b-loading :is-full-page="false" :active.sync="isLoading" :can-cancel="false"></b-loading>
-    <v-client-table v-if="levels && levels.length && !isLoading" :data="levels" :columns="levelsColumns"
-                    :options="options">
-      <span slot="iconClass" slot-scope="props">
-        <div class="">
-            <i class="has-text-info subject-icon skills-icon level-icon" v-bind:class="`${props.row.iconClass}`"></i>
-          </div>
-      </span>
-      <span slot="pointsFrom" slot-scope="props">
-        <span v-if="props.row.pointsFrom !== null">{{ props.row.pointsFrom | number }}</span>
-        <span v-else>N/A - Please create more rules first</span>
-      </span>
-      <span slot="pointsTo" slot-scope="props">
-        <span v-if="props.row.pointsTo">{{props.row.pointsTo | number}}</span>
-        <span v-else-if="!props.row.pointsFrom">N/A - Please create more rules first</span>
-        <span v-else><i class="fas fa-infinity"/></span>
-      </span>
+    <div class="skills-bordered-component">
+      <b-loading :is-full-page="false" :active.sync="isLoading" :can-cancel="false"></b-loading>
+      <v-client-table v-if="levels && levels.length && !isLoading" :data="levels" :columns="levelsColumns"
+                      :options="options">
+        <span slot="iconClass" slot-scope="props">
+          <div class="">
+              <i class="has-text-info subject-icon skills-icon level-icon" v-bind:class="`${props.row.iconClass}`"></i>
+            </div>
+        </span>
+        <span slot="pointsFrom" slot-scope="props">
+          <span v-if="props.row.pointsFrom !== null">{{ props.row.pointsFrom | number }}</span>
+          <span v-else>N/A - Please create more rules first</span>
+        </span>
+        <span slot="pointsTo" slot-scope="props">
+          <span v-if="props.row.pointsTo">{{props.row.pointsTo | number}}</span>
+          <span v-else-if="!props.row.pointsFrom">N/A - Please create more rules first</span>
+          <span v-else><i class="fas fa-infinity"/></span>
+        </span>
 
-      <div slot="edit" slot-scope="props" class="">
-        <a v-on:click="editLevel(props.row)" class="button is-outlined is-info">
-                  <span class="icon is-small">
-                    <i class="fas fa-edit"/>
-                  </span>
-          <span>Edit</span>
-        </a>
-      </div>
-    </v-client-table>
+        <div slot="edit" slot-scope="props" class="">
+          <a v-on:click="editLevel(props.row)" class="button is-outlined is-info">
+                    <span class="icon is-small">
+                      <i class="fas fa-edit"/>
+                    </span>
+            <span>Edit</span>
+          </a>
+        </div>
+      </v-client-table>
+    </div>
   </div>
 </template>
 
@@ -81,7 +83,7 @@
           columnsClasses: {
             edit: 'control-column',
           },
-          sortable: ['skillId', 'name', 'pointIncrement', 'totalPoints'],
+          sortable: [],
           sortIcon: {
             base: 'fa fa-sort', up: 'fa fa-sort-up', down: 'fa fa-sort-down', is: 'fa fa-sort',
           },
@@ -227,18 +229,25 @@
 </script>
 
 <style>
-  .control-column{
+  #level-def-panel .control-column{
     width: 4rem;
     /*background: yellow;*/
   }
 
-  .level-icon {
+  #level-def-panel .level-icon {
     font-size: 1.5rem;
     height: 24px;
     width: 24px;
   }
+
+  #level-def-panel .VuePagination__count {
+    display: none;
+  }
+
+
 </style>
 
 <style scoped>
 
 </style>
+
