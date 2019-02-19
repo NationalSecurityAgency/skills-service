@@ -1,5 +1,5 @@
 <template>
-  <div class="modal-card" style="width: auto">
+  <div class="modal-card" style="width:400px">
     <header class="modal-card-head">
       <icon-picker :startIcon="iconClassInternal"
                    v-on:on-icon-selected="onSelectedIcons"
@@ -11,33 +11,41 @@
 
     <section class="modal-card-body">
       <template v-if="isEdit">
-        <b-field label="Level">
-          <b-input v-model="levelInternal" type="number" min="0" required></b-input>
+        <b-field label="Level" :type="{'help is-danger': errors.has('level')}"
+                 :message="errors.first('level')">
+          <b-input v-model="levelInternal" name="level" v-validate="'required|min:0|max:100|numeric'"></b-input>
         </b-field>
-        <b-field v-if="!this.levelAsPoints" label="Percent">
-          <b-input v-model="percentInternal" type="number" min="0" required></b-input>
+        <b-field v-if="!this.levelAsPoints" label="Percent" :type="{'help is-danger': errors.has('percent')}"
+                 :message="errors.first('percent')">
+          <b-input v-model="percentInternal" name="percent" v-validate="'required|min:0|max:100|numeric'"></b-input>
         </b-field>
         <template v-else>
-          <b-field label="Points From">
-            <b-input v-model="pointsFromInternal" type="number" min="0" required></b-input>
+          <b-field label="Points From" :type="{'help is-danger': errors.has('pointsFrom')}"
+                   :message="errors.first('pointsFrom')">
+            <b-input v-model="pointsFromInternal" name="pointsFrom" v-validate="'required|min:0|numeric'"></b-input>
           </b-field>
-          <b-field label="Points To">
-            <b-input v-model="pointsToInternal" type="number" min="0" required></b-input>
+          <b-field label="Points To" :type="{'help is-danger': errors.has('pointsTo')}"
+                   :message="errors.first('pointsTo')">
+            <b-input v-model="pointsToInternal" name="pointsTo" v-validate="'required|min:0|numeric'"></b-input>
           </b-field>
         </template>
-        <b-field label="Name">
-          <b-input v-model="nameInternal"></b-input>
+        <b-field label="Name" :type="{'help is-danger': errors.has('name')}"
+                 :message="errors.first('name')">
+          <b-input v-model="nameInternal" name="name"></b-input>
         </b-field>
       </template>
       <template v-else>
-        <b-field v-if="!this.levelAsPoints" label="Percent">
-          <b-input v-model="percentInternal" type="number" min="0" required></b-input>
+        <b-field v-if="!this.levelAsPoints" label="Percent" :type="{'help is-danger': errors.has('percent')}"
+                 :message="errors.first('percent')">
+          <b-input v-model="percentInternal" name="percent" v-validate="'required|min:0|max:100|numeric'"></b-input>
         </b-field>
-        <b-field v-else label="Points">
-          <b-input v-model="pointsInternal" type="number" min="0" required></b-input>
+        <b-field v-else label="Points" :type="{'help is-danger': errors.has('points')}"
+                 :message="errors.first('points')">
+          <b-input v-model="pointsInternal" name="points" v-validate="'required|min:0|numeric'"></b-input>
         </b-field>
-        <b-field label="Name">
-          <b-input v-model="nameInternal"></b-input>
+        <b-field label="Name" :type="{'help is-danger': errors.has('name')}"
+                 :message="errors.first('name')">
+          <b-input v-model="nameInternal" name="name"></b-input>
         </b-field>
       </template>
     </section>
@@ -50,7 +58,7 @@
             </span>
       </button>
 
-      <button class="button is-primary is-outlined" v-on:click="saveLevel">
+      <button class="button is-primary is-outlined" v-on:click="saveLevel" :disabled="errors.any()">
         <span>Save</span>
         <span class="icon is-small">
               <i class="fas fa-arrow-circle-right"/>
@@ -61,6 +69,7 @@
 </template>
 
 <script>
+  import { Validator } from 'vee-validate';
   import IconPicker from '../utils/iconPicker/IconPicker';
 
   export default {
@@ -78,27 +87,46 @@
         levelInternal: this.level,
       };
     },
+    created() {
+      const dictionary = {
+        en: {
+          attributes: {
+            percent: 'Percent',
+            points: 'Points',
+            pointsFrom: 'Points From',
+            pointsTo: 'Points To',
+            name: 'Name',
+            level: 'Level',
+          },
+        },
+      };
+      Validator.localize(dictionary);
+    },
     methods: {
       saveLevel() {
-        if (this.isEdit === true) {
-          this.$emit('edited-level', {
-            percent: this.percentInternal,
-            pointsFrom: this.pointsFromInternal,
-            pointsTo: this.pointsToInternal,
-            name: this.nameInternal,
-            iconClass: this.iconClassInternal,
-            id: this.levelId,
-            level: this.levelInternal,
-          });
-        } else {
-          this.$emit('new-level', {
-            percent: this.percentInternal,
-            points: this.pointsInternal,
-            name: this.nameInternal,
-            iconClass: this.iconClassInternal,
-          });
-        }
-        this.$parent.close();
+        this.$validator.validateAll().then((res) => {
+          if (res) {
+            if (this.isEdit === true) {
+              this.$emit('edited-level', {
+                percent: this.percentInternal,
+                pointsFrom: this.pointsFromInternal,
+                pointsTo: this.pointsToInternal,
+                name: this.nameInternal,
+                iconClass: this.iconClassInternal,
+                id: this.levelId,
+                level: this.levelInternal,
+              });
+            } else {
+              this.$emit('new-level', {
+                percent: this.percentInternal,
+                points: this.pointsInternal,
+                name: this.nameInternal,
+                iconClass: this.iconClassInternal,
+              });
+            }
+            this.$parent.close();
+          }
+        });
       },
       onSelectedIcons(selectedIconCss) {
         this.iconClassInternal = selectedIconCss;
