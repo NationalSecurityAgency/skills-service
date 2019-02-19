@@ -17,15 +17,15 @@
                         <i v-if="props.option.otherProjectId" class="fas fa-w-16 fa-handshake"></i>
                         <i v-else class="fas fa-w-16 fa-list-alt"></i>
                       </div>
-                      <div class="column skills-handle-overflow" style="width:45%;" :title="props.option.name">
+                      <div class="column skills-handle-overflow" style="width:30%;" :title="props.option.name">
                         <span class="selector-skill-name">
                           <span v-if="props.option.otherProjectId" class="has-text-weight-bold">{{props.option.otherProjectName}} : </span>
                           {{ props.option.name }}</span>
                       </div>
-                      <div class="column is-one-fifth skills-handle-overflow" style="width:30%;" :title="props.option.skillId">
+                      <div class="column is-one-fifth skills-handle-overflow" style="width:20%;" :title="props.option.skillId">
                         <span class="selector-other-label">ID:</span> <span class="selector-other-value">{{props.option.skillId}}</span>
                       </div>
-                      <div class="column is-one-fifth" style="width:20%;">
+                      <div class="column is-one-fifth" style="width:15%;">
                         <span v-if="props.option.otherProjectId" class="has-text-warning">** Shared Skill **</span>
                         <span v-else>
                           <span class="selector-other-label">Total Points:</span> <span class="selector-other-value">{{ props.option.totalPoints}}</span>
