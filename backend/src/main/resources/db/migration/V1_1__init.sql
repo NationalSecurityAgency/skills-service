@@ -113,7 +113,7 @@ create table skills.level_definition
 	skill_id int,
 
 	level int not null,
-	percent int not null,
+	percent int,
 
 	INDEX (project_id),
 	INDEX (skill_id),
@@ -122,7 +122,12 @@ create table skills.level_definition
 	FOREIGN KEY (project_id) REFERENCES skills.project_definition(id) ON DELETE CASCADE ON UPDATE CASCADE,
 
 	created DATETIME default CURRENT_TIMESTAMP,
-  updated DATETIME default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP
+  updated DATETIME default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+  custom_icon_id int,
+  icon_class varchar(255),
+  logical_name varchar(255),
+  points_from int,
+  points_to int
 ) engine=InnoDB;
 
 create table skills.users
@@ -257,4 +262,26 @@ create table skills.allowed_origins
 
 	created DATETIME default CURRENT_TIMESTAMP,
 	updated DATETIME default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP
+) engine=InnoDB;
+
+create table skills.settings
+(
+  id int not null AUTO_INCREMENT PRIMARY KEY,
+  setting varchar(255) not null,
+  value varchar(255) not null,
+  project_id varchar(255) not null,
+
+  setting_group varchar(255),
+
+  INDEX (project_id),
+  INDEX (setting_group),
+  INDEX (setting),
+  INDEX (project_id, setting),
+  INDEX (project_id, setting_group),
+
+  UNIQUE(project_id, setting),
+  FOREIGN KEY (project_id) REFERENCES skills.project_definition(project_id) ON DELETE CASCADE ON UPDATE CASCADE,
+
+  created DATETIME default CURRENT_TIMESTAMP,
+  updated DATETIME default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP
 ) engine=InnoDB;
