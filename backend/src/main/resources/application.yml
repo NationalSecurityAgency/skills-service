@@ -26,7 +26,7 @@ spring:
           github:
             client-id: ***REMOVED***
             client-secret: ***REMOVED***
-            redirectUriTemplate: 'http://localhost:8082/{action}/oauth2/code/{registrationId}'
+            redirectUriTemplate: 'http://localhost:8080/{action}/oauth2/code/{registrationId}'
             iconClass: fab fa-github
 
   profiles:

@@ -56,13 +56,13 @@ class FormSecurityConfiguration extends WebSecurityConfigurerAdapter {
         http
                 .addFilter(securityContextPersistenceFilter())
                 .formLogin()
-                .loginPage("/")
-                .loginProcessingUrl("/performLogin")
-                .failureHandler(new SimpleUrlAuthenticationFailureHandler())
+                    .loginPage("/")
+                    .loginProcessingUrl("/performLogin")
+                    .failureHandler(new SimpleUrlAuthenticationFailureHandler())
                 .and()
                 .oauth2Login()
-                .loginPage("/")
-                .failureHandler(new SimpleUrlAuthenticationFailureHandler())
+                    .loginPage("/")
+                    .failureHandler(new SimpleUrlAuthenticationFailureHandler())
                 .and().logout()
     }
 
