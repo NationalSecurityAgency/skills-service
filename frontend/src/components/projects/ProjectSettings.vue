@@ -24,7 +24,7 @@
 
       <div class="columns skills-pad-top-1-rem">
         <div class="column">
-          <a class="button is-outlined is-info" v-on:click="save"
+          <a class="button is-outlined is-success" v-on:click="save"
              :disabled="errors.any()">
             <span>Save</span>
             <span class="icon is-small">

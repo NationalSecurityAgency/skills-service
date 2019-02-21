@@ -8,8 +8,6 @@ import VeeValidate from 'vee-validate';
 import VueApexCharts from 'vue-apexcharts';
 import Vuex from 'vuex';
 import 'babel-polyfill';
-import 'buefy/dist/buefy.css';
-import 'animate.css/animate.css';
 import './filters/NumberFilter';
 import './filters/TruncateFilter';
 import App from './App';
