@@ -53,7 +53,6 @@
 </script>
 
 <style scoped>
-  /** THESE CAN BE TAKEN OUT AFTER SASS BASED CUSTOMIZATION **/
 
   i {
     width: 2rem;
@@ -62,11 +61,6 @@
   li {
     margin-bottom: 0.75rem;
     font-size: 1.1rem;
-
-  }
-
-  a {
-    color: #3273dc;
   }
 
 </style>

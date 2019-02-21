@@ -1,0 +1,38 @@
+@charset "utf-8";
+
+// Import Bulma's core
+@import "../../node_modules/bulma/sass/utilities/_all";
+
+@import "./palette.scss";
+
+// Set your colors
+$primary: $blue-palette-color1;
+$link: $blue-palette-color5;
+$info: $blue-palette-color2;
+$success: $green-palette-color2;
+
+// Setup $colors to use as bulma classes (e.g. 'is-twitter')
+$colors: (
+  "white": ($white, $black),
+  "black": ($black, $white),
+  "light": ($light, $light-invert),
+  "dark": ($dark, $dark-invert),
+  "primary": ($primary, $primary-invert),
+  "info": ($info, $info-invert),
+  "success": ($success, $success-invert),
+  "warning": ($warning, $warning-invert),
+  "danger": ($danger, $danger-invert),
+  //"twitter": ($twitter, $twitter-invert)
+);
+
+// Update some of Bulma's component variables
+//$control-border-width: 2px;
+$menu-item-active-background-color: $blue-palette-color3;
+$body-background-color: $background-color1;
+$menu-item-hover-background-color: $blue-palette-color4;
+$menu-item-hover-color: $background-color2;
+
+
+// Import Bulma and Buefy styles
+@import "../../node_modules/bulma";
+@import "../../node_modules/buefy/src/scss/buefy";

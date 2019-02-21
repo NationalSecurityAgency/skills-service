@@ -5,7 +5,7 @@
         <div class="subtitle">User/Role Settings</div>
       </div>
       <div class="column has-text-right">
-        <a v-on:click="newUser" class="button is-outlined is-info">
+        <a v-on:click="newUser" class="button is-outlined is-success">
           <span>Add New User</span>
           <span class="icon is-small">
             <i class="fas fa-plus-circle"/>
@@ -27,7 +27,7 @@
               <!--</a>-->
             <!--</p>-->
             <p class="control">
-              <a v-on:click="deleteUserRole(props.row)" class="button">
+              <a v-on:click="deleteUserRole(props.row)" class="button is-outlined">
               <span class="icon is-small">
                 <i class="fas fa-trash"/>
               </span>

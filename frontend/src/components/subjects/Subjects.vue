@@ -5,7 +5,7 @@
         <div class="title">Subjects</div>
       </div>
       <div class="column has-text-right">
-        <a v-on:click="newSubject" class="button is-outlined is-info">
+        <a v-on:click="newSubject" class="button is-outlined is-success">
           <span>Add New Subject</span>
           <span class="icon is-small">
               <i class="fas fa-plus-circle"/>
@@ -32,7 +32,7 @@
               Create your subject today by pressing
             </p>
             <p class="has-text-centered">
-              <a v-on:click="newSubject" class="button is-outlined is-info">
+              <a v-on:click="newSubject" class="button is-outlined is-success">
                 <span>Add New Subject</span>
                 <span class="icon is-small">
               <i class="fas fa-plus-circle"/>

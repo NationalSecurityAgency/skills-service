@@ -5,7 +5,7 @@
         <div class="subtitle">CORS Settings</div>
       </div>
       <div class="column has-text-right">
-        <a v-on:click="newAllowedOrigin" class="button is-outlined is-info">
+        <a v-on:click="newAllowedOrigin" class="button is-outlined is-success">
           <span>Add New Origin</span>
           <span class="icon is-small">
             <i class="fas fa-plus-circle"/>

@@ -1,7 +1,7 @@
 <template>
   <div>
-    <a v-on:click="newSkill(false)" class="button is-outlined is-info">
-      <span>Skill</span>
+    <a v-on:click="newSkill(false)" class="button is-outlined is-success">
+      <span>New Skill</span>
       <span class="icon is-small">
             <i class="fas fa-plus-circle"/>
       </span>

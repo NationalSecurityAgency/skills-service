@@ -5,7 +5,7 @@
         <div class="title">Badges</div>
       </div>
       <div class="column has-text-right">
-        <a v-on:click="newBadge" class="button is-outlined is-info">
+        <a v-on:click="newBadge" class="button is-outlined is-success">
           <span>Add New Badge</span>
           <span class="icon is-small">
               <i class="fas fa-plus-circle"/>
@@ -36,7 +36,7 @@
               Create your first badge today by pressing
             </p>
             <p class="has-text-centered">
-              <a v-on:click="newBadge" class="button is-outlined is-info">
+              <a v-on:click="newBadge" class="button is-outlined is-success">
                 <span>Add New Badge</span>
                 <span class="icon is-small">
               <i class="fas fa-plus-circle"/>
