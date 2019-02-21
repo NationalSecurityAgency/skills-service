@@ -10,11 +10,14 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.R
 import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices
 import org.springframework.security.oauth2.provider.token.TokenStore
+import org.springframework.security.web.access.intercept.FilterSecurityInterceptor
+import org.springframework.security.web.context.SecurityContextPersistenceFilter
 import org.springframework.security.web.util.matcher.RequestMatcher
 
 import javax.servlet.http.HttpServletRequest
 
-import static skills.service.auth.SecurityConfiguration.*
+import static skills.service.auth.SecurityConfiguration.FormAuth
+import static skills.service.auth.SecurityConfiguration.PortalWebSecurityHelper
 
 @Conditional(FormAuth)
 @Configuration
@@ -35,6 +38,9 @@ class ResourceServerConfig extends ResourceServerConfigurerAdapter {
     @Autowired
     PortalWebSecurityHelper portalWebSecurityHelper
 
+    @Autowired
+    SecurityContextPersistenceFilter securityContextPersistenceFilter
+
     // To allow the ResourceServerConfigurerAdapter to understand the token,
     // it must share the same characteristics with AuthorizationServerConfigurerAdapter.
     // So, we must wire it up the beans in the ResourceServerSecurityConfigurer.
@@ -48,8 +54,11 @@ class ResourceServerConfig extends ResourceServerConfigurerAdapter {
 
     @Override
     void configure(HttpSecurity http) throws Exception {
-        portalWebSecurityHelper.configureHttpSecurity(http.requestMatcher(new OAuthRequestedMatcher()))
-//        portalWebSecurityHelper.configureHttpSecurity(http)
+        portalWebSecurityHelper.configureHttpSecurity(
+                http
+                        .requestMatcher(new OAuthRequestedMatcher())
+                        .addFilterBefore(securityContextPersistenceFilter, FilterSecurityInterceptor)
+        )
     }
 
     private static class OAuthRequestedMatcher implements RequestMatcher {
