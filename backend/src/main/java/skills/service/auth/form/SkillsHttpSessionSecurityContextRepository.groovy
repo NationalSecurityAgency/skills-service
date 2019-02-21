@@ -44,53 +44,60 @@ class SkillsHttpSessionSecurityContextRepository extends HttpSessionSecurityCont
         // Let the parent class actually get the SecurityContext from the HTTPSession first.
         SecurityContext context = super.loadContext(requestResponseHolder)
 
+        boolean loadedFromSession = true
         Authentication auth = context.getAuthentication()
-        if (!em.isJoinedToTransaction()) {
-            em.joinTransaction()
+        if (!auth) {
+            // if the Authentication is not available from the HTTP session, then this is the
+            // initial request but this session.  See if the Authentication object was made
+            //  available in the SecurityContextHolder by an Authentication filter
+            auth = SecurityContextHolder.getContext().getAuthentication()
+            loadedFromSession = false
         }
+        if (auth) {
+            if (!em.isJoinedToTransaction()) {
+                em.joinTransaction()
+            }
 
-//        Authentication auth = SecurityContextHolder.getContext().getAuthentication()
-        if (auth instanceof OAuth2Authentication) {
-            // OAuth2Authentication is used when then the OAuth2 client uses the client_credentials grant_type we
-            // look for a custom "proxy_user" field where the trusted client must specify the skills user that the
-            // request is being performed on behalf of.  The proxy_user field is required for client_credentials grant_type
-            OAuth2AuthenticationDetails oauthDetails = (OAuth2AuthenticationDetails) auth.getDetails()
-            Map claims = oauthDetails.getDecodedDetails()
-            if (claims && claims.containsKey('proxy-user')) {
-                String proxyUserId = claims.get('proxy-user')
-                if (!proxyUserId) {
-                    throw new SkillsAuthorizationException("client_credentials grant_type must specify proxy-user field for ")
+            if (auth instanceof OAuth2Authentication) {
+                // OAuth2Authentication is used when then the OAuth2 client uses the client_credentials grant_type we
+                // look for a custom "proxy_user" field where the trusted client must specify the skills user that the
+                // request is being performed on behalf of.  The proxy_user field is required for client_credentials grant_type
+                OAuth2AuthenticationDetails oauthDetails = (OAuth2AuthenticationDetails) auth.getDetails()
+                Map claims = oauthDetails.getDecodedDetails()
+                if (claims && claims.containsKey('proxy-user')) {
+                    String proxyUserId = claims.get('proxy-user')
+                    if (!proxyUserId) {
+                        throw new SkillsAuthorizationException("client_credentials grant_type must specify proxy-user field for ")
+                    }
+                    log.info("Loading proxyUser [${proxyUserId}]")
+                    UserInfo currentUser = new UserInfo(
+                            username: proxyUserId,
+                            proxied: true,
+                            proxyingSystemId: auth.principal
+                    )
+                    // Create new Authentication using UserInfo
+                    auth = new UsernamePasswordAuthenticationToken(currentUser, null, currentUser.authorities)
                 }
-                log.info("Loading proxyUser [${proxyUserId}]")
-                UserInfo currentUser = new UserInfo(
-                        username: proxyUserId,
-                        proxied: true,
-                        proxyingSystemId: auth.principal
-                )
+            } else if (auth && auth instanceof OAuth2AuthenticationToken && auth.principal instanceof OAuth2User) {
+                String clientId = auth.authorizedClientRegistrationId
+                OAuth2User oAuth2User = auth.principal
+                // convert to UserInfo using configured converter for registrationId (fail if none available)
+                UserInfo currentUser = userConverter.convert(clientId, oAuth2User)
+
+                // also create/update the UserInfo in the database.
+                currentUser = userAuthService.createOrUpdateUser(currentUser)
+
                 // Create new Authentication using UserInfo
                 auth = new UsernamePasswordAuthenticationToken(currentUser, null, currentUser.authorities)
+            } else if (auth && auth.principal instanceof UserInfo && loadedFromSession) {
+                // reload the granted_authorities for this skills user
+                UserInfo userInfo = auth.principal
+                userInfo.authorities = userAuthService.loadAuthorities(userInfo.username)
+                auth = new UsernamePasswordAuthenticationToken(userInfo, auth.credentials, userInfo.authorities)
             }
-        } else if (auth && auth instanceof OAuth2AuthenticationToken && auth.principal instanceof OAuth2User) {
-            String clientId = auth.authorizedClientRegistrationId
-            OAuth2User oAuth2User = auth.principal
-            // convert to UserInfo using configured converter for registrationId (fail if none available)
-            UserInfo currentUser = userConverter.convert(clientId, oAuth2User)
 
-            // also create/update the UserInfo in the database.
-            currentUser = userAuthService.createOrUpdateUser(currentUser)
-
-            // Create new Authentication using UserInfo
-            auth = new UsernamePasswordAuthenticationToken(currentUser, null, currentUser.authorities)
-        } else if (auth && auth.principal instanceof UserInfo) {
-            // reload the granted_authorities for this skills user
-            UserInfo userInfo = auth.principal
-            userInfo.authorities = userAuthService.loadAuthorities(userInfo.username)
-            auth = new UsernamePasswordAuthenticationToken(userInfo, auth.credentials, userInfo.authorities)
+            context.setAuthentication(auth)
         }
-
-        SecurityContextHolder.getContext().setAuthentication(auth)
-        context.setAuthentication(auth)
-        super.saveContext(context, requestResponseHolder.getRequest(), requestResponseHolder.getResponse())
 
         return context
     }
