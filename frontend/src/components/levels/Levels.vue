@@ -1,6 +1,6 @@
 <template>
   <div id="level-def-panel">
-    <div class="columns">
+    <div class="columns skills-underline-container">
       <div class="column">
         <div class="title">Level Defintions</div>
       </div>

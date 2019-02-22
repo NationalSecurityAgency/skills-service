@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="columns">
+    <div class="columns skills-underline-container">
       <div class="column">
         <span class="title">Access Settings</span>
       </div>

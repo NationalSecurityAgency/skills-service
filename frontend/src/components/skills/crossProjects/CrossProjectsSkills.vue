@@ -1,6 +1,6 @@
 <template>
   <div id="cross-projects-panel">
-    <div class="columns">
+    <div class="columns skills-underline-container">
       <div class="column is-full">
         <span class="title is-3">Cross Project Skills</span>
       </div>
