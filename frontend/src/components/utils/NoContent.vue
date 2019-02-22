@@ -30,7 +30,7 @@
   }
 
   .container .panel-heading {
-    background-color: $green-palette-color3;
+    background-color: $green-palette-color4;
     color: whitesmoke;
   }
   .container .panel-block {
