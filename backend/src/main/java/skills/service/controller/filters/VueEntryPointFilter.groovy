@@ -15,22 +15,28 @@ import javax.servlet.http.HttpServletRequest
 @Slf4j
 class VueEntryPointFilter implements Filter {
 
-    @Value('#{"${skills.vue.entry.blacklist:/api,/admin,/app,/server,/static,/favicon.ico,/icons,/performLogin,/createAccount}".split(",")}')
-    private List<String> urlBlacklist
+    @Value('#{"${skills.vue.entry.backend.resources:/api,/admin,/app,/server,/static,/favicon.ico,/icons,/performLogin,/createAccount,/oauth,/logout}".split(",")}')
+    private List<String> backendResources
 
     @Override
     void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain) throws IOException, ServletException {
         HttpServletRequest httpServletRequest = (HttpServletRequest) request
         String requestUri = httpServletRequest.getRequestURI()
-        if(!isBlacklistUrl(requestUri) ) {
+        if(isFrontendResource(requestUri) ) {
+            // frontend resource, forward to the UI for vue-js to handle
             httpServletRequest.getRequestDispatcher("/").forward(request,response)
         } else {
+            // backend resource, continue with the filter chain
             filterChain.doFilter(request,response)
         }
     }
 
-    boolean isBlacklistUrl(String pathInfo) {
-        return urlBlacklist ? urlBlacklist.find { String ignoreUrl ->
+    boolean isFrontendResource(String pathInfo) {
+        return !isBackendResource(pathInfo)
+    }
+
+    boolean isBackendResource(String pathInfo) {
+        return backendResources ? backendResources.find { String ignoreUrl ->
             return pathInfo.startsWith(ignoreUrl)
         } : false
     }

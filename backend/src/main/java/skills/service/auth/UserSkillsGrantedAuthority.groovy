@@ -1,11 +1,11 @@
 package skills.service.auth
 
+import groovy.transform.Canonical
 import groovy.transform.CompileStatic
-import groovy.transform.Immutable
 import org.springframework.security.core.GrantedAuthority
 import skills.storage.model.auth.UserRole
 
-@Immutable
+@Canonical
 @CompileStatic
 class UserSkillsGrantedAuthority implements GrantedAuthority {
 

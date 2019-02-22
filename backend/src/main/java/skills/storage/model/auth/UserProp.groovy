@@ -1,6 +1,6 @@
 package skills.storage.model.auth
 
-import groovy.transform.Immutable
+import groovy.transform.Canonical
 import groovy.transform.ToString
 
 import javax.persistence.*
@@ -8,7 +8,7 @@ import javax.persistence.*
 @ToString
 @Entity
 @Table(name = 'user_properties')
-@Immutable
+@Canonical
 class UserProp {
 
     @Id

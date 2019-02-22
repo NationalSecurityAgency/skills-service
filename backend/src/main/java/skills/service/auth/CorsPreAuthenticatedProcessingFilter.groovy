@@ -17,7 +17,7 @@ import javax.servlet.ServletResponse
 import javax.servlet.http.HttpServletRequest
 
 @CompileStatic
-@Component
+//@Component
 class CorsPreAuthenticatedProcessingFilter extends GenericFilterBean {
 
     static final String CORS_ONLY_RESOURCE_MESSAGE = 'This resource is only available Cross-origin resource sharings (CORS) compliant request'

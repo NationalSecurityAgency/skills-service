@@ -17,4 +17,6 @@ class UserInfo implements UserDetails {
     boolean accountNonLocked = true
     boolean credentialsNonExpired = true
     boolean enabled = true
+    boolean proxied = false
+    String proxyingSystemId
 }
