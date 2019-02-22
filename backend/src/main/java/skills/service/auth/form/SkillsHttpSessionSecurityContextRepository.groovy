@@ -20,6 +20,8 @@ import javax.persistence.EntityManager
 import javax.persistence.PersistenceContext
 import javax.transaction.Transactional
 
+import static skills.service.auth.form.AuthorizationServerConfig.SKILLS_PROXY_USER
+
 /**
  * this class is responsible for converting OAuth2 authenticated principal's to UserInfo objects
  * and storing them in the SecurityContextHolder.  It also reload the users granted_authorities
@@ -60,10 +62,10 @@ class SkillsHttpSessionSecurityContextRepository extends HttpSessionSecurityCont
                 // request is being performed on behalf of.  The proxy_user field is required for client_credentials grant_type
                 OAuth2AuthenticationDetails oauthDetails = (OAuth2AuthenticationDetails) auth.getDetails()
                 Map claims = oauthDetails.getDecodedDetails()
-                if (claims && claims.containsKey('proxy-user')) {
-                    String proxyUserId = claims.get('proxy-user')
+                if (claims && claims.containsKey(SKILLS_PROXY_USER)) {
+                    String proxyUserId = claims.get(SKILLS_PROXY_USER)
                     if (!proxyUserId) {
-                        throw new SkillsAuthorizationException("client_credentials grant_type must specify proxy-user field for ")
+                        throw new SkillsAuthorizationException("client_credentials grant_type must specify $SKILLS_PROXY_USER field for ")
                     }
                     log.info("Loading proxyUser [${proxyUserId}]")
                     UserInfo currentUser = new UserInfo(
