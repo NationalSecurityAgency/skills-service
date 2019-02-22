@@ -32,13 +32,20 @@ import skills.service.auth.SecurityConfiguration
 @Conditional(SecurityConfiguration.FormAuth)
 @EnableAuthorizationServer
 class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
-    private int accessTokenValiditySeconds = 10000
-    private int refreshTokenValiditySeconds = 30000
 
     static final String SKILLS_PROXY_USER = 'proxy_user'
 
     @Value('#{"${security.oauth2.resource.id:skills-service-oauth}"}')
     private String resourceId
+
+    @Value('#{"${security.oauth2.jwt.keystore.resource:jwtkeys.jks}"}')
+    private String jwtKeystoreResource
+
+    @Value('#{"${security.oauth2.jwt.keystore.password:password}"}')
+    private String jwtKeystorePassword
+
+    @Value('#{"${security.oauth2.jwt.keystore.alias:jwtkeys}"}')
+    private String jwtKeystoreAlias
 
     @Autowired
     private AuthenticationManager authenticationManager
@@ -68,13 +75,10 @@ class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
         clients.inMemory()
                 .withClient("trusted-app")
                 .autoApprove(true)
-                .authorizedGrantTypes("authorization_code", "client_credentials", "password", "refresh_token")
+                .authorizedGrantTypes("client_credentials")
                 .authorities("ROLE_TRUSTED_CLIENT")
                 .scopes("read", "write")
                 .resourceIds(resourceId)
-                .accessTokenValiditySeconds(accessTokenValiditySeconds)
-                .refreshTokenValiditySeconds(refreshTokenValiditySeconds)
-                .redirectUris("/home", "/", "http://localhost:8080/login/oauth2/code/skills")//oauth/authorize")
                 .secret(passwordEncoder.encode("secret"))
     }
 
@@ -85,7 +89,6 @@ class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
 
     @Bean
     JwtAccessTokenConverter accessTokenConverter() {
-
         JwtAccessTokenConverter jwtAccessTokenConverter = new JwtAccessTokenConverter()
         jwtAccessTokenConverter.setAccessTokenConverter(new DefaultAccessTokenConverter() {
             @Override
@@ -95,9 +98,9 @@ class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
                 return authentication
             }
         })
-//        converter.setSigningKey("abcd")
-        KeyStoreKeyFactory keyStoreKeyFactory = new KeyStoreKeyFactory(new ClassPathResource("jwtkeys.jks"), "password".toCharArray())
-        jwtAccessTokenConverter.setKeyPair(keyStoreKeyFactory.getKeyPair("jwtkeys"))
+
+        KeyStoreKeyFactory keyStoreKeyFactory = new KeyStoreKeyFactory(new ClassPathResource(jwtKeystoreResource), jwtKeystorePassword.toCharArray())
+        jwtAccessTokenConverter.setKeyPair(keyStoreKeyFactory.getKeyPair(jwtKeystoreAlias))
 
         return jwtAccessTokenConverter
     }
@@ -114,14 +117,12 @@ class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
     DefaultTokenServices tokenServices() {
         DefaultTokenServices defaultTokenServices = new DefaultTokenServices()
         defaultTokenServices.setTokenStore(tokenStore())
-        defaultTokenServices.setSupportRefreshToken(true)
         defaultTokenServices.setTokenEnhancer(tokenEnhancer())
         return defaultTokenServices
     }
 
     @Slf4j
     static class SkillsProxyUserTokenEnhancer implements TokenEnhancer {
-
         @Override
         OAuth2AccessToken enhance(OAuth2AccessToken accessToken, OAuth2Authentication authentication) {
             OAuth2AccessToken result = new DefaultOAuth2AccessToken(accessToken)
