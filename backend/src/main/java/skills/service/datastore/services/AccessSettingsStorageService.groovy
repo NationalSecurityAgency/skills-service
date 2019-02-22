@@ -2,6 +2,7 @@ package skills.service.datastore.services
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.security.core.GrantedAuthority
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.service.auth.UserInfo
@@ -70,17 +71,24 @@ class AccessSettingsStorageService {
     }
 
     @Transactional()
-    UserRole createAppUser(UserInfo userInfo) {
+    User createAppUser(UserInfo userInfo, boolean createOrUpdate) {
         log.info("Creating new app user for ID [{}], DN [{}]", userInfo.username, userInfo.userDn)
 
         User user = userRepository.findByUserId(userInfo.username?.toLowerCase())
-        assert !user, "CREATE FAILED -> user with userId [$user.userId] already exists"
+        if (!createOrUpdate) {
+            assert !user, "CREATE FAILED -> user with userId [$user.userId] already exists"
+        }
 
-        // create new user with APP_USER role
-        user = createNewUser(userInfo)
+        if (user) {
+            // updating an existing user
+            updateUser(userInfo, user)
+        } else {
+            // create new user with APP_USER role
+            user = createNewUser(userInfo)
+        }
         userRepository.save(user)
         log.info("Created app user [{}]", userInfo.username)
-        return user.roles.first()
+        return user
     }
 
     @Transactional(readOnly = true)
@@ -119,7 +127,7 @@ class AccessSettingsStorageService {
         User user = new User(
                 userId: userInfo.username?.toLowerCase(),
                 password: userInfo.password,
-                roles: [new UserRole(userId: userInfo.username?.toLowerCase(), roleName: RoleName.ROLE_APP_USER)],
+                roles: getRoles(userInfo),
                 userProps: [
                         new UserProp(name: 'DN', value: userInfo.userDn ?: ""),
                         new UserProp(name: 'email', value: userInfo.email ?: ""),
@@ -128,5 +136,38 @@ class AccessSettingsStorageService {
                 ]
         )
         return user
+    }
+
+    private User updateUser(UserInfo userInfo, User user) {
+        user.userId = userInfo.username?.toLowerCase()
+        user.password = userInfo.password
+        getOrSetUserProp(user, 'DN',  userInfo.userDn ?: "")
+        getOrSetUserProp(user, 'email', userInfo.email ?: "")
+        getOrSetUserProp(user, 'firstName',  userInfo.firstName ?: "")
+        getOrSetUserProp(user, 'lastName',  userInfo.lastName ?: "")
+//        user.roles = getRoles(userInfo)
+        return user
+    }
+
+    private void getOrSetUserProp(User user, String name, value) {
+        UserProp userProp = user.userProps.find {it.name == name}
+        if (userProp) {
+            userProp.value = value
+        } else {
+            user.userProps.add(new UserProp(name: name, value: value))
+        }
+    }
+
+    private List<UserRole> getRoles(UserInfo userInfo) {
+        List<UserRole> roles
+        if (userInfo.authorities) {
+            roles = []
+            for (GrantedAuthority authority : userInfo.authorities) {
+                roles.add(new UserRole(userId: userInfo.username?.toLowerCase(), roleName: RoleName.valueOf(authority.authority)))
+            }
+        } else {
+            roles = [new UserRole(userId: userInfo.username?.toLowerCase(), roleName: RoleName.ROLE_APP_USER)]
+        }
+        return roles
     }
 }

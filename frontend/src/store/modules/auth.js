@@ -1,12 +1,12 @@
 import axios from 'axios';
-import router from '../../router';
+// import router from '../../router';
 
 const getters = {
   userInfo(state) {
     return state.userInfo;
   },
   isAuthenticated(state) {
-    return (state.token !== null || state.pkiAuth) && state.userInfo;
+    return (state.token !== null || state.localAuth || state.oAuthAuth || state.pkiAuth) && state.userInfo;
   },
   isPkiAuthenticated(state) {
     return state.pkiAuth;
@@ -15,10 +15,18 @@ const getters = {
 
 const mutations = {
   authUser(state, authData) {
-    state.token = authData.token;
-    localStorage.setItem('token', authData.token);
-    localStorage.setItem('expirationDate', authData.expirationDate.getTime().toString());
+    state.localAuth = true;
+    localStorage.setItem('localAuth', 'true');
+    if (authData.token) {
+      state.token = authData.token;
+      localStorage.setItem('token', authData.token);
+      localStorage.setItem('expirationDate', authData.expirationDate.getTime().toString());
+    }
     axios.defaults.headers.common.Authorization = authData.token;
+  },
+  o2AuthAuthUser(state) {
+    state.oAuthAuth = true;
+    localStorage.setItem('oAuthAuth', 'true');
   },
   storeUser(state, userInfo) {
     state.userInfo = userInfo;
@@ -26,6 +34,10 @@ const mutations = {
   clearAuthData(state) {
     state.token = null;
     state.userId = null;
+    state.localAuth = false;
+    state.oAuthAuth = false;
+    localStorage.removeItem('localAuth');
+    localStorage.removeItem('oAuthAuth');
     localStorage.removeItem('token');
     localStorage.removeItem('expirationDate');
     localStorage.removeItem('userInfo');
@@ -39,13 +51,16 @@ const actions = {
       axios.put('/createAccount', authData)
         .then((result) => {
           const token = result.headers.authorization;
-          const expirationDate = new Date(Number(result.headers.tokenexpirationtimestamp));
+          let expirationDate;
+          if (result.headers.tokenexpirationtimestamp) {
+            expirationDate = new Date(Number(result.headers.tokenexpirationtimestamp));
+            dispatch('setLogoutTimer', expirationDate);
+          }
           commit('authUser', { token, expirationDate });
           dispatch('fetchUser')
             .then(() => {
               resolve(result);
           });
-          dispatch('setLogoutTimer', expirationDate);
         })
         .catch(error => reject(error));
     });
@@ -55,21 +70,30 @@ const actions = {
       axios.post('/performLogin', authData)
         .then((result) => {
           const token = result.headers.authorization;
-          const expirationDate = new Date(Number(result.headers.tokenexpirationtimestamp));
+          let expirationDate;
+          if (result.headers.tokenexpirationtimestamp) {
+            expirationDate = new Date(Number(result.headers.tokenexpirationtimestamp));
+            dispatch('setLogoutTimer', expirationDate);
+          }
           commit('authUser', { token, expirationDate });
           dispatch('fetchUser')
             .then(() => {
               resolve(result);
           });
-          dispatch('setLogoutTimer', expirationDate);
         })
         .catch(error => reject(error));
     });
+  },
+  oAuth2Login({ commit }, oAuthId) {
+    commit('o2AuthAuthUser');
+    window.location = `/oauth2/authorization/${oAuthId}`;
   },
   restoreSessionIfAvailable({ commit, dispatch, state }) {
     return new Promise((resolve, reject) => {
       let reAuthenticated = false;
       const token = localStorage.getItem('token');
+      const localAuth = (localStorage.getItem('localAuth') === 'true');
+      const oAuthAuth = (localStorage.getItem('oAuthAuth') === 'true');
       if (token) {
         let tokenExpired = true;
         let expirationDate = localStorage.getItem('expirationDate');
@@ -92,10 +116,15 @@ const actions = {
         resolve(reAuthenticated);
       } else {
         // attempt to retrieve userInfo using PKI (2-way ssl)
+        // (or username/password if being redirected after successful login)
         dispatch('fetchUser', false).then(() => {
           if (state.userInfo) {
-            state.pkiAuth = true;
             reAuthenticated = true;
+            if (!localAuth && !oAuthAuth) {
+              state.pkiAuth = true;
+            } else {
+              state.localAuth = true;
+            }
           }
           resolve(reAuthenticated);
         }).catch(error => reject(error));
@@ -104,7 +133,7 @@ const actions = {
   },
   logout({ commit }) {
     commit('clearAuthData');
-    router.replace('/');
+    window.location = '/logout';
   },
   setLogoutTimer({ dispatch }, expirationDate) {
     const expiresInMillis = expirationDate.getTime() - new Date().getTime();
@@ -129,7 +158,8 @@ const state = {
   token: null,
   userInfo: null,
   pkiAuth: false,
-  finishedReauthAttempt: false,
+  localAuth: false,
+  oAuthAuth: false,
 };
 
 export default {

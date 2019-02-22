@@ -26,6 +26,19 @@
             <div class="columns">
 
               <div class="column is-three-fifths is-offset-one-fifth">
+                <div v-if="oAuthProviders" class="skills-pad-bottom-1-rem">
+                  <div v-for="oAuthProvider in oAuthProviders" :key="oAuthProvider.registrationId" class="field">
+                    <a class="button is-outlined" style="width: 100%"
+                       @click="oAuth2Login(oAuthProvider.registrationId)">
+                      <span class="icon is-small">
+                        <i :class="oAuthProvider.iconClass" aria-hidden="true"/>
+                      </span>
+                      <span>Continue with {{ oAuthProvider.clientName }}</span>
+                    </a>
+                  </div>
+                  <hr/>
+                </div>
+
                 <div class="field">
                   <label class="label">Email</label>
                   <input class="input" type="text" v-model="loginFields.username" name="username"
@@ -40,7 +53,8 @@
                 </div>
                 <div class="field is-grouped">
                   <div class="control">
-                    <button class="button is-primary is-outlined" :disabled="errors.any() || !loginFields.username || !loginFields.password">
+                    <button class="button is-primary is-outlined"
+                            :disabled="errors.any() || !loginFields.username || !loginFields.password">
                       <span class="icon is-small">
                         <i class="fas fa-arrow-circle-right"/>
                       </span>
@@ -70,6 +84,7 @@
 </template>
 
 <script>
+  import axios from 'axios';
   import { Validator } from 'vee-validate';
 
   const dictionary = {
@@ -92,6 +107,7 @@
         },
         loginFailed: false,
         serverErrors: [],
+        oAuthProviders: [],
       };
     },
     methods: {
@@ -117,6 +133,9 @@
           }
         });
       },
+      oAuth2Login(registrationId) {
+        this.$store.dispatch('oAuth2Login', registrationId);
+      },
       resetAfterFailedLogin() {
         this.loginFailed = true;
         delete this.loginFields.username;
@@ -129,6 +148,20 @@
       forgotPassword() {
         // TODO - add forgot password page
       },
+    },
+    created() {
+      // eslint-disable-next-line
+      console.log("error: ", this.$route.query.error);
+      // eslint-disable-next-line
+      console.log("error_description: ", this.$route.query.error_description);
+      axios.get('/app/oAuthProviders')
+        .then((response) => {
+          // this.isLoading = false;
+          this.oAuthProviders = response.data;
+        })
+        .catch((e) => {
+          this.serverErrors.push(e);
+      });
     },
   };
 </script>

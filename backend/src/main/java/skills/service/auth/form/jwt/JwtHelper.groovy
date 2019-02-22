@@ -1,4 +1,4 @@
-package skills.service.auth.jwt
+package skills.service.auth.form.jwt
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
@@ -10,6 +10,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.userdetails.UserDetails
+import org.springframework.stereotype.Component
 import skills.service.auth.UserAuthService
 import skills.service.auth.UserInfo
 
@@ -18,8 +19,9 @@ import javax.crypto.KeyGenerator
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
+@Component
 @Configuration
-@ConfigurationProperties(prefix = 'skills.authorization.jwt')
+@ConfigurationProperties(prefix = 'skills.authorization.form')
 @Slf4j
 class JwtHelper {
 
