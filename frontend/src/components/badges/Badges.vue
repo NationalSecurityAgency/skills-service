@@ -132,7 +132,8 @@
           parent: this,
           component: EditBadge,
           hasModalCard: true,
-          width: 1110,
+          canCancel: false,
+          width: 1300,
           props: {
             badge: emptyBadge,
           },

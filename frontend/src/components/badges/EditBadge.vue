@@ -1,14 +1,7 @@
 <template>
-  <div class="modal-card" style="width: 900px;">
-    <header class="modal-card-head">
-      <p v-if="isEdit" class="modal-card-title">Editing Existing Badge</p>
-      <p v-else class="modal-card-title">New Badge</p>
-      <button class="delete" aria-label="close" v-on:click="$parent.close()"></button>
-    </header>
-
-
-    <section class="modal-card-body">
-      <div class="field is-horizontal">
+  <modal :title="title" @cancel-clicked="closeMe" @save-clicked="updateBadge">
+    <template slot="content">
+      <div class="field is-horizontal" style="width: 1000px;">
         <div class="field-body">
           <div class="field is-narrow">
             <icon-picker :startIcon="badge.iconClass" v-on:on-icon-selected="onSelectedIcons"></icon-picker>
@@ -64,7 +57,7 @@
           <div class="column has-text-right" style="font-size: 0.8rem; font-weight: lighter">
             <label class="checkbox" style="font-size: 0.8rem; font-weight: lighter">
               <input type="checkbox" v-model="limitTimeframe" @change="onEnableGemFeature"/>
-                Enable Gem Feature
+              Enable Gem Feature
               <b-tooltip label="The Gem feature allows for the badge to only be achievable during the specified time frame."
                          position="is-left" animanted="true" type="is-light">
                 <span><i class="fas fa-question-circle"></i></span>
@@ -108,30 +101,15 @@
       </div>
 
       <p v-if="errors.any() && overallErrMsg" class="help is-danger has-text-centered">***{{ overallErrMsg }}***</p>
-    </section>
-
-    <footer class="modal-card-foot skills-justify-content-right">
-      <a class="button is-outlined" v-on:click="$parent.close()">
-        <span class="icon is-small">
-          <i class="fas fa-stop-circle"/>
-        </span>
-        <span>Cancel</span>
-      </a>
-
-      <a class="button is-primary is-outlined" v-on:click="updateBadge" :disabled="errors.any()">
-        <span class="icon is-small">
-          <i class="fas fa-arrow-circle-right"/>
-        </span>
-        <span>Save</span>
-      </a>
-    </footer>
-  </div>
+    </template>
+  </modal>
 </template>
 
 <script>
   import { Validator } from 'vee-validate';
   import MarkdownEditor from '../utils/MarkdownEditor';
   import IconPicker from '../utils/iconPicker/IconPicker';
+  import Modal from '../utils/modal/Modal';
 
   let self;
   const dictionary = {
@@ -168,9 +146,7 @@
   });
   export default {
     name: 'EditBadge',
-    components: {
-      IconPicker, MarkdownEditor,
-    },
+    components: { Modal, IconPicker, MarkdownEditor },
     props: ['badge', 'isEdit'],
     data() {
       // convert string to Date objects
@@ -186,7 +162,15 @@
     mounted() {
       self = this;
     },
+    computed: {
+      title() {
+        return this.isEdit ? 'Editing Existing Badge' : 'New Badge';
+      },
+    },
     methods: {
+      closeMe() {
+        this.$parent.close();
+      },
       updateDescription(event) {
         this.badgeInternal.description = event.value;
       },
@@ -231,8 +215,4 @@
 </script>
 
 <style scoped>
-  .disableControl {
-    pointer-events: none;
-    color: #a8a8a8;
-  }
 </style>

@@ -1,7 +1,7 @@
 <template>
   <div id="skillsTable">
 
-    <div class="columns skills-underline-container">
+    <div class="columns">
       <div class="column">
         <slot name="skillsTableTitle"></slot>
       </div>
@@ -10,116 +10,118 @@
       </div>
     </div>
 
-    <b-loading :is-full-page="true" :active.sync="isLoading" :can-cancel="false">
-    </b-loading>
-    <div v-if="isLoading" class="modal-card-body" style="height: 400px;">
-    </div>
+    <div  class="skills-bordered-component">
+      <b-loading :is-full-page="true" :active.sync="isLoading" :can-cancel="false">
+      </b-loading>
+      <div v-if="isLoading" class="modal-card-body" style="height: 400px;">
+      </div>
 
-    <v-client-table :data="skills" :columns="skillsColumns"
-                    :options="options" v-if="this.skills && this.skills.length" v-on:sorted="handleColumnSort">
+      <v-client-table :data="skills" :columns="skillsColumns"
+                      :options="options" v-if="this.skills && this.skills.length" v-on:sorted="handleColumnSort">
 
-      <div slot="name" slot-scope="props" class="field has-addons">
-        <div class="columns">
-          <div class="column">
-            <div>{{ props.row.name }}</div>
-            <div class="subtitle has-text-grey" style="font-size: 0.9rem;">ID: {{ props.row.skillId }}</div>
+        <div slot="name" slot-scope="props" class="field has-addons">
+          <div class="columns">
+            <div class="column">
+              <div>{{ props.row.name }}</div>
+              <div class="subtitle has-text-grey" style="font-size: 0.9rem;">ID: {{ props.row.skillId }}</div>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div slot="displayOrder" slot-scope="props" class="">
-        <div class="field has-addons">
-          <span>{{props.row.displayOrder}}</span>
-          <b-tooltip
-            label='Sorting controls are enabled only when Display Order column is sorted in the ascending order.'
-            position="is-top" animanted="true" type="is-white black" :active="!sortButtonEnabled" multilined>
-            <span class="field has-addons skills-pad-left-1-rem">
-               <span class="control">
-                    <button class="button is-outlined is-info see" v-on:click="moveDisplayOrderDown(props.row)"
-                            :class="{'is-loading': props.row.isMoving}"
-                            :disabled="!sortButtonEnabled || props.row.disabledDownButton || isMovingRows">
-                          <span class="icon is-small">
-                            <i class="fas fa-arrow-circle-down"/>
-                          </span>
-                    </button>
-                </span>
-              <span class="control">
-                    <button class="button is-outlined is-info" :class="{'is-loading': props.row.isMoving}"
-                            :disabled="!sortButtonEnabled || props.row.disabledUpButton || isMovingRows"
-                            v-on:click="moveDisplayOrderUp(props.row)">
-                          <span class="icon is-small">
-                            <i class="fas fa-arrow-circle-up"/>
-                          </span>
-                    </button>
-                </span>
-            </span>
-          </b-tooltip>
+        <div slot="displayOrder" slot-scope="props" class="">
+          <div class="field has-addons">
+            <span>{{props.row.displayOrder}}</span>
+            <b-tooltip
+              label='Sorting controls are enabled only when Display Order column is sorted in the ascending order.'
+              position="is-top" animanted="true" type="is-white black" :active="!sortButtonEnabled" multilined>
+              <span class="field has-addons skills-pad-left-1-rem">
+                 <span class="control">
+                      <button class="button is-outlined is-info see" v-on:click="moveDisplayOrderDown(props.row)"
+                              :class="{'is-loading': props.row.isMoving}"
+                              :disabled="!sortButtonEnabled || props.row.disabledDownButton || isMovingRows">
+                            <span class="icon is-small">
+                              <i class="fas fa-arrow-circle-down"/>
+                            </span>
+                      </button>
+                  </span>
+                <span class="control">
+                      <button class="button is-outlined is-info" :class="{'is-loading': props.row.isMoving}"
+                              :disabled="!sortButtonEnabled || props.row.disabledUpButton || isMovingRows"
+                              v-on:click="moveDisplayOrderUp(props.row)">
+                            <span class="icon is-small">
+                              <i class="fas fa-arrow-circle-up"/>
+                            </span>
+                      </button>
+                  </span>
+              </span>
+            </b-tooltip>
+          </div>
         </div>
-      </div>
 
-      <div slot="created" slot-scope="props" class="field has-addons">
-        {{ props.row.created }}
-      </div>
+        <div slot="created" slot-scope="props" class="field has-addons">
+          {{ props.row.created }}
+        </div>
 
-      <div slot="edit" slot-scope="props">
-        <div class="field has-addons">
-          <span class="field has-addons">
-            <p class="control">
-              <a v-on:click="editSkill(props.row)" class="button is-outlined is-info"
-                 :class="{'is-loading': props.row.isEditLoading}">
-                    <span class="icon is-small">
-                      <i class="fas fa-edit"/>
-                    </span>
-                <!--<span>Edit</span>-->
-              </a>
-            </p>
-            <p class="control">
-              <a v-on:click="deleteSkill(props.row)" class="button is-outlined is-info"
-                 :class="{'is-loading': props.row.isDeleteLoading}">
-                    <span class="icon is-small">
-                      <i class="fas fa-trash"/>
-                    </span>
-                <!--<span>Delete</span>-->
-              </a>
-            </p>
-            <p class="control">
-              <a v-on:click="addUser(props.row)" class="button is-outlined is-info">
+        <div slot="edit" slot-scope="props">
+          <div class="field has-addons">
+            <span class="field has-addons">
+              <p class="control">
+                <a v-on:click="editSkill(props.row)" class="button is-outlined is-info"
+                   :class="{'is-loading': props.row.isEditLoading}">
                       <span class="icon is-small">
-                        <i class="fas fa-user-plus"/>
+                        <i class="fas fa-edit"/>
                       </span>
-                <!--<span>Add User</span>-->
-              </a>
-            </p>
+                  <!--<span>Edit</span>-->
+                </a>
+              </p>
+              <p class="control">
+                <a v-on:click="deleteSkill(props.row)" class="button is-outlined is-info"
+                   :class="{'is-loading': props.row.isDeleteLoading}">
+                      <span class="icon is-small">
+                        <i class="fas fa-trash"/>
+                      </span>
+                  <!--<span>Delete</span>-->
+                </a>
+              </p>
+              <p class="control">
+                <a v-on:click="addUser(props.row)" class="button is-outlined is-info">
+                        <span class="icon is-small">
+                          <i class="fas fa-user-plus"/>
+                        </span>
+                  <!--<span>Add User</span>-->
+                </a>
+              </p>
+              </span>
+          <p class="skills-pad-left-1-rem">
+
+            <router-link :to="{ name:'SkillPage',
+                params: { projectId: props.row.projectId, subjectId: props.row.subjectId, skillId: props.row.skillId }}"
+                         class="button is-outlined is-info">
+              <span>Manage</span>
+              <span class="icon is-small">
+                <i class="fas fa-arrow-circle-right"/>
             </span>
-        <p class="skills-pad-left-1-rem">
-
-          <router-link :to="{ name:'SkillPage',
-              params: { projectId: props.row.projectId, subjectId: props.row.subjectId, skillId: props.row.skillId }}"
-                       class="button is-outlined is-info">
-            <span>Manage</span>
-            <span class="icon is-small">
-              <i class="fas fa-arrow-circle-right"/>
-          </span>
-          </router-link>
-        </p>
+            </router-link>
+          </p>
+          </div>
         </div>
-      </div>
 
-      <div slot="child_row" slot-scope="props" class="skills-table-child-row">
-        <ChildRowSkillsDisplay :project-id="projectId" :subject-id="subjectId" :parent-skill-id="props.row.skillId"></ChildRowSkillsDisplay>
-      </div>
-    </v-client-table>
+        <div slot="child_row" slot-scope="props" class="skills-table-child-row">
+          <ChildRowSkillsDisplay :project-id="projectId" :subject-id="subjectId" :parent-skill-id="props.row.skillId"></ChildRowSkillsDisplay>
+        </div>
+      </v-client-table>
 
-    <no-content :should-display="!(this.skills && this.skills.length)" :title="'No Skills Yet'">
-      <div slot="content" class="content" style="width: 100%;">
-        <p class="has-text-centered">
-          Create your first skill today by pressing
-        </p>
-        <p class="has-text-centered">
-          <new-skill-items-buttons v-on:new-skill-item="newSkill"></new-skill-items-buttons>
-        </p>
-      </div>
+      <no-content :should-display="!(this.skills && this.skills.length)" :title="'No Skills Yet'">
+        <div slot="content" class="content" style="width: 100%;">
+          <p class="has-text-centered">
+            Create your first skill today by pressing
+          </p>
+          <p class="has-text-centered">
+            <new-skill-items-buttons v-on:new-skill-item="newSkill"></new-skill-items-buttons>
+          </p>
+        </div>
     </no-content>
+    </div>
   </div>
 </template>
 
@@ -200,7 +202,8 @@
           parent: this,
           component: EditSkill,
           hasModalCard: true,
-          width: 1110,
+          canCancel: false,
+          width: 1300,
           props: {
             skill: emptySkill,
             projectId: this.projectId,
@@ -216,7 +219,8 @@
           parent: this,
           component: EditSkill,
           hasModalCard: true,
-          width: 1110,
+          canCancel: false,
+          width: 1300,
           props: {
             skill: skillToEdit,
             isEdit: true,
@@ -439,10 +443,6 @@
    /*remove count on the bottom of the table*/
   #skillsTable .VuePagination__count {
     display: none;
-  }
-
-  #skillsTable .section {
-    padding: 1rem 1rem 1rem 8rem;
   }
 
   .skills-table-hierarchy-type {

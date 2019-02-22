@@ -1,19 +1,7 @@
 <template>
-  <div id="editSkill" class="modal-card" style="width: 1110px;">
-    <header class="modal-card-head">
-      <p v-if="isEdit" class="modal-card-title">Editing Existing Skill</p>
-      <p v-else class="modal-card-title">New Skill</p>
-      <button class="delete" aria-label="close" v-on:click="$parent.close()"></button>
-    </header>
-
-    <b-loading :is-full-page="true" :active.sync="isLoading" :can-cancel="false">
-    </b-loading>
-    <div v-if="isLoading" class="modal-card-body" style="height: 400px;">
-    </div>
-
-    <section class="modal-card-body" v-show="!isLoading">
-
-      <div class="field">
+  <modal :title="title" @cancel-clicked="closeMe" @save-clicked="saveSkill">
+    <template slot="content">
+      <div class="field" style="width: 1110px;">
         <label class="label">Skill Name *</label>
         <div class="control">
           <input class="input" type="text" v-model="skillInternal.name" v-on:input="updateSkillId"
@@ -130,26 +118,8 @@
       </div>
 
       <p v-if="errors.any() && overallErrMsg" class="help is-danger has-text-centered">***{{ overallErrMsg }}***</p>
-
-      <!--</loading-container>-->
-    </section>
-
-    <footer class="modal-card-foot skills-justify-content-right">
-      <a class="button is-outlined" v-on:click="$parent.close()">
-        <span>Cancel</span>
-        <span class="icon is-small">
-                <i class="fas fa-stop-circle"/>
-              </span>
-      </a>
-
-      <a class="button is-primary is-outlined" v-on:click="saveSkill" :disabled="errors.any()">
-        <span>Save</span>
-        <span class="icon is-small">
-                <i class="fas fa-arrow-circle-right"/>
-              </span>
-      </a>
-    </footer>
-  </div>
+    </template>
+  </modal>
 </template>
 
 <script>
@@ -158,10 +128,11 @@
   import SearchAllSkillsCheckbox from './SearchAllSkillsCheckbox';
   import SkillsService from './SkillsService';
   import MarkdownEditor from '../utils/MarkdownEditor';
+  import Modal from '../utils/modal/Modal';
 
   export default {
     name: 'EditSkill',
-    components: { SearchAllSkillsCheckbox, LoadingContainer, MarkdownEditor },
+    components: { Modal, SearchAllSkillsCheckbox, LoadingContainer, MarkdownEditor },
     props: ['projectId', 'subjectId', 'skill', 'isEdit'],
     data() {
       return {
@@ -222,10 +193,10 @@
       }
     },
     computed: {
-      isLoading: function isLoadingCheck() {
+      isLoading() {
         return this.isLoadingSkillDetails;
       },
-      totalPoints: function calculateTotalPoints() {
+      totalPoints() {
         if (this.skillInternal.pointIncrement && this.skillInternal.maxSkillAchievedCount) {
           const result = this.skillInternal.pointIncrement * this.skillInternal.maxSkillAchievedCount;
           if (result > 0) {
@@ -234,8 +205,14 @@
         }
         return 0;
       },
+      title() {
+        return this.isEdit ? 'Editing Existing Skill' : 'New Skill';
+      },
     },
     methods: {
+      closeMe() {
+        this.$parent.close();
+      },
       updateDescription(value) {
         this.skillInternal.description = value.value;
       },

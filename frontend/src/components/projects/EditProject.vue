@@ -1,7 +1,7 @@
 <template>
   <modal :title="title" @cancel-clicked="closeMe" @save-clicked="updateProject">
     <template slot="content">
-      <div class="field">
+      <div class="field" style="width: 500px">
         <label class="label">Project Name</label>
         <div class="control">
           <input class="input" type="text" v-model="internalProject.name" v-on:input="updateProjectId"
@@ -35,7 +35,7 @@
   import { Validator } from 'vee-validate';
   import ProjectService from './ProjectService';
   import HelpItem from '../utils/HelpItem';
-  import Modal from '../utils/Modal';
+  import Modal from '../utils/modal/Modal';
 
   export default {
     name: 'EditProject',
@@ -43,17 +43,11 @@
     props: ['project', 'isEdit'],
     data() {
       return {
-        title: 'New Project',
         internalProject: Object.assign({}, this.project),
         canEditProjectId: false,
         overallErrMsg: '',
         serverErrors: [],
       };
-    },
-    mounted() {
-      if (this.isEdit) {
-        this.title = 'Editing Existing Project';
-      }
     },
     created() {
       const dictionary = {
@@ -90,6 +84,11 @@
           immediate: false,
         });
       }
+    },
+    computed: {
+      title() {
+        return this.isEdit ? 'Editing Existing Project' : 'New Project';
+      },
     },
     methods: {
       closeMe() {
