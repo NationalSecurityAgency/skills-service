@@ -46,18 +46,14 @@ class SkillsHttpSessionSecurityContextRepository extends HttpSessionSecurityCont
 
         boolean loadedFromSession = true
         Authentication auth = context.getAuthentication()
-        if (!auth) {
-            // if the Authentication is not available from the HTTP session, then this is the
-            // initial request but this session.  See if the Authentication object was made
-            //  available in the SecurityContextHolder by an Authentication filter
+        if (!auth || isProxyiedAuth(auth)) {
+            // if the Authentication is not available from the HTTP session (initial request for this session),
+            // or if it is an OAuth2 proxied principal we want to reload on each request so see if the Authentication
+            // object was made  available in the SecurityContextHolder by an Authentication filter.
             auth = SecurityContextHolder.getContext().getAuthentication()
             loadedFromSession = false
         }
         if (auth) {
-            if (!em.isJoinedToTransaction()) {
-                em.joinTransaction()
-            }
-
             if (auth instanceof OAuth2Authentication) {
                 // OAuth2Authentication is used when then the OAuth2 client uses the client_credentials grant_type we
                 // look for a custom "proxy_user" field where the trusted client must specify the skills user that the
@@ -85,12 +81,13 @@ class SkillsHttpSessionSecurityContextRepository extends HttpSessionSecurityCont
                 UserInfo currentUser = userConverter.convert(clientId, oAuth2User)
 
                 // also create/update the UserInfo in the database.
+                if (!em.isJoinedToTransaction()) { em.joinTransaction() }
                 currentUser = userAuthService.createOrUpdateUser(currentUser)
 
                 // Create new Authentication using UserInfo
                 auth = new UsernamePasswordAuthenticationToken(currentUser, null, currentUser.authorities)
             } else if (auth && auth.principal instanceof UserInfo && loadedFromSession) {
-                // reload the granted_authorities for this skills user
+                // reload the granted_authorities for this skills user if loaded from the HTTP Session)
                 UserInfo userInfo = auth.principal
                 userInfo.authorities = userAuthService.loadAuthorities(userInfo.username)
                 auth = new UsernamePasswordAuthenticationToken(userInfo, auth.credentials, userInfo.authorities)
@@ -98,7 +95,10 @@ class SkillsHttpSessionSecurityContextRepository extends HttpSessionSecurityCont
 
             context.setAuthentication(auth)
         }
-
         return context
+    }
+
+    private boolean isProxyiedAuth(Authentication auth) {
+        return (auth && auth.principal && auth.principal instanceof UserInfo && auth.principal.isProxied())
     }
 }
