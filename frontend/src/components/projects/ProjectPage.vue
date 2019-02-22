@@ -45,8 +45,6 @@
       </loading-container>
     </section>
 
-    <hr class="skills-no-margin"/>
-
     <section class="section" v-if="project.name">
       <navigation :nav-items="[
           {name: 'Subjects', iconClass: 'fa-cubes'},
@@ -153,4 +151,5 @@
   .section {
     padding: 2rem 1.5rem;
   }
+
 </style>

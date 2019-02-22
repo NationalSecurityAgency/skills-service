@@ -1,6 +1,6 @@
 <template>
   <div>
-    <section class="section skills-underline-container-1">
+    <section class="section skills-underline-container">
       <loading-container v-bind:is-loading="isLoading">
 
         <div class="columns has-text-left">
@@ -44,8 +44,6 @@
         </div>
       </loading-container>
     </section>
-
-    <hr class="skills-no-margin"/>
 
     <section class="section">
       <navigation :nav-items="[
