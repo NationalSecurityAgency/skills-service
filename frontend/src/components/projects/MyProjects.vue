@@ -100,6 +100,7 @@
           parent: this,
           component: EditProject,
           hasModalCard: true,
+          canCancel: false,
           // width: 400,
           props: {
             project: { name: '', projectId: '' },

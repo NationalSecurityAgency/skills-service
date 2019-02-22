@@ -48,8 +48,8 @@
   };
 </script>
 
-<style scoped>
-
+<style lang="scss" scoped>
+  @import "../../styles/palette";
 
   .breadcrumbContainer {
     border-color: #E8E8E8;
@@ -58,7 +58,7 @@
     border-style: solid;
     padding: 8px 10px 8px 40px;
 
-    background-image: linear-gradient(to right, #3273dc, lightgray);
+    background-image: linear-gradient(to right, $blue-palette-color5, lightgray);
   }
 
   .currentItem {
