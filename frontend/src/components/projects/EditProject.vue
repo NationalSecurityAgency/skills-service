@@ -1,6 +1,5 @@
 <template>
-  <!--<div class="modal-background"></div>-->
-  <div class="modal-card" style="width: 500px">
+  <div class="modal-card">
     <header class="modal-card-head">
       <p v-if="isEdit" class="modal-card-title">Editing Existing Project</p>
       <p v-else class="modal-card-title">New Project</p>
@@ -27,10 +26,7 @@
         <p class="help is-danger" v-show="errors.has('projectId')">{{ errors.first('projectId')}}</p>
       </div>
       <p class="control has-text-right">
-        <b-tooltip label="Enable to override auto-generated ID."
-                   position="is-left" animanted="true" type="is-light">
-          <span><i class="fas fa-question-circle"></i></span>
-        </b-tooltip>
+        <help-item msg="Enable to override auto-generated ID" position="is-left"></help-item>
         <span v-on:click="toggleProject()">
           <a class="is-info" v-bind:class="{'disableControl': isEdit}" v-if="!canEditProjectId">Enable</a>
           <a class="is-info" v-if="canEditProjectId">Disable</a>
@@ -41,19 +37,19 @@
     </section>
 
     <div class="modal-card-foot skills-justify-content-right">
-        <a class="button is-outlined" v-on:click="$parent.close()">
+        <a class="button is-danger  is-outlined" v-on:click="$parent.close()">
           <span>Cancel</span>
           <span class="icon is-small">
               <i class="fas fa-stop-circle"/>
             </span>
         </a>
 
-        <a class="button is-primary is-outlined" v-on:click="updateProject"
+        <a class="button is-success is-outlined" v-on:click="updateProject"
           :disabled="errors.any() || internalProject.projectName === ''">
           <span>Save</span>
           <span class="icon is-small">
             <i class="fas fa-arrow-circle-right"/>
-            </span>
+          </span>
         </a>
     </div>
   </div>
@@ -62,9 +58,11 @@
 <script>
   import { Validator } from 'vee-validate';
   import ProjectService from './ProjectService';
+  import HelpItem from '../utils/HelpItem';
 
   export default {
     name: 'EditProject',
+    components: { HelpItem },
     props: ['project', 'isEdit'],
     data() {
       return {
@@ -134,7 +132,25 @@
   };
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
+  @import "../../styles/palette";
+
+  .modal-card .modal-card-head {
+    background-color: $green-palette-color1;
+  }
+
+  .modal-card .modal-card-head .modal-card-title {
+    color: whitesmoke;
+  }
+
+  .modal-card .label {
+    color: $monochrome-palette-color1;
+  }
+
+  .modal-card .modal-card-foot {
+    background-color: white;
+  }
+
   .disableField {
     pointer-events: none;
     background-color: #f0f0f0;
