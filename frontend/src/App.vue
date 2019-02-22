@@ -83,18 +83,21 @@
   };
 </script>
 
+
+<style lang="scss">
+  @import "styles/buefy-custom";
+</style>
+
 <style>
-  @import '../node_modules/bulma/css/bulma.min.css';
+  /*@import '../node_modules/bulma/css/bulma.min.css';*/
   @import '../node_modules/@fortawesome/fontawesome-free/css/all.css';
   @import '../node_modules/material-icons/iconfont/material-icons.css';
   @import '../node_modules/material-icons/css/material-icons.css';
+  /*@import '../node_modules/buefy/dist/buefy.css';*/
+  @import '../node_modules/animate.css/animate.css';
   @import './styles/utils.css';
 
   .overall-container {
     min-height: calc(100vh - 50px);
   }
-</style>
-
-<style lang="scss">
-  @import "styles/bulma-custom";
 </style>

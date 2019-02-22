@@ -1,6 +1,6 @@
 <template>
   <div class="columns">
-    <div class="column is-narrow">
+    <div class="column is-narrow" style="height: 800px">
       <div class="skills-pad-right-2-rem">
         <h3 class="title is-4 logo">Navigation</h3>
         <aside class="menu">
@@ -52,8 +52,8 @@
   };
 </script>
 
-<style scoped>
-  /** THESE CAN BE TAKEN OUT AFTER SASS BASED CUSTOMIZATION **/
+<style lang="scss" scoped>
+  @import "../../styles/palette";
 
   i {
     width: 2rem;
@@ -62,11 +62,20 @@
   li {
     margin-bottom: 0.75rem;
     font-size: 1.1rem;
-
   }
 
-  a {
-    color: #3273dc;
+  .columns .is-narrow{
+    padding: 20px;
+    border: 1px solid #ddd;
+    box-shadow: 0 22px 35px -16px rgba(0,0,0,0.1);
+    margin-bottom: 2rem;
+    border-radius: 5px;
   }
+
+  /*.columns h3 {*/
+    /*border-color: lightgrey;*/
+    /*border-width: 0 0 1px 0px;*/
+    /*border-style: inset;*/
+  /*}*/
 
 </style>
