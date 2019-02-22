@@ -33,7 +33,7 @@ import skills.service.auth.SecurityConfiguration
 @EnableAuthorizationServer
 class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
 
-    static final String SKILLS_PROXY_USER = 'proxy_user'
+    public static final String SKILLS_PROXY_USER = 'proxy_user'
 
     @Value('#{"${security.oauth2.resource.id:skills-service-oauth}"}')
     private String resourceId
