@@ -110,7 +110,8 @@
           parent: this,
           component: EditSubject,
           hasModalCard: true,
-          width: 1110,
+          canCancel: false,
+          // width: 1300,
           props: {
             subject: emptySubject,
           },

@@ -1,9 +1,6 @@
 <template>
   <div class="modal-card">
-    <header class="modal-card-head">
-      <p class="modal-card-title">{{ title }}</p>
-      <button class="delete" aria-label="close" v-on:click="$emit('cancel-clicked')"></button>
-    </header>
+    <modal-header :title="title" @cancel-clicked="$emit('cancel-clicked')"></modal-header>
 
     <section class="modal-card-body">
       <slot name="content"></slot>
@@ -28,28 +25,24 @@
 </template>
 
 <script>
+  import ModalHeader from './ModalHeader';
+
   export default {
     name: 'Modal',
+    components: { ModalHeader },
     props: ['title', 'isSaveButtonDisabled'],
   };
 </script>
 
 <style lang="scss" scoped>
-  @import "../../styles/palette";
+  @import "../../../styles/palette";
 
   .modal-card {
     margin-left: 1rem;
     padding-left: 1rem;
     margin-right: 1rem;
     padding-right: 1rem;
-  }
-
-  .modal-card .modal-card-head {
-    background-color: $green-palette-color4;
-  }
-
-  .modal-card .modal-card-head .modal-card-title {
-    color: whitesmoke;
+    width: 100%;
   }
 
   .modal-card .label {

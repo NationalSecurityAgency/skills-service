@@ -1,17 +1,10 @@
 <template>
-  <div class="modal-card" style="width: 900px">
-    <header class="modal-card-head">
-      <p v-if="isEdit" class="modal-card-title">Editing Existing Subject</p>
-      <p v-else class="modal-card-title">New Subject</p>
-      <button class="delete" aria-label="close" v-on:click="$parent.close()"></button>
-    </header>
-
-    <section class="modal-card-body">
-
-      <div class="field is-horizontal">
+  <modal :title="title" @cancel-clicked="closeMe" @save-clicked="updateSubject">
+    <template slot="content">
+      <div class="field is-horizontal" style="width: 720px;">
         <div class="field-body">
           <div class="field is-narrow">
-            <icon-picker :startIcon="subject.iconClass" v-on:on-icon-selected="onSelectedIcons"></icon-picker>
+            <icon-picker :startIcon="subjectInternal.iconClass" v-on:on-icon-selected="onSelectedIcons"></icon-picker>
           </div>
           <div class="field">
             <label class="label">Subject Name</label>
@@ -39,37 +32,21 @@
           <span><i class="fas fa-question-circle"></i></span>
         </b-tooltip>
         <span v-on:click="toggleSubject()">
-          <a class="is-info" v-bind:class="{'disableControl': isEdit}" v-if="!canEditSubjectId">Enable</a>
-          <a class="is-info" v-if="canEditSubjectId">Disable</a>
-        </span>
+            <a class="is-info" v-bind:class="{'disableControl': isEdit}" v-if="!canEditSubjectId">Enable</a>
+            <a class="is-info" v-if="canEditSubjectId">Disable</a>
+          </span>
       </p>
 
       <div class="field">
         <label class="label">Description</label>
         <div class="control">
-          <markdown-editor :value="subject.description" @value-updated="updateDescription"></markdown-editor>
+          <markdown-editor :value="subjectInternal.description" @value-updated="updateDescription"></markdown-editor>
         </div>
       </div>
 
       <p v-if="overallErrMsg" class="help is-danger has-text-centered">***{{ overallErrMsg }}***</p>
-    </section>
-
-    <footer class="modal-card-foot skills-justify-content-right">
-      <a class="button is-outlined" v-on:click="$parent.close()">
-        <span class="icon is-small">
-          <i class="fas fa-stop-circle"/>
-        </span>
-        <span>Cancel</span>
-      </a>
-
-      <a class="button is-primary is-outlined" v-on:click="updateSubject" :disabled="errors.any()">
-        <span class="icon is-small">
-          <i class="fas fa-arrow-circle-right"/>
-        </span>
-        <span>Save</span>
-      </a>
-    </footer>
-  </div>
+    </template>
+  </modal>
 </template>
 
 <script>
@@ -77,12 +54,14 @@
   import SubjectsService from './SubjectsService';
   import IconPicker from '../utils/iconPicker/IconPicker';
   import MarkdownEditor from '../utils/MarkdownEditor';
+  import Modal from '../utils/modal/Modal';
 
   let self = null;
 
   export default {
     name: 'EditSubject',
     components: {
+      Modal,
       IconPicker,
       MarkdownEditor,
     },
@@ -113,7 +92,7 @@
         Validator.extend('uniqueName', {
           getMessage: field => `The value for the ${field} is already taken.`,
           validate(value) {
-            return SubjectsService.subjectWithNameExists(self.subject.projectId, value)
+            return SubjectsService.subjectWithNameExists(self.subjectInternal.projectId, value)
               .catch(e => this.serverErrors.push(e));
           },
         }, {
@@ -123,7 +102,7 @@
         Validator.extend('uniqueId', {
           getMessage: field => `The value for the ${field} is already taken.`,
           validate(value) {
-            return SubjectsService.subjectWithIdExists(self.subject.projectId, value)
+            return SubjectsService.subjectWithIdExists(self.subjectInternal.projectId, value)
               .catch(e => this.serverErrors.push(e));
           },
         }, {
@@ -134,7 +113,15 @@
     mounted() {
       self = this;
     },
+    computed: {
+      title() {
+        return this.isEdit ? 'Editing Existing Subject' : 'New Subject';
+      },
+    },
     methods: {
+      closeMe() {
+        this.$parent.close();
+      },
       updateDescription(value) {
         this.subjectInternal.description = value.value;
       },
@@ -165,8 +152,5 @@
 </script>
 
 <style scoped>
-  .disableControl {
-    pointer-events: none;
-    color: #a8a8a8;
-  }
+
 </style>

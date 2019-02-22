@@ -1,9 +1,7 @@
 <template>
     <div id="gfmDescription" class="modal-card" style="width: 1110px;">
-      <header class="modal-card-head">
-        <p class="modal-card-title"><i class="fab fa-markdown"></i> Markdown Syntax</p>
-        <button class="delete" aria-label="close" v-on:click="$parent.close()"></button>
-      </header>
+      <modal-header title="Markdown Syntax" @cancel-clicked="$parent.close()"></modal-header>
+
 
       <section class="modal-card-body content">
         <p>Descriptions support GFM (Git Flavored Markdown). Some limited examples of the supported formatting are:</p>
@@ -89,8 +87,11 @@
 </template>
 
 <script>
+  import ModalHeader from './modal/ModalHeader';
+
   export default {
     name: 'GFMDescription',
+    components: { ModalHeader },
     props: [],
     data() {
       return {
