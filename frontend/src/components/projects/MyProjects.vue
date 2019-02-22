@@ -12,7 +12,7 @@
         </div>
         <div class="level-right">
           <div class="level-item">
-            <a v-on:click="newProject" class="button is-outlined is-info">
+            <a v-on:click="newProject" class="button is-outlined is-success">
               <span>Add New Project</span>
               <span class="icon is-small">
                 <i class="fas fa-plus-circle"/>
@@ -36,7 +36,7 @@
           Create your first project today by pressing
           </p>
           <p class="has-text-centered">
-            <a v-on:click="newProject" class="button is-outlined is-info">
+            <a v-on:click="newProject" class="button is-outlined is-success">
               <span>Add New Project</span>
               <span class="icon is-small">
               <i class="fas fa-plus-circle"/>
@@ -100,7 +100,8 @@
           parent: this,
           component: EditProject,
           hasModalCard: true,
-          width: 700,
+          canCancel: false,
+          // width: 400,
           props: {
             project: { name: '', projectId: '' },
           },

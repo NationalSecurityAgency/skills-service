@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="columns">
-      <div class="column is-full">
+      <div class="column is-full skills-underline-container">
         <span class="title is-3">Skill Dependencies</span>
       </div>
     </div>

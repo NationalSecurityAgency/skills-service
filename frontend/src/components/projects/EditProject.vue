@@ -1,19 +1,11 @@
 <template>
-  <!--<div class="modal-background"></div>-->
-  <div class="modal-card" style="width: 500px">
-    <header class="modal-card-head">
-      <p v-if="isEdit" class="modal-card-title">Editing Existing Project</p>
-      <p v-else class="modal-card-title">New Project</p>
-      <button class="delete" aria-label="close" v-on:click="$parent.close()"></button>
-    </header>
-
-    <section class="modal-card-body">
-
-      <div class="field">
+  <modal :title="title" @cancel-clicked="closeMe" @save-clicked="updateProject">
+    <template slot="content">
+      <div class="field" style="width: 500px">
         <label class="label">Project Name</label>
         <div class="control">
           <input class="input" type="text" v-model="internalProject.name" v-on:input="updateProjectId"
-            v-validate="'required|min:3|max:50|uniqueName'" data-vv-delay="500" name="projectName" v-focus/>
+                 v-validate="'required|min:3|max:50|uniqueName'" data-vv-delay="500" name="projectName" v-focus/>
         </div>
         <p class="help is-danger" v-show="errors.has('projectName')">{{ errors.first('projectName')}}</p>
       </div>
@@ -27,44 +19,27 @@
         <p class="help is-danger" v-show="errors.has('projectId')">{{ errors.first('projectId')}}</p>
       </div>
       <p class="control has-text-right">
-        <b-tooltip label="Enable to override auto-generated ID."
-                   position="is-left" animanted="true" type="is-light">
-          <span><i class="fas fa-question-circle"></i></span>
-        </b-tooltip>
+        <help-item msg="Enable to override auto-generated ID" position="is-left"></help-item>
         <span v-on:click="toggleProject()">
-          <a class="is-info" v-bind:class="{'disableControl': isEdit}" v-if="!canEditProjectId">Enable</a>
-          <a class="is-info" v-if="canEditProjectId">Disable</a>
+          <a class="is-info" v-if="!canEditProjectId">Enable</a>
+          <a class="is-info" v-else>Disable</a>
         </span>
       </p>
 
       <p v-if="overallErrMsg" class="help is-danger has-text-centered">***{{ overallErrMsg }}***</p>
-    </section>
-
-    <div class="modal-card-foot skills-justify-content-right">
-        <a class="button is-outlined" v-on:click="$parent.close()">
-          <span>Cancel</span>
-          <span class="icon is-small">
-              <i class="fas fa-stop-circle"/>
-            </span>
-        </a>
-
-        <a class="button is-primary is-outlined" v-on:click="updateProject"
-          :disabled="errors.any() || internalProject.projectName === ''">
-          <span>Save</span>
-          <span class="icon is-small">
-            <i class="fas fa-arrow-circle-right"/>
-            </span>
-        </a>
-    </div>
-  </div>
+    </template>
+  </modal>
 </template>
 
 <script>
   import { Validator } from 'vee-validate';
   import ProjectService from './ProjectService';
+  import HelpItem from '../utils/HelpItem';
+  import Modal from '../utils/modal/Modal';
 
   export default {
     name: 'EditProject',
+    components: { Modal, HelpItem },
     props: ['project', 'isEdit'],
     data() {
       return {
@@ -110,13 +85,21 @@
         });
       }
     },
+    computed: {
+      title() {
+        return this.isEdit ? 'Editing Existing Project' : 'New Project';
+      },
+    },
     methods: {
+      closeMe() {
+        this.$parent.close();
+      },
       updateProject() {
         this.$validator.validateAll().then((res) => {
           if (!res) {
             this.overallErrMsg = 'Form did NOT pass validation, please fix and try to Save again';
           } else {
-            this.$parent.close();
+            this.closeMe();
             this.$emit('project-created', this.internalProject);
           }
         });
@@ -127,20 +110,13 @@
         }
       },
       toggleProject() {
-        this.canEditProjectId = !this.canEditProjectId && !this.isEdit;
+        this.canEditProjectId = !this.canEditProjectId;
         this.updateProjectId();
       },
     },
   };
 </script>
 
-<style scoped>
-  .disableField {
-    pointer-events: none;
-    background-color: #f0f0f0;
-  }
-  .disableControl {
-    pointer-events: none;
-    color: #a8a8a8;
-  }
+<style lang="scss" scoped>
+
 </style>

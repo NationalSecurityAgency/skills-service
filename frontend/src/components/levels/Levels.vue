@@ -1,18 +1,18 @@
 <template>
   <div id="level-def-panel">
-    <div class="columns">
+    <div class="columns skills-underline-container">
       <div class="column">
         <div class="title">Level Defintions</div>
       </div>
       <div class="column has-text-right">
-        <a v-on:click="removeLastItem" class="button is-outlined is-info">
+        <a v-on:click="removeLastItem" class="button is-outlined is-success">
           <span>Remove Highest Level</span>
           <span class="icon is-small">
               <i class="fas fa-trash-alt"/>
             </span>
         </a>
 
-        <a v-on:click="editLevel()" class="button is-outlined is-info">
+        <a v-on:click="editLevel()" class="button is-outlined is-success">
           <span>Add Next Level</span>
           <span class="icon is-small">
               <i class="fas fa-plus-circle"/>
@@ -41,7 +41,7 @@
         </span>
 
         <div slot="edit" slot-scope="props" class="">
-          <a v-on:click="editLevel(props.row)" class="button is-outlined is-info">
+          <a v-on:click="editLevel(props.row)" class="button is-outlined is-success">
                     <span class="icon is-small">
                       <i class="fas fa-edit"/>
                     </span>
