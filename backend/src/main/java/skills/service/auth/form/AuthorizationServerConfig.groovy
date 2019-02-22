@@ -35,6 +35,8 @@ class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
     private int accessTokenValiditySeconds = 10000
     private int refreshTokenValiditySeconds = 30000
 
+    static final String SKILLS_PROXY_USER = 'proxy_user'
+
     @Value('#{"${security.oauth2.resource.id:skills-service-oauth}"}')
     private String resourceId
 
@@ -119,8 +121,6 @@ class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
 
     @Slf4j
     static class SkillsProxyUserTokenEnhancer implements TokenEnhancer {
-
-        static final String SKILLS_PROXY_USER = 'proxy-user'
 
         @Override
         OAuth2AccessToken enhance(OAuth2AccessToken accessToken, OAuth2Authentication authentication) {
