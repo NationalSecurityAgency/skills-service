@@ -54,9 +54,9 @@
 </template>
 
 <script>
-  import axios from 'axios';
   import NewLevel from './NewLevel';
   import SettingService from '../settings/SettingsService';
+  import LevelService from './LevelService';
 
   export default {
     name: 'Levels',
@@ -125,25 +125,24 @@
       this.loadLevels();
     },
     methods: {
-      getLevelsUrl() {
-        let url = `/admin/projects/${this.projectId}`;
-        if (this.subjectId) {
-          url = `${url}/subjects/${this.subjectId}/levels`;
-        } else {
-          url = `${url}/levels`;
-        }
-        return url;
-      },
       loadLevels() {
-        const url = this.getLevelsUrl();
-        axios.get(url)
-          .then((response) => {
+        if (this.subjectId) {
+          LevelService.getLevelsForSubject(this.projectId, this.subjectId).then((response) => {
             this.isLoading = false;
-            this.levels = response.data;
+            this.levels = response;
           })
-          .catch((e) => {
-            this.serverErrors.push(e);
-        });
+            .catch((e) => {
+              this.serverErrors.push(e);
+          });
+        } else {
+          LevelService.getLevelsForProject(this.projectId).then((response) => {
+            this.isLoading = false;
+            this.levels = response;
+          })
+            .catch((e) => {
+              this.serverErrors.push(e);
+          });
+        }
       },
       removeLastItem() {
         this.$dialog.confirm({
@@ -160,14 +159,23 @@
       },
       doRemoveLastItem() {
         this.isLoading = true;
-        const url = `${this.getLevelsUrl()}/last`;
-        axios.delete(url)
-          .then(() => {
+        if (this.subjectId) {
+          LevelService.deleteLastLevelForSubject(this.projectId, this.subjectId).then(() => {
+            this.isLoading = false;
             this.loadLevels();
           })
-          .catch((e) => {
-            this.serverErrors.push(e);
-        });
+            .catch((e) => {
+              this.serverErrors.push(e);
+          });
+        } else {
+          LevelService.deleteLastLevelForProject(this.projectId).then(() => {
+            this.isLoading = false;
+            this.loadLevels();
+          })
+            .catch((e) => {
+              this.serverErrors.push(e);
+          });
+        }
       },
       editLevel(existingLevel) {
         let editProps = null;
@@ -186,7 +194,7 @@
         } else {
           editProps = {
             levelAsPoints: this.levelsAsPoints,
-            iconClass: 'fas fa-arrow-circle-up',
+            iconClass: 'fas user-ninja',
             isEdit: false,
           };
         }
@@ -204,25 +212,43 @@
       },
       doCreateNewLevel(nextLevelObj) {
         this.loading = true;
-        const url = `${this.getLevelsUrl()}/next`;
-        axios.put(url, nextLevelObj)
-          .then(() => {
+        if (this.subjectId) {
+          LevelService.createNewLevelForSubject(this.projectId, this.subjectId, nextLevelObj).then(() => {
+            this.isLoading = false;
             this.loadLevels();
           })
-          .catch((e) => {
-            this.serverErrors.push(e);
-        });
+            .catch((e) => {
+              this.serverErrors.push(e);
+          });
+        } else {
+          LevelService.createNewLevelForProject(this.projectId, nextLevelObj).then(() => {
+            this.isLoading = false;
+            this.loadLevels();
+          })
+            .catch((e) => {
+              this.serverErrors.push(e);
+          });
+        }
       },
       doEditLevel(editedLevelObj) {
         this.loading = true;
-        const url = `${this.getLevelsUrl()}/edit/${editedLevelObj.id}`;
-        axios.put(url, editedLevelObj)
-          .then(() => {
+        if (this.subjectId) {
+          LevelService.editlevelForSubject(this.projectId, this.subjectId, editedLevelObj).then(() => {
+            this.isLoading = false;
             this.loadLevels();
           })
-          .catch((e) => {
-            this.serverErrors.push(e);
-        });
+            .catch((e) => {
+              this.serverErrors.push(e);
+          });
+        } else {
+          LevelService.editlevelForProject(this.projectId, editedLevelObj).then(() => {
+            this.isLoading = false;
+            this.loadLevels();
+          })
+            .catch((e) => {
+              this.serverErrors.push(e);
+          });
+        }
       },
     },
   };

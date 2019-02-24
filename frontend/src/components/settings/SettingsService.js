@@ -9,4 +9,8 @@ export default {
     return axios.post(`/admin/projects/${projectId}/settings/${settingObj.setting}`, settingObj)
       .then(remoteRes => remoteRes.data);
   },
+  getSettingsForProject(projectId) {
+    return axios.get(`/admin/projects/${projectId}/settings`)
+      .then(remoteRes => remoteRes.data);
+  },
 };

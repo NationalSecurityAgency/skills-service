@@ -108,7 +108,9 @@ class AdminProjService {
             log.info("Created project [{}]", projectDefinition)
 
             List<LevelDef> levelDefinitions = levelDefService.createDefault()
-            projectDefinition.levelDefinitions = levelDefinitions
+            levelDefinitions.each{
+                projectDefinition.addLevel(it)
+            }
 
             projectDefinition = projDefRepo.save(projectDefinition)
             log.info("Saved [{}]", projectDefinition)
@@ -152,7 +154,9 @@ class AdminProjService {
                     displayOrder: displayOrder
             )
 
-            skillDef.levelDefinitions = levelDefService.createDefault()
+            levelDefService.createDefault().each{
+                skillDef.addLevel(it)
+            }
 
             res = skillDefRepo.save(skillDef)
             log.info("Created [{}]", res)
