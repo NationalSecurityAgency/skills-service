@@ -45,6 +45,9 @@ class ProjDef implements Serializable {
         if (level == null) {
             throw new IllegalArgumentException("cannot add null level")
         }
+        if(levelDefinitions == null){
+            levelDefinitions = []
+        }
         if (level.getProjDef() != null) {
             level.getProjDef().getLevelDefinitions().remove(level)
         }

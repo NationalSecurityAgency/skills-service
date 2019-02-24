@@ -15,7 +15,7 @@
             <span><i class="fas fa-question-circle"></i></span>
             </b-tooltip>
             Use Points For Levels:
-            <b-switch v-model="levelPointsSetting.value">
+            <b-switch v-model="levelPointsSetting.value" v-on:input="settingChanged">
               {{ levelPointsSetting.value }}
             </b-switch>
           </span>
@@ -31,6 +31,10 @@
               <i class="fas fa-arrow-circle-right"/>
               </span>
           </a>
+          <b-tooltip v-if="dirty" label="Settings have been changed, don't forget to save"
+                     position="is-right" animanted="true" type="is-light">
+            <span><i class="mi mi-warning"></i></span>
+          </b-tooltip>
         </div>
       </div>
     </div>
@@ -38,45 +42,70 @@
 </template>
 
 <script>
-  import SettingService from '../settings/SettingsService';
+  import SettingService from './SettingsService';
+  import ToastHelper from '../utils/ToastHelper';
 
+  const initialSettingValue = { value: 'false', setting: 'level.points.enabled' };
   export default {
     name: 'ProjectSettings',
     props: ['projectId'],
     data() {
       return {
         isLoading: true,
-        levelPointsSetting: { value: false, setting: 'level.points.enabled', projectId: this.projectId },
+        levelPointsSetting: Object.assign({ projectId: this.projectId }, initialSettingValue),
+        lastLoadedValue: null,
         serverErrors: [],
+        dirty: false,
       };
     },
     mounted() {
       this.loadSettings();
     },
     methods: {
+      settingChanged(value) {
+        if (value+'' !== this.lastLoadedValue.value) {
+          this.dirty = true;
+        } else {
+          this.dirty = false;
+        }
+      },
       loadSettings() {
         SettingService.getSetting(this.projectId, this.levelPointsSetting.setting)
           .then((response) => {
             this.isLoading = false;
             if (response) {
               this.levelPointsSetting = response;
+            } else {
+              this.levelPointsSetting = Object.assign({ projectId: this.projectId }, initialSettingValue);
             }
+            this.lastLoadedValue = Object.assign({}, this.levelPointsSetting);
           })
           .catch((e) => {
             this.serverErrors.push(e);
         });
       },
       save() {
+        const self = this;
         this.isLoading = true;
         SettingService.saveSetting(this.projectId, this.levelPointsSetting)
           .then((res) => {
             this.isLoading = false;
+            this.dirty = false;
             this.levelPointsSetting = res;
+            this.$toast.open(ToastHelper.defaultConf('Successfully saved settings!', false));
           })
           .catch((e) => {
+            this.dirty = false;
+            self.loadSettings();
             this.isLoading = false;
             this.serverErrors.push(e);
-            throw e;
+            if (e && e.response) {
+              if (e.response.data && e.response.data.errorMsg) {
+                this.$toast.open(ToastHelper.defaultConf(`Error saving settings: ${e.response.data.errorMsg}`, true));
+              } else {
+                this.$toast.open(ToastHelper.defaultConf(`Error saving settings: ${e.response.status} - ${e.response.statusText}`, true));
+              }
+            }
         });
       },
     },

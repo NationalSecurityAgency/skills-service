@@ -10,6 +10,8 @@ import skills.storage.model.Setting
 import skills.storage.repos.SettingRepo
 import skills.utils.Props
 
+import javax.transaction.Transactional
+
 @Service
 @Slf4j
 class SettingsService {
@@ -22,7 +24,7 @@ class SettingsService {
     @Autowired
     List<SettingChangedListener> listeners = [];
 
-
+    @Transactional
     public SettingsResult saveSetting(SettingsRequest request) {
         Setting setting
 
@@ -66,6 +68,7 @@ class SettingsService {
         }
     }
 
+    @Transactional
     List<SettingsResult> loadSettingsForProject(String projectId){
         def result = []
         settingRepo.findAllByProjectId(projectId)?.each{
@@ -77,6 +80,7 @@ class SettingsService {
         return result
     }
 
+    @Transactional
     List<SettingsResult> loadSettingsByType(String projectId, String settingGroup){
         def result = []
         settingRepo.findAllByProjectIdAndSettingGroup(projectId, settingGroup)?.each{
@@ -88,6 +92,7 @@ class SettingsService {
         return result
     }
 
+    @Transactional
     SettingsResult getSetting(String projectId, String setting){
         List<Setting> settings = settingRepo.findAllByProjectIdAndSetting(projectId, setting)
         if(!settings){
@@ -104,6 +109,7 @@ class SettingsService {
      * Note that this method must only be called by users with the ADMIN role
      * @return
      */
+    @Transactional
     List<SettingsResult> loadSystemSettings(){
         List<Setting> systemSettings = settingRepo.findAllBySettingGroup(SYSTEM_SETTINGS)
         List<SettingsResult> resultList = []

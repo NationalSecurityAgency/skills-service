@@ -3,6 +3,8 @@ package skills.service.datastore.services.settings.listeners
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
+import skills.service.controller.exceptions.ErrorCode
+import skills.service.controller.exceptions.SkillException
 import skills.service.controller.request.model.SettingsRequest
 import skills.service.controller.result.model.LevelDefinitionRes
 import skills.service.datastore.services.LevelDefinitionStorageService
@@ -19,6 +21,8 @@ import javax.transaction.Transactional
 @Slf4j
 @Component
 class LevelPointsSettingListener implements SettingChangedListener{
+
+    static final int MIN_TOTAL_POINTS_REQUIRED_TO_SWITCH = 100
 
     @Autowired
     ProjDefRepo projDefRepo
@@ -38,6 +42,13 @@ class LevelPointsSettingListener implements SettingChangedListener{
 
         if(setting.isEnabled() && (!previousValue?.isEnabled())){
             log.info("converting all levels for project [${setting.projectId}] (including skill levels) to points")
+            if(project?.totalPoints < MIN_TOTAL_POINTS_REQUIRED_TO_SWITCH){
+                throw new SkillException("Project has [${project.totalPoints}] total points. " +
+                        "[$MIN_TOTAL_POINTS_REQUIRED_TO_SWITCH] total points required to switch to points based levels",
+                        project.projectId,
+                        "N/A",
+                        ErrorCode.InsufficientPointsToConvertLevels)
+            }
             convertToPoints(project.levelDefinitions, project.totalPoints)
             project.subjects?.each{
                 convertToPoints(it.levelDefinitions, it.totalPoints)

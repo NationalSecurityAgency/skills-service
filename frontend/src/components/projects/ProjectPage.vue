@@ -112,7 +112,7 @@
   import LoadingContainer from '../utils/LoadingContainer';
   import ProjectStats from '../stats/ProjectStats';
   import FullDependencyGraph from '../skills/dependencies/FullDependencyGraph';
-  import ProjectSettings from './ProjectSettings';
+  import ProjectSettings from '../settings/ProjectSettings';
   import CrossProjectsSkills from '../skills/crossProjects/CrossProjectsSkills';
 
   export default {

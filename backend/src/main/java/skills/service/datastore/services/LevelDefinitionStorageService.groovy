@@ -39,7 +39,7 @@ class LevelDefinitionStorageService {
     SettingsService settingsService
 
     // this could also come from DB.. eventually
-    List<Integer> defaultPercentages = [10, 25, 45, 67, 92]
+    Map<String,Integer> defaultPercentages = ["White Belt":10, "Blue Belt":25, "Purple Belt":45, "Brown Belt":67, "Black Belt":92]
 
 
     LevelInfo getLevelInfo(SkillDef skillDefinition, int currentScore) {
@@ -145,7 +145,7 @@ class LevelDefinitionStorageService {
         List<Integer> levelScores = []
         if(!setting?.isEnabled()) {
             levelScores = levelDefinitions.sort({ it.level }).collect {
-                return (int) (totalPoints * (it.percent / 100d))
+                return totalPoints > 0 ? (int) (totalPoints * (it.percent / 100d)) : null
             }
         }
 
@@ -351,10 +351,12 @@ class LevelDefinitionStorageService {
 
     List<LevelDef> createDefault() {
         List<LevelDef> res = []
-        defaultPercentages.eachWithIndex { int entry, int i ->
-            res << new LevelDef(level: i + 1, percent: entry)
+        int i=0
+        defaultPercentages.each { String name, Integer percentage ->
+            def levelDef = new LevelDef(level: ++i, percent: percentage, name: name, iconClass: "fas fa-user-ninja")
+            log.info("creating default level $levelDef")
+            res << levelDef
         }
-
         levelDefinitionRepository.saveAll(res)
     }
 }
