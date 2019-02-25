@@ -226,6 +226,7 @@ class LevelDefinitionStorageService {
     @Transactional(isolation = Isolation.SERIALIZABLE)
     LevelDef editLevel(String projectId, EditLevelRequest editLevelRequest, String levelId, String skillId = null) {
         SettingsResult setting = settingsService.getSetting(projectId, Settings.LEVEL_AS_POINTS.settingName)
+        assert editLevelRequest.name?.length() <= 50
         boolean asPoints = false
         if(setting?.isEnabled()){
             asPoints = true
@@ -291,7 +292,7 @@ class LevelDefinitionStorageService {
     @Transactional(isolation = Isolation.SERIALIZABLE)
     LevelDef addNextLevel(String projectId, NextLevelRequest nextLevelRequest, String skillId = null) {
         SettingsResult setting = settingsService.getSetting(projectId, Settings.LEVEL_AS_POINTS.settingName)
-
+        assert nextLevelRequest.name?.length() <= 50
         boolean asPoints = false
         if(setting?.isEnabled()){
             asPoints = true

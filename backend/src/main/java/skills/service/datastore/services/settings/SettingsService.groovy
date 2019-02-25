@@ -92,7 +92,7 @@ class SettingsService {
         return result
     }
 
-    @Transactional
+    @Transactional()
     SettingsResult getSetting(String projectId, String setting){
         List<Setting> settings = settingRepo.findAllByProjectIdAndSetting(projectId, setting)
         if(!settings){
