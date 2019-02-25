@@ -8,16 +8,22 @@ import javax.transaction.Transactional
 
 interface SettingRepo extends CrudRepository<Setting, Integer> {
 
+    @Transactional
     List<Setting> findAllByProjectId(String projectId)
 
+    @Transactional
     List<Setting> findAllBySettingGroup(String settingGroup)
 
+    @Transactional
     List<Setting> findAllByProjectIdAndSettingGroup(String projectId, String settingGroup)
 
+    @Transactional
     void delete(Setting toDelete)
 
+    @Transactional
     List<Setting> findAllByProjectIdAndSetting(String projectid, String setting)
 
+    @Transactional
     List<Setting> findAllBySetting(String setting)
 
     @Transactional

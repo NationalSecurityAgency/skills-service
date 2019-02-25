@@ -33,7 +33,7 @@
           </a>
           <b-tooltip v-if="dirty" label="Settings have been changed, don't forget to save"
                      position="is-right" animanted="true" type="is-light">
-            <span><i class="mi mi-warning"></i></span>
+            <span><i class="mi mi-warning dirty-warning"></i></span>
           </b-tooltip>
         </div>
       </div>
@@ -63,7 +63,8 @@
     },
     methods: {
       settingChanged(value) {
-        if (value+'' !== this.lastLoadedValue.value) {
+        const valueStr = `${value}`;
+        if (valueStr !== this.lastLoadedValue.value) {
           this.dirty = true;
         } else {
           this.dirty = false;
@@ -114,5 +115,8 @@
 </script>
 
 <style scoped>
+  .dirty-warning {
+    color: #E6B34F;
+  }
 
 </style>

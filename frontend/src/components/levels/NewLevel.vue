@@ -31,7 +31,7 @@
         </template>
         <b-field label="Name" :type="{'help is-danger': errors.has('name')}"
                  :message="errors.first('name')">
-          <b-input v-model="nameInternal" name="name"></b-input>
+          <b-input v-model="nameInternal" name="name" v-validate="'max:50'"></b-input>
         </b-field>
       </template>
       <template v-else>
@@ -45,7 +45,7 @@
         </b-field>
         <b-field label="Name" :type="{'help is-danger': errors.has('name')}"
                  :message="errors.first('name')">
-          <b-input v-model="nameInternal" name="name"></b-input>
+          <b-input v-model="nameInternal" name="name" v-validate="'max:50'"></b-input>
         </b-field>
       </template>
     </section>
