@@ -13,7 +13,7 @@
         <module>backend</module>
     </modules>
     <properties>
-        <nexusServer>http://10.113.80.244/repository/</nexusServer>
+        <nexusServer></nexusServer>
         <main.basedir>${project.basedir}</main.basedir>
         <java.version>1.8</java.version>
 
