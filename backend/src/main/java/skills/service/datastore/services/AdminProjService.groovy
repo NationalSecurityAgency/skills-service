@@ -80,6 +80,7 @@ class AdminProjService {
     ProjectResult saveProject(ProjectRequest projectRequest) {
         assert projectRequest?.projectId
         assert projectRequest?.name
+        assert projectRequest?.secretCode
 
         IdFormatValidator.validate(projectRequest.projectId)
 
@@ -87,7 +88,7 @@ class AdminProjService {
         if (projectRequest.id) {
             Optional<ProjDef> existing = projDefRepo.findById(projectRequest.id)
             if (!existing.present) {
-                throw new SkillException("Requested subject update id [${projectRequest.id}] doesn't exist.", projectRequest.projectId, null)
+                throw new SkillException("Requested project update id [${projectRequest.id}] doesn't exist.", projectRequest.projectId, null)
             }
             log.info("Updating with [{}]", projectRequest)
             projectDefinition = existing.get()
@@ -104,7 +105,7 @@ class AdminProjService {
             Integer lastDisplayOrder = projectDefinitions ? projectDefinitions.collect({ it.displayOrder }).max() : 0
             int displayOrder = lastDisplayOrder == null ? 0 : lastDisplayOrder + 1
 
-            projectDefinition = new ProjDef(projectId: projectRequest.projectId, name: projectRequest.name, displayOrder: displayOrder)
+            projectDefinition = new ProjDef(projectId: projectRequest.projectId, name: projectRequest.name, displayOrder: displayOrder, secretCode: projectRequest.secretCode)
             log.info("Created project [{}]", projectDefinition)
 
             List<LevelDef> levelDefinitions = levelDefService.createDefault()
@@ -522,7 +523,8 @@ class AdminProjService {
                 id: definition.id,
                 projectId: definition.projectId, name: definition.name, totalPoints: definition.totalPoints,
                 numSubjects: definition.subjects ? definition.subjects.size() : 0,
-                displayOrder: definition.displayOrder
+                displayOrder: definition.displayOrder,
+                secretCode: definition.secretCode
         )
         res.numUsers = projDefRepo.calculateDistinctUsers(definition.projectId)
         res.numSkills = skillDefRepo.countByProjectIdAndType(definition.projectId, SkillDef.ContainerType.Skill)

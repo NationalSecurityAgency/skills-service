@@ -2,18 +2,17 @@ package skills.service.controller
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.ResponseEntity
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.web.bind.annotation.*
-import skills.service.auth.UserInfo
 import skills.service.controller.request.model.ProjectRequest
 import skills.service.controller.result.model.CustomIconResult
-import skills.service.controller.result.model.ProjectResult
 import skills.service.controller.result.model.ProjectResult
 import skills.service.datastore.services.AdminProjService
 import skills.service.icons.CustomIconFacade
 import skills.service.icons.IconCssNameUtil
 import skills.storage.model.CustomIcon
 import skills.storage.model.ProjDef
+import skills.utils.SecretCodeGenerator
 
 @RestController
 @RequestMapping("/app")
@@ -24,6 +23,9 @@ class ProjectController {
 
     @Autowired
     CustomIconFacade customIconFacade
+
+    @Autowired
+    PasswordEncoder passwordEncoder
 
     @RequestMapping(value = "/projects", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
@@ -38,6 +40,7 @@ class ProjectController {
         assert projectRequest?.name
         assert projectId == projectRequest.projectId
 
+        projectRequest.secretCode = new SecretCodeGenerator().generateSecretCode()
         return projectAdminStorageService.saveProject(projectRequest)
     }
 
