@@ -6,7 +6,7 @@ const getters = {
     return state.userInfo;
   },
   isAuthenticated(state) {
-    return (state.token !== null || state.localAuth || state.oAuthAuth || state.pkiAuth) && state.userInfo;
+    return (state.token !== null || state.localAuth || state.oAuthAuth || state.pkiAuth) && state.userInfo !== null;
   },
   isPkiAuthenticated(state) {
     return state.pkiAuth;
@@ -33,7 +33,7 @@ const mutations = {
   },
   clearAuthData(state) {
     state.token = null;
-    state.userId = null;
+    state.userInfo = null;
     state.localAuth = false;
     state.oAuthAuth = false;
     localStorage.removeItem('localAuth');

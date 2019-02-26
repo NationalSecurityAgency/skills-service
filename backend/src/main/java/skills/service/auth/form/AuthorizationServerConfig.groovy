@@ -13,7 +13,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken
 import org.springframework.security.oauth2.common.OAuth2AccessToken
-import org.springframework.security.oauth2.config.annotation.builders.ClientDetailsServiceBuilder
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer
@@ -159,7 +158,7 @@ class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
             result.setAuthorizedGrantTypes(["client_credentials"])
             result.setAuthorities([new SimpleGrantedAuthority("ROLE_TRUSTED_CLIENT")])
             result.setResourceIds([resourceId])
-            result.setClientSecret(passwordEncoder.encode(projDef.secretCode))
+            result.setClientSecret(passwordEncoder.encode(projDef.clientSecret))
             return result
         }
     }

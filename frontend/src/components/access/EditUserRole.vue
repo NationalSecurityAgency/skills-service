@@ -36,9 +36,9 @@
 </template>
 
 <script>
-  import axios from 'axios';
   import { Validator } from 'vee-validate';
   import UserDnInput from '../utils/UserDnInput';
+  import AccessService from './AccessService';
 
   const dictionary = {
     en: {
@@ -72,15 +72,11 @@
           if (!res) {
             this.isSaving = false;
           } else {
-            axios.put(`/admin/projects/${this.projectId}/users/${this.$refs.userDn.$data.userDn}/roles/${this.roleNameVal}`, {
-              userDnVal: this.$refs.userDn.$data.userDn,
-              projectIdVal: this.projectIdVal,
-              roleNameVal: this.roleNameVal,
-            })
+            AccessService.saveUserRole(this.projectId, this.$refs.userDn.$data.userDn, this.roleNameVal)
               .then((result) => {
                 this.isSaving = false;
                 this.$parent.close();
-                this.$emit('user-role-created', result.data);
+                this.$emit('user-role-created', result);
               })
               .catch((e) => {
                 this.isSaving = false;

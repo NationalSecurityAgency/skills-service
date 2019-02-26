@@ -6,14 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.web.bind.annotation.*
 import skills.service.controller.request.model.*
-import skills.service.controller.result.model.BadgeResult
-import skills.service.controller.result.model.LevelDefinitionRes
-import skills.service.controller.result.model.ProjectResult
-import skills.service.controller.result.model.SettingsResult
-import skills.service.controller.result.model.SkillDefRes
-import skills.service.controller.result.model.SkillsGraphRes
-import skills.service.controller.result.model.SubjectResult
-import skills.service.controller.result.model.TableResult
 import skills.service.controller.result.model.*
 import skills.service.datastore.services.AdminProjService
 import skills.service.datastore.services.AdminUsersService
@@ -21,6 +13,7 @@ import skills.service.datastore.services.LevelDefinitionStorageService
 import skills.service.datastore.services.settings.SettingsService
 import skills.service.datastore.services.UserAdminService
 import skills.storage.model.SkillDef
+import skills.utils.ClientSecretGenerator
 
 import static org.springframework.data.domain.Sort.Direction.ASC
 import static org.springframework.data.domain.Sort.Direction.DESC
@@ -514,4 +507,11 @@ class AdminController {
         settingsService.saveSetting(value)
     }
 
+    @RequestMapping(value = "/projects/{projectId}/resetClientSecret", method = [RequestMethod.POST, RequestMethod.PUT], produces = "application/json")
+    @ResponseBody
+    String resetClientSecret(@PathVariable("projectId") String projectId) {
+        String clientSecret = new ClientSecretGenerator().generateClientSecret()
+        projectAdminStorageService.updateClientSecret(projectId, clientSecret)
+        return clientSecret
+    }
 }

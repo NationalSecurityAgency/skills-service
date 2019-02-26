@@ -12,7 +12,7 @@ import skills.service.icons.CustomIconFacade
 import skills.service.icons.IconCssNameUtil
 import skills.storage.model.CustomIcon
 import skills.storage.model.ProjDef
-import skills.utils.SecretCodeGenerator
+import skills.utils.ClientSecretGenerator
 
 @RestController
 @RequestMapping("/app")
@@ -40,7 +40,7 @@ class ProjectController {
         assert projectRequest?.name
         assert projectId == projectRequest.projectId
 
-        projectRequest.secretCode = new SecretCodeGenerator().generateSecretCode()
+        projectRequest.clientSecret = new ClientSecretGenerator().generateClientSecret()
         return projectAdminStorageService.saveProject(projectRequest)
     }
 

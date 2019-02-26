@@ -8,5 +8,5 @@ class SimpleProjectResult {
 
     String name
 
-    String secretCode
+    String clientSecret
 }

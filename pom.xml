@@ -15,10 +15,10 @@
     <properties>
         <nexusServer></nexusServer>
         <main.basedir>${project.basedir}</main.basedir>
-        <java.version>1.8</java.version>
+        <java.version>1.11</java.version>
 
         <!-- can NOT name it groovy.version as spock's dependency picks it up-->
-        <groovy.version>2.5.3</groovy.version>
+        <groovy.version>2.5.5</groovy.version>
         <groovy.eclipse.compiler.version>3.0.0-01</groovy.eclipse.compiler.version>
         <groovy.eclipse.batch.version>2.5.1-02</groovy.eclipse.batch.version>
 

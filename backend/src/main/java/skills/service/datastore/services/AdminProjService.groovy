@@ -15,7 +15,6 @@ import skills.service.controller.exceptions.SkillException
 import skills.service.controller.request.model.*
 import skills.service.controller.result.model.BadgeResult
 import skills.service.controller.result.model.DependencyCheckResult
-import skills.service.controller.result.model.ProjectResult
 import skills.service.controller.result.model.SettingsResult
 import skills.service.controller.result.model.SkillDefRes
 import skills.service.controller.result.model.ProjectResult
@@ -80,7 +79,7 @@ class AdminProjService {
     ProjectResult saveProject(ProjectRequest projectRequest) {
         assert projectRequest?.projectId
         assert projectRequest?.name
-        assert projectRequest?.secretCode
+        assert projectRequest?.clientSecret
 
         IdFormatValidator.validate(projectRequest.projectId)
 
@@ -105,7 +104,7 @@ class AdminProjService {
             Integer lastDisplayOrder = projectDefinitions ? projectDefinitions.collect({ it.displayOrder }).max() : 0
             int displayOrder = lastDisplayOrder == null ? 0 : lastDisplayOrder + 1
 
-            projectDefinition = new ProjDef(projectId: projectRequest.projectId, name: projectRequest.name, displayOrder: displayOrder, secretCode: projectRequest.secretCode)
+            projectDefinition = new ProjDef(projectId: projectRequest.projectId, name: projectRequest.name, displayOrder: displayOrder, clientSecret: projectRequest.clientSecret)
             log.info("Created project [{}]", projectDefinition)
 
             List<LevelDef> levelDefinitions = levelDefService.createDefault()
@@ -524,7 +523,7 @@ class AdminProjService {
                 projectId: definition.projectId, name: definition.name, totalPoints: definition.totalPoints,
                 numSubjects: definition.subjects ? definition.subjects.size() : 0,
                 displayOrder: definition.displayOrder,
-                secretCode: definition.secretCode
+                clientSecret: definition.clientSecret
         )
         res.numUsers = projDefRepo.calculateDistinctUsers(definition.projectId)
         res.numSkills = skillDefRepo.countByProjectIdAndType(definition.projectId, SkillDef.ContainerType.Skill)
@@ -978,5 +977,12 @@ class AdminProjService {
     @Transactional
     List<SkillDefRes> getSkillsForBadge(String projectId, String badgeId) {
         return getSkillsByProjectSkillAndType(projectId, badgeId, SkillDef.ContainerType.Badge, RelationshipType.BadgeDependence)
+    }
+
+    @Transactional
+    void updateClientSecret(String projectId, String clientSecret) {
+        ProjDef projDef = getProjDef(projectId)
+        projDef.clientSecret = clientSecret
+
     }
 }

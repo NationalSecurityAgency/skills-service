@@ -27,7 +27,7 @@
               <!--</a>-->
             <!--</p>-->
             <p class="control">
-              <a v-on:click="deleteUserRole(props.row)" class="button is-outlined">
+              <a v-on:click="deleteUserRoleConfirm(props.row)" class="button is-outlined">
               <span class="icon is-small">
                 <i class="fas fa-trash"/>
               </span>
@@ -42,10 +42,10 @@
 </template>
 
 <script>
-  import axios from 'axios';
   import EditUserRole from './EditUserRole';
   import LoadingContainer from '../utils/LoadingContainer';
   import ToastHelper from '../utils/ToastHelper';
+  import AccessService from './AccessService';
 
   export default {
     name: 'UserRoles',
@@ -77,10 +77,10 @@
       };
     },
     mounted() {
-      axios.get(`/admin/projects/${this.project.projectId}/userRoles`)
-        .then((response) => {
+      AccessService.getUserRoles(this.project.projectId)
+        .then((result) => {
           this.isLoading = false;
-          this.data = response.data;
+          this.data = result;
         })
         .catch((e) => {
           this.serverErrors.push(e);
@@ -105,7 +105,7 @@
         this.data.push(userRole);
         this.$toast.open(ToastHelper.defaultConf(`Created '${userRole.roleName}' role`));
       },
-      deleteUserRole(row) {
+      deleteUserRoleConfirm(row) {
         this.$dialog.confirm({
           title: 'Delete Role',
           message: `Are you absolutely sure you want to delete [${row.roleName}] for user
@@ -113,11 +113,11 @@
           confirmText: 'Delete',
           type: 'is-danger',
           hasIcon: true,
-          onConfirm: () => this.deleteUserRoleAjax(row),
+          onConfirm: () => this.deleteUserRole(row),
         });
       },
-      deleteUserRoleAjax(row) {
-        axios.delete(`/admin/projects/${row.projectId}/users/${row.userId}/roles/${encodeURIComponent(row.roleName)}`)
+      deleteUserRole(row) {
+        AccessService.deleteUserRole(row.projectId, row.userId, row.roleName)
           .then(() => {
             this.data = this.data.filter(item => item.id !== row.id);
             this.$toast.open(ToastHelper.defaultConf(`Removed '${row.roleName}' role`));

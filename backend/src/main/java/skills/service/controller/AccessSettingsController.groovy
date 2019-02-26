@@ -2,22 +2,21 @@ package skills.service.controller
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.web.bind.annotation.*
 import skills.service.auth.UserInfo
-import skills.service.auth.UserInfoService
+import skills.service.datastore.services.AccessSettingsStorageService
 import skills.storage.model.auth.AllowedOrigin
 import skills.storage.model.auth.RoleName
 import skills.storage.model.auth.UserRole
-import skills.service.datastore.services.AccessSettingsStorageService
 
 @RestController
 @RequestMapping("/admin")
 @Slf4j
 class AccessSettingsController {
 
-
     @Autowired
-    UserInfoService userInfoService
+    UserDetailsService userDetailsService
 
     @Autowired
     AccessSettingsStorageService accessSettingsStorageService
@@ -65,6 +64,6 @@ class AccessSettingsController {
     }
 
     private UserInfo lookupUserInfo(String userDn) {
-        return userInfoService.lookupUser(userDn)
+        return userDetailsService.loadUserByUsername(userDn)
     }
 }
