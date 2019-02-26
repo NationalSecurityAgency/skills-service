@@ -2,9 +2,9 @@ package skills.utils
 
 import org.apache.commons.text.RandomStringGenerator
 
-class SecretCodeGenerator {
+class ClientSecretGenerator {
 
-    String generateSecretCode() {
+    String generateClientSecret() {
         String pwString = generateRandomNumbers(12)
                 .concat(generateRandomAlphabet(10, true))
                 .concat(generateRandomAlphabet(12, false))

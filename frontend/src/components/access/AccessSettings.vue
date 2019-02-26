@@ -6,17 +6,17 @@
       </div>
     </div>
     <user-roles :project="project"/>
-    <allowed-origins :project="project"/>
+    <trusted-client-props :project="project"/>
   </div>
 </template>
 
 <script>
   import UserRoles from './UserRoles';
-  import AllowedOrigins from './AllowedOrigins';
+  import TrustedClientProps from './TrustedClientProps';
 
   export default {
     name: 'AccessSettings',
-    components: { UserRoles, AllowedOrigins },
+    components: { UserRoles, TrustedClientProps },
     props: ['project'],
   };
 </script>

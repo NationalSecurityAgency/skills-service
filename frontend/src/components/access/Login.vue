@@ -84,8 +84,8 @@
 </template>
 
 <script>
-  import axios from 'axios';
   import { Validator } from 'vee-validate';
+  import AccessService from './AccessService';
 
   const dictionary = {
     en: {
@@ -150,14 +150,10 @@
       },
     },
     created() {
-      // eslint-disable-next-line
-      console.log("error: ", this.$route.query.error);
-      // eslint-disable-next-line
-      console.log("error_description: ", this.$route.query.error_description);
-      axios.get('/app/oAuthProviders')
-        .then((response) => {
+      AccessService.getOAuthProviders()
+        .then((result) => {
           // this.isLoading = false;
-          this.oAuthProviders = response.data;
+          this.oAuthProviders = result;
         })
         .catch((e) => {
           this.serverErrors.push(e);

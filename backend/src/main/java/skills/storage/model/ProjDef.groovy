@@ -18,7 +18,7 @@ class ProjDef implements Serializable {
 
     String name
 
-    String secretCode
+    String clientSecret
 
     // need to be denormalized so levels can be efficiently calculated (without the need of loading all of the rules)
     int totalPoints
