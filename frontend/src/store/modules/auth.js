@@ -1,5 +1,5 @@
 import axios from 'axios';
-// import router from '../../router';
+import router from '../../router';
 
 const getters = {
   userInfo(state) {
@@ -133,7 +133,10 @@ const actions = {
   },
   logout({ commit }) {
     commit('clearAuthData');
-    window.location = '/logout';
+    axios.get('/logout')
+      .then(() => {
+        router.replace('/');
+    });
   },
   setLogoutTimer({ dispatch }, expirationDate) {
     const expiresInMillis = expirationDate.getTime() - new Date().getTime();

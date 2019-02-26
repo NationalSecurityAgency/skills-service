@@ -9,15 +9,21 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
 import org.springframework.core.io.ClassPathResource
 import org.springframework.security.authentication.AuthenticationManager
+import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken
 import org.springframework.security.oauth2.common.OAuth2AccessToken
+import org.springframework.security.oauth2.config.annotation.builders.ClientDetailsServiceBuilder
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer
+import org.springframework.security.oauth2.provider.ClientDetails
+import org.springframework.security.oauth2.provider.ClientDetailsService
+import org.springframework.security.oauth2.provider.ClientRegistrationException
 import org.springframework.security.oauth2.provider.OAuth2Authentication
+import org.springframework.security.oauth2.provider.client.BaseClientDetails
 import org.springframework.security.oauth2.provider.token.DefaultAccessTokenConverter
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices
 import org.springframework.security.oauth2.provider.token.TokenEnhancer
@@ -27,6 +33,8 @@ import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenCo
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore
 import org.springframework.security.oauth2.provider.token.store.KeyStoreKeyFactory
 import skills.service.auth.SecurityConfiguration
+import skills.service.datastore.services.AdminProjService
+import skills.storage.model.ProjDef
 
 @Configuration
 @Conditional(SecurityConfiguration.FormAuth)
@@ -34,9 +42,6 @@ import skills.service.auth.SecurityConfiguration
 class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
 
     public static final String SKILLS_PROXY_USER = 'proxy_user'
-
-    @Value('#{"${security.oauth2.resource.id:skills-service-oauth}"}')
-    private String resourceId
 
     @Value('#{"${security.oauth2.jwt.keystore.resource:jwtkeys.jks}"}')
     private String jwtKeystoreResource
@@ -49,9 +54,6 @@ class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
 
     @Autowired
     private AuthenticationManager authenticationManager
-
-    @Autowired
-    PasswordEncoder passwordEncoder
 
     @Override
     void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
@@ -71,15 +73,8 @@ class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
     }
 
     @Override
-    void configure(ClientDetailsServiceConfigurer clients) throws Exception {
-        clients.inMemory()
-                .withClient("trusted-app")
-                .autoApprove(true)
-                .authorizedGrantTypes("client_credentials")
-                .authorities("ROLE_TRUSTED_CLIENT")
-                .scopes("read", "write")
-                .resourceIds(resourceId)
-                .secret(passwordEncoder.encode("secret"))
+    void configure(ClientDetailsServiceConfigurer configurer) throws Exception {
+        configurer.withClientDetails(skillsClientDetailsService())
     }
 
     @Bean
@@ -121,6 +116,11 @@ class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
         return defaultTokenServices
     }
 
+    @Bean
+    SkillsClientDetailsService skillsClientDetailsService() {
+        return new SkillsClientDetailsService()
+    }
+
     @Slf4j
     static class SkillsProxyUserTokenEnhancer implements TokenEnhancer {
         @Override
@@ -134,6 +134,32 @@ class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
             } else {
                 log.warn("No $SKILLS_PROXY_USER found on OAuth2 request.")
             }
+            return result
+        }
+    }
+
+    static class SkillsClientDetailsService implements ClientDetailsService {
+        @Value('#{"${security.oauth2.resource.id:skills-service-oauth}"}')
+        private String resourceId
+
+        @Autowired
+        private AdminProjService projService
+
+        @Autowired
+        PasswordEncoder passwordEncoder
+
+        @Override
+        ClientDetails loadClientByClientId(String clientId) throws ClientRegistrationException {
+            ProjDef projDef = projService.getProjDef(clientId)
+
+            BaseClientDetails result = new BaseClientDetails();
+            result.setClientId(clientId);
+            result.setScope(["read", "write"])
+            result.setAutoApproveScopes(result.getScope())
+            result.setAuthorizedGrantTypes(["client_credentials"])
+            result.setAuthorities([new SimpleGrantedAuthority("ROLE_TRUSTED_CLIENT")])
+            result.setResourceIds([resourceId])
+            result.setClientSecret(passwordEncoder.encode(projDef.secretCode))
             return result
         }
     }

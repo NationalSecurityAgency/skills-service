@@ -5,17 +5,27 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Conditional
 import org.springframework.context.annotation.Configuration
+import org.springframework.http.HttpStatus
+import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
+import org.springframework.security.core.AuthenticationException
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
+import org.springframework.security.web.access.AccessDeniedHandler
+import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler
+import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository
 import org.springframework.security.web.context.SecurityContextPersistenceFilter
 import org.springframework.stereotype.Component
+
+import javax.servlet.ServletException
+import javax.servlet.http.HttpServletRequest
+import javax.servlet.http.HttpServletResponse
 
 import static skills.service.auth.SecurityConfiguration.FormAuth
 import static skills.service.auth.SecurityConfiguration.PortalWebSecurityHelper
@@ -30,12 +40,17 @@ class FormSecurityConfiguration extends WebSecurityConfigurerAdapter {
     PortalWebSecurityHelper portalWebSecurityHelper
 
     @Autowired
+    RestAccessDeniedHandler accessDeniedHandler
+
+    @Autowired
+    private RestAuthenticationEntryPoint restAuthenticationEntryPoint
+
+    @Autowired
     void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
         auth
                 .userDetailsService(localUserDetailsService())
                 .passwordEncoder(passwordEncoder())
     }
-
 
     @Bean
     PasswordEncoder passwordEncoder() {
@@ -53,17 +68,22 @@ class FormSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
         // Portal endpoints config
         portalWebSecurityHelper.configureHttpSecurity(http)
-        http
                 .addFilter(securityContextPersistenceFilter())
+                .exceptionHandling()
+                .accessDeniedHandler(accessDeniedHandler)
+                .authenticationEntryPoint(restAuthenticationEntryPoint)
+        .and()
                 .formLogin()
                     .loginPage("/")
                     .loginProcessingUrl("/performLogin")
                     .failureHandler(new SimpleUrlAuthenticationFailureHandler())
-                .and()
+        .and()
                 .oauth2Login()
                     .loginPage("/")
                     .failureHandler(new SimpleUrlAuthenticationFailureHandler())
-                .and().logout()
+        .and()
+                .logout()
+                    .logoutSuccessHandler(new HttpStatusReturningLogoutSuccessHandler(HttpStatus.OK))
     }
 
     @Bean
@@ -89,5 +109,29 @@ class FormSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 google: new OAuth2UserConverterService.GoogleUserConverter(),
                 github: new OAuth2UserConverterService.GitHubUserConverter(),
         ]
+    }
+
+    @Component
+    static class RestAccessDeniedHandler implements AccessDeniedHandler {
+        @Override
+        void handle(final HttpServletRequest request, final HttpServletResponse response, final AccessDeniedException ex) throws IOException, ServletException {
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN)
+        }
+    }
+
+    @Component
+    static final class RestAuthenticationEntryPoint extends LoginUrlAuthenticationEntryPoint {
+        RestAuthenticationEntryPoint() { super('/') }
+        @Override
+        void commence(
+                final HttpServletRequest request,
+                final HttpServletResponse response,
+                final AuthenticationException authException) throws IOException {
+            if (request.servletPath == '/performLogin') {
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized")
+            } else {
+                super.commence(request, response, authException)
+            }
+        }
     }
 }

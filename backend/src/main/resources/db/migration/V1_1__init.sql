@@ -3,6 +3,7 @@ create table skills.project_definition
 	id int not null AUTO_INCREMENT PRIMARY KEY,
 	project_id varchar(255) not null,
 	name varchar(255) not null,
+  secret_code varchar(255) not null,
 	constraint unique_name unique (name),
 	total_points int not null default 0,
 	display_order int not null,
