@@ -2,7 +2,6 @@ package skills;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -12,7 +11,7 @@ import javax.net.ssl.HttpsURLConnection;
 
 @EnableScheduling
 @EnableWebSecurity
-@SpringBootApplication(exclude=ErrorMvcAutoConfiguration.class)
+@SpringBootApplication
 @EnableJpaRepositories(basePackages = {"skills.storage.repos"})
 @ImportResource(locations = {"classpath:app-context-db.xml"})
 public class SpringBootApp {
