@@ -9,6 +9,10 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.core.type.AnnotatedTypeMetadata
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.stereotype.Component
+import org.springframework.web.cors.CorsConfiguration
+import org.springframework.web.cors.CorsConfigurationSource
+
+import javax.servlet.http.HttpServletRequest
 
 @Component
 @Configuration('securityConfig')
@@ -23,11 +27,23 @@ class SecurityConfiguration {
     static class PortalWebSecurityHelper {
         HttpSecurity configureHttpSecurity(HttpSecurity http) {
             http
-                    .cors().and().csrf().disable()
+                    .csrf().disable()
                     .authorizeRequests()
-                    .antMatchers("/", "/favicon.ico", "/icons/**", "/static/**", "/error", "/login*", "/performLogin", "/createAccount", "/app/userInfo", "/app/users/validExistingUserId/*", "/oauth/**", "/app/oAuthProviders", "index.html").permitAll()
+                    .antMatchers("/", "/favicon.ico", "/icons/**", "/static/**", "/error", "/oauth/**", "/login*", "/performLogin", "/createAccount", "/app/userInfo", "/app/users/validExistingUserId/*", "/app/oAuthProviders", "index.html").permitAll()
                     .antMatchers('/admin/**').hasRole('PROJECT_ADMIN')
                     .anyRequest().authenticated()
+
+//            http.antMatcher("/app/**").cors().configurationSource(new CorsConfigurationSource() {
+//                @Override
+//                CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
+//                    new CorsConfiguration(
+//                            allowCredentials: true,
+//                            allowedHeaders: [CorsConfiguration.ALL],
+//                            allowedMethods: [CorsConfiguration.ALL],
+//                            allowedOrigins: [CorsConfiguration.ALL],
+//                    )
+//                }
+//            })
             return http
         }
     }

@@ -151,8 +151,8 @@ class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
         ClientDetails loadClientByClientId(String clientId) throws ClientRegistrationException {
             ProjDef projDef = projService.getProjDef(clientId)
 
-            BaseClientDetails result = new BaseClientDetails();
-            result.setClientId(clientId);
+            BaseClientDetails result = new BaseClientDetails()
+            result.setClientId(clientId)
             result.setScope(["read", "write"])
             result.setAutoApproveScopes(result.getScope())
             result.setAuthorizedGrantTypes(["client_credentials"])

@@ -10,6 +10,7 @@ import skills.service.skillLoading.SkillsLoader
 import skills.service.skillLoading.model.*
 import skills.service.skillsManagement.SkillsManagementFacade
 
+@CrossOrigin(allowCredentials = 'true')
 @RestController
 @RequestMapping("/api")
 @Slf4j

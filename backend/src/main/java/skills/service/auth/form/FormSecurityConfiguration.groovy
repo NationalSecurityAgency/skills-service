@@ -52,6 +52,13 @@ class FormSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .passwordEncoder(passwordEncoder())
     }
 
+    @Override
+    @Bean
+    AuthenticationManager authenticationManagerBean() throws Exception {
+        // provides the default AuthenticationManager as a Bean
+        return super.authenticationManagerBean()
+    }
+
     @Bean
     PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder()
@@ -96,13 +103,6 @@ class FormSecurityConfiguration extends WebSecurityConfigurerAdapter {
         return new SkillsHttpSessionSecurityContextRepository()
     }
 
-    @Override
-    @Bean
-    AuthenticationManager authenticationManagerBean() throws Exception {
-        // provides the default AuthenticationManager as a Bean
-        return super.authenticationManagerBean()
-    }
-
     @Bean(name = 'oauth2UserConverters')
     Map<String, OAuth2UserConverterService.OAuth2UserConverter> oAuth2UserConverterMap() {
         return [
@@ -130,6 +130,7 @@ class FormSecurityConfiguration extends WebSecurityConfigurerAdapter {
             if (request.servletPath == '/performLogin') {
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized")
             } else {
+                // redirect to the login page and then forward to the requested page after successful login
                 super.commence(request, response, authException)
             }
         }

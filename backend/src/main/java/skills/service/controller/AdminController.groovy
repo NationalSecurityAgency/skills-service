@@ -4,6 +4,9 @@ import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.oauth2.common.OAuth2AccessToken
+import org.springframework.security.oauth2.provider.endpoint.TokenEndpoint
 import org.springframework.web.bind.annotation.*
 import skills.service.controller.request.model.*
 import skills.service.controller.result.model.*
@@ -36,6 +39,9 @@ class AdminController {
 
     @Autowired
     SettingsService settingsService
+
+    @Autowired
+    TokenEndpoint tokenEndpoint
 
     @RequestMapping(value = "/projects/{id}", method = RequestMethod.DELETE)
     void deleteProject(@PathVariable("id") String projectId) {
@@ -513,5 +519,13 @@ class AdminController {
         String clientSecret = new ClientSecretGenerator().generateClientSecret()
         projectAdminStorageService.updateClientSecret(projectId, clientSecret)
         return clientSecret
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/token/{userId}", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    OAuth2AccessToken getUserToken(@PathVariable("projectId") String projectId, @PathVariable("userId") String userId) {
+        UsernamePasswordAuthenticationToken principal = new UsernamePasswordAuthenticationToken(projectId, null ,[])
+        Map<String, String> parameters = [grant_type : 'client_credentials', proxy_user : userId]
+        return tokenEndpoint.getAccessToken(principal, parameters)
     }
 }
