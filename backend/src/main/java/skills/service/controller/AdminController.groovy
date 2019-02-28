@@ -4,6 +4,7 @@ import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
+import org.springframework.http.ResponseEntity
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.oauth2.common.OAuth2AccessToken
 import org.springframework.security.oauth2.provider.endpoint.TokenEndpoint
@@ -523,9 +524,9 @@ class AdminController {
 
     @RequestMapping(value = "/projects/{projectId}/token/{userId}", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
-    OAuth2AccessToken getUserToken(@PathVariable("projectId") String projectId, @PathVariable("userId") String userId) {
+    ResponseEntity<OAuth2AccessToken> getUserToken(@PathVariable("projectId") String projectId, @PathVariable("userId") String userId) {
         UsernamePasswordAuthenticationToken principal = new UsernamePasswordAuthenticationToken(projectId, null ,[])
         Map<String, String> parameters = [grant_type : 'client_credentials', proxy_user : userId]
-        return tokenEndpoint.getAccessToken(principal, parameters)
+        return tokenEndpoint.postAccessToken(principal, parameters)
     }
 }
