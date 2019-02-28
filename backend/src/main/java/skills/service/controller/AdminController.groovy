@@ -335,7 +335,7 @@ class AdminController {
         levelDefinitionStorageService.deleteLastLevel(projectId)
     }
 
-    @RequestMapping(value = "/projects/{projectId}/levels/next", method = RequestMethod.PUT, produces = "application/json")
+    @RequestMapping(value = "/projects/{projectId}/levels/next", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
     void addNextLevel(@PathVariable("projectId") String projectId, @RequestBody NextLevelRequest nextLevelRequest) {
         levelDefinitionStorageService.addNextLevel(projectId, nextLevelRequest)
     }
@@ -345,7 +345,7 @@ class AdminController {
         levelDefinitionStorageService.deleteLastLevel(projectId, subjectId)
     }
 
-    @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/levels/next", method = RequestMethod.PUT, produces = "application/json")
+    @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/levels/next", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
     void addNextLevel(
             @PathVariable("projectId") String projectId,
             @PathVariable("subjectId") String subjectId, @RequestBody NextLevelRequest nextLevelRequest) {
@@ -353,7 +353,7 @@ class AdminController {
     }
 
     //Need new methods to edit existing level methods for project and subject
-    @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/levels/edit/{levelId}", method = RequestMethod.PUT, produces = "application/json")
+    @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/levels/edit/{levelId}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
     void editLevel(@PathVariable("projectId") String projectId,
                    @PathVariable("subjectId") String subjectId,
                    @PathVariable("levelId")   String levelId, @RequestBody EditLevelRequest editLevelRequest){
@@ -361,7 +361,7 @@ class AdminController {
     }
 
     //Need new methods to edit existing level methods for project and subject
-    @RequestMapping(value = "/projects/{projectId}/levels/edit/{levelId}", method = RequestMethod.PUT, produces = "application/json")
+    @RequestMapping(value = "/projects/{projectId}/levels/edit/{levelId}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
     void editLevel(@PathVariable("projectId") String projectId,
                    @PathVariable("levelId")   String levelId, @RequestBody EditLevelRequest editLevelRequest){
         levelDefinitionStorageService.editLevel(projectId, editLevelRequest, levelId)
@@ -509,7 +509,7 @@ class AdminController {
         return settingsService.getSetting(projectId, setting)
     }
 
-    @RequestMapping(value = "/projects/{projectId}/settings/{setting}", method = RequestMethod.POST)
+    @RequestMapping(value = "/projects/{projectId}/settings/{setting}", method = RequestMethod.POST, produces = "application/json")
     SettingsResult saveProjectSetting(@PathVariable("projectId") String projectId, @PathVariable("setting") String setting, @RequestBody SettingsRequest value){
         settingsService.saveSetting(value)
     }
