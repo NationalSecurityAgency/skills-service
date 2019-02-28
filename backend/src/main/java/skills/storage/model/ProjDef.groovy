@@ -25,11 +25,11 @@ class ProjDef implements Serializable {
 
     int displayOrder
 
-    @OneToMany(fetch = FetchType.LAZY)
+    @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.REMOVE)
     @JoinColumn(name="projectId")
     List<LevelDef> levelDefinitions
 
-    @OneToMany(fetch = FetchType.LAZY)
+    @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.REMOVE)
     @JoinColumn(name="projRefId")
     @Where(clause = "type = 'Subject'")
     List<SkillDef> subjects

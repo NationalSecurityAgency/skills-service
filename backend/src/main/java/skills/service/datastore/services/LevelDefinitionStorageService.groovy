@@ -230,46 +230,25 @@ class LevelDefinitionStorageService {
         boolean asPoints = false
         if(setting?.isEnabled()){
             asPoints = true
-            assert editLevelRequest?.pointsFrom > 0
-            Validate.isTrue(editLevelRequest.pointsTo >= 0)
-            Validate.isTrue(editLevelRequest.pointsTo >= 0)
-        }else {
-            Validate.isTrue(editLevelRequest.percent >= 0)
         }
-        Validate.isTrue(editLevelRequest.level >= 0)
+        LevelValidator.validateEditRequest(editLevelRequest, asPoints)
 
         LevelDefRes existingDefinitions = getLevelDefs(projectId, skillId)
         existingDefinitions.levels.sort({it.level})
-        LevelDef previous = null
-        int lastIdx = existingDefinitions.levels.size()-1
+
+        int toEditIndex = existingDefinitions.levels.findIndexOf { it.id == editLevelRequest.id }
         LevelDef toEdit = null
 
         //validate that the edit doesn't break the consistency of the other levels.
         for(int i=0; i < existingDefinitions.levels.size(); i++){
-            LevelDef current = existingDefinitions.levels.get(i)
-            if(current.id == editLevelRequest.id){
-                toEdit = current
-                if(previous != null){
-                    if(asPoints && editLevelRequest.pointsFrom < previous.pointsTo) {
-                        throw new SkillException("Edited Level's points from overlaps with previous level")
-                    }else if(editLevelRequest.percent <= previous.percent){
-                        throw new SkillException("Edited Level's percent overlaps with previous level")
-                    }
-                }
-
-                if(i != lastIdx){
-                    LevelDef next = existingDefinitions.levels.get(i+1)
-                    if(asPoints && editLevelRequest.pointsTo > next.pointsFrom){
-                        throw new SkillException("Edited Level's points to overlaps with next level")
-                    }else if(editLevelRequest.percent >= next.percent){
-                        throw new SkillException("Edited Level's percent overlaps with next level")
-                    }
-                }
-
-                break
+            def levelDef = existingDefinitions.levels.get(i)
+            if(i < toEditIndex){
+                LevelValidator.validateLevelsBefore(levelDef, editLevelRequest, asPoints)
+            }else if(i == toEditIndex){
+                toEdit = levelDef
+            }else if(i > toEditIndex){
+                LevelValidator.validateLevelsAfter(levelDef, editLevelRequest, asPoints)
             }
-
-            previous = current
         }
 
         assert toEdit != null
@@ -284,7 +263,6 @@ class LevelDefinitionStorageService {
         toEdit.name = editLevelRequest.name
         toEdit.iconClass = editLevelRequest.iconClass
         toEdit = levelDefinitionRepository.save(toEdit)
-
 
         return toEdit
     }
