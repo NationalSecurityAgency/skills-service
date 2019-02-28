@@ -17,15 +17,17 @@
       <div class="column is-one-fifth">
         <h1>Client Secret: </h1>
       </div>
-      <div class="column is-three-fifths">
+      <div class="column">
         <h1>{{ project.clientSecret }}</h1>
       </div>
-        <div class="column has-text-left" style="padding-top: 0.5rem;">
+    </div>
+    <div class="columns">
+      <div class="column has-text-left">
         <button class="button is-primary is-outlined" v-on:click="confirmResetClientSecret">
           <span class="icon">
             <i class="fas fa-sync-alt"></i>
           </span>
-          <span>Reset</span>
+          <span>Reset Client Secret</span>
         </button>
       </div>
     </div>
