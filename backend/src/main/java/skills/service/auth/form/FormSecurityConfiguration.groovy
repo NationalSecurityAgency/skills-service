@@ -11,13 +11,16 @@ import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
+import org.springframework.security.core.Authentication
 import org.springframework.security.core.AuthenticationException
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.access.AccessDeniedHandler
+import org.springframework.security.web.authentication.AuthenticationFailureHandler
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler
 import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository
 import org.springframework.security.web.context.SecurityContextPersistenceFilter
@@ -37,19 +40,50 @@ import static skills.service.auth.SecurityConfiguration.PortalWebSecurityHelper
 class FormSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Autowired
-    PortalWebSecurityHelper portalWebSecurityHelper
+    private PortalWebSecurityHelper portalWebSecurityHelper
 
     @Autowired
-    RestAccessDeniedHandler accessDeniedHandler
+    private RestAccessDeniedHandler restAccessDeniedHandler
 
     @Autowired
     private RestAuthenticationEntryPoint restAuthenticationEntryPoint
+
+    @Autowired
+    private AuthenticationFailureHandler restAuthenticationFailureHandler
+
+    @Autowired
+    private RestAuthenticationSuccessHandler restAuthenticationSuccessHandler
 
     @Autowired
     void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
         auth
                 .userDetailsService(localUserDetailsService())
                 .passwordEncoder(passwordEncoder())
+    }
+
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        log.info("Configuring FORM authorization mode")
+
+        // Portal endpoints config
+        portalWebSecurityHelper.configureHttpSecurity(http)
+                .addFilter(securityContextPersistenceFilter())
+                .exceptionHandling()
+                .accessDeniedHandler(restAccessDeniedHandler)
+                .authenticationEntryPoint(restAuthenticationEntryPoint)
+        .and()
+                .formLogin()
+                    .loginPage("/")
+                    .loginProcessingUrl("/performLogin")
+                    .successHandler(restAuthenticationSuccessHandler)
+                    .failureHandler(restAuthenticationFailureHandler)
+        .and()
+                .oauth2Login()
+                    .loginPage("/")
+                    .failureHandler(restAuthenticationFailureHandler)
+        .and()
+                .logout()
+                    .logoutSuccessHandler(new HttpStatusReturningLogoutSuccessHandler(HttpStatus.OK))
     }
 
     @Override
@@ -69,30 +103,6 @@ class FormSecurityConfiguration extends WebSecurityConfigurerAdapter {
         new LocalUserDetailsService()
     }
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        log.info("Configuring FORM authorization mode")
-
-        // Portal endpoints config
-        portalWebSecurityHelper.configureHttpSecurity(http)
-                .addFilter(securityContextPersistenceFilter())
-                .exceptionHandling()
-                .accessDeniedHandler(accessDeniedHandler)
-                .authenticationEntryPoint(restAuthenticationEntryPoint)
-        .and()
-                .formLogin()
-                    .loginPage("/")
-                    .loginProcessingUrl("/performLogin")
-                    .failureHandler(new SimpleUrlAuthenticationFailureHandler())
-        .and()
-                .oauth2Login()
-                    .loginPage("/")
-                    .failureHandler(new SimpleUrlAuthenticationFailureHandler())
-        .and()
-                .logout()
-                    .logoutSuccessHandler(new HttpStatusReturningLogoutSuccessHandler(HttpStatus.OK))
-    }
-
     @Bean
     SecurityContextPersistenceFilter securityContextPersistenceFilter() {
         return new SecurityContextPersistenceFilter(httpSessionSecurityContextRepository())
@@ -109,6 +119,11 @@ class FormSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 google: new OAuth2UserConverterService.GoogleUserConverter(),
                 github: new OAuth2UserConverterService.GitHubUserConverter(),
         ]
+    }
+
+    @Bean
+    AuthenticationFailureHandler authenticationFailureHandler() {
+        return new SimpleUrlAuthenticationFailureHandler()
     }
 
     @Component
@@ -133,6 +148,14 @@ class FormSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 // redirect to the login page and then forward to the requested page after successful login
                 super.commence(request, response, authException)
             }
+        }
+    }
+
+    @Component
+    static final class RestAuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
+        @Override
+        void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
+            clearAuthenticationAttributes(request)
         }
     }
 }

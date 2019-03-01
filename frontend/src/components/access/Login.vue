@@ -120,7 +120,7 @@
             this.$store.dispatch('login', formData)
               .then(() => {
                 this.loginFailed = false;
-                this.$router.push('/');
+                this.$router.push(this.$route.query.redirect || '/');
               })
               .catch((error) => {
                 if (error.response.status === 401) {

@@ -24,7 +24,7 @@ const mutations = {
     }
     axios.defaults.headers.common.Authorization = authData.token;
   },
-  o2AuthAuthUser(state) {
+  oAuth2AuthUser(state) {
     state.oAuthAuth = true;
     localStorage.setItem('oAuthAuth', 'true');
   },
@@ -85,7 +85,7 @@ const actions = {
     });
   },
   oAuth2Login({ commit }, oAuthId) {
-    commit('o2AuthAuthUser');
+    commit('oAuth2AuthUser');
     window.location = `/oauth2/authorization/${oAuthId}`;
   },
   restoreSessionIfAvailable({ commit, dispatch, state }) {
@@ -125,6 +125,9 @@ const actions = {
             } else {
               state.localAuth = true;
             }
+          } else {
+            // cannot obtain userInfo, so clear any other lingering auth data
+            commit('clearAuthData');
           }
           resolve(reAuthenticated);
         }).catch(error => reject(error));

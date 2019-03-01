@@ -30,37 +30,55 @@ const router = new Router({
       path: '/projects/:projectId',
       name: 'ProjectPage',
       component: ProjectPage,
+      meta: { requiresAuth: true },
     },
     {
       path: '/projects/:projectId/subjects/:subjectId',
       name: 'SubjectPage',
       component: SubjectPage,
+      meta: { requiresAuth: true },
     },
     {
       path: '/projects/:projectId/badges/:badgeId',
       name: 'BadgePage',
       component: BadgePage,
+      meta: { requiresAuth: true },
     },
     {
       path: '/projects/:projectId/subjects/:subjectId/skills/:skillId',
       name: 'SkillPage',
       component: SkillPage,
+      meta: { requiresAuth: true },
     },
     {
       path: '/projects/:projectId/user/:userId',
       name: 'UserPage',
       component: UserPage,
+      meta: { requiresAuth: true },
     },
   ],
 });
 
 const isActiveProjectIdChange = (to, from) => to.params.projectId !== from.params.projectId;
+const isLoggedIn = () => store.getters.isAuthenticated;
 
 router.beforeEach((to, from, next) => {
   if (isActiveProjectIdChange(to, from)) {
     store.commit('currentProjectId', to.params.projectId);
   }
-  next();
+  if (to.matched.some(record => record.meta.requiresAuth)) {
+    // this route requires auth, check if logged in if not, redirect to login page.
+    if (!isLoggedIn()) {
+      next({
+        path: '/',
+        query: { redirect: to.fullPath },
+      });
+    } else {
+      next();
+    }
+  } else {
+    next();
+  }
 });
 
 export default router;
