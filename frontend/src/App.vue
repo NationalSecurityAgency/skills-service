@@ -44,7 +44,7 @@
     },
     data() {
       return {
-        isLoading: true,
+        isLoading: false,
         serverErrors: [],
       };
     },
@@ -67,13 +67,9 @@
       },
     },
     created() {
-      this.$store.dispatch('restoreSessionIfAvailable')
-        .then(() => {
-          this.isLoading = false;
-          if (this.activeProjectId) {
-            this.addCustomIconCSS();
-          }
-      });
+      if (this.isAuthenticatedUser && this.activeProjectId) {
+        this.addCustomIconCSS();
+      }
     },
     methods: {
       addCustomIconCSS() { // This must be done here AFTER authentication
