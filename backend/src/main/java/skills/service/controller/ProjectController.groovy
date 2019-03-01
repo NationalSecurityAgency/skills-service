@@ -67,10 +67,4 @@ class ProjectController {
             return new CustomIconResult(filename: icon.filename, cssClassname: cssClassname)
         }
     }
-
-    @RequestMapping(value = "/projects/{id}/customIconCss", method = RequestMethod.GET, produces = "text/css")
-    @ResponseBody
-    String getCustomIconCss(@PathVariable("id") String projectId) {
-        return customIconFacade.generateCss(projectId)
-    }
 }
