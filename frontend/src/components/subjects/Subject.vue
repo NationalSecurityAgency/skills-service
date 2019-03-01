@@ -5,7 +5,7 @@
 
         <div class="columns">
           <div class="column is-narrow is-vcentered">
-            <i class="has-text-info subject-icon skills-icon" v-bind:class="`${subject.iconClass}`"></i>
+            <i class="has-text-info subject-tile-icon skills-icon" v-bind:class="`${subject.iconClass}`"></i>
           </div>
           <div class="column has-text-left">
             <div class="subject-title">

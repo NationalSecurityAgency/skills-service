@@ -5,6 +5,7 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
 import skills.service.auth.UserInfoService
+import skills.service.icons.CustomIconFacade
 import skills.service.skillLoading.RankingLoader
 import skills.service.skillLoading.SkillsLoader
 import skills.service.skillLoading.model.*
@@ -25,6 +26,9 @@ class UserSkillsController {
 
     @Autowired
     UserInfoService userInfoService
+
+    @Autowired
+    CustomIconFacade customIconFacade
 
     @Autowired
     RankingLoader rankingLoader
@@ -106,4 +110,9 @@ class UserSkillsController {
         return rankingLoader.getRankingDistribution(projectId, userInfoService.currentUser.username, subjectId)
     }
 
+    @RequestMapping(value = "/projects/{id}/customIconCss", method = RequestMethod.GET, produces = "text/css")
+    @ResponseBody
+    String getCustomIconCss(@PathVariable("id") String projectId) {
+        return customIconFacade.generateCss(projectId)
+    }
 }
