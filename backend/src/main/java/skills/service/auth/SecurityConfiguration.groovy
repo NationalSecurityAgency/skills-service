@@ -1,6 +1,7 @@
 package skills.service.auth
 
 import groovy.util.logging.Slf4j
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.context.annotation.Condition
@@ -38,9 +39,14 @@ class SecurityConfiguration {
     @Configuration
     @Order(99)
     static class CorsSecurityConfiguration extends WebSecurityConfigurerAdapter {
+
+        @Autowired
+        private PortalWebSecurityHelper portalWebSecurityHelper
+
         @Override
         protected void configure(HttpSecurity http) throws Exception {
             http.antMatcher("/api/**").cors()
+            portalWebSecurityHelper.configureHttpSecurity(http)
         }
     }
 
