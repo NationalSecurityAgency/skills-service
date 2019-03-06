@@ -324,6 +324,7 @@
           parent: this,
           component: AddUser,
           hasModalCard: true,
+          canCancel: false,
           width: 1110,
           props: {
             skillId: row.skillId,

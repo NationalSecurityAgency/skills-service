@@ -3,8 +3,10 @@ package skills.service.controller
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.web.bind.annotation.*
+import skills.service.auth.AuthMode
 import skills.service.auth.UserInfoService
 import skills.service.controller.request.model.AddSkillRequest
 import skills.service.datastore.services.UserAdminService
@@ -22,6 +24,9 @@ import skills.service.skillsManagement.SkillsManagementFacade
 @Slf4j
 @CompileStatic
 class UserSkillsAdminController {
+
+    @Value('${skills.authorization.authMode:#{T(skills.service.auth.AuthMode).DEFAULT_AUTH_MODE}}')
+    AuthMode authMode
 
     @Autowired
     SkillsLoader skillsLoader
@@ -126,13 +131,15 @@ class UserSkillsAdminController {
     private String lookupUserId(String userId) {
         String retVal
         if (userId) {
-
-            // TODO - do we need to validate existing user here?  I think just need to do a lookup if authMode == PKI,
-            // otherwise just add the skill for the passed in userId?
-            if (userAdminService.isValidExistingUserId(userId)) {
-                retVal = userId
+            if(authMode == AuthMode.PKI) {
+                if (userAdminService.isValidExistingUserId(userId)) {
+                    retVal = userId
+                } else {
+                    retVal = userDetailsService.loadUserByUsername(userId).username
+                }
             } else {
-                retVal = userDetailsService.loadUserByUsername(userId).username
+                // allow to specify any user id in non-pki mode
+                retVal = userId
             }
         } else {
             retVal = userInfoService.getCurrentUser().username
