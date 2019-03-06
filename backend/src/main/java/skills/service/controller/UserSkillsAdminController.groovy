@@ -25,9 +25,6 @@ import skills.service.skillsManagement.SkillsManagementFacade
 @CompileStatic
 class UserSkillsAdminController {
 
-    @Value('${skills.authorization.authMode:#{T(skills.service.auth.AuthMode).DEFAULT_AUTH_MODE}}')
-    AuthMode authMode
-
     @Autowired
     SkillsLoader skillsLoader
 
@@ -38,13 +35,8 @@ class UserSkillsAdminController {
     UserInfoService userInfoService
 
     @Autowired
-    UserDetailsService userDetailsService
-
-    @Autowired
     SkillsManagementFacade skillsManagementFacade
 
-    @Autowired
-    UserAdminService userAdminService
 
     @RequestMapping(value = "/projects/{projectId}/level", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
@@ -122,28 +114,9 @@ class UserSkillsAdminController {
             incomingDate = skillRequest.timestamp != null ? new Date(skillRequest.timestamp) : incomingDate
         }
 
-        SkillsManagementFacade.AddSkillResult result = skillsManagementFacade.addSkill(projectId, skillId, lookupUserId(userId), incomingDate)
+        SkillsManagementFacade.AddSkillResult result = skillsManagementFacade.addSkill(projectId, skillId, userInfoService.lookupUserId(userId), incomingDate)
 
         log.info("received result ${result?.wasPerformed} for adding skill $skillId to user $userId for project $projectId")
         return result
-    }
-
-    private String lookupUserId(String userId) {
-        String retVal
-        if (userId) {
-            if(authMode == AuthMode.PKI) {
-                if (userAdminService.isValidExistingUserId(userId)) {
-                    retVal = userId
-                } else {
-                    retVal = userDetailsService.loadUserByUsername(userId).username
-                }
-            } else {
-                // allow to specify any user id in non-pki mode
-                retVal = userId
-            }
-        } else {
-            retVal = userInfoService.getCurrentUser().username
-        }
-        return retVal
     }
 }
