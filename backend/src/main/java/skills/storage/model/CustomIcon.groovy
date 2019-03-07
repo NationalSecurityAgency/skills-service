@@ -12,7 +12,7 @@ import javax.persistence.*
  */
 @Entity
 @Table(name='custom_icons')
-@ToString(includeNames = true)
+@ToString(includeNames = true, excludes = 'projDef')
 class CustomIcon {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
