@@ -29,6 +29,8 @@ class SkillDef {
     int pointIncrementInterval
     int totalPoints
 
+    int version
+
     String iconClass
 
     @Enumerated(EnumType.STRING)

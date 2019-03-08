@@ -21,6 +21,8 @@ class SkillRequest {
     int maxSkillAchievedCount
     int totalPoints
 
+    int version = 0
+
     String description
 
     String helpUrl

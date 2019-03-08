@@ -20,7 +20,7 @@
       </div>
       <p class="control has-text-right skills-enable-control">
         <b-tooltip label="Enable to override auto-generated ID."
-                   position="is-left" animanted="true" type="is-light">
+                   position="is-left" animated type="is-light">
           <span><i class="fas fa-question-circle"></i></span>
         </b-tooltip>
         <span v-on:click="toggleSkill()">
@@ -79,7 +79,7 @@
           <div class="field skills-point">
             <label class="label">Increment Interval (hours) *
               <b-tooltip label="The number of hours that must elapse between incrementing points for a user."
-                         position="is-left" animanted="true" type="is-light">
+                         position="is-left" animated type="is-light">
                 <span><i class="fas fa-question-circle"></i></span>
               </b-tooltip>
             </label>
@@ -96,6 +96,21 @@
           </div>
 
         </div>
+      </div>
+
+      <div class="field skills-remove-bottom-margin">
+        <label class="label">Version
+          <b-tooltip
+            label="An optional version for this skill to allow filtering of available skills for different versions of an application"
+            position="is-right" animated type="is-light">
+            <span><i class="fas fa-question-circle"></i></span>
+          </b-tooltip>
+        </label>
+        <div class="control" id="version-field">
+          <input class="input" type="number" min="0" v-model="skillInternal.version" :disabled="isEdit"
+                 v-validate="'min_value:0|max_value:999|numeric'" data-vv-delay="500" name="version"/>
+        </div>
+        <p class="help is-danger" v-show="errors.has('version')">{{ errors.first('version')}}</p>
       </div>
 
       <div class="field skills-pad-top-1-rem">
@@ -162,6 +177,7 @@
             maxSkillAchievedCount: 'Number of Times to Complete',
             totalPoints: 'Total Points',
             helpUrl: 'Help UrL',
+            version: 0,
           },
         },
       };
@@ -287,5 +303,9 @@
   .input.total-points {
     border: none;
     box-shadow: none;
+  }
+
+  #version-field {
+    width: 8%;
   }
 </style>

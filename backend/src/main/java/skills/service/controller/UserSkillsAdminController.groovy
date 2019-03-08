@@ -47,15 +47,15 @@ class UserSkillsAdminController {
     @RequestMapping(value = "/projects/{projectId}/summary", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     @CompileStatic
-    OverallSkillSummary getSkillsSummary(@PathVariable("projectId") String projectId, @RequestParam(name = "userId") String userId) {
-        return skillsLoader.loadOverallSummary(projectId, userId)
+    OverallSkillSummary getSkillsSummary(@PathVariable("projectId") String projectId, @RequestParam(name = "userId") String userId, @RequestParam(name = 'version') Integer version) {
+        return skillsLoader.loadOverallSummary(projectId, userId, version)
     }
 
     @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/summary", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     @CompileStatic
-    SkillSubjectSummary getSubjectsSkillsSummary(@PathVariable("projectId") String projectId, @PathVariable("subjectId") String subjectId, @RequestParam(name = "userId") String userId) {
-        return skillsLoader.loadSubject(projectId, userId, subjectId)
+    SkillSubjectSummary getSubjectsSkillsSummary(@PathVariable("projectId") String projectId, @PathVariable("subjectId") String subjectId, @RequestParam(name = "userId") String userId, @RequestParam(name = 'version') Integer version) {
+        return skillsLoader.loadSubject(projectId, userId, subjectId, version)
     }
 
     @RequestMapping(value = "/projects/{projectId}/pointHistory", method = RequestMethod.GET, produces = "application/json")

@@ -53,6 +53,7 @@ create table skills.skill_definition
 	icon_class varchar(255),
 	start_date DATETIME, /* optional, only used for 'gem' badges currently */
 	end_date DATETIME, /* optional, only used for 'gem' badges currently */
+	version int not null default 0,
 
   INDEX (skill_id),
 	INDEX (project_id),
