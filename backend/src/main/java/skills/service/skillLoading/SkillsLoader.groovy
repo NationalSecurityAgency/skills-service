@@ -49,10 +49,10 @@ class SkillsLoader {
     }
 
     @Transactional(readOnly = true)
-    OverallSkillSummary loadOverallSummary(String projectId, String userId) {
+    OverallSkillSummary loadOverallSummary(String projectId, String userId, Integer version = -1) {
         ProjDef projDef = getProjDef(projectId)
         List<SkillSubjectSummary> subjects = projDef.getSubjects().collect { SkillDef subjectDefinition ->
-            loadSubjectSummary(projDef, userId, subjectDefinition)
+            loadSubjectSummary(projDef, userId, subjectDefinition, version)
         }
         List<SkillBadgeSummary> badges = projDef.getBadges().collect { SkillDef badgeDefinition ->
             loadBadgeSummary(projDef, userId, badgeDefinition)
@@ -108,11 +108,15 @@ class SkillsLoader {
     }
 
     @Transactional(readOnly = true)
-    SkillSubjectSummary loadSubject(String projectId, String userId, String subjectId) {
+    SkillSubjectSummary loadSubject(String projectId, String userId, String subjectId, Integer version = -1) {
         ProjDef projDef = getProjDef(projectId)
         SkillDef subjectDef = getSkillDef(projectId, subjectId, SkillDef.ContainerType.Subject)
 
-        return loadSubjectSummary(projDef, userId, subjectDef, true)
+        if (version == -1 || subjectDef.version <= version) {
+            return loadSubjectSummary(projDef, userId, subjectDef, version, true)
+        } else {
+            return null
+        }
     }
 
     @Transactional(readOnly = true)
@@ -123,11 +127,11 @@ class SkillsLoader {
         return loadBadgeSummary(projDef, userId, badgeDef, true)
     }
 
-    private SkillSubjectSummary loadSubjectSummary(ProjDef projDef, String userId, SkillDef subjectDefinition, boolean loadSkills = false) {
+    private SkillSubjectSummary loadSubjectSummary(ProjDef projDef, String userId, SkillDef subjectDefinition, Integer version, boolean loadSkills = false) {
         List<SkillSummary> skillsRes = []
 
         if (loadSkills) {
-            SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, projDef.projectId, subjectDefinition.skillId)
+            SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, projDef.projectId, subjectDefinition.skillId, version)
             skillsRes = createSkillSummaries(groupChildrenMeta.childrenWithPoints)
         }
 

@@ -17,6 +17,7 @@ class SkillDefRes {
     int maxSkillAchievedCount
     int totalPoints
 
+    int version
 
     SkillDef.ContainerType type
     // optional: in case of the container, indicate what type of container it is (ex. subject)

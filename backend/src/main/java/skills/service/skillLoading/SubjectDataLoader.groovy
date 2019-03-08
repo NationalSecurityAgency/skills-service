@@ -32,11 +32,11 @@ class SubjectDataLoader {
         return loadData(userId, projectId, skillId, SkillRelDef.RelationshipType.RuleSetDefinition)
     }
 
-    SkillsData loadData(String userId, String projectId, String skillId, SkillRelDef.RelationshipType relationshipType) {
-        List<SkillDefAndUserPoints> childrenWithUserPoints = loadChildren(userId, projectId, skillId, relationshipType)
+    SkillsData loadData(String userId, String projectId, String skillId, Integer version = -1, SkillRelDef.RelationshipType relationshipType) {
+        List<SkillDefAndUserPoints> childrenWithUserPoints = loadChildren(userId, projectId, skillId, relationshipType, version)
         childrenWithUserPoints = childrenWithUserPoints?.sort({ it.skillDef.displayOrder })
 
-        List<SkillDefAndUserPoints> todaysUserPoints = loadChildren(userId, projectId, skillId, relationshipType, new Date().clearTime())
+        List<SkillDefAndUserPoints> todaysUserPoints = loadChildren(userId, projectId, skillId, relationshipType, version, new Date().clearTime())
 
         List<SkillsAndPoints> skillsAndPoints = childrenWithUserPoints.collect { SkillDefAndUserPoints skillDefAndUserPoints ->
             SkillDefAndUserPoints todaysPoints = todaysUserPoints.find({
@@ -73,10 +73,14 @@ class SubjectDataLoader {
         UserPoints points
     }
 
-    private List<SkillDefAndUserPoints> loadChildren(String userId, String projectId, String skillId, SkillRelDef.RelationshipType relationshipType, Date day = null) {
+    private List<SkillDefAndUserPoints> loadChildren(String userId, String projectId, String skillId, SkillRelDef.RelationshipType relationshipType, Integer version = -1, Date day = null) {
+
+        if (version == -1) {
+            version = Integer.MAX_VALUE
+        }
         List<Object[]> childrenWithUserPoints = day ?
-                userPointsRepo.findChildrenAndTheirUserPoints(userId, projectId, skillId, relationshipType, day) :
-                userPointsRepo.findChildrenAndTheirUserPoints(userId, projectId, skillId, relationshipType)
+                userPointsRepo.findChildrenAndTheirUserPoints(userId, projectId, skillId, relationshipType, version, day) :
+                userPointsRepo.findChildrenAndTheirUserPoints(userId, projectId, skillId, relationshipType, version)
 
         List<SkillDefAndUserPoints> res = childrenWithUserPoints.collect {
             UserPoints userPoints = (it.length > 1 ? it[1] : null)

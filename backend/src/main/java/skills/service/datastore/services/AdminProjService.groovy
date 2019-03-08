@@ -845,7 +845,8 @@ class AdminProjService {
                         description: skillRequest.description,
                         helpUrl: skillRequest.helpUrl,
                         displayOrder: displayOrder,
-                        type: SkillDef.ContainerType.Skill
+                        type: SkillDef.ContainerType.Skill,
+                        version: skillRequest.version
                 )
                 log.info("Saving [{}]", skillDefinition)
                 shouldRebuildScores = true

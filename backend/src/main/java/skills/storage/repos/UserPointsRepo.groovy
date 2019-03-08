@@ -38,10 +38,10 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
      */
     @Query('''select sdChild, userPoints
     from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
-    left join UserPoints userPoints on sdChild.projectId = userPoints.projectId and sdChild.skillId = userPoints.skillId and userPoints.day=?5 and userPoints.userId=?1
+    left join UserPoints userPoints on sdChild.projectId = userPoints.projectId and sdChild.skillId = userPoints.skillId and userPoints.day=?6 and userPoints.userId=?1
       where srd.parent=sdParent.id and  srd.child=sdChild.id and
-      sdParent.projectId=?2 and sdParent.skillId=?3 and srd.type=?4''')
-    List<Object []> findChildrenAndTheirUserPoints(String userId, String projectId, String skillId, SkillRelDef.RelationshipType type, Date day)
+      sdParent.projectId=?2 and sdParent.skillId=?3 and srd.type=?4 and sdChild.version<=?5''')
+    List<Object []> findChildrenAndTheirUserPoints(String userId, String projectId, String skillId, SkillRelDef.RelationshipType type, Integer version, Date day)
 
     /**
      *  NOTE: this is query is identical to the above query the only difference is 'userPoints.day is null', if you change this query you MUST change the one above
@@ -53,8 +53,8 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
     from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
     left join UserPoints userPoints on sdChild.projectId = userPoints.projectId and sdChild.skillId = userPoints.skillId and userPoints.day is null and userPoints.userId=?1
       where srd.parent=sdParent.id and  srd.child=sdChild.id and
-      sdParent.projectId=?2 and sdParent.skillId=?3 and srd.type=?4''')
-    List<Object []> findChildrenAndTheirUserPoints(String userId, String projectId, String skillId, SkillRelDef.RelationshipType type)
+      sdParent.projectId=?2 and sdParent.skillId=?3 and srd.type=?4 and sdChild.version<=?5''')
+    List<Object []> findChildrenAndTheirUserPoints(String userId, String projectId, String skillId, SkillRelDef.RelationshipType type, Integer version)
 
 
     @Query('''select sdChild, achievement.id

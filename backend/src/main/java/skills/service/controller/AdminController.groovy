@@ -221,6 +221,8 @@ class AdminController {
         assert skillRequest.pointIncrement > 0
         assert skillRequest.pointIncrementInterval > 0
         assert skillRequest.maxSkillAchievedCount > 0
+        assert skillRequest.version >= 0
+        assert skillRequest.version < 1000
 
         skillRequest.totalPoints = skillRequest.pointIncrement * skillRequest.maxSkillAchievedCount
 //        assert skillRequest.subjectId == subjectId
