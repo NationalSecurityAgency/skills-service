@@ -11,6 +11,7 @@
     <modules>
         <module>frontend</module>
         <module>backend</module>
+        <module>client-display</module>
     </modules>
     <properties>
         <nexusServer></nexusServer>
