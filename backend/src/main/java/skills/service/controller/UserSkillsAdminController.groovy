@@ -3,20 +3,12 @@ package skills.service.controller
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Value
-import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.web.bind.annotation.*
-import skills.service.auth.AuthMode
 import skills.service.auth.UserInfoService
 import skills.service.controller.request.model.AddSkillRequest
-import skills.service.datastore.services.UserAdminService
 import skills.service.skillLoading.RankingLoader
 import skills.service.skillLoading.SkillsLoader
-import skills.service.skillLoading.model.OverallSkillSummary
-import skills.service.skillLoading.model.SkillSubjectSummary
-import skills.service.skillLoading.model.SkillsRanking
-import skills.service.skillLoading.model.SkillsRankingDistribution
-import skills.service.skillLoading.model.UserPointHistorySummary
+import skills.service.skillLoading.model.*
 import skills.service.skillsManagement.SkillsManagementFacade
 
 @RestController
@@ -70,6 +62,13 @@ class UserSkillsAdminController {
     @CompileStatic
     UserPointHistorySummary getSubjectsPointHistory(@PathVariable("projectId") String projectId, @PathVariable("subjectId") String subjectId, @RequestParam(name = "userId") String userId) {
         return skillsLoader.loadPointHistorySummary(projectId, userId, 365, subjectId)
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/dependencies", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    @CompileStatic
+    SkillDependencyInfo loadSkillDependencyInfo(@PathVariable("projectId") String projectId, @PathVariable("skillId") String skillId, @RequestParam(name = "userId") String userId) {
+        return skillsLoader.loadSkillDependencyInfo(projectId, userId, skillId)
     }
 
     @RequestMapping(value = "/projects/{projectId}/rank", method = RequestMethod.GET, produces = "application/json")

@@ -127,6 +127,13 @@ class SkillsLoader {
         return loadBadgeSummary(projDef, userId, badgeDef, true)
     }
 
+    @Transactional(readOnly = true)
+    SkillDependencyInfo loadSkillDependencyInfo(String projectId, String userId, String skillId) {
+        SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, projectId, skillId, SkillRelDef.RelationshipType.Dependence)
+        List<SkillSummary> skillSummaries = createSkillSummaries(groupChildrenMeta.childrenWithPoints)
+        return new SkillDependencyInfo(dependencies: skillSummaries)
+    }
+
     private SkillSubjectSummary loadSubjectSummary(ProjDef projDef, String userId, SkillDef subjectDefinition, Integer version, boolean loadSkills = false) {
         List<SkillSummary> skillsRes = []
 
