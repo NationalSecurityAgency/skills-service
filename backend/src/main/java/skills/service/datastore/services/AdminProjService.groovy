@@ -830,7 +830,7 @@ class AdminProjService {
 
                 shouldRebuildScores = skillDefinition.totalPoints != skillRequest.totalPoints
 
-                Props.copy(skillRequest, skillDefinition, "childSkills")
+                Props.copy(skillRequest, skillDefinition, "childSkills", 'version')
             } else {
                 String parentSkillId = skillRequest.subjectId
                 Integer highestDisplayOrder = skillDefRepo.calculateChildSkillsHighestDisplayOrder(skillRequest.projectId, parentSkillId)
