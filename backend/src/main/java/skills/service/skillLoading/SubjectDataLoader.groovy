@@ -28,11 +28,11 @@ class SubjectDataLoader {
         List<SkillsAndPoints> childrenWithPoints
     }
 
-    SkillsData loadData(String userId, String projectId, String skillId) {
-        return loadData(userId, projectId, skillId, SkillRelDef.RelationshipType.RuleSetDefinition)
+    SkillsData loadData(String userId, String projectId, String skillId, Integer version = 0) {
+        return loadData(userId, projectId, skillId, version, SkillRelDef.RelationshipType.RuleSetDefinition)
     }
 
-    SkillsData loadData(String userId, String projectId, String skillId, Integer version = -1, SkillRelDef.RelationshipType relationshipType) {
+    SkillsData loadData(String userId, String projectId, String skillId, Integer version = 0, SkillRelDef.RelationshipType relationshipType) {
         List<SkillDefAndUserPoints> childrenWithUserPoints = loadChildren(userId, projectId, skillId, relationshipType, version)
         childrenWithUserPoints = childrenWithUserPoints?.sort({ it.skillDef.displayOrder })
 

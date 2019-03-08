@@ -47,14 +47,14 @@ class UserSkillsAdminController {
     @RequestMapping(value = "/projects/{projectId}/summary", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     @CompileStatic
-    OverallSkillSummary getSkillsSummary(@PathVariable("projectId") String projectId, @RequestParam(name = "userId") String userId, @RequestParam(name = 'version') Integer version) {
+    OverallSkillSummary getSkillsSummary(@PathVariable("projectId") String projectId, @RequestParam(name = "userId") String userId, @RequestParam(name = 'version', required = false, defaultValue = '0') Integer version) {
         return skillsLoader.loadOverallSummary(projectId, userId, version)
     }
 
     @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/summary", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     @CompileStatic
-    SkillSubjectSummary getSubjectsSkillsSummary(@PathVariable("projectId") String projectId, @PathVariable("subjectId") String subjectId, @RequestParam(name = "userId") String userId, @RequestParam(name = 'version') Integer version) {
+    SkillSubjectSummary getSubjectsSkillsSummary(@PathVariable("projectId") String projectId, @PathVariable("subjectId") String subjectId, @RequestParam(name = "userId") String userId, @RequestParam(name = 'version', required = false, defaultValue = '0') Integer version) {
         return skillsLoader.loadSubject(projectId, userId, subjectId, version)
     }
 
