@@ -3,6 +3,7 @@ package skills.service.skillLoading
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
+import skills.service.skillLoading.model.SkillDependencySummary
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillRelDef
 import skills.storage.model.UserPoints
@@ -20,7 +21,7 @@ class SubjectDataLoader {
         int points
         int todaysPoints
 
-        List<SkillDef> mustAchieveTheseFirst
+        SkillDependencySummary dependencyInfo
     }
 
     static class SkillsData {
@@ -44,11 +45,27 @@ class SubjectDataLoader {
             int todayPoints = todaysPoints.points ? todaysPoints.points?.points : 0
             int points = skillDefAndUserPoints.points ? skillDefAndUserPoints.points.points : 0
 
-            List<SkillDef> mustAchieveTheseSkillsFirst = userPointsRepo.findChildrenWithoutAchievements(userId, projectId, skillDefAndUserPoints.skillDef.skillId, SkillRelDef.RelationshipType.Dependence)
+            List<SkillWithAchievementIndicator> dependents = loadDependentSkills(userId, projectId, skillDefAndUserPoints.skillDef.skillId)
+            SkillDependencySummary dependencyInfo = dependents ? new SkillDependencySummary(
+                    numDirectDependents: dependents.size(),
+                    achieved: !dependents.find { !it.isAchieved }
+            ) : null
 
-            new SkillsAndPoints(skillDef: skillDefAndUserPoints.skillDef, points: points, todaysPoints: todayPoints, mustAchieveTheseFirst: mustAchieveTheseSkillsFirst)
+            new SkillsAndPoints(skillDef: skillDefAndUserPoints.skillDef, points: points, todaysPoints: todayPoints, dependencyInfo: dependencyInfo)
         }
         new SkillsData(childrenWithPoints: skillsAndPoints)
+    }
+
+    private static class SkillWithAchievementIndicator {
+        SkillDef skillDef
+        boolean isAchieved
+    }
+
+    private List<SkillWithAchievementIndicator> loadDependentSkills(String userId, String projectId, String skillId) {
+        List<Object []> dependentSkillsAndTheirAchievementStatus = userPointsRepo.findChildrenAndThierAchievements(userId, projectId, skillId, SkillRelDef.RelationshipType.Dependence)
+        return dependentSkillsAndTheirAchievementStatus.collect {
+            new SkillWithAchievementIndicator(skillDef: it[0], isAchieved: it[1] != null)
+        }
     }
 
     private static class SkillDefAndUserPoints {

@@ -1,5 +1,7 @@
 package skills.service.skillLoading.model
 
+import skills.service.skillLoading.SubjectDataLoader
+
 class SkillSummary {
 
     String skillId
@@ -16,4 +18,5 @@ class SkillSummary {
 
     List<SkillSummary> children
     List<SkillSummary> mustAchieveTheseFirst
+    SkillDependencySummary dependencyInfo
 }

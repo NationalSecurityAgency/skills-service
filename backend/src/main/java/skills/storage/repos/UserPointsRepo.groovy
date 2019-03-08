@@ -57,12 +57,12 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
     List<Object []> findChildrenAndTheirUserPoints(String userId, String projectId, String skillId, SkillRelDef.RelationshipType type)
 
 
-    @Query('''select sdChild
+    @Query('''select sdChild, achievement.id
     from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
     left join UserAchievement achievement on sdChild.projectId = achievement.projectId and sdChild.skillId = achievement.skillId and achievement.userId=?1
       where srd.parent=sdParent.id and  srd.child=sdChild.id and
-      sdParent.projectId=?2 and sdParent.skillId=?3 and srd.type=?4 and achievement.id is null''')
-    List<SkillDef> findChildrenWithoutAchievements(String userId, String projectId, String skillId, SkillRelDef.RelationshipType type)
+      sdParent.projectId=?2 and sdParent.skillId=?3 and srd.type=?4''')
+    List<Object []> findChildrenAndThierAchievements(String userId, String projectId, String skillId, SkillRelDef.RelationshipType type)
 
     @Query('''select up.day as day, count(up) as numUsers
     from UserPoints up where up.projectId=?1 and up.day>=?2 and up.skillId is null and up.day is not null group by up.day

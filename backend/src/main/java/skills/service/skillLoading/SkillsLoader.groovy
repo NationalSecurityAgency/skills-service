@@ -201,7 +201,7 @@ class SkillsLoader {
                     skill: skillDef.name, points: points, todaysPoints: todayPoints,
                     pointIncrement: skillDef.pointIncrement, totalPoints: skillDef.totalPoints,
                     description: new SkillDescription(description: skillDef.description, href: skillDef.helpUrl),
-                    mustAchieveTheseFirst: skillDefAndUserPoints.mustAchieveTheseFirst
+                    dependencyInfo: skillDefAndUserPoints.dependencyInfo
             )
         }
 
