@@ -16,6 +16,10 @@ class SubjectDataLoader {
     @Autowired
     UserPointsRepo userPointsRepo
 
+    @Autowired
+    DependencySummaryLoader dependencySummaryLoader
+
+
     static class SkillsAndPoints {
         SkillDef skillDef
         int points
@@ -45,27 +49,11 @@ class SubjectDataLoader {
             int todayPoints = todaysPoints.points ? todaysPoints.points?.points : 0
             int points = skillDefAndUserPoints.points ? skillDefAndUserPoints.points.points : 0
 
-            List<SkillWithAchievementIndicator> dependents = loadDependentSkills(userId, projectId, skillDefAndUserPoints.skillDef.skillId)
-            SkillDependencySummary dependencyInfo = dependents ? new SkillDependencySummary(
-                    numDirectDependents: dependents.size(),
-                    achieved: !dependents.find { !it.isAchieved }
-            ) : null
+            SkillDependencySummary dependencyInfo = dependencySummaryLoader.loadDependencySummary(userId, projectId, skillDefAndUserPoints.skillDef.skillId)
 
             new SkillsAndPoints(skillDef: skillDefAndUserPoints.skillDef, points: points, todaysPoints: todayPoints, dependencyInfo: dependencyInfo)
         }
         new SkillsData(childrenWithPoints: skillsAndPoints)
-    }
-
-    private static class SkillWithAchievementIndicator {
-        SkillDef skillDef
-        boolean isAchieved
-    }
-
-    private List<SkillWithAchievementIndicator> loadDependentSkills(String userId, String projectId, String skillId) {
-        List<Object []> dependentSkillsAndTheirAchievementStatus = userPointsRepo.findChildrenAndThierAchievements(userId, projectId, skillId, SkillRelDef.RelationshipType.Dependence)
-        return dependentSkillsAndTheirAchievementStatus.collect {
-            new SkillWithAchievementIndicator(skillDef: it[0], isAchieved: it[1] != null)
-        }
     }
 
     private static class SkillDefAndUserPoints {

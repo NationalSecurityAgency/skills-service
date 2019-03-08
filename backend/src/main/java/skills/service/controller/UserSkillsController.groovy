@@ -74,6 +74,12 @@ class UserSkillsController {
         return skillsLoader.loadPointHistorySummary(projectId, userInfoService.currentUser.username, 365, subjectId)
     }
 
+    @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/dependencies", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    @CompileStatic
+    SkillDependencyInfo loadSkillDependencyInfo(@PathVariable("projectId") String projectId, @PathVariable("skillId") String skillId) {
+        return skillsLoader.loadSkillDependencyInfo(projectId, userInfoService.currentUser.username, skillId)
+    }
 
     @RequestMapping(value = "/projects/{projectId}/skills/{skillId}", method = RequestMethod.POST, produces = "application/json")
     @ResponseBody
@@ -115,4 +121,5 @@ class UserSkillsController {
     String getCustomIconCss(@PathVariable("id") String projectId) {
         return customIconFacade.generateCss(projectId)
     }
+
 }
