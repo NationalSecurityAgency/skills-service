@@ -1,15 +1,15 @@
 <template>
-  <div class="modal-card" style="width:400px">
-    <header class="modal-card-head">
-      <icon-picker :startIcon="iconClassInternal"
-                   v-on:on-icon-selected="onSelectedIcons"
-                   custom-icon-height="24px"
-                   custom-icon-width="24px"></icon-picker>
-      <span v-if="isEdit" class="level-title">Edit Level</span>
-      <span v-else class="level-title">New Level</span>
-    </header>
+  <modal :title="title" @cancel-clicked="closeMe" @save-clicked="saveLevel">
+    <template slot="content">
+      <div class="field is-horizontal">
+        <div class="field-body">
+          <div class="field is-narrow">
+            <icon-picker :startIcon="iconClassInternal"
+                         v-on:on-icon-selected="onSelectedIcons"></icon-picker>
+          </div>
+        </div>
+      </div>
 
-    <section class="modal-card-body">
       <template v-if="isEdit">
         <b-field label="Level" :type="{'help is-danger': errors.has('level')}"
                  :message="errors.first('level')">
@@ -17,16 +17,16 @@
         </b-field>
         <b-field v-if="!this.levelAsPoints" label="Percent" :type="{'help is-danger': errors.has('percent')}"
                  :message="errors.first('percent')">
-          <b-input v-model="percentInternal" name="percent" v-validate="'required|min:0|max:100|numeric'"></b-input>
+          <b-input v-model="percentInternal" name="percent" v-validate="'required|min:0|max:100|numeric|overlap'"></b-input>
         </b-field>
         <template v-else>
           <b-field label="Points From" :type="{'help is-danger': errors.has('pointsFrom')}"
                    :message="errors.first('pointsFrom')">
-            <b-input v-model="pointsFromInternal" name="pointsFrom" v-validate="'required|min:0|numeric'"></b-input>
+            <b-input v-model="pointsFromInternal" name="pointsFrom" v-validate="'required|min:0|numeric|overlap'"></b-input>
           </b-field>
           <b-field label="Points To" :type="{'help is-danger': errors.has('pointsTo')}"
                    :message="errors.first('pointsTo')">
-            <b-input v-model="pointsToInternal" name="pointsTo" v-validate="'required|min:0|numeric'"></b-input>
+            <b-input v-model="pointsToInternal" name="pointsTo" v-validate="'required|min:0|numeric|overlap'"></b-input>
           </b-field>
         </template>
         <b-field label="Name" :type="{'help is-danger': errors.has('name')}"
@@ -37,45 +37,33 @@
       <template v-else>
         <b-field v-if="!this.levelAsPoints" label="Percent" :type="{'help is-danger': errors.has('percent')}"
                  :message="errors.first('percent')">
-          <b-input v-model="percentInternal" name="percent" v-validate="'required|min:0|max:100|numeric'"></b-input>
+          <b-input v-model="percentInternal" name="percent" v-validate="'required|min:0|max:100|numeric|overlap'"></b-input>
         </b-field>
         <b-field v-else label="Points" :type="{'help is-danger': errors.has('points')}"
                  :message="errors.first('points')">
-          <b-input v-model="pointsInternal" name="points" v-validate="'required|min:0|numeric'"></b-input>
+          <b-input v-model="pointsInternal" name="points" v-validate="'required|min:0|numeric|overlap'"></b-input>
         </b-field>
         <b-field label="Name" :type="{'help is-danger': errors.has('name')}"
                  :message="errors.first('name')">
           <b-input v-model="nameInternal" name="name" v-validate="'max:50'"></b-input>
         </b-field>
       </template>
-    </section>
 
-    <footer class="modal-card-foot">
-      <button class="button is-link is-outlined" v-on:click="$parent.close()">
-        <span>Cancel</span>
-        <span class="icon is-small">
-              <i class="fas fa-stop-circle"/>
-            </span>
-      </button>
-
-      <button class="button is-primary is-outlined" v-on:click="saveLevel" :disabled="errors.any()">
-        <span>Save</span>
-        <span class="icon is-small">
-              <i class="fas fa-arrow-circle-right"/>
-            </span>
-      </button>
-    </footer>
-  </div>
+    </template>
+  </modal>
 </template>
 
 <script>
   import { Validator } from 'vee-validate';
   import IconPicker from '../utils/iconPicker/IconPicker';
+  import Modal from '../utils/modal/Modal';
+
+  let self;
 
   export default {
     name: 'NewLevel',
-    components: { IconPicker },
-    props: ['levelAsPoints', 'percent', 'points', 'pointsFrom', 'pointsTo', 'name', 'iconClass', 'isEdit', 'levelId', 'level'],
+    components: { IconPicker, Modal },
+    props: ['levelAsPoints', 'percent', 'points', 'pointsFrom', 'pointsTo', 'name', 'iconClass', 'isEdit', 'levelId', 'level', 'boundaries'],
     data() {
       return {
         percentInternal: this.percent,
@@ -86,6 +74,9 @@
         pointsToInternal: this.pointsTo,
         levelInternal: this.level,
       };
+    },
+    mounted() {
+      self = this;
     },
     created() {
       const dictionary = {
@@ -100,9 +91,37 @@
           },
         },
       };
+
+      Validator.extend('overlap', {
+        getMessage: 'Value must not overlap with other levels',
+        validate(value) {
+          let valid = true;
+          if (self.boundaries) {
+            let previousValid = true;
+            let nextValid = true;
+            if (self.boundaries.previous !== null) {
+              previousValid = value > self.boundaries.previous;
+            }
+            if (self.boundaries.next !== null) {
+              nextValid = value < self.boundaries.next;
+            }
+            valid = nextValid && previousValid;
+          }
+          return valid;
+        },
+      });
+
       Validator.localize(dictionary);
     },
+    computed: {
+      title() {
+        return this.isEdit ? 'Edit Level' : 'New Level';
+      },
+    },
     methods: {
+      closeMe() {
+        this.$parent.close();
+      },
       saveLevel() {
         this.$validator.validateAll().then((res) => {
           if (res) {
