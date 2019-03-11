@@ -61,7 +61,7 @@
 
   export default {
     name: 'Levels',
-    props: ['projectId', 'subjectId'],
+    props: ['projectId', 'subjectId', 'maxLevels'],
     data() {
       return {
         levelsAsPoints: false,
@@ -226,6 +226,11 @@
             boundaries: bounds,
           };
         } else {
+
+          if(this.levels.length >= this.maxLevels){
+            this.$toast.open(ToastHelper.defaultConf(`You cannot have more then ${this.maxLevels} levels`));
+          }
+
           const last = this.levels[this.levels.length - 1];
           const bounds = {
             previous: null,
