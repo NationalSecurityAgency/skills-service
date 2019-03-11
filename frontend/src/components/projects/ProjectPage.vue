@@ -63,7 +63,7 @@
           </section>
         </template>
         <template slot="Levels">
-          <levels :project-id="project.projectId"/>
+          <levels :project-id="project.projectId" :max-levels="25"/>
         </template>
         <template slot="Badges">
           <badges :project="project" v-on:subjects-changed="loadProjects"/>

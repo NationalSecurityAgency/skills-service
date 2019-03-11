@@ -56,7 +56,7 @@
           <skills :project-id="projectId" :subject-id="subjectId" v-on:skills-change="loadSubject"/>
         </template>
         <template slot="Level Definitions">
-          <levels :project-id="projectId" :subject-id="subjectId"/>
+          <levels :project-id="projectId" :subject-id="subjectId" :max-levels="25"/>
         </template>
         <template slot="Users">
           <section v-if="projectId" class="">

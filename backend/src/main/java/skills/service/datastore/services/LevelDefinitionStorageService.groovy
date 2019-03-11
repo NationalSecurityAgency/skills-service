@@ -5,6 +5,7 @@ import groovy.transform.ToString
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.Validate
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Isolation
 import org.springframework.transaction.annotation.Transactional
@@ -25,6 +26,9 @@ import skills.storage.model.SkillDef
 @Service
 @Slf4j
 class LevelDefinitionStorageService {
+
+    @Value('#{"${skills.levels.max:25}"}')
+    private int maxLevels
 
     @Autowired
     LevelDefRepo levelDefinitionRepository
@@ -207,7 +211,7 @@ class LevelDefinitionStorageService {
         LevelDef removed
         LevelDefRes result = getLevelDefs(projectId, skillId)
         List<LevelDef> existingDefinitions = result?.levels
-        
+
         if (existingDefinitions.size() == 1) {
             throw new SkillException("A minimum of one level is required", projectId, skillId)
         }
@@ -284,6 +288,11 @@ class LevelDefinitionStorageService {
 
         LevelDef created
         LevelDefRes existingDefinitions = getLevelDefs(projectId, skillId)
+
+        if(existingDefinitions.levels.size() == maxLevels){
+            throw new SkillException("No more then $maxLevels levels are allowed", projectId, skillId)
+        }
+
         if(asPoints) {
             assert existingDefinitions.levels.collect({ it.pointsTo }).max() < nextLevelRequest.points
         }else{
