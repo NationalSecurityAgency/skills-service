@@ -228,6 +228,7 @@
         } else {
           if (this.levels.length >= this.maxLevels) {
             this.$toast.open(ToastHelper.defaultConf(`You cannot have more then ${this.maxLevels} levels`));
+            return;
           }
 
           const last = this.levels[this.levels.length - 1];
