@@ -207,6 +207,11 @@ class LevelDefinitionStorageService {
         LevelDef removed
         LevelDefRes result = getLevelDefs(projectId, skillId)
         List<LevelDef> existingDefinitions = result?.levels
+        
+        if (existingDefinitions.size() == 1) {
+            throw new SkillException("A minimum of one level is required", projectId, skillId)
+        }
+
         if (existingDefinitions) {
             existingDefinitions = existingDefinitions.sort({ it.level })
             removed = existingDefinitions.last()

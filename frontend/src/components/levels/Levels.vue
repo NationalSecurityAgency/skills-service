@@ -57,6 +57,7 @@
   import NewLevel from './NewLevel';
   import SettingService from '../settings/SettingsService';
   import LevelService from './LevelService';
+  import ToastHelper from '../utils/ToastHelper';
 
   export default {
     name: 'Levels',
@@ -145,17 +146,21 @@
         }
       },
       removeLastItem() {
-        this.$dialog.confirm({
-          title: 'WARNING: Delete Highest Level',
-          message: 'Are you absolutely sure you want to delete the highest Level?',
-          confirmText: 'Delete',
-          type: 'is-danger',
-          hasIcon: true,
-          icon: 'exclamation-triangle',
-          iconPack: 'fa',
-          scroll: 'keep',
-          onConfirm: () => this.doRemoveLastItem(),
-        });
+        if (this.levels.length > 1) {
+          this.$dialog.confirm({
+            title: 'WARNING: Delete Highest Level',
+            message: 'Are you absolutely sure you want to delete the highest Level?',
+            confirmText: 'Delete',
+            type: 'is-danger',
+            hasIcon: true,
+            icon: 'exclamation-triangle',
+            iconPack: 'fa',
+            scroll: 'keep',
+            onConfirm: () => this.doRemoveLastItem(),
+          });
+        } else {
+          this.$toast.open(ToastHelper.defaultConf('You must retain at least one level'));
+        }
       },
       doRemoveLastItem() {
         this.isLoading = true;
@@ -166,6 +171,7 @@
           })
             .catch((e) => {
               this.serverErrors.push(e);
+              this.showError('Error removing level', e);
           });
         } else {
           LevelService.deleteLastLevelForProject(this.projectId).then(() => {
@@ -174,6 +180,7 @@
           })
             .catch((e) => {
               this.serverErrors.push(e);
+              this.showError('Error removing level', e);
           });
         }
       },
@@ -181,21 +188,61 @@
         let editProps = null;
 
         if (existingLevel) {
+          const bounds = {
+            previous: null,
+            next: null,
+          };
+
+          const existingIdx = this.levels.findIndex(level => existingLevel.level === level.level);
+          const byIndex = new Map(this.levels.map((level, index) => [index, level]));
+
+          const previous = byIndex.get(existingIdx - 1);
+          const next = byIndex.get(existingIdx + 1);
+
+          if (previous) {
+            if (this.levelsAsPoints) {
+              bounds.previous = previous.pointsTo;
+            } else {
+              bounds.previous = previous.percent;
+            }
+          }
+          if (next) {
+            if (this.levelsAsPoints) {
+              bounds.next = next.pointsFrom;
+            } else {
+              bounds.next = next.percent;
+            }
+          }
+
           editProps = {
             isEdit: true,
             percent: existingLevel.percent,
             pointsFrom: existingLevel.pointsFrom,
             pointsTo: existingLevel.pointsTo,
             name: existingLevel.name,
-            iconClass: existingLevel.iconClass,
+            iconClass: existingLevel.iconClass || 'fas fa-user-ninja',
             level: existingLevel.level,
             levelId: existingLevel.id,
+            boundaries: bounds,
           };
         } else {
+          const last = this.levels[this.levels.length - 1];
+          const bounds = {
+            previous: null,
+            next: null,
+          };
+
+          if (this.levelsAsPoints) {
+            bounds.previous = last.pointsFrom;
+          } else {
+            bounds.previous = last.percent;
+          }
+
           editProps = {
             levelAsPoints: this.levelsAsPoints,
-            iconClass: 'fas user-ninja',
+            iconClass: 'fas fa-user-ninja',
             isEdit: false,
+            boundaries: bounds,
           };
         }
 
@@ -219,6 +266,7 @@
           })
             .catch((e) => {
               this.serverErrors.push(e);
+              this.showError('Error creating level', e);
           });
         } else {
           LevelService.createNewLevelForProject(this.projectId, nextLevelObj).then(() => {
@@ -227,6 +275,7 @@
           })
             .catch((e) => {
               this.serverErrors.push(e);
+              this.showError('Error creating level', e);
           });
         }
       },
@@ -239,6 +288,7 @@
           })
             .catch((e) => {
               this.serverErrors.push(e);
+              this.showError('Error editing level', e);
           });
         } else {
           LevelService.editlevelForProject(this.projectId, editedLevelObj).then(() => {
@@ -247,7 +297,17 @@
           })
             .catch((e) => {
               this.serverErrors.push(e);
+              this.showError('Error editing level', e);
           });
+        }
+      },
+      showError(msgPrefix, e) {
+        if (e && e.response) {
+          if (e.response.data && e.response.data.errorMsg) {
+            this.$toast.open(ToastHelper.defaultConf(`${msgPrefix}: ${e.response.data.errorMsg}`, true));
+          } else {
+            this.$toast.open(ToastHelper.defaultConf(`${msgPrefix}: ${e.response.status} - ${e.response.statusText}`, true));
+          }
         }
       },
     },

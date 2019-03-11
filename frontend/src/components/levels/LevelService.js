@@ -14,7 +14,7 @@ export default {
     return axios.delete(url);
   },
   deleteLastLevelForSubject(projectId, subjectId) {
-    const url = `/admin/projects/${projectId}/subjects/${subjectId}/levels`;
+    const url = `/admin/projects/${projectId}/subjects/${subjectId}/levels/last`;
     return axios.delete(url);
   },
   createNewLevelForProject(projectId, nextLevelObject) {
