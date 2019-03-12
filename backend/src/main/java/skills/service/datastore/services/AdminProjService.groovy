@@ -439,7 +439,7 @@ class AdminProjService {
         List<SkillShareDefRepo.SkillSharedMeta> sharedMetas = skillShareDefRepo.getSkillDefsSharedFromOtherProjectsByProjectId(projDef)
         return sharedMetas.collect { SkillShareDefRepo.SkillSharedMeta meta ->
             new SharedSkillResult(
-                    id: meta.getId(), skillName: meta.skillName, skillId: meta.skillId,
+                    skillName: meta.skillName, skillId: meta.skillId,
                     projectName: meta.projectName, projectId: meta.projectId
             )
         }
@@ -723,14 +723,14 @@ class AdminProjService {
         List<SkillDef> res = skillDefRepo.findAllByProjectIdAndVersionAndType(projectId, version, SkillDef.ContainerType.Skill)
         List<SkillDefForDependencyRes> finalRes = res.collect {
             new SkillDefForDependencyRes(
-                    id: it.id, skillId: it.skillId, name: it.name, projectId: it.projectId, totalPoints: it.totalPoints, version: it.version
+                    skillId: it.skillId, name: it.name, projectId: it.projectId, totalPoints: it.totalPoints, version: it.version
             )
         }
         List<SharedSkillResult> sharedSkills = getSharedSkillsFromOtherProjects(projectId)
         sharedSkills.each {
             finalRes.add(
                     new SkillDefForDependencyRes(
-                            id: it.id, skillId: it.skillId, name: it.skillName, projectId: projectId, otherProjectId: it.projectId, otherProjectName: it.projectName
+                            skillId: it.skillId, name: it.skillName, projectId: projectId, otherProjectId: it.projectId, otherProjectName: it.projectName
                     )
             )
         }
