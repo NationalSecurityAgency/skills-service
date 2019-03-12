@@ -6,7 +6,12 @@ const getters = {
     return state.userInfo;
   },
   isAuthenticated(state) {
-    return (state.token !== null || state.localAuth || state.oAuthAuth || state.pkiAuth) && state.userInfo !== null;
+    return (
+      state.token !== null ||
+      state.pkiAuth ||
+      state.localAuth ||
+      state.oAuthAuth
+    ) && state.userInfo !== null;
   },
   isPkiAuthenticated(state) {
     return state.pkiAuth;
@@ -67,7 +72,7 @@ const actions = {
   },
   login({ commit, dispatch }, authData) {
     return new Promise((resolve, reject) => {
-      axios.post('/performLogin', authData)
+      axios.post('/performLogin', authData, { handleError: false })
         .then((result) => {
           const token = result.headers.authorization;
           let expirationDate;
