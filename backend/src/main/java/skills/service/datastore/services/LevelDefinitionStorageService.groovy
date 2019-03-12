@@ -47,28 +47,63 @@ class LevelDefinitionStorageService {
 
 
     LevelInfo getLevelInfo(SkillDef skillDefinition, int currentScore) {
-        List<Integer> levelScores = loadPercentLevels(skillDefinition.levelDefinitions, skillDefinition.totalPoints)
+        SettingsResult setting = settingsService.getSetting(skillDefinition.projectId, Settings.LEVEL_AS_POINTS.settingName)
+
+        List<Integer> levelScores = []
+        if(setting.isEnabled()){
+            levelScores = loadPointsLevels(skillDefinition.levelDefinitions)
+        } else {
+            levelScores = loadPercentLevels(skillDefinition.levelDefinitions, skillDefinition.totalPoints)
+        }
         return calculateLevel(levelScores, currentScore)
     }
 
     LevelInfo getOverallLevelInfo(ProjDef projDef, int currentScore) {
-        List<Integer> levelScores = loadPercentLevels(projDef.levelDefinitions, projDef.totalPoints)
+        SettingsResult setting = settingsService.getSetting(projDef.projectId, Settings.LEVEL_AS_POINTS.settingName)
+
+        List<Integer> levelScores = []
+        if(setting.isEnabled()){
+            levelScores = loadPointsLevels(projDef.levelDefinitions)
+        } else {
+            levelScores = loadPercentLevels(projDef.levelDefinitions, projDef.totalPoints)
+        }
         return calculateLevel(levelScores, currentScore)
     }
 
     int getPointsRequiredForLevel(SkillDef skillDefinition, int level) {
-        List<Integer> levelScores = loadPercentLevels(skillDefinition.levelDefinitions, skillDefinition.totalPoints)
+        SettingsResult setting = settingsService.getSetting(skillDefinition.projectId, Settings.LEVEL_AS_POINTS.settingName)
+
+        List<Integer> levelScores = []
+        if(setting.isEnabled()){
+            levelScores = loadPointsLevels(skillDefinition.levelDefinitions)
+        } else {
+            levelScores = loadPercentLevels(skillDefinition.levelDefinitions, skillDefinition.totalPoints)
+        }
         return calculatePointsRequiredForLevel(levelScores, level)
     }
 
     int getPointsRequiredForOverallLevel(ProjDef projDef, int level) {
-        List<Integer> levelScores = loadPercentLevels(projDef.levelDefinitions, projDef.totalPoints)
+        SettingsResult setting = settingsService.getSetting(projDef.projectId, Settings.LEVEL_AS_POINTS.settingName)
+
+        List<Integer> levelScores = []
+        if(setting.isEnabled()){
+            levelScores = loadPointsLevels(projDef.levelDefinitions)
+        } else {
+            levelScores = loadPercentLevels(projDef.levelDefinitions, projDef.totalPoints)
+        }
         return calculatePointsRequiredForLevel(levelScores, level)
     }
 
     private List<Integer> loadPercentLevels(List<LevelDef> levelDefinitions, int currentScore) {
         List<Integer> levelScores = levelDefinitions.sort({ it.level }).collect {
             return (int) (currentScore * (it.percent / 100d))
+        }
+        return levelScores
+    }
+
+    private List<Integer> loadPointsLevels(List<LevelDef> levelDefinitions){
+        List<Integer> levelScores = levelDefinitions.sort({ it.level }).collect {
+            return it.pointsFrom
         }
         return levelScores
     }
