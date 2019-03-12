@@ -18,6 +18,7 @@ import skills.service.datastore.services.settings.SettingsService
 import skills.service.datastore.services.UserAdminService
 import skills.storage.model.SkillDef
 import skills.utils.ClientSecretGenerator
+import skills.utils.Constants
 
 import static org.springframework.data.domain.Sort.Direction.ASC
 import static org.springframework.data.domain.Sort.Direction.DESC
@@ -222,7 +223,7 @@ class AdminController {
         assert skillRequest.pointIncrementInterval > 0
         assert skillRequest.maxSkillAchievedCount > 0
         assert skillRequest.version >= 0
-        assert skillRequest.version < 1000
+        assert skillRequest.version < Constants.MAX_VERSION
 
         skillRequest.totalPoints = skillRequest.pointIncrement * skillRequest.maxSkillAchievedCount
 //        assert skillRequest.subjectId == subjectId
@@ -230,6 +231,10 @@ class AdminController {
         return projectAdminStorageService.saveSkill(skillRequest)
     }
 
+    @GetMapping(value =  '/projects/{projectId}/latestVersion', produces = 'application/json')
+    Integer findLatestSkillVersion(@PathVariable('projectId') String projectId) {
+        return projectAdminStorageService.findLatestSkillVersion(projectId)
+    }
 
     @RequestMapping(value = "/projects/{projectId}/dependency/availableSkills", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody

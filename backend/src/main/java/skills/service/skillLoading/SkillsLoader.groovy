@@ -128,8 +128,8 @@ class SkillsLoader {
     }
 
     @Transactional(readOnly = true)
-    SkillDependencyInfo loadSkillDependencyInfo(String projectId, String userId, String skillId) {
-        SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, projectId, skillId, SkillRelDef.RelationshipType.Dependence)
+    SkillDependencyInfo loadSkillDependencyInfo(String projectId, String userId, String skillId, Integer version = Integer.MAX_VALUE) {
+        SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, projectId, skillId, version, SkillRelDef.RelationshipType.Dependence)
         List<SkillSummary> skillSummaries = createSkillSummaries(groupChildrenMeta.childrenWithPoints)
         return new SkillDependencyInfo(dependencies: skillSummaries)
     }

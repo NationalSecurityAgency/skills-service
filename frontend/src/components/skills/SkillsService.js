@@ -75,4 +75,8 @@ export default {
     return axios.get(`/admin/projects/${projectId}/skillExists?skillId=${skillId}`)
       .then(remoteRes => !remoteRes.data);
   },
+  getLatestSkillVersion(projectId) {
+    return axios.get(`/admin/projects/${projectId}/latestVersion`)
+      .then(remoteRes => remoteRes.data);
+  },
 };

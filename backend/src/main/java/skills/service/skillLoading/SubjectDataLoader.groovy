@@ -32,11 +32,11 @@ class SubjectDataLoader {
         List<SkillsAndPoints> childrenWithPoints
     }
 
-    SkillsData loadData(String userId, String projectId, String skillId, Integer version = 0) {
+    SkillsData loadData(String userId, String projectId, String skillId, Integer version = Integer.MAX_VALUE) {
         return loadData(userId, projectId, skillId, version, SkillRelDef.RelationshipType.RuleSetDefinition)
     }
 
-    SkillsData loadData(String userId, String projectId, String skillId, Integer version = 0, SkillRelDef.RelationshipType relationshipType) {
+    SkillsData loadData(String userId, String projectId, String skillId, Integer version = Integer.MAX_VALUE, SkillRelDef.RelationshipType relationshipType) {
         List<SkillDefAndUserPoints> childrenWithUserPoints = loadChildren(userId, projectId, skillId, relationshipType, version)
         childrenWithUserPoints = childrenWithUserPoints?.sort({ it.skillDef.displayOrder })
 
@@ -49,7 +49,7 @@ class SubjectDataLoader {
             int todayPoints = todaysPoints.points ? todaysPoints.points?.points : 0
             int points = skillDefAndUserPoints.points ? skillDefAndUserPoints.points.points : 0
 
-            SkillDependencySummary dependencyInfo = dependencySummaryLoader.loadDependencySummary(userId, projectId, skillDefAndUserPoints.skillDef.skillId)
+            SkillDependencySummary dependencyInfo = dependencySummaryLoader.loadDependencySummary(userId, projectId, skillDefAndUserPoints.skillDef.skillId, version)
 
             new SkillsAndPoints(skillDef: skillDefAndUserPoints.skillDef, points: points, todaysPoints: todayPoints, dependencyInfo: dependencyInfo)
         }
@@ -61,11 +61,8 @@ class SubjectDataLoader {
         UserPoints points
     }
 
-    private List<SkillDefAndUserPoints> loadChildren(String userId, String projectId, String skillId, SkillRelDef.RelationshipType relationshipType, Integer version = -1, Date day = null) {
+    private List<SkillDefAndUserPoints> loadChildren(String userId, String projectId, String skillId, SkillRelDef.RelationshipType relationshipType, Integer version = Integer.MAX_VALUE, Date day = null) {
 
-        if (version == -1) {
-            version = Integer.MAX_VALUE
-        }
         List<Object[]> childrenWithUserPoints = day ?
                 userPointsRepo.findChildrenAndTheirUserPoints(userId, projectId, skillId, relationshipType, version, day) :
                 userPointsRepo.findChildrenAndTheirUserPoints(userId, projectId, skillId, relationshipType, version)

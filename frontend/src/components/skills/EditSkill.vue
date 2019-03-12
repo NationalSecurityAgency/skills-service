@@ -163,8 +163,8 @@
       if (this.isEdit) {
         this.loadSkillDetails();
       } else {
-        this.isLoadingSkillDetails = false;
-        this.skillInternal = Object.assign({}, this.skill);
+        this.skillInternal = Object.assign({ version: 0 }, this.skill);
+        this.findLatestSkillVersion();
       }
 
       const dictionary = {
@@ -177,7 +177,7 @@
             maxSkillAchievedCount: 'Number of Times to Complete',
             totalPoints: 'Total Points',
             helpUrl: 'Help UrL',
-            version: 0,
+            version: 'Version',
           },
         },
       };
@@ -259,6 +259,20 @@
             this.isLoadingSkillDetails = false;
             throw e;
         });
+      },
+      findLatestSkillVersion() {
+        // let myLatestVersion = 0;
+        SkillsService.getLatestSkillVersion(this.projectId)
+          .then((latestVersion) => {
+            this.skillInternal.version = latestVersion;
+            this.isLoadingSkillDetails = false;
+          })
+          .catch((e) => {
+            this.serverErrors.push(e);
+            this.isLoadingSkillDetails = false;
+            throw e;
+        });
+        // this.skillInternal.version = myLatestVersion;
       },
       toggleSkill() {
         this.canEditSkillId = !this.canEditSkillId && !this.isEdit;

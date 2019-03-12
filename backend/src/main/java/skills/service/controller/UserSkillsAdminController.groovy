@@ -10,6 +10,7 @@ import skills.service.skillLoading.RankingLoader
 import skills.service.skillLoading.SkillsLoader
 import skills.service.skillLoading.model.*
 import skills.service.skillsManagement.SkillsManagementFacade
+import skills.utils.Constants
 
 @RestController
 @RequestMapping("/admin")
@@ -39,14 +40,14 @@ class UserSkillsAdminController {
     @RequestMapping(value = "/projects/{projectId}/summary", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     @CompileStatic
-    OverallSkillSummary getSkillsSummary(@PathVariable("projectId") String projectId, @RequestParam(name = "userId") String userId, @RequestParam(name = 'version', required = false, defaultValue = '0') Integer version) {
+    OverallSkillSummary getSkillsSummary(@PathVariable("projectId") String projectId, @RequestParam(name = "userId") String userId, @RequestParam(name = 'version', required = false, defaultValue = Constants.MAX_VERSION_STRING) Integer version) {
         return skillsLoader.loadOverallSummary(projectId, userId, version)
     }
 
     @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/summary", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     @CompileStatic
-    SkillSubjectSummary getSubjectsSkillsSummary(@PathVariable("projectId") String projectId, @PathVariable("subjectId") String subjectId, @RequestParam(name = "userId") String userId, @RequestParam(name = 'version', required = false, defaultValue = '0') Integer version) {
+    SkillSubjectSummary getSubjectsSkillsSummary(@PathVariable("projectId") String projectId, @PathVariable("subjectId") String subjectId, @RequestParam(name = "userId") String userId, @RequestParam(name = 'version', required = false, defaultValue = Constants.MAX_VERSION_STRING) Integer version) {
         return skillsLoader.loadSubject(projectId, userId, subjectId, version)
     }
 
@@ -67,8 +68,8 @@ class UserSkillsAdminController {
     @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/dependencies", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     @CompileStatic
-    SkillDependencyInfo loadSkillDependencyInfo(@PathVariable("projectId") String projectId, @PathVariable("skillId") String skillId, @RequestParam(name = "userId") String userId) {
-        return skillsLoader.loadSkillDependencyInfo(projectId, userId, skillId)
+    SkillDependencyInfo loadSkillDependencyInfo(@PathVariable("projectId") String projectId, @PathVariable("skillId") String skillId, @RequestParam(name = "userId") String userId, @RequestParam(name =  'version', required = false, defaultValue = Constants.MAX_VERSION_STRING) Integer version) {
+        return skillsLoader.loadSkillDependencyInfo(projectId, userId, skillId, version)
     }
 
     @RequestMapping(value = "/projects/{projectId}/rank", method = RequestMethod.GET, produces = "application/json")
