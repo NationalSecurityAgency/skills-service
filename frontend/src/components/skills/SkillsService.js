@@ -47,8 +47,8 @@ export default {
     return axios.get(`/admin/projects/${projectId}/badge/${badgeId}/skills`)
       .then(res => res.data);
   },
-  getSkillsFroDependency(projectId) {
-    return axios.get(`/admin/projects/${projectId}/dependency/availableSkills`)
+  getSkillsFroDependency(projectId, version) {
+    return axios.get(`/admin/projects/${projectId}/dependency/availableSkills?version=${version}`)
       .then(res => res.data);
   },
   assignDependency(projectId, skillId, dependentSkillId, dependentProjectId) {
