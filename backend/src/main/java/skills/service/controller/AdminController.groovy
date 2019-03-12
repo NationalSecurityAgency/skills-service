@@ -4,6 +4,7 @@ import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.oauth2.common.OAuth2AccessToken
@@ -50,7 +51,7 @@ class AdminController {
         projectAdminStorageService.deleteProject(projectId)
     }
 
-    @RequestMapping(value = "/projects/{projectId}", method = RequestMethod.PATCH, produces = "application/json")
+    @RequestMapping(value = "/projects/{projectId}", method = RequestMethod.PATCH, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     void setProjectDisplayOrder(
             @PathVariable("projectId") String projectId, @RequestBody ActionPatchRequest projectPatchRequest) {
@@ -58,18 +59,18 @@ class AdminController {
         projectAdminStorageService.setProjectDisplayOrder(projectId, projectPatchRequest)
     }
 
-    @RequestMapping(value = "/projects/{id}", method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value = "/projects/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     ProjectResult getProject(@PathVariable("id") String projectId) {
         return projectAdminStorageService.getProject(projectId)
     }
 
-    @RequestMapping(value = "/projects/{id}/projectSearch", method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value = "/projects/{id}/projectSearch", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     List<SimpleProjectResult> searchProjects(@PathVariable("id") String projectId, @RequestParam("nameQuery") nameQuery) {
         return projectAdminStorageService.searchProjects(nameQuery)
     }
 
-    @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
+    @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}", method = [RequestMethod.PUT, RequestMethod.POST], produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     SubjectResult saveSubject(@PathVariable("projectId") String projectId,
                               @PathVariable("subjectId") String subjectId,
@@ -80,7 +81,7 @@ class AdminController {
         return projectAdminStorageService.saveSubject(projectId, subjectRequest)
     }
 
-    @RequestMapping(value = "/projects/{projectId}/subjectExists", method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value = "/projects/{projectId}/subjectExists", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     boolean doesSubjectExist(@PathVariable("projectId") String projectId,
                              @RequestParam(value = "subjectId", required = false) String subjectId,
@@ -95,7 +96,7 @@ class AdminController {
         return projectAdminStorageService.existsBySubjectName(projectId, subjectName)
     }
 
-    @RequestMapping(value = "/projects/{projectId}/skillExists", method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value = "/projects/{projectId}/skillExists", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     boolean doesSkillExist(@PathVariable("projectId") String projectId,
                            @RequestParam(value = "skillId", required = false) String skillId,
@@ -115,19 +116,19 @@ class AdminController {
         projectAdminStorageService.deleteSubject(projectId, subjectId)
     }
 
-    @RequestMapping(value = "/projects/{projectId}/subjects", method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value = "/projects/{projectId}/subjects", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     List<SubjectResult> getSubjects(@PathVariable("projectId") String projectId) {
         return projectAdminStorageService.getSubjects(projectId)
     }
 
-    @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}", method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     SubjectResult getSubject(@PathVariable("projectId") String projectId, @PathVariable("subjectId") String subjectId) {
         return projectAdminStorageService.getSubject(projectId, subjectId)
     }
 
-    @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}", method = RequestMethod.PATCH, produces = "application/json")
+    @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}", method = RequestMethod.PATCH, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     void setSubjectDisplayOrder(
             @PathVariable("projectId") String projectId,
@@ -136,7 +137,7 @@ class AdminController {
         projectAdminStorageService.setSubjectDisplayOrder(projectId, subjectId, subjectPatchRequest)
     }
 
-    @RequestMapping(value = "/projects/{projectId}/badges/{badgeId}", method = RequestMethod.PUT, produces = "application/json")
+    @RequestMapping(value = "/projects/{projectId}/badges/{badgeId}", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     BadgeResult saveBadge(@PathVariable("projectId") String projectId,
                           @PathVariable("badgeId") String badgeId,
@@ -149,7 +150,7 @@ class AdminController {
         return projectAdminStorageService.saveBadge(projectId, badgeRequest)
     }
 
-    @RequestMapping(value = "/projects/{projectId}/badge/{badgeId}/skills/{skillId}", method = RequestMethod.POST, produces = "application/json")
+    @RequestMapping(value = "/projects/{projectId}/badge/{badgeId}/skills/{skillId}", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     def assignSkillToBadge(@PathVariable("projectId") String projectId,
                            @PathVariable("badgeId") String badgeId,
@@ -158,7 +159,7 @@ class AdminController {
         return [status: 'success']
     }
 
-    @RequestMapping(value = "/projects/{projectId}/badge/{badgeId}/skills/{skillId}", method = RequestMethod.DELETE, produces = "application/json")
+    @RequestMapping(value = "/projects/{projectId}/badge/{badgeId}/skills/{skillId}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     def removeSkillFromBadge(@PathVariable("projectId") String projectId,
                            @PathVariable("badgeId") String badgeId,
@@ -172,20 +173,20 @@ class AdminController {
         projectAdminStorageService.deleteBadge(projectId, badgeId)
     }
 
-    @RequestMapping(value = "/projects/{projectId}/badges", method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value = "/projects/{projectId}/badges", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     List<BadgeResult> getBadges(@PathVariable("projectId") String projectId) {
         return projectAdminStorageService.getBadges(projectId)
     }
 
-    @RequestMapping(value = "/projects/{projectId}/badges/{badgeId}", method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value = "/projects/{projectId}/badges/{badgeId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     BadgeResult getBadge(@PathVariable("projectId") String projectId,
                           @PathVariable("badgeId") String badgeId) {
         return projectAdminStorageService.getBadge(projectId, badgeId)
     }
 
-    @RequestMapping(value = "/projects/{projectId}/badges/{badgeId}", method = RequestMethod.PATCH, produces = "application/json")
+    @RequestMapping(value = "/projects/{projectId}/badges/{badgeId}", method = RequestMethod.PATCH, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     void setBadgeDisplayOrder(
             @PathVariable("projectId") String projectId,
@@ -194,13 +195,13 @@ class AdminController {
         projectAdminStorageService.setBadgeDisplayOrder(projectId, badgeId, badgePatchRequest)
     }
 
-    @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/skills", method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/skills", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     List<SkillDefRes> getSkills(
             @PathVariable("projectId") String projectId, @PathVariable("subjectId") String subjectId) {
         return projectAdminStorageService.getSkills(projectId, subjectId)
     }
 
-    @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/skills/{skillId}", method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/skills/{skillId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     SkillDefRes getSkill(
             @PathVariable("projectId") String projectId,
@@ -208,7 +209,7 @@ class AdminController {
         return projectAdminStorageService.getSkill(projectId, subjectId, skillId)
     }
 
-    @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/skills/{skillId}", method = [RequestMethod.POST, RequestMethod.PUT], produces = "application/json")
+    @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/skills/{skillId}", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     SkillDefRes saveSkill(@PathVariable("projectId") String projectId,
                           @PathVariable("subjectId") String subjectId,
@@ -236,13 +237,13 @@ class AdminController {
         return projectAdminStorageService.findLatestSkillVersion(projectId)
     }
 
-    @RequestMapping(value = "/projects/{projectId}/dependency/availableSkills", method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value = "/projects/{projectId}/dependency/availableSkills", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     List<SkillDefForDependencyRes> getSkillsAvailableForDependency(@PathVariable("projectId") String projectId, @RequestParam(name = 'version', required = false, defaultValue = Constants.MAX_VERSION_STRING) Integer version) {
         return projectAdminStorageService.getSkillsAvailableForDependency(projectId, version)
     }
 
-    @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/dependency/{dependentSkillId}", method = [RequestMethod.POST, RequestMethod.PUT], produces = "application/json")
+    @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/dependency/{dependentSkillId}", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     def assignDependency(@PathVariable("projectId") String projectId,
                          @PathVariable("skillId") String skillId,
@@ -252,7 +253,7 @@ class AdminController {
     }
 
 
-    @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/dependency/projects/{dependentProjectId}/skills/{dependentSkillId}", method = [RequestMethod.POST, RequestMethod.PUT], produces = "application/json")
+    @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/dependency/projects/{dependentProjectId}/skills/{dependentSkillId}", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     def assignDependencyFromAnotherProject(@PathVariable("projectId") String projectId,
                                            @PathVariable("skillId") String skillId,
@@ -263,7 +264,7 @@ class AdminController {
     }
 
 
-    @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/dependency/{dependentSkillId}", method = RequestMethod.DELETE, produces = "application/json")
+    @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/dependency/{dependentSkillId}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     def removeDependency(@PathVariable("projectId") String projectId,
                          @PathVariable("skillId") String skillId,
@@ -272,7 +273,7 @@ class AdminController {
         return [status: 'success']
     }
 
-    @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/dependency/projects/{dependentProjectId}/skills/{dependentSkillId}", method = RequestMethod.DELETE, produces = "application/json")
+    @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/dependency/projects/{dependentProjectId}/skills/{dependentSkillId}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     def removeDependencyFromAnotherProject(@PathVariable("projectId") String projectId,
                          @PathVariable("skillId") String skillId,
@@ -282,14 +283,14 @@ class AdminController {
         return [status: 'success']
     }
 
-    @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/dependency/graph", method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/dependency/graph", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     SkillsGraphRes getDependencyForSkill(@PathVariable("projectId") String projectId,
                                          @PathVariable("skillId") String skillId) {
         return projectAdminStorageService.getDependentSkillsGraph(projectId, skillId)
     }
 
-    @RequestMapping(value = "/projects/{projectId}/dependency/graph", method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value = "/projects/{projectId}/dependency/graph", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     SkillsGraphRes getDependencyForProject(@PathVariable("projectId") String projectId) {
         return projectAdminStorageService.getDependentSkillsGraph(projectId)
@@ -306,7 +307,7 @@ class AdminController {
         return projectAdminStorageService.updateSkillDisplayOrder(projectId, subjectId, skillId, patchRequest)
     }
 
-    @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/skills/{skillId}", method = RequestMethod.DELETE, produces = "application/json")
+    @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/skills/{skillId}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     void deleteSkill(@PathVariable("projectId") String projectId,
                      @PathVariable("subjectId") String subjectId,
@@ -315,7 +316,7 @@ class AdminController {
     }
 
 
-    @RequestMapping(value = "/projects/{projectId}/skills", method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value = "/projects/{projectId}/skills", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     List<SkillDefRes> getAllSkillsForProject(
             @PathVariable("projectId") String projectId) {
         List<SkillDefRes> res = projectAdminStorageService.getSkills(projectId)
@@ -323,36 +324,36 @@ class AdminController {
     }
 
 
-    @RequestMapping(value = "/projects/{projectId}/levels", method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value = "/projects/{projectId}/levels", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     List<LevelDefinitionRes> getLevels(
             @PathVariable("projectId") String projectId) {
         List<LevelDefinitionRes> res = levelDefinitionStorageService.getLevels(projectId)
         return res
     }
 
-    @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/levels", method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/levels", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     List<LevelDefinitionRes> getLevels(
             @PathVariable("projectId") String projectId, @PathVariable("subjectId") String subjectId) {
         List<LevelDefinitionRes> res = levelDefinitionStorageService.getLevels(projectId, subjectId)
         return res
     }
 
-    @RequestMapping(value = "/projects/{projectId}/levels/last", method = RequestMethod.DELETE, produces = "application/json")
+    @RequestMapping(value = "/projects/{projectId}/levels/last", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
     void deleteLastLevel(@PathVariable("projectId") String projectId) {
         levelDefinitionStorageService.deleteLastLevel(projectId)
     }
 
-    @RequestMapping(value = "/projects/{projectId}/levels/next", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
+    @RequestMapping(value = "/projects/{projectId}/levels/next", method = [RequestMethod.PUT, RequestMethod.POST], produces = MediaType.APPLICATION_JSON_VALUE)
     void addNextLevel(@PathVariable("projectId") String projectId, @RequestBody NextLevelRequest nextLevelRequest) {
         levelDefinitionStorageService.addNextLevel(projectId, nextLevelRequest)
     }
 
-    @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/levels/last", method = RequestMethod.DELETE, produces = "application/json")
+    @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/levels/last", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
     void deleteLastLevel(@PathVariable("projectId") String projectId, @PathVariable("subjectId") String subjectId) {
         levelDefinitionStorageService.deleteLastLevel(projectId, subjectId)
     }
 
-    @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/levels/next", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
+    @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/levels/next", method = [RequestMethod.PUT, RequestMethod.POST], produces = MediaType.APPLICATION_JSON_VALUE)
     void addNextLevel(
             @PathVariable("projectId") String projectId,
             @PathVariable("subjectId") String subjectId, @RequestBody NextLevelRequest nextLevelRequest) {
@@ -360,7 +361,7 @@ class AdminController {
     }
 
     //Need new methods to edit existing level methods for project and subject
-    @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/levels/edit/{levelId}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
+    @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/levels/edit/{levelId}", method = [RequestMethod.PUT, RequestMethod.POST], produces = MediaType.APPLICATION_JSON_VALUE)
     void editLevel(@PathVariable("projectId") String projectId,
                    @PathVariable("subjectId") String subjectId,
                    @PathVariable("levelId")   String levelId, @RequestBody EditLevelRequest editLevelRequest){
@@ -368,13 +369,13 @@ class AdminController {
     }
 
     //Need new methods to edit existing level methods for project and subject
-    @RequestMapping(value = "/projects/{projectId}/levels/edit/{levelId}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
+    @RequestMapping(value = "/projects/{projectId}/levels/edit/{levelId}", method = [RequestMethod.PUT, RequestMethod.POST], produces = MediaType.APPLICATION_JSON_VALUE)
     void editLevel(@PathVariable("projectId") String projectId,
                    @PathVariable("levelId")   String levelId, @RequestBody EditLevelRequest editLevelRequest){
         levelDefinitionStorageService.editLevel(projectId, editLevelRequest, levelId)
     }
 
-    @RequestMapping(value = "/projects/{projectId}/performedSkills/{userId}", method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value = "/projects/{projectId}/performedSkills/{userId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @CompileStatic
     TableResult getUserPerformedSkills(@PathVariable("projectId") String projectId,
@@ -396,7 +397,7 @@ class AdminController {
         return userAdminService.distinctSkillsCount(projectId, userId)
     }
 
-    @GetMapping(value = "/projects/{projectId}/users", produces = "application/json")
+    @GetMapping(value = "/projects/{projectId}/users", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @CompileStatic
     TableResult getProjectUsers(@PathVariable("projectId") String projectId,
@@ -409,7 +410,7 @@ class AdminController {
         return adminUsersService.loadUsersPage(projectId, query, pageRequest)
     }
 
-    @GetMapping(value = "/projects/{projectId}/subjects/{subjectId}/users", produces = "application/json")
+    @GetMapping(value = "/projects/{projectId}/subjects/{subjectId}/users", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     TableResult getSubjectUsers(@PathVariable("projectId") String projectId,
                                   @PathVariable("subjectId") String subjectId,
@@ -424,7 +425,7 @@ class AdminController {
         return adminUsersService.loadUsersPage(projectId, skillIds, query, pageRequest)
     }
 
-    @GetMapping(value = "/projects/{projectId}/skills/{skillId}/users", produces = "application/json")
+    @GetMapping(value = "/projects/{projectId}/skills/{skillId}/users", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     TableResult getSkillUsers(@PathVariable("projectId") String projectId,
                                 @PathVariable("skillId") String skillId,
@@ -437,7 +438,7 @@ class AdminController {
         return adminUsersService.loadUsersPage(projectId, Collections.singletonList(skillId), query, pageRequest)
     }
 
-    @GetMapping(value = "/projects/{projectId}/badges/{badgeId}/users", produces = "application/json")
+    @GetMapping(value = "/projects/{projectId}/badges/{badgeId}/users", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     TableResult getBadgeUsers(@PathVariable("projectId") String projectId,
                               @PathVariable("badgeId") String badgeId,
@@ -455,73 +456,73 @@ class AdminController {
         return adminUsersService.loadUsersPage(projectId, skillIds, query, pageRequest)
     }
 
-    @RequestMapping(value = "/projects/{projectId}/badge/{badgeId}/skills", method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value = "/projects/{projectId}/badge/{badgeId}/skills", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     List<SkillDefRes> getBadgeSkills(@PathVariable("projectId") String projectId, @PathVariable("badgeId") String badgeId) {
         return projectAdminStorageService.getSkillsForBadge(projectId, badgeId)
     }
 
-    @RequestMapping(value = "/projects/{projectId}/suggestUsers/{query}", method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value = "/projects/{projectId}/suggestUsers/{query}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     List<String> suggestExistingUsers(@PathVariable("projectId") String projectId, @PathVariable("query") String query) {
         return userAdminService.suggestUsersForProject(projectId, query, new PageRequest(0, 10))
     }
 
-    @RequestMapping(value = "/projects/{projectId}/validExistingUserId/{userId}", method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value = "/projects/{projectId}/validExistingUserId/{userId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     Boolean isValidExistingUserId(@PathVariable("projectId") String projectId, @PathVariable("userId") String userId) {
         return userAdminService.isValidExistingUserIdForProject(projectId, userId)
     }
 
-    @RequestMapping(value = "/suggestUsers/{query}", method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value = "/suggestUsers/{query}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     List<String> suggestExistingUsers(@PathVariable("query") String query) {
         return userAdminService.suggestUsers(query, new PageRequest(0, 10))
     }
 
-    @RequestMapping(value = "/validExistingUserId/{userId}", method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value = "/validExistingUserId/{userId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     Boolean isValidExistingUserId(@PathVariable("userId") String userId) {
         return userAdminService.isValidExistingUserId(userId)
     }
 
 
-    @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/shared/projects/{sharedProjectId}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
+    @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/shared/projects/{sharedProjectId}", method = [RequestMethod.PUT, RequestMethod.POST], produces = MediaType.APPLICATION_JSON_VALUE)
     void shareSkillToAnotherProject(@PathVariable("projectId") String projectId,
                                        @PathVariable("skillId") String skillId,
                                        @PathVariable("sharedProjectId") String sharedProjectId) {
         projectAdminStorageService.shareSkillToExternalProject(projectId, skillId, sharedProjectId)
     }
 
-    @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/shared/projects/{sharedProjectId}", method = RequestMethod.DELETE, produces = "application/json")
+    @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/shared/projects/{sharedProjectId}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
     void deleteSkillShare(@PathVariable("projectId") String projectId,
                                     @PathVariable("skillId") String skillId,
                                     @PathVariable("sharedProjectId") String sharedProjectId) {
         projectAdminStorageService.deleteSkillShare(projectId, skillId, sharedProjectId)
     }
 
-    @RequestMapping(value = "/projects/{projectId}/shared", method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value = "/projects/{projectId}/shared", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     List<SharedSkillResult>  getSharedSkills(@PathVariable("projectId") String projectId) {
         return projectAdminStorageService.getSharedSkillsWithOtherProjects(projectId)
     }
 
-    @RequestMapping(value = "/projects/{projectId}/sharedWithMe", method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value = "/projects/{projectId}/sharedWithMe", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     List<SharedSkillResult>  getSharedWithMeSkills(@PathVariable("projectId") String projectId) {
         return projectAdminStorageService.getSharedSkillsFromOtherProjects(projectId)
     }
 
-    @RequestMapping(value = "/projects/{projectId}/settings", method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value = "/projects/{projectId}/settings", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     List<SettingsResult> getProjectSettings(@PathVariable("projectId") String projectId) {
         return settingsService.loadSettingsForProject(projectId)
     }
 
-    @RequestMapping(value = "/projects/{projectId}/settings/{setting}", method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value = "/projects/{projectId}/settings/{setting}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     SettingsResult getProjectSetting(@PathVariable("projectId") String projectId, @PathVariable("setting") String setting) {
         return settingsService.getSetting(projectId, setting)
     }
 
-    @RequestMapping(value = "/projects/{projectId}/settings/{setting}", method = RequestMethod.POST, produces = "application/json")
+    @RequestMapping(value = "/projects/{projectId}/settings/{setting}", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     SettingsResult saveProjectSetting(@PathVariable("projectId") String projectId, @PathVariable("setting") String setting, @RequestBody SettingsRequest value){
         settingsService.saveSetting(value)
     }
 
-    @RequestMapping(value = "/projects/{projectId}/resetClientSecret", method = [RequestMethod.POST, RequestMethod.PUT], produces = "application/json")
+    @RequestMapping(value = "/projects/{projectId}/resetClientSecret", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     String resetClientSecret(@PathVariable("projectId") String projectId) {
         String clientSecret = new ClientSecretGenerator().generateClientSecret()
@@ -529,7 +530,7 @@ class AdminController {
         return clientSecret
     }
 
-    @RequestMapping(value = "/projects/{projectId}/token/{userId}", method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value = "/projects/{projectId}/token/{userId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     ResponseEntity<OAuth2AccessToken> getUserToken(@PathVariable("projectId") String projectId, @PathVariable("userId") String userId) {
         UsernamePasswordAuthenticationToken principal = new UsernamePasswordAuthenticationToken(projectId, null ,[])
