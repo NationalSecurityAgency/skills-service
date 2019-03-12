@@ -22,8 +22,8 @@ class DependencySummaryLoader {
     }
 
     @Transactional(readOnly = true)
-    SkillDependencySummary loadDependencySummary(String userId, String projectId, String skillId){
-        List<SkillWithAchievementIndicator> dependents = loadDependentSkills(userId, projectId, skillId)
+    SkillDependencySummary loadDependencySummary(String userId, String projectId, String skillId, int version = 0){
+        List<SkillWithAchievementIndicator> dependents = loadDependentSkills(userId, projectId, skillId, version)
         SkillDependencySummary dependencySummary = dependents ? new SkillDependencySummary(
                 numDirectDependents: dependents.size(),
                 achieved: !dependents.find { !it.isAchieved }
@@ -32,8 +32,8 @@ class DependencySummaryLoader {
         return dependencySummary
     }
 
-    private List<SkillWithAchievementIndicator> loadDependentSkills(String userId, String projectId, String skillId) {
-        List<Object []> dependentSkillsAndTheirAchievementStatus = userPointsRepo.findChildrenAndThierAchievements(userId, projectId, skillId, SkillRelDef.RelationshipType.Dependence)
+    private List<SkillWithAchievementIndicator> loadDependentSkills(String userId, String projectId, String skillId, int version) {
+        List<Object []> dependentSkillsAndTheirAchievementStatus = userPointsRepo.findChildrenAndTheirAchievements(userId, projectId, skillId, SkillRelDef.RelationshipType.Dependence, version)
         return dependentSkillsAndTheirAchievementStatus.collect {
             new SkillWithAchievementIndicator(skillDef: it[0], isAchieved: it[1] != null)
         }

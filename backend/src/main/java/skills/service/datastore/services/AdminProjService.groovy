@@ -5,6 +5,7 @@ import org.apache.commons.collections.CollectionUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.data.domain.PageRequest
+import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.PathVariable
@@ -700,6 +701,10 @@ class AdminProjService {
         List<SkillDefRes> nodes = distinctNodes.collect({ convertToSkillDefRes(it) })
         SkillsGraphRes res = new SkillsGraphRes(nodes: nodes, edges: edgesRes)
         return res
+    }
+
+    Integer findLatestSkillVersion(String projectId) {
+        return skillDefRepo.findMaxVersionByProjectId(projectId)
     }
 
     private static class GraphSkillDefEdge {

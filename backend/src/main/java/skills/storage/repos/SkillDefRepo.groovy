@@ -54,4 +54,7 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
 
     boolean existsByProjectIdAndSkillIdAndType(String id, String skillId, SkillDef.ContainerType type)
     boolean existsByProjectIdAndNameAndType(String id, String name, SkillDef.ContainerType type)
+
+    @Query('SELECT MAX (s.version) from SkillDef s where s.projectId=?1')
+    Integer findMaxVersionByProjectId(String projectId)
 }
