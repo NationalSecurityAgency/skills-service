@@ -7,6 +7,8 @@
         <span class="subtitle skills-pad-left-1-rem">Total:</span> <span class="points">{{ skillInfo.totalPoints }}</span>,
         <span class="subtitle skills-pad-left-1-rem">Interval Increment:</span> <span class="points">{{ skillInfo.pointIncrementInterval }}</span>
       </div>
+      <span class="title is-5">Version:</span>
+      <span class="points">{{ skillInfo.version }}</span>
 
       <div v-if="description" class="skills-pad-top-1-rem">
         <h2 class="title is-5">Description</h2>

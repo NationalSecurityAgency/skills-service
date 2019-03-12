@@ -189,7 +189,7 @@
       },
       loadAllSkills() {
         this.loading.finishedAllSkills = false;
-        SkillsService.getSkillsFroDependency(this.skill.projectId)
+        SkillsService.getSkillsFroDependency(this.skill.projectId, this.skill.version)
           .then((skills) => {
             this.allSkills = skills.filter(item => (item.skillId !== this.skill.skillId || item.otherProjectId));
             this.loading.finishedAllSkills = true;

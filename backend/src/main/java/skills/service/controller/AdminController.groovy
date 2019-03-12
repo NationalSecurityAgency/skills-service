@@ -238,8 +238,8 @@ class AdminController {
 
     @RequestMapping(value = "/projects/{projectId}/dependency/availableSkills", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
-    List<SkillDefForDependencyRes> getSkillsAvailableForDependency(@PathVariable("projectId") String projectId) {
-        return projectAdminStorageService.getSkillsAvailableForDependency(projectId)
+    List<SkillDefForDependencyRes> getSkillsAvailableForDependency(@PathVariable("projectId") String projectId, @RequestParam(name = 'version', required = false, defaultValue = Constants.MAX_VERSION_STRING) Integer version) {
+        return projectAdminStorageService.getSkillsAvailableForDependency(projectId, version)
     }
 
     @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/dependency/{dependentSkillId}", method = [RequestMethod.POST, RequestMethod.PUT], produces = "application/json")

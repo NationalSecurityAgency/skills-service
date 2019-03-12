@@ -37,6 +37,7 @@ import skills.storage.repos.ProjDefRepo
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.SkillRelDefRepo
 import skills.storage.repos.SkillShareDefRepo
+import skills.utils.Constants
 import skills.utils.Props
 
 @Service
@@ -703,6 +704,7 @@ class AdminProjService {
         return res
     }
 
+    @Transactional(readOnly = true)
     Integer findLatestSkillVersion(String projectId) {
         return skillDefRepo.findMaxVersionByProjectId(projectId)
     }
@@ -717,11 +719,11 @@ class AdminProjService {
     }
 
     @Transactional(readOnly = true)
-    List<SkillDefForDependencyRes> getSkillsAvailableForDependency(String projectId) {
-        List<SkillDef> res = skillDefRepo.findAllByProjectIdAndType(projectId, SkillDef.ContainerType.Skill)
+    List<SkillDefForDependencyRes> getSkillsAvailableForDependency(String projectId, int version = Constants.MAX_VERSION) {
+        List<SkillDef> res = skillDefRepo.findAllByProjectIdAndVersionAndType(projectId, version, SkillDef.ContainerType.Skill)
         List<SkillDefForDependencyRes> finalRes = res.collect {
             new SkillDefForDependencyRes(
-                    id: it.id, skillId: it.skillId, name: it.name, projectId: it.projectId, totalPoints: it.totalPoints
+                    id: it.id, skillId: it.skillId, name: it.name, projectId: it.projectId, totalPoints: it.totalPoints, version: it.version
             )
         }
         List<SharedSkillResult> sharedSkills = getSharedSkillsFromOtherProjects(projectId)
