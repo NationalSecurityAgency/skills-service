@@ -50,7 +50,7 @@ class LevelDefinitionStorageService {
         SettingsResult setting = settingsService.getSetting(skillDefinition.projectId, Settings.LEVEL_AS_POINTS.settingName)
 
         List<Integer> levelScores = []
-        if(setting.isEnabled()){
+        if(setting?.isEnabled()){
             levelScores = loadPointsLevels(skillDefinition.levelDefinitions)
         } else {
             levelScores = loadPercentLevels(skillDefinition.levelDefinitions, skillDefinition.totalPoints)
@@ -62,7 +62,7 @@ class LevelDefinitionStorageService {
         SettingsResult setting = settingsService.getSetting(projDef.projectId, Settings.LEVEL_AS_POINTS.settingName)
 
         List<Integer> levelScores = []
-        if(setting.isEnabled()){
+        if(setting?.isEnabled()){
             levelScores = loadPointsLevels(projDef.levelDefinitions)
         } else {
             levelScores = loadPercentLevels(projDef.levelDefinitions, projDef.totalPoints)
@@ -74,7 +74,7 @@ class LevelDefinitionStorageService {
         SettingsResult setting = settingsService.getSetting(skillDefinition.projectId, Settings.LEVEL_AS_POINTS.settingName)
 
         List<Integer> levelScores = []
-        if(setting.isEnabled()){
+        if(setting?.isEnabled()){
             levelScores = loadPointsLevels(skillDefinition.levelDefinitions)
         } else {
             levelScores = loadPercentLevels(skillDefinition.levelDefinitions, skillDefinition.totalPoints)
@@ -86,7 +86,7 @@ class LevelDefinitionStorageService {
         SettingsResult setting = settingsService.getSetting(projDef.projectId, Settings.LEVEL_AS_POINTS.settingName)
 
         List<Integer> levelScores = []
-        if(setting.isEnabled()){
+        if(setting?.isEnabled()){
             levelScores = loadPointsLevels(projDef.levelDefinitions)
         } else {
             levelScores = loadPercentLevels(projDef.levelDefinitions, projDef.totalPoints)
