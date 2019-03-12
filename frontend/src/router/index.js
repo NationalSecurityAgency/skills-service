@@ -2,6 +2,7 @@ import Vue from 'vue';
 import Router from 'vue-router';
 import HomePage from '@/components/HomePage';
 import ProjectPage from '@/components/projects/ProjectPage';
+import ErrorPage from '@/components/utils/ErrorPage';
 import SubjectPage from '@/components/subjects/SubjectPage';
 import BadgePage from '@/components/badges/BadgePage';
 import SkillPage from '@/components/skills/SkillPage';
@@ -17,6 +18,19 @@ const router = new Router({
       path: '/',
       name: 'HomePage',
       component: HomePage,
+      meta: {
+        breadcrumb: {
+          label: 'Home',
+          utils: {
+            iconClass: 'fas fa-home',
+          },
+        },
+      },
+    },
+    {
+      path: '/error',
+      name: 'ErrorPage',
+      component: ErrorPage,
       meta: {
         breadcrumb: {
           label: 'Home',

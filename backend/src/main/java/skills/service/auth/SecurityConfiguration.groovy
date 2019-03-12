@@ -11,7 +11,12 @@ import org.springframework.core.annotation.Order
 import org.springframework.core.type.AnnotatedTypeMetadata
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
+import org.springframework.security.core.AuthenticationException
+import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint
 import org.springframework.stereotype.Component
+
+import javax.servlet.http.HttpServletRequest
+import javax.servlet.http.HttpServletResponse
 
 @Component
 @Configuration('securityConfig')
@@ -43,10 +48,27 @@ class SecurityConfiguration {
         @Autowired
         private PortalWebSecurityHelper portalWebSecurityHelper
 
+        @Autowired
+        private RestAuthenticationEntryPoint restAuthenticationEntryPoint
+
         @Override
         protected void configure(HttpSecurity http) throws Exception {
             http.antMatcher("/api/**").cors()
             portalWebSecurityHelper.configureHttpSecurity(http)
+                    .exceptionHandling().authenticationEntryPoint(restAuthenticationEntryPoint)
+        }
+    }
+
+    @Component
+    static final class RestAuthenticationEntryPoint extends LoginUrlAuthenticationEntryPoint {
+        RestAuthenticationEntryPoint() { super('/') }
+
+        @Override
+        void commence(
+                final HttpServletRequest request,
+                final HttpServletResponse response,
+                final AuthenticationException authException) throws IOException {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized")
         }
     }
 

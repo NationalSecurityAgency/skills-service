@@ -12,13 +12,11 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
 import org.springframework.security.core.Authentication
-import org.springframework.security.core.AuthenticationException
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.access.AccessDeniedHandler
 import org.springframework.security.web.authentication.AuthenticationFailureHandler
-import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler
 import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler
@@ -30,8 +28,7 @@ import javax.servlet.ServletException
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
-import static skills.service.auth.SecurityConfiguration.FormAuth
-import static skills.service.auth.SecurityConfiguration.PortalWebSecurityHelper
+import static skills.service.auth.SecurityConfiguration.*
 
 @Conditional(FormAuth)
 @Component
@@ -131,23 +128,6 @@ class FormSecurityConfiguration extends WebSecurityConfigurerAdapter {
         @Override
         void handle(final HttpServletRequest request, final HttpServletResponse response, final AccessDeniedException ex) throws IOException, ServletException {
             response.setStatus(HttpServletResponse.SC_FORBIDDEN)
-        }
-    }
-
-    @Component
-    static final class RestAuthenticationEntryPoint extends LoginUrlAuthenticationEntryPoint {
-        RestAuthenticationEntryPoint() { super('/') }
-        @Override
-        void commence(
-                final HttpServletRequest request,
-                final HttpServletResponse response,
-                final AuthenticationException authException) throws IOException {
-            if (request.servletPath == '/performLogin') {
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized")
-            } else {
-                // redirect to the login page and then forward to the requested page after successful login
-                super.commence(request, response, authException)
-            }
         }
     }
 
