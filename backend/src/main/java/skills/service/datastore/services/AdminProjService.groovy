@@ -744,8 +744,15 @@ class AdminProjService {
         SkillDef skill1 = getSkillDef(projectId, skillId)
         SkillDef skill2 = getSkillDef(dependentProjectId ?: projectId, dependentSkillId)
 
+        validateDependencyVersions(skill1, skill2)
         checkForCircularGraphAndThrowException(skill1, skill2, SkillRelDef.RelationshipType.Dependence)
         skillRelDefRepo.save(new SkillRelDef(parent: skill1, child: skill2, type: SkillRelDef.RelationshipType.Dependence))
+    }
+
+    private void validateDependencyVersions(SkillDef parent, SkillDef child) {
+        if (parent.version > child.version) {
+            throw new SkillException('The parent version must be less than or equal to the child version in dependency relationships', parent.projectId, parent.skillId, ErrorCode.FailedToAssignDependency)
+        }
     }
 
     @Transactional()
