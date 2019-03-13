@@ -146,7 +146,7 @@
             this.loadDependentSkills();
           })
           .catch((e) => {
-            if (e.response.data && e.response.data.errCode && e.response.data.errCode === 'FailedToAssignDependency') {
+            if (e.response.data && e.response.data.errorCode && e.response.data.errorCode === 'FailedToAssignDependency') {
               this.errNotification.msg = e.response.data.message;
               this.errNotification.enable = true;
               this.loading.finishedDependents = true;
