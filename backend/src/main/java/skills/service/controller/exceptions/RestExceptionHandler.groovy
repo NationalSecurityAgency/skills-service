@@ -16,7 +16,7 @@ class RestExceptionHandler extends ResponseEntityExceptionHandler{
     static class ErrBody{
         String projectId
         String skillId
-        String errorMsg
+        String message
         String errorCode
     }
 
@@ -24,7 +24,7 @@ class RestExceptionHandler extends ResponseEntityExceptionHandler{
     protected ResponseEntity<Object> handleSkillException(SkillException ex, WebRequest webRequest){
         Object body
         if(ex instanceof SkillException){
-            body = new ErrBody(projectId: ex.projectId, skillId: ex.skillId, errorMsg: ex.message, errorCode: ex.errorCode.name())
+            body = new ErrBody(projectId: ex.projectId, skillId: ex.skillId, message: ex.message, errorCode: ex.errorCode.name())
             log.error("Exception for: projectId=[${ex.projectId}], skillId=${ex.skillId}", ex)
         } else {
             log.error("Unexpected exception type [${ex?.class?.simpleName}]", ex)
