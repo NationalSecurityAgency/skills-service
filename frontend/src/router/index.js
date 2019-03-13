@@ -25,6 +25,7 @@ const router = new Router({
             iconClass: 'fas fa-home',
           },
         },
+        requiresAuth: false,
       },
     },
     {
@@ -38,6 +39,7 @@ const router = new Router({
             iconClass: 'fas fa-home',
           },
         },
+        requiresAuth: false,
       },
     },
     {
@@ -69,6 +71,15 @@ const router = new Router({
       name: 'UserPage',
       component: UserPage,
       meta: { requiresAuth: true },
+    },
+    {
+      path: '*',
+      name: '404',
+      redirect: {
+        name: 'ErrorPage',
+        query: { errorMessage: '404 - Page Not Found' },
+      },
+      meta: { requiresAuth: false },
     },
   ],
 });

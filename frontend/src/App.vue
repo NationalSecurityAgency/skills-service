@@ -6,14 +6,8 @@
       <loading-container v-bind:is-loading="isLoading">
         <div v-if="!isLoading">
           <header-view/>
-          <div v-if="isAuthenticatedUser">
-            <div class="container is-fluid">
-              <router-view/>
-            </div>
-          </div>
-          <div v-else-if="!isAuthenticatedUser">
-            <login-form v-if="!requestAccount"/>
-            <request-account-form v-else/>
+          <div class="container is-fluid">
+            <router-view/>
           </div>
         </div>
       </loading-container>
@@ -25,8 +19,6 @@
 
 <script>
   import HeaderView from './components/header/Header';
-  import LoginForm from './components/access/Login';
-  import RequestAccountForm from './components/access/RequestAccess';
   import LoadingContainer from './components/utils/LoadingContainer';
   import CustomizableHeader from './components/customization/CustomizableHeader';
   import CustomizableFooter from './components/customization/CustomizableFooter';
@@ -37,8 +29,6 @@
     components: {
       CustomizableFooter,
       CustomizableHeader,
-      LoginForm,
-      RequestAccountForm,
       HeaderView,
       LoadingContainer,
     },
@@ -51,9 +41,6 @@
     computed: {
       isAuthenticatedUser() {
         return this.$store.getters.isAuthenticated;
-      },
-      requestAccount() {
-        return this.$route.query.requestAccount;
       },
       activeProjectId() {
         return this.$store.state.projectId;
