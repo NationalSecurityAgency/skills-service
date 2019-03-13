@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.service.auth.UserInfo
 import skills.service.auth.UserInfoService
+import skills.service.controller.exceptions.ErrorCode
+import skills.service.controller.exceptions.SkillException
 import skills.storage.model.auth.*
 import skills.storage.repos.AllowedOriginRepo
 import skills.storage.repos.UserRepo
@@ -76,7 +78,11 @@ class AccessSettingsStorageService {
 
         User user = userRepository.findByUserId(userInfo.username?.toLowerCase())
         if (!createOrUpdate) {
-            assert !user, "CREATE FAILED -> user with userId [$user.userId] already exists"
+            if (user) {
+                SkillException exception = new SkillException("User [${userInfo.username?.toLowerCase()}] already exists.")
+                exception.errorCode = ErrorCode.UserAlreadyExists
+                throw exception
+            }
         }
 
         if (user) {

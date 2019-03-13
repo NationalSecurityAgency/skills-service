@@ -55,17 +55,19 @@ const actions = {
     return new Promise((resolve, reject) => {
       axios.put('/createAccount', authData)
         .then((result) => {
-          const token = result.headers.authorization;
-          let expirationDate;
-          if (result.headers.tokenexpirationtimestamp) {
-            expirationDate = new Date(Number(result.headers.tokenexpirationtimestamp));
-            dispatch('setLogoutTimer', expirationDate);
+          if (result) {
+            const token = result.headers.authorization;
+            let expirationDate;
+            if (result.headers.tokenexpirationtimestamp) {
+              expirationDate = new Date(Number(result.headers.tokenexpirationtimestamp));
+              dispatch('setLogoutTimer', expirationDate);
+            }
+            commit('authUser', { token, expirationDate });
+            dispatch('fetchUser')
+              .then(() => {
+                resolve(result);
+            });
           }
-          commit('authUser', { token, expirationDate });
-          dispatch('fetchUser')
-            .then(() => {
-              resolve(result);
-          });
         })
         .catch(error => reject(error));
     });
