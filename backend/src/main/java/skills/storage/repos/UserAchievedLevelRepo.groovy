@@ -14,7 +14,7 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
 
     void deleteByProjectIdAndSkillId(String projectId, String skillId)
 
-    @Query('''select sdParent.skillId as skillId, sdChild.skillId as childSkillId, ua.skillId as childAchievedSkillId 
+    @Query('''select sdParent.skillId as skillId, sdChild.skillId as childSkillId, sdChild.projectId as childProjectId, ua.skillId as childAchievedSkillId 
     from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
     left join UserAchievement ua on sdChild.projectId = ua.projectId and sdChild.skillId = ua.skillId and ua.userId=?1
       where srd.parent=sdParent.id and  srd.child=sdChild.id and
@@ -24,6 +24,7 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
     static interface ChildWithAchievementsInfo {
         String getSkillId()
 
+        String getChildProjectId()
         String getChildSkillId()
 
         String getChildAchievedSkillId()

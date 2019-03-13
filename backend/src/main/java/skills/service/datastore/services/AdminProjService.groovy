@@ -744,9 +744,27 @@ class AdminProjService {
         SkillDef skill1 = getSkillDef(projectId, skillId)
         SkillDef skill2 = getSkillDef(dependentProjectId ?: projectId, dependentSkillId)
 
+        if (dependentProjectId) {
+            validateDependencyEligibility(projectId, skill2)
+        }
+
         validateDependencyVersions(skill1, skill2)
         checkForCircularGraphAndThrowException(skill1, skill2, SkillRelDef.RelationshipType.Dependence)
-        skillRelDefRepo.save(new SkillRelDef(parent: skill1, child: skill2, type: SkillRelDef.RelationshipType.Dependence))
+        try {
+            skillRelDefRepo.save(new SkillRelDef(parent: skill1, child: skill2, type: SkillRelDef.RelationshipType.Dependence))
+        } catch (DataIntegrityViolationException e) {
+            String msg = "Skill dependency [${skill1.projectId}:${skill1.skillId}]=>[${skill2.projectId}:${skill2.skillId}] already exist.".toString()
+            log.error(msg, e)
+            throw new SkillException(msg, skill1.projectId, skill1.skillId, ErrorCode.FailedToAssignDependency)
+        }
+    }
+
+    private void validateDependencyEligibility(String projectId, SkillDef skill2) {
+        ProjDef projDef = getProjDef(projectId)
+        SkillShareDef skillShareDef = skillShareDefRepo.findBySkillAndSharedToProject(skill2, projDef)
+        if (!skillShareDef) {
+            throw new SkillException("Skill [${skill2.projectId}:${skill2.skillId}] is not shared (or does not exist) to [$projectId] project", projectId)
+        }
     }
 
     private void validateDependencyVersions(SkillDef parent, SkillDef child) {

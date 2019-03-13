@@ -51,7 +51,7 @@ class SkillsManagementFacade {
     static class AddSkillResult {
         boolean wasPerformed = true
         // only really applicable if it wasn't performed
-        String explanation = "Skill was applied"
+        String explanation = "Skill event was applied"
         List<CompletionItem> completed = []
     }
 
@@ -103,7 +103,8 @@ class SkillsManagementFacade {
         })
         if (notAchievedDependents) {
             res.wasPerformed = false
-            res.explanation = "Not all dependent skills have been achieved. Missing achievements for ${notAchievedDependents.size()} out of ${dependentsAndAchievements.size()}. Waiting on completion of ${notAchievedDependents.collect({it.childSkillId})}."
+            res.explanation = "Not all dependent skills have been achieved. Missing achievements for ${notAchievedDependents.size()} out of ${dependentsAndAchievements.size()}. " +
+                    "Waiting on completion of ${notAchievedDependents.collect({ it.childProjectId + ":" + it.childSkillId})}."
             return res
         }
 
