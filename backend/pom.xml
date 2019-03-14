@@ -258,11 +258,11 @@
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${basedir}/src/main/resources/public/clientPortal</outputDirectory>
+                            <outputDirectory>${basedir}/src/main/resources/public/static/clientPortal</outputDirectory>
                             <overwrite>true</overwrite>
                             <resources>
                                 <resource>
-                                    <directory>${project.parent.basedir}/client-display/target/dist</directory>
+                                    <directory>${project.parent.basedir}/client-display/dist</directory>
                                     <includes>
                                         <include>static/</include>
                                         <include>index.html</include>
@@ -272,8 +272,6 @@
                         </configuration>
                     </execution>
                 </executions>
-
-
             </plugin>
         </plugins>
     </build>
