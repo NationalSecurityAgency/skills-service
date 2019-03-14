@@ -6,6 +6,9 @@ server:
   error:
     whitelabel:
       enabled: false
+  servlet:
+    session:
+      timeout: 24h
 spring:
   main:
     allow-bean-definition-overriding: true
