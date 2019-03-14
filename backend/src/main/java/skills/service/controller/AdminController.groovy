@@ -456,32 +456,11 @@ class AdminController {
         return adminUsersService.loadUsersPage(projectId, skillIds, query, pageRequest)
     }
 
-    @RequestMapping(value = "/projects/{projectId}/badge/{badgeId}/skills", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value  = "/projects/{projectId}/badge/{badgeId}/skills", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     List<SkillDefRes> getBadgeSkills(@PathVariable("projectId") String projectId, @PathVariable("badgeId") String badgeId) {
         return projectAdminStorageService.getSkillsForBadge(projectId, badgeId)
     }
-
-    @RequestMapping(value = "/projects/{projectId}/suggestUsers/{query}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    List<String> suggestExistingUsers(@PathVariable("projectId") String projectId, @PathVariable("query") String query) {
-        return userAdminService.suggestUsersForProject(projectId, query, new PageRequest(0, 10))
-    }
-
-    @RequestMapping(value = "/projects/{projectId}/validExistingUserId/{userId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    Boolean isValidExistingUserId(@PathVariable("projectId") String projectId, @PathVariable("userId") String userId) {
-        return userAdminService.isValidExistingUserIdForProject(projectId, userId)
-    }
-
-    @RequestMapping(value = "/suggestUsers/{query}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    List<String> suggestExistingUsers(@PathVariable("query") String query) {
-        return userAdminService.suggestUsers(query, new PageRequest(0, 10))
-    }
-
-    @RequestMapping(value = "/validExistingUserId/{userId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    Boolean isValidExistingUserId(@PathVariable("userId") String userId) {
-        return userAdminService.isValidExistingUserId(userId)
-    }
-
 
     @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/shared/projects/{sharedProjectId}", method = [RequestMethod.PUT, RequestMethod.POST], produces = MediaType.APPLICATION_JSON_VALUE)
     void shareSkillToAnotherProject(@PathVariable("projectId") String projectId,

@@ -4,14 +4,13 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.PageRequest
-import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
 import skills.service.auth.AuthMode
 import skills.service.auth.SkillsAuthorizationException
-
-//import skills.service.auth.DistinguishedNameLoader
 import skills.service.auth.UserInfo
 import skills.service.auth.UserInfoService
+import skills.service.datastore.services.UserAdminService
 import skills.storage.model.auth.User
 import skills.storage.repos.UserRepo
 
@@ -29,8 +28,8 @@ class UserInfoController {
     @Value('#{securityConfig.authMode}}')
     AuthMode authMode = AuthMode.DEFAULT_AUTH_MODE
 
-//    @Autowired
-//    DistinguishedNameLoader suggestionLoader
+    @Autowired
+    UserAdminService userAdminService
 
     static class UserInfoRes {
         String userId
@@ -72,29 +71,41 @@ class UserInfoController {
         return foundRole
     }
 
-    @RequestMapping(value = "/users/suggestDns/{dnPrefix}", method = RequestMethod.GET, produces = "application/json")
-    List<String> suggestDns(@PathVariable("dnPrefix") String dnPrefix) {
-
-        // TODO - fix me
-//        return suggestionLoader.suggestDns(dnPrefix)
-    }
-
-    @RequestMapping(value="/users/validDn/{dn}", method =  RequestMethod.GET, produces = "application/json")
-    Boolean isValidDn(@PathVariable("dn") String dn){
-        // TODO - fix me
-//        return suggestionLoader.isValidDn(dn)
-    }
-
-    @RequestMapping(value = "/users/suggestUsers/{query}", method = RequestMethod.GET, produces = "application/json")
-    List<UserInfoRes> suggestExistngPortalUsers(@PathVariable("query") String query) {
+    @RequestMapping(value = "/users/suggestDashboardUsers/{query}", method = RequestMethod.GET, produces = "application/json")
+    List<String> suggestExistingDashboardUsers(@PathVariable("query") String query,
+                                               @RequestParam(required = false) boolean includeSelf) {
         List<User> matchingUsers = userRepo.getUserByUserIdOrPropWildcard(query, new PageRequest(0, 10))
-        List<UserInfoRes> results = matchingUsers.collect { new UserInfoRes(userId: it.userId, first: it.userProps.find {it.name == 'firstName'}.value, last: it.userProps.find {it.name == 'lastName'}.value) }
-
+        List<String> results = matchingUsers.collect { it.userId }
+        if (!includeSelf) {
+            String currentUserId = userInfoService.currentUser.username
+            results = results.findAll { it != currentUserId }
+        }
         return results
     }
 
-    @RequestMapping(value="/users/validExistingUserId/{userId}", method =  RequestMethod.GET, produces = "application/json")
-    Boolean isValidExistingPortalUserId(@PathVariable("userId") String userId){
+    @RequestMapping(value="/users/validExistingDashboardUserId/{userId}", method =  RequestMethod.GET, produces = "application/json")
+    Boolean isValidExistingDashboardUserId(@PathVariable("userId") String userId){
         return userRepo.findByUserId(userId) != null
     }
+
+    @RequestMapping(value = "/users/projects/{projectId}/suggestClientUsers/{query}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    List<String> suggestExistingClientUsersForProject(@PathVariable("projectId") String projectId, @PathVariable("query") String query) {
+        return userAdminService.suggestUsersForProject(projectId, query, new PageRequest(0, 10))
+    }
+
+    @RequestMapping(value = "/users/suggestClientUsers/{query}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    List<String> suggestExistingClientUsers(@PathVariable("query") String query) {
+        return userAdminService.suggestUsers(query, new PageRequest(0, 10))
+    }
+
+    @RequestMapping(value = "/users/projects/{projectId}/validExistingClientUserId/{userId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    Boolean isValidExistingClientUserIdForProject(@PathVariable("projectId") String projectId, @PathVariable("userId") String userId) {
+        return userAdminService.isValidExistingUserIdForProject(projectId, userId)
+    }
+
+    @RequestMapping(value = "/users/validExistingClientUserId/{userId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    Boolean isValidExistingClientUserId(@PathVariable("userId") String userId) {
+        return userAdminService.isValidExistingUserId(userId)
+    }
+
 }

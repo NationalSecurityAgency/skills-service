@@ -8,7 +8,7 @@
     <section class="modal-card-body">
       <div class="columns" style="margin-right: 10px;">
         <div class="column">
-          <existing-user-input :project-id="projectId" ref="userIdField"></existing-user-input>
+          <existing-user-input :suggest="true" :project-id="projectId" ref="userIdField"></existing-user-input>
         </div>
         <div class="column is-4">
           <b-field label="Date *">

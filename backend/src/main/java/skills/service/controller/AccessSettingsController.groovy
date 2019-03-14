@@ -2,9 +2,12 @@ package skills.service.controller
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.security.core.AuthenticationException
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.web.bind.annotation.*
 import skills.service.auth.UserInfo
+import skills.service.auth.UserInfoService
+import skills.service.controller.exceptions.SkillException
 import skills.service.datastore.services.AccessSettingsStorageService
 import skills.storage.model.auth.AllowedOrigin
 import skills.storage.model.auth.RoleName
@@ -14,6 +17,9 @@ import skills.storage.model.auth.UserRole
 @RequestMapping("/admin")
 @Slf4j
 class AccessSettingsController {
+
+    @Autowired
+    UserInfoService userInfoService
 
     @Autowired
     UserDetailsService userDetailsService
@@ -27,18 +33,23 @@ class AccessSettingsController {
         return accessSettingsStorageService.getUserRoles(projectId)
     }
 
-    @RequestMapping(value = "/projects/{projectId}/users/{userDn}/roles/{roleName}", method = RequestMethod.DELETE)
+    @RequestMapping(value = "/projects/{projectId}/users/{userId}/roles/{roleName}", method = RequestMethod.DELETE)
     void deleteUserRole(
             @PathVariable("projectId") String projectId,
-            @PathVariable("userDn") String userDn, @PathVariable("roleName") RoleName roleName) {
-        accessSettingsStorageService.deleteUserRole(lookupUserInfo(userDn), projectId, roleName)
+            @PathVariable("userId") String userId, @PathVariable("roleName") RoleName roleName) {
+        UserInfo toDelete = lookupUserInfo(userId)
+        if (toDelete != userInfoService.currentUser) {
+            accessSettingsStorageService.deleteUserRole(toDelete, projectId, roleName)
+        } else {
+            throw new SkillException("You cannot delete yourself.")
+        }
     }
 
-    @RequestMapping(value = "/projects/{projectId}/users/{userDn}/roles/{roleName}", method = RequestMethod.PUT)
+    @RequestMapping(value = "/projects/{projectId}/users/{userId}/roles/{roleName}", method = RequestMethod.PUT)
     UserRole createUserRole(
             @PathVariable("projectId") String projectId,
-            @PathVariable("userDn") String userDn, @PathVariable("roleName") RoleName roleName) {
-        accessSettingsStorageService.addUserRole(lookupUserInfo(userDn), projectId, roleName)
+            @PathVariable("userId") String userId, @PathVariable("roleName") RoleName roleName) {
+        accessSettingsStorageService.addUserRole(lookupUserInfo(userId), projectId, roleName)
     }
 
     @RequestMapping(value = "/projects/{projectId}/allowedOrigins", method = RequestMethod.GET, produces = "application/json")
@@ -63,7 +74,11 @@ class AccessSettingsController {
         accessSettingsStorageService.deleteAllowedOrigin(projectId, allowedOriginId)
     }
 
-    private UserInfo lookupUserInfo(String userDn) {
-        return userDetailsService.loadUserByUsername(userDn)
+    private UserInfo lookupUserInfo(String userId) {
+        try {
+            return userDetailsService.loadUserByUsername(userId)
+        } catch (AuthenticationException e) {
+            throw new SkillException(e.message)
+        }
     }
 }
