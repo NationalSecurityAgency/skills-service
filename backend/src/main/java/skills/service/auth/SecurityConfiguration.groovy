@@ -36,6 +36,7 @@ class SecurityConfiguration {
                     .authorizeRequests()
                     .antMatchers("/", "/favicon.ico", "/icons/**", "/static/**", "/error", "/oauth/**", "/login*", "/performLogin", "/createAccount", "/app/userInfo", "/app/users/validExistingUserId/*", "/app/oAuthProviders", "index.html").permitAll()
                     .antMatchers('/admin/**').hasRole('PROJECT_ADMIN')
+                    .antMatchers('/server/**').hasAnyRole('SERVER', 'PROJECT_ADMIN')
                     .anyRequest().authenticated()
             return http
         }
