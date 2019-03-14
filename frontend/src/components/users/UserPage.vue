@@ -93,6 +93,7 @@
       return {
         projectId: '',
         userId: '',
+        authToken: '',
         totalPoints: 0,
         uniqueSkills: 0,
         isLoading: true,
@@ -102,6 +103,10 @@
       this.projectId = this.$route.params.projectId;
       this.userId = this.$route.params.userId;
       this.totalPoints = this.$route.params.totalPoints;
+      UsersService.getUserToken(this.projectId, this.userId)
+        .then((result) => {
+          this.authToken = result;
+      });
       this.loadUserDetails();
     },
     computed: {
