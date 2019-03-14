@@ -14,5 +14,5 @@ interface UserRepo extends CrudRepository<User, Integer> {
     User getUserByDn(String userDn)
 
     @Query(value = "select DISTINCT u from User u JOIN u.userProps props where lower(u.userId) LIKE %?1% OR lower(props.value) LIKE %?1%")
-    List<User> getUserByUserIdOrPropWildcard(String userDn, Pageable pageable)
+    List<User> getUserByUserIdOrPropWildcard(String userId, Pageable pageable)
 }

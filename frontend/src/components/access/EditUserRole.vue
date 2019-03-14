@@ -1,11 +1,11 @@
 <template>
-  <div class="modal-card" style="width: 1110px">
+  <div class="modal-card" style="width: 750px">
     <header class="modal-card-head">
       New User Role
     </header>
 
     <section class="modal-card-body">
-      <user-dn-input ref="userDn"></user-dn-input>
+      <existing-user-input :suggest="true" :validate="true" user-type="DASHBOARD" ref="userInput"></existing-user-input>
 
       <b-field label="Role">
         <b-select name="role" placeholder="Select a role" v-model="roleNameVal" v-validate="'required'" required>
@@ -18,7 +18,7 @@
     </section>
 
     <footer class="modal-card-foot skills-justify-content-right">
-      <button class="button is-outlined" v-on:click="$parent.close()">
+      <button class="button is-outlined" @click="$parent.close()">
         <span>Cancel</span>
         <span class="icon is-small">
               <i class="fas fa-stop-circle"/>
@@ -37,7 +37,7 @@
 
 <script>
   import { Validator } from 'vee-validate';
-  import UserDnInput from '../utils/UserDnInput';
+  import ExistingUserInput from '../utils/ExistingUserInput';
   import AccessService from './AccessService';
 
   const dictionary = {
@@ -53,7 +53,7 @@
   export default {
     name: 'EditUserRole',
     props: ['projectId', 'userDn', 'roleName'],
-    components: { UserDnInput },
+    components: { ExistingUserInput },
     data() {
       return {
         projectIdVal: this.projectId,
@@ -72,7 +72,7 @@
           if (!res) {
             this.isSaving = false;
           } else {
-            AccessService.saveUserRole(this.projectId, this.$refs.userDn.$data.userDn, this.roleNameVal)
+            AccessService.saveUserRole(this.projectId, this.$refs.userInput.$data.userQuery, this.roleNameVal)
               .then((result) => {
                 this.isSaving = false;
                 this.$parent.close();

@@ -27,7 +27,7 @@
               <!--</a>-->
             <!--</p>-->
             <p class="control">
-              <a v-on:click="deleteUserRoleConfirm(props.row)" class="button is-outlined">
+              <a v-if="notCurrentUser(props.row.userId)" v-on:click="deleteUserRoleConfirm(props.row)" class="button is-outlined">
               <span class="icon is-small">
                 <i class="fas fa-trash"/>
               </span>
@@ -92,7 +92,6 @@
           parent: this,
           component: EditUserRole,
           hasModalCard: true,
-          width: 1110,
           props: {
             projectId: this.project.projectId,
           },
@@ -122,6 +121,9 @@
             this.data = this.data.filter(item => item.id !== row.id);
             this.$toast.open(ToastHelper.defaultConf(`Removed '${row.roleName}' role`));
         });
+      },
+      notCurrentUser(userId) {
+        return userId !== this.$store.getters.userInfo.userId;
       },
     },
   };
