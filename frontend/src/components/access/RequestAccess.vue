@@ -45,8 +45,14 @@
                 <div class="field">
                   <label class="label">Password</label>
                   <input class="input" type="password" v-model="loginFields.password" name="password"
-                         v-validate="'required|min:8|max:15'" data-vv-delay="500"/>
+                         v-validate="'required|min:8|max:15'" data-vv-delay="500" ref="password"/>
                   <p class="help is-danger" v-show="errors.has('password')">{{ errors.first('password')}}</p>
+                </div>
+                <div class="field">
+                  <label class="label">Confirm Password</label>
+                  <input class="input" type="password" name="password_confirmation"
+                         v-validate="'required|confirmed:password'" data-vv-delay="500" data-vv-as="Password Confirmation"/>
+                  <p class="help is-danger" v-show="errors.has('password_confirmation')">{{ errors.first('password_confirmation')}}</p>
                 </div>
                 <div class="field is-grouped">
                   <div class="control">
@@ -82,6 +88,7 @@
     en: {
       attributes: {
         password: 'Password',
+        password_confirmation: 'Password Confirmation',
         email: 'Email',
         firstName: 'First Name',
         lastName: 'Last Name',
