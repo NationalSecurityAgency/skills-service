@@ -38,6 +38,7 @@ class SecurityConfiguration {
                     .antMatchers('/admin/**').hasRole('PROJECT_ADMIN')
                     .antMatchers('/server/**').hasAnyRole('SERVER', 'PROJECT_ADMIN')
                     .anyRequest().authenticated()
+            http.headers().frameOptions().sameOrigin()
             return http
         }
     }
