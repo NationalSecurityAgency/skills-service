@@ -48,6 +48,7 @@ module.exports = {
       '/createAccount' : proxyConf,
       '/oauth2' : proxyConf,
       '/login' : proxyConf,
+      '/static' : proxyConf,
     },
 
     // Various Dev Server settings
