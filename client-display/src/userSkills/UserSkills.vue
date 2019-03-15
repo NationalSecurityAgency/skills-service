@@ -59,6 +59,13 @@
   import Popper from 'vue-popperjs';
   import 'vue-popperjs/dist/css/vue-popper.css';
 
+  const getDocumentHeight = () => {
+    const body = document.body;
+    const html = document.documentElement;
+
+    return Math.max( body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight );
+  };
+
   export default {
     components: {
       MyProgressSummary,
@@ -131,17 +138,18 @@
             this.error = { message: null, details: null };
             this.isLoaded = true;
           })
-          .then(() => {
-            const height = document.querySelector('html').offsetHeight;
-            /* eslint-disable no-restricted-globals */
-            parent.postMessage(`height::${height}`, '*');
-          })
           .catch(() => {
             this.isLoaded = true;
             this.error = {
               message: 'Something Went Wrong',
               details: 'Unable to retrieve Skills.  Try again later.',
             };
+          })
+          .finally(() => {
+            const payload = {
+              contentHeight: getDocumentHeight(),
+            };
+            parent.postMessage(`skills::frame-loaded::${JSON.stringify(payload)}`, '*');
         });
       },
     },
