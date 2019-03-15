@@ -42,7 +42,7 @@
         ]">
         <template slot="Client Display">
           <section v-if="userId" class="">
-            <user-skills :userId="this.userId" :serviceUrl="serviceUrl" :projectId="this.projectId"></user-skills>
+            <client-display-frame />
           </section>
         </template>
         <template slot="Stats">
@@ -63,10 +63,18 @@
   import ProjectStats from '../stats/ProjectStats';
   import UserSkillsPerformed from './UserSkillsPerformed';
   import UsersService from './UsersService';
+  import ClientDisplayFrame from './ClientDisplayFrame';
 
   export default {
     name: 'UserPage',
-    components: { LoadingContainer, Navigation, ProjectStats, UserSkills, UserSkillsPerformed },
+    components: {
+      LoadingContainer,
+      Navigation,
+      ProjectStats,
+      UserSkills,
+      UserSkillsPerformed,
+      ClientDisplayFrame,
+    },
     breadcrumb() {
       return {
         label: `USER: ${this.userId}`,
@@ -108,6 +116,9 @@
           this.authToken = result;
       });
       this.loadUserDetails();
+    },
+    mounted() {
+
     },
     computed: {
       serviceUrl() {
