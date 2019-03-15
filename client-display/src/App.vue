@@ -1,6 +1,7 @@
 <template>
   <div id="app" style="width: 1000px; margin-left:auto; margin-right: auto;">
     <user-skills
+      v-if="token"
       :service-url="serviceUrl"
       :project-id="projectId"
       :token="token"/>
@@ -33,6 +34,15 @@
       };
     },
     mounted() {
+      window.addEventListener('message', (event) => {
+        const eventData = event.data && event.data.split ? event.data.split('::') : [];
+        if (eventData.length === 3 && eventData[0] === 'skills' && eventData[1] === 'data-init') {
+          const payload = JSON.parse(eventData[2]);
+          this.serviceUrl = payload.serviceUrl;
+          this.projectId = payload.projectId;
+          this.token = payload.authToken;
+        }
+      });
       const payload = {
         contentHeight: getDocumentHeight(),
       };

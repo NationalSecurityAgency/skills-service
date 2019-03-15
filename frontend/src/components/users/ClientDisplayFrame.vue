@@ -1,6 +1,7 @@
 <template>
   <div id="client-portal-frame">
     <iframe
+      v-if="authToken"
       ref="theIframe"
       width="1500"
       src="/static/clientPortal/index.html"/>
@@ -8,46 +9,36 @@
 </template>
 
 <script>
-  class SkillsFrameMessageParser {
-    constructor(message) {
-      this.parsedMessage = this.parseMessage(message);
-    }
-
-    parseMessage(message) {
-      let parsedMessage = null;
-      const split = message && message.split ? message.split('::') : [];
-      if (split.length >= 2 && split[0] === 'skills') {
-        const name = split[1];
-        const payload = split[2] ? JSON.parse(split[2]) : null;
-        parsedMessage = {
-          name,
-          payload,
-        };
-      }
-      return parsedMessage;
-    }
-
-    getParsedMessage() {
-      return this.parsedMessage;
-    }
-
-    isSkillsMessage() {
-      let isSkillsMessage = false;
-      if (this.parsedMessage) {
-        isSkillsMessage = true;
-      }
-      return isSkillsMessage;
-    }
-  }
+  import ClientDisplayFrameMessage from '../utils/ClientDisplayFrameMessage';
 
   export default {
+    props: {
+      authToken: {
+        type: String,
+        required: true,
+      },
+      serviceUrl: {
+        type: String,
+        default: '',
+      },
+      projectId: {
+        type: String,
+        required: true,
+      },
+    },
     created() {
       window.addEventListener('message', (event) => {
-        const messageParser = new SkillsFrameMessageParser(event.data);
+        const messageParser = new ClientDisplayFrameMessage(event.data);
         if (messageParser.isSkillsMessage()) {
           const parsedMessage = messageParser.getParsedMessage();
           if (parsedMessage.name === 'frame-loaded'){
             this.$refs.theIframe.height = parsedMessage.payload.contentHeight;
+            const bindings = {
+              projectId: this.projectId,
+              serviceUrl: this.serviceUrl,
+              authToken: this.authToken,
+            };
+            this.$refs.theIframe.contentWindow.postMessage(`skills::data-init::${JSON.stringify(bindings)}`, '*');
           }
         }
       });
