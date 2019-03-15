@@ -60,10 +60,10 @@
   import 'vue-popperjs/dist/css/vue-popper.css';
 
   const getDocumentHeight = () => {
-    const body = document.body;
+    const { body } = document;
     const html = document.documentElement;
 
-    return Math.max( body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight );
+    return Math.max(body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight);
   };
 
   export default {
@@ -149,7 +149,7 @@
             const payload = {
               contentHeight: getDocumentHeight(),
             };
-            parent.postMessage(`skills::frame-loaded::${JSON.stringify(payload)}`, '*');
+            window.parent.postMessage(`skills::frame-loaded::${JSON.stringify(payload)}`, '*');
         });
       },
     },

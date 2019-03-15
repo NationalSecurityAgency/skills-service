@@ -1,9 +1,9 @@
 export default class ClientDisplayFrameMessage {
   constructor(message) {
-    this.parsedMessage = this.parseMessage(message);
+    this.parsedMessage = ClientDisplayFrameMessage.parseMessage(message);
   }
 
-  parseMessage(message) {
+  static parseMessage(message) {
     let parsedMessage = null;
     const split = message && message.split ? message.split('::') : [];
     if (split.length >= 2 && split[0] === 'skills') {
