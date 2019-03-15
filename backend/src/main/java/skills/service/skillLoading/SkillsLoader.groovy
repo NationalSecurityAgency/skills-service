@@ -202,14 +202,23 @@ class SkillsLoader {
 
     private List<SkillSummary> createSkillSummaries(List<SubjectDataLoader.SkillsAndPoints> childrenWithPoints) {
         List<SkillSummary> skillsRes = []
+
+        Map<String,ProjDef> projDefMap = [:]
         childrenWithPoints.each { SubjectDataLoader.SkillsAndPoints skillDefAndUserPoints ->
             SkillDef skillDef = skillDefAndUserPoints.skillDef
             int points = skillDefAndUserPoints.points
             int todayPoints = skillDefAndUserPoints.todaysPoints
 
+            ProjDef projDef = projDefMap[skillDef.projectId]
+            if(!projDef){
+                projDef = projDefRepo.findByProjectId(skillDef.projectId)
+                projDefMap[skillDef.projectId] = projDef
+            }
+
             skillsRes << new SkillSummary(
-                    skillId: skillDef.skillId,
-                    skill: skillDef.name, points: points, todaysPoints: todayPoints,
+                    projectId: skillDef.projectId, projectName: projDef.name,
+                    skillId: skillDef.skillId, skill: skillDef.name,
+                    points: points, todaysPoints: todayPoints,
                     pointIncrement: skillDef.pointIncrement, totalPoints: skillDef.totalPoints,
                     description: new SkillDescription(description: skillDef.description, href: skillDef.helpUrl),
                     dependencyInfo: skillDefAndUserPoints.dependencyInfo
