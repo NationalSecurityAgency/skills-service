@@ -15,7 +15,6 @@
     data() {
       return {
         userInfoLoaded: false,
-        serverErrors: [],
       };
     },
     computed: {

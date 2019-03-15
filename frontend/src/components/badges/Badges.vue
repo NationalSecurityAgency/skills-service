@@ -66,7 +66,6 @@
       return {
         isLoading: true,
         badges: [],
-        serverErrors: [],
       };
     },
     mounted() {
@@ -83,10 +82,8 @@
               this.badges[this.badges.length - 1].isLast = true;
             }
           })
-          .catch((e) => {
+          .finally(() => {
             this.isLoading = false;
-            this.serverErrors.push(e);
-            throw e;
         });
       },
       deleteBadge(badge) {
@@ -98,10 +95,8 @@
             this.badges = this.badges.filter(item => item.id !== badge.id);
             this.$emit('badges-changed', badge.badgeId);
           })
-          .catch((e) => {
+          .finally(() => {
             this.isLoading = false;
-            this.serverErrors.push(e);
-            throw e;
         });
       },
       saveBadge(badge) {
@@ -113,10 +108,8 @@
             this.loadBadges();
             this.$emit('badges-changed', badge.badgeId);
           })
-          .catch((e) => {
+          .finally(() => {
             this.isLoading = false;
-            this.serverErrors.push(e);
-            throw e;
         });
       },
       newBadge() {
@@ -154,9 +147,8 @@
           .then(() => {
             this.loadBadges();
           })
-          .catch((e) => {
+          .finally(() => {
             this.isLoading = false;
-            throw e;
         });
       },
 

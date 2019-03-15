@@ -54,7 +54,6 @@
         isLoading: true,
         levelPointsSetting: Object.assign({ projectId: this.projectId }, initialSettingValue),
         lastLoadedValue: null,
-        serverErrors: [],
         dirty: false,
       };
     },
@@ -80,9 +79,6 @@
               this.levelPointsSetting = Object.assign({ projectId: this.projectId }, initialSettingValue);
             }
             this.lastLoadedValue = Object.assign({}, this.levelPointsSetting);
-          })
-          .catch((e) => {
-            this.serverErrors.push(e);
         });
       },
       save() {
@@ -95,18 +91,10 @@
             this.levelPointsSetting = res;
             this.$toast.open(ToastHelper.defaultConf('Successfully saved settings!', false));
           })
-          .catch((e) => {
+          .finally(() => {
             this.dirty = false;
             self.loadSettings();
             this.isLoading = false;
-            this.serverErrors.push(e);
-            if (e && e.response) {
-              if (e.response.data && e.response.data.errorMsg) {
-                this.$toast.open(ToastHelper.defaultConf(`Error saving settings: ${e.response.data.errorMsg}`, true));
-              } else {
-                this.$toast.open(ToastHelper.defaultConf(`Error saving settings: ${e.response.status} - ${e.response.statusText}`, true));
-              }
-            }
         });
       },
     },

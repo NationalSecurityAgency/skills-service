@@ -49,7 +49,6 @@
         network: null,
         nodes: new vis.DataSet(),
         edges: new vis.DataSet(),
-        serverErrors: [],
         displayOptions: {
           layout: {
             hierarchical: {
@@ -88,10 +87,8 @@
             this.isLoading = true;
             this.createGraph();
           })
-          .catch((e) => {
-            this.serverErrors.push(e);
+          .finally(() => {
             this.isLoading = true;
-            throw e;
         });
       },
 

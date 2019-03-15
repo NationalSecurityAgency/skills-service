@@ -101,7 +101,6 @@
 
   import fontAwesomeIcons from './font-awesome-index';
   import materialIcons from './material-index';
-  import ToastHelper from '../ToastHelper';
   import IconManagerService from './IconManagerService';
 
   const faIconList = fontAwesomeIcons.icons.slice();
@@ -175,9 +174,6 @@
           definitiveCustomIconList = response.slice();
           this.customIconList = response;
         }
-      }).catch((err) => {
-        this.$toast.open(ToastHelper.defaultConf(`Error Loading Custom Icons [${err.response.status} - ${err.response.statusText}]`, true));
-        throw err;
       });
     },
     methods: {

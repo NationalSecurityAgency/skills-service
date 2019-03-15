@@ -155,7 +155,6 @@
         skillInternal: {},
         canEditSkillId: false,
         overallErrMsg: '',
-        serverErrors: [],
       };
     },
     mounted() {
@@ -190,8 +189,7 @@
         Validator.extend('uniqueName', {
           getMessage: field => `The value for the ${field} is already taken.`,
           validate(value) {
-            return SkillsService.skillWithNameExists(self.projectId, value)
-              .catch(e => this.serverErrors.push(e));
+            return SkillsService.skillWithNameExists(self.projectId, value);
           },
         }, {
           immediate: false,
@@ -200,8 +198,7 @@
         Validator.extend('uniqueId', {
           getMessage: field => `The value for the ${field} is already taken.`,
           validate(value) {
-            return SkillsService.skillWithIdExists(self.projectId, value)
-              .catch(e => this.serverErrors.push(e));
+            return SkillsService.skillWithIdExists(self.projectId, value);
           },
         }, {
           immediate: false,
@@ -254,10 +251,8 @@
             this.skillInternal = loadedSkill;
             this.isLoadingSkillDetails = false;
           })
-          .catch((e) => {
-            this.serverErrors.push(e);
+          .finally(() => {
             this.isLoadingSkillDetails = false;
-            throw e;
         });
       },
       findLatestSkillVersion() {
@@ -267,10 +262,8 @@
             this.skillInternal.version = latestVersion;
             this.isLoadingSkillDetails = false;
           })
-          .catch((e) => {
-            this.serverErrors.push(e);
+          .finally(() => {
             this.isLoadingSkillDetails = false;
-            throw e;
         });
         // this.skillInternal.version = myLatestVersion;
       },

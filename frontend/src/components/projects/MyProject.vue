@@ -65,7 +65,6 @@
     data() {
       return {
         isLoading: false,
-        serverErrors: [],
         projectInternal: {},
       };
     },
@@ -111,10 +110,8 @@
             this.isLoading = false;
             this.projectInternal = res;
           })
-          .catch((e) => {
+          .finally(() => {
             this.isLoading = false;
-            this.serverErrors.push(e);
-            throw e;
         });
       },
       moveUp() {

@@ -53,7 +53,6 @@
     props: ['project'],
     data() {
       return {
-        serverErrors: [],
         // user roles table properties
         isLoading: true,
         data: [],
@@ -81,9 +80,6 @@
         .then((result) => {
           this.isLoading = false;
           this.data = result;
-        })
-        .catch((e) => {
-          this.serverErrors.push(e);
       });
     },
     methods: {

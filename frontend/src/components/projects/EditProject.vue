@@ -46,7 +46,6 @@
         internalProject: Object.assign({}, this.project),
         canEditProjectId: false,
         overallErrMsg: '',
-        serverErrors: [],
       };
     },
     created() {

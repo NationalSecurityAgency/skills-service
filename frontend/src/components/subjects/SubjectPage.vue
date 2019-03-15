@@ -109,7 +109,6 @@
       return {
         isLoading: true,
         subject: {},
-        serverErrors: [],
         projectId: '',
         subjectId: '',
       };
@@ -128,10 +127,6 @@
           .then((response) => {
             this.subject = response;
             this.isLoading = false;
-          })
-          .catch((e) => {
-            this.serverErrors.push(e);
-            throw e;
         });
       },
     },

@@ -103,7 +103,6 @@
         previousSkills: [],
         graph: {},
         allSkills: [],
-        serverErrors: [],
       };
     },
     watch: {
@@ -132,10 +131,6 @@
           .then(() => {
             this.errNotification.enable = false;
             this.loadDependentSkills();
-          })
-          .catch((e) => {
-            this.serverErrors.push(e);
-            throw e;
         });
       },
       skillAdded(newItem) {
@@ -155,8 +150,8 @@
               // specifically so the select component removes failed item from its list
               this.skills = this.skills.map(entry => entry);
             } else {
-              this.serverErrors.push(e);
-              throw e;
+              const errorMessage = (e.response && e.response.data && e.response.data.message) ? e.response.data.message : undefined;
+              this.$router.push({ name: 'ErrorPage', query: { errorMessage } });
             }
         });
       },
@@ -181,10 +176,8 @@
             // this.previousSkills = this.skills.map(entry => entry);
             this.loading.finishedDependents = true;
           })
-          .catch((e) => {
-            this.serverErrors.push(e);
+          .finally(() => {
             this.loading.finishedDependents = true;
-            throw e;
         });
       },
       loadAllSkills() {
@@ -194,10 +187,8 @@
             this.allSkills = skills.filter(item => (item.skillId !== this.skill.skillId || item.otherProjectId));
             this.loading.finishedAllSkills = true;
           })
-          .catch((e) => {
-            this.serverErrors.push(e);
+          .finally(() => {
             this.loading.finishedAllSkills = true;
-            throw e;
         });
       },
     },

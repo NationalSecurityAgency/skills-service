@@ -106,7 +106,6 @@
           password: '',
         },
         loginFailed: false,
-        serverErrors: [],
         oAuthProviders: [],
       };
     },
@@ -126,8 +125,8 @@
                 if (error.response.status === 401) {
                   this.resetAfterFailedLogin();
                 } else {
-                  this.serverErrors.push(error);
-                  throw error;
+                  const errorMessage = (error.response && error.response.data && error.response.data.message) ? error.response.data.message : undefined;
+                  this.$router.push({ name: 'ErrorPage', query: { errorMessage } });
                 }
             });
           }
@@ -154,9 +153,6 @@
         .then((result) => {
           // this.isLoading = false;
           this.oAuthProviders = result;
-        })
-        .catch((e) => {
-          this.serverErrors.push(e);
       });
     },
   };

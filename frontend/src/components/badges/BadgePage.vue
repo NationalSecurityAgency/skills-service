@@ -97,7 +97,6 @@
       return {
         isLoading: true,
         badge: {},
-        serverErrors: [],
         projectId: '',
         badgeId: '',
       };
@@ -117,10 +116,8 @@
             this.badge = response;
             this.isLoading = false;
           })
-          .catch((e) => {
-            this.serverErrors.push(e);
+          .finally(() => {
             this.isLoading = false;
-            throw e;
         });
       },
     },

@@ -107,7 +107,6 @@
           email: '',
           password: '',
         },
-        serverErrors: [],
       };
     },
     methods: {
@@ -116,10 +115,6 @@
           if (valid) {
             this.$store.dispatch('signup', this.loginFields).then(() => {
               this.$router.push({ name: 'HomePage' });
-            })
-              .catch((error) => {
-                this.serverErrors.push(error);
-                throw error;
             });
           }
         });

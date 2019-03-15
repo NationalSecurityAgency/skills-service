@@ -37,7 +37,6 @@
     data() {
       return {
         isLoading: true,
-        serverErrors: [],
         skillInfo: {},
       };
     },
@@ -64,9 +63,8 @@
               this.skillInfo = response.data;
               this.isLoading = false;
             })
-            .catch((e) => {
+            .finally(() => {
               this.isLoading = false;
-              this.serverErrors.push(e);
           });
         }
       },

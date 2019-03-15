@@ -70,7 +70,6 @@
       return {
         isLoading: false,
         badgeInternal: Object.assign({}, this.badge),
-        serverErrors: [],
       };
     },
     methods: {

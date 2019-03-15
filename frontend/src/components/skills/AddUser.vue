@@ -118,9 +118,8 @@
           const historyObj = { success: data.wasPerformed, msg: data.explanation, userId: this.$refs.userIdField.$data.userQuery, key: this.$refs.userIdField.$data.userQuery + new Date().getTime() + data.wasPerformed };
           this.usersAdded.push(historyObj);
         })
-          .catch((e) => {
+          .finally(() => {
             this.isSaving = false;
-            throw e;
         });
       },
     },
