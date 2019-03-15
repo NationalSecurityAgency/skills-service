@@ -140,7 +140,6 @@
     components: { ChildRowSkillsDisplay, NewSkillItemsButtons, NoContent },
     data() {
       return {
-        serverErrors: [],
         isLoading: false,
         skills: [],
         skillsColumns: ['name', 'displayOrder', 'created', 'edit'],
@@ -259,15 +258,8 @@
             this.$emit('skills-change', skill.skillId);
             this.toast(`Saved '${skill.name}' skill.`);
           })
-          .catch((e) => {
-            // this.$snackbar.open(`Fail=[${e.toString()}]`);
-            this.toast(`Fail to save skill [${skill.name}]. Error=[${e.toString()}]`, true);
-            // if (item1Index > -1) {
-            //   this.$set(this.skills[item1Index], 'isEditLoading', false);
-            // }
+          .finally(() => {
             this.isLoading = false;
-            this.serverErrors.push(e);
-            throw e;
         });
       },
 
@@ -303,10 +295,8 @@
 
             this.toast(`Skill '${skill.name}' was removed.`);
           })
-          .catch((e) => {
+          .finally(() => {
             this.isLoading = false;
-            // this.$set(this.skills[item1Index], 'isDeleteLoading', false);
-            this.toast(`Failed to remove skill '${skill.name}', Error=[${e.toString()}]`, true);
         });
       },
       rebuildDisplayOrder() {
@@ -368,10 +358,9 @@
             this.isMovingRows = false;
             this.$set(this.skills[item2Index], 'isMoving', false);
           })
-          .catch(() => {
+          .finally(() => {
             this.isMovingRows = false;
             this.$set(this.skills[item1Index], 'isMoving', false);
-            this.toast(`Failed to move skill '${row.skillId}'`, true);
         });
       },
       disableFirstAndLastButtons() {

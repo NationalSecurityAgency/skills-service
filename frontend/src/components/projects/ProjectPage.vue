@@ -128,7 +128,6 @@
       return {
         isLoading: true,
         project: {},
-        serverErrors: [],
       };
     },
     mounted() {

@@ -117,10 +117,9 @@
             this.suggestions = response.data;
             this.isFetching = false;
           })
-          .catch((e) => {
+          .finally(() => {
             this.isFetching = false;
             this.suggestions = [];
-            throw e;
         });
       }, 200),
     },

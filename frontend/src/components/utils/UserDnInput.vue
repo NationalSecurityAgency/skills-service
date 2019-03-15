@@ -65,10 +65,9 @@
             this.suggestions = response.data;
             this.isFetching = false;
           })
-          .catch((e) => {
+          .finally(() => {
             this.isFetching = false;
             this.suggestions = [];
-            throw e;
         });
       }, 200),
     },
@@ -96,10 +95,6 @@
               valid: isValid,
               data: undefined,
             });
-          })
-          .catch((e) => {
-            ctx.$toast.open(ToastHelper.defaultConf(`Critical Error encountered. Unable to validate supplied user DN. Failure=[${e.toString()}]`, true));
-            throw e;
         });
       });
     },

@@ -81,7 +81,6 @@
     data() {
       return {
         isLoading: false,
-        serverErrors: [],
       };
     },
     methods: {
@@ -105,10 +104,8 @@
             this.isLoading = false;
             this.$emit('subject-deleted', this.subject);
           })
-          .catch((e) => {
+          .finally(() => {
             this.isLoading = false;
-            this.serverErrors.push(e);
-            throw e;
         });
       },
       editSubject() {
@@ -133,10 +130,8 @@
             this.subject = subject;
             this.isLoading = false;
           })
-          .catch((e) => {
+          .finally(() => {
             this.isLoading = false;
-            this.serverErrors.push(e);
-            throw e;
         });
       },
       moveUp() {

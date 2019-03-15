@@ -78,9 +78,8 @@
                 this.$parent.close();
                 this.$emit('user-role-created', result);
               })
-              .catch((e) => {
+              .finally(() => {
                 this.isSaving = false;
-                throw e;
             });
           }
         });

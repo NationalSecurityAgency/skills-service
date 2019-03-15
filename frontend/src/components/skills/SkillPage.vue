@@ -127,7 +127,6 @@
       return {
         isLoading: true,
         skill: {},
-        serverErrors: [],
         subjectId: '',
       };
     },
@@ -153,10 +152,8 @@
             this.skill = Object.assign(response, { subjectId: this.$route.params.subjectId });
             this.isLoading = false;
           })
-          .catch((e) => {
-            this.serverErrors.push(e);
+          .finally(() => {
             this.isLoading = false;
-            throw e;
         });
       },
     },

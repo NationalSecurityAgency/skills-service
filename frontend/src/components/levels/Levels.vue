@@ -66,7 +66,6 @@
       return {
         levelsAsPoints: false,
         isLoading: true,
-        serverErrors: [],
         levels: [],
         levelsColumns: ['iconClass', 'level', 'name', 'percent', 'pointsFrom', 'pointsTo', 'edit'],
         options: {
@@ -131,17 +130,11 @@
           LevelService.getLevelsForSubject(this.projectId, this.subjectId).then((response) => {
             this.isLoading = false;
             this.levels = response;
-          })
-            .catch((e) => {
-              this.serverErrors.push(e);
           });
         } else {
           LevelService.getLevelsForProject(this.projectId).then((response) => {
             this.isLoading = false;
             this.levels = response;
-          })
-            .catch((e) => {
-              this.serverErrors.push(e);
           });
         }
       },
@@ -168,19 +161,11 @@
           LevelService.deleteLastLevelForSubject(this.projectId, this.subjectId).then(() => {
             this.isLoading = false;
             this.loadLevels();
-          })
-            .catch((e) => {
-              this.serverErrors.push(e);
-              this.showError('Error removing level', e);
           });
         } else {
           LevelService.deleteLastLevelForProject(this.projectId).then(() => {
             this.isLoading = false;
             this.loadLevels();
-          })
-            .catch((e) => {
-              this.serverErrors.push(e);
-              this.showError('Error removing level', e);
           });
         }
       },
@@ -268,19 +253,11 @@
           LevelService.createNewLevelForSubject(this.projectId, this.subjectId, nextLevelObj).then(() => {
             this.isLoading = false;
             this.loadLevels();
-          })
-            .catch((e) => {
-              this.serverErrors.push(e);
-              this.showError('Error creating level', e);
           });
         } else {
           LevelService.createNewLevelForProject(this.projectId, nextLevelObj).then(() => {
             this.isLoading = false;
             this.loadLevels();
-          })
-            .catch((e) => {
-              this.serverErrors.push(e);
-              this.showError('Error creating level', e);
           });
         }
       },
@@ -290,29 +267,12 @@
           LevelService.editlevelForSubject(this.projectId, this.subjectId, editedLevelObj).then(() => {
             this.isLoading = false;
             this.loadLevels();
-          })
-            .catch((e) => {
-              this.serverErrors.push(e);
-              this.showError('Error editing level', e);
           });
         } else {
           LevelService.editlevelForProject(this.projectId, editedLevelObj).then(() => {
             this.isLoading = false;
             this.loadLevels();
-          })
-            .catch((e) => {
-              this.serverErrors.push(e);
-              this.showError('Error editing level', e);
           });
-        }
-      },
-      showError(msgPrefix, e) {
-        if (e && e.response) {
-          if (e.response.data && e.response.data.errorMsg) {
-            this.$toast.open(ToastHelper.defaultConf(`${msgPrefix}: ${e.response.data.errorMsg}`, true));
-          } else {
-            this.$toast.open(ToastHelper.defaultConf(`${msgPrefix}: ${e.response.status} - ${e.response.statusText}`, true));
-          }
         }
       },
     },

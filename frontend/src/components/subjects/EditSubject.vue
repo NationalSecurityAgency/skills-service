@@ -71,7 +71,6 @@
         canEditSubjectId: false,
         subjectInternal: Object.assign({}, this.subject),
         overallErrMsg: '',
-        serverErrors: [],
       };
     },
     created() {
@@ -92,8 +91,7 @@
         Validator.extend('uniqueName', {
           getMessage: field => `The value for the ${field} is already taken.`,
           validate(value) {
-            return SubjectsService.subjectWithNameExists(self.subjectInternal.projectId, value)
-              .catch(e => this.serverErrors.push(e));
+            return SubjectsService.subjectWithNameExists(self.subjectInternal.projectId, value);
           },
         }, {
           immediate: false,
@@ -102,8 +100,7 @@
         Validator.extend('uniqueId', {
           getMessage: field => `The value for the ${field} is already taken.`,
           validate(value) {
-            return SubjectsService.subjectWithIdExists(self.subjectInternal.projectId, value)
-              .catch(e => this.serverErrors.push(e));
+            return SubjectsService.subjectWithIdExists(self.subjectInternal.projectId, value);
           },
         }, {
           immediate: false,

@@ -62,7 +62,6 @@
       return {
         isLoading: true,
         subjects: [],
-        serverErrors: [],
       };
     },
     mounted() {
@@ -77,9 +76,8 @@
             this.subjects[0].isFirst = true;
             this.subjects[this.subjects.length - 1].isLast = true;
           })
-          .catch((e) => {
+          .finally(() => {
             this.isLoading = false;
-            this.serverErrors.push(e);
         });
       },
       subjectRemoved(subject) {
@@ -93,9 +91,8 @@
             this.loadSubjects();
             this.$emit('subjects-changed', subject.subjectId);
           })
-          .catch((e) => {
+          .finally(() => {
             this.isLoading = false;
-            throw e;
         });
       },
       newSubject() {
@@ -132,9 +129,8 @@
           .then(() => {
             this.loadSubjects();
           })
-          .catch((e) => {
+          .finally(() => {
             this.isLoading = false;
-            throw e;
         });
       },
 

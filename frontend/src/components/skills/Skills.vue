@@ -23,7 +23,6 @@
       return {
         isLoading: true,
         skills: [],
-        serverErrors: [],
       };
     },
     mounted() {
@@ -40,9 +39,6 @@
               copy.created = window.moment(loadedSkill.created);
               return copy;
             });
-          })
-          .catch((e) => {
-            this.serverErrors.push(e);
         });
       },
       skillsChanged(skillId) {

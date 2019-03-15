@@ -24,7 +24,6 @@
     data() {
       return {
         displayName: 'Skills Performed Table',
-        serverErrors: [],
         isLoading: true,
         data: [],
         columns: ['skillId', 'performedOn'],
