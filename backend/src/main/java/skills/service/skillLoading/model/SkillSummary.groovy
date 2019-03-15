@@ -2,6 +2,9 @@ package skills.service.skillLoading.model
 
 class SkillSummary  {
 
+    String projectId
+    String projectName
+
     String skillId
     String skill
 

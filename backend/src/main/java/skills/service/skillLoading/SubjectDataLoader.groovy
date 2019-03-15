@@ -49,7 +49,10 @@ class SubjectDataLoader {
             int todayPoints = todaysPoints.points ? todaysPoints.points?.points : 0
             int points = skillDefAndUserPoints.points ? skillDefAndUserPoints.points.points : 0
 
-            SkillDependencySummary dependencyInfo = dependencySummaryLoader.loadDependencySummary(userId, projectId, skillDefAndUserPoints.skillDef.skillId, version)
+            SkillDependencySummary dependencyInfo = dependencySummaryLoader.loadDependencySummary(userId,
+                    skillDefAndUserPoints.skillDef.projectId,
+                    skillDefAndUserPoints.skillDef.skillId,
+                    version)
 
             new SkillsAndPoints(skillDef: skillDefAndUserPoints.skillDef, points: points, todaysPoints: todayPoints, dependencyInfo: dependencyInfo)
         }
