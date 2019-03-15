@@ -8,6 +8,6 @@ export default {
 
   getUserToken(projectId, userId) {
     return axios.get(`/admin/projects/${projectId}/token/${userId}`)
-      .then(response => `Bearer ${response.data.access_token}`);
+      .then(response => `${response.data.access_token}`);
   },
 };

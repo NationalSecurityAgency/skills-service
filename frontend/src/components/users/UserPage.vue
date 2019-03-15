@@ -41,8 +41,10 @@
           {name: 'Performed Skills', iconClass: 'fa-award'},
         ]">
         <template slot="Client Display">
-          <section v-if="userId" class="">
-            <client-display-frame />
+          <section v-if="authToken" class="">
+            <client-display-frame
+              :auth-token="authToken"
+              :project-id="projectId" />
           </section>
         </template>
         <template slot="Stats">
@@ -116,9 +118,6 @@
           this.authToken = result;
       });
       this.loadUserDetails();
-    },
-    mounted() {
-
     },
     computed: {
       serviceUrl() {
