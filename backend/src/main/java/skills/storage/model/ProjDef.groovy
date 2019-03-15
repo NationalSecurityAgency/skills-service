@@ -7,7 +7,7 @@ import javax.persistence.*
 
 @Entity
 @Table(name = 'project_definition')
-@ToString(includeNames = true, excludes = ['levelDefinitions', 'subjects', 'badges'])
+@ToString(includeNames = true, excludes = ['levelDefinitions', 'subjects', 'badges', 'customIcons'])
 class ProjDef implements Serializable {
 
     @Id

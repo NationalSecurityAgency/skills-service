@@ -41,8 +41,10 @@
           {name: 'Performed Skills', iconClass: 'fa-award'},
         ]">
         <template slot="Client Display">
-          <section v-if="userId" class="">
-            <user-skills :userId="this.userId" :serviceUrl="serviceUrl" :projectId="this.projectId"></user-skills>
+          <section v-if="authToken" class="">
+            <client-display-frame
+              :auth-token="authToken"
+              :project-id="projectId" />
           </section>
         </template>
         <template slot="Stats">
@@ -63,10 +65,18 @@
   import ProjectStats from '../stats/ProjectStats';
   import UserSkillsPerformed from './UserSkillsPerformed';
   import UsersService from './UsersService';
+  import ClientDisplayFrame from './ClientDisplayFrame';
 
   export default {
     name: 'UserPage',
-    components: { LoadingContainer, Navigation, ProjectStats, UserSkills, UserSkillsPerformed },
+    components: {
+      LoadingContainer,
+      Navigation,
+      ProjectStats,
+      UserSkills,
+      UserSkillsPerformed,
+      ClientDisplayFrame,
+    },
     breadcrumb() {
       return {
         label: `USER: ${this.userId}`,
@@ -93,6 +103,7 @@
       return {
         projectId: '',
         userId: '',
+        authToken: '',
         totalPoints: 0,
         uniqueSkills: 0,
         isLoading: true,
@@ -102,6 +113,10 @@
       this.projectId = this.$route.params.projectId;
       this.userId = this.$route.params.userId;
       this.totalPoints = this.$route.params.totalPoints;
+      UsersService.getUserToken(this.projectId, this.userId)
+        .then((result) => {
+          this.authToken = result;
+      });
       this.loadUserDetails();
     },
     computed: {
