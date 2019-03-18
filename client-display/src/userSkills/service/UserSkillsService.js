@@ -11,11 +11,14 @@ export default {
 
   userId: new URLSearchParams(window.location.search).get('userId'),
 
+  version: null,
+
   getUserSkills() {
     let response = null;
     response = axios.get(`${this.serviceUrl}${this.getServicePath()}/${this.projectId}/summary`, {
       params: {
         userId: this.userId,
+        version: this.version,
       },
       withCredentials: true,
     }).then(result => result.data);
@@ -34,6 +37,7 @@ export default {
     return axios.get(`${this.serviceUrl}${this.getServicePath()}/${this.projectId}/subjects/${subjectId}/summary`, {
       params: {
         userId: this.userId,
+        version: this.version,
       },
       withCredentials: true,
     }).then(result => result.data);
