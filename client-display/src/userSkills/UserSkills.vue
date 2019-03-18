@@ -182,7 +182,6 @@
   }
 
   .user-skills-container {
-    width: 1000px;
     margin-top: 20px;
     text-align: center;
   }
