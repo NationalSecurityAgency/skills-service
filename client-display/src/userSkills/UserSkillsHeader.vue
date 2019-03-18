@@ -3,7 +3,7 @@
     <div
       class="stats-container"
       style="margin: 0 75px; overflow: hidden;">
-      <div class="text-center col-xs-4">
+      <div class="text-center col-xs-12 col-md-4">
         <circle-progress
           :user-skills="userSkills"
           :total-completed-points="userSkills.levelPoints"
@@ -18,11 +18,11 @@
         </circle-progress>
       </div>
 
-      <div class="text-center col-xs-4">
+      <div class="text-center col-xs-12 col-md-4">
         <my-skill-level :skill-level="userSkills.skillsLevel" />
       </div>
 
-      <div class="text-center col-xs-4">
+      <div class="text-center col-xs-12 col-md-4">
         <circle-progress
           :user-skills="userSkills"
           :total-completed-points="userSkills.points"
@@ -41,7 +41,7 @@
     <hr>
 
     <div class="stats-container">
-      <div class="text-center col-xs-3">
+      <div class="text-center col-xs-12 col-md-3">
         <my-rank
           v-if="userSkillsRanking"
           :rank="userSkillsRanking.position"
@@ -50,7 +50,7 @@
 
       <div
         id="point-progress-container"
-        class="text-center col-xs-9">
+        class="text-center col-xs-12 col-md-9">
         <point-progress-chart
           v-if="pointsHistory && pointsHistory.length > 0"
           :points-history="pointsHistory"/>

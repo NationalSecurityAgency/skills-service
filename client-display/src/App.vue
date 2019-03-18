@@ -1,5 +1,5 @@
 <template>
-  <div id="app" style="width: 1000px; margin-left:auto; margin-right: auto;">
+  <div id="app" style="">
     <user-skills
       v-if="token"
       :service-url="serviceUrl"
