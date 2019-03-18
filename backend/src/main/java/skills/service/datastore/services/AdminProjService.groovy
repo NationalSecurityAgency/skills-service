@@ -84,6 +84,9 @@ class AdminProjService {
         assert projectRequest?.clientSecret
 
         IdFormatValidator.validate(projectRequest.projectId)
+        if(projectRequest.name.length() > 50){
+            throw new SkillException("Bad Name [${projectRequest.name}] - must not exceed 50 chars.")
+        }
 
         ProjDef projectDefinition
         if (projectRequest.id) {
@@ -127,6 +130,9 @@ class AdminProjService {
     @Transactional()
     SubjectResult saveSubject(String projectId, SubjectRequest subjectRequest) {
         IdFormatValidator.validate(subjectRequest.subjectId)
+        if(subjectRequest.name.length() > 50){
+            throw new SkillException("Bad Name [${subjectRequest.name}] - must not exceed 50 chars.")
+        }
 
         SkillDef res
         if (subjectRequest.id) {
@@ -186,6 +192,9 @@ class AdminProjService {
     @Transactional()
     BadgeResult saveBadge(String projectId, BadgeRequest badgeRequest) {
         IdFormatValidator.validate(badgeRequest.badgeId)
+        if(badgeRequest.name.length() > 50){
+            throw new SkillException("Bad Name [${badgeRequest.name}] - must not exceed 50 chars.")
+        }
 
         boolean isEdit = badgeRequest.id
         SkillDef skillDefinition
@@ -847,6 +856,9 @@ class AdminProjService {
     SkillDefRes saveSkill(SkillRequest skillRequest) {
         try {
             IdFormatValidator.validate(skillRequest.skillId)
+            if(skillRequest.name.length() > 100){
+                throw new SkillException("Bad Name [${skillRequest.name}] - must not exceed 100 chars.")
+            }
             boolean shouldRebuildScores
 
             boolean isEdit = skillRequest.id
