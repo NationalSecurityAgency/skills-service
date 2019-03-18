@@ -17,14 +17,6 @@
       <user-skills-header
         v-if="!error.message"
         :user-skills="userSkills" />
-      <div class="user-skills-more-info text-muted">
-        <strong>Need more information?</strong>
-        <a
-          href="#"
-          target="_blank">
-          Click here!
-        </a>
-      </div>
       <div
         v-if="error.message"
         class="user-skills-error-message user-skills-panel">

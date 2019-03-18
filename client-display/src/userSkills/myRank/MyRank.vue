@@ -86,6 +86,6 @@
     color: #333;
     line-height: 1.2em;
     margin-top: 1.8em;
-    background-color: #ffffff;
+    background: rgba(255, 255, 255, 0.6);
   }
 </style>

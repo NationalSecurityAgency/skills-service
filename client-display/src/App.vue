@@ -28,8 +28,9 @@
     },
     data() {
       return {
-        serviceUrl: null,
-        projectId: null,
+        serviceUrl: 'http://localhost:8080',
+        projectId: 'test1',
+        // eslint-disable-next-line max-len
         token: null,
       };
     },
