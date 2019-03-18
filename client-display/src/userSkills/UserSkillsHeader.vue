@@ -129,7 +129,7 @@
 
 <style>
   .stats-container {
-    padding: 2px 0;
+    padding-bottom: 20px;
     overflow: auto;
     text-align: center;
   }

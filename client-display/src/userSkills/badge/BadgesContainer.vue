@@ -9,11 +9,6 @@
     <div
       v-if="badges.length !== 0"
       class="badges-container">
-      <ribbon
-        :color="'#c74a41'"
-        class="subject-tile-ribbon">
-        Badges
-      </ribbon>
       <div class="positioner">
         <span
           class="previous-button"
