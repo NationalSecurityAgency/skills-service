@@ -22,6 +22,7 @@ import skills.storage.repos.SkillDefRepo
 import skills.storage.model.LevelDef
 import skills.storage.model.ProjDef
 import skills.storage.model.SkillDef
+import skills.storage.repos.UserAchievedLevelRepo
 
 @Service
 @Slf4j
@@ -41,6 +42,9 @@ class LevelDefinitionStorageService {
 
     @Autowired
     SettingsService settingsService
+
+    @Autowired
+    UserAchievedLevelRepo achievedLevelRepository
 
     // this could also come from DB.. eventually
     Map<String,Integer> defaultPercentages = ["White Belt":10, "Blue Belt":25, "Purple Belt":45, "Brown Belt":67, "Black Belt":92]
@@ -113,6 +117,11 @@ class LevelDefinitionStorageService {
             return 0
         }
 
+        //this can occur when a user has achieved a level
+        //but levels have been deleted since their achievement
+        if(level > levelScores.size()){
+            level = levelScores.size()
+        }
         assert level <= levelScores.size()
         return levelScores[level - 1]
     }
@@ -251,9 +260,17 @@ class LevelDefinitionStorageService {
             throw new SkillException("A minimum of one level is required", projectId, skillId)
         }
 
+
+
         if (existingDefinitions) {
             existingDefinitions = existingDefinitions.sort({ it.level })
             removed = existingDefinitions.last()
+
+            int usersAtLevel = achievedLevelRepository.countByProjectIdAndSkillIdAndLevel(projectId, skillId, removed.level)
+            if(usersAtLevel > 0){
+                throw new SkillException("Unable to delete level ${removed.level}, $usersAtLevel ${usersAtLevel > 1 ? 'users have' : 'user has'} achieved this level")
+            }
+
             levelDefinitionRepository.deleteById(removed.id)
             log.info("Deleted last level [{}]", removed)
             //now we have to null out the toPoints of the 2nd to last level

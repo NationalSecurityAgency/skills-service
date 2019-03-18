@@ -2,6 +2,7 @@ package skills.service.skillLoading
 
 import org.apache.commons.lang3.SerializationUtils
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import skills.service.controller.exceptions.SkillException
@@ -236,11 +237,18 @@ class SkillsLoader {
     private LevelDefinitionStorageService.LevelInfo updateLevelBasedOnLastAchieved(ProjDef projDef, int points, UserAchievement lastAchievedLevel, LevelDefinitionStorageService.LevelInfo calculatedLevelInfo, SkillDef subjectDef) {
         LevelDefinitionStorageService.LevelInfo res = SerializationUtils.clone(calculatedLevelInfo)
 
+        int maxLevel = Integer.MAX_VALUE
+        if(subjectDef){
+            maxLevel = subjectDef.levelDefinitions.size()
+        }else{
+            maxLevel = projDef.levelDefinitions.size()
+        }
+
         if (lastAchievedLevel && lastAchievedLevel?.level > calculatedLevelInfo.level) {
-            if (lastAchievedLevel.level >= 5) {
+            if (lastAchievedLevel.level >= maxLevel) {
                 res.currentPoints = 0
                 res.nextLevelPoints = -1
-                res.level = 5
+                res.level = maxLevel
             } else {
                 int nextLevelPointsToAchievel
 
