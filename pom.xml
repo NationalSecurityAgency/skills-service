@@ -10,6 +10,7 @@
     <version>1.0-SNAPSHOT</version>
     <modules>
         <module>frontend</module>
+        <module>skills-bootstrap</module>
         <module>backend</module>
     </modules>
     <properties>

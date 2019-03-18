@@ -13,8 +13,10 @@ import org.springframework.web.bind.annotation.*
 import skills.service.auth.SecurityConfiguration
 import skills.service.auth.UserAuthService
 import skills.service.auth.UserInfo
-import skills.service.auth.form.jwt.JwtHelper
+import skills.service.auth.UserSkillsGrantedAuthority
 import skills.service.controller.result.model.OAuth2Provider
+import skills.storage.model.auth.RoleName
+import skills.storage.model.auth.UserRole
 
 import javax.servlet.http.HttpServletResponse
 
@@ -40,7 +42,23 @@ class CreateAccountController {
     void createAppUser(@RequestBody UserInfo userInfo, HttpServletResponse response) {
         String password = userInfo.password
         userInfo.password = passwordEncoder.encode(password)
-        userInfo.username = userInfo.email
+        if (!userInfo.username) {
+            userInfo.username = userInfo.email
+        }
+        userInfo = userAuthService.createUser(userInfo)
+        userAuthService.autologin(userInfo, password)
+    }
+
+    @PutMapping("createRootAccount")
+    void createRootUser(@RequestBody UserInfo userInfo, HttpServletResponse response) {
+        String password = userInfo.password
+        userInfo.password = passwordEncoder.encode(password)
+        if (!userInfo.username) {
+            userInfo.username = userInfo.email
+        }
+        userInfo.authorities = [new UserSkillsGrantedAuthority(new UserRole(
+                roleName: RoleName.ROLE_SUPER_DUPER_USER
+        ))]
         userInfo = userAuthService.createUser(userInfo)
         userAuthService.autologin(userInfo, password)
     }
