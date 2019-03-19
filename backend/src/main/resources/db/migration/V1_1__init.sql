@@ -4,12 +4,12 @@ create table skills.project_definition
 	project_id varchar(255) not null,
 	name varchar(255) not null,
   client_secret varchar(255) not null,
-	constraint unique_name unique (name),
 	total_points int not null default 0,
 	display_order int not null,
 
 	INDEX (project_id),
-	CONSTRAINT UNIQUE (project_id),
+	CONSTRAINT ProjectDefUniqueProjectIdConstraint UNIQUE (project_id),
+  CONSTRAINT ProjectDefUniqueProjectNameConstraint UNIQUE (name),
 
 	created DATETIME default CURRENT_TIMESTAMP,
 	updated DATETIME default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP
@@ -58,8 +58,8 @@ create table skills.skill_definition
   INDEX (skill_id),
 	INDEX (project_id),
 
-	CONSTRAINT UNIQUE (project_id, skill_id, type),
-	CONSTRAINT UNIQUE (project_id, name, type),
+	CONSTRAINT SkillDefUniqueSkillIdConstraint UNIQUE (project_id, skill_id, type),
+	CONSTRAINT SkillDefUniqueSkillNameConstraint UNIQUE (project_id, name, type),
 
 	FOREIGN KEY (project_id) REFERENCES skills.project_definition(project_id) ON UPDATE CASCADE ON DELETE CASCADE,
 	FOREIGN KEY (proj_ref_id) REFERENCES skills.project_definition(id) ON UPDATE CASCADE ON DELETE CASCADE,
