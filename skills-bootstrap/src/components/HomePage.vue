@@ -17,6 +17,7 @@
       return {
         initialized: false,
         isPki: false,
+        serverErrors: [],
       };
     },
     created() {

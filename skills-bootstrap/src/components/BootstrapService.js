@@ -10,4 +10,7 @@ export default {
   isLoggedIn() {
     return axios.get('/app/userInfo').then(response => response.data);
   },
+  userWithEmailExists(email) {
+    return axios.get(`/userExists/${email}`).then(response => !response.data);
+  },
 };
