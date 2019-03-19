@@ -13,7 +13,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
 import org.springframework.security.core.AuthenticationException
 import org.springframework.security.web.AuthenticationEntryPoint
-import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint
 import org.springframework.stereotype.Component
 
 import javax.servlet.http.HttpServletRequest
@@ -34,9 +33,10 @@ class SecurityConfiguration {
             http
                     .csrf().disable()
                     .authorizeRequests()
-                    .antMatchers("/", "/favicon.ico", "/icons/**", "/static/**", "/error", "/oauth/**", "/login*", "/performLogin", "/createAccount", "/app/userInfo", "/app/users/validExistingDashboardUserId/*", "/app/oAuthProviders", "index.html").permitAll()
+                    .antMatchers("/", "/favicon.ico", "/icons/**", "/static/**", "/error", "/oauth/**", "/login*", "/bootstrap/**", "/performLogin", "/createAccount", "/createRootAccount", '/grantFirstRoot', "/app/userInfo", "/app/users/validExistingDashboardUserId/*", "/app/oAuthProviders", "index.html").permitAll()
                     .antMatchers('/admin/**').hasRole('PROJECT_ADMIN')
                     .antMatchers('/server/**').hasAnyRole('SERVER', 'PROJECT_ADMIN')
+                    .antMatchers('/grantRoot').hasRole('SUPER_DUPER_USER')
                     .anyRequest().authenticated()
             http.headers().frameOptions().sameOrigin()
             return http

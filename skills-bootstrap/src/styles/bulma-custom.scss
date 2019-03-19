@@ -1,0 +1,47 @@
+@charset "utf-8";
+
+// Import a Google Font
+@import url('https://fonts.googleapis.com/css?family=Nunito:400,700');
+
+// Set your brand colors
+$color1: #36899b;
+$color2: #3a98c4;
+$color3: #59a1ea;
+$color4: #64bde0;
+$color5: #4b71d1;
+
+$green-palette-color1: #acd32a;
+$green-palette-color2: #02e520;
+$green-palette-color3: #33cc59;
+$green-palette-color4: #0c968a;
+$green-palette-color5: #62efa1;
+
+
+// Update Bulma's global variables
+$primary: $color1;
+$link: $color5;
+$info: $color2;
+//$success: $green;
+//$warning: $yellow
+//$danger: $red
+//$dark: $grey-darker
+//$text: $grey-dark
+
+// Update some of Bulma's component variables
+$menu-item-active-background-color: $color4;
+$menu-item-active-color: $color4;
+$body-background-color: #f7f8f3;
+$control-border-width: 2px;
+//$input-border-color: transparent;
+//$input-shadow: none;
+
+// Import only what you need from Bulma
+@import "../../node_modules/bulma/sass/utilities/_all.sass";
+@import "../../node_modules/bulma/sass/base/_all.sass";
+@import "../../node_modules/bulma/sass/elements/button.sass";
+@import "../../node_modules/bulma/sass/elements/container.sass";
+@import "../../node_modules/bulma/sass/elements/form.sass";
+@import "../../node_modules/bulma/sass/elements/title.sass";
+@import "../../node_modules/bulma/sass/components/navbar.sass";
+@import "../../node_modules/bulma/sass/layout/hero.sass";
+@import "../../node_modules/bulma/sass/layout/section.sass";
