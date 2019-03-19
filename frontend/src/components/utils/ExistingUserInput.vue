@@ -61,7 +61,10 @@
         default: CLIENT,
         validator: value => ([DASHBOARD, CLIENT].indexOf(value) >= 0),
       },
-
+      excludedSuggestions: {
+        type: Array,
+        default: () => ([]),
+      },
     },
     data() {
       return {
@@ -114,7 +117,7 @@
         this.isFetching = true;
         axios.get(this.suggestUrl)
           .then((response) => {
-            this.suggestions = response.data;
+            this.suggestions = response.data.filter(suggestedUserId => !this.excludedSuggestions.includes(suggestedUserId));
             this.isFetching = false;
           })
           .finally(() => {

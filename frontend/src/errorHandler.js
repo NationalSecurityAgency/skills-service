@@ -5,7 +5,7 @@ import store from './store/store';
 import ErrorModal from './components/utils/ErrorModal';
 
 function errorResponseHandler(error) {
-  // check if the caller wants to handle the error
+  // check if the caller wants to handle the error with displaying the errorPage/dialog
   if (Object.prototype.hasOwnProperty.call(error.config, 'handleError') && error.config.handleError === false) {
     return Promise.reject(error);
   }
@@ -21,14 +21,13 @@ function errorResponseHandler(error) {
       router.push(loginRoute);
     }
   } else {
-    const popupAlert = Object.prototype.hasOwnProperty.call(error.config, 'useErrorPage') && error.config.useErrorPage === false;
     const errorMessage = (error.response && error.response.data && error.response.data.message) ? error.response.data.message : undefined;
-    if (popupAlert) {
+    const showModalDialog = Object.prototype.hasOwnProperty.call(error.config, 'useErrorPage') && error.config.useErrorPage === false;
+    if (showModalDialog) {
       ModalProgrammatic.open({
         parent: this,
         component: ErrorModal,
         hasModalCard: true,
-        // width: 1110,
         props: {
           errorMessage,
         },
@@ -37,7 +36,7 @@ function errorResponseHandler(error) {
       router.push({ name: 'ErrorPage', query: { errorMessage } });
     }
   }
-  return Promise.resolve(false);
+  return Promise.reject(error);
 }
 
 // apply interceptor on response

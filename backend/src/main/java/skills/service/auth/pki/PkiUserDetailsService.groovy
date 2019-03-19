@@ -30,6 +30,10 @@ class PkiUserDetailsService implements UserDetailsService, AuthenticationUserDet
         try {
             userInfo = restTemplate.getForObject(userInfoUri, UserInfo, dn)
             userInfo.password = 'PKI_AUTHENTICATED'
+            // TODO - may need to call userAuthService.createOrUpdateUser() like we do in
+            // SkillsHttpSessionSecurityContextRepository for OAuth users.  this will create
+            // the account for first time users.  I think this may be necessary for granting
+            // another user 'project admin role' to a project via the Access settings page
             if (userInfo) {
                 userInfo.authorities = userAuthService.loadAuthorities(userInfo.username)
             } else {

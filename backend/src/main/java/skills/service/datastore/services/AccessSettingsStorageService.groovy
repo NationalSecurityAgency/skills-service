@@ -56,13 +56,12 @@ class AccessSettingsStorageService {
         log.info("Creating user-role for ID [{}], DN [{}] and role [{}] on project [{}]", userId, userDn, roleName, projectId)
 
         User user = userRepository.findByUserId(userId)
-        if (!user) {
-            // create user
-            user = createNewUser(userInfo)
-        } else {
+        if (user) {
             // check that the new user role does not already exist
             UserRole existingUserRole = user?.roles?.find {it.projectId == projectId && it.roleName == roleName}
             assert !existingUserRole, "CREATE FAILED -> user-role with project id [$projectId], userId [$userId] and roleName [$roleName] already exists"
+        } else {
+            throw new SkillException("User [$userId]  does not exist", projectId)
         }
 
         UserRole userRole = new UserRole(userId: userId, roleName: roleName, projectId: projectId)
