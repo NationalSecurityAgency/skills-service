@@ -93,7 +93,6 @@
           })
           .finally(() => {
             this.dirty = false;
-            self.loadSettings();
             this.isLoading = false;
         });
       },
