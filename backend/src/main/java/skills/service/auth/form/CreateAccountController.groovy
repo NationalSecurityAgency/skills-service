@@ -72,6 +72,12 @@ class CreateAccountController {
         userAuthService.grantRoot(request.getUserPrincipal().name)
     }
 
+    @GetMapping('userExists/{user}')
+    boolean userExists(@PathVariable('user') String user) {
+        Validate.isTrue(!userAuthService.rootExists(), 'A root user already exists! Granting additional root privileges requires a root user to grant them!')
+        return userAuthService.userExists(user)
+    }
+
     @GetMapping("/app/oAuthProviders")
     List<OAuth2Provider> getOAuthProviders() {
         List<OAuth2Provider> providers = []

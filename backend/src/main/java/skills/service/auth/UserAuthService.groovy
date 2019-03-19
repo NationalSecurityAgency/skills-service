@@ -3,6 +3,7 @@ package skills.service.auth
 import groovy.util.logging.Slf4j
 import org.apache.commons.collections.CollectionUtils
 import org.apache.commons.lang3.Validate
+import org.hibernate.Transaction
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Conditional
 import org.springframework.security.authentication.AuthenticationManager
@@ -133,5 +134,10 @@ class UserAuthService {
     @Transactional
     void grantRoot(String userId) {
         accessSettingsStorageService.grantRoot(userId)
+    }
+
+    @Transactional(readOnly = true)
+    boolean userExists(String userId) {
+        return userRepository.existsByUserId(userId)
     }
 }
