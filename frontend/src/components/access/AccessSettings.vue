@@ -5,18 +5,18 @@
         <span class="title">Access Settings</span>
       </div>
     </div>
-    <user-roles :project="project"/>
+    <project-admins :project="project"/>
     <trusted-client-props :project="project"/>
   </div>
 </template>
 
 <script>
-  import UserRoles from './UserRoles';
+  import ProjectAdmins from './ProjectAdmins';
   import TrustedClientProps from './TrustedClientProps';
 
   export default {
     name: 'AccessSettings',
-    components: { UserRoles, TrustedClientProps },
+    components: { ProjectAdmins, TrustedClientProps },
     props: ['project'],
   };
 </script>
