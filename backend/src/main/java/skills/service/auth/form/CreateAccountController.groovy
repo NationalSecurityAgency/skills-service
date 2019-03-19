@@ -1,6 +1,7 @@
 package skills.service.auth.form
 
 import groovy.util.logging.Slf4j
+import org.apache.commons.lang3.Validate
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.context.annotation.Conditional
@@ -18,6 +19,7 @@ import skills.service.controller.result.model.OAuth2Provider
 import skills.storage.model.auth.RoleName
 import skills.storage.model.auth.UserRole
 
+import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
 @Conditional(SecurityConfiguration.FormAuth)
@@ -61,6 +63,13 @@ class CreateAccountController {
         ))]
         userInfo = userAuthService.createUser(userInfo)
         userAuthService.autologin(userInfo, password)
+    }
+
+    @PostMapping('grantFirstRoot')
+    void grantFirstRoot(HttpServletRequest request) {
+        Validate.isTrue(!userAuthService.rootExists(), 'A root user already exists! Granting additional root privileges requires a root user to grant them!')
+        Validate.notNull(request.getUserPrincipal(), 'Granting the first root user is only available in PKI mode, but it looks like the request was not made by an authenticated account!')
+        userAuthService.grantRoot(request.getUserPrincipal().name)
     }
 
     @GetMapping("/app/oAuthProviders")

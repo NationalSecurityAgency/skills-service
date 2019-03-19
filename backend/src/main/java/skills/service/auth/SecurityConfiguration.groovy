@@ -33,8 +33,9 @@ class SecurityConfiguration {
             http
                     .csrf().disable()
                     .authorizeRequests()
-                    .antMatchers("/", "/favicon.ico", "/icons/**", "/static/**", "/error", "/oauth/**", "/login*", "/bootstrap/**", "/performLogin", "/createAccount", "/createRootAccount", "/app/userInfo", "/app/users/validExistingUserId/*", "/app/oAuthProviders", "index.html").permitAll()
+                    .antMatchers("/", "/favicon.ico", "/icons/**", "/static/**", "/error", "/oauth/**", "/login*", "/bootstrap/**", "/performLogin", "/createAccount", "/createRootAccount", '/grantFirstRoot', "/app/userInfo", "/app/users/validExistingUserId/*", "/app/oAuthProviders", "index.html").permitAll()
                     .antMatchers('/admin/**').hasRole('PROJECT_ADMIN')
+                    .antMatchers('/grantRoot').hasRole('SUPER_DUPER_USER')
                     .anyRequest().authenticated()
             return http
         }
