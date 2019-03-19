@@ -2,7 +2,7 @@
   <div class="box">
     <div class="columns">
       <div class="column">
-        <div class="subtitle">User/Role Settings</div>
+        <div class="subtitle">Project Administrators</div>
       </div>
       <div class="column has-text-right">
         <a v-on:click="newUser" class="button is-outlined is-success">
@@ -18,14 +18,6 @@
       <transition name="userRolesContainer" enter-active-class="animated fadeIn">
         <v-client-table :data="data" :columns="columns" :options="options">
           <div slot="edit" slot-scope="props" class="field has-addons">
-            <!--<p class="control">-->
-              <!--<a class="button">-->
-              <!--<span class="icon is-small">-->
-                <!--<i class="fas fa-edit"/>-->
-              <!--</span>-->
-                <!--<span>Edit</span>-->
-              <!--</a>-->
-            <!--</p>-->
             <p class="control">
               <a v-if="notCurrentUser(props.row.userId)" v-on:click="deleteUserRoleConfirm(props.row)" class="button is-outlined">
               <span class="icon is-small">
@@ -57,11 +49,10 @@
         isLoading: true,
         data: [],
         userIds: [],
-        columns: ['userId', 'roleName', 'edit'],
+        columns: ['userId', 'edit'],
         options: {
           headings: {
             userId: 'User',
-            roleName: 'Role',
             edit: '',
           },
           columnsClasses: {
@@ -107,8 +98,7 @@
       deleteUserRoleConfirm(row) {
         this.$dialog.confirm({
           title: 'Delete Role',
-          message: `Are you absolutely sure you want to delete [${row.roleName}] for user
-                    [${row.userId}]?`,
+          message: `Are you absolutely sure you want to remove [${row.userId}] as a Project Administrator?`,
           confirmText: 'Delete',
           type: 'is-danger',
           hasIcon: true,

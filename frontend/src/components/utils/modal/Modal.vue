@@ -14,7 +14,7 @@
             </span>
       </a>
 
-      <a class="button is-success is-outlined" v-on:click="$emit('save-clicked')">
+      <a class="button is-success is-outlined" v-on:click="$emit('save-clicked')" :disabled="errors.any()">
         <span>Save</span>
         <span class="icon is-small">
             <i class="fas fa-arrow-circle-right"/>
@@ -29,6 +29,7 @@
 
   export default {
     name: 'Modal',
+    inject: ['$validator'],
     components: { ModalHeader },
     props: ['title', 'isSaveButtonDisabled'],
   };
