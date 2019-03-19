@@ -1,6 +1,7 @@
 package skills.service.auth.form
 
 import groovy.util.logging.Slf4j
+import org.apache.commons.lang3.Validate
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.context.annotation.Conditional
@@ -13,9 +14,12 @@ import org.springframework.web.bind.annotation.*
 import skills.service.auth.SecurityConfiguration
 import skills.service.auth.UserAuthService
 import skills.service.auth.UserInfo
-import skills.service.auth.form.jwt.JwtHelper
+import skills.service.auth.UserSkillsGrantedAuthority
 import skills.service.controller.result.model.OAuth2Provider
+import skills.storage.model.auth.RoleName
+import skills.storage.model.auth.UserRole
 
+import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
 @Conditional(SecurityConfiguration.FormAuth)
@@ -40,9 +44,32 @@ class CreateAccountController {
     void createAppUser(@RequestBody UserInfo userInfo, HttpServletResponse response) {
         String password = userInfo.password
         userInfo.password = passwordEncoder.encode(password)
-        userInfo.username = userInfo.email
+        if (!userInfo.username) {
+            userInfo.username = userInfo.email
+        }
         userInfo = userAuthService.createUser(userInfo)
         userAuthService.autologin(userInfo, password)
+    }
+
+    @PutMapping("createRootAccount")
+    void createRootUser(@RequestBody UserInfo userInfo, HttpServletResponse response) {
+        String password = userInfo.password
+        userInfo.password = passwordEncoder.encode(password)
+        if (!userInfo.username) {
+            userInfo.username = userInfo.email
+        }
+        userInfo.authorities = [new UserSkillsGrantedAuthority(new UserRole(
+                roleName: RoleName.ROLE_SUPER_DUPER_USER
+        ))]
+        userInfo = userAuthService.createUser(userInfo)
+        userAuthService.autologin(userInfo, password)
+    }
+
+    @PostMapping('grantFirstRoot')
+    void grantFirstRoot(HttpServletRequest request) {
+        Validate.isTrue(!userAuthService.rootExists(), 'A root user already exists! Granting additional root privileges requires a root user to grant them!')
+        Validate.notNull(request.getUserPrincipal(), 'Granting the first root user is only available in PKI mode, but it looks like the request was not made by an authenticated account!')
+        userAuthService.grantRoot(request.getUserPrincipal().name)
     }
 
     @GetMapping("/app/oAuthProviders")

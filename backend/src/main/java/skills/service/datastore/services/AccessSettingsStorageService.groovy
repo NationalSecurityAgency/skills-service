@@ -98,6 +98,21 @@ class AccessSettingsStorageService {
     }
 
     @Transactional(readOnly = true)
+    boolean rootAdminExists() {
+        return userRoleRepository.existsByRoleName(RoleName.ROLE_SUPER_DUPER_USER)
+    }
+
+    @Transactional
+    void grantRoot(String userId) {
+        userRoleRepository.save(
+                new UserRole(
+                        userId: userId,
+                        roleName: RoleName.ROLE_SUPER_DUPER_USER
+                )
+        )
+    }
+
+    @Transactional(readOnly = true)
     List<AllowedOrigin> getAllowedOrigins(String projectId) {
         List<AllowedOrigin> res = allowedOriginRepository.findAllByProjectId(projectId)
         return res

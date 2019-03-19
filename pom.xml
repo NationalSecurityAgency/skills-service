@@ -11,6 +11,7 @@
     <modules>
         <module>frontend</module>
         <module>client-display</module>
+        <module>skills-bootstrap</module>
         <module>backend</module>
     </modules>
     <properties>

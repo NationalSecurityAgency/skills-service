@@ -2,6 +2,7 @@ package skills.service.auth
 
 import groovy.util.logging.Slf4j
 import org.apache.commons.collections.CollectionUtils
+import org.apache.commons.lang3.Validate
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Conditional
 import org.springframework.security.authentication.AuthenticationManager
@@ -122,5 +123,15 @@ class UserAuthService {
             log.warn("Unable to current request attributes. Error Recievedd [$e]")
         }
         return httpServletRequest
+    }
+
+    @Transactional(readOnly = true)
+    boolean rootExists() {
+        return accessSettingsStorageService.rootAdminExists()
+    }
+
+    @Transactional
+    void grantRoot(String userId) {
+        accessSettingsStorageService.grantRoot(userId)
     }
 }
