@@ -82,7 +82,6 @@
         });
       },
       save() {
-        const self = this;
         this.isLoading = true;
         SettingService.saveSetting(this.projectId, this.levelPointsSetting)
           .then((res) => {
