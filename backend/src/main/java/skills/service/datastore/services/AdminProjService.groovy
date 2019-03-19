@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestBody
 import skills.service.auth.UserInfoService
+import skills.service.controller.exceptions.DataIntegrityViolationExceptionHandler
 import skills.service.controller.exceptions.ErrorCode
 import skills.service.controller.exceptions.SkillException
 import skills.service.controller.request.model.*
@@ -77,6 +78,23 @@ class AdminProjService {
     @Autowired
     SettingsService settingsService
 
+
+    private static DataIntegrityViolationExceptionHandler dataIntegrityViolationExceptionHandler =
+            new DataIntegrityViolationExceptionHandler([
+                    "ProjectDefUniqueProjectNameConstraint" : "Provided project name already exist.",
+                    "ProjectDefUniqueProjectIdConstraint": "Provided project id already exist.",
+            ])
+
+    private static DataIntegrityViolationExceptionHandler subjectDataIntegrityViolationExceptionHandler = crateSkillDefBasedDataIntegrityViolationExceptionHandler("subject")
+    private static DataIntegrityViolationExceptionHandler badgeDataIntegrityViolationExceptionHandler = crateSkillDefBasedDataIntegrityViolationExceptionHandler("badge")
+    private static DataIntegrityViolationExceptionHandler skillDataIntegrityViolationExceptionHandler = crateSkillDefBasedDataIntegrityViolationExceptionHandler("skill")
+    private static DataIntegrityViolationExceptionHandler crateSkillDefBasedDataIntegrityViolationExceptionHandler(String type) {
+        new DataIntegrityViolationExceptionHandler([
+                "SkillDefUniqueSkillIdConstraint" : "Provided ${type} id already exist.".toString(),
+                "SkillDefUniqueSkillNameConstraint": "Provided ${type} name already exist.".toString(),
+        ])
+    }
+
     @Transactional()
     ProjectResult saveProject(ProjectRequest projectRequest) {
         assert projectRequest?.projectId
@@ -101,7 +119,9 @@ class AdminProjService {
 
             log.info("Updating [{}]", projectDefinition)
 
-            projectDefinition = projDefRepo.save(projectDefinition)
+            dataIntegrityViolationExceptionHandler.handle(projectDefinition.projectId){
+                projectDefinition = projDefRepo.save(projectDefinition)
+            }
             log.info("Saved [{}]", projectDefinition)
 
         } else {
@@ -117,7 +137,9 @@ class AdminProjService {
                 projectDefinition.addLevel(it)
             }
 
-            projectDefinition = projDefRepo.save(projectDefinition)
+            dataIntegrityViolationExceptionHandler.handle(projectDefinition.projectId){
+                projectDefinition = projDefRepo.save(projectDefinition)
+            }
             log.info("Saved [{}]", projectDefinition)
 
             accessSettingsStorageService.addUserRole(userInfoService.currentUser, projectRequest.projectId, RoleName.ROLE_PROJECT_ADMIN)
@@ -143,7 +165,9 @@ class AdminProjService {
             SkillDef skillDefinition = existing.get()
 
             Props.copy(subjectRequest, skillDefinition)
-            res = skillDefRepo.save(skillDefinition)
+            subjectDataIntegrityViolationExceptionHandler.handle(projectId) {
+                res = skillDefRepo.save(skillDefinition)
+            }
             log.info("Updated [{}]", skillDefinition)
         } else {
             ProjDef projDef = getProjDef(projectId)
@@ -165,8 +189,9 @@ class AdminProjService {
             levelDefService.createDefault().each{
                 skillDef.addLevel(it)
             }
-
-            res = skillDefRepo.save(skillDef)
+            subjectDataIntegrityViolationExceptionHandler.handle(projectId) {
+                res = skillDefRepo.save(skillDef)
+            }
             log.info("Created [{}]", res)
         }
         return convertToSubject(res)
@@ -228,7 +253,11 @@ class AdminProjService {
             log.info("Saving [{}]", skillDefinition)
         }
 
-        SkillDef savedSkill = skillDefRepo.save(skillDefinition)
+        SkillDef savedSkill
+
+        badgeDataIntegrityViolationExceptionHandler.handle(projectId) {
+            savedSkill = skillDefRepo.save(skillDefinition)
+        }
 
         log.info("Saved [{}]", savedSkill)
         return convertToBadge(savedSkill)
@@ -854,7 +883,6 @@ class AdminProjService {
 
     @Transactional()
     SkillDefRes saveSkill(SkillRequest skillRequest) {
-        try {
             IdFormatValidator.validate(skillRequest.skillId)
             if(skillRequest.name.length() > 100){
                 throw new SkillException("Bad Name [${skillRequest.name}] - must not exceed 100 chars.")
@@ -896,25 +924,24 @@ class AdminProjService {
                 shouldRebuildScores = true
             }
 
-            SkillDef savedSkill = skillDefRepo.save(skillDefinition)
+        SkillDef savedSkill
 
-            if (!isEdit) {
-                assignToParent(skillRequest, savedSkill)
-            }
-
-            if (shouldRebuildScores) {
-                log.info("Rebuilding scores")
-                ruleSetDefinitionScoreUpdater.updateFromLeaf(savedSkill)
-            }
-
-            log.info("Saved [{}]", savedSkill)
-            SkillDefRes skillDefRes = convertToSkillDefRes(savedSkill)
-            return skillDefRes
-        } catch (DataIntegrityViolationException dve) {
-            throw new SkillException("Failed to save due to Data Integrity violation", dve, skillRequest.projectId, skillRequest.skillId)
-        } catch (Throwable t) {
-            throw new SkillException(t.message, t, skillRequest.projectId, skillRequest.skillId)
+        skillDataIntegrityViolationExceptionHandler.handle(skillRequest.projectId, skillRequest.skillId) {
+            savedSkill = skillDefRepo.save(skillDefinition)
         }
+
+        if (!isEdit) {
+            assignToParent(skillRequest, savedSkill)
+        }
+
+        if (shouldRebuildScores) {
+            log.info("Rebuilding scores")
+            ruleSetDefinitionScoreUpdater.updateFromLeaf(savedSkill)
+        }
+
+        log.info("Saved [{}]", savedSkill)
+        SkillDefRes skillDefRes = convertToSkillDefRes(savedSkill)
+        return skillDefRes
     }
 
     private void assignToParent(SkillRequest skillRequest, SkillDef savedSkill) {
