@@ -56,6 +56,7 @@
         // user roles table properties
         isLoading: true,
         data: [],
+        userIds: [],
         columns: ['userId', 'roleName', 'edit'],
         options: {
           headings: {
@@ -80,6 +81,7 @@
         .then((result) => {
           this.isLoading = false;
           this.data = result;
+          this.userIds = result.map(({ userId }) => userId);
       });
     },
     methods: {
@@ -90,6 +92,7 @@
           hasModalCard: true,
           props: {
             projectId: this.project.projectId,
+            userIds: this.userIds,
           },
           events: {
             'user-role-created': this.userAdded,
@@ -98,6 +101,7 @@
       },
       userAdded(userRole) {
         this.data.push(userRole);
+        this.userIds.push(userRole.userId);
         this.$toast.open(ToastHelper.defaultConf(`Created '${userRole.roleName}' role`));
       },
       deleteUserRoleConfirm(row) {
@@ -115,6 +119,7 @@
         AccessService.deleteUserRole(row.projectId, row.userId, row.roleName)
           .then(() => {
             this.data = this.data.filter(item => item.id !== row.id);
+            this.userIds = this.userIds.filter(userId => userId !== row.userId);
             this.$toast.open(ToastHelper.defaultConf(`Removed '${row.roleName}' role`));
         });
       },

@@ -1,20 +1,11 @@
 <template>
-  <div class="modal-card" style="width: 750px">
+  <div class="modal-card" style="height: 420px; width: 750px">
     <header class="modal-card-head">
       New User Role
     </header>
 
     <section class="modal-card-body">
-      <existing-user-input :suggest="true" :validate="true" user-type="DASHBOARD" ref="userInput"></existing-user-input>
-
-      <b-field label="Role">
-        <b-select name="role" placeholder="Select a role" v-model="roleNameVal" v-validate="'required'" required>
-          <option value="ROLE_PROJECT_ADMIN">Project Admin</option>
-          <option value="ROLE_SERVER">Server/System</option>
-        </b-select>
-      </b-field>
-      <p class="help is-danger" v-show="errors.has('role')">{{ errors.first('role') }}</p>
-
+      <existing-user-input :suggest="true" :validate="true" user-type="DASHBOARD" :excluded-suggestions="userIds" ref="userInput"></existing-user-input>
     </section>
 
     <footer class="modal-card-foot skills-justify-content-right">
@@ -52,16 +43,20 @@
 
   export default {
     name: 'EditUserRole',
-    props: ['projectId', 'userDn', 'roleName'],
+    props: {
+      projectId: {
+        type: String,
+      },
+      userIds: {
+        type: Array,
+        default: () => ([]),
+      },
+    },
     components: { ExistingUserInput },
     data() {
       return {
         projectIdVal: this.projectId,
         userDnVal: this.userDn,
-        roleNameVal: this.roleName,
-        suggestions: [],
-        selected: null,
-        isFetching: false,
         isSaving: false,
       };
     },
@@ -72,14 +67,13 @@
           if (!res) {
             this.isSaving = false;
           } else {
-            AccessService.saveUserRole(this.projectId, this.$refs.userInput.$data.userQuery, this.roleNameVal)
+            AccessService.saveUserRole(this.projectId, this.$refs.userInput.$data.userQuery, 'ROLE_PROJECT_ADMIN')
               .then((result) => {
-                this.isSaving = false;
-                this.$parent.close();
                 this.$emit('user-role-created', result);
               })
               .finally(() => {
                 this.isSaving = false;
+                this.$parent.close();
             });
           }
         });

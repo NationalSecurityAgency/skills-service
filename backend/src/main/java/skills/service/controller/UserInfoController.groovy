@@ -74,13 +74,13 @@ class UserInfoController {
     @RequestMapping(value = "/users/suggestDashboardUsers/{query}", method = RequestMethod.GET, produces = "application/json")
     List<String> suggestExistingDashboardUsers(@PathVariable("query") String query,
                                                @RequestParam(required = false) boolean includeSelf) {
-        List<User> matchingUsers = userRepo.getUserByUserIdOrPropWildcard(query, new PageRequest(0, 10))
+        List<User> matchingUsers = userRepo.getUserByUserIdOrPropWildcard(query, new PageRequest(0, 6))
         List<String> results = matchingUsers.collect { it.userId }
         if (!includeSelf) {
             String currentUserId = userInfoService.currentUser.username
             results = results.findAll { it != currentUserId }
         }
-        return results
+        return results.take(5)
     }
 
     @RequestMapping(value="/users/validExistingDashboardUserId/{userId}", method =  RequestMethod.GET, produces = "application/json")
@@ -90,12 +90,12 @@ class UserInfoController {
 
     @RequestMapping(value = "/users/projects/{projectId}/suggestClientUsers/{query}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     List<String> suggestExistingClientUsersForProject(@PathVariable("projectId") String projectId, @PathVariable("query") String query) {
-        return userAdminService.suggestUsersForProject(projectId, query, new PageRequest(0, 10))
+        return userAdminService.suggestUsersForProject(projectId, query, new PageRequest(0, 5))
     }
 
     @RequestMapping(value = "/users/suggestClientUsers/{query}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     List<String> suggestExistingClientUsers(@PathVariable("query") String query) {
-        return userAdminService.suggestUsers(query, new PageRequest(0, 10))
+        return userAdminService.suggestUsers(query, new PageRequest(0, 5))
     }
 
     @RequestMapping(value = "/users/projects/{projectId}/validExistingClientUserId/{userId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
