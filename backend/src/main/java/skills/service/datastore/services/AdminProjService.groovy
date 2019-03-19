@@ -883,46 +883,46 @@ class AdminProjService {
 
     @Transactional()
     SkillDefRes saveSkill(SkillRequest skillRequest) {
-            IdFormatValidator.validate(skillRequest.skillId)
-            if(skillRequest.name.length() > 100){
-                throw new SkillException("Bad Name [${skillRequest.name}] - must not exceed 100 chars.")
+        IdFormatValidator.validate(skillRequest.skillId)
+        if (skillRequest.name.length() > 100) {
+            throw new SkillException("Bad Name [${skillRequest.name}] - must not exceed 100 chars.")
+        }
+        boolean shouldRebuildScores
+
+        boolean isEdit = skillRequest.id
+
+        SkillDef skillDefinition
+        if (isEdit) {
+            Optional<SkillDef> existing = skillDefRepo.findById(skillRequest.id)
+            if (!existing.present) {
+                throw new SkillException("Requested skill update id [${skillRequest.id}] doesn't exist.", skillRequest.projectId, skillRequest.skillId)
             }
-            boolean shouldRebuildScores
+            log.info("Updating with [{}]", skillRequest)
+            skillDefinition = existing.get()
 
-            boolean isEdit = skillRequest.id
+            shouldRebuildScores = skillDefinition.totalPoints != skillRequest.totalPoints
 
-            SkillDef skillDefinition
-            if (isEdit) {
-                Optional<SkillDef> existing = skillDefRepo.findById(skillRequest.id)
-                if (!existing.present) {
-                    throw new SkillException("Requested skill update id [${skillRequest.id}] doesn't exist.", skillRequest.projectId, skillRequest.skillId)
-                }
-                log.info("Updating with [{}]", skillRequest)
-                skillDefinition = existing.get()
-
-                shouldRebuildScores = skillDefinition.totalPoints != skillRequest.totalPoints
-
-                Props.copy(skillRequest, skillDefinition, "childSkills", 'version')
-            } else {
-                String parentSkillId = skillRequest.subjectId
-                Integer highestDisplayOrder = skillDefRepo.calculateChildSkillsHighestDisplayOrder(skillRequest.projectId, parentSkillId)
-                int displayOrder = highestDisplayOrder == null ? 0 : highestDisplayOrder + 1
-                skillDefinition = new SkillDef(
-                        skillId: skillRequest.skillId,
-                        projectId: skillRequest.projectId,
-                        name: skillRequest.name,
-                        pointIncrement: skillRequest.pointIncrement,
-                        pointIncrementInterval: skillRequest.pointIncrementInterval,
-                        totalPoints: skillRequest.totalPoints,
-                        description: skillRequest.description,
-                        helpUrl: skillRequest.helpUrl,
-                        displayOrder: displayOrder,
-                        type: SkillDef.ContainerType.Skill,
-                        version: skillRequest.version
-                )
-                log.info("Saving [{}]", skillDefinition)
-                shouldRebuildScores = true
-            }
+            Props.copy(skillRequest, skillDefinition, "childSkills", 'version')
+        } else {
+            String parentSkillId = skillRequest.subjectId
+            Integer highestDisplayOrder = skillDefRepo.calculateChildSkillsHighestDisplayOrder(skillRequest.projectId, parentSkillId)
+            int displayOrder = highestDisplayOrder == null ? 0 : highestDisplayOrder + 1
+            skillDefinition = new SkillDef(
+                    skillId: skillRequest.skillId,
+                    projectId: skillRequest.projectId,
+                    name: skillRequest.name,
+                    pointIncrement: skillRequest.pointIncrement,
+                    pointIncrementInterval: skillRequest.pointIncrementInterval,
+                    totalPoints: skillRequest.totalPoints,
+                    description: skillRequest.description,
+                    helpUrl: skillRequest.helpUrl,
+                    displayOrder: displayOrder,
+                    type: SkillDef.ContainerType.Skill,
+                    version: skillRequest.version
+            )
+            log.info("Saving [{}]", skillDefinition)
+            shouldRebuildScores = true
+        }
 
         SkillDef savedSkill
 
