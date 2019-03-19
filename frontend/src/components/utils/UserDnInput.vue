@@ -67,7 +67,6 @@
           })
           .finally(() => {
             this.isFetching = false;
-            this.suggestions = [];
         });
       }, 200),
     },
