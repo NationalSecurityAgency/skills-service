@@ -34,13 +34,13 @@
 </template>
 
 <script>
-  import EditUserRole from './EditUserRole';
+  import AddProjectAdmin from './AddProjectAdmin';
   import LoadingContainer from '../utils/LoadingContainer';
   import ToastHelper from '../utils/ToastHelper';
   import AccessService from './AccessService';
 
   export default {
-    name: 'UserRoles',
+    name: 'ProjectAdmins',
     components: { LoadingContainer },
     props: ['project'],
     data() {
@@ -79,7 +79,7 @@
       newUser() {
         this.$modal.open({
           parent: this,
-          component: EditUserRole,
+          component: AddProjectAdmin,
           hasModalCard: true,
           props: {
             projectId: this.project.projectId,

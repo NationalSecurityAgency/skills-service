@@ -23,7 +23,7 @@
   Validator.localize(dictionary);
 
   export default {
-    name: 'EditUserRole',
+    name: 'AddProjectAdmin',
     props: {
       projectId: {
         type: String,
