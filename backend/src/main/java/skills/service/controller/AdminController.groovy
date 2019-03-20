@@ -10,6 +10,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.oauth2.common.OAuth2AccessToken
 import org.springframework.security.oauth2.provider.endpoint.TokenEndpoint
 import org.springframework.web.bind.annotation.*
+import skills.service.controller.exceptions.ErrorCode
+import skills.service.controller.exceptions.SkillException
 import skills.service.controller.request.model.*
 import skills.service.controller.result.model.*
 import skills.service.datastore.services.AdminProjService
@@ -75,8 +77,18 @@ class AdminController {
     SubjectResult saveSubject(@PathVariable("projectId") String projectId,
                               @PathVariable("subjectId") String subjectId,
                               @RequestBody SubjectRequest subjectRequest) {
-        assert subjectRequest.name
-        assert subjectId == subjectRequest.subjectId
+        // subject id is optional
+        if (subjectRequest.subjectId && subjectId != subjectRequest.subjectId) {
+            throw new SkillException("Subject id in the request doesn't equal to subject id in the URL. [${subjectRequest.subjectId}]<>[${subjectId}]", null, null, ErrorCode.BadParam)
+        }
+        if (!subjectRequest.subjectId) {
+            subjectRequest.subjectId = subjectId
+        }
+        if (!subjectRequest?.name) {
+            throw new SkillException("Subject name was not provided.", projectId, null, ErrorCode.BadParam)
+        }
+
+
 
         return projectAdminStorageService.saveSubject(projectId, subjectRequest)
     }
@@ -137,20 +149,36 @@ class AdminController {
         projectAdminStorageService.setSubjectDisplayOrder(projectId, subjectId, subjectPatchRequest)
     }
 
-    @RequestMapping(value = "/projects/{projectId}/badges/{badgeId}", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/projects/{projectId}/badges/{badgeId}", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     BadgeResult saveBadge(@PathVariable("projectId") String projectId,
                           @PathVariable("badgeId") String badgeId,
                           @RequestBody BadgeRequest badgeRequest) {
-        assert badgeRequest.name
-        assert badgeId == badgeRequest.badgeId
-        if (badgeRequest.startDate) { assert badgeRequest.endDate }
-        if (badgeRequest.endDate) { assert badgeRequest.startDate }
+
+        // badge id is optional
+        if (badgeRequest.badgeId && badgeId != badgeRequest.badgeId) {
+            throw new SkillException("Badge id in the request doesn't equal to badge id in the URL. [${badgeRequest.badgeId}]<>[${badgeId}]", null, null, ErrorCode.BadParam)
+        }
+        if (!badgeRequest.badgeId) {
+            badgeRequest.badgeId = badgeId
+        }
+
+        if (!badgeRequest?.name) {
+            throw new SkillException("Badge name was not provided.", projectId, null, ErrorCode.BadParam)
+        }
+
+        if (badgeRequest.startDate && !badgeRequest.endDate){
+            throw new SkillException("If start date is provided then end date must be provided", projectId, null, ErrorCode.BadParam)
+        }
+
+        if (badgeRequest.endDate && !badgeRequest.startDate){
+            throw new SkillException("If end date is provided then start date must be provided", projectId, null, ErrorCode.BadParam)
+        }
 
         return projectAdminStorageService.saveBadge(projectId, badgeRequest)
     }
 
-    @RequestMapping(value = "/projects/{projectId}/badge/{badgeId}/skills/{skillId}", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/projects/{projectId}/badge/{badgeId}/skills/{skillId}", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     def assignSkillToBadge(@PathVariable("projectId") String projectId,
                            @PathVariable("badgeId") String badgeId,
@@ -216,18 +244,37 @@ class AdminController {
                           @PathVariable("skillId") String skillId,
                           @RequestBody SkillRequest skillRequest) {
 
-//        assert subjectId == skillRequest.activityId
-        assert projectId == skillRequest.projectId
-        assert skillId == skillRequest.skillId
+        // project id is optional
+        if (skillRequest.projectId && projectId != skillRequest.projectId) {
+            throw new SkillException("Project id in the request doesn't equal to project id in the URL. [${skillRequest?.projectId}]<>[${projectId}]", null, null, ErrorCode.BadParam)
+        }
+        if (!skillRequest.projectId) {
+            skillRequest.projectId = projectId
+        }
+
+        // subject id is optional
+        if (skillRequest.subjectId && subjectId != skillRequest.subjectId) {
+            throw new SkillException("Subject id in the request doesn't equal to subject id in the URL. [${skillRequest.subjectId}]<>[${subjectId}]", null, null, ErrorCode.BadParam)
+        }
+        if (!skillRequest.subjectId) {
+            skillRequest.subjectId = subjectId
+        }
+
+        // skill id is optional
+        if (skillRequest.skillId && skillId != skillRequest.skillId) {
+            throw new SkillException("Skill id in the request doesn't equal to skillId id in the URL. [${skillRequest?.skillId}]<>[${skillId}]", null, null, ErrorCode.BadParam)
+        }
+        if (!skillRequest.skillId) {
+            skillRequest.skillId = skillId
+        }
 
         assert skillRequest.pointIncrement > 0
         assert skillRequest.pointIncrementInterval > 0
-        assert skillRequest.maxSkillAchievedCount > 0
+        assert skillRequest.numPerformToCompletion > 0
         assert skillRequest.version >= 0
         assert skillRequest.version < Constants.MAX_VERSION
 
-        skillRequest.totalPoints = skillRequest.pointIncrement * skillRequest.maxSkillAchievedCount
-//        assert skillRequest.subjectId == subjectId
+        skillRequest.totalPoints = skillRequest.pointIncrement * skillRequest.numPerformToCompletion
 
         return projectAdminStorageService.saveSkill(skillRequest)
     }

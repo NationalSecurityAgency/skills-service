@@ -4,6 +4,8 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.web.bind.annotation.*
+import skills.service.controller.exceptions.ErrorCode
+import skills.service.controller.exceptions.SkillException
 import skills.service.controller.request.model.ProjectRequest
 import skills.service.controller.result.model.CustomIconResult
 import skills.service.controller.result.model.ProjectResult
@@ -12,7 +14,6 @@ import skills.service.icons.CustomIconFacade
 import skills.service.icons.IconCssNameUtil
 import skills.storage.model.CustomIcon
 import skills.storage.model.ProjDef
-import skills.utils.ClientSecretGenerator
 
 @RestController
 @RequestMapping("/app")
@@ -36,11 +37,18 @@ class ProjectController {
     @RequestMapping(value = "/projects/{id}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
     @ResponseBody
     ProjectResult saveProject(@PathVariable("id") String projectId, @RequestBody ProjectRequest projectRequest) {
-        assert projectRequest?.projectId
-        assert projectRequest?.name
-        assert projectId == projectRequest.projectId
 
-        projectRequest.clientSecret = new ClientSecretGenerator().generateClientSecret()
+        // project id is optional
+        if (projectRequest.projectId && projectId != projectRequest.projectId) {
+            throw new SkillException("Project id in the request doesn't equal to project id in the URL. [${projectRequest?.projectId}]<>[${projectId}]", null, null, ErrorCode.BadParam)
+        }
+        if (!projectRequest.projectId) {
+            projectRequest.projectId = projectId
+        }
+        if (!projectRequest?.name) {
+            throw new SkillException("Project name was not provided.", projectId, null, ErrorCode.BadParam)
+        }
+
         return projectAdminStorageService.saveProject(projectRequest)
     }
 

@@ -5,7 +5,6 @@ import org.apache.commons.collections.CollectionUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.data.domain.PageRequest
-import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.PathVariable
@@ -38,6 +37,7 @@ import skills.storage.repos.ProjDefRepo
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.SkillRelDefRepo
 import skills.storage.repos.SkillShareDefRepo
+import skills.utils.ClientSecretGenerator
 import skills.utils.Constants
 import skills.utils.Props
 
@@ -99,7 +99,6 @@ class AdminProjService {
     ProjectResult saveProject(ProjectRequest projectRequest) {
         assert projectRequest?.projectId
         assert projectRequest?.name
-        assert projectRequest?.clientSecret
 
         IdFormatValidator.validate(projectRequest.projectId)
         if(projectRequest.name.length() > 50){
@@ -129,7 +128,10 @@ class AdminProjService {
             Integer lastDisplayOrder = projectDefinitions ? projectDefinitions.collect({ it.displayOrder }).max() : 0
             int displayOrder = lastDisplayOrder == null ? 0 : lastDisplayOrder + 1
 
-            projectDefinition = new ProjDef(projectId: projectRequest.projectId, name: projectRequest.name, displayOrder: displayOrder, clientSecret: projectRequest.clientSecret)
+            String clientSecret = new ClientSecretGenerator().generateClientSecret()
+
+            projectDefinition = new ProjDef(projectId: projectRequest.projectId, name: projectRequest.name, displayOrder: displayOrder,
+                    clientSecret: clientSecret)
             log.info("Created project [{}]", projectDefinition)
 
             List<LevelDef> levelDefinitions = levelDefService.createDefault()
@@ -1000,7 +1002,8 @@ class AdminProjService {
     private SkillDefRes convertToSkillDefRes(SkillDef skillDef, boolean loadNumUsers = false) {
         SkillDefRes res = new SkillDefRes()
         Props.copy(skillDef, res)
-        res.maxSkillAchievedCount = res.totalPoints / res.pointIncrement
+        res.numPerformToCompletion = skillDef.totalPoints / res.pointIncrement
+        res.totalPoints = skillDef.totalPoints
 
         if (loadNumUsers) {
             res.numUsers = skillDefRepo.calculateDistinctUsersForASingleSkill(skillDef.projectId, skillDef.skillId)
