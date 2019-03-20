@@ -17,6 +17,12 @@ import skills.storage.repos.UserPointsRepo
 @Component
 class SkillsLoader {
 
+    @Value('#{"${skills.subjects.minimumPoints:20}"}')
+    int minimumSubjectPoints
+
+    @Value('#{"${skills.project.minimumPoints:20}"}')
+    int minimumProjectPoints
+
     @Autowired
     ProjDefRepo projDefRepo
 
@@ -84,6 +90,11 @@ class SkillsLoader {
             levelPoints = levelInfo?.currentPoints
             levelTotalPoints = levelInfo?.nextLevelPoints
         }
+
+        if(totalPoints < minimumProjectPoints){
+            skillLevel = 0
+        }
+
         OverallSkillSummary res = new OverallSkillSummary(
                 projectName: projDef.name,
                 skillsLevel: skillLevel,
@@ -155,6 +166,10 @@ class SkillsLoader {
         if (achievedLevels) {
             achievedLevels = achievedLevels.sort({ it.created })
             levelInfo = updateLevelBasedOnLastAchieved(projDef, points, achievedLevels?.last(), levelInfo, subjectDefinition)
+        }
+
+        if(subjectDefinition.totalPoints < minimumSubjectPoints){
+            levelInfo.level = 0
         }
 
         return new SkillSubjectSummary(
