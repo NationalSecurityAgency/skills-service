@@ -5,6 +5,7 @@ import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.service.controller.exceptions.SkillException
@@ -26,6 +27,12 @@ import skills.storage.model.UserPoints
 @CompileStatic
 @Slf4j
 class SkillsManagementFacade {
+
+    @Value('#{"${skills.subjects.minimumPoints:20}"}')
+    int minimumSubjectPoints
+
+    @Value('#{"${skills.project.minimumPoints:20}"}')
+    int minimumProjectPoints
 
     @Autowired
     UserPerformedSkillRepo performedSkillRepository
@@ -203,6 +210,9 @@ class SkillsManagementFacade {
         // updated project level
         UserPoints totalPoints = updateUserPoints(userId, skillDef, incomingSkillDate)
         ProjDef projDef = projDefRepo.findByProjectId(skillDef.projectId)
+        if(projDef.totalPoints < minimumProjectPoints){
+            throw new SkillException("Insufficient project points, skill achievement's disallowed", projDef.projectId)
+        }
         LevelDefinitionStorageService.LevelInfo levelInfo = levelDefService.getOverallLevelInfo(projDef, totalPoints.points)
         CompletionItem completionItem = calculateLevels(levelInfo, totalPoints, null, userId, "OVERALL")
         if (completionItem?.level && completionItem?.level > 0) {
