@@ -47,17 +47,6 @@
 
 <style scoped>
   #client-portal-frame {
-    overflow: hidden;
-    padding-top: 100%;
-    position: relative;
-  }
-
-  #client-portal-frame iframe {
-    border: 0;
-    height: 100%;
-    left: 0;
-    position: absolute;
-    top: 0;
-    width: 100%;
+    width: 1000px;
   }
 </style>
