@@ -1,14 +1,21 @@
 <template>
   <loading-container class="child-row" v-bind:is-loading="isLoading">
     <div class="child-row-container">
-      <div v-if="skillInfo.pointIncrement">
+      <div>
         <span class="title is-5">Skills Points: </span>
-        <span class="subtitle skills-pad-left-1-rem">Increment:</span> <span class="points">{{ skillInfo.pointIncrement }}</span>,
-        <span class="subtitle skills-pad-left-1-rem">Total:</span> <span class="points">{{ skillInfo.totalPoints }}</span>,
-        <span class="subtitle skills-pad-left-1-rem">Interval Increment:</span> <span class="points">{{ skillInfo.pointIncrementInterval }}</span>
+        <span class="subtitle skills-pad-left-1-rem"></span> <span class="points">{{ skillInfo.totalPoints }}</span> Total Points
+        (<span class="points">{{ skillInfo.pointIncrement }}</span> increment  <i class="fa fa-times"></i>
+        <span class="points">{{ skillInfo.numPerformToCompletion }}</span> times to completion )
       </div>
-      <span class="title is-5">Version:</span>
-      <span class="points">{{ skillInfo.version }}</span>
+      <div>
+        <span class="title is-5">Interval Increment:</span>
+        <span class="points">{{ skillInfo.pointIncrementInterval }}</span> hours
+      </div>
+
+      <div>
+        <span class="title is-5">Version:</span>
+        <span class="points">{{ skillInfo.version }}</span>
+      </div>
 
       <div v-if="description" class="skills-pad-top-1-rem">
         <h2 class="title is-5">Description</h2>
@@ -26,9 +33,9 @@
 </template>
 
 <script>
-  import axios from 'axios';
   import marked from 'marked';
   import LoadingContainer from '../utils/LoadingContainer';
+  import SkillsService from './SkillsService';
 
   export default {
     name: 'ChildRowSkillsDisplay',
@@ -57,10 +64,9 @@
           this.skillInfo = this.skill;
           this.isLoading = false;
         } else {
-          axios.get(`/admin/projects/${this.projectId}/subjects/${this.subjectId}/skills/${this.parentSkillId}`)
+          SkillsService.getSkillDetails(this.projectId, this.subjectId, this.parentSkillId)
             .then((response) => {
-              this.isLoading = false;
-              this.skillInfo = response.data;
+              this.skillInfo = response;
               this.isLoading = false;
             })
             .finally(() => {
@@ -73,6 +79,10 @@
 </script>
 
 <style scoped>
+
+  .child-row-container i {
+    padding-left: 5px;
+  }
 
   .name {
     font-size: 1.3rem;

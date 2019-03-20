@@ -14,7 +14,7 @@ class SkillDefRes {
 
     int pointIncrement
     int pointIncrementInterval
-    int maxSkillAchievedCount
+    int numPerformToCompletion
     int totalPoints
 
     int version

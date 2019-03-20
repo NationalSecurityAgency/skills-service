@@ -7,5 +7,4 @@ class ProjectRequest {
     Integer id
     String projectId
     String name
-    String clientSecret
 }

@@ -49,15 +49,15 @@
           </div>
 
           <div class="field skills-point">
-            <label class="label">Times Performed to Completion *</label>
+            <label class="label">Times Perform to Completion *</label>
             <p class="control is-expanded has-icons-left">
-              <input class="input" type="text" v-model="skillInternal.maxSkillAchievedCount"
-                     v-validate="'required|numeric|min_value:1|max_value:10000'" name="maxSkillAchievedCount"/>
+              <input class="input" type="text" v-model="skillInternal.numPerformToCompletion"
+                     v-validate="'required|numeric|min_value:1|max_value:10000'" name="numPerformToCompletion"/>
               <span class="icon is-small is-left">
                     <i class="fas fa-battery-quarter"></i>
                   </span>
             </p>
-            <p class="help is-danger" v-show="errors.has('maxSkillAchievedCount')">{{ errors.first('maxSkillAchievedCount')}}</p>
+            <p class="help is-danger" v-show="errors.has('numPerformToCompletion')">{{ errors.first('numPerformToCompletion')}}</p>
           </div>
 
           <div class="operator field">
@@ -173,7 +173,7 @@
             skillId: 'Skill ID',
             pointIncrement: 'Point Increment',
             pointIncrementInterval: 'Point Increment Interval',
-            maxSkillAchievedCount: 'Number of Times to Complete',
+            numPerformToCompletion: 'Number of Times to Complete',
             totalPoints: 'Total Points',
             helpUrl: 'Help UrL',
             version: 'Version',
@@ -210,8 +210,8 @@
         return this.isLoadingSkillDetails;
       },
       totalPoints() {
-        if (this.skillInternal.pointIncrement && this.skillInternal.maxSkillAchievedCount) {
-          const result = this.skillInternal.pointIncrement * this.skillInternal.maxSkillAchievedCount;
+        if (this.skillInternal.pointIncrement && this.skillInternal.numPerformToCompletion) {
+          const result = this.skillInternal.pointIncrement * this.skillInternal.numPerformToCompletion;
           if (result > 0) {
             return result;
           }

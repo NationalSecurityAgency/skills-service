@@ -13,16 +13,11 @@
           <div class="column">
             <div class="columns has-text-centered">
               <div class="column is-one-quarter">
+              </div>
+              <div class="column is-one-quarter">
                 <div>
                   <p class="heading">Skills</p>
                   <p class="title">{{ subject.numSkills | number}}</p>
-                </div>
-              </div>
-
-              <div class="column is-one-quarter">
-                <div>
-                  <p class="heading">Num Disabled Skills</p>
-                  <p class="title">0</p>
                 </div>
               </div>
 

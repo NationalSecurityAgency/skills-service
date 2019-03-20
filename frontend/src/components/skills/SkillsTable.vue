@@ -188,13 +188,11 @@
           projectId: this.projectId,
           subjectId: this.subjectId,
           name: '',
-          pointIncrement: null,
+          pointIncrement: 10,
           pointIncrementInterval: 8,
-          totalPoints: null,
+          numPerformToCompletion: 10,
           description: null,
           helpUrl: null,
-          dependentSkills: [],
-          skillRecommendations: [],
         };
 
         this.$modal.open({

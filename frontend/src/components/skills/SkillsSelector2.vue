@@ -76,6 +76,7 @@
   #skills-selector .selected-item {
     background-color: lightblue;
     color: black;
+    margin: 5px;
   }
 
 </style>

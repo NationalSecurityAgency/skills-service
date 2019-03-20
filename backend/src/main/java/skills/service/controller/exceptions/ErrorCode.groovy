@@ -5,5 +5,6 @@ enum ErrorCode {
     FailedToAssignDependency,
     InsufficientPointsToConvertLevels,
     UserAlreadyExists,
-    ConstraintViolation
+    ConstraintViolation,
+    BadParam
 }

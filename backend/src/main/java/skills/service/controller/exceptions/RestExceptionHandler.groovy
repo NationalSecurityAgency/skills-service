@@ -37,12 +37,6 @@ class RestExceptionHandler extends ResponseEntityExceptionHandler{
         return handleExceptionInternal(ex, body, new HttpHeaders(), HttpStatus.BAD_REQUEST, webRequest)
     }
 
-    private static Map<String, String> constraintNameToMsgMapping = Collections.unmodifiableMap([
-            "unique_name" : "Provided project name already exist.",
-            "project_id_2": "Provided project id already exist.",
-            "project_id_3": "Provided subject name already exist."
-    ])
-
     @ExceptionHandler(DataIntegrityViolationException)
     protected ResponseEntity<Object> handleDataIntegrityViolation(DataIntegrityViolationException violationException, WebRequest webRequest) {
         log.error("Violation Exception", violationException)
