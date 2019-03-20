@@ -12,6 +12,7 @@ import org.springframework.security.oauth2.provider.endpoint.TokenEndpoint
 import org.springframework.web.bind.annotation.*
 import skills.service.controller.exceptions.ErrorCode
 import skills.service.controller.exceptions.SkillException
+import skills.service.controller.exceptions.SkillsValidator
 import skills.service.controller.request.model.*
 import skills.service.controller.result.model.*
 import skills.service.datastore.services.AdminProjService
@@ -77,18 +78,11 @@ class AdminController {
     SubjectResult saveSubject(@PathVariable("projectId") String projectId,
                               @PathVariable("subjectId") String subjectId,
                               @RequestBody SubjectRequest subjectRequest) {
-        // subject id is optional
-        if (subjectRequest.subjectId && subjectId != subjectRequest.subjectId) {
-            throw new SkillException("Subject id in the request doesn't equal to subject id in the URL. [${subjectRequest.subjectId}]<>[${subjectId}]", null, null, ErrorCode.BadParam)
-        }
-        if (!subjectRequest.subjectId) {
-            subjectRequest.subjectId = subjectId
-        }
-        if (!subjectRequest?.name) {
-            throw new SkillException("Subject name was not provided.", projectId, null, ErrorCode.BadParam)
-        }
-
-
+        SkillsValidator.isFirstOrMustEqualToSecond(subjectRequest.subjectId, subjectId, "Subject Id")
+        subjectRequest.subjectId = subjectRequest.subjectId ?: subjectId
+        SkillsValidator.isNotBlank(projectId, "Subject Id")
+        SkillsValidator.isNotBlank(subjectId, "Subject Id", projectId)
+        SkillsValidator.isNotBlank(subjectRequest?.name, "Subject name", projectId)
 
         return projectAdminStorageService.saveSubject(projectId, subjectRequest)
     }
@@ -244,35 +238,24 @@ class AdminController {
                           @PathVariable("skillId") String skillId,
                           @RequestBody SkillRequest skillRequest) {
 
-        // project id is optional
-        if (skillRequest.projectId && projectId != skillRequest.projectId) {
-            throw new SkillException("Project id in the request doesn't equal to project id in the URL. [${skillRequest?.projectId}]<>[${projectId}]", null, null, ErrorCode.BadParam)
-        }
-        if (!skillRequest.projectId) {
-            skillRequest.projectId = projectId
-        }
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(subjectId, "Subject Id", projectId)
+        SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
 
-        // subject id is optional
-        if (skillRequest.subjectId && subjectId != skillRequest.subjectId) {
-            throw new SkillException("Subject id in the request doesn't equal to subject id in the URL. [${skillRequest.subjectId}]<>[${subjectId}]", null, null, ErrorCode.BadParam)
-        }
-        if (!skillRequest.subjectId) {
-            skillRequest.subjectId = subjectId
-        }
+        SkillsValidator.isFirstOrMustEqualToSecond(skillRequest.projectId, projectId, "Project Id")
+        skillRequest.projectId = skillRequest.projectId ?: projectId
 
-        // skill id is optional
-        if (skillRequest.skillId && skillId != skillRequest.skillId) {
-            throw new SkillException("Skill id in the request doesn't equal to skillId id in the URL. [${skillRequest?.skillId}]<>[${skillId}]", null, null, ErrorCode.BadParam)
-        }
-        if (!skillRequest.skillId) {
-            skillRequest.skillId = skillId
-        }
+        SkillsValidator.isFirstOrMustEqualToSecond(skillRequest.subjectId, subjectId, "Subject Id")
+        skillRequest.subjectId = skillRequest.subjectId ?: subjectId
 
-        assert skillRequest.pointIncrement > 0
-        assert skillRequest.pointIncrementInterval > 0
-        assert skillRequest.numPerformToCompletion > 0
-        assert skillRequest.version >= 0
-        assert skillRequest.version < Constants.MAX_VERSION
+        SkillsValidator.isFirstOrMustEqualToSecond(skillRequest.skillId, skillId, "Skill Id")
+        skillRequest.skillId = skillRequest.skillId ?: skillId
+
+        SkillsValidator.isTrue(skillRequest.pointIncrement > 0, "pointIncrement must be > 0", projectId, skillId)
+        SkillsValidator.isTrue(skillRequest.pointIncrementInterval > 0, "pointIncrementInterval must be > 0", projectId, skillId)
+        SkillsValidator.isTrue(skillRequest.numPerformToCompletion > 0, "numPerformToCompletion must be > 0", projectId, skillId)
+        SkillsValidator.isTrue(skillRequest.version >= 0, "version must be >= 0", projectId, skillId)
+        SkillsValidator.isTrue(skillRequest.version < Constants.MAX_VERSION, "version exceeds max version", projectId, skillId)
 
         skillRequest.totalPoints = skillRequest.pointIncrement * skillRequest.numPerformToCompletion
 
