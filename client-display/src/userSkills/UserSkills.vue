@@ -1,6 +1,6 @@
 <template>
   <div
-    class="user-skills-panel user-skills-container">
+    class="user-skills-container">
     <ribbon>
       User Skills
     </ribbon>
@@ -50,13 +50,6 @@
 
   import Popper from 'vue-popperjs';
   import 'vue-popperjs/dist/css/vue-popper.css';
-
-  const getDocumentHeight = () => {
-    const { body } = document;
-    const html = document.documentElement;
-
-    return Math.max(body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight);
-  };
 
   export default {
     components: {
@@ -138,10 +131,9 @@
             };
           })
           .finally(() => {
-            const payload = {
-              contentHeight: getDocumentHeight(),
-            };
-            window.parent.postMessage(`skills::frame-loaded::${JSON.stringify(payload)}`, '*');
+            this.$nextTick(() => {
+              this.$emit('height-change');
+            });
         });
       },
     },
@@ -178,11 +170,9 @@
     border: 1px solid #ddd;
     border-radius: 4px;
     box-shadow: 0 1px 1px rgba(0, 0, 0, .05);
-    margin-bottom: 17px;
   }
 
   .user-skills-container {
-    margin-top: 20px;
     text-align: center;
   }
 

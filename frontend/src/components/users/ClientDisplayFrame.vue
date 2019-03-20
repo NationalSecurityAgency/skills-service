@@ -3,7 +3,7 @@
     <iframe
       v-if="authToken"
       ref="theIframe"
-      width="1500"
+      class="the-iframe"
       src="/static/clientPortal/index.html"/>
   </div>
 </template>
@@ -38,7 +38,9 @@
               serviceUrl: this.serviceUrl,
               authToken: this.authToken,
             };
+            console.log('the iframe');
             this.$refs.theIframe.contentWindow.postMessage(`skills::data-init::${JSON.stringify(bindings)}`, '*');
+            console.log('the iframe');
           }
         }
       });
@@ -47,7 +49,7 @@
 </script>
 
 <style scoped>
-  #client-portal-frame {
-    width: 1000px;
+  .the-iframe {
+    width: 100%;
   }
 </style>
