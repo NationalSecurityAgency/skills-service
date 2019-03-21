@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Conditional
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Primary
 import org.springframework.http.HttpStatus
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.authentication.AuthenticationManager
@@ -20,9 +21,8 @@ import org.springframework.security.web.authentication.AuthenticationFailureHand
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler
 import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler
-import org.springframework.security.web.context.HttpSessionSecurityContextRepository
-import org.springframework.security.web.context.SecurityContextPersistenceFilter
 import org.springframework.stereotype.Component
+import skills.service.auth.form.oauth2.OAuth2UserConverterService
 
 import javax.servlet.ServletException
 import javax.servlet.http.HttpServletRequest
@@ -64,7 +64,8 @@ class FormSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
         // Portal endpoints config
         portalWebSecurityHelper.configureHttpSecurity(http)
-                .addFilter(securityContextPersistenceFilter())
+                .securityContext().securityContextRepository(httpSessionSecurityContextRepository())
+        .and()
                 .exceptionHandling()
                 .accessDeniedHandler(restAccessDeniedHandler)
                 .authenticationEntryPoint(restAuthenticationEntryPoint)
@@ -84,7 +85,8 @@ class FormSecurityConfiguration extends WebSecurityConfigurerAdapter {
     }
 
     @Override
-    @Bean
+    @Bean(name = 'defaultAuthManager')
+    @Primary
     AuthenticationManager authenticationManagerBean() throws Exception {
         // provides the default AuthenticationManager as a Bean
         return super.authenticationManagerBean()
@@ -101,12 +103,7 @@ class FormSecurityConfiguration extends WebSecurityConfigurerAdapter {
     }
 
     @Bean
-    SecurityContextPersistenceFilter securityContextPersistenceFilter() {
-        return new SecurityContextPersistenceFilter(httpSessionSecurityContextRepository())
-    }
-
-    @Bean
-    HttpSessionSecurityContextRepository httpSessionSecurityContextRepository() {
+    SkillsHttpSessionSecurityContextRepository httpSessionSecurityContextRepository() {
         return new SkillsHttpSessionSecurityContextRepository()
     }
 
