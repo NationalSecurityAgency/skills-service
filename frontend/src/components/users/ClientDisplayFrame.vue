@@ -32,7 +32,6 @@
         if (messageParser.isSkillsMessage()) {
           const parsedMessage = messageParser.getParsedMessage();
           if (parsedMessage.name === 'frame-loaded') {
-            console.log('received contentheight', parsedMessage.payload.contentHeight);
             this.$refs.theIframe.height = parsedMessage.payload.contentHeight;
             const bindings = {
               projectId: this.projectId,

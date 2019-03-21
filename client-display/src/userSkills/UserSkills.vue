@@ -55,9 +55,8 @@
   import 'vue-popperjs/dist/css/vue-popper.css';
 
   const debouncedContentHeightUpdated = debounce((context) => {
-    console.log('firing height change event');
     context.$emit('height-change');
-  }, 250);
+  }, 5);
 
   export default {
     components: {
