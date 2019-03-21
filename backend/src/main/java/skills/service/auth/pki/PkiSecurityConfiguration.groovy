@@ -5,11 +5,13 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Conditional
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Primary
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
 import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.core.userdetails.UserDetailsService
+import org.springframework.security.web.context.NullSecurityContextRepository
 import org.springframework.stereotype.Component
 
 import static skills.service.auth.SecurityConfiguration.PkiAuth
@@ -47,9 +49,15 @@ class PkiSecurityConfiguration extends WebSecurityConfigurerAdapter {
         }
 
     @Override
-    @Bean
+    @Bean(name = 'defaultAuthManager')
+    @Primary
     AuthenticationManager authenticationManagerBean() throws Exception {
         // provides the default AuthenticationManager as a Bean
         return super.authenticationManagerBean()
+    }
+
+    @Bean
+    NullSecurityContextRepository httpSessionSecurityContextRepository() {
+        return new NullSecurityContextRepository()
     }
 }

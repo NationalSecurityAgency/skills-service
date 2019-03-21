@@ -13,6 +13,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
 import org.springframework.security.core.AuthenticationException
 import org.springframework.security.web.AuthenticationEntryPoint
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository
 import org.springframework.stereotype.Component
 
 import javax.servlet.http.HttpServletRequest
@@ -54,10 +55,15 @@ class SecurityConfiguration {
         @Autowired
         private RestAuthenticationEntryPoint restAuthenticationEntryPoint
 
+        @Autowired
+        HttpSessionSecurityContextRepository securityContextRepository
+
         @Override
         protected void configure(HttpSecurity http) throws Exception {
             http.antMatcher("/api/**").cors()
             portalWebSecurityHelper.configureHttpSecurity(http)
+                    .securityContext().securityContextRepository(securityContextRepository)
+            .and()
                     .exceptionHandling().authenticationEntryPoint(restAuthenticationEntryPoint)
         }
     }
