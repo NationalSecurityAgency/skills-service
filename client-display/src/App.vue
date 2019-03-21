@@ -1,10 +1,11 @@
 <template>
-  <div id="app" style="">
+  <div id="app">
     <user-skills
       v-if="token"
       :service-url="serviceUrl"
       :project-id="projectId"
-      :token="token"/>
+      :token="token"
+      @height-change="onHeightChange"/>
   </div>
 </template>
 
@@ -15,10 +16,8 @@
   import 'bootstrap/dist/css/bootstrap.css';
 
   const getDocumentHeight = () => {
-    const { body } = document;
     const html = document.documentElement;
-
-    return Math.max(body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight);
+    return html.offsetHeight;
   };
 
   export default {
@@ -29,12 +28,13 @@
     data() {
       return {
         serviceUrl: 'http://localhost:8080',
-        projectId: 'test1',
+        projectId: 'MyProject',
         // eslint-disable-next-line max-len
         token: null,
       };
     },
     mounted() {
+      this.onHeightChange();
       window.addEventListener('message', (event) => {
         const eventData = event.data && event.data.split ? event.data.split('::') : [];
         if (eventData.length === 3 && eventData[0] === 'skills' && eventData[1] === 'data-init') {
@@ -44,10 +44,14 @@
           this.token = payload.authToken;
         }
       });
-      const payload = {
-        contentHeight: getDocumentHeight(),
-      };
-      window.parent.postMessage(`skills::frame-loaded::${JSON.stringify(payload)}`, '*');
+    },
+    methods: {
+      onHeightChange() {
+        const payload = {
+          contentHeight: getDocumentHeight(),
+        };
+        window.parent.postMessage(`skills::frame-loaded::${JSON.stringify(payload)}`, '*');
+      },
     },
   };
 </script>
