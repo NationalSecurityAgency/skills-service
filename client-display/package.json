@@ -7,7 +7,7 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "build-lib": "NODE_ENV='production' && rm -rfv dist && vue-cli-service build --target lib --name userSkills './src/index.js'",
-    "deploy": "npm run build && cp -rT dist ../backend/src/main/resources/public/static/clientPortal && cp -rT dist ../backend/target/classes/public/static/clientPortal ",
+    "deploy": "npm run build && rm -rf ../backend/src/main/resources/public/static/clientPortal && cp -rT dist ../backend/src/main/resources/public/static/clientPortal && cp -rT dist ../backend/target/classes/public/static/clientPortal ",
     "lint": "vue-cli-service lint",
     "test:unit": "vue-cli-service test:unit"
   },
