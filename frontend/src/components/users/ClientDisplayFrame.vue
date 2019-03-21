@@ -3,7 +3,7 @@
     <iframe
       v-if="authToken"
       ref="theIframe"
-      width="1500"
+      class="the-iframe"
       src="/static/clientPortal/index.html"/>
   </div>
 </template>
@@ -47,7 +47,7 @@
 </script>
 
 <style scoped>
-  #client-portal-frame {
-    width: 1000px;
+  .the-iframe {
+    width: 100%;
   }
 </style>

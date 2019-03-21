@@ -1,6 +1,6 @@
 <template>
   <div
-    class="user-skills-panel user-skills-container">
+    class="user-skills-container">
     <ribbon>
       User Skills
     </ribbon>
@@ -16,7 +16,8 @@
     <div v-if="isLoaded">
       <user-skills-header
         v-if="!error.message"
-        :user-skills="userSkills" />
+        :user-skills="userSkills"
+        @hook:updated="contentHeightUpdated" />
       <div
         v-if="error.message"
         class="user-skills-error-message user-skills-panel">
@@ -48,15 +49,14 @@
   import Ribbon from '@/common/ribbon/Ribbon.vue';
   import StarProgress from '@/common/progress/StarProgress.vue';
 
+  import { debounce } from 'lodash';
+
   import Popper from 'vue-popperjs';
   import 'vue-popperjs/dist/css/vue-popper.css';
 
-  const getDocumentHeight = () => {
-    const { body } = document;
-    const html = document.documentElement;
-
-    return Math.max(body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight);
-  };
+  const debouncedContentHeightUpdated = debounce((context) => {
+    context.$emit('height-change');
+  }, 5);
 
   export default {
     components: {
@@ -92,6 +92,7 @@
         userSkillsSubjectModalSubject: null,
         userSkillsSubjectModalSubjectIcon: null,
         showUserSkillsSubjectModal: false,
+        contentHeightNotifier: null,
       };
     },
     watch: {
@@ -100,13 +101,21 @@
         this.getUserSkills();
       },
     },
+    updated() {
+      this.contentHeightUpdated();
+    },
     mounted() {
+      this.contentHeightNotifier = () => { return debouncedContentHeightUpdated(this) };
+      window.addEventListener('resize', this.contentHeightNotifier);
       UserSkillsService.setServiceUrl(this.serviceUrl);
       UserSkillsService.setProjectId(this.projectId);
       UserSkillsService.setUserId(this.userId);
       UserSkillsService.setToken(this.token);
       this.getCustomIconCss();
       this.getUserSkills();
+    },
+    beforeDestroy() {
+      window.removeEventListener('resize', this.contentHeightNotifier);
     },
     methods: {
       getCustomIconCss() {
@@ -136,13 +145,10 @@
               message: 'Something Went Wrong',
               details: 'Unable to retrieve Skills.  Try again later.',
             };
-          })
-          .finally(() => {
-            const payload = {
-              contentHeight: getDocumentHeight(),
-            };
-            window.parent.postMessage(`skills::frame-loaded::${JSON.stringify(payload)}`, '*');
         });
+      },
+      contentHeightUpdated() {
+        debouncedContentHeightUpdated(this);
       },
     },
   };
@@ -178,11 +184,9 @@
     border: 1px solid #ddd;
     border-radius: 4px;
     box-shadow: 0 1px 1px rgba(0, 0, 0, .05);
-    margin-bottom: 17px;
   }
 
   .user-skills-container {
-    margin-top: 20px;
     text-align: center;
   }
 
