@@ -16,7 +16,8 @@
     <div v-if="isLoaded">
       <user-skills-header
         v-if="!error.message"
-        :user-skills="userSkills" />
+        :user-skills="userSkills"
+        @hook:updated="contentHeightUpdated" />
       <div
         v-if="error.message"
         class="user-skills-error-message user-skills-panel">
@@ -48,8 +49,15 @@
   import Ribbon from '@/common/ribbon/Ribbon.vue';
   import StarProgress from '@/common/progress/StarProgress.vue';
 
+  import { debounce } from 'lodash';
+
   import Popper from 'vue-popperjs';
   import 'vue-popperjs/dist/css/vue-popper.css';
+
+  const debouncedContentHeightUpdated = debounce((context) => {
+    console.log('firing height change event');
+    context.$emit('height-change');
+  }, 250);
 
   export default {
     components: {
@@ -85,6 +93,7 @@
         userSkillsSubjectModalSubject: null,
         userSkillsSubjectModalSubjectIcon: null,
         showUserSkillsSubjectModal: false,
+        contentHeightNotifier: null,
       };
     },
     watch: {
@@ -93,13 +102,21 @@
         this.getUserSkills();
       },
     },
+    updated() {
+      this.contentHeightUpdated();
+    },
     mounted() {
+      this.contentHeightNotifier = () => { return debouncedContentHeightUpdated(this) };
+      window.addEventListener('resize', this.contentHeightNotifier);
       UserSkillsService.setServiceUrl(this.serviceUrl);
       UserSkillsService.setProjectId(this.projectId);
       UserSkillsService.setUserId(this.userId);
       UserSkillsService.setToken(this.token);
       this.getCustomIconCss();
       this.getUserSkills();
+    },
+    beforeDestroy() {
+      window.removeEventListener('resize', this.contentHeightNotifier);
     },
     methods: {
       getCustomIconCss() {
@@ -129,12 +146,10 @@
               message: 'Something Went Wrong',
               details: 'Unable to retrieve Skills.  Try again later.',
             };
-          })
-          .finally(() => {
-            this.$nextTick(() => {
-              this.$emit('height-change');
-            });
         });
+      },
+      contentHeightUpdated() {
+        debouncedContentHeightUpdated(this);
       },
     },
   };

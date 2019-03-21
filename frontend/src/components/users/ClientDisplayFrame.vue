@@ -32,15 +32,14 @@
         if (messageParser.isSkillsMessage()) {
           const parsedMessage = messageParser.getParsedMessage();
           if (parsedMessage.name === 'frame-loaded') {
+            console.log('received contentheight', parsedMessage.payload.contentHeight);
             this.$refs.theIframe.height = parsedMessage.payload.contentHeight;
             const bindings = {
               projectId: this.projectId,
               serviceUrl: this.serviceUrl,
               authToken: this.authToken,
             };
-            console.log('the iframe');
             this.$refs.theIframe.contentWindow.postMessage(`skills::data-init::${JSON.stringify(bindings)}`, '*');
-            console.log('the iframe');
           }
         }
       });
