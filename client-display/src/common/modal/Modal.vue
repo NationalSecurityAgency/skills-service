@@ -4,8 +4,7 @@
       <div class="modal-wrapper">
         <div
         class="modal-container"
-        :append-to-body="true"
-        :class="size">
+        :append-to-body="true" >
           <div class="modal-header">
             <slot name="header">
               default header
@@ -34,12 +33,7 @@
 
 <script>
   export default {
-    props: {
-      size: {
-        type: String,
-        default: 'lg',
-      },
-    },
+
   };
 </script>
 
@@ -70,9 +64,12 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.33);
     transition: all 0.3s ease;
     font-family: Helvetica, Aria, sans-serif;
+    width: 100%;
+  }
 
-    &.lg {
-      width: 1100px;
+  @media(min-width: 1000px) {
+    .modal-container {
+      width: 1000px;
     }
   }
 
