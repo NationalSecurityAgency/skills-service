@@ -1,4 +1,4 @@
-package skills.service.auth.form
+package skills.service.auth.form.oauth2
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
