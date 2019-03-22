@@ -35,7 +35,7 @@
                   </template>
 
                   <template slot="selected-item" slot-scope="{ props }">
-                    <span class="tag has-text-weight-bold" style="margin-right: 7px;" v-bind:style="{'background-color': props.option.isFromAnotherProject ? '#ffb87f' : 'lightblue'}">
+                    <span class="tag has-text-weight-bold" style="margin: 5px;" v-bind:style="{'background-color': props.option.isFromAnotherProject ? '#ffb87f' : 'lightblue'}">
                       <span class="skills-handle-overflow" style="width: 15rem;" :title="props.option.isFromAnotherProject ? props.option.projectId + ' : ' + props.option.name : props.option.name" >
                         <span v-if="props.option.isFromAnotherProject">{{ props.option.projectId | truncate(10)}} : </span>
                         {{ props.option.name }}
