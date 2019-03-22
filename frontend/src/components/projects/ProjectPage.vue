@@ -28,7 +28,12 @@
               <div class="column is-one-quarter">
                 <div>
                   <p class="heading">Total Points</p>
-                  <p class="title">{{ project.totalPoints | number }}</p>
+                  <p class="title">{{ project.totalPoints | number }}
+                  <b-tooltip v-if="project.totalPoints < 100" label="Project has insufficient points assigned. Skills cannot be achieved until project has at least 100 points."
+                             position="is-bottom" animanted="true" type="is-light" multilined>
+                    <span><i class="fa fa-exclamation-circle"></i></span>
+                  </b-tooltip>
+                  </p>
                 </div>
               </div>
               <div class="column is-one-quarter">

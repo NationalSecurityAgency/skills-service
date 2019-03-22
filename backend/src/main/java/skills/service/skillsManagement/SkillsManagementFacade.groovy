@@ -89,6 +89,7 @@ class SkillsManagementFacade {
         if (!skillDefinition) {
             throw new SkillException("Skill definition does not exist. Must create the skill definition first!", projectId, skillId)
         }
+
         Long numExistingSkills = performedSkillRepository.countByUserIdAndProjectIdAndSkillId(userId, projectId, skillId)
         numExistingSkills = numExistingSkills ?: 0 // account for null
 
@@ -211,7 +212,7 @@ class SkillsManagementFacade {
         UserPoints totalPoints = updateUserPoints(userId, skillDef, incomingSkillDate)
         ProjDef projDef = projDefRepo.findByProjectId(skillDef.projectId)
         if(projDef.totalPoints < minimumProjectPoints){
-            throw new SkillException("Insufficient project points, skill achievement's disallowed", projDef.projectId)
+            throw new SkillException("Insufficient project points, skill achievement is disallowed", projDef.projectId)
         }
         LevelDefinitionStorageService.LevelInfo levelInfo = levelDefService.getOverallLevelInfo(projDef, totalPoints.points)
         CompletionItem completionItem = calculateLevels(levelInfo, totalPoints, null, userId, "OVERALL")
