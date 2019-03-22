@@ -182,28 +182,36 @@
       };
       Validator.localize(dictionary);
 
+      let skillName = '';
+      let skillId = '';
       if (this.isEdit) {
-        Validator.extend('uniqueName', { validate: () => true });
-        Validator.extend('uniqueId', { validate: () => true });
-      } else {
-        Validator.extend('uniqueName', {
-          getMessage: field => `The value for the ${field} is already taken.`,
-          validate(value) {
-            return SkillsService.skillWithNameExists(self.projectId, value);
-          },
-        }, {
-          immediate: false,
-        });
-
-        Validator.extend('uniqueId', {
-          getMessage: field => `The value for the ${field} is already taken.`,
-          validate(value) {
-            return SkillsService.skillWithIdExists(self.projectId, value);
-          },
-        }, {
-          immediate: false,
-        });
+        skillName = this.skill.name;
+        skillId = this.skill.skillId;
       }
+
+      Validator.extend('uniqueName', {
+        getMessage: field => `The value for the ${field} is already taken.`,
+        validate(value) {
+          if (skillName === value) {
+            return true;
+          }
+          return SkillsService.skillWithNameExists(self.projectId, value);
+        },
+      }, {
+        immediate: false,
+      });
+
+      Validator.extend('uniqueId', {
+        getMessage: field => `The value for the ${field} is already taken.`,
+        validate(value) {
+          if (skillId === value) {
+            return true;
+          }
+          return SkillsService.skillWithIdExists(self.projectId, value);
+        },
+      }, {
+        immediate: false,
+      });
     },
     computed: {
       isLoading() {
