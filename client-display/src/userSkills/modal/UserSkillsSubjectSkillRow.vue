@@ -25,12 +25,17 @@
           <vertical-progress
             v-if="skill.points !== skill.totalPoints && progress.total !== 100"
             :total-progress="progress.total"
-            :total-progress-before-today="progress.totalBeforeToday" />
+            :total-progress-before-today="progress.totalBeforeToday"
+            :is-locked="locked"
+          />
         </div>
         <div class="popper">
-          <my-progress-summary
+          <my-progress-summary v-if="!locked"
             :user-skills="skill"
             summary-type="skill" />
+          <div v-else>
+            <skill-is-locked-message :user-skill="skill"></skill-is-locked-message>
+          </div>
         </div>
       </popper>
       <div
@@ -96,6 +101,7 @@
 <script>
   import MyProgressSummary from '@/userSkills/MyProgressSummary.vue';
   import VerticalProgress from '@/common/progress/VerticalProgress.vue';
+  import SkillIsLockedMessage from '@/userSkills/SkillIsLockedMessage.vue';
 
   import ProgressBar from 'vue-simple-progress';
   import Popper from 'vue-popperjs';
@@ -103,9 +109,11 @@
 
   import 'vue-popperjs/dist/css/vue-popper.css';
 
+
   export default {
     name: 'UserSkillsSubjectSkillRow',
     components: {
+      SkillIsLockedMessage,
       MyProgressSummary,
       VerticalProgress,
       ProgressBar,
@@ -121,6 +129,9 @@
           total: (this.skill.points / this.skill.totalPoints) * 100,
           totalBeforeToday: ((this.skill.points - this.skill.todaysPoints) / this.skill.totalPoints) * 100,
         };
+      },
+      locked() {
+        return this.skill.dependencyInfo && !this.skill.dependencyInfo.achieved;
       },
     },
     methods: {
