@@ -105,7 +105,7 @@
       this.contentHeightUpdated();
     },
     mounted() {
-      this.contentHeightNotifier = () => { return debouncedContentHeightUpdated(this) };
+      this.contentHeightNotifier = () => debouncedContentHeightUpdated(this);
       window.addEventListener('resize', this.contentHeightNotifier);
       UserSkillsService.setServiceUrl(this.serviceUrl);
       UserSkillsService.setProjectId(this.projectId);
