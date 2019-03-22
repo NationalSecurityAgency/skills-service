@@ -1,5 +1,5 @@
 <template>
-  <div class="user-skill-progress-layers">
+  <div class="user-skill-progress-layers" :class="{ 'cursor-pointer': isLocked }">
     <div v-if="isLocked" class="locked-border"></div>
     <span v-if="isLocked" class="locked-icon">
       <i class="fas fa-lock"></i>
@@ -71,6 +71,10 @@
       position: absolute;
       top: 2px;
       color: #5d5d5d;
+  }
+
+  .cursor-pointer {
+    cursor: pointer;
   }
 
 </style>
