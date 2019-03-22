@@ -49,6 +49,9 @@ module.exports = {
       '/oauth2' : proxyConf,
       '/login' : proxyConf,
       '/bootstrap' : proxyConf,
+      '/userExists' : proxyConf,
+      '/createRoot' : proxyConf,
+      '/grantFirstRoot' : proxyConf,
     },
 
     // Various Dev Server settings

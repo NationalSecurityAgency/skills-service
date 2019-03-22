@@ -1,7 +1,12 @@
 <template>
-    <div v-if="initialized">
-        <root-registration v-if="!isPki" v-on:login="onLogin"/>
-        <root-pki v-else v-on:proceed="onProceed"/>
+    <div>
+        <div v-if="initialized && !accountCreated">
+            <root-registration v-if="!isPki" v-on:registerUser="onRegisterUser"/>
+            <root-pki v-else v-on:grantRoot="onGrantRoot"/>
+        </div>
+        <div v-if="initialized && accountCreated">
+            <success @proceed="onProceed"/>
+        </div>
     </div>
 </template>
 
@@ -9,15 +14,16 @@
   import BootstrapService from './BootstrapService';
   import RootPki from './RootPki';
   import RootRegistration from './RootRegistration';
+  import Success from './Success';
 
   export default {
     name: 'HomePage',
-    components: { RootPki, RootRegistration },
+    components: { RootPki, RootRegistration, Success },
     data() {
       return {
         initialized: false,
         isPki: false,
-        serverErrors: [],
+        accountCreated: false,
       };
     },
     created() {
@@ -30,32 +36,28 @@
             this.initialized = true;
           })
           .catch((error) => {
-            this.serverErrors.push(error);
             this.initialized = true;
             throw error;
         });
       }
     },
     methods: {
-      onLogin(loginFields) {
+      onRegisterUser(loginFields) {
         BootstrapService.registerUser(loginFields)
           .then(() => {
-            window.location = '/';
+            this.accountCreated = true;
           })
-          .catch((error) => {
-            this.serverErrors.push(error);
-            throw error;
-        });
+          .catch((error) => { throw error; });
       },
-      onProceed() {
+      onGrantRoot() {
         BootstrapService.grantRoot()
           .then(() => {
-            window.location = '/';
+            this.accountCreated = true;
           })
-          .catch((error) => {
-            this.serverErrors.push(error);
-            throw error;
-        });
+          .catch((error) => { throw error; });
+      },
+      onProceed() {
+        window.location = '/';
       },
     },
   };
