@@ -84,28 +84,36 @@
       };
       Validator.localize(dictionary);
 
+      let subjectName = '';
+      let subjectId = '';
       if (this.isEdit) {
-        Validator.extend('uniqueName', { validate: () => true });
-        Validator.extend('uniqueId', { validate: () => true });
-      } else {
-        Validator.extend('uniqueName', {
-          getMessage: field => `The value for the ${field} is already taken.`,
-          validate(value) {
-            return SubjectsService.subjectWithNameExists(self.subjectInternal.projectId, value);
-          },
-        }, {
-          immediate: false,
-        });
-
-        Validator.extend('uniqueId', {
-          getMessage: field => `The value for the ${field} is already taken.`,
-          validate(value) {
-            return SubjectsService.subjectWithIdExists(self.subjectInternal.projectId, value);
-          },
-        }, {
-          immediate: false,
-        });
+        subjectId = this.subject.subjectId;
+        subjectName = this.subject.name;
       }
+
+      Validator.extend('uniqueName', {
+        getMessage: field => `The value for the ${field} is already taken.`,
+        validate(value) {
+          if (subjectName === value) {
+            return true;
+          }
+          return SubjectsService.subjectWithNameExists(self.subjectInternal.projectId, value);
+        },
+      }, {
+        immediate: false,
+      });
+
+      Validator.extend('uniqueId', {
+        getMessage: field => `The value for the ${field} is already taken.`,
+        validate(value) {
+          if (subjectId === value) {
+            return true;
+          }
+          return SubjectsService.subjectWithIdExists(self.subjectInternal.projectId, value);
+        },
+      }, {
+        immediate: false,
+      });
     },
     mounted() {
       self = this;

@@ -59,30 +59,38 @@
       };
       Validator.localize(dictionary);
 
-      if (this.isEdit) {
-        Validator.extend('uniqueName', { validate: () => true });
-        Validator.extend('uniqueId', { validate: () => true });
-      } else {
-        Validator.extend('uniqueName', {
-          getMessage: field => `The value for the ${field} is already taken.`,
-          validate(value) {
-            return ProjectService.checkIfProjectNameExist(value)
-              .then(remoteRes => !remoteRes);
-          },
-        }, {
-          immediate: false,
-        });
+      let projectName = '';
+      let projectId = '';
 
-        Validator.extend('uniqueId', {
-          getMessage: field => `The value for the ${field} is already taken.`,
-          validate(value) {
-            return ProjectService.checkIfProjectIdExist(value)
-              .then(remoteRes => !remoteRes);
-          },
-        }, {
-          immediate: false,
-        });
+      if (this.isEdit) {
+        projectName = this.project.name;
+        projectId = this.project.projectId;
       }
+      Validator.extend('uniqueName', {
+        getMessage: field => `The value for the ${field} is already taken.`,
+        validate(value) {
+          if (projectName === value) {
+            return true;
+          }
+          return ProjectService.checkIfProjectNameExist(value)
+            .then(remoteRes => !remoteRes);
+        },
+      }, {
+        immediate: false,
+      });
+
+      Validator.extend('uniqueId', {
+        getMessage: field => `The value for the ${field} is already taken.`,
+        validate(value) {
+          if (projectId === value) {
+            return true;
+          }
+          return ProjectService.checkIfProjectIdExist(value)
+            .then(remoteRes => !remoteRes);
+        },
+      }, {
+        immediate: false,
+      });
     },
     computed: {
       title() {
