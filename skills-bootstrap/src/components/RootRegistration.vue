@@ -7,11 +7,11 @@
                         <span class="icon is-large">
                           <i class="card-header-icon fas fa-award"/>
                         </span>
-                        <p class="card-header-title">User Skills Management Portal</p>
+                        <p class="card-header-title">User Skills Management Dashboard</p>
                     </div>
                     <div class="card-content">
                         <p>
-                            Welcome to the User Skills Management Portal.  It looks like the application isn't fully setup. Before you can start using the Portal, you'll need a root user configured to update settings, grant permissions, etc.
+                            Welcome to the User Skills Management Dashboard.  It looks like the application isn't fully setup. Before you can start using the Dashboard, you'll need a root user configured to update settings, grant permissions, etc.
                         </p>
                         <p style="margin-top:2em">
                             Please create the root account to get started. </p>
@@ -95,7 +95,7 @@
     getMessage: 'The email address is already used for another account.',
     validate(value) {
       return BootstrapService.userWithEmailExists(value)
-        .catch(e => this.serverErrors.push(e));
+        .catch((e) => { throw e; });
     },
   }, {
     immediate: false,
@@ -113,14 +113,13 @@
           password: '',
           password_confirmation: '',
         },
-        serverErrors: [],
       };
     },
     methods: {
       validateAndLogin() {
         this.$validator.validate().then((valid) => {
           if (valid) {
-            this.$emit('login', this.loginFields);
+            this.$emit('registerUser', this.loginFields);
           }
         });
       },

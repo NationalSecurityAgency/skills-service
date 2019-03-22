@@ -7,16 +7,16 @@
                         <span class="icon is-large">
                           <i class="card-header-icon fas fa-award"/>
                         </span>
-                        <p class="card-header-title">User Skills Management Portal</p>
+                        <p class="card-header-title">User Skills Management Dashboard</p>
                     </div>
                     <div class="card-content">
                         <p>
-                            Welcome to the User Skills Management Portal.  It looks like you're using PKI authentication, but you don't currently have a user with root permissions. At least one user must have root privileges.
+                            Welcome to the User Skills Management Dashboard.  It looks like you're using PKI authentication, but you don't currently have a user with root permissions. At least one user must have root privileges.
                         </p>
                         <p style="margin-top:2em">
                             Click Continue to grant root privileges to your account. </p>
                     </div>
-                    <form @submit="$emit('proceed')">
+                    <form @submit="$emit('grantRoot')">
                             <div class="field">
                                 <div id="button-control" class="control">
                                     <button id="continue-button" class="button is-primary"
