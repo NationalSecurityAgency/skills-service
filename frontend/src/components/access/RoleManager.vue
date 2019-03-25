@@ -1,17 +1,8 @@
 <template>
   <div class="box">
-    <div class="columns">
-      <div class="column">
-        <div class="subtitle">Project Administrators</div>
-      </div>
-      <div class="column has-text-right">
-        <a v-on:click="newUser" class="button is-outlined is-success">
-          <span>Add New User</span>
-          <span class="icon is-small">
-            <i class="fas fa-plus-circle"/>
-          </span>
-        </a>
-      </div>
+    <div>
+      <existing-user-input :suggest="true" :validate="true" :user-type="userType" :excluded-suggestions="userIds" ref="userInput"
+                           v-on:userSelected="onUserSelected"></existing-user-input>
     </div>
 
     <loading-container v-bind:is-loading="isLoading">
@@ -34,15 +25,33 @@
 </template>
 
 <script>
-  import AddProjectAdmin from './AddProjectAdmin';
+  import AddRole from './AddRole';
   import LoadingContainer from '../utils/LoadingContainer';
   import ToastHelper from '../utils/ToastHelper';
   import AccessService from './AccessService';
+  import ExistingUserInput from '../utils/ExistingUserInput';
 
   export default {
-    name: 'ProjectAdmins',
-    components: { LoadingContainer },
-    props: ['project'],
+    name: 'RoleManager',
+    components: { ExistingUserInput, LoadingContainer },
+    props: {
+      project: {
+        type: Object,
+        default: () => ({}),
+      },
+      role: {
+        type: String,
+        default: 'ROLE_PROJECT_ADMIN',
+      },
+      roleDescription: {
+        type: String,
+        default: 'Project Administrator',
+      },
+      userType: {
+        type: String,
+        default: 'DASHBOARD',
+      },
+    },
     data() {
       return {
         // user roles table properties
@@ -79,7 +88,7 @@
       newUser() {
         this.$modal.open({
           parent: this,
-          component: AddProjectAdmin,
+          component: AddRole,
           hasModalCard: true,
           props: {
             projectId: this.project.projectId,
@@ -98,7 +107,7 @@
       deleteUserRoleConfirm(row) {
         this.$dialog.confirm({
           title: 'Delete Role',
-          message: `Are you absolutely sure you want to remove [${row.userId}] as a Project Administrator?`,
+          message: `Are you absolutely sure you want to remove [${row.userId}] as a ${this.roleDescription}?`,
           confirmText: 'Delete',
           type: 'is-danger',
           hasIcon: true,
@@ -115,6 +124,21 @@
       },
       notCurrentUser(userId) {
         return userId !== this.$store.getters.userInfo.userId;
+      },
+      onUserSelected(userId) {
+        this.$dialog.confirm({
+          title: 'Add Role',
+          message: `Are you absolutely sure you want to add [${userId}] as a ${this.roleDescription}?`,
+          confirmText: 'Add',
+          type: 'is-danger',
+          hasIcon: true,
+          onConfirm: () => this.addUserRole(userId),
+        });
+      },
+      addUserRole(userId) {
+        AccessService.saveUserRole(this.project.projectId, userId, this.role).then((userInfo) => {
+          this.userAdded(userInfo);
+        });
       },
     },
   };

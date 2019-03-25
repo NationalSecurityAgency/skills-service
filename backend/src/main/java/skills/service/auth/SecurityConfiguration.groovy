@@ -15,6 +15,7 @@ import org.springframework.security.core.AuthenticationException
 import org.springframework.security.web.AuthenticationEntryPoint
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository
 import org.springframework.stereotype.Component
+import skills.storage.model.auth.RoleName
 
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
@@ -37,6 +38,8 @@ class SecurityConfiguration {
                     .antMatchers("/", "/favicon.ico", "/icons/**", "/static/**", "/error", "/oauth/**", "/app/oAuthProviders", "/login*", "/bootstrap/**", "/performLogin", "/createAccount", "/createRootAccount", '/grantFirstRoot', '/userExists/**', "/app/userInfo", "/app/users/validExistingDashboardUserId/*", "/app/oAuthProviders", "index.html").permitAll()
                     .antMatchers('/admin/**').hasRole('PROJECT_ADMIN')
                     .antMatchers('/server/**').hasAnyRole('SERVER', 'PROJECT_ADMIN')
+                    .antMatchers('/root/isRoot').hasAnyAuthority(RoleName.values().collect {it.name()}.toArray(new String[0]))
+                    .antMatchers('/root/**').hasRole('SUPER_DUPER_USER')
                     .antMatchers('/grantRoot').hasRole('SUPER_DUPER_USER')
                     .anyRequest().authenticated()
             http.headers().frameOptions().sameOrigin()

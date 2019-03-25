@@ -13,4 +13,7 @@ export default {
     return axios.get(`/admin/projects/${projectId}/settings`)
       .then(remoteRes => remoteRes.data);
   },
+  hasRoot() {
+    return axios.get('/root/isRoot').then(response => response.data);
+  },
 };

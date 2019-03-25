@@ -73,8 +73,10 @@
           .then((response) => {
             this.isLoading = false;
             this.subjects = response;
-            this.subjects[0].isFirst = true;
-            this.subjects[this.subjects.length - 1].isLast = true;
+            if (this.subjects.length) {
+              this.subjects[0].isFirst = true;
+              this.subjects[this.subjects.length - 1].isLast = true;
+            }
           })
           .finally(() => {
             this.isLoading = false;

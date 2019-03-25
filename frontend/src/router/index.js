@@ -8,6 +8,7 @@ import BadgePage from '@/components/badges/BadgePage';
 import SkillPage from '@/components/skills/SkillPage';
 import UserPage from '@/components/users/UserPage';
 import store from '@/store/store';
+import GlobalSettings from '../components/settings/GlobalSettings';
 
 Vue.use(Router);
 
@@ -71,6 +72,20 @@ const router = new Router({
       name: 'UserPage',
       component: UserPage,
       meta: { requiresAuth: true },
+    },
+    {
+      path: '/settings/:settingsCategory',
+      name: 'Settings',
+      component: GlobalSettings,
+      meta: {
+        breadcrumb: {
+          label: 'Settings',
+          utils: {
+            iconClass: 'fas fa-home',
+          },
+        },
+        requiresAuth: true,
+      },
     },
     {
       path: '*',
