@@ -19,7 +19,7 @@
           </template>
 
             <virtual-list :size="60" :remain="5" :bench="10" wclass="scroll-container">
-              <div class="icon-row" v-for="(row, index) in fontAwesomeIcons.icons" :key="index">
+              <div class="icon-row" v-for="(row, index) in fontAwesomeIcons.icons" :key="`${row[0].cssClass}-${index}`">
                   <div class="icon-item" v-for="item in row" :key="item.cssClass">
                     <a
                       href="#"
@@ -99,12 +99,12 @@
 
   import FileUpload from '../upload/FileUpload';
 
-  import fontAwesomeIcons from './font-awesome-index';
-  import materialIcons from './material-index';
+  import fontAwesomeIconsCanonical from './font-awesome-index';
+  import materialIconsCanonical from './material-index';
   import IconManagerService from './IconManagerService';
 
-  const faIconList = fontAwesomeIcons.icons.slice();
-  const matIconList = materialIcons.icons.slice();
+  const faIconList = fontAwesomeIconsCanonical.icons.slice();
+  const matIconList = materialIconsCanonical.icons.slice();
   const customIconList = [];
   let definitiveCustomIconList = [];
 
@@ -128,8 +128,8 @@
     return result;
   }
 
-  fontAwesomeIcons.icons = groupIntoRows(fontAwesomeIcons.icons, 5);
-  materialIcons.icons = groupIntoRows(materialIcons.icons, 5);
+  fontAwesomeIconsCanonical.icons = groupIntoRows(fontAwesomeIconsCanonical.icons, 5);
+  materialIconsCanonical.icons = groupIntoRows(materialIconsCanonical.icons, 5);
 
   export default {
     name: 'IconManager',
@@ -151,9 +151,9 @@
         selected: '',
         selectedCss: '',
         selectedIconPack: '',
-        activePack: fontAwesomeIcons.iconPack,
-        fontAwesomeIcons,
-        materialIcons,
+        activePack: fontAwesomeIconsCanonical.iconPack,
+        fontAwesomeIcons: fontAwesomeIconsCanonical,
+        materialIcons: materialIconsCanonical,
         customIconList,
       };
     },
@@ -187,10 +187,10 @@
       onChange(tabIndex) {
         const value = this.$refs.iconFilterInput.value;
         if (tabIndex === 0) {
-          this.activePack = fontAwesomeIcons.iconPack;
+          this.activePack = fontAwesomeIconsCanonical.iconPack;
           this.filter(value);
         } else if (tabIndex === 1) {
-          this.activePack = materialIcons.iconPack;
+          this.activePack = materialIconsCanonical.iconPack;
           this.filter(value);
         } else if (tabIndex === 2) {
           this.activePack = 'Custom Icons';
@@ -202,12 +202,15 @@
         const regex = new RegExp(value, 'gi');
         const filter = icon => icon.name.match(regex);
 
-        if (iconPack === fontAwesomeIcons.iconPack) {
-          this.fontAwesomeIcons.icons = value.length === 0 ? groupIntoRows(faIconList, 5) : groupIntoRows(faIconList.filter(filter), 5);
-        } else if (iconPack === materialIcons.iconPack) {
-          this.materialIcons.icons = value.length === 0 ? groupIntoRows(matIconList, 5) : groupIntoRows(matIconList.filter(filter), 5);
+        if (iconPack === fontAwesomeIconsCanonical.iconPack) {
+          const filtered = value.length === 0 ? groupIntoRows(faIconList, 5) : groupIntoRows(faIconList.filter(filter), 5);
+          this.fontAwesomeIcons.icons = filtered;
+        } else if (iconPack === materialIconsCanonical.iconPack) {
+          const filtered = value.length === 0 ? groupIntoRows(matIconList, 5) : groupIntoRows(matIconList.filter(filter), 5);
+          this.materialIcons.icons = filtered;
         } else if (iconPack === 'Custom Icons') {
-          this.customIconList = value.length === 0 ? definitiveCustomIconList : definitiveCustomIconList.filter(filter);
+          const filtered = value.length === 0 ? definitiveCustomIconList : definitiveCustomIconList.filter(filter);
+          this.customIconList = filtered;
         }
       }, 250),
       handleUploadedIcon(response) {
