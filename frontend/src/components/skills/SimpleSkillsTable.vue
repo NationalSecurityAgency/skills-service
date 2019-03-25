@@ -77,7 +77,7 @@
       getManagedBtnDisabledMsg(row) {
         let msg = '';
         if (this.isManagedBtnDisabled(row)) {
-          msg = row.disabledStatus.manageBtn.msg;
+          ({ msg } = row.disabledStatus.manageBtn);
         }
         return msg;
       },

@@ -26,7 +26,6 @@
   import axios from 'axios';
   import { Validator } from 'vee-validate';
   import debounce from 'lodash.debounce';
-  import ToastHelper from './ToastHelper';
 
   export default {
     name: 'UserDnInput',
@@ -67,12 +66,10 @@
           })
           .finally(() => {
             this.isFetching = false;
-        });
+          });
       }, 200),
     },
   };
-
-  const ctx = this;
 
   Validator.extend('suggestDn', {
     getMessage() {
@@ -94,7 +91,7 @@
               valid: isValid,
               data: undefined,
             });
-        });
+          });
       });
     },
   });

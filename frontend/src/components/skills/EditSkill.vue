@@ -139,15 +139,15 @@
 
 <script>
   import { Validator } from 'vee-validate';
-  import LoadingContainer from '../utils/LoadingContainer';
-  import SearchAllSkillsCheckbox from './SearchAllSkillsCheckbox';
   import SkillsService from './SkillsService';
   import MarkdownEditor from '../utils/MarkdownEditor';
   import Modal from '../utils/modal/Modal';
 
   export default {
     name: 'EditSkill',
-    components: { Modal, SearchAllSkillsCheckbox, LoadingContainer, MarkdownEditor },
+    components: {
+      Modal, MarkdownEditor,
+    },
     props: ['projectId', 'subjectId', 'skill', 'isEdit'],
     data() {
       return {
@@ -186,7 +186,7 @@
       let skillId = '';
       if (this.isEdit) {
         skillName = this.skill.name;
-        skillId = this.skill.skillId;
+        ({ skillId } = this.skill);
       }
 
       Validator.extend('uniqueName', {
@@ -261,7 +261,7 @@
           })
           .finally(() => {
             this.isLoadingSkillDetails = false;
-        });
+          });
       },
       findLatestSkillVersion() {
         // let myLatestVersion = 0;
@@ -272,7 +272,7 @@
           })
           .finally(() => {
             this.isLoadingSkillDetails = false;
-        });
+          });
         // this.skillInternal.version = myLatestVersion;
       },
       toggleSkill() {

@@ -33,7 +33,7 @@
         })
           .finally(() => {
             this.isLoading = false;
-        });
+          });
       },
     },
   };

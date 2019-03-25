@@ -87,7 +87,7 @@
       let subjectName = '';
       let subjectId = '';
       if (this.isEdit) {
-        subjectId = this.subject.subjectId;
+        ({ subjectId } = this.subject);
         subjectName = this.subject.name;
       }
 

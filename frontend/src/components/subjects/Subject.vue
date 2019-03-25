@@ -106,7 +106,7 @@
           })
           .finally(() => {
             this.isLoading = false;
-        });
+          });
       },
       editSubject() {
         this.$modal.open({
@@ -132,7 +132,7 @@
           })
           .finally(() => {
             this.isLoading = false;
-        });
+          });
       },
       moveUp() {
         this.$emit('move-subject-up', this.subject);

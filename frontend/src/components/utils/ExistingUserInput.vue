@@ -113,7 +113,7 @@
           })
           .finally(() => {
             this.isFetching = false;
-        });
+          });
       }, 200),
       onUserSelected(userId) {
         this.$emit('userSelected', userId);
@@ -130,7 +130,7 @@
                 } else {
                   this.theError = 'Invalid User Id';
                 }
-            });
+              });
           } else {
             this.onUserSelected(userId);
           }

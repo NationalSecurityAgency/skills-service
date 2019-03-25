@@ -41,7 +41,9 @@
   export default {
     name: 'FullDependencyGraph',
     props: ['projectId'],
-    components: { GraphLegend, NoContent2, GraphNodeSortMethodSelector, LoadingContainer },
+    components: {
+      GraphLegend, NoContent2, GraphNodeSortMethodSelector, LoadingContainer,
+    },
     data() {
       return {
         isLoading: false,
@@ -89,7 +91,7 @@
           })
           .finally(() => {
             this.isLoading = true;
-        });
+          });
       },
 
       onSortNodeStrategyChange(newStrategy) {

@@ -79,7 +79,6 @@
 
 <script>
   import SkillsService from '../SkillsService';
-  import SkillsTable from '../SkillsTable';
   import LoadingContainer from '../../utils/LoadingContainer';
   import DependantsGraph from './DependantsGraph';
   import SkillsSelector2 from '../SkillsSelector2';
@@ -87,7 +86,9 @@
 
   export default {
     name: 'SkillDependencies',
-    components: { SimpleSkillsTable, SkillsSelector2, DependantsGraph, LoadingContainer, SkillsTable },
+    components: {
+      SimpleSkillsTable, SkillsSelector2, DependantsGraph, LoadingContainer,
+    },
     props: ['skill'],
     data() {
       return {
@@ -131,7 +132,7 @@
           .then(() => {
             this.errNotification.enable = false;
             this.loadDependentSkills();
-        });
+          });
       },
       skillAdded(newItem) {
         this.loading.finishedDependents = false;
@@ -153,7 +154,7 @@
               const errorMessage = (e.response && e.response.data && e.response.data.message) ? e.response.data.message : undefined;
               this.$router.push({ name: 'ErrorPage', query: { errorMessage } });
             }
-        });
+          });
       },
       loadDependentSkills() {
         this.loading.finishedDependents = false;
@@ -178,7 +179,7 @@
           })
           .finally(() => {
             this.loading.finishedDependents = true;
-        });
+          });
       },
       loadAllSkills() {
         this.loading.finishedAllSkills = false;
@@ -189,7 +190,7 @@
           })
           .finally(() => {
             this.loading.finishedAllSkills = true;
-        });
+          });
       },
     },
   };

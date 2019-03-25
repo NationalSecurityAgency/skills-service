@@ -68,7 +68,7 @@
     },
     methods: {
       loadData() {
-        const userInfo = this.$store.getters.userInfo;
+        const { userInfo } = this.$store.getters;
         if (userInfo !== null) {
           this.loginFields.firstName = userInfo.first;
           this.loginFields.lastName = userInfo.last;

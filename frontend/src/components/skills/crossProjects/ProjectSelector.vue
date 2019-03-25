@@ -54,7 +54,7 @@
           .then((response) => {
             this.isLoading = false;
             this.projects = response.filter(entry => entry.projectId !== this.projectId);
-        });
+          });
       },
     },
   };

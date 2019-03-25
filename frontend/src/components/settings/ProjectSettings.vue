@@ -79,7 +79,7 @@
               this.levelPointsSetting = Object.assign({ projectId: this.projectId }, initialSettingValue);
             }
             this.lastLoadedValue = Object.assign({}, this.levelPointsSetting);
-        });
+          });
       },
       save() {
         this.isLoading = true;
@@ -93,7 +93,7 @@
           .finally(() => {
             this.dirty = false;
             this.isLoading = false;
-        });
+          });
       },
     },
   };

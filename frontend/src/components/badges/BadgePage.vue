@@ -70,7 +70,9 @@
 
   export default {
     name: 'BadgePage',
-    components: { BadgeSkills, ProjectStats, LoadingContainer, Navigation, Users },
+    components: {
+      BadgeSkills, ProjectStats, LoadingContainer, Navigation, Users,
+    },
     breadcrumb() {
       return {
         label: `BADGE: ${this.badgeId}`,
@@ -118,7 +120,7 @@
           })
           .finally(() => {
             this.isLoading = false;
-        });
+          });
       },
     },
   };

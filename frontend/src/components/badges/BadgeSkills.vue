@@ -37,7 +37,9 @@
 
   export default {
     name: 'BadgeSkills',
-    components: { NoContent2, SimpleSkillsTable, LoadingContainer, SkillsSelector2 },
+    components: {
+      NoContent2, SimpleSkillsTable, LoadingContainer, SkillsSelector2,
+    },
     props: ['projectId', 'badgeId'],
     data() {
       return {
@@ -60,14 +62,14 @@
           .then((loadedSkills) => {
             this.allSkills = loadedSkills;
             this.loading.availableSkills = false;
-        });
+          });
       },
       loadAssignedBadgeSkills() {
         SkillsService.getBadgeSkills(this.projectId, this.badgeId)
           .then((loadedSkills) => {
             this.badgeSkills = loadedSkills;
             this.loading.badgeSkills = false;
-        });
+          });
       },
       skillDeleted(deletedItem) {
         this.loading.skillOp = true;
@@ -76,7 +78,7 @@
             this.badgeSkills = this.badgeSkills.filter(entry => entry.id !== deletedItem.id);
             this.loading.skillOp = false;
             this.$emit('skills-changed', deletedItem);
-        });
+          });
       },
       skillAdded(newItem) {
         this.loading.skillOp = true;
@@ -85,7 +87,7 @@
             this.badgeSkills.push(newItem);
             this.loading.skillOp = false;
             this.$emit('skills-changed', newItem);
-        });
+          });
       },
     },
   };

@@ -55,7 +55,7 @@
         AccessService.resetClientSecret(this.project.projectId)
           .then((clientSecret) => {
             this.project.clientSecret = clientSecret;
-        });
+          });
       },
     },
   };

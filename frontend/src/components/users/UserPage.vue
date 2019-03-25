@@ -59,7 +59,6 @@
 </template>
 
 <script>
-  import { UserSkills } from '@skills/user-skills';
   import Navigation from '../utils/Navigation';
   import LoadingContainer from '../utils/LoadingContainer';
   import ProjectStats from '../stats/ProjectStats';
@@ -73,7 +72,6 @@
       LoadingContainer,
       Navigation,
       ProjectStats,
-      UserSkills,
       UserSkillsPerformed,
       ClientDisplayFrame,
     },
@@ -116,7 +114,7 @@
       UsersService.getUserToken(this.projectId, this.userId)
         .then((result) => {
           this.authToken = result;
-      });
+        });
       this.loadUserDetails();
     },
     computed: {
@@ -134,7 +132,7 @@
           })
           .finally(() => {
             this.isLoading = false;
-        });
+          });
       },
     },
   };

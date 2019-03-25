@@ -185,7 +185,7 @@
         this.selectIcon(icon, iconCss, iconPack);
       },
       onChange(tabIndex) {
-        const value = this.$refs.iconFilterInput.value;
+        const { value } = this.$refs.iconFilterInput;
         if (tabIndex === 0) {
           this.activePack = fontAwesomeIconsCanonical.iconPack;
           this.filter(value);

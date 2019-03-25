@@ -39,7 +39,7 @@
               copy.created = window.moment(loadedSkill.created);
               return copy;
             });
-        });
+          });
       },
       skillsChanged(skillId) {
         this.$emit('skills-change', skillId);
@@ -50,4 +50,3 @@
 
 <style scoped>
 </style>
-

@@ -35,7 +35,9 @@
 
   export default {
     name: 'ProjectStats',
-    components: { AvailableStats, UsersPerLevelChart, AchievedSkillsChart, SystemUsageChart },
+    components: {
+      AvailableStats, UsersPerLevelChart, AchievedSkillsChart, SystemUsageChart,
+    },
     props: ['projectId'],
   };
 </script>

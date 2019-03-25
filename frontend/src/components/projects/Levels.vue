@@ -35,7 +35,9 @@
         isLoading: true,
         errors: [],
         levels: [
-          { level: 1, percent: 10, fromPts: 100, toPts: 500 },
+          {
+            level: 1, percent: 10, fromPts: 100, toPts: 500,
+          },
         ],
         levelsColumns: ['level', 'percent', 'fromPts', 'toPts'],
         options: {

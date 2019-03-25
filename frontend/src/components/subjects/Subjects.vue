@@ -19,7 +19,7 @@
         <div>
           <div v-if="subjects && subjects.length" class="columns is-multiline">
 
-            <div v-if="subjects && subjects.length" v-for="(subject) of subjects"
+            <div v-for="(subject) of subjects"
                  :key="subject.id" class="column is-half-tablet is-half-desktop is-one-third-widescreen">
               <subject :subject="subject" v-on:subject-deleted="subjectRemoved" v-on:move-subject-up="moveSubjectUp" v-on:move-subject-down="moveSubjectDown"/>
             </div>
@@ -80,7 +80,7 @@
           })
           .finally(() => {
             this.isLoading = false;
-        });
+          });
       },
       subjectRemoved(subject) {
         this.subjects = this.subjects.filter(item => item.id !== subject.id);
@@ -95,7 +95,7 @@
           })
           .finally(() => {
             this.isLoading = false;
-        });
+          });
       },
       newSubject() {
         const emptySubject = {
@@ -133,7 +133,7 @@
           })
           .finally(() => {
             this.isLoading = false;
-        });
+          });
       },
 
     },

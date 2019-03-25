@@ -22,9 +22,9 @@
         </div>
       </nav>
 
-      <transition name="projectContainer" enter-active-class="animated fadeIn">
+      <transition v-if="projects && projects.length" name="projectContainer" enter-active-class="animated fadeIn">
         <div>
-          <div v-if="projects && projects.length" v-for="project of projects" :key="project.id" class="box">
+          <div v-for="project of projects" :key="project.id" class="box">
             <my-project :project="project" v-on:project-deleted="projectRemoved" v-on:move-project-up="moveProjectUp" v-on:move-project-down="moveProjectDown"/>
           </div>
         </div>
@@ -79,21 +79,21 @@
           .then((response) => {
             this.isLoading = false;
             this.projects = response;
-        });
+          });
       },
       projectRemoved(project) {
         this.isLoading = true;
         ProjectService.deleteProject(project.projectId)
           .then(() => {
             this.loadProjects();
-        });
+          });
       },
       projectAdded(project) {
         this.isLoading = true;
         ProjectService.saveProject(project)
           .then(() => {
             this.loadProjects();
-        });
+          });
       },
       newProject() {
         this.$modal.open({
@@ -121,7 +121,7 @@
         ProjectService.changeProjectOrder(project.projectId, actionToSubmit)
           .then(() => {
             this.loadProjects();
-        });
+          });
       },
 
     },
@@ -130,4 +130,3 @@
 
 <style scoped>
 </style>
-
