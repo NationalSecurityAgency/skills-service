@@ -15,11 +15,10 @@
 </template>
 
 <script>
-  import LoadingContainer from '../utils/LoadingContainer';
 
   export default {
     name: 'UserSkillsPerformed',
-    components: { LoadingContainer },
+    components: { },
     props: ['projectId', 'userId'],
     data() {
       return {

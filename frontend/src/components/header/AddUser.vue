@@ -72,9 +72,9 @@
                 })
                 .finally(() => {
                   this.isSaving = false;
-              });
+                });
             }
-        });
+          });
       },
     },
   };

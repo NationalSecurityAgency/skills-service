@@ -128,7 +128,7 @@
                   const errorMessage = (error.response && error.response.data && error.response.data.message) ? error.response.data.message : undefined;
                   this.$router.push({ name: 'ErrorPage', query: { errorMessage } });
                 }
-            });
+              });
           }
         });
       },
@@ -153,7 +153,7 @@
         .then((result) => {
           // this.isLoading = false;
           this.oAuthProviders = result;
-      });
+        });
     },
   };
 </script>

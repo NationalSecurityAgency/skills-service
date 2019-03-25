@@ -106,7 +106,6 @@
 </template>
 
 <script>
-  import MyProject from './MyProject';
   import ProjectService from './ProjectService';
   import Subjects from '../subjects/Subjects';
   import Levels from '../levels/Levels';
@@ -122,7 +121,9 @@
 
   export default {
     name: 'ProjectPage',
-    components: { ProjectSettings, CrossProjectsSkills, FullDependencyGraph, ProjectStats, LoadingContainer, Navigation, Levels, Subjects, Badges, AccessSettings, MyProject, Users },
+    components: {
+      ProjectSettings, CrossProjectsSkills, FullDependencyGraph, ProjectStats, LoadingContainer, Navigation, Levels, Subjects, Badges, AccessSettings, Users,
+    },
     breadcrumb() {
       return {
         label: `PROJECT: ${this.$route.params.projectId}`,
@@ -145,7 +146,7 @@
           .then((response) => {
             this.isLoading = false;
             this.project = response;
-        });
+          });
       },
     },
   };

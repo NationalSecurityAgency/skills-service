@@ -28,7 +28,7 @@
         </router-link>
       </li>
 
-      <span slot-scope="{label, utils}" slot="current">
+      <span slot-scope="{label}" slot="current">
          <a class="currentItem">
           <!--<span class="icon is-small">-->
             <!--<i :class="utils && utils.iconClass"/>-->

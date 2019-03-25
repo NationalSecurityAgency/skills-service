@@ -43,7 +43,7 @@
           .then((data) => {
             this.sharedSkills = data;
             this.loading = false;
-        });
+          });
       },
     },
   };

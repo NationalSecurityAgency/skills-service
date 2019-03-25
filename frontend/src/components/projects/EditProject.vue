@@ -60,11 +60,11 @@
       Validator.localize(dictionary);
 
       let projectName = '';
-      let projectId = '';
+      let pid = '';
 
       if (this.isEdit) {
         projectName = this.project.name;
-        projectId = this.project.projectId;
+        pid = this.project.projectId;
       }
       Validator.extend('uniqueName', {
         getMessage: field => `The value for the ${field} is already taken.`,
@@ -82,7 +82,7 @@
       Validator.extend('uniqueId', {
         getMessage: field => `The value for the ${field} is already taken.`,
         validate(value) {
-          if (projectId === value) {
+          if (pid === value) {
             return true;
           }
           return ProjectService.checkIfProjectIdExist(value)

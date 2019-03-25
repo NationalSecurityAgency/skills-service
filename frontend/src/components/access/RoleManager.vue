@@ -82,7 +82,7 @@
           this.isLoading = false;
           this.data = result;
           this.userIds = result.map(({ userId }) => userId);
-      });
+        });
     },
     methods: {
       newUser() {
@@ -120,7 +120,7 @@
             this.data = this.data.filter(item => item.id !== row.id);
             this.userIds = this.userIds.filter(userId => userId !== row.userId);
             this.$toast.open(ToastHelper.defaultConf(`Removed '${row.roleName}' role`));
-        });
+          });
       },
       notCurrentUser(userId) {
         return userId !== this.$store.getters.userInfo.userId;

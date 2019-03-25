@@ -89,7 +89,9 @@
 
   export default {
     name: 'SkillPage',
-    components: { SkillDependencies, ChildRowSkillsDisplay, ProjectStats, LoadingContainer, Navigation, Users },
+    components: {
+      SkillDependencies, ChildRowSkillsDisplay, ProjectStats, LoadingContainer, Navigation, Users,
+    },
     breadcrumb() {
       return {
         label: `SKILL: ${this.skill.name || this.$route.params.skillId}`,
@@ -154,7 +156,7 @@
           })
           .finally(() => {
             this.isLoading = false;
-        });
+          });
       },
     },
   };
@@ -163,4 +165,3 @@
 <style scoped>
 
 </style>
-

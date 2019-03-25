@@ -71,7 +71,7 @@
             })
             .finally(() => {
               this.isLoading = false;
-          });
+            });
         }
       },
     },

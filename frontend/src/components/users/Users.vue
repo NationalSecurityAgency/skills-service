@@ -31,11 +31,6 @@
 <script>
   import { Validator } from 'vee-validate';
   import '@skills/user-skills/dist/userSkills.css';
-  import BLoading from 'buefy/src/components/loading/Loading';
-  import BTabs from 'buefy/src/components/tabs/Tabs';
-  import BTabItem from 'buefy/src/components/tabs/TabItem';
-  import NoContent from '../utils/NoContent';
-  import LoadingContainer from '../utils/LoadingContainer';
 
   const dictionary = {
     en: {
@@ -48,7 +43,7 @@
 
   export default {
     name: 'Users',
-    components: { BTabItem, BTabs, BLoading, NoContent, LoadingContainer },
+    components: {},
     props: ['projectId', 'subjectId', 'skillId', 'badgeId'],
     data() {
       return {
@@ -113,4 +108,3 @@
     width: 4rem;
   }
 </style>
-

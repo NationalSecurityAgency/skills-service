@@ -68,7 +68,7 @@
               .finally(() => {
                 this.isSaving = false;
                 this.$parent.close();
-            });
+              });
           }
         });
       },

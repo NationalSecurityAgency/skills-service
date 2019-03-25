@@ -77,7 +77,9 @@
 
   export default {
     name: 'SubjectPage',
-    components: { ProjectStats, LoadingContainer, Skills, Levels, Users, Navigation },
+    components: {
+      ProjectStats, LoadingContainer, Skills, Levels, Users, Navigation,
+    },
     breadcrumb() {
       return {
         label: `SUBJECT: ${this.subjectId}`,
@@ -122,7 +124,7 @@
           .then((response) => {
             this.subject = response;
             this.isLoading = false;
-        });
+          });
       },
     },
   };

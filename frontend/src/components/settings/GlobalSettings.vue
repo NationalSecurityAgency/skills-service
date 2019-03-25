@@ -44,7 +44,9 @@
 
   export default {
     name: 'GlobalSettings',
-    components: { SecuritySettings, GeneralSettings, Navigation, LoadingContainer },
+    components: {
+      SecuritySettings, GeneralSettings, Navigation, LoadingContainer,
+    },
     data() {
       return {
         isLoading: true,

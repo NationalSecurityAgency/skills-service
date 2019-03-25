@@ -19,7 +19,7 @@
         <div>
           <div v-if="badges && badges.length" class="columns is-multiline">
 
-            <div v-if="badges && badges.length" v-for="(badge) of badges"
+            <div v-for="(badge) of badges"
                  :key="badge.id" class="column is-one-third">
               <badge :badge="badge"
                      @badge-updated="saveBadge"
@@ -60,7 +60,9 @@
 
   export default {
     name: 'Badges',
-    components: { NoContent, LoadingContainer, EditBadge, Badge },
+    components: {
+      NoContent, LoadingContainer, Badge,
+    },
     props: ['project'],
     data() {
       return {
@@ -84,7 +86,7 @@
           })
           .finally(() => {
             this.isLoading = false;
-        });
+          });
       },
       deleteBadge(badge) {
         this.isLoading = true;
@@ -97,7 +99,7 @@
           })
           .finally(() => {
             this.isLoading = false;
-        });
+          });
       },
       saveBadge(badge) {
         this.isLoading = true;
@@ -110,7 +112,7 @@
           })
           .finally(() => {
             this.isLoading = false;
-        });
+          });
       },
       newBadge() {
         const emptyBadge = {
@@ -149,7 +151,7 @@
           })
           .finally(() => {
             this.isLoading = false;
-        });
+          });
       },
 
     },

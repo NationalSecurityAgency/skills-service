@@ -258,7 +258,7 @@
           })
           .finally(() => {
             this.isLoading = false;
-        });
+          });
       },
 
       deleteSkill(row) {
@@ -295,7 +295,7 @@
           })
           .finally(() => {
             this.isLoading = false;
-        });
+          });
       },
       rebuildDisplayOrder() {
         if (this.skills && this.skills.length > 0) {
@@ -359,7 +359,7 @@
           .finally(() => {
             this.isMovingRows = false;
             this.$set(this.skills[item1Index], 'isMoving', false);
-        });
+          });
       },
       disableFirstAndLastButtons() {
         if (this.skills && this.skills.length > 0) {

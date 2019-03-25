@@ -117,7 +117,7 @@
           })
           .finally(() => {
             this.isLoading = false;
-        });
+          });
       },
       moveUp() {
         this.$emit('move-project-up', this.projectInternal);

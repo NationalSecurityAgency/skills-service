@@ -7,10 +7,10 @@ const getters = {
   },
   isAuthenticated(state) {
     return (
-      state.token !== null ||
-      state.pkiAuth ||
-      state.localAuth ||
-      state.oAuthAuth
+      state.token !== null
+      || state.pkiAuth
+      || state.localAuth
+      || state.oAuthAuth
     ) && state.userInfo !== null;
   },
   isPkiAuthenticated(state) {

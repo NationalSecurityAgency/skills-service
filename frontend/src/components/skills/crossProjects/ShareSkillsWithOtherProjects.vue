@@ -57,7 +57,9 @@
   export default {
     name: 'ShareSkillsWithOtherProjects',
     props: ['projectId'],
-    components: { NoContent2, SharedSkillsTable, ProjectSelector, LoadingContainer, SkillsSelector2 },
+    components: {
+      NoContent2, SharedSkillsTable, ProjectSelector, LoadingContainer, SkillsSelector2,
+    },
     data() {
       return {
         loading: {
@@ -89,7 +91,7 @@
           .then((skills) => {
             this.allSkills = skills;
             this.loading.allSkills = false;
-        });
+          });
       },
       loadSharedSkills() {
         this.loading.sharedSkills = true;
@@ -98,7 +100,7 @@
             this.sharedSkills = data;
             this.loading.sharedSkillsInit = false;
             this.loading.sharedSkills = false;
-        });
+          });
       },
 
       shareSkill() {
@@ -111,7 +113,7 @@
           SkillsShareService.shareSkillToAnotherProject(this.projectId, selectedSkill.skillId, this.selectedProject.projectId)
             .then(() => {
               this.loadSharedSkills();
-          });
+            });
         }
       },
       doesShareAlreadyExist() {
@@ -124,7 +126,7 @@
         SkillsShareService.deleteSkillShare(this.projectId, itemToRemove.skillId, itemToRemove.projectId)
           .then(() => {
             this.loadSharedSkills();
-        });
+          });
       },
       onSelectedProject(item) {
         this.selectedProject = item;
