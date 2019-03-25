@@ -3,6 +3,7 @@ package skills.service.controller
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
+import skills.service.controller.exceptions.SkillsValidator
 import skills.service.datastore.services.AccessSettingsStorageService
 import skills.storage.model.auth.UserRole
 
@@ -43,7 +44,7 @@ class RootController {
 
     @DeleteMapping('/deleteRoot/{userId}')
     void deleteRoot(@PathVariable('userId') String userId) {
-        assert accessSettingsStorageService.getRootAdminCount() > 1
+        SkillsValidator.isTrue(accessSettingsStorageService.getRootAdminCount() > 1, 'At least one root user must exist at all times! Deleting another user will cause no root users to exist!')
         accessSettingsStorageService.deleteRoot(userId)
     }
 }
