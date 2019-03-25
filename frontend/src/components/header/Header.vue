@@ -14,6 +14,10 @@
           <settings-button/>
         </div>
 
+        <div class="level-item" v-if="isAuthenticated">
+          <global-settings-button/>
+        </div>
+
         <div class="level-item" v-if="isJwtAuthenticatedUser">
           <b-tooltip label="Sign Out"
                      position="is-bottom" animanted="true" type="is-light">
@@ -72,10 +76,12 @@
 <script>
   import SettingsButton from './SettingsButton';
   import Breadcrumb from './Breadcrumb';
+  import GlobalSettingsButton from './GlobalSettingsButton';
 
   export default {
     name: 'Header',
     components: {
+      GlobalSettingsButton,
       Breadcrumb,
       SettingsButton,
     },
@@ -85,6 +91,9 @@
       },
     },
     computed: {
+      isAuthenticated() {
+        return this.$store.getters.isAuthenticated;
+      },
       isJwtAuthenticatedUser() {
         return this.$store.getters.isAuthenticated && !this.$store.getters.isPkiAuthenticated;
       },

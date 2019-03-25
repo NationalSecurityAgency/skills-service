@@ -36,10 +36,45 @@ class AccessSettingsStorageService {
         return res
     }
 
+    @Transactional(readOnly = true)
+    List<UserRole> getRootUsers() {
+        return userRoleRepository.findAllByRoleName(RoleName.ROLE_SUPER_DUPER_USER)
+    }
+
+    @Transactional(readOnly = true)
+    List<UserRole> getNonRootUsers() {
+        List<UserRole> rootUsers = getRootUsers()
+        return userRoleRepository.findAllByUserIdNotIn(rootUsers.collect {it.userId}.unique())
+    }
+
+    @Transactional(readOnly = true)
+    boolean isRoot(String userId) {
+        return userRoleRepository.existsByUserIdAndRoleName(userId, RoleName.ROLE_SUPER_DUPER_USER)
+    }
+
+    @Transactional
+    UserRole addRoot(String userId) {
+        return addUserRoleInternal(userId, null, RoleName.ROLE_SUPER_DUPER_USER)
+    }
+
+    @Transactional
+    void deleteRoot(String userId) {
+        deleteUserRoleInternal(userId, null, RoleName.ROLE_SUPER_DUPER_USER)
+    }
+
     @Transactional()
     void deleteUserRole(UserInfo userInfo, String projectId, RoleName roleName) {
         String userId = userInfo.username?.toLowerCase()
-        log.info("Deleting user-role for DN [{}] and role [{}] on project [{}]", userId, roleName, projectId)
+        deleteUserRoleInternal(userId, projectId, roleName)
+    }
+
+    @Transactional(readOnly = true)
+    int getRootAdminCount() {
+        return userRoleRepository.countByRoleName(RoleName.ROLE_SUPER_DUPER_USER)
+    }
+
+    private void deleteUserRoleInternal(String userId, String projectId, RoleName roleName) {
+        log.info('Deleting user-role for DN [{}] and role [{}] on project [{}]', userId, roleName, projectId)
         User user = userRepository.findByUserId(userId)
         UserRole userRole = user?.roles?.find {it.projectId == projectId && it.roleName == roleName}
         assert userRole, "DELETE FAILED -> no user-role with project id [$projectId], userId [$userId] and roleName [$roleName]"
@@ -52,9 +87,11 @@ class AccessSettingsStorageService {
     @Transactional()
     UserRole addUserRole(UserInfo userInfo, String projectId, RoleName roleName) {
         String userId = userInfo.username?.toLowerCase()
-        String userDn = userInfo.userDn?.toLowerCase()
-        log.info("Creating user-role for ID [{}], DN [{}] and role [{}] on project [{}]", userId, userDn, roleName, projectId)
+        return addUserRoleInternal(userId, projectId, roleName)
+    }
 
+    private UserRole addUserRoleInternal(String userId, String projectId, RoleName roleName) {
+        log.info('Creating user-role for ID [{}] and role [{}] on project [{}]', userId, roleName, projectId)
         User user = userRepository.findByUserId(userId)
         if (user) {
             // check that the new user role does not already exist

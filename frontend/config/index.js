@@ -49,6 +49,7 @@ module.exports = {
       '/oauth2' : proxyConf,
       '/login' : proxyConf,
       '/static' : proxyConf,
+      '/root' : proxyConf,
     },
 
     // Various Dev Server settings
