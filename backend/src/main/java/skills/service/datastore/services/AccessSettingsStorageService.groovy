@@ -110,7 +110,6 @@ class AccessSettingsStorageService {
 
     @Transactional()
     User createAppUser(UserInfo userInfo, boolean createOrUpdate) {
-        log.info("Creating new app user for ID [{}], DN [{}]", userInfo.username, userInfo.userDn)
 
         User user = userRepository.findByUserId(userInfo.username?.toLowerCase())
         if (!createOrUpdate) {
@@ -123,9 +122,11 @@ class AccessSettingsStorageService {
 
         if (user) {
             // updating an existing user
+            log.info("Updating existing app user for ID [{}], DN [{}]", userInfo.username, userInfo.userDn)
             updateUser(userInfo, user)
         } else {
             // create new user with APP_USER role
+            log.info("Creating new app user for ID [{}], DN [{}]", userInfo.username, userInfo.userDn)
             user = createNewUser(userInfo)
         }
         userRepository.save(user)

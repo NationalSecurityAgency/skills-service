@@ -37,7 +37,7 @@ class SkillsHttpSessionSecurityContextRepository extends HttpSessionSecurityCont
     private NullSecurityContextRepository nullSecurityContextRepository = new NullSecurityContextRepository()
 
     @Override
-    @Transactional
+    synchronized
     SecurityContext loadContext(HttpRequestResponseHolder requestResponseHolder) {
         SecurityContext context
         if (isProxyiedAuth(SecurityContextHolder.getContext(), requestResponseHolder.request)) {
