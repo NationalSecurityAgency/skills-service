@@ -33,13 +33,13 @@
   }, 50);
 
   Vue.use({
-    install(Vue) {
+    install() {
       Vue.mixin({
         updated() {
           onHeightChanged();
         },
       });
-    }
+    },
   });
 
   export default {
