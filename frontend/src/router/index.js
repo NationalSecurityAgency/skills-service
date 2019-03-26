@@ -1,6 +1,8 @@
 import Vue from 'vue';
 import Router from 'vue-router';
 import HomePage from '@/components/HomePage';
+import LoginForm from '@/components/access/Login';
+import RequestAccountForm from '@/components/access/RequestAccess';
 import ProjectPage from '@/components/projects/ProjectPage';
 import ErrorPage from '@/components/utils/ErrorPage';
 import SubjectPage from '@/components/subjects/SubjectPage';
@@ -26,6 +28,22 @@ const router = new Router({
             iconClass: 'fas fa-home',
           },
         },
+        requiresAuth: true,
+      },
+    },
+    {
+      path: '/skills-login',
+      name: 'Login',
+      component: LoginForm,
+      meta: {
+        requiresAuth: false,
+      },
+    },
+    {
+      path: '/request-account',
+      name: 'RequestAccount',
+      component: RequestAccountForm,
+      meta: {
         requiresAuth: false,
       },
     },
@@ -110,7 +128,7 @@ router.beforeEach((to, from, next) => {
     // this route requires auth, check if logged in if not, redirect to login page.
     if (!isLoggedIn()) {
       next({
-        path: '/',
+        path: '/skills-login',
         query: { redirect: to.fullPath },
       });
     } else {
