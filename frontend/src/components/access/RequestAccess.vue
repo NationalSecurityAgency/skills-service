@@ -39,7 +39,7 @@
                 <div class="field">
                   <label class="label">Email</label>
                   <input class="input" type="text" v-model="loginFields.email" name="email"
-                         v-validate="'required|email'" data-vv-delay="500"/>
+                         v-validate="'required|email|uniqueEmail'" data-vv-delay="500"/>
                   <p class="help is-danger" v-show="errors.has('email')">{{ errors.first('email')}}</p>
                 </div>
                 <div class="field">
@@ -83,6 +83,7 @@
 
 <script>
   import { Validator } from 'vee-validate';
+  import AccessService from './AccessService';
 
   const dictionary = {
     en: {
@@ -96,6 +97,14 @@
     },
   };
   Validator.localize(dictionary);
+  Validator.extend('uniqueEmail', {
+    getMessage: 'The email address is already used for another account.',
+    validate(value) {
+      return AccessService.userWithEmailExists(value);
+    },
+  }, {
+    immediate: false,
+  });
 
   export default {
     name: 'RequestAccount',
