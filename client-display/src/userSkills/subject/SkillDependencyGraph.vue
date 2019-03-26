@@ -15,6 +15,9 @@
                     {label: 'Achieved Dependencies', color: 'lightgreen'}
                     ]">
                 </graph-legend>
+
+                <skill-dependency-summary v-if="dependencies && dependencies.length > 0"
+                                          class="summary-widget" :dependencies="dependencies"></skill-dependency-summary>
                 <div id="dependent-skills-network" style="height: 500px"></div>
             </div>
 
@@ -34,10 +37,16 @@
     import ModalHeader from '@/common/modal/ModalHeader.vue';
     import UserSkillsService from '@/userSkills/service/UserSkillsService';
     import GraphLegend from '@/userSkills/subject/GraphLegend.vue';
+    import SkillDependencySummary from '@/userSkills/subject/SkillDependencySummary.vue';
 
     export default {
         name: 'SkillDependencyGraph',
-        components: { GraphLegend, Modal, ModalHeader },
+        components: {
+            SkillDependencySummary,
+            GraphLegend,
+            Modal,
+            ModalHeader,
+        },
         props: {
             skill: {
                 type: Object,
@@ -46,6 +55,7 @@
         },
         data() {
             return {
+                dependencies: [],
                 network: null,
                 displayOptions: {
                     layout: {
@@ -85,26 +95,27 @@
         mounted() {
             UserSkillsService.getSkillDependencies(this.skill.skillId)
                 .then((res) => {
-                    this.createGraph(res.dependencies);
+                    this.dependencies = res.dependencies;
+                    this.createGraph();
             });
         },
         methods: {
             handleClose() {
                 this.$emit('ok');
             },
-            createGraph(dependencies) {
-                const data = this.buildData(dependencies);
+            createGraph() {
+                const data = this.buildData();
                 const container = document.getElementById('dependent-skills-network');
                 this.network = new vis.Network(container, data, this.displayOptions);
             },
-            buildData(dependencies) {
+            buildData() {
                 const nodes = new vis.DataSet();
                 const edges = new vis.DataSet();
                 const createdSkillIds = [];
 
                 // color: { border: '#3273dc', background: 'lightblue' },
                 // nodes.add(this.buildNode(this.skill, { color: { border: 'green', background: 'lightgreen' } }));
-                dependencies.forEach((item) => {
+                this.dependencies.forEach((item) => {
                     const isThisSkill = this.skill.projectId === item.skill.projectId && this.skill.skillId === item.skill.skillId;
                     const extraParentProps = isThisSkill ? { color: { border: '#3273dc', background: 'lightblue' } } : {};
                     this.buildNode(item.skill, createdSkillIds, nodes, extraParentProps);
@@ -148,6 +159,11 @@
     .graph-legend {
         position: absolute;
         z-index: 10;
+    }
+    .summary-widget {
+        position: absolute;
+        z-index: 10;
+        right: 40px;
     }
 </style>
 

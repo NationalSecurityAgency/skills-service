@@ -50,9 +50,9 @@
     data() {
       return {
         serviceUrl: 'http://localhost:8080',
-        projectId: 'MyProject',
+        projectId: 'movies',
         // eslint-disable-next-line max-len
-        token: null,//'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsic2tpbGxzLXNlcnZpY2Utb2F1dGgiXSwic2NvcGUiOlsicmVhZCIsIndyaXRlIl0sInByb3h5X3VzZXIiOiJtQG0uY29tIiwiZXhwIjoxNTUzMzA1ODc1LCJhdXRob3JpdGllcyI6WyJST0xFX1RSVVNURURfQ0xJRU5UIl0sImp0aSI6IjI1YWZlYjQ1LTljOTUtNGU1Ni1iYzEzLTI4MWMxNDUzMDlmMiIsImNsaWVudF9pZCI6Ik15UHJvamVjdCJ9.gVGnvHxyc3Jhn2TUeumuRPHIvU9xj9RTNExrnJqGSTpojFCzIR34_JFPN7FxHzevtMDkNrl-qT242Y6zFS8ItVvXMowjq8_iYCpdm541b47Sn8ZAJxJPVIwyYw1Ps18mQvtQTpQhWclx_y56cEJK7Z3ZEaxQLQf4E7P9fi1sB7zhNh4g4rq_gcN2k2VVcQ6dtVfqDUFezkM8N_Z0Hhd3hkhLdVutXccQaFBjW5ohs_74HorMvu4B8peiy5xa9zEgkpD2wGnQhk4VWrC386Afjn3TnQ1h16yBSTKf69wPgXuQacjERLbykhns6hQxCVz13Azq0fN7gqV6UCbz2zfQmw',
+        token: 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsic2tpbGxzLXNlcnZpY2Utb2F1dGgiXSwic2NvcGUiOlsicmVhZCIsIndyaXRlIl0sInByb3h5X3VzZXIiOiJtQG0uY29tIiwiZXhwIjoxNTUzNjcyNjgwLCJhdXRob3JpdGllcyI6WyJST0xFX1RSVVNURURfQ0xJRU5UIl0sImp0aSI6IjdhZjJkYjNiLTU3NjQtNGYxOS1hOGM4LTk4MTA4MWQxZWMxMyIsImNsaWVudF9pZCI6Im1vdmllcyJ9.fGq0lnG-HdVhbfdsgG70dKgLWwePM7OuRSN47jVMxNAaiGhLpH2fAHcxls60P_JR-1sgG0MigS0uTmXLjWnMRx0rQZU8yYZdc3xHmvcJkbJvL-jfXPGMoUTVWxEsaOode8mqhAIlrgeNbShR705LmgeIJR0H3X2_GxQm8kTe-AvXguTK6EzZXJ7YmVX8gXec0G-GbcKCFirnTh2ridFS2l9M1lYX7Lqe4QvhVqDyqUcIIKmzFDnskzaM5OAtOGHg7TlLQQJVZGn84qWmofOTZeo0cIf8i7fGmfp1q3dSUQuzGa-d-UYAYA51w3nT5XfhF-HF7jSZ9HNQ7aTofLqTEQ',
       };
     },
     mounted() {
