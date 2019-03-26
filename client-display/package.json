@@ -28,6 +28,7 @@
     "vue-popperjs": "1.5.4",
     "vue-radial-progress": "0.2.10",
     "vue-router": "3.0.2",
+    "vue-scrollto": "^2.15.0",
     "vue-simple-progress": "1.1.0",
     "vue-simple-spinner": "1.2.8",
     "vue-tiny-slider": "0.1.31"
