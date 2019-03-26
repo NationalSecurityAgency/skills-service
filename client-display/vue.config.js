@@ -13,6 +13,7 @@ let exportObject = {
     },
   },
   publicPath: '.',
+  assetsDir: 'static',
 };
 
 if (!process.env.USER_SKILLS_WEBPACK_DEV_SERVER_SSL_KEY_PATH || !process.env.USER_SKILLS_WEBPACK_DEV_SERVER_SSL_CERT_PATH) {
