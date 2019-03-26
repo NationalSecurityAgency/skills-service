@@ -1,5 +1,8 @@
 <template>
   <div class="subject-skill-row-container">
+    <skill-dependency-graph v-if="showSkillDependencyGraph" :skill="skill"
+                            @ok="showSkillDependencyGraph=false"></skill-dependency-graph>
+
     <div class="skill-label-container col-xs-3">
       <span
         class="skill-label">
@@ -14,14 +17,14 @@
       <popper
         trigger="hover"
         :options="{ placement: 'top' }">
-        <div
-          slot="reference">
+        <div slot="reference" v-on:click="skillRowClicked">
           <vertical-progress
             v-if="progress.total === 100"
             total-progress-bar-color="#59ad52"
             before-today-bar-color="#59ad52"
             :total-progress="progress.total"
-            :total-progress-before-today="progress.totalBeforeToday" />
+            :total-progress-before-today="progress.totalBeforeToday"
+          />
           <vertical-progress
             v-if="skill.points !== skill.totalPoints && progress.total !== 100"
             :total-progress="progress.total"
@@ -102,6 +105,7 @@
   import MyProgressSummary from '@/userSkills/MyProgressSummary.vue';
   import VerticalProgress from '@/common/progress/VerticalProgress.vue';
   import SkillIsLockedMessage from '@/userSkills/SkillIsLockedMessage.vue';
+  import SkillDependencyGraph from '@/userSkills/subject/SkillDependencyGraph.vue';
 
   import ProgressBar from 'vue-simple-progress';
   import Popper from 'vue-popperjs';
@@ -109,10 +113,10 @@
 
   import 'vue-popperjs/dist/css/vue-popper.css';
 
-
   export default {
     name: 'UserSkillsSubjectSkillRow',
     components: {
+      SkillDependencyGraph,
       SkillIsLockedMessage,
       MyProgressSummary,
       VerticalProgress,
@@ -122,6 +126,11 @@
     props: {
       skill: Object,
       showDescription: Boolean,
+    },
+    data() {
+      return {
+        showSkillDependencyGraph: false,
+      };
     },
     computed: {
       progress() {
@@ -137,6 +146,12 @@
     methods: {
       parseMarkdown(markdown) {
         return marked(markdown);
+      },
+      skillRowClicked() {
+        // only respond to events if the row is locked and we need to display dependency component
+        if (this.locked) {
+           this.showSkillDependencyGraph = true;
+        }
       },
     },
   };
