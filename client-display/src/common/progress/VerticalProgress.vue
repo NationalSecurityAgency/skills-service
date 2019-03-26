@@ -1,6 +1,6 @@
 <template>
   <div class="user-skill-progress-layers" :class="{ 'cursor-pointer': isLocked, 'locked-background': isLocked }">
-    <div v-if="isLocked" class="locked-border"></div>
+    <div class="locked-border"></div>
     <span v-if="isLocked" class="locked-icon">
       <i class="fas fa-lock"></i>
     </span>
@@ -57,7 +57,7 @@
 
   .user-skill-progress-layers {
     position: relative;
-    background-color: lightgrey;
+    background-color: #e8e8e8;
   }
 
   .locked-background {

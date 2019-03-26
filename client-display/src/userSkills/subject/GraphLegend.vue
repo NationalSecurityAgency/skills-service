@@ -1,6 +1,5 @@
 <template>
   <div class='legend'>
-    <div class='legend-title'>Color Legend</div>
     <div class='legend-scale'>
       <ul class='legend-labels'>
         <li v-for="item in items" v-bind:key="item.label">
@@ -27,12 +26,6 @@
   .legend .legend-labels {
     text-align: left;
     color: black;
-  }
-  .legend .legend-title {
-    text-align: left;
-    margin-bottom: 5px;
-    font-weight: bold;
-    font-size: 90%;
   }
 
   .legend .legend-scale ul {

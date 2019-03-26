@@ -76,7 +76,7 @@ class SubjectDataLoader {
                     skillDef: it[0], points: userPoints
             )
         }
-        return res
+        return res?.sort { it.skillDef.displayOrder }
     }
 
 }
