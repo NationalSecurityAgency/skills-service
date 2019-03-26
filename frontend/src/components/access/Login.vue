@@ -42,13 +42,13 @@
                 <div class="field">
                   <label class="label">Email</label>
                   <input class="input" type="text" v-model="loginFields.username" name="username"
-                         v-validate="'required|min:5'" data-vv-delay="500"/>
+                         v-validate="'required|min:5'" data-vv-delay="500" @keypress="onKeyPress"/>
                   <p class="help is-danger" v-show="errors.has('username')">{{ errors.first('username')}}</p>
                 </div>
                 <div class="field">
                   <label class="label">Password</label>
                   <input class="input" type="password" v-model="loginFields.password" name="password"
-                         v-validate="'required|min:8|max:15'" data-vv-delay="500"/>
+                         v-validate="'required|min:8|max:15'" data-vv-delay="500" @keypress="onKeyPress"/>
                   <p class="help is-danger" v-show="errors.has('password')">{{ errors.first('password')}}</p>
                 </div>
                 <div class="field is-grouped">
@@ -137,7 +137,6 @@
       },
       resetAfterFailedLogin() {
         this.loginFailed = true;
-        delete this.loginFields.username;
         delete this.loginFields.password;
         this.errors.clear();
       },
@@ -146,6 +145,9 @@
       },
       forgotPassword() {
         // TODO - add forgot password page
+      },
+      onKeyPress() {
+        this.loginFailed = false;
       },
     },
     created() {
