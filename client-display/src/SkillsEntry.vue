@@ -1,10 +1,14 @@
 <template>
-  <user-skills
-    v-if="token"
-    :service-url="serviceUrl"
-    :project-id="projectId"
-    :token="token"
-    @height-change="onHeightChange"/>
+  <div
+    ref="containerElement"
+    class="skills-container">
+    <user-skills
+      v-if="token"
+      :service-url="serviceUrl"
+      :project-id="projectId"
+      :token="token"
+      @height-change="onHeightChange"/>
+  </div>
 </template>
 
 <script>
@@ -13,10 +17,31 @@
   import '@fortawesome/fontawesome-free/css/all.css';
   import 'bootstrap/dist/css/bootstrap.css';
 
+  import Vue from 'vue';
+  import { debounce } from 'lodash';
+
   const getDocumentHeight = () => {
     const html = document.documentElement;
     return html.offsetHeight;
   };
+
+  const onHeightChanged = debounce(() => {
+    const payload = {
+      contentHeight: getDocumentHeight(),
+    };
+    window.parent.postMessage(`skills::frame-loaded::${JSON.stringify(payload)}`, '*');
+  }, 50);
+
+  Vue.use({
+    install(Vue) {
+      Vue.mixin({
+        updated() {
+          console.log(this);
+          onHeightChanged();
+        },
+      });
+    }
+  });
 
   export default {
     name: 'SkillsEntry',
@@ -45,10 +70,7 @@
     },
     methods: {
       onHeightChange() {
-        const payload = {
-          contentHeight: getDocumentHeight(),
-        };
-        window.parent.postMessage(`skills::frame-loaded::${JSON.stringify(payload)}`, '*');
+        onHeightChanged();
       },
     },
   };

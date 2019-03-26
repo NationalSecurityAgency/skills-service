@@ -63,7 +63,7 @@
 
 <style scoped>
   #client-portal-frame {
-    max-width: 1000px;
+    max-width: 1100px;
   }
 
   .the-iframe {
