@@ -9,7 +9,11 @@
 </template>
 
 <script>
+  import Vue from 'vue';
+  import VueScrollTo from 'vue-scrollto';
   import ClientDisplayFrameMessage from '../utils/ClientDisplayFrameMessage';
+
+  Vue.use(VueScrollTo);
 
   export default {
     props: {
@@ -27,8 +31,9 @@
       },
     },
     created() {
-      window.addEventListener('message', (event) => {
+      this.messageHandler = (event) => {
         const messageParser = new ClientDisplayFrameMessage(event.data);
+        console.log(event.data);
         if (messageParser.isSkillsMessage()) {
           const parsedMessage = messageParser.getParsedMessage();
           if (parsedMessage.name === 'frame-loaded') {
@@ -39,14 +44,28 @@
               authToken: this.authToken,
             };
             this.$refs.theIframe.contentWindow.postMessage(`skills::data-init::${JSON.stringify(bindings)}`, '*');
+          } else if (parsedMessage.name === 'route-changed') {
+            VueScrollTo.scrollTo(this.$refs.theIframe, 0, {
+              y: true,
+              x: false,
+              offset: -60,
+            });
           }
         }
-      });
+      };
+      window.addEventListener('message', this.messageHandler);
+    },
+    beforeDestroy() {
+      window.removeEventListener('message', this.messageHandler);
     },
   };
 </script>
 
 <style scoped>
+  #client-portal-frame {
+    max-width: 1100px;
+  }
+
   .the-iframe {
     width: 100%;
   }

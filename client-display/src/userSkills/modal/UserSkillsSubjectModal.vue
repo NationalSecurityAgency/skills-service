@@ -135,7 +135,7 @@
   }
 
   .user-skill-subject-window .modal-dialog {
-    width: 1100px;
+    width: 100%;
   }
 
   .description-toggle-container {
