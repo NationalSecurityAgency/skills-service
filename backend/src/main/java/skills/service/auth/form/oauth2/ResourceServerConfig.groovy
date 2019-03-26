@@ -66,6 +66,5 @@ class ResourceServerConfig extends ResourceServerConfigurerAdapter {
         .and()
                 .requestMatcher(oAuthUtils.oAuthRequestedMatcher)
         )
-        http.securityContext().securityContextRepository(securityContextRepository)
     }
 }
