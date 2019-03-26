@@ -56,8 +56,13 @@
         type: Array,
         default: () => ([]),
       },
-      userQuery: {
+      selectedUserId: {
         type: String,
+      },
+    },
+    watch: {
+      selectedUserId(newVal) {
+        this.userQuery = newVal;
       },
     },
     data() {
@@ -66,6 +71,7 @@
         suggestions: [],
         selectedUser: null,
         theError: '',
+        userQuery: this.selectedUser,
       };
     },
     computed: {

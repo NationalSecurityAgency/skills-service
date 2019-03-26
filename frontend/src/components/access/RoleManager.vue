@@ -2,7 +2,7 @@
   <div class="box">
     <div id="add-user-div" class="columns">
       <div id="input-column" class="column">
-        <existing-user-input :suggest="true" :validate="true" :user-type="userType" :excluded-suggestions="userIds" :userQuery="selectedUserId"
+        <existing-user-input :suggest="true" :validate="true" :user-type="userType" :excluded-suggestions="userIds" :selectedUserId="selectedUserId"
                              ref="userInput"
                              v-on:userSelected="onUserSelected"></existing-user-input>
       </div>
