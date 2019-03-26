@@ -145,7 +145,7 @@ const actions = {
     commit('clearAuthData');
     axios.get('/logout')
       .then(() => {
-        router.replace('/');
+        router.replace('/skills-login');
     });
   },
   setLogoutTimer({ dispatch }, expirationDate) {

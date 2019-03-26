@@ -5,7 +5,7 @@
     <div class="overall-container">
       <loading-container v-bind:is-loading="isLoading">
         <div v-if="!isLoading">
-          <header-view/>
+          <header-view v-if="isAuthenticatedUser"/>
           <div class="container is-fluid">
             <router-view/>
           </div>
