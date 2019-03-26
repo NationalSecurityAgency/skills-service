@@ -68,8 +68,8 @@ class UserSkillsAdminController {
     @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/dependencies", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     @CompileStatic
-    SkillDependencyInfo loadSkillDependencyInfo(@PathVariable("projectId") String projectId, @PathVariable("skillId") String skillId, @RequestParam(name = "userId") String userId, @RequestParam(name =  'version', required = false, defaultValue = Constants.MAX_VERSION_STRING) Integer version) {
-        return skillsLoader.loadSkillDependencyInfo(projectId, userId, skillId, version)
+    SkillDependencyInfo loadSkillDependencyInfo(@PathVariable("projectId") String projectId, @PathVariable("skillId") String skillId, @RequestParam(name = "userId") String userId) {
+        return skillsLoader.loadSkillDependencyInfo(projectId, userId, skillId)
     }
 
     @RequestMapping(value = "/projects/{projectId}/rank", method = RequestMethod.GET, produces = "application/json")

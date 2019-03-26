@@ -1,5 +1,5 @@
 <template>
-  <div class="user-skill-progress-layers" :class="{ 'cursor-pointer': isLocked }">
+  <div class="user-skill-progress-layers" :class="{ 'cursor-pointer': isLocked, 'locked-background': isLocked }">
     <div v-if="isLocked" class="locked-border"></div>
     <span v-if="isLocked" class="locked-icon">
       <i class="fas fa-lock"></i>
@@ -8,7 +8,7 @@
       :val="totalProgress"
       :size="barSize"
       :bar-color="totalProgressBeforeToday ? totalProgressBarColor : beforeTodayBarColor"
-      :bg-color="isLocked ? lightgrey : 'E6E6E6'"
+      :bg-color="isLocked ? 'E6E6E6' : 'aeaeae'"
       class="complete-total"/>
     <progress-bar
       v-if="totalProgress !== 100"
@@ -60,11 +60,15 @@
     background-color: lightgrey;
   }
 
+  .locked-background {
+    background-color: #e8e8e8;
+  }
+
   .locked-border {
     position: absolute;
     width: 100%;
     height: 100%;
-    border: #E6E6E6 solid 2px;
+    border: lightgrey solid 2px;
   }
 
   .locked-icon {
