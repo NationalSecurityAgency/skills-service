@@ -45,7 +45,6 @@
             };
             this.$refs.theIframe.contentWindow.postMessage(`skills::data-init::${JSON.stringify(bindings)}`, '*');
           } else if (parsedMessage.name === 'route-changed') {
-            window.yeaboi = this.$refs.theIframe;
             VueScrollTo.scrollTo(this.$refs.theIframe, 0, {
               y: true,
               x: false,
@@ -58,11 +57,15 @@
     },
     beforeDestroy() {
       window.removeEventListener('message', this.messageHandler);
-    }
+    },
   };
 </script>
 
 <style scoped>
+  #client-portal-frame {
+    max-width: 1000px;
+  }
+
   .the-iframe {
     width: 100%;
   }
