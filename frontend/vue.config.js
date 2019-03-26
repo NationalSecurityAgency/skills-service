@@ -7,7 +7,12 @@ module.exports = {
     host: 'localhost',
     port: 8082,
     overlay: true,
-    proxy: 'http://localhost:8080',
+    proxy: {
+      '/': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+      }
+    },
   },
 
   configureWebpack: {
