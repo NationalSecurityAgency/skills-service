@@ -1,8 +1,21 @@
 <template>
   <div class="box">
-    <div>
-      <existing-user-input :suggest="true" :validate="true" :user-type="userType" :excluded-suggestions="userIds" ref="userInput"
-                           v-on:userSelected="onUserSelected"></existing-user-input>
+    <div id="add-user-div" class="columns">
+      <div id="input-column" class="column">
+        <existing-user-input :suggest="true" :validate="true" :user-type="userType" :excluded-suggestions="userIds" :userQuery="selectedUserId"
+                             ref="userInput"
+                             v-on:userSelected="onUserSelected"></existing-user-input>
+      </div>
+      <div class="column control-column">
+        <p class="control" style="margin-top:2em">
+          <button id="save-button" class="button is-primary is-outlined" v-on:click="addUserRole" :disabled="errors.any() || !selectedUserId">
+            <span id="button-text">Add</span>
+            <span class="icon is-small">
+                <i :class="[isSaving ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-arrow-circle-right']"></i>
+              </span>
+          </button>
+        </p>
+      </div>
     </div>
 
     <loading-container v-bind:is-loading="isLoading">
@@ -59,6 +72,8 @@
         data: [],
         userIds: [],
         columns: ['userId', 'edit'],
+        selectedUserId: '',
+        isSaving: false,
         options: {
           headings: {
             userId: 'User',
@@ -126,24 +141,31 @@
         return userId !== this.$store.getters.userInfo.userId;
       },
       onUserSelected(userId) {
-        this.$dialog.confirm({
-          title: 'Add Role',
-          message: `Are you absolutely sure you want to add [${userId}] as a ${this.roleDescription}?`,
-          confirmText: 'Add',
-          type: 'is-danger',
-          hasIcon: true,
-          onConfirm: () => this.addUserRole(userId),
-        });
+        this.selectedUserId = userId;
       },
-      addUserRole(userId) {
-        AccessService.saveUserRole(this.project.projectId, userId, this.role).then((userInfo) => {
+      addUserRole() {
+        this.isSaving = true;
+        AccessService.saveUserRole(this.project.projectId, this.selectedUserId, this.role).then((userInfo) => {
           this.userAdded(userInfo);
-        });
+        })
+          .finally(() => {
+            this.isSaving = false;
+            this.selectedUserId = '';
+          });
       },
     },
   };
 </script>
 
 <style scoped>
-
+  #add-user-div {
+    margin-left: 0px;
+    margin-right: 0px;
+  }
+  #button-text {
+    min-width: 45px;
+  }
+  .control-column {
+    max-width: 176px;
+  }
 </style>

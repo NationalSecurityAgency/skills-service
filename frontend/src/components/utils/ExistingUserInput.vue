@@ -3,7 +3,6 @@
     <b-field :label="fieldLabel">
       <b-autocomplete
         v-model="userQuery"
-        clear-on-select
         :data="suggestions"
         :placeholder="placeholder"
         :loading="isFetching"
@@ -57,10 +56,12 @@
         type: Array,
         default: () => ([]),
       },
+      userQuery: {
+        type: String,
+      },
     },
     data() {
       return {
-        userQuery: null,
         isFetching: false,
         suggestions: [],
         selectedUser: null,
