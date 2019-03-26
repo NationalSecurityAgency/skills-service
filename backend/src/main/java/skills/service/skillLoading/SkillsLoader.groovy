@@ -11,6 +11,7 @@ import skills.service.skillLoading.model.*
 import skills.storage.model.*
 import skills.storage.repos.ProjDefRepo
 import skills.storage.repos.SkillDefRepo
+import skills.storage.repos.SkillRelDefRepo
 import skills.storage.repos.UserAchievedLevelRepo
 import skills.storage.repos.UserPointsRepo
 
@@ -28,6 +29,9 @@ class SkillsLoader {
 
     @Autowired
     SkillDefRepo skillDefRepo
+
+    @Autowired
+    SkillRelDefRepo skillRelDefRepo
 
     @Autowired
     UserPointsRepo userPointsRepo
@@ -140,10 +144,17 @@ class SkillsLoader {
     }
 
     @Transactional(readOnly = true)
-    SkillDependencyInfo loadSkillDependencyInfo(String projectId, String userId, String skillId, Integer version = Integer.MAX_VALUE) {
-        SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, projectId, skillId, version, SkillRelDef.RelationshipType.Dependence)
-        List<SkillSummary> skillSummaries = createSkillSummaries(groupChildrenMeta.childrenWithPoints)
-        return new SkillDependencyInfo(dependencies: skillSummaries)
+    SkillDependencyInfo loadSkillDependencyInfo(String projectId, String userId, String skillId) {
+        List<SkillRelDefRepo.GraphRelWithAchievement> graphDBRes = skillRelDefRepo.getDependencyGraphWithAchievedIndicator(projectId, skillId, userId)
+
+        List<SkillDependencyInfo.SkillRelationshipItem> deps = graphDBRes.collect {
+            new SkillDependencyInfo.SkillRelationship(
+                    skill: new SkillDependencyInfo.SkillRelationshipItem(projectId: it.parentProjectId, projectName: it.parentProjectName, skillId: it.parentSkillId, skillName: it.parentName),
+                    dependsOn: new SkillDependencyInfo.SkillRelationshipItem(projectId: it.childProjectId, projectName: it.childProjectName, skillId: it.childSkillId, skillName: it.childName),
+                    achieved: it.achievementId != null
+            )
+        }
+        return new SkillDependencyInfo(dependencies: deps)
     }
 
     private SkillSubjectSummary loadSubjectSummary(ProjDef projDef, String userId, SkillDef subjectDefinition, Integer version, boolean loadSkills = false) {
