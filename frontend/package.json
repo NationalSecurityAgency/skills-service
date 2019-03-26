@@ -32,7 +32,8 @@
     "vue-apexcharts": "1.2.9",
     "vue-friendly-iframe": "^0.12.0",
     "vue-multiselect": "2.1.3",
-    "vue-router": "^3.0.1",
+    "vue-router": "3.0.2",
+    "vue-scrollto": "^2.15.0",
     "vue-tables-2": "1.4.70",
     "vue-virtual-scroll-list": "1.3.2",
     "vuex": "^3.0.1"
