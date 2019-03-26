@@ -73,7 +73,6 @@ class CreateAccountController {
 
     @GetMapping('userExists/{user}')
     boolean userExists(@PathVariable('user') String user) {
-        Validate.isTrue(!userAuthService.rootExists(), 'A root user already exists! Granting additional root privileges requires a root user to grant them!')
         return userAuthService.userExists(user)
     }
 
