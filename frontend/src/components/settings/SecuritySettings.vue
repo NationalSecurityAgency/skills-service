@@ -1,5 +1,10 @@
 <template>
-  <div class="column is-half is-offset-one-quarter">
+  <div>
+    <div class="columns skills-underline-container">
+      <div class="column">
+        <span class="title">Access Settings</span>
+      </div>
+    </div>
     <loading-container v-bind:is-loading="isLoading">
       <role-manager :role="role" :user-type="userType" :role-description="roleDescription" v-if="isRoot" />
     </loading-container>
