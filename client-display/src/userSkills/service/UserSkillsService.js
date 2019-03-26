@@ -43,6 +43,15 @@ export default {
     }).then(result => result.data);
   },
 
+  getSkillDependencies(skillId) {
+    return axios.get(`${this.serviceUrl}${this.getServicePath()}/${this.projectId}/skills/${skillId}/dependencies`, {
+      params: {
+        userId: this.userId,
+      },
+      withCredentials: true,
+    }).then(result => result.data);
+  },
+
   getBadgeSkills(badgeId) {
     return axios.get(`${this.serviceUrl}${this.getServicePath()}/${this.projectId}/badges/${badgeId}/summary`, {
       withCredentials: true,
