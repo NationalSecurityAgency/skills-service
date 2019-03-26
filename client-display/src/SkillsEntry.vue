@@ -36,7 +36,6 @@
     install(Vue) {
       Vue.mixin({
         updated() {
-          console.log(this);
           onHeightChanged();
         },
       });
