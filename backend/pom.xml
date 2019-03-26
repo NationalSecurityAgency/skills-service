@@ -242,11 +242,7 @@
                             <overwrite>true</overwrite>
                             <resources>
                                 <resource>
-                                    <directory>${project.parent.basedir}/frontend/target/dist</directory>
-                                    <includes>
-                                        <include>static/</include>
-                                        <include>index.html</include>
-                                    </includes>
+                                    <directory>${project.parent.basedir}/frontend/dist</directory>
                                 </resource>
                             </resources>
                         </configuration>

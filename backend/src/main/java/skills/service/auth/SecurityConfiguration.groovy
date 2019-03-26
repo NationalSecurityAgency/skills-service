@@ -35,7 +35,7 @@ class SecurityConfiguration {
             http
                     .csrf().disable()
                     .authorizeRequests()
-                    .antMatchers("/", "/favicon.ico", "/icons/**", "/static/**", "/error", "/oauth/**", "/app/oAuthProviders", "/login*", "/bootstrap/**", "/performLogin", "/createAccount", "/createRootAccount", '/grantFirstRoot', '/userExists/**', "/app/userInfo", "/app/users/validExistingDashboardUserId/*", "/app/oAuthProviders", "index.html").permitAll()
+                    .antMatchers("/", "/favicon.ico", "/icons/**", "/static/**", "/skills.ico", "/skills.jpeg", "/error", "/oauth/**", "/app/oAuthProviders", "/login*", "/bootstrap/**", "/performLogin", "/createAccount", "/createRootAccount", '/grantFirstRoot', '/userExists/**', "/app/userInfo", "/app/users/validExistingDashboardUserId/*", "/app/oAuthProviders", "index.html").permitAll()
                     .antMatchers('/admin/**').hasRole('PROJECT_ADMIN')
                     .antMatchers('/server/**').hasAnyRole('SERVER', 'PROJECT_ADMIN')
                     .antMatchers('/root/isRoot').hasAnyAuthority(RoleName.values().collect {it.name()}.toArray(new String[0]))

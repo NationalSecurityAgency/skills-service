@@ -26,7 +26,6 @@ module.exports = {
       '/static': proxyConf,
     },
   },
-
   configureWebpack: {
     resolve: {
       alias: {
@@ -36,9 +35,9 @@ module.exports = {
     devtool: 'cheap-module-eval-source-map',
   },
 
-  publicPath: undefined,
+  publicPath: './',
   outputDir: undefined,
-  assetsDir: undefined,
+  assetsDir: 'static',
   runtimeCompiler: true,
   productionSourceMap: undefined,
   parallel: undefined,
