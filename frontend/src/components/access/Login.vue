@@ -26,13 +26,12 @@
               <div class="field">
                 <label class="label">Password</label>
                 <input class="input" type="password" v-model="loginFields.password" name="password"
-                       v-validate="'required|min:8|max:15'" data-vv-delay="500"/>
+                       @animationstart="onAnimationStart" v-validate="'required|min:8|max:15'" data-vv-delay="500"/>
                 <p class="help is-danger" v-show="errors.has('password')">{{ errors.first('password')}}</p>
               </div>
               <div class="field ">
                 <div class="control">
-                  <button class="button is-primary is-outlined"
-                          :disabled="errors.any() || !loginFields.username || !loginFields.password">
+                  <button class="button is-primary is-outlined" :disabled="disabled">
                     <span class="icon is-small">
                       <i class="fas fa-arrow-circle-right"/>
                     </span>
@@ -97,6 +96,7 @@
           username: '',
           password: '',
         },
+        isAutoFilled: false,
         loginFailed: false,
         oAuthProviders: [],
       };
@@ -139,6 +139,18 @@
       forgotPassword() {
         // TODO - add forgot password page
       },
+      onAnimationStart(event) {
+        if (event && event.animationName && event.animationName.startsWith('onAutoFillStart')) {
+          this.isAutoFilled = true;
+        } else {
+          this.isAutoFilled = false;
+        }
+      },
+    },
+    computed: {
+      disabled() {
+        return this.errors.any() || (!this.isAutoFilled && (!this.loginFields.username || !this.loginFields.password));
+      },
     },
     created() {
       AccessService.getOAuthProviders()
@@ -149,6 +161,19 @@
   };
 </script>
 
-<style scoped>
-
+<style lang="css" scoped>
+  :-webkit-autofill {
+    animation-name: onAutoFillStart;
+  }
+  :not(:-webkit-autofill) {
+    animation-name: onAutoFillCancel;
+  }
+  @keyframes onAutoFillStart {
+    from { }
+    to { }
+  }
+  @keyframes onAutoFillCancel {
+    from { }
+    to { }
+  }
 </style>
