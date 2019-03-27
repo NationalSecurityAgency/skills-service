@@ -25,6 +25,7 @@ module.exports = {
       '/login': proxyConf,
       '/static': proxyConf,
       '/root': proxyConf,
+      '/userExists': proxyConf,
     },
   },
   configureWebpack: {
