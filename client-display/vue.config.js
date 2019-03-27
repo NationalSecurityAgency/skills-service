@@ -6,13 +6,13 @@ console.log(process.env.USER_SKILLS_WEBPACK_DEV_SERVER_SSL_CERT_PATH);
 
 let exportObject = {
   configureWebpack: {
-
     optimization: {
       // We no not want to minimize our code.
       minimize: false
     },
   },
   publicPath: '.',
+  runtimeCompiler: true,
   assetsDir: 'static',
 };
 

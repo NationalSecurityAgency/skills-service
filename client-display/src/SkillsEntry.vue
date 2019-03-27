@@ -52,7 +52,7 @@
         serviceUrl: 'http://localhost:8080',
         projectId: 'movies',
         // eslint-disable-next-line max-len
-        token: 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsic2tpbGxzLXNlcnZpY2Utb2F1dGgiXSwic2NvcGUiOlsicmVhZCIsIndyaXRlIl0sInByb3h5X3VzZXIiOiJtQG0uY29tIiwiZXhwIjoxNTUzNzUzMzc2LCJhdXRob3JpdGllcyI6WyJST0xFX1RSVVNURURfQ0xJRU5UIl0sImp0aSI6IjVmZjBjNGYyLTRlNjUtNGNmNC1hNjJmLTNkMjBlNTVhYzA4OCIsImNsaWVudF9pZCI6Im1vdmllcyJ9.PAI9050Ux5C8c-Pn8sIMZ1iKdvE8A1J4nhofmoMVRSjGcWtKoASMMR8a46wQfYt_7sqocIXUW1Tgb3RyDo1CGgi23_bI4xghBhZQ-niYnrQhLAjrBEOJBAnpK7EsfTpgFU3X2liOTfSOiFlU5e8yyyH1zJHhGMbi2yKShWrfsKCheTNLo-xToDsBTQ9D0agxpcGjC4PV0rKJ8Gdd_RPCF5bH-vdDR8bO-ZUtITj1EGy0_gVcHUfdg1uqrGYWIiQTBjmP3Edpb5FWRI8hZY5tRvYK5nrNXVsMCQsonsOaX6sksrYENrmDlHaUdCVWbH9l_bFjNJeK5FK2At7bFz2Vmg',
+        token: null,
       };
     },
     mounted() {
@@ -78,5 +78,6 @@
 <style scoped>
   .skills-container {
     max-width: 1100px;
+    margin: 0 auto;
   }
 </style>
