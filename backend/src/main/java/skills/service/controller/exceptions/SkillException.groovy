@@ -3,18 +3,23 @@ package skills.service.controller.exceptions
 import groovy.transform.CompileStatic
 
 @CompileStatic
-class SkillException extends RuntimeException{
+class SkillException extends RuntimeException {
+    static final String NA = 'N/A'
 
     String projectId
     String skillId
     ErrorCode errorCode = ErrorCode.InternalError
 
     SkillException(String msg) {
-        this(msg, "N/A", "N/A")
+        this(msg, NA, NA)
+    }
+
+    SkillException(String msg, Throwable t) {
+        this(msg, t, NA, NA)
     }
 
     SkillException(String msg, String projectId) {
-        this(msg, projectId, "N/A")
+        this(msg, projectId, NA)
     }
 
     SkillException(String msg, String projectId, String skillId) {

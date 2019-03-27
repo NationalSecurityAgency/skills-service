@@ -271,7 +271,7 @@ create table skills.settings
   id int not null AUTO_INCREMENT PRIMARY KEY,
   setting varchar(255) not null,
   value varchar(255) not null,
-  project_id varchar(255) not null,
+  project_id varchar(255),
 
   setting_group varchar(255),
 

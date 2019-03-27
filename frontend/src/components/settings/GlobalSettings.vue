@@ -25,11 +25,13 @@
         </template>
         <template slot="Security">
           <section>
-            <security-settings/>
+            <security-settings :is-root="isRoot"/>
           </section>
         </template>
         <template slot="Email">
-
+          <section>
+            <email-settings :is-root="isRoot"/>
+          </section>
         </template>
       </navigation>
     </section>
@@ -41,15 +43,18 @@
   import Navigation from '../utils/Navigation';
   import GeneralSettings from './GeneralSettings';
   import SecuritySettings from './SecuritySettings';
+  import EmailSettings from './EmailSettings';
+  import SettingsService from './SettingsService';
 
   export default {
     name: 'GlobalSettings',
     components: {
-      SecuritySettings, GeneralSettings, Navigation, LoadingContainer,
+      EmailSettings, SecuritySettings, GeneralSettings, Navigation, LoadingContainer,
     },
     data() {
       return {
         isLoading: true,
+        isRoot: false,
       };
     },
     mounted() {
@@ -57,7 +62,12 @@
     },
     methods: {
       loadSettings() {
-        this.isLoading = false;
+        SettingsService.hasRoot().then((response) => {
+          this.isRoot = response;
+        })
+          .finally(() => {
+            this.isLoading = false;
+          });
       },
     },
   };
@@ -66,5 +76,8 @@
 <style scoped>
   .section {
     padding: 2rem 1.5rem;
+  }
+  .settings-div {
+    max-width: 788px;
   }
 </style>

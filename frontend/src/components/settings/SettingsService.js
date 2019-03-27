@@ -16,4 +16,10 @@ export default {
   hasRoot() {
     return axios.get('/root/isRoot').then(response => response.data);
   },
+  testConnection(emailConnectionInfo) {
+    return axios.post('/root/testEmailSettings', emailConnectionInfo).then(response => response.data);
+  },
+  saveEmailSettings(emailConnectionInfo) {
+    return axios.post('/root/saveEmailSettings', emailConnectionInfo).then(response => response.data);
+  },
 };
