@@ -108,7 +108,7 @@ class UserSkillsAdminController {
         return rankingLoader.getRankingDistribution(projectId, userId, subjectId)
     }
 
-    @RequestMapping(value = "/projects/{projectId}/skills/{skillId}", method = RequestMethod.POST, produces = "application/json")
+    @RequestMapping(value = "/projects/{projectId}/skills/{skillId}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
     @ResponseBody
     @CompileStatic
     SkillsManagementFacade.AddSkillResult addSkill(
