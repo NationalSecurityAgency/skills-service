@@ -29,7 +29,7 @@
   import Ribbon from '@/common/ribbon/Ribbon.vue';
   import SkillsProgressList from '@/userSkills/modal/SkillsProgressList.vue';
 
-  import marked from 'marked';
+  // import marked from 'marked';
 
   import ToggleButton from 'vue-js-toggle-button/src/Button.vue';
 

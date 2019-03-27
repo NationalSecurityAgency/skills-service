@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
 
-import SkillsEntry from '@/SkillsEntry';
+import SkillsEntry from '@/SkillsEntry.vue';
 import SubjectDetails from '@/userSkills/subject/SubjectDetails.vue';
 
 Vue.use(VueRouter);
@@ -22,7 +22,7 @@ const router = new VueRouter({
     {
       path: '*',
       component: SkillsEntry,
-    }
+    },
   ],
 });
 
