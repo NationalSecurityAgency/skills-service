@@ -108,6 +108,11 @@
                     this.createGraph();
             });
         },
+        beforeDestroy() {
+          if (this.network) {
+              this.network.destroy();
+          }
+        },
         methods: {
             handleClose() {
                 this.$emit('ok');

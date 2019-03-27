@@ -77,6 +77,11 @@
         this.createGraph();
       }
     },
+    beforeDestroy() {
+      if (this.network) {
+        this.network.destroy();
+      }
+    },
     watch: {
       graph: function watchGraph() {
         if (this.network) {
