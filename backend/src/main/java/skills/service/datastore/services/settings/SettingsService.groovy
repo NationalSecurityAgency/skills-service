@@ -3,6 +3,7 @@ package skills.service.datastore.services.settings
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import skills.service.controller.exceptions.SkillException
 import skills.service.controller.request.model.SettingsRequest
 import skills.service.controller.result.model.SettingsResult
@@ -10,7 +11,7 @@ import skills.storage.model.Setting
 import skills.storage.repos.SettingRepo
 import skills.utils.Props
 
-import javax.transaction.Transactional
+import java.security.Key
 
 @Service
 @Slf4j
@@ -92,7 +93,7 @@ class SettingsService {
         return result
     }
 
-    @Transactional()
+    @Transactional(readOnly = true)
     SettingsResult getSetting(String projectId, String setting){
         List<Setting> settings = settingRepo.findAllByProjectIdAndSetting(projectId, setting)
         if(!settings){
@@ -103,6 +104,32 @@ class SettingsService {
         SettingsResult result = new SettingsResult()
         Props.copy(settings.first(), result)
         return result
+    }
+
+    @Transactional(readOnly = true)
+    SettingsResult getGlobalSetting(String setting) {
+        return getSetting(null, setting)
+    }
+
+    @Transactional
+    void saveOrUpdateGroup(String projectId, String settingsGroup, Map<String, String> settingsMap) {
+        settingsMap.each { String key, String value ->
+            saveOrUpdateSettingInternal(projectId, settingsGroup, key, value)
+        }
+    }
+
+    private SettingsResult saveOrUpdateSettingInternal(String projectId, String settingsGroup, String setting, String value) {
+        SettingsResult result = getGlobalSetting(setting)
+        SettingsRequest request = new SettingsRequest(
+                projectId: projectId,
+                settingGroup: settingsGroup,
+                setting: setting,
+                value: value
+        )
+        if (result?.id) {
+            request.id = result.id
+        }
+        return saveSetting(request)
     }
 
     /**

@@ -5,6 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
 import skills.service.controller.exceptions.SkillsValidator
 import skills.service.datastore.services.AccessSettingsStorageService
+import skills.service.settings.EmailConnectionInfo
+import skills.service.settings.EmailSettingsService
 import skills.storage.model.auth.UserRole
 
 import java.security.Principal
@@ -16,6 +18,9 @@ class RootController {
 
     @Autowired
     AccessSettingsStorageService accessSettingsStorageService
+
+    @Autowired
+    EmailSettingsService emailSettingsService
 
     @GetMapping('/rootUsers')
     @ResponseBody
@@ -46,5 +51,15 @@ class RootController {
     void deleteRoot(@PathVariable('userId') String userId) {
         SkillsValidator.isTrue(accessSettingsStorageService.getRootAdminCount() > 1, 'At least one root user must exist at all times! Deleting another user will cause no root users to exist!')
         accessSettingsStorageService.deleteRoot(userId)
+    }
+
+    @PostMapping('/testEmailSettings')
+    boolean testEmailSettings(@RequestBody EmailConnectionInfo emailConnectionInfo) {
+        return emailSettingsService.testConnection(emailConnectionInfo)
+    }
+
+    @PostMapping('/saveEmailSettings')
+    void saveEmailSettings(@RequestBody EmailConnectionInfo emailConnectionInfo) {
+        emailSettingsService.updateConnectionInfo(emailConnectionInfo)
     }
 }
