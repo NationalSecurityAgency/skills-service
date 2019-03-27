@@ -8,28 +8,24 @@
                             slot="header"
                             class="text-left"
                             icon-class="fa fa-bar-chart"
-                            :title="nodeDetailsView.skill.skill"
+                            :title="title"
                             @cancel="close"/>
 
                 </div>
                 <div class="panel-body text-left">
-                    <div>
-                        <vertical-progress
-                                v-if="progress.total === 100"
-                                total-progress-bar-color="#59ad52"
-                                before-today-bar-color="#59ad52"
-                                :total-progress="progress.total"
-                                :total-progress-before-today="progress.totalBeforeToday"
-                        />
-                        <vertical-progress
-                                v-if="nodeDetailsView.skill.points !== nodeDetailsView.skill.totalPoints && progress.total !== 100"
-                                :total-progress="progress.total"
-                                :total-progress-before-today="progress.totalBeforeToday"
-                                :is-locked="locked"
-                        />
+                    <div class="row">
+                        <div class="col-md-9 text-left">
+                            {{ progress.currentPoints }} / {{ progress.totalPoints }} Points
+                        </div>
+                        <div class="col-md-3 text-right">
+                            <span class="text-muted">{{ progress.percentComplete }}%</span>
+                        </div>
                     </div>
                     <div>
-                        {{ nodeDetailsView.skill.description.description }}
+                        <progress-bar bar-color="lightgreen" :val="progress.percentComplete"></progress-bar>
+                    </div>
+                    <div>
+                        <p>{{ nodeDetailsView.skill.description.description }}</p>
                     </div>
                 </div>
                 <div class="panel-footer">
@@ -44,10 +40,13 @@
     import ModalHeader from '@/common/modal/ModalHeader.vue';
     import VerticalProgress from '@/common/progress/VerticalProgress.vue';
 
+    import ProgressBar from 'vue-simple-progress';
+
     export default {
         components: {
             VerticalProgress,
             ModalHeader,
+            ProgressBar,
         },
         name: 'SkillDependencyDetails',
         props: {
@@ -69,10 +68,14 @@
             },
         },
         computed: {
+            title() {
+                return this.nodeDetailsView.skill.skill;
+            },
             progress() {
                 return {
-                    total: (this.nodeDetailsView.skill.points / this.nodeDetailsView.skill.totalPoints) * 100,
-                    totalBeforeToday: ((this.nodeDetailsView.skill.points - this.nodeDetailsView.skill.todaysPoints) / this.nodeDetailsView.skill.totalPoints) * 100,
+                    currentPoints: this.nodeDetailsView.skill.points,
+                    totalPoints: this.nodeDetailsView.skill.totalPoints,
+                    percentComplete: (this.nodeDetailsView.skill.points / this.nodeDetailsView.skill.totalPoints) * 100,
                 };
             },
         },

@@ -81,6 +81,11 @@
     mounted() {
       this.loadGraphDataAndCreateGraph();
     },
+    beforeDestroy() {
+      if (this.network) {
+        this.network.destroy();
+      }
+    },
     methods: {
       loadGraphDataAndCreateGraph() {
         SkillsService.getDependentSkillsGraphForProject(this.projectId)

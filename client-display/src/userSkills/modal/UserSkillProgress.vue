@@ -35,7 +35,7 @@
             </div>
         </div>
         <div class="col-xs-3">
-            <div class="col-xs-8">
+            <div class="col-xs-7">
                 <popper trigger="hover" :options="{ placement: 'left' }">
                     <div slot="reference" class="skill-label text-left">
                         {{ skill.points | number }} / {{ skill.totalPoints | number }}
