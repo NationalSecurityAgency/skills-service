@@ -42,7 +42,11 @@ class EmailSettingsService {
                 tlsEnabled: settingsService.getGlobalSetting(tlsEnableSetting)?.value?.toBoolean() ?: false,
         )
 
-        configureMailSender(emailConnectionInfo)
+        try {
+            configureMailSender(emailConnectionInfo)
+        } catch (SkillException e) {
+            log.error('Email connection failed. No email can be sent without updating the configuration', e)
+        }
     }
 
     void updateConnectionInfo(EmailConnectionInfo emailConnectionInfo) {
