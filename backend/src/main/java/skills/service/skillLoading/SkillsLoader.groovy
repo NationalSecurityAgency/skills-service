@@ -136,6 +136,24 @@ class SkillsLoader {
     }
 
     @Transactional(readOnly = true)
+    SkillSummary loadSkillSummary(String projectId, String userId, String skillId) {
+        ProjDef projDef = getProjDef(projectId)
+        SkillDef skillDef = getSkillDef(projectId, skillId, SkillDef.ContainerType.Skill)
+
+        UserPoints points = userPointsRepo.findByProjectIdAndUserIdAndSkillIdAndDay(projectId, userId, skillId, null)
+        UserPoints todayPoints = userPointsRepo.findByProjectIdAndUserIdAndSkillIdAndDay(projectId, userId, skillId, null)
+
+        return new SkillSummary(
+                projectId: skillDef.projectId, projectName: projDef.name,
+                skillId: skillDef.skillId, skill: skillDef.name,
+                points: points?.points ?: 0, todaysPoints: todayPoints?.points ?: 0,
+                pointIncrement: skillDef.pointIncrement, totalPoints: skillDef.totalPoints,
+                description: new SkillDescription(description: skillDef.description, href: skillDef.helpUrl),
+//                dependencyInfo: new SkillDependencySummary(numDirectDependents: skillDependencyInfo.)
+        )
+    }
+
+    @Transactional(readOnly = true)
     SkillBadgeSummary loadBadge(String projectId, String userId, String subjectId) {
         ProjDef projDef = getProjDef(projectId)
         SkillDef badgeDef = getSkillDef(projectId, subjectId, SkillDef.ContainerType.Badge)

@@ -42,6 +42,7 @@
   }
 
   .modal-close-x {
+    padding-left: 1rem;
     margin-top: -2px;
     font-size: 24px;
     font-weight: 700;

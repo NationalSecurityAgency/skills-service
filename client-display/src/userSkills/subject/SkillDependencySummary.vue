@@ -1,6 +1,5 @@
 <template>
     <div class="skills-dep-container container" style="max-width: 18rem;">
-        <!--see if can make something like this https://themes.getbootstrap.com/preview/?theme_id=19889&show_new= (under analytics -->
         <div class="row">
             <div class="col-md-9 text-left">
                 <strong>{{ numDependencies }}</strong> Dependencies
