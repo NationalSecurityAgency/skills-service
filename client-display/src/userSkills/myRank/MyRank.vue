@@ -1,11 +1,5 @@
 <template>
   <div class="my-rank-wrapper">
-    <my-rank-modal
-      v-if="myRankModal.show"
-      :subject="subject"
-      @ok="closeMyRankModal"
-      @cancel="closeMyRankModal"/>
-
     <label class="skill-tile-label">My Rank</label>
     <span class="fa-stack skills-icon user-rank-stack">
       <i class="fa fa-users fa-stack-2x"/>
@@ -17,37 +11,28 @@
     </span>
     <button
       class="btn btn-clear-search"
-      @click.stop="openMyRankModal(subject)">
+      @click.stop="openMyRankDetails()">
       <strong>ALL RANKINGS</strong>
     </button>
   </div>
 </template>
 
 <script>
-  import MyRankModal from '@/userSkills/myRank/MyRankModal.vue';
-
   export default {
     components: {
-      MyRankModal,
-    },
-    data() {
-      return {
-        myRankModal: {
-          show: false,
-        },
-      };
     },
     props: {
       subject: String,
       rank: Number,
     },
     methods: {
-      openMyRankModal() {
-        this.myRankModal.show = true;
-      },
-
-      closeMyRankModal() {
-        this.myRankModal.show = false;
+      openMyRankDetails() {
+        this.$router.push({
+          name: 'myRankDetails',
+          params: {
+            subject: this.subject,
+          },
+        });
       },
     },
   };
