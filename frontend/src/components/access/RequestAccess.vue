@@ -108,7 +108,7 @@
         this.$validator.validate().then((valid) => {
           if (valid) {
             this.$store.dispatch('signup', this.loginFields).then(() => {
-              this.$router.push({ name: 'RequestAccount' });
+              this.$router.push({ name: 'HomePage' });
             });
           }
         });
@@ -117,7 +117,7 @@
         return !this.loginFields.firstName || !this.loginFields.lastName || !this.loginFields.email || !this.loginFields.password;
       },
       loginPage() {
-        this.$router.push({ name: 'HomePage' });
+        this.$router.push({ name: 'Login' });
       },
     },
   };
