@@ -95,7 +95,6 @@
   import Ribbon from '@/common/ribbon/Ribbon.vue';
   import StarProgress from '@/common/progress/StarProgress.vue';
   import VerticalProgressBar from '@/common/progress/VerticalProgress.vue';
-  import UserSkillsSubjectModal from '@/userSkills/modal/UserSkillsSubjectModal.vue';
 
   import Spinner from 'vue-simple-spinner';
   import Popper from 'vue-popperjs';
@@ -115,7 +114,6 @@
       MyProgressSummary,
       VerticalProgressBar,
       ProgressBar,
-      UserSkillsSubjectModal,
     },
     props: {
       subject: {

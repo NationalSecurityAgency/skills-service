@@ -3,7 +3,7 @@ import VueRouter from 'vue-router';
 import VueBreadcrumbs from 'vue-2-breadcrumbs';
 
 import SkillsEntry from '@/SkillsEntry.vue';
-// import SubjectDetails from '@/userSkills/subject/SubjectDetails.vue';
+import SubjectDetails from '@/userSkills/subject/SubjectDetails.vue';
 import MyRankDetails from '@/userSkills/myRank/MyRankDetails.vue';
 
 
@@ -18,17 +18,17 @@ const router = new VueRouter({
       name: 'home',
       component: SkillsEntry,
     },
-    // {
-    //   path: '/subject/:subjectId',
-    //   component: SubjectDetails,
-    //   name: 'subjectDetails',
-    //   props: true,
-    //   meta: {
-    //     breadcrumb: {
-    //       label: 'Subject Details',
-    //     },
-    //   },
-    // },
+    {
+      path: '/subject/:subjectId',
+      component: SubjectDetails,
+      name: 'subjectDetails',
+      props: true,
+      meta: {
+        breadcrumb: {
+          label: 'Subject Details',
+        },
+      },
+    },
     {
       path: '/myrank',
       component: MyRankDetails,
