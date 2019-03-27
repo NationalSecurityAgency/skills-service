@@ -1,13 +1,6 @@
 <template>
   <div
     class="user-skills-categories-container">
-    <user-skills-subject-modal
-      v-if="showUserSkillsSubjectModal"
-      :subject="userSkillsSubjectModalSubject"
-      :ribbon-color="'pink'"
-      @ok="showUserSkillsSubjectModal = false"
-      @cancel="showUserSkillsSubjectModal = false"/>
-
     <div
       v-for="(subject, index) in subjects"
       :key="`unique-subject-${index}`"
@@ -34,18 +27,17 @@
         required: true,
       },
     },
-    data() {
-      return {
-        userSkillsSubjectModalSubject: null,
-        showUserSkillsSubjectModal: false,
-      };
-    },
     methods: {
       openUserSkillSubject(subject) {
         UserSkillsService.getSubjectSummary(subject.subjectId)
           .then((result) => {
-            this.showUserSkillsSubjectModal = true;
-            this.userSkillsSubjectModalSubject = result;
+            this.$router.push({
+              name: 'subjectDetails',
+              params: {
+                subjectId: subject.subjectId,
+                subject: result,
+              },
+            });
           });
       },
     },
