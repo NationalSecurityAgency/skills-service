@@ -40,7 +40,6 @@ class SecurityConfiguration {
                     .antMatchers('/server/**').hasAnyRole('SERVER', 'PROJECT_ADMIN')
                     .antMatchers('/root/isRoot').hasAnyAuthority(RoleName.values().collect {it.name()}.toArray(new String[0]))
                     .antMatchers('/root/**').hasRole('SUPER_DUPER_USER')
-                    .antMatchers('/grantRoot').hasRole('SUPER_DUPER_USER')
                     .anyRequest().authenticated()
             http.headers().frameOptions().sameOrigin()
             return http
