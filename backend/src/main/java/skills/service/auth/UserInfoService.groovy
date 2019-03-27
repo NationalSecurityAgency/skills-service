@@ -38,20 +38,15 @@ class UserInfoService {
      * @param userId
      * @return if userId parameter is supplied, then return the correct userId based on authMode,
      * i.e. - do a DN lookup if in PKI mode, otherwise return the passed in userId as we do not
-     * need to do lookup's in FORM auth mode.  If userId is not supplied, then return the current
-     * user's userId.
      */
     String lookupUserId(String userId) {
+        assert userId
         String retVal
-        if (userId) {
-            if (authMode == AuthMode.FORM) {
-                retVal = userId
-            } else {
-                // we are in PKI auth mode so we need to lookup the user to convert from DN to username
-                retVal = userDetailsService.loadUserByUsername(userId).username
-            }
+        if (authMode == AuthMode.FORM) {
+            retVal = userId
         } else {
-            retVal = getCurrentUser().username
+            // we are in PKI auth mode so we need to lookup the user to convert from DN to username
+            retVal = userDetailsService.loadUserByUsername(userId).username
         }
         return retVal
     }
