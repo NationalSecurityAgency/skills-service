@@ -72,9 +72,10 @@
   }
 
   .locked-icon {
-      position: absolute;
-      top: 2px;
-      color: #5d5d5d;
+    position: absolute;
+    top: 2px;
+    left: 50%;
+    color: #5d5d5d;
   }
 
   .cursor-pointer {
