@@ -13,7 +13,24 @@
 
                 </div>
                 <div class="panel-body text-left">
-                    {{ nodeDetailsView.skill.description.description }}
+                    <div>
+                        <vertical-progress
+                                v-if="progress.total === 100"
+                                total-progress-bar-color="#59ad52"
+                                before-today-bar-color="#59ad52"
+                                :total-progress="progress.total"
+                                :total-progress-before-today="progress.totalBeforeToday"
+                        />
+                        <vertical-progress
+                                v-if="nodeDetailsView.skill.points !== nodeDetailsView.skill.totalPoints && progress.total !== 100"
+                                :total-progress="progress.total"
+                                :total-progress-before-today="progress.totalBeforeToday"
+                                :is-locked="locked"
+                        />
+                    </div>
+                    <div>
+                        {{ nodeDetailsView.skill.description.description }}
+                    </div>
                 </div>
                 <div class="panel-footer">
                     <button class="btn btn-default" v-on:click="close">OK</button>
@@ -25,9 +42,11 @@
 
 <script>
     import ModalHeader from '@/common/modal/ModalHeader.vue';
+    import VerticalProgress from '@/common/progress/VerticalProgress.vue';
 
     export default {
         components: {
+            VerticalProgress,
             ModalHeader,
         },
         name: 'SkillDependencyDetails',
@@ -47,6 +66,14 @@
         methods: {
             close() {
                 this.$emit('close');
+            },
+        },
+        computed: {
+            progress() {
+                return {
+                    total: (this.nodeDetailsView.skill.points / this.nodeDetailsView.skill.totalPoints) * 100,
+                    totalBeforeToday: ((this.nodeDetailsView.skill.points - this.nodeDetailsView.skill.todaysPoints) / this.nodeDetailsView.skill.totalPoints) * 100,
+                };
             },
         },
     };
