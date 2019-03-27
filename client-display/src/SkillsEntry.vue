@@ -76,5 +76,7 @@
 </script>
 
 <style scoped>
-
+  .skills-container {
+    max-width: 1100px;
+  }
 </style>
