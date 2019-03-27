@@ -2,7 +2,7 @@
     <transition name="node-transition" enter-active-class="animated zoomIn" leave-active-class="animated zoomOut">
         <div id="node-details-info" class="skill-details-container">
 
-            <div class="panel panel-default">
+            <div class="panel panel-info">
                 <div class="panel-heading">
                     <modal-header
                             slot="header"
@@ -25,11 +25,17 @@
                         <progress-bar bar-color="lightgreen" :val="progress.percentComplete"></progress-bar>
                     </div>
                     <div>
-                        <p>{{ nodeDetailsView.skill.description.description }}</p>
+                        <p class="skill-description">{{ nodeDetailsView.skill.description.description }}</p>
                     </div>
                 </div>
-                <div class="panel-footer">
-                    <button class="btn btn-default" v-on:click="close">OK</button>
+                <div class="panel-footer" style="min-height: 5rem;">
+                    <span v-show="nodeDetailsView.skill.description.href" class="pull-left">
+                        <span>Need help?</span>
+                        <a :href="nodeDetailsView.skill.description.href" target="_blank">
+                            Click here!
+                        </a>
+                    </span>
+                    <button class="btn btn-info pull-right" v-on:click="close">OK</button>
                 </div>
             </div>
         </div>
@@ -87,5 +93,9 @@
         position: absolute;
         z-index: 100;
         max-width: 40rem;
+    }
+
+    .skill-details-container .skill-description {
+        padding-top: 1rem;
     }
 </style>
