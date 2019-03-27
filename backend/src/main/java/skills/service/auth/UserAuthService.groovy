@@ -112,12 +112,11 @@ class UserAuthService {
 
     HttpServletRequest getServletRequest() {
         HttpServletRequest httpServletRequest
-
         try {
             ServletRequestAttributes currentRequestAttributes = RequestContextHolder.currentRequestAttributes() as ServletRequestAttributes
             httpServletRequest = currentRequestAttributes.getRequest()
         } catch (Exception e) {
-            log.warn("Unable to current request attributes. Error Recievedd [$e]")
+            log.warn("Unable to current request attributes. Error Recieved [$e]")
         }
         return httpServletRequest
     }
