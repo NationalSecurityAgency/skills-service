@@ -39,7 +39,7 @@ class UserInfoController {
 
     @RequestMapping(value = "/userInfo", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
-    def getUserInfo() {
+    UserInfoRes getUserInfo() {
         UserInfoRes res
         UserInfo currentUser = userInfoService.getCurrentUser()
         if (currentUser) {
