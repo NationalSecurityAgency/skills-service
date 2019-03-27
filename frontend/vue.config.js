@@ -36,7 +36,6 @@ module.exports = {
     devtool: 'cheap-module-eval-source-map',
   },
 
-  publicPath: './',
   outputDir: undefined,
   assetsDir: 'static',
   runtimeCompiler: true,
