@@ -54,6 +54,13 @@ class UserSkillsController {
         return skillsLoader.loadSubject(projectId, userInfoService.currentUser.username, subjectId, version)
     }
 
+    @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/summary", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    @CompileStatic
+    SkillSummary getSkillSummary(@PathVariable("projectId") String projectId, @PathVariable("skillId") String skillId) {
+        return skillsLoader.loadSkillSummary(projectId, userInfoService.currentUser.username, skillId)
+    }
+
     @RequestMapping(value = "/projects/{projectId}/badges/{badgeId}/summary", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     @CompileStatic

@@ -9,6 +9,9 @@
                     @cancel="handleClose"/>
 
             <div>
+                <skill-dependency-details
+                        v-if="nodeDetailsView.show"
+                        :node-details-view="nodeDetailsView" @close="closeNodeDetails"></skill-dependency-details>
                 <graph-legend class="graph-legend" :items="[
                     {label: 'This Skill', color: 'lightblue'},
                     {label: 'Dependencies', color: 'lightgray'},
@@ -38,10 +41,12 @@
     import UserSkillsService from '@/userSkills/service/UserSkillsService';
     import GraphLegend from '@/userSkills/subject/GraphLegend.vue';
     import SkillDependencySummary from '@/userSkills/subject/SkillDependencySummary.vue';
+    import SkillDependencyDetails from '@/userSkills/subject/SkillDependencyDetails.vue';
 
     export default {
         name: 'SkillDependencyGraph',
         components: {
+            SkillDependencyDetails,
             SkillDependencySummary,
             GraphLegend,
             Modal,
@@ -55,6 +60,15 @@
         },
         data() {
             return {
+                nodeDetailsView: {
+                    show: false,
+                    skill: {},
+                    pointer: {
+                        x: 0,
+                        y: 0,
+                    },
+                },
+                clickParams: '',
                 dependencies: [],
                 network: null,
                 displayOptions: {
@@ -64,17 +78,12 @@
                             enabled: true,
                             sortMethod: 'directed',
                             nodeSpacing: 350,
-                            // treeSpacing: 1000,
-                            // blockShifting: false,
-                            // edgeMinimization: false,
-                            // parentCentralization: false,
-                            // levelSeparation: 1000,
-                            // direction: 'UP',
                         },
                     },
                     interaction: {
                         selectConnectedEdges: false,
                         navigationButtons: true,
+                        hover: true,
                     },
                     physics: {
                         enabled: false,
@@ -107,6 +116,48 @@
                 const data = this.buildData();
                 const container = document.getElementById('dependent-skills-network');
                 this.network = new vis.Network(container, data, this.displayOptions);
+                // const self = this;
+                this.network.on('click', (params) => {
+                    if (this.nodeDetailsView.show) {
+                        this.nodeDetailsView.show = false;
+                    } else if (params.nodes && params.nodes.length > 0) {
+                        const skillItem = this.locateSelectedSkill(params);
+                        if (skillItem) {
+                            this.nodeDetailsView.pointer.x = params.pointer.DOM.x;
+                            this.nodeDetailsView.pointer.y = params.pointer.DOM.y;
+                            UserSkillsService.getSkillSummary(skillItem.projectId, skillItem.skillId)
+                                .then((res) => {
+                                    this.nodeDetailsView.skill = res;
+                                    this.nodeDetailsView.show = true;
+                            });
+                        }
+                    }
+                });
+                const networkCanvas = container.getElementsByTagName('canvas')[0];
+                this.network.on('hoverNode', () => {
+                    networkCanvas.style.cursor = 'pointer';
+                });
+                this.network.on('blurNode', () => {
+                    networkCanvas.style.cursor = 'default';
+                });
+            },
+            closeNodeDetails() {
+                this.nodeDetailsView.show = false;
+            },
+            locateSelectedSkill(params) {
+                const skillId = params.nodes[0];
+                let skillItem = null;
+                const depItem = this.dependencies.find(item => this.getNodeId(item.dependsOn) === skillId);
+                if (depItem) {
+                    skillItem = depItem.dependsOn;
+                } else {
+                    const found = this.dependencies.find(item => this.getNodeId(item.skill) === skillId);
+                    if (found) {
+                        skillItem = found.skill;
+                    }
+                }
+
+                return skillItem;
             },
             buildData() {
                 const nodes = new vis.DataSet();
@@ -136,13 +187,13 @@
                 if (!createdSkillIds.includes(skill.skillId)) {
                     createdSkillIds.push(skill.skillId);
 
-                    const isCrossProj = skill.projectId !== this.skill.projectId;
                     const node = {
                         id: this.getNodeId(skill),
-                        label: isCrossProj ? `${skill.projectName} : ${skill.skillName}` : skill.skillName,
+                        label: this.getLabel(skill),
                         margin: 10,
                         shape: 'box',
                         chosen: false,
+                        font: { multi: 'html', size: 20 },
                     };
                     const res = Object.assign(node, extraProps);
                     nodes.add(res);
@@ -150,6 +201,11 @@
             },
             getNodeId(skill) {
                 return `${skill.projectName}_${skill.skillId}`;
+            },
+            getLabel(skill) {
+                const isCrossProj = skill.projectId !== this.skill.projectId;
+                const label = isCrossProj ? `<b>${skill.projectName}</b>\n${skill.skillName}` : skill.skillName;
+                return label;
             },
         },
     };

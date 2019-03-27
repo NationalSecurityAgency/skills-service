@@ -54,6 +54,7 @@ class RestExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(ResponseStatusException)
     protected ResponseEntity<Object> handleResponseStatusException(ResponseStatusException ex, WebRequest webRequest) {
         BasicErrBody body = new BasicErrBody(message: ex.message)
+        log.error(message, ex)
         return handleExceptionInternal(ex, body, new HttpHeaders(), ex.status, webRequest)
     }
 
@@ -68,14 +69,17 @@ class RestExceptionHandler extends ResponseEntityExceptionHandler {
         HttpStatus httpStatus = HttpStatus.INTERNAL_SERVER_ERROR
         // check if the exception is annotated w/ @ResponseStatus
         ResponseStatus responseStatus = AnnotatedElementUtils.findMergedAnnotation(ex.getClass(), ResponseStatus.class)
+        String message
         if (responseStatus) {
             httpStatus = responseStatus.code()
             String reason = responseStatus.reason()
-            String message = "${httpStatus}${(reason ? " \"${reason}\"" : "")}"
+            message = "${httpStatus}${(reason ? " \"${reason}\"" : "")}"
             body = new BasicErrBody(message: message)
         } else {
-            body = new BasicErrBody(message: 'Unexpected Exception')
+            message = 'Unexpected Exception'
+            body = new BasicErrBody(message: message)
         }
+        log.error(message, ex)
         return handleExceptionInternal(ex, body, new HttpHeaders(), httpStatus, webRequest)
     }
 
