@@ -4,6 +4,7 @@ import VueBreadcrumbs from 'vue-2-breadcrumbs';
 
 import SkillsEntry from '@/SkillsEntry.vue';
 import SubjectDetails from '@/userSkills/subject/SubjectDetails.vue';
+import SkillDependencies from '@/userSkills/subject/SkillDependencies.vue';
 import MyRankDetails from '@/userSkills/myRank/MyRankDetails.vue';
 
 
@@ -23,22 +24,18 @@ const router = new VueRouter({
       component: SubjectDetails,
       name: 'subjectDetails',
       props: true,
-      meta: {
-        breadcrumb: {
-          label: 'Subject Details',
-        },
-      },
+    },
+    {
+      path: '/skill/dependencies',
+      component: SkillDependencies,
+      name: 'skillDependencies',
+      props: true,
     },
     {
       path: '/myrank',
       component: MyRankDetails,
       name: 'myRankDetails',
       props: true,
-      meta: {
-        breadcrumb: {
-          label: 'My Rank',
-        },
-      },
     },
     {
       path: '*',
