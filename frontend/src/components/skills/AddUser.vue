@@ -109,7 +109,7 @@
     methods: {
       addSkill() {
         this.isSaving = true;
-        axios.put(`/admin/projects/${this.projectId}/userSkills/${this.skillId}`, {
+        axios.put(`/admin/projects/${this.projectId}/skills/${this.skillId}`, {
           userId: this.$refs.userIdField.$data.userQuery,
           timestamp: this.dateAdded.getTime(),
         }).then((skillAddedResult) => {
