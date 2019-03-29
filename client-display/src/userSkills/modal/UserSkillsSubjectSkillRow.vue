@@ -44,7 +44,13 @@
       skillRowClicked() {
         // only respond to events if the row is locked and we need to display dependency component
         if (this.locked) {
-           this.showSkillDependencyGraph = true;
+           // this.showSkillDependencyGraph = true;
+          this.$router.push({
+            name: 'skillDependencies',
+            params: {
+              skill: this.skill,
+            },
+          });
         }
       },
     },
