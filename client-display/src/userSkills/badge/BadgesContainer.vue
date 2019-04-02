@@ -1,11 +1,5 @@
 <template>
   <div>
-    <badge-modal
-      v-if="badgeModal.show"
-      :badge="badgeModal.badge"
-      :ribbon-color="'gold'"
-      @ok="badgeModal.show = false"
-      @cancel="badgeModal.show = false"/>
     <div
       v-if="badges.length !== 0"
       class="badges-container">
@@ -38,7 +32,6 @@
 <script>
   import Ribbon from '@/common/ribbon/Ribbon.vue';
   import BadgeTile from '@/userSkills/badge/BadgeTile.vue';
-  import BadgeModal from '@/userSkills/badge/BadgeModal.vue';
   import UserSkillsService from '@/userSkills/service/UserSkillsService';
 
   import VueTinySlider from 'vue-tiny-slider';
@@ -48,7 +41,6 @@
     components: {
       BadgeTile,
       Ribbon,
-      BadgeModal,
       'tiny-slider': VueTinySlider,
     },
     props: {
@@ -56,14 +48,6 @@
         type: Array,
         required: true,
       },
-    },
-    data() {
-      return {
-        badgeModal: {
-          show: false,
-          badge: null,
-        },
-      };
     },
     methods: {
       goNext() {
@@ -77,10 +61,13 @@
       openBadgeStats(badge) {
         UserSkillsService.getBadgeSkills(badge.badgeId)
           .then((badgeSummary) => {
-            this.badgeModal = {
-              badge: badgeSummary,
-              show: true,
-            };
+            this.$router.push({
+              name: 'badgeDetails',
+              params: {
+                badge: badgeSummary,
+                ribbonColor: 'gold',
+              },
+            });
           });
       },
     },

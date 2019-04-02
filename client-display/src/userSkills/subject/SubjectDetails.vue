@@ -22,8 +22,8 @@
       </div>
 
       <skills-progress-list
-          :subject="subject"
-          :show-descriptions="showDescriptions" />
+        :subject="subject"
+        :show-descriptions="showDescriptions" />
     </div>
 
     <div class="pull-left">
