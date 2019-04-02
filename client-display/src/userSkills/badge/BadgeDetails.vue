@@ -38,6 +38,7 @@
                 </span>
               </div>
             </div>
+            <div v-else></div>
           </popper>
           <span
             v-if="badge.description"
