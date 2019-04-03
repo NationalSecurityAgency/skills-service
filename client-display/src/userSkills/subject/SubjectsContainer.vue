@@ -14,12 +14,10 @@
 <script>
   import SubjectTile from '@/userSkills/subject/SubjectTile.vue';
   import UserSkillsService from '@/userSkills/service/UserSkillsService';
-  import UserSkillsSubjectModal from '@/userSkills/modal/UserSkillsSubjectModal.vue';
 
   export default {
     components: {
       SubjectTile,
-      UserSkillsSubjectModal,
     },
     props: {
       subjects: {
