@@ -11,6 +11,10 @@
     <div
       v-if="!loading"
       class="point-distribution-info">
+      <h1
+        class="title text=primary">
+        <i class="fas fa-chart-bar" /><span>My Rank</span>
+      </h1>
       <div class="dist-info-tile col-xs-3">
         <h1 class="distribution-icon-text">{{ rankingDistribution.myLevel | number }}</h1>
         <h4>My Level</h4>
@@ -135,6 +139,26 @@
   .myrank-container {
     max-width: 800px;
     margin: 0 auto;
+  }
+
+  .myrank-container .title {
+    text-align: left;
+    width: 40%;
+    border-bottom: 3px solid #d0d9e8;
+    padding-left: 1rem;
+  }
+
+  .myrank-container .title i {
+    color: #d0d9e8;
+    font-size: 120%;
+    vertical-align: middle;
+  }
+
+  .myrank-container .title span {
+    font-size: 80%;
+    color: #698dad;
+    vertical-align: middle;
+    padding-left: 1rem;
   }
 
   .myrank-loading-spinner {
