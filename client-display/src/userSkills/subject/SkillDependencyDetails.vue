@@ -43,6 +43,7 @@
 </template>
 
 <script>
+    import ModalHeader from '@/common/modal/ModalHeader.vue';
     import VerticalProgress from '@/common/progress/VerticalProgress.vue';
 
     import ProgressBar from 'vue-simple-progress';
