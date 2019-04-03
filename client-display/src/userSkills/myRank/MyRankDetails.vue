@@ -160,5 +160,6 @@
     display: block;
     width: 100%;
     padding: 10px;
+    height: 480px;
   }
 </style>
