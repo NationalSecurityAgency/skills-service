@@ -49,6 +49,7 @@
 
 <script>
   import UserSkillsHeader from '@/userSkills/UserSkillsHeader.vue';
+  import UserSkillsService from '@/userSkills/service/UserSkillsService';
   import Ribbon from '@/common/ribbon/Ribbon.vue';
   import SkillsProgressList from '@/userSkills/modal/SkillsProgressList.vue';
 
@@ -64,15 +65,17 @@
       SkillsProgressList,
     },
     props: {
-      starArray: Array,
       ribbonColor: String,
-      subject: Object,
     },
     data() {
       return {
         initialized: false,
         showDescriptions: false,
+        subject: null,
       };
+    },
+    watch: {
+      '$route': 'fetchData'
     },
     computed: {
       helpTipHref() {
@@ -82,8 +85,15 @@
     mounted() {
       this.showDescriptions = false;
       this.initialized = true;
+      this.fetchData();
     },
     methods: {
+      fetchData() {
+        UserSkillsService.getSubjectSummary(this.$route.params.subjectId)
+          .then((result) => {
+            this.subject = result;
+          });
+      },
       parseMarkdown(text) {
         return marked(text);
       },

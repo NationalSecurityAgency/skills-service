@@ -59,16 +59,15 @@
         slider.goTo('prev');
       },
       openBadgeStats(badge) {
-        UserSkillsService.getBadgeSkills(badge.badgeId)
-          .then((badgeSummary) => {
-            this.$router.push({
-              name: 'badgeDetails',
-              params: {
-                badge: badgeSummary,
-                ribbonColor: 'gold',
-              },
-            });
-          });
+        this.$router.push({
+          name: 'badgeDetails',
+          params: {
+            badgeId: badge.badgeId,
+          },
+          query: {
+            ribbonColor: 'gold'
+          },
+        });
       },
     },
   };

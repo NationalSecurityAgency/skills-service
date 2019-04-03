@@ -83,6 +83,8 @@
 
   import ToggleButton from 'vue-js-toggle-button/src/Button.vue';
 
+  import UserSkillsService from '@/userSkills/service/UserSkillsService';
+
   import 'vue-popperjs/dist/css/vue-popper.css';
 
   export default {
@@ -92,12 +94,12 @@
       ToggleButton,
       Popper,
     },
-    props: {
-      badge: Object,
-      ribbonColor: String,
-    },
     data() {
       return {
+        badge: null,
+        ribbonColor: {
+          default: 'gold',
+        },
         initialized: false,
         showDescriptions: false,
       };
@@ -116,7 +118,21 @@
         return '';
       },
     },
+    watch: {
+      '$route': 'fetchData'
+    },
+    mounted() {
+      this.fetchData();
+    },
     methods: {
+      fetchData() {
+        this.ribbonColor = this.$route.query.ribbonColor;
+        UserSkillsService.getBadgeSkills(this.$route.params.badgeId)
+          .then((badgeSummary) => {
+            this.badge = badgeSummary;
+          });
+      },
+
       parseMarkdown(text) {
         return marked(text);
       },
