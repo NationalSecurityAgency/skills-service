@@ -119,7 +119,7 @@
       },
     },
     watch: {
-      '$route': 'fetchData'
+      $route: 'fetchData',
     },
     mounted() {
       this.fetchData();
