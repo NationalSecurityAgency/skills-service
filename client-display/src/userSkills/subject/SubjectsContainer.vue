@@ -13,7 +13,6 @@
 
 <script>
   import SubjectTile from '@/userSkills/subject/SubjectTile.vue';
-  import UserSkillsService from '@/userSkills/service/UserSkillsService';
 
   export default {
     components: {
@@ -27,16 +26,12 @@
     },
     methods: {
       openUserSkillSubject(subject) {
-        UserSkillsService.getSubjectSummary(subject.subjectId)
-          .then((result) => {
-            this.$router.push({
-              name: 'subjectDetails',
-              params: {
-                subjectId: subject.subjectId,
-                subject: result,
-              },
-            });
-          });
+        this.$router.push({
+          name: 'subjectDetails',
+          params: {
+            subjectId: subject.subjectId,
+          },
+        });
       },
     },
   };
