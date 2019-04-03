@@ -23,8 +23,6 @@
 <script>
   import vis from 'vis';
   import 'vis/dist/vis.css';
-  import Modal from '@/common/modal/Modal.vue';
-  import ModalHeader from '@/common/modal/ModalHeader.vue';
   import UserSkillsService from '@/userSkills/service/UserSkillsService';
   import GraphLegend from '@/userSkills/subject/GraphLegend.vue';
   import SkillDependencySummary from '@/userSkills/subject/SkillDependencySummary.vue';
@@ -36,8 +34,6 @@
       SkillDependencyDetails,
       SkillDependencySummary,
       GraphLegend,
-      Modal,
-      ModalHeader,
     },
     props: {
       skill: {
