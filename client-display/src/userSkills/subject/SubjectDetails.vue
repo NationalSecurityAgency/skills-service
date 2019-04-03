@@ -75,7 +75,7 @@
       };
     },
     watch: {
-      '$route': 'fetchData'
+      $route: 'fetchData',
     },
     computed: {
       helpTipHref() {

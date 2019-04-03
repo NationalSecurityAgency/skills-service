@@ -32,7 +32,6 @@
 <script>
   import Ribbon from '@/common/ribbon/Ribbon.vue';
   import BadgeTile from '@/userSkills/badge/BadgeTile.vue';
-  import UserSkillsService from '@/userSkills/service/UserSkillsService';
 
   import VueTinySlider from 'vue-tiny-slider';
   import 'tiny-slider/dist/tiny-slider.css';
@@ -65,7 +64,7 @@
             badgeId: badge.badgeId,
           },
           query: {
-            ribbonColor: 'gold'
+            ribbonColor: 'gold',
           },
         });
       },
