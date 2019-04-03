@@ -63,7 +63,6 @@
     import MyProgressSummary from '@/userSkills/MyProgressSummary.vue';
     import VerticalProgress from '@/common/progress/VerticalProgress.vue';
     import SkillIsLockedMessage from '@/userSkills/SkillIsLockedMessage.vue';
-    import SkillDependencyGraph from '@/userSkills/subject/SkillDependencyGraph.vue';
 
     import Popper from 'vue-popperjs';
     import marked from 'marked';
@@ -71,7 +70,6 @@
     export default {
         name: 'UserSkillProgress',
         components: {
-            SkillDependencyGraph,
             SkillIsLockedMessage,
             MyProgressSummary,
             VerticalProgress,

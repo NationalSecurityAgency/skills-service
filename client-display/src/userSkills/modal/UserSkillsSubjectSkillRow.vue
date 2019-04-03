@@ -1,8 +1,5 @@
 <template>
   <div class="subject-skill-row-container">
-    <skill-dependency-graph v-if="showSkillDependencyGraph" :skill="skill"
-                            @ok="showSkillDependencyGraph=false"></skill-dependency-graph>
-
     <div class="skill-label-container col-xs-4">
       <span class="skill-label">
         <span class="skill-name">
@@ -17,14 +14,12 @@
 </template>
 
 <script>
-  import SkillDependencyGraph from '@/userSkills/subject/SkillDependencyGraph.vue';
   import UserSkillProgress from '@/userSkills/modal/UserSkillProgress.vue';
 
   export default {
     name: 'UserSkillsSubjectSkillRow',
     components: {
       UserSkillProgress,
-      SkillDependencyGraph,
     },
     props: {
       skill: Object,
