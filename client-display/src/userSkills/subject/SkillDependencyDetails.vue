@@ -65,8 +65,14 @@
             const detailsDiv = document.getElementById('node-details-info');
             const width = detailsDiv.offsetWidth;
             const height = detailsDiv.offsetHeight;
-            detailsDiv.style.left = `${this.nodeDetailsView.pointer.x - (width / 2)}px`;
-            detailsDiv.style.top = `${this.nodeDetailsView.pointer.y - (height / 2)}px`;
+            let xPosition = this.nodeDetailsView.pointer.x - (width / 2);
+            let yPosition = this.nodeDetailsView.pointer.y - (height / 2);
+
+            yPosition = yPosition < 0 ? 0 : yPosition;
+            xPosition = xPosition < 0 ? 0 : xPosition;
+
+            detailsDiv.style.left = `${xPosition}px`;
+            detailsDiv.style.top = `${yPosition}px`;
         },
         methods: {
             close() {
@@ -96,6 +102,29 @@
     }
 
     .skill-details-container .skill-description {
-        padding-top: 1rem;
+        margin-top: 1rem;
+        height: 15rem;
+        overflow: auto;
+    }
+
+    .skill-description::-webkit-scrollbar-track
+    {
+        -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+        background-color: #F5F5F5;
+        border-radius: 5px;
+    }
+
+
+    .skill-description::-webkit-scrollbar
+    {
+        width: 5px;
+        background-color: #F5F5F5;
+        border-radius: 5px;
+    }
+
+    .skill-description::-webkit-scrollbar-thumb
+    {
+        background-color: #585858;
+        border-radius: 5px;
     }
 </style>
