@@ -10,10 +10,12 @@
 
           <div class="column is-three-fifths is-offset-one-fifth">
 
-            <div v-if="loginFailed" class="notification is-danger">
-              <button class="delete" @click="loginFailed = false"/>
-              Invalid Username or Password
-            </div>
+            <transition name="fade" mode="out-in">
+              <div v-if="loginFailed" class="notification is-danger">
+                <button class="delete" @click="loginFailed = false"/>
+                Invalid Username or Password
+              </div>
+            </transition>
 
             <div class="box">
 
@@ -140,6 +142,7 @@
         // TODO - add forgot password page
       },
       onAnimationStart(event) {
+        // required to work around chrome auto-fill issue (see see https://stackoverflow.com/a/41530164)
         if (event && event.animationName && event.animationName.startsWith('onAutoFillStart')) {
           this.isAutoFilled = true;
         } else {
