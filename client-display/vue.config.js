@@ -1,21 +1,11 @@
-const path = require('path');
-
-const resolve = dir => path.join(__dirname, dir);
-
-module.exports = {
+const exportObject = {
   configureWebpack: {
-    resolve: {
-      alias: {
-        '@$': resolve('src'),
-      },
-    },
-    devtool: 'cheap-module-eval-source-map',
   },
-
-  outputDir: undefined,
-  assetsDir: 'static',
-  runtimeCompiler: true,
-  productionSourceMap: undefined,
-  parallel: undefined,
-  css: undefined,
 };
+
+if (process.env.NODE_ENV === 'production') {
+  console.log('production mode detected');
+  exportObject.publicPath = '.'
+}
+
+module.exports = exportObject;
