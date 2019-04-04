@@ -1,21 +1,23 @@
 <template>
   <section>
-    <div
-      class="graph-container">
-      <skill-dependency-details
-        v-if="nodeDetailsView.show"
-        :node-details-view="nodeDetailsView" @close="closeNodeDetails"></skill-dependency-details>
-      <graph-legend class="graph-legend" :items="[
-        {label: 'This Skill', color: 'lightblue'},
-        {label: 'Dependencies', color: 'lightgray'},
-        {label: 'Achieved Dependencies', color: 'lightgreen'}
-        ]">
-      </graph-legend>
+    <div class="graph-container">
+      <h3>Dependencies</h3>
+      <div class="skills-container">
+        <skill-dependency-details
+          v-if="nodeDetailsView.show"
+          :node-details-view="nodeDetailsView" @close="closeNodeDetails"></skill-dependency-details>
+        <graph-legend class="graph-legend" :items="[
+          {label: 'This Skill', color: 'lightblue'},
+          {label: 'Dependencies', color: 'lightgray'},
+          {label: 'Achieved Dependencies', color: 'lightgreen'}
+          ]">
+        </graph-legend>
 
-      <skill-dependency-summary
-          v-if="dependencies && dependencies.length > 0"
-          class="summary-widget" :dependencies="dependencies"></skill-dependency-summary>
-      <div id="dependent-skills-network" style="height: 500px"></div>
+        <skill-dependency-summary
+            v-if="dependencies && dependencies.length > 0"
+            class="summary-widget" :dependencies="dependencies"></skill-dependency-summary>
+        <div id="dependent-skills-network" style="height: 500px"></div>
+      </div>
     </div>
   </section>
 </template>
@@ -29,7 +31,7 @@
   import SkillDependencyDetails from '@/userSkills/subject/SkillDependencyDetails.vue';
 
   export default {
-    name: 'SkillDependencyGraph',
+    name: 'SkillDependencies',
     components: {
       SkillDependencyDetails,
       SkillDependencySummary,
@@ -200,8 +202,20 @@
 </script>
 
 <style scoped>
+  .skills-container {
+    border: 1px solid #E5E9F2;
+    border-radius: 0.2rem;
+    word-wrap: break-word;
+    background-color: #fff;
+    background-clip: border-box;
+  }
+
+  #dependent-skills-network {
+    padding-bottom: 1rem;
+  }
+
   .graph-container {
-    max-width: 1100px;
+    max-width: 70vw;
     margin: 0 auto;
     position: relative;
   }
@@ -209,11 +223,14 @@
   .graph-legend {
     position: absolute;
     z-index: 10;
+    margin-left: 1rem;
+    margin-top: 1rem;
   }
   .summary-widget {
     position: absolute;
     z-index: 10;
-    right: 40px;
+    margin-top: 1rem;
+    right: 1rem;
   }
 </style>
 

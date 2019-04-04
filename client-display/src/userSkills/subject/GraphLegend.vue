@@ -1,5 +1,5 @@
 <template>
-  <div class='legend'>
+  <div class='legend container'>
     <div class='legend-scale'>
       <ul class='legend-labels'>
         <li v-for="item in items" v-bind:key="item.label">
@@ -22,6 +22,7 @@
     border: #e3e3e3 solid 1px;
     border-radius: 5px;
     padding: 10px 0 5px 10px;
+    max-width: 20rem;
   }
   .legend .legend-labels {
     text-align: left;
