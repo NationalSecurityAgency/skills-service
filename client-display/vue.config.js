@@ -1,33 +1,21 @@
-const merge = require('webpack-merge');
-const fs = require('fs');
+const path = require('path');
 
-console.log(process.env.USER_SKILLS_WEBPACK_DEV_SERVER_SSL_KEY_PATH);
-console.log(process.env.USER_SKILLS_WEBPACK_DEV_SERVER_SSL_CERT_PATH);
+const resolve = dir => path.join(__dirname, dir);
 
-let exportObject = {
+module.exports = {
   configureWebpack: {
-    optimization: {
-      // We no not want to minimize our code.
-      minimize: false
-    },
-  },
-  publicPath: '.',
-  runtimeCompiler: true,
-  assetsDir: 'static',
-};
-
-if (!process.env.USER_SKILLS_WEBPACK_DEV_SERVER_SSL_KEY_PATH || !process.env.USER_SKILLS_WEBPACK_DEV_SERVER_SSL_CERT_PATH) {
-  console.warn('No SSL certificates configured')
-  module.exports = exportObject;
-} else {
-  exportObject = merge(exportObject, {
-    devServer: {
-      https: {
-        key: fs.readFileSync(process.env.USER_SKILLS_WEBPACK_DEV_SERVER_SSL_KEY_PATH),
-        cert: fs.readFileSync(process.env.USER_SKILLS_WEBPACK_DEV_SERVER_SSL_CERT_PATH),
+    resolve: {
+      alias: {
+        '@$': resolve('src'),
       },
-    }
-  });
-}
+    },
+    devtool: 'cheap-module-eval-source-map',
+  },
 
-module.exports = exportObject;
+  outputDir: undefined,
+  assetsDir: 'static',
+  runtimeCompiler: true,
+  productionSourceMap: undefined,
+  parallel: undefined,
+  css: undefined,
+};
