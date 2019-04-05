@@ -15,9 +15,9 @@
       </div>
 
       <div>
-        <p
+        <small
             v-if="showDescriptions && subject.description"
-            class="user-skill-subject-description"
+            class="font-italic d-block pl-3 pt-4 text-left"
             v-html="parseMarkdown(subject.description)"/>
       </div>
 

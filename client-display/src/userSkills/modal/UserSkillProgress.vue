@@ -1,7 +1,10 @@
 <template>
     <div class="row">
         <div class="col-sm-9">
-            <popper trigger="hover" :options="{ placement: 'top' }">
+            <popper
+                trigger="hover"
+                :options="{ placement: 'top' }"
+                :delay-on-mouse-over="250">
                 <div slot="reference" v-on:click="progressBarClicked">
                     <vertical-progress v-if="progress.total === 100"
                                        total-progress-bar-color="#59ad52" before-today-bar-color="#59ad52"
@@ -19,25 +22,27 @@
                     </div>
                 </div>
             </popper>
-            <div v-if="showDescription && skill.description" class="user-skill-subject-description text-muted">
-                <p v-if="skill.description.description" v-html="parseMarkdown(skill.description.description)"/>
-                <ul v-if="skill.description.examples">
-                    Examples:
-                    <li v-for="(example, index) in skill.description.examples"
-                        :key="`unique-example-${index}`" v-html="example"/>
-                </ul>
-                <div v-if="skill.description.href" class="user-skill-description-href">
-                    <strong>Need help?</strong>
-                    <a :href="skill.description.href" target="_blank">
-                        Click here!
-                    </a>
-                </div>
+            <div v-if="showDescription && skill.description" class="font-italic pl-2 py-3 text-left text-muted">
+                <small>
+                    <p v-if="skill.description.description" v-html="parseMarkdown(skill.description.description)"/>
+                    <ul v-if="skill.description.examples">
+                        Examples:
+                        <li v-for="(example, index) in skill.description.examples"
+                            :key="`unique-example-${index}`" v-html="example"/>
+                    </ul>
+                    <div v-if="skill.description.href" class="user-skill-description-href">
+                        <strong>Need help?</strong>
+                        <a :href="skill.description.href" target="_blank">
+                            Click here!
+                        </a>
+                    </div>
+                </small>
             </div>
         </div>
         <div class="col-sm-3">
             <div class="col-sm-7">
                 <popper trigger="hover" :options="{ placement: 'left' }">
-                    <div slot="reference" class="skill-label text-left">
+                    <div slot="reference" class="text-left">
                         <small>{{ skill.points | number }} / {{ skill.totalPoints | number }}</small>
                     </div>
                     <div class="popper">
@@ -100,16 +105,3 @@
         },
     };
 </script>
-
-<style scoped>
-    .user-skill-subject-description {
-        text-align: left;
-        font-style: italic;
-        padding: 10px;
-    }
-
-    .user-skill-description-href {
-        margin-top: 8.5px;
-    }
-
-</style>
