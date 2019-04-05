@@ -1,9 +1,9 @@
 <template>
   <div class="user-skills-overview">
     <div
-      class="stats-container"
+      class="stats-container row"
       style="margin: 0 75px; overflow: hidden;">
-      <div class="text-center col-xs-12 col-md-4">
+      <div class="text-center col-md-4">
         <circle-progress
           :user-skills="userSkills"
           :total-completed-points="userSkills.levelPoints"
