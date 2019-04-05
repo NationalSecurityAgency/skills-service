@@ -15,3 +15,7 @@
 <style>
   @import '../node_modules/animate.css/animate.min.css';
 </style>
+
+<style lang="scss">
+  @import "./assets/_common.scss";
+</style>

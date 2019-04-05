@@ -1,19 +1,22 @@
 <template>
-  <div class="my-rank-wrapper">
-    <label class="skill-tile-label">My Rank</label>
-    <span class="fa-stack skills-icon user-rank-stack">
-      <i class="fa fa-users fa-stack-2x"/>
-      <strong
-        id="user-rank-text"
-        class="fa-stack-1x">
+  <div class="card">
+    <div class="card-header">
+      <h5 class="card-title mb-0 float-left">My Rank</h5>
+<!--      <span class="badge badge-primary float-right">Badge</span>-->
+    </div>
+    <div class="card-body">
+      <span class="fa-stack skills-icon user-rank-stack">
+        <i class="fa fa-users fa-stack-2x"/>
+        <strong id="user-rank-text" class="fa-stack-1x">
           {{ rank | number }}
-      </strong>
-    </span>
-    <button
-      class="btn btn-clear-search"
-      @click.stop="openMyRankDetails()">
-      <strong>ALL RANKINGS</strong>
-    </button>
+        </strong>
+      </span>
+      <div>
+        <button class="btn btn-info mr-1 text-uppercase" @click.stop="openMyRankDetails()">
+          Ranking Stats
+        </button>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -37,6 +40,9 @@
     },
   };
 </script>
+
+<style scoped src="../../assets/bootstrap4tmp/bootstrap.min.css">
+</style>
 
 <style scoped>
   .my-rank-wrapper {

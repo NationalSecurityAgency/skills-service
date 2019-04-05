@@ -40,8 +40,8 @@
 
     <hr>
 
-    <div class="stats-container">
-      <div class="text-center col-xs-12 col-md-3">
+    <div class="row">
+      <div class="col-lg-3">
         <my-rank
           v-if="userSkillsRanking"
           :rank="userSkillsRanking.position"
@@ -50,7 +50,7 @@
 
       <div
         id="point-progress-container"
-        class="text-center col-xs-12 col-md-9">
+        class="col-lg-9">
         <point-progress-chart
           v-if="pointsHistory && pointsHistory.length > 0"
           :points-history="pointsHistory"/>
@@ -126,6 +126,9 @@
     },
   };
 </script>
+
+<style scoped src="../assets/bootstrap4tmp/bootstrap.min.css">
+</style>
 
 <style>
   .stats-container {

@@ -1,7 +1,9 @@
 <template functional>
-  <div>
-    <label class="skill-tile-label">Points Progress</label>
-    <div class="user-skills-history-no-data">
+  <div class="card skills-full-height">
+    <div class="card-header">
+      <h5 class="card-title mb-0 float-left">Points Progress</h5>
+    </div>
+    <div class="card-body">
       <span class="fa-stack user-skills-no-data-icon">
         <i class="fas fa-chart-line fa-stack-2x"/>
         <strong class="fa-stack-1x user-skills-no-data-icon-text">Locked</strong>
@@ -10,6 +12,9 @@
     </div>
   </div>
 </template>
+
+<style scoped src="../assets/bootstrap4tmp/bootstrap.min.css">
+</style>
 
 <style scoped>
   .user-skills-history-no-data {
