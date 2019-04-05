@@ -73,7 +73,7 @@
 
   .locked-icon {
     position: absolute;
-    top: 2px;
+    top: -3px;
     left: 50%;
     color: #5d5d5d;
   }
