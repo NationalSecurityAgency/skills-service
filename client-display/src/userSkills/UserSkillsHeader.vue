@@ -1,8 +1,6 @@
 <template>
   <div class="user-skills-overview">
-    <div
-      class="stats-container row"
-      style="margin: 0 75px; overflow: hidden;">
+    <div class="row border rounded">
       <div class="text-center col-md-4">
         <circle-progress
           :user-skills="userSkills"
@@ -38,9 +36,7 @@
       </div>
     </div>
 
-    <hr>
-
-    <div class="row">
+    <div class="row pt-3">
       <div class="col-lg-3">
         <my-rank
           v-if="userSkillsRanking"
@@ -133,116 +129,6 @@
   };
 </script>
 
-<style>
-  .stats-container {
-    padding-bottom: 20px;
-    overflow: auto;
-    text-align: center;
-  }
+<style scoped>
 
-  .progress {
-    background-color: #eaeaea;
-    border-radius: 0;
-    margin-bottom: 0;
-    position: relative;
-  }
-
-  .progress .progress-bar {
-    line-height: 20px;
-    overflow: hidden;
-    position: absolute;
-  }
-
-  .progress-loading {
-    width: 100%;
-    transition: opacity 0.6s ease 0s;
-    position: absolute;
-  }
-
-  .progress-loading-fixed{
-    z-index: 300;
-    position: fixed;
-    top: 0;
-  }
-
-  .progress-loading .empty-bar, .progress-loading .full-bar{
-    opacity: 0;
-  }
-
-  .full-bar > .progress-bar {
-    background-color: #59ad52;
-  }
-
-  .progress-xxs {
-    height: 2px;
-  }
-
-  .progress-xs {
-    height: 6px;
-  }
-
-  .progress-sm {
-    height: 12px;
-  }
-
-  .progress-sm .progress-bar {
-    font-size: 10px;
-    line-height: 1em;
-  }
-
-  .progress,
-  .progress-bar {
-    -webkit-box-shadow: none;
-    box-shadow: none;
-  }
-
-  .progress-bar-primary {
-    background-color: #7266ba;
-  }
-
-  .progress-bar-info {
-    background-color: #23b7e5;
-  }
-
-  .progress-bar-success {
-    background-color: #27c24c;
-  }
-
-  .progress-bar-warning {
-    background-color: #fad733;
-  }
-
-  .progress-bar-danger {
-    background-color: #f05050;
-  }
-
-  .progress-bar-black {
-    background-color: #1c2b36;
-  }
-
-  .progress-bar-white {
-    background-color: #fff;
-  }
-
-  .progress.right .progress-bar {
-    right: 0;
-  }
-  .progress.vertical {
-    float: left;
-    height: 100%;
-    margin-right: 20px;
-    width: 20px;
-  }
-  .progress.vertical.bottom {
-    position: relative;
-  }
-  .progress.vertical .progress-bar {
-    height: 0;
-    transition: height 0.6s ease 0s;
-    width: 100%;
-  }
-  .progress.vertical.bottom .progress-bar {
-    bottom: 0;
-    position: absolute;
-  }
 </style>
