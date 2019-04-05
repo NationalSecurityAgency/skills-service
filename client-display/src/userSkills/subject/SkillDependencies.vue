@@ -202,14 +202,6 @@
 </script>
 
 <style scoped>
-  .skills-container {
-    border: 1px solid #E5E9F2;
-    border-radius: 0.2rem;
-    word-wrap: break-word;
-    background-color: #fff;
-    background-clip: border-box;
-  }
-
   #dependent-skills-network {
     padding-bottom: 1rem;
   }

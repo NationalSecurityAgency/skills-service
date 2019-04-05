@@ -7,7 +7,7 @@
     <div class="card-body">
       <span class="fa-stack skills-icon user-rank-stack">
         <i class="fa fa-users fa-stack-2x"/>
-        <strong id="user-rank-text" class="fa-stack-1x">
+        <strong class="fa-stack-1x user-rank-text">
           {{ rank | number }}
         </strong>
       </span>
@@ -45,16 +45,6 @@
 </style>
 
 <style scoped>
-  .my-rank-wrapper {
-    position: relative;
-  }
-
-  .skill-tile-label {
-    font-size: 19px;
-    color: #333;
-    width: 100%;
-  }
-
   .skills-icon {
     display: inline-block;
     color: #b1b1b1;
@@ -72,7 +62,7 @@
     color: #aed7ac;
   }
 
-  #user-rank-text {
+  .user-rank-text {
     font-size: 0.5em;
     color: #333;
     line-height: 1.2em;

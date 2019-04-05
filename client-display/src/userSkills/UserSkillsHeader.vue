@@ -50,11 +50,15 @@
 
       <div
         id="point-progress-container"
-        class="col-lg-9">
+        class="col-lg-6">
         <point-progress-chart
           v-if="pointsHistory && pointsHistory.length > 0"
           :points-history="pointsHistory"/>
         <not-enough-data-chart-placeholder v-if="!pointsHistory || pointsHistory.length === 0" />
+      </div>
+
+      <div class="col-lg-3">
+        <my-badges></my-badges>
       </div>
     </div>
   </div>
@@ -71,9 +75,11 @@
   import StarProgress from '@/common/progress/StarProgress.vue';
   import MyRank from '@/userSkills/myRank/MyRank.vue';
   import MySkillLevel from '@/userSkills/MySkillLevel.vue';
+  import MyBadges from '@/userSkills/badge/MyBadges.vue';
 
   export default {
     components: {
+      MyBadges,
       PointProgressChart,
       MyProgressSummary,
       CircleProgress,
