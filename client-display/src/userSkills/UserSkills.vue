@@ -1,13 +1,10 @@
 <template>
-  <div
-    class="user-skills-container">
+  <div class="user-skills-container">
     <ribbon>
       User Skills
     </ribbon>
 
-    <div
-      v-if="!isLoaded"
-      class="user-skills-spinner">
+    <div v-if="!isLoaded" class="user-skills-spinner">
       <vue-simple-spinner
         size="large"
         message="Loading..."/>
@@ -27,7 +24,6 @@
     </div>
     <div
       v-if="isLoaded && !error.message">
-      <badges-container :badges="userSkills.badges" />
       <subjects-container :subjects="userSkills.subjects" />
     </div>
   </div>
@@ -38,7 +34,6 @@
   import UserSkillsHeader from '@/userSkills/UserSkillsHeader.vue';
   import UserSkillsService from '@/userSkills/service/UserSkillsService';
   import SubjectsContainer from '@/userSkills/subject/SubjectsContainer.vue';
-  import BadgesContainer from '@/userSkills/badge/BadgesContainer.vue';
 
   import '@/common/filter/NumberFilter';
 
@@ -68,7 +63,6 @@
       Ribbon,
       StarProgress,
       SubjectsContainer,
-      BadgesContainer,
       'vue-simple-spinner': Spinner,
     },
     props: {

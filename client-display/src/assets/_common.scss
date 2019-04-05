@@ -6,6 +6,11 @@
 $sizes: () !default;
 $sizes: map-set($sizes, 85, 85%);
 
+$body-bg: #f7f7f7 !default;
+
+$font-size-base: 0.875rem !default; //instead of 1rem
+
+$card-cap-bg: white !default;
 
 
 .skills-full-height {

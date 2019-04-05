@@ -24,6 +24,7 @@
       <skills-progress-list
         :subject="subject"
         :show-descriptions="showDescriptions" />
+
       <div class="pull-left">
         <span>
           Need help?
@@ -106,7 +107,7 @@
 
 <style>
   .subject-detail-container {
-    max-width: 875px;
+    max-width: 1100px;
     margin: 0 auto;
   }
 
@@ -137,13 +138,7 @@
     padding: 3px 15px 0 0;
     position: relative;
   }
-
-  .user-skill-subject-body {
-    background-color: #fcfcfc;
-  }
-
   .user-skill-subject-overall {
-    background-color: #ffffff;
     border-bottom: 1px solid #e5e5e5;
   }
 

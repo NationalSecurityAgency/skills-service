@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
-import VueBreadcrumbs from 'vue-2-breadcrumbs';
+// import VueBreadcrumbs from 'vue-2-breadcrumbs';
 
 import SkillsEntry from '@/SkillsEntry.vue';
 import BadgeDetails from '@/userSkills/badge/BadgeDetails.vue';
@@ -10,7 +10,7 @@ import MyRankDetails from '@/userSkills/myRank/MyRankDetails.vue';
 
 
 Vue.use(VueRouter);
-Vue.use(VueBreadcrumbs);
+// Vue.use(VueBreadcrumbs);
 
 const router = new VueRouter({
   mode: 'history',

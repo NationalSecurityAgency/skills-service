@@ -1,7 +1,7 @@
 <template>
   <div class="card">
     <div class="card-header">
-      <h5 class="card-title mb-0 float-left">My Rank</h5>
+      <h6 class="card-title mb-0 float-left">My Rank</h6>
 <!--      <span class="badge badge-primary float-right">Badge</span>-->
     </div>
     <div class="card-body">
@@ -12,7 +12,7 @@
         </strong>
       </span>
       <div>
-        <button class="btn btn-info mr-1 text-uppercase" @click.stop="openMyRankDetails()">
+        <button class="btn btn-info btn-sm mr-1 text-uppercase" @click.stop="openMyRankDetails()">
           Ranking Stats
         </button>
       </div>

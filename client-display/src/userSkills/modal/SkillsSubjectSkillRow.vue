@@ -13,7 +13,7 @@
   import UserSkillProgress from '@/userSkills/modal/SkillProgress.vue';
 
   export default {
-    name: 'UserSkillsSubjectSkillRow',
+    name: 'SkillsSubjectSkillRow',
     components: {
       UserSkillProgress,
     },
