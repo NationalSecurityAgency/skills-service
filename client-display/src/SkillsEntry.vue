@@ -14,9 +14,6 @@
 <script>
   import UserSkills from '@/userSkills/UserSkills.vue';
 
-  import '@fortawesome/fontawesome-free/css/all.css';
-  import 'bootstrap/dist/css/bootstrap.css';
-
   import Vue from 'vue';
   import { debounce } from 'lodash';
 

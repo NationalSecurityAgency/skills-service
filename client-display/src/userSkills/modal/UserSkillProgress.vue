@@ -1,6 +1,6 @@
 <template>
     <div class="row">
-        <div class="col-xs-9">
+        <div class="col-sm-9">
             <popper trigger="hover" :options="{ placement: 'top' }">
                 <div slot="reference" v-on:click="progressBarClicked">
                     <vertical-progress v-if="progress.total === 100"
@@ -34,8 +34,8 @@
                 </div>
             </div>
         </div>
-        <div class="col-xs-3">
-            <div class="col-xs-7">
+        <div class="col-md-3">
+            <div class="col-md-7">
                 <popper trigger="hover" :options="{ placement: 'left' }">
                     <div slot="reference" class="skill-label text-left">
                         {{ skill.points | number }} / {{ skill.totalPoints | number }}
@@ -47,7 +47,7 @@
                     </div>
                 </popper>
             </div>
-            <div v-if="skill.points === skill.totalPoints" class="col-xs-3">
+            <div v-if="skill.points === skill.totalPoints" class="col-md-3">
                 <popper trigger="hover" :options="{ placement: 'left' }">
                     <div slot="reference" class="fa fa-check item-complete-icon"/>
                     <div class="popper">
