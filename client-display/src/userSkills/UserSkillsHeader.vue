@@ -133,9 +133,6 @@
   };
 </script>
 
-<style scoped src="../assets/bootstrap4tmp/bootstrap.min.css">
-</style>
-
 <style>
   .stats-container {
     padding-bottom: 20px;

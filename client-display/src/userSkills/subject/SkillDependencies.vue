@@ -2,7 +2,7 @@
   <section>
     <div class="graph-container">
       <h3>Dependencies</h3>
-      <div class="skills-container">
+      <div class="border rounded">
         <skill-dependency-details
           v-if="nodeDetailsView.show"
           :node-details-view="nodeDetailsView" @close="closeNodeDetails"></skill-dependency-details>
@@ -203,7 +203,8 @@
 
 <style scoped>
   #dependent-skills-network {
-    padding-bottom: 1rem;
+    /*padding-bottom: 1rem;*/
+    margin-bottom: 2rem;
   }
 
   .graph-container {
@@ -242,7 +243,7 @@
   }
 
   #dependent-skills-network .vis-button:after {
-    font-size: 2.7em;
+    font-size: 2em;
     color: gray;
     font-family: "Font Awesome 5 Free";
   }
