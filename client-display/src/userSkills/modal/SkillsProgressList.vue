@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="pt-3">
     <div
       v-for="(skill, index) in subject.skills"
       :key="`unique-skill-${index}`"

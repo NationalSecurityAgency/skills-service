@@ -1,7 +1,7 @@
 <template>
   <div class="row col-sm-12">
-    <div class="col-sm-4 text-right w-85 text-truncate font-weight-bold">
-      {{ skill.skill }}
+    <div class="col-sm-4 text-right">
+      <small class="d-inline-block text-truncate font-weight-bold">{{ skill.skill }}</small>
     </div>
     <div class="col-md-8">
       <user-skill-progress :skill="skill" :show-description="showDescription" v-on:progressbar-clicked="skillRowClicked"></user-skill-progress>

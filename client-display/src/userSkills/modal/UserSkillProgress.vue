@@ -34,11 +34,11 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="col-md-7">
+        <div class="col-sm-3">
+            <div class="col-sm-7">
                 <popper trigger="hover" :options="{ placement: 'left' }">
                     <div slot="reference" class="skill-label text-left">
-                        {{ skill.points | number }} / {{ skill.totalPoints | number }}
+                        <small>{{ skill.points | number }} / {{ skill.totalPoints | number }}</small>
                     </div>
                     <div class="popper">
                         <div>
@@ -47,7 +47,7 @@
                     </div>
                 </popper>
             </div>
-            <div v-if="skill.points === skill.totalPoints" class="col-md-3">
+            <div v-if="skill.points === skill.totalPoints" class="col-sm-3">
                 <popper trigger="hover" :options="{ placement: 'left' }">
                     <div slot="reference" class="fa fa-check item-complete-icon"/>
                     <div class="popper">
