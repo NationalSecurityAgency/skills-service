@@ -41,9 +41,6 @@
   };
 </script>
 
-<style scoped src="../../assets/bootstrap4tmp/bootstrap.min.css">
-</style>
-
 <style scoped>
   .skills-icon {
     display: inline-block;

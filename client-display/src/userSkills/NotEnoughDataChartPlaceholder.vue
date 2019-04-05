@@ -13,9 +13,6 @@
   </div>
 </template>
 
-<style scoped src="../assets/bootstrap4tmp/bootstrap.min.css">
-</style>
-
 <style scoped>
   .user-skills-history-no-data {
     width: 100%;
