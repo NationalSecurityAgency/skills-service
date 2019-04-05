@@ -7,6 +7,9 @@
 </template>
 
 <script>
+  import 'bootstrap';
+  import 'jquery/dist/jquery.slim';
+
   export default {
     name: 'app',
   };
@@ -14,8 +17,10 @@
 
 <style>
   @import '../node_modules/animate.css/animate.min.css';
+  @import '../node_modules/@fortawesome/fontawesome-free/css/all.css';
 </style>
 
 <style lang="scss">
   @import "./assets/_common.scss";
+  @import "~bootstrap/scss/bootstrap";
 </style>
