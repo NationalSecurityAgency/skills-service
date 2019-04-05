@@ -1,13 +1,9 @@
 <template>
-  <div class="subject-skill-row-container">
-    <div class="skill-label-container col-xs-4">
-      <span class="skill-label">
-        <span class="skill-name">
-          {{ skill.skill }}
-        </span>
-      </span>
+  <div class="row col-sm-12">
+    <div class="col-sm-4 text-right w-85 text-truncate font-weight-bold">
+      {{ skill.skill }}
     </div>
-    <div class="col-xs-8 skill-progress-cell">
+    <div class="col-md-8">
       <user-skill-progress :skill="skill" :show-description="showDescription" v-on:progressbar-clicked="skillRowClicked"></user-skill-progress>
     </div>
   </div>
@@ -53,28 +49,4 @@
 </script>
 
 <style scoped>
-  .subject-skill-row-container .skill-progress-cell {
-    padding-left: 0px;
-    padding-right: 0px;
-  }
-  .skill-label {
-    line-height: 1;
-    width: 100%;
-    text-align: right;
-  }
-
-  .subject-skill-row-container .skill-label-container {
-    padding-right: 0px;
-  }
-
-  .skill-label .skill-name {
-    vertical-align: middle;
-    font-weight: bold;
-    display: inline-block;
-    max-width: 85%;
-    min-width: 85%;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
 </style>
