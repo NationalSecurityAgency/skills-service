@@ -10,7 +10,7 @@
 </template>
 
 <script>
-  import UserSkillProgress from '@/userSkills/modal/UserSkillProgress.vue';
+  import UserSkillProgress from '@/userSkills/modal/SkillProgress.vue';
 
   export default {
     name: 'UserSkillsSubjectSkillRow',
