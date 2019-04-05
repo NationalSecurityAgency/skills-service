@@ -4,7 +4,7 @@
       v-for="(skill, index) in subject.skills"
       :key="`unique-skill-${index}`"
       class="row">
-      <user-skills-subject-skill-row
+      <skills-subject-skill-row
         :skill="skill"
         :show-description="showDescriptions" />
     </div>
@@ -12,11 +12,11 @@
 </template>
 
 <script>
-  import UserSkillsSubjectSkillRow from '@/userSkills/modal/UserSkillsSubjectSkillRow.vue';
+  import SkillsSubjectSkillRow from '@/userSkills/modal/SkillsSubjectSkillRow.vue';
 
   export default {
     components: {
-      UserSkillsSubjectSkillRow,
+      SkillsSubjectSkillRow,
     },
     props: {
       subject: {

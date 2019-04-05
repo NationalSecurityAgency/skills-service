@@ -1,7 +1,7 @@
 <template>
     <div class="card skills-full-height">
         <div class="card-header">
-            <h5 class="card-title mb-0 float-left">My Badges</h5>
+            <h6 class="card-title mb-0 float-left">My Badges</h6>
         </div>
         <div class="card-body">
       <span class="fa-stack skills-icon user-rank-stack">
@@ -11,7 +11,7 @@
         </strong>
       </span>
 <!--                @click.stop="openMyRankDetails()"-->
-         <button class="btn btn-info mr-1 text-uppercase" >
+         <button class="btn btn-info btn-sm mr-1 text-uppercase" >
                    Badges Catalog
          </button>
       </div>

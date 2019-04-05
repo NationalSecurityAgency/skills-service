@@ -1,26 +1,27 @@
 <template>
   <div class="user-skills-overview">
-    <div class="row border rounded">
-      <div class="text-center col-md-4">
-        <circle-progress
-          :user-skills="userSkills"
-          :total-completed-points="userSkills.levelPoints"
-          :points-completed-today="userSkills.todaysPoints"
-          :total-possible-points="userSkills.levelTotalPoints"
-          :total-completed-color="isLevelComplete ? '#59ad52' : '#7ed6f3'"
-          title="My Progress">
-          <div slot="footer">
-            <p v-if="isLevelComplete">All levels complete</p>
-            <p v-if="!isLevelComplete">{{ ( userSkills.levelTotalPoints - userSkills.levelPoints ) | number }} points to next level</p>
-          </div>
-        </circle-progress>
-      </div>
+    <div class=" card">
+      <div class="row card-body">
+        <div class="text-center col-md-4">
+          <circle-progress
+            :user-skills="userSkills"
+            :total-completed-points="userSkills.levelPoints"
+            :points-completed-today="userSkills.todaysPoints"
+            :total-possible-points="userSkills.levelTotalPoints"
+            :total-completed-color="isLevelComplete ? '#59ad52' : '#7ed6f3'"
+            title="My Progress">
+            <div slot="footer">
+              <p v-if="isLevelComplete">All levels complete</p>
+              <p v-if="!isLevelComplete">{{ ( userSkills.levelTotalPoints - userSkills.levelPoints ) | number }} points to next level</p>
+            </div>
+          </circle-progress>
+        </div>
 
-      <div class="text-center col-xs-12 col-md-4">
-        <my-skill-level :skill-level="userSkills.skillsLevel" />
-      </div>
+        <div class="text-center col-md-4">
+          <my-skill-level :skill-level="userSkills.skillsLevel" />
+        </div>
 
-      <div class="text-center col-xs-12 col-md-4">
+        <div class="text-center col-md-4">
         <circle-progress
           :user-skills="userSkills"
           :total-completed-points="userSkills.points"
@@ -33,6 +34,7 @@
             <p v-if="userSkills.points !== userSkills.totalPoints">{{ userSkills.totalPoints | number }} total points</p>
           </div>
         </circle-progress>
+      </div>
       </div>
     </div>
 

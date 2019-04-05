@@ -1,12 +1,9 @@
 <template>
-  <div
-    class="user-skills-categories-container">
-    <div
-      v-for="(subject, index) in subjects"
-      :key="`unique-subject-${index}`"
-      class="btn user-skill-subject-tile user-skills-panel"
+  <div class="row py-3">
+    <div v-for="(subject, index) in subjects" :key="`unique-subject-${index}`"
+      class="btn user-skill-subject-tile col-md-4"
       @click="openUserSkillSubject(subject, index)" >
-      <subject-tile :subject="subject" />
+      <subject-tile :subject="subject"/>
     </div>
   </div>
 </template>
@@ -38,16 +35,8 @@
 </script>
 
 <style scoped>
-  .user-skills-categories-container {
-    background-color: #f0f0f0;
-    padding: 10px;
-  }
-
   .user-skill-subject-tile {
-    padding: 10px 0;
     cursor: pointer;
-    width: 305px;
-    margin: 10px;
   }
 
   .user-skill-subject-tile:hover {

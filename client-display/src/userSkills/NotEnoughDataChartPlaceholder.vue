@@ -1,7 +1,7 @@
 <template functional>
   <div class="card skills-full-height">
     <div class="card-header">
-      <h5 class="card-title mb-0 float-left">Points Progress</h5>
+      <h6 class="card-title mb-0 float-left">Points Progress</h6>
     </div>
     <div class="card-body">
       <span class="fa-stack user-skills-no-data-icon">

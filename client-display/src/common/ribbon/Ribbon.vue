@@ -1,6 +1,6 @@
 <template>
   <div class="non-semantic-protector">
-    <h1
+    <h3
       :style="{ 'background': color }"
       class="category-ribbon">
       <span
@@ -18,7 +18,7 @@
       <span
         :style="{ 'border-color': `${shadowColor0} transparent ${shadowColor0} ${shadowColor0}` }"
         class="ribbon-shadow-0 after" />
-    </h1>
+    </h3>
   </div>
 </template>
 
@@ -57,8 +57,8 @@
     position: relative;
     z-index: 1;
 
-    h1.category-ribbon {
-      font-size: 25px;
+    h3.category-ribbon {
+      font-size: 1rem;
       color: #ffffff;
     }
 
