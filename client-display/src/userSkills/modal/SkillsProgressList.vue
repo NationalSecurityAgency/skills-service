@@ -3,7 +3,7 @@
     <div
       v-for="(skill, index) in subject.skills"
       :key="`unique-skill-${index}`"
-      class="skill-row">
+      class="row">
       <user-skills-subject-skill-row
         :skill="skill"
         :show-description="showDescriptions" />
@@ -32,9 +32,4 @@
 </script>
 
 <style scoped>
-  .skill-row {
-    font-size: 12px;
-    padding: 12px 20px;
-    clear: both;
-  }
 </style>
