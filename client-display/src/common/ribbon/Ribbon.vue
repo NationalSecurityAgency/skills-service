@@ -63,7 +63,7 @@
     }
 
     .category-ribbon {
-      width: 50%;
+      width: 75%;
       position: relative;
       text-align: center;
       padding: 0.25em 0.5em;
