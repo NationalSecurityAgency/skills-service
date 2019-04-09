@@ -13,13 +13,16 @@ function errorResponseHandler(error) {
   const errorCode = error.response ? error.response.status : undefined;
   if (errorCode === 401) {
     const urlParams = new URLSearchParams(window.location.search);
-    const redirectParam = urlParams.get('redirect');
+    let redirectParam = urlParams.get('redirect');
     if (!redirectParam) {
       const path = window.location.pathname;
-      const loginRoute = path && path !== '/' ? { name: 'HomePage', query: { redirect: path } } : { name: 'HomePage' };
-      store.commit('clearAuthData');
-      router.push(loginRoute);
+      if (path && path !== '/') {
+        redirectParam = path;
+      }
     }
+    const loginRoute = redirectParam ? { name: 'Login', query: { redirect: redirectParam } } : { name: 'Login' };
+    store.commit('clearAuthData');
+    router.push(loginRoute);
   } else {
     const errorMessage = (error.response && error.response.data && error.response.data.message) ? error.response.data.message : undefined;
     const showModalDialog = Object.prototype.hasOwnProperty.call(error.config, 'useErrorPage') && error.config.useErrorPage === false;
