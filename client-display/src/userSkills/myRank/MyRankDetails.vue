@@ -11,38 +11,31 @@
     <div
       v-if='!loading'
       class='row text-center mt-2'>
-      <div class='col-md-3'>
-        <div class='card'>
-          <div class='card-body'>
-            <h1 class='distribution-icon-text'>{{ rankingDistribution.myLevel | number }}</h1>
-            <h4>My Level</h4>
-          </div>
-        </div>
-      </div>
-      <div class='col-md-3'>
-        <div class='card'>
-          <div class='card-body'>
-            <h1 class='distribution-icon-text'>{{ rankingDistribution.myPoints | number }}</h1>
-            <h4>My Points</h4>
-          </div>
-        </div>
-      </div>
-      <div class='col-md-3'>
-        <div class='card'>
-          <div class='card-body'>
-            <h1 class='distribution-icon-text'>{{ rankingDistribution.myPosition | number }}</h1>
-            <h4>My Rank</h4>
-          </div>
-        </div>
-      </div>
-      <div class='col-md-3'>
-        <div class='card'>
-          <div class='card-body'>
-            <h1 class='distribution-icon-text'>{{ rankingDistribution.totalUsers | number }}</h1>
-            <h4>Total Users</h4>
-          </div>
-        </div>
-      </div>
+
+      <my-rank-detail-stat-card
+        class="col-md-3"
+        icon-class="fas fa-trophy"
+        label="My Level"
+        :value="rankingDistribution.myLevel" />
+
+      <my-rank-detail-stat-card
+        class="col-md-3"
+        icon-class="fas fa-running"
+        label="My Points"
+        :value="rankingDistribution.myPoints" />
+
+      <my-rank-detail-stat-card
+        class="col-md-3"
+        icon-class="fas fa-flag-checkered"
+        label="My Position"
+        :value="rankingDistribution.myPosition" />
+
+      <my-rank-detail-stat-card
+        class="col-md-3"
+        icon-class="fa fa-users"
+        label="Total Users"
+        :value="rankingDistribution.totalUsers" />
+
     </div>
 
     <div
@@ -64,6 +57,8 @@
 </template>
 
 <script>
+  import MyRankDetailStatCard from '@/userSkills/myRank/MyRankDetailStatCard.vue';
+
   import UserSkillsService from '@/userSkills/service/UserSkillsService';
 
   import Spinner from 'vue-simple-spinner';
@@ -71,6 +66,7 @@
 
   export default {
     components: {
+      MyRankDetailStatCard,
       apexchart: VueApexCharts,
       'vue-simple-spinner': Spinner,
     },
@@ -182,7 +178,6 @@
 </script>
 
 <style scoped>
-
   /*.myrank-container .title {*/
   /*  text-align: left;*/
   /*  width: 40%;*/
