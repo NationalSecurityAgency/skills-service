@@ -12,17 +12,12 @@ function errorResponseHandler(error) {
 
   const errorCode = error.response ? error.response.status : undefined;
   if (errorCode === 401) {
-    const urlParams = new URLSearchParams(window.location.search);
-    let redirectParam = urlParams.get('redirect');
-    if (!redirectParam) {
-      const path = window.location.pathname;
-      if (path && path !== '/') {
-        redirectParam = path;
-      }
-    }
-    const loginRoute = redirectParam ? { name: 'Login', query: { redirect: redirectParam } } : { name: 'Login' };
     store.commit('clearAuthData');
-    router.push(loginRoute);
+    const path = window.location.pathname;
+    if (path !== '/skills-login') {
+      const loginRoute = path !== '/' ? { name: 'Login', query: { redirect: path } } : { name: 'Login' };
+      router.push(loginRoute);
+    }
   } else {
     const errorMessage = (error.response && error.response.data && error.response.data.message) ? error.response.data.message : undefined;
     const showModalDialog = Object.prototype.hasOwnProperty.call(error.config, 'useErrorPage') && error.config.useErrorPage === false;
