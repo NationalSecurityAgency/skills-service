@@ -180,10 +180,6 @@
     box-shadow: 0 1px 1px rgba(0, 0, 0, .05);
   }
 
-  .user-skills-container {
-    text-align: center;
-  }
-
   .user-skills-spinner {
     height: 50px;
     position: relative;
