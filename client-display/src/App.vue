@@ -18,6 +18,12 @@
 <style>
   @import '../node_modules/animate.css/animate.min.css';
   @import '../node_modules/@fortawesome/fontawesome-free/css/all.css';
+
+  #app {
+    max-width: 1100px;
+    margin: 0 auto;
+    text-align: center;
+  }
 </style>
 
 <style lang="scss">

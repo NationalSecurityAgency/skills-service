@@ -1,55 +1,77 @@
 <template>
   <section
-    class="myrank-container">
-    <div v-if="loading">
+    class='myrank-container'>
+    <div v-if='loading'>
       <vue-simple-spinner
-        class="myrank-loading-spinner"
-        size="large"
-        message="Loading..."/>
+        class='myrank-loading-spinner'
+        size='large'
+        message='Loading...'/>
+    </div>
+
+    <div
+      v-if='!loading'
+      class='row text-center mt-2'>
+      <div class='col-md-3'>
+        <div class='card'>
+          <div class='card-body'>
+            <h1 class='distribution-icon-text'>{{ rankingDistribution.myLevel | number }}</h1>
+            <h4>My Level</h4>
+          </div>
+        </div>
+      </div>
+      <div class='col-md-3'>
+        <div class='card'>
+          <div class='card-body'>
+            <h1 class='distribution-icon-text'>{{ rankingDistribution.myPoints | number }}</h1>
+            <h4>My Points</h4>
+          </div>
+        </div>
+      </div>
+      <div class='col-md-3'>
+        <div class='card'>
+          <div class='card-body'>
+            <h1 class='distribution-icon-text'>{{ rankingDistribution.myPosition | number }}</h1>
+            <h4>My Rank</h4>
+          </div>
+        </div>
+      </div>
+      <div class='col-md-3'>
+        <div class='card'>
+          <div class='card-body'>
+            <h1 class='distribution-icon-text'>{{ rankingDistribution.totalUsers | number }}</h1>
+            <h4>Total Users</h4>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div
       v-if="!loading"
-      class="point-distribution-info">
-      <h1
-        class="title text=primary">
-        <i class="fas fa-chart-bar" /><span>My Rank</span>
-      </h1>
-      <div class="dist-info-tile col-xs-3">
-        <h1 class="distribution-icon-text">{{ rankingDistribution.myLevel | number }}</h1>
-        <h4>My Level</h4>
+      class='row mt-3'>
+      <div class='col-sm-6'>
+        <div class='card'>
+          <div class='card-body'>
+            <apexchart
+              v-if="chartSeries"
+              :options='chartOptions'
+              :series='chartSeries'
+              height='250' type='bar' />
+          </div>
+        </div>
       </div>
-      <div class="dist-info-tile col-xs-3">
-        <h1 class="distribution-icon-text">{{ rankingDistribution.myPoints | number }}</h1>
-        <h4>My Points</h4>
-      </div>
-      <div class="dist-info-tile col-xs-3">
-        <h1 class="distribution-icon-text">{{ rankingDistribution.myPosition | number }}</h1>
-        <h4>My Rank</h4>
-      </div>
-      <div class="dist-info-tile col-xs-3">
-        <h1 class="distribution-icon-text">{{ rankingDistribution.totalUsers | number }}</h1>
-        <h4>Total Users</h4>
-      </div>
-    </div>
-
-    <div
-      v-show="!loading"
-      class="point-distribution-wrapper">
-      <canvas :id="chartId"/>
     </div>
   </section>
 </template>
 
 <script>
   import UserSkillsService from '@/userSkills/service/UserSkillsService';
-  import UniqueIdGenerator from '@/common/utilities/UniqueIdGenerator';
 
   import Spinner from 'vue-simple-spinner';
-  import Chart from 'chart.js/src/chart';
+  import VueApexCharts from 'vue-apexcharts';
 
   export default {
     components: {
+      apexchart: VueApexCharts,
       'vue-simple-spinner': Spinner,
     },
     props: {
@@ -57,38 +79,94 @@
     },
     data() {
       return {
-        loading: false,
-        chartId: UniqueIdGenerator.uniqueId('skills-chart-'),
-        rankingDistribution: {},
+        loading: true,
+        rankingDistribution: null,
+        chartSeries: {},
+        chartOptions: {
+          annotations: {
+            points: [{
+              x: 'Level 0',
+              seriesIndex: 0,
+              label: {
+                borderColor: '#775DD0',
+                offsetY: 0,
+                style: {
+                  color: '#fff',
+                  background: '#775DD0',
+                },
+                text: 'You are Level 0!',
+              },
+            }],
+          },
+          plotOptions: {
+            bar: {
+              columnWidth: '50%',
+              endingShape: 'rounded',
+            },
+          },
+          dataLabels: {
+            enabled: false,
+          },
+          title: {
+            text: 'My Level Position',
+            align: 'left',
+            style: {
+              color: '#008FFB',
+            },
+          },
+          grid: {
+            row: {
+              colors: ['#fff', '#f2f2f2'],
+            },
+          },
+          xaxis: {
+            labels: {
+              rotate: -45,
+            },
+          },
+          yaxis: {
+            title: {
+              text: '# of Users',
+            },
+          },
+          fill: {
+            type: 'gradient',
+            gradient: {
+              shade: 'dark',
+              type: 'horizontal',
+              shadeIntensity: 0.25,
+              gradientToColors: undefined,
+              inverseColors: true,
+              opacityFrom: 0.85,
+              opacityTo: 0.85,
+              stops: [50, 0, 100],
+            },
+          },
+        },
       };
-    },
-    computed: {
-      dataObject() {
-        const labels = [];
-        const data = [];
-        const colors = [];
-        Object.values(this.rankingDistribution.usersPerLevel).forEach((level) => {
-          labels.push('Level '.concat(level.level));
-          data.push(level.numUsers);
-          colors.push(level.level === this.rankingDistribution.myLevel ? '#aed7ac' : '#7cb5ec');
-        });
-        return {
-          labels,
-          datasets: [{
-            data,
-            label: '# Users',
-            backgroundColor: colors,
-          }],
-        };
-      },
     },
     mounted() {
       this.getData();
     },
-    beforeDestroy() {
-      this.chart.destroy();
-    },
     methods: {
+      computeRankingDistributionChartSeries() {
+        const series = [{
+          name: '# of Users',
+          data: [{ x: 'Level 0', y: 20 }], // Current end point does not return level 0 count which my user is in. Just mock it right now
+        }];
+        if (this.rankingDistribution.usersPerLevel) {
+          Object.values(this.rankingDistribution.usersPerLevel).forEach((level) => {
+            const datum = { x: `Level ${level.level}`, y: level.numUsers };
+            series[0].data.push(datum);
+            if (level.level === this.rankingDistribution.myLevel) {
+              this.chartOptions.annotations.points[0].x = datum.x;
+              this.chartOptions.annotations.points[0].text = `You are ${datum.x}!`;
+            }
+          });
+        }
+        this.chartOptions = { ...this.chartOptions }; // Trigger reactivity
+        this.chartSeries = series;
+      },
       getData() {
         this.loading = true;
         const subjectId = this.subject ? this.subject.subjectId : null;
@@ -96,94 +174,59 @@
           .then((response) => {
             this.rankingDistribution = response;
             this.loading = false;
-            const ctx = document.getElementById(this.chartId);
-            setTimeout(() => {
-              this.chart = new Chart(ctx, this.getChartConfig());
-            }, 250); // Timeout necessary for Firefox 38. I think it is because the modal animation when opening.
+            this.computeRankingDistributionChartSeries();
           });
-      },
-      getChartConfig() {
-        return {
-          type: 'bar',
-          data: this.dataObject,
-          options: {
-            legend: {
-              display: false,
-            },
-            scales: {
-              yAxes: [{
-                scaleLabel: {
-                  display: true,
-                  labelString: '# Users',
-                },
-                ticks: {
-                  beginAtZero: true,
-                  callback(value) {
-                    let result = null;
-                    if (Number.isInteger(value)) {
-                      result = value;
-                    }
-                    return result;
-                  },
-                },
-              }],
-            },
-          },
-        };
       },
     },
   };
 </script>
 
 <style scoped>
-  .myrank-container {
-    max-width: 800px;
-    margin: 0 auto;
-  }
 
-  .myrank-container .title {
-    text-align: left;
-    width: 40%;
-    border-bottom: 3px solid #d0d9e8;
-    padding-left: 1rem;
-  }
+  /*.myrank-container .title {*/
+  /*  text-align: left;*/
+  /*  width: 40%;*/
+  /*  border-bottom: 3px solid #d0d9e8;*/
+  /*  padding-left: 1rem;*/
+  /*}*/
 
-  .myrank-container .title i {
-    color: #d0d9e8;
-    font-size: 120%;
-    vertical-align: middle;
-  }
+  /*.myrank-container .title i {*/
+  /*  color: #d0d9e8;*/
+  /*  font-size: 120%;*/
+  /*  vertical-align: middle;*/
+  /*}*/
 
-  .myrank-container .title span {
-    font-size: 80%;
-    color: #698dad;
-    vertical-align: middle;
-    padding-left: 1rem;
-  }
+  /*.myrank-container .title span {*/
+  /*  font-size: 80%;*/
+  /*  color: #698dad;*/
+  /*  vertical-align: middle;*/
+  /*  padding-left: 1rem;*/
+  /*}*/
 
-  .myrank-loading-spinner {
-    padding-top: 15rem;
-  }
+  /*.myrank-loading-spinner {*/
+  /*  padding-top: 15rem;*/
+  /*}*/
 
-  .point-distribution-info {
-    width: 100%;
-    text-align: center;
-    display: inline-block;
-  }
+  /*.point-distribution-info {*/
+  /*  width: 100%;*/
+  /*  text-align: center;*/
+  /*  display: inline-block;*/
+  /*}*/
 
-  .dist-info-tile:not(:first-child) {
-    display: block;
-    border-left: 1px solid #ccc;
-  }
+  /*.distribution-tile {*/
+  /*  background-color: white;*/
+  /*}*/
 
-  .distribution-icon-text {
-    font-size: 60px;
-  }
+  /*.distribution-icon-text {*/
+  /*  font-size: 60px;*/
+  /*}*/
 
   .point-distribution-wrapper {
     display: block;
+    position: relative;
     width: 100%;
     padding: 10px;
     height: 480px;
+    background-color: orange;
   }
 </style>
