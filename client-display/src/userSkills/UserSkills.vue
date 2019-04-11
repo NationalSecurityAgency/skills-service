@@ -149,30 +149,6 @@
 </script>
 
 <style lang="scss">
-  .modal-open {
-    overflow: hidden;
-  }
-
-  .modal-backdrop {
-    position: fixed;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    z-index: 1040;
-    background-color: #000;
-
-    &.fade {
-      filter: alpha(opacity=0);
-      opacity: 0;
-    }
-
-    &.in {
-      filter: alpha(opacity=50);
-      opacity: .5;
-    }
-  }
-
   .user-skills-panel {
     background-color: #fff;
     border: 1px solid #ddd;
@@ -186,50 +162,16 @@
     padding: 50px;
   }
 
-  .progress-circle-wrapper {
-    position: relative;
-  }
-
-  .progress-circle {
-    position: relative;
-    width: 120px;
-    margin: 10px 0;
-    display: inline-block;
-  }
-
   .skill-tile-label {
     font-size: 19px;
     color: #333;
     width: 100%;
   }
 
-  .progress-circle-wrapper p {
-    display: block;
-    font-size: 17px;
-    color: #333;
-  }
-
   .skills-icon {
     display: inline-block;
     color: #b1b1b1;
     margin: 5px 0;
-  }
-
-  .pc-percent {
-    font-size: 2em;
-  }
-
-  .circle-number {
-    position: absolute;
-    color: #565656;
-    font-weight: lighter;
-    line-height: 1;
-    top: 50%;
-    bottom: auto;
-    left: 50%;
-    transform: translateY(-50%) translateX(-50%);
-    font-size: 22px;
-    text-align: center;
   }
 
   .user-skills-more-info {
