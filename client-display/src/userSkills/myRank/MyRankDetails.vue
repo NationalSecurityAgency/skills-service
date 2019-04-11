@@ -20,13 +20,13 @@
 
       <my-rank-detail-stat-card
         class="col-md-3"
-        icon-class="fas fa-running"
+        icon-class="fas fa-user-plus"
         label="My Points"
         :value="rankingDistribution.myPoints" />
 
       <my-rank-detail-stat-card
         class="col-md-3"
-        icon-class="fas fa-flag-checkered"
+        icon-class="fas fa-running"
         label="My Position"
         :value="rankingDistribution.myPosition" />
 
@@ -39,16 +39,58 @@
     </div>
 
     <div
+        v-if="!loading"
+        class="row mt-3">
+        <div class="col-sm-12" style="height: 305px">
+          <div class="card" style="height: 100%;">
+            <div class="card-body">
+              <h3 class="text-left">Rank History</h3>
+              <my-rank-history-chart />
+            </div>
+          </div>
+        </div>
+    </div>
+
+    <div
       v-if="!loading"
-      class='row mt-3'>
-      <div class='col-sm-6'>
-        <div class='card'>
-          <div class='card-body'>
+      class="row mt-3">
+      <div class="col-sm-6">
+        <div class="card">
+          <div class="card-body">
             <apexchart
               v-if="chartSeries"
-              :options='chartOptions'
-              :series='chartSeries'
-              height='250' type='bar' />
+              :options="chartOptions"
+              :series="chartSeries"
+              height="250" type="bar" />
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-6" style="height: 305px">
+        <div class="card" style="height: 100%" >
+          <div class="card-body" >
+            <h3 class="text-left">Stats</h3>
+            <ul>
+              <li>
+                <i class="fas fa-bolt" style="color: #f3d221" />
+                <span class="pl-3">Your rank is <b>18</b> with <b>53</b> points</span>
+              </li>
+              <li>
+                <i class="fas fa-hand-peace" style="color: #f3d221" />
+                <span class="pl-3">You are <b>30</b> points passed rank <b>17</b></span>
+              </li>
+              <li>
+                <i class="fas fa-crosshairs" style="color: rgb(251, 118, 118)" />
+                <span class="pl-3">You need <b>300</b> more points to pass rank <b>19</b>.</span>
+              </li>
+              <li>
+                <i class="fas fa-flag-checkered" style="color: #44484b" />
+                <span class="pl-3">You need <b>1,000</b> more points to reach <b>Level 2</b>.</span>
+              </li>
+              <li>
+                <i class="fas fa-users" style="color: rgb(128, 226, 131)" />
+                <span class="pl-3"><b>50</b> users are lower rank to you.</span>
+              </li>
+            </ul>
           </div>
         </div>
       </div>
@@ -58,6 +100,7 @@
 
 <script>
   import MyRankDetailStatCard from '@/userSkills/myRank/MyRankDetailStatCard.vue';
+  import MyRankHistoryChart from '@/userSkills/myRank/MyRankHistoryChart.vue';
 
   import UserSkillsService from '@/userSkills/service/UserSkillsService';
 
@@ -67,6 +110,7 @@
   export default {
     components: {
       MyRankDetailStatCard,
+      MyRankHistoryChart,
       apexchart: VueApexCharts,
       'vue-simple-spinner': Spinner,
     },
@@ -178,50 +222,20 @@
 </script>
 
 <style scoped>
-  /*.myrank-container .title {*/
-  /*  text-align: left;*/
-  /*  width: 40%;*/
-  /*  border-bottom: 3px solid #d0d9e8;*/
-  /*  padding-left: 1rem;*/
-  /*}*/
+  ul {
+    list-style: none;
+    text-align: left;
+    padding-left: 1rem;
+  }
 
-  /*.myrank-container .title i {*/
-  /*  color: #d0d9e8;*/
-  /*  font-size: 120%;*/
-  /*  vertical-align: middle;*/
-  /*}*/
+  ul li {
+    padding-top: 1rem;
+  }
 
-  /*.myrank-container .title span {*/
-  /*  font-size: 80%;*/
-  /*  color: #698dad;*/
-  /*  vertical-align: middle;*/
-  /*  padding-left: 1rem;*/
-  /*}*/
-
-  /*.myrank-loading-spinner {*/
-  /*  padding-top: 15rem;*/
-  /*}*/
-
-  /*.point-distribution-info {*/
-  /*  width: 100%;*/
-  /*  text-align: center;*/
-  /*  display: inline-block;*/
-  /*}*/
-
-  /*.distribution-tile {*/
-  /*  background-color: white;*/
-  /*}*/
-
-  /*.distribution-icon-text {*/
-  /*  font-size: 60px;*/
-  /*}*/
-
-  .point-distribution-wrapper {
-    display: block;
-    position: relative;
-    width: 100%;
-    padding: 10px;
-    height: 480px;
-    background-color: orange;
+  ul li i {
+    font-size: 2rem;
+    width: 2.5rem;
+    text-align: center;
+    vertical-align: middle;
   }
 </style>
