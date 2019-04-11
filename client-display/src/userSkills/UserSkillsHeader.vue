@@ -22,18 +22,18 @@
         </div>
 
         <div class="text-center col-md-4">
-        <circle-progress
-          :user-skills="userSkills"
-          :total-completed-points="userSkills.points"
-          :points-completed-today="userSkills.todaysPoints"
-          :total-possible-points="userSkills.totalPoints"
-          :total-completed-color="userSkills.points === userSkills.totalPoints ? '#59ad52' : '#7ed6f3'"
-          title="My Points">
-          <div slot="footer">
-            <p v-if="userSkills.points === userSkills.totalPoints">Total points earned</p>
-            <p v-if="userSkills.points !== userSkills.totalPoints">{{ userSkills.totalPoints | number }} total points</p>
-          </div>
-        </circle-progress>
+          <circle-progress
+            :user-skills="userSkills"
+            :total-completed-points="userSkills.points"
+            :points-completed-today="userSkills.todaysPoints"
+            :total-possible-points="userSkills.totalPoints"
+            :total-completed-color="userSkills.points === userSkills.totalPoints ? '#59ad52' : '#7ed6f3'"
+            title="My Points">
+            <div slot="footer">
+              <p v-if="userSkills.points === userSkills.totalPoints">Total points earned</p>
+              <p v-if="userSkills.points !== userSkills.totalPoints">{{ userSkills.totalPoints | number }} total points</p>
+            </div>
+          </circle-progress>
       </div>
       </div>
     </div>
