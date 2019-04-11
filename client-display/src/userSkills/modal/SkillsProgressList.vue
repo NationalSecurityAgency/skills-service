@@ -5,6 +5,7 @@
       :key="`unique-skill-${index}`"
       class="row">
       <skills-subject-skill-row
+        class="col-sm-12"
         :skill="skill"
         :show-description="showDescriptions" />
     </div>
