@@ -40,7 +40,7 @@ class AdminUsersService {
         List<TimestampCountItem> countsPerDay = []
         startDate.upto(new Date().clearTime()) { Date theDate ->
             UserPointsRepo.UsageItem found = res.find({it.day.clearTime() == theDate})
-            countsPerDay << new TimestampCountItem(timestamp: theDate.time, count: found?.numUsers ?: 0)
+            countsPerDay << new TimestampCountItem(value: theDate.time, count: found?.numUsers ?: 0)
         }
 
         return countsPerDay
@@ -50,7 +50,7 @@ class AdminUsersService {
         List<UserAchievedLevelRepo.LabelCountInfo> res = userAchievedRepo.getUsageFacetedViaSubject(projectId, SkillDef.ContainerType.Subject)
 
         return res.collect {
-            new LabelCountItem(label: it.label, count: it.count)
+            new LabelCountItem(value: it.label, count: it.count)
         }
     }
 
@@ -58,7 +58,7 @@ class AdminUsersService {
         List<UsersPerLevel> levels = rankingLoader.getUserCountsPerLevel(projectId, true)
 
         return levels.collect{
-            new LabelCountItem(label: "Level ${it.level}", count: it.numUsers)
+            new LabelCountItem(value: "Level ${it.level}", count: it.numUsers)
         }
     }
 
