@@ -4,7 +4,10 @@
       <small class="d-inline-block text-truncate font-weight-bold">{{ skill.skill }}</small>
     </div>
     <div class="col-md-8">
-      <user-skill-progress :skill="skill" :show-description="showDescription" v-on:progressbar-clicked="skillRowClicked"></user-skill-progress>
+      <user-skill-progress
+        :skill="skill"
+        :show-description="showDescription"
+        @progressbar-clicked="skillRowClicked" />
     </div>
   </div>
 </template>
@@ -13,7 +16,6 @@
   import UserSkillProgress from '@/userSkills/modal/SkillProgress.vue';
 
   export default {
-    name: 'SkillsSubjectSkillRow',
     components: {
       UserSkillProgress,
     },
