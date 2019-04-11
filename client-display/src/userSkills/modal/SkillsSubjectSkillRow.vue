@@ -1,5 +1,5 @@
 <template>
-  <div class="row col-sm-12">
+  <div class="row">
     <div class="col-sm-4 text-right">
       <small class="d-inline-block text-truncate font-weight-bold">{{ skill.skill }}</small>
     </div>
