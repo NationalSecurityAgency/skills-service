@@ -129,6 +129,19 @@
     left: 0;
   }
 
+  .circle-number {
+    position: absolute;
+    color: #565656;
+    font-weight: lighter;
+    line-height: 1;
+    top: 50%;
+    bottom: auto;
+    left: 50%;
+    transform: translateY(-50%) translateX(-50%);
+    font-size: 22px;
+    text-align: center;
+  }
+
   .progress-circle-wrapper {
     position: relative;
   }
