@@ -3,10 +3,10 @@ import VueRouter from 'vue-router';
 // import VueBreadcrumbs from 'vue-2-breadcrumbs';
 
 import SkillsEntry from '@/SkillsEntry.vue';
-import BadgeDetails from '@/userSkills/badge/BadgeDetails.vue';
 import SubjectDetails from '@/userSkills/subject/SubjectDetails.vue';
 import SkillDependencies from '@/userSkills/subject/SkillDependencies.vue';
 import MyRankDetails from '@/userSkills/myRank/MyRankDetails.vue';
+import BadgesDetails from '@/userSkills/badge/BadgesDetails.vue';
 
 
 Vue.use(VueRouter);
@@ -27,9 +27,9 @@ const router = new VueRouter({
       props: true,
     },
     {
-      path: '/badgeDetails/:badgeId',
-      component: BadgeDetails,
-      name: 'badgeDetails',
+      path: '/badges',
+      component: BadgesDetails,
+      name: 'badges',
       props: true,
     },
     {

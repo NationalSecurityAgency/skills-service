@@ -4,17 +4,16 @@
             <h6 class="card-title mb-0 float-left">My Badges</h6>
         </div>
         <div class="card-body">
-      <span class="fa-stack skills-icon user-rank-stack">
-        <i class="fa fa-award fa-stack-2x"/>
-        <strong class="fa-stack-1x user-rank-text">
-          0 out of 3
-        </strong>
-      </span>
-<!--                @click.stop="openMyRankDetails()"-->
-         <button class="btn btn-info btn-sm mr-1 text-uppercase" >
-                   Badges Catalog
-         </button>
-      </div>
+            <span class="fa-stack skills-icon user-rank-stack">
+                <i class="fa fa-award fa-stack-2x"/>
+                <strong class="fa-stack-1x user-rank-text">
+                  0 out of 3
+                </strong>
+            </span>
+            <router-link to="/badges" tag="button" class="btn btn-info btn-sm mr-1 text-uppercase">
+                Badges Catalog
+            </router-link>
+        </div>
     </div>
 </template>
 
