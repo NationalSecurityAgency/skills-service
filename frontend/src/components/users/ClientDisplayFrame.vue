@@ -62,10 +62,6 @@
 </script>
 
 <style scoped>
-  #client-portal-frame {
-    max-width: 1100px;
-  }
-
   .the-iframe {
     width: 100%;
   }

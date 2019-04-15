@@ -101,7 +101,6 @@
       if (this.totalPossiblePoints === -1) {
         this.isCompleted = true;
       }
-
       this.beforeTodayProgressVal = this._getBeforeTodayProgressVal(this.totalCompletedPoints, this.pointsCompletedToday);
     },
     methods: {
