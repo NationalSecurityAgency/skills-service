@@ -18,13 +18,8 @@
   import { debounce } from 'lodash';
 
   const getDocumentHeight = () => {
-    // const html = document.documentElement;
-    // console.log(html);
-    // return html.offsetHeight;
-    var body = document.body;
-
-    var height = Math.max( body.scrollHeight, body.offsetHeight);
-    return height;
+    const { body } = document;
+    return Math.max(body.scrollHeight, body.offsetHeight);
   };
 
   const onHeightChanged = debounce(() => {
