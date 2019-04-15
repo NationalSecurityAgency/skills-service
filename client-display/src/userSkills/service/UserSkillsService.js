@@ -67,6 +67,11 @@ export default {
     }).then(result => result.data);
   },
 
+  getBadgeSummaries() {
+    // Todo: this should call its own endpoint
+    return this.getUserSkills().then(result => result.badges);
+  },
+
   getPointsHistory(subjectId) {
     let response = null;
     let url = `${this.serviceUrl}${this.getServicePath()}/${this.projectId}/subjects/${subjectId}/pointHistory`;
