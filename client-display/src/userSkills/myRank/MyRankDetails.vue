@@ -41,7 +41,7 @@
     <div
         v-if="!loading"
         class="row mt-3">
-        <div class="col-sm-12" style="height: 305px">
+        <div class="col-sm-12 rank-history-chart">
           <div class="card" style="height: 100%;">
             <div class="card-body">
               <h3 class="text-left">Rank History</h3>
@@ -65,7 +65,7 @@
           </div>
         </div>
       </div>
-      <div class="col-sm-6" style="height: 305px">
+      <div class="col-sm-6 summary-card">
         <div class="card" style="height: 100%" >
           <div class="card-body" >
             <h3 class="text-left">Stats</h3>
@@ -237,5 +237,13 @@
     width: 2.5rem;
     text-align: center;
     vertical-align: middle;
+  }
+
+  .summary-card {
+    height: 305px;
+  }
+
+  .rank-history-chart {
+    height: 305px;
   }
 </style>
