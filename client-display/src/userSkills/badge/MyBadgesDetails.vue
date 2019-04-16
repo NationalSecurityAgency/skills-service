@@ -21,7 +21,7 @@
                             <div class="card-title mb-0 text-truncate">
                                 {{ badge.badge }}
                             </div>
-                            <div class="text-muted mb-2"><i class="far fa-clock text-secondary" style="font-size: 0.8rem;"></i> 5 days ago</div>
+                            <div class="text-muted mb-2"><i class="far fa-clock text-secondary" style="font-size: 0.8rem;"></i> {{ badge.dateAchieved | moment("from", "now") }}</div>
                         </div>
                     </div>
 
