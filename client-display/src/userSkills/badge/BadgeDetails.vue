@@ -4,37 +4,13 @@
             {{ badge.badge }}
         </ribbon>
 
-        <div v-if="badge" class="card">
+        <div class="card">
             <div class="card-body">
-                <popper trigger="hover" :options="{ placement: 'top' }">
-                    <div slot="reference">
-                        <i class="badge-description-icon" :class="badge.iconClass"/>
-                        <i v-if="badge.gem" class="fas fa-gem gem-indicator"/>
-                    </div>
-                    <div v-if="badge.gem" class="popper">
-                        <div class="popover-title">
-                            <span class="progress-popup-label">
-                                Gem Information
-                            </span>
-                        </div>
-                        <div class="popover-content-row">
-                            <span class="progress-popup-label">Expires:</span>
-                            <span class="progress-popup-value">
-                                 {{ gemExpirationDate }}
-                            </span>
-                        </div>
-                    </div>
-                    <div v-else></div>
-                </popper>
-                <span v-if="badge.description" class="user-skill-subject-description"
-                        v-html="parseMarkdown(badge.description)"/>
+                <badge-details-overview :badge="badge"></badge-details-overview>
             </div>
         </div>
 
-            <skills-progress-list
-                    :subject="badge"
-                    :show-descriptions="showDescriptions"/>
-
+        <skills-progress-list :subject="badge" :show-descriptions="showDescriptions"/>
 
         <div class="pull-left">
       <span>
@@ -59,6 +35,7 @@
 
 <script>
     import Ribbon from '@/common/ribbon/Ribbon.vue';
+    import BadgeDetailsOverview from '@/userSkills/badge/BadgeDetailsOverview.vue';
     import SkillsProgressList from '@/userSkills/modal/SkillsProgressList.vue';
     import Popper from 'vue-popperjs';
     import marked from 'marked';
@@ -75,6 +52,7 @@
             SkillsProgressList,
             ToggleButton,
             Popper,
+            BadgeDetailsOverview,
         },
         data() {
             return {
