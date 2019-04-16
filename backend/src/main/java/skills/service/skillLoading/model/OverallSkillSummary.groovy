@@ -19,5 +19,11 @@ class OverallSkillSummary {
 
     List<SkillSubjectSummary> subjects
 
-    List<SkillBadgeSummary> badges
+    BadgeStats badges
+
+    public static class BadgeStats {
+        int numBadgesCompleted = 0
+        boolean enabled = false
+    }
 }
+

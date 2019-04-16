@@ -65,9 +65,6 @@ class SkillsLoader {
         List<SkillSubjectSummary> subjects = projDef.getSubjects().collect { SkillDef subjectDefinition ->
             loadSubjectSummary(projDef, userId, subjectDefinition, version)
         }
-        List<SkillBadgeSummary> badges = projDef.getBadges().collect { SkillDef badgeDefinition ->
-            loadBadgeSummary(projDef, userId, badgeDefinition)
-        }
 
         int points
         int totalPoints
@@ -99,6 +96,8 @@ class SkillsLoader {
             skillLevel = 0
         }
 
+        int numBadgesAchieved = achievedLevelRepository.countAchievedForUser(userId, projectId, SkillDef.ContainerType.Badge)
+
         OverallSkillSummary res = new OverallSkillSummary(
                 projectName: projDef.name,
                 skillsLevel: skillLevel,
@@ -108,10 +107,23 @@ class SkillsLoader {
                 levelPoints: levelPoints,
                 levelTotalPoints: levelTotalPoints,
                 subjects: subjects,
-                badges: badges,
+                badges: new OverallSkillSummary.BadgeStats(numBadgesCompleted: numBadgesAchieved, enabled: true)
         )
 
         return res
+    }
+
+    @Transactional(readOnly = true)
+    List<SkillBadgeSummary> loadBadgeSummaries(String projectId, String userId, Integer version = -1){
+        ProjDef projDef = getProjDef(projectId)
+        List<SkillDef> badgeDefs = projDef.getBadges()
+        if ( version >= 0 ) {
+            badgeDefs = badgeDefs.findAll { it.version <= version }
+        }
+        List<SkillBadgeSummary> badges = badgeDefs.collect { SkillDef badgeDefinition ->
+            loadBadgeSummary(projDef, userId, badgeDefinition)
+        }
+        return badges
     }
 
 
@@ -233,11 +245,17 @@ class SkillsLoader {
             assert achievements.size() == 1
         }
 
+        int numAchievedSkills = achievedLevelRepository.countAchievedChildren(userId, projDef.projectId, badgeDefinition.skillId, SkillRelDef.RelationshipType.BadgeDependence)
+        int numChildSkills = skillDefRepo.countChildren(projDef.projectId, badgeDefinition.skillId, SkillRelDef.RelationshipType.BadgeDependence)
+
         return new SkillBadgeSummary(
                 badge: badgeDefinition.name,
                 badgeId: badgeDefinition.skillId,
                 description: badgeDefinition.description,
                 badgeAchieved: achievements,
+                dateAchieved: achievements ? achievements.first().created : null,
+                numSkillsAchieved: numAchievedSkills,
+                numTotalSkills: numChildSkills,
                 startDate: badgeDefinition.startDate,
                 endDate: badgeDefinition.endDate,
                 skills: skillsRes,
