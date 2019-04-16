@@ -63,6 +63,18 @@ export default {
 
   getBadgeSkills(badgeId) {
     return axios.get(`${this.serviceUrl}${this.getServicePath()}/${this.projectId}/badges/${badgeId}/summary`, {
+      params: {
+        userId: this.userId,
+      },
+      withCredentials: true,
+    }).then(result => result.data);
+  },
+
+  getBadgeSummaries() {
+    return axios.get(`${this.serviceUrl}${this.getServicePath()}/${this.projectId}/badges/summary`, {
+      params: {
+        userId: this.userId,
+      },
       withCredentials: true,
     }).then(result => result.data);
   },

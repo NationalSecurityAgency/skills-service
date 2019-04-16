@@ -4,23 +4,28 @@
             <h6 class="card-title mb-0 float-left">My Badges</h6>
         </div>
         <div class="card-body">
-      <span class="fa-stack skills-icon user-rank-stack">
-        <i class="fa fa-award fa-stack-2x"/>
-        <strong class="fa-stack-1x user-rank-text">
-          0 out of 3
-        </strong>
-      </span>
-<!--                @click.stop="openMyRankDetails()"-->
-         <button class="btn btn-info btn-sm mr-1 text-uppercase" >
-                   Badges Catalog
-         </button>
-      </div>
+            <span class="fa-stack skills-icon user-rank-stack">
+                <i class="fa fa-award fa-stack-2x"/>
+                <strong class="fa-stack-1x user-rank-text">
+                  {{ numBadgesCompleted }} <span>Badge{{numBadgesCompleted > 1 ? 's' : ''}}</span>
+                </strong>
+            </span>
+            <router-link to="/badges" tag="button" class="btn btn-info btn-sm mr-1 text-uppercase">
+                View Badges
+            </router-link>
+        </div>
     </div>
 </template>
 
 <script>
     export default {
         name: 'MyBadges',
+        props: {
+            numBadgesCompleted: {
+                type: Number,
+                required: true,
+            },
+        },
     };
 </script>
 
@@ -48,5 +53,9 @@
         line-height: 1.2em;
         margin-top: 1.8em;
         background: rgba(255, 255, 255, 0.6);
+    }
+
+    .user-rank-text span {
+        font-weight: normal;
     }
 </style>
