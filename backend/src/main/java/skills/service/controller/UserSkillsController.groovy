@@ -61,10 +61,19 @@ class UserSkillsController {
         return skillsLoader.loadSkillSummary(projectId, userInfoService.currentUser.username, skillId)
     }
 
+    @RequestMapping(value = "/projects/{projectId}/badges/summary", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    @CompileStatic
+    List<SkillBadgeSummary>  getAllBadgesSummary(@PathVariable("projectId") String projectId,
+                                                 @RequestParam(name = 'version', required = false, defaultValue = Constants.MAX_VERSION_STRING) Integer version) {
+        return skillsLoader.loadBadgeSummaries(projectId, userInfoService.currentUser.username, version)
+    }
+
+
     @RequestMapping(value = "/projects/{projectId}/badges/{badgeId}/summary", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     @CompileStatic
-    SkillBadgeSummary getBadgesSkillsSummary(@PathVariable("projectId") String projectId, @PathVariable("badgeId") String badgeId) {
+    SkillBadgeSummary getBadgeSummary(@PathVariable("projectId") String projectId, @PathVariable("badgeId") String badgeId) {
         return skillsLoader.loadBadge(projectId, userInfoService.currentUser.username, badgeId)
     }
 
