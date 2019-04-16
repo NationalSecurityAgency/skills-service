@@ -1,19 +1,28 @@
 <template>
     <div class="row">
-        <div class="col-md-2">
+        <div class="col-lg-2">
             <div class="card mb-2">
                 <div class="card-body">
                     <i :class="badge.iconClass" class="text-success fa-3x" style="min-width: 3rem;, max-width: 4rem;"/>
                     <i v-if="badge.gem" class="fas fa-gem position-absolute" style="top: 5px; right: 5px; color: purple"></i>
+<!--                    <div v-if="badge.gem">-->
+<!--                        <span class="text-muted">Expires:</span> {{badge.endDate}}-->
+<!--                    </div>-->
                 </div>
             </div>
         </div>
 
-        <div class="text-left catalog-item col-md-10">
-            <small class="float-right text-navy" :class="{ 'text-success': percent === 100 }">
-               <i v-if="percent === 100" class="fa fa-check"/> {{ percent }}% Complete
-            </small>
-            <h4 class="mb-1">{{ badge.badge }}</h4>
+        <div class="text-sm-left text-center catalog-item col-lg-10">
+            <div class="row">
+                <h4 class="mb-1 col-md-8">{{ badge.badge }}</h4>
+                <div class="col-md-4 text-right">
+                <small class=" float-right text-navy" :class="{ 'text-success': percent === 100 }">
+                    <i v-if="percent === 100" class="fa fa-check"/> {{ percent }}% Complete
+                </small>
+                </div>
+            </div>
+
+
             <div class="mb-2">
                 <progress-bar bar-color="lightgreen" :val="percent"></progress-bar>
             </div>
