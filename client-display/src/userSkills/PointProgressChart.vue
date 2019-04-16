@@ -1,9 +1,13 @@
 <template>
   <div
-    :class="{'disabled': !pointsHistory || !pointsHistory.length}"
+    :class="{'disabled': !hasData}"
     class="card position-relative">
-    <div class="disabled-overlay" />
-    <div class="text-center user-skills-no-data-icon-text">
+    <div
+      v-if="!hasData"
+      class="disabled-overlay" />
+    <div
+      v-if="!hasData"
+      class="text-center user-skills-no-data-icon-text">
       <h1 class="">Locked</h1>
       <div class="user-skills-no-data-icon-subtext">*** Earn more points to unlock points progress chart! ***</div>
     </div>
@@ -61,6 +65,10 @@
       };
     },
     computed: {
+      hasData() {
+        return this.pointsHistory && this.pointsHistory.length;
+      },
+
       chartSeries() {
         const dataArray = [{
           data: [],
