@@ -63,13 +63,20 @@ export default {
 
   getBadgeSkills(badgeId) {
     return axios.get(`${this.serviceUrl}${this.getServicePath()}/${this.projectId}/badges/${badgeId}/summary`, {
+      params: {
+        userId: this.userId,
+      },
       withCredentials: true,
     }).then(result => result.data);
   },
 
   getBadgeSummaries() {
-    // Todo: this should call its own endpoint
-    return this.getUserSkills().then(result => result.badges);
+    return axios.get(`${this.serviceUrl}${this.getServicePath()}/${this.projectId}/badges/summary`, {
+      params: {
+        userId: this.userId,
+      },
+      withCredentials: true,
+    }).then(result => result.data);
   },
 
   getPointsHistory(subjectId) {
