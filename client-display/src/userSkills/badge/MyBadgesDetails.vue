@@ -5,7 +5,7 @@
                 My Earned Badges
             </h6>
             <span v-if="badges && badges.length > 0" class="text-muted float-right">
-                <strong>{{ badges.length }}</strong> Badge<span v-if="badges.length > 1">s</span> Earned
+                <span class="badge badge-info">{{ badges.length }}</span> Badge<span v-if="badges.length > 1">s</span> Earned
             </span>
         </div>
         <div class="card-body">
