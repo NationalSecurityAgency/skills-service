@@ -1,32 +1,69 @@
 <template>
-  <div style="height: 215px">
-    <canvas :id="chartId"/>
+  <div>
+    <h4>Point History</h4>
+    <apexchart
+      v-if="chartOptions && hasData"
+      :options="chartOptions"
+      :series="chartSeries"
+      height="250" type="area" />
   </div>
 </template>
 
 <script>
-  import UniqueIdGenerator from '@/common/utilities/UniqueIdGenerator';
-
-  import numeral from 'numeral';
-  import Chart from 'chart.js';
+  import VueApexCharts from 'vue-apexcharts';
 
   export default {
+    components: {
+      apexchart: VueApexCharts,
+    },
     props: {
       pointsHistory: Array,
     },
     data() {
       return {
-        chartId: UniqueIdGenerator.uniqueId('chart-'),
+        chartOptions: {
+          chart: {
+            type: 'area',
+            height: 250,
+          },
+          dataLabels: {
+            enabled: false,
+          },
+          markers: {
+            size: 0,
+            style: 'hollow',
+          },
+          xaxis: {
+            type: 'datetime',
+            tickAmount: 1,
+          },
+          fill: {
+            type: 'gradient',
+            gradient: {
+              shadeIntensity: 1,
+              opacityFrom: 0.7,
+              opacityTo: 0.9,
+              stops: [0, 100],
+            },
+          },
+        },
       };
     },
     computed: {
-      dataArray() {
-        let dataArray = [];
+      hasData() {
+        return this.chartSeries && this.chartSeries[0].data.length > 0;
+      },
+
+      chartSeries() {
+        const dataArray = [{
+          data: [],
+          name: 'Points',
+        }];
 
         if (this.pointsHistory.length > 0) {
-          dataArray = this.pointsHistory
+          dataArray[0].data = this.pointsHistory
             .map(value => ({
-              t: new Date(parseInt(value.dayPerformed, 10)),
+              x: new Date(parseInt(value.dayPerformed, 10)).getTime(),
               y: value.points,
             }));
         }
@@ -34,70 +71,11 @@
         return dataArray;
       },
     },
-    beforeDestroy() {
-      this.chart.destroy();
-    },
-    mounted() {
-      const ctx = document.getElementById(this.chartId);
-      this.chart = new Chart(ctx, {
-        type: 'line',
-        data: {
-          datasets: [{
-            borderColor: '#7CB5EC',
-            pointBorderWidth: 0,
-            borderWidth: 2,
-            data: this.dataArray,
-          }],
-        },
-        options: {
-          maintainAspectRatio: false,
-          tooltips: {
-            callbacks: {
-              label(tooltipItem) {
-                return `Points: ${numeral(tooltipItem.yLabel).format('0,0')}`;
-              },
-            },
-          },
-          elements: {
-            point: {
-              radius: 0,
-              hitRadius: 10,
-              hoverRadius: 5,
-            },
-          },
-          title: {
-            display: true,
-            fontStyle: 'bold',
-            padding: 0,
-            fontSize: 20,
-            text: 'Point Progress',
-          },
-          legend: {
-            display: false,
-          },
-          scales: {
-            xAxes: [{
-              gridLines: {
-                display: false,
-              },
-              type: 'time',
-              position: 'bottom',
-              time: {
-                displayFormats: {
-                  day: 'MMM YYYY',
-                },
-              },
-            }],
-            yAxes: [{
-              ticks: {
-                callback(unformatted) {
-                  return numeral(unformatted).format('0a');
-                },
-              },
-            }],
-          },
-        },
-      });
-    },
   };
 </script>
+
+<style scoped>
+  h4 {
+    color: #666666;
+  }
+</style>
