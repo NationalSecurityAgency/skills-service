@@ -6,6 +6,9 @@ class SkillBadgeSummary {
     String badgeId
     String description
     boolean badgeAchieved = false
+    Date dateAchieved
+    int numSkillsAchieved
+    int numTotalSkills
 
     Date startDate
     Date endDate

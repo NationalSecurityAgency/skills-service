@@ -1,5 +1,5 @@
 <template>
-    <div class="flex-fill card">
+    <div class="flex-fill card mb-5">
         <div class="card-body">
             <div class="" v-for="(badge, index) in badges" v-bind:key="badge.badgeId">
                 <badge-catalog-item :badge="badge" class="pb-3"></badge-catalog-item>
