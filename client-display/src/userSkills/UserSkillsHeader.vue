@@ -50,9 +50,7 @@
         id="point-progress-container"
         class="col-lg-6">
         <point-progress-chart
-          v-if="pointsHistory && pointsHistory.length > 0"
           :points-history="pointsHistory"/>
-        <not-enough-data-chart-placeholder v-if="!pointsHistory || pointsHistory.length === 0" />
       </div>
 
       <div class="col-lg-3">
@@ -66,7 +64,6 @@
   import MyProgressSummary from '@/userSkills/MyProgressSummary.vue';
   import PointProgressChart from '@/userSkills/PointProgressChart.vue';
   import UserSkillsService from '@/userSkills/service/UserSkillsService';
-  import NotEnoughDataChartPlaceholder from '@/userSkills/NotEnoughDataChartPlaceholder.vue';
 
   import CircleProgress from '@/common/progress/CircleProgress.vue';
   import Popper from 'vue-popperjs';
@@ -85,7 +82,6 @@
       Popper,
       MyRank,
       MySkillLevel,
-      NotEnoughDataChartPlaceholder,
     },
     props: {
       userSkills: Object,
