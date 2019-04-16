@@ -7,6 +7,7 @@ import SubjectDetails from '@/userSkills/subject/SubjectDetails.vue';
 import SkillDependencies from '@/userSkills/subject/SkillDependencies.vue';
 import MyRankDetails from '@/userSkills/myRank/MyRankDetails.vue';
 import BadgesDetails from '@/userSkills/badge/BadgesDetails.vue';
+import BadgeDetails from '@/userSkills/badge/BadgeDetails.vue';
 
 
 Vue.use(VueRouter);
@@ -30,6 +31,12 @@ const router = new VueRouter({
       path: '/badges',
       component: BadgesDetails,
       name: 'badges',
+      props: true,
+    },
+    {
+      path: '/badgeDetails/:badgeId',
+      component: BadgeDetails,
+      name: 'badgeDetails',
       props: true,
     },
     {

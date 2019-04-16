@@ -48,13 +48,13 @@
 
       <div
         id="point-progress-container"
-        class="col-lg-6">
+        :class="{ 'col-lg-6' : hasBadges, 'col-lg-9' : !hasBadges }">
         <point-progress-chart
           :points-history="pointsHistory"/>
       </div>
 
-      <div class="col-lg-3">
-        <my-badges></my-badges>
+      <div v-if="hasBadges" class="col-lg-3">
+        <my-badges :num-badges-completed="userSkills.badges.numBadgesCompleted"></my-badges>
       </div>
     </div>
   </div>
@@ -122,6 +122,11 @@
           .then((result) => {
             this.pointsHistory = result;
           });
+      },
+    },
+    computed: {
+      hasBadges() {
+        return this.userSkills && this.userSkills.badges && this.userSkills.badges.enabled;
       },
     },
   };

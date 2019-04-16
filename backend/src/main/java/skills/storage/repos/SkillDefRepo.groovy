@@ -60,4 +60,12 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
 
     @Query('SELECT MAX (s.version) from SkillDef s where s.projectId=?1')
     Integer findMaxVersionByProjectId(String projectId)
+
+    @Query(value='''SELECT count(c) 
+        from SkillDef s, SkillRelDef r, SkillDef c 
+        where 
+            s.id = r.parent and c.id = r.child and 
+            s.projectId=?1 and c.projectId=?1 and
+            s.skillId=?2 and r.type=?3''')
+    Integer countChildren(String projectId, String skillId, RelationshipType relationshipType)
 }

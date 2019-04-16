@@ -1,38 +1,32 @@
 <template>
-    <div class="media">
-        <i :class="badge.iconClass" class="mr-4 text-success fa-3x" style="min-width: 3rem;, max-width: 4rem;"/>
-        <div class="media-body text-left catalog-item">
-            <small class="float-right text-navy">0% Complete</small>
+    <div class="row">
+        <div class="col-md-2">
+            <div class="card mb-2">
+                <div class="card-body">
+                    <i :class="badge.iconClass" class="text-success fa-3x" style="min-width: 3rem;, max-width: 4rem;"/>
+                    <i v-if="badge.gem" class="fas fa-gem position-absolute" style="top: 5px; right: 5px; color: purple"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-left catalog-item col-md-10">
+            <small class="float-right text-navy" :class="{ 'text-success': percent === 100 }">
+               <i v-if="percent === 100" class="fa fa-check"/> {{ percent }}% Complete
+            </small>
             <h4 class="mb-1">{{ badge.badge }}</h4>
             <div class="mb-2">
-                <progress-bar bar-color="lightgreen" :val="3"></progress-bar>
+                <progress-bar bar-color="lightgreen" :val="percent"></progress-bar>
             </div>
 
             <p class="">
                 {{ badge.description }}
             </p>
 
-            <router-link to="/badges" tag="button" class="btn btn-info btn-sm mr-1 text-uppercase">
+            <router-link :to="{ name: 'badgeDetails', params: { badgeId: badge.badgeId }}" tag="button" class="btn btn-info btn-sm mr-1 text-uppercase">
                 View Details
             </router-link>
         </div>
     </div>
-
-    <!--    <div class="card">-->
-    <!--        <div class="card-header">-->
-    <!--            <h3>{{ badge.badge }}</h3>-->
-    <!--        </div>-->
-    <!--        <div class="card-body">-->
-    <!--            <div class="text-primary">-->
-    <!--                <i :class="badge.iconClass" class="badge-icon fa-5x" />-->
-    <!--            </div>-->
-    <!--            <div class="pt-2">-->
-    <!--                <router-link to="/badges" tag="button" class="btn btn-info btn-sm mr-1 text-uppercase">-->
-    <!--                    View Details-->
-    <!--                </router-link>-->
-    <!--            </div>-->
-    <!--        </div>-->
-    <!--    </div>-->
 </template>
 
 <script>
@@ -47,6 +41,11 @@
             badge: {
                 type: Object,
                 required: true,
+            },
+        },
+        computed: {
+            percent() {
+                return Math.trunc((this.badge.numSkillsAchieved / this.badge.numTotalSkills) * 100);
             },
         },
     };
