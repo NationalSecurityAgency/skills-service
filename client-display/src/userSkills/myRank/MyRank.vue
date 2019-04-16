@@ -1,8 +1,7 @@
 <template>
-  <div class="card">
+  <div class="card skills-full-height">
     <div class="card-header">
       <h6 class="card-title mb-0 float-left">My Rank</h6>
-<!--      <span class="badge badge-primary float-right">Badge</span>-->
     </div>
     <div class="card-body">
       <span class="fa-stack skills-icon user-rank-stack">
