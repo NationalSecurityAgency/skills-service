@@ -58,8 +58,6 @@
   import IconPicker from '../utils/iconPicker/IconPicker';
   import Modal from '../utils/modal/Modal';
 
-  let self;
-
   export default {
     name: 'NewLevel',
     components: { IconPicker, Modal },
@@ -76,9 +74,9 @@
       };
     },
     mounted() {
-      self = this;
     },
     created() {
+      const self = this;
       const dictionary = {
         en: {
           attributes: {
