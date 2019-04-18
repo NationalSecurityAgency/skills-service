@@ -44,7 +44,7 @@
 
     import UserSkillsService from '@/userSkills/service/UserSkillsService';
 
-    import 'vue-popperjs/dist/css/vue-popper.css';
+    import 'vue-popperjs/dist/vue-popper.css';
 
     export default {
         components: {
