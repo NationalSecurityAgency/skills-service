@@ -88,7 +88,9 @@ class LevelPointsSettingListener implements SettingChangedListener{
             log.warn("totalPoints [$totalPoints] are lower " +
                     "then the highest level's pointsFrom [${highestLevelPoints}], " +
                     "this would create invalid percentage values. Using [${highestLevelPoints}] as totalPoints for purposes of conversion")
-            totalPoints = highestLevelPoints
+            //since we don't know what the total was before deletion, let's model the percentages off the highest level points being 92%
+            //since that's what we do for the default, otherwise the last level would be 100%
+            totalPoints = highestLevelPoints*1.08
         }
         levelDefs.eachWithIndex { LevelDef entry, int i ->
             entry.percent = (int) (((double) entry.pointsFrom / totalPoints) * 100d)

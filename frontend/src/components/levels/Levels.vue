@@ -213,6 +213,7 @@
             level: existingLevel.level,
             levelId: existingLevel.id,
             boundaries: bounds,
+            levelAsPoints: this.levelsAsPoints,
           };
         } else {
           if (this.levels.length >= this.maxLevels) {
