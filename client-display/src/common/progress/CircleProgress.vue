@@ -1,9 +1,14 @@
 <template>
   <div class="progress-circle-wrapper">
     <label class="skill-tile-label">{{ title }}</label>
-    <div class="progress-circle">
+    <div
+      v-if="initialized"
+      class="progress-circle">
       <div class="circle-number">
-        {{ totalCompletedPoints | number }}
+        <span v-if="!isCompleted">{{ totalCompletedPoints | number }}</span>
+        <i
+          v-else
+          class="fas fa-check text-success fa-2x"></i>
       </div>
       <popper
         trigger="hover"
@@ -94,14 +99,18 @@
       return {
         beforeTodayProgressVal: 0,
         isCompleted: false,
+        initialized: false,
       };
     },
-    mounted() {
+    updated() {
       // If totalPossiblePoints is -1 it means this is charting Level progress and the user has completed this level
       if (this.totalPossiblePoints === -1) {
         this.isCompleted = true;
       }
+
       this.beforeTodayProgressVal = this._getBeforeTodayProgressVal(this.totalCompletedPoints, this.pointsCompletedToday);
+
+      this.initialized = true;
     },
     methods: {
       _getBeforeTodayProgressVal(points, todaysPoints) {
