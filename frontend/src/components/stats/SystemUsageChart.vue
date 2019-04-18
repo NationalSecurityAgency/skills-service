@@ -56,7 +56,7 @@
     methods: {
       loadData() {
         UsersService.getUsage(this.projectId, this.numDaysToShow).then((response) => {
-          const seriesPairs = response.map(item => [item.timestamp, item.count]);
+          const seriesPairs = response.map(item => [item.value, item.count]);
           // this.options = {
           //   series: [{ name: 'Distinct Users', data: seriesPairs }],
           // };
