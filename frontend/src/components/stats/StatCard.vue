@@ -19,7 +19,7 @@
     </div>
 
     <div class="card-footer">
-      <a href="#" class="button card-footer-item is-primary is-outlined">View</a>
+      <a @click="loadChart" class="button card-footer-item is-primary is-outlined">View</a>
     </div>
   </div>
 </template>
@@ -27,7 +27,12 @@
 <script>
   export default {
     name: 'StatCard',
-    props: ['title', 'subtitle', 'description', 'icon'],
+    props: ['title', 'subtitle', 'description', 'icon', 'chartBuilderId'],
+    methods: {
+      loadChart() {
+        this.$emit('load-chart', this.chartBuilderId);
+      },
+    },
   };
 </script>
 

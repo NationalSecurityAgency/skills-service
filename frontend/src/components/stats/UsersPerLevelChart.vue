@@ -47,7 +47,7 @@
       loadData() {
         StatsService.numUsersPerSkillLevel(this.projectId).then((response) => {
           const seriesPairs = response.map((item) => {
-            const seriesItem = { x: item.label, y: item.count };
+            const seriesItem = { x: item.value, y: item.count };
             return seriesItem;
           });
           // const sortedSeries = seriesPairs.sort((a, b) => a.y - b.y);

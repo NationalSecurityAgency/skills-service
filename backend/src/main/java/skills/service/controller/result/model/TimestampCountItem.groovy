@@ -1,7 +1,6 @@
 package skills.service.controller.result.model
 
-class TimestampCountItem {
-
-    long timestamp
+class TimestampCountItem implements CountItem {
+    Long value
     int count
 }

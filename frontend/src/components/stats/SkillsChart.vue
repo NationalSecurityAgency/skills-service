@@ -1,0 +1,88 @@
+<template>
+  <div style="position: relative">
+    <div v-if="!chart.hasData" class="disabled-overlay" />
+    <div v-if="!chart.hasData" class="text-center user-skills-no-data-icon-text">
+      <h1 class="">Locked</h1>
+      <div class="user-skills-no-data-icon-subtext">*** No Data Available ***</div>
+    </div>
+    <apexchart v-if="chart.dataLoaded"
+               :class="{'disabled': !chart.hasData}"
+               class="skills-chart skills-bordered-component"
+               height="350" :type="chart.chartType"
+               :options="chart.options" :series="chart.series">
+    </apexchart>
+  </div>
+</template>
+
+<script>
+  export default {
+    name: 'SkillsChart',
+    props: {
+      projectId: String,
+      chart: {
+        type: Object,
+        default: () => ({}),
+      },
+    },
+    created() {
+      // add random data for an empty chart
+      if (!this.chart.hasData) {
+        this.chart.series[0].data = [
+          { x: '0', y: 2 },
+          { x: '1', y: 1 },
+          { x: '2', y: 0 },
+          { x: '3', y: 4 },
+          { x: '4', y: 5 },
+          { x: '5', y: 3 },
+        ];
+        this.chart.options.theme = {
+          monochrome: {
+            enabled: true,
+            color: '#efefef',
+          },
+        };
+      }
+    },
+  };
+</script>
+
+<style scoped>
+
+  .skills-chart {
+    min-width: 350px;
+  }
+
+  .disabled {
+    opacity: 0.3;
+  }
+
+  .disabled-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #666666;
+    opacity: 0;
+    z-index: 999;
+  }
+
+  .user-skills-no-data-icon-text {
+    font-weight: 700;
+    background-color: #eaeaea;
+    color: #f10d1a;
+    opacity: 0.8;
+    position: absolute;
+    left: 0;
+    top: 50%;
+    z-index: 1000;
+    text-align: center;
+    width: 100%;
+    transform: translateY(-50%);
+  }
+  .user-skills-no-data-icon-subtext {
+    font-size: 0.9em;
+    color: grey;
+    display: block;
+  }
+</style>
