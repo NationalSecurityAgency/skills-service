@@ -54,7 +54,7 @@ class LevelPointsSettingListener implements SettingChangedListener{
                 convertToPoints(it.levelDefinitions, it.totalPoints)
             }
         }else if(!setting.isEnabled()){
-            log.info("convering all levels for project [${setting.projectId}] (including skill levels) to percentages")
+            log.info("converting all levels for project [${setting.projectId}] (including skill levels) to percentages")
             convertToPercentage(project.levelDefinitions, project.totalPoints)
             project.subjects?.each{
                 convertToPercentage(it.levelDefinitions, it.totalPoints)
@@ -79,6 +79,19 @@ class LevelPointsSettingListener implements SettingChangedListener{
     }
 
     private void convertToPercentage(List<LevelDef> levelDefs, int totalPoints){
+        levelDefs.sort({ it.level })
+
+        Integer highestLevelPoints = levelDefs?.last()?.pointsFrom
+        if(highestLevelPoints > totalPoints){
+            //this means that skills were deleted since the levels were converted to points/edited
+            //if we convert as-is to percentages, we'll wind up with invalid percentage values
+            log.warn("totalPoints [$totalPoints] are lower " +
+                    "then the highest level's pointsFrom [${highestLevelPoints}], " +
+                    "this would create invalid percentage values. Using [${highestLevelPoints}] as totalPoints for purposes of conversion")
+            //since we don't know what the total was before deletion, let's model the percentages off the highest level points being 92%
+            //since that's what we do for the default, otherwise the last level would be 100%
+            totalPoints = highestLevelPoints*1.08
+        }
         levelDefs.eachWithIndex { LevelDef entry, int i ->
             entry.percent = (int) (((double) entry.pointsFrom / totalPoints) * 100d)
             levelDefRepo.save(entry)
