@@ -7,14 +7,14 @@
     </div>
 
     <div class="columns is-multiline">
-      <div v-for="(chart, index) in chartsWithData" class="column" :class="index == 0 ? 'is-full' : ''" :key="chart.options.id">
+      <div v-for="(chart, index) in loadedCharts" class="column" :class="index == 0 ? 'is-full' : ''" :key="chart.options.id">
         <div class="column" :class="index == 0 ? 'is-full' : ''" >
           <skills-chart :chart="chart" :project-id="projectId"></skills-chart>
         </div>
       </div>
     </div>
 
-    <div v-if="chartsWithoutData.length > 0" class="columns">
+    <div v-if="loadableCharts.length > 0" class="columns">
       <div class="column is-full">
         <div class="skills-bordered-component">
           <div class="columns">
@@ -23,9 +23,11 @@
             </div>
           </div>
           <div class="columns is-multiline">
-            <div v-for="chart in chartsWithoutData" class="column is-one-third" :key="chart.options.id">
+            <div v-for="chart in loadableCharts" class="column is-one-third" :key="chart.options.id">
               <stat-card :title="chart.chartMeta.title" :subtitle="chart.chartMeta.subtitle" :icon="chart.chartMeta.icon"
-                         :description="chart.chartMeta.description"></stat-card>
+                         :description="chart.chartMeta.description" :chart-builder-id="chart.chartMeta.chartBuilderId"
+                         @load-chart="loadChart">
+              </stat-card>
             </div>
           </div>
         </div>
@@ -48,7 +50,6 @@
       StatCard,
     },
     props: ['projectId'],
-    loadedCharts: [],
     data() {
       return {
         numDaysToShow: 120,
@@ -57,26 +58,34 @@
       };
     },
     mounted() {
-      this.loadData();
+      this.loadInitialCharts();
     },
     computed: {
-      chartsWithData() {
-        return this.charts.filter(chart => chart.hasData);
+      loadedCharts() {
+        return this.charts.filter(chart => chart.dataLoaded);
       },
-      chartsWithoutData() {
-        return this.charts.filter(chart => !chart.hasData);
+      loadableCharts() {
+        return this.charts.filter(chart => !chart.dataLoaded);
       },
     },
     methods: {
-      loadData() {
+      loadInitialCharts() {
         StatsService.getChartsForProjectSection(this.projectId, this.numDaysToShow).then((response) => {
           this.charts = response;
-          this.loadedCharts = this.charts.map(chart => chart.options.id);
+          this.isLoading = false;
+        }).finally(() => {
           this.isLoading = false;
         });
       },
-      loading(id) {
-        return !this.loadedCharts.includes(id);
+      loadChart(chartBuilderId) {
+        this.isLoading = true;
+        StatsService.getChartForProjectSection(this.projectId, chartBuilderId, this.numDaysToShow).then((response) => {
+          this.charts.splice(this.charts.findIndex(it => it.chartMeta.chartBuilderId === chartBuilderId), 1);
+          this.charts.push(response);
+          this.isLoading = false;
+        }).finally(() => {
+          this.isLoading = false;
+        });
       },
     },
   };

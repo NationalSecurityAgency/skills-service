@@ -37,14 +37,17 @@ class MetricsService {
         return chartBuildersMap.get(section).collect { builder ->
             boolean loadData = loadFirst < 0 || ++i <= loadFirst
             MetricsChart chart = builder.build(projectId, props, loadData)
+            chart.dataLoaded = loadData
             chart.chartOptions.put(ChartOption.chartBuilderId, builder.class.name)
             return chart
         }
     }
 
-    MetricsChart loadChartWithData(String builderId, Section section, String projectId, Map<String, String> props) {
-        MetricsChartBuilder chartBuilder = chartBuildersMap.get(section).find { it.class.name == 'id'}
+    MetricsChart loadChartForSection(String builderId, Section section, String projectId, Map<String, String> props) {
+        MetricsChartBuilder chartBuilder = chartBuildersMap.get(section).find { it.class.name == builderId}
         assert chartBuilder, "Unknown chart builder id [$builderId]"
-        return chartBuilder.build(projectId, props, true)
+        MetricsChart chart = chartBuilder.build(projectId, props, true)
+        chart.dataLoaded = true
+        return chart
     }
 }

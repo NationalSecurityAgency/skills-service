@@ -9,6 +9,7 @@ import skills.service.controller.result.model.CountItem
 class MetricsChart {
 
     ChartType chartType
+    boolean dataLoaded = false
     String icon
 
     Map<ChartOption, Object> chartOptions = [:]

@@ -27,7 +27,7 @@ class TopAchievedChartBuilder implements MetricsChartBuilder {
 
     @Override
     MetricsChart build(String projectId, Map<String, String> props, boolean loadData=true) {
-        List<CountItem> dataItems = (loadData ? adminUsersService.getUserCountsPerLevel(projectId) : []) as List<CountItem>
+        List<CountItem> dataItems = [] //(loadData ? adminUsersService.getUserCountsPerLevel(projectId) : []) as List<CountItem>
 
         MetricsChart metricsChart = new MetricsChart(
                 chartType: ChartType.VerticalBarChart,
