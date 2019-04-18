@@ -49,6 +49,10 @@ class RuleSetDefinitionScoreUpdater {
         parents?.each {
             walkUpAndSubtractFromTotal(it.parent, skillDef.totalPoints)
         }
+        if(SkillDef.ContainerType.Skill == skillDef.type){
+            ProjDef projDef = projDefRepo.findByProjectId(skillDef.projectId)
+            projDef.totalPoints -= skillDef.totalPoints
+        }
     }
 
     private void walkUpAndSubtractFromTotal(SkillDef skillDef, int pointsToSubtract) {
