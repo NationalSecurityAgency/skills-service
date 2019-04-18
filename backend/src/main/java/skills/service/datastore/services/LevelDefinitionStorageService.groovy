@@ -213,7 +213,8 @@ class LevelDefinitionStorageService {
                     pointsFrom: fromPts,
                     pointsTo: toPts,
                     name: entry.name,
-                    iconClass: entry.iconClass
+                    iconClass: entry.iconClass,
+                    achievable: fromPts <= totalPoints
                     )
         }
         return finalRes

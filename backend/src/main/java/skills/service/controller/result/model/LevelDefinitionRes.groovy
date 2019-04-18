@@ -14,4 +14,6 @@ class LevelDefinitionRes {
 
     String iconClass
     String name
+
+    boolean achievable = true
 }

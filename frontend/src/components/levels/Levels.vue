@@ -28,6 +28,10 @@
         <span slot="iconClass" slot-scope="props">
           <div class="">
               <i class="has-text-info subject-icon skills-icon level-icon" v-bind:class="`${props.row.iconClass}`"></i>
+              <b-tooltip v-if="props.row.achievable === false" label="Level is unachievable. Insufficient available points in project."
+                         position="is-top" animanted="true" type="is-light" multilined>
+              <span><i class="icon-warning fa fa-exclamation-circle"></i></span>
+            </b-tooltip>
             </div>
         </span>
         <span slot="pointsFrom" slot-scope="props">
@@ -295,6 +299,9 @@
     display: none;
   }
 
+  .icon-warning {
+    font-size: 1.5rem;
+  }
 
 </style>
 
