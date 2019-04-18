@@ -17,6 +17,10 @@ export default {
     return axios.get(`/admin/projects/${projectId}/metrics?numDays=${numDays}&loadDataForFirst=${loadDataForFirst}`)
       .then(response => Promise.resolve(this.buildCharts(response.data)));
   },
+  getChartForProjectSection(projectId, chartBuilderId, numDays) {
+    return axios.get(`/admin/projects/${projectId}/metrics/${chartBuilderId}?numDays=${numDays}`)
+      .then(response => Promise.resolve(this.buildChart(response.data)));
+  },
 
   buildCharts(data) {
     return data.map(item => this.buildChart(item));
@@ -25,12 +29,14 @@ export default {
   buildChart(chartData) {
     const chartType = (chartData.chartType === 'LineChart') ? 'line' : 'bar';
     const hasData = Array.isArray(chartData.dataItems) && chartData.dataItems.length;
+    const { dataLoaded } = chartData;
     const series = this.buildSeries(chartData);
     const chartMeta = chartData.chartOptions;
     const options = this.buildOptions(chartData.chartType, chartData.chartOptions);
     return {
       chartType,
       hasData,
+      dataLoaded,
       options,
       chartMeta,
       series,

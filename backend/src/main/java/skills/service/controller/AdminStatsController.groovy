@@ -36,7 +36,7 @@ class AdminStatsController {
 
     @RequestMapping(value = "/projects/{projectId}/metrics/{chartBuilderId}", method =  RequestMethod.GET, produces = "application/json")
     MetricsChart getProjectMetricsChart(@PathVariable("projectId") String projectId, @PathVariable(ChartParams.CHART_BUILDER_ID) String chartBuilderId, @RequestParam Map<String,String> chartProps){
-        return metricsService.loadChartsForSection(chartBuilderId, Section.Projects, projectId, chartProps)
+        return metricsService.loadChartForSection(chartBuilderId, Section.Projects, projectId, chartProps)
     }
 
     enum StatType {
