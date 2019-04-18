@@ -102,7 +102,7 @@
   import Popper from 'vue-popperjs';
   import ProgressBar from 'vue-simple-progress';
 
-  import 'vue-popperjs/dist/css/vue-popper.css';
+  import 'vue-popperjs/dist/vue-popper.css';
 
   /* Hack for ribbon color. Ultimately backend will send ribbon color */
   let index = 0;
