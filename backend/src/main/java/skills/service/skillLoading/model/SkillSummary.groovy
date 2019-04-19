@@ -9,6 +9,7 @@ class SkillSummary  {
     String skill
 
     int pointIncrement
+    int pointIncrementInterval
 
     int points
     int totalPoints
