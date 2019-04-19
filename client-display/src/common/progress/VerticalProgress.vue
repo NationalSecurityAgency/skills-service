@@ -41,7 +41,7 @@
       },
       barSize: {
         type: Number,
-        default: 18,
+        default: 22,
       },
     },
   };
@@ -73,7 +73,7 @@
 
   .locked-icon {
     position: absolute;
-    top: -3px;
+    /*top: -5px;*/
     left: 50%;
     color: #5d5d5d;
   }
