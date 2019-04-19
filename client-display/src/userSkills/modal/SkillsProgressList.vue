@@ -4,24 +4,8 @@
             <skills-subject-skill-row v-if="subject.skills && subject.skills.length > 0"
                                       v-for="(skill, index) in subject.skills" :key="`unique-skill-${index}`"
                                       :skill="skill" :show-description="showDescriptionsInternal"/>
-
-            <div v-if="!(subject.skills && subject.skills.length > 0)" class="row my-2 text-secondary">
-                <div class="col">
-                    <span class="fa-stack fa-3x " style="vertical-align: top;">
-                      <i class="fas fa-circle fa-stack-2x"></i>
-                      <i class="fas fa-battery-empty fa-stack-1x fa-inverse"></i>
-                    </span>
-                </div>
-                <div class="w-100"></div>
-                <div class="col pt-2">
-                    <h3>No Skills have been added yet.</h3>
-                </div>
-                <div class="w-100"></div>
-                <div class="col">
-                    Please contact this project's administrator.
-                </div>
-
-            </div>
+            <no-data-yet v-if="!(subject.skills && subject.skills.length > 0)" class="my-2"
+                    title="Skills have not been added yet." sub-title="Please contact this project's administrator."/>
         </div>
 
         <div v-if="subject.skills && subject.skills.length > 0" class="card-footer">
@@ -44,9 +28,11 @@
 <script>
     import SkillsSubjectSkillRow from '@/userSkills/modal/SkillsSubjectSkillRow.vue';
     import ToggleButton from 'vue-js-toggle-button/src/Button.vue';
+    import NoDataYet from '@/common/utilities/NoDataYet.vue';
 
     export default {
         components: {
+            NoDataYet,
             SkillsSubjectSkillRow,
             ToggleButton,
         },
