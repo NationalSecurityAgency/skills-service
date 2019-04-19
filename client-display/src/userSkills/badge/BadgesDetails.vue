@@ -1,6 +1,6 @@
 <template>
     <div v-if="!loading" class="container">
-        <ribbon :color="green">
+        <ribbon>
             Badges
         </ribbon>
 

@@ -1,5 +1,5 @@
 <template>
-    <div class="row">
+    <div v-if=badge class="row">
         <div class="col-lg-2">
             <div class="card mb-2">
                 <div class="card-body">
@@ -35,10 +35,6 @@
             <slot name="body-footer" v-bind:props="badge">
 
             </slot>
-
-<!--            <router-link :to="{ name: 'badgeDetails', params: { badgeId: badge.badgeId }}" tag="button" class="btn btn-info btn-sm mr-1 text-uppercase">-->
-<!--                View Details-->
-<!--            </router-link>-->
         </div>
     </div>
 </template>
@@ -54,7 +50,6 @@
         props: {
             badge: {
                 type: Object,
-                required: true,
             },
         },
         computed: {
