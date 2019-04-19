@@ -1,9 +1,12 @@
 <template>
-  <div class='legend border rounded'>
-    <div class='legend-scale'>
-      <ul class='legend-labels'>
-        <li v-for="item in items" v-bind:key="item.label">
-          <span v-bind:style=' {background: item.color }'></span>{{ item.label }}
+  <div class='card' style="min-width: 13rem;">
+    <div class="card-header">
+      <h6 class="card-title mb-0 float-left">Node Legend</h6>
+    </div>
+    <div class='card-body'>
+      <ul class='text-left p-0 mb-0'>
+        <li v-for="item in items" v-bind:key="item.label" class="legend-list-item mb-0">
+          <span v-bind:style=' {background: item.color }' class="mr-2 mb-0 border border-secondary rounded"></span>{{ item.label }}
         </li>
       </ul>
     </div>
@@ -18,42 +21,16 @@
 </script>
 
 <style scoped>
-  .legend {
-    padding: 10px 10px 5px 10px;
-    max-width: 20rem;
-  }
-  .legend .legend-labels {
-    text-align: left;
-    color: black;
-  }
-
-  .legend .legend-scale ul {
-    margin: 0;
-    margin-bottom: 5px;
-    padding: 0;
-    float: left;
+  .legend-list-item {
+    font-size: 0.8rem;
     list-style: none;
   }
 
-  .legend .legend-scale ul li {
-    font-size: 80%;
-    list-style: none;
-    margin-left: 0;
-    line-height: 18px;
-    margin-bottom: 2px;
-  }
-
-  .legend ul.legend-labels li span {
+  .legend-list-item span {
     display: block;
     float: left;
     height: 16px;
     width: 30px;
-    margin-right: 5px;
-    margin-left: 0;
-    border: 1px solid #999;
   }
 
-  .legend a {
-    color: #777;
-  }
 </style>

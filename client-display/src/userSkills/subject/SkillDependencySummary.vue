@@ -1,14 +1,20 @@
 <template>
-    <div class="skills-dep-container container" style="max-width: 18rem;">
-        <div class="row">
-            <div class="col-md-9 text-left">
-                <strong>{{ numDependencies }}</strong> Dependencies
-            </div>
-            <div class="col-md-3">
-                <span class="text-muted">{{ percentComplete }}%</span>
-            </div>
+    <div class="card">
+        <div class="card-header">
+            <h6 class="card-title mb-0 float-left">Progress</h6>
         </div>
-        <progress-bar bar-color="lightgreen" :val="percentComplete"></progress-bar>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-8 text-left">
+                    <strong>{{ numDependencies }}</strong> Dependencies
+                </div>
+                <div class="col-4">
+                    <span class="text-muted">{{ percentComplete }}%</span>
+                </div>
+            </div>
+            <progress-bar bar-color="lightgreen" :val="percentComplete"></progress-bar>
+        </div>
+
     </div>
 </template>
 
@@ -43,12 +49,4 @@
 </script>
 
 <style scoped>
-    .skills-dep-container {
-        border: #e3e3e3 solid 1px;
-        border-radius: 5px;
-        padding: 15px 17px 15px 15px;
-    }
-    .skills-dep-container strong {
-        font-size: 1.4rem;
-    }
 </style>
