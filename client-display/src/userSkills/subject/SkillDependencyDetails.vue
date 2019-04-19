@@ -2,17 +2,11 @@
     <transition name="node-transition" enter-active-class="animated zoomIn" leave-active-class="animated zoomOut">
         <div id="node-details-info" class="skill-details-container">
 
-            <div class="panel panel-info">
-                <div class="panel-heading">
-                    <modal-header
-                            slot="header"
-                            class="text-left"
-                            icon-class="fa fa-bar-chart"
-                            :title="title"
-                            @cancel="close"/>
-
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="card-title mb-0 float-left">{{ title }}</h6>
                 </div>
-                <div class="panel-body text-left">
+                <div class="card-body text-left">
                     <div class="row">
                         <div class="col-md-9 text-left">
                             {{ progress.currentPoints }} / {{ progress.totalPoints }} Points
@@ -25,17 +19,23 @@
                         <progress-bar bar-color="lightgreen" :val="progress.percentComplete"></progress-bar>
                     </div>
                     <div>
-                        <p class="skill-description">{{ nodeDetailsView.skill.description.description }}</p>
+                        <p class="skill-description"><small>{{ nodeDetailsView.skill.description.description }}</small></p>
                     </div>
                 </div>
-                <div class="panel-footer" style="min-height: 5rem;">
-                    <span v-show="nodeDetailsView.skill.description.href" class="pull-left">
-                        <span>Need help?</span>
-                        <a :href="nodeDetailsView.skill.description.href" target="_blank">
-                            Click here!
-                        </a>
-                    </span>
-                    <button class="btn btn-info pull-right" v-on:click="close">OK</button>
+                <div class="card-footer">
+                    <div class="row">
+                        <div v-show="nodeDetailsView.skill.description.href" class="col text-left">
+                            <span>Need help?</span>
+                            <a :href="nodeDetailsView.skill.description.href" target="_blank">
+                                Click here!
+                            </a>
+                        </div>
+                        <div class="col text-right">
+                            <button class="btn btn-info pull-right" v-on:click="close">OK</button>
+                        </div>
+                    </div>
+
+
                 </div>
             </div>
         </div>
@@ -58,7 +58,6 @@
         props: {
             nodeDetailsView: {
                 type: Object,
-                required: true,
             },
         },
         mounted() {
@@ -98,32 +97,29 @@
     .skill-details-container {
         position: absolute;
         z-index: 100;
-        max-width: 40rem;
+        max-width: 30rem;
     }
 
     .skill-details-container .skill-description {
         margin-top: 1rem;
-        height: 15rem;
+        height: 12rem;
         overflow: auto;
     }
 
-    .skill-description::-webkit-scrollbar-track
-    {
-        -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+    .skill-description::-webkit-scrollbar-track {
+        -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
         background-color: #F5F5F5;
         border-radius: 5px;
     }
 
 
-    .skill-description::-webkit-scrollbar
-    {
+    .skill-description::-webkit-scrollbar {
         width: 5px;
         background-color: #F5F5F5;
         border-radius: 5px;
     }
 
-    .skill-description::-webkit-scrollbar-thumb
-    {
+    .skill-description::-webkit-scrollbar-thumb {
         background-color: #585858;
         border-radius: 5px;
     }
