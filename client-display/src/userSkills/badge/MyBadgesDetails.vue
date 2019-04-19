@@ -9,7 +9,7 @@
             </span>
         </div>
         <div class="card-body">
-            <no-earned-badges v-if="!badges || badges.length === 0"></no-earned-badges>
+            <no-data-yet v-if="!badges || badges.length === 0" title="No badges earned yet." sub-title="Take a peak at the catalog below to get started!"/>
 
             <div v-if="badges && badges.length > 0" class="row justify-content-md-center">
                 <div v-for="badge in badges" v-bind:key="badge.badgeId" class="col-lg-3 col-sm-6 my-2">
@@ -33,11 +33,11 @@
 </template>
 
 <script>
-    import NoEarnedBadges from '@/userSkills/badge/NoEarnedBadges.vue';
+    import NoDataYet from '@/common/utilities/NoDataYet.vue';
 
     export default {
         name: 'MyBadgesDetails',
-        components: { NoEarnedBadges },
+        components: { NoDataYet },
         props: {
             badges: {
                 type: Array,
