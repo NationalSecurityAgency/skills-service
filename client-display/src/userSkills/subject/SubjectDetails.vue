@@ -24,25 +24,6 @@
       <skills-progress-list
         :subject="subject"
         :show-descriptions="showDescriptions" />
-
-      <div class="pull-left">
-        <span>
-          Need help?
-          <a
-            :href="helpTipHref" style="padding-right: 10px"
-            target="_blank">Click here!</a>
-        </span>
-        <div class="description-toggle-container">
-          <span>
-          <span class="text-muted">User skills descriptions:&nbsp;</span>
-          </span>
-          <toggle-button
-              v-model="showDescriptions"
-              :labels="{ checked: 'On', unchecked: 'Off' }"
-              @change="toggleDescriptions">
-          </toggle-button>
-        </div>
-      </div>
     </div>
   </section>
 </template>
