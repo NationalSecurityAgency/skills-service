@@ -159,7 +159,7 @@ class SkillsLoader {
                 projectId: skillDef.projectId, projectName: projDef.name,
                 skillId: skillDef.skillId, skill: skillDef.name,
                 points: points?.points ?: 0, todaysPoints: todayPoints?.points ?: 0,
-                pointIncrement: skillDef.pointIncrement, totalPoints: skillDef.totalPoints,
+                pointIncrement: skillDef.pointIncrement, pointIncrementInterval: skillDef.pointIncrementInterval, totalPoints: skillDef.totalPoints,
                 description: new SkillDescription(description: skillDef.description, href: skillDef.helpUrl),
 //                dependencyInfo: new SkillDependencySummary(numDirectDependents: skillDependencyInfo.)
         )
@@ -282,7 +282,7 @@ class SkillsLoader {
                     projectId: skillDef.projectId, projectName: projDef.name,
                     skillId: skillDef.skillId, skill: skillDef.name,
                     points: points, todaysPoints: todayPoints,
-                    pointIncrement: skillDef.pointIncrement, totalPoints: skillDef.totalPoints,
+                    pointIncrement: skillDef.pointIncrement, pointIncrementInterval: skillDef.pointIncrementInterval, totalPoints: skillDef.totalPoints,
                     description: new SkillDescription(description: skillDef.description, href: skillDef.helpUrl),
                     dependencyInfo: skillDefAndUserPoints.dependencyInfo
             )

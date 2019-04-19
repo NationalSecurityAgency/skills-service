@@ -1,13 +1,5 @@
 <template>
   <user-skill-progress :skill="skill" :show-description="showDescription" @progressbar-clicked="skillRowClicked" />
-<!--  <div class="row">-->
-<!--    <div class="col-sm-4 text-right">-->
-<!--      <small class="d-inline-block text-truncate font-weight-bold">{{ skill.skill }}</small>-->
-<!--    </div>-->
-<!--    <div class="col-md-8">-->
-<!--      <user-skill-progress :skill="skill" :show-description="showDescription" @progressbar-clicked="skillRowClicked" />-->
-<!--    </div>-->
-<!--  </div>-->
 </template>
 
 <script>
