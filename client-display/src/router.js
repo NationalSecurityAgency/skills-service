@@ -34,7 +34,7 @@ const router = new VueRouter({
       props: true,
     },
     {
-      path: '/badgeDetails/:badgeId',
+      path: '/badges/:badgeId',
       component: BadgeDetails,
       name: 'badgeDetails',
       props: true,
