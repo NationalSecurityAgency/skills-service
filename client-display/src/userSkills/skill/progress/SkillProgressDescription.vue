@@ -31,7 +31,7 @@
 
 <script>
     import marked from 'marked';
-    import SkillSummaryCards from '@/userSkills/skill/SkillSummaryCards.vue';
+    import SkillSummaryCards from '@/userSkills/skill/progress/SkillSummaryCards.vue';
 
     export default {
         name: 'SkillProgressDescription',

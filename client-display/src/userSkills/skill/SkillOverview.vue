@@ -36,9 +36,9 @@
 </template>
 
 <script>
-    import ProgressBar from '@/userSkills/skill/ProgressBar.vue';
-    import SkillProgressDescription from '@/userSkills/modal/SkillProgressDescription.vue';
-    import SkillSummaryCards from '@/userSkills/skill/SkillSummaryCards.vue';
+    import ProgressBar from '@/userSkills/skill/progress/ProgressBar.vue';
+    import SkillProgressDescription from '@/userSkills/skill/progress/SkillProgressDescription.vue';
+    import SkillSummaryCards from '@/userSkills/skill/progress/SkillSummaryCards.vue';
 
     export default {
         name: 'SkillOverview',

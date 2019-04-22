@@ -32,7 +32,7 @@
   import UserSkillsHeader from '@/userSkills/UserSkillsHeader.vue';
   import UserSkillsService from '@/userSkills/service/UserSkillsService';
   import Ribbon from '@/common/ribbon/Ribbon.vue';
-  import SkillsProgressList from '@/userSkills/modal/SkillsProgressList.vue';
+  import SkillsProgressList from '@/userSkills/skill/progress/SkillsProgressList.vue';
 
   import marked from 'marked';
 

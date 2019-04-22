@@ -22,8 +22,8 @@
 </template>
 
 <script>
-    import SkillProgressDescription from '@/userSkills/modal/SkillProgressDescription.vue';
-    import ProgressBar from '@/userSkills/skill/ProgressBar.vue';
+    import SkillProgressDescription from '@/userSkills/skill/progress/SkillProgressDescription.vue';
+    import ProgressBar from '@/userSkills/skill/progress/ProgressBar.vue';
 
 
     export default {
