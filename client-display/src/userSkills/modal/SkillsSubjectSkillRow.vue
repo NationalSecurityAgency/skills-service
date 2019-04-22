@@ -1,34 +1,26 @@
 <template>
-  <user-skill-progress :skill="skill" :show-description="showDescription" @progressbar-clicked="skillRowClicked" />
+  <skill-progress :skill="skill" :show-description="showDescription" @progressbar-clicked="skillRowClicked" />
 </template>
 
 <script>
-  import UserSkillProgress from '@/userSkills/modal/SkillProgress.vue';
+  import SkillProgress from '@/userSkills/modal/SkillProgress.vue';
 
   export default {
     components: {
-      UserSkillProgress,
+      SkillProgress,
     },
     props: {
       skill: Object,
       showDescription: Boolean,
     },
-    computed: {
-      locked() {
-        return this.skill.dependencyInfo && !this.skill.dependencyInfo.achieved;
-      },
-    },
     methods: {
       skillRowClicked() {
-        // only respond to events if the row is locked and we need to display dependency component
-        if (this.locked) {
-          this.$router.push({
-            name: 'skillDependencies',
-            params: {
-              skillId: this.skill.skillId,
-            },
-          });
-        }
+        this.$router.push({
+          name: 'skillDependencies',
+          params: {
+            skillId: this.skill.skillId,
+          },
+        });
       },
     },
   };

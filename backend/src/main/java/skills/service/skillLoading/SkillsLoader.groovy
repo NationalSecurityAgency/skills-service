@@ -48,6 +48,8 @@ class SkillsLoader {
     @Autowired
     SubjectDataLoader subjectDataLoader
 
+    @Autowired
+    DependencySummaryLoader dependencySummaryLoader
 
     @Transactional(readOnly = true)
     Integer getUserLevel(String projectId, String userId) {
@@ -148,12 +150,14 @@ class SkillsLoader {
     }
 
     @Transactional(readOnly = true)
-    SkillSummary loadSkillSummary(String projectId, String userId, String skillId) {
+    SkillSummary loadSkillSummary(String projectId, String userId, String skillId, Integer version = Integer.MAX_VALUE) {
         ProjDef projDef = getProjDef(projectId)
         SkillDef skillDef = getSkillDef(projectId, skillId, SkillDef.ContainerType.Skill)
 
         UserPoints points = userPointsRepo.findByProjectIdAndUserIdAndSkillIdAndDay(projectId, userId, skillId, null)
-        UserPoints todayPoints = userPointsRepo.findByProjectIdAndUserIdAndSkillIdAndDay(projectId, userId, skillId, null)
+        UserPoints todayPoints = userPointsRepo.findByProjectIdAndUserIdAndSkillIdAndDay(projectId, userId, skillId, new Date().clearTime())
+
+        SkillDependencySummary skillDependencySummary = dependencySummaryLoader.loadDependencySummary(userId, projectId, skillId, version)
 
         return new SkillSummary(
                 projectId: skillDef.projectId, projectName: projDef.name,
@@ -161,7 +165,7 @@ class SkillsLoader {
                 points: points?.points ?: 0, todaysPoints: todayPoints?.points ?: 0,
                 pointIncrement: skillDef.pointIncrement, pointIncrementInterval: skillDef.pointIncrementInterval, totalPoints: skillDef.totalPoints,
                 description: new SkillDescription(description: skillDef.description, href: skillDef.helpUrl),
-//                dependencyInfo: new SkillDependencySummary(numDirectDependents: skillDependencyInfo.)
+                dependencyInfo: skillDependencySummary
         )
     }
 

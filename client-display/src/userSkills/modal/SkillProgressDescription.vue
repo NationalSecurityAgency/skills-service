@@ -6,20 +6,8 @@
                 Click <i class="fas fa-lock icon"></i> to see its dependencies. ***
             </div>
         </div>
-        <div v-else class="row mb-2 mt-0 px-3 justify-content-center">
-            <div class="col-lg-4 mb-2 my-lg-0 px-1">
-                <progress-info-card :points="skill.points" label="Overall Points" icon="fa fa-running text-primary"/>
-            </div>
-
-            <div class="col-lg-4 mb-2 my-lg-0 px-1">
-                <progress-info-card :points="skill.todaysPoints" label="Today's Points"
-                                    icon="fa fa-clock text-warning"/>
-            </div>
-
-            <div class="col-lg-4 m-b2 my-lg-0 px-1">
-                <progress-info-card :points="skill.pointIncrement" :label="pointIncrementLabel"
-                                    icon="fa fa-user-clock text-success"/>
-            </div>
+        <div v-else>
+            <skill-summary-cards class="mb-3" :skill="skill"/>
         </div>
 
 
@@ -43,14 +31,13 @@
 
 <script>
     import marked from 'marked';
-    import ProgressInfoCard from '@/userSkills/modal/ProgressInfoCard.vue';
+    import SkillSummaryCards from '@/userSkills/skill/SkillSummaryCards.vue';
 
     export default {
         name: 'SkillProgressDescription',
-        components: { ProgressInfoCard },
+        components: { SkillSummaryCards },
         props: {
             skill: Object,
-            locked: Boolean,
         },
         methods: {
             parseMarkdown(markdown) {
@@ -58,8 +45,8 @@
             },
         },
         computed: {
-            pointIncrementLabel() {
-                return `Per ${this.skill.pointIncrementInterval} hours allowance`;
+            locked() {
+                return this.skill.dependencyInfo && !this.skill.dependencyInfo.achieved;
             },
         },
     };
