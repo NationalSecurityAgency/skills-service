@@ -7,9 +7,15 @@
       class="disabled-overlay" />
     <div
       v-if="!hasData"
-      class="text-center user-skills-no-data-icon-text">
-      <h1 class="">Locked</h1>
-      <div class="user-skills-no-data-icon-subtext">*** Earn more points to unlock points progress chart! ***</div>
+      class="text-center user-skills-no-data-icon-text text-danger">
+        <div class="row justify-content-center">
+          <div class="col-5 text-center border rounded bg-light p-2">
+            <div style="font-size: 1rem;" class="text-uppercase"><i class="fa fa-lock"></i> Locked</div>
+            <small class="text-black-50">*** Earn more points to unlock this chart! ***</small>
+          </div>
+        </div>
+<!--      <h1 class="">Locked</h1>-->
+<!--      <div class="user-skills-no-data-icon-subtext">*** Earn more points to unlock points progress chart! ***</div>-->
     </div>
     <div class="card-header">
       <h6 class="card-title mb-0 float-left">Point History</h6>
@@ -130,8 +136,8 @@
 
   .user-skills-no-data-icon-text {
     font-weight: 700;
-    background-color: #eaeaea;
-    color: #f10d1a;
+    /*background-color: #eaeaea;*/
+    /*color: #f10d1a;*/
     opacity: 0.8;
     position: absolute;
     left: 0;
