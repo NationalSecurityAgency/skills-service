@@ -631,17 +631,21 @@ class AdminProjService {
         return res
     }
 
-    private void resetDisplayOrderAttributes(SkillDef parentSkill) {
+    private void resetDisplayOrderAttributes(SkillDef parentSkill, String deletedSkillId) {
         List<SkillDef> ciblings = ruleSetDefGraphService.getChildrenSkills(parentSkill)
         ciblings = ciblings.sort({ it.displayOrder })
         int i = 0
         List<SkillDef> toSave = []
         ciblings.each {
-            if (it.displayOrder != i) {
-                it.displayOrder = i
-                toSave.add(it)
+            //getChildrenSkills returns the SkillDef that was deleted earlier in the transaction
+            //we need to exclude it from toSave
+            if(it.skillId != deletedSkillId) {
+                i++
+                if (it.displayOrder != i) {
+                    it.displayOrder = i
+                    toSave.add(it)
+                }
             }
-            i++
         }
         if (toSave) {
 
@@ -657,13 +661,14 @@ class AdminProjService {
 
         SkillDef parentSkill = ruleSetDefGraphService.getParentSkill(skillDefinition)
 
+
         ruleSetDefinitionScoreUpdater.skillToBeRemoved(skillDefinition)
         userPointsManagement.handleSkillRemoval(skillDefinition)
 
         deleteSkillWithItsDescendants(skillDefinition)
         log.info("Deleted skill [{}]", skillDefinition.skillId)
 
-        resetDisplayOrderAttributes(parentSkill)
+        resetDisplayOrderAttributes(parentSkill, skillDefinition.skillId)
     }
 
 

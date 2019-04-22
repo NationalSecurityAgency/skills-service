@@ -23,6 +23,7 @@ import javax.transaction.Transactional
 class LevelPointsSettingListener implements SettingChangedListener{
 
     static final int MIN_TOTAL_POINTS_REQUIRED_TO_SWITCH = 100
+    static final double SCALE_THRESHOLD = 1.3
 
     @Autowired
     ProjDefRepo projDefRepo
@@ -68,9 +69,6 @@ class LevelPointsSettingListener implements SettingChangedListener{
         }
         levelDefs.eachWithIndex{ LevelDef entry, int i ->
             Integer fromPts = levelScores.get(i)
-            /*if(i > 0){
-                fromPts+=1
-            }*/
             Integer toPts = (i != levelScores.size() - 1) ? levelScores.get(i + 1) : null
             entry.pointsFrom = fromPts
             entry.pointsTo = toPts
@@ -82,6 +80,8 @@ class LevelPointsSettingListener implements SettingChangedListener{
         levelDefs.sort({ it.level })
 
         Integer highestLevelPoints = levelDefs?.last()?.pointsFrom
+        double scaler = 1.0;
+
         if(highestLevelPoints > totalPoints){
             //this means that skills were deleted since the levels were converted to points/edited
             //if we convert as-is to percentages, we'll wind up with invalid percentage values
@@ -91,9 +91,26 @@ class LevelPointsSettingListener implements SettingChangedListener{
             //since we don't know what the total was before deletion, let's model the percentages off the highest level points being 92%
             //since that's what we do for the default, otherwise the last level would be 100%
             totalPoints = highestLevelPoints*1.08
+        } else if (SCALE_THRESHOLD*highestLevelPoints < totalPoints){
+            //this will result in an approximation as we don't know for sure the user's original intent
+            //but it will at least make more sense then leaving it untouched in this scenario.
+            log.info("skills were added after defining levels as points, attempting to scale the current point posture to the total points")
+            scaler = totalPoints/highestLevelPoints.toDouble()
         }
+
+        LevelDef lastEntry = null
+
         levelDefs.eachWithIndex { LevelDef entry, int i ->
-            entry.percent = (int) (((double) entry.pointsFrom / totalPoints) * 100d)
+            double scaled = entry.pointsFrom * scaler
+            entry.percent = (int) ((scaled / totalPoints) * 100d)
+            if(entry.percent == 0){
+                //this can happen if someone adds a skill with a very large range of points after
+                //a conversion to points happens. The first few level points could be such a small percentage
+                //of the total that they would be effectively zero. Lets prevent that and use some sort of sensible default
+                //in those cases
+                entry.percent += 10+(lastEntry?.percent ? lastEntry.percent : 0)
+            }
+            lastEntry = entry
             levelDefRepo.save(entry)
         }
     }
