@@ -1,12 +1,10 @@
 <template>
     <div class="container">
-        <ribbon>
-            Badges
-        </ribbon>
-
-        <skills-spinner v-if="loading" :loading="loading" class="mt-5"/>
+        <skills-spinner :loading="loading"/>
 
         <div v-if="!loading">
+            <skills-title>Badges</skills-title>
+
             <my-badges-details :badges="achievedBadges"></my-badges-details>
             <badges-catalog v-if="badges && badges.length > 0" class="mt-3" :badges="badges"></badges-catalog>
         </div>
@@ -14,19 +12,19 @@
 </template>
 
 <script>
-    import Ribbon from '@/common/ribbon/Ribbon.vue';
     import MyBadgesDetails from '@/userSkills/badge/MyBadgesDetails.vue';
     import BadgesCatalog from '@/userSkills/badge/BadgesCatalog.vue';
     import UserSkillsService from '@/userSkills/service/UserSkillsService';
     import SkillsSpinner from '@/common/utilities/SkillsSpinner.vue';
+    import SkillsTitle from '@/common/utilities/SkillsTitle.vue';
 
     export default {
         name: 'BadgesDetails',
         components: {
+            SkillsTitle,
             SkillsSpinner,
             BadgesCatalog,
             MyBadgesDetails,
-            Ribbon,
         },
         data() {
           return {

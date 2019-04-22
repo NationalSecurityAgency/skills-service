@@ -1,12 +1,10 @@
 <template>
     <div class="container">
-        <ribbon>
-            Badge Details
-        </ribbon>
-
-        <skills-spinner v-if="loading" :loading="loading" class="mt-5"/>
+        <skills-spinner :loading="loading" />
 
         <div v-if="!loading">
+            <skills-title>Badge Details</skills-title>
+
             <div class="card">
                 <div class="card-body">
                     <badge-details-overview :badge="badge"></badge-details-overview>
@@ -19,7 +17,6 @@
 </template>
 
 <script>
-    import Ribbon from '@/common/ribbon/Ribbon.vue';
     import BadgeDetailsOverview from '@/userSkills/badge/BadgeDetailsOverview.vue';
     import SkillsProgressList from '@/userSkills/skill/progress/SkillsProgressList.vue';
     import SkillsSpinner from '@/common/utilities/SkillsSpinner.vue';
@@ -27,10 +24,11 @@
     import UserSkillsService from '@/userSkills/service/UserSkillsService';
 
     import 'vue-popperjs/dist/vue-popper.css';
+    import SkillsTitle from '@/common/utilities/SkillsTitle.vue';
 
     export default {
         components: {
-            Ribbon,
+            SkillsTitle,
             SkillsProgressList,
             BadgeDetailsOverview,
             SkillsSpinner,

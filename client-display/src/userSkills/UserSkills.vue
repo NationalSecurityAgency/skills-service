@@ -1,14 +1,10 @@
 <template>
   <div class="container">
-    <ribbon>
-      User Skills
-    </ribbon>
-
-    <div v-if="!isLoaded" class="mt-5">
-      <skills-spinner :loading="!isLoaded"/>
-    </div>
+    <skills-spinner :loading="!isLoaded"/>
 
     <div v-if="isLoaded">
+      <skills-title>User Skills</skills-title>
+
       <user-skills-header
         v-if="!error.message"
         :user-skills="userSkills"
@@ -39,7 +35,7 @@
   import ProgressBar from 'vue-simple-progress';
   import VerticalProgressBar from '@/common/progress/VerticalProgress.vue';
 
-  import Ribbon from '@/common/ribbon/Ribbon.vue';
+  import SkillsTitle from '@/common/utilities/SkillsTitle.vue';
   import StarProgress from '@/common/progress/StarProgress.vue';
 
   import { debounce } from 'lodash';
@@ -58,7 +54,7 @@
       ProgressBar,
       VerticalProgressBar,
       Popper,
-      Ribbon,
+      SkillsTitle,
       StarProgress,
       SubjectsContainer,
       SkillsSpinner,

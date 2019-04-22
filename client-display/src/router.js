@@ -22,7 +22,7 @@ const router = new VueRouter({
       component: SkillsEntry,
     },
     {
-      path: '/subject/:subjectId',
+      path: '/subjects/:subjectId',
       component: SubjectDetails,
       name: 'subjectDetails',
       props: true,
@@ -40,7 +40,7 @@ const router = new VueRouter({
       props: true,
     },
     {
-      path: '/skills/:skillId/dependencies',
+      path: '/skills/:skillId',
       component: SkillDetails,
       name: 'skillDependencies',
     },
