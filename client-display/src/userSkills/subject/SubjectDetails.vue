@@ -1,17 +1,12 @@
 <template>
-  <section
-    class="subject-detail-container">
-    <ribbon
-      v-if="subject"
-      :color="ribbonColor">
-      {{ subject.subject }}
-    </ribbon>
-    <div
-      v-if="subject && initialized"
-      class="user-skill-subject-body">
+  <section class="container">
+    <skills-spinner v-if="loading" :loading="loading" class="mt-5"></skills-spinner>
+
+    <div v-if="!loading" class="user-skill-subject-body">
+      <skills-title>{{ subject.subject }}</skills-title>
+
       <div class="user-skill-subject-overall">
-        <user-skills-header
-          :user-skills="subject" />
+        <user-skills-header :user-skills="subject" />
       </div>
 
       <div>
@@ -31,8 +26,9 @@
 <script>
   import UserSkillsHeader from '@/userSkills/UserSkillsHeader.vue';
   import UserSkillsService from '@/userSkills/service/UserSkillsService';
-  import Ribbon from '@/common/ribbon/Ribbon.vue';
+  import SkillsTitle from '@/common/utilities/SkillsTitle.vue';
   import SkillsProgressList from '@/userSkills/skill/progress/SkillsProgressList.vue';
+  import SkillsSpinner from '@/common/utilities/SkillsSpinner.vue';
 
   import marked from 'marked';
 
@@ -42,15 +38,16 @@
     components: {
       UserSkillsHeader,
       ToggleButton,
-      Ribbon,
+      SkillsTitle,
       SkillsProgressList,
+      SkillsSpinner,
     },
     props: {
       ribbonColor: String,
     },
     data() {
       return {
-        initialized: false,
+        loading: true,
         showDescriptions: false,
         subject: null,
       };
@@ -65,7 +62,6 @@
     },
     mounted() {
       this.showDescriptions = false;
-      this.initialized = true;
       this.fetchData();
     },
     methods: {
@@ -73,6 +69,7 @@
         UserSkillsService.getSubjectSummary(this.$route.params.subjectId)
           .then((result) => {
             this.subject = result;
+            this.loading = false;
           });
       },
       parseMarkdown(text) {
@@ -87,11 +84,6 @@
 </script>
 
 <style>
-  .subject-detail-container {
-    max-width: 1100px;
-    margin: 0 auto;
-  }
-
   .skill-row {
     font-size: 12px;
     padding: 12px 20px;

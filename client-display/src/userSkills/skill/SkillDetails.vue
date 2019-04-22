@@ -1,8 +1,7 @@
 <template>
     <div class="container">
-        <ribbon>Skill Overview</ribbon>
-
         <div v-if="!loading.dependencies && !loading.skill">
+            <skills-title>Skill Overview</skills-title>
             <skill-overview class="my-2" :skill="skill"></skill-overview>
             <skill-dependencies v-if="dependencies && dependencies.length > 0" :dependencies="dependencies"
                                 :skill-id="$route.params.skillId"></skill-dependencies>
@@ -17,15 +16,15 @@
     import UserSkillsService from '@/userSkills/service/UserSkillsService';
     import SkillDependencies from '@/userSkills/skill/dependencies/SkillDependencies.vue';
     import SkillOverview from '@/userSkills/skill/SkillOverview.vue';
-    import Ribbon from '@/common/ribbon/Ribbon.vue';
     import SkillsSpinner from '@/common/utilities/SkillsSpinner.vue';
+    import SkillsTitle from '@/common/utilities/SkillsTitle.vue';
 
     export default {
         name: 'SkillDetails',
         components: {
+            SkillsTitle,
             SkillOverview,
             SkillDependencies,
-            Ribbon,
             SkillsSpinner,
         },
         data() {
