@@ -33,11 +33,13 @@
     created() {
       this.messageHandler = (event) => {
         const messageParser = new ClientDisplayFrameMessage(event.data);
-        console.log(event.data);
         if (messageParser.isSkillsMessage()) {
           const parsedMessage = messageParser.getParsedMessage();
           if (parsedMessage.name === 'frame-loaded') {
-            this.$refs.theIframe.height = parsedMessage.payload.contentHeight;
+            if (parsedMessage.payload.contentHeight > 0) {
+              this.$refs.theIframe.height = parsedMessage.payload.contentHeight;
+              this.$refs.theIframe.style.height = `${parsedMessage.payload.contentHeight}px`;
+            }
             const bindings = {
               projectId: this.projectId,
               serviceUrl: this.serviceUrl,
@@ -64,5 +66,6 @@
 <style scoped>
   .the-iframe {
     width: 100%;
+    height: 1000px;
   }
 </style>

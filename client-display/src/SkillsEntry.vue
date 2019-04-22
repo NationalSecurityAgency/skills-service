@@ -27,7 +27,7 @@
       contentHeight: getDocumentHeight(),
     };
     window.parent.postMessage(`skills::frame-loaded::${JSON.stringify(payload)}`, '*');
-  }, 50);
+  }, 250);
 
   Vue.use({
     install() {
@@ -61,6 +61,9 @@
           this.serviceUrl = payload.serviceUrl;
           this.projectId = payload.projectId;
           this.token = payload.authToken;
+
+          // No scroll bars for iframe.
+          document.body.style['overflow-y'] = 'hidden';
         }
       });
     },
