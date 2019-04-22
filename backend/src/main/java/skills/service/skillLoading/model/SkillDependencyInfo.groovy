@@ -15,5 +15,6 @@ class SkillDependencyInfo {
         SkillRelationshipItem skill
         SkillRelationshipItem dependsOn
         Boolean achieved
+        Boolean crossProject = false
     }
 }
