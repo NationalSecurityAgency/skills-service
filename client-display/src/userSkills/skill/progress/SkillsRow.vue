@@ -3,7 +3,7 @@
 </template>
 
 <script>
-  import SkillProgress from '@/userSkills/modal/SkillProgress.vue';
+  import SkillProgress from '@/userSkills/skill/progress/SkillProgress.vue';
 
   export default {
     components: {

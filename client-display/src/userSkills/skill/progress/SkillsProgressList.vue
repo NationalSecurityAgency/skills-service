@@ -26,7 +26,7 @@
 </template>
 
 <script>
-    import SkillsSubjectSkillRow from '@/userSkills/modal/SkillsSubjectSkillRow.vue';
+    import SkillsSubjectSkillRow from '@/userSkills/skill/progress/SkillsRow.vue';
     import ToggleButton from 'vue-js-toggle-button/src/Button.vue';
     import NoDataYet from '@/common/utilities/NoDataYet.vue';
 

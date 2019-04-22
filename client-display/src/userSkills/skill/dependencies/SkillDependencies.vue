@@ -23,14 +23,12 @@
     import vis from 'vis';
     import 'vis/dist/vis.css';
     import Ribbon from '@/common/ribbon/Ribbon.vue';
-    import GraphLegend from '@/userSkills/subject/GraphLegend.vue';
-    import SkillDependencySummary from '@/userSkills/subject/SkillDependencySummary.vue';
-    import SkillDependencyModal from '@/userSkills/subject/SkillDependencyModal.vue';
+    import GraphLegend from '@/userSkills/skill/dependencies/GraphLegend.vue';
+    import SkillDependencySummary from '@/userSkills/skill/dependencies/SkillDependencySummary.vue';
 
     export default {
         name: 'SkillDependencies',
         components: {
-            SkillDependencyModal,
             SkillDependencySummary,
             GraphLegend,
             Ribbon,

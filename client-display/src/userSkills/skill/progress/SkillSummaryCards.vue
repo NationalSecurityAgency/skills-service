@@ -17,7 +17,7 @@
 </template>
 
 <script>
-    import ProgressInfoCard from '@/userSkills/modal/ProgressInfoCard.vue';
+    import ProgressInfoCard from '@/userSkills/skill/progress/ProgressInfoCard.vue';
 
     export default {
         name: 'SkillSummaryCards',

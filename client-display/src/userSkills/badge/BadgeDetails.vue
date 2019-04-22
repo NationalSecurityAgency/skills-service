@@ -17,7 +17,7 @@
 <script>
     import Ribbon from '@/common/ribbon/Ribbon.vue';
     import BadgeDetailsOverview from '@/userSkills/badge/BadgeDetailsOverview.vue';
-    import SkillsProgressList from '@/userSkills/modal/SkillsProgressList.vue';
+    import SkillsProgressList from '@/userSkills/skill/progress/SkillsProgressList.vue';
 
 
     import UserSkillsService from '@/userSkills/service/UserSkillsService';

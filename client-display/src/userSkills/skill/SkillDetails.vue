@@ -10,7 +10,7 @@
 
 <script>
     import UserSkillsService from '@/userSkills/service/UserSkillsService';
-    import SkillDependencies from '@/userSkills/subject/SkillDependencies.vue';
+    import SkillDependencies from '@/userSkills/skill/dependencies/SkillDependencies.vue';
     import SkillOverview from '@/userSkills/skill/SkillOverview.vue';
     import NoDataYet from '@/common/utilities/NoDataYet.vue';
     import Ribbon from '@/common/ribbon/Ribbon.vue';
