@@ -39,7 +39,7 @@
     </div>
 
     <div class="row pt-3">
-      <div class="col-lg-3">
+      <div class="col-lg-3 pb-3 pb-lg-0">
         <my-rank
           v-if="userSkillsRanking"
           :rank="userSkillsRanking.position"
@@ -48,7 +48,7 @@
 
       <div
         id="point-progress-container"
-        :class="{ 'col-lg-6' : hasBadges, 'col-lg-9' : !hasBadges }">
+        :class="{ 'col-lg-6' : hasBadges, 'col-lg-9' : !hasBadges }" class="pb-3 pb-lg-0">
         <point-progress-chart
           :points-history="pointsHistory"/>
       </div>

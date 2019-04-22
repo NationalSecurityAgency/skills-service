@@ -1,16 +1,20 @@
 <template>
     <div class="container">
-        <ribbon v-if="badge">
-            {{ badge.badge }}
+        <ribbon>
+            Badge Details
         </ribbon>
 
-        <div class="card">
-            <div class="card-body">
-                <badge-details-overview :badge="badge"></badge-details-overview>
-            </div>
-        </div>
+        <skills-spinner v-if="loading" :loading="loading" class="mt-5"/>
 
-        <skills-progress-list v-if="badge" :subject="badge" :show-descriptions="showDescriptions" :helpTipHref="helpTipHref"/>
+        <div v-if="!loading">
+            <div class="card">
+                <div class="card-body">
+                    <badge-details-overview :badge="badge"></badge-details-overview>
+                </div>
+            </div>
+
+            <skills-progress-list v-if="badge" :subject="badge" :show-descriptions="showDescriptions" :helpTipHref="helpTipHref"/>
+        </div>
     </div>
 </template>
 
@@ -18,7 +22,7 @@
     import Ribbon from '@/common/ribbon/Ribbon.vue';
     import BadgeDetailsOverview from '@/userSkills/badge/BadgeDetailsOverview.vue';
     import SkillsProgressList from '@/userSkills/skill/progress/SkillsProgressList.vue';
-
+    import SkillsSpinner from '@/common/utilities/SkillsSpinner.vue';
 
     import UserSkillsService from '@/userSkills/service/UserSkillsService';
 
@@ -29,9 +33,11 @@
             Ribbon,
             SkillsProgressList,
             BadgeDetailsOverview,
+            SkillsSpinner,
         },
         data() {
             return {
+                loading: true,
                 badge: null,
                 initialized: false,
                 showDescriptions: false,
@@ -53,6 +59,7 @@
                 UserSkillsService.getBadgeSkills(this.$route.params.badgeId)
                     .then((badgeSummary) => {
                         this.badge = badgeSummary;
+                        this.loading = false;
                     });
             },
         },

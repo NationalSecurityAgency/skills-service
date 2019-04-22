@@ -1,10 +1,15 @@
 <template>
-    <div v-if="!loading.dependencies && !loading.skill" class="container">
+    <div class="container">
         <ribbon>Skill Overview</ribbon>
 
-        <skill-overview class="my-2" :skill="skill"></skill-overview>
-        <skill-dependencies v-if="dependencies && dependencies.length > 0" :dependencies="dependencies"
-                            :skill-id="$route.params.skillId"></skill-dependencies>
+        <div v-if="!loading.dependencies && !loading.skill">
+            <skill-overview class="my-2" :skill="skill"></skill-overview>
+            <skill-dependencies v-if="dependencies && dependencies.length > 0" :dependencies="dependencies"
+                                :skill-id="$route.params.skillId"></skill-dependencies>
+        </div>
+        <div v-else>
+            <skills-spinner :loading="loading.dependencies || loading.skill" class="mt-5"/>
+        </div>
     </div>
 </template>
 
@@ -12,12 +17,17 @@
     import UserSkillsService from '@/userSkills/service/UserSkillsService';
     import SkillDependencies from '@/userSkills/skill/dependencies/SkillDependencies.vue';
     import SkillOverview from '@/userSkills/skill/SkillOverview.vue';
-    import NoDataYet from '@/common/utilities/NoDataYet.vue';
     import Ribbon from '@/common/ribbon/Ribbon.vue';
+    import SkillsSpinner from '@/common/utilities/SkillsSpinner.vue';
 
     export default {
         name: 'SkillDetails',
-        components: { NoDataYet, SkillOverview, SkillDependencies, Ribbon },
+        components: {
+            SkillOverview,
+            SkillDependencies,
+            Ribbon,
+            SkillsSpinner,
+        },
         data() {
             return {
                 loading: {

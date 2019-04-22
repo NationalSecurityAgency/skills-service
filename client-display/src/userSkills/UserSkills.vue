@@ -1,13 +1,11 @@
 <template>
-  <div class="user-skills-container">
+  <div class="container">
     <ribbon>
       User Skills
     </ribbon>
 
-    <div v-if="!isLoaded" class="user-skills-spinner">
-      <vue-simple-spinner
-        size="large"
-        message="Loading..."/>
+    <div v-if="!isLoaded" class="mt-5">
+      <skills-spinner :loading="!isLoaded"/>
     </div>
 
     <div v-if="isLoaded">
@@ -34,12 +32,12 @@
   import UserSkillsHeader from '@/userSkills/UserSkillsHeader.vue';
   import UserSkillsService from '@/userSkills/service/UserSkillsService';
   import SubjectsContainer from '@/userSkills/subject/SubjectsContainer.vue';
+  import SkillsSpinner from '@/common/utilities/SkillsSpinner.vue';
 
   import '@/common/filter/NumberFilter';
 
   import ProgressBar from 'vue-simple-progress';
   import VerticalProgressBar from '@/common/progress/VerticalProgress.vue';
-  import Spinner from 'vue-simple-spinner';
 
   import Ribbon from '@/common/ribbon/Ribbon.vue';
   import StarProgress from '@/common/progress/StarProgress.vue';
@@ -63,7 +61,7 @@
       Ribbon,
       StarProgress,
       SubjectsContainer,
-      'vue-simple-spinner': Spinner,
+      SkillsSpinner,
     },
     props: {
       userId: String,
@@ -154,12 +152,6 @@
     border: 1px solid #ddd;
     border-radius: 4px;
     box-shadow: 0 1px 1px rgba(0, 0, 0, .05);
-  }
-
-  .user-skills-spinner {
-    height: 50px;
-    position: relative;
-    padding: 50px;
   }
 
   .skill-tile-label {
