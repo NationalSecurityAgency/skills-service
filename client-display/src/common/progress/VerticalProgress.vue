@@ -1,5 +1,5 @@
 <template>
-  <div class="user-skill-progress-layers" :class="{ 'cursor-pointer': isLocked, 'locked-background': isLocked }">
+  <div class="user-skill-progress-layers" :class="{ 'cursor-pointer': isClickable, 'locked-background': isLocked }">
     <div class="locked-border"></div>
     <span v-if="isLocked" class="locked-icon">
       <i class="fas fa-lock"></i>
@@ -29,6 +29,7 @@
     },
     props: {
       isLocked: Boolean,
+      isClickable: Boolean,
       totalProgress: Number,
       totalProgressBeforeToday: Number,
       beforeTodayBarColor: {

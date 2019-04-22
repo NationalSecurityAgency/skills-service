@@ -4,7 +4,7 @@ import VueRouter from 'vue-router';
 
 import SkillsEntry from '@/SkillsEntry.vue';
 import SubjectDetails from '@/userSkills/subject/SubjectDetails.vue';
-import SkillDependencies from '@/userSkills/subject/SkillDependencies.vue';
+import SkillDetails from '@/userSkills/skill/SkillDetails.vue';
 import SkillDependencyDetails from '@/userSkills/subject/SkillDependencyDetails.vue';
 import MyRankDetails from '@/userSkills/myRank/MyRankDetails.vue';
 import BadgesDetails from '@/userSkills/badge/BadgesDetails.vue';
@@ -42,16 +42,13 @@ const router = new VueRouter({
     },
     {
       path: '/skills/:skillId/dependencies',
-      component: SkillDependencies,
+      component: SkillDetails,
       name: 'skillDependencies',
     },
     {
       path: '/skill/:skillId/dependencySummary',
       component: SkillDependencyDetails,
       name: 'skillDependencySummary',
-      props: route => ({
-        ...route.params,
-      }),
     },
     {
       path: '/myrank',

@@ -12,7 +12,7 @@
             </div>
         </div>
 
-        <div class="text-sm-left text-center catalog-item col-lg-10">
+        <div class="text-sm-left text-center skills-text-description col-lg-10">
             <div class="row">
                 <h4 class="mb-1 col-md-8">{{ badge.badge }}</h4>
                 <div class="col-md-4 text-right">
@@ -61,10 +61,5 @@
 </script>
 
 <style scoped>
-    .catalog-item {
-        font-size: 0.8rem;
-        font-weight: 400;
-        line-height: 1.5;
-        color: #4f565d;
-    }
+
 </style>
