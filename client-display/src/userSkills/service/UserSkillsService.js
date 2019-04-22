@@ -52,8 +52,8 @@ export default {
     }).then(result => result.data);
   },
 
-  getSkillSummary(projectId, skillId) {
-    return axios.get(`${this.serviceUrl}${this.getServicePath()}/${projectId}/skills/${skillId}/summary`, {
+  getSkillSummary(skillId) {
+    return axios.get(`${this.serviceUrl}${this.getServicePath()}/${this.projectId}/skills/${skillId}/summary`, {
       params: {
         userId: this.userId,
       },

@@ -3,7 +3,7 @@
         <ribbon>Dependencies</ribbon>
         <div class="card">
             <div class="card-body px-0">
-                <skill-dependency-details v-if="nodeDetailsView.show" :node-details-view="nodeDetailsView" @close="closeNodeDetails"/>
+                <skill-dependency-modal v-if="nodeDetailsView.show" :node-details-view="nodeDetailsView" @close="closeNodeDetails"/>
 
                 <div class="row justify-content-between px-2">
                     <div class="col-lg-3 mb-2 mb-lg-0">
@@ -17,6 +17,7 @@
                 <div id="dependent-skills-network" style="height: 500px"></div>
             </div>
         </div>
+
     </div>
 </template>
 
@@ -27,12 +28,12 @@
     import Ribbon from '@/common/ribbon/Ribbon.vue';
     import GraphLegend from '@/userSkills/subject/GraphLegend.vue';
     import SkillDependencySummary from '@/userSkills/subject/SkillDependencySummary.vue';
-    import SkillDependencyDetails from '@/userSkills/subject/SkillDependencyDetails.vue';
+    import SkillDependencyModal from '@/userSkills/subject/SkillDependencyModal.vue';
 
     export default {
         name: 'SkillDependencies',
         components: {
-            SkillDependencyDetails,
+            SkillDependencyModal,
             SkillDependencySummary,
             GraphLegend,
             Ribbon,
@@ -40,11 +41,12 @@
         props: {
             skill: {
                 type: Object,
-                required: true,
+                required: false,
             },
         },
         data() {
             return {
+                loading: true,
                 nodeDetailsView: {
                     show: false,
                     skill: {},
@@ -60,6 +62,7 @@
                 ],
                 clickParams: '',
                 dependencies: [],
+                thisSkill: {},
                 network: null,
                 displayOptions: {
                     layout: {
@@ -92,11 +95,7 @@
             };
         },
         mounted() {
-            UserSkillsService.getSkillDependencies(this.skill.skillId)
-                .then((res) => {
-                    this.dependencies = res.dependencies;
-                    this.createGraph();
-                });
+            this.loadDependencies();
         },
         beforeDestroy() {
             if (this.network) {
@@ -104,8 +103,20 @@
             }
         },
         methods: {
+            loadDependencies() {
+                UserSkillsService.getSkillDependencies(this.$route.params.skillId)
+                    .then((res) => {
+                        this.dependencies = res.dependencies;
+                        this.createGraph();
+                        this.loading = false;
+                    });
+            },
             handleClose() {
                 this.$emit('ok');
+            },
+            isSmallScreen() {
+                const width = window.innerWidth;
+                return width <= 768;
             },
             createGraph() {
                 const data = this.buildData();
@@ -118,13 +129,22 @@
                     } else if (params.nodes && params.nodes.length > 0) {
                         const skillItem = this.locateSelectedSkill(params);
                         if (skillItem) {
-                            this.nodeDetailsView.pointer.x = params.pointer.DOM.x;
-                            this.nodeDetailsView.pointer.y = params.pointer.DOM.y;
-                            UserSkillsService.getSkillSummary(skillItem.projectId, skillItem.skillId)
-                                .then((res) => {
-                                    this.nodeDetailsView.skill = res;
-                                    this.nodeDetailsView.show = true;
+                            if (this.isSmallScreen()) {
+                                this.$router.push({
+                                    name: 'skillDependencySummary',
+                                    params: {
+                                        skillId: skillItem.skillId,
+                                    },
                                 });
+                            } else {
+                                this.nodeDetailsView.pointer.x = params.pointer.DOM.x;
+                                this.nodeDetailsView.pointer.y = params.pointer.DOM.y;
+                                UserSkillsService.getSkillSummary(skillItem.skillId)
+                                    .then((res) => {
+                                        this.nodeDetailsView.skill = res;
+                                        this.nodeDetailsView.show = true;
+                                    });
+                            }
                         }
                     }
                 });
@@ -135,6 +155,21 @@
                 this.network.on('blurNode', () => {
                     networkCanvas.style.cursor = 'default';
                 });
+
+                this.focusOnParentNode();
+            },
+            focusOnParentNode() {
+                if (this.isSmallScreen()) {
+                    const options = {
+                        scale: 0.7,
+                        offset: { x: 0, y: 0 },
+                        animation: {
+                            duration: 1500,
+                            easingFunction: 'easeInOutQuad',
+                        },
+                    };
+                    this.network.focus(this.getNodeId(this.thisSkill), options);
+                }
             },
             closeNodeDetails() {
                 this.nodeDetailsView.show = false;
@@ -159,10 +194,13 @@
                 const edges = new vis.DataSet();
                 const createdSkillIds = [];
 
-                // color: { border: '#3273dc', background: 'lightblue' },
-                // nodes.add(this.buildNode(this.skill, { color: { border: 'green', background: 'lightgreen' } }));
                 this.dependencies.forEach((item) => {
-                    const isThisSkill = this.skill.projectId === item.skill.projectId && this.skill.skillId === item.skill.skillId;
+                    const isThisSkill = !item.skill.crossProject && this.$route.params.skillId === item.skill.skillId;
+
+                    if (isThisSkill) {
+                        this.thisSkill = item.skill;
+                    }
+
                     const extraParentProps = isThisSkill ? {
                         color: {
                             border: '#3273dc',
@@ -208,8 +246,7 @@
                 return `${skill.projectName}_${skill.skillId}`;
             },
             getLabel(skill) {
-                const isCrossProj = skill.projectId !== this.skill.projectId;
-                const label = isCrossProj ? `<b>${skill.projectName}</b>\n${skill.skillName}` : skill.skillName;
+                const label = skill.crossProject ? `<b>${skill.projectName}</b>\n${skill.skillName}` : skill.skillName;
                 return label;
             },
         },
@@ -221,26 +258,12 @@
         /*padding-bottom: 1rem;*/
         margin-bottom: 2rem;
     }
-
-    /*.graph-container {*/
-    /*max-width: 70vw;*/
-    /*margin: 0 auto;*/
-    /*position: relative;*/
-    /*}*/
-
     .graph-legend {
         position: absolute;
         z-index: 10;
         /*margin-left: 1rem;*/
         margin-top: 1rem;
     }
-
-    /*.summary-widget {*/
-    /*    position: absolute;*/
-    /*    z-index: 10;*/
-    /*    margin-top: 1rem;*/
-    /*    right: 1rem;*/
-    /*}*/
 </style>
 
 <style>
@@ -264,8 +287,13 @@
         font-family: "Font Awesome 5 Free";
     }
 
+    @media screen and (max-width: 720px) {
+        #dependent-skills-network .vis-button {
+            display: none;
+        }
+    }
+
     #dependent-skills-network .vis-button:hover:after {
-        font-size: 2em;
         color: #3273dc;
     }
 

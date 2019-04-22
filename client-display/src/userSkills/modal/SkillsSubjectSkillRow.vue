@@ -25,7 +25,7 @@
           this.$router.push({
             name: 'skillDependencies',
             params: {
-              skill: this.skill,
+              skillId: this.skill.skillId,
             },
           });
         }

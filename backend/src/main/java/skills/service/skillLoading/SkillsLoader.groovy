@@ -181,7 +181,8 @@ class SkillsLoader {
             new SkillDependencyInfo.SkillRelationship(
                     skill: new SkillDependencyInfo.SkillRelationshipItem(projectId: it.parentProjectId, projectName: it.parentProjectName, skillId: it.parentSkillId, skillName: it.parentName),
                     dependsOn: new SkillDependencyInfo.SkillRelationshipItem(projectId: it.childProjectId, projectName: it.childProjectName, skillId: it.childSkillId, skillName: it.childName),
-                    achieved: it.achievementId != null
+                    achieved: it.achievementId != null,
+                    crossProject: projectId != it.childProjectName
             )
         }
         return new SkillDependencyInfo(dependencies: deps)
