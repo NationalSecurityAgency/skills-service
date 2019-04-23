@@ -6,7 +6,9 @@ import groovy.transform.CompileStatic
 class ChartParams {
     public static final String CHART_BUILDER_ID = 'chartBuilderId'
     public static final String NUM_DAYS = 'numDays' // limit data to X days
+    public static final String NUM_MONTHS = 'numMonths' // limit data to X months
     public static final String LOAD_DATA_FOR_FIRST = 'loadDataForFirst'  // only load the first X charts data for a section
+    public static final String BADGE_ID = 'badgeId'
 
     static String getValue(Map<String, String> props, String key, String defaultVal=null) {
         String value = defaultVal

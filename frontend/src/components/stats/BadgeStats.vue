@@ -45,15 +45,19 @@
   import { SECTION, SectionParams } from './SectionHelper';
 
   export default {
-    name: 'ProjectStats',
+    name: 'BadgeStats',
     components: {
       SkillsChart,
       StatCard,
     },
-    props: ['projectId'],
+    props: {
+      projectId: String,
+      badgeId: String,
+    },
     data() {
       return {
         numDaysToShow: 120,
+        numMonthsToShow: 6,
         charts: [],
         isLoading: true,
       };
@@ -71,7 +75,12 @@
     },
     methods: {
       loadInitialCharts() {
-        const sectionParams = new SectionParams.Builder(SECTION.PROJECTS, this.projectId).build();
+        const sectionParams = new SectionParams.Builder(SECTION.BADGES, this.projectId)
+          .withSectionIdParam(this.badgeId)
+          .withNumMonths(this.numMonthsToShow)
+          .withNumDays(this.numDaysToShow)
+          .withLoadDataForFirst(3)
+          .build();
         StatsService.getChartsForSection(sectionParams).then((response) => {
           this.charts = response;
           this.isLoading = false;
@@ -82,6 +91,9 @@
       loadChart(chartBuilderId) {
         this.isLoading = true;
         const sectionParams = new SectionParams.Builder(SECTION.PROJECTS, this.projectId)
+          .withSectionIdParam(this.badgeId)
+          .withNumMonths(this.numMonthsToShow)
+          .withNumDays(this.numDaysToShow)
           .withChartBuilderId(chartBuilderId)
           .build();
         StatsService.getChartForSection(sectionParams).then((response) => {

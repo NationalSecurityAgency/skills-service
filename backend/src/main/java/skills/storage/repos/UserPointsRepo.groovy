@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param
 import skills.service.controller.result.model.ProjectUser
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillRelDef
+import skills.storage.model.UsageItem
 import skills.storage.model.UserPoints
 
 interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
@@ -64,15 +65,10 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
       sdParent.projectId=?2 and sdParent.skillId=?3 and srd.type=?4 and sdChild.version<=?5''')
     List<Object []> findChildrenAndTheirAchievements(String userId, String projectId, String skillId, SkillRelDef.RelationshipType type, Integer version)
 
-    @Query('''select up.day as day, count(up) as numUsers
+    @Query('''select up.day as day, count(up) as numItems
     from UserPoints up where up.projectId=?1 and up.day>=?2 and up.skillId is null and up.day is not null group by up.day
     ''')
     List<UsageItem> findDistinctUserCountsByProject(String projectId, Date mustBeAfterThisDate)
-
-    static interface UsageItem {
-        Date getDay()
-        Integer getNumUsers()
-    }
 
     @Query("SELECT up from UserPoints up where up.projectId=?1 and up.skillId=?1 and up.day is null" )
     List<UserPoints> findDistinctUsersWithPoints(String projectId, String skillId)
