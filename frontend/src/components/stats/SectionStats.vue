@@ -60,7 +60,7 @@
       },
       numMonthsToShow: {
         type: Number,
-        default: 120,
+        default: 6,
       },
     },
     data() {
