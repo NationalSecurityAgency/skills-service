@@ -1,43 +1,39 @@
 <template>
-  <div>
-    <label class="skill-tile-label level-label">Skill Level</label>
-    <popper
-      trigger="hover"
-      :append-to-body="true">
-        <span
-          slot="reference"
-          class="fa-stack skills-icon trophy-stack">
+    <div>
+        <label class="skill-tile-label level-label">My Level</label>
+
+        <span slot="reference" class="fa-stack skills-icon trophy-stack">
             <i class="fa fa-trophy fa-stack-2x"/>
             <i class="fa fa-star fa-stack-1x trophy-star"/>
             <strong class="fa-stack-1x trophy-text">{{ skillLevel }}</strong>
         </span>
-      <div class="popper">
-        <div>Level {{ skillLevel }} out of 5</div>
-      </div>
-    </popper>
 
-    <h2 class="skill-tile-label">Level {{ skillLevel }}</h2>
+        <div class="level-subtitle">
+            Level <strong>{{ skillLevel }}</strong> out of <strong>{{ totalNumLevels }}</strong>
+        </div>
 
-    <star-progress
-      :number-complete="skillLevel"
-      star-style="circle" />
-  </div>
+        <star-progress :number-complete="skillLevel" star-style="circle"/>
+    </div>
 </template>
 
 <script>
-  import StarProgress from '@/common/progress/StarProgress.vue';
+    import StarProgress from '@/common/progress/StarProgress.vue';
 
-  import Popper from 'vue-popperjs';
+    import Popper from 'vue-popperjs';
 
-  export default {
-    components: {
-      StarProgress,
-      Popper,
-    },
-    props: {
-      skillLevel: Number,
-    },
-  };
+    export default {
+        components: {
+            StarProgress,
+            Popper,
+        },
+        props: {
+            skillLevel: Number,
+            totalNumLevels: {
+                type: Number,
+                default: 5,
+            },
+        },
+    };
 </script>
 
 <style scoped>
@@ -51,6 +47,10 @@
     margin-top: -0.65em;
     font-size: 0.5em;
     color: #333;
+  }
+
+  .level-subtitle {
+
   }
 
   .skills-icon {

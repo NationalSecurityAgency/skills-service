@@ -31,6 +31,7 @@
   import SkillsSpinner from '@/common/utilities/SkillsSpinner.vue';
 
   import '@/common/filter/NumberFilter';
+  import '@/common/filter/PluralFilter.js';
 
   import ProgressBar from 'vue-simple-progress';
   import VerticalProgressBar from '@/common/progress/VerticalProgress.vue';

@@ -5,15 +5,13 @@
       v-if="initialized"
       class="progress-circle">
       <div class="circle-number">
-        <span v-if="!isCompleted">{{ totalCompletedPoints | number }}</span>
-        <i
-          v-else
-          class="fas fa-check text-success fa-2x"></i>
+        <span v-if="!isCompleted">
+          <div>{{ totalCompletedPoints | number }}</div>
+          <div style="font-size: 0.7rem;">out of</div>
+          <div style="font-size: 0.9rem;">{{ totalPossiblePoints | number }}</div>
+        </span>
+        <i v-else class="fas fa-check text-success fa-2x"/>
       </div>
-      <popper
-        trigger="hover"
-        :disabled="isCompleted"
-        :append-to-body="true">
         <div
           slot="reference" >
           <radial-progress-bar
@@ -35,12 +33,6 @@
             inner-stroke-color="transparent"
             class="complete-before-today"/>
         </div>
-        <div class="popper">
-          <my-progress-summary
-            :user-skills="userSkills"
-            :summary-type="userSkills.subject ? 'subject' : 'total'" />
-        </div>
-      </popper>
     </div>
     <slot name="footer" />
   </div>
@@ -60,7 +52,7 @@
     props: {
       diameter: {
         type: Number,
-        default: 125,
+        default: 160,
       },
       title: {
         type: String,
@@ -155,7 +147,7 @@
 
   .progress-circle {
     position: relative;
-    width: 120px;
+    /*width: 120px;*/
     margin: 10px 0;
     display: inline-block;
   }

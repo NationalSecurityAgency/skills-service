@@ -14,8 +14,6 @@
             <small class="text-black-50">*** Earn more points to unlock this chart! ***</small>
           </div>
         </div>
-<!--      <h1 class="">Locked</h1>-->
-<!--      <div class="user-skills-no-data-icon-subtext">*** Earn more points to unlock points progress chart! ***</div>-->
     </div>
     <div class="card-header">
       <h6 class="card-title mb-0 float-left">Point History</h6>

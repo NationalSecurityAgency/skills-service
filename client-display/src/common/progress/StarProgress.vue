@@ -3,7 +3,7 @@
     <div
       v-for="index in 5"
       :key="`unique-star-${index}`"
-      :class="[ (index < numberComplete) ? 'star-filled' : 'star-empty', starStyle === 'circle' ? 'circle-star-wrapper' : 'star-wrapper' ]">
+      :class="[ (index <= numberComplete) ? 'star-filled' : 'star-empty', starStyle === 'circle' ? 'circle-star-wrapper' : 'star-wrapper' ]">
         <span
           v-if="starStyle === 'circle'"
           class="fa-stack star-stack">

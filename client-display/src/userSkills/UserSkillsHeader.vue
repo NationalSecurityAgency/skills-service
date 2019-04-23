@@ -1,41 +1,57 @@
 <template>
   <div class="user-skills-overview">
-    <div class=" card">
-      <div class="row card-body">
-        <div class="text-center col-md-4">
-          <circle-progress
-            :user-skills="userSkills"
-            :total-completed-points="userSkills.levelPoints"
-            :points-completed-today="userSkills.todaysPoints"
-            :total-possible-points="userSkills.levelTotalPoints"
-            :total-completed-color="isLevelComplete ? '#59ad52' : '#7ed6f3'"
-            title="My Progress">
-            <div slot="footer">
-              <p v-if="isLevelComplete">All levels complete</p>
-              <p v-if="!isLevelComplete">{{ ( userSkills.levelTotalPoints - userSkills.levelPoints ) | number }} points to next level</p>
-            </div>
-          </circle-progress>
-        </div>
+      <div class="card">
+          <div class="row card-body">
+              <div class="text-center col-md-4">
+                  <circle-progress
+                          :user-skills="userSkills"
+                          :total-completed-points="userSkills.points"
+                          :points-completed-today="userSkills.todaysPoints"
+                          :total-possible-points="userSkills.totalPoints"
+                          :total-completed-color="userSkills.points === userSkills.totalPoints ? '#59ad52' : '#7ed6f3'"
+                          title="Overall Points">
+                      <div slot="footer">
+                          <p v-if="userSkills.points === userSkills.totalPoints">Total points earned</p>
+                          <div v-else>
+                              <div>Earn up to <strong>{{ userSkills.totalPoints | number }}</strong> points</div>
+                              <div>
+                                  <strong>{{ userSkills.todaysPoints }}</strong> Points earned Today
+                              </div>
+                          </div>
+                      </div>
+                  </circle-progress>
+              </div>
 
-        <div class="text-center col-md-4">
-          <my-skill-level :skill-level="userSkills.skillsLevel" />
-        </div>
+              <div class="text-center col-md-4">
+                  <my-skill-level :skill-level="userSkills.skillsLevel"/>
+              </div>
 
-        <div class="text-center col-md-4">
-          <circle-progress
-            :user-skills="userSkills"
-            :total-completed-points="userSkills.points"
-            :points-completed-today="userSkills.todaysPoints"
-            :total-possible-points="userSkills.totalPoints"
-            :total-completed-color="userSkills.points === userSkills.totalPoints ? '#59ad52' : '#7ed6f3'"
-            title="My Points">
-            <div slot="footer">
-              <p v-if="userSkills.points === userSkills.totalPoints">Total points earned</p>
-              <p v-if="userSkills.points !== userSkills.totalPoints">{{ userSkills.totalPoints | number }} total points</p>
-            </div>
-          </circle-progress>
-      </div>
-      </div>
+              <div class="text-center col-md-4">
+                  <circle-progress
+                          :user-skills="userSkills"
+                          :total-completed-points="userSkills.levelPoints"
+                          :points-completed-today="userSkills.todaysPoints"
+                          :total-possible-points="userSkills.levelTotalPoints"
+                          :total-completed-color="isLevelComplete ? '#59ad52' : '#7ed6f3'"
+                          :title="levelStats.title">
+                      <div slot="footer">
+                          <p v-if="isLevelComplete">All levels complete</p>
+
+                          <div v-if="!isLevelComplete">
+                              <div>
+                                  <strong>{{ levelStats.pointsTillNextLevel | number }}</strong>
+                                  {{ 'Point' | plural(levelStats.pointsTillNextLevel) }} to Level {{
+                                  levelStats.nextLevel }}
+                              </div>
+                              <div>
+                                  <strong>{{ userSkills.todaysPoints }}</strong> Points earned Today
+                              </div>
+                          </div>
+                      </div>
+                  </circle-progress>
+              </div>
+
+          </div>
     </div>
 
     <div class="row pt-3">
@@ -127,6 +143,13 @@
     computed: {
       hasBadges() {
         return this.userSkills && this.userSkills.badges && this.userSkills.badges.enabled;
+      },
+      levelStats () {
+        return {
+          title: `Level ${this.userSkills.skillsLevel + 1} Progress`,
+          nextLevel: this.userSkills.skillsLevel + 1,
+          pointsTillNextLevel: this.userSkills.levelTotalPoints - this.userSkills.levelPoints,
+        };
       },
     },
   };
