@@ -53,7 +53,7 @@
           <users :project-id="projectId" :badge-id="this.badgeId" />
         </template>
         <template slot="Stats">
-          <project-stats :project-id="this.projectId"></project-stats>
+          <badge-stats :project-id="this.projectId" :badge-id="this.badgeId"></badge-stats>
         </template>
       </navigation>
     </section>
@@ -64,14 +64,14 @@
   import BadgesService from './BadgesService';
   import Navigation from '../utils/Navigation';
   import LoadingContainer from '../utils/LoadingContainer';
-  import ProjectStats from '../stats/ProjectStats';
+  import BadgeStats from '../stats/BadgeStats';
   import Users from '../users/Users';
   import BadgeSkills from './BadgeSkills';
 
   export default {
     name: 'BadgePage',
     components: {
-      BadgeSkills, ProjectStats, LoadingContainer, Navigation, Users,
+      BadgeSkills, BadgeStats, LoadingContainer, Navigation, Users,
     },
     breadcrumb() {
       return {

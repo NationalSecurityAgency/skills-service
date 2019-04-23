@@ -18,7 +18,6 @@
   export default {
     name: 'SkillsChart',
     props: {
-      projectId: String,
       chart: {
         type: Object,
         default: () => ({}),

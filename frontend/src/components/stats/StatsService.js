@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { SECTION } from './SectionHelper';
 
 export default {
   getUsage(projectId, numDays) {
@@ -13,14 +14,25 @@ export default {
     return axios.get(`/admin/projects/${projectId}/stats?type=NUM_USERS_PER_OVERALL_SKILL_LEVEL`)
       .then(response => response.data);
   },
-  getChartsForProjectSection(projectId, numDays, loadDataForFirst = 3) {
-    return axios.get(`/admin/projects/${projectId}/metrics?numDays=${numDays}&loadDataForFirst=${loadDataForFirst}`)
+
+  getChartsForSection(sectionParams) {
+    let url = `/admin/projects/${sectionParams.projectId}/metrics?numDays=${sectionParams.numDays}&?numMonths=${sectionParams.numMonths}&loadDataForFirst=${sectionParams.loadDataForFirst}`;
+    if (sectionParams.section !== SECTION.PROJECTS) {
+      url = `/admin/projects/${sectionParams.projectId}/${sectionParams.section}/${sectionParams.sectionIdParam}/metrics?numDays=${sectionParams.numDays}&?numMonths=${sectionParams.numMonths}&loadDataForFirst=${sectionParams.loadDataForFirst}`;
+    }
+    return axios.get(url)
       .then(response => Promise.resolve(this.buildCharts(response.data)));
   },
-  getChartForProjectSection(projectId, chartBuilderId, numDays) {
-    return axios.get(`/admin/projects/${projectId}/metrics/${chartBuilderId}?numDays=${numDays}`)
+
+  getChartForSection(sectionParams) {
+    let url = `/admin/projects/${sectionParams.projectId}/metrics/${sectionParams.chartBuilderId}?numDays=${sectionParams.numDays}`;
+    if (sectionParams.section !== SECTION.PROJECTS) {
+      url = `/admin/projects/${sectionParams.projectId}/${sectionParams.section}/${sectionParams.sectionIdParam}/metrics/${sectionParams.chartBuilderId}?numDays=${sectionParams.numDays}&?numMonths=${sectionParams.numMonths}`;
+    }
+    return axios.get(url)
       .then(response => Promise.resolve(this.buildChart(response.data)));
   },
+
 
   buildCharts(data) {
     return data.map(item => this.buildChart(item));
