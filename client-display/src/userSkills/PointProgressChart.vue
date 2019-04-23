@@ -82,7 +82,7 @@
         if (this.pointsHistory && this.pointsHistory.length > 0) {
           dataArray[0].data = this.pointsHistory
             .map(value => ({
-              x: new Date(parseInt(value.dayPerformed, 10)).getTime(),
+              x: new Date(value.dayPerformed).getTime(),
               y: value.points,
             }));
         } else {

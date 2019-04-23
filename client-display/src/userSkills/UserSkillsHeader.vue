@@ -144,7 +144,7 @@
       hasBadges() {
         return this.userSkills && this.userSkills.badges && this.userSkills.badges.enabled;
       },
-      levelStats () {
+      levelStats() {
         return {
           title: `Level ${this.userSkills.skillsLevel + 1} Progress`,
           nextLevel: this.userSkills.skillsLevel + 1,
