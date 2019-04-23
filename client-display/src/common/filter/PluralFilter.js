@@ -3,7 +3,7 @@ import Vue from 'vue';
 const wordFormatter = (value, number) => {
   let formatString = value;
   if (number > 1) {
-    formatString = formatString + 's';
+    formatString += 's';
   }
   return formatString;
 };

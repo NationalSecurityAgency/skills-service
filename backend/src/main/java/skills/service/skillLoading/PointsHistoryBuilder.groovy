@@ -29,7 +29,8 @@ class PointsHistoryBuilder {
 
         Map<Date, Integer> pointsByDay = [:]
         userPoints.each {
-            pointsByDay.put(it.day, it.points)
+            // it.day is java.sql.Date - bye bye!
+            pointsByDay.put(new Date(it.day.time).clearTime(), it.points)
         }
 
         return doBuildHistory(pointsByDay, showHistoryForNumDays)
