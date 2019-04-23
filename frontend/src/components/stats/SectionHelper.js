@@ -1,6 +1,7 @@
 export const SECTION = {
   PROJECTS: 'projects',
   BADGES: 'badges',
+  SKILLS: 'skills',
   SUBJECTS: 'subjects',
   DEPENDENCIES: 'dependencies',
   USERS: 'users',
@@ -55,6 +56,8 @@ export class SectionParams {
           case SECTION.PROJECTS:
             break;
           case SECTION.BADGES:
+            break;
+          case SECTION.SKILLS:
             break;
           case SECTION.SUBJECTS:
             break;

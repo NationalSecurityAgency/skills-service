@@ -85,7 +85,7 @@
         </template>
         <template slot="Stats">
           <section v-if="project.projectId" class="">
-            <project-stats :project-id="project.projectId"></project-stats>
+            <section-stats :project-id="project.projectId" :section="section"></section-stats>
           </section>
         </template>
         <template slot="Dependencies">
@@ -114,15 +114,16 @@
   import Users from '../users/Users';
   import Navigation from '../utils/Navigation';
   import LoadingContainer from '../utils/LoadingContainer';
-  import ProjectStats from '../stats/ProjectStats';
+  import SectionStats from '../stats/SectionStats';
   import FullDependencyGraph from '../skills/dependencies/FullDependencyGraph';
   import ProjectSettings from '../settings/ProjectSettings';
   import CrossProjectsSkills from '../skills/crossProjects/CrossProjectsSkills';
+  import { SECTION } from '../stats/SectionHelper';
 
   export default {
     name: 'ProjectPage',
     components: {
-      ProjectSettings, CrossProjectsSkills, FullDependencyGraph, ProjectStats, LoadingContainer, Navigation, Levels, Subjects, Badges, AccessSettings, Users,
+      ProjectSettings, CrossProjectsSkills, FullDependencyGraph, SectionStats, LoadingContainer, Navigation, Levels, Subjects, Badges, AccessSettings, Users,
     },
     breadcrumb() {
       return {
@@ -133,6 +134,7 @@
     data() {
       return {
         isLoading: true,
+        section: SECTION.PROJECTS,
         project: {},
       };
     },
