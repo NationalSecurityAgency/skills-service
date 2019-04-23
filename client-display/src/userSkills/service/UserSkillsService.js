@@ -2,6 +2,8 @@ import axios from 'axios';
 
 import 'url-search-params-polyfill';
 
+axios.defaults.withCredentials = true;
+
 export default {
   serviceUrl: null,
 
@@ -20,7 +22,6 @@ export default {
         userId: this.userId,
         version: this.version,
       },
-      withCredentials: true,
     }).then(result => result.data);
     return response;
   },
@@ -28,7 +29,6 @@ export default {
   getCustomIconCss() {
     let response = null;
     response = axios.get(`${this.serviceUrl}${this.getServicePath()}/${this.projectId}/customIconCss`, {
-      withCredentials: true,
     }).then(result => result.data);
     return response;
   },
@@ -39,7 +39,6 @@ export default {
         userId: this.userId,
         version: this.version,
       },
-      withCredentials: true,
     }).then(result => result.data);
   },
 
@@ -48,7 +47,6 @@ export default {
       params: {
         userId: this.userId,
       },
-      withCredentials: true,
     }).then(result => result.data);
   },
 
@@ -66,7 +64,6 @@ export default {
       params: {
         userId: this.userId,
       },
-      withCredentials: true,
     }).then(result => result.data);
   },
 
@@ -75,7 +72,6 @@ export default {
       params: {
         userId: this.userId,
       },
-      withCredentials: true,
     }).then(result => result.data);
   },
 
@@ -89,7 +85,6 @@ export default {
       params: {
         userId: this.userId,
       },
-      withCredentials: true,
     }).then(result => result.data.pointsHistory);
     return response;
   },
@@ -100,7 +95,6 @@ export default {
       params: {
         userId: this.userId,
       },
-      withCredentials: true,
     }).then(result => result.data);
     return response;
   },
@@ -115,7 +109,6 @@ export default {
       params: {
         userId: this.userId,
       },
-      withCredentials: true,
     }).then(result => result.data);
     return response;
   },
@@ -131,7 +124,6 @@ export default {
         subjectId,
         userId: this.userId,
       },
-      withCredentials: true,
     }).then(result => result.data);
     return response;
   },
