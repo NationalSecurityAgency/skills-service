@@ -1,7 +1,7 @@
 // eslint-disable-next-line
 const fontAwesomeIcons = {
   iconPack: 'Font Awesome Free',
-  version: '5.3.1',
+  version: '5.7.1',
   icons: [
     {
       name: '500px',
@@ -14,6 +14,1654 @@ const fontAwesomeIcons = {
     {
       name: 'accusoft',
       cssClass: 'fab fa-accusoft',
+    },
+    {
+      name: 'acquisitions-incorporated',
+      cssClass: 'fab fa-acquisitions-incorporated',
+    },
+    {
+      name: 'adn',
+      cssClass: 'fab fa-adn',
+    },
+    {
+      name: 'adobe',
+      cssClass: 'fab fa-adobe',
+    },
+    {
+      name: 'adversal',
+      cssClass: 'fab fa-adversal',
+    },
+    {
+      name: 'affiliatetheme',
+      cssClass: 'fab fa-affiliatetheme',
+    },
+    {
+      name: 'algolia',
+      cssClass: 'fab fa-algolia',
+    },
+    {
+      name: 'alipay',
+      cssClass: 'fab fa-alipay',
+    },
+    {
+      name: 'amazon',
+      cssClass: 'fab fa-amazon',
+    },
+    {
+      name: 'amazon-pay',
+      cssClass: 'fab fa-amazon-pay',
+    },
+    {
+      name: 'amilia',
+      cssClass: 'fab fa-amilia',
+    },
+    {
+      name: 'android',
+      cssClass: 'fab fa-android',
+    },
+    {
+      name: 'angellist',
+      cssClass: 'fab fa-angellist',
+    },
+    {
+      name: 'angrycreative',
+      cssClass: 'fab fa-angrycreative',
+    },
+    {
+      name: 'angular',
+      cssClass: 'fab fa-angular',
+    },
+    {
+      name: 'app-store',
+      cssClass: 'fab fa-app-store',
+    },
+    {
+      name: 'app-store-ios',
+      cssClass: 'fab fa-app-store-ios',
+    },
+    {
+      name: 'apper',
+      cssClass: 'fab fa-apper',
+    },
+    {
+      name: 'apple',
+      cssClass: 'fab fa-apple',
+    },
+    {
+      name: 'apple-pay',
+      cssClass: 'fab fa-apple-pay',
+    },
+    {
+      name: 'artstation',
+      cssClass: 'fab fa-artstation',
+    },
+    {
+      name: 'asymmetrik',
+      cssClass: 'fab fa-asymmetrik',
+    },
+    {
+      name: 'atlassian',
+      cssClass: 'fab fa-atlassian',
+    },
+    {
+      name: 'audible',
+      cssClass: 'fab fa-audible',
+    },
+    {
+      name: 'autoprefixer',
+      cssClass: 'fab fa-autoprefixer',
+    },
+    {
+      name: 'avianex',
+      cssClass: 'fab fa-avianex',
+    },
+    {
+      name: 'aviato',
+      cssClass: 'fab fa-aviato',
+    },
+    {
+      name: 'aws',
+      cssClass: 'fab fa-aws',
+    },
+    {
+      name: 'bandcamp',
+      cssClass: 'fab fa-bandcamp',
+    },
+    {
+      name: 'behance',
+      cssClass: 'fab fa-behance',
+    },
+    {
+      name: 'behance-square',
+      cssClass: 'fab fa-behance-square',
+    },
+    {
+      name: 'bimobject',
+      cssClass: 'fab fa-bimobject',
+    },
+    {
+      name: 'bitbucket',
+      cssClass: 'fab fa-bitbucket',
+    },
+    {
+      name: 'bitcoin',
+      cssClass: 'fab fa-bitcoin',
+    },
+    {
+      name: 'bity',
+      cssClass: 'fab fa-bity',
+    },
+    {
+      name: 'black-tie',
+      cssClass: 'fab fa-black-tie',
+    },
+    {
+      name: 'blackberry',
+      cssClass: 'fab fa-blackberry',
+    },
+    {
+      name: 'blogger',
+      cssClass: 'fab fa-blogger',
+    },
+    {
+      name: 'blogger-b',
+      cssClass: 'fab fa-blogger-b',
+    },
+    {
+      name: 'bluetooth',
+      cssClass: 'fab fa-bluetooth',
+    },
+    {
+      name: 'bluetooth-b',
+      cssClass: 'fab fa-bluetooth-b',
+    },
+    {
+      name: 'btc',
+      cssClass: 'fab fa-btc',
+    },
+    {
+      name: 'buromobelexperte',
+      cssClass: 'fab fa-buromobelexperte',
+    },
+    {
+      name: 'buysellads',
+      cssClass: 'fab fa-buysellads',
+    },
+    {
+      name: 'canadian-maple-leaf',
+      cssClass: 'fab fa-canadian-maple-leaf',
+    },
+    {
+      name: 'cc-amazon-pay',
+      cssClass: 'fab fa-cc-amazon-pay',
+    },
+    {
+      name: 'cc-amex',
+      cssClass: 'fab fa-cc-amex',
+    },
+    {
+      name: 'cc-apple-pay',
+      cssClass: 'fab fa-cc-apple-pay',
+    },
+    {
+      name: 'cc-diners-club',
+      cssClass: 'fab fa-cc-diners-club',
+    },
+    {
+      name: 'cc-discover',
+      cssClass: 'fab fa-cc-discover',
+    },
+    {
+      name: 'cc-jcb',
+      cssClass: 'fab fa-cc-jcb',
+    },
+    {
+      name: 'cc-mastercard',
+      cssClass: 'fab fa-cc-mastercard',
+    },
+    {
+      name: 'cc-paypal',
+      cssClass: 'fab fa-cc-paypal',
+    },
+    {
+      name: 'cc-stripe',
+      cssClass: 'fab fa-cc-stripe',
+    },
+    {
+      name: 'cc-visa',
+      cssClass: 'fab fa-cc-visa',
+    },
+    {
+      name: 'centercode',
+      cssClass: 'fab fa-centercode',
+    },
+    {
+      name: 'centos',
+      cssClass: 'fab fa-centos',
+    },
+    {
+      name: 'chrome',
+      cssClass: 'fab fa-chrome',
+    },
+    {
+      name: 'cloudscale',
+      cssClass: 'fab fa-cloudscale',
+    },
+    {
+      name: 'cloudsmith',
+      cssClass: 'fab fa-cloudsmith',
+    },
+    {
+      name: 'cloudversify',
+      cssClass: 'fab fa-cloudversify',
+    },
+    {
+      name: 'codepen',
+      cssClass: 'fab fa-codepen',
+    },
+    {
+      name: 'codiepie',
+      cssClass: 'fab fa-codiepie',
+    },
+    {
+      name: 'confluence',
+      cssClass: 'fab fa-confluence',
+    },
+    {
+      name: 'connectdevelop',
+      cssClass: 'fab fa-connectdevelop',
+    },
+    {
+      name: 'contao',
+      cssClass: 'fab fa-contao',
+    },
+    {
+      name: 'cpanel',
+      cssClass: 'fab fa-cpanel',
+    },
+    {
+      name: 'creative-commons',
+      cssClass: 'fab fa-creative-commons',
+    },
+    {
+      name: 'creative-commons-by',
+      cssClass: 'fab fa-creative-commons-by',
+    },
+    {
+      name: 'creative-commons-nc',
+      cssClass: 'fab fa-creative-commons-nc',
+    },
+    {
+      name: 'creative-commons-nc-eu',
+      cssClass: 'fab fa-creative-commons-nc-eu',
+    },
+    {
+      name: 'creative-commons-nc-jp',
+      cssClass: 'fab fa-creative-commons-nc-jp',
+    },
+    {
+      name: 'creative-commons-nd',
+      cssClass: 'fab fa-creative-commons-nd',
+    },
+    {
+      name: 'creative-commons-pd',
+      cssClass: 'fab fa-creative-commons-pd',
+    },
+    {
+      name: 'creative-commons-pd-alt',
+      cssClass: 'fab fa-creative-commons-pd-alt',
+    },
+    {
+      name: 'creative-commons-remix',
+      cssClass: 'fab fa-creative-commons-remix',
+    },
+    {
+      name: 'creative-commons-sa',
+      cssClass: 'fab fa-creative-commons-sa',
+    },
+    {
+      name: 'creative-commons-sampling',
+      cssClass: 'fab fa-creative-commons-sampling',
+    },
+    {
+      name: 'creative-commons-sampling-plus',
+      cssClass: 'fab fa-creative-commons-sampling-plus',
+    },
+    {
+      name: 'creative-commons-share',
+      cssClass: 'fab fa-creative-commons-share',
+    },
+    {
+      name: 'creative-commons-zero',
+      cssClass: 'fab fa-creative-commons-zero',
+    },
+    {
+      name: 'critical-role',
+      cssClass: 'fab fa-critical-role',
+    },
+    {
+      name: 'css3',
+      cssClass: 'fab fa-css3',
+    },
+    {
+      name: 'css3-alt',
+      cssClass: 'fab fa-css3-alt',
+    },
+    {
+      name: 'cuttlefish',
+      cssClass: 'fab fa-cuttlefish',
+    },
+    {
+      name: 'd-and-d',
+      cssClass: 'fab fa-d-and-d',
+    },
+    {
+      name: 'd-and-d-beyond',
+      cssClass: 'fab fa-d-and-d-beyond',
+    },
+    {
+      name: 'dashcube',
+      cssClass: 'fab fa-dashcube',
+    },
+    {
+      name: 'delicious',
+      cssClass: 'fab fa-delicious',
+    },
+    {
+      name: 'deploydog',
+      cssClass: 'fab fa-deploydog',
+    },
+    {
+      name: 'deskpro',
+      cssClass: 'fab fa-deskpro',
+    },
+    {
+      name: 'dev',
+      cssClass: 'fab fa-dev',
+    },
+    {
+      name: 'deviantart',
+      cssClass: 'fab fa-deviantart',
+    },
+    {
+      name: 'dhl',
+      cssClass: 'fab fa-dhl',
+    },
+    {
+      name: 'diaspora',
+      cssClass: 'fab fa-diaspora',
+    },
+    {
+      name: 'digg',
+      cssClass: 'fab fa-digg',
+    },
+    {
+      name: 'digital-ocean',
+      cssClass: 'fab fa-digital-ocean',
+    },
+    {
+      name: 'discord',
+      cssClass: 'fab fa-discord',
+    },
+    {
+      name: 'discourse',
+      cssClass: 'fab fa-discourse',
+    },
+    {
+      name: 'dochub',
+      cssClass: 'fab fa-dochub',
+    },
+    {
+      name: 'docker',
+      cssClass: 'fab fa-docker',
+    },
+    {
+      name: 'draft2digital',
+      cssClass: 'fab fa-draft2digital',
+    },
+    {
+      name: 'dribbble',
+      cssClass: 'fab fa-dribbble',
+    },
+    {
+      name: 'dribbble-square',
+      cssClass: 'fab fa-dribbble-square',
+    },
+    {
+      name: 'dropbox',
+      cssClass: 'fab fa-dropbox',
+    },
+    {
+      name: 'drupal',
+      cssClass: 'fab fa-drupal',
+    },
+    {
+      name: 'dyalog',
+      cssClass: 'fab fa-dyalog',
+    },
+    {
+      name: 'earlybirds',
+      cssClass: 'fab fa-earlybirds',
+    },
+    {
+      name: 'ebay',
+      cssClass: 'fab fa-ebay',
+    },
+    {
+      name: 'edge',
+      cssClass: 'fab fa-edge',
+    },
+    {
+      name: 'elementor',
+      cssClass: 'fab fa-elementor',
+    },
+    {
+      name: 'ello',
+      cssClass: 'fab fa-ello',
+    },
+    {
+      name: 'ember',
+      cssClass: 'fab fa-ember',
+    },
+    {
+      name: 'empire',
+      cssClass: 'fab fa-empire',
+    },
+    {
+      name: 'envira',
+      cssClass: 'fab fa-envira',
+    },
+    {
+      name: 'erlang',
+      cssClass: 'fab fa-erlang',
+    },
+    {
+      name: 'ethereum',
+      cssClass: 'fab fa-ethereum',
+    },
+    {
+      name: 'etsy',
+      cssClass: 'fab fa-etsy',
+    },
+    {
+      name: 'expeditedssl',
+      cssClass: 'fab fa-expeditedssl',
+    },
+    {
+      name: 'facebook',
+      cssClass: 'fab fa-facebook',
+    },
+    {
+      name: 'facebook-f',
+      cssClass: 'fab fa-facebook-f',
+    },
+    {
+      name: 'facebook-messenger',
+      cssClass: 'fab fa-facebook-messenger',
+    },
+    {
+      name: 'facebook-square',
+      cssClass: 'fab fa-facebook-square',
+    },
+    {
+      name: 'fantasy-flight-games',
+      cssClass: 'fab fa-fantasy-flight-games',
+    },
+    {
+      name: 'fedex',
+      cssClass: 'fab fa-fedex',
+    },
+    {
+      name: 'fedora',
+      cssClass: 'fab fa-fedora',
+    },
+    {
+      name: 'figma',
+      cssClass: 'fab fa-figma',
+    },
+    {
+      name: 'firefox',
+      cssClass: 'fab fa-firefox',
+    },
+    {
+      name: 'first-order',
+      cssClass: 'fab fa-first-order',
+    },
+    {
+      name: 'first-order-alt',
+      cssClass: 'fab fa-first-order-alt',
+    },
+    {
+      name: 'firstdraft',
+      cssClass: 'fab fa-firstdraft',
+    },
+    {
+      name: 'flickr',
+      cssClass: 'fab fa-flickr',
+    },
+    {
+      name: 'flipboard',
+      cssClass: 'fab fa-flipboard',
+    },
+    {
+      name: 'fly',
+      cssClass: 'fab fa-fly',
+    },
+    {
+      name: 'font-awesome',
+      cssClass: 'fab fa-font-awesome',
+    },
+    {
+      name: 'font-awesome-alt',
+      cssClass: 'fab fa-font-awesome-alt',
+    },
+    {
+      name: 'font-awesome-flag',
+      cssClass: 'fab fa-font-awesome-flag',
+    },
+    {
+      name: 'font-awesome-logo-full',
+      cssClass: 'fab fa-font-awesome-logo-full',
+    },
+    {
+      name: 'fonticons',
+      cssClass: 'fab fa-fonticons',
+    },
+    {
+      name: 'fonticons-fi',
+      cssClass: 'fab fa-fonticons-fi',
+    },
+    {
+      name: 'fort-awesome',
+      cssClass: 'fab fa-fort-awesome',
+    },
+    {
+      name: 'fort-awesome-alt',
+      cssClass: 'fab fa-fort-awesome-alt',
+    },
+    {
+      name: 'forumbee',
+      cssClass: 'fab fa-forumbee',
+    },
+    {
+      name: 'foursquare',
+      cssClass: 'fab fa-foursquare',
+    },
+    {
+      name: 'free-code-camp',
+      cssClass: 'fab fa-free-code-camp',
+    },
+    {
+      name: 'freebsd',
+      cssClass: 'fab fa-freebsd',
+    },
+    {
+      name: 'fulcrum',
+      cssClass: 'fab fa-fulcrum',
+    },
+    {
+      name: 'galactic-republic',
+      cssClass: 'fab fa-galactic-republic',
+    },
+    {
+      name: 'galactic-senate',
+      cssClass: 'fab fa-galactic-senate',
+    },
+    {
+      name: 'get-pocket',
+      cssClass: 'fab fa-get-pocket',
+    },
+    {
+      name: 'gg',
+      cssClass: 'fab fa-gg',
+    },
+    {
+      name: 'gg-circle',
+      cssClass: 'fab fa-gg-circle',
+    },
+    {
+      name: 'git',
+      cssClass: 'fab fa-git',
+    },
+    {
+      name: 'git-square',
+      cssClass: 'fab fa-git-square',
+    },
+    {
+      name: 'github',
+      cssClass: 'fab fa-github',
+    },
+    {
+      name: 'github-alt',
+      cssClass: 'fab fa-github-alt',
+    },
+    {
+      name: 'github-square',
+      cssClass: 'fab fa-github-square',
+    },
+    {
+      name: 'gitkraken',
+      cssClass: 'fab fa-gitkraken',
+    },
+    {
+      name: 'gitlab',
+      cssClass: 'fab fa-gitlab',
+    },
+    {
+      name: 'gitter',
+      cssClass: 'fab fa-gitter',
+    },
+    {
+      name: 'glide',
+      cssClass: 'fab fa-glide',
+    },
+    {
+      name: 'glide-g',
+      cssClass: 'fab fa-glide-g',
+    },
+    {
+      name: 'gofore',
+      cssClass: 'fab fa-gofore',
+    },
+    {
+      name: 'goodreads',
+      cssClass: 'fab fa-goodreads',
+    },
+    {
+      name: 'goodreads-g',
+      cssClass: 'fab fa-goodreads-g',
+    },
+    {
+      name: 'google',
+      cssClass: 'fab fa-google',
+    },
+    {
+      name: 'google-drive',
+      cssClass: 'fab fa-google-drive',
+    },
+    {
+      name: 'google-play',
+      cssClass: 'fab fa-google-play',
+    },
+    {
+      name: 'google-plus',
+      cssClass: 'fab fa-google-plus',
+    },
+    {
+      name: 'google-plus-g',
+      cssClass: 'fab fa-google-plus-g',
+    },
+    {
+      name: 'google-plus-square',
+      cssClass: 'fab fa-google-plus-square',
+    },
+    {
+      name: 'google-wallet',
+      cssClass: 'fab fa-google-wallet',
+    },
+    {
+      name: 'gratipay',
+      cssClass: 'fab fa-gratipay',
+    },
+    {
+      name: 'grav',
+      cssClass: 'fab fa-grav',
+    },
+    {
+      name: 'gripfire',
+      cssClass: 'fab fa-gripfire',
+    },
+    {
+      name: 'grunt',
+      cssClass: 'fab fa-grunt',
+    },
+    {
+      name: 'gulp',
+      cssClass: 'fab fa-gulp',
+    },
+    {
+      name: 'hacker-news',
+      cssClass: 'fab fa-hacker-news',
+    },
+    {
+      name: 'hacker-news-square',
+      cssClass: 'fab fa-hacker-news-square',
+    },
+    {
+      name: 'hackerrank',
+      cssClass: 'fab fa-hackerrank',
+    },
+    {
+      name: 'hips',
+      cssClass: 'fab fa-hips',
+    },
+    {
+      name: 'hire-a-helper',
+      cssClass: 'fab fa-hire-a-helper',
+    },
+    {
+      name: 'hooli',
+      cssClass: 'fab fa-hooli',
+    },
+    {
+      name: 'hornbill',
+      cssClass: 'fab fa-hornbill',
+    },
+    {
+      name: 'hotjar',
+      cssClass: 'fab fa-hotjar',
+    },
+    {
+      name: 'houzz',
+      cssClass: 'fab fa-houzz',
+    },
+    {
+      name: 'html5',
+      cssClass: 'fab fa-html5',
+    },
+    {
+      name: 'hubspot',
+      cssClass: 'fab fa-hubspot',
+    },
+    {
+      name: 'imdb',
+      cssClass: 'fab fa-imdb',
+    },
+    {
+      name: 'instagram',
+      cssClass: 'fab fa-instagram',
+    },
+    {
+      name: 'intercom',
+      cssClass: 'fab fa-intercom',
+    },
+    {
+      name: 'internet-explorer',
+      cssClass: 'fab fa-internet-explorer',
+    },
+    {
+      name: 'invision',
+      cssClass: 'fab fa-invision',
+    },
+    {
+      name: 'ioxhost',
+      cssClass: 'fab fa-ioxhost',
+    },
+    {
+      name: 'itunes',
+      cssClass: 'fab fa-itunes',
+    },
+    {
+      name: 'itunes-note',
+      cssClass: 'fab fa-itunes-note',
+    },
+    {
+      name: 'java',
+      cssClass: 'fab fa-java',
+    },
+    {
+      name: 'jedi-order',
+      cssClass: 'fab fa-jedi-order',
+    },
+    {
+      name: 'jenkins',
+      cssClass: 'fab fa-jenkins',
+    },
+    {
+      name: 'jira',
+      cssClass: 'fab fa-jira',
+    },
+    {
+      name: 'joget',
+      cssClass: 'fab fa-joget',
+    },
+    {
+      name: 'joomla',
+      cssClass: 'fab fa-joomla',
+    },
+    {
+      name: 'js',
+      cssClass: 'fab fa-js',
+    },
+    {
+      name: 'js-square',
+      cssClass: 'fab fa-js-square',
+    },
+    {
+      name: 'jsfiddle',
+      cssClass: 'fab fa-jsfiddle',
+    },
+    {
+      name: 'kaggle',
+      cssClass: 'fab fa-kaggle',
+    },
+    {
+      name: 'keybase',
+      cssClass: 'fab fa-keybase',
+    },
+    {
+      name: 'keycdn',
+      cssClass: 'fab fa-keycdn',
+    },
+    {
+      name: 'kickstarter',
+      cssClass: 'fab fa-kickstarter',
+    },
+    {
+      name: 'kickstarter-k',
+      cssClass: 'fab fa-kickstarter-k',
+    },
+    {
+      name: 'korvue',
+      cssClass: 'fab fa-korvue',
+    },
+    {
+      name: 'laravel',
+      cssClass: 'fab fa-laravel',
+    },
+    {
+      name: 'lastfm',
+      cssClass: 'fab fa-lastfm',
+    },
+    {
+      name: 'lastfm-square',
+      cssClass: 'fab fa-lastfm-square',
+    },
+    {
+      name: 'leanpub',
+      cssClass: 'fab fa-leanpub',
+    },
+    {
+      name: 'less',
+      cssClass: 'fab fa-less',
+    },
+    {
+      name: 'line',
+      cssClass: 'fab fa-line',
+    },
+    {
+      name: 'linkedin',
+      cssClass: 'fab fa-linkedin',
+    },
+    {
+      name: 'linkedin-in',
+      cssClass: 'fab fa-linkedin-in',
+    },
+    {
+      name: 'linode',
+      cssClass: 'fab fa-linode',
+    },
+    {
+      name: 'linux',
+      cssClass: 'fab fa-linux',
+    },
+    {
+      name: 'lyft',
+      cssClass: 'fab fa-lyft',
+    },
+    {
+      name: 'magento',
+      cssClass: 'fab fa-magento',
+    },
+    {
+      name: 'mailchimp',
+      cssClass: 'fab fa-mailchimp',
+    },
+    {
+      name: 'mandalorian',
+      cssClass: 'fab fa-mandalorian',
+    },
+    {
+      name: 'markdown',
+      cssClass: 'fab fa-markdown',
+    },
+    {
+      name: 'mastodon',
+      cssClass: 'fab fa-mastodon',
+    },
+    {
+      name: 'maxcdn',
+      cssClass: 'fab fa-maxcdn',
+    },
+    {
+      name: 'medapps',
+      cssClass: 'fab fa-medapps',
+    },
+    {
+      name: 'medium',
+      cssClass: 'fab fa-medium',
+    },
+    {
+      name: 'medium-m',
+      cssClass: 'fab fa-medium-m',
+    },
+    {
+      name: 'medrt',
+      cssClass: 'fab fa-medrt',
+    },
+    {
+      name: 'meetup',
+      cssClass: 'fab fa-meetup',
+    },
+    {
+      name: 'megaport',
+      cssClass: 'fab fa-megaport',
+    },
+    {
+      name: 'mendeley',
+      cssClass: 'fab fa-mendeley',
+    },
+    {
+      name: 'microsoft',
+      cssClass: 'fab fa-microsoft',
+    },
+    {
+      name: 'mix',
+      cssClass: 'fab fa-mix',
+    },
+    {
+      name: 'mixcloud',
+      cssClass: 'fab fa-mixcloud',
+    },
+    {
+      name: 'mizuni',
+      cssClass: 'fab fa-mizuni',
+    },
+    {
+      name: 'modx',
+      cssClass: 'fab fa-modx',
+    },
+    {
+      name: 'monero',
+      cssClass: 'fab fa-monero',
+    },
+    {
+      name: 'napster',
+      cssClass: 'fab fa-napster',
+    },
+    {
+      name: 'neos',
+      cssClass: 'fab fa-neos',
+    },
+    {
+      name: 'nimblr',
+      cssClass: 'fab fa-nimblr',
+    },
+    {
+      name: 'nintendo-switch',
+      cssClass: 'fab fa-nintendo-switch',
+    },
+    {
+      name: 'node',
+      cssClass: 'fab fa-node',
+    },
+    {
+      name: 'node-js',
+      cssClass: 'fab fa-node-js',
+    },
+    {
+      name: 'npm',
+      cssClass: 'fab fa-npm',
+    },
+    {
+      name: 'ns8',
+      cssClass: 'fab fa-ns8',
+    },
+    {
+      name: 'nutritionix',
+      cssClass: 'fab fa-nutritionix',
+    },
+    {
+      name: 'odnoklassniki',
+      cssClass: 'fab fa-odnoklassniki',
+    },
+    {
+      name: 'odnoklassniki-square',
+      cssClass: 'fab fa-odnoklassniki-square',
+    },
+    {
+      name: 'old-republic',
+      cssClass: 'fab fa-old-republic',
+    },
+    {
+      name: 'opencart',
+      cssClass: 'fab fa-opencart',
+    },
+    {
+      name: 'openid',
+      cssClass: 'fab fa-openid',
+    },
+    {
+      name: 'opera',
+      cssClass: 'fab fa-opera',
+    },
+    {
+      name: 'optin-monster',
+      cssClass: 'fab fa-optin-monster',
+    },
+    {
+      name: 'osi',
+      cssClass: 'fab fa-osi',
+    },
+    {
+      name: 'page4',
+      cssClass: 'fab fa-page4',
+    },
+    {
+      name: 'pagelines',
+      cssClass: 'fab fa-pagelines',
+    },
+    {
+      name: 'palfed',
+      cssClass: 'fab fa-palfed',
+    },
+    {
+      name: 'patreon',
+      cssClass: 'fab fa-patreon',
+    },
+    {
+      name: 'paypal',
+      cssClass: 'fab fa-paypal',
+    },
+    {
+      name: 'penny-arcade',
+      cssClass: 'fab fa-penny-arcade',
+    },
+    {
+      name: 'periscope',
+      cssClass: 'fab fa-periscope',
+    },
+    {
+      name: 'phabricator',
+      cssClass: 'fab fa-phabricator',
+    },
+    {
+      name: 'phoenix-framework',
+      cssClass: 'fab fa-phoenix-framework',
+    },
+    {
+      name: 'phoenix-squadron',
+      cssClass: 'fab fa-phoenix-squadron',
+    },
+    {
+      name: 'php',
+      cssClass: 'fab fa-php',
+    },
+    {
+      name: 'pied-piper',
+      cssClass: 'fab fa-pied-piper',
+    },
+    {
+      name: 'pied-piper-alt',
+      cssClass: 'fab fa-pied-piper-alt',
+    },
+    {
+      name: 'pied-piper-hat',
+      cssClass: 'fab fa-pied-piper-hat',
+    },
+    {
+      name: 'pied-piper-pp',
+      cssClass: 'fab fa-pied-piper-pp',
+    },
+    {
+      name: 'pinterest',
+      cssClass: 'fab fa-pinterest',
+    },
+    {
+      name: 'pinterest-p',
+      cssClass: 'fab fa-pinterest-p',
+    },
+    {
+      name: 'pinterest-square',
+      cssClass: 'fab fa-pinterest-square',
+    },
+    {
+      name: 'playstation',
+      cssClass: 'fab fa-playstation',
+    },
+    {
+      name: 'product-hunt',
+      cssClass: 'fab fa-product-hunt',
+    },
+    {
+      name: 'pushed',
+      cssClass: 'fab fa-pushed',
+    },
+    {
+      name: 'python',
+      cssClass: 'fab fa-python',
+    },
+    {
+      name: 'qq',
+      cssClass: 'fab fa-qq',
+    },
+    {
+      name: 'quinscape',
+      cssClass: 'fab fa-quinscape',
+    },
+    {
+      name: 'quora',
+      cssClass: 'fab fa-quora',
+    },
+    {
+      name: 'r-project',
+      cssClass: 'fab fa-r-project',
+    },
+    {
+      name: 'raspberry-pi',
+      cssClass: 'fab fa-raspberry-pi',
+    },
+    {
+      name: 'ravelry',
+      cssClass: 'fab fa-ravelry',
+    },
+    {
+      name: 'react',
+      cssClass: 'fab fa-react',
+    },
+    {
+      name: 'reacteurope',
+      cssClass: 'fab fa-reacteurope',
+    },
+    {
+      name: 'readme',
+      cssClass: 'fab fa-readme',
+    },
+    {
+      name: 'rebel',
+      cssClass: 'fab fa-rebel',
+    },
+    {
+      name: 'red-river',
+      cssClass: 'fab fa-red-river',
+    },
+    {
+      name: 'reddit',
+      cssClass: 'fab fa-reddit',
+    },
+    {
+      name: 'reddit-alien',
+      cssClass: 'fab fa-reddit-alien',
+    },
+    {
+      name: 'reddit-square',
+      cssClass: 'fab fa-reddit-square',
+    },
+    {
+      name: 'redhat',
+      cssClass: 'fab fa-redhat',
+    },
+    {
+      name: 'renren',
+      cssClass: 'fab fa-renren',
+    },
+    {
+      name: 'replyd',
+      cssClass: 'fab fa-replyd',
+    },
+    {
+      name: 'researchgate',
+      cssClass: 'fab fa-researchgate',
+    },
+    {
+      name: 'resolving',
+      cssClass: 'fab fa-resolving',
+    },
+    {
+      name: 'rev',
+      cssClass: 'fab fa-rev',
+    },
+    {
+      name: 'rocketchat',
+      cssClass: 'fab fa-rocketchat',
+    },
+    {
+      name: 'rockrms',
+      cssClass: 'fab fa-rockrms',
+    },
+    {
+      name: 'safari',
+      cssClass: 'fab fa-safari',
+    },
+    {
+      name: 'sass',
+      cssClass: 'fab fa-sass',
+    },
+    {
+      name: 'schlix',
+      cssClass: 'fab fa-schlix',
+    },
+    {
+      name: 'scribd',
+      cssClass: 'fab fa-scribd',
+    },
+    {
+      name: 'searchengin',
+      cssClass: 'fab fa-searchengin',
+    },
+    {
+      name: 'sellcast',
+      cssClass: 'fab fa-sellcast',
+    },
+    {
+      name: 'sellsy',
+      cssClass: 'fab fa-sellsy',
+    },
+    {
+      name: 'servicestack',
+      cssClass: 'fab fa-servicestack',
+    },
+    {
+      name: 'shirtsinbulk',
+      cssClass: 'fab fa-shirtsinbulk',
+    },
+    {
+      name: 'shopware',
+      cssClass: 'fab fa-shopware',
+    },
+    {
+      name: 'simplybuilt',
+      cssClass: 'fab fa-simplybuilt',
+    },
+    {
+      name: 'sistrix',
+      cssClass: 'fab fa-sistrix',
+    },
+    {
+      name: 'sith',
+      cssClass: 'fab fa-sith',
+    },
+    {
+      name: 'sketch',
+      cssClass: 'fab fa-sketch',
+    },
+    {
+      name: 'skyatlas',
+      cssClass: 'fab fa-skyatlas',
+    },
+    {
+      name: 'skype',
+      cssClass: 'fab fa-skype',
+    },
+    {
+      name: 'slack',
+      cssClass: 'fab fa-slack',
+    },
+    {
+      name: 'slack-hash',
+      cssClass: 'fab fa-slack-hash',
+    },
+    {
+      name: 'slideshare',
+      cssClass: 'fab fa-slideshare',
+    },
+    {
+      name: 'snapchat',
+      cssClass: 'fab fa-snapchat',
+    },
+    {
+      name: 'snapchat-ghost',
+      cssClass: 'fab fa-snapchat-ghost',
+    },
+    {
+      name: 'snapchat-square',
+      cssClass: 'fab fa-snapchat-square',
+    },
+    {
+      name: 'soundcloud',
+      cssClass: 'fab fa-soundcloud',
+    },
+    {
+      name: 'sourcetree',
+      cssClass: 'fab fa-sourcetree',
+    },
+    {
+      name: 'speakap',
+      cssClass: 'fab fa-speakap',
+    },
+    {
+      name: 'spotify',
+      cssClass: 'fab fa-spotify',
+    },
+    {
+      name: 'squarespace',
+      cssClass: 'fab fa-squarespace',
+    },
+    {
+      name: 'stack-exchange',
+      cssClass: 'fab fa-stack-exchange',
+    },
+    {
+      name: 'stack-overflow',
+      cssClass: 'fab fa-stack-overflow',
+    },
+    {
+      name: 'staylinked',
+      cssClass: 'fab fa-staylinked',
+    },
+    {
+      name: 'steam',
+      cssClass: 'fab fa-steam',
+    },
+    {
+      name: 'steam-square',
+      cssClass: 'fab fa-steam-square',
+    },
+    {
+      name: 'steam-symbol',
+      cssClass: 'fab fa-steam-symbol',
+    },
+    {
+      name: 'sticker-mule',
+      cssClass: 'fab fa-sticker-mule',
+    },
+    {
+      name: 'strava',
+      cssClass: 'fab fa-strava',
+    },
+    {
+      name: 'stripe',
+      cssClass: 'fab fa-stripe',
+    },
+    {
+      name: 'stripe-s',
+      cssClass: 'fab fa-stripe-s',
+    },
+    {
+      name: 'studiovinari',
+      cssClass: 'fab fa-studiovinari',
+    },
+    {
+      name: 'stumbleupon',
+      cssClass: 'fab fa-stumbleupon',
+    },
+    {
+      name: 'stumbleupon-circle',
+      cssClass: 'fab fa-stumbleupon-circle',
+    },
+    {
+      name: 'superpowers',
+      cssClass: 'fab fa-superpowers',
+    },
+    {
+      name: 'supple',
+      cssClass: 'fab fa-supple',
+    },
+    {
+      name: 'suse',
+      cssClass: 'fab fa-suse',
+    },
+    {
+      name: 'teamspeak',
+      cssClass: 'fab fa-teamspeak',
+    },
+    {
+      name: 'telegram',
+      cssClass: 'fab fa-telegram',
+    },
+    {
+      name: 'telegram-plane',
+      cssClass: 'fab fa-telegram-plane',
+    },
+    {
+      name: 'tencent-weibo',
+      cssClass: 'fab fa-tencent-weibo',
+    },
+    {
+      name: 'the-red-yeti',
+      cssClass: 'fab fa-the-red-yeti',
+    },
+    {
+      name: 'themeco',
+      cssClass: 'fab fa-themeco',
+    },
+    {
+      name: 'themeisle',
+      cssClass: 'fab fa-themeisle',
+    },
+    {
+      name: 'think-peaks',
+      cssClass: 'fab fa-think-peaks',
+    },
+    {
+      name: 'trade-federation',
+      cssClass: 'fab fa-trade-federation',
+    },
+    {
+      name: 'trello',
+      cssClass: 'fab fa-trello',
+    },
+    {
+      name: 'tripadvisor',
+      cssClass: 'fab fa-tripadvisor',
+    },
+    {
+      name: 'tumblr',
+      cssClass: 'fab fa-tumblr',
+    },
+    {
+      name: 'tumblr-square',
+      cssClass: 'fab fa-tumblr-square',
+    },
+    {
+      name: 'twitch',
+      cssClass: 'fab fa-twitch',
+    },
+    {
+      name: 'twitter',
+      cssClass: 'fab fa-twitter',
+    },
+    {
+      name: 'twitter-square',
+      cssClass: 'fab fa-twitter-square',
+    },
+    {
+      name: 'typo3',
+      cssClass: 'fab fa-typo3',
+    },
+    {
+      name: 'uber',
+      cssClass: 'fab fa-uber',
+    },
+    {
+      name: 'ubuntu',
+      cssClass: 'fab fa-ubuntu',
+    },
+    {
+      name: 'uikit',
+      cssClass: 'fab fa-uikit',
+    },
+    {
+      name: 'uniregistry',
+      cssClass: 'fab fa-uniregistry',
+    },
+    {
+      name: 'untappd',
+      cssClass: 'fab fa-untappd',
+    },
+    {
+      name: 'ups',
+      cssClass: 'fab fa-ups',
+    },
+    {
+      name: 'usb',
+      cssClass: 'fab fa-usb',
+    },
+    {
+      name: 'usps',
+      cssClass: 'fab fa-usps',
+    },
+    {
+      name: 'ussunnah',
+      cssClass: 'fab fa-ussunnah',
+    },
+    {
+      name: 'vaadin',
+      cssClass: 'fab fa-vaadin',
+    },
+    {
+      name: 'viacoin',
+      cssClass: 'fab fa-viacoin',
+    },
+    {
+      name: 'viadeo',
+      cssClass: 'fab fa-viadeo',
+    },
+    {
+      name: 'viadeo-square',
+      cssClass: 'fab fa-viadeo-square',
+    },
+    {
+      name: 'viber',
+      cssClass: 'fab fa-viber',
+    },
+    {
+      name: 'vimeo',
+      cssClass: 'fab fa-vimeo',
+    },
+    {
+      name: 'vimeo-square',
+      cssClass: 'fab fa-vimeo-square',
+    },
+    {
+      name: 'vimeo-v',
+      cssClass: 'fab fa-vimeo-v',
+    },
+    {
+      name: 'vine',
+      cssClass: 'fab fa-vine',
+    },
+    {
+      name: 'vk',
+      cssClass: 'fab fa-vk',
+    },
+    {
+      name: 'vnv',
+      cssClass: 'fab fa-vnv',
+    },
+    {
+      name: 'vuejs',
+      cssClass: 'fab fa-vuejs',
+    },
+    {
+      name: 'weebly',
+      cssClass: 'fab fa-weebly',
+    },
+    {
+      name: 'weibo',
+      cssClass: 'fab fa-weibo',
+    },
+    {
+      name: 'weixin',
+      cssClass: 'fab fa-weixin',
+    },
+    {
+      name: 'whatsapp',
+      cssClass: 'fab fa-whatsapp',
+    },
+    {
+      name: 'whatsapp-square',
+      cssClass: 'fab fa-whatsapp-square',
+    },
+    {
+      name: 'whmcs',
+      cssClass: 'fab fa-whmcs',
+    },
+    {
+      name: 'wikipedia-w',
+      cssClass: 'fab fa-wikipedia-w',
+    },
+    {
+      name: 'windows',
+      cssClass: 'fab fa-windows',
+    },
+    {
+      name: 'wix',
+      cssClass: 'fab fa-wix',
+    },
+    {
+      name: 'wizards-of-the-coast',
+      cssClass: 'fab fa-wizards-of-the-coast',
+    },
+    {
+      name: 'wolf-pack-battalion',
+      cssClass: 'fab fa-wolf-pack-battalion',
+    },
+    {
+      name: 'wordpress',
+      cssClass: 'fab fa-wordpress',
+    },
+    {
+      name: 'wordpress-simple',
+      cssClass: 'fab fa-wordpress-simple',
+    },
+    {
+      name: 'wpbeginner',
+      cssClass: 'fab fa-wpbeginner',
+    },
+    {
+      name: 'wpexplorer',
+      cssClass: 'fab fa-wpexplorer',
+    },
+    {
+      name: 'wpforms',
+      cssClass: 'fab fa-wpforms',
+    },
+    {
+      name: 'wpressr',
+      cssClass: 'fab fa-wpressr',
+    },
+    {
+      name: 'xbox',
+      cssClass: 'fab fa-xbox',
+    },
+    {
+      name: 'xing',
+      cssClass: 'fab fa-xing',
+    },
+    {
+      name: 'xing-square',
+      cssClass: 'fab fa-xing-square',
+    },
+    {
+      name: 'y-combinator',
+      cssClass: 'fab fa-y-combinator',
+    },
+    {
+      name: 'yahoo',
+      cssClass: 'fab fa-yahoo',
+    },
+    {
+      name: 'yandex',
+      cssClass: 'fab fa-yandex',
+    },
+    {
+      name: 'yandex-international',
+      cssClass: 'fab fa-yandex-international',
+    },
+    {
+      name: 'yarn',
+      cssClass: 'fab fa-yarn',
+    },
+    {
+      name: 'yelp',
+      cssClass: 'fab fa-yelp',
+    },
+    {
+      name: 'yoast',
+      cssClass: 'fab fa-yoast',
+    },
+    {
+      name: 'youtube',
+      cssClass: 'fab fa-youtube',
+    },
+    {
+      name: 'youtube-square',
+      cssClass: 'fab fa-youtube-square',
+    },
+    {
+      name: 'zhihu',
+      cssClass: 'fab fa-zhihu',
     },
     {
       name: 'ad',
@@ -32,24 +1680,8 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-adjust',
     },
     {
-      name: 'adn',
-      cssClass: 'fab fa-adn',
-    },
-    {
-      name: 'adversal',
-      cssClass: 'fab fa-adversal',
-    },
-    {
-      name: 'affiliatetheme',
-      cssClass: 'fab fa-affiliatetheme',
-    },
-    {
       name: 'air-freshener',
       cssClass: 'fas fa-air-freshener',
-    },
-    {
-      name: 'algolia',
-      cssClass: 'fab fa-algolia',
     },
     {
       name: 'align-center',
@@ -68,20 +1700,8 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-align-right',
     },
     {
-      name: 'alipay',
-      cssClass: 'fab fa-alipay',
-    },
-    {
       name: 'allergies',
       cssClass: 'fas fa-allergies',
-    },
-    {
-      name: 'amazon',
-      cssClass: 'fab fa-amazon',
-    },
-    {
-      name: 'amazon-pay',
-      cssClass: 'fab fa-amazon-pay',
     },
     {
       name: 'ambulance',
@@ -92,20 +1712,8 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-american-sign-language-interpreting',
     },
     {
-      name: 'amilia',
-      cssClass: 'fab fa-amilia',
-    },
-    {
       name: 'anchor',
       cssClass: 'fas fa-anchor',
-    },
-    {
-      name: 'android',
-      cssClass: 'fab fa-android',
-    },
-    {
-      name: 'angellist',
-      cssClass: 'fab fa-angellist',
     },
     {
       name: 'angle-double-down',
@@ -144,40 +1752,12 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-angry',
     },
     {
-      name: 'angrycreative',
-      cssClass: 'fab fa-angrycreative',
-    },
-    {
-      name: 'angular',
-      cssClass: 'fab fa-angular',
-    },
-    {
       name: 'ankh',
       cssClass: 'fas fa-ankh',
     },
     {
-      name: 'app-store',
-      cssClass: 'fab fa-app-store',
-    },
-    {
-      name: 'app-store-ios',
-      cssClass: 'fab fa-app-store-ios',
-    },
-    {
-      name: 'apper',
-      cssClass: 'fab fa-apper',
-    },
-    {
-      name: 'apple',
-      cssClass: 'fab fa-apple',
-    },
-    {
       name: 'apple-alt',
       cssClass: 'fas fa-apple-alt',
-    },
-    {
-      name: 'apple-pay',
-      cssClass: 'fab fa-apple-pay',
     },
     {
       name: 'archive',
@@ -256,10 +1836,6 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-asterisk',
     },
     {
-      name: 'asymmetrik',
-      cssClass: 'fab fa-asymmetrik',
-    },
-    {
       name: 'at',
       cssClass: 'fas fa-at',
     },
@@ -272,32 +1848,20 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-atom',
     },
     {
-      name: 'audible',
-      cssClass: 'fab fa-audible',
-    },
-    {
       name: 'audio-description',
       cssClass: 'fas fa-audio-description',
-    },
-    {
-      name: 'autoprefixer',
-      cssClass: 'fab fa-autoprefixer',
-    },
-    {
-      name: 'avianex',
-      cssClass: 'fab fa-avianex',
-    },
-    {
-      name: 'aviato',
-      cssClass: 'fab fa-aviato',
     },
     {
       name: 'award',
       cssClass: 'fas fa-award',
     },
     {
-      name: 'aws',
-      cssClass: 'fab fa-aws',
+      name: 'baby',
+      cssClass: 'fas fa-baby',
+    },
+    {
+      name: 'baby-carriage',
+      cssClass: 'fas fa-baby-carriage',
     },
     {
       name: 'backspace',
@@ -306,6 +1870,10 @@ const fontAwesomeIcons = {
     {
       name: 'backward',
       cssClass: 'fas fa-backward',
+    },
+    {
+      name: 'bacon',
+      cssClass: 'fas fa-bacon',
     },
     {
       name: 'balance-scale',
@@ -318,10 +1886,6 @@ const fontAwesomeIcons = {
     {
       name: 'band-aid',
       cssClass: 'fas fa-band-aid',
-    },
-    {
-      name: 'bandcamp',
-      cssClass: 'fab fa-bandcamp',
     },
     {
       name: 'barcode',
@@ -372,14 +1936,6 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-beer',
     },
     {
-      name: 'behance',
-      cssClass: 'fab fa-behance',
-    },
-    {
-      name: 'behance-square',
-      cssClass: 'fab fa-behance-square',
-    },
-    {
       name: 'bell',
       cssClass: 'fas fa-bell',
     },
@@ -400,60 +1956,32 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-bicycle',
     },
     {
-      name: 'bimobject',
-      cssClass: 'fab fa-bimobject',
-    },
-    {
       name: 'binoculars',
       cssClass: 'fas fa-binoculars',
+    },
+    {
+      name: 'biohazard',
+      cssClass: 'fas fa-biohazard',
     },
     {
       name: 'birthday-cake',
       cssClass: 'fas fa-birthday-cake',
     },
     {
-      name: 'bitbucket',
-      cssClass: 'fab fa-bitbucket',
-    },
-    {
-      name: 'bitcoin',
-      cssClass: 'fab fa-bitcoin',
-    },
-    {
-      name: 'bity',
-      cssClass: 'fab fa-bity',
-    },
-    {
-      name: 'black-tie',
-      cssClass: 'fab fa-black-tie',
-    },
-    {
-      name: 'blackberry',
-      cssClass: 'fab fa-blackberry',
-    },
-    {
       name: 'blender',
       cssClass: 'fas fa-blender',
+    },
+    {
+      name: 'blender-phone',
+      cssClass: 'fas fa-blender-phone',
     },
     {
       name: 'blind',
       cssClass: 'fas fa-blind',
     },
     {
-      name: 'blogger',
-      cssClass: 'fab fa-blogger',
-    },
-    {
-      name: 'blogger-b',
-      cssClass: 'fab fa-blogger-b',
-    },
-    {
-      name: 'bluetooth',
-      cssClass: 'fab fa-bluetooth',
-    },
-    {
-      name: 'bluetooth-b',
-      cssClass: 'fab fa-bluetooth-b',
+      name: 'blog',
+      cssClass: 'fas fa-blog',
     },
     {
       name: 'bold',
@@ -478,6 +2006,14 @@ const fontAwesomeIcons = {
     {
       name: 'book',
       cssClass: 'fas fa-book',
+    },
+    {
+      name: 'book-dead',
+      cssClass: 'fas fa-book-dead',
+    },
+    {
+      name: 'book-medical',
+      cssClass: 'fas fa-book-medical',
     },
     {
       name: 'book-open',
@@ -516,6 +2052,10 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-brain',
     },
     {
+      name: 'bread-slice',
+      cssClass: 'fas fa-bread-slice',
+    },
+    {
       name: 'briefcase',
       cssClass: 'fas fa-briefcase',
     },
@@ -534,10 +2074,6 @@ const fontAwesomeIcons = {
     {
       name: 'brush',
       cssClass: 'fas fa-brush',
-    },
-    {
-      name: 'btc',
-      cssClass: 'fab fa-btc',
     },
     {
       name: 'bug',
@@ -560,10 +2096,6 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-burn',
     },
     {
-      name: 'buromobelexperte',
-      cssClass: 'fab fa-buromobelexperte',
-    },
-    {
       name: 'bus',
       cssClass: 'fas fa-bus',
     },
@@ -574,10 +2106,6 @@ const fontAwesomeIcons = {
     {
       name: 'business-time',
       cssClass: 'fas fa-business-time',
-    },
-    {
-      name: 'buysellads',
-      cssClass: 'fab fa-buysellads',
     },
     {
       name: 'calculator',
@@ -596,6 +2124,10 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-calendar-check',
     },
     {
+      name: 'calendar-day',
+      cssClass: 'fas fa-calendar-day',
+    },
+    {
       name: 'calendar-minus',
       cssClass: 'fas fa-calendar-minus',
     },
@@ -608,12 +2140,24 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-calendar-times',
     },
     {
+      name: 'calendar-week',
+      cssClass: 'fas fa-calendar-week',
+    },
+    {
       name: 'camera',
       cssClass: 'fas fa-camera',
     },
     {
       name: 'camera-retro',
       cssClass: 'fas fa-camera-retro',
+    },
+    {
+      name: 'campground',
+      cssClass: 'fas fa-campground',
+    },
+    {
+      name: 'candy-cane',
+      cssClass: 'fas fa-candy-cane',
     },
     {
       name: 'cannabis',
@@ -676,6 +2220,10 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-caret-up',
     },
     {
+      name: 'carrot',
+      cssClass: 'fas fa-carrot',
+    },
+    {
       name: 'cart-arrow-down',
       cssClass: 'fas fa-cart-arrow-down',
     },
@@ -684,52 +2232,20 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-cart-plus',
     },
     {
-      name: 'cc-amazon-pay',
-      cssClass: 'fab fa-cc-amazon-pay',
+      name: 'cash-register',
+      cssClass: 'fas fa-cash-register',
     },
     {
-      name: 'cc-amex',
-      cssClass: 'fab fa-cc-amex',
-    },
-    {
-      name: 'cc-apple-pay',
-      cssClass: 'fab fa-cc-apple-pay',
-    },
-    {
-      name: 'cc-diners-club',
-      cssClass: 'fab fa-cc-diners-club',
-    },
-    {
-      name: 'cc-discover',
-      cssClass: 'fab fa-cc-discover',
-    },
-    {
-      name: 'cc-jcb',
-      cssClass: 'fab fa-cc-jcb',
-    },
-    {
-      name: 'cc-mastercard',
-      cssClass: 'fab fa-cc-mastercard',
-    },
-    {
-      name: 'cc-paypal',
-      cssClass: 'fab fa-cc-paypal',
-    },
-    {
-      name: 'cc-stripe',
-      cssClass: 'fab fa-cc-stripe',
-    },
-    {
-      name: 'cc-visa',
-      cssClass: 'fab fa-cc-visa',
-    },
-    {
-      name: 'centercode',
-      cssClass: 'fab fa-centercode',
+      name: 'cat',
+      cssClass: 'fas fa-cat',
     },
     {
       name: 'certificate',
       cssClass: 'fas fa-certificate',
+    },
+    {
+      name: 'chair',
+      cssClass: 'fas fa-chair',
     },
     {
       name: 'chalkboard',
@@ -774,6 +2290,10 @@ const fontAwesomeIcons = {
     {
       name: 'check-square',
       cssClass: 'fas fa-check-square',
+    },
+    {
+      name: 'cheese',
+      cssClass: 'fas fa-cheese',
     },
     {
       name: 'chess',
@@ -844,10 +2364,6 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-child',
     },
     {
-      name: 'chrome',
-      cssClass: 'fab fa-chrome',
-    },
-    {
       name: 'church',
       cssClass: 'fas fa-church',
     },
@@ -862,6 +2378,10 @@ const fontAwesomeIcons = {
     {
       name: 'city',
       cssClass: 'fas fa-city',
+    },
+    {
+      name: 'clinic-medical',
+      cssClass: 'fas fa-clinic-medical',
     },
     {
       name: 'clipboard',
@@ -896,20 +2416,36 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-cloud-download-alt',
     },
     {
+      name: 'cloud-meatball',
+      cssClass: 'fas fa-cloud-meatball',
+    },
+    {
+      name: 'cloud-moon',
+      cssClass: 'fas fa-cloud-moon',
+    },
+    {
+      name: 'cloud-moon-rain',
+      cssClass: 'fas fa-cloud-moon-rain',
+    },
+    {
+      name: 'cloud-rain',
+      cssClass: 'fas fa-cloud-rain',
+    },
+    {
+      name: 'cloud-showers-heavy',
+      cssClass: 'fas fa-cloud-showers-heavy',
+    },
+    {
+      name: 'cloud-sun',
+      cssClass: 'fas fa-cloud-sun',
+    },
+    {
+      name: 'cloud-sun-rain',
+      cssClass: 'fas fa-cloud-sun-rain',
+    },
+    {
       name: 'cloud-upload-alt',
       cssClass: 'fas fa-cloud-upload-alt',
-    },
-    {
-      name: 'cloudscale',
-      cssClass: 'fab fa-cloudscale',
-    },
-    {
-      name: 'cloudsmith',
-      cssClass: 'fab fa-cloudsmith',
-    },
-    {
-      name: 'cloudversify',
-      cssClass: 'fab fa-cloudversify',
     },
     {
       name: 'cocktail',
@@ -922,14 +2458,6 @@ const fontAwesomeIcons = {
     {
       name: 'code-branch',
       cssClass: 'fas fa-code-branch',
-    },
-    {
-      name: 'codepen',
-      cssClass: 'fab fa-codepen',
-    },
-    {
-      name: 'codiepie',
-      cssClass: 'fab fa-codiepie',
     },
     {
       name: 'coffee',
@@ -968,6 +2496,10 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-comment-dots',
     },
     {
+      name: 'comment-medical',
+      cssClass: 'fas fa-comment-medical',
+    },
+    {
       name: 'comment-slash',
       cssClass: 'fas fa-comment-slash',
     },
@@ -992,16 +2524,12 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-compress',
     },
     {
+      name: 'compress-arrows-alt',
+      cssClass: 'fas fa-compress-arrows-alt',
+    },
+    {
       name: 'concierge-bell',
       cssClass: 'fas fa-concierge-bell',
-    },
-    {
-      name: 'connectdevelop',
-      cssClass: 'fab fa-connectdevelop',
-    },
-    {
-      name: 'contao',
-      cssClass: 'fab fa-contao',
     },
     {
       name: 'cookie',
@@ -1022,62 +2550,6 @@ const fontAwesomeIcons = {
     {
       name: 'couch',
       cssClass: 'fas fa-couch',
-    },
-    {
-      name: 'cpanel',
-      cssClass: 'fab fa-cpanel',
-    },
-    {
-      name: 'creative-commons',
-      cssClass: 'fab fa-creative-commons',
-    },
-    {
-      name: 'creative-commons-by',
-      cssClass: 'fab fa-creative-commons-by',
-    },
-    {
-      name: 'creative-commons-nc',
-      cssClass: 'fab fa-creative-commons-nc',
-    },
-    {
-      name: 'creative-commons-nc-eu',
-      cssClass: 'fab fa-creative-commons-nc-eu',
-    },
-    {
-      name: 'creative-commons-nc-jp',
-      cssClass: 'fab fa-creative-commons-nc-jp',
-    },
-    {
-      name: 'creative-commons-nd',
-      cssClass: 'fab fa-creative-commons-nd',
-    },
-    {
-      name: 'creative-commons-pd',
-      cssClass: 'fab fa-creative-commons-pd',
-    },
-    {
-      name: 'creative-commons-pd-alt',
-      cssClass: 'fab fa-creative-commons-pd-alt',
-    },
-    {
-      name: 'creative-commons-remix',
-      cssClass: 'fab fa-creative-commons-remix',
-    },
-    {
-      name: 'creative-commons-sa',
-      cssClass: 'fab fa-creative-commons-sa',
-    },
-    {
-      name: 'creative-commons-sampling',
-      cssClass: 'fab fa-creative-commons-sampling',
-    },
-    {
-      name: 'creative-commons-sampling-plus',
-      cssClass: 'fab fa-creative-commons-sampling-plus',
-    },
-    {
-      name: 'creative-commons-share',
-      cssClass: 'fab fa-creative-commons-share',
     },
     {
       name: 'credit-card',
@@ -1108,12 +2580,8 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-crown',
     },
     {
-      name: 'css3',
-      cssClass: 'fab fa-css3',
-    },
-    {
-      name: 'css3-alt',
-      cssClass: 'fab fa-css3-alt',
+      name: 'crutch',
+      cssClass: 'fas fa-crutch',
     },
     {
       name: 'cube',
@@ -1128,18 +2596,6 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-cut',
     },
     {
-      name: 'cuttlefish',
-      cssClass: 'fab fa-cuttlefish',
-    },
-    {
-      name: 'd-and-d',
-      cssClass: 'fab fa-d-and-d',
-    },
-    {
-      name: 'dashcube',
-      cssClass: 'fab fa-dashcube',
-    },
-    {
       name: 'database',
       cssClass: 'fas fa-database',
     },
@@ -1148,24 +2604,12 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-deaf',
     },
     {
-      name: 'delicious',
-      cssClass: 'fab fa-delicious',
-    },
-    {
-      name: 'deploydog',
-      cssClass: 'fab fa-deploydog',
-    },
-    {
-      name: 'deskpro',
-      cssClass: 'fab fa-deskpro',
+      name: 'democrat',
+      cssClass: 'fas fa-democrat',
     },
     {
       name: 'desktop',
       cssClass: 'fas fa-desktop',
-    },
-    {
-      name: 'deviantart',
-      cssClass: 'fab fa-deviantart',
     },
     {
       name: 'dharmachakra',
@@ -1178,6 +2622,14 @@ const fontAwesomeIcons = {
     {
       name: 'dice',
       cssClass: 'fas fa-dice',
+    },
+    {
+      name: 'dice-d20',
+      cssClass: 'fas fa-dice-d20',
+    },
+    {
+      name: 'dice-d6',
+      cssClass: 'fas fa-dice-d6',
     },
     {
       name: 'dice-five',
@@ -1204,28 +2656,12 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-dice-two',
     },
     {
-      name: 'digg',
-      cssClass: 'fab fa-digg',
-    },
-    {
-      name: 'digital-ocean',
-      cssClass: 'fab fa-digital-ocean',
-    },
-    {
       name: 'digital-tachograph',
       cssClass: 'fas fa-digital-tachograph',
     },
     {
       name: 'directions',
       cssClass: 'fas fa-directions',
-    },
-    {
-      name: 'discord',
-      cssClass: 'fab fa-discord',
-    },
-    {
-      name: 'discourse',
-      cssClass: 'fab fa-discourse',
     },
     {
       name: 'divide',
@@ -1240,12 +2676,8 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-dna',
     },
     {
-      name: 'dochub',
-      cssClass: 'fab fa-dochub',
-    },
-    {
-      name: 'docker',
-      cssClass: 'fab fa-docker',
+      name: 'dog',
+      cssClass: 'fas fa-dog',
     },
     {
       name: 'dollar-sign',
@@ -1284,28 +2716,16 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-download',
     },
     {
-      name: 'draft2digital',
-      cssClass: 'fab fa-draft2digital',
-    },
-    {
       name: 'drafting-compass',
       cssClass: 'fas fa-drafting-compass',
     },
     {
+      name: 'dragon',
+      cssClass: 'fas fa-dragon',
+    },
+    {
       name: 'draw-polygon',
       cssClass: 'fas fa-draw-polygon',
-    },
-    {
-      name: 'dribbble',
-      cssClass: 'fab fa-dribbble',
-    },
-    {
-      name: 'dribbble-square',
-      cssClass: 'fab fa-dribbble-square',
-    },
-    {
-      name: 'dropbox',
-      cssClass: 'fab fa-dropbox',
     },
     {
       name: 'drum',
@@ -1316,40 +2736,36 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-drum-steelpan',
     },
     {
-      name: 'drupal',
-      cssClass: 'fab fa-drupal',
+      name: 'drumstick-bite',
+      cssClass: 'fas fa-drumstick-bite',
     },
     {
       name: 'dumbbell',
       cssClass: 'fas fa-dumbbell',
     },
     {
-      name: 'dyalog',
-      cssClass: 'fab fa-dyalog',
+      name: 'dumpster',
+      cssClass: 'fas fa-dumpster',
     },
     {
-      name: 'earlybirds',
-      cssClass: 'fab fa-earlybirds',
+      name: 'dumpster-fire',
+      cssClass: 'fas fa-dumpster-fire',
     },
     {
-      name: 'ebay',
-      cssClass: 'fab fa-ebay',
-    },
-    {
-      name: 'edge',
-      cssClass: 'fab fa-edge',
+      name: 'dungeon',
+      cssClass: 'fas fa-dungeon',
     },
     {
       name: 'edit',
       cssClass: 'fas fa-edit',
     },
     {
-      name: 'eject',
-      cssClass: 'fas fa-eject',
+      name: 'egg',
+      cssClass: 'fas fa-egg',
     },
     {
-      name: 'elementor',
-      cssClass: 'fab fa-elementor',
+      name: 'eject',
+      cssClass: 'fas fa-eject',
     },
     {
       name: 'ellipsis-h',
@@ -1358,18 +2774,6 @@ const fontAwesomeIcons = {
     {
       name: 'ellipsis-v',
       cssClass: 'fas fa-ellipsis-v',
-    },
-    {
-      name: 'ello',
-      cssClass: 'fab fa-ello',
-    },
-    {
-      name: 'ember',
-      cssClass: 'fab fa-ember',
-    },
-    {
-      name: 'empire',
-      cssClass: 'fab fa-empire',
     },
     {
       name: 'envelope',
@@ -1388,10 +2792,6 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-envelope-square',
     },
     {
-      name: 'envira',
-      cssClass: 'fab fa-envira',
-    },
-    {
       name: 'equals',
       cssClass: 'fas fa-equals',
     },
@@ -1400,16 +2800,8 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-eraser',
     },
     {
-      name: 'erlang',
-      cssClass: 'fab fa-erlang',
-    },
-    {
-      name: 'ethereum',
-      cssClass: 'fab fa-ethereum',
-    },
-    {
-      name: 'etsy',
-      cssClass: 'fab fa-etsy',
+      name: 'ethernet',
+      cssClass: 'fas fa-ethernet',
     },
     {
       name: 'euro-sign',
@@ -1440,10 +2832,6 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-expand-arrows-alt',
     },
     {
-      name: 'expeditedssl',
-      cssClass: 'fab fa-expeditedssl',
-    },
-    {
       name: 'external-link-alt',
       cssClass: 'fas fa-external-link-alt',
     },
@@ -1462,22 +2850,6 @@ const fontAwesomeIcons = {
     {
       name: 'eye-slash',
       cssClass: 'fas fa-eye-slash',
-    },
-    {
-      name: 'facebook',
-      cssClass: 'fab fa-facebook',
-    },
-    {
-      name: 'facebook-f',
-      cssClass: 'fab fa-facebook-f',
-    },
-    {
-      name: 'facebook-messenger',
-      cssClass: 'fab fa-facebook-messenger',
-    },
-    {
-      name: 'facebook-square',
-      cssClass: 'fab fa-facebook-square',
     },
     {
       name: 'fast-backward',
@@ -1530,6 +2902,10 @@ const fontAwesomeIcons = {
     {
       name: 'file-contract',
       cssClass: 'fas fa-file-contract',
+    },
+    {
+      name: 'file-csv',
+      cssClass: 'fas fa-file-csv',
     },
     {
       name: 'file-download',
@@ -1620,32 +2996,24 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-fire',
     },
     {
-      name: 'fire-extinguisher',
-      cssClass: 'fas fa-fire-extinguisher',
+      name: 'fire-alt',
+      cssClass: 'fas fa-fire-alt',
     },
     {
-      name: 'firefox',
-      cssClass: 'fab fa-firefox',
+      name: 'fire-extinguisher',
+      cssClass: 'fas fa-fire-extinguisher',
     },
     {
       name: 'first-aid',
       cssClass: 'fas fa-first-aid',
     },
     {
-      name: 'first-order',
-      cssClass: 'fab fa-first-order',
-    },
-    {
-      name: 'first-order-alt',
-      cssClass: 'fab fa-first-order-alt',
-    },
-    {
-      name: 'firstdraft',
-      cssClass: 'fab fa-firstdraft',
-    },
-    {
       name: 'fish',
       cssClass: 'fas fa-fish',
+    },
+    {
+      name: 'fist-raised',
+      cssClass: 'fas fa-fist-raised',
     },
     {
       name: 'flag',
@@ -1656,24 +3024,16 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-flag-checkered',
     },
     {
+      name: 'flag-usa',
+      cssClass: 'fas fa-flag-usa',
+    },
+    {
       name: 'flask',
       cssClass: 'fas fa-flask',
     },
     {
-      name: 'flickr',
-      cssClass: 'fab fa-flickr',
-    },
-    {
-      name: 'flipboard',
-      cssClass: 'fab fa-flipboard',
-    },
-    {
       name: 'flushed',
       cssClass: 'fas fa-flushed',
-    },
-    {
-      name: 'fly',
-      cssClass: 'fab fa-fly',
     },
     {
       name: 'folder',
@@ -1696,60 +3056,16 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-font',
     },
     {
-      name: 'font-awesome',
-      cssClass: 'fab fa-font-awesome',
-    },
-    {
-      name: 'font-awesome-alt',
-      cssClass: 'fab fa-font-awesome-alt',
-    },
-    {
-      name: 'font-awesome-flag',
-      cssClass: 'fab fa-font-awesome-flag',
-    },
-    {
       name: 'font-awesome-logo-full',
-      cssClass: 'fab fa-font-awesome-logo-full',
-    },
-    {
-      name: 'fonticons',
-      cssClass: 'fab fa-fonticons',
-    },
-    {
-      name: 'fonticons-fi',
-      cssClass: 'fab fa-fonticons-fi',
+      cssClass: 'fas fa-font-awesome-logo-full',
     },
     {
       name: 'football-ball',
       cssClass: 'fas fa-football-ball',
     },
     {
-      name: 'fort-awesome',
-      cssClass: 'fab fa-fort-awesome',
-    },
-    {
-      name: 'fort-awesome-alt',
-      cssClass: 'fab fa-fort-awesome-alt',
-    },
-    {
-      name: 'forumbee',
-      cssClass: 'fab fa-forumbee',
-    },
-    {
       name: 'forward',
       cssClass: 'fas fa-forward',
-    },
-    {
-      name: 'foursquare',
-      cssClass: 'fab fa-foursquare',
-    },
-    {
-      name: 'free-code-camp',
-      cssClass: 'fab fa-free-code-camp',
-    },
-    {
-      name: 'freebsd',
-      cssClass: 'fab fa-freebsd',
     },
     {
       name: 'frog',
@@ -1764,24 +3080,12 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-frown-open',
     },
     {
-      name: 'fulcrum',
-      cssClass: 'fab fa-fulcrum',
-    },
-    {
       name: 'funnel-dollar',
       cssClass: 'fas fa-funnel-dollar',
     },
     {
       name: 'futbol',
       cssClass: 'fas fa-futbol',
-    },
-    {
-      name: 'galactic-republic',
-      cssClass: 'fab fa-galactic-republic',
-    },
-    {
-      name: 'galactic-senate',
-      cssClass: 'fab fa-galactic-senate',
     },
     {
       name: 'gamepad',
@@ -1804,52 +3108,20 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-genderless',
     },
     {
-      name: 'get-pocket',
-      cssClass: 'fab fa-get-pocket',
-    },
-    {
-      name: 'gg',
-      cssClass: 'fab fa-gg',
-    },
-    {
-      name: 'gg-circle',
-      cssClass: 'fab fa-gg-circle',
+      name: 'ghost',
+      cssClass: 'fas fa-ghost',
     },
     {
       name: 'gift',
       cssClass: 'fas fa-gift',
     },
     {
-      name: 'git',
-      cssClass: 'fab fa-git',
+      name: 'gifts',
+      cssClass: 'fas fa-gifts',
     },
     {
-      name: 'git-square',
-      cssClass: 'fab fa-git-square',
-    },
-    {
-      name: 'github',
-      cssClass: 'fab fa-github',
-    },
-    {
-      name: 'github-alt',
-      cssClass: 'fab fa-github-alt',
-    },
-    {
-      name: 'github-square',
-      cssClass: 'fab fa-github-square',
-    },
-    {
-      name: 'gitkraken',
-      cssClass: 'fab fa-gitkraken',
-    },
-    {
-      name: 'gitlab',
-      cssClass: 'fab fa-gitlab',
-    },
-    {
-      name: 'gitter',
-      cssClass: 'fab fa-gitter',
+      name: 'glass-cheers',
+      cssClass: 'fas fa-glass-cheers',
     },
     {
       name: 'glass-martini',
@@ -1860,16 +3132,12 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-glass-martini-alt',
     },
     {
+      name: 'glass-whiskey',
+      cssClass: 'fas fa-glass-whiskey',
+    },
+    {
       name: 'glasses',
       cssClass: 'fas fa-glasses',
-    },
-    {
-      name: 'glide',
-      cssClass: 'fab fa-glide',
-    },
-    {
-      name: 'glide-g',
-      cssClass: 'fab fa-glide-g',
     },
     {
       name: 'globe',
@@ -1888,48 +3156,12 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-globe-asia',
     },
     {
-      name: 'gofore',
-      cssClass: 'fab fa-gofore',
+      name: 'globe-europe',
+      cssClass: 'fas fa-globe-europe',
     },
     {
       name: 'golf-ball',
       cssClass: 'fas fa-golf-ball',
-    },
-    {
-      name: 'goodreads',
-      cssClass: 'fab fa-goodreads',
-    },
-    {
-      name: 'goodreads-g',
-      cssClass: 'fab fa-goodreads-g',
-    },
-    {
-      name: 'google',
-      cssClass: 'fab fa-google',
-    },
-    {
-      name: 'google-drive',
-      cssClass: 'fab fa-google-drive',
-    },
-    {
-      name: 'google-play',
-      cssClass: 'fab fa-google-play',
-    },
-    {
-      name: 'google-plus',
-      cssClass: 'fab fa-google-plus',
-    },
-    {
-      name: 'google-plus-g',
-      cssClass: 'fab fa-google-plus-g',
-    },
-    {
-      name: 'google-plus-square',
-      cssClass: 'fab fa-google-plus-square',
-    },
-    {
-      name: 'google-wallet',
-      cssClass: 'fab fa-google-wallet',
     },
     {
       name: 'gopuram',
@@ -1938,14 +3170,6 @@ const fontAwesomeIcons = {
     {
       name: 'graduation-cap',
       cssClass: 'fas fa-graduation-cap',
-    },
-    {
-      name: 'gratipay',
-      cssClass: 'fab fa-gratipay',
-    },
-    {
-      name: 'grav',
-      cssClass: 'fab fa-grav',
     },
     {
       name: 'greater-than',
@@ -2016,36 +3240,32 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-grip-horizontal',
     },
     {
+      name: 'grip-lines',
+      cssClass: 'fas fa-grip-lines',
+    },
+    {
+      name: 'grip-lines-vertical',
+      cssClass: 'fas fa-grip-lines-vertical',
+    },
+    {
       name: 'grip-vertical',
       cssClass: 'fas fa-grip-vertical',
     },
     {
-      name: 'gripfire',
-      cssClass: 'fab fa-gripfire',
-    },
-    {
-      name: 'grunt',
-      cssClass: 'fab fa-grunt',
-    },
-    {
-      name: 'gulp',
-      cssClass: 'fab fa-gulp',
+      name: 'guitar',
+      cssClass: 'fas fa-guitar',
     },
     {
       name: 'h-square',
       cssClass: 'fas fa-h-square',
     },
     {
-      name: 'hacker-news',
-      cssClass: 'fab fa-hacker-news',
+      name: 'hamburger',
+      cssClass: 'fas fa-hamburger',
     },
     {
-      name: 'hacker-news-square',
-      cssClass: 'fab fa-hacker-news-square',
-    },
-    {
-      name: 'hackerrank',
-      cssClass: 'fab fa-hackerrank',
+      name: 'hammer',
+      cssClass: 'fas fa-hammer',
     },
     {
       name: 'hamsa',
@@ -2066,6 +3286,10 @@ const fontAwesomeIcons = {
     {
       name: 'hand-lizard',
       cssClass: 'fas fa-hand-lizard',
+    },
+    {
+      name: 'hand-middle-finger',
+      cssClass: 'fas fa-hand-middle-finger',
     },
     {
       name: 'hand-paper',
@@ -2120,8 +3344,20 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-handshake',
     },
     {
+      name: 'hanukiah',
+      cssClass: 'fas fa-hanukiah',
+    },
+    {
+      name: 'hard-hat',
+      cssClass: 'fas fa-hard-hat',
+    },
+    {
       name: 'hashtag',
       cssClass: 'fas fa-hashtag',
+    },
+    {
+      name: 'hat-wizard',
+      cssClass: 'fas fa-hat-wizard',
     },
     {
       name: 'haykal',
@@ -2152,6 +3388,10 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-heart',
     },
     {
+      name: 'heart-broken',
+      cssClass: 'fas fa-heart-broken',
+    },
+    {
       name: 'heartbeat',
       cssClass: 'fas fa-heartbeat',
     },
@@ -2164,12 +3404,12 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-highlighter',
     },
     {
-      name: 'hips',
-      cssClass: 'fab fa-hips',
+      name: 'hiking',
+      cssClass: 'fas fa-hiking',
     },
     {
-      name: 'hire-a-helper',
-      cssClass: 'fab fa-hire-a-helper',
+      name: 'hippo',
+      cssClass: 'fas fa-hippo',
     },
     {
       name: 'history',
@@ -2180,16 +3420,20 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-hockey-puck',
     },
     {
+      name: 'holly-berry',
+      cssClass: 'fas fa-holly-berry',
+    },
+    {
       name: 'home',
       cssClass: 'fas fa-home',
     },
     {
-      name: 'hooli',
-      cssClass: 'fab fa-hooli',
+      name: 'horse',
+      cssClass: 'fas fa-horse',
     },
     {
-      name: 'hornbill',
-      cssClass: 'fab fa-hornbill',
+      name: 'horse-head',
+      cssClass: 'fas fa-horse-head',
     },
     {
       name: 'hospital',
@@ -2208,12 +3452,12 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-hot-tub',
     },
     {
-      name: 'hotel',
-      cssClass: 'fas fa-hotel',
+      name: 'hotdog',
+      cssClass: 'fas fa-hotdog',
     },
     {
-      name: 'hotjar',
-      cssClass: 'fab fa-hotjar',
+      name: 'hotel',
+      cssClass: 'fas fa-hotel',
     },
     {
       name: 'hourglass',
@@ -2232,20 +3476,24 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-hourglass-start',
     },
     {
-      name: 'houzz',
-      cssClass: 'fab fa-houzz',
+      name: 'house-damage',
+      cssClass: 'fas fa-house-damage',
     },
     {
-      name: 'html5',
-      cssClass: 'fab fa-html5',
-    },
-    {
-      name: 'hubspot',
-      cssClass: 'fab fa-hubspot',
+      name: 'hryvnia',
+      cssClass: 'fas fa-hryvnia',
     },
     {
       name: 'i-cursor',
       cssClass: 'fas fa-i-cursor',
+    },
+    {
+      name: 'ice-cream',
+      cssClass: 'fas fa-ice-cream',
+    },
+    {
+      name: 'icicles',
+      cssClass: 'fas fa-icicles',
     },
     {
       name: 'id-badge',
@@ -2260,16 +3508,16 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-id-card-alt',
     },
     {
+      name: 'igloo',
+      cssClass: 'fas fa-igloo',
+    },
+    {
       name: 'image',
       cssClass: 'fas fa-image',
     },
     {
       name: 'images',
       cssClass: 'fas fa-images',
-    },
-    {
-      name: 'imdb',
-      cssClass: 'fab fa-imdb',
     },
     {
       name: 'inbox',
@@ -2296,108 +3544,36 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-info-circle',
     },
     {
-      name: 'instagram',
-      cssClass: 'fab fa-instagram',
-    },
-    {
-      name: 'internet-explorer',
-      cssClass: 'fab fa-internet-explorer',
-    },
-    {
-      name: 'ioxhost',
-      cssClass: 'fab fa-ioxhost',
-    },
-    {
       name: 'italic',
       cssClass: 'fas fa-italic',
-    },
-    {
-      name: 'itunes',
-      cssClass: 'fab fa-itunes',
-    },
-    {
-      name: 'itunes-note',
-      cssClass: 'fab fa-itunes-note',
-    },
-    {
-      name: 'java',
-      cssClass: 'fab fa-java',
     },
     {
       name: 'jedi',
       cssClass: 'fas fa-jedi',
     },
     {
-      name: 'jedi-order',
-      cssClass: 'fab fa-jedi-order',
-    },
-    {
-      name: 'jenkins',
-      cssClass: 'fab fa-jenkins',
-    },
-    {
-      name: 'joget',
-      cssClass: 'fab fa-joget',
-    },
-    {
       name: 'joint',
       cssClass: 'fas fa-joint',
-    },
-    {
-      name: 'joomla',
-      cssClass: 'fab fa-joomla',
     },
     {
       name: 'journal-whills',
       cssClass: 'fas fa-journal-whills',
     },
     {
-      name: 'js',
-      cssClass: 'fab fa-js',
-    },
-    {
-      name: 'js-square',
-      cssClass: 'fab fa-js-square',
-    },
-    {
-      name: 'jsfiddle',
-      cssClass: 'fab fa-jsfiddle',
-    },
-    {
       name: 'kaaba',
       cssClass: 'fas fa-kaaba',
-    },
-    {
-      name: 'kaggle',
-      cssClass: 'fab fa-kaggle',
     },
     {
       name: 'key',
       cssClass: 'fas fa-key',
     },
     {
-      name: 'keybase',
-      cssClass: 'fab fa-keybase',
-    },
-    {
       name: 'keyboard',
       cssClass: 'fas fa-keyboard',
     },
     {
-      name: 'keycdn',
-      cssClass: 'fab fa-keycdn',
-    },
-    {
       name: 'khanda',
       cssClass: 'fas fa-khanda',
-    },
-    {
-      name: 'kickstarter',
-      cssClass: 'fab fa-kickstarter',
-    },
-    {
-      name: 'kickstarter-k',
-      cssClass: 'fab fa-kickstarter-k',
     },
     {
       name: 'kiss',
@@ -2416,10 +3592,6 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-kiwi-bird',
     },
     {
-      name: 'korvue',
-      cssClass: 'fab fa-korvue',
-    },
-    {
       name: 'landmark',
       cssClass: 'fas fa-landmark',
     },
@@ -2436,16 +3608,8 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-laptop-code',
     },
     {
-      name: 'laravel',
-      cssClass: 'fab fa-laravel',
-    },
-    {
-      name: 'lastfm',
-      cssClass: 'fab fa-lastfm',
-    },
-    {
-      name: 'lastfm-square',
-      cssClass: 'fab fa-lastfm-square',
+      name: 'laptop-medical',
+      cssClass: 'fas fa-laptop-medical',
     },
     {
       name: 'laugh',
@@ -2472,16 +3636,8 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-leaf',
     },
     {
-      name: 'leanpub',
-      cssClass: 'fab fa-leanpub',
-    },
-    {
       name: 'lemon',
       cssClass: 'fas fa-lemon',
-    },
-    {
-      name: 'less',
-      cssClass: 'fab fa-less',
     },
     {
       name: 'less-than',
@@ -2508,28 +3664,8 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-lightbulb',
     },
     {
-      name: 'line',
-      cssClass: 'fab fa-line',
-    },
-    {
       name: 'link',
       cssClass: 'fas fa-link',
-    },
-    {
-      name: 'linkedin',
-      cssClass: 'fab fa-linkedin',
-    },
-    {
-      name: 'linkedin-in',
-      cssClass: 'fab fa-linkedin-in',
-    },
-    {
-      name: 'linode',
-      cssClass: 'fab fa-linode',
-    },
-    {
-      name: 'linux',
-      cssClass: 'fab fa-linux',
     },
     {
       name: 'lira-sign',
@@ -2588,14 +3724,6 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-luggage-cart',
     },
     {
-      name: 'lyft',
-      cssClass: 'fab fa-lyft',
-    },
-    {
-      name: 'magento',
-      cssClass: 'fab fa-magento',
-    },
-    {
       name: 'magic',
       cssClass: 'fas fa-magic',
     },
@@ -2608,16 +3736,8 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-mail-bulk',
     },
     {
-      name: 'mailchimp',
-      cssClass: 'fab fa-mailchimp',
-    },
-    {
       name: 'male',
       cssClass: 'fas fa-male',
-    },
-    {
-      name: 'mandalorian',
-      cssClass: 'fab fa-mandalorian',
     },
     {
       name: 'map',
@@ -2648,10 +3768,6 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-map-signs',
     },
     {
-      name: 'markdown',
-      cssClass: 'fab fa-markdown',
-    },
-    {
       name: 'marker',
       cssClass: 'fas fa-marker',
     },
@@ -2676,44 +3792,16 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-mars-stroke-v',
     },
     {
-      name: 'mastodon',
-      cssClass: 'fab fa-mastodon',
-    },
-    {
-      name: 'maxcdn',
-      cssClass: 'fab fa-maxcdn',
+      name: 'mask',
+      cssClass: 'fas fa-mask',
     },
     {
       name: 'medal',
       cssClass: 'fas fa-medal',
     },
     {
-      name: 'medapps',
-      cssClass: 'fab fa-medapps',
-    },
-    {
-      name: 'medium',
-      cssClass: 'fab fa-medium',
-    },
-    {
-      name: 'medium-m',
-      cssClass: 'fab fa-medium-m',
-    },
-    {
       name: 'medkit',
       cssClass: 'fas fa-medkit',
-    },
-    {
-      name: 'medrt',
-      cssClass: 'fab fa-medrt',
-    },
-    {
-      name: 'meetup',
-      cssClass: 'fab fa-meetup',
-    },
-    {
-      name: 'megaport',
-      cssClass: 'fab fa-megaport',
     },
     {
       name: 'meh',
@@ -2740,6 +3828,10 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-mercury',
     },
     {
+      name: 'meteor',
+      cssClass: 'fas fa-meteor',
+    },
+    {
       name: 'microchip',
       cssClass: 'fas fa-microchip',
     },
@@ -2764,10 +3856,6 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-microscope',
     },
     {
-      name: 'microsoft',
-      cssClass: 'fab fa-microsoft',
-    },
-    {
       name: 'minus',
       cssClass: 'fas fa-minus',
     },
@@ -2780,16 +3868,8 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-minus-square',
     },
     {
-      name: 'mix',
-      cssClass: 'fab fa-mix',
-    },
-    {
-      name: 'mixcloud',
-      cssClass: 'fab fa-mixcloud',
-    },
-    {
-      name: 'mizuni',
-      cssClass: 'fab fa-mizuni',
+      name: 'mitten',
+      cssClass: 'fas fa-mitten',
     },
     {
       name: 'mobile',
@@ -2798,14 +3878,6 @@ const fontAwesomeIcons = {
     {
       name: 'mobile-alt',
       cssClass: 'fas fa-mobile-alt',
-    },
-    {
-      name: 'modx',
-      cssClass: 'fab fa-modx',
-    },
-    {
-      name: 'monero',
-      cssClass: 'fab fa-monero',
     },
     {
       name: 'money-bill',
@@ -2852,20 +3924,24 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-motorcycle',
     },
     {
+      name: 'mountain',
+      cssClass: 'fas fa-mountain',
+    },
+    {
       name: 'mouse-pointer',
       cssClass: 'fas fa-mouse-pointer',
+    },
+    {
+      name: 'mug-hot',
+      cssClass: 'fas fa-mug-hot',
     },
     {
       name: 'music',
       cssClass: 'fas fa-music',
     },
     {
-      name: 'napster',
-      cssClass: 'fab fa-napster',
-    },
-    {
-      name: 'neos',
-      cssClass: 'fab fa-neos',
+      name: 'network-wired',
+      cssClass: 'fas fa-network-wired',
     },
     {
       name: 'neuter',
@@ -2876,40 +3952,12 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-newspaper',
     },
     {
-      name: 'nimblr',
-      cssClass: 'fab fa-nimblr',
-    },
-    {
-      name: 'nintendo-switch',
-      cssClass: 'fab fa-nintendo-switch',
-    },
-    {
-      name: 'node',
-      cssClass: 'fab fa-node',
-    },
-    {
-      name: 'node-js',
-      cssClass: 'fab fa-node-js',
-    },
-    {
       name: 'not-equal',
       cssClass: 'fas fa-not-equal',
     },
     {
       name: 'notes-medical',
       cssClass: 'fas fa-notes-medical',
-    },
-    {
-      name: 'npm',
-      cssClass: 'fab fa-npm',
-    },
-    {
-      name: 'ns8',
-      cssClass: 'fab fa-ns8',
-    },
-    {
-      name: 'nutritionix',
-      cssClass: 'fab fa-nutritionix',
     },
     {
       name: 'object-group',
@@ -2920,56 +3968,24 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-object-ungroup',
     },
     {
-      name: 'odnoklassniki',
-      cssClass: 'fab fa-odnoklassniki',
-    },
-    {
-      name: 'odnoklassniki-square',
-      cssClass: 'fab fa-odnoklassniki-square',
-    },
-    {
       name: 'oil-can',
       cssClass: 'fas fa-oil-can',
-    },
-    {
-      name: 'old-republic',
-      cssClass: 'fab fa-old-republic',
     },
     {
       name: 'om',
       cssClass: 'fas fa-om',
     },
     {
-      name: 'opencart',
-      cssClass: 'fab fa-opencart',
-    },
-    {
-      name: 'openid',
-      cssClass: 'fab fa-openid',
-    },
-    {
-      name: 'opera',
-      cssClass: 'fab fa-opera',
-    },
-    {
-      name: 'optin-monster',
-      cssClass: 'fab fa-optin-monster',
-    },
-    {
-      name: 'osi',
-      cssClass: 'fab fa-osi',
+      name: 'otter',
+      cssClass: 'fas fa-otter',
     },
     {
       name: 'outdent',
       cssClass: 'fas fa-outdent',
     },
     {
-      name: 'page4',
-      cssClass: 'fab fa-page4',
-    },
-    {
-      name: 'pagelines',
-      cssClass: 'fab fa-pagelines',
+      name: 'pager',
+      cssClass: 'fas fa-pager',
     },
     {
       name: 'paint-brush',
@@ -2982,10 +3998,6 @@ const fontAwesomeIcons = {
     {
       name: 'palette',
       cssClass: 'fas fa-palette',
-    },
-    {
-      name: 'palfed',
-      cssClass: 'fab fa-palfed',
     },
     {
       name: 'pallet',
@@ -3024,10 +4036,6 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-paste',
     },
     {
-      name: 'patreon',
-      cssClass: 'fab fa-patreon',
-    },
-    {
       name: 'pause',
       cssClass: 'fas fa-pause',
     },
@@ -3038,10 +4046,6 @@ const fontAwesomeIcons = {
     {
       name: 'paw',
       cssClass: 'fas fa-paw',
-    },
-    {
-      name: 'paypal',
-      cssClass: 'fab fa-paypal',
     },
     {
       name: 'peace',
@@ -3080,6 +4084,10 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-people-carry',
     },
     {
+      name: 'pepper-hot',
+      cssClass: 'fas fa-pepper-hot',
+    },
+    {
       name: 'percent',
       cssClass: 'fas fa-percent',
     },
@@ -3088,20 +4096,8 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-percentage',
     },
     {
-      name: 'periscope',
-      cssClass: 'fab fa-periscope',
-    },
-    {
-      name: 'phabricator',
-      cssClass: 'fab fa-phabricator',
-    },
-    {
-      name: 'phoenix-framework',
-      cssClass: 'fab fa-phoenix-framework',
-    },
-    {
-      name: 'phoenix-squadron',
-      cssClass: 'fab fa-phoenix-squadron',
+      name: 'person-booth',
+      cssClass: 'fas fa-person-booth',
     },
     {
       name: 'phone',
@@ -3120,26 +4116,6 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-phone-volume',
     },
     {
-      name: 'php',
-      cssClass: 'fab fa-php',
-    },
-    {
-      name: 'pied-piper',
-      cssClass: 'fab fa-pied-piper',
-    },
-    {
-      name: 'pied-piper-alt',
-      cssClass: 'fab fa-pied-piper-alt',
-    },
-    {
-      name: 'pied-piper-hat',
-      cssClass: 'fab fa-pied-piper-hat',
-    },
-    {
-      name: 'pied-piper-pp',
-      cssClass: 'fab fa-pied-piper-pp',
-    },
-    {
       name: 'piggy-bank',
       cssClass: 'fas fa-piggy-bank',
     },
@@ -3148,16 +4124,8 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-pills',
     },
     {
-      name: 'pinterest',
-      cssClass: 'fab fa-pinterest',
-    },
-    {
-      name: 'pinterest-p',
-      cssClass: 'fab fa-pinterest-p',
-    },
-    {
-      name: 'pinterest-square',
-      cssClass: 'fab fa-pinterest-square',
+      name: 'pizza-slice',
+      cssClass: 'fas fa-pizza-slice',
     },
     {
       name: 'place-of-worship',
@@ -3182,10 +4150,6 @@ const fontAwesomeIcons = {
     {
       name: 'play-circle',
       cssClass: 'fas fa-play-circle',
-    },
-    {
-      name: 'playstation',
-      cssClass: 'fab fa-playstation',
     },
     {
       name: 'plug',
@@ -3218,6 +4182,10 @@ const fontAwesomeIcons = {
     {
       name: 'poo',
       cssClass: 'fas fa-poo',
+    },
+    {
+      name: 'poo-storm',
+      cssClass: 'fas fa-poo-storm',
     },
     {
       name: 'poop',
@@ -3264,28 +4232,12 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-procedures',
     },
     {
-      name: 'product-hunt',
-      cssClass: 'fab fa-product-hunt',
-    },
-    {
       name: 'project-diagram',
       cssClass: 'fas fa-project-diagram',
     },
     {
-      name: 'pushed',
-      cssClass: 'fab fa-pushed',
-    },
-    {
       name: 'puzzle-piece',
       cssClass: 'fas fa-puzzle-piece',
-    },
-    {
-      name: 'python',
-      cssClass: 'fab fa-python',
-    },
-    {
-      name: 'qq',
-      cssClass: 'fab fa-qq',
     },
     {
       name: 'qrcode',
@@ -3304,14 +4256,6 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-quidditch',
     },
     {
-      name: 'quinscape',
-      cssClass: 'fab fa-quinscape',
-    },
-    {
-      name: 'quora',
-      cssClass: 'fab fa-quora',
-    },
-    {
       name: 'quote-left',
       cssClass: 'fas fa-quote-left',
     },
@@ -3324,28 +4268,20 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-quran',
     },
     {
-      name: 'r-project',
-      cssClass: 'fab fa-r-project',
+      name: 'radiation',
+      cssClass: 'fas fa-radiation',
+    },
+    {
+      name: 'radiation-alt',
+      cssClass: 'fas fa-radiation-alt',
+    },
+    {
+      name: 'rainbow',
+      cssClass: 'fas fa-rainbow',
     },
     {
       name: 'random',
       cssClass: 'fas fa-random',
-    },
-    {
-      name: 'ravelry',
-      cssClass: 'fab fa-ravelry',
-    },
-    {
-      name: 'react',
-      cssClass: 'fab fa-react',
-    },
-    {
-      name: 'readme',
-      cssClass: 'fab fa-readme',
-    },
-    {
-      name: 'rebel',
-      cssClass: 'fab fa-rebel',
     },
     {
       name: 'receipt',
@@ -3354,22 +4290,6 @@ const fontAwesomeIcons = {
     {
       name: 'recycle',
       cssClass: 'fas fa-recycle',
-    },
-    {
-      name: 'red-river',
-      cssClass: 'fab fa-red-river',
-    },
-    {
-      name: 'reddit',
-      cssClass: 'fab fa-reddit',
-    },
-    {
-      name: 'reddit-alien',
-      cssClass: 'fab fa-reddit-alien',
-    },
-    {
-      name: 'reddit-square',
-      cssClass: 'fab fa-reddit-square',
     },
     {
       name: 'redo',
@@ -3384,14 +4304,6 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-registered',
     },
     {
-      name: 'rendact',
-      cssClass: 'fab fa-rendact',
-    },
-    {
-      name: 'renren',
-      cssClass: 'fab fa-renren',
-    },
-    {
       name: 'reply',
       cssClass: 'fas fa-reply',
     },
@@ -3400,28 +4312,24 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-reply-all',
     },
     {
-      name: 'replyd',
-      cssClass: 'fab fa-replyd',
+      name: 'republican',
+      cssClass: 'fas fa-republican',
     },
     {
-      name: 'researchgate',
-      cssClass: 'fab fa-researchgate',
-    },
-    {
-      name: 'resolving',
-      cssClass: 'fab fa-resolving',
+      name: 'restroom',
+      cssClass: 'fas fa-restroom',
     },
     {
       name: 'retweet',
       cssClass: 'fas fa-retweet',
     },
     {
-      name: 'rev',
-      cssClass: 'fab fa-rev',
-    },
-    {
       name: 'ribbon',
       cssClass: 'fas fa-ribbon',
+    },
+    {
+      name: 'ring',
+      cssClass: 'fas fa-ring',
     },
     {
       name: 'road',
@@ -3434,14 +4342,6 @@ const fontAwesomeIcons = {
     {
       name: 'rocket',
       cssClass: 'fas fa-rocket',
-    },
-    {
-      name: 'rocketchat',
-      cssClass: 'fab fa-rocketchat',
-    },
-    {
-      name: 'rockrms',
-      cssClass: 'fab fa-rockrms',
     },
     {
       name: 'route',
@@ -3476,6 +4376,10 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-ruler-vertical',
     },
     {
+      name: 'running',
+      cssClass: 'fas fa-running',
+    },
+    {
       name: 'rupee-sign',
       cssClass: 'fas fa-rupee-sign',
     },
@@ -3488,20 +4392,16 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-sad-tear',
     },
     {
-      name: 'safari',
-      cssClass: 'fab fa-safari',
+      name: 'satellite',
+      cssClass: 'fas fa-satellite',
     },
     {
-      name: 'sass',
-      cssClass: 'fab fa-sass',
+      name: 'satellite-dish',
+      cssClass: 'fas fa-satellite-dish',
     },
     {
       name: 'save',
       cssClass: 'fas fa-save',
-    },
-    {
-      name: 'schlix',
-      cssClass: 'fab fa-schlix',
     },
     {
       name: 'school',
@@ -3512,8 +4412,12 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-screwdriver',
     },
     {
-      name: 'scribd',
-      cssClass: 'fab fa-scribd',
+      name: 'scroll',
+      cssClass: 'fas fa-scroll',
+    },
+    {
+      name: 'sd-card',
+      cssClass: 'fas fa-sd-card',
     },
     {
       name: 'search',
@@ -3536,28 +4440,12 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-search-plus',
     },
     {
-      name: 'searchengin',
-      cssClass: 'fab fa-searchengin',
-    },
-    {
       name: 'seedling',
       cssClass: 'fas fa-seedling',
     },
     {
-      name: 'sellcast',
-      cssClass: 'fab fa-sellcast',
-    },
-    {
-      name: 'sellsy',
-      cssClass: 'fab fa-sellsy',
-    },
-    {
       name: 'server',
       cssClass: 'fas fa-server',
-    },
-    {
-      name: 'servicestack',
-      cssClass: 'fab fa-servicestack',
     },
     {
       name: 'shapes',
@@ -3596,10 +4484,6 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-shipping-fast',
     },
     {
-      name: 'shirtsinbulk',
-      cssClass: 'fab fa-shirtsinbulk',
-    },
-    {
       name: 'shoe-prints',
       cssClass: 'fas fa-shoe-prints',
     },
@@ -3614,10 +4498,6 @@ const fontAwesomeIcons = {
     {
       name: 'shopping-cart',
       cssClass: 'fas fa-shopping-cart',
-    },
-    {
-      name: 'shopware',
-      cssClass: 'fab fa-shopware',
     },
     {
       name: 'shower',
@@ -3652,48 +4532,44 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-signature',
     },
     {
-      name: 'simplybuilt',
-      cssClass: 'fab fa-simplybuilt',
-    },
-    {
-      name: 'sistrix',
-      cssClass: 'fab fa-sistrix',
+      name: 'sim-card',
+      cssClass: 'fas fa-sim-card',
     },
     {
       name: 'sitemap',
       cssClass: 'fas fa-sitemap',
     },
     {
-      name: 'sith',
-      cssClass: 'fab fa-sith',
+      name: 'skating',
+      cssClass: 'fas fa-skating',
+    },
+    {
+      name: 'skiing',
+      cssClass: 'fas fa-skiing',
+    },
+    {
+      name: 'skiing-nordic',
+      cssClass: 'fas fa-skiing-nordic',
     },
     {
       name: 'skull',
       cssClass: 'fas fa-skull',
     },
     {
-      name: 'skyatlas',
-      cssClass: 'fab fa-skyatlas',
+      name: 'skull-crossbones',
+      cssClass: 'fas fa-skull-crossbones',
     },
     {
-      name: 'skype',
-      cssClass: 'fab fa-skype',
+      name: 'slash',
+      cssClass: 'fas fa-slash',
     },
     {
-      name: 'slack',
-      cssClass: 'fab fa-slack',
-    },
-    {
-      name: 'slack-hash',
-      cssClass: 'fab fa-slack-hash',
+      name: 'sleigh',
+      cssClass: 'fas fa-sleigh',
     },
     {
       name: 'sliders-h',
       cssClass: 'fas fa-sliders-h',
-    },
-    {
-      name: 'slideshare',
-      cssClass: 'fab fa-slideshare',
     },
     {
       name: 'smile',
@@ -3708,6 +4584,10 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-smile-wink',
     },
     {
+      name: 'smog',
+      cssClass: 'fas fa-smog',
+    },
+    {
       name: 'smoking',
       cssClass: 'fas fa-smoking',
     },
@@ -3716,20 +4596,24 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-smoking-ban',
     },
     {
-      name: 'snapchat',
-      cssClass: 'fab fa-snapchat',
+      name: 'sms',
+      cssClass: 'fas fa-sms',
     },
     {
-      name: 'snapchat-ghost',
-      cssClass: 'fab fa-snapchat-ghost',
-    },
-    {
-      name: 'snapchat-square',
-      cssClass: 'fab fa-snapchat-square',
+      name: 'snowboarding',
+      cssClass: 'fas fa-snowboarding',
     },
     {
       name: 'snowflake',
       cssClass: 'fas fa-snowflake',
+    },
+    {
+      name: 'snowman',
+      cssClass: 'fas fa-snowman',
+    },
+    {
+      name: 'snowplow',
+      cssClass: 'fas fa-snowplow',
     },
     {
       name: 'socks',
@@ -3776,10 +4660,6 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-sort-up',
     },
     {
-      name: 'soundcloud',
-      cssClass: 'fab fa-soundcloud',
-    },
-    {
       name: 'spa',
       cssClass: 'fas fa-spa',
     },
@@ -3788,8 +4668,8 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-space-shuttle',
     },
     {
-      name: 'speakap',
-      cssClass: 'fab fa-speakap',
+      name: 'spider',
+      cssClass: 'fas fa-spider',
     },
     {
       name: 'spinner',
@@ -3798,10 +4678,6 @@ const fontAwesomeIcons = {
     {
       name: 'splotch',
       cssClass: 'fas fa-splotch',
-    },
-    {
-      name: 'spotify',
-      cssClass: 'fab fa-spotify',
     },
     {
       name: 'spray-can',
@@ -3818,18 +4694,6 @@ const fontAwesomeIcons = {
     {
       name: 'square-root-alt',
       cssClass: 'fas fa-square-root-alt',
-    },
-    {
-      name: 'squarespace',
-      cssClass: 'fab fa-squarespace',
-    },
-    {
-      name: 'stack-exchange',
-      cssClass: 'fab fa-stack-exchange',
-    },
-    {
-      name: 'stack-overflow',
-      cssClass: 'fab fa-stack-overflow',
     },
     {
       name: 'stamp',
@@ -3860,22 +4724,6 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-star-of-life',
     },
     {
-      name: 'staylinked',
-      cssClass: 'fab fa-staylinked',
-    },
-    {
-      name: 'steam',
-      cssClass: 'fab fa-steam',
-    },
-    {
-      name: 'steam-square',
-      cssClass: 'fab fa-steam-square',
-    },
-    {
-      name: 'steam-symbol',
-      cssClass: 'fab fa-steam-symbol',
-    },
-    {
       name: 'step-backward',
       cssClass: 'fas fa-step-backward',
     },
@@ -3886,10 +4734,6 @@ const fontAwesomeIcons = {
     {
       name: 'stethoscope',
       cssClass: 'fas fa-stethoscope',
-    },
-    {
-      name: 'sticker-mule',
-      cssClass: 'fab fa-sticker-mule',
     },
     {
       name: 'sticky-note',
@@ -3916,10 +4760,6 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-store-alt',
     },
     {
-      name: 'strava',
-      cssClass: 'fab fa-strava',
-    },
-    {
       name: 'stream',
       cssClass: 'fas fa-stream',
     },
@@ -3932,28 +4772,8 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-strikethrough',
     },
     {
-      name: 'stripe',
-      cssClass: 'fab fa-stripe',
-    },
-    {
-      name: 'stripe-s',
-      cssClass: 'fab fa-stripe-s',
-    },
-    {
       name: 'stroopwafel',
       cssClass: 'fas fa-stroopwafel',
-    },
-    {
-      name: 'studiovinari',
-      cssClass: 'fab fa-studiovinari',
-    },
-    {
-      name: 'stumbleupon',
-      cssClass: 'fab fa-stumbleupon',
-    },
-    {
-      name: 'stumbleupon-circle',
-      cssClass: 'fab fa-stumbleupon-circle',
     },
     {
       name: 'subscript',
@@ -3976,16 +4796,8 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-sun',
     },
     {
-      name: 'superpowers',
-      cssClass: 'fab fa-superpowers',
-    },
-    {
       name: 'superscript',
       cssClass: 'fas fa-superscript',
-    },
-    {
-      name: 'supple',
-      cssClass: 'fab fa-supple',
     },
     {
       name: 'surprise',
@@ -4064,10 +4876,6 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-taxi',
     },
     {
-      name: 'teamspeak',
-      cssClass: 'fab fa-teamspeak',
-    },
-    {
       name: 'teeth',
       cssClass: 'fas fa-teeth',
     },
@@ -4076,16 +4884,16 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-teeth-open',
     },
     {
-      name: 'telegram',
-      cssClass: 'fab fa-telegram',
+      name: 'temperature-high',
+      cssClass: 'fas fa-temperature-high',
     },
     {
-      name: 'telegram-plane',
-      cssClass: 'fab fa-telegram-plane',
+      name: 'temperature-low',
+      cssClass: 'fas fa-temperature-low',
     },
     {
-      name: 'tencent-weibo',
-      cssClass: 'fab fa-tencent-weibo',
+      name: 'tenge',
+      cssClass: 'fas fa-tenge',
     },
     {
       name: 'terminal',
@@ -4112,20 +4920,8 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-th-list',
     },
     {
-      name: 'the-red-yeti',
-      cssClass: 'fab fa-the-red-yeti',
-    },
-    {
       name: 'theater-masks',
       cssClass: 'fas fa-theater-masks',
-    },
-    {
-      name: 'themeco',
-      cssClass: 'fab fa-themeco',
-    },
-    {
-      name: 'themeisle',
-      cssClass: 'fab fa-themeisle',
     },
     {
       name: 'thermometer',
@@ -4196,8 +4992,20 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-toggle-on',
     },
     {
+      name: 'toilet',
+      cssClass: 'fas fa-toilet',
+    },
+    {
+      name: 'toilet-paper',
+      cssClass: 'fas fa-toilet-paper',
+    },
+    {
       name: 'toolbox',
       cssClass: 'fas fa-toolbox',
+    },
+    {
+      name: 'tools',
+      cssClass: 'fas fa-tools',
     },
     {
       name: 'tooth',
@@ -4212,8 +5020,8 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-torii-gate',
     },
     {
-      name: 'trade-federation',
-      cssClass: 'fab fa-trade-federation',
+      name: 'tractor',
+      cssClass: 'fas fa-tractor',
     },
     {
       name: 'trademark',
@@ -4226,6 +5034,10 @@ const fontAwesomeIcons = {
     {
       name: 'train',
       cssClass: 'fas fa-train',
+    },
+    {
+      name: 'tram',
+      cssClass: 'fas fa-tram',
     },
     {
       name: 'transgender',
@@ -4244,16 +5056,16 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-trash-alt',
     },
     {
+      name: 'trash-restore',
+      cssClass: 'fas fa-trash-restore',
+    },
+    {
+      name: 'trash-restore-alt',
+      cssClass: 'fas fa-trash-restore-alt',
+    },
+    {
       name: 'tree',
       cssClass: 'fas fa-tree',
-    },
-    {
-      name: 'trello',
-      cssClass: 'fab fa-trello',
-    },
-    {
-      name: 'tripadvisor',
-      cssClass: 'fab fa-tripadvisor',
     },
     {
       name: 'trophy',
@@ -4288,40 +5100,8 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-tty',
     },
     {
-      name: 'tumblr',
-      cssClass: 'fab fa-tumblr',
-    },
-    {
-      name: 'tumblr-square',
-      cssClass: 'fab fa-tumblr-square',
-    },
-    {
       name: 'tv',
       cssClass: 'fas fa-tv',
-    },
-    {
-      name: 'twitch',
-      cssClass: 'fab fa-twitch',
-    },
-    {
-      name: 'twitter',
-      cssClass: 'fab fa-twitter',
-    },
-    {
-      name: 'twitter-square',
-      cssClass: 'fab fa-twitter-square',
-    },
-    {
-      name: 'typo3',
-      cssClass: 'fab fa-typo3',
-    },
-    {
-      name: 'uber',
-      cssClass: 'fab fa-uber',
-    },
-    {
-      name: 'uikit',
-      cssClass: 'fab fa-uikit',
     },
     {
       name: 'umbrella',
@@ -4344,10 +5124,6 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-undo-alt',
     },
     {
-      name: 'uniregistry',
-      cssClass: 'fab fa-uniregistry',
-    },
-    {
       name: 'universal-access',
       cssClass: 'fas fa-universal-access',
     },
@@ -4368,16 +5144,8 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-unlock-alt',
     },
     {
-      name: 'untappd',
-      cssClass: 'fab fa-untappd',
-    },
-    {
       name: 'upload',
       cssClass: 'fas fa-upload',
-    },
-    {
-      name: 'usb',
-      cssClass: 'fab fa-usb',
     },
     {
       name: 'user',
@@ -4424,6 +5192,10 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-user-graduate',
     },
     {
+      name: 'user-injured',
+      cssClass: 'fas fa-user-injured',
+    },
+    {
       name: 'user-lock',
       cssClass: 'fas fa-user-lock',
     },
@@ -4438,6 +5210,10 @@ const fontAwesomeIcons = {
     {
       name: 'user-ninja',
       cssClass: 'fas fa-user-ninja',
+    },
+    {
+      name: 'user-nurse',
+      cssClass: 'fas fa-user-nurse',
     },
     {
       name: 'user-plus',
@@ -4476,20 +5252,12 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-users-cog',
     },
     {
-      name: 'ussunnah',
-      cssClass: 'fab fa-ussunnah',
-    },
-    {
       name: 'utensil-spoon',
       cssClass: 'fas fa-utensil-spoon',
     },
     {
       name: 'utensils',
       cssClass: 'fas fa-utensils',
-    },
-    {
-      name: 'vaadin',
-      cssClass: 'fab fa-vaadin',
     },
     {
       name: 'vector-square',
@@ -4508,28 +5276,12 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-venus-mars',
     },
     {
-      name: 'viacoin',
-      cssClass: 'fab fa-viacoin',
-    },
-    {
-      name: 'viadeo',
-      cssClass: 'fab fa-viadeo',
-    },
-    {
-      name: 'viadeo-square',
-      cssClass: 'fab fa-viadeo-square',
-    },
-    {
       name: 'vial',
       cssClass: 'fas fa-vial',
     },
     {
       name: 'vials',
       cssClass: 'fas fa-vials',
-    },
-    {
-      name: 'viber',
-      cssClass: 'fab fa-viber',
     },
     {
       name: 'video',
@@ -4544,36 +5296,16 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-vihara',
     },
     {
-      name: 'vimeo',
-      cssClass: 'fab fa-vimeo',
-    },
-    {
-      name: 'vimeo-square',
-      cssClass: 'fab fa-vimeo-square',
-    },
-    {
-      name: 'vimeo-v',
-      cssClass: 'fab fa-vimeo-v',
-    },
-    {
-      name: 'vine',
-      cssClass: 'fab fa-vine',
-    },
-    {
-      name: 'vk',
-      cssClass: 'fab fa-vk',
-    },
-    {
-      name: 'vnv',
-      cssClass: 'fab fa-vnv',
-    },
-    {
       name: 'volleyball-ball',
       cssClass: 'fas fa-volleyball-ball',
     },
     {
       name: 'volume-down',
       cssClass: 'fas fa-volume-down',
+    },
+    {
+      name: 'volume-mute',
+      cssClass: 'fas fa-volume-mute',
     },
     {
       name: 'volume-off',
@@ -4584,8 +5316,12 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-volume-up',
     },
     {
-      name: 'vuejs',
-      cssClass: 'fab fa-vuejs',
+      name: 'vote-yea',
+      cssClass: 'fas fa-vote-yea',
+    },
+    {
+      name: 'vr-cardboard',
+      cssClass: 'fas fa-vr-cardboard',
     },
     {
       name: 'walking',
@@ -4600,12 +5336,8 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-warehouse',
     },
     {
-      name: 'weebly',
-      cssClass: 'fab fa-weebly',
-    },
-    {
-      name: 'weibo',
-      cssClass: 'fab fa-weibo',
+      name: 'water',
+      cssClass: 'fas fa-water',
     },
     {
       name: 'weight',
@@ -4616,32 +5348,16 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-weight-hanging',
     },
     {
-      name: 'weixin',
-      cssClass: 'fab fa-weixin',
-    },
-    {
-      name: 'whatsapp',
-      cssClass: 'fab fa-whatsapp',
-    },
-    {
-      name: 'whatsapp-square',
-      cssClass: 'fab fa-whatsapp-square',
-    },
-    {
       name: 'wheelchair',
       cssClass: 'fas fa-wheelchair',
-    },
-    {
-      name: 'whmcs',
-      cssClass: 'fab fa-whmcs',
     },
     {
       name: 'wifi',
       cssClass: 'fas fa-wifi',
     },
     {
-      name: 'wikipedia-w',
-      cssClass: 'fab fa-wikipedia-w',
+      name: 'wind',
+      cssClass: 'fas fa-wind',
     },
     {
       name: 'window-close',
@@ -4660,8 +5376,8 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-window-restore',
     },
     {
-      name: 'windows',
-      cssClass: 'fab fa-windows',
+      name: 'wine-bottle',
+      cssClass: 'fas fa-wine-bottle',
     },
     {
       name: 'wine-glass',
@@ -4672,36 +5388,8 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-wine-glass-alt',
     },
     {
-      name: 'wix',
-      cssClass: 'fab fa-wix',
-    },
-    {
-      name: 'wolf-pack-battalion',
-      cssClass: 'fab fa-wolf-pack-battalion',
-    },
-    {
       name: 'won-sign',
       cssClass: 'fas fa-won-sign',
-    },
-    {
-      name: 'wordpress',
-      cssClass: 'fab fa-wordpress',
-    },
-    {
-      name: 'wordpress-simple',
-      cssClass: 'fab fa-wordpress-simple',
-    },
-    {
-      name: 'wpbeginner',
-      cssClass: 'fab fa-wpbeginner',
-    },
-    {
-      name: 'wpexplorer',
-      cssClass: 'fab fa-wpexplorer',
-    },
-    {
-      name: 'wpforms',
-      cssClass: 'fab fa-wpforms',
     },
     {
       name: 'wrench',
@@ -4712,60 +5400,12 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-x-ray',
     },
     {
-      name: 'xbox',
-      cssClass: 'fab fa-xbox',
-    },
-    {
-      name: 'xing',
-      cssClass: 'fab fa-xing',
-    },
-    {
-      name: 'xing-square',
-      cssClass: 'fab fa-xing-square',
-    },
-    {
-      name: 'y-combinator',
-      cssClass: 'fab fa-y-combinator',
-    },
-    {
-      name: 'yahoo',
-      cssClass: 'fab fa-yahoo',
-    },
-    {
-      name: 'yandex',
-      cssClass: 'fab fa-yandex',
-    },
-    {
-      name: 'yandex-international',
-      cssClass: 'fab fa-yandex-international',
-    },
-    {
-      name: 'yelp',
-      cssClass: 'fab fa-yelp',
-    },
-    {
       name: 'yen-sign',
       cssClass: 'fas fa-yen-sign',
     },
     {
       name: 'yin-yang',
       cssClass: 'fas fa-yin-yang',
-    },
-    {
-      name: 'yoast',
-      cssClass: 'fab fa-yoast',
-    },
-    {
-      name: 'youtube',
-      cssClass: 'fab fa-youtube',
-    },
-    {
-      name: 'youtube-square',
-      cssClass: 'fab fa-youtube-square',
-    },
-    {
-      name: 'zhihu',
-      cssClass: 'fab fa-zhihu',
     },
   ],
 };
