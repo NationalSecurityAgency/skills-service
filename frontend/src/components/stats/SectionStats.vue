@@ -62,6 +62,10 @@
         type: Number,
         default: 6,
       },
+      loadDataForFirst: {
+        type: Number,
+        default: 3,
+      },
     },
     data() {
       return {
@@ -86,7 +90,7 @@
           .withSectionIdParam(this.sectionIdParam)
           .withNumMonths(this.numMonthsToShow)
           .withNumDays(this.numDaysToShow)
-          .withLoadDataForFirst(3)
+          .withLoadDataForFirst(this.loadDataForFirst)
           .build();
         StatsService.getChartsForSection(sectionParams).then((response) => {
           this.charts = response;
