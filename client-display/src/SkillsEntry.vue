@@ -49,7 +49,7 @@
         serviceUrl: 'http://localhost:8080',
         projectId: 'movies',
         // eslint-disable-next-line max-len
-        token: null,
+        token: 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsic2tpbGxzLXNlcnZpY2Utb2F1dGgiXSwic2NvcGUiOlsicmVhZCIsIndyaXRlIl0sInByb3h5X3VzZXIiOiJVc2VyIDAiLCJleHAiOjE1NTYxNDY4ODYsImF1dGhvcml0aWVzIjpbIlJPTEVfVFJVU1RFRF9DTElFTlQiXSwianRpIjoiM2JmMWNiMjYtYmM3Ny00OTJhLWJiYTMtODBjODU3NzgyN2I5IiwiY2xpZW50X2lkIjoibW92aWVzIn0.gmz047XyySi9Lbrw4hEksSY1ly2rUpHWqKYsEtUMh8IOi7XQBxLCbiFCzcknjzLrbLf-2vIaRWoc1czottwyIElq3c2SK1sZWO--5sVmaXb2-YwG3rMJVazPUFTnKwPzVoQ9cjNmihrJqbia1ozc7wFDqUlYuVq1TZ-CV1C2W5v9PEClgdc3onaynxIQa0CL28zomkyvv31CVzr3S3yc7HyVrT6ZDnp9QD2KF2S3nQV_aP_af9m_O3OuWrOkCWztFBTnKbAc7czvNd1LN1iobssBUKZaj3fbMRfcCWiBLZ0j7gQvZ9sBhBE29uIs7dUvpx0zvkY56I8JSojb_Z5GHA',
       };
     },
     mounted() {

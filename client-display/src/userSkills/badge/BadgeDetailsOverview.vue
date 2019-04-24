@@ -28,7 +28,7 @@
             </div>
 
             <p class="">
-                {{ badge.description }}
+               <markdown-text :text="badge.description"/>
             </p>
 
 
@@ -41,11 +41,13 @@
 
 <script>
     import ProgressBar from 'vue-simple-progress';
+    import MarkdownText from '@/common/utilities/MarkdownText.vue';
 
     export default {
         name: 'BadgeDetailsOverview',
         components: {
             ProgressBar,
+            MarkdownText,
         },
         props: {
             badge: {

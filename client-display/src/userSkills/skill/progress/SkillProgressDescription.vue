@@ -11,7 +11,9 @@
         </div>
 
 
-        <p v-if="skill.description.description" v-html="parseMarkdown(skill.description.description)"/>
+        <p v-if="skill.description.description">
+            <markdown-text :text="skill.description.description"/>
+        </p>
         <ul v-if="skill.description.examples">
             Examples:
             <li v-for="(example, index) in skill.description.examples" :key="`unique-example-${index}`"
@@ -30,19 +32,14 @@
 </template>
 
 <script>
-    import marked from 'marked';
     import SkillSummaryCards from '@/userSkills/skill/progress/SkillSummaryCards.vue';
+    import MarkdownText from '@/common/utilities/MarkdownText.vue';
 
     export default {
         name: 'SkillProgressDescription',
-        components: { SkillSummaryCards },
+        components: { SkillSummaryCards, MarkdownText },
         props: {
             skill: Object,
-        },
-        methods: {
-            parseMarkdown(markdown) {
-                return marked(markdown);
-            },
         },
         computed: {
             locked() {
