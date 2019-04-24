@@ -1,93 +1,51 @@
 <template>
   <div class="card" style="height: 100%">
     <div class="card-body">
-      <ribbon
-        :color="ribbonColor"
-        class="subject-tile-ribbon">
+      <ribbon :color="ribbonColor" class="subject-tile-ribbon">
         {{ subject.subject }}
       </ribbon>
-      <i
-        :class="subject.iconClass"
-        class="fa subject-tile-icon"/>
-      <h2 class="skill-tile-label">Level {{ subject.skillsLevel }}</h2>
-      <popper
-        trigger="hover"
-        :options="{ placement: 'top' }">
-        <star-progress
-          :number-complete="subject.skillsLevel"
-          slot="reference" />
-        <div class="popper">
-          <div>Level {{ subject.skillsLevel }} out of 5</div>
+
+      <i :class="subject.iconClass" class="fa subject-tile-icon"/>
+      <h2 class="skill-tile-label pt-1">Level {{ subject.skillsLevel }}</h2>
+      <star-progress :number-complete="subject.skillsLevel" class="py-1"/>
+
+      <div class="row">
+        <div class="col-3">
+          <label class="skill-label text-left" style="min-width: 5rem;">Overall</label>
         </div>
-      </popper>
-      <div class="skill-row">
-        <div
-          v-if="subject.levelTotalPoints >= 0"
-          class="col-xs-3">
-          <label class="skill-label text-left">Level</label>
+        <div class="col-9">
+          <label class="skill-label text-right">
+            {{ subject.points | number }} / {{ subject.totalPoints | number }}
+          </label>
         </div>
-        <div
-          v-if="subject.levelTotalPoints >= 0"
-          class="col-xs-9">
-          <label class="skill-label text-right">{{ subject.levelPoints | number }} / {{ subject.levelTotalPoints |
-            number }}</label>
+        <div class="col-12">
+          <vertical-progress-bar
+                  :total-progress="progress.total"
+                  :total-progress-before-today="progress.totalBeforeToday"/>
         </div>
-        <div
-          v-if="subject.levelTotalPoints < 0"
-          class="col-xs-12">
+      </div>
+
+      <div class="row mt-3">
+        <div v-if="!progress.allLevelsComplete" class="col-5">
+          <label class="skill-label text-left" style="min-width: 10rem;">Next Level</label>
+        </div>
+        <div v-if="!progress.allLevelsComplete" class="col-7">
+          <label class="skill-label text-right">
+            {{ subject.levelPoints | number }} / {{ subject.levelTotalPoints | number }}
+          </label>
+        </div>
+        <div v-if="progress.allLevelsComplete" class="col-12">
           <label class="skill-label text-center">All levels complete</label>
         </div>
-        <div class="col-xs-12">
-          <progress-bar
-            v-if="subject.levelTotalPoints === -1"
-            :size="18"
-            :val="progress.level"
-            bar-color="#59ad52"
-            class="complete-total"/>
-          <popper
-            v-if="subject.levelTotalPoints !== -1"
-            trigger="hover"
-            :options="{ placement: 'left' }">
-            <div
-              slot="reference">
-              <vertical-progress-bar
-                :total-progress="progress.level"
-                :total-progress-before-today="progress.levelBeforeToday"/>
-            </div>
-            <div class="popper">
-              <my-progress-summary
-                :user-skills="subject"
-                summary-type="level" />
-            </div>
-          </popper>
+        <div class="col-12">
+          <progress-bar v-if="progress.allLevelsComplete" :val="progress.level"
+                        :size="18" bar-color="#59ad52" class="complete-total"/>
+          <vertical-progress-bar
+                  :total-progress="progress.level"
+                  :total-progress-before-today="progress.levelBeforeToday"/>
         </div>
       </div>
-      <div class="skill-row">
-        <div class="col-xs-3">
-          <label class="skill-label text-left">Total</label>
-        </div>
-        <div class="col-xs-9">
-          <label class="skill-label text-right">{{ subject.points | number }} / {{ subject.totalPoints | number
-            }}</label>
-        </div>
-        <div class="col-xs-12">
-          <popper
-            trigger="hover"
-            :options="{ placement: 'left' }">
-            <div
-              slot="reference">
-              <vertical-progress-bar
-                :total-progress="progress.total"
-                :total-progress-before-today="progress.totalBeforeToday"/>
-            </div>
-            <div class="popper">
-              <my-progress-summary
-                :user-skills="subject"
-                summary-type="subject" />
-            </div>
-          </popper>
-        </div>
-      </div>
+
     </div>
   </div>
 </template>
@@ -99,17 +57,13 @@
   import VerticalProgressBar from '@/common/progress/VerticalProgress.vue';
 
   import Spinner from 'vue-simple-spinner';
-  import Popper from 'vue-popperjs';
   import ProgressBar from 'vue-simple-progress';
-
-  import 'vue-popperjs/dist/vue-popper.css';
 
   /* Hack for ribbon color. Ultimately backend will send ribbon color */
   let index = 0;
 
   export default {
     components: {
-      Popper,
       Spinner,
       Ribbon,
       StarProgress,
@@ -143,6 +97,7 @@
           totalBeforeToday: ((subject.points - subject.todaysPoints) / subject.totalPoints) * 100,
           level: subject.levelTotalPoints === -1 ? 100 : ((subject.levelPoints / subject.levelTotalPoints) * 100),
           levelBeforeToday,
+          allLevelsComplete: subject.levelTotalPoints < 0,
         };
       },
     },
@@ -160,12 +115,6 @@
 </style>
 
 <style scoped>
-  .skill-row {
-    font-size: 12px;
-    padding: 12px 20px;
-    clear: both;
-  }
-
   .subject-tile-icon {
     font-size: 60px;
     height: 60px;
@@ -175,11 +124,9 @@
     background-size: 60px 60px;
   }
 
-  .skill-tile {
-    text-align: center;
-  }
-
-  .skill-tile h2 {
-    margin-top: 8.5px;
+  .skill-tile-label {
+    font-size: 1.3rem;
+    color: #333;
+    width: 100%;
   }
 </style>

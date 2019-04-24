@@ -82,7 +82,6 @@
   import UserSkillsService from '@/userSkills/service/UserSkillsService';
 
   import CircleProgress from '@/common/progress/CircleProgress.vue';
-  import Popper from 'vue-popperjs';
   import StarProgress from '@/common/progress/StarProgress.vue';
   import MyRank from '@/userSkills/myRank/MyRank.vue';
   import MySkillLevel from '@/userSkills/MySkillLevel.vue';
@@ -95,7 +94,6 @@
       MyProgressSummary,
       CircleProgress,
       StarProgress,
-      Popper,
       MyRank,
       MySkillLevel,
     },

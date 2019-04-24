@@ -23,7 +23,6 @@
 
     import UserSkillsService from '@/userSkills/service/UserSkillsService';
 
-    import 'vue-popperjs/dist/vue-popper.css';
     import SkillsTitle from '@/common/utilities/SkillsTitle.vue';
 
     export default {

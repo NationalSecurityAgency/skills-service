@@ -84,12 +84,6 @@
 </script>
 
 <style>
-  .skill-row {
-    font-size: 12px;
-    padding: 12px 20px;
-    clear: both;
-  }
-
   .user-skill-subject-window .modal-dialog {
     width: 100%;
   }

@@ -41,9 +41,6 @@
 
   import { debounce } from 'lodash';
 
-  import Popper from 'vue-popperjs';
-  import 'vue-popperjs/dist/vue-popper.css';
-
   const debouncedContentHeightUpdated = debounce((context) => {
     context.$emit('height-change');
   }, 5);
@@ -54,7 +51,6 @@
       UserSkillsHeader,
       ProgressBar,
       VerticalProgressBar,
-      Popper,
       SkillsTitle,
       StarProgress,
       SubjectsContainer,
@@ -149,12 +145,6 @@
     border: 1px solid #ddd;
     border-radius: 4px;
     box-shadow: 0 1px 1px rgba(0, 0, 0, .05);
-  }
-
-  .skill-tile-label {
-    font-size: 19px;
-    color: #333;
-    width: 100%;
   }
 
   .skills-icon {

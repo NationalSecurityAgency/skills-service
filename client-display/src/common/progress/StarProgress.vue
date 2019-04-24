@@ -37,11 +37,11 @@
 
 <style scoped>
   .star-container {
-    font-size: 30px;
+    font-size: 1.5rem;
   }
 
   .star-stack {
-    font-size: 16px;
+    font-size: 1rem;
   }
 
   .circle-star-wrapper {
