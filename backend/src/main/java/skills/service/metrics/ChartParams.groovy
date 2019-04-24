@@ -9,6 +9,7 @@ class ChartParams {
     public static final String NUM_MONTHS = 'numMonths' // limit data to X months
     public static final String LOAD_DATA_FOR_FIRST = 'loadDataForFirst'  // only load the first X charts data for a section
     public static final String BADGE_ID = 'badgeId'
+    public static final String SECTION_ID = 'sectionId'
 
     static String getValue(Map<String, String> props, String key, String defaultVal=null) {
         String value = defaultVal

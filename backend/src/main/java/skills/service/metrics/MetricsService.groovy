@@ -34,7 +34,7 @@ class MetricsService {
     List<MetricsChart> loadChartsForSection(Section section, String projectId, Map<String, String> props) {
         int loadFirst = ChartParams.getIntValue(props, ChartParams.LOAD_DATA_FOR_FIRST, -1)
         int i = 0
-        return chartBuildersMap.get(section).collect { builder ->
+        return chartBuildersMap.get(section)?.collect { builder ->
             boolean loadData = loadFirst < 0 || ++i <= loadFirst
             MetricsChart chart = builder.build(projectId, props, loadData)
             chart.dataLoaded = loadData

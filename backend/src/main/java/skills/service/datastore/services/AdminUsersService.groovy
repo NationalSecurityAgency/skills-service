@@ -33,7 +33,7 @@ class AdminUsersService {
     @Autowired
     RankingLoader rankingLoader
 
-    List<TimestampCountItem> getUsage(String projectId, Integer numDays) {
+    List<TimestampCountItem> getProjectUsage(String projectId, Integer numDays) {
         Date startDate
         use (TimeCategory) {
             startDate = (numDays-1).days.ago
@@ -51,14 +51,32 @@ class AdminUsersService {
         return countsPerDay
     }
 
-    List<TimestampCountItem> getBadgesPerDay(String projectId, Integer numDays) {
+    List<TimestampCountItem> getSubjectUsage(String projectId, String subjectId, Integer numDays) {
         Date startDate
         use (TimeCategory) {
             startDate = (numDays-1).days.ago
             startDate.clearTime()
         }
 
-        List<UsageItem> res = userAchievedRepo.countAchievementsForProjectPerDay(projectId, SkillDef.ContainerType.Badge, startDate)
+        List<UsageItem> res = userPointsRepo.findDistinctUserCountsBySkillId(projectId, subjectId, startDate)
+
+        List<TimestampCountItem> countsPerDay = []
+        startDate.upto(new Date().clearTime()) { Date theDate ->
+            UsageItem found = res.find({it.day.clearTime() == theDate})
+            countsPerDay << new TimestampCountItem(value: theDate.time, count: found?.numItems ?: 0)
+        }
+
+        return countsPerDay
+    }
+
+    List<TimestampCountItem> getBadgesPerDay(String projectId, String badgeId, Integer numDays) {
+        Date startDate
+        use (TimeCategory) {
+            startDate = (numDays-1).days.ago
+            startDate.clearTime()
+        }
+
+        List<UsageItem> res = userAchievedRepo.countAchievementsForProjectPerDay(projectId, badgeId, SkillDef.ContainerType.Badge, startDate)
 
         List<TimestampCountItem> countsPerDay = []
         startDate.upto(new Date().clearTime()) { Date theDate ->
@@ -71,14 +89,14 @@ class AdminUsersService {
         return countsPerDay
     }
 
-    List<LabelCountItem> getBadgesPerMonth(String projectId, Integer numMonths=6) {
+    List<LabelCountItem> getBadgesPerMonth(String projectId, String badgeId, Integer numMonths=6) {
         Date startDate
         use (TimeCategory) {
             startDate = (numMonths-1).months.ago
             startDate.clearTime()
         }
 
-        List<UserAchievedLevelRepo.LabelCountInfo> res = userAchievedRepo.countAchievementsForProjectPerMonth(projectId, SkillDef.ContainerType.Badge, startDate)
+        List<UserAchievedLevelRepo.LabelCountInfo> res = userAchievedRepo.countAchievementsForProjectPerMonth(projectId, badgeId, SkillDef.ContainerType.Badge, startDate)
 
         List<LabelCountItem> countsPerMonth = []
         Month currentMonth = LocalDate.now().month
@@ -105,8 +123,16 @@ class AdminUsersService {
         }
     }
 
-    List<LabelCountItem> getUserCountsPerLevel(String projectId) {
-        List<UsersPerLevel> levels = rankingLoader.getUserCountsPerLevel(projectId, true)
+    List<LabelCountItem> getAchievementCountsPerSkill(String projectId, String subjectId) {
+        List<UserAchievedLevelRepo.LabelCountInfo> res = userAchievedRepo.getSubjectUsageFacetedViaSkill(projectId, subjectId, SkillDef.ContainerType.Subject)
+
+        return res.collect {
+            new LabelCountItem(value: it.label, count: it.count)
+        }
+    }
+
+    List<LabelCountItem> getUserCountsPerLevel(String projectId, subjectId = null) {
+        List<UsersPerLevel> levels = rankingLoader.getUserCountsPerLevel(projectId,true, subjectId)
 
         return levels.collect{
             new LabelCountItem(value: "Level ${it.level}", count: it.numUsers)

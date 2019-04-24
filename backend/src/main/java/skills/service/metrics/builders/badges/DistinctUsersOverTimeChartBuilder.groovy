@@ -12,7 +12,7 @@ import skills.service.metrics.model.ChartType
 import skills.service.metrics.model.MetricsChart
 import skills.service.metrics.model.Section
 
-@Component('badge-distinctUsersOverTimeChartBuilder')
+@Component('badges-DistinctUsersOverTimeChartBuilder')
 @CompileStatic
 class DistinctUsersOverTimeChartBuilder implements MetricsChartBuilder {
 
@@ -25,7 +25,7 @@ class DistinctUsersOverTimeChartBuilder implements MetricsChartBuilder {
 
     @Override
     Section getSection() {
-        return Section.Badges
+        return Section.badges
     }
 
     @Override
@@ -33,7 +33,10 @@ class DistinctUsersOverTimeChartBuilder implements MetricsChartBuilder {
         Integer numDays = ChartParams.getIntValue(props, ChartParams.NUM_DAYS, NUM_DAYS_DEFAULT)
         assert numDays > 1, "Property [${ChartParams.NUM_DAYS}] with value [${numDays}] must be greater than 1"
 
-        List<CountItem> dataItems = (loadData ? adminUsersService.getBadgesPerDay(projectId, numDays) : []) as List<CountItem>
+        String badgeId = ChartParams.getValue(props, ChartParams.SECTION_ID)
+        assert badgeId, "badgeId must be specified via ${ChartParams.SECTION_ID} url param"
+
+        List<CountItem> dataItems = (loadData ? adminUsersService.getBadgesPerDay(projectId, badgeId, numDays) : []) as List<CountItem>
 
         MetricsChart metricsChart = new MetricsChart(
                 chartType: ChartType.LineChart,

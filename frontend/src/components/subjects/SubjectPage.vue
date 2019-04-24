@@ -59,7 +59,7 @@
           </section>
         </template>
         <template slot="Stats">
-          <project-stats :project-id="projectId"></project-stats>
+          <section-stats :project-id="projectId" :section="section" :section-id-param="subjectId"></section-stats>
         </template>
       </navigation>
     </section>
@@ -71,14 +71,15 @@
   import Levels from '../levels/Levels';
   import Skills from '../skills/Skills';
   import LoadingContainer from '../utils/LoadingContainer';
-  import ProjectStats from '../stats/ProjectStats';
+  import SectionStats from '../stats/SectionStats';
   import Users from '../users/Users';
   import SubjectsService from './SubjectsService';
+  import { SECTION } from '../stats/SectionHelper';
 
   export default {
     name: 'SubjectPage',
     components: {
-      ProjectStats, LoadingContainer, Skills, Levels, Users, Navigation,
+      SectionStats, LoadingContainer, Skills, Levels, Users, Navigation,
     },
     breadcrumb() {
       return {
@@ -108,6 +109,7 @@
         subject: {},
         projectId: '',
         subjectId: '',
+        section: SECTION.SUBJECTS,
       };
     },
     created() {

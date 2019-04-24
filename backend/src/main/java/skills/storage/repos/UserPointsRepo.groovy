@@ -76,6 +76,11 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
     ''')
     List<UsageItem> findDistinctUserCountsByProject(String projectId, Date mustBeAfterThisDate)
 
+    @Query('''select up.day as day, count(up) as numItems
+    from UserPoints up where up.projectId=?1 and up.skillId=?2 and up.day>=?3 and up.day is not null group by up.day
+    ''')
+    List<UsageItem> findDistinctUserCountsBySkillId(String projectId, String skillId, Date mustBeAfterThisDate)
+
     @Query("SELECT up from UserPoints up where up.projectId=?1 and up.skillId=?1 and up.day is null" )
     List<UserPoints> findDistinctUsersWithPoints(String projectId, String skillId)
 
