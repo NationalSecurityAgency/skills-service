@@ -18,7 +18,7 @@
     <div class="card-header">
       <h6 class="card-title mb-0 float-left">Point History</h6>
     </div>
-    <div class="card-body m-0 mr-1 p-0">
+    <div class="card-body m-0 mr-1 p-0 apex-chart-container">
       <apexchart
         v-if="chartOptions"
         :options="chartOptions"
@@ -115,9 +115,9 @@
 </script>
 
 <style>
-  .apexcharts-toolbar {
-    position: absolute;
-    top: -1.95rem;
+  .apex-chart-container .apexcharts-toolbar {
+    position: absolute !important;
+    top: -1.95rem !important;
   }
 </style>
 
