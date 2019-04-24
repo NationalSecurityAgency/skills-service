@@ -32,17 +32,6 @@
 
             </div>
 
-            <!--            <div class="row mt-3">-->
-            <!--                <div class="col-sm-12 rank-history-chart">-->
-            <!--                    <div class="card" style="height: 100%;">-->
-            <!--                        <div class="card-body">-->
-            <!--                            <h3 class="text-left">Rank History</h3>-->
-            <!--                            <my-rank-history-chart/>-->
-            <!--                        </div>-->
-            <!--                    </div>-->
-            <!--                </div>-->
-            <!--            </div>-->
-
             <div class="row mt-3">
                 <div class="col-lg-6 mb-2 mb-lg-0">
                     <levels-breakdown-chart :ranking-distribution="rankingDistribution"/>
@@ -53,13 +42,12 @@
 
                         <span v-if="rankingDistribution.pointsToPassNextUser === -1">
                             <h4 class="mb-2">Wow!! You are in the lead!</h4>
-                            <div class="">That's one small step for a man, one giant leap for mankind. </div>
+                            <div class="">That's one small step for man, one giant leap for mankind. </div>
                         </span>
                         <span v-else>
                             <h4 class="mb-2">Just <strong>{{rankingDistribution.pointsToPassNextUser}}</strong> more points...</h4>
-                            <div class="">To pass the next participant. That's one small step for a man, one giant leap for mankind. </div>
+                            <div class="">to pass the next participant. That's one small step for man, one giant leap for mankind. </div>
                         </span>
-
 
                     </my-rank-encouragement-card>
 
@@ -70,7 +58,7 @@
                         </span>
                         <span v-else>
                             <h4 class="mb-2">Rank may drop in 1, 2.., <strong>{{ rankingDistribution.pointsAnotherUserToPassMe | number }}</strong> points</h4>
-                            <div class="">There is a competitor right behind you, only <strong>{{ rankingDistribution.pointsAnotherUserToPassMe | number }}</strong> points behind. Don't let her pass you!</div>
+                            <div class="">There is a competitor right behind you, only <strong>{{ rankingDistribution.pointsAnotherUserToPassMe | number }}</strong> points behind. Don't let them pass you!</div>
                         </span>
                     </my-rank-encouragement-card>
 
@@ -86,33 +74,6 @@
                     </my-rank-encouragement-card>
                 </div>
 
-                <!--                <div class="col-sm-6 mt-2">-->
-                <!--                    <div class="card skills-full-height">-->
-                <!--                        <div class="card-header">-->
-                <!--                            <h6 class="card-title mb-0 float-left">Stats</h6>-->
-                <!--                        </div>-->
-                <!--                        <div class="card-body">-->
-                <!--                            <ul>-->
-                <!--                                <li>-->
-                <!--                                    <i class="fas fa-hand-peace" style="color: #f3d221"/>-->
-                <!--                                    <span class="pl-3">You are <b>30</b> points passed rank <b>17</b></span>-->
-                <!--                                </li>-->
-                <!--                                <li>-->
-                <!--                                    <i class="fas fa-crosshairs" style="color: rgb(251, 118, 118)"/>-->
-                <!--                                    <span class="pl-3">You need <b>300</b> more points to pass rank <b>19</b>.</span>-->
-                <!--                                </li>-->
-                <!--                                <li>-->
-                <!--                                    <i class="fas fa-flag-checkered" style="color: #44484b"/>-->
-                <!--                                    <span class="pl-3">You need <b>1,000</b> more points to reach <b>Level 2</b>.</span>-->
-                <!--                                </li>-->
-                <!--                                <li>-->
-                <!--                                    <i class="fas fa-users" style="color: rgb(128, 226, 131)"/>-->
-                <!--                                    <span class="pl-3"><b>50</b> users are lower rank to you.</span>-->
-                <!--                                </li>-->
-                <!--                            </ul>-->
-                <!--                        </div>-->
-                <!--                    </div>-->
-                <!--                </div>-->
             </div>
         </div>
     </section>
