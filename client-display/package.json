@@ -30,7 +30,6 @@
     "vue-moment": "4.0.0",
     "vue-radial-progress": "0.2.10",
     "vue-router": "3.0.6",
-    "vue-scrollto": "2.15.0",
     "vue-simple-progress": "1.1.0",
     "vue-simple-spinner": "1.2.8"
   },
