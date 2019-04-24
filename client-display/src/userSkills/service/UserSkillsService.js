@@ -4,7 +4,9 @@ import 'url-search-params-polyfill';
 
 axios.defaults.withCredentials = true;
 
-export default {
+const service = {
+  authenticationUrl: null,
+
   serviceUrl: null,
 
   projectId: null,
@@ -14,6 +16,10 @@ export default {
   userId: new URLSearchParams(window.location.search).get('userId'),
 
   version: null,
+
+  getAuthenticationToken() {
+    return axios.get(this.authenticationUrl).then(result => result.data);
+  },
 
   getUserSkills() {
     let response = null;
@@ -136,6 +142,10 @@ export default {
     return servicePath;
   },
 
+  setAuthenticationUrl(authenticationUrl) {
+    this.authenticationUrl = authenticationUrl;
+  },
+
   setServiceUrl(serviceUrl) {
     this.serviceUrl = serviceUrl;
   },
@@ -157,3 +167,5 @@ export default {
     }
   },
 };
+
+export default service;

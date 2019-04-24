@@ -4,40 +4,12 @@
     class="skills-container">
     <user-skills
       v-if="token"
-      :service-url="serviceUrl"
-      :project-id="projectId"
-      :token="token"
       @height-change="onHeightChange"/>
   </div>
 </template>
 
 <script>
   import UserSkills from '@/userSkills/UserSkills.vue';
-
-  import Vue from 'vue';
-  import { debounce } from 'lodash';
-
-  const getDocumentHeight = () => {
-    const { body } = document;
-    return Math.max(body.scrollHeight, body.offsetHeight);
-  };
-
-  const onHeightChanged = debounce(() => {
-    const payload = {
-      contentHeight: getDocumentHeight(),
-    };
-    window.parent.postMessage(`skills::frame-loaded::${JSON.stringify(payload)}`, '*');
-  }, 250);
-
-  Vue.use({
-    install() {
-      Vue.mixin({
-        updated() {
-          onHeightChanged();
-        },
-      });
-    },
-  });
 
   export default {
     name: 'SkillsEntry',
@@ -48,30 +20,13 @@
       return {
         serviceUrl: 'http://localhost:8080',
         projectId: 'movies',
-        // eslint-disable-next-line max-len
-        token: null,
       };
     },
-    mounted() {
-      this.onHeightChange();
-      window.addEventListener('message', (event) => {
-        const eventData = event.data && event.data.split ? event.data.split('::') : [];
-        if (eventData.length === 3 && eventData[0] === 'skills' && eventData[1] === 'data-init') {
-          const payload = JSON.parse(eventData[2]);
-          this.serviceUrl = payload.serviceUrl;
-          this.projectId = payload.projectId;
-          this.token = payload.authToken;
-
-          // No scroll bars for iframe.
-          document.body.style['overflow-y'] = 'hidden';
-        }
-      });
-    },
-    methods: {
-      onHeightChange() {
-        onHeightChanged();
+    computed: {
+      token() {
+        return this.$store.state.authToken;
       },
-    },
+    }
   };
 </script>
 
