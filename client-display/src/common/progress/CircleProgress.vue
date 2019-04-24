@@ -1,9 +1,7 @@
 <template>
   <div class="progress-circle-wrapper">
     <label class="skill-tile-label">{{ title }}</label>
-    <div
-      v-if="initialized"
-      class="progress-circle">
+    <div class="progress-circle">
       <div class="circle-number">
         <span v-if="!isCompleted">
           <div>{{ totalCompletedPoints | number }}</div>
@@ -40,11 +38,9 @@
 
 <script>
   import RadialProgressBar from 'vue-radial-progress';
-  import MyProgressSummary from '@/userSkills/MyProgressSummary.vue';
 
   export default {
     components: {
-      MyProgressSummary,
       RadialProgressBar,
     },
     props: {
@@ -54,10 +50,6 @@
       },
       title: {
         type: String,
-      },
-      userSkills: {
-        type: Object,
-        required: true,
       },
       completedBeforeTodayColor: {
         type: String,
@@ -85,24 +77,14 @@
         type: Number,
       },
     },
-    data() {
-      return {
-        beforeTodayProgressVal: 0,
-        isCompleted: false,
-        initialized: false,
-      };
-    },
-    updated() {
-      // If totalPossiblePoints is -1 it means this is charting Level progress and the user has completed this level
-      if (this.totalPossiblePoints === -1) {
-        this.isCompleted = true;
-      }
-      this.beforeTodayProgressVal = this._getBeforeTodayProgressVal(this.totalCompletedPoints, this.pointsCompletedToday);
-
-      this.initialized = true;
-    },
-    methods: {
-      _getBeforeTodayProgressVal(points, todaysPoints) {
+    computed: {
+      isCompleted() {
+        // If totalPossiblePoints is -1 it means this is charting Level progress and the user has completed this level
+        return this.totalPossiblePoints === -1;
+      },
+      beforeTodayProgressVal() {
+        const points = this.totalCompletedPoints;
+        const todaysPoints = this.pointsCompletedToday;
         let returnVal;
 
         if (todaysPoints && points > todaysPoints) {
