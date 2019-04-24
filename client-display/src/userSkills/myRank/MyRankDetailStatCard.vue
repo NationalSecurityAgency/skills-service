@@ -5,7 +5,7 @@
         <i :class="iconClass" />
         <div>
           <h1 class='distribution-icon-text'>{{ value | number }}</h1>
-          <h4>{{ label }}</h4>
+          <h5>{{ label }}</h5>
         </div>
       </div>
     </div>

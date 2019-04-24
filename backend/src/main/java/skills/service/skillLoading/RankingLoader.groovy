@@ -2,6 +2,7 @@ package skills.service.skillLoading
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Component
 import skills.service.controller.result.model.LevelDefinitionRes
 import skills.storage.repos.UserAchievedLevelRepo
@@ -57,7 +58,20 @@ class RankingLoader {
         List<UserAchievement> myLevels = achievedLevelRepository.findAllByUserIdAndProjectIdAndSkillId(userId, projectId, subjectId)
         int myLevel = myLevels ? myLevels.collect({it.level}).max() : 0
 
-        return new SkillsRankingDistribution(totalUsers: skillsRanking.numUsers, myPosition: skillsRanking.position, myLevel: myLevel, myPoints: usersPoints?.points ?: 0, usersPerLevel: usersPerLevel)
+        Integer pointsToPassNextUser = -1
+        Integer pointsAnotherUserToPassMe = -1
+
+        if(usersPoints?.points){
+            List<UserPoints> next = userPointsRepository.findHigherUserPoints(projectId, usersPoints.points, new PageRequest(0 , 1))
+            pointsToPassNextUser = next ? next.first().points - usersPoints.points : -1
+
+            List<UserPoints> previous = userPointsRepository.findPreviousUserPoints(projectId, usersPoints.points, new PageRequest(0 , 1))
+            pointsAnotherUserToPassMe = previous ? usersPoints.points - previous.first().points : -1
+        }
+
+        return new SkillsRankingDistribution(totalUsers: skillsRanking.numUsers, myPosition: skillsRanking.position,
+                myLevel: myLevel, myPoints: usersPoints?.points ?: 0, usersPerLevel: usersPerLevel,
+                pointsToPassNextUser: pointsToPassNextUser, pointsAnotherUserToPassMe: pointsAnotherUserToPassMe)
     }
 
     List<UsersPerLevel> getUserCountsPerLevel(String projectId, boolean includeZeroLevel = false, String subjectId = null) {
