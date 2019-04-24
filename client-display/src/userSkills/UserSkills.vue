@@ -1,24 +1,12 @@
 <template>
   <div class="container">
-    <skills-spinner :loading="!isLoaded"/>
+    <skills-spinner :loading="loading.userSkills || loading.pointsHistory || loading.userSkillsRanking"/>
 
-    <div v-if="isLoaded">
+    <div v-if="!loading.userSkills && !loading.pointsHistory && !loading.userSkillsRanking">
       <skills-title>User Skills</skills-title>
 
-      <user-skills-header
-        v-if="!error.message"
-        :user-skills="userSkills"
-        @hook:updated="contentHeightUpdated" />
-      <div
-        v-if="error.message"
-        class="user-skills-error-message user-skills-panel">
-        <h1>{{ error.message }}</h1>
-        <p>{{ error.details }}</p>
-      </div>
-    </div>
-    <div
-      v-if="isLoaded && !error.message">
-      <subjects-container :subjects="userSkills.subjects" />
+      <user-skills-header :display-data="displayData" @hook:updated="contentHeightUpdated" />
+      <subjects-container :subjects="displayData.userSkills.subjects" />
     </div>
   </div>
 </template>
@@ -70,9 +58,16 @@
     },
     data() {
       return {
-        isLoaded: false,
-        error: { message: null, details: null },
-        userSkills: null,
+        loading: {
+          userSkills: true,
+          pointsHistory: true,
+          userSkillsRanking: true,
+        },
+        displayData: {
+          userSkills: null,
+          pointsHistory: null,
+          userSkillsRanking: null,
+        },
         subjectIcon: 'fa-trophy',
         userSkillsSubjectModalSubject: null,
         userSkillsSubjectModalSubjectIcon: null,
@@ -98,6 +93,8 @@
       UserSkillsService.setToken(this.token);
       this.getCustomIconCss();
       this.getUserSkills();
+      this.loadPointsHistory();
+      this.loadUserSkillsRanking();
     },
     beforeDestroy() {
       window.removeEventListener('resize', this.contentHeightNotifier);
@@ -119,18 +116,25 @@
       },
       getUserSkills() {
         UserSkillsService.getUserSkills()
-          .then((response) => {
-            this.userSkills = response;
-            this.error = { message: null, details: null };
-            this.isLoaded = true;
-          })
-          .catch(() => {
-            this.isLoaded = true;
-            this.error = {
-              message: 'Something Went Wrong',
-              details: 'Unable to retrieve Skills.  Try again later.',
-            };
-        });
+                .then((response) => {
+                  this.displayData.userSkills = response;
+                  this.loading.userSkills = false;
+                });
+      },
+      loadUserSkillsRanking(subjectId) {
+        UserSkillsService.getUserSkillsRanking(subjectId)
+                .then((response) => {
+                  this.displayData.userSkillsRanking = response;
+                  this.loading.userSkillsRanking = false;
+                });
+      },
+
+      loadPointsHistory(subjectId) {
+        UserSkillsService.getPointsHistory(subjectId)
+                .then((result) => {
+                  this.displayData.pointsHistory = result;
+                  this.loading.pointsHistory = false;
+                });
       },
       contentHeightUpdated() {
         debouncedContentHeightUpdated(this);
@@ -156,24 +160,6 @@
   .user-skills-more-info {
     font-size: 13px;
     padding: 5px 0;
-  }
-
-  .user-skills-error-message {
-    display: inline-block;
-    margin: 20px;
-    padding: 20px;
-    text-align: center;
-    width: 600px;
-  }
-
-  .user-skills-error-message h1 {
-    color: #438843;
-    font-size: 22px;
-    font-weight: bold;
-  }
-
-  .user-skills-error-message p {
-    font-size: 15px;
   }
 
   .skill-row {
