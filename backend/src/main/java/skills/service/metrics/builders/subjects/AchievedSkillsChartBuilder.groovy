@@ -1,4 +1,5 @@
-package skills.service.metrics.builders.badges
+package skills.service.metrics.builders.subjects
+
 
 import groovy.transform.CompileStatic
 import org.springframework.beans.factory.annotation.Autowired
@@ -12,34 +13,30 @@ import skills.service.metrics.model.ChartType
 import skills.service.metrics.model.MetricsChart
 import skills.service.metrics.model.Section
 
-@Component('badges-AchievedPerMonthChartBuilder')
+@Component('subjects-AchievedSkillsChartBuilder')
 @CompileStatic
-class AchievedPerMonthChartBuilder implements MetricsChartBuilder {
+class AchievedSkillsChartBuilder implements MetricsChartBuilder {
 
-    static final Integer NUM_MONTHS_DEFAULT = 6
-
-    final Integer displayOrder = 1
+    final Integer displayOrder = 2
 
     @Autowired
     AdminUsersService adminUsersService
 
     @Override
     Section getSection() {
-        return Section.badges
+        return Section.subjects
     }
 
     @Override
     MetricsChart build(String projectId, Map<String, String> props, boolean loadData=true) {
-        Integer numMonths = ChartParams.getIntValue(props, ChartParams.NUM_MONTHS, NUM_MONTHS_DEFAULT)
-        assert numMonths > 1, "Property [${ChartParams.NUM_MONTHS}] with value [${numMonths}] must be greater than 1"
 
-        String badgeId = ChartParams.getValue(props, ChartParams.SECTION_ID)
-        assert badgeId, "badgeId must be specified via ${ChartParams.SECTION_ID} url param"
+        String subjectId = ChartParams.getValue(props, ChartParams.SECTION_ID)
+        assert subjectId, "subjectId must be specified via ${ChartParams.SECTION_ID} url param"
 
-        List<CountItem> dataItems = (loadData ? adminUsersService.getBadgesPerMonth(projectId, badgeId, numMonths) : []) as List<CountItem>
+        List<CountItem> dataItems = (loadData ? adminUsersService.getAchievementCountsPerSkill(projectId, subjectId) : []) as List<CountItem>
 
         MetricsChart metricsChart = new MetricsChart(
-                chartType: ChartType.VerticalBarChart,
+                chartType: ChartType.HorizontalBarChart,
                 dataItems: dataItems,
                 chartOptions: getChartOptions(),
         )
@@ -48,9 +45,13 @@ class AchievedPerMonthChartBuilder implements MetricsChartBuilder {
 
     private Map<ChartOption, Object> getChartOptions() {
         Map<ChartOption, Object> chartOptions = [
-                (ChartOption.title)      : 'Distinct # of Users per Month',
-                (ChartOption.yAxisLabel) : 'Distinct # of Users',
-                (ChartOption.dataLabel)  : 'Distinct Users',
+                (ChartOption.title)             : 'Achieved Skills for Subject (for ALL users)',
+                (ChartOption.showDataLabels)    : true,
+                (ChartOption.dataLabel)         : 'Achieved Skills',
+                (ChartOption.distributed)       : true,
+                (ChartOption.dataLabelPosition) : 'top',
+                (ChartOption.sort)              : 'asc',
+                (ChartOption.palette)           : 'palette2',
         ] as Map<ChartOption, Object>
         return chartOptions
     }

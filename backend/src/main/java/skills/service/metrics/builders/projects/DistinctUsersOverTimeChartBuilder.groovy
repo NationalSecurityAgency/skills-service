@@ -25,7 +25,7 @@ class DistinctUsersOverTimeChartBuilder implements MetricsChartBuilder {
 
     @Override
     Section getSection() {
-        return Section.Projects
+        return Section.projects
     }
 
     @Override
@@ -33,7 +33,7 @@ class DistinctUsersOverTimeChartBuilder implements MetricsChartBuilder {
         Integer numDays = ChartParams.getIntValue(props, ChartParams.NUM_DAYS, NUM_DAYS_DEFAULT)
         assert numDays > 1, "Property [${ChartParams.NUM_DAYS}] with value [${numDays}] must be greater than 1"
 
-        List<CountItem> dataItems = (loadData ? adminUsersService.getUsage(projectId, numDays) : []) as List<CountItem>
+        List<CountItem> dataItems = (loadData ? adminUsersService.getProjectUsage(projectId, numDays) : []) as List<CountItem>
 
         MetricsChart metricsChart = new MetricsChart(
                 chartType: ChartType.LineChart,

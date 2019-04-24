@@ -22,7 +22,7 @@ class NumUsersPerLevelChartBuilder implements MetricsChartBuilder {
 
     @Override
     Section getSection() {
-        return Section.Projects
+        return Section.projects
     }
 
     @Override

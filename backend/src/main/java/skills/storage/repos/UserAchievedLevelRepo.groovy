@@ -53,6 +53,13 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
       sdParent.projectId=?1 and sdParent.type=?2 group by sdParent.skillId''')
     List<LabelCountInfo> getUsageFacetedViaSubject(String projectId, SkillDef.ContainerType subjectType)
 
+    @Query('''select sdChild.name as label, count(ua) as count
+    from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
+      left outer join UserAchievement ua ON sdChild.skillId=ua.skillId 
+      where srd.parent=sdParent.id and srd.child=sdChild.id and ua.level is null and 
+      sdParent.projectId=?1 and sdParent.skillId=?2 and sdParent.type=?3 group by sdChild.name''')
+    List<LabelCountInfo> getSubjectUsageFacetedViaSkill(String projectId, String subjectId, SkillDef.ContainerType subjectType)
+
     static interface LabelCountInfo {
         String getLabel()
         Integer getCount()
@@ -82,11 +89,12 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
       where 
         ua.level is null and 
         skillDef.skill_id = ua.skill_id and skillDef.project_id = ua.project_id and 
-        skillDef.project_id= :projectId and 
+        skillDef.project_id= :projectId and  
+        skillDef.skill_id = :badgeId and
         skillDef.type= :#{#type.toString()} and
         ua.created >= :date 
         group by day''', nativeQuery = true)
-    List<UsageItem> countAchievementsForProjectPerDay(@Param('projectId') String projectId, @Param('type') SkillDef.ContainerType containerType, @Param('date') Date mustBeAfterThisDate)
+    List<UsageItem> countAchievementsForProjectPerDay(@Param('projectId') String projectId, @Param('badgeId') String badgeId, @Param('type') SkillDef.ContainerType containerType, @Param('date') Date mustBeAfterThisDate)
 
     @Query(value = '''select month(ua.created) label, count(*) count
       from skill_definition skillDef, user_achievement ua 
@@ -94,8 +102,9 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
         ua.level is null and 
         skillDef.skill_id = ua.skill_id and skillDef.project_id = ua.project_id and 
         skillDef.project_id= :projectId and 
+        skillDef.skill_id = :badgeId and
         skillDef.type= :#{#type.toString()} and
         ua.created >= :date 
         group by label''', nativeQuery = true)
-    List<LabelCountInfo> countAchievementsForProjectPerMonth(@Param('projectId') String projectId, @Param('type') SkillDef.ContainerType containerType, @Param('date') Date mustBeAfterThisDate)
+    List<LabelCountInfo> countAchievementsForProjectPerMonth(@Param('projectId') String projectId, @Param('badgeId') String badgeId, @Param('type') SkillDef.ContainerType containerType, @Param('date') Date mustBeAfterThisDate)
 }

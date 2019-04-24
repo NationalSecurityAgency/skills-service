@@ -70,7 +70,7 @@
           <users :project-id="this.$route.params.projectId" :skill-id="this.$route.params.skillId" />
         </template>
         <template slot="Stats">
-          <project-stats :project-id="this.$route.params.projectId"></project-stats>
+          <section-stats :project-id="this.$route.params.projectId"  :section="section" :section-id-param="this.$route.params.skillId"></section-stats>
         </template>
       </navigation>
     </section>
@@ -82,15 +82,16 @@
   import Navigation from '../utils/Navigation';
   // import Skills from '../skills/Skills';
   import LoadingContainer from '../utils/LoadingContainer';
-  import ProjectStats from '../stats/ProjectStats';
+  import SectionStats from '../stats/SectionStats';
   import ChildRowSkillsDisplay from './ChildRowSkillsDisplay';
   import SkillDependencies from './dependencies/SkillDependencies';
   import Users from '../users/Users';
+  import { SECTION } from '../stats/SectionHelper';
 
   export default {
     name: 'SkillPage',
     components: {
-      SkillDependencies, ChildRowSkillsDisplay, ProjectStats, LoadingContainer, Navigation, Users,
+      SkillDependencies, ChildRowSkillsDisplay, SectionStats, LoadingContainer, Navigation, Users,
     },
     breadcrumb() {
       return {
@@ -130,6 +131,7 @@
         isLoading: true,
         skill: {},
         subjectId: '',
+        section: SECTION.SKILLS,
       };
     },
     mounted() {
