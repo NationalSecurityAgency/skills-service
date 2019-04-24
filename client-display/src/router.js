@@ -45,7 +45,7 @@ const router = new VueRouter({
       name: 'skillDependencies',
     },
     {
-      path: '/myrank',
+      path: '/rank',
       component: MyRankDetails,
       name: 'myRankDetails',
       props: true,

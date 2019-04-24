@@ -31,6 +31,12 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
     @Query("SELECT count(p) from UserPoints p where p.projectId=?1 and p.skillId is null and p.points<?2 and p.day is null" )
     Integer calculateNumUsersWithLessScore(String projectId, int points)
 
+    @Query("SELECT p from UserPoints p where p.projectId=?1 and p.skillId is null and p.points>?2 and p.day is null order by p.points ASC" )
+    List<UserPoints> findHigherUserPoints(String projectId, int points, Pageable pageable)
+
+    @Query("SELECT p from UserPoints p where p.projectId=?1 and p.skillId is null and p.points<?2 and p.day is null order by p.points ASC" )
+    List<UserPoints> findPreviousUserPoints(String projectId, int points, Pageable pageable)
+
     /**
      *  NOTE: this is query is identical to the below query the only difference is userPoints.day=?5, if you change this query you MUST change the one below
      *
