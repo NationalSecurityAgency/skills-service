@@ -18,7 +18,7 @@
     <div class="card-header">
       <h6 class="card-title mb-0 float-left">Point History</h6>
     </div>
-    <div class="card-body mb-0 pb-0">
+    <div class="card-body m-0 mr-1 p-0">
       <apexchart
         v-if="chartOptions"
         :options="chartOptions"
@@ -43,7 +43,7 @@
         chartOptions: {
           chart: {
             type: 'area',
-            height: 250,
+            // height: 250,
           },
           dataLabels: {
             enabled: false,
@@ -55,6 +55,9 @@
           xaxis: {
             type: 'datetime',
             tickAmount: 1,
+          },
+          yaxis: {
+            min: 0,
           },
           fill: {
             type: 'gradient',
@@ -110,6 +113,13 @@
     },
   };
 </script>
+
+<style>
+  .apexcharts-toolbar {
+    position: absolute;
+    top: -1.95rem;
+  }
+</style>
 
 <style scoped>
   h4 {
