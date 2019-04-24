@@ -5,9 +5,6 @@
 </template>
 
 <script>
-  import 'bootstrap';
-  import 'jquery/dist/jquery.slim';
-
   export default {
     name: 'app',
   };
