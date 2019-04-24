@@ -40,13 +40,11 @@
 
 <script>
   import RadialProgressBar from 'vue-radial-progress';
-  import Popper from 'vue-popperjs';
   import MyProgressSummary from '@/userSkills/MyProgressSummary.vue';
 
   export default {
     components: {
       MyProgressSummary,
-      Popper,
       RadialProgressBar,
     },
     props: {
@@ -153,7 +151,7 @@
   }
 
   .skill-tile-label {
-    font-size: 19px;
+    font-size: 1.2rem;
     color: #333;
     width: 100%;
   }

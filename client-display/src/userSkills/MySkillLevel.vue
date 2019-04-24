@@ -1,6 +1,6 @@
 <template>
     <div>
-        <label class="skill-tile-label level-label">My Level</label>
+        <label class="skill-tile-label">My Level</label>
 
         <span slot="reference" class="fa-stack skills-icon trophy-stack">
             <i class="fa fa-trophy fa-stack-2x"/>
@@ -19,12 +19,9 @@
 <script>
     import StarProgress from '@/common/progress/StarProgress.vue';
 
-    import Popper from 'vue-popperjs';
-
     export default {
         components: {
             StarProgress,
-            Popper,
         },
         props: {
             skillLevel: Number,
@@ -37,6 +34,12 @@
 </script>
 
 <style scoped>
+    .skill-tile-label {
+        font-size: 1.2rem;
+        color: #333;
+        width: 100%;
+    }
+
   /* Font awesome gives a 2em width which doesnt fit the full trophy at font-size:60px. A bug? */
   .trophy-stack.fa-stack {
     width: 3em;
