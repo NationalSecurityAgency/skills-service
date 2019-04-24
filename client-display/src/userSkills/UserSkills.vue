@@ -1,8 +1,8 @@
 <template>
   <div class="container">
-    <skills-spinner :loading="loading.userSkills || loading.pointsHistory || loading.userSkillsRanking"/>
+    <skills-spinner :loading="!isLoaded"/>
 
-    <div v-if="!loading.userSkills && !loading.pointsHistory && !loading.userSkillsRanking">
+    <div v-if="isLoaded">
       <skills-title>User Skills</skills-title>
 
       <user-skills-header :display-data="displayData" @hook:updated="contentHeightUpdated" />
@@ -17,6 +17,7 @@
   import UserSkillsService from '@/userSkills/service/UserSkillsService';
   import SubjectsContainer from '@/userSkills/subject/SubjectsContainer.vue';
   import SkillsSpinner from '@/common/utilities/SkillsSpinner.vue';
+  import SkillDisplayDataLoadingMixin from '@/userSkills/SkillDisplayDataLoadingMixin.vue';
 
   import '@/common/filter/NumberFilter';
   import '@/common/filter/PluralFilter';
@@ -34,6 +35,8 @@
   }, 5);
 
   export default {
+    mixins: [SkillDisplayDataLoadingMixin],
+
     components: {
       MyProgressSummary,
       UserSkillsHeader,
@@ -58,16 +61,6 @@
     },
     data() {
       return {
-        loading: {
-          userSkills: true,
-          pointsHistory: true,
-          userSkillsRanking: true,
-        },
-        displayData: {
-          userSkills: null,
-          pointsHistory: null,
-          userSkillsRanking: null,
-        },
         subjectIcon: 'fa-trophy',
         userSkillsSubjectModalSubject: null,
         userSkillsSubjectModalSubjectIcon: null,
@@ -78,7 +71,7 @@
     watch: {
       userId() {
         UserSkillsService.setUserId(this.userId);
-        this.getUserSkills();
+        this.fetchData();
       },
     },
     updated() {
@@ -92,14 +85,18 @@
       UserSkillsService.setUserId(this.userId);
       UserSkillsService.setToken(this.token);
       this.getCustomIconCss();
-      this.getUserSkills();
-      this.loadPointsHistory();
-      this.loadUserSkillsRanking();
+      this.fetchData();
     },
     beforeDestroy() {
       window.removeEventListener('resize', this.contentHeightNotifier);
     },
     methods: {
+      fetchData() {
+        this.resetLoading();
+        this.loadUserSkills();
+        this.loadPointsHistory();
+        this.loadUserSkillsRanking();
+      },
       getCustomIconCss() {
         UserSkillsService.getCustomIconCss()
           .then((css) => {
@@ -113,28 +110,6 @@
               head.appendChild(customIconStyles);
             }
           });
-      },
-      getUserSkills() {
-        UserSkillsService.getUserSkills()
-                .then((response) => {
-                  this.displayData.userSkills = response;
-                  this.loading.userSkills = false;
-                });
-      },
-      loadUserSkillsRanking(subjectId) {
-        UserSkillsService.getUserSkillsRanking(subjectId)
-                .then((response) => {
-                  this.displayData.userSkillsRanking = response;
-                  this.loading.userSkillsRanking = false;
-                });
-      },
-
-      loadPointsHistory(subjectId) {
-        UserSkillsService.getPointsHistory(subjectId)
-                .then((result) => {
-                  this.displayData.pointsHistory = result;
-                  this.loading.pointsHistory = false;
-                });
       },
       contentHeightUpdated() {
         debouncedContentHeightUpdated(this);

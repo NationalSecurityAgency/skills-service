@@ -18,7 +18,7 @@
             <skill-summary-cards v-if="!locked" :skill="skill" class="mt-3"></skill-summary-cards>
 
             <p class="skills-text-description mx-2 mt-3">
-                {{ skill.description.description }}
+                <markdown-text :text="skill.description.description"/>
             </p>
         </div>
         <div class="card-footer">
@@ -39,6 +39,7 @@
     import ProgressBar from '@/userSkills/skill/progress/ProgressBar.vue';
     import SkillProgressDescription from '@/userSkills/skill/progress/SkillProgressDescription.vue';
     import SkillSummaryCards from '@/userSkills/skill/progress/SkillSummaryCards.vue';
+    import MarkdownText from '@/common/utilities/MarkdownText.vue';
 
     export default {
         name: 'SkillOverview',
@@ -46,6 +47,7 @@
             SkillSummaryCards,
             SkillProgressDescription,
             ProgressBar,
+            MarkdownText,
         },
         props: {
             skill: Object,
