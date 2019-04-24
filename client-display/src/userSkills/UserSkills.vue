@@ -47,18 +47,6 @@
       SubjectsContainer,
       SkillsSpinner,
     },
-    props: {
-      userId: String,
-      token: String,
-      projectId: {
-        type: String,
-        required: true,
-      },
-      serviceUrl: {
-        type: String,
-        required: true,
-      },
-    },
     data() {
       return {
         subjectIcon: 'fa-trophy',
@@ -80,10 +68,6 @@
     mounted() {
       this.contentHeightNotifier = () => debouncedContentHeightUpdated(this);
       window.addEventListener('resize', this.contentHeightNotifier);
-      UserSkillsService.setServiceUrl(this.serviceUrl);
-      UserSkillsService.setProjectId(this.projectId);
-      UserSkillsService.setUserId(this.userId);
-      UserSkillsService.setToken(this.token);
       this.getCustomIconCss();
       this.fetchData();
     },

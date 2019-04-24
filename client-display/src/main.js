@@ -1,7 +1,8 @@
 import Vue from 'vue';
 import App from '@/App.vue';
 
-import Router from '@/router';
+import router from '@/router';
+import store from '@/store';
 
 import 'apexcharts';
 import VueApexCharts from 'vue-apexcharts';
@@ -12,6 +13,7 @@ Vue.use(VueApexCharts);
 Vue.use(require('vue-moment'));
 
 new Vue({
-  router: Router,
+  router,
+  store,
   render: h => h(App),
 }).$mount('#app');

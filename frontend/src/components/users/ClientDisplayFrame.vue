@@ -1,7 +1,6 @@
 <template>
   <div id="client-portal-frame">
     <iframe
-      v-if="authToken"
       ref="theIframe"
       class="the-iframe"
       src="/static/clientPortal/index.html"/>
@@ -17,15 +16,15 @@
 
   export default {
     props: {
-      authToken: {
-        type: String,
-        required: true,
-      },
       serviceUrl: {
         type: String,
         default: '',
       },
       projectId: {
+        type: String,
+        required: true,
+      },
+      authenticationUrl: {
         type: String,
         required: true,
       },
@@ -42,8 +41,8 @@
             }
             const bindings = {
               projectId: this.projectId,
+              authenticationUrl: this.authenticationUrl,
               serviceUrl: this.serviceUrl,
-              authToken: this.authToken,
             };
             this.$refs.theIframe.contentWindow.postMessage(`skills::data-init::${JSON.stringify(bindings)}`, '*');
           } else if (parsedMessage.name === 'route-changed') {
