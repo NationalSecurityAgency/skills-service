@@ -37,6 +37,11 @@
     name: 'app',
     mounted() {
       this.onHeightChange();
+
+      if (process.env.NODE_ENV === 'development') {
+        this.configureDevelopmentMode();
+      }
+
       window.addEventListener('message', (event) => {
         const eventData = event.data && event.data.split ? event.data.split('::') : [];
         if (eventData.length === 3 && eventData[0] === 'skills' && eventData[1] === 'data-init') {
@@ -46,21 +51,53 @@
           UserSkillsService.setServiceUrl(payload.serviceUrl);
           UserSkillsService.setProjectId(payload.projectId);
 
-          UserSkillsService.getAuthenticationToken()
-            .then((result) => {
-              this.$store.commit('authToken', result.access_token);
-              UserSkillsService.setToken(result.access_token);
-            });
+          this.storeAuthToken();
 
           // No scroll bars for iframe.
           document.body.style['overflow-y'] = 'hidden';
         }
       });
-      window.parent.postMessage(`skills::frame-initialized::`, '*');
+      window.parent.postMessage('skills::frame-initialized::', '*');
     },
     methods: {
       onHeightChange() {
         onHeightChanged();
+      },
+
+      configureDevelopmentMode() {
+        if (!this.isValidDevelopmentMode()) {
+          const errorMessage = `
+            Development mode is not properly configured
+            You must create a local file '.env.development.local' that defines:
+
+            VUE_APP_AUTHENTICATION_URL
+            VUE_APP_PROJECT_ID
+            VUE_APP_SERVICE_URL
+
+            For an example see .env.development.local.example
+          `;
+
+          // eslint-disable-next-line no-alert
+          alert(errorMessage);
+        } else {
+          UserSkillsService.setAuthenticationUrl(process.env.VUE_APP_AUTHENTICATION_URL);
+          UserSkillsService.setServiceUrl(process.env.VUE_APP_SERVICE_URL);
+          UserSkillsService.setProjectId(process.env.VUE_APP_PROJECT_ID);
+
+          this.storeAuthToken();
+        }
+      },
+
+      isValidDevelopmentMode() {
+        return process.env.VUE_APP_AUTHENTICATION_URL && process.env.VUE_APP_PROJECT_ID && process.env.VUE_APP_SERVICE_URL;
+      },
+
+      storeAuthToken() {
+        UserSkillsService.getAuthenticationToken()
+          .then((result) => {
+            this.$store.commit('authToken', result.access_token);
+            UserSkillsService.setToken(result.access_token);
+          });
       },
     },
   };
