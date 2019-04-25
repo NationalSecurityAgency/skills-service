@@ -39,7 +39,7 @@ class DistinctUsersOverTimeChartBuilder implements MetricsChartBuilder {
         List<CountItem> dataItems = (loadData ? adminUsersService.getSubjectUsage(projectId, skillId, numDays) : []) as List<CountItem>
 
         MetricsChart metricsChart = new MetricsChart(
-                chartType: ChartType.LineChart,
+                chartType: ChartType.Line,
                 dataItems: dataItems,
                 chartOptions: getChartOptions(),
         )

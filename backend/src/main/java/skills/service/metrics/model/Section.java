@@ -1,5 +1,5 @@
 package skills.service.metrics.model;
 
 public enum Section {
-    projects, subjects, badges, skills, user,
+    projects, subjects, badges, skills, users,
 }

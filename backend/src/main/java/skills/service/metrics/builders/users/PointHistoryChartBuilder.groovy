@@ -1,9 +1,10 @@
-package skills.service.metrics.builders.badges
+package skills.service.metrics.builders.users
 
 import groovy.transform.CompileStatic
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import skills.service.controller.result.model.CountItem
+import skills.service.controller.result.model.TimestampCountItem
 import skills.service.datastore.services.AdminUsersService
 import skills.service.metrics.ChartParams
 import skills.service.metrics.builders.MetricsChartBuilder
@@ -11,21 +12,25 @@ import skills.service.metrics.model.ChartOption
 import skills.service.metrics.model.ChartType
 import skills.service.metrics.model.MetricsChart
 import skills.service.metrics.model.Section
+import skills.service.skillLoading.SkillsLoader
 
-@Component('badges-DistinctUsersOverTimeChartBuilder')
+@Component('user-PointHistoryChartBuilder')
 @CompileStatic
-class DistinctUsersOverTimeChartBuilder implements MetricsChartBuilder {
+class PointHistoryChartBuilder implements MetricsChartBuilder {
 
-    static final Integer NUM_DAYS_DEFAULT = 120
+    static final Integer NUM_DAYS_DEFAULT = 365
 
     final Integer displayOrder = 0
 
     @Autowired
     AdminUsersService adminUsersService
 
+    @Autowired
+    SkillsLoader skillsLoader
+
     @Override
     Section getSection() {
-        return Section.badges
+        return Section.users
     }
 
     @Override
@@ -33,13 +38,18 @@ class DistinctUsersOverTimeChartBuilder implements MetricsChartBuilder {
         Integer numDays = ChartParams.getIntValue(props, ChartParams.NUM_DAYS, NUM_DAYS_DEFAULT)
         assert numDays > 1, "Property [${ChartParams.NUM_DAYS}] with value [${numDays}] must be greater than 1"
 
-        String badgeId = ChartParams.getValue(props, ChartParams.SECTION_ID)
-        assert badgeId, "badgeId must be specified via ${ChartParams.SECTION_ID} url param"
+        String userId = ChartParams.getValue(props, ChartParams.SECTION_ID)
+        assert userId, "userId must be specified via ${ChartParams.SECTION_ID} url param"
 
-        List<CountItem> dataItems = (loadData ? adminUsersService.getBadgesPerDay(projectId, badgeId, numDays) : []) as List<CountItem>
+        List<CountItem> dataItems = []
+        if (loadData) {
+            dataItems = skillsLoader.loadPointHistorySummary(projectId, userId, numDays).pointsHistory.collect {
+                new TimestampCountItem(value: it.dayPerformed.time, count: it.points)
+            } as List<CountItem>
+        }
 
         MetricsChart metricsChart = new MetricsChart(
-                chartType: ChartType.Line,
+                chartType: ChartType.Area,
                 dataItems: dataItems,
                 chartOptions: getChartOptions(),
         )
@@ -48,10 +58,11 @@ class DistinctUsersOverTimeChartBuilder implements MetricsChartBuilder {
 
     private Map<ChartOption, Object> getChartOptions() {
         Map<ChartOption, Object> chartOptions = [
-                (ChartOption.title)      : 'Distinct # of Users over Time',
+                (ChartOption.title)      : 'Point History',
                 (ChartOption.xAxisType)  : 'datetime',
-                (ChartOption.yAxisLabel) : 'Distinct # of Users',
-                (ChartOption.dataLabel)  : 'Distinct Users',
+//                (ChartOption.yAxisLabel) : '# of Points',
+                (ChartOption.dataLabel)  : 'Points',
+                (ChartOption.showDataLabels)  : false,
         ] as Map<ChartOption, Object>
         return chartOptions
     }

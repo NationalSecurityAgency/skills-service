@@ -30,7 +30,7 @@ class TopAchievedChartBuilder implements MetricsChartBuilder {
         List<CountItem> dataItems = [] //(loadData ? adminUsersService.getUserCountsPerLevel(projectId) : []) as List<CountItem>
 
         MetricsChart metricsChart = new MetricsChart(
-                chartType: ChartType.VerticalBarChart,
+                chartType: ChartType.VerticalBar,
                 dataItems: dataItems,
                 chartOptions: getChartOptions(),
         )

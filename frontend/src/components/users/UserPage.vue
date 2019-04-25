@@ -49,7 +49,7 @@
           </section>
         </template>
         <template slot="Stats">
-          <project-stats :project-id="this.projectId"></project-stats>
+          <section-stats :project-id="this.projectId" :section="section" :section-id-param="this.userId" :num-days-to-show="365"></section-stats>
         </template>
         <template slot="Performed Skills">
           <user-skills-performed ref="skillsPerformedTable" :projectId="this.projectId" :userId="this.userId" />
@@ -62,17 +62,18 @@
 <script>
   import Navigation from '../utils/Navigation';
   import LoadingContainer from '../utils/LoadingContainer';
-  import ProjectStats from '../stats/ProjectStats';
+  import SectionStats from '../stats/SectionStats';
   import UserSkillsPerformed from './UserSkillsPerformed';
   import UsersService from './UsersService';
   import ClientDisplayFrame from './ClientDisplayFrame';
+  import { SECTION } from '../stats/SectionHelper';
 
   export default {
     name: 'UserPage',
     components: {
       LoadingContainer,
       Navigation,
-      ProjectStats,
+      SectionStats,
       UserSkillsPerformed,
       ClientDisplayFrame,
     },
@@ -107,6 +108,7 @@
         totalPoints: 0,
         uniqueSkills: 0,
         isLoading: true,
+        section: SECTION.USERS,
       };
     },
     created() {
