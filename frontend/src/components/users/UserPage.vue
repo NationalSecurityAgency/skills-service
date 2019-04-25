@@ -43,6 +43,7 @@
         <template slot="Client Display">
           <section v-if="authToken" class="">
             <client-display-frame
+              :authentication-url="authenticationUrl"
               :auth-token="authToken"
               :project-id="projectId" />
           </section>
@@ -102,6 +103,7 @@
         projectId: '',
         userId: '',
         authToken: '',
+        authenticationUrl: '',
         totalPoints: 0,
         uniqueSkills: 0,
         isLoading: true,
@@ -111,6 +113,7 @@
       this.projectId = this.$route.params.projectId;
       this.userId = this.$route.params.userId;
       this.totalPoints = this.$route.params.totalPoints;
+      this.authenticationUrl = `${this.serviceUrl}/admin/projects/${this.projectId}/token/${this.userId}`;
       UsersService.getUserToken(this.projectId, this.userId)
         .then((result) => {
           this.authToken = result;
