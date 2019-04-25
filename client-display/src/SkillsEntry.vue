@@ -16,12 +16,6 @@
     components: {
       UserSkills,
     },
-    data() {
-      return {
-        serviceUrl: 'http://localhost:8080',
-        projectId: 'movies',
-      };
-    },
     computed: {
       token() {
         return this.$store.state.authToken;
