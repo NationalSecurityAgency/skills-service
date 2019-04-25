@@ -58,8 +58,19 @@ class UserSkillsController {
     @ResponseBody
     @CompileStatic
     SkillSummary getSkillSummary(@PathVariable("projectId") String projectId, @PathVariable("skillId") String skillId, @RequestParam(name = 'version', required = false, defaultValue = Constants.MAX_VERSION_STRING) Integer version) {
-        return skillsLoader.loadSkillSummary(projectId, userInfoService.currentUser.username, skillId, version)
+        return skillsLoader.loadSkillSummary(projectId, userInfoService.currentUser.username, null, skillId, version)
     }
+
+    @RequestMapping(value = "/projects/{projectId}/projects/{crossProjectId}/skills/{skillId}/summary", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    @CompileStatic
+    SkillSummary getCrossProjectSkillSummary(@PathVariable("projectId") String projectId,
+                                             @PathVariable("crossProjectId") String crossProjectId,
+                                             @PathVariable("skillId") String skillId,
+                                             @RequestParam(name = 'version', required = false, defaultValue = Constants.MAX_VERSION_STRING) Integer version) {
+        return skillsLoader.loadSkillSummary(projectId, userInfoService.currentUser.username, crossProjectId, skillId, version)
+    }
+
 
     @RequestMapping(value = "/projects/{projectId}/badges/summary", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody

@@ -56,8 +56,12 @@ const service = {
     }).then(result => result.data);
   },
 
-  getSkillSummary(skillId) {
-    return axios.get(`${this.serviceUrl}${this.getServicePath()}/${this.projectId}/skills/${skillId}/summary`, {
+  getSkillSummary(skillId, optionalCrossProjectId) {
+    let url = `${this.serviceUrl}${this.getServicePath()}/${this.projectId}/skills/${skillId}/summary`;
+    if (optionalCrossProjectId) {
+      url = `${this.serviceUrl}${this.getServicePath()}/${this.projectId}/projects/${optionalCrossProjectId}/skills/${skillId}/summary`;
+    }
+    return axios.get(url, {
       params: {
         userId: this.userId,
       },

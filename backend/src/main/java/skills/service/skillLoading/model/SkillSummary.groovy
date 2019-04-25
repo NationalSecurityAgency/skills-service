@@ -18,4 +18,6 @@ class SkillSummary  {
     SkillDescription description
 
     SkillDependencySummary dependencyInfo
+
+    boolean crossProject
 }

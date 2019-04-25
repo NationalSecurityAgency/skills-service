@@ -12,6 +12,7 @@ import skills.storage.model.*
 import skills.storage.repos.ProjDefRepo
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.SkillRelDefRepo
+import skills.storage.repos.SkillShareDefRepo
 import skills.storage.repos.UserAchievedLevelRepo
 import skills.storage.repos.UserPointsRepo
 
@@ -35,6 +36,9 @@ class SkillsLoader {
 
     @Autowired
     UserPointsRepo userPointsRepo
+
+    @Autowired
+    SkillShareDefRepo skillShareDefRepo
 
     @Autowired
     UserAchievedLevelRepo achievedLevelRepository
@@ -138,21 +142,13 @@ class SkillsLoader {
     }
 
     @Transactional(readOnly = true)
-    SkillSubjectSummary loadSubject(String projectId, String userId, String subjectId, Integer version = -1) {
-        ProjDef projDef = getProjDef(projectId)
-        SkillDef subjectDef = getSkillDef(projectId, subjectId, SkillDef.ContainerType.Subject)
+    SkillSummary loadSkillSummary(String projectId, String userId, String crossProjectId, String skillId, Integer version = Integer.MAX_VALUE) {
+        ProjDef projDef = getProjDef(crossProjectId ?: projectId)
+        SkillDef skillDef = getSkillDef(crossProjectId ?: projectId, skillId, SkillDef.ContainerType.Skill)
 
-        if (version == -1 || subjectDef.version <= version) {
-            return loadSubjectSummary(projDef, userId, subjectDef, version, true)
-        } else {
-            return null
+        if(crossProjectId) {
+            validateDependencyEligibility(projectId, skillDef)
         }
-    }
-
-    @Transactional(readOnly = true)
-    SkillSummary loadSkillSummary(String projectId, String userId, String skillId, Integer version = Integer.MAX_VALUE) {
-        ProjDef projDef = getProjDef(projectId)
-        SkillDef skillDef = getSkillDef(projectId, skillId, SkillDef.ContainerType.Skill)
 
         UserPoints points = userPointsRepo.findByProjectIdAndUserIdAndSkillIdAndDay(projectId, userId, skillId, null)
         UserPoints todayPoints = userPointsRepo.findByProjectIdAndUserIdAndSkillIdAndDay(projectId, userId, skillId, new Date().clearTime())
@@ -165,8 +161,21 @@ class SkillsLoader {
                 points: points?.points ?: 0, todaysPoints: todayPoints?.points ?: 0,
                 pointIncrement: skillDef.pointIncrement, pointIncrementInterval: skillDef.pointIncrementInterval, totalPoints: skillDef.totalPoints,
                 description: new SkillDescription(description: skillDef.description, href: skillDef.helpUrl),
-                dependencyInfo: skillDependencySummary
+                dependencyInfo: skillDependencySummary,
+                crossProject: crossProjectId != null
         )
+    }
+
+    @Transactional(readOnly = true)
+    SkillSubjectSummary loadSubject(String projectId, String userId, String subjectId, Integer version = -1) {
+        ProjDef projDef = getProjDef(projectId)
+        SkillDef subjectDef = getSkillDef(projectId, subjectId, SkillDef.ContainerType.Subject)
+
+        if (version == -1 || subjectDef.version <= version) {
+            return loadSubjectSummary(projDef, userId, subjectDef, version, true)
+        } else {
+            return null
+        }
     }
 
     @Transactional(readOnly = true)
@@ -186,7 +195,7 @@ class SkillsLoader {
                     skill: new SkillDependencyInfo.SkillRelationshipItem(projectId: it.parentProjectId, projectName: it.parentProjectName, skillId: it.parentSkillId, skillName: it.parentName),
                     dependsOn: new SkillDependencyInfo.SkillRelationshipItem(projectId: it.childProjectId, projectName: it.childProjectName, skillId: it.childSkillId, skillName: it.childName),
                     achieved: it.achievementId != null,
-                    crossProject: projectId != it.childProjectName
+                    crossProject: projectId != it.childProjectId
             )
         }
         return new SkillDependencyInfo(dependencies: deps)
@@ -349,5 +358,13 @@ class SkillsLoader {
             throw new SkillException("Skill with id [${skillId}] doesn't exist", projectId, skillId)
         }
         return skillDef
+    }
+
+    private void validateDependencyEligibility(String projectId, SkillDef skill2) {
+        ProjDef projDef = getProjDef(projectId)
+        SkillShareDef skillShareDef = skillShareDefRepo.findBySkillAndSharedToProject(skill2, projDef)
+        if (!skillShareDef) {
+            throw new SkillException("Skill [${skill2.projectId}:${skill2.skillId}] is not shared (or does not exist) to [$projectId] project", projectId)
+        }
     }
 }

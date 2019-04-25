@@ -1,11 +1,22 @@
 <template>
     <div class="card">
         <div class="card-body text-center text-sm-left">
-            <div class="row">
-                <div class="col">
-                    <h4 style="min-width: 10rem;">{{ skill.skill }}</h4>
+
+            <div v-if="skill.crossProject" class="row border-bottom mb-3 text-primary text-center">
+                <div class="col-md-6 text-md-left">
+                    <h4><span class="text-muted">Project:</span> {{ skill.projectName }}</h4>
                 </div>
-                <div class="col text-sm-right" style="min-width: 10rem;" :class="{ 'text-success' : isSkillComplete }">
+                <div class="col-md-6 text-md-right text-muted text-uppercase">
+                    <h5><i class="fa fa-vector-square"/> Cross-project Skill</h5>
+                </div>
+
+            </div>
+
+            <div class="row text-center">
+                <div class="col-md-6 text-md-left">
+                    <h4>{{ skill.skill }}</h4>
+                </div>
+                <div class="col-md-6 text-right" :class="{ 'text-success' : isSkillComplete, 'text-muted': !isSkillComplete }">
                     <span v-if="isSkillComplete" class="pr-1"><i class="fa fa-check"/></span>{{ skill.points }} / {{ skill.totalPoints }} Points
                 </div>
             </div>
