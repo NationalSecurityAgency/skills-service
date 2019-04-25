@@ -17,6 +17,8 @@
     "apexcharts": "3.2.1",
     "axios": "0.18.0",
     "babel-polyfill": "6.26.0",
+    "bootstrap": "4.3.1",
+    "bootstrap-vue": "2.0.0-rc.19",
     "buefy": "0.7.2",
     "bulma": "0.7.2",
     "font-awesome-picker": "2.0.0",
