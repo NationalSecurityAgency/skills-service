@@ -82,6 +82,10 @@
   @import '../node_modules/animate.css/animate.css';
   @import './styles/utils.css';
 
+  #app {
+    background-color: #f1f1f1;
+  }
+
   .overall-container {
     min-height: calc(100vh - 50px);
   }

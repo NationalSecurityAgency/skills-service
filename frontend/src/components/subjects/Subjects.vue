@@ -1,48 +1,29 @@
 <template>
   <div>
-    <div class="columns skills-underline-container">
-      <div class="column">
-        <div class="title">Subjects</div>
+    <div class="row p-2 mb-2 border-bottom">
+      <div class="col-8">
+        <span class="h2 text-uppercase">Subjects</span>
       </div>
-      <div class="column has-text-right">
-        <a v-on:click="newSubject" class="button is-outlined is-success">
-          <span>Add New Subject</span>
-          <span class="icon is-small">
-              <i class="fas fa-plus-circle"/>
-            </span>
-        </a>
+      <div class="col-4 text-right">
+        <button type="button" class="btn btn-outline-primary" v-on:click="newSubject">
+          <span class="d-none d-sm-inline">Subject </span> <i class="fas fa-plus-circle"/>
+        </button>
       </div>
     </div>
 
     <loading-container v-bind:is-loading="isLoading">
-      <transition name="projectContainer" enter-active-class="animated fadeIn">
-        <div>
-          <div v-if="subjects && subjects.length" class="columns is-multiline">
-
-            <div v-for="(subject) of subjects"
-                 :key="subject.id" class="column is-half-tablet is-half-desktop is-one-third-widescreen">
-              <subject :subject="subject" v-on:subject-deleted="subjectRemoved" v-on:move-subject-up="moveSubjectUp" v-on:move-subject-down="moveSubjectDown"/>
-            </div>
-
+      <div>
+        <div v-if="subjects && subjects.length" class="row justify-content-center">
+          <div v-for="(subject) of subjects" :key="subject.id" class="col-lg-4 mb-3" style="min-width: 23rem;">
+            <subject :subject="subject" v-on:subject-deleted="subjectRemoved" v-on:move-subject-up="moveSubjectUp"
+                     v-on:move-subject-down="moveSubjectDown"/>
           </div>
 
-        <no-content :should-display="!subjects || subjects.length==0" :title="'No Subjects Yet'">
-          <div slot="content" class="content" style="width: 100%;">
-            <p class="has-text-centered">
-              Create your subject today by pressing
-            </p>
-            <p class="has-text-centered">
-              <a v-on:click="newSubject" class="button is-outlined is-success">
-                <span>Add New Subject</span>
-                <span class="icon is-small">
-              <i class="fas fa-plus-circle"/>
-              </span>
-              </a>
-            </p>
-          </div>
-        </no-content>
         </div>
-      </transition>
+
+        <no-content3 v-if="!subjects || subjects.length==0"
+          title="No Subjects Yet" sub-title="Create a project to get started!"></no-content3>
+      </div>
     </loading-container>
   </div>
 </template>
@@ -51,12 +32,16 @@
   import Subject from './Subject';
   import EditSubject from './EditSubject';
   import LoadingContainer from '../utils/LoadingContainer';
-  import NoContent from '../utils/NoContent';
   import SubjectsService from './SubjectsService';
+  import NoContent3 from '../utils/NoContent3';
 
   export default {
     name: 'Subjects',
-    components: { NoContent, LoadingContainer, Subject },
+    components: {
+      NoContent3,
+      LoadingContainer,
+      Subject,
+    },
     props: ['project'],
     data() {
       return {
