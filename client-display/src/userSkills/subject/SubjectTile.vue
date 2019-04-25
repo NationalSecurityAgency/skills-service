@@ -56,7 +56,6 @@
   import StarProgress from '@/common/progress/StarProgress.vue';
   import VerticalProgressBar from '@/common/progress/VerticalProgress.vue';
 
-  import Spinner from 'vue-simple-spinner';
   import ProgressBar from 'vue-simple-progress';
 
   /* Hack for ribbon color. Ultimately backend will send ribbon color */
@@ -64,7 +63,6 @@
 
   export default {
     components: {
-      Spinner,
       Ribbon,
       StarProgress,
       MyProgressSummary,
