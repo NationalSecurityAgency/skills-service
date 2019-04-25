@@ -1,70 +1,64 @@
 <template>
-  <div class="box">
-    <div class="columns has-text-centered">
-      <div class="column is-full">
-
-        <div class="columns">
-          <div class="column is-narrow is-vcentered">
-            <i class="has-text-info subject-icon" v-bind:class="`${subject.iconClass}`"></i>
-          </div>
-          <div class="column has-text-left">
-            <div class="subject-title">
-              <h1 class="title is-4 has-text-primary">{{ subject.name }}</h1>
-              <h2 class="subtitle is-7 has-text-grey">ID: {{ subject.subjectId }}</h2>
+  <div class="card h-100">
+    <div class="card-body">
+      <div class="row mb-4">
+        <div class="col-10">
+          <div class="media">
+            <div class="d-inline-block mt-2 mr-3 border rounded p-1 text-info">
+              <i class="fa-3x" :class="`${subject.iconClass}`"></i>
+            </div>
+            <div class="media-body">
+              <h3 class="mb-2 h3 text-truncate text-info" style="max-width: 12rem;">{{ subject.name }}</h3>
+              <h5 class="h5 text-truncate text-muted" style="max-width: 12rem;">ID: {{ subject.subjectId }}</h5>
             </div>
           </div>
-          <div class="column is-narrow">
-            <edit-and-delete-dropdown v-on:deleted="deleteSubject" v-on:edited="editSubject" v-on:move-up="moveUp" v-on:move-down="moveDown"
-                                      :isFirst="subject.isFirst" :isLast="subject.isLast" :isLoading="isLoading"
-                                      class="subject-settings"></edit-and-delete-dropdown>
+        </div>
+
+        <div class="col-2 text-right">
+          <edit-and-delete-dropdown v-on:deleted="deleteSubject" v-on:edited="editSubject" v-on:move-up="moveUp"
+                                    v-on:move-down="moveDown"
+                                    :isFirst="subject.isFirst" :isLast="subject.isLast" :isLoading="isLoading"
+                                    class="subject-settings"></edit-and-delete-dropdown>
+        </div>
+      </div>
+
+      <div class="row text-center mb-3">
+        <div class="col">
+          <div>
+            <p class="h6 text-uppercase text-muted">Number Skills</p>
+            <strong class="h3">{{ subject.numSkills | number }}</strong>
+          </div>
+        </div>
+        <div class="col">
+          <div>
+            <p class="h6 text-uppercase text-muted">Number Users</p>
+            <p class="h3">{{ subject.numUsers | number }}</p>
           </div>
         </div>
       </div>
-    </div>
 
-    <div class="columns has-text-centered">
-      <div class="column is-half">
-        <div>
-          <p class="heading">Number Skills</p>
-          <p class="title">{{ subject.numSkills | number }}</p>
+      <div class="row text-center mb-3">
+        <div class="col">
+          <div>
+            <p class="h6 text-uppercase text-muted">Total Points</p>
+            <p class="h3">{{ subject.totalPoints | number }}</p>
+          </div>
+        </div>
+        <div class="col">
+          <div>
+            <p class="h6 text-uppercase text-muted">Points %</p>
+            <p class="h3">{{ subject.pointsPercentage }}</p>
+          </div>
         </div>
       </div>
-      <div class="column is-half">
-        <div>
-          <p class="heading">Number Users</p>
-          <p class="title">{{ subject.numUsers | number }}</p>
-        </div>
-      </div>
-    </div>
 
-    <div class="columns has-text-centered">
-      <div class="column is-half">
-        <div>
-          <p class="heading">Total Points</p>
-          <p class="title">{{ subject.totalPoints | number }}</p>
-        </div>
-      </div>
-      <div class="column is-half">
-        <div>
-          <p class="heading">Points %</p>
-          <p class="title">{{ subject.pointsPercentage }}</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="columns has-text-centered">
-      <div class="column is-full">
-        <router-link :to="{ name:'SubjectPage',
-              params: { projectId: this.subject.projectId, subjectId: this.subject.subjectId}}"
-                     class="button is-outlined is-info">
-          <span>Manage</span>
-          <span class="icon is-small">
-              <i class="fas fa-arrow-circle-right"/>
-          </span>
+      <div class="text-center">
+        <router-link :to="{ name:'SubjectPage', params: { projectId: this.subject.projectId, subjectId: this.subject.subjectId}}"
+                     class="btn btn-outline-info">
+          Manage <i class="fas fa-arrow-circle-right"/>
         </router-link>
       </div>
     </div>
-
   </div>
 </template>
 
@@ -149,10 +143,6 @@
     position: relative;
     display: inline-block;
     float: right;
-  }
-
-  .subject-title {
-    display: inline-block;
   }
 
   .subject-icon {

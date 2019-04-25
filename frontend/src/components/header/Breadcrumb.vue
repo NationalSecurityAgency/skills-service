@@ -5,41 +5,39 @@
   Let's consider implementing out own breadcrumb impl, perhaps using vuex
   -->
 
-  <div class="breadcrumbContainer">
-  <nav class="breadcrumb has-arrow-separator" aria-label="breadcrubms">
-    <!-- To support icons in the current item we'd need to patch the existing lib, TODO: submit bug to the lib
+<!--    <nav class="breadcrumb" aria-label="breadcrubms">-->
+      <!-- To support icons in the current item we'd need to patch the existing lib, TODO: submit bug to the lib
 
-      THERE IS A BUG IN vue-2-crumbs, the bug is with slot=current, to fix change frontend/node_modules/vue-2-crumbs/index.js the following:
-        <slot name="current" :label="getRouteLabel(currentRoute)"
+        THERE IS A BUG IN vue-2-crumbs, the bug is with slot=current, to fix change frontend/node_modules/vue-2-crumbs/index.js the following:
+          <slot name="current" :label="getRouteLabel(currentRoute)"
 
-        to
+          to
 
-        <slot name="current" :label="getRouteLabel(currentRoute)" :utils="currentRoute.meta.breadcrumb.utils">
-    -->
-    <app-breadcrumbs container="ul">
-      <li slot-scope="{to, label, utils}">
-        <router-link :to="to"
-                     class=""
-                     :itemprop="utils && utils.itemprop">
-              <!--<span class="icon is-small">-->
+          <slot name="current" :label="getRouteLabel(currentRoute)" :utils="currentRoute.meta.breadcrumb.utils">
+      -->
+      <app-breadcrumbs container="ol" class="breadcrumb bg-light pl-md-5 breadcrumbContainer">
+        <li slot-scope="{to, label, utils}">
+          <router-link :to="to"
+                       class=""
+                       :itemprop="utils && utils.itemprop">
+            <!--<span class="icon is-small">-->
             <!--<i :class="utils && utils.iconClass" class="parentItems"/>-->
-          <!--</span>-->
-          <span class="parentItems">{{ label }}</span>
-        </router-link>
-      </li>
+            <!--</span>-->
+            <span class="breadcrumb-item text-white">{{ label }}</span>
+          </router-link>
+        </li>
 
-      <span slot-scope="{label}" slot="current">
-         <a class="currentItem">
+        <span slot-scope="{label}" slot="current">
+         <a class="breadcrumb-item text-white">
           <!--<span class="icon is-small">-->
-            <!--<i :class="utils && utils.iconClass"/>-->
-          <!--</span>-->
+           <!--<i :class="utils && utils.iconClass"/>-->
+           <!--</span>-->
           <span>{{ label }}</span>
          </a>
         </span>
 
-    </app-breadcrumbs>
-  </nav>
-  </div>
+      </app-breadcrumbs>
+<!--    </nav>-->
 </template>
 
 <script>
@@ -53,30 +51,11 @@
 
   .breadcrumbContainer {
     border-color: #E8E8E8;
-    /*border-color: #3273dc;*/
     border-width: 1px 0px 1px 0px;
     border-style: solid;
     padding: 8px 10px 8px 40px;
 
     background-image: linear-gradient(to right, $blue-palette-color5, lightgray);
-  }
-
-  .currentItem {
-    color: blanchedalmond;
-
-  }
-
-  .currentItem:hover {
-    color: blanchedalmond;
-    cursor: default;
-  }
-
-  .parentItems {
-    color: whitesmoke;
-  }
-
-  .parentItems:hover {
-    color: blanchedalmond;
   }
 
 </style>
