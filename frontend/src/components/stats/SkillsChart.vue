@@ -1,10 +1,13 @@
 <template>
   <div style="position: relative">
     <div v-if="!chart.hasData" class="disabled-overlay" />
-    <div v-if="!chart.hasData" class="text-center user-skills-no-data-icon-text">
-      <h1 class="">Locked</h1>
-      <div class="user-skills-no-data-icon-subtext">*** No Data Available ***</div>
+    <div v-if="!chart.hasData" class="text-center user-skills-no-data-icon-text text-danger">
+    <div class="row justify-content-center">
+      <div class="col-5 text-center border rounded bg-light p-2">
+        <div style="font-size: 1rem;"><i class="fa fa-ban"></i> No Data Available</div>
+      </div>
     </div>
+  </div>
     <apexchart v-if="chart.dataLoaded"
                :class="{'disabled': !chart.hasData}"
                class="skills-chart skills-bordered-component"
@@ -68,8 +71,6 @@
 
   .user-skills-no-data-icon-text {
     font-weight: 700;
-    background-color: #eaeaea;
-    color: #f10d1a;
     opacity: 0.8;
     position: absolute;
     left: 0;
