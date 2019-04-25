@@ -7,7 +7,9 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 
+import javax.annotation.PostConstruct;
 import javax.net.ssl.HttpsURLConnection;
+import java.util.TimeZone;
 
 @EnableScheduling
 @EnableWebSecurity
@@ -26,5 +28,10 @@ public class SpringBootApp {
         }
 
         SpringApplication.run(SpringBootApp.class, args);
+    }
+
+    @PostConstruct
+    public void init(){
+        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
     }
 }
