@@ -5,6 +5,7 @@ const resolve = dir => path.join(__dirname, dir);
 const proxyConf = {
   target: 'http://localhost:8080',
   changeOrigin: true,
+  logLevel: 'debug',
 };
 
 module.exports = {

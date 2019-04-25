@@ -20,7 +20,7 @@
       token() {
         return this.$store.state.authToken;
       },
-    }
+    },
   };
 </script>
 
