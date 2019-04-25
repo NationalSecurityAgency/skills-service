@@ -2,7 +2,11 @@ import axios from 'axios';
 
 import 'url-search-params-polyfill';
 
-export default {
+axios.defaults.withCredentials = true;
+
+const service = {
+  authenticationUrl: null,
+
   serviceUrl: null,
 
   projectId: null,
@@ -13,6 +17,10 @@ export default {
 
   version: null,
 
+  getAuthenticationToken() {
+    return axios.get(this.authenticationUrl).then(result => result.data);
+  },
+
   getUserSkills() {
     let response = null;
     response = axios.get(`${this.serviceUrl}${this.getServicePath()}/${this.projectId}/summary`, {
@@ -20,7 +28,6 @@ export default {
         userId: this.userId,
         version: this.version,
       },
-      withCredentials: true,
     }).then(result => result.data);
     return response;
   },
@@ -28,7 +35,6 @@ export default {
   getCustomIconCss() {
     let response = null;
     response = axios.get(`${this.serviceUrl}${this.getServicePath()}/${this.projectId}/customIconCss`, {
-      withCredentials: true,
     }).then(result => result.data);
     return response;
   },
@@ -39,7 +45,6 @@ export default {
         userId: this.userId,
         version: this.version,
       },
-      withCredentials: true,
     }).then(result => result.data);
   },
 
@@ -48,7 +53,6 @@ export default {
       params: {
         userId: this.userId,
       },
-      withCredentials: true,
     }).then(result => result.data);
   },
 
@@ -66,7 +70,6 @@ export default {
       params: {
         userId: this.userId,
       },
-      withCredentials: true,
     }).then(result => result.data);
   },
 
@@ -75,7 +78,6 @@ export default {
       params: {
         userId: this.userId,
       },
-      withCredentials: true,
     }).then(result => result.data);
   },
 
@@ -89,7 +91,6 @@ export default {
       params: {
         userId: this.userId,
       },
-      withCredentials: true,
     }).then(result => result.data.pointsHistory);
     return response;
   },
@@ -100,7 +101,6 @@ export default {
       params: {
         userId: this.userId,
       },
-      withCredentials: true,
     }).then(result => result.data);
     return response;
   },
@@ -115,7 +115,6 @@ export default {
       params: {
         userId: this.userId,
       },
-      withCredentials: true,
     }).then(result => result.data);
     return response;
   },
@@ -131,7 +130,6 @@ export default {
         subjectId,
         userId: this.userId,
       },
-      withCredentials: true,
     }).then(result => result.data);
     return response;
   },
@@ -142,6 +140,10 @@ export default {
       servicePath = '/admin/projects';
     }
     return servicePath;
+  },
+
+  setAuthenticationUrl(authenticationUrl) {
+    this.authenticationUrl = authenticationUrl;
   },
 
   setServiceUrl(serviceUrl) {
@@ -165,3 +167,5 @@ export default {
     }
   },
 };
+
+export default service;

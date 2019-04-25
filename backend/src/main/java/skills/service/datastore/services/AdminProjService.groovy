@@ -1063,6 +1063,5 @@ class AdminProjService {
     void updateClientSecret(String projectId, String clientSecret) {
         ProjDef projDef = getProjDef(projectId)
         projDef.clientSecret = clientSecret
-
     }
 }
