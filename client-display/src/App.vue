@@ -8,8 +8,6 @@
   import UserSkillsService from '@/userSkills/service/UserSkillsService';
 
   import Vue from 'vue';
-  import 'bootstrap';
-  import 'jquery/dist/jquery.slim';
 
   import { debounce } from 'lodash';
 
