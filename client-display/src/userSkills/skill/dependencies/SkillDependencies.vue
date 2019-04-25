@@ -103,12 +103,22 @@
                 this.network.on('click', (params) => {
                     const skillItem = this.locateSelectedSkill(params);
                     if (skillItem) {
-                        this.$router.push({
-                            name: 'skillDependencies',
-                            params: {
-                                skillId: skillItem.skillId,
-                            },
-                        });
+                        if (skillItem.isCrossProject) {
+                            this.$router.push({
+                                name: 'crossProjectSkillDetails',
+                                params: {
+                                    crossProjectId: skillItem.projectId,
+                                    skillId: skillItem.skillId,
+                                },
+                            });
+                        } else {
+                            this.$router.push({
+                                name: 'skillDetails',
+                                params: {
+                                    skillId: skillItem.skillId,
+                                },
+                            });
+                        }
                     }
                 });
                 const networkCanvas = container.getElementsByTagName('canvas')[0];
@@ -137,17 +147,20 @@
             locateSelectedSkill(params) {
                 const skillId = params.nodes[0];
                 let skillItem = null;
+                let crossProj = false;
                 const depItem = this.dependencies.find(item => this.getNodeId(item.dependsOn) === skillId);
                 if (depItem) {
                     skillItem = depItem.dependsOn;
+                    crossProj = depItem.crossProject;
                 } else {
                     const found = this.dependencies.find(item => this.getNodeId(item.skill) === skillId);
                     if (found) {
                         skillItem = found.skill;
+                        crossProj = found.crossProject;
                     }
                 }
 
-                return skillItem;
+                return Object.assign(skillItem, { isCrossProject: crossProj });
             },
             buildData() {
                 const nodes = new vis.DataSet();
@@ -155,7 +168,7 @@
                 const createdSkillIds = [];
 
                 this.dependencies.forEach((item) => {
-                    const isThisSkill = !item.skill.crossProject && this.$route.params.skillId === item.skill.skillId;
+                    const isThisSkill = !item.crossProject && this.$route.params.skillId === item.skill.skillId;
 
                     if (isThisSkill) {
                         this.thisSkill = item.skill;
@@ -167,7 +180,7 @@
                             background: 'lightblue',
                         },
                     } : {};
-                    this.buildNode(item.skill, createdSkillIds, nodes, extraParentProps);
+                    this.buildNode(item.skill, false, createdSkillIds, nodes, extraParentProps);
 
                     const extraChildProps = item.achieved ? {
                         color: {
@@ -175,7 +188,7 @@
                             background: 'lightgreen',
                         },
                     } : {};
-                    this.buildNode(item.dependsOn, createdSkillIds, nodes, extraChildProps);
+                    this.buildNode(item.dependsOn, item.crossProject, createdSkillIds, nodes, extraChildProps);
                     edges.add({
                         from: this.getNodeId(item.skill),
                         to: this.getNodeId(item.dependsOn),
@@ -186,13 +199,13 @@
                 const data = { nodes, edges };
                 return data;
             },
-            buildNode(skill, createdSkillIds, nodes, extraProps = {}) {
+            buildNode(skill, isCrossProject, createdSkillIds, nodes, extraProps = {}) {
                 if (!createdSkillIds.includes(skill.skillId)) {
                     createdSkillIds.push(skill.skillId);
 
                     const node = {
                         id: this.getNodeId(skill),
-                        label: this.getLabel(skill),
+                        label: this.getLabel(skill, isCrossProject),
                         margin: 10,
                         shape: 'box',
                         chosen: false,
@@ -205,8 +218,8 @@
             getNodeId(skill) {
                 return `${skill.projectName}_${skill.skillId}`;
             },
-            getLabel(skill) {
-                const label = skill.crossProject ? `<b>${skill.projectName}</b>\n${skill.skillName}` : skill.skillName;
+            getLabel(skill, isCrossProject) {
+                const label = isCrossProject ? `CROSS-PROJECT SKILL\n<b>${skill.projectName}</b>\n${skill.skillName}` : skill.skillName;
                 return label;
             },
         },

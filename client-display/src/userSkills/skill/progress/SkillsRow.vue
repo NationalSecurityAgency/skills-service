@@ -16,7 +16,7 @@
     methods: {
       skillRowClicked() {
         this.$router.push({
-          name: 'skillDependencies',
+          name: 'skillDetails',
           params: {
             skillId: this.skill.skillId,
           },

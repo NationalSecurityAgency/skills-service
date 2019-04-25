@@ -53,14 +53,18 @@
                 this.loadSkillSummary();
             },
             loadDependencies() {
-                UserSkillsService.getSkillDependencies(this.$route.params.skillId)
-                    .then((res) => {
-                        this.dependencies = res.dependencies;
-                        this.loading.dependencies = false;
-                    });
+                if (!this.$route.params.crossProjectId) {
+                    UserSkillsService.getSkillDependencies(this.$route.params.skillId)
+                        .then((res) => {
+                            this.dependencies = res.dependencies;
+                            this.loading.dependencies = false;
+                        });
+                } else {
+                    this.loading.dependencies = false;
+                }
             },
             loadSkillSummary() {
-                UserSkillsService.getSkillSummary(this.$route.params.skillId)
+                UserSkillsService.getSkillSummary(this.$route.params.skillId, this.$route.params.crossProjectId)
                     .then((res) => {
                         this.skill = res;
                         this.loading.skill = false;

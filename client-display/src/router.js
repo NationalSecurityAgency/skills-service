@@ -42,7 +42,12 @@ const router = new VueRouter({
     {
       path: '/skills/:skillId',
       component: SkillDetails,
-      name: 'skillDependencies',
+      name: 'skillDetails',
+    },
+    {
+      path: '/skills/crossProject/:crossProjectId/:skillId',
+      component: SkillDetails,
+      name: 'crossProjectSkillDetails',
     },
     {
       path: '/rank',
