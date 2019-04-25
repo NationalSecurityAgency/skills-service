@@ -22,7 +22,7 @@
     const payload = {
       contentHeight: getDocumentHeight(),
     };
-    window.parent.postMessage(`skills::frame-loaded::${JSON.stringify(payload)}`, '*');
+    window.parent.postMessage(`skills::height-change::${JSON.stringify(payload)}`, '*');
   }, 250);
 
   Vue.use({
@@ -35,7 +35,6 @@
     },
   });
 
->>>>>>> #74 semi working auth URL based approach
   export default {
     name: 'app',
     mounted() {
@@ -59,6 +58,7 @@
           document.body.style['overflow-y'] = 'hidden';
         }
       });
+      window.parent.postMessage(`skills::frame-initialized::`, '*');
     },
     methods: {
       onHeightChange() {

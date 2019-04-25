@@ -34,11 +34,12 @@
         const messageParser = new ClientDisplayFrameMessage(event.data);
         if (messageParser.isSkillsMessage()) {
           const parsedMessage = messageParser.getParsedMessage();
-          if (parsedMessage.name === 'frame-loaded') {
+          if (parsedMessage.name === 'height-change') {
             if (parsedMessage.payload.contentHeight > 0) {
               this.$refs.theIframe.height = parsedMessage.payload.contentHeight;
               this.$refs.theIframe.style.height = `${parsedMessage.payload.contentHeight}px`;
             }
+          } else if (parsedMessage.name === 'frame-initialized') {
             const bindings = {
               projectId: this.projectId,
               authenticationUrl: this.authenticationUrl,
