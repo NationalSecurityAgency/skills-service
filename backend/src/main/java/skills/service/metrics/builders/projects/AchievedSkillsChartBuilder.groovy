@@ -31,7 +31,7 @@ class AchievedSkillsChartBuilder implements MetricsChartBuilder {
         List<CountItem> dataItems = (loadData ? adminUsersService.getAchievementCountsPerSubject(projectId) : []) as List<CountItem>
 
         MetricsChart metricsChart = new MetricsChart(
-                chartType: ChartType.HorizontalBarChart,
+                chartType: ChartType.HorizontalBar,
                 dataItems: dataItems,
                 chartOptions: getChartOptions(),
         )

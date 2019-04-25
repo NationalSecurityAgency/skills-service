@@ -39,7 +39,7 @@ class AchievedPerMonthChartBuilder implements MetricsChartBuilder {
         List<CountItem> dataItems = (loadData ? adminUsersService.getBadgesPerMonth(projectId, badgeId, numMonths) : []) as List<CountItem>
 
         MetricsChart metricsChart = new MetricsChart(
-                chartType: ChartType.VerticalBarChart,
+                chartType: ChartType.VerticalBar,
                 dataItems: dataItems,
                 chartOptions: getChartOptions(),
         )

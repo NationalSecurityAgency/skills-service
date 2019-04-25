@@ -39,7 +39,7 @@ export default {
   },
 
   buildChart(chartData) {
-    const chartType = (chartData.chartType === 'LineChart') ? 'line' : 'bar';
+    const chartType = (chartData.chartType === 'HorizontalBar' || chartData.chartType === 'VerticalBar') ? 'bar' : chartData.chartType.toLowerCase();
     const hasData = Array.isArray(chartData.dataItems) && chartData.dataItems.length;
     const { dataLoaded } = chartData;
     const series = this.buildSeries(chartData);
@@ -94,7 +94,7 @@ export default {
         palette: chartOptions.palette,
       },
     };
-    if (chartType === 'HorizontalBarChart') {
+    if (chartType === 'HorizontalBar') {
       options.plotOptions.bar = {
         horizontal: true,
         distributed,
@@ -102,7 +102,7 @@ export default {
           position: chartOptions.dataLabelPosition || 'center',
         },
       };
-    } else if (chartType === 'VerticalBarChart') {
+    } else if (chartType === 'VerticalBar') {
       options.plotOptions.bar = {
         horizontal: false,
         distributed,
