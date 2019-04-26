@@ -9,7 +9,7 @@ export default new Vuex.Store({
   },
   mutations: {
     authToken(state, authToken) {
-      // eslint-disable-line no-param-reassign
+      // eslint-disable-next-line no-param-reassign
       state.authToken = authToken;
     },
   },
