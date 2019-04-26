@@ -1,14 +1,8 @@
 <template>
   <div id="skillsTable">
 
-    <div class="columns">
-      <div class="column">
-        <slot name="skillsTableTitle"></slot>
-      </div>
-      <div class="column has-text-right" style="margin-bottom: 0;">
-        <new-skill-items-buttons v-on:new-skill-item="newSkill"></new-skill-items-buttons>
-      </div>
-    </div>
+    <sub-page-header title="Skills" action="Skill" @add-action="newSkill"/>
+
 
     <div  class="skills-bordered-component">
       <b-loading :is-full-page="true" :active.sync="isLoading" :can-cancel="false">
@@ -133,11 +127,17 @@
   import ChildRowSkillsDisplay from './ChildRowSkillsDisplay';
   import SkillsService from './SkillsService';
   import ToastHelper from '../utils/ToastHelper';
+  import SubPageHeader from '../utils/pages/SubPageHeader';
 
   export default {
     name: 'SkillsTable',
     props: ['projectId', 'subjectId', 'skillsProp'],
-    components: { ChildRowSkillsDisplay, NewSkillItemsButtons, NoContent },
+    components: {
+      SubPageHeader,
+      ChildRowSkillsDisplay,
+      NewSkillItemsButtons,
+      NoContent,
+    },
     data() {
       return {
         isLoading: false,

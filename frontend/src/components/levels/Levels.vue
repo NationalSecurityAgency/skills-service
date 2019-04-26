@@ -1,25 +1,17 @@
 <template>
   <div id="level-def-panel">
-    <div class="columns skills-underline-container">
-      <div class="column">
-        <div class="title">Level Defintions</div>
+    <sub-page-header title="Level Definitions">
+      <div class="row">
+        <div class="col">
+          <button v-on:click="removeLastItem" class="btn btn-outline-primary mr-2">
+            Remove Highest <i class="fas fa-trash-alt"/>
+          </button>
+          <button v-on:click="editLevel()" class="btn btn-outline-primary">
+            Add Next <i class="fas fa-plus-circle"/>
+          </button>
+        </div>
       </div>
-      <div class="column has-text-right">
-        <a v-on:click="removeLastItem" class="button is-outlined is-success">
-          <span>Remove Highest Level</span>
-          <span class="icon is-small">
-              <i class="fas fa-trash-alt"/>
-            </span>
-        </a>
-
-        <a v-on:click="editLevel()" class="button is-outlined is-success">
-          <span>Add Next Level</span>
-          <span class="icon is-small">
-              <i class="fas fa-plus-circle"/>
-            </span>
-        </a>
-      </div>
-    </div>
+    </sub-page-header>
 
     <div class="skills-bordered-component">
       <b-loading :is-full-page="false" :active.sync="isLoading" :can-cancel="false"></b-loading>
@@ -62,9 +54,11 @@
   import SettingService from '../settings/SettingsService';
   import LevelService from './LevelService';
   import ToastHelper from '../utils/ToastHelper';
+  import SubPageHeader from '../utils/pages/SubPageHeader';
 
   export default {
     name: 'Levels',
+    components: { SubPageHeader },
     props: ['projectId', 'subjectId', 'maxLevels'],
     data() {
       return {

@@ -1,16 +1,6 @@
 <template>
   <div>
-    <div class="row p-2 mb-2 border-bottom">
-      <div class="col-8">
-        <span class="h2 text-uppercase">Subjects</span>
-      </div>
-      <div class="col-4 text-right">
-        <button type="button" class="btn btn-outline-primary" v-on:click="newSubject">
-          <span class="d-none d-sm-inline">Subject </span> <i class="fas fa-plus-circle"/>
-        </button>
-      </div>
-    </div>
-
+    <sub-page-header title="Subjects" action="Subject" @add-action="newSubject"/>
     <loading-container v-bind:is-loading="isLoading">
       <div>
         <div v-if="subjects && subjects.length" class="row justify-content-center">
@@ -34,10 +24,12 @@
   import LoadingContainer from '../utils/LoadingContainer';
   import SubjectsService from './SubjectsService';
   import NoContent3 from '../utils/NoContent3';
+  import SubPageHeader from '../utils/pages/SubPageHeader';
 
   export default {
     name: 'Subjects',
     components: {
+      SubPageHeader,
       NoContent3,
       LoadingContainer,
       Subject,

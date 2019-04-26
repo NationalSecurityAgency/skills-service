@@ -1,18 +1,6 @@
 <template>
   <div>
-    <div class="columns skills-underline-container">
-      <div class="column">
-        <div class="title">Badges</div>
-      </div>
-      <div class="column has-text-right">
-        <a v-on:click="newBadge" class="button is-outlined is-success">
-          <span>Add New Badge</span>
-          <span class="icon is-small">
-              <i class="fas fa-plus-circle"/>
-            </span>
-        </a>
-      </div>
-    </div>
+    <sub-page-header title="Badges" action="Badge" @add-action="newBadge"/>
 
     <loading-container v-bind:is-loading="isLoading">
       <transition name="projectContainer" enter-active-class="animated fadeIn">
@@ -57,11 +45,15 @@
   import EditBadge from './EditBadge';
   import LoadingContainer from '../utils/LoadingContainer';
   import NoContent from '../utils/NoContent';
+  import SubPageHeader from '../utils/pages/SubPageHeader';
 
   export default {
     name: 'Badges',
     components: {
-      NoContent, LoadingContainer, Badge,
+      SubPageHeader,
+      NoContent,
+      LoadingContainer,
+      Badge,
     },
     props: ['project'],
     data() {

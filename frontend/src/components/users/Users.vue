@@ -1,10 +1,6 @@
 <template>
   <div>
-    <div class="columns skills-underline-container">
-      <div class="column is-full">
-        <span class="title is-3">Users</span>
-      </div>
-    </div>
+    <sub-page-header title="Users"/>
 
     <div class="skills-bordered-component">
       <v-server-table ref="table" :columns="columns" :url="getUrl()" :options="options" class="skills-pad-bottom-1-rem"
@@ -31,6 +27,7 @@
 <script>
   import { Validator } from 'vee-validate';
   import '@skills/user-skills/dist/userSkills.css';
+  import SubPageHeader from '../utils/pages/SubPageHeader';
 
   const dictionary = {
     en: {
@@ -43,7 +40,7 @@
 
   export default {
     name: 'Users',
-    components: {},
+    components: { SubPageHeader },
     props: ['projectId', 'subjectId', 'skillId', 'badgeId'],
     data() {
       return {

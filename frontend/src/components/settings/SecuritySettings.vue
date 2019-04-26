@@ -1,23 +1,23 @@
 <template>
-  <div class="settings-div">
-    <div class="columns skills-underline-container">
-      <div class="column">
-        <span class="title">Security Settings</span>
+  <div>
+    <sub-page-header title="Security Settings"/>
+
+    <div v-if="isRoot" class="card">
+      <div class="card-header">Root Users Management</div>
+      <div class="card-body">
+        <role-manager :role="role" :user-type="userType" :role-description="roleDescription" />
       </div>
-    </div>
-    <div v-if="isRoot">
-      <span class="subtitle">Root Users</span>
-      <role-manager :role="role" :user-type="userType" :role-description="roleDescription" />
     </div>
   </div>
 </template>
 
 <script>
   import RoleManager from '../access/RoleManager';
+  import SubPageHeader from '../utils/pages/SubPageHeader';
 
   export default {
     name: 'SecuritySettings',
-    components: { RoleManager },
+    components: { SubPageHeader, RoleManager },
     props: {
       isRoot: {
         type: Boolean,

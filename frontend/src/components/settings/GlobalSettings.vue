@@ -1,17 +1,8 @@
 <template>
   <div>
-    <section class="section">
-      <loading-container v-bind:is-loading="isLoading">
+    <page-header :loading="isLoading"
+                 :options="{title: 'Settings', icon: 'fas fa-cog', subTitle: 'Dashboard settings.'}"/>
 
-        <div class="columns has-text-left">
-          <div class="column">
-            <div class="subject-title">
-              <h1 class="title"><i class="fas fa-list-alt has-text-link"/> SETTINGS</h1>
-            </div>
-          </div>
-        </div>
-      </loading-container>
-    </section>
     <section class="section">
       <navigation :nav-items="[
         {name: 'General', iconClass: 'fa-address-card'},
@@ -19,19 +10,13 @@
         {name: 'Email', iconClass: 'fa-at'}
       ]">
         <template slot="General">
-          <section>
-            <general-settings/>
-          </section>
+          <general-settings/>
         </template>
         <template slot="Security">
-          <section>
-            <security-settings :is-root="isRoot"/>
-          </section>
+          <security-settings :is-root="isRoot"/>
         </template>
         <template slot="Email">
-          <section>
-            <email-settings :is-root="isRoot"/>
-          </section>
+          <email-settings :is-root="isRoot"/>
         </template>
       </navigation>
     </section>
@@ -39,17 +24,21 @@
 </template>
 
 <script>
-  import LoadingContainer from '../utils/LoadingContainer';
   import Navigation from '../utils/Navigation';
   import GeneralSettings from './GeneralSettings';
   import SecuritySettings from './SecuritySettings';
   import EmailSettings from './EmailSettings';
   import SettingsService from './SettingsService';
+  import PageHeader from '../utils/pages/PageHeader';
 
   export default {
     name: 'GlobalSettings',
     components: {
-      EmailSettings, SecuritySettings, GeneralSettings, Navigation, LoadingContainer,
+      PageHeader,
+      EmailSettings,
+      SecuritySettings,
+      GeneralSettings,
+      Navigation,
     },
     data() {
       return {
@@ -62,9 +51,10 @@
     },
     methods: {
       loadSettings() {
-        SettingsService.hasRoot().then((response) => {
-          this.isRoot = response;
-        })
+        SettingsService.hasRoot()
+          .then((response) => {
+            this.isRoot = response;
+          })
           .finally(() => {
             this.isLoading = false;
           });
@@ -74,10 +64,5 @@
 </script>
 
 <style scoped>
-  .section {
-    padding: 2rem 1.5rem;
-  }
-  .settings-div {
-    max-width: 788px;
-  }
+
 </style>

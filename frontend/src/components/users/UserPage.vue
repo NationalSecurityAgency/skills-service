@@ -10,6 +10,7 @@
         ]">
         <template slot="Client Display">
           <section v-if="authToken" class="">
+            <sub-page-header title="Client Display"/>
             <client-display-frame
               :authentication-url="authenticationUrl"
               :auth-token="authToken"
@@ -36,6 +37,7 @@
   import ClientDisplayFrame from './ClientDisplayFrame';
   import { SECTION } from '../stats/SectionHelper';
   import PageHeader from '../utils/pages/PageHeader';
+  import SubPageHeader from '../utils/pages/SubPageHeader';
 
   export default {
     name: 'UserPage',
@@ -45,6 +47,7 @@
       SectionStats,
       UserSkillsPerformed,
       ClientDisplayFrame,
+      SubPageHeader,
     },
     breadcrumb() {
       return {

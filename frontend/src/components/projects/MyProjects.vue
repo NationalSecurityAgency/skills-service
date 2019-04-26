@@ -1,31 +1,13 @@
 <template>
-  <div class="section">
+  <div>
+    <sub-page-header title="My Projects" action="Project" @add-action="newProject"/>
 
     <loading-container v-bind:is-loading="isLoading">
-      <nav class="level">
-        <div class="level-left">
-          <div class="level-item">
-            <div>
-              <h1 class="title"><i class="fas fa-home has-text-link"/> My Projects</h1>
-            </div>
-          </div>
-        </div>
-        <div class="level-right">
-          <div class="level-item">
-            <a v-on:click="newProject" class="button is-outlined is-success">
-              <span>Add New Project</span>
-              <span class="icon is-small">
-                <i class="fas fa-plus-circle"/>
-              </span>
-            </a>
-          </div>
-        </div>
-      </nav>
-
       <transition v-if="projects && projects.length" name="projectContainer" enter-active-class="animated fadeIn">
         <div>
           <div v-for="project of projects" :key="project.id" class="box">
-            <my-project :project="project" v-on:project-deleted="projectRemoved" v-on:move-project-up="moveProjectUp" v-on:move-project-down="moveProjectDown"/>
+            <my-project :project="project" v-on:project-deleted="projectRemoved" v-on:move-project-up="moveProjectUp"
+                        v-on:move-project-down="moveProjectDown"/>
           </div>
         </div>
       </transition>
@@ -33,7 +15,7 @@
       <no-content :should-display="!projects || projects.length==0" :title="'No Projects Yet'">
         <div slot="content" class="content" style="width: 100%;">
           <p class="has-text-centered">
-          Create your first project today by pressing
+            Create your first project today by pressing
           </p>
           <p class="has-text-centered">
             <a v-on:click="newProject" class="button is-outlined is-success">
@@ -58,6 +40,7 @@
   import LoadingContainer from '../utils/LoadingContainer';
   import NoContent from '../utils/NoContent';
   import ProjectService from './ProjectService';
+  import SubPageHeader from '../utils/pages/SubPageHeader';
 
   // EditProject.
 
@@ -69,7 +52,12 @@
         projects: [],
       };
     },
-    components: { NoContent, LoadingContainer, MyProject },
+    components: {
+      SubPageHeader,
+      NoContent,
+      LoadingContainer,
+      MyProject,
+    },
     mounted() {
       this.loadProjects();
     },

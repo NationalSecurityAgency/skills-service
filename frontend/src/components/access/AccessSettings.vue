@@ -1,11 +1,12 @@
 <template>
   <div>
-    <div class="columns skills-underline-container">
-      <div class="column">
-        <span class="title">Access Settings</span>
+    <sub-page-header title="Access Settings"/>
+    <div class="card mb-2">
+      <div class="card-body">
+        <role-manager :project="project"/>
       </div>
     </div>
-    <role-manager :project="project"/>
+
     <trusted-client-props :project="project"/>
   </div>
 </template>
@@ -13,10 +14,11 @@
 <script>
   import RoleManager from './RoleManager';
   import TrustedClientProps from './TrustedClientProps';
+  import SubPageHeader from '../utils/pages/SubPageHeader';
 
   export default {
     name: 'AccessSettings',
-    components: { RoleManager, TrustedClientProps },
+    components: { SubPageHeader, RoleManager, TrustedClientProps },
     props: ['project'],
   };
 </script>

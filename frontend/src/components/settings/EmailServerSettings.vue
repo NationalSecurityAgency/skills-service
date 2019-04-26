@@ -1,7 +1,5 @@
 <template>
   <div>
-
-    <span class="subtitle">Email Connection Settings</span>
     <div class="box">
       <div class="columns">
         <div class="column">
