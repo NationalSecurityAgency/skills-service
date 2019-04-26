@@ -1,51 +1,6 @@
 <template>
   <div>
-    <section class="section skills-underline-container-1">
-      <loading-container v-bind:is-loading="isLoading">
-
-        <div class="columns has-text-left">
-          <div class="column">
-            <div class="subject-title ">
-              <h1 class="title"><i class="fas fa-graduation-cap"/> SKILL: {{ skill.name }}</h1>
-              <h2 class="subtitle is-6 has-text-grey">ID: {{ skill.skillId }}</h2>
-            </div>
-          </div>
-          <div class="column">
-            <div class="columns has-text-centered">
-              <div class="column is-one-quarter">
-                <!--<div>-->
-                  <!--<p class="heading">Skills</p>-->
-                  <!--&lt;!&ndash;<p class="title">{{ badge.numSkills | number}}</p>&ndash;&gt;-->
-                <!--</div>-->
-              </div>
-
-              <div class="column is-one-quarter">
-                <!--<div>-->
-                  <!--<p class="heading">Num Disabled Skills</p>-->
-                  <!--<p class="title">0</p>-->
-                <!--</div>-->
-              </div>
-
-              <div class="column is-one-quarter">
-                <div>
-                  <p class="heading">Total Points</p>
-                  <p class="title">{{ this.skill.totalPoints | number }}</p>
-                </div>
-              </div>
-
-              <div class="column is-one-quarter">
-                <div>
-                  <p class="heading">Users</p>
-                  <p class="title">{{ this.skill.numUsers | number }}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </loading-container>
-    </section>
-
-    <hr class="skills-no-margin"/>
+    <page-header :loading="isLoading" :options="headerOptions"/>
 
     <section class="section">
       <navigation :nav-items="[
@@ -81,17 +36,22 @@
   import SkillsService from './SkillsService';
   import Navigation from '../utils/Navigation';
   // import Skills from '../skills/Skills';
-  import LoadingContainer from '../utils/LoadingContainer';
   import SectionStats from '../stats/SectionStats';
   import ChildRowSkillsDisplay from './ChildRowSkillsDisplay';
   import SkillDependencies from './dependencies/SkillDependencies';
   import Users from '../users/Users';
   import { SECTION } from '../stats/SectionHelper';
+  import PageHeader from '../utils/pages/PageHeader';
 
   export default {
     name: 'SkillPage',
     components: {
-      SkillDependencies, ChildRowSkillsDisplay, SectionStats, LoadingContainer, Navigation, Users,
+      PageHeader,
+      SkillDependencies,
+      ChildRowSkillsDisplay,
+      SectionStats,
+      Navigation,
+      Users,
     },
     breadcrumb() {
       return {
@@ -132,6 +92,7 @@
         skill: {},
         subjectId: '',
         section: SECTION.SKILLS,
+        headerOptions: {},
       };
     },
     mounted() {
@@ -154,11 +115,23 @@
         SkillsService.getSkillDetails(this.$route.params.projectId, this.$route.params.subjectId, this.$route.params.skillId)
           .then((response) => {
             this.skill = Object.assign(response, { subjectId: this.$route.params.subjectId });
-            this.isLoading = false;
-          })
-          .finally(() => {
+            this.headerOptions = this.buildHeaderOptions(this.skill);
             this.isLoading = false;
           });
+      },
+      buildHeaderOptions(skill) {
+        return {
+          icon: 'fas fa-graduation-cap',
+          title: `SKILL: ${skill.name}`,
+          subTitle: `ID: ${skill.skillId}`,
+          stats: [{
+            label: 'Points',
+            count: skill.totalPoints,
+          }, {
+            label: 'Users',
+            count: skill.numUsers,
+          }],
+        };
       },
     },
   };

@@ -1,54 +1,6 @@
 <template>
   <div>
-    <section class="section">
-      <loading-container v-bind:is-loading="isLoading">
-
-        <div class="columns has-text-left">
-          <div class="column">
-            <div class="subject-title">
-              <h1 class="title"><i class="fas fa-list-alt has-text-link"/> PROJECT: {{ project.name }}</h1>
-              <h2 class="subtitle is-6 has-text-grey">ID: {{ project.projectId }}</h2>
-            </div>
-          </div>
-          <div class="column">
-            <div class="columns has-text-centered">
-              <div class="column is-one-quarter">
-                <div>
-                  <p class="heading">Subjects</p>
-                  <p class="title">{{ project.numSubjects | number}}</p>
-                </div>
-              </div>
-              <div class="column is-one-quarter">
-                <div>
-                  <p class="heading">Skills</p>
-                  <p class="title">{{ project.numSkills | number}}</p>
-                </div>
-              </div>
-
-              <div class="column is-one-quarter">
-                <div>
-                  <p class="heading">Total Points</p>
-                  <p class="title">{{ project.totalPoints | number }}
-                  <b-tooltip v-if="project.totalPoints < 100" label="Project has insufficient points assigned. Skills cannot be achieved until project has at least 100 points."
-                             position="is-bottom" animanted="true" type="is-light" multilined>
-                    <span><i class="fa fa-exclamation-circle"></i></span>
-                  </b-tooltip>
-                  </p>
-                </div>
-              </div>
-              <div class="column is-one-quarter">
-                <div>
-                  <p class="heading">Users</p>
-                  <p class="title">{{ project.numUsers | number }}</p>
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-
-      </loading-container>
-    </section>
+    <page-header :loading="isLoading" :options="headerOptions"/>
 
     <section class="section" v-if="project.name">
       <navigation :nav-items="[
@@ -113,17 +65,27 @@
   import AccessSettings from '../access/AccessSettings';
   import Users from '../users/Users';
   import Navigation from '../utils/Navigation';
-  import LoadingContainer from '../utils/LoadingContainer';
   import SectionStats from '../stats/SectionStats';
   import FullDependencyGraph from '../skills/dependencies/FullDependencyGraph';
   import ProjectSettings from '../settings/ProjectSettings';
   import CrossProjectsSkills from '../skills/crossProjects/CrossProjectsSkills';
   import { SECTION } from '../stats/SectionHelper';
+  import PageHeader from '../utils/pages/PageHeader';
 
   export default {
     name: 'ProjectPage',
     components: {
-      ProjectSettings, CrossProjectsSkills, FullDependencyGraph, SectionStats, LoadingContainer, Navigation, Levels, Subjects, Badges, AccessSettings, Users,
+      PageHeader,
+      ProjectSettings,
+      CrossProjectsSkills,
+      FullDependencyGraph,
+      SectionStats,
+      Navigation,
+      Levels,
+      Subjects,
+      Badges,
+      AccessSettings,
+      Users,
     },
     breadcrumb() {
       return {
@@ -136,6 +98,7 @@
         isLoading: true,
         section: SECTION.PROJECTS,
         project: {},
+        headerOptions: {},
       };
     },
     mounted() {
@@ -146,17 +109,36 @@
         this.isLoading = true;
         ProjectService.getProjectDetails(this.$route.params.projectId)
           .then((response) => {
-            this.isLoading = false;
             this.project = response;
+            this.headerOptions = this.buildHeaderOptions(this.project);
+            this.isLoading = false;
           });
+      },
+      buildHeaderOptions(project) {
+        return {
+          icon: 'fas fa-list-alt',
+          title: `PROJECT: ${project.name}`,
+          subTitle: `ID: ${project.projectId}`,
+          stats: [{
+            label: 'Subjects',
+            count: project.numSubjects,
+          }, {
+            label: 'Skills',
+            count: project.numSkills,
+          }, {
+            label: 'Points',
+            count: project.totalPoints,
+            warnMsg: project.totalPoints < 100 ? 'Project has insufficient points assigned. Skills cannot be achieved until project has at least 100 points.' : null,
+          }, {
+            label: 'Users',
+            count: project.numUsers,
+          }],
+        };
       },
     },
   };
 </script>
 
 <style scoped>
-  .section {
-    padding: 2rem 1.5rem;
-  }
 
 </style>

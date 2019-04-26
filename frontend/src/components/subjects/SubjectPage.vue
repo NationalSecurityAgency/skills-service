@@ -1,44 +1,6 @@
 <template>
   <div>
-    <section class="section skills-underline-container">
-      <loading-container v-bind:is-loading="isLoading">
-
-        <div class="columns has-text-left">
-          <div class="column">
-            <div class="subject-title ">
-              <h1 class="title"><i class="fas fa-cubes"/> SUBJECT: {{ subject.name }}</h1>
-              <h2 class="subtitle is-6 has-text-grey">ID: {{ subject.subjectId }}</h2>
-            </div>
-          </div>
-          <div class="column">
-            <div class="columns has-text-centered">
-              <div class="column is-one-quarter">
-              </div>
-              <div class="column is-one-quarter">
-                <div>
-                  <p class="heading">Skills</p>
-                  <p class="title">{{ subject.numSkills | number}}</p>
-                </div>
-              </div>
-
-              <div class="column is-one-quarter">
-                <div>
-                  <p class="heading">Total Points</p>
-                  <p class="title">{{ subject.totalPoints | number }}</p>
-                </div>
-              </div>
-
-              <div class="column is-one-quarter">
-                <div>
-                  <p class="heading">Users</p>
-                  <p class="title">{{ subject.numUsers | number}}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </loading-container>
-    </section>
+    <page-header :loading="isLoading" :options="headerOptions"/>
 
     <section class="section">
       <navigation :nav-items="[
@@ -70,16 +32,21 @@
   import Navigation from '../utils/Navigation';
   import Levels from '../levels/Levels';
   import Skills from '../skills/Skills';
-  import LoadingContainer from '../utils/LoadingContainer';
   import SectionStats from '../stats/SectionStats';
   import Users from '../users/Users';
   import SubjectsService from './SubjectsService';
   import { SECTION } from '../stats/SectionHelper';
+  import PageHeader from '../utils/pages/PageHeader';
 
   export default {
     name: 'SubjectPage',
     components: {
-      SectionStats, LoadingContainer, Skills, Levels, Users, Navigation,
+      PageHeader,
+      SectionStats,
+      Skills,
+      Levels,
+      Users,
+      Navigation,
     },
     breadcrumb() {
       return {
@@ -110,6 +77,7 @@
         projectId: '',
         subjectId: '',
         section: SECTION.SUBJECTS,
+        headerOptions: {},
       };
     },
     created() {
@@ -125,15 +93,30 @@
         SubjectsService.getSubjectDetails(this.projectId, this.subjectId)
           .then((response) => {
             this.subject = response;
+            this.headerOptions = this.buildHeaderOptions(this.subject);
             this.isLoading = false;
           });
+      },
+      buildHeaderOptions(subject) {
+        return {
+          icon: 'fas fa-cubes',
+          title: `SUBJECT: ${subject.name}`,
+          subTitle: `ID: ${this.subjectId}`,
+          stats: [{
+            label: 'Skills',
+            count: subject.numSkills,
+          }, {
+            label: 'Points',
+            count: subject.totalPoints,
+          }, {
+            label: 'Users',
+            count: subject.numUsers,
+          }],
+        };
       },
     },
   };
 </script>
 
 <style scoped>
-  .section {
-    padding: 2rem 1.5rem;
-  }
 </style>
