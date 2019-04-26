@@ -28,12 +28,6 @@
   import SkillsTitle from '@/common/utilities/SkillsTitle.vue';
   import StarProgress from '@/common/progress/StarProgress.vue';
 
-  import { debounce } from 'lodash';
-
-  const debouncedContentHeightUpdated = debounce((context) => {
-    context.$emit('height-change');
-  }, 5);
-
   export default {
     mixins: [SkillDisplayDataLoadingMixin],
 
@@ -62,17 +56,9 @@
         this.fetchData();
       },
     },
-    updated() {
-      this.contentHeightUpdated();
-    },
     mounted() {
-      this.contentHeightNotifier = () => debouncedContentHeightUpdated(this);
-      window.addEventListener('resize', this.contentHeightNotifier);
       this.getCustomIconCss();
       this.fetchData();
-    },
-    beforeDestroy() {
-      window.removeEventListener('resize', this.contentHeightNotifier);
     },
     methods: {
       fetchData() {
@@ -94,9 +80,6 @@
               head.appendChild(customIconStyles);
             }
           });
-      },
-      contentHeightUpdated() {
-        debouncedContentHeightUpdated(this);
       },
     },
   };
