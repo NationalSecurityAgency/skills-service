@@ -1,44 +1,6 @@
 <template>
   <div>
-    <section class="section skills-underline-container-1">
-      <loading-container v-bind:is-loading="isLoading">
-
-        <div class="columns has-text-left">
-          <div class="column">
-            <div class="subject-title ">
-              <h1 class="title"><i class="fas fa-award"/> BADGE: {{ badge.name }}</h1>
-              <h2 class="subtitle is-6 has-text-grey">ID: {{ badge.badgeId }}</h2>
-            </div>
-          </div>
-          <div class="column">
-            <div class="columns has-text-centered">
-              <div class="column is-one-third">
-                <div>
-                  <p class="heading">Skills</p>
-                  <p class="title">{{ badge.numSkills | number}}</p>
-                </div>
-              </div>
-
-              <div class="column is-one-third">
-                <div>
-                  <p class="heading">Total Points</p>
-                  <p class="title">{{ badge.totalPoints | number }}</p>
-                </div>
-              </div>
-
-              <div class="column is-one-third">
-                <div>
-                  <p class="heading">Users</p>
-                  <p class="title">{{ badge.numUsers | number}}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </loading-container>
-    </section>
-
-    <hr class="skills-no-margin"/>
+    <page-header :loading="isLoading" :options="headerOptions"/>
 
     <section class="section">
       <navigation :nav-items="[
@@ -63,16 +25,20 @@
 <script>
   import BadgesService from './BadgesService';
   import Navigation from '../utils/Navigation';
-  import LoadingContainer from '../utils/LoadingContainer';
   import SectionStats from '../stats/SectionStats';
   import Users from '../users/Users';
   import BadgeSkills from './BadgeSkills';
   import { SECTION } from '../stats/SectionHelper';
+  import PageHeader from '../utils/pages/PageHeader';
 
   export default {
     name: 'BadgePage',
     components: {
-      BadgeSkills, SectionStats, LoadingContainer, Navigation, Users,
+      PageHeader,
+      BadgeSkills,
+      SectionStats,
+      Navigation,
+      Users,
     },
     breadcrumb() {
       return {
@@ -103,6 +69,7 @@
         projectId: '',
         badgeId: '',
         section: SECTION.BADGES,
+        headerOptions: {},
       };
     },
     created() {
@@ -118,11 +85,26 @@
         BadgesService.getBadge(this.projectId, this.badgeId)
           .then((response) => {
             this.badge = response;
-            this.isLoading = false;
-          })
-          .finally(() => {
+            this.headerOptions = this.buildHeaderOptions(this.badge);
             this.isLoading = false;
           });
+      },
+      buildHeaderOptions(badge) {
+        return {
+          icon: 'fas fa-award',
+          title: `SUBJECT: ${badge.name}`,
+          subTitle: `ID: ${badge.skillId}`,
+          stats: [{
+            label: 'Skills',
+            count: badge.numSkills,
+          }, {
+            label: 'Points',
+            count: badge.totalPoints,
+          }, {
+            label: 'Users',
+            count: badge.numUsers,
+          }],
+        };
       },
     },
   };

@@ -1,38 +1,6 @@
 <template>
   <div>
-    <section class="section">
-      <loading-container v-bind:is-loading="isLoading">
-
-        <div class="columns has-text-left">
-          <div class="column">
-            <div class="subject-title">
-              <h1 class="title"><i class="fas fa-list-alt has-text-link"/>User: {{ userId }}</h1>
-              <h2 class="subtitle is-6 has-text-grey">ID: {{ userId }}</h2>
-            </div>
-          </div>
-          <div class="column">
-            <div class="columns has-text-centered">
-              <div class="column is-one-half">
-                <div>
-                  <p class="heading">Skills</p>
-                  <p class="title">{{ uniqueSkills }}</p>
-                </div>
-              </div>
-              <div class="column is-one-half">
-                <div>
-                  <p class="heading">Total Points</p>
-                  <p class="title">{{ totalPoints}}</p>
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-
-      </loading-container>
-    </section>
-
-    <hr class="skills-no-margin"/>
+    <page-header :loading="isLoading" :options="headerOptons"/>
 
     <section class="section" v-if="userId">
       <navigation :nav-items="[
@@ -45,14 +13,15 @@
             <client-display-frame
               :authentication-url="authenticationUrl"
               :auth-token="authToken"
-              :project-id="projectId" />
+              :project-id="projectId"/>
           </section>
         </template>
         <template slot="Stats">
-          <section-stats :project-id="this.projectId" :section="section" :section-id-param="this.userId" :num-days-to-show="365"></section-stats>
+          <section-stats :project-id="this.projectId" :section="section" :section-id-param="this.userId"
+                         :num-days-to-show="365"></section-stats>
         </template>
         <template slot="Performed Skills">
-          <user-skills-performed ref="skillsPerformedTable" :projectId="this.projectId" :userId="this.userId" />
+          <user-skills-performed ref="skillsPerformedTable" :projectId="this.projectId" :userId="this.userId"/>
         </template>
       </navigation>
     </section>
@@ -61,17 +30,17 @@
 
 <script>
   import Navigation from '../utils/Navigation';
-  import LoadingContainer from '../utils/LoadingContainer';
   import SectionStats from '../stats/SectionStats';
   import UserSkillsPerformed from './UserSkillsPerformed';
   import UsersService from './UsersService';
   import ClientDisplayFrame from './ClientDisplayFrame';
   import { SECTION } from '../stats/SectionHelper';
+  import PageHeader from '../utils/pages/PageHeader';
 
   export default {
     name: 'UserPage',
     components: {
-      LoadingContainer,
+      PageHeader,
       Navigation,
       SectionStats,
       UserSkillsPerformed,
@@ -109,6 +78,7 @@
         uniqueSkills: 0,
         isLoading: true,
         section: SECTION.USERS,
+        headerOptons: {},
       };
     },
     created() {
@@ -133,11 +103,23 @@
         UsersService.getUserUniqueSkillsCount(this.projectId, this.userId)
           .then((response) => {
             this.uniqueSkills = response;
-            this.isLoading = false;
-          })
-          .finally(() => {
+            this.headerOptons = this.buildHeaderOptions();
             this.isLoading = false;
           });
+      },
+      buildHeaderOptions() {
+        return {
+          icon: 'fas fa-user',
+          title: `SUBJECT: ${this.userId}`,
+          subTitle: `ID: ${this.userId}`,
+          stats: [{
+            label: 'Skills',
+            count: this.uniqueSkills,
+          }, {
+            label: 'Points',
+            count: this.totalPoints,
+          }],
+        };
       },
     },
   };
