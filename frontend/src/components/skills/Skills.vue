@@ -1,11 +1,7 @@
 <template>
   <div>
     <loading-container v-bind:is-loading="isLoading">
-      <skills-table :skills-prop="skills" :is-top-level="true" :project-id="projectId" :subject-id="subjectId" v-on:skills-change="skillsChanged">
-        <div slot="skillsTableTitle">
-          <h1 class="title is-3">Skills</h1>
-        </div>
-      </skills-table>
+      <skills-table :skills-prop="skills" :is-top-level="true" :project-id="projectId" :subject-id="subjectId" v-on:skills-change="skillsChanged"/>
     </loading-container>
   </div>
 </template>

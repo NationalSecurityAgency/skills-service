@@ -1,10 +1,6 @@
 <template>
   <div id="cross-projects-panel">
-    <div class="columns skills-underline-container">
-      <div class="column is-full">
-        <span class="title is-3">Cross Project Skills</span>
-      </div>
-    </div>
+    <sub-page-header title="Cross-Project Skills"/>
 
     <share-skills-with-other-projects :project-id="projectId"></share-skills-with-other-projects>
 
@@ -15,11 +11,12 @@
 <script>
   import ShareSkillsWithOtherProjects from './ShareSkillsWithOtherProjects';
   import SharedSkillsFromOtherProjects from './SharedSkillsFromOtherProjects';
+  import SubPageHeader from '../../utils/pages/SubPageHeader';
 
   export default {
     name: 'CrossProjectsSkills',
     props: ['projectId'],
-    components: { SharedSkillsFromOtherProjects, ShareSkillsWithOtherProjects },
+    components: { SubPageHeader, SharedSkillsFromOtherProjects, ShareSkillsWithOtherProjects },
   };
 </script>
 

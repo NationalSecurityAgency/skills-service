@@ -1,10 +1,6 @@
 <template>
   <div>
-    <div class="columns skills-underline-container">
-      <div class="column">
-        <span class="title is-3">Settings</span>
-      </div>
-    </div>
+    <sub-page-header title="Project Settings"/>
     <div class="skills-bordered-component">
       <b-loading :is-full-page="false" :active.sync="isLoading" :can-cancel="false"></b-loading>
       <div class="columns">
@@ -44,10 +40,12 @@
 <script>
   import SettingService from './SettingsService';
   import ToastHelper from '../utils/ToastHelper';
+  import SubPageHeader from '../utils/pages/SubPageHeader';
 
   const initialSettingValue = { value: 'false', setting: 'level.points.enabled' };
   export default {
     name: 'ProjectSettings',
+    components: { SubPageHeader },
     props: ['projectId'],
     data() {
       return {

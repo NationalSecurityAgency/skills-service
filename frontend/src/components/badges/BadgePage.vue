@@ -93,7 +93,7 @@
         return {
           icon: 'fas fa-award',
           title: `SUBJECT: ${badge.name}`,
-          subTitle: `ID: ${badge.skillId}`,
+          subTitle: `ID: ${badge.badgeId}`,
           stats: [{
             label: 'Skills',
             count: badge.numSkills,

@@ -1,31 +1,29 @@
 <template>
-  <div class="column is-half is-offset-one-quarter">
+  <div>
+    <sub-page-header title="General"/>
+
     <loading-container v-bind:is-loading="isLoading">
       <div class="card">
-        <div class="columns">
-          <div class="column is-three-fifths is-offset-one-fifth">
-            <div class="field">
-              <label class="label">First Name</label>
-              <input class="input" type="text" v-model="loginFields.firstName" name="firstName"
-                     v-validate="'required'" data-vv-delay="500"/>
-              <p class="help is-danger" v-show="errors.has('firstName')">{{ errors.first('firstName')}}</p>
-            </div>
-            <div class="field">
-              <label class="label">Last Name</label>
-              <input class="input" type="text" v-model="loginFields.lastName" name="lastName"
-                     v-validate="'required'" data-vv-delay="500"/>
-              <p class="help is-danger" v-show="errors.has('lastName')">{{ errors.first('lastName')}}</p>
-            </div>
-            <div class="field is-grouped">
-              <div class="control">
-                <button class="button is-primary is-outlined" :disabled="errors.any() || !hasChangedValues()">
-                        <span class="icon is-small">
-                          <i class="fas fa-arrow-circle-right"/>
-                        </span>
-                  <span>Save</span>
-                </button>
-              </div>
-            </div>
+        <div class="card-body">
+          <label>First Name</label>
+          <div class="input-group">
+            <input id="first-name" aria-describedby="basic-addon1" class="form-control"
+                   type="text" v-model="loginFields.firstName" name="firstName" v-validate="'required'"
+                   data-vv-delay="500"/>
+          </div>
+          <p class="text-danger" v-show="errors.has('firstName')">{{ errors.first('firstName')}}</p>
+
+          <label class="mt-2">Last Name</label>
+          <div class="input-group">
+            <input class="form-control" type="text" v-model="loginFields.lastName" name="lastName"
+                   v-validate="'required'" data-vv-delay="500"/>
+          </div>
+          <p class="text-danger" v-show="errors.has('lastName')">{{ errors.first('lastName')}}</p>
+
+          <div class="mt-2">
+            <button class="btn btn-outline-primary" :disabled="errors.any() || !hasChangedValues()">
+              Save <i class="fas fa-arrow-circle-right"/>
+            </button>
           </div>
         </div>
       </div>
@@ -36,6 +34,7 @@
 <script>
   import { Validator } from 'vee-validate';
   import LoadingContainer from '../utils/LoadingContainer';
+  import SubPageHeader from '../utils/pages/SubPageHeader';
 
   const dictionary = {
     en: {
@@ -49,7 +48,7 @@
 
   export default {
     name: 'GeneralSettings',
-    components: { LoadingContainer },
+    components: { SubPageHeader, LoadingContainer },
     data() {
       return {
         isLoading: true,

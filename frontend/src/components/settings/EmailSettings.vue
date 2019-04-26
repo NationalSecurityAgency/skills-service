@@ -1,20 +1,17 @@
 <template>
-  <div class="settings-div">
-    <div class="columns skills-underline-container">
-      <div class="column">
-        <span class="title">Email Settings</span>
-      </div>
-    </div>
+  <div>
+    <sub-page-header title="Email Settings"/>
     <email-server-settings v-if="isRoot"/>
   </div>
 </template>
 
 <script>
   import EmailServerSettings from './EmailServerSettings';
+  import SubPageHeader from '../utils/pages/SubPageHeader';
 
   export default {
     name: 'EmailSettings',
-    components: { EmailServerSettings },
+    components: { SubPageHeader, EmailServerSettings },
     props: {
       isRoot: {
         type: Boolean,

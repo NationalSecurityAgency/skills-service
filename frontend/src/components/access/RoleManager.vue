@@ -1,5 +1,5 @@
 <template>
-  <div class="box">
+  <div class="">
     <div id="add-user-div" class="columns">
       <div id="input-column" class="column">
         <existing-user-input :suggest="true" :validate="true" :user-type="userType" :excluded-suggestions="userIds" :selectedUserId="selectedUserId"

@@ -1,10 +1,7 @@
 <template>
   <div>
-    <div class="columns">
-      <div class="column is-full skills-underline-container">
-        <span class="title is-3">Skill Dependencies</span>
-      </div>
-    </div>
+    <sub-page-header title="Skill Dependencies"/>
+
     <div id="full-dependent-skills-graph" class="skills-bordered-component">
       <loading-container :is-loading="!isLoading">
         <div v-if="!this.graph.nodes || this.graph.nodes.length === 0" class="columns is-centered skills-pad-top-1-rem">
@@ -37,12 +34,17 @@
   import NoContent2 from '../../utils/NoContent2';
   import GraphUtils from './GraphUtils';
   import GraphLegend from './GraphLegend';
+  import SubPageHeader from '../../utils/pages/SubPageHeader';
 
   export default {
     name: 'FullDependencyGraph',
     props: ['projectId'],
     components: {
-      GraphLegend, NoContent2, GraphNodeSortMethodSelector, LoadingContainer,
+      SubPageHeader,
+      GraphLegend,
+      NoContent2,
+      GraphNodeSortMethodSelector,
+      LoadingContainer,
     },
     data() {
       return {

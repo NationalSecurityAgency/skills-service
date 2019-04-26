@@ -1,11 +1,7 @@
 <template>
   <div>
-    <div class="columns skills-underline-container">
-      <div class="column is-full">
-        <span class="title is-3">Stats</span>
-      </div>
-    </div>
-
+    <sub-page-header title="Stats"/>
+    <div></div>
     <div class="columns is-multiline">
       <div v-for="(chart, index) in loadedCharts" class="column" :class="index == 0 ? 'is-full' : ''" :key="chart.options.id">
         <div class="column" :class="index == 0 ? 'is-full' : ''" >
@@ -43,10 +39,12 @@
   import StatCard from './StatCard';
   import StatsService from './StatsService';
   import { SECTION, SectionParams } from './SectionHelper';
+  import SubPageHeader from '../utils/pages/SubPageHeader';
 
   export default {
     name: 'ProjectStats',
     components: {
+      SubPageHeader,
       SkillsChart,
       StatCard,
     },

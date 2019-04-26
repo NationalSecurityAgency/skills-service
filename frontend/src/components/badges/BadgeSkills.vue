@@ -1,10 +1,6 @@
 <template>
   <div>
-    <div class="columns">
-      <div class="column is-full">
-        <span class="title is-3">Skills</span>
-      </div>
-    </div>
+    <sub-page-header title="Skills"/>
 
     <div class="skills-bordered-component">
       <loading-container  v-bind:is-loading="loading.availableSkills || loading.badgeSkills || loading.skillOp">
@@ -34,11 +30,16 @@
   import LoadingContainer from '../utils/LoadingContainer';
   import SimpleSkillsTable from '../skills/SimpleSkillsTable';
   import NoContent2 from '../utils/NoContent2';
+  import SubPageHeader from '../utils/pages/SubPageHeader';
 
   export default {
     name: 'BadgeSkills',
     components: {
-      NoContent2, SimpleSkillsTable, LoadingContainer, SkillsSelector2,
+      SubPageHeader,
+      NoContent2,
+      SimpleSkillsTable,
+      LoadingContainer,
+      SkillsSelector2,
     },
     props: ['projectId', 'badgeId'],
     data() {
