@@ -1,19 +1,16 @@
 <template>
-  <div class="columns">
-    <div class="column is-narrow" style="height: 800px">
-      <div class="skills-pad-right-2-rem">
-        <h3 class="title is-4 logo">Navigation</h3>
-        <aside class="menu">
-          <ul class="menu-list">
-            <li v-for="(navItem) of navItems" :key="navItem.name">
-              <a v-on:click="navigate(`${navItem.name}`)" v-bind:class="{'is-active': menuSelections.get(navItem.name)}">
-                <i v-bind:class="navItem.iconClass" class="fas fa-w-16"/> {{ navItem.name }}</a>
-            </li>
-          </ul>
-      </aside>
-      </div>
+  <div class="row">
+    <div class="col-lg-2 border rounded p-3 mb-2 bg-light" style="min-width: 15rem;">
+      <h3 class="h3 mb-2">Navigation</h3>
+      <ul class="nav flex-column">
+        <li class="nav-item h5" v-for="(navItem) of navItems" :key="navItem.name">
+          <a class="nav-link" v-on:click="navigate(`${navItem.name}`)"
+             :class="{'bg-primary': menuSelections.get(navItem.name), 'text-light': menuSelections.get(navItem.name)}">
+            <i v-bind:class="navItem.iconClass" class="fas fa-w-16" style="min-width: 2rem;"/> {{ navItem.name }}</a>
+        </li>
+      </ul>
     </div>
-    <div class="column">
+    <div class="col">
       <div v-for="(navItem) of navItems" :key="navItem.name">
         <div v-if="menuSelections.get(navItem.name)">
           <slot :name="navItem.name"></slot>
@@ -52,30 +49,5 @@
   };
 </script>
 
-<style lang="scss" scoped>
-  @import "../../styles/palette";
-
-  i {
-    width: 2rem;
-  }
-
-  li {
-    margin-bottom: 0.75rem;
-    font-size: 1.1rem;
-  }
-
-  .columns .is-narrow{
-    padding: 20px;
-    border: 1px solid #ddd;
-    box-shadow: 0 22px 35px -16px rgba(0,0,0,0.1);
-    margin-bottom: 2rem;
-    border-radius: 5px;
-  }
-
-  /*.columns h3 {*/
-    /*border-color: lightgrey;*/
-    /*border-width: 0 0 1px 0px;*/
-    /*border-style: inset;*/
-  /*}*/
-
+<style scoped>
 </style>

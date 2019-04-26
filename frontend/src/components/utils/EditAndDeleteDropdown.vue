@@ -1,71 +1,22 @@
 <template>
-  <b-dropdown position="is-bottom-left">
-    <button class="button" slot="trigger" :class="{'is-loading': isLoading}">
-                <span class="icon is-small">
-                  <i class="fas fa-bars"/>
-                </span>
-    </button>
+  <b-dropdown variant="outline-secondary" right>
 
-    <b-dropdown-item v-on:click="emit('edited')">
-      <div class="level">
-        <div class="level-right">
-          <div class="level-item">
-                <span class="icon is-medium has-text-info">
-                 <i class="fas fa-edit"/>
-                </span>
-          </div>
-          <div class="level-item">
-            <h2 class="has-text-info">Edit</h2>
-          </div>
-        </div>
-      </div>
+    <b-dropdown-item v-on:click="emit('edited')" class="mb-1">
+      <span class="has-text-info px-2"> <i class="fas fa-edit"/> Edit</span>
     </b-dropdown-item>
 
     <b-dropdown-item v-on:click="emit('deleted')">
-      <div class="level is-fullwidth">
-        <div class="level-right">
-          <div class="level-item">
-                <span class="icon is-medium has-text-info">
-                 <i class="fas fa-trash"/>
-                </span>
-          </div>
-          <div class="level-item">
-            <span class="has-text-info">Delete</span>
-          </div>
-        </div>
-      </div>
+      <span class="has-text-info px-2"> <i class="fas fa-trash"/> Delete</span>
     </b-dropdown-item>
 
-    <hr class="dropdown-divider"/>
+    <hr class="my-2"/>
 
-    <b-dropdown-item v-on:click="emit('move-up')" :disabled="isFirst">
-      <div class="level is-fullwidth">
-        <div class="level-right">
-          <div class="level-item">
-                <span class="icon is-medium has-text-info">
-                 <i class="fas fa-arrow-circle-up"/>
-                </span>
-          </div>
-          <div class="level-item">
-            <span class="has-text-info">Move Up</span>
-          </div>
-        </div>
-      </div>
+    <b-dropdown-item v-on:click="emit('move-up')" :disabled="isFirst" class="mb-1">
+      <span class="has-text-info px-2"> <i class="fas fa-arrow-circle-up"/> Move Up</span>
     </b-dropdown-item>
 
     <b-dropdown-item v-on:click="emit('move-down')" :disabled="isLast">
-      <div class="level is-fullwidth">
-        <div class="level-right">
-          <div class="level-item">
-                <span class="icon is-medium has-text-info">
-                 <i class="fas fa-arrow-circle-down"/>
-                </span>
-          </div>
-          <div class="level-item">
-            <span class="has-text-info">Move Down</span>
-          </div>
-        </div>
-      </div>
+      <span class="has-text-info px-2"> <i class="fas fa-arrow-circle-down"/> Move Down</span>
     </b-dropdown-item>
 
   </b-dropdown>

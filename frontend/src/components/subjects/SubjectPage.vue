@@ -5,14 +5,14 @@
     <section class="section">
       <navigation :nav-items="[
           {name: 'Skills', iconClass: 'fa-graduation-cap'},
-          {name: 'Level Definitions', iconClass: 'fa-trophy'},
+          {name: 'Levels', iconClass: 'fa-trophy'},
           {name: 'Users', iconClass: 'fa-users'},
           {name: 'Stats', iconClass: 'fa-chart-bar'},
         ]">
         <template slot="Skills">
           <skills :project-id="projectId" :subject-id="subjectId" v-on:skills-change="loadSubject"/>
         </template>
-        <template slot="Level Definitions">
+        <template slot="Levels">
           <levels :project-id="projectId" :subject-id="subjectId" :max-levels="25"/>
         </template>
         <template slot="Users">

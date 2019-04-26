@@ -1,12 +1,9 @@
 <template>
-  <b-tooltip :label="toolTipText"
-             position="is-bottom" animanted="true" type="is-light">
-    <a class="button is-outlined">
-      <span class="icon is-small"><i class="fas fa-user-astronaut"/></span>
-      <span v-if="isAuthenticatedUser" class="pad-left settings">{{ userInfo.first }} {{ userInfo.last }}</span>
-      <span v-else class="pad-left settings">{{ 'Hello, Sign In' }}</span>
-    </a>
-  </b-tooltip>
+    <button class="btn btn-outline-info" v-b-tooltip.hover.bottom="toolTipText">
+      <i class="fas fa-user-astronaut pr-1"/>
+      <span v-if="isAuthenticatedUser">{{ userInfo.first }} {{ userInfo.last }}</span>
+      <span v-else>Hello, Sign In</span>
+    </button>
 </template>
 
 <script>
@@ -36,9 +33,6 @@
 </script>
 
 <style scoped>
-  .settings {
-    width: 6em;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
+
+
 </style>

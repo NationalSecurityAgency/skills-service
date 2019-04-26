@@ -1,75 +1,20 @@
 <template>
-  <div class="header">
-    <nav class="level container is-fluid">
-      <div class="level-left">
-        <div class="level-item">
-          <p class="title">
-            <router-link to="/"><i class="fas fa-users"/> User Skills</router-link>
-          </p>
-        </div>
+  <div>
+    <div class="row p-3">
+      <div class="col-sm text-center text-sm-left">
+        <router-link class="h2 text-primary" to="/"><i class="fas fa-users"/> User Skills</router-link>
       </div>
 
-      <div class="level-right">
-        <div class="level-item">
-          <settings-button/>
-        </div>
-
-        <div class="level-item" v-if="isAuthenticated">
-          <global-settings-button/>
-        </div>
-
-        <div class="level-item" v-if="isJwtAuthenticatedUser">
-          <b-tooltip label="Sign Out"
-                     position="is-bottom" animanted="true" type="is-light">
-            <button class="button is-outlined" v-on:click="signOut" >
-              <span class="icon is-small"><i class="fas fa-sign-out-alt"/></span>
-            </button>
-          </b-tooltip>
-        </div>
-
-        <div class="level-item">
-
-          <b-dropdown position="is-bottom-left">
-            <button class="button is-outlined" slot="trigger">
-                <span class="icon is-small">
-                  <i class="fas fa-question-circle"/>
-                </span>
-            </button>
-            <b-dropdown-item>
-              <div class="media">
-                <div class="media-left">
-                  <span class="icon is-medium has-text-info">
-                    <i class="fas fa-info-circle"/>
-                  </span>
-                </div>
-                <div class="media-content">
-                  <h2 class="has-text-info">About</h2>
-                  <small>How do User Skills work</small>
-                </div>
-              </div>
-            </b-dropdown-item>
-            <b-dropdown-item>
-              <div class="media">
-                <div class="media-left">
-                  <span class="icon is-medium has-text-info">
-                    <i class="fas fa-code"/>
-                  </span>
-                </div>
-                <div class="media-content">
-                  <h2 class="has-text-info">API</h2>
-                  <small>Docs for Programatic Interface</small>
-                </div>
-              </div>
-            </b-dropdown-item>
-          </b-dropdown>
-
-        </div>
-
+      <div class="col text-center text-sm-right mt-3 mt-sm-0">
+        <settings-button class="mr-2"/>
+        <global-settings-button v-if="isAuthenticated"  class="mr-2"/>
+        <button v-if="isJwtAuthenticatedUser" class="btn btn-outline-info" v-on:click="signOut"
+                v-b-tooltip.hover title="Sign Out">
+          <i class="fas fa-sign-out-alt"/>
+        </button>
       </div>
-    </nav>
-
+    </div>
     <breadcrumb></breadcrumb>
-
   </div>
 </template>
 
