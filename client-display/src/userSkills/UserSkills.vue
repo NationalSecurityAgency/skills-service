@@ -5,7 +5,7 @@
     <div v-if="isLoaded">
       <skills-title>User Skills</skills-title>
 
-      <user-skills-header :display-data="displayData" @hook:updated="contentHeightUpdated" />
+      <user-skills-header :display-data="displayData" />
       <subjects-container :subjects="displayData.userSkills.subjects" />
     </div>
   </div>
