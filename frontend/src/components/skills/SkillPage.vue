@@ -10,13 +10,12 @@
           {name: 'Stats', iconClass: 'fa-chart-bar'},
         ]">
         <template slot="Overview">
-          <div class="columns">
-            <div class="column is-full">
-              <span class="title is-3">Overview</span>
+          <sub-page-header title="Overview"/>
+          <div class="card">
+            <div class="card-body">
+              <child-row-skills-display v-if="this.skill.skillId" :skill="this.skill"></child-row-skills-display>
             </div>
           </div>
-
-          <child-row-skills-display v-if="this.skill.skillId" :skill="this.skill"></child-row-skills-display>
         </template>
         <template slot="Dependencies">
           <skill-dependencies :skill="skill"></skill-dependencies>
@@ -42,10 +41,12 @@
   import Users from '../users/Users';
   import { SECTION } from '../stats/SectionHelper';
   import PageHeader from '../utils/pages/PageHeader';
+  import SubPageHeader from '../utils/pages/SubPageHeader';
 
   export default {
     name: 'SkillPage',
     components: {
+      SubPageHeader,
       PageHeader,
       SkillDependencies,
       ChildRowSkillsDisplay,

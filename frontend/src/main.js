@@ -2,6 +2,7 @@
 // (runtime-only or standalone) has been set in webpack.base.conf with an alias.
 import Vue from 'vue';
 import Buefy from 'buefy';
+import BootstrapVue from 'bootstrap-vue';
 import { ClientTable, ServerTable } from 'vue-tables-2';
 import Vue2Crumbs from 'vue-2-crumbs';
 import VeeValidate from 'vee-validate';
@@ -21,6 +22,7 @@ Vue.use(Vue2Crumbs);
 Vue.use(VeeValidate);
 Vue.use(Vuex);
 Vue.use(VueApexCharts);
+Vue.use(BootstrapVue);
 
 Vue.component('apexchart', VueApexCharts);
 

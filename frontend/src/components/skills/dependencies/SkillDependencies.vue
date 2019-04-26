@@ -1,10 +1,6 @@
 <template>
     <div id="skill-dependencies-display">
-      <div class="columns">
-        <div class="column is-full">
-          <span class="title is-3">Dependencies</span>
-        </div>
-      </div>
+      <sub-page-header title="Dependencies"/>
 
       <div class="skills-bordered-component dependencies-container">
         <loading-container :is-loading="!loading.finishedAllSkills || !loading.finishedDependents">
@@ -79,15 +75,18 @@
 
 <script>
   import SkillsService from '../SkillsService';
-  import LoadingContainer from '../../utils/LoadingContainer';
   import DependantsGraph from './DependantsGraph';
   import SkillsSelector2 from '../SkillsSelector2';
   import SimpleSkillsTable from '../SimpleSkillsTable';
+  import SubPageHeader from '../../utils/pages/SubPageHeader';
 
   export default {
     name: 'SkillDependencies',
     components: {
-      SimpleSkillsTable, SkillsSelector2, DependantsGraph, LoadingContainer,
+      SubPageHeader,
+      SimpleSkillsTable,
+      SkillsSelector2,
+      DependantsGraph,
     },
     props: ['skill'],
     data() {
