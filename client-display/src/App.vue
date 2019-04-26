@@ -38,6 +38,8 @@
     mounted() {
       this.onHeightChange();
 
+      window.addEventListener('resize', onHeightChanged);
+
       if (process.env.NODE_ENV === 'development') {
         this.configureDevelopmentMode();
       }

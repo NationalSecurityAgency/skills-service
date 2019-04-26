@@ -3,8 +3,7 @@
     ref="containerElement"
     class="skills-container">
     <user-skills
-      v-if="token"
-      @height-change="onHeightChange"/>
+      v-if="token" />
   </div>
 </template>
 
