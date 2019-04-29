@@ -1,6 +1,6 @@
 <template>
   <div class="loading-container">
-    <b-loading :is-full-page="false" :active.sync="isLoading" :can-cancel="false"></b-loading>
+    <b-spinner  v-if="isLoading" label="Loading..."></b-spinner>
     <div v-if="!isLoading">
       <slot></slot>
     </div>

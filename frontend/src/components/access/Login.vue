@@ -1,76 +1,73 @@
 <template>
-  <div class="columns section">
-    <div class="column is-half is-offset-one-quarter">
-      <div class="has-text-centered skills-pad-bottom-1-rem">
-        <i class="fa fa-users fa-3x"></i>
-        <h2 class="title is-5 skills-pad-top-2-rem">Sign in to Skills Dashboard</h2>
+  <div class="row justify-content-center text-center">
+    <div class="col col-md-8 col-lg-7 col-xl-4 mt-3" style="min-width: 20rem;">
+      <div class="mt-5">
+        <i class="fa fa-users fa-4x"></i>
+        <h2 class="mt-4">Sign in to Skills Dashboard</h2>
       </div>
       <form @submit.prevent="login()">
-        <div class="columns">
+        <transition name="fade" mode="out-in">
+          <b-alert v-if="loginFailed" variant="danger" @dismissed="loginFailed=false" show dismissible>Invalid Username
+            or Password
+          </b-alert>
+        </transition>
 
-          <div class="column is-three-fifths is-offset-one-fifth">
+        <div class="card text-left">
+          <div class="card-body p-4">
 
-            <transition name="fade" mode="out-in">
-              <div v-if="loginFailed" class="notification is-danger">
-                <button class="delete" @click="loginFailed = false"/>
-                Invalid Username or Password
-              </div>
-            </transition>
-
-            <div class="box">
-
-              <div class="field">
-                <label class="label">Email</label>
-                <input class="input" type="text" v-model="loginFields.username" name="username"
-                       v-validate="'required|min:5'" data-vv-delay="500"/>
-                <p class="help is-danger" v-show="errors.has('username')">{{ errors.first('username')}}</p>
-              </div>
-              <div class="field">
-                <label class="label">Password</label>
-                <input class="input" type="password" v-model="loginFields.password" name="password"
-                       @animationstart="onAnimationStart" v-validate="'required|min:8|max:15'" data-vv-delay="500"/>
-                <p class="help is-danger" v-show="errors.has('password')">{{ errors.first('password')}}</p>
-              </div>
-              <div class="field ">
-                <div class="control">
-                  <button class="button is-primary is-outlined" :disabled="disabled">
-                    <span class="icon is-small">
-                      <i class="fas fa-arrow-circle-right"/>
-                    </span>
-                    <span>Login</span>
-                  </button>
+            <div class="form-group">
+              <label for="username">Email address</label>
+              <input type="text" class="form-control" id="username" placeholder="Enter email"
+                     aria-describedby="emailHelp"
+                     v-model="loginFields.username" v-validate="'required|min:5'" data-vv-delay="500">
+              <small id="emailHelp" class="form-text text-danger" v-show="errors.has('username')">{{
+                errors.first('username')}}
+              </small>
+            </div>
+            <div class="form-group">
+              <div class="row">
+                <div class="col">
+                  <label for="inputPassword">Password</label>
+                </div>
+                <div class="col text-right">
+                  <small class="text-muted"><b-link @click="forgotPassword">Forgot Password?</b-link></small>
                 </div>
               </div>
-              <div>
-                  <p class="info" style="font-size: 0.8rem"><a @click="forgotPassword">Forgot Password?</a></p>
-              </div>
-
-              <div class="skills-pad-bottom-1-rem">
-                <hr/>
-                <p class="info has-text-centered">Don't have a User Skills account?
-                  <a style="font-weight: bold" @click="requestAccountPage">Sign up</a>
-                </p>
-              </div>
-
+              <input type="password" class="form-control" id="inputPassword" placeholder="Password"
+                     v-model="loginFields.password" name="password" aria-describedby="passwordHelp"
+                     @animationstart="onAnimationStart" v-validate="'required|min:8|max:15'" data-vv-delay="500">
+              <small id="passwordHelp" class="form-text text-danger" v-show="errors.has('password')">{{
+                errors.first('password')}}
+              </small>
             </div>
+            <button type="submit" class="btn btn-outline-primary" :disabled="disabled">
+              Login <i class="fas fa-arrow-circle-right"/>
+            </button>
 
-            <div class="box">
-              <div v-if="oAuthProviders">
-                <div v-for="oAuthProvider in oAuthProviders" :key="oAuthProvider.registrationId" class="field">
-                  <a class="button is-outlined" style="width: 100%"
-                     @click="oAuth2Login(oAuthProvider.registrationId)">
-                    <span class="icon is-small">
-                      <i :class="oAuthProvider.iconClass" aria-hidden="true"/>
-                    </span>
-                    <span>Continue with {{ oAuthProvider.clientName }}</span>
-                  </a>
-                </div>
-              </div>
-            </div>
-
+            <hr/>
+            <p class="text-center"><small>Don't have a User Skills account?
+              <strong><b-link @click="requestAccountPage">Sign up</b-link></strong>
+            </small>
+            </p>
           </div>
-
         </div>
+
+        <div class="card mt-3">
+          <div class="card-body">
+            <div v-if="oAuthProviders" class="row">
+              <div v-for="oAuthProvider in oAuthProviders" :key="oAuthProvider.registrationId" class="col">
+                <button class="btn btn-outline-dark w-100 h-100"
+                        @click="oAuth2Login(oAuthProvider.registrationId)">
+                  <small><i :class="oAuthProvider.iconClass" aria-hidden="true"/>
+                  Continue with {{ oAuthProvider.clientName }}
+                  </small>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
       </form>
     </div>
   </div>
@@ -105,27 +102,28 @@
     },
     methods: {
       login() {
-        this.$validator.validate().then((valid) => {
-          if (valid) {
-            this.loginFailed = false;
-            const formData = new FormData();
-            formData.append('username', this.loginFields.username);
-            formData.append('password', this.loginFields.password);
-            this.$store.dispatch('login', formData)
-              .then(() => {
-                this.loginFailed = false;
-                this.$router.push(this.$route.query.redirect || '/');
-              })
-              .catch((error) => {
-                if (error.response.status === 401) {
-                  this.resetAfterFailedLogin();
-                } else {
-                  const errorMessage = (error.response && error.response.data && error.response.data.message) ? error.response.data.message : undefined;
-                  this.$router.push({ name: 'ErrorPage', query: { errorMessage } });
-                }
-              });
-          }
-        });
+        this.$validator.validate()
+          .then((valid) => {
+            if (valid) {
+              this.loginFailed = false;
+              const formData = new FormData();
+              formData.append('username', this.loginFields.username);
+              formData.append('password', this.loginFields.password);
+              this.$store.dispatch('login', formData)
+                .then(() => {
+                  this.loginFailed = false;
+                  this.$router.push(this.$route.query.redirect || '/');
+                })
+                .catch((error) => {
+                  if (error.response.status === 401) {
+                    this.resetAfterFailedLogin();
+                  } else {
+                    const errorMessage = (error.response && error.response.data && error.response.data.message) ? error.response.data.message : undefined;
+                    this.$router.push({ name: 'ErrorPage', query: { errorMessage } });
+                  }
+                });
+            }
+          });
       },
       oAuth2Login(registrationId) {
         this.$store.dispatch('oAuth2Login', registrationId);
@@ -168,15 +166,22 @@
   :-webkit-autofill {
     animation-name: onAutoFillStart;
   }
+
   :not(:-webkit-autofill) {
     animation-name: onAutoFillCancel;
   }
+
   @keyframes onAutoFillStart {
-    from { }
-    to { }
+    from {
+    }
+    to {
+    }
   }
+
   @keyframes onAutoFillCancel {
-    from { }
-    to { }
+    from {
+    }
+    to {
+    }
   }
 </style>
