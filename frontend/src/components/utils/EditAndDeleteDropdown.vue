@@ -1,5 +1,5 @@
 <template>
-  <b-dropdown variant="outline-secondary" right>
+  <b-dropdown variant="outline-secondary" size="sm" right>
 
     <b-dropdown-item v-on:click="emit('edited')" class="mb-1">
       <span class="has-text-info px-2"> <i class="fas fa-edit"/> Edit</span>
