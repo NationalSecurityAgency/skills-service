@@ -1,75 +1,52 @@
 <template>
-  <div class="box">
-    <div class="columns has-text-centered">
-      <div class="column is-narrow is-vcentered">
-        <i class="has-text-info badge-icon" v-bind:class="`${badgeInternal.iconClass}`"></i>
-      </div>
-      <div class="column has-text-left">
-        <div class="badge-title">
-          <h1 class="title is-4 has-text-primary">{{ badgeInternal.name }}</h1>
-          <h2 class="subtitle is-7 has-text-grey">ID: {{ badgeInternal.badgeId }}</h2>
-        </div>
-      </div>
-      <div class="column is-narrow">
-        <edit-and-delete-dropdown v-on:deleted="deleteBadge" v-on:edited="editBadge" v-on:move-up="moveUp"
-                                  v-on:move-down="moveDown"
-                                  :isFirst="badgeInternal.isFirst" :isLast="badgeInternal.isLast" :isLoading="isLoading"
-                                  class="badge-settings"></edit-and-delete-dropdown>
-      </div>
+  <page-preview-card :options="cardOptions">
+    <div slot="header-top-right">
+      <edit-and-delete-dropdown v-on:deleted="deleteBadge" v-on:edited="editBadge" v-on:move-up="moveUp"
+                                v-on:move-down="moveDown"
+                                :isFirst="badgeInternal.isFirst" :isLast="badgeInternal.isLast" :isLoading="isLoading"
+                                class="badge-settings"></edit-and-delete-dropdown>
     </div>
-
-    <div class="columns has-text-centered">
-      <div class="column is-half">
-        <div>
-          <p class="heading">Number Skills</p>
-          <p class="title">{{ badgeInternal.numSkills | number }}</p>
-        </div>
-      </div>
-      <div class="column is-half">
-        <div>
-          <p class="heading">Number Users</p>
-          <p class="title">{{ badgeInternal.numUsers | number }}</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="columns has-text-centered">
-      <div class="column is-full">
-        <div>
-          <p class="heading">Total Points</p>
-          <p class="title">{{ badgeInternal.totalPoints | number }}</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="columns has-text-centered">
-      <div class="column is-full">
-        <router-link :to="{ name:'BadgePage',
+    <div slot="footer">
+      <router-link :to="{ name:'BadgePage',
               params: { projectId: this.badgeInternal.projectId, badgeId: this.badgeInternal.badgeId}}"
-                     class="button is-outlined is-info">
-          <span>Manage</span>
-          <span class="icon is-small">
-              <i class="fas fa-arrow-circle-right"/>
-          </span>
-        </router-link>
-      </div>
+                   class="btn btn-outline-primary btn-sm">
+        Manage <i class="fas fa-arrow-circle-right"/>
+      </router-link>
     </div>
-
-  </div>
+  </page-preview-card>
 </template>
 
 <script>
   import EditAndDeleteDropdown from '@/components/utils/EditAndDeleteDropdown';
   import EditBadge from './EditBadge';
+  import PagePreviewCard from '../utils/pages/PagePreviewCard';
 
   export default {
     name: 'Badge',
-    components: { EditAndDeleteDropdown },
+    components: { PagePreviewCard, EditAndDeleteDropdown },
     props: ['badge'],
     data() {
       return {
         isLoading: false,
         badgeInternal: Object.assign({}, this.badge),
+        cardOptions: {},
+      };
+    },
+    mounted() {
+      this.cardOptions = {
+        icon: this.badgeInternal.iconClass,
+        title: this.badgeInternal.name,
+        subTitle: `ID: ${this.badgeInternal.badgeId}`,
+        stats: [{
+          label: 'Number Skills',
+          count: this.badgeInternal.numSkills,
+        }, {
+          label: 'Number Users',
+          count: this.badgeInternal.numUsers,
+        }, {
+          label: 'Total Points',
+          count: this.badgeInternal.totalPoints,
+        }],
       };
     },
     methods: {
@@ -133,6 +110,6 @@
     padding: 10px;
     border: 1px solid #ddd;
     border-radius: 5px;
-    box-shadow: 0 22px 35px -16px rgba(0,0,0,0.1);
+    box-shadow: 0 22px 35px -16px rgba(0, 0, 0, 0.1);
   }
 </style>

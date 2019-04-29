@@ -3,7 +3,7 @@
     <div class="col-lg-2 border rounded p-3 mb-2 bg-light" style="min-width: 15rem;">
       <h3 class="h3 mb-2">Navigation</h3>
       <ul class="nav flex-column">
-        <li class="nav-item h5" v-for="(navItem) of navItems" :key="navItem.name">
+        <li class="nav-item skills-nav-item" v-for="(navItem) of navItems" :key="navItem.name">
           <a class="nav-link" v-on:click="navigate(`${navItem.name}`)"
              :class="{'bg-primary': menuSelections.get(navItem.name), 'text-light': menuSelections.get(navItem.name)}">
             <i v-bind:class="navItem.iconClass" class="fas fa-w-16" style="min-width: 2rem;"/> {{ navItem.name }}</a>
@@ -50,4 +50,7 @@
 </script>
 
 <style scoped>
+  .skills-nav-item {
+    font-size: 1.1rem;
+  }
 </style>

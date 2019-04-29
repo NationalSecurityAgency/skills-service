@@ -1,80 +1,56 @@
 <template>
-  <div class="card h-100">
-    <div class="card-body">
-      <div class="row mb-4">
-        <div class="col-10">
-          <div class="media">
-            <div class="d-inline-block mt-2 mr-3 border rounded p-1 text-info">
-              <i class="fa-3x" :class="`${subject.iconClass}`"></i>
-            </div>
-            <div class="media-body">
-              <h3 class="mb-2 h3 text-truncate text-info" style="max-width: 12rem;">{{ subject.name }}</h3>
-              <h5 class="h5 text-truncate text-muted" style="max-width: 12rem;">ID: {{ subject.subjectId }}</h5>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-2 text-right">
-          <edit-and-delete-dropdown v-on:deleted="deleteSubject" v-on:edited="editSubject" v-on:move-up="moveUp"
-                                    v-on:move-down="moveDown"
-                                    :isFirst="subject.isFirst" :isLast="subject.isLast" :isLoading="isLoading"
-                                    class="subject-settings"></edit-and-delete-dropdown>
-        </div>
-      </div>
-
-      <div class="row text-center mb-3">
-        <div class="col">
-          <div>
-            <p class="h6 text-uppercase text-muted">Number Skills</p>
-            <strong class="h3">{{ subject.numSkills | number }}</strong>
-          </div>
-        </div>
-        <div class="col">
-          <div>
-            <p class="h6 text-uppercase text-muted">Number Users</p>
-            <p class="h3">{{ subject.numUsers | number }}</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="row text-center mb-3">
-        <div class="col">
-          <div>
-            <p class="h6 text-uppercase text-muted">Total Points</p>
-            <p class="h3">{{ subject.totalPoints | number }}</p>
-          </div>
-        </div>
-        <div class="col">
-          <div>
-            <p class="h6 text-uppercase text-muted">Points %</p>
-            <p class="h3">{{ subject.pointsPercentage }}</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="text-center">
-        <router-link :to="{ name:'SubjectPage', params: { projectId: this.subject.projectId, subjectId: this.subject.subjectId}}"
-                     class="btn btn-outline-info">
-          Manage <i class="fas fa-arrow-circle-right"/>
-        </router-link>
-      </div>
+  <page-preview-card :options="cardOptions">
+    <div slot="header-top-right">
+      <edit-and-delete-dropdown v-on:deleted="deleteSubject" v-on:edited="editSubject" v-on:move-up="moveUp"
+                                v-on:move-down="moveDown"
+                                :isFirst="subject.isFirst" :isLast="subject.isLast" :isLoading="isLoading"
+                                class="subject-settings"></edit-and-delete-dropdown>
     </div>
-  </div>
-</template>
+    <div slot="footer">
+      <router-link
+        :to="{ name:'SubjectPage', params: { projectId: this.subject.projectId, subjectId: this.subject.subjectId}}"
+        class="btn btn-outline-primary btn-sm">
+        Manage <i class="fas fa-arrow-circle-right"/>
+      </router-link>
+    </div>
+  </page-preview-card>
+</template>computed
 
 <script>
   import EditAndDeleteDropdown from '@/components/utils/EditAndDeleteDropdown';
   import EditSubject from './EditSubject';
   import SubjectsService from './SubjectsService';
+  import PagePreviewCard from '../utils/pages/PagePreviewCard';
 
 
   export default {
     name: 'Subject',
-    components: { EditAndDeleteDropdown },
+    components: { PagePreviewCard, EditAndDeleteDropdown },
     props: ['subject'],
     data() {
       return {
         isLoading: false,
+        cardOptions: {},
+      };
+    },
+    mounted() {
+      this.cardOptions = {
+        icon: this.subject.iconClass,
+        title: this.subject.name,
+        subTitle: `ID: ${this.subject.subjectId}`,
+        stats: [{
+          label: 'Number Skills',
+          count: this.subject.numSkills,
+        }, {
+          label: 'Number Users',
+          count: this.subject.numUsers,
+        }, {
+          label: 'Total Points',
+          count: this.subject.totalPoints,
+        }, {
+          label: 'Points %',
+          count: this.subject.pointsPercentage,
+        }],
       };
     },
     methods: {

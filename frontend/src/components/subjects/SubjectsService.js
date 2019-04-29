@@ -22,8 +22,7 @@ export default {
       .then(res => res.data);
   },
   patchSubject(subject, actionToSubmit) {
-    axios.patch(`/admin/projects/${subject.projectId}/subjects/${subject.subjectId}`, { action: actionToSubmit })
-      .then(res => res.data);
+    return axios.patch(`/admin/projects/${subject.projectId}/subjects/${subject.subjectId}`, { action: actionToSubmit });
   },
   deleteSubject(subject) {
     return axios.delete(`/admin/projects/${subject.projectId}/subjects/${subject.subjectId}`);

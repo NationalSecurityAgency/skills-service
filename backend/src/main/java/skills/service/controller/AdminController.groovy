@@ -149,13 +149,14 @@ class AdminController {
 
     @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}", method = RequestMethod.PATCH, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    void setSubjectDisplayOrder(
+    def setSubjectDisplayOrder(
             @PathVariable("projectId") String projectId,
             @PathVariable("subjectId") String subjectId, @RequestBody ActionPatchRequest subjectPatchRequest) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(subjectId, "Subject Id", projectId)
         SkillsValidator.isNotNull(subjectPatchRequest.action, "Action must be provided", projectId)
         projectAdminStorageService.setSubjectDisplayOrder(projectId, subjectId, subjectPatchRequest)
+        return [status: 'success']
     }
 
     @RequestMapping(value = "/projects/{projectId}/badges/{badgeId}", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
