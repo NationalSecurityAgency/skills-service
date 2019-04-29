@@ -6,7 +6,7 @@
       <loading-container v-bind:is-loading="isLoading">
         <div v-if="!isLoading">
           <header-view v-if="isAuthenticatedUser"/>
-          <div class="container is-fluid">
+          <div class="container-fluid">
             <router-view/>
           </div>
         </div>
@@ -70,15 +70,12 @@
 <style lang="scss">
   @import "~bootstrap/scss/bootstrap";
   @import '~bootstrap-vue/src/index.scss';
-  @import "styles/buefy-custom";
 </style>
 
 <style>
-  /*@import '../node_modules/bulma/css/bulma.min.css';*/
   @import '../node_modules/@fortawesome/fontawesome-free/css/all.css';
   @import '../node_modules/material-icons/iconfont/material-icons.css';
   @import '../node_modules/material-icons/css/material-icons.css';
-  /*@import '../node_modules/buefy/dist/buefy.css';*/
   @import '../node_modules/animate.css/animate.css';
   @import './styles/utils.css';
 

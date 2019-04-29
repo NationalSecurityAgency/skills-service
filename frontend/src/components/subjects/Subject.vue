@@ -1,19 +1,24 @@
 <template>
-  <page-preview-card :options="cardOptions">
-    <div slot="header-top-right">
-      <edit-and-delete-dropdown v-on:deleted="deleteSubject" v-on:edited="editSubject" v-on:move-up="moveUp"
-                                v-on:move-down="moveDown"
-                                :isFirst="subject.isFirst" :isLast="subject.isLast" :isLoading="isLoading"
-                                class="subject-settings"></edit-and-delete-dropdown>
-    </div>
-    <div slot="footer">
-      <router-link
-        :to="{ name:'SubjectPage', params: { projectId: this.subject.projectId, subjectId: this.subject.subjectId}}"
-        class="btn btn-outline-primary btn-sm">
-        Manage <i class="fas fa-arrow-circle-right"/>
-      </router-link>
-    </div>
-  </page-preview-card>
+  <div>
+    <page-preview-card :options="cardOptions">
+      <div slot="header-top-right">
+        <edit-and-delete-dropdown v-on:deleted="deleteSubject" v-on:edited="editSubject" v-on:move-up="moveUp"
+                                  v-on:move-down="moveDown"
+                                  :isFirst="subject.isFirst" :isLast="subject.isLast" :isLoading="isLoading"
+                                  class="subject-settings"></edit-and-delete-dropdown>
+      </div>
+      <div slot="footer">
+        <router-link
+          :to="{ name:'SubjectPage', params: { projectId: this.subject.projectId, subjectId: this.subject.subjectId}}"
+          class="btn btn-outline-primary btn-sm">
+          Manage <i class="fas fa-arrow-circle-right"/>
+        </router-link>
+      </div>
+    </page-preview-card>
+    <b-modal id="edit-subject-modal" title="BootstrapVue">
+      <p class="my-4">Hello from modal!</p>
+    </b-modal>
+  </div>
 </template>computed
 
 <script>
@@ -78,7 +83,7 @@
             this.isLoading = false;
           });
       },
-      editSubject() {
+      editSubjectOld() {
         this.$modal.open({
           parent: this,
           component: EditSubject,
@@ -92,6 +97,22 @@
             'subject-created': this.subjectEdited,
           },
         });
+      },
+      editSubject() {
+        this.$bvModal.show('edit-subject-modal');
+        // this.$modal.open({
+        //   parent: this,
+        //   component: EditSubject,
+        //   hasModalCard: true,
+        //   width: 1110,
+        //   props: {
+        //     subject: this.subject,
+        //     isEdit: true,
+        //   },
+        //   events: {
+        //     'subject-created': this.subjectEdited,
+        //   },
+        // });
       },
       subjectEdited(subject) {
         this.isLoading = true;

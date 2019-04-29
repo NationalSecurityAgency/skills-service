@@ -2,29 +2,27 @@
   <div>
     <page-header :loading="isLoading" :options="headerOptions"/>
 
-    <section class="section">
-      <navigation :nav-items="[
+    <navigation :nav-items="[
           {name: 'Skills', iconClass: 'fa-graduation-cap'},
           {name: 'Levels', iconClass: 'fa-trophy'},
           {name: 'Users', iconClass: 'fa-users'},
           {name: 'Stats', iconClass: 'fa-chart-bar'},
         ]">
-        <template slot="Skills">
-          <skills :project-id="projectId" :subject-id="subjectId" v-on:skills-change="loadSubject"/>
-        </template>
-        <template slot="Levels">
-          <levels :project-id="projectId" :subject-id="subjectId" :max-levels="25"/>
-        </template>
-        <template slot="Users">
-          <section v-if="projectId" class="">
-            <users :project-id="projectId" :subject-id="subjectId"/>
-          </section>
-        </template>
-        <template slot="Stats">
-          <section-stats :project-id="projectId" :section="section" :section-id-param="subjectId"></section-stats>
-        </template>
-      </navigation>
-    </section>
+      <template slot="Skills">
+        <skills :project-id="projectId" :subject-id="subjectId" v-on:skills-change="loadSubject"/>
+      </template>
+      <template slot="Levels">
+        <levels :project-id="projectId" :subject-id="subjectId" :max-levels="25"/>
+      </template>
+      <template slot="Users">
+        <section v-if="projectId" class="">
+          <users :project-id="projectId" :subject-id="subjectId"/>
+        </section>
+      </template>
+      <template slot="Stats">
+        <section-stats :project-id="projectId" :section="section" :section-id-param="subjectId"></section-stats>
+      </template>
+    </navigation>
   </div>
 </template>
 

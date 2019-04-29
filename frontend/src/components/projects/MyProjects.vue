@@ -5,7 +5,7 @@
     <loading-container v-bind:is-loading="isLoading">
       <transition v-if="projects && projects.length" name="projectContainer" enter-active-class="animated fadeIn">
         <div>
-          <div v-for="project of projects" :key="project.id" class="box">
+          <div v-for="project of projects" :key="project.id" class="mb-3">
             <my-project :project="project" v-on:project-deleted="projectRemoved" v-on:move-project-up="moveProjectUp"
                         v-on:move-project-down="moveProjectDown"/>
           </div>
