@@ -25,7 +25,7 @@
       </li>
 
       <span slot-scope="{label}" slot="current">
-         <a class="breadcrumb-item">
+         <a class="breadcrumb-item active">
           <!--<span class="icon is-small">-->
            <!--<i :class="utils && utils.iconClass"/>-->
            <!--</span>-->
