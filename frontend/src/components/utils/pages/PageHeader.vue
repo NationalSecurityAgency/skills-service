@@ -1,11 +1,11 @@
 <template>
-  <div class="card">
+  <div class="card mb-3 mx-0 py-0">
     <div class="card-body">
       <loading-container :is-loading="loading">
         <div class="row">
           <div class="col-lg-6 text-center text-lg-left">
-            <h1 class="h3"><i v-if="options.icon" class="has-text-link" :class="options.icon"/> {{ options.title }}</h1>
-            <h2 class="text-muted">{{ options.subTitle }}</h2>
+            <h3><i v-if="options.icon" class="has-text-link" :class="options.icon"/> {{ options.title }}</h3>
+            <h5 class="text-muted">{{ options.subTitle }}</h5>
           </div>
           <div class="col-lg-6">
             <div class="row text-center mt-4 mt-lg-0 justify-content-end">

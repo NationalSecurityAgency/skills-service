@@ -5,30 +5,27 @@
   Let's consider implementing out own breadcrumb impl, perhaps using vuex
   -->
 
-<!--    <nav class="breadcrumb" aria-label="breadcrubms">-->
-      <!-- To support icons in the current item we'd need to patch the existing lib, TODO: submit bug to the lib
+  <!--    <nav class="breadcrumb" aria-label="breadcrubms">-->
+  <!-- To support icons in the current item we'd need to patch the existing lib, TODO: submit bug to the lib
 
-        THERE IS A BUG IN vue-2-crumbs, the bug is with slot=current, to fix change frontend/node_modules/vue-2-crumbs/index.js the following:
-          <slot name="current" :label="getRouteLabel(currentRoute)"
+    THERE IS A BUG IN vue-2-crumbs, the bug is with slot=current, to fix change frontend/node_modules/vue-2-crumbs/index.js the following:
+      <slot name="current" :label="getRouteLabel(currentRoute)"
 
-          to
+      to
 
-          <slot name="current" :label="getRouteLabel(currentRoute)" :utils="currentRoute.meta.breadcrumb.utils">
-      -->
-      <app-breadcrumbs container="ol" class="breadcrumb bg-light pl-md-5 breadcrumbContainer">
-        <li slot-scope="{to, label, utils}">
-          <router-link :to="to"
-                       class=""
-                       :itemprop="utils && utils.itemprop">
-            <!--<span class="icon is-small">-->
-            <!--<i :class="utils && utils.iconClass" class="parentItems"/>-->
-            <!--</span>-->
-            <span class="breadcrumb-item text-white">{{ label }}</span>
-          </router-link>
-        </li>
+      <slot name="current" :label="getRouteLabel(currentRoute)" :utils="currentRoute.meta.breadcrumb.utils">
+  -->
 
-        <span slot-scope="{label}" slot="current">
-         <a class="breadcrumb-item text-white">
+  <nav aria-label="breadcrumb">
+    <app-breadcrumbs container="ol" class="breadcrumb">
+      <li slot-scope="{to, label, utils}" class="breadcrumb-item">
+        <router-link :to="to" class="" :itemprop="utils && utils.itemprop">
+          <span class="">{{ label }}</span>
+        </router-link>
+      </li>
+
+      <span slot-scope="{label}" slot="current">
+         <a class="breadcrumb-item">
           <!--<span class="icon is-small">-->
            <!--<i :class="utils && utils.iconClass"/>-->
            <!--</span>-->
@@ -36,8 +33,8 @@
          </a>
         </span>
 
-      </app-breadcrumbs>
-<!--    </nav>-->
+    </app-breadcrumbs>
+  </nav>
 </template>
 
 <script>

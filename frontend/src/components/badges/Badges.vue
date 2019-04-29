@@ -5,10 +5,10 @@
     <loading-container v-bind:is-loading="isLoading">
       <transition name="projectContainer" enter-active-class="animated fadeIn">
         <div>
-          <div v-if="badges && badges.length" class="columns is-multiline">
+          <div v-if="badges && badges.length" class="row justify-content-center ">
 
             <div v-for="(badge) of badges"
-                 :key="badge.id" class="column is-one-third">
+                 :key="badge.id" class="col-lg-4 mb-3"  style="min-width: 23rem;">
               <badge :badge="badge"
                      @badge-updated="saveBadge"
                      @badge-deleted="deleteBadge"

@@ -4,7 +4,7 @@
       <div class="row mb-2">
         <div class="col-10">
           <div class="media">
-            <div class="d-inline-block mr-2 border rounded p-1 text-info text-center" style="min-width: 3rem;">
+            <div v-if="options.icon" class="d-inline-block mr-2 border rounded p-1 text-info text-center" style="min-width: 3rem;">
               <i class="fa-2x" :class="`${options.icon}`"></i>
             </div>
             <div class="media-body">
@@ -20,7 +20,7 @@
       </div>
 
       <div class="row text-center justify-content-center">
-        <div v-for="(stat) in options.stats" :key="stat.label" class="col-6 my-3">
+        <div v-for="(stat) in options.stats" :key="stat.label" class="col my-3" style="min-width: 10rem;">
           <div>
             <p class="text-uppercase text-muted count-label">{{ stat.label }}</p>
             <strong class="h5">{{ stat.count | number }}</strong>
