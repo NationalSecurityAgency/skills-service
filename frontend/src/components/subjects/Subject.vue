@@ -15,8 +15,8 @@
         </router-link>
       </div>
     </page-preview-card>
-    <b-modal id="edit-subject-modal" title="BootstrapVue">
-      <p class="my-4">Hello from modal!</p>
+    <b-modal :id="subject.subjectId" size="xl" title="Edit Subject">
+      <edit-subject :subject="subject" :is-edit="true"/>
     </b-modal>
   </div>
 </template>computed
@@ -30,7 +30,7 @@
 
   export default {
     name: 'Subject',
-    components: { PagePreviewCard, EditAndDeleteDropdown },
+    components: { EditSubject, PagePreviewCard, EditAndDeleteDropdown },
     props: ['subject'],
     data() {
       return {
@@ -99,7 +99,7 @@
         });
       },
       editSubject() {
-        this.$bvModal.show('edit-subject-modal');
+        this.$bvModal.show(this.subject.subjectId);
         // this.$modal.open({
         //   parent: this,
         //   component: EditSubject,

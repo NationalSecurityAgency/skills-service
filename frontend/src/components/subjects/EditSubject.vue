@@ -1,52 +1,53 @@
 <template>
-  <modal :title="title" @cancel-clicked="closeMe" @save-clicked="updateSubject">
-    <template slot="content">
-      <div class="field is-horizontal" style="width: 720px;">
-        <div class="field-body">
-          <div class="field is-narrow">
-            <icon-picker :startIcon="subjectInternal.iconClass" v-on:on-icon-selected="onSelectedIcons"></icon-picker>
-          </div>
-          <div class="field">
-            <label class="label">Subject Name</label>
-            <div class="control">
-              <input class="input" type="text" v-model="subjectInternal.name" v-on:input="updateSubjectId"
-                     v-validate="'required|min:3|max:50|uniqueName'" data-vv-delay="500" name="subjectName" v-focus/>
-            </div>
-            <p class="help is-danger" v-show="errors.has('subjectName')">{{ errors.first('subjectName')}}</p>
-          </div>
+  <b-container fluid>
+
+    <div class="media">
+      <icon-picker :startIcon="subjectInternal.iconClass" v-on:on-icon-selected="onSelectedIcons" class="mr-3"></icon-picker>
+      <div class="media-body">
+        <div class="form-group">
+          <label for="subjName">Subject Name</label>
+          <input type="email" class="form-control" id="subjName" aria-describedby="nameHelp" placeholder="Subject Name"
+                 v-model="subjectInternal.name" v-on:input="updateSubjectId"
+                 v-validate="'required|min:3|max:50|uniqueName'" data-vv-delay="500" name="nameHelp" v-focus>
+          <small id="nameHelp" class="form-text text-danger" v-show="errors.has('subjectName')">{{ errors.first('subjectName')}}</small>
         </div>
       </div>
+    </div>
 
+    <div class="form-group mt-2">
+      <label for="subjId">Subject ID</label>
+      <input type="email" class="form-control" id="subjId" aria-describedby="subjIdHelp" placeholder="Enter email"
+             v-model="subjectInternal.subjectId" :disabled="!canEditSubjectId"
+             v-validate="'required|min:3|max:50|alpha_num|uniqueId'" data-vv-delay="500">
+      <small id="subjIdHelp" class="form-text text-danger" v-show="errors.has('subjectId')">{{ errors.first('subjectId')}}</small>
+    </div>
 
-      <div class="field skills-remove-bottom-margin">
-        <label class="label">Subject ID</label>
-        <div class="control">
-          <input class="input" type="text" v-model="subjectInternal.subjectId" :disabled="!canEditSubjectId"
-                 v-validate="'required|min:3|max:50|alpha_num|uniqueId'" data-vv-delay="500" name="subjectId"/>
-        </div>
-        <p class="help is-danger" v-show="errors.has('subjectId')">{{ errors.first('subjectId')}}</p>
+    <div class="text-right" style="margin-top: -1rem;">
+      <i class="fas fa-question-circle mr-1 text-secondary" v-b-tooltip.hover.bottom title="Enable to override auto-generated ID." />
+      <b-link v-if="!canEditSubjectId" @click="toggleSubject">Enable</b-link>
+      <b-link v-else @click="toggleSubject">Disable</b-link>
+    </div>
+
+<!--    <p class="control has-text-right">-->
+<!--      <b-tooltip label="Enable to override auto-generated ID."-->
+<!--                 position="is-left" animanted="true" type="is-light">-->
+<!--        <span><i class="fas fa-question-circle"></i></span>-->
+<!--      </b-tooltip>-->
+<!--      <span v-on:click="toggleSubject()">-->
+<!--            <a class="is-info" v-bind:class="{'disableControl': isEdit}" v-if="!canEditSubjectId">Enable</a>-->
+<!--            <a class="is-info" v-if="canEditSubjectId">Disable</a>-->
+<!--          </span>-->
+<!--    </p>-->
+
+    <div class="field">
+      <label class="label">Description</label>
+      <div class="control">
+        <markdown-editor :value="subjectInternal.description" @value-updated="updateDescription"></markdown-editor>
       </div>
-      <p class="control has-text-right">
-        <b-tooltip label="Enable to override auto-generated ID."
-                   position="is-left" animanted="true" type="is-light">
-          <span><i class="fas fa-question-circle"></i></span>
-        </b-tooltip>
-        <span v-on:click="toggleSubject()">
-            <a class="is-info" v-bind:class="{'disableControl': isEdit}" v-if="!canEditSubjectId">Enable</a>
-            <a class="is-info" v-if="canEditSubjectId">Disable</a>
-          </span>
-      </p>
+    </div>
 
-      <div class="field">
-        <label class="label">Description</label>
-        <div class="control">
-          <markdown-editor :value="subjectInternal.description" @value-updated="updateDescription"></markdown-editor>
-        </div>
-      </div>
-
-      <p v-if="overallErrMsg" class="help is-danger has-text-centered">***{{ overallErrMsg }}***</p>
-    </template>
-  </modal>
+    <p v-if="overallErrMsg" class="help is-danger has-text-centered">***{{ overallErrMsg }}***</p>
+  </b-container>
 </template>
 
 <script>
@@ -54,14 +55,12 @@
   import SubjectsService from './SubjectsService';
   import IconPicker from '../utils/iconPicker/IconPicker';
   import MarkdownEditor from '../utils/MarkdownEditor';
-  import Modal from '../utils/modal/Modal';
 
   let self = null;
 
   export default {
     name: 'EditSubject',
     components: {
-      Modal,
       IconPicker,
       MarkdownEditor,
     },
@@ -131,14 +130,15 @@
         this.subjectInternal.description = value.value;
       },
       updateSubject() {
-        this.$validator.validateAll().then((res) => {
-          if (!res) {
-            this.overallErrMsg = 'Form did NOT pass validation, please fix and try to Save again';
-          } else {
-            this.$parent.close();
-            this.$emit('subject-created', this.subjectInternal);
-          }
-        });
+        this.$validator.validateAll()
+          .then((res) => {
+            if (!res) {
+              this.overallErrMsg = 'Form did NOT pass validation, please fix and try to Save again';
+            } else {
+              this.$parent.close();
+              this.$emit('subject-created', this.subjectInternal);
+            }
+          });
       },
       updateSubjectId() {
         if (!this.isEdit && !this.canEditSubjectId) {
