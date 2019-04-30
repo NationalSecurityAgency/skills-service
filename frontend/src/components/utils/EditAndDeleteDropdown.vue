@@ -25,7 +25,11 @@
 <script>
   export default {
     name: 'EditAndDeleteDropdown',
-    props: ['isFirst', 'isLast', 'isLoading'],
+    props: {
+      isFirst: Boolean,
+      isLast: Boolean,
+      isLoading: Boolean,
+    },
     methods: {
       emit(eventName) {
         this.$emit(eventName);

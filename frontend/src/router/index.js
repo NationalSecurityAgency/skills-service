@@ -10,7 +10,8 @@ import BadgePage from '@/components/badges/BadgePage';
 import SkillPage from '@/components/skills/SkillPage';
 import UserPage from '@/components/users/UserPage';
 import store from '@/store/store';
-import GlobalSettings from '../components/settings/GlobalSettings';
+import GlobalSettings from '@/components/settings/GlobalSettings';
+import GFMDescription from '@//components/utils/GFMDescription';
 
 Vue.use(Router);
 
@@ -104,6 +105,12 @@ const router = new Router({
         },
         requiresAuth: true,
       },
+    },
+    {
+      path: '/markdown',
+      name: 'MarkDownSupport',
+      component: GFMDescription,
+      meta: { requiresAuth: true },
     },
     {
       path: '*',
