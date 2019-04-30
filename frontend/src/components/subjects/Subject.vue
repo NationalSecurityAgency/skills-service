@@ -1,8 +1,10 @@
 <template>
-  <div>
-    <page-preview-card :options="cardOptions">
+  <div class="h-100">
+    <loading-card :loading="isLoading"/>
+    <page-preview-card v-if="!isLoading" :options="cardOptions">
       <div slot="header-top-right">
-        <edit-and-delete-dropdown v-on:deleted="deleteSubject" v-on:edited="editSubject" v-on:move-up="moveUp"
+        <edit-and-delete-dropdown v-on:deleted="deleteSubject" v-on:edited="showEditSubject=true"
+                                  v-on:move-up="moveUp"
                                   v-on:move-down="moveDown"
                                   :isFirst="subject.isFirst" :isLast="subject.isLast" :isLoading="isLoading"
                                   class="subject-settings"></edit-and-delete-dropdown>
@@ -15,50 +17,60 @@
         </router-link>
       </div>
     </page-preview-card>
-    <b-modal :id="subject.subjectId" size="xl" title="Edit Subject">
-      <edit-subject :subject="subject" :is-edit="true"/>
-    </b-modal>
+
+    <edit-subject v-if="showEditSubject" v-model="showEditSubject"  :id="subject.subjectId"
+                  :subject="subject" :is-edit="true" @subject-saved="subjectSaved"/>
   </div>
-</template>computed
+</template>
 
 <script>
   import EditAndDeleteDropdown from '@/components/utils/EditAndDeleteDropdown';
   import EditSubject from './EditSubject';
   import SubjectsService from './SubjectsService';
   import PagePreviewCard from '../utils/pages/PagePreviewCard';
+  import LoadingCard from '../utils/LoadingCard';
 
 
   export default {
     name: 'Subject',
-    components: { EditSubject, PagePreviewCard, EditAndDeleteDropdown },
+    components: {
+      LoadingCard,
+      EditSubject,
+      PagePreviewCard,
+      EditAndDeleteDropdown,
+    },
     props: ['subject'],
     data() {
       return {
         isLoading: false,
+        showEditSubject: false,
         cardOptions: {},
       };
     },
     mounted() {
-      this.cardOptions = {
-        icon: this.subject.iconClass,
-        title: this.subject.name,
-        subTitle: `ID: ${this.subject.subjectId}`,
-        stats: [{
-          label: 'Number Skills',
-          count: this.subject.numSkills,
-        }, {
-          label: 'Number Users',
-          count: this.subject.numUsers,
-        }, {
-          label: 'Total Points',
-          count: this.subject.totalPoints,
-        }, {
-          label: 'Points %',
-          count: this.subject.pointsPercentage,
-        }],
-      };
+      this.buildCardOptions();
     },
     methods: {
+      buildCardOptions() {
+        this.cardOptions = {
+          icon: this.subject.iconClass,
+          title: this.subject.name,
+          subTitle: `ID: ${this.subject.subjectId}`,
+          stats: [{
+            label: 'Number Skills',
+            count: this.subject.numSkills,
+          }, {
+            label: 'Number Users',
+            count: this.subject.numUsers,
+          }, {
+            label: 'Total Points',
+            count: this.subject.totalPoints,
+          }, {
+            label: 'Points %',
+            count: this.subject.pointsPercentage,
+          }],
+        };
+      },
       deleteSubject() {
         this.$dialog.confirm({
           title: 'WARNING: Delete Subject Action',
@@ -83,42 +95,12 @@
             this.isLoading = false;
           });
       },
-      editSubjectOld() {
-        this.$modal.open({
-          parent: this,
-          component: EditSubject,
-          hasModalCard: true,
-          width: 1110,
-          props: {
-            subject: this.subject,
-            isEdit: true,
-          },
-          events: {
-            'subject-created': this.subjectEdited,
-          },
-        });
-      },
-      editSubject() {
-        this.$bvModal.show(this.subject.subjectId);
-        // this.$modal.open({
-        //   parent: this,
-        //   component: EditSubject,
-        //   hasModalCard: true,
-        //   width: 1110,
-        //   props: {
-        //     subject: this.subject,
-        //     isEdit: true,
-        //   },
-        //   events: {
-        //     'subject-created': this.subjectEdited,
-        //   },
-        // });
-      },
-      subjectEdited(subject) {
+      subjectSaved(subject) {
         this.isLoading = true;
         SubjectsService.saveSubject(subject)
           .then(() => {
             this.subject = subject;
+            this.buildCardOptions();
             this.isLoading = false;
           })
           .finally(() => {
