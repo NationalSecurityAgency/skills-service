@@ -2,8 +2,9 @@
   <b-modal :id="subjectInternal.subjectId" size="xl" :title="title" v-model="show"
            header-bg-variant="info" header-text-variant="light" no-fade>
     <b-container fluid>
+      <div v-if="displayIconManager === false">
       <div class="media">
-        <icon-picker :startIcon="subjectInternal.iconClass" v-on:on-icon-selected="onSelectedIcons"
+        <icon-picker :startIcon="subjectInternal.iconClass" @select-icon="toggleIconDisplay(true)"
                      class="mr-3"></icon-picker>
         <div class="media-body">
 
@@ -29,6 +30,13 @@
       </div>
 
       <p v-if="overallErrMsg" class="text-center text-danger">***{{ overallErrMsg }}***</p>
+      </div>
+      <div v-else>
+        <b-card title="Select Icon">
+          <icon-manager @selected-icon="onSelectedIcon"></icon-manager>
+          <b-button href="#" variant="primary" @click="toggleIconDisplay(false)">back</b-button>
+        </b-card>
+      </div>
     </b-container>
 
     <div slot="modal-footer" class="w-100">
@@ -48,6 +56,8 @@
   import IconPicker from '../utils/iconPicker/IconPicker';
   import MarkdownEditor from '../utils/MarkdownEditor';
   import IdInput from '../utils/inputForm/IdInput';
+  import IconManager from '../utils/iconPicker/IconManager';
+
 
   export default {
     name: 'EditSubject',
@@ -55,6 +65,7 @@
       IdInput,
       IconPicker,
       MarkdownEditor,
+      IconManager,
     },
     props: {
       subject: Object,
@@ -67,6 +78,7 @@
         subjectInternal: Object.assign({}, this.subject),
         overallErrMsg: '',
         show: this.value,
+        displayIconManager: false,
       };
     },
     created() {
@@ -102,8 +114,12 @@
           this.subjectInternal.subjectId = this.subjectInternal.name.replace(/[^\w]/gi, '');
         }
       },
-      onSelectedIcons(selectedIconCss) {
-        this.subjectInternal.iconClass = selectedIconCss;
+      onSelectedIcon(selectedIcon) {
+        this.subjectInternal.iconClass = `${selectedIcon.css}`;
+        this.displayIconManager = false;
+      },
+      toggleIconDisplay(shouldDisplay) {
+        this.displayIconManager = shouldDisplay;
       },
       assignCustomValidation() {
         const dictionary = {
