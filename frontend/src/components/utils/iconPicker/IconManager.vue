@@ -87,23 +87,32 @@
 <script>
   import debounce from 'lodash.debounce';
   import VirtualList from 'vue-virtual-scroll-list';
-
+  import enquire from 'enquire.js';
   import FileUpload from '../upload/FileUpload';
-
   import fontAwesomeIconsCanonical from './font-awesome-index';
   import materialIconsCanonical from './material-index';
   import IconManagerService from './IconManagerService';
 
+
   const faIconList = fontAwesomeIconsCanonical.icons.slice();
   const matIconList = materialIconsCanonical.icons.slice();
   const customIconList = [];
+
+  const xsAndSmaller = '(max-width: 575.98px)';
+  const smAndUp = '(min-width: 576px) and (max-width: 767.98px)';
+  const mdAndUp = '(min-width: 768px) and (max-width: 991.98px)';
+  const lgAndUp = '(min-width: 992px) and (max-width: 1199.98px)';
+  const xlAndUp = '(min-width: 1200px)';
+
   let definitiveCustomIconList = [];
 
-  function groupIntoRows(array, rowLength) {
+  let rowLength = 5;
+
+  function groupIntoRows(array, rl) {
     let subArr = [];
     const result = [];
     for (let i = 0; i < array.length; i += 1) {
-      if (i > 0 && i % rowLength === 0) {
+      if (i > 0 && i % rl === 0) {
         result.push(subArr);
         subArr = [];
       }
@@ -119,8 +128,8 @@
     return result;
   }
 
-  fontAwesomeIconsCanonical.icons = groupIntoRows(fontAwesomeIconsCanonical.icons, 5);
-  materialIconsCanonical.icons = groupIntoRows(materialIconsCanonical.icons, 5);
+  fontAwesomeIconsCanonical.icons = groupIntoRows(fontAwesomeIconsCanonical.icons, rowLength);
+  materialIconsCanonical.icons = groupIntoRows(materialIconsCanonical.icons, rowLength);
 
   export default {
     name: 'IconManager',
@@ -166,11 +175,34 @@
           this.customIconList = response;
         }
       });
-      /* this.$root.$on('bv::modal::hide', (bvEvent, modalId) => {
-        if (modalId === 'icons') {
-          this.resetIcons();
-        }
-      }); */
+
+      enquire.register(xsAndSmaller, () => {
+        rowLength = 2;
+        this.groupRows();
+      });
+      enquire.register(smAndUp, () => {
+        rowLength = 3;
+        this.groupRows();
+      });
+      enquire.register(mdAndUp, () => {
+        rowLength = 3;
+        this.groupRows();
+      });
+      enquire.register(lgAndUp, () => {
+        rowLength = 5;
+        this.groupRows();
+      });
+      enquire.register(xlAndUp, () => {
+        rowLength = 6;
+        this.groupRows();
+      });
+    },
+    beforeDestroy() {
+      enquire.unregister(xsAndSmaller);
+      enquire.unregister(smAndUp);
+      enquire.unregister(mdAndUp);
+      enquire.unregister(lgAndUp);
+      enquire.unregister(xlAndUp);
     },
     methods: {
       getIcon(icon, iconCss, iconPack) {
@@ -179,6 +211,10 @@
         this.selectedIconPack = iconPack;
 
         this.selectIcon(icon, iconCss, iconPack);
+      },
+      onResize: function onResize(event) {
+        console.log(event);
+        console.log(`window width is ${window.innerWidth}`);
       },
       onChange(tabIndex) {
         const { value } = this.$refs.iconFilterInput;
@@ -199,10 +235,10 @@
         const filter = icon => icon.name.match(regex);
 
         if (iconPack === fontAwesomeIconsCanonical.iconPack) {
-          const filtered = value.length === 0 ? groupIntoRows(faIconList, 5) : groupIntoRows(faIconList.filter(filter), 5);
+          const filtered = value.length === 0 ? groupIntoRows(faIconList, rowLength) : groupIntoRows(faIconList.filter(filter), rowLength);
           this.fontAwesomeIcons.icons = filtered;
         } else if (iconPack === materialIconsCanonical.iconPack) {
-          const filtered = value.length === 0 ? groupIntoRows(matIconList, 5) : groupIntoRows(matIconList.filter(filter), 5);
+          const filtered = value.length === 0 ? groupIntoRows(matIconList, rowLength) : groupIntoRows(matIconList.filter(filter), rowLength);
           this.materialIcons.icons = filtered;
         } else if (iconPack === 'Custom Icons') {
           const filtered = value.length === 0 ? definitiveCustomIconList : definitiveCustomIconList.filter(filter);
@@ -231,11 +267,15 @@
 
         this.$emit('selected-icon', result);
       },
+      groupRows() {
+        this.fontAwesomeIcons.icons = groupIntoRows(this.fontAwesomeIcons.icons.flat(), rowLength);
+        this.materialIcons.icons = groupIntoRows(this.materialIcons.icons.flat(), rowLength);
+      },
       resetIcons() {
         if (this.$refs.iconFilterInput.value.length > 0) {
           setTimeout(() => {
-            this.fontAwesomeIcons.icons = groupIntoRows(faIconList, 5);
-            this.materialIcons.icons = groupIntoRows(matIconList, 5);
+            this.fontAwesomeIcons.icons = groupIntoRows(faIconList, rowLength);
+            this.materialIcons.icons = groupIntoRows(matIconList, rowLength);
             this.customIconList = definitiveCustomIconList;
             this.$refs.iconFilterInput.value = '';
           }, 100);
