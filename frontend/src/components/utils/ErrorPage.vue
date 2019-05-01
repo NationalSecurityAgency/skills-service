@@ -1,21 +1,28 @@
 <template>
-  <div class="skills-bordered-component2" style="padding-top: 100px;">
-  <div class="columns">
-    <header class="error-header column is-half is-offset-one-quarter">
-      <p class="error-title">Unexpected Error Occurred</p>
-    </header>
-  </div>
+  <div class="mt-5">
+    <div class="text-center text-secondary">
+      <span class="fa-stack fa-3x " style="vertical-align: top;">
+                      <i class="fas fa-circle fa-stack-2x"></i>
+                      <i class="fas fa-heart-broken fa-stack-1x fa-inverse"></i>
+                    </span>
+    </div>
+    <div class="text-center text-secondary">
+      <h4 class="">Tiny-bit of an error!</h4>
+    </div>
 
-  <div class="columns">
-    <div class="error-body column is-half is-offset-one-quarter">
-      <div>
-        Oh no, something went wrong!  An error occurred and we are unable to process your request,
-        please try again later.  If the error persists, please contact us and let us know.
-
-        <p v-if="errorMessage" class="skills-pad-top-1-rem ">Details: <strong>{{ errorMessage }}</strong></p>
+    <div class="row justify-content-center text-danger mt-3">
+      <div class="col col-sm-8 col-md-6 col-lg-4 text-center">
+        <p>
+          Oh no, something went wrong! An error occurred and we are unable to process your request, please try again
+          later.
+        </p>
       </div>
     </div>
-  </div>
+
+    <div class="text-center">
+      <b-button to="/" variant="outline-primary" class="p-2"><i class="fas fa-home mr-1"/>Take Me Home</b-button>
+<!--      <b-button class="ml-2 p-2" variant="outline-info"><i class="fas fa-envelope mr-1"></i>Report This Issue</b-button>-->
+    </div>
   </div>
 </template>
 
@@ -41,10 +48,12 @@
     border-top-right-radius: 7px;
     padding: 1rem;
   }
+
   .error-title {
     color: whitesmoke;
     font-size: 1.5rem;
   }
+
   .error-body {
     border: 1px solid #ddd;
     border-bottom-left-radius: 7px;
