@@ -5,7 +5,7 @@
       <div v-if="subjects && subjects.length" class="row justify-content-center">
         <div v-for="(subject) of subjects" :key="subject.id" :id="subject.id" class="col-lg-4 mb-3"
              style="min-width: 23rem;">
-          <subject :subject="subject" v-on:subject-deleted="subjectRemoved" v-on:move-subject-up="moveSubjectUp"
+          <subject :subject="subject" v-on:subject-deleted="deleteSubject" v-on:move-subject-up="moveSubjectUp"
                    v-on:move-subject-down="moveSubjectDown"/>
         </div>
       </div>
@@ -64,9 +64,16 @@
             this.isLoading = false;
           });
       },
-      subjectRemoved(subject) {
-        this.subjects = this.subjects.filter(item => item.id !== subject.id);
-        this.$emit('subjects-changed', subject.subjectId);
+      deleteSubject(subject) {
+        this.isLoading = true;
+        SubjectsService.deleteSubject(subject)
+          .then(() => {
+            this.subjects = this.subjects.filter(item => item.id !== subject.id);
+            this.$emit('subjects-changed', subject.subjectId);
+          })
+          .finally(() => {
+            this.isLoading = false;
+          });
       },
       subjectAdded(subject) {
         this.displayNewSubjectModal = false;

@@ -18,7 +18,7 @@
       </div>
     </page-preview-card>
 
-    <edit-subject v-if="showEditSubject" v-model="showEditSubject"  :id="subject.subjectId"
+    <edit-subject v-if="showEditSubject" v-model="showEditSubject" :id="subject.subjectId"
                   :subject="subject" :is-edit="true" @subject-saved="subjectSaved"/>
   </div>
 </template>
@@ -29,10 +29,11 @@
   import SubjectsService from './SubjectsService';
   import PagePreviewCard from '../utils/pages/PagePreviewCard';
   import LoadingCard from '../utils/LoadingCard';
-
+  import MsgBoxMixin from '../utils/modal/MsgBoxMixin';
 
   export default {
     name: 'Subject',
+    mixins: [MsgBoxMixin],
     components: {
       LoadingCard,
       EditSubject,
@@ -72,27 +73,12 @@
         };
       },
       deleteSubject() {
-        this.$dialog.confirm({
-          title: 'WARNING: Delete Subject Action',
-          message: `Subject Id: <b>${this.subject.subjectId}</b> <br/><br/>Delete Action can not be undone and <b>permanently</b> removes its skill definitions and users' performed skills.`,
-          confirmText: 'Delete',
-          type: 'is-danger',
-          hasIcon: true,
-          icon: 'exclamation-triangle',
-          iconPack: 'fa',
-          scroll: 'keep',
-          onConfirm: () => this.deleteSubjectAjax(),
-        });
-      },
-      deleteSubjectAjax() {
-        this.isLoading = true;
-        SubjectsService.deleteSubject(this.subject)
-          .then(() => {
-            this.isLoading = false;
-            this.$emit('subject-deleted', this.subject);
-          })
-          .finally(() => {
-            this.isLoading = false;
+        const msg = `Subject with id [${this.subject.subjectId}] will be removed. Delete Action can not be undone and permanently removes its skill definitions and users' performed skills.`;
+        this.msgConfirm(msg)
+          .then((res) => {
+            if (res) {
+              this.$emit('subject-deleted', this.subject);
+            }
           });
       },
       subjectSaved(subject) {
