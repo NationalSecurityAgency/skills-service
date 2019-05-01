@@ -4,117 +4,71 @@
     <sub-page-header title="Skills" action="Skill" @add-action="newSkill"/>
 
 
-    <div  class="skills-bordered-component">
-      <b-loading :is-full-page="true" :active.sync="isLoading" :can-cancel="false">
-      </b-loading>
-      <div v-if="isLoading" class="modal-card-body" style="height: 400px;">
-      </div>
+    <div class="card">
+      <div class="card-body">
+        <div v-if="isLoading" class="modal-card-body" style="height: 400px;">
+        </div>
 
-      <v-client-table :data="skills" :columns="skillsColumns"
-                      :options="options" v-if="this.skills && this.skills.length" v-on:sorted="handleColumnSort">
+        <v-client-table :data="skills" :columns="skillsColumns"
+                        :options="options" v-if="this.skills && this.skills.length" v-on:sorted="handleColumnSort">
 
-        <div slot="name" slot-scope="props" class="field has-addons">
-          <div class="columns">
-            <div class="column">
+          <div slot="name" slot-scope="props" class="field has-addons">
+            <div>
               <div>{{ props.row.name }}</div>
-              <div class="subtitle has-text-grey" style="font-size: 0.9rem;">ID: {{ props.row.skillId }}</div>
+              <div class="text-muted" style="font-size: 0.9rem;">ID: {{ props.row.skillId }}</div>
             </div>
           </div>
-        </div>
 
-        <div slot="displayOrder" slot-scope="props" class="">
-          <div class="field has-addons">
+          <div slot="displayOrder" slot-scope="props">
             <span>{{props.row.displayOrder}}</span>
-            <b-tooltip
-              label='Sorting controls are enabled only when Display Order column is sorted in the ascending order.'
-              position="is-top" animanted="true" type="is-white black" :active="!sortButtonEnabled" multilined>
-              <span class="field has-addons skills-pad-left-1-rem">
-                 <span class="control">
-                      <button class="button is-outlined is-info see" v-on:click="moveDisplayOrderDown(props.row)"
-                              :class="{'is-loading': props.row.isMoving}"
-                              :disabled="!sortButtonEnabled || props.row.disabledDownButton || isMovingRows">
-                            <span class="icon is-small">
-                              <i class="fas fa-arrow-circle-down"/>
-                            </span>
-                      </button>
-                  </span>
-                <span class="control">
-                      <button class="button is-outlined is-info" :class="{'is-loading': props.row.isMoving}"
-                              :disabled="!sortButtonEnabled || props.row.disabledUpButton || isMovingRows"
-                              v-on:click="moveDisplayOrderUp(props.row)">
-                            <span class="icon is-small">
-                              <i class="fas fa-arrow-circle-up"/>
-                            </span>
-                      </button>
-                  </span>
-              </span>
-            </b-tooltip>
+
+            <b-button-group size="sm" class="ml-1"
+                            v-b-popover.hover="'Sorting controls are enabled only when Display Order column is sorted in the ascending order.'">
+              <b-button @click="moveDisplayOrderDown(props.row)" variant="outline-info"
+                        :disabled="!sortButtonEnabled || props.row.disabledDownButton || isMovingRows">
+                <i class="fas fa-arrow-circle-down"/>
+              </b-button>
+              <b-button @click="moveDisplayOrderUp(props.row)" variant="outline-info"
+                        :disabled="!sortButtonEnabled || props.row.disabledDownButton || isMovingRows">
+                <i class="fas fa-arrow-circle-up"/>
+              </b-button>
+            </b-button-group>
           </div>
-        </div>
 
-        <div slot="created" slot-scope="props" class="field has-addons">
-          {{ props.row.created }}
-        </div>
+          <div slot="created" slot-scope="props" class="field has-addons">
+            {{ props.row.created }}
+          </div>
 
-        <div slot="edit" slot-scope="props">
-          <div class="field has-addons">
-            <span class="field has-addons">
-              <p class="control">
-                <a v-on:click="editSkill(props.row)" class="button is-outlined is-info"
-                   :class="{'is-loading': props.row.isEditLoading}">
-                      <span class="icon is-small">
-                        <i class="fas fa-edit"/>
-                      </span>
-                  <!--<span>Edit</span>-->
-                </a>
-              </p>
-              <p class="control">
-                <a v-on:click="deleteSkill(props.row)" class="button is-outlined is-info"
-                   :class="{'is-loading': props.row.isDeleteLoading}">
-                      <span class="icon is-small">
-                        <i class="fas fa-trash"/>
-                      </span>
-                  <!--<span>Delete</span>-->
-                </a>
-              </p>
-              <p class="control">
-                <a v-on:click="addUser(props.row)" class="button is-outlined is-info">
-                        <span class="icon is-small">
-                          <i class="fas fa-user-plus"/>
-                        </span>
-                  <!--<span>Add User</span>-->
-                </a>
-              </p>
-              </span>
-          <p class="skills-pad-left-1-rem">
-
+          <div slot="edit" slot-scope="props">
+            <b-button-group size="sm" class="mr-1">
+              <b-button @click="editSkill(props.row)" variant="outline-primary"><i class="fas fa-edit"/></b-button>
+              <b-button @click="deleteSkill(props.row)" variant="outline-primary"><i class="fas fa-trash"/></b-button>
+              <b-button @click="addUser(props.row)" variant="outline-primary"><i class="fas fa-user-plus"/></b-button>
+            </b-button-group>
             <router-link :to="{ name:'SkillPage',
-                params: { projectId: props.row.projectId, subjectId: props.row.subjectId, skillId: props.row.skillId }}"
-                         class="button is-outlined is-info">
-              <span>Manage</span>
-              <span class="icon is-small">
-                <i class="fas fa-arrow-circle-right"/>
-            </span>
+                            params: { projectId: props.row.projectId, subjectId: props.row.subjectId, skillId: props.row.skillId }}"
+                         class="btn btn-outline-primary btn-sm">
+              Manage <i class="fas fa-arrow-circle-right"/>
             </router-link>
-          </p>
           </div>
-        </div>
 
-        <div slot="child_row" slot-scope="props" class="skills-table-child-row">
-          <ChildRowSkillsDisplay :project-id="projectId" :subject-id="subjectId" :parent-skill-id="props.row.skillId"></ChildRowSkillsDisplay>
-        </div>
-      </v-client-table>
+          <div slot="child_row" slot-scope="props" class="skills-table-child-row">
+            <ChildRowSkillsDisplay :project-id="projectId" :subject-id="subjectId"
+                                   :parent-skill-id="props.row.skillId"></ChildRowSkillsDisplay>
+          </div>
+        </v-client-table>
 
-      <no-content :should-display="!(this.skills && this.skills.length)" :title="'No Skills Yet'">
-        <div slot="content" class="content" style="width: 100%;">
-          <p class="has-text-centered">
-            Create your first skill today by pressing
-          </p>
-          <p class="has-text-centered">
-            <new-skill-items-buttons v-on:new-skill-item="newSkill"></new-skill-items-buttons>
-          </p>
-        </div>
-    </no-content>
+        <no-content :should-display="!(this.skills && this.skills.length)" :title="'No Skills Yet'">
+          <div slot="content" class="content" style="width: 100%;">
+            <p class="has-text-centered">
+              Create your first skill today by pressing
+            </p>
+            <p class="has-text-centered">
+              <new-skill-items-buttons v-on:new-skill-item="newSkill"></new-skill-items-buttons>
+            </p>
+          </div>
+        </no-content>
+      </div>
     </div>
   </div>
 </template>
@@ -128,9 +82,11 @@
   import SkillsService from './SkillsService';
   import ToastHelper from '../utils/ToastHelper';
   import SubPageHeader from '../utils/pages/SubPageHeader';
+  import MsgBoxMixin from '../utils/modal/MsgBoxMixin';
 
   export default {
     name: 'SkillsTable',
+    mixins: [MsgBoxMixin],
     props: ['projectId', 'subjectId', 'skillsProp'],
     components: {
       SubPageHeader,
@@ -148,11 +104,7 @@
         options: {
           headings: {
             created: 'Created (GMT)',
-            // skillId: 'Skill Id',
             name: 'Skill Name',
-            pointIncrement: 'Point Increment',
-            totalPoints: 'Total Points',
-            pointIncrementInterval: 'Point Increment Interval (hours)',
             edit: '',
             displayOrder: 'Display Order',
           },
@@ -160,9 +112,11 @@
           dateFormat: 'YYYY-MM-DD HH:mm',
           descOrderColumns: ['created'],
           orderBy: { column: 'created', ascending: false },
+          columnsDisplay: {
+            created: 'not_mobile',
+          },
           columnsClasses: {
             edit: 'control-column',
-            type: 'type-column',
             displayOrder: 'display-order-column',
             created: 'date-column',
             name: 'skills-table-skill-name',
@@ -262,25 +216,15 @@
       },
 
       deleteSkill(row) {
-        this.$dialog.confirm({
-          title: 'WARNING: Delete Skill Action',
-          message: `Skill Id: <b>${row.skillId}</b> <br/><br/>Delete Action can not be undone and <b>permanently</b> removes users' performed skills.`,
-          confirmText: 'Delete',
-          type: 'is-danger',
-          hasIcon: true,
-          icon: 'exclamation-triangle',
-          iconPack: 'fa',
-          scroll: 'keep',
-          onConfirm: () => this.doDeleteSkill(row),
-        });
+        this.msgConfirm(`Skill Id: [${row.skillId}]. Delete Action can not be undone and permanently removes users' performed skills.`)
+          .then((res) => {
+            if (res) {
+              this.doDeleteSkill(row);
+            }
+          });
       },
       doDeleteSkill(skill) {
         this.isLoading = true;
-        // const index = this.skills.findIndex(item => item.id === skill.id);
-        // if (item1Index >= 0) {
-        //   this.$set(this.skills[item1Index], 'isDeleteLoading', true);
-        // }
-
         SkillsService.deleteSkill(skill)
           .then(() => {
             const index = this.skills.findIndex(item => item.id === skill.id);
@@ -384,16 +328,19 @@
     width: 8rem;
   }
 
-  .control-column{
-    width: 11rem;
+  .control-column {
+    width: 14rem;
     /*background: yellow;*/
   }
-  .display-order-column{
+
+  .display-order-column {
+    width: 9rem;
+  }
+
+  .date-column {
     width: 11rem;
   }
-  .date-column{
-    width: 11rem;
-  }
+
   .VueTables__child-row-toggler {
     width: 16px;
     height: 16px;
@@ -428,7 +375,7 @@
     border-left: 0.5px solid #dbdbdb;
   }
 
-   /*remove count on the bottom of the table*/
+  /*remove count on the bottom of the table*/
   #skillsTable .VuePagination__count {
     display: none;
   }

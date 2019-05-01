@@ -1,7 +1,7 @@
 <template>
   <div class="row">
     <div class="col-lg-2 border rounded p-3 mb-2 bg-light" style="min-width: 15rem;">
-      <h3 class="h3 mb-2">Navigation</h3>
+      <h3 class="mb-2">Navigation</h3>
       <ul class="nav flex-column">
         <li class="nav-item skills-nav-item" v-for="(navItem) of navItems" :key="navItem.name">
           <a class="nav-link" v-on:click="navigate(`${navItem.name}`)"
