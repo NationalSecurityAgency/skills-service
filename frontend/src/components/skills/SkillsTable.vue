@@ -70,6 +70,9 @@
         </no-content>
       </div>
     </div>
+
+    <edit-skill v-if="editSkillInfo.show" v-model="editSkillInfo.show" :skillId="editSkillInfo.skill.skillId"
+                :project-id="projectId" :subject-id="subjectId" :is-edit="true"/>
   </div>
 </template>
 
@@ -89,6 +92,7 @@
     mixins: [MsgBoxMixin],
     props: ['projectId', 'subjectId', 'skillsProp'],
     components: {
+      EditSkill,
       SubPageHeader,
       ChildRowSkillsDisplay,
       NewSkillItemsButtons,
@@ -97,6 +101,10 @@
     data() {
       return {
         isLoading: false,
+        editSkillInfo: {
+          show: false,
+          skill: {},
+        },
         skills: [],
         skillsColumns: ['name', 'displayOrder', 'created', 'edit'],
         sortButtonEnabled: false,
@@ -166,22 +174,24 @@
         });
       },
       editSkill(skillToEdit) {
-        this.$modal.open({
-          parent: this,
-          component: EditSkill,
-          hasModalCard: true,
-          canCancel: false,
-          width: 1300,
-          props: {
-            skill: skillToEdit,
-            isEdit: true,
-            projectId: this.projectId,
-            subjectId: this.subjectId,
-          },
-          events: {
-            'skill-created': this.skillCreatedOrUpdated,
-          },
-        });
+        this.editSkillInfo.skill = skillToEdit;
+        this.editSkillInfo.show = true;
+        // this.$modal.open({
+        //   parent: this,
+        //   component: EditSkill,
+        //   hasModalCard: true,
+        //   canCancel: false,
+        //   width: 1300,
+        //   props: {
+        //     skill: skillToEdit,
+        //     isEdit: true,
+        //     projectId: this.projectId,
+        //     subjectId: this.subjectId,
+        //   },
+        //   events: {
+        //     'skill-created': this.skillCreatedOrUpdated,
+        //   },
+        // });
       },
 
       skillCreatedOrUpdated(skill) {
