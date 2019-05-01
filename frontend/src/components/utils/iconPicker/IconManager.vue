@@ -166,11 +166,11 @@
           this.customIconList = response;
         }
       });
-      this.$root.$on('bv::modal::hide', (bvEvent, modalId) => {
+      /* this.$root.$on('bv::modal::hide', (bvEvent, modalId) => {
         if (modalId === 'icons') {
           this.resetIcons();
         }
-      });
+      }); */
     },
     methods: {
       getIcon(icon, iconCss, iconPack) {
