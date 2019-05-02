@@ -24,13 +24,8 @@
         </router-link>
       </li>
 
-      <span slot-scope="{label}" slot="current">
-         <a class="breadcrumb-item active">
-          <!--<span class="icon is-small">-->
-           <!--<i :class="utils && utils.iconClass"/>-->
-           <!--</span>-->
-          <span>{{ label }}</span>
-         </a>
+      <span slot-scope="{label}" slot="current" class="breadcrumb-item active ml-2">
+          / {{ label }}
         </span>
 
     </app-breadcrumbs>

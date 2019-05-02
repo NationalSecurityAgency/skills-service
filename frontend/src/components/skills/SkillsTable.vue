@@ -14,7 +14,7 @@
 
           <div slot="name" slot-scope="props" class="field has-addons">
             <div>
-              <div>{{ props.row.name }}</div>
+              <h5>{{ props.row.name }}</h5>
               <div class="text-muted" style="font-size: 0.9rem;">ID: {{ props.row.skillId }}</div>
             </div>
           </div>
@@ -43,18 +43,18 @@
             <b-button-group size="sm" class="mr-1">
               <b-button @click="editSkill(props.row)" variant="outline-primary"><i class="fas fa-edit"/></b-button>
               <b-button @click="deleteSkill(props.row)" variant="outline-primary"><i class="fas fa-trash"/></b-button>
-              <b-button @click="addUser(props.row)" variant="outline-primary"><i class="fas fa-user-plus"/></b-button>
+<!--              <b-button @click="addUser(props.row)" variant="outline-primary"><i class="fas fa-user-plus"/></b-button>-->
             </b-button-group>
             <router-link :to="{ name:'SkillPage',
                             params: { projectId: props.row.projectId, subjectId: props.row.subjectId, skillId: props.row.skillId }}"
                          class="btn btn-outline-primary btn-sm">
-              Manage <i class="fas fa-arrow-circle-right"/>
+              <span class="d-none d-sm-inline">Manage </span> <i class="fas fa-arrow-circle-right"/>
             </router-link>
           </div>
 
-          <div slot="child_row" slot-scope="props" class="skills-table-child-row">
+          <div slot="child_row" slot-scope="props">
             <ChildRowSkillsDisplay :project-id="projectId" :subject-id="subjectId"
-                                   :parent-skill-id="props.row.skillId"></ChildRowSkillsDisplay>
+                                   :parent-skill-id="props.row.skillId" class="mr-3 ml-5 mb-3"></ChildRowSkillsDisplay>
           </div>
         </v-client-table>
 
@@ -121,6 +121,7 @@
           descOrderColumns: ['created'],
           orderBy: { column: 'created', ascending: false },
           columnsDisplay: {
+            displayOrder: 'not_mobile',
             created: 'not_mobile',
           },
           columnsClasses: {
@@ -129,7 +130,7 @@
             created: 'date-column',
             name: 'skills-table-skill-name',
           },
-          sortable: ['displayOrder', 'created', 'skillId', 'name', 'pointIncrement', 'pointIncrementInterval', 'totalPoints'],
+          sortable: ['displayOrder', 'created', 'name'],
           sortIcon: {
             base: 'fa fa-sort', up: 'fa fa-sort-up', down: 'fa fa-sort-down', is: 'fa fa-sort',
           },
@@ -150,22 +151,6 @@
           show: true,
           isEdit: false,
         };
-        //
-        // this.$modal.open({
-        //   parent: this,
-        //   component: EditSkill,
-        //   hasModalCard: true,
-        //   canCancel: false,
-        //   width: 1300,
-        //   props: {
-        //     skill: emptySkill,
-        //     projectId: this.projectId,
-        //     subjectId: this.subjectId,
-        //   },
-        //   events: {
-        //     'skill-created': this.skillCreatedOrUpdated,
-        //   },
-        // });
       },
       editSkill(skillToEdit) {
         this.editSkillInfo = { skill: skillToEdit, show: true, isEdit: true };
@@ -318,20 +303,27 @@
 </script>
 
 <style>
-  .type-column {
+  #skillsTable .type-column {
     width: 8rem;
   }
 
-  .control-column {
-    width: 14rem;
-    /*background: yellow;*/
+  #skillsTable .control-column {
+    width: 12rem;
   }
 
-  .display-order-column {
+  /* on the mobile platform some of the columns will be removed
+     so let's allow the table to size on its own*/
+  @media (max-width: 576px) {
+    #skillsTable .control-column {
+      width: unset;
+    }
+  }
+
+  #skillsTable .display-order-column {
     width: 9rem;
   }
 
-  .date-column {
+  #skillsTable .date-column {
     width: 11rem;
   }
 
@@ -354,39 +346,20 @@
     content: "\f146";
   }
 
-  .points {
-    font-size: 1.2rem;
-    font-weight: bold;
-    padding-left: 5px;
-  }
-
-  .skills-table-child-row {
-    background-color: #f9f9f9;
-    margin-left: 2rem;
-    padding-left: 1rem;
-    padding-top: 1rem;
-    padding-bottom: 1rem;
-    border-left: 0.5px solid #dbdbdb;
-  }
-
   /*remove count on the bottom of the table*/
   #skillsTable .VuePagination__count {
     display: none;
   }
 
-  .skills-table-hierarchy-type {
-    font-size: 0.8rem;
-    font-weight: bold;
-  }
-
-  .skills-table-skill-name {
-    font-size: 1.1rem;
-    font-weight: bold;
-  }
-
-  /* reduce the width of first colun that hots expand control*/
+  /* reduce the width of first column that hosts expand control*/
   #skillsTable tbody > tr > td:first-child {
-    padding: 0.5rem 0rem;
+    padding: 1rem 0rem;
+    width: 2rem;
+  }
+
+  #skillsTable .form-inline label {
+    /*text-align: left !important;*/
+    justify-content: left !important;
   }
 
 </style>

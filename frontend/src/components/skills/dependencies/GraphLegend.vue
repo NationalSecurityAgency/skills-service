@@ -1,5 +1,5 @@
 <template>
-  <div class='legend'>
+  <simple-card class="legend" style="max-width: 18rem; min-width: 17rem;">
     <div class='legend-title'>Color Legend</div>
     <div class='legend-scale'>
       <ul class='legend-labels'>
@@ -8,12 +8,15 @@
         </li>
       </ul>
     </div>
-  </div>
+  </simple-card>
 </template>
 
 <script>
+  import SimpleCard from '../../utils/cards/SimpleCard';
+
   export default {
     name: 'GraphLegend',
+    components: { SimpleCard },
     props: ['items'],
   };
 </script>

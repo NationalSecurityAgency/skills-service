@@ -8,13 +8,19 @@
 
     </div>
     <div v-else>
-      <graph-node-sort-method-selector class="sort-method-selector" v-on:value-changed="onSortNodeStrategyChange"></graph-node-sort-method-selector>
-      <graph-legend class="graph-legend" :items="[
+      <div class="row">
+        <div class="col-12 col-sm">
+          <graph-legend :items="[
             {label: 'This Skill', color: 'lightgreen'},
             {label: 'My Dependencies', color: 'lightblue'},
             {label: 'Cross Project Skill Dependencies', color: '#ffb87f'},
             {label: 'Transitive Dependencies', color: 'lightgray'}
             ]"></graph-legend>
+        </div>
+        <div class="col text-left text-sm-right mt-2">
+          <graph-node-sort-method-selector v-on:value-changed="onSortNodeStrategyChange"></graph-node-sort-method-selector>
+        </div>
+      </div>
     </div>
     <div id="dependent-skills-network" style="height: 500px"></div>
   </div>
@@ -190,15 +196,6 @@
 </script>
 
 <style scoped>
-  .sort-method-selector {
-    position: absolute;
-    z-index: 10;
-    right: 40px;
-  }
-  .graph-legend {
-    position: absolute;
-    z-index: 10;
-  }
 </style>
 
 <style>
