@@ -6,7 +6,7 @@
           <i class="fa fa-edit mr-1"></i> <span>Write</span>
         </template>
         <div class="mt-2 content-height">
-          <b-form-textarea rows="6" max-rows="6" v-model="valueInternal" @input="dataChanged"/>
+          <b-form-textarea rows="5" max-rows="5" v-model="valueInternal" @input="dataChanged"/>
         </div>
       </b-tab>
       <b-tab>
@@ -35,6 +35,11 @@
         valueInternal: this.value,
       };
     },
+    watch: {
+      value(newValue) {
+        this.valueInternal = newValue;
+      },
+    },
     computed: {
       compiledMarkdown: function compileMarkdown() {
         if (this.valueInternal) {
@@ -55,7 +60,7 @@
 
 <style>
   .content-height {
-    height: 10rem;
+    height: 9rem;
   }
 
   .markdown-preview ul {
