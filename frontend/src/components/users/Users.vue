@@ -26,7 +26,6 @@
 
 <script>
   import { Validator } from 'vee-validate';
-  import '@skills/user-skills/dist/userSkills.css';
   import SubPageHeader from '../utils/pages/SubPageHeader';
 
   const dictionary = {
