@@ -15,7 +15,6 @@
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "5.7.1",
-    "@skills/user-skills": "0.0.6",
     "animate.css": "3.7.0",
     "apexcharts": "3.2.1",
     "axios": "0.18.0",
