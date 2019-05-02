@@ -1,6 +1,8 @@
 <template>
   <div class="loading-container">
-    <b-spinner  v-if="isLoading" label="Loading..."></b-spinner>
+    <div v-if="isLoading" class="d-flex justify-content-center mt-5">
+      <b-spinner label="Loading..." style="width: 3rem; height: 3rem;" variant="info"/>
+    </div>
     <div v-if="!isLoading">
       <slot></slot>
     </div>

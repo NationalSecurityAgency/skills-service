@@ -2,6 +2,7 @@
   <b-modal :id="skillInternal.skillId" size="xl" :title="title" v-model="show"
            header-bg-variant="info" header-text-variant="light" no-fade>
     <b-container fluid>
+      <loading-container :is-loading="isLoading">
       <div class="row">
         <div class="col-12 col-lg">
           <div class="form-group">
@@ -103,10 +104,11 @@
       </div>
 
       <p v-if="errors.any() && overallErrMsg" class="text-center text-danger">***{{ overallErrMsg }}***</p>
+    </loading-container>
     </b-container>
 
     <div slot="modal-footer" class="w-100">
-      <b-button variant="success" size="sm" class="float-right" @click="saveSkill">
+      <b-button variant="success" size="sm" class="float-right" @click="saveSkill" :disabled="isLoading">
         Save
       </b-button>
       <b-button variant="secondary" size="sm" class="float-right mr-2" @click="close">
@@ -122,10 +124,12 @@
   import MarkdownEditor from '../utils/MarkdownEditor';
   import IdInput from '../utils/inputForm/IdInput';
   import InlineHelp from '../utils/InlineHelp';
+  import LoadingContainer from '../utils/LoadingContainer';
 
   export default {
     name: 'EditSkill',
     components: {
+      LoadingContainer,
       InlineHelp,
       IdInput,
       MarkdownEditor,
