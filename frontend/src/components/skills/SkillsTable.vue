@@ -71,8 +71,8 @@
       </div>
     </div>
 
-    <edit-skill v-if="editSkillInfo.show" v-model="editSkillInfo.show" :skillId="editSkillInfo.skill.skillId"
-                :project-id="projectId" :subject-id="subjectId" :is-edit="true"/>
+    <edit-skill v-if="editSkillInfo.show" v-model="editSkillInfo.show" :skillId="editSkillInfo.skill.skillId" :is-edit="editSkillInfo.isEdit"
+                :project-id="projectId" :subject-id="subjectId" @skill-saved="skillCreatedOrUpdated"/>
   </div>
 </template>
 
@@ -83,7 +83,6 @@
   import NewSkillItemsButtons from './NewSkillItemsButtons';
   import ChildRowSkillsDisplay from './ChildRowSkillsDisplay';
   import SkillsService from './SkillsService';
-  import ToastHelper from '../utils/ToastHelper';
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import MsgBoxMixin from '../utils/modal/MsgBoxMixin';
 
@@ -102,6 +101,7 @@
       return {
         isLoading: false,
         editSkillInfo: {
+          isEdit: false,
           show: false,
           skill: {},
         },
@@ -145,37 +145,12 @@
     },
     methods: {
       newSkill() {
-        const emptySkill = {
-          skillId: '',
-          projectId: this.projectId,
-          subjectId: this.subjectId,
-          name: '',
-          pointIncrement: 10,
-          pointIncrementInterval: 8,
-          numPerformToCompletion: 10,
-          description: null,
-          helpUrl: null,
+        this.editSkillInfo = {
+          skill: {},
+          show: true,
+          isEdit: false,
         };
-
-        this.$modal.open({
-          parent: this,
-          component: EditSkill,
-          hasModalCard: true,
-          canCancel: false,
-          width: 1300,
-          props: {
-            skill: emptySkill,
-            projectId: this.projectId,
-            subjectId: this.subjectId,
-          },
-          events: {
-            'skill-created': this.skillCreatedOrUpdated,
-          },
-        });
-      },
-      editSkill(skillToEdit) {
-        this.editSkillInfo.skill = skillToEdit;
-        this.editSkillInfo.show = true;
+        //
         // this.$modal.open({
         //   parent: this,
         //   component: EditSkill,
@@ -183,8 +158,7 @@
         //   canCancel: false,
         //   width: 1300,
         //   props: {
-        //     skill: skillToEdit,
-        //     isEdit: true,
+        //     skill: emptySkill,
         //     projectId: this.projectId,
         //     subjectId: this.subjectId,
         //   },
@@ -192,6 +166,9 @@
         //     'skill-created': this.skillCreatedOrUpdated,
         //   },
         // });
+      },
+      editSkill(skillToEdit) {
+        this.editSkillInfo = { skill: skillToEdit, show: true, isEdit: true };
       },
 
       skillCreatedOrUpdated(skill) {
@@ -218,7 +195,7 @@
             this.isLoading = false;
 
             this.$emit('skills-change', skill.skillId);
-            this.toast(`Saved '${skill.name}' skill.`);
+            this.toast('Skill Saved', `Saved '${skill.name}' skill.`);
           })
           .finally(() => {
             this.isLoading = false;
@@ -245,7 +222,7 @@
             this.isLoading = false;
             this.$emit('skills-change', skill.skillId);
 
-            this.toast(`Skill '${skill.name}' was removed.`);
+            this.toast('Removed Skill', `Skill '${skill.name}' was removed.`);
           })
           .finally(() => {
             this.isLoading = false;
@@ -326,8 +303,15 @@
           tableData[tableData.length - 1].disabledDownButton = true;
         }
       },
-      toast(msg, isErr) {
-        this.$toast.open(ToastHelper.defaultConf(msg, isErr));
+      toast(toastTitle, msg) {
+        this.$bvToast.toast(msg, {
+          title: toastTitle,
+          autoHideDelay: 4000,
+          toaster: 'b-toaster-top-center',
+          solid: true,
+          appendToast: true,
+          variant: 'success',
+        });
       },
     },
   };

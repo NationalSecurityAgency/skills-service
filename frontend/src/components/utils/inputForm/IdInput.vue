@@ -1,5 +1,5 @@
 <template>
-  <div class="form-group mt-2 mb-0">
+  <div class="form-group mt-0 mb-0">
     <div class="row">
       <div class="col">
         <label for="idInput">{{ label }}</label>
