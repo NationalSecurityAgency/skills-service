@@ -4,8 +4,10 @@
       <div class="row mb-2">
         <div class="col-10">
           <div class="media">
-            <div v-if="options.icon" class="d-inline-block mr-2 border rounded p-1 text-info text-center" style="min-width: 3rem;">
-              <i class="fa-2x" :class="`${options.icon}`"></i>
+            <div v-if="options.icon" class="d-inline-block mr-2 border rounded text-info text-center" style="min-width: 3rem;">
+              <i
+                :class="[`${options.icon}`]"
+                class="m-1"/>
             </div>
             <div class="media-body">
               <div class="text-truncate text-info mb-0 pb-0 preview-card-title">{{ options.title }}</div>
@@ -65,4 +67,10 @@
     font-size: 0.9rem;
   }
 
+  i {
+    font-size: 3rem;
+    width: 48px;
+    height: 48px;
+    display: inline-block;
+  }
 </style>
