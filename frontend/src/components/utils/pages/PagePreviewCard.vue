@@ -26,6 +26,7 @@
           <div>
             <p class="text-uppercase text-muted count-label">{{ stat.label }}</p>
             <strong class="h5">{{ stat.count | number }}</strong>
+            <i v-if="stat.warn" class="fas fa-exclamation-circle text-warning" style="font-size: 1.5rem;" v-b-tooltip.hover="stat.warnMsg"/>
           </div>
         </div>
       </div>

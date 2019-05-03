@@ -13,39 +13,34 @@
       </div>
     </sub-page-header>
 
-    <div class="skills-bordered-component">
-      <b-loading :is-full-page="false" :active.sync="isLoading" :can-cancel="false"></b-loading>
-      <v-client-table v-if="levels && levels.length && !isLoading" :data="levels" :columns="levelsColumns"
-                      :options="options">
+
+    <loading-container :is-loading="isLoading">
+      <simple-card>
+        <v-client-table v-if="levels && levels.length && !isLoading" :data="levels" :columns="levelsColumns"
+                        :options="options">
         <span slot="iconClass" slot-scope="props">
-          <div class="">
-              <i class="has-text-info subject-icon skills-icon level-icon" v-bind:class="`${props.row.iconClass}`"></i>
-              <b-tooltip v-if="props.row.achievable === false" label="Level is unachievable. Insufficient available points in project."
-                         position="is-top" animanted="true" type="is-light" multilined>
-              <span><i class="icon-warning fa fa-exclamation-circle"></i></span>
-            </b-tooltip>
-            </div>
+              <i class="text-info level-icon" v-bind:class="`${props.row.iconClass}`"></i>
+                <i class="icon-warning fa fa-exclamation-circle text-warning"
+                   v-b-tooltip.hover="'Level is unachievable. Insufficient available points in project.'"/>
         </span>
-        <span slot="pointsFrom" slot-scope="props">
+          <span slot="pointsFrom" slot-scope="props">
           <span v-if="props.row.pointsFrom !== null">{{ props.row.pointsFrom | number }}</span>
           <span v-else>N/A - Please create more rules first</span>
         </span>
-        <span slot="pointsTo" slot-scope="props">
+          <span slot="pointsTo" slot-scope="props">
           <span v-if="props.row.pointsTo">{{props.row.pointsTo | number}}</span>
           <span v-else-if="!props.row.pointsFrom">N/A - Please create more rules first</span>
           <span v-else><i class="fas fa-infinity"/></span>
         </span>
 
-        <div slot="edit" slot-scope="props" class="">
-          <a v-on:click="editLevel(props.row)" class="button is-outlined is-success">
-                    <span class="icon is-small">
-                      <i class="fas fa-edit"/>
-                    </span>
-            <span>Edit</span>
-          </a>
-        </div>
-      </v-client-table>
-    </div>
+          <div slot="edit" slot-scope="props" class="">
+            <b-button @:click="editLevel(props.row)" variant="outline-info" style="width: 5rem;">
+                      <i class="fas fa-edit"/> Edit
+            </b-button>
+          </div>
+        </v-client-table>
+      </simple-card>
+    </loading-container>
   </div>
 </template>
 
@@ -55,10 +50,12 @@
   import LevelService from './LevelService';
   import ToastHelper from '../utils/ToastHelper';
   import SubPageHeader from '../utils/pages/SubPageHeader';
+  import LoadingContainer from '../utils/LoadingContainer';
+  import SimpleCard from '../utils/cards/SimpleCard';
 
   export default {
     name: 'Levels',
-    components: { SubPageHeader },
+    components: { SimpleCard, LoadingContainer, SubPageHeader },
     props: ['projectId', 'subjectId', 'maxLevels'],
     data() {
       return {
@@ -72,7 +69,7 @@
           headings: {
             level: 'Level',
             name: 'Name',
-            percent: 'Percent',
+            percent: 'Percent %',
             pointsFrom: 'From Points',
             pointsTo: 'To Points',
             edit: '',
@@ -90,34 +87,35 @@
       };
     },
     created() {
-      SettingService.getSetting(this.projectId, 'level.points.enabled').then((data) => {
-        if (data) {
-          const pointsEnabled = (data.value === true || data.value === 'true');
-          if (pointsEnabled) {
-            this.levelsAsPoints = true;
-            this.levelsColumns = ['iconClass', 'level', 'name', 'pointsFrom', 'pointsTo', 'edit'];
-            this.options.headings = {
-              level: 'Level',
-              name: 'Name',
-              pointsFrom: 'From Points',
-              pointsTo: 'To Points',
-              edit: '',
-              iconClass: '',
-            };
-          } else {
-            this.levelsColumns = ['iconClass', 'level', 'name', 'percent', 'pointsFrom', 'pointsTo', 'edit'];
-            this.options.headings = {
-              level: 'Level',
-              name: 'Name',
-              percent: 'Percent',
-              pointsFrom: 'From Points',
-              pointsTo: 'To Points',
-              edit: '',
-              iconClass: '',
-            };
+      SettingService.getSetting(this.projectId, 'level.points.enabled')
+        .then((data) => {
+          if (data) {
+            const pointsEnabled = (data.value === true || data.value === 'true');
+            if (pointsEnabled) {
+              this.levelsAsPoints = true;
+              this.levelsColumns = ['iconClass', 'level', 'name', 'pointsFrom', 'pointsTo', 'edit'];
+              this.options.headings = {
+                level: 'Level',
+                name: 'Name',
+                pointsFrom: 'From Points',
+                pointsTo: 'To Points',
+                edit: '',
+                iconClass: '',
+              };
+            } else {
+              this.levelsColumns = ['iconClass', 'level', 'name', 'percent', 'pointsFrom', 'pointsTo', 'edit'];
+              this.options.headings = {
+                level: 'Level',
+                name: 'Name',
+                percent: 'Percent',
+                pointsFrom: 'From Points',
+                pointsTo: 'To Points',
+                edit: '',
+                iconClass: '',
+              };
+            }
           }
-        }
-      });
+        });
     },
     mounted() {
       this.loadLevels();
@@ -125,15 +123,17 @@
     methods: {
       loadLevels() {
         if (this.subjectId) {
-          LevelService.getLevelsForSubject(this.projectId, this.subjectId).then((response) => {
-            this.isLoading = false;
-            this.levels = response;
-          });
+          LevelService.getLevelsForSubject(this.projectId, this.subjectId)
+            .then((response) => {
+              this.isLoading = false;
+              this.levels = response;
+            });
         } else {
-          LevelService.getLevelsForProject(this.projectId).then((response) => {
-            this.isLoading = false;
-            this.levels = response;
-          });
+          LevelService.getLevelsForProject(this.projectId)
+            .then((response) => {
+              this.isLoading = false;
+              this.levels = response;
+            });
         }
       },
       removeLastItem() {
@@ -156,15 +156,17 @@
       doRemoveLastItem() {
         this.isLoading = true;
         if (this.subjectId) {
-          LevelService.deleteLastLevelForSubject(this.projectId, this.subjectId).then(() => {
-            this.isLoading = false;
-            this.loadLevels();
-          });
+          LevelService.deleteLastLevelForSubject(this.projectId, this.subjectId)
+            .then(() => {
+              this.isLoading = false;
+              this.loadLevels();
+            });
         } else {
-          LevelService.deleteLastLevelForProject(this.projectId).then(() => {
-            this.isLoading = false;
-            this.loadLevels();
-          });
+          LevelService.deleteLastLevelForProject(this.projectId)
+            .then(() => {
+              this.isLoading = false;
+              this.loadLevels();
+            });
         }
       },
       editLevel(existingLevel) {
@@ -249,29 +251,33 @@
       doCreateNewLevel(nextLevelObj) {
         this.loading = true;
         if (this.subjectId) {
-          LevelService.createNewLevelForSubject(this.projectId, this.subjectId, nextLevelObj).then(() => {
-            this.isLoading = false;
-            this.loadLevels();
-          });
+          LevelService.createNewLevelForSubject(this.projectId, this.subjectId, nextLevelObj)
+            .then(() => {
+              this.isLoading = false;
+              this.loadLevels();
+            });
         } else {
-          LevelService.createNewLevelForProject(this.projectId, nextLevelObj).then(() => {
-            this.isLoading = false;
-            this.loadLevels();
-          });
+          LevelService.createNewLevelForProject(this.projectId, nextLevelObj)
+            .then(() => {
+              this.isLoading = false;
+              this.loadLevels();
+            });
         }
       },
       doEditLevel(editedLevelObj) {
         this.loading = true;
         if (this.subjectId) {
-          LevelService.editlevelForSubject(this.projectId, this.subjectId, editedLevelObj).then(() => {
-            this.isLoading = false;
-            this.loadLevels();
-          });
+          LevelService.editlevelForSubject(this.projectId, this.subjectId, editedLevelObj)
+            .then(() => {
+              this.isLoading = false;
+              this.loadLevels();
+            });
         } else {
-          LevelService.editlevelForProject(this.projectId, editedLevelObj).then(() => {
-            this.isLoading = false;
-            this.loadLevels();
-          });
+          LevelService.editlevelForProject(this.projectId, editedLevelObj)
+            .then(() => {
+              this.isLoading = false;
+              this.loadLevels();
+            });
         }
       },
     },
@@ -279,11 +285,6 @@
 </script>
 
 <style>
-  #level-def-panel .control-column{
-    width: 4rem;
-    /*background: yellow;*/
-  }
-
   #level-def-panel .level-icon {
     font-size: 1.5rem;
     height: 24px;
