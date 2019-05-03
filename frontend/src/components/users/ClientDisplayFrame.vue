@@ -67,5 +67,6 @@
   .the-iframe {
     width: 100%;
     height: 1000px;
+    border: 0;
   }
 </style>
