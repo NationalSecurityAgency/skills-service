@@ -1,48 +1,42 @@
 <template>
-  <div id="shared-skills-with-others-panel" class="skills-bordered-component dependencies-container">
+  <simple-card id="shared-skills-with-others-panel">
     <loading-container :is-loading="loading.sharedSkillsInit || loading.allSkills">
 
-      <h2 class="title is-6">Share Skills <strong>With</strong> Other Projects</h2>
+      <h6>Share Skills <strong>With</strong> Other Projects</h6>
 
-      <div class="columns">
-        <div class="column">
-          <skills-selector2 :options="allSkills" v-on:added="onSelectedSkill" v-on:removed="onDeselectedSkill" :selected="selectedSkills"></skills-selector2>
+      <div class="row text-center">
+        <div class="col-sm-5">
+          <skills-selector2 :options="allSkills" v-on:added="onSelectedSkill" v-on:removed="onDeselectedSkill"
+                            :selected="selectedSkills"></skills-selector2>
         </div>
-        <div class="column">
+        <div class="col-sm-5 my-2 my-sm-0 px-sm-1">
           <project-selector :project-id="projectId" :selected="selectedProject"
                             v-on:selected="onSelectedProject" v-on:unselected="onUnSelectedProject"></project-selector>
         </div>
-        <div class="column is-narrow">
-          <button class="button is-primary is-outlined" v-on:click="shareSkill" :disabled="!shareButtonEnabled">
-              <span class="icon">
-                <i class="fas fa-share-alt"></i>
-              </span>
-            <span>Share</span>
+        <div class="col-sm-2 text-center text-sm-left">
+          <button class="btn btn-sm btn-outline-primary h-100" v-on:click="shareSkill" :disabled="!shareButtonEnabled">
+            <i class="fas fa-share-alt mr-1"></i><span class="text-truncate">Share</span>
           </button>
         </div>
       </div>
 
-      <b-notification v-if="displayError" :active.sync="displayError" type="is-warning">
-            <span>
+      <b-alert v-if="displayError" variant="danger" class="mt-2" show dismissible>
               <i class="fa fa-exclamation-circle"></i> Skill <strong>[{{ selectedSkills[0].name }}]</strong> is already shared to project <strong>[{{ selectedProject.name }}]</strong>.
-            </span>
-      </b-notification>
+      </b-alert>
 
       <loading-container :is-loading="loading.sharedSkills">
-        <div v-if="sharedSkills && sharedSkills.length > 0" class="skills-pad-bottom-1-rem">
+        <div v-if="sharedSkills && sharedSkills.length > 0" class="my-4">
           <shared-skills-table :shared-skills="sharedSkills"
                                v-on:skill-removed="deleteSharedSkill"></shared-skills-table>
         </div>
-        <div v-else class="columns is-centered">
-          <div class="column is-half">
-            <no-content2 title="Share Skills With Other Projects" icon="fas fa-share-alt"
-              message="To start sharing skills please select a skill and then the project that you want to share this skill with."></no-content2>
-          </div>
+        <div v-else>
+          <no-content2 title="Share Skills With Other Projects" icon="fas fa-share-alt" class="my-5"
+                       message="To start sharing skills please select a skill and then the project that you want to share this skill with."/>
         </div>
       </loading-container>
 
     </loading-container>
-  </div>
+  </simple-card>
 </template>
 
 <script>
@@ -53,12 +47,18 @@
   import SharedSkillsTable from './SharedSkillsTable';
   import SkillsShareService from './SkillsShareService';
   import NoContent2 from '../../utils/NoContent2';
+  import SimpleCard from '../../utils/cards/SimpleCard';
 
   export default {
     name: 'ShareSkillsWithOtherProjects',
     props: ['projectId'],
     components: {
-      NoContent2, SharedSkillsTable, ProjectSelector, LoadingContainer, SkillsSelector2,
+      SimpleCard,
+      NoContent2,
+      SharedSkillsTable,
+      ProjectSelector,
+      LoadingContainer,
+      SkillsSelector2,
     },
     data() {
       return {

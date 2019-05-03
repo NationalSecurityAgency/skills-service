@@ -1,26 +1,24 @@
 <template>
-  <div>
+  <div id="full-dependent-skills-graph">
     <sub-page-header title="Skill Dependencies"/>
 
-    <div id="full-dependent-skills-graph" class="skills-bordered-component">
+    <simple-card>
       <loading-container :is-loading="!isLoading">
-        <div v-if="!this.graph.nodes || this.graph.nodes.length === 0" class="columns is-centered skills-pad-top-1-rem">
-          <div class="column is-half">
+        <div v-if="!this.graph.nodes || this.graph.nodes.length === 0" class="mt-5">
             <no-content2 icon="fa fa-vector-square" title="No Dependencies Yet..."
-              message="You can manage and visualize skill's dependencies. Please add dependencies to get started."></no-content2>
-          </div>
+                         message="You can manage and visualize skill's dependencies. Please add dependencies to get started."></no-content2>
         </div>
-        <div v-else>
-          <graph-legend class="graph-legend" :items="[
-            {label: 'Skill Dependencies', color: 'lightgreen'},
-            {label: 'Cross Project Skill Dependencies', color: '#ffb87f'}
-            ]"></graph-legend>
-          <graph-node-sort-method-selector class="sort-method-selector"
-                                           v-on:value-changed="onSortNodeStrategyChange"></graph-node-sort-method-selector>
+        <div v-else class="row">
+          <div class="col-12 col-sm">
+            <graph-legend class="graph-legend" :items="legendItems"/>
+          </div>
+          <div class="col text-left text-sm-right mt-2">
+            <graph-node-sort-method-selector @:value-changed="onSortNodeStrategyChange"/>
+          </div>
         </div>
       </loading-container>
       <div id="dependency-graph" style="height: 800px"></div>
-    </div>
+    </simple-card>
   </div>
 </template>
 
@@ -35,11 +33,13 @@
   import GraphUtils from './GraphUtils';
   import GraphLegend from './GraphLegend';
   import SubPageHeader from '../../utils/pages/SubPageHeader';
+  import SimpleCard from '../../utils/cards/SimpleCard';
 
   export default {
     name: 'FullDependencyGraph',
     props: ['projectId'],
     components: {
+      SimpleCard,
       SubPageHeader,
       GraphLegend,
       NoContent2,
@@ -53,6 +53,10 @@
         network: null,
         nodes: new vis.DataSet(),
         edges: new vis.DataSet(),
+        legendItems: [
+          { label: 'Skill Dependencies', color: 'lightgreen' },
+          { label: 'Cross Project Skill Dependencies', color: '#ffb87f' },
+        ],
         displayOptions: {
           layout: {
             hierarchical: {
@@ -208,9 +212,5 @@
 </style>
 
 <style scoped>
-  .sort-method-selector {
-    position: absolute;
-    z-index: 10;
-    right: 40px;
-  }
+
 </style>
