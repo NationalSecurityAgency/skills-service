@@ -64,12 +64,12 @@
                 <a
                   href="#"
                   @click.stop.prevent="getIcon(name, cssClassname, 'Custom Icons')"
-                  :class="`item ${selectedCss === cssClassname ? 'selected' : ''}`"
-                >
-                    <span class="icon is-large">
-                      <i :class="cssClassname"></i>
-                    </span>
-                </a><br/>
+                  :class="`item ${selectedCss === cssClassname ? 'selected' : ''}`">
+                  <span class="icon is-large">
+                    <i :class="cssClassname"></i>
+                  </span>
+                </a>
+                <br/>
                 <span class="iconName">
                   <a class="delete-icon" ref="#" @click="deleteIcon(filename, activeProjectId)">
                     <span class="icon is-tiny"><i style="font-size:1rem;height:1rem;width:1rem;" class="fas fa-trash"></i></span>
@@ -315,6 +315,7 @@
     font-size: 3rem;
     width: 48px;
     height: 48px;
+    display: inline-block;
   }
 
   .tab-content div {
