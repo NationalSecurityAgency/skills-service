@@ -6,5 +6,6 @@ enum ErrorCode {
     InsufficientPointsToConvertLevels,
     UserAlreadyExists,
     ConstraintViolation,
-    BadParam
+    BadParam,
+    AccessDenied
 }
