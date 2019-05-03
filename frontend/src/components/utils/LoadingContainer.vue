@@ -1,8 +1,6 @@
 <template>
   <div class="loading-container">
-    <div v-if="isLoading" class="d-flex justify-content-center mt-5">
-      <b-spinner label="Loading..." style="width: 3rem; height: 3rem;" variant="info"/>
-    </div>
+    <skills-spinner :is-loading="isLoading"/>
     <div v-if="!isLoading">
       <slot></slot>
     </div>
@@ -10,8 +8,13 @@
 </template>
 
 <script>
+  import SkillsSpinner from './SkillsSpinner';
+
   export default {
     name: 'LoadingContainer',
+    components: {
+      SkillsSpinner,
+    },
     props: ['isLoading'],
   };
 </script>
