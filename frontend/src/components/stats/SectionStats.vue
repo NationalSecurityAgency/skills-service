@@ -2,35 +2,29 @@
   <div>
     <sub-page-header title="Stats"/>
 
-    <div class="columns is-multiline">
-      <div v-for="(chart, index) in loadedCharts" class="column" :class="index == 0 ? 'is-full' : ''" :key="chart.options.id">
-        <div class="column" :class="index == 0 ? 'is-full' : ''" >
-          <skills-chart :chart="chart"></skills-chart>
-        </div>
+    <div v-if="!isLoading" class="row">
+      <div v-for="(chart, index) in loadedCharts" :key="chart.options.chart.id"
+           :class="index == 0 ? 'col-12' : 'col-6'" class="mb-3">
+
+<!--        {{ index }} ==> {{ chart.options.chart.id }}-->
+        <skills-chart :chart="chart"/>
       </div>
     </div>
 
-    <div v-if="loadableCharts.length > 0" class="columns">
-      <div class="column is-full">
-        <div class="skills-bordered-component">
-          <div class="columns">
-            <div class="column is-full">
-              <span class="title is-5">Available Stats</span>
-            </div>
-          </div>
-          <div class="columns is-multiline">
-            <div v-for="chart in loadableCharts" class="column is-one-third" :key="chart.options.id">
-              <stat-card :title="chart.chartMeta.title" :subtitle="chart.chartMeta.subtitle" :icon="chart.chartMeta.icon"
-                         :description="chart.chartMeta.description" :chart-builder-id="chart.chartMeta.chartBuilderId"
-                         @load-chart="loadChart">
-              </stat-card>
-            </div>
-          </div>
+    <simple-card v-if="loadableCharts.length > 0">
+      <h5>Available Stats</h5>
+
+      <div class="row">
+        <div v-for="(chart, index) in loadableCharts" class="col-4 mb-3" :key="chart.options.chart.id">
+          <stat-card :title="chart.chartMeta.title" :subtitle="chart.chartMeta.subtitle" :icon="getStatCardColorClass(chart.chartMeta.icon, index)"
+                     :description="chart.chartMeta.description" :chart-builder-id="chart.chartMeta.chartBuilderId"
+                     @load-chart="loadChart">
+          </stat-card>
         </div>
       </div>
-    </div>
+    </simple-card>
 
-    <b-loading :is-full-page="false" :active.sync="isLoading" :can-cancel="false"></b-loading>
+    <skills-spinner :is-loading="isLoading"/>
   </div>
 </template>
 
@@ -40,10 +34,14 @@
   import StatsService from './StatsService';
   import { SectionParams } from './SectionHelper';
   import SubPageHeader from '../utils/pages/SubPageHeader';
+  import SimpleCard from '../utils/cards/SimpleCard';
+  import SkillsSpinner from '../utils/SkillsSpinner';
 
   export default {
     name: 'SectionStats',
     components: {
+      SkillsSpinner,
+      SimpleCard,
       SubPageHeader,
       SkillsChart,
       StatCard,
@@ -69,6 +67,7 @@
       return {
         charts: [],
         isLoading: true,
+        statCardIconsColors: ['text-warning', 'text-primary', 'text-info', 'text-danger'],
       };
     },
     mounted() {
@@ -83,6 +82,11 @@
       },
     },
     methods: {
+      getStatCardColorClass(icon, index) {
+        const colorIndex = this.statCardIconsColors.length < index ? index : index % this.statCardIconsColors.length;
+        const color = this.statCardIconsColors[colorIndex];
+        return `${icon} ${color}`;
+      },
       loadInitialCharts() {
         const sectionParams = new SectionParams.Builder(this.section, this.projectId)
           .withSectionIdParam(this.sectionIdParam)
@@ -90,12 +94,14 @@
           .withNumDays(this.numDaysToShow)
           .withLoadDataForFirst(this.loadDataForFirst)
           .build();
-        StatsService.getChartsForSection(sectionParams).then((response) => {
-          this.charts = response;
-          this.isLoading = false;
-        }).finally(() => {
-          this.isLoading = false;
-        });
+        StatsService.getChartsForSection(sectionParams)
+          .then((response) => {
+            this.charts = response;
+            this.isLoading = false;
+          })
+          .finally(() => {
+            this.isLoading = false;
+          });
       },
       loadChart(chartBuilderId) {
         this.isLoading = true;
@@ -105,13 +111,15 @@
           .withNumDays(this.numDaysToShow)
           .withChartBuilderId(chartBuilderId)
           .build();
-        StatsService.getChartForSection(sectionParams).then((response) => {
-          this.charts.splice(this.charts.findIndex(it => it.chartMeta.chartBuilderId === chartBuilderId), 1);
-          this.charts.push(response);
-          this.isLoading = false;
-        }).finally(() => {
-          this.isLoading = false;
-        });
+        StatsService.getChartForSection(sectionParams)
+          .then((response) => {
+            this.charts.splice(this.charts.findIndex(it => it.chartMeta.chartBuilderId === chartBuilderId), 1);
+            this.charts.push(response);
+            this.isLoading = false;
+          })
+          .finally(() => {
+            this.isLoading = false;
+          });
       },
     },
   };

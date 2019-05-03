@@ -1,25 +1,27 @@
 <template>
-  <div class="card has-text-centered">
-    <div class="card-content">
-      <div class="media">
-        <div class="media-left">
-          <figure class="image is-48x48 has-text-info">
-            <i :class="this.icon" style="font-size: 48px;"></i>
-          </figure>
-        </div>
-        <div class="media-content">
-          <p class="title is-4 has-text-primary">{{ title }}</p>
-          <p class="subtitle is-6 has-text-grey-light is-uppercase">{{ subtitle }}</p>
-        </div>
-      </div>
+  <div class="card h-100">
+    <div class="card-body">
 
-      <div class="content has-text-left" style="min-height: 5rem;">
-        {{ description }}
+      <div class="media">
+        <div class="d-inline-block mt-1 mr-3">
+          <i class="fa-3x" :class="icon"/>
+        </div>
+        <div class="media-body">
+          <h4 class="mb-2 text-uppercase">{{ title }}</h4>
+          <div style="font-size: 0.95rem;" class="text-secondary">
+            <slot>
+              {{ subtitle }}
+            </slot>
+          </div>
+        </div>
       </div>
+      <p class="mt-2">
+        <small>{{ description }}</small>
+      </p>
     </div>
 
-    <div class="card-footer">
-      <a @click="loadChart" class="button card-footer-item is-primary is-outlined">View</a>
+    <div class="card-footer text-center">
+      <b-button @click="loadChart" variant="outline-primary">Add <i class="fas fa-plus-circle"/></b-button>
     </div>
   </div>
 </template>

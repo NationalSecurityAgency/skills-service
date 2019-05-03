@@ -9,7 +9,7 @@
         <div v-if="isLoading" class="modal-card-body" style="height: 400px;">
         </div>
 
-        <v-client-table :data="skills" :columns="skillsColumns"
+        <v-client-table class="vue-table-2" :data="skills" :columns="skillsColumns"
                         :options="options" v-if="this.skills && this.skills.length" v-on:sorted="handleColumnSort">
 
           <div slot="name" slot-scope="props" class="field has-addons">
@@ -311,14 +311,6 @@
     width: 12rem;
   }
 
-  /* on the mobile platform some of the columns will be removed
-     so let's allow the table to size on its own*/
-  @media (max-width: 576px) {
-    #skillsTable .control-column {
-      width: unset;
-    }
-  }
-
   #skillsTable .display-order-column {
     width: 9rem;
   }
@@ -357,9 +349,10 @@
     width: 2rem;
   }
 
+  /* Work around - "Filter:" label is not left aligned */
   #skillsTable .form-inline label {
-    /*text-align: left !important;*/
     justify-content: left !important;
   }
+
 
 </style>

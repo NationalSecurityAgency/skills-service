@@ -2,25 +2,25 @@
   <div>
     <sub-page-header title="Performed Skills"/>
 
-    <div class="card">
-      <div class="card-body">
-        <v-server-table ref="table" :columns="columns" :url="getUrl()" :options="options"
-                        v-on:loaded="emit('loaded', $event)" v-on:error="emit('error', $event)">
-          <div slot="performedOn" slot-scope="props" class="field has-addons">
-            {{ getDate(props) }}
-          </div>
-        </v-server-table>
-      </div>
-    </div>
+    <simple-card>
+      <v-server-table class="vue-table-2" ref="table" :columns="columns" :url="getUrl()" :options="options"
+                      v-on:loaded="emit('loaded', $event)" v-on:error="emit('error', $event)">
+        <div slot="performedOn" slot-scope="props">
+          {{ getDate(props) }}
+        </div>
+      </v-server-table>
+    </simple-card>
   </div>
 </template>
 
 <script>
   import SubPageHeader from '../utils/pages/SubPageHeader';
+  import SimpleCard from '../utils/cards/SimpleCard';
 
   export default {
     name: 'UserSkillsPerformed',
     components: {
+      SimpleCard,
       SubPageHeader,
     },
     props: ['projectId', 'userId'],
@@ -63,7 +63,8 @@
         this.$refs.table.count = 0;
       },
       getDate(props) {
-        return window.moment(props.row.performedOn).format('LLL');
+        return window.moment(props.row.performedOn)
+          .format('LLL');
       },
     },
   };

@@ -1,25 +1,30 @@
 <template>
-  <div style="position: relative">
-    <div v-if="!chart.hasData" class="disabled-overlay" />
-    <div v-if="!chart.hasData" class="text-center user-skills-no-data-icon-text text-danger">
-    <div class="row justify-content-center">
-      <div class="col-5 text-center border rounded bg-light p-2">
-        <div style="font-size: 1rem;"><i class="fa fa-ban"></i> No Data Available</div>
-      </div>
-    </div>
-  </div>
-    <apexchart v-if="chart.dataLoaded"
-               :class="{'disabled': !chart.hasData}"
-               class="skills-chart skills-bordered-component"
-               height="350" :type="chart.chartType"
-               :options="chart.options" :series="chart.series">
-    </apexchart>
+  <div>
+<!--    <div v-if="!chart.hasData" class="disabled-overlay"/>-->
+<!--    <div v-if="!chart.hasData" class="text-center user-skills-no-data-icon-text text-danger">-->
+<!--      <div class="row justify-content-center">-->
+<!--        <div class="col-5 text-center border rounded bg-light p-2">-->
+<!--          <div style="font-size: 1rem;"><i class="fa fa-ban"></i> No Data Available</div>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--    </div>-->
+    <simple-card>
+      <apexchart v-if="chart.dataLoaded"
+                 :class="{'disabled': !chart.hasData}"
+                 class="skills-chart"
+                 height="350" :type="chart.chartType"
+                 :options="chart.options" :series="chart.series">
+      </apexchart>
+    </simple-card>
   </div>
 </template>
 
 <script>
+  import SimpleCard from '../utils/cards/SimpleCard';
+
   export default {
     name: 'SkillsChart',
+    components: { SimpleCard },
     props: {
       chart: {
         type: Object,
@@ -80,6 +85,7 @@
     width: 100%;
     transform: translateY(-50%);
   }
+
   .user-skills-no-data-icon-subtext {
     font-size: 0.9em;
     color: grey;

@@ -86,4 +86,10 @@
   .overall-container {
     min-height: calc(100vh - 50px);
   }
+
+  /* vue-table-2s bug? - "Filter:" label is not left aligned, this is a workaround */
+  .vue-table-2 .form-inline label {
+    justify-content: left !important;
+  }
+
 </style>
