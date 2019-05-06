@@ -1,12 +1,12 @@
 <template>
-  <div id="app">
+  <div id="app" class="container-fluid">
     <customizable-header></customizable-header>
 
     <div class="overall-container">
       <loading-container v-bind:is-loading="isLoading">
         <div v-if="!isLoading">
           <header-view v-if="isAuthenticatedUser"/>
-          <div class="container-fluid">
+          <div>
             <router-view/>
           </div>
         </div>
