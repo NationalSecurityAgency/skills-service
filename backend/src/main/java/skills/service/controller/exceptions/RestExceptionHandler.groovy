@@ -1,12 +1,12 @@
 package skills.service.controller.exceptions
 
 import groovy.util.logging.Slf4j
-import org.hibernate.exception.ConstraintViolationException
 import org.springframework.core.annotation.AnnotatedElementUtils
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.access.AccessDeniedException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ResponseStatus
@@ -48,13 +48,21 @@ class RestExceptionHandler extends ResponseEntityExceptionHandler {
         return handleExceptionInternal(violationException, body, new HttpHeaders(), HttpStatus.BAD_REQUEST, webRequest)
     }
 
+    @ExceptionHandler(AccessDeniedException)
+    protected ResponseEntity<Object> handleAccessDeniedException(AccessDeniedException accessDeniedException, WebRequest webRequest) {
+        log.warn("Access is denied - programmatic exception", accessDeniedException)
+        String msg = "Access Denied"
+        BasicErrBody body = new BasicErrBody(message: msg, errorCode: ErrorCode.AccessDenied)
+        return handleExceptionInternal(accessDeniedException, body, new HttpHeaders(), HttpStatus.FORBIDDEN, webRequest)
+    }
+
     /**
      * Supports the ResponseStatusException introduced in Spring 5
      */
     @ExceptionHandler(ResponseStatusException)
     protected ResponseEntity<Object> handleResponseStatusException(ResponseStatusException ex, WebRequest webRequest) {
         BasicErrBody body = new BasicErrBody(message: ex.message)
-        log.error(message, ex)
+        log.error(ex.message, ex)
         return handleExceptionInternal(ex, body, new HttpHeaders(), ex.status, webRequest)
     }
 
