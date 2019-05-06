@@ -5,8 +5,6 @@
     <div v-if="!isLoading" class="row">
       <div v-for="(chart, index) in loadedCharts" :key="chart.options.chart.id"
            :class="index == 0 ? 'col-12' : 'col-6'" class="mb-3">
-
-<!--        {{ index }} ==> {{ chart.options.chart.id }}-->
         <skills-chart :chart="chart"/>
       </div>
     </div>
@@ -15,7 +13,7 @@
       <h5>Available Stats</h5>
 
       <div class="row">
-        <div v-for="(chart, index) in loadableCharts" class="col-4 mb-3" :key="chart.options.chart.id">
+        <div v-for="(chart, index) in loadableCharts" style="min-width: 25rem;" class="col-4 mb-3" :key="chart.options.chart.id">
           <stat-card :title="chart.chartMeta.title" :subtitle="chart.chartMeta.subtitle" :icon="getStatCardColorClass(chart.chartMeta.icon, index)"
                      :description="chart.chartMeta.description" :chart-builder-id="chart.chartMeta.chartBuilderId"
                      @load-chart="loadChart">

@@ -39,5 +39,7 @@
 </script>
 
 <style scoped>
-
+  .card {
+    min-width: 15rem;
+  }
 </style>
