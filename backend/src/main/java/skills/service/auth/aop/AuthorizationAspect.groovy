@@ -18,7 +18,7 @@ import skills.storage.model.auth.RoleName
 @Component
 class AuthorizationAspect {
 
-    static final String USER_ID_PARAM = 'userId'
+    static final String USER_ID_PARAM = 'userIdParam'
 
     MessageSourceAccessor messages = SpringSecurityMessageSource.getAccessor()
 
