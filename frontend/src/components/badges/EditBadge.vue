@@ -1,115 +1,85 @@
 <template>
-  <modal :title="title" @cancel-clicked="closeMe" @save-clicked="updateBadge">
-    <template slot="content">
-      <div class="field is-horizontal" style="width: 1000px;">
-        <div class="field-body">
-          <div class="field is-narrow">
-            <icon-picker :startIcon="badge.iconClass" v-on:on-icon-selected="onSelectedIcons"></icon-picker>
-          </div>
-          <div class="field">
-            <label class="label">Badge Name</label>
-            <div class="control">
-              <input class="input" type="text" v-model="badgeInternal.name" v-on:input="updateBadgeId"
-                     v-validate="'required|min:3|max:50'" data-vv-delay="500" name="badgeName" v-focus/>
+  <b-modal :id="badgeInternal.badgeId" size="xl" :title="title" v-model="show"
+           header-bg-variant="info" header-text-variant="light" no-fade >
+    <b-container fluid>
+      <div v-if="displayIconManager === false" class="text-left">
+        <div class="media">
+          <icon-picker :startIcon="badgeInternal.iconClass" @select-icon="toggleIconDisplay(true)" class="mr-3"></icon-picker>
+          <div class="media-body">
+            <div class="form-group">
+              <label for="badgeName">Badge Name</label>
+              <input class="form-control" id="badgeName" type="text" v-model="badgeInternal.name"
+                     @input="updateBadgeId"
+                     v-validate="'required|min:3|max:50'" data-vv-delay="500" datat-vv-name="badgeName" v-focus/>
+              <small class="form-text text-danger" v-show="errors.has('badgeName')">{{ errors.first('badgeName')}}
+              </small>
             </div>
-            <p class="help is-danger" v-show="errors.has('badgeName')">{{ errors.first('badgeName')}}</p>
           </div>
         </div>
-      </div>
 
+        <id-input type="text" label="Badge ID" v-model="badgeInternal.badgeId" @input="canAutoGenerateId=false"
+                  v-validate="'required|min:3|max:50|alpha_num'" data-vv-name="badgeId"/>
+        <small class="form-text text-danger">{{ errors.first('badgeId')}}</small>
 
-      <div class="field skills-remove-bottom-margin">
-        <label class="label">Badge ID</label>
-        <div class="control">
-          <input class="input" type="text" v-model="badgeInternal.badgeId" :disabled="!canEditBadgeId"
-                 v-validate="'required|min:3|max:50|alpha_num'" data-vv-delay="500" name="badgeId"/>
-        </div>
-        <p class="help is-danger" v-show="errors.has('badgeId')">{{ errors.first('badgeId')}}</p>
-      </div>
-      <p class="control has-text-right">
-        <b-tooltip label="Enable to override auto-generated ID."
-                   position="is-left" animanted="true" type="is-light">
-          <span><i class="fas fa-question-circle"></i></span>
-        </b-tooltip>
-        <span v-on:click="toggleEditId()">
-          <a class="is-info" v-bind:class="{'disableControl': isEdit}" v-if="!canEditBadgeId">Enable</a>
-          <a class="is-info" v-if="canEditBadgeId">Disable</a>
-        </span>
-      </p>
-
-      <div class="field">
-        <label class="label">Description</label>
-        <div class="control">
+        <div class="mt-2">
+          <label>Description</label>
           <markdown-editor :value="badge.description" @value-updated="updateDescription"></markdown-editor>
         </div>
+
+        <b-form-checkbox v-model="limitTimeframe"
+                         @change="onEnableGemFeature"
+                         v-b-tooltip.hover="'The Gem feature allows for the badge to only be achievable during the specified time frame.'"
+                         >
+            Enable Gem Feature
+        </b-form-checkbox>
+
+        <b-collapse id="gemCollapse" v-model="limitTimeframe">
+          <b-card no-body>
+            <b-row no-gutters>
+              <b-col md="4">
+                <label class="label">Start Date</label>
+                <datepicker :inline="true" v-model="badgeInternal.startDate" name="startDate"
+                            v-validate="'required|dateOrder'"></datepicker>
+                <small class="form-text text-danger" v-show="errors.has('startDate')">{{ errors.first('startDate')}}
+                </small>
+              </b-col>
+              <b-col md="4">
+                <label class="label">End Date</label>
+                <datepicker :inline="true" v-model="badgeInternal.endDate" name="endDate"
+                            v-validate="'required|dateOrder'"></datepicker>
+                <small class="form-text text-danger" v-show="errors.has('endDate')">{{ errors.first('endDate')}}</small>
+              </b-col>
+            </b-row>
+          </b-card>
+        </b-collapse>
+        <p v-if="overallErrMsg" class="text-center text-danger">***{{ overallErrMsg }}***</p>
       </div>
-
-      <div class="box">
-        <div class="columns">
-          <div class="column">
-            <h2 class="title is-5" :class="{ 'has-text-grey-light': !limitTimeframe }">Gem Feature
-              <b-tooltip label="The Gem feature allows for the badge to achievable during the specified time frame."
-                         position="is-right" animanted="true" type="is-light">
-                <span><i class="fas fa-question-circle"></i></span>
-              </b-tooltip>
-            </h2>
-          </div>
-          <div class="column has-text-right" style="font-size: 0.8rem; font-weight: lighter">
-            <label class="checkbox" style="font-size: 0.8rem; font-weight: lighter">
-              <input type="checkbox" v-model="limitTimeframe" @change="onEnableGemFeature"/>
-              Enable Gem Feature
-              <b-tooltip label="The Gem feature allows for the badge to only be achievable during the specified time frame."
-                         position="is-left" animanted="true" type="is-light">
-                <span><i class="fas fa-question-circle"></i></span>
-              </b-tooltip>
-            </label>
-          </div>
-        </div>
-
-        <div class="field is-horizontal">
-          <div class="field-body">
-            <div class="field">
-              <label class="label" :class="{ 'has-text-grey-light': !limitTimeframe }">Start Date</label>
-              <div class="control is-expanded">
-                <b-datepicker inline
-                              placeholder="Click to select a date..."
-                              v-model="badgeInternal.startDate"
-                              ref="startDate"
-                              icon="calendar-today"
-                              :disabled="!limitTimeframe"
-                              v-validate="'required|dateOrder'" name="startDate">
-                </b-datepicker>
-              </div>
-              <p class="help is-danger" v-show="errors.has('startDate')">{{ errors.first('startDate')}}</p>
-            </div>
-            <div class="field">
-              <label class="label" :class="{ 'has-text-grey-light': !limitTimeframe }">End Date</label>
-              <div class="control ">
-                <b-datepicker inline
-                              placeholder="Click to select a date..."
-                              v-model="badgeInternal.endDate"
-                              ref="endDate"
-                              icon="calendar-today"
-                              :disabled="!limitTimeframe"
-                              v-validate="'required|dateOrder'" name="endDate">
-                </b-datepicker>
-              </div>
-              <p class="help is-danger" v-show="errors.has('endDate')">{{ errors.first('endDate')}}</p>
-            </div>
-          </div>
-        </div>
+      <div v-else>
+        <b-card title="Select Icon">
+          <icon-manager @selected-icon="onSelectedIcon"></icon-manager>
+          <b-button href="#" variant="primary" @click="toggleIconDisplay(false)">back</b-button>
+        </b-card>
       </div>
+    </b-container>
 
-      <p v-if="errors.any() && overallErrMsg" class="help is-danger has-text-centered">***{{ overallErrMsg }}***</p>
-    </template>
-  </modal>
+    <div slot="modal-footer" class="w-100">
+      <b-button variant="success" size="sm" class="float-right" @click="updateBadge">
+        Save
+      </b-button>
+      <b-button variant="secondary" size="sm" class="float-right mr-2" @click="closeMe">
+        Cancel
+      </b-button>
+    </div>
+  </b-modal>
 </template>
 
 <script>
   import { Validator } from 'vee-validate';
+  import Datepicker from 'vuejs-datepicker';
   import MarkdownEditor from '../utils/MarkdownEditor';
   import IconPicker from '../utils/iconPicker/IconPicker';
-  import Modal from '../utils/modal/Modal';
+  import IconManager from '../utils/iconPicker/IconManager';
+  import IdInput from '../utils/inputForm/IdInput';
 
   let self;
   const dictionary = {
@@ -144,19 +114,36 @@
   }, {
     immediate: false,
   });
+
   export default {
     name: 'EditBadge',
-    components: { Modal, IconPicker, MarkdownEditor },
-    props: ['badge', 'isEdit'],
+    components: {
+      IconPicker,
+      MarkdownEditor,
+      Datepicker,
+      IconManager,
+      IdInput,
+    },
+    props: {
+      badge: Object,
+      isEdit: Boolean,
+      value: Boolean,
+    },
     data() {
+      console.log('start of data()');
       // convert string to Date objects
       this.badge.startDate = this.toDate(this.badge.startDate);
       this.badge.endDate = this.toDate(this.badge.endDate);
+
+      const timeframe = !!(this.badge.startDate && this.badge.endDate);
       return {
+        canAutoGenerateId: true,
         canEditBadgeId: false,
-        limitTimeframe: this.badge.startDate && this.badge.endDate,
+        limitTimeframe: timeframe,
         badgeInternal: Object.assign({}, this.badge),
         overallErrMsg: '',
+        show: this.value,
+        displayIconManager: false,
       };
     },
     mounted() {
@@ -167,9 +154,14 @@
         return this.isEdit ? 'Editing Existing Badge' : 'New Badge';
       },
     },
+    watch: {
+      show(newValue) {
+        this.$emit('input', newValue);
+      },
+    },
     methods: {
       closeMe() {
-        this.$parent.close();
+        this.show = false;
       },
       updateDescription(event) {
         this.badgeInternal.description = event.value;
@@ -179,18 +171,19 @@
           if (!res) {
             this.overallErrMsg = 'Form did NOT pass validation, please fix and try to Save again';
           } else {
-            this.$parent.close();
+            this.show = false;
             this.$emit('badge-updated', this.badgeInternal);
           }
         });
       },
       updateBadgeId() {
-        if (!this.isEdit && !this.canEditBadgeId) {
+        if (!this.isEdit && this.canAutoGenerateId) {
           this.badgeInternal.badgeId = this.badgeInternal.name.replace(/[^\w]/gi, '');
         }
       },
-      onSelectedIcons(selectedIconCss) {
-        this.badgeInternal.iconClass = selectedIconCss;
+      onSelectedIcon(selectedIcon) {
+        this.badgeInternal.iconClass = `${selectedIcon.css}`;
+        this.displayIconManager = false;
       },
       onEnableGemFeature() {
         if (!this.limitTimeframe) {
@@ -208,6 +201,9 @@
       toggleEditId() {
         this.canEditBadgeId = !this.canEditBadgeId && !this.isEdit;
         this.updateBadgeId();
+      },
+      toggleIconDisplay(shouldDisplay) {
+        this.displayIconManager = shouldDisplay;
       },
     },
   };

@@ -212,10 +212,6 @@
 
         this.selectIcon(icon, iconCss, iconPack);
       },
-      onResize: function onResize(event) {
-        console.log(event);
-        console.log(`window width is ${window.innerWidth}`);
-      },
       onChange(tabIndex) {
         const { value } = this.$refs.iconFilterInput;
         if (tabIndex === 0) {
