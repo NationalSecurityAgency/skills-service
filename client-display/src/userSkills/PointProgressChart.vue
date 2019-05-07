@@ -116,8 +116,8 @@
 
 <style>
   .apex-chart-container .apexcharts-toolbar {
-    position: absolute !important;
-    top: -1.95rem !important;
+    position: absolute;
+    top: -1.95rem;
   }
 </style>
 
@@ -144,8 +144,6 @@
 
   .user-skills-no-data-icon-text {
     font-weight: 700;
-    /*background-color: #eaeaea;*/
-    /*color: #f10d1a;*/
     opacity: 0.8;
     position: absolute;
     left: 0;
@@ -154,12 +152,5 @@
     text-align: center;
     width: 100%;
     transform: translateY(-50%);
-  }
-
-  .user-skills-no-data-icon-subtext {
-    font-size: 15px;
-    font-size: 0.9em;
-    color: grey;
-    display: block;
   }
 </style>
