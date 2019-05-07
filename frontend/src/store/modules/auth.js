@@ -27,6 +27,7 @@ const mutations = {
       localStorage.setItem('token', authData.token);
       localStorage.setItem('expirationDate', authData.expirationDate.getTime().toString());
     }
+    console.log('authUser', authData);
     axios.defaults.headers.common.Authorization = authData.token;
   },
   oAuth2AuthUser(state) {
@@ -143,6 +144,7 @@ const actions = {
   },
   logout({ commit }) {
     commit('clearAuthData');
+    alert('logout');
     axios.get('/logout')
       .then(() => {
         router.replace('/skills-login');

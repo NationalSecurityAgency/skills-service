@@ -6,11 +6,16 @@ Vue.use(Vuex);
 export default new Vuex.Store({
   state: {
     authToken: null,
+    isAuthenticating: false,
   },
   mutations: {
     authToken(state, authToken) {
       // eslint-disable-next-line no-param-reassign
       state.authToken = authToken;
+    },
+    isAuthenticating(state, isAuthenticating) {
+      // eslint-disable-next-line no-param-reassign
+      state.isAuthenticating = isAuthenticating;
     },
   },
 });

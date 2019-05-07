@@ -1,8 +1,33 @@
 import axios from 'axios';
+import router from '@/router.js';
+import store from '@/store.js';
 
 import 'url-search-params-polyfill';
 
 axios.defaults.withCredentials = true;
+
+axios.interceptors.response.use((response) => {
+  return response;
+}, () => {
+  console.log('request rejected');
+  console.log(router.currentRoute);
+  if (store.state.isAuthenticating) {
+    // redirect to error
+    router.push({
+      name: 'error',
+      params: {
+        errorMessage: 'Authentication Failed',
+      },
+    });
+  } else {
+    router.push({
+      name: 'authenticate',
+      params: {
+        targetRoute: router.currentRoute,
+      },
+    });
+  }
+});
 
 const service = {
   authenticationUrl: null,
