@@ -16,6 +16,7 @@ import App from './App';
 import router from './router';
 import store from './store/store';
 
+
 Vue.use(ClientTable, {}, false, 'bootstrap4', 'default');
 Vue.use(ServerTable, {}, false, 'bootstrap4', 'default');
 Vue.use(Vue2Crumbs);

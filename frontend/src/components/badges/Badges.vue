@@ -36,6 +36,8 @@
         </div>
       </transition>
     </loading-container>
+
+    <edit-badge v-if="displayNewBadgeModal" v-model="displayNewBadgeModal" :badge="emptyNewBadge" @badge-updated="saveBadge"></edit-badge>
   </div>
 </template>
 
@@ -54,16 +56,30 @@
       NoContent,
       LoadingContainer,
       Badge,
+      EditBadge,
     },
     props: ['project'],
     data() {
       return {
         isLoading: true,
         badges: [],
+        displayNewBadgeModal: false,
       };
     },
     mounted() {
       this.loadBadges();
+    },
+    computed: {
+      emptyNewBadge() {
+        return {
+          projectId: this.project.projectId,
+          name: '',
+          badgeId: '',
+          description: '',
+          iconClass: 'fas fa-award',
+          requiredSkills: [],
+        };
+      },
     },
     methods: {
       loadBadges() {
@@ -107,27 +123,8 @@
           });
       },
       newBadge() {
-        const emptyBadge = {
-          projectId: this.project.projectId,
-          name: '',
-          badgeId: '',
-          description: '',
-          iconClass: 'fas fa-award',
-          requiredSkills: [],
-        };
-        this.$modal.open({
-          parent: this,
-          component: EditBadge,
-          hasModalCard: true,
-          canCancel: false,
-          width: 1300,
-          props: {
-            badge: emptyBadge,
-          },
-          events: {
-            'badge-updated': this.saveBadge,
-          },
-        });
+        console.log('newBadge called');
+        this.displayNewBadgeModal = true;
       },
       moveBadgeDown(badge) {
         this.moveBadge(badge, 'DisplayOrderDown');

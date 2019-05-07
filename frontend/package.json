@@ -37,7 +37,8 @@
     "vue-scrollto": "^2.15.0",
     "vue-tables-2": "1.4.70",
     "vue-virtual-scroll-list": "1.3.2",
-    "vuex": "^3.0.1"
+    "vuex": "^3.0.1",
+    "vuejs-datepicker": "1.5.4"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^3.5.0",

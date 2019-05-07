@@ -1,7 +1,7 @@
 <template>
   <page-preview-card :options="cardOptions">
     <div slot="header-top-right">
-      <edit-and-delete-dropdown v-on:deleted="deleteBadge" v-on:edited="editBadge" v-on:move-up="moveUp"
+      <edit-and-delete-dropdown v-on:deleted="deleteBadge" v-on:edited="showEditBadge=true" v-on:move-up="moveUp"
                                 v-on:move-down="moveDown"
                                 :isFirst="badgeInternal.isFirst" :isLast="badgeInternal.isLast" :isLoading="isLoading"
                                 class="badge-settings"></edit-and-delete-dropdown>
@@ -12,6 +12,8 @@
                    class="btn btn-outline-primary btn-sm">
         Manage <i class="fas fa-arrow-circle-right"/>
       </router-link>
+
+      <edit-badge v-if="showEditBadge" v-model="showEditBadge" :id="badge.badgeId" :badge="badge" @badge-updated="badgeEdited"></edit-badge>
     </div>
   </page-preview-card>
 </template>
@@ -23,13 +25,14 @@
 
   export default {
     name: 'Badge',
-    components: { PagePreviewCard, EditAndDeleteDropdown },
+    components: { PagePreviewCard, EditAndDeleteDropdown, EditBadge },
     props: ['badge'],
     data() {
       return {
         isLoading: false,
         badgeInternal: Object.assign({}, this.badge),
         cardOptions: {},
+        showEditBadge: false,
       };
     },
     mounted() {
@@ -61,21 +64,6 @@
           iconPack: 'fa',
           scroll: 'keep',
           onConfirm: () => this.badgeDeleted(),
-        });
-      },
-      editBadge() {
-        this.$modal.open({
-          parent: this,
-          component: EditBadge,
-          hasModalCard: true,
-          width: 1110,
-          props: {
-            badge: this.badgeInternal,
-            isEdit: true,
-          },
-          events: {
-            'badge-updated': this.badgeEdited,
-          },
         });
       },
       badgeEdited(badge) {
