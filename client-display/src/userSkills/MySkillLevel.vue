@@ -8,7 +8,7 @@
             <strong class="fa-stack-1x trophy-text">{{ skillLevel }}</strong>
         </span>
 
-        <div class="level-subtitle">
+        <div>
             Level <strong>{{ skillLevel }}</strong> out of <strong>{{ totalNumLevels }}</strong>
         </div>
 
@@ -50,10 +50,6 @@
     margin-top: -0.65em;
     font-size: 0.5em;
     color: #333;
-  }
-
-  .level-subtitle {
-
   }
 
   .skills-icon {
