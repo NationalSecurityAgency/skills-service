@@ -657,6 +657,9 @@ class AdminController {
     @RequestMapping(value = "/projects/{projectId}/token/{userId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     ResponseEntity<OAuth2AccessToken> getUserToken(@PathVariable("projectId") String projectId, @PathVariable("userId") String userId) {
+        println("+++++++++")
+        println("GETTING TOKEN!!!")
+        println("++++++++++")
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(userId, "User Id")
 
