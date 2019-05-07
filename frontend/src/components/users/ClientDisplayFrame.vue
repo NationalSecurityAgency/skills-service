@@ -36,7 +36,7 @@
           const parsedMessage = messageParser.getParsedMessage();
           if (parsedMessage.name === 'height-change') {
             if (parsedMessage.payload.contentHeight > 0) {
-              const adjustedHeight = Math.max(parsedMessage.payload.contentHeight, screen.height);
+              const adjustedHeight = Math.max(parsedMessage.payload.contentHeight, window.screen.height);
               this.$refs.theIframe.height = adjustedHeight;
               this.$refs.theIframe.style.height = `${adjustedHeight}px`;
             }
