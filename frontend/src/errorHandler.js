@@ -1,8 +1,8 @@
 import axios from 'axios';
-import { ModalProgrammatic } from 'buefy/dist/components/modal';
+// import { ModalProgrammatic } from 'buefy/dist/components/modal';
 import router from './router';
 import store from './store/store';
-import ErrorModal from './components/utils/ErrorModal';
+// import ErrorModal from './components/utils/ErrorModal';
 
 function errorResponseHandler(error) {
   // check if the caller wants to handle the error with displaying the errorPage/dialog
@@ -22,14 +22,14 @@ function errorResponseHandler(error) {
     const errorMessage = (error.response && error.response.data && error.response.data.message) ? error.response.data.message : undefined;
     const showModalDialog = Object.prototype.hasOwnProperty.call(error.config, 'useErrorPage') && error.config.useErrorPage === false;
     if (showModalDialog) {
-      ModalProgrammatic.open({
-        parent: this,
-        component: ErrorModal,
-        hasModalCard: true,
-        props: {
-          errorMessage,
-        },
-      });
+      // ModalProgrammatic.open({
+      //   parent: this,
+      //   component: ErrorModal,
+      //   hasModalCard: true,
+      //   props: {
+      //     errorMessage,
+      //   },
+      // });
     } else {
       router.push({ name: 'ErrorPage', query: { errorMessage } });
     }

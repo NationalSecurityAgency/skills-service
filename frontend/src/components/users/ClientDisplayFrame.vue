@@ -36,8 +36,9 @@
           const parsedMessage = messageParser.getParsedMessage();
           if (parsedMessage.name === 'height-change') {
             if (parsedMessage.payload.contentHeight > 0) {
-              this.$refs.theIframe.height = parsedMessage.payload.contentHeight;
-              this.$refs.theIframe.style.height = `${parsedMessage.payload.contentHeight}px`;
+              const adjustedHeight = Math.max(parsedMessage.payload.contentHeight, window.screen.height);
+              this.$refs.theIframe.height = adjustedHeight;
+              this.$refs.theIframe.style.height = `${adjustedHeight}px`;
             }
           } else if (parsedMessage.name === 'frame-initialized') {
             const bindings = {
@@ -47,10 +48,9 @@
             };
             this.$refs.theIframe.contentWindow.postMessage(`skills::data-init::${JSON.stringify(bindings)}`, '*');
           } else if (parsedMessage.name === 'route-changed') {
-            VueScrollTo.scrollTo(this.$refs.theIframe, 0, {
+            VueScrollTo.scrollTo(this.$refs.theIframe, 1000, {
               y: true,
               x: false,
-              offset: -60,
             });
           }
         }
@@ -67,5 +67,6 @@
   .the-iframe {
     width: 100%;
     height: 1000px;
+    border: 0;
   }
 </style>

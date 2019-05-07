@@ -1,20 +1,11 @@
 <template>
-  <b-field>
-    <b-radio-button v-model="sortMethod" native-value="directed">
-      <b-tooltip label="Directed algorithm adheres to the to and from data of the edges. A --> B so B is a level lower than A."
-                 position="is-bottom" animanted="true" type="is-info" multilined>
-        <span><i class="fas fa-vector-square"></i> Directed</span>
-      </b-tooltip>
-
-    </b-radio-button>
-
-    <b-radio-button v-model="sortMethod" native-value="hubsize">
-      <b-tooltip label="Hubsize algorithm takes the nodes with the most edges and puts them at the top. From that the rest of the hierarchy is evaluated."
-                 position="is-bottom" animanted="true" type="is-info" multilined>
-        <span><i class="fas fa-bezier-curve"></i> Hubsize</span>
-      </b-tooltip>
-    </b-radio-button>
-  </b-field>
+  <div>
+      <b-form-radio-group id="radio-group-2" v-model="sortMethod"
+                          name="graph-sort-method" button-variant="outline-info" stacked buttons>
+        <b-form-radio value="directed" v-b-tooltip.hover="msg.directed"><span><i class="fas fa-vector-square"></i> Directed</span></b-form-radio>
+        <b-form-radio value="hubsize" v-b-tooltip.hover="msg.hubsize"><span><i class="fas fa-bezier-curve"></i> Hubsize</span></b-form-radio>
+      </b-form-radio-group>
+  </div>
 </template>
 
 <script>
@@ -23,6 +14,10 @@
     data() {
       return {
         sortMethod: 'directed',
+        msg: {
+          directed: 'Directed adheres to the to and from data of the edges. A --> B so B is a level lower than A.',
+          hubsize: 'Hubsize takes the nodes with the most edges and puts them at the top. From that the rest of the hierarchy is evaluated.',
+        },
       };
     },
     watch: {

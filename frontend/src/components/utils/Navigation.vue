@@ -1,16 +1,17 @@
 <template>
   <div class="row">
-    <div class="col-lg-2 border rounded p-3 mb-2 bg-light" style="min-width: 15rem;">
-      <h3 class="h3 mb-2">Navigation</h3>
+    <div class="col-lg-2 border rounded p-3 mb-2 bg-light">
+      <h3 class="mb-2">Navigation</h3>
       <ul class="nav flex-column">
         <li class="nav-item skills-nav-item" v-for="(navItem) of navItems" :key="navItem.name">
-          <a class="nav-link" v-on:click="navigate(`${navItem.name}`)"
+          <b-link class="nav-link" @click="navigate(`${navItem.name}`)"
              :class="{'bg-primary': menuSelections.get(navItem.name), 'text-light': menuSelections.get(navItem.name)}">
-            <i v-bind:class="navItem.iconClass" class="fas fa-w-16" style="min-width: 2rem;"/> {{ navItem.name }}</a>
+            <i v-bind:class="navItem.iconClass" class="fas fa-w-16" style="min-width: 2rem;"/> {{ navItem.name }}
+          </b-link>
         </li>
       </ul>
     </div>
-    <div class="col">
+    <div class="col-lg-10">
       <div v-for="(navItem) of navItems" :key="navItem.name">
         <div v-if="menuSelections.get(navItem.name)">
           <slot :name="navItem.name"></slot>
@@ -18,7 +19,6 @@
       </div>
     </div>
   </div>
-
 </template>
 
 <script>

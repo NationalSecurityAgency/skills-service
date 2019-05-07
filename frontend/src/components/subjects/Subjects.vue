@@ -1,20 +1,20 @@
 <template>
   <div>
-    <sub-page-header title="Subjects" action="Subject" @add-action="newSubject"/>
+    <sub-page-header title="Subjects" action="Subject" @add-action="openNewSubjectModal"/>
     <loading-container v-bind:is-loading="isLoading">
-      <div>
-        <div v-if="subjects && subjects.length" class="row justify-content-center">
-          <div v-for="(subject) of subjects" :key="subject.id" class="col-lg-4 mb-3" style="min-width: 23rem;">
-            <subject :subject="subject" v-on:subject-deleted="subjectRemoved" v-on:move-subject-up="moveSubjectUp"
-                     v-on:move-subject-down="moveSubjectDown"/>
-          </div>
-
+      <div v-if="subjects && subjects.length" class="row justify-content-center">
+        <div v-for="(subject) of subjects" :key="subject.id" :id="subject.id" class="col-lg-4 mb-3"
+             style="min-width: 23rem;">
+          <subject :subject="subject" v-on:subject-deleted="deleteSubject" v-on:move-subject-up="moveSubjectUp"
+                   v-on:move-subject-down="moveSubjectDown"/>
         </div>
-
-        <no-content3 v-if="!subjects || subjects.length==0"
-          title="No Subjects Yet" sub-title="Create a project to get started!"></no-content3>
       </div>
+
+      <no-content3 v-if="!subjects || subjects.length==0"
+                   title="No Subjects Yet" sub-title="Create a project to get started!"></no-content3>
     </loading-container>
+
+    <edit-subject v-if="displayNewSubjectModal" v-model="displayNewSubjectModal" :subject="emptyNewSubject" @subject-saved="subjectAdded"/>
   </div>
 </template>
 
@@ -29,6 +29,7 @@
   export default {
     name: 'Subjects',
     components: {
+      EditSubject,
       SubPageHeader,
       NoContent3,
       LoadingContainer,
@@ -39,12 +40,16 @@
       return {
         isLoading: true,
         subjects: [],
+        displayNewSubjectModal: false,
       };
     },
     mounted() {
       this.loadSubjects();
     },
     methods: {
+      openNewSubjectModal() {
+        this.displayNewSubjectModal = true;
+      },
       loadSubjects() {
         SubjectsService.getSubjects(this.project.projectId)
           .then((response) => {
@@ -59,11 +64,19 @@
             this.isLoading = false;
           });
       },
-      subjectRemoved(subject) {
-        this.subjects = this.subjects.filter(item => item.id !== subject.id);
-        this.$emit('subjects-changed', subject.subjectId);
+      deleteSubject(subject) {
+        this.isLoading = true;
+        SubjectsService.deleteSubject(subject)
+          .then(() => {
+            this.subjects = this.subjects.filter(item => item.id !== subject.id);
+            this.$emit('subjects-changed', subject.subjectId);
+          })
+          .finally(() => {
+            this.isLoading = false;
+          });
       },
       subjectAdded(subject) {
+        this.displayNewSubjectModal = false;
         this.isLoading = true;
         SubjectsService.saveSubject(subject)
           .then(() => {
@@ -73,28 +86,6 @@
           .finally(() => {
             this.isLoading = false;
           });
-      },
-      newSubject() {
-        const emptySubject = {
-          projectId: this.project.projectId,
-          name: '',
-          subjectId: '',
-          description: '',
-          iconClass: 'fab fa-pied-piper-alt',
-        };
-        this.$modal.open({
-          parent: this,
-          component: EditSubject,
-          hasModalCard: true,
-          canCancel: false,
-          // width: 1300,
-          props: {
-            subject: emptySubject,
-          },
-          events: {
-            'subject-created': this.subjectAdded,
-          },
-        });
       },
       moveSubjectDown(subject) {
         this.moveSubject(subject, 'DisplayOrderDown');
@@ -112,7 +103,17 @@
             this.isLoading = false;
           });
       },
-
+    },
+    computed: {
+      emptyNewSubject() {
+        return {
+          projectId: this.project.projectId,
+          name: '',
+          subjectId: '',
+          description: '',
+          iconClass: 'fab fa-pied-piper-alt',
+        };
+      },
     },
   };
 </script>

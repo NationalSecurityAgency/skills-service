@@ -1,6 +1,6 @@
 <template>
   <div class="loading-container">
-    <b-loading :is-full-page="false" :active.sync="isLoading" :can-cancel="false"></b-loading>
+    <skills-spinner :is-loading="isLoading"/>
     <div v-if="!isLoading">
       <slot></slot>
     </div>
@@ -8,8 +8,13 @@
 </template>
 
 <script>
+  import SkillsSpinner from './SkillsSpinner';
+
   export default {
     name: 'LoadingContainer',
+    components: {
+      SkillsSpinner,
+    },
     props: ['isLoading'],
   };
 </script>

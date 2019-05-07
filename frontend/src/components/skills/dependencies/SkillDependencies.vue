@@ -1,76 +1,60 @@
 <template>
-    <div id="skill-dependencies-display">
-      <sub-page-header title="Dependencies"/>
+  <div>
+    <sub-page-header title="Dependencies"/>
 
-      <div class="skills-bordered-component dependencies-container">
-        <loading-container :is-loading="!loading.finishedAllSkills || !loading.finishedDependents">
-            <div class="columns">
-              <div class="column is-full">
-                <skills-selector2 :options="allSkills" :selected="skills" v-on:added="skillAdded" v-on:removed="skillDeleted">
-                  <template slot="dropdown-item" slot-scope="{ props }">
-                    <div class="columns">
-                      <div class="column is-narrow" style="width: 40px;">
-                        <i v-if="props.option.otherProjectId" class="fas fa-w-16 fa-handshake"></i>
-                        <i v-else class="fas fa-w-16 fa-list-alt"></i>
-                      </div>
-                      <div class="column skills-handle-overflow" style="width:30%;" :title="props.option.name">
-                        <span class="selector-skill-name">
-                          <span v-if="props.option.otherProjectId" class="has-text-weight-bold">{{props.option.otherProjectName}} : </span>
-                          {{ props.option.name }}</span>
-                      </div>
-                      <div class="column is-one-fifth skills-handle-overflow" style="width:20%;" :title="props.option.skillId">
-                        <span class="selector-other-label">ID:</span> <span class="selector-other-value">{{props.option.skillId}}</span>
-                      </div>
-                      <div class="column is-one-fifth" style="width:15%;">
-                        <span v-if="props.option.otherProjectId" class="has-text-warning">** Shared Skill **</span>
-                        <span v-else>
-                          <span class="selector-other-label">Total Points:</span> <span class="selector-other-value">{{ props.option.totalPoints}}</span>
-                        </span>
-                      </div>
-                    </div>
-                  </template>
-
-                  <template slot="selected-item" slot-scope="{ props }">
-                    <span class="tag has-text-weight-bold" style="margin: 5px;" v-bind:style="{'background-color': props.option.isFromAnotherProject ? '#ffb87f' : 'lightblue'}">
-                      <span class="skills-handle-overflow" style="width: 15rem;" :title="props.option.isFromAnotherProject ? props.option.projectId + ' : ' + props.option.name : props.option.name" >
-                        <span v-if="props.option.isFromAnotherProject">{{ props.option.projectId | truncate(10)}} : </span>
-                        {{ props.option.name }}
-                      </span>
-                      <button class="delete is-small" v-on:click="props.remove(props.option)"></button>
-                    </span>
-
-                  </template>
-
-                </skills-selector2>
+    <simple-card class="dependencies-container">
+      <loading-container :is-loading="!loading.finishedAllSkills || !loading.finishedDependents">
+        <skills-selector2 :options="allSkills" :selected="skills" v-on:added="skillAdded" v-on:removed="skillDeleted">
+          <template slot="dropdown-item" slot-scope="{ props }">
+            <div class="media">
+              <div class="d-inline-block mt-1 mr-3">
+                <i v-if="props.option.otherProjectId" class="fas fa-w-16 fa-handshake text-primary"></i>
+                <i v-else class="fas fa-w-16 fa-list-alt text-info"></i>
+              </div>
+              <div class="media-body">
+                <strong class="mb-2"><span v-if="props.option.otherProjectId" class="">{{props.option.otherProjectName}} : </span>
+                  {{ props.option.name }}</strong>
+                <div style="font-size: 0.95rem;" class="text-secondary">
+                  <span class="">ID:</span> <span class="">{{props.option.skillId}}</span>
+                  <span v-if="props.option.otherProjectId" class="text-warning ml-3">** Shared Skill **</span>
+                </div>
               </div>
             </div>
+          </template>
 
-          <b-notification :active.sync="errNotification.enable" type="is-warning">
-            <span style="font-size: 1.2rem;">
-              <i style="font-size: 1.4rem;" class="fa fa-exclamation-circle"></i> <strong>Error!</strong> Request could not be completed! <strong>{{ errNotification.msg }}</strong>
+          <template slot="selected-item" slot-scope="{ props }">
+            <span class="mt-2 mr-2 border-primary rounded px-1" style="padding-top: 2px; padding-bottom: 2px;"
+                  v-bind:style="{'background-color': props.option.isFromAnotherProject ? '#ffb87f' : 'lightblue'}">
+              <span class="skills-handle-overflow" style="width: 15rem;"
+                  :title="props.option.isFromAnotherProject ? props.option.projectId + ' : ' + props.option.name : props.option.name">
+                <span v-if="props.option.isFromAnotherProject">{{ props.option.projectId | truncate(10)}} : </span>
+                {{ props.option.name }}
+              </span>
+              <button class="btn btn-sm btn-outline-secondary p-0 border-0 ml-1" v-on:click="props.remove(props.option)"><i class="fas fa-times"/></button>
             </span>
-          </b-notification>
+          </template>
+        </skills-selector2>
 
-          <dependants-graph :skill="skill" :dependent-skills="skills" :graph="graph"></dependants-graph>
+        <b-alert v-if="errNotification.enable" variant="danger" class="mt-2" show dismissible>
+          <i class="fa fa-exclamation-circle mr-1"></i> <strong>Error!</strong> Request could not be completed! <strong>{{ errNotification.msg }}</strong>
+        </b-alert>
 
-          <simple-skills-table :skills="skills" v-on:skill-removed="skillDeleted">
+        <dependants-graph :skill="skill" :dependent-skills="skills" :graph="graph" class="mt-3"/>
+
+        <simple-skills-table :skills="skills" v-on:skill-removed="skillDeleted">
             <span slot="name-cell" slot-scope="row">
-              <i v-if="row.props.isFromAnotherProject" class="fas fa-w-16 fa-handshake"></i>
-              <i v-else class="fas fa-w-16 fa-list-alt"></i>
-              <span v-if="row.props.isFromAnotherProject" class=""><span class="has-text-weight-bold">Cross Project Dependency </span> {{row.props.projectId}} : </span>
+              <i v-if="row.props.isFromAnotherProject" class="fas fa-w-16 fa-handshake text-primary mr-1"></i>
+              <i v-else class="fas fa-w-16 fa-list-alt text-info mr-1"></i>
               {{ row.props.name }}
+               <div v-if="row.props.isFromAnotherProject" class="">
+                Cross Project Dependency from project [{{row.props.projectId}}]
+              </div>
             </span>
+        </simple-skills-table>
 
-            <!--<b-tooltip label="By default only skills under current subject will be considered."-->
-                       <!--position="is-left" animanted="true" type="is-light">-->
-              <!--<span><i class="fas fa-question-circle"></i></span>-->
-            <!--</b-tooltip>-->
-
-          </simple-skills-table>
-
-        </loading-container>
-      </div>
-    </div>
+      </loading-container>
+    </simple-card>
+  </div>
 </template>
 
 <script>
@@ -79,10 +63,14 @@
   import SkillsSelector2 from '../SkillsSelector2';
   import SimpleSkillsTable from '../SimpleSkillsTable';
   import SubPageHeader from '../../utils/pages/SubPageHeader';
+  import SimpleCard from '../../utils/cards/SimpleCard';
+  import LoadingContainer from '../../utils/LoadingContainer';
 
   export default {
     name: 'SkillDependencies',
     components: {
+      LoadingContainer,
+      SimpleCard,
       SubPageHeader,
       SimpleSkillsTable,
       SkillsSelector2,
@@ -170,7 +158,11 @@
                   msg: 'Cannot manage skills from external projects.',
                 },
               };
-              return Object.assign(entry, { subjectId: this.skill.subjectId, disabledStatus: disableInfo, isFromAnotherProject: externalProject });
+              return Object.assign(entry, {
+                subjectId: this.skill.subjectId,
+                disabledStatus: disableInfo,
+                isFromAnotherProject: externalProject,
+              });
             });
 
             // this.previousSkills = this.skills.map(entry => entry);

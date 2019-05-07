@@ -1,22 +1,20 @@
 <template>
-    <div id="simple-skills-table" v-if="this.skills && this.skills.length">
-      <v-client-table :data="skills" :columns="columns" :options="options">
-        <div slot="edit" slot-scope="props">
-          <div class="field has-addons has-text-right">
+  <div id="simple-skills-table" v-if="this.skills && this.skills.length">
+    <v-client-table :data="skills" :columns="columns" :options="options">
+      <div slot="edit" slot-scope="props">
+        <div class="field has-addons has-text-right">
           <span class="field has-addons">
             <p class="">
-              <a v-on:click="onDeleteEvent(props.row)" class="button is-outlined is-info">
-                    <span class="icon is-small">
+              <button v-on:click="onDeleteEvent(props.row)" class="btn btn-sm btn-outline-primary">
                       <i class="fas fa-trash"/>
-                    </span>
-              </a>
+              </button>
             </p>
             <p class="skills-pad-left-1-rem">
               <b-tooltip :label="getManagedBtnDisabledMsg(props.row)" :active="isManagedBtnDisabled(props.row)"
                          position="is-left" animanted="true" type="is-light">
                 <router-link :to="{ name:'SkillPage',
                 params: { projectId: props.row.projectId, subjectId: props.row.subjectId, skillId: props.row.skillId }}"
-                             class="button is-outlined is-info"
+                             class="btn btn-sm btn-outline-primary"
                              v-bind:class="{ notactive: isManagedBtnDisabled(props.row) }">
                   <span>Manage</span>
                   <span class="icon is-small">
@@ -26,18 +24,18 @@
               </b-tooltip>
             </p>
           </span>
-          </div>
         </div>
+      </div>
 
 
-        <div slot="name" slot-scope="props">
-          <!-- allow to override how name field is rendered-->
-          <slot name="name-cell" v-bind:props="props.row">
-            {{ props.row.name }}
-          </slot>
-        </div>
-      </v-client-table>
-    </div>
+      <div slot="name" slot-scope="props">
+        <!-- allow to override how name field is rendered-->
+        <slot name="name-cell" v-bind:props="props.row">
+          {{ props.row.name }}
+        </slot>
+      </div>
+    </v-client-table>
+  </div>
 </template>
 
 <script>
@@ -58,6 +56,11 @@
           perPage: 15,
           columnsClasses: {
             edit: 'control-column',
+          },
+          columnsDisplay: {
+            skillId: 'not_mobile',
+            pointIncrement: 'not_mobile',
+            totalPoints: 'not_mobile',
           },
           pagination: { dropdown: false, edge: false },
           sortable: ['name', 'skillId', 'pointIncrement', 'totalPoints'],
@@ -90,13 +93,21 @@
 
 <style>
   #simple-skills-table .VueTables__limit-field {
-    display:none;
+    display: none;
   }
 
-  #simple-skills-table .control-column{
+  #simple-skills-table .control-column {
     width: 11rem;
-    /*background: yellow;*/
   }
+
+  /* on the mobile platform some of the columns will be removed
+     so let's allow the table to size on its own*/
+  @media (max-width: 576px) {
+    #simple-skills-table .control-column {
+      width: unset;
+    }
+  }
+
 
   #simple-skills-table .notactive {
     cursor: not-allowed;

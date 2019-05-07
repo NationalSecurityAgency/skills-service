@@ -1,15 +1,22 @@
 <template>
-  <div class="section has-text-grey has-text-centered">
-
-    <div class="columns is-centered">
-      <div class="column is-narrow box icon-container">
-        <i class="icon-style" :class="icon"></i>
+  <div class="text-secondary text-center">
+    <div class="row">
+      <div class="col">
+        <span class="fa-stack fa-3x " style="vertical-align: top;">
+          <i class="fas fa-circle fa-stack-2x"></i>
+          <i class="fa-stack-1x fa-inverse" :class="icon"></i>
+        </span>
+      </div>
+      <div class="w-100"></div>
+      <div class="col pt-2">
+        <h3 class="h3">{{ title }}</h3>
       </div>
     </div>
-    <h1 class="title skills-pad-top-1-rem has-text-grey">{{ title }}</h1>
-    <p>
-      {{ message }}
-    </p>
+    <div class="row justify-content-center ">
+      <div class="col col-md-8 col-lg-7 col-xl-5">
+        {{ message }}
+      </div>
+    </div>
   </div>
 </template>
 

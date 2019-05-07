@@ -1,33 +1,48 @@
 <template>
   <loading-container class="child-row" v-bind:is-loading="isLoading">
-    <div class="child-row-container">
-      <div>
-        <span class="title is-5">Skills Points: </span>
-        <span class="subtitle skills-pad-left-1-rem"></span> <span class="points">{{ skillInfo.totalPoints }}</span> Total Points
-        (<span class="points">{{ skillInfo.pointIncrement }}</span> increment  <i class="fa fa-times"></i>
-        <span class="points">{{ skillInfo.numPerformToCompletion }}</span> times to completion )
-      </div>
-      <div>
-        <span class="title is-5">Interval Increment:</span>
-        <span class="points">{{ skillInfo.pointIncrementInterval }}</span> hours
-      </div>
 
-      <div>
-        <span class="title is-5">Version:</span>
-        <span class="points">{{ skillInfo.version }}</span>
+    <div class="row">
+      <div class="col-12 col-md-12 col-xl mb-md-3 mb-xl-0">
+        <media-info-card :title="`${skillInfo.totalPoints} Points`" icon-class="fas fa-calculator text-success">
+          <strong>{{ skillInfo.pointIncrement }}</strong> Increment <i class="fa fa-times text-muted"/>
+          <strong> {{ skillInfo.numPerformToCompletion }}</strong> Times to Completion
+        </media-info-card>
       </div>
+      <div class="col-12  col-md-6 col-xl my-3 my-md-0">
+        <media-info-card :title="`${skillInfo.pointIncrementInterval} Hours`" icon-class="fas fa-hourglass-half text-info">
+          Interval Increment
+        </media-info-card>
+      </div>
+      <div class="col-12 col-md-6 col-xl">
+        <media-info-card :title="`Version # ${skillInfo.version}`" icon-class="fas fa-code-branch text-warning">
+          Version of this Skill
+        </media-info-card>
+      </div>
+    </div>
 
-      <div v-if="description" class="skills-pad-top-1-rem">
-        <h2 class="title is-5">Description</h2>
-        <div class="description-container">
-          <p v-html="description"></p>
-        </div>
-      </div>
 
-      <div v-if="skillInfo.helpUrl" class="skills-pad-top-1-rem">
-        <span class="title is-5">Help URL:</span>
-        <span class="skills-pad-left-1-rem"><a :href="skillInfo.helpUrl" target="_blank">{{ skillInfo.helpUrl }}</a></span>
+    <div class="card mt-3">
+      <div class="card-header">
+        Description
       </div>
+      <div class="card-body">
+        <p v-if="description" v-html="description"></p>
+        <p v-else class="text-muted">
+          Not Specified
+        </p>
+      </div>
+    </div>
+
+    <div class="input-group mt-3">
+      <div class="input-group-prepend">
+        <div class="input-group-text"><i class="fas fa-link mr-1"></i> Help URL: </div>
+      </div>
+      <span class="form-control">
+        <a v-if="skillInfo.helpUrl" :href="skillInfo.helpUrl" target="_blank">{{ skillInfo.helpUrl }}</a>
+        <span v-else class="text-muted">
+          Not Specified
+        </span>
+      </span>
     </div>
   </loading-container>
 </template>
@@ -36,10 +51,11 @@
   import marked from 'marked';
   import LoadingContainer from '../utils/LoadingContainer';
   import SkillsService from './SkillsService';
+  import MediaInfoCard from '../utils/cards/MediaInfoCard';
 
   export default {
     name: 'ChildRowSkillsDisplay',
-    components: { LoadingContainer },
+    components: { MediaInfoCard, LoadingContainer },
     props: ['projectId', 'subjectId', 'parentSkillId', 'skill'],
     data() {
       return {

@@ -1,18 +1,14 @@
 <template>
   <div id="project-selector">
     <!-- see https://github.com/shentao/vue-multiselect/issues/421 for explanation of :blockKeys-->
-    <multiselect v-model="selectedValue" placeholder="Type to search for a project..."
+    <multiselect v-model="selectedValue" placeholder="Search for a project..."
                  :options="projects" :multiple="true" :taggable="false" :blockKeys="['Delete']"
                  :hide-selected="true" label="name" track-by="id" v-on:select="onSelected" v-on:remove="onRemoved"
                  @search-change="search" :loading="isLoading" :internal-search="false"
                  :clear-on-select="false">
       <template slot="option" slot-scope="props">
-        <div class="columns">
-          <div class="column skills-handle-overflow" style="flex:none; width:45%;" :title="props.option.name"><span class="selector-skill-name">{{ props.option.name }}</span></div>
-          <div class="column is-one-fifth skills-handle-overflow" style="flex:none; width:30%;" :title="props.option.projectId">
-            <span class="selector-other-label">ID:</span> <span class="selector-other-value">{{props.option.projectId}}</span>
-          </div>
-        </div>
+        <h6>{{ props.option.name }}</h6>
+        <div class="text-secondary">ID: {{props.option.projectId}}</div>
       </template>
     </multiselect>
   </div>
