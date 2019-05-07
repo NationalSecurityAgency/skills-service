@@ -4,118 +4,75 @@
     <sub-page-header title="Skills" action="Skill" @add-action="newSkill"/>
 
 
-    <div  class="skills-bordered-component">
-      <b-loading :is-full-page="true" :active.sync="isLoading" :can-cancel="false">
-      </b-loading>
-      <div v-if="isLoading" class="modal-card-body" style="height: 400px;">
-      </div>
+    <div class="card">
+      <div class="card-body">
+        <div v-if="isLoading" class="modal-card-body" style="height: 400px;">
+        </div>
 
-      <v-client-table :data="skills" :columns="skillsColumns"
-                      :options="options" v-if="this.skills && this.skills.length" v-on:sorted="handleColumnSort">
+        <v-client-table class="vue-table-2" :data="skills" :columns="skillsColumns"
+                        :options="options" v-if="this.skills && this.skills.length" v-on:sorted="handleColumnSort">
 
-        <div slot="name" slot-scope="props" class="field has-addons">
-          <div class="columns">
-            <div class="column">
-              <div>{{ props.row.name }}</div>
-              <div class="subtitle has-text-grey" style="font-size: 0.9rem;">ID: {{ props.row.skillId }}</div>
+          <div slot="name" slot-scope="props" class="field has-addons">
+            <div>
+              <h5>{{ props.row.name }}</h5>
+              <div class="text-muted" style="font-size: 0.9rem;">ID: {{ props.row.skillId }}</div>
             </div>
           </div>
-        </div>
 
-        <div slot="displayOrder" slot-scope="props" class="">
-          <div class="field has-addons">
+          <div slot="displayOrder" slot-scope="props">
             <span>{{props.row.displayOrder}}</span>
-            <b-tooltip
-              label='Sorting controls are enabled only when Display Order column is sorted in the ascending order.'
-              position="is-top" animanted="true" type="is-white black" :active="!sortButtonEnabled" multilined>
-              <span class="field has-addons skills-pad-left-1-rem">
-                 <span class="control">
-                      <button class="button is-outlined is-info see" v-on:click="moveDisplayOrderDown(props.row)"
-                              :class="{'is-loading': props.row.isMoving}"
-                              :disabled="!sortButtonEnabled || props.row.disabledDownButton || isMovingRows">
-                            <span class="icon is-small">
-                              <i class="fas fa-arrow-circle-down"/>
-                            </span>
-                      </button>
-                  </span>
-                <span class="control">
-                      <button class="button is-outlined is-info" :class="{'is-loading': props.row.isMoving}"
-                              :disabled="!sortButtonEnabled || props.row.disabledUpButton || isMovingRows"
-                              v-on:click="moveDisplayOrderUp(props.row)">
-                            <span class="icon is-small">
-                              <i class="fas fa-arrow-circle-up"/>
-                            </span>
-                      </button>
-                  </span>
-              </span>
-            </b-tooltip>
+
+            <b-button-group size="sm" class="ml-1"
+                            v-b-popover.hover="'Sorting controls are enabled only when Display Order column is sorted in the ascending order.'">
+              <b-button @click="moveDisplayOrderDown(props.row)" variant="outline-info"
+                        :disabled="!sortButtonEnabled || props.row.disabledDownButton || isMovingRows">
+                <i class="fas fa-arrow-circle-down"/>
+              </b-button>
+              <b-button @click="moveDisplayOrderUp(props.row)" variant="outline-info"
+                        :disabled="!sortButtonEnabled || props.row.disabledDownButton || isMovingRows">
+                <i class="fas fa-arrow-circle-up"/>
+              </b-button>
+            </b-button-group>
           </div>
-        </div>
 
-        <div slot="created" slot-scope="props" class="field has-addons">
-          {{ props.row.created }}
-        </div>
+          <div slot="created" slot-scope="props" class="field has-addons">
+            {{ props.row.created }}
+          </div>
 
-        <div slot="edit" slot-scope="props">
-          <div class="field has-addons">
-            <span class="field has-addons">
-              <p class="control">
-                <a v-on:click="editSkill(props.row)" class="button is-outlined is-info"
-                   :class="{'is-loading': props.row.isEditLoading}">
-                      <span class="icon is-small">
-                        <i class="fas fa-edit"/>
-                      </span>
-                  <!--<span>Edit</span>-->
-                </a>
-              </p>
-              <p class="control">
-                <a v-on:click="deleteSkill(props.row)" class="button is-outlined is-info"
-                   :class="{'is-loading': props.row.isDeleteLoading}">
-                      <span class="icon is-small">
-                        <i class="fas fa-trash"/>
-                      </span>
-                  <!--<span>Delete</span>-->
-                </a>
-              </p>
-              <p class="control">
-                <a v-on:click="addUser(props.row)" class="button is-outlined is-info">
-                        <span class="icon is-small">
-                          <i class="fas fa-user-plus"/>
-                        </span>
-                  <!--<span>Add User</span>-->
-                </a>
-              </p>
-              </span>
-          <p class="skills-pad-left-1-rem">
-
+          <div slot="edit" slot-scope="props">
+            <b-button-group size="sm" class="mr-1">
+              <b-button @click="editSkill(props.row)" variant="outline-primary"><i class="fas fa-edit"/></b-button>
+              <b-button @click="deleteSkill(props.row)" variant="outline-primary"><i class="fas fa-trash"/></b-button>
+<!--              <b-button @click="addUser(props.row)" variant="outline-primary"><i class="fas fa-user-plus"/></b-button>-->
+            </b-button-group>
             <router-link :to="{ name:'SkillPage',
-                params: { projectId: props.row.projectId, subjectId: props.row.subjectId, skillId: props.row.skillId }}"
-                         class="button is-outlined is-info">
-              <span>Manage</span>
-              <span class="icon is-small">
-                <i class="fas fa-arrow-circle-right"/>
-            </span>
+                            params: { projectId: props.row.projectId, subjectId: props.row.subjectId, skillId: props.row.skillId }}"
+                         class="btn btn-outline-primary btn-sm">
+              <span class="d-none d-sm-inline">Manage </span> <i class="fas fa-arrow-circle-right"/>
             </router-link>
-          </p>
           </div>
-        </div>
 
-        <div slot="child_row" slot-scope="props" class="skills-table-child-row">
-          <ChildRowSkillsDisplay :project-id="projectId" :subject-id="subjectId" :parent-skill-id="props.row.skillId"></ChildRowSkillsDisplay>
-        </div>
-      </v-client-table>
+          <div slot="child_row" slot-scope="props">
+            <ChildRowSkillsDisplay :project-id="projectId" :subject-id="subjectId"
+                                   :parent-skill-id="props.row.skillId" class="mr-3 ml-5 mb-3"></ChildRowSkillsDisplay>
+          </div>
+        </v-client-table>
 
-      <no-content :should-display="!(this.skills && this.skills.length)" :title="'No Skills Yet'">
-        <div slot="content" class="content" style="width: 100%;">
-          <p class="has-text-centered">
-            Create your first skill today by pressing
-          </p>
-          <p class="has-text-centered">
-            <new-skill-items-buttons v-on:new-skill-item="newSkill"></new-skill-items-buttons>
-          </p>
-        </div>
-    </no-content>
+        <no-content :should-display="!(this.skills && this.skills.length)" :title="'No Skills Yet'">
+          <div slot="content" class="content" style="width: 100%;">
+            <p class="has-text-centered">
+              Create your first skill today by pressing
+            </p>
+            <p class="has-text-centered">
+              <new-skill-items-buttons v-on:new-skill-item="newSkill"></new-skill-items-buttons>
+            </p>
+          </div>
+        </no-content>
+      </div>
     </div>
+
+    <edit-skill v-if="editSkillInfo.show" v-model="editSkillInfo.show" :skillId="editSkillInfo.skill.skillId" :is-edit="editSkillInfo.isEdit"
+                :project-id="projectId" :subject-id="subjectId" @skill-saved="skillCreatedOrUpdated"/>
   </div>
 </template>
 
@@ -126,13 +83,15 @@
   import NewSkillItemsButtons from './NewSkillItemsButtons';
   import ChildRowSkillsDisplay from './ChildRowSkillsDisplay';
   import SkillsService from './SkillsService';
-  import ToastHelper from '../utils/ToastHelper';
   import SubPageHeader from '../utils/pages/SubPageHeader';
+  import MsgBoxMixin from '../utils/modal/MsgBoxMixin';
 
   export default {
     name: 'SkillsTable',
+    mixins: [MsgBoxMixin],
     props: ['projectId', 'subjectId', 'skillsProp'],
     components: {
+      EditSkill,
       SubPageHeader,
       ChildRowSkillsDisplay,
       NewSkillItemsButtons,
@@ -141,6 +100,11 @@
     data() {
       return {
         isLoading: false,
+        editSkillInfo: {
+          isEdit: false,
+          show: false,
+          skill: {},
+        },
         skills: [],
         skillsColumns: ['name', 'displayOrder', 'created', 'edit'],
         sortButtonEnabled: false,
@@ -148,11 +112,7 @@
         options: {
           headings: {
             created: 'Created (GMT)',
-            // skillId: 'Skill Id',
             name: 'Skill Name',
-            pointIncrement: 'Point Increment',
-            totalPoints: 'Total Points',
-            pointIncrementInterval: 'Point Increment Interval (hours)',
             edit: '',
             displayOrder: 'Display Order',
           },
@@ -160,14 +120,17 @@
           dateFormat: 'YYYY-MM-DD HH:mm',
           descOrderColumns: ['created'],
           orderBy: { column: 'created', ascending: false },
+          columnsDisplay: {
+            displayOrder: 'not_mobile',
+            created: 'not_mobile',
+          },
           columnsClasses: {
             edit: 'control-column',
-            type: 'type-column',
             displayOrder: 'display-order-column',
             created: 'date-column',
             name: 'skills-table-skill-name',
           },
-          sortable: ['displayOrder', 'created', 'skillId', 'name', 'pointIncrement', 'pointIncrementInterval', 'totalPoints'],
+          sortable: ['displayOrder', 'created', 'name'],
           sortIcon: {
             base: 'fa fa-sort', up: 'fa fa-sort-up', down: 'fa fa-sort-down', is: 'fa fa-sort',
           },
@@ -183,51 +146,14 @@
     },
     methods: {
       newSkill() {
-        const emptySkill = {
-          skillId: '',
-          projectId: this.projectId,
-          subjectId: this.subjectId,
-          name: '',
-          pointIncrement: 10,
-          pointIncrementInterval: 8,
-          numPerformToCompletion: 10,
-          description: null,
-          helpUrl: null,
+        this.editSkillInfo = {
+          skill: {},
+          show: true,
+          isEdit: false,
         };
-
-        this.$modal.open({
-          parent: this,
-          component: EditSkill,
-          hasModalCard: true,
-          canCancel: false,
-          width: 1300,
-          props: {
-            skill: emptySkill,
-            projectId: this.projectId,
-            subjectId: this.subjectId,
-          },
-          events: {
-            'skill-created': this.skillCreatedOrUpdated,
-          },
-        });
       },
       editSkill(skillToEdit) {
-        this.$modal.open({
-          parent: this,
-          component: EditSkill,
-          hasModalCard: true,
-          canCancel: false,
-          width: 1300,
-          props: {
-            skill: skillToEdit,
-            isEdit: true,
-            projectId: this.projectId,
-            subjectId: this.subjectId,
-          },
-          events: {
-            'skill-created': this.skillCreatedOrUpdated,
-          },
-        });
+        this.editSkillInfo = { skill: skillToEdit, show: true, isEdit: true };
       },
 
       skillCreatedOrUpdated(skill) {
@@ -254,7 +180,7 @@
             this.isLoading = false;
 
             this.$emit('skills-change', skill.skillId);
-            this.toast(`Saved '${skill.name}' skill.`);
+            this.toast('Skill Saved', `Saved '${skill.name}' skill.`);
           })
           .finally(() => {
             this.isLoading = false;
@@ -262,25 +188,15 @@
       },
 
       deleteSkill(row) {
-        this.$dialog.confirm({
-          title: 'WARNING: Delete Skill Action',
-          message: `Skill Id: <b>${row.skillId}</b> <br/><br/>Delete Action can not be undone and <b>permanently</b> removes users' performed skills.`,
-          confirmText: 'Delete',
-          type: 'is-danger',
-          hasIcon: true,
-          icon: 'exclamation-triangle',
-          iconPack: 'fa',
-          scroll: 'keep',
-          onConfirm: () => this.doDeleteSkill(row),
-        });
+        this.msgConfirm(`Skill Id: [${row.skillId}]. Delete Action can not be undone and permanently removes users' performed skills.`)
+          .then((res) => {
+            if (res) {
+              this.doDeleteSkill(row);
+            }
+          });
       },
       doDeleteSkill(skill) {
         this.isLoading = true;
-        // const index = this.skills.findIndex(item => item.id === skill.id);
-        // if (item1Index >= 0) {
-        //   this.$set(this.skills[item1Index], 'isDeleteLoading', true);
-        // }
-
         SkillsService.deleteSkill(skill)
           .then(() => {
             const index = this.skills.findIndex(item => item.id === skill.id);
@@ -291,7 +207,7 @@
             this.isLoading = false;
             this.$emit('skills-change', skill.skillId);
 
-            this.toast(`Skill '${skill.name}' was removed.`);
+            this.toast('Removed Skill', `Skill '${skill.name}' was removed.`);
           })
           .finally(() => {
             this.isLoading = false;
@@ -372,28 +288,37 @@
           tableData[tableData.length - 1].disabledDownButton = true;
         }
       },
-      toast(msg, isErr) {
-        this.$toast.open(ToastHelper.defaultConf(msg, isErr));
+      toast(toastTitle, msg) {
+        this.$bvToast.toast(msg, {
+          title: toastTitle,
+          autoHideDelay: 4000,
+          toaster: 'b-toaster-top-center',
+          solid: true,
+          appendToast: true,
+          variant: 'success',
+        });
       },
     },
   };
 </script>
 
 <style>
-  .type-column {
+  #skillsTable .type-column {
     width: 8rem;
   }
 
-  .control-column{
-    width: 11rem;
-    /*background: yellow;*/
+  #skillsTable .control-column {
+    width: 12rem;
   }
-  .display-order-column{
+
+  #skillsTable .display-order-column {
+    width: 9rem;
+  }
+
+  #skillsTable .date-column {
     width: 11rem;
   }
-  .date-column{
-    width: 11rem;
-  }
+
   .VueTables__child-row-toggler {
     width: 16px;
     height: 16px;
@@ -413,39 +338,21 @@
     content: "\f146";
   }
 
-  .points {
-    font-size: 1.2rem;
-    font-weight: bold;
-    padding-left: 5px;
-  }
-
-  .skills-table-child-row {
-    background-color: #f9f9f9;
-    margin-left: 2rem;
-    padding-left: 1rem;
-    padding-top: 1rem;
-    padding-bottom: 1rem;
-    border-left: 0.5px solid #dbdbdb;
-  }
-
-   /*remove count on the bottom of the table*/
+  /*remove count on the bottom of the table*/
   #skillsTable .VuePagination__count {
     display: none;
   }
 
-  .skills-table-hierarchy-type {
-    font-size: 0.8rem;
-    font-weight: bold;
-  }
-
-  .skills-table-skill-name {
-    font-size: 1.1rem;
-    font-weight: bold;
-  }
-
-  /* reduce the width of first colun that hots expand control*/
+  /* reduce the width of first column that hosts expand control*/
   #skillsTable tbody > tr > td:first-child {
-    padding: 0.5rem 0rem;
+    padding: 1rem 0rem;
+    width: 2rem;
   }
+
+  /* Work around - "Filter:" label is not left aligned */
+  #skillsTable .form-inline label {
+    justify-content: left !important;
+  }
+
 
 </style>

@@ -2,9 +2,9 @@
   <div id="cross-projects-panel">
     <sub-page-header title="Cross-Project Skills"/>
 
-    <share-skills-with-other-projects :project-id="projectId"></share-skills-with-other-projects>
+    <share-skills-with-other-projects :project-id="projectId" class="mb-3"/>
 
-    <shared-skills-from-other-projects :project-id="projectId"></shared-skills-from-other-projects>
+    <shared-skills-from-other-projects :project-id="projectId"/>
   </div>
 </template>
 

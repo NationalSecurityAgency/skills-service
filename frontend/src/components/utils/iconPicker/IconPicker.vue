@@ -1,20 +1,28 @@
 <template>
-    <div class="icon-box has-text-centered has-text-info" v-on:click="selectIcon">
-      <div class="columns is-centered" style="height: 100%">
-        <div class="column">
+    <div class="has-text-centered has-text-info">
+      <div class="columns is-centered" style="height: 100%;">
+        <div class="icon-box column" v-on:click="selectIcon">
           <i
             :class="[selectedIconClass]"
-            class="skills-icon"/>
+            class="select-icon"/>
         </div>
       </div>
+
+      <!--<b-modal id="icons" size="lg" title="Icon Selection">
+          <icon-manager v-bind:customIconHeight="this.customIconHeight"
+                        v-bind:customIconWidth="this.customIconWidth"
+                        v-on:selected-icon="onSelectedIcon"></icon-manager>
+      </b-modal>-->
     </div>
+
 </template>
 
 <script>
-  import IconManager from './IconManager';
+  /* import IconManager from './IconManager'; */
 
   export default {
     name: 'IconPicker',
+    components: { /* IconManager */ },
     props: {
       startIcon: String,
       customIconHeight: {
@@ -34,24 +42,14 @@
     },
     methods: {
       selectIcon() {
-        this.$modal.open({
-          parent: this,
-          width: '900px',
-          component: IconManager,
-          hasModalCard: true,
-          props: {
-            customIconHeight: this.customIconHeight,
-            customIconWidth: this.customIconWidth,
-          },
-          events: {
-            'selected-icon': this.onSelectedIcon,
-          },
-        });
+        this.$emit('select-icon');
+        /* this.$bvModal.show('icons'); */
       },
       onSelectedIcon(selectedIcon) {
         this.selectedIconClass = `${selectedIcon.css}`;
         this.hideAvailableIcons = true;
         this.$emit('on-icon-selected', this.selectedIconClass);
+        this.$bvModal.hide('icons');
       },
       close() {
         this.hideAvailableIcons = true;
@@ -69,6 +67,12 @@
     width: 6rem;
     height: 5rem;
     cursor: pointer;
+    text-align: center;
+  }
+
+  .select-icon {
+    height: 64px;
+    width: 64px;
   }
 
 </style>

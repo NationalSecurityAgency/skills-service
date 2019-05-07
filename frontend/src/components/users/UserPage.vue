@@ -4,7 +4,7 @@
 
     <section class="section" v-if="userId">
       <navigation :nav-items="[
-          {name: 'Client Display', iconClass: 'fa-cubes'},
+          {name: 'Client Display', iconClass: 'fa-user'},
           {name: 'Stats', iconClass: 'fa-chart-bar'},
           {name: 'Performed Skills', iconClass: 'fa-award'},
         ]">

@@ -1,34 +1,23 @@
 <template>
   <div>
-    <sub-page-header title="My Projects" action="Project" @add-action="newProject"/>
+    <sub-page-header title="My Projects" action="Project" @add-action="newProject.show=true"/>
 
     <loading-container v-bind:is-loading="isLoading">
       <transition v-if="projects && projects.length" name="projectContainer" enter-active-class="animated fadeIn">
         <div>
-          <div v-for="project of projects" :key="project.id" class="box">
+          <div v-for="project of projects" :key="project.id" class="mb-3">
             <my-project :project="project" v-on:project-deleted="projectRemoved" v-on:move-project-up="moveProjectUp"
                         v-on:move-project-down="moveProjectDown"/>
           </div>
         </div>
       </transition>
 
-      <no-content :should-display="!projects || projects.length==0" :title="'No Projects Yet'">
-        <div slot="content" class="content" style="width: 100%;">
-          <p class="has-text-centered">
-            Create your first project today by pressing
-          </p>
-          <p class="has-text-centered">
-            <a v-on:click="newProject" class="button is-outlined is-success">
-              <span>Add New Project</span>
-              <span class="icon is-small">
-              <i class="fas fa-plus-circle"/>
-            </span>
-            </a>
-          </p>
-        </div>
-      </no-content>
-
+      <no-content2 v-if="!projects || projects.length==0" icon="fas fa-hand-spock" class="mt-4"
+                   title="No Projects Yet..." message="Welcome!! Start by creating a new project."/>
     </loading-container>
+
+    <edit-project v-if="newProject.show" v-model="newProject.show" :project="newProject.project"
+                  @project-saved="projectAdded"/>
 
   </div>
 
@@ -41,8 +30,7 @@
   import NoContent from '../utils/NoContent';
   import ProjectService from './ProjectService';
   import SubPageHeader from '../utils/pages/SubPageHeader';
-
-  // EditProject.
+  import NoContent2 from '../utils/NoContent2';
 
   export default {
     name: 'MyProjects',
@@ -50,13 +38,19 @@
       return {
         isLoading: true,
         projects: [],
+        newProject: {
+          show: false,
+          project: { name: '', projectId: '' },
+        },
       };
     },
     components: {
+      NoContent2,
       SubPageHeader,
       NoContent,
       LoadingContainer,
       MyProject,
+      EditProject,
     },
     mounted() {
       this.loadProjects();
@@ -82,21 +76,6 @@
           .then(() => {
             this.loadProjects();
           });
-      },
-      newProject() {
-        this.$modal.open({
-          parent: this,
-          component: EditProject,
-          hasModalCard: true,
-          canCancel: false,
-          // width: 400,
-          props: {
-            project: { name: '', projectId: '' },
-          },
-          events: {
-            'project-created': this.projectAdded,
-          },
-        });
       },
       moveProjectDown(project) {
         this.moveProject(project, 'DisplayOrderDown');

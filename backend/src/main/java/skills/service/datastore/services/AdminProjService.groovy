@@ -545,9 +545,9 @@ class AdminProjService {
 
     @Transactional(readOnly = true)
     List<ProjectResult> getProjects() {
-        List<ProjectResult> finalRes = projDefRepo.getProjectsByUser(userId).collect({
+        // sql join with UserRoles and ther is 1-many relationship that needs to be normalized
+        List<ProjectResult> finalRes = projDefRepo.getProjectsByUser(userId).unique({it.projectId}).collect({
             ProjectResult res = convert(it)
-
             return res
         })
 

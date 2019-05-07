@@ -1,52 +1,53 @@
 <template>
-  <modal :title="title" @cancel-clicked="closeMe" @save-clicked="updateSubject">
-    <template slot="content">
-      <div class="field is-horizontal" style="width: 720px;">
-        <div class="field-body">
-          <div class="field is-narrow">
-            <icon-picker :startIcon="subjectInternal.iconClass" v-on:on-icon-selected="onSelectedIcons"></icon-picker>
+  <b-modal :id="subjectInternal.subjectId" size="xl" :title="title" v-model="show"
+           header-bg-variant="info" header-text-variant="light" no-fade>
+    <b-container fluid>
+      <div v-if="displayIconManager === false">
+      <div class="media">
+        <icon-picker :startIcon="subjectInternal.iconClass" @select-icon="toggleIconDisplay(true)"
+                     class="mr-3"></icon-picker>
+        <div class="media-body">
+
+
+          <div class="form-group">
+            <label for="subjName">Subject Name</label>
+            <input type="text" class="form-control" id="subjName" @input="updateSubjectId"
+                   v-model="subjectInternal.name" v-on:input="updateSubjectId"
+                   v-validate="'required|min:3|max:50|uniqueName'" data-vv-delay="500" data-vv-name="subjectName"
+                   v-focus>
+            <small class="form-text text-danger">{{ errors.first('subjectName')}}</small>
           </div>
-          <div class="field">
-            <label class="label">Subject Name</label>
-            <div class="control">
-              <input class="input" type="text" v-model="subjectInternal.name" v-on:input="updateSubjectId"
-                     v-validate="'required|min:3|max:50|uniqueName'" data-vv-delay="500" name="subjectName" v-focus/>
-            </div>
-            <p class="help is-danger" v-show="errors.has('subjectName')">{{ errors.first('subjectName')}}</p>
-          </div>
         </div>
       </div>
 
+      <id-input type="text" label="Subject ID" v-model="subjectInternal.subjectId" @input="canAutoGenerateId=false"
+                v-validate="'required|min:3|max:50|alpha_num|uniqueId'" data-vv-name="subjectId"/>
+      <small class="form-text text-danger">{{ errors.first('subjectId')}}</small>
 
-      <div class="field skills-remove-bottom-margin">
-        <label class="label">Subject ID</label>
-        <div class="control">
-          <input class="input" type="text" v-model="subjectInternal.subjectId" :disabled="!canEditSubjectId"
-                 v-validate="'required|min:3|max:50|alpha_num|uniqueId'" data-vv-delay="500" name="subjectId"/>
-        </div>
-        <p class="help is-danger" v-show="errors.has('subjectId')">{{ errors.first('subjectId')}}</p>
-      </div>
-      <p class="control has-text-right">
-        <b-tooltip label="Enable to override auto-generated ID."
-                   position="is-left" animanted="true" type="is-light">
-          <span><i class="fas fa-question-circle"></i></span>
-        </b-tooltip>
-        <span v-on:click="toggleSubject()">
-            <a class="is-info" v-bind:class="{'disableControl': isEdit}" v-if="!canEditSubjectId">Enable</a>
-            <a class="is-info" v-if="canEditSubjectId">Disable</a>
-          </span>
-      </p>
-
-      <div class="field">
-        <label class="label">Description</label>
-        <div class="control">
-          <markdown-editor :value="subjectInternal.description" @value-updated="updateDescription"></markdown-editor>
-        </div>
+      <div class="mt-2">
+        <label>Description</label>
+        <markdown-editor v-model="subjectInternal.description" />
       </div>
 
-      <p v-if="overallErrMsg" class="help is-danger has-text-centered">***{{ overallErrMsg }}***</p>
-    </template>
-  </modal>
+      <p v-if="overallErrMsg" class="text-center text-danger">***{{ overallErrMsg }}***</p>
+      </div>
+      <div v-else>
+        <b-card title="Select Icon">
+          <icon-manager @selected-icon="onSelectedIcon"></icon-manager>
+          <b-button href="#" variant="primary" @click="toggleIconDisplay(false)">back</b-button>
+        </b-card>
+      </div>
+    </b-container>
+
+    <div slot="modal-footer" class="w-100">
+      <b-button variant="success" size="sm" class="float-right" @click="updateSubject">
+        Save
+      </b-button>
+      <b-button variant="secondary" size="sm" class="float-right mr-2" @click="close">
+        Cancel
+      </b-button>
+    </div>
+  </b-modal>
 </template>
 
 <script>
@@ -54,69 +55,39 @@
   import SubjectsService from './SubjectsService';
   import IconPicker from '../utils/iconPicker/IconPicker';
   import MarkdownEditor from '../utils/MarkdownEditor';
-  import Modal from '../utils/modal/Modal';
+  import IdInput from '../utils/inputForm/IdInput';
+  import IconManager from '../utils/iconPicker/IconManager';
 
-  let self = null;
 
   export default {
     name: 'EditSubject',
     components: {
-      Modal,
+      IdInput,
       IconPicker,
       MarkdownEditor,
+      IconManager,
     },
-    props: ['subject', 'isEdit'],
+    props: {
+      subject: Object,
+      isEdit: Boolean,
+      value: Boolean,
+    },
     data() {
       return {
-        canEditSubjectId: false,
+        canAutoGenerateId: true,
         subjectInternal: Object.assign({}, this.subject),
         overallErrMsg: '',
+        show: this.value,
+        displayIconManager: false,
       };
     },
     created() {
-      const dictionary = {
-        en: {
-          attributes: {
-            subjectName: 'Subject Name',
-            subjectId: 'Subject ID',
-          },
-        },
-      };
-      Validator.localize(dictionary);
-
-      let subjectName = '';
-      let subjectId = '';
-      if (this.isEdit) {
-        ({ subjectId } = this.subject);
-        subjectName = this.subject.name;
-      }
-
-      Validator.extend('uniqueName', {
-        getMessage: field => `The value for the ${field} is already taken.`,
-        validate(value) {
-          if (subjectName === value) {
-            return true;
-          }
-          return SubjectsService.subjectWithNameExists(self.subjectInternal.projectId, value);
-        },
-      }, {
-        immediate: false,
-      });
-
-      Validator.extend('uniqueId', {
-        getMessage: field => `The value for the ${field} is already taken.`,
-        validate(value) {
-          if (subjectId === value) {
-            return true;
-          }
-          return SubjectsService.subjectWithIdExists(self.subjectInternal.projectId, value);
-        },
-      }, {
-        immediate: false,
-      });
+      this.assignCustomValidation();
     },
-    mounted() {
-      self = this;
+    watch: {
+      show(newValue) {
+        this.$emit('input', newValue);
+      },
     },
     computed: {
       title() {
@@ -124,33 +95,70 @@
       },
     },
     methods: {
-      closeMe() {
-        this.$parent.close();
-      },
-      updateDescription(value) {
-        this.subjectInternal.description = value.value;
+      close() {
+        this.show = false;
       },
       updateSubject() {
-        this.$validator.validateAll().then((res) => {
-          if (!res) {
-            this.overallErrMsg = 'Form did NOT pass validation, please fix and try to Save again';
-          } else {
-            this.$parent.close();
-            this.$emit('subject-created', this.subjectInternal);
-          }
-        });
+        this.$validator.validateAll()
+          .then((res) => {
+            if (!res) {
+              this.overallErrMsg = 'Form did NOT pass validation, please fix and try to Save again';
+            } else {
+              this.close();
+              this.$emit('subject-saved', this.subjectInternal);
+            }
+          });
       },
       updateSubjectId() {
-        if (!this.isEdit && !this.canEditSubjectId) {
+        if (!this.isEdit && this.canAutoGenerateId) {
           this.subjectInternal.subjectId = this.subjectInternal.name.replace(/[^\w]/gi, '');
         }
       },
-      onSelectedIcons(selectedIconCss) {
-        this.subjectInternal.iconClass = selectedIconCss;
+      onSelectedIcon(selectedIcon) {
+        this.subjectInternal.iconClass = `${selectedIcon.css}`;
+        this.displayIconManager = false;
       },
-      toggleSubject() {
-        this.canEditSubjectId = !this.canEditSubjectId && !this.isEdit;
-        this.updateSubjectId();
+      toggleIconDisplay(shouldDisplay) {
+        this.displayIconManager = shouldDisplay;
+      },
+      assignCustomValidation() {
+        const dictionary = {
+          en: {
+            attributes: {
+              subjectName: 'Subject Name',
+              subjectId: 'Subject ID',
+            },
+          },
+        };
+        Validator.localize(dictionary);
+
+
+        // only want to validate for a new subject, existing subjects will override
+        // name and subject id
+        const self = this;
+        Validator.extend('uniqueName', {
+          getMessage: field => `The value for the ${field} is already taken.`,
+          validate(value) {
+            if (self.isEdit) {
+              return true;
+            }
+            return SubjectsService.subjectWithNameExists(self.subjectInternal.projectId, value);
+          },
+        }, {
+          immediate: false,
+        });
+
+        Validator.extend('uniqueId', {
+          getMessage: field => `The value for the ${field} is already taken.`,
+          validate(value) {
+            if (self.isEdit) {
+              return true;
+            }
+            return SubjectsService.subjectWithIdExists(self.subjectInternal.projectId, value);
+          },
+        }, {
+          immediate: false,
+        });
       },
     },
   };

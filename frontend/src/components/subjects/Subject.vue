@@ -1,103 +1,92 @@
 <template>
-  <page-preview-card :options="cardOptions">
-    <div slot="header-top-right">
-      <edit-and-delete-dropdown v-on:deleted="deleteSubject" v-on:edited="editSubject" v-on:move-up="moveUp"
-                                v-on:move-down="moveDown"
-                                :isFirst="subject.isFirst" :isLast="subject.isLast" :isLoading="isLoading"
-                                class="subject-settings"></edit-and-delete-dropdown>
-    </div>
-    <div slot="footer">
-      <router-link
-        :to="{ name:'SubjectPage', params: { projectId: this.subject.projectId, subjectId: this.subject.subjectId}}"
-        class="btn btn-outline-primary btn-sm">
-        Manage <i class="fas fa-arrow-circle-right"/>
-      </router-link>
-    </div>
-  </page-preview-card>
-</template>computed
+  <div class="h-100">
+    <loading-card :loading="isLoading"/>
+    <page-preview-card v-if="!isLoading" :options="cardOptions">
+      <div slot="header-top-right">
+        <edit-and-delete-dropdown v-on:deleted="deleteSubject" v-on:edited="showEditSubject=true"
+                                  v-on:move-up="moveUp"
+                                  v-on:move-down="moveDown"
+                                  :isFirst="subject.isFirst" :isLast="subject.isLast" :isLoading="isLoading"
+                                  class="subject-settings"></edit-and-delete-dropdown>
+      </div>
+      <div slot="footer">
+        <router-link
+          :to="{ name:'SubjectPage', params: { projectId: this.subject.projectId, subjectId: this.subject.subjectId}}"
+          class="btn btn-outline-primary btn-sm">
+          Manage <i class="fas fa-arrow-circle-right"/>
+        </router-link>
+      </div>
+    </page-preview-card>
+
+    <edit-subject v-if="showEditSubject" v-model="showEditSubject" :id="subject.subjectId"
+                  :subject="subject" :is-edit="true" @subject-saved="subjectSaved"/>
+  </div>
+</template>
 
 <script>
   import EditAndDeleteDropdown from '@/components/utils/EditAndDeleteDropdown';
   import EditSubject from './EditSubject';
   import SubjectsService from './SubjectsService';
   import PagePreviewCard from '../utils/pages/PagePreviewCard';
-
+  import LoadingCard from '../utils/LoadingCard';
+  import MsgBoxMixin from '../utils/modal/MsgBoxMixin';
 
   export default {
     name: 'Subject',
-    components: { PagePreviewCard, EditAndDeleteDropdown },
+    mixins: [MsgBoxMixin],
+    components: {
+      LoadingCard,
+      EditSubject,
+      PagePreviewCard,
+      EditAndDeleteDropdown,
+    },
     props: ['subject'],
     data() {
       return {
         isLoading: false,
+        showEditSubject: false,
         cardOptions: {},
       };
     },
     mounted() {
-      this.cardOptions = {
-        icon: this.subject.iconClass,
-        title: this.subject.name,
-        subTitle: `ID: ${this.subject.subjectId}`,
-        stats: [{
-          label: 'Number Skills',
-          count: this.subject.numSkills,
-        }, {
-          label: 'Number Users',
-          count: this.subject.numUsers,
-        }, {
-          label: 'Total Points',
-          count: this.subject.totalPoints,
-        }, {
-          label: 'Points %',
-          count: this.subject.pointsPercentage,
-        }],
-      };
+      this.buildCardOptions();
     },
     methods: {
-      deleteSubject() {
-        this.$dialog.confirm({
-          title: 'WARNING: Delete Subject Action',
-          message: `Subject Id: <b>${this.subject.subjectId}</b> <br/><br/>Delete Action can not be undone and <b>permanently</b> removes its skill definitions and users' performed skills.`,
-          confirmText: 'Delete',
-          type: 'is-danger',
-          hasIcon: true,
-          icon: 'exclamation-triangle',
-          iconPack: 'fa',
-          scroll: 'keep',
-          onConfirm: () => this.deleteSubjectAjax(),
-        });
+      buildCardOptions() {
+        this.cardOptions = {
+          icon: this.subject.iconClass,
+          title: this.subject.name,
+          subTitle: `ID: ${this.subject.subjectId}`,
+          stats: [{
+            label: 'Number Skills',
+            count: this.subject.numSkills,
+          }, {
+            label: 'Number Users',
+            count: this.subject.numUsers,
+          }, {
+            label: 'Total Points',
+            count: this.subject.totalPoints,
+          }, {
+            label: 'Points %',
+            count: this.subject.pointsPercentage,
+          }],
+        };
       },
-      deleteSubjectAjax() {
-        this.isLoading = true;
-        SubjectsService.deleteSubject(this.subject)
-          .then(() => {
-            this.isLoading = false;
-            this.$emit('subject-deleted', this.subject);
-          })
-          .finally(() => {
-            this.isLoading = false;
+      deleteSubject() {
+        const msg = `Subject with id [${this.subject.subjectId}] will be removed. Delete Action can not be undone and permanently removes its skill definitions and users' performed skills.`;
+        this.msgConfirm(msg)
+          .then((res) => {
+            if (res) {
+              this.$emit('subject-deleted', this.subject);
+            }
           });
       },
-      editSubject() {
-        this.$modal.open({
-          parent: this,
-          component: EditSubject,
-          hasModalCard: true,
-          width: 1110,
-          props: {
-            subject: this.subject,
-            isEdit: true,
-          },
-          events: {
-            'subject-created': this.subjectEdited,
-          },
-        });
-      },
-      subjectEdited(subject) {
+      subjectSaved(subject) {
         this.isLoading = true;
         SubjectsService.saveSubject(subject)
           .then(() => {
             this.subject = subject;
+            this.buildCardOptions();
             this.isLoading = false;
           })
           .finally(() => {

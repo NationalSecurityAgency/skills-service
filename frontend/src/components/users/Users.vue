@@ -1,9 +1,9 @@
 <template>
-  <div>
+  <div class="usersTable">
     <sub-page-header title="Users"/>
 
     <div class="skills-bordered-component">
-      <v-server-table ref="table" :columns="columns" :url="getUrl()" :options="options" class="skills-pad-bottom-1-rem"
+      <v-server-table ref="table" :columns="columns" :url="getUrl()" :options="options" class="vue-table-2"
                       v-on:loaded="emit('loaded', $event)" v-on:error="emit('error', $event)">
         <div slot="lastUpdated" slot-scope="props" class="field has-addons">
           {{ getDate(props) }}
@@ -12,11 +12,8 @@
         <div slot="viewDetail" slot-scope="props" class="">
           <router-link :to="{ name:'UserPage',
                   params: { projectId: projectId, userId: props.row.userId, totalPoints: props.row.totalPoints }}"
-                       class="button is-outlined is-info">
-            <span>View Details</span>
-            <span class="icon is-small">
-                      <i class="fas fa-edit"/>
-                    </span>
+                       tag="button" class="btn btn-outline-primary">
+            <span class="d-none d-sm-inline">Details</span><i class="fas fa-arrow-circle-right ml-sm-1"/>
           </router-link>
         </div>
       </v-server-table>
@@ -99,8 +96,15 @@
   };
 </script>
 
-<style scoped>
-  .control-column{
-    width: 4rem;
+<style>
+  .usersTable .control-column{
+    width: 8rem;
+  }
+  /* on the mobile platform some of the columns will be removed
+   so let's allow the table to size on its own*/
+  @media (max-width: 576px) {
+    .usersTable .control-column {
+      width: unset;
+    }
   }
 </style>
