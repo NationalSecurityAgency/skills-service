@@ -27,7 +27,6 @@
   import MyProject from './MyProject';
   import EditProject from './EditProject';
   import LoadingContainer from '../utils/LoadingContainer';
-  import NoContent from '../utils/NoContent';
   import ProjectService from './ProjectService';
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import NoContent2 from '../utils/NoContent2';
@@ -47,7 +46,6 @@
     components: {
       NoContent2,
       SubPageHeader,
-      NoContent,
       LoadingContainer,
       MyProject,
       EditProject,
