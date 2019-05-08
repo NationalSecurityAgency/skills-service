@@ -1,65 +1,57 @@
 <template>
-  <div class="columns section">
-    <div class="column is-half is-offset-one-quarter">
-      <div class="has-text-centered skills-pad-bottom-1-rem">
-        <i class="fa fa-users fa-3x"></i>
-        <h2 class="title is-5 skills-pad-top-2-rem">Create Skills Dashboard Account</h2>
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-7 col-xl-4 mt-3" style="min-width: 20rem;">
+      <div class="text-center mt-5">
+        <i class="fa fa-users fa-4x"></i>
+        <h2 class="mt-4">Create Skills Dashboard Account</h2>
       </div>
       <form @submit.prevent="login()">
-        <div class="columns">
-          <div class="column is-three-fifths is-offset-one-fifth">
-
-            <div class="box">
-              <div class="field">
-                <label class="label">First Name</label>
-                <input class="input" type="text" v-model="loginFields.firstName" name="firstName"
+        <div class="card">
+            <div class="card-body p-4">
+              <div class="form-group">
+                <label for="firstName">First Name</label>
+                <input class="form-control" type="text" v-model="loginFields.firstName" id="firstName"
                        v-validate="'required'" data-vv-delay="500"/>
                 <p class="help is-danger" v-show="errors.has('firstName')">{{ errors.first('firstName')}}</p>
               </div>
-              <div class="field">
-                <label class="label">Last Name</label>
-                <input class="input" type="text" v-model="loginFields.lastName" name="lastName"
+              <div class="form-group">
+                <label for="lastName">Last Name</label>
+                <input class="form-control" type="text" v-model="loginFields.lastName" id="lastName"
                        v-validate="'required'" data-vv-delay="500"/>
                 <p class="help is-danger" v-show="errors.has('lastName')">{{ errors.first('lastName')}}</p>
               </div>
-              <div class="field">
-                <label class="label">Email</label>
-                <input class="input" type="text" v-model="loginFields.email" name="email"
+              <div class="form-group">
+                <label for="email">Email</label>
+                <input class="form-control" type="text" v-model="loginFields.email" id="email"
                        v-validate="'required|email|uniqueEmail'" data-vv-delay="500"/>
                 <p class="help is-danger" v-show="errors.has('email')">{{ errors.first('email')}}</p>
               </div>
-              <div class="field">
-                <label class="label">Password</label>
-                <input class="input" type="password" v-model="loginFields.password" name="password"
+              <div class="form-group">
+                <label for="password">Password</label>
+                <input class="form-control" type="password" v-model="loginFields.password" id="password"
                        v-validate="'required|min:8|max:15'" data-vv-delay="500" ref="password"/>
                 <p class="help is-danger" v-show="errors.has('password')">{{ errors.first('password')}}</p>
               </div>
-              <div class="field">
-                <label class="label">Confirm Password</label>
-                <input class="input" type="password" name="password_confirmation"
+              <div class="form-group">
+                <label for="password_confirmation">Confirm Password</label>
+                <input class="form-control" type="password" id="password_confirmation"
                        v-validate="'required|confirmed:password'" data-vv-delay="500" data-vv-as="Password Confirmation"/>
                 <p class="help is-danger" v-show="errors.has('password_confirmation')">{{ errors.first('password_confirmation')}}</p>
               </div>
               <div class="field is-grouped">
                 <div class="control">
-                  <button class="button is-primary is-outlined" :disabled="errors.any() || missingRequiredValues()">
-                    <span class="icon is-small">
-                      <i class="fas fa-arrow-circle-right"/>
-                    </span>
-                    <span>Create Account</span>
+                  <button type="submit" class="btn btn-outline-primary" :disabled="errors.any() || missingRequiredValues()">
+                    Create Account <i class="fas fa-arrow-circle-right"/>
                   </button>
                 </div>
               </div>
               <div class="skills-pad-bottom-1-rem">
                 <hr/>
-                <p class="info has-text-centered">Already have a User Skills account?
-                  <a style="font-weight: bold" @click="loginPage">Sign in</a>
+                <p class="text-center"><small>Already have a User Skills account?
+                  <strong><b-link @click="loginPage">Sign in</b-link></strong></small>
                 </p>
               </div>
             </div>
-
-          </div>
-
         </div>
       </form>
     </div>
