@@ -11,32 +11,32 @@
               <div class="form-group">
                 <label for="firstName">First Name</label>
                 <input class="form-control" type="text" v-model="loginFields.firstName" id="firstName"
-                       v-validate="'required'" data-vv-delay="500"/>
-                <p class="help is-danger" v-show="errors.has('firstName')">{{ errors.first('firstName')}}</p>
+                       name="firstName" v-validate="'required'" data-vv-delay="500"/>
+                <small class="form-text text-danger" v-show="errors.has('firstName')">{{ errors.first('firstName')}}</small>
               </div>
               <div class="form-group">
                 <label for="lastName">Last Name</label>
                 <input class="form-control" type="text" v-model="loginFields.lastName" id="lastName"
-                       v-validate="'required'" data-vv-delay="500"/>
-                <p class="help is-danger" v-show="errors.has('lastName')">{{ errors.first('lastName')}}</p>
+                       name="lastName" v-validate="'required'" data-vv-delay="500"/>
+                <small class="form-text text-danger" v-show="errors.has('lastName')">{{ errors.first('lastName')}}</small>
               </div>
               <div class="form-group">
                 <label for="email">Email</label>
                 <input class="form-control" type="text" v-model="loginFields.email" id="email"
-                       v-validate="'required|email|uniqueEmail'" data-vv-delay="500"/>
-                <p class="help is-danger" v-show="errors.has('email')">{{ errors.first('email')}}</p>
+                       name="email" v-validate="'required|email|uniqueEmail'" data-vv-delay="500"/>
+                <small class="form-text text-danger" v-show="errors.has('email')">{{ errors.first('email')}}</small>
               </div>
               <div class="form-group">
                 <label for="password">Password</label>
                 <input class="form-control" type="password" v-model="loginFields.password" id="password"
-                       v-validate="'required|min:8|max:15'" data-vv-delay="500" ref="password"/>
-                <p class="help is-danger" v-show="errors.has('password')">{{ errors.first('password')}}</p>
+                       name="password" v-validate="'required|min:8|max:15'" data-vv-delay="500" ref="password"/>
+                <small class="form-text text-danger" v-show="errors.has('password')">{{ errors.first('password')}}</small>
               </div>
               <div class="form-group">
                 <label for="password_confirmation">Confirm Password</label>
                 <input class="form-control" type="password" id="password_confirmation"
-                       v-validate="'required|confirmed:password'" data-vv-delay="500" data-vv-as="Password Confirmation"/>
-                <p class="help is-danger" v-show="errors.has('password_confirmation')">{{ errors.first('password_confirmation')}}</p>
+                       name="password_confirmation" v-validate="'required|confirmed:password'" data-vv-delay="500" data-vv-as="Password Confirmation"/>
+                <small class="form-text text-danger" v-show="errors.has('password_confirmation')">{{ errors.first('password_confirmation')}}</small>
               </div>
               <div class="field is-grouped">
                 <div class="control">
