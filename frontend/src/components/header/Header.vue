@@ -7,7 +7,6 @@
 
       <div class="col text-center text-sm-right mt-3 mt-sm-0">
         <settings-button class="mr-2"/>
-        <global-settings-button v-if="isAuthenticated"  class="mr-2"/>
         <button v-if="isJwtAuthenticatedUser" class="btn btn-outline-info" v-on:click="signOut"
                 v-b-tooltip.hover title="Sign Out">
           <i class="fas fa-sign-out-alt"/>
@@ -21,12 +20,10 @@
 <script>
   import SettingsButton from './SettingsButton';
   import Breadcrumb from './Breadcrumb';
-  import GlobalSettingsButton from './GlobalSettingsButton';
 
   export default {
     name: 'Header',
     components: {
-      GlobalSettingsButton,
       Breadcrumb,
       SettingsButton,
     },
