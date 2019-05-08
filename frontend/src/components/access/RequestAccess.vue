@@ -1,12 +1,13 @@
 <template>
-  <div class="row justify-content-center">
-    <div class="col-md-8 col-lg-7 col-xl-4 mt-3" style="min-width: 20rem;">
-      <div class="text-center mt-5">
-        <i class="fa fa-users fa-4x"></i>
-        <h2 class="mt-4">Create Skills Dashboard Account</h2>
-      </div>
-      <form @submit.prevent="login()">
-        <div class="card">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-6 mt-3">
+        <div class="text-center mt-5">
+          <i class="fa fa-users fa-4x"></i>
+          <h2 class="mt-4">Create Skills Dashboard Account</h2>
+        </div>
+        <form @submit.prevent="login()">
+          <div class="card">
             <div class="card-body p-4">
               <div class="form-group">
                 <label for="firstName">First Name</label>
@@ -52,8 +53,9 @@
                 </p>
               </div>
             </div>
-        </div>
-      </form>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
 </template>
