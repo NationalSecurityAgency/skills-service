@@ -123,7 +123,6 @@
           });
       },
       newBadge() {
-        console.log('newBadge called');
         this.displayNewBadgeModal = true;
       },
       moveBadgeDown(badge) {

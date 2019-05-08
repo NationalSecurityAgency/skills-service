@@ -20,7 +20,7 @@
                         :options="options">
         <span slot="iconClass" slot-scope="props">
               <i class="text-info level-icon" v-bind:class="`${props.row.iconClass}`"></i>
-                <i class="icon-warning fa fa-exclamation-circle text-warning"
+                <i v-if="props.row.achievable === false" class="icon-warning fa fa-exclamation-circle text-warning"
                    v-b-tooltip.hover="'Level is unachievable. Insufficient available points in project.'"/>
         </span>
           <span slot="pointsFrom" slot-scope="props">
@@ -34,13 +34,21 @@
         </span>
 
           <div slot="edit" slot-scope="props" class="">
-            <b-button @:click="editLevel(props.row)" variant="outline-info" style="width: 5rem;">
+            <b-button @click="editLevel(props.row)" variant="outline-info" style="width: 5rem;">
                       <i class="fas fa-edit"/> Edit
             </b-button>
           </div>
         </v-client-table>
       </simple-card>
     </loading-container>
+    <new-level v-if="displayLevelModal"
+               v-model="displayLevelModal"
+               @new-level="doCreateNewLevel"
+               @edited-level="doEditLevel"
+               :boundaries="bounds"
+               :level="levelToEdit"
+               :level-as-points="levelsAsPoints"
+               :is-edit="isEdit"></new-level>
   </div>
 </template>
 
@@ -52,15 +60,25 @@
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import LoadingContainer from '../utils/LoadingContainer';
   import SimpleCard from '../utils/cards/SimpleCard';
+  import MsgBoxMixin from '../utils/modal/MsgBoxMixin';
 
   export default {
     name: 'Levels',
-    components: { SimpleCard, LoadingContainer, SubPageHeader },
+    components: {
+      NewLevel,
+      SimpleCard,
+      LoadingContainer,
+      SubPageHeader,
+    },
     props: ['projectId', 'subjectId', 'maxLevels'],
+    mixins: [MsgBoxMixin],
     data() {
       return {
+        displayLevelModal: false,
+        isEdit: false,
         levelsAsPoints: false,
         isLoading: true,
+        levelToEdit: { iconClass: 'fas fa-user-ninja' },
         levels: [],
         levelsColumns: ['iconClass', 'level', 'name', 'percent', 'pointsFrom', 'pointsTo', 'edit'],
         options: {
@@ -120,6 +138,46 @@
     mounted() {
       this.loadLevels();
     },
+    computed: {
+      bounds() {
+        const bounds = {
+          previous: null,
+          next: null,
+        };
+
+        if (this.isEdit) {
+          const existingIdx = this.levels.findIndex(level => this.levelToEdit.level === level.level);
+          const byIndex = new Map(this.levels.map((level, index) => [index, level]));
+
+          const previous = byIndex.get(existingIdx - 1);
+          const next = byIndex.get(existingIdx + 1);
+
+          if (previous) {
+            if (this.levelsAsPoints) {
+              bounds.previous = previous.pointsTo;
+            } else {
+              bounds.previous = previous.percent;
+            }
+          }
+          if (next) {
+            if (this.levelsAsPoints) {
+              bounds.next = next.pointsFrom;
+            } else {
+              bounds.next = next.percent;
+            }
+          }
+        } else {
+          const last = this.levels[this.levels.length - 1];
+          if (this.levelsAsPoints) {
+            bounds.previous = last.pointsFrom;
+          } else {
+            bounds.previous = last.percent;
+          }
+        }
+
+        return bounds;
+      },
+    },
     methods: {
       loadLevels() {
         if (this.subjectId) {
@@ -138,16 +196,11 @@
       },
       removeLastItem() {
         if (this.levels.length > 1) {
-          this.$dialog.confirm({
-            title: 'WARNING: Delete Highest Level',
-            message: 'Are you absolutely sure you want to delete the highest Level?',
-            confirmText: 'Delete',
-            type: 'is-danger',
-            hasIcon: true,
-            icon: 'exclamation-triangle',
-            iconPack: 'fa',
-            scroll: 'keep',
-            onConfirm: () => this.doRemoveLastItem(),
+          const msg = 'Are you absolutely sure you want to delete the highest Level?';
+          this.msgConfirm(msg, 'WARNING: Delete Highest Level').then((res) => {
+            if (res) {
+              this.doRemoveLastItem();
+            }
           });
         } else {
           this.$toast.open(ToastHelper.defaultConf('You must retain at least one level'));
@@ -170,83 +223,19 @@
         }
       },
       editLevel(existingLevel) {
-        let editProps = null;
+        this.isEdit = !!existingLevel;
 
         if (existingLevel) {
-          const bounds = {
-            previous: null,
-            next: null,
-          };
-
-          const existingIdx = this.levels.findIndex(level => existingLevel.level === level.level);
-          const byIndex = new Map(this.levels.map((level, index) => [index, level]));
-
-          const previous = byIndex.get(existingIdx - 1);
-          const next = byIndex.get(existingIdx + 1);
-
-          if (previous) {
-            if (this.levelsAsPoints) {
-              bounds.previous = previous.pointsTo;
-            } else {
-              bounds.previous = previous.percent;
-            }
-          }
-          if (next) {
-            if (this.levelsAsPoints) {
-              bounds.next = next.pointsFrom;
-            } else {
-              bounds.next = next.percent;
-            }
-          }
-
-          editProps = {
-            isEdit: true,
-            percent: existingLevel.percent,
-            pointsFrom: existingLevel.pointsFrom,
-            pointsTo: existingLevel.pointsTo,
-            name: existingLevel.name,
-            iconClass: existingLevel.iconClass || 'fas fa-user-ninja',
-            level: existingLevel.level,
-            levelId: existingLevel.id,
-            boundaries: bounds,
-            levelAsPoints: this.levelsAsPoints,
-          };
+          this.levelToEdit = Object.assign({}, existingLevel);
         } else {
           if (this.levels.length >= this.maxLevels) {
             this.$toast.open(ToastHelper.defaultConf(`You cannot have more then ${this.maxLevels} levels`));
             return;
           }
-
-          const last = this.levels[this.levels.length - 1];
-          const bounds = {
-            previous: null,
-            next: null,
-          };
-
-          if (this.levelsAsPoints) {
-            bounds.previous = last.pointsFrom;
-          } else {
-            bounds.previous = last.percent;
-          }
-
-          editProps = {
-            levelAsPoints: this.levelsAsPoints,
-            iconClass: 'fas fa-user-ninja',
-            isEdit: false,
-            boundaries: bounds,
-          };
+          this.levelToEdit = { iconClass: 'fas fa-user-ninja' };
         }
 
-        this.$modal.open({
-          parent: this,
-          component: NewLevel,
-          hasModalCard: true,
-          props: editProps,
-          events: {
-            'new-level': this.doCreateNewLevel,
-            'edited-level': this.doEditLevel,
-          },
-        });
+        this.displayLevelModal = true;
       },
       doCreateNewLevel(nextLevelObj) {
         this.loading = true;
