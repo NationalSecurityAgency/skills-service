@@ -60,6 +60,5 @@
   #project-selector .multiselect__tag {
     background-color: lightblue;
     color: black;
-    /*margin: 10px;*/
   }
 </style>
