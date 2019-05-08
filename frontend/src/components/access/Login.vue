@@ -17,7 +17,7 @@
 
             <div class="form-group">
               <label for="username">Email address</label>
-              <input type="text" class="form-control" id="username" placeholder="Enter email"
+              <input type="text" class="form-control" id="username" tabindex="1" placeholder="Enter email"
                      aria-describedby="emailHelp"
                      v-model="loginFields.username" v-validate="'required|min:5'" data-vv-delay="500">
               <small id="emailHelp" class="form-text text-danger" v-show="errors.has('username')">{{
@@ -30,17 +30,17 @@
                   <label for="inputPassword">Password</label>
                 </div>
                 <div class="col text-right">
-                  <small class="text-muted"><b-link @click="forgotPassword">Forgot Password?</b-link></small>
+                  <small class="text-muted"><b-link tabindex="4" @click="forgotPassword">Forgot Password?</b-link></small>
                 </div>
               </div>
-              <input type="password" class="form-control" id="inputPassword" placeholder="Password"
+              <input type="password" class="form-control" id="inputPassword" tabindex="2" placeholder="Password"
                      v-model="loginFields.password" name="password" aria-describedby="passwordHelp"
                      @animationstart="onAnimationStart" v-validate="'required|min:8|max:15'" data-vv-delay="500">
               <small id="passwordHelp" class="form-text text-danger" v-show="errors.has('password')">{{
                 errors.first('password')}}
               </small>
             </div>
-            <button type="submit" class="btn btn-outline-primary" :disabled="disabled">
+            <button type="submit" class="btn btn-outline-primary" tabindex="3" :disabled="disabled">
               Login <i class="fas fa-arrow-circle-right"/>
             </button>
 
