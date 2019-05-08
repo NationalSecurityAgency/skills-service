@@ -1,42 +1,47 @@
 <template>
-  <simple-card id="shared-skills-with-others-panel">
-    <loading-container :is-loading="loading.sharedSkillsInit || loading.allSkills">
+  <div id="shared-skills-with-others-panel" class="card">
+    <div class="card-header">
+      Share Skills <strong>With</strong> Other Projects
+    </div>
+    <div class="card-body">
+      <loading-container :is-loading="loading.sharedSkillsInit || loading.allSkills">
+        <div class="row text-center">
+          <div class="col-sm-5">
+            <skills-selector2 :options="allSkills" v-on:added="onSelectedSkill" v-on:removed="onDeselectedSkill"
+                              :selected="selectedSkills"></skills-selector2>
+          </div>
+          <div class="col-sm-5 my-2 my-sm-0 px-sm-1">
+            <project-selector :project-id="projectId" :selected="selectedProject"
+                              v-on:selected="onSelectedProject"
+                              v-on:unselected="onUnSelectedProject"></project-selector>
+          </div>
+          <div class="col-sm-2 text-center text-sm-left">
+            <button class="btn btn-sm btn-outline-primary h-100" v-on:click="shareSkill"
+                    :disabled="!shareButtonEnabled">
+              <i class="fas fa-share-alt mr-1"></i><span class="text-truncate">Share</span>
+            </button>
+          </div>
+        </div>
 
-      <h6>Share Skills <strong>With</strong> Other Projects</h6>
+        <b-alert v-if="displayError" variant="danger" class="mt-2" show dismissible>
+          <i class="fa fa-exclamation-circle"></i> Skill <strong>[{{ selectedSkills[0].name }}]</strong> is already
+          shared to project <strong>[{{ selectedProject.name }}]</strong>.
+        </b-alert>
 
-      <div class="row text-center">
-        <div class="col-sm-5">
-          <skills-selector2 :options="allSkills" v-on:added="onSelectedSkill" v-on:removed="onDeselectedSkill"
-                            :selected="selectedSkills"></skills-selector2>
-        </div>
-        <div class="col-sm-5 my-2 my-sm-0 px-sm-1">
-          <project-selector :project-id="projectId" :selected="selectedProject"
-                            v-on:selected="onSelectedProject" v-on:unselected="onUnSelectedProject"></project-selector>
-        </div>
-        <div class="col-sm-2 text-center text-sm-left">
-          <button class="btn btn-sm btn-outline-primary h-100" v-on:click="shareSkill" :disabled="!shareButtonEnabled">
-            <i class="fas fa-share-alt mr-1"></i><span class="text-truncate">Share</span>
-          </button>
-        </div>
-      </div>
+        <loading-container :is-loading="loading.sharedSkills">
+          <div v-if="sharedSkills && sharedSkills.length > 0" class="my-4">
+            <shared-skills-table :shared-skills="sharedSkills"
+                                 v-on:skill-removed="deleteSharedSkill"></shared-skills-table>
+          </div>
+          <div v-else>
+            <no-content2 title="Share Skills With Other Projects" icon="fas fa-share-alt" class="my-5"
+                         message="To start sharing skills please select a skill and then the project that you want to share this skill with."/>
+          </div>
+        </loading-container>
 
-      <b-alert v-if="displayError" variant="danger" class="mt-2" show dismissible>
-              <i class="fa fa-exclamation-circle"></i> Skill <strong>[{{ selectedSkills[0].name }}]</strong> is already shared to project <strong>[{{ selectedProject.name }}]</strong>.
-      </b-alert>
-
-      <loading-container :is-loading="loading.sharedSkills">
-        <div v-if="sharedSkills && sharedSkills.length > 0" class="my-4">
-          <shared-skills-table :shared-skills="sharedSkills"
-                               v-on:skill-removed="deleteSharedSkill"></shared-skills-table>
-        </div>
-        <div v-else>
-          <no-content2 title="Share Skills With Other Projects" icon="fas fa-share-alt" class="my-5"
-                       message="To start sharing skills please select a skill and then the project that you want to share this skill with."/>
-        </div>
       </loading-container>
-
-    </loading-container>
-  </simple-card>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -47,13 +52,11 @@
   import SharedSkillsTable from './SharedSkillsTable';
   import SkillsShareService from './SkillsShareService';
   import NoContent2 from '../../utils/NoContent2';
-  import SimpleCard from '../../utils/cards/SimpleCard';
 
   export default {
     name: 'ShareSkillsWithOtherProjects',
     props: ['projectId'],
     components: {
-      SimpleCard,
       NoContent2,
       SharedSkillsTable,
       ProjectSelector,
