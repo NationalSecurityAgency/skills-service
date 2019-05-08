@@ -52,7 +52,7 @@
       <div v-else>
         <b-card title="Select Icon">
           <icon-manager @selected-icon="onSelectedIcon"></icon-manager>
-          <b-button href="#" variant="primary" @click="toggleIconDisplay(false)">back</b-button>
+          <b-button href="#" variant="primary" @click="toggleIconDisplay(false)" class="mt-4">back</b-button>
         </b-card>
       </div>
     </b-container>
