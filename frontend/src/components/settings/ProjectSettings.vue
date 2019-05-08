@@ -1,39 +1,38 @@
 <template>
   <div>
     <sub-page-header title="Project Settings"/>
-    <div class="skills-bordered-component">
-      <b-loading :is-full-page="false" :active.sync="isLoading" :can-cancel="false"></b-loading>
-      <div class="columns">
-        <div class="column is-full">
-           <span>
-             <b-tooltip label="Change to true to calculate levels based on explicit point values instead of percentages."
-                        position="is-top" size="is-small" animanted="true" type="is-light" multilined>
-            <span><i class="fas fa-question-circle"></i></span>
-            </b-tooltip>
-            Use Points For Levels:
-            <b-switch v-model="levelPointsSetting.value" v-on:input="settingChanged">
-              {{ levelPointsSetting.value }}
-            </b-switch>
-          </span>
+    <simple-card>
+      <loading-container :is-loading="isLoading">
+      <div class="row">
+        <div class="col text-secondary">
+          Use Points For Levels:
+          <inline-help
+            msg="Change to true to calculate levels based on explicit point values instead of percentages."/>
+        </div>
+        <div class="col">
+          <b-form-checkbox v-model="levelPointsSetting.value" v-on:input="settingChanged" name="check-button" switch>
+            {{ levelPointsSetting.value }}
+          </b-form-checkbox>
         </div>
       </div>
 
-      <div class="columns skills-pad-top-1-rem">
-        <div class="column">
-          <a class="button is-outlined is-success" v-on:click="save"
-             :disabled="errors.any()">
-            <span>Save</span>
-            <span class="icon is-small">
-              <i class="fas fa-arrow-circle-right"/>
-              </span>
-          </a>
-          <b-tooltip v-if="dirty" label="Settings have been changed, don't forget to save"
-                     position="is-right" animanted="true" type="is-light">
-            <span><i class="mi mi-warning dirty-warning"></i></span>
-          </b-tooltip>
+      <hr/>
+
+      <div class="row">
+        <div class="col">
+        <b-button variant="outline-info" @click="save" :disabled="errors.any()">
+          Save <i class="fas fa-arrow-circle-right"/>
+        </b-button>
+
+        <span v-if="dirty" class="text-warning ml-2">
+          <i class="fa fa-exclamation-circle"
+             v-b-tooltip.hover="'Settings have been changed, don not forget to save'"/> Unsaved Changes
+        </span>
         </div>
       </div>
-    </div>
+      </loading-container>
+    </simple-card>
+
   </div>
 </template>
 
@@ -41,11 +40,19 @@
   import SettingService from './SettingsService';
   import ToastHelper from '../utils/ToastHelper';
   import SubPageHeader from '../utils/pages/SubPageHeader';
+  import SimpleCard from '../utils/cards/SimpleCard';
+  import InlineHelp from '../utils/InlineHelp';
+  import LoadingContainer from '../utils/LoadingContainer';
 
   const initialSettingValue = { value: 'false', setting: 'level.points.enabled' };
   export default {
     name: 'ProjectSettings',
-    components: { SubPageHeader },
+    components: {
+      LoadingContainer,
+      InlineHelp,
+      SimpleCard,
+      SubPageHeader,
+    },
     props: ['projectId'],
     data() {
       return {
@@ -99,8 +106,4 @@
 </script>
 
 <style scoped>
-  .dirty-warning {
-    color: #E6B34F;
-  }
-
 </style>
