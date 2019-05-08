@@ -4,7 +4,7 @@
     <simple-card>
       <loading-container :is-loading="isLoading">
       <div class="row">
-        <div class="col text-secondary">
+        <div class="col col-md-3 text-secondary">
           Use Points For Levels:
           <inline-help
             msg="Change to true to calculate levels based on explicit point values instead of percentages."/>
