@@ -1,24 +1,21 @@
 <template>
   <div class="existingUserInput">
-    <b-field :label="fieldLabel">
-      <b-autocomplete
-        v-model="userQuery"
-        :data="suggestions"
-        :placeholder="placeholder"
-        :loading="isFetching"
-        @input="suggestUsers"
-        icon="fas fa-search"
-        @select="validateUserId">
-        <template slot="empty">{{ emptySlot }}</template>
-      </b-autocomplete>
-    </b-field>
-    <p class="help is-danger" v-show="validate && theError">{{ theError }}</p>
+    <multiselect v-model="userQuery" :placeholder="placeholder"
+                 :options="suggestions" :multiple="true" :taggable="false"
+                 :hide-selected="true"
+                 @search-change="suggestUsers" :loading="isFetching" :internal-search="false"
+                 v-on:select="onSelected" v-on:remove="onRemoved"
+                 :clear-on-select="true">
+    </multiselect>
+
+    <p class="text-danger" v-show="validate && theError">{{ theError }}</p>
   </div>
 </template>
 
 <script>
   import axios from 'axios';
   import debounce from 'lodash.debounce';
+  import Multiselect from 'vue-multiselect';
 
   // user type constants
   const DASHBOARD = 'DASHBOARD';
@@ -27,13 +24,14 @@
 
   export default {
     name: 'ExistingUserInput',
+    components: { Multiselect },
     props: {
       fieldLabel: {
         default: 'Skills User',
         type: String,
       },
       placeholder: {
-        default: 'enter user id',
+        default: 'Enter user id',
         type: String,
       },
       projectId: {
@@ -82,14 +80,14 @@
         let suggestUrl;
         if (this.userType === CLIENT) {
           if (this.projectId) {
-            suggestUrl = `/app/users/projects/${this.projectId}/suggestClientUsers/${this.userQuery}`;
+            suggestUrl = `/app/users/projects/${this.projectId}/suggestClientUsers`;
           } else {
-            suggestUrl = `/app/users/suggestClientUsers/${this.userQuery}`;
+            suggestUrl = '/app/users/suggestClientUsers/';
           }
         } else if (this.userType === ROOT) {
-          suggestUrl = `/root/users/${this.userQuery}`;
+          suggestUrl = '/root/users';
         } else {
-          suggestUrl = `/app/users/suggestDashboardUsers/${this.userQuery}`;
+          suggestUrl = '/app/users/suggestDashboardUsers';
         }
         return suggestUrl;
       },
@@ -108,13 +106,18 @@
       },
     },
     methods: {
-      suggestUsers: debounce(function debouncedSuggestUsers() {
-        if (!this.suggest || !this.userQuery) {
+      suggestUsers: debounce(function debouncedSuggestUsers(query) {
+        // if (!this.suggest || !this.userQuery) {
+        //   this.suggestions = [];
+        //   return;
+        // }
+        if (!query) {
           this.suggestions = [];
           return;
         }
+        const url = `${this.suggestUrl}/${query}`;
         this.isFetching = true;
-        axios.get(this.suggestUrl)
+        axios.get(url)
           .then((response) => {
             this.suggestions = response.data.filter(suggestedUserId => !this.excludedSuggestions.includes(suggestedUserId));
           })
@@ -122,9 +125,14 @@
             this.isFetching = false;
           });
       }, 200),
-      onUserSelected(userId) {
-        this.$emit('userSelected', userId);
+
+      onSelected(selectedItem) {
+        this.$emit('userSelected', selectedItem);
       },
+      onRemoved(item) {
+        this.$emit('userRemoved', item);
+      },
+
       validateUserId(userId) {
         if (userId !== null) {
           if (this.validate) {
@@ -146,3 +154,10 @@
     },
   };
 </script>
+
+<style>
+  .existingUserInput .multiselect__tag {
+    background-color: lightblue;
+    color: black;
+  }
+</style>

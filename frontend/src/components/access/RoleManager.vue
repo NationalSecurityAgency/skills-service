@@ -1,20 +1,17 @@
 <template>
-  <div class="">
-    <div id="add-user-div" class="columns">
-      <div id="input-column" class="column">
-        <existing-user-input :suggest="true" :validate="true" :user-type="userType" :excluded-suggestions="userIds" :selectedUserId="selectedUserId"
+  <div class="role-manager">
+    <div id="add-user-div" class="row mt-2 mb-4">
+      <div class="col-12 col-md-10 col-xlg-11 pb-2 pb-md-0">
+        <existing-user-input :suggest="true" :validate="true" :user-type="userType" :excluded-suggestions="userIds"
+                             :selectedUserId="selectedUserId"
                              ref="userInput"
                              v-on:userSelected="onUserSelected"></existing-user-input>
       </div>
-      <div class="column control-column">
-        <p class="control" style="margin-top:2em">
-          <button id="save-button" class="button is-primary is-outlined" v-on:click="addUserRole" :disabled="errors.any() || !selectedUserId">
-            <span id="button-text">Add</span>
-            <span class="icon is-small">
-                <i :class="[isSaving ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-arrow-circle-right']"></i>
-              </span>
-          </button>
-        </p>
+      <div class="col-auto">
+        <b-button variant="outline-primary" @click="addUserRole" :disabled="errors.any() || !selectedUserId"
+                  class="h-100">
+          Add <i :class="[isSaving ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-arrow-circle-right']"></i>
+        </b-button>
       </div>
     </div>
 
@@ -22,14 +19,13 @@
       <transition name="userRolesContainer" enter-active-class="animated fadeIn">
         <v-client-table :data="data" :columns="columns" :options="options">
           <div slot="edit" slot-scope="props" class="field has-addons">
-            <p class="control">
-              <a v-if="notCurrentUser(props.row.userId)" v-on:click="deleteUserRoleConfirm(props.row)" class="button is-outlined">
-              <span class="icon is-small">
-                <i class="fas fa-trash"/>
-              </span>
-                <span>Delete</span>
-              </a>
-            </p>
+            <b-button v-if="notCurrentUser(props.row.userId)" @click="deleteUserRoleConfirm(props.row)"
+                      variant="outline-primary">
+              <i class="fas fa-trash"/>
+            </b-button>
+            <span v-else v-b-tooltip.hover="'Can not remove myself. Sorry!!'">
+              <b-button variant="outline-primary" disabled><i class="fas fa-trash"/></b-button>
+            </span>
           </div>
         </v-client-table>
       </transition>
@@ -38,14 +34,15 @@
 </template>
 
 <script>
-  import AddRole from './AddRole';
   import LoadingContainer from '../utils/LoadingContainer';
   import ToastHelper from '../utils/ToastHelper';
   import AccessService from './AccessService';
   import ExistingUserInput from '../utils/ExistingUserInput';
+  import MsgBoxMixin from '../utils/modal/MsgBoxMixin';
 
   export default {
     name: 'RoleManager',
+    mixins: [MsgBoxMixin],
     components: { ExistingUserInput, LoadingContainer },
     props: {
       project: {
@@ -100,34 +97,26 @@
         });
     },
     methods: {
-      newUser() {
-        this.$modal.open({
-          parent: this,
-          component: AddRole,
-          hasModalCard: true,
-          props: {
-            projectId: this.project.projectId,
-            userIds: this.userIds,
-          },
-          events: {
-            'user-role-created': this.userAdded,
-          },
-        });
-      },
       userAdded(userRole) {
         this.data.push(userRole);
         this.userIds.push(userRole.userId);
-        this.$toast.open(ToastHelper.defaultConf(`Created '${userRole.roleName}' role`));
       },
       deleteUserRoleConfirm(row) {
-        this.$dialog.confirm({
-          title: 'Delete Role',
-          message: `Are you absolutely sure you want to remove [${row.userId}] as a ${this.roleDescription}?`,
-          confirmText: 'Delete',
-          type: 'is-danger',
-          hasIcon: true,
-          onConfirm: () => this.deleteUserRole(row),
-        });
+        const msg = `Are you absolutely sure you want to remove [${row.userId}] as a ${this.roleDescription}?`;
+        this.msgConfirm(msg)
+          .then((res) => {
+            if (res) {
+              this.deleteUserRole(row);
+            }
+          });
+        // this.$dialog.confirm({
+        //   title: 'Delete Role',
+        //   message: `Are you absolutely sure you want to remove [${row.userId}] as a ${this.roleDescription}?`,
+        //   confirmText: 'Delete',
+        //   type: 'is-danger',
+        //   hasIcon: true,
+        //   onConfirm: () => this.deleteUserRole(row),
+        // });
       },
       deleteUserRole(row) {
         AccessService.deleteUserRole(row.projectId, row.userId, row.roleName)
@@ -145,9 +134,10 @@
       },
       addUserRole() {
         this.isSaving = true;
-        AccessService.saveUserRole(this.project.projectId, this.selectedUserId, this.role).then((userInfo) => {
-          this.userAdded(userInfo);
-        })
+        AccessService.saveUserRole(this.project.projectId, this.selectedUserId, this.role)
+          .then((userInfo) => {
+            this.userAdded(userInfo);
+          })
           .finally(() => {
             this.isSaving = false;
             this.selectedUserId = '';
@@ -158,14 +148,10 @@
 </script>
 
 <style scoped>
-  #add-user-div {
-    margin-left: 0px;
-    margin-right: 0px;
-  }
-  #button-text {
-    min-width: 45px;
-  }
-  .control-column {
-    max-width: 176px;
+</style>
+
+<style>
+  .role-manager .control-column {
+    max-width: 2rem;
   }
 </style>

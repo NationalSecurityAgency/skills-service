@@ -1,55 +1,56 @@
 <template>
-  <div class="box" id="trusted-client-props-panel">
-    <div class="columns">
-      <div class="column is-full">
-        <span class="subtitle">Trusted Client Properties</span>
-      </div>
+  <div class="card" id="trusted-client-props-panel">
+    <div class="card-header">
+      Trusted Client Properties
     </div>
-    <div class="columns">
-      <div class="column is-one-fifth">
-        <h1>Client ID: </h1>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-12 col-md-3 text-secondary">
+          <span>Client ID:</span>
+        </div>
+        <div class="col">
+          <span>{{ project.projectId }}</span>
+        </div>
       </div>
-      <div class="column">
-        <h1>{{ project.projectId }}</h1>
+      <div class="row mt-1">
+        <div class="col-12 col-md-3 text-secondary">
+          <span>Client Secret:</span>
+        </div>
+        <div class="col">
+          <span>{{ project.clientSecret }}</span>
+        </div>
       </div>
-    </div>
-    <div class="columns">
-      <div class="column is-one-fifth">
-        <h1>Client Secret: </h1>
-      </div>
-      <div class="column">
-        <h1>{{ project.clientSecret }}</h1>
-      </div>
-    </div>
-    <div class="columns">
-      <div class="column has-text-left">
-        <button class="button is-primary is-outlined" v-on:click="confirmResetClientSecret">
-          <span class="icon">
-            <i class="fas fa-sync-alt"></i>
-          </span>
-          <span>Reset Client Secret</span>
-        </button>
-      </div>
+      <b-button @click="confirmResetClientSecret" variant="outline-info" class="mt-3">
+        <i class="fas fa-sync-alt"/> Reset Client Secret
+      </b-button>
     </div>
   </div>
 </template>
 
 <script>
   import AccessService from './AccessService';
+  import MsgBoxMixin from '../utils/modal/MsgBoxMixin';
 
   export default {
     name: 'TrustedClientProps',
+    mixins: [MsgBoxMixin],
     props: ['project'],
     methods: {
       confirmResetClientSecret() {
-        this.$dialog.confirm({
-          title: 'Reset Client Secret',
-          message: 'Are you sure you want reset the client secret? Your current client secret will no longer work after reset and you will need to update any application configuration using the old secret.',
-          confirmText: 'Reset',
-          type: 'is-danger',
-          hasIcon: true,
-          onConfirm: () => this.resetClientSecret(),
-        });
+        this.msgConfirm('Are you sure you want reset the client secret? Your current client secret will no longer work after reset and you will need to update any application configuration using the old secret.', 'Reset Secret?', 'Reset Please!')
+          .then((res) => {
+            if (res) {
+              this.resetClientSecret();
+            }
+          });
+        // this.$dialog.confirm({
+        //   title: 'Reset Client Secret',
+        //   message: 'Are you sure you want reset the client secret? Your current client secret will no longer work after reset and you will need to update any application configuration using the old secret.',
+        //   confirmText: 'Reset',
+        //   type: 'is-danger',
+        //   hasIcon: true,
+        //   onConfirm: () => this.resetClientSecret(),
+        // });
       },
       resetClientSecret() {
         AccessService.resetClientSecret(this.project.projectId)
