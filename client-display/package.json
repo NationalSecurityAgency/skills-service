@@ -16,6 +16,7 @@
     "animate.css": "3.7.0",
     "apexcharts": "3.6.7",
     "axios": "0.18.0",
+    "axios-auth-refresh": "1.0.6",
     "bootstrap": "4.3.1",
     "lodash": "4.17.11",
     "marked": "0.6.2",
