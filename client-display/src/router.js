@@ -10,6 +10,7 @@ import BadgesDetails from '@/userSkills/badge/BadgesDetails.vue';
 import BadgeDetails from '@/userSkills/badge/BadgeDetails.vue';
 import ErrorPage from '@/userSkills/ErrorPage.vue';
 
+import { debounce } from 'lodash';
 
 Vue.use(VueRouter);
 
@@ -68,8 +69,8 @@ const router = new VueRouter({
   ],
 });
 
-router.afterEach(() => {
+router.afterEach(debounce(() => {
   window.parent.postMessage('skills::route-changed::{}', '*');
-});
+}, 250));
 
 export default router;
