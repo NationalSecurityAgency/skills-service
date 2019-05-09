@@ -22,6 +22,18 @@ const refreshAuthorization = (failedRequest) => {
 // Instantiate the interceptor (you can chain it as it returns the axios instance)
 createAuthRefreshInterceptor(axios, refreshAuthorization);
 
+axios.interceptors.response.use(function (response) {
+  return response;
+}, function (error) {
+  router.push({
+    name: 'error',
+    params: {
+      errorMessage: error.response.statusText,
+    },
+  });
+  return Promise.reject(error);
+});
+
 service = {
   authenticationUrl: null,
 

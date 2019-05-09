@@ -21,7 +21,6 @@
 </template>
 
 <script>
-
   export default {
     props: {
       errorMessage: null,
