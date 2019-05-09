@@ -1,4 +1,5 @@
 import axios from 'axios';
+import createAuthRefreshInterceptor from 'axios-auth-refresh/src/index.js'
 import router from '@/router.js';
 import store from '@/store.js';
 
@@ -6,30 +7,22 @@ import 'url-search-params-polyfill';
 
 axios.defaults.withCredentials = true;
 
-axios.interceptors.response.use((response) => {
-  return response;
-}, () => {
-  console.log('request rejected');
-  console.log(router.currentRoute);
-  if (store.state.isAuthenticating) {
-    // redirect to error
-    router.push({
-      name: 'error',
-      params: {
-        errorMessage: 'Authentication Failed',
-      },
-    });
-  } else {
-    router.push({
-      name: 'authenticate',
-      params: {
-        targetRoute: router.currentRoute,
-      },
-    });
-  }
-});
+let service = {};
 
-const service = {
+const refreshAuthorization = (failedRequest) => {
+  service.setToken(null);
+  return service.getAuthenticationToken().then((result) => {
+    service.setToken(result.access_token);
+    failedRequest.response.config.headers['Authorization'] = 'Bearer ' + result.access_token;
+    axios.defaults.headers.common.Authorization = `Bearer ${result.access_token}`;
+    return Promise.resolve();
+  });
+};
+
+// Instantiate the interceptor (you can chain it as it returns the axios instance)
+createAuthRefreshInterceptor(axios, refreshAuthorization);
+
+service = {
   authenticationUrl: null,
 
   serviceUrl: null,
@@ -42,8 +35,16 @@ const service = {
 
   version: null,
 
+  authenticatingPromise: null,
+
   getAuthenticationToken() {
-    return axios.get(this.authenticationUrl).then(result => result.data);
+    if (!store.state.isAuthenticating) {
+      store.commit('isAuthenticating', true);
+      this.authenticatingPromise = axios.get(this.authenticationUrl)
+        .then(result => result.data)
+        .finally(() => store.commit('isAuthenticating', false));
+    }
+    return this.authenticatingPromise;
   },
 
   getUserSkills() {

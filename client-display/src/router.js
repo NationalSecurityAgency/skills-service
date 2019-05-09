@@ -8,7 +8,6 @@ import SkillDetails from '@/userSkills/skill/SkillDetails.vue';
 import MyRankDetails from '@/userSkills/myRank/MyRankDetails.vue';
 import BadgesDetails from '@/userSkills/badge/BadgesDetails.vue';
 import BadgeDetails from '@/userSkills/badge/BadgeDetails.vue';
-import Authenticate from '@/userSkills/Authenticate.vue';
 import ErrorPage from '@/userSkills/ErrorPage.vue';
 
 
@@ -21,12 +20,6 @@ const router = new VueRouter({
       path: '/',
       name: 'home',
       component: SkillsEntry,
-    },
-    {
-      path: '/authenticate',
-      name: 'authenticate',
-      component: Authenticate,
-      props: true,
     },
     {
       path: '',
