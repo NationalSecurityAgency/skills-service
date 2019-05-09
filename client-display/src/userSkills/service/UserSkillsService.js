@@ -1,19 +1,21 @@
 import axios from 'axios';
-import createAuthRefreshInterceptor from 'axios-auth-refresh/src/index.js'
-import router from '@/router.js';
-import store from '@/store.js';
+import createAuthRefreshInterceptor from 'axios-auth-refresh';
+import router from '@/router';
+import store from '@/store';
 
 import 'url-search-params-polyfill';
 
 axios.defaults.withCredentials = true;
 
+// eslint-disable-next-line
 let service = {};
 
 const refreshAuthorization = (failedRequest) => {
   service.setToken(null);
   return service.getAuthenticationToken().then((result) => {
     service.setToken(result.access_token);
-    failedRequest.response.config.headers['Authorization'] = 'Bearer ' + result.access_token;
+    // eslint-disable-next-line no-param-reassign
+    failedRequest.response.config.headers.Authorization = `Bearer ${result.access_token}`;
     axios.defaults.headers.common.Authorization = `Bearer ${result.access_token}`;
     return Promise.resolve();
   });
@@ -22,9 +24,7 @@ const refreshAuthorization = (failedRequest) => {
 // Instantiate the interceptor (you can chain it as it returns the axios instance)
 createAuthRefreshInterceptor(axios, refreshAuthorization);
 
-axios.interceptors.response.use(function (response) {
-  return response;
-}, function (error) {
+axios.interceptors.response.use(response => response, (error) => {
   router.push({
     name: 'error',
     params: {
