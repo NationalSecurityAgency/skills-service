@@ -6,7 +6,7 @@
           <i class="fa fa-edit mr-1"></i> <span>Write</span>
         </template>
         <div class="mt-2 content-height">
-          <b-form-textarea rows="5" max-rows="5" v-model="valueInternal" @input="dataChanged"/>
+          <b-form-textarea rows="5" max-rows="5" v-model="valueInternal" @input="dataChanged" no-resize/>
         </div>
       </b-tab>
       <b-tab>
