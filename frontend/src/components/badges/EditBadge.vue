@@ -130,7 +130,6 @@
       value: Boolean,
     },
     data() {
-      console.log('start of data()');
       // convert string to Date objects
       this.badge.startDate = this.toDate(this.badge.startDate);
       this.badge.endDate = this.toDate(this.badge.endDate);
