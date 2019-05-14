@@ -19,7 +19,7 @@
               <label for="username">Email address</label>
               <input type="text" class="form-control" id="username" tabindex="1" placeholder="Enter email"
                      aria-describedby="emailHelp"
-                     v-model="loginFields.username" v-validate="'required|min:5'" data-vv-delay="500">
+                     v-model="loginFields.username" v-validate="'required|min:5'" data-vv-delay="500" data-vv-name="username">
               <small id="emailHelp" class="form-text text-danger" v-show="errors.has('username')">{{
                 errors.first('username')}}
               </small>
@@ -35,7 +35,7 @@
               </div>
               <input type="password" class="form-control" id="inputPassword" tabindex="2" placeholder="Password"
                      v-model="loginFields.password" name="password" aria-describedby="passwordHelp"
-                     @animationstart="onAnimationStart" v-validate="'required|min:8|max:15'" data-vv-delay="500">
+                     @animationstart="onAnimationStart" v-validate="'required|min:8|max:15'" data-vv-delay="500" data-vv-name="password">
               <small id="passwordHelp" class="form-text text-danger" v-show="errors.has('password')">{{
                 errors.first('password')}}
               </small>

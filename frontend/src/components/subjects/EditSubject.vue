@@ -3,49 +3,49 @@
            header-bg-variant="info" header-text-variant="light" no-fade>
     <b-container fluid>
       <div v-if="displayIconManager === false">
-      <div class="media">
-        <icon-picker :startIcon="subjectInternal.iconClass" @select-icon="toggleIconDisplay(true)"
-                     class="mr-3"></icon-picker>
-        <div class="media-body">
-
-
-          <div class="form-group">
-            <label for="subjName">Subject Name</label>
-            <input type="text" class="form-control" id="subjName" @input="updateSubjectId"
-                   v-model="subjectInternal.name" v-on:input="updateSubjectId"
-                   v-validate="'required|min:3|max:50|uniqueName'" data-vv-delay="500" data-vv-name="subjectName"
-                   v-focus>
-            <small class="form-text text-danger">{{ errors.first('subjectName')}}</small>
+        <div class="media">
+          <icon-picker :startIcon="subjectInternal.iconClass" @select-icon="toggleIconDisplay(true)"
+                       class="mr-3"></icon-picker>
+          <div class="media-body">
+            <div class="form-group">
+              <label for="subjName">Subject Name</label>
+              <input type="text" class="form-control" id="subjName" @input="updateSubjectId"
+                     v-model="subjectInternal.name" v-on:input="updateSubjectId"
+                     v-validate="'required|min:3|max:50|uniqueName'" data-vv-delay="500" data-vv-name="subjectName"
+                     v-focus>
+              <small class="form-text text-danger">{{ errors.first('subjectName')}}</small>
+            </div>
           </div>
         </div>
-      </div>
 
-      <id-input type="text" label="Subject ID" v-model="subjectInternal.subjectId" @input="canAutoGenerateId=false"
-                v-validate="'required|min:3|max:50|alpha_num|uniqueId'" data-vv-name="subjectId"/>
-      <small class="form-text text-danger">{{ errors.first('subjectId')}}</small>
+        <id-input type="text" label="Subject ID" v-model="subjectInternal.subjectId" @input="canAutoGenerateId=false"
+                  v-validate="'required|min:3|max:50|alpha_num|uniqueId'" data-vv-name="subjectId"/>
+        <small class="form-text text-danger">{{ errors.first('subjectId')}}</small>
 
-      <div class="mt-2">
-        <label>Description</label>
-        <markdown-editor v-model="subjectInternal.description" />
-      </div>
+        <div class="mt-2">
+          <label>Description</label>
+          <markdown-editor v-model="subjectInternal.description"/>
+        </div>
 
-      <p v-if="overallErrMsg" class="text-center text-danger">***{{ overallErrMsg }}***</p>
+        <p v-if="overallErrMsg" class="text-center text-danger">***{{ overallErrMsg }}***</p>
       </div>
       <div v-else>
-        <b-card title="Select Icon">
           <icon-manager @selected-icon="onSelectedIcon"></icon-manager>
-          <b-button href="#" variant="primary" @click="toggleIconDisplay(false)" class="mt-4">back</b-button>
-        </b-card>
+          <div class="text-right mr-2">
+            <b-button variant="secondary" @click="toggleIconDisplay(false)" class="mt-4">Cancel Icon Selection</b-button>
+          </div>
       </div>
     </b-container>
 
     <div slot="modal-footer" class="w-100">
-      <b-button variant="success" size="sm" class="float-right" @click="updateSubject">
-        Save
-      </b-button>
-      <b-button variant="secondary" size="sm" class="float-right mr-2" @click="close">
-        Cancel
-      </b-button>
+      <div v-if="displayIconManager === false">
+        <b-button variant="success" size="sm" class="float-right" @click="updateSubject">
+          Save
+        </b-button>
+        <b-button variant="secondary" size="sm" class="float-right mr-2" @click="close">
+          Cancel
+        </b-button>
+      </div>
     </div>
   </b-modal>
 </template>
