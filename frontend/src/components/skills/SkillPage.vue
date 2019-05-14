@@ -7,6 +7,7 @@
           {name: 'Overview', iconClass: 'fa-info-circle'},
           {name: 'Dependencies', iconClass: 'fa-vector-square'},
           {name: 'Users', iconClass: 'fa-users'},
+          {name: 'Add Event', iconClass: 'fa-user-plus'},
           {name: 'Stats', iconClass: 'fa-chart-bar'},
         ]">
         <template slot="Overview">
@@ -22,6 +23,9 @@
         </template>
         <template slot="Users">
           <users :project-id="this.$route.params.projectId" :skill-id="this.$route.params.skillId" />
+        </template>
+        <template slot="Add Event">
+          <add-skill-event :project-id="this.$route.params.projectId" :skill-id="this.$route.params.skillId" />
         </template>
         <template slot="Stats">
           <section-stats :project-id="this.$route.params.projectId"  :section="section" :section-id-param="this.$route.params.skillId"></section-stats>
@@ -42,10 +46,12 @@
   import { SECTION } from '../stats/SectionHelper';
   import PageHeader from '../utils/pages/PageHeader';
   import SubPageHeader from '../utils/pages/SubPageHeader';
+  import AddSkillEvent from './AddSkillEvent';
 
   export default {
     name: 'SkillPage',
     components: {
+      AddSkillEvent,
       SubPageHeader,
       PageHeader,
       SkillDependencies,

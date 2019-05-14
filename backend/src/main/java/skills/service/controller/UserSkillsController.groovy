@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
 import skills.service.auth.UserInfoService
 import skills.service.auth.aop.AdminUsersOnlyWhenUserIdSupplied
+import skills.service.controller.request.model.SkillEventRequest
 import skills.service.icons.CustomIconFacade
 import skills.service.skillLoading.RankingLoader
 import skills.service.skillLoading.SkillsLoader
@@ -133,11 +134,9 @@ class UserSkillsController {
     @CompileStatic
     SkillsManagementFacade.AddSkillResult addSkill(@PathVariable("projectId") String projectId,
                                                    @PathVariable("skillId") String skillId,
-                                                   @RequestParam(name = "userId", required = false) String userIdParam,
-                                                   @RequestParam(name = "timestamp", required = false) Long timestamp) {
-
-        Date incomingDate = timestamp != null ? new Date(timestamp) : new Date()
-        skillsManagementFacade.addSkill(projectId, skillId,  getUserId(userIdParam), incomingDate)
+                                                   @RequestBody(required = false) SkillEventRequest skillEventRequest) {
+        Date incomingDate = skillEventRequest?.timestamp != null ? new Date(skillEventRequest.timestamp) : new Date()
+        skillsManagementFacade.addSkill(projectId, skillId,  getUserId(skillEventRequest?.userId), incomingDate)
     }
 
     @RequestMapping(value = "/projects/{projectId}/rank", method = RequestMethod.GET, produces = "application/json")

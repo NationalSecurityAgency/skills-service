@@ -2,7 +2,7 @@
   <div class="usersTable">
     <sub-page-header title="Users"/>
 
-    <div class="skills-bordered-component">
+    <simple-card>
       <v-server-table ref="table" :columns="columns" :url="getUrl()" :options="options" class="vue-table-2"
                       v-on:loaded="emit('loaded', $event)" v-on:error="emit('error', $event)">
         <div slot="lastUpdated" slot-scope="props" class="field has-addons">
@@ -17,13 +17,14 @@
           </router-link>
         </div>
       </v-server-table>
-    </div>
+    </simple-card>
   </div>
 </template>
 
 <script>
   import { Validator } from 'vee-validate';
   import SubPageHeader from '../utils/pages/SubPageHeader';
+  import SimpleCard from '../utils/cards/SimpleCard';
 
   const dictionary = {
     en: {
@@ -36,7 +37,7 @@
 
   export default {
     name: 'Users',
-    components: { SubPageHeader },
+    components: { SimpleCard, SubPageHeader },
     props: ['projectId', 'subjectId', 'skillId', 'badgeId'],
     data() {
       return {
