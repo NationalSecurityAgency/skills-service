@@ -26,49 +26,50 @@
           <markdown-editor :value="badge.description" @value-updated="updateDescription"></markdown-editor>
         </div>
 
-        <b-form-checkbox v-model="limitTimeframe"
-                         @change="onEnableGemFeature"
-                         v-b-tooltip.hover="'The Gem feature allows for the badge to only be achievable during the specified time frame.'"
-                         >
-            Enable Gem Feature
+        <b-form-checkbox v-model="limitTimeframe" class="mt-4"
+                         @change="onEnableGemFeature">
+            Enable Gem Feature <inline-help msg="The Gem feature allows for the badge to only be achievable during the specified time frame."/>
         </b-form-checkbox>
 
+
         <b-collapse id="gemCollapse" v-model="limitTimeframe">
-          <b-card no-body>
-            <b-row no-gutters>
-              <b-col md="4">
-                <label class="label">Start Date</label>
+<!--          <b-card no-body class="mt-2">-->
+            <b-row no-gutters class="justify-content-md-center mt-3">
+              <b-col cols="12" md="4" style="min-width: 20rem;">
+                <label class="label mt-2">Start Date</label>
                 <datepicker :inline="true" v-model="badgeInternal.startDate" name="startDate"
                             v-validate="'required|dateOrder'"></datepicker>
                 <small class="form-text text-danger" v-show="errors.has('startDate')">{{ errors.first('startDate')}}
                 </small>
               </b-col>
-              <b-col md="4">
-                <label class="label">End Date</label>
+              <b-col cols="12" md="4"  style="min-width: 20rem;">
+                <label class="label mt-2">End Date</label>
                 <datepicker :inline="true" v-model="badgeInternal.endDate" name="endDate"
                             v-validate="'required|dateOrder'"></datepicker>
                 <small class="form-text text-danger" v-show="errors.has('endDate')">{{ errors.first('endDate')}}</small>
               </b-col>
             </b-row>
-          </b-card>
+<!--          </b-card>-->
         </b-collapse>
-        <p v-if="overallErrMsg" class="text-center text-danger">***{{ overallErrMsg }}***</p>
+        <p v-if="overallErrMsg" class="text-center text-danger mt-3">***{{ overallErrMsg }}***</p>
       </div>
       <div v-else>
-        <b-card title="Select Icon">
-          <icon-manager @selected-icon="onSelectedIcon"></icon-manager>
-          <b-button href="#" variant="primary" @click="toggleIconDisplay(false)" class="mt-4">back</b-button>
-        </b-card>
+        <icon-manager @selected-icon="onSelectedIcon"></icon-manager>
+        <div class="text-right mr-2">
+          <b-button variant="secondary" @click="toggleIconDisplay(false)" class="mt-4">Cancel Icon Selection</b-button>
+        </div>
       </div>
     </b-container>
 
     <div slot="modal-footer" class="w-100">
-      <b-button variant="success" size="sm" class="float-right" @click="updateBadge">
-        Save
-      </b-button>
-      <b-button variant="secondary" size="sm" class="float-right mr-2" @click="closeMe">
-        Cancel
-      </b-button>
+      <div v-if="displayIconManager === false">
+        <b-button variant="success" size="sm" class="float-right" @click="updateBadge">
+          Save
+        </b-button>
+        <b-button variant="secondary" size="sm" class="float-right mr-2" @click="closeMe">
+          Cancel
+        </b-button>
+      </div>
     </div>
   </b-modal>
 </template>
@@ -80,6 +81,7 @@
   import IconPicker from '../utils/iconPicker/IconPicker';
   import IconManager from '../utils/iconPicker/IconManager';
   import IdInput from '../utils/inputForm/IdInput';
+  import InlineHelp from '../utils/InlineHelp';
 
   let self;
   const dictionary = {
@@ -118,6 +120,7 @@
   export default {
     name: 'EditBadge',
     components: {
+      InlineHelp,
       IconPicker,
       MarkdownEditor,
       Datepicker,

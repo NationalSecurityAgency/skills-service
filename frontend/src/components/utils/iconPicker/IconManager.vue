@@ -1,14 +1,11 @@
 <template xmlns:v-if="http://www.w3.org/1999/xlink">
     <div>
-      <div class="field">
-        <div class="control">
-          <input type="text" class="input" :placeholder="searchPlaceholder" @keyup="filter($event.target.value)" ref="iconFilterInput">
-        </div>
-      </div>
-      <b-tabs content-class="mt-3" justified @input="onChange($event)">
+      <input type="text" class="form-control mb-3" :placeholder="searchPlaceholder" @keyup="filter($event.target.value)" ref="iconFilterInput">
+      <b-card no-body>
+      <b-tabs content-class="mt-3" @input="onChange($event)" card>
         <b-tab>
           <template slot="title">
-            <i class="fab fa-font-awesome-flag"></i> <span>{{ fontAwesomeIcons.iconPack }}</span>
+            <i class="fab fa-font-awesome-flag"></i> {{ fontAwesomeIcons.iconPack }}
           </template>
             <span v-if="fontAwesomeIcons.icons.length === 0 && this.activePack === fontAwesomeIcons.iconPack">No icons matched your search</span>
             <virtual-list :size="60" :remain="5" :bench="10" wclass="scroll-container">
@@ -30,7 +27,7 @@
         </b-tab>
         <b-tab>
           <template slot="title">
-            <i class="mi mi-description"></i> {{ materialIcons.iconPack }}
+            <i class="fas fa-file-alt"></i> {{ materialIcons.iconPack }}
           </template>
           <span v-if="materialIcons.icons.length === 0 && this.activePack === materialIcons.iconPack">No icons matched your search</span>
             <virtual-list :size="60" :remain="5" :bench="10" wclass="scroll-container">
@@ -81,6 +78,7 @@
           </div>
         </b-tab>
       </b-tabs>
+      </b-card>
     </div>
 </template>
 

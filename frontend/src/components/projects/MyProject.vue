@@ -9,10 +9,9 @@
                                   class="project-settings"></edit-and-delete-dropdown>
       </div>
       <div slot="footer">
-        <router-link :to="{ name:'ProjectPage', params: { projectId: this.projectInternal.projectId}}"
-                     class="btn btn-outline-primary">
+        <b-button :to="{ name:'ProjectPage', params: { projectId: this.projectInternal.projectId}}" variant="outline-primary">
           Manage <i class="fas fa-arrow-circle-right"/>
-        </router-link>
+        </b-button>
       </div>
     </page-preview-card>
 
@@ -36,13 +35,12 @@
     data() {
       return {
         isLoading: false,
-        projectInternal: {},
+        projectInternal: Object.assign({}, this.project),
         cardOptions: {},
         showEditProjectModal: false,
       };
     },
     mounted() {
-      this.projectInternal = this.project;
       this.createCardOptions();
     },
     methods: {

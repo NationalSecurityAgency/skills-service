@@ -50,19 +50,21 @@
         </div>
       </div>
       <div v-else>
-        <b-card title="Select Icon">
-          <icon-manager @selected-icon="onSelectedIcon"></icon-manager>
-          <b-button href="#" variant="primary" @click="toggleIconDisplay(false)" class="mt-4">back</b-button>
-        </b-card>
+        <icon-manager @selected-icon="onSelectedIcon"></icon-manager>
+        <div class="text-right mr-2">
+          <b-button variant="secondary" @click="toggleIconDisplay(false)" class="mt-4">Cancel Icon Selection</b-button>
+        </div>
       </div>
     </b-container>
     <div slot="modal-footer" class="w-100">
-      <b-button variant="success" size="sm" class="float-right" @click="saveLevel">
-        Save
-      </b-button>
-      <b-button variant="secondary" size="sm" class="float-right mr-2" @click="closeMe">
-        Cancel
-      </b-button>
+      <div v-if="displayIconManager === false">
+        <b-button variant="success" size="sm" class="float-right" @click="saveLevel">
+          Save
+        </b-button>
+        <b-button variant="secondary" size="sm" class="float-right mr-2" @click="closeMe">
+          Cancel
+        </b-button>
+      </div>
     </div>
   </b-modal>
 </template>

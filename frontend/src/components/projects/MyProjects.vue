@@ -3,14 +3,10 @@
     <sub-page-header title="My Projects" action="Project" @add-action="newProject.show=true"/>
 
     <loading-container v-bind:is-loading="isLoading">
-      <transition v-if="projects && projects.length" name="projectContainer" enter-active-class="animated fadeIn">
-        <div>
-          <div v-for="project of projects" :key="project.id" class="mb-3">
-            <my-project :project="project" v-on:project-deleted="projectRemoved" v-on:move-project-up="moveProjectUp"
-                        v-on:move-project-down="moveProjectDown"/>
-          </div>
-        </div>
-      </transition>
+      <div v-for="project of projects" :key="project.id" class="mb-3">
+        <my-project :project="project" v-on:project-deleted="projectRemoved" v-on:move-project-up="moveProjectUp"
+                    v-on:move-project-down="moveProjectDown"/>
+      </div>
 
       <no-content2 v-if="!projects || projects.length==0" icon="fas fa-hand-spock" class="mt-4"
                    title="No Projects Yet..." message="Welcome!! Start by creating a new project."/>
@@ -57,8 +53,10 @@
       loadProjects() {
         ProjectService.getProjects()
           .then((response) => {
-            this.isLoading = false;
             this.projects = response;
+          })
+          .finally(() => {
+            this.isLoading = false;
           });
       },
       projectRemoved(project) {
