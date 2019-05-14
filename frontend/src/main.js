@@ -42,7 +42,7 @@ Vue.directive('focus', {
 
 require('vue-multiselect/dist/vue-multiselect.min.css');
 
-store.dispatch('restoreSessionIfAvailable').then(() => {
+store.dispatch('restoreSessionIfAvailable').finally(() => {
   /* eslint-disable no-new */
   const vm = new Vue({
     el: '#app',
