@@ -5,7 +5,7 @@
         <existing-user-input :suggest="true" :validate="true" :user-type="userType" :excluded-suggestions="userIds"
                              :selectedUserId="selectedUserId"
                              ref="userInput"
-                             v-on:userSelected="onUserSelected"></existing-user-input>
+                             v-model="selectedUserId"/>
       </div>
       <div class="col-auto">
         <b-button variant="outline-primary" @click="addUserRole" :disabled="errors.any() || !selectedUserId"
@@ -35,7 +35,6 @@
 
 <script>
   import LoadingContainer from '../utils/LoadingContainer';
-  import ToastHelper from '../utils/ToastHelper';
   import AccessService from './AccessService';
   import ExistingUserInput from '../utils/ExistingUserInput';
   import MsgBoxMixin from '../utils/modal/MsgBoxMixin';
@@ -73,7 +72,7 @@
         isSaving: false,
         options: {
           headings: {
-            userId: 'User',
+            userId: this.roleDescription,
             edit: '',
           },
           columnsClasses: {
@@ -109,28 +108,16 @@
               this.deleteUserRole(row);
             }
           });
-        // this.$dialog.confirm({
-        //   title: 'Delete Role',
-        //   message: `Are you absolutely sure you want to remove [${row.userId}] as a ${this.roleDescription}?`,
-        //   confirmText: 'Delete',
-        //   type: 'is-danger',
-        //   hasIcon: true,
-        //   onConfirm: () => this.deleteUserRole(row),
-        // });
       },
       deleteUserRole(row) {
         AccessService.deleteUserRole(row.projectId, row.userId, row.roleName)
           .then(() => {
             this.data = this.data.filter(item => item.id !== row.id);
             this.userIds = this.userIds.filter(userId => userId !== row.userId);
-            this.$toast.open(ToastHelper.defaultConf(`Removed '${row.roleName}' role`));
           });
       },
       notCurrentUser(userId) {
         return userId !== this.$store.getters.userInfo.userId;
-      },
-      onUserSelected(userId) {
-        this.selectedUserId = userId;
       },
       addUserRole() {
         this.isSaving = true;

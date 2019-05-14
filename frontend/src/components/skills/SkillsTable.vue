@@ -43,7 +43,6 @@
             <b-button-group size="sm" class="mr-1">
               <b-button @click="editSkill(props.row)" variant="outline-primary"><i class="fas fa-edit"/></b-button>
               <b-button @click="deleteSkill(props.row)" variant="outline-primary"><i class="fas fa-trash"/></b-button>
-<!--              <b-button @click="addUser(props.row)" variant="outline-primary"><i class="fas fa-user-plus"/></b-button>-->
             </b-button-group>
             <router-link :to="{ name:'SkillPage',
                             params: { projectId: props.row.projectId, subjectId: props.row.subjectId, skillId: props.row.skillId }}"
@@ -78,7 +77,6 @@
 
 <script>
   import EditSkill from './EditSkill';
-  import AddUser from './AddUser';
   import NoContent from '../utils/NoContent';
   import NewSkillItemsButtons from './NewSkillItemsButtons';
   import ChildRowSkillsDisplay from './ChildRowSkillsDisplay';
@@ -221,23 +219,6 @@
             tableData[i].displayOrder = i;
           }
         }
-      },
-
-      addUser(row) {
-        this.$modal.open({
-          parent: this,
-          component: AddUser,
-          hasModalCard: true,
-          canCancel: false,
-          width: 1110,
-          props: {
-            skillId: row.skillId,
-            projectId: this.projectId,
-            suggestions: [],
-            isFetching: false,
-            skillName: row.name,
-          },
-        });
       },
 
       handleColumnSort(param) {

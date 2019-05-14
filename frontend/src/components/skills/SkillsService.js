@@ -79,4 +79,8 @@ export default {
     return axios.get(`/admin/projects/${projectId}/latestVersion`)
       .then(remoteRes => remoteRes.data);
   },
+  saveSkillEvent(projectId, skillId, userId, timestamp) {
+    return axios.put(`/api/projects/${projectId}/skills/${skillId}`, { userId, timestamp })
+      .then(remoteRes => remoteRes.data);
+  },
 };

@@ -1,10 +1,9 @@
 <template>
   <div class="existingUserInput">
-    <multiselect v-model="userQuery" :placeholder="placeholder"
-                 :options="suggestions" :multiple="true" :taggable="false"
+    <multiselect v-model="userQuery" :placeholder="placeholder" tag-placeholder="Enter to select"
+                 :options="suggestions" :multiple="true" :taggable="canEnterNewUser" @tag="addTag"
                  :hide-selected="true"
                  @search-change="suggestUsers" :loading="isFetching" :internal-search="false"
-                 v-on:select="onSelected" v-on:remove="onRemoved"
                  :clear-on-select="true">
     </multiselect>
 
@@ -57,10 +56,26 @@
       selectedUserId: {
         type: String,
       },
+      value: String,
+      canEnterNewUser: {
+        type: Boolean,
+        default: false,
+      },
     },
     watch: {
       selectedUserId(newVal) {
         this.userQuery = newVal;
+      },
+      userQuery(newVal) {
+        // must be able to handle string or an array as the multiselect lib will place
+        // an array if it was selected from the dropdown and a string if it was entered
+        if (Object.getPrototypeOf(newVal) === String.prototype) {
+          this.$emit('input', newVal);
+        } else if (!newVal || newVal.length === 0) {
+          this.$emit('input', null);
+        } else {
+          this.$emit('input', newVal[0]);
+        }
       },
     },
     data() {
@@ -69,7 +84,7 @@
         suggestions: [],
         selectedUser: null,
         theError: '',
-        userQuery: this.selectedUser,
+        userQuery: this.value,
       };
     },
     computed: {
@@ -111,12 +126,13 @@
         //   this.suggestions = [];
         //   return;
         // }
+        this.isFetching = true;
         if (!query) {
           this.suggestions = [];
+          this.isFetching = false;
           return;
         }
         const url = `${this.suggestUrl}/${query}`;
-        this.isFetching = true;
         axios.get(url)
           .then((response) => {
             this.suggestions = response.data.filter(suggestedUserId => !this.excludedSuggestions.includes(suggestedUserId));
@@ -126,11 +142,15 @@
           });
       }, 200),
 
-      onSelected(selectedItem) {
-        this.$emit('userSelected', selectedItem);
-      },
-      onRemoved(item) {
-        this.$emit('userRemoved', item);
+      // onSelected(selectedItem) {
+      //   this.$emit('userSelected', selectedItem);
+      // },
+      // onRemoved(item) {
+      //   this.$emit('userRemoved', item);
+      // },
+
+      addTag(newTag) {
+        this.userQuery = newTag;
       },
 
       validateUserId(userId) {

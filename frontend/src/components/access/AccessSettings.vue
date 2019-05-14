@@ -3,7 +3,7 @@
     <sub-page-header title="Access Settings"/>
     <div class="card">
       <div class="card-header">
-        Project Administrator
+        Project Administrators
       </div>
       <div class="card-body">
         <role-manager :project="project"/>

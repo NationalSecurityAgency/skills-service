@@ -1,7 +1,7 @@
 <template>
   <div class="row p-2 mb-2 border-bottom">
     <div class="col-8">
-      <span class="h2 text-uppercase">{{ title }}</span>
+      <span class="h4 text-uppercase">{{ title }}</span>
     </div>
     <div class="col-4 text-right">
       <slot>
