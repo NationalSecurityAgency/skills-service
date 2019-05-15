@@ -1,6 +1,6 @@
 <template>
-  <div id="dependent-skills-graph" class="skills-bordered-component">
-    <div v-if="!this.dependentSkills || this.dependentSkills.length === 0" class="columns is-centered">
+  <simple-card id="dependent-skills-graph">
+    <div v-if="!this.dependentSkills || this.dependentSkills.length === 0">
       <div class="column is-half has-text-centered">
         <no-content2 icon="fa fa-vector-square" title="No Dependencies Yet..."
                      message="You can manage and visualize skill's dependencies on this page. Please use the dropdown above to start adding dependent skills."></no-content2>
@@ -23,7 +23,7 @@
       </div>
     </div>
     <div id="dependent-skills-network" style="height: 500px"></div>
-  </div>
+  </simple-card>
 </template>
 
 <script>
@@ -33,10 +33,16 @@
   import GraphNodeSortMethodSelector from './GraphNodeSortMethodSelector';
   import NoContent2 from '../../utils/NoContent2';
   import GraphUtils from './GraphUtils';
+  import SimpleCard from '../../utils/cards/SimpleCard';
 
   export default {
     name: 'DependantsGraph',
-    components: { NoContent2, GraphNodeSortMethodSelector, GraphLegend },
+    components: {
+      SimpleCard,
+      NoContent2,
+      GraphNodeSortMethodSelector,
+      GraphLegend,
+    },
     props: ['skill', 'dependentSkills', 'graph'],
     data() {
       return {

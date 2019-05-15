@@ -1,13 +1,13 @@
 <template>
   <div>
-<!--    <div v-if="!chart.hasData" class="disabled-overlay"/>-->
-<!--    <div v-if="!chart.hasData" class="text-center user-skills-no-data-icon-text text-danger">-->
-<!--      <div class="row justify-content-center">-->
-<!--        <div class="col-5 text-center border rounded bg-light p-2">-->
-<!--          <div style="font-size: 1rem;"><i class="fa fa-ban"></i> No Data Available</div>-->
-<!--        </div>-->
-<!--      </div>-->
-<!--    </div>-->
+    <div v-if="!chart.hasData" class="disabled-overlay"/>
+    <div v-if="!chart.hasData" class="text-center user-skills-no-data-icon-text text-danger">
+      <div class="row justify-content-center">
+        <div class="col-5 text-center border rounded bg-light p-2">
+          <div style="font-size: 1rem;"><i class="fa fa-ban"></i> No Data Available</div>
+        </div>
+      </div>
+    </div>
     <simple-card>
       <apexchart v-if="chart.dataLoaded"
                  :class="{'disabled': !chart.hasData}"

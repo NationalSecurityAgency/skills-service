@@ -18,21 +18,7 @@
 
           </div>
 
-        <no-content :should-display="!badges || badges.length==0" :title="'No Badges Yet'">
-          <div slot="content" class="content" style="width: 100%;">
-            <p class="has-text-centered">
-              Create your first badge today by pressing
-            </p>
-            <p class="has-text-centered">
-              <a v-on:click="newBadge" class="button is-outlined is-success">
-                <span>Add New Badge</span>
-                <span class="icon is-small">
-              <i class="fas fa-plus-circle"/>
-              </span>
-              </a>
-            </p>
-          </div>
-        </no-content>
+          <no-content3 v-if="!badges || badges.length==0" title="No Badges Yet" sub-title="Start creating badges today!"/>
         </div>
       </transition>
     </loading-container>
@@ -46,14 +32,14 @@
   import Badge from './Badge';
   import EditBadge from './EditBadge';
   import LoadingContainer from '../utils/LoadingContainer';
-  import NoContent from '../utils/NoContent';
+  import NoContent3 from '../utils/NoContent3';
   import SubPageHeader from '../utils/pages/SubPageHeader';
 
   export default {
     name: 'Badges',
     components: {
       SubPageHeader,
-      NoContent,
+      NoContent3,
       LoadingContainer,
       Badge,
       EditBadge,

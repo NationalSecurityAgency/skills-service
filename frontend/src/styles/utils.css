@@ -34,15 +34,6 @@
   padding-bottom: 1rem;
 }
 
-.skills-bordered-component {
-  padding: 20px;
-  border: 1px solid #ddd;
-  box-shadow: 0 22px 35px -16px rgba(0,0,0,0.1);
-  margin-bottom: 2rem;
-  border-radius: 5px;
-  background-color: white;
-}
-
 .skills-handle-overflow {
   overflow: hidden;
   text-overflow: ellipsis;

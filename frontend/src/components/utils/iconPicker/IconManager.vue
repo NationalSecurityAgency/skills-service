@@ -54,15 +54,15 @@
           <file-upload :name="'customIcon'" :url="uploadUrl" :accept="acceptType"
                        @upload-success="handleUploadedIcon($event)" validate-images="true"
                        :image-height="customIconHeight" :image-width="customIconWidth"/>
-          <span>* custom icons must be 48px X 48px</span><br />
-          <div class="columns is-multiline">
-            <div class="column" v-for="{cssClassname, filename} in customIconList" :key="cssClassname">
+          <span class="text-center text-danger">* custom icons must be 48px X 48px</span><br />
+          <div class="row text-info justify-content-center mt-4">
+            <div class="col-4 mb-4" v-for="{cssClassname, filename} in customIconList" :key="cssClassname">
               <div class="icon-item">
                 <a
                   href="#"
                   @click.stop.prevent="getIcon(name, cssClassname, 'Custom Icons')"
                   :class="`item ${selectedCss === cssClassname ? 'selected' : ''}`">
-                  <span class="icon is-large">
+                  <span class="icon is-large text-info">
                     <i :class="cssClassname"></i>
                   </span>
                 </a>

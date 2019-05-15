@@ -39,7 +39,7 @@
           <i class="fa fa-exclamation-circle mr-1"></i> <strong>Error!</strong> Request could not be completed! <strong>{{ errNotification.msg }}</strong>
         </b-alert>
 
-        <dependants-graph :skill="skill" :dependent-skills="skills" :graph="graph" class="mt-3"/>
+        <dependants-graph :skill="skill" :dependent-skills="skills" :graph="graph" class="my-3"/>
 
         <simple-skills-table :skills="skills" v-on:skill-removed="skillDeleted">
             <span slot="name-cell" slot-scope="row">

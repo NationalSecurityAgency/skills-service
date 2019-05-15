@@ -23,7 +23,14 @@
 <script>
   export default {
     name: 'NoContent2',
-    props: ['title', 'message', 'icon'],
+    props: {
+      title: String,
+      message: String,
+      icon: {
+        type: String,
+        default: 'fas fa-heart-broken',
+      },
+    },
   };
 </script>
 
