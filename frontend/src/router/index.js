@@ -128,6 +128,9 @@ const isActiveProjectIdChange = (to, from) => to.params.projectId !== from.param
 const isLoggedIn = () => store.getters.isAuthenticated;
 
 router.beforeEach((to, from, next) => {
+  if (from.path !== '/error') {
+    store.commit('previousUrl', from.fullPath);
+  }
   if (isActiveProjectIdChange(to, from)) {
     store.commit('currentProjectId', to.params.projectId);
   }
