@@ -7,10 +7,14 @@ Vue.use(Vuex);
 export default new Vuex.Store({
   state: {
     projectId: '',
+    previousUrl: '',
   },
   mutations: {
     currentProjectId(state, projectId) {
       state.projectId = projectId;
+    },
+    previousUrl(state, previousUrl) {
+      state.previousUrl = previousUrl;
     },
   },
   modules: {
