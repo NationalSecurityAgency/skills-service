@@ -3,12 +3,19 @@
     <sub-page-header title="Level Definitions">
       <div class="row">
         <div class="col">
-          <button v-on:click="removeLastItem" class="btn btn-outline-primary mr-2">
-            Remove Highest <i class="fas fa-trash-alt"/>
-          </button>
-          <button v-on:click="editLevel()" class="btn btn-outline-primary">
-            Add Next <i class="fas fa-plus-circle"/>
-          </button>
+
+          <b-tooltip target="remove-button" title="You must retain at least one level." :disabled="!onlyOneLevelLeft"></b-tooltip>
+          <span id="remove-button" class="mr-2">
+            <b-button variant="outline-primary" @click="removeLastItem" :disabled="onlyOneLevelLeft">
+              <span class="d-none d-sm-inline">Remove</span> Highest <i class="fas fa-trash-alt"/>
+            </b-button>
+          </span>
+          <b-tooltip target="add-button" title="Reached maximum limit of levels." :disabled="!reachedMaxLevels"></b-tooltip>
+          <span id="add-button">
+            <b-button @click="editLevel()" variant="outline-primary" :disabled="reachedMaxLevels">
+              <span class="d-none d-sm-inline">Add</span> Next <i class="fas fa-plus-circle" />
+            </b-button>
+          </span>
         </div>
       </div>
     </sub-page-header>
@@ -56,7 +63,6 @@
   import NewLevel from './NewLevel';
   import SettingService from '../settings/SettingsService';
   import LevelService from './LevelService';
-  import ToastHelper from '../utils/ToastHelper';
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import LoadingContainer from '../utils/LoadingContainer';
   import SimpleCard from '../utils/cards/SimpleCard';
@@ -177,6 +183,12 @@
 
         return bounds;
       },
+      reachedMaxLevels() {
+        return this.levels.length >= this.maxLevels;
+      },
+      onlyOneLevelLeft() {
+        return this.levels.length <= 1;
+      },
     },
     methods: {
       loadLevels() {
@@ -195,15 +207,13 @@
         }
       },
       removeLastItem() {
-        if (this.levels.length > 1) {
+        if (!this.onlyOneLevelLeft) {
           const msg = 'Are you absolutely sure you want to delete the highest Level?';
           this.msgConfirm(msg, 'WARNING: Delete Highest Level').then((res) => {
             if (res) {
               this.doRemoveLastItem();
             }
           });
-        } else {
-          this.$toast.open(ToastHelper.defaultConf('You must retain at least one level'));
         }
       },
       doRemoveLastItem() {
@@ -227,11 +237,7 @@
 
         if (existingLevel) {
           this.levelToEdit = Object.assign({}, existingLevel);
-        } else {
-          if (this.levels.length >= this.maxLevels) {
-            this.$toast.open(ToastHelper.defaultConf(`You cannot have more then ${this.maxLevels} levels`));
-            return;
-          }
+        } else if (!this.reachedMaxLevels) {
           this.levelToEdit = { iconClass: 'fas fa-user-ninja' };
         }
 

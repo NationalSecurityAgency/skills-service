@@ -17,8 +17,8 @@
 </template>
 
 <script>
-  import ToastHelper from '../ToastHelper';
   import FileUploadService from './FileUploadService';
+  import ToastSupport from '../ToastSupport';
 
   const STATUS_INITIAL = 0;
   const STATUS_SAVING = 1;
@@ -29,6 +29,7 @@
 
   export default {
     name: 'FileUpload',
+    mixins: [ToastSupport],
     props: ['url', 'name', 'accept', 'validateImages', 'imageWidth', 'imageHeight'],
     data() {
       return {
@@ -76,7 +77,7 @@
           self.currentStatus = STATUS_SUCCESS;
           self.statusMsg = DEFAULT_STATUS_MSG;
           self.$emit('upload-success', response.data);
-          self.$toast.open(ToastHelper.defaultConf('File successfully uploaded'));
+          self.successToast('Success!', 'File successfully uploaded');
           self.reset();
         }, (err) => {
           self.uploadError = err.response;

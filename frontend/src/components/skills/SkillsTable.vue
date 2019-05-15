@@ -57,16 +57,7 @@
           </div>
         </v-client-table>
 
-        <no-content :should-display="!(this.skills && this.skills.length)" :title="'No Skills Yet'">
-          <div slot="content" class="content" style="width: 100%;">
-            <p class="has-text-centered">
-              Create your first skill today by pressing
-            </p>
-            <p class="has-text-centered">
-              <new-skill-items-buttons v-on:new-skill-item="newSkill"></new-skill-items-buttons>
-            </p>
-          </div>
-        </no-content>
+        <no-content2 v-if="!badges || badges.length==0" title="No Skills Yet" message="Start creating skills today!"/>
       </div>
     </div>
 
@@ -77,23 +68,22 @@
 
 <script>
   import EditSkill from './EditSkill';
-  import NoContent from '../utils/NoContent';
-  import NewSkillItemsButtons from './NewSkillItemsButtons';
+  import NoContent2 from '../utils/NoContent2';
   import ChildRowSkillsDisplay from './ChildRowSkillsDisplay';
   import SkillsService from './SkillsService';
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import MsgBoxMixin from '../utils/modal/MsgBoxMixin';
+  import ToastSupport from '../utils/ToastSupport';
 
   export default {
     name: 'SkillsTable',
-    mixins: [MsgBoxMixin],
+    mixins: [MsgBoxMixin, ToastSupport],
     props: ['projectId', 'subjectId', 'skillsProp'],
     components: {
       EditSkill,
       SubPageHeader,
       ChildRowSkillsDisplay,
-      NewSkillItemsButtons,
-      NoContent,
+      NoContent2,
     },
     data() {
       return {
@@ -178,7 +168,7 @@
             this.isLoading = false;
 
             this.$emit('skills-change', skill.skillId);
-            this.toast('Skill Saved', `Saved '${skill.name}' skill.`);
+            this.successToast('Skill Saved', `Saved '${skill.name}' skill.`);
           })
           .finally(() => {
             this.isLoading = false;
@@ -205,7 +195,7 @@
             this.isLoading = false;
             this.$emit('skills-change', skill.skillId);
 
-            this.toast('Removed Skill', `Skill '${skill.name}' was removed.`);
+            this.successToast('Removed Skill', `Skill '${skill.name}' was removed.`);
           })
           .finally(() => {
             this.isLoading = false;
@@ -268,16 +258,6 @@
           tableData[0].disabledUpButton = true;
           tableData[tableData.length - 1].disabledDownButton = true;
         }
-      },
-      toast(toastTitle, msg) {
-        this.$bvToast.toast(msg, {
-          title: toastTitle,
-          autoHideDelay: 4000,
-          toaster: 'b-toaster-top-center',
-          solid: true,
-          appendToast: true,
-          variant: 'success',
-        });
       },
     },
   };

@@ -79,7 +79,7 @@
 <script>
   import { Validator } from 'vee-validate';
   import SettingsService from './SettingsService';
-  import ToastHelper from '../utils/ToastHelper';
+  import ToastSupport from '../utils/ToastSupport';
 
   const dictionary = {
     en: {
@@ -96,6 +96,7 @@
 
   export default {
     name: 'EmailServerSettings',
+    mixins: [ToastSupport],
     data() {
       return {
         emailInfo: {
@@ -116,13 +117,13 @@
         this.isTesting = true;
         SettingsService.testConnection(this.emailInfo).then((response) => {
           if (response) {
-            this.$toast.open(ToastHelper.defaultConf('Email Connection Successful!'));
+            this.successToast('Connection Status', 'Email Connection Successful!');
           } else {
-            this.$toast.open(ToastHelper.defaultConf('Email Connection Failed', true));
+            this.errorToast('Connection Status', 'Email Connection Failed');
           }
         })
           .catch(() => {
-            this.$toast.open(ToastHelper.defaultConf('Failed to Test the Email Connection', true));
+            this.errorToast('Failure', 'Failed to Test the Email Connection');
           })
           .finally(() => {
             this.isTesting = false;
@@ -131,10 +132,10 @@
       saveEmailSettings() {
         this.isSaving = true;
         SettingsService.saveEmailSettings(this.emailInfo).then(() => {
-          this.$toast.open(ToastHelper.defaultConf('Email Settings Saved!'));
+          this.successToast('Saved', 'Email Connection Successful!');
         })
           .catch(() => {
-            this.$toast.open(ToastHelper.defaultConf('Failed to Save the Connection Settings!', true));
+            this.errorToast('Failure', 'Failed to Save the Connection Settings!');
           })
           .finally(() => {
             this.isSaving = false;

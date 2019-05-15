@@ -2,25 +2,18 @@
   <div>
     <sub-page-header title="Skills"/>
 
-    <div class="skills-bordered-component">
-      <loading-container  v-bind:is-loading="loading.availableSkills || loading.badgeSkills || loading.skillOp">
-        <div class="columns">
-          <div class="column is-full">
-            <skills-selector2 :options="allSkills" :selected="badgeSkills"
-                              v-on:added="skillAdded" v-on:removed="skillDeleted"></skills-selector2>
-          </div>
-        </div>
+    <simple-card>
+      <loading-container v-bind:is-loading="loading.availableSkills || loading.badgeSkills || loading.skillOp">
+        <skills-selector2 :options="allSkills" :selected="badgeSkills" class="mb-4"
+                          v-on:added="skillAdded" v-on:removed="skillDeleted"></skills-selector2>
 
         <simple-skills-table v-if="badgeSkills && badgeSkills.length > 0"
                              :skills="badgeSkills" v-on:skill-removed="skillDeleted"></simple-skills-table>
-        <div v-else class="columns is-centered">
-          <div class="column is-half">
-            <no-content2 title="No Skills Selected Yet..." icon="fas fa-award"
-                         message="Please use drop-down above to start adding skills to this badge!"></no-content2>
-          </div>
-        </div>
+
+        <no-content2 v-else title="No Skills Selected Yet..." icon="fas fa-award"
+                     message="Please use drop-down above to start adding skills to this badge!"></no-content2>
       </loading-container>
-    </div>
+    </simple-card>
   </div>
 </template>
 
@@ -31,10 +24,12 @@
   import SimpleSkillsTable from '../skills/SimpleSkillsTable';
   import NoContent2 from '../utils/NoContent2';
   import SubPageHeader from '../utils/pages/SubPageHeader';
+  import SimpleCard from '../utils/cards/SimpleCard';
 
   export default {
     name: 'BadgeSkills',
     components: {
+      SimpleCard,
       SubPageHeader,
       NoContent2,
       SimpleSkillsTable,

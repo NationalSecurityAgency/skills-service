@@ -1,9 +1,9 @@
 <template>
   <div class="row p-2 mb-2 border-bottom">
-    <div class="col-8">
+    <div class="col-12 col-md-7">
       <span class="h4 text-uppercase">{{ title }}</span>
     </div>
-    <div class="col-4 text-right">
+    <div class="col-12 col-md-5 pt-2 pt-md-0 text-md-right">
       <slot>
         <button v-if="action" type="button" class="btn btn-outline-primary" v-on:click="addClicked">
           <span class="d-none d-sm-inline">{{ action }} </span> <i class="fas fa-plus-circle"/>
