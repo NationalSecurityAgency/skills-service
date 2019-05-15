@@ -34,6 +34,15 @@
       errorMessage() {
         return this.$route.query.errorMessage;
       },
+      previousUrl() {
+        return this.$store.state.previousUrl;
+      },
+    },
+    mounted() {
+      if (this.previousUrl) {
+        // eslint-disable-next-line
+        history.replaceState(history.state, '', this.previousUrl);
+      }
     },
   };
 </script>
