@@ -21,6 +21,7 @@
     "lodash": "4.17.11",
     "marked": "0.6.2",
     "numeral": "2.0.6",
+    "postmate": "1.5.0",
     "q": "1.5.1",
     "tinycolor2": "1.4.1",
     "url-search-params-polyfill": "6.0.0",
