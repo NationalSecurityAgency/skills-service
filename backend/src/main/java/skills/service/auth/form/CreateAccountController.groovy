@@ -48,6 +48,9 @@ class CreateAccountController {
         if (!userInfo.username) {
             userInfo.username = userInfo.email
         }
+        if (!userInfo.nickName) {
+            userInfo.nickName = "${userInfo.firstName} ${userInfo.lastName}"
+        }
         userInfo = userAuthService.createUser(userInfo)
         userAuthService.autologin(userInfo, password)
     }
@@ -59,6 +62,9 @@ class CreateAccountController {
         userInfo.password = passwordEncoder.encode(password)
         if (!userInfo.username) {
             userInfo.username = userInfo.email
+        }
+        if (!userInfo.nickName) {
+            userInfo.nickName = "${userInfo.firstName} ${userInfo.lastName}"
         }
         userInfo.authorities = [new UserSkillsGrantedAuthority(new UserRole(
                 roleName: RoleName.ROLE_SUPER_DUPER_USER

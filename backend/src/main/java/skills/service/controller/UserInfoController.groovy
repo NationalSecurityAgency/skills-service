@@ -8,6 +8,7 @@ import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
 import skills.service.auth.AuthMode
 import skills.service.auth.SkillsAuthorizationException
+import skills.service.auth.UserAuthService
 import skills.service.auth.UserInfo
 import skills.service.auth.UserInfoService
 import skills.service.datastore.services.UserAdminService
@@ -23,6 +24,9 @@ class UserInfoController {
     UserInfoService userInfoService
 
     @Autowired
+    UserAuthService userAuthService
+
+    @Autowired
     UserRepo userRepo
 
     @Value('#{securityConfig.authMode}}')
@@ -35,6 +39,7 @@ class UserInfoController {
         String userId
         String first
         String last
+        String nickName
     }
 
     @RequestMapping(value = "/userInfo", method = RequestMethod.GET, produces = "application/json")
@@ -43,11 +48,41 @@ class UserInfoController {
         UserInfoRes res
         UserInfo currentUser = userInfoService.getCurrentUser()
         if (currentUser) {
-            res  = new UserInfoRes(userId: currentUser.username, first: currentUser.firstName, last: currentUser.lastName)
+            res  = convertToUserinfoRes(currentUser)
         } else if (authMode == AuthMode.PKI) {
             throw new SkillsAuthorizationException('Unauthenticated user while using PKI Authorization Mode')
         }
         return res
+    }
+
+    @RequestMapping(value = "/userInfo", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    UserInfoRes resetClientSecret(@RequestBody UserInfoRes userInfoReq) {
+        UserInfoRes res
+        UserInfo currentUser = userInfoService.getCurrentUser()
+        if (currentUser) {
+            if (userInfoReq.first) {
+                currentUser.firstName = userInfoReq.first
+            }
+            if (userInfoReq.last) {
+                currentUser.lastName = userInfoReq.last
+            }
+            currentUser.nickName = userInfoReq.nickName
+            currentUser = userAuthService.createOrUpdateUser(currentUser)
+            res  = convertToUserinfoRes(currentUser)
+        } else if (authMode == AuthMode.PKI) {
+            throw new SkillsAuthorizationException('Unauthenticated user while using PKI Authorization Mode')
+        }
+        return res
+    }
+
+    UserInfoRes convertToUserinfoRes(UserInfo userInfo) {
+        return new UserInfoRes(
+                userId: userInfo.username,
+                first: userInfo.firstName,
+                last: userInfo.lastName,
+                nickName: userInfo.nickName
+        )
     }
 
     @RequestMapping(value = "/userInfo/hasRole/{role}", method = RequestMethod.GET, produces = "application/json")
