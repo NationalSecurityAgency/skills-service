@@ -115,18 +115,6 @@
     immediate: false,
   });
 
-  Validator.extend('gemRequired', {
-    getMessage: field => `The ${field} field is required.`,
-    validate(value) {
-      let valid = true;
-      console.log(`value [${value}], self.limitTimeframe [${self.limitTimeframe}]`);
-      if (self.limitTimeframe) {
-        valid = !!value;
-      }
-      return valid;
-    },
-  });
-
   export default {
     name: 'EditBadge',
     components: {
