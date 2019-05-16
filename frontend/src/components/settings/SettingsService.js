@@ -22,4 +22,7 @@ export default {
   saveEmailSettings(emailConnectionInfo) {
     return axios.post('/root/saveEmailSettings', emailConnectionInfo).then(response => response.data);
   },
+  saveUserInfo(userInfo) {
+    return axios.post('/app/userInfo', userInfo).then(response => response.data);
+  },
 };

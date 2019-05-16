@@ -1,7 +1,12 @@
 <template>
   <div>
     <sub-page-header title="Email Settings"/>
-    <email-server-settings v-if="isRoot"/>
+    <div v-if="isRoot" class="card">
+      <div class="card-header">Email Connection Settings</div>
+      <div class="card-body">
+        <email-server-settings />
+      </div>
+    </div>
   </div>
 </template>
 

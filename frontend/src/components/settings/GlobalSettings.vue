@@ -1,14 +1,10 @@
 <template>
   <div>
     <page-header :loading="isLoading"
-                 :options="{title: 'Settings', icon: 'fas fa-cog', subTitle: 'Dashboard settings.'}"/>
+                 :options="{title: 'Settings', icon: 'fas fa-cog', subTitle: 'Dashboard settings'}"/>
 
     <section class="section">
-      <navigation :nav-items="[
-        {name: 'General', iconClass: 'fa-address-card'},
-        {name: 'Security', iconClass: 'fa-lock'},
-        {name: 'Email', iconClass: 'fa-at'}
-      ]">
+      <navigation :nav-items="navItems">
         <template slot="General">
           <general-settings/>
         </template>
@@ -44,6 +40,7 @@
       return {
         isLoading: true,
         isRoot: false,
+        navItems: [{ name: 'General', iconClass: 'fa-address-card' }],
       };
     },
     mounted() {
@@ -54,6 +51,12 @@
         SettingsService.hasRoot()
           .then((response) => {
             this.isRoot = response;
+            if (this.isRoot) {
+              this.navItems.push(
+                { name: 'Security', iconClass: 'fa-lock' },
+                { name: 'Email', iconClass: 'fa-at' },
+              );
+            }
           })
           .finally(() => {
             this.isLoading = false;
