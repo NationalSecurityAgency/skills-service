@@ -142,7 +142,7 @@ class SkillsLoader {
     }
 
     @Transactional(readOnly = true)
-    SkillSummary loadSkillSummary(String projectId, String userId, String crossProjectId, String skillId, Integer version = Integer.MAX_VALUE) {
+    SkillSummary loadSkillSummary(String projectId, String userId, String crossProjectId, String skillId) {
         ProjDef projDef = getProjDef(crossProjectId ?: projectId)
         SkillDef skillDef = getSkillDef(crossProjectId ?: projectId, skillId, SkillDef.ContainerType.Skill)
 
@@ -150,10 +150,13 @@ class SkillsLoader {
             validateDependencyEligibility(projectId, skillDef)
         }
 
-        UserPoints points = userPointsRepo.findByProjectIdAndUserIdAndSkillIdAndDay(projectId, userId, skillId, null)
-        UserPoints todayPoints = userPointsRepo.findByProjectIdAndUserIdAndSkillIdAndDay(projectId, userId, skillId, new Date().clearTime())
+        UserPoints points = userPointsRepo.findByProjectIdAndUserIdAndSkillIdAndDay(crossProjectId ?: projectId, userId, skillId, null)
+        UserPoints todayPoints = userPointsRepo.findByProjectIdAndUserIdAndSkillIdAndDay(crossProjectId ?: projectId, userId, skillId, new Date().clearTime())
 
-        SkillDependencySummary skillDependencySummary = dependencySummaryLoader.loadDependencySummary(userId, projectId, skillId, version)
+        SkillDependencySummary skillDependencySummary
+        if (!crossProjectId) {
+            skillDependencySummary = dependencySummaryLoader.loadDependencySummary(userId, projectId, skillId, version)
+        }
 
         return new SkillSummary(
                 projectId: skillDef.projectId, projectName: projDef.name,
