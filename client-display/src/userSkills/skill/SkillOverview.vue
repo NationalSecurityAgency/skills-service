@@ -6,10 +6,13 @@
                 <div class="col-md-6 text-md-left">
                     <h4><span class="text-muted">Project:</span> {{ skill.projectName }}</h4>
                 </div>
-                <div class="col-md-6 text-md-right text-muted text-uppercase">
+                <div class="col-md-6 text-md-right text-success text-uppercase">
                     <h5><i class="fa fa-vector-square"/> Cross-project Skill</h5>
                 </div>
+            </div>
 
+            <div v-if="skill.crossProject && !isSkillComplete" class="alert alert-primary text-center" role="alert">
+                This is a cross-project skill! In order to complete this skill please visit <strong>{{ skill.projectName }}</strong> project! Happy playing!!
             </div>
 
             <div class="row text-center">
