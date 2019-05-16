@@ -1,20 +1,21 @@
 <template>
-  <div class="error-container" style="padding-top: 100px;">
-    <div class="">
-      <header class="error-header">
-        <p class="error-title">Unexpected Error Occurred</p>
-      </header>
+  <div class="mt-5">
+    <div class="text-center text-secondary">
+      <span class="fa-stack fa-3x " style="vertical-align: top;">
+                      <i class="fas fa-circle fa-stack-2x"></i>
+                      <i class="fas fa-heart-broken fa-stack-1x fa-inverse"></i>
+                    </span>
+    </div>
+    <div class="text-center text-secondary">
+      <h4 class="">Tiny-bit of an error!</h4>
     </div>
 
-    <div class="">
-      <div class="error-body">
-        <i class="fa fa-sad-tear error-icon"></i>
-        <div style="padding-top: 2rem;">
-          Oh no, something went wrong!  An error occurred and we are unable to process your request,
-          please try again later.  If the error persists, please contact us and let us know.
-
-          <p v-if="errorMessage" class="skills-pad-top-1-rem ">Details: <strong>{{ errorMessage }}</strong></p>
-        </div>
+    <div class="row justify-content-center text-danger m-3">
+      <div class="col col-sm-8 col-md-6 col-lg-5 text-center">
+        <p>
+          Oh no, something went wrong! An error occurred and we are unable to process your request, please try again
+          later.
+        </p>
       </div>
     </div>
   </div>
