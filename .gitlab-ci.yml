@@ -15,7 +15,6 @@ build:
     paths:
       - backend/target/backend-*.jar
 
-
 deploy:
   image: alpine:latest
   stage: deploy
