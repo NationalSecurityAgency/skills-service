@@ -1,7 +1,7 @@
 <template>
   <b-dropdown right variant="outline-info">
     <template slot="button-content">
-      <i class="fas fa-user-astronaut pr-1"/> {{ userInfo.first }} {{ userInfo.last }}
+      <i class="fas fa-user-astronaut pr-1"/> {{ displayName }}
     </template>
     <b-dropdown-item href="#"  @click="gotoSettings">
       <span class="text-info"> <i class="fas fa-cog" style="width: 1.5rem;"/>Settings</span>
@@ -35,6 +35,14 @@
       },
       isJwtAuthenticatedUser() {
         return this.isAuthenticatedUser && !this.$store.getters.isPkiAuthenticated;
+      },
+      displayName() {
+        const { userInfo } = this.$store.getters;
+        let displayName = userInfo.nickame;
+        if (!displayName) {
+          displayName = `${userInfo.first} ${userInfo.last}`;
+        }
+        return displayName;
       },
     },
     methods: {

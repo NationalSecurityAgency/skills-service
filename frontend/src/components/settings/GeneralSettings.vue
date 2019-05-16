@@ -20,12 +20,12 @@
           </div>
           <p class="text-danger" v-show="errors.has('lastName')">{{ errors.first('lastName')}}</p>
 
-          <label class="mt-2">Nick Name</label>
+          <label class="mt-2">Nickname</label>
           <div class="input-group">
-            <input class="form-control" type="text" v-model="loginFields.nickName" name="nickName"
+            <input class="form-control" type="text" v-model="loginFields.nickname" name="nickname"
                    v-validate="'required'" data-vv-delay="500"/>
           </div>
-          <p class="text-danger" v-show="errors.has('nickName')">{{ errors.first('nickName')}}</p>
+          <p class="text-danger" v-show="errors.has('nickname')">{{ errors.first('nickname')}}</p>
 
           <div class="mt-2">
             <button class="btn btn-outline-primary" @click="updateUserInfo" :disabled="errors.any() || !hasChangedValues()">
@@ -49,7 +49,7 @@
   const dictionary = {
     en: {
       attributes: {
-        nickName: 'Nickname',
+        nickname: 'Nickname',
         firstName: 'First Name',
         lastName: 'Last Name',
       },
@@ -67,12 +67,12 @@
         loginFields: {
           firstName: '',
           lastName: '',
-          nickName: '',
+          nickname: '',
         },
         originalValues: {
           firstName: '',
           lastName: '',
-          nickName: '',
+          nickname: '',
         },
         isSaving: false,
       };
@@ -86,10 +86,10 @@
         if (userInfo !== null) {
           this.loginFields.firstName = userInfo.first;
           this.loginFields.lastName = userInfo.last;
-          this.loginFields.nickName = userInfo.nickName;
+          this.loginFields.nickname = userInfo.nickname;
           this.originalValues.firstName = userInfo.first;
           this.originalValues.lastName = userInfo.last;
-          this.originalValues.nickName = userInfo.nickName;
+          this.originalValues.nickname = userInfo.nickname;
         }
         this.isLoading = false;
       },

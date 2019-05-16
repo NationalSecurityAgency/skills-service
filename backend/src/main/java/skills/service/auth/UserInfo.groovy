@@ -8,7 +8,7 @@ import org.springframework.security.core.userdetails.UserDetails
 class UserInfo implements UserDetails {
     String firstName
     String lastName
-    String nickName
+    String nickname
     String email
     String username
     String userDn
