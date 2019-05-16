@@ -1,7 +1,6 @@
 package skills.service.auth.form
 
 import groovy.util.logging.Slf4j
-import org.apache.commons.lang3.Validate
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.context.annotation.Conditional
@@ -48,8 +47,8 @@ class CreateAccountController {
         if (!userInfo.username) {
             userInfo.username = userInfo.email
         }
-        if (!userInfo.nickName) {
-            userInfo.nickName = "${userInfo.firstName} ${userInfo.lastName}"
+        if (!userInfo.nickname) {
+            userInfo.nickname = "${userInfo.firstName} ${userInfo.lastName}"
         }
         userInfo = userAuthService.createUser(userInfo)
         userAuthService.autologin(userInfo, password)
@@ -63,8 +62,8 @@ class CreateAccountController {
         if (!userInfo.username) {
             userInfo.username = userInfo.email
         }
-        if (!userInfo.nickName) {
-            userInfo.nickName = "${userInfo.firstName} ${userInfo.lastName}"
+        if (!userInfo.nickname) {
+            userInfo.nickname = "${userInfo.firstName} ${userInfo.lastName}"
         }
         userInfo.authorities = [new UserSkillsGrantedAuthority(new UserRole(
                 roleName: RoleName.ROLE_SUPER_DUPER_USER

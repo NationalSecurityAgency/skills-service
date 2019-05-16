@@ -56,7 +56,7 @@ class UserAuthService {
                     lastName: user.userProps.find {it.name =='lastName'}?.value,
                     email: user.userProps.find {it.name =='email'}?.value,
                     userDn: user.userProps.find {it.name =='DN'}?.value,
-                    nickName: user.userProps.find {it.name =='nickName'}?.value,
+                    nickname: user.userProps.find {it.name =='nickname'}?.value,
                     authorities: convertRoles(userRepository.findByUserId(userId)?.roles)
             )
         }

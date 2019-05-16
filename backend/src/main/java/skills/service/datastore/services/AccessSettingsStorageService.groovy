@@ -191,7 +191,7 @@ class AccessSettingsStorageService {
                         new UserProp(name: 'email', value: userInfo.email ?: ""),
                         new UserProp(name: 'firstName', value: userInfo.firstName ?: ""),
                         new UserProp(name: 'lastName', value: userInfo.lastName ?: ""),
-                        new UserProp(nickName: 'lastName', value: userInfo.nickName ?: ""),
+                        new UserProp(name: 'nickname', value: userInfo.nickname ?: ""),
                 ]
         )
         return user
@@ -204,7 +204,7 @@ class AccessSettingsStorageService {
         getOrSetUserProp(user, 'email', userInfo.email ?: "")
         getOrSetUserProp(user, 'firstName',  userInfo.firstName ?: "")
         getOrSetUserProp(user, 'lastName',  userInfo.lastName ?: "")
-        getOrSetUserProp(user, 'nickName',  userInfo.nickName ?: "")
+        getOrSetUserProp(user, 'nickname',  userInfo.nickname ?: "")
 //        user.roles = getRoles(userInfo)
         return user
     }

@@ -39,7 +39,7 @@ class UserInfoController {
         String userId
         String first
         String last
-        String nickName
+        String nickname
     }
 
     @RequestMapping(value = "/userInfo", method = RequestMethod.GET, produces = "application/json")
@@ -57,7 +57,7 @@ class UserInfoController {
 
     @RequestMapping(value = "/userInfo", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    UserInfoRes resetClientSecret(@RequestBody UserInfoRes userInfoReq) {
+    UserInfoRes updateUserInfo(@RequestBody UserInfoRes userInfoReq) {
         UserInfoRes res
         UserInfo currentUser = userInfoService.getCurrentUser()
         if (currentUser) {
@@ -67,7 +67,7 @@ class UserInfoController {
             if (userInfoReq.last) {
                 currentUser.lastName = userInfoReq.last
             }
-            currentUser.nickName = userInfoReq.nickName
+            currentUser.nickname = userInfoReq.nickname
             currentUser = userAuthService.createOrUpdateUser(currentUser)
             res  = convertToUserinfoRes(currentUser)
         } else if (authMode == AuthMode.PKI) {
@@ -81,7 +81,7 @@ class UserInfoController {
                 userId: userInfo.username,
                 first: userInfo.firstName,
                 last: userInfo.lastName,
-                nickName: userInfo.nickName
+                nickname: userInfo.nickname
         )
     }
 
