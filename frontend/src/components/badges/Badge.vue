@@ -21,12 +21,14 @@
 <script>
   import EditAndDeleteDropdown from '@/components/utils/EditAndDeleteDropdown';
   import EditBadge from './EditBadge';
+  import MsgBoxMixin from '../utils/modal/MsgBoxMixin';
   import PagePreviewCard from '../utils/pages/PagePreviewCard';
 
   export default {
     name: 'Badge',
     components: { PagePreviewCard, EditAndDeleteDropdown, EditBadge },
     props: ['badge'],
+    mixins: [MsgBoxMixin],
     data() {
       return {
         isLoading: false,
@@ -54,16 +56,11 @@
     },
     methods: {
       deleteBadge() {
-        this.$dialog.confirm({
-          title: 'WARNING: Delete Badge Action',
-          message: `Badge Id: <b>${this.badgeInternal.badgeId}</b> <br/><br/>Delete Action cannot be undone.`,
-          confirmText: 'Delete',
-          type: 'is-danger',
-          hasIcon: true,
-          icon: 'exclamation-triangle',
-          iconPack: 'fa',
-          scroll: 'keep',
-          onConfirm: () => this.badgeDeleted(),
+        const msg = `Deleting Badge Id: ${this.badgeInternal.badgeId} this cannot be undone.`;
+        this.msgConfirm(msg, 'WARNING: Delete Badge').then((res) => {
+          if (res) {
+            this.badgeDeleted();
+          }
         });
       },
       badgeEdited(badge) {

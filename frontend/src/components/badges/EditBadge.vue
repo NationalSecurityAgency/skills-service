@@ -33,8 +33,7 @@
 
 
         <b-collapse id="gemCollapse" v-model="limitTimeframe">
-<!--          <b-card no-body class="mt-2">-->
-            <b-row no-gutters class="justify-content-md-center mt-3">
+            <b-row v-if="limitTimeframe" no-gutters class="justify-content-md-center mt-3">
               <b-col cols="12" md="4" style="min-width: 20rem;">
                 <label class="label mt-2">Start Date</label>
                 <datepicker :inline="true" v-model="badgeInternal.startDate" name="startDate"
@@ -49,7 +48,6 @@
                 <small class="form-text text-danger" v-show="errors.has('endDate')">{{ errors.first('endDate')}}</small>
               </b-col>
             </b-row>
-<!--          </b-card>-->
         </b-collapse>
         <p v-if="overallErrMsg" class="text-center text-danger mt-3">***{{ overallErrMsg }}***</p>
       </div>
@@ -115,6 +113,18 @@
     },
   }, {
     immediate: false,
+  });
+
+  Validator.extend('gemRequired', {
+    getMessage: field => `The ${field} field is required.`,
+    validate(value) {
+      let valid = true;
+      console.log(`value [${value}], self.limitTimeframe [${self.limitTimeframe}]`);
+      if (self.limitTimeframe) {
+        valid = !!value;
+      }
+      return valid;
+    },
   });
 
   export default {
