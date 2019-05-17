@@ -103,6 +103,7 @@ class SkillsLoader {
         }
 
         int numBadgesAchieved = achievedLevelRepository.countAchievedForUser(userId, projectId, SkillDef.ContainerType.Badge)
+        int numTotalBadges = skillDefRepo.countByProjectIdAndType(projectId, SkillDef.ContainerType.Badge)
 
         OverallSkillSummary res = new OverallSkillSummary(
                 projectName: projDef.name,
@@ -113,7 +114,7 @@ class SkillsLoader {
                 levelPoints: levelPoints,
                 levelTotalPoints: levelTotalPoints,
                 subjects: subjects,
-                badges: new OverallSkillSummary.BadgeStats(numBadgesCompleted: numBadgesAchieved, enabled: true)
+                badges: new OverallSkillSummary.BadgeStats(numBadgesCompleted: numBadgesAchieved, enabled: numTotalBadges > 0)
         )
 
         return res
