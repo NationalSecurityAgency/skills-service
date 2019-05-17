@@ -8,17 +8,17 @@
           <label>First Name</label>
           <div class="input-group">
             <input id="first-name" aria-describedby="basic-addon1" class="form-control"
-                   type="text" v-model="loginFields.firstName" name="firstName" v-validate="'required'"
+                   type="text" v-model="loginFields.first" name="first" v-validate="'required'"
                    data-vv-delay="500"/>
           </div>
-          <p class="text-danger" v-show="errors.has('firstName')">{{ errors.first('firstName')}}</p>
+          <p class="text-danger" v-show="errors.has('first')">{{ errors.first('first')}}</p>
 
           <label class="mt-2">Last Name</label>
           <div class="input-group">
-            <input class="form-control" type="text" v-model="loginFields.lastName" name="lastName"
+            <input class="form-control" type="text" v-model="loginFields.last" name="last"
                    v-validate="'required'" data-vv-delay="500"/>
           </div>
-          <p class="text-danger" v-show="errors.has('lastName')">{{ errors.first('lastName')}}</p>
+          <p class="text-danger" v-show="errors.has('last')">{{ errors.first('last')}}</p>
 
           <label class="mt-2">Nickname</label>
           <div class="input-group">
@@ -50,8 +50,8 @@
     en: {
       attributes: {
         nickname: 'Nickname',
-        firstName: 'First Name',
-        lastName: 'Last Name',
+        first: 'First Name',
+        last: 'Last Name',
       },
     },
   };
@@ -65,13 +65,13 @@
       return {
         isLoading: true,
         loginFields: {
-          firstName: '',
-          lastName: '',
+          first: '',
+          last: '',
           nickname: '',
         },
         originalValues: {
-          firstName: '',
-          lastName: '',
+          first: '',
+          last: '',
           nickname: '',
         },
         isSaving: false,
@@ -84,11 +84,11 @@
       loadData() {
         const { userInfo } = this.$store.getters;
         if (userInfo !== null) {
-          this.loginFields.firstName = userInfo.first;
-          this.loginFields.lastName = userInfo.last;
+          this.loginFields.first = userInfo.first;
+          this.loginFields.last = userInfo.last;
           this.loginFields.nickname = userInfo.nickname;
-          this.originalValues.firstName = userInfo.first;
-          this.originalValues.lastName = userInfo.last;
+          this.originalValues.first = userInfo.first;
+          this.originalValues.last = userInfo.last;
           this.originalValues.nickname = userInfo.nickname;
         }
         this.isLoading = false;
@@ -101,7 +101,7 @@
           }
         });
         return hasChangedValues;
-        // return this.originalValues.firstName !== this.loginFields.firstName || this.originalValues.lastName !== this.loginFields.lastName;
+        // return this.originalValues.first !== this.loginFields.first || this.originalValues.last !== this.loginFields.last;
       },
       updateUserInfo() {
         this.isSaving = true;
