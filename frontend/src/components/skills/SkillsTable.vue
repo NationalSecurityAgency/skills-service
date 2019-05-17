@@ -57,7 +57,7 @@
           </div>
         </v-client-table>
 
-        <no-content2 v-if="!badges || badges.length==0" title="No Skills Yet" message="Start creating skills today!"/>
+        <no-content2 v-if="!skills || skills.length==0" title="No Skills Yet" message="Start creating skills today!"/>
       </div>
     </div>
 
