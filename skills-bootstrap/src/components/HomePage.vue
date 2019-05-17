@@ -4,7 +4,7 @@
             <root-registration v-if="!isPki" v-on:registerUser="onRegisterUser"/>
             <root-pki v-else v-on:grantRoot="onGrantRoot"/>
         </div>
-        <div v-if="initialized && accountCreated">
+        <div v-if="(initialized && accountCreated)">
             <success @proceed="onProceed"/>
         </div>
     </div>

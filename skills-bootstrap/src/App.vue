@@ -1,5 +1,5 @@
 <template>
-    <div id="app">
+    <div id="app" class="container-fluid">
         <div class="overall-container">
         <home-page/>
         </div>
@@ -18,7 +18,8 @@
 </script>
 
 <style lang="scss">
-    @import "styles/buefy-custom";
+    @import "~bootstrap/scss/bootstrap";
+    @import '~bootstrap-vue/src/index.scss';
 </style>
 
 <style>
