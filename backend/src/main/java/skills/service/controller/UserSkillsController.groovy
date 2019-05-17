@@ -63,18 +63,22 @@ class UserSkillsController {
         return skillsLoader.loadSubject(projectId, getUserId(userIdParam), subjectId, version)
     }
 
+    /**
+     * Note: skill version is not applicable to a single skill;
+     * there is no reason exclude dependency skills as the system will not allow to dependent skills with later version
+     */
     @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/summary", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     @CompileStatic
     SkillSummary getSkillSummary(@PathVariable("projectId") String projectId,
                                  @PathVariable("skillId") String skillId,
-                                 @RequestParam(name = "userId", required = false) String userIdParam,
-                                 @RequestParam(name = 'version', required = false, defaultValue = Constants.MAX_VERSION_STRING) Integer version) {
-        return skillsLoader.loadSkillSummary(projectId, getUserId(userIdParam), null, skillId, version)
+                                 @RequestParam(name = "userId", required = false) String userIdParam) {
+        return skillsLoader.loadSkillSummary(projectId, getUserId(userIdParam), null, skillId)
     }
 
     /**
-     * Note: skill versioning is not applicable to a single skill
+     * Note: skill version is not applicable to a single skill;
+     * there is no reason exclude dependency skills as the system will not allow to dependent skills with later version
      */
     @RequestMapping(value = "/projects/{projectId}/projects/{crossProjectId}/skills/{skillId}/summary", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
@@ -82,9 +86,8 @@ class UserSkillsController {
     SkillSummary getCrossProjectSkillSummary(@PathVariable("projectId") String projectId,
                                              @PathVariable("crossProjectId") String crossProjectId,
                                              @PathVariable("skillId") String skillId,
-                                             @RequestParam(name = "userId", required = false) String userIdParam,
-                                             @RequestParam(name = 'version', required = false, defaultValue = Constants.MAX_VERSION_STRING) Integer version) {
-        return skillsLoader.loadSkillSummary(projectId, getUserId(userIdParam), crossProjectId, skillId, version)
+                                             @RequestParam(name = "userId", required = false) String userIdParam) {
+        return skillsLoader.loadSkillSummary(projectId, getUserId(userIdParam), crossProjectId, skillId)
     }
 
 

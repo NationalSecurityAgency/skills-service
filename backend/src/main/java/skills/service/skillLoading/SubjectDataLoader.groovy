@@ -51,8 +51,7 @@ class SubjectDataLoader {
 
             SkillDependencySummary dependencyInfo = dependencySummaryLoader.loadDependencySummary(userId,
                     skillDefAndUserPoints.skillDef.projectId,
-                    skillDefAndUserPoints.skillDef.skillId,
-                    version)
+                    skillDefAndUserPoints.skillDef.skillId)
 
             new SkillsAndPoints(skillDef: skillDefAndUserPoints.skillDef, points: points, todaysPoints: todayPoints, dependencyInfo: dependencyInfo)
         }

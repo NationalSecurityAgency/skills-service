@@ -142,7 +142,7 @@ class SkillsLoader {
     }
 
     @Transactional(readOnly = true)
-    SkillSummary loadSkillSummary(String projectId, String userId, String crossProjectId, String skillId, int version = Integer.MAX_VALUE) {
+    SkillSummary loadSkillSummary(String projectId, String userId, String crossProjectId, String skillId) {
         ProjDef projDef = getProjDef(crossProjectId ?: projectId)
         SkillDef skillDef = getSkillDef(crossProjectId ?: projectId, skillId, SkillDef.ContainerType.Skill)
 
@@ -155,7 +155,7 @@ class SkillsLoader {
 
         SkillDependencySummary skillDependencySummary
         if (!crossProjectId) {
-            skillDependencySummary = dependencySummaryLoader.loadDependencySummary(userId, projectId, skillId, version)
+            skillDependencySummary = dependencySummaryLoader.loadDependencySummary(userId, projectId, skillId)
         }
 
         return new SkillSummary(
