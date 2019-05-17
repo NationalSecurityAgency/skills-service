@@ -38,7 +38,7 @@
       },
       displayName() {
         const { userInfo } = this.$store.getters;
-        let displayName = userInfo.nickame;
+        let displayName = userInfo.nickname;
         if (!displayName) {
           displayName = `${userInfo.first} ${userInfo.last}`;
         }
