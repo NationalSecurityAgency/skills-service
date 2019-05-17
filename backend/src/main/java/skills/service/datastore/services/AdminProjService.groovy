@@ -812,9 +812,11 @@ class AdminProjService {
         }
     }
 
-    private void validateDependencyVersions(SkillDef parent, SkillDef child) {
-        if (parent.version > child.version) {
-            throw new SkillException('The parent version must be less than or equal to the child version in dependency relationships', parent.projectId, parent.skillId, ErrorCode.FailedToAssignDependency)
+    private void validateDependencyVersions(SkillDef skill, SkillDef dependOnSkill) {
+        if (skill.version < dependOnSkill.version) {
+            throw new SkillException("Not allowed to depend on skill with a later version. " +
+                    "Skill [ID:${skill.skillId}, version ${skill.version}] can not depend on [ID:${dependOnSkill.skillId}, version ${dependOnSkill.version}]",
+                    skill.projectId, skill.skillId, ErrorCode.FailedToAssignDependency)
         }
     }
 
