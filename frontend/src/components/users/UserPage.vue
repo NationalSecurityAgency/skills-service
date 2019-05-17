@@ -13,6 +13,7 @@
             <sub-page-header title="Client Display"/>
             <client-display-frame
               :authentication-url="authenticationUrl"
+              service-url="http://localhost:8082"
               :auth-token="authToken"
               :project-id="projectId"/>
           </section>
