@@ -6,8 +6,11 @@
 
 <script>
   import UserSkillsService from '@/userSkills/service/UserSkillsService';
+  import store from '@/store';
 
   import Vue from 'vue';
+
+  import Postmate from 'postmate';
 
   import { debounce } from 'lodash';
 
@@ -17,11 +20,10 @@
   };
 
   const onHeightChanged = debounce(() => {
-    const payload = {
-      contentHeight: getDocumentHeight(),
-    };
-    window.parent.postMessage(`skills::height-change::${JSON.stringify(payload)}`, '*');
-  }, 250);
+    if (process.env.NODE_ENV !== 'development') {
+      store.state.parentFrame.emit('height-changed', getDocumentHeight());
+    }
+  }, 0);
 
   Vue.use({
     install() {
@@ -34,32 +36,31 @@
   });
 
   export default {
-    name: 'app',
     mounted() {
-      this.onHeightChange();
-
-      window.addEventListener('resize', onHeightChanged);
-
-      if (process.env.NODE_ENV === 'development') {
+      if (this.isDevelopmentMode()) {
         this.configureDevelopmentMode();
-      }
+      } else {
+        const handshake = new Postmate.Model({
+          updateAuthenticationToken(authToken) {
+            store.commit('authToken', authToken);
+            UserSkillsService.setToken(authToken);
+          },
+        });
 
-      window.addEventListener('message', (event) => {
-        const eventData = event.data && event.data.split ? event.data.split('::') : [];
-        if (eventData.length === 3 && eventData[0] === 'skills' && eventData[1] === 'data-init') {
-          const payload = JSON.parse(eventData[2]);
+        handshake.then((parent) => {
+          this.$store.commit('parentFrame', parent);
+          window.addEventListener('resize', onHeightChanged);
+          this.onHeightChange();
 
-          UserSkillsService.setAuthenticationUrl(payload.authenticationUrl);
-          UserSkillsService.setServiceUrl(payload.serviceUrl);
-          UserSkillsService.setProjectId(payload.projectId);
+          UserSkillsService.setServiceUrl(parent.model.serviceUrl);
+          UserSkillsService.setProjectId(parent.model.projectId);
 
-          this.storeAuthToken();
+          this.$store.state.parentFrame.emit('needs-authentication');
 
           // No scroll bars for iframe.
           document.body.style['overflow-y'] = 'hidden';
-        }
-      });
-      window.parent.postMessage('skills::frame-initialized::', '*');
+        });
+      }
     },
     methods: {
       onHeightChange() {
@@ -85,9 +86,12 @@
           UserSkillsService.setAuthenticationUrl(process.env.VUE_APP_AUTHENTICATION_URL);
           UserSkillsService.setServiceUrl(process.env.VUE_APP_SERVICE_URL);
           UserSkillsService.setProjectId(process.env.VUE_APP_PROJECT_ID);
-
           this.storeAuthToken();
         }
+      },
+
+      isDevelopmentMode() {
+        return process.env.NODE_ENV === 'development';
       },
 
       isValidDevelopmentMode() {
@@ -97,7 +101,7 @@
       storeAuthToken() {
         UserSkillsService.getAuthenticationToken()
           .then((result) => {
-            this.$store.commit('authToken', result.access_token);
+            this.$store.commit('authToken', result);
             UserSkillsService.setToken(result.access_token);
           });
       },

@@ -12,25 +12,28 @@ let service = {};
 
 const refreshAuthorization = (failedRequest) => {
   service.setToken(null);
-  return service.getAuthenticationToken().then((result) => {
-    service.setToken(result.access_token);
-    // eslint-disable-next-line no-param-reassign
-    failedRequest.response.config.headers.Authorization = `Bearer ${result.access_token}`;
-    axios.defaults.headers.common.Authorization = `Bearer ${result.access_token}`;
-    return Promise.resolve();
-  });
+  return service.getAuthenticationToken()
+    .then((result) => {
+      service.setToken(result.access_token);
+      // eslint-disable-next-line no-param-reassign
+      failedRequest.response.config.headers.Authorization = `Bearer ${result.access_token}`;
+      axios.defaults.headers.common.Authorization = `Bearer ${result.access_token}`;
+      return Promise.resolve();
+    });
 };
 
 // Instantiate the interceptor (you can chain it as it returns the axios instance)
 createAuthRefreshInterceptor(axios, refreshAuthorization);
 
 axios.interceptors.response.use(response => response, (error) => {
-  router.push({
-    name: 'error',
-    params: {
-      errorMessage: error.response.statusText,
-    },
-  });
+  if (error.response && error.response.status !== 401) {
+    router.push({
+      name: 'error',
+      params: {
+        errorMessage: error.response.statusText,
+      },
+    });
+  }
   return Promise.reject(error);
 });
 
@@ -52,7 +55,22 @@ service = {
   getAuthenticationToken() {
     if (!store.state.isAuthenticating) {
       store.commit('isAuthenticating', true);
-      this.authenticatingPromise = axios.get(this.authenticationUrl)
+      if (process.env.NODE_ENV === 'development') {
+        this.authenticatingPromise = axios.get(this.authenticationUrl);
+      } else {
+        store.state.parentFrame.emit('needs-authentication');
+        this.authenticatingPromise = new Promise((resolve) => {
+          const unsubscribe = store.subscribe((mutation) => {
+            if (mutation.type === 'authToken') {
+              resolve({
+                access_token: mutation.payload,
+              });
+              unsubscribe();
+            }
+          });
+        });
+      }
+      this.authenticatingPromise
         .then(result => result.data)
         .finally(() => store.commit('isAuthenticating', false));
     }

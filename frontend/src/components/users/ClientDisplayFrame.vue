@@ -1,16 +1,12 @@
 <template>
-  <div id="client-portal-frame">
-    <iframe
-      ref="theIframe"
-      class="the-iframe"
-      src="/static/clientPortal/index.html"/>
-  </div>
+  <div ref="iframeContainer" />
 </template>
 
 <script>
   import Vue from 'vue';
   import VueScrollTo from 'vue-scrollto';
-  import ClientDisplayFrameMessage from '../utils/ClientDisplayFrameMessage';
+  import Postmate from 'postmate';
+  import axios from 'axios';
 
   Vue.use(VueScrollTo);
 
@@ -29,44 +25,61 @@
         required: true,
       },
     },
-    created() {
-      this.messageHandler = (event) => {
-        const messageParser = new ClientDisplayFrameMessage(event.data);
-        if (messageParser.isSkillsMessage()) {
-          const parsedMessage = messageParser.getParsedMessage();
-          if (parsedMessage.name === 'height-change') {
-            if (parsedMessage.payload.contentHeight > 0) {
-              const adjustedHeight = Math.max(parsedMessage.payload.contentHeight, window.screen.height);
-              this.$refs.theIframe.height = adjustedHeight;
-              this.$refs.theIframe.style.height = `${adjustedHeight}px`;
-            }
-          } else if (parsedMessage.name === 'frame-initialized') {
-            const bindings = {
-              projectId: this.projectId,
-              authenticationUrl: this.authenticationUrl,
-              serviceUrl: this.serviceUrl,
-            };
-            this.$refs.theIframe.contentWindow.postMessage(`skills::data-init::${JSON.stringify(bindings)}`, '*');
-          } else if (parsedMessage.name === 'route-changed') {
-            VueScrollTo.scrollTo(this.$refs.theIframe, 1000, {
-              y: true,
-              x: false,
-            });
-          }
-        }
+    data() {
+      return {
+        childFrame: null,
+        authenticationPromise: null, // Vuex would be more appropriate
       };
-      window.addEventListener('message', this.messageHandler);
+    },
+    mounted() {
+      const handshake = new Postmate({
+        container: this.$refs.iframeContainer,
+        url: '/static/clientPortal/index.html',
+        classListArray: ['client-display-iframe'],
+        model: {
+          serviceUrl: this.serviceUrl,
+          projectId: this.projectId,
+        }
+      });
+
+      handshake.then(child => {
+        this.childFrame = child;
+        child.on('height-changed', (data) => {
+          if (data > 0) {
+            const adjustedHeight = Math.max(data, window.screen.height);
+            this.$refs.iframeContainer.height = adjustedHeight;
+            this.$refs.iframeContainer.style.height = `${adjustedHeight}px`;
+          }
+        });
+        child.on('route-changed', () => {
+          VueScrollTo.scrollTo(this.$refs.iframeContainer, 1000, {
+            y: true,
+            x: false,
+          });
+        });
+        child.on('needs-authentication', () => {
+          if (!this.authenticationPromise) {
+            this.authenticationPromise = axios.get(this.authenticationUrl)
+              .then((result) => {
+                child.call('updateAuthenticationToken', result.data.access_token);
+              })
+              .finally(() => {
+                this.authenticationPromise = null;
+              });
+          }
+        });
+      });
     },
     beforeDestroy() {
-      window.removeEventListener('message', this.messageHandler);
+      this.childFrame.destroy();
     },
   };
 </script>
 
-<style scoped>
-  .the-iframe {
+<style>
+  .client-display-iframe {
     width: 100%;
-    height: 1000px;
+    height: 100%;
     border: 0;
   }
 </style>

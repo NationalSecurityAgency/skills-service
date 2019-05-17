@@ -1,6 +1,5 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
-// import VueBreadcrumbs from 'vue-2-breadcrumbs';
 
 import SkillsEntry from '@/SkillsEntry.vue';
 import SubjectDetails from '@/userSkills/subject/SubjectDetails.vue';
@@ -9,6 +8,7 @@ import MyRankDetails from '@/userSkills/myRank/MyRankDetails.vue';
 import BadgesDetails from '@/userSkills/badge/BadgesDetails.vue';
 import BadgeDetails from '@/userSkills/badge/BadgeDetails.vue';
 import ErrorPage from '@/userSkills/ErrorPage.vue';
+import store from '@/store';
 
 import { debounce } from 'lodash';
 
@@ -70,7 +70,9 @@ const router = new VueRouter({
 });
 
 router.afterEach(debounce(() => {
-  window.parent.postMessage('skills::route-changed::{}', '*');
+  if (process.env.NODE_ENV !== 'development') {
+    store.state.parentFrame.emit('route-changed');
+  }
 }, 250));
 
 export default router;
