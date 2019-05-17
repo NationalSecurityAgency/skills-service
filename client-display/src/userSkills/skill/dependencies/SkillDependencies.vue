@@ -160,7 +160,7 @@
                     }
                 }
 
-                return Object.assign(skillItem, { isCrossProject: crossProj });
+                return {...skillItem, ...{ isCrossProject: crossProj }};
             },
             buildData() {
                 const nodes = new vis.DataSet();
