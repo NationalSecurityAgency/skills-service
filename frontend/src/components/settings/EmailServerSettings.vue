@@ -4,21 +4,21 @@
             <label class="label">Host</label>
       <input class="form-control" type="text" v-model="emailInfo.host" name="host"
              v-validate="'required'" data-vv-delay="500"/>
-      <p class="help is-danger" v-show="errors.has('host')">{{
+      <p class="text-danger" v-show="errors.has('host')">{{
         errors.first('host')}}</p>
     </div>
     <div class="form-group">
       <label class="label">Port</label>
       <input class="form-control" type="text" v-model="emailInfo.port" name="port"
              v-validate="'required|min_value:1|max_value:65535'" data-vv-delay="500"/>
-      <p class="help is-danger" v-show="errors.has('port')">{{
+      <p class="text-danger" v-show="errors.has('port')">{{
         errors.first('port')}}</p>
     </div>
     <div class="form-group">
       <label class="label">Protocol</label>
       <input class="form-control" type="text" v-model="emailInfo.protocol" name="protocol"
              v-validate="'required'" data-vv-delay="500"/>
-      <p class="help is-danger" v-show="errors.has('protocol')">{{
+      <p class="text-danger" v-show="errors.has('protocol')">{{
         errors.first('protocol')}}</p>
     </div>
     <div class="form-group">
@@ -36,14 +36,14 @@
         <label class="label">Username</label>
         <input class="form-control" type="text" v-model="emailInfo.username" name="username"
                v-validate="'required'" data-vv-delay="500"/>
-        <p class="help is-danger" v-show="errors.has('username')">{{
+        <p class="text-danger" v-show="errors.has('username')">{{
           errors.first('username')}}</p>
       </div>
       <div class="form-group">
         <label class="label">Password</label>
         <input class="form-control" type="text" v-model="emailInfo.password" name="password"
                v-validate="'required'" data-vv-delay="500"/>
-        <p class="help is-danger" v-show="errors.has('password')">{{
+        <p class="text-danger" v-show="errors.has('password')">{{
           errors.first('password')}}</p>
       </div>
     </div>
