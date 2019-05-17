@@ -1,5 +1,5 @@
 <template>
-    <div class="card skills-full-height">
+    <div class="card h-100">
         <div class="card-body container">
             <div class="media">
                 <div class="d-inline-block mt-2 mr-3">

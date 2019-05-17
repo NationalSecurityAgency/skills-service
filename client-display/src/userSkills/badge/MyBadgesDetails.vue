@@ -13,7 +13,7 @@
 
             <div v-if="badges && badges.length > 0" class="row justify-content-md-center">
                 <div v-for="badge in badges" v-bind:key="badge.badgeId" class="col-lg-3 col-sm-6 my-2">
-                    <div class="card skills-full-height">
+                    <div class="card h-100">
                         <router-link  :to="{ name: 'badgeDetails', params: { badgeId: badge.badgeId }}" tag="div" class="card-body">
                             <i class="fa fa-check-circle position-absolute text-success" style="right: 10px; top: 10px;"/>
                             <i v-if="badge.gem" class="fas fa-gem position-absolute" style="top: 10px; left: 10px; color: purple"></i>
