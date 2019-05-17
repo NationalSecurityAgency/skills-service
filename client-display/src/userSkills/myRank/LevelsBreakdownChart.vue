@@ -1,5 +1,5 @@
 <template>
-    <div class="card level-breakdown-container skills-full-height">
+    <div class="card level-breakdown-container h-100">
         <div class="card-header">
             <h6 class="card-title mb-0 float-left">Level Breakdown</h6>
         </div>

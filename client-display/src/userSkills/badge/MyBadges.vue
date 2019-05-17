@@ -1,5 +1,5 @@
 <template>
-    <div class="card skills-full-height">
+    <div class="card h-100">
         <div class="card-header">
             <h6 class="card-title mb-0 float-left">My Badges</h6>
         </div>
