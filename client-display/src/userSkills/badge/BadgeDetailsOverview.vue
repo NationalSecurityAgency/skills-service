@@ -56,6 +56,9 @@
         },
         computed: {
             percent() {
+                if (this.badge.numTotalSkills === 0) {
+                    return 0;
+                }
                 return Math.trunc((this.badge.numSkillsAchieved / this.badge.numTotalSkills) * 100);
             },
         },
