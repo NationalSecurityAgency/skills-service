@@ -24,6 +24,7 @@
 
 <script>
   import marked from 'marked';
+  import debounce from 'lodash.debounce';
 
   export default {
     name: 'MarkdownEditor',
@@ -51,9 +52,9 @@
       },
     },
     methods: {
-      dataChanged() {
+      dataChanged: debounce(function debouncedCataChanged(event) {
         this.$emit('input', this.valueInternal);
-      },
+      }, 250),
     },
   };
 </script>
