@@ -14,6 +14,7 @@
     "@fortawesome/fontawesome-free": "5.8.2",
     "animate.css": "3.7.0",
     "apexcharts": "3.6.10",
+    "array-flat-polyfill": "^1.0.1",
     "axios": "0.18.0",
     "babel-polyfill": "6.26.0",
     "bootstrap": "4.3.1",

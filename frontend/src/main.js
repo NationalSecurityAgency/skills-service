@@ -10,6 +10,7 @@ import Vuex from 'vuex';
 import 'babel-polyfill';
 import 'matchmedia-polyfill';
 import 'matchmedia-polyfill/matchMedia.addListener';
+import 'array-flat-polyfill';
 import './filters/NumberFilter';
 import './filters/TruncateFilter';
 import App from './App';
