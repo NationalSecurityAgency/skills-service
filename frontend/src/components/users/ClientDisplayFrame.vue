@@ -39,10 +39,10 @@
         model: {
           serviceUrl: this.serviceUrl,
           projectId: this.projectId,
-        }
+        },
       });
 
-      handshake.then(child => {
+      handshake.then((child) => {
         this.childFrame = child;
         child.on('height-changed', (data) => {
           if (data > 0) {

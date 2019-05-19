@@ -5,7 +5,7 @@
       <div class="dropbox">
         <input type="file"
                :name="name"
-               :disabled="isSaving"
+               :disabled="disableInput"
                @change="filesChange($event.target.name, $event.target.files)"
                :accept="accept"
                class="input-file"/>
@@ -17,80 +17,33 @@
 </template>
 
 <script>
-  import FileUploadService from './FileUploadService';
-  import ToastSupport from '../ToastSupport';
-
-  const STATUS_INITIAL = 0;
-  const STATUS_SAVING = 1;
-  const STATUS_SUCCESS = 2;
-  const STATUS_FAILED = 3;
-
   const DEFAULT_STATUS_MSG = 'Drag your file here to upload or click to browse';
 
   export default {
+    $_veeValidate: {
+      value() {
+        return this.getFormData();
+      },
+      name() {
+        return this.name;
+      },
+    },
     name: 'FileUpload',
-    mixins: [ToastSupport],
-    props: ['url', 'name', 'accept', 'validateImages', 'imageWidth', 'imageHeight'],
+    props: ['name', 'accept'],
     data() {
       return {
         uploadError: null,
         currentStatus: null,
         uploadedFileName: '',
         statusMsg: DEFAULT_STATUS_MSG,
+        formData: null,
+        label: null,
+        disableInput: false,
       };
     },
-    computed: {
-      isInitial() {
-        return this.currentStatus === STATUS_INITIAL;
-      },
-      isSaving() {
-        return this.currentStatus === STATUS_SAVING;
-      },
-      isSuccess() {
-        return this.currentStatus === STATUS_SUCCESS;
-      },
-      isFailed() {
-        return this.currentStatus === STATUS_FAILED;
-      },
-    },
-    mounted() {
-      this.reset();
-    },
     methods: {
-      reset() {
-        this.currentStatus = STATUS_INITIAL;
-        this.uploadError = null;
-        this.statusMsg = DEFAULT_STATUS_MSG;
-      },
-      setTemporaryStatusMsg(status) {
-        this.statusMsg = status;
-        setTimeout(() => {
-          this.statusMsg = DEFAULT_STATUS_MSG;
-        }, 7000);
-      },
-      save(formData) {
-        this.currentStatus = STATUS_SAVING;
-        this.statusMsg = 'Uploading...';
-        const self = this;
-
-        FileUploadService.upload(this.url, formData, (response) => {
-          self.currentStatus = STATUS_SUCCESS;
-          self.statusMsg = DEFAULT_STATUS_MSG;
-          self.$emit('upload-success', response.data);
-          self.successToast('Success!', 'File successfully uploaded');
-          self.reset();
-        }, (err) => {
-          self.uploadError = err.response;
-          self.currentStatus = STATUS_FAILED;
-
-          self.setTemporaryStatusMsg('<span class="upload-failure">Upload Failed</span>');
-
-          let msg = this.uploadError.statusText;
-          if (this.uploadError.data && this.uploadError.data.message) {
-            msg = this.uploadError.data.message;
-          }
-          throw msg;
-        });
+      getFormData() {
+        return this.formData;
       },
       filesChange(fieldName, fileList) {
         const formData = new FormData();
@@ -103,32 +56,9 @@
             return x;
           });
 
-        const saveAction = (() => this.save(formData));
+        this.formData = formData;
 
-        if (this.validateImages && this.imageWidth && this.imageHeight) {
-          const file = formData.get(this.name);
-          const isImageType = file.type.startsWith('image/');
-
-          if (file && isImageType) {
-            const image = new Image();
-            image.src = window.URL.createObjectURL(file);
-            image.onload = () => {
-              const width = image.naturalWidth;
-              const height = image.naturalHeight;
-              window.URL.revokeObjectURL(image.src);
-
-              if (width === this.imageWidth && height === this.imageHeight) {
-                saveAction();
-              } else {
-                const errorMsg = `Invalid image dimensions, ${file.name} must be  ${this.imageHeight} x ${this.imageWidth}`;
-                this.setTemporaryStatusMsg(`<span class="upload-failure">${errorMsg}</span>`);
-                throw new Error(errorMsg);
-              }
-            };
-          }
-        } else {
-          saveAction();
-        }
+        this.$emit('file-selected', { fieldname: this.name, form: this.formData });
       },
     },
   };
