@@ -51,10 +51,12 @@
           <template slot="title">
             <i class="fas fa-wrench"></i> Custom
           </template>
-          <file-upload :name="'customIcon'" :url="uploadUrl" :accept="acceptType"
-                       @upload-success="handleUploadedIcon($event)" validate-images="true"
-                       :image-height="customIconHeight" :image-width="customIconWidth"/>
-          <span class="text-center text-danger">* custom icons must be 48px X 48px</span><br />
+          <file-upload data-vv-name="customIcon" v-validate.disable="'imageDimensions|duplicateFilename'"
+                       :name="'customIcon'"
+                       @file-selected="customIconUploadRequest"
+                      :disable-input="disableCustomUpload"/>
+          <small class="text-center form-text text-danger" v-show="errors.has('customIcon')">{{ errors.first('customIcon') }}</small>
+          <p class="text-right text-danger">* custom icons must be 48px X 48px</p>
           <div class="row text-info justify-content-center mt-4">
             <div class="col-4 mb-4" v-for="{cssClassname, filename} in customIconList" :key="cssClassname">
               <div class="icon-item">
@@ -86,10 +88,13 @@
   import debounce from 'lodash.debounce';
   import VirtualList from 'vue-virtual-scroll-list';
   import enquire from 'enquire.js';
+  import { Validator } from 'vee-validate';
   import FileUpload from '../upload/FileUpload';
+  import FileUploadService from '../upload/FileUploadService';
   import fontAwesomeIconsCanonical from './font-awesome-index';
   import materialIconsCanonical from './material-index';
   import IconManagerService from './IconManagerService';
+  import ToastSupport from '../ToastSupport';
 
 
   const faIconList = fontAwesomeIconsCanonical.icons.slice();
@@ -105,6 +110,7 @@
   let definitiveCustomIconList = [];
 
   let rowLength = 5;
+  let self = null;
 
   function groupIntoRows(array, rl) {
     let subArr = [];
@@ -129,9 +135,80 @@
   fontAwesomeIconsCanonical.icons = groupIntoRows(fontAwesomeIconsCanonical.icons, rowLength);
   materialIconsCanonical.icons = groupIntoRows(materialIconsCanonical.icons, rowLength);
 
+  Validator.extend('imageDimensions', {
+    getMessage(field, params, data) {
+      return (data && data.message) || `Custom Icon must be ${self.customIconHeight} X ${self.customIconWidth}`;
+    },
+    validate(value) {
+      return new Promise((resolve) => {
+        if (value) {
+          const file = value.get('customIcon');
+          const isImageType = file.type.startsWith('image/');
+          if (!isImageType) {
+            resolve({
+              valid: false,
+              data: { message: 'File is not an image format' },
+            });
+          } else {
+            const image = new Image();
+            image.src = window.URL.createObjectURL(file);
+            image.onload = () => {
+              const width = image.naturalWidth;
+              const height = image.naturalHeight;
+              window.URL.revokeObjectURL(image.src);
+
+              if (width !== self.customIconWidth && height !== self.customIconHeight) {
+                resolve({
+                  valid: false,
+                  data: { message: `Invalid image dimensions, ${file.name} must be ${self.customIconHeight} x ${self.customIconWidth}` },
+                });
+              } else {
+                resolve({
+                  valid: true,
+                });
+              }
+            };
+          }
+        } else {
+          resolve({
+            valid: true,
+          });
+        }
+      });
+    },
+  }, {
+    immediate: false,
+  });
+
+  Validator.extend('duplicateFilename', {
+    getMessage(field, params, data) {
+      return (data && data.message) || 'Custom Icon with this filename already exists';
+    },
+    validate(value) {
+      return new Promise((resolve) => {
+        if (value) {
+          const file = value.get('customIcon');
+
+          const index = definitiveCustomIconList.findIndex(item => item.filename === file.name);
+          if (index >= 0) {
+            resolve({
+              valid: false,
+              data: { message: `Custom Icon with filename ${file.name} already exists` },
+            });
+            return;
+          }
+        }
+        resolve({ valid: true });
+      });
+    },
+  }, {
+    immediate: false,
+  });
+
   export default {
     name: 'IconManager',
     components: { FileUpload, 'virtual-list': VirtualList },
+    mixins: [ToastSupport],
     props: {
       searchBox: String,
       customIconHeight: {
@@ -153,6 +230,7 @@
         fontAwesomeIcons: fontAwesomeIconsCanonical,
         materialIcons: materialIconsCanonical,
         customIconList,
+        disableCustomUpload: false,
       };
     },
     computed: {
@@ -167,6 +245,7 @@
       },
     },
     mounted() {
+      self = this;
       IconManagerService.getIconIndex(this.activeProjectId).then((response) => {
         if (response) {
           definitiveCustomIconList = response.slice();
@@ -260,6 +339,22 @@
         };
 
         this.$emit('selected-icon', result);
+      },
+      customIconUploadRequest(event) {
+        this.$validator.validate().then((res) => {
+          if (res) {
+            this.disableCustomUpload = true;
+            FileUploadService.upload(this.uploadUrl, event.form, (response) => {
+              self.handleUploadedIcon(response.data);
+              self.successToast('Success!', 'File successfully uploaded');
+              this.disableCustomUpload = false;
+            }, (err) => {
+              self.errorToast('Error!', 'Encountered error when uploading icon');
+              this.disableCustomUpload = false;
+              throw err;
+            });
+          }
+        });
       },
       groupRows() {
         this.fontAwesomeIcons.icons = groupIntoRows(this.fontAwesomeIcons.icons.flat(), rowLength);
