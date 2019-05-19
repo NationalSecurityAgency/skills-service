@@ -23,7 +23,7 @@
 
         <div class="mt-2">
           <label>Description</label>
-          <markdown-editor :value="badge.description" @value-updated="updateDescription"></markdown-editor>
+          <markdown-editor :value="badge.description" @input="updateDescription"></markdown-editor>
         </div>
 
         <b-form-checkbox v-model="limitTimeframe" class="mt-4"
@@ -164,7 +164,7 @@
         this.show = false;
       },
       updateDescription(event) {
-        this.badgeInternal.description = event.value;
+        this.badgeInternal.description = event;
       },
       updateBadge() {
         this.$validator.validateAll().then((res) => {
