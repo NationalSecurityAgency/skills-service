@@ -83,6 +83,17 @@ class RankingLoader {
             new UsersPerLevel(level: levelMeta.level, numUsers: numUsers ?: 0)
         }
 
+        // when level completed by a user a UserAchievement record is stored,
+        // a user that achieved level 1, 2 and 3 will have three UserAchievement records, therefore
+        // the sql logic ends up double counting for lower levels; as a fix let's remove
+        // number of users of higher levels from lower levels
+        usersPerLevel = usersPerLevel.sort({ it.level })
+        usersPerLevel.eachWithIndex { UsersPerLevel entry, int i ->
+            if (i + 1 < usersPerLevel.size()) {
+                entry.numUsers -= usersPerLevel[i + 1].numUsers
+            }
+        }
+
         if(includeZeroLevel){
             Integer numUsers = achievedLevelRepository.countByProjectIdAndSkillIdAndLevel(projectId, subjectId, 0)
             usersPerLevel.add(0, new UsersPerLevel(level: 0, numUsers: numUsers ?: 0))
