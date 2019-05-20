@@ -34,7 +34,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
     @Query("SELECT p from UserPoints p where p.projectId=?1 and p.skillId is null and p.points>?2 and p.day is null order by p.points ASC" )
     List<UserPoints> findHigherUserPoints(String projectId, int points, Pageable pageable)
 
-    @Query("SELECT p from UserPoints p where p.projectId=?1 and p.skillId is null and p.points<?2 and p.day is null order by p.points ASC" )
+    @Query("SELECT p from UserPoints p where p.projectId=?1 and p.skillId is null and p.points<?2 and p.day is null order by p.points DESC" )
     List<UserPoints> findPreviousUserPoints(String projectId, int points, Pageable pageable)
 
     /**
