@@ -10,7 +10,7 @@
               <label for="badgeName">Badge Name</label>
               <input class="form-control" id="badgeName" type="text" v-model="badgeInternal.name"
                      @input="updateBadgeId"
-                     v-validate="'required|min:3|max:50'" data-vv-delay="500" datat-vv-name="badgeName" v-focus/>
+                     v-validate="'required|min:3|max:50'" data-vv-delay="500" data-vv-name="badgeName" v-focus/>
               <small class="form-text text-danger" v-show="errors.has('badgeName')">{{ errors.first('badgeName')}}
               </small>
             </div>
