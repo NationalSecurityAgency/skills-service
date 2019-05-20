@@ -69,7 +69,7 @@
     methods: {
       settingChanged(value) {
         const valueStr = `${value}`;
-        if (valueStr !== this.lastLoadedValue.value) {
+        if (valueStr !== `${this.lastLoadedValue.value}`) {
           this.dirty = true;
         } else {
           this.dirty = false;
