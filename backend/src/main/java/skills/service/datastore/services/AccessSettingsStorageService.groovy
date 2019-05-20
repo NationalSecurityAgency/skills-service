@@ -14,6 +14,8 @@ import skills.storage.repos.AllowedOriginRepo
 import skills.storage.repos.UserRepo
 import skills.storage.repos.UserRoleRepo
 
+import static skills.service.controller.exceptions.SkillException.*
+
 @Service
 @Slf4j
 class AccessSettingsStorageService {
@@ -110,7 +112,7 @@ class AccessSettingsStorageService {
 
     @Transactional()
     User createAppUser(UserInfo userInfo, boolean createOrUpdate) {
-
+        validateUserInfo(userInfo)
         User user = userRepository.findByUserId(userInfo.username?.toLowerCase())
         if (!createOrUpdate) {
             if (user) {
@@ -132,6 +134,18 @@ class AccessSettingsStorageService {
         userRepository.save(user)
         log.info("Created app user [{}]", userInfo.username)
         return user
+    }
+
+    private void validateUserInfo(UserInfo userInfo) {
+        if (!userInfo.firstName || userInfo.firstName.length() > 30) {
+            throw new SkillException("First Name is required and can be no longer than 30 characters", NA, NA, ErrorCode.BadParam)
+        }
+        if (!userInfo.lastName || userInfo.lastName.length() > 30) {
+            throw new SkillException("Last Name is required and can be no longer than 30 characters", NA, NA, ErrorCode.BadParam)
+        }
+        if (userInfo.nickname && userInfo.nickname.length() > 30) {
+            throw new SkillException("Nickname cannot be over 30 characters", NA, NA, ErrorCode.BadParam)
+        }
     }
 
     @Transactional(readOnly = true)
