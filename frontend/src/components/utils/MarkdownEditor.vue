@@ -52,7 +52,7 @@
       },
     },
     methods: {
-      dataChanged: debounce(function debouncedCataChanged(event) {
+      dataChanged: debounce(function debouncedCataChanged() {
         this.$emit('input', this.valueInternal);
       }, 250),
     },
