@@ -357,8 +357,8 @@
         });
       },
       groupRows() {
-        this.fontAwesomeIcons.icons = groupIntoRows(this.fontAwesomeIcons.icons.flat(), rowLength);
-        this.materialIcons.icons = groupIntoRows(this.materialIcons.icons.flat(), rowLength);
+        this.fontAwesomeIcons.icons = groupIntoRows([].concat(...this.fontAwesomeIcons.icons), rowLength);
+        this.materialIcons.icons = groupIntoRows([].concat(...this.materialIcons.icons), rowLength);
       },
       resetIcons() {
         if (this.$refs.iconFilterInput.value.length > 0) {
