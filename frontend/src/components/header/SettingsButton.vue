@@ -1,7 +1,8 @@
 <template>
   <b-dropdown right variant="outline-info">
     <template slot="button-content">
-      <i class="fas fa-user-astronaut pr-1"/> {{ displayName }}
+      <i class="fas fa-user-astronaut pr-1"/>
+      <span class="d-inline-block text-truncate" style="max-width: 12rem; vertical-align: top">{{ displayName }}</span>
     </template>
     <b-dropdown-item href="#"  @click="gotoSettings">
       <span class="text-info"> <i class="fas fa-cog" style="width: 1.5rem;"/>Settings</span>
@@ -10,12 +11,6 @@
       <span class="text-info"> <i class="fas fa-sign-out-alt" style="width: 1.5rem;"/>Log Out</span>
     </b-dropdown-item>
   </b-dropdown>
-
-<!--    <button class="btn btn-outline-info" v-b-tooltip.hover.bottom="toolTipText" @click="gotoSettings">-->
-<!--      <i class="fas fa-user-astronaut pr-1"/>-->
-<!--      <span v-if="isAuthenticatedUser">{{ userInfo.first }} {{ userInfo.last }}</span>-->
-<!--      <span v-else>Hello, Sign In</span>-->
-<!--    </button>-->
 </template>
 
 <script>
