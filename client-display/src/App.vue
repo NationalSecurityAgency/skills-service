@@ -37,6 +37,7 @@
 
   export default {
     mounted() {
+      const vm = this;
       if (this.isDevelopmentMode()) {
         this.configureDevelopmentMode();
       } else {
@@ -44,6 +45,12 @@
           updateAuthenticationToken(authToken) {
             store.commit('authToken', authToken);
             UserSkillsService.setToken(authToken);
+          },
+          updateVersion(newVersion) {
+            UserSkillsService.setVersion(newVersion);
+            vm.$router.push({
+              name: 'home',
+            });
           },
         });
 
@@ -54,6 +61,7 @@
 
           UserSkillsService.setServiceUrl(parent.model.serviceUrl);
           UserSkillsService.setProjectId(parent.model.projectId);
+          UserSkillsService.setVersion(parent.model.version);
 
           this.$store.state.parentFrame.emit('needs-authentication');
 
