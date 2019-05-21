@@ -20,7 +20,7 @@
 
         <div class="row">
           <div class="col">
-            <b-button variant="outline-info" @click="save" :disabled="errors.any()">
+            <b-button variant="outline-info" @click="save" :disabled="!dirty || errors.any()">
               Save <i class="fas fa-arrow-circle-right"/>
             </b-button>
 
@@ -95,6 +95,14 @@
             this.lastLoadedValue = Object.assign({}, this.levelPointsSetting);
             this.levelPointsSetting = res;
             this.successToast('Settings Updated', 'Successfully saved settings!');
+          })
+          .catch((e) => {
+            if (e.response.data && e.response.data.errorCode && e.response.data.errorCode === 'InsufficientPointsToConvertLevels') {
+              this.errorToast('Setting Not Saved!', e.response.data.message);
+            } else {
+              const errorMessage = (e.response && e.response.data && e.response.data.message) ? e.response.data.message : undefined;
+              this.$router.push({ name: 'ErrorPage', query: { errorMessage } });
+            }
           })
           .finally(() => {
             this.isLoading = false;
