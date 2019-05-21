@@ -5,7 +5,6 @@ import org.springframework.data.repository.CrudRepository
 import skills.storage.model.ProjDef
 
 interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
-
     ProjDef findByProjectId(String projectId)
 
     boolean existsByProjectId(String projectId)
@@ -19,4 +18,7 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
 
     @Query("select p from ProjDef p where lower(p.name) LIKE %?1%" )
     List<ProjDef> queryProjectsByNameQuery(String nameQuery)
+
+    @Query("SELECT DISTINCT s.version from SkillDef s where s.projectId=?1 ORDER BY s.version ASC")
+    List<Integer> getUniqueVersionList(String projectId)
 }
