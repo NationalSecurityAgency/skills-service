@@ -3,12 +3,14 @@ package skills.storage.repos
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.PagingAndSortingRepository
+import org.springframework.lang.Nullable
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillRelDef.RelationshipType
 
 interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
 
     List<SkillDef> findAllByProjectIdAndType(String id, SkillDef.ContainerType type)
+    @Nullable
     SkillDef findByProjectIdAndSkillIdAndType(String id, String skillId, SkillDef.ContainerType type)
 
     @Query('SELECT s from SkillDef s where s.projectId = ?1 and s.version >= ?2 and s.type = ?3')
@@ -17,6 +19,7 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
     @Query(value = '''SELECT max(sdChild.displayOrder) from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
       where srd.parent=sdParent.id and srd.child=sdChild.id and 
       sdParent.projectId=?1 and sdParent.skillId=?2 and srd.type='RuleSetDefinition' ''' )
+    @Nullable
     Integer calculateChildSkillsHighestDisplayOrder(String projectId, String skillId)
 
     @Query(value='''SELECT c 

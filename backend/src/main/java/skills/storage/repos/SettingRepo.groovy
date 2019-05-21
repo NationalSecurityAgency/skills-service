@@ -1,6 +1,7 @@
 package skills.storage.repos
 
 import org.springframework.data.repository.CrudRepository
+import org.springframework.lang.Nullable
 import skills.storage.model.CustomIcon
 import skills.storage.model.Setting
 
@@ -21,7 +22,7 @@ interface SettingRepo extends CrudRepository<Setting, Integer> {
     void delete(Setting toDelete)
 
     @Transactional
-    List<Setting> findAllByProjectIdAndSetting(String projectid, String setting)
+    List<Setting> findAllByProjectIdAndSetting(@Nullable String projectid, String setting)
 
     @Transactional
     List<Setting> findAllBySetting(String setting)

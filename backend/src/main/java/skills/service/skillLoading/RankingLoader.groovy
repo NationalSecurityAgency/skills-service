@@ -1,8 +1,10 @@
 package skills.service.skillLoading
 
+import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Component
 import skills.service.controller.result.model.LevelDefinitionRes
 import skills.storage.repos.UserAchievedLevelRepo
@@ -33,7 +35,7 @@ class RankingLoader {
     }
 
     private  SkillsRanking doGetUserSkillsRanking(String projectId, UserPoints usersPoints, String subjectId = null) {
-        int numUsers = userPointsRepository.countByProjectIdAndSkillIdAndDay(projectId, null, null)
+        int numUsers = userPointsRepository.countByProjectIdAndSkillIdAndDay(projectId, subjectId, null)
         // always calculate total number of users
         SkillsRanking ranking
         if (usersPoints) {
@@ -62,16 +64,28 @@ class RankingLoader {
         Integer pointsAnotherUserToPassMe = -1
 
         if(usersPoints?.points){
-            List<UserPoints> next = userPointsRepository.findHigherUserPoints(projectId, usersPoints.points, new PageRequest(0 , 1))
+            List<UserPoints> next = findHighestUserPoints(projectId, usersPoints, subjectId)
             pointsToPassNextUser = next ? next.first().points - usersPoints.points : -1
 
-            List<UserPoints> previous = userPointsRepository.findPreviousUserPoints(projectId, usersPoints.points, new PageRequest(0 , 1))
+            List<UserPoints> previous = findLowestUserPoints(projectId, usersPoints, subjectId)
             pointsAnotherUserToPassMe = previous ? usersPoints.points - previous.first().points : -1
         }
 
         return new SkillsRankingDistribution(totalUsers: skillsRanking.numUsers, myPosition: skillsRanking.position,
                 myLevel: myLevel, myPoints: usersPoints?.points ?: 0, usersPerLevel: usersPerLevel,
                 pointsToPassNextUser: pointsToPassNextUser, pointsAnotherUserToPassMe: pointsAnotherUserToPassMe)
+    }
+
+    @CompileStatic
+    private List<UserPoints> findLowestUserPoints(String projectId, UserPoints usersPoints, String subjectId) {
+        List<UserPoints> previous = userPointsRepository.findByProjectIdAndSkillIdAndPointsLessThanAndDayIsNull(projectId, subjectId, usersPoints.points, new PageRequest(0, 1, Sort.Direction.DESC, "points"))
+        previous
+    }
+
+    @CompileStatic
+    private List<UserPoints> findHighestUserPoints(String projectId, UserPoints usersPoints, String subjectId) {
+        List<UserPoints> next = userPointsRepository.findByProjectIdAndSkillIdAndPointsGreaterThanAndDayIsNull(projectId, subjectId, usersPoints.points, new PageRequest(0, 1, Sort.Direction.ASC, "points"))
+        next
     }
 
     List<UsersPerLevel> getUserCountsPerLevel(String projectId, boolean includeZeroLevel = false, String subjectId = null) {
