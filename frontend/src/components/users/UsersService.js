@@ -10,4 +10,11 @@ export default {
     return axios.get(`/admin/projects/${projectId}/token/${userId}`)
       .then(response => `${response.data.access_token}`);
   },
+
+  getAvailableVersions(projectId) {
+    return axios.get(`/app/projects/${projectId}/versions`)
+      .then((response) => {
+        return response.data;
+      });
+  },
 };

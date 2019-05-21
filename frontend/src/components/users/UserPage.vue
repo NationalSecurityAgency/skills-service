@@ -10,12 +10,24 @@
         ]">
         <template slot="Client Display">
           <section v-if="authToken" class="">
-            <sub-page-header title="Client Display"/>
+            <sub-page-header title="Client Display">
+              <b-form
+                v-if="versionOptions && versionOptions.length > 1"
+                inline>
+                <label class="pr-3 font-weight-bold" for="version-select">View for Version: </label>
+                <b-form-select
+                  id="version-select"
+                  class="version-select"
+                  v-model="selectedVersion"
+                  :options="versionOptions" />
+              </b-form>
+            </sub-page-header>
             <client-display-frame
               :authentication-url="authenticationUrl"
-              service-url="http://localhost:8082"
+              :version="selectedVersion"
               :auth-token="authToken"
-              :project-id="projectId"/>
+              :project-id="projectId"
+              service-url="http://localhost:8082"/>
           </section>
         </template>
         <template slot="Stats">
@@ -83,6 +95,8 @@
         isLoading: true,
         section: SECTION.USERS,
         headerOptons: {},
+        selectedVersion: 0,
+        versionOptions: [],
       };
     },
     created() {
@@ -93,6 +107,11 @@
       UsersService.getUserToken(this.projectId, this.userId)
         .then((result) => {
           this.authToken = result;
+        });
+      UsersService.getAvailableVersions(this.projectId)
+        .then((result) => {
+          this.versionOptions = result;
+          this.selectedVersion = Math.max(...this.versionOptions);
         });
       this.loadUserDetails();
     },
@@ -130,5 +149,7 @@
 </script>
 
 <style scoped>
-
+  .version-select {
+    width: 10rem;
+  }
 </style>

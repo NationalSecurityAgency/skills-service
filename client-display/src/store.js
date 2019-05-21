@@ -8,6 +8,7 @@ export default new Vuex.Store({
     authToken: null,
     isAuthenticating: false,
     parentFrame: null,
+    version: null,
   },
   mutations: {
     authToken(state, authToken) {
@@ -21,6 +22,10 @@ export default new Vuex.Store({
     isAuthenticating(state, isAuthenticating) {
       // eslint-disable-next-line no-param-reassign
       state.isAuthenticating = isAuthenticating;
+    },
+    version(state, version) {
+      // eslint-disable-next-line no-param-reassign
+      state.version = version;
     },
   },
 });

@@ -12,6 +12,10 @@
 
   export default {
     props: {
+      version: {
+        type: Number,
+        default: 0
+      },
       serviceUrl: {
         type: String,
         default: '',
@@ -31,6 +35,11 @@
         authenticationPromise: null, // Vuex would be more appropriate
       };
     },
+    watch: {
+      version(newValue) {
+        this.childFrame.call('updateVersion', newValue);
+      },
+    },
     mounted() {
       const handshake = new Postmate({
         container: this.$refs.iframeContainer,
@@ -39,6 +48,7 @@
         model: {
           serviceUrl: this.serviceUrl,
           projectId: this.projectId,
+          version: this.version,
         },
       });
 

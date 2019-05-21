@@ -208,6 +208,11 @@ class AdminProjService {
         return projDef
     }
 
+    @Transactional()
+    List<Integer> getUniqueVersionList(String projectId) {
+        projDefRepo.getUniqueVersionList(projectId);
+    }
+
     private SkillDef getSkillDef(String projectId, String skillId, SkillDef.ContainerType containerType = SkillDef.ContainerType.Skill) {
         SkillDef skillDef = skillDefRepo.findByProjectIdAndSkillIdAndType(projectId, skillId, containerType)
         if (!skillDef) {

@@ -202,6 +202,11 @@ service = {
     return servicePath;
   },
 
+  setVersion(version) {
+    store.commit('version', version);
+    this.version = version;
+  },
+
   setAuthenticationUrl(authenticationUrl) {
     this.authenticationUrl = authenticationUrl;
   },

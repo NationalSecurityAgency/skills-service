@@ -21,6 +21,7 @@ const router = new VueRouter({
       path: '/',
       name: 'home',
       component: SkillsEntry,
+      props: true,
     },
     {
       path: '',
