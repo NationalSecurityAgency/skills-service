@@ -1,21 +1,25 @@
 package skills.storage.repos
 
+import groovy.transform.CompileStatic
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param
+import org.springframework.lang.Nullable
 import skills.service.controller.result.model.ProjectUser
-import skills.storage.model.SkillDef
 import skills.storage.model.SkillRelDef
 import skills.storage.model.UsageItem
 import skills.storage.model.UserPoints
 
+@CompileStatic
 interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
+
     List<UserPoints> findAllByProjectIdAndUserIdAndDay(String projectId, String userId, Date day)
     List<UserPoints> findAllByProjectIdAndUserIdAndSkillId(String projectId, String userId, String skillId)
-    UserPoints findByProjectIdAndUserIdAndSkillIdAndDay(String projectId, String userId, String skillId, Date day)
-    long countByProjectIdAndSkillIdAndDay(String projectId, String skillId, Date day)
+    @Nullable
+    UserPoints findByProjectIdAndUserIdAndSkillIdAndDay(String projectId, String userId, @Nullable String skillId, @Nullable Date day)
+    long countByProjectIdAndSkillIdAndDay(String projectId, @Nullable String skillId, @Nullable Date day)
 
     void deleteByProjectIdAndSkillId(String projectId, String skillId)
 
@@ -31,11 +35,8 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
     @Query("SELECT count(p) from UserPoints p where p.projectId=?1 and p.skillId is null and p.points<?2 and p.day is null" )
     Integer calculateNumUsersWithLessScore(String projectId, int points)
 
-    @Query("SELECT p from UserPoints p where p.projectId=?1 and p.skillId is null and p.points>?2 and p.day is null order by p.points ASC" )
-    List<UserPoints> findHigherUserPoints(String projectId, int points, Pageable pageable)
-
-    @Query("SELECT p from UserPoints p where p.projectId=?1 and p.skillId is null and p.points<?2 and p.day is null order by p.points DESC" )
-    List<UserPoints> findPreviousUserPoints(String projectId, int points, Pageable pageable)
+    List<UserPoints> findByProjectIdAndSkillIdAndPointsGreaterThanAndDayIsNull(String projectId, @Nullable String skillId, int points, Pageable pageable)
+    List<UserPoints> findByProjectIdAndSkillIdAndPointsLessThanAndDayIsNull(String projectId, @Nullable String skillId, int points, Pageable pageable)
 
     /**
      *  NOTE: this is query is identical to the below query the only difference is userPoints.day=?5, if you change this query you MUST change the one below

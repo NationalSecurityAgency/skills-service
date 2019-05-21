@@ -3,6 +3,7 @@ package skills.storage.repos
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param
+import org.springframework.lang.Nullable
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillRelDef
 import skills.storage.model.UsageItem
@@ -10,9 +11,9 @@ import skills.storage.model.UserAchievement
 
 interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer> {
 
-    List<UserAchievement> findAllByUserIdAndProjectIdAndSkillId(String userId, String projectId, String skillId)
+    List<UserAchievement> findAllByUserIdAndProjectIdAndSkillId(String userId, String projectId, @Nullable String skillId)
 
-    Integer countByProjectIdAndSkillIdAndLevel(String projectId, String skillId, int level)
+    Integer countByProjectIdAndSkillIdAndLevel(String projectId, @Nullable String skillId, int level)
 
     void deleteByProjectIdAndSkillId(String projectId, String skillId)
 
