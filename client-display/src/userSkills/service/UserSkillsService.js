@@ -203,6 +203,7 @@ service = {
   },
 
   setVersion(version) {
+    store.commit('version', version);
     this.version = version;
   },
 

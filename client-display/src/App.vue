@@ -48,7 +48,9 @@
           },
           updateVersion(newVersion) {
             UserSkillsService.setVersion(newVersion);
-            vm.$router.push('/goHome');
+            vm.$router.push({
+              name: 'home',
+            });
           },
         });
 
