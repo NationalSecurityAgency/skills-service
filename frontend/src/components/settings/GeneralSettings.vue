@@ -69,6 +69,11 @@
           last: '',
           nickname: '',
         },
+        originalValues: {
+          first: '',
+          last: '',
+          nickname: '',
+        },
         isSaving: false,
       };
     },
@@ -82,11 +87,18 @@
           this.loginFields.first = userInfo.first;
           this.loginFields.last = userInfo.last;
           this.loginFields.nickname = userInfo.nickname;
+          this.setOriginalValues();
         }
         this.isLoading = false;
       },
       hasChangedValues() {
-        return Object.keys(this.fields).some(key => this.fields[key].changed);
+        let hasChangedValues = false;
+        Object.keys(this.originalValues).forEach((index) => {
+          if (this.originalValues[index] !== this.loginFields[index]) {
+            hasChangedValues = true;
+          }
+        });
+        return hasChangedValues;
       },
       updateUserInfo() {
         this.isSaving = true;
@@ -94,7 +106,7 @@
         SettingsService.saveUserInfo(userInfo).then(() => {
           this.$store.commit('storeUser', userInfo);
           this.successToast('Saved', 'Updated User Info Successful!');
-          this.$validator.reset();
+          this.setOriginalValues();
         })
           .catch(() => {
             this.errorToast('Failure', 'Failed to Update User Info Settings!');
@@ -103,6 +115,11 @@
             this.isSaving = false;
           });
       },
+      setOriginalValues() {
+        this.originalValues.first = this.loginFields.first;
+        this.originalValues.last = this.loginFields.last;
+        this.originalValues.nickname = this.loginFields.nickname;
+      }
     },
   };
 </script>
