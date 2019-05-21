@@ -202,6 +202,10 @@ service = {
     return servicePath;
   },
 
+  setVersion(version) {
+    this.version = version;
+  },
+
   setAuthenticationUrl(authenticationUrl) {
     this.authenticationUrl = authenticationUrl;
   },

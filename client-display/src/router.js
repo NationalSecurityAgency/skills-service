@@ -17,10 +17,12 @@ Vue.use(VueRouter);
 const router = new VueRouter({
   mode: 'history',
   routes: [
+    { path: '/goHome', redirect: { name: 'home' }},
     {
       path: '/',
       name: 'home',
       component: SkillsEntry,
+      props: true,
     },
     {
       path: '',
