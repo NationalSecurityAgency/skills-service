@@ -61,7 +61,7 @@
     },
     computed: {
       version() {
-          return this.$store.state.version
+        return this.$store.state.version;
       },
     },
     mounted() {
