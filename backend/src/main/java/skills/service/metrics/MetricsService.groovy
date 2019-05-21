@@ -47,6 +47,7 @@ class MetricsService {
         MetricsChartBuilder chartBuilder = chartBuildersMap.get(section).find { it.class.name == builderId}
         assert chartBuilder, "Unknown chart builder id [$builderId]"
         MetricsChart chart = chartBuilder.build(projectId, props, true)
+        chart.chartOptions.put(ChartOption.chartBuilderId, chartBuilder.class.name)
         chart.dataLoaded = true
         return chart
     }
