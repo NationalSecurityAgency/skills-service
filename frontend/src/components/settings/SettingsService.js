@@ -6,7 +6,7 @@ export default {
       .then(remoteRes => remoteRes.data);
   },
   saveSetting(projectId, settingObj) {
-    return axios.post(`/admin/projects/${projectId}/settings/${settingObj.setting}`, settingObj)
+    return axios.post(`/admin/projects/${projectId}/settings/${settingObj.setting}`, settingObj, { handleError: false })
       .then(remoteRes => remoteRes.data);
   },
   getSettingsForProject(projectId) {
