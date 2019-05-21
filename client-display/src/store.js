@@ -26,6 +26,6 @@ export default new Vuex.Store({
     version(state, version) {
       // eslint-disable-next-line no-param-reassign
       state.version = version;
-    }
+    },
   },
 });
