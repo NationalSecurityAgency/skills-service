@@ -13,8 +13,6 @@ export default {
 
   getAvailableVersions(projectId) {
     return axios.get(`/app/projects/${projectId}/versions`)
-      .then((response) => {
-        return response.data;
-      });
+      .then(response => response.data);
   },
 };
