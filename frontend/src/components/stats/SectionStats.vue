@@ -5,7 +5,7 @@
     <div v-if="!isLoading" class="row">
       <div v-for="(chart, index) in loadedCharts" :key="chart.options.chart.id"
            :class="index == 0 ? 'col-12' : 'col-md-6'" class="mb-3">
-        <skills-chart :chart="chart"/>
+        <skills-chart :chart="chart" :scrollIntoView="chart.scrollIntoView" @scrolledIntoView="chart.scrollIntoView = false"/>
       </div>
     </div>
 
@@ -13,8 +13,10 @@
       <h5>Available Stats</h5>
 
       <div class="row justify-content-center">
-        <div v-for="(chart, index) in loadableCharts" style="min-width: 25rem;" class="col-4 mb-3" :key="chart.options.chart.id">
-          <stat-card :title="chart.chartMeta.title" :subtitle="chart.chartMeta.subtitle" :icon="getStatCardColorClass(chart.chartMeta.icon, index)"
+        <div v-for="(chart, index) in loadableCharts" style="min-width: 25rem;" class="col-4 mb-3"
+             :key="chart.options.chart.id">
+          <stat-card :title="chart.chartMeta.title" :subtitle="chart.chartMeta.subtitle"
+                     :icon="getStatCardColorClass(chart.chartMeta.icon, index)"
                      :description="chart.chartMeta.description" :chart-builder-id="chart.chartMeta.chartBuilderId"
                      @load-chart="loadChart">
           </stat-card>
@@ -95,7 +97,6 @@
         StatsService.getChartsForSection(sectionParams)
           .then((response) => {
             this.charts = response;
-            this.isLoading = false;
           })
           .finally(() => {
             this.isLoading = false;
@@ -112,8 +113,7 @@
         StatsService.getChartForSection(sectionParams)
           .then((response) => {
             this.charts.splice(this.charts.findIndex(it => it.chartMeta.chartBuilderId === chartBuilderId), 1);
-            this.charts.push(response);
-            this.isLoading = false;
+            this.charts.push(Object.assign({ scrollIntoView: true }, response));
           })
           .finally(() => {
             this.isLoading = false;

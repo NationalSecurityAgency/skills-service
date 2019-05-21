@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div ref="chartContainer">
     <div v-if="!chart.hasData" class="disabled-overlay"/>
     <div v-if="!chart.hasData" class="text-center user-skills-no-data-icon-text text-danger">
       <div class="row justify-content-center">
@@ -20,7 +20,11 @@
 </template>
 
 <script>
+  import Vue from 'vue';
+  import VueScrollTo from 'vue-scrollto';
   import SimpleCard from '../utils/cards/SimpleCard';
+
+  Vue.use(VueScrollTo);
 
   export default {
     name: 'SkillsChart',
@@ -29,6 +33,10 @@
       chart: {
         type: Object,
         default: () => ({}),
+      },
+      scrollIntoView: {
+        type: Boolean,
+        default: false,
       },
     },
     created() {
@@ -48,6 +56,15 @@
             color: '#efefef',
           },
         };
+      }
+    },
+    mounted() {
+      if (this.scrollIntoView) {
+        VueScrollTo.scrollTo(this.$refs.chartContainer, 750, {
+          y: true,
+          x: false,
+        });
+        this.$emit('scrolledIntoView');
       }
     },
   };
