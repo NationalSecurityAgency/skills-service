@@ -15,7 +15,7 @@
                 <label class="pr-3 font-weight-bold" for="version-select">View for Version: </label>
                 <b-form-select
                   id="version-select"
-                  style="width: 10rem;"t stash
+                  style="width: 10rem;"
                   v-model="selectedVersion"
                   :options="versionOptions" />
               </b-form>

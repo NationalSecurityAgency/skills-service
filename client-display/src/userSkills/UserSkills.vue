@@ -55,6 +55,14 @@
         UserSkillsService.setUserId(this.userId);
         this.fetchData();
       },
+      version() {
+        this.fetchData();
+      },
+    },
+    computed: {
+      version() {
+          return this.$store.state.version
+      },
     },
     mounted() {
       this.getCustomIconCss();
