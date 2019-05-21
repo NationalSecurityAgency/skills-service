@@ -14,7 +14,7 @@
     props: {
       version: {
         type: Number,
-        default: 0
+        default: 0,
       },
       serviceUrl: {
         type: String,
