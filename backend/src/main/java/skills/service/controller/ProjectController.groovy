@@ -75,4 +75,10 @@ class ProjectController {
             return new CustomIconResult(filename: icon.filename, cssClassname: cssClassname)
         }
     }
+
+    @RequestMapping(value = "/projects/{id}/versions", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    List<Integer> listVersions(@PathVariable("id") String projectId) {
+        return [0, 1, 2, 3, 4]
+    }
 }

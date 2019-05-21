@@ -10,10 +10,20 @@
         ]">
         <template slot="Client Display">
           <section v-if="authToken" class="">
-            <sub-page-header title="Client Display"/>
+            <sub-page-header title="Client Display">
+              <b-form inline>
+                <label class="pr-3 font-weight-bold" for="version-select">View for Version: </label>
+                <b-form-select
+                  id="version-select"
+                  style="width: 10rem;"t stash
+                  v-model="selectedVersion"
+                  :options="versionOptions" />
+              </b-form>
+            </sub-page-header>
             <client-display-frame
               :authentication-url="authenticationUrl"
               service-url="http://localhost:8082"
+              :version="selectedVersion"
               :auth-token="authToken"
               :project-id="projectId"/>
           </section>
@@ -83,6 +93,8 @@
         isLoading: true,
         section: SECTION.USERS,
         headerOptons: {},
+        selectedVersion: null,
+        versionOptions: [],
       };
     },
     created() {
@@ -93,6 +105,11 @@
       UsersService.getUserToken(this.projectId, this.userId)
         .then((result) => {
           this.authToken = result;
+        });
+      UsersService.getAvailableVersions(this.projectId)
+        .then((result) => {
+          this.versionOptions = result;
+          this.selectedVersion = Math.max(...this.versionOptions);
         });
       this.loadUserDetails();
     },

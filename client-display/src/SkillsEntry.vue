@@ -15,6 +15,12 @@
     components: {
       UserSkills,
     },
+    props: {
+      version: {
+        type: Number,
+        default: 0,
+      },
+    },
     computed: {
       token() {
         return this.$store.state.authToken;
