@@ -44,11 +44,11 @@ class UserInfoController {
 
     @RequestMapping(value = "/userInfo", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
-    UserInfoRes getUserInfo() {
-        UserInfoRes res
+    def getUserInfo() {
+        def res = 'null'
         UserInfo currentUser = userInfoService.getCurrentUser()
         if (currentUser) {
-            res  = convertToUserinfoRes(currentUser)
+            res = convertToUserinfoRes(currentUser)
         } else if (authMode == AuthMode.PKI) {
             throw new SkillsAuthorizationException('Unauthenticated user while using PKI Authorization Mode')
         }

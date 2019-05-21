@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Conditional
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
@@ -52,6 +53,9 @@ class FormSecurityConfiguration extends WebSecurityConfigurerAdapter {
     private RestAuthenticationSuccessHandler restAuthenticationSuccessHandler
 
     @Autowired
+    private RestLogoutSuccessHandler restLogoutSuccessHandler
+
+    @Autowired
     void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
         auth
                 .userDetailsService(localUserDetailsService())
@@ -81,7 +85,7 @@ class FormSecurityConfiguration extends WebSecurityConfigurerAdapter {
                     .failureHandler(restAuthenticationFailureHandler)
         .and()
                 .logout()
-                    .logoutSuccessHandler(new HttpStatusReturningLogoutSuccessHandler(HttpStatus.OK))
+                    .logoutSuccessHandler(restLogoutSuccessHandler)
     }
 
     @Override
@@ -133,6 +137,28 @@ class FormSecurityConfiguration extends WebSecurityConfigurerAdapter {
         @Override
         void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
             clearAuthenticationAttributes(request)
+            writeNullJson(response)
         }
+    }
+
+    @Component
+    static final class RestLogoutSuccessHandler extends HttpStatusReturningLogoutSuccessHandler {
+        RestLogoutSuccessHandler() {
+            super(HttpStatus.OK)
+        }
+
+        @Override
+        void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
+            writeNullJson(response)
+            super.onLogoutSuccess(request, response, authentication)
+        }
+    }
+
+    static final String NULL_JSON = 'null'
+    static writeNullJson(HttpServletResponse response) {
+        response.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
+        response.setContentLength(NULL_JSON.bytes.length)
+        response.getWriter().write(NULL_JSON)
+        response.getWriter().flush()
     }
 }
