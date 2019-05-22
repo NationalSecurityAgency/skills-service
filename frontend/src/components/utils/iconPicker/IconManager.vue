@@ -55,8 +55,12 @@
                        :name="'customIcon'"
                        @file-selected="customIconUploadRequest"
                       :disable-input="disableCustomUpload"/>
-          <small class="text-center form-text text-danger" v-show="errors.has('customIcon')">{{ errors.first('customIcon') }}</small>
           <p class="text-right text-danger">* custom icons must be 48px X 48px</p>
+
+          <b-alert show variant="danger" v-show="errors.has('customIcon')" class="text-center">
+            <i class="fas fa-exclamation-circle"/> {{ errors.first('customIcon') }} <i class="fas fa-exclamation-circle"/>
+          </b-alert>
+
           <div class="row text-info justify-content-center mt-4">
             <div class="col-4 mb-4" v-for="{cssClassname, filename} in customIconList" :key="cssClassname">
               <div class="icon-item">
