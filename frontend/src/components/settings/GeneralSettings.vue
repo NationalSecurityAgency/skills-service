@@ -119,7 +119,7 @@
         this.originalValues.first = this.loginFields.first;
         this.originalValues.last = this.loginFields.last;
         this.originalValues.nickname = this.loginFields.nickname;
-      }
+      },
     },
   };
 </script>
