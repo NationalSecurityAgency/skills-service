@@ -55,7 +55,8 @@ class LevelDefinitionStorageService {
     }
 
     LevelInfo getOverallLevelInfo(ProjDef projDef, int currentScore) {
-        return doGetLevelInfo(projDef.projectId, projDef.levelDefinitions, projDef.totalPoints, currentScore)
+        LevelInfo levelInfo = doGetLevelInfo(projDef.projectId, projDef.levelDefinitions, projDef.totalPoints, currentScore)
+        return levelInfo
     }
 
     private LevelInfo doGetLevelInfo(String projectId, List<LevelDef> levelDefinitions, int totalPoints, int currentScore) {
@@ -67,7 +68,8 @@ class LevelDefinitionStorageService {
         } else {
             levelScores = loadPercentLevels(levelDefinitions, totalPoints)
         }
-        return calculateLevel(levelScores, levelDefinitions, currentScore)
+        LevelInfo levelInfo = calculateLevel(levelScores, levelDefinitions, currentScore)
+        return levelInfo
     }
 
     int getPointsRequiredForLevel(SkillDef skillDefinition, int level) {
@@ -150,12 +152,13 @@ class LevelDefinitionStorageService {
             }
         }
 
-        return new LevelInfo(
+        LevelInfo levelInfo = new LevelInfo(
                 level: index + 1,
                 currentPoints: currentScore - substract,
                 nextLevelPoints: nextLevelPoints,
                 totalNumLevels: levelDefinitions.size()
         )
+        return levelInfo
     }
 
     @EqualsAndHashCode
