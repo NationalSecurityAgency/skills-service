@@ -51,27 +51,23 @@ class LevelDefinitionStorageService {
 
 
     LevelInfo getLevelInfo(SkillDef skillDefinition, int currentScore) {
-        SettingsResult setting = settingsService.getSetting(skillDefinition.projectId, Settings.LEVEL_AS_POINTS.settingName)
-
-        List<Integer> levelScores = []
-        if(setting?.isEnabled()){
-            levelScores = loadPointsLevels(skillDefinition.levelDefinitions)
-        } else {
-            levelScores = loadPercentLevels(skillDefinition.levelDefinitions, skillDefinition.totalPoints)
-        }
-        return calculateLevel(levelScores, currentScore)
+        return doGetLevelInfo(skillDefinition.projectId, skillDefinition.levelDefinitions, skillDefinition.totalPoints, currentScore)
     }
 
     LevelInfo getOverallLevelInfo(ProjDef projDef, int currentScore) {
-        SettingsResult setting = settingsService.getSetting(projDef.projectId, Settings.LEVEL_AS_POINTS.settingName)
+        return doGetLevelInfo(projDef.projectId, projDef.levelDefinitions, projDef.totalPoints, currentScore)
+    }
 
-        List<Integer> levelScores = []
+    private LevelInfo doGetLevelInfo(String projectId, List<LevelDef> levelDefinitions, int totalPoints, int currentScore) {
+        SettingsResult setting = settingsService.getSetting(projectId, Settings.LEVEL_AS_POINTS.settingName)
+
+        List<Integer> levelScores
         if(setting?.isEnabled()){
-            levelScores = loadPointsLevels(projDef.levelDefinitions)
+            levelScores = loadPointsLevels(levelDefinitions)
         } else {
-            levelScores = loadPercentLevels(projDef.levelDefinitions, projDef.totalPoints)
+            levelScores = loadPercentLevels(levelDefinitions, totalPoints)
         }
-        return calculateLevel(levelScores, currentScore)
+        return calculateLevel(levelScores, levelDefinitions, currentScore)
     }
 
     int getPointsRequiredForLevel(SkillDef skillDefinition, int level) {
@@ -126,7 +122,7 @@ class LevelDefinitionStorageService {
         return levelScores[level - 1]
     }
 
-    private LevelInfo calculateLevel(List<Integer> levelScores, int currentScore) {
+    private LevelInfo calculateLevel(List<Integer> levelScores, List<LevelDef> levelDefinitions, int currentScore) {
         Integer found
 
         levelScores.each {
@@ -157,7 +153,8 @@ class LevelDefinitionStorageService {
         return new LevelInfo(
                 level: index + 1,
                 currentPoints: currentScore - substract,
-                nextLevelPoints: nextLevelPoints
+                nextLevelPoints: nextLevelPoints,
+                totalNumLevels: levelDefinitions.size()
         )
     }
 
@@ -165,6 +162,7 @@ class LevelDefinitionStorageService {
     @ToString
     static class LevelInfo implements Serializable {
         int level
+        int totalNumLevels
         int currentPoints
         int nextLevelPoints
     }

@@ -22,8 +22,8 @@
                     </circle-progress>
                 </div>
 
-                <div class="text-center col-md-4">
-                    <my-skill-level :skill-level="displayData.userSkills.skillsLevel"/>
+                <div class="text-center col-md-4 my-5 my-md-0">
+                    <my-skill-level :skill-level="displayData.userSkills.skillsLevel" :total-num-levels="displayData.userSkills.totalLevels"/>
                 </div>
 
                 <div class="text-center col-md-4">

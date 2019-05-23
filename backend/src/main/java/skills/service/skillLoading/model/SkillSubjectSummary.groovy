@@ -5,7 +5,9 @@ class SkillSubjectSummary {
     String subject
     String subjectId
     String description
+
     int skillsLevel
+    int totalLevels
 
     int points
     int totalPoints

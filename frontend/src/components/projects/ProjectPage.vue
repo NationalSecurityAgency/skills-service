@@ -20,7 +20,8 @@
           </section>
         </template>
         <template slot="Levels">
-          <levels :project-id="project.projectId" :max-levels="6"/>
+<!--          TODO: we may want to load max-levels threshold from props-->
+          <levels :project-id="project.projectId" :max-levels="25"/>
         </template>
         <template slot="Badges">
           <badges :project="project" v-on:subjects-changed="loadProjects"/>

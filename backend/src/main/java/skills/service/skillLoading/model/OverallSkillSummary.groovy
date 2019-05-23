@@ -8,6 +8,7 @@ class OverallSkillSummary {
     String projectName
 
     int skillsLevel
+    int totalLevels
 
     int points
     int totalPoints
