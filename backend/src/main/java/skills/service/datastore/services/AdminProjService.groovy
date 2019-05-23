@@ -210,7 +210,7 @@ class AdminProjService {
 
     @Transactional()
     List<Integer> getUniqueVersionList(String projectId) {
-        projDefRepo.getUniqueVersionList(projectId);
+        skillDefRepo.getUniqueVersionList(projectId)
     }
 
     private SkillDef getSkillDef(String projectId, String skillId, SkillDef.ContainerType containerType = SkillDef.ContainerType.Skill) {
