@@ -117,7 +117,7 @@
           });
       },
       notCurrentUser(userId) {
-        return userId !== this.$store.getters.userInfo.userId;
+        return this.$store.getters.userInfo && userId !== this.$store.getters.userInfo.userId;
       },
       addUserRole() {
         this.isSaving = true;
