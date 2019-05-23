@@ -22,7 +22,6 @@
 <script>
     import vis from 'vis';
     import 'vis/dist/vis.css';
-    import Ribbon from '@/common/ribbon/Ribbon.vue';
     import GraphLegend from '@/userSkills/skill/dependencies/GraphLegend.vue';
     import SkillDependencySummary from '@/userSkills/skill/dependencies/SkillDependencySummary.vue';
 
@@ -31,7 +30,6 @@
         components: {
             SkillDependencySummary,
             GraphLegend,
-            Ribbon,
         },
         props: {
             dependencies: Array,
