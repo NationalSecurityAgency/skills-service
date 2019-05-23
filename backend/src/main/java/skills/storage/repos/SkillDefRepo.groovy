@@ -71,4 +71,7 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
             s.projectId=?1 and c.projectId=?1 and
             s.skillId=?2 and r.type=?3''')
     Integer countChildren(String projectId, String skillId, RelationshipType relationshipType)
+
+    @Query("SELECT DISTINCT s.version from SkillDef s where s.projectId=?1 ORDER BY s.version ASC")
+    List<Integer> getUniqueVersionList(String projectId)
 }
