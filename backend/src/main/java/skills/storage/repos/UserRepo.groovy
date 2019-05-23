@@ -4,10 +4,12 @@ package skills.storage.repos
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
+import org.springframework.lang.Nullable
 import skills.storage.model.auth.User
 
 interface UserRepo extends CrudRepository<User, Integer> {
 
+    @Nullable
     User findByUserId(String userId)
 
     @Query(value = "select u from User u JOIN u.userProps props where props.name = 'DN' and props.value = ?1")
