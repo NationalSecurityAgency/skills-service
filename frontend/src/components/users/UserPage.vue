@@ -14,7 +14,7 @@
               <b-form
                 v-if="versionOptions && versionOptions.length > 1"
                 inline>
-                <label class="pr-3 font-weight-bold" for="version-select">View for Version: </label>
+                <label class="pr-3 font-weight-bold" for="version-select">Version: </label>
                 <b-form-select
                   id="version-select"
                   class="version-select"
