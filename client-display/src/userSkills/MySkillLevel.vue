@@ -12,22 +12,34 @@
             Level <strong>{{ skillLevel }}</strong> out of <strong>{{ totalNumLevels }}</strong>
         </div>
 
-        <star-progress :number-complete="skillLevel" star-style="circle"/>
+        <star-progress v-if="totalNumLevels <= 6" :number-complete="skillLevel" :total-num-levels="totalNumLevels" star-style="circle"/>
+        <div v-else class="row justify-content-center">
+            <div class="col-6 col-md-9 col-lg-7">
+                <progress-bar class="mt-2 mx-3 text-center" bar-color="rgb(89, 173, 82)" size="large" :val="progressPercent"></progress-bar>
+            </div>
+        </div>
     </div>
 </template>
 
 <script>
+    import ProgressBar from 'vue-simple-progress';
     import StarProgress from '@/common/progress/StarProgress.vue';
 
     export default {
         components: {
             StarProgress,
+            ProgressBar,
         },
         props: {
             skillLevel: Number,
             totalNumLevels: {
                 type: Number,
                 default: 5,
+            },
+        },
+        computed: {
+            progressPercent() {
+                return Math.floor((this.skillLevel / this.totalNumLevels) * 100);
             },
         },
     };

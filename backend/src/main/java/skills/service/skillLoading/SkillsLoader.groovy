@@ -78,7 +78,6 @@ class SkillsLoader {
         int levelPoints
         int levelTotalPoints
         LevelDefinitionStorageService.LevelInfo levelInfo
-        List<SkillsLevelDefinition> levelDefinitions
         int todaysPoints = 0
 
         if (subjects) {
@@ -108,6 +107,7 @@ class SkillsLoader {
         OverallSkillSummary res = new OverallSkillSummary(
                 projectName: projDef.name,
                 skillsLevel: skillLevel,
+                totalLevels: levelInfo.totalNumLevels,
                 points: points,
                 totalPoints: totalPoints,
                 todaysPoints: todaysPoints,
@@ -238,6 +238,8 @@ class SkillsLoader {
                 points: points,
 
                 skillsLevel: levelInfo.level,
+                totalLevels: levelInfo.totalNumLevels,
+
                 levelPoints: levelInfo.currentPoints,
                 levelTotalPoints: levelInfo.nextLevelPoints,
 
