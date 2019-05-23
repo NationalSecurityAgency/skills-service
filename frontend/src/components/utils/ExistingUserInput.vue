@@ -69,10 +69,10 @@
       userQuery(newVal) {
         // must be able to handle string or an array as the multiselect lib will place
         // an array if it was selected from the dropdown and a string if it was entered
-        if (Object.getPrototypeOf(newVal) === String.prototype) {
-          this.$emit('input', newVal);
-        } else if (!newVal || newVal.length === 0) {
+        if (!newVal || newVal.length === 0) {
           this.$emit('input', null);
+        } else if (Object.getPrototypeOf(newVal) === String.prototype) {
+          this.$emit('input', newVal);
         } else {
           this.$emit('input', newVal[0]);
         }
