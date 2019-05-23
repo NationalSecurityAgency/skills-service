@@ -11,15 +11,16 @@
         <template slot="Client Display">
           <section v-if="authToken" class="">
             <sub-page-header title="Client Display">
-              <b-form
-                v-if="versionOptions && versionOptions.length > 1"
-                inline>
-                <label class="pr-3 font-weight-bold" for="version-select">Version: </label>
+              <b-form inline>
+                <label class="pr-3 d-none d-sm-inline font-weight-bold" for="version-select">Version: </label>
                 <b-form-select
                   id="version-select"
                   class="version-select"
                   v-model="selectedVersion"
                   :options="versionOptions" />
+                <inline-help
+                  class="pl-2"
+                  msg="Multiple skills versions can be defined if you have multiple versions of your application deployed." />
               </b-form>
             </sub-page-header>
             <client-display-frame
@@ -51,6 +52,7 @@
   import { SECTION } from '../stats/SectionHelper';
   import PageHeader from '../utils/pages/PageHeader';
   import SubPageHeader from '../utils/pages/SubPageHeader';
+  import InlineHelp from '../utils/InlineHelp';
 
   export default {
     name: 'UserPage',
@@ -61,6 +63,7 @@
       UserSkillsPerformed,
       ClientDisplayFrame,
       SubPageHeader,
+      InlineHelp,
     },
     breadcrumb() {
       return {
@@ -150,6 +153,6 @@
 
 <style scoped>
   .version-select {
-    width: 10rem;
+    width: 7rem;
   }
 </style>
