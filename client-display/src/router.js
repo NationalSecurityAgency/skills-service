@@ -4,6 +4,7 @@ import VueRouter from 'vue-router';
 import SkillsEntry from '@/SkillsEntry.vue';
 import SubjectDetails from '@/userSkills/subject/SubjectDetails.vue';
 import MyRankDetails from '@/userSkills/myRank/MyRankDetails.vue';
+import SkillDetails from '@/userSkills/skill/SkillDetails.vue';
 import BadgesDetails from '@/userSkills/badge/BadgesDetails.vue';
 import BadgeDetails from '@/userSkills/badge/BadgeDetails.vue';
 import ErrorPage from '@/userSkills/ErrorPage.vue';
@@ -14,7 +15,7 @@ import { debounce } from 'lodash';
 Vue.use(VueRouter);
 
 // divide the app into smaller chunks and only load a component from the server when it’s needed
-const SkillDetails = () => import('@/userSkills/skill/SkillDetails.vue');
+// const SkillDetails = () => import('@/userSkills/skill/SkillDetails.vue');
 
 const router = new VueRouter({
   mode: 'history',
