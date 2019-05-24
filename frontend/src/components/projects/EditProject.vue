@@ -1,5 +1,5 @@
 <template>
-  <b-modal :id="internalProject.projectId" :title="title" v-model="show"
+  <b-modal :id="internalProject.projectId" :title="title" v-model="show" :no-close-on-backdrop="true"
            header-bg-variant="info" header-text-variant="light" no-fade>
     <b-container fluid>
       <div class="row">
@@ -18,32 +18,6 @@
           <small class="form-text text-danger">{{ errors.first('projectId')}}</small>
         </div>
       </div>
-
-
-<!--      <div class="field" style="width: 500px">-->
-<!--        <label class="label">Project Name</label>-->
-<!--        <div class="control">-->
-<!--          <input class="input" type="text" v-model="internalProject.name" v-on:input="updateProjectId"-->
-<!--                 v-validate="'required|min:3|max:50|uniqueName'" data-vv-delay="500" name="projectName" v-focus/>-->
-<!--        </div>-->
-<!--        <p class="help is-danger" v-show="errors.has('projectName')">{{ errors.first('projectName')}}</p>-->
-<!--      </div>-->
-
-<!--      <div class="field skills-remove-bottom-margin">-->
-<!--        <label class="label">Project ID</label>-->
-<!--        <div class="control">-->
-<!--          <input class="input" type="text" v-model="internalProject.projectId" :disabled="!canEditProjectId"-->
-<!--                 v-validate="'required|min:3|max:50|alpha_num|uniqueId'" data-vv-delay="500" name="projectId"/>-->
-<!--        </div>-->
-<!--        <p class="help is-danger" v-show="errors.has('projectId')">{{ errors.first('projectId')}}</p>-->
-<!--      </div>-->
-<!--      <p class="control has-text-right">-->
-<!--        <help-item msg="Enable to override auto-generated ID" position="is-left"></help-item>-->
-<!--        <span v-on:click="toggleProject()">-->
-<!--          <a class="is-info" v-if="!canEditProjectId">Enable</a>-->
-<!--          <a class="is-info" v-else>Disable</a>-->
-<!--        </span>-->
-<!--      </p>-->
 
       <p v-if="overallErrMsg" class="text-center text-danger mt-2"><small>***{{ overallErrMsg }}***</small></p>
     </b-container>

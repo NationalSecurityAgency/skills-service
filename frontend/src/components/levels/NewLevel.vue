@@ -1,5 +1,5 @@
 <template>
-  <b-modal :id="levelId" size="xl" :title="title" v-model="show"
+  <b-modal :id="levelId" size="xl" :title="title" v-model="show" :no-close-on-backdrop="true"
            header-bg-variant="info" header-text-variant="light" no-fade >
     <b-container fluid>
       <div v-if="displayIconManager === false">
