@@ -14,9 +14,6 @@ import { debounce } from 'lodash';
 
 Vue.use(VueRouter);
 
-// divide the app into smaller chunks and only load a component from the server when it’s needed
-// const SkillDetails = () => import('@/userSkills/skill/SkillDetails.vue');
-
 const router = new VueRouter({
   mode: 'history',
   routes: [
