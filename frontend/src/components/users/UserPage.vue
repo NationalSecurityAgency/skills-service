@@ -1,15 +1,15 @@
 <template>
   <div>
-    <page-header :loading="isLoading" :options="headerOptons"/>
+    <page-header :loading="loading.userDetails" :options="headerOptons"/>
 
-    <section class="section" v-if="userId">
+    <div v-if="userId" class="section">
       <navigation :nav-items="[
           {name: 'Client Display', iconClass: 'fa-user'},
           {name: 'Stats', iconClass: 'fa-chart-bar'},
           {name: 'Performed Skills', iconClass: 'fa-award'},
         ]">
         <template slot="Client Display">
-          <section v-if="authToken" class="">
+          <section v-if="authToken && !loading.userDetails && !loading.userToken && !loading.availableVersions && !loading.hostInfo" class="">
             <sub-page-header title="Client Display">
               <b-form inline>
                 <label class="pr-3 d-none d-sm-inline font-weight-bold" for="version-select">Version: </label>
@@ -28,7 +28,7 @@
               :version="selectedVersion"
               :auth-token="authToken"
               :project-id="projectId"
-              service-url="http://localhost:8082"/>
+              :service-url="hostUrl"/>
           </section>
         </template>
         <template slot="Stats">
@@ -39,7 +39,7 @@
           <user-skills-performed ref="skillsPerformedTable" :projectId="this.projectId" :userId="this.userId"/>
         </template>
       </navigation>
-    </section>
+    </div>
   </div>
 </template>
 
@@ -53,6 +53,7 @@
   import PageHeader from '../utils/pages/PageHeader';
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import InlineHelp from '../utils/InlineHelp';
+  import UtilsService from '../utils/UtilsService';
 
   export default {
     name: 'UserPage',
@@ -95,11 +96,17 @@
         authenticationUrl: '',
         totalPoints: 0,
         uniqueSkills: 0,
-        isLoading: true,
+        loading: {
+          userToken: true,
+          availableVersions: true,
+          hostInfo: true,
+          userDetails: true,
+        },
         section: SECTION.USERS,
         headerOptons: {},
         selectedVersion: 0,
         versionOptions: [],
+        hostUrl: '',
       };
     },
     created() {
@@ -110,13 +117,26 @@
       UsersService.getUserToken(this.projectId, this.userId)
         .then((result) => {
           this.authToken = result;
+        })
+        .finally(() => {
+          this.loading.userToken = false;
         });
       UsersService.getAvailableVersions(this.projectId)
         .then((result) => {
           this.versionOptions = result;
           this.selectedVersion = Math.max(...this.versionOptions);
+        })
+        .finally(() => {
+          this.loading.availableVersions = false;
         });
       this.loadUserDetails();
+      UtilsService.getHostInfo(this.projectId)
+        .then((result) => {
+          this.hostUrl = `${result.hostName}:${result.port}`;
+        })
+        .finally(() => {
+          this.loading.hostInfo = false;
+        });
     },
     computed: {
       serviceUrl() {
@@ -125,12 +145,12 @@
     },
     methods: {
       loadUserDetails() {
-        this.isLoading = true;
+        this.loading.userDetails = true;
         UsersService.getUserUniqueSkillsCount(this.projectId, this.userId)
           .then((response) => {
             this.uniqueSkills = response;
             this.headerOptons = this.buildHeaderOptions();
-            this.isLoading = false;
+            this.loading.userDetails = false;
           });
       },
       buildHeaderOptions() {
