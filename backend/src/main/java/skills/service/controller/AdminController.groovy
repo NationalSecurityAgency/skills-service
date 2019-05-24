@@ -3,6 +3,7 @@ package skills.service.controller
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.core.env.Environment
 import org.springframework.data.domain.PageRequest
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -10,16 +11,14 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.oauth2.common.OAuth2AccessToken
 import org.springframework.security.oauth2.provider.endpoint.TokenEndpoint
 import org.springframework.web.bind.annotation.*
-import skills.service.controller.exceptions.ErrorCode
-import skills.service.controller.exceptions.SkillException
 import skills.service.controller.exceptions.SkillsValidator
 import skills.service.controller.request.model.*
 import skills.service.controller.result.model.*
 import skills.service.datastore.services.AdminProjService
 import skills.service.datastore.services.AdminUsersService
 import skills.service.datastore.services.LevelDefinitionStorageService
-import skills.service.datastore.services.settings.SettingsService
 import skills.service.datastore.services.UserAdminService
+import skills.service.datastore.services.settings.SettingsService
 import skills.storage.model.SkillDef
 import skills.utils.ClientSecretGenerator
 import skills.utils.Constants
@@ -663,5 +662,16 @@ class AdminController {
         UsernamePasswordAuthenticationToken principal = new UsernamePasswordAuthenticationToken(projectId, null, [])
         Map<String, String> parameters = [grant_type: 'client_credentials', proxy_user: userId]
         return tokenEndpoint.postAccessToken(principal, parameters)
+    }
+
+    @Autowired
+    Environment environment;
+
+    @RequestMapping(value = "/projects/{projectId}/hostInfo", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    def getHostInfo() {
+        InetAddress host = InetAddress.getLocalHost()
+
+        return [hostName: host.getHostName(), hostAddress: host.getHostAddress(), port: environment.getProperty("local.server.port")]
     }
 }
