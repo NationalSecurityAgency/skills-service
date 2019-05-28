@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*
 import skills.service.auth.UserInfo
 import skills.service.auth.UserInfoService
 import skills.service.controller.exceptions.SkillException
+import skills.service.controller.exceptions.SkillsValidator
 import skills.service.datastore.services.AccessSettingsStorageService
 import skills.storage.model.auth.AllowedOrigin
 import skills.storage.model.auth.RoleName
@@ -60,10 +61,9 @@ class AccessSettingsController {
 
     @RequestMapping(value = "/projects/{projectId}/allowedOrigins", method = RequestMethod.PUT)
     AllowedOrigin saveOrUpdateAllowedOrigin(@PathVariable("projectId") String projectId, @RequestBody AllowedOrigin update) {
-        assert update
-        assert update.allowedOrigin
-        assert update.projectId
-        assert update.projectId == projectId
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(update.allowedOrigin, "Allowed Origin", projectId)
+        SkillsValidator.isFirstOrMustEqualToSecond(update.projectId, projectId, "Project Id")
 
         return accessSettingsStorageService.saveOrUpdateAllowedOrigin(projectId, update)
     }

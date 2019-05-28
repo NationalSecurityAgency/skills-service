@@ -6,6 +6,7 @@ import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.web.bind.annotation.*
 import skills.service.controller.exceptions.ErrorCode
 import skills.service.controller.exceptions.SkillException
+import skills.service.controller.exceptions.SkillsValidator
 import skills.service.controller.request.model.ProjectRequest
 import skills.service.controller.result.model.CustomIconResult
 import skills.service.controller.result.model.ProjectResult
@@ -56,8 +57,8 @@ class ProjectController {
     @ResponseBody
     boolean doesProjectExist(@RequestParam(value = "projectId", required = false) String projectId,
                              @RequestParam(value = "projectName", required = false) String projectName) {
-        assert projectId || projectName
-        assert !(projectId && projectName)
+        SkillsValidator.isTrue((projectId || projectName), "One of Project Id or Project Name must be provided.")
+        SkillsValidator.isTrue(!(projectId && projectName), "Only Project Id or Project Name may be provided, not both.")
 
         if (projectId) {
             return projectAdminStorageService.existsByProjectId(projectId)
