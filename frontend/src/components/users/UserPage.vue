@@ -132,7 +132,7 @@
       this.loadUserDetails();
       UtilsService.getHostInfo(this.projectId)
         .then((result) => {
-          this.hostUrl = `${result.hostName}:${result.port}`;
+          this.hostUrl = `${result.protocol}://${result.hostAddress}:${result.port}`;
         })
         .finally(() => {
           this.loading.hostInfo = false;
