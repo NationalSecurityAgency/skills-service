@@ -46,7 +46,7 @@ class AccessSettingsController {
     }
 
     @RequestMapping(value = "/projects/{projectId}/users/{userId}/roles/{roleName}", method = RequestMethod.PUT)
-    UserRole createUserRole(
+    UserRole addUserRole(
             @PathVariable("projectId") String projectId,
             @PathVariable("userId") String userId, @PathVariable("roleName") RoleName roleName) {
         accessSettingsStorageService.addUserRole(lookupUserInfo(userId), projectId, roleName)
