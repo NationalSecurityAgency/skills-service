@@ -386,7 +386,10 @@ class AdminController {
                                      @PathVariable("subjectId") String subjectId,
                                      @PathVariable("skillId") String skillId,
                                      @RequestBody ActionPatchRequest patchRequest) {
-        assert patchRequest.action
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(subjectId, "Subject Id", projectId)
+        SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
+        SkillsValidator.isNotNull(patchRequest.action, "Action must be provided", projectId)
 
         return projectAdminStorageService.updateSkillDisplayOrder(projectId, subjectId, skillId, patchRequest)
     }
