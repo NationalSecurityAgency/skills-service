@@ -39,7 +39,7 @@
     props: {
       loading: {
         type: Boolean,
-        defaut: true,
+        default: true,
       },
       options: {
         icon: String,
