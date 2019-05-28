@@ -103,13 +103,13 @@ class EmailSettingsService {
 
     void storeSettings(EmailConnectionInfo emailConnectionInfo) {
         settingsService.saveOrUpdateGroup(null, settingsGroup, [
-                hostSetting     : emailConnectionInfo.host,
-                portSetting     : emailConnectionInfo.port?.toString(),
-                protocolSetting : emailConnectionInfo.protocol,
-                usernameSetting : emailConnectionInfo.username,
-                passwordSetting : emailConnectionInfo.password,
-                authSetting     : emailConnectionInfo.authEnabled?.toString(),
-                tlsEnableSetting: emailConnectionInfo.tlsEnabled?.toString(),
+                (hostSetting)     : emailConnectionInfo.host,
+                (portSetting)     : emailConnectionInfo.port?.toString(),
+                (protocolSetting) : emailConnectionInfo.protocol,
+                (usernameSetting) : emailConnectionInfo.username,
+                (passwordSetting) : emailConnectionInfo.password,
+                (authSetting)     : emailConnectionInfo.authEnabled?.toString(),
+                (tlsEnableSetting): emailConnectionInfo.tlsEnabled?.toString(),
         ])
     }
 
