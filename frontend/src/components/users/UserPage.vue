@@ -9,7 +9,7 @@
           {name: 'Performed Skills', iconClass: 'fa-award'},
         ]">
         <template slot="Client Display">
-          <section v-if="authToken && !loading.userDetails && !loading.userToken && !loading.availableVersions && !loading.hostInfo" class="">
+          <section v-if="authToken && !loading.userDetails && !loading.userToken && !loading.availableVersions">
             <sub-page-header title="Client Display">
               <b-form inline>
                 <label class="pr-3 d-none d-sm-inline font-weight-bold" for="version-select">Version: </label>
@@ -28,7 +28,7 @@
               :version="selectedVersion"
               :auth-token="authToken"
               :project-id="projectId"
-              :service-url="hostUrl"/>
+              :service-url="serviceUrl"/>
           </section>
         </template>
         <template slot="Stats">
@@ -53,7 +53,6 @@
   import PageHeader from '../utils/pages/PageHeader';
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import InlineHelp from '../utils/InlineHelp';
-  import UtilsService from '../utils/UtilsService';
 
   export default {
     name: 'UserPage',
@@ -99,14 +98,12 @@
         loading: {
           userToken: true,
           availableVersions: true,
-          hostInfo: true,
           userDetails: true,
         },
         section: SECTION.USERS,
         headerOptons: {},
         selectedVersion: 0,
         versionOptions: [],
-        hostUrl: '',
       };
     },
     created() {
@@ -130,13 +127,6 @@
           this.loading.availableVersions = false;
         });
       this.loadUserDetails();
-      UtilsService.getHostInfo(this.projectId)
-        .then((result) => {
-          this.hostUrl = `${result.protocol}://${result.hostAddress}:${result.port}`;
-        })
-        .finally(() => {
-          this.loading.hostInfo = false;
-        });
     },
     computed: {
       serviceUrl() {
