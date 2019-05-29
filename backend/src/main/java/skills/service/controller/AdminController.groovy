@@ -3,8 +3,6 @@ package skills.service.controller
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.ApplicationContext
-import org.springframework.core.env.Environment
 import org.springframework.data.domain.PageRequest
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -666,25 +664,4 @@ class AdminController {
         return tokenEndpoint.postAccessToken(principal, parameters)
     }
 
-    @Autowired
-    Environment environment;
-
-    @Autowired
-    private ApplicationContext applicationContext
-
-    @RequestMapping(value = "/projects/{projectId}/hostInfo", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    def getHostInfo() {
-        InetAddress host = InetAddress.getLocalHost()
-
-        // Is there a better way?
-        String protocol =  applicationContext.servletContext.context.service.connectors[0].scheme
-
-        return [
-            protocol: protocol,
-            hostName: host.getHostName(),
-            hostAddress: host.getHostAddress(),
-            port: environment.getProperty("local.server.port")
-        ]
-    }
 }

@@ -145,7 +145,7 @@
       buildHeaderOptions() {
         return {
           icon: 'fas fa-user',
-          title: `SUBJECT: ${this.userId}`,
+          title: `USER: ${this.userId}`,
           subTitle: `ID: ${this.userId}`,
           stats: [{
             label: 'Skills',
