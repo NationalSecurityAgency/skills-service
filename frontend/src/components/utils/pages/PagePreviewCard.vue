@@ -4,10 +4,8 @@
       <div class="row mb-2">
         <div class="col-10">
           <div class="media">
-            <div v-if="options.icon" class="d-inline-block mr-2 border rounded text-info text-center" style="min-width: 3rem;">
-              <i
-                :class="[`${options.icon}`]"
-                class="m-1"/>
+            <div v-if="options.icon" class="d-inline-block mr-2 border rounded text-info text-center" style="min-width: 3.2rem;">
+              <i :class="[`${options.icon}`]" class="m-1"/>
             </div>
             <div class="media-body">
               <div class="text-truncate text-info mb-0 pb-0 preview-card-title">{{ options.title }}</div>
@@ -26,7 +24,7 @@
           <div>
             <p class="text-uppercase text-muted count-label">{{ stat.label }}</p>
             <strong class="h5">{{ stat.count | number }}</strong>
-            <i v-if="stat.warn" class="fas fa-exclamation-circle text-warning" style="font-size: 1.5rem;" v-b-tooltip.hover="stat.warnMsg"/>
+            <i v-if="stat.warn" class="fas fa-exclamation-circle text-warning ml-1" style="font-size: 1.5rem;" v-b-tooltip.hover="stat.warnMsg"/>
           </div>
         </div>
       </div>
@@ -69,9 +67,7 @@
   }
 
   i {
-    font-size: 3rem;
-    width: 48px;
-    height: 48px;
+    font-size: 2.5rem;
     display: inline-block;
   }
 </style>

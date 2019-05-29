@@ -1,6 +1,8 @@
 <template>
-  <div class="icon-box text-info" v-on:click="selectIcon">
-    <i :class="[selectedIconClass]" class="select-icon"/>
+  <div class="card" @click="selectIcon">
+    <div class="card-body text-info" style="min-height: 4rem;">
+      <i :class="[selectedIconClass]"/>
+    </div>
   </div>
 </template>
 
@@ -43,21 +45,7 @@
 </script>
 
 <style scoped>
-  .icon-box {
-    background-color: white;
-    border-radius: 6px;
-    border: 1px solid #c9c9c9;
-    /*box-shadow: 0 2px 3px rgba(10, 10, 10, 0.1), 0 0 0 1px rgba(10, 10, 10, 0.1);*/
+  i {
     font-size: 3rem;
-    width: 6rem;
-    height: 5rem;
-    cursor: pointer;
-    text-align: center;
   }
-
-  .select-icon {
-    height: 64px;
-    width: 64px;
-  }
-
 </style>

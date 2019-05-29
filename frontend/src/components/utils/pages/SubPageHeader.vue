@@ -3,7 +3,7 @@
     <div class="col-6 pt-2 col-md-7">
       <span class="h4 text-uppercase">{{ title }}</span>
     </div>
-    <div class="col-6 col-md-5 pt-0 text-md-right">
+    <div class="col-6 col-md-5 pt-0 text-right">
       <slot>
         <button v-if="action" type="button" class="btn btn-outline-primary" v-on:click="addClicked">
           <span class="d-none d-sm-inline">{{ action }} </span> <i class="fas fa-plus-circle"/>

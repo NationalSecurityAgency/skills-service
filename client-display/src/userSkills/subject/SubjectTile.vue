@@ -90,12 +90,21 @@
           levelBeforeToday = 0;
         }
 
+        let level = 0;
+        if (subject.totalPoints > 0) {
+          if (subject.levelTotalPoints === -1) {
+            level = 100;
+          } else {
+            level = (subject.levelPoints / subject.levelTotalPoints) * 100;
+          }
+        }
+
         return {
-          total: (subject.points / subject.totalPoints) * 100,
-          totalBeforeToday: ((subject.points - subject.todaysPoints) / subject.totalPoints) * 100,
-          level: subject.levelTotalPoints === -1 ? 100 : ((subject.levelPoints / subject.levelTotalPoints) * 100),
+          total: subject.totalPoints > 0 ? (subject.points / subject.totalPoints) * 100 : 0,
+          totalBeforeToday: subject.totalPoints > 0 ? ((subject.points - subject.todaysPoints) / subject.totalPoints) * 100 : 0,
+          level,
           levelBeforeToday,
-          allLevelsComplete: subject.levelTotalPoints < 0,
+          allLevelsComplete: subject.totalPoints > 0 && subject.levelTotalPoints < 0,
         };
       },
     },

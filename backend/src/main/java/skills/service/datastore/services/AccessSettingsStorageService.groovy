@@ -2,7 +2,9 @@ package skills.service.datastore.services
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.security.core.AuthenticationException
 import org.springframework.security.core.GrantedAuthority
+import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.service.auth.UserInfo
@@ -32,6 +34,12 @@ class AccessSettingsStorageService {
     @Autowired
     UserInfoService userInfoService
 
+    @Autowired
+    UserDetailsService userDetailsService
+
+    @Autowired
+    InceptionProjectService inceptionProjectService
+
     @Transactional(readOnly = true)
     List<UserRole> getUserRoles(String projectId) {
         List<UserRole> res = userRoleRepository.findAllByProjectId(projectId)
@@ -56,7 +64,9 @@ class AccessSettingsStorageService {
 
     @Transactional
     UserRole addRoot(String userId) {
-        return addUserRoleInternal(userId, null, RoleName.ROLE_SUPER_DUPER_USER)
+        UserRole userRole = addUserRoleInternal(userId, null, RoleName.ROLE_SUPER_DUPER_USER)
+        inceptionProjectService.createInceptionAndAssignUser(userRole)
+        return userRole
     }
 
     @Transactional
@@ -65,9 +75,14 @@ class AccessSettingsStorageService {
     }
 
     @Transactional()
-    void deleteUserRole(UserInfo userInfo, String projectId, RoleName roleName) {
-        String userId = userInfo.username?.toLowerCase()
-        deleteUserRoleInternal(userId, projectId, roleName)
+    void deleteUserRole(String userId, String projectId, RoleName roleName) {
+        UserInfo toDelete = lookupUserInfo(userId)
+        if (toDelete != userInfoService.currentUser) {
+            String normalizedUserId = toDelete.username?.toLowerCase()
+            deleteUserRoleInternal(normalizedUserId, projectId, roleName)
+        } else {
+            throw new SkillException("You cannot delete yourself.")
+        }
     }
 
     @Transactional(readOnly = true)
@@ -87,9 +102,23 @@ class AccessSettingsStorageService {
     }
 
     @Transactional()
+    UserRole addUserRole(String userId, String projectId, RoleName roleName) {
+        UserInfo userInfo = lookupUserInfo(userId)
+        addUserRole(userInfo, projectId, roleName)
+    }
+
+    @Transactional()
     UserRole addUserRole(UserInfo userInfo, String projectId, RoleName roleName) {
         String userId = userInfo.username?.toLowerCase()
         return addUserRoleInternal(userId, projectId, roleName)
+    }
+
+    private UserInfo lookupUserInfo(String userId) {
+        try {
+            return userDetailsService.loadUserByUsername(userId)
+        } catch (AuthenticationException e) {
+            throw new SkillException(e.message)
+        }
     }
 
     private UserRole addUserRoleInternal(String userId, String projectId, RoleName roleName) {

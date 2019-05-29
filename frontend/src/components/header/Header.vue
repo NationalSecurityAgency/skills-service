@@ -6,6 +6,7 @@
       </div>
 
       <div class="col text-center text-sm-right mt-3 mt-sm-0">
+        <inception-button class="mr-2"></inception-button>
         <settings-button class="mr-2"/>
       </div>
     </div>
@@ -16,10 +17,12 @@
 <script>
   import SettingsButton from './SettingsButton';
   import Breadcrumb from './Breadcrumb';
+  import InceptionButton from '../inception/InceptionButton';
 
   export default {
     name: 'Header',
     components: {
+      InceptionButton,
       Breadcrumb,
       SettingsButton,
     },

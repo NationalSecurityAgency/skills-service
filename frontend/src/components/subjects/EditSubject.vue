@@ -3,7 +3,7 @@
            header-bg-variant="info" header-text-variant="light" no-fade>
     <b-container fluid>
       <div v-if="displayIconManager === false">
-        <div class="media">
+        <div class="media mb-3">
           <icon-picker :startIcon="subjectInternal.iconClass" @select-icon="toggleIconDisplay(true)"
                        class="mr-3"></icon-picker>
           <div class="media-body">

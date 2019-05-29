@@ -12,6 +12,7 @@ import UserPage from '@/components/users/UserPage';
 import store from '@/store/store';
 import GlobalSettings from '@/components/settings/GlobalSettings';
 import GFMDescription from '@//components/utils/GFMDescription';
+import InceptionSkills from '@//components/inception/InceptionSkills';
 
 Vue.use(Router);
 
@@ -111,6 +112,12 @@ const router = new Router({
       name: 'MarkDownSupport',
       component: GFMDescription,
       meta: { requiresAuth: true },
+    },
+    {
+      path: '/inception',
+      name: 'InceptionSkills',
+      component: InceptionSkills,
+      meta: { requiresAuth: true, breadcrumb: 'Dashboard Skills' },
     },
     {
       path: '*',

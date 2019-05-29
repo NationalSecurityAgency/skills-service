@@ -107,7 +107,7 @@ class SkillsLoader {
         OverallSkillSummary res = new OverallSkillSummary(
                 projectName: projDef.name,
                 skillsLevel: skillLevel,
-                totalLevels: levelInfo.totalNumLevels,
+                totalLevels: levelInfo?.totalNumLevels ?: 0,
                 points: points,
                 totalPoints: totalPoints,
                 todaysPoints: todaysPoints,

@@ -13,6 +13,7 @@ import skills.service.auth.UserInfoService
 import skills.service.controller.exceptions.DataIntegrityViolationExceptionHandler
 import skills.service.controller.exceptions.ErrorCode
 import skills.service.controller.exceptions.SkillException
+import skills.service.controller.exceptions.SkillsValidator
 import skills.service.controller.request.model.*
 import skills.service.controller.result.model.BadgeResult
 import skills.service.controller.result.model.DependencyCheckResult
@@ -901,10 +902,13 @@ class AdminProjService {
         if (skillRequest.name.length() > 100) {
             throw new SkillException("Bad Name [${skillRequest.name}] - must not exceed 100 chars.")
         }
+        SkillsValidator.isNotBlank(skillRequest.projectId, "Project Id")
+
         boolean shouldRebuildScores
 
         boolean isEdit = skillRequest.id
 
+        int totalPointsRequested = skillRequest.pointIncrement * skillRequest.numPerformToCompletion;
         SkillDef skillDefinition
         if (isEdit) {
             Optional<SkillDef> existing = skillDefRepo.findById(skillRequest.id)
@@ -914,7 +918,7 @@ class AdminProjService {
             log.info("Updating with [{}]", skillRequest)
             skillDefinition = existing.get()
 
-            shouldRebuildScores = skillDefinition.totalPoints != skillRequest.totalPoints
+            shouldRebuildScores = skillDefinition.totalPoints != totalPointsRequested
 
             Props.copy(skillRequest, skillDefinition, "childSkills", 'version')
         } else {
@@ -927,7 +931,7 @@ class AdminProjService {
                     name: skillRequest.name,
                     pointIncrement: skillRequest.pointIncrement,
                     pointIncrementInterval: skillRequest.pointIncrementInterval,
-                    totalPoints: skillRequest.totalPoints,
+                    totalPoints: totalPointsRequested,
                     description: skillRequest.description,
                     helpUrl: skillRequest.helpUrl,
                     displayOrder: displayOrder,
