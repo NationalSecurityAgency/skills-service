@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "5.8.2",
+    "@skills/skills-client-vue": "0.0.1",
     "animate.css": "3.7.0",
     "apexcharts": "3.6.10",
     "axios": "0.18.0",

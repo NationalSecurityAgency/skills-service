@@ -44,15 +44,15 @@
 </template>
 
 <script>
+  import { SkillsDisplay } from '@skills/skills-client-vue/src/index';
+  import { SECTION } from '../stats/SectionHelper';
   import Navigation from '../utils/Navigation';
   import SectionStats from '../stats/SectionStats';
   import UserSkillsPerformed from './UserSkillsPerformed';
   import UsersService from './UsersService';
-  import { SECTION } from '../stats/SectionHelper';
   import PageHeader from '../utils/pages/PageHeader';
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import InlineHelp from '../utils/InlineHelp';
-  import SkillsDisplay from './SkillsDisplay';
 
   export default {
     name: 'UserPage',
