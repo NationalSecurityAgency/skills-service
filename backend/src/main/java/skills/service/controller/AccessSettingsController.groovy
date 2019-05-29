@@ -23,9 +23,6 @@ class AccessSettingsController {
     UserInfoService userInfoService
 
     @Autowired
-    UserDetailsService userDetailsService
-
-    @Autowired
     AccessSettingsStorageService accessSettingsStorageService
 
     @RequestMapping(value = "/projects/{projectId}/userRoles", method = RequestMethod.GET, produces = "application/json")
@@ -38,19 +35,14 @@ class AccessSettingsController {
     void deleteUserRole(
             @PathVariable("projectId") String projectId,
             @PathVariable("userId") String userId, @PathVariable("roleName") RoleName roleName) {
-        UserInfo toDelete = lookupUserInfo(userId)
-        if (toDelete != userInfoService.currentUser) {
-            accessSettingsStorageService.deleteUserRole(toDelete, projectId, roleName)
-        } else {
-            throw new SkillException("You cannot delete yourself.")
-        }
+        accessSettingsStorageService.deleteUserRole(userId, projectId, roleName)
     }
 
     @RequestMapping(value = "/projects/{projectId}/users/{userId}/roles/{roleName}", method = RequestMethod.PUT)
     UserRole addUserRole(
             @PathVariable("projectId") String projectId,
             @PathVariable("userId") String userId, @PathVariable("roleName") RoleName roleName) {
-        accessSettingsStorageService.addUserRole(lookupUserInfo(userId), projectId, roleName)
+        accessSettingsStorageService.addUserRole(userId, projectId, roleName)
     }
 
     @RequestMapping(value = "/projects/{projectId}/allowedOrigins", method = RequestMethod.GET, produces = "application/json")
@@ -74,11 +66,4 @@ class AccessSettingsController {
         accessSettingsStorageService.deleteAllowedOrigin(projectId, allowedOriginId)
     }
 
-    private UserInfo lookupUserInfo(String userId) {
-        try {
-            return userDetailsService.loadUserByUsername(userId)
-        } catch (AuthenticationException e) {
-            throw new SkillException(e.message)
-        }
-    }
 }

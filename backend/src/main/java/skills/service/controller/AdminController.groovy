@@ -286,8 +286,6 @@ class AdminController {
         SkillsValidator.isTrue(skillRequest.version >= 0, "version must be >= 0", projectId, skillId)
         SkillsValidator.isTrue(skillRequest.version < Constants.MAX_VERSION, "version exceeds max version", projectId, skillId)
 
-        skillRequest.totalPoints = skillRequest.pointIncrement * skillRequest.numPerformToCompletion
-
         return projectAdminStorageService.saveSkill(skillRequest)
     }
 

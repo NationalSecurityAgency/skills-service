@@ -19,7 +19,6 @@ class SkillRequest {
     int pointIncrement
     int pointIncrementInterval
     int numPerformToCompletion
-    int totalPoints
 
     int version = 0
 

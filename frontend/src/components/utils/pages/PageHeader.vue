@@ -13,10 +13,9 @@
                 <div>
                   <p class="h6 text-uppercase text-muted">{{stat.label}}</p>
                   <p class="h2">{{ stat.count | number}}
-                    <b-tooltip v-if="stat.warnMsg" :label="stat.warnMsg"
-                               position="is-bottom" animanted="true" type="is-light" multilined>
-                      <i class="fa fa-exclamation-circle text-warning"></i>
-                    </b-tooltip>
+                    <span v-if="stat.warnMsg">
+                      <i class="fa fa-exclamation-circle text-warning" v-b-tooltip.hover="stat.warnMsg"/>
+                    </span>
                   </p>
                 </div>
               </div>

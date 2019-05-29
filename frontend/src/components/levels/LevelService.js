@@ -33,4 +33,8 @@ export default {
     const url = `/admin/projects/${projectId}/subjects/${subjectId}/levels/edit/${editedLevel.id}`;
     return axios.put(url, editedLevel);
   },
+  getUserLevel(projectId, userId) {
+    const url = `/api/projects/${projectId}/level`;
+    return axios.get(url, { userId }).then(response => response.data);
+  }
 };

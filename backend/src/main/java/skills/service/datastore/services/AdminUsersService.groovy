@@ -152,6 +152,9 @@ class AdminUsersService {
 
     TableResult loadUsersPage(String projectId, List<String> skillIds, String query, PageRequest pageRequest) {
         TableResult result = new TableResult()
+        if (!skillIds) {
+            return result
+        }
         Long totalProjectUsers = userPointsRepo.countDistinctUserIdByProjectIdAndSkillIdInAndUserIdLike(projectId, skillIds, query)
         if (totalProjectUsers) {
             List<ProjectUser> projectUsers = userPointsRepo.findDistinctProjectUsersByProjectIdAndSkillIdInAndUserIdLike(projectId, skillIds, query, pageRequest)

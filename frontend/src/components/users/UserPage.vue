@@ -11,7 +11,7 @@
         <template slot="Client Display">
           <section v-if="authToken && !loading.userDetails && !loading.userToken && !loading.availableVersions">
             <sub-page-header title="Client Display">
-              <b-form inline>
+              <b-form class="float-right" inline>
                 <label class="pr-3 d-none d-sm-inline font-weight-bold" for="version-select">Version: </label>
                 <b-form-select
                   id="version-select"
@@ -26,7 +26,6 @@
             <skills-display
               :authentication-url="authenticationUrl"
               :version="selectedVersion"
-              :auth-token="authToken"
               :project-id="projectId"
               :service-url="serviceUrl"/>
           </section>
