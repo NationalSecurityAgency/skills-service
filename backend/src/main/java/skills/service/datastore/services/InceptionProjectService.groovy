@@ -46,14 +46,17 @@ class InceptionProjectService {
         doCreateAndAssign(userInfo.username?.toLowerCase())
     }
 
+    @Transactional
+    void removeUser(String userId) {
+        accessSettingsStorageService.deleteUserRole(userId, inceptionProjectId, RoleName.ROLE_PROJECT_ADMIN)
+    }
+
     private void doCreateAndAssign(String userId) {
         boolean createdNewProject = createInceptionProjectIfNeeded(userId)
 
         if (!createdNewProject) {
             List<UserRole> existingRoles = accessSettingsStorageService.getUserRoles(inceptionProjectId)
-            if (!existingRoles.find({
-                it.userId == userId && it.projectId == inceptionProjectId
-            })) {
+            if (!existingRoles.find({ it.userId == userId && it.roleName == RoleName.ROLE_PROJECT_ADMIN })) {
                 log.info("Making [{}] project admin of [{}]", userId, inceptionProjectId)
                 accessSettingsStorageService.addUserRole(userId, inceptionProjectId, RoleName.ROLE_PROJECT_ADMIN)
             }
