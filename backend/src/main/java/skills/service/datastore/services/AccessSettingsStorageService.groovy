@@ -72,6 +72,7 @@ class AccessSettingsStorageService {
     @Transactional
     void deleteRoot(String userId) {
         deleteUserRoleInternal(userId, null, RoleName.ROLE_SUPER_DUPER_USER)
+        inceptionProjectService.removeUser(userId)
     }
 
     @Transactional()
@@ -129,7 +130,7 @@ class AccessSettingsStorageService {
             UserRole existingUserRole = user?.roles?.find {it.projectId == projectId && it.roleName == roleName}
             assert !existingUserRole, "CREATE FAILED -> user-role with project id [$projectId], userId [$userId] and roleName [$roleName] already exists"
         } else {
-            throw new SkillException("User [$userId]  does not exist", projectId)
+            throw new SkillException("User [$userId]  does not exist", (String) projectId)
         }
 
         UserRole userRole = new UserRole(userId: userId, roleName: roleName, projectId: projectId)
@@ -184,12 +185,18 @@ class AccessSettingsStorageService {
 
     @Transactional
     void grantRoot(String userId) {
-        userRoleRepository.save(
-                new UserRole(
-                        userId: userId,
-                        roleName: RoleName.ROLE_SUPER_DUPER_USER
-                )
-        )
+        User user = userRepository.findByUserId(userId.toLowerCase())
+        if (!user) {
+            SkillException exception = new SkillException("User [${userId.toLowerCase()}] does not exist.")
+            exception.errorCode = ErrorCode.BadParam
+            throw exception
+        }
+
+        user.roles.add(new UserRole(
+                userId: userId,
+                roleName: RoleName.ROLE_SUPER_DUPER_USER
+        ))
+        userRepository.save(user)
     }
 
     @Transactional(readOnly = true)
