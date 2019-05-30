@@ -104,11 +104,11 @@ class AccessSettingsStorageService {
     @Transactional()
     UserRole addUserRole(String userId, String projectId, RoleName roleName) {
         UserInfo userInfo = lookupUserInfo(userId)
-        addUserRole(userInfo, projectId, roleName)
+        addUserRoleViaUserInfo(userInfo, projectId, roleName)
     }
 
     @Transactional()
-    UserRole addUserRole(UserInfo userInfo, String projectId, RoleName roleName) {
+    UserRole addUserRoleViaUserInfo(UserInfo userInfo, String projectId, RoleName roleName) {
         String userId = userInfo.username?.toLowerCase()
         return addUserRoleInternal(userId, projectId, roleName)
     }

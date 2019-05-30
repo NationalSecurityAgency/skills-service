@@ -3,6 +3,7 @@ package skills.service.datastore.services
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import skills.service.auth.UserInfo
 import skills.service.controller.request.model.ProjectRequest
 import skills.service.controller.request.model.SkillRequest
 import skills.service.controller.request.model.SubjectRequest
@@ -34,23 +35,44 @@ class InceptionProjectService {
      */
     @Transactional
     void createInceptionAndAssignUser(UserRole userRole) {
-        ProjDef projDef = projDefRepo.findByProjectId(inceptionProjectId)
-        if (!projDef) {
-            log.info("Creating {} project", inceptionProjectId)
-            createProject()
-        }
+        doCreateAndAssign(userRole.userId)
+    }
 
-        List<UserRole> existingRoles = accessSettingsStorageService.getUserRoles(inceptionProjectId)
-        if (!existingRoles.find({
-            it.userId == userRole.userId && it.projectId == userRole.projectId && it.roleName == userRole.roleName
-        })) {
-            log.info("Making [{}] project admin of [{}]", userRole.userId, inceptionProjectId)
-            accessSettingsStorageService.addUserRole(userRole.userId, inceptionProjectId, RoleName.ROLE_PROJECT_ADMIN)
+    /**
+     * If inception project exist then user will simply be assigned as an admin
+     */
+    @Transactional
+    void createInceptionAndAssignUser(UserInfo userInfo) {
+        doCreateAndAssign(userInfo.username?.toLowerCase())
+    }
+
+    private void doCreateAndAssign(String userId) {
+        boolean createdNewProject = createInceptionProjectIfNeeded(userId)
+
+        if (!createdNewProject) {
+            List<UserRole> existingRoles = accessSettingsStorageService.getUserRoles(inceptionProjectId)
+            if (!existingRoles.find({
+                it.userId == userId && it.projectId == inceptionProjectId
+            })) {
+                log.info("Making [{}] project admin of [{}]", userId, inceptionProjectId)
+                accessSettingsStorageService.addUserRole(userId, inceptionProjectId, RoleName.ROLE_PROJECT_ADMIN)
+            }
         }
     }
 
-    private void createProject() {
-        projectAdminStorageService.saveProject(new ProjectRequest(projectId: inceptionProjectId, name: inceptionProjectId))
+    private boolean createInceptionProjectIfNeeded(String userId) {
+        ProjDef projDef = projDefRepo.findByProjectId(inceptionProjectId)
+        if (!projDef) {
+            log.info("Creating {} project", inceptionProjectId)
+            createProject(userId)
+            return true
+        }
+
+        return false
+    }
+
+    private void createProject(String userId) {
+        projectAdminStorageService.saveProject(new ProjectRequest(projectId: inceptionProjectId, name: inceptionProjectId), userId)
 
         List<SubjectRequest> subs = [
                 new SubjectRequest(name: "Projects", subjectId: "Projects", iconClass: "fas fa-project-diagram",

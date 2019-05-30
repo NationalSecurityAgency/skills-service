@@ -97,7 +97,7 @@ class AdminProjService {
     }
 
     @Transactional()
-    ProjectResult saveProject(ProjectRequest projectRequest) {
+    ProjectResult saveProject(ProjectRequest projectRequest, String userIdParam = null) {
         assert projectRequest?.projectId
         assert projectRequest?.name
 
@@ -125,9 +125,14 @@ class AdminProjService {
             log.info("Saved [{}]", projectDefinition)
 
         } else {
-            List<ProjDef> projectDefinitions = projDefRepo.getProjectsByUser(userId)
-            Integer lastDisplayOrder = projectDefinitions ? projectDefinitions.collect({ it.displayOrder }).max() : 0
-            int displayOrder = lastDisplayOrder == null ? 0 : lastDisplayOrder + 1
+            // TODO: temp hack around since user is not yet defined when Inception project is created
+            // This will be addressed in ticket #139
+            int displayOrder = 0
+            if (!userIdParam) {
+                List<ProjDef> projectDefinitions = projDefRepo.getProjectsByUser(this.getUserId())
+                Integer lastDisplayOrder = projectDefinitions ? projectDefinitions.collect({ it.displayOrder }).max() : 0
+                displayOrder = lastDisplayOrder == null ? 0 : lastDisplayOrder + 1
+            }
 
             String clientSecret = new ClientSecretGenerator().generateClientSecret()
 
@@ -145,7 +150,7 @@ class AdminProjService {
             }
             log.info("Saved [{}]", projectDefinition)
 
-            accessSettingsStorageService.addUserRole(userInfoService.currentUser, projectRequest.projectId, RoleName.ROLE_PROJECT_ADMIN)
+            accessSettingsStorageService.addUserRole(userIdParam ?: this.getUserId(), projectRequest.projectId, RoleName.ROLE_PROJECT_ADMIN)
             log.info("Added user role [{}]", RoleName.ROLE_PROJECT_ADMIN)
         }
 

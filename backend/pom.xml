@@ -285,7 +285,7 @@
                             <overwrite>true</overwrite>
                             <resources>
                                 <resource>
-                                    <directory>${project.parent.basedir}/skills-bootstrap/target/dist/bootstrap</directory>
+                                    <directory>${project.parent.basedir}/skills-bootstrap/dist/</directory>
                                     <includes>
                                         <include>static/</include>
                                         <include>index.html</include>

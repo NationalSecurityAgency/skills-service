@@ -12,7 +12,9 @@ import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
+import skills.service.controller.exceptions.SkillsValidator
 import skills.service.datastore.services.AccessSettingsStorageService
+import skills.service.datastore.services.InceptionProjectService
 import skills.storage.model.auth.RoleName
 import skills.storage.model.auth.User
 import skills.storage.model.auth.UserRole
@@ -38,6 +40,8 @@ class UserAuthService {
     @Autowired
     PasswordEncoder passwordEncoder
 
+    @Autowired
+    InceptionProjectService inceptionProjectService
 
     @Transactional(readOnly = true)
     Collection<GrantedAuthority> loadAuthorities(String userId) {
@@ -64,8 +68,14 @@ class UserAuthService {
     }
 
     @Transactional
-    UserInfo createUser(UserInfo userInfo) {
+    UserInfo createUser(UserInfo userInfo, boolean isSuperUser = false) {
         accessSettingsStorageService.createAppUser(userInfo, false)
+
+        if (isSuperUser) {
+            // super user gets assigned to Inception project
+            inceptionProjectService.createInceptionAndAssignUser(userInfo)
+        }
+
         return loadByUserId(userInfo.username)
     }
 

@@ -68,7 +68,7 @@ class CreateAccountController {
         userInfo.authorities = [new UserSkillsGrantedAuthority(new UserRole(
                 roleName: RoleName.ROLE_SUPER_DUPER_USER
         ))]
-        userAuthService.createUser(userInfo)
+        userAuthService.createUser(userInfo, true)
     }
 
     @PostMapping('grantFirstRoot')
