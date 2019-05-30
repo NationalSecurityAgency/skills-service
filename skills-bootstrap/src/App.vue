@@ -23,6 +23,10 @@
 </style>
 
 <style>
+    #app {
+        background-color: #f1f1f1;
+    }
+
     @import '../node_modules/@fortawesome/fontawesome-free/css/all.css';
     @import '../node_modules/material-icons/iconfont/material-icons.css';
     @import '../node_modules/material-icons/css/material-icons.css';
