@@ -36,5 +36,5 @@ export default {
   getUserLevel(projectId, userId) {
     const url = `/api/projects/${projectId}/level`;
     return axios.get(url, { userId }).then(response => response.data);
-  }
+  },
 };
