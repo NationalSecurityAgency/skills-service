@@ -139,7 +139,10 @@ class UserAuthService {
 
     @Transactional
     void grantRoot(String userId) {
-        accessSettingsStorageService.grantRoot(userId)
+        UserRole userRole = accessSettingsStorageService.grantRoot(userId)
+
+        // super user gets assigned to Inception project
+        inceptionProjectService.createInceptionAndAssignUser(userRole)
     }
 
     @Transactional(readOnly = true)

@@ -25,6 +25,6 @@ class BootstrapController {
 
     @GetMapping('/bootstrap')
     ModelAndView handleBootstrapPart2(ModelMap modelMap) {
-        return new ModelAndView('/bootstrap/index.html', modelMap)
+        return new ModelAndView('redirect:/bootstrap/index.html', modelMap)
     }
 }
