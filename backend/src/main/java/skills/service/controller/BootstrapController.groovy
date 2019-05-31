@@ -18,7 +18,7 @@ class BootstrapController {
     @GetMapping('/')
     ModelAndView handleBootstrap(ModelMap model) {
         if (!accessSettingsStorageService.rootAdminExists()) {
-            return new ModelAndView('redirect:/bootstrap', model)
+            return new ModelAndView('redirect:/bootstrap/index.html', model)
         }
         return new ModelAndView('/index.html', model)
     }

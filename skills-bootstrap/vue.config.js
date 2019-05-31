@@ -38,11 +38,11 @@ module.exports = {
     },
     devtool: 'cheap-module-eval-source-map',
   },
-
-  outputDir: undefined,
-  assetsDir: 'static',
+  publicPath: '.',
+  // outputDir: undefined,
+  // assetsDir: 'static',
   runtimeCompiler: true,
-  productionSourceMap: undefined,
-  parallel: undefined,
-  css: undefined,
+  // productionSourceMap: undefined,
+  // parallel: undefined,
+  // css: undefined,
 };
