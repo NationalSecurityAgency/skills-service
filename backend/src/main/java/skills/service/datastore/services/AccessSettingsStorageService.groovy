@@ -184,19 +184,21 @@ class AccessSettingsStorageService {
     }
 
     @Transactional
-    void grantRoot(String userId) {
+    UserRole grantRoot(String userId) {
         User user = userRepository.findByUserId(userId.toLowerCase())
         if (!user) {
             SkillException exception = new SkillException("User [${userId.toLowerCase()}] does not exist.")
             exception.errorCode = ErrorCode.BadParam
             throw exception
         }
-
-        user.roles.add(new UserRole(
+        UserRole role = new UserRole(
                 userId: userId,
                 roleName: RoleName.ROLE_SUPER_DUPER_USER
-        ))
+        )
+
+        user.roles.add(role)
         userRepository.save(user)
+        return role
     }
 
     @Transactional(readOnly = true)
