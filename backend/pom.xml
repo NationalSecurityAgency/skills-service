@@ -287,8 +287,7 @@
                                 <resource>
                                     <directory>${project.parent.basedir}/skills-bootstrap/dist/</directory>
                                     <includes>
-                                        <include>static/</include>
-                                        <include>index.html</include>
+                                        <include>/*/</include>
                                     </includes>
                                 </resource>
                             </resources>
