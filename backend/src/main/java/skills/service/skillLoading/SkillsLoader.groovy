@@ -57,6 +57,12 @@ class SkillsLoader {
 
     @Transactional(readOnly = true)
     Integer getUserLevel(String projectId, String userId) {
+        ProjDef projDef = projDefRepo.findByProjectId(projectId)
+        if (!projDef) {
+            // indicates that project doesn't exist at all
+            return -1;
+        }
+
         Integer res = 0
         List<UserAchievement> levels = achievedLevelRepository.findAllByUserIdAndProjectIdAndSkillId(userId, projectId, null)
         if (levels) {

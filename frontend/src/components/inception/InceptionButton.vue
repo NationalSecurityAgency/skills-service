@@ -1,8 +1,6 @@
 <template>
-  <b-button to="/inception" variant="outline-info">
-    Level
-    <b-spinner v-if="level === -1" small label="Spinning"></b-spinner>
-    <span v-else>{{ level }}</span>
+  <b-button v-if="level > -1" to="/inception" variant="outline-info">
+    Level {{ level }}
   </b-button>
 </template>
 
