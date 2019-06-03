@@ -16,9 +16,9 @@ export default {
   },
 
   getChartsForSection(sectionParams) {
-    let url = `/admin/projects/${sectionParams.projectId}/metrics?numDays=${sectionParams.numDays}&?numMonths=${sectionParams.numMonths}&loadDataForFirst=${sectionParams.loadDataForFirst}`;
+    let url = `/admin/projects/${sectionParams.projectId}/metrics?numDays=${sectionParams.numDays}&numMonths=${sectionParams.numMonths}&loadDataForFirst=${sectionParams.loadDataForFirst}`;
     if (sectionParams.section !== SECTION.PROJECTS) {
-      url = `/admin/projects/${sectionParams.projectId}/${sectionParams.section}/${sectionParams.sectionIdParam}/metrics?numDays=${sectionParams.numDays}&?numMonths=${sectionParams.numMonths}&loadDataForFirst=${sectionParams.loadDataForFirst}`;
+      url = `/admin/projects/${sectionParams.projectId}/${sectionParams.section}/${sectionParams.sectionIdParam}/metrics?numDays=${sectionParams.numDays}&numMonths=${sectionParams.numMonths}&loadDataForFirst=${sectionParams.loadDataForFirst}`;
     }
     return axios.get(url)
       .then(response => Promise.resolve(this.buildCharts(response.data)));
@@ -27,7 +27,7 @@ export default {
   getChartForSection(sectionParams) {
     let url = `/admin/projects/${sectionParams.projectId}/metrics/${sectionParams.chartBuilderId}?numDays=${sectionParams.numDays}`;
     if (sectionParams.section !== SECTION.PROJECTS) {
-      url = `/admin/projects/${sectionParams.projectId}/${sectionParams.section}/${sectionParams.sectionIdParam}/metrics/${sectionParams.chartBuilderId}?numDays=${sectionParams.numDays}&?numMonths=${sectionParams.numMonths}`;
+      url = `/admin/projects/${sectionParams.projectId}/${sectionParams.section}/${sectionParams.sectionIdParam}/metrics/${sectionParams.chartBuilderId}?numDays=${sectionParams.numDays}&numMonths=${sectionParams.numMonths}`;
     }
     return axios.get(url)
       .then(response => Promise.resolve(this.buildChart(response.data)));
