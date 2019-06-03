@@ -55,7 +55,9 @@
         });
 
         handshake.then((parent) => {
-          this.$store.commit('parentFrame', parent);
+          // Make sure to freeze the parent object so Vuex won't try to make it reactive
+          // CORs won't allow this because parent object can't be changed from an iframe
+          this.$store.commit('parentFrame', Object.freeze(parent));
           window.addEventListener('resize', onHeightChanged);
           this.onHeightChange();
 
