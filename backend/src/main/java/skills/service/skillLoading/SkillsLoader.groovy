@@ -267,7 +267,7 @@ class SkillsLoader {
 
         List<UserAchievement> achievements = achievedLevelRepository.findAllByUserIdAndProjectIdAndSkillId(userId, projDef.projectId, badgeDefinition.skillId)
         if (achievements) {
-            // for badges, there should only be one UserAchievment
+            // for badges, there should only be one UserAchievement
             assert achievements.size() == 1
         }
 

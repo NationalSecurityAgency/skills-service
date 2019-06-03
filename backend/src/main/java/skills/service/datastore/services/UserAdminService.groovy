@@ -24,7 +24,7 @@ class UserAdminService {
         if(totalPerformedSkills) {
             List<UserPerformedSkill> performedSkills = performedSkillRepository.findByUserIdAndProjectIdAndSkillIdContaining(userId, projectId, query, pageRequest)
             result.data = performedSkills.collect({
-                new SkillPerfomed(it.skillId, it.performedOn)
+                new SkillPerfomed("${it.id}", it.skillId, it.performedOn)
             })
             result.count = totalPerformedSkills
         }

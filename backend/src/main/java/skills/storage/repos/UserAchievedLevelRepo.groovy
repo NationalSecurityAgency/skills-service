@@ -16,6 +16,7 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
     Integer countByProjectIdAndSkillIdAndLevel(String projectId, @Nullable String skillId, int level)
 
     void deleteByProjectIdAndSkillId(String projectId, String skillId)
+    void deleteByProjectIdAndSkillIdAndUserIdAndLevel(String projectId, @Nullable String skillId, String userId, @Nullable Integer level)
 
     @Query('''select sdParent.skillId as skillId, sdChild.skillId as childSkillId, sdChild.projectId as childProjectId, ua.skillId as childAchievedSkillId 
     from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
