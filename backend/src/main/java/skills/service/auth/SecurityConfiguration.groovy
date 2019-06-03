@@ -40,7 +40,8 @@ class SecurityConfiguration {
                     .antMatchers('/root/isRoot').hasAnyAuthority(RoleName.values().collect {it.name()}.toArray(new String[0]))
                     .antMatchers('/root/**').hasRole('SUPER_DUPER_USER')
                     .anyRequest().authenticated()
-            http.headers().frameOptions().sameOrigin()
+            http.headers().frameOptions().disable()
+
             return http
         }
     }
