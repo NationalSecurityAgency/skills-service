@@ -1,7 +1,7 @@
 <template>
   <div>
     <sub-page-header title="Email Settings"/>
-    <div v-if="isRoot" class="card">
+    <div class="card">
       <div class="card-header">Email Connection Settings</div>
       <div class="card-body">
         <email-server-settings />
@@ -17,12 +17,6 @@
   export default {
     name: 'EmailSettings',
     components: { SubPageHeader, EmailServerSettings },
-    props: {
-      isRoot: {
-        type: Boolean,
-        default: false,
-      },
-    },
   };
 </script>
 

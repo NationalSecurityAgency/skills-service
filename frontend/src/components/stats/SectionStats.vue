@@ -32,7 +32,7 @@
   import SkillsChart from './SkillsChart';
   import StatCard from './StatCard';
   import StatsService from './StatsService';
-  import { SectionParams } from './SectionHelper';
+  import { SECTION, SectionParams } from './SectionHelper';
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import SimpleCard from '../utils/cards/SimpleCard';
   import SkillsSpinner from '../utils/SkillsSpinner';
@@ -47,9 +47,6 @@
       StatCard,
     },
     props: {
-      projectId: String,
-      sectionIdParam: String,
-      section: String,
       numDaysToShow: {
         type: Number,
         default: 120,
@@ -67,10 +64,26 @@
       return {
         charts: [],
         isLoading: true,
+        section: SECTION.PROJECTS,
+        sectionIdParam: String,
         statCardIconsColors: ['text-warning', 'text-primary', 'text-info', 'text-danger'],
       };
     },
     mounted() {
+      if (this.$route.params.badgeId) {
+        this.section = SECTION.BADGES;
+        this.sectionIdParam = this.$route.params.badgeId;
+      } else if (this.$route.params.subjectId) {
+        this.section = SECTION.SUBJECTS;
+        this.sectionIdParam = this.$route.params.subjectId;
+      } else if (this.$route.params.skillId) {
+        this.section = SECTION.SKILLS;
+        this.sectionIdParam = this.$route.params.skillId;
+      } else if (this.$route.params.userId) {
+        this.section = SECTION.USERS;
+        this.sectionIdParam = this.$route.params.userId;
+      }
+
       this.loadInitialCharts();
     },
     computed: {
@@ -88,7 +101,7 @@
         return `${icon} ${color}`;
       },
       loadInitialCharts() {
-        const sectionParams = new SectionParams.Builder(this.section, this.projectId)
+        const sectionParams = new SectionParams.Builder(this.section, this.$route.params.projectId)
           .withSectionIdParam(this.sectionIdParam)
           .withNumMonths(this.numMonthsToShow)
           .withNumDays(this.numDaysToShow)
@@ -104,7 +117,7 @@
       },
       loadChart(chartBuilderId) {
         this.isLoading = true;
-        const sectionParams = new SectionParams.Builder(this.section, this.projectId)
+        const sectionParams = new SectionParams.Builder(this.section, this.$route.params.projectId)
           .withSectionIdParam(this.sectionIdParam)
           .withNumMonths(this.numMonthsToShow)
           .withNumDays(this.numDaysToShow)

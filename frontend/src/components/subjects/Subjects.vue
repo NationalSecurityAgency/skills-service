@@ -35,7 +35,6 @@
       LoadingContainer,
       Subject,
     },
-    props: ['project'],
     data() {
       return {
         isLoading: true,
@@ -51,7 +50,7 @@
         this.displayNewSubjectModal = true;
       },
       loadSubjects() {
-        SubjectsService.getSubjects(this.project.projectId)
+        SubjectsService.getSubjects(this.$route.params.projectId)
           .then((response) => {
             this.isLoading = false;
             this.subjects = response;
@@ -107,7 +106,7 @@
     computed: {
       emptyNewSubject() {
         return {
-          projectId: this.project.projectId,
+          projectId: this.$route.params.projectId,
           name: '',
           subjectId: '',
           description: '',

@@ -54,11 +54,10 @@
       SimpleCard,
       SubPageHeader,
     },
-    props: ['projectId'],
     data() {
       return {
         isLoading: true,
-        levelPointsSetting: Object.assign({ projectId: this.projectId }, initialSettingValue),
+        levelPointsSetting: Object.assign({ projectId: this.$route.params.projectId }, initialSettingValue),
         lastLoadedValue: null,
         dirty: false,
       };
@@ -76,20 +75,20 @@
         }
       },
       loadSettings() {
-        SettingService.getSetting(this.projectId, this.levelPointsSetting.setting)
+        SettingService.getSetting(this.$route.params.projectId, this.levelPointsSetting.setting)
           .then((response) => {
             this.isLoading = false;
             if (response) {
               this.levelPointsSetting = response;
             } else {
-              this.levelPointsSetting = Object.assign({ projectId: this.projectId }, initialSettingValue);
+              this.levelPointsSetting = Object.assign({ projectId: this.$route.params.projectId }, initialSettingValue);
             }
             this.lastLoadedValue = Object.assign({}, this.levelPointsSetting);
           });
       },
       save() {
         this.isLoading = true;
-        SettingService.saveSetting(this.projectId, this.levelPointsSetting)
+        SettingService.saveSetting(this.$route.params.projectId, this.levelPointsSetting)
           .then((res) => {
             this.dirty = false;
             this.lastLoadedValue = Object.assign({}, this.levelPointsSetting);

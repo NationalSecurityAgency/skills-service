@@ -43,14 +43,6 @@
               this.resetClientSecret();
             }
           });
-        // this.$dialog.confirm({
-        //   title: 'Reset Client Secret',
-        //   message: 'Are you sure you want reset the client secret? Your current client secret will no longer work after reset and you will need to update any application configuration using the old secret.',
-        //   confirmText: 'Reset',
-        //   type: 'is-danger',
-        //   hasIcon: true,
-        //   onConfirm: () => this.resetClientSecret(),
-        // });
       },
       resetClientSecret() {
         AccessService.resetClientSecret(this.project.projectId)

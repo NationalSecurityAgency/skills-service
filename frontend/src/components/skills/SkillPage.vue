@@ -2,63 +2,27 @@
   <div>
     <page-header :loading="isLoading" :options="headerOptions"/>
 
-    <section class="section">
-      <navigation :nav-items="[
-          {name: 'Overview', iconClass: 'fa-info-circle'},
-          {name: 'Dependencies', iconClass: 'fa-vector-square'},
-          {name: 'Users', iconClass: 'fa-users'},
-          {name: 'Add Event', iconClass: 'fa-user-plus'},
-          {name: 'Stats', iconClass: 'fa-chart-bar'},
+    <navigation :nav-items="[
+          {name: 'Overview', iconClass: 'fa-info-circle', page: 'SkillOverview'},
+          {name: 'Dependencies', iconClass: 'fa-vector-square', page: 'SkillDependencies'},
+          {name: 'Users', iconClass: 'fa-users', page: 'SkillUsers'},
+          {name: 'Add Event', iconClass: 'fa-user-plus', page: 'AddSkillEvent'},
+          {name: 'Stats', iconClass: 'fa-chart-bar', page: 'SkillStats'},
         ]">
-        <template slot="Overview">
-          <sub-page-header title="Overview"/>
-          <div class="card">
-            <div class="card-body">
-              <child-row-skills-display v-if="this.skill.skillId" :skill="this.skill"></child-row-skills-display>
-            </div>
-          </div>
-        </template>
-        <template slot="Dependencies">
-          <skill-dependencies :skill="skill"></skill-dependencies>
-        </template>
-        <template slot="Users">
-          <users :project-id="this.$route.params.projectId" :skill-id="this.$route.params.skillId" />
-        </template>
-        <template slot="Add Event">
-          <add-skill-event :project-id="this.$route.params.projectId" :skill-id="this.$route.params.skillId" />
-        </template>
-        <template slot="Stats">
-          <section-stats :project-id="this.$route.params.projectId"  :section="section" :section-id-param="this.$route.params.skillId"></section-stats>
-        </template>
-      </navigation>
-    </section>
+    </navigation>
   </div>
 </template>
 
 <script>
   import SkillsService from './SkillsService';
   import Navigation from '../utils/Navigation';
-  // import Skills from '../skills/Skills';
-  import SectionStats from '../stats/SectionStats';
-  import ChildRowSkillsDisplay from './ChildRowSkillsDisplay';
-  import SkillDependencies from './dependencies/SkillDependencies';
-  import Users from '../users/Users';
-  import { SECTION } from '../stats/SectionHelper';
   import PageHeader from '../utils/pages/PageHeader';
-  import SubPageHeader from '../utils/pages/SubPageHeader';
-  import AddSkillEvent from './AddSkillEvent';
 
   export default {
     name: 'SkillPage',
     components: {
-      AddSkillEvent,
-      SubPageHeader,
       PageHeader,
-      SkillDependencies,
-      ChildRowSkillsDisplay,
-      SectionStats,
       Navigation,
-      Users,
     },
     breadcrumb() {
       return {
@@ -98,7 +62,6 @@
         isLoading: true,
         skill: {},
         subjectId: '',
-        section: SECTION.SKILLS,
         headerOptions: {},
       };
     },
