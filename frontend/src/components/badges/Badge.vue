@@ -7,7 +7,7 @@
                                 class="badge-settings"></edit-and-delete-dropdown>
     </div>
     <div slot="footer">
-      <router-link :to="{ name:'BadgePage',
+      <router-link :to="{ name:'BadgeSkills',
               params: { projectId: this.badgeInternal.projectId, badgeId: this.badgeInternal.badgeId}}"
                    class="btn btn-outline-primary btn-sm">
         Manage <i class="fas fa-arrow-circle-right"/>

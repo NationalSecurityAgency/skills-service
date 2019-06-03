@@ -17,18 +17,19 @@
   -->
 
   <nav aria-label="breadcrumb">
-    <app-breadcrumbs container="ol" class="breadcrumb">
-      <li slot-scope="{to, label, utils}" class="breadcrumb-item">
-        <router-link :to="to" class="" :itemprop="utils && utils.itemprop">
-          <span class="">{{ label }}</span>
-        </router-link>
-      </li>
+    Hi
+<!--    <app-breadcrumbs container="ol" class="breadcrumb">-->
+<!--      <li slot-scope="{to, label, utils}" class="breadcrumb-item">-->
+<!--        <router-link :to="to" class="" :itemprop="utils && utils.itemprop">-->
+<!--          <span class="">{{ label }}</span>-->
+<!--        </router-link>-->
+<!--      </li>-->
 
-      <span slot-scope="{label}" slot="current" class="breadcrumb-item active ml-2">
-          / {{ label }}
-        </span>
+<!--      <span slot-scope="{label}" slot="current" class="breadcrumb-item active ml-2">-->
+<!--          / {{ label }}-->
+<!--        </span>-->
 
-    </app-breadcrumbs>
+<!--    </app-breadcrumbs>-->
   </nav>
 </template>
 

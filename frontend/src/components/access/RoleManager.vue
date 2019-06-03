@@ -1,6 +1,6 @@
 <template>
   <div class="role-manager">
-    <div id="add-user-div" class="row mt-2 mb-4">
+    <div id="add-user-div" class="row mt-2 mb-5">
       <div class="col-12 col-md-10 col-xlg-11 pb-2 pb-md-0">
         <existing-user-input :suggest="true" :validate="true" :user-type="userType" :excluded-suggestions="userIds"
                              :selectedUserId="selectedUserId"
@@ -140,5 +140,9 @@
 <style>
   .role-manager .control-column {
     max-width: 2rem;
+  }
+
+  .role-manager .VuePagination__count {
+    display: none;
   }
 </style>

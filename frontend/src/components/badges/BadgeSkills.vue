@@ -36,7 +36,6 @@
       LoadingContainer,
       SkillsSelector2,
     },
-    props: ['projectId', 'badgeId'],
     data() {
       return {
         loading: {
@@ -54,14 +53,14 @@
     },
     methods: {
       loadAvailableBadgeSkills() {
-        SkillsService.getProjectSkills(this.projectId)
+        SkillsService.getProjectSkills(this.$route.params.projectId)
           .then((loadedSkills) => {
             this.allSkills = loadedSkills;
             this.loading.availableSkills = false;
           });
       },
       loadAssignedBadgeSkills() {
-        SkillsService.getBadgeSkills(this.projectId, this.badgeId)
+        SkillsService.getBadgeSkills(this.$route.params.projectId, this.$route.params.badgeId)
           .then((loadedSkills) => {
             this.badgeSkills = loadedSkills;
             this.loading.badgeSkills = false;
@@ -69,7 +68,7 @@
       },
       skillDeleted(deletedItem) {
         this.loading.skillOp = true;
-        SkillsService.removeSkillFromBadge(this.projectId, this.badgeId, deletedItem.skillId)
+        SkillsService.removeSkillFromBadge(this.$route.params.projectId, this.$route.params.badgeId, deletedItem.skillId)
           .then(() => {
             this.badgeSkills = this.badgeSkills.filter(entry => entry.id !== deletedItem.id);
             this.loading.skillOp = false;
@@ -78,7 +77,7 @@
       },
       skillAdded(newItem) {
         this.loading.skillOp = true;
-        SkillsService.assignSkillToBadge(this.projectId, this.badgeId, newItem.skillId)
+        SkillsService.assignSkillToBadge(this.$route.params.projectId, this.$route.params.badgeId, newItem.skillId)
           .then(() => {
             this.badgeSkills.push(newItem);
             this.loading.skillOp = false;

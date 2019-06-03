@@ -2,48 +2,25 @@
   <div>
     <page-header :loading="isLoading" :options="headerOptions"/>
 
-    <navigation :nav-items="[
-          {name: 'Skills', iconClass: 'fa-graduation-cap'},
-          {name: 'Levels', iconClass: 'fa-trophy'},
-          {name: 'Users', iconClass: 'fa-users'},
-          {name: 'Stats', iconClass: 'fa-chart-bar'},
+    <navigation v-if="!isLoading" :nav-items="[
+          {name: 'Skills', iconClass: 'fa-graduation-cap', page: 'SubjectSkills'},
+          {name: 'Levels', iconClass: 'fa-trophy', page: 'SubjectLevels'},
+          {name: 'Users', iconClass: 'fa-users', page: 'SubjectUsers'},
+          {name: 'Stats', iconClass: 'fa-chart-bar', page: 'SubjectStats'},
         ]">
-      <template slot="Skills">
-        <skills :project-id="projectId" :subject-id="subjectId" v-on:skills-change="loadSubject"/>
-      </template>
-      <template slot="Levels">
-        <levels :project-id="projectId" :subject-id="subjectId" :max-levels="25"/>
-      </template>
-      <template slot="Users">
-        <section v-if="projectId" class="">
-          <users :project-id="projectId" :subject-id="subjectId"/>
-        </section>
-      </template>
-      <template slot="Stats">
-        <section-stats :project-id="projectId" :section="section" :section-id-param="subjectId"></section-stats>
-      </template>
     </navigation>
   </div>
 </template>
 
 <script>
   import Navigation from '../utils/Navigation';
-  import Levels from '../levels/Levels';
-  import Skills from '../skills/Skills';
-  import SectionStats from '../stats/SectionStats';
-  import Users from '../users/Users';
   import SubjectsService from './SubjectsService';
-  import { SECTION } from '../stats/SectionHelper';
   import PageHeader from '../utils/pages/PageHeader';
 
   export default {
     name: 'SubjectPage',
     components: {
       PageHeader,
-      SectionStats,
-      Skills,
-      Levels,
-      Users,
       Navigation,
     },
     breadcrumb() {
@@ -74,7 +51,6 @@
         subject: {},
         projectId: '',
         subjectId: '',
-        section: SECTION.SUBJECTS,
         headerOptions: {},
       };
     },

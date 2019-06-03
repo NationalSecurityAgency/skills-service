@@ -44,7 +44,7 @@
               <b-button @click="editSkill(props.row)" variant="outline-primary"><i class="fas fa-edit"/></b-button>
               <b-button @click="deleteSkill(props.row)" variant="outline-primary"><i class="fas fa-trash"/></b-button>
             </b-button-group>
-            <router-link :to="{ name:'SkillPage',
+            <router-link :to="{ name:'SkillOverview',
                             params: { projectId: props.row.projectId, subjectId: props.row.subjectId, skillId: props.row.skillId }}"
                          class="btn btn-outline-primary btn-sm">
               <span class="d-none d-sm-inline">Manage </span> <i class="fas fa-arrow-circle-right"/>

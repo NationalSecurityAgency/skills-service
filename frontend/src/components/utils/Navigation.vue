@@ -8,23 +8,25 @@
           </b-button>
         </span>
       </h4>
+
       <!-- bootstrap didn't handle vertical menus well so rolling out our own-->
       <b-collapse id="menu-collapse-control" :visible="!smallScreenMode">
         <ul class="m-0 p-0" style="list-style: none;">
-          <li class="mb-1 p-2 text-primary" v-for="(navItem) of navItems" :key="navItem.name"
-              @click="navigate(`${navItem.name}`)"
+          <router-link :to="{ name: navItem.page }" tag="li" class="mb-1 p-2 text-primary" v-for="(navItem) of navItems" :key="navItem.name"
+              @click.native="navigate(`${navItem.name}`)"
               :class="{'bg-primary': menuSelections.get(navItem.name), 'text-light': menuSelections.get(navItem.name), 'select-cursor': !menuSelections.get(navItem.name)}">
             <div class="text-truncate">
-              <i v-bind:class="navItem.iconClass" class="fas fa-w-16" style="min-width: 1.7rem;"/> {{ navItem.name }}
+                <i v-bind:class="navItem.iconClass" class="fas fa-w-16" style="min-width: 1.7rem;"/> {{ navItem.name }}
             </div>
-          </li>
+          </router-link>
         </ul>
       </b-collapse>
     </div>
     <div class="col-lg-10">
       <div v-for="(navItem) of navItems" :key="navItem.name">
         <div v-if="menuSelections.get(navItem.name)">
-          <slot :name="navItem.name"></slot>
+<!--          <slot :name="navItem.name"></slot>-->
+          <router-view></router-view>
         </div>
       </div>
     </div>
@@ -36,18 +38,24 @@
     name: 'Navigation',
     props: ['navItems'],
     data() {
-      const menuSelectionsTemp = this.buildNewMenuMap(this.navItems[0].name);
       return {
-        menuSelections: menuSelectionsTemp,
+        menuSelections: [],
         windowWidth: 0,
       };
     },
     created() {
+      this.buildNewMenuMapWhenPropsChange(this.navItems);
       window.addEventListener('resize', this.handleResize);
       this.handleResize();
     },
     destroyed() {
       window.removeEventListener('resize', this.handleResize);
+    },
+    watch: {
+      // must watch the input because the user is allowed to modify the menu any time
+      navItems(newValue) {
+        this.buildNewMenuMapWhenPropsChange(newValue);
+      },
     },
     methods: {
       navigate(selectedKey) {
@@ -56,6 +64,11 @@
         }
         const menuSelectionsTemp = this.buildNewMenuMap(selectedKey);
         this.menuSelections = menuSelectionsTemp;
+      },
+      buildNewMenuMapWhenPropsChange(navigationItems) {
+        const routeName = this.$route.name;
+        const navItem = navigationItems.find(item => item.page === routeName);
+        this.menuSelections = this.buildNewMenuMap(navItem ? navItem.name : navigationItems[0].name);
       },
       buildNewMenuMap(selectedKey) {
         const menuSelectionsTemp = new Map();

@@ -9,7 +9,7 @@
                                   class="project-settings"></edit-and-delete-dropdown>
       </div>
       <div slot="footer">
-        <b-button :to="{ name:'ProjectPage', params: { projectId: this.projectInternal.projectId}}" variant="outline-primary">
+        <b-button :to="{ name:'Subjects', params: { projectId: this.projectInternal.projectId}}" variant="outline-primary">
           Manage <i class="fas fa-arrow-circle-right"/>
         </b-button>
       </div>

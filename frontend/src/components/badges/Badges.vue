@@ -44,7 +44,6 @@
       Badge,
       EditBadge,
     },
-    props: ['project'],
     data() {
       return {
         isLoading: true,
@@ -58,7 +57,7 @@
     computed: {
       emptyNewBadge() {
         return {
-          projectId: this.project.projectId,
+          projectId: this.$route.params.projectId,
           name: '',
           badgeId: '',
           description: '',
@@ -69,7 +68,7 @@
     },
     methods: {
       loadBadges() {
-        BadgesService.getBadges(this.project.projectId)
+        BadgesService.getBadges(this.$route.params.projectId)
           .then((badges) => {
             this.isLoading = false;
             this.badges = badges;

@@ -2,9 +2,9 @@
   <div id="cross-projects-panel">
     <sub-page-header title="Cross-Project Skills"/>
 
-    <share-skills-with-other-projects :project-id="projectId"/>
+    <share-skills-with-other-projects :project-id="this.$route.params.projectId"/>
 
-    <shared-skills-from-other-projects :project-id="projectId" class="my-4"/>
+    <shared-skills-from-other-projects :project-id="this.$route.params.projectId" class="my-4"/>
   </div>
 </template>
 
@@ -15,7 +15,6 @@
 
   export default {
     name: 'CrossProjectsSkills',
-    props: ['projectId'],
     components: { SubPageHeader, SharedSkillsFromOtherProjects, ShareSkillsWithOtherProjects },
   };
 </script>
