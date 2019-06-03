@@ -2,7 +2,7 @@
   <div>
     <sub-page-header title="Security Settings"/>
 
-    <div v-if="isRoot" class="card">
+    <div class="card">
       <div class="card-header">Root Users Management</div>
       <div class="card-body">
         <role-manager :role="role" :user-type="userType" :role-description="roleDescription" />
@@ -18,12 +18,6 @@
   export default {
     name: 'SecuritySettings',
     components: { SubPageHeader, RoleManager },
-    props: {
-      isRoot: {
-        type: Boolean,
-        default: false,
-      },
-    },
     data() {
       return {
         role: 'ROLE_SUPER_DUPER_ADMIN',

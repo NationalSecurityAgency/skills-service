@@ -2,43 +2,25 @@
   <div>
     <page-header :loading="isLoading" :options="headerOptions"/>
 
-    <section class="section">
-      <navigation :nav-items="[
-          {name: 'Skills', iconClass: 'fa-graduation-cap'},
-          {name: 'Users', iconClass: 'fa-users'},
-          {name: 'Stats', iconClass: 'fa-chart-bar'},
+    <navigation :nav-items="[
+          {name: 'Skills', iconClass: 'fa-graduation-cap', page: 'BadgeSkills'},
+          {name: 'Users', iconClass: 'fa-users', page: 'BadgeUsers'},
+          {name: 'Stats', iconClass: 'fa-chart-bar', page: 'BadgeStats'},
         ]">
-        <template slot="Skills">
-          <badge-skills :project-id="projectId" :badge-id="badgeId" v-on:skills-changed="loadBadge"></badge-skills>
-        </template>
-        <template slot="Users">
-          <users :project-id="projectId" :badge-id="this.badgeId" />
-        </template>
-        <template slot="Stats">
-          <section-stats :project-id="this.projectId" :section="section" :section-id-param="this.badgeId"></section-stats>
-        </template>
-      </navigation>
-    </section>
+    </navigation>
   </div>
 </template>
 
 <script>
   import BadgesService from './BadgesService';
   import Navigation from '../utils/Navigation';
-  import SectionStats from '../stats/SectionStats';
-  import Users from '../users/Users';
-  import BadgeSkills from './BadgeSkills';
-  import { SECTION } from '../stats/SectionHelper';
   import PageHeader from '../utils/pages/PageHeader';
 
   export default {
     name: 'BadgePage',
     components: {
       PageHeader,
-      BadgeSkills,
-      SectionStats,
       Navigation,
-      Users,
     },
     breadcrumb() {
       return {
@@ -68,7 +50,6 @@
         badge: {},
         projectId: '',
         badgeId: '',
-        section: SECTION.BADGES,
         headerOptions: {},
       };
     },

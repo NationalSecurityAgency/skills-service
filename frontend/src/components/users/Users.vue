@@ -10,8 +10,8 @@
         </div>
 
         <div slot="viewDetail" slot-scope="props" class="">
-          <router-link :to="{ name:'UserPage',
-                  params: { projectId: projectId, userId: props.row.userId, totalPoints: props.row.totalPoints }}"
+          <router-link :to="{ name:'ClientDisplayPreview',
+                  params: { projectId: $route.params.projectId, userId: props.row.userId, totalPoints: props.row.totalPoints }}"
                        tag="button" class="btn btn-outline-primary">
             <span class="d-none d-sm-inline">Details</span><i class="fas fa-arrow-circle-right ml-sm-1"/>
           </router-link>
@@ -38,7 +38,6 @@
   export default {
     name: 'Users',
     components: { SimpleCard, SubPageHeader },
-    props: ['projectId', 'subjectId', 'skillId', 'badgeId'],
     data() {
       return {
         userId: '',
@@ -72,13 +71,13 @@
     },
     methods: {
       getUrl() {
-        let url = `/admin/projects/${this.projectId}`;
-        if (this.subjectId) {
-          url += `/subjects/${this.subjectId}`;
-        } else if (this.skillId) {
-          url += `/skills/${this.skillId}`;
-        } else if (this.badgeId) {
-          url += `/badges/${this.badgeId}`;
+        let url = `/admin/projects/${this.$route.params.projectId}`;
+        if (this.$route.params.subjectId) {
+          url += `/subjects/${this.$route.params.subjectId}`;
+        } else if (this.$route.params.skillId) {
+          url += `/skills/${this.$route.params.skillId}`;
+        } else if (this.$route.params.badgeId) {
+          url += `/badges/${this.$route.params.badgeId}`;
         }
         url += '/users';
         return url;

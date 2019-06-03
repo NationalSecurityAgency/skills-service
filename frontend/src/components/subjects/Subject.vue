@@ -11,7 +11,7 @@
       </div>
       <div slot="footer">
         <router-link
-          :to="{ name:'SubjectPage', params: { projectId: this.subject.projectId, subjectId: this.subject.subjectId}}"
+          :to="{ name:'SubjectSkills', params: { projectId: this.subject.projectId, subjectId: this.subject.subjectId}}"
           class="btn btn-outline-primary btn-sm">
           Manage <i class="fas fa-arrow-circle-right"/>
         </router-link>

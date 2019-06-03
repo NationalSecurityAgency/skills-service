@@ -56,7 +56,6 @@
 
   export default {
     name: 'AddSkillEvent',
-    props: ['skillId', 'user', 'projectId', 'skillName'],
     components: {
       ExistingUserInput,
       SimpleCard,
@@ -70,7 +69,6 @@
         isFetching: false,
         suggestions: [],
         dateAdded: new Date(),
-        skillNameInternal: this.skillName,
         usersAdded: [],
         isSaving: false,
         currentSelectedUserId: '',
@@ -88,7 +86,7 @@
       // },
       addSkill() {
         this.isSaving = true;
-        SkillsService.saveSkillEvent(this.projectId, this.skillId, this.currentSelectedUserId, this.dateAdded.getTime())
+        SkillsService.saveSkillEvent(this.$route.params.projectId, this.$route.params.skillId, this.currentSelectedUserId, this.dateAdded.getTime())
           .then((data) => {
             this.isSaving = false;
             const historyObj = {

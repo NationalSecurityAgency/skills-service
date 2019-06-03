@@ -76,7 +76,12 @@
       LoadingContainer,
       SubPageHeader,
     },
-    props: ['projectId', 'subjectId', 'maxLevels'],
+    props: {
+      maxLevels: {
+        type: Number,
+        default: 25,
+      },
+    },
     mixins: [MsgBoxMixin],
     data() {
       return {
@@ -111,7 +116,7 @@
       };
     },
     created() {
-      SettingService.getSetting(this.projectId, 'level.points.enabled')
+      SettingService.getSetting(this.$route.params.projectId, 'level.points.enabled')
         .then((data) => {
           if (data) {
             const pointsEnabled = (data.value === true || data.value === 'true');
@@ -192,14 +197,14 @@
     },
     methods: {
       loadLevels() {
-        if (this.subjectId) {
-          LevelService.getLevelsForSubject(this.projectId, this.subjectId)
+        if (this.$route.params.subjectId) {
+          LevelService.getLevelsForSubject(this.$route.params.projectId, this.$route.params.subjectId)
             .then((response) => {
               this.isLoading = false;
               this.levels = response;
             });
         } else {
-          LevelService.getLevelsForProject(this.projectId)
+          LevelService.getLevelsForProject(this.$route.params.projectId)
             .then((response) => {
               this.isLoading = false;
               this.levels = response;
@@ -218,14 +223,14 @@
       },
       doRemoveLastItem() {
         this.isLoading = true;
-        if (this.subjectId) {
-          LevelService.deleteLastLevelForSubject(this.projectId, this.subjectId)
+        if (this.$route.params.subjectId) {
+          LevelService.deleteLastLevelForSubject(this.$route.params.projectId, this.$route.params.subjectId)
             .then(() => {
               this.isLoading = false;
               this.loadLevels();
             });
         } else {
-          LevelService.deleteLastLevelForProject(this.projectId)
+          LevelService.deleteLastLevelForProject(this.$route.params.projectId)
             .then(() => {
               this.isLoading = false;
               this.loadLevels();
@@ -245,14 +250,14 @@
       },
       doCreateNewLevel(nextLevelObj) {
         this.loading = true;
-        if (this.subjectId) {
-          LevelService.createNewLevelForSubject(this.projectId, this.subjectId, nextLevelObj)
+        if (this.$route.params.subjectId) {
+          LevelService.createNewLevelForSubject(this.$route.params.projectId, this.$route.params.subjectId, nextLevelObj)
             .then(() => {
               this.isLoading = false;
               this.loadLevels();
             });
         } else {
-          LevelService.createNewLevelForProject(this.projectId, nextLevelObj)
+          LevelService.createNewLevelForProject(this.$route.params.projectId, nextLevelObj)
             .then(() => {
               this.isLoading = false;
               this.loadLevels();
@@ -261,14 +266,14 @@
       },
       doEditLevel(editedLevelObj) {
         this.loading = true;
-        if (this.subjectId) {
-          LevelService.editlevelForSubject(this.projectId, this.subjectId, editedLevelObj)
+        if (this.$route.params.subjectId) {
+          LevelService.editlevelForSubject(this.$route.params.projectId, this.$route.params.subjectId, editedLevelObj)
             .then(() => {
               this.isLoading = false;
               this.loadLevels();
             });
         } else {
-          LevelService.editlevelForProject(this.projectId, editedLevelObj)
+          LevelService.editlevelForProject(this.$route.params.projectId, editedLevelObj)
             .then(() => {
               this.isLoading = false;
               this.loadLevels();

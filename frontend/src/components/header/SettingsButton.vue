@@ -42,7 +42,7 @@
     },
     methods: {
       gotoSettings() {
-        this.$router.push({ name: 'Settings', params: { settingsCategory: 'general' } });
+        this.$router.push({ name: 'GeneralSettings' });
       },
       signOut() {
         this.$store.dispatch('logout');
