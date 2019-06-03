@@ -6,7 +6,11 @@
       <v-server-table class="vue-table-2" ref="table" :columns="columns" :url="getUrl()" :options="options"
                       v-on:loaded="emit('loaded', $event)" v-on:error="emit('error', $event)">
         <div slot="performedOn" slot-scope="props">
-          {{ getDate(props) }}
+          {{ getDate(props.row) }}
+        </div>
+
+        <div slot="delete" slot-scope="props">
+          <b-button @click="deleteSkill(props.row)" variant="outline-primary"><i class="fas fa-trash"/></b-button>
         </div>
       </v-server-table>
     </simple-card>
@@ -16,9 +20,13 @@
 <script>
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import SimpleCard from '../utils/cards/SimpleCard';
+  import MsgBoxMixin from '../utils/modal/MsgBoxMixin';
+  import ToastSupport from '../utils/ToastSupport';
+  import UsersService from './UsersService';
 
   export default {
     name: 'UserSkillsPerformed',
+    mixins: [MsgBoxMixin, ToastSupport],
     components: {
       SimpleCard,
       SubPageHeader,
@@ -29,11 +37,12 @@
         displayName: 'Skills Performed Table',
         isLoading: true,
         data: [],
-        columns: ['skillId', 'performedOn'],
+        columns: ['skillId', 'performedOn', 'delete'],
         options: {
           headings: {
             skillId: 'Skill ID',
             performedOn: 'Performed On',
+            delete: '',
           },
           sortable: ['skillId', 'performedOn'],
           orderBy: {
@@ -62,9 +71,36 @@
         this.$refs.table.data = [];
         this.$refs.table.count = 0;
       },
-      getDate(props) {
-        return window.moment(props.row.performedOn)
+      getDate(row) {
+        return window.moment(row.performedOn)
           .format('LLL');
+      },
+      getRowDisplayId(row) {
+        return `Skill Id: [${row.skillId}] - (${this.getDate(row)}) ${row.id}`;
+      },
+      deleteSkill(row) {
+        this.msgConfirm(`${this.getRowDisplayId(row)}. Delete Action can not be undone and permanently removes users' performed skills.`)
+          .then((res) => {
+            if (res) {
+              this.doDeleteSkill(row);
+            }
+          });
+      },
+      doDeleteSkill(skill) {
+        this.isLoading = true;
+        UsersService.deleteSkillEvent(this.projectId, skill)
+          .then((data) => {
+            if (data.wasPerformed) {
+              const index = this.$refs.table.data.findIndex(item => item.id === skill.id);
+              this.$refs.table.data.splice(index, 1);
+              this.successToast('Removed Skill', `Skill '${skill.skillId}' was removed.`);
+            } else {
+              this.errorToast('Unable to Remove Skill', `Skill '${skill.skillId}' was not removed.  ${data.explanation}`);
+            }
+          })
+          .finally(() => {
+            this.isLoading = false;
+          });
       },
     },
   };

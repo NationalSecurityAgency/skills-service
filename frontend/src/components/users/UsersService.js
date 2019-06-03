@@ -15,4 +15,9 @@ export default {
     return axios.get(`/app/projects/${projectId}/versions`)
       .then(response => response.data);
   },
+
+  deleteSkillEvent(projectId, skill) {
+    return axios.delete(`/admin/projects/${projectId}/skills/${skill.id}`)
+      .then(res => res.data);
+  },
 };

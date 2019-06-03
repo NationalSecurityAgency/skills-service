@@ -3,6 +3,7 @@ package skills.storage.repos
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
+import skills.storage.model.SkillDef
 import skills.storage.model.UserPerformedSkill
 
 interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integer> {
@@ -29,4 +30,11 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
 
     @Query('SELECT COUNT(DISTINCT p.skillId) from UserPerformedSkill p where p.projectId=?1 and p.userId = ?2')
     Integer countDistinctSkillIdByProjectIdAndUserId(String projectId, String userId)
+
+    @Query(''' select DISTINCT(sdParent)
+    from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
+    inner join UserPerformedSkill ups on sdParent.skillId = ups.skillId and ups.userId=?1
+      where srd.parent=sdParent.id and srd.child=sdChild.id and
+      sdChild.projectId=?2 and sdChild.skillId=?3 and srd.type='Dependence' ''')
+    List<SkillDef> findPerformedParentSkills(String userId, String projectId, String skillId)
 }
