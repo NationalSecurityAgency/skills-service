@@ -138,9 +138,9 @@ class UserSkillsController {
     @RequestMapping(value = "/projects/{projectId}/skills/{skillId}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
     @ResponseBody
     @CompileStatic
-    SkillsManagementFacade.AddSkillResult addSkill(@PathVariable("projectId") String projectId,
-                                                   @PathVariable("skillId") String skillId,
-                                                   @RequestBody(required = false) SkillEventRequest skillEventRequest) {
+    SkillsManagementFacade.SkillEventResult addSkill(@PathVariable("projectId") String projectId,
+                                                     @PathVariable("skillId") String skillId,
+                                                     @RequestBody(required = false) SkillEventRequest skillEventRequest) {
         Date incomingDate = skillEventRequest?.timestamp != null ? new Date(skillEventRequest.timestamp) : new Date()
         skillsManagementFacade.addSkill(projectId, skillId,  getUserId(skillEventRequest?.userId), incomingDate)
     }

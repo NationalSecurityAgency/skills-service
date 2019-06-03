@@ -18,6 +18,7 @@ import skills.service.datastore.services.AdminUsersService
 import skills.service.datastore.services.LevelDefinitionStorageService
 import skills.service.datastore.services.UserAdminService
 import skills.service.datastore.services.settings.SettingsService
+import skills.service.skillsManagement.SkillsManagementFacade
 import skills.storage.model.SkillDef
 import skills.utils.ClientSecretGenerator
 import skills.utils.Constants
@@ -46,6 +47,9 @@ class AdminController {
 
     @Autowired
     TokenEndpoint tokenEndpoint
+
+    @Autowired
+    SkillsManagementFacade skillsManagementFacade
 
     @RequestMapping(value = "/projects/{id}", method = RequestMethod.DELETE)
     void deleteProject(@PathVariable("id") String projectId) {
@@ -402,6 +406,15 @@ class AdminController {
         projectAdminStorageService.deleteSkill(projectId, subjectId, skillId)
     }
 
+    @RequestMapping(value = "/projects/{projectId}/skills/{skillEventId}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    SkillsManagementFacade.SkillEventResult deleteSkillEvent(@PathVariable("projectId") String projectId,
+                                                             @PathVariable("skillEventId") Integer skillEventId) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotNull(skillEventId, "Skill Event Id", "$skillEventId")
+
+        return skillsManagementFacade.deleteSkillEvent(skillEventId)
+    }
 
     @RequestMapping(value = "/projects/{projectId}/skills", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     List<SkillDefRes> getAllSkillsForProject(
