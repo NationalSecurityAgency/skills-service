@@ -1,7 +1,7 @@
 <template>
   <div>
     <loading-container v-bind:is-loading="isLoading">
-      <skills-table :skills-prop="skills" :is-top-level="true" :project-id="projectId" :subject-id="subjectId" v-on:skills-change="skillsChanged"/>
+      <skills-table :skills-prop="skills" :is-top-level="true" :project-id="this.$route.params.projectId" :subject-id="this.$route.params.subjectId" v-on:skills-change="skillsChanged"/>
     </loading-container>
   </div>
 </template>
@@ -13,7 +13,6 @@
 
   export default {
     name: 'Skills',
-    props: ['projectId', 'subjectId'],
     components: { SkillsTable, LoadingContainer },
     data() {
       return {
@@ -26,7 +25,7 @@
     },
     methods: {
       loadSkills() {
-        SkillsService.getSubjectSkills(this.projectId, this.subjectId)
+        SkillsService.getSubjectSkills(this.$route.params.projectId, this.$route.params.subjectId)
           .then((skills) => {
             this.isLoading = false;
             const loadedSkills = skills;

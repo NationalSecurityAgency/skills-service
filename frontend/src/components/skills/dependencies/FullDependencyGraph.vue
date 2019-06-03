@@ -37,7 +37,6 @@
 
   export default {
     name: 'FullDependencyGraph',
-    props: ['projectId'],
     components: {
       SimpleCard,
       SubPageHeader,
@@ -94,7 +93,7 @@
     },
     methods: {
       loadGraphDataAndCreateGraph() {
-        SkillsService.getDependentSkillsGraphForProject(this.projectId)
+        SkillsService.getDependentSkillsGraphForProject(this.$route.params.projectId)
           .then((response) => {
             this.graph = response;
             this.isLoading = true;
@@ -123,7 +122,7 @@
       },
       buildData() {
         this.graph.nodes.forEach((node) => {
-          const isCrossProject = node.projectId !== this.projectId;
+          const isCrossProject = node.projectId !== this.$route.params.projectId;
           const newNode = {
             id: node.id,
             label: GraphUtils.getLabel(node, isCrossProject),

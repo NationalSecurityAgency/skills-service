@@ -3,27 +3,12 @@
     <page-header :loading="isLoading"
                  :options="{title: 'Settings', icon: 'fas fa-cog', subTitle: 'Dashboard settings'}"/>
 
-    <section class="section">
-      <navigation :nav-items="navItems">
-        <template slot="General">
-          <general-settings/>
-        </template>
-        <template slot="Security">
-          <security-settings :is-root="isRoot"/>
-        </template>
-        <template slot="Email">
-          <email-settings :is-root="isRoot"/>
-        </template>
-      </navigation>
-    </section>
+    <navigation :nav-items="navItems"/>
   </div>
 </template>
 
 <script>
   import Navigation from '../utils/Navigation';
-  import GeneralSettings from './GeneralSettings';
-  import SecuritySettings from './SecuritySettings';
-  import EmailSettings from './EmailSettings';
   import SettingsService from './SettingsService';
   import PageHeader from '../utils/pages/PageHeader';
 
@@ -31,16 +16,13 @@
     name: 'GlobalSettings',
     components: {
       PageHeader,
-      EmailSettings,
-      SecuritySettings,
-      GeneralSettings,
       Navigation,
     },
     data() {
       return {
         isLoading: true,
         isRoot: false,
-        navItems: [{ name: 'General', iconClass: 'fa-address-card' }],
+        navItems: [{ name: 'General', iconClass: 'fa-address-card', page: 'GeneralSettings' }],
       };
     },
     mounted() {
@@ -53,8 +35,8 @@
             this.isRoot = response;
             if (this.isRoot) {
               this.navItems.push(
-                { name: 'Security', iconClass: 'fa-lock' },
-                { name: 'Email', iconClass: 'fa-at' },
+                { name: 'Security', iconClass: 'fa-lock', page: 'SecuritySettings' },
+                { name: 'Email', iconClass: 'fa-at', page: 'EmailSettings' },
               );
             }
           })

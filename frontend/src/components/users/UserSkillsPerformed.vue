@@ -62,7 +62,7 @@
     },
     methods: {
       getUrl() {
-        return `/admin/projects/${this.projectId}/performedSkills/${this.userId}`;
+        return `/admin/projects/${this.$route.params.projectId}/performedSkills/${this.$route.params.userId}`;
       },
       emit(name, event) {
         this.$emit(name, event, this);

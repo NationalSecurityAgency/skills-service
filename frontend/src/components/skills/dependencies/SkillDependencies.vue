@@ -26,17 +26,19 @@
             <span class="mt-2 mr-2 border-primary rounded px-1" style="padding-top: 2px; padding-bottom: 2px;"
                   v-bind:style="{'background-color': props.option.isFromAnotherProject ? '#ffb87f' : 'lightblue'}">
               <span class="skills-handle-overflow" style="width: 15rem;"
-                  :title="props.option.isFromAnotherProject ? props.option.projectId + ' : ' + props.option.name : props.option.name">
+                    :title="props.option.isFromAnotherProject ? props.option.projectId + ' : ' + props.option.name : props.option.name">
                 <span v-if="props.option.isFromAnotherProject">{{ props.option.projectId | truncate(10)}} : </span>
                 {{ props.option.name }}
               </span>
-              <button class="btn btn-sm btn-outline-secondary p-0 border-0 ml-1" v-on:click="props.remove(props.option)"><i class="fas fa-times"/></button>
+              <button class="btn btn-sm btn-outline-secondary p-0 border-0 ml-1"
+                      v-on:click="props.remove(props.option)"><i class="fas fa-times"/></button>
             </span>
           </template>
         </skills-selector2>
 
         <b-alert v-if="errNotification.enable" variant="danger" class="mt-2" show dismissible>
-          <i class="fa fa-exclamation-circle mr-1"></i> <strong>Error!</strong> Request could not be completed! <strong>{{ errNotification.msg }}</strong>
+          <i class="fa fa-exclamation-circle mr-1"></i> <strong>Error!</strong> Request could not be completed! <strong>{{
+          errNotification.msg }}</strong>
         </b-alert>
 
         <dependants-graph :skill="skill" :dependent-skills="skills" :graph="graph" class="my-3"/>
@@ -76,9 +78,9 @@
       SkillsSelector2,
       DependantsGraph,
     },
-    props: ['skill'],
     data() {
       return {
+        skill: {},
         loading: {
           finishedDependents: false,
           finishedAllSkills: false,
@@ -105,13 +107,19 @@
       },
     },
     mounted() {
-      this.initData();
+      this.loadSkill();
     },
     methods: {
       initData() {
         this.errNotification.enable = false;
-        this.loadDependentSkills();
         this.loadAllSkills();
+        this.loadDependentSkills();
+      },
+      loadSkill() {
+        SkillsService.getSkillDetails(this.$route.params.projectId, this.$route.params.subjectId, this.$route.params.skillId)
+          .then((response) => {
+            this.skill = Object.assign(response, { subjectId: this.$route.params.subjectId });
+          });
       },
       skillDeleted(deletedItem) {
         this.loading.finishedDependents = false;
