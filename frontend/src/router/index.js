@@ -18,20 +18,20 @@ import Badges from '@//components/badges/Badges';
 import Levels from '@//components/levels/Levels';
 import FullDependencyGraph from '@//components/skills/dependencies/FullDependencyGraph';
 import CrossProjectsSkills from '@//components/skills/crossProjects/CrossProjectsSkills';
-import Users from '../components/users/Users';
-import AccessSettings from '../components/access/AccessSettings';
-import ProjectSettings from '../components/settings/ProjectSettings';
-import SectionStats from '../components/stats/SectionStats';
-import Skills from '../components/skills/Skills';
-import BadgeSkills from '../components/badges/BadgeSkills';
-import SkillOverview from '../components/skills/SkillOverview';
-import SkillDependencies from '../components/skills/dependencies/SkillDependencies';
-import AddSkillEvent from '../components/skills/AddSkillEvent';
-import ClientDisplayPreview from '../components/users/ClientDisplayPreview';
-import UserSkillsPerformed from '../components/users/UserSkillsPerformed';
-import GeneralSettings from '../components/settings/GeneralSettings';
-import SecuritySettings from '../components/settings/SecuritySettings';
-import EmailSettings from '../components/settings/EmailSettings';
+import Users from '@//components/users/Users';
+import AccessSettings from '@//components/access/AccessSettings';
+import ProjectSettings from '@//components/settings/ProjectSettings';
+import SectionStats from '@//components/stats/SectionStats';
+import Skills from '@//components/skills/Skills';
+import BadgeSkills from '@//components/badges/BadgeSkills';
+import SkillOverview from '@//components/skills/SkillOverview';
+import SkillDependencies from '@//components/skills/dependencies/SkillDependencies';
+import AddSkillEvent from '@//components/skills/AddSkillEvent';
+import ClientDisplayPreview from '@//components/users/ClientDisplayPreview';
+import UserSkillsPerformed from '@//components/users/UserSkillsPerformed';
+import GeneralSettings from '@//components/settings/GeneralSettings';
+import SecuritySettings from '@//components/settings/SecuritySettings';
+import EmailSettings from '@//components/settings/EmailSettings';
 
 Vue.use(Router);
 
@@ -43,12 +43,6 @@ const router = new Router({
       name: 'HomePage',
       component: HomePage,
       meta: {
-        breadcrumb: {
-          label: 'Home',
-          utils: {
-            iconClass: 'fas fa-home',
-          },
-        },
         requiresAuth: true,
       },
     },
@@ -73,12 +67,6 @@ const router = new Router({
       name: 'ErrorPage',
       component: ErrorPage,
       meta: {
-        breadcrumb: {
-          label: 'Home',
-          utils: {
-            iconClass: 'fas fa-home',
-          },
-        },
         requiresAuth: false,
       },
     },
@@ -88,7 +76,7 @@ const router = new Router({
       meta: { requiresAuth: true },
       children: [{
         name: 'Subjects',
-        path: 'subjects',
+        path: '',
         component: Subjects,
         meta: { requiresAuth: true },
       }, {
@@ -139,7 +127,7 @@ const router = new Router({
       meta: { requiresAuth: true },
       children: [{
         name: 'SubjectSkills',
-        path: 'skills',
+        path: '',
         component: Skills,
         meta: { requiresAuth: true },
       }, {
@@ -165,7 +153,7 @@ const router = new Router({
       meta: { requiresAuth: true },
       children: [{
         name: 'BadgeSkills',
-        path: 'skills',
+        path: '',
         component: BadgeSkills,
         meta: { requiresAuth: true },
       }, {
@@ -186,7 +174,7 @@ const router = new Router({
       meta: { requiresAuth: true },
       children: [{
         name: 'SkillOverview',
-        path: 'overview',
+        path: '',
         component: SkillOverview,
         meta: { requiresAuth: true },
       }, {
@@ -203,7 +191,7 @@ const router = new Router({
         name: 'AddSkillEvent',
         path: 'addSkillEvent',
         component: AddSkillEvent,
-        meta: { requiresAuth: true },
+        meta: { requiresAuth: true, breadcrumb: 'Add Skill Event' },
       }, {
         name: 'SkillStats',
         path: 'stats',
@@ -212,12 +200,12 @@ const router = new Router({
       }],
     },
     {
-      path: '/projects/:projectId/user/:userId',
+      path: '/projects/:projectId/users/:userId',
       component: UserPage,
       meta: { requiresAuth: true },
       children: [{
         name: 'ClientDisplayPreview',
-        path: 'displayPreview',
+        path: '',
         component: ClientDisplayPreview,
         meta: { requiresAuth: true },
       }, {
@@ -236,22 +224,16 @@ const router = new Router({
       path: '/settings',
       component: GlobalSettings,
       meta: {
-        breadcrumb: {
-          label: 'Settings',
-          utils: {
-            iconClass: 'fas fa-home',
-          },
-        },
         requiresAuth: true,
       },
       children: [{
         name: 'GeneralSettings',
-        path: 'general',
+        path: '',
         component: GeneralSettings,
         meta: { requiresAuth: true },
       }, {
         name: 'SecuritySettings',
-        path: 'access',
+        path: 'security',
         component: SecuritySettings,
         meta: { requiresAuth: true },
       }, {
@@ -268,7 +250,7 @@ const router = new Router({
       meta: { requiresAuth: true },
     },
     {
-      path: '/inception',
+      path: '/skills',
       name: 'InceptionSkills',
       component: InceptionSkills,
       meta: { requiresAuth: true, breadcrumb: 'Dashboard Skills' },

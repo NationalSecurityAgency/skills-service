@@ -23,28 +23,6 @@
       PageHeader,
       Navigation,
     },
-    breadcrumb() {
-      return {
-        label: `SUBJECT: ${this.subjectId}`,
-        parentsList: [
-          {
-            to: {
-              name: 'ProjectPage',
-              params: {
-                projectId: this.projectId,
-              },
-            },
-            label: `PROJECT: ${this.projectId}`,
-          },
-          {
-            to: {
-              name: 'HomePage',
-            },
-            label: 'Home',
-          },
-        ],
-      };
-    },
     data() {
       return {
         isLoading: true,
