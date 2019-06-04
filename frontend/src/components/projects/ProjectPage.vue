@@ -29,12 +29,6 @@
       PageHeader,
       Navigation,
     },
-    breadcrumb() {
-      return {
-        label: `PROJECT: ${this.$route.params.projectId}`,
-        parent: 'HomePage',
-      };
-    },
     data() {
       return {
         isLoading: true,

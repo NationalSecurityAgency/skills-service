@@ -1,5 +1,5 @@
 <template>
-  <b-button v-if="level > -1" to="/inception" variant="outline-info">
+  <b-button v-if="level > -1" to="/skills" variant="outline-info">
     Level {{ level }}
   </b-button>
 </template>

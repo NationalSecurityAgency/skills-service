@@ -22,28 +22,6 @@
       PageHeader,
       Navigation,
     },
-    breadcrumb() {
-      return {
-        label: `USER: ${this.userId}`,
-        parentsList: [
-          {
-            to: {
-              name: 'ProjectPage',
-              params: {
-                projectId: this.projectId,
-              },
-            },
-            label: `PROJECT: ${this.projectId}`,
-          },
-          {
-            to: {
-              name: 'HomePage',
-            },
-            label: 'Home',
-          },
-        ],
-      };
-    },
     data() {
       return {
         projectId: '',
