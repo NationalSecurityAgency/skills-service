@@ -22,28 +22,6 @@
       PageHeader,
       Navigation,
     },
-    breadcrumb() {
-      return {
-        label: `BADGE: ${this.badgeId}`,
-        parentsList: [
-          {
-            to: {
-              name: 'ProjectPage',
-              params: {
-                projectId: this.projectId,
-              },
-            },
-            label: `PROJECT: ${this.projectId}`,
-          },
-          {
-            to: {
-              name: 'HomePage',
-            },
-            label: 'Home',
-          },
-        ],
-      };
-    },
     data() {
       return {
         isLoading: true,
@@ -73,7 +51,7 @@
       buildHeaderOptions(badge) {
         return {
           icon: 'fas fa-award',
-          title: `SUBJECT: ${badge.name}`,
+          title: `BADGE: ${badge.name}`,
           subTitle: `ID: ${badge.badgeId}`,
           stats: [{
             label: 'Skills',

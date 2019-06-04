@@ -3,7 +3,6 @@
 import Vue from 'vue';
 import BootstrapVue from 'bootstrap-vue';
 import { ClientTable, ServerTable } from 'vue-tables-2';
-import Vue2Crumbs from 'vue-2-crumbs';
 import VeeValidate from 'vee-validate';
 import VueApexCharts from 'vue-apexcharts';
 import Vuex from 'vuex';
@@ -19,7 +18,6 @@ import store from './store/store';
 
 Vue.use(ClientTable, {}, false, 'bootstrap4', 'default');
 Vue.use(ServerTable, {}, false, 'bootstrap4', 'default');
-Vue.use(Vue2Crumbs);
 Vue.use(VeeValidate);
 Vue.use(Vuex);
 Vue.use(VueApexCharts);

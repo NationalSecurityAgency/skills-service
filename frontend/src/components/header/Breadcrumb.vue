@@ -1,41 +1,98 @@
 <template>
-  <!-- TODO: Consider implementing our own breadcrumb
-  In order to implement dynamic names in the breadcrumb path
-  vue-2-crumbs puts a lot of burden on each component to specify a list of its parents as well as params;
-  Let's consider implementing out own breadcrumb impl, perhaps using vuex
-  -->
-
-  <!--    <nav class="breadcrumb" aria-label="breadcrubms">-->
-  <!-- To support icons in the current item we'd need to patch the existing lib, TODO: submit bug to the lib
-
-    THERE IS A BUG IN vue-2-crumbs, the bug is with slot=current, to fix change frontend/node_modules/vue-2-crumbs/index.js the following:
-      <slot name="current" :label="getRouteLabel(currentRoute)"
-
-      to
-
-      <slot name="current" :label="getRouteLabel(currentRoute)" :utils="currentRoute.meta.breadcrumb.utils">
-  -->
-
   <nav aria-label="breadcrumb">
-    Hi
-<!--    <app-breadcrumbs container="ol" class="breadcrumb">-->
-<!--      <li slot-scope="{to, label, utils}" class="breadcrumb-item">-->
-<!--        <router-link :to="to" class="" :itemprop="utils && utils.itemprop">-->
-<!--          <span class="">{{ label }}</span>-->
-<!--        </router-link>-->
-<!--      </li>-->
-
-<!--      <span slot-scope="{label}" slot="current" class="breadcrumb-item active ml-2">-->
-<!--          / {{ label }}-->
-<!--        </span>-->
-
-<!--    </app-breadcrumbs>-->
+    <ol class="breadcrumb">
+      <li v-for="(item, index) of items" :key="item.label" class="breadcrumb-item">
+         <span v-if="index === items.length-1">
+           <span v-if="item.label" class="breadcrumb-item-label text-uppercase">{{ item.label }}: </span><span>{{ item.value }}</span>
+         </span>
+         <span v-else>
+           <router-link :to="item.url">
+             <span v-if="item.label" class="breadcrumb-item-label text-uppercase">{{ item.label }}: </span>
+             <span>{{ item.value }}</span>
+           </router-link>
+         </span>
+      </li>
+    </ol>
   </nav>
 </template>
 
 <script>
   export default {
     name: 'Breadcrumb',
+    data() {
+      return {
+        items: [],
+        idsToExcludeFromPath: ['subjects', 'skills', 'projects'],
+      };
+    },
+    mounted() {
+      this.build();
+    },
+    watch: {
+      $route: function routeChange() {
+        this.build();
+      },
+    },
+    methods: {
+      build() {
+        const newItems = [this.buildHomeResItem()];
+        let res = this.$route.path.split('/');
+        res = res.slice(1, res.length);
+        let key = null;
+
+        const lastItemInPathCustomName = this.$route.meta.breadcrumb;
+
+        res.forEach((item, index) => {
+          let value = item;
+          if (value) {
+            if (index === res.length - 1 && lastItemInPathCustomName) {
+              key = null;
+              value = lastItemInPathCustomName;
+            }
+
+            if (key) {
+              newItems.push(this.buildResItem(key, value, res, index));
+              key = null;
+            } else {
+              if (!this.shouldExclude(value)) {
+                newItems.push(this.buildResItem(key, value, res, index));
+              }
+              key = value;
+            }
+          }
+        });
+
+        this.items = newItems;
+      },
+      buildResItem(key, item, res, index) {
+        const decodedItem = decodeURIComponent(item);
+        return {
+          label: key ? this.prepKey(key) : null,
+          value: !key ? this.capitalize(decodedItem) : decodedItem,
+          url: this.getUrl(res, index + 1),
+        };
+      },
+      buildHomeResItem() {
+        return {
+          label: null,
+          value: 'Home',
+          url: '/',
+        };
+      },
+      getUrl(arr, endIndex) {
+        return `/${arr.slice(0, endIndex).join('/')}`;
+      },
+      prepKey(key) {
+        const res = key.endsWith('s') ? key.substring(0, key.length - 1) : key;
+        return this.capitalize(res);
+      },
+      capitalize(value) {
+        return value.charAt(0).toUpperCase() + value.slice(1);
+      },
+      shouldExclude(item) {
+        return this.idsToExcludeFromPath.some(searchForMe => item === searchForMe);
+      },
+    },
   };
 </script>
 
@@ -49,6 +106,11 @@
     padding: 8px 10px 8px 40px;
 
     background-image: linear-gradient(to right, $blue-palette-color5, lightgray);
+  }
+
+  .breadcrumb-item-label {
+    /*font-style:  oblique;*/
+    font-size: 0.9rem;
   }
 
 </style>
