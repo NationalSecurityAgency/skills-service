@@ -24,39 +24,6 @@
       PageHeader,
       Navigation,
     },
-    breadcrumb() {
-      return {
-        label: `SKILL: ${this.skill.name || this.$route.params.skillId}`,
-        parentsList: [
-          {
-            to: {
-              name: 'SubjectPage',
-              params: {
-                projectId: this.$route.params.projectId,
-                subjectId: this.$route.params.subjectId,
-              },
-            },
-            label: `SUBJECT: ${this.$route.params.subjectId}`,
-          },
-          {
-            to: {
-              name: 'ProjectPage',
-              params: {
-                projectId: this.$route.params.projectId,
-                projectName: this.$route.params.projectId,
-              },
-            },
-            label: `PROJECT: ${this.$route.params.projectId}`,
-          },
-          {
-            to: {
-              name: 'HomePage',
-            },
-            label: 'Home',
-          },
-        ],
-      };
-    },
     data() {
       return {
         isLoading: true,

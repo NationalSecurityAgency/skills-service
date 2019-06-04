@@ -56,6 +56,9 @@
       navItems(newValue) {
         this.buildNewMenuMapWhenPropsChange(newValue);
       },
+      $route: function routeChange() {
+        this.buildNewMenuMapWhenPropsChange(this.navItems);
+      },
     },
     methods: {
       navigate(selectedKey) {
