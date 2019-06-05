@@ -2,27 +2,16 @@
   <div id="simple-skills-table" v-if="this.skills && this.skills.length">
     <v-client-table :data="skills" :columns="columns" :options="options">
       <div slot="edit" slot-scope="props">
-        <div class="field has-addons has-text-right">
-          <span class="field has-addons">
-            <p class="">
+        <div class="field text-right">
+          <span class="field">
               <button v-on:click="onDeleteEvent(props.row)" class="btn btn-sm btn-outline-primary">
                       <i class="fas fa-trash"/>
               </button>
-            </p>
-            <p class="skills-pad-left-1-rem">
-              <b-tooltip :label="getManagedBtnDisabledMsg(props.row)" :active="isManagedBtnDisabled(props.row)"
-                         position="is-left" animanted="true" type="is-light">
-                <router-link :to="{ name:'SkillPage',
+                <router-link v-if="props.row.subjectId" :id="props.row.skillId" :to="{ name:'SkillOverview',
                 params: { projectId: props.row.projectId, subjectId: props.row.subjectId, skillId: props.row.skillId }}"
-                             class="btn btn-sm btn-outline-primary"
-                             v-bind:class="{ notactive: isManagedBtnDisabled(props.row) }">
-                  <span>Manage</span>
-                  <span class="icon is-small">
-                    <i class="fas fa-arrow-circle-right"/>
-                  </span>
+                             class="btn btn-sm btn-outline-primary ml-2">
+                  Manage <i class="fas fa-arrow-circle-right"/>
                 </router-link>
-              </b-tooltip>
-            </p>
           </span>
         </div>
       </div>
@@ -74,16 +63,6 @@
       };
     },
     methods: {
-      isManagedBtnDisabled(row) {
-        return row && row.disabledStatus && row.disabledStatus.manageBtn && row.disabledStatus.manageBtn.disable;
-      },
-      getManagedBtnDisabledMsg(row) {
-        let msg = '';
-        if (this.isManagedBtnDisabled(row)) {
-          ({ msg } = row.disabledStatus.manageBtn);
-        }
-        return msg;
-      },
       onDeleteEvent(skill) {
         this.$emit('skill-removed', skill);
       },
@@ -97,7 +76,7 @@
   }
 
   #simple-skills-table .control-column {
-    width: 11rem;
+    width: 10rem;
   }
 
   /* on the mobile platform some of the columns will be removed

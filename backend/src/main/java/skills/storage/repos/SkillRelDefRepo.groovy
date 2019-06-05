@@ -10,6 +10,10 @@ interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
     SkillRelDef findByChildAndParentAndType(SkillDef child, SkillDef parent, SkillRelDef.RelationshipType type)
     List<SkillRelDef> findAllByParentAndType(SkillDef parent, SkillRelDef.RelationshipType type)
 
+    @Query('''select sd2 from SkillDef sd1, SkillDef sd2, SkillRelDef srd 
+        where sd1 = srd.parent and sd2 = srd.child and srd.type=?2 
+              and sd1.skillId=?1''')
+    List<SkillDef> getChildren(String parentSkillId, SkillRelDef.RelationshipType type)
 
     // keep in mind that most of the time you want to ask for a specific relationship type so use this method with caution
     List<SkillRelDef> findAllByParent(SkillDef parent)
