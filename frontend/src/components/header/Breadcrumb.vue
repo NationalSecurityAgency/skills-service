@@ -1,3 +1,14 @@
+
+<!--
+ Please note that we heavily rely on routes' naming convention to build the breadcrumb
+ Generally we expect pattern of '/entity/id/entity2/id2' which then will map to
+ 'entity:id / entity2:id2' breadcrumb; If the number of entities is even then the last item
+ will not have entity/label, for example '/entity/id/entity2/id2/last' will produce:
+ 'entity:id / entity2:id2 / last'
+
+ You can optionally override the last items display in the router config:
+ meta: { breadcrumb: 'Add Skill Event' },
+-->
 <template>
   <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
@@ -54,6 +65,13 @@
               newItems.push(this.buildResItem(key, value, res, index));
               key = null;
             } else {
+              // must exclude items in the path because each page with navigation
+              // doesn't have a sub-route in the url, for example:
+              // '/projects/projectId' will conceptually map to '/projects/projectId/subjects'
+              // but there is no '/project/projectId/subjects' route configured so when parsing something like
+              // '/projects/projectId/subjects/subjectId/stats we must end up with:
+              //    'projects / project:projectId / subject:subjectId / stats'
+              // notice that 'subjects' is missing
               if (!this.shouldExclude(value)) {
                 newItems.push(this.buildResItem(key, value, res, index));
               }
@@ -96,21 +114,16 @@
   };
 </script>
 
-<style lang="scss" scoped>
-  @import "../../styles/palette";
-
-  .breadcrumbContainer {
-    border-color: #E8E8E8;
-    border-width: 1px 0px 1px 0px;
-    border-style: solid;
-    padding: 8px 10px 8px 40px;
-
-    background-image: linear-gradient(to right, $blue-palette-color5, lightgray);
-  }
-
+<style scoped>
   .breadcrumb-item-label {
-    /*font-style:  oblique;*/
     font-size: 0.9rem;
   }
 
+  .breadcrumb li {
+    display: inline;
+    max-width: 15rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 </style>

@@ -41,12 +41,18 @@
     methods: {
       loadBadge() {
         this.isLoading = false;
-        BadgesService.getBadge(this.projectId, this.badgeId)
-          .then((response) => {
-            this.badge = response;
-            this.headerOptions = this.buildHeaderOptions(this.badge);
-            this.isLoading = false;
-          });
+        if (this.$route.params.badge) {
+          this.badge = this.$route.params.badge;
+          this.headerOptions = this.buildHeaderOptions(this.badge);
+          this.isLoading = false;
+        } else {
+          BadgesService.getBadge(this.projectId, this.badgeId)
+            .then((response) => {
+              this.badge = response;
+              this.headerOptions = this.buildHeaderOptions(this.badge);
+              this.isLoading = false;
+            });
+        }
       },
       buildHeaderOptions(badge) {
         return {

@@ -509,15 +509,15 @@ class AdminController {
         return userAdminService.loadUserPerformedSkillsPage(projectId, userId, query, pageRequest)
     }
 
-    @GetMapping(value = '/projects/{projectId}/users/{userId}/skillsCount', produces = 'application/json')
+    @GetMapping(value = '/projects/{projectId}/users/{userId}/metrics', produces = 'application/json')
     @ResponseBody
     @CompileStatic
-    Integer getUserSkillsCount(@PathVariable('projectId') String projectId,
+    UserSkillsMetrics getUserSkillsMetrics(@PathVariable('projectId') String projectId,
                                @PathVariable('userId') String userId) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(userId, "User Id", projectId)
 
-        return userAdminService.distinctSkillsCount(projectId, userId)
+        return userAdminService.getUserSkillsMetrics(projectId, userId)
     }
 
     @GetMapping(value = "/projects/{projectId}/users", produces = MediaType.APPLICATION_JSON_VALUE)
