@@ -5,7 +5,7 @@
         {{ subject.subject }}
       </ribbon>
 
-      <i :class="subject.iconClass" class="fa subject-tile-icon"/>
+      <i :class="subject.iconClass" class="d-inline-block subject-tile-icon"/>
       <h2 class="skill-tile-label pt-1">Level {{ subject.skillsLevel }}</h2>
       <star-progress :number-complete="subject.skillsLevel" class="py-1"/>
 

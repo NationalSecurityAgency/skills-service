@@ -121,6 +121,8 @@
 
 <style>
   @import '../node_modules/animate.css/animate.min.css';
+  @import '../node_modules/material-icons/iconfont/material-icons.css';
+  @import '../node_modules/material-icons/css/material-icons.css';
   @import '../node_modules/@fortawesome/fontawesome-free/css/all.css';
 
   #app {
