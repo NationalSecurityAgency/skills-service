@@ -284,6 +284,7 @@
       enquire.unregister(mdAndUp);
       enquire.unregister(lgAndUp);
       enquire.unregister(xlAndUp);
+      this.resetIcons();
     },
     methods: {
       getIcon(icon, iconCss, iconPack) {
