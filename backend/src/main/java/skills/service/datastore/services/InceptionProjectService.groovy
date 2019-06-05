@@ -28,7 +28,7 @@ class InceptionProjectService {
     @Autowired
     ProjDefRepo projDefRepo
 
-    String inceptionProjectId = "Inception"
+    static final String inceptionProjectId = "Inception"
 
     /**
      * If inception project exist then user will simply be assigned as an admin

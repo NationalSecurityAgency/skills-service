@@ -25,7 +25,7 @@
       };
     },
     created() {
-      this.authenticationUrl = `${this.serviceUrl}/admin/projects/${this.projectId}/token/${this.userId}`;
+      this.authenticationUrl = `${this.serviceUrl}/app/projects/inception/users/${encodeURIComponent(this.userId)}/token`;
     },
     computed: {
       serviceUrl() {

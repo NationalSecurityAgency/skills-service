@@ -53,7 +53,7 @@
       this.projectId = this.$route.params.projectId;
       this.userId = this.$route.params.userId;
       this.totalPoints = this.$route.params.totalPoints;
-      this.authenticationUrl = `${this.serviceUrl}/admin/projects/${this.projectId}/token/${this.userId}`;
+      this.authenticationUrl = `${this.serviceUrl}/admin/projects/${encodeURIComponent(this.projectId)}/token/${encodeURIComponent(this.userId)}`;
 
       UsersService.getUserToken(this.projectId, this.userId)
         .then((result) => {
