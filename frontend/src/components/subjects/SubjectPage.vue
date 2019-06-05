@@ -42,12 +42,18 @@
     methods: {
       loadSubject() {
         this.isLoading = true;
-        SubjectsService.getSubjectDetails(this.projectId, this.subjectId)
-          .then((response) => {
-            this.subject = response;
-            this.headerOptions = this.buildHeaderOptions(this.subject);
-            this.isLoading = false;
-          });
+        if (this.$route.params.subject) {
+          this.subject = this.$route.params.subject;
+          this.headerOptions = this.buildHeaderOptions(this.subject);
+          this.isLoading = false;
+        } else {
+          SubjectsService.getSubjectDetails(this.projectId, this.subjectId)
+            .then((response) => {
+              this.subject = response;
+              this.headerOptions = this.buildHeaderOptions(this.subject);
+              this.isLoading = false;
+            });
+        }
       },
       buildHeaderOptions(subject) {
         return {
