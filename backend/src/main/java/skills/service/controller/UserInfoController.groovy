@@ -8,6 +8,7 @@ import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
 import skills.service.auth.AuthMode
 import skills.service.auth.SkillsAuthorizationException
+
 import skills.service.auth.UserAuthService
 import skills.service.auth.UserInfo
 import skills.service.auth.UserInfoService
@@ -69,7 +70,7 @@ class UserInfoController {
             }
             currentUser.nickname = userInfoReq.nickname
             currentUser = userAuthService.createOrUpdateUser(currentUser)
-            res  = convertToUserinfoRes(currentUser)
+            res = convertToUserinfoRes(currentUser)
         } else if (authMode == AuthMode.PKI) {
             throw new SkillsAuthorizationException('Unauthenticated user while using PKI Authorization Mode')
         }
@@ -90,14 +91,15 @@ class UserInfoController {
     boolean hasRole(@PathVariable("role") String role) {
         role = role.toLowerCase()
         UserInfo currentUser = userInfoService.getCurrentUser()
-        return currentUser.authorities.find {it.authority.toLowerCase() == role}
+        return currentUser.authorities.find { it.authority.toLowerCase() == role }
     }
 
     @RequestMapping(value = "/userInfo/hasAnyRole/{roles}", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     boolean hasAnyRole(@PathVariable("roles") List<String> roles) {
         boolean foundRole = false
-        roleCheckLoop: for (String role : roles) {
+        roleCheckLoop:
+        for (String role : roles) {
             if (hasRole(role)) {
                 foundRole = true
                 break roleCheckLoop
@@ -118,8 +120,8 @@ class UserInfoController {
         return results.take(5)
     }
 
-    @RequestMapping(value="/users/validExistingDashboardUserId/{userId}", method =  RequestMethod.GET, produces = "application/json")
-    Boolean isValidExistingDashboardUserId(@PathVariable("userId") String userId){
+    @RequestMapping(value = "/users/validExistingDashboardUserId/{userId}", method = RequestMethod.GET, produces = "application/json")
+    Boolean isValidExistingDashboardUserId(@PathVariable("userId") String userId) {
         return userRepo.findByUserId(userId) != null
     }
 
@@ -142,5 +144,5 @@ class UserInfoController {
     Boolean isValidExistingClientUserId(@PathVariable("userId") String userId) {
         return userAdminService.isValidExistingUserId(userId)
     }
-
 }
+

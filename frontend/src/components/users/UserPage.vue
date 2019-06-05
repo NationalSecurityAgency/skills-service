@@ -35,11 +35,6 @@
       this.userId = this.$route.params.userId;
       this.loadUserDetails();
     },
-    computed: {
-      serviceUrl() {
-        return window.location.origin;
-      },
-    },
     methods: {
       loadUserDetails() {
         this.isLoading = true;

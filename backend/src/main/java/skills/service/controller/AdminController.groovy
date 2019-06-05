@@ -46,9 +46,6 @@ class AdminController {
     SettingsService settingsService
 
     @Autowired
-    TokenEndpoint tokenEndpoint
-
-    @Autowired
     SkillsManagementFacade skillsManagementFacade
 
     @RequestMapping(value = "/projects/{id}", method = RequestMethod.DELETE)
@@ -665,16 +662,4 @@ class AdminController {
         projectAdminStorageService.updateClientSecret(projectId, clientSecret)
         return clientSecret
     }
-
-    @RequestMapping(value = "/projects/{projectId}/token/{userId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    ResponseEntity<OAuth2AccessToken> getUserToken(@PathVariable("projectId") String projectId, @PathVariable("userId") String userId) {
-        SkillsValidator.isNotBlank(projectId, "Project Id")
-        SkillsValidator.isNotBlank(userId, "User Id")
-
-        UsernamePasswordAuthenticationToken principal = new UsernamePasswordAuthenticationToken(projectId, null, [])
-        Map<String, String> parameters = [grant_type: 'client_credentials', proxy_user: userId]
-        return tokenEndpoint.postAccessToken(principal, parameters)
-    }
-
 }
