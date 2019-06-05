@@ -62,6 +62,6 @@ class UserAdminService {
     UserSkillsMetrics getUserSkillsMetrics(String projectId, String userId) {
         int numSkills =  performedSkillRepository.countDistinctSkillIdByProjectIdAndUserId(projectId, userId)
         UserPoints userPoints = userPointsRepo.findByProjectIdAndUserIdAndSkillIdAndDay(projectId, userId, null, null)
-        return new UserSkillsMetrics(numSkills: numSkills, userTotalPoints: userPoints.points )
+        return new UserSkillsMetrics(numSkills: numSkills, userTotalPoints: userPoints?.points ?: 0 )
     }
 }
