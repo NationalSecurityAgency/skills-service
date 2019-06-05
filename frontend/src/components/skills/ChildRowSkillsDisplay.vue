@@ -4,13 +4,13 @@
     <div class="row">
       <div class="col-12 col-md-12 col-xl mb-md-3 mb-xl-0">
         <media-info-card :title="`${skillInfo.totalPoints} Points`" icon-class="fas fa-calculator text-success">
-          <strong>{{ skillInfo.pointIncrement }}</strong> Increment <i class="fa fa-times text-muted"/>
-          <strong> {{ skillInfo.numPerformToCompletion }}</strong> Times to Completion
+          <strong>{{ skillInfo.pointIncrement }}</strong> points <i class="fa fa-times text-muted"/>
+          <strong> {{ skillInfo.numPerformToCompletion }}</strong> repetitions to Completion
         </media-info-card>
       </div>
       <div class="col-12  col-md-6 col-xl my-3 my-md-0">
         <media-info-card :title="`${skillInfo.pointIncrementInterval} Hours`" icon-class="fas fa-hourglass-half text-info">
-          Interval Increment
+          Minimum time between repetitions to receive points
         </media-info-card>
       </div>
       <div class="col-12 col-md-6 col-xl">
