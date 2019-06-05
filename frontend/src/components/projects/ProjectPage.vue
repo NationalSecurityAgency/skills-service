@@ -41,12 +41,18 @@
     methods: {
       loadProjects() {
         this.isLoading = true;
-        ProjectService.getProjectDetails(this.$route.params.projectId)
-          .then((response) => {
-            this.headerOptions = this.buildHeaderOptions(response);
-          }).finally(() => {
-            this.isLoading = false;
-          });
+        if (this.$route.params.project) {
+          this.headerOptions = this.buildHeaderOptions(this.$route.params.project);
+          this.isLoading = false;
+        } else {
+          ProjectService.getProjectDetails(this.$route.params.projectId)
+            .then((response) => {
+              this.headerOptions = this.buildHeaderOptions(response);
+            })
+            .finally(() => {
+              this.isLoading = false;
+            });
+        }
       },
       buildHeaderOptions(project) {
         return {

@@ -6,9 +6,12 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.service.controller.result.model.TableResult
+import skills.service.controller.result.model.UserSkillsMetrics
 import skills.service.skillLoading.model.SkillPerfomed
 import skills.storage.model.UserPerformedSkill
+import skills.storage.model.UserPoints
 import skills.storage.repos.UserPerformedSkillRepo
+import skills.storage.repos.UserPointsRepo
 
 @Service
 @Slf4j
@@ -16,6 +19,9 @@ class UserAdminService {
 
     @Autowired
     UserPerformedSkillRepo performedSkillRepository
+
+    @Autowired
+    UserPointsRepo userPointsRepo
 
     @Transactional(readOnly = true)
     TableResult loadUserPerformedSkillsPage(String projectId, String userId, String query, PageRequest pageRequest){
@@ -52,7 +58,10 @@ class UserAdminService {
         return performedSkillRepository.existsByUserId(userId)
     }
 
-    Integer distinctSkillsCount(String projectId, String userId) {
-        return performedSkillRepository.countDistinctSkillIdByProjectIdAndUserId(projectId, userId)
+    @Transactional(readOnly = true)
+    UserSkillsMetrics getUserSkillsMetrics(String projectId, String userId) {
+        int numSkills =  performedSkillRepository.countDistinctSkillIdByProjectIdAndUserId(projectId, userId)
+        UserPoints userPoints = userPointsRepo.findByProjectIdAndUserIdAndSkillIdAndDay(projectId, userId, null, null)
+        return new UserSkillsMetrics(numSkills: numSkills, userTotalPoints: userPoints.points )
     }
 }

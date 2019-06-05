@@ -8,7 +8,7 @@
     </div>
     <div slot="footer">
       <router-link :to="{ name:'BadgeSkills',
-              params: { projectId: this.badgeInternal.projectId, badgeId: this.badgeInternal.badgeId}}"
+              params: { projectId: this.badgeInternal.projectId, badgeId: this.badgeInternal.badgeId, badge: this.badgeInternal}}"
                    class="btn btn-outline-primary btn-sm">
         Manage <i class="fas fa-arrow-circle-right"/>
       </router-link>

@@ -11,7 +11,7 @@
 
         <div slot="viewDetail" slot-scope="props" class="">
           <router-link :to="{ name:'ClientDisplayPreview',
-                  params: { projectId: $route.params.projectId, userId: props.row.userId, totalPoints: props.row.totalPoints }}"
+                  params: { projectId: $route.params.projectId, userId: props.row.userId }}"
                        tag="button" class="btn btn-outline-primary">
             <span class="d-none d-sm-inline">Details</span><i class="fas fa-arrow-circle-right ml-sm-1"/>
           </router-link>

@@ -43,25 +43,25 @@
     methods: {
       loadUserDetails() {
         this.isLoading = true;
-        UsersService.getUserUniqueSkillsCount(this.projectId, this.userId)
+        UsersService.getUserSkillsMetrics(this.projectId, this.userId)
           .then((response) => {
-            this.headerOptons = this.buildHeaderOptions(response, 0);
+            this.headerOptons = this.buildHeaderOptions(response);
           })
           .finally(() => {
             this.isLoading = false;
           });
       },
-      buildHeaderOptions(numUniqueSkills, totalPoints) {
+      buildHeaderOptions(metrics) {
         return {
           icon: 'fas fa-user',
           title: `USER: ${this.userId}`,
           subTitle: `ID: ${this.userId}`,
           stats: [{
             label: 'Skills',
-            count: numUniqueSkills,
+            count: metrics.numSkills,
           }, {
             label: 'Points',
-            count: totalPoints,
+            count: metrics.userTotalPoints,
           }],
         };
       },
