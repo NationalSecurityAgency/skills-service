@@ -23,8 +23,8 @@ import static skills.service.auth.SecurityConfiguration.PortalWebSecurityHelper
 @Configuration
 class PkiSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
-    @Autowired
-    UserDetailsService userDetailsService
+//    @Autowired
+//    UserDetailsService userDetailsService
 
     @Bean
     @Conditional(PkiAuth)

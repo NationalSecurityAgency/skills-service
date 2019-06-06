@@ -2,6 +2,7 @@ package skills.service.auth.form.oauth2
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Conditional
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.AuthenticationException
 import org.springframework.security.oauth2.client.resource.OAuth2AccessDeniedException
@@ -12,11 +13,13 @@ import org.springframework.stereotype.Component
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
 import skills.service.auth.AuthUtils
+import skills.service.auth.SecurityConfiguration
 import skills.service.auth.UserInfo
 
 import javax.servlet.http.HttpServletRequest
 
 @Component('skillsOAuth2AuthManager')
+@Conditional(SecurityConfiguration.FormAuth)
 @Slf4j
 class SkillsOAuth2AuthenticationManager extends OAuth2AuthenticationManager {
 
