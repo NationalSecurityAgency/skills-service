@@ -2,7 +2,7 @@
   <div>
     {{ userInfo }}
     <skills-display
-      :authentication-url="authenticationUrl"
+      :authenticator="authenticator"
       :version="skillsVersion"
       :project-id="projectId"
       :service-url="serviceUrl"/>
@@ -20,7 +20,6 @@
     data() {
       return {
         projectId: 'Inception',
-        authenticationUrl: '',
         skillsVersion: 0,
       };
     },
@@ -30,6 +29,12 @@
     computed: {
       serviceUrl() {
         return window.location.origin;
+      },
+      authenticator() {
+        if (this.$store.getters.isPkiAuthenticated) {
+          return 'pki';
+        }
+        return `${this.serviceUrl}/admin/projects/${encodeURIComponent(this.projectId)}/token/${encodeURIComponent(this.userId)}`;
       },
       userId() {
         return this.$store.getters.userInfo.userId;
