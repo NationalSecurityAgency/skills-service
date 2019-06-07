@@ -225,7 +225,7 @@ service = {
 
   setToken(token) {
     this.token = token;
-    if (token) {
+    if (token  && token !== 'pki') {
       axios.defaults.headers.common.Authorization = `Bearer ${token}`;
     } else {
       delete axios.defaults.headers.common.Authorization;
