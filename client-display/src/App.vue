@@ -64,6 +64,7 @@
           UserSkillsService.setServiceUrl(parent.model.serviceUrl);
           UserSkillsService.setProjectId(parent.model.projectId);
           UserSkillsService.setVersion(parent.model.version);
+          UserSkillsService.setUserId(parent.model.userId);
 
           this.$store.state.parentFrame.emit('needs-authentication');
 
