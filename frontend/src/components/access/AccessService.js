@@ -16,9 +16,12 @@ export default {
         projectIdVal: projectId,
         roleNameVal: roleName,
       })
-        .then(response => response.data);
+        .then(() => axios.get(`/admin/projects/${projectId}/users/${userDn}/roles`)
+          .then(response => response.data.find(element => element.roleName === roleName)));
     }
-    return axios.put(`/root/addRoot/${userDn}`).then(response => response.data);
+    return axios.put(`/root/addRoot/${userDn}`)
+      .then(() => axios.get('/root/rootUsers')
+        .then(response => response.data.find(element => element.userId === userDn)));
   },
   deleteUserRole(projectId, userId, roleName) {
     if (projectId) {
@@ -32,7 +35,8 @@ export default {
   },
   resetClientSecret(projectId) {
     return axios.put(`/admin/projects/${projectId}/resetClientSecret`)
-      .then(response => response.data);
+      .then(() => axios.get(`/admin/projects/${projectId}/clientSecret`)
+        .then(response => response.data));
   },
   getClientSecret(projectId) {
     return axios.get(`/admin/projects/${projectId}/clientSecret`)

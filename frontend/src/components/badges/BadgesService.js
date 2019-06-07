@@ -11,7 +11,7 @@ export default {
   },
   saveBadge(badgeReq) {
     return axios.put(`/admin/projects/${badgeReq.projectId}/badges/${badgeReq.badgeId}`, badgeReq)
-      .then(response => response.data);
+      .then(() => this.getBadge(badgeReq.projectId, badgeReq.badgeId));
   },
   deleteBadge(projectId, badgeId) {
     return axios.delete(`/admin/projects/${projectId}/badges/${badgeId}`)

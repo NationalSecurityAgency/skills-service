@@ -66,7 +66,7 @@ class JwtHelper {
                 }
             } catch(JWTVerificationException e) {
                 log.warn('Unable to verify JWT token')
-//                throw new BadCredentialsException(e.message, e)
+//                throw new BadCredentialsException(e.explanation, e)
             }
         }
         return authentication
