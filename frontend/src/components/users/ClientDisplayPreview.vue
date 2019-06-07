@@ -17,6 +17,7 @@
       :authenticator="authenticator"
       :version="selectedVersion"
       :project-id="projectId"
+      :user-id="userId"
       :service-url="serviceUrl"/>
   </div>
 
