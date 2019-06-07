@@ -8,6 +8,7 @@ import skills.service.controller.exceptions.ErrorCode
 import skills.service.controller.exceptions.SkillException
 import skills.service.controller.exceptions.SkillsValidator
 import skills.service.controller.request.model.ProjectRequest
+import skills.service.controller.result.model.RequestResult
 import skills.service.controller.result.model.CustomIconResult
 import skills.service.controller.result.model.ProjectResult
 import skills.service.datastore.services.AdminProjService
@@ -37,8 +38,7 @@ class ProjectController {
 
     @RequestMapping(value = "/projects/{id}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
     @ResponseBody
-    ProjectResult saveProject(@PathVariable("id") String projectId, @RequestBody ProjectRequest projectRequest) {
-
+    RequestResult saveProject(@PathVariable("id") String projectId, @RequestBody ProjectRequest projectRequest) {
         // project id is optional
         if (projectRequest.projectId && projectId != projectRequest.projectId) {
             throw new SkillException("Project id in the request doesn't equal to project id in the URL. [${projectRequest?.projectId}]<>[${projectId}]", null, null, ErrorCode.BadParam)
@@ -50,7 +50,15 @@ class ProjectController {
             throw new SkillException("Project name was not provided.", projectId, null, ErrorCode.BadParam)
         }
 
-        return projectAdminStorageService.saveProject(projectRequest)
+        projectAdminStorageService.saveProject(projectRequest)
+        return new RequestResult(success: true)
+    }
+
+    @RequestMapping(value="/projects/{id}", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    ProjectResult getProject(@PathVariable("id") String projectId){
+        SkillsValidator.isNotBlank(projectId, "id")
+        return projectAdminStorageService.getProject(projectId)
     }
 
     @RequestMapping(value = "/projectExist", method = RequestMethod.GET, produces = "application/json")

@@ -15,7 +15,6 @@ import skills.service.datastore.services.LevelDefinitionStorageService
 import skills.service.datastore.services.UserAdminService
 import skills.service.datastore.services.settings.SettingsService
 import skills.service.skillsManagement.SkillsManagementFacade
-import skills.storage.model.SkillDef
 import skills.utils.ClientSecretGenerator
 import skills.utils.Constants
 
@@ -52,12 +51,13 @@ class AdminController {
 
     @RequestMapping(value = "/projects/{projectId}", method = RequestMethod.PATCH, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    void setProjectDisplayOrder(
+    RequestResult setProjectDisplayOrder(
             @PathVariable("projectId") String projectId, @RequestBody ActionPatchRequest projectPatchRequest) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotNull(projectPatchRequest.action, "Action", projectId)
 
         projectAdminStorageService.setProjectDisplayOrder(projectId, projectPatchRequest)
+        return new RequestResult(success: true)
     }
 
     @RequestMapping(value = "/projects/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -144,21 +144,21 @@ class AdminController {
 
     @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}", method = RequestMethod.PATCH, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    def setSubjectDisplayOrder(
+    RequestResult setSubjectDisplayOrder(
             @PathVariable("projectId") String projectId,
             @PathVariable("subjectId") String subjectId, @RequestBody ActionPatchRequest subjectPatchRequest) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(subjectId, "Subject Id", projectId)
         SkillsValidator.isNotNull(subjectPatchRequest.action, "Action must be provided", projectId)
         projectAdminStorageService.setSubjectDisplayOrder(projectId, subjectId, subjectPatchRequest)
-        return [status: 'success']
+        return new RequestResult(success: true)
     }
 
     @RequestMapping(value = "/projects/{projectId}/badges/{badgeId}", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    BadgeResult saveBadge(@PathVariable("projectId") String projectId,
-                          @PathVariable("badgeId") String badgeId,
-                          @RequestBody BadgeRequest badgeRequest) {
+    RequestResult saveBadge(@PathVariable("projectId") String projectId,
+                            @PathVariable("badgeId") String badgeId,
+                            @RequestBody BadgeRequest badgeRequest) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(badgeId, "Badge Id", projectId)
         SkillsValidator.isFirstOrMustEqualToSecond(badgeRequest.badgeId, badgeId, "Badge Id")
@@ -167,33 +167,34 @@ class AdminController {
         SkillsValidator.isTrue((badgeRequest.startDate && badgeRequest.endDate) || (!badgeRequest.startDate && !badgeRequest.endDate),
                 "If one date is provided then both start and end dates must be provided", projectId)
 
-        return projectAdminStorageService.saveBadge(projectId, badgeRequest)
+        projectAdminStorageService.saveBadge(projectId, badgeRequest)
+        return new RequestResult(success: true)
     }
 
     @RequestMapping(value = "/projects/{projectId}/badge/{badgeId}/skills/{skillId}", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    def assignSkillToBadge(@PathVariable("projectId") String projectId,
-                           @PathVariable("badgeId") String badgeId,
-                           @PathVariable("skillId") String skillId) {
+    RequestResult assignSkillToBadge(@PathVariable("projectId") String projectId,
+                                     @PathVariable("badgeId") String badgeId,
+                                     @PathVariable("skillId") String skillId) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(badgeId, "Badge Id", projectId)
         SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
 
         projectAdminStorageService.addSkillToBadge(projectId, badgeId, skillId)
-        return [status: 'success']
+        return new RequestResult(success: true)
     }
 
     @RequestMapping(value = "/projects/{projectId}/badge/{badgeId}/skills/{skillId}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    def removeSkillFromBadge(@PathVariable("projectId") String projectId,
-                             @PathVariable("badgeId") String badgeId,
-                             @PathVariable("skillId") String skillId) {
+    RequestResult removeSkillFromBadge(@PathVariable("projectId") String projectId,
+                                       @PathVariable("badgeId") String badgeId,
+                                       @PathVariable("skillId") String skillId) {
         projectAdminStorageService.removeSkillFromBadge(projectId, badgeId, skillId)
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(badgeId, "Badge Id", projectId)
         SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
 
-        return [status: 'success']
+        return new RequestResult(success: true)
     }
 
     @RequestMapping(value = "/projects/{projectId}/badges/{badgeId}", method = RequestMethod.DELETE)
@@ -257,10 +258,10 @@ class AdminController {
 
     @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/skills/{skillId}", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    SkillDefRes saveSkill(@PathVariable("projectId") String projectId,
-                          @PathVariable("subjectId") String subjectId,
-                          @PathVariable("skillId") String skillId,
-                          @RequestBody SkillRequest skillRequest) {
+    RequestResult saveSkill(@PathVariable("projectId") String projectId,
+                            @PathVariable("subjectId") String subjectId,
+                            @PathVariable("skillId") String skillId,
+                            @RequestBody SkillRequest skillRequest) {
 
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(subjectId, "Subject Id", projectId)
@@ -281,7 +282,8 @@ class AdminController {
         SkillsValidator.isTrue(skillRequest.version >= 0, "version must be >= 0", projectId, skillId)
         SkillsValidator.isTrue(skillRequest.version < Constants.MAX_VERSION, "version exceeds max version", projectId, skillId)
 
-        return projectAdminStorageService.saveSkill(skillRequest)
+        projectAdminStorageService.saveSkill(skillRequest)
+        return new RequestResult(success: true)
     }
 
     @GetMapping(value = '/projects/{projectId}/latestVersion', produces = 'application/json')
@@ -299,60 +301,60 @@ class AdminController {
 
     @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/dependency/{dependentSkillId}", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    def assignDependency(@PathVariable("projectId") String projectId,
-                         @PathVariable("skillId") String skillId,
-                         @PathVariable("dependentSkillId") String dependentSkillId) {
+    RequestResult assignDependency(@PathVariable("projectId") String projectId,
+                                   @PathVariable("skillId") String skillId,
+                                   @PathVariable("dependentSkillId") String dependentSkillId) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
         SkillsValidator.isNotBlank(dependentSkillId, "Dependent Skill Id", projectId)
 
         projectAdminStorageService.assignSkillDependency(projectId, skillId, dependentSkillId)
-        return [status: 'success']
+        return new RequestResult(success: true)
     }
 
 
     @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/dependency/projects/{dependentProjectId}/skills/{dependentSkillId}", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    def assignDependencyFromAnotherProject(@PathVariable("projectId") String projectId,
-                                           @PathVariable("skillId") String skillId,
-                                           @PathVariable("dependentProjectId") String dependentProjectId,
-                                           @PathVariable("dependentSkillId") String dependentSkillId) {
+    RequestResult assignDependencyFromAnotherProject(@PathVariable("projectId") String projectId,
+                                                     @PathVariable("skillId") String skillId,
+                                                     @PathVariable("dependentProjectId") String dependentProjectId,
+                                                     @PathVariable("dependentSkillId") String dependentSkillId) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
         SkillsValidator.isNotBlank(dependentProjectId, "Dependent Project Id", projectId)
         SkillsValidator.isNotBlank(dependentSkillId, "Dependent Skill Id", projectId)
 
         projectAdminStorageService.assignSkillDependency(projectId, skillId, dependentSkillId, dependentProjectId)
-        return [status: 'success']
+        return new RequestResult(success: true)
     }
 
 
     @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/dependency/{dependentSkillId}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    def removeDependency(@PathVariable("projectId") String projectId,
-                         @PathVariable("skillId") String skillId,
-                         @PathVariable("dependentSkillId") String dependentSkillId) {
+    RequestResult removeDependency(@PathVariable("projectId") String projectId,
+                                   @PathVariable("skillId") String skillId,
+                                   @PathVariable("dependentSkillId") String dependentSkillId) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
         SkillsValidator.isNotBlank(dependentSkillId, "Dependent Skill Id", projectId)
 
         projectAdminStorageService.removeSkillDependency(projectId, skillId, dependentSkillId)
-        return [status: 'success']
+        return new RequestResult(success: true)
     }
 
     @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/dependency/projects/{dependentProjectId}/skills/{dependentSkillId}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    def removeDependencyFromAnotherProject(@PathVariable("projectId") String projectId,
-                                           @PathVariable("skillId") String skillId,
-                                           @PathVariable("dependentProjectId") String dependentProjectId,
-                                           @PathVariable("dependentSkillId") String dependentSkillId) {
+    RequestResult removeDependencyFromAnotherProject(@PathVariable("projectId") String projectId,
+                                                     @PathVariable("skillId") String skillId,
+                                                     @PathVariable("dependentProjectId") String dependentProjectId,
+                                                     @PathVariable("dependentSkillId") String dependentSkillId) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
         SkillsValidator.isNotBlank(dependentProjectId, "Dependent Project Id", projectId)
         SkillsValidator.isNotBlank(dependentSkillId, "Dependent Skill Id", projectId)
 
         projectAdminStorageService.removeSkillDependency(projectId, skillId, dependentSkillId, dependentProjectId)
-        return [status: 'success']
+        return new RequestResult(success: true)
     }
 
     @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/dependency/graph", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -375,16 +377,17 @@ class AdminController {
 
     @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/skills/{skillId}", method = RequestMethod.PATCH)
     @ResponseBody
-    SkillDef updateSkillDisplayOrder(@PathVariable("projectId") String projectId,
-                                     @PathVariable("subjectId") String subjectId,
-                                     @PathVariable("skillId") String skillId,
-                                     @RequestBody ActionPatchRequest patchRequest) {
+    RequestResult updateSkillDisplayOrder(@PathVariable("projectId") String projectId,
+                                          @PathVariable("subjectId") String subjectId,
+                                          @PathVariable("skillId") String skillId,
+                                          @RequestBody ActionPatchRequest patchRequest) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(subjectId, "Subject Id", projectId)
         SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
         SkillsValidator.isNotNull(patchRequest.action, "Action must be provided", projectId)
 
-        return projectAdminStorageService.updateSkillDisplayOrder(projectId, subjectId, skillId, patchRequest)
+        projectAdminStorageService.updateSkillDisplayOrder(projectId, subjectId, skillId, patchRequest)
+        return new RequestResult(success: true)
     }
 
     @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/skills/{skillId}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -446,9 +449,10 @@ class AdminController {
     }
 
     @RequestMapping(value = "/projects/{projectId}/levels/next", method = [RequestMethod.PUT, RequestMethod.POST], produces = MediaType.APPLICATION_JSON_VALUE)
-    void addNextLevel(@PathVariable("projectId") String projectId, @RequestBody NextLevelRequest nextLevelRequest) {
+    RequestResult addNextLevel(@PathVariable("projectId") String projectId, @RequestBody NextLevelRequest nextLevelRequest) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         levelDefinitionStorageService.addNextLevel(projectId, nextLevelRequest)
+        return new RequestResult(success: true)
     }
 
     @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/levels/last", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -458,31 +462,34 @@ class AdminController {
     }
 
     @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/levels/next", method = [RequestMethod.PUT, RequestMethod.POST], produces = MediaType.APPLICATION_JSON_VALUE)
-    void addNextLevel(
+    RequestResult addNextLevel(
             @PathVariable("projectId") String projectId,
             @PathVariable("subjectId") String subjectId, @RequestBody NextLevelRequest nextLevelRequest) {
         levelDefinitionStorageService.addNextLevel(projectId, nextLevelRequest, subjectId)
+        return new RequestResult(success: true)
     }
 
     //Need new methods to edit existing level methods for project and subject
     @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/levels/edit/{levelId}", method = [RequestMethod.PUT, RequestMethod.POST], produces = MediaType.APPLICATION_JSON_VALUE)
-    void editLevel(@PathVariable("projectId") String projectId,
-                   @PathVariable("subjectId") String subjectId,
-                   @PathVariable("levelId") String levelId, @RequestBody EditLevelRequest editLevelRequest) {
+    RequestResult editLevel(@PathVariable("projectId") String projectId,
+                            @PathVariable("subjectId") String subjectId,
+                            @PathVariable("levelId") String levelId, @RequestBody EditLevelRequest editLevelRequest) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(subjectId, "Subject Id", projectId)
         SkillsValidator.isNotBlank(levelId, "Level Id", projectId)
 
         levelDefinitionStorageService.editLevel(projectId, editLevelRequest, levelId, subjectId)
+        return new RequestResult(success: true)
     }
 
     //Need new methods to edit existing level methods for project and subject
     @RequestMapping(value = "/projects/{projectId}/levels/edit/{levelId}", method = [RequestMethod.PUT, RequestMethod.POST], produces = MediaType.APPLICATION_JSON_VALUE)
-    void editLevel(@PathVariable("projectId") String projectId,
-                   @PathVariable("levelId") String levelId, @RequestBody EditLevelRequest editLevelRequest) {
+    RequestResult editLevel(@PathVariable("projectId") String projectId,
+                            @PathVariable("levelId") String levelId, @RequestBody EditLevelRequest editLevelRequest) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(levelId, "Level Id", projectId)
         levelDefinitionStorageService.editLevel(projectId, editLevelRequest, levelId)
+        return new RequestResult(success: true)
     }
 
     @RequestMapping(value = "/projects/{projectId}/performedSkills/{userId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -640,23 +647,31 @@ class AdminController {
     }
 
     @RequestMapping(value = "/projects/{projectId}/settings/{setting}", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    SettingsResult saveProjectSetting(@PathVariable("projectId") String projectId, @PathVariable("setting") String setting, @RequestBody SettingsRequest value) {
+    RequestResult saveProjectSetting(@PathVariable("projectId") String projectId, @PathVariable("setting") String setting, @RequestBody SettingsRequest value) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(setting, "Setting Id", projectId)
         SkillsValidator.isTrue(projectId == value.projectId, "Project Id must equal", projectId)
         SkillsValidator.isTrue(setting == value.setting, "Setting Id must equal", projectId)
 
         settingsService.saveSetting(value)
+        return new RequestResult(success: true)
     }
 
     @RequestMapping(value = "/projects/{projectId}/resetClientSecret", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    String resetClientSecret(@PathVariable("projectId") String projectId) {
+    RequestResult resetClientSecret(@PathVariable("projectId") String projectId) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
 
         String clientSecret = new ClientSecretGenerator().generateClientSecret()
         projectAdminStorageService.updateClientSecret(projectId, clientSecret)
-        return clientSecret
+        return new RequestResult(success: true)
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/clientSecret", method = [RequestMethod.GET], produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    String getClientSecret(@PathVariable("projectId") String projectId) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        return projectAdminStorageService.getProjDef(projectId).clientSecret
     }
 
     @RequestMapping(value = "/projects/{projectId}/clientSecret", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)

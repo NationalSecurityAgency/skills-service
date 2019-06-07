@@ -56,7 +56,8 @@ class SkillsManagementFacade {
     UserAchievedLevelRepo achievedLevelRepo
 
     static class SkillEventResult {
-        boolean wasPerformed = true
+        boolean success = true
+        boolean skillApplied = true
         // only really applicable if it wasn't performed
         String explanation = "Skill event was applied"
         List<CompletionItem> completed = []
@@ -100,7 +101,7 @@ class SkillsManagementFacade {
 
         List<SkillDef> performedDependencies = performedSkillRepository.findPerformedParentSkills(userId, projectId, skillId)
         if (performedDependencies) {
-            res.wasPerformed = false
+            res.skillApplied = false
             res.explanation = "You cannot delete a skill event when a parent skill dependency has already been performed. You must first delete " +
                     "the performed skills for the parent dependencies: ${performedDependencies.collect({ it.projectId + ":" + it.skillId})}."
             return res
@@ -136,13 +137,13 @@ class SkillsManagementFacade {
         numExistingSkills = numExistingSkills ?: 0 // account for null
 
         if (hasReachedMaxPoints(numExistingSkills, skillDefinition)) {
-            res.wasPerformed = false
+            res.skillApplied = false
             res.explanation = "This skill reached its maximum points"
             return res
         }
 
         if (isInsideTimePeriod(skillDefinition, userId, incomingSkillDate)) {
-            res.wasPerformed = false
+            res.skillApplied = false
             res.explanation = "This skill was already performed within the configured time period (within the last ${skillDefinition.pointIncrementInterval} hours)"
             return res
         }
@@ -152,7 +153,7 @@ class SkillsManagementFacade {
             !it.childAchievedSkillId
         })
         if (notAchievedDependents) {
-            res.wasPerformed = false
+            res.skillApplied = false
             res.explanation = "Not all dependent skills have been achieved. Missing achievements for ${notAchievedDependents.size()} out of ${dependentsAndAchievements.size()}. " +
                     "Waiting on completion of ${notAchievedDependents.collect({ it.childProjectId + ":" + it.childSkillId})}."
             return res
