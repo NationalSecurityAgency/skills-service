@@ -7,7 +7,7 @@ export default {
   },
   saveSetting(projectId, settingObj) {
     return axios.post(`/admin/projects/${projectId}/settings/${settingObj.setting}`, settingObj, { handleError: false })
-      .then(() => getSetting(projectId, settingObj.setting));
+      .then(() => this.getSetting(projectId, settingObj.setting));
   },
   getSettingsForProject(projectId) {
     return axios.get(`/admin/projects/${projectId}/settings`)
@@ -27,5 +27,5 @@ export default {
   },
   getUserInfo() {
     return axios.get('/app/userInfo').then(response => response.data);
-  }
+  },
 };

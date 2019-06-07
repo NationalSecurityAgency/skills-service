@@ -35,7 +35,7 @@ class AccessSettingsController {
         accessSettingsStorageService.deleteUserRole(userId, projectId, roleName)
     }
 
-    @RequestMapping(value = "/projects/{projectId}/users/{userId}/roles/{roleName}", method = RequestMethod.PUT)
+    @RequestMapping(value = "/projects/{projectId}/users/{userId}/roles/{roleName}", method = [RequestMethod.PUT, RequestMethod.POST])
     RequestResult addUserRole(
             @PathVariable("projectId") String projectId,
             @PathVariable("userId") String userId, @PathVariable("roleName") RoleName roleName) {
@@ -49,7 +49,7 @@ class AccessSettingsController {
         return accessSettingsStorageService.getAllowedOrigins(projectId)
     }
 
-    @RequestMapping(value = "/projects/{projectId}/allowedOrigins", method = RequestMethod.PUT)
+    @RequestMapping(value = "/projects/{projectId}/allowedOrigins", method = [RequestMethod.PUT, RequestMethod.POST])
     AllowedOrigin saveOrUpdateAllowedOrigin(@PathVariable("projectId") String projectId, @RequestBody AllowedOrigin update) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(update.allowedOrigin, "Allowed Origin", projectId)

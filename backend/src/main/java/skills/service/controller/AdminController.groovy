@@ -646,7 +646,7 @@ class AdminController {
         return settingsService.getSetting(projectId, setting)
     }
 
-    @RequestMapping(value = "/projects/{projectId}/settings/{setting}", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/projects/{projectId}/settings/{setting}", method = [RequestMethod.PUT, RequestMethod.POST], produces = MediaType.APPLICATION_JSON_VALUE)
     RequestResult saveProjectSetting(@PathVariable("projectId") String projectId, @PathVariable("setting") String setting, @RequestBody SettingsRequest value) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(setting, "Setting Id", projectId)
