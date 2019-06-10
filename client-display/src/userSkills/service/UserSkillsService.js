@@ -196,9 +196,6 @@ service = {
 
   getServicePath() {
     let servicePath = '/api/projects';
-    if (this.userId) {
-      servicePath = '/admin/projects';
-    }
     return servicePath;
   },
 
