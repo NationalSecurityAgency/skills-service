@@ -7,7 +7,7 @@
     <b-dropdown-item href="#"  @click="gotoSettings">
       <span class="text-info"> <i class="fas fa-cog" style="width: 1.5rem;"/>Settings</span>
     </b-dropdown-item>
-    <b-dropdown-item v-if="isJwtAuthenticatedUser" href="#" @click="signOut">
+    <b-dropdown-item v-if="isFormAuthenticatedUser" href="#" @click="signOut">
       <span class="text-info"> <i class="fas fa-sign-out-alt" style="width: 1.5rem;"/>Log Out</span>
     </b-dropdown-item>
   </b-dropdown>
@@ -28,7 +28,7 @@
       isAuthenticatedUser() {
         return this.$store.getters.isAuthenticated;
       },
-      isJwtAuthenticatedUser() {
+      isFormAuthenticatedUser() {
         return this.isAuthenticatedUser && !this.$store.getters.isPkiAuthenticated;
       },
       displayName() {

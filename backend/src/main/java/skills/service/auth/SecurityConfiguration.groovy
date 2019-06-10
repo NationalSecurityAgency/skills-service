@@ -4,16 +4,23 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.context.properties.ConfigurationProperties
+import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Condition
 import org.springframework.context.annotation.ConditionContext
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.annotation.Order
 import org.springframework.core.type.AnnotatedTypeMetadata
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
+import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.core.AuthenticationException
+import org.springframework.security.core.userdetails.UserDetailsService
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.AuthenticationEntryPoint
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository
+import org.springframework.security.web.context.SecurityContextRepository
 import org.springframework.stereotype.Component
 import skills.storage.model.auth.RoleName
 
@@ -51,14 +58,30 @@ class SecurityConfiguration {
     @Order(99)
     static class CorsSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
+        @Value('#{securityConfig.authMode}}')
+        AuthMode authMode = AuthMode.DEFAULT_AUTH_MODE
+
         @Autowired
         private PortalWebSecurityHelper portalWebSecurityHelper
 
         @Autowired
         private RestAuthenticationEntryPoint restAuthenticationEntryPoint
 
-        @Autowired
+        @Autowired(required = false)  // not required for PKI_AUTH
         HttpSessionSecurityContextRepository securityContextRepository
+
+        @Autowired
+        PasswordEncoder passwordEncoder
+
+        @Autowired
+        UserDetailsService userDetailsService
+
+        @Autowired
+        void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+            auth
+                    .userDetailsService(userDetailsService)
+                    .passwordEncoder(passwordEncoder)
+        }
 
         @Override
         protected void configure(HttpSecurity http) throws Exception {
@@ -67,6 +90,14 @@ class SecurityConfiguration {
                     .securityContext().securityContextRepository(securityContextRepository)
             .and()
                     .exceptionHandling().authenticationEntryPoint(restAuthenticationEntryPoint)
+
+            if (this.authMode == AuthMode.PKI) {
+                http
+                        .x509()
+                        .subjectPrincipalRegex(/(.*)/)
+                        .and()
+                        .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            }
         }
     }
 
@@ -79,6 +110,11 @@ class SecurityConfiguration {
                 final AuthenticationException authException) throws IOException {
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized")
         }
+    }
+
+    @Bean
+    PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder()
     }
 
     static class PkiAuth implements Condition {

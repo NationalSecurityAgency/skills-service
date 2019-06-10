@@ -22,7 +22,7 @@ import skills.storage.model.auth.UserRole
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
-@Conditional(SecurityConfiguration.FormAuth)
+//@Conditional(SecurityConfiguration.FormAuth)
 @RestController
 @RequestMapping("/")
 @Slf4j
@@ -37,9 +37,10 @@ class CreateAccountController {
     @Autowired
     private ClientRegistrationRepository clientRegistrationRepository;
 
-    @Autowired
+    @Autowired(required = false)
     OAuth2ProviderProperties oAuth2ProviderProperties
 
+    @Conditional(SecurityConfiguration.FormAuth)
     @PutMapping("createAccount")
     void createAppUser(@RequestBody UserInfo userInfo, HttpServletResponse response) {
         String password = userInfo.password
@@ -54,6 +55,7 @@ class CreateAccountController {
         userAuthService.autologin(userInfo, password)
     }
 
+    @Conditional(SecurityConfiguration.FormAuth)
     @PutMapping("createRootAccount")
     void createRootUser(@RequestBody UserInfo userInfo, HttpServletResponse response) {
         SkillsValidator.isTrue(!userAuthService.rootExists(), 'A root user already exists! Granting additional root privileges requires a root user to grant them!')
@@ -71,6 +73,7 @@ class CreateAccountController {
         userAuthService.createUser(userInfo, true)
     }
 
+    @Conditional(SecurityConfiguration.PkiAuth)
     @PostMapping('grantFirstRoot')
     void grantFirstRoot(HttpServletRequest request) {
         SkillsValidator.isTrue(!userAuthService.rootExists(), 'A root user already exists! Granting additional root privileges requires a root user to grant them!')
@@ -78,11 +81,13 @@ class CreateAccountController {
         userAuthService.grantRoot(request.getUserPrincipal().name)
     }
 
+    @Conditional(SecurityConfiguration.FormAuth)
     @GetMapping('userExists/{user}')
     boolean userExists(@PathVariable('user') String user) {
         return userAuthService.userExists(user)
     }
 
+    @Conditional(SecurityConfiguration.FormAuth)
     @GetMapping("/app/oAuthProviders")
     List<OAuth2Provider> getOAuthProviders() {
         List<OAuth2Provider> providers = []
@@ -98,7 +103,8 @@ class CreateAccountController {
     @Component
     @Configuration
     @ConfigurationProperties(prefix = "spring.security.oauth2.client")
+    @Conditional(SecurityConfiguration.FormAuth)
     static class OAuth2ProviderProperties {
-        final Map<String, OAuth2Provider> registration = new HashMap<>();
+        final Map<String, OAuth2Provider> registration = new HashMap<>()
     }
 }

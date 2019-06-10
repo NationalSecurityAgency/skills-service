@@ -10,8 +10,13 @@ import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken
 import org.springframework.web.client.RestTemplate
+import skills.service.auth.SkillsAuthorizationException
 import skills.service.auth.UserAuthService
 import skills.service.auth.UserInfo
+
+import javax.persistence.EntityManager
+import javax.persistence.PersistenceContext
+import javax.transaction.Transactional
 
 @Slf4j
 class PkiUserDetailsService implements UserDetailsService, AuthenticationUserDetailsService<PreAuthenticatedAuthenticationToken> {
@@ -22,22 +27,33 @@ class PkiUserDetailsService implements UserDetailsService, AuthenticationUserDet
     @Autowired
     UserAuthService userAuthService
 
+    @PersistenceContext
+    protected EntityManager em
+
     RestTemplate restTemplate = new RestTemplate()
 
     @Override
+    @Transactional
     UserDetails loadUserByUsername(String dn) throws UsernameNotFoundException {
         UserInfo userInfo
         try {
             userInfo = restTemplate.getForObject(userInfoUri, UserInfo, dn)
-            userInfo.password = 'PKI_AUTHENTICATED'
-            // TODO - may need to call userAuthService.createOrUpdateUser() like we do in
-            // SkillsHttpSessionSecurityContextRepository for OAuth users.  this will create
-            // the account for first time users.  I think this may be necessary for granting
-            // another user 'project admin role' to a project via the Access settings page
             if (userInfo) {
-                userInfo.authorities = userAuthService.loadAuthorities(userInfo.username)
+                UserInfo existingUserInfo = userAuthService.loadByUserId(userInfo.username)
+                if (existingUserInfo) {
+                    userInfo.password = existingUserInfo.password
+                    userInfo.nickname = existingUserInfo.nickname
+                } else {
+                    userInfo.password = 'PKI_AUTHENTICATED'
+                }
+
+                // update user properties and load user roles, or create the account if this is the first time the user has connected
+                if (!em.isJoinedToTransaction()) {
+                    em.joinTransaction()
+                }
+                userInfo = userAuthService.createOrUpdateUser(userInfo)
             } else {
-                throw new RuntimeException("Unknown user [$dn]")
+                throw new SkillsAuthorizationException("Unknown user [$dn]")
             }
         } catch (Exception e) {
             log.error("Error occurred looking up user info for DN [${dn}]", e)

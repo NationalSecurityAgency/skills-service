@@ -196,9 +196,6 @@ service = {
 
   getServicePath() {
     let servicePath = '/api/projects';
-    if (this.userId) {
-      servicePath = '/admin/projects';
-    }
     return servicePath;
   },
 
@@ -225,7 +222,7 @@ service = {
 
   setToken(token) {
     this.token = token;
-    if (token) {
+    if (token  && token !== 'pki') {
       axios.defaults.headers.common.Authorization = `Bearer ${token}`;
     } else {
       delete axios.defaults.headers.common.Authorization;
