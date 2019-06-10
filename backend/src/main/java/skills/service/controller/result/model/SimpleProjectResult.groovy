@@ -7,6 +7,4 @@ class SimpleProjectResult {
     String projectId
 
     String name
-
-    String clientSecret
 }
