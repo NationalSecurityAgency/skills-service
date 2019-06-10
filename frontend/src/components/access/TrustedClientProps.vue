@@ -17,7 +17,8 @@
           <span>Client Secret:</span>
         </div>
         <div class="col">
-          <span>{{ project.clientSecret }}</span>
+          <b-spinner v-if="!clientSecret" small label="Loading..." variant="info"/>
+          <span>{{ clientSecret }}</span>
         </div>
       </div>
       <b-button @click="confirmResetClientSecret" variant="outline-info" class="mt-3">
@@ -35,6 +36,18 @@
     name: 'TrustedClientProps',
     mixins: [MsgBoxMixin],
     props: ['project'],
+    data() {
+      return {
+        loadingSecret: true,
+        clientSecret: '',
+      };
+    },
+    mounted() {
+      AccessService.getClientSecret(this.project.projectId)
+        .then((clientSecret) => {
+          this.clientSecret = clientSecret;
+        });
+    },
     methods: {
       confirmResetClientSecret() {
         this.msgConfirm('Are you sure you want reset the client secret? Your current client secret will no longer work after reset and you will need to update any application configuration using the old secret.', 'Reset Secret?', 'Reset Please!')

@@ -5,10 +5,6 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.http.MediaType
-import org.springframework.http.ResponseEntity
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
-import org.springframework.security.oauth2.common.OAuth2AccessToken
-import org.springframework.security.oauth2.provider.endpoint.TokenEndpoint
 import org.springframework.web.bind.annotation.*
 import skills.service.controller.exceptions.SkillsValidator
 import skills.service.controller.request.model.*
@@ -661,5 +657,12 @@ class AdminController {
         String clientSecret = new ClientSecretGenerator().generateClientSecret()
         projectAdminStorageService.updateClientSecret(projectId, clientSecret)
         return clientSecret
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/clientSecret", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    String getProjectClientSecret(@PathVariable("projectId") String projectId) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        return projectAdminStorageService.getProjectSecret(projectId)
     }
 }

@@ -34,6 +34,10 @@ export default {
     return axios.put(`/admin/projects/${projectId}/resetClientSecret`)
       .then(response => response.data);
   },
+  getClientSecret(projectId) {
+    return axios.get(`/admin/projects/${projectId}/clientSecret`)
+      .then(response => response.data);
+  },
   userWithEmailExists(email) {
     return axios.get(`/userExists/${email}`).then(response => !response.data);
   },
