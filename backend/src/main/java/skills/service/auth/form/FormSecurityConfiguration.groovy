@@ -13,6 +13,7 @@ import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
+import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
@@ -56,10 +57,13 @@ class FormSecurityConfiguration extends WebSecurityConfigurerAdapter {
     private RestLogoutSuccessHandler restLogoutSuccessHandler
 
     @Autowired
+    PasswordEncoder passwordEncoder
+
+    @Autowired
     void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
         auth
                 .userDetailsService(localUserDetailsService())
-                .passwordEncoder(passwordEncoder())
+                .passwordEncoder(passwordEncoder)
     }
 
     @Override
@@ -68,6 +72,8 @@ class FormSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
         // Portal endpoints config
         portalWebSecurityHelper.configureHttpSecurity(http)
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
+        .and()
                 .securityContext().securityContextRepository(httpSessionSecurityContextRepository())
         .and()
                 .exceptionHandling()
@@ -94,11 +100,6 @@ class FormSecurityConfiguration extends WebSecurityConfigurerAdapter {
     AuthenticationManager authenticationManagerBean() throws Exception {
         // provides the default AuthenticationManager as a Bean
         return super.authenticationManagerBean()
-    }
-
-    @Bean
-    PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder()
     }
 
     @Bean

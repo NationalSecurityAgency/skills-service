@@ -1,5 +1,5 @@
 <template>
-  <div v-if="authToken && !loading.userToken && !loading.availableVersions">
+  <div v-if="!loading.userToken && !loading.availableVersions">
     <sub-page-header title="Client Display">
       <b-form class="float-right" inline>
         <label class="pr-3 d-none d-sm-inline font-weight-bold" for="version-select">Version: </label>
@@ -17,6 +17,7 @@
       :authenticator="authenticator"
       :version="selectedVersion"
       :project-id="projectId"
+      :user-id="userId"
       :service-url="serviceUrl"/>
   </div>
 
@@ -40,7 +41,6 @@
         projectId: '',
         userId: '',
         authToken: '',
-        authenticationUrl: '',
         loading: {
           userToken: true,
           availableVersions: true,
@@ -53,15 +53,18 @@
       this.projectId = this.$route.params.projectId;
       this.userId = this.$route.params.userId;
       this.totalPoints = this.$route.params.totalPoints;
-      this.authenticator = `${this.serviceUrl}/admin/projects/${encodeURIComponent(this.projectId)}/token/${encodeURIComponent(this.userId)}`;
 
-      UsersService.getUserToken(this.projectId, this.userId)
-        .then((result) => {
-          this.authToken = result;
-        })
-        .finally(() => {
-          this.loading.userToken = false;
-        });
+      if (!this.$store.getters.isPkiAuthenticated) {
+        UsersService.getUserToken(this.projectId, this.userId)
+          .then((result) => {
+            this.authToken = result;
+          })
+          .finally(() => {
+            this.loading.userToken = false;
+          });
+      } else {
+        this.loading.userToken = false;
+      }
       UsersService.getAvailableVersions(this.projectId)
         .then((result) => {
           this.versionOptions = result;
@@ -74,6 +77,12 @@
     computed: {
       serviceUrl() {
         return window.location.origin;
+      },
+      authenticator() {
+        if (this.$store.getters.isPkiAuthenticated) {
+          return 'pki';
+        }
+        return `${this.serviceUrl}/admin/projects/${encodeURIComponent(this.projectId)}/token/${encodeURIComponent(this.userId)}`;
       },
     },
   };

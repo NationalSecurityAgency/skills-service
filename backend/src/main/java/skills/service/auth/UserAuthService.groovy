@@ -7,12 +7,10 @@ import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
-import skills.service.controller.exceptions.SkillsValidator
 import skills.service.datastore.services.AccessSettingsStorageService
 import skills.service.datastore.services.InceptionProjectService
 import skills.storage.model.auth.RoleName
@@ -36,9 +34,6 @@ class UserAuthService {
 
     @Autowired
     private AuthenticationManager authenticationManager
-
-    @Autowired
-    PasswordEncoder passwordEncoder
 
     @Autowired
     InceptionProjectService inceptionProjectService

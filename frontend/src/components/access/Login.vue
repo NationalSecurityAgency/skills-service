@@ -154,10 +154,12 @@
       },
     },
     created() {
-      AccessService.getOAuthProviders()
-        .then((result) => {
-          this.oAuthProviders = result;
-        });
+      if (!this.$store.getters.isPkiAuthenticate) {
+        AccessService.getOAuthProviders()
+          .then((result) => {
+            this.oAuthProviders = result;
+          });
+      }
     },
   };
 </script>
