@@ -576,7 +576,6 @@ class AdminProjService {
                 projectId: definition.projectId, name: definition.name, totalPoints: definition.totalPoints,
                 numSubjects: definition.subjects ? definition.subjects.size() : 0,
                 displayOrder: definition.displayOrder,
-                clientSecret: definition.clientSecret
         )
         res.numUsers = projDefRepo.calculateDistinctUsers(definition.projectId)
         res.numSkills = skillDefRepo.countByProjectIdAndType(definition.projectId, SkillDef.ContainerType.Skill)
@@ -637,7 +636,6 @@ class AdminProjService {
     @Transactional(readOnly = true)
     ProjectResult getProject(String projectId) {
         ProjDef projectDefinition = getProjDef(projectId)
-        assert projectDefinition, "Failed to find project with id [$projectId]"
         ProjectResult res = convert(projectDefinition)
         return res
     }
@@ -1073,6 +1071,13 @@ class AdminProjService {
     @Transactional
     List<SkillDefRes> getSkillsForBadge(String projectId, String badgeId) {
         return getSkillsByProjectSkillAndType(projectId, badgeId, SkillDef.ContainerType.Badge, RelationshipType.BadgeDependence)
+    }
+
+
+    @Transactional(readOnly = true)
+    String getProjectSecret(String projectId) {
+        ProjDef projectDefinition = getProjDef(projectId)
+        return projectDefinition.clientSecret
     }
 
     @Transactional
