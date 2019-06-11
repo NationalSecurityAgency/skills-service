@@ -46,7 +46,7 @@ class UserInfoService {
             retVal = userId
         } else {
             // we are in PKI auth mode so we need to lookup the user to convert from DN to username
-            retVal = userDetailsService.loadUserByUsername(userId).username
+            retVal = userDetailsService.loadUserByUsername(userId, false).username
         }
         return retVal
     }
