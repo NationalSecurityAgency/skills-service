@@ -38,6 +38,11 @@
     mounted() {
       this.loadProjects();
     },
+    computed: {
+      minimumPoints() {
+        return this.$store.state.minimumProjectPoints;
+      },
+    },
     methods: {
       loadProjects() {
         this.isLoading = true;
@@ -68,7 +73,7 @@
           }, {
             label: 'Points',
             count: project.totalPoints,
-            warnMsg: project.totalPoints < 100 ? 'Project has insufficient points assigned. Skills cannot be achieved until project has at least 100 points.' : null,
+            warnMsg: project.totalPoints < this.minimumPoints ? 'Project has insufficient points assigned. Skills cannot be achieved until project has at least 100 points.' : null,
           }, {
             label: 'Users',
             count: project.numUsers,

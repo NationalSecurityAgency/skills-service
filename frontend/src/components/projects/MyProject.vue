@@ -43,6 +43,11 @@
     mounted() {
       this.createCardOptions();
     },
+    computed: {
+      minimumPoints() {
+        return this.$store.state.minimumProjectPoints;
+      },
+    },
     methods: {
       createCardOptions() {
         this.cardOptions = {
@@ -58,7 +63,7 @@
           }, {
             label: 'Points',
             count: this.projectInternal.totalPoints,
-            warn: this.projectInternal.totalPoints < 100,
+            warn: this.projectInternal.totalPoints < this.minimumPoints,
             warnMsg: 'Project has insufficient points assigned. Skills cannot be achieved until project has at least 100 points.',
           }, {
             label: 'Users',
