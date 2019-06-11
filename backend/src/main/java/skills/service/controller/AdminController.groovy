@@ -75,7 +75,7 @@ class AdminController {
 
     @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}", method = [RequestMethod.PUT, RequestMethod.POST], produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    SubjectResult saveSubject(@PathVariable("projectId") String projectId,
+    RequestResult saveSubject(@PathVariable("projectId") String projectId,
                               @PathVariable("subjectId") String subjectId,
                               @RequestBody SubjectRequest subjectRequest) {
         SkillsValidator.isFirstOrMustEqualToSecond(subjectRequest.subjectId, subjectId, "Subject Id")
@@ -84,7 +84,8 @@ class AdminController {
         SkillsValidator.isNotBlank(subjectId, "Subject Id", projectId)
         SkillsValidator.isNotBlank(subjectRequest?.name, "Subject name", projectId)
 
-        return projectAdminStorageService.saveSubject(projectId, subjectRequest)
+        projectAdminStorageService.saveSubject(projectId, subjectRequest)
+        return new RequestResult(success: true)
     }
 
     @RequestMapping(value = "/projects/{projectId}/subjectExists", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)

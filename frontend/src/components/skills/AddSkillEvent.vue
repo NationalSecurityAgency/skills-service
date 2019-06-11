@@ -62,6 +62,14 @@
       SubPageHeader,
       Datepicker,
     },
+    props: {
+      projectId: {
+        type: String,
+      },
+    },
+    mounted() {
+      console.log(`projectId: ${this.projectId}`);
+    },
     data() {
       return {
         overallErrMsg: '',

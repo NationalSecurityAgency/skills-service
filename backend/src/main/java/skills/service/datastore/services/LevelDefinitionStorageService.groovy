@@ -262,8 +262,6 @@ class LevelDefinitionStorageService {
             throw new SkillException("A minimum of one level is required", projectId, skillId)
         }
 
-
-
         if (existingDefinitions) {
             existingDefinitions = existingDefinitions.sort({ it.level })
             removed = existingDefinitions.last()
@@ -396,7 +394,9 @@ class LevelDefinitionStorageService {
         return created
     }
 
-    List<LevelDef> createDefault() {
+    List<LevelDef> createDefault(String projectId) {
+        SettingsResult setting = settingsService.getSetting(projectId, Settings.LEVEL_AS_POINTS.settingName)
+
         List<LevelDef> res = []
         int i=0
         defaultPercentages.each { String name, Integer percentage ->
@@ -404,6 +404,10 @@ class LevelDefinitionStorageService {
             log.info("creating default level $levelDef")
             res << levelDef
         }
+        if(setting?.isEnabled()){
+            new LevelUtils().convertToPoints(res, LevelUtils.defaultTotalPointsGuess)
+        }
+
         levelDefinitionRepository.saveAll(res)
     }
 }

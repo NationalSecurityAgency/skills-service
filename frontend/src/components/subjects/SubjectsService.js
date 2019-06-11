@@ -19,7 +19,7 @@ export default {
   },
   saveSubject(subject) {
     return axios.post(`/admin/projects/${subject.projectId}/subjects/${subject.subjectId}`, subject)
-      .then(res => res.data);
+      .then(() => this.getSubjectDetails(subject.projectId, subject.subjectId));
   },
   patchSubject(subject, actionToSubmit) {
     return axios.patch(`/admin/projects/${subject.projectId}/subjects/${subject.subjectId}`, { action: actionToSubmit });
