@@ -10,8 +10,10 @@
           <datepicker input-class="border-0" wrapper-class="form-control" v-model="dateAdded" name="Event Date" v-validate="'required'"/>
         </div>
         <div class="col-auto">
-          <b-button variant="outline-primary" @click="addSkill" :disabled="errors.any() || (!currentSelectedUserId || currentSelectedUserId.length ===0)">
-            Add <i :class="[isSaving ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-arrow-circle-right']"></i>
+          <b-button variant="outline-primary" @click="addSkill" :disabled="errors.any() || (!currentSelectedUserId || currentSelectedUserId.length ===0) || projectTotalPoints < minimumPoints">
+            Add <i v-if="projectTotalPoints >= minimumPoints" :class="[isSaving ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-arrow-circle-right']"></i>
+            <i v-else class="icon-warning fa fa-exclamation-circle text-warning"
+               v-b-tooltip.hover="'Unable to add skill for user. Insufficient available points in project.'"></i>
           </b-button>
         </div>
       </div>
@@ -42,6 +44,7 @@
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import SimpleCard from '../utils/cards/SimpleCard';
   import SkillsService from './SkillsService';
+  import ProjectService from '../projects/ProjectService';
 
   const dictionary = {
     en: {
@@ -67,9 +70,6 @@
         type: String,
       },
     },
-    mounted() {
-      console.log(`projectId: ${this.projectId}`);
-    },
     data() {
       return {
         overallErrMsg: '',
@@ -80,15 +80,27 @@
         usersAdded: [],
         isSaving: false,
         currentSelectedUserId: '',
+        projectTotalPoints: 0,
       };
+    },
+    mounted() {
+      this.loadProject();
     },
     computed: {
       reversedUsersAdded: function reversedUsersAdded() {
         return this.usersAdded.map(e => e)
           .reverse();
       },
+      minimumPoints() {
+        return this.$store.state.minimumProjectPoints;
+      },
     },
     methods: {
+      loadProject() {
+        ProjectService.getProject(this.projectId).then((res) => {
+          this.projectTotalPoints = res.totalPoints;
+        });
+      },
       // onUserSelected(userId) {
       //   this.currentSelectedUserId = userId;
       // },
