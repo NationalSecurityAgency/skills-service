@@ -22,7 +22,7 @@ deploy:
     - apk --update --no-cache add sshpass openssh git
   script:
     - git clone https://${GITLAB_DEPLOY_USERNAME}:${GITLAB_DEPLOY_PASSWORD}@gitlab.evoforge.org/skills/skills-deploy.git
-    - git clone https://${GITLAB_DEPLOY_USERNAME}:${GITLAB_DEPLOY_PASSWORD}@gitlab.evoforge.org/skills/user-info-service.git
+    - git clone https://${GITLAB_USER_SVC_USERNAME}:${GITLAB_USER_SVC_PASSWORD}@gitlab.evoforge.org/skills/user-info-service.git
     - TIMESTAMP=`date +%s`
     - TMP_DIR="deploy_${TIMESTAMP}"
     - DEST_PATH="/home/${CI_USERNAME}/$TMP_DIR"
