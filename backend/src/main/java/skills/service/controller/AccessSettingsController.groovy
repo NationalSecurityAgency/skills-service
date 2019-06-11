@@ -2,13 +2,10 @@ package skills.service.controller
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.security.core.AuthenticationException
-import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.web.bind.annotation.*
-import skills.service.auth.UserInfo
 import skills.service.auth.UserInfoService
-import skills.service.controller.exceptions.SkillException
 import skills.service.controller.exceptions.SkillsValidator
+import skills.service.controller.result.model.RequestResult
 import skills.service.datastore.services.AccessSettingsStorageService
 import skills.storage.model.auth.AllowedOrigin
 import skills.storage.model.auth.RoleName
@@ -38,11 +35,12 @@ class AccessSettingsController {
         accessSettingsStorageService.deleteUserRole(userId, projectId, roleName)
     }
 
-    @RequestMapping(value = "/projects/{projectId}/users/{userId}/roles/{roleName}", method = RequestMethod.PUT)
-    UserRole addUserRole(
+    @RequestMapping(value = "/projects/{projectId}/users/{userId}/roles/{roleName}", method = [RequestMethod.PUT, RequestMethod.POST])
+    RequestResult addUserRole(
             @PathVariable("projectId") String projectId,
             @PathVariable("userId") String userId, @PathVariable("roleName") RoleName roleName) {
         accessSettingsStorageService.addUserRole(userId, projectId, roleName)
+        return new RequestResult(success: true)
     }
 
     @RequestMapping(value = "/projects/{projectId}/allowedOrigins", method = RequestMethod.GET, produces = "application/json")
@@ -51,7 +49,7 @@ class AccessSettingsController {
         return accessSettingsStorageService.getAllowedOrigins(projectId)
     }
 
-    @RequestMapping(value = "/projects/{projectId}/allowedOrigins", method = RequestMethod.PUT)
+    @RequestMapping(value = "/projects/{projectId}/allowedOrigins", method = [RequestMethod.PUT, RequestMethod.POST])
     AllowedOrigin saveOrUpdateAllowedOrigin(@PathVariable("projectId") String projectId, @RequestBody AllowedOrigin update) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(update.allowedOrigin, "Allowed Origin", projectId)

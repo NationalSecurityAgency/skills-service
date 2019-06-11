@@ -8,6 +8,7 @@ import skills.service.controller.exceptions.SkillException
 import skills.service.controller.request.model.SettingsRequest
 import skills.service.controller.result.model.LevelDefinitionRes
 import skills.service.datastore.services.LevelDefinitionStorageService
+import skills.service.datastore.services.LevelUtils
 import skills.service.datastore.services.settings.SettingChangedListener
 import skills.service.datastore.services.settings.Settings
 import skills.storage.model.LevelDef
@@ -23,7 +24,6 @@ import javax.transaction.Transactional
 class LevelPointsSettingListener implements SettingChangedListener{
 
     static final int MIN_TOTAL_POINTS_REQUIRED_TO_SWITCH = 100
-    static final double SCALE_THRESHOLD = 1.3
 
     @Autowired
     ProjDefRepo projDefRepo
@@ -41,6 +41,8 @@ class LevelPointsSettingListener implements SettingChangedListener{
     void execute(Setting previousValue, SettingsRequest setting) {
         ProjDef project = projDefRepo.findByProjectId(setting.projectId)
 
+        LevelUtils levelUtils = new LevelUtils()
+
         if(setting.isEnabled() && (!previousValue?.isEnabled())){
             log.info("converting all levels for project [${setting.projectId}] (including skill levels) to points")
             if(project?.totalPoints < MIN_TOTAL_POINTS_REQUIRED_TO_SWITCH){
@@ -50,68 +52,32 @@ class LevelPointsSettingListener implements SettingChangedListener{
                         "N/A",
                         ErrorCode.InsufficientPointsToConvertLevels)
             }
-            convertToPoints(project.levelDefinitions, project.totalPoints)
+            levelUtils.convertToPoints(project.levelDefinitions, project.totalPoints)
+            project.levelDefinitions.each{
+                levelDefRepo.save(it)
+            }
             project.subjects?.each{
-                convertToPoints(it.levelDefinitions, it.totalPoints)
+                levelUtils.convertToPoints(it.levelDefinitions, it.totalPoints == 0 ? LevelUtils.defaultTotalPointsGuess : it.totalPoints)
+                it.levelDefinitions.each { LevelDef level ->
+                    levelDefRepo.save(level)
+                }
             }
         }else if(!setting.isEnabled()){
             log.info("converting all levels for project [${setting.projectId}] (including skill levels) to percentages")
-            convertToPercentage(project.levelDefinitions, project.totalPoints)
+            levelUtils.convertToPercentage(project.levelDefinitions, project.totalPoints)
+            project.levelDefinitions.each{
+                levelDefRepo.save(it)
+            }
             project.subjects?.each{
-                convertToPercentage(it.levelDefinitions, it.totalPoints)
+                log.info("converting level definitions ${it.levelDefinitions} for subject ${it}")
+                //conditions we need to handle:
+                levelUtils.convertToPercentage(it.levelDefinitions, it.totalPoints)
+                it.levelDefinitions.each{ LevelDef level ->
+                    levelDefRepo.save(level)
+                }
+
             }
         }
     }
 
-    private void convertToPoints(List<LevelDef> levelDefs, int totalPoints){
-        List<Integer> levelScores = levelDefs.sort({ it.level }).collect {
-            return (int) (totalPoints * (it.percent / 100d))
-        }
-        levelDefs.eachWithIndex{ LevelDef entry, int i ->
-            Integer fromPts = levelScores.get(i)
-            Integer toPts = (i != levelScores.size() - 1) ? levelScores.get(i + 1) : null
-            entry.pointsFrom = fromPts
-            entry.pointsTo = toPts
-            levelDefRepo.save(entry)
-        }
-    }
-
-    private void convertToPercentage(List<LevelDef> levelDefs, int totalPoints){
-        levelDefs.sort({ it.level })
-
-        Integer highestLevelPoints = levelDefs?.last()?.pointsFrom
-        double scaler = 1.0;
-
-        if(highestLevelPoints > totalPoints){
-            //this means that skills were deleted since the levels were converted to points/edited
-            //if we convert as-is to percentages, we'll wind up with invalid percentage values
-            log.warn("totalPoints [$totalPoints] are lower " +
-                    "then the highest level's pointsFrom [${highestLevelPoints}], " +
-                    "this would create invalid percentage values. Using [${highestLevelPoints}] as totalPoints for purposes of conversion")
-            //since we don't know what the total was before deletion, let's model the percentages off the highest level points being 92%
-            //since that's what we do for the default, otherwise the last level would be 100%
-            totalPoints = highestLevelPoints*1.08
-        } else if (SCALE_THRESHOLD*highestLevelPoints < totalPoints){
-            //this will result in an approximation as we don't know for sure the user's original intent
-            //but it will at least make more sense then leaving it untouched in this scenario.
-            log.info("skills were added after defining levels as points, attempting to scale the current point posture to the total points")
-            scaler = totalPoints/highestLevelPoints.toDouble()
-        }
-
-        LevelDef lastEntry = null
-
-        levelDefs.eachWithIndex { LevelDef entry, int i ->
-            double scaled = entry.pointsFrom * scaler
-            entry.percent = (int) ((scaled / totalPoints) * 100d)
-            if(entry.percent == 0){
-                //this can happen if someone adds a skill with a very large range of points after
-                //a conversion to points happens. The first few level points could be such a small percentage
-                //of the total that they would be effectively zero. Lets prevent that and use some sort of sensible default
-                //in those cases
-                entry.percent += 10+(lastEntry?.percent ? lastEntry.percent : 0)
-            }
-            lastEntry = entry
-            levelDefRepo.save(entry)
-        }
-    }
 }

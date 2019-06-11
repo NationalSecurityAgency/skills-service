@@ -31,7 +31,7 @@ class DataIntegrityViolationExceptionHandler {
                 if (entry) {
                     msg = entry.value
                 } else {
-                    log.warn("Failed to locate error message for the constraint name [{}], please consider adding one!", constraintViolationException.constraintName)
+                    log.warn("Failed to locate error explanation for the constraint name [{}], please consider adding one!", constraintViolationException.constraintName)
                 }
             }
             throw new SkillException(msg, projectId, skillId, ErrorCode.ConstraintViolation)

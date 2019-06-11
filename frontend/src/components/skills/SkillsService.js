@@ -15,7 +15,7 @@ export default {
   },
   saveSkill(skill) {
     return axios.put(`/admin/projects/${skill.projectId}/subjects/${skill.subjectId}/skills/${skill.skillId}`, skill)
-      .then(createdRuleResult => createdRuleResult.data);
+      .then(() => this.getSkillDetails(skill.projectId, skill.subjectId, skill.skillId));
   },
   deleteSkill(skill) {
     return axios.delete(`/admin/projects/${skill.projectId}/subjects/${skill.subjectId}/skills/${skill.skillId}`)
@@ -25,7 +25,7 @@ export default {
     return axios.patch(`/admin/projects/${skill.projectId}/subjects/${skill.subjectId}/skills/${skill.skillId}`, {
       action: actionToSubmit,
     })
-      .then(res => res.data);
+      .then(() => this.getSkillDetails(skill.projectId, skill.subjectId, skill.skillId));
   },
   getDependentSkillsGraphForSkill(projectId, skillId) {
     return axios.get(`/admin/projects/${projectId}/skills/${skillId}/dependency/graph`)

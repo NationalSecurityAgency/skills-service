@@ -4,12 +4,11 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
 import skills.service.controller.exceptions.SkillsValidator
+import skills.service.controller.result.model.RequestResult
 import skills.service.datastore.services.AccessSettingsStorageService
-import skills.service.datastore.services.InceptionProjectService
 import skills.service.settings.EmailConnectionInfo
 import skills.service.settings.EmailSettingsService
 import skills.storage.model.auth.UserRole
-import spock.lang.AutoCleanup
 
 import java.security.Principal
 
@@ -46,9 +45,9 @@ class RootController {
     }
 
     @PutMapping('/addRoot/{userId}')
-    UserRole addRoot(@PathVariable('userId') String userId) {
-        UserRole res = accessSettingsStorageService.addRoot(userId)
-        return res;
+    RequestResult addRoot(@PathVariable('userId') String userId) {
+        accessSettingsStorageService.addRoot(userId)
+        return new RequestResult(success: true);
     }
 
     @DeleteMapping('/deleteRoot/{userId}')
