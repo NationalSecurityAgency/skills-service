@@ -35,8 +35,7 @@ export default {
   },
   resetClientSecret(projectId) {
     return axios.put(`/admin/projects/${projectId}/resetClientSecret`)
-      .then(() => axios.get(`/admin/projects/${projectId}/clientSecret`)
-        .then(response => response.data));
+      .then(() => this.getClientSecret(projectId))
   },
   getClientSecret(projectId) {
     return axios.get(`/admin/projects/${projectId}/clientSecret`)
