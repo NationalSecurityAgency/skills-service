@@ -7,7 +7,7 @@ export default {
   },
   saveSetting(projectId, settingObj) {
     return axios.post(`/admin/projects/${projectId}/settings/${settingObj.setting}`, settingObj, { handleError: false })
-      .then(remoteRes => remoteRes.data);
+      .then(() => this.getSetting(projectId, settingObj.setting));
   },
   getSettingsForProject(projectId) {
     return axios.get(`/admin/projects/${projectId}/settings`)
@@ -23,6 +23,9 @@ export default {
     return axios.post('/root/saveEmailSettings', emailConnectionInfo).then(response => response.data);
   },
   saveUserInfo(userInfo) {
-    return axios.post('/app/userInfo', userInfo).then(response => response.data);
+    return axios.post('/app/userInfo', userInfo).then(() => this.getUserInfo());
+  },
+  getUserInfo() {
+    return axios.get('/app/userInfo').then(response => response.data);
   },
 };

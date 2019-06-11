@@ -5,6 +5,9 @@ export default {
     return axios.get('/app/projects')
       .then(response => response.data);
   },
+  getProject(projectId) {
+    return axios.get(`/app/projects/${projectId}`).then(response => response.data);
+  },
   getProjectDetails(projectId) {
     return axios.get(`/admin/projects/${projectId}`)
       .then(response => response.data);
@@ -15,7 +18,7 @@ export default {
   },
   saveProject(project) {
     return axios.post(`/app/projects/${project.projectId}`, project)
-      .then(response => response.data);
+      .then(() => this.getProject(project.projectId));
   },
   deleteProject(projectId) {
     return axios.delete(`/admin/projects/${projectId}`);

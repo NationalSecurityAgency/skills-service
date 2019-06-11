@@ -12,6 +12,7 @@ import skills.service.auth.SkillsAuthorizationException
 import skills.service.auth.UserAuthService
 import skills.service.auth.UserInfo
 import skills.service.auth.UserInfoService
+import skills.service.controller.result.model.RequestResult
 import skills.service.datastore.services.UserAdminService
 import skills.storage.model.auth.User
 import skills.storage.repos.UserRepo
@@ -58,8 +59,7 @@ class UserInfoController {
 
     @RequestMapping(value = "/userInfo", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    UserInfoRes updateUserInfo(@RequestBody UserInfoRes userInfoReq) {
-        UserInfoRes res
+    RequestResult updateUserInfo(@RequestBody UserInfoRes userInfoReq) {
         UserInfo currentUser = userInfoService.getCurrentUser()
         if (currentUser) {
             if (userInfoReq.first) {
@@ -69,12 +69,11 @@ class UserInfoController {
                 currentUser.lastName = userInfoReq.last
             }
             currentUser.nickname = userInfoReq.nickname
-            currentUser = userAuthService.createOrUpdateUser(currentUser)
-            res = convertToUserinfoRes(currentUser)
+            userAuthService.createOrUpdateUser(currentUser)
         } else if (authMode == AuthMode.PKI) {
             throw new SkillsAuthorizationException('Unauthenticated user while using PKI Authorization Mode')
         }
-        return res
+        return new RequestResult(success: true)
     }
 
     UserInfoRes convertToUserinfoRes(UserInfo userInfo) {

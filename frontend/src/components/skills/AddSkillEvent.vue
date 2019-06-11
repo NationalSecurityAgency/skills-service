@@ -62,6 +62,14 @@
       SubPageHeader,
       Datepicker,
     },
+    props: {
+      projectId: {
+        type: String,
+      },
+    },
+    mounted() {
+      console.log(`projectId: ${this.projectId}`);
+    },
     data() {
       return {
         overallErrMsg: '',
@@ -90,10 +98,10 @@
           .then((data) => {
             this.isSaving = false;
             const historyObj = {
-              success: data.wasPerformed,
+              success: data.skillApplied,
               msg: data.explanation,
               userId: this.currentSelectedUserId,
-              key: this.currentSelectedUserId + new Date().getTime() + data.wasPerformed,
+              key: this.currentSelectedUserId + new Date().getTime() + data.skillApplied,
             };
             this.usersAdded.push(historyObj);
           })

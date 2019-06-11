@@ -23,7 +23,7 @@ class CustomIconAdminController {
     @Autowired
     CustomIconFacade iconFacade
 
-    @RequestMapping(value = "/projects/{projectId}/icons/upload", method = RequestMethod.POST, produces = "application/json")
+    @RequestMapping(value = "/projects/{projectId}/icons/upload", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
     @ResponseBody
     UploadedIcon addCustomIcon(
             @PathVariable("projectId") String projectId,
