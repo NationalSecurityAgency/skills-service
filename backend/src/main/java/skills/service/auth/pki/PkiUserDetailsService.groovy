@@ -35,6 +35,10 @@ class PkiUserDetailsService implements UserDetailsService, AuthenticationUserDet
     @Override
     @Transactional
     UserDetails loadUserByUsername(String dn) throws UsernameNotFoundException {
+        return loadUserByUsername(dn, true)
+    }
+
+    UserDetails loadUserByUsername(String dn, boolean createOrUpdate) throws UsernameNotFoundException {
         UserInfo userInfo
         try {
             userInfo = restTemplate.getForObject(userInfoUri, UserInfo, dn)
@@ -48,10 +52,12 @@ class PkiUserDetailsService implements UserDetailsService, AuthenticationUserDet
                 }
 
                 // update user properties and load user roles, or create the account if this is the first time the user has connected
-                if (!em.isJoinedToTransaction()) {
-                    em.joinTransaction()
+                if (createOrUpdate) {
+                    if (!em.isJoinedToTransaction()) {
+                        em.joinTransaction()
+                    }
+                    userInfo = userAuthService.createOrUpdateUser(userInfo)
                 }
-                userInfo = userAuthService.createOrUpdateUser(userInfo)
             } else {
                 throw new SkillsAuthorizationException("Unknown user [$dn]")
             }
