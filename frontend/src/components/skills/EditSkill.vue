@@ -163,7 +163,7 @@
           name: '',
           pointIncrement: 10,
           pointIncrementInterval: 8,
-          numPerformToCompletion: 10,
+          numPerformToCompletion: 5,
           description: null,
           helpUrl: null,
         },

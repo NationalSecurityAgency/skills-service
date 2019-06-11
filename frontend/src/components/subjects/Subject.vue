@@ -6,20 +6,20 @@
         <edit-and-delete-dropdown v-on:deleted="deleteSubject" v-on:edited="showEditSubject=true"
                                   v-on:move-up="moveUp"
                                   v-on:move-down="moveDown"
-                                  :isFirst="subject.isFirst" :isLast="subject.isLast" :isLoading="isLoading"
+                                  :isFirst="subjectInternal.isFirst" :isLast="subjectInternal.isLast" :isLoading="isLoading"
                                   class="subject-settings"></edit-and-delete-dropdown>
       </div>
       <div slot="footer">
         <router-link
-          :to="{ name:'SubjectSkills', params: { projectId: this.subject.projectId, subjectId: this.subject.subjectId, subject: this.subject}}"
+          :to="{ name:'SubjectSkills', params: { projectId: this.subjectInternal.projectId, subjectId: this.subjectInternal.subjectId, subject: this.subjectInternal}}"
           class="btn btn-outline-primary btn-sm">
           Manage <i class="fas fa-arrow-circle-right"/>
         </router-link>
       </div>
     </page-preview-card>
 
-    <edit-subject v-if="showEditSubject" v-model="showEditSubject" :id="subject.subjectId"
-                  :subject="subject" :is-edit="true" @subject-saved="subjectSaved"/>
+    <edit-subject v-if="showEditSubject" v-model="showEditSubject" :id="subjectInternal.subjectId"
+                  :subject="subjectInternal" :is-edit="true" @subject-saved="subjectSaved"/>
   </div>
 </template>
 
@@ -46,6 +46,7 @@
         isLoading: false,
         showEditSubject: false,
         cardOptions: {},
+        subjectInternal: Object.assign({}, this.subject),
       };
     },
     mounted() {
@@ -56,36 +57,36 @@
         this.cardOptions = {
           icon: this.subject.iconClass,
           title: this.subject.name,
-          subTitle: `ID: ${this.subject.subjectId}`,
+          subTitle: `ID: ${this.subjectInternal.subjectId}`,
           stats: [{
             label: 'Number Skills',
-            count: this.subject.numSkills,
+            count: this.subjectInternal.numSkills,
           }, {
             label: 'Number Users',
-            count: this.subject.numUsers,
+            count: this.subjectInternal.numUsers,
           }, {
             label: 'Total Points',
-            count: this.subject.totalPoints,
+            count: this.subjectInternal.totalPoints,
           }, {
             label: 'Points %',
-            count: this.subject.pointsPercentage,
+            count: this.subjectInternal.pointsPercentage,
           }],
         };
       },
       deleteSubject() {
-        const msg = `Subject with id [${this.subject.subjectId}] will be removed. Delete Action can not be undone and permanently removes its skill definitions and users' performed skills.`;
+        const msg = `Subject with id [${this.subjectInternal.subjectId}] will be removed. Delete Action can not be undone and permanently removes its skill definitions and users' performed skills.`;
         this.msgConfirm(msg)
           .then((res) => {
             if (res) {
-              this.$emit('subject-deleted', this.subject);
+              this.$emit('subject-deleted', this.subjectInternal);
             }
           });
       },
       subjectSaved(subject) {
         this.isLoading = true;
-        SubjectsService.saveSubject(subject)
+        SubjectsService.saveSubject(this.subjectInternal)
           .then(() => {
-            this.subject = subject;
+            this.subjectInternal = subject;
             this.buildCardOptions();
             this.isLoading = false;
           })
@@ -94,10 +95,10 @@
           });
       },
       moveUp() {
-        this.$emit('move-subject-up', this.subject);
+        this.$emit('move-subject-up', this.subjectInternal);
       },
       moveDown() {
-        this.$emit('move-subject-down', this.subject);
+        this.$emit('move-subject-down', this.subjectInternal);
       },
     },
   };

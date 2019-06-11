@@ -140,7 +140,7 @@ class AdminProjService {
                     clientSecret: clientSecret)
             log.info("Created project [{}]", projectDefinition)
 
-            List<LevelDef> levelDefinitions = levelDefService.createDefault()
+            List<LevelDef> levelDefinitions = levelDefService.createDefault(projectRequest.projectId)
             levelDefinitions.each{
                 projectDefinition.addLevel(it)
             }

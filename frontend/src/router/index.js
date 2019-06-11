@@ -192,6 +192,7 @@ const router = new Router({
         path: 'addSkillEvent',
         component: AddSkillEvent,
         meta: { requiresAuth: true, breadcrumb: 'Add Skill Event' },
+        props: true,
       }, {
         name: 'SkillStats',
         path: 'stats',
