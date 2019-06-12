@@ -21,8 +21,8 @@
 </template>
 
 <script>
-  import { SkillsDisplay } from '@skills/skills-client-vue/src/index';
-  import SkillsClientConfiguration from '@skills/skills-client-configuration';
+  import { SkillsDisplay } from '@skills/skills-client-vue';
+  import SkillsConfiguration from '@skills/skills-client-configuration';
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import UsersService from './UsersService';
   import InlineHelp from '../utils/InlineHelp';
@@ -52,7 +52,7 @@
       this.userId = this.$route.params.userId;
       this.totalPoints = this.$route.params.totalPoints;
 
-      SkillsClientConfiguration.configure({
+      SkillsConfiguration.configure({
         projectId: this.projectId,
         authenticator: this.authenticator,
         serviceUrl: this.serviceUrl,
