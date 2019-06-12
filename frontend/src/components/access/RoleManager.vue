@@ -3,7 +3,6 @@
     <div id="add-user-div" class="row mt-2 mb-5">
       <div class="col-12 col-md-10 col-xlg-11 pb-2 pb-md-0">
         <existing-user-input :suggest="true" :validate="true" :user-type="userType" :excluded-suggestions="userIds"
-                             :selectedUserId="selectedUserId"
                              ref="userInput"
                              v-model="selectedUserId"/>
       </div>

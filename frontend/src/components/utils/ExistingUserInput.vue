@@ -53,9 +53,6 @@
         type: Array,
         default: () => ([]),
       },
-      selectedUserId: {
-        type: String,
-      },
       value: String,
       canEnterNewUser: {
         type: Boolean,
@@ -63,9 +60,6 @@
       },
     },
     watch: {
-      selectedUserId(newVal) {
-        this.userQuery = newVal;
-      },
       userQuery(newVal) {
         // must be able to handle string or an array as the multiselect lib will place
         // an array if it was selected from the dropdown and a string if it was entered
