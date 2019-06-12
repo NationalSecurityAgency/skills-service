@@ -1,16 +1,13 @@
 <template>
   <div>
     {{ userInfo }}
-    <skills-display
-      :authenticator="authenticator"
-      :version="skillsVersion"
-      :project-id="projectId"
-      :service-url="serviceUrl"/>
+    <skills-display :version="skillsVersion"/>
   </div>
 </template>
 
 <script>
-  import { SkillsDisplay } from '@skills/skills-client-vue/src/index';
+  import { SkillsDisplay } from '@skills/skills-client-vue';
+  import SkillsConfiguration from '@skills/skills-client-configuration';
 
   export default {
     name: 'InceptionSkills',
@@ -24,7 +21,11 @@
       };
     },
     created() {
-      this.authenticationUrl = `${this.serviceUrl}/app/projects/inception/users/${encodeURIComponent(this.userId)}/token`;
+      SkillsConfiguration.configure({
+        projectId: this.projectId,
+        authenticator: this.authenticator,
+        serviceUrl: this.serviceUrl,
+      });
     },
     computed: {
       serviceUrl() {
