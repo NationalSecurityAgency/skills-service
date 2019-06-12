@@ -14,17 +14,15 @@
       </b-form>
     </sub-page-header>
     <skills-display
-      :authenticator="authenticator"
       :version="selectedVersion"
-      :project-id="projectId"
-      :user-id="userId"
-      :service-url="serviceUrl"/>
+      :user-id="userId" />
   </div>
 
 </template>
 
 <script>
   import { SkillsDisplay } from '@skills/skills-client-vue/src/index';
+  import SkillsClientConfiguration from '@skills/skills-client-configuration';
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import UsersService from './UsersService';
   import InlineHelp from '../utils/InlineHelp';
@@ -53,6 +51,12 @@
       this.projectId = this.$route.params.projectId;
       this.userId = this.$route.params.userId;
       this.totalPoints = this.$route.params.totalPoints;
+
+      SkillsClientConfiguration.configure({
+        projectId: this.projectId,
+        authenticator: this.authenticator,
+        serviceUrl: this.serviceUrl,
+      });
 
       if (!this.$store.getters.isPkiAuthenticated) {
         UsersService.getUserToken(this.projectId, this.userId)

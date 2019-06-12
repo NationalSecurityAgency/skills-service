@@ -11,8 +11,9 @@
     "test:unit": "vue-cli-service test:unit"
   },
   "dependencies": {
+    "@skills/skills-client-vue": "0.0.14",
+    "@skills/skills-client-configuration": "0.0.4",
     "@fortawesome/fontawesome-free": "5.8.2",
-    "@skills/skills-client-vue": "0.0.13",
     "animate.css": "3.7.0",
     "apexcharts": "3.6.10",
     "axios": "0.18.0",
