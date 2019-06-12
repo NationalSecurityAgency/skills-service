@@ -668,10 +668,10 @@ class AdminController {
         return new RequestResult(success: true)
     }
 
-    @RequestMapping(value = "/projects/{projectId}/clientSecret", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/projects/{projectId}/clientSecret", method = [RequestMethod.GET], produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    String getProjectClientSecret(@PathVariable("projectId") String projectId) {
+    String getClientSecret(@PathVariable("projectId") String projectId) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
-        return projectAdminStorageService.getProjectSecret(projectId)
+        return projectAdminStorageService.getProjDef(projectId).clientSecret
     }
 }
