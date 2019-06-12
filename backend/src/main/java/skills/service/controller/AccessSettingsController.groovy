@@ -24,8 +24,15 @@ class AccessSettingsController {
 
     @RequestMapping(value = "/projects/{projectId}/userRoles", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
-    List<UserRole> getUserRoles(@PathVariable("projectId") String projectId) {
+    List<UserRole> getProjectUserRoles(@PathVariable("projectId") String projectId) {
         return accessSettingsStorageService.getUserRoles(projectId)
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/users/{userId}/roles", method = RequestMethod.GET)
+    List<UserRole>  getUserRoles(
+            @PathVariable("projectId") String projectId,
+            @PathVariable("userId") String userId) {
+        accessSettingsStorageService.getUserRoles(projectId, userId)
     }
 
     @RequestMapping(value = "/projects/{projectId}/users/{userId}/roles/{roleName}", method = RequestMethod.DELETE)

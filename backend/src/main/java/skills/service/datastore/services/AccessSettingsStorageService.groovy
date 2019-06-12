@@ -47,6 +47,12 @@ class AccessSettingsStorageService {
     }
 
     @Transactional(readOnly = true)
+    List<UserRole> getUserRoles(String projectId, String userId) {
+        List<UserRole> res = userRoleRepository.findAllByProjectIdAndUserId(projectId, userId)
+        return res
+    }
+
+    @Transactional(readOnly = true)
     List<UserRole> getRootUsers() {
         return userRoleRepository.findAllByRoleName(RoleName.ROLE_SUPER_DUPER_USER)
     }

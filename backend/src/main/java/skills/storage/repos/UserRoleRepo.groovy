@@ -8,6 +8,8 @@ interface UserRoleRepo extends CrudRepository<UserRole, Integer> {
 
     List<UserRole> findAllByProjectId(String projectId)
 
+    List<UserRole> findAllByProjectIdAndUserId(String projectId, String userId)
+
     boolean existsByRoleName(RoleName roleName)
 
     List<UserRole> findAllByRoleName(RoleName roleName)
