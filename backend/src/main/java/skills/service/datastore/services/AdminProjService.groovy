@@ -97,7 +97,7 @@ class AdminProjService {
     }
 
     @Transactional()
-    ProjectResult saveProject(ProjectRequest projectRequest, String userIdParam = null) {
+    void saveProject(ProjectRequest projectRequest, String userIdParam = null) {
         assert projectRequest?.projectId
         assert projectRequest?.name
 
@@ -153,12 +153,10 @@ class AdminProjService {
             accessSettingsStorageService.addUserRole(userIdParam ?: this.getUserId(), projectRequest.projectId, RoleName.ROLE_PROJECT_ADMIN)
             log.info("Added user role [{}]", RoleName.ROLE_PROJECT_ADMIN)
         }
-
-        return convert(projectDefinition)
     }
 
     @Transactional()
-    SubjectResult saveSubject(String projectId, SubjectRequest subjectRequest) {
+    void saveSubject(String projectId, SubjectRequest subjectRequest) {
         IdFormatValidator.validate(subjectRequest.subjectId)
         if(subjectRequest.name.length() > 50){
             throw new SkillException("Bad Name [${subjectRequest.name}] - must not exceed 50 chars.")
@@ -202,7 +200,6 @@ class AdminProjService {
             }
             log.info("Created [{}]", res)
         }
-        return convertToSubject(res)
     }
 
     @Transactional()
@@ -228,7 +225,7 @@ class AdminProjService {
     }
 
     @Transactional()
-    BadgeResult saveBadge(String projectId, BadgeRequest badgeRequest) {
+    void saveBadge(String projectId, BadgeRequest badgeRequest) {
         IdFormatValidator.validate(badgeRequest.badgeId)
         if(badgeRequest.name.length() > 50){
             throw new SkillException("Bad Name [${badgeRequest.name}] - must not exceed 50 chars.")
@@ -273,7 +270,6 @@ class AdminProjService {
         }
 
         log.info("Saved [{}]", savedSkill)
-        return convertToBadge(savedSkill)
     }
 
     @Transactional()
