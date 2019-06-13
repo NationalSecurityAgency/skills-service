@@ -154,7 +154,7 @@
       },
     },
     created() {
-      if (!this.$store.getters.isPkiAuthenticate) {
+      if (!this.$store.getters.isPkiAuthenticated) {
         AccessService.getOAuthProviders()
           .then((result) => {
             this.oAuthProviders = result;
