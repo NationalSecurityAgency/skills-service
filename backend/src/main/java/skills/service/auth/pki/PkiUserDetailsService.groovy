@@ -27,10 +27,11 @@ class PkiUserDetailsService implements UserDetailsService, AuthenticationUserDet
     @Autowired
     UserAuthService userAuthService
 
+    @Autowired
+    PkiUserLookup pkiUserLookup
+
     @PersistenceContext
     protected EntityManager em
-
-    RestTemplate restTemplate = new RestTemplate()
 
     @Override
     @Transactional
@@ -41,7 +42,7 @@ class PkiUserDetailsService implements UserDetailsService, AuthenticationUserDet
     UserDetails loadUserByUsername(String dn, boolean createOrUpdate) throws UsernameNotFoundException {
         UserInfo userInfo
         try {
-            userInfo = restTemplate.getForObject(userInfoUri, UserInfo, dn)
+            userInfo = pkiUserLookup.lookupUserDn(dn)
             if (userInfo) {
                 UserInfo existingUserInfo = userAuthService.loadByUserId(userInfo.username)
                 if (existingUserInfo) {
