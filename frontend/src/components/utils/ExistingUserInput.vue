@@ -96,7 +96,12 @@
         } else if (this.userType === ROOT) {
           suggestUrl = '/root/users';
         } else {
-          suggestUrl = '/app/users/suggestDashboardUsers';
+          // userType === DASHBOARD
+          if (this.$store.getters.isPkiAuthenticated) {
+            suggestUrl = '/app/users/suggestPkiUsers'
+          }  else {
+            suggestUrl = '/app/users/suggestDashboardUsers';
+          }
         }
         return suggestUrl;
       },

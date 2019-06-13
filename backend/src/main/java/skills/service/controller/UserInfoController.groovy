@@ -12,6 +12,7 @@ import skills.service.auth.SkillsAuthorizationException
 import skills.service.auth.UserAuthService
 import skills.service.auth.UserInfo
 import skills.service.auth.UserInfoService
+import skills.service.auth.pki.PkiUserLookup
 import skills.service.controller.result.model.RequestResult
 import skills.service.datastore.services.UserAdminService
 import skills.storage.model.auth.User
@@ -37,11 +38,16 @@ class UserInfoController {
     @Autowired
     UserAdminService userAdminService
 
+    @Autowired(required = false)
+    PkiUserLookup pkiUserLookup
+
+
     static class UserInfoRes {
         String userId
         String first
         String last
         String nickname
+        String dn
     }
 
     @RequestMapping(value = "/userInfo", method = RequestMethod.GET, produces = "application/json")
@@ -81,7 +87,8 @@ class UserInfoController {
                 userId: userInfo.username,
                 first: userInfo.firstName,
                 last: userInfo.lastName,
-                nickname: userInfo.nickname
+                nickname: userInfo.nickname,
+                dn: userInfo.userDn,
         )
     }
 
@@ -142,6 +149,11 @@ class UserInfoController {
     @RequestMapping(value = "/users/validExistingClientUserId/{userId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     Boolean isValidExistingClientUserId(@PathVariable("userId") String userId) {
         return userAdminService.isValidExistingUserId(userId)
+    }
+
+    @RequestMapping(value = "/users/suggestPkiUsers/{query}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    List<String> suggestExistingPkiUsers(@PathVariable("query") String query) {
+        return pkiUserLookup?.suggestUsers(query)?.take(5).collect {it.username}
     }
 }
 

@@ -32,6 +32,12 @@ class PkiSecurityConfiguration extends WebSecurityConfigurerAdapter {
         new PkiUserDetailsService()
     }
 
+    @Bean
+    @Conditional(PkiAuth)
+    PkiUserLookup pkiUserLookup() {
+        new PkiUserLookup()
+    }
+
     @Autowired
     PortalWebSecurityHelper portalWebSecurityHelper
 
