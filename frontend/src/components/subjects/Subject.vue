@@ -55,8 +55,8 @@
     methods: {
       buildCardOptions() {
         this.cardOptions = {
-          icon: this.subject.iconClass,
-          title: this.subject.name,
+          icon: this.subjectInternal.iconClass,
+          title: this.subjectInternal.name,
           subTitle: `ID: ${this.subjectInternal.subjectId}`,
           stats: [{
             label: 'Number Skills',
