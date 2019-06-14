@@ -69,9 +69,9 @@
     methods: {
       loadBadges() {
         BadgesService.getBadges(this.$route.params.projectId)
-          .then((badges) => {
+          .then((badgesResponse) => {
             this.isLoading = false;
-            this.badges = badges;
+            this.badges = badgesResponse;
             if (this.badges && this.badges.length) {
               this.badges[0].isFirst = true;
               this.badges[this.badges.length - 1].isLast = true;

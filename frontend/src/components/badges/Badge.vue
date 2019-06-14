@@ -37,24 +37,35 @@
         showEditBadge: false,
       };
     },
+    watch: {
+      badge: function badgeWatch(newBadge, oldBadge) {
+        if (oldBadge) {
+          this.badgeInternal = newBadge;
+          this.buildCardOptions();
+        }
+      },
+    },
     mounted() {
-      this.cardOptions = {
-        icon: this.badgeInternal.iconClass,
-        title: this.badgeInternal.name,
-        subTitle: `ID: ${this.badgeInternal.badgeId}`,
-        stats: [{
-          label: 'Number Skills',
-          count: this.badgeInternal.numSkills,
-        }, {
-          label: 'Number Users',
-          count: this.badgeInternal.numUsers,
-        }, {
-          label: 'Total Points',
-          count: this.badgeInternal.totalPoints,
-        }],
-      };
+      this.buildCardOptions();
     },
     methods: {
+      buildCardOptions() {
+        this.cardOptions = {
+          icon: this.badgeInternal.iconClass,
+          title: this.badgeInternal.name,
+          subTitle: `ID: ${this.badgeInternal.badgeId}`,
+          stats: [{
+            label: 'Number Skills',
+            count: this.badgeInternal.numSkills,
+          }, {
+            label: 'Number Users',
+            count: this.badgeInternal.numUsers,
+          }, {
+            label: 'Total Points',
+            count: this.badgeInternal.totalPoints,
+          }],
+        };
+      },
       deleteBadge() {
         const msg = `Deleting Badge Id: ${this.badgeInternal.badgeId} this cannot be undone.`;
         this.msgConfirm(msg, 'WARNING: Delete Badge').then((res) => {
