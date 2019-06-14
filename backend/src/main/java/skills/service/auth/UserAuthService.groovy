@@ -40,13 +40,13 @@ class UserAuthService {
 
     @Transactional(readOnly = true)
     Collection<GrantedAuthority> loadAuthorities(String userId) {
-        return convertRoles(userRepository.findByUserId(userId)?.roles)
+        return convertRoles(userRepository.findByUserIdIgnoreCase(userId)?.roles)
     }
 
     @Transactional(readOnly = true)
     UserInfo loadByUserId(String userId) {
         UserInfo userInfo
-        User user = userRepository.findByUserId(userId)
+        User user = userRepository.findByUserIdIgnoreCase(userId)
         if (user) {
             userInfo = new UserInfo (
                     username: user.userId,
@@ -56,7 +56,7 @@ class UserAuthService {
                     email: user.userProps.find {it.name =='email'}?.value,
                     userDn: user.userProps.find {it.name =='DN'}?.value,
                     nickname: user.userProps.find {it.name =='nickname'}?.value,
-                    authorities: convertRoles(userRepository.findByUserId(userId)?.roles)
+                    authorities: convertRoles(userRepository.findByUserIdIgnoreCase(userId)?.roles)
             )
         }
         return userInfo
@@ -142,6 +142,6 @@ class UserAuthService {
 
     @Transactional(readOnly = true)
     boolean userExists(String userId) {
-        return userRepository.existsByUserId(userId)
+        return userRepository.existsByUserIdIgnoreCase(userId)
     }
 }

@@ -82,8 +82,8 @@ class AdminProjService {
 
     private static DataIntegrityViolationExceptionHandler dataIntegrityViolationExceptionHandler =
             new DataIntegrityViolationExceptionHandler([
-                    "ProjectDefUniqueProjectNameConstraint" : "Provided project name already exist.",
-                    "ProjectDefUniqueProjectIdConstraint": "Provided project id already exist.",
+                    "index_project_definition_name" : "Provided project name already exist.",
+                    "index_project_definition_project_id": "Provided project id already exist.",
             ])
 
     private static DataIntegrityViolationExceptionHandler subjectDataIntegrityViolationExceptionHandler = crateSkillDefBasedDataIntegrityViolationExceptionHandler("subject")
@@ -91,8 +91,8 @@ class AdminProjService {
     private static DataIntegrityViolationExceptionHandler skillDataIntegrityViolationExceptionHandler = crateSkillDefBasedDataIntegrityViolationExceptionHandler("skill")
     private static DataIntegrityViolationExceptionHandler crateSkillDefBasedDataIntegrityViolationExceptionHandler(String type) {
         new DataIntegrityViolationExceptionHandler([
-                "SkillDefUniqueSkillIdConstraint" : "Provided ${type} id already exist.".toString(),
-                "SkillDefUniqueSkillNameConstraint": "Provided ${type} name already exist.".toString(),
+                "index_skill_definition_project_id_skill_id_type" : "Provided ${type} id already exist.".toString(),
+                "index_skill_definition_project_id_name_type": "Provided ${type} name already exist.".toString(),
         ])
     }
 
