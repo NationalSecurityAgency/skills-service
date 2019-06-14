@@ -93,7 +93,7 @@ class AccessSettingsStorageService {
 
     private void deleteUserRoleInternal(String userId, String projectId, RoleName roleName) {
         log.info('Deleting user-role for DN [{}] and role [{}] on project [{}]', userId, roleName, projectId)
-        User user = userRepository.findByUserId(userId)
+        User user = userRepository.findByUserIdIgnoreCase(userId)
         UserRole userRole = user?.roles?.find {it.projectId == projectId && it.roleName == roleName}
         assert userRole, "DELETE FAILED -> no user-role with project id [$projectId], userId [$userId] and roleName [$roleName]"
 
@@ -124,7 +124,7 @@ class AccessSettingsStorageService {
 
     private UserRole addUserRoleInternal(String userId, String projectId, RoleName roleName) {
         log.info('Creating user-role for ID [{}] and role [{}] on project [{}]', userId, roleName, projectId)
-        User user = userRepository.findByUserId(userId)
+        User user = userRepository.findByUserIdIgnoreCase(userId)
         if (user) {
             // check that the new user role does not already exist
             UserRole existingUserRole = user?.roles?.find {it.projectId == projectId && it.roleName == roleName}
@@ -143,7 +143,7 @@ class AccessSettingsStorageService {
     @Transactional()
     User createAppUser(UserInfo userInfo, boolean createOrUpdate) {
         validateUserInfo(userInfo)
-        User user = userRepository.findByUserId(userInfo.username?.toLowerCase())
+        User user = userRepository.findByUserIdIgnoreCase(userInfo.username?.toLowerCase())
         if (!createOrUpdate) {
             if (user) {
                 SkillException exception = new SkillException("User [${userInfo.username?.toLowerCase()}] already exists.")
@@ -185,7 +185,7 @@ class AccessSettingsStorageService {
 
     @Transactional
     UserRole grantRoot(String userId) {
-        User user = userRepository.findByUserId(userId.toLowerCase())
+        User user = userRepository.findByUserIdIgnoreCase(userId.toLowerCase())
         if (!user) {
             SkillException exception = new SkillException("User [${userId.toLowerCase()}] does not exist.")
             exception.errorCode = ErrorCode.BadParam

@@ -4,7 +4,7 @@ databaseChangeLog:
       author: skills
       changes:
         - createTable:
-            tableName: person
+            tableName: project_definition
             columns:
               - column:
                   name: id
@@ -14,13 +14,44 @@ databaseChangeLog:
                     primaryKey: true
                     nullable: false
               - column:
-                  name: firstname
-                  type: varchar(50)
-              - column:
-                  name: lastname
-                  type: varchar(50)
+                  name: project_id
+                  type: varchar(255)
                   constraints:
                     nullable: false
               - column:
-                  name: state
-                  type: char(2)
+                  name: name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: client_secret
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: total_points
+                  type: int
+                  defaultValue: 0
+                  constraints:
+                    nullable: false
+              - column:
+                  name: display_order
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created
+                  type: DATETIME
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated
+                  type: DATETIME
+                  defaultValueComputed: CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+        -modifySql:
+            dbms: mysql
+            append:
+              value: " engine innodb"
