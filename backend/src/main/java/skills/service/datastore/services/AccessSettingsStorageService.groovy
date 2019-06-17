@@ -117,8 +117,7 @@ class AccessSettingsStorageService {
         return addUserRoleInternal(userId, projectId, roleName)
     }
 
-    private UserRole addUserRoleInternal(String userKey, String projectId, RoleName roleName) {
-        String userId = getUserId(userKey, projectId)
+    private UserRole addUserRoleInternal(String userId, String projectId, RoleName roleName) {
         log.info('Creating user-role for ID [{}] and role [{}] on project [{}]', userId, roleName, projectId)
         User user = userRepository.findByUserIdIgnoreCase(userId)
         if (user) {
@@ -134,19 +133,6 @@ class AccessSettingsStorageService {
         userRepository.save(user)
         log.info("Created userRole [{}]", userRole)
         return userRole
-    }
-
-    private String getUserId(String userKey, String projectId) {
-        try {
-            // userKey will be the userId when in FORM authMode, or the DN when in PKI auth mode.
-            // When in PKI auth mode, the userDetailsService implementation will create the user
-            // account if the user is not already a portal user (PkiUserDetailsService).
-            // In the case of FORM authMode, the userKey is the userId and the user is expected
-            // to already have a portal user account in the database
-            return userDetailsService.loadUserByUsername(userKey).username
-        } catch(UsernameNotFoundException e) {
-            throw new SkillException("User [$userKey]  does not exist", (String) projectId)
-        }
     }
 
     @Transactional()

@@ -22,7 +22,7 @@ export default {
     }
     return axios.put(`/root/addRoot/${userKey}`)
       .then(() => axios.get('/root/rootUsers')
-        .then(response => response.data.find(element => element.userId === userId)));
+        .then(response => response.data.find(element => element.userId.toLowerCase() === userId.toLowerCase())));
   },
   deleteUserRole(projectId, userId, roleName) {
     if (projectId) {
