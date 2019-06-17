@@ -1,6 +1,7 @@
 package skills.storage.model
 
 import groovy.transform.ToString
+import org.hibernate.annotations.Type
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
@@ -24,7 +25,8 @@ class CustomIcon {
 
     String filename;
 
-    @Column(columnDefinition = 'TEXT')
+    @Lob
+    @Column(columnDefinition = "text")
     String dataUri;
 
     String contentType;
