@@ -4,7 +4,7 @@ import groovy.transform.CompileStatic
 
 @CompileStatic
 class SkillException extends RuntimeException {
-    static final String NA = 'N/A'
+    public static final String NA = 'N/A'
 
     String projectId
     String skillId

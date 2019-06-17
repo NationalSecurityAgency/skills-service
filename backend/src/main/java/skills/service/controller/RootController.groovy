@@ -2,7 +2,13 @@ package skills.service.controller
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.security.core.userdetails.UserDetailsService
+import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.web.bind.annotation.*
+import skills.service.auth.AuthMode
+import skills.service.auth.pki.PkiUserLookup
+import skills.service.controller.exceptions.SkillException
 import skills.service.controller.exceptions.SkillsValidator
 import skills.service.controller.result.model.RequestResult
 import skills.service.controller.result.model.UserInfoRes
@@ -28,6 +34,15 @@ class RootController {
     @Autowired
     UserRepo userRepository
 
+    @Value('#{securityConfig.authMode}}')
+    AuthMode authMode = AuthMode.DEFAULT_AUTH_MODE
+
+    @Autowired(required = false)
+    PkiUserLookup pkiUserLookup
+
+    @Autowired
+    UserDetailsService userDetailsService
+
     @GetMapping('/rootUsers')
     @ResponseBody
     List<UserRole> getRootUsers() {
@@ -38,9 +53,16 @@ class RootController {
     @ResponseBody
     List<UserInfoRes> getNonRootUsers(@PathVariable('query') String query) {
         query = query.toLowerCase()
-        return accessSettingsStorageService.getNonRootUsers().findAll {
-            it.userId.toLowerCase().contains(query)
-        }.collect { new UserInfoRes(userRepository.findByUserId(it.userId)) }.unique()
+        if (authMode == AuthMode.FORM) {
+            return accessSettingsStorageService.getNonRootUsers().findAll {
+                it.userId.toLowerCase().contains(query)
+            }.collect { new UserInfoRes(userRepository.findByUserIdIgnoreCase(it.userId)) }.unique()
+        } else {
+            List<String> rootUsers = accessSettingsStorageService.rootUsers.collect { it.userId.toLowerCase() }
+            return pkiUserLookup?.suggestUsers(query)?.findAll {
+                !rootUsers.contains(it.username.toLowerCase())
+            }.unique().take(5).collect { new UserInfoRes(it) }
+        }
     }
 
     @GetMapping('/isRoot')
@@ -48,9 +70,9 @@ class RootController {
         return accessSettingsStorageService.isRoot(principal.name)
     }
 
-    @PutMapping('/addRoot/{userId}')
-    RequestResult addRoot(@PathVariable('userId') String userId) {
-        accessSettingsStorageService.addRoot(userId)
+    @PutMapping('/addRoot/{userKey}')
+    RequestResult addRoot(@PathVariable('userKey') String userKey) {
+        accessSettingsStorageService.addRoot(getUserId(userKey))
         return new RequestResult(success: true)
     }
 
@@ -68,5 +90,22 @@ class RootController {
     @PostMapping('/saveEmailSettings')
     void saveEmailSettings(@RequestBody EmailConnectionInfo emailConnectionInfo) {
         emailSettingsService.updateConnectionInfo(emailConnectionInfo)
+    }
+
+    private String getUserId(String userKey) {
+        // userKey will be the userId when in FORM authMode, or the DN when in PKI auth mode.
+        // When in PKI auth mode, the userDetailsService implementation will create the user
+        // account if the user is not already a portal user (PkiUserDetailsService).
+        // In the case of FORM authMode, the userKey is the userId and the user is expected
+        // to already have a portal user account in the database
+        if (authMode == AuthMode.PKI) {
+            try {
+                return userDetailsService.loadUserByUsername(userKey).username
+            } catch (UsernameNotFoundException e) {
+                throw new SkillException("User [$userKey]  does not exist", (String) projectId)
+            }
+        } else {
+            return userKey
+        }
     }
 }
