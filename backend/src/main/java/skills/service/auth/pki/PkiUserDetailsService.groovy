@@ -9,7 +9,6 @@ import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken
-import org.springframework.web.client.RestTemplate
 import skills.service.auth.SkillsAuthorizationException
 import skills.service.auth.UserAuthService
 import skills.service.auth.UserInfo
@@ -36,15 +35,11 @@ class PkiUserDetailsService implements UserDetailsService, AuthenticationUserDet
     @Override
     @Transactional
     UserDetails loadUserByUsername(String dn) throws UsernameNotFoundException {
-        return loadUserByUsername(dn, true)
-    }
-
-    UserDetails loadUserByUsername(String dn, boolean createOrUpdate) throws UsernameNotFoundException {
         UserInfo userInfo
         try {
             userInfo = pkiUserLookup.lookupUserDn(dn)
             if (userInfo) {
-                UserInfo existingUserInfo = userAuthService.loadByUserId(userInfo.username)
+                UserInfo existingUserInfo = userAuthService.loadByUserId(userInfo.username?.toLowerCase())
                 if (existingUserInfo) {
                     userInfo.password = existingUserInfo.password
                     userInfo.nickname = existingUserInfo.nickname
@@ -53,12 +48,10 @@ class PkiUserDetailsService implements UserDetailsService, AuthenticationUserDet
                 }
 
                 // update user properties and load user roles, or create the account if this is the first time the user has connected
-                if (createOrUpdate) {
-                    if (!em.isJoinedToTransaction()) {
-                        em.joinTransaction()
-                    }
-                    userInfo = userAuthService.createOrUpdateUser(userInfo)
+                if (!em.isJoinedToTransaction()) {
+                    em.joinTransaction()
                 }
+                userInfo = userAuthService.createOrUpdateUser(userInfo)
             } else {
                 throw new SkillsAuthorizationException("Unknown user [$dn]")
             }

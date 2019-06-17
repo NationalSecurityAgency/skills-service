@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
 import skills.service.auth.UserInfoService
 import skills.service.auth.aop.AdminUsersOnlyWhenUserIdSupplied
+import skills.service.controller.exceptions.ErrorCode
+import skills.service.controller.exceptions.SkillException
 import skills.service.controller.request.model.SkillEventRequest
 import skills.service.icons.CustomIconFacade
 import skills.service.skillLoading.RankingLoader
@@ -13,6 +15,8 @@ import skills.service.skillLoading.SkillsLoader
 import skills.service.skillLoading.model.*
 import skills.service.skillsManagement.SkillsManagementFacade
 import skills.utils.Constants
+
+import static skills.service.controller.exceptions.SkillException.NA
 
 @CrossOrigin(allowCredentials = 'true')
 @RestController
@@ -186,10 +190,16 @@ class UserSkillsController {
     }
 
     private String getUserId(String userIdParam) {
+        String userId
         if (userIdParam) {
-            return userInfoService.lookupUserId(userIdParam)
+            userId = userInfoService.lookupUserId(userIdParam)
         } else {
-            return userInfoService.currentUser.username
+            userId = userInfoService.getCurrentUser().username
         }
+        if (!userId) {
+            // this should only happen in PKI mode, when the passed in param does not exist in the external UserInfoService!
+            throw new SkillException("Invalid userId param [${userIdParam}]", NA, NA, ErrorCode.BadParam)
+        }
+        return userId
     }
 }

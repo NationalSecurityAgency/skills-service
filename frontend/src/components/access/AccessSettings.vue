@@ -10,7 +10,7 @@
       </div>
     </div>
 
-    <trusted-client-props :project="project" class="my-4"/>
+    <trusted-client-props v-if="!$store.getters.isPkiAuthenticated" :project="project" class="my-4"/>
   </loading-container>
 </template>
 

@@ -5,10 +5,12 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
 import skills.service.controller.exceptions.SkillsValidator
 import skills.service.controller.result.model.RequestResult
+import skills.service.controller.result.model.UserInfoRes
 import skills.service.datastore.services.AccessSettingsStorageService
 import skills.service.settings.EmailConnectionInfo
 import skills.service.settings.EmailSettingsService
 import skills.storage.model.auth.UserRole
+import skills.storage.repos.UserRepo
 
 import java.security.Principal
 
@@ -23,6 +25,8 @@ class RootController {
     @Autowired
     EmailSettingsService emailSettingsService
 
+    @Autowired
+    UserRepo userRepository
 
     @GetMapping('/rootUsers')
     @ResponseBody
@@ -32,11 +36,11 @@ class RootController {
 
     @GetMapping('/users/{query}')
     @ResponseBody
-    List<String> getNonRootUsers(@PathVariable('query') String query) {
+    List<UserInfoRes> getNonRootUsers(@PathVariable('query') String query) {
         query = query.toLowerCase()
         return accessSettingsStorageService.getNonRootUsers().findAll {
             it.userId.toLowerCase().contains(query)
-        }.collect {it.userId}.unique()
+        }.collect { new UserInfoRes(userRepository.findByUserId(it.userId)) }.unique()
     }
 
     @GetMapping('/isRoot')
@@ -47,7 +51,7 @@ class RootController {
     @PutMapping('/addRoot/{userId}')
     RequestResult addRoot(@PathVariable('userId') String userId) {
         accessSettingsStorageService.addRoot(userId)
-        return new RequestResult(success: true);
+        return new RequestResult(success: true)
     }
 
     @DeleteMapping('/deleteRoot/{userId}')

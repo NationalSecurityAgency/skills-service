@@ -34,8 +34,8 @@ class InceptionProjectService {
      * If inception project exist then user will simply be assigned as an admin
      */
     @Transactional
-    void createInceptionAndAssignUser(UserRole userRole) {
-        doCreateAndAssign(userRole.userId)
+    void createInceptionAndAssignUser(String userId) {
+        doCreateAndAssign(userId)
     }
 
     /**
