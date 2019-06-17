@@ -236,13 +236,13 @@ class LevelDefinitionStorageService {
             if(!skillDef){
                 throw new SkillException("Failed to find Ability for project", projectId, skillId)
             }
-            res = new LevelDefRes(levels: skillDef.levelDefinitions, projectId: skillDef.projectId, skillId: skillDef.skillId, totalPoints: skillDef.totalPoints)
+            res = new LevelDefRes(levels: skillDef.levelDefinitions?.sort({it.level}), projectId: skillDef.projectId, skillId: skillDef.skillId, totalPoints: skillDef.totalPoints)
         } else {
             ProjDef projDef = projDefRepo.findByProjectId(projectId)
             if(!projDef){
                 throw new SkillException("Failed to find project", projectId, null)
             }
-            res = new LevelDefRes(levels: projDef.levelDefinitions, projectId: projDef.projectId, totalPoints: projDef.totalPoints)
+            res = new LevelDefRes(levels: projDef.levelDefinitions?.sort({it.level}), projectId: projDef.projectId, totalPoints: projDef.totalPoints)
         }
         return res
     }

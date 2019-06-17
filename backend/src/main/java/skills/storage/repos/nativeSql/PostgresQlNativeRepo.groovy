@@ -33,21 +33,20 @@ class PostgresQlNativeRepo implements NativeQueriesRepo {
     @Override
     void updateOverallScoresBySummingUpAllChildSubjects(String projectId, SkillDef.ContainerType subjectType) {
         String q = '''
-         update user_points points,
-          (
-            select
-              user_id                 sumUserId,
-              day                     sumDay,
-              SUM(pointsInner.points) sumPoints
-            from user_points pointsInner
-              join skill_definition definition
-                on pointsInner.project_id = definition.project_id and pointsInner.skill_id = definition.skill_id and
-                   definition.type = :subjectType
-            where pointsInner.project_id = :projectId and definition.project_id = :projectId
-            group by user_id, day
-          ) sum
-        set points.points = sum.sumPoints
-        where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay is null and points.day is null)) and points.skill_id is null and points.project_id = :projectId'''.toString()
+         update user_points points set points = sum.sumPoints
+FROM (
+    select
+        user_id                 sumUserId,
+        day                     sumDay,
+        SUM(pointsInner.points) sumPoints
+    from user_points pointsInner
+             join skill_definition definition
+                  on pointsInner.project_id = definition.project_id and pointsInner.skill_id = definition.skill_id and
+                     definition.type = :subjectType
+    where pointsInner.project_id = :projectId and definition.project_id = :projectId
+    group by user_id, day
+) AS sum
+where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay is null and points.day is null)) and points.skill_id is null and points.project_id = :projectId'''.toString()
 
         Query query = entityManager.createNativeQuery(q);
         query.setParameter("projectId", projectId);

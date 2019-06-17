@@ -91,6 +91,8 @@ class AdminProjService {
     private static DataIntegrityViolationExceptionHandler skillDataIntegrityViolationExceptionHandler = crateSkillDefBasedDataIntegrityViolationExceptionHandler("skill")
     private static DataIntegrityViolationExceptionHandler crateSkillDefBasedDataIntegrityViolationExceptionHandler(String type) {
         new DataIntegrityViolationExceptionHandler([
+                "index_skill_definition_project_id_skill_id" : "Provided ${type} id already exist.".toString(),
+                "index_skill_definition_project_id_name": "Provided ${type} name already exist.".toString(),
                 "index_skill_definition_project_id_skill_id_type" : "Provided ${type} id already exist.".toString(),
                 "index_skill_definition_project_id_name_type": "Provided ${type} name already exist.".toString(),
         ])
@@ -379,23 +381,27 @@ class AdminProjService {
     }
 
     private void calculatePercentages(List<SubjectResult> res) {
-        if (res) {
+        // make a shallow copy so we can sort it
+        // sorting will make percentage calculation consistent since we don't ask db to sort
+        List<SubjectResult> copy = new ArrayList<>(res)
+        copy = copy.sort { it.name }
+        if (copy) {
             // calculate percentage
-            if (res.size() == 1) {
-                res.first().pointsPercentage = 100
+            if (copy.size() == 1) {
+                copy.first().pointsPercentage = 100
             } else {
-                int overallPoints = res.collect({ it.totalPoints }).sum()
+                int overallPoints = copy.collect({ it.totalPoints }).sum()
                 if (overallPoints == 0) {
-                    res.each {
+                    copy.each {
                         it.pointsPercentage = 0
                     }
                 } else {
-                    List<SubjectResult> withoutLastOne = res[0..res.size() - 2]
+                    List<SubjectResult> withoutLastOne = copy[0..copy.size() - 2]
 
                     withoutLastOne.each {
                         it.pointsPercentage = (int) ((it.totalPoints / overallPoints) * 100)
                     }
-                    res.last().pointsPercentage = 100 - (withoutLastOne.collect({ it.pointsPercentage }).sum())
+                    copy.last().pointsPercentage = 100 - (withoutLastOne.collect({ it.pointsPercentage }).sum())
                 }
             }
         }
