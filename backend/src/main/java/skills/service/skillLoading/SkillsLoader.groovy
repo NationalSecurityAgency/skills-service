@@ -15,6 +15,8 @@ import skills.storage.repos.SkillRelDefRepo
 import skills.storage.repos.SkillShareDefRepo
 import skills.storage.repos.UserAchievedLevelRepo
 import skills.storage.repos.UserPointsRepo
+import skills.storage.repos.nativeSql.GraphRelWithAchievement
+import skills.storage.repos.nativeSql.NativeQueriesRepo
 
 @Component
 class SkillsLoader {
@@ -54,6 +56,9 @@ class SkillsLoader {
 
     @Autowired
     DependencySummaryLoader dependencySummaryLoader
+
+    @Autowired
+    NativeQueriesRepo nativeQueriesRepo
 
     @Transactional(readOnly = true)
     Integer getUserLevel(String projectId, String userId) {
@@ -198,7 +203,7 @@ class SkillsLoader {
 
     @Transactional(readOnly = true)
     SkillDependencyInfo loadSkillDependencyInfo(String projectId, String userId, String skillId) {
-        List<SkillRelDefRepo.GraphRelWithAchievement> graphDBRes = skillRelDefRepo.getDependencyGraphWithAchievedIndicator(projectId, skillId, userId)
+        List<GraphRelWithAchievement> graphDBRes = nativeQueriesRepo.getDependencyGraphWithAchievedIndicator(projectId, skillId, userId)
 
         List<SkillDependencyInfo.SkillRelationshipItem> deps = graphDBRes.collect {
             new SkillDependencyInfo.SkillRelationship(

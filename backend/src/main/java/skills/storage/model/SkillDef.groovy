@@ -1,7 +1,6 @@
 package skills.storage.model
 
 import groovy.transform.ToString
-import org.hibernate.annotations.Type
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
@@ -39,13 +38,11 @@ class SkillDef {
 
 
     @Lob
-    @Column(name="description", columnDefinition = "TEXT")
-    @Type(type = "org.hibernate.type.TextType")
+    @Column(columnDefinition = "text")
     String description
 
     @Lob
-    @Column(name="helpUrl", columnDefinition = "TEXT")
-    @Type(type = "org.hibernate.type.TextType")
+    @Column(columnDefinition = "text")
     String helpUrl
 
     int displayOrder
