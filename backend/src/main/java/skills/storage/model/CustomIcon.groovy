@@ -3,6 +3,7 @@ package skills.storage.model
 import groovy.transform.ToString
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
+import org.springframework.data.jpa.domain.support.AuditingEntityListener
 
 import javax.persistence.*
 /**
@@ -13,6 +14,7 @@ import javax.persistence.*
 @Entity
 @Table(name='custom_icons')
 @ToString(includeNames = true, excludes = 'projDef')
+@EntityListeners(AuditingEntityListener)
 class CustomIcon {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

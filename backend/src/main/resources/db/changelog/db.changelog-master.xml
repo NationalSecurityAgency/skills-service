@@ -1,0 +1,786 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+    <changeSet id="1" author="skills team">
+
+        <!-- ============================================================================
+        Table: Project Definition
+        ============================================================================-->
+        <createTable tableName="project_definition">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="project_id" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="client_secret" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="total_points" type="int" defaultValue="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="display_order" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex indexName="index_project_definition_project_id"
+                     tableName="project_definition" unique="true">
+            <column name="project_id" type="varchar(255)"/>
+        </createIndex>
+        <createIndex indexName="index_project_definition_name"
+                     tableName="project_definition" unique="true">
+            <column name="name" type="varchar(255)"/>
+        </createIndex>
+
+        <!-- ============================================================================
+        Table: Custom Icons
+        ============================================================================-->
+        <createTable tableName="custom_icons">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="project_id" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="proj_ref_id" type="int"/>
+            <column name="filename" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="content_type" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="data_uri" type="text">
+                <constraints nullable="false"/>
+            </column>
+           <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex indexName="index_custom_icons_project_id"
+                     tableName="custom_icons">
+            <column name="project_id" type="varchar(255)"/>
+        </createIndex>
+        <createIndex indexName="index_custom_icons_filename"
+                     tableName="custom_icons">
+            <column name="filename" type="varchar(255)"/>
+        </createIndex>
+        <createIndex indexName="index_custom_icons_project_id_filename"
+                     tableName="custom_icons" unique="true">
+            <column name="project_id" type="varchar(255)"/>
+            <column name="filename" type="varchar(255)"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="project_id"
+                                 baseTableName="custom_icons"
+                                 constraintName="fk_custom_icons_project_definition_project_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="project_id"
+                                 referencedTableName="project_definition"/>
+        <addForeignKeyConstraint baseColumnNames="proj_ref_id"
+                                 baseTableName="custom_icons"
+                                 constraintName="fk_custom_icons_proj_ref_id_project_definition_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="project_definition"/>
+
+        <!-- ============================================================================
+        Table: Skill Definition
+        ============================================================================-->
+        <createTable tableName="skill_definition">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="project_id" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="skill_id" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+
+            <!-- optional, only if immediate child of project -->
+            <column name="proj_ref_id" type="int"/>
+
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="point_increment" type="int" defaultValue="100">
+                <constraints nullable="false"/>
+            </column>
+            <column name="point_increment_interval" type="int" defaultValue="8">
+                <constraints nullable="false"/>
+            </column>
+            <column name="total_points" type="int" defaultValue="200">
+                <constraints nullable="false"/>
+            </column>
+
+            <!-- optional -->
+            <column name="description" type="text"/>
+            <column name="help_url" type="text"/>
+
+            <column name="display_order" type="int">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="type" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+
+            <!-- optional -->
+            <column name="custom_icon_id" type="int"/>
+            <column name="icon_class" type="varchar(255)"/>
+
+            <!-- optional, only used for 'gem' badges currently -->
+            <column name="start_date" type="DATETIME" />
+            <column name="end_date" type="DATETIME" />
+
+            <column name="version" type="int" defaultValue="0">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex indexName="index_skill_definition_project_id_skill_id"
+                     tableName="skill_definition" unique="true">
+            <column name="project_id" type="varchar(255)"/>
+            <column name="skill_id" type="varchar(255)"/>
+        </createIndex>
+        <createIndex indexName="index_skill_definition_project_id_skill_id_type"
+                     tableName="skill_definition" unique="true">
+            <column name="project_id" type="varchar(255)"/>
+            <column name="skill_id" type="varchar(255)"/>
+            <column name="type" type="varchar(255)"/>
+        </createIndex>
+        <createIndex indexName="index_skill_definition_project_id_name_type"
+                     tableName="skill_definition" unique="true">
+            <column name="project_id" type="varchar(255)"/>
+            <column name="name" type="varchar(255)"/>
+            <column name="type" type="varchar(255)"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="project_id"
+                                 baseTableName="skill_definition"
+                                 constraintName="fk_skill_definition_project_definition_project_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="project_id"
+                                 referencedTableName="project_definition"/>
+        <addForeignKeyConstraint baseColumnNames="proj_ref_id"
+                                 baseTableName="skill_definition"
+                                 constraintName="fk_skill_definition_proj_ref_id_project_definition_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="project_definition"/>
+        <addForeignKeyConstraint baseColumnNames="custom_icon_id"
+                                 baseTableName="skill_definition"
+                                 constraintName="fk_skill_definition_custom_icon_id_custom_icons_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="custom_icons"/>
+
+        <!-- ============================================================================
+        Table: Skill Relationship Definition
+        ============================================================================-->
+        <createTable tableName="skill_relationship_definition">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="parent_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="child_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex indexName="index_skill_relationship_definition_parent_type"
+                     tableName="skill_relationship_definition" unique="false">
+            <column name="parent_id" type="int"/>
+            <column name="type" type="int"/>
+        </createIndex>
+        <createIndex indexName="index_skill_relationship_definition_child_type"
+                     tableName="skill_relationship_definition" unique="false">
+            <column name="child_id" type="int"/>
+            <column name="type" type="int"/>
+        </createIndex>
+        <createIndex indexName="index_skill_relationship_definition_parent_child_type"
+                     tableName="skill_relationship_definition" unique="true">
+            <column name="parent_id" type="int"/>
+            <column name="child_id" type="int"/>
+            <column name="type" type="int"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="parent_id"
+                                 baseTableName="skill_relationship_definition"
+                                 constraintName="fk_skill_relationship_definition_parent_id_skill_definition_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="skill_definition"/>
+        <addForeignKeyConstraint baseColumnNames="child_id"
+                                 baseTableName="skill_relationship_definition"
+                                 constraintName="fk_skill_relationship_definition_child_id_skill_definition_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="skill_definition"/>
+
+        <!-- ============================================================================
+        Table: Skill Relationship Definition
+        ============================================================================-->
+        <createTable tableName="skill_share_definition">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="skill_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="shared_to_project_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex indexName="index_skill_share_definition_skill_id_shared_to_project_id"
+                     tableName="skill_share_definition" unique="true">
+            <column name="skill_id" type="int"/>
+            <column name="shared_to_project_id" type="int"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="skill_id"
+                                 baseTableName="skill_share_definition"
+                                 constraintName="fk_skill_id_skill_share_definition_skill_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="skill_definition"/>
+        <addForeignKeyConstraint baseColumnNames="shared_to_project_id"
+                                 baseTableName="skill_share_definition"
+                                 constraintName="fk_skill_id_skill_share_definition_shared_to_project_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="project_definition"/>
+
+        <!-- ============================================================================
+        Table: Level Definition
+        ============================================================================-->
+        <createTable tableName="level_definition">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <!-- optional, either belong to project or skill -->
+            <column name="project_id" type="int"/>
+            <column name="skill_id" type="int"/>
+
+            <column name="level" type="int">
+                <constraints nullable="false"/>
+            </column>
+
+            <!-- optional, either percent or points -->
+            <column name="percent" type="int"/>
+            <column name="points_from" type="int"/>
+            <column name="points_to" type="int"/>
+
+            <!-- optional -->
+            <column name="custom_icon_id" type="int"/>
+            <column name="icon_class" type="varchar(255)"/>
+            <column name="logical_name" type="varchar(255)"/>
+
+            <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex indexName="index_skill_definition_project_id"
+                     tableName="level_definition">
+            <column name="project_id" type="int"/>
+        </createIndex>
+        <createIndex indexName="index_level_definition_project_id_skill_id"
+                     tableName="level_definition">
+            <column name="project_id" type="int"/>
+            <column name="skill_id" type="int"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="skill_id"
+                                 baseTableName="level_definition"
+                                 constraintName="fk_skill_definition_skill_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="skill_definition"/>
+        <addForeignKeyConstraint baseColumnNames="project_id"
+                                 baseTableName="level_definition"
+                                 constraintName="fk_skill_definition_project_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="project_definition"/>
+
+        <!-- ============================================================================
+        Table: Users
+        ============================================================================-->
+        <createTable tableName="users">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="user_id" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="password" type="varchar(255)"/>
+
+
+            <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex indexName="index_users_user_id"
+                     tableName="users" unique="true">
+            <column name="user_id" type="varchar(255)"/>
+        </createIndex>
+
+        <!-- ============================================================================
+        Table: User Roles
+        ============================================================================-->
+        <createTable tableName="user_roles">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="user_ref_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="role_name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="project_id" type="varchar(255)"/>
+
+            <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex indexName="index_user_roles_user_id"
+                     tableName="user_roles">
+            <column name="user_id" type="varchar(255)"/>
+        </createIndex>
+        <createIndex indexName="index_user_roles_user_id_role_name_project_id"
+                     tableName="user_roles" unique="true">
+            <column name="user_id" type="varchar(255)"/>
+            <column name="role_name" type="varchar(255)"/>
+            <column name="project_id" type="varchar(255)"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="user_ref_id"
+                                 baseTableName="user_roles"
+                                 constraintName="fk_user_roles_user_ref_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="users"/>
+        <addForeignKeyConstraint baseColumnNames="user_id"
+                                 baseTableName="user_roles"
+                                 constraintName="fk_user_roles_user_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="user_id"
+                                 referencedTableName="users"/>
+        <addForeignKeyConstraint baseColumnNames="project_id"
+                                 baseTableName="user_roles"
+                                 constraintName="fk_user_roles_project_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="project_id"
+                                 referencedTableName="project_definition"/>
+        <!-- ============================================================================
+        Table: User Properties
+        ============================================================================-->
+        <createTable tableName="user_properties">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="user_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="value" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex indexName="index_user_properties_user_id"
+                     tableName="user_properties">
+            <column name="user_id" type="int"/>
+        </createIndex>
+        <createIndex indexName="index_user_properties_user_id_name_value"
+                     tableName="user_properties" unique="true">
+            <column name="user_id" type="int"/>
+            <column name="name" type="varchar(255)"/>
+            <column name="value" type="varchar(255)"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="user_id"
+                                 baseTableName="user_properties"
+                                 constraintName="fk_user_properties_user_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="users"/>
+
+        <!-- ============================================================================
+        Table: User Performed Skill
+        ============================================================================-->
+        <createTable tableName="user_performed_skill">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="user_id" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="skill_id" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="project_id" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="performed_on" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex indexName="index_user_performed_skill_skill_id"
+                     tableName="user_performed_skill">
+            <column name="skill_id" type="varchar(255)"/>
+        </createIndex>
+        <createIndex indexName="index_user_performed_skill_project_id"
+                     tableName="user_performed_skill">
+            <column name="project_id" type="varchar(255)"/>
+        </createIndex>
+        <createIndex indexName="index_user_performed_skill_project_id_skill_id"
+                     tableName="user_performed_skill">
+            <column name="project_id" type="varchar(255)"/>
+            <column name="skill_id" type="varchar(255)"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="project_id"
+                                 baseTableName="user_performed_skill"
+                                 constraintName="fk_user_performed_skill_project_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="project_id"
+                                 referencedTableName="project_definition"/>
+        <addForeignKeyConstraint baseColumnNames="project_id,skill_id"
+                                 baseTableName="user_performed_skill"
+                                 constraintName="fk_user_performed_skill_project_id_skill_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="project_id,skill_id"
+                                 referencedTableName="skill_definition"/>
+
+        <!-- ============================================================================
+        Table: User Points
+        ============================================================================-->
+        <createTable tableName="user_points">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="user_id" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="project_id" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="skill_id" type="varchar(255)"/>
+            <column name="points" type="int">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="day" type="date"/>
+
+            <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex indexName="index_user_points_project_id"
+                     tableName="user_points">
+            <column name="project_id" type="varchar(255)"/>
+        </createIndex>
+        <createIndex indexName="index_user_points_project_id_skill_id"
+                     tableName="user_points">
+            <column name="project_id" type="varchar(255)"/>
+            <column name="skill_id" type="varchar(255)"/>
+        </createIndex>
+        <createIndex indexName="index_user_points_user_id_project_id_skill_id"
+                     tableName="user_points">
+            <column name="user_id" type="varchar(255)"/>
+            <column name="project_id" type="varchar(255)"/>
+            <column name="skill_id" type="varchar(255)"/>
+        </createIndex>
+        <createIndex indexName="index_user_points_user_id_project_id_skill_id_day"
+                     tableName="user_points">
+            <column name="user_id" type="varchar(255)"/>
+            <column name="project_id" type="varchar(255)"/>
+            <column name="skill_id" type="varchar(255)"/>
+            <column name="day" type="date"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="project_id"
+                                 baseTableName="user_points"
+                                 constraintName="fk_user_points_project_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="project_id"
+                                 referencedTableName="project_definition"/>
+        <addForeignKeyConstraint baseColumnNames="project_id,skill_id"
+                                 baseTableName="user_points"
+                                 constraintName="fk_user_points_project_id_skill_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="project_id,skill_id"
+                                 referencedTableName="skill_definition"/>
+
+        <!-- ============================================================================
+        Table: User Achievement
+        ============================================================================-->
+        <createTable tableName="user_achievement">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="user_id" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="project_id" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="skill_id" type="varchar(255)"/>
+            <column name="skill_ref_id" type="int"/>
+
+            <column name="level" type="int"/>
+            <column name="points_when_achieved" type="int">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex indexName="index_user_achievement_user_id"
+                     tableName="user_achievement">
+            <column name="user_id" type="varchar(255)"/>
+        </createIndex>
+        <createIndex indexName="index_user_achievement_skill_id"
+                     tableName="user_achievement">
+            <column name="skill_id" type="varchar(255)"/>
+        </createIndex>
+        <createIndex indexName="index_user_achievement_user_id_project_id"
+                     tableName="user_achievement">
+            <column name="user_id" type="varchar(255)"/>
+            <column name="project_id" type="varchar(255)"/>
+        </createIndex>
+        <createIndex indexName="index_user_achievement_user_id_project_id_skill_id"
+                     tableName="user_achievement">
+            <column name="user_id" type="varchar(255)"/>
+            <column name="project_id" type="varchar(255)"/>
+            <column name="skill_id" type="varchar(255)"/>
+        </createIndex>
+        <createIndex indexName="index_user_achievement_user_id_project_id_skill_ref_id"
+                     tableName="user_achievement">
+            <column name="user_id" type="varchar(255)"/>
+            <column name="project_id" type="varchar(255)"/>
+            <column name="skill_ref_id" type="varchar(255)"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="skill_ref_id"
+                                 baseTableName="user_achievement"
+                                 constraintName="fk_user_achievement_skill_ref_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="skill_definition"/>
+        <addForeignKeyConstraint baseColumnNames="project_id"
+                                 baseTableName="user_achievement"
+                                 constraintName="fk_user_achievement_project_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="project_id"
+                                 referencedTableName="project_definition"/>
+        <addForeignKeyConstraint baseColumnNames="project_id,skill_id"
+                                 baseTableName="user_achievement"
+                                 constraintName="fk_user_achievement_project_id_skill_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="project_id,skill_id"
+                                 referencedTableName="skill_definition"/>
+
+       <!-- ============================================================================
+       Table: Allowed Origins
+       ============================================================================-->
+        <createTable tableName="allowed_origins">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="allowed_origin" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="project_id" type="varchar(255)"/>
+
+            <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex indexName="index_allowed_origins_project_id"
+                     tableName="allowed_origins">
+            <column name="project_id" type="varchar(255)"/>
+        </createIndex>
+        <createIndex indexName="index_allowed_origins_project_id_allowed_origin"
+                     tableName="allowed_origins" unique="true">
+            <column name="project_id" type="varchar(255)"/>
+            <column name="allowed_origin" type="varchar(255)"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="project_id"
+                                 baseTableName="allowed_origins"
+                                 constraintName="fk_allowed_origins_project_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="project_id"
+                                 referencedTableName="project_definition"/>
+
+       <!-- ============================================================================
+       Table: Settings
+       ============================================================================-->
+        <createTable tableName="settings">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="setting" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="value" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="project_id" type="varchar(255)"/>
+            <column name="setting_group" type="varchar(255)"/>
+
+            <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex indexName="index_settings_project_id"
+                     tableName="settings">
+            <column name="project_id" type="varchar(255)"/>
+        </createIndex>
+        <createIndex indexName="index_settings_setting_group"
+                     tableName="settings">
+            <column name="setting_group" type="varchar(255)"/>
+        </createIndex>
+        <createIndex indexName="index_settings_setting_group_setting"
+                     tableName="settings">
+            <column name="setting_group" type="varchar(255)"/>
+            <column name="setting" type="varchar(255)"/>
+        </createIndex>
+        <createIndex indexName="index_settings_project_id_setting_group"
+                     tableName="settings">
+            <column name="project_id" type="varchar(255)"/>
+            <column name="setting_group" type="varchar(255)"/>
+        </createIndex>
+        <createIndex indexName="index_settings_project_id_setting"
+                     tableName="settings" unique="true">
+            <column name="project_id" type="varchar(255)"/>
+            <column name="setting" type="varchar(255)"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="project_id"
+                                 baseTableName="settings"
+                                 constraintName="fk_settings_project_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="project_id"
+                                 referencedTableName="project_definition"/>
+
+        <!-- ============================================================================
+        SQL Modifications
+        ============================================================================-->
+<!--        <modifySql dbms="mysql">-->
+<!--            <regExpReplace replace="'CURRENT_TIMESTAMP_AND_UPDATED'" with="CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"/>-->
+<!--        </modifySql>-->
+        <modifySql dbms="mysql">
+            <!-- Only append for create table statements -->
+            <regExpReplace replace="(CREATE TABLE.*)" with="$1 engine innodb"/>
+        </modifySql>
+    </changeSet>
+
+</databaseChangeLog>
