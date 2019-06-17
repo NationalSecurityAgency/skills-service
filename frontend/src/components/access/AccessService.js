@@ -9,19 +9,20 @@ export default {
     return axios.get('/root/rootUsers')
       .then(response => response.data);
   },
-  saveUserRole(projectId, userDn, roleName) {
+  saveUserRole(projectId, userInfo, roleName, isPkiAuthenticated) {
+    const { userId } = userInfo;
+    let userKey = userId;
+    if (isPkiAuthenticated) {
+      userKey = userInfo.dn;
+    }
     if (projectId) {
-      return axios.put(`/admin/projects/${projectId}/users/${userDn}/roles/${roleName}`, {
-        userDnVal: userDn,
-        projectIdVal: projectId,
-        roleNameVal: roleName,
-      })
-        .then(() => axios.get(`/admin/projects/${projectId}/users/${userDn}/roles`)
+      return axios.put(`/admin/projects/${projectId}/users/${userKey}/roles/${roleName}`)
+        .then(() => axios.get(`/admin/projects/${projectId}/users/${userId}/roles`)
           .then(response => response.data.find(element => element.roleName === roleName)));
     }
-    return axios.put(`/root/addRoot/${userDn}`)
+    return axios.put(`/root/addRoot/${userKey}`)
       .then(() => axios.get('/root/rootUsers')
-        .then(response => response.data.find(element => element.userId === userDn)));
+        .then(response => response.data.find(element => element.userId === userId)));
   },
   deleteUserRole(projectId, userId, roleName) {
     if (projectId) {

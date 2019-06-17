@@ -2,13 +2,14 @@ package skills.service.datastore.services
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.security.core.AuthenticationException
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.userdetails.UserDetailsService
+import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.service.auth.UserInfo
 import skills.service.auth.UserInfoService
+import skills.service.auth.pki.PkiUserLookup
 import skills.service.controller.exceptions.ErrorCode
 import skills.service.controller.exceptions.SkillException
 import skills.storage.model.auth.*
@@ -39,6 +40,9 @@ class AccessSettingsStorageService {
 
     @Autowired
     InceptionProjectService inceptionProjectService
+
+    @Autowired(required = false)
+    PkiUserLookup pkiUserLookup
 
     @Transactional(readOnly = true)
     List<UserRole> getUserRoles(String projectId) {
@@ -71,22 +75,22 @@ class AccessSettingsStorageService {
     @Transactional
     UserRole addRoot(String userId) {
         UserRole userRole = addUserRoleInternal(userId, null, RoleName.ROLE_SUPER_DUPER_USER)
-        inceptionProjectService.createInceptionAndAssignUser(userRole)
+        inceptionProjectService.createInceptionAndAssignUser(userId)
         return userRole
     }
 
     @Transactional
     void deleteRoot(String userId) {
+        userId = userId?.toLowerCase()
         deleteUserRoleInternal(userId, null, RoleName.ROLE_SUPER_DUPER_USER)
         inceptionProjectService.removeUser(userId)
     }
 
     @Transactional()
     void deleteUserRole(String userId, String projectId, RoleName roleName) {
-        UserInfo toDelete = lookupUserInfo(userId)
-        if (toDelete != userInfoService.currentUser) {
-            String normalizedUserId = toDelete.username?.toLowerCase()
-            deleteUserRoleInternal(normalizedUserId, projectId, roleName)
+        userId = userId?.toLowerCase()
+        if (userId != userInfoService.getCurrentUser().username.toLowerCase()) {
+            deleteUserRoleInternal(userId, projectId, roleName)
         } else {
             throw new SkillException("You cannot delete yourself.")
         }
@@ -98,7 +102,7 @@ class AccessSettingsStorageService {
     }
 
     private void deleteUserRoleInternal(String userId, String projectId, RoleName roleName) {
-        log.info('Deleting user-role for DN [{}] and role [{}] on project [{}]', userId, roleName, projectId)
+        log.info('Deleting user-role for userId [{}] and role [{}] on project [{}]', userId, roleName, projectId)
         User user = userRepository.findByUserIdIgnoreCase(userId)
         UserRole userRole = user?.roles?.find {it.projectId == projectId && it.roleName == roleName}
         assert userRole, "DELETE FAILED -> no user-role with project id [$projectId], userId [$userId] and roleName [$roleName]"
@@ -110,25 +114,11 @@ class AccessSettingsStorageService {
 
     @Transactional()
     UserRole addUserRole(String userId, String projectId, RoleName roleName) {
-        UserInfo userInfo = lookupUserInfo(userId)
-        addUserRoleViaUserInfo(userInfo, projectId, roleName)
-    }
-
-    @Transactional()
-    UserRole addUserRoleViaUserInfo(UserInfo userInfo, String projectId, RoleName roleName) {
-        String userId = userInfo.username?.toLowerCase()
         return addUserRoleInternal(userId, projectId, roleName)
     }
 
-    private UserInfo lookupUserInfo(String userId) {
-        try {
-            return userDetailsService.loadUserByUsername(userId)
-        } catch (AuthenticationException e) {
-            throw new SkillException(e.message)
-        }
-    }
-
-    private UserRole addUserRoleInternal(String userId, String projectId, RoleName roleName) {
+    private UserRole addUserRoleInternal(String userKey, String projectId, RoleName roleName) {
+        String userId = getUserId(userKey, projectId)
         log.info('Creating user-role for ID [{}] and role [{}] on project [{}]', userId, roleName, projectId)
         User user = userRepository.findByUserIdIgnoreCase(userId)
         if (user) {
@@ -144,6 +134,19 @@ class AccessSettingsStorageService {
         userRepository.save(user)
         log.info("Created userRole [{}]", userRole)
         return userRole
+    }
+
+    private String getUserId(String userKey, String projectId) {
+        try {
+            // userKey will be the userId when in FORM authMode, or the DN when in PKI auth mode.
+            // When in PKI auth mode, the userDetailsService implementation will create the user
+            // account if the user is not already a portal user (PkiUserDetailsService).
+            // In the case of FORM authMode, the userKey is the userId and the user is expected
+            // to already have a portal user account in the database
+            return userDetailsService.loadUserByUsername(userKey).username
+        } catch(UsernameNotFoundException e) {
+            throw new SkillException("User [$userKey]  does not exist", (String) projectId)
+        }
     }
 
     @Transactional()
@@ -168,7 +171,6 @@ class AccessSettingsStorageService {
             user = createNewUser(userInfo)
         }
         userRepository.save(user)
-        log.info("Created app user [{}]", userInfo.username)
         return user
     }
 

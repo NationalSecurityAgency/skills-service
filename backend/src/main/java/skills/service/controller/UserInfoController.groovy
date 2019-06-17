@@ -14,6 +14,7 @@ import skills.service.auth.UserInfo
 import skills.service.auth.UserInfoService
 import skills.service.auth.pki.PkiUserLookup
 import skills.service.controller.result.model.RequestResult
+import skills.service.controller.result.model.UserInfoRes
 import skills.service.datastore.services.UserAdminService
 import skills.storage.model.auth.User
 import skills.storage.repos.UserRepo
@@ -42,21 +43,13 @@ class UserInfoController {
     PkiUserLookup pkiUserLookup
 
 
-    static class UserInfoRes {
-        String userId
-        String first
-        String last
-        String nickname
-        String dn
-    }
-
     @RequestMapping(value = "/userInfo", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     def getUserInfo() {
         def res = 'null'
         UserInfo currentUser = userInfoService.getCurrentUser()
         if (currentUser) {
-            res = convertToUserinfoRes(currentUser)
+            res = new UserInfoRes(currentUser)
         } else if (authMode == AuthMode.PKI) {
             throw new SkillsAuthorizationException('Unauthenticated user while using PKI Authorization Mode')
         }
@@ -82,16 +75,6 @@ class UserInfoController {
         return new RequestResult(success: true)
     }
 
-    UserInfoRes convertToUserinfoRes(UserInfo userInfo) {
-        return new UserInfoRes(
-                userId: userInfo.username,
-                first: userInfo.firstName,
-                last: userInfo.lastName,
-                nickname: userInfo.nickname,
-                dn: userInfo.userDn,
-        )
-    }
-
     @RequestMapping(value = "/userInfo/hasRole/{role}", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     boolean hasRole(@PathVariable("role") String role) {
@@ -115,13 +98,13 @@ class UserInfoController {
     }
 
     @RequestMapping(value = "/users/suggestDashboardUsers/{query}", method = RequestMethod.GET, produces = "application/json")
-    List<String> suggestExistingDashboardUsers(@PathVariable("query") String query,
-                                               @RequestParam(required = false) boolean includeSelf) {
+    List<UserInfoRes> suggestExistingDashboardUsers(@PathVariable("query") String query,
+                                                    @RequestParam(required = false) boolean includeSelf) {
         List<User> matchingUsers = userRepo.getUserByUserIdOrPropWildcard(query, new PageRequest(0, 6))
-        List<String> results = matchingUsers.collect { it.userId }
+        List<UserInfoRes> results = matchingUsers.collect { new UserInfoRes(it) }
         if (!includeSelf) {
             String currentUserId = userInfoService.currentUser.username
-            results = results.findAll { it != currentUserId }
+            results = results.findAll { it.userId != currentUserId }
         }
         return results.take(5)
     }
@@ -132,13 +115,13 @@ class UserInfoController {
     }
 
     @RequestMapping(value = "/users/projects/{projectId}/suggestClientUsers/{query}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    List<String> suggestExistingClientUsersForProject(@PathVariable("projectId") String projectId, @PathVariable("query") String query) {
-        return userAdminService.suggestUsersForProject(projectId, query, new PageRequest(0, 5))
+    List<UserInfoRes> suggestExistingClientUsersForProject(@PathVariable("projectId") String projectId, @PathVariable("query") String query) {
+        return userAdminService.suggestUsersForProject(projectId, query, new PageRequest(0, 5)).collect { new UserInfoRes(userId: it) }
     }
 
     @RequestMapping(value = "/users/suggestClientUsers/{query}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    List<String> suggestExistingClientUsers(@PathVariable("query") String query) {
-        return userAdminService.suggestUsers(query, new PageRequest(0, 5))
+    List<UserInfoRes> suggestExistingClientUsers(@PathVariable("query") String query) {
+        return userAdminService.suggestUsers(query, new PageRequest(0, 5)).collect { new UserInfoRes(userId: it) }
     }
 
     @RequestMapping(value = "/users/projects/{projectId}/validExistingClientUserId/{userId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -152,8 +135,9 @@ class UserInfoController {
     }
 
     @RequestMapping(value = "/users/suggestPkiUsers/{query}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    List<String> suggestExistingPkiUsers(@PathVariable("query") String query) {
-        return pkiUserLookup?.suggestUsers(query)?.take(5).collect {it.username}
+    List<UserInfoRes> suggestExistingPkiUsers(@PathVariable("query") String query) {
+        return pkiUserLookup?.suggestUsers(query)?.take(5).collect { new UserInfoRes(it) }
     }
+
 }
 

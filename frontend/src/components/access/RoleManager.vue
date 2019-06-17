@@ -3,10 +3,10 @@
     <div id="add-user-div" class="row mt-2 mb-5">
       <div class="col-12 col-md-10 col-xlg-11 pb-2 pb-md-0">
         <existing-user-input :suggest="true" :validate="true" :user-type="userType" :excluded-suggestions="userIds"
-                             v-model="selectedUserId"/>
+                             v-model="selectedUser"/>
       </div>
       <div class="col-auto">
-        <b-button variant="outline-primary" @click="addUserRole" :disabled="errors.any() || !selectedUserId"
+        <b-button variant="outline-primary" @click="addUserRole" :disabled="errors.any() || !selectedUser"
                   class="h-100">
           Add <i :class="[isSaving ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-arrow-circle-right']"></i>
         </b-button>
@@ -66,7 +66,7 @@
         data: [],
         userIds: [],
         columns: ['userId', 'edit'],
-        selectedUserId: '',
+        selectedUser: null,
         isSaving: false,
         options: {
           headings: {
@@ -119,13 +119,14 @@
       },
       addUserRole() {
         this.isSaving = true;
-        AccessService.saveUserRole(this.project.projectId, this.selectedUserId, this.role)
+        const pkiAuthenticated = this.$store.getters.isPkiAuthenticated;
+        AccessService.saveUserRole(this.project.projectId, this.selectedUser, this.role, pkiAuthenticated)
           .then((userInfo) => {
             this.userAdded(userInfo);
           })
           .finally(() => {
             this.isSaving = false;
-            this.selectedUserId = '';
+            this.selectedUser = null;
           });
       },
     },

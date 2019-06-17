@@ -4,13 +4,13 @@
     <simple-card style="min-height: 20rem;">
       <div id="add-user-div" class="row mt-2 mb-4">
         <div class="col-12 col-md-6 pb-2 pb-md-0">
-          <existing-user-input :project-id="projectId" v-model="currentSelectedUserId"  :can-enter-new-user="true"/>
+          <existing-user-input :project-id="projectId" v-model="currentSelectedUser" :can-enter-new-user="!pkiAuthenticated"/>
         </div>
         <div class="col-auto">
           <datepicker input-class="border-0" wrapper-class="form-control" v-model="dateAdded" name="Event Date" v-validate="'required'"/>
         </div>
         <div class="col-auto">
-          <b-button variant="outline-primary" @click="addSkill" :disabled="errors.any() || (!currentSelectedUserId || currentSelectedUserId.length ===0) || projectTotalPoints < minimumPoints">
+          <b-button variant="outline-primary" @click="addSkill" :disabled="errors.any() || (!currentSelectedUser || !currentSelectedUser.userId || currentSelectedUser.userId.length === 0) || projectTotalPoints < minimumPoints">
             Add <i v-if="projectTotalPoints >= minimumPoints" :class="[isSaving ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-arrow-circle-right']"></i>
             <i v-else class="icon-warning fa fa-exclamation-circle text-warning"
                v-b-tooltip.hover="'Unable to add skill for user. Insufficient available points in project.'"></i>
@@ -79,12 +79,14 @@
         dateAdded: new Date(),
         usersAdded: [],
         isSaving: false,
-        currentSelectedUserId: '',
+        currentSelectedUser: null,
         projectTotalPoints: 0,
+        pkiAuthenticated: false,
       };
     },
     mounted() {
       this.loadProject();
+      this.pkiAuthenticated = this.$store.getters.isPkiAuthenticated;
     },
     computed: {
       reversedUsersAdded: function reversedUsersAdded() {
@@ -101,19 +103,16 @@
           this.projectTotalPoints = res.totalPoints;
         });
       },
-      // onUserSelected(userId) {
-      //   this.currentSelectedUserId = userId;
-      // },
       addSkill() {
         this.isSaving = true;
-        SkillsService.saveSkillEvent(this.$route.params.projectId, this.$route.params.skillId, this.currentSelectedUserId, this.dateAdded.getTime())
+        SkillsService.saveSkillEvent(this.$route.params.projectId, this.$route.params.skillId, this.currentSelectedUser, this.dateAdded.getTime(), this.pkiAuthenticated)
           .then((data) => {
             this.isSaving = false;
             const historyObj = {
               success: data.skillApplied,
               msg: data.explanation,
-              userId: this.currentSelectedUserId,
-              key: this.currentSelectedUserId + new Date().getTime() + data.skillApplied,
+              userId: this.currentSelectedUser.userId,
+              key: this.currentSelectedUser.uesrId + new Date().getTime() + data.skillApplied,
             };
             this.usersAdded.push(historyObj);
           })

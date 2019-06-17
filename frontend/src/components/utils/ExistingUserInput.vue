@@ -2,7 +2,7 @@
   <div class="existingUserInput">
     <multiselect v-model="userQuery" :placeholder="placeholder" tag-placeholder="Enter to select"
                  :options="suggestions" :multiple="true" :taggable="canEnterNewUser" @tag="addTag"
-                 :hide-selected="true"
+                 :hide-selected="true" track-by="userId" label="label"
                  @search-change="suggestUsers" :loading="isFetching" :internal-search="false"
                  :clear-on-select="true">
     </multiselect>
@@ -53,7 +53,7 @@
         type: Array,
         default: () => ([]),
       },
-      value: String,
+      value: Object,
       canEnterNewUser: {
         type: Boolean,
         default: false,
@@ -65,10 +65,10 @@
         // an array if it was selected from the dropdown and a string if it was entered
         if (!newVal || newVal.length === 0) {
           this.$emit('input', null);
-        } else if (Object.getPrototypeOf(newVal) === String.prototype) {
-          this.$emit('input', newVal);
-        } else {
+        } else if (Array.isArray(newVal)) {
           this.$emit('input', newVal[0]);
+        } else {
+          this.$emit('input', newVal);
         }
       },
     },
@@ -88,7 +88,9 @@
       suggestUrl() {
         let suggestUrl;
         if (this.userType === CLIENT) {
-          if (this.projectId) {
+          if (this.$store.getters.isPkiAuthenticated) {
+            suggestUrl = '/app/users/suggestPkiUsers';
+          } else if (this.projectId) {
             suggestUrl = `/app/users/projects/${this.projectId}/suggestClientUsers`;
           } else {
             suggestUrl = '/app/users/suggestClientUsers/';
@@ -97,10 +99,9 @@
           suggestUrl = '/root/users';
         } else {
           // userType === DASHBOARD
+          suggestUrl = '/app/users/suggestDashboardUsers';
           if (this.$store.getters.isPkiAuthenticated) {
-            suggestUrl = '/app/users/suggestPkiUsers'
-          }  else {
-            suggestUrl = '/app/users/suggestDashboardUsers';
+            suggestUrl = '/app/users/suggestPkiUsers';
           }
         }
         return suggestUrl;
@@ -121,10 +122,6 @@
     },
     methods: {
       suggestUsers: debounce(function debouncedSuggestUsers(query) {
-        // if (!this.suggest || !this.userQuery) {
-        //   this.suggestions = [];
-        //   return;
-        // }
         this.isFetching = true;
         if (!query) {
           this.suggestions = [];
@@ -134,22 +131,28 @@
         const url = `${this.suggestUrl}/${query}`;
         axios.get(url)
           .then((response) => {
-            this.suggestions = response.data.filter(suggestedUserId => !this.excludedSuggestions.includes(suggestedUserId));
+            this.suggestions = response.data.filter(suggestedUser => !this.excludedSuggestions.includes(suggestedUser.userId));
+            this.suggestions = this.suggestions.map((it) => {
+              const label = it.first && it.last ? `${it.last}, ${it.first} (${it.userId})` : it.userId;
+              const sug = {
+                ...it,
+                label,
+              };
+              return sug;
+            });
           })
           .finally(() => {
             this.isFetching = false;
           });
       }, 200),
-
-      // onSelected(selectedItem) {
-      //   this.$emit('userSelected', selectedItem);
-      // },
-      // onRemoved(item) {
-      //   this.$emit('userRemoved', item);
-      // },
-
       addTag(newTag) {
-        this.userQuery = newTag;
+        const tag = {
+          userId: newTag,
+          label: newTag,
+        };
+        this.userQuery = tag;
+        this.value = tag;
+        this.suggestions.push(tag);
       },
 
       validateUserId(userId) {

@@ -4,8 +4,8 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.stereotype.Component
+import skills.service.auth.pki.PkiUserLookup
 import skills.service.datastore.services.UserAdminService
 
 @Component
@@ -18,8 +18,8 @@ class UserInfoService {
     @Autowired
     UserAdminService userAdminService
 
-    @Autowired
-    UserDetailsService userDetailsService
+    @Autowired(required = false)
+    PkiUserLookup pkiUserLookup
 
     UserInfo getCurrentUser() {
         UserInfo currentUser
@@ -35,19 +35,19 @@ class UserInfoService {
     }
 
     /**
-     * @param userId
-     * @return if userId parameter is supplied, then return the correct userId based on authMode,
-     * i.e. - do a DN lookup if in PKI mode, otherwise return the passed in userId as we do not
+     * @param userKey - this will be the user's DN in PKI authMode, or the actual userId in FORM authMode
+     * @return return the correct userKey based on authMode,
+     * i.e. - do a DN lookup if in PKI mode, otherwise just return the passed in userKey
      */
-    String lookupUserId(String userId) {
-        assert userId
-        String retVal
+    String lookupUserId(String userKey) {
+        assert userKey
+        String userId
         if (authMode == AuthMode.FORM) {
-            retVal = userId
+            userId = userKey  // we are using FORM authMode, so the userKey is the userId
         } else {
-            // we are in PKI auth mode so we need to lookup the user to convert from DN to username
-            retVal = userDetailsService.loadUserByUsername(userId, false).username
+            // we using PKI auth mode so we need to lookup the user to convert from DN to username
+            userId = pkiUserLookup.lookupUserDn(userKey)?.username
         }
-        return retVal
+        return userId?.toLowerCase()
     }
 }
