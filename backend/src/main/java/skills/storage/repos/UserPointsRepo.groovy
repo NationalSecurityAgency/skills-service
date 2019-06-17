@@ -97,29 +97,4 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
     @Query('SELECT userId as userId, max(updated) as lastUpdated, sum(points) as totalPoints from UserPoints up where up.projectId=?1 and up.skillId in (?2) and up.userId like %?3% and up.day is null GROUP BY userId')
     List<ProjectUser> findDistinctProjectUsersByProjectIdAndSkillIdInAndUserIdLike(String projectId, List<String> skillIds, String userId, Pageable pageable)
 
-    @Modifying
-    @Query(value = '''UPDATE user_points a join user_points b on a.user_id = b.user_id and (a.day = b.day OR (a.day is null and b.day is null)) 
-        set b.points = b.points - a.points
-        where a.project_id = :projectId and a.skill_id= :deletedSkillId and (b.skill_id= :parentSubjectSkillId or b.skill_id is null) and b.project_id = :projectId''', nativeQuery =  true)
-    void decrementPointsForDeletedSkill(@Param("projectId") String projectId, @Param("deletedSkillId") String deletedSkillId, @Param("parentSubjectSkillId") String parentSubjectSkillId)
-
-    @Modifying
-    @Query(value = '''
-         update user_points points,
-          (
-            select
-              user_id                 sumUserId,
-              day                     sumDay,
-              SUM(pointsInner.points) sumPoints
-            from user_points pointsInner
-              join skill_definition definition
-                on pointsInner.project_id = definition.project_id and pointsInner.skill_id = definition.skill_id and
-                   definition.type = :subjectType
-            where pointsInner.project_id = :projectId and definition.project_id = :projectId
-            group by user_id, day
-          ) sum
-        set points.points = sum.sumPoints
-        where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay is null and points.day is null)) and points.skill_id is null and points.project_id = :projectId''', nativeQuery = true)
-    void updateOverallScoresBySummingUpAllChildSubjects(@Param("projectId") String projectId, @Param("subjectType") String subjectType) // must pass subjectType as a string, otherwise sql doesn't work
-
 }

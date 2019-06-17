@@ -121,7 +121,7 @@ class UserInfoController {
 
     @RequestMapping(value = "/users/validExistingDashboardUserId/{userId}", method = RequestMethod.GET, produces = "application/json")
     Boolean isValidExistingDashboardUserId(@PathVariable("userId") String userId) {
-        return userRepo.findByUserId(userId) != null
+        return userRepo.findByUserIdIgnoreCase(userId) != null
     }
 
     @RequestMapping(value = "/users/projects/{projectId}/suggestClientUsers/{query}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
