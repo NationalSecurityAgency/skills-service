@@ -97,7 +97,7 @@
           })
           .catch((e) => {
             if (e.response.data && e.response.data.errorCode && e.response.data.errorCode === 'InsufficientPointsToConvertLevels') {
-              this.errorToast('Setting Not Saved!', e.response.data.message);
+              this.errorToast('Setting Not Saved!', e.response.data.explanation);
             } else {
               const errorMessage = (e.response && e.response.data && e.response.data.message) ? e.response.data.message : undefined;
               this.$router.push({ name: 'ErrorPage', query: { errorMessage } });
