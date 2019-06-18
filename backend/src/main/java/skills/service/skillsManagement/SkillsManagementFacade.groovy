@@ -371,7 +371,6 @@ class SkillsManagementFacade {
                     id: userPts.skillId ?: "OVERALL",
                     type: userPts.skillId ? CompletionItem.CompletionItemType.Subject : CompletionItem.CompletionItemType.Overall)
         } else if (decrement) {
-            assert levelAlreadyAchieved, "we are decrementing and the current level has not already been achieved??"
             // we are decrementing, so we need to remove any level that is greater than the current level (there should only be one)
             List<UserAchievement> levelsToRemove = userAchievedLevels?.findAll { it.level >= levelInfo.level }
             if (levelsToRemove) {

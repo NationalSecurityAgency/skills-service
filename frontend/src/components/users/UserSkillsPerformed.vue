@@ -31,7 +31,6 @@
       SimpleCard,
       SubPageHeader,
     },
-    props: ['projectId', 'userId'],
     data() {
       return {
         displayName: 'Skills Performed Table',
@@ -88,9 +87,9 @@
       },
       doDeleteSkill(skill) {
         this.isLoading = true;
-        UsersService.deleteSkillEvent(this.projectId, skill)
+        UsersService.deleteSkillEvent(this.$route.params.projectId, skill)
           .then((data) => {
-            if (data.wasPerformed) {
+            if (data.success) {
               const index = this.$refs.table.data.findIndex(item => item.id === skill.id);
               this.$refs.table.data.splice(index, 1);
               this.successToast('Removed Skill', `Skill '${skill.skillId}' was removed.`);
