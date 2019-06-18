@@ -92,7 +92,7 @@ class AccessSettingsController {
             try {
                 return userDetailsService.loadUserByUsername(userKey).username
             } catch (UsernameNotFoundException e) {
-                throw new SkillException("User [$userKey]  does not exist", (String) projectId)
+                throw new SkillException("User [$userKey] does not exist")
             }
         } else {
             return userKey
