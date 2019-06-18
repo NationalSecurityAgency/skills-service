@@ -21,8 +21,7 @@
 </template>
 
 <script>
-  import { SkillsDisplay } from '@skills/skills-client-vue';
-  import SkillsConfiguration from '@skills/skills-client-configuration';
+  import { SkillsDisplay, SkillsConfiguration } from '@skills/skills-client-vue';
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import UsersService from './UsersService';
   import InlineHelp from '../utils/InlineHelp';
