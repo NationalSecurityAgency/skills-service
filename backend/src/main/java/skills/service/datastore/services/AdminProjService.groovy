@@ -16,6 +16,7 @@ import skills.service.controller.exceptions.SkillException
 import skills.service.controller.exceptions.SkillsValidator
 import skills.service.controller.request.model.*
 import skills.service.controller.result.model.BadgeResult
+import skills.service.controller.result.model.CustomIconResult
 import skills.service.controller.result.model.DependencyCheckResult
 import skills.service.controller.result.model.SettingsResult
 import skills.service.controller.result.model.SkillDefRes
@@ -26,7 +27,9 @@ import skills.service.controller.result.model.SkillsGraphRes
 import skills.service.controller.result.model.SubjectResult
 import skills.service.datastore.services.settings.Settings
 import skills.service.datastore.services.settings.SettingsService
+import skills.service.icons.IconCssNameUtil
 import skills.service.skillsManagement.UserAchievementsAndPointsManagement
+import skills.storage.model.CustomIcon
 import skills.storage.model.LevelDef
 import skills.storage.model.ProjDef
 import skills.storage.model.SkillDef
@@ -1086,5 +1089,14 @@ class AdminProjService {
     void updateClientSecret(String projectId, String clientSecret) {
         ProjDef projDef = getProjDef(projectId)
         projDef.clientSecret = clientSecret
+    }
+
+    @Transactional(readOnly = true)
+    List<CustomIconResult> getCustomIcons(String projectId){
+        ProjDef project = getProjDef(projectId)
+        return project.getCustomIcons().collect { CustomIcon icon ->
+            String cssClassname = IconCssNameUtil.getCssClass(icon.projectId, icon.filename)
+            return new CustomIconResult(filename: icon.filename, cssClassname: cssClassname)
+        }
     }
 }

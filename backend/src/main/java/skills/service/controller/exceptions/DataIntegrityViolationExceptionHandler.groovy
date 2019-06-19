@@ -26,7 +26,9 @@ class DataIntegrityViolationExceptionHandler {
             if (violationException.cause instanceof ConstraintViolationException) {
                 ConstraintViolationException constraintViolationException = violationException.cause
                 def entry = constraintNameToMsgMapping.find {
-                    it.key.equalsIgnoreCase(constraintViolationException.constraintName)
+                    boolean generalCase = it.key.equalsIgnoreCase(constraintViolationException.constraintName)
+                    boolean h2DBCase = constraintViolationException.constraintName.toUpperCase().startsWith("\"${it.key.toUpperCase()}")
+                    generalCase || h2DBCase
                 }
                 if (entry) {
                     msg = entry.value

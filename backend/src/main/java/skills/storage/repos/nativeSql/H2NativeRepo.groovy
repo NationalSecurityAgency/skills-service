@@ -18,13 +18,15 @@ class H2NativeRepo implements NativeQueriesRepo {
     @Override
     void decrementPointsForDeletedSkill(String projectId, String deletedSkillId, String parentSubjectSkillId) {
         String q = '''
-        UPDATE user_points b
-        SET points = (
-            SELECT b.points - a.points FROM user_points a
-            WHERE a.user_id = b.user_id and (a.day = b.day OR (a.day is null and b.day is null))
-              and (b.skill_id= :parentSubjectSkillId or b.skill_id is null) and b.project_id = :projectId)
-        WHERE exists
-            (SELECT * FROM user_points a WHERE a.project_id = :projectId and a.skill_id= :deletedSkillId);'''.toString()
+        merge into USER_POINTS(id, points) key(id)
+        SELECT b.id, b.points - a.points as points
+        FROM user_points a, user_points b
+        WHERE a.user_id = b.user_id
+          and (a.day = b.day OR (a.day is null and b.day is null))
+          and a.skill_id = :deletedSkillId
+          and (b.skill_id = :parentSubjectSkillId or b.skill_id is null)
+          and b.project_id = :projectId
+          and a.project_id = :projectId'''.toString()
 
         Query query = entityManager.createNativeQuery(q);
         query.setParameter("projectId", projectId);
@@ -36,20 +38,22 @@ class H2NativeRepo implements NativeQueriesRepo {
     @Override
     void updateOverallScoresBySummingUpAllChildSubjects(String projectId, SkillDef.ContainerType subjectType) {
         String q = '''
-         update user_points points set points = sum.sumPoints
-FROM (
-    select
-        user_id                 sumUserId,
-        day                     sumDay,
-        SUM(pointsInner.points) sumPoints
-    from user_points pointsInner
-             join skill_definition definition
-                  on pointsInner.project_id = definition.project_id and pointsInner.skill_id = definition.skill_id and
-                     definition.type = :subjectType
-    where pointsInner.project_id = :projectId and definition.project_id = :projectId
-    group by user_id, day
-) AS sum
-where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay is null and points.day is null)) and points.skill_id is null and points.project_id = :projectId'''.toString()
+        merge into USER_POINTS (id, points) key (id)
+    select points.id, sum.sumPoints
+    from (select user_id sumUserId, day sumDay, SUM(pointsInner.points) sumPoints
+          from user_points pointsInner
+                   join skill_definition definition
+                        on pointsInner.project_id = definition.project_id and
+                           pointsInner.skill_id = definition.skill_id and
+                           definition.type = :subjectType
+          where pointsInner.project_id = :projectId
+            and definition.project_id = :projectId
+          group by user_id, day) sum,
+         user_points points
+    where sum.sumUserId = points.user_id
+      and (sum.sumDay = points.day OR (sum.sumDay is null and points.day is null))
+      and points.skill_id is null
+      and points.project_id = :projectId'''.toString()
 
         Query query = entityManager.createNativeQuery(q);
         query.setParameter("projectId", projectId);
@@ -60,7 +64,7 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
     @Override
     List<GraphRelWithAchievement> getDependencyGraphWithAchievedIndicator(String projectId, String skillId, String userId){
         String q = '''
-            WITH RECURSIVE skill_deps_path AS (
+            WITH RECURSIVE skill_deps_path(parentProjectId, parentSkillId, parentId, parentName, childProjectId, childSkillId, childId, childName) AS (
               select sd.project_id as parentProjectId, sd.skill_id as parentSkillId, sd.id as parentId, sd.name as parentName,
                      sd1.project_id as childProjectId, sd1.skill_id as childSkillId, sd1.id as childId, sd1.name as childName
               from skill_definition sd,
@@ -109,6 +113,7 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
                     childId: it[7],
                     childSkillId: it[8],
                     childName: it[9],
+                    achievementId: it[10]
             )
         }
         return resList
