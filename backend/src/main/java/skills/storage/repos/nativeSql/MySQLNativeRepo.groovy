@@ -56,7 +56,7 @@ class MySQLNativeRepo implements NativeQueriesRepo {
     @Override
     List<GraphRelWithAchievement> getDependencyGraphWithAchievedIndicator(String projectId, String skillId, String userId){
         String q = '''
-            WITH RECURSIVE skill_deps_path AS (
+            WITH RECURSIVE skill_deps_path(parentProjectId, parentSkillId, parentId, parentName, childProjectId, childSkillId, childId, childName) AS (
               select sd.project_id as parentProjectId, sd.skill_id as parentSkillId, sd.id as parentId, sd.name as parentName,
                      sd1.project_id as childProjectId, sd1.skill_id as childSkillId, sd1.id as childId, sd1.name as childName
               from skill_definition sd,
@@ -104,6 +104,7 @@ class MySQLNativeRepo implements NativeQueriesRepo {
                     childId: it[7],
                     childSkillId: it[8],
                     childName: it[9],
+                    achievementId: it[10]
             )
         }
         return resList
