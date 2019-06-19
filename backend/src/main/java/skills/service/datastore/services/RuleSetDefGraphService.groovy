@@ -27,6 +27,6 @@ class RuleSetDefGraphService {
     }
 
     List<SkillDef> getChildrenSkills(SkillDef skillDef, RelationshipType relationshipType) {
-        return skillRelDefRepo.getChildren(skillDef.skillId, relationshipType)
+        return skillRelDefRepo.getChildren(skillDef.projectId, skillDef.skillId, relationshipType)
     }
 }
