@@ -39,6 +39,11 @@
     mounted() {
       this.loadSubject();
     },
+    computed: {
+      minimumPoints() {
+        return this.$store.state.minimumSubjectPoints;
+      },
+    },
     methods: {
       loadSubject() {
         this.isLoading = true;
@@ -66,6 +71,8 @@
           }, {
             label: 'Points',
             count: subject.totalPoints,
+            warn: subject.totalPoints < this.minimumPoints,
+            warnMsg: subject.totalPoints < this.minimumPoints ? `Subject has insufficient points assigned. Skills cannot be achieved until subject has at least ${this.minimumPoints} points.` : null,
           }, {
             label: 'Users',
             count: subject.numUsers,
