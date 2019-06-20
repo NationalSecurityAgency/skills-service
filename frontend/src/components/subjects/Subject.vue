@@ -52,6 +52,11 @@
     mounted() {
       this.buildCardOptions();
     },
+    computed: {
+      minimumPoints() {
+        return this.$store.state.minimumSubjectPoints;
+      },
+    },
     methods: {
       buildCardOptions() {
         this.cardOptions = {
@@ -67,6 +72,8 @@
           }, {
             label: 'Total Points',
             count: this.subjectInternal.totalPoints,
+            warn: this.subjectInternal.totalPoints < this.minimumPoints,
+            warnMsg: this.subjectInternal.totalPoints < this.minimumPoints ? `Subject has insufficient points assigned. Skills cannot be achieved until subject has at least ${this.minimumPoints} points.` : null,
           }, {
             label: 'Points %',
             count: this.subjectInternal.pointsPercentage,

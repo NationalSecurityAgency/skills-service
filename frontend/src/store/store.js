@@ -9,6 +9,7 @@ export default new Vuex.Store({
     projectId: '',
     previousUrl: '',
     minimumProjectPoints: 100,
+    minimumSubjectPoints: 100,
   },
   mutations: {
     currentProjectId(state, projectId) {
