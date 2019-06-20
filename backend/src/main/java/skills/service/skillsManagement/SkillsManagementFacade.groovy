@@ -307,6 +307,9 @@ class SkillsManagementFacade {
                     achievedLevelRepo.deleteByProjectIdAndSkillIdAndUserIdAndLevel(currentDef.projectId, currentDef.skillId, userId, null)
                 }
             } else if (hasLevelDefs) {
+                if (currentDef.totalPoints < minimumSubjectPoints) {
+                    throw new SkillException("Insufficient Subject points, skill achievement is disallowed", currentDef.skillId)
+                }
                 LevelDefinitionStorageService.LevelInfo levelInfo = levelDefService.getLevelInfo(currentDef, decrement ? updatedPoints.points + requesterDef.pointIncrement : updatedPoints.points)
                 CompletionItem completionItem = calculateLevels(levelInfo, updatedPoints, currentDef,  userId, currentDef.name, decrement)
                 if (!decrement && completionItem?.level && completionItem?.level > 0) {
