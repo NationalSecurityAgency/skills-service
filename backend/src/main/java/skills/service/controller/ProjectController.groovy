@@ -78,11 +78,7 @@ class ProjectController {
     @RequestMapping(value = "/projects/{id}/customIcons", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     List<CustomIconResult> getCustomIcons(@PathVariable("id") String projectId) {
-        ProjDef project = projectAdminStorageService.getProjDef(projectId)
-        return project.getCustomIcons().collect { CustomIcon icon ->
-            String cssClassname = IconCssNameUtil.getCssClass(icon.projectId, icon.filename)
-            return new CustomIconResult(filename: icon.filename, cssClassname: cssClassname)
-        }
+        return projectAdminStorageService.getCustomIcons(projectId)
     }
 
     @RequestMapping(value = "/projects/{id}/versions", method = RequestMethod.GET, produces = "application/json")

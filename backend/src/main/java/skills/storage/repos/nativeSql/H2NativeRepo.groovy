@@ -8,18 +8,25 @@ import javax.persistence.EntityManager
 import javax.persistence.PersistenceContext
 import javax.persistence.Query
 
-@Conditional(DBConditions.MySQL)
+@Conditional(DBConditions.H2)
 @Service
-class MySQLNativeRepo implements NativeQueriesRepo {
+class H2NativeRepo implements NativeQueriesRepo {
 
     @PersistenceContext
     EntityManager entityManager;
 
     @Override
     void decrementPointsForDeletedSkill(String projectId, String deletedSkillId, String parentSubjectSkillId) {
-        String q = '''UPDATE user_points a join user_points b on a.user_id = b.user_id and (a.day = b.day OR (a.day is null and b.day is null)) 
-        set b.points = b.points - a.points
-        where a.project_id = :projectId and a.skill_id= :deletedSkillId and (b.skill_id= :parentSubjectSkillId or b.skill_id is null) and b.project_id = :projectId'''.toString()
+        String q = '''
+        merge into USER_POINTS(id, points) key(id)
+        SELECT b.id, b.points - a.points as points
+        FROM user_points a, user_points b
+        WHERE a.user_id = b.user_id
+          and (a.day = b.day OR (a.day is null and b.day is null))
+          and a.skill_id = :deletedSkillId
+          and (b.skill_id = :parentSubjectSkillId or b.skill_id is null)
+          and b.project_id = :projectId
+          and a.project_id = :projectId'''.toString()
 
         Query query = entityManager.createNativeQuery(q);
         query.setParameter("projectId", projectId);
@@ -31,21 +38,22 @@ class MySQLNativeRepo implements NativeQueriesRepo {
     @Override
     void updateOverallScoresBySummingUpAllChildSubjects(String projectId, SkillDef.ContainerType subjectType) {
         String q = '''
-         update user_points points,
-          (
-            select
-              user_id                 sumUserId,
-              day                     sumDay,
-              SUM(pointsInner.points) sumPoints
-            from user_points pointsInner
-              join skill_definition definition
-                on pointsInner.project_id = definition.project_id and pointsInner.skill_id = definition.skill_id and
-                   definition.type = :subjectType
-            where pointsInner.project_id = :projectId and definition.project_id = :projectId
-            group by user_id, day
-          ) sum
-        set points.points = sum.sumPoints
-        where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay is null and points.day is null)) and points.skill_id is null and points.project_id = :projectId'''.toString()
+        merge into USER_POINTS (id, points) key (id)
+    select points.id, sum.sumPoints
+    from (select user_id sumUserId, day sumDay, SUM(pointsInner.points) sumPoints
+          from user_points pointsInner
+                   join skill_definition definition
+                        on pointsInner.project_id = definition.project_id and
+                           pointsInner.skill_id = definition.skill_id and
+                           definition.type = :subjectType
+          where pointsInner.project_id = :projectId
+            and definition.project_id = :projectId
+          group by user_id, day) sum,
+         user_points points
+    where sum.sumUserId = points.user_id
+      and (sum.sumDay = points.day OR (sum.sumDay is null and points.day is null))
+      and points.skill_id is null
+      and points.project_id = :projectId'''.toString()
 
         Query query = entityManager.createNativeQuery(q);
         query.setParameter("projectId", projectId);
@@ -91,6 +99,7 @@ class MySQLNativeRepo implements NativeQueriesRepo {
         query.setParameter("projectId", projectId);
         query.setParameter("skillId", skillId)
         query.setParameter("userId", userId)
+
         List resList = query.getResultList().collect {
             new GraphRelWithAchievement(
                     parentProjectId: it[0],

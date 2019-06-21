@@ -581,7 +581,7 @@
             <column name="skill_id" type="varchar(255)"/>
         </createIndex>
         <createIndex indexName="index_user_points_user_id_project_id_skill_id_day"
-                     tableName="user_points">
+                     tableName="user_points" unique="true">
             <column name="user_id" type="varchar(255)"/>
             <column name="project_id" type="varchar(255)"/>
             <column name="skill_id" type="varchar(255)"/>
