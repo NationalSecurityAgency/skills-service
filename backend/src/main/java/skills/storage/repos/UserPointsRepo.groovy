@@ -2,10 +2,8 @@ package skills.storage.repos
 
 import groovy.transform.CompileStatic
 import org.springframework.data.domain.Pageable
-import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
-import org.springframework.data.repository.query.Param
 import org.springframework.lang.Nullable
 import skills.service.controller.result.model.ProjectUser
 import skills.storage.model.SkillRelDef
