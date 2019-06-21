@@ -212,7 +212,7 @@ class SkillsLoader {
                     achieved: it.achievementId != null,
                     crossProject: projectId != it.childProjectId
             )
-        }
+        }?.sort({ it.skill.skillId })
         return new SkillDependencyInfo(dependencies: deps)
     }
 
