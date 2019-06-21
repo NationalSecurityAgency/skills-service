@@ -360,11 +360,13 @@ class AdminProjService {
         skillDefRepo.deleteAll(toDelete)
     }
 
+    @Transactional(readOnly = true)
     SubjectResult getSubject(String projectId, String subjectId) {
         SkillDef skillDef = skillDefRepo.findByProjectIdAndSkillIdAndType(projectId, subjectId, SkillDef.ContainerType.Subject)
         convertToSubject(skillDef)
     }
 
+    @Transactional(readOnly = true)
     List<SubjectResult> getSubjects(String projectId) {
         ProjDef projDef = getProjDef(projectId)
         List<SubjectResult> res = projDef.subjects.collect { convertToSubject(it) }
@@ -372,12 +374,14 @@ class AdminProjService {
         return res?.sort({ it.displayOrder })
     }
 
+    @Transactional(readOnly = true)
     List<BadgeResult> getBadges(String projectId) {
         ProjDef projDef = getProjDef(projectId)
         List<BadgeResult> res = projDef.badges.collect { convertToBadge(it) }
         return res?.sort({ it.displayOrder })
     }
 
+    @Transactional(readOnly = true)
     BadgeResult getBadge(String projectId, String badgeId) {
         SkillDef skillDef = skillDefRepo.findByProjectIdAndSkillIdAndType(projectId, badgeId, SkillDef.ContainerType.Badge)
         return convertToBadge(skillDef)
@@ -841,6 +845,7 @@ class AdminProjService {
     }
 
 
+    @Transactional
     void assignGraphRelationship(String projectId, String skillId, SkillDef.ContainerType skillType,
                                  String relationshipSkillId, SkillRelDef.RelationshipType relationshipType) {
         SkillDef skill1 = getSkillDef(projectId, skillId, skillType)
@@ -848,6 +853,7 @@ class AdminProjService {
         skillRelDefRepo.save(new SkillRelDef(parent: skill1, child: skill2, type: relationshipType))
     }
 
+    @Transactional
     void removeGraphRelationship(String projectId, String skillId, SkillDef.ContainerType skillType,
                                  String relationshipProjectId, String relationshipSkillId, SkillRelDef.RelationshipType relationshipType){
         SkillDef skill1 = getSkillDef(projectId, skillId, skillType)
