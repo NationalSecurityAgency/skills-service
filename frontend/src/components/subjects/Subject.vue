@@ -91,7 +91,7 @@
       },
       subjectSaved(subject) {
         this.isLoading = true;
-        SubjectsService.saveSubject(this.subjectInternal)
+        SubjectsService.saveSubject(subject)
           .then(() => {
             this.subjectInternal = subject;
             this.buildCardOptions();
