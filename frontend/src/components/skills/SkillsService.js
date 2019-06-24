@@ -68,11 +68,11 @@ export default {
       .then(createdRuleResult => createdRuleResult.data);
   },
   skillWithNameExists(projectId, skillName) {
-    return axios.get(`/admin/projects/${projectId}/skillExists?skillName=${encodeURIComponent(skillName)}`)
+    return axios.get(`/admin/projects/${projectId}/skillNameExists?skillName=${encodeURIComponent(skillName)}`)
       .then(remoteRes => !remoteRes.data);
   },
   skillWithIdExists(projectId, skillId) {
-    return axios.get(`/admin/projects/${projectId}/skillExists?skillId=${skillId}`)
+    return axios.get(`/admin/projects/${projectId}/entityIdExists?id=${skillId}`)
       .then(remoteRes => !remoteRes.data);
   },
   getLatestSkillVersion(projectId) {

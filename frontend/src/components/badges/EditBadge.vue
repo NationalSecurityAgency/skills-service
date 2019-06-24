@@ -10,7 +10,7 @@
               <label for="badgeName">Badge Name</label>
               <input class="form-control" id="badgeName" type="text" v-model="badgeInternal.name"
                      @input="updateBadgeId"
-                     v-validate="'required|min:3|max:50'" data-vv-delay="500" data-vv-name="badgeName" v-focus/>
+                     v-validate="'required|min:3|max:50|uniqueName'" data-vv-delay="500" data-vv-name="badgeName" v-focus/>
               <small class="form-text text-danger" v-show="errors.has('badgeName')">{{ errors.first('badgeName')}}
               </small>
             </div>
@@ -18,7 +18,7 @@
         </div>
 
         <id-input type="text" label="Badge ID" v-model="badgeInternal.badgeId" @input="canAutoGenerateId=false"
-                  v-validate="'required|min:3|max:50|alpha_num'" data-vv-name="badgeId"/>
+                  v-validate="'required|min:3|max:50|alpha_num|uniqueId'" data-vv-name="badgeId"/>
         <small class="form-text text-danger">{{ errors.first('badgeId')}}</small>
 
         <div class="mt-2">
@@ -80,13 +80,14 @@
   import IconManager from '../utils/iconPicker/IconManager';
   import IdInput from '../utils/inputForm/IdInput';
   import InlineHelp from '../utils/InlineHelp';
+  import BadgesService from './BadgesService';
 
-  let self;
+
   const dictionary = {
     en: {
       attributes: {
         badgeName: 'Badge Name',
-        badgeId: 'Badge ID',
+        badgeId: 'ID',
         requiredSkills: 'Required Skills',
         startDate: 'Start Date',
         endDate: 'End Date',
@@ -97,6 +98,7 @@
   Validator.extend('dateOrder', {
     getMessage: 'Start Date must come before End Date',
     validate() {
+      const self = this;
       let valid = true;
       if (self.limitTimeframe) {
         if (self.badgeInternal.startDate && self.badgeInternal.endDate) {
@@ -145,8 +147,8 @@
         displayIconManager: false,
       };
     },
-    mounted() {
-      self = this;
+    created() {
+      this.assignCustomValidation();
     },
     computed: {
       title() {
@@ -177,7 +179,14 @@
       },
       updateBadgeId() {
         if (!this.isEdit && this.canAutoGenerateId) {
-          this.badgeInternal.badgeId = this.badgeInternal.name.replace(/[^\w]/gi, '');
+          let id = this.badgeInternal.name.replace(/[^\w]/gi, '');
+          // Subjects, skills and badges can not have same id under a project
+          // by default append Badge to avoid id collision with other entities,
+          // user can always override in edit mode
+          if (id) {
+            id = `${id}Badge`;
+          }
+          this.badgeInternal.badgeId = id;
         }
       },
       onSelectedIcon(selectedIcon) {
@@ -205,6 +214,34 @@
       },
       toggleIconDisplay(shouldDisplay) {
         this.displayIconManager = shouldDisplay;
+      },
+      assignCustomValidation() {
+        // only want to validate for a new badge, existing subjects will override
+        // name and badge id
+        const self = this;
+        Validator.extend('uniqueName', {
+          getMessage: field => `The value for the ${field} is already taken.`,
+          validate(value) {
+            if (self.isEdit) {
+              return true;
+            }
+            return BadgesService.badgeWithNameExists(self.badgeInternal.projectId, value);
+          },
+        }, {
+          immediate: false,
+        });
+
+        Validator.extend('uniqueId', {
+          getMessage: field => `The value for the ${field} is already taken.`,
+          validate(value) {
+            if (self.isEdit) {
+              return true;
+            }
+            return BadgesService.badgeWithIdExists(self.badgeInternal.projectId, value);
+          },
+        }, {
+          immediate: false,
+        });
       },
     },
   };

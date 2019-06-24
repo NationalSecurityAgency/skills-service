@@ -1070,8 +1070,13 @@ class AdminProjService {
     }
 
     @Transactional(readOnly = true)
+    boolean existsByBadgeName(String projectId, String subjectName) {
+        return skillDefRepo.existsByProjectIdAndNameAndType(projectId, subjectName, SkillDef.ContainerType.Badge)
+    }
+
+    @Transactional(readOnly = true)
     boolean existsBySkillId(String projectId, String skillId) {
-        return skillDefRepo.existsByProjectIdAndSkillIdAndType(projectId, skillId, SkillDef.ContainerType.Skill)
+        return skillDefRepo.existsByProjectIdAndSkillId(projectId, skillId)
     }
 
     @Transactional(readOnly = true)

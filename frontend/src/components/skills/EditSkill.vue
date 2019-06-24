@@ -16,7 +16,8 @@
         </div>
         <div class="col-12 col-lg">
 
-          <id-input type="text" label="Skill ID" v-model="skillInternal.skillId" @input="canAutoGenerateId=false"
+          <id-input type="text" label="Skill ID"
+                    v-model="skillInternal.skillId" @input="canAutoGenerateId=false"
                     v-validate="'required|min:3|max:50|alpha_num|uniqueId'" data-vv-name="skillId"/>
           <small class="form-text text-danger">{{ errors.first('skillId')}}</small>
         </div>
@@ -216,7 +217,7 @@
           en: {
             attributes: {
               name: 'Skill Name',
-              skillId: 'Skill ID',
+              skillId: 'ID',
               pointIncrement: 'Point Increment',
               pointIncrementInterval: 'Point Increment Interval',
               numPerformToCompletion: 'Number of Times to Complete',
@@ -286,7 +287,14 @@
       },
       updateSkillId() {
         if (!this.isEdit && !this.canEditSkillId) {
-          this.skillInternal.skillId = this.skillInternal.name.replace(/[^\w]/gi, '');
+          let id = this.skillInternal.name.replace(/[^\w]/gi, '');
+          // Subjects, skills and badges can not have same id under a project
+          // by default append Skill to avoid id collision with other entities,
+          // user can always override in edit mode
+          if (id) {
+            id = `${id}Skill`;
+          }
+          this.skillInternal.skillId = id;
         }
       },
     },
@@ -294,43 +302,4 @@
 </script>
 
 <style>
-  .skills-enable-control {
-    font-size: 0.8rem;
-    font-weight: lighter;
-  }
-
-  .markdown-preview ul {
-    list-style: unset;
-  }
-
-  .markdown-info {
-    cursor: pointer;
-  }
-
-  .disableControl {
-    pointer-events: none;
-    color: #a8a8a8;
-  }
-
-  .field.operator {
-    margin-top: 2.2rem;
-    text-align: center;
-  }
-
-  .skills-point {
-    width: 25%;
-  }
-
-  #total-points-field {
-    border-right: 1px solid lightgray;
-  }
-
-  .input.total-points {
-    border: none;
-    box-shadow: none;
-  }
-
-  #version-field {
-    width: 8%;
-  }
 </style>
