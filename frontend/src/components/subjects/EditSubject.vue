@@ -111,7 +111,14 @@
       },
       updateSubjectId() {
         if (!this.isEdit && this.canAutoGenerateId) {
-          this.subjectInternal.subjectId = this.subjectInternal.name.replace(/[^\w]/gi, '');
+          let id = this.subjectInternal.name.replace(/[^\w]/gi, '');
+          // Subjects, skills and badges can not have same id under a project
+          // by default append Subject to avoid id collision with other entities,
+          // user can always override in edit mode
+          if (id) {
+            id = `${id}Subject`;
+          }
+          this.subjectInternal.subjectId = id;
         }
       },
       onSelectedIcon(selectedIcon) {
@@ -126,7 +133,7 @@
           en: {
             attributes: {
               subjectName: 'Subject Name',
-              subjectId: 'Subject ID',
+              subjectId: 'ID',
             },
           },
         };

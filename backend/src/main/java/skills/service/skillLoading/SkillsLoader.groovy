@@ -138,7 +138,7 @@ class SkillsLoader {
         if ( version >= 0 ) {
             badgeDefs = badgeDefs.findAll { it.version <= version }
         }
-        List<SkillBadgeSummary> badges = badgeDefs.collect { SkillDef badgeDefinition ->
+        List<SkillBadgeSummary> badges = badgeDefs.sort({ it.skillId }).collect { SkillDef badgeDefinition ->
             loadBadgeSummary(projDef, userId, badgeDefinition)
         }
         return badges
@@ -212,7 +212,9 @@ class SkillsLoader {
                     achieved: it.achievementId != null,
                     crossProject: projectId != it.childProjectId
             )
-        }?.sort({ it.skill.skillId })
+        }?.sort({ a,b ->
+            a.skill.skillId <=> b.skill.skillId ?: a.dependsOn.skillId <=> b.dependsOn.skillId
+        })
         return new SkillDependencyInfo(dependencies: deps)
     }
 

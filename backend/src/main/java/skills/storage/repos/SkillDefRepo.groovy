@@ -59,6 +59,8 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
     int calculateDistinctUsersForASingleSkill(String projectId, String skillId)
 
     boolean existsByProjectIdAndSkillIdAndType(String id, String skillId, SkillDef.ContainerType type)
+    boolean existsByProjectIdAndSkillId(String id, String skillId)
+
     boolean existsByProjectIdAndNameAndType(String id, String name, SkillDef.ContainerType type)
 
     @Query('SELECT MAX (s.version) from SkillDef s where s.projectId=?1')

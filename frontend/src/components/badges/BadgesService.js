@@ -23,4 +23,12 @@ export default {
     })
       .then(response => response.data);
   },
+  badgeWithNameExists(projectId, badgeName) {
+    return axios.get(`/admin/projects/${projectId}/badgeNameExists?badgeName=${encodeURIComponent(badgeName)}`)
+      .then(remoteRes => !remoteRes.data);
+  },
+  badgeWithIdExists(projectId, badgeId) {
+    return axios.get(`/admin/projects/${projectId}/entityIdExists?id=${badgeId}`)
+      .then(remoteRes => !remoteRes.data);
+  },
 };

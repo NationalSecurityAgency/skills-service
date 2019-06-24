@@ -18,6 +18,8 @@ import skills.service.skillsManagement.SkillsManagementFacade
 import skills.utils.ClientSecretGenerator
 import skills.utils.Constants
 
+import java.nio.charset.StandardCharsets
+
 import static org.springframework.data.domain.Sort.Direction.ASC
 import static org.springframework.data.domain.Sort.Direction.DESC
 
@@ -88,36 +90,49 @@ class AdminController {
         return new RequestResult(success: true)
     }
 
-    @RequestMapping(value = "/projects/{projectId}/subjectExists", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/projects/{projectId}/subjectNameExists", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    boolean doesSubjectExist(@PathVariable("projectId") String projectId,
-                             @RequestParam(value = "subjectId", required = false) String subjectId,
+    boolean doesSubjectNameExist(@PathVariable("projectId") String projectId,
                              @RequestParam(value = "subjectName", required = false) String subjectName) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
-        SkillsValidator.isTrue(subjectId || subjectName, 'Subject Id and Subject Name must be specified', projectId)
-        SkillsValidator.isTrue(!(subjectId && subjectName), 'Both Subject Id and Subject Name can NOT be provided', projectId)
-
-        if (subjectId) {
-            return projectAdminStorageService.existsBySubjectId(projectId, subjectId)
-        }
-
-        return projectAdminStorageService.existsBySubjectName(projectId, subjectName)
+        SkillsValidator.isNotBlank(subjectName, "Subject Name")
+        String decodedName = URLDecoder.decode(subjectName,  StandardCharsets.UTF_8.toString())
+        return projectAdminStorageService.existsBySubjectName(projectId, decodedName)
     }
 
-    @RequestMapping(value = "/projects/{projectId}/skillExists", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/projects/{projectId}/badgeNameExists", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    boolean doesSkillExist(@PathVariable("projectId") String projectId,
-                           @RequestParam(value = "skillId", required = false) String skillId,
+    boolean doesBadgeExist(@PathVariable("projectId") String projectId,
+                             @RequestParam(value = "badgeName", required = false) String badgeName) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(badgeName, "Badge Name")
+        String decodedName = URLDecoder.decode(badgeName,  StandardCharsets.UTF_8.toString())
+        return projectAdminStorageService.existsByBadgeName(projectId, decodedName)
+    }
+    @RequestMapping(value = "/projects/{projectId}/skillNameExists", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    boolean doesSkillNameExist(@PathVariable("projectId") String projectId,
                            @RequestParam(value = "skillName", required = false) String skillName) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
-        SkillsValidator.isTrue(skillId || skillName, 'Skill Id and Skill Name must be specified', projectId)
-        SkillsValidator.isTrue(!(skillId && skillName), 'Both Skill Id and Skill Name can NOT be provided', projectId)
+        SkillsValidator.isNotBlank(projectId, "Skill Name")
+        String decodedName = URLDecoder.decode(skillName,  StandardCharsets.UTF_8.toString())
+        return projectAdminStorageService.existsBySkillName(projectId, decodedName)
+    }
 
-        if (skillId) {
-            return projectAdminStorageService.existsBySkillId(projectId, skillId)
-        }
+    /**
+     * checks whether any entities with the given id exist, which can be id for subject, skill, badge, etc...
+     * @param projectId
+     * @param id - this id can be subject, skill, badge, et..
+     * @return true or false
+     */
+    @RequestMapping(value = "/projects/{projectId}/entityIdExists", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    boolean doesProjectEntityIdExist(@PathVariable("projectId") String projectId,
+                                    @RequestParam(value = "id") String id) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(id, "Entity Id")
 
-        return projectAdminStorageService.existsBySkillName(projectId, skillName)
+        return projectAdminStorageService.existsBySkillId(projectId, id)
     }
 
     @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}", method = RequestMethod.DELETE)
