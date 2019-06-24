@@ -687,6 +687,6 @@ class AdminController {
     @ResponseBody
     String getClientSecret(@PathVariable("projectId") String projectId) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
-        return projectAdminStorageService.getProjDef(projectId).clientSecret
+        return projectAdminStorageService.getProjectSecret(projectId)
     }
 }
