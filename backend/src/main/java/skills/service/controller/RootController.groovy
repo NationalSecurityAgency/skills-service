@@ -31,9 +31,6 @@ class RootController {
     @Autowired
     EmailSettingsService emailSettingsService
 
-    @Autowired
-    UserRepo userRepository
-
     @Value('#{securityConfig.authMode}}')
     AuthMode authMode = AuthMode.DEFAULT_AUTH_MODE
 
@@ -56,7 +53,7 @@ class RootController {
         if (authMode == AuthMode.FORM) {
             return accessSettingsStorageService.getNonRootUsers().findAll {
                 it.userId.toLowerCase().contains(query)
-            }.collect { new UserInfoRes(userRepository.findByUserIdIgnoreCase(it.userId)) }.unique()
+            }.collect { new UserInfoRes(accessSettingsStorageService.findByUserIdIgnoreCase(it.userId)) }.unique()
         } else {
             List<String> rootUsers = accessSettingsStorageService.rootUsers.collect { it.userId.toLowerCase() }
             return pkiUserLookup?.suggestUsers(query)?.findAll {
