@@ -74,11 +74,8 @@
         return window.moment(row.performedOn)
           .format('LLL');
       },
-      getRowDisplayId(row) {
-        return `Skill Id: [${row.skillId}] - (${this.getDate(row)}) ${row.id}`;
-      },
       deleteSkill(row) {
-        this.msgConfirm(`${this.getRowDisplayId(row)}. Delete Action can not be undone and permanently removes users' performed skills.`)
+        this.msgConfirm(`Removing skill [${row.skillId}] performed on [${this.getDate(row)}]. This will permanently remove this user's performed skill and cannot be undone.`)
           .then((res) => {
             if (res) {
               this.doDeleteSkill(row);
