@@ -1,7 +1,7 @@
 <template>
   <div class="existingUserInput">
     <multiselect v-model="userQuery" :placeholder="placeholder" tag-placeholder="Enter to select"
-                 :options="suggestions" :multiple="true" :taggable="canEnterNewUser" @tag="addTag"
+                 :options="suggestions" :multiple="allowMultipleSelections" :taggable="canEnterNewUser" @tag="addTag"
                  :hide-selected="true" track-by="userId" label="label"
                  @search-change="suggestUsers" :loading="isFetching" :internal-search="false"
                  :clear-on-select="true">
@@ -41,6 +41,10 @@
         default: false,
       },
       suggest: {
+        type: Boolean,
+        default: false,
+      },
+      allowMultipleSelections: {
         type: Boolean,
         default: false,
       },
