@@ -935,6 +935,9 @@ class AdminProjService {
             shouldRebuildScores = skillDefinition.totalPoints != totalPointsRequested
 
             Props.copy(skillRequest, skillDefinition, "childSkills", 'version')
+            //totalPoints is not a prop on skillRequest, it is a calculated value so we
+            //need to manually update it in the case of edits.
+            skillDefinition.totalPoints = totalPointsRequested
         } else {
             String parentSkillId = skillRequest.subjectId
             Integer highestDisplayOrder = skillDefRepo.calculateChildSkillsHighestDisplayOrder(skillRequest.projectId, parentSkillId)

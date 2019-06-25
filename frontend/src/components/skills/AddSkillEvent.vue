@@ -10,11 +10,12 @@
           <datepicker input-class="border-0" wrapper-class="form-control" v-model="dateAdded" name="Event Date" v-validate="'required'"/>
         </div>
         <div class="col-auto">
-          <b-button variant="outline-primary" @click="addSkill" :disabled="errors.any() || (!currentSelectedUser || !currentSelectedUser.userId || currentSelectedUser.userId.length === 0) || projectTotalPoints < minimumPoints">
-            Add <i v-if="projectTotalPoints >= minimumPoints" :class="[isSaving ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-arrow-circle-right']"></i>
-            <i v-else class="icon-warning fa fa-exclamation-circle text-warning"
-               v-b-tooltip.hover="'Unable to add skill for user. Insufficient available points in project.'"></i>
-          </b-button>
+          <div v-b-tooltip.hover="generateMinPointsTooltip">
+            <b-button variant="outline-primary" @click="addSkill" :disabled="errors.any() || disable">
+              Add <i v-if="projectTotalPoints >= minimumPoints" :class="[isSaving ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-arrow-circle-right']"></i>
+              <i v-else class="icon-warning fa fa-exclamation-circle text-warning"></i>
+            </b-button>
+          </div>
         </div>
       </div>
 
@@ -96,8 +97,21 @@
       minimumPoints() {
         return this.$store.state.minimumProjectPoints;
       },
+      minimumSubjectPoints() {
+        return this.$store.state.minimumSubjectPoints;
+      },
+      disable() {
+        return (!this.currentSelectedUser || !this.currentSelectedUser.userId || this.currentSelectedUser.userId.length === 0) || this.projectTotalPoints < this.minimumPoints;
+      },
     },
     methods: {
+      generateMinPointsTooltip() {
+        let text = '';
+        if (this.projectTotalPoints < this.minimumPoints) {
+          text = 'Unable to add skill for user. Insufficient available points in project.';
+        }
+        return text;
+      },
       loadProject() {
         ProjectService.getProject(this.projectId).then((res) => {
           this.projectTotalPoints = res.totalPoints;
