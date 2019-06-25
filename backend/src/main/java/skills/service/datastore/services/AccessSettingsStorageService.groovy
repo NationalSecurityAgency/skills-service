@@ -227,6 +227,11 @@ class AccessSettingsStorageService {
         log.info("Deleted allowedOrigin [{}]", toDelete)
     }
 
+    @Transactional(readOnly = true)
+    User findByUserIdIgnoreCase(String userId) {
+        return userRepository.findByUserIdIgnoreCase(userId)
+    }
+
     private User createNewUser(UserInfo userInfo) {
         User user = new User(
                 userId: userInfo.username?.toLowerCase(),
