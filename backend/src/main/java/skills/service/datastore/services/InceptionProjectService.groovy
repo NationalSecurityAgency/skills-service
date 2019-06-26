@@ -90,6 +90,11 @@ class InceptionProjectService {
         }
 
         List<SkillRequest> skills = [
+                new SkillRequest(name: "Create Project", skillId: "CreateProject", subjectId: "Projects", projectId: inceptionProjectId,
+                        pointIncrement: 10, pointIncrementInterval: 8, numPerformToCompletion: 1,
+                        description: "Project is an overall container that represents skills' ruleset for a single application with gamified training. " +
+                                "Project's administrator(s) manage training skills definitions, subjects, levels, dependencies and other attributes " +
+                                "that make up application's training profile. To create project click 'Project +' button."),
                 new SkillRequest(name: "Create Subject", skillId: "CreateSubject", subjectId: "Projects", projectId: inceptionProjectId,
                         pointIncrement: 10, pointIncrementInterval: 8, numPerformToCompletion: 1,
                         description: "To create a subject navigate a subject tab on a project page then click 'Subject +' button.")

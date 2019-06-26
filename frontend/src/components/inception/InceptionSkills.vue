@@ -1,6 +1,5 @@
 <template>
   <div>
-    {{ userInfo }}
     <skills-display :version="skillsVersion"/>
   </div>
 </template>
@@ -34,7 +33,7 @@
         if (this.$store.getters.isPkiAuthenticated) {
           return 'pki';
         }
-        return `${this.serviceUrl}/app/projects/${encodeURIComponent(this.projectId)}/token/${encodeURIComponent(this.userId)}`;
+        return `${this.serviceUrl}/app/projects/${encodeURIComponent(this.projectId)}/users/${encodeURIComponent(this.userId)}/token`;
       },
       userId() {
         return this.$store.getters.userInfo.userId;

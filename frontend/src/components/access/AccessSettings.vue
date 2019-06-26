@@ -1,6 +1,6 @@
 <template>
   <loading-container v-bind:is-loading="isLoading">
-    <sub-page-header title="Access Settings"/>
+    <sub-page-header title="Access Management"/>
     <div class="card">
       <div class="card-header">
         Project Administrators
