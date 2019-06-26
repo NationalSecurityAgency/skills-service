@@ -29,7 +29,7 @@ class UserTokenController {
      * @param userId
      * @return
      */
-    @RequestMapping(value = "/app/projects/inception/users/{userId}/token", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/app/projects/Inception/users/{userId}/token", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     ResponseEntity<OAuth2AccessToken> getUserToken(@PathVariable("userId") String userId) {
         return createToken(InceptionProjectService.inceptionProjectId, userId)
