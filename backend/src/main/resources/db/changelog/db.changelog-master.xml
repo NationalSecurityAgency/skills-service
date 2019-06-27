@@ -781,6 +781,12 @@
             <!-- Only append for create table statements -->
             <regExpReplace replace="(CREATE TABLE.*)" with="$1 engine innodb"/>
         </modifySql>
+
+        <modifySql dbms="postgres">
+            <!-- Only append for create table statements -->
+            <regExpReplace replace="VARCHAR" with="CITEXT"/>
+        </modifySql>
+
     </changeSet>
 
 </databaseChangeLog>
