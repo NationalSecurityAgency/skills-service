@@ -783,7 +783,6 @@
         </modifySql>
 
         <modifySql dbms="postgres">
-            <!-- Only append for create table statements -->
             <regExpReplace replace="VARCHAR" with="CITEXT"/>
         </modifySql>
 
