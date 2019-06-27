@@ -1,11 +1,13 @@
 <template>
   <div>
-    <skills-display :version="skillsVersion"/>
+    <skills-display
+      :options="options"
+      :version="skillsVersion"/>
   </div>
 </template>
 
 <script>
-  import { SkillsDisplay, SkillsConfiguration } from '@skills/skills-client-vue';
+  import { SkillsDisplay } from '@skills/skills-client-vue';
 
   export default {
     name: 'InceptionSkills',
@@ -18,14 +20,14 @@
         skillsVersion: 0,
       };
     },
-    created() {
-      SkillsConfiguration.configure({
-        projectId: this.projectId,
-        authenticator: this.authenticator,
-        serviceUrl: this.serviceUrl,
-      });
-    },
     computed: {
+      options() {
+        return {
+          projectId: this.projectId,
+          authenticator: this.authenticator,
+          serviceUrl: this.serviceUrl,
+        };
+      },
       serviceUrl() {
         return window.location.origin;
       },
