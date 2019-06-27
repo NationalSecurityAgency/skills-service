@@ -1,7 +1,8 @@
 <template>
   <div class="card" @click="selectIcon">
     <div class="card-body text-info" style="min-height: 4rem;">
-      <i :class="[selectedIconClass]"/>
+      <i
+        :class="[selectedIconClass]" />
     </div>
   </div>
 </template>

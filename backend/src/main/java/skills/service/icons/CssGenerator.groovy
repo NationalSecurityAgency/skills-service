@@ -20,6 +20,10 @@ class CssGenerator {
             String cssClass = ".${cssClassName} {"
             lines.add(cssClass)
             lines.add("\tbackground-image: url(\"${it.dataUri}\");".toString())
+            lines.add("\tbackground-repeat: no-repeat;")
+            lines.add("\twidth: 48px;")
+            lines.add("\theight: 48px;")
+            lines.add("\tdisplay: inline-block;")
             lines.add("}".toString())
             css += "${lines.join('')}"
         }
