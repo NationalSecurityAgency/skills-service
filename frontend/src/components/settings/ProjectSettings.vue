@@ -10,21 +10,35 @@
               msg="Change to true to calculate levels based on explicit point values instead of percentages."/>
           </div>
           <div class="col">
-            <b-form-checkbox v-model="levelPointsSetting.value" v-on:input="settingChanged" name="check-button" switch>
-              {{ levelPointsSetting.value }}
+            <b-form-checkbox v-model="settings.levelPointsEnabled.value" name="check-button" v-on:input="levelPointsEnabledChanged" switch>
+              {{ settings.levelPointsEnabled.value }}
             </b-form-checkbox>
+          </div>
+        </div>
+
+        <div class="row mt-3">
+          <div class="col col-md-3 text-secondary">
+            Root Help Url:
+            <inline-help
+              msg="Optional root for Skills' 'Help Url' parameter. When configured 'Help Url' can use relative path to this root."/>
+          </div>
+          <div class="col">
+            <b-form-input v-model="settings.helpUrlHost.value" placeholder="http://www.HelpArticlesHost.com"
+                          v-on:input="helpUrlHostChanged"></b-form-input>
           </div>
         </div>
 
         <hr/>
 
+        <p v-if="errMsg" class="text-center text-danger mt-3">***{{ errMsg }}***</p>
+
         <div class="row">
           <div class="col">
-            <b-button variant="outline-info" @click="save" :disabled="!dirty || errors.any()">
+            <b-button variant="outline-info" @click="save" :disabled="!isDirty || errors.any()">
               Save <i class="fas fa-arrow-circle-right"/>
             </b-button>
 
-            <span v-if="dirty" class="text-warning ml-2">
+            <span v-if="isDirty" class="text-warning ml-2">
           <i class="fa fa-exclamation-circle"
              v-b-tooltip.hover="'Settings have been changed, don not forget to save'"/> Unsaved Changes
         </span>
@@ -44,7 +58,6 @@
   import LoadingContainer from '../utils/LoadingContainer';
   import ToastSupport from '../utils/ToastSupport';
 
-  const initialSettingValue = { value: 'false', setting: 'level.points.enabled' };
   export default {
     name: 'ProjectSettings',
     mixins: [ToastSupport],
@@ -57,51 +70,83 @@
     data() {
       return {
         isLoading: true,
-        levelPointsSetting: Object.assign({ projectId: this.$route.params.projectId }, initialSettingValue),
-        lastLoadedValue: null,
-        dirty: false,
+        settings: {
+          levelPointsEnabled: {
+            value: 'false',
+            setting: 'level.points.enabled',
+            lastLoadedValue: 'false',
+            dirty: false,
+            projectId: this.$route.params.projectId,
+          },
+          helpUrlHost: {
+            value: '',
+            setting: 'help.url.root',
+            lastLoadedValue: '',
+            dirty: false,
+            projectId: this.$route.params.projectId,
+          },
+        },
+        errMsg: null,
       };
     },
     mounted() {
       this.loadSettings();
     },
+    computed: {
+      isDirty() {
+        const foundDirty = Object.values(this.settings).find(item => item.dirty);
+        return foundDirty;
+      },
+    },
     methods: {
-      settingChanged(value) {
-        const valueStr = `${value}`;
-        if (valueStr !== `${this.lastLoadedValue.value}`) {
-          this.dirty = true;
-        } else {
-          this.dirty = false;
-        }
+      levelPointsEnabledChanged(value) {
+        this.settings.levelPointsEnabled.dirty = `${value}` !== `${this.settings.levelPointsEnabled.lastLoadedValue}`;
+      },
+      helpUrlHostChanged(value) {
+        this.settings.helpUrlHost.dirty = `${value}` !== `${this.settings.helpUrlHost.lastLoadedValue}`;
       },
       loadSettings() {
-        SettingService.getSetting(this.$route.params.projectId, this.levelPointsSetting.setting)
+        SettingService.getSettingsForProject(this.$route.params.projectId)
           .then((response) => {
-            this.isLoading = false;
             if (response) {
-              this.levelPointsSetting = response;
-            } else {
-              this.levelPointsSetting = Object.assign({ projectId: this.$route.params.projectId }, initialSettingValue);
+              const entries = Object.entries(this.settings);
+              entries.forEach((entry) => {
+                const [key, value] = entry;
+                const found = response.find(item => item.setting === value.setting);
+                if (found) {
+                  this.settings[key] = Object.assign({ dirty: false, lastLoadedValue: found.value }, found);
+                }
+              });
             }
-            this.lastLoadedValue = Object.assign({}, this.levelPointsSetting);
+          })
+          .finally(() => {
+            this.isLoading = false;
           });
       },
       save() {
-        this.isLoading = true;
-        SettingService.saveSetting(this.$route.params.projectId, this.levelPointsSetting)
-          .then((res) => {
-            this.dirty = false;
-            this.lastLoadedValue = Object.assign({}, this.levelPointsSetting);
-            this.levelPointsSetting = res;
+        const dirtyChanges = Object.values(this.settings).filter(item => item.dirty);
+        if (dirtyChanges) {
+          this.isLoading = true;
+          SettingService.checkSettingsValidity(this.$route.params.projectId, dirtyChanges)
+            .then((res) => {
+              if (res.valid) {
+                this.saveSettings(dirtyChanges);
+              } else {
+                this.errMsg = res.explanation;
+                this.isLoading = false;
+              }
+            });
+        }
+      },
+      saveSettings(dirtyChanges) {
+        SettingService.saveSettings(this.$route.params.projectId, dirtyChanges)
+          .then(() => {
             this.successToast('Settings Updated', 'Successfully saved settings!');
-          })
-          .catch((e) => {
-            if (e.response.data && e.response.data.errorCode && e.response.data.errorCode === 'InsufficientPointsToConvertLevels') {
-              this.errorToast('Setting Not Saved!', e.response.data.explanation);
-            } else {
-              const errorMessage = (e.response && e.response.data && e.response.data.message) ? e.response.data.message : undefined;
-              this.$router.push({ name: 'ErrorPage', query: { errorMessage } });
-            }
+            const entries = Object.entries(this.settings);
+            entries.forEach((entry) => {
+              const [key, value] = entry;
+              this.settings[key] = Object.assign(value, { dirty: false, lastLoadedValue: value.value });
+            });
           })
           .finally(() => {
             this.isLoading = false;
@@ -109,7 +154,6 @@
       },
     },
   };
-
 </script>
 
 <style scoped>

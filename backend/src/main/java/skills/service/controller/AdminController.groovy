@@ -14,6 +14,7 @@ import skills.service.datastore.services.AdminUsersService
 import skills.service.datastore.services.LevelDefinitionStorageService
 import skills.service.datastore.services.UserAdminService
 import skills.service.datastore.services.settings.SettingsService
+import skills.service.datastore.services.settings.listeners.ValidationRes
 import skills.service.skillsManagement.SkillsManagementFacade
 import skills.utils.ClientSecretGenerator
 import skills.utils.Constants
@@ -670,6 +671,28 @@ class AdminController {
         SkillsValidator.isTrue(setting == value.setting, "Setting Id must equal", projectId)
 
         settingsService.saveSetting(value)
+        return new RequestResult(success: true)
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/settings/checkValidity", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    def checkSettingsValidity(@PathVariable("projectId") String projectId, @RequestBody List<SettingsRequest> values) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotNull(values, "Settings")
+
+        ValidationRes validationRes = settingsService.isValid(values)
+        return [
+                success: true,
+                valid: validationRes.isValid,
+                explanation: validationRes.explanation
+        ]
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/settings", method = [RequestMethod.PUT, RequestMethod.POST], produces = MediaType.APPLICATION_JSON_VALUE)
+    RequestResult saveProjectSettings(@PathVariable("projectId") String projectId, @RequestBody List<SettingsRequest> values) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotNull(values, "Settings")
+
+        settingsService.saveSettings(values)
         return new RequestResult(success: true)
     }
 

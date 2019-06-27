@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional
 import skills.service.controller.exceptions.SkillException
 import skills.service.controller.request.model.SettingsRequest
 import skills.service.controller.result.model.SettingsResult
+import skills.service.datastore.services.settings.listeners.ValidationRes
 import skills.storage.model.Setting
 import skills.storage.repos.SettingRepo
 import skills.utils.Props
@@ -26,7 +27,14 @@ class SettingsService {
     List<SettingChangedListener> listeners = [];
 
     @Transactional
-    public SettingsResult saveSetting(SettingsRequest request) {
+    void saveSettings(List<SettingsRequest> request) {
+        request.each {
+            saveSetting(it)
+        }
+    }
+
+    @Transactional
+    SettingsResult saveSetting(SettingsRequest request) {
         Setting setting
 
         if (request.id) {
@@ -67,6 +75,26 @@ class SettingsService {
                 it.execute(previousValue, incomingValue)
             }
         }
+    }
+
+    @Transactional(readOnly = true)
+    ValidationRes isValid(List<SettingsRequest> settings) {
+        ValidationRes foundInvalid = settings.collect({ isValid(it) }).find({!it.isValid})
+        return foundInvalid ?: new ValidationRes(isValid: true)
+    }
+
+    @Transactional(readOnly = true)
+    ValidationRes isValid(SettingsRequest setting) {
+        ValidationRes res = new ValidationRes(isValid: true);
+        listeners?.each {
+            if (it.supports(setting)) {
+                res = it.isValid(setting)
+                if(!res.isValid){
+                    return res;
+                }
+            }
+        }
+        return res
     }
 
     @Transactional

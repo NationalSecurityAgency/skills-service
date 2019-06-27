@@ -5,9 +5,11 @@ export default {
     return axios.get(`/admin/projects/${projectId}/settings/${settingName}`)
       .then(remoteRes => remoteRes.data);
   },
-  saveSetting(projectId, settingObj) {
-    return axios.post(`/admin/projects/${projectId}/settings/${settingObj.setting}`, settingObj, { handleError: false })
-      .then(() => this.getSetting(projectId, settingObj.setting));
+  saveSettings(projectId, settings) {
+    return axios.post(`/admin/projects/${projectId}/settings`, settings).then(response => response.data);
+  },
+  checkSettingsValidity(projectId, settings) {
+    return axios.post(`/admin/projects/${projectId}/settings/checkValidity`, settings).then(response => response.data);
   },
   getSettingsForProject(projectId) {
     return axios.get(`/admin/projects/${projectId}/settings`)
