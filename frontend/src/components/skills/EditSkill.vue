@@ -99,8 +99,7 @@
 
       <div class="form-group mt-3">
         <label>Help URL</label>
-        <input class="form-control" type="text" v-model="skillInternal.helpUrl"
-               v-validate="'url:require_protocol'" data-vv-name="helpUrl"/>
+        <input class="form-control" type="text" v-model="skillInternal.helpUrl" data-vv-name="helpUrl"/>
         <small class="form-text text-danger">{{ errors.first('helpUrl')}}</small>
       </div>
 

@@ -36,6 +36,13 @@ class LevelPointsSettingListener implements SettingChangedListener{
         return setting.setting == Settings.LEVEL_AS_POINTS.settingName
     }
 
+    @Override
+    ValidationRes isValid(SettingsRequest setting){
+        ProjDef project = projDefRepo.findByProjectId(setting.projectId)
+        boolean isValid = project?.totalPoints > MIN_TOTAL_POINTS_REQUIRED_TO_SWITCH
+        return new ValidationRes(isValid: isValid, explanation: !isValid ? getErrExplanation(project) : null)
+    }
+
     @Transactional
     @Override
     void execute(Setting previousValue, SettingsRequest setting) {
@@ -46,8 +53,7 @@ class LevelPointsSettingListener implements SettingChangedListener{
         if(setting.isEnabled() && (!previousValue?.isEnabled())){
             log.info("converting all levels for project [${setting.projectId}] (including skill levels) to points")
             if(project?.totalPoints < MIN_TOTAL_POINTS_REQUIRED_TO_SWITCH){
-                throw new SkillException("Project has [${project.totalPoints}] total points. " +
-                        "[$MIN_TOTAL_POINTS_REQUIRED_TO_SWITCH] total points required to switch to points based levels",
+                throw new SkillException(getErrExplanation(project),
                         project.projectId,
                         "N/A",
                         ErrorCode.InsufficientPointsToConvertLevels)
@@ -78,6 +84,11 @@ class LevelPointsSettingListener implements SettingChangedListener{
 
             }
         }
+    }
+
+    private String getErrExplanation(ProjDef project) {
+        "Use Points For Levels: Project has [${project.totalPoints}] total points. " +
+                "[$MIN_TOTAL_POINTS_REQUIRED_TO_SWITCH] total points required to switch to points based levels"
     }
 
 }

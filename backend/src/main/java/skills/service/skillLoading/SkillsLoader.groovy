@@ -6,7 +6,9 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import skills.service.controller.exceptions.SkillException
+import skills.service.controller.result.model.SettingsResult
 import skills.service.datastore.services.LevelDefinitionStorageService
+import skills.service.datastore.services.settings.SettingsService
 import skills.service.skillLoading.model.*
 import skills.storage.model.*
 import skills.storage.repos.ProjDefRepo
@@ -59,6 +61,11 @@ class SkillsLoader {
 
     @Autowired
     NativeQueriesRepo nativeQueriesRepo
+
+    @Autowired
+    SettingsService settingsService
+
+    private static PROP_HELP_URL_ROOT = "help.url.root"
 
     @Transactional(readOnly = true)
     Integer getUserLevel(String projectId, String userId) {
@@ -170,12 +177,14 @@ class SkillsLoader {
             skillDependencySummary = dependencySummaryLoader.loadDependencySummary(userId, projectId, skillId)
         }
 
+        SettingsResult helpUrlRootSetting = settingsService.getSetting(projectId, PROP_HELP_URL_ROOT)
+
         return new SkillSummary(
                 projectId: skillDef.projectId, projectName: projDef.name,
                 skillId: skillDef.skillId, skill: skillDef.name,
                 points: points?.points ?: 0, todaysPoints: todayPoints?.points ?: 0,
                 pointIncrement: skillDef.pointIncrement, pointIncrementInterval: skillDef.pointIncrementInterval, totalPoints: skillDef.totalPoints,
-                description: new SkillDescription(description: skillDef.description, href: skillDef.helpUrl),
+                description: new SkillDescription(description: skillDef.description, href: getHelpUrl(helpUrlRootSetting, skillDef)),
                 dependencyInfo: skillDependencySummary,
                 crossProject: crossProjectId != null
         )
@@ -223,7 +232,7 @@ class SkillsLoader {
 
         if (loadSkills) {
             SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, projDef.projectId, subjectDefinition.skillId, version)
-            skillsRes = createSkillSummaries(groupChildrenMeta.childrenWithPoints)
+            skillsRes = createSkillSummaries(projDef, groupChildrenMeta.childrenWithPoints)
         }
 
         UserPoints overallPts = userPointsRepo.findByProjectIdAndUserIdAndSkillIdAndDay(projDef.projectId, userId, subjectDefinition.skillId, null)
@@ -269,7 +278,7 @@ class SkillsLoader {
 
         if (loadSkills) {
             SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, projDef.projectId, badgeDefinition.skillId, SkillRelDef.RelationshipType.BadgeDependence)
-            skillsRes = createSkillSummaries(groupChildrenMeta.childrenWithPoints)
+            skillsRes = createSkillSummaries(projDef, groupChildrenMeta.childrenWithPoints)
         }
 
         List<UserAchievement> achievements = achievedLevelRepository.findAllByUserIdAndProjectIdAndSkillId(userId, projDef.projectId, badgeDefinition.skillId)
@@ -296,8 +305,24 @@ class SkillsLoader {
         )
     }
 
-    private List<SkillSummary> createSkillSummaries(List<SubjectDataLoader.SkillsAndPoints> childrenWithPoints) {
+    private String getHelpUrl(SettingsResult helpUrlRootSetting, SkillDef skillDef) {
+        String res = skillDef.helpUrl
+
+        if (skillDef.helpUrl && helpUrlRootSetting && !skillDef.helpUrl.toLowerCase().startsWith("http")) {
+            String rootUrl = helpUrlRootSetting.value
+            if (rootUrl.endsWith("/") && res.startsWith("/")) {
+                rootUrl = rootUrl.substring(0, rootUrl.length() - 2)
+            }
+            res = rootUrl + res
+        }
+
+        return res
+    }
+
+    private List<SkillSummary> createSkillSummaries(ProjDef thisProjDef, List<SubjectDataLoader.SkillsAndPoints> childrenWithPoints) {
         List<SkillSummary> skillsRes = []
+
+        SettingsResult helpUrlRootSetting = settingsService.getSetting(thisProjDef.projectId, PROP_HELP_URL_ROOT)
 
         Map<String,ProjDef> projDefMap = [:]
         childrenWithPoints.each { SubjectDataLoader.SkillsAndPoints skillDefAndUserPoints ->
@@ -316,7 +341,7 @@ class SkillsLoader {
                     skillId: skillDef.skillId, skill: skillDef.name,
                     points: points, todaysPoints: todayPoints,
                     pointIncrement: skillDef.pointIncrement, pointIncrementInterval: skillDef.pointIncrementInterval, totalPoints: skillDef.totalPoints,
-                    description: new SkillDescription(description: skillDef.description, href: skillDef.helpUrl),
+                    description: new SkillDescription(description: skillDef.description, href: getHelpUrl(helpUrlRootSetting, skillDef)),
                     dependencyInfo: skillDefAndUserPoints.dependencyInfo
             )
         }
