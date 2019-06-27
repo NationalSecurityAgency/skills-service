@@ -98,7 +98,10 @@
       </div>
 
       <div class="form-group mt-3">
-        <label>Help URL</label>
+        <label>Help URL/Path
+          <inline-help
+            msg="If project level 'Root Help Url' is specified then this path will be relative to 'Root Help Url'"/>
+        </label>
         <input class="form-control" type="text" v-model="skillInternal.helpUrl" data-vv-name="helpUrl"/>
         <small class="form-text text-danger">{{ errors.first('helpUrl')}}</small>
       </div>
