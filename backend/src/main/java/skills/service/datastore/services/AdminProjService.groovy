@@ -948,6 +948,7 @@ class AdminProjService {
                     name: skillRequest.name,
                     pointIncrement: skillRequest.pointIncrement,
                     pointIncrementInterval: skillRequest.pointIncrementInterval,
+                    numMaxOccurrencesIncrementInterval: skillRequest.numMaxOccurrencesIncrementInterval,
                     totalPoints: totalPointsRequested,
                     description: skillRequest.description,
                     helpUrl: skillRequest.helpUrl,
@@ -1037,6 +1038,7 @@ class AdminProjService {
         Props.copy(skillDef, res)
         res.numPerformToCompletion = skillDef.totalPoints / res.pointIncrement
         res.totalPoints = skillDef.totalPoints
+        res.numMaxOccurrencesIncrementInterval = skillDef.numMaxOccurrencesIncrementInterval
 
         if (loadNumUsers) {
             res.numUsers = skillDefRepo.calculateDistinctUsersForASingleSkill(skillDef.projectId, skillDef.skillId)
