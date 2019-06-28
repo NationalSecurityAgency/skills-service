@@ -21,6 +21,17 @@
                     v-validate="'required|min:3|max:50|alpha_num|uniqueId'" data-vv-name="skillId"/>
           <small class="form-text text-danger">{{ errors.first('skillId')}}</small>
         </div>
+        <div class="col-12 col-lg-2 mt-2 mt-lg-0">
+          <div class="form-group">
+            <label>Version
+              <inline-help
+                msg="An optional version for this skill to allow filtering of available skills for different versions of an application"/>
+            </label>
+            <input class="form-control" type="number" min="0" v-model="skillInternal.version" :disabled="isEdit"
+                   v-validate="'min_value:0|max_value:999|numeric'" data-vv-delay="500" data-vv-name="version"/>
+            <small class="form-text text-danger">{{ errors.first('version')}}</small>
+          </div>
+        </div>
       </div>
       <hr class="mb-0 pb-1 mt-4 mt-lg-0"/>
       <hr class="my-0 py-0"/>
@@ -36,7 +47,7 @@
         </div>
         <div class="col-12 col-lg">
           <div class="form-group mt-2 mt-lg-0">
-            <label for="subjName">Times to Completion</label>
+            <label for="subjName">Occurrences to Completion</label>
             <div class="input-group">
               <div class="input-group-prepend">
                 <div class="input-group-text"><i class="fas fa-times"/></div>
@@ -68,18 +79,38 @@
       <div class="row">
         <div class="col-12 col-lg">
           <div class="form-group">
-            <label>Increment Interval (hours)
+            <label><b-form-checkbox id="checkbox-1" class="d-inline"></b-form-checkbox>Time Window
               <inline-help msg="The number of hours that must elapse between incrementing points for a user."/>
+
             </label>
-            <input class="form-control" type="text" v-model="skillInternal.pointIncrementInterval"
-                   v-validate="'required|numeric|min_value:1|max_value:10000'" data-vv-name="pointIncrementInterval"
-                   value="8"/>
+            <div class="row">
+              <div class="col">
+                <div class="input-group">
+                  <input class="form-control d-inline" type="text" v-model="skillInternal.pointIncrementInterval"
+                         v-validate="'required|numeric|min_value:1|max_value:10000'" data-vv-name="pointIncrementInterval"
+                         value="8"/>
+                  <div class="input-group-append">
+                    <span class="input-group-text" id="hours-append">Hours</span>
+                  </div>
+                </div>
+              </div>
+              <div class="col">
+                <div class="input-group">
+                  <input class="form-control d-inline"  type="text" v-model="skillInternal.pointIncrementInterval"
+                         v-validate="'required|numeric|min_value:0|max_value:10000'" data-vv-name="pointIncrementInterval"
+                         value="0"/>
+                  <div class="input-group-append">
+                    <span class="input-group-text" id="minutes-append">Minutes</span>
+                  </div>
+                </div>
+              </div>
+            </div>
             <small class="form-text text-danger">{{ errors.first('pointIncrementInterval')}}</small>
           </div>
         </div>
         <div class="col-12 col-lg">
           <div class="form-group">
-            <label>Version (Optional)
+            <label>Max Occurrences Within Window
               <inline-help
                 msg="An optional version for this skill to allow filtering of available skills for different versions of an application"/>
             </label>
@@ -89,6 +120,9 @@
           </div>
         </div>
       </div>
+
+        <hr class="my-0 pb-1"/>
+        <hr class="mt-0 pt-0"/>
 
       <div class="">
         <label class="label">Description</label>

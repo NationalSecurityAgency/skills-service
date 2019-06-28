@@ -13,7 +13,12 @@ class SkillDefRes {
     String name
 
     int pointIncrement
+
+    // Time Window - in minute; 0 means that the action can be performed right away
     int pointIncrementInterval
+    // Max Occurrences Within Window;
+    int numMaxOccurrencesIncrementInterval
+
     int numPerformToCompletion
     int totalPoints
 
