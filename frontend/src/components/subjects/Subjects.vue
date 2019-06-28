@@ -19,6 +19,7 @@
 </template>
 
 <script>
+  import { SkillsReporter } from '@skills/skills-client-vue';
   import Subject from './Subject';
   import EditSubject from './EditSubject';
   import LoadingContainer from '../utils/LoadingContainer';
@@ -81,6 +82,7 @@
           .then(() => {
             this.loadSubjects();
             this.$emit('subjects-changed', subject.subjectId);
+            SkillsReporter.reportSkill('CreateSubject');
           })
           .finally(() => {
             this.isLoading = false;

@@ -18,6 +18,7 @@
 </template>
 
 <script>
+  import { SkillsConfiguration } from '@skills/skills-client-vue';
   import HeaderView from './components/header/Header';
   import LoadingContainer from './components/utils/LoadingContainer';
   import CustomizableHeader from './components/customization/CustomizableHeader';
@@ -45,11 +46,19 @@
       activeProjectId() {
         return this.$store.state.projectId;
       },
+      userInfo() {
+        return this.$store.getters.userInfo;
+      },
     },
     watch: {
       activeProjectId(projectId) {
         if (projectId) {
           this.addCustomIconCSS();
+        }
+      },
+      userInfo(newUserInfo) {
+        if (newUserInfo) {
+          this.configureInceptionSkillReporting(newUserInfo.userId);
         }
       },
     },
@@ -58,9 +67,30 @@
         this.addCustomIconCSS();
       }
     },
+    mounted() {
+      if (this.$store.getters.userInfo) {
+        this.configureInceptionSkillReporting(this.$store.getters.userInfo.userId);
+      }
+    },
     methods: {
       addCustomIconCSS() { // This must be done here AFTER authentication
         IconManagerService.refreshCustomIconCss(this.activeProjectId);
+      },
+      configureInceptionSkillReporting(userId) {
+        const projectId = 'Inception';
+        const serviceUrl = window.location.origin;
+        let authenticator;
+        if (this.$store.getters.isPkiAuthenticated) {
+          authenticator = 'pki';
+        } else {
+          authenticator = `/app/projects/${encodeURIComponent(projectId)}/users/${encodeURIComponent(userId)}/token`;
+        }
+
+        SkillsConfiguration.configure({
+          serviceUrl,
+          projectId,
+          authenticator,
+        });
       },
     },
   };
