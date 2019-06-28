@@ -20,6 +20,7 @@
 </template>
 
 <script>
+  import { SkillsReporter } from '@skills/skills-client-vue';
   import MyProject from './MyProject';
   import EditProject from './EditProject';
   import LoadingContainer from '../utils/LoadingContainer';
@@ -71,6 +72,7 @@
         ProjectService.saveProject(project)
           .then(() => {
             this.loadProjects();
+            SkillsReporter.reportSkill('CreateProject');
           });
       },
       moveProjectDown(project) {

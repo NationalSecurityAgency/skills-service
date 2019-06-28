@@ -52,16 +52,23 @@ class InceptionProjectService {
     }
 
     private void doCreateAndAssign(String userId) {
-        boolean createdNewProject = createInceptionProjectIfNeeded(userId)
+        createInceptionProjectIfNeeded(userId)
+        assignAllRootUsersToInception();
+    }
 
-        if (!createdNewProject) {
-            List<UserRole> existingRoles = accessSettingsStorageService.getUserRoles(inceptionProjectId)
-            if (!existingRoles.find({ it.userId == userId && it.roleName == RoleName.ROLE_PROJECT_ADMIN })) {
-                log.info("Making [{}] project admin of [{}]", userId, inceptionProjectId)
-                accessSettingsStorageService.addUserRole(userId, inceptionProjectId, RoleName.ROLE_PROJECT_ADMIN)
+    private assignAllRootUsersToInception(){
+        List<UserRole> rootUsers = accessSettingsStorageService.getRootUsers()
+
+        rootUsers.each {
+            List<UserRole> inceptionRoles = accessSettingsStorageService.getUserRoles(inceptionProjectId, it.userId)
+            if (!inceptionRoles.find({it.roleName == RoleName.ROLE_PROJECT_ADMIN})) {
+                log.info("Making [{}] project admin of [{}]", it.userId, inceptionProjectId)
+                accessSettingsStorageService.addUserRole(it.userId, inceptionProjectId, RoleName.ROLE_PROJECT_ADMIN)
             }
         }
     }
+
+
 
     private boolean createInceptionProjectIfNeeded(String userId) {
         ProjDef projDef = projDefRepo.findByProjectId(inceptionProjectId)
@@ -91,13 +98,41 @@ class InceptionProjectService {
 
         List<SkillRequest> skills = [
                 new SkillRequest(name: "Create Project", skillId: "CreateProject", subjectId: "Projects", projectId: inceptionProjectId,
-                        pointIncrement: 10, pointIncrementInterval: 8, numPerformToCompletion: 1,
+                        pointIncrement: 50, pointIncrementInterval: 8, numPerformToCompletion: 1,
                         description: "Project is an overall container that represents skills' ruleset for a single application with gamified training. " +
                                 "Project's administrator(s) manage training skills definitions, subjects, levels, dependencies and other attributes " +
-                                "that make up application's training profile. To create project click 'Project +' button."),
+                                "that make up application's training profile. To create project click 'Project +' button.",
+                        helpUrl: "/dashboard/user-guide/projects.html"
+                ),
                 new SkillRequest(name: "Create Subject", skillId: "CreateSubject", subjectId: "Projects", projectId: inceptionProjectId,
-                        pointIncrement: 10, pointIncrementInterval: 8, numPerformToCompletion: 1,
-                        description: "To create a subject navigate a subject tab on a project page then click 'Subject +' button.")
+                        pointIncrement: 20, pointIncrementInterval: 8, numPerformToCompletion: 3,
+                        description: "To create a subject navigate a subject tab on a project page then click 'Subject +' button.",
+                        helpUrl: "/dashboard/user-guide/subjects.html"
+                ),
+                new SkillRequest(name: "Configure Root Help Url", skillId: "ConfigureRootHelpUrl", subjectId: "Projects", projectId: inceptionProjectId,
+                        pointIncrement: 50, pointIncrementInterval: 8, numPerformToCompletion: 1,
+                        description: "Configure project's 'Root Help Url' by navigating to Project -> Settings. " +
+                                "Skill definition's `Help Url/Path` will be treated relative to this `Root Help Url`.",
+                        helpUrl: "/dashboard/user-guide/projects.html#settings"
+                ),
+                new SkillRequest(name: "Add Project Administrator", skillId: "AddAdmin", subjectId: "Projects", projectId: inceptionProjectId,
+                        pointIncrement: 50, pointIncrementInterval: 8, numPerformToCompletion: 1,
+                        description: "Add another project administrator under Project -> Access so you don't get too lonely.",
+                        helpUrl: "/dashboard/user-guide/access-management.html"
+                ),
+
+                new SkillRequest(name: "Add or Modify Levels", skillId: "AddOrModifyProjectLevels", subjectId: "Dashboard", projectId: inceptionProjectId,
+                        pointIncrement: 25, pointIncrementInterval: 8, numPerformToCompletion: 4,
+                        description: "Managing project's and subject levels is tricky. Study available percentage based and point-based strategy and make several modifications to levels as needed.",
+                        helpUrl: "/dashboard/user-guide/access-management.html"
+                ),
+
+
+                new SkillRequest(name: "Create Skill", skillId: "CreateSkill", subjectId: "Skills", projectId: inceptionProjectId,
+                        pointIncrement: 10, pointIncrementInterval: 8, numPerformToCompletion: 50,
+                        description: "To crate skill navigate to a subject and then click 'Skill +' button.",
+                        helpUrl: "/dashboard/user-guide/skills.html"
+                )
         ]
 
         skills.each {

@@ -66,8 +66,9 @@ class RuleSetDefinitionScoreUpdater {
     }
 
     void updateForProjectByOnlyConsideringImmediateChildren(ProjDef projDef) {
-        if (projDef.subjects) {
-            int total = projDef.subjects.collect({ it.totalPoints }).sum()
+        List<SkillDef> subjects = skillDefRepo.findAllByProjectIdAndType(projDef.projectId, SkillDef.ContainerType.Subject)
+        if (subjects) {
+            int total = subjects.collect({ it.totalPoints }).sum()
             projDef.totalPoints = total
             projDefRepo.save(projDef)
         }

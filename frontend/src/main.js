@@ -3,6 +3,7 @@
 import Vue from 'vue';
 import BootstrapVue from 'bootstrap-vue';
 import { ClientTable, ServerTable } from 'vue-tables-2';
+import { SkillsDirective } from '@skills/skills-client-vue';
 import VeeValidate from 'vee-validate';
 import VueApexCharts from 'vue-apexcharts';
 import Vuex from 'vuex';
@@ -22,6 +23,7 @@ Vue.use(VeeValidate);
 Vue.use(Vuex);
 Vue.use(VueApexCharts);
 Vue.use(BootstrapVue);
+Vue.use(SkillsDirective);
 
 Vue.component('apexchart', VueApexCharts);
 

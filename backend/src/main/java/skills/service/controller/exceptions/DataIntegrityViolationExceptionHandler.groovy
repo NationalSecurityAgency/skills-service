@@ -36,6 +36,15 @@ class DataIntegrityViolationExceptionHandler {
                     log.warn("Failed to locate error explanation for the constraint name [{}], please consider adding one!", constraintViolationException.constraintName)
                 }
             }
+
+            if (projectId) {
+                msg = "${msg}; ProjectId=[${projectId}]"
+            }
+
+            if (skillId) {
+                msg = "${msg}; SkillId=[${skillId}]"
+            }
+
             throw new SkillException(msg, projectId, skillId, ErrorCode.ConstraintViolation)
         }
     }
