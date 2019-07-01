@@ -1046,12 +1046,12 @@ class AdminProjService {
 
     @Transactional(readOnly = true)
     boolean existsByProjectId(String projectId) {
-        return projDefRepo.existsByProjectId(projectId)
+        return projDefRepo.existsByProjectIdIgnoreCase(projectId)
     }
 
     @Transactional(readOnly = true)
     boolean existsByProjectName(String projectName) {
-        return projDefRepo.existsByName(projectName)
+        return projDefRepo.existsByNameIgnoreCase(projectName)
     }
 
     private String getUserId() {
@@ -1064,27 +1064,27 @@ class AdminProjService {
 
     @Transactional(readOnly = true)
     boolean existsBySubjectId(String projectId, String subjectId) {
-        return skillDefRepo.existsByProjectIdAndSkillIdAndType(projectId, subjectId, SkillDef.ContainerType.Subject)
+        return skillDefRepo.existsByProjectIdAndSkillIdAndTypeAllIgnoreCase(projectId, subjectId, SkillDef.ContainerType.Subject)
     }
 
     @Transactional(readOnly = true)
     boolean existsBySubjectName(String projectId, String subjectName) {
-        return skillDefRepo.existsByProjectIdAndNameAndType(projectId, subjectName, SkillDef.ContainerType.Subject)
+        return skillDefRepo.existsByProjectIdAndNameAndTypeAllIgnoreCase(projectId, subjectName, SkillDef.ContainerType.Subject)
     }
 
     @Transactional(readOnly = true)
     boolean existsByBadgeName(String projectId, String subjectName) {
-        return skillDefRepo.existsByProjectIdAndNameAndType(projectId, subjectName, SkillDef.ContainerType.Badge)
+        return skillDefRepo.existsByProjectIdAndNameAndTypeAllIgnoreCase(projectId, subjectName, SkillDef.ContainerType.Badge)
     }
 
     @Transactional(readOnly = true)
     boolean existsBySkillId(String projectId, String skillId) {
-        return skillDefRepo.existsByProjectIdAndSkillId(projectId, skillId)
+        return skillDefRepo.existsByProjectIdAndSkillIdAllIgnoreCase(projectId, skillId)
     }
 
     @Transactional(readOnly = true)
     boolean existsBySkillName(String projectId, String skillName) {
-        return skillDefRepo.existsByProjectIdAndNameAndType(projectId, skillName, SkillDef.ContainerType.Skill)
+        return skillDefRepo.existsByProjectIdAndNameAndTypeAllIgnoreCase(projectId, skillName, SkillDef.ContainerType.Skill)
     }
 
     @Transactional

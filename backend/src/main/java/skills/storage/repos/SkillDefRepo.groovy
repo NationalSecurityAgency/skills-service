@@ -58,10 +58,10 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
     @Query(value = "SELECT COUNT(DISTINCT s.userId) from UserPoints s where s.projectId=?1 and s.skillId=?2")
     int calculateDistinctUsersForASingleSkill(String projectId, String skillId)
 
-    boolean existsByProjectIdAndSkillIdAndType(String id, String skillId, SkillDef.ContainerType type)
-    boolean existsByProjectIdAndSkillId(String id, String skillId)
+    boolean existsByProjectIdAndSkillIdAndTypeAllIgnoreCase(String id, String skillId, SkillDef.ContainerType type)
+    boolean existsByProjectIdAndSkillIdAllIgnoreCase(String id, String skillId)
 
-    boolean existsByProjectIdAndNameAndType(String id, String name, SkillDef.ContainerType type)
+    boolean existsByProjectIdAndNameAndTypeAllIgnoreCase(String id, String name, SkillDef.ContainerType type)
 
     @Query('SELECT MAX (s.version) from SkillDef s where s.projectId=?1')
     Integer findMaxVersionByProjectId(String projectId)
