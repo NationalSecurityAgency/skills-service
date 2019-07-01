@@ -9,8 +9,8 @@
         </media-info-card>
       </div>
       <div class="col-12  col-md-6 col-xl my-3 my-md-0">
-        <media-info-card :title="`${skillInfo.pointIncrementInterval} Hours`" icon-class="fas fa-hourglass-half text-info">
-          Minimum time between repetitions to receive points
+        <media-info-card :title="timeWindowTitle" icon-class="fas fa-hourglass-half text-info">
+          {{ timeWindowDescription }}
         </media-info-card>
       </div>
       <div class="col-12 col-md-6 col-xl">
@@ -67,6 +67,34 @@
       this.loadSkills();
     },
     computed: {
+      timeWindowTitle() {
+        let title = '';
+        if (!this.skillInfo.timeWindowEnabled) {
+          title = 'Time Window Disabled';
+        } else {
+          title = `${this.skillInfo.pointIncrementIntervalHrs} Hour`;
+          if (this.skillInfo.pointIncrementIntervalHrs > 1) {
+            title = `${title}s`;
+          }
+          if (this.skillInfo.pointIncrementIntervalMins > 0) {
+            title = `${title} ${this.skillInfo.pointIncrementIntervalMins} Minute`;
+            if (this.skillInfo.pointIncrementIntervalMins > 1) {
+              title = `${title}s`;
+            }
+          }
+        }
+        return title;
+      },
+      timeWindowDescription() {
+        const numOccur = this.skillInfo.numPointIncrementMaxOccurrences;
+        let desc = 'Minimum Time Window between occurrences to receive points';
+        if (!this.skillInfo.timeWindowEnabled) {
+          desc = 'Each occurrence will receive points immediately';
+        } else if (numOccur > 1) {
+          desc = `Up to ${numOccur} occurrences within this time window to receive points`;
+        }
+        return desc;
+      },
       description: function markDownDescription() {
         if (this.skillInfo && this.skillInfo.description) {
           return marked(this.skillInfo.description, { sanitize: true, smartLists: true });

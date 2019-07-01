@@ -294,8 +294,14 @@ class AdminController {
         skillRequest.skillId = skillRequest.skillId ?: skillId
 
         SkillsValidator.isTrue(skillRequest.pointIncrement > 0, "pointIncrement must be > 0", projectId, skillId)
-        SkillsValidator.isTrue(skillRequest.pointIncrementInterval > 0, "pointIncrementInterval must be > 0", projectId, skillId)
+        SkillsValidator.isTrue(skillRequest.pointIncrementInterval >= 0, "pointIncrementInterval must be >= 0", projectId, skillId)
+        SkillsValidator.isTrue(skillRequest.pointIncrementInterval <= 10000, "pointIncrementInterval must be <= 10000", projectId, skillId)
         SkillsValidator.isTrue(skillRequest.numPerformToCompletion > 0, "numPerformToCompletion must be > 0", projectId, skillId)
+        SkillsValidator.isTrue(skillRequest.numPerformToCompletion <= 10000, "numPerformToCompletion must be <= 10000", projectId, skillId)
+
+        SkillsValidator.isTrue(skillRequest.numMaxOccurrencesIncrementInterval > 0, "numMaxOccurrencesIncrementInterval must be >= 0", projectId, skillId)
+        SkillsValidator.isTrue(skillRequest.numPerformToCompletion >= skillRequest.numMaxOccurrencesIncrementInterval, "numPerformToCompletion must be > numMaxOccurrencesIncrementInterval", projectId, skillId)
+
         SkillsValidator.isTrue(skillRequest.version >= 0, "version must be >= 0", projectId, skillId)
         SkillsValidator.isTrue(skillRequest.version < Constants.MAX_VERSION, "version exceeds max version", projectId, skillId)
 

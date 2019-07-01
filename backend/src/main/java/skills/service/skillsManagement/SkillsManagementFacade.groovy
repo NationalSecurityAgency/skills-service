@@ -55,6 +55,9 @@ class SkillsManagementFacade {
     @Autowired
     UserAchievedLevelRepo achievedLevelRepo
 
+    @Autowired
+    TimeWindowHelper timeWindowHelper
+
     static class SkillEventResult {
         boolean success = true
         boolean skillApplied = true
@@ -142,9 +145,10 @@ class SkillsManagementFacade {
             return res
         }
 
-        if (isInsideTimePeriod(skillDefinition, userId, incomingSkillDate)) {
+        TimeWindowHelper.TimeWindowRes timeWindowRes = timeWindowHelper.checkTimeWindow(skillDefinition, userId, incomingSkillDate)
+        if (timeWindowRes.isFull()) {
             res.skillApplied = false
-            res.explanation = "This skill was already performed within the configured time period (within the last ${skillDefinition.pointIncrementInterval} hours)"
+            res.explanation = timeWindowRes.msg
             return res
         }
 
@@ -154,8 +158,9 @@ class SkillsManagementFacade {
         })
         if (notAchievedDependents) {
             res.skillApplied = false
+            List<UserAchievedLevelRepo.ChildWithAchievementsInfo> sorted = notAchievedDependents.sort({ a, b -> a.childProjectId <=> b.childProjectId ?: a.childSkillId <=> b.childSkillId })
             res.explanation = "Not all dependent skills have been achieved. Missing achievements for ${notAchievedDependents.size()} out of ${dependentsAndAchievements.size()}. " +
-                    "Waiting on completion of ${notAchievedDependents.collect({ it.childProjectId + ":" + it.childSkillId})}."
+                    "Waiting on completion of ${sorted.collect({ it.childProjectId + ":" + it.childSkillId})}."
             return res
         }
 
@@ -389,30 +394,7 @@ class SkillsManagementFacade {
         return numSkills * skillDefinition.pointIncrement >= skillDefinition.totalPoints
     }
 
-    @CompileDynamic
-    private boolean isInsideTimePeriod(SkillDef skillDefinition, String userId, Date incomingSkillDate) {
 
-        // because incoming date may be provided in the past (ex. automated job) then we simply have to make sure that
-        // there is no other skill before or after skillDefinition.pointIncrementInterval
-        Date checkStartDate
-        Date checkEndDate
-        use(TimeCategory) {
-            checkStartDate = incomingSkillDate - skillDefinition.pointIncrementInterval.hours
-            checkEndDate = incomingSkillDate + skillDefinition.pointIncrementInterval.hours
-        }
-        if (log.isDebugEnabled()) {
-            log.debug("Looking for [$skillDefinition.skillId] between [$checkStartDate] and [$checkEndDate]")
-        }
-
-        Long count = performedSkillRepository.countByUserIdAndProjectIdAndSkillIdAndPerformedOnGreaterThanAndPerformedOnLessThan(
-                userId,
-                skillDefinition.projectId,
-                skillDefinition.skillId,
-                checkStartDate,
-                checkEndDate
-        )
-        return count > 0
-    }
 }
 
 

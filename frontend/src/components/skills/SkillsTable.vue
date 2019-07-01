@@ -147,9 +147,7 @@
       skillCreatedOrUpdated(skill) {
         this.isLoading = true;
         const item1Index = this.skills.findIndex(item => item.id === skill.id);
-        // if (item1Index >= 0) {
-        //   this.$set(this.skills[item1Index], 'isEditLoading', true);
-        // }
+
         SkillsService.saveSkill(skill)
           .then((skillRes) => {
             let createdSkill = skillRes;
