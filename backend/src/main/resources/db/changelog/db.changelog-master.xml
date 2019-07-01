@@ -782,8 +782,8 @@
             <regExpReplace replace="(CREATE TABLE.*)" with="$1 engine innodb"/>
         </modifySql>
 
-        <modifySql dbms="postgres">
-            <regExpReplace replace="VARCHAR" with="CITEXT"/>
+        <modifySql dbms="postgresql">
+            <replace replace="VARCHAR(255)" with="CITEXT"/>
         </modifySql>
 
     </changeSet>

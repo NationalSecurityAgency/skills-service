@@ -9,8 +9,8 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
     @Nullable
     ProjDef findByProjectId(String projectId)
 
-    boolean existsByProjectId(String projectId)
-    boolean existsByName(String projectName)
+    boolean existsByProjectIdIgnoreCase(String projectId)
+    boolean existsByNameIgnoreCase(String projectName)
 
     @Query(value = "select p.* from project_definition p, user_roles u where p.project_id = u.project_id and u.user_id=?1 order by p.display_order", nativeQuery = true)
     List<ProjDef> getProjectsByUser(String userId)
