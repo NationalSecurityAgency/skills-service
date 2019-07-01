@@ -3,7 +3,23 @@ import axios from 'axios';
 export default {
   getSkillDetails(projectId, subjectId, skillId) {
     return axios.get(`/admin/projects/${projectId}/subjects/${subjectId}/skills/${skillId}`)
-      .then(response => response.data);
+      .then((response) => {
+        const skill = response.data;
+        const copy = Object.assign({}, skill);
+
+        copy.timeWindowEnabled = skill.pointIncrementInterval > 0;
+        if (!copy.timeWindowEnabled) {
+          // set to default if window is disabled
+          copy.pointIncrementIntervalHrs = 8;
+          copy.pointIncrementIntervalMins = 0;
+        } else {
+          copy.pointIncrementIntervalHrs = skill.pointIncrementInterval > 59 ? Math.floor(skill.pointIncrementInterval / 60) : 0;
+          copy.pointIncrementIntervalMins = skill.pointIncrementInterval > 60 ? skill.pointIncrementInterval % 60 : skill.pointIncrementInterval;
+        }
+        copy.numPointIncrementMaxOccurrences = skill.numMaxOccurrencesIncrementInterval;
+
+        return copy;
+      });
   },
   getSubjectSkills(projectId, subjectId) {
     return axios.get(`/admin/projects/${projectId}/subjects/${subjectId}/skills`)
@@ -14,7 +30,16 @@ export default {
       .then(response => response.data);
   },
   saveSkill(skill) {
-    return axios.put(`/admin/projects/${skill.projectId}/subjects/${skill.subjectId}/skills/${skill.skillId}`, skill)
+    const copy = Object.assign({}, skill);
+    if (!skill.timeWindowEnabled) {
+      copy.pointIncrementInterval = 0;
+    } else {
+      // convert to minutes
+      copy.pointIncrementInterval = (parseInt(skill.pointIncrementIntervalHrs, 10) * 60 + parseInt(skill.pointIncrementIntervalMins, 10));
+    }
+    copy.numMaxOccurrencesIncrementInterval = skill.numPointIncrementMaxOccurrences;
+
+    return axios.put(`/admin/projects/${skill.projectId}/subjects/${skill.subjectId}/skills/${skill.skillId}`, copy)
       .then(() => this.getSkillDetails(skill.projectId, skill.subjectId, skill.skillId));
   },
   deleteSkill(skill) {

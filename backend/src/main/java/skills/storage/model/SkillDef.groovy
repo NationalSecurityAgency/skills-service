@@ -27,6 +27,8 @@ class SkillDef {
 
     int pointIncrement
     int pointIncrementInterval
+    @Column(name = 'increment_interval_max_occurrences')
+    int numMaxOccurrencesIncrementInterval
     int totalPoints
 
     int version
