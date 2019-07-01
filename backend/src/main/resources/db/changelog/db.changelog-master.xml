@@ -128,6 +128,9 @@
             <column name="point_increment_interval" type="int" defaultValue="8">
                 <constraints nullable="false"/>
             </column>
+            <column name="increment_interval_max_occurrences" type="int" defaultValue="1">
+                <constraints nullable="false"/>
+            </column>
             <column name="total_points" type="int" defaultValue="200">
                 <constraints nullable="false"/>
             </column>

@@ -21,6 +21,17 @@
                     v-validate="'required|min:3|max:50|alpha_num|uniqueId'" data-vv-name="skillId"/>
           <small class="form-text text-danger">{{ errors.first('skillId')}}</small>
         </div>
+        <div class="col-12 col-lg-2 mt-2 mt-lg-0">
+          <div class="form-group">
+            <label>Version
+              <inline-help
+                msg="An optional version for this skill to allow filtering of available skills for different versions of an application"/>
+            </label>
+            <input class="form-control" type="number" min="0" v-model="skillInternal.version" :disabled="isEdit"
+                   v-validate="'min_value:0|max_value:999|numeric'" data-vv-delay="500" data-vv-name="version"/>
+            <small class="form-text text-danger">{{ errors.first('version')}}</small>
+          </div>
+        </div>
       </div>
       <hr class="mb-0 pb-1 mt-4 mt-lg-0"/>
       <hr class="my-0 py-0"/>
@@ -29,20 +40,20 @@
         <div class="col-12 col-lg">
           <div class="form-group mb-1">
             <label for="subjName">Point Increment</label>
-            <input class="form-control" type="text" v-model="skillInternal.pointIncrement"
+            <input class="form-control" type="number"  min="1" v-model="skillInternal.pointIncrement"
                    v-validate="'required|numeric|min_value:1|max_value:10000'" data-vv-name="pointIncrement"/>
           </div>
           <small class="form-text text-danger">{{ errors.first('pointIncrement')}}</small>
         </div>
         <div class="col-12 col-lg">
           <div class="form-group mt-2 mt-lg-0">
-            <label for="subjName">Times to Completion</label>
+            <label for="subjName">Occurrences to Completion</label>
             <div class="input-group">
               <div class="input-group-prepend">
                 <div class="input-group-text"><i class="fas fa-times"/></div>
               </div>
-              <input class="form-control" type="text" v-model="skillInternal.numPerformToCompletion"
-                     v-validate="'required|numeric|min_value:1|max_value:10000'" data-vv-name="numPerformToCompletion"/>
+              <input class="form-control" type="number" min="1" v-model="skillInternal.numPerformToCompletion"
+                     v-validate="'required|numeric|min_value:1|max_value:10000|moreThanMaxWindowOccurrences'" data-vv-name="numPerformToCompletion"/>
             </div>
             <small class="form-text text-danger">{{ errors.first('numPerformToCompletion')}}</small>
           </div>
@@ -68,27 +79,53 @@
       <div class="row">
         <div class="col-12 col-lg">
           <div class="form-group">
-            <label>Increment Interval (hours)
+            <label><b-form-checkbox id="checkbox-1" class="d-inline" v-model="skillInternal.timeWindowEnabled" v-on:input="resetTimeWindow"/>Time Window
               <inline-help msg="The number of hours that must elapse between incrementing points for a user."/>
+
             </label>
-            <input class="form-control" type="text" v-model="skillInternal.pointIncrementInterval"
-                   v-validate="'required|numeric|min_value:1|max_value:10000'" data-vv-name="pointIncrementInterval"
-                   value="8"/>
-            <small class="form-text text-danger">{{ errors.first('pointIncrementInterval')}}</small>
+            <div class="row">
+              <div class="col">
+                <div class="input-group">
+                  <input class="form-control d-inline" type="number" min="0" v-model="skillInternal.pointIncrementIntervalHrs"
+                         v-validate="'required|numeric|min_value:0|max_value:1000|cantBe0IfMins0'" data-vv-name="pointIncrementIntervalHrs"
+                         value="8" :disabled="!skillInternal.timeWindowEnabled"/>
+                  <div class="input-group-append">
+                    <span class="input-group-text" id="hours-append">Hours</span>
+                  </div>
+                </div>
+                <small class="form-text text-danger">{{ errors.first('pointIncrementIntervalHrs')}}</small>
+              </div>
+              <div class="col">
+                <div class="input-group">
+                  <input class="form-control d-inline"  type="number" min="0" v-model="skillInternal.pointIncrementIntervalMins"
+                         v-validate="'required|numeric|min_value:0|max_value:59|cantBe0IfHours0'" data-vv-name="pointIncrementIntervalMins"
+                         value="0" :disabled="!skillInternal.timeWindowEnabled"/>
+                  <div class="input-group-append">
+                    <span class="input-group-text" id="minutes-append">Minutes</span>
+                  </div>
+                </div>
+                <small class="form-text text-danger">{{ errors.first('pointIncrementIntervalMins')}}</small>
+              </div>
+            </div>
+
           </div>
         </div>
         <div class="col-12 col-lg">
           <div class="form-group">
-            <label>Version (Optional)
+            <label>Max Occurrences Within Window
               <inline-help
                 msg="An optional version for this skill to allow filtering of available skills for different versions of an application"/>
             </label>
-            <input class="form-control" type="number" min="0" v-model="skillInternal.version" :disabled="isEdit"
-                   v-validate="'min_value:0|max_value:999|numeric'" data-vv-delay="500" data-vv-name="version"/>
-            <small class="form-text text-danger">{{ errors.first('version')}}</small>
+            <input class="form-control" type="number" min="0" v-model="skillInternal.numPointIncrementMaxOccurrences"
+                   v-validate="'min_value:1|max_value:999|numeric|lessThanTotalOccurrences'" data-vv-delay="500" data-vv-name="numPointIncrementMaxOccurrences"
+                   :disabled="!skillInternal.timeWindowEnabled"/>
+            <small class="form-text text-danger">{{ errors.first('numPointIncrementMaxOccurrences')}}</small>
           </div>
         </div>
       </div>
+
+        <hr class="my-0 pb-1"/>
+        <hr class="mt-0 pt-0"/>
 
       <div class="">
         <label class="label">Description</label>
@@ -165,8 +202,15 @@
           subjectId: this.subjectId,
           name: '',
           pointIncrement: 10,
-          pointIncrementInterval: 8,
           numPerformToCompletion: 5,
+          // Time Window - represented in hrs + mins;
+          // 0  for both means 'disabled' and that
+          // the action can be performed right away
+          pointIncrementIntervalHrs: 8,
+          pointIncrementIntervalMins: 0,
+          timeWindowEnabled: true,
+          // Max Occurrences Within Window
+          numPointIncrementMaxOccurrences: 1,
           description: null,
           helpUrl: null,
         },
@@ -221,8 +265,10 @@
               name: 'Skill Name',
               skillId: 'ID',
               pointIncrement: 'Point Increment',
-              pointIncrementInterval: 'Point Increment Interval',
+              pointIncrementIntervalMins: 'Minutes',
+              pointIncrementIntervalHrs: 'Hours',
               numPerformToCompletion: 'Number of Times to Complete',
+              numPointIncrementMaxOccurrences: 'Max Occurrences Within Window',
               totalPoints: 'Total Points',
               helpUrl: 'Help UrL',
               version: 'Version',
@@ -251,6 +297,45 @@
               return true;
             }
             return SkillsService.skillWithIdExists(self.projectId, value);
+          },
+        }, {
+          immediate: false,
+        });
+
+        Validator.extend('lessThanTotalOccurrences', {
+          getMessage: () => 'Must be less than or equals to \'Occurrences to Completion\' field',
+          validate(value) {
+            return self.skillInternal.numPerformToCompletion >= value;
+          },
+        }, {
+          immediate: false,
+        });
+        Validator.extend('moreThanMaxWindowOccurrences', {
+          getMessage: () => 'Must be more than or equals to \'Max Occurrences Within Window\' field',
+          validate(value) {
+            return value >= self.skillInternal.numPointIncrementMaxOccurrences;
+          },
+        }, {
+          immediate: false,
+        });
+        Validator.extend('cantBe0IfHours0', {
+          getMessage: field => `${field} must be > 0 if Hours = 0`,
+          validate(value) {
+            if (value > 0 || self.skillInternal.pointIncrementIntervalHrs > 0) {
+              return true;
+            }
+            return false;
+          },
+        }, {
+          immediate: false,
+        });
+        Validator.extend('cantBe0IfMins0', {
+          getMessage: field => `${field} must be > 0 if Minutes = 0`,
+          validate(value) {
+            if (value > 0 || self.skillInternal.pointIncrementIntervalMins > 0) {
+              return true;
+            }
+            return false;
           },
         }, {
           immediate: false,
@@ -297,6 +382,13 @@
             id = `${id}Skill`;
           }
           this.skillInternal.skillId = id;
+        }
+      },
+      resetTimeWindow(checked) {
+        if (!checked) {
+          this.skillInternal.pointIncrementIntervalHrs = 8;
+          this.skillInternal.pointIncrementIntervalMins = 0;
+          this.skillInternal.numPointIncrementMaxOccurrences = 1;
         }
       },
     },
