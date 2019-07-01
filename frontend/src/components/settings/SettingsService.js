@@ -30,4 +30,12 @@ export default {
   getUserInfo() {
     return axios.get('/app/userInfo').then(response => response.data);
   },
+  getPublicSettings(settingGroup) {
+    return axios.get(`/app/public/settings/group/${settingGroup}`)
+      .then(remoteRes => remoteRes.data);
+  },
+  getPublicSetting(settingName, settingGroup) {
+    return axios.get(`/app/public/settings/${settingName}/group/${settingGroup}`)
+      .then(remoteRes => remoteRes.data);
+  },
 };

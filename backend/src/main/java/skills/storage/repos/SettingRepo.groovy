@@ -16,13 +16,16 @@ interface SettingRepo extends CrudRepository<Setting, Integer> {
     List<Setting> findAllBySettingGroup(String settingGroup)
 
     @Transactional
-    List<Setting> findAllByProjectIdAndSettingGroup(String projectId, String settingGroup)
+    List<Setting> findAllByProjectIdAndSettingGroup(@Nullable String projectId, String settingGroup)
 
     @Transactional
     void delete(Setting toDelete)
 
     @Transactional
     List<Setting> findAllByProjectIdAndSetting(@Nullable String projectid, String setting)
+
+    @Transactional
+    List<Setting> findAllByProjectIdAndSettingGroupAndSetting(@Nullable String projectid, @Nullable String settingGroup, String setting)
 
     @Transactional
     List<Setting> findAllBySetting(String setting)

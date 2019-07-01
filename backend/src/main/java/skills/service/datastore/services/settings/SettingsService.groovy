@@ -122,8 +122,8 @@ class SettingsService {
     }
 
     @Transactional(readOnly = true)
-    SettingsResult getSetting(String projectId, String setting){
-        List<Setting> settings = settingRepo.findAllByProjectIdAndSetting(projectId, setting)
+    SettingsResult getSetting(String projectId, String setting, String settingGroup){
+        List<Setting> settings = settingRepo.findAllByProjectIdAndSettingGroupAndSetting(projectId, settingGroup, setting)
         if(!settings){
             return null
         }
@@ -132,6 +132,11 @@ class SettingsService {
         SettingsResult result = new SettingsResult()
         Props.copy(settings.first(), result)
         return result
+    }
+
+    @Transactional(readOnly = true)
+    SettingsResult getSetting(String projectId, String setting) {
+        return getSetting(projectId, setting, null)
     }
 
     @Transactional(readOnly = true)

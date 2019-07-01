@@ -3,6 +3,7 @@ package skills.service.controller
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.http.MediaType
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.web.bind.annotation.*
@@ -10,13 +11,14 @@ import skills.service.auth.AuthMode
 import skills.service.auth.pki.PkiUserLookup
 import skills.service.controller.exceptions.SkillException
 import skills.service.controller.exceptions.SkillsValidator
+import skills.service.controller.request.model.SettingsRequest
 import skills.service.controller.result.model.RequestResult
 import skills.service.controller.result.model.UserInfoRes
 import skills.service.datastore.services.AccessSettingsStorageService
+import skills.service.datastore.services.settings.SettingsService
 import skills.service.settings.EmailConnectionInfo
 import skills.service.settings.EmailSettingsService
 import skills.storage.model.auth.UserRole
-import skills.storage.repos.UserRepo
 
 import java.security.Principal
 
@@ -39,6 +41,9 @@ class RootController {
 
     @Autowired
     UserDetailsService userDetailsService
+
+    @Autowired
+    SettingsService settingsService
 
     @GetMapping('/rootUsers')
     @ResponseBody
@@ -87,6 +92,16 @@ class RootController {
     @PostMapping('/saveEmailSettings')
     void saveEmailSettings(@RequestBody EmailConnectionInfo emailConnectionInfo) {
         emailSettingsService.updateConnectionInfo(emailConnectionInfo)
+    }
+
+    @RequestMapping(value = "/global/settings/{setting}", method = [RequestMethod.PUT, RequestMethod.POST], produces = MediaType.APPLICATION_JSON_VALUE)
+    RequestResult saveGlobalSetting(@PathVariable("setting") String setting, @RequestBody SettingsRequest value) {
+        SkillsValidator.isNotBlank(setting, "Setting Id")
+        SkillsValidator.isTrue(null == value.projectId, "Project Id must null for global settings")
+        SkillsValidator.isTrue(setting == value.setting, "Setting Id must equal")
+
+        settingsService.saveSetting(value)
+        return new RequestResult(success: true)
     }
 
     private String getUserId(String userKey) {
