@@ -17,6 +17,8 @@ import skills.service.icons.IconCssNameUtil
 import skills.storage.model.CustomIcon
 import skills.storage.model.ProjDef
 
+import java.nio.charset.StandardCharsets
+
 @RestController
 @RequestMapping("/app")
 @Slf4j
@@ -69,9 +71,11 @@ class ProjectController {
         SkillsValidator.isTrue(!(projectId && projectName), "Only Project Id or Project Name may be provided, not both.")
 
         if (projectId) {
+            projectId = URLDecoder.decode(projectId, StandardCharsets.UTF_8.toString())
             return projectAdminStorageService.existsByProjectId(projectId)
         }
 
+        projectName = URLDecoder.decode(projectName, StandardCharsets.UTF_8.toString())
         return projectAdminStorageService.existsByProjectName(projectName)
     }
 

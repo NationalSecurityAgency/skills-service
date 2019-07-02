@@ -78,8 +78,8 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
                 and srd.type = 'Dependence'
                 and skill_deps_path.childProjectId=:projectId
             )
-            select pd.project_id as parentProjectId, pd.name as parentProjectName, skill_deps_path.parentId, skill_deps_path.parentSkillId, skill_deps_path.parentName,
-                   skill_deps_path.childProjectId, pd1.name as childProjectName, skill_deps_path.childId, skill_deps_path.childSkillId, skill_deps_path.childName,
+            select CAST(pd.project_id as TEXT) as parentProjectId, CAST(pd.name as TEXT) as parentProjectName, skill_deps_path.parentId, CAST(skill_deps_path.parentSkillId as TEXT), CAST(skill_deps_path.parentName as TEXT),
+                   CAST(skill_deps_path.childProjectId as TEXT), CAST(pd1.name as TEXT) as childProjectName, skill_deps_path.childId, CAST(skill_deps_path.childSkillId as TEXT), CAST(skill_deps_path.childName as TEXT),
                    ua.id as achievementId
             from skill_deps_path
               join project_definition pd on skill_deps_path.parentProjectId = pd.project_id
@@ -93,7 +93,7 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
         query.setParameter("skillId", skillId)
         query.setParameter("userId", userId)
 
-        List resList = query.getResultList().collect {
+        List resList = query.getResultList()?.collect {
             new GraphRelWithAchievement(
                     parentProjectId: it[0],
                     parentProjectName: it[1],
