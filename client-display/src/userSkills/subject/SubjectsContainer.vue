@@ -38,8 +38,4 @@
   .user-skill-subject-tile {
     cursor: pointer;
   }
-
-  .user-skill-subject-tile:hover {
-    background-color: #f8f8f8;
-  }
 </style>

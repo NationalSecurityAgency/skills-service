@@ -2,7 +2,7 @@
   <div class="progress-circle-wrapper">
     <label class="skill-tile-label">{{ title }}</label>
     <div class="progress-circle">
-      <div class="circle-number">
+      <div class="text-muted circle-number">
         <span v-if="!isCompleted">
           <div>{{ totalCompletedPoints | number }}</div>
           <div style="font-size: 0.7rem;">out of</div>
@@ -110,7 +110,6 @@
 
   .circle-number {
     position: absolute;
-    color: #565656;
     font-weight: lighter;
     line-height: 1;
     top: 50%;
@@ -127,7 +126,6 @@
 
   .progress-circle {
     position: relative;
-    /*width: 120px;*/
     margin: 10px 0;
     display: inline-block;
   }

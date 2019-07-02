@@ -1,14 +1,16 @@
 <template>
     <div class="user-skills-overview">
         <div class="card">
-            <div class="row card-body">
+            <div class="row card-body ml-0 mr-0">
                 <div class="text-center col-md-4">
                     <circle-progress
                             :user-skills="displayData.userSkills"
                             :total-completed-points="displayData.userSkills.points"
                             :points-completed-today="displayData.userSkills.todaysPoints"
                             :total-possible-points="displayData.userSkills.totalPoints"
-                            :total-completed-color="displayData.userSkills.points === displayData.userSkills.totalPoints ? '#59ad52' : '#7ed6f3'"
+                            :completed-before-today-color="beforeTodayColor"
+                            :incomplete-color="incompleteColor"
+                            :total-completed-color="displayData.userSkills.points === displayData.userSkills.totalPoints ? completeColor : earnedTodayColor"
                             title="Overall Points">
                         <div slot="footer">
                             <p v-if="displayData.userSkills.points === displayData.userSkills.totalPoints">Total points earned</p>
@@ -31,7 +33,9 @@
                             :total-completed-points="displayData.userSkills.levelPoints"
                             :points-completed-today="displayData.userSkills.todaysPoints"
                             :total-possible-points="displayData.userSkills.levelTotalPoints"
-                            :total-completed-color="isLevelComplete ? '#59ad52' : '#7ed6f3'"
+                            :completed-before-today-color="beforeTodayColor"
+                            :incomplete-color="incompleteColor"
+                            :total-completed-color="isLevelComplete ? completeColor : earnedTodayColor"
                             :title="levelStats.title">
                         <div slot="footer">
                             <p v-if="isLevelComplete">All levels complete</p>
@@ -112,6 +116,18 @@
                     nextLevel: this.displayData.userSkills.skillsLevel + 1,
                     pointsTillNextLevel: this.displayData.userSkills.levelTotalPoints - this.displayData.userSkills.levelPoints,
                 };
+            },
+            beforeTodayColor() {
+                return this.$store.state.themeModule.progressIndicators.beforeTodayColor;
+            },
+            earnedTodayColor() {
+                return this.$store.state.themeModule.progressIndicators.earnedTodayColor;
+            },
+            completeColor() {
+                return this.$store.state.themeModule.progressIndicators.completeColor;
+            },
+            incompleteColor() {
+                return this.$store.state.themeModule.progressIndicators.incompleteColor;
             },
         },
     };

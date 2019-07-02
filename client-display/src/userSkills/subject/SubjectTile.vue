@@ -20,8 +20,10 @@
         </div>
         <div class="col-12">
           <vertical-progress-bar
-                  :total-progress="progress.total"
-                  :total-progress-before-today="progress.totalBeforeToday"/>
+            :before-today-bar-color="beforeTodayColor"
+            :total-progress-bar-color="earnedTodayColor"
+            :total-progress="progress.total"
+            :total-progress-before-today="progress.totalBeforeToday"/>
         </div>
       </div>
 
@@ -38,11 +40,17 @@
           <label class="skill-label text-center">All levels complete</label>
         </div>
         <div class="col-12">
-          <progress-bar v-if="progress.allLevelsComplete" :val="progress.level"
-                        :size="18" bar-color="#59ad52" class="complete-total"/>
+          <progress-bar
+            v-if="progress.allLevelsComplete"
+            :val="progress.level"
+            :size="18"
+            :bar-color="completeColor"
+            class="complete-total"/>
           <vertical-progress-bar
-                  :total-progress="progress.level"
-                  :total-progress-before-today="progress.levelBeforeToday"/>
+            :before-today-bar-color="beforeTodayColor"
+            :total-progress-bar-color="earnedTodayColor"
+            :total-progress="progress.level"
+            :total-progress-before-today="progress.levelBeforeToday"/>
         </div>
       </div>
 
@@ -81,6 +89,18 @@
       };
     },
     computed: {
+      beforeTodayColor() {
+        return this.$store.state.themeModule.progressIndicators.beforeTodayColor;
+      },
+      earnedTodayColor() {
+        return this.$store.state.themeModule.progressIndicators.earnedTodayColor;
+      },
+      completeColor() {
+        return this.$store.state.themeModule.progressIndicators.completeColor;
+      },
+      incompleteColor() {
+        return this.$store.state.themeModule.progressIndicators.incompleteColor;
+      },
       progress() {
         let levelBeforeToday = 0;
         const { subject } = this;

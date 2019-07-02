@@ -1,5 +1,5 @@
 <template>
-    <div class="py-2 mt-2 mb-3 border-bottom border-top rounded bg-white text-info text-uppercase">
+    <div class="py-2 mt-2 mb-3 card-body border-bottom border-top rounded bg-white text-info text-uppercase">
         <h2>
             <slot/>
         </h2>

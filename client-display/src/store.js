@@ -3,7 +3,21 @@ import Vuex from 'vuex';
 
 Vue.use(Vuex);
 
+const themeModule = {
+  state: {
+    progressIndicators: {
+      beforeTodayColor: '#14a3d2',
+      earnedTodayColor: '#7ed6f3',
+      completeColor: '#59ad52',
+      incompleteColor: '#cdcdcd',
+    },
+  },
+};
+
 export default new Vuex.Store({
+  modules: {
+    themeModule,
+  },
   state: {
     authToken: null,
     isAuthenticating: false,
