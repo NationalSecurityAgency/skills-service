@@ -13,6 +13,11 @@ spring:
   main:
     allow-bean-definition-overriding: true
   jpa:
+    properties:
+      hibernate:
+        jdbc:
+          lob:
+            non_contextual_creation: true
     hibernate:
       ddl-auto: none
 #    show-sql: true
