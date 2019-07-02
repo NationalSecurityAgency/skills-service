@@ -10,6 +10,7 @@ class SkillSummary  {
 
     int pointIncrement
     int pointIncrementInterval
+    int maxOccurrencesWithinIncrementInterval
 
     int points
     int totalPoints

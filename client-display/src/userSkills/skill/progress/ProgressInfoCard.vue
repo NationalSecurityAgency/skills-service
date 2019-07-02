@@ -6,10 +6,11 @@
                     <i class="fa-3x" :class="icon"/>
                 </div>
                 <div class="media-body">
-                    <h3 class="mb-2">{{points | number}}</h3>
-                    <div class="">{{label}}</div>
+                    <h3 class="mb-0">{{points | number}}</h3>
+                    <div class="mt-0 pt-0">Points</div>
                 </div>
             </div>
+            <div class="mt-2">{{label}}</div>
         </div>
     </div>
 </template>
@@ -29,6 +30,7 @@
     .container {
         background-color: #eeeeee;
     }
+
     .media .media-body {
         color: black;
     }

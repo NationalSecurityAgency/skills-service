@@ -305,7 +305,7 @@
         Validator.extend('lessThanTotalOccurrences', {
           getMessage: () => 'Must be less than or equals to \'Occurrences to Completion\' field',
           validate(value) {
-            return self.skillInternal.numPerformToCompletion >= value;
+            return parseInt(self.skillInternal.numPerformToCompletion, 10) >= parseInt(value, 10);
           },
         }, {
           immediate: false,
@@ -313,7 +313,7 @@
         Validator.extend('moreThanMaxWindowOccurrences', {
           getMessage: () => 'Must be more than or equals to \'Max Occurrences Within Window\' field',
           validate(value) {
-            return value >= self.skillInternal.numPointIncrementMaxOccurrences;
+            return parseInt(value, 10) >= parseInt(self.skillInternal.numPointIncrementMaxOccurrences, 10);
           },
         }, {
           immediate: false,
@@ -321,7 +321,7 @@
         Validator.extend('cantBe0IfHours0', {
           getMessage: field => `${field} must be > 0 if Hours = 0`,
           validate(value) {
-            if (value > 0 || self.skillInternal.pointIncrementIntervalHrs > 0) {
+            if (parseInt(value, 10) > 0 || parseInt(self.skillInternal.pointIncrementIntervalHrs, 10) > 0) {
               return true;
             }
             return false;
@@ -332,7 +332,7 @@
         Validator.extend('cantBe0IfMins0', {
           getMessage: field => `${field} must be > 0 if Minutes = 0`,
           validate(value) {
-            if (value > 0 || self.skillInternal.pointIncrementIntervalMins > 0) {
+            if (parseInt(value, 10) > 0 || parseInt(self.skillInternal.pointIncrementIntervalMins, 10) > 0) {
               return true;
             }
             return false;
