@@ -5,7 +5,7 @@
         </div>
         <div class="card-body">
             <span class="fa-stack skills-icon user-rank-stack">
-                <i class="fa fa-award fa-stack-2x"/>
+                <i class="fa fa-award fa-stack-2x watermark-icon"/>
                 <strong class="fa-stack-1x user-rank-text">
                   {{ numBadgesCompleted }} <span>Badge{{numBadgesCompleted > 1 ? 's' : ''}}</span>
                 </strong>
@@ -37,14 +37,15 @@
     }
 
     .skills-icon.user-rank-stack i {
-        color: #aed7ac;
+        color: #0fcc15d1;
+        opacity: 0.38;
     }
 
     .skills-icon.user-rank-stack {
         margin: 14px 0;
         font-size: 60px;
         width: 100%;
-        color: #aed7ac;
+        color: #0fcc15d1;
     }
 
     .user-rank-text {

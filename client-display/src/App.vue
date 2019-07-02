@@ -12,7 +12,8 @@
 
   import Postmate from 'postmate';
 
-  import { debounce } from 'lodash';
+  import debounce from 'lodash/debounce';
+  import merge from 'lodash/merge';
 
   const getDocumentHeight = () => {
     const { body } = document;
@@ -37,6 +38,9 @@
 
   export default {
     mounted() {
+      // console.log('remove this line');
+      // this.handleTheming();
+
       const vm = this;
       if (this.isDevelopmentMode()) {
         this.configureDevelopmentMode();
@@ -54,6 +58,7 @@
           },
         });
 
+
         handshake.then((parent) => {
           // Make sure to freeze the parent object so Vuex won't try to make it reactive
           // CORs won't allow this because parent object can't be changed from an iframe
@@ -66,6 +71,8 @@
           UserSkillsService.setVersion(parent.model.version);
           UserSkillsService.setUserId(parent.model.userId);
 
+          this.handleTheming(parent.model.theme);
+
           this.$store.state.parentFrame.emit('needs-authentication');
 
           // No scroll bars for iframe.
@@ -74,6 +81,108 @@
       }
     },
     methods: {
+      handleTheming() {
+        const nonCSSConfig = ['progressIndicators'];
+
+        const selectorKey = {
+          backgroundColor: {
+            selector: 'body #app',
+            styleName: 'background-color',
+          },
+          secondaryTextColor: {
+            selector: 'body #app .text-muted, body #app .text-secondary',
+            styleName: 'color',
+          },
+          primaryTextColor: {
+            selector: 'body #app .card-header, body #app .card-body, body #app .skill-tile-label',
+            styleName: 'color',
+          },
+          tiles: {
+            backgroundColor: {
+              selector: 'body #app .card-header, body #app .card-body, body #app .card-footer',
+              styleName: 'background-color',
+            },
+            watermarkIconColor: {
+              selector: 'body #app .card-body .watermark-icon',
+              styleName: 'color',
+            },
+          },
+          stars: {
+            unearnedColor: {
+              selector: 'body #app .star-empty',
+              styleName: 'color',
+            },
+            earnedColor: {
+              selector: 'body #app .star-filled',
+              styleName: 'color',
+            },
+          },
+        };
+
+        const mockTheme = {
+          // backgroundColor: {
+          //   value: 'grey',
+          // },
+          // secondaryTextColor: {
+          //   value: 'purple',
+          // },
+          // primaryTextColor: {
+          //   value: 'green',
+          // },
+          // stars: {
+          //   unearnedColor: {
+          //     value: 'blue'
+          //   },
+          //   earnedColor: {
+          //     value: 'green',
+          //   }
+          // },
+          // progressIndicators: {
+          //   beforeTodayColor: '#3e4d44',
+          //   earnedTodayColor: '#667da4',
+          //   completeColor: '#59ad52',
+          //   incompleteColor: '#cdcdcd',
+          // },
+          // tiles: {
+          //   backgroundColor: {
+          //     value: '#D6EAF8',
+          //   },
+          //   watermarkIconColor: {
+          //     value: 'orange',
+          //   },
+          // },
+        };
+
+        const themeKey = merge(JSON.parse(JSON.stringify(selectorKey)), mockTheme);
+
+        const { body } = document;
+
+        let css = '';
+        const buildCss = (obj, keys) => {
+          keys.forEach((key) => {
+            const isCSSConfig = !nonCSSConfig.includes(key);
+            if (isCSSConfig && (obj[key].value || obj[key].selector || obj[key].styleName)) {
+              const { selector, styleName, value } = obj[key];
+              if (!selector || !styleName) {
+                throw new Error(`Invalid custom theme defined by ${key}`);
+              } else if (value) {
+                const sanitizedValue = value.split(';')[0]; // No injection
+                css += `${selector} { ${styleName}: ${sanitizedValue} !important }`;
+              }
+            } else if (isCSSConfig) {
+              buildCss(themeKey[key], Object.keys(themeKey[key]));
+            }
+          });
+        };
+
+        buildCss(themeKey, Object.keys(themeKey));
+
+        const style = document.createElement('style');
+        style.appendChild(document.createTextNode(css));
+
+        body.appendChild(style);
+      },
+
       onHeightChange() {
         onHeightChanged();
       },

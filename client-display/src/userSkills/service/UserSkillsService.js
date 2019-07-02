@@ -195,8 +195,7 @@ service = {
   },
 
   getServicePath() {
-    let servicePath = '/api/projects';
-    return servicePath;
+    return '/api/projects';
   },
 
   setVersion(version) {
@@ -222,7 +221,7 @@ service = {
 
   setToken(token) {
     this.token = token;
-    if (token  && token !== 'pki') {
+    if (token && token !== 'pki') {
       axios.defaults.headers.common.Authorization = `Bearer ${token}`;
     } else {
       delete axios.defaults.headers.common.Authorization;

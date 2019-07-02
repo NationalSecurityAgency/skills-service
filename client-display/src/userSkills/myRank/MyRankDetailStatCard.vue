@@ -2,7 +2,9 @@
   <div>
     <div class='card position-relative'>
       <div class='card-body'>
-        <i :class="iconClass" />
+        <i
+          :class="iconClass"
+          class="watermark-icon"/>
         <div>
           <h1 class='distribution-icon-text'>{{ value | number }}</h1>
           <h5>{{ label }}</h5>
