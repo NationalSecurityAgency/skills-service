@@ -311,7 +311,7 @@ class SkillsLoader {
         if (skillDef.helpUrl && helpUrlRootSetting && !skillDef.helpUrl.toLowerCase().startsWith("http")) {
             String rootUrl = helpUrlRootSetting.value
             if (rootUrl.endsWith("/") && res.startsWith("/")) {
-                rootUrl = rootUrl.substring(0, rootUrl.length() - 2)
+                rootUrl = rootUrl.substring(0, rootUrl.length() - 1)
             }
             res = rootUrl + res
         }
