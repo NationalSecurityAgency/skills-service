@@ -535,7 +535,7 @@ class AdminController {
         return userAdminService.loadUserPerformedSkillsPage(projectId, userId, query, pageRequest)
     }
 
-    @GetMapping(value = '/projects/{projectId}/users/{userId}/metrics', produces = 'application/json')
+    @GetMapping(value = '/projects/{projectId}/users/{userId}/stats', produces = 'application/json')
     @ResponseBody
     @CompileStatic
     UserSkillsMetrics getUserSkillsMetrics(@PathVariable('projectId') String projectId,
@@ -543,7 +543,7 @@ class AdminController {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(userId, "User Id", projectId)
 
-        return userAdminService.getUserSkillsMetrics(projectId, userId)
+        return userAdminService.getUserSkillsStats(projectId, userId)
     }
 
     @GetMapping(value = "/projects/{projectId}/users", produces = MediaType.APPLICATION_JSON_VALUE)
