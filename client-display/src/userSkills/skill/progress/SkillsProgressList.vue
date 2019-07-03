@@ -11,7 +11,7 @@
         <div v-if="subject.skills && subject.skills.length > 0" class="card-footer">
             <div class="row">
                 <div class="col">
-                        <span v-if="helpTipHref" class="float-left">
+                        <span v-if="helpTipHref" class="float-left text-muted">
                             Need help? <a :href="helpTipHref" target="_blank">Click here!</a>
                         </span>
                 </div>

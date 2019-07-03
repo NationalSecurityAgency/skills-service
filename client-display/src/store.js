@@ -11,6 +11,9 @@ const themeModule = {
       completeColor: '#59ad52',
       incompleteColor: '#cdcdcd',
     },
+    charts: {
+      axisLabelColor: 'black',
+    },
   },
 };
 
