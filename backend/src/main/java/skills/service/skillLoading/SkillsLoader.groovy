@@ -86,7 +86,7 @@ class SkillsLoader {
     @Transactional(readOnly = true)
     OverallSkillSummary loadOverallSummary(String projectId, String userId, Integer version = -1) {
         ProjDef projDef = getProjDef(projectId)
-        List<SkillSubjectSummary> subjects = projDef.getSubjects().collect { SkillDef subjectDefinition ->
+        List<SkillSubjectSummary> subjects = projDef.getSubjects()?.sort({it.displayOrder})?.collect { SkillDef subjectDefinition ->
             loadSubjectSummary(projDef, userId, subjectDefinition, version)
         }
 

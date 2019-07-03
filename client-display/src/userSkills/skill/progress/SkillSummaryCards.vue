@@ -27,6 +27,10 @@
         },
         computed: {
             pointIncrementLabel() {
+                if (this.skill.totalPoints / this.skill.pointIncrement === 1) {
+                    return '1 occurrence will complete the skill.';
+                }
+
                 const hours = this.skill.pointIncrementInterval > 59 ? Math.floor(this.skill.pointIncrementInterval / 60) : 0;
                 const minutes = this.skill.pointIncrementInterval > 60 ? this.skill.pointIncrementInterval % 60 : this.skill.pointIncrementInterval;
                 const occur = this.skill.maxOccurrencesWithinIncrementInterval;
