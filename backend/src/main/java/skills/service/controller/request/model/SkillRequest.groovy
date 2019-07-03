@@ -18,9 +18,9 @@ class SkillRequest {
 
     int pointIncrement
     // Time Window - in minute; 0 means that the action can be performed right away
-    int pointIncrementInterval
+    int pointIncrementInterval = 60 * 8
     // Max Occurrences Within Window
-    int numMaxOccurrencesIncrementInterval
+    int numMaxOccurrencesIncrementInterval = 1
     int numPerformToCompletion
 
     int version = 0

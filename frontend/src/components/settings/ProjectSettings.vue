@@ -51,6 +51,7 @@
 </template>
 
 <script>
+  import { SkillsReporter } from '@skills/skills-client-vue';
   import SettingService from './SettingsService';
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import SimpleCard from '../utils/cards/SimpleCard';
@@ -146,6 +147,9 @@
             entries.forEach((entry) => {
               const [key, value] = entry;
               this.settings[key] = Object.assign(value, { dirty: false, lastLoadedValue: value.value });
+              if (value.setting === this.settings.helpUrlHost.setting) {
+                SkillsReporter.reportSkill('ConfigureProjectRootHelpUrl');
+              }
             });
           })
           .finally(() => {

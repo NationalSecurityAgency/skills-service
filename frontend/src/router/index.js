@@ -32,6 +32,7 @@ import UserSkillsPerformed from '@//components/users/UserSkillsPerformed';
 import GeneralSettings from '@//components/settings/GeneralSettings';
 import SecuritySettings from '@//components/settings/SecuritySettings';
 import EmailSettings from '@//components/settings/EmailSettings';
+import { SkillsReporter } from '@skills/skills-client-vue';
 
 Vue.use(Router);
 
@@ -78,7 +79,7 @@ const router = new Router({
         name: 'Subjects',
         path: '',
         component: Subjects,
-        meta: { requiresAuth: true },
+        meta: { requiresAuth: true, reportSkillId: 'ViewSubjects' },
       }, {
         name: 'Badges',
         path: 'badges',
@@ -290,6 +291,12 @@ router.beforeEach((to, from, next) => {
     }
   } else {
     next();
+  }
+});
+
+router.afterEach((to) => {
+  if (to.meta.reportSkillId) {
+    SkillsReporter.reportSkill(to.meta.reportSkillId);
   }
 });
 
