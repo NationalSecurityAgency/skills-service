@@ -2,7 +2,7 @@ import axios from 'axios';
 
 export default {
   getUserSkillsMetrics(projectId, userId) {
-    return axios.get(`/admin/projects/${projectId}/users/${userId}/metrics`)
+    return axios.get(`/admin/projects/${projectId}/users/${userId}/stats`)
       .then(response => response.data);
   },
 

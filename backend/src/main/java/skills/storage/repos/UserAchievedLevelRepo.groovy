@@ -52,7 +52,7 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
     @Query('''select sdParent.name as label, count(ua) as count
     from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild, UserAchievement ua
       where srd.parent=sdParent.id and srd.child=sdChild.id and sdChild.skillId=ua.skillId and ua.level is null and 
-      sdParent.projectId=?1 and sdParent.type=?2 group by sdParent.skillId''')
+      sdParent.projectId=?1 and sdParent.type=?2 group by sdParent.name''')
     List<LabelCountInfo> getUsageFacetedViaSubject(String projectId, SkillDef.ContainerType subjectType)
 
     @Query('''select sdChild.name as label, count(ua) as count
