@@ -5,7 +5,7 @@
       <div class="col-12 col-md-12 col-xl mb-md-3 mb-xl-0">
         <media-info-card :title="`${skillInfo.totalPoints} Points`" icon-class="fas fa-calculator text-success">
           <strong>{{ skillInfo.pointIncrement }}</strong> points <i class="fa fa-times text-muted"/>
-          <strong> {{ skillInfo.numPerformToCompletion }}</strong> repetitions to Completion
+          <strong> {{ skillInfo.numPerformToCompletion }}</strong> repetition<span v-if="skillInfo.numPerformToCompletion>1">s</span> to Completion
         </media-info-card>
       </div>
       <div class="col-12  col-md-6 col-xl my-3 my-md-0">
@@ -71,6 +71,8 @@
         let title = '';
         if (!this.skillInfo.timeWindowEnabled) {
           title = 'Time Window Disabled';
+        } else if (this.skillInfo.numPerformToCompletion === 1) {
+          title = 'Time Window N/A';
         } else {
           title = `${this.skillInfo.pointIncrementIntervalHrs} Hour`;
           if (this.skillInfo.pointIncrementIntervalHrs > 1) {
@@ -92,6 +94,8 @@
           desc = 'Each occurrence will receive points immediately';
         } else if (numOccur > 1) {
           desc = `Up to ${numOccur} occurrences within this time window to receive points`;
+        } else if (this.skillInfo.numPerformToCompletion === 1) {
+          desc = 'Only one event is required to complete this skill.';
         }
         return desc;
       },
