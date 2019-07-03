@@ -55,9 +55,19 @@
           xaxis: {
             type: 'datetime',
             tickAmount: 1,
+            labels: {
+              style: {
+                colors: this.$store.state.themeModule.charts.axisLabelColor,
+              },
+            },
           },
           yaxis: {
             min: 0,
+            labels: {
+              style: {
+                color: this.$store.state.themeModule.charts.axisLabelColor,
+              },
+            },
           },
           fill: {
             type: 'gradient',

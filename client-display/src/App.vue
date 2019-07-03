@@ -38,8 +38,8 @@
 
   export default {
     mounted() {
-      // console.log('remove this line');
-      // this.handleTheming();
+      console.log('remove this line');
+      this.handleTheming();
 
       const vm = this;
       if (this.isDevelopmentMode()) {
@@ -57,7 +57,6 @@
             });
           },
         });
-
 
         handshake.then((parent) => {
           // Make sure to freeze the parent object so Vuex won't try to make it reactive
@@ -82,7 +81,7 @@
     },
     methods: {
       handleTheming() {
-        const nonCSSConfig = ['progressIndicators'];
+        const nonCSSConfig = ['progressIndicators', 'charts'];
 
         const selectorKey = {
           backgroundColor: {
@@ -94,12 +93,12 @@
             styleName: 'color',
           },
           primaryTextColor: {
-            selector: 'body #app .card-header, body #app .card-body, body #app .skill-tile-label',
+            selector: 'body #app .card-header, body #app .card-body, body #app .skill-tile-label, body #app .card-title body #app .card ',
             styleName: 'color',
           },
           tiles: {
             backgroundColor: {
-              selector: 'body #app .card-header, body #app .card-body, body #app .card-footer',
+              selector: 'body #app .card, body #app .card-header, body #app .card-body, body #app .card-footer',
               styleName: 'background-color',
             },
             watermarkIconColor: {
@@ -121,21 +120,21 @@
 
         const mockTheme = {
           // backgroundColor: {
-          //   value: 'grey',
+          //   value: '#626d7d',
           // },
           // secondaryTextColor: {
-          //   value: 'purple',
+          //   value: '#b1adad',
           // },
           // primaryTextColor: {
-          //   value: 'green',
+          //   value: 'white',
           // },
           // stars: {
           //   unearnedColor: {
-          //     value: 'blue'
+          //     value: '#787886'
           //   },
           //   earnedColor: {
-          //     value: 'green',
-          //   }
+          //     value: 'gold',
+          //   },
           // },
           // progressIndicators: {
           //   beforeTodayColor: '#3e4d44',
@@ -143,12 +142,15 @@
           //   completeColor: '#59ad52',
           //   incompleteColor: '#cdcdcd',
           // },
+          // charts: {
+          //   axisLabelColor: 'white',
+          // },
           // tiles: {
           //   backgroundColor: {
-          //     value: '#D6EAF8',
+          //     value: '#152E4d',
           //   },
           //   watermarkIconColor: {
-          //     value: 'orange',
+          //     value: '#a6c5f7',
           //   },
           // },
         };
@@ -171,11 +173,20 @@
               }
             } else if (isCSSConfig) {
               buildCss(themeKey[key], Object.keys(themeKey[key]));
+            } else {
+              this.$store.state.themeModule[key] = themeKey[key];
             }
           });
         };
 
         buildCss(themeKey, Object.keys(themeKey));
+
+        // Some CSS may mess up some things, fix those here
+        // Apex charts context menu
+        css += 'body #app .apexcharts-menu.open { color: black !important; }';
+
+        // console.log('temporary');
+        // css += "body { background-color: #626d7d }";
 
         const style = document.createElement('style');
         style.appendChild(document.createTextNode(css));
@@ -240,6 +251,10 @@
     margin: 0 auto;
     text-align: center;
     overflow: hidden;
+  }
+
+  .card {
+    box-shadow: 0 0.75rem 1.5rem rgba(18,38,63,.5);
   }
 </style>
 
