@@ -51,7 +51,9 @@ class TimeWindowHelper {
                 checkStartDate,
                 checkEndDate
         )
-        boolean isFull = count >= skillDefinition.numMaxOccurrencesIncrementInterval
+        // a little bit of paranoia to make sure that count is at least 1 before comparing with occurrences
+        // this could only happen of course if numMaxOccurrencesIncrementInterval is miconfigured, but hey, happens
+        boolean isFull = count > 0 && count >= skillDefinition.numMaxOccurrencesIncrementInterval
         String msg = isFull ? buildMsg(skillDefinition, count) : null
         new TimeWindowRes(full: isFull, msg: msg)
     }
