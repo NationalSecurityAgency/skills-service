@@ -34,6 +34,9 @@
         <commons.lang.version>3.7</commons.lang.version>
         <commons.collections.version>3.2.2</commons.collections.version>
         <commons.io.version>2.6</commons.io.version>
+
+        <frontend-maven-plugin.version>1.7.6</frontend-maven-plugin.version>
+        <node.version>v11.6.0</node.version>
     </properties>
 
     <parent>
