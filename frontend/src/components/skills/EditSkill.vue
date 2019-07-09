@@ -80,7 +80,7 @@
         <div class="col-12 col-lg">
           <div class="form-group">
             <label><b-form-checkbox id="checkbox-1" class="d-inline" v-model="skillInternal.timeWindowEnabled" v-on:input="resetTimeWindow"/>Time Window
-              <inline-help msg="The number of hours that must elapse between incrementing points for a user."/>
+              <inline-help msg="Uncheck to disable. When disabled skill events are applied immediately."/>
 
             </label>
             <div class="row">
@@ -114,7 +114,7 @@
           <div class="form-group">
             <label>Max Occurrences Within Window
               <inline-help
-                msg="An optional version for this skill to allow filtering of available skills for different versions of an application"/>
+                msg="Once this Max Occurrences reached points will not be incremented until outside of the configured Time Window."/>
             </label>
             <input class="form-control" type="number" min="0" v-model="skillInternal.numPointIncrementMaxOccurrences"
                    v-validate="'min_value:1|max_value:999|numeric|lessThanTotalOccurrences'" data-vv-delay="500" data-vv-name="numPointIncrementMaxOccurrences"
