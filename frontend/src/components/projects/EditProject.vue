@@ -7,14 +7,14 @@
           <div class="form-group">
             <label>Project Name</label>
             <input class="form-control" type="text" v-model="internalProject.name" v-on:input="updateProjectId"
-                   v-validate="'required|min:3|max:50|uniqueName'" data-vv-delay="500" data-vv-name="projectName" v-focus/>
+                   v-validate="'required|min:3|max:50|uniqueName'" data-vv-delay="750" data-vv-name="projectName" v-focus/>
             <small class="form-text text-danger">{{ errors.first('projectName')}}</small>
           </div>
         </div>
 
         <div class="col-12">
           <id-input type="text" label="Project ID" v-model="internalProject.projectId"
-                    v-validate="'required|min:3|max:50|alpha_num|uniqueId'" data-vv-name="projectId"/>
+                    v-validate="'required|min:3|max:50|alpha_num|uniqueId'" data-vv-name="projectId" data-vv-delay="750"/>
           <small class="form-text text-danger">{{ errors.first('projectId')}}</small>
         </div>
       </div>
