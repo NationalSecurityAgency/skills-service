@@ -1,5 +1,8 @@
 package skills.service.controller.request.model
 
+import groovy.transform.Canonical
+
+@Canonical
 class SettingsRequest {
 
     Integer id

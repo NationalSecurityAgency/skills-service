@@ -13,6 +13,7 @@ import skills.service.controller.exceptions.SkillException
 import skills.service.controller.exceptions.SkillsValidator
 import skills.service.controller.request.model.SettingsRequest
 import skills.service.controller.result.model.RequestResult
+import skills.service.controller.result.model.SettingsResult
 import skills.service.controller.result.model.UserInfoRes
 import skills.service.datastore.services.AccessSettingsStorageService
 import skills.service.datastore.services.settings.SettingsService
@@ -95,12 +96,19 @@ class RootController {
     }
 
     @RequestMapping(value = "/global/settings/{setting}", method = [RequestMethod.PUT, RequestMethod.POST], produces = MediaType.APPLICATION_JSON_VALUE)
-    RequestResult saveGlobalSetting(@PathVariable("setting") String setting, @RequestBody SettingsRequest value) {
+    RequestResult saveGlobalSetting(@PathVariable("setting") String setting, @RequestBody SettingsRequest settingRequest) {
         SkillsValidator.isNotBlank(setting, "Setting Id")
-        SkillsValidator.isTrue(null == value.projectId, "Project Id must null for global settings")
-        SkillsValidator.isTrue(setting == value.setting, "Setting Id must equal")
+        SkillsValidator.isTrue(null == settingRequest.projectId, "Project Id must null for global settings")
+        SkillsValidator.isTrue(setting == settingRequest.setting, "Setting Id must equal")
 
-        settingsService.saveSetting(value)
+        SettingsResult existingSetting = settingsService.getSetting(settingRequest.projectId, settingRequest.setting, settingRequest.settingGroup)
+        if (existingSetting?.id) {
+            settingRequest.id = existingSetting.id
+            log.info("Updating existing global setting [{}]", existingSetting)
+        } else {
+            log.info("Adding new global setting [{}]", settingRequest)
+        }
+        settingsService.saveSetting(settingRequest)
         return new RequestResult(success: true)
     }
 
