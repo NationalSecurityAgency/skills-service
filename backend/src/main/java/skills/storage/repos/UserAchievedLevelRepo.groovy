@@ -86,19 +86,20 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
     int countAchievedChildren(String userId, String projectId, String skillId, SkillRelDef.RelationshipType type)
 
 
-    @Query(value = '''select date(ua.created) day, count(*) numItems
-      from skill_definition skillDef, user_achievement ua 
+    @Query(value = '''select ua.created AS day, count(ua) AS numItems
+      from SkillDef skillDef, UserAchievement ua 
       where 
         ua.level is null and 
-        skillDef.skill_id = ua.skill_id and skillDef.project_id = ua.project_id and 
-        skillDef.project_id= :projectId and  
-        skillDef.skill_id = :badgeId and
-        skillDef.type= :#{#type.toString()} and
+        skillDef.skillId = ua.skillId 
+        and skillDef.projectId = ua.projectId and 
+        skillDef.projectId= :projectId and  
+        skillDef.skillId = :badgeId and
+        skillDef.type= :type and
         ua.created >= :date 
-        group by day''', nativeQuery = true)
+        group by ua.created''')
     List<UsageItem> countAchievementsForProjectPerDay(@Param('projectId') String projectId, @Param('badgeId') String badgeId, @Param('type') SkillDef.ContainerType containerType, @Param('date') Date mustBeAfterThisDate)
 
-    @Query(value = '''select month(ua.created) label, count(*) count
+    @Query(value = '''select EXTRACT(MONTH FROM ua.created) as label, count(*) count
       from skill_definition skillDef, user_achievement ua 
       where 
         ua.level is null and 
@@ -107,6 +108,6 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
         skillDef.skill_id = :badgeId and
         skillDef.type= :#{#type.toString()} and
         ua.created >= :date 
-        group by label''', nativeQuery = true)
+        group by EXTRACT(MONTH FROM ua.created)''', nativeQuery = true)
     List<LabelCountInfo> countAchievementsForProjectPerMonth(@Param('projectId') String projectId, @Param('badgeId') String badgeId, @Param('type') SkillDef.ContainerType containerType, @Param('date') Date mustBeAfterThisDate)
 }
