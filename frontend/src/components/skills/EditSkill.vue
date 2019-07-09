@@ -9,7 +9,7 @@
             <label for="subjName">Skill Name</label>
             <input type="text" class="form-control" id="subjName" @input="updateSkillId"
                    v-model="skillInternal.name"
-                   v-validate="'required|min:3|max:100|uniqueName'" data-vv-delay="500" data-vv-name="name"
+                   v-validate="'required|min:3|max:100|uniqueName'" data-vv-delay="750" data-vv-name="name"
                    v-focus>
             <small class="form-text text-danger">{{ errors.first('name')}}</small>
           </div>
@@ -18,7 +18,7 @@
 
           <id-input type="text" label="Skill ID"
                     v-model="skillInternal.skillId" @input="canAutoGenerateId=false"
-                    v-validate="'required|min:3|max:50|alpha_num|uniqueId'" data-vv-name="skillId"/>
+                    v-validate="'required|min:3|max:50|alpha_num|uniqueId'" data-vv-name="skillId" data-vv-delay="750"/>
           <small class="form-text text-danger">{{ errors.first('skillId')}}</small>
         </div>
         <div class="col-12 col-lg-2 mt-2 mt-lg-0">
@@ -41,7 +41,7 @@
           <div class="form-group mb-1">
             <label for="subjName">Point Increment</label>
             <input class="form-control" type="number"  min="1" v-model="skillInternal.pointIncrement"
-                   v-validate="'required|numeric|min_value:1|max_value:10000'" data-vv-name="pointIncrement"/>
+                   v-validate="'required|numeric|min_value:1|max_value:10000'" data-vv-name="pointIncrement" data-vv-delay="500"/>
           </div>
           <small class="form-text text-danger">{{ errors.first('pointIncrement')}}</small>
         </div>
@@ -53,7 +53,7 @@
                 <div class="input-group-text"><i class="fas fa-times"/></div>
               </div>
               <input class="form-control" type="number" min="1" v-model="skillInternal.numPerformToCompletion"
-                     v-validate="'required|numeric|min_value:1|max_value:10000|moreThanMaxWindowOccurrences'" data-vv-name="numPerformToCompletion"/>
+                     v-validate="'required|numeric|min_value:1|max_value:10000|moreThanMaxWindowOccurrences'" data-vv-name="numPerformToCompletion" data-vv-delay="500"/>
             </div>
             <small class="form-text text-danger">{{ errors.first('numPerformToCompletion')}}</small>
           </div>
@@ -88,7 +88,7 @@
                 <div class="input-group">
                   <input class="form-control d-inline" type="number" min="0" v-model="skillInternal.pointIncrementIntervalHrs"
                          v-validate="'required|numeric|min_value:0|max_value:1000|cantBe0IfMins0'" data-vv-name="pointIncrementIntervalHrs"
-                         value="8" :disabled="!skillInternal.timeWindowEnabled"/>
+                         value="8" :disabled="!skillInternal.timeWindowEnabled" data-vv-delay="500"/>
                   <div class="input-group-append">
                     <span class="input-group-text" id="hours-append">Hours</span>
                   </div>
@@ -99,7 +99,7 @@
                 <div class="input-group">
                   <input class="form-control d-inline"  type="number" min="0" v-model="skillInternal.pointIncrementIntervalMins"
                          v-validate="'required|numeric|min_value:0|max_value:59|cantBe0IfHours0'" data-vv-name="pointIncrementIntervalMins"
-                         value="0" :disabled="!skillInternal.timeWindowEnabled"/>
+                         value="0" :disabled="!skillInternal.timeWindowEnabled" data-vv-delay="500"/>
                   <div class="input-group-append">
                     <span class="input-group-text" id="minutes-append">Minutes</span>
                   </div>

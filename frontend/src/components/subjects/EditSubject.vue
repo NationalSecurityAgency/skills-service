@@ -11,7 +11,7 @@
               <label for="subjName">Subject Name</label>
               <input type="text" class="form-control" id="subjName" @input="updateSubjectId"
                      v-model="subjectInternal.name" v-on:input="updateSubjectId"
-                     v-validate="'required|min:3|max:50|uniqueName'" data-vv-delay="500" data-vv-name="subjectName"
+                     v-validate="'required|min:3|max:50|uniqueName'" data-vv-delay="750" data-vv-name="subjectName"
                      v-focus>
               <small class="form-text text-danger">{{ errors.first('subjectName')}}</small>
             </div>
@@ -19,7 +19,7 @@
         </div>
 
         <id-input type="text" label="Subject ID" v-model="subjectInternal.subjectId" @input="canAutoGenerateId=false"
-                  v-validate="'required|min:3|max:50|alpha_num|uniqueId'" data-vv-name="subjectId"/>
+                  v-validate="'required|min:3|max:50|alpha_num|uniqueId'" data-vv-name="subjectId" data-vv-delay="750"/>
         <small class="form-text text-danger">{{ errors.first('subjectId')}}</small>
 
         <div class="mt-2">
