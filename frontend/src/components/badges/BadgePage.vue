@@ -1,6 +1,11 @@
 <template>
   <div>
-    <page-header :loading="isLoading" :options="headerOptions"/>
+    <page-header :loading="isLoading" :options="headerOptions">
+      <span slot="right-of-header">
+        <i v-if="badge.endDate" class="fas fa-gem ml-2" style="font-size: 1.6rem; color: purple;"></i>
+      </span>
+    </page-header>
+
 
     <navigation :nav-items="[
           {name: 'Skills', iconClass: 'fa-graduation-cap', page: 'BadgeSkills'},
