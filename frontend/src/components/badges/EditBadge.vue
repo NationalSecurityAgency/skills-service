@@ -95,27 +95,6 @@
     },
   };
   Validator.localize(dictionary);
-  Validator.extend('dateOrder', {
-    getMessage: 'Start Date must come before End Date',
-    validate() {
-      const self = this;
-      let valid = true;
-      if (self.limitTimeframe) {
-        if (self.badgeInternal.startDate && self.badgeInternal.endDate) {
-          valid = self.badgeInternal.startDate < self.badgeInternal.endDate;
-          if (valid) {
-            // manually clear errors in case the orig error occurred when setting startDate,
-            // but was fixed by updating endDate (or vise-versa)
-            self.errors.remove('startDate');
-            self.errors.remove('endDate');
-          }
-        }
-      }
-      return valid;
-    },
-  }, {
-    immediate: false,
-  });
 
   export default {
     name: 'EditBadge',
@@ -238,6 +217,27 @@
               return true;
             }
             return BadgesService.badgeWithIdExists(self.badgeInternal.projectId, value);
+          },
+        }, {
+          immediate: false,
+        });
+
+        Validator.extend('dateOrder', {
+          getMessage: 'Start Date must come before End Date',
+          validate() {
+            let valid = true;
+            if (self.limitTimeframe) {
+              if (self.badgeInternal.startDate && self.badgeInternal.endDate) {
+                valid = self.badgeInternal.startDate < self.badgeInternal.endDate;
+                if (valid) {
+                  // manually clear errors in case the orig error occurred when setting startDate,
+                  // but was fixed by updating endDate (or vise-versa)
+                  self.errors.remove('startDate');
+                  self.errors.remove('endDate');
+                }
+              }
+            }
+            return valid;
           },
         }, {
           immediate: false,
