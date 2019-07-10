@@ -7,7 +7,7 @@
                                 class="badge-settings"></edit-and-delete-dropdown>
     </div>
     <div slot="footer">
-      <i v-if="badgeInternal.endDate"  class="fas fa-gem position-absolute" style="font-size: 1rem; top: 1rem; left: 1rem; color: purple"></i>
+      <i v-if="badgeInternal.endDate" class="fas fa-gem position-absolute" style="font-size: 1rem; top: 1rem; left: 1rem; color: purple"></i>
       <router-link :to="{ name:'BadgeSkills',
               params: { projectId: this.badgeInternal.projectId, badgeId: this.badgeInternal.badgeId, badge: this.badgeInternal}}"
                    class="btn btn-outline-primary btn-sm">

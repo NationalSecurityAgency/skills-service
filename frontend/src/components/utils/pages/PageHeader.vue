@@ -4,7 +4,7 @@
       <loading-container :is-loading="loading">
         <div class="row">
           <div class="col-lg-6 text-center text-lg-left">
-            <h3><i v-if="options.icon" class="has-text-link" :class="options.icon"/> {{ options.title }}</h3>
+            <h3><i v-if="options.icon" class="has-text-link" :class="options.icon"/> {{ options.title }}<slot name="right-of-header"></slot></h3>
             <h5 class="text-muted">{{ options.subTitle }}</h5>
           </div>
           <div class="col-lg-6">
