@@ -13,7 +13,7 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
     @Nullable
     SkillDef findByProjectIdAndSkillIdAndType(String id, String skillId, SkillDef.ContainerType type)
 
-    @Query('SELECT s from SkillDef s where s.projectId = ?1 and s.version >= ?2 and s.type = ?3')
+    @Query('SELECT s from SkillDef s where s.projectId = ?1 and s.version <= ?2 and s.type = ?3')
     List<SkillDef> findAllByProjectIdAndVersionAndType(String id, Integer version, SkillDef.ContainerType type)
 
     @Query(value = '''SELECT max(sdChild.displayOrder) from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild

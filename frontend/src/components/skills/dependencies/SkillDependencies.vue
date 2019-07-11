@@ -14,9 +14,18 @@
               <div class="media-body">
                 <strong class="mb-2"><span v-if="props.option.otherProjectId" class="">{{props.option.otherProjectName}} : </span>
                   {{ props.option.name }}</strong>
-                <div style="font-size: 0.95rem;" class="text-secondary">
-                  <span class="">ID:</span> <span class="">{{props.option.skillId}}</span>
-                  <span v-if="props.option.otherProjectId" class="text-warning ml-3">** Shared Skill **</span>
+                <div style="font-size: 0.95rem;" class="row text-secondary">
+                  <div class="col-md">
+                    <span class="font-italic">ID:</span> <span class="ml-1">{{props.option.skillId}}</span>
+                  </div>
+                  <div class="col-md">
+                    <span v-if="props.option.otherProjectId" class="text-warning ml-3">** Shared Skill **</span>
+                    <span v-else class="ml-2">
+                      <span class="font-italic">Version:</span>
+                      <span class="ml-1">{{props.option.version}}</span>
+                      <span v-if="props.option.version > skill.version" class="text-danger ml-3"><br class="d-lg-none"/>** Not Eligible due to later version**</span>
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -138,7 +147,7 @@
           })
           .catch((e) => {
             if (e.response.data && e.response.data.errorCode && e.response.data.errorCode === 'FailedToAssignDependency') {
-              this.errNotification.msg = e.response.data.message;
+              this.errNotification.msg = e.response.data.explanation;
               this.errNotification.enable = true;
               this.loading.finishedDependents = true;
 
@@ -182,7 +191,7 @@
       },
       loadAllSkills() {
         this.loading.finishedAllSkills = false;
-        SkillsService.getSkillsFroDependency(this.skill.projectId, this.skill.version)
+        SkillsService.getSkillsFroDependency(this.skill.projectId)
           .then((skills) => {
             this.allSkills = skills.filter(item => (item.skillId !== this.skill.skillId || item.otherProjectId));
             this.loading.finishedAllSkills = true;
