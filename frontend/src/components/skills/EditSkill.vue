@@ -27,8 +27,9 @@
               <inline-help
                 msg="An optional version for this skill to allow filtering of available skills for different versions of an application"/>
             </label>
-            <input class="form-control" type="number" min="0" v-model="skillInternal.version" :disabled="isEdit"
-                   v-validate="'min_value:0|max_value:999|numeric'" data-vv-delay="500" data-vv-name="version"/>
+            <input class="form-control" type="number" min="0"
+                   v-model="skillInternal.version" :disabled="isEdit"
+                   v-validate="'min_value:0|max_value:999|numeric|maxVersion'" data-vv-delay="500" data-vv-name="version"/>
             <small class="form-text text-danger">{{ errors.first('version')}}</small>
           </div>
         </div>
@@ -218,6 +219,7 @@
         initial: {
           skillId: '',
           skillName: '',
+          latestVersion: 0,
         },
         overallErrMsg: '',
         show: this.value,
@@ -340,6 +342,18 @@
         }, {
           immediate: false,
         });
+
+        Validator.extend('maxVersion', {
+          getMessage: () => `Version ${self.initial.latestVersion} is the latest; max supported version is ${self.initial.latestVersion + 1} (latest + 1)`,
+          validate(value) {
+            if (parseInt(value, 10) > (self.initial.latestVersion + 1)) {
+              return false;
+            }
+            return true;
+          },
+        }, {
+          immediate: true,
+        });
       },
       saveSkill() {
         this.$validator.validateAll()
@@ -367,6 +381,7 @@
         SkillsService.getLatestSkillVersion(this.projectId)
           .then((latestVersion) => {
             this.skillInternal.version = latestVersion;
+            this.initial.latestVersion = latestVersion;
           })
           .finally(() => {
             this.isLoadingSkillDetails = false;

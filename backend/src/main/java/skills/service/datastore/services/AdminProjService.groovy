@@ -917,6 +917,7 @@ class AdminProjService {
             throw new SkillException("Bad Name [${skillRequest.name}] - must not exceed 100 chars.")
         }
         SkillsValidator.isNotBlank(skillRequest.projectId, "Project Id")
+        validateSkillVersion(skillRequest)
 
         boolean shouldRebuildScores
 
@@ -979,6 +980,14 @@ class AdminProjService {
         SkillDefRes skillDefRes = convertToSkillDefRes(savedSkill)
         return skillDefRes
     }
+
+    private void validateSkillVersion(SkillRequest skillRequest){
+        int latestSkillVersion = findLatestSkillVersion(skillRequest.projectId)
+        if (skillRequest.version > (latestSkillVersion + 1)) {
+            throw new SkillException("Latest skill version is [${latestSkillVersion}]; max supported version is latest+1 but provided [${skillRequest.version}] version", skillRequest.projectId, skillRequest.skillId, ErrorCode.BadParam)
+        }
+    }
+
 
     private void assignToParent(SkillRequest skillRequest, SkillDef savedSkill) {
         String parentSkillId = skillRequest.subjectId
