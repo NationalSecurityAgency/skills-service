@@ -12,7 +12,7 @@ import skills.service.controller.result.model.TimestampCountItem
 import skills.service.skillLoading.RankingLoader
 import skills.service.skillLoading.model.UsersPerLevel
 import skills.storage.model.SkillDef
-import skills.storage.model.UsageItem
+import skills.storage.model.DayCountItem
 import skills.storage.repos.UserAchievedLevelRepo
 import skills.storage.repos.UserPointsRepo
 
@@ -40,12 +40,12 @@ class AdminUsersService {
             startDate.clearTime()
         }
 
-        List<UsageItem> res = userPointsRepo.findDistinctUserCountsByProject(projectId, startDate)
+        List<DayCountItem> res = userPointsRepo.findDistinctUserCountsByProject(projectId, startDate)
 
         List<TimestampCountItem> countsPerDay = []
         startDate.upto(new Date().clearTime()) { Date theDate ->
-            UsageItem found = res.find({it.day.clearTime() == theDate})
-            countsPerDay << new TimestampCountItem(value: theDate.time, count: found?.numItems ?: 0)
+            DayCountItem found = res.find({it.day.clearTime() == theDate})
+            countsPerDay << new TimestampCountItem(value: theDate.time, count: found?.count ?: 0)
         }
 
         return countsPerDay
@@ -58,12 +58,12 @@ class AdminUsersService {
             startDate.clearTime()
         }
 
-        List<UsageItem> res = userPointsRepo.findDistinctUserCountsBySkillId(projectId, subjectId, startDate)
+        List<DayCountItem> res = userPointsRepo.findDistinctUserCountsBySkillId(projectId, subjectId, startDate)
 
         List<TimestampCountItem> countsPerDay = []
         startDate.upto(new Date().clearTime()) { Date theDate ->
-            UsageItem found = res.find({it.day.clearTime() == theDate})
-            countsPerDay << new TimestampCountItem(value: theDate.time, count: found?.numItems ?: 0)
+            DayCountItem found = res.find({it.day.clearTime() == theDate})
+            countsPerDay << new TimestampCountItem(value: theDate.time, count: found?.count ?: 0)
         }
 
         return countsPerDay
@@ -76,14 +76,14 @@ class AdminUsersService {
             startDate.clearTime()
         }
 
-        List<UsageItem> res = userAchievedRepo.countAchievementsForProjectPerDay(projectId, badgeId, SkillDef.ContainerType.Badge, startDate)
+        List<DayCountItem> res = userAchievedRepo.countAchievementsForProjectPerDay(projectId, badgeId, SkillDef.ContainerType.Badge, startDate)
 
         List<TimestampCountItem> countsPerDay = []
         startDate.upto(new Date().clearTime()) { Date theDate ->
-            UsageItem found = res.find({
+            DayCountItem found = res.find({
                 it.day.clearTime() == theDate
             })
-            countsPerDay << new TimestampCountItem(value: theDate.time, count: found?.numItems ?: 0)
+            countsPerDay << new TimestampCountItem(value: theDate.time, count: found?.count ?: 0)
         }
 
         return countsPerDay

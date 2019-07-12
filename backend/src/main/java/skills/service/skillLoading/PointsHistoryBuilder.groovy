@@ -5,8 +5,8 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import skills.service.skillLoading.model.SkillHistoryPoints
-import skills.storage.model.UserPoints
-import skills.storage.repos.UserPointsRepo
+import skills.storage.model.DayCountItem
+import skills.storage.repos.UserPerformedSkillRepo
 
 @Component
 @Slf4j
@@ -17,20 +17,20 @@ class PointsHistoryBuilder {
     int minNumOfDaysBeforeReturningHistory = 2
 
     @Autowired
-    UserPointsRepo userPointsRepo
+    UserPerformedSkillRepo userPerformedSkillRepo
 
-    List<SkillHistoryPoints> buildHistory(String projectId, String userId, Integer showHistoryForNumDays, String skillId = null) {
-        List<UserPoints> userPoints
+    List<SkillHistoryPoints> buildHistory(String projectId, String userId, Integer showHistoryForNumDays, String skillId = null, Integer version = Integer.MAX_VALUE) {
+        List<DayCountItem> userPoints
         if(skillId) {
-            userPoints = userPointsRepo.findAllUserPointsUsageHistory(projectId, userId, skillId)
+            userPoints = userPerformedSkillRepo.calculatePointHistoryByProjectIdAndUserIdAndVersion(projectId, userId, skillId, version)
         } else {
-            userPoints = userPointsRepo.findAllUserPointsUsageHistory(projectId, userId)
+            userPoints = userPerformedSkillRepo.calculatePointHistoryByProjectIdAndUserIdAndVersion(projectId, userId, null, version)
         }
 
         Map<Date, Integer> pointsByDay = [:]
         userPoints.each {
             // it.day is java.sql.Date - bye bye!
-            pointsByDay.put(new Date(it.day.time).clearTime(), it.points)
+            pointsByDay.put(new Date(it.day.time).clearTime(), it.count)
         }
 
         return doBuildHistory(pointsByDay, showHistoryForNumDays)

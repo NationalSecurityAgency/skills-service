@@ -7,16 +7,15 @@ import org.springframework.data.repository.CrudRepository
 import org.springframework.lang.Nullable
 import skills.service.controller.result.model.ProjectUser
 import skills.storage.model.SkillRelDef
-import skills.storage.model.UsageItem
+import skills.storage.model.DayCountItem
 import skills.storage.model.UserPoints
 
 @CompileStatic
 interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
 
-    List<UserPoints> findAllByProjectIdAndUserIdAndDay(String projectId, String userId, Date day)
-    List<UserPoints> findAllByProjectIdAndUserIdAndSkillId(String projectId, String userId, String skillId)
     @Nullable
     UserPoints findByProjectIdAndUserIdAndSkillIdAndDay(String projectId, String userId, @Nullable String skillId, @Nullable Date day)
+
     long countByProjectIdAndSkillIdAndDay(String projectId, @Nullable String skillId, @Nullable Date day)
 
     void deleteByProjectIdAndSkillId(String projectId, String skillId)
@@ -70,18 +69,15 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
       sdParent.projectId=?2 and sdParent.skillId=?3 and srd.type=?4 and sdChild.version<=?5''')
     List<Object []> findChildrenAndTheirAchievements(String userId, String projectId, String skillId, SkillRelDef.RelationshipType type, Integer version)
 
-    @Query('''select up.day as day, count(up) as numItems
+    @Query('''select up.day as day, count(up) as count
     from UserPoints up where up.projectId=?1 and up.day>=?2 and up.skillId is null and up.day is not null group by up.day
     ''')
-    List<UsageItem> findDistinctUserCountsByProject(String projectId, Date mustBeAfterThisDate)
+    List<DayCountItem> findDistinctUserCountsByProject(String projectId, Date mustBeAfterThisDate)
 
-    @Query('''select up.day as day, count(up) as numItems
+    @Query('''select up.day as day, count(up) as count
     from UserPoints up where up.projectId=?1 and up.skillId=?2 and up.day>=?3 and up.day is not null group by up.day
     ''')
-    List<UsageItem> findDistinctUserCountsBySkillId(String projectId, String skillId, Date mustBeAfterThisDate)
-
-    @Query("SELECT up from UserPoints up where up.projectId=?1 and up.skillId=?1 and up.day is null" )
-    List<UserPoints> findDistinctUsersWithPoints(String projectId, String skillId)
+    List<DayCountItem> findDistinctUserCountsBySkillId(String projectId, String skillId, Date mustBeAfterThisDate)
 
     @Query('SELECT COUNT(DISTINCT userId) from UserPoints up where up.projectId=?1 and up.userId like %?2% and up.day is null')
     Long countDistinctUserIdByProjectIdAndUserIdLike(String projectId, String query)

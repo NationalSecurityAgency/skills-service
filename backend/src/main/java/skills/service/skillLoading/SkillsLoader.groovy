@@ -16,6 +16,7 @@ import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.SkillRelDefRepo
 import skills.storage.repos.SkillShareDefRepo
 import skills.storage.repos.UserAchievedLevelRepo
+import skills.storage.repos.UserPerformedSkillRepo
 import skills.storage.repos.UserPointsRepo
 import skills.storage.repos.nativeSql.GraphRelWithAchievement
 import skills.storage.repos.nativeSql.NativeQueriesRepo
@@ -46,6 +47,9 @@ class SkillsLoader {
 
     @Autowired
     UserAchievedLevelRepo achievedLevelRepository
+
+    @Autowired
+    UserPerformedSkillRepo userPerformedSkillRepo
 
     @Autowired
     PointsHistoryBuilder pointsHistoryBuilder
@@ -139,22 +143,22 @@ class SkillsLoader {
     }
 
     @Transactional(readOnly = true)
-    List<SkillBadgeSummary> loadBadgeSummaries(String projectId, String userId, Integer version = -1){
+    List<SkillBadgeSummary> loadBadgeSummaries(String projectId, String userId, Integer version = Integer.MAX_VALUE){
         ProjDef projDef = getProjDef(projectId)
         List<SkillDef> badgeDefs = projDef.getBadges()
         if ( version >= 0 ) {
             badgeDefs = badgeDefs.findAll { it.version <= version }
         }
         List<SkillBadgeSummary> badges = badgeDefs.sort({ it.skillId }).collect { SkillDef badgeDefinition ->
-            loadBadgeSummary(projDef, userId, badgeDefinition)
+            loadBadgeSummary(projDef, userId, badgeDefinition, version)
         }
         return badges
     }
 
 
     @Transactional(readOnly = true)
-    UserPointHistorySummary loadPointHistorySummary(String projectId, String userId, int showHistoryForNumDays, String skillId = null) {
-        List<SkillHistoryPoints> historyPoints = pointsHistoryBuilder.buildHistory(projectId, userId, showHistoryForNumDays, skillId)
+    UserPointHistorySummary loadPointHistorySummary(String projectId, String userId, int showHistoryForNumDays, String skillId = null, Integer version = Integer.MAX_VALUE) {
+        List<SkillHistoryPoints> historyPoints = pointsHistoryBuilder.buildHistory(projectId, userId, showHistoryForNumDays, skillId, version)
         return new UserPointHistorySummary(
                 pointsHistory: historyPoints
         )
@@ -205,11 +209,11 @@ class SkillsLoader {
     }
 
     @Transactional(readOnly = true)
-    SkillBadgeSummary loadBadge(String projectId, String userId, String subjectId) {
+    SkillBadgeSummary loadBadge(String projectId, String userId, String subjectId, Integer version = Integer.MAX_VALUE) {
         ProjDef projDef = getProjDef(projectId)
         SkillDef badgeDef = getSkillDef(projectId, subjectId, SkillDef.ContainerType.Badge)
 
-        return loadBadgeSummary(projDef, userId, badgeDef, true)
+        return loadBadgeSummary(projDef, userId, badgeDef, version,true)
     }
 
     @Transactional(readOnly = true)
@@ -232,16 +236,23 @@ class SkillsLoader {
     private SkillSubjectSummary loadSubjectSummary(ProjDef projDef, String userId, SkillDef subjectDefinition, Integer version, boolean loadSkills = false) {
         List<SkillSummary> skillsRes = []
 
+        // must compute total points so the provided version is taken into advantage
+        // subjectDefinition.totalPoints is total overall regardless of the version
+        int totalPoints
         if (loadSkills) {
             SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, projDef.projectId, subjectDefinition.skillId, version)
             skillsRes = createSkillSummaries(projDef, groupChildrenMeta.childrenWithPoints)
+            totalPoints = skillsRes ? skillsRes.collect({it.totalPoints}).sum() : 0
+        } else {
+            totalPoints = skillDefRepo.calculateTotalPointsForSkill(projDef.projectId, subjectDefinition.skillId, SkillRelDef.RelationshipType.RuleSetDefinition, version)
         }
 
-        UserPoints overallPts = userPointsRepo.findByProjectIdAndUserIdAndSkillIdAndDay(projDef.projectId, userId, subjectDefinition.skillId, null)
-        int points = overallPts ? overallPts.points : 0
+        Integer points = userPerformedSkillRepo.calculateUserPointsByProjectIdAndUserIdAndAndDayAndVersion(projDef.projectId, userId, subjectDefinition.skillId, version, null)
+        Integer todaysPoints = userPerformedSkillRepo.calculateUserPointsByProjectIdAndUserIdAndAndDayAndVersion(projDef.projectId, userId, subjectDefinition.skillId, version, new Date().clearTime())
 
-        UserPoints todayPts = userPointsRepo.findByProjectIdAndUserIdAndSkillIdAndDay(projDef.projectId, userId, subjectDefinition.skillId, new Date().clearTime())
-        int todaysPoints = todayPts ? todayPts.points : 0
+        // convert null result to 0
+        points = points ?: 0
+        todaysPoints = todaysPoints ?: 0
 
         LevelDefinitionStorageService.LevelInfo levelInfo = levelDefService.getLevelInfo(subjectDefinition, points)
 
@@ -267,7 +278,7 @@ class SkillsLoader {
                 levelPoints: levelInfo.currentPoints,
                 levelTotalPoints: levelInfo.nextLevelPoints,
 
-                totalPoints: subjectDefinition.totalPoints,
+                totalPoints: totalPoints,
                 todaysPoints: todaysPoints,
 
                 skills: skillsRes,
@@ -275,11 +286,11 @@ class SkillsLoader {
                 iconClass: subjectDefinition.iconClass
         )
     }
-    private SkillBadgeSummary loadBadgeSummary(ProjDef projDef, String userId, SkillDef badgeDefinition, boolean loadSkills = false) {
+    private SkillBadgeSummary loadBadgeSummary(ProjDef projDef, String userId, SkillDef badgeDefinition, Integer version = Integer.MAX_VALUE, boolean loadSkills = false) {
         List<SkillSummary> skillsRes = []
 
         if (loadSkills) {
-            SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, projDef.projectId, badgeDefinition.skillId, SkillRelDef.RelationshipType.BadgeDependence)
+            SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, projDef.projectId, badgeDefinition.skillId, version, SkillRelDef.RelationshipType.BadgeDependence)
             skillsRes = createSkillSummaries(projDef, groupChildrenMeta.childrenWithPoints)
         }
 

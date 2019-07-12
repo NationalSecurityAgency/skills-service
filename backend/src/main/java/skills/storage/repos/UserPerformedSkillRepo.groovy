@@ -3,8 +3,13 @@ package skills.storage.repos
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
+import org.springframework.data.repository.query.Param
+import org.springframework.lang.Nullable
+import skills.storage.model.DayCountItem
 import skills.storage.model.SkillDef
 import skills.storage.model.UserPerformedSkill
+
+import javax.validation.constraints.Null
 
 interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integer> {
 
@@ -37,4 +42,53 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
       where srd.parent=sdParent.id and srd.child=sdChild.id and
       sdChild.projectId=?2 and sdChild.skillId=?3 and srd.type='Dependence' ''')
     List<SkillDef> findPerformedParentSkills(String userId, String projectId, String skillId)
+
+//    @Query('''SELECT SUM(DISTINCT s.totalPoints)
+//            from UserPerformedSkill p, SkillDef s where s.skillId = p.skillId and s.projectId=?1 and p.projectId=?1 and p.userId = ?2 and s.skillId''')
+//    Integer calculateUserPointsByProjectIdAndUserIdAndSkillIdAndDayAndVersion(String projectId, String userId, @Nullable String skillId, @Nullable Date day, Integer version)
+
+//    static String QUERY_calculateUserPointsByProjectIdAndUserIdAndAndDayAndVersion = '''
+//'''
+
+
+    @Nullable
+    @Query('''select SUM(sdChild.pointIncrement)
+    from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild, UserPerformedSkill ups
+      where
+          srd.parent=sdParent.id and 
+          srd.child=sdChild.id and
+          sdChild.skillId = ups.skillId and 
+          ups.projectId=:projectId and
+          sdChild.projectId=:projectId and
+          sdParent.projectId=:projectId and 
+          ups.userId=:userId and
+          sdParent.skillId=:skillId and
+          sdChild.version<=:version and
+          srd.type='RuleSetDefinition' and
+          (CAST(ups.performedOn as date)=:day OR CAST(:day as date) is null)''')
+    Integer calculateUserPointsByProjectIdAndUserIdAndAndDayAndVersion(@Param('projectId') String projectId,
+                                                                       @Param('userId') String userId,
+                                                                       @Param('skillId') String skillId,
+                                                                       @Param('version') Integer version,
+                                                                       @Param('day') @Nullable Date day)
+
+    @Nullable
+    @Query('''select CAST(ups.performedOn as date) as day, SUM(sdChild.pointIncrement) as count
+    from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild, UserPerformedSkill ups
+      where
+          srd.parent=sdParent.id and 
+          srd.child=sdChild.id and
+          sdChild.skillId = ups.skillId and 
+          ups.projectId=:projectId and
+          sdChild.projectId=:projectId and
+          sdParent.projectId=:projectId and 
+          ups.userId=:userId and
+          (sdParent.skillId=:skillId OR :skillId is null) and
+          sdChild.version<=:version and
+          srd.type='RuleSetDefinition'
+       group by CAST(ups.performedOn as date)''')
+    List<DayCountItem> calculatePointHistoryByProjectIdAndUserIdAndVersion(@Param('projectId') String projectId,
+                                                                           @Param('userId') String userId,
+                                                                           @Nullable @Param('skillId') String skillId,
+                                                                           @Param('version') Integer version)
 }

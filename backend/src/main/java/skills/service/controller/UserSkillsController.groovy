@@ -105,16 +105,18 @@ class UserSkillsController {
     @CompileStatic
     SkillBadgeSummary getBadgeSummary(@PathVariable("projectId") String projectId,
                                       @PathVariable("badgeId") String badgeId,
-                                      @RequestParam(name = "userId", required = false) String userIdParam) {
-        return skillsLoader.loadBadge(projectId, getUserId(userIdParam), badgeId)
+                                      @RequestParam(name = "userId", required = false) String userIdParam,
+                                      @RequestParam(name = 'version', required = false, defaultValue = Constants.MAX_VERSION_STRING) Integer version) {
+        return skillsLoader.loadBadge(projectId, getUserId(userIdParam), badgeId, version)
     }
 
     @RequestMapping(value = "/projects/{projectId}/pointHistory", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     @CompileStatic
     UserPointHistorySummary getProjectsPointHistory(@PathVariable("projectId") String projectId,
-                                                    @RequestParam(name = "userId", required = false) String userIdParam) {
-        return skillsLoader.loadPointHistorySummary(projectId, getUserId(userIdParam), 365)
+                                                    @RequestParam(name = "userId", required = false) String userIdParam,
+                                                    @RequestParam(name = 'version', required = false, defaultValue = Constants.MAX_VERSION_STRING) Integer version) {
+        return skillsLoader.loadPointHistorySummary(projectId, getUserId(userIdParam), 365, null, version)
     }
 
     @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/pointHistory", method = RequestMethod.GET, produces = "application/json")
@@ -122,8 +124,9 @@ class UserSkillsController {
     @CompileStatic
     UserPointHistorySummary getSubjectsPointHistory(@PathVariable("projectId") String projectId,
                                                     @PathVariable("subjectId") String subjectId,
-                                                    @RequestParam(name = "userId", required = false) String userIdParam) {
-        return skillsLoader.loadPointHistorySummary(projectId, getUserId(userIdParam), 365, subjectId)
+                                                    @RequestParam(name = "userId", required = false) String userIdParam,
+                                                    @RequestParam(name = 'version', required = false, defaultValue = Constants.MAX_VERSION_STRING) Integer version) {
+        return skillsLoader.loadPointHistorySummary(projectId, getUserId(userIdParam), 365, subjectId, version)
     }
 
     @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/dependencies", method = RequestMethod.GET, produces = "application/json")
