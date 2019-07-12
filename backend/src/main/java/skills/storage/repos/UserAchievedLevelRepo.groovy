@@ -6,7 +6,7 @@ import org.springframework.data.repository.query.Param
 import org.springframework.lang.Nullable
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillRelDef
-import skills.storage.model.UsageItem
+import skills.storage.model.DayCountItem
 import skills.storage.model.UserAchievement
 
 interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer> {
@@ -86,7 +86,7 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
     int countAchievedChildren(String userId, String projectId, String skillId, SkillRelDef.RelationshipType type)
 
 
-    @Query(value = '''select ua.created AS day, count(ua) AS numItems
+    @Query(value = '''select ua.created AS day, count(ua) AS count
       from SkillDef skillDef, UserAchievement ua 
       where 
         ua.level is null and 
@@ -97,7 +97,7 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
         skillDef.type= :type and
         ua.created >= :date 
         group by ua.created''')
-    List<UsageItem> countAchievementsForProjectPerDay(@Param('projectId') String projectId, @Param('badgeId') String badgeId, @Param('type') SkillDef.ContainerType containerType, @Param('date') Date mustBeAfterThisDate)
+    List<DayCountItem> countAchievementsForProjectPerDay(@Param('projectId') String projectId, @Param('badgeId') String badgeId, @Param('type') SkillDef.ContainerType containerType, @Param('date') Date mustBeAfterThisDate)
 
     @Query(value = '''select EXTRACT(MONTH FROM ua.created) as label, count(*) count
       from skill_definition skillDef, user_achievement ua 

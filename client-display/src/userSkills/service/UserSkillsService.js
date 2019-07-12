@@ -129,6 +129,7 @@ service = {
     return axios.get(`${this.serviceUrl}${this.getServicePath()}/${this.projectId}/badges/${badgeId}/summary`, {
       params: {
         userId: this.userId,
+        version: this.version,
       },
     }).then(result => result.data);
   },
@@ -137,6 +138,7 @@ service = {
     return axios.get(`${this.serviceUrl}${this.getServicePath()}/${this.projectId}/badges/summary`, {
       params: {
         userId: this.userId,
+        version: this.version,
       },
     }).then(result => result.data);
   },
@@ -150,6 +152,7 @@ service = {
     response = axios.get(url, {
       params: {
         userId: this.userId,
+        version: this.version,
       },
     }).then(result => result.data.pointsHistory);
     return response;

@@ -2,7 +2,7 @@ package skills.storage.model;
 
 import java.util.Date;
 
-public interface UsageItem {
+public interface DayCountItem {
     Date getDay();
-    Integer getNumItems();
+    Integer getCount();
 }
