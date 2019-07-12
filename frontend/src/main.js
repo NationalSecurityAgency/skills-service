@@ -19,9 +19,7 @@ import store from './store/store';
 
 Vue.use(ClientTable, {}, false, 'bootstrap4', 'default');
 Vue.use(ServerTable, {}, false, 'bootstrap4', 'default');
-Vue.use(VeeValidate, {
-  events: 'change|blur',
-});
+Vue.use(VeeValidate);
 Vue.use(Vuex);
 Vue.use(VueApexCharts);
 Vue.use(BootstrapVue);
