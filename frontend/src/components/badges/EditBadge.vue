@@ -191,7 +191,7 @@
       toDate(value) {
         let dateVal = value;
         if (value && !(value instanceof Date)) {
-          dateVal = new Date(Date.parse(value));
+          dateVal = new Date(Date.parse(value.replace(/-/g, '/')));
         }
         return dateVal;
       },
