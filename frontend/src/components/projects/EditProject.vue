@@ -6,16 +6,20 @@
         <div class="col-12">
           <div class="form-group">
             <label>Project Name</label>
-            <input class="form-control" type="text" v-model="internalProject.name" v-on:input="updateProjectId"
-                   v-validate="'required|min:3|max:50|uniqueName'" data-vv-delay="750" data-vv-name="projectName" v-focus/>
-            <small class="form-text text-danger">{{ errors.first('projectName')}}</small>
+            <ValidationProvider rules="required|min:3|max:50|uniqueName" v-slot="{errors}" name="Project Name">
+              <input class="form-control" type="text" v-model="internalProject.name" v-on:input="updateProjectId"
+                     data-vv-name="projectName" v-focus/>
+              <small class="form-text text-danger">{{ errors[0] }}</small>
+            </ValidationProvider>
           </div>
         </div>
 
         <div class="col-12">
+          <ValidationProvider rules="required|min:3|max:50|alpha_num|uniqueId" v-slot="{errors}" name="Project Id">
           <id-input type="text" label="Project ID" v-model="internalProject.projectId"
-                    v-validate="'required|min:3|max:50|alpha_num|uniqueId'" data-vv-name="projectId" data-vv-delay="750"/>
-          <small class="form-text text-danger">{{ errors.first('projectId')}}</small>
+                    data-vv-name="projectId"/>
+          <small class="form-text text-danger">{{ errors[0]}}</small>
+          </ValidationProvider>
         </div>
       </div>
 
@@ -35,13 +39,13 @@
 </template>
 
 <script>
-  import { Validator } from 'vee-validate';
+  import { Validator, ValidationProvider } from 'vee-validate';
   import ProjectService from './ProjectService';
   import IdInput from '../utils/inputForm/IdInput';
 
   export default {
     name: 'EditProject',
-    components: { IdInput },
+    components: { IdInput, ValidationProvider },
     props: ['project', 'isEdit', 'value'],
     data() {
       return {

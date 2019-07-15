@@ -8,18 +8,22 @@
           <div class="media-body">
             <div class="form-group">
               <label for="badgeName">Badge Name</label>
-              <input class="form-control" id="badgeName" type="text" v-model="badgeInternal.name"
-                     @input="updateBadgeId"
-                     v-validate="'required|min:3|max:50|uniqueName'" data-vv-delay="750" data-vv-name="badgeName" v-focus/>
-              <small class="form-text text-danger" v-show="errors.has('badgeName')">{{ errors.first('badgeName')}}
-              </small>
+              <ValidationProvider rules="required|min:3|max:50|uniqueName" v-slot="{errors}" name="Badge Name">
+                <input class="form-control" id="badgeName" type="text" v-model="badgeInternal.name"
+                       @input="updateBadgeId"
+                       data-vv-name="badgeName" v-focus/>
+                <small class="form-text text-danger" v-show="errors[0]">{{ errors[0] }}
+                </small>
+              </ValidationProvider>
             </div>
           </div>
         </div>
 
-        <id-input type="text" label="Badge ID" v-model="badgeInternal.badgeId" @input="canAutoGenerateId=false"
-                  v-validate="'required|min:3|max:50|alpha_num|uniqueId'" data-vv-name="badgeId" data-vv-delay="750"/>
-        <small class="form-text text-danger">{{ errors.first('badgeId')}}</small>
+        <ValidationProvider rules="required|min:3|max:50|alpha_num|uniqueId" v-slot="{errors}" name="Badge Name">
+          <id-input type="text" label="Badge ID" v-model="badgeInternal.badgeId" @input="canAutoGenerateId=false"
+                    data-vv-name="badgeId"/>
+          <small class="form-text text-danger">{{ errors[0] }}</small>
+        </ValidationProvider>
 
         <div class="mt-2">
           <label>Description</label>
@@ -36,16 +40,19 @@
             <b-row v-if="limitTimeframe" no-gutters class="justify-content-md-center mt-3" key="gemTimeFields">
               <b-col cols="12" md="4" style="min-width: 20rem;">
                 <label class="label mt-2">Start Date</label>
-                <datepicker :inline="true" v-model="badgeInternal.startDate" name="startDate"
-                            v-validate="'required|dateOrder'" key="gemFrom"></datepicker>
-                <small class="form-text text-danger" v-show="errors.has('startDate')">{{ errors.first('startDate')}}
-                </small>
+                <ValidationProvider rules="required|dateOrder" v-slot="{errors}" name="Start Date">
+                  <datepicker :inline="true" v-model="badgeInternal.startDate" name="startDate" key="gemFrom"></datepicker>
+                  <small class="form-text text-danger" v-show="errors[0]">{{ errors[0] }}
+                  </small>
+                </ValidationProvider>
               </b-col>
               <b-col cols="12" md="4"  style="min-width: 20rem;">
                 <label class="label mt-2">End Date</label>
-                <datepicker :inline="true" v-model="badgeInternal.endDate" name="endDate"
-                            v-validate="'required|dateOrder'" key="gemTo"></datepicker>
-                <small class="form-text text-danger" v-show="errors.has('endDate')">{{ errors.first('endDate')}}</small>
+                <ValidationProvider rules="required|dateOrder" v-slot="{errors}" name="End Date">
+                  <datepicker :inline="true" v-model="badgeInternal.endDate" name="endDate"
+                              key="gemTo"></datepicker>
+                  <small class="form-text text-danger" v-show="errors[0]">{{ errors[0] }}</small>
+                </ValidationProvider>
               </b-col>
             </b-row>
         </b-collapse>
@@ -73,7 +80,7 @@
 </template>
 
 <script>
-  import { Validator } from 'vee-validate';
+  import { Validator, ValidationProvider } from 'vee-validate';
   import Datepicker from 'vuejs-datepicker';
   import MarkdownEditor from '../utils/MarkdownEditor';
   import IconPicker from '../utils/iconPicker/IconPicker';
@@ -105,6 +112,7 @@
       Datepicker,
       IconManager,
       IdInput,
+      ValidationProvider,
     },
     props: {
       badge: Object,

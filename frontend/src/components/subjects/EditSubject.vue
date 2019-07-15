@@ -9,18 +9,21 @@
           <div class="media-body">
             <div class="form-group">
               <label for="subjName">Subject Name</label>
+              <ValidationProvider rules="required|min:3|max:50|uniqueName" v-slot="{errors}" name="Subject Name">
               <input type="text" class="form-control" id="subjName" @input="updateSubjectId"
                      v-model="subjectInternal.name" v-on:input="updateSubjectId"
-                     v-validate="'required|min:3|max:50|uniqueName'" data-vv-delay="750" data-vv-name="subjectName"
-                     v-focus>
-              <small class="form-text text-danger">{{ errors.first('subjectName')}}</small>
+                     data-vv-name="subjectName" v-focus>
+              <small class="form-text text-danger">{{ errors[0] }}</small>
+              </ValidationProvider>
             </div>
           </div>
         </div>
 
-        <id-input type="text" label="Subject ID" v-model="subjectInternal.subjectId" @input="canAutoGenerateId=false"
-                  v-validate="'required|min:3|max:50|alpha_num|uniqueId'" data-vv-name="subjectId" data-vv-delay="750"/>
-        <small class="form-text text-danger">{{ errors.first('subjectId')}}</small>
+        <ValidationProvider rules="required|min:3|max:50|alpha_num|uniqueId" v-slot="{errors}" name="Subject Id">
+          <id-input type="text" label="Subject ID" v-model="subjectInternal.subjectId" @input="canAutoGenerateId=false"
+                    data-vv-name="subjectId" />
+          <small class="form-text text-danger">{{ errors[0] }}</small>
+        </ValidationProvider>
 
         <div class="mt-2">
           <label>Description</label>
@@ -51,7 +54,7 @@
 </template>
 
 <script>
-  import { Validator } from 'vee-validate';
+  import { Validator, ValidationProvider } from 'vee-validate';
   import SubjectsService from './SubjectsService';
   import IconPicker from '../utils/iconPicker/IconPicker';
   import MarkdownEditor from '../utils/MarkdownEditor';
@@ -66,6 +69,7 @@
       IconPicker,
       MarkdownEditor,
       IconManager,
+      ValidationProvider,
     },
     props: {
       subject: Object,
