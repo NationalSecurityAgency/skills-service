@@ -7,19 +7,20 @@
         <div class="col-12 col-lg">
           <div class="form-group">
             <label for="subjName">Skill Name</label>
-            <input type="text" class="form-control" id="subjName" @input="updateSkillId"
-                   v-model="skillInternal.name"
-                   v-validate="'required|min:3|max:100|uniqueName'" data-vv-delay="750" data-vv-name="name"
-                   v-focus>
-            <small class="form-text text-danger">{{ errors.first('name')}}</small>
+            <ValidationProvider rules="required|min:3|max:100|uniqueName" v-slot="{errors}" name="Skill Name">
+              <input type="text" class="form-control" id="subjName" @input="updateSkillId"
+                     v-model="skillInternal.name" data-vv-name="name" v-focus>
+              <small class="form-text text-danger">{{ errors[0] }}</small>
+            </ValidationProvider>
           </div>
         </div>
         <div class="col-12 col-lg">
-
-          <id-input type="text" label="Skill ID"
-                    v-model="skillInternal.skillId" @input="canAutoGenerateId=false"
-                    v-validate="'required|min:3|max:50|alpha_num|uniqueId'" data-vv-name="skillId" data-vv-delay="750"/>
-          <small class="form-text text-danger">{{ errors.first('skillId')}}</small>
+          <ValidationProvider rule="required|min:3|max:50|alpha_num|uniqueId" v-slot="{errors}" name="Skill Id">
+            <id-input type="text" label="Skill ID"
+                      v-model="skillInternal.skillId" @input="canAutoGenerateId=false"
+                      data-vv-name="skillId"/>
+            <small class="form-text text-danger">{{ errors[0]}}</small>
+          </ValidationProvider>
         </div>
         <div class="col-12 col-lg-2 mt-2 mt-lg-0">
           <div class="form-group">
@@ -27,10 +28,12 @@
               <inline-help
                 msg="An optional version for this skill to allow filtering of available skills for different versions of an application"/>
             </label>
-            <input class="form-control" type="number" min="0"
-                   v-model="skillInternal.version" :disabled="isEdit"
-                   v-validate="'min_value:0|max_value:999|numeric|maxVersion'" data-vv-delay="500" data-vv-name="version"/>
-            <small class="form-text text-danger">{{ errors.first('version')}}</small>
+            <ValidationProvider rules="min_value:0|max_value:999|numeric|maxVersion" v-slot="{errors}" name="Version">
+              <input class="form-control" type="number" min="0"
+                     v-model="skillInternal.version" :disabled="isEdit"
+                     data-vv-name="version"/>
+              <small class="form-text text-danger">{{ errors[0]}}</small>
+            </ValidationProvider>
           </div>
         </div>
       </div>
@@ -41,22 +44,26 @@
         <div class="col-12 col-lg">
           <div class="form-group mb-1">
             <label for="subjName">Point Increment</label>
-            <input class="form-control" type="number"  min="1" v-model="skillInternal.pointIncrement"
-                   v-validate="'required|numeric|min_value:1|max_value:10000'" data-vv-name="pointIncrement" data-vv-delay="500"/>
+            <ValidationProvider rules="required|numeric|min_value:1|max_value:10000" v-slot="{errors}" name="Point Increment">
+              <input class="form-control" type="number"  min="1" v-model="skillInternal.pointIncrement"
+                     data-vv-name="pointIncrement"/>
+              <small class="form-text text-danger">{{ errors[0]}}</small>
+            </ValidationProvider>
           </div>
-          <small class="form-text text-danger">{{ errors.first('pointIncrement')}}</small>
         </div>
         <div class="col-12 col-lg">
           <div class="form-group mt-2 mt-lg-0">
             <label for="subjName">Occurrences to Completion</label>
+            <ValidationProvider rules="required|numeric|min_value:1|max_value:10000|moreThanMaxWindowOccurrences" v-slot="{errors}" name="Occurrences to Completion" tag="div">
             <div class="input-group">
               <div class="input-group-prepend">
                 <div class="input-group-text"><i class="fas fa-times"/></div>
               </div>
-              <input class="form-control" type="number" min="1" v-model="skillInternal.numPerformToCompletion"
-                     v-validate="'required|numeric|min_value:1|max_value:10000|moreThanMaxWindowOccurrences'" data-vv-name="numPerformToCompletion" data-vv-delay="500"/>
+                <input class="form-control" type="number" min="1" v-model="skillInternal.numPerformToCompletion"
+                       data-vv-name="numPerformToCompletion"/>
             </div>
-            <small class="form-text text-danger">{{ errors.first('numPerformToCompletion')}}</small>
+              <small class="form-text text-danger">{{ errors[0]}}</small>
+            </ValidationProvider>
           </div>
         </div>
         <div class="col-12 col-lg-2">
@@ -86,26 +93,30 @@
             </label>
             <div class="row">
               <div class="col">
-                <div class="input-group">
-                  <input class="form-control d-inline" type="number" min="0" v-model="skillInternal.pointIncrementIntervalHrs"
-                         v-validate="'required|numeric|min_value:0|max_value:1000|cantBe0IfMins0'" data-vv-name="pointIncrementIntervalHrs"
-                         value="8" :disabled="!skillInternal.timeWindowEnabled" data-vv-delay="500"/>
-                  <div class="input-group-append">
-                    <span class="input-group-text" id="hours-append">Hours</span>
+                <ValidationProvider rules="required|numeric|min_value:0|max_value:1000|cantBe0IfMins0" v-slot="{errors}" name="Hours">
+                  <div class="input-group">
+                    <input class="form-control d-inline" type="number" min="0" v-model="skillInternal.pointIncrementIntervalHrs"
+                           data-vv-name="pointIncrementIntervalHrs"
+                           value="8" :disabled="!skillInternal.timeWindowEnabled"/>
+                    <div class="input-group-append">
+                      <span class="input-group-text" id="hours-append">Hours</span>
+                    </div>
                   </div>
-                </div>
-                <small class="form-text text-danger">{{ errors.first('pointIncrementIntervalHrs')}}</small>
+                  <small class="form-text text-danger">{{ errors[0] }}</small>
+                </ValidationProvider>
               </div>
               <div class="col">
-                <div class="input-group">
-                  <input class="form-control d-inline"  type="number" min="0" v-model="skillInternal.pointIncrementIntervalMins"
-                         v-validate="'required|numeric|min_value:0|max_value:59|cantBe0IfHours0'" data-vv-name="pointIncrementIntervalMins"
-                         value="0" :disabled="!skillInternal.timeWindowEnabled" data-vv-delay="500"/>
-                  <div class="input-group-append">
-                    <span class="input-group-text" id="minutes-append">Minutes</span>
+                <ValidationProvider rules="required|numeric|min_value:0|max_value:59|cantBe0IfHours0" v-slot="{errors}" name="Minutes">
+                  <div class="input-group">
+                    <input class="form-control d-inline"  type="number" min="0" v-model="skillInternal.pointIncrementIntervalMins"
+                           data-vv-name="pointIncrementIntervalMins"
+                           value="0" :disabled="!skillInternal.timeWindowEnabled"/>
+                    <div class="input-group-append">
+                      <span class="input-group-text" id="minutes-append">Minutes</span>
+                    </div>
                   </div>
-                </div>
-                <small class="form-text text-danger">{{ errors.first('pointIncrementIntervalMins')}}</small>
+                  <small class="form-text text-danger">{{ errors[0]}}</small>
+                </ValidationProvider>
               </div>
             </div>
 
@@ -115,12 +126,14 @@
           <div class="form-group">
             <label>Max Occurrences Within Window
               <inline-help
-                msg="Once this Max Occurrences reached points will not be incremented until outside of the configured Time Window."/>
+                msg="Once this Max Occurrences has been reached, points will not be incremented until outside of the configured Time Window."/>
             </label>
-            <input class="form-control" type="number" min="0" v-model="skillInternal.numPointIncrementMaxOccurrences"
-                   v-validate="'min_value:1|max_value:999|numeric|lessThanTotalOccurrences'" data-vv-delay="500" data-vv-name="numPointIncrementMaxOccurrences"
-                   :disabled="!skillInternal.timeWindowEnabled"/>
-            <small class="form-text text-danger">{{ errors.first('numPointIncrementMaxOccurrences')}}</small>
+            <ValidationProvider rules="min_value:1|max_value:999|numeric|lessThanTotalOccurrences" v-slot="{errors}" name="Max Occurrences Within Window">
+              <input class="form-control" type="number" min="0" v-model="skillInternal.numPointIncrementMaxOccurrences"
+                     data-vv-name="numPointIncrementMaxOccurrences"
+                     :disabled="!skillInternal.timeWindowEnabled"/>
+              <small class="form-text text-danger">{{ errors[0]}}</small>
+            </ValidationProvider>
           </div>
         </div>
       </div>
@@ -160,7 +173,7 @@
 </template>
 
 <script>
-  import { Validator } from 'vee-validate';
+  import { Validator, ValidationProvider } from 'vee-validate';
   import SkillsService from './SkillsService';
   import MarkdownEditor from '../utils/MarkdownEditor';
   import IdInput from '../utils/inputForm/IdInput';
@@ -174,6 +187,7 @@
       InlineHelp,
       IdInput,
       MarkdownEditor,
+      ValidationProvider,
     },
     props: {
       projectId: {

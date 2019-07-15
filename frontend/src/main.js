@@ -25,6 +25,8 @@ Vue.use(VueApexCharts);
 Vue.use(BootstrapVue);
 Vue.use(SkillsDirective);
 
+VeeValidate.setMode('betterEager', () => ({ on: ['input'], debounce: 500 }));
+
 Vue.component('apexchart', VueApexCharts);
 
 Vue.config.productionTip = false;
