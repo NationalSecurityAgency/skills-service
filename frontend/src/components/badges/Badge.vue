@@ -14,7 +14,8 @@
         Manage <i class="fas fa-arrow-circle-right"/>
       </router-link>
 
-      <edit-badge v-if="showEditBadge" v-model="showEditBadge" :id="badge.badgeId" :badge="badge" @badge-updated="badgeEdited"></edit-badge>
+      <edit-badge v-if="showEditBadge" v-model="showEditBadge" :id="badge.badgeId" :badge="badge" :is-edit="true"
+                  @badge-updated="badgeEdited"></edit-badge>
     </div>
   </page-preview-card>
 </template>

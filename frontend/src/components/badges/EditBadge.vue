@@ -41,7 +41,7 @@
                 <b-row v-if="limitTimeframe" no-gutters class="justify-content-md-center mt-3" key="gemTimeFields">
                   <b-col cols="12" md="4" style="min-width: 20rem;">
                     <label class="label mt-2">Start Date</label>
-                    <ValidationProvider rules="required|dateOrder" v-slot="{errors}" name="Start Date">
+                    <ValidationProvider rules="required|dateOrder|noHistoricalStart" v-slot="{errors}" name="Start Date">
                       <datepicker :inline="true" v-model="badgeInternal.startDate" name="startDate" key="gemFrom"></datepicker>
                       <small class="form-text text-danger" v-show="errors[0]">{{ errors[0] }}
                       </small>
@@ -210,9 +210,10 @@
         // name and badge id
         const self = this;
         Validator.extend('uniqueName', {
-          getMessage: field => `The value for the ${field} is already taken.`,
+          getMessage: field => `The value for ${field} is already taken.`,
           validate(value) {
-            if (self.isEdit) {
+            console.log(`self.isEdit [${self.isEdit}] self.badge.name [${self.badge.name}] value [${value}]`);
+            if (self.isEdit && self.badge.name === value) {
               return true;
             }
             return BadgesService.badgeWithNameExists(self.badgeInternal.projectId, value);
@@ -222,9 +223,9 @@
         });
 
         Validator.extend('uniqueId', {
-          getMessage: field => `The value for the ${field} is already taken.`,
+          getMessage: field => `The value for ${field} is already taken.`,
           validate(value) {
-            if (self.isEdit) {
+            if (self.isEdit && self.badge.badgeId === value) {
               return true;
             }
             return BadgesService.badgeWithIdExists(self.badgeInternal.projectId, value);
@@ -246,6 +247,24 @@
                   self.errors.remove('startDate');
                   self.errors.remove('endDate');
                 }
+              }
+            }
+            return valid;
+          },
+        }, {
+          immediate: false,
+        });
+
+        Validator.extend('noHistoricalStart', {
+          getMessage: 'Start Date cannot be in the past',
+          validate() {
+            let valid = true;
+            if (self.limitTimeframe) {
+              if (self.badgeInternal.startDate) {
+                const now = new Date();
+                const nowStr = `${now.getFullYear()}${now.getMonth()}${now.getDate()}`;
+                const startStr = `${self.badgeInternal.startDate.getFullYear()}${self.badgeInternal.startDate.getMonth()}${self.badgeInternal.startDate.getDate()}`;
+                valid = startStr >= nowStr;
               }
             }
             return valid;
