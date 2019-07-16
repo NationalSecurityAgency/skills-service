@@ -212,7 +212,6 @@
         Validator.extend('uniqueName', {
           getMessage: field => `The value for ${field} is already taken.`,
           validate(value) {
-            console.log(`self.isEdit [${self.isEdit}] self.badge.name [${self.badge.name}] value [${value}]`);
             if (self.isEdit && self.badge.name === value) {
               return true;
             }
