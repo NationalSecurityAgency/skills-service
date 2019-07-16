@@ -1,70 +1,72 @@
 <template>
   <b-modal :id="badgeInternal.badgeId" size="xl" :title="title" v-model="show" :no-close-on-backdrop="true"
            header-bg-variant="info" header-text-variant="light" no-fade >
-    <b-container fluid>
-      <div v-if="displayIconManager === false" class="text-left">
-        <div class="media">
-          <icon-picker :startIcon="badgeInternal.iconClass" @select-icon="toggleIconDisplay(true)" class="mr-3"></icon-picker>
-          <div class="media-body">
-            <div class="form-group">
-              <label for="badgeName">Badge Name</label>
-              <ValidationProvider rules="required|min:3|max:50|uniqueName" v-slot="{errors}" name="Badge Name">
-                <input class="form-control" id="badgeName" type="text" v-model="badgeInternal.name"
-                       @input="updateBadgeId"
-                       data-vv-name="badgeName" v-focus/>
-                <small class="form-text text-danger" v-show="errors[0]">{{ errors[0] }}
-                </small>
-              </ValidationProvider>
+    <ValidationObserver ref="observer" v-slot="{invalid}" slim>
+      <b-container fluid>
+        <div v-if="displayIconManager === false" class="text-left">
+            <div class="media">
+              <icon-picker :startIcon="badgeInternal.iconClass" @select-icon="toggleIconDisplay(true)" class="mr-3"></icon-picker>
+              <div class="media-body">
+                <div class="form-group">
+                  <label for="badgeName">Badge Name</label>
+                  <ValidationProvider rules="required|min:3|max:50|uniqueName" v-slot="{errors}" name="Badge Name">
+                    <input class="form-control" id="badgeName" type="text" v-model="badgeInternal.name"
+                           @input="updateBadgeId"
+                           data-vv-name="badgeName" v-focus/>
+                    <small class="form-text text-danger" v-show="errors[0]">{{ errors[0] }}
+                    </small>
+                  </ValidationProvider>
+                </div>
+              </div>
             </div>
+
+            <ValidationProvider rules="required|min:3|max:50|alpha_num|uniqueId" v-slot="{errors}" name="Badge Name">
+              <id-input type="text" label="Badge ID" v-model="badgeInternal.badgeId" @input="canAutoGenerateId=false"
+                        data-vv-name="badgeId"/>
+              <small class="form-text text-danger">{{ errors[0] }}</small>
+            </ValidationProvider>
+
+            <div class="mt-2">
+              <label>Description</label>
+              <markdown-editor :value="badge.description" @input="updateDescription"></markdown-editor>
+            </div>
+
+            <b-form-checkbox v-model="limitTimeframe" class="mt-4"
+                             @change="onEnableGemFeature">
+                Enable Gem Feature <inline-help msg="The Gem feature allows for the badge to only be achievable during the specified time frame."/>
+            </b-form-checkbox>
+
+
+            <b-collapse id="gemCollapse" v-model="limitTimeframe">
+                <b-row v-if="limitTimeframe" no-gutters class="justify-content-md-center mt-3" key="gemTimeFields">
+                  <b-col cols="12" md="4" style="min-width: 20rem;">
+                    <label class="label mt-2">Start Date</label>
+                    <ValidationProvider rules="required|dateOrder" v-slot="{errors}" name="Start Date">
+                      <datepicker :inline="true" v-model="badgeInternal.startDate" name="startDate" key="gemFrom"></datepicker>
+                      <small class="form-text text-danger" v-show="errors[0]">{{ errors[0] }}
+                      </small>
+                    </ValidationProvider>
+                  </b-col>
+                  <b-col cols="12" md="4"  style="min-width: 20rem;">
+                    <label class="label mt-2">End Date</label>
+                    <ValidationProvider rules="required|dateOrder" v-slot="{errors}" name="End Date">
+                      <datepicker :inline="true" v-model="badgeInternal.endDate" name="endDate"
+                                  key="gemTo"></datepicker>
+                      <small class="form-text text-danger" v-show="errors[0]">{{ errors[0] }}</small>
+                    </ValidationProvider>
+                  </b-col>
+                </b-row>
+            </b-collapse>
+            <p v-if="overallErrMsg" class="text-center text-danger mt-3">***{{ overallErrMsg }}***</p>
+        </div>
+        <div v-else>
+          <icon-manager @selected-icon="onSelectedIcon"></icon-manager>
+          <div class="text-right mr-2">
+            <b-button variant="secondary" @click="toggleIconDisplay(false)" class="mt-4">Cancel Icon Selection</b-button>
           </div>
         </div>
-
-        <ValidationProvider rules="required|min:3|max:50|alpha_num|uniqueId" v-slot="{errors}" name="Badge Name">
-          <id-input type="text" label="Badge ID" v-model="badgeInternal.badgeId" @input="canAutoGenerateId=false"
-                    data-vv-name="badgeId"/>
-          <small class="form-text text-danger">{{ errors[0] }}</small>
-        </ValidationProvider>
-
-        <div class="mt-2">
-          <label>Description</label>
-          <markdown-editor :value="badge.description" @input="updateDescription"></markdown-editor>
-        </div>
-
-        <b-form-checkbox v-model="limitTimeframe" class="mt-4"
-                         @change="onEnableGemFeature">
-            Enable Gem Feature <inline-help msg="The Gem feature allows for the badge to only be achievable during the specified time frame."/>
-        </b-form-checkbox>
-
-
-        <b-collapse id="gemCollapse" v-model="limitTimeframe">
-            <b-row v-if="limitTimeframe" no-gutters class="justify-content-md-center mt-3" key="gemTimeFields">
-              <b-col cols="12" md="4" style="min-width: 20rem;">
-                <label class="label mt-2">Start Date</label>
-                <ValidationProvider rules="required|dateOrder" v-slot="{errors}" name="Start Date">
-                  <datepicker :inline="true" v-model="badgeInternal.startDate" name="startDate" key="gemFrom"></datepicker>
-                  <small class="form-text text-danger" v-show="errors[0]">{{ errors[0] }}
-                  </small>
-                </ValidationProvider>
-              </b-col>
-              <b-col cols="12" md="4"  style="min-width: 20rem;">
-                <label class="label mt-2">End Date</label>
-                <ValidationProvider rules="required|dateOrder" v-slot="{errors}" name="End Date">
-                  <datepicker :inline="true" v-model="badgeInternal.endDate" name="endDate"
-                              key="gemTo"></datepicker>
-                  <small class="form-text text-danger" v-show="errors[0]">{{ errors[0] }}</small>
-                </ValidationProvider>
-              </b-col>
-            </b-row>
-        </b-collapse>
-        <p v-if="overallErrMsg" class="text-center text-danger mt-3">***{{ overallErrMsg }}***</p>
-      </div>
-      <div v-else>
-        <icon-manager @selected-icon="onSelectedIcon"></icon-manager>
-        <div class="text-right mr-2">
-          <b-button variant="secondary" @click="toggleIconDisplay(false)" class="mt-4">Cancel Icon Selection</b-button>
-        </div>
-      </div>
-    </b-container>
+      </b-container>
+    </ValidationObserver>
 
     <div slot="modal-footer" class="w-100">
       <div v-if="displayIconManager === false">
@@ -80,7 +82,7 @@
 </template>
 
 <script>
-  import { Validator, ValidationProvider } from 'vee-validate';
+  import { Validator, ValidationProvider, ValidationObserver } from 'vee-validate';
   import Datepicker from 'vuejs-datepicker';
   import MarkdownEditor from '../utils/MarkdownEditor';
   import IconPicker from '../utils/iconPicker/IconPicker';
@@ -113,6 +115,7 @@
       IconManager,
       IdInput,
       ValidationProvider,
+      ValidationObserver,
     },
     props: {
       badge: Object,
@@ -155,7 +158,7 @@
         this.badgeInternal.description = event;
       },
       updateBadge() {
-        this.$validator.validateAll().then((res) => {
+        this.$refs.observer.validate().then((res) => {
           if (!res) {
             this.overallErrMsg = 'Form did NOT pass validation, please fix and try to Save again';
           } else {

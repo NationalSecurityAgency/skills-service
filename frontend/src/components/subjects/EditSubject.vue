@@ -1,44 +1,46 @@
 <template>
   <b-modal :id="subjectInternal.subjectId" size="xl" :title="title" v-model="show" :no-close-on-backdrop="true"
            header-bg-variant="info" header-text-variant="light" no-fade>
-    <b-container fluid>
-      <div v-if="displayIconManager === false">
-        <div class="media mb-3">
-          <icon-picker :startIcon="subjectInternal.iconClass" @select-icon="toggleIconDisplay(true)"
-                       class="mr-3"></icon-picker>
-          <div class="media-body">
-            <div class="form-group">
-              <label for="subjName">Subject Name</label>
-              <ValidationProvider rules="required|min:3|max:50|uniqueName" v-slot="{errors}" name="Subject Name">
-              <input type="text" class="form-control" id="subjName" @input="updateSubjectId"
-                     v-model="subjectInternal.name" v-on:input="updateSubjectId"
-                     data-vv-name="subjectName" v-focus>
-              <small class="form-text text-danger">{{ errors[0] }}</small>
-              </ValidationProvider>
+    <ValidationObserver ref="observer" v-slot="{invalid}" slim>
+      <b-container fluid>
+        <div v-if="displayIconManager === false">
+            <div class="media mb-3">
+              <icon-picker :startIcon="subjectInternal.iconClass" @select-icon="toggleIconDisplay(true)"
+                           class="mr-3"></icon-picker>
+              <div class="media-body">
+                <div class="form-group">
+                  <label for="subjName">Subject Name</label>
+                  <ValidationProvider rules="required|min:3|max:50|uniqueName" v-slot="{errors}" name="Subject Name">
+                  <input type="text" class="form-control" id="subjName" @input="updateSubjectId"
+                         v-model="subjectInternal.name" v-on:input="updateSubjectId"
+                         data-vv-name="subjectName" v-focus>
+                  <small class="form-text text-danger">{{ errors[0] }}</small>
+                  </ValidationProvider>
+                </div>
+              </div>
             </div>
-          </div>
+
+            <ValidationProvider rules="required|min:3|max:50|alpha_num|uniqueId" v-slot="{errors}" name="Subject Id">
+              <id-input type="text" label="Subject ID" v-model="subjectInternal.subjectId" @input="canAutoGenerateId=false"
+                        data-vv-name="subjectId" />
+              <small class="form-text text-danger">{{ errors[0] }}</small>
+            </ValidationProvider>
+
+            <div class="mt-2">
+              <label>Description</label>
+              <markdown-editor v-model="subjectInternal.description"/>
+            </div>
+
+            <p v-if="overallErrMsg" class="text-center text-danger">***{{ overallErrMsg }}***</p>
         </div>
-
-        <ValidationProvider rules="required|min:3|max:50|alpha_num|uniqueId" v-slot="{errors}" name="Subject Id">
-          <id-input type="text" label="Subject ID" v-model="subjectInternal.subjectId" @input="canAutoGenerateId=false"
-                    data-vv-name="subjectId" />
-          <small class="form-text text-danger">{{ errors[0] }}</small>
-        </ValidationProvider>
-
-        <div class="mt-2">
-          <label>Description</label>
-          <markdown-editor v-model="subjectInternal.description"/>
+        <div v-else>
+            <icon-manager @selected-icon="onSelectedIcon"></icon-manager>
+            <div class="text-right mr-2">
+              <b-button variant="secondary" @click="toggleIconDisplay(false)" class="mt-4">Cancel Icon Selection</b-button>
+            </div>
         </div>
-
-        <p v-if="overallErrMsg" class="text-center text-danger">***{{ overallErrMsg }}***</p>
-      </div>
-      <div v-else>
-          <icon-manager @selected-icon="onSelectedIcon"></icon-manager>
-          <div class="text-right mr-2">
-            <b-button variant="secondary" @click="toggleIconDisplay(false)" class="mt-4">Cancel Icon Selection</b-button>
-          </div>
-      </div>
-    </b-container>
+      </b-container>
+    </ValidationObserver>
 
     <div slot="modal-footer" class="w-100">
       <div v-if="displayIconManager === false">
@@ -54,7 +56,7 @@
 </template>
 
 <script>
-  import { Validator, ValidationProvider } from 'vee-validate';
+  import { Validator, ValidationProvider, ValidationObserver } from 'vee-validate';
   import SubjectsService from './SubjectsService';
   import IconPicker from '../utils/iconPicker/IconPicker';
   import MarkdownEditor from '../utils/MarkdownEditor';
@@ -70,6 +72,7 @@
       MarkdownEditor,
       IconManager,
       ValidationProvider,
+      ValidationObserver,
     },
     props: {
       subject: Object,
@@ -103,7 +106,7 @@
         this.show = false;
       },
       updateSubject() {
-        this.$validator.validateAll()
+        this.$refs.observer.validate()
           .then((res) => {
             if (!res) {
               this.overallErrMsg = 'Form did NOT pass validation, please fix and try to Save again';
