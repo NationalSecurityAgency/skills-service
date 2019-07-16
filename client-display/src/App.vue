@@ -38,8 +38,7 @@
 
   export default {
     mounted() {
-      console.log('remove this line');
-      this.handleTheming();
+      // this.handleTheming();
 
       const vm = this;
       if (this.isDevelopmentMode()) {
@@ -80,118 +79,119 @@
       }
     },
     methods: {
-      handleTheming() {
-        const nonCSSConfig = ['progressIndicators', 'charts'];
+      handleTheming(theme) {
+        if (theme) {
+          const nonCSSConfig = ['progressIndicators', 'charts'];
 
-        const selectorKey = {
-          backgroundColor: {
-            selector: 'body #app',
-            styleName: 'background-color',
-          },
-          secondaryTextColor: {
-            selector: 'body #app .text-muted, body #app .text-secondary',
-            styleName: 'color',
-          },
-          primaryTextColor: {
-            selector: 'body #app .card-header, body #app .card-body, body #app .skill-tile-label, body #app .card-title body #app .card ',
-            styleName: 'color',
-          },
-          tiles: {
+          const selectorKey = {
             backgroundColor: {
-              selector: 'body #app .card, body #app .card-header, body #app .card-body, body #app .card-footer',
+              selector: 'body #app',
               styleName: 'background-color',
             },
-            watermarkIconColor: {
-              selector: 'body #app .card-body .watermark-icon',
+            secondaryTextColor: {
+              selector: 'body #app .text-muted, body #app .text-secondary',
               styleName: 'color',
             },
-          },
-          stars: {
-            unearnedColor: {
-              selector: 'body #app .star-empty',
+            primaryTextColor: {
+              selector: 'body #app .card-header, body #app .card-body, body #app .skill-tile-label, body #app .card-title body #app .card ',
               styleName: 'color',
             },
-            earnedColor: {
-              selector: 'body #app .star-filled',
-              styleName: 'color',
+            tiles: {
+              backgroundColor: {
+                selector: 'body #app .card, body #app .card-header, body #app .card-body, body #app .card-footer',
+                styleName: 'background-color',
+              },
+              watermarkIconColor: {
+                selector: 'body #app .card-body .watermark-icon',
+                styleName: 'color',
+              },
             },
-          },
-        };
+            stars: {
+              unearnedColor: {
+                selector: 'body #app .star-empty',
+                styleName: 'color',
+              },
+              earnedColor: {
+                selector: 'body #app .star-filled',
+                styleName: 'color',
+              },
+            },
+          };
 
-        const mockTheme = {
-          // backgroundColor: {
-          //   value: '#626d7d',
-          // },
-          // secondaryTextColor: {
-          //   value: '#b1adad',
-          // },
-          // primaryTextColor: {
-          //   value: 'white',
-          // },
-          // stars: {
-          //   unearnedColor: {
-          //     value: '#787886'
-          //   },
-          //   earnedColor: {
-          //     value: 'gold',
-          //   },
-          // },
-          // progressIndicators: {
-          //   beforeTodayColor: '#3e4d44',
-          //   earnedTodayColor: '#667da4',
-          //   completeColor: '#59ad52',
-          //   incompleteColor: '#cdcdcd',
-          // },
-          // charts: {
-          //   axisLabelColor: 'white',
-          // },
-          // tiles: {
+          // const mockTheme = {
           //   backgroundColor: {
-          //     value: '#152E4d',
+          //     value: '#626d7d',
           //   },
-          //   watermarkIconColor: {
-          //     value: '#a6c5f7',
+          //   secondaryTextColor: {
+          //     value: '#b1adad',
           //   },
-          // },
-        };
+          //   primaryTextColor: {
+          //     value: 'white',
+          //   },
+          //   stars: {
+          //     unearnedColor: {
+          //       value: '#787886',
+          //     },
+          //     earnedColor: {
+          //       value: 'gold',
+          //     },
+          //   },
+          //   progressIndicators: {
+          //     beforeTodayColor: '#3e4d44',
+          //     earnedTodayColor: '#667da4',
+          //     completeColor: '#59ad52',
+          //     incompleteColor: '#cdcdcd',
+          //   },
+          //   charts: {
+          //     axisLabelColor: 'white',
+          //   },
+          //   tiles: {
+          //     backgroundColor: {
+          //       value: '#152E4d',
+          //     },
+          //     watermarkIconColor: {
+          //       value: '#a6c5f7',
+          //     },
+          //   },
+          // };
 
-        const themeKey = merge(JSON.parse(JSON.stringify(selectorKey)), mockTheme);
+          const themeKey = merge(JSON.parse(JSON.stringify(selectorKey)), theme);
 
-        const { body } = document;
+          const { body } = document;
 
-        let css = '';
-        const buildCss = (obj, keys) => {
-          keys.forEach((key) => {
-            const isCSSConfig = !nonCSSConfig.includes(key);
-            if (isCSSConfig && (obj[key].value || obj[key].selector || obj[key].styleName)) {
-              const { selector, styleName, value } = obj[key];
-              if (!selector || !styleName) {
-                throw new Error(`Invalid custom theme defined by ${key}`);
-              } else if (value) {
-                const sanitizedValue = value.split(';')[0]; // No injection
-                css += `${selector} { ${styleName}: ${sanitizedValue} !important }`;
+          let css = '';
+          const buildCss = (obj, keys) => {
+            keys.forEach((key) => {
+              const isCSSConfig = !nonCSSConfig.includes(key);
+              if (isCSSConfig && (obj[key].value || obj[key].selector || obj[key].styleName)) {
+                const { selector, styleName, value } = obj[key];
+                if (!selector || !styleName) {
+                  throw new Error(`Invalid custom theme defined by ${key}`);
+                } else if (value) {
+                  const sanitizedValue = value.split(';')[0]; // No injection
+                  css += `${selector} { ${styleName}: ${sanitizedValue} !important }`;
+                }
+              } else if (isCSSConfig) {
+                buildCss(themeKey[key], Object.keys(themeKey[key]));
+              } else {
+                this.$store.state.themeModule[key] = themeKey[key];
               }
-            } else if (isCSSConfig) {
-              buildCss(themeKey[key], Object.keys(themeKey[key]));
-            } else {
-              this.$store.state.themeModule[key] = themeKey[key];
-            }
-          });
-        };
+            });
+          };
 
-        buildCss(themeKey, Object.keys(themeKey));
+          buildCss(themeKey, Object.keys(themeKey));
 
-        // Some CSS may mess up some things, fix those here
-        // Apex charts context menu
-        css += 'body #app .apexcharts-menu.open { color: black !important; }';
+          // Some CSS may mess up some things, fix those here
+          // Apex charts context menu
+          css += 'body #app .apexcharts-menu.open { color: black !important; }';
 
-        // console.log('temporary');
-        // css += "body { background-color: #626d7d }";
+          const style = document.createElement('style');
 
-        const style = document.createElement('style');
-        style.appendChild(document.createTextNode(css));
+          style.id = this.$store.state.themeStyleId;
+          style.appendChild(document.createTextNode(css));
 
-        body.appendChild(style);
+          body.appendChild(style);
+        }
       },
 
       onHeightChange() {
@@ -247,14 +247,14 @@
   @import '../node_modules/@fortawesome/fontawesome-free/css/all.css';
 
   #app {
-    max-width: 1100px;
+    /*max-width: 1100px;*/
     margin: 0 auto;
     text-align: center;
     overflow: hidden;
   }
 
   .card {
-    box-shadow: 0 0.75rem 1.5rem rgba(18,38,63,.5);
+    /*box-shadow: 0 0.75rem 1.5rem rgba(18,38,63,.5);*/
   }
 </style>
 

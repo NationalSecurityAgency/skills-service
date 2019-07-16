@@ -3,7 +3,7 @@
     ref="containerElement"
     class="skills-container">
     <user-skills
-      v-if="token" />
+      v-if="token"/>
   </div>
 </template>
 

@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
+import UniqueIdGenerator from '@/common/utilities/UniqueIdGenerator';
 
 Vue.use(Vuex);
 
@@ -26,6 +27,7 @@ export default new Vuex.Store({
     isAuthenticating: false,
     parentFrame: null,
     version: null,
+    themeStyleId: UniqueIdGenerator.uniqueId('custom-theme-style-node-'),
   },
   mutations: {
     authToken(state, authToken) {
