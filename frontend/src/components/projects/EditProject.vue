@@ -1,30 +1,32 @@
 <template>
   <b-modal :id="internalProject.projectId" :title="title" v-model="show" :no-close-on-backdrop="true"
            header-bg-variant="info" header-text-variant="light" no-fade>
-    <b-container fluid>
-      <div class="row">
-        <div class="col-12">
-          <div class="form-group">
-            <label>Project Name</label>
-            <ValidationProvider rules="required|min:3|max:50|uniqueName" v-slot="{errors}" name="Project Name">
-              <input class="form-control" type="text" v-model="internalProject.name" v-on:input="updateProjectId"
-                     data-vv-name="projectName" v-focus/>
-              <small class="form-text text-danger">{{ errors[0] }}</small>
+    <ValidationObserver ref="observer" v-slot="{invalid}" slim>
+      <b-container fluid>
+        <div class="row">
+          <div class="col-12">
+            <div class="form-group">
+              <label>Project Name</label>
+              <ValidationProvider rules="required|min:3|max:50|uniqueName" v-slot="{errors}" name="Project Name">
+                <input class="form-control" type="text" v-model="internalProject.name" v-on:input="updateProjectId"
+                       data-vv-name="projectName" v-focus/>
+                <small class="form-text text-danger">{{ errors[0] }}</small>
+              </ValidationProvider>
+            </div>
+          </div>
+
+          <div class="col-12">
+            <ValidationProvider rules="required|min:3|max:50|alpha_num|uniqueId" v-slot="{errors}" name="Project Id">
+            <id-input type="text" label="Project ID" v-model="internalProject.projectId"
+                      data-vv-name="projectId"/>
+            <small class="form-text text-danger">{{ errors[0]}}</small>
             </ValidationProvider>
           </div>
         </div>
 
-        <div class="col-12">
-          <ValidationProvider rules="required|min:3|max:50|alpha_num|uniqueId" v-slot="{errors}" name="Project Id">
-          <id-input type="text" label="Project ID" v-model="internalProject.projectId"
-                    data-vv-name="projectId"/>
-          <small class="form-text text-danger">{{ errors[0]}}</small>
-          </ValidationProvider>
-        </div>
-      </div>
-
-      <p v-if="overallErrMsg" class="text-center text-danger mt-2"><small>***{{ overallErrMsg }}***</small></p>
-    </b-container>
+        <p v-if="overallErrMsg" class="text-center text-danger mt-2"><small>***{{ overallErrMsg }}***</small></p>
+      </b-container>
+    </ValidationObserver>
 
 
     <div slot="modal-footer" class="w-100">
@@ -39,13 +41,13 @@
 </template>
 
 <script>
-  import { Validator, ValidationProvider } from 'vee-validate';
+  import { Validator, ValidationProvider, ValidationObserver } from 'vee-validate';
   import ProjectService from './ProjectService';
   import IdInput from '../utils/inputForm/IdInput';
 
   export default {
     name: 'EditProject',
-    components: { IdInput, ValidationProvider },
+    components: { IdInput, ValidationProvider, ValidationObserver },
     props: ['project', 'isEdit', 'value'],
     data() {
       return {
@@ -83,7 +85,7 @@
         this.show = false;
       },
       updateProject() {
-        this.$validator.validateAll().then((res) => {
+        this.$refs.observer.validate().then((res) => {
           if (!res) {
             this.overallErrMsg = 'Form did NOT pass validation, please fix and try to Save again';
           } else {
