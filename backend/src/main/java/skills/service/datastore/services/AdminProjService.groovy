@@ -176,6 +176,8 @@ class AdminProjService {
             SkillDef skillDefinition = existing.get()
 
             Props.copy(subjectRequest, skillDefinition)
+            //we need to manually copy subjectId into skillId
+            skillDefinition.skillId = subjectRequest.subjectId
             subjectDataIntegrityViolationExceptionHandler.handle(projectId) {
                 res = skillDefRepo.save(skillDefinition)
             }
@@ -247,6 +249,7 @@ class AdminProjService {
             skillDefinition = existing.get()
 
             Props.copy(badgeRequest, skillDefinition)
+            skillDefinition.skillId = badgeRequest.badgeId
         } else {
             ProjDef projDef = getProjDef(projectId)
 
