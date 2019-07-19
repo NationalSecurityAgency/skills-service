@@ -9,7 +9,8 @@
           <div class="media-body">
             <template v-if="isEdit">
               <label for="editLevel-level">Level</label>
-              <b-form-input v-focus id="editLevel-level" v-model="levelInternal.level" name="level" v-validate="'required|min_value:0|max_value:100|numeric'" data-vv-delay="500"></b-form-input>
+              <b-form-input v-focus id="editLevel-level" v-model="levelInternal.level" name="level"
+                            v-validate="'required|min_value:0|max_value:100|numeric'" data-vv-delay="500"></b-form-input>
               <small class="form-text text-danger" v-show="errors.has('level')">{{ errors.first('level')}}</small>
 
               <template v-if="!this.levelAsPoints">
@@ -34,7 +35,8 @@
             <template v-else>
               <template v-if="!this.levelAsPoints">
                 <label for="newLevel-percent">Percent</label>
-                <b-form-input v-focus id="newLevel-percent" v-model="levelInternal.percent" name="percent" v-validate="'required|min_value:0|max_value:100|numeric|overlap'" data-vv-delay="500"></b-form-input>
+                <b-form-input v-focus id="newLevel-percent" v-model="levelInternal.percent" name="percent"
+                              v-validate="'required|min_value:0|max_value:100|numeric|overlap'" data-vv-delay="500"></b-form-input>
                 <small class="form-text text-danger" v-show="errors.has('percent')">{{ errors.first('percent')}}</small>
               </template>
               <template v-else>

@@ -41,7 +41,7 @@
                 <b-row v-if="limitTimeframe" no-gutters class="justify-content-md-center mt-3" key="gemTimeFields">
                   <b-col cols="12" md="4" style="min-width: 20rem;">
                     <label class="label mt-2">Start Date</label>
-                    <ValidationProvider rules="required|dateOrder|noHistoricalStart" v-slot="{errors}" name="Start Date">
+                    <ValidationProvider rules="required|dateOrder" v-slot="{errors}" name="Start Date">
                       <datepicker :inline="true" v-model="badgeInternal.startDate" name="startDate" key="gemFrom"></datepicker>
                       <small class="form-text text-danger" v-show="errors[0]">{{ errors[0] }}
                       </small>
@@ -49,7 +49,7 @@
                   </b-col>
                   <b-col cols="12" md="4"  style="min-width: 20rem;">
                     <label class="label mt-2">End Date</label>
-                    <ValidationProvider rules="required|dateOrder" v-slot="{errors}" name="End Date">
+                    <ValidationProvider rules="required|dateOrder|noHistoricalEnd" v-slot="{errors}" name="End Date">
                       <datepicker :inline="true" v-model="badgeInternal.endDate" name="endDate"
                                   key="gemTo"></datepicker>
                       <small class="form-text text-danger" v-show="errors[0]">{{ errors[0] }}</small>
@@ -254,16 +254,17 @@
           immediate: false,
         });
 
-        Validator.extend('noHistoricalStart', {
-          getMessage: 'Start Date cannot be in the past',
+        Validator.extend('noHistoricalEnd', {
+          getMessage: 'End Date cannot be in the past',
           validate() {
             let valid = true;
             if (self.limitTimeframe) {
-              if (self.badgeInternal.startDate) {
+              if (self.badgeInternal.endDate) {
                 const now = new Date();
                 const nowStr = `${now.getFullYear()}${now.getMonth()}${now.getDate()}`;
-                const startStr = `${self.badgeInternal.startDate.getFullYear()}${self.badgeInternal.startDate.getMonth()}${self.badgeInternal.startDate.getDate()}`;
-                valid = startStr >= nowStr;
+                const endStr = `${self.badgeInternal.endDate.getFullYear()}${self.badgeInternal.endDate.getMonth()}${self.badgeInternal.endDate.getDate()}`;
+
+                valid = parseInt(endStr, 10) >= parseInt(nowStr, 10);
               }
             }
             return valid;
