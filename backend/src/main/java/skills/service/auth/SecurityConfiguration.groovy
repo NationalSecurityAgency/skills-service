@@ -22,6 +22,7 @@ import org.springframework.security.web.AuthenticationEntryPoint
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository
 import org.springframework.security.web.context.SecurityContextRepository
 import org.springframework.stereotype.Component
+import org.springframework.web.context.request.RequestContextListener
 import skills.storage.model.auth.RoleName
 
 import javax.servlet.http.HttpServletRequest
@@ -131,5 +132,10 @@ class SecurityConfiguration {
             AuthMode authMode = AuthMode.getFromContext(context)
             return authMode == AuthMode.FORM
         }
+    }
+
+    @Bean
+    RequestContextListener requestContextListener() {
+        return new RequestContextListener()
     }
 }
