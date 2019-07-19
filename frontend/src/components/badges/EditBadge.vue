@@ -10,9 +10,9 @@
                 <div class="form-group">
                   <label for="badgeName">Badge Name</label>
                   <ValidationProvider rules="required|min:3|max:50|uniqueName" v-slot="{errors}" name="Badge Name">
-                    <input class="form-control" id="badgeName" type="text" v-model="badgeInternal.name"
+                    <input v-focus class="form-control" id="badgeName" type="text" v-model="badgeInternal.name"
                            @input="updateBadgeId"
-                           data-vv-name="badgeName" v-focus/>
+                           data-vv-name="badgeName"/>
                     <small class="form-text text-danger" v-show="errors[0]">{{ errors[0] }}
                     </small>
                   </ValidationProvider>

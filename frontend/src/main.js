@@ -37,8 +37,8 @@ window.axios = require('axios');
 require('./errorHandler');
 
 Vue.directive('focus', {
-  inserted: (e1) => {
-    e1.focus();
+  inserted: (el) => {
+    setTimeout(() => el.focus(), 10);
   },
 });
 
