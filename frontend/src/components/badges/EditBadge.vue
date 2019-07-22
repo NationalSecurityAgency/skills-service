@@ -259,7 +259,7 @@
           validate() {
             let valid = true;
             if (self.limitTimeframe) {
-              //only trigger this validation on new badge entry, not edits
+              // only trigger this validation on new badge entry, not edits
               if (self.badgeInternal.endDate && !self.badge.badgeId) {
                 const now = new Date();
                 const nowStr = `${now.getFullYear()}${now.getMonth()}${now.getDate()}`;
