@@ -21,7 +21,7 @@ import CrossProjectsSkills from '@//components/skills/crossProjects/CrossProject
 import Users from '@//components/users/Users';
 import AccessSettings from '@//components/access/AccessSettings';
 import ProjectSettings from '@//components/settings/ProjectSettings';
-import SectionStats from '@//components/stats/SectionStats';
+import SectionMetrics from '@//components/metrics/SectionMetrics';
 import Skills from '@//components/skills/Skills';
 import BadgeSkills from '@//components/badges/BadgeSkills';
 import SkillOverview from '@//components/skills/SkillOverview';
@@ -116,9 +116,9 @@ const router = new Router({
         component: ProjectSettings,
         meta: { requiresAuth: true },
       }, {
-        name: 'ProjectStats',
-        path: 'stats',
-        component: SectionStats,
+        name: 'ProjectMetrics',
+        path: 'metrics',
+        component: SectionMetrics,
         meta: { requiresAuth: true },
       }],
     },
@@ -142,9 +142,9 @@ const router = new Router({
         component: Users,
         meta: { requiresAuth: true },
       }, {
-        name: 'SubjectStats',
-        path: 'stats',
-        component: SectionStats,
+        name: 'SubjectMetrics',
+        path: 'metrics',
+        component: SectionMetrics,
         meta: { requiresAuth: true },
       }],
     },
@@ -163,9 +163,9 @@ const router = new Router({
         component: Users,
         meta: { requiresAuth: true },
       }, {
-        name: 'BadgeStats',
-        path: 'stats',
-        component: SectionStats,
+        name: 'BadgeMetrics',
+        path: 'metrics',
+        component: SectionMetrics,
         meta: { requiresAuth: true },
       }],
     },
@@ -195,9 +195,9 @@ const router = new Router({
         meta: { requiresAuth: true, breadcrumb: 'Add Skill Event' },
         props: true,
       }, {
-        name: 'SkillStats',
-        path: 'stats',
-        component: SectionStats,
+        name: 'SkillMetrics',
+        path: 'metrics',
+        component: SectionMetrics,
         meta: { requiresAuth: true },
       }],
     },
@@ -216,9 +216,9 @@ const router = new Router({
         component: UserSkillsPerformed,
         meta: { requiresAuth: true },
       }, {
-        name: 'UserStats',
-        path: 'stats',
-        component: SectionStats,
+        name: 'UserMetrics',
+        path: 'metrics',
+        component: SectionMetrics,
         meta: { requiresAuth: true },
       }],
     },

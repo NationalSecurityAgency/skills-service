@@ -1,6 +1,6 @@
 <template>
   <div>
-    <sub-page-header title="Stats"/>
+    <sub-page-header title="Metrics"/>
 
     <div v-if="!isLoading" class="row">
       <div v-for="(chart, index) in loadedCharts" :key="chart.options.chart.id"
@@ -10,16 +10,16 @@
     </div>
 
     <simple-card v-if="loadableCharts.length > 0">
-      <h5>Available Stats</h5>
+      <h5>Available Metrics</h5>
 
       <div class="row justify-content-center">
         <div v-for="(chart, index) in loadableCharts" style="min-width: 25rem;" class="col-4 mb-3"
              :key="chart.options.chart.id">
-          <stat-card :title="chart.chartMeta.title" :subtitle="chart.chartMeta.subtitle"
-                     :icon="getStatCardColorClass(chart.chartMeta.icon, index)"
+          <metric-card :title="chart.chartMeta.title" :subtitle="chart.chartMeta.subtitle"
+                     :icon="getMetricCardColorClass(chart.chartMeta.icon, index)"
                      :description="chart.chartMeta.description" :chart-builder-id="chart.chartMeta.chartBuilderId"
                      @load-chart="loadChart">
-          </stat-card>
+          </metric-card>
         </div>
       </div>
     </simple-card>
@@ -30,21 +30,21 @@
 
 <script>
   import SkillsChart from './SkillsChart';
-  import StatCard from './StatCard';
-  import StatsService from './StatsService';
+  import MetricsCard from './MetricsCard';
+  import MetricsService from './MetricsService';
   import { SECTION, SectionParams } from './SectionHelper';
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import SimpleCard from '../utils/cards/SimpleCard';
   import SkillsSpinner from '../utils/SkillsSpinner';
 
   export default {
-    name: 'SectionStats',
+    name: 'SectionMetrics',
     components: {
       SkillsSpinner,
       SimpleCard,
       SubPageHeader,
       SkillsChart,
-      StatCard,
+      MetricsCard,
     },
     props: {
       numDaysToShow: {
@@ -66,7 +66,7 @@
         isLoading: true,
         section: SECTION.PROJECTS,
         sectionIdParam: String,
-        statCardIconsColors: ['text-warning', 'text-primary', 'text-info', 'text-danger'],
+        metricCardIconsColors: ['text-warning', 'text-primary', 'text-info', 'text-danger'],
       };
     },
     mounted() {
@@ -95,9 +95,9 @@
       },
     },
     methods: {
-      getStatCardColorClass(icon, index) {
-        const colorIndex = this.statCardIconsColors.length < index ? index : index % this.statCardIconsColors.length;
-        const color = this.statCardIconsColors[colorIndex];
+      getMetricCardColorClass(icon, index) {
+        const colorIndex = this.metricCardIconsColors.length < index ? index : index % this.metricCardIconsColors.length;
+        const color = this.metricCardIconsColors[colorIndex];
         return `${icon} ${color}`;
       },
       loadInitialCharts() {
@@ -107,7 +107,7 @@
           .withNumDays(this.numDaysToShow)
           .withLoadDataForFirst(this.loadDataForFirst)
           .build();
-        StatsService.getChartsForSection(sectionParams)
+        MetricsService.getChartsForSection(sectionParams)
           .then((response) => {
             this.charts = response;
           })
@@ -123,7 +123,7 @@
           .withNumDays(this.numDaysToShow)
           .withChartBuilderId(chartBuilderId)
           .build();
-        StatsService.getChartForSection(sectionParams)
+        MetricsService.getChartForSection(sectionParams)
           .then((response) => {
             this.charts.splice(this.charts.findIndex(it => it.chartMeta.chartBuilderId === chartBuilderId), 1);
             this.charts.push(Object.assign({ scrollIntoView: true }, response));

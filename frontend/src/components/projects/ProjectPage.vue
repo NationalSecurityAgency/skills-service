@@ -9,7 +9,7 @@
           {name: 'Cross Projects', iconClass: 'fa-handshake', page: 'CrossProjectsSkills'},
           {name: 'Levels', iconClass: 'fa-trophy', page: 'ProjectLevels'},
           {name: 'Users', iconClass: 'fa-users', page: 'ProjectUsers'},
-          {name: 'Stats', iconClass: 'fa-chart-bar', page: 'ProjectStats'},
+          {name: 'Metrics', iconClass: 'fa-chart-bar', page: 'ProjectMetrics'},
           {name: 'Access', iconClass: 'fa-shield-alt', page: 'ProjectAccess'},
           {name: 'Settings', iconClass: 'fa-cogs', page: 'ProjectSettings'}
         ]">
