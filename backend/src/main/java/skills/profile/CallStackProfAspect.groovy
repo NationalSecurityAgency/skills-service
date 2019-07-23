@@ -7,6 +7,7 @@ import org.aspectj.lang.ProceedingJoinPoint
 import org.aspectj.lang.annotation.Around
 import org.aspectj.lang.annotation.Aspect
 import org.aspectj.lang.reflect.CodeSignature
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 
 @Aspect
@@ -15,8 +16,18 @@ import org.springframework.stereotype.Component
 @CompileStatic
 class CallStackProfAspect {
 
+    @Value('#{"${skills.prof.enabled:false}"}')
+    boolean enabled
+
+    @Value('#{"${skills.prof.minMillisToPrint:100}"}')
+    int minMillisToPrint
+
     @Around("@within(EnableCallStackProf) || @annotation(EnableCallStackProf)")
     Object profile(ProceedingJoinPoint joinPoint) {
+        if (!enabled) {
+            return joinPoint.proceed()
+        }
+
         Object retVal
         CProf.clear()
         String profileName = getProfileName(joinPoint)
@@ -27,7 +38,9 @@ class CallStackProfAspect {
             CProf.stop(profileName)
         }
 
-        log.info("Service Profiling:\n{}", CProf.prettyPrint())
+        if (CProf.rootEvent.getRuntimeInMillis() > minMillisToPrint) {
+            log.info("Service Profiling:\n{}", CProf.prettyPrint())
+        }
         return retVal
     }
 

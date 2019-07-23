@@ -1,5 +1,6 @@
 package skills.services
 
+import callStack.profiler.Profile
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import groovy.util.logging.Slf4j
@@ -48,6 +49,7 @@ class LevelDefinitionStorageService {
         return doGetLevelInfo(skillDefinition.projectId, skillDefinition.levelDefinitions, skillDefinition.totalPoints, currentScore)
     }
 
+    @Profile
     LevelInfo getOverallLevelInfo(ProjDef projDef, int currentScore) {
         LevelInfo levelInfo = doGetLevelInfo(projDef.projectId, projDef.levelDefinitions, projDef.totalPoints, currentScore)
         return levelInfo
