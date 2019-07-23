@@ -1,5 +1,6 @@
-package skills.skillsManagement
+package skills.services.events
 
+import callStack.profiler.Profile
 import groovy.time.TimeCategory
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
@@ -24,6 +25,7 @@ class TimeWindowHelper {
 
     private static TimeWindowRes disabled = new TimeWindowRes(full: false);
 
+    @Profile
     @CompileDynamic
     TimeWindowRes checkTimeWindow(SkillDef skillDefinition, String userId, Date incomingSkillDate) {
         // pointIncrementInterval set to 0 disables time windows and skill events should be applied immediately

@@ -19,7 +19,6 @@ import skills.controller.request.model.SubjectRequest
 import skills.auth.UserInfoService
 import skills.services.settings.Settings
 import skills.icons.IconCssNameUtil
-import skills.skillsManagement.UserAchievementsAndPointsManagement
 import skills.services.settings.SettingsService
 import skills.storage.model.CustomIcon
 import skills.storage.model.LevelDef

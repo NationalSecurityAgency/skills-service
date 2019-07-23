@@ -1,4 +1,4 @@
-package skills.skillsManagement
+package skills.services
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired

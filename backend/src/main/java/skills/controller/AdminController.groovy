@@ -30,9 +30,10 @@ import skills.services.AdminProjService
 import skills.services.AdminUsersService
 import skills.services.LevelDefinitionStorageService
 import skills.services.UserAdminService
+import skills.services.events.SkillEventResult
 import skills.services.settings.SettingsService
 import skills.services.settings.listeners.ValidationRes
-import skills.skillsManagement.SkillsManagementFacade
+import skills.services.events.SkillEventsService
 import skills.utils.ClientSecretGenerator
 import skills.utils.Constants
 
@@ -62,7 +63,7 @@ class AdminController {
     SettingsService settingsService
 
     @Autowired
-    SkillsManagementFacade skillsManagementFacade
+    SkillEventsService skillsManagementFacade
 
     @RequestMapping(value = "/projects/{id}", method = RequestMethod.DELETE)
     void deleteProject(@PathVariable("id") String projectId) {
@@ -448,8 +449,8 @@ class AdminController {
 
     @RequestMapping(value = "/projects/{projectId}/skills/{skillEventId}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    SkillsManagementFacade.SkillEventResult deleteSkillEvent(@PathVariable("projectId") String projectId,
-                                                             @PathVariable("skillEventId") Integer skillEventId) {
+    SkillEventResult deleteSkillEvent(@PathVariable("projectId") String projectId,
+                                      @PathVariable("skillEventId") Integer skillEventId) {
         skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
         skills.controller.exceptions.SkillsValidator.isNotNull(skillEventId, "Skill Event Id", "$skillEventId")
 
