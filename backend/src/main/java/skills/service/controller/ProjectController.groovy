@@ -14,6 +14,7 @@ import skills.service.controller.result.model.ProjectResult
 import skills.service.datastore.services.AdminProjService
 import skills.service.icons.CustomIconFacade
 import skills.service.icons.IconCssNameUtil
+import skills.service.profile.EnableCallStackProf
 import skills.storage.model.CustomIcon
 import skills.storage.model.ProjDef
 
@@ -22,6 +23,7 @@ import java.nio.charset.StandardCharsets
 @RestController
 @RequestMapping("/app")
 @Slf4j
+@EnableCallStackProf
 class ProjectController {
     @Autowired
     AdminProjService projectAdminStorageService

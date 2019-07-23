@@ -15,6 +15,7 @@ import skills.service.datastore.services.LevelDefinitionStorageService
 import skills.service.datastore.services.UserAdminService
 import skills.service.datastore.services.settings.SettingsService
 import skills.service.datastore.services.settings.listeners.ValidationRes
+import skills.service.profile.EnableCallStackProf
 import skills.service.skillsManagement.SkillsManagementFacade
 import skills.utils.ClientSecretGenerator
 import skills.utils.Constants
@@ -27,6 +28,7 @@ import static org.springframework.data.domain.Sort.Direction.DESC
 @RestController
 @RequestMapping("/admin")
 @Slf4j
+@EnableCallStackProf
 class AdminController {
     @Autowired
     LevelDefinitionStorageService levelDefinitionStorageService

@@ -1,5 +1,6 @@
 package skills.service.datastore.services.settings
 
+import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -135,6 +136,7 @@ class SettingsService {
     }
 
     @Transactional(readOnly = true)
+    @Profile
     SettingsResult getSetting(String projectId, String setting) {
         return getSetting(projectId, setting, null)
     }

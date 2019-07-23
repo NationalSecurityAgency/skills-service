@@ -11,12 +11,14 @@ import skills.service.controller.exceptions.InvalidContentTypeException
 import skills.service.controller.exceptions.MaxIconSizeExceeded
 import skills.service.icons.CustomIconFacade
 import skills.service.icons.UploadedIcon
+import skills.service.profile.EnableCallStackProf
 
 import javax.servlet.http.HttpServletResponse
 
 @RestController
 @RequestMapping("/admin")
 @Slf4j
+@EnableCallStackProf
 class CustomIconAdminController {
     private static final long maxIconFileSize = 1024*1024
 
