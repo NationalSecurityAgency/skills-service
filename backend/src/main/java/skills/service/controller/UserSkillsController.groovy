@@ -8,6 +8,7 @@ import skills.service.auth.UserInfoService
 import skills.service.auth.aop.AdminUsersOnlyWhenUserIdSupplied
 import skills.service.controller.request.model.SkillEventRequest
 import skills.service.icons.CustomIconFacade
+import skills.service.profile.EnableCallStackProf
 import skills.service.skillLoading.RankingLoader
 import skills.service.skillLoading.SkillsLoader
 import skills.service.skillLoading.model.*
@@ -20,6 +21,7 @@ import skills.utils.Constants
 @Slf4j
 @CompileStatic
 @AdminUsersOnlyWhenUserIdSupplied
+@EnableCallStackProf
 class UserSkillsController {
 
     @Autowired

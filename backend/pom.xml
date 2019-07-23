@@ -168,6 +168,12 @@
             </exclusions>
         </dependency>
 
+        <dependency>
+            <groupId>profile</groupId>
+            <artifactId>call-stack-profiler</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+
     </dependencies>
 
     <build>

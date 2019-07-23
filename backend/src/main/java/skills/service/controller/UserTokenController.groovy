@@ -16,9 +16,11 @@ import skills.service.auth.SecurityConfiguration
 
 import skills.service.controller.exceptions.SkillsValidator
 import skills.service.datastore.services.InceptionProjectService
+import skills.service.profile.EnableCallStackProf
 
 @Conditional(SecurityConfiguration.FormAuth)
 @RestController
+@EnableCallStackProf
 class UserTokenController {
 
     @Autowired

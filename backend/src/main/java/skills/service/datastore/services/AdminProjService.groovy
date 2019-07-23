@@ -1,5 +1,6 @@
 package skills.service.datastore.services
 
+import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
 import org.apache.commons.collections.CollectionUtils
 import org.springframework.beans.factory.annotation.Autowired
@@ -582,6 +583,7 @@ class AdminProjService {
         return finalRes
     }
 
+    @Profile
     private ProjectResult convert(ProjDef definition) {
         ProjectResult res = new ProjectResult(
                 id: definition.id,
@@ -589,8 +591,8 @@ class AdminProjService {
                 numSubjects: definition.subjects ? definition.subjects.size() : 0,
                 displayOrder: definition.displayOrder,
         )
-        res.numUsers = projDefRepo.calculateDistinctUsers(definition.projectId)
-        res.numSkills = skillDefRepo.countByProjectIdAndType(definition.projectId, SkillDef.ContainerType.Skill)
+        res.numUsers = calculateNumUsersForProject(definition)
+        res.numSkills = countNumSkillsForProject(definition)
         SettingsResult result = settingsService.getSetting(definition.projectId, Settings.LEVEL_AS_POINTS.settingName)
 
         if(result == null || result.value == "false"){
@@ -602,6 +604,17 @@ class AdminProjService {
         res
     }
 
+    @Profile
+    private long countNumSkillsForProject(ProjDef definition) {
+        skillDefRepo.countByProjectIdAndType(definition.projectId, SkillDef.ContainerType.Skill)
+    }
+
+    @Profile
+    private int calculateNumUsersForProject(ProjDef definition) {
+        projDefRepo.calculateDistinctUsers(definition.projectId)
+    }
+
+    @Profile
     private SubjectResult convertToSubject(SkillDef skillDef) {
         SubjectResult res = new SubjectResult(
                 id: skillDef.id,
@@ -614,9 +627,20 @@ class AdminProjService {
                 iconClass: skillDef.iconClass,
         )
 
-        res.numSkills = skillDefRepo.countChildSkillsByIdAndRelationshipType(skillDef, SkillRelDef.RelationshipType.RuleSetDefinition)
-        res.numUsers = skillDefRepo.calculateDistinctUsersForChildSkills(skillDef.projectId, skillDef, SkillRelDef.RelationshipType.RuleSetDefinition)
+        res.numSkills = calculateNumChildSkills(skillDef)
+        res.numUsers = calculateNumUsersForChildSkills(skillDef)
+
         return res
+    }
+
+    @Profile
+    private long calculateNumUsersForChildSkills(SkillDef skillDef) {
+        skillDefRepo.calculateDistinctUsersForChildSkills(skillDef.projectId, skillDef, RelationshipType.RuleSetDefinition)
+    }
+
+    @Profile
+    private long calculateNumChildSkills(SkillDef skillDef) {
+        skillDefRepo.countChildSkillsByIdAndRelationshipType(skillDef, RelationshipType.RuleSetDefinition)
     }
 
     private BadgeResult convertToBadge(SkillDef skillDef) {

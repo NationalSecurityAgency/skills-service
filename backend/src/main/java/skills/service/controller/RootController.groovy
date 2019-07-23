@@ -17,6 +17,7 @@ import skills.service.controller.result.model.SettingsResult
 import skills.service.controller.result.model.UserInfoRes
 import skills.service.datastore.services.AccessSettingsStorageService
 import skills.service.datastore.services.settings.SettingsService
+import skills.service.profile.EnableCallStackProf
 import skills.service.settings.EmailConnectionInfo
 import skills.service.settings.EmailSettingsService
 import skills.storage.model.auth.UserRole
@@ -26,6 +27,7 @@ import java.security.Principal
 @RestController
 @RequestMapping('/root')
 @Slf4j
+@EnableCallStackProf
 class RootController {
 
     @Autowired

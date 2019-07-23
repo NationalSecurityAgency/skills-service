@@ -7,9 +7,11 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.servlet.ModelAndView
 import skills.service.datastore.services.AccessSettingsStorageService
+import skills.service.profile.EnableCallStackProf
 
 @RestController
 @Slf4j
+@EnableCallStackProf
 class BootstrapController {
 
     @Autowired

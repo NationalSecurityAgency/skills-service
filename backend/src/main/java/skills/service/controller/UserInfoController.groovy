@@ -16,12 +16,14 @@ import skills.service.auth.pki.PkiUserLookup
 import skills.service.controller.result.model.RequestResult
 import skills.service.controller.result.model.UserInfoRes
 import skills.service.datastore.services.UserAdminService
+import skills.service.profile.EnableCallStackProf
 import skills.storage.model.auth.User
 import skills.storage.repos.UserRepo
 
 @RestController
 @RequestMapping("/app")
 @Slf4j
+@EnableCallStackProf
 class UserInfoController {
 
     @Autowired

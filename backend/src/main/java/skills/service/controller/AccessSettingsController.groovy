@@ -12,6 +12,7 @@ import skills.service.controller.exceptions.SkillException
 import skills.service.controller.exceptions.SkillsValidator
 import skills.service.controller.result.model.RequestResult
 import skills.service.datastore.services.AccessSettingsStorageService
+import skills.service.profile.EnableCallStackProf
 import skills.storage.model.auth.AllowedOrigin
 import skills.storage.model.auth.RoleName
 import skills.storage.model.auth.UserRole
@@ -19,6 +20,7 @@ import skills.storage.model.auth.UserRole
 @RestController
 @RequestMapping("/admin")
 @Slf4j
+@EnableCallStackProf
 class AccessSettingsController {
 
     @Autowired

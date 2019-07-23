@@ -10,10 +10,12 @@ import org.springframework.web.bind.annotation.RestController
 import skills.service.controller.exceptions.SkillsValidator
 import skills.service.controller.result.model.SettingsResult
 import skills.service.datastore.services.settings.SettingsService
+import skills.service.profile.EnableCallStackProf
 
 @RestController
 @RequestMapping("/app/public")
 @Slf4j
+@EnableCallStackProf
 class PublicSettingsController {
 
     @Autowired

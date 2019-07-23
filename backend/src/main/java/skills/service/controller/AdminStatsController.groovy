@@ -8,10 +8,12 @@ import skills.service.metrics.ChartParams
 import skills.service.metrics.MetricsService
 import skills.service.metrics.model.MetricsChart
 import skills.service.metrics.model.Section
+import skills.service.profile.EnableCallStackProf
 
 @RestController
 @RequestMapping("/admin")
 @Slf4j
+@EnableCallStackProf
 class AdminStatsController {
 
     @Autowired
