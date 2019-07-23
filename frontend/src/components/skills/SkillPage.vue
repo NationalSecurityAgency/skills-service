@@ -7,7 +7,7 @@
           {name: 'Dependencies', iconClass: 'fa-vector-square', page: 'SkillDependencies'},
           {name: 'Users', iconClass: 'fa-users', page: 'SkillUsers'},
           {name: 'Add Event', iconClass: 'fa-user-plus', page: 'AddSkillEvent'},
-          {name: 'Stats', iconClass: 'fa-chart-bar', page: 'SkillStats'},
+          {name: 'Metrics', iconClass: 'fa-chart-bar', page: 'SkillMetrics'},
         ]">
     </navigation>
   </div>

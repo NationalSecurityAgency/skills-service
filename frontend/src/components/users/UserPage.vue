@@ -5,7 +5,7 @@
     <navigation v-if="userId" :nav-items="[
           {name: 'Client Display', iconClass: 'fa-user', page: 'ClientDisplayPreview'},
           {name: 'Performed Skills', iconClass: 'fa-award', page: 'UserSkillEvents'},
-          {name: 'Stats', iconClass: 'fa-chart-bar', page: 'UserStats'},
+          {name: 'Metrics', iconClass: 'fa-chart-bar', page: 'UserMetrics'},
         ]">
     </navigation>
   </div>

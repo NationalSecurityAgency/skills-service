@@ -6,7 +6,7 @@
           {name: 'Skills', iconClass: 'fa-graduation-cap', page: 'SubjectSkills'},
           {name: 'Levels', iconClass: 'fa-trophy', page: 'SubjectLevels'},
           {name: 'Users', iconClass: 'fa-users', page: 'SubjectUsers'},
-          {name: 'Stats', iconClass: 'fa-chart-bar', page: 'SubjectStats'},
+          {name: 'Metrics', iconClass: 'fa-chart-bar', page: 'SubjectMetrics'},
         ]">
     </navigation>
   </div>

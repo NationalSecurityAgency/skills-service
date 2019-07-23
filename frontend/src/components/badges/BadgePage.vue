@@ -10,7 +10,7 @@
     <navigation :nav-items="[
           {name: 'Skills', iconClass: 'fa-graduation-cap', page: 'BadgeSkills'},
           {name: 'Users', iconClass: 'fa-users', page: 'BadgeUsers'},
-          {name: 'Stats', iconClass: 'fa-chart-bar', page: 'BadgeStats'},
+          {name: 'Metrics', iconClass: 'fa-chart-bar', page: 'BadgeMetrics'},
         ]">
     </navigation>
   </div>
