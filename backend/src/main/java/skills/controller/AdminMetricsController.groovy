@@ -14,7 +14,7 @@ import skills.profile.EnableCallStackProf
 @RequestMapping("/admin")
 @Slf4j
 @EnableCallStackProf
-class AdminStatsController {
+class AdminMetricsController {
 
     @Autowired
     AdminUsersService adminUsersService
