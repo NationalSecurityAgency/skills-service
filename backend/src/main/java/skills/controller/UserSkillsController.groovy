@@ -4,6 +4,7 @@ import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
+import skills.services.events.SkillEventResult
 import skills.skillLoading.RankingLoader
 import skills.skillLoading.SkillsLoader
 import skills.skillLoading.model.OverallSkillSummary
@@ -14,7 +15,7 @@ import skills.skillLoading.model.SkillSummary
 import skills.skillLoading.model.SkillsRanking
 import skills.skillLoading.model.SkillsRankingDistribution
 import skills.skillLoading.model.UserPointHistorySummary
-import skills.skillsManagement.SkillsManagementFacade
+import skills.services.events.SkillEventsService
 import skills.utils.Constants
 
 @CrossOrigin(allowCredentials = 'true')
@@ -27,7 +28,7 @@ import skills.utils.Constants
 class UserSkillsController {
 
     @Autowired
-    SkillsManagementFacade skillsManagementFacade
+    SkillEventsService skillsManagementFacade
 
     @Autowired
     SkillsLoader skillsLoader
@@ -145,11 +146,11 @@ class UserSkillsController {
     @RequestMapping(value = "/projects/{projectId}/skills/{skillId}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
     @ResponseBody
     @CompileStatic
-    SkillsManagementFacade.SkillEventResult addSkill(@PathVariable("projectId") String projectId,
-                                                     @PathVariable("skillId") String skillId,
-                                                     @RequestBody(required = false) skills.controller.request.model.SkillEventRequest skillEventRequest) {
+    SkillEventResult addSkill(@PathVariable("projectId") String projectId,
+                              @PathVariable("skillId") String skillId,
+                              @RequestBody(required = false) skills.controller.request.model.SkillEventRequest skillEventRequest) {
         Date incomingDate = skillEventRequest?.timestamp != null ? new Date(skillEventRequest.timestamp) : new Date()
-        skillsManagementFacade.addSkill(projectId, skillId,  getUserId(skillEventRequest?.userId), incomingDate)
+        skillsManagementFacade.reportSkill(projectId, skillId,  getUserId(skillEventRequest?.userId), incomingDate)
     }
 
     @RequestMapping(value = "/projects/{projectId}/rank", method = RequestMethod.GET, produces = "application/json")

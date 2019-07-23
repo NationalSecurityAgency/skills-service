@@ -1,12 +1,13 @@
-package skills.skillsManagement
+package skills.services.events
 
-
+import callStack.profiler.Profile
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import skills.controller.exceptions.SkillException
 import skills.services.LevelDefinitionStorageService
 import skills.storage.model.ProjDef
 import skills.storage.model.SkillRelDef
@@ -24,7 +25,7 @@ import skills.storage.model.UserPoints
 @Service
 @CompileStatic
 @Slf4j
-class SkillsManagementFacade {
+class SkillEventsService {
 
     @Value('#{"${skills.subjects.minimumPoints:20}"}')
     int minimumSubjectPoints
@@ -56,29 +57,9 @@ class SkillsManagementFacade {
     @Autowired
     TimeWindowHelper timeWindowHelper
 
-    static class SkillEventResult {
-        boolean success = true
-        boolean skillApplied = true
-        // only really applicable if it wasn't performed
-        String explanation = "Skill event was applied"
-        List<CompletionItem> completed = []
-    }
+    @Autowired
+    CheckDependenciesHelper checkDependenciesHelper
 
-    static class CompletionItem {
-        static enum CompletionItemType {
-            Overall, Subject, Skill, Badge
-        };
-        CompletionItemType type
-        Integer level // optional
-        String id
-        String name
-        List<RecommendationItem> recommendations = []
-    }
-
-    static class RecommendationItem {
-        String id
-        String name
-    }
     @Transactional
     SkillEventResult deleteSkillEvent(Integer skillPkId) {
         assert skillPkId
@@ -97,7 +78,7 @@ class SkillsManagementFacade {
             throw new skills.controller.exceptions.SkillException("Skill definition does not exist!", projectId, skillId)
         }
 
-        Long numExistingSkills = performedSkillRepository.countByUserIdAndProjectIdAndSkillId(userId, projectId, skillId)
+        Long numExistingSkills = getNumExistingSkills(userId, projectId, skillId)
         numExistingSkills = numExistingSkills ?: 0 // account for null
 
         List<SkillDef> performedDependencies = performedSkillRepository.findPerformedParentSkills(userId, projectId, skillId)
@@ -122,19 +103,17 @@ class SkillsManagementFacade {
     }
 
     @Transactional
-    SkillEventResult addSkill(String projectId, String skillId, String userId, Date incomingSkillDate = new Date()) {
+    @Profile
+    SkillEventResult reportSkill(String projectId, String skillId, String userId, Date incomingSkillDate = new Date()) {
         assert projectId
         assert skillId
 
         // TODO: make a builder for the class
         SkillEventResult res = new SkillEventResult()
 
-        SkillDef skillDefinition = skillDefRepo.findByProjectIdAndSkillIdAndType(projectId, skillId, SkillDef.ContainerType.Skill)
-        if (!skillDefinition) {
-            throw new skills.controller.exceptions.SkillException("Skill definition does not exist. Must create the skill definition first!", projectId, skillId)
-        }
+        SkillDef skillDefinition = getSkillDef(projectId, skillId)
 
-        Long numExistingSkills = performedSkillRepository.countByUserIdAndProjectIdAndSkillId(userId, projectId, skillId)
+        Long numExistingSkills = getNumExistingSkills(userId, projectId, skillId)
         numExistingSkills = numExistingSkills ?: 0 // account for null
 
         if (hasReachedMaxPoints(numExistingSkills, skillDefinition)) {
@@ -150,22 +129,16 @@ class SkillsManagementFacade {
             return res
         }
 
-        List<UserAchievedLevelRepo.ChildWithAchievementsInfo> dependentsAndAchievements = achievedLevelRepo.findChildrenAndTheirAchievements(userId, projectId, skillId, SkillRelDef.RelationshipType.Dependence)
-        List<UserAchievedLevelRepo.ChildWithAchievementsInfo> notAchievedDependents = dependentsAndAchievements.findAll({
-            !it.childAchievedSkillId
-        })
-        if (notAchievedDependents) {
+        CheckDependenciesHelper.DependencyCheckRes dependencyCheckRes = checkDependenciesHelper.check(userId, projectId, skillId)
+        if (dependencyCheckRes.hasNotAchievedDependents) {
             res.skillApplied = false
-            List<UserAchievedLevelRepo.ChildWithAchievementsInfo> sorted = notAchievedDependents.sort({ a, b -> a.childProjectId <=> b.childProjectId ?: a.childSkillId <=> b.childSkillId })
-            res.explanation = "Not all dependent skills have been achieved. Missing achievements for ${notAchievedDependents.size()} out of ${dependentsAndAchievements.size()}. " +
-                    "Waiting on completion of ${sorted.collect({ it.childProjectId + ":" + it.childSkillId})}."
+            res.explanation = dependencyCheckRes.msg
             return res
         }
 
         boolean decrement = false
         UserPerformedSkill performedSkill = new UserPerformedSkill(userId: userId, skillId: skillId, projectId: projectId, performedOn: incomingSkillDate)
-        performedSkillRepository.save(performedSkill)
-        log.debug("Saved skill [{}]", performedSkill)
+        savePerformedSkill(performedSkill)
         updateUserPoints(userId, skillDefinition, incomingSkillDate, skillId, decrement)
 
         boolean requestedSkillCompleted = hasReachedMaxPoints(numExistingSkills + 1, skillDefinition)
@@ -179,6 +152,27 @@ class SkillsManagementFacade {
         return res
     }
 
+    @Profile
+    private void savePerformedSkill(UserPerformedSkill performedSkill) {
+        performedSkillRepository.save(performedSkill)
+        log.debug("Saved skill [{}]", performedSkill)
+    }
+
+    @Profile
+    private long getNumExistingSkills(String userId, String projectId, String skillId) {
+        performedSkillRepository.countByUserIdAndProjectIdAndSkillId(userId, projectId, skillId)
+    }
+
+    @Profile
+    private SkillDef getSkillDef(String projectId, String skillId) {
+        SkillDef skillDefinition = skillDefRepo.findByProjectIdAndSkillIdAndType(projectId, skillId, SkillDef.ContainerType.Skill)
+        if (!skillDefinition) {
+            throw new SkillException("Skill definition does not exist. Must create the skill definition first!", projectId, skillId)
+        }
+        return skillDefinition
+    }
+
+    @Profile
     private void documentSkillAchieved(String userId, long numExistingSkills, SkillDef skillDefinition, SkillEventResult res) {
         UserAchievement skillAchieved = new UserAchievement(userId: userId, projectId: skillDefinition.projectId, skillId: skillDefinition.skillId, skillDef: skillDefinition,
                 pointsWhenAchieved: ((numExistingSkills.intValue() + 1) * skillDefinition.pointIncrement))
@@ -190,6 +184,7 @@ class SkillsManagementFacade {
         res.completed.add(new CompletionItem(type: CompletionItem.CompletionItemType.Skill, id: skillDefinition.skillId, name: skillDefinition.name, recommendations: recommendationItems))
     }
 
+    @Profile
     private List<RecommendationItem> checkForRecommendations(String userId, String projectId, String skillId) {
         List<RecommendationItem> res = []
 
@@ -214,6 +209,7 @@ class SkillsManagementFacade {
         return res
     }
 
+    @Profile
     private List<RecommendationItem> checkGraphForRecommendations(String userId, SkillDef skillDef) {
         List<RecommendationItem> res = []
         List<SkillDef> nonAchievedChildren = achievedLevelRepo.findNonAchievedChildren(userId, skillDef.projectId, skillDef.skillId, SkillRelDef.RelationshipType.Dependence)
@@ -228,6 +224,7 @@ class SkillsManagementFacade {
         return res
     }
 
+    @Profile
     private void checkForBadgesAchieved(SkillEventResult res, String userId, SkillDef currentSkillDef, boolean decrement) {
         List<SkillRelDef> parentsRels = skillRelDefRepo.findAllByChildAndType(currentSkillDef, SkillRelDef.RelationshipType.BadgeDependence)
         parentsRels.each {
@@ -259,6 +256,7 @@ class SkillsManagementFacade {
         return withinActiveTimeframe
     }
 
+    @Profile
     private void checkParentGraph(Date incomingSkillDate, SkillEventResult res, String userId, SkillDef skillDef, boolean decrement) {
         updateByTraversingUpSkillDefs(incomingSkillDate, res, skillDef, skillDef, userId, decrement)
 
@@ -292,6 +290,7 @@ class SkillsManagementFacade {
         }
     }
 
+    @Profile
     private void updateByTraversingUpSkillDefs(Date incomingSkillDate, SkillEventResult res, SkillDef currentDef, SkillDef requesterDef, String userId, boolean decrement) {
         if (shouldEvaluateForAchievement(currentDef)) {
             UserPoints updatedPoints = updateUserPoints(userId, requesterDef, incomingSkillDate, currentDef.skillId, decrement)
@@ -336,6 +335,7 @@ class SkillsManagementFacade {
         return res
     }
 
+    @Profile
     private UserPoints doUpdateUserPoints(SkillDef requestedSkill, String userId, Date incomingSkillDate, String skillId, boolean decrement) {
         Date day = incomingSkillDate ? new Date(incomingSkillDate.time).clearTime() : null
         UserPoints subjectPoints = userSubjectPointsRepository.findByProjectIdAndUserIdAndSkillIdAndDay(requestedSkill.projectId, userId, skillId, day)
@@ -361,6 +361,7 @@ class SkillsManagementFacade {
         res
     }
 
+    @Profile
     private CompletionItem calculateLevels(LevelDefinitionStorageService.LevelInfo levelInfo, UserPoints userPts, SkillDef skillDef, String userId, String name, boolean decrement) {
         CompletionItem res
 
