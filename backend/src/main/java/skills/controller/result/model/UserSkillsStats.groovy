@@ -1,6 +1,6 @@
 package skills.controller.result.model
 
-class UserSkillsMetrics {
+class UserSkillsStats {
     int numSkills
     int userTotalPoints
 }

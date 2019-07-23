@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import skills.controller.result.model.UserSkillsStats
 import skills.skillLoading.model.SkillPerfomed
 import skills.storage.model.UserPerformedSkill
 import skills.storage.model.UserPoints
@@ -57,9 +58,9 @@ class UserAdminService {
     }
 
     @Transactional(readOnly = true)
-    skills.controller.result.model.UserSkillsMetrics getUserSkillsStats(String projectId, String userId) {
+    UserSkillsStats getUserSkillsStats(String projectId, String userId) {
         int numSkills =  performedSkillRepository.countDistinctSkillIdByProjectIdAndUserId(projectId, userId)
         UserPoints userPoints = userPointsRepo.findByProjectIdAndUserIdAndSkillIdAndDay(projectId, userId, null, null)
-        return new skills.controller.result.model.UserSkillsMetrics(numSkills: numSkills, userTotalPoints: userPoints?.points ?: 0 )
+        return new UserSkillsStats(numSkills: numSkills, userTotalPoints: userPoints?.points ?: 0 )
     }
 }

@@ -25,7 +25,7 @@ import skills.controller.result.model.SkillDefRes
 import skills.controller.result.model.SkillsGraphRes
 import skills.controller.result.model.SubjectResult
 import skills.controller.result.model.TableResult
-import skills.controller.result.model.UserSkillsMetrics
+import skills.controller.result.model.UserSkillsStats
 import skills.services.AdminProjService
 import skills.services.AdminUsersService
 import skills.services.LevelDefinitionStorageService
@@ -557,8 +557,8 @@ class AdminController {
     @GetMapping(value = '/projects/{projectId}/users/{userId}/stats', produces = 'application/json')
     @ResponseBody
     @CompileStatic
-    UserSkillsMetrics getUserSkillsMetrics(@PathVariable('projectId') String projectId,
-                                           @PathVariable('userId') String userId) {
+    UserSkillsStats getUserSkillsStats(@PathVariable('projectId') String projectId,
+                                       @PathVariable('userId') String userId) {
         skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
         skills.controller.exceptions.SkillsValidator.isNotBlank(userId, "User Id", projectId)
 
