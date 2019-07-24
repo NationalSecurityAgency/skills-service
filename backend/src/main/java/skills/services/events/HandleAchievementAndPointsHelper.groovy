@@ -168,7 +168,7 @@ class HandleAchievementAndPointsHelper {
             UserAchievement newLevel = new UserAchievement(userId: userId, projectId: userPts.projectId, skillId: userPts.skillId, skillRefId: skillDef?.id,
                     level: levelInfo.level, pointsWhenAchieved: userPts.points)
             achievedLevelRepo.save(newLevel)
-            log.info("Achieved new level [{}]", newLevel)
+            log.debug("Achieved new level [{}]", newLevel)
 
             res = new CompletionItem(
                     level: newLevel.level, name: name,

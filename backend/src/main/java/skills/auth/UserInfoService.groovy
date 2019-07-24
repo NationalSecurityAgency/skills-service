@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 import skills.auth.pki.PkiUserLookup
-import skills.services.UserAdminService
 
 @Component
 @Slf4j
@@ -14,9 +13,6 @@ class UserInfoService {
 
     @Value('${skills.authorization.authMode:#{T(skills.auth.AuthMode).DEFAULT_AUTH_MODE}}')
     AuthMode authMode
-
-    @Autowired
-    UserAdminService userAdminService
 
     @Autowired(required = false)
     PkiUserLookup pkiUserLookup

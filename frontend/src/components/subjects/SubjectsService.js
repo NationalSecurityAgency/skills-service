@@ -18,6 +18,10 @@ export default {
       .then(res => res.data);
   },
   saveSubject(subject) {
+    if (subject.id) {
+      return axios.post(`/admin/projects/${subject.projectId}/subjects/${subject.originalSubjectId}`, subject)
+        .then(() => this.getSubjectDetails(subject.projectId, subject.subjectId));
+    }
     return axios.post(`/admin/projects/${subject.projectId}/subjects/${subject.subjectId}`, subject)
       .then(() => this.getSubjectDetails(subject.projectId, subject.subjectId));
   },
