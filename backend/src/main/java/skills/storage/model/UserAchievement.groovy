@@ -29,12 +29,16 @@ class UserAchievement {
 
     String userId
 
+    // denormalize for performance and convenience
     String projectId
 
+    // denormalize for performance and convenience
+    // null subject will represent overall points
     String skillId // null will represent overall points for all
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="skillRefId")
-    SkillDef skillDef // null will represent overall points for all
+
+    // fk to SkillDef
+    // null will represent overall points for all
+    Integer skillRefId
 
     Integer level
 

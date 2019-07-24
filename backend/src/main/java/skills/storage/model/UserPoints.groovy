@@ -21,10 +21,12 @@ class UserPoints {
     // denormalize for performance and convenience
     String projectId
 
+    // denormalize for performance and convenience
     // null subject will represent overall points
     String skillId
 
     // fk to SkillDef
+    // null will represent overall points for all
     Integer skillRefId
 
     int points
