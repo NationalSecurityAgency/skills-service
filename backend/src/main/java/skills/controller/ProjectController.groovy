@@ -2,9 +2,15 @@ package skills.controller
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.web.bind.annotation.*
+import skills.auth.UserInfoService
+import skills.auth.UserSkillsGrantedAuthority
+import skills.controller.exceptions.ErrorCode
+import skills.controller.exceptions.SkillException
 import skills.services.AdminProjService
+import skills.storage.model.auth.RoleName
 
 import java.nio.charset.StandardCharsets
 
@@ -21,6 +27,9 @@ class ProjectController {
 
     @Autowired
     PasswordEncoder passwordEncoder
+
+    @Autowired
+    UserInfoService userInfoService
 
     @RequestMapping(value = "/projects", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
@@ -40,6 +49,11 @@ class ProjectController {
         }
         if (!projectRequest?.name) {
             throw new skills.controller.exceptions.SkillException("Project name was not provided.", projectId, null, skills.controller.exceptions.ErrorCode.BadParam)
+        }
+
+        // if the id is provided then this is an 'edit operation' then user must be an amdin of this project
+        if (projectRequest.id) {
+            throw new SkillException("Can not edit project id using /app/projects/{id} endpoint. Plese use /admin/projects/{id}", projectId, null, ErrorCode.AccessDenied)
         }
 
         projectAdminStorageService.saveProject(projectRequest)

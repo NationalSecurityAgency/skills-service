@@ -17,6 +17,10 @@ export default {
       .then(response => response.data);
   },
   saveProject(project) {
+    if (project.id) {
+      return axios.post(`/admin/projects/${project.originalProjectId}`, project)
+        .then(() => this.getProject(project.projectId));
+    }
     return axios.post(`/app/projects/${project.projectId}`, project)
       .then(() => this.getProject(project.projectId));
   },

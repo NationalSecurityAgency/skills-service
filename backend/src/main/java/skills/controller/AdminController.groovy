@@ -5,7 +5,10 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.http.MediaType
+import org.springframework.validation.ValidationUtils
 import org.springframework.web.bind.annotation.*
+import skills.controller.exceptions.ErrorCode
+import skills.controller.exceptions.SkillException
 import skills.controller.request.model.ActionPatchRequest
 import skills.controller.request.model.BadgeRequest
 import skills.controller.request.model.EditLevelRequest
@@ -47,6 +50,7 @@ import static org.springframework.data.domain.Sort.Direction.DESC
 @Slf4j
 @skills.profile.EnableCallStackProf
 class AdminController {
+
     @Autowired
     LevelDefinitionStorageService levelDefinitionStorageService
 
@@ -64,6 +68,16 @@ class AdminController {
 
     @Autowired
     SkillEventsService skillsManagementFacade
+
+    @RequestMapping(value = "/projects/{id}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
+    @ResponseBody
+    RequestResult saveProject(@PathVariable("id") String projectId, @RequestBody skills.controller.request.model.ProjectRequest projectRequest) {
+        skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
+        skills.controller.exceptions.SkillsValidator.isNotBlank(projectRequest.projectId, "Project Id")
+        skills.controller.exceptions.SkillsValidator.isNotBlank(projectRequest.name, " Name")
+        projectAdminStorageService.saveProject(projectRequest)
+        return new skills.controller.result.model.RequestResult(success: true)
+    }
 
     @RequestMapping(value = "/projects/{id}", method = RequestMethod.DELETE)
     void deleteProject(@PathVariable("id") String projectId) {
@@ -100,7 +114,6 @@ class AdminController {
     RequestResult saveSubject(@PathVariable("projectId") String projectId,
                               @PathVariable("subjectId") String subjectId,
                               @RequestBody SubjectRequest subjectRequest) {
-        skills.controller.exceptions.SkillsValidator.isFirstOrMustEqualToSecond(subjectRequest.subjectId, subjectId, "Subject Id")
         subjectRequest.subjectId = subjectRequest.subjectId ?: subjectId
         skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
         skills.controller.exceptions.SkillsValidator.isNotBlank(subjectId, "Subject Id", projectId)
