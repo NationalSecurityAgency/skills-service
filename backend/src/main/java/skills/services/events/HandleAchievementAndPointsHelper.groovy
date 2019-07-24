@@ -82,7 +82,10 @@ class HandleAchievementAndPointsHelper {
         UserPoints userPoints = getUserPoints(requestedSkill, userId, skillId, day)
         if (!userPoints) {
             assert !decrement
-            userPoints = new UserPoints(userId: userId, projectId: requestedSkill.projectId, skillId: skillId, points: requestedSkill.pointIncrement, day: day)
+            userPoints = new UserPoints(userId: userId, projectId: requestedSkill.projectId,
+                    skillId: skillId,
+                    skillRefId: skillId ? requestedSkill.id : null,
+                    points: requestedSkill.pointIncrement, day: day)
         } else {
             if (decrement) {
                 userPoints.points -= requestedSkill.pointIncrement
@@ -94,7 +97,10 @@ class HandleAchievementAndPointsHelper {
         UserPoints res
         if (decrement && userPoints.points <= 0) {
             userPointsRepo.delete(userPoints)
-            res = new UserPoints(userId: userId, projectId: requestedSkill.projectId, skillId: skillId, points: 0, day: day)
+            res = new UserPoints(userId: userId, projectId: requestedSkill.projectId,
+                    skillId: skillId,
+                    skillRefId: skillId ? requestedSkill.id : null,
+                    points: 0, day: day)
         } else {
             res = saveUserPoints(userPoints)
             log.debug("Updated points [{}]", res)

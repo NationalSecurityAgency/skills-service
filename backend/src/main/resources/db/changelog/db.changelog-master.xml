@@ -558,6 +558,7 @@
             <column name="project_id" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>
+            <column name="skill_ref_id" type="int"/>
             <column name="skill_id" type="varchar(255)"/>
             <column name="points" type="int">
                 <constraints nullable="false"/>
@@ -576,22 +577,20 @@
                      tableName="user_points">
             <column name="project_id" type="varchar(255)"/>
         </createIndex>
-        <createIndex indexName="index_user_points_project_id_skill_id"
+        <createIndex indexName="index_user_points_skill_ref_id"
                      tableName="user_points">
-            <column name="project_id" type="varchar(255)"/>
+            <column name="skill_ref_id" type="int"/>
+        </createIndex>
+        <createIndex indexName="index_user_points_skill_id"
+                     tableName="user_points">
             <column name="skill_id" type="varchar(255)"/>
         </createIndex>
-        <createIndex indexName="index_user_points_user_id_project_id_skill_id"
+        <createIndex indexName="index_user_points_user_id"
                      tableName="user_points">
             <column name="user_id" type="varchar(255)"/>
-            <column name="project_id" type="varchar(255)"/>
-            <column name="skill_id" type="varchar(255)"/>
         </createIndex>
-        <createIndex indexName="index_user_points_user_id_project_id_skill_id_day"
-                     tableName="user_points" unique="true">
-            <column name="user_id" type="varchar(255)"/>
-            <column name="project_id" type="varchar(255)"/>
-            <column name="skill_id" type="varchar(255)"/>
+        <createIndex indexName="index_user_points_day"
+                     tableName="user_points">
             <column name="day" type="date"/>
         </createIndex>
         <addForeignKeyConstraint baseColumnNames="project_id"
@@ -601,12 +600,12 @@
                                  onUpdate="CASCADE"
                                  referencedColumnNames="project_id"
                                  referencedTableName="project_definition"/>
-        <addForeignKeyConstraint baseColumnNames="project_id,skill_id"
+        <addForeignKeyConstraint baseColumnNames="skill_ref_id"
                                  baseTableName="user_points"
-                                 constraintName="fk_user_points_project_id_skill_id"
+                                 constraintName="fk_user_points_skill_ref_id"
                                  onDelete="CASCADE"
                                  onUpdate="CASCADE"
-                                 referencedColumnNames="project_id,skill_id"
+                                 referencedColumnNames="id"
                                  referencedTableName="skill_definition"/>
 
         <!-- ============================================================================
