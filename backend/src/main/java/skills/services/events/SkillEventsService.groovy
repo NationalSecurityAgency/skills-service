@@ -174,7 +174,7 @@ class SkillEventsService {
 
     @Profile
     private void documentSkillAchieved(String userId, long numExistingSkills, SkillDef skillDefinition, SkillEventResult res) {
-        UserAchievement skillAchieved = new UserAchievement(userId: userId, projectId: skillDefinition.projectId, skillId: skillDefinition.skillId, skillDef: skillDefinition,
+        UserAchievement skillAchieved = new UserAchievement(userId: userId, projectId: skillDefinition.projectId, skillId: skillDefinition.skillId, skillRefId: skillDefinition?.id,
                 pointsWhenAchieved: ((numExistingSkills.intValue() + 1) * skillDefinition.pointIncrement))
         achievedLevelRepo.save(skillAchieved)
 
@@ -196,7 +196,7 @@ class SkillEventsService {
                     if (!decrement) {
                         List<UserAchievement> badges = achievedLevelRepo.findAllByUserIdAndProjectIdAndSkillId(userId, badge.projectId, badge.skillId)
                         if (!badges) {
-                            UserAchievement groupAchievement = new UserAchievement(userId: userId, projectId: badge.projectId, skillId: badge.skillId, skillDef: badge)
+                            UserAchievement groupAchievement = new UserAchievement(userId: userId, projectId: badge.projectId, skillId: badge.skillId, skillRefId: badge?.id)
                             achievedLevelRepo.save(groupAchievement)
                             res.completed.add(new CompletionItem(type: CompletionTypeUtil.getCompletionType(badge), id: badge.skillId, name: badge.name))
                         }

@@ -126,7 +126,7 @@ class HandleAchievementAndPointsHelper {
             boolean hasLevelDefs = currentDef.levelDefinitions
             if (!hasLevelDefs) {
                 if (!decrement && updatedPoints.points >= currentDef.totalPoints) {
-                    UserAchievement groupAchievement = new UserAchievement(userId: userId, projectId: currentDef.projectId, skillId: currentDef.skillId, skillDef: currentDef,
+                    UserAchievement groupAchievement = new UserAchievement(userId: userId, projectId: currentDef.projectId, skillId: currentDef.skillId, skillRefId: currentDef?.id,
                             pointsWhenAchieved: updatedPoints.points)
                     achievedLevelRepo.save(groupAchievement)
 
@@ -165,7 +165,7 @@ class HandleAchievementAndPointsHelper {
         List<UserAchievement> userAchievedLevels = achievedLevelRepo.findAllByUserIdAndProjectIdAndSkillId(userId, userPts.projectId, userPts.skillId)
         boolean levelAlreadyAchieved = userAchievedLevels?.find { it.level == levelInfo.level }
         if (!levelAlreadyAchieved && !decrement) {
-            UserAchievement newLevel = new UserAchievement(userId: userId, projectId: userPts.projectId, skillId: userPts.skillId, skillDef: skillDef,
+            UserAchievement newLevel = new UserAchievement(userId: userId, projectId: userPts.projectId, skillId: userPts.skillId, skillRefId: skillDef?.id,
                     level: levelInfo.level, pointsWhenAchieved: userPts.points)
             achievedLevelRepo.save(newLevel)
             log.info("Achieved new level [{}]", newLevel)
