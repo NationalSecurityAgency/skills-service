@@ -22,19 +22,6 @@ class AdminMetricsController {
     @Autowired
     MetricsService metricsService
 
-    @RequestMapping(value = "/projects/{projectId}/metrics", method =  RequestMethod.GET, produces = "application/json")
-    List<MetricsChart> getAllProjectMetricsCharts(@PathVariable("projectId") String projectId,
-                                                  @RequestParam Map<String,String> chartProps){
-        return metricsService.loadChartsForSection(Section.projects, projectId, chartProps)
-    }
-
-    @RequestMapping(value = "/projects/{projectId}/metrics/{chartBuilderId}", method =  RequestMethod.GET, produces = "application/json")
-    MetricsChart getProjectMetricsChart(@PathVariable("projectId") String projectId,
-                                        @PathVariable(ChartParams.CHART_BUILDER_ID) String chartBuilderId,
-                                        @RequestParam Map<String,String> chartProps){
-        return metricsService.loadChartForSection(chartBuilderId, Section.projects, projectId, chartProps)
-    }
-
     @RequestMapping(value = "/projects/{projectId}/{section}/{sectionId}/metrics", method =  RequestMethod.GET, produces = "application/json")
     List<MetricsChart> getAllSectionMetricsCharts(@PathVariable("projectId") String projectId,
                                                   @PathVariable("section") Section section,

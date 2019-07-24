@@ -5,6 +5,8 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Service
+import skills.controller.exceptions.ErrorCode
+import skills.controller.exceptions.SkillException
 import skills.metrics.model.ChartOption
 import skills.metrics.model.MetricsChart
 import skills.metrics.builders.MetricsChartBuilder
@@ -45,7 +47,11 @@ class MetricsService {
 
     MetricsChart loadChartForSection(String builderId, Section section, String projectId, Map<String, String> props) {
         MetricsChartBuilder chartBuilder = chartBuildersMap.get(section).find { it.class.name == builderId}
-        assert chartBuilder, "Unknown chart builder id [$builderId]"
+        if (!chartBuilder) {
+            SkillException ex = new SkillException("Unknown chart builder id [$builderId]")
+            ex.errorCode = ErrorCode.BadParam
+            throw ex
+        }
         MetricsChart chart = chartBuilder.build(projectId, props, true)
         chart.chartOptions.put(ChartOption.chartBuilderId, chartBuilder.class.name)
         chart.dataLoaded = true
