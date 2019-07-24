@@ -578,6 +578,13 @@
                                  onUpdate="CASCADE"
                                  referencedColumnNames="id"
                                  referencedTableName="skill_definition"/>
+        <addForeignKeyConstraint baseColumnNames="project_id,skill_id"
+                                 baseTableName="user_performed_skill"
+                                 constraintName="fk_user_performed_skill_proj_id_skill_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="project_id,skill_id"
+                                 referencedTableName="skill_definition"/>
 
         <!-- ============================================================================
         Table: User Points
@@ -642,6 +649,13 @@
                                  onUpdate="CASCADE"
                                  referencedColumnNames="id"
                                  referencedTableName="skill_definition"/>
+        <addForeignKeyConstraint baseColumnNames="project_id,skill_id"
+                                 baseTableName="user_points"
+                                 constraintName="fk_user_points_proj_id_skill_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="project_id,skill_id"
+                                 referencedTableName="skill_definition"/>
 
         <!-- ============================================================================
         Table: User Achievement
@@ -703,6 +717,13 @@
                                  onUpdate="CASCADE"
                                  referencedColumnNames="project_id"
                                  referencedTableName="project_definition"/>
+        <addForeignKeyConstraint baseColumnNames="project_id,skill_id"
+                                 baseTableName="user_achievement"
+                                 constraintName="fk_user_achievement_proj_id_skill_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="project_id,skill_id"
+                                 referencedTableName="skill_definition"/>
 
        <!-- ============================================================================
        Table: Allowed Origins
