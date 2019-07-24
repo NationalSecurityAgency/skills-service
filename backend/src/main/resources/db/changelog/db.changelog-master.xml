@@ -495,6 +495,10 @@
             <column name="user_id" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>
+
+            <column name="skill_ref_id" type="int">
+                <constraints nullable="false"/>
+            </column>
             <column name="skill_id" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>
@@ -512,32 +516,32 @@
                 <constraints nullable="false"/>
             </column>
         </createTable>
-        <createIndex indexName="index_user_performed_skill_skill_id"
+        <createIndex indexName="index_user_performed_skill_user_id"
                      tableName="user_performed_skill">
-            <column name="skill_id" type="varchar(255)"/>
+            <column name="user_id" type="varchar(255)"/>
         </createIndex>
         <createIndex indexName="index_user_performed_skill_project_id"
                      tableName="user_performed_skill">
             <column name="project_id" type="varchar(255)"/>
         </createIndex>
-        <createIndex indexName="index_user_performed_skill_project_id_skill_id"
+        <createIndex indexName="index_user_performed_skill_skill_id"
                      tableName="user_performed_skill">
-            <column name="project_id" type="varchar(255)"/>
             <column name="skill_id" type="varchar(255)"/>
         </createIndex>
-        <addForeignKeyConstraint baseColumnNames="project_id"
+        <createIndex indexName="index_user_performed_skill_skill_ref_id"
+                     tableName="user_performed_skill">
+            <column name="skill_ref_id" type="int"/>
+        </createIndex>
+        <createIndex indexName="index_user_performed_skill_performed_on"
+                     tableName="user_performed_skill">
+            <column name="performed_on" type="datetime"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="skill_ref_id"
                                  baseTableName="user_performed_skill"
-                                 constraintName="fk_user_performed_skill_project_id"
+                                 constraintName="fk_user_performed_skill_skill_ref_id"
                                  onDelete="CASCADE"
                                  onUpdate="CASCADE"
-                                 referencedColumnNames="project_id"
-                                 referencedTableName="project_definition"/>
-        <addForeignKeyConstraint baseColumnNames="project_id,skill_id"
-                                 baseTableName="user_performed_skill"
-                                 constraintName="fk_user_performed_skill_project_id_skill_id"
-                                 onDelete="CASCADE"
-                                 onUpdate="CASCADE"
-                                 referencedColumnNames="project_id,skill_id"
+                                 referencedColumnNames="id"
                                  referencedTableName="skill_definition"/>
 
         <!-- ============================================================================
