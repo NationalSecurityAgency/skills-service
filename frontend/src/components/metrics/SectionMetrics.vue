@@ -15,11 +15,11 @@
       <div class="row justify-content-center">
         <div v-for="(chart, index) in loadableCharts" style="min-width: 25rem;" class="col-4 mb-3"
              :key="chart.options.chart.id">
-          <metric-card :title="chart.chartMeta.title" :subtitle="chart.chartMeta.subtitle"
+          <metrics-card :title="chart.chartMeta.title" :subtitle="chart.chartMeta.subtitle"
                      :icon="getMetricCardColorClass(chart.chartMeta.icon, index)"
                      :description="chart.chartMeta.description" :chart-builder-id="chart.chartMeta.chartBuilderId"
                      @load-chart="loadChart">
-          </metric-card>
+          </metrics-card>
         </div>
       </div>
     </simple-card>
@@ -70,6 +70,7 @@
       };
     },
     mounted() {
+      this.sectionIdParam = this.$route.params.projectId;
       if (this.$route.params.badgeId) {
         this.section = SECTION.BADGES;
         this.sectionIdParam = this.$route.params.badgeId;
