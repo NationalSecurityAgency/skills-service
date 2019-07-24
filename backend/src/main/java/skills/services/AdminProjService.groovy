@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestBody
+import skills.controller.exceptions.ErrorCode
+import skills.controller.exceptions.SkillException
 import skills.controller.request.model.ActionPatchRequest
 import skills.controller.request.model.BadgeRequest
 import skills.controller.request.model.ProjectRequest
@@ -121,6 +123,16 @@ class AdminProjService {
             log.info("Saved [{}]", projectDefinition)
 
         } else {
+            ProjDef idExist = projDefRepo.findByProjectIdIgnoreCase(projectRequest.projectId)
+            if (idExist) {
+                throw new SkillException("Project with id [${projectRequest.projectId}] already exists! Sorry!", null, null, ErrorCode.ConstraintViolation)
+            }
+
+            ProjDef nameExist = projDefRepo.findByNameIgnoreCase(projectRequest.name)
+            if (nameExist) {
+                throw new SkillException("Project with name [${projectRequest.projectId}] already exists! Sorry!", null, null, ErrorCode.ConstraintViolation)
+            }
+
             // TODO: temp hack around since user is not yet defined when Inception project is created
             // This will be addressed in ticket #139
             int displayOrder = 0
@@ -140,6 +152,8 @@ class AdminProjService {
             levelDefinitions.each{
                 projectDefinition.addLevel(it)
             }
+
+
 
             dataIntegrityViolationExceptionHandler.handle(projectDefinition.projectId){
                 projectDefinition = projDefRepo.save(projectDefinition)
@@ -174,6 +188,16 @@ class AdminProjService {
             }
             log.info("Updated [{}]", skillDefinition)
         } else {
+            SkillDef idExists = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, subjectRequest.subjectId, SkillDef.ContainerType.Subject)
+            if (idExists) {
+                throw new SkillException("Subject with id [${subjectRequest.subjectId}] already exists! Sorry!", projectId, null, ErrorCode.ConstraintViolation)
+            }
+
+            SkillDef nameExists = skillDefRepo.findByProjectIdAndNameIgnoreCaseAndType(projectId, subjectRequest.name, SkillDef.ContainerType.Subject)
+            if (nameExists) {
+                throw new SkillException("Subject with name [${subjectRequest.name}] already exists! Sorry!", projectId, null, ErrorCode.ConstraintViolation)
+            }
+
             ProjDef projDef = getProjDef(projectId)
 
             Integer lastDisplayOrder = projDef.subjects?.collect({ it.displayOrder })?.max()
@@ -202,7 +226,7 @@ class AdminProjService {
 
     @Transactional()
     ProjDef getProjDef(String projectId) {
-        ProjDef projDef = projDefRepo.findByProjectId(projectId)
+        ProjDef projDef = projDefRepo.findByProjectIdIgnoreCase(projectId)
         if (!projDef) {
             throw new skills.controller.exceptions.SkillException("Failed to find project [$projectId]", projectId, null)
         }
@@ -215,7 +239,7 @@ class AdminProjService {
     }
 
     private SkillDef getSkillDef(String projectId, String skillId, SkillDef.ContainerType containerType = SkillDef.ContainerType.Skill) {
-        SkillDef skillDef = skillDefRepo.findByProjectIdAndSkillIdAndType(projectId, skillId, containerType)
+        SkillDef skillDef = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, skillId, containerType)
         if (!skillDef) {
             throw new skills.controller.exceptions.SkillException("Failed to find skillId [$skillId] for [$projectId] with type [${containerType}]", projectId, skillId)
         }
@@ -242,6 +266,16 @@ class AdminProjService {
             Props.copy(badgeRequest, skillDefinition)
             skillDefinition.skillId = badgeRequest.badgeId
         } else {
+            SkillDef idExists = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, badgeRequest.badgeId, SkillDef.ContainerType.Badge)
+            if (idExists) {
+                throw new SkillException("Badge with id [${badgeRequest.badgeId}] already exists! Sorry!", projectId, null, ErrorCode.ConstraintViolation)
+            }
+
+            SkillDef nameExists = skillDefRepo.findByProjectIdAndNameIgnoreCaseAndType(projectId, badgeRequest.name, SkillDef.ContainerType.Badge)
+            if (nameExists) {
+                throw new SkillException("Badge with name [${badgeRequest.name}] already exists! Sorry!", projectId, null, ErrorCode.ConstraintViolation)
+            }
+
             ProjDef projDef = getProjDef(projectId)
 
             Integer lastDisplayOrder = projDef.badges?.collect({ it.displayOrder })?.max()
@@ -286,7 +320,7 @@ class AdminProjService {
     @Transactional
     void deleteSubject(String projectId, String subjectId) {
         log.info("Deleting subject with project id [{}] and subject id [{}]", projectId, subjectId)
-        SkillDef subjectDefinition = skillDefRepo.findByProjectIdAndSkillIdAndType(projectId, subjectId, SkillDef.ContainerType.Subject)
+        SkillDef subjectDefinition = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, subjectId, SkillDef.ContainerType.Subject)
         assert subjectDefinition, "DELETE FAILED -> no subject with project id [$projectId] and subjet id [$subjectId]"
         assert subjectDefinition.type == SkillDef.ContainerType.Subject
 
@@ -308,7 +342,7 @@ class AdminProjService {
     @Transactional
     void deleteBadge(String projectId, String badgeId) {
         log.info("Deleting badge with project id [{}] and badge id [{}]", projectId, badgeId)
-        SkillDef badgeDefinition = skillDefRepo.findByProjectIdAndSkillIdAndType(projectId, badgeId, SkillDef.ContainerType.Badge)
+        SkillDef badgeDefinition = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, badgeId, SkillDef.ContainerType.Badge)
         assert badgeDefinition, "DELETE FAILED -> no badge with project id [$projectId] and badge id [$badgeId]"
         assert badgeDefinition.type == SkillDef.ContainerType.Badge
 
@@ -356,7 +390,7 @@ class AdminProjService {
 
     @Transactional(readOnly = true)
     skills.controller.result.model.SubjectResult getSubject(String projectId, String subjectId) {
-        SkillDef skillDef = skillDefRepo.findByProjectIdAndSkillIdAndType(projectId, subjectId, SkillDef.ContainerType.Subject)
+        SkillDef skillDef = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, subjectId, SkillDef.ContainerType.Subject)
         convertToSubject(skillDef)
     }
 
@@ -377,7 +411,7 @@ class AdminProjService {
 
     @Transactional(readOnly = true)
     skills.controller.result.model.BadgeResult getBadge(String projectId, String badgeId) {
-        SkillDef skillDef = skillDefRepo.findByProjectIdAndSkillIdAndType(projectId, badgeId, SkillDef.ContainerType.Badge)
+        SkillDef skillDef = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, badgeId, SkillDef.ContainerType.Badge)
         return convertToBadge(skillDef)
     }
 
@@ -691,7 +725,7 @@ class AdminProjService {
     @Transactional
     void deleteSkill(String projectId, String subjectId, String skillId) {
         log.info("Deleting skill with project id [{}] and subject id [{}] and skill id [{}]", projectId, subjectId, skillId)
-        SkillDef skillDefinition = skillDefRepo.findByProjectIdAndSkillIdAndType(projectId, skillId, SkillDef.ContainerType.Skill)
+        SkillDef skillDefinition = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, skillId, SkillDef.ContainerType.Skill)
         assert skillDefinition, "DELETE FAILED -> no skill with project find with projectId=[$projectId], subjectId=[$subjectId], skillId=[$skillId]"
 
         SkillDef parentSkill = ruleSetDefGraphService.getParentSkill(skillDefinition)
@@ -713,7 +747,7 @@ class AdminProjService {
     }
 
     private List<skills.controller.result.model.SkillDefRes> getSkillsByProjectSkillAndType(String projectId, String skillId, SkillDef.ContainerType type, RelationshipType relationshipType) {
-        SkillDef parent = skillDefRepo.findByProjectIdAndSkillIdAndType(projectId, skillId, type)
+        SkillDef parent = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, skillId, type)
         if (!parent) {
             throw new skills.controller.exceptions.SkillException("There is no skill id [${skillId}] doesn't exist.", projectId, null)
         }
@@ -730,7 +764,7 @@ class AdminProjService {
 
     @Transactional(readOnly = true)
     skills.controller.result.model.SkillDefRes getSkill(String projectId, String subjectId, String skillId) {
-        SkillDef res = skillDefRepo.findByProjectIdAndSkillIdAndType(projectId, skillId, SkillDef.ContainerType.Skill)
+        SkillDef res = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, skillId, SkillDef.ContainerType.Skill)
         assert res
         return convertToSkillDefRes(res, true)
     }
@@ -957,6 +991,16 @@ class AdminProjService {
             //need to manually update it in the case of edits.
             skillDefinition.totalPoints = totalPointsRequested
         } else {
+            SkillDef idExists = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(skillRequest.projectId, skillRequest.skillId, SkillDef.ContainerType.Skill)
+            if (idExists) {
+                throw new SkillException("Skill with id [${skillRequest.skillId}] already exists! Sorry!", skillRequest.projectId, null, ErrorCode.ConstraintViolation)
+            }
+
+            SkillDef nameExists = skillDefRepo.findByProjectIdAndNameIgnoreCaseAndType(skillRequest.projectId, skillRequest.name, SkillDef.ContainerType.Skill)
+            if (nameExists) {
+                throw new SkillException("Skill with name [${skillRequest.name}] already exists! Sorry!", skillRequest.projectId, null, ErrorCode.ConstraintViolation)
+            }
+
             String parentSkillId = skillRequest.subjectId
             Integer highestDisplayOrder = skillDefRepo.calculateChildSkillsHighestDisplayOrder(skillRequest.projectId, parentSkillId)
             int displayOrder = highestDisplayOrder == null ? 0 : highestDisplayOrder + 1
@@ -1010,7 +1054,7 @@ class AdminProjService {
         String parentSkillId = skillRequest.subjectId
         SkillDef.ContainerType containerType = SkillDef.ContainerType.Subject
 
-        SkillDef parent = skillDefRepo.findByProjectIdAndSkillIdAndType(skillRequest.projectId, parentSkillId, containerType)
+        SkillDef parent = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(skillRequest.projectId, parentSkillId, containerType)
         if (!parent) {
             throw new skills.controller.exceptions.SkillException("Requested parent skill id [${parentSkillId}] doesn't exist for type [${containerType}].", skillRequest.projectId, skillRequest.skillId)
         }

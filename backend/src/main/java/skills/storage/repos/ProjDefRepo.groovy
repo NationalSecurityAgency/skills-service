@@ -6,8 +6,15 @@ import org.springframework.lang.Nullable
 import skills.storage.model.ProjDef
 
 interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
+
+    @Nullable
+    ProjDef findByProjectIdIgnoreCase(String projectId)
+
     @Nullable
     ProjDef findByProjectId(String projectId)
+
+    @Nullable
+    ProjDef findByNameIgnoreCase(String projectId)
 
     boolean existsByProjectIdIgnoreCase(String projectId)
     boolean existsByNameIgnoreCase(String projectName)

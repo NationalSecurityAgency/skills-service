@@ -4,12 +4,10 @@ import callStack.profiler.Profile
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.controller.exceptions.SkillException
 import skills.services.LevelDefinitionStorageService
-import skills.storage.model.ProjDef
 import skills.storage.model.SkillRelDef
 import skills.storage.repos.ProjDefRepo
 import skills.storage.repos.SkillRelDefRepo
@@ -20,7 +18,6 @@ import skills.storage.repos.UserPointsRepo
 import skills.storage.model.UserPerformedSkill
 import skills.storage.model.SkillDef
 import skills.storage.model.UserAchievement
-import skills.storage.model.UserPoints
 
 @Service
 @CompileStatic

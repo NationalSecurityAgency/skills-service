@@ -11,7 +11,11 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
 
     List<SkillDef> findAllByProjectIdAndType(String id, SkillDef.ContainerType type)
     @Nullable
+    SkillDef findByProjectIdAndSkillIdIgnoreCaseAndType(String id, String skillId, SkillDef.ContainerType type)
+    @Nullable
     SkillDef findByProjectIdAndSkillIdAndType(String id, String skillId, SkillDef.ContainerType type)
+    @Nullable
+    SkillDef findByProjectIdAndNameIgnoreCaseAndType(String id, String name, SkillDef.ContainerType type)
 
     @Query('SELECT s from SkillDef s where s.projectId = ?1 and s.version <= ?2 and s.type = ?3')
     List<SkillDef> findAllByProjectIdAndVersionAndType(String id, Integer version, SkillDef.ContainerType type)
