@@ -137,7 +137,7 @@ class SkillEventsService {
         }
 
         boolean decrement = false
-        UserPerformedSkill performedSkill = new UserPerformedSkill(userId: userId, skillId: skillId, projectId: projectId, performedOn: incomingSkillDate)
+        UserPerformedSkill performedSkill = new UserPerformedSkill(userId: userId, skillId: skillId, projectId: projectId, performedOn: incomingSkillDate, skillRefId: skillDefinition.id )
         savePerformedSkill(performedSkill)
         handleAchievementAndPointsHelper.updateUserPoints(userId, skillDefinition, incomingSkillDate, skillId, decrement)
 

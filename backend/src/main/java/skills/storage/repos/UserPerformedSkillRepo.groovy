@@ -37,10 +37,14 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
     Integer countDistinctSkillIdByProjectIdAndUserId(String projectId, String userId)
 
     @Query(''' select DISTINCT(sdParent)
-    from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
-    inner join UserPerformedSkill ups on sdParent.skillId = ups.skillId and ups.userId=?1
-      where srd.parent=sdParent.id and srd.child=sdChild.id and
-      sdChild.projectId=?2 and sdChild.skillId=?3 and srd.type='Dependence' ''')
+        from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
+            inner join UserPerformedSkill ups on sdParent.id = ups.skillRefId and ups.userId=?1
+        where 
+            srd.parent=sdParent.id and 
+            srd.child=sdChild.id and
+            sdChild.projectId=?2 and 
+            sdChild.skillId=?3 and 
+            srd.type='Dependence' ''')
     List<SkillDef> findPerformedParentSkills(String userId, String projectId, String skillId)
 
 //    @Query('''SELECT SUM(DISTINCT s.totalPoints)
@@ -57,8 +61,7 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
       where
           srd.parent=sdParent.id and 
           srd.child=sdChild.id and
-          sdChild.skillId = ups.skillId and 
-          ups.projectId=:projectId and
+          sdChild.id = ups.skillRefId and 
           sdChild.projectId=:projectId and
           sdParent.projectId=:projectId and 
           ups.userId=:userId and
@@ -76,12 +79,11 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
     @Query('''select CAST(ups.performedOn as date) as day, SUM(sdChild.pointIncrement) as count
     from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild, UserPerformedSkill ups
       where
+          sdParent.projectId = :projectId and
+          sdChild.projectId = :projectId and
           srd.parent=sdParent.id and 
           srd.child=sdChild.id and
-          sdChild.skillId = ups.skillId and 
-          ups.projectId=:projectId and
-          sdChild.projectId=:projectId and
-          sdParent.projectId=:projectId and 
+          sdChild.id = ups.skillRefId and 
           ups.userId=:userId and
           (sdParent.skillId=:skillId OR :skillId is null) and
           sdChild.version<=:version and
