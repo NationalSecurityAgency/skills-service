@@ -75,6 +75,9 @@
           this.$emit('input', newVal);
         }
       },
+      value(newVal) {
+        this.userQuery = newVal;
+      },
     },
     data() {
       return {
