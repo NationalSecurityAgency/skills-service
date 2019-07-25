@@ -9,14 +9,14 @@
           <div class="input-group">
             <input id="first-name" aria-describedby="basic-addon1" class="form-control"
                    type="text" v-model="loginFields.first" name="first" v-validate="'required|max:30'"
-                   data-vv-delay="500"/>
+                   data-vv-delay="500" :disabled="pkiAuthenticated"/>
           </div>
           <p class="text-danger" v-show="errors.has('first')">{{ errors.first('first')}}</p>
 
           <label class="mt-2">Last Name</label>
           <div class="input-group">
             <input class="form-control" type="text" v-model="loginFields.last" name="last"
-                   v-validate="'required|max:30'" data-vv-delay="500"/>
+                   v-validate="'required|max:30'" data-vv-delay="500" :disabled="pkiAuthenticated"/>
           </div>
           <p class="text-danger" v-show="errors.has('last')">{{ errors.first('last')}}</p>
 
@@ -75,10 +75,12 @@
           nickname: '',
         },
         isSaving: false,
+        pkiAuthenticated: false,
       };
     },
     mounted() {
       this.loadData();
+      this.pkiAuthenticated = this.$store.getters.isPkiAuthenticated;
     },
     methods: {
       loadData() {
