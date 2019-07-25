@@ -9,12 +9,14 @@ import org.springframework.transaction.annotation.Transactional
 import skills.auth.UserInfo
 import skills.auth.UserInfoService
 import skills.auth.pki.PkiUserLookup
-import skills.storage.model.auth.*
-import skills.storage.repos.AllowedOriginRepo
+import skills.storage.model.auth.RoleName
+import skills.storage.model.auth.User
+import skills.storage.model.auth.UserProp
+import skills.storage.model.auth.UserRole
 import skills.storage.repos.UserRepo
 import skills.storage.repos.UserRoleRepo
 
-import static skills.controller.exceptions.SkillException.*
+import static skills.controller.exceptions.SkillException.NA
 
 @Service
 @Slf4j
@@ -25,9 +27,6 @@ class AccessSettingsStorageService {
 
     @Autowired
     UserRepo userRepository
-
-    @Autowired
-    AllowedOriginRepo allowedOriginRepository
 
     @Autowired
     UserInfoService userInfoService
@@ -190,38 +189,6 @@ class AccessSettingsStorageService {
         user.roles.add(role)
         userRepository.save(user)
         return role
-    }
-
-    @Transactional(readOnly = true)
-    List<AllowedOrigin> getAllowedOrigins(String projectId) {
-        List<AllowedOrigin> res = allowedOriginRepository.findAllByProjectId(projectId)
-        return res
-    }
-
-    @Transactional()
-    AllowedOrigin saveOrUpdateAllowedOrigin(String projectId, AllowedOrigin update) {
-        assert update
-        assert update.allowedOrigin
-        assert update.projectId
-        assert update.projectId == projectId
-
-        String allowedOriginName = update.allowedOrigin
-
-        log.info("Updating allowed origin [{}] for project [{}]", allowedOriginName, projectId)
-        allowedOriginRepository.save(update)
-        log.info("Updated allowedOrigin [{}]", update)
-        return update
-    }
-
-    @Transactional()
-    void deleteAllowedOrigin(String projectId, Integer allowedOriginId) {
-        log.info("Deleting allowedOrigin [{}] for project [{}]", allowedOriginId, projectId)
-        Optional<AllowedOrigin> existing = allowedOriginRepository.findById(allowedOriginId)
-        assert existing.present, "DELETE FAILED -> no allowedOrigin [$allowedOriginId] found for project id [$projectId]"
-
-        AllowedOrigin toDelete = existing.get()
-        allowedOriginRepository.delete(toDelete)
-        log.info("Deleted allowedOrigin [{}]", toDelete)
     }
 
     @Transactional(readOnly = true)
