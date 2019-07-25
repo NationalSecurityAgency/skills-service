@@ -7,7 +7,6 @@ import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.web.bind.annotation.*
 import skills.services.AccessSettingsStorageService
-import skills.storage.model.auth.AllowedOrigin
 import skills.storage.model.auth.RoleName
 import skills.storage.model.auth.UserRole
 
@@ -55,27 +54,6 @@ class AccessSettingsController {
             @PathVariable("userKey") String userKey, @PathVariable("roleName") RoleName roleName) {
         accessSettingsStorageService.addUserRole(getUserId(userKey), projectId, roleName)
         return new skills.controller.result.model.RequestResult(success: true)
-    }
-
-    @RequestMapping(value = "/projects/{projectId}/allowedOrigins", method = RequestMethod.GET, produces = "application/json")
-    @ResponseBody
-    List<AllowedOrigin> getAllowedOrigins(@PathVariable("projectId") String projectId) {
-        return accessSettingsStorageService.getAllowedOrigins(projectId)
-    }
-
-    @RequestMapping(value = "/projects/{projectId}/allowedOrigins", method = [RequestMethod.PUT, RequestMethod.POST])
-    AllowedOrigin saveOrUpdateAllowedOrigin(@PathVariable("projectId") String projectId, @RequestBody AllowedOrigin update) {
-        skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
-        skills.controller.exceptions.SkillsValidator.isNotBlank(update.allowedOrigin, "Allowed Origin", projectId)
-        skills.controller.exceptions.SkillsValidator.isFirstOrMustEqualToSecond(update.projectId, projectId, "Project Id")
-
-        return accessSettingsStorageService.saveOrUpdateAllowedOrigin(projectId, update)
-    }
-
-    @RequestMapping(value = "/projects/{projectId}/allowedOrigins/{allowedOriginId}", method = RequestMethod.DELETE)
-    void deleteAllowedOrigin(
-            @PathVariable("projectId") String projectId, @PathVariable("allowedOriginId") Integer allowedOriginId) {
-        accessSettingsStorageService.deleteAllowedOrigin(projectId, allowedOriginId)
     }
 
     private String getUserId(String userKey) {
