@@ -2,29 +2,41 @@
   <div class="usersTable">
     <sub-page-header title="Users"/>
 
-    <simple-card>
-      <v-server-table ref="table" :columns="columns" :url="getUrl()" :options="options" class="vue-table-2"
-                      v-on:loaded="emit('loaded', $event)" v-on:error="emit('error', $event)">
-        <div slot="lastUpdated" slot-scope="props" class="field has-addons">
-          {{ getDate(props) }}
-        </div>
+      <simple-card style="min-height: 30rem;">
+        <skills-spinner :is-loading="loading"/>
+        <div v-show="!loading">
+          <h4 class="border-bottom text-center text-lg-left text-secondary">
+            <i class="fa fa-users mr-2"/>
+            <span class=""><strong>{{ totalNumUsers | number}}</strong> Total Users</span>
+          </h4>
 
-        <div slot="viewDetail" slot-scope="props" class="">
-          <router-link :to="{ name:'ClientDisplayPreview',
-                  params: { projectId: $route.params.projectId, userId: props.row.userId }}"
-                       tag="button" class="btn btn-outline-primary">
-            <span class="d-none d-sm-inline">Details</span><i class="fas fa-arrow-circle-right ml-sm-1"/>
-          </router-link>
+          <v-server-table ref="table" :columns="columns" :url="getUrl()" :options="options"
+                          class="vue-table-2"
+                          v-on:loaded="emit('loaded', $event)" v-on:error="emit('error', $event)">
+            <div slot="lastUpdated" slot-scope="props" class="field has-addons">
+              {{ getDate(props) }}
+            </div>
+
+            <div slot="viewDetail" slot-scope="props" class="">
+              <router-link :to="{ name:'ClientDisplayPreview',
+                      params: { projectId: $route.params.projectId, userId: props.row.userId }}"
+                           tag="button" class="btn btn-outline-primary">
+                <span class="d-none d-sm-inline">Details</span><i class="fas fa-arrow-circle-right ml-sm-1"/>
+              </router-link>
+            </div>
+          </v-server-table>
+
         </div>
-      </v-server-table>
-    </simple-card>
+      </simple-card>
   </div>
 </template>
 
 <script>
+  import axios from 'axios';
   import { Validator } from 'vee-validate';
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import SimpleCard from '../utils/cards/SimpleCard';
+  import SkillsSpinner from '../utils/SkillsSpinner';
 
   const dictionary = {
     en: {
@@ -37,11 +49,13 @@
 
   export default {
     name: 'Users',
-    components: { SimpleCard, SubPageHeader },
+    components: { SkillsSpinner, SimpleCard, SubPageHeader },
     data() {
+      const self = this;
       return {
-        userId: '',
+        loading: true,
         data: [],
+        totalNumUsers: -1,
         columns: ['userId', 'totalPoints', 'lastUpdated', 'viewDetail'],
         options: {
           headings: {
@@ -66,6 +80,21 @@
           filterable: true,
           highlightMatches: true,
           skin: 'table is-striped is-fullwidth',
+          /* eslint-disable */
+          requestFunction: function (data) {
+            return axios.get(this.url, {
+              params: data
+            }).then((res) => {
+              self.loading = false;
+              self.totalNumUsers = res.data.count;
+              return res;
+            }).catch(function (e) {
+              self.loading = false;
+              self.totalNumUsers = 0;
+              this.dispatch('error', e);
+            }.bind(this));
+          },
+          /* eslint-enable */
         },
       };
     },

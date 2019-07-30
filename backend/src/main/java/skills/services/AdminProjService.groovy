@@ -1,6 +1,8 @@
 package skills.services
 
+import callStack.profiler.CProf
 import callStack.profiler.Profile
+import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.apache.commons.collections.CollectionUtils
 import org.springframework.beans.factory.annotation.Autowired
@@ -19,6 +21,9 @@ import skills.controller.request.model.SkillDefForDependencyRes
 import skills.controller.request.model.SkillRequest
 import skills.controller.request.model.SubjectRequest
 import skills.auth.UserInfoService
+import skills.controller.result.model.NumUsersRes
+import skills.controller.result.model.SkillDefPartialRes
+import skills.controller.result.model.SkillDefSkinnyRes
 import skills.services.settings.Settings
 import skills.icons.IconCssNameUtil
 import skills.services.settings.SettingsService
@@ -615,7 +620,7 @@ class AdminProjService {
                 numSubjects: definition.subjects ? definition.subjects.size() : 0,
                 displayOrder: definition.displayOrder,
         )
-        res.numUsers = calculateNumUsersForProject(definition)
+        res.numBadges = skillDefRepo.countByProjectIdAndType(definition.projectId, SkillDef.ContainerType.Badge)
         res.numSkills = countNumSkillsForProject(definition)
         skills.controller.result.model.SettingsResult result = settingsService.getSetting(definition.projectId, Settings.LEVEL_AS_POINTS.settingName)
 
@@ -634,9 +639,11 @@ class AdminProjService {
     }
 
     @Profile
-    private int calculateNumUsersForProject(ProjDef definition) {
-        projDefRepo.calculateDistinctUsers(definition.projectId)
+    NumUsersRes getNumUsersByProjectId(String projectId) {
+        int numUsers = projDefRepo.calculateDistinctUsers(projectId)
+        return  new NumUsersRes(numUsers: numUsers)
     }
+
 
     @Profile
     private skills.controller.result.model.SubjectResult convertToSubject(SkillDef skillDef) {
@@ -652,7 +659,7 @@ class AdminProjService {
         )
 
         res.numSkills = calculateNumChildSkills(skillDef)
-        res.numUsers = calculateNumUsersForChildSkills(skillDef)
+//        res.numUsers = calculateNumUsersForChildSkills(skillDef)
 
         return res
     }
@@ -742,24 +749,30 @@ class AdminProjService {
 
 
     @Transactional(readOnly = true)
-    List<skills.controller.result.model.SkillDefRes> getSkills(String projectId, String subjectId) {
+    List<SkillDefPartialRes> getSkills(String projectId, String subjectId) {
         return getSkillsByProjectSkillAndType(projectId, subjectId, SkillDef.ContainerType.Subject, RelationshipType.RuleSetDefinition)
     }
 
-    private List<skills.controller.result.model.SkillDefRes> getSkillsByProjectSkillAndType(String projectId, String skillId, SkillDef.ContainerType type, RelationshipType relationshipType) {
+    private List<SkillDefPartialRes> getSkillsByProjectSkillAndType(String projectId, String skillId, SkillDef.ContainerType type, RelationshipType relationshipType) {
         SkillDef parent = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, skillId, type)
         if (!parent) {
             throw new skills.controller.exceptions.SkillException("There is no skill id [${skillId}] doesn't exist.", projectId, null)
         }
 
-        List<SkillDef> res = ruleSetDefGraphService.getChildrenSkills(parent, relationshipType)
-        return res.collect { convertToSkillDefRes(it) }
+        List<SkillDefRepo.SkillDefPartial> res = skillRelDefRepo.getChildrenPartial(parent.projectId, parent.skillId, relationshipType)
+        return res.collect { convertToSkillDefPartialRes(it) }
     }
 
     @Transactional(readOnly = true)
-    List<skills.controller.result.model.SkillDefRes> getSkills(String projectId) {
-        List<SkillDef> res = skillDefRepo.findAllByProjectIdAndType(projectId, SkillDef.ContainerType.Skill)
-        return res.collect { convertToSkillDefRes(it) }
+    List<SkillDefSkinnyRes> getSkinnySkills(String projectId) {
+        List<SkillDefRepo.SkillDefSkinny> data = loadSkinnySkills(projectId)
+        List<SkillDefPartialRes> res = data.collect { convertToSkillDefSkinnyRes(it) }
+        return res
+    }
+
+    @Profile
+    private List<SkillDefRepo.SkillDefSkinny> loadSkinnySkills(String projectId) {
+        skillDefRepo.findAllSkinnySelectByProjectIdAndType(projectId, SkillDef.ContainerType.Skill)
     }
 
     @Transactional(readOnly = true)
@@ -833,11 +846,11 @@ class AdminProjService {
     }
 
     @Transactional(readOnly = true)
-    List<SkillDefForDependencyRes> getSkillsAvailableForDependency(String projectId, int version = Constants.MAX_VERSION) {
-        List<SkillDef> res = skillDefRepo.findAllByProjectIdAndVersionAndType(projectId, version, SkillDef.ContainerType.Skill)
+    List<SkillDefForDependencyRes> getSkillsAvailableForDependency(String projectId) {
+        List<SkillDefRepo.SkillDefSkinny> res = skillDefRepo.findAllSkinnySelectByProjectIdAndType(projectId, SkillDef.ContainerType.Skill)
         List<SkillDefForDependencyRes> finalRes = res.collect {
             new SkillDefForDependencyRes(
-                    skillId: it.skillId, name: it.name, projectId: it.projectId, totalPoints: it.totalPoints, version: it.version
+                    skillId: it.skillId, name: it.name, projectId: it.projectId, version: it.version
             )
         }
         List<skills.controller.result.model.SharedSkillResult> sharedSkills = getSharedSkillsFromOtherProjects(projectId)
@@ -1103,6 +1116,7 @@ class AdminProjService {
 
 
 
+    @Profile
     private skills.controller.result.model.SkillDefRes convertToSkillDefRes(SkillDef skillDef, boolean loadNumUsers = false) {
         skills.controller.result.model.SkillDefRes res = new skills.controller.result.model.SkillDefRes()
         Props.copy(skillDef, res)
@@ -1111,10 +1125,62 @@ class AdminProjService {
         res.numMaxOccurrencesIncrementInterval = skillDef.numMaxOccurrencesIncrementInterval
 
         if (loadNumUsers) {
-            res.numUsers = skillDefRepo.calculateDistinctUsersForASingleSkill(skillDef.projectId, skillDef.skillId)
+//            res.numUsers = calculateDistinctUsersForSkill(skillDef.projectId, skillDef.skillId)
         }
         return res
     }
+
+    @CompileStatic
+    @Profile
+    private SkillDefSkinnyRes convertToSkillDefSkinnyRes(SkillDefRepo.SkillDefSkinny skinny) {
+        SkillDefSkinnyRes res = new SkillDefSkinnyRes(
+                id: skinny.id,
+                skillId: skinny.skillId,
+                projectId: skinny.projectId,
+                name: skinny.name,
+                version: skinny.version,
+                displayOrder: skinny.displayOrder,
+                created: skinny.created,
+        )
+        return res;
+    }
+
+    @CompileStatic
+    @Profile
+    private SkillDefPartialRes convertToSkillDefPartialRes(SkillDefRepo.SkillDefPartial partial, boolean loadNumUsers = false) {
+        SkillDefPartialRes res = new SkillDefPartialRes(
+                id: partial.id,
+                skillId: partial.skillId,
+                projectId: partial.projectId,
+                name: partial.name,
+                pointIncrement: partial.pointIncrement,
+                pointIncrementInterval: partial.pointIncrementInterval,
+                numMaxOccurrencesIncrementInterval: partial.numMaxOccurrencesIncrementInterval,
+                numPerformToCompletion: partial.numMaxOccurrencesIncrementInterval,
+                totalPoints: partial.totalPoints,
+                version: partial.version,
+                type: partial.skillType,
+                displayOrder: partial.displayOrder,
+                created: partial.created,
+                updated: partial.updated,
+        )
+
+        res.numPerformToCompletion = (Integer)(res.totalPoints / res.pointIncrement)
+        res.totalPoints = partial.totalPoints
+        res.numMaxOccurrencesIncrementInterval = partial.numMaxOccurrencesIncrementInterval
+
+        if (loadNumUsers) {
+            res.numUsers = calculateDistinctUsersForSkill((SkillDefRepo.SkillDefPartial)partial)
+        }
+
+        return res;
+    }
+
+    @Profile
+    private int calculateDistinctUsersForSkill(SkillDefRepo.SkillDefPartial partial) {
+        skillDefRepo.calculateDistinctUsersForASingleSkill(partial.projectId, partial.skillId)
+    }
+
 
     @Transactional(readOnly = true)
     boolean existsByProjectId(String projectId) {
@@ -1160,7 +1226,7 @@ class AdminProjService {
     }
 
     @Transactional
-    List<skills.controller.result.model.SkillDefRes> getSkillsForBadge(String projectId, String badgeId) {
+    List<SkillDefPartialRes> getSkillsForBadge(String projectId, String badgeId) {
         return getSkillsByProjectSkillAndType(projectId, badgeId, SkillDef.ContainerType.Badge, RelationshipType.BadgeDependence)
     }
 

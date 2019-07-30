@@ -79,7 +79,10 @@ const router = new Router({
         name: 'Subjects',
         path: '',
         component: Subjects,
-        meta: { requiresAuth: true, reportSkillId: 'ViewSubjects' },
+        meta: {
+          requiresAuth: true,
+          // reportSkillId: 'ViewSubjects',
+        },
       }, {
         name: 'Badges',
         path: 'badges',

@@ -6,6 +6,11 @@ export default {
       .then(response => response.data);
   },
 
+  getNumUsersForProject(projectId) {
+    return axios.get(`/admin/projects/${projectId}/users/count`)
+      .then(response => response.data);
+  },
+
   getUserToken(projectId, userId) {
     return axios.get(`/admin/projects/${projectId}/token/${userId}`)
       .then(response => `${response.data.access_token}`);

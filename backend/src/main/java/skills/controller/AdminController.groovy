@@ -5,10 +5,7 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.http.MediaType
-import org.springframework.validation.ValidationUtils
 import org.springframework.web.bind.annotation.*
-import skills.controller.exceptions.ErrorCode
-import skills.controller.exceptions.SkillException
 import skills.controller.request.model.ActionPatchRequest
 import skills.controller.request.model.BadgeRequest
 import skills.controller.request.model.EditLevelRequest
@@ -19,12 +16,15 @@ import skills.controller.request.model.SkillRequest
 import skills.controller.request.model.SubjectRequest
 import skills.controller.result.model.BadgeResult
 import skills.controller.result.model.LevelDefinitionRes
+import skills.controller.result.model.NumUsersRes
 import skills.controller.result.model.ProjectResult
 import skills.controller.result.model.RequestResult
 import skills.controller.result.model.SettingsResult
 import skills.controller.result.model.SharedSkillResult
 import skills.controller.result.model.SimpleProjectResult
 import skills.controller.result.model.SkillDefRes
+import skills.controller.result.model.SkillDefPartialRes
+import skills.controller.result.model.SkillDefSkinnyRes
 import skills.controller.result.model.SkillsGraphRes
 import skills.controller.result.model.SubjectResult
 import skills.controller.result.model.TableResult
@@ -285,7 +285,7 @@ class AdminController {
     }
 
     @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/skills", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    List<SkillDefRes> getSkills(
+    List<SkillDefPartialRes> getSkills(
             @PathVariable("projectId") String projectId, @PathVariable("subjectId") String subjectId) {
         skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
         skills.controller.exceptions.SkillsValidator.isNotBlank(subjectId, "Subject Id", projectId)
@@ -471,11 +471,11 @@ class AdminController {
     }
 
     @RequestMapping(value = "/projects/{projectId}/skills", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    List<SkillDefRes> getAllSkillsForProject(
+    List<SkillDefSkinnyRes> getAllSkillsForProject(
             @PathVariable("projectId") String projectId) {
         skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
 
-        List<SkillDefRes> res = projectAdminStorageService.getSkills(projectId)
+        List<SkillDefSkinnyRes> res = projectAdminStorageService.getSkinnySkills(projectId)
         return res
     }
 
@@ -565,6 +565,14 @@ class AdminController {
 
         PageRequest pageRequest = new PageRequest(page - 1, limit, ascending ? ASC : DESC, orderBy)
         return userAdminService.loadUserPerformedSkillsPage(projectId, userId, query, pageRequest)
+    }
+
+    @GetMapping(value = '/projects/{projectId}/users/count', produces = 'application/json')
+    @ResponseBody
+    @CompileStatic
+    NumUsersRes getUserSkillsStats(@PathVariable('projectId') String projectId) {
+        skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
+        return projectAdminStorageService.getNumUsersByProjectId(projectId)
     }
 
     @GetMapping(value = '/projects/{projectId}/users/{userId}/stats', produces = 'application/json')

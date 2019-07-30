@@ -9,8 +9,6 @@ class SkillDefForDependencyRes {
 
     String projectId
 
-    int totalPoints
-
     int version
 
     // will only be non-null for cross-project shared skills

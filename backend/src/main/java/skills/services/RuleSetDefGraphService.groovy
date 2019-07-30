@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillRelDef
 import skills.storage.model.SkillRelDef.RelationshipType
+import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.SkillRelDefRepo
 
 @Service

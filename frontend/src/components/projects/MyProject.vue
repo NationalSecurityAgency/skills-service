@@ -66,8 +66,8 @@
             warn: this.projectInternal.totalPoints < this.minimumPoints,
             warnMsg: 'Project has insufficient points assigned. Skills cannot be achieved until project has at least 100 points.',
           }, {
-            label: 'Users',
-            count: this.projectInternal.numUsers,
+            label: 'Badges',
+            count: this.projectInternal.numBadges,
           }],
         };
       },
