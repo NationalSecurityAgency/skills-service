@@ -163,6 +163,7 @@
           // Some CSS may mess up some things, fix those here
           // Apex charts context menu
           css += 'body #app .apexcharts-menu.open { color: black !important; }';
+          css += 'body #app .apexcharts-tooltip { color: black !important; }';
 
           const style = document.createElement('style');
 
