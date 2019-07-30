@@ -9,6 +9,42 @@ import skills.storage.model.SkillRelDef.RelationshipType
 
 interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
 
+    static interface SkillDefSkinny {
+        Integer getId()
+        String getProjectId()
+        String getName()
+        String getSkillId()
+        Integer getVersion()
+        Integer getDisplayOrder()
+        Date getCreated()
+    }
+
+    static interface SkillDefPartial extends SkillDefSkinny{
+        Integer getPointIncrement()
+        Integer getPointIncrementInterval()
+        Integer getNumMaxOccurrencesIncrementInterval()
+        Integer getTotalPoints()
+        String getIconClass()
+        SkillDef.ContainerType getSkillType()
+        Date getUpdated()
+    }
+
+    /**
+     * Need to create a custom query with limited fields as having many fields is slow,
+     * for example 300 rows select is 330ms+ with description and 20ms without
+     */
+    @Query('''SELECT
+        s.id as id,
+        s.name as name,
+        s.skillId as skillId,
+        s.projectId as projectId,
+        s.displayOrder as displayOrder,
+        s.created as created,
+        s.version as version
+        from SkillDef s where s.projectId = ?1 and s.type = ?2''')
+    List<SkillDefSkinny> findAllSkinnySelectByProjectIdAndType(String id, SkillDef.ContainerType type)
+
+
     List<SkillDef> findAllByProjectIdAndType(String id, SkillDef.ContainerType type)
     @Nullable
     SkillDef findByProjectIdAndSkillIdIgnoreCaseAndType(String id, String skillId, SkillDef.ContainerType type)
@@ -16,9 +52,6 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
     SkillDef findByProjectIdAndSkillIdAndType(String id, String skillId, SkillDef.ContainerType type)
     @Nullable
     SkillDef findByProjectIdAndNameIgnoreCaseAndType(String id, String name, SkillDef.ContainerType type)
-
-    @Query('SELECT s from SkillDef s where s.projectId = ?1 and s.version <= ?2 and s.type = ?3')
-    List<SkillDef> findAllByProjectIdAndVersionAndType(String id, Integer version, SkillDef.ContainerType type)
 
     @Query(value = '''SELECT max(sdChild.displayOrder) from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
       where srd.parent=sdParent.id and srd.child=sdChild.id and 
