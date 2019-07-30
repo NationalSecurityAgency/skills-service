@@ -118,46 +118,25 @@
             },
           };
 
-          // const mockTheme = {
-          //   backgroundColor: {
-          //     value: '#626d7d',
-          //   },
-          //   secondaryTextColor: {
-          //     value: '#b1adad',
-          //   },
-          //   primaryTextColor: {
-          //     value: 'white',
-          //   },
-          //   stars: {
-          //     unearnedColor: {
-          //       value: '#787886',
-          //     },
-          //     earnedColor: {
-          //       value: 'gold',
-          //     },
-          //   },
-          //   progressIndicators: {
-          //     beforeTodayColor: '#3e4d44',
-          //     earnedTodayColor: '#667da4',
-          //     completeColor: '#59ad52',
-          //     incompleteColor: '#cdcdcd',
-          //   },
-          //   charts: {
-          //     axisLabelColor: 'white',
-          //   },
-          //   tiles: {
-          //     backgroundColor: {
-          //       value: '#152E4d',
-          //     },
-          //     watermarkIconColor: {
-          //       value: '#a6c5f7',
-          //     },
-          //   },
-          // };
+          const { body } = document;
+
+          const expandValue = (object, key) => {
+            const isCSSConfig = !nonCSSConfig.includes(key);
+            if (isCSSConfig && typeof object[key] === 'object') {
+              Object.keys(object[key]).forEach((childKey) => {
+                expandValue(object[key], childKey);
+              });
+            } else if (isCSSConfig) {
+              // eslint-disable-next-line no-param-reassign
+              object[key] = { value: object[key] };
+            }
+          };
+
+          Object.keys(theme).forEach((key) => {
+            expandValue(theme, key);
+          });
 
           const themeKey = merge(JSON.parse(JSON.stringify(selectorKey)), theme);
-
-          const { body } = document;
 
           let css = '';
           const buildCss = (obj, keys) => {
@@ -174,7 +153,7 @@
               } else if (isCSSConfig) {
                 buildCss(themeKey[key], Object.keys(themeKey[key]));
               } else {
-                this.$store.state.themeModule[key] = themeKey[key];
+                this.$store.state.themeModule[key] = { ...this.$store.state.themeModule[key], ...themeKey[key] };
               }
             });
           };
