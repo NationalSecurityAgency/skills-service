@@ -31,6 +31,8 @@ class ProjectController {
     @Autowired
     UserInfoService userInfoService
 
+    static final RESERVERED_PROJECT_ID = AdminProjService.ALL_SKILLS_PROJECTS
+
     @RequestMapping(value = "/projects", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     List<skills.controller.result.model.ProjectResult> getProjects() {
@@ -47,13 +49,16 @@ class ProjectController {
         if (!projectRequest.projectId) {
             projectRequest.projectId = projectId
         }
+        if (projectRequest.projectId == RESERVERED_PROJECT_ID) {
+            throw new skills.controller.exceptions.SkillException("Project id uses a reserved id, please choose a different project id.", projectId, null, skills.controller.exceptions.ErrorCode.BadParam)
+        }
         if (!projectRequest?.name) {
             throw new skills.controller.exceptions.SkillException("Project name was not provided.", projectId, null, skills.controller.exceptions.ErrorCode.BadParam)
         }
 
         // if the id is provided then this is an 'edit operation' then user must be an amdin of this project
         if (projectRequest.id) {
-            throw new SkillException("Can not edit project id using /app/projects/{id} endpoint. Plese use /admin/projects/{id}", projectId, null, ErrorCode.AccessDenied)
+            throw new SkillException("Cannot edit project id using /app/projects/{id} endpoint. Please use /admin/projects/{id}", projectId, null, ErrorCode.AccessDenied)
         }
 
         projectAdminStorageService.saveProject(projectRequest)

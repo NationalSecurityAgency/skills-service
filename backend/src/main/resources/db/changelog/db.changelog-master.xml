@@ -305,7 +305,7 @@
                 <constraints nullable="false"/>
             </column>
             <column name="shared_to_project_id" type="int">
-                <constraints nullable="false"/>
+                <constraints nullable="true"/>
             </column>
 
             <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">

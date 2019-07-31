@@ -32,6 +32,9 @@ export default {
       .then(response => response.data);
   },
   checkIfProjectIdExist(projectId) {
+    if (projectId && projectId.toUpperCase() === 'ALL_SKILLS_PROJECTS') {
+      return true;
+    }
     return axios.get(`/app/projectExist?projectId=${encodeURIComponent(projectId)}`)
       .then(response => response.data);
   },

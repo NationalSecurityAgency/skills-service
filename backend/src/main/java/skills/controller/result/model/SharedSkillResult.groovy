@@ -5,4 +5,5 @@ class SharedSkillResult {
     String skillId
     String projectName
     String projectId
+    boolean sharedWithAllProjects = false
 }

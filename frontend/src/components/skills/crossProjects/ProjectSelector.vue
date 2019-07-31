@@ -5,7 +5,7 @@
                  :options="projects" :multiple="true" :taggable="false" :blockKeys="['Delete']"
                  :hide-selected="true" label="name" track-by="id" v-on:select="onSelected" v-on:remove="onRemoved"
                  @search-change="search" :loading="isLoading" :internal-search="false"
-                 :clear-on-select="false">
+                 :clear-on-select="false" :disabled="disabled">
       <template slot="option" slot-scope="props">
         <h6>{{ props.option.name }}</h6>
         <div class="text-secondary">ID: {{props.option.projectId}}</div>
@@ -21,7 +21,14 @@
   export default {
     name: 'ProjectSelector',
     components: { Multiselect },
-    props: ['projectId', 'selected'],
+    props: {
+      projectId: String,
+      selected: Object,
+      disabled: {
+        type: Boolean,
+        default: false,
+      },
+    },
     data() {
       return {
         isLoading: false,

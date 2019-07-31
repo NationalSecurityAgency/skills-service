@@ -16,7 +16,8 @@ interface SkillShareDefRepo extends CrudRepository<SkillShareDef, Long> {
 
     @Query('''select skill.id as id, skill.skillId as skillId, skill.name as skillName, proj.projectId as projectId, proj.name as projectName
         from SkillShareDef share, SkillDef skill, ProjDef proj
-        where share.skill = skill and skill.projectId=proj.projectId and share.sharedToProject=?1''')
+        where share.skill = skill and skill.projectId=proj.projectId 
+            and (share.sharedToProject=?1 or share.sharedToProject is null) and proj <> ?1''')
     List<SkillSharedMeta> getSkillDefsSharedFromOtherProjectsByProjectId(ProjDef sharedToProject)
 
     static interface SkillSharedMeta {
@@ -29,4 +30,7 @@ interface SkillShareDefRepo extends CrudRepository<SkillShareDef, Long> {
 
     @Nullable
     SkillShareDef findBySkillAndSharedToProject(SkillDef skill, ProjDef sharedToProject)
+
+    @Nullable
+    SkillShareDef findBySkillAndSharedToProjectIsNull(SkillDef skill)
 }

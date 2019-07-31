@@ -14,8 +14,8 @@
         <div class="text-secondary" style="font-size: 0.9rem;">ID: {{ props.row.skillId }}</div>
       </div>
       <div slot="project" slot-scope="props">
-        <div>{{ props.row.projectName }}</div>
-        <div class="text-secondary" style="font-size: 0.9rem;">ID: {{ props.row.projectId }}</div>
+        <div>{{ getProjectName(props.row) }}</div>
+        <div class="text-secondary" style="font-size: 0.9rem;">ID: {{ getProjectId(props.row) }}</div>
       </div>
 
     </v-client-table>
@@ -59,6 +59,18 @@
     methods: {
       onDeleteEvent(skill) {
         this.$emit('skill-removed', skill);
+      },
+      getProjectName(row) {
+        if (row.sharedWithAllProjects) {
+          return 'All Projects';
+        }
+        return row.projectName;
+      },
+      getProjectId(row) {
+        if (row.sharedWithAllProjects) {
+          return 'All';
+        }
+        return row.projectId;
       },
     },
   };

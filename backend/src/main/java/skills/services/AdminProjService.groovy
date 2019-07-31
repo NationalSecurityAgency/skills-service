@@ -47,6 +47,8 @@ import skills.utils.Props
 @Slf4j
 class AdminProjService {
 
+    static final ALL_SKILLS_PROJECTS = 'ALL_SKILLS_PROJECTS'
+
     @Autowired
     ProjDefRepo projDefRepo
 
@@ -490,7 +492,11 @@ class AdminProjService {
             throw new skills.controller.exceptions.SkillException("Can not share skill to itself. Requested project [$sharedToProjectId] is itself!", projectId, skillId)
         }
         SkillDef skill = getSkillDef(projectId, skillId)
-        ProjDef sharedToProject = getProjDef(sharedToProjectId)
+
+        ProjDef sharedToProject = null
+        if (sharedToProjectId != ALL_SKILLS_PROJECTS) {
+            sharedToProject = getProjDef(sharedToProjectId)
+        }
 
         SkillShareDef skillShareDef = new SkillShareDef(skill: skill, sharedToProject: sharedToProject)
         skillShareDefRepo.save(skillShareDef)
@@ -499,8 +505,14 @@ class AdminProjService {
     @Transactional()
     void deleteSkillShare(String projectId, String skillId, String sharedToProjectId) {
         SkillDef skill = getSkillDef(projectId, skillId)
-        ProjDef sharedToProject = getProjDef(sharedToProjectId)
-        SkillShareDef skillShareDef = skillShareDefRepo.findBySkillAndSharedToProject(skill, sharedToProject)
+        SkillShareDef skillShareDef
+        if (sharedToProjectId == ALL_SKILLS_PROJECTS) {
+            skillShareDef = skillShareDefRepo.findBySkillAndSharedToProjectIsNull(skill)
+        } else {
+            ProjDef sharedToProject = getProjDef(sharedToProjectId)
+            skillShareDef = skillShareDefRepo.findBySkillAndSharedToProject(skill, sharedToProject)
+        }
+
         if (!skillShareDef){
             throw new skills.controller.exceptions.SkillException("Failed to find skill share definition for project [$projectId] skill [$skillId] => [$sharedToProjectId] project", projectId, skillId)
         }
@@ -514,7 +526,8 @@ class AdminProjService {
         return shareDefs.collect { SkillShareDef shareDef ->
             new skills.controller.result.model.SharedSkillResult(
                     skillName: shareDef.skill.name, skillId: shareDef.skill.skillId,
-                    projectName: shareDef.sharedToProject.name, projectId: shareDef.sharedToProject.projectId
+                    projectName: shareDef.sharedToProject?.name, projectId: shareDef.sharedToProject?.projectId,
+                    sharedWithAllProjects: shareDef.sharedToProject == null
             )
         }
     }
