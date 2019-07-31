@@ -5,16 +5,27 @@
     </div>
     <div class="card-body">
       <loading-container :is-loading="loading.sharedSkillsInit || loading.allSkills">
-        <div class="row text-center">
-          <div class="col-sm-5">
+        <div class="row mb-2">
+          <div class="col-md-12 col-lg-10 col-xl-8">
             <skills-selector2 :options="allSkills" v-on:added="onSelectedSkill" v-on:removed="onDeselectedSkill"
                               :selected="selectedSkills"></skills-selector2>
           </div>
-          <div class="col-sm-5 my-2 my-sm-0 px-sm-1">
+        </div>
+        <b-form-checkbox v-model="shareWithAllProjects" @change="onShareWithAllProjects " class="mt-2">
+          <small>Share With All Projects </small><inline-help msg="Select this checkbox to share the skill with ALL projects."/>
+        </b-form-checkbox>
+        <div class="row mb-2">
+          <div class="col-md-12 col-lg-10 col-xl-8">
             <project-selector :project-id="projectId" :selected="selectedProject"
                               v-on:selected="onSelectedProject"
-                              v-on:unselected="onUnSelectedProject"></project-selector>
+                              v-on:unselected="onUnSelectedProject"
+                              :disabled="shareWithAllProjects">
+
+            </project-selector>
           </div>
+        </div>
+
+        <div class="row">
           <div class="col-sm-2 text-center text-sm-left">
             <button class="btn btn-sm btn-outline-primary h-100" v-on:click="shareSkill"
                     :disabled="!shareButtonEnabled">
@@ -24,8 +35,7 @@
         </div>
 
         <b-alert v-if="displayError" variant="danger" class="mt-2" show dismissible>
-          <i class="fa fa-exclamation-circle"></i> Skill <strong>[{{ selectedSkills[0].name }}]</strong> is already
-          shared to project <strong>[{{ selectedProject.name }}]</strong>.
+          <i class="fa fa-exclamation-circle"></i> <span v-html="errorMessage"></span>
         </b-alert>
 
         <loading-container :is-loading="loading.sharedSkills">
@@ -52,6 +62,7 @@
   import SharedSkillsTable from './SharedSkillsTable';
   import SkillsShareService from './SkillsShareService';
   import NoContent2 from '../../utils/NoContent2';
+  import InlineHelp from '../../utils/InlineHelp';
 
   export default {
     name: 'ShareSkillsWithOtherProjects',
@@ -62,6 +73,7 @@
       ProjectSelector,
       LoadingContainer,
       SkillsSelector2,
+      InlineHelp,
     },
     data() {
       return {
@@ -76,6 +88,8 @@
         sharedSkills: [],
         selectedProject: null,
         displayError: false,
+        errorMessage: '',
+        shareWithAllProjects: false,
       };
     },
     mounted() {
@@ -84,7 +98,7 @@
     },
     computed: {
       shareButtonEnabled() {
-        return this.selectedProject && this.selectedSkills && this.selectedSkills.length > 0 && !this.loading.sharedSkills;
+        return (this.selectedProject || this.shareWithAllProjects) && this.selectedSkills && this.selectedSkills.length > 0 && !this.loading.sharedSkills;
       },
     },
     methods: {
@@ -113,7 +127,11 @@
           this.displayError = false;
           this.loading.sharedSkills = true;
           const selectedSkill = this.selectedSkills[0];
-          SkillsShareService.shareSkillToAnotherProject(this.projectId, selectedSkill.skillId, this.selectedProject.projectId)
+          let sharedProjectId = 'ALL_SKILLS_PROJECTS';
+          if (!this.shareWithAllProjects) {
+            sharedProjectId = this.selectedProject.projectId;
+          }
+          SkillsShareService.shareSkillToAnotherProject(this.projectId, selectedSkill.skillId, sharedProjectId)
             .then(() => {
               this.loadSharedSkills();
             });
@@ -121,27 +139,48 @@
       },
       doesShareAlreadyExist() {
         const selectedSkill = this.selectedSkills[0];
-        const alreadyExist = this.sharedSkills.find(entry => entry.skillId === selectedSkill.skillId && entry.projectId === this.selectedProject.projectId);
+        const alreadyExist = this.sharedSkills.find(entry => entry.skillId === selectedSkill.skillId && (!entry.projectId || this.shareWithAllProjects || entry.projectId === this.selectedProject.projectId));
+        if (alreadyExist) {
+          if (alreadyExist.sharedWithAllProjects) {
+            this.errorMessage = `Skill <strong>[${selectedSkill.name}]</strong> is already shared to <strong>[All Projects]</strong>.`;
+          } else {
+            this.errorMessage = `Skill <strong>[${selectedSkill.name}]</strong> is already shared to project <strong>[${alreadyExist.projectName}]</strong>.`;
+          }
+        }
         return alreadyExist;
       },
       deleteSharedSkill(itemToRemove) {
         this.loading.sharedSkills = true;
-        SkillsShareService.deleteSkillShare(this.projectId, itemToRemove.skillId, itemToRemove.projectId)
+        let sharedProjectId = 'ALL_SKILLS_PROJECTS';
+        if (!itemToRemove.sharedWithAllProjects) {
+          sharedProjectId = itemToRemove.projectId;
+        }
+        SkillsShareService.deleteSkillShare(this.projectId, itemToRemove.skillId, sharedProjectId)
           .then(() => {
             this.loadSharedSkills();
           });
       },
       onSelectedProject(item) {
+        this.displayError = false;
         this.selectedProject = item;
       },
       onUnSelectedProject() {
+        this.displayError = false;
         this.selectedProject = null;
       },
       onSelectedSkill(item) {
+        this.displayError = false;
         this.selectedSkills = [item];
       },
       onDeselectedSkill() {
+        this.displayError = false;
         this.selectedSkills = [];
+      },
+      onShareWithAllProjects(checked) {
+        this.displayError = false;
+        if (checked) {
+          this.selectedProject = null;
+        }
       },
     },
 

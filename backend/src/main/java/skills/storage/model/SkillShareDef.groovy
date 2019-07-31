@@ -22,7 +22,7 @@ class SkillShareDef {
     SkillDef skill
 
     @ManyToOne
-    @JoinColumn(name="shared_to_project_id")
+    @JoinColumn(name="shared_to_project_id", nullable = true)
     ProjDef sharedToProject
 
     @Temporal(TemporalType.TIMESTAMP)
