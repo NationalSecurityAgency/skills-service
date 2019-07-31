@@ -153,17 +153,12 @@ class AdminProjService {
                     clientSecret: clientSecret)
             log.info("Created project [{}]", projectDefinition)
 
-            List<LevelDef> levelDefinitions = levelDefService.createDefault(projectRequest.projectId)
-            levelDefinitions.each{
-                projectDefinition.addLevel(it)
-            }
-
-
-
             dataIntegrityViolationExceptionHandler.handle(projectDefinition.projectId){
                 projectDefinition = projDefRepo.save(projectDefinition)
             }
             log.info("Saved [{}]", projectDefinition)
+
+            levelDefService.createDefault(projectRequest.projectId, projectDefinition)
 
             accessSettingsStorageService.addUserRole(userIdParam ?: this.getUserId(), projectRequest.projectId, RoleName.ROLE_PROJECT_ADMIN)
             log.info("Added user role [{}]", RoleName.ROLE_PROJECT_ADMIN)
@@ -219,12 +214,10 @@ class AdminProjService {
                     displayOrder: displayOrder
             )
 
-            levelDefService.createDefault().each{
-                skillDef.addLevel(it)
-            }
             subjectDataIntegrityViolationExceptionHandler.handle(projectId) {
                 res = skillDefRepo.save(skillDef)
             }
+            levelDefService.createDefault(projectId, null, skillDef)
             log.info("Created [{}]", res)
         }
     }
@@ -542,10 +535,11 @@ class AdminProjService {
     @Transactional()
     void deleteProject(String projectId) {
         log.info("Deleting project with id [{}]", projectId)
-        ProjDef projectDefinition = getProjDef(projectId)
-        assert projectDefinition, "DELETE FAILED -> no project with id $projectId"
+        if (!existsByProjectId(projectId)){
+            throw new SkillException("Project with id [${projectId}] does NOT exist")
+        }
 
-        projDefRepo.deleteById(projectDefinition.id)
+        projDefRepo.deleteByProjectIdIgnoreCase(projectId)
         log.info("Deleted project with id [{}]", projectId)
     }
 

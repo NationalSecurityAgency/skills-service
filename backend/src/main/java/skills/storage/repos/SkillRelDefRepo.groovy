@@ -7,6 +7,9 @@ import skills.storage.model.SkillRelDef
 
 interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
     List<SkillRelDef> findAllByChildAndType(SkillDef child, SkillRelDef.RelationshipType type)
+
+    @Query('''SELECT srd from SkillRelDef srd where srd.child.id=?1 and srd.type=?2''')
+    List<SkillRelDef> findAllByChildIdAndType(Integer childId, SkillRelDef.RelationshipType type)
     SkillRelDef findByChildAndParentAndType(SkillDef child, SkillDef parent, SkillRelDef.RelationshipType type)
     List<SkillRelDef> findAllByParentAndType(SkillDef parent, SkillRelDef.RelationshipType type)
 

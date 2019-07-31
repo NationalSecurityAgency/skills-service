@@ -10,6 +10,8 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
     @Nullable
     ProjDef findByProjectIdIgnoreCase(String projectId)
 
+    void deleteByProjectIdIgnoreCase(String projectId)
+
     @Nullable
     ProjDef findByProjectId(String projectId)
 

@@ -53,10 +53,9 @@ class LevelPointsSettingListener implements SettingChangedListener{
                         "N/A",
                         skills.controller.exceptions.ErrorCode.InsufficientPointsToConvertLevels)
             }
-            levelUtils.convertToPoints(project.levelDefinitions, project.totalPoints)
-            project.levelDefinitions.each{
-                levelDefRepo.save(it)
-            }
+            List<LevelDef> levelDefs = levelDefRepo.findAllByProjectId(project.id)
+            levelUtils.convertToPoints(levelDefs, project.totalPoints)
+            levelDefRepo.saveAll(levelDefs)
             project.subjects?.each{
                 levelUtils.convertToPoints(it.levelDefinitions, it.totalPoints == 0 ? LevelUtils.defaultTotalPointsGuess : it.totalPoints)
                 it.levelDefinitions.each { LevelDef level ->
@@ -65,10 +64,9 @@ class LevelPointsSettingListener implements SettingChangedListener{
             }
         }else if(!setting.isEnabled()){
             log.info("converting all levels for project [${setting.projectId}] (including skill levels) to percentages")
-            levelUtils.convertToPercentage(project.levelDefinitions, project.totalPoints)
-            project.levelDefinitions.each{
-                levelDefRepo.save(it)
-            }
+            List<LevelDef> levelDefs = levelDefRepo.findAllByProjectId(project.id)
+            levelUtils.convertToPercentage(levelDefs, project.totalPoints)
+            levelDefRepo.saveAll(levelDefs)
             project.subjects?.each{
                 log.info("converting level definitions ${it.levelDefinitions} for subject ${it}")
                 //conditions we need to handle:
