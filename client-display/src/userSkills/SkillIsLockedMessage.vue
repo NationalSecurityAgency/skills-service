@@ -1,6 +1,6 @@
 <template>
     <div class="mb-2">
-        <span>Skill has <b>{{ userSkill.dependencyInfo.numDirectDependents}}</b> direct dependent(s).
+        <span class="text-muted">Skill has <b>{{ userSkill.dependencyInfo.numDirectDependents}}</b> direct dependent(s).
             Click <i class="fas fa-lock icon"></i> to see its dependencies.</span>
     </div>
 </template>

@@ -1,7 +1,7 @@
 <template>
     <small v-if="skill" class="font-italic text-left text-muted pb-md-2">
         <div v-if="locked" class="row justify-content-center pb-3 locked-text">
-            <div class="col-12 col-md-9">
+            <div class="col-12 col-md-9 text-muted">
                 *** Skill has <b>{{ skill.dependencyInfo.numDirectDependents}}</b> direct dependent(s).
                 Click <i class="fas fa-lock icon"></i> to see its dependencies. ***
             </div>
