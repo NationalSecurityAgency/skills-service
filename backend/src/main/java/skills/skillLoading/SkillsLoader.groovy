@@ -382,7 +382,7 @@ class SkillsLoader {
         if(subjectDef){
             maxLevel = subjectDef.levelDefinitions.size()
         }else{
-            maxLevel = projDef.levelDefinitions.size()
+            maxLevel = levelDefService.maxProjectLevel(projDef)
         }
 
         if (lastAchievedLevel && lastAchievedLevel?.level > calculatedLevelInfo.level) {

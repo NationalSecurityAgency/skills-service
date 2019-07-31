@@ -46,16 +46,17 @@ class LevelDefinitionStorageService {
 
 
     LevelInfo getLevelInfo(SkillDef skillDefinition, int currentScore) {
-        return doGetLevelInfo(skillDefinition.projectId, skillDefinition.levelDefinitions, skillDefinition.totalPoints, currentScore)
+        return getLevelInfo(skillDefinition.projectId, skillDefinition.levelDefinitions, skillDefinition.totalPoints, currentScore)
     }
 
     @Profile
     LevelInfo getOverallLevelInfo(ProjDef projDef, int currentScore) {
-        LevelInfo levelInfo = doGetLevelInfo(projDef.projectId, projDef.levelDefinitions, projDef.totalPoints, currentScore)
+        List<LevelDef> levelDefinitions = levelDefinitionRepository.findAllByProjectId(projDef.id)
+        LevelInfo levelInfo = getLevelInfo(projDef.projectId, levelDefinitions, projDef.totalPoints, currentScore)
         return levelInfo
     }
 
-    private LevelInfo doGetLevelInfo(String projectId, List<LevelDef> levelDefinitions, int totalPoints, int currentScore) {
+    LevelInfo getLevelInfo(String projectId, List<LevelDef> levelDefinitions, int totalPoints, int currentScore) {
         skills.controller.result.model.SettingsResult setting = settingsService.getSetting(projectId, Settings.LEVEL_AS_POINTS.settingName)
 
         List<Integer> levelScores
@@ -83,13 +84,19 @@ class LevelDefinitionStorageService {
     int getPointsRequiredForOverallLevel(ProjDef projDef, int level) {
         skills.controller.result.model.SettingsResult setting = settingsService.getSetting(projDef.projectId, Settings.LEVEL_AS_POINTS.settingName)
 
+        List<LevelDef> levelDefinitions = getProjLevelDefs(projDef)
         List<Integer> levelScores = []
         if(setting?.isEnabled()){
-            levelScores = loadPointsLevels(projDef.levelDefinitions)
+            levelScores = loadPointsLevels(levelDefinitions)
         } else {
-            levelScores = loadPercentLevels(projDef.levelDefinitions, projDef.totalPoints)
+            levelScores = loadPercentLevels(levelDefinitions, projDef.totalPoints)
         }
         return calculatePointsRequiredForLevel(levelScores, level)
+    }
+
+    @Profile
+    private List<LevelDef> getProjLevelDefs(ProjDef projDef) {
+        levelDefinitionRepository.findAllByProjectId(projDef.id)
     }
 
     private List<Integer> loadPercentLevels(List<LevelDef> levelDefinitions, int currentScore) {
@@ -174,11 +181,6 @@ class LevelDefinitionStorageService {
     }
 
     @Transactional
-    List<skills.controller.result.model.LevelDefinitionRes> getLevelsDefRes(ProjDef projDef) {
-        return doGetLevelsDefRes(projDef.levelDefinitions, projDef.totalPoints, projDef.projectId)
-    }
-
-    @Transactional
     List<skills.controller.result.model.LevelDefinitionRes> getLevelsDefRes(SkillDef skillDef) {
         return doGetLevelsDefRes(skillDef.levelDefinitions, skillDef.totalPoints, skillDef.projectId, skillDef.skillId)
     }
@@ -238,7 +240,7 @@ class LevelDefinitionStorageService {
             if(!projDef){
                 throw new skills.controller.exceptions.SkillException("Failed to find project", projectId, null)
             }
-            res = new LevelDefRes(levels: projDef.levelDefinitions?.sort({it.level}), projectId: projDef.projectId, totalPoints: projDef.totalPoints)
+            res = new LevelDefRes(levels: getProjLevelDefs(projDef)?.sort({it.level}), projectId: projDef.projectId, totalPoints: projDef.totalPoints)
         }
         return res
     }
@@ -367,36 +369,39 @@ class LevelDefinitionStorageService {
             }
 
             created = new LevelDef(level: lastOne.level + 1,
-                    projDef: project,
+                    projectId: project?.id,
                     percent: nextLevelRequest.percent,
-                    skillDef: skill,
+                    skillRefId: skill?.id,
                     name: nextLevelRequest.name,
                     pointsFrom: nextLevelRequest.points,
                     iconClass: nextLevelRequest.iconClass
             )
 
             created = levelDefinitionRepository.save(created)
-
-            if(skill){
-                skill.addLevel(created)
-                skillDefRepo.save(skill)
-            }else{
-                project.addLevel(created)
-                projDefRepo.save(project)
-            }
             log.info("Added new level [{}]", created)
         }
 
         return created
     }
 
-    List<LevelDef> createDefault(String projectId) {
+    /**
+     * Levels belong to either project or skill; so only project OR skill must be provided
+     */
+    List<LevelDef> createDefault(String projectId, ProjDef projDef, SkillDef skillDef = null) {
         skills.controller.result.model.SettingsResult setting = settingsService.getSetting(projectId, Settings.LEVEL_AS_POINTS.settingName)
+
+        assert projDef || skillDef
 
         List<LevelDef> res = []
         int i=0
         defaultPercentages.each { String name, Integer percentage ->
-            def levelDef = new LevelDef(level: ++i, percent: percentage, name: name, iconClass: "fas fa-user-ninja")
+            def levelDef = new LevelDef(
+                    projectId: skillDef ? null : projDef?.id,
+                    skillRefId: skillDef?.id,
+                    level: ++i,
+                    percent: percentage,
+                    name: name,
+                    iconClass: "fas fa-user-ninja")
             log.info("creating default level $levelDef")
             res << levelDef
         }
@@ -405,5 +410,9 @@ class LevelDefinitionStorageService {
         }
 
         levelDefinitionRepository.saveAll(res)
+    }
+
+    int maxProjectLevel(ProjDef projDef) {
+        return getProjLevelDefs(projDef).size()
     }
 }

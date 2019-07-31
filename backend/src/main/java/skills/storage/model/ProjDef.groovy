@@ -7,7 +7,7 @@ import javax.persistence.*
 
 @Entity
 @Table(name = 'project_definition')
-@ToString(includeNames = true, excludes = ['levelDefinitions', 'subjects', 'badges', 'customIcons'])
+@ToString(includeNames = true, excludes = ['subjects', 'badges', 'customIcons'])
 class ProjDef implements Serializable {
 
     @Id
@@ -25,35 +25,17 @@ class ProjDef implements Serializable {
 
     int displayOrder
 
-    @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.REMOVE)
-    @JoinColumn(name="projectId")
-    List<LevelDef> levelDefinitions
-
-    @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.REMOVE)
-    @JoinColumn(name="projRefId")
+    @OneToMany(fetch = FetchType.LAZY, cascade = [])
+    @JoinColumn(name="projRefId", insertable = false, updatable = false)
     @Where(clause = "type = 'Subject'")
     List<SkillDef> subjects
 
-    @OneToMany(fetch = FetchType.LAZY)
-    @JoinColumn(name="projRefId")
+    @OneToMany(fetch = FetchType.LAZY, cascade = [])
+    @JoinColumn(name="projRefId", insertable = false, updatable = false)
     @Where(clause = "type = 'Badge'")
     List<SkillDef> badges
 
-    @OneToMany(fetch = FetchType.LAZY)
-    @JoinColumn(name="projRefId")
+    @OneToMany(fetch = FetchType.LAZY, cascade = [])
+    @JoinColumn(name="projRefId", insertable = false, updatable = false)
     List<CustomIcon> customIcons
-
-    public void addLevel(LevelDef level){
-        if (level == null) {
-            throw new IllegalArgumentException("cannot add null level")
-        }
-        if(levelDefinitions == null){
-            levelDefinitions = []
-        }
-        if (level.getProjDef() != null) {
-            level.getProjDef().getLevelDefinitions().remove(level)
-        }
-        levelDefinitions.add(level)
-        level.setProjDef(this)
-    }
 }

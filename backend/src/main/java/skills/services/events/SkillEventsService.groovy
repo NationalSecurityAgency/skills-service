@@ -10,6 +10,7 @@ import skills.controller.exceptions.SkillException
 import skills.services.LevelDefinitionStorageService
 import skills.storage.model.SkillRelDef
 import skills.storage.repos.ProjDefRepo
+import skills.storage.repos.SkillEventsSupportRepo
 import skills.storage.repos.SkillRelDefRepo
 import skills.storage.repos.UserPerformedSkillRepo
 import skills.storage.repos.SkillDefRepo
@@ -29,6 +30,9 @@ class SkillEventsService {
 
     @Autowired
     SkillDefRepo skillDefRepo
+
+    @Autowired
+    SkillEventsSupportRepo skillEventsSupportRepo
 
     @Autowired
     ProjDefRepo projDefRepo
@@ -70,10 +74,7 @@ class SkillEventsService {
 
         SkillEventResult res = new SkillEventResult()
 
-        SkillDef skillDefinition = skillDefRepo.findByProjectIdAndSkillIdAndType(projectId, skillId, SkillDef.ContainerType.Skill)
-        if (!skillDefinition) {
-            throw new skills.controller.exceptions.SkillException("Skill definition does not exist!", projectId, skillId)
-        }
+        SkillEventsSupportRepo.SkillDefMin skillDefinitionMin = getSkillDef(projectId, skillId)
 
         Long numExistingSkills = getNumExistingSkills(userId, projectId, skillId)
         numExistingSkills = numExistingSkills ?: 0 // account for null
@@ -87,13 +88,13 @@ class SkillEventsService {
         }
 
         boolean decrement = true
-        handleAchievementAndPointsHelper.updateUserPoints(userId, skillDefinition, performedSkill.performedOn, skillId, decrement)
-        boolean requestedSkillCompleted = hasReachedMaxPoints(numExistingSkills, skillDefinition)
+        handleAchievementAndPointsHelper.updateUserPoints(userId, skillDefinitionMin, performedSkill.performedOn, skillId, decrement)
+        boolean requestedSkillCompleted = hasReachedMaxPoints(numExistingSkills, skillDefinitionMin)
         if (requestedSkillCompleted) {
-            checkForBadgesAchieved(res, userId, skillDefinition, decrement)
+            checkForBadgesAchieved(res, userId, skillDefinitionMin, decrement)
             achievedLevelRepo.deleteByProjectIdAndSkillIdAndUserIdAndLevel(performedSkill.projectId, performedSkill.skillId, userId, null)
         }
-        handleAchievementAndPointsHelper.checkParentGraph(performedSkill.performedOn, res, userId, skillDefinition, decrement)
+        handleAchievementAndPointsHelper.checkParentGraph(performedSkill.performedOn, res, userId, skillDefinitionMin, decrement)
         performedSkillRepository.delete(performedSkill)
 
         return res
@@ -108,7 +109,7 @@ class SkillEventsService {
         // TODO: make a builder for the class
         SkillEventResult res = new SkillEventResult()
 
-        SkillDef skillDefinition = getSkillDef(projectId, skillId)
+        SkillEventsSupportRepo.SkillDefMin skillDefinition = getSkillDef(projectId, skillId)
 
         Long numExistingSkills = getNumExistingSkills(userId, projectId, skillId)
         numExistingSkills = numExistingSkills ?: 0 // account for null
@@ -146,6 +147,8 @@ class SkillEventsService {
 
         handleAchievementAndPointsHelper.checkParentGraph(incomingSkillDate, res, userId, skillDefinition, decrement)
 
+        // do it at the very end for performance reasons as it will rarely get to this point
+        handleAchievementAndPointsHelper.checkProjectPoints(projectId)
         return res
     }
 
@@ -161,8 +164,8 @@ class SkillEventsService {
     }
 
     @Profile
-    private SkillDef getSkillDef(String projectId, String skillId) {
-        SkillDef skillDefinition = skillDefRepo.findByProjectIdAndSkillIdAndType(projectId, skillId, SkillDef.ContainerType.Skill)
+    private SkillEventsSupportRepo.SkillDefMin getSkillDef(String projectId, String skillId) {
+        SkillEventsSupportRepo.SkillDefMin skillDefinition = skillEventsSupportRepo.findByProjectIdAndSkillIdAndType(projectId, skillId, SkillDef.ContainerType.Skill)
         if (!skillDefinition) {
             throw new SkillException("Skill definition does not exist. Must create the skill definition first!", projectId, skillId)
         }
@@ -170,7 +173,7 @@ class SkillEventsService {
     }
 
     @Profile
-    private void documentSkillAchieved(String userId, long numExistingSkills, SkillDef skillDefinition, SkillEventResult res) {
+    private void documentSkillAchieved(String userId, long numExistingSkills, SkillEventsSupportRepo.SkillDefMin skillDefinition, SkillEventResult res) {
         UserAchievement skillAchieved = new UserAchievement(userId: userId, projectId: skillDefinition.projectId, skillId: skillDefinition.skillId, skillRefId: skillDefinition?.id,
                 pointsWhenAchieved: ((numExistingSkills.intValue() + 1) * skillDefinition.pointIncrement))
         achievedLevelRepo.save(skillAchieved)
@@ -183,8 +186,8 @@ class SkillEventsService {
 
 
     @Profile
-    private void checkForBadgesAchieved(SkillEventResult res, String userId, SkillDef currentSkillDef, boolean decrement) {
-        List<SkillRelDef> parentsRels = skillRelDefRepo.findAllByChildAndType(currentSkillDef, SkillRelDef.RelationshipType.BadgeDependence)
+    private void checkForBadgesAchieved(SkillEventResult res, String userId, SkillEventsSupportRepo.SkillDefMin currentSkillDef, boolean decrement) {
+        List<SkillRelDef> parentsRels = skillRelDefRepo.findAllByChildIdAndType(currentSkillDef.id, SkillRelDef.RelationshipType.BadgeDependence)
         parentsRels.each {
             if (it.parent.type == SkillDef.ContainerType.Badge && withinActiveTimeframe(it.parent)) {
                 SkillDef badge = it.parent
@@ -195,7 +198,7 @@ class SkillEventsService {
                         if (!badges) {
                             UserAchievement groupAchievement = new UserAchievement(userId: userId, projectId: badge.projectId, skillId: badge.skillId, skillRefId: badge?.id)
                             achievedLevelRepo.save(groupAchievement)
-                            res.completed.add(new CompletionItem(type: CompletionTypeUtil.getCompletionType(badge), id: badge.skillId, name: badge.name))
+                            res.completed.add(new CompletionItem(type: CompletionTypeUtil.getCompletionType(badge.type), id: badge.skillId, name: badge.name))
                         }
                     } else {
                         achievedLevelRepo.deleteByProjectIdAndSkillIdAndUserIdAndLevel(badge.projectId, badge.skillId, userId, null)
@@ -215,7 +218,7 @@ class SkillEventsService {
     }
 
 
-    private boolean hasReachedMaxPoints(long numSkills, SkillDef skillDefinition) {
+    private boolean hasReachedMaxPoints(long numSkills, SkillEventsSupportRepo.SkillDefMin skillDefinition) {
         return numSkills * skillDefinition.pointIncrement >= skillDefinition.totalPoints
     }
 

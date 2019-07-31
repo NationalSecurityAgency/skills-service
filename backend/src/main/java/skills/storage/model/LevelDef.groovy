@@ -14,7 +14,7 @@ import javax.persistence.Table
 
 @Entity
 @Table(name='level_definition')
-@ToString(includeNames = true, excludes = ['projDef', 'skillDef'])
+@ToString(includeNames = true)
 class LevelDef implements Serializable{
 
     @Id
@@ -24,13 +24,11 @@ class LevelDef implements Serializable{
     int level
     Integer percent
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name="id", insertable = false, updatable = false)
-    ProjDef projDef
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = true)
-    @JoinColumn(name="id", insertable = false, updatable = false)
-    SkillDef skillDef
+    // either belongs to a project or to skill
+    @Column(name="project_id")
+    Integer projectId
+    @Column(name="skill_id")
+    Integer skillRefId
 
     Integer pointsFrom
     Integer pointsTo

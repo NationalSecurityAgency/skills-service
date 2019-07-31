@@ -65,8 +65,8 @@ class SkillDef {
     Date updated
 
     @OneToMany(fetch = FetchType.LAZY)
-    @JoinColumn(name="skillId")
-    List<LevelDef> levelDefinitions = new ArrayList<LevelDef>()
+    @JoinColumn(name="skill_id", insertable = false, updatable = false)
+    List<LevelDef> levelDefinitions
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customIconId")
@@ -75,15 +75,4 @@ class SkillDef {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="projRefId")
     ProjDef projDef
-
-    public void addLevel(LevelDef level) {
-        if (level == null) {
-            throw new IllegalArgumentException("cannot add null level")
-        }
-        if (level.getSkillDef() != null) {
-            level.getSkillDef().getLevelDefinitions().remove(level)
-        }
-        levelDefinitions.add(level)
-        level.setSkillDef(this)
-    }
 }
