@@ -93,7 +93,7 @@
               styleName: 'color',
             },
             primaryTextColor: {
-              selector: 'body #app .card-header, body #app .card-body, body #app .skill-tile-label, body #app .card-title body #app .card ',
+              selector: 'body #app .text-primary, body #app .card-header, body #app .card-body, body #app .skill-tile-label, body #app .card-title body #app .card, body #app h2, body #app h3',
               styleName: 'color',
             },
             tiles: {
