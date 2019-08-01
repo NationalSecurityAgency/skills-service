@@ -38,9 +38,6 @@ class SkillEventsService {
     CheckDependenciesHelper checkDependenciesHelper
 
     @Autowired
-    CheckRecommendationHelper checkRecommendationHelper
-
-    @Autowired
     PointsAndAchievementsHandler pointsAndAchievementsHandler
 
     @Autowired
@@ -52,7 +49,6 @@ class SkillEventsService {
         assert projectId
         assert skillId
 
-        // TODO: make a builder for the class
         SkillEventResult res = new SkillEventResult()
 
         SkillEventsSupportRepo.SkillDefMin skillDefinition = getSkillDef(projectId, skillId)
@@ -122,11 +118,7 @@ class SkillEventsService {
         UserAchievement skillAchieved = new UserAchievement(userId: userId, projectId: skillDefinition.projectId, skillId: skillDefinition.skillId, skillRefId: skillDefinition?.id,
                 pointsWhenAchieved: ((numExistingSkills.intValue() + 1) * skillDefinition.pointIncrement))
         achievedLevelRepo.save(skillAchieved)
-
-        List<RecommendationItem> recommendationItems = checkRecommendationHelper.checkForRecommendations(userId, skillDefinition.projectId, skillDefinition.skillId)
-        // only return first 10
-        recommendationItems = recommendationItems?.take(10)
-        res.completed.add(new CompletionItem(type: CompletionItem.CompletionItemType.Skill, id: skillDefinition.skillId, name: skillDefinition.name, recommendations: recommendationItems))
+        res.completed.add(new CompletionItem(type: CompletionItem.CompletionItemType.Skill, id: skillDefinition.skillId, name: skillDefinition.name))
     }
 
     private boolean hasReachedMaxPoints(long numSkills, SkillEventsSupportRepo.SkillDefMin skillDefinition) {

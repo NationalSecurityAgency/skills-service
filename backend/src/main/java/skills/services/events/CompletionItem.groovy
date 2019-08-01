@@ -13,5 +13,4 @@ class CompletionItem {
     Integer level // optional
     String id
     String name
-    List<RecommendationItem> recommendations = []
 }
