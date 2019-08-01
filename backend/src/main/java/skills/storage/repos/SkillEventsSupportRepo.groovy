@@ -78,6 +78,8 @@ interface SkillEventsSupportRepo extends CrudRepository<SkillDef, Long> {
         int getNumMaxOccurrencesIncrementInterval()
         int getTotalPoints()
         SkillDef.ContainerType getType()
+        Date getStartDate()
+        Date getEndDate()
     }
 
     @Query('''SELECT
@@ -137,7 +139,9 @@ interface SkillEventsSupportRepo extends CrudRepository<SkillDef, Long> {
         s.pointIncrementInterval as pointIncrementInterval,
         s.numMaxOccurrencesIncrementInterval as numMaxOccurrencesIncrementInterval,
         s.totalPoints as totalPoints,
-        s.type as type
+        s.type as type,
+        s.startDate as startDate,
+        s.endDate as endDate
         from SkillDef s, SkillRelDef srd 
         where
             s.id = srd.parent and  
