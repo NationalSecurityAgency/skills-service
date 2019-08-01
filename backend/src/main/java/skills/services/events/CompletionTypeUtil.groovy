@@ -1,7 +1,9 @@
 package skills.services.events
 
+import groovy.transform.CompileStatic
 import skills.storage.model.SkillDef
 
+@CompileStatic
 class CompletionTypeUtil {
 
     static CompletionItem.CompletionItemType getCompletionType(SkillDef.ContainerType type){
