@@ -49,6 +49,13 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
       sdParent.projectId=?2 and sdParent.skillId=?3 and ua.id is null and srd.type=?4''')
     List<SkillDef> findNonAchievedChildren(String userId, String projectId, String skillId, SkillRelDef.RelationshipType type)
 
+    @Query(''' select count(sdChild.id)
+    from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
+    left join UserAchievement ua on sdChild.id = ua.skillRefId and ua.userId=?1
+      where srd.parent=sdParent.id and srd.child=sdChild.id and
+      sdParent.projectId=?2 and sdParent.skillId=?3 and ua.id is null and srd.type=?4''')
+    Long countNonAchievedChildren(String userId, String projectId, String skillId, SkillRelDef.RelationshipType type)
+
     @Query('''select sdParent.name as label, count(ua) as count
     from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild, UserAchievement ua
       where srd.parent=sdParent.id and srd.child=sdChild.id and sdChild.skillId=ua.skillId and ua.level is null and 

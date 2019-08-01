@@ -29,9 +29,6 @@ class SkillEventsService {
     SkillEventsSupportRepo skillEventsSupportRepo
 
     @Autowired
-    SkillRelDefRepo skillRelDefRepo
-
-    @Autowired
     UserAchievedLevelRepo achievedLevelRepo
 
     @Autowired
@@ -44,8 +41,10 @@ class SkillEventsService {
     CheckRecommendationHelper checkRecommendationHelper
 
     @Autowired
-    PointsAndAchievementsHandler handleAchievementAndPointsHelper
+    PointsAndAchievementsHandler pointsAndAchievementsHandler
 
+    @Autowired
+    AchievedBadgeHandler achievedBadgeHandler
 
     @Transactional
     @Profile
@@ -81,11 +80,10 @@ class SkillEventsService {
             return res
         }
 
-        boolean decrement = false
         UserPerformedSkill performedSkill = new UserPerformedSkill(userId: userId, skillId: skillId, projectId: projectId, performedOn: incomingSkillDate, skillRefId: skillDefinition.id)
         savePerformedSkill(performedSkill)
 
-        List<CompletionItem> achievements = handleAchievementAndPointsHelper.updatePointsAndAchievements(userId, skillDefinition, incomingSkillDate)
+        List<CompletionItem> achievements = pointsAndAchievementsHandler.updatePointsAndAchievements(userId, skillDefinition, incomingSkillDate)
         if (achievements) {
             res.completed.addAll(achievements)
         }
@@ -93,7 +91,7 @@ class SkillEventsService {
         boolean requestedSkillCompleted = hasReachedMaxPoints(numExistingSkills + 1, skillDefinition)
         if (requestedSkillCompleted) {
             documentSkillAchieved(userId, numExistingSkills, skillDefinition, res)
-            checkForBadgesAchieved(res, userId, skillDefinition, decrement)
+            achievedBadgeHandler.checkForBadges(res, userId, skillDefinition)
         }
 
         return res
@@ -130,40 +128,6 @@ class SkillEventsService {
         recommendationItems = recommendationItems?.take(10)
         res.completed.add(new CompletionItem(type: CompletionItem.CompletionItemType.Skill, id: skillDefinition.skillId, name: skillDefinition.name, recommendations: recommendationItems))
     }
-
-
-    @Profile
-    private void checkForBadgesAchieved(SkillEventResult res, String userId, SkillEventsSupportRepo.SkillDefMin currentSkillDef, boolean decrement) {
-        List<SkillRelDef> parentsRels = skillRelDefRepo.findAllByChildIdAndType(currentSkillDef.id, SkillRelDef.RelationshipType.BadgeDependence)
-        parentsRels.each {
-            if (it.parent.type == SkillDef.ContainerType.Badge && withinActiveTimeframe(it.parent)) {
-                SkillDef badge = it.parent
-                List<SkillDef> nonAchievedChildren = achievedLevelRepo.findNonAchievedChildren(userId, badge.projectId, badge.skillId, SkillRelDef.RelationshipType.BadgeDependence)
-                if (!nonAchievedChildren) {
-                    if (!decrement) {
-                        List<UserAchievement> badges = achievedLevelRepo.findAllByUserIdAndProjectIdAndSkillId(userId, badge.projectId, badge.skillId)
-                        if (!badges) {
-                            UserAchievement groupAchievement = new UserAchievement(userId: userId, projectId: badge.projectId, skillId: badge.skillId, skillRefId: badge?.id)
-                            achievedLevelRepo.save(groupAchievement)
-                            res.completed.add(new CompletionItem(type: CompletionTypeUtil.getCompletionType(badge.type), id: badge.skillId, name: badge.name))
-                        }
-                    } else {
-                        achievedLevelRepo.deleteByProjectIdAndSkillIdAndUserIdAndLevel(badge.projectId, badge.skillId, userId, null)
-                    }
-                }
-            }
-        }
-    }
-
-    private boolean withinActiveTimeframe(SkillDef skillDef) {
-        boolean withinActiveTimeframe = true;
-        if (skillDef.startDate && skillDef.endDate) {
-            Date now = new Date()
-            withinActiveTimeframe = skillDef.startDate.before(now) && skillDef.endDate.after(now)
-        }
-        return withinActiveTimeframe
-    }
-
 
     private boolean hasReachedMaxPoints(long numSkills, SkillEventsSupportRepo.SkillDefMin skillDefinition) {
         return numSkills * skillDefinition.pointIncrement >= skillDefinition.totalPoints
