@@ -1,6 +1,7 @@
 package skills.services.events
 
 import callStack.profiler.Profile
+import groovy.transform.CompileStatic
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import skills.storage.model.SkillDef
@@ -8,6 +9,7 @@ import skills.storage.model.SkillRelDef
 import skills.storage.repos.UserAchievedLevelRepo
 
 @Component
+@CompileStatic
 class CheckRecommendationHelper {
 
     @Autowired

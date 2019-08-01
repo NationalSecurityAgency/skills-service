@@ -7,19 +7,15 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.controller.exceptions.SkillException
-import skills.services.LevelDefinitionStorageService
 import skills.services.events.pointsAndAchievements.PointsAndAchievementsHandler
+import skills.storage.model.SkillDef
 import skills.storage.model.SkillRelDef
-import skills.storage.repos.ProjDefRepo
+import skills.storage.model.UserAchievement
+import skills.storage.model.UserPerformedSkill
 import skills.storage.repos.SkillEventsSupportRepo
 import skills.storage.repos.SkillRelDefRepo
-import skills.storage.repos.UserPerformedSkillRepo
-import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.UserAchievedLevelRepo
-import skills.storage.repos.UserPointsRepo
-import skills.storage.model.UserPerformedSkill
-import skills.storage.model.SkillDef
-import skills.storage.model.UserAchievement
+import skills.storage.repos.UserPerformedSkillRepo
 
 @Service
 @CompileStatic
@@ -30,22 +26,10 @@ class SkillEventsService {
     UserPerformedSkillRepo performedSkillRepository
 
     @Autowired
-    SkillDefRepo skillDefRepo
-
-    @Autowired
     SkillEventsSupportRepo skillEventsSupportRepo
 
     @Autowired
-    ProjDefRepo projDefRepo
-
-    @Autowired
     SkillRelDefRepo skillRelDefRepo
-
-    @Autowired
-    UserPointsRepo userPointsRepo
-
-    @Autowired
-    LevelDefinitionStorageService levelDefService
 
     @Autowired
     UserAchievedLevelRepo achievedLevelRepo
@@ -62,44 +46,6 @@ class SkillEventsService {
     @Autowired
     PointsAndAchievementsHandler handleAchievementAndPointsHelper
 
-    @Transactional
-    SkillEventResult deleteSkillEvent(Integer skillPkId) {
-        assert skillPkId
-        Optional<UserPerformedSkill> existing = performedSkillRepository.findById(skillPkId)
-        assert existing.present, "Skill [${skillPkId}] with id [${skillPkId}] does not exist"
-        UserPerformedSkill performedSkill = existing.get()
-        String projectId = performedSkill.projectId
-        String skillId = performedSkill.skillId
-        String userId = performedSkill.userId
-        log.debug("Deleting skill [{}] for user [{}]", performedSkill, userId)
-
-        SkillEventResult res = new SkillEventResult()
-
-        SkillEventsSupportRepo.SkillDefMin skillDefinitionMin = getSkillDef(projectId, skillId)
-
-        Long numExistingSkills = getNumExistingSkills(userId, projectId, skillId)
-        numExistingSkills = numExistingSkills ?: 0 // account for null
-
-        List<SkillDef> performedDependencies = performedSkillRepository.findPerformedParentSkills(userId, projectId, skillId)
-        if (performedDependencies) {
-            res.skillApplied = false
-            res.explanation = "You cannot delete a skill event when a parent skill dependency has already been performed. You must first delete " +
-                    "the performed skills for the parent dependencies: ${performedDependencies.collect({ it.projectId + ":" + it.skillId})}."
-            return res
-        }
-
-        boolean decrement = true
-        handleAchievementAndPointsHelper.updateUserPoints(userId, skillDefinitionMin, performedSkill.performedOn, skillId, decrement)
-        boolean requestedSkillCompleted = hasReachedMaxPoints(numExistingSkills, skillDefinitionMin)
-        if (requestedSkillCompleted) {
-            checkForBadgesAchieved(res, userId, skillDefinitionMin, decrement)
-            achievedLevelRepo.deleteByProjectIdAndSkillIdAndUserIdAndLevel(performedSkill.projectId, performedSkill.skillId, userId, null)
-        }
-        handleAchievementAndPointsHelper.checkParentGraph(performedSkill.performedOn, res, userId, skillDefinitionMin, decrement)
-        performedSkillRepository.delete(performedSkill)
-
-        return res
-    }
 
     @Transactional
     @Profile
@@ -136,7 +82,7 @@ class SkillEventsService {
         }
 
         boolean decrement = false
-        UserPerformedSkill performedSkill = new UserPerformedSkill(userId: userId, skillId: skillId, projectId: projectId, performedOn: incomingSkillDate, skillRefId: skillDefinition.id )
+        UserPerformedSkill performedSkill = new UserPerformedSkill(userId: userId, skillId: skillId, projectId: projectId, performedOn: incomingSkillDate, skillRefId: skillDefinition.id)
         savePerformedSkill(performedSkill)
 
         List<CompletionItem> achievements = handleAchievementAndPointsHelper.updatePointsAndAchievements(userId, skillDefinition, incomingSkillDate)

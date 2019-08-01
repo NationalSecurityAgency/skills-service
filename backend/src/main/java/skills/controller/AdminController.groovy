@@ -32,11 +32,11 @@ import skills.controller.result.model.UserSkillsStats
 import skills.services.AdminProjService
 import skills.services.AdminUsersService
 import skills.services.LevelDefinitionStorageService
+import skills.services.SkillEventAdminService
 import skills.services.UserAdminService
 import skills.services.events.SkillEventResult
 import skills.services.settings.SettingsService
 import skills.services.settings.listeners.ValidationRes
-import skills.services.events.SkillEventsService
 import skills.utils.ClientSecretGenerator
 import skills.utils.Constants
 
@@ -67,7 +67,7 @@ class AdminController {
     SettingsService settingsService
 
     @Autowired
-    SkillEventsService skillsManagementFacade
+    SkillEventAdminService skillEventService
 
     @RequestMapping(value = "/projects/{id}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
     @ResponseBody
@@ -467,7 +467,7 @@ class AdminController {
         skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
         skills.controller.exceptions.SkillsValidator.isNotNull(skillEventId, "Skill Event Id", "$skillEventId")
 
-        return skillsManagementFacade.deleteSkillEvent(skillEventId)
+        return skillEventService.deleteSkillEvent(skillEventId)
     }
 
     @RequestMapping(value = "/projects/{projectId}/skills", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
