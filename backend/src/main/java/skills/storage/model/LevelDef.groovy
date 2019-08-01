@@ -15,7 +15,7 @@ import javax.persistence.Table
 @Entity
 @Table(name='level_definition')
 @ToString(includeNames = true)
-class LevelDef implements Serializable{
+class LevelDef implements Serializable, LevelDefInterface{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

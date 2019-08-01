@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.controller.exceptions.SkillException
 import skills.services.LevelDefinitionStorageService
+import skills.services.events.pointsAndAchievements.PointsAndAchievementsHandler
 import skills.storage.model.SkillRelDef
 import skills.storage.repos.ProjDefRepo
 import skills.storage.repos.SkillEventsSupportRepo
@@ -59,7 +60,7 @@ class SkillEventsService {
     CheckRecommendationHelper checkRecommendationHelper
 
     @Autowired
-    HandleAchievementAndPointsHelper handleAchievementAndPointsHelper
+    PointsAndAchievementsHandler handleAchievementAndPointsHelper
 
     @Transactional
     SkillEventResult deleteSkillEvent(Integer skillPkId) {
@@ -137,7 +138,11 @@ class SkillEventsService {
         boolean decrement = false
         UserPerformedSkill performedSkill = new UserPerformedSkill(userId: userId, skillId: skillId, projectId: projectId, performedOn: incomingSkillDate, skillRefId: skillDefinition.id )
         savePerformedSkill(performedSkill)
-        handleAchievementAndPointsHelper.updateUserPoints(userId, skillDefinition, incomingSkillDate, skillId, decrement)
+
+        List<CompletionItem> achievements = handleAchievementAndPointsHelper.updatePointsAndAchievements(userId, skillDefinition, incomingSkillDate)
+        if (achievements) {
+            res.completed.addAll(achievements)
+        }
 
         boolean requestedSkillCompleted = hasReachedMaxPoints(numExistingSkills + 1, skillDefinition)
         if (requestedSkillCompleted) {
@@ -145,10 +150,6 @@ class SkillEventsService {
             checkForBadgesAchieved(res, userId, skillDefinition, decrement)
         }
 
-        handleAchievementAndPointsHelper.checkParentGraph(incomingSkillDate, res, userId, skillDefinition, decrement)
-
-        // do it at the very end for performance reasons as it will rarely get to this point
-        handleAchievementAndPointsHelper.checkProjectPoints(projectId)
         return res
     }
 
