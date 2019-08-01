@@ -1,8 +1,10 @@
 package skills.services.events
 
 import groovy.transform.Canonical
+import groovy.transform.builder.Builder
 
 @Canonical
+@Builder
 class SkillEventResult {
     boolean success = true
     boolean skillApplied = true

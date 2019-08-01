@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Isolation
 import org.springframework.transaction.annotation.Transactional
 import skills.services.settings.Settings
 import skills.services.settings.SettingsService
+import skills.storage.model.LevelDefInterface
 import skills.storage.repos.LevelDefRepo
 import skills.storage.repos.ProjDefRepo
 import skills.storage.repos.SkillDefRepo
@@ -56,7 +57,7 @@ class LevelDefinitionStorageService {
         return levelInfo
     }
 
-    LevelInfo getLevelInfo(String projectId, List<LevelDef> levelDefinitions, int totalPoints, int currentScore) {
+    LevelInfo getLevelInfo(String projectId, List<? extends LevelDefInterface> levelDefinitions, int totalPoints, int currentScore) {
         skills.controller.result.model.SettingsResult setting = settingsService.getSetting(projectId, Settings.LEVEL_AS_POINTS.settingName)
 
         List<Integer> levelScores
@@ -65,7 +66,7 @@ class LevelDefinitionStorageService {
         } else {
             levelScores = loadPercentLevels(levelDefinitions, totalPoints)
         }
-        LevelInfo levelInfo = calculateLevel(levelScores, levelDefinitions, currentScore)
+        LevelInfo levelInfo = calculateLevel(levelScores, currentScore)
         return levelInfo
     }
 
@@ -99,14 +100,14 @@ class LevelDefinitionStorageService {
         levelDefinitionRepository.findAllByProjectId(projDef.id)
     }
 
-    private List<Integer> loadPercentLevels(List<LevelDef> levelDefinitions, int currentScore) {
+    private List<Integer> loadPercentLevels(List<LevelDefInterface> levelDefinitions, int currentScore) {
         List<Integer> levelScores = levelDefinitions.sort({ it.level }).collect {
             return (int) (currentScore * (it.percent / 100d))
         }
         return levelScores
     }
 
-    private List<Integer> loadPointsLevels(List<LevelDef> levelDefinitions){
+    private List<Integer> loadPointsLevels(List<LevelDefInterface> levelDefinitions){
         List<Integer> levelScores = levelDefinitions.sort({ it.level }).collect {
             return it.pointsFrom
         }
@@ -127,7 +128,7 @@ class LevelDefinitionStorageService {
         return levelScores[level - 1]
     }
 
-    private LevelInfo calculateLevel(List<Integer> levelScores, List<LevelDef> levelDefinitions, int currentScore) {
+    private LevelInfo calculateLevel(List<Integer> levelScores, int currentScore) {
         Integer found
 
         levelScores.each {
@@ -159,7 +160,7 @@ class LevelDefinitionStorageService {
                 level: index + 1,
                 currentPoints: currentScore - substract,
                 nextLevelPoints: nextLevelPoints,
-                totalNumLevels: levelDefinitions.size()
+                totalNumLevels: levelScores.size()
         )
         return levelInfo
     }

@@ -1,19 +1,22 @@
-package skills.services.events
+package skills.services.events.pointsAndAchievements
 
 import callStack.profiler.Profile
+import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import skills.controller.exceptions.SkillException
 import skills.services.LevelDefinitionStorageService
+import skills.services.events.CompletionItem
+import skills.services.events.CompletionTypeUtil
+import skills.services.events.SkillEventResult
 import skills.storage.model.LevelDef
-import skills.storage.model.ProjDef
+import skills.storage.model.LevelDefInterface
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillRelDef
 import skills.storage.model.UserAchievement
 import skills.storage.model.UserPoints
-import skills.storage.repos.LevelDefRepo
 import skills.storage.repos.ProjDefRepo
 import skills.storage.repos.SkillEventsSupportRepo
 import skills.storage.repos.SkillRelDefRepo
@@ -22,13 +25,17 @@ import skills.storage.repos.UserPointsRepo
 
 @Component
 @Slf4j
-class HandleAchievementAndPointsHelper {
+@CompileStatic
+class PointsAndAchievementsHandler {
 
     @Autowired
     ProjDefRepo projDefRepo
 
     @Autowired
     UserPointsRepo userPointsRepo
+
+    @Autowired
+    UserAchievedLevelRepo userAchievedLevelRepo
 
     @Autowired
     UserAchievedLevelRepo achievedLevelRepo
@@ -42,20 +49,32 @@ class HandleAchievementAndPointsHelper {
     @Autowired
     SkillEventsSupportRepo skillEventsSupportRepo
 
-    @Value('#{"${skills.subjects.minimumPoints:20}"}')
-    int minimumSubjectPoints
+    @Autowired
+    PointsAndAchievementsSaver saver
 
-    @Value('#{"${skills.project.minimumPoints:20}"}')
-    int minimumProjectPoints
-
+    @Autowired
+    PointsAndAchievementsDataLoader dataLoader
 
     @Profile
-    void checkProjectPoints(String projectId) {
-        int projectTotalPoints = skillEventsSupportRepo.getProjectTotalPoints(projectId)
-        if (projectTotalPoints < minimumProjectPoints) {
-            throw new SkillException("Insufficient project points, skill achievement is disallowed", projectId)
-        }
+    List<CompletionItem> updatePointsAndAchievements(String userId, SkillEventsSupportRepo.SkillDefMin skillDef, Date incomingSkillDate){
+        LoadedData loadedData = dataLoader.loadData(skillDef.projectId, userId, incomingSkillDate, skillDef)
+
+        PointsAndAchievementsBuilder builder = new PointsAndAchievementsBuilder(
+                userId: userId,
+                projectId: skillDef.projectId,
+                skillId: skillDef.skillId,
+                skillRefId: skillDef.id,
+                loadedData: loadedData,
+                pointIncrement: skillDef.pointIncrement,
+                incomingSkillDate: incomingSkillDate,
+                levelDefService: levelDefService,
+        )
+        PointsAndAchievementsBuilder.PointsAndAchievementsResult result = builder.build()
+        saver.save(result.dataToSave)
+        return result.completionItems
     }
+
+
 
     @Profile
     void checkParentGraph(Date incomingSkillDate, SkillEventResult res, String userId, SkillEventsSupportRepo.SkillDefMin skillDef, boolean decrement) {
@@ -65,19 +84,13 @@ class HandleAchievementAndPointsHelper {
         UserPoints totalPoints = updateUserPoints(userId, skillDef, incomingSkillDate, null, decrement)
         if (!decrement) {
             List<LevelDef> levelDefs = skillEventsSupportRepo.findLevelsByProjectId(skillDef.projectId)
-            int totalProjectPoints = skillEventsSupportRepo.getProjectTotalPoints(skillDef.projectId)
-            LevelDefinitionStorageService.LevelInfo levelInfo = levelDefService.getLevelInfo(skillDef.projectId, levelDefs, totalProjectPoints, totalPoints.points)
+            SkillEventsSupportRepo.TinyProjectDef totalProjectPoints = skillEventsSupportRepo.getTinyProjectDef(skillDef.projectId)
+            LevelDefinitionStorageService.LevelInfo levelInfo = levelDefService.getLevelInfo(skillDef.projectId, levelDefs, totalProjectPoints.totalPoints, totalPoints.points)
             CompletionItem completionItem = calculateLevels(levelInfo, totalPoints, null, userId, "OVERALL", decrement)
             if (completionItem?.level && completionItem?.level > 0) {
                 res.completed.add(completionItem)
             }
         }
-    }
-
-    @Profile
-    private ProjDef getProfDef(SkillDef skillDef) {
-        ProjDef projDef = projDefRepo.findByProjectId(skillDef.projectId)
-        return projDef
     }
 
     /**
@@ -153,9 +166,6 @@ class HandleAchievementAndPointsHelper {
                     achievedLevelRepo.deleteByProjectIdAndSkillIdAndUserIdAndLevel(currentDef.projectId, currentDef.skillId, userId, null)
                 }
             } else {
-                if (currentDef.totalPoints < minimumSubjectPoints) {
-                    throw new skills.controller.exceptions.SkillException("Insufficient Subject points, skill achievement is disallowed", currentDef.skillId)
-                }
                 int currentScore = decrement ? updatedPoints.points + requesterDef.pointIncrement : updatedPoints.points
                 LevelDefinitionStorageService.LevelInfo levelInfo = levelDefService.getLevelInfo(currentDef.projectId, levelDefs, currentDef.totalPoints, currentScore)
                 CompletionItem completionItem = calculateLevels(levelInfo, updatedPoints, currentDef,  userId, currentDef.name, decrement)

@@ -20,12 +20,6 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
 
     void deleteByProjectIdAndSkillId(String projectId, String skillId)
 
-    @Query("SELECT p from UserPoints p where p.projectId=?1 and p.userId=?2 and p.skillId is null and p.day is not null" )
-    List<UserPoints> findAllUserPointsUsageHistory(String projectId, String userId)
-
-    @Query("SELECT p from UserPoints p where p.projectId=?1 and p.userId=?2 and p.skillId=?3 and p.day is not null" )
-    List<UserPoints> findAllUserPointsUsageHistory(String projectId, String userId, String skillId)
-
     @Query("SELECT count(p) from UserPoints p where p.projectId=?1 and p.skillId=?2 and p.points<?3 and p.day is null" )
     Integer calculateNumUsersWithLessScore(String projectId, String skillId, int points)
 
