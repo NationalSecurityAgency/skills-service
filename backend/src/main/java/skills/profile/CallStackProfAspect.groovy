@@ -9,6 +9,10 @@ import org.aspectj.lang.annotation.Aspect
 import org.aspectj.lang.reflect.CodeSignature
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
+import org.springframework.web.context.request.RequestContextHolder
+import org.springframework.web.context.request.ServletRequestAttributes
+
+import javax.servlet.http.HttpServletRequest
 
 @Aspect
 @Component
@@ -39,9 +43,20 @@ class CallStackProfAspect {
         }
 
         if (CProf.rootEvent.getRuntimeInMillis() > minMillisToPrint) {
-            log.info("Service Profiling:\n{}", CProf.prettyPrint())
+            log.info("\nProfiling Endpoint: {}\n{}", getServletRequestPath(), CProf.prettyPrint())
         }
         return retVal
+    }
+
+    private String getServletRequestPath() {
+        HttpServletRequest httpServletRequest
+        try {
+            ServletRequestAttributes currentRequestAttributes = RequestContextHolder.currentRequestAttributes() as ServletRequestAttributes
+            httpServletRequest = currentRequestAttributes.getRequest()
+        } catch (Exception e) {
+            log.warn("Unable to access current HttpServletRequest. Error Recieved [$e]")
+        }
+        return httpServletRequest?.getServletPath() ?: "Could not be determined :("
     }
 
     private String getProfileName(ProceedingJoinPoint joinPoint) {
