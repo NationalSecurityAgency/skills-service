@@ -28,12 +28,16 @@
 </template>
 
 <script>
+  import { createNamespacedHelpers } from 'vuex';
+
   import BadgesService from './BadgesService';
   import Badge from './Badge';
   import EditBadge from './EditBadge';
   import LoadingContainer from '../utils/LoadingContainer';
   import NoContent3 from '../utils/NoContent3';
   import SubPageHeader from '../utils/pages/SubPageHeader';
+
+  const { mapActions } = createNamespacedHelpers('projects');
 
   export default {
     name: 'Badges',
@@ -49,15 +53,17 @@
         isLoading: true,
         badges: [],
         displayNewBadgeModal: false,
+        projectId: null,
       };
     },
     mounted() {
+      this.projectId = this.$route.params.projectId;
       this.loadBadges();
     },
     computed: {
       emptyNewBadge() {
         return {
-          projectId: this.$route.params.projectId,
+          projectId: this.projectId,
           name: '',
           badgeId: '',
           description: '',
@@ -67,8 +73,11 @@
       },
     },
     methods: {
+      ...mapActions([
+        'loadProjectDetailsState',
+      ]),
       loadBadges() {
-        BadgesService.getBadges(this.$route.params.projectId)
+        BadgesService.getBadges(this.projectId)
           .then((badgesResponse) => {
             this.isLoading = false;
             this.badges = badgesResponse;
@@ -88,6 +97,7 @@
             this.isLoading = false;
             this.$emit('badge-deleted', this.badge);
             this.badges = this.badges.filter(item => item.id !== badge.id);
+            this.loadProjectDetailsState({ projectId: this.projectId });
             this.$emit('badges-changed', badge.badgeId);
           })
           .finally(() => {
@@ -101,6 +111,7 @@
         BadgesService.saveBadge(badgeReq)
           .then(() => {
             this.loadBadges();
+            this.loadProjectDetailsState({ projectId: this.projectId });
             this.$emit('badges-changed', badge.badgeId);
           })
           .finally(() => {
