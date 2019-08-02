@@ -73,7 +73,11 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
     ''')
     List<DayCountItem> findDistinctUserCountsBySkillId(String projectId, String skillId, Date mustBeAfterThisDate)
 
-    @Query('SELECT COUNT(DISTINCT userId) from UserPoints up where up.projectId=?1 and up.userId like %?2% and up.day is null')
+    // Postgresql is 10 fold faster with the nested query over COUNT(DISTINCT)
+    @Query(value ='''SELECT COUNT(*)
+        FROM (SELECT DISTINCT userpoints0_.user_id FROM user_points userpoints0_
+                where userpoints0_.project_id = ?1 and (userpoints0_.day is null)) AS temp''',
+            nativeQuery = true)
     Long countDistinctUserIdByProjectIdAndUserIdLike(String projectId, String query)
 
     @Query('SELECT userId as userId, max(updated) as lastUpdated, sum(points) as totalPoints from UserPoints up where up.projectId=?1 and up.userId like %?2% and up.day is null and up.skillId is null GROUP BY userId')

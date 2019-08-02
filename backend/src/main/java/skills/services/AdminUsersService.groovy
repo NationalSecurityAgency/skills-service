@@ -1,10 +1,12 @@
 package skills.services
 
+import callStack.profiler.Profile
 import groovy.time.TimeCategory
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
+import skills.controller.result.model.ProjectUser
 import skills.skillLoading.RankingLoader
 import skills.skillLoading.model.UsersPerLevel
 import skills.storage.model.SkillDef
@@ -137,13 +139,23 @@ class AdminUsersService {
 
     skills.controller.result.model.TableResult loadUsersPage(String projectId, String query, PageRequest pageRequest) {
         skills.controller.result.model.TableResult result = new skills.controller.result.model.TableResult()
-        Long totalProjectUsers = userPointsRepo.countDistinctUserIdByProjectIdAndUserIdLike(projectId, query)
+        Long totalProjectUsers = countTotalProjUsers(projectId, query)
         if (totalProjectUsers) {
-            List<skills.controller.result.model.ProjectUser> projectUsers = userPointsRepo.findDistinctProjectUsersAndUserIdLike(projectId, query, pageRequest)
+            List<skills.controller.result.model.ProjectUser> projectUsers = findDistincUsers(projectId, query, pageRequest)
             result.data = projectUsers
             result.count = totalProjectUsers
         }
         return result
+    }
+
+    @Profile
+    private List<ProjectUser> findDistincUsers(String projectId, String query, PageRequest pageRequest) {
+        userPointsRepo.findDistinctProjectUsersAndUserIdLike(projectId, query, pageRequest)
+    }
+
+    @Profile
+    private long countTotalProjUsers(String projectId, String query) {
+        userPointsRepo.countDistinctUserIdByProjectIdAndUserIdLike(projectId, query)
     }
 
     skills.controller.result.model.TableResult loadUsersPage(String projectId, List<String> skillIds, String query, PageRequest pageRequest) {
