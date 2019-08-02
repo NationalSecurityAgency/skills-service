@@ -91,18 +91,6 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
         where r.parent=?1 and c.id = r.child and r.type=?2''')
     long sumChildSkillsTotalPointsBySkillAndRelationshipType(SkillDef parent, RelationshipType relationshipType)
 
-    @Query(value='''select count(distinct up.userId) 
-        from SkillRelDef r, SkillDef c, UserPoints up 
-        where up.projectId=?1 
-            and c.projectId=?1 
-            and c.id = r.child 
-            and c.skillId = up.skillId
-            and c.projectId = up.projectId
-            and r.parent=?2 
-            and r.type=?3
-            and up.day is null''')
-    long calculateDistinctUsersForChildSkills(String projectId, SkillDef parent, RelationshipType relationshipType)
-
     @Query(value = "SELECT COUNT(DISTINCT s.userId) from UserPoints s where s.projectId=?1 and s.skillId=?2")
     int calculateDistinctUsersForASingleSkill(String projectId, String skillId)
 

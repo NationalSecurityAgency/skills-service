@@ -60,9 +60,6 @@
             label: 'Number Skills',
             count: this.badgeInternal.numSkills,
           }, {
-            label: 'Number Users',
-            count: this.badgeInternal.numUsers,
-          }, {
             label: 'Total Points',
             count: this.badgeInternal.totalPoints,
           }],
