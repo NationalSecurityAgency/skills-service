@@ -3,6 +3,7 @@ import Vuex from 'vuex';
 import auth from './modules/auth';
 import users from './modules/users';
 import subjects from './modules/subjects';
+import projects from './modules/projects';
 
 Vue.use(Vuex);
 
@@ -25,5 +26,6 @@ export default new Vuex.Store({
     auth,
     users,
     subjects,
+    projects,
   },
 });
