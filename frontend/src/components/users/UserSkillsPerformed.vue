@@ -18,11 +18,15 @@
 </template>
 
 <script>
+  import { createNamespacedHelpers } from 'vuex';
+
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import SimpleCard from '../utils/cards/SimpleCard';
   import MsgBoxMixin from '../utils/modal/MsgBoxMixin';
   import ToastSupport from '../utils/ToastSupport';
   import UsersService from './UsersService';
+
+  const { mapActions } = createNamespacedHelpers('users');
 
   export default {
     name: 'UserSkillsPerformed',
@@ -59,9 +63,16 @@
         },
       };
     },
+    created() {
+      this.projectId = this.$route.params.projectId;
+      this.userId = this.$route.params.userId;
+    },
     methods: {
+      ...mapActions([
+        'loadUserDetailsState',
+      ]),
       getUrl() {
-        return `/admin/projects/${this.$route.params.projectId}/performedSkills/${this.$route.params.userId}`;
+        return `/admin/projects/${this.projectId}/performedSkills/${this.userId}`;
       },
       emit(name, event) {
         this.$emit(name, event, this);
@@ -84,11 +95,12 @@
       },
       doDeleteSkill(skill) {
         this.isLoading = true;
-        UsersService.deleteSkillEvent(this.$route.params.projectId, skill)
+        UsersService.deleteSkillEvent(this.projectId, skill)
           .then((data) => {
             if (data.success) {
               const index = this.$refs.table.data.findIndex(item => item.id === skill.id);
               this.$refs.table.data.splice(index, 1);
+              this.loadUserDetailsState({ projectId: this.projectId, userId: this.userId });
               this.successToast('Removed Skill', `Skill '${skill.skillId}' was removed.`);
             } else {
               this.errorToast('Unable to Remove Skill', `Skill '${skill.skillId}' was not removed.  ${data.explanation}`);
