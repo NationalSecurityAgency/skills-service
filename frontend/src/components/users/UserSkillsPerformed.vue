@@ -61,6 +61,8 @@
           highlightMatches: true,
           skin: 'table is-striped is-fullwidth',
         },
+        projectId: null,
+        userId: null,
       };
     },
     created() {

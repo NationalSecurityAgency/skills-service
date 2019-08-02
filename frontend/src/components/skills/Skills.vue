@@ -7,9 +7,12 @@
 </template>
 
 <script>
+  import { createNamespacedHelpers } from 'vuex';
   import LoadingContainer from '../utils/LoadingContainer';
   import SkillsTable from './SkillsTable';
   import SkillsService from './SkillsService';
+
+  const { mapActions } = createNamespacedHelpers('subjects');
 
   export default {
     name: 'Skills',
@@ -18,14 +21,21 @@
       return {
         isLoading: true,
         skills: [],
+        projectId: null,
+        subjectId: null,
       };
     },
     mounted() {
+      this.projectId = this.$route.params.projectId;
+      this.subjectId = this.$route.params.subjectId;
       this.loadSkills();
     },
     methods: {
+      ...mapActions([
+        'loadSubjectDetailsState',
+      ]),
       loadSkills() {
-        SkillsService.getSubjectSkills(this.$route.params.projectId, this.$route.params.subjectId)
+        SkillsService.getSubjectSkills(this.projectId, this.subjectId)
           .then((skills) => {
             this.isLoading = false;
             const loadedSkills = skills;
@@ -37,6 +47,7 @@
           });
       },
       skillsChanged(skillId) {
+        this.loadSubjectDetailsState({ projectId: this.projectId, subjectId: this.subjectId });
         this.$emit('skills-change', skillId);
       },
     },
