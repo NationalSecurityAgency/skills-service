@@ -1,6 +1,10 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import auth from './modules/auth';
+import users from './modules/users';
+import subjects from './modules/subjects';
+import projects from './modules/projects';
+import badges from './modules/badges';
 
 Vue.use(Vuex);
 
@@ -21,5 +25,9 @@ export default new Vuex.Store({
   },
   modules: {
     auth,
+    users,
+    subjects,
+    projects,
+    badges,
   },
 });
