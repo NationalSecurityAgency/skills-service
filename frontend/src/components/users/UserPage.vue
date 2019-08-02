@@ -1,6 +1,6 @@
 <template>
   <div>
-    <page-header :loading="isLoading" :options="headerOptons"/>
+    <page-header :loading="isLoading" :options="headerOptions"/>
 
     <navigation v-if="userId" :nav-items="[
           {name: 'Client Display', iconClass: 'fa-user', page: 'ClientDisplayPreview'},
@@ -12,9 +12,12 @@
 </template>
 
 <script>
+  import { createNamespacedHelpers } from 'vuex';
+
   import Navigation from '../utils/Navigation';
-  import UsersService from './UsersService';
   import PageHeader from '../utils/pages/PageHeader';
+
+  const { mapActions, mapGetters } = createNamespacedHelpers('users');
 
   export default {
     name: 'UserPage',
@@ -27,7 +30,6 @@
         projectId: '',
         userId: '',
         isLoading: true,
-        headerOptons: {},
       };
     },
     created() {
@@ -35,30 +37,36 @@
       this.userId = this.$route.params.userId;
       this.loadUserDetails();
     },
-    methods: {
-      loadUserDetails() {
-        this.isLoading = true;
-        UsersService.getUserSkillsMetrics(this.projectId, this.userId)
-          .then((response) => {
-            this.headerOptons = this.buildHeaderOptions(response);
-          })
-          .finally(() => {
-            this.isLoading = false;
-          });
-      },
-      buildHeaderOptions(metrics) {
+    computed: {
+      ...mapGetters([
+        'numSkills',
+        'userTotalPoints',
+      ]),
+      headerOptions() {
         return {
           icon: 'fas fa-user',
           title: `USER: ${this.userId}`,
           subTitle: `ID: ${this.userId}`,
           stats: [{
             label: 'Skills',
-            count: metrics.numSkills,
+            count: this.numSkills,
           }, {
             label: 'Points',
-            count: metrics.userTotalPoints,
+            count: this.userTotalPoints,
           }],
         };
+      },
+    },
+    methods: {
+      ...mapActions([
+        'loadUserDetailsState',
+      ]),
+      loadUserDetails() {
+        this.isLoading = true;
+        this.loadUserDetailsState({ projectId: this.projectId, userId: this.userId })
+          .finally(() => {
+            this.isLoading = false;
+          });
       },
     },
   };

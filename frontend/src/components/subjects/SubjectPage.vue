@@ -13,9 +13,12 @@
 </template>
 
 <script>
+  import { createNamespacedHelpers } from 'vuex';
+
   import Navigation from '../utils/Navigation';
-  import SubjectsService from './SubjectsService';
   import PageHeader from '../utils/pages/PageHeader';
+
+  const { mapActions, mapGetters, mapMutations } = createNamespacedHelpers('subjects');
 
   export default {
     name: 'SubjectPage',
@@ -26,10 +29,8 @@
     data() {
       return {
         isLoading: true,
-        subject: {},
         projectId: '',
         subjectId: '',
-        headerOptions: {},
       };
     },
     created() {
@@ -40,41 +41,50 @@
       this.loadSubject();
     },
     computed: {
+      ...mapGetters([
+        'subject',
+      ]),
+      headerOptions() {
+        if (!this.subject) {
+          return {};
+        }
+        return {
+          icon: 'fas fa-cubes',
+          title: `SUBJECT: ${this.subject.name}`,
+          subTitle: `ID: ${this.subjectId}`,
+          stats: [{
+            label: 'Skills',
+            count: this.subject.numSkills,
+          }, {
+            label: 'Points',
+            count: this.subject.totalPoints,
+            warn: this.subject.totalPoints < this.minimumPoints,
+            warnMsg: this.subject.totalPoints < this.minimumPoints ? `Subject has insufficient points assigned. Skills cannot be achieved until subject has at least ${this.minimumPoints} points.` : null,
+          }],
+        };
+      },
       minimumPoints() {
         return this.$store.state.minimumSubjectPoints;
       },
     },
     methods: {
+      ...mapActions([
+        'loadSubjectDetailsState',
+      ]),
+      ...mapMutations([
+        'setSubject',
+      ]),
       loadSubject() {
         this.isLoading = true;
         if (this.$route.params.subject) {
-          this.subject = this.$route.params.subject;
-          this.headerOptions = this.buildHeaderOptions(this.subject);
+          this.setSubject(this.$route.params.subject);
           this.isLoading = false;
         } else {
-          SubjectsService.getSubjectDetails(this.projectId, this.subjectId)
-            .then((response) => {
-              this.subject = response;
-              this.headerOptions = this.buildHeaderOptions(this.subject);
+          this.loadSubjectDetailsState({ projectId: this.projectId, subjectId: this.subjectId })
+            .finally(() => {
               this.isLoading = false;
             });
         }
-      },
-      buildHeaderOptions(subject) {
-        return {
-          icon: 'fas fa-cubes',
-          title: `SUBJECT: ${subject.name}`,
-          subTitle: `ID: ${this.subjectId}`,
-          stats: [{
-            label: 'Skills',
-            count: subject.numSkills,
-          }, {
-            label: 'Points',
-            count: subject.totalPoints,
-            warn: subject.totalPoints < this.minimumPoints,
-            warnMsg: subject.totalPoints < this.minimumPoints ? `Subject has insufficient points assigned. Skills cannot be achieved until subject has at least ${this.minimumPoints} points.` : null,
-          }],
-        };
       },
     },
   };

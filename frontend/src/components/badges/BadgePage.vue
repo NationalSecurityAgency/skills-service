@@ -2,7 +2,7 @@
   <div>
     <page-header :loading="isLoading" :options="headerOptions">
       <span slot="right-of-header">
-        <i v-if="badge.endDate" class="fas fa-gem ml-2" style="font-size: 1.6rem; color: purple;"></i>
+        <i v-if="badge && badge.endDate" class="fas fa-gem ml-2" style="font-size: 1.6rem; color: purple;"></i>
       </span>
     </page-header>
 
@@ -17,9 +17,12 @@
 </template>
 
 <script>
-  import BadgesService from './BadgesService';
+  import { createNamespacedHelpers } from 'vuex';
+
   import Navigation from '../utils/Navigation';
   import PageHeader from '../utils/pages/PageHeader';
+
+  const { mapActions, mapGetters, mapMutations } = createNamespacedHelpers('badges');
 
   export default {
     name: 'BadgePage',
@@ -30,10 +33,8 @@
     data() {
       return {
         isLoading: true,
-        badge: {},
         projectId: '',
         badgeId: '',
-        headerOptions: {},
       };
     },
     created() {
@@ -43,36 +44,46 @@
     mounted() {
       this.loadBadge();
     },
+    computed: {
+      ...mapGetters([
+        'badge',
+      ]),
+      headerOptions() {
+        if (!this.badge) {
+          return {};
+        }
+        return {
+          icon: 'fas fa-award',
+          title: `BADGE: ${this.badge.name}`,
+          subTitle: `ID: ${this.badge.badgeId}`,
+          stats: [{
+            label: 'Skills',
+            count: this.badge.numSkills,
+          }, {
+            label: 'Points',
+            count: this.badge.totalPoints,
+          }],
+        };
+      },
+    },
     methods: {
+      ...mapActions([
+        'loadBadgeDetailsState',
+      ]),
+      ...mapMutations([
+        'setBadge',
+      ]),
       loadBadge() {
         this.isLoading = false;
         if (this.$route.params.badge) {
-          this.badge = this.$route.params.badge;
-          this.headerOptions = this.buildHeaderOptions(this.badge);
+          this.setBadge(this.$route.params.badge);
           this.isLoading = false;
         } else {
-          BadgesService.getBadge(this.projectId, this.badgeId)
-            .then((response) => {
-              this.badge = response;
-              this.headerOptions = this.buildHeaderOptions(this.badge);
+          this.loadBadgeDetailsState({ projectId: this.projectId, badgeId: this.badgeId })
+            .finally(() => {
               this.isLoading = false;
             });
         }
-      },
-
-      buildHeaderOptions(badge) {
-        return {
-          icon: 'fas fa-award',
-          title: `BADGE: ${badge.name}`,
-          subTitle: `ID: ${badge.badgeId}`,
-          stats: [{
-            label: 'Skills',
-            count: badge.numSkills,
-          }, {
-            label: 'Points',
-            count: badge.totalPoints,
-          }],
-        };
       },
     },
   };
