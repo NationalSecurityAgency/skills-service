@@ -799,7 +799,7 @@ class AdminProjService {
 
         return convertToSkillsGraphRes(collectedRes)
     }
-
+    @Profile
     private void collectDescendants(List<GraphSkillDefEdge> allEdges, List<GraphSkillDefEdge> currentLevel, List<GraphSkillDefEdge> collectedRes){
         if(currentLevel){
             collectedRes.addAll(currentLevel)
@@ -844,9 +844,36 @@ class AdminProjService {
         SkillDef from
         SkillDef to
     }
+    @Profile
     private List<GraphSkillDefEdge> loadGraphEdges(String projectId, SkillRelDef.RelationshipType type){
         List<Object[]> edges = skillRelDefRepo.getGraph(projectId, type)
-        return edges.collect({ new GraphSkillDefEdge(from: it[0], to: it[1])})
+
+        return edges.collect({
+            //   mapping directly to entity is slow, we can save over a second in latency by mapping attributes explicitly
+
+            SkillDef from = new SkillDef(
+                    id: it[0],
+                    name: it[1],
+                    skillId: it[2],
+                    projectId: it[3],
+                    pointIncrement: it[4],
+                    totalPoints: it[5],
+                    type: it[6],
+            )
+
+            SkillDef to = new SkillDef(
+                    id: it[7],
+                    name: it[8],
+                    skillId: it[9],
+                    projectId: it[10],
+                    pointIncrement: it[11],
+                    totalPoints: it[12],
+                    type: it[13],
+            )
+
+            new GraphSkillDefEdge(from: from, to: to)
+
+        })
     }
 
     @Transactional(readOnly = true)
