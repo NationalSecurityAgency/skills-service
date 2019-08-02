@@ -64,9 +64,6 @@
           stats: [{
             label: 'Points',
             count: skill.totalPoints,
-          }, {
-            label: 'Users',
-            count: skill.numUsers,
           }],
         };
       },

@@ -19,7 +19,6 @@ class BadgeResult {
     String description
 
     int numSkills
-    int numUsers
 
     int displayOrder
 

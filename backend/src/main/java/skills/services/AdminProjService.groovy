@@ -412,7 +412,7 @@ class AdminProjService {
     @Transactional(readOnly = true)
     skills.controller.result.model.BadgeResult getBadge(String projectId, String badgeId) {
         SkillDef skillDef = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, badgeId, SkillDef.ContainerType.Badge)
-        return convertToBadge(skillDef)
+        return convertToBadge(skillDef, true)
     }
 
     private void calculatePercentages(List<skills.controller.result.model.SubjectResult> res) {
@@ -672,16 +672,12 @@ class AdminProjService {
     }
 
     @Profile
-    private long calculateNumUsersForChildSkills(SkillDef skillDef) {
-        skillDefRepo.calculateDistinctUsersForChildSkills(skillDef.projectId, skillDef, RelationshipType.RuleSetDefinition)
-    }
-
-    @Profile
     private long calculateNumChildSkills(SkillDef skillDef) {
         skillDefRepo.countChildSkillsByIdAndRelationshipType(skillDef, RelationshipType.RuleSetDefinition)
     }
 
-    private skills.controller.result.model.BadgeResult convertToBadge(SkillDef skillDef) {
+    @Profile
+    private skills.controller.result.model.BadgeResult convertToBadge(SkillDef skillDef, boolean loadRequiredSkills = false) {
         skills.controller.result.model.BadgeResult res = new skills.controller.result.model.BadgeResult(
                 id: skillDef.id,
                 badgeId: skillDef.skillId,
@@ -694,8 +690,10 @@ class AdminProjService {
                 endDate: skillDef.endDate,
         )
 
-        List<SkillRelDef> dependentSkillsRels = skillRelDefRepo.findAllByParentAndType(skillDef, SkillRelDef.RelationshipType.BadgeDependence)
-        res.requiredSkills = dependentSkillsRels?.collect { convertToSkillDefRes(it.child) }
+        if (loadRequiredSkills) {
+            List<SkillRelDef> dependentSkillsRels = skillRelDefRepo.findAllByParentAndType(skillDef, SkillRelDef.RelationshipType.BadgeDependence)
+            res.requiredSkills = dependentSkillsRels?.collect { convertToSkillDefRes(it.child) }
+        }
 
         res.numSkills = skillDefRepo.countChildSkillsByIdAndRelationshipType(skillDef, SkillRelDef.RelationshipType.BadgeDependence)
         if (res.numSkills > 0) {
@@ -703,7 +701,6 @@ class AdminProjService {
         } else {
             res.totalPoints = 0
         }
-        res.numUsers = skillDefRepo.calculateDistinctUsersForChildSkills(skillDef.projectId, skillDef, RelationshipType.BadgeDependence)
         return res
     }
 

@@ -59,6 +59,7 @@
             });
         }
       },
+
       buildHeaderOptions(badge) {
         return {
           icon: 'fas fa-award',
@@ -70,9 +71,6 @@
           }, {
             label: 'Points',
             count: badge.totalPoints,
-          }, {
-            label: 'Users',
-            count: badge.numUsers,
           }],
         };
       },
