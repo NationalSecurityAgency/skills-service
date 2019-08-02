@@ -19,6 +19,7 @@
 </template>
 
 <script>
+  import { createNamespacedHelpers } from 'vuex';
   import { SkillsReporter } from '@skills/skills-client-vue';
   import Subject from './Subject';
   import EditSubject from './EditSubject';
@@ -26,6 +27,8 @@
   import SubjectsService from './SubjectsService';
   import NoContent3 from '../utils/NoContent3';
   import SubPageHeader from '../utils/pages/SubPageHeader';
+
+  const { mapActions } = createNamespacedHelpers('projects');
 
   export default {
     name: 'Subjects',
@@ -41,17 +44,22 @@
         isLoading: true,
         subjects: [],
         displayNewSubjectModal: false,
+        projectId: null,
       };
     },
     mounted() {
+      this.projectId = this.$route.params.projectId;
       this.loadSubjects();
     },
     methods: {
+      ...mapActions([
+        'loadProjectDetailsState',
+      ]),
       openNewSubjectModal() {
         this.displayNewSubjectModal = true;
       },
       loadSubjects() {
-        SubjectsService.getSubjects(this.$route.params.projectId)
+        SubjectsService.getSubjects(this.projectId)
           .then((response) => {
             this.isLoading = false;
             this.subjects = response;
@@ -69,6 +77,7 @@
         SubjectsService.deleteSubject(subject)
           .then(() => {
             this.subjects = this.subjects.filter(item => item.id !== subject.id);
+            this.loadProjectDetailsState({ projectId: this.projectId });
             this.$emit('subjects-changed', subject.subjectId);
           })
           .finally(() => {
@@ -81,6 +90,7 @@
         SubjectsService.saveSubject(subject)
           .then(() => {
             this.loadSubjects();
+            this.loadProjectDetailsState({ projectId: this.projectId });
             this.$emit('subjects-changed', subject.subjectId);
             SkillsReporter.reportSkill('CreateSubject');
           })
