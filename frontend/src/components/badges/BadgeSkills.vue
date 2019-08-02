@@ -18,6 +18,8 @@
 </template>
 
 <script>
+  import { createNamespacedHelpers } from 'vuex';
+
   import SkillsService from '../skills/SkillsService';
   import SkillsSelector2 from '../skills/SkillsSelector2';
   import LoadingContainer from '../utils/LoadingContainer';
@@ -25,6 +27,8 @@
   import NoContent2 from '../utils/NoContent2';
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import SimpleCard from '../utils/cards/SimpleCard';
+
+  const { mapActions } = createNamespacedHelpers('badges');
 
   export default {
     name: 'BadgeSkills',
@@ -45,22 +49,29 @@
         },
         badgeSkills: [],
         allSkills: [],
+        projectId: null,
+        badgeId: null,
       };
     },
     mounted() {
+      this.projectId = this.$route.params.projectId;
+      this.badgeId = this.$route.params.badgeId;
       this.loadAvailableBadgeSkills();
       this.loadAssignedBadgeSkills();
     },
     methods: {
+      ...mapActions([
+        'loadBadgeDetailsState',
+      ]),
       loadAvailableBadgeSkills() {
-        SkillsService.getProjectSkills(this.$route.params.projectId)
+        SkillsService.getProjectSkills(this.projectId)
           .then((loadedSkills) => {
             this.allSkills = loadedSkills;
             this.loading.availableSkills = false;
           });
       },
       loadAssignedBadgeSkills() {
-        SkillsService.getBadgeSkills(this.$route.params.projectId, this.$route.params.badgeId)
+        SkillsService.getBadgeSkills(this.projectId, this.badgeId)
           .then((loadedSkills) => {
             this.badgeSkills = loadedSkills;
             this.loading.badgeSkills = false;
@@ -68,19 +79,21 @@
       },
       skillDeleted(deletedItem) {
         this.loading.skillOp = true;
-        SkillsService.removeSkillFromBadge(this.$route.params.projectId, this.$route.params.badgeId, deletedItem.skillId)
+        SkillsService.removeSkillFromBadge(this.projectId, this.badgeId, deletedItem.skillId)
           .then(() => {
             this.badgeSkills = this.badgeSkills.filter(entry => entry.id !== deletedItem.id);
             this.loading.skillOp = false;
+            this.loadBadgeDetailsState({ projectId: this.projectId, badgeId: this.badgeId });
             this.$emit('skills-changed', deletedItem);
           });
       },
       skillAdded(newItem) {
         this.loading.skillOp = true;
-        SkillsService.assignSkillToBadge(this.$route.params.projectId, this.$route.params.badgeId, newItem.skillId)
+        SkillsService.assignSkillToBadge(this.projectId, this.badgeId, newItem.skillId)
           .then(() => {
             this.badgeSkills.push(newItem);
             this.loading.skillOp = false;
+            this.loadBadgeDetailsState({ projectId: this.projectId, badgeId: this.badgeId });
             this.$emit('skills-changed', newItem);
           });
       },
