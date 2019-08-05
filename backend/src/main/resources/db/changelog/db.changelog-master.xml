@@ -726,42 +726,6 @@
                                  referencedTableName="skill_definition"/>
 
        <!-- ============================================================================
-       Table: Allowed Origins
-       ============================================================================-->
-        <createTable tableName="allowed_origins">
-            <column name="id" type="int" autoIncrement="true">
-                <constraints primaryKey="true" nullable="false"/>
-            </column>
-
-            <column name="allowed_origin" type="varchar(255)">
-                <constraints nullable="false"/>
-            </column>
-            <column name="project_id" type="varchar(255)"/>
-
-            <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
-                <constraints nullable="false"/>
-            </column>
-            <column name="updated" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
-                <constraints nullable="false"/>
-            </column>
-        </createTable>
-        <createIndex indexName="index_allowed_origins_project_id"
-                     tableName="allowed_origins">
-            <column name="project_id" type="varchar(255)"/>
-        </createIndex>
-        <createIndex indexName="index_allowed_origins_allowed_origin"
-                     tableName="allowed_origins" unique="true">
-            <column name="allowed_origin" type="varchar(255)"/>
-        </createIndex>
-        <addForeignKeyConstraint baseColumnNames="project_id"
-                                 baseTableName="allowed_origins"
-                                 constraintName="fk_allowed_origins_project_id"
-                                 onDelete="CASCADE"
-                                 onUpdate="CASCADE"
-                                 referencedColumnNames="project_id"
-                                 referencedTableName="project_definition"/>
-
-       <!-- ============================================================================
        Table: Settings
        ============================================================================-->
         <createTable tableName="settings">
