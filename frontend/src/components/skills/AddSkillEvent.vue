@@ -129,9 +129,7 @@
               key: this.currentSelectedUser.userId + new Date().getTime() + data.skillApplied,
             };
             this.usersAdded.push(historyObj);
-            console.log('clearing user');
             this.currentSelectedUser = null;
-            console.log('done');
           })
           .finally(() => {
             this.isSaving = false;
