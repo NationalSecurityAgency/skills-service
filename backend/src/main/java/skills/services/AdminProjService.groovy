@@ -921,6 +921,11 @@ class AdminProjService {
         ProjDef projDef = getProjDef(projectId)
         SkillShareDef skillShareDef = skillShareDefRepo.findBySkillAndSharedToProject(skill2, projDef)
         if (!skillShareDef) {
+            // check if the dependency is shared with ALL projects (null shared_to_project_id)
+            skillShareDef = skillShareDefRepo.findBySkillAndSharedToProjectIsNull(skill2)
+        }
+
+        if (!skillShareDef) {
             throw new skills.controller.exceptions.SkillException("Skill [${skill2.projectId}:${skill2.skillId}] is not shared (or does not exist) to [$projectId] project", projectId)
         }
     }
