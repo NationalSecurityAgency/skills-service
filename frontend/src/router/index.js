@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import Router from 'vue-router';
 import HomePage from '@/components/HomePage';
+import LandingPage from '@/components/LandingPage';
 import LoginForm from '@/components/access/Login';
 import RequestAccountForm from '@/components/access/RequestAccess';
 import ProjectPage from '@/components/projects/ProjectPage';
@@ -15,6 +16,7 @@ import GFMDescription from '@//components/utils/GFMDescription';
 import InceptionSkills from '@//components/inception/InceptionSkills';
 import Subjects from '@//components/subjects/Subjects';
 import Badges from '@//components/badges/Badges';
+import CrossProjectBadges from '@//components/badges/CrossProjectBadges';
 import Levels from '@//components/levels/Levels';
 import FullDependencyGraph from '@//components/skills/dependencies/FullDependencyGraph';
 import CrossProjectsSkills from '@//components/skills/crossProjects/CrossProjectsSkills';
@@ -41,11 +43,19 @@ const router = new Router({
   routes: [
     {
       path: '/',
-      name: 'HomePage',
-      component: HomePage,
-      meta: {
-        requiresAuth: true,
-      },
+      component: LandingPage,
+      meta: { requiresAuth: true },
+      children: [{
+        name: 'HomePage',
+        path: '',
+        component: HomePage,
+        meta: { requiresAuth: true },
+      }, {
+        name: 'CrossProjectBadges',
+        path: 'crossProjectBadges',
+        component: CrossProjectBadges,
+        meta: { requiresAuth: true, breadcrumb: 'Cross Project Badges' },
+      }],
     },
     {
       path: '/skills-login',
