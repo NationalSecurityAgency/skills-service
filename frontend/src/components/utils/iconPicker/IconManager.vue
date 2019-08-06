@@ -55,7 +55,7 @@
                        :name="'customIcon'"
                        @file-selected="customIconUploadRequest"
                       :disable-input="disableCustomUpload"/>
-          <p class="text-right text-danger">* custom icons must be 48px X 48px</p>
+          <p class="text-muted text-right text-primary font-italic">* custom icons must be between 48px X 48px and 100px X 100px</p>
 
           <b-alert show variant="danger" v-show="errors.has('customIcon')" class="text-center">
             <i class="fas fa-exclamation-circle"/> {{ errors.first('customIcon') }} <i class="fas fa-exclamation-circle"/>
@@ -139,6 +139,15 @@
   fontAwesomeIconsCanonical.icons = groupIntoRows(fontAwesomeIconsCanonical.icons, rowLength);
   materialIconsCanonical.icons = groupIntoRows(materialIconsCanonical.icons, rowLength);
 
+  const isValidCustomIconDimensions = (vm, width, height) => {
+    let isValid = width / height === 1;
+    if (isValid) {
+      isValid = vm.minCustomIconDimensions.width <= width && vm.minCustomIconDimensions.height <= height;
+      isValid = isValid && vm.maxCustomIconDimensions.width >= width && vm.maxCustomIconDimensions.height >= height;
+    }
+    return isValid;
+  };
+
   Validator.extend('imageDimensions', {
     getMessage(field, params, data) {
       return (data && data.message) || `Custom Icon must be ${self.customIconHeight} X ${self.customIconWidth}`;
@@ -161,10 +170,13 @@
               const height = image.naturalHeight;
               window.URL.revokeObjectURL(image.src);
 
-              if (width !== self.customIconWidth && height !== self.customIconHeight) {
+              if (!isValidCustomIconDimensions(self, width, height)) {
+                const dimensionRange = { min: self.minCustomIconDimensions.width, max: self.maxCustomIconDimensions.width };
                 resolve({
                   valid: false,
-                  data: { message: `Invalid image dimensions, ${file.name} must be ${self.customIconHeight} x ${self.customIconWidth}` },
+                  data: {
+                    message: `Invalid image dimensions, dimensions must be square and must be between ${dimensionRange.min} x ${dimensionRange.min} and ${dimensionRange.max} x ${dimensionRange.max} for ${file.name} `,
+                  },
                 });
               } else {
                 resolve({
@@ -209,19 +221,50 @@
     immediate: false,
   });
 
+  const validateIconDimensions = (dimensions) => {
+    const { width, height } = dimensions;
+    let isValid = true;
+
+    if (!width || !height) {
+      console.error('width and height are required dimensions');
+      isValid = false;
+    }
+
+    if (isValid) {
+      isValid = width / height === 1;
+      if (!isValid) {
+        console.error('Icon dimensions must be square');
+      }
+    }
+
+    return isValid;
+  };
+
   export default {
     name: 'IconManager',
     components: { FileUpload, 'virtual-list': VirtualList },
     mixins: [ToastSupport],
     props: {
       searchBox: String,
-      customIconHeight: {
-        type: Number,
-        default: 48,
+      maxCustomIconDimensions: {
+        type: Object,
+        default() {
+          return {
+            width: 100,
+            height: 100,
+          };
+        },
+        validator: validateIconDimensions,
       },
-      customIconWidth: {
-        type: Number,
-        default: 48,
+      minCustomIconDimensions: {
+        type: Object,
+        default() {
+          return {
+            width: 48,
+            height: 48,
+          };
+        },
+        validator: validateIconDimensions,
       },
     },
     data() {
