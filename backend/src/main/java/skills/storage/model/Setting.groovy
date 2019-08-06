@@ -3,6 +3,8 @@ package skills.storage.model
 import groovy.transform.ToString
 
 import javax.persistence.Entity
+import javax.persistence.EnumType
+import javax.persistence.Enumerated
 import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
 import javax.persistence.Id
@@ -12,6 +14,8 @@ import javax.persistence.Table
 @Table(name = 'settings')
 @ToString(includeNames = true)
 class Setting {
+
+    static enum SettingType { User, Project, Global }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,6 +32,12 @@ class Setting {
 
     //non-null
     String value
+
+    //nullable
+    String userId
+
+    @Enumerated(EnumType.STRING)
+    SettingType type
 
     //convenience method for settings that are in an either on or off state as opposed to containing a meaningful value
     boolean isEnabled(){

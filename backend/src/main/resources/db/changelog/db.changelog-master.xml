@@ -476,6 +476,7 @@
                                  referencedTableName="project_definition"/>
         <!-- ============================================================================
         Table: User Properties
+        DEPRECATED
         ============================================================================-->
         <createTable tableName="user_properties">
             <column name="id" type="int" autoIncrement="true">
@@ -739,8 +740,12 @@
             <column name="value" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>
+            <column name="type" type="varchar(255)">
+                <constraints nullable="false" />
+            </column>
             <column name="project_id" type="varchar(255)"/>
             <column name="setting_group" type="varchar(255)"/>
+            <column name="user_id" type="int" />
 
             <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
                 <constraints nullable="false"/>
@@ -761,6 +766,14 @@
                      tableName="settings">
             <column name="setting" type="varchar(255)"/>
         </createIndex>
+        <createIndex indexName="index_settings_user_id"
+                     tableName="settings">
+            <column name="user_id" type="int"/>
+        </createIndex>
+        <createIndex indexName="index_settings_type"
+                     tableName="settings">
+            <column name="type" type="varchar(255)"/>
+        </createIndex>
         <addForeignKeyConstraint baseColumnNames="project_id"
                                  baseTableName="settings"
                                  constraintName="fk_settings_project_id"
@@ -768,6 +781,13 @@
                                  onUpdate="CASCADE"
                                  referencedColumnNames="project_id"
                                  referencedTableName="project_definition"/>
+        <addForeignKeyConstraint baseColumnNames="user_id"
+                                 baseTableName="settings"
+                                 constraintName="fk_settings_user_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="users"/>
 
         <!-- ============================================================================
         SQL Modifications
