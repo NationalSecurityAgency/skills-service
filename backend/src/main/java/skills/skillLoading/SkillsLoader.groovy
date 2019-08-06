@@ -1,5 +1,8 @@
 package skills.skillLoading
 
+import callStack.profiler.Profile
+import groovy.transform.CompileStatic
+import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.SerializationUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -28,6 +31,8 @@ import skills.storage.repos.nativeSql.GraphRelWithAchievement
 import skills.storage.repos.nativeSql.NativeQueriesRepo
 
 @Component
+@CompileStatic
+@Slf4j
 class SkillsLoader {
 
     @Value('#{"${skills.subjects.minimumPoints:20}"}')
@@ -75,7 +80,7 @@ class SkillsLoader {
     @Autowired
     SettingsService settingsService
 
-    private static PROP_HELP_URL_ROOT = "help.url.root"
+    private static String PROP_HELP_URL_ROOT = "help.url.root"
 
     @Transactional(readOnly = true)
     Integer getUserLevel(String projectId, String userId) {
@@ -93,10 +98,11 @@ class SkillsLoader {
         return res
     }
 
+    @Profile
     @Transactional(readOnly = true)
     OverallSkillSummary loadOverallSummary(String projectId, String userId, Integer version = -1) {
         ProjDef projDef = getProjDef(projectId)
-        List<SkillSubjectSummary> subjects = projDef.getSubjects()?.sort({it.displayOrder})?.collect { SkillDef subjectDefinition ->
+        List<SkillSubjectSummary> subjects = loadSubjectsFromDB(projDef)?.sort({it.displayOrder})?.collect { SkillDef subjectDefinition ->
             loadSubjectSummary(projDef, userId, subjectDefinition, version)
         }
 
@@ -114,7 +120,7 @@ class SkillsLoader {
             levelInfo = levelDefService.getOverallLevelInfo(projDef, points)
             todaysPoints = (Integer) subjects?.collect({ it.todaysPoints })?.sum()
 
-            List<UserAchievement> achievedLevels = achievedLevelRepository.findAllByUserIdAndProjectIdAndSkillId(userId, projectId, null)
+            List<UserAchievement> achievedLevels = getProjectsAchievedLevels(userId, projectId)
             if (achievedLevels) {
                 achievedLevels = achievedLevels.sort({ it.created })
                 levelInfo = updateLevelBasedOnLastAchieved(projDef, points, achievedLevels.last(), levelInfo, null)
@@ -130,7 +136,7 @@ class SkillsLoader {
         }
 
         int numBadgesAchieved = achievedLevelRepository.countAchievedForUser(userId, projectId, SkillDef.ContainerType.Badge)
-        int numTotalBadges = skillDefRepo.countByProjectIdAndType(projectId, SkillDef.ContainerType.Badge)
+        long numTotalBadges = skillDefRepo.countByProjectIdAndType(projectId, SkillDef.ContainerType.Badge)
 
         OverallSkillSummary res = new OverallSkillSummary(
                 projectName: projDef.name,
@@ -146,6 +152,15 @@ class SkillsLoader {
         )
 
         return res
+    }
+    @Profile
+    private List<UserAchievement> getProjectsAchievedLevels(String userId, String projectId) {
+        achievedLevelRepository.findAllByUserIdAndProjectIdAndSkillId(userId, projectId, null)
+    }
+
+    @Profile
+    private List<SkillDef> loadSubjectsFromDB(ProjDef projDef) {
+        projDef.getSubjects()
     }
 
     @Transactional(readOnly = true)
@@ -235,10 +250,11 @@ class SkillsLoader {
             )
         }?.sort({ a,b ->
             a.skill.skillId <=> b.skill.skillId ?: a.dependsOn.skillId <=> b.dependsOn.skillId
-        })
+        }) as List<SkillDependencyInfo.SkillRelationshipItem>
         return new SkillDependencyInfo(dependencies: deps)
     }
 
+    @Profile
     private SkillSubjectSummary loadSubjectSummary(ProjDef projDef, String userId, SkillDef subjectDefinition, Integer version, boolean loadSkills = false) {
         List<SkillSummary> skillsRes = []
 
@@ -248,13 +264,13 @@ class SkillsLoader {
         if (loadSkills) {
             SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, projDef.projectId, subjectDefinition.skillId, version)
             skillsRes = createSkillSummaries(projDef, groupChildrenMeta.childrenWithPoints)
-            totalPoints = skillsRes ? skillsRes.collect({it.totalPoints}).sum() : 0
+            totalPoints = skillsRes ? skillsRes.collect({it.totalPoints}).sum() as Integer: 0
         } else {
-            totalPoints = skillDefRepo.calculateTotalPointsForSkill(projDef.projectId, subjectDefinition.skillId, SkillRelDef.RelationshipType.RuleSetDefinition, version)
+            totalPoints = calculateTotalForSkillDef(projDef, subjectDefinition, version)
         }
 
-        Integer points = userPerformedSkillRepo.calculateUserPointsByProjectIdAndUserIdAndAndDayAndVersion(projDef.projectId, userId, subjectDefinition.skillId, version, null)
-        Integer todaysPoints = userPerformedSkillRepo.calculateUserPointsByProjectIdAndUserIdAndAndDayAndVersion(projDef.projectId, userId, subjectDefinition.skillId, version, new Date().clearTime())
+        Integer points = calculatePoints(projDef, userId, subjectDefinition, version)
+        Integer todaysPoints = calculateTodayPoints(projDef, userId, subjectDefinition, version)
 
         // convert null result to 0
         points = points ?: 0
@@ -262,7 +278,7 @@ class SkillsLoader {
 
         LevelDefinitionStorageService.LevelInfo levelInfo = levelDefService.getLevelInfo(subjectDefinition, points)
 
-        List<UserAchievement> achievedLevels = achievedLevelRepository.findAllByUserIdAndProjectIdAndSkillId(userId, projDef.projectId, subjectDefinition.skillId)
+        List<UserAchievement> achievedLevels = locateAchievedLevels(userId, projDef, subjectDefinition)
         if (achievedLevels) {
             achievedLevels = achievedLevels.sort({ it.created })
             levelInfo = updateLevelBasedOnLastAchieved(projDef, points, achievedLevels?.last(), levelInfo, subjectDefinition)
@@ -292,6 +308,28 @@ class SkillsLoader {
                 iconClass: subjectDefinition.iconClass
         )
     }
+
+    @Profile
+    private int calculateTotalForSkillDef(ProjDef projDef, SkillDef subjectDefinition, int version) {
+        skillDefRepo.calculateTotalPointsForSkill(projDef.projectId, subjectDefinition.skillId, SkillRelDef.RelationshipType.RuleSetDefinition, version)
+    }
+
+    @Profile
+    private List<UserAchievement> locateAchievedLevels(String userId, ProjDef projDef, SkillDef subjectDefinition) {
+        achievedLevelRepository.findAllByUserIdAndProjectIdAndSkillId(userId, projDef.projectId, subjectDefinition.skillId)
+    }
+
+    @Profile
+    private Integer calculateTodayPoints(ProjDef projDef, String userId, SkillDef subjectDefinition, int version) {
+        userPerformedSkillRepo.calculateUserPointsByProjectIdAndUserIdAndAndDayAndVersion(projDef.projectId, userId, subjectDefinition.skillId, version, new Date().clearTime())
+    }
+
+    @Profile
+    private Integer calculatePoints(ProjDef projDef, String userId, SkillDef subjectDefinition, int version) {
+        userPerformedSkillRepo.calculateUserPointsByProjectIdAndUserIdAndAndDayAndVersion(projDef.projectId, userId, subjectDefinition.skillId, version, null)
+    }
+
+    @Profile
     private SkillBadgeSummary loadBadgeSummary(ProjDef projDef, String userId, SkillDef badgeDefinition, Integer version = Integer.MAX_VALUE, boolean loadSkills = false) {
         List<SkillSummary> skillsRes = []
 
@@ -313,7 +351,7 @@ class SkillsLoader {
                 badge: badgeDefinition.name,
                 badgeId: badgeDefinition.skillId,
                 description: badgeDefinition.description,
-                badgeAchieved: achievements,
+                badgeAchieved: achievements?.size() > 0,
                 dateAchieved: achievements ? achievements.first().created : null,
                 numSkillsAchieved: numAchievedSkills,
                 numTotalSkills: numChildSkills,
@@ -338,6 +376,7 @@ class SkillsLoader {
         return res
     }
 
+    @Profile
     private List<SkillSummary> createSkillSummaries(ProjDef thisProjDef, List<SubjectDataLoader.SkillsAndPoints> childrenWithPoints) {
         List<SkillSummary> skillsRes = []
 
@@ -375,6 +414,7 @@ class SkillsLoader {
      * which re-balanced how many points required for that level;
      * in that case we'll assign already achieved level and add the points from the previous levels + new level (total number till next level achievement)
      */
+    @Profile
     private LevelDefinitionStorageService.LevelInfo updateLevelBasedOnLastAchieved(ProjDef projDef, int points, UserAchievement lastAchievedLevel, LevelDefinitionStorageService.LevelInfo calculatedLevelInfo, SkillDef subjectDef) {
         LevelDefinitionStorageService.LevelInfo res = SerializationUtils.clone(calculatedLevelInfo)
 
