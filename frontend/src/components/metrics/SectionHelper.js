@@ -1,4 +1,5 @@
 export const SECTION = {
+  GLOBAL: 'global',
   PROJECTS: 'projects',
   BADGES: 'badges',
   SKILLS: 'skills',
@@ -64,6 +65,8 @@ export class SectionParams {
           case SECTION.DEPENDENCIES:
             break;
           case SECTION.USERS:
+            break;
+          case SECTION.GLOBAL:
             break;
           default:
             throw new Error(`Invalid Section [${section}]`);
