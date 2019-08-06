@@ -1,5 +1,6 @@
 package skills.skillLoading
 
+import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -32,6 +33,7 @@ class SubjectDataLoader {
         List<SkillsAndPoints> childrenWithPoints
     }
 
+    @Profile
     SkillsData loadData(String userId, String projectId, String skillId, Integer version = Integer.MAX_VALUE) {
         return loadData(userId, projectId, skillId, version, SkillRelDef.RelationshipType.RuleSetDefinition)
     }

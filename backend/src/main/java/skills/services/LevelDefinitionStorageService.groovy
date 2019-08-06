@@ -46,6 +46,7 @@ class LevelDefinitionStorageService {
     Map<String,Integer> defaultPercentages = ["White Belt":10, "Blue Belt":25, "Purple Belt":45, "Brown Belt":67, "Black Belt":92]
 
 
+    @Profile
     LevelInfo getLevelInfo(SkillDef skillDefinition, int currentScore) {
         return getLevelInfo(skillDefinition.projectId, skillDefinition.levelDefinitions, skillDefinition.totalPoints, currentScore)
     }
