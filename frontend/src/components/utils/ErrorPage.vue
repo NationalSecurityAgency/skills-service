@@ -20,7 +20,7 @@
     </div>
 
     <div class="text-center">
-      <b-button to="/" variant="outline-primary" class="p-2"><i class="fas fa-home mr-1"/>Take Me Home</b-button>
+      <b-button href="/" variant="outline-primary" class="p-2"><i class="fas fa-home mr-1"/>Take Me Home</b-button>
 <!--      <b-button class="ml-2 p-2" variant="outline-info"><i class="fas fa-envelope mr-1"></i>Report This Issue</b-button>-->
     </div>
   </div>
