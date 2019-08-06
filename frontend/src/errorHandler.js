@@ -13,7 +13,10 @@ function errorResponseHandler(error) {
     store.commit('clearAuthData');
     const path = window.location.pathname;
     if (path !== '/skills-login') {
-      const loginRoute = path !== '/' ? { name: 'Login', query: { redirect: path } } : { name: 'Login' };
+      let loginRoute = path !== '/' ? { name: 'Login', query: { redirect: path } } : { name: 'Login' };
+      if (store.getters.isPkiAuthenticated) {
+        loginRoute = path !== '/' ? { name: 'HomePage', query: { redirect: path } } : { name: 'HomePage' };
+      }
       router.push(loginRoute);
     }
   } else {
