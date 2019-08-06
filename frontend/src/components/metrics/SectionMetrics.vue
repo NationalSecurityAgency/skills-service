@@ -23,6 +23,7 @@
         </div>
       </div>
     </simple-card>
+    <no-content3 v-if="(!loadedCharts || loadedCharts.length==0 && !loadedCharts || loadedCharts.length==0)" title="No Metrics Yet" sub-title="Metrics coming soon!"/>
 
     <skills-spinner :is-loading="isLoading"/>
   </div>
@@ -36,6 +37,7 @@
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import SimpleCard from '../utils/cards/SimpleCard';
   import SkillsSpinner from '../utils/SkillsSpinner';
+  import NoContent3 from '../utils/NoContent3';
 
   export default {
     name: 'SectionMetrics',
@@ -45,6 +47,7 @@
       SubPageHeader,
       SkillsChart,
       MetricsCard,
+      NoContent3,
     },
     props: {
       numDaysToShow: {
@@ -64,14 +67,16 @@
       return {
         charts: [],
         isLoading: true,
-        section: SECTION.PROJECTS,
+        section: SECTION.GLOBAL,
         sectionIdParam: String,
         metricCardIconsColors: ['text-warning', 'text-primary', 'text-info', 'text-danger'],
       };
     },
     mounted() {
-      this.sectionIdParam = this.$route.params.projectId;
-      if (this.$route.params.badgeId) {
+      if (this.$route.params.projectId) {
+        this.sectionIdParam = this.$route.params.projectId;
+        this.section = SECTION.PROJECTS;
+      } else if (this.$route.params.badgeId) {
         this.section = SECTION.BADGES;
         this.sectionIdParam = this.$route.params.badgeId;
       } else if (this.$route.params.subjectId) {
@@ -102,19 +107,22 @@
         return `${icon} ${color}`;
       },
       loadInitialCharts() {
-        const sectionParams = new SectionParams.Builder(this.section, this.$route.params.projectId)
-          .withSectionIdParam(this.sectionIdParam)
-          .withNumMonths(this.numMonthsToShow)
-          .withNumDays(this.numDaysToShow)
-          .withLoadDataForFirst(this.loadDataForFirst)
-          .build();
-        MetricsService.getChartsForSection(sectionParams)
-          .then((response) => {
-            this.charts = response;
-          })
-          .finally(() => {
-            this.isLoading = false;
-          });
+        if (this.section !== SECTION.GLOBAL) {
+          const sectionParams = new SectionParams.Builder(this.section, this.$route.params.projectId)
+            .withSectionIdParam(this.sectionIdParam)
+            .withNumMonths(this.numMonthsToShow)
+            .withNumDays(this.numDaysToShow)
+            .withLoadDataForFirst(this.loadDataForFirst)
+            .build();
+          MetricsService.getChartsForSection(sectionParams)
+            .then((response) => {
+              this.charts = response;
+            })
+            .finally(() => {
+              this.isLoading = false;
+            });
+        }
+        this.isLoading = false;
       },
       loadChart(chartBuilderId) {
         this.isLoading = true;

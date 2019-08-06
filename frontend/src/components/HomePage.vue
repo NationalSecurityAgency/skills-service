@@ -1,21 +1,21 @@
 <template>
   <div>
-    <my-projects v-if="isAuthenticatedUser"/>
+    <navigation :nav-items="[
+          {name: 'Projects', iconClass: 'fa-project-diagram', page: 'HomePage'},
+          {name: 'Badges', iconClass: 'fa-award', page: 'GlobalBadges'},
+          {name: 'Metrics', iconClass: 'fa-cogs', page: 'GlobalMetrics'}
+        ]">
+    </navigation>
   </div>
 </template>
 
 <script>
-  import MyProjects from './projects/MyProjects';
+  import Navigation from './utils/Navigation';
 
   export default {
     name: 'HomePage',
     components: {
-      MyProjects,
-    },
-    computed: {
-      isAuthenticatedUser() {
-        return this.$store.getters.isAuthenticated;
-      },
+      Navigation,
     },
   };
 </script>

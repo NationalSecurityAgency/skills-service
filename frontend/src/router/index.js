@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import Router from 'vue-router';
 import HomePage from '@/components/HomePage';
-import LandingPage from '@/components/LandingPage';
+import MyProjects from '@/components/projects/MyProjects';
 import LoginForm from '@/components/access/Login';
 import RequestAccountForm from '@/components/access/RequestAccess';
 import ProjectPage from '@/components/projects/ProjectPage';
@@ -43,18 +43,23 @@ const router = new Router({
   routes: [
     {
       path: '/',
-      component: LandingPage,
-      meta: { requiresAuth: true },
+      component: HomePage,
+      meta: { requiresAuth: false },
       children: [{
         name: 'HomePage',
         path: '',
-        component: HomePage,
+        component: MyProjects,
         meta: { requiresAuth: true },
       }, {
-        name: 'CrossProjectBadges',
-        path: 'crossProjectBadges',
+        name: 'GlobalBadges',
+        path: 'globalBadges',
         component: CrossProjectBadges,
-        meta: { requiresAuth: true, breadcrumb: 'Cross Project Badges' },
+        meta: { requiresAuth: true },
+      }, {
+        name: 'GlobalMetrics',
+        path: 'metrics',
+        component: SectionMetrics,
+        meta: { requiresAuth: true },
       }],
     },
     {
