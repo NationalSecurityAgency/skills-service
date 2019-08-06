@@ -1,5 +1,6 @@
 package skills.storage.repos
 
+import org.hibernate.Transaction
 import org.springframework.data.repository.CrudRepository
 import org.springframework.lang.Nullable
 import skills.storage.model.CustomIcon
@@ -11,6 +12,15 @@ interface SettingRepo extends CrudRepository<Setting, Integer> {
 
     @Transactional
     List<Setting> findAllByProjectId(String projectId)
+
+    @Transactional
+    List<Setting> findAllByUserId(String userId)
+
+    @Transactional
+    List<Setting> findAllByUserIdAndProjectId(String userId, String projectId)
+
+    @Transactional
+    List<Setting> findAllByUserIdAndProjectIdAndSettingGroup(String userId, String projectId, String settingGroup)
 
     @Transactional
     List<Setting> findAllBySettingGroup(String settingGroup)
