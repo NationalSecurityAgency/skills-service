@@ -63,7 +63,13 @@
             <column name="data_uri" type="text">
                 <constraints nullable="false"/>
             </column>
-           <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+            <column name="width" type="int">
+                <constraints nullable="false" />
+            </column>
+            <column name="height" type="int">
+                <constraints nullable="false" />
+            </column>
+            <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
                 <constraints nullable="false"/>
             </column>
             <column name="updated" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">

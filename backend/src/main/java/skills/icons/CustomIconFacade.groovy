@@ -10,7 +10,9 @@ import skills.services.IconService
 import skills.storage.model.CustomIcon
 import skills.storage.model.ProjDef
 
+import javax.imageio.ImageIO
 import javax.transaction.Transactional
+import java.awt.image.BufferedImage
 
 @Service
 @CompileStatic
@@ -56,7 +58,15 @@ class CustomIconFacade {
 
             ProjDef project = projectAdminStorageService.getProjDef(projectId)
 
-            CustomIcon customIcon = new CustomIcon(projectId: projectId, filename: iconFilename, contentType: contentType, dataUri: dataUri)
+            def imageDimensions = getImageDimensions(file);
+
+            CustomIcon customIcon = new CustomIcon(
+                projectId: projectId,
+                filename: iconFilename,
+                contentType: contentType,
+                width: imageDimensions['width'] as Integer,
+                height: imageDimensions['height'] as Integer,
+                dataUri: dataUri)
             customIcon.setProjDef(project)
 
             iconService.saveIcon(customIcon)
@@ -68,6 +78,20 @@ class CustomIconFacade {
         }catch(Exception cve){
             log.error("unable to save icon $iconFilename for project $projectId")
             throw cve;
+        }
+    }
+
+    private def getImageDimensions(byte[] imageBytes) {
+        ByteArrayInputStream bis = null;
+        try {
+            bis = new ByteArrayInputStream(imageBytes);
+            BufferedImage image = ImageIO.read(bis);
+            return [
+                width: image.getWidth(),
+                height: image.getHeight(),
+            ];
+        } finally {
+            bis.close();
         }
     }
 

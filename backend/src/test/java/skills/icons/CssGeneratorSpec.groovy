@@ -11,8 +11,8 @@ class CssGeneratorSpec extends Specification {
         String mockDataUri1 = "data:image/png;base64:rarararararararararachacha"
         String mockDataUri2 = "data:image/png;base64:rararararachacha"
 
-        CustomIcon icon1 = new CustomIcon(projectId: "proj", dataUri: mockDataUri1, filename: "file.png", id:  1)
-        CustomIcon icon2 = new CustomIcon(projectId: "proj", dataUri: mockDataUri2, filename: "file2.jpg", id:  2)
+        CustomIcon icon1 = new CustomIcon(projectId: "proj", width: 48, height: 48, dataUri: mockDataUri1, filename: "file.png", id:  1)
+        CustomIcon icon2 = new CustomIcon(projectId: "proj", width: 48, height: 48, dataUri: mockDataUri2, filename: "file2.jpg", id:  2)
 
         def icons = [icon1, icon2]
 
@@ -28,8 +28,8 @@ class CssGeneratorSpec extends Specification {
         String mockDataUri1 = "data:image/png;base64:rarararararararararachacha"
         String mockDataUri2 = "data:image/png;base64:rararararachacha"
 
-        CustomIcon icon1 = new CustomIcon(projectId: "proj", dataUri: mockDataUri1, filename: "file.png", id:  1)
-        CustomIcon icon2 = new CustomIcon(projectId: "proj", dataUri: mockDataUri2, filename: "file2.jpg", id:  2)
+        CustomIcon icon1 = new CustomIcon(projectId: "proj", width: 48, height: 48, dataUri: mockDataUri1, filename: "file.png", id:  1)
+        CustomIcon icon2 = new CustomIcon(projectId: "proj", width: 48, height: 48, dataUri: mockDataUri2, filename: "file2.jpg", id:  2)
 
         def icons = [icon1, icon2]
 
