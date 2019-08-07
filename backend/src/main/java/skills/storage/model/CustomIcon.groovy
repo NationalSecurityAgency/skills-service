@@ -31,6 +31,9 @@ class CustomIcon {
 
     String contentType;
 
+    Integer width;
+    Integer height;
+
     @Temporal(TemporalType.TIMESTAMP)
     @CreatedDate
     Date created

@@ -1,13 +1,14 @@
 package skills.icons
 
+import callStack.profiler.Profile
 import groovy.transform.CompileStatic
 import org.springframework.stereotype.Component
 import skills.storage.model.CustomIcon
-/**
- * Created with IntelliJ IDEA.
- * Date: 11/30/18
- * Time: 11:47 AM
- */
+
+import javax.imageio.ImageIO
+import java.awt.image.BufferedImage
+import java.util.concurrent.TimeUnit
+
 @Component
 @CompileStatic
 class CssGenerator {
@@ -21,8 +22,8 @@ class CssGenerator {
             lines.add(cssClass)
             lines.add("\tbackground-image: url(\"${it.dataUri}\");".toString())
             lines.add("\tbackground-repeat: no-repeat;")
-            lines.add("\twidth: 48px;")
-            lines.add("\theight: 48px;")
+            lines.add("\twidth: ${it.width}px;".toString())
+            lines.add("\theight: ${it.height}px;".toString())
             lines.add("\tdisplay: inline-block;")
             lines.add("}".toString())
             css += "${lines.join('')}"
