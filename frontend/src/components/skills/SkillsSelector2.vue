@@ -29,7 +29,7 @@
       };
     },
     mounted() {
-      this.selectedInternal = this.selected.map(entry => entry);
+      this.setSelectedInternal();
       if (this.onlySingleSelectedValue) {
         this.multipleSelection = false;
       }
@@ -41,7 +41,9 @@
     },
     methods: {
       setSelectedInternal() {
-        this.selectedInternal = this.selected.map(entry => entry);
+        if (this.selected) {
+          this.selectedInternal = this.selected.map(entry => entry);
+        }
       },
       removed(removedItem) {
         this.$emit('removed', removedItem);
