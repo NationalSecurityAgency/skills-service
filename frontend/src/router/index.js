@@ -16,7 +16,7 @@ import GFMDescription from '@//components/utils/GFMDescription';
 import InceptionSkills from '@//components/inception/InceptionSkills';
 import Subjects from '@//components/subjects/Subjects';
 import Badges from '@//components/badges/Badges';
-import CrossProjectBadges from '@//components/badges/CrossProjectBadges';
+import GlobalBadges from '@//components/badges/GlobalBadges';
 import Levels from '@//components/levels/Levels';
 import FullDependencyGraph from '@//components/skills/dependencies/FullDependencyGraph';
 import CrossProjectsSkills from '@//components/skills/crossProjects/CrossProjectsSkills';
@@ -53,7 +53,7 @@ const router = new Router({
       }, {
         name: 'GlobalBadges',
         path: 'globalBadges',
-        component: CrossProjectBadges,
+        component: GlobalBadges,
         meta: { requiresAuth: true },
       }, {
         name: 'GlobalMetrics',
