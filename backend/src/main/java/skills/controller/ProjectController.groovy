@@ -2,28 +2,32 @@ package skills.controller
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.web.bind.annotation.*
 import skills.auth.UserInfoService
-import skills.auth.UserSkillsGrantedAuthority
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
+import skills.controller.exceptions.SkillsValidator
+import skills.controller.request.model.ProjectRequest
+import skills.controller.result.model.CustomIconResult
+import skills.controller.result.model.ProjectResult
+import skills.controller.result.model.RequestResult
+import skills.icons.CustomIconFacade
+import skills.profile.EnableCallStackProf
 import skills.services.AdminProjService
-import skills.storage.model.auth.RoleName
 
 import java.nio.charset.StandardCharsets
 
 @RestController
 @RequestMapping("/app")
 @Slf4j
-@skills.profile.EnableCallStackProf
+@EnableCallStackProf
 class ProjectController {
     @Autowired
     AdminProjService projectAdminStorageService
 
     @Autowired
-    skills.icons.CustomIconFacade customIconFacade
+    CustomIconFacade customIconFacade
 
     @Autowired
     PasswordEncoder passwordEncoder
@@ -35,25 +39,25 @@ class ProjectController {
 
     @RequestMapping(value = "/projects", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
-    List<skills.controller.result.model.ProjectResult> getProjects() {
+    List<ProjectResult> getProjects() {
         return projectAdminStorageService.getProjects()
     }
 
     @RequestMapping(value = "/projects/{id}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
     @ResponseBody
-    skills.controller.result.model.RequestResult saveProject(@PathVariable("id") String projectId, @RequestBody skills.controller.request.model.ProjectRequest projectRequest) {
+    RequestResult saveProject(@PathVariable("id") String projectId, @RequestBody ProjectRequest projectRequest) {
         // project id is optional
         if (projectRequest.projectId && projectId != projectRequest.projectId) {
-            throw new skills.controller.exceptions.SkillException("Project id in the request doesn't equal to project id in the URL. [${projectRequest?.projectId}]<>[${projectId}]", null, null, skills.controller.exceptions.ErrorCode.BadParam)
+            throw new SkillException("Project id in the request doesn't equal to project id in the URL. [${projectRequest?.projectId}]<>[${projectId}]", null, null, ErrorCode.BadParam)
         }
         if (!projectRequest.projectId) {
             projectRequest.projectId = projectId
         }
         if (projectRequest.projectId == RESERVERED_PROJECT_ID) {
-            throw new skills.controller.exceptions.SkillException("Project id uses a reserved id, please choose a different project id.", projectId, null, skills.controller.exceptions.ErrorCode.BadParam)
+            throw new SkillException("Project id uses a reserved id, please choose a different project id.", projectId, null, ErrorCode.BadParam)
         }
         if (!projectRequest?.name) {
-            throw new skills.controller.exceptions.SkillException("Project name was not provided.", projectId, null, skills.controller.exceptions.ErrorCode.BadParam)
+            throw new SkillException("Project name was not provided.", projectId, null, ErrorCode.BadParam)
         }
 
         // if the id is provided then this is an 'edit operation' then user must be an amdin of this project
@@ -62,13 +66,13 @@ class ProjectController {
         }
 
         projectAdminStorageService.saveProject(projectRequest)
-        return new skills.controller.result.model.RequestResult(success: true)
+        return new RequestResult(success: true)
     }
 
     @RequestMapping(value="/projects/{id}", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
-    skills.controller.result.model.ProjectResult getProject(@PathVariable("id") String projectId){
-        skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "id")
+    ProjectResult getProject(@PathVariable("id") String projectId){
+        SkillsValidator.isNotBlank(projectId, "id")
         return projectAdminStorageService.getProject(projectId)
     }
 
@@ -76,8 +80,8 @@ class ProjectController {
     @ResponseBody
     boolean doesProjectExist(@RequestParam(value = "projectId", required = false) String projectId,
                              @RequestParam(value = "projectName", required = false) String projectName) {
-        skills.controller.exceptions.SkillsValidator.isTrue((projectId || projectName), "One of Project Id or Project Name must be provided.")
-        skills.controller.exceptions.SkillsValidator.isTrue(!(projectId && projectName), "Only Project Id or Project Name may be provided, not both.")
+        SkillsValidator.isTrue((projectId || projectName), "One of Project Id or Project Name must be provided.")
+        SkillsValidator.isTrue(!(projectId && projectName), "Only Project Id or Project Name may be provided, not both.")
 
         if (projectId) {
             projectId = URLDecoder.decode(projectId, StandardCharsets.UTF_8.toString())
@@ -90,7 +94,7 @@ class ProjectController {
 
     @RequestMapping(value = "/projects/{id}/customIcons", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
-    List<skills.controller.result.model.CustomIconResult> getCustomIcons(@PathVariable("id") String projectId) {
+    List<CustomIconResult> getCustomIcons(@PathVariable("id") String projectId) {
         return projectAdminStorageService.getCustomIcons(projectId)
     }
 

@@ -3,13 +3,11 @@ package skills.controller.request.model
 import groovy.transform.Canonical
 
 @Canonical
-class SettingsRequest {
+abstract class SettingsRequest {
 
     Integer id
     //nullable
     String settingGroup
-    //nullable
-    String projectId
     //non-null
     String setting
     //non-null

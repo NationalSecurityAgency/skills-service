@@ -51,11 +51,11 @@ class UserAuthService {
             userInfo = new UserInfo (
                     username: user.userId,
                     password: user.password,
-                    firstName: user.userProps.find {it.name =='firstName'}?.value,
-                    lastName: user.userProps.find {it.name =='lastName'}?.value,
-                    email: user.userProps.find {it.name =='email'}?.value,
-                    userDn: user.userProps.find {it.name =='DN'}?.value,
-                    nickname: user.userProps.find {it.name =='nickname'}?.value,
+                    firstName: user.userProps.find {it.setting =='firstName'}?.value,
+                    lastName: user.userProps.find {it.setting =='lastName'}?.value,
+                    email: user.userProps.find {it.setting =='email'}?.value,
+                    userDn: user.userProps.find {it.setting =='DN'}?.value,
+                    nickname: user.userProps.find {it.setting =='nickname'}?.value,
                     authorities: convertRoles(userRepository.findByUserIdIgnoreCase(userId)?.roles)
             )
         }

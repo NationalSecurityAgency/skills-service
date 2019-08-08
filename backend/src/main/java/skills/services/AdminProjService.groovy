@@ -1,6 +1,6 @@
 package skills.services
 
-import callStack.profiler.CProf
+
 import callStack.profiler.Profile
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
@@ -12,8 +12,10 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestBody
+import skills.controller.exceptions.DataIntegrityViolationExceptionHandler
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
+import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.ActionPatchRequest
 import skills.controller.request.model.BadgeRequest
 import skills.controller.request.model.ProjectRequest
@@ -21,14 +23,23 @@ import skills.controller.request.model.SkillDefForDependencyRes
 import skills.controller.request.model.SkillRequest
 import skills.controller.request.model.SubjectRequest
 import skills.auth.UserInfoService
+import skills.controller.result.model.BadgeResult
+import skills.controller.result.model.CustomIconResult
+import skills.controller.result.model.DependencyCheckResult
 import skills.controller.result.model.NumUsersRes
+import skills.controller.result.model.ProjectResult
+import skills.controller.result.model.SettingsResult
+import skills.controller.result.model.SharedSkillResult
+import skills.controller.result.model.SimpleProjectResult
 import skills.controller.result.model.SkillDefPartialRes
+import skills.controller.result.model.SkillDefRes
 import skills.controller.result.model.SkillDefSkinnyRes
+import skills.controller.result.model.SkillsGraphRes
+import skills.controller.result.model.SubjectResult
 import skills.services.settings.Settings
 import skills.icons.IconCssNameUtil
 import skills.services.settings.SettingsService
 import skills.storage.model.CustomIcon
-import skills.storage.model.LevelDef
 import skills.storage.model.ProjDef
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillRelDef
@@ -40,7 +51,6 @@ import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.SkillRelDefRepo
 import skills.storage.repos.SkillShareDefRepo
 import skills.utils.ClientSecretGenerator
-import skills.utils.Constants
 import skills.utils.Props
 
 @Service
@@ -82,18 +92,21 @@ class AdminProjService {
     @Autowired
     SettingsService settingsService
 
+    @Autowired
+    SortingService sortingService
 
-    private static skills.controller.exceptions.DataIntegrityViolationExceptionHandler dataIntegrityViolationExceptionHandler =
-            new skills.controller.exceptions.DataIntegrityViolationExceptionHandler([
+
+    private static DataIntegrityViolationExceptionHandler dataIntegrityViolationExceptionHandler =
+            new DataIntegrityViolationExceptionHandler([
                     "index_project_definition_name" : "Provided project name already exist.",
                     "index_project_definition_project_id": "Provided project id already exist.",
             ])
 
-    private static skills.controller.exceptions.DataIntegrityViolationExceptionHandler subjectDataIntegrityViolationExceptionHandler = crateSkillDefBasedDataIntegrityViolationExceptionHandler("subject")
-    private static skills.controller.exceptions.DataIntegrityViolationExceptionHandler badgeDataIntegrityViolationExceptionHandler = crateSkillDefBasedDataIntegrityViolationExceptionHandler("badge")
-    private static skills.controller.exceptions.DataIntegrityViolationExceptionHandler skillDataIntegrityViolationExceptionHandler = crateSkillDefBasedDataIntegrityViolationExceptionHandler("skill")
-    private static skills.controller.exceptions.DataIntegrityViolationExceptionHandler crateSkillDefBasedDataIntegrityViolationExceptionHandler(String type) {
-        new skills.controller.exceptions.DataIntegrityViolationExceptionHandler([
+    private static DataIntegrityViolationExceptionHandler subjectDataIntegrityViolationExceptionHandler = crateSkillDefBasedDataIntegrityViolationExceptionHandler("subject")
+    private static DataIntegrityViolationExceptionHandler badgeDataIntegrityViolationExceptionHandler = crateSkillDefBasedDataIntegrityViolationExceptionHandler("badge")
+    private static DataIntegrityViolationExceptionHandler skillDataIntegrityViolationExceptionHandler = crateSkillDefBasedDataIntegrityViolationExceptionHandler("skill")
+    private static DataIntegrityViolationExceptionHandler crateSkillDefBasedDataIntegrityViolationExceptionHandler(String type) {
+        new DataIntegrityViolationExceptionHandler([
                 "index_skill_definition_project_id_skill_id" : "Provided ${type} id already exist.".toString(),
                 "index_skill_definition_project_id_name": "Provided ${type} name already exist.".toString(),
                 "index_skill_definition_project_id_skill_id_type" : "Provided ${type} id already exist.".toString(),
@@ -108,14 +121,14 @@ class AdminProjService {
 
         IdFormatValidator.validate(projectRequest.projectId)
         if(projectRequest.name.length() > 50){
-            throw new skills.controller.exceptions.SkillException("Bad Name [${projectRequest.name}] - must not exceed 50 chars.")
+            throw new SkillException("Bad Name [${projectRequest.name}] - must not exceed 50 chars.")
         }
 
         ProjDef projectDefinition
         if (projectRequest.id) {
             Optional<ProjDef> existing = projDefRepo.findById(projectRequest.id)
             if (!existing.present) {
-                throw new skills.controller.exceptions.SkillException("Requested project update id [${projectRequest.id}] doesn't exist.", projectRequest.projectId, null)
+                throw new SkillException("Requested project update id [${projectRequest.id}] doesn't exist.", projectRequest.projectId, null)
             }
             log.info("Updating with [{}]", projectRequest)
             projectDefinition = existing.get()
@@ -128,7 +141,6 @@ class AdminProjService {
                 projectDefinition = projDefRepo.save(projectDefinition)
             }
             log.info("Saved [{}]", projectDefinition)
-
         } else {
             ProjDef idExist = projDefRepo.findByProjectIdIgnoreCase(projectRequest.projectId)
             if (idExist) {
@@ -142,21 +154,18 @@ class AdminProjService {
 
             // TODO: temp hack around since user is not yet defined when Inception project is created
             // This will be addressed in ticket #139
-            int displayOrder = 0
-            if (!userIdParam) {
-                List<ProjDef> projectDefinitions = projDefRepo.getProjectsByUser(this.getUserId())
-                Integer lastDisplayOrder = projectDefinitions ? projectDefinitions.collect({ it.displayOrder }).max() : 0
-                displayOrder = lastDisplayOrder == null ? 0 : lastDisplayOrder + 1
-            }
-
             String clientSecret = new ClientSecretGenerator().generateClientSecret()
 
-            projectDefinition = new ProjDef(projectId: projectRequest.projectId, name: projectRequest.name, displayOrder: displayOrder,
+            projectDefinition = new ProjDef(projectId: projectRequest.projectId, name: projectRequest.name,
                     clientSecret: clientSecret)
             log.info("Created project [{}]", projectDefinition)
 
             dataIntegrityViolationExceptionHandler.handle(projectDefinition.projectId){
                 projectDefinition = projDefRepo.save(projectDefinition)
+            }
+
+            if (!userIdParam) {
+                sortingService.setNewProjectDisplayOrder(projectRequest.projectId)
             }
             log.info("Saved [{}]", projectDefinition)
 
@@ -171,14 +180,14 @@ class AdminProjService {
     void saveSubject(String projectId, SubjectRequest subjectRequest) {
         IdFormatValidator.validate(subjectRequest.subjectId)
         if(subjectRequest.name.length() > 50){
-            throw new skills.controller.exceptions.SkillException("Bad Name [${subjectRequest.name}] - must not exceed 50 chars.")
+            throw new SkillException("Bad Name [${subjectRequest.name}] - must not exceed 50 chars.")
         }
 
         SkillDef res
         if (subjectRequest.id) {
             Optional<SkillDef> existing = skillDefRepo.findById(subjectRequest.id)
             if (!existing.present) {
-                throw new skills.controller.exceptions.SkillException("Subject id [${subjectRequest.id}] doesn't exist.", projectId, null)
+                throw new SkillException("Subject id [${subjectRequest.id}] doesn't exist.", projectId, null)
             }
             SkillDef skillDefinition = existing.get()
 
@@ -228,7 +237,7 @@ class AdminProjService {
     ProjDef getProjDef(String projectId) {
         ProjDef projDef = projDefRepo.findByProjectIdIgnoreCase(projectId)
         if (!projDef) {
-            throw new skills.controller.exceptions.SkillException("Failed to find project [$projectId]", projectId, null)
+            throw new SkillException("Failed to find project [$projectId]", projectId, null)
         }
         return projDef
     }
@@ -241,7 +250,7 @@ class AdminProjService {
     private SkillDef getSkillDef(String projectId, String skillId, SkillDef.ContainerType containerType = SkillDef.ContainerType.Skill) {
         SkillDef skillDef = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, skillId, containerType)
         if (!skillDef) {
-            throw new skills.controller.exceptions.SkillException("Failed to find skillId [$skillId] for [$projectId] with type [${containerType}]", projectId, skillId)
+            throw new SkillException("Failed to find skillId [$skillId] for [$projectId] with type [${containerType}]", projectId, skillId)
         }
         return skillDef
     }
@@ -250,7 +259,7 @@ class AdminProjService {
     void saveBadge(String projectId, BadgeRequest badgeRequest) {
         IdFormatValidator.validate(badgeRequest.badgeId)
         if(badgeRequest.name.length() > 50){
-            throw new skills.controller.exceptions.SkillException("Bad Name [${badgeRequest.name}] - must not exceed 50 chars.")
+            throw new SkillException("Bad Name [${badgeRequest.name}] - must not exceed 50 chars.")
         }
 
         boolean isEdit = badgeRequest.id
@@ -258,7 +267,7 @@ class AdminProjService {
         if (isEdit) {
             Optional<SkillDef> existing = skillDefRepo.findById(badgeRequest.id)
             if (!existing.present) {
-                throw new skills.controller.exceptions.SkillException("Badge id [${badgeRequest.id}] doesn't exist.", projectId, null)
+                throw new SkillException("Badge id [${badgeRequest.id}] doesn't exist.", projectId, null)
             }
             log.info("Updating with [{}]", badgeRequest)
             skillDefinition = existing.get()
@@ -307,13 +316,13 @@ class AdminProjService {
 
     @Transactional()
     void addSkillToBadge(String projectId, String badgeId, String skillid) {
-        assignGraphRelationship(projectId, badgeId, SkillDef.ContainerType.Badge, skillid, SkillRelDef.RelationshipType.BadgeDependence)
+        assignGraphRelationship(projectId, badgeId, SkillDef.ContainerType.Badge, skillid, RelationshipType.BadgeDependence)
     }
 
     @Transactional()
     void removeSkillFromBadge(String projectId, String badgeId, String skillid) {
         removeGraphRelationship(projectId, badgeId, SkillDef.ContainerType.Badge,
-                projectId, skillid, SkillRelDef.RelationshipType.BadgeDependence)
+                projectId, skillid, RelationshipType.BadgeDependence)
     }
 
 
@@ -389,36 +398,36 @@ class AdminProjService {
     }
 
     @Transactional(readOnly = true)
-    skills.controller.result.model.SubjectResult getSubject(String projectId, String subjectId) {
+    SubjectResult getSubject(String projectId, String subjectId) {
         SkillDef skillDef = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, subjectId, SkillDef.ContainerType.Subject)
         convertToSubject(skillDef)
     }
 
     @Transactional(readOnly = true)
-    List<skills.controller.result.model.SubjectResult> getSubjects(String projectId) {
+    List<SubjectResult> getSubjects(String projectId) {
         ProjDef projDef = getProjDef(projectId)
-        List<skills.controller.result.model.SubjectResult> res = projDef.subjects.collect { convertToSubject(it) }
+        List<SubjectResult> res = projDef.subjects.collect { convertToSubject(it) }
         calculatePercentages(res)
         return res?.sort({ it.displayOrder })
     }
 
     @Transactional(readOnly = true)
-    List<skills.controller.result.model.BadgeResult> getBadges(String projectId) {
+    List<BadgeResult> getBadges(String projectId) {
         ProjDef projDef = getProjDef(projectId)
-        List<skills.controller.result.model.BadgeResult> res = projDef.badges.collect { convertToBadge(it) }
+        List<BadgeResult> res = projDef.badges.collect { convertToBadge(it) }
         return res?.sort({ it.displayOrder })
     }
 
     @Transactional(readOnly = true)
-    skills.controller.result.model.BadgeResult getBadge(String projectId, String badgeId) {
+    BadgeResult getBadge(String projectId, String badgeId) {
         SkillDef skillDef = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, badgeId, SkillDef.ContainerType.Badge)
         return convertToBadge(skillDef, true)
     }
 
-    private void calculatePercentages(List<skills.controller.result.model.SubjectResult> res) {
+    private void calculatePercentages(List<SubjectResult> res) {
         // make a shallow copy so we can sort it
         // sorting will make percentage calculation consistent since we don't ask db to sort
-        List<skills.controller.result.model.SubjectResult> copy = new ArrayList<>(res)
+        List<SubjectResult> copy = new ArrayList<>(res)
         copy = copy.sort { it.name }
         if (copy) {
             // calculate percentage
@@ -431,7 +440,7 @@ class AdminProjService {
                         it.pointsPercentage = 0
                     }
                 } else {
-                    List<skills.controller.result.model.SubjectResult> withoutLastOne = copy[0..copy.size() - 2]
+                    List<SubjectResult> withoutLastOne = copy[0..copy.size() - 2]
 
                     withoutLastOne.each {
                         it.pointsPercentage = (int) ((it.totalPoints / overallPoints) * 100)
@@ -489,7 +498,7 @@ class AdminProjService {
     @Transactional()
     void shareSkillToExternalProject(String projectId, String skillId, String sharedToProjectId) {
         if (projectId?.equalsIgnoreCase(sharedToProjectId)) {
-            throw new skills.controller.exceptions.SkillException("Can not share skill to itself. Requested project [$sharedToProjectId] is itself!", projectId, skillId)
+            throw new SkillException("Can not share skill to itself. Requested project [$sharedToProjectId] is itself!", projectId, skillId)
         }
         SkillDef skill = getSkillDef(projectId, skillId)
 
@@ -514,17 +523,17 @@ class AdminProjService {
         }
 
         if (!skillShareDef){
-            throw new skills.controller.exceptions.SkillException("Failed to find skill share definition for project [$projectId] skill [$skillId] => [$sharedToProjectId] project", projectId, skillId)
+            throw new SkillException("Failed to find skill share definition for project [$projectId] skill [$skillId] => [$sharedToProjectId] project", projectId, skillId)
         }
         skillShareDefRepo.delete(skillShareDef)
     }
 
 
     @Transactional(readOnly = true)
-    List<skills.controller.result.model.SharedSkillResult> getSharedSkillsWithOtherProjects(String projectId) {
+    List<SharedSkillResult> getSharedSkillsWithOtherProjects(String projectId) {
         List<SkillShareDef> shareDefs = skillShareDefRepo.getSkillShareDefsWithOtherProjectsByProjectId(projectId)
         return shareDefs.collect { SkillShareDef shareDef ->
-            new skills.controller.result.model.SharedSkillResult(
+            new SharedSkillResult(
                     skillName: shareDef.skill.name, skillId: shareDef.skill.skillId,
                     projectName: shareDef.sharedToProject?.name, projectId: shareDef.sharedToProject?.projectId,
                     sharedWithAllProjects: shareDef.sharedToProject == null
@@ -533,11 +542,11 @@ class AdminProjService {
     }
 
     @Transactional(readOnly = true)
-    List<skills.controller.result.model.SharedSkillResult> getSharedSkillsFromOtherProjects(String projectId) {
+    List<SharedSkillResult> getSharedSkillsFromOtherProjects(String projectId) {
         ProjDef projDef = getProjDef(projectId)
         List<SkillShareDefRepo.SkillSharedMeta> sharedMetas = skillShareDefRepo.getSkillDefsSharedFromOtherProjectsByProjectId(projDef)
         return sharedMetas.collect { SkillShareDefRepo.SkillSharedMeta meta ->
-            new skills.controller.result.model.SharedSkillResult(
+            new SharedSkillResult(
                     skillName: meta.skillName, skillId: meta.skillId,
                     projectName: meta.projectName, projectId: meta.projectId
             )
@@ -557,10 +566,10 @@ class AdminProjService {
     }
 
     @Transactional()
-    List<skills.controller.result.model.SimpleProjectResult> searchProjects(String nameQuery) {
+    List<SimpleProjectResult> searchProjects(String nameQuery) {
         List<ProjDef> projDefs = projDefRepo.queryProjectsByNameQuery(nameQuery)
         return projDefs.collect {
-            new skills.controller.result.model.SimpleProjectResult(id: it.id, name: it.name, projectId: it.projectId)
+            new SimpleProjectResult(id: it.id, name: it.name, projectId: it.projectId)
         }
     }
 
@@ -568,48 +577,28 @@ class AdminProjService {
     void setProjectDisplayOrder(String projectId, ActionPatchRequest projectPatchRequest) {
         assert projectPatchRequest.action
 
-        List<ProjDef> projectDefinitions = projDefRepo.getProjectsByUser(userId)
-        ProjDef toUpdate = projectDefinitions.find({ it.projectId == projectId })
-        ProjDef switchWith
-
         switch (projectPatchRequest.action) {
             case ActionPatchRequest.ActionType.DisplayOrderDown:
-                projectDefinitions = projectDefinitions.sort({ it.displayOrder })
-                switchWith = projectDefinitions.find({ it.displayOrder > toUpdate.displayOrder })
+                sortingService.changeProjectOrder(projectId, SortingService.Move.DOWN)
                 break;
             case ActionPatchRequest.ActionType.DisplayOrderUp:
-                projectDefinitions = projectDefinitions.sort({ it.displayOrder }).reverse()
-                switchWith = projectDefinitions.find({ it.displayOrder < toUpdate.displayOrder })
+                sortingService.changeProjectOrder(projectId, SortingService.Move.UP)
                 break;
             default:
                 throw new IllegalArgumentException("Unknown action ${projectPatchRequest.action}")
         }
-
-
-        if (!switchWith) {
-            assert switchWith, "Failed to find project definition to switch with [${toUpdate}] for action [$projectPatchRequest.action]"
-        }
-        assert switchWith.projectId != toUpdate.projectId
-
-        int switchWithDisplayOrderTmp = toUpdate.displayOrder
-        int toUpdateDisplayOrderTmp = switchWith.displayOrder
-
-        switchWith.displayOrder = -1
-        toUpdate.displayOrder = -2
-        projDefRepo.saveAll([toUpdate, switchWith])
-
-        switchWith.displayOrder = switchWithDisplayOrderTmp
-        toUpdate.displayOrder = toUpdateDisplayOrderTmp
-        projDefRepo.saveAll([toUpdate, switchWith])
     }
 
     @Transactional(readOnly = true)
-    List<skills.controller.result.model.ProjectResult> getProjects() {
+    List<ProjectResult> getProjects() {
+        Map<String,Integer> projectIdSortOrder = sortingService.getUserProjectsOrder(userId)
         // sql join with UserRoles and ther is 1-many relationship that needs to be normalized
-        List<skills.controller.result.model.ProjectResult> finalRes = projDefRepo.getProjectsByUser(userId).unique({it.projectId}).collect({
-            skills.controller.result.model.ProjectResult res = convert(it)
+        List<ProjectResult> finalRes = projDefRepo.getProjectsByUser(userId).unique({it.projectId}).collect({
+            ProjectResult res = convert(it, projectIdSortOrder)
             return res
         })
+
+        finalRes.sort() { it.displayOrder }
 
         if (finalRes) {
             finalRes.first().isFirst = true
@@ -620,16 +609,17 @@ class AdminProjService {
     }
 
     @Profile
-    private skills.controller.result.model.ProjectResult convert(ProjDef definition) {
-        skills.controller.result.model.ProjectResult res = new skills.controller.result.model.ProjectResult(
+    private ProjectResult convert(ProjDef definition, Map<String,Integer> projectIdSortOrder) {
+        Integer order = projectIdSortOrder?.get(definition.projectId)
+        ProjectResult res = new ProjectResult(
                 id: definition.id,
                 projectId: definition.projectId, name: definition.name, totalPoints: definition.totalPoints,
                 numSubjects: definition.subjects ? definition.subjects.size() : 0,
-                displayOrder: definition.displayOrder,
+                displayOrder: order != null ? order : 0,
         )
         res.numBadges = skillDefRepo.countByProjectIdAndType(definition.projectId, SkillDef.ContainerType.Badge)
         res.numSkills = countNumSkillsForProject(definition)
-        skills.controller.result.model.SettingsResult result = settingsService.getSetting(definition.projectId, Settings.LEVEL_AS_POINTS.settingName)
+        SettingsResult result = settingsService.getProjectSetting(definition.projectId, Settings.LEVEL_AS_POINTS.settingName)
 
         if(result == null || result.value == "false"){
             res.levelsArePoints = false
@@ -653,8 +643,8 @@ class AdminProjService {
 
 
     @Profile
-    private skills.controller.result.model.SubjectResult convertToSubject(SkillDef skillDef) {
-        skills.controller.result.model.SubjectResult res = new skills.controller.result.model.SubjectResult(
+    private SubjectResult convertToSubject(SkillDef skillDef) {
+        SubjectResult res = new SubjectResult(
                 id: skillDef.id,
                 subjectId: skillDef.skillId,
                 projectId: skillDef.projectId,
@@ -677,8 +667,8 @@ class AdminProjService {
     }
 
     @Profile
-    private skills.controller.result.model.BadgeResult convertToBadge(SkillDef skillDef, boolean loadRequiredSkills = false) {
-        skills.controller.result.model.BadgeResult res = new skills.controller.result.model.BadgeResult(
+    private BadgeResult convertToBadge(SkillDef skillDef, boolean loadRequiredSkills = false) {
+        BadgeResult res = new BadgeResult(
                 id: skillDef.id,
                 badgeId: skillDef.skillId,
                 projectId: skillDef.projectId,
@@ -691,13 +681,13 @@ class AdminProjService {
         )
 
         if (loadRequiredSkills) {
-            List<SkillRelDef> dependentSkillsRels = skillRelDefRepo.findAllByParentAndType(skillDef, SkillRelDef.RelationshipType.BadgeDependence)
+            List<SkillRelDef> dependentSkillsRels = skillRelDefRepo.findAllByParentAndType(skillDef, RelationshipType.BadgeDependence)
             res.requiredSkills = dependentSkillsRels?.collect { convertToSkillDefRes(it.child) }
         }
 
-        res.numSkills = skillDefRepo.countChildSkillsByIdAndRelationshipType(skillDef, SkillRelDef.RelationshipType.BadgeDependence)
+        res.numSkills = skillDefRepo.countChildSkillsByIdAndRelationshipType(skillDef, RelationshipType.BadgeDependence)
         if (res.numSkills > 0) {
-            res.totalPoints = skillDefRepo.sumChildSkillsTotalPointsBySkillAndRelationshipType(skillDef, SkillRelDef.RelationshipType.BadgeDependence)
+            res.totalPoints = skillDefRepo.sumChildSkillsTotalPointsBySkillAndRelationshipType(skillDef, RelationshipType.BadgeDependence)
         } else {
             res.totalPoints = 0
         }
@@ -705,9 +695,10 @@ class AdminProjService {
     }
 
     @Transactional(readOnly = true)
-    skills.controller.result.model.ProjectResult getProject(String projectId) {
+    ProjectResult getProject(String projectId) {
         ProjDef projectDefinition = getProjDef(projectId)
-        skills.controller.result.model.ProjectResult res = convert(projectDefinition)
+        Integer order = sortingService.getProjectSortOrder(projectId)
+        ProjectResult res = convert(projectDefinition, [(projectId): order])
         return res
     }
 
@@ -760,7 +751,7 @@ class AdminProjService {
     private List<SkillDefPartialRes> getSkillsByProjectSkillAndType(String projectId, String skillId, SkillDef.ContainerType type, RelationshipType relationshipType) {
         SkillDef parent = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, skillId, type)
         if (!parent) {
-            throw new skills.controller.exceptions.SkillException("There is no skill id [${skillId}] doesn't exist.", projectId, null)
+            throw new SkillException("There is no skill id [${skillId}] doesn't exist.", projectId, null)
         }
 
         List<SkillDefRepo.SkillDefPartial> res = skillRelDefRepo.getChildrenPartial(parent.projectId, parent.skillId, relationshipType)
@@ -780,15 +771,15 @@ class AdminProjService {
     }
 
     @Transactional(readOnly = true)
-    skills.controller.result.model.SkillDefRes getSkill(String projectId, String subjectId, String skillId) {
+    SkillDefRes getSkill(String projectId, String subjectId, String skillId) {
         SkillDef res = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, skillId, SkillDef.ContainerType.Skill)
         assert res
         return convertToSkillDefRes(res, true)
     }
 
     @Transactional(readOnly = true)
-    skills.controller.result.model.SkillsGraphRes getDependentSkillsGraph(String projectId, String skillId) {
-        List<GraphSkillDefEdge> edges = loadGraphEdges(projectId, SkillRelDef.RelationshipType.Dependence)
+    SkillsGraphRes getDependentSkillsGraph(String projectId, String skillId) {
+        List<GraphSkillDefEdge> edges = loadGraphEdges(projectId, RelationshipType.Dependence)
 
         // must only keep the provide skill id and its descendants
         List<GraphSkillDefEdge> collectedRes = []
@@ -811,27 +802,27 @@ class AdminProjService {
     }
 
     @Transactional(readOnly = true)
-    skills.controller.result.model.SkillsGraphRes getDependentSkillsGraph(String projectId) {
-        List<GraphSkillDefEdge> edges = loadGraphEdges(projectId, SkillRelDef.RelationshipType.Dependence)
+    SkillsGraphRes getDependentSkillsGraph(String projectId) {
+        List<GraphSkillDefEdge> edges = loadGraphEdges(projectId, RelationshipType.Dependence)
         return convertToSkillsGraphRes(edges)
     }
 
-    private skills.controller.result.model.SkillsGraphRes convertToSkillsGraphRes(List<GraphSkillDefEdge> edges) {
+    private SkillsGraphRes convertToSkillsGraphRes(List<GraphSkillDefEdge> edges) {
         Set<SkillDef> distinctNodes = new TreeSet<>(new Comparator<SkillDef>() {
             @Override
             int compare(SkillDef o1, SkillDef o2) {
                 return o1.id.compareTo(o2.id)
             }
         })
-        List<skills.controller.result.model.SkillsGraphRes.Edge> edgesRes = []
+        List<SkillsGraphRes.Edge> edgesRes = []
         edges.each {
-            edgesRes.add(new skills.controller.result.model.SkillsGraphRes.Edge(fromId: it.from.id, toId: it.to.id))
+            edgesRes.add(new SkillsGraphRes.Edge(fromId: it.from.id, toId: it.to.id))
             distinctNodes.add(it.from)
             distinctNodes.add(it.to)
         }
 
-        List<skills.controller.result.model.SkillDefRes> nodes = distinctNodes.collect({ convertToSkillDefRes(it) })
-        skills.controller.result.model.SkillsGraphRes res = new skills.controller.result.model.SkillsGraphRes(nodes: nodes, edges: edgesRes)
+        List<SkillDefRes> nodes = distinctNodes.collect({ convertToSkillDefRes(it) })
+        SkillsGraphRes res = new SkillsGraphRes(nodes: nodes, edges: edgesRes)
         return res
     }
 
@@ -845,7 +836,7 @@ class AdminProjService {
         SkillDef to
     }
     @Profile
-    private List<GraphSkillDefEdge> loadGraphEdges(String projectId, SkillRelDef.RelationshipType type){
+    private List<GraphSkillDefEdge> loadGraphEdges(String projectId, RelationshipType type){
         List<Object[]> edges = skillRelDefRepo.getGraph(projectId, type)
 
         return edges.collect({
@@ -884,7 +875,7 @@ class AdminProjService {
                     skillId: it.skillId, name: it.name, projectId: it.projectId, version: it.version
             )
         }
-        List<skills.controller.result.model.SharedSkillResult> sharedSkills = getSharedSkillsFromOtherProjects(projectId)
+        List<SharedSkillResult> sharedSkills = getSharedSkillsFromOtherProjects(projectId)
         sharedSkills.each {
             finalRes.add(
                     new SkillDefForDependencyRes(
@@ -907,13 +898,13 @@ class AdminProjService {
         }
 
         validateDependencyVersions(skill1, skill2)
-        checkForCircularGraphAndThrowException(skill1, skill2, SkillRelDef.RelationshipType.Dependence)
+        checkForCircularGraphAndThrowException(skill1, skill2, RelationshipType.Dependence)
         try {
-            skillRelDefRepo.save(new SkillRelDef(parent: skill1, child: skill2, type: SkillRelDef.RelationshipType.Dependence))
+            skillRelDefRepo.save(new SkillRelDef(parent: skill1, child: skill2, type: RelationshipType.Dependence))
         } catch (DataIntegrityViolationException e) {
             String msg = "Skill dependency [${skill1.projectId}:${skill1.skillId}]=>[${skill2.projectId}:${skill2.skillId}] already exist.".toString()
             log.error(msg, e)
-            throw new skills.controller.exceptions.SkillException(msg, skill1.projectId, skill1.skillId, skills.controller.exceptions.ErrorCode.FailedToAssignDependency)
+            throw new SkillException(msg, skill1.projectId, skill1.skillId, ErrorCode.FailedToAssignDependency)
         }
     }
 
@@ -926,28 +917,28 @@ class AdminProjService {
         }
 
         if (!skillShareDef) {
-            throw new skills.controller.exceptions.SkillException("Skill [${skill2.projectId}:${skill2.skillId}] is not shared (or does not exist) to [$projectId] project", projectId)
+            throw new SkillException("Skill [${skill2.projectId}:${skill2.skillId}] is not shared (or does not exist) to [$projectId] project", projectId)
         }
     }
 
-    private void validateDependencyVersions(SkillDef skill, SkillDef dependOnSkill) {
+    private static void validateDependencyVersions(SkillDef skill, SkillDef dependOnSkill) {
         if (skill.version < dependOnSkill.version) {
-            throw new skills.controller.exceptions.SkillException("Not allowed to depend on skill with a later version. " +
+            throw new SkillException("Not allowed to depend on skill with a later version. " +
                     "Skill [ID:${skill.skillId}, version ${skill.version}] can not depend on [ID:${dependOnSkill.skillId}, version ${dependOnSkill.version}]",
-                    skill.projectId, skill.skillId, skills.controller.exceptions.ErrorCode.FailedToAssignDependency)
+                    skill.projectId, skill.skillId, ErrorCode.FailedToAssignDependency)
         }
     }
 
     @Transactional()
     void removeSkillDependency(String projectId, String skillId, String dependentSkillId, String dependentProjectId = null) {
         removeGraphRelationship(projectId, skillId, SkillDef.ContainerType.Skill,
-                dependentProjectId ?: projectId, dependentSkillId, SkillRelDef.RelationshipType.Dependence)
+                dependentProjectId ?: projectId, dependentSkillId, RelationshipType.Dependence)
     }
 
 
     @Transactional
     void assignGraphRelationship(String projectId, String skillId, SkillDef.ContainerType skillType,
-                                 String relationshipSkillId, SkillRelDef.RelationshipType relationshipType) {
+                                 String relationshipSkillId, RelationshipType relationshipType) {
         SkillDef skill1 = getSkillDef(projectId, skillId, skillType)
         SkillDef skill2 = getSkillDef(projectId, relationshipSkillId)
         skillRelDefRepo.save(new SkillRelDef(parent: skill1, child: skill2, type: relationshipType))
@@ -955,31 +946,31 @@ class AdminProjService {
 
     @Transactional
     void removeGraphRelationship(String projectId, String skillId, SkillDef.ContainerType skillType,
-                                 String relationshipProjectId, String relationshipSkillId, SkillRelDef.RelationshipType relationshipType){
+                                 String relationshipProjectId, String relationshipSkillId, RelationshipType relationshipType){
         SkillDef skill1 = getSkillDef(projectId, skillId, skillType)
         SkillDef skill2 = getSkillDef(relationshipProjectId, relationshipSkillId)
         SkillRelDef relDef = skillRelDefRepo.findByChildAndParentAndType(skill2, skill1, relationshipType)
         if (!relDef) {
-            throw new skills.controller.exceptions.SkillException("Failed to find relationship [$relationshipType] between [$skillId] and [$relationshipSkillId] for [$projectId]", projectId, skillId)
+            throw new SkillException("Failed to find relationship [$relationshipType] between [$skillId] and [$relationshipSkillId] for [$projectId]", projectId, skillId)
         }
         skillRelDefRepo.delete(relDef)
     }
 
 
-    private void checkForCircularGraphAndThrowException(SkillDef skill1, SkillDef skill2, SkillRelDef.RelationshipType type) {
+    private void checkForCircularGraphAndThrowException(SkillDef skill1, SkillDef skill2, RelationshipType type) {
         assert skill1.skillId != skill2.skillId || skill1.projectId != skill2.projectId
 
-        skills.controller.result.model.DependencyCheckResult dependencyCheckResult = checkForCircularGraph(skill1, skill2, type)
+        DependencyCheckResult dependencyCheckResult = checkForCircularGraph(skill1, skill2, type)
         if (!dependencyCheckResult.possible) {
-            throw new skills.controller.exceptions.SkillException(dependencyCheckResult.reason, skill1.projectId, skill1.skillId, skills.controller.exceptions.ErrorCode.FailedToAssignDependency)
+            throw new SkillException(dependencyCheckResult.reason, skill1.projectId, skill1.skillId, ErrorCode.FailedToAssignDependency)
         }
     }
 
-    private skills.controller.result.model.DependencyCheckResult checkForCircularGraph(SkillDef proposedParent, SkillDef proposedChild, SkillRelDef.RelationshipType type) {
+    private DependencyCheckResult checkForCircularGraph(SkillDef proposedParent, SkillDef proposedChild, RelationshipType type) {
         try {
             recursiveCircularDependenceCheck(proposedChild, proposedParent, [getDependencyCheckId(proposedParent), getDependencyCheckId(proposedChild)], type)
         } catch (Throwable t) {
-            throw new skills.controller.exceptions.SkillException(t.message, t, proposedParent.projectId, proposedParent.skillId)
+            throw new SkillException(t.message, t, proposedParent.projectId, proposedParent.skillId)
         }
     }
 
@@ -987,7 +978,7 @@ class AdminProjService {
         return skill.projectId + ":" + skill.skillId
     }
 
-    private skills.controller.result.model.DependencyCheckResult recursiveCircularDependenceCheck(SkillDef parent, SkillDef originalParent, List<String> idPath, SkillRelDef.RelationshipType type, int currentIter = 0, int maxIter = 100) {
+    private DependencyCheckResult recursiveCircularDependenceCheck(SkillDef parent, SkillDef originalParent, List<String> idPath, RelationshipType type, int currentIter = 0, int maxIter = 100) {
         if (currentIter > maxIter) {
             throw new IllegalStateException("Number of [$maxIter] iterations exceeded when checking for circular dependency for [${originalParent.skillId}]")
         }
@@ -995,28 +986,28 @@ class AdminProjService {
         List<SkillRelDef> relationships = skillRelDefRepo.findAllByParentAndType(parent, type)
         if (relationships) {
             if (relationships.find { it.child.skillId == originalParent.skillId }) {
-                return new skills.controller.result.model.DependencyCheckResult(skillId: originalParent.skillId, dependentSkillId: idPath.last(), possible: false, reason: "Discovered circular dependency [${idPath.join(" -> ")} -> ${getDependencyCheckId(originalParent)}]".toString())
+                return new DependencyCheckResult(skillId: originalParent.skillId, dependentSkillId: idPath.last(), possible: false, reason: "Discovered circular dependency [${idPath.join(" -> ")} -> ${getDependencyCheckId(originalParent)}]".toString())
             }
             for ( SkillRelDef skillRelDef : relationships ) {
                 List<String> idPathCopy = new ArrayList<>(idPath)
                 idPathCopy.add(getDependencyCheckId(skillRelDef.child))
-                skills.controller.result.model.DependencyCheckResult res = recursiveCircularDependenceCheck(skillRelDef.child, originalParent, idPathCopy, type, currentIter++, maxIter)
+                DependencyCheckResult res = recursiveCircularDependenceCheck(skillRelDef.child, originalParent, idPathCopy, type, currentIter++, maxIter)
                 if (!res.possible) {
                     return res
                 }
             }
         }
 
-        return new skills.controller.result.model.DependencyCheckResult(skillId: originalParent.skillId, dependentSkillId: idPath.last())
+        return new DependencyCheckResult(skillId: originalParent.skillId, dependentSkillId: idPath.last())
     }
 
     @Transactional()
-    skills.controller.result.model.SkillDefRes saveSkill(SkillRequest skillRequest) {
+    SkillDefRes saveSkill(SkillRequest skillRequest) {
         IdFormatValidator.validate(skillRequest.skillId)
         if (skillRequest.name.length() > 100) {
-            throw new skills.controller.exceptions.SkillException("Bad Name [${skillRequest.name}] - must not exceed 100 chars.")
+            throw new SkillException("Bad Name [${skillRequest.name}] - must not exceed 100 chars.")
         }
-        skills.controller.exceptions.SkillsValidator.isNotBlank(skillRequest.projectId, "Project Id")
+        SkillsValidator.isNotBlank(skillRequest.projectId, "Project Id")
         validateSkillVersion(skillRequest)
 
         boolean shouldRebuildScores
@@ -1028,7 +1019,7 @@ class AdminProjService {
         if (isEdit) {
             Optional<SkillDef> existing = skillDefRepo.findById(skillRequest.id)
             if (!existing.present) {
-                throw new skills.controller.exceptions.SkillException("Requested skill update id [${skillRequest.id}] doesn't exist.", skillRequest.projectId, skillRequest.skillId)
+                throw new SkillException("Requested skill update id [${skillRequest.id}] doesn't exist.", skillRequest.projectId, skillRequest.skillId)
             }
             log.info("Updating with [{}]", skillRequest)
             skillDefinition = existing.get()
@@ -1087,14 +1078,14 @@ class AdminProjService {
         }
 
         log.info("Saved [{}]", savedSkill)
-        skills.controller.result.model.SkillDefRes skillDefRes = convertToSkillDefRes(savedSkill)
+        SkillDefRes skillDefRes = convertToSkillDefRes(savedSkill)
         return skillDefRes
     }
 
     private void validateSkillVersion(SkillRequest skillRequest){
         int latestSkillVersion = findLatestSkillVersion(skillRequest.projectId)
         if (skillRequest.version > (latestSkillVersion + 1)) {
-            throw new skills.controller.exceptions.SkillException("Latest skill version is [${latestSkillVersion}]; max supported version is latest+1 but provided [${skillRequest.version}] version", skillRequest.projectId, skillRequest.skillId, skills.controller.exceptions.ErrorCode.BadParam)
+            throw new SkillException("Latest skill version is [${latestSkillVersion}]; max supported version is latest+1 but provided [${skillRequest.version}] version", skillRequest.projectId, skillRequest.skillId, skills.controller.exceptions.ErrorCode.BadParam)
         }
     }
 
@@ -1105,10 +1096,10 @@ class AdminProjService {
 
         SkillDef parent = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(skillRequest.projectId, parentSkillId, containerType)
         if (!parent) {
-            throw new skills.controller.exceptions.SkillException("Requested parent skill id [${parentSkillId}] doesn't exist for type [${containerType}].", skillRequest.projectId, skillRequest.skillId)
+            throw new SkillException("Requested parent skill id [${parentSkillId}] doesn't exist for type [${containerType}].", skillRequest.projectId, skillRequest.skillId)
         }
 
-        SkillRelDef relDef = new SkillRelDef(parent: parent, child: savedSkill, type: SkillRelDef.RelationshipType.RuleSetDefinition)
+        SkillRelDef relDef = new SkillRelDef(parent: parent, child: savedSkill, type: RelationshipType.RuleSetDefinition)
         skillRelDefRepo.save(relDef)
     }
 
@@ -1127,10 +1118,10 @@ class AdminProjService {
         SkillDef switchWith
         switch (patchRequest.action) {
             case ActionPatchRequest.ActionType.DisplayOrderDown:
-                switchWith = skillDefRepo.findNextSkillDefs(projectId, parent.skillId, moveMe.displayOrder, SkillRelDef.RelationshipType.RuleSetDefinition, new PageRequest(0, 1))?.first()
+                switchWith = skillDefRepo.findNextSkillDefs(projectId, parent.skillId, moveMe.displayOrder, RelationshipType.RuleSetDefinition, new PageRequest(0, 1))?.first()
                 break;
             case ActionPatchRequest.ActionType.DisplayOrderUp:
-                switchWith = skillDefRepo.findPreviousSkillDefs(projectId, parent.skillId, moveMe.displayOrder, SkillRelDef.RelationshipType.RuleSetDefinition, new PageRequest(0, 1))?.first()
+                switchWith = skillDefRepo.findPreviousSkillDefs(projectId, parent.skillId, moveMe.displayOrder, RelationshipType.RuleSetDefinition, new PageRequest(0, 1))?.first()
                 break;
             default:
                 throw new IllegalArgumentException("Unknown action ${patchRequest.action}")
@@ -1153,8 +1144,8 @@ class AdminProjService {
 
 
     @Profile
-    private skills.controller.result.model.SkillDefRes convertToSkillDefRes(SkillDef skillDef, boolean loadNumUsers = false) {
-        skills.controller.result.model.SkillDefRes res = new skills.controller.result.model.SkillDefRes()
+    private SkillDefRes convertToSkillDefRes(SkillDef skillDef, boolean loadNumUsers = false) {
+        SkillDefRes res = new SkillDefRes()
         Props.copy(skillDef, res)
         res.numPerformToCompletion = skillDef.totalPoints / res.pointIncrement
         res.totalPoints = skillDef.totalPoints
@@ -1280,11 +1271,11 @@ class AdminProjService {
     }
 
     @Transactional(readOnly = true)
-    List<skills.controller.result.model.CustomIconResult> getCustomIcons(String projectId){
+    List<CustomIconResult> getCustomIcons(String projectId){
         ProjDef project = getProjDef(projectId)
         return project.getCustomIcons().collect { CustomIcon icon ->
             String cssClassname = IconCssNameUtil.getCssClass(icon.projectId, icon.filename)
-            return new skills.controller.result.model.CustomIconResult(filename: icon.filename, cssClassname: cssClassname)
+            return new CustomIconResult(filename: icon.filename, cssClassname: cssClassname)
         }
     }
 }

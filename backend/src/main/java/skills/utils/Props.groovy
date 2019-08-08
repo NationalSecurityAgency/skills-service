@@ -15,8 +15,9 @@ class Props {
         List<String> ignore = ["class", "metaClass"]
         ignore.addAll(ignoreProperties)
 
+        String[] ignoreProps = ignore.toArray(new String[0])
         // ignore groovy artifacts
-        BeanUtils.copyProperties(source, target, ignore.toArray(new String[0]))
+        BeanUtils.copyProperties(source, target, ignoreProps)
 
         return target
     }

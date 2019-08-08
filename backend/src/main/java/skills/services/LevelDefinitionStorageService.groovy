@@ -9,6 +9,11 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Isolation
 import org.springframework.transaction.annotation.Transactional
+import skills.controller.exceptions.SkillException
+import skills.controller.request.model.EditLevelRequest
+import skills.controller.request.model.NextLevelRequest
+import skills.controller.result.model.LevelDefinitionRes
+import skills.controller.result.model.SettingsResult
 import skills.services.settings.Settings
 import skills.services.settings.SettingsService
 import skills.storage.model.LevelDefInterface
@@ -59,7 +64,7 @@ class LevelDefinitionStorageService {
     }
 
     LevelInfo getLevelInfo(String projectId, List<? extends LevelDefInterface> levelDefinitions, int totalPoints, int currentScore) {
-        skills.controller.result.model.SettingsResult setting = settingsService.getSetting(projectId, Settings.LEVEL_AS_POINTS.settingName)
+        SettingsResult setting = settingsService.getProjectSetting(projectId, Settings.LEVEL_AS_POINTS.settingName)
 
         List<Integer> levelScores
         if(setting?.isEnabled()){
@@ -72,7 +77,7 @@ class LevelDefinitionStorageService {
     }
 
     int getPointsRequiredForLevel(SkillDef skillDefinition, int level) {
-        skills.controller.result.model.SettingsResult setting = settingsService.getSetting(skillDefinition.projectId, Settings.LEVEL_AS_POINTS.settingName)
+        SettingsResult setting = settingsService.getProjectSetting(skillDefinition.projectId, Settings.LEVEL_AS_POINTS.settingName)
 
         List<Integer> levelScores = []
         if(setting?.isEnabled()){
@@ -84,7 +89,7 @@ class LevelDefinitionStorageService {
     }
 
     int getPointsRequiredForOverallLevel(ProjDef projDef, int level) {
-        skills.controller.result.model.SettingsResult setting = settingsService.getSetting(projDef.projectId, Settings.LEVEL_AS_POINTS.settingName)
+        SettingsResult setting = settingsService.getProjectSetting(projDef.projectId, Settings.LEVEL_AS_POINTS.settingName)
 
         List<LevelDef> levelDefinitions = getProjLevelDefs(projDef)
         List<Integer> levelScores = []
@@ -177,19 +182,19 @@ class LevelDefinitionStorageService {
 
 
     @Transactional
-    List<skills.controller.result.model.LevelDefinitionRes> getLevels(String projectId, String skillId = null) {
+    List<LevelDefinitionRes> getLevels(String projectId, String skillId = null) {
         LevelDefRes levelDefRes = getLevelDefs(projectId, skillId)
         return doGetLevelsDefRes(levelDefRes.levels, levelDefRes.totalPoints, levelDefRes.projectId, levelDefRes.skillId)
     }
 
     @Transactional
-    List<skills.controller.result.model.LevelDefinitionRes> getLevelsDefRes(SkillDef skillDef) {
+    List<LevelDefinitionRes> getLevelsDefRes(SkillDef skillDef) {
         return doGetLevelsDefRes(skillDef.levelDefinitions, skillDef.totalPoints, skillDef.projectId, skillDef.skillId)
     }
 
-    private List<skills.controller.result.model.LevelDefinitionRes> doGetLevelsDefRes(List<LevelDef> levelDefinitions, int totalPoints, String projectId, String skillId = null) {
+    private List<LevelDefinitionRes> doGetLevelsDefRes(List<LevelDef> levelDefinitions, int totalPoints, String projectId, String skillId = null) {
 
-        skills.controller.result.model.SettingsResult setting = settingsService.getSetting(projectId, Settings.LEVEL_AS_POINTS.settingName)
+        SettingsResult setting = settingsService.getProjectSetting(projectId, Settings.LEVEL_AS_POINTS.settingName)
 
         List<Integer> levelScores = []
         if(!setting?.isEnabled()) {
@@ -198,7 +203,7 @@ class LevelDefinitionStorageService {
             }
         }
 
-        List<skills.controller.result.model.LevelDefinitionRes> finalRes = []
+        List<LevelDefinitionRes> finalRes = []
         levelDefinitions.eachWithIndex { LevelDef entry, int i ->
             Integer fromPts =  entry.pointsFrom
             Integer toPts = entry.pointsTo
@@ -206,7 +211,7 @@ class LevelDefinitionStorageService {
                 fromPts = levelScores.get(i)
                 toPts = (i != levelScores.size() - 1) ? levelScores.get(i + 1) : null
             }
-            finalRes << new skills.controller.result.model.LevelDefinitionRes(projectId: projectId,
+            finalRes << new LevelDefinitionRes(projectId: projectId,
                     id: entry.id,
                     skillId: skillId,
                     level: entry.level,
@@ -285,8 +290,8 @@ class LevelDefinitionStorageService {
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    LevelDef editLevel(String projectId, skills.controller.request.model.EditLevelRequest editLevelRequest, String levelId, String skillId = null) {
-        skills.controller.result.model.SettingsResult setting = settingsService.getSetting(projectId, Settings.LEVEL_AS_POINTS.settingName)
+    LevelDef editLevel(String projectId, EditLevelRequest editLevelRequest, String levelId, String skillId = null) {
+        SettingsResult setting = settingsService.getProjectSetting(projectId, Settings.LEVEL_AS_POINTS.settingName)
         assert editLevelRequest.name?.length() <= 50
         boolean asPoints = false
         if(setting?.isEnabled()){
@@ -329,8 +334,8 @@ class LevelDefinitionStorageService {
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    LevelDef addNextLevel(String projectId, skills.controller.request.model.NextLevelRequest nextLevelRequest, String skillId = null) {
-        skills.controller.result.model.SettingsResult setting = settingsService.getSetting(projectId, Settings.LEVEL_AS_POINTS.settingName)
+    LevelDef addNextLevel(String projectId, NextLevelRequest nextLevelRequest, String skillId = null) {
+        SettingsResult setting = settingsService.getProjectSetting(projectId, Settings.LEVEL_AS_POINTS.settingName)
         assert nextLevelRequest.name?.length() <= 50
         boolean asPoints = false
         if(setting?.isEnabled()){
@@ -342,7 +347,7 @@ class LevelDefinitionStorageService {
         LevelDefRes existingDefinitions = getLevelDefs(projectId, skillId)
 
         if(existingDefinitions.levels.size() == maxLevels){
-            throw new skills.controller.exceptions.SkillException("No more then $maxLevels levels are allowed", projectId, skillId)
+            throw new SkillException("No more then $maxLevels levels are allowed", projectId, skillId)
         }
 
         if(asPoints) {
@@ -390,7 +395,7 @@ class LevelDefinitionStorageService {
      * Levels belong to either project or skill; so only project OR skill must be provided
      */
     List<LevelDef> createDefault(String projectId, ProjDef projDef, SkillDef skillDef = null) {
-        skills.controller.result.model.SettingsResult setting = settingsService.getSetting(projectId, Settings.LEVEL_AS_POINTS.settingName)
+        SettingsResult setting = settingsService.getProjectSetting(projectId, Settings.LEVEL_AS_POINTS.settingName)
 
         assert projDef || skillDef
 

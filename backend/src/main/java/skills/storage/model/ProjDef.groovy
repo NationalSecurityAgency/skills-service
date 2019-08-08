@@ -23,8 +23,6 @@ class ProjDef implements Serializable {
     // need to be denormalized so levels can be efficiently calculated (without the need of loading all of the rules)
     int totalPoints
 
-    int displayOrder
-
     @OneToMany(fetch = FetchType.LAZY, cascade = [])
     @JoinColumn(name="projRefId", insertable = false, updatable = false)
     @Where(clause = "type = 'Subject'")

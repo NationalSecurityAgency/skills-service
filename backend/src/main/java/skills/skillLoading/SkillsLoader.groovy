@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
+import skills.controller.result.model.SettingsResult
 import skills.services.LevelDefinitionStorageService
 import skills.services.settings.SettingsService
 import skills.skillLoading.model.OverallSkillSummary
@@ -202,7 +203,7 @@ class SkillsLoader {
             skillDependencySummary = dependencySummaryLoader.loadDependencySummary(userId, projectId, skillId)
         }
 
-        skills.controller.result.model.SettingsResult helpUrlRootSetting = settingsService.getSetting(projectId, PROP_HELP_URL_ROOT)
+        SettingsResult helpUrlRootSetting = settingsService.getProjectSetting(projectId, PROP_HELP_URL_ROOT)
 
         return new SkillSummary(
                 projectId: skillDef.projectId, projectName: projDef.name,
@@ -380,7 +381,7 @@ class SkillsLoader {
     private List<SkillSummary> createSkillSummaries(ProjDef thisProjDef, List<SubjectDataLoader.SkillsAndPoints> childrenWithPoints) {
         List<SkillSummary> skillsRes = []
 
-        skills.controller.result.model.SettingsResult helpUrlRootSetting = settingsService.getSetting(thisProjDef.projectId, PROP_HELP_URL_ROOT)
+        SettingsResult helpUrlRootSetting = settingsService.getProjectSetting(thisProjDef.projectId, PROP_HELP_URL_ROOT)
 
         Map<String,ProjDef> projDefMap = [:]
         childrenWithPoints.each { SubjectDataLoader.SkillsAndPoints skillDefAndUserPoints ->

@@ -171,7 +171,7 @@
         <dependency>
             <groupId>profile</groupId>
             <artifactId>call-stack-profiler</artifactId>
-            <version>1.0.0</version>
+            <version>1.0.1-SNAPSHOT</version>
         </dependency>
 
     </dependencies>
