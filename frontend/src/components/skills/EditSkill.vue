@@ -158,7 +158,7 @@
           <small class="form-text text-danger">{{ errors.first('helpUrl')}}</small>
         </div>
 
-        <p v-if="overallErrMsg" class="text-center text-danger">***{{ overallErrMsg }}***</p>
+        <p v-if="invalid && overallErrMsg" class="text-center text-danger">***{{ overallErrMsg }}***</p>
       </loading-container>
       </b-container>
     </ValidationObserver>

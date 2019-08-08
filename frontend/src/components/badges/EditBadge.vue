@@ -57,7 +57,7 @@
                   </b-col>
                 </b-row>
             </b-collapse>
-            <p v-if="overallErrMsg" class="text-center text-danger mt-3">***{{ overallErrMsg }}***</p>
+            <p v-if="invalid && overallErrMsg" class="text-center text-danger mt-3">***{{ overallErrMsg }}***</p>
         </div>
         <div v-else>
           <icon-manager @selected-icon="onSelectedIcon"></icon-manager>

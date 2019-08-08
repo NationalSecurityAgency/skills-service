@@ -24,7 +24,7 @@
           </div>
         </div>
 
-        <p v-if="overallErrMsg" class="text-center text-danger mt-2"><small>***{{ overallErrMsg }}***</small></p>
+        <p v-if="invalid && overallErrMsg" class="text-center text-danger mt-2"><small>***{{ overallErrMsg }}***</small></p>
       </b-container>
     </ValidationObserver>
 
