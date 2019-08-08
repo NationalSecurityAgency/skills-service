@@ -10,6 +10,7 @@ import skills.controller.request.model.ActionPatchRequest
 import skills.controller.request.model.BadgeRequest
 import skills.controller.request.model.EditLevelRequest
 import skills.controller.request.model.NextLevelRequest
+import skills.controller.request.model.ProjectSettingsRequest
 import skills.controller.request.model.SettingsRequest
 import skills.controller.request.model.SkillDefForDependencyRes
 import skills.controller.request.model.SkillRequest
@@ -709,11 +710,11 @@ class AdminController {
     SettingsResult getProjectSetting(@PathVariable("projectId") String projectId, @PathVariable("setting") String setting) {
         skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
         skills.controller.exceptions.SkillsValidator.isNotBlank(setting, "Setting Id", projectId)
-        return settingsService.getSetting(projectId, setting)
+        return settingsService.getProjectSetting(projectId, setting)
     }
 
     @RequestMapping(value = "/projects/{projectId}/settings/{setting}", method = [RequestMethod.PUT, RequestMethod.POST], produces = MediaType.APPLICATION_JSON_VALUE)
-    RequestResult saveProjectSetting(@PathVariable("projectId") String projectId, @PathVariable("setting") String setting, @RequestBody SettingsRequest value) {
+    RequestResult saveProjectSetting(@PathVariable("projectId") String projectId, @PathVariable("setting") String setting, @RequestBody ProjectSettingsRequest value) {
         skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
         skills.controller.exceptions.SkillsValidator.isNotBlank(setting, "Setting Id", projectId)
         skills.controller.exceptions.SkillsValidator.isTrue(projectId == value.projectId, "Project Id must equal", projectId)
@@ -724,7 +725,7 @@ class AdminController {
     }
 
     @RequestMapping(value = "/projects/{projectId}/settings/checkValidity", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    def checkSettingsValidity(@PathVariable("projectId") String projectId, @RequestBody List<SettingsRequest> values) {
+    def checkSettingsValidity(@PathVariable("projectId") String projectId, @RequestBody List<ProjectSettingsRequest> values) {
         skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
         skills.controller.exceptions.SkillsValidator.isNotNull(values, "Settings")
 
@@ -737,7 +738,7 @@ class AdminController {
     }
 
     @RequestMapping(value = "/projects/{projectId}/settings", method = [RequestMethod.PUT, RequestMethod.POST], produces = MediaType.APPLICATION_JSON_VALUE)
-    RequestResult saveProjectSettings(@PathVariable("projectId") String projectId, @RequestBody List<SettingsRequest> values) {
+    RequestResult saveProjectSettings(@PathVariable("projectId") String projectId, @RequestBody List<ProjectSettingsRequest> values) {
         skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
         skills.controller.exceptions.SkillsValidator.isNotNull(values, "Settings")
 

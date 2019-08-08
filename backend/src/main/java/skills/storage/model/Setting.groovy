@@ -2,6 +2,7 @@ package skills.storage.model
 
 import groovy.transform.ToString
 
+import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.EnumType
 import javax.persistence.Enumerated
@@ -33,8 +34,9 @@ class Setting {
     //non-null
     String value
 
+    @Column(insertable = false, updatable = false)
     //nullable
-    String userId
+    Integer userId
 
     @Enumerated(EnumType.STRING)
     SettingType type

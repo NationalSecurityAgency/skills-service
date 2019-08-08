@@ -9,9 +9,12 @@ import org.springframework.transaction.annotation.Transactional
 import skills.auth.UserInfo
 import skills.auth.UserInfoService
 import skills.auth.pki.PkiUserLookup
+import skills.controller.exceptions.ErrorCode
+import skills.controller.exceptions.SkillException
+import skills.storage.model.Setting
 import skills.storage.model.auth.RoleName
 import skills.storage.model.auth.User
-import skills.storage.model.auth.UserProp
+
 import skills.storage.model.auth.UserRole
 import skills.storage.repos.UserRepo
 import skills.storage.repos.UserRoleRepo
@@ -88,7 +91,7 @@ class AccessSettingsStorageService {
         if (userId != userInfoService.getCurrentUser().username.toLowerCase()) {
             deleteUserRoleInternal(userId, projectId, roleName)
         } else {
-            throw new skills.controller.exceptions.SkillException("You cannot delete yourself.")
+            throw new SkillException("You cannot delete yourself.")
         }
     }
 
@@ -121,7 +124,7 @@ class AccessSettingsStorageService {
             UserRole existingUserRole = user?.roles?.find {it.projectId == projectId && it.roleName == roleName}
             assert !existingUserRole, "CREATE FAILED -> user-role with project id [$projectId], userId [$userId] and roleName [$roleName] already exists"
         } else {
-            throw new skills.controller.exceptions.SkillException("User [$userId]  does not exist", (String) projectId)
+            throw new SkillException("User [$userId]  does not exist", (String) projectId)
         }
 
         UserRole userRole = new UserRole(userId: userId, roleName: roleName, projectId: projectId)
@@ -137,8 +140,8 @@ class AccessSettingsStorageService {
         User user = userRepository.findByUserIdIgnoreCase(userInfo.username?.toLowerCase())
         if (!createOrUpdate) {
             if (user) {
-                skills.controller.exceptions.SkillException exception = new skills.controller.exceptions.SkillException("User [${userInfo.username?.toLowerCase()}] already exists.")
-                exception.errorCode = skills.controller.exceptions.ErrorCode.UserAlreadyExists
+                SkillException exception = new SkillException("User [${userInfo.username?.toLowerCase()}] already exists.")
+                exception.errorCode = ErrorCode.UserAlreadyExists
                 throw exception
             }
         }
@@ -158,13 +161,13 @@ class AccessSettingsStorageService {
 
     private void validateUserInfo(UserInfo userInfo) {
         if (!userInfo.firstName || userInfo.firstName.length() > 30) {
-            throw new skills.controller.exceptions.SkillException("First Name is required and can be no longer than 30 characters", NA, NA, skills.controller.exceptions.ErrorCode.BadParam)
+            throw new SkillException("First Name is required and can be no longer than 30 characters", NA, NA, ErrorCode.BadParam)
         }
         if (!userInfo.lastName || userInfo.lastName.length() > 30) {
-            throw new skills.controller.exceptions.SkillException("Last Name is required and can be no longer than 30 characters", NA, NA, skills.controller.exceptions.ErrorCode.BadParam)
+            throw new SkillException("Last Name is required and can be no longer than 30 characters", NA, NA, ErrorCode.BadParam)
         }
         if (userInfo.nickname && userInfo.nickname.length() > 30) {
-            throw new skills.controller.exceptions.SkillException("Nickname cannot be over 30 characters", NA, NA, skills.controller.exceptions.ErrorCode.BadParam)
+            throw new SkillException("Nickname cannot be over 30 characters", NA, NA, ErrorCode.BadParam)
         }
     }
 
@@ -177,8 +180,8 @@ class AccessSettingsStorageService {
     UserRole grantRoot(String userId) {
         User user = userRepository.findByUserIdIgnoreCase(userId.toLowerCase())
         if (!user) {
-            skills.controller.exceptions.SkillException exception = new skills.controller.exceptions.SkillException("User [${userId.toLowerCase()}] does not exist.")
-            exception.errorCode = skills.controller.exceptions.ErrorCode.BadParam
+            SkillException exception = new SkillException("User [${userId.toLowerCase()}] does not exist.")
+            exception.errorCode = ErrorCode.BadParam
             throw exception
         }
         UserRole role = new UserRole(
@@ -197,16 +200,17 @@ class AccessSettingsStorageService {
     }
 
     private User createNewUser(UserInfo userInfo) {
+        String userId = userInfo.username?.toLowerCase()
         User user = new User(
-                userId: userInfo.username?.toLowerCase(),
+                userId: userId,
                 password: userInfo.password,
                 roles: getRoles(userInfo),
                 userProps: [
-                        new UserProp(name: 'DN', value: userInfo.userDn ?: ""),
-                        new UserProp(name: 'email', value: userInfo.email ?: ""),
-                        new UserProp(name: 'firstName', value: userInfo.firstName ?: ""),
-                        new UserProp(name: 'lastName', value: userInfo.lastName ?: ""),
-                        new UserProp(name: 'nickname', value: userInfo.nickname ?: ""),
+                        new Setting(type: Setting.SettingType.User, setting: 'DN', value: userInfo.userDn ?: ""),
+                        new Setting(type: Setting.SettingType.User, setting: 'email', value: userInfo.email ?: ""),
+                        new Setting(type: Setting.SettingType.User, setting: 'firstName', value: userInfo.firstName ?: ""),
+                        new Setting(type: Setting.SettingType.User, setting: 'lastName', value: userInfo.lastName ?: ""),
+                        new Setting(type: Setting.SettingType.User, setting: 'nickname', value: userInfo.nickname ?: ""),
                 ]
         )
         return user
@@ -225,11 +229,11 @@ class AccessSettingsStorageService {
     }
 
     private void getOrSetUserProp(User user, String name, value) {
-        UserProp userProp = user.userProps.find {it.name == name}
+        Setting userProp = user.userProps.find {it.setting == name}
         if (userProp) {
             userProp.value = value
         } else {
-            user.userProps.add(new UserProp(name: name, value: value))
+            user.userProps.add(new Setting(type: Setting.SettingType.User, userId: user.userId, setting: name, value: value))
         }
     }
 

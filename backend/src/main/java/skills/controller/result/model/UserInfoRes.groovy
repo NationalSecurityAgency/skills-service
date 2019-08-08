@@ -25,9 +25,9 @@ class UserInfoRes {
 
     UserInfoRes(User user) {
         userId = user.userId
-        first =  user.userProps.find {it.name == 'firstName'}?.value
-        last =  user.userProps.find {it.name == 'lastName'}?.value
-        nickname =  user.userProps.find {it.name == 'nickname'}?.value
-        dn =  user.userProps.find {it.name == 'DN'}?.value
+        first =  user.userProps.find {it.setting == 'firstName'}?.value
+        last =  user.userProps.find {it.setting == 'lastName'}?.value
+        nickname =  user.userProps.find {it.setting == 'nickname'}?.value
+        dn =  user.userProps.find {it.setting == 'DN'}?.value
     }
 }

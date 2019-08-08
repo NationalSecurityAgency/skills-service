@@ -2,6 +2,7 @@ package skills.storage.model.auth
 
 
 import groovy.transform.ToString
+import skills.storage.model.Setting
 
 import javax.persistence.*
 
@@ -25,5 +26,5 @@ class User {
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name="userId", nullable = false)
-    List<UserProp> userProps = []
+    List<Setting> userProps = []
 }

@@ -27,9 +27,6 @@
             <column name="total_points" type="int" defaultValue="0">
                 <constraints nullable="false"/>
             </column>
-            <column name="display_order" type="int">
-                <constraints nullable="false"/>
-            </column>
             <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
                 <constraints nullable="false"/>
             </column>
@@ -474,51 +471,6 @@
                                  onUpdate="CASCADE"
                                  referencedColumnNames="project_id"
                                  referencedTableName="project_definition"/>
-        <!-- ============================================================================
-        Table: User Properties
-        DEPRECATED
-        ============================================================================-->
-        <createTable tableName="user_properties">
-            <column name="id" type="int" autoIncrement="true">
-                <constraints primaryKey="true" nullable="false"/>
-            </column>
-
-            <column name="user_id" type="int">
-                <constraints nullable="false"/>
-            </column>
-            <column name="name" type="varchar(255)">
-                <constraints nullable="false"/>
-            </column>
-            <column name="value" type="varchar(255)">
-                <constraints nullable="false"/>
-            </column>
-
-            <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
-                <constraints nullable="false"/>
-            </column>
-            <column name="updated" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
-                <constraints nullable="false"/>
-            </column>
-        </createTable>
-        <createIndex indexName="index_user_properties_user_id"
-                     tableName="user_properties">
-            <column name="user_id" type="int"/>
-        </createIndex>
-        <createIndex indexName="index_user_properties_name"
-                     tableName="user_properties">
-            <column name="name" type="varchar(255)"/>
-        </createIndex>
-        <createIndex indexName="index_user_properties_value"
-                     tableName="user_properties">
-            <column name="value" type="varchar(255)"/>
-        </createIndex>
-        <addForeignKeyConstraint baseColumnNames="user_id"
-                                 baseTableName="user_properties"
-                                 constraintName="fk_user_properties_user_id"
-                                 onDelete="CASCADE"
-                                 onUpdate="CASCADE"
-                                 referencedColumnNames="id"
-                                 referencedTableName="users"/>
 
         <!-- ============================================================================
         Table: User Performed Skill

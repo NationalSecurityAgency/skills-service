@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.JavaMailSenderImpl
 import org.springframework.stereotype.Service
+import skills.controller.exceptions.SkillException
 import skills.services.settings.SettingsService
 
 import javax.annotation.PostConstruct
@@ -43,7 +44,7 @@ class EmailSettingsService {
 
         try {
             configureMailSender(emailConnectionInfo)
-        } catch (skills.controller.exceptions.SkillException e) {
+        } catch (SkillException e) {
             log.error('Email connection failed. No email can be sent without updating the configuration', e)
         }
     }
@@ -64,7 +65,7 @@ class EmailSettingsService {
             updateMailSender(tmpMailSender)
         } catch (MessagingException e) {
             log.warn('Email connection failed!', e)
-            throw new skills.controller.exceptions.SkillException('Could not connect with the email settings ' + emailConnectionInfo, e)
+            throw new SkillException('Could not connect with the email settings ' + emailConnectionInfo, e)
         }
     }
 
@@ -101,7 +102,7 @@ class EmailSettingsService {
     }
 
     void storeSettings(EmailConnectionInfo emailConnectionInfo) {
-        settingsService.saveOrUpdateGroup(null, settingsGroup, [
+        settingsService.saveOrUpdateGlobalGroup(settingsGroup, [
                 (hostSetting)     : emailConnectionInfo.host,
                 (portSetting)     : emailConnectionInfo.port?.toString(),
                 (protocolSetting) : emailConnectionInfo.protocol,

@@ -13,6 +13,8 @@ class SettingsResult {
     String setting
     //non-null
     String value
+    //nullable
+    String userId
 
     boolean isEnabled(){
         return Boolean.valueOf(value) || value.toLowerCase() == "enabled" || value.toLowerCase() == "enable" || value.toLowerCase() == "on"
