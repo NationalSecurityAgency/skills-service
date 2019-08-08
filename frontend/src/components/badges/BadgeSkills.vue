@@ -4,11 +4,12 @@
 
     <simple-card>
       <loading-container v-bind:is-loading="loading.availableSkills || loading.badgeSkills || loading.skillOp">
-        <skills-selector2 :options="allSkills" :selected="badgeSkills" class="mb-4"
-                          v-on:added="skillAdded" v-on:removed="skillDeleted"></skills-selector2>
+        <skills-selector2 :options="availableSkills" class="mb-4"
+                          v-on:added="skillAdded"
+                          :onlySingleSelectedValue="true"></skills-selector2>
 
         <simple-skills-table v-if="badgeSkills && badgeSkills.length > 0"
-                             :skills="badgeSkills" v-on:skill-removed="skillDeleted"></simple-skills-table>
+                             :skills="badgeSkills" v-on:skill-removed="deleteSkill"></simple-skills-table>
 
         <no-content2 v-else title="No Skills Selected Yet..." icon="fas fa-award"
                      message="Please use drop-down above to start adding skills to this badge!"></no-content2>
@@ -27,6 +28,7 @@
   import NoContent2 from '../utils/NoContent2';
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import SimpleCard from '../utils/cards/SimpleCard';
+  import MsgBoxMixin from '../utils/modal/MsgBoxMixin';
 
   const { mapActions } = createNamespacedHelpers('badges');
 
@@ -40,6 +42,7 @@
       LoadingContainer,
       SkillsSelector2,
     },
+    mixins: [MsgBoxMixin],
     data() {
       return {
         loading: {
@@ -48,7 +51,7 @@
           skillOp: false,
         },
         badgeSkills: [],
-        allSkills: [],
+        availableSkills: [],
         projectId: null,
         badgeId: null,
       };
@@ -56,7 +59,6 @@
     mounted() {
       this.projectId = this.$route.params.projectId;
       this.badgeId = this.$route.params.badgeId;
-      this.loadAvailableBadgeSkills();
       this.loadAssignedBadgeSkills();
     },
     methods: {
@@ -66,7 +68,8 @@
       loadAvailableBadgeSkills() {
         SkillsService.getProjectSkills(this.projectId)
           .then((loadedSkills) => {
-            this.allSkills = loadedSkills;
+            const badgeSkillIds = this.badgeSkills.map(item => item.id);
+            this.availableSkills = loadedSkills.filter(item => !badgeSkillIds.includes(item.id));
             this.loading.availableSkills = false;
           });
       },
@@ -75,15 +78,25 @@
           .then((loadedSkills) => {
             this.badgeSkills = loadedSkills;
             this.loading.badgeSkills = false;
+            this.loadAvailableBadgeSkills();
           });
+      },
+      deleteSkill(skill) {
+        const msg = `Are you sure you want to remove ${skill.skillId} from the ${this.badgeId} Badge?`;
+        this.msgConfirm(msg, 'WARNING: Remove Required Skill').then((res) => {
+          if (res) {
+            this.skillDeleted(skill);
+          }
+        });
       },
       skillDeleted(deletedItem) {
         this.loading.skillOp = true;
         SkillsService.removeSkillFromBadge(this.projectId, this.badgeId, deletedItem.skillId)
           .then(() => {
             this.badgeSkills = this.badgeSkills.filter(entry => entry.id !== deletedItem.id);
-            this.loading.skillOp = false;
+            this.availableSkills.unshift(deletedItem);
             this.loadBadgeDetailsState({ projectId: this.projectId, badgeId: this.badgeId });
+            this.loading.skillOp = false;
             this.$emit('skills-changed', deletedItem);
           });
       },
@@ -92,8 +105,9 @@
         SkillsService.assignSkillToBadge(this.projectId, this.badgeId, newItem.skillId)
           .then(() => {
             this.badgeSkills.push(newItem);
-            this.loading.skillOp = false;
+            this.availableSkills = this.availableSkills.filter(item => item.id !== newItem.id);
             this.loadBadgeDetailsState({ projectId: this.projectId, badgeId: this.badgeId });
+            this.loading.skillOp = false;
             this.$emit('skills-changed', newItem);
           });
       },
