@@ -4,38 +4,38 @@
     <ValidationObserver ref="observer" v-slot="{invalid}" slim>
       <b-container fluid>
         <div v-if="displayIconManager === false" class="text-left">
-            <div class="media">
-              <icon-picker :startIcon="badgeInternal.iconClass" @select-icon="toggleIconDisplay(true)" class="mr-3"></icon-picker>
-              <div class="media-body">
-                <div class="form-group">
-                  <label for="badgeName">Badge Name</label>
-                  <ValidationProvider rules="required|min:3|max:50|uniqueName" v-slot="{errors}" name="Badge Name">
-                    <input v-focus class="form-control" id="badgeName" type="text" v-model="badgeInternal.name"
-                           @input="updateBadgeId"
-                           data-vv-name="badgeName"/>
-                    <small class="form-text text-danger" v-show="errors[0]">{{ errors[0] }}
-                    </small>
-                  </ValidationProvider>
-                </div>
+          <div class="media">
+            <icon-picker :startIcon="badgeInternal.iconClass" @select-icon="toggleIconDisplay(true)" class="mr-3"></icon-picker>
+            <div class="media-body">
+              <div class="form-group">
+                <label for="badgeName">Badge Name</label>
+                <ValidationProvider rules="required|min:3|max:50|uniqueName" v-slot="{errors}" name="Badge Name">
+                  <input v-focus class="form-control" id="badgeName" type="text" v-model="badgeInternal.name"
+                         @input="updateBadgeId"
+                         data-vv-name="badgeName"/>
+                  <small class="form-text text-danger" v-show="errors[0]">{{ errors[0] }}
+                  </small>
+                </ValidationProvider>
               </div>
             </div>
+          </div>
 
-            <ValidationProvider rules="required|min:3|max:50|alpha_num|uniqueId" v-slot="{errors}" name="Badge Name">
-              <id-input type="text" label="Badge ID" v-model="badgeInternal.badgeId" @input="canAutoGenerateId=false"
-                        data-vv-name="badgeId"/>
-              <small class="form-text text-danger">{{ errors[0] }}</small>
-            </ValidationProvider>
+          <ValidationProvider rules="required|min:3|max:50|alpha_num|uniqueId" v-slot="{errors}" name="Badge Name">
+            <id-input type="text" label="Badge ID" v-model="badgeInternal.badgeId" @input="canAutoGenerateId=false"
+                      data-vv-name="badgeId"/>
+            <small class="form-text text-danger">{{ errors[0] }}</small>
+          </ValidationProvider>
 
-            <div class="mt-2">
-              <label>Description</label>
-              <markdown-editor :value="badge.description" @input="updateDescription"></markdown-editor>
-            </div>
+          <div class="mt-2">
+            <label>Description</label>
+            <markdown-editor :value="badge.description" @input="updateDescription"></markdown-editor>
+          </div>
 
+          <div v-if="!global">
             <b-form-checkbox v-model="limitTimeframe" class="mt-4"
                              @change="onEnableGemFeature">
                 Enable Gem Feature <inline-help msg="The Gem feature allows for the badge to only be achievable during the specified time frame."/>
             </b-form-checkbox>
-
 
             <b-collapse id="gemCollapse" v-model="limitTimeframe">
                 <b-row v-if="limitTimeframe" no-gutters class="justify-content-md-center mt-3" key="gemTimeFields">
@@ -57,7 +57,8 @@
                   </b-col>
                 </b-row>
             </b-collapse>
-            <p v-if="invalid && overallErrMsg" class="text-center text-danger mt-3">***{{ overallErrMsg }}***</p>
+          </div>
+          <p v-if="invalid && overallErrMsg" class="text-center text-danger mt-3">***{{ overallErrMsg }}***</p>
         </div>
         <div v-else>
           <icon-manager @selected-icon="onSelectedIcon"></icon-manager>
@@ -121,6 +122,10 @@
       badge: Object,
       isEdit: Boolean,
       value: Boolean,
+      global: {
+        type: Boolean,
+        default: false,
+      },
     },
     data() {
       // convert string to Date objects
@@ -224,7 +229,7 @@
         Validator.extend('uniqueId', {
           getMessage: field => `The value for ${field} is already taken.`,
           validate(value) {
-            if (self.isEdit && self.badge.badgeId === value) {
+            if (self.global || (self.isEdit && self.badge.badgeId === value)) {
               return true;
             }
             return BadgesService.badgeWithIdExists(self.badgeInternal.projectId, value);
