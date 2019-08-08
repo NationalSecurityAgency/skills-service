@@ -54,11 +54,13 @@
         availableSkills: [],
         projectId: null,
         badgeId: null,
+        badge: null,
       };
     },
     mounted() {
       this.projectId = this.$route.params.projectId;
       this.badgeId = this.$route.params.badgeId;
+      this.badge = this.$route.params.badge;
       this.loadAssignedBadgeSkills();
     },
     methods: {
@@ -82,7 +84,7 @@
           });
       },
       deleteSkill(skill) {
-        const msg = `Are you sure you want to remove ${skill.skillId} from the ${this.badgeId} Badge?`;
+        const msg = `Are you sure you want to remove Skill "${skill.name}" from Badge "${this.badge.name}"?`;
         this.msgConfirm(msg, 'WARNING: Remove Required Skill').then((res) => {
           if (res) {
             this.skillDeleted(skill);
