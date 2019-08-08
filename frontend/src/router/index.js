@@ -16,7 +16,7 @@ import GFMDescription from '@//components/utils/GFMDescription';
 import InceptionSkills from '@//components/inception/InceptionSkills';
 import Subjects from '@//components/subjects/Subjects';
 import Badges from '@//components/badges/Badges';
-import GlobalBadges from '@//components/badges/GlobalBadges';
+import GlobalBadges from '@//components/badges/global/GlobalBadges';
 import Levels from '@//components/levels/Levels';
 import FullDependencyGraph from '@//components/skills/dependencies/FullDependencyGraph';
 import CrossProjectsSkills from '@//components/skills/crossProjects/CrossProjectsSkills';

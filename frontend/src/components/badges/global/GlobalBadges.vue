@@ -23,19 +23,19 @@
       </transition>
     </loading-container>
 
-    <edit-badge v-if="displayNewBadgeModal" v-model="displayNewBadgeModal" :badge="emptyNewBadge" @badge-updated="saveBadge"></edit-badge>
+    <edit-badge v-if="displayNewBadgeModal" v-model="displayNewBadgeModal" :badge="emptyNewBadge" :global="true" @badge-updated="saveBadge"></edit-badge>
   </div>
 </template>
 
 <script>
   import { createNamespacedHelpers } from 'vuex';
 
-  import BadgesService from './BadgesService';
-  import Badge from './Badge';
-  import EditBadge from './EditBadge';
-  import LoadingContainer from '../utils/LoadingContainer';
-  import NoContent3 from '../utils/NoContent3';
-  import SubPageHeader from '../utils/pages/SubPageHeader';
+  import BadgesService from '../BadgesService';
+  import Badge from '../Badge';
+  import EditBadge from '../EditBadge';
+  import LoadingContainer from '../../utils/LoadingContainer';
+  import NoContent3 from '../../utils/NoContent3';
+  import SubPageHeader from '../../utils/pages/SubPageHeader';
 
   const { mapActions } = createNamespacedHelpers('projects');
 
