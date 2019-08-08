@@ -13,8 +13,8 @@ export default {
           copy.pointIncrementIntervalHrs = 8;
           copy.pointIncrementIntervalMins = 0;
         } else {
-          copy.pointIncrementIntervalHrs = skill.pointIncrementInterval > 59 ? Math.floor(skill.pointIncrementInterval / 60) : 0;
-          copy.pointIncrementIntervalMins = skill.pointIncrementInterval > 60 ? skill.pointIncrementInterval % 60 : skill.pointIncrementInterval;
+          copy.pointIncrementIntervalHrs = Math.floor(skill.pointIncrementInterval / 60);
+          copy.pointIncrementIntervalMins = skill.pointIncrementInterval % 60;
         }
         copy.numPointIncrementMaxOccurrences = skill.numMaxOccurrencesIncrementInterval;
 
@@ -35,7 +35,7 @@ export default {
       copy.pointIncrementInterval = 0;
     } else {
       // convert to minutes
-      copy.pointIncrementInterval = (parseInt(skill.pointIncrementIntervalHrs, 10) * 60 + parseInt(skill.pointIncrementIntervalMins, 10));
+      copy.pointIncrementInterval = ((parseInt(skill.pointIncrementIntervalHrs, 10) * 60) + parseInt(skill.pointIncrementIntervalMins, 10));
     }
     copy.numMaxOccurrencesIncrementInterval = skill.numPointIncrementMaxOccurrences;
 

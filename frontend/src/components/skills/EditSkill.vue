@@ -94,7 +94,7 @@
               </label>
               <div class="row">
                 <div class="col">
-                  <ValidationProvider rules="required|numeric|min_value:0|max_value:1000|cantBe0IfMins0" v-slot="{errors}" name="Hours">
+                  <ValidationProvider rules="required|numeric|min_value:0|max_value:165|cantBe0IfMins0" v-slot="{errors}" name="Hours">
                     <div class="input-group">
                       <input class="form-control d-inline" type="number" min="0" v-model="skillInternal.pointIncrementIntervalHrs"
                              data-vv-name="pointIncrementIntervalHrs"
