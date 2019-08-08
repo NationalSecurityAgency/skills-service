@@ -31,7 +31,7 @@
               <markdown-editor v-model="subjectInternal.description"/>
             </div>
 
-            <p v-if="overallErrMsg" class="text-center text-danger">***{{ overallErrMsg }}***</p>
+            <p v-if="invalid && overallErrMsg" class="text-center text-danger">***{{ overallErrMsg }}***</p>
         </div>
         <div v-else>
             <icon-manager @selected-icon="onSelectedIcon"></icon-manager>
