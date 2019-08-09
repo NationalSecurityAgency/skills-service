@@ -53,11 +53,6 @@
                 this.loading.userSkillsRanking = true;
             },
         },
-        computed: {
-            isLoaded() {
-                return !this.loading.userSkills && !this.loading.pointsHistory && !this.loading.userSkillsRanking;
-            },
-        },
     };
 </script>
 

@@ -68,12 +68,12 @@ class RankingLoader {
     }
 
     SkillsRankingDistribution getRankingDistribution(String projectId, String userId, String subjectId = null) {
-        UserPoints usersPoints = userPointsRepository.findByProjectIdAndUserIdAndSkillIdAndDay(projectId, userId, subjectId, null)
+        UserPoints usersPoints = loadUserPoints(projectId, userId, subjectId)
         SkillsRanking skillsRanking = doGetUserSkillsRanking(projectId, usersPoints, subjectId)
 
         List<UsersPerLevel> usersPerLevel = getUserCountsPerLevel(projectId, false, subjectId)
 
-        List<UserAchievement> myLevels = achievedLevelRepository.findAllByUserIdAndProjectIdAndSkillId(userId, projectId, subjectId)
+        List<UserAchievement> myLevels = loadUserAchievements(userId, projectId, subjectId)
         int myLevel = myLevels ? myLevels.collect({it.level}).max() : 0
 
         Integer pointsToPassNextUser = -1
@@ -93,17 +93,33 @@ class RankingLoader {
     }
 
     @CompileStatic
+    @Profile
+    private UserPoints loadUserPoints(String projectId, String userId, String subjectId) {
+        userPointsRepository.findByProjectIdAndUserIdAndSkillIdAndDay(projectId, userId, subjectId, null)
+    }
+
+    @CompileStatic
+    @Profile
+    private List<UserAchievement> loadUserAchievements(String userId, String projectId, String subjectId) {
+        achievedLevelRepository.findAllByUserIdAndProjectIdAndSkillId(userId, projectId, subjectId)
+    }
+
+    @CompileStatic
+    @Profile
     private List<UserPoints> findLowestUserPoints(String projectId, UserPoints usersPoints, String subjectId) {
         List<UserPoints> previous = userPointsRepository.findByProjectIdAndSkillIdAndPointsLessThanAndDayIsNull(projectId, subjectId, usersPoints.points, new PageRequest(0, 1, Sort.Direction.DESC, "points"))
         previous
     }
 
     @CompileStatic
+    @Profile
     private List<UserPoints> findHighestUserPoints(String projectId, UserPoints usersPoints, String subjectId) {
         List<UserPoints> next = userPointsRepository.findByProjectIdAndSkillIdAndPointsGreaterThanAndDayIsNull(projectId, subjectId, usersPoints.points, new PageRequest(0, 1, Sort.Direction.ASC, "points"))
         next
     }
 
+    @CompileStatic
+    @Profile
     List<UsersPerLevel> getUserCountsPerLevel(String projectId, boolean includeZeroLevel = false, String subjectId = null) {
         List<skills.controller.result.model.LevelDefinitionRes> levels = levelDefinitionStorageService.getLevels(projectId, subjectId)
         List<UsersPerLevel> usersPerLevel = !levels ? [] : levels.sort({

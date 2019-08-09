@@ -1,5 +1,6 @@
 package skills.storage.repos
 
+import groovy.transform.CompileStatic
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param
@@ -9,6 +10,7 @@ import skills.storage.model.SkillRelDef
 import skills.storage.model.DayCountItem
 import skills.storage.model.UserAchievement
 
+@CompileStatic
 interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer> {
 
     List<UserAchievement> findAllByUserIdAndProjectIdAndSkillId(String userId, String projectId, @Nullable String skillId)
