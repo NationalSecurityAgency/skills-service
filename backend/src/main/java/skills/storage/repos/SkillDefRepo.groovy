@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.PagingAndSortingRepository
 import org.springframework.lang.Nullable
 import skills.storage.model.SkillDef
+import skills.storage.model.SkillDefWithExtra
 import skills.storage.model.SkillRelDef.RelationshipType
 
 interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
@@ -83,13 +84,18 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
 
     @Query(value='''select count(c) 
         from SkillRelDef r, SkillDef c 
-        where r.parent=?1 and c.id = r.child and r.type=?2''')
-    long countChildSkillsByIdAndRelationshipType(SkillDef parent, RelationshipType relationshipType)
+        where r.parent.id=?1 and c.id = r.child and r.type=?2''')
+    long countChildSkillsByIdAndRelationshipType(Integer parentSkillRefId, RelationshipType relationshipType)
+
+    @Query(value='''select c 
+        from SkillRelDef r, SkillDef c 
+        where r.parent.id=?1 and c.id = r.child and r.type=?2''')
+    List<SkillDef> findChildSkillsByIdAndRelationshipType(Integer parentSkillRefId, RelationshipType relationshipType)
 
     @Query(value='''select sum(c.totalPoints) 
         from SkillRelDef r, SkillDef c 
-        where r.parent=?1 and c.id = r.child and r.type=?2''')
-    long sumChildSkillsTotalPointsBySkillAndRelationshipType(SkillDef parent, RelationshipType relationshipType)
+        where r.parent.id=?1 and c.id = r.child and r.type=?2''')
+    long sumChildSkillsTotalPointsBySkillAndRelationshipType(Integer parentSkillRefId, RelationshipType relationshipType)
 
     @Query(value = "SELECT COUNT(DISTINCT s.userId) from UserPoints s where s.projectId=?1 and s.skillId=?2")
     int calculateDistinctUsersForASingleSkill(String projectId, String skillId)

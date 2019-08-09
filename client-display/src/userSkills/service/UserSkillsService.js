@@ -197,6 +197,19 @@ service = {
     return response;
   },
 
+  getDescriptions(parentId, type = 'subject') {
+    let url = `${this.serviceUrl}${this.getServicePath()}/${this.projectId}/subjects/${parentId}/descriptions`;
+    if (type === 'badge') {
+      url = `${this.serviceUrl}${this.getServicePath()}/${this.projectId}/badges/${parentId}/descriptions`;
+    }
+    const response = axios.get(url, {
+      params: {
+        version: this.version,
+      },
+    }).then(result => result.data);
+    return response;
+  },
+
   getServicePath() {
     return '/api/projects';
   },

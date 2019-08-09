@@ -1,5 +1,6 @@
 package skills.storage.repos
 
+import groovy.transform.CompileStatic
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
@@ -11,6 +12,7 @@ import skills.storage.model.UserPerformedSkill
 
 import javax.validation.constraints.Null
 
+@CompileStatic
 interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integer> {
 
     void deleteByProjectIdAndSkillId(String projectId, String skillId)

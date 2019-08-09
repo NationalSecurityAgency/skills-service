@@ -10,6 +10,7 @@ import skills.skillLoading.SkillsLoader
 import skills.skillLoading.model.OverallSkillSummary
 import skills.skillLoading.model.SkillBadgeSummary
 import skills.skillLoading.model.SkillDependencyInfo
+import skills.skillLoading.model.SkillDescription
 import skills.skillLoading.model.SkillSubjectSummary
 import skills.skillLoading.model.SkillSummary
 import skills.skillLoading.model.SkillsRanking
@@ -61,11 +62,20 @@ class UserSkillsController {
     @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/summary", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     @CompileStatic
-    SkillSubjectSummary getSubjectsSkillsSummary(@PathVariable("projectId") String projectId,
-                                                 @PathVariable("subjectId") String subjectId,
-                                                 @RequestParam(name = "userId", required = false) String userIdParam,
-                                                 @RequestParam(name = 'version', required = false, defaultValue = Constants.MAX_VERSION_STRING) Integer version) {
+    SkillSubjectSummary getSubjectSummary(@PathVariable("projectId") String projectId,
+                                          @PathVariable("subjectId") String subjectId,
+                                          @RequestParam(name = "userId", required = false) String userIdParam,
+                                          @RequestParam(name = 'version', required = false, defaultValue = Constants.MAX_VERSION_STRING) Integer version) {
         return skillsLoader.loadSubject(projectId, getUserId(userIdParam), subjectId, version)
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/descriptions", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    @CompileStatic
+    List<SkillDescription> getSubjectSkillsDescriptions(@PathVariable("projectId") String projectId,
+                                                  @PathVariable("subjectId") String subjectId,
+                                                  @RequestParam(name = 'version', required = false, defaultValue = Constants.MAX_VERSION_STRING) Integer version) {
+        return skillsLoader.loadSubjectDescriptions(projectId, subjectId, version)
     }
 
     /**
@@ -103,6 +113,15 @@ class UserSkillsController {
                                                  @RequestParam(name = "userId", required = false) String userIdParam,
                                                  @RequestParam(name = 'version', required = false, defaultValue = Constants.MAX_VERSION_STRING) Integer version) {
         return skillsLoader.loadBadgeSummaries(projectId, getUserId(userIdParam), version)
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/badges/{badgeId}/descriptions", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    @CompileStatic
+    List<SkillDescription> getBadgeSkillsDescriptions(@PathVariable("projectId") String projectId,
+                                                        @PathVariable("badgeId") String badgeId,
+                                                        @RequestParam(name = 'version', required = false, defaultValue = Constants.MAX_VERSION_STRING) Integer version) {
+        return skillsLoader.loadBadgeDescriptions(projectId, badgeId, version)
     }
 
     @RequestMapping(value = "/projects/{projectId}/badges/{badgeId}/summary", method = RequestMethod.GET, produces = "application/json")

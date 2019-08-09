@@ -16,13 +16,10 @@ import skills.controller.result.model.LevelDefinitionRes
 import skills.controller.result.model.SettingsResult
 import skills.services.settings.Settings
 import skills.services.settings.SettingsService
-import skills.storage.model.LevelDefInterface
+import skills.storage.model.*
 import skills.storage.repos.LevelDefRepo
 import skills.storage.repos.ProjDefRepo
 import skills.storage.repos.SkillDefRepo
-import skills.storage.model.LevelDef
-import skills.storage.model.ProjDef
-import skills.storage.model.SkillDef
 import skills.storage.repos.UserAchievedLevelRepo
 
 @Service
@@ -394,7 +391,7 @@ class LevelDefinitionStorageService {
     /**
      * Levels belong to either project or skill; so only project OR skill must be provided
      */
-    List<LevelDef> createDefault(String projectId, ProjDef projDef, SkillDef skillDef = null) {
+    List<LevelDef> createDefault(String projectId, ProjDef projDef, SkillDefParent skillDef = null) {
         SettingsResult setting = settingsService.getProjectSetting(projectId, Settings.LEVEL_AS_POINTS.settingName)
 
         assert projDef || skillDef

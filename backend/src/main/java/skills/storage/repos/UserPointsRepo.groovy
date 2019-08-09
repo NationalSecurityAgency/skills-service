@@ -56,12 +56,25 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
     List<Object []> findChildrenAndTheirUserPoints(String userId, String projectId, String skillId, SkillRelDef.RelationshipType type, Integer version)
 
 
-    @Query('''select sdChild, achievement.id
+    @Query('''select sdChild.id, achievement.id
     from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
     left join UserAchievement achievement on sdChild.projectId = achievement.projectId and sdChild.skillId = achievement.skillId and achievement.userId=?1
       where srd.parent=sdParent.id and  srd.child=sdChild.id and
       sdParent.projectId=?2 and sdParent.skillId=?3 and srd.type=?4 and sdChild.version<=?5''')
     List<Object []> findChildrenAndTheirAchievements(String userId, String projectId, String skillId, SkillRelDef.RelationshipType type, Integer version)
+
+    @Query('''select sdParent.id as parentId, sdChild.id as childId, achievement.id as achievementId
+    from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
+    left join UserAchievement achievement on sdChild.projectId = achievement.projectId and sdChild.skillId = achievement.skillId and achievement.userId=?1
+      where srd.parent=sdParent.id and  srd.child=sdChild.id and
+      sdParent.projectId=?2 and srd.type=?3 and sdChild.version<=?4''')
+    List<SkillWithChildAndAchievementIndicator> findAllChildrenAndTheirAchievementsForProject(String userId, String projectId, SkillRelDef.RelationshipType type, Integer version)
+
+    static interface SkillWithChildAndAchievementIndicator {
+        Integer getParentId()
+        Integer getChildId()
+        Integer getAchievementId()
+    }
 
     @Query('''select up.day as day, count(up) as count
     from UserPoints up where up.projectId=?1 and up.day>=?2 and up.skillId is null and up.day is not null group by up.day
@@ -74,11 +87,11 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
     List<DayCountItem> findDistinctUserCountsBySkillId(String projectId, String skillId, Date mustBeAfterThisDate)
 
     // Postgresql is 10 fold faster with the nested query over COUNT(DISTINCT)
+    // using user_performed_skill table as it has less records than user_points
     @Query(value ='''SELECT COUNT(*)
-        FROM (SELECT DISTINCT userpoints0_.user_id FROM user_points userpoints0_
-                where userpoints0_.project_id = ?1 and (userpoints0_.day is null)) AS temp''',
+        FROM (SELECT DISTINCT usr.user_id FROM user_performed_skill usr where usr.project_id = ?1) AS temp''',
             nativeQuery = true)
-    Long countDistinctUserIdByProjectIdAndUserIdLike(String projectId, String query)
+    Long countDistinctUserIdByProjectId(String projectId)
 
     @Query('SELECT userId as userId, max(updated) as lastUpdated, sum(points) as totalPoints from UserPoints up where up.projectId=?1 and up.userId like %?2% and up.day is null and up.skillId is null GROUP BY userId')
     List<ProjectUser> findDistinctProjectUsersAndUserIdLike(String projectId, String query, Pageable pageable)
@@ -89,4 +102,11 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
     @Query('SELECT userId as userId, max(updated) as lastUpdated, sum(points) as totalPoints from UserPoints up where up.projectId=?1 and up.skillId in (?2) and up.userId like %?3% and up.day is null GROUP BY userId')
     List<ProjectUser> findDistinctProjectUsersByProjectIdAndSkillIdInAndUserIdLike(String projectId, List<String> skillIds, String userId, Pageable pageable)
 
+    @Nullable
+    @Query('SELECT up.points from UserPoints up where up.projectId=?1 and up.userId=?2 and up.skillRefId=?3 and up.day is null')
+    Integer getPointsByProjectIdAndUserIdAndSkillRefId(String projectId, String userId, Integer skillRefId)
+
+    @Nullable
+    @Query('SELECT up.points from UserPoints up where up.projectId=?1 and up.userId=?2 and up.skillRefId=?3 and up.day=?4')
+    Integer getPointsByProjectIdAndUserIdAndSkillRefIdAndDay(String projectId, String userId, Integer skillRefId, Date day)
 }

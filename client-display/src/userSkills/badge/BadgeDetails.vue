@@ -11,7 +11,7 @@
                 </div>
             </div>
 
-            <skills-progress-list v-if="badge" :subject="badge" :show-descriptions="showDescriptions" :helpTipHref="helpTipHref"/>
+            <skills-progress-list v-if="badge" :subject="badge" :show-descriptions="showDescriptions" :helpTipHref="helpTipHref" type="badge"/>
         </div>
     </div>
 </template>

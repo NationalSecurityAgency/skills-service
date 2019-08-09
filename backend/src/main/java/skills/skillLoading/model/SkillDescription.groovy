@@ -1,8 +1,7 @@
 package skills.skillLoading.model
 
 class SkillDescription {
+    String skillId
     String description
-    @Deprecated
-    List<String> examples
     String href
 }

@@ -27,7 +27,7 @@
                 <progress-bar bar-color="lightgreen" :val="percent"></progress-bar>
             </div>
 
-            <p class="">
+            <p v-if="badge && badge.description" class="">
                <markdown-text :text="badge.description"/>
             </p>
 
