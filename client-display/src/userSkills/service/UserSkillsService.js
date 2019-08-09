@@ -197,6 +197,20 @@ service = {
     return response;
   },
 
+  getRankingDistributionUsersPerLevel(subjectId) {
+    let response = null;
+    let url = `${this.serviceUrl}${this.getServicePath()}/${this.projectId}/subjects/${subjectId}/rankDistribution/usersPerLevel`;
+    if (!subjectId) {
+      url = `${this.serviceUrl}${this.getServicePath()}/${this.projectId}/rankDistribution/usersPerLevel`;
+    }
+    response = axios.get(url, {
+      params: {
+        subjectId,
+      },
+    }).then(result => result.data);
+    return response;
+  },
+
   getDescriptions(parentId, type = 'subject') {
     let url = `${this.serviceUrl}${this.getServicePath()}/${this.projectId}/subjects/${parentId}/descriptions`;
     if (type === 'badge') {

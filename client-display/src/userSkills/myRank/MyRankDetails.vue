@@ -34,7 +34,7 @@
 
             <div class="row mt-3">
                 <div class="col-lg-6 mb-2 mb-lg-0">
-                    <levels-breakdown-chart :ranking-distribution="rankingDistribution"/>
+                    <levels-breakdown-chart :users-per-level="usersPerLevel"/>
                 </div>
 
                 <div class="col-lg-6">
@@ -81,7 +81,6 @@
 
 <script>
     import MyRankDetailStatCard from '@/userSkills/myRank/MyRankDetailStatCard.vue';
-    import MyRankHistoryChart from '@/userSkills/myRank/MyRankHistoryChart.vue';
     import LevelsBreakdownChart from '@/userSkills/myRank/LevelsBreakdownChart.vue';
     import MyRankEncouragementCard from '@/userSkills/myRank/MyRankEncouragementCard.vue';
 
@@ -95,7 +94,6 @@
             SkillsSpinner,
             SkillsTitle,
             MyRankDetailStatCard,
-            MyRankHistoryChart,
             LevelsBreakdownChart,
             MyRankEncouragementCard,
         },
@@ -106,6 +104,7 @@
             return {
                 loading: true,
                 rankingDistribution: null,
+                usersPerLevel: null,
             };
         },
         mounted() {
@@ -119,6 +118,10 @@
                     .then((response) => {
                         this.rankingDistribution = response;
                         this.loading = false;
+                    });
+                UserSkillsService.getRankingDistributionUsersPerLevel(subjectId)
+                    .then((response) => {
+                        this.usersPerLevel = response;
                     });
             },
         },
