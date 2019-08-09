@@ -10,7 +10,7 @@
                         class="col-md-3 mb-2 mb-md-0"
                         icon-class="fas fa-users"
                         label="My Rank"
-                        :value="rankingDistribution.myPosition"/>
+                        :value="myRankPosition"/>
 
                 <my-rank-detail-stat-card
                         class="col-md-3 mb-2 mb-md-0"
@@ -28,7 +28,7 @@
                         class="col-md-3 mb-2 mb-md-0"
                         icon-class="fas fa-user-friends"
                         label="Total Users"
-                        :value="rankingDistribution.totalUsers"/>
+                        :value="totalNumUsers"/>
 
             </div>
 
@@ -105,6 +105,7 @@
                 loading: true,
                 rankingDistribution: null,
                 usersPerLevel: null,
+                myRank: null,
             };
         },
         mounted() {
@@ -123,11 +124,21 @@
                     .then((response) => {
                         this.usersPerLevel = response;
                     });
+                UserSkillsService.getUserSkillsRanking(subjectId)
+                    .then((response) => {
+                        this.myRank = response;
+                    });
             },
         },
         computed: {
             numUsersBehindMe() {
                 return this.rankingDistribution.totalUsers - this.rankingDistribution.myPosition;
+            },
+            myRankPosition() {
+                return this.myRank ? this.myRank.position : -1;
+            },
+            totalNumUsers() {
+                return this.myRank ? this.myRank.numUsers : -1;
             },
         },
     };
