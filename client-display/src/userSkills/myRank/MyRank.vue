@@ -7,7 +7,10 @@
       <span class="fa-stack skills-icon user-rank-stack">
         <i class="fa fa-users fa-stack-2x watermark-icon"/>
         <strong class="fa-stack-1x user-rank-text">
-          {{ rank | number }}
+          <span v-if="displayData.userSkillsRanking">
+            {{ displayData.userSkillsRanking.position | number }}
+          </span>
+          <vue-simple-spinner v-else line-bg-color="#333" line-fg-color="#17a2b8"/>
         </strong>
       </span>
       <div>
@@ -20,19 +23,21 @@
 </template>
 
 <script>
+  import Spinner from 'vue-simple-spinner';
+
   export default {
     components: {
+      'vue-simple-spinner': Spinner,
     },
     props: {
-      subject: String,
-      rank: Number,
+      displayData: Object,
     },
     methods: {
       openMyRankDetails() {
         this.$router.push({
           name: 'myRankDetails',
           params: {
-            subject: this.subject,
+            subject: this.displayData.userSkills.subject,
           },
         });
       },

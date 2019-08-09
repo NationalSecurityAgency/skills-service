@@ -59,9 +59,7 @@
 
         <div class="row pt-3">
             <div class="col-lg-3 pb-3 pb-lg-0">
-                <my-rank v-if="displayData.userSkillsRanking"
-                        :rank="displayData.userSkillsRanking.position"
-                        :subject="displayData.userSkills.subject"/>
+                <my-rank :display-data="displayData"/>
             </div>
 
             <div id="point-progress-container" class="pb-3 pb-lg-0"

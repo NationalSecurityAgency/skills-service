@@ -1,17 +1,14 @@
 <template>
-  <div
-    :class="{'disabled': !hasData}"
-    class="card position-relative">
-    <div
-      v-if="!hasData"
-      class="disabled-overlay" />
-    <div
-      v-if="!hasData"
-      class="text-center user-skills-no-data-icon-text text-danger">
+  <div :class="{'disabled': !hasData}" class="card position-relative">
+    <div v-if="!hasData" class="disabled-overlay" />
+    <div v-if="!hasData" class="text-center user-skills-no-data-icon-text text-danger">
         <div class="row justify-content-center">
           <div class="col-5 text-center border rounded bg-light p-2">
-            <div style="font-size: 1rem;" class="text-uppercase"><i class="fa fa-lock"></i> Locked</div>
-            <small class="text-black-50">*** Earn more points to unlock this chart! ***</small>
+            <vue-simple-spinner v-if="loading" line-bg-color="#333" line-fg-color="#17a2b8" size="small" message="Loading Chart ..."/>
+            <div v-else>
+              <div style="font-size: 1rem;" class="text-uppercase"><i class="fa fa-lock"></i> Locked</div>
+              <small class="text-black-50">*** Earn more points to unlock this chart! ***</small>
+            </div>
           </div>
         </div>
     </div>
@@ -19,21 +16,19 @@
       <h6 class="card-title mb-0 float-left">Point History</h6>
     </div>
     <div class="card-body m-0 mr-1 p-0 apex-chart-container">
-      <apexchart
-        v-if="chartOptions"
-        :options="chartOptions"
-        :series="chartSeries"
-        height="200" type="area" />
+      <apexchart v-if="chartOptions" :options="chartOptions" :series="chartSeries" height="200" type="area" />
     </div>
   </div>
 </template>
 
 <script>
   import VueApexCharts from 'vue-apexcharts';
+  import Spinner from 'vue-simple-spinner';
 
   export default {
     components: {
       apexchart: VueApexCharts,
+      'vue-simple-spinner': Spinner,
     },
     props: {
       pointsHistory: Array,
@@ -84,6 +79,9 @@
     computed: {
       hasData() {
         return this.pointsHistory && this.pointsHistory.length;
+      },
+      loading() {
+        return this.pointsHistory === null;
       },
 
       chartSeries() {

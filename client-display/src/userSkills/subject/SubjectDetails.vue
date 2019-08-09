@@ -1,8 +1,8 @@
 <template>
     <section class="container">
-        <skills-spinner :loading="!isLoaded"></skills-spinner>
+        <skills-spinner :loading="loading.userSkills"></skills-spinner>
 
-        <div v-if="isLoaded"
+        <div v-if="!loading.userSkills"
              class="user-skill-subject-body">
             <skills-title>{{ displayData.userSkills.subject }}</skills-title>
 
