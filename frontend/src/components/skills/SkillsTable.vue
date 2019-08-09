@@ -5,8 +5,8 @@
 
 
     <div class="card">
-      <div class="card-body">
-        <div v-if="isLoading" class="modal-card-body" style="height: 400px;">
+      <div class="card-body" style="min-height: 400px;">
+        <div v-if="isLoading" class="modal-card-body">
         </div>
 
         <v-client-table class="vue-table-2" :data="skills" :columns="skillsColumns"

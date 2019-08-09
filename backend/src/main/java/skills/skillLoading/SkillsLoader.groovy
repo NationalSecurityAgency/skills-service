@@ -1,5 +1,6 @@
 package skills.skillLoading
 
+
 import callStack.profiler.Profile
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
@@ -9,25 +10,12 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import skills.controller.result.model.SettingsResult
+import skills.services.DependencyValidator
 import skills.services.LevelDefinitionStorageService
 import skills.services.settings.SettingsService
-import skills.skillLoading.model.OverallSkillSummary
-import skills.skillLoading.model.SkillBadgeSummary
-import skills.skillLoading.model.SkillDependencyInfo
-import skills.skillLoading.model.SkillDependencySummary
-import skills.skillLoading.model.SkillDescription
-import skills.skillLoading.model.SkillHistoryPoints
-import skills.skillLoading.model.SkillSubjectSummary
-import skills.skillLoading.model.SkillSummary
-import skills.skillLoading.model.UserPointHistorySummary
+import skills.skillLoading.model.*
 import skills.storage.model.*
-import skills.storage.repos.ProjDefRepo
-import skills.storage.repos.SkillDefRepo
-import skills.storage.repos.SkillRelDefRepo
-import skills.storage.repos.SkillShareDefRepo
-import skills.storage.repos.UserAchievedLevelRepo
-import skills.storage.repos.UserPerformedSkillRepo
-import skills.storage.repos.UserPointsRepo
+import skills.storage.repos.*
 import skills.storage.repos.nativeSql.GraphRelWithAchievement
 import skills.storage.repos.nativeSql.NativeQueriesRepo
 
@@ -47,6 +35,9 @@ class SkillsLoader {
 
     @Autowired
     SkillDefRepo skillDefRepo
+
+    @Autowired
+    SkillDefWithExtraRepo skillDefWithExtraRepo
 
     @Autowired
     SkillRelDefRepo skillRelDefRepo
@@ -81,6 +72,9 @@ class SkillsLoader {
     @Autowired
     SettingsService settingsService
 
+    @Autowired
+    DependencyValidator dependencyValidator
+
     private static String PROP_HELP_URL_ROOT = "help.url.root"
 
     @Transactional(readOnly = true)
@@ -103,9 +97,8 @@ class SkillsLoader {
     @Transactional(readOnly = true)
     OverallSkillSummary loadOverallSummary(String projectId, String userId, Integer version = -1) {
         ProjDef projDef = getProjDef(projectId)
-        List<SkillSubjectSummary> subjects = loadSubjectsFromDB(projDef)?.sort({it.displayOrder})?.collect { SkillDef subjectDefinition ->
-            loadSubjectSummary(projDef, userId, subjectDefinition, version)
-        }
+
+        List<SkillSubjectSummary> subjects = loadSubjectsSummaries(projDef, userId, version)
 
         int points
         int totalPoints
@@ -154,6 +147,16 @@ class SkillsLoader {
 
         return res
     }
+
+    @Profile
+    private List<SkillSubjectSummary> loadSubjectsSummaries(ProjDef projDef, String userId, int version) {
+        List<SkillDef> subjectsToConvert = loadSubjectsFromDB(projDef)?.sort({ it.displayOrder })
+        List<SkillSubjectSummary> subjects = subjectsToConvert?.collect { SkillDef subjectDefinition ->
+            return loadSubjectSummary(projDef, userId, subjectDefinition, version)
+        }
+        subjects
+    }
+
     @Profile
     private List<UserAchievement> getProjectsAchievedLevels(String userId, String projectId) {
         achievedLevelRepository.findAllByUserIdAndProjectIdAndSkillId(userId, projectId, null)
@@ -161,17 +164,17 @@ class SkillsLoader {
 
     @Profile
     private List<SkillDef> loadSubjectsFromDB(ProjDef projDef) {
-        projDef.getSubjects()
+        return skillDefRepo.findAllByProjectIdAndType(projDef.projectId, SkillDef.ContainerType.Subject)
     }
 
     @Transactional(readOnly = true)
     List<SkillBadgeSummary> loadBadgeSummaries(String projectId, String userId, Integer version = Integer.MAX_VALUE){
         ProjDef projDef = getProjDef(projectId)
-        List<SkillDef> badgeDefs = projDef.getBadges()
+        List<SkillDefWithExtra> badgeDefs = skillDefWithExtraRepo.findAllByProjectIdAndType(projectId, SkillDef.ContainerType.Badge)
         if ( version >= 0 ) {
             badgeDefs = badgeDefs.findAll { it.version <= version }
         }
-        List<SkillBadgeSummary> badges = badgeDefs.sort({ it.skillId }).collect { SkillDef badgeDefinition ->
+        List<SkillBadgeSummary> badges = badgeDefs.sort({ it.skillId }).collect { SkillDefWithExtra badgeDefinition ->
             loadBadgeSummary(projDef, userId, badgeDefinition, version)
         }
         return badges
@@ -189,10 +192,10 @@ class SkillsLoader {
     @Transactional(readOnly = true)
     SkillSummary loadSkillSummary(String projectId, String userId, String crossProjectId, String skillId) {
         ProjDef projDef = getProjDef(crossProjectId ?: projectId)
-        SkillDef skillDef = getSkillDef(crossProjectId ?: projectId, skillId, SkillDef.ContainerType.Skill)
+        SkillDefWithExtra skillDef = getSkillDefWithExtra(crossProjectId ?: projectId, skillId, SkillDef.ContainerType.Skill)
 
         if(crossProjectId) {
-            validateDependencyEligibility(projectId, skillDef)
+            dependencyValidator.validateDependencyEligibility(projectId, skillDef)
         }
 
         UserPoints points = userPointsRepo.findByProjectIdAndUserIdAndSkillIdAndDay(crossProjectId ?: projectId, userId, skillId, null)
@@ -212,7 +215,10 @@ class SkillsLoader {
                 pointIncrement: skillDef.pointIncrement, pointIncrementInterval: skillDef.pointIncrementInterval,
                 maxOccurrencesWithinIncrementInterval: skillDef.numMaxOccurrencesIncrementInterval,
                 totalPoints: skillDef.totalPoints,
-                description: new SkillDescription(description: skillDef.description, href: getHelpUrl(helpUrlRootSetting, skillDef)),
+                description: new SkillDescription(
+                        skillId: skillDef.skillId,
+                        description: skillDef.description,
+                        href: getHelpUrl(helpUrlRootSetting, skillDef)),
                 dependencyInfo: skillDependencySummary,
                 crossProject: crossProjectId != null
         )
@@ -231,9 +237,30 @@ class SkillsLoader {
     }
 
     @Transactional(readOnly = true)
+    List<SkillDescription> loadSubjectDescriptions(String projectId, String subjectId, Integer version = -1) {
+        return loadDescriptions(projectId, subjectId, SkillRelDef.RelationshipType.RuleSetDefinition, version)
+    }
+    @Transactional(readOnly = true)
+    List<SkillDescription> loadBadgeDescriptions(String projectId, String badgeId, Integer version = -1) {
+        return loadDescriptions(projectId, badgeId, SkillRelDef.RelationshipType.BadgeDependence, version)
+    }
+
+    private List<SkillDescription> loadDescriptions(String projectId, String subjectId, SkillRelDef.RelationshipType relationshipType, int version) {
+        List<SkillDefWithExtraRepo.SkillDescDBRes> dbRes = skillDefWithExtraRepo.findAllChildSkillsDescriptions(projectId, subjectId, relationshipType, version)
+        List<SkillDescription> res = dbRes.collect {
+            new SkillDescription(
+                    skillId: it.getSkillId(),
+                    description: it.getDescription(),
+                    href: it.getHelpUrl()
+            )
+        }
+        return res;
+    }
+
+    @Transactional(readOnly = true)
     SkillBadgeSummary loadBadge(String projectId, String userId, String subjectId, Integer version = Integer.MAX_VALUE) {
         ProjDef projDef = getProjDef(projectId)
-        SkillDef badgeDef = getSkillDef(projectId, subjectId, SkillDef.ContainerType.Badge)
+        SkillDefWithExtra badgeDef = getSkillDefWithExtra(projectId, subjectId, SkillDef.ContainerType.Badge)
 
         return loadBadgeSummary(projDef, userId, badgeDef, version,true)
     }
@@ -292,7 +319,7 @@ class SkillsLoader {
         return new SkillSubjectSummary(
                 subject: subjectDefinition.name,
                 subjectId: subjectDefinition.skillId,
-                description: subjectDefinition.description,
+//                description: subjectDefinition.description,
                 points: points,
 
                 skillsLevel: levelInfo.level,
@@ -322,16 +349,20 @@ class SkillsLoader {
 
     @Profile
     private Integer calculateTodayPoints(ProjDef projDef, String userId, SkillDef subjectDefinition, int version) {
-        userPerformedSkillRepo.calculateUserPointsByProjectIdAndUserIdAndAndDayAndVersion(projDef.projectId, userId, subjectDefinition.skillId, version, new Date().clearTime())
+//        userPerformedSkillRepo.calculateUserPointsByProjectIdAndUserIdAndAndDayAndVersion(projDef.projectId, userId, subjectDefinition.skillId, version, new Date().clearTime())
+        Integer res = userPointsRepo.getPointsByProjectIdAndUserIdAndSkillRefIdAndDay(projDef.projectId, userId, subjectDefinition.id, new Date().clearTime())
+        return res ?: 0
     }
 
     @Profile
     private Integer calculatePoints(ProjDef projDef, String userId, SkillDef subjectDefinition, int version) {
-        userPerformedSkillRepo.calculateUserPointsByProjectIdAndUserIdAndAndDayAndVersion(projDef.projectId, userId, subjectDefinition.skillId, version, null)
+        Integer res = userPointsRepo.getPointsByProjectIdAndUserIdAndSkillRefId(projDef.projectId, userId, subjectDefinition.id)
+        return res ?: 0
+//        userPerformedSkillRepo.calculateUserPointsByProjectIdAndUserIdAndAndDayAndVersion(projDef.projectId, userId, subjectDefinition.skillId, version, null)
     }
 
     @Profile
-    private SkillBadgeSummary loadBadgeSummary(ProjDef projDef, String userId, SkillDef badgeDefinition, Integer version = Integer.MAX_VALUE, boolean loadSkills = false) {
+    private SkillBadgeSummary loadBadgeSummary(ProjDef projDef, String userId, SkillDefWithExtra badgeDefinition, Integer version = Integer.MAX_VALUE, boolean loadSkills = false) {
         List<SkillSummary> skillsRes = []
 
         if (loadSkills) {
@@ -363,7 +394,7 @@ class SkillsLoader {
         )
     }
 
-    private String getHelpUrl(skills.controller.result.model.SettingsResult helpUrlRootSetting, SkillDef skillDef) {
+    private String getHelpUrl(SettingsResult helpUrlRootSetting, SkillDefWithExtra skillDef) {
         String res = skillDef.helpUrl
 
         if (skillDef.helpUrl && helpUrlRootSetting && !skillDef.helpUrl.toLowerCase().startsWith("http")) {
@@ -402,7 +433,6 @@ class SkillsLoader {
                     pointIncrement: skillDef.pointIncrement, pointIncrementInterval: skillDef.pointIncrementInterval,
                     maxOccurrencesWithinIncrementInterval: skillDef.numMaxOccurrencesIncrementInterval,
                     totalPoints: skillDef.totalPoints,
-                    description: new SkillDescription(description: skillDef.description, href: getHelpUrl(helpUrlRootSetting, skillDef)),
                     dependencyInfo: skillDefAndUserPoints.dependencyInfo
             )
         }
@@ -466,16 +496,11 @@ class SkillsLoader {
         return skillDef
     }
 
-    private void validateDependencyEligibility(String projectId, SkillDef skill2) {
-        ProjDef projDef = getProjDef(projectId)
-        SkillShareDef skillShareDef = skillShareDefRepo.findBySkillAndSharedToProject(skill2, projDef)
-        if (!skillShareDef) {
-            // check if the dependency is shared with ALL projects (null shared_to_project_id)
-            skillShareDef = skillShareDefRepo.findBySkillAndSharedToProjectIsNull(skill2)
+    private SkillDefWithExtra getSkillDefWithExtra(String projectId, String skillId, SkillDef.ContainerType containerType) {
+        SkillDefWithExtra skillDef = skillDefWithExtraRepo.findByProjectIdAndSkillIdAndType(projectId, skillId, containerType)
+        if (!skillDef) {
+            throw new skills.controller.exceptions.SkillException("Skill with id [${skillId}] doesn't exist", projectId, skillId)
         }
-
-        if (!skillShareDef) {
-            throw new skills.controller.exceptions.SkillException("Skill [${skill2.projectId}:${skill2.skillId}] is not shared (or does not exist) to [$projectId] project", projectId)
-        }
+        return skillDef
     }
 }

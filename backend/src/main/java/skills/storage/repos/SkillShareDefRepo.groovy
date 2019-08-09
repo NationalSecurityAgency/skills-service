@@ -33,4 +33,12 @@ interface SkillShareDefRepo extends CrudRepository<SkillShareDef, Long> {
 
     @Nullable
     SkillShareDef findBySkillAndSharedToProjectIsNull(SkillDef skill)
+
+    @Nullable
+    SkillShareDef findBySkillIdAndSharedToProjectIsNull(Integer skillId)
+
+    @Nullable
+    @Query('''select share from SkillShareDef share, ProjDef proj
+        where share.sharedToProject = proj and proj.projectId=?1 and share.skill.id=?2''')
+    SkillShareDef findBySharedToProjectIdAndSkillId(String projectId, Integer skillId)
 }

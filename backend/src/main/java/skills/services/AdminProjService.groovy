@@ -1,6 +1,5 @@
 package skills.services
 
-
 import callStack.profiler.Profile
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
@@ -12,44 +11,24 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestBody
-import skills.controller.exceptions.DataIntegrityViolationExceptionHandler
+import skills.auth.UserInfoService
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
-import skills.controller.exceptions.SkillsValidator
-import skills.controller.request.model.ActionPatchRequest
-import skills.controller.request.model.BadgeRequest
-import skills.controller.request.model.ProjectRequest
-import skills.controller.request.model.SkillDefForDependencyRes
-import skills.controller.request.model.SkillRequest
-import skills.controller.request.model.SubjectRequest
-import skills.auth.UserInfoService
-import skills.controller.result.model.BadgeResult
-import skills.controller.result.model.CustomIconResult
-import skills.controller.result.model.DependencyCheckResult
+import skills.controller.request.model.*
 import skills.controller.result.model.NumUsersRes
 import skills.controller.result.model.ProjectResult
 import skills.controller.result.model.SettingsResult
 import skills.controller.result.model.SharedSkillResult
 import skills.controller.result.model.SimpleProjectResult
 import skills.controller.result.model.SkillDefPartialRes
-import skills.controller.result.model.SkillDefRes
 import skills.controller.result.model.SkillDefSkinnyRes
-import skills.controller.result.model.SkillsGraphRes
-import skills.controller.result.model.SubjectResult
-import skills.services.settings.Settings
 import skills.icons.IconCssNameUtil
+import skills.services.settings.Settings
 import skills.services.settings.SettingsService
-import skills.storage.model.CustomIcon
-import skills.storage.model.ProjDef
-import skills.storage.model.SkillDef
-import skills.storage.model.SkillRelDef
+import skills.storage.model.*
 import skills.storage.model.SkillRelDef.RelationshipType
-import skills.storage.model.SkillShareDef
 import skills.storage.model.auth.RoleName
-import skills.storage.repos.ProjDefRepo
-import skills.storage.repos.SkillDefRepo
-import skills.storage.repos.SkillRelDefRepo
-import skills.storage.repos.SkillShareDefRepo
+import skills.storage.repos.*
 import skills.utils.ClientSecretGenerator
 import skills.utils.Props
 
@@ -72,6 +51,9 @@ class AdminProjService {
     SkillDefRepo skillDefRepo
 
     @Autowired
+    SkillDefWithExtraRepo skillDefWithExtraRepo
+
+    @Autowired
     SkillRelDefRepo skillRelDefRepo
 
     @Autowired
@@ -92,6 +74,8 @@ class AdminProjService {
     @Autowired
     SettingsService settingsService
 
+    @Autowired
+    DependencyValidator dependencyValidator
     @Autowired
     SortingService sortingService
 
@@ -183,13 +167,13 @@ class AdminProjService {
             throw new SkillException("Bad Name [${subjectRequest.name}] - must not exceed 50 chars.")
         }
 
-        SkillDef res
+        SkillDefWithExtra res
         if (subjectRequest.id) {
-            Optional<SkillDef> existing = skillDefRepo.findById(subjectRequest.id)
+            Optional<SkillDefWithExtra> existing = skillDefWithExtraRepo.findById(subjectRequest.id)
             if (!existing.present) {
                 throw new SkillException("Subject id [${subjectRequest.id}] doesn't exist.", projectId, null)
             }
-            SkillDef skillDefinition = existing.get()
+            SkillDefWithExtra skillDefinition = existing.get()
 
             Props.copy(subjectRequest, skillDefinition)
             //we need to manually copy subjectId into skillId
@@ -214,7 +198,7 @@ class AdminProjService {
             Integer lastDisplayOrder = projDef.subjects?.collect({ it.displayOrder })?.max()
             int displayOrder = lastDisplayOrder != null ? lastDisplayOrder + 1 : 0
 
-            SkillDef skillDef = new SkillDef(
+            SkillDefWithExtra skillDef = new SkillDefWithExtra(
                     type: SkillDef.ContainerType.Subject,
                     projectId: projectId,
                     skillId: subjectRequest.subjectId,
@@ -226,9 +210,10 @@ class AdminProjService {
             )
 
             subjectDataIntegrityViolationExceptionHandler.handle(projectId) {
-                res = skillDefRepo.save(skillDef)
+                res = skillDefWithExtraRepo.save(skillDef)
             }
             levelDefService.createDefault(projectId, null, skillDef)
+
             log.info("Created [{}]", res)
         }
     }
@@ -263,9 +248,9 @@ class AdminProjService {
         }
 
         boolean isEdit = badgeRequest.id
-        SkillDef skillDefinition
+        SkillDefWithExtra skillDefinition
         if (isEdit) {
-            Optional<SkillDef> existing = skillDefRepo.findById(badgeRequest.id)
+            Optional<SkillDefWithExtra> existing = skillDefWithExtraRepo.findById(badgeRequest.id)
             if (!existing.present) {
                 throw new SkillException("Badge id [${badgeRequest.id}] doesn't exist.", projectId, null)
             }
@@ -290,7 +275,7 @@ class AdminProjService {
             Integer lastDisplayOrder = projDef.badges?.collect({ it.displayOrder })?.max()
             int displayOrder = lastDisplayOrder != null ? lastDisplayOrder + 1 : 0
 
-            skillDefinition = new SkillDef(
+            skillDefinition = new SkillDefWithExtra(
                     type: SkillDef.ContainerType.Badge,
                     projectId: projectId,
                     skillId: badgeRequest.badgeId,
@@ -305,10 +290,10 @@ class AdminProjService {
             log.info("Saving [{}]", skillDefinition)
         }
 
-        SkillDef savedSkill
+        SkillDefWithExtra savedSkill
 
         badgeDataIntegrityViolationExceptionHandler.handle(projectId) {
-            savedSkill = skillDefRepo.save(skillDefinition)
+            savedSkill = skillDefWithExtraRepo.save(skillDefinition)
         }
 
         log.info("Saved [{}]", savedSkill)
@@ -398,29 +383,30 @@ class AdminProjService {
     }
 
     @Transactional(readOnly = true)
-    SubjectResult getSubject(String projectId, String subjectId) {
-        SkillDef skillDef = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, subjectId, SkillDef.ContainerType.Subject)
+    skills.controller.result.model.SubjectResult getSubject(String projectId, String subjectId) {
+        SkillDefWithExtra skillDef = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, subjectId, SkillDef.ContainerType.Subject)
         convertToSubject(skillDef)
     }
 
     @Transactional(readOnly = true)
-    List<SubjectResult> getSubjects(String projectId) {
-        ProjDef projDef = getProjDef(projectId)
-        List<SubjectResult> res = projDef.subjects.collect { convertToSubject(it) }
+    List<skills.controller.result.model.SubjectResult> getSubjects(String projectId) {
+//        List<SkillDef> subjects = skillDefRepo.findAllByProjectIdAndType(projectId, SkillDef.ContainerType.Subject)
+        List<SkillDefWithExtra> subjects = skillDefWithExtraRepo.findAllByProjectIdAndType(projectId, SkillDef.ContainerType.Subject)
+        List<skills.controller.result.model.SubjectResult> res = subjects.collect { convertToSubject(it) }
         calculatePercentages(res)
         return res?.sort({ it.displayOrder })
     }
 
     @Transactional(readOnly = true)
-    List<BadgeResult> getBadges(String projectId) {
-        ProjDef projDef = getProjDef(projectId)
-        List<BadgeResult> res = projDef.badges.collect { convertToBadge(it) }
+    List<skills.controller.result.model.BadgeResult> getBadges(String projectId) {
+        List<SkillDefWithExtra> badges = skillDefWithExtraRepo.findAllByProjectIdAndType(projectId, SkillDef.ContainerType.Badge)
+        List<skills.controller.result.model.BadgeResult> res = badges.collect { convertToBadge(it) }
         return res?.sort({ it.displayOrder })
     }
 
     @Transactional(readOnly = true)
-    BadgeResult getBadge(String projectId, String badgeId) {
-        SkillDef skillDef = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, badgeId, SkillDef.ContainerType.Badge)
+    skills.controller.result.model.BadgeResult getBadge(String projectId, String badgeId) {
+        SkillDefWithExtra skillDef = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, badgeId, SkillDef.ContainerType.Badge)
         return convertToBadge(skillDef, true)
     }
 
@@ -643,7 +629,7 @@ class AdminProjService {
 
 
     @Profile
-    private SubjectResult convertToSubject(SkillDef skillDef) {
+    private SubjectResult convertToSubject(SkillDefWithExtra skillDef) {
         SubjectResult res = new SubjectResult(
                 id: skillDef.id,
                 subjectId: skillDef.skillId,
@@ -662,13 +648,13 @@ class AdminProjService {
     }
 
     @Profile
-    private long calculateNumChildSkills(SkillDef skillDef) {
-        skillDefRepo.countChildSkillsByIdAndRelationshipType(skillDef, RelationshipType.RuleSetDefinition)
+    private long calculateNumChildSkills(SkillDefParent skillDef) {
+        skillDefRepo.countChildSkillsByIdAndRelationshipType(skillDef.id, RelationshipType.RuleSetDefinition)
     }
 
     @Profile
-    private BadgeResult convertToBadge(SkillDef skillDef, boolean loadRequiredSkills = false) {
-        BadgeResult res = new BadgeResult(
+    private skills.controller.result.model.BadgeResult convertToBadge(SkillDefWithExtra skillDef, boolean loadRequiredSkills = false) {
+        skills.controller.result.model.BadgeResult res = new skills.controller.result.model.BadgeResult(
                 id: skillDef.id,
                 badgeId: skillDef.skillId,
                 projectId: skillDef.projectId,
@@ -681,15 +667,17 @@ class AdminProjService {
         )
 
         if (loadRequiredSkills) {
-            List<SkillRelDef> dependentSkillsRels = skillRelDefRepo.findAllByParentAndType(skillDef, RelationshipType.BadgeDependence)
-            res.requiredSkills = dependentSkillsRels?.collect { convertToSkillDefRes(it.child) }
-        }
-
-        res.numSkills = skillDefRepo.countChildSkillsByIdAndRelationshipType(skillDef, RelationshipType.BadgeDependence)
-        if (res.numSkills > 0) {
-            res.totalPoints = skillDefRepo.sumChildSkillsTotalPointsBySkillAndRelationshipType(skillDef, RelationshipType.BadgeDependence)
+            List<SkillDef> dependentSkills = skillDefRepo.findChildSkillsByIdAndRelationshipType(skillDef.id, SkillRelDef.RelationshipType.BadgeDependence)
+            res.requiredSkills = dependentSkills?.collect { convertToSkillDefRes(it) }
+            res.numSkills = dependentSkills ? dependentSkills.size() : 0
+            res.totalPoints = dependentSkills ? dependentSkills?.collect({ it.totalPoints })?.sum() : 0
         } else {
-            res.totalPoints = 0
+            res.numSkills = skillDefRepo.countChildSkillsByIdAndRelationshipType(skillDef.id, SkillRelDef.RelationshipType.BadgeDependence)
+            if (res.numSkills > 0) {
+                res.totalPoints = skillDefRepo.sumChildSkillsTotalPointsBySkillAndRelationshipType(skillDef.id, SkillRelDef.RelationshipType.BadgeDependence)
+            } else {
+                res.totalPoints = 0
+            }
         }
         return res
     }
@@ -771,10 +759,10 @@ class AdminProjService {
     }
 
     @Transactional(readOnly = true)
-    SkillDefRes getSkill(String projectId, String subjectId, String skillId) {
-        SkillDef res = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, skillId, SkillDef.ContainerType.Skill)
+    skills.controller.result.model.SkillDefRes getSkill(String projectId, String subjectId, String skillId) {
+        SkillDefWithExtra res = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, skillId, SkillDef.ContainerType.Skill)
         assert res
-        return convertToSkillDefRes(res, true)
+        return convertToSkillDefRes(res)
     }
 
     @Transactional(readOnly = true)
@@ -887,14 +875,13 @@ class AdminProjService {
         return finalRes
     }
 
-
     @Transactional()
     void assignSkillDependency(String projectId, String skillId, String dependentSkillId, String dependentProjectId = null) {
         SkillDef skill1 = getSkillDef(projectId, skillId)
         SkillDef skill2 = getSkillDef(dependentProjectId ?: projectId, dependentSkillId)
 
         if (dependentProjectId) {
-            validateDependencyEligibility(projectId, skill2)
+            dependencyValidator.validateDependencyEligibility(projectId, skill2)
         }
 
         validateDependencyVersions(skill1, skill2)
@@ -908,20 +895,7 @@ class AdminProjService {
         }
     }
 
-    private void validateDependencyEligibility(String projectId, SkillDef skill2) {
-        ProjDef projDef = getProjDef(projectId)
-        SkillShareDef skillShareDef = skillShareDefRepo.findBySkillAndSharedToProject(skill2, projDef)
-        if (!skillShareDef) {
-            // check if the dependency is shared with ALL projects (null shared_to_project_id)
-            skillShareDef = skillShareDefRepo.findBySkillAndSharedToProjectIsNull(skill2)
-        }
-
-        if (!skillShareDef) {
-            throw new SkillException("Skill [${skill2.projectId}:${skill2.skillId}] is not shared (or does not exist) to [$projectId] project", projectId)
-        }
-    }
-
-    private static void validateDependencyVersions(SkillDef skill, SkillDef dependOnSkill) {
+    private void validateDependencyVersions(SkillDef skill, SkillDef dependOnSkill) {
         if (skill.version < dependOnSkill.version) {
             throw new SkillException("Not allowed to depend on skill with a later version. " +
                     "Skill [ID:${skill.skillId}, version ${skill.version}] can not depend on [ID:${dependOnSkill.skillId}, version ${dependOnSkill.version}]",
@@ -1015,9 +989,9 @@ class AdminProjService {
         boolean isEdit = skillRequest.id
 
         int totalPointsRequested = skillRequest.pointIncrement * skillRequest.numPerformToCompletion;
-        SkillDef skillDefinition
+        SkillDefWithExtra skillDefinition
         if (isEdit) {
-            Optional<SkillDef> existing = skillDefRepo.findById(skillRequest.id)
+            Optional<SkillDefWithExtra> existing = skillDefWithExtraRepo.findById(skillRequest.id)
             if (!existing.present) {
                 throw new SkillException("Requested skill update id [${skillRequest.id}] doesn't exist.", skillRequest.projectId, skillRequest.skillId)
             }
@@ -1044,7 +1018,7 @@ class AdminProjService {
             String parentSkillId = skillRequest.subjectId
             Integer highestDisplayOrder = skillDefRepo.calculateChildSkillsHighestDisplayOrder(skillRequest.projectId, parentSkillId)
             int displayOrder = highestDisplayOrder == null ? 0 : highestDisplayOrder + 1
-            skillDefinition = new SkillDef(
+            skillDefinition = new SkillDefWithExtra(
                     skillId: skillRequest.skillId,
                     projectId: skillRequest.projectId,
                     name: skillRequest.name,
@@ -1062,11 +1036,11 @@ class AdminProjService {
             shouldRebuildScores = true
         }
 
-        SkillDef savedSkill
-
         skillDataIntegrityViolationExceptionHandler.handle(skillRequest.projectId, skillRequest.skillId) {
-            savedSkill = skillDefRepo.save(skillDefinition)
+            skillDefWithExtraRepo.save(skillDefinition)
         }
+
+        SkillDef savedSkill = skillDefRepo.findByProjectIdAndSkillIdAndType(skillRequest.projectId, skillRequest.skillId, SkillDef.ContainerType.Skill)
 
         if (!isEdit) {
             assignToParent(skillRequest, savedSkill)
@@ -1144,16 +1118,18 @@ class AdminProjService {
 
 
     @Profile
-    private SkillDefRes convertToSkillDefRes(SkillDef skillDef, boolean loadNumUsers = false) {
-        SkillDefRes res = new SkillDefRes()
+    private skills.controller.result.model.SkillDefRes convertToSkillDefRes(SkillDef skillDef) {
+        skills.controller.result.model.SkillDefRes res = new skills.controller.result.model.SkillDefRes()
         Props.copy(skillDef, res)
         res.numPerformToCompletion = skillDef.totalPoints / res.pointIncrement
-        res.totalPoints = skillDef.totalPoints
-        res.numMaxOccurrencesIncrementInterval = skillDef.numMaxOccurrencesIncrementInterval
+        return res
+    }
 
-        if (loadNumUsers) {
-//            res.numUsers = calculateDistinctUsersForSkill(skillDef.projectId, skillDef.skillId)
-        }
+    @Profile
+    private skills.controller.result.model.SkillDefRes convertToSkillDefRes(SkillDefWithExtra skillDef) {
+        skills.controller.result.model.SkillDefRes res = new skills.controller.result.model.SkillDefRes()
+        Props.copy(skillDef, res)
+        res.numPerformToCompletion = skillDef.totalPoints / res.pointIncrement
         return res
     }
 

@@ -139,7 +139,7 @@ class AdminUsersService {
 
     skills.controller.result.model.TableResult loadUsersPage(String projectId, String query, PageRequest pageRequest) {
         skills.controller.result.model.TableResult result = new skills.controller.result.model.TableResult()
-        Long totalProjectUsers = countTotalProjUsers(projectId, query)
+        Long totalProjectUsers = countTotalProjUsers(projectId)
         if (totalProjectUsers) {
             List<skills.controller.result.model.ProjectUser> projectUsers = findDistincUsers(projectId, query, pageRequest)
             result.data = projectUsers
@@ -154,8 +154,8 @@ class AdminUsersService {
     }
 
     @Profile
-    private long countTotalProjUsers(String projectId, String query) {
-        userPointsRepo.countDistinctUserIdByProjectIdAndUserIdLike(projectId, query)
+    private long countTotalProjUsers(String projectId) {
+        userPointsRepo.countDistinctUserIdByProjectId(projectId)
     }
 
     skills.controller.result.model.TableResult loadUsersPage(String projectId, List<String> skillIds, String query, PageRequest pageRequest) {

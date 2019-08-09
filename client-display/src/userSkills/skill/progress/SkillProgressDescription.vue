@@ -11,20 +11,22 @@
         </div>
 
 
-        <p v-if="skill.description.description">
-            <markdown-text :text="skill.description.description"/>
-        </p>
-        <ul v-if="skill.description.examples">
-            Examples:
-            <li v-for="(example, index) in skill.description.examples" :key="`unique-example-${index}`"
-                v-html="example"/>
-        </ul>
+        <div v-if="skill.description">
+            <p v-if="skill.description.description">
+                <markdown-text :text="skill.description.description"/>
+            </p>
+            <ul v-if="skill.description.examples">
+                Examples:
+                <li v-for="(example, index) in skill.description.examples" :key="`unique-example-${index}`"
+                    v-html="example"/>
+            </ul>
 
-        <div v-if="skill.description.href" class="user-skill-description-href mb-3 text-center text-md-left">
-            <strong>Need help?</strong>
-            <a :href="skill.description.href" target="_blank">
-                Click here!
-            </a>
+            <div v-if="skill.description.href" class="user-skill-description-href mb-3 text-center text-md-left">
+                <strong>Need help?</strong>
+                <a :href="skill.description.href" target="_blank">
+                    Click here!
+                </a>
+            </div>
         </div>
 
         <hr class="mb-2"/>
