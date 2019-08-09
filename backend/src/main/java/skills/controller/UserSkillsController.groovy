@@ -193,7 +193,6 @@ class UserSkillsController {
     @ResponseBody
     @CompileStatic
     List<UsersPerLevel> getUsersPerLevel(@PathVariable("projectId") String projectId) {
-        Thread.sleep(2000)
         return rankingLoader.getUserCountsPerLevel(projectId)
     }
 
