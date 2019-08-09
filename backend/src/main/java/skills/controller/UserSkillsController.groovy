@@ -17,6 +17,7 @@ import skills.skillLoading.model.SkillsRanking
 import skills.skillLoading.model.SkillsRankingDistribution
 import skills.skillLoading.model.UserPointHistorySummary
 import skills.services.events.SkillEventsService
+import skills.skillLoading.model.UsersPerLevel
 import skills.utils.Constants
 
 @CrossOrigin(allowCredentials = 'true')
@@ -188,6 +189,21 @@ class UserSkillsController {
                                       @RequestParam(name = "userId", required = false) String userIdParam) {
         return rankingLoader.getUserSkillsRanking(projectId, getUserId(userIdParam), subjectId)
     }
+    @RequestMapping(value = "/projects/{projectId}/rankDistribution/usersPerLevel", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    @CompileStatic
+    List<UsersPerLevel> getUsersPerLevel(@PathVariable("projectId") String projectId) {
+        Thread.sleep(2000)
+        return rankingLoader.getUserCountsPerLevel(projectId)
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/rankDistribution/usersPerLevel", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    @CompileStatic
+    List<UsersPerLevel> getUsersPerLevelForSubject(@PathVariable("projectId") String projectId, @PathVariable("subjectId") String subjectId) {
+        return rankingLoader.getUserCountsPerLevel(projectId, false, subjectId)
+    }
+
 
     @RequestMapping(value = "/projects/{projectId}/rankDistribution", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody

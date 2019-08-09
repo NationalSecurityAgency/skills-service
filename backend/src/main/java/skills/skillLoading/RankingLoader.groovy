@@ -71,8 +71,6 @@ class RankingLoader {
         UserPoints usersPoints = loadUserPoints(projectId, userId, subjectId)
         SkillsRanking skillsRanking = doGetUserSkillsRanking(projectId, usersPoints, subjectId)
 
-        List<UsersPerLevel> usersPerLevel = getUserCountsPerLevel(projectId, false, subjectId)
-
         List<UserAchievement> myLevels = loadUserAchievements(userId, projectId, subjectId)
         int myLevel = myLevels ? myLevels.collect({it.level}).max() : 0
 
@@ -86,9 +84,8 @@ class RankingLoader {
             List<UserPoints> previous = findLowestUserPoints(projectId, usersPoints, subjectId)
             pointsAnotherUserToPassMe = previous ? usersPoints.points - previous.first().points : -1
         }
-
         return new SkillsRankingDistribution(totalUsers: skillsRanking.numUsers, myPosition: skillsRanking.position,
-                myLevel: myLevel, myPoints: usersPoints?.points ?: 0, usersPerLevel: usersPerLevel,
+                myLevel: myLevel, myPoints: usersPoints?.points ?: 0,
                 pointsToPassNextUser: pointsToPassNextUser, pointsAnotherUserToPassMe: pointsAnotherUserToPassMe)
     }
 

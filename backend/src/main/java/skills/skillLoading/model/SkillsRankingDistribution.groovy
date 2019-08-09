@@ -1,7 +1,6 @@
 package skills.skillLoading.model
 
 class SkillsRankingDistribution {
-
     Integer myPosition
     Integer myPoints
     Integer myLevel
@@ -10,5 +9,4 @@ class SkillsRankingDistribution {
     Integer pointsAnotherUserToPassMe
 
     Integer totalUsers
-    List<UsersPerLevel> usersPerLevel
 }
