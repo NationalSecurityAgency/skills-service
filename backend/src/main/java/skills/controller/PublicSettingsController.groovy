@@ -6,7 +6,9 @@ import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestMethod
+import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.bind.annotation.RestController
+import skills.UIConfigProperties
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.result.model.SettingsResult
 import skills.profile.EnableCallStackProf
@@ -20,6 +22,15 @@ class PublicSettingsController {
 
     @Autowired
     SettingsService settingsService
+
+    @Autowired
+    UIConfigProperties uiConfigProperties
+
+    @RequestMapping(value = "/config", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    Map<String,String> getConfig(){
+        return uiConfigProperties.ui
+    }
 
     @RequestMapping(value = "/settings/group/{settingGroup}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     List<SettingsResult> getPublicSettings(@PathVariable("settingGroup") String settingGroup) {

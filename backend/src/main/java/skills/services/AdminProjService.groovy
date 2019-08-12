@@ -5,6 +5,7 @@ import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.apache.commons.collections.CollectionUtils
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
@@ -74,6 +75,9 @@ class AdminProjService {
     DependencyValidator dependencyValidator
     @Autowired
     SortingService sortingService
+
+    @Value("skills.config.ui.descriptionMaxLength")
+    int maxDescriptionLength
 
 
     private static DataIntegrityViolationExceptionHandler dataIntegrityViolationExceptionHandler =
@@ -156,6 +160,9 @@ class AdminProjService {
         if(subjectRequest.name.length() > 50){
             throw new SkillException("Bad Name [${subjectRequest.name}] - must not exceed 50 chars.")
         }
+        if(subjectRequest.description.length() > maxDescriptionLength) {
+            throw new SkillException("Bad Description - must not exceed [${maxDescriptionLength}] chars")
+        }
 
         SkillDefWithExtra existing = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, origSubjectId, SkillDef.ContainerType.Subject)
 
@@ -234,6 +241,9 @@ class AdminProjService {
         IdFormatValidator.validate(badgeRequest.badgeId)
         if(badgeRequest.name.length() > 50){
             throw new SkillException("Bad Name [${badgeRequest.name}] - must not exceed 50 chars.")
+        }
+        if(badgeRequest.description.length() > maxDescriptionLength) {
+            throw new SkillException("Bad Description - must not exceed [${maxDescriptionLength}] chars")
         }
 
         SkillDefWithExtra skillDefinition = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, originalBadgeId, SkillDef.ContainerType.Badge)
@@ -960,6 +970,9 @@ class AdminProjService {
         IdFormatValidator.validate(skillRequest.skillId)
         if (skillRequest.name.length() > 100) {
             throw new SkillException("Bad Name [${skillRequest.name}] - must not exceed 100 chars.")
+        }
+        if(skillRequest.description.length() > maxDescriptionLength) {
+            throw new SkillException("Bad Description - must not exceed [${maxDescriptionLength}] chars")
         }
         SkillsValidator.isNotBlank(skillRequest.projectId, "Project Id")
         validateSkillVersion(skillRequest)

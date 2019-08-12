@@ -28,7 +28,10 @@
 
             <div class="mt-2">
               <label>Description</label>
-              <markdown-editor v-model="subjectInternal.description"/>
+              <ValidationProvider rules="maxDescriptionLength" v-slot="{errors}" name="Subject Description">
+                <markdown-editor v-model="subjectInternal.description"/>
+                <small class="form-text text-danger">{{ errors[0] }}</small>
+              </ValidationProvider>
             </div>
 
             <p v-if="invalid && overallErrMsg" class="text-center text-danger">***{{ overallErrMsg }}***</p>
@@ -169,6 +172,17 @@
               return true;
             }
             return SubjectsService.subjectWithIdExists(self.subjectInternal.projectId, value);
+          },
+        }, {
+          immediate: false,
+        });
+        Validator.extend('maxDescriptionLength', {
+          getMessage: field => `${field} cannot exceed ${self.$store.getters.config.descriptionMaxLength} characters.`,
+          validate(value) {
+            if (value.length > self.$store.getters.config.descriptionMaxLength) {
+              return false;
+            }
+            return true;
           },
         }, {
           immediate: false,

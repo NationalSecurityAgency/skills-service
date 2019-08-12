@@ -38,7 +38,10 @@ spring:
             client-secret: d79a5c4c063f4afae5963c50b73e828251ca3ae2
             redirectUriTemplate: 'http://localhost:8080/{action}/oauth2/code/{registrationId}'
             iconClass: fab fa-github
-
+skills:
+  config:
+    ui:
+      descriptionMaxLength: 2000
   profiles:
     active: default
 #logging:
