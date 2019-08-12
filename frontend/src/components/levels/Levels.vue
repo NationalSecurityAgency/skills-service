@@ -267,13 +267,13 @@
       doEditLevel(editedLevelObj) {
         this.loading = true;
         if (this.$route.params.subjectId) {
-          LevelService.editlevelForSubject(this.$route.params.projectId, this.$route.params.subjectId, editedLevelObj)
+          LevelService.editLevelForSubject(this.$route.params.projectId, this.$route.params.subjectId, editedLevelObj)
             .then(() => {
               this.isLoading = false;
               this.loadLevels();
             });
         } else {
-          LevelService.editlevelForProject(this.$route.params.projectId, editedLevelObj)
+          LevelService.editLevelForProject(this.$route.params.projectId, editedLevelObj)
             .then(() => {
               this.isLoading = false;
               this.loadLevels();

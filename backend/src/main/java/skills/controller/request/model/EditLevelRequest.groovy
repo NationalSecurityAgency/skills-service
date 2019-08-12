@@ -4,7 +4,6 @@ import groovy.transform.Canonical
 
 @Canonical
 class EditLevelRequest {
-    Integer id
     String name
     String iconClass
     //this might be edited if you want to collapse an existing level, say you remove level 2 out of 5

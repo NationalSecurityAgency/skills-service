@@ -1,7 +1,6 @@
 package skills.controller.result.model
 
 class LevelDefinitionRes {
-    String id
     String projectId
 
     String skillId
