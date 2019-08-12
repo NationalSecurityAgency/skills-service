@@ -60,7 +60,7 @@ class ProjectController {
             throw new SkillException("Project name was not provided.", projectId, null, ErrorCode.BadParam)
         }
 
-        projectAdminStorageService.saveProject(projectId, projectRequest)
+        projectAdminStorageService.saveProject(null, projectRequest)
         return new RequestResult(success: true)
     }
 
