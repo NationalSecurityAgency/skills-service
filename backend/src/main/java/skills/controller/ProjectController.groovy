@@ -48,7 +48,7 @@ class ProjectController {
     RequestResult saveProject(@PathVariable("id") String projectId, @RequestBody ProjectRequest projectRequest) {
         // project id is optional
         if (projectRequest.projectId && projectId != projectRequest.projectId) {
-            throw new SkillException("Project id in the request doesn't equal to project id in the URL. [${projectRequest?.projectId}]<>[${projectId}]", null, null, ErrorCode.BadParam)
+            throw new SkillException("Project id in the request doesn't equal to project id in the URL [${projectRequest?.projectId}]<>[${projectId}]. Cannot edit project id using /app/projects/{id} endpoint. Please use /admin/projects/{id}", null, null, ErrorCode.AccessDenied)
         }
         if (!projectRequest.projectId) {
             projectRequest.projectId = projectId
@@ -60,12 +60,7 @@ class ProjectController {
             throw new SkillException("Project name was not provided.", projectId, null, ErrorCode.BadParam)
         }
 
-        // if the id is provided then this is an 'edit operation' then user must be an amdin of this project
-        if (projectRequest.id) {
-            throw new SkillException("Cannot edit project id using /app/projects/{id} endpoint. Please use /admin/projects/{id}", projectId, null, ErrorCode.AccessDenied)
-        }
-
-        projectAdminStorageService.saveProject(projectRequest)
+        projectAdminStorageService.saveProject(projectId, projectRequest)
         return new RequestResult(success: true)
     }
 

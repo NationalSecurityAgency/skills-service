@@ -76,7 +76,7 @@ class AdminController {
         skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
         skills.controller.exceptions.SkillsValidator.isNotBlank(projectRequest.projectId, "Project Id")
         skills.controller.exceptions.SkillsValidator.isNotBlank(projectRequest.name, " Name")
-        projectAdminStorageService.saveProject(projectRequest)
+        projectAdminStorageService.saveProject(projectId, projectRequest)
         return new skills.controller.result.model.RequestResult(success: true)
     }
 
