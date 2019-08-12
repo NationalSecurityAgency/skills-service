@@ -10,6 +10,10 @@ export default {
       .then(response => response.data);
   },
   saveBadge(badgeReq) {
+    if (badgeReq.isEdit) {
+      return axios.put(`/admin/projects/${badgeReq.projectId}/badges/${badgeReq.originalBadgeId}`, badgeReq)
+        .then(() => this.getBadge(badgeReq.projectId, badgeReq.badgeId));
+    }
     return axios.put(`/admin/projects/${badgeReq.projectId}/badges/${badgeReq.badgeId}`, badgeReq)
       .then(() => this.getBadge(badgeReq.projectId, badgeReq.badgeId));
   },

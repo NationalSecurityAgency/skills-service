@@ -17,7 +17,7 @@ export default {
       .then(response => response.data);
   },
   saveProject(project) {
-    if (project.id) {
+    if (project.isEdit) {
       return axios.post(`/admin/projects/${project.originalProjectId}`, project)
         .then(() => this.getProject(project.projectId));
     }

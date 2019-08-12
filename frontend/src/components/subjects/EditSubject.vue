@@ -82,7 +82,7 @@
     data() {
       return {
         canAutoGenerateId: true,
-        subjectInternal: Object.assign({ originalSubjectId: this.subject.subjectId }, this.subject),
+        subjectInternal: Object.assign({ originalSubjectId: this.subject.subjectId, isEdit: this.isEdit }, this.subject),
         overallErrMsg: '',
         show: this.value,
         displayIconManager: false,
