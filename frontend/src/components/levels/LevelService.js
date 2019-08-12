@@ -25,12 +25,12 @@ export default {
     const url = `/admin/projects/${projectId}/subjects/${subjectId}/levels/next`;
     return axios.put(url, nextLevelObject);
   },
-  editlevelForProject(projectId, editedLevel) {
-    const url = `/admin/projects/${projectId}/levels/edit/${editedLevel.id}`;
+  editLevelForProject(projectId, editedLevel) {
+    const url = `/admin/projects/${projectId}/levels/edit/${editedLevel.level}`;
     return axios.put(url, editedLevel);
   },
-  editlevelForSubject(projectId, subjectId, editedLevel) {
-    const url = `/admin/projects/${projectId}/subjects/${subjectId}/levels/edit/${editedLevel.id}`;
+  editLevelForSubject(projectId, subjectId, editedLevel) {
+    const url = `/admin/projects/${projectId}/subjects/${subjectId}/levels/edit/${editedLevel.level}`;
     return axios.put(url, editedLevel);
   },
   getUserLevel(projectId, userId) {

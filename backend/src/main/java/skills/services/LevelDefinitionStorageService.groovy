@@ -209,7 +209,6 @@ class LevelDefinitionStorageService {
                 toPts = (i != levelScores.size() - 1) ? levelScores.get(i + 1) : null
             }
             finalRes << new LevelDefinitionRes(projectId: projectId,
-                    id: entry.id,
                     skillId: skillId,
                     level: entry.level,
                     percent: entry.percent,
@@ -287,7 +286,7 @@ class LevelDefinitionStorageService {
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    LevelDef editLevel(String projectId, EditLevelRequest editLevelRequest, String levelId, String skillId = null) {
+    LevelDef editLevel(String projectId, EditLevelRequest editLevelRequest, Integer level, String skillId = null) {
         SettingsResult setting = settingsService.getProjectSetting(projectId, Settings.LEVEL_AS_POINTS.settingName)
         assert editLevelRequest.name?.length() <= 50
         boolean asPoints = false
@@ -299,7 +298,10 @@ class LevelDefinitionStorageService {
         LevelDefRes existingDefinitions = getLevelDefs(projectId, skillId)
         existingDefinitions.levels.sort({it.level})
 
-        int toEditIndex = existingDefinitions.levels.findIndexOf { it.id == editLevelRequest.id }
+        int toEditIndex = existingDefinitions.levels.findIndexOf { it.level == level }
+        if (toEditIndex < 0) {
+            throw new SkillException("Failed to find level [${level}]", projectId, skillId)
+        }
         LevelDef toEdit = null
 
         //validate that the edit doesn't break the consistency of the other levels.

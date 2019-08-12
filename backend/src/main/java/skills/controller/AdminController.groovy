@@ -526,25 +526,25 @@ class AdminController {
     }
 
     //Need new methods to edit existing level methods for project and subject
-    @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/levels/edit/{levelId}", method = [RequestMethod.PUT, RequestMethod.POST], produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/levels/edit/{level}", method = [RequestMethod.PUT, RequestMethod.POST], produces = MediaType.APPLICATION_JSON_VALUE)
     RequestResult editLevel(@PathVariable("projectId") String projectId,
                             @PathVariable("subjectId") String subjectId,
-                            @PathVariable("levelId") String levelId, @RequestBody EditLevelRequest editLevelRequest) {
+                            @PathVariable("level") Integer level, @RequestBody EditLevelRequest editLevelRequest) {
         skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
         skills.controller.exceptions.SkillsValidator.isNotBlank(subjectId, "Subject Id", projectId)
-        skills.controller.exceptions.SkillsValidator.isNotBlank(levelId, "Level Id", projectId)
+        skills.controller.exceptions.SkillsValidator.isNotNull(level, "Level", projectId)
 
-        levelDefinitionStorageService.editLevel(projectId, editLevelRequest, levelId, subjectId)
+        levelDefinitionStorageService.editLevel(projectId, editLevelRequest, level, subjectId)
         return new RequestResult(success: true)
     }
 
     //Need new methods to edit existing level methods for project and subject
-    @RequestMapping(value = "/projects/{projectId}/levels/edit/{levelId}", method = [RequestMethod.PUT, RequestMethod.POST], produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/projects/{projectId}/levels/edit/{level}", method = [RequestMethod.PUT, RequestMethod.POST], produces = MediaType.APPLICATION_JSON_VALUE)
     RequestResult editLevel(@PathVariable("projectId") String projectId,
-                            @PathVariable("levelId") String levelId, @RequestBody EditLevelRequest editLevelRequest) {
+                            @PathVariable("level") Integer level, @RequestBody EditLevelRequest editLevelRequest) {
         skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
-        skills.controller.exceptions.SkillsValidator.isNotBlank(levelId, "Level Id", projectId)
-        levelDefinitionStorageService.editLevel(projectId, editLevelRequest, levelId)
+        skills.controller.exceptions.SkillsValidator.isNotNull(level, "Level", projectId)
+        levelDefinitionStorageService.editLevel(projectId, editLevelRequest, level)
         return new RequestResult(success: true)
     }
 
