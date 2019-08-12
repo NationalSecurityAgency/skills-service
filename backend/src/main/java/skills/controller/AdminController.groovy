@@ -120,7 +120,7 @@ class AdminController {
         skills.controller.exceptions.SkillsValidator.isNotBlank(subjectId, "Subject Id", projectId)
         skills.controller.exceptions.SkillsValidator.isNotBlank(subjectRequest?.name, "Subject name", projectId)
 
-        projectAdminStorageService.saveSubject(projectId, subjectRequest)
+        projectAdminStorageService.saveSubject(projectId, subjectId, subjectRequest)
         return new RequestResult(success: true)
     }
 
@@ -211,13 +211,12 @@ class AdminController {
                             @RequestBody BadgeRequest badgeRequest) {
         skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
         skills.controller.exceptions.SkillsValidator.isNotBlank(badgeId, "Badge Id", projectId)
-        skills.controller.exceptions.SkillsValidator.isFirstOrMustEqualToSecond(badgeRequest.badgeId, badgeId, "Badge Id")
         badgeRequest.badgeId = badgeRequest.badgeId ?: badgeId
         skills.controller.exceptions.SkillsValidator.isNotBlank(badgeRequest?.name, "Badge Name", projectId)
         skills.controller.exceptions.SkillsValidator.isTrue((badgeRequest.startDate && badgeRequest.endDate) || (!badgeRequest.startDate && !badgeRequest.endDate),
                 "If one date is provided then both start and end dates must be provided", projectId)
 
-        projectAdminStorageService.saveBadge(projectId, badgeRequest)
+        projectAdminStorageService.saveBadge(projectId, badgeId, badgeRequest)
         return new RequestResult(success: true)
     }
 
@@ -322,8 +321,6 @@ class AdminController {
 
         skills.controller.exceptions.SkillsValidator.isFirstOrMustEqualToSecond(skillRequest.subjectId, subjectId, "Subject Id")
         skillRequest.subjectId = skillRequest.subjectId ?: subjectId
-
-        skills.controller.exceptions.SkillsValidator.isFirstOrMustEqualToSecond(skillRequest.skillId, skillId, "Skill Id")
         skillRequest.skillId = skillRequest.skillId ?: skillId
 
         skills.controller.exceptions.SkillsValidator.isTrue(skillRequest.pointIncrement > 0, "pointIncrement must be > 0", projectId, skillId)
@@ -341,7 +338,7 @@ class AdminController {
         skills.controller.exceptions.SkillsValidator.isTrue(skillRequest.version >= 0, "version must be >= 0", projectId, skillId)
         skills.controller.exceptions.SkillsValidator.isTrue(skillRequest.version < Constants.MAX_VERSION, "version exceeds max version", projectId, skillId)
 
-        projectAdminStorageService.saveSkill(skillRequest)
+        projectAdminStorageService.saveSkill(skillId, skillRequest)
         return new RequestResult(success: true)
     }
 

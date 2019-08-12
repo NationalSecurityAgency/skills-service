@@ -151,38 +151,37 @@ class AdminProjService {
     }
 
     @Transactional()
-    void saveSubject(String projectId, SubjectRequest subjectRequest) {
+    void saveSubject(String projectId, String origSubjectId, SubjectRequest subjectRequest) {
         IdFormatValidator.validate(subjectRequest.subjectId)
         if(subjectRequest.name.length() > 50){
             throw new SkillException("Bad Name [${subjectRequest.name}] - must not exceed 50 chars.")
         }
 
-        SkillDefWithExtra res
-        if (subjectRequest.id) {
-            Optional<SkillDefWithExtra> existing = skillDefWithExtraRepo.findById(subjectRequest.id)
-            if (!existing.present) {
-                throw new SkillException("Subject id [${subjectRequest.id}] doesn't exist.", projectId, null)
-            }
-            SkillDefWithExtra skillDefinition = existing.get()
+        SkillDefWithExtra existing = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, origSubjectId, SkillDef.ContainerType.Subject)
 
-            Props.copy(subjectRequest, skillDefinition)
-            //we need to manually copy subjectId into skillId
-            skillDefinition.skillId = subjectRequest.subjectId
-            subjectDataIntegrityViolationExceptionHandler.handle(projectId) {
-                res = skillDefRepo.save(skillDefinition)
-            }
-            log.info("Updated [{}]", skillDefinition)
-        } else {
+        if (!existing || !existing.skillId.equalsIgnoreCase(subjectRequest.subjectId)) {
             SkillDef idExists = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, subjectRequest.subjectId, SkillDef.ContainerType.Subject)
             if (idExists) {
                 throw new SkillException("Subject with id [${subjectRequest.subjectId}] already exists! Sorry!", projectId, null, ErrorCode.ConstraintViolation)
             }
-
+        }
+        if (!existing || !existing.name.equalsIgnoreCase(subjectRequest.name)) {
             SkillDef nameExists = skillDefRepo.findByProjectIdAndNameIgnoreCaseAndType(projectId, subjectRequest.name, SkillDef.ContainerType.Subject)
             if (nameExists) {
                 throw new SkillException("Subject with name [${subjectRequest.name}] already exists! Sorry!", projectId, null, ErrorCode.ConstraintViolation)
             }
+        }
 
+        SkillDefWithExtra res
+        if (existing) {
+            Props.copy(subjectRequest, existing)
+            //we need to manually copy subjectId into skillId
+            existing.skillId = subjectRequest.subjectId
+            subjectDataIntegrityViolationExceptionHandler.handle(projectId) {
+                res = skillDefWithExtraRepo.save(existing)
+            }
+            log.info("Updated [{}]", existing)
+        } else {
             ProjDef projDef = getProjDef(projectId)
 
             Integer lastDisplayOrder = projDef.subjects?.collect({ it.displayOrder })?.max()
@@ -231,35 +230,31 @@ class AdminProjService {
     }
 
     @Transactional()
-    void saveBadge(String projectId, BadgeRequest badgeRequest) {
+    void saveBadge(String projectId, String originalBadgeId, BadgeRequest badgeRequest) {
         IdFormatValidator.validate(badgeRequest.badgeId)
         if(badgeRequest.name.length() > 50){
             throw new SkillException("Bad Name [${badgeRequest.name}] - must not exceed 50 chars.")
         }
 
-        boolean isEdit = badgeRequest.id
-        SkillDefWithExtra skillDefinition
-        if (isEdit) {
-            Optional<SkillDefWithExtra> existing = skillDefWithExtraRepo.findById(badgeRequest.id)
-            if (!existing.present) {
-                throw new SkillException("Badge id [${badgeRequest.id}] doesn't exist.", projectId, null)
-            }
-            log.info("Updating with [{}]", badgeRequest)
-            skillDefinition = existing.get()
+        SkillDefWithExtra skillDefinition = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, originalBadgeId, SkillDef.ContainerType.Badge)
 
-            Props.copy(badgeRequest, skillDefinition)
-            skillDefinition.skillId = badgeRequest.badgeId
-        } else {
+        if (!skillDefinition || !skillDefinition.skillId.equalsIgnoreCase(badgeRequest.badgeId)) {
             SkillDef idExists = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, badgeRequest.badgeId, SkillDef.ContainerType.Badge)
             if (idExists) {
                 throw new SkillException("Badge with id [${badgeRequest.badgeId}] already exists! Sorry!", projectId, null, ErrorCode.ConstraintViolation)
             }
-
+        }
+        if (!skillDefinition || !skillDefinition.name.equalsIgnoreCase(badgeRequest.name)) {
             SkillDef nameExists = skillDefRepo.findByProjectIdAndNameIgnoreCaseAndType(projectId, badgeRequest.name, SkillDef.ContainerType.Badge)
             if (nameExists) {
                 throw new SkillException("Badge with name [${badgeRequest.name}] already exists! Sorry!", projectId, null, ErrorCode.ConstraintViolation)
             }
+        }
 
+        if (skillDefinition) {
+            Props.copy(badgeRequest, skillDefinition)
+            skillDefinition.skillId = badgeRequest.badgeId
+        } else {
             ProjDef projDef = getProjDef(projectId)
 
             Integer lastDisplayOrder = projDef.badges?.collect({ it.displayOrder })?.max()
@@ -620,7 +615,6 @@ class AdminProjService {
     @Profile
     private SubjectResult convertToSubject(SkillDefWithExtra skillDef) {
         SubjectResult res = new SubjectResult(
-                id: skillDef.id,
                 subjectId: skillDef.skillId,
                 projectId: skillDef.projectId,
                 name: skillDef.name,
@@ -631,8 +625,6 @@ class AdminProjService {
         )
 
         res.numSkills = calculateNumChildSkills(skillDef)
-//        res.numUsers = calculateNumUsersForChildSkills(skillDef)
-
         return res
     }
 
@@ -644,7 +636,6 @@ class AdminProjService {
     @Profile
     private skills.controller.result.model.BadgeResult convertToBadge(SkillDefWithExtra skillDef, boolean loadRequiredSkills = false) {
         skills.controller.result.model.BadgeResult res = new skills.controller.result.model.BadgeResult(
-                id: skillDef.id,
                 badgeId: skillDef.skillId,
                 projectId: skillDef.projectId,
                 name: skillDef.name,
@@ -965,7 +956,7 @@ class AdminProjService {
     }
 
     @Transactional()
-    SkillDefRes saveSkill(SkillRequest skillRequest) {
+    SkillDefRes saveSkill(String originalSkillId, SkillRequest skillRequest) {
         IdFormatValidator.validate(skillRequest.skillId)
         if (skillRequest.name.length() > 100) {
             throw new SkillException("Bad Name [${skillRequest.name}] - must not exceed 100 chars.")
@@ -973,20 +964,27 @@ class AdminProjService {
         SkillsValidator.isNotBlank(skillRequest.projectId, "Project Id")
         validateSkillVersion(skillRequest)
 
+        SkillDefWithExtra skillDefinition = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(skillRequest.projectId, originalSkillId, SkillDef.ContainerType.Skill)
+
+        if (!skillDefinition || !skillDefinition.skillId.equalsIgnoreCase(skillRequest.skillId)) {
+            SkillDef idExists = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(skillRequest.projectId, skillRequest.skillId, SkillDef.ContainerType.Skill)
+            if (idExists) {
+                throw new SkillException("Skill with id [${skillRequest.skillId}] already exists! Sorry!", skillRequest.projectId, null, ErrorCode.ConstraintViolation)
+            }
+        }
+
+        if (!skillDefinition || !skillDefinition.name.equalsIgnoreCase(skillRequest.name)) {
+            SkillDef nameExists = skillDefRepo.findByProjectIdAndNameIgnoreCaseAndType(skillRequest.projectId, skillRequest.name, SkillDef.ContainerType.Skill)
+            if (nameExists) {
+                throw new SkillException("Skill with name [${skillRequest.name}] already exists! Sorry!", skillRequest.projectId, null, ErrorCode.ConstraintViolation)
+            }
+        }
+
         boolean shouldRebuildScores
 
-        boolean isEdit = skillRequest.id
-
+        boolean isEdit = skillDefinition
         int totalPointsRequested = skillRequest.pointIncrement * skillRequest.numPerformToCompletion;
-        SkillDefWithExtra skillDefinition
         if (isEdit) {
-            Optional<SkillDefWithExtra> existing = skillDefWithExtraRepo.findById(skillRequest.id)
-            if (!existing.present) {
-                throw new SkillException("Requested skill update id [${skillRequest.id}] doesn't exist.", skillRequest.projectId, skillRequest.skillId)
-            }
-            log.info("Updating with [{}]", skillRequest)
-            skillDefinition = existing.get()
-
             shouldRebuildScores = skillDefinition.totalPoints != totalPointsRequested
 
             Props.copy(skillRequest, skillDefinition, "childSkills", 'version')
@@ -994,16 +992,6 @@ class AdminProjService {
             //need to manually update it in the case of edits.
             skillDefinition.totalPoints = totalPointsRequested
         } else {
-            SkillDef idExists = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(skillRequest.projectId, skillRequest.skillId, SkillDef.ContainerType.Skill)
-            if (idExists) {
-                throw new SkillException("Skill with id [${skillRequest.skillId}] already exists! Sorry!", skillRequest.projectId, null, ErrorCode.ConstraintViolation)
-            }
-
-            SkillDef nameExists = skillDefRepo.findByProjectIdAndNameIgnoreCaseAndType(skillRequest.projectId, skillRequest.name, SkillDef.ContainerType.Skill)
-            if (nameExists) {
-                throw new SkillException("Skill with name [${skillRequest.name}] already exists! Sorry!", skillRequest.projectId, null, ErrorCode.ConstraintViolation)
-            }
-
             String parentSkillId = skillRequest.subjectId
             Integer highestDisplayOrder = skillDefRepo.calculateChildSkillsHighestDisplayOrder(skillRequest.projectId, parentSkillId)
             int displayOrder = highestDisplayOrder == null ? 0 : highestDisplayOrder + 1
@@ -1126,7 +1114,6 @@ class AdminProjService {
     @Profile
     private SkillDefSkinnyRes convertToSkillDefSkinnyRes(SkillDefRepo.SkillDefSkinny skinny) {
         SkillDefSkinnyRes res = new SkillDefSkinnyRes(
-                id: skinny.id,
                 skillId: skinny.skillId,
                 projectId: skinny.projectId,
                 name: skinny.name,
@@ -1141,7 +1128,6 @@ class AdminProjService {
     @Profile
     private SkillDefPartialRes convertToSkillDefPartialRes(SkillDefRepo.SkillDefPartial partial, boolean loadNumUsers = false) {
         SkillDefPartialRes res = new SkillDefPartialRes(
-                id: partial.id,
                 skillId: partial.skillId,
                 projectId: partial.projectId,
                 name: partial.name,

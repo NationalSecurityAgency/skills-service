@@ -5,8 +5,6 @@ import groovy.transform.Canonical
 @Canonical
 class SubjectResult {
 
-    Integer id
-
     String subjectId
 
     String projectId

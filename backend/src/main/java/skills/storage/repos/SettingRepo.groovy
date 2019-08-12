@@ -16,6 +16,8 @@ interface SettingRepo extends CrudRepository<Setting, Integer> {
     @Transactional
     List<Setting> findAllByTypeAndProjectId(Setting.SettingType type, String projectId)
 
+    Setting findByProjectIdAndSettingGroupAndSetting(String projectId, String settingGroup, String setting)
+
     @Transactional
     List<Setting> findAllByTypeAndUserId(Setting.SettingType type,Integer userId)
 

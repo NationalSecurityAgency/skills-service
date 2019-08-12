@@ -2,8 +2,6 @@ package skills.controller.request.model
 
 class SkillDefForDependencyRes {
 
-    Integer id
-
     String name
     String skillId
 

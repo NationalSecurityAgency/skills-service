@@ -6,8 +6,6 @@ import groovy.transform.Canonical
 @Canonical
 class BadgeResult {
 
-    Integer id
-
     String badgeId
 
     String projectId
