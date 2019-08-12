@@ -76,7 +76,7 @@ class AdminProjService {
     @Autowired
     SortingService sortingService
 
-    @Value("skills.config.ui.descriptionMaxLength")
+    @Value('#{"${skills.config.ui.descriptionMaxLength}"}')
     int maxDescriptionLength
 
 

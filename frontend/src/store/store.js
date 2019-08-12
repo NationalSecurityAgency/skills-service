@@ -11,7 +11,7 @@ Vue.use(Vuex);
 
 const loadConfigAfterAuth = (store) => {
   store.subscribe((mutation) => {
-    if (mutation.type === 'storeUser') {
+    if (mutation.type === 'storeUser' && mutation.payload) {
       store.dispatch('loadConfigState');
     }
   });
