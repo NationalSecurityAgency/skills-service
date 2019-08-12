@@ -18,7 +18,7 @@ export default {
       .then(res => res.data);
   },
   saveSubject(subject) {
-    if (subject.id) {
+    if (subject.isEdit) {
       return axios.post(`/admin/projects/${subject.projectId}/subjects/${subject.originalSubjectId}`, subject)
         .then(() => this.getSubjectDetails(subject.projectId, subject.subjectId));
     }

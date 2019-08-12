@@ -52,7 +52,7 @@
     data() {
       return {
         show: this.value,
-        internalProject: Object.assign({ originalProjectId: this.project.projectId }, this.project),
+        internalProject: Object.assign({ originalProjectId: this.project.projectId, isEdit: this.isEdit }, this.project),
         canEditProjectId: false,
         overallErrMsg: '',
         original: {

@@ -135,7 +135,7 @@
       return {
         canAutoGenerateId: true,
         canEditBadgeId: false,
-        badgeInternal: Object.assign({}, this.badge),
+        badgeInternal: Object.assign({ originalBadgeId: this.badge.badgeId, isEdit: this.isEdit }, this.badge),
         overallErrMsg: '',
         limitTimeframe: limitedTimeframe,
         show: this.value,

@@ -386,7 +386,7 @@
       loadSkillDetails() {
         SkillsService.getSkillDetails(this.projectId, this.subjectId, this.skillId)
           .then((loadedSkill) => {
-            this.skillInternal = loadedSkill;
+            this.skillInternal = Object.assign({ originalSkillId: loadedSkill.skillId, isEdit: this.isEdit }, loadedSkill);
             this.initial.skillId = this.skillInternal.skillId;
             this.initial.skillName = this.skillInternal.name;
           })

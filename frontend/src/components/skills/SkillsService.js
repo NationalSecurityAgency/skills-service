@@ -39,7 +39,11 @@ export default {
     }
     copy.numMaxOccurrencesIncrementInterval = skill.numPointIncrementMaxOccurrences;
 
-    return axios.put(`/admin/projects/${skill.projectId}/subjects/${skill.subjectId}/skills/${skill.skillId}`, copy)
+    let requestSkillId = skill.skillId;
+    if (skill.isEdit) {
+      requestSkillId = skill.originalSkillId;
+    }
+    return axios.put(`/admin/projects/${skill.projectId}/subjects/${skill.subjectId}/skills/${requestSkillId}`, copy)
       .then(() => this.getSkillDetails(skill.projectId, skill.subjectId, skill.skillId));
   },
   deleteSkill(skill) {

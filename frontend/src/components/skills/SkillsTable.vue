@@ -146,7 +146,7 @@
 
       skillCreatedOrUpdated(skill) {
         this.isLoading = true;
-        const item1Index = this.skills.findIndex(item => item.id === skill.id);
+        const item1Index = this.skills.findIndex(item => item.skillId === skill.originalSkillId);
 
         SkillsService.saveSkill(skill)
           .then((skillRes) => {
@@ -185,7 +185,7 @@
         this.isLoading = true;
         SkillsService.deleteSkill(skill)
           .then(() => {
-            const index = this.skills.findIndex(item => item.id === skill.id);
+            const index = this.skills.findIndex(item => item.skillId === skill.skillId);
             this.skills.splice(index, 1);
 
             this.rebuildDisplayOrder();
