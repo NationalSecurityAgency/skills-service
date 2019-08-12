@@ -145,7 +145,10 @@
         <div class="">
           <label class="label">Description</label>
           <div class="control">
-            <markdown-editor v-if="skillInternal" v-model="skillInternal.description"/>
+            <ValidationProvider rules="maxDescriptionLength" v-slot="{errors}" name="Skill Description">
+              <markdown-editor v-if="skillInternal" v-model="skillInternal.description"/>
+              <small class="form-text text-danger">{{ errors[0] }}</small>
+            </ValidationProvider>
           </div>
         </div>
 
@@ -370,6 +373,17 @@
           },
         }, {
           immediate: true,
+        });
+        Validator.extend('maxDescriptionLength', {
+          getMessage: field => `${field} cannot exceed ${self.$store.getters.config.descriptionMaxLength} characters.`,
+          validate(value) {
+            if (value.length > self.$store.getters.config.descriptionMaxLength) {
+              return false;
+            }
+            return true;
+          },
+        }, {
+          immediate: false,
         });
       },
       saveSkill() {

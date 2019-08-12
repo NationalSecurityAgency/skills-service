@@ -5,8 +5,17 @@ import users from './modules/users';
 import subjects from './modules/subjects';
 import projects from './modules/projects';
 import badges from './modules/badges';
+import config from './modules/config';
 
 Vue.use(Vuex);
+
+const loadConfigAfterAuth = (store) => {
+  store.subscribe((mutation) => {
+    if (mutation.type === 'storeUser') {
+      store.dispatch('loadConfigState');
+    }
+  });
+};
 
 export default new Vuex.Store({
   state: {
@@ -23,11 +32,15 @@ export default new Vuex.Store({
       state.previousUrl = previousUrl;
     },
   },
+  plugins: [
+    loadConfigAfterAuth,
+  ],
   modules: {
     auth,
     users,
     subjects,
     projects,
     badges,
+    config,
   },
 });

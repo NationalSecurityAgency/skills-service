@@ -28,7 +28,10 @@
 
           <div class="mt-2">
             <label>Description</label>
-            <markdown-editor :value="badge.description" @input="updateDescription"></markdown-editor>
+            <ValidationProvider rules="maxDescriptionLength" v-slot="{errors}" name="Badge Description">
+              <markdown-editor v-model="badgeInternal.description" @input="updateDescription"></markdown-editor>
+              <small class="form-text text-danger">{{ errors[0] }}</small>
+            </ValidationProvider>
           </div>
 
           <div v-if="!global">
@@ -274,6 +277,17 @@
               }
             }
             return valid;
+          },
+        }, {
+          immediate: false,
+        });
+        Validator.extend('maxDescriptionLength', {
+          getMessage: field => `${field} cannot exceed ${self.$store.getters.config.descriptionMaxLength} characters.`,
+          validate(value) {
+            if (value.length > self.$store.getters.config.descriptionMaxLength) {
+              return false;
+            }
+            return true;
           },
         }, {
           immediate: false,

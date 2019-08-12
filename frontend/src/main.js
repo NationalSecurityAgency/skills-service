@@ -45,13 +45,13 @@ Vue.directive('focus', {
 require('vue-multiselect/dist/vue-multiselect.min.css');
 
 store.dispatch('restoreSessionIfAvailable').finally(() => {
-  /* eslint-disable no-new */
-  const vm = new Vue({
-    el: '#app',
-    router,
-    components: { App },
-    template: '<App/>',
-    store,
-  });
-  window.vm = vm;
+    /* eslint-disable no-new */
+    const vm = new Vue({
+      el: '#app',
+      router,
+      components: { App },
+      template: '<App/>',
+      store,
+    });
+    window.vm = vm;
 });

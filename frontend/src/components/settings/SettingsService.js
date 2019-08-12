@@ -38,4 +38,8 @@ export default {
     return axios.get(`/app/public/settings/${settingName}/group/${settingGroup}`)
       .then(remoteRes => remoteRes.data);
   },
+  getConfig() {
+    return axios.get('/app/public/config')
+      .then(remoteRes => remoteRes.data);
+  },
 };

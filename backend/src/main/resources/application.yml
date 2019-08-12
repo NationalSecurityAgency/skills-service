@@ -38,7 +38,10 @@ spring:
             client-secret: ***REMOVED***
             redirectUriTemplate: 'http://localhost:8080/{action}/oauth2/code/{registrationId}'
             iconClass: fab fa-github
-
+skills:
+  config:
+    ui:
+      descriptionMaxLength: 2000
   profiles:
     active: default
 #logging:
