@@ -4,7 +4,7 @@
     class="">
     <div
       v-if="helpUrl"
-      class="modal-footer-help-link">
+      class="modal-footer-help-link href">
       Need help?
       <a
         :href="helpUrl"

@@ -31,14 +31,14 @@
 
             <skill-summary-cards v-if="!locked" :skill="skill" class="mt-3"></skill-summary-cards>
 
-            <p class="skills-text-description mx-2 mt-3">
+            <p class="skills-text-description text-primary mx-2 mt-3">
                 <markdown-text :text="skill.description.description"/>
             </p>
         </div>
         <div class="card-footer">
             <div class="row">
                 <div v-show="skill.description.href" class="col text-left">
-                    <span>Need help?</span>
+                    <span class="text-secondary">Need help?</span>
                     <a :href="skill.description.href" target="_blank">
                         Click here!
                     </a>
