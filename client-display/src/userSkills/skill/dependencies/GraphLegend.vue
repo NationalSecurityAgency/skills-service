@@ -1,5 +1,5 @@
 <template>
-  <div class='card' style="min-width: 13rem;">
+  <div class='graph-legend card' style="min-width: 13rem;">
     <div class="card-header">
       <h6 class="card-title mb-0 float-left">Node Legend</h6>
     </div>

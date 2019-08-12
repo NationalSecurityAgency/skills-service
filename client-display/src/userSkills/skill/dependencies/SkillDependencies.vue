@@ -10,8 +10,10 @@
                 </div>
 
                 <div class="col-lg-4 text-right">
-                    <skill-dependency-summary v-if="dependencies && dependencies.length > 0"
-                                              :dependencies="dependencies"/>
+                    <skill-dependency-summary
+                        v-if="dependencies && dependencies.length > 0"
+                        :dependencies="dependencies"
+                        class="graph-legend"/>
                 </div>
             </div>
             <div id="dependent-skills-network" style="height: 500px"></div>

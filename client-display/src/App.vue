@@ -116,6 +116,10 @@
                 styleName: 'color',
               },
             },
+            graphLegendBorderColor: {
+              selector: 'body #app .graph-legend .card-header, body #app .graph-legend .card-body',
+              styleName: 'border',
+            }
           };
 
           const { body } = document;
