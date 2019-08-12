@@ -95,26 +95,33 @@ class AdminProjService {
     }
 
     @Transactional()
-    void saveProject(ProjectRequest projectRequest, String userIdParam = null) {
+    void saveProject(String originalProjectId, ProjectRequest projectRequest, String userIdParam = null) {
         assert projectRequest?.projectId
         assert projectRequest?.name
+        assert originalProjectId
 
         IdFormatValidator.validate(projectRequest.projectId)
         if(projectRequest.name.length() > 50){
             throw new SkillException("Bad Name [${projectRequest.name}] - must not exceed 50 chars.")
         }
 
-        ProjDef projectDefinition
-        if (projectRequest.id) {
-            Optional<ProjDef> existing = projDefRepo.findById(projectRequest.id)
-            if (!existing.present) {
-                throw new SkillException("Requested project update id [${projectRequest.id}] doesn't exist.", projectRequest.projectId, null)
+        ProjDef projectDefinition = projDefRepo.findByProjectIdIgnoreCase(originalProjectId)
+        if (projectDefinition) {
+            if (!projectRequest.projectId.equalsIgnoreCase(originalProjectId)) {
+                ProjDef idExist = projDefRepo.findByProjectIdIgnoreCase(projectRequest.projectId)
+                if (idExist) {
+                    throw new SkillException("Project with id [${projectRequest.projectId}] already exists! Sorry!", null, null, ErrorCode.ConstraintViolation)
+                }
             }
-            log.info("Updating with [{}]", projectRequest)
-            projectDefinition = existing.get()
-
+            if (!projectRequest.name.equalsIgnoreCase(projectDefinition.name)) {
+                ProjDef nameExist = projDefRepo.findByNameIgnoreCase(projectRequest.name)
+                if (nameExist) {
+                    throw new SkillException("Project with name [${projectRequest.name}] already exists! Sorry!", null, null, ErrorCode.ConstraintViolation)
+                }
+            }
+        }
+        if (projectDefinition) {
             Props.copy(projectRequest, projectDefinition)
-
             log.info("Updating [{}]", projectDefinition)
 
             dataIntegrityViolationExceptionHandler.handle(projectDefinition.projectId){
@@ -122,16 +129,6 @@ class AdminProjService {
             }
             log.info("Saved [{}]", projectDefinition)
         } else {
-            ProjDef idExist = projDefRepo.findByProjectIdIgnoreCase(projectRequest.projectId)
-            if (idExist) {
-                throw new SkillException("Project with id [${projectRequest.projectId}] already exists! Sorry!", null, null, ErrorCode.ConstraintViolation)
-            }
-
-            ProjDef nameExist = projDefRepo.findByNameIgnoreCase(projectRequest.name)
-            if (nameExist) {
-                throw new SkillException("Project with name [${projectRequest.projectId}] already exists! Sorry!", null, null, ErrorCode.ConstraintViolation)
-            }
-
             // TODO: temp hack around since user is not yet defined when Inception project is created
             // This will be addressed in ticket #139
             String clientSecret = new ClientSecretGenerator().generateClientSecret()
@@ -551,7 +548,7 @@ class AdminProjService {
     List<SimpleProjectResult> searchProjects(String nameQuery) {
         List<ProjDef> projDefs = projDefRepo.queryProjectsByNameQuery(nameQuery)
         return projDefs.collect {
-            new SimpleProjectResult(id: it.id, name: it.name, projectId: it.projectId)
+            new SimpleProjectResult(name: it.name, projectId: it.projectId)
         }
     }
 
@@ -594,7 +591,6 @@ class AdminProjService {
     private ProjectResult convert(ProjDef definition, Map<String,Integer> projectIdSortOrder) {
         Integer order = projectIdSortOrder?.get(definition.projectId)
         ProjectResult res = new ProjectResult(
-                id: definition.id,
                 projectId: definition.projectId, name: definition.name, totalPoints: definition.totalPoints,
                 numSubjects: definition.subjects ? definition.subjects.size() : 0,
                 displayOrder: order != null ? order : 0,

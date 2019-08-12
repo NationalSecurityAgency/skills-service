@@ -78,7 +78,7 @@ class InceptionProjectService {
     }
 
     private void createProject(String userId) {
-        projectAdminStorageService.saveProject(new skills.controller.request.model.ProjectRequest(projectId: inceptionProjectId, name: inceptionProjectId), userId)
+        projectAdminStorageService.saveProject(inceptionProjectId, new skills.controller.request.model.ProjectRequest(projectId: inceptionProjectId, name: inceptionProjectId), userId)
 
         List<skills.controller.request.model.SubjectRequest> subs = [
                 new skills.controller.request.model.SubjectRequest(name: "Projects", subjectId: "Projects", iconClass: "fas fa-project-diagram",
