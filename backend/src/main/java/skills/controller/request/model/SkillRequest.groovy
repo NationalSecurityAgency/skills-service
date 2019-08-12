@@ -5,8 +5,6 @@ import groovy.transform.Canonical
 @Canonical
 class SkillRequest {
 
-    Integer id
-
     String skillId
 
     // optional

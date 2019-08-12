@@ -89,7 +89,7 @@ class InceptionProjectService {
                         description: "Number of ancillary dashboard features including user management."),
         ]
         subs.each {
-            projectAdminStorageService.saveSubject(inceptionProjectId, it)
+            projectAdminStorageService.saveSubject(inceptionProjectId, it.subjectId, it)
         }
 
         List<skills.controller.request.model.SkillRequest> skills = [

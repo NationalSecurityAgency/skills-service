@@ -1,7 +1,6 @@
 package skills.controller.result.model
 
 class SkillDefSkinnyRes {
-    Integer id
 
     String skillId
 
