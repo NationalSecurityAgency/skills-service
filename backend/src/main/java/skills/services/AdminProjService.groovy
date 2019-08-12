@@ -98,26 +98,23 @@ class AdminProjService {
     void saveProject(String originalProjectId, ProjectRequest projectRequest, String userIdParam = null) {
         assert projectRequest?.projectId
         assert projectRequest?.name
-        assert originalProjectId
 
         IdFormatValidator.validate(projectRequest.projectId)
         if(projectRequest.name.length() > 50){
             throw new SkillException("Bad Name [${projectRequest.name}] - must not exceed 50 chars.")
         }
 
-        ProjDef projectDefinition = projDefRepo.findByProjectIdIgnoreCase(originalProjectId)
-        if (projectDefinition) {
-            if (!projectRequest.projectId.equalsIgnoreCase(originalProjectId)) {
-                ProjDef idExist = projDefRepo.findByProjectIdIgnoreCase(projectRequest.projectId)
-                if (idExist) {
-                    throw new SkillException("Project with id [${projectRequest.projectId}] already exists! Sorry!", null, null, ErrorCode.ConstraintViolation)
-                }
+        ProjDef projectDefinition = originalProjectId ? projDefRepo.findByProjectIdIgnoreCase(originalProjectId) : null
+        if (!projectDefinition || !projectRequest.projectId.equalsIgnoreCase(originalProjectId)) {
+            ProjDef idExist = projDefRepo.findByProjectIdIgnoreCase(projectRequest.projectId)
+            if (idExist) {
+                throw new SkillException("Project with id [${projectRequest.projectId}] already exists! Sorry!", null, null, ErrorCode.ConstraintViolation)
             }
-            if (!projectRequest.name.equalsIgnoreCase(projectDefinition.name)) {
-                ProjDef nameExist = projDefRepo.findByNameIgnoreCase(projectRequest.name)
-                if (nameExist) {
-                    throw new SkillException("Project with name [${projectRequest.name}] already exists! Sorry!", null, null, ErrorCode.ConstraintViolation)
-                }
+        }
+        if (!projectDefinition || !projectRequest.name.equalsIgnoreCase(projectDefinition.name)) {
+            ProjDef nameExist = projDefRepo.findByNameIgnoreCase(projectRequest.name)
+            if (nameExist) {
+                throw new SkillException("Project with name [${projectRequest.name}] already exists! Sorry!", null, null, ErrorCode.ConstraintViolation)
             }
         }
         if (projectDefinition) {
