@@ -36,7 +36,7 @@ class PublicSettingsController {
     List<SettingsResult> getPublicSettings(@PathVariable("settingGroup") String settingGroup) {
         SkillsValidator.isNotBlank(settingGroup, "Setting Group")
         SkillsValidator.isTrue(settingGroup.startsWith("public_"), "Setting Group [$settingGroup] must be prefixed with 'public_'")
-        return settingsService.loadGlobalSettingsByType(settingGroup)
+        return settingsService.getGlobalSettingsByGroup(settingGroup)
     }
 
     @RequestMapping(value = "/settings/{setting}/group/{settingGroup}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)

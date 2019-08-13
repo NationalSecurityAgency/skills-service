@@ -355,12 +355,10 @@ class InceptionProjectService {
                         description: "",
                         helpUrl: "/dashboard/user-guide/skills.html#skills-versioning"
                 ),
-
-
         ]
 
         skills.each {
-            projectAdminStorageService.saveSkill(it)
+            projectAdminStorageService.saveSkill(it.skillId, it)
         }
 
     }

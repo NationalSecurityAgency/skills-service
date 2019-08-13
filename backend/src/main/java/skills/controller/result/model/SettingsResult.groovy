@@ -4,7 +4,6 @@ import groovy.transform.Canonical
 
 @Canonical
 class SettingsResult {
-    Integer id
     //nullable
     String settingGroup
     //nullable

@@ -23,8 +23,4 @@ class User {
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval=true)
     @JoinColumn(name="userRefId", nullable = false)
     List<UserRole> roles = []
-
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name="userId", nullable = false)
-    List<Setting> userProps = []
 }
