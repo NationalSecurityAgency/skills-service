@@ -22,12 +22,4 @@ class UserInfoRes {
         this.nickname = userInfo.nickname
         this.dn = userInfo.userDn
     }
-
-    UserInfoRes(User user) {
-        userId = user.userId
-        first =  user.userProps.find {it.setting == 'firstName'}?.value
-        last =  user.userProps.find {it.setting == 'lastName'}?.value
-        nickname =  user.userProps.find {it.setting == 'nickname'}?.value
-        dn =  user.userProps.find {it.setting == 'DN'}?.value
-    }
 }

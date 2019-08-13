@@ -11,8 +11,10 @@ import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
+import skills.controller.result.model.SettingsResult
 import skills.services.AccessSettingsStorageService
 import skills.services.InceptionProjectService
+import skills.services.settings.SettingsService
 import skills.storage.model.auth.RoleName
 import skills.storage.model.auth.User
 import skills.storage.model.auth.UserRole
@@ -38,6 +40,9 @@ class UserAuthService {
     @Autowired
     InceptionProjectService inceptionProjectService
 
+    @Autowired
+    SettingsService settingsService
+
     @Transactional(readOnly = true)
     Collection<GrantedAuthority> loadAuthorities(String userId) {
         return convertRoles(userRepository.findByUserIdIgnoreCase(userId)?.roles)
@@ -48,14 +53,15 @@ class UserAuthService {
         UserInfo userInfo
         User user = userRepository.findByUserIdIgnoreCase(userId)
         if (user) {
+            List<SettingsResult> userInfoSettings = settingsService.getUserSettingsForGroup(user.userId, AccessSettingsStorageService.USER_INFO_SETTING_GROUP)
             userInfo = new UserInfo (
                     username: user.userId,
                     password: user.password,
-                    firstName: user.userProps.find {it.setting =='firstName'}?.value,
-                    lastName: user.userProps.find {it.setting =='lastName'}?.value,
-                    email: user.userProps.find {it.setting =='email'}?.value,
-                    userDn: user.userProps.find {it.setting =='DN'}?.value,
-                    nickname: user.userProps.find {it.setting =='nickname'}?.value,
+                    firstName: userInfoSettings.find {it.setting =='firstName'}?.value,
+                    lastName: userInfoSettings.find {it.setting =='lastName'}?.value,
+                    email: userInfoSettings.find {it.setting =='email'}?.value,
+                    userDn: userInfoSettings.find {it.setting =='DN'}?.value,
+                    nickname: userInfoSettings.find {it.setting =='nickname'}?.value,
                     authorities: convertRoles(userRepository.findByUserIdIgnoreCase(userId)?.roles)
             )
         }

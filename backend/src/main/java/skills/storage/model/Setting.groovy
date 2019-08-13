@@ -16,7 +16,7 @@ import javax.persistence.Table
 @ToString(includeNames = true)
 class Setting {
 
-    static enum SettingType { User, Project, Global }
+    static enum SettingType { User, Project, Global, UserProject }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,10 +34,10 @@ class Setting {
     //non-null
     String value
 
-    @Column(insertable = false, updatable = false)
     //nullable
     Integer userId
 
+    // reliably differentiate between different setting types
     @Enumerated(EnumType.STRING)
     SettingType type
 

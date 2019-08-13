@@ -11,6 +11,10 @@ import skills.auth.UserInfoService
 import skills.auth.pki.PkiUserLookup
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
+import skills.controller.request.model.UserSettingsRequest
+import skills.controller.result.model.SettingsResult
+import skills.controller.result.model.UserInfoRes
+import skills.services.settings.SettingsService
 import skills.storage.model.Setting
 import skills.storage.model.auth.RoleName
 import skills.storage.model.auth.User
@@ -24,6 +28,8 @@ import static skills.controller.exceptions.SkillException.NA
 @Service
 @Slf4j
 class AccessSettingsStorageService {
+
+    static String USER_INFO_SETTING_GROUP = "user_info"
 
     @Autowired
     UserRoleRepo userRoleRepository
@@ -42,6 +48,9 @@ class AccessSettingsStorageService {
 
     @Autowired(required = false)
     PkiUserLookup pkiUserLookup
+
+    @Autowired
+    SettingsService settingsService
 
     @Transactional(readOnly = true)
     List<UserRole> getUserRoles(String projectId) {
@@ -156,6 +165,8 @@ class AccessSettingsStorageService {
             user = createNewUser(userInfo)
         }
         userRepository.save(user)
+        saveSettings(user.userId, userInfo)
+
         return user
     }
 
@@ -199,42 +210,57 @@ class AccessSettingsStorageService {
         return userRepository.findByUserIdIgnoreCase(userId)
     }
 
+    UserInfoRes loadUserInfo(String userId) {
+        User user = userRepository.findByUserIdIgnoreCase(userId)
+        List<SettingsResult> settings = settingsService.getUserSettingsForGroup(user.userId)
+        new UserInfoRes(
+                userId: user.userId,
+                first: settings.find({it.setting == "firstName"}) ?: "",
+                last: settings.find({it.setting == "lastName"}) ?: "",
+                nickname: settings.find({it.setting == "nickname"}) ?: "",
+                dn: settings.find({it.setting == "DN"}) ?: "",
+        )
+    }
+
     private User createNewUser(UserInfo userInfo) {
         String userId = userInfo.username?.toLowerCase()
         User user = new User(
                 userId: userId,
                 password: userInfo.password,
                 roles: getRoles(userInfo),
-                userProps: [
-                        new Setting(type: Setting.SettingType.User, setting: 'DN', value: userInfo.userDn ?: ""),
-                        new Setting(type: Setting.SettingType.User, setting: 'email', value: userInfo.email ?: ""),
-                        new Setting(type: Setting.SettingType.User, setting: 'firstName', value: userInfo.firstName ?: ""),
-                        new Setting(type: Setting.SettingType.User, setting: 'lastName', value: userInfo.lastName ?: ""),
-                        new Setting(type: Setting.SettingType.User, setting: 'nickname', value: userInfo.nickname ?: ""),
-                ]
         )
         return user
     }
 
-    private User updateUser(UserInfo userInfo, User user) {
+
+
+    private void updateUser(UserInfo userInfo, User user) {
         user.userId = userInfo.username?.toLowerCase()
         user.password = userInfo.password
-        getOrSetUserProp(user, 'DN',  userInfo.userDn ?: "")
-        getOrSetUserProp(user, 'email', userInfo.email ?: "")
-        getOrSetUserProp(user, 'firstName',  userInfo.firstName ?: "")
-        getOrSetUserProp(user, 'lastName',  userInfo.lastName ?: "")
-        getOrSetUserProp(user, 'nickname',  userInfo.nickname ?: "")
-//        user.roles = getRoles(userInfo)
-        return user
+
+        saveSettings(user.userId, userInfo)
     }
 
-    private void getOrSetUserProp(User user, String name, value) {
-        Setting userProp = user.userProps.find {it.setting == name}
-        if (userProp) {
-            userProp.value = value
-        } else {
-            user.userProps.add(new Setting(type: Setting.SettingType.User, userId: user.userId, setting: name, value: value))
-        }
+    void saveSettings(String userId, UserInfo userInfo) {
+        List<UserSettingsRequest> settingsRequests = [
+                createSetting(userId, 'DN', userInfo.userDn ?: ""),
+                createSetting(userId, 'email', userInfo.email ?: ""),
+                createSetting(userId, 'firstName', userInfo.firstName ?: ""),
+                createSetting(userId, 'lastName', userInfo.lastName ?: ""),
+                createSetting(userId, 'nickname', userInfo.nickname ?: ""),
+        ]
+        settingsService.saveSettings(settingsRequests)
+    }
+
+    private UserSettingsRequest createSetting(String userId, String prop, String value) {
+        UserSettingsRequest settingsRequest =
+                new UserSettingsRequest(
+                        userId: userId,
+                        settingGroup: AccessSettingsStorageService.USER_INFO_SETTING_GROUP,
+                        setting: prop,
+                        value: value
+                )
+        return settingsRequest
     }
 
     private List<UserRole> getRoles(UserInfo userInfo) {

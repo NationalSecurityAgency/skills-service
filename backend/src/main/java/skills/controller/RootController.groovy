@@ -18,6 +18,7 @@ import skills.services.AccessSettingsStorageService
 import skills.services.settings.SettingsService
 import skills.settings.EmailConnectionInfo
 import skills.settings.EmailSettingsService
+import skills.storage.model.auth.User
 import skills.storage.model.auth.UserRole
 
 import java.security.Principal
@@ -59,7 +60,9 @@ class RootController {
         if (authMode == AuthMode.FORM) {
             return accessSettingsStorageService.getNonRootUsers().findAll {
                 it.userId.toLowerCase().contains(query)
-            }.collect { new UserInfoRes(accessSettingsStorageService.findByUserIdIgnoreCase(it.userId)) }.unique()
+            }.collect {
+                accessSettingsStorageService.loadUserInfo(it.userId)
+            }.unique()
         } else {
             List<String> rootUsers = accessSettingsStorageService.rootUsers.collect { it.userId.toLowerCase() }
             return pkiUserLookup?.suggestUsers(query)?.findAll {
@@ -100,13 +103,6 @@ class RootController {
         SkillsValidator.isNotBlank(setting, "Setting Id")
         SkillsValidator.isTrue(setting == settingRequest.setting, "Setting Id must equal")
 
-        SettingsResult existingSetting = settingsService.getGlobalSetting(settingRequest.setting, settingRequest.settingGroup)
-        if (existingSetting?.id) {
-            settingRequest.id = existingSetting.id
-            log.info("Updating existing global setting [{}]", existingSetting)
-        } else {
-            log.info("Adding new global setting [{}]", settingRequest)
-        }
         settingsService.saveSetting(settingRequest)
         return new RequestResult(success: true)
     }

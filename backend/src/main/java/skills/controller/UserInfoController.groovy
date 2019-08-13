@@ -14,6 +14,7 @@ import skills.auth.UserInfoService
 import skills.auth.pki.PkiUserLookup
 import skills.controller.result.model.RequestResult
 import skills.controller.result.model.UserInfoRes
+import skills.services.AccessSettingsStorageService
 import skills.services.UserAdminService
 import skills.storage.model.auth.User
 import skills.storage.repos.UserRepo
@@ -97,11 +98,16 @@ class UserInfoController {
         return foundRole
     }
 
+    @Autowired
+    AccessSettingsStorageService accessSettingsStorageService
+
     @RequestMapping(value = "/users/suggestDashboardUsers/{query}", method = RequestMethod.GET, produces = "application/json")
     List<UserInfoRes> suggestExistingDashboardUsers(@PathVariable("query") String query,
                                                     @RequestParam(required = false) boolean includeSelf) {
         List<User> matchingUsers = userRepo.getUserByUserIdOrPropWildcard(query, new PageRequest(0, 6))
-        List<UserInfoRes> results = matchingUsers.collect { new UserInfoRes(it) }
+        List<UserInfoRes> results = matchingUsers.collect {
+            accessSettingsStorageService.loadUserInfo(it.userId)
+        }
         if (!includeSelf) {
             String currentUserId = userInfoService.currentUser.username
             results = results.findAll { it.userId != currentUserId }

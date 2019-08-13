@@ -5,7 +5,6 @@ import groovy.transform.Canonical
 @Canonical
 abstract class SettingsRequest {
 
-    Integer id
     //nullable
     String settingGroup
     //non-null

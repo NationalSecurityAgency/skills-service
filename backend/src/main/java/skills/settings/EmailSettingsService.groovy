@@ -6,7 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.JavaMailSenderImpl
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import skills.controller.exceptions.SkillException
+import skills.controller.request.model.GlobalSettingsRequest
+import skills.controller.request.model.SettingsRequest
 import skills.services.settings.SettingsService
 
 import javax.annotation.PostConstruct
@@ -102,7 +105,7 @@ class EmailSettingsService {
     }
 
     void storeSettings(EmailConnectionInfo emailConnectionInfo) {
-        settingsService.saveOrUpdateGlobalGroup(settingsGroup, [
+        saveOrUpdateGlobalGroup(settingsGroup, [
                 (hostSetting)     : emailConnectionInfo.host,
                 (portSetting)     : emailConnectionInfo.port?.toString(),
                 (protocolSetting) : emailConnectionInfo.protocol,
@@ -111,6 +114,14 @@ class EmailSettingsService {
                 (authSetting)     : emailConnectionInfo.authEnabled?.toString(),
                 (tlsEnableSetting): emailConnectionInfo.tlsEnabled?.toString(),
         ])
+    }
+
+    private void saveOrUpdateGlobalGroup(String settingsGroup, Map<String, String> settingsMap) {
+        List<SettingsRequest> settingsRequests = []
+        settingsMap.each { String setting, String value ->
+            settingsRequests << new GlobalSettingsRequest(settingGroup: settingsGroup, setting: setting, value: value)
+        }
+        settingsService.saveSettings(settingsRequests)
     }
 
     @WithWriteLock

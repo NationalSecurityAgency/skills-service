@@ -5,14 +5,14 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import skills.auth.UserInfo
 import skills.auth.UserInfoService
+import skills.controller.request.model.UserProjectSettingsRequest
 import skills.controller.request.model.UserSettingsRequest
 import skills.controller.result.model.SettingsResult
+import skills.services.settings.SettingsDataAccessor
 import skills.services.settings.SettingsService
 import skills.storage.model.Setting
 import skills.storage.model.auth.User
 import skills.storage.repos.UserRepo
-import skills.utils.Props
-
 import org.springframework.transaction.annotation.Transactional
 
 @Service
@@ -33,26 +33,29 @@ class SortingService {
     @Autowired
     UserRepo userRepo
 
+    @Autowired
+    SettingsDataAccessor settingsDataAccessor
+
     @Transactional(readOnly = true)
     Integer getProjectSortOrder(String projectId){
         UserInfo userInfo = userInfoService.getCurrentUser()
 
         SettingsResult setting = settingsService.getUserSetting(userInfo.username, projectId, PROJECT_SORT_SETTING, PROJECT_SORT_GROUP)
         if(!setting){
-            log.warn("no user sort setting exists for user [${userInfo.username}] for project [${projectId}")
+            log.debug("no user sort setting exists for user [{}] for project [{}]", userInfo.username, projectId)
             return null
         }
 
         return setting.value.toInteger()
     }
 
-    @Transactional(readOnly = true)
-    Integer getHighestSortForUserProjects(){
+    private Integer getHighestSortForUserProjects(){
         UserInfo userInfo = userInfoService.getCurrentUser()
-        List<SettingsResult> sortOrder = settingsService.getUserSettingsByType(userInfo.username, PROJECT_SORT_GROUP)
-
+        List<SettingsResult> sortOrder = settingsService.getUserProjectSettingsForGroup(userInfo.username, PROJECT_SORT_GROUP)
+        if (!sortOrder) {
+            return 0
+        }
         sortOrder?.sort() { SettingsResult one, SettingsResult two -> one.value.toInteger() <=> two.value.toInteger() }
-
         return sortOrder?.last()?.value?.toInteger()
     }
 
@@ -64,7 +67,7 @@ class SortingService {
 
     @Transactional(readOnly = true)
     Map<String,Integer> getUserProjectsOrder(String userId){
-        List<SettingsResult> sortOrder = settingsService.getUserSettingsByType(userId, PROJECT_SORT_GROUP)
+        List<SettingsResult> sortOrder = settingsService.getUserProjectSettingsForGroup(userId, PROJECT_SORT_GROUP)
         if(!sortOrder){
             return [:]
         }
@@ -86,17 +89,12 @@ class SortingService {
     void setProjectSortOrder(String projectId, Integer order){
         UserInfo userInfo = userInfoService.getCurrentUser()
 
-        UserSettingsRequest request = new UserSettingsRequest()
-        request.projectId = projectId
+        UserProjectSettingsRequest request = new UserProjectSettingsRequest()
         request.userId = userInfo.username
+        request.projectId = projectId
         request.value = order
         request.settingGroup = PROJECT_SORT_GROUP
         request.setting = PROJECT_SORT_SETTING
-
-        SettingsResult existingSort = settingsService.getUserSetting(userInfo.username, projectId, PROJECT_SORT_SETTING, PROJECT_SORT_GROUP)
-        if(existingSort){
-            request.id = existingSort.id
-        }
 
         settingsService.saveSetting(request)
     }
@@ -114,7 +112,7 @@ class SortingService {
     void changeProjectOrder(String moveMeProjectId, Move direction){
         UserInfo userInfo = userInfoService.getCurrentUser()
         User user = userRepo.findByUserIdIgnoreCase(userInfo.username)
-        List<Setting> sortOrder = user.userProps.findAll { it.settingGroup == PROJECT_SORT_GROUP }
+        List<Setting> sortOrder = settingsDataAccessor.getUserProjectSettingsForGroup(userInfo.username, PROJECT_SORT_GROUP)
 
         sortOrder.sort() { Setting one, Setting two -> one.value.toInteger() <=> two.value.toInteger() }
 
@@ -143,53 +141,5 @@ class SortingService {
 
         userRepo.save(user)
     }
-
-    /**
-     * Changes moveMeProjectId to be above or below the adajcentProjectId's sort order based on the direction parameter.
-     *
-     * Note that these projectIds must be adjacent to one another to perform this operation
-     *
-     * @param moveMeProjectId
-     * @param adjacentProjectId
-     * @param direction
-     *//*
-    @Transactional
-    void changeProjectOrder(String moveMeProjectId, String adjacentProjectId, Move direction){
-        UserInfo userInfo = userInfoService.getCurrentUser()
-        List<SettingsResult> sortOrder = settingsService.getUserSettingsByType(userInfo.username, PROJECT_SORT_GROUP)
-
-        sortOrder.sort() { SettingsResult one, SettingsResult two -> one.value.toInteger() <=> two.value.toInteger() }
-
-        int idx = sortOrder.findIndexOf { it.projectId == moveMeProjectId }
-
-        assert idx > -1
-        SettingsResult moveMe = sortOrder.get(idx)
-        SettingsResult swapWith
-
-        if(direction == Move.UP){
-            assert idx+1 < sortOrder.size()
-            swapWith = sortOrder.get(idx+1)
-            assert swapWith.projectId == adjacentProjectId
-        }else{
-            assert idx-1 >= 0
-            swapWith = sortOrder.get(idx-1)
-            assert swapWith.projectId == adjacentProjectId
-        }
-
-        Integer swapWithOrder = swapWith.value.toInteger()
-        Integer moveMeOrder = moveMe.value.toInteger()
-
-        UserSettingsRequest moveMeRequest = new UserSettingsRequest()
-        Props.copy(moveMe, moveMeRequest)
-        UserSettingsRequest swapWithRequest = new UserSettingsRequest()
-        Props.copy(moveMe, swapWithRequest)
-
-        moveMeRequest.value = swapWithOrder
-        swapWithRequest.value = moveMeOrder
-
-
-        settingsService.saveSetting(moveMeRequest)
-        settingsService.saveSetting(swapWithRequest)
-    }*/
 
 }
