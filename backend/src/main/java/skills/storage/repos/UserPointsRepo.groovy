@@ -93,13 +93,13 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
             nativeQuery = true)
     Long countDistinctUserIdByProjectId(String projectId)
 
-    @Query('SELECT userId as userId, max(updated) as lastUpdated, sum(points) as totalPoints from UserPoints up where up.projectId=?1 and up.userId like %?2% and up.day is null and up.skillId is null GROUP BY userId')
+    @Query('SELECT userId as userId, max(updated) as lastUpdated, sum(points) as totalPoints from UserPoints up where up.projectId=?1 and upper(up.userId) like UPPER(CONCAT(\'%\', ?2, \'%\')) and up.day is null and up.skillId is null GROUP BY userId')
     List<ProjectUser> findDistinctProjectUsersAndUserIdLike(String projectId, String query, Pageable pageable)
 
-    @Query('SELECT COUNT(DISTINCT userId) from UserPoints up where up.projectId=?1 and up.skillId in (?2) and up.userId like %?3% and up.day is null')
+    @Query('SELECT COUNT(DISTINCT userId) from UserPoints up where up.projectId=?1 and up.skillId in (?2) and upper(up.userId) like UPPER(CONCAT(\'%\', ?3, \'%\')) and up.day is null')
     Long countDistinctUserIdByProjectIdAndSkillIdInAndUserIdLike(String projectId, List<String> skillIds, String userId)
 
-    @Query('SELECT userId as userId, max(updated) as lastUpdated, sum(points) as totalPoints from UserPoints up where up.projectId=?1 and up.skillId in (?2) and up.userId like %?3% and up.day is null GROUP BY userId')
+    @Query('SELECT userId as userId, max(updated) as lastUpdated, sum(points) as totalPoints from UserPoints up where up.projectId=?1 and up.skillId in (?2) and upper(up.userId) like UPPER(CONCAT(\'%\', ?3, \'%\')) and up.day is null GROUP BY userId')
     List<ProjectUser> findDistinctProjectUsersByProjectIdAndSkillIdInAndUserIdLike(String projectId, List<String> skillIds, String userId, Pageable pageable)
 
     @Nullable
