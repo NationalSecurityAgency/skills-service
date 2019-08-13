@@ -56,7 +56,7 @@ class InceptionProjectService {
         List<UserRole> rootUsers = accessSettingsStorageService.getRootUsers()
 
         rootUsers.each {
-            List<UserRole> inceptionRoles = accessSettingsStorageService.getUserRoles(inceptionProjectId, it.userId)
+            List<UserRole> inceptionRoles = accessSettingsStorageService.getUserRolesForProjectIdAndUserId(inceptionProjectId, it.userId)
             if (!inceptionRoles.find({it.roleName == RoleName.ROLE_PROJECT_ADMIN})) {
                 log.info("Making [{}] project admin of [{}]", it.userId, inceptionProjectId)
                 accessSettingsStorageService.addUserRole(it.userId, inceptionProjectId, RoleName.ROLE_PROJECT_ADMIN)

@@ -18,6 +18,7 @@ import skills.services.AccessSettingsStorageService
 import skills.services.settings.SettingsService
 import skills.settings.EmailConnectionInfo
 import skills.settings.EmailSettingsService
+import skills.storage.model.auth.RoleName
 import skills.storage.model.auth.User
 import skills.storage.model.auth.UserRole
 
@@ -71,6 +72,25 @@ class RootController {
         }
     }
 
+    @GetMapping('/users/without/role/{roleName}/{query}')
+    @ResponseBody
+    List<UserInfoRes> suggestUsersWithoutRole(@PathVariable("roleName") RoleName roleName,
+                                              @PathVariable('query') String query) {
+        query = query.toLowerCase()
+        if (authMode == AuthMode.FORM) {
+            return accessSettingsStorageService.getUserRolesWithoutRole(roleName).findAll {
+                it.userId.toLowerCase().contains(query)
+            }.collect {
+                accessSettingsStorageService.loadUserInfo(it.userId)
+            }.unique()
+        } else {
+            List<String> usersWithRole = accessSettingsStorageService.getUserRolesWithRole(roleName).collect { it.userId.toLowerCase() }
+            return pkiUserLookup?.suggestUsers(query)?.findAll {
+                !usersWithRole.contains(it.username.toLowerCase())
+            }?.unique()?.take(5)?.collect { new UserInfoRes(it) }
+        }
+    }
+
     @GetMapping('/isRoot')
     boolean isRoot(Principal principal) {
         return accessSettingsStorageService.isRoot(principal.name)
@@ -86,6 +106,33 @@ class RootController {
     void deleteRoot(@PathVariable('userId') String userId) {
         SkillsValidator.isTrue(accessSettingsStorageService.getRootAdminCount() > 1, 'At least one root user must exist at all times! Deleting another user will cause no root users to exist!')
         accessSettingsStorageService.deleteRoot(userId)
+    }
+
+    @GetMapping('/users/roles/{roleName}')
+    @ResponseBody
+    List<UserRole> getUserRolesWithRole(@PathVariable("roleName") RoleName roleName) {
+        return accessSettingsStorageService.getUserRolesWithRole(roleName)
+    }
+
+    @PutMapping('/users/{userKey}/roles/{roleName}')
+    RequestResult addRole(@PathVariable('userKey') String userKey,
+                          @PathVariable("roleName") RoleName roleName) {
+        if (roleName == RoleName.ROLE_SUPER_DUPER_USER) {
+            addRoot(userKey)
+        } else {
+            accessSettingsStorageService.addUserRole(getUserId(userKey), null, roleName)
+        }
+        return new RequestResult(success: true)
+    }
+
+    @DeleteMapping('/users/{userId}/roles/{roleName}')
+    void deleteRole(@PathVariable('userId') String userId,
+                    @PathVariable("roleName") RoleName roleName) {
+        if (roleName == RoleName.ROLE_SUPER_DUPER_USER) {
+            deleteRoot(userId)
+        } else {
+            accessSettingsStorageService.deleteUserRole(userId, null, roleName)
+        }
     }
 
     @PostMapping('/testEmailSettings')

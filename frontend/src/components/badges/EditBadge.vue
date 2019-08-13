@@ -94,6 +94,7 @@
   import IdInput from '../utils/inputForm/IdInput';
   import InlineHelp from '../utils/InlineHelp';
   import BadgesService from './BadgesService';
+  import GlobalBadgeService from './global/GlobalBadgeService';
 
 
   const dictionary = {
@@ -223,6 +224,9 @@
             if (self.isEdit && self.badge.name === value) {
               return true;
             }
+            if (self.global) {
+              return GlobalBadgeService.badgeWithNameExists(value);
+            }
             return BadgesService.badgeWithNameExists(self.badgeInternal.projectId, value);
           },
         }, {
@@ -232,8 +236,11 @@
         Validator.extend('uniqueId', {
           getMessage: field => `The value for ${field} is already taken.`,
           validate(value) {
-            if (self.global || (self.isEdit && self.badge.badgeId === value)) {
+            if (self.isEdit && self.badge.badgeId === value) {
               return true;
+            }
+            if (self.global) {
+              return GlobalBadgeService.badgeWithIdExists(value);
             }
             return BadgesService.badgeWithIdExists(self.badgeInternal.projectId, value);
           },

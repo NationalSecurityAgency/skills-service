@@ -20,6 +20,7 @@
   const DASHBOARD = 'DASHBOARD';
   const CLIENT = 'CLIENT';
   const ROOT = 'ROOT';
+  const SUPERVISOR = 'SUPERVISOR';
 
   export default {
     name: 'ExistingUserInput',
@@ -51,7 +52,7 @@
       userType: {
         type: String,
         default: CLIENT,
-        validator: value => ([DASHBOARD, CLIENT, ROOT].indexOf(value) >= 0),
+        validator: value => ([DASHBOARD, CLIENT, ROOT, SUPERVISOR].indexOf(value) >= 0),
       },
       excludedSuggestions: {
         type: Array,
@@ -102,8 +103,10 @@
           } else {
             suggestUrl = '/app/users/suggestClientUsers/';
           }
+        } else if (this.userType === SUPERVISOR) {
+          suggestUrl = '/root/users/without/role/ROLE_SUPERVISOR';
         } else if (this.userType === ROOT) {
-          suggestUrl = '/root/users';
+          suggestUrl = '/root/users/without/role/ROLE_SUPER_DUPER_USER';
         } else {
           // userType === DASHBOARD
           suggestUrl = '/app/users/suggestDashboardUsers';

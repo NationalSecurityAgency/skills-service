@@ -8,6 +8,7 @@ import ProjectPage from '@/components/projects/ProjectPage';
 import ErrorPage from '@/components/utils/ErrorPage';
 import SubjectPage from '@/components/subjects/SubjectPage';
 import BadgePage from '@/components/badges/BadgePage';
+import GlobalBadgePage from '@/components/badges/global/GlobalBadgePage';
 import SkillPage from '@/components/skills/SkillPage';
 import UserPage from '@/components/users/UserPage';
 import store from '@/store/store';
@@ -26,6 +27,7 @@ import ProjectSettings from '@//components/settings/ProjectSettings';
 import SectionMetrics from '@//components/metrics/SectionMetrics';
 import Skills from '@//components/skills/Skills';
 import BadgeSkills from '@//components/badges/BadgeSkills';
+import GlobalBadgeSkills from '@//components/badges/global/GlobalBadgeSkills';
 import SkillOverview from '@//components/skills/SkillOverview';
 import SkillDependencies from '@//components/skills/dependencies/SkillDependencies';
 import AddSkillEvent from '@//components/skills/AddSkillEvent';
@@ -274,6 +276,33 @@ const router = new Router({
       name: 'InceptionSkills',
       component: InceptionSkills,
       meta: { requiresAuth: true, breadcrumb: 'Dashboard Skills' },
+    },
+    {
+      path: '/globalBadges/:badgeId',
+      component: GlobalBadgePage,
+      meta: { requiresAuth: true },
+      children: [{
+        name: 'GlobalBadgeSkills',
+        path: '',
+        component: GlobalBadgeSkills,
+        meta: { requiresAuth: true },
+      // }, {
+      //   name: 'GlobalBadgeLevels',
+      //   path: 'levels',
+      //   component: GlobalBadgeLevels,
+      //   meta: { requiresAuth: true },
+      // }, {
+      // }, {
+      //   name: 'GlobalBadgeUsers',
+      //   path: 'users',
+      //   component: Users,
+      //   meta: { requiresAuth: true },
+      // }, {
+      //   name: 'GlobalBadgeMetrics',
+      //   path: 'metrics',
+      //   component: SectionMetrics,
+      //   meta: { requiresAuth: true },
+      }],
     },
     {
       path: '*',

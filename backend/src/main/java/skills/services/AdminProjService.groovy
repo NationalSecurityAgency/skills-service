@@ -1105,8 +1105,6 @@ class AdminProjService {
         return switchWith
     }
 
-
-
     @Profile
     private skills.controller.result.model.SkillDefRes convertToSkillDefRes(SkillDef skillDef) {
         skills.controller.result.model.SkillDefRes res = new skills.controller.result.model.SkillDefRes()

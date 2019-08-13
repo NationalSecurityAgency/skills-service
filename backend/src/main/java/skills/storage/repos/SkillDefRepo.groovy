@@ -45,14 +45,16 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
         from SkillDef s where s.projectId = ?1 and s.type = ?2''')
     List<SkillDefSkinny> findAllSkinnySelectByProjectIdAndType(String id, SkillDef.ContainerType type)
 
-
-    List<SkillDef> findAllByProjectIdAndType(String id, SkillDef.ContainerType type)
     @Nullable
-    SkillDef findByProjectIdAndSkillIdIgnoreCaseAndType(String id, String skillId, SkillDef.ContainerType type)
+    List<SkillDef> findAllByType(SkillDef.ContainerType type)
+
+    List<SkillDef> findAllByProjectIdAndType(@Nullable String id, SkillDef.ContainerType type)
+    @Nullable
+    SkillDef findByProjectIdAndSkillIdIgnoreCaseAndType(@Nullable String id, String skillId, SkillDef.ContainerType type)
     @Nullable
     SkillDef findByProjectIdAndSkillIdAndType(String id, String skillId, SkillDef.ContainerType type)
     @Nullable
-    SkillDef findByProjectIdAndNameIgnoreCaseAndType(String id, String name, SkillDef.ContainerType type)
+    SkillDef findByProjectIdAndNameIgnoreCaseAndType(@Nullable String id, String name, SkillDef.ContainerType type)
 
     @Query(value = '''SELECT max(sdChild.displayOrder) from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
       where srd.parent=sdParent.id and srd.child=sdChild.id and 
@@ -101,9 +103,9 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
     int calculateDistinctUsersForASingleSkill(String projectId, String skillId)
 
     boolean existsByProjectIdAndSkillIdAndTypeAllIgnoreCase(String id, String skillId, SkillDef.ContainerType type)
-    boolean existsByProjectIdAndSkillIdAllIgnoreCase(String id, String skillId)
+    boolean existsByProjectIdAndSkillIdAllIgnoreCase(@Nullable String id, String skillId)
 
-    boolean existsByProjectIdAndNameAndTypeAllIgnoreCase(String id, String name, SkillDef.ContainerType type)
+    boolean existsByProjectIdAndNameAndTypeAllIgnoreCase(@Nullable String id, String name, SkillDef.ContainerType type)
 
     @Query('SELECT MAX (s.version) from SkillDef s where s.projectId=?1')
     Integer findMaxVersionByProjectId(String projectId)
