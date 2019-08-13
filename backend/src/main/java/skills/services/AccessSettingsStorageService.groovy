@@ -53,15 +53,30 @@ class AccessSettingsStorageService {
     SettingsService settingsService
 
     @Transactional(readOnly = true)
-    List<UserRole> getUserRoles(String projectId) {
+    List<UserRole> getUserRolesForProjectId(String projectId) {
         List<UserRole> res = userRoleRepository.findAllByProjectId(projectId)
         return res
     }
 
     @Transactional(readOnly = true)
-    List<UserRole> getUserRoles(String projectId, String userId) {
+    List<UserRole> getUserRolesForProjectIdAndUserId(String projectId, String userId) {
         List<UserRole> res = userRoleRepository.findAllByProjectIdAndUserId(projectId, userId)
         return res
+    }
+
+    @Transactional(readOnly = true)
+    List<UserRole> getUserRolesWithRole(RoleName roleName) {
+        return userRoleRepository.findAllByRoleName(roleName)
+    }
+
+    @Transactional(readOnly = true)
+    List<UserRole> getUserRolesWithoutRole(RoleName roleName) {
+        List<UserRole> usersWithRole = getUserRolesWithRole(roleName)
+        if (usersWithRole) {
+            return userRoleRepository.findAllByUserIdNotIn(usersWithRole.collect { it.userId }.unique())
+        } else {
+            return userRepository.findAll()
+        }
     }
 
     @Transactional(readOnly = true)

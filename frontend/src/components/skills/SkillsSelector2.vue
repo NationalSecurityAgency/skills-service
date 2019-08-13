@@ -4,7 +4,8 @@
     <!-- see https://github.com/shentao/vue-multiselect/issues/421 for explanation of :blockKeys-->
     <multiselect v-model="selectedInternal" placeholder="Select skill(s)..."
                  :options="options" :multiple="multipleSelection" :taggable="false" :blockKeys="['Delete']"
-                 :hide-selected="true" label="name" track-by="id" v-on:remove="removed" v-on:select="added">
+                 :hide-selected="true" label="name" track-by="id" :is-loading="isLoading"
+                 v-on:remove="removed" v-on:select="added" v-on:search-changed="searchChanged">
       <template slot="option" slot-scope="props">
         <slot name="dropdown-item" v-bind:props="props">
           <h6>{{ props.option.name }}</h6>
@@ -21,7 +22,23 @@
   export default {
     name: 'SkillsSelector2',
     components: { Multiselect },
-    props: ['options', 'selected', 'onlySingleSelectedValue'],
+    props: {
+      options: {
+        type: Array,
+        required: true,
+      },
+      selected: {
+        type: Object,
+      },
+      onlySingleSelectedValue: {
+        type: Boolean,
+        default: false,
+      },
+      isLoading: {
+        type: Boolean,
+        default: false,
+      },
+    },
     data() {
       return {
         selectedInternal: null,
@@ -50,6 +67,9 @@
       },
       added(addedItem) {
         this.$emit('added', addedItem);
+      },
+      searchChanged(query) {
+        this.$emit('search-changed', query);
       },
     },
   };

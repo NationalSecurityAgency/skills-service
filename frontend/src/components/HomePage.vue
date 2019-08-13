@@ -7,7 +7,7 @@
 
 <script>
   import Navigation from './utils/Navigation';
-  import SettingsService from './settings/SettingsService';
+  import AccessService from './access/AccessService';
 
   export default {
     name: 'HomePage',
@@ -28,7 +28,7 @@
     },
     methods: {
       loadNavItems() {
-        SettingsService.hasRoot()
+        AccessService.hasRole('ROLE_SUPERVISOR')
           .then((response) => {
             this.isRoot = response;
             if (this.isRoot) {
