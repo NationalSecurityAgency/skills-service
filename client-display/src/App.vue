@@ -1,5 +1,7 @@
 <template>
-  <div id="app">
+  <div
+    id="app"
+    :style="appStyleObject">
     <router-view />
   </div>
 </template>
@@ -37,6 +39,11 @@
   });
 
   export default {
+    data() {
+      return {
+        appStyleObject: {},
+      };
+    },
     mounted() {
       // this.handleTheming();
 
@@ -73,6 +80,10 @@
 
           this.$store.state.parentFrame.emit('needs-authentication');
 
+          if (parent.model.minHeight) {
+            Vue.set(this.appStyleObject, 'min-height', parent.model.minHeight);
+          }
+
           // No scroll bars for iframe.
           document.body.style['overflow-y'] = 'hidden';
         });
@@ -93,7 +104,7 @@
               styleName: 'color',
             },
             primaryTextColor: {
-              selector: 'body #app .text-primary, body #app .card-header, body #app .card-body, body #app .skill-tile-label, body #app .card-title body #app .card, body #app h2, body #app h3',
+              selector: 'body #app .text-primary, body #app .card-header, body #app .card-body, body #app .skill-tile-label, body #app .card-title body #app .card, body #app h2, body #app h3, body #app p',
               styleName: 'color',
             },
             tiles: {
@@ -119,7 +130,7 @@
             graphLegendBorderColor: {
               selector: 'body #app .graph-legend .card-header, body #app .graph-legend .card-body',
               styleName: 'border',
-            }
+            },
           };
 
           const { body } = document;
@@ -235,6 +246,10 @@
     margin: 0 auto;
     text-align: center;
     overflow: hidden;
+  }
+
+  #app .text-primary {
+    color: #4f565d !important;
   }
 
   .card {

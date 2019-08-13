@@ -31,7 +31,7 @@
 
             <skill-summary-cards v-if="!locked" :skill="skill" class="mt-3"></skill-summary-cards>
 
-            <p class="skills-text-description text-primary mx-2 mt-3">
+            <p class="skills-text-description text-secondary mx-2 mt-3">
                 <markdown-text :text="skill.description.description"/>
             </p>
         </div>
