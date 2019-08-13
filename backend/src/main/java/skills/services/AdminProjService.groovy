@@ -160,7 +160,7 @@ class AdminProjService {
         if(subjectRequest.name.length() > 50){
             throw new SkillException("Bad Name [${subjectRequest.name}] - must not exceed 50 chars.")
         }
-        if(subjectRequest.description.length() > maxDescriptionLength) {
+        if(subjectRequest.description && subjectRequest.description.length() > maxDescriptionLength) {
             throw new SkillException("Bad Description - must not exceed [${maxDescriptionLength}] chars")
         }
 
@@ -242,7 +242,7 @@ class AdminProjService {
         if(badgeRequest.name.length() > 50){
             throw new SkillException("Bad Name [${badgeRequest.name}] - must not exceed 50 chars.")
         }
-        if(badgeRequest.description.length() > maxDescriptionLength) {
+        if(badgeRequest.description && badgeRequest.description.length() > maxDescriptionLength) {
             throw new SkillException("Bad Description - must not exceed [${maxDescriptionLength}] chars")
         }
 
@@ -971,7 +971,7 @@ class AdminProjService {
         if (skillRequest.name.length() > 100) {
             throw new SkillException("Bad Name [${skillRequest.name}] - must not exceed 100 chars.")
         }
-        if(skillRequest.description.length() > maxDescriptionLength) {
+        if(skillRequest.description && skillRequest.description.length() > maxDescriptionLength) {
             throw new SkillException("Bad Description - must not exceed [${maxDescriptionLength}] chars")
         }
         SkillsValidator.isNotBlank(skillRequest.projectId, "Project Id")
