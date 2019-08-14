@@ -86,7 +86,7 @@
               params: data
             }).then((res) => {
               self.loading = false;
-              self.totalNumUsers = res.data.count;
+              self.totalNumUsers = res.data.totalCount;
               return res;
             }).catch(function (e) {
               self.loading = false;

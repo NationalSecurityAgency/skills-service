@@ -1,12 +1,10 @@
 <template>
   <div>
     <sub-page-header title="Badges" action="Badge" @add-action="newBadge"/>
-
     <loading-container v-bind:is-loading="isLoading">
       <transition name="projectContainer" enter-active-class="animated fadeIn">
         <div>
           <div v-if="badges && badges.length" class="row justify-content-center ">
-
             <div v-for="(badge) of badges"
                  :key="badge.id" class="col-lg-4 mb-3"  style="min-width: 23rem;">
               <badge :badge="badge"
@@ -15,10 +13,9 @@
                      @move-badge-up="moveBadgeUp"
                      @move-badge-down="moveBadgeDown"/>
             </div>
-
           </div>
 
-          <no-content3 v-if="!badges || badges.length==0" title="No Badges Yet" sub-title="Start creating badges today!"/>
+          <no-content3 v-if="!badges || badges.length === 0" title="No Badges Yet" sub-title="Start creating badges today!"/>
         </div>
       </transition>
     </loading-container>

@@ -8,8 +8,7 @@
     </div>
     <div slot="footer">
       <i v-if="badgeInternal.endDate" class="fas fa-gem position-absolute" style="font-size: 1rem; top: 1rem; left: 1rem; color: purple"></i>
-      <router-link :to="{ name:'BadgeSkills',
-              params: { projectId: this.badgeInternal.projectId, badgeId: this.badgeInternal.badgeId, badge: this.badgeInternal}}"
+      <router-link :to="buildManageLink()"
                    class="btn btn-outline-primary btn-sm">
         Manage <i class="fas fa-arrow-circle-right"/>
       </router-link>
@@ -29,7 +28,13 @@
   export default {
     name: 'Badge',
     components: { PagePreviewCard, EditAndDeleteDropdown, EditBadge },
-    props: ['badge'],
+    props: {
+      badge: Object,
+      global: {
+        type: Boolean,
+        default: false,
+      },
+    },
     mixins: [MsgBoxMixin],
     data() {
       return {
@@ -64,6 +69,17 @@
             count: this.badgeInternal.totalPoints,
           }],
         };
+      },
+      buildManageLink() {
+        const link = {
+          name: this.global ? 'GlobalBadgeSkills' : 'BadgeSkills',
+          params: {
+            projectId: this.badgeInternal.projectId,
+            badgeId: this.badgeInternal.badgeId,
+            badge: this.badgeInternal,
+          },
+        };
+        return link;
       },
       deleteBadge() {
         const msg = `Deleting Badge Id: ${this.badgeInternal.badgeId} this cannot be undone.`;

@@ -5,7 +5,14 @@
     <div class="card">
       <div class="card-header">Root Users Management</div>
       <div class="card-body">
-        <role-manager :role="role" :user-type="userType" :role-description="roleDescription" />
+        <role-manager :role="root.role" :user-type="root.userType" :role-description="root.roleDescription" />
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">Supervisor Users Management</div>
+      <div class="card-body">
+        <role-manager :role="supervisor.role" :user-type="supervisor.userType" :role-description="supervisor.roleDescription" />
       </div>
     </div>
   </div>
@@ -20,9 +27,16 @@
     components: { SubPageHeader, RoleManager },
     data() {
       return {
-        role: 'ROLE_SUPER_DUPER_ADMIN',
-        roleDescription: 'Root User',
-        userType: 'ROOT',
+        root: {
+          role: 'ROLE_SUPER_DUPER_USER',
+          roleDescription: 'Root User',
+          userType: 'ROOT',
+        },
+        supervisor: {
+          role: 'ROLE_SUPERVISOR',
+          roleDescription: 'Supervisor User',
+          userType: 'SUPERVISOR',
+        },
       };
     },
   };
