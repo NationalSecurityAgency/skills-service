@@ -20,6 +20,8 @@ import skills.storage.repos.SkillRelDefRepo
 import skills.storage.repos.SkillShareDefRepo
 import skills.utils.Props
 
+import static skills.storage.repos.SkillDefRepo.*
+
 @Service
 @Slf4j
 class GlobalSkillsStorageService {
@@ -223,10 +225,10 @@ class GlobalSkillsStorageService {
     }
 
     @Transactional
-    List<SkillDef> getAvailableSkillsForGlobalBadge(String badgeId, String query) {
-        List<SkillDef> allSkillDefs = skillDefRepo.findAllByTypeAndNameLike(SkillDef.ContainerType.Skill, query)
+    List<SkillDefPartialRes> getAvailableSkillsForGlobalBadge(String badgeId, String query) {
+        List<SkillDefPartial> allSkillDefs = skillDefRepo.findAllByTypeAndNameLike(SkillDef.ContainerType.Skill, query)
         Set<String> existingBadgeSkillIds = getSkillsForBadge(badgeId).collect { "${it.projectId}${it.skillId}" }
-        return allSkillDefs.findAll { !("${it.projectId}${it.skillId}" in existingBadgeSkillIds) }.sort().take(10)
+        return allSkillDefs.findAll { !("${it.projectId}${it.skillId}" in existingBadgeSkillIds) }.sort().take(10).collect { convertToSkillDefPartialRes(it) }
     }
 
     @Transactional
@@ -240,13 +242,13 @@ class GlobalSkillsStorageService {
             throw new SkillException("There is no skill id [${skillId}] doesn't exist.", projectId, null)
         }
 
-        List<SkillDefRepo.SkillDefPartial> res = skillRelDefRepo.getGlobalChildrenPartial(parent.skillId, relationshipType)
+        List<SkillDefPartial> res = skillRelDefRepo.getGlobalChildrenPartial(parent.skillId, relationshipType)
         return res.collect { convertToSkillDefPartialRes(it) }
     }
 
     @CompileStatic
     @Profile
-    private SkillDefPartialRes convertToSkillDefPartialRes(SkillDefRepo.SkillDefPartial partial, boolean loadNumUsers = false) {
+    private SkillDefPartialRes convertToSkillDefPartialRes(SkillDefPartial partial, boolean loadNumUsers = false) {
         SkillDefPartialRes res = new SkillDefPartialRes(
                 skillId: partial.skillId,
                 projectId: partial.projectId,
@@ -268,14 +270,14 @@ class GlobalSkillsStorageService {
         res.numMaxOccurrencesIncrementInterval = partial.numMaxOccurrencesIncrementInterval
 
         if (loadNumUsers) {
-            res.numUsers = calculateDistinctUsersForSkill((SkillDefRepo.SkillDefPartial)partial)
+            res.numUsers = calculateDistinctUsersForSkill((SkillDefPartial)partial)
         }
 
         return res;
     }
 
     @Profile
-    private int calculateDistinctUsersForSkill(SkillDefRepo.SkillDefPartial partial) {
+    private int calculateDistinctUsersForSkill(SkillDefPartial partial) {
         skillDefRepo.calculateDistinctUsersForASingleSkill(partial.projectId, partial.skillId)
     }
 

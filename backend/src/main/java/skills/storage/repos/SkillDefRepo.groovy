@@ -49,16 +49,22 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
     List<SkillDef> findAllByType(SkillDef.ContainerType type)
 
     @Nullable
-    @Query('''SELECT
+    @Query('''SELECT         
         s.id as id,
-        s.name as name,
-        s.skillId as skillId,
-        s.projectId as projectId,
+        s.name as name, 
+        s.skillId as skillId, 
+        s.projectId as projectId, 
+        s.version as version,
+        s.pointIncrement as pointIncrement,
+        s.pointIncrementInterval as pointIncrementInterval,
+        s.numMaxOccurrencesIncrementInterval as numMaxOccurrencesIncrementInterval,
+        s.totalPoints as totalPoints,
+        s.type as skillType,
         s.displayOrder as displayOrder,
         s.created as created,
-        s.version as version
+        s.updated as updated
         from SkillDef s where s.type = ?1 and upper(s.name) like UPPER(CONCAT('%', ?2, '%'))''')
-    List<SkillDefSkinny> findAllByTypeAndNameLike(SkillDef.ContainerType type, String name)
+    List<SkillDefPartial> findAllByTypeAndNameLike(SkillDef.ContainerType type, String name)
 
     List<SkillDef> findAllByProjectIdAndType(@Nullable String id, SkillDef.ContainerType type)
     @Nullable
