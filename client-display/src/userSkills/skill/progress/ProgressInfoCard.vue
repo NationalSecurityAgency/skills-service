@@ -5,9 +5,9 @@
                 <div class="d-inline-block mt-2 mr-3">
                     <i class="fa-3x" :class="icon"/>
                 </div>
-                <div class="media-body">
+                <div class="media-body text-primary">
                     <h3 class="mb-0">{{points | number}}</h3>
-                    <div class="mt-0 pt-0 text-primary">Points</div>
+                    <div class="mt-0 pt-0">Points</div>
                 </div>
             </div>
             <div class="mt-2">{{label}}</div>

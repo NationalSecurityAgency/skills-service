@@ -1,5 +1,5 @@
 <template>
-    <div class="container">
+    <div class="container text-primary">
         <div v-if="!loading.dependencies && !loading.skill">
             <skills-title>Skill Overview</skills-title>
             <skill-overview class="my-2" :skill="skill"></skill-overview>
