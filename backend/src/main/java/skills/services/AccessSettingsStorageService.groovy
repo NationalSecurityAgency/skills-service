@@ -227,13 +227,13 @@ class AccessSettingsStorageService {
 
     UserInfoRes loadUserInfo(String userId) {
         User user = userRepository.findByUserIdIgnoreCase(userId)
-        List<SettingsResult> settings = settingsService.getUserSettingsForGroup(user.userId, USER_INFO_SETTING_GROUP)
+        List<SettingsResult> settings = settingsService.getUserSettingsForGroup(user.userId, AccessSettingsStorageService.USER_INFO_SETTING_GROUP)
         new UserInfoRes(
                 userId: user.userId,
-                first: settings.find({it.setting == "firstName"}) ?: "",
-                last: settings.find({it.setting == "lastName"}) ?: "",
-                nickname: settings.find({it.setting == "nickname"}) ?: "",
-                dn: settings.find({it.setting == "DN"}) ?: "",
+                first: settings.find({it.setting == "firstName"})?.value ?: "",
+                last: settings.find({it.setting == "lastName"})?.value ?: "",
+                nickname: settings.find({it.setting == "nickname"})?.value ?: "",
+                dn: settings.find({it.setting == "DN"})?.value ?: "",
         )
     }
 
