@@ -3,6 +3,7 @@ package skills.controller
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.PageRequest
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
@@ -69,6 +70,9 @@ class AdminController {
 
     @Autowired
     SkillEventAdminService skillEventService
+
+    @Value('#{"${skills.config.ui.maxTimeWindowInMinutes}"}')
+    int maxTimeWindowInMinutes
 
     @RequestMapping(value = "/projects/{id}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
     @ResponseBody
@@ -325,7 +329,7 @@ class AdminController {
 
         skills.controller.exceptions.SkillsValidator.isTrue(skillRequest.pointIncrement > 0, "pointIncrement must be > 0", projectId, skillId)
         skills.controller.exceptions.SkillsValidator.isTrue(skillRequest.pointIncrementInterval >= 0, "pointIncrementInterval must be >= 0", projectId, skillId)
-        skills.controller.exceptions.SkillsValidator.isTrue(skillRequest.pointIncrementInterval <= 10000, "pointIncrementInterval must be <= 10000", projectId, skillId)
+        skills.controller.exceptions.SkillsValidator.isTrue(skillRequest.pointIncrementInterval <= maxTimeWindowInMinutes, "pointIncrementInterval must be <= $maxTimeWindowInMinutes", projectId, skillId)
         skills.controller.exceptions.SkillsValidator.isTrue(skillRequest.numPerformToCompletion > 0, "numPerformToCompletion must be > 0", projectId, skillId)
         skills.controller.exceptions.SkillsValidator.isTrue(skillRequest.numPerformToCompletion <= 10000, "numPerformToCompletion must be <= 10000", projectId, skillId)
 
