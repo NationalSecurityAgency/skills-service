@@ -6,4 +6,5 @@ import groovy.transform.Canonical
 class TableResult {
     List data = []
     Integer count = 0
+    Integer totalCount = 0
 }
