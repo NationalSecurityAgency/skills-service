@@ -42,6 +42,18 @@ Vue.directive('focus', {
   },
 });
 
+VeeValidate.Validator.extend('maxDescriptionLength', {
+  getMessage: field => `${field} cannot exceed ${store.getters.config.descriptionMaxLength} characters.`,
+  validate(value) {
+    if (value.length > store.getters.config.descriptionMaxLength) {
+      return false;
+    }
+    return true;
+  },
+}, {
+  immediate: false,
+});
+
 require('vue-multiselect/dist/vue-multiselect.min.css');
 
 store.dispatch('restoreSessionIfAvailable').finally(() => {
