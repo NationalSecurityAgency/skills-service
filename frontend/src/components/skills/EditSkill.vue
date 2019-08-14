@@ -94,11 +94,12 @@
               </label>
               <div class="row">
                 <div class="col">
-                  <ValidationProvider rules="required|numeric|min_value:0|max_value:165|cantBe0IfMins0" v-slot="{errors}" name="Hours">
+                  <ValidationProvider rules="required|numeric|min_value:0|hoursMaxTimeWindow:timeWindowMinutes|cantBe0IfMins0" vid="timeWindowHours" v-slot="{errors}" name="Hours">
                     <div class="input-group">
                       <input class="form-control d-inline" type="number" min="0" v-model="skillInternal.pointIncrementIntervalHrs"
                              data-vv-name="pointIncrementIntervalHrs"
-                             value="8" :disabled="!skillInternal.timeWindowEnabled"/>
+                             value="8" :disabled="!skillInternal.timeWindowEnabled"
+                             ref="timeWindowHours"/>
                       <div class="input-group-append">
                         <span class="input-group-text" id="hours-append">Hours</span>
                       </div>
@@ -107,11 +108,11 @@
                   </ValidationProvider>
                 </div>
                 <div class="col">
-                  <ValidationProvider rules="required|numeric|min_value:0|max_value:59|cantBe0IfHours0" v-slot="{errors}" name="Minutes">
+                  <ValidationProvider rules="required|numeric|min_value:0|max_value:59|minutesMaxTimeWindow:timeWindowHours|cantBe0IfHours0" vid="timeWindowMinutes" v-slot="{errors}" name="Minutes">
                     <div class="input-group">
                       <input class="form-control d-inline"  type="number" min="0" v-model="skillInternal.pointIncrementIntervalMins"
                              data-vv-name="pointIncrementIntervalMins"
-                             value="0" :disabled="!skillInternal.timeWindowEnabled"/>
+                             value="0" :disabled="!skillInternal.timeWindowEnabled" ref="timeWindowMinutes"/>
                       <div class="input-group-append">
                         <span class="input-group-text" id="minutes-append">Minutes</span>
                       </div>
@@ -373,6 +374,39 @@
           },
         }, {
           immediate: true,
+        });
+
+        const validateWindow = (windowHours, windowMinutes) => {
+          let hours = 0;
+          let minutes = 0;
+          if (windowHours) {
+            hours = parseInt(windowHours, 10);
+          }
+
+          if (windowMinutes) {
+            minutes = parseInt(windowMinutes, 10);
+          }
+
+          return ((hours * 60) + minutes) <= this.$store.getters.config.maxTimeWindowInMinutes;
+        };
+
+        Validator.extend('hoursMaxTimeWindow', {
+          getMessage: () => `Time Window must be less then ${self.$store.getters.config.maxTimeWindowInMinutes / 60} hours`,
+          validate(value, [otherValue]) {
+            return validateWindow(value, otherValue);
+          },
+        }, {
+          immediate: false,
+          hasTarget: true,
+        });
+        Validator.extend('minutesMaxTimeWindow', {
+          getMessage: () => `Time Window must be less then ${self.$store.getters.config.maxTimeWindowInMinutes / 60} hours`,
+          validate(value, [otherValue]) {
+            return validateWindow(otherValue, value);
+          },
+        }, {
+          immediate: false,
+          hasTarget: true,
         });
       },
       saveSkill() {

@@ -42,6 +42,7 @@ skills:
   config:
     ui:
       descriptionMaxLength: 2000
+      maxTimeWindowInMinutes: 43200
   profiles:
     active: default
 #logging:
