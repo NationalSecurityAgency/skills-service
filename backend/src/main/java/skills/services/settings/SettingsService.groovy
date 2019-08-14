@@ -42,7 +42,7 @@ class SettingsService {
         if (setting) {
             applyListeners(setting, request)
             Props.copy(request, setting)
-            log.info("Updating [{}]", setting)
+            log.debug("Updating [{}]", setting)
         } else {
             setting = new Setting()
             setting.type = SettingTypeUtil.getType(request)
@@ -53,7 +53,7 @@ class SettingsService {
 
 
         settingsDataAccessor.save(setting)
-        log.info("saved [{}]", setting)
+        log.debug("saved [{}]", setting)
 
         return convertToRes(setting)
     }
