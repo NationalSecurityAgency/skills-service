@@ -3,12 +3,17 @@ package skills.intTests
 import org.springframework.beans.factory.annotation.Autowired
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
+import skills.storage.model.ProjDef
 import skills.storage.repos.LevelDefRepo
+import skills.storage.repos.ProjDefRepo
 
 class DataCleanupSpecs extends DefaultIntSpec {
 
     @Autowired
     LevelDefRepo levelDefRepo
+
+    @Autowired
+    ProjDefRepo projDefRepo
 
     def "make sure there are no orphan levels in db when project is removed"() {
         Map proj = SkillsFactory.createProject()
@@ -18,9 +23,10 @@ class DataCleanupSpecs extends DefaultIntSpec {
         skillsService.createProject(proj)
         skillsService.createSubject(subject)
 
-        long countBefore = levelDefRepo.count()
+        ProjDef projDef = projDefRepo.findByProjectId(proj.projectId)
+        long countBefore = levelDefRepo.findAllByProjectId(projDef.id).size()
         skillsService.deleteProject(proj.projectId)
-        long countAfter = levelDefRepo.count()
+        long countAfter = levelDefRepo.findAllByProjectId(projDef.id).size()
 
         then:
         countBefore > 0
