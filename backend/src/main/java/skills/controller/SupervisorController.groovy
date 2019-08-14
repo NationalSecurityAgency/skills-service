@@ -70,7 +70,7 @@ class SupervisorController {
         SkillsValidator.isTrue((badgeRequest.startDate && badgeRequest.endDate) || (!badgeRequest.startDate && !badgeRequest.endDate),
                 "If one date is provided then both start and end dates must be provided")
 
-        globalSkillsStorageService.saveBadge(badgeRequest)
+        globalSkillsStorageService.saveBadge(badgeId, badgeRequest)
         return new RequestResult(success: true)
     }
 
@@ -172,11 +172,7 @@ class SupervisorController {
     List<SkillDefRes> suggestBadgeSkills(@PathVariable("badgeId") String badgeId,
                                          @RequestParam String query) {
         SkillsValidator.isNotBlank(badgeId, "Badge Id")
-        if (query) {
-            String q = query
-            log.info("Optional query param is [${q}]")
-        }
-        return globalSkillsStorageService.getAvailableSkillsForGlobalBadge(badgeId ,"")
+        return globalSkillsStorageService.getAvailableSkillsForGlobalBadge(badgeId, query)
     }
 
 //    @GetMapping('/supervisorUsers')
