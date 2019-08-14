@@ -2,21 +2,18 @@
   <div>
     <page-header :loading="isLoading" :options="headerOptions"/>
 
-    <navigation :nav-items="[
-          {name: 'Overview', iconClass: 'fa-info-circle', page: 'SkillOverview'},
-          {name: 'Dependencies', iconClass: 'fa-vector-square', page: 'SkillDependencies'},
-          {name: 'Users', iconClass: 'fa-users', page: 'SkillUsers'},
-          {name: 'Add Event', iconClass: 'fa-user-plus', page: 'AddSkillEvent'},
-          {name: 'Metrics', iconClass: 'fa-chart-bar', page: 'SkillMetrics'},
-        ]">
+    <navigation :nav-items="navItems">
     </navigation>
   </div>
 </template>
 
 <script>
+  import { createNamespacedHelpers } from 'vuex';
   import SkillsService from './SkillsService';
   import Navigation from '../utils/Navigation';
   import PageHeader from '../utils/pages/PageHeader';
+
+  const { mapGetters } = createNamespacedHelpers('subjects');
 
   export default {
     name: 'SkillPage',
@@ -34,6 +31,23 @@
     },
     mounted() {
       this.loadSkill();
+    },
+    computed: {
+      ...mapGetters([
+        'subject',
+      ]),
+      navItems() {
+        const items = [];
+        items.push({ name: 'Overview', iconClass: 'fa-info-circle', page: 'SkillOverview' });
+        items.push({ name: 'Dependencies', iconClass: 'fa-vector-square', page: 'SkillDependencies' });
+        items.push({ name: 'Users', iconClass: 'fa-users', page: 'SkillUsers' });
+        const addEventDisabled = this.subject.totalPoints < this.$store.state.minimumSubjectPoints;
+        items.push({
+          name: 'Add Event', iconClass: 'fa-user-plus', page: 'AddSkillEvent', isDisabled: addEventDisabled,
+        });
+        items.push({ name: 'Metrics', iconClass: 'fa-chart-bar', page: 'SkillMetrics' });
+        return items;
+      },
     },
     watch: {
       // Vue caches components and when re-directed to the same component the path will be pushed
