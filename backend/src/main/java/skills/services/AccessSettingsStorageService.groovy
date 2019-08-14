@@ -52,6 +52,9 @@ class AccessSettingsStorageService {
     @Autowired
     SettingsService settingsService
 
+    @Autowired
+    SortingService sortingService
+
     @Transactional(readOnly = true)
     List<UserRole> getUserRolesForProjectId(String projectId) {
         List<UserRole> res = userRoleRepository.findAllByProjectId(projectId)
@@ -155,6 +158,9 @@ class AccessSettingsStorageService {
         user.roles.add(userRole)
         userRepository.save(user)
         log.debug("Created userRole [{}]", userRole)
+
+        log.debug("setting sort order for user [{}] on project [{}]", userId, projectId)
+        sortingService.setNewProjectDisplayOrder(projectId, userId)
         return userRole
     }
 

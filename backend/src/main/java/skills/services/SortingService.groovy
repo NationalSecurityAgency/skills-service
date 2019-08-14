@@ -40,9 +40,15 @@ class SortingService {
     Integer getProjectSortOrder(String projectId){
         UserInfo userInfo = userInfoService.getCurrentUser()
 
-        SettingsResult setting = settingsService.getUserSetting(userInfo.username, projectId, PROJECT_SORT_SETTING, PROJECT_SORT_GROUP)
+        return getProjectSortOrder(projectId, userInfo.username)
+    }
+
+    @Transactional(readOnly = true)
+    Integer getProjectSortOrder(String projectId, String userId){
+
+        SettingsResult setting = settingsService.getUserSetting(userId, projectId, PROJECT_SORT_SETTING, PROJECT_SORT_GROUP)
         if(!setting){
-            log.debug("no user sort setting exists for user [{}] for project [{}]", userInfo.username, projectId)
+            log.debug("no user sort setting exists for user [{}] for project [{}]", userId, projectId)
             return null
         }
 
@@ -51,7 +57,11 @@ class SortingService {
 
     private Integer getHighestSortForUserProjects(){
         UserInfo userInfo = userInfoService.getCurrentUser()
-        List<SettingsResult> sortOrder = settingsService.getUserProjectSettingsForGroup(userInfo.username, PROJECT_SORT_GROUP)
+        return getHighestSortForUserProjects(userInfo.username)
+    }
+
+    private Integer getHighestSortForUserProjects(String userId){
+        List<SettingsResult> sortOrder = settingsService.getUserProjectSettingsForGroup(userId, PROJECT_SORT_GROUP)
         if (!sortOrder) {
             return 0
         }
@@ -78,10 +88,23 @@ class SortingService {
     @Transactional
     void setNewProjectDisplayOrder(String projectId){
         //check for existing sort order for this projectId, just to be sure
-        assert getProjectSortOrder(projectId) == null
+        if(getProjectSortOrder(projectId) != null){
+            return
+        }
         Integer currentHighest = getHighestSortForUserProjects()
 
         setProjectSortOrder(projectId, currentHighest == null ? 0 : currentHighest+1)
+    }
+
+    @Transactional
+    void setNewProjectDisplayOrder(String projectId, String userId){
+        //check for existing sort order for this projectId, just to be sure
+        if (getProjectSortOrder(projectId, userId) != null){
+            return
+        }
+        Integer currentHighest = getHighestSortForUserProjects(userId)
+
+        setProjectSortOrder(projectId, currentHighest == null ? 0 : currentHighest+1, userId)
     }
 
 
@@ -89,8 +112,14 @@ class SortingService {
     void setProjectSortOrder(String projectId, Integer order){
         UserInfo userInfo = userInfoService.getCurrentUser()
 
+        setProjectSortOrder(projectId, order, userInfo.username)
+    }
+
+    @Transactional
+    void setProjectSortOrder(String projectId, Integer order, String userId){
+
         UserProjectSettingsRequest request = new UserProjectSettingsRequest()
-        request.userId = userInfo.username
+        request.userId = userId
         request.projectId = projectId
         request.value = order
         request.settingGroup = PROJECT_SORT_GROUP
@@ -100,7 +129,7 @@ class SortingService {
     }
 
     /**
-     * Changes moveMeProjectId to be above or below the adajcentProjectId's sort order based on the direction parameter.
+     * Changes moveMeProjectId to be above or below the adjacentProjectId's sort order based on the direction parameter.
      *
      * Note that these projectIds must be adjacent to one another to perform this operation
      *

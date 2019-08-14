@@ -142,9 +142,6 @@ class AdminProjService {
                 projectDefinition = projDefRepo.save(projectDefinition)
             }
 
-            if (!userIdParam) {
-                sortingService.setNewProjectDisplayOrder(projectRequest.projectId)
-            }
             log.debug("Saved [{}]", projectDefinition)
 
             levelDefService.createDefault(projectRequest.projectId, projectDefinition)
