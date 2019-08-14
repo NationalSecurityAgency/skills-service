@@ -99,12 +99,20 @@
               selector: 'body #app',
               styleName: 'background-color',
             },
-            secondaryTextColor: {
-              selector: 'body #app .text-muted, body #app .text-secondary',
+            pageTitleTextColor: {
+              selector: 'body #app .skills-page-title-text-color',
               styleName: 'color',
             },
-            primaryTextColor: {
-              selector: 'body #app .text-primary, body #app .card-header, body #app .card-body, body #app .skill-tile-label, body #app .card-title body #app .card, body #app h2, body #app h3, body #app p',
+            textPrimaryColor: {
+              selector: 'body #app .text-primary, body #app',
+              styleName: 'color',
+            },
+            textPrimaryMutedColor: {
+              selector: 'body #app .text-primary .text-muted, body #app .text-primary.text-muted',
+              styleName: 'color',
+            },
+            textSecondaryColor: {
+              selector: 'body #app .text-muted, body #app .text-secondary',
               styleName: 'color',
             },
             tiles: {
