@@ -5,7 +5,7 @@
     <multiselect v-model="selectedInternal" placeholder="Select skill(s)..."
                  :options="options" :multiple="multipleSelection" :taggable="false" :blockKeys="['Delete']"
                  :hide-selected="true" label="name" track-by="id" :is-loading="isLoading"
-                 v-on:remove="removed" v-on:select="added" v-on:search-changed="searchChanged">
+                 v-on:remove="removed" v-on:select="added" v-on:search-change="searchChanged" :options-limit="10" :internal-search="false">
       <template slot="option" slot-scope="props">
         <slot name="dropdown-item" v-bind:props="props">
           <h6>{{ props.option.name }}</h6>
@@ -69,7 +69,7 @@
         this.$emit('added', addedItem);
       },
       searchChanged(query) {
-        this.$emit('search-changed', query);
+        this.$emit('search-change', query);
       },
     },
   };

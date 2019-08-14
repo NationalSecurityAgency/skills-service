@@ -10,10 +10,10 @@ import skills.storage.model.SkillRelDef
 
 interface SkillDefWithExtraRepo extends PagingAndSortingRepository<SkillDefWithExtra, Integer> {
 
-    List<SkillDefWithExtra> findAllByProjectIdAndType(String id, SkillDef.ContainerType type)
+    List<SkillDefWithExtra> findAllByProjectIdAndType(@Nullable String id, SkillDef.ContainerType type)
 
     @Nullable
-    SkillDefWithExtra findByProjectIdAndSkillIdIgnoreCaseAndType(String id, String skillId, SkillDef.ContainerType type)
+    SkillDefWithExtra findByProjectIdAndSkillIdIgnoreCaseAndType(@Nullable String id, String skillId, SkillDef.ContainerType type)
 
     @Nullable
     SkillDefWithExtra findByProjectIdAndSkillIdAndType(String id, String skillId, SkillDef.ContainerType type)

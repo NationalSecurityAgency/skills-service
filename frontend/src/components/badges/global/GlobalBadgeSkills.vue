@@ -5,7 +5,7 @@
     <simple-card>
       <loading-container v-bind:is-loading="loading.availableSkills || loading.badgeSkills || loading.skillOp">
         <skills-selector2 :options="availableSkills" class="mb-4"
-                          v-on:added="skillAdded"
+                          v-on:added="skillAdded" v-on:search-change="searchChanged"
                           :onlySingleSelectedValue="true"></skills-selector2>
 
         <simple-skills-table v-if="badgeSkills && badgeSkills.length > 0"
@@ -56,20 +56,31 @@
     mounted() {
       this.projectId = this.$route.params.projectId;
       this.badgeId = this.$route.params.badgeId;
-      this.badge = this.$route.params.badge;
+      this.loadBadge();
       this.loadAssignedBadgeSkills();
     },
     methods: {
+      loadBadge() {
+        this.isLoading = false;
+        if (this.$route.params.badge) {
+          this.badge = this.$route.params.badge;
+        } else {
+          GlobalBadgeService.getBadge(this.badgeId)
+            .then((response) => {
+              this.badge = response;
+            });
+        }
+      },
       loadAssignedBadgeSkills() {
         GlobalBadgeService.getBadgeSkills(this.badgeId)
           .then((loadedSkills) => {
             this.badgeSkills = loadedSkills;
             this.loading.badgeSkills = false;
-            this.loadAvailableBadgeSkills();
+            this.loadAvailableBadgeSkills('');
           });
       },
-      loadAvailableBadgeSkills() {
-        GlobalBadgeService.suggestProjectSkills(this.badgeId, '')
+      loadAvailableBadgeSkills(query) {
+        GlobalBadgeService.suggestProjectSkills(this.badgeId, query)
           .then((loadedSkills) => {
             const badgeSkillIds = this.badgeSkills.map(item => item.id);
             this.availableSkills = loadedSkills.filter(item => !badgeSkillIds.includes(item.id));
@@ -103,6 +114,9 @@
             this.loading.skillOp = false;
             this.$emit('skills-changed', newItem);
           });
+      },
+      searchChanged(query) {
+        this.loadAvailableBadgeSkills(query);
       },
     },
   };

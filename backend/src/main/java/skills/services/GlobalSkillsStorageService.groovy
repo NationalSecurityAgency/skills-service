@@ -15,6 +15,7 @@ import skills.services.settings.SettingsService
 import skills.storage.model.*
 import skills.storage.model.SkillRelDef.RelationshipType
 import skills.storage.repos.SkillDefRepo
+import skills.storage.repos.SkillDefWithExtraRepo
 import skills.storage.repos.SkillRelDefRepo
 import skills.storage.repos.SkillShareDefRepo
 import skills.utils.Props
@@ -25,6 +26,9 @@ class GlobalSkillsStorageService {
 
     @Autowired
     SkillDefRepo skillDefRepo
+
+    @Autowired
+    SkillDefWithExtraRepo skillDefWithExtraRepo
 
     @Autowired
     SkillRelDefRepo skillRelDefRepo
@@ -62,44 +66,39 @@ class GlobalSkillsStorageService {
 
 
     @Transactional()
-    void saveBadge(BadgeRequest badgeRequest) {
+    void saveBadge(String originalBadgeId, BadgeRequest badgeRequest) {
         IdFormatValidator.validate(badgeRequest.badgeId)
         if(badgeRequest.name.length() > 50){
             throw new SkillException("Bad Name [${badgeRequest.name}] - must not exceed 50 chars.")
         }
 
-        boolean isEdit = badgeRequest.id
-//        boolean isEdit = skillDefRepo.findByProjectIdAndNameIgnoreCaseAndType(null, badgeRequest.name, SkillDef.ContainerType.GlobalBadge)
-        SkillDef skillDefinition
-        if (isEdit) {
-            Optional<SkillDef> existing = skillDefRepo.findById(badgeRequest.id)
-            if (!existing.present) {
-                throw new SkillException("Badge id [${badgeRequest.id}] doesn't exist.")
-            }
-            log.info("Updating with [{}]", badgeRequest)
-            skillDefinition = existing.get()
+        SkillDefWithExtra skillDefinition = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(null, originalBadgeId, SkillDef.ContainerType.Badge)
 
-            Props.copy(badgeRequest, skillDefinition)
-            skillDefinition.skillId = badgeRequest.badgeId
-        } else {
-            SkillDef idExists = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(null, badgeRequest.badgeId, SkillDef.ContainerType.GlobalBadge)
+        if (!skillDefinition || !skillDefinition.skillId.equalsIgnoreCase(badgeRequest.badgeId)) {
+            SkillDef idExists = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(null, badgeRequest.badgeId, SkillDef.ContainerType.Badge)
             if (idExists) {
                 throw new SkillException("Badge with id [${badgeRequest.badgeId}] already exists! Sorry!", null, null, ErrorCode.ConstraintViolation)
             }
-
-            SkillDef nameExists = skillDefRepo.findByProjectIdAndNameIgnoreCaseAndType(null, badgeRequest.name, SkillDef.ContainerType.GlobalBadge)
+        }
+        if (!skillDefinition || !skillDefinition.name.equalsIgnoreCase(badgeRequest.name)) {
+            SkillDef nameExists = skillDefRepo.findByProjectIdAndNameIgnoreCaseAndType(null, badgeRequest.name, SkillDef.ContainerType.Badge)
             if (nameExists) {
                 throw new SkillException("Badge with name [${badgeRequest.name}] already exists! Sorry!", null, null, ErrorCode.ConstraintViolation)
             }
+        }
 
+        if (skillDefinition) {
+            Props.copy(badgeRequest, skillDefinition)
+            skillDefinition.skillId = badgeRequest.badgeId
+        } else {
 //            ProjDef projDef = getProjDef(projectId)
 
-            Integer lastDisplayOrder = null//projDef.badges?.collect({ it.displayOrder })?.max()
+            Integer lastDisplayOrder = getBadges()?.collect({ it.displayOrder })?.max()
             int displayOrder = lastDisplayOrder != null ? lastDisplayOrder + 1 : 0
 
-            skillDefinition = new SkillDef(
+            skillDefinition = new SkillDefWithExtra(
                     type: SkillDef.ContainerType.GlobalBadge,
-                    projectId: null,
+//                    projectId: projectId,
                     skillId: badgeRequest.badgeId,
                     name: badgeRequest?.name,
                     description: badgeRequest?.description,
@@ -112,10 +111,10 @@ class GlobalSkillsStorageService {
             log.info("Saving [{}]", skillDefinition)
         }
 
-        SkillDef savedSkill
+        SkillDefWithExtra savedSkill
 
         badgeDataIntegrityViolationExceptionHandler.handle(null) {
-            savedSkill = skillDefRepo.save(skillDefinition)
+            savedSkill = skillDefWithExtraRepo.save(skillDefinition)
         }
 
         log.info("Saved [{}]", savedSkill)
@@ -127,7 +126,7 @@ class GlobalSkillsStorageService {
     }
 
     @Transactional()
-    void removeSkillFromBadge(String badgeId, String skillId) {
+    void removeSkillFromBadge(String badgeId, projectId, String skillId) {
         removeGraphRelationship(badgeId, SkillDef.ContainerType.GlobalBadge, projectId, skillId, RelationshipType.BadgeDependence)
     }
     @Transactional
@@ -207,14 +206,14 @@ class GlobalSkillsStorageService {
 
     @Transactional(readOnly = true)
     List<BadgeResult> getBadges() {
-        List<SkillDef> badges = skillDefRepo.findAllByProjectIdAndType(null, SkillDef.ContainerType.GlobalBadge)
+        List<SkillDefWithExtra> badges = skillDefWithExtraRepo.findAllByProjectIdAndType(null, SkillDef.ContainerType.GlobalBadge)
         List<BadgeResult> res = badges.collect { convertToBadge(it) }
         return res?.sort({ it.displayOrder })
     }
 
     @Transactional(readOnly = true)
     BadgeResult getBadge(String badgeId) {
-        SkillDef skillDef = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(null, badgeId, SkillDef.ContainerType.GlobalBadge)
+        SkillDefWithExtra skillDef = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(null, badgeId, SkillDef.ContainerType.GlobalBadge)
         return convertToBadge(skillDef, true)
     }
 
@@ -225,9 +224,9 @@ class GlobalSkillsStorageService {
 
     @Transactional
     List<SkillDef> getAvailableSkillsForGlobalBadge(String badgeId, String query) {
-        List<SkillDef> allSkillDefs = skillDefRepo.findAllByType(SkillDef.ContainerType.Skill)
-        List<SkillDefPartialRes> existingBadgeSkills = getSkillsForBadge(badgeId)
-        return allSkillDefs.findAll { !(it.id in existingBadgeSkills.id) }.sort().take(10)
+        List<SkillDef> allSkillDefs = skillDefRepo.findAllByTypeAndNameLike(SkillDef.ContainerType.Skill, query)
+        Set<String> existingBadgeSkillIds = getSkillsForBadge(badgeId).collect { "${it.projectId}${it.skillId}" }
+        return allSkillDefs.findAll { !("${it.projectId}${it.skillId}" in existingBadgeSkillIds) }.sort().take(10)
     }
 
     @Transactional
@@ -249,7 +248,6 @@ class GlobalSkillsStorageService {
     @Profile
     private SkillDefPartialRes convertToSkillDefPartialRes(SkillDefRepo.SkillDefPartial partial, boolean loadNumUsers = false) {
         SkillDefPartialRes res = new SkillDefPartialRes(
-                id: partial.id,
                 skillId: partial.skillId,
                 projectId: partial.projectId,
                 name: partial.name,
@@ -314,9 +312,8 @@ class GlobalSkillsStorageService {
     }
 
     @Profile
-    private BadgeResult convertToBadge(SkillDef skillDef, boolean loadRequiredSkills = false) {
+    private BadgeResult convertToBadge(SkillDefWithExtra skillDef, boolean loadRequiredSkills = false) {
         BadgeResult res = new BadgeResult(
-                id: skillDef.id,
                 badgeId: skillDef.skillId,
                 projectId: skillDef.projectId,
                 name: skillDef.name,
@@ -328,15 +325,17 @@ class GlobalSkillsStorageService {
         )
 
         if (loadRequiredSkills) {
-            List<SkillRelDef> dependentSkillsRels = skillRelDefRepo.findAllByParentAndType(skillDef, RelationshipType.BadgeDependence)
-            res.requiredSkills = dependentSkillsRels?.collect { convertToSkillDefRes(it.child) }
-        }
-
-        res.numSkills = skillDefRepo.countChildSkillsByIdAndRelationshipType(skillDef, RelationshipType.BadgeDependence)
-        if (res.numSkills > 0) {
-            res.totalPoints = skillDefRepo.sumChildSkillsTotalPointsBySkillAndRelationshipType(skillDef, RelationshipType.BadgeDependence)
+            List<SkillDef> dependentSkills = skillDefRepo.findChildSkillsByIdAndRelationshipType(skillDef.id, SkillRelDef.RelationshipType.BadgeDependence)
+            res.requiredSkills = dependentSkills?.collect { convertToSkillDefRes(it) }
+            res.numSkills = dependentSkills ? dependentSkills.size() : 0
+            res.totalPoints = dependentSkills ? dependentSkills?.collect({ it.totalPoints })?.sum() : 0
         } else {
-            res.totalPoints = 0
+            res.numSkills = skillDefRepo.countChildSkillsByIdAndRelationshipType(skillDef.id, SkillRelDef.RelationshipType.BadgeDependence)
+            if (res.numSkills > 0) {
+                res.totalPoints = skillDefRepo.sumChildSkillsTotalPointsBySkillAndRelationshipType(skillDef.id, SkillRelDef.RelationshipType.BadgeDependence)
+            } else {
+                res.totalPoints = 0
+            }
         }
         return res
     }
