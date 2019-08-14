@@ -125,14 +125,14 @@ class AccessSettingsStorageService {
     }
 
     private void deleteUserRoleInternal(String userId, String projectId, RoleName roleName) {
-        log.info('Deleting user-role for userId [{}] and role [{}] on project [{}]', userId, roleName, projectId)
+        log.debug('Deleting user-role for userId [{}] and role [{}] on project [{}]', userId, roleName, projectId)
         User user = userRepository.findByUserIdIgnoreCase(userId)
         UserRole userRole = user?.roles?.find {it.projectId == projectId && it.roleName == roleName}
         assert userRole, "DELETE FAILED -> no user-role with project id [$projectId], userId [$userId] and roleName [$roleName]"
 
         assert user.roles.remove(userRole), "DELETE FAILED -> failed to remove user-role with project id [$projectId], userId [$userId] and roleName [$roleName]"
         userRepository.save(user)
-        log.info("Deleted userRole [{}]", userRole)
+        log.debug("Deleted userRole [{}]", userRole)
     }
 
     @Transactional()
@@ -141,7 +141,7 @@ class AccessSettingsStorageService {
     }
 
     private UserRole addUserRoleInternal(String userId, String projectId, RoleName roleName) {
-        log.info('Creating user-role for ID [{}] and role [{}] on project [{}]', userId, roleName, projectId)
+        log.debug('Creating user-role for ID [{}] and role [{}] on project [{}]', userId, roleName, projectId)
         User user = userRepository.findByUserIdIgnoreCase(userId)
         if (user) {
             // check that the new user role does not already exist
@@ -154,7 +154,7 @@ class AccessSettingsStorageService {
         UserRole userRole = new UserRole(userId: userId, roleName: roleName, projectId: projectId)
         user.roles.add(userRole)
         userRepository.save(user)
-        log.info("Created userRole [{}]", userRole)
+        log.debug("Created userRole [{}]", userRole)
         return userRole
     }
 
@@ -172,11 +172,11 @@ class AccessSettingsStorageService {
 
         if (user) {
             // updating an existing user
-            log.info("Updating existing app user for ID [{}], DN [{}]", userInfo.username, userInfo.userDn)
+            log.debug("Updating existing app user for ID [{}], DN [{}]", userInfo.username, userInfo.userDn)
             updateUser(userInfo, user)
         } else {
             // create new user with APP_USER role
-            log.info("Creating new app user for ID [{}], DN [{}]", userInfo.username, userInfo.userDn)
+            log.debug("Creating new app user for ID [{}], DN [{}]", userInfo.username, userInfo.userDn)
             user = createNewUser(userInfo)
         }
         userRepository.save(user)

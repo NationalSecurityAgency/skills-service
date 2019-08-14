@@ -123,12 +123,12 @@ class AdminProjService {
         }
         if (projectDefinition) {
             Props.copy(projectRequest, projectDefinition)
-            log.info("Updating [{}]", projectDefinition)
+            log.debug("Updating [{}]", projectDefinition)
 
             dataIntegrityViolationExceptionHandler.handle(projectDefinition.projectId){
                 projectDefinition = projDefRepo.save(projectDefinition)
             }
-            log.info("Saved [{}]", projectDefinition)
+            log.debug("Saved [{}]", projectDefinition)
         } else {
             // TODO: temp hack around since user is not yet defined when Inception project is created
             // This will be addressed in ticket #139
@@ -136,7 +136,7 @@ class AdminProjService {
 
             projectDefinition = new ProjDef(projectId: projectRequest.projectId, name: projectRequest.name,
                     clientSecret: clientSecret)
-            log.info("Created project [{}]", projectDefinition)
+            log.debug("Created project [{}]", projectDefinition)
 
             dataIntegrityViolationExceptionHandler.handle(projectDefinition.projectId){
                 projectDefinition = projDefRepo.save(projectDefinition)
@@ -145,12 +145,12 @@ class AdminProjService {
             if (!userIdParam) {
                 sortingService.setNewProjectDisplayOrder(projectRequest.projectId)
             }
-            log.info("Saved [{}]", projectDefinition)
+            log.debug("Saved [{}]", projectDefinition)
 
             levelDefService.createDefault(projectRequest.projectId, projectDefinition)
 
             accessSettingsStorageService.addUserRole(userIdParam ?: this.getUserId(), projectRequest.projectId, RoleName.ROLE_PROJECT_ADMIN)
-            log.info("Added user role [{}]", RoleName.ROLE_PROJECT_ADMIN)
+            log.debug("Added user role [{}]", RoleName.ROLE_PROJECT_ADMIN)
         }
     }
 
@@ -187,7 +187,7 @@ class AdminProjService {
             subjectDataIntegrityViolationExceptionHandler.handle(projectId) {
                 res = skillDefWithExtraRepo.save(existing)
             }
-            log.info("Updated [{}]", existing)
+            log.debug("Updated [{}]", existing)
         } else {
             ProjDef projDef = getProjDef(projectId)
 
@@ -210,7 +210,7 @@ class AdminProjService {
             }
             levelDefService.createDefault(projectId, null, skillDef)
 
-            log.info("Created [{}]", res)
+            log.debug("Created [{}]", res)
         }
     }
 
@@ -282,7 +282,7 @@ class AdminProjService {
                     projDef: projDef,
                     displayOrder: displayOrder,
             )
-            log.info("Saving [{}]", skillDefinition)
+            log.debug("Saving [{}]", skillDefinition)
         }
 
         SkillDefWithExtra savedSkill
@@ -291,7 +291,7 @@ class AdminProjService {
             savedSkill = skillDefWithExtraRepo.save(skillDefinition)
         }
 
-        log.info("Saved [{}]", savedSkill)
+        log.debug("Saved [{}]", savedSkill)
     }
 
     @Transactional()
@@ -308,7 +308,7 @@ class AdminProjService {
 
     @Transactional
     void deleteSubject(String projectId, String subjectId) {
-        log.info("Deleting subject with project id [{}] and subject id [{}]", projectId, subjectId)
+        log.debug("Deleting subject with project id [{}] and subject id [{}]", projectId, subjectId)
         SkillDef subjectDefinition = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, subjectId, SkillDef.ContainerType.Subject)
         assert subjectDefinition, "DELETE FAILED -> no subject with project id [$projectId] and subjet id [$subjectId]"
         assert subjectDefinition.type == SkillDef.ContainerType.Subject
@@ -325,12 +325,12 @@ class AdminProjService {
         projDefRepo.save(projDef)
         userPointsManagement.handleSubjectRemoval(subjectDefinition)
 
-        log.info("Deleted subject with id [{}]", subjectDefinition.skillId)
+        log.debug("Deleted subject with id [{}]", subjectDefinition.skillId)
     }
 
     @Transactional
     void deleteBadge(String projectId, String badgeId) {
-        log.info("Deleting badge with project id [{}] and badge id [{}]", projectId, badgeId)
+        log.debug("Deleting badge with project id [{}] and badge id [{}]", projectId, badgeId)
         SkillDef badgeDefinition = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, badgeId, SkillDef.ContainerType.Badge)
         assert badgeDefinition, "DELETE FAILED -> no badge with project id [$projectId] and badge id [$badgeId]"
         assert badgeDefinition.type == SkillDef.ContainerType.Badge
@@ -342,7 +342,7 @@ class AdminProjService {
         List<SkillDef> badges = projDef.badges
         badges = badges?.findAll({ it.id != badgeDefinition.id }) // need to remove because of JPA level caching?
         resetDisplayOrder(badges)
-        log.info("Deleted badge with id [{}]", badgeDefinition)
+        log.debug("Deleted badge with id [{}]", badgeDefinition)
     }
 
     private void resetDisplayOrder(List<SkillDef> skillDefs) {
@@ -373,7 +373,7 @@ class AdminProjService {
             }?.flatten()
         }
         toDelete.add(skillDef)
-        log.info("Deleting [{}] skill definitions (descendants + me) under [{}]", toDelete.size(), skillDef.skillId)
+        log.debug("Deleting [{}] skill definitions (descendants + me) under [{}]", toDelete.size(), skillDef.skillId)
         skillDefRepo.deleteAll(toDelete)
     }
 
@@ -473,7 +473,7 @@ class AdminProjService {
         switchWith.displayOrder = switchWithDisplayOrderTmp
         skillDefRepo.saveAll([toUpdate, switchWith])
 
-        log.info("Switched order of [{}] and [{}]", toUpdate.skillId, switchWith.skillId)
+        log.debug("Switched order of [{}] and [{}]", toUpdate.skillId, switchWith.skillId)
     }
 
     @Transactional()
@@ -537,13 +537,13 @@ class AdminProjService {
 
     @Transactional()
     void deleteProject(String projectId) {
-        log.info("Deleting project with id [{}]", projectId)
+        log.debug("Deleting project with id [{}]", projectId)
         if (!existsByProjectId(projectId)){
             throw new SkillException("Project with id [${projectId}] does NOT exist")
         }
 
         projDefRepo.deleteByProjectIdIgnoreCase(projectId)
-        log.info("Deleted project with id [{}]", projectId)
+        log.debug("Deleted project with id [{}]", projectId)
     }
 
     @Transactional()
@@ -704,7 +704,7 @@ class AdminProjService {
 
     @Transactional
     void deleteSkill(String projectId, String subjectId, String skillId) {
-        log.info("Deleting skill with project id [{}] and subject id [{}] and skill id [{}]", projectId, subjectId, skillId)
+        log.debug("Deleting skill with project id [{}] and subject id [{}] and skill id [{}]", projectId, subjectId, skillId)
         SkillDef skillDefinition = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, skillId, SkillDef.ContainerType.Skill)
         assert skillDefinition, "DELETE FAILED -> no skill with project find with projectId=[$projectId], subjectId=[$subjectId], skillId=[$skillId]"
 
@@ -715,7 +715,7 @@ class AdminProjService {
         userPointsManagement.handleSkillRemoval(skillDefinition)
 
         deleteSkillWithItsDescendants(skillDefinition)
-        log.info("Deleted skill [{}]", skillDefinition.skillId)
+        log.debug("Deleted skill [{}]", skillDefinition.skillId)
 
         resetDisplayOrderAttributes(parentSkill, skillDefinition.skillId)
     }
@@ -1022,7 +1022,7 @@ class AdminProjService {
                     type: SkillDef.ContainerType.Skill,
                     version: skillRequest.version
             )
-            log.info("Saving [{}]", skillDefinition)
+            log.debug("Saving [{}]", skillDefinition)
             shouldRebuildScores = true
         }
 
@@ -1037,11 +1037,11 @@ class AdminProjService {
         }
 
         if (shouldRebuildScores) {
-            log.info("Rebuilding scores")
+            log.debug("Rebuilding scores")
             ruleSetDefinitionScoreUpdater.updateFromLeaf(savedSkill)
         }
 
-        log.info("Saved [{}]", savedSkill)
+        log.debug("Saved [{}]", savedSkill)
         SkillDefRes skillDefRes = convertToSkillDefRes(savedSkill)
         return skillDefRes
     }

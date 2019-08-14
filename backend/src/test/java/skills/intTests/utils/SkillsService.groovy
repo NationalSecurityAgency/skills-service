@@ -38,7 +38,7 @@ class SkillsService {
         def projects = getProjects()
         projects.each {
             deleteProject(it.projectId)
-            log.info("Removed ${it.projectId} project")
+            log.debug("Removed {} project", it.projectId)
         }
     }
 

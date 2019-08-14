@@ -273,7 +273,7 @@ class LevelDefinitionStorageService {
             }
 
             levelDefinitionRepository.deleteById(removed.id)
-            log.info("Deleted last level [{}]", removed)
+            log.debug("Deleted last level [{}]", removed)
             //now we have to null out the toPoints of the 2nd to last level
             if(existingDefinitions.size() > 1){
                 LevelDef alter = existingDefinitions.get(existingDefinitions.size()-2)
@@ -384,7 +384,7 @@ class LevelDefinitionStorageService {
             )
 
             created = levelDefinitionRepository.save(created)
-            log.info("Added new level [{}]", created)
+            log.debug("Added new level [{}]", created)
         }
 
         return created
@@ -408,7 +408,7 @@ class LevelDefinitionStorageService {
                     percent: percentage,
                     name: name,
                     iconClass: "fas fa-user-ninja")
-            log.info("creating default level $levelDef")
+            log.debug("creating default level {}", levelDef)
             res << levelDef
         }
         if(setting?.isEnabled()){

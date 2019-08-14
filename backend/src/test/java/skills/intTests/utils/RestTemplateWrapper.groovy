@@ -53,7 +53,7 @@ class RestTemplateWrapper extends RestTemplate {
 
             if (cookie == null) {
                 cookie = response.getHeaders().getFirst(HttpHeaders.SET_COOKIE);
-                log.info("Setting cookie to [{}]", cookie)
+                log.debug("Setting cookie to [{}]", cookie)
             }
             return response;
         }
