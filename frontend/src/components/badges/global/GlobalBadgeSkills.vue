@@ -19,6 +19,8 @@
 </template>
 
 <script>
+  import { createNamespacedHelpers } from 'vuex';
+
   import GlobalBadgeService from './GlobalBadgeService';
   import SkillsSelector2 from '../../skills/SkillsSelector2';
   import LoadingContainer from '../../utils/LoadingContainer';
@@ -27,6 +29,8 @@
   import SubPageHeader from '../../utils/pages/SubPageHeader';
   import SimpleCard from '../../utils/cards/SimpleCard';
   import MsgBoxMixin from '../../utils/modal/MsgBoxMixin';
+
+  const { mapActions } = createNamespacedHelpers('badges');
 
   export default {
     name: 'GlobalBadgeSkills',
@@ -60,6 +64,9 @@
       this.loadAssignedBadgeSkills();
     },
     methods: {
+      ...mapActions([
+        'loadGlobalBadgeDetailsState',
+      ]),
       loadBadge() {
         this.isLoading = false;
         if (this.$route.params.badge) {
@@ -82,8 +89,8 @@
       loadAvailableBadgeSkills(query) {
         GlobalBadgeService.suggestProjectSkills(this.badgeId, query)
           .then((loadedSkills) => {
-            const badgeSkillIds = this.badgeSkills.map(item => item.id);
-            this.availableSkills = loadedSkills.filter(item => !badgeSkillIds.includes(item.id));
+            const badgeSkillIds = this.badgeSkills.map(item => `${item.projectId}${item.skillId}`);
+            this.availableSkills = loadedSkills.filter(item => !badgeSkillIds.includes(`${item.projectId}${item.skillId}`));
             this.loading.availableSkills = false;
           });
       },
@@ -99,8 +106,9 @@
         this.loading.skillOp = true;
         GlobalBadgeService.removeSkillFromBadge(this.badgeId, deletedItem.projectId, deletedItem.skillId)
           .then(() => {
-            this.badgeSkills = this.badgeSkills.filter(entry => entry.id !== deletedItem.id);
+            this.badgeSkills = this.badgeSkills.filter(entry => `${entry.projectId}${entry.skillId}` !== `${deletedItem.projectId}${deletedItem.skillId}`);
             this.availableSkills.unshift(deletedItem);
+            this.loadGlobalBadgeDetailsState({ badgeId: this.badgeId });
             this.loading.skillOp = false;
             this.$emit('skills-changed', deletedItem);
           });
@@ -111,6 +119,7 @@
           .then(() => {
             this.badgeSkills.push(newItem);
             this.availableSkills = this.availableSkills.filter(item => item.id !== newItem.id);
+            this.loadGlobalBadgeDetailsState({ badgeId: this.badgeId });
             this.loading.skillOp = false;
             this.$emit('skills-changed', newItem);
           });

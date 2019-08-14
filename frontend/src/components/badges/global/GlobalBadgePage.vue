@@ -18,9 +18,12 @@
 </template>
 
 <script>
+  import { createNamespacedHelpers } from 'vuex';
+
   import Navigation from '../../utils/Navigation';
   import PageHeader from '../../utils/pages/PageHeader';
-  import GlobalBadgeService from './GlobalBadgeService';
+
+  const { mapActions, mapGetters, mapMutations } = createNamespacedHelpers('badges');
 
   export default {
     name: 'BadgePage',
@@ -33,7 +36,6 @@
         isLoading: true,
         projectId: '',
         badgeId: '',
-        badge: {},
       };
     },
     created() {
@@ -44,6 +46,9 @@
       this.loadBadge();
     },
     computed: {
+      ...mapGetters([
+        'badge',
+      ]),
       headerOptions() {
         if (!this.badge) {
           return {};
@@ -63,16 +68,20 @@
       },
     },
     methods: {
+      ...mapActions([
+        'loadGlobalBadgeDetailsState',
+      ]),
+      ...mapMutations([
+        'setBadge',
+      ]),
       loadBadge() {
         this.isLoading = false;
         if (this.$route.params.badge) {
-          this.badge = this.$route.params.badge;
+          this.setBadge(this.$route.params.badge);
           this.isLoading = false;
         } else {
-          GlobalBadgeService.getBadge(this.badgeId)
-            .then((response) => {
-              this.badge = response;
-            }).finally(() => {
+          this.loadGlobalBadgeDetailsState({ badgeId: this.badgeId })
+            .finally(() => {
               this.isLoading = false;
             });
         }
