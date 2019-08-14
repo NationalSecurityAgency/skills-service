@@ -37,6 +37,12 @@
   import ExistingUserInput from '../utils/ExistingUserInput';
   import MsgBoxMixin from '../utils/modal/MsgBoxMixin';
 
+  // role constants
+  const ROLE_APP_USER = 'ROLE_APP_USER';
+  const ROLE_PROJECT_ADMIN = 'ROLE_PROJECT_ADMIN';
+  const ROLE_SUPERVISOR = 'ROLE_SUPERVISOR';
+  const ROLE_SUPER_DUPER_USER = 'ROLE_SUPER_DUPER_USER';
+
   export default {
     name: 'RoleManager',
     mixins: [MsgBoxMixin],
@@ -49,6 +55,7 @@
       role: {
         type: String,
         default: 'ROLE_PROJECT_ADMIN',
+        validator: value => ([ROLE_APP_USER, ROLE_PROJECT_ADMIN, ROLE_SUPERVISOR, ROLE_SUPER_DUPER_USER].indexOf(value) >= 0),
       },
       roleDescription: {
         type: String,
@@ -86,7 +93,7 @@
       };
     },
     mounted() {
-      AccessService.getUserRoles(this.project.projectId)
+      AccessService.getUserRoles(this.project.projectId, this.role)
         .then((result) => {
           this.isLoading = false;
           this.data = result;

@@ -110,10 +110,9 @@ class UserAuthService {
     }
 
     private boolean shouldAddRole(UserRole userRole) {
-        boolean shouldAddRole = false
-        if (userRole.roleName == RoleName.ROLE_APP_USER || userRole.roleName == RoleName.ROLE_SUPER_DUPER_USER) {
-            shouldAddRole = true
-        } else {
+        boolean shouldAddRole = true
+        if (userRole.roleName == RoleName.ROLE_PROJECT_ADMIN) {
+            shouldAddRole = false
             String projectId = AuthUtils.getProjectIdFromRequest(servletRequest)
             if (projectId && projectId.equalsIgnoreCase(userRole.projectId)) {
                 shouldAddRole = true

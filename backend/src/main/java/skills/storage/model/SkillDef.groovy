@@ -17,7 +17,7 @@ import javax.persistence.TemporalType
 @CompileStatic
 class SkillDef extends SkillDefParent {
     static enum ContainerType {
-        Subject, Skill, Badge
+        Subject, Skill, Badge, GlobalBadge
     }
 
 }

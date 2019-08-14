@@ -5,7 +5,7 @@
     <simple-card>
       <loading-container v-bind:is-loading="loading.availableSkills || loading.badgeSkills || loading.skillOp">
         <skills-selector2 :options="availableSkills" class="mb-4"
-                          v-on:added="skillAdded"
+                          v-on:added="skillAdded" v-on:search-change="searchChanged"
                           :onlySingleSelectedValue="true"></skills-selector2>
 
         <simple-skills-table v-if="badgeSkills && badgeSkills.length > 0"
@@ -21,19 +21,19 @@
 <script>
   import { createNamespacedHelpers } from 'vuex';
 
-  import SkillsService from '../skills/SkillsService';
-  import SkillsSelector2 from '../skills/SkillsSelector2';
-  import LoadingContainer from '../utils/LoadingContainer';
-  import SimpleSkillsTable from '../skills/SimpleSkillsTable';
-  import NoContent2 from '../utils/NoContent2';
-  import SubPageHeader from '../utils/pages/SubPageHeader';
-  import SimpleCard from '../utils/cards/SimpleCard';
-  import MsgBoxMixin from '../utils/modal/MsgBoxMixin';
+  import GlobalBadgeService from './GlobalBadgeService';
+  import SkillsSelector2 from '../../skills/SkillsSelector2';
+  import LoadingContainer from '../../utils/LoadingContainer';
+  import SimpleSkillsTable from '../../skills/SimpleSkillsTable';
+  import NoContent2 from '../../utils/NoContent2';
+  import SubPageHeader from '../../utils/pages/SubPageHeader';
+  import SimpleCard from '../../utils/cards/SimpleCard';
+  import MsgBoxMixin from '../../utils/modal/MsgBoxMixin';
 
   const { mapActions } = createNamespacedHelpers('badges');
 
   export default {
-    name: 'BadgeSkills',
+    name: 'GlobalBadgeSkills',
     components: {
       SimpleCard,
       SubPageHeader,
@@ -60,26 +60,37 @@
     mounted() {
       this.projectId = this.$route.params.projectId;
       this.badgeId = this.$route.params.badgeId;
-      this.badge = this.$route.params.badge;
+      this.loadBadge();
       this.loadAssignedBadgeSkills();
     },
     methods: {
       ...mapActions([
-        'loadBadgeDetailsState',
+        'loadGlobalBadgeDetailsState',
       ]),
+      loadBadge() {
+        this.isLoading = false;
+        if (this.$route.params.badge) {
+          this.badge = this.$route.params.badge;
+        } else {
+          GlobalBadgeService.getBadge(this.badgeId)
+            .then((response) => {
+              this.badge = response;
+            });
+        }
+      },
       loadAssignedBadgeSkills() {
-        SkillsService.getBadgeSkills(this.projectId, this.badgeId)
+        GlobalBadgeService.getBadgeSkills(this.badgeId)
           .then((loadedSkills) => {
             this.badgeSkills = loadedSkills;
             this.loading.badgeSkills = false;
-            this.loadAvailableBadgeSkills();
+            this.loadAvailableBadgeSkills('');
           });
       },
-      loadAvailableBadgeSkills() {
-        SkillsService.getProjectSkills(this.projectId)
+      loadAvailableBadgeSkills(query) {
+        GlobalBadgeService.suggestProjectSkills(this.badgeId, query)
           .then((loadedSkills) => {
-            const badgeSkillIds = this.badgeSkills.map(item => item.id);
-            this.availableSkills = loadedSkills.filter(item => !badgeSkillIds.includes(item.id));
+            const badgeSkillIds = this.badgeSkills.map(item => `${item.projectId}${item.skillId}`);
+            this.availableSkills = loadedSkills.filter(item => !badgeSkillIds.includes(`${item.projectId}${item.skillId}`));
             this.loading.availableSkills = false;
           });
       },
@@ -93,25 +104,28 @@
       },
       skillDeleted(deletedItem) {
         this.loading.skillOp = true;
-        SkillsService.removeSkillFromBadge(this.projectId, this.badgeId, deletedItem.skillId)
+        GlobalBadgeService.removeSkillFromBadge(this.badgeId, deletedItem.projectId, deletedItem.skillId)
           .then(() => {
-            this.badgeSkills = this.badgeSkills.filter(entry => entry.id !== deletedItem.id);
+            this.badgeSkills = this.badgeSkills.filter(entry => `${entry.projectId}${entry.skillId}` !== `${deletedItem.projectId}${deletedItem.skillId}`);
             this.availableSkills.unshift(deletedItem);
-            this.loadBadgeDetailsState({ projectId: this.projectId, badgeId: this.badgeId });
+            this.loadGlobalBadgeDetailsState({ badgeId: this.badgeId });
             this.loading.skillOp = false;
             this.$emit('skills-changed', deletedItem);
           });
       },
       skillAdded(newItem) {
         this.loading.skillOp = true;
-        SkillsService.assignSkillToBadge(this.projectId, this.badgeId, newItem.skillId)
+        GlobalBadgeService.assignSkillToBadge(this.badgeId, newItem.projectId, newItem.skillId)
           .then(() => {
             this.badgeSkills.push(newItem);
             this.availableSkills = this.availableSkills.filter(item => item.id !== newItem.id);
-            this.loadBadgeDetailsState({ projectId: this.projectId, badgeId: this.badgeId });
+            this.loadGlobalBadgeDetailsState({ badgeId: this.badgeId });
             this.loading.skillOp = false;
             this.$emit('skills-changed', newItem);
           });
+      },
+      searchChanged(query) {
+        this.loadAvailableBadgeSkills(query);
       },
     },
   };

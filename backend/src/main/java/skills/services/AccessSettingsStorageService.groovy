@@ -53,15 +53,30 @@ class AccessSettingsStorageService {
     SettingsService settingsService
 
     @Transactional(readOnly = true)
-    List<UserRole> getUserRoles(String projectId) {
+    List<UserRole> getUserRolesForProjectId(String projectId) {
         List<UserRole> res = userRoleRepository.findAllByProjectId(projectId)
         return res
     }
 
     @Transactional(readOnly = true)
-    List<UserRole> getUserRoles(String projectId, String userId) {
+    List<UserRole> getUserRolesForProjectIdAndUserId(String projectId, String userId) {
         List<UserRole> res = userRoleRepository.findAllByProjectIdAndUserId(projectId, userId)
         return res
+    }
+
+    @Transactional(readOnly = true)
+    List<UserRole> getUserRolesWithRole(RoleName roleName) {
+        return userRoleRepository.findAllByRoleName(roleName)
+    }
+
+    @Transactional(readOnly = true)
+    List<UserRole> getUserRolesWithoutRole(RoleName roleName) {
+        List<UserRole> usersWithRole = getUserRolesWithRole(roleName)
+        if (usersWithRole) {
+            return userRoleRepository.findAllByUserIdNotIn(usersWithRole.collect { it.userId }.unique())
+        } else {
+            return userRepository.findAll()
+        }
     }
 
     @Transactional(readOnly = true)
@@ -215,10 +230,10 @@ class AccessSettingsStorageService {
         List<SettingsResult> settings = settingsService.getUserSettingsForGroup(user.userId, USER_INFO_SETTING_GROUP)
         new UserInfoRes(
                 userId: user.userId,
-                first: settings.find({it.setting == "firstName"}) ?: "",
-                last: settings.find({it.setting == "lastName"}) ?: "",
-                nickname: settings.find({it.setting == "nickname"}) ?: "",
-                dn: settings.find({it.setting == "DN"}) ?: "",
+                first: settings.find({it.setting == "firstName"})?.value ?: "",
+                last: settings.find({it.setting == "lastName"})?.value ?: "",
+                nickname: settings.find({it.setting == "nickname"})?.value ?: "",
+                dn: settings.find({it.setting == "DN"})?.value ?: "",
         )
     }
 
@@ -256,7 +271,7 @@ class AccessSettingsStorageService {
         UserSettingsRequest settingsRequest =
                 new UserSettingsRequest(
                         userId: userId,
-                        settingGroup: AccessSettingsStorageService.USER_INFO_SETTING_GROUP,
+                        settingGroup: USER_INFO_SETTING_GROUP,
                         setting: prop,
                         value: value
                 )
