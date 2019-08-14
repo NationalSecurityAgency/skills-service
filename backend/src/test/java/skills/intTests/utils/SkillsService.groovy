@@ -110,6 +110,10 @@ class SkillsService {
         wsHelper.adminDelete("/projects/${projectId}/users/${userId}/roles/${role}")
     }
 
+    def addUserRole(String userId, String projectId, String role) {
+        wsHelper.adminPost("/projects/${projectId}/users/${userId}/roles/${role}", [:])
+    }
+
     @Profile
     def createSubject(Map props, boolean throwExceptionOnFailure = true) {
         wsHelper.adminPost(getSubjectUrl(props.projectId, props.subjectId), props, throwExceptionOnFailure)
