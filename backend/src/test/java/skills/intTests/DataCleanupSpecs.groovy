@@ -1,18 +1,15 @@
 package skills.intTests
 
-
-import skills.intTests.utils.DBHelper
+import org.springframework.beans.factory.annotation.Autowired
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
-import spock.lang.IgnoreIf
-import spock.lang.Shared
+import skills.storage.repos.LevelDefRepo
 
 class DataCleanupSpecs extends DefaultIntSpec {
 
-    @Shared
-    DBHelper dbHelper = new DBHelper()
+    @Autowired
+    LevelDefRepo levelDefRepo
 
-    @IgnoreIf({ !DBChecksUtil.isEnabled() })
     def "make sure there are no orphan levels in db when project is removed"() {
         Map proj = SkillsFactory.createProject()
         Map subject = SkillsFactory.createSubject()
@@ -20,26 +17,14 @@ class DataCleanupSpecs extends DefaultIntSpec {
         when:
         skillsService.createProject(proj)
         skillsService.createSubject(subject)
-        String sqlCountLevelsForProj = "select count(*) as num from level_definition l, project_definition p where l.project_id = p.id and p.project_id = '${proj.projectId}'".toString()
-        int projLevelBefore = dbHelper.firstRow(sqlCountLevelsForProj).num
 
-        String sqlCountLevelsForSubj = "select count(*) as num from level_definition l, skill_definition s where l.skill_id = s.id and  s.project_id = '${proj.projectId}' and s.skill_id = '${subject.subjectId}'".toString()
-        int subjLevelsBefore = dbHelper.firstRow(sqlCountLevelsForSubj).num
-
+        long countBefore = levelDefRepo.count()
         skillsService.deleteProject(proj.projectId)
-
-        int projLevelAfter = dbHelper.firstRow(sqlCountLevelsForProj).num
-        int subjLevelsAfter = dbHelper.firstRow(sqlCountLevelsForSubj).num
+        long countAfter = levelDefRepo.count()
 
         then:
-        projLevelBefore > 0
-        subjLevelsBefore > 0
-
-        projLevelAfter == 0
-        subjLevelsAfter == 0
-
-        // now make sure there are no orphans where neither project or subj assigned
-        dbHelper.firstRow("select count(*) as num from level_definition where skill_id is null and project_id is null").num == 0
+        countBefore > 0
+        countAfter == 0
     }
 
     def "when project is removed performed events must be removed as well"() {
