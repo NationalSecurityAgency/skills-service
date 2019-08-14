@@ -34,7 +34,7 @@
 
             <div class="row mt-3">
                 <div class="col-lg-6 mb-2 mb-lg-0">
-                    <levels-breakdown-chart :users-per-level="usersPerLevel"/>
+                    <levels-breakdown-chart :users-per-level="usersPerLevel" :my-level="rankingDistribution.myLevel"/>
                 </div>
 
                 <div class="col-lg-6">

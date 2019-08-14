@@ -1,16 +1,23 @@
 <template>
-  <div class="card level-breakdown-container h-100">
+  <div :class="{'disabled': showOverlay}" class="card level-breakdown-container h-100">
+
+    <div v-if="showOverlay" class="disabled-overlay" />
+    <div v-if="showOverlay" class="overlay-msg">
+      <div  class="row justify-content-center">
+        <div class="col-5 text-center border rounded bg-light p-2">
+          <vue-simple-spinner v-if="loading" line-bg-color="#333" line-fg-color="#17a2b8" message="Loading Chart ..."/>
+          <div v-else>
+            <div>No one achieved <span class="text-info">Level 1</span> yet...</div>
+            <div>You could be the <u>first one</u>!</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="card-header">
       <h6 class="card-title mb-0 float-left">Level Breakdown</h6>
     </div>
     <div class="card-body m-0 p-0 mr-1 mt-1">
-      <div v-if="loading" style="position: absolute; top:30%; width: 100%; z-index: 1000">
-        <div  class="row justify-content-center">
-          <div class="col-5 text-center border rounded bg-light p-2">
-            <vue-simple-spinner line-bg-color="#333" line-fg-color="#17a2b8" message="Loading Chart ..."/>
-          </div>
-        </div>
-      </div>
       <apexchart
         :options="chartOptions"
         :series="chartSeries"
@@ -40,21 +47,22 @@
           data: [{ x: 'Level 1', y: 0 }, { x: 'Level 2', y: 0 }, { x: 'Level 3', y: 0 }, { x: 'Level 4', y: 0 }, { x: 'Level 5', y: 0 }],
         }],
         chartOptions: {
-          // annotations: {
-          //   points: [{
-          //     x: 'Level 0',
-          //     seriesIndex: 0,
-          //     label: {
-          //       borderColor: '#775DD0',
-          //       offsetY: 0,
-          //       style: {
-          //         color: '#fff',
-          //         background: '#775DD0',
-          //       },
-          //       text: 'You are Level 0!',
-          //     },
-          //   }],
-          // },
+          annotations: {
+            // points: [],
+            points: [{
+              x: 'Level 0',
+              seriesIndex: 0,
+              label: {
+                borderColor: '#775DD0',
+                offsetY: 0,
+                style: {
+                  color: '#fff',
+                  background: '#775DD0',
+                },
+                text: 'You are Level 0!',
+              },
+            }],
+          },
           plotOptions: {
             bar: {
               columnWidth: '50%',
@@ -115,11 +123,21 @@
       },
     },
     computed: {
+      showOverlay() {
+        return this.loadingLogic() || !this.hasData();
+      },
       loading() {
-        return this.usersPerLevel === null;
+        return this.loadingLogic();
       },
     },
     methods: {
+      loadingLogic() {
+        return this.usersPerLevel === null;
+      },
+      hasData() {
+        const foundMoreThan0 = this.chartSeries[0].data.find(item => item.y > 0);
+        return foundMoreThan0;
+      },
       computeChartSeries() {
         const series = [{
           name: '# of Users',
@@ -129,13 +147,18 @@
           this.usersPerLevel.forEach((level) => {
               const datum = { x: `Level ${level.level}`, y: level.numUsers };
               series[0].data.push(datum);
-              // if (level.level === this.myLevel) {
-              //   this.chartOptions.annotations.points[0].x = datum.x;
-              //   this.chartOptions.annotations.points[0].text = `You are ${datum.x}!`;
-              // }
+              if (level.level === this.myLevel) {
+                // const label = {
+                //   x: datum.x,
+                //   text: `You are ${datum.x}!`,
+                // };
+                // this.chartOptions.annotations.points = [label];
+                this.chartOptions.annotations.points[0].x = datum.x;
+                this.chartOptions.annotations.points[0].label.text = `You are ${datum.x}!`;
+              }
             });
         }
-        // this.chartOptions = { ...this.chartOptions }; // Trigger reactivity
+        this.chartOptions = { ...this.chartOptions }; // Trigger reactivity
         this.chartSeries = series;
       },
     },
@@ -150,5 +173,31 @@
 </style>
 
 <style scoped>
+  .card.disabled .card-header,
+  .card.disabled .card-body {
+    opacity: 0.4;
+  }
 
+  .disabled-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #666666;
+    opacity: 0;
+    z-index: 999;
+  }
+
+  .overlay-msg {
+    font-weight: 700;
+    opacity: 0.8;
+    position: absolute;
+    left: 0;
+    top: 50%;
+    z-index: 1000;
+    text-align: center;
+    width: 100%;
+    transform: translateY(-50%);
+  }
 </style>
