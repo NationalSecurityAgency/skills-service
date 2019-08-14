@@ -6,7 +6,7 @@
     <div class="card-body">
       <span class="fa-stack skills-icon user-rank-stack">
         <i class="fa fa-users fa-stack-2x watermark-icon"/>
-        <strong class="fa-stack-1x user-rank-text">
+        <strong class="fa-stack-1x text-primary user-rank-text">
           <span v-if="displayData.userSkillsRanking">
             {{ displayData.userSkillsRanking.position | number }}
           </span>
@@ -64,7 +64,6 @@
 
   .user-rank-text {
     font-size: 0.5em;
-    color: #333;
     line-height: 1.2em;
     margin-top: 1.8em;
     background: rgba(255, 255, 255, 0.6);

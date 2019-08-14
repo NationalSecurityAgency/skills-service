@@ -1,5 +1,5 @@
 <template>
-    <div class="py-2 mt-2 mb-3 card-body card rounded bg-white text-info text-uppercase">
+    <div class="py-2 mt-2 mb-3 card-body skills-page-title-text-color card rounded bg-white text-info text-uppercase">
         <h2>
             <slot/>
         </h2>
@@ -11,7 +11,3 @@
         name: 'SkillsTitle',
     };
 </script>
-
-<style scoped>
-
-</style>

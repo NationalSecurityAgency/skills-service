@@ -1,12 +1,12 @@
 <template>
   <div class="card" style="height: 100%">
-    <div class="card-body">
+    <div class="card-body text-primary">
       <ribbon :color="ribbonColor" class="subject-tile-ribbon">
         {{ subject.subject }}
       </ribbon>
 
       <i :class="subject.iconClass" class="d-inline-block subject-tile-icon"/>
-      <h2 class="skill-tile-label pt-1">Level {{ subject.skillsLevel }}</h2>
+      <h2 class="skill-tile-label text-primary pt-1">Level {{ subject.skillsLevel }}</h2>
       <star-progress :number-complete="subject.skillsLevel" class="py-1"/>
 
       <div class="row">
@@ -153,7 +153,6 @@
 
   .skill-tile-label {
     font-size: 1.3rem;
-    color: #333;
     width: 100%;
   }
 </style>

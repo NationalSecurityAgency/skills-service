@@ -19,7 +19,7 @@
                 <div class="col-md-6 text-md-left">
                     <h4>{{ skill.skill }}</h4>
                 </div>
-                <div class="col-md-6 text-right" :class="{ 'text-success' : isSkillComplete, 'text-muted': !isSkillComplete }">
+                <div class="col-md-6 text-right" :class="{ 'text-success' : isSkillComplete, 'text-primary': !isSkillComplete }">
                     <span v-if="isSkillComplete" class="pr-1"><i class="fa fa-check"/></span>{{ skill.points }} / {{ skill.totalPoints }} Points
                 </div>
             </div>
@@ -31,7 +31,7 @@
 
             <skill-summary-cards v-if="!locked" :skill="skill" class="mt-3"></skill-summary-cards>
 
-            <p class="skills-text-description text-secondary mx-2 mt-3">
+            <p class="skills-text-description text-primary mx-2 mt-3">
                 <markdown-text :text="skill.description.description"/>
             </p>
         </div>

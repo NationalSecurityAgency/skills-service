@@ -132,7 +132,6 @@
 
   .skill-tile-label {
     font-size: 1.2rem;
-    color: #333;
     width: 100%;
   }
 
