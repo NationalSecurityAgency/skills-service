@@ -281,17 +281,6 @@
         }, {
           immediate: false,
         });
-        Validator.extend('maxDescriptionLength', {
-          getMessage: field => `${field} cannot exceed ${self.$store.getters.config.descriptionMaxLength} characters.`,
-          validate(value) {
-            if (value.length > self.$store.getters.config.descriptionMaxLength) {
-              return false;
-            }
-            return true;
-          },
-        }, {
-          immediate: false,
-        });
       },
     },
   };
