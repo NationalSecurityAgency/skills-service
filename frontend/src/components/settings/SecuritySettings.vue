@@ -9,7 +9,7 @@
       </div>
     </div>
 
-    <div class="card">
+    <div class="card mt-2">
       <div class="card-header">Supervisor Users Management</div>
       <div class="card-body">
         <role-manager :role="supervisor.role" :user-type="supervisor.userType" :role-description="supervisor.roleDescription" />
