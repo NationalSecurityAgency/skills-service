@@ -595,6 +595,10 @@
                      tableName="user_points">
             <column name="day" type="date"/>
         </createIndex>
+        <createIndex indexName="index_user_points_points"
+                     tableName="user_points">
+            <column name="points" type="int"/>
+        </createIndex>
         <addForeignKeyConstraint baseColumnNames="project_id"
                                  baseTableName="user_points"
                                  constraintName="fk_user_points_project_id"
