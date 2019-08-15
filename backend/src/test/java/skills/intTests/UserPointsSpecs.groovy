@@ -38,6 +38,7 @@ class UserPointsSpecs extends DefaultIntSpec {
         then:
         results
         results.count == 2
+        results.totalCount == 2
         results.data.size() == 2
         results.data.get(0).userId == sampleUserIds.get(0)
         results.data.get(0).totalPoints == 20
@@ -53,14 +54,34 @@ class UserPointsSpecs extends DefaultIntSpec {
         then:
         results1
         results1.count == 2
+        results1.totalCount == 2
         results1.data.size() == 1
         results1.data.get(0).userId == sampleUserIds.get(0)
         results1.data.get(0).totalPoints == 20
         results2
         results2.count == 2
+        results2.totalCount == 2
         results2.data.size() == 1
         results2.data.get(0).userId == sampleUserIds.get(1)
         results2.data.get(0).totalPoints == 10
+    }
+
+    def 'get project users with paging and query'() {
+        when:
+        def results1 = skillsService.getProjectUsers(projId, 1, 1, "userId", true, "d")
+        def results2 = skillsService.getProjectUsers(projId, 1, 2, "userId", true, "d")
+
+        then:
+        results1
+        results1.count == 1  // result count
+        results1.totalCount == 2  // total user count
+        results1.data.size() == 1
+        results1.data.get(0).userId == sampleUserIds.get(0)
+        results1.data.get(0).totalPoints == 20
+        results2
+        results2.count == 1
+        results2.totalCount == 2
+        results2.data.size() == 0
     }
 
     def 'get subject users when project exists'() {
@@ -72,12 +93,14 @@ class UserPointsSpecs extends DefaultIntSpec {
         then:
         results1
         results1.count == 1
+        results1.totalCount == 1
         results1.data.size() == 1
         results1.data.get(0).userId == sampleUserIds.get(0)
         results1.data.get(0).totalPoints == 10
 
         results2
         results2.count == 2
+        results2.totalCount == 2
         results2.data.size() == 2
         results2.data.get(0).userId == sampleUserIds.get(0)
         results2.data.get(0).totalPoints == 10
@@ -86,6 +109,7 @@ class UserPointsSpecs extends DefaultIntSpec {
 
         results3
         results3.count == 0
+        results3.totalCount == 0
         !results3.data
     }
 
@@ -98,12 +122,14 @@ class UserPointsSpecs extends DefaultIntSpec {
         then:
         results1
         results1.count == 1
+        results1.totalCount == 1
         results1.data.size() == 1
         results1.data.get(0).userId == sampleUserIds.get(0)
         results1.data.get(0).totalPoints == 10
 
         results2
         results2.count == 2
+        results2.totalCount == 2
         results2.data.size() == 2
         results2.data.get(0).userId == sampleUserIds.get(0)
         results2.data.get(0).totalPoints == 10
@@ -112,6 +138,34 @@ class UserPointsSpecs extends DefaultIntSpec {
 
         results3
         results3.count == 0
+        results3.totalCount == 0
+        !results3.data
+    }
+
+    def 'get skill users with paging when project exists'() {
+        when:
+        def results1 = skillsService.getSkillUsers(projId, allSkillIds.get(0).get(0), 1, 1, "userId", true, "d")
+        def results2 = skillsService.getSkillUsers(projId, allSkillIds.get(1).get(0), 1, 1, "userId", true, "d")
+        def results3 = skillsService.getSkillUsers(projId, allSkillIds.get(1).get(1), 1, 1, "userId", true, "d")
+
+        then:
+        results1
+        results1.count == 1
+        results1.totalCount == 1
+        results1.data.size() == 1
+        results1.data.get(0).userId == sampleUserIds.get(0)
+        results1.data.get(0).totalPoints == 10
+
+        results2
+        results2.count == 1
+        results2.totalCount == 2
+        results2.data.size() == 1
+        results2.data.get(0).userId == sampleUserIds.get(0)
+        results2.data.get(0).totalPoints == 10
+
+        results3
+        results3.count == 0
+        results3.totalCount == 0
         !results3.data
     }
 
@@ -122,6 +176,7 @@ class UserPointsSpecs extends DefaultIntSpec {
         then:
         results1
         results1.count == 1
+        results1.totalCount == 1
         results1.data.size() == 1
         results1.data.get(0).userId == sampleUserIds.get(0)
         results1.data.get(0).totalPoints == 10
