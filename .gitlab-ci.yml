@@ -12,6 +12,9 @@ build:
     - cat ~/.m2/settings.xml
     - mvn install
   artifacts:
+    reports:
+      junit:
+        - backend/target/surefire-reports/TEST-*.xml
     paths:
       - backend/target/backend-*.jar
 
