@@ -44,7 +44,7 @@
         const addEventDisabled = this.subject.totalPoints < this.$store.state.minimumSubjectPoints;
         const msg = addEventDisabled ? `Subject needs at least ${this.$store.state.minimumSubjectPoints} points before events can be added` : '';
         items.push({
-          name: 'Add Event', iconClass: 'fa-user-plus', page: 'AddSkillEvent', isDisabled: addEventDisabled, msg: msg,
+          name: 'Add Event', iconClass: 'fa-user-plus', page: 'AddSkillEvent', isDisabled: addEventDisabled, msg,
         });
         items.push({ name: 'Metrics', iconClass: 'fa-chart-bar', page: 'SkillMetrics' });
         return items;
