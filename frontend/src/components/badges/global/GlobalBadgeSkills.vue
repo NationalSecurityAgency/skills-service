@@ -53,14 +53,12 @@
         },
         badgeSkills: [],
         availableSkills: [],
-        projectId: null,
         badgeId: null,
         badge: null,
         afterListSlotText: '',
       };
     },
     mounted() {
-      this.projectId = this.$route.params.projectId;
       this.badgeId = this.$route.params.badgeId;
       this.loadBadge();
       this.loadAssignedBadgeSkills();
@@ -70,7 +68,6 @@
         'loadGlobalBadgeDetailsState',
       ]),
       loadBadge() {
-        this.isLoading = false;
         if (this.$route.params.badge) {
           this.badge = this.$route.params.badge;
         } else {
@@ -113,7 +110,7 @@
         this.loading.skillOp = true;
         GlobalBadgeService.removeSkillFromBadge(this.badgeId, deletedItem.projectId, deletedItem.skillId)
           .then(() => {
-            this.badgeSkills = this.badgeSkills.filter(entry => `${entry.projectId}${entry.skillId}` !== `${deletedItem.projectId}${deletedItem.skillId}`);
+            this.badgeSkills = this.badgeSkills.filter(item => `${item.projectId}${item.skillId}` !== `${deletedItem.projectId}${deletedItem.skillId}`);
             this.availableSkills.unshift(deletedItem);
             this.loadGlobalBadgeDetailsState({ badgeId: this.badgeId });
             this.loading.skillOp = false;
@@ -125,7 +122,7 @@
         GlobalBadgeService.assignSkillToBadge(this.badgeId, newItem.projectId, newItem.skillId)
           .then(() => {
             this.badgeSkills.push(newItem);
-            this.availableSkills = this.availableSkills.filter(item => item.id !== newItem.id);
+            this.availableSkills = this.availableSkills.filter(item => `${item.projectId}${item.skillId}` !== `${newItem.projectId}${newItem.skillId}`);
             this.loadGlobalBadgeDetailsState({ badgeId: this.badgeId });
             this.loading.skillOp = false;
             this.$emit('skills-changed', newItem);
