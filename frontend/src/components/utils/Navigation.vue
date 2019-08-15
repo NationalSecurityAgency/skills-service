@@ -17,6 +17,7 @@
               :class="{'bg-primary': menuSelections.get(navItem.name), 'text-light': menuSelections.get(navItem.name), 'select-cursor': !menuSelections.get(navItem.name), 'disabled': navItem.isDisabled}">
             <div class="text-truncate">
                 <i v-bind:class="navItem.iconClass" class="fas fa-w-16" style="min-width: 1.7rem;"/> {{ navItem.name }}
+                <i v-if="navItem.isDisabled" class="fas fa-exclamation-circle text-warning ml-1" style="pointer-events: all; font-size: 1.5rem;" v-b-tooltip.hover="navItem.msg"/>
             </div>
           </router-link>
         </ul>

@@ -1,5 +1,5 @@
-import store from '../store/store';
 import VeeValidate from 'vee-validate';
+import store from '../store/store';
 
 const validator = {
   getMessage: field => `${field} cannot exceed ${store.getters.config.descriptionMaxLength} characters.`,
