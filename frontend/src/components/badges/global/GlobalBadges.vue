@@ -9,7 +9,7 @@
                  :key="badge.id" class="col-lg-4 mb-3"  style="min-width: 23rem;">
               <badge :badge="badge" :global="true"
                      @badge-updated="saveBadge"
-                     @  badge-deleted="deleteBadge"
+                     @badge-deleted="deleteBadge"
                      @move-badge-up="moveBadgeUp"
                      @move-badge-down="moveBadgeDown"/>
             </div>
