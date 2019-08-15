@@ -21,6 +21,7 @@ import java.nio.charset.StandardCharsets
 
 import static org.springframework.data.domain.Sort.Direction.ASC
 import static org.springframework.data.domain.Sort.Direction.DESC
+import static skills.services.GlobalSkillsStorageService.*
 
 @RestController
 @RequestMapping("/supervisor")
@@ -169,8 +170,8 @@ class SupervisorController {
 
     @RequestMapping(value = "/badges/{badgeId}/skills/available", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    List<SkillDefRes> suggestBadgeSkills(@PathVariable("badgeId") String badgeId,
-                                         @RequestParam String query) {
+    AvailableSkillsResult suggestBadgeSkills(@PathVariable("badgeId") String badgeId,
+                                                   @RequestParam String query) {
         SkillsValidator.isNotBlank(badgeId, "Badge Id")
         return globalSkillsStorageService.getAvailableSkillsForGlobalBadge(badgeId, query)
     }
