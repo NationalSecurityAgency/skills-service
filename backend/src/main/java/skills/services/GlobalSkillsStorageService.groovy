@@ -225,10 +225,16 @@ class GlobalSkillsStorageService {
     }
 
     @Transactional
-    List<SkillDefPartialRes> getAvailableSkillsForGlobalBadge(String badgeId, String query) {
+    AvailableSkillsResult getAvailableSkillsForGlobalBadge(String badgeId, String query) {
         List<SkillDefPartial> allSkillDefs = skillDefRepo.findAllByTypeAndNameLike(SkillDef.ContainerType.Skill, query)
         Set<String> existingBadgeSkillIds = getSkillsForBadge(badgeId).collect { "${it.projectId}${it.skillId}" }
-        return allSkillDefs.findAll { !("${it.projectId}${it.skillId}" in existingBadgeSkillIds) }.sort().take(10).collect { convertToSkillDefPartialRes(it) }
+        List<SkillDefPartial> suggestedSkillDefs = allSkillDefs.findAll { !("${it.projectId}${it.skillId}" in existingBadgeSkillIds) }
+        AvailableSkillsResult res = new AvailableSkillsResult()
+        if (suggestedSkillDefs) {
+            res.totalAvailable = suggestedSkillDefs.size()
+            res.suggestedSkills = suggestedSkillDefs.sort().take(10).collect { convertToSkillDefPartialRes(it) }
+        }
+        return res
     }
 
     @Transactional
@@ -353,5 +359,10 @@ class GlobalSkillsStorageService {
 //            res.numUsers = calculateDistinctUsersForSkill(skillDef.projectId, skillDef.skillId)
         }
         return res
+    }
+
+    static class AvailableSkillsResult {
+        int totalAvailable = 0
+        List<SkillDefPartialRes> suggestedSkills = []
     }
 }

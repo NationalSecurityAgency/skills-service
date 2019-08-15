@@ -5,12 +5,15 @@
     <multiselect v-model="selectedInternal" placeholder="Select skill(s)..."
                  :options="options" :multiple="multipleSelection" :taggable="false" :blockKeys="['Delete']"
                  :hide-selected="true" label="name" track-by="id" :is-loading="isLoading"
-                 v-on:remove="removed" v-on:select="added" v-on:search-change="searchChanged" :options-limit="10" :internal-search="false">
+                 v-on:remove="removed" v-on:select="added" v-on:search-change="searchChanged" :internal-search="internalSearch">
       <template slot="option" slot-scope="props">
         <slot name="dropdown-item" v-bind:props="props">
           <h6>{{ props.option.name }}</h6>
           <div class="text-secondary">ID: {{props.option.skillId}}</div>
         </slot>
+      </template>
+      <template v-if="afterListSlotText" slot="afterList">
+        <h6 class="ml-1"> {{ this.afterListSlotText }}</h6>
       </template>
     </multiselect>
   </div>
@@ -37,6 +40,14 @@
       isLoading: {
         type: Boolean,
         default: false,
+      },
+      internalSearch: {
+        type: Boolean,
+        default: true,
+      },
+      afterListSlotText: {
+        type: String,
+        default: '',
       },
     },
     data() {

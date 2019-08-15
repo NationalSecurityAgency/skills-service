@@ -6,7 +6,8 @@
       <loading-container v-bind:is-loading="loading.availableSkills || loading.badgeSkills || loading.skillOp">
         <skills-selector2 :options="availableSkills" class="mb-4"
                           v-on:added="skillAdded" v-on:search-change="searchChanged"
-                          :onlySingleSelectedValue="true"></skills-selector2>
+                          :onlySingleSelectedValue="true" :internal-search="false"
+                          :after-list-slot-text="afterListSlotText"></skills-selector2>
 
         <simple-skills-table v-if="badgeSkills && badgeSkills.length > 0"
                              :skills="badgeSkills" v-on:skill-removed="deleteSkill"></simple-skills-table>
@@ -55,6 +56,7 @@
         projectId: null,
         badgeId: null,
         badge: null,
+        afterListSlotText: '',
       };
     },
     mounted() {
@@ -88,9 +90,14 @@
       },
       loadAvailableBadgeSkills(query) {
         GlobalBadgeService.suggestProjectSkills(this.badgeId, query)
-          .then((loadedSkills) => {
+          .then((res) => {
             const badgeSkillIds = this.badgeSkills.map(item => `${item.projectId}${item.skillId}`);
-            this.availableSkills = loadedSkills.filter(item => !badgeSkillIds.includes(`${item.projectId}${item.skillId}`));
+            this.availableSkills = res.suggestedSkills.filter(item => !badgeSkillIds.includes(`${item.projectId}${item.skillId}`));
+            if (res.totalAvailable > res.suggestedSkills.length) {
+              this.afterListSlotText = `Showing ${res.suggestedSkills.length} of ${res.totalAvailable} results.  Use search to narrow results.`;
+            } else {
+              this.afterListSlotText = '';
+            }
             this.loading.availableSkills = false;
           });
       },
