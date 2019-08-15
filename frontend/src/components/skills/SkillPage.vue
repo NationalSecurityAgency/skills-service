@@ -42,8 +42,9 @@
         items.push({ name: 'Dependencies', iconClass: 'fa-vector-square', page: 'SkillDependencies' });
         items.push({ name: 'Users', iconClass: 'fa-users', page: 'SkillUsers' });
         const addEventDisabled = this.subject.totalPoints < this.$store.state.minimumSubjectPoints;
+        const msg = addEventDisabled ? `Subject needs at least ${this.$store.state.minimumSubjectPoints} points before events can be added` : '';
         items.push({
-          name: 'Add Event', iconClass: 'fa-user-plus', page: 'AddSkillEvent', isDisabled: addEventDisabled,
+          name: 'Add Event', iconClass: 'fa-user-plus', page: 'AddSkillEvent', isDisabled: addEventDisabled, msg: msg,
         });
         items.push({ name: 'Metrics', iconClass: 'fa-chart-bar', page: 'SkillMetrics' });
         return items;
