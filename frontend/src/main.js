@@ -12,6 +12,7 @@ import 'matchmedia-polyfill';
 import 'matchmedia-polyfill/matchMedia.addListener';
 import './filters/NumberFilter';
 import './filters/TruncateFilter';
+import './validators/MaxDescriptionLengthValidator';
 import App from './App';
 import router from './router';
 import store from './store/store';
@@ -40,18 +41,6 @@ Vue.directive('focus', {
   inserted: (el) => {
     setTimeout(() => el.focus(), 10);
   },
-});
-
-VeeValidate.Validator.extend('maxDescriptionLength', {
-  getMessage: field => `${field} cannot exceed ${store.getters.config.descriptionMaxLength} characters.`,
-  validate(value) {
-    if (value.length > store.getters.config.descriptionMaxLength) {
-      return false;
-    }
-    return true;
-  },
-}, {
-  immediate: false,
 });
 
 require('vue-multiselect/dist/vue-multiselect.min.css');
