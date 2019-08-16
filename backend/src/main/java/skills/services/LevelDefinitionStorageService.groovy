@@ -303,6 +303,7 @@ class LevelDefinitionStorageService {
             throw new SkillException("Failed to find level [${level}]", projectId, skillId)
         }
         LevelDef toEdit = null
+        int levelToEditIdx = 0
 
         //validate that the edit doesn't break the consistency of the other levels.
         for(int i=0; i < existingDefinitions.levels.size(); i++){
@@ -311,6 +312,7 @@ class LevelDefinitionStorageService {
                 LevelValidator.validateLevelsBefore(levelDef, editLevelRequest, asPoints)
             }else if(i == toEditIndex){
                 toEdit = levelDef
+                levelToEditIdx = i
             }else if(i > toEditIndex){
                 LevelValidator.validateLevelsAfter(levelDef, editLevelRequest, asPoints)
             }
@@ -320,6 +322,12 @@ class LevelDefinitionStorageService {
         if(asPoints){
             toEdit.pointsFrom = editLevelRequest.pointsFrom
             toEdit.pointsTo = editLevelRequest.pointsTo
+
+            //prevent gaps
+            List<LevelDef> modified = new LevelUtils().fixGaps(existingDefinitions.levels, toEdit, levelToEditIdx)
+            modified.each {
+                levelDefinitionRepository.save(it)
+            }
         }else{
             toEdit.percent = editLevelRequest.percent
         }

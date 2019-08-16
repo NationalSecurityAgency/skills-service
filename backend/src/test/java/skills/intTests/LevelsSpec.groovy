@@ -808,6 +808,86 @@ class LevelsSpec extends  DefaultIntSpec{
         levels.first().pointsTo > 0
     }
 
+    def "automatically prevent gaps when editing level points"(){
+        when:
+        def setting = skillsService.changeSetting(projId, projectPointsSetting, [projectId: projId, setting: projectPointsSetting, value: "true"])
+        assert setting.body.success == true
+
+        def levels = skillsService.getLevels(projId, null).sort(){it.level}
+
+        def levelToEdit = levels[1]
+        def props = [:]
+        props.projectId = levelToEdit.projectId
+        props.skillId = levelToEdit.skillId
+        props.level = levelToEdit.level
+        props.percent = levelToEdit.percent
+        props.pointsFrom = 40 //was 37
+        props.pointsTo = 60 //was 67
+        props.name = "TwoEagles"
+        props.iconClass = "two-eagles"
+
+        skillsService.editLevel(projId, null, props.level as String, props)
+        levels = skillsService.getLevels(projId, null).sort(){it.level}
+
+        then:
+        levels[0].pointsTo == 40
+        levels[1].pointsFrom == 40
+        levels[1].pointsTo == 60
+        levels[2].pointsFrom == 60
+    }
+
+    def "automatically prevent gaps when editing first level points"(){
+        when:
+        def setting = skillsService.changeSetting(projId, projectPointsSetting, [projectId: projId, setting: projectPointsSetting, value: "true"])
+        assert setting.body.success == true
+
+        def levels = skillsService.getLevels(projId, null).sort(){it.level}
+
+        def levelToEdit = levels[0]
+        def props = [:]
+        props.projectId = levelToEdit.projectId
+        props.skillId = levelToEdit.skillId
+        props.level = levelToEdit.level
+        props.percent = levelToEdit.percent
+        props.pointsFrom = 5
+        props.pointsTo = 10
+        props.name = "TwoEagles"
+        props.iconClass = "two-eagles"
+
+        skillsService.editLevel(projId, null, props.level as String, props)
+        levels = skillsService.getLevels(projId, null).sort(){it.level}
+
+        then:
+        levels[0].pointsTo == 10
+        levels[1].pointsFrom == 10
+    }
+
+    def "automatically prevent gaps when editing last level points"(){
+        when:
+        def setting = skillsService.changeSetting(projId, projectPointsSetting, [projectId: projId, setting: projectPointsSetting, value: "true"])
+        assert setting.body.success == true
+
+        def levels = skillsService.getLevels(projId, null).sort(){it.level}
+
+        def levelToEdit = levels.last()
+        def props = [:]
+        props.projectId = levelToEdit.projectId
+        props.skillId = levelToEdit.skillId
+        props.level = levelToEdit.level
+        props.percent = levelToEdit.percent
+        props.pointsFrom = 1500
+        props.pointsTo = 2500
+        props.name = "TwoEagles"
+        props.iconClass = "two-eagles"
+
+        skillsService.editLevel(projId, null, props.level as String, props)
+        levels = skillsService.getLevels(projId, null).sort(){it.level}
+
+        then:
+        levels[levels.size()-1].pointsFrom == 1500
+        levels[levels.size()-2].pointsTo == 1500
+    }
+
     private List<List<String>> setupProjectWithSkills(List<String> subjects = ['testSubject1', 'testSubject2']) {
         List<List<String>> skillIds = []
         skillsService.createProject([projectId: projId, name: "Test Project"])

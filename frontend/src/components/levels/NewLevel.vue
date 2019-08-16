@@ -124,10 +124,10 @@
             let previousValid = true;
             let nextValid = true;
             if (self.boundaries.previous !== null) {
-              previousValid = value > self.boundaries.previous;
+              previousValid = value >= self.boundaries.previous;
             }
             if (self.boundaries.next !== null) {
-              nextValid = value < self.boundaries.next;
+              nextValid = value <= self.boundaries.next;
             }
             valid = nextValid && previousValid;
           }
