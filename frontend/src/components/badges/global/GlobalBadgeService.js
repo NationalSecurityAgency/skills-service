@@ -31,7 +31,6 @@ export default {
     return axios.get(`/supervisor/badges/name/${encodeURIComponent(badgeId)}/exists`)
       .then(remoteRes => !remoteRes.data);
   },
-
   assignSkillToBadge(badgeId, projectId, skillId) {
     return axios.post(`/supervisor/badges/${badgeId}/projects/${projectId}/skills/${skillId}`)
       .then(res => res.data);
@@ -46,6 +45,18 @@ export default {
   },
   suggestProjectSkills(badgeId, search) {
     return axios.get(`/supervisor/badges/${badgeId}/skills/available?query=${search}`)
+      .then(res => res.data);
+  },
+  getAllProjects() {
+    return axios.get('/supervisor/projects')
+      .then(res => res.data);
+  },
+  getProjectLevels(projectId) {
+    return axios.get(`/supervisor/projects/${projectId}/levels`)
+      .then(res => res.data);
+  },
+  assignProjectLevelToBadge(badgeId, projectId, levelId) {
+    return axios.post(`/supervisor/badges/${badgeId}/projects/${projectId}/level/${levelId}`)
       .then(res => res.data);
   },
 };

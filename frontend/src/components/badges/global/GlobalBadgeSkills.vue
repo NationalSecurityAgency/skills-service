@@ -12,7 +12,7 @@
         <simple-skills-table v-if="badgeSkills && badgeSkills.length > 0"
                              :skills="badgeSkills" v-on:skill-removed="deleteSkill"></simple-skills-table>
 
-        <no-content2 v-else title="No Skills Selected Yet..." icon="fas fa-award"
+        <no-content2 v-else title="No Skills Added Yet..." icon="fas fa-award"
                      message="Please use drop-down above to start adding skills to this badge!"></no-content2>
       </loading-container>
     </simple-card>
@@ -70,20 +70,19 @@
       loadBadge() {
         if (this.$route.params.badge) {
           this.badge = this.$route.params.badge;
+          this.badgeSkills = this.badge.requiredSkills;
+          this.loading.badgeSkills = false;
         } else {
           GlobalBadgeService.getBadge(this.badgeId)
             .then((response) => {
               this.badge = response;
+              this.badgeSkills = response.requiredSkills;
+              this.loading.badgeSkills = false;
             });
         }
       },
       loadAssignedBadgeSkills() {
-        GlobalBadgeService.getBadgeSkills(this.badgeId)
-          .then((loadedSkills) => {
-            this.badgeSkills = loadedSkills;
-            this.loading.badgeSkills = false;
-            this.loadAvailableBadgeSkills('');
-          });
+        this.loadAvailableBadgeSkills('');
       },
       loadAvailableBadgeSkills(query) {
         GlobalBadgeService.suggestProjectSkills(this.badgeId, query)

@@ -9,7 +9,7 @@
 
     <navigation :nav-items="[
           {name: 'Skills', iconClass: 'fa-graduation-cap', page: 'GlobalBadgeSkills'},
-          // {name: 'Levels', iconClass: 'fa-users', page: 'GlobalBadgeLevels'},
+          {name: 'Levels', iconClass: 'fa-trophy', page: 'GlobalBadgeLevels'},
           // {name: 'Users', iconClass: 'fa-users', page: 'GlobalBadgeUsers'},
           // {name: 'Metrics', iconClass: 'fa-chart-bar', page: 'GlobalBadgeMetrics'},
         ]">

@@ -28,6 +28,7 @@ import SectionMetrics from '@//components/metrics/SectionMetrics';
 import Skills from '@//components/skills/Skills';
 import BadgeSkills from '@//components/badges/BadgeSkills';
 import GlobalBadgeSkills from '@//components/badges/global/GlobalBadgeSkills';
+import GlobalBadgeLevels from '@//components/levels/global/GlobalBadgeLevels';
 import SkillOverview from '@//components/skills/SkillOverview';
 import SkillDependencies from '@//components/skills/dependencies/SkillDependencies';
 import AddSkillEvent from '@//components/skills/AddSkillEvent';
@@ -286,12 +287,11 @@ const router = new Router({
         path: '',
         component: GlobalBadgeSkills,
         meta: { requiresAuth: true },
-      // }, {
-      //   name: 'GlobalBadgeLevels',
-      //   path: 'levels',
-      //   component: GlobalBadgeLevels,
-      //   meta: { requiresAuth: true },
-      // }, {
+      }, {
+        name: 'GlobalBadgeLevels',
+        path: 'levels',
+        component: GlobalBadgeLevels,
+        meta: { requiresAuth: true },
       // }, {
       //   name: 'GlobalBadgeUsers',
       //   path: 'users',

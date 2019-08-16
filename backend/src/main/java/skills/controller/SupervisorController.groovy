@@ -3,7 +3,6 @@ package skills.controller
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.data.domain.PageRequest
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
 import skills.controller.exceptions.SkillsValidator
@@ -15,12 +14,9 @@ import skills.services.AdminProjService
 import skills.services.AdminUsersService
 import skills.services.GlobalSkillsStorageService
 import skills.services.LevelDefinitionStorageService
-import skills.storage.model.auth.UserRole
 
 import java.nio.charset.StandardCharsets
 
-import static org.springframework.data.domain.Sort.Direction.ASC
-import static org.springframework.data.domain.Sort.Direction.DESC
 import static skills.services.GlobalSkillsStorageService.*
 
 @RestController
@@ -110,13 +106,13 @@ class SupervisorController {
 
     @RequestMapping(value = "/badges", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    List<BadgeResult> getBadges() {
+    List<GlobalBadgeResult> getBadges() {
         return globalSkillsStorageService.getBadges()
     }
 
     @RequestMapping(value = "/badges/{badgeId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    BadgeResult getBadge(@PathVariable("badgeId") String badgeId) {
+    GlobalBadgeResult getBadge(@PathVariable("badgeId") String badgeId) {
         SkillsValidator.isNotBlank(badgeId, "Badge Id")
 
         return globalSkillsStorageService.getBadge(badgeId)
@@ -130,34 +126,6 @@ class SupervisorController {
         SkillsValidator.isNotNull(badgePatchRequest.action, "Action must be provided")
 
         globalSkillsStorageService.setBadgeDisplayOrder(badgeId, badgePatchRequest)
-    }
-
-    @RequestMapping(value = "/projects/{projectId}/levels", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    List<LevelDefinitionRes> getLevels(
-            @PathVariable("projectId") String projectId) {
-        SkillsValidator.isNotBlank(projectId, "Project Id")
-
-        List<LevelDefinitionRes> res = levelDefinitionStorageService.getLevels(projectId)
-        return res
-    }
-
-    @GetMapping(value = "/badges/{badgeId}/users", produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    TableResult getBadgeUsers(@PathVariable("badgeId") String badgeId,
-                              @RequestParam String query,
-                              @RequestParam int limit,
-                              @RequestParam int page,
-                              @RequestParam String orderBy,
-                              @RequestParam Boolean ascending) {
-        SkillsValidator.isNotBlank(badgeId, "Badge Id")
-
-        PageRequest pageRequest = new PageRequest(page - 1, limit, ascending ? ASC : DESC, orderBy)
-        List<SkillDefRes> badgeSkills = getBadgeSkills(badgeId)
-        List<String> skillIds = badgeSkills.collect { it.skillId }
-        if (!skillIds) {
-            return new TableResult()
-        }
-        return adminUsersService.loadUsersPage(null, skillIds, query, pageRequest)
     }
 
     @RequestMapping(value = "/badges/{badgeId}/skills", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -176,9 +144,46 @@ class SupervisorController {
         return globalSkillsStorageService.getAvailableSkillsForGlobalBadge(badgeId, query)
     }
 
-//    @GetMapping('/supervisorUsers')
-//    @ResponseBody
-//    List<UserRole> getSupervisorUsers() {
-//        return accessSettingsStorageService.getSupervisorUsers()
-//    }
+    @RequestMapping(value = "/projects", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    List<ProjectResult> getAllProjects() {
+        return globalSkillsStorageService.getAllProjects()
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/levels", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    List<LevelDefinitionRes> getLevelsForProject(
+            @PathVariable("projectId") String projectId) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+
+        List<LevelDefinitionRes> res = levelDefinitionStorageService.getLevels(projectId)
+        return res
+    }
+
+    @RequestMapping(value = "/badges/{badgeId}/projects/{projectId}/level/{level}", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    RequestResult assignProjectLevelToBadge(@PathVariable("badgeId") String badgeId,
+                                            @PathVariable("projectId") String projectId,
+                                            @PathVariable("level") Integer level) {
+        SkillsValidator.isNotBlank(badgeId, "Badge Id")
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotNull(level, "Level")
+
+        globalSkillsStorageService.addProjectLevelToBadge(badgeId, projectId, level)
+        return new RequestResult(success: true)
+    }
+
+
+    @RequestMapping(value = "/badges/{badgeId}/projects/{projectId}/level/{level}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    RequestResult removeProjectLevelFromBadge(@PathVariable("badgeId") String badgeId,
+                                              @PathVariable("projectId") String projectId,
+                                              @PathVariable("level") Integer level) {
+        SkillsValidator.isNotBlank(badgeId, "Badge Id", projectId)
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotNull(level, "Level")
+
+        globalSkillsStorageService.removeProjectLevelFromBadge(badgeId, projectId, level)
+        return new RequestResult(success: true)
+    }
+
 }
