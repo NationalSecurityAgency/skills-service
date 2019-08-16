@@ -52,6 +52,14 @@
     mounted() {
       this.buildCardOptions();
     },
+    watch: {
+      subject(newVal) {
+        if (newVal) {
+          this.subjectInternal = newVal;
+          this.buildCardOptions();
+        }
+      },
+    },
     computed: {
       minimumPoints() {
         return this.$store.state.minimumSubjectPoints;

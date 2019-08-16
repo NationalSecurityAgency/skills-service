@@ -24,12 +24,12 @@
 
             <b-button-group size="sm" class="ml-1"
                             v-b-popover.hover="'Sorting controls are enabled only when Display Order column is sorted in the ascending order.'">
-              <b-button @click="moveDisplayOrderDown(props.row)" variant="outline-info"
-                        :disabled="!sortButtonEnabled || props.row.disabledDownButton || isMovingRows">
+              <b-button @click="moveDisplayOrderDown(props.row)" variant="outline-info" :class="{disabled:props.row.disabledDownButton}"
+                        :disabled="!sortButtonEnabled || props.row.disabledDownButton">
                 <i class="fas fa-arrow-circle-down"/>
               </b-button>
-              <b-button @click="moveDisplayOrderUp(props.row)" variant="outline-info"
-                        :disabled="!sortButtonEnabled || props.row.disabledDownButton || isMovingRows">
+              <b-button @click="moveDisplayOrderUp(props.row)" variant="outline-info" :class="{disabled: props.row.disabledDownButton}"
+                        :disabled="!sortButtonEnabled || props.row.disabledUpButton">
                 <i class="fas fa-arrow-circle-up"/>
               </b-button>
             </b-button-group>
@@ -96,7 +96,6 @@
         skills: [],
         skillsColumns: ['name', 'displayOrder', 'created', 'edit'],
         sortButtonEnabled: false,
-        isMovingRows: false,
         options: {
           headings: {
             created: 'Created (GMT)',
@@ -225,25 +224,12 @@
         this.moveDisplayOrder(row, 'DisplayOrderDown');
       },
       moveDisplayOrder(row, actionToSubmit) {
-        this.isMovingRows = true;
-
-        const item1Index = this.skills.findIndex(item => item.skillId === row.skillId);
-        this.$set(this.skills[item1Index], 'isMoving', true);
-
         SkillsService.updateSkill(row, actionToSubmit)
-          .then((response) => {
-            const item2Index = this.skills.findIndex(item => item.skillId === response.skillId);
-            const tmpOrder = this.skills[item1Index].displayOrder;
-            this.skills[item1Index].displayOrder = this.skills[item2Index].displayOrder;
-            this.skills[item2Index].displayOrder = tmpOrder;
-
-            this.disableFirstAndLastButtons();
-            this.isMovingRows = false;
-            this.$set(this.skills[item2Index], 'isMoving', false);
-          })
-          .finally(() => {
-            this.isMovingRows = false;
-            this.$set(this.skills[item1Index], 'isMoving', false);
+          .then(() => {
+            SkillsService.getSubjectSkills(this.projectId, this.subjectId).then((data) => {
+              this.skills = data;
+              this.disableFirstAndLastButtons();
+            });
           });
       },
       disableFirstAndLastButtons() {

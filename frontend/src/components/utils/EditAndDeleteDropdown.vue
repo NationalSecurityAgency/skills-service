@@ -12,11 +12,11 @@
 
     <hr class="my-2"/>
 
-    <b-dropdown-item v-on:click="emit('move-up')" :disabled="isFirst" class="mb-1">
+    <b-dropdown-item v-on:click="emit('move-up')" :disabled="isFirst" :class="'{mb-1: true, disabled: isFirst}'">
       <span class="text-info"> <i class="fas fa-arrow-circle-up pr-1"/> Move Up</span>
     </b-dropdown-item>
 
-    <b-dropdown-item v-on:click="emit('move-down')" :disabled="isLast">
+    <b-dropdown-item v-on:click="emit('move-down')" :disabled="isLast" :class="'{disabled: isLast}'">
       <span class="text-info"> <i class="fas fa-arrow-circle-down pr-1"/> Move Down</span>
     </b-dropdown-item>
 
