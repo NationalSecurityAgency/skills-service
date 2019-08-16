@@ -8,6 +8,13 @@ import skills.intTests.utils.SkillsService
 
 class AdminEditSpecs extends DefaultIntSpec {
 
+    def "test"(){
+        when:
+        skillsService.createProject([projectId: "GString", name:"GString"])
+        then:
+        true
+    }
+
     def "Edit subjectId"(){
         Map proj = SkillsFactory.createProject()
         Map subject = SkillsFactory.createSubject()

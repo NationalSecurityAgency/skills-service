@@ -154,9 +154,9 @@
         // name and subject id
         const self = this;
         Validator.extend('uniqueName', {
-          getMessage: field => `The value for the ${field} is already taken.`,
+          getMessage: field => `${field} is already taken.`,
           validate(value) {
-            if (self.isEdit) {
+            if (value === self.subject.name) {
               return true;
             }
             return SubjectsService.subjectWithNameExists(self.subjectInternal.projectId, value);
@@ -166,9 +166,9 @@
         });
 
         Validator.extend('uniqueId', {
-          getMessage: field => `The value for the ${field} is already taken.`,
+          getMessage: field => `${field} is already taken.`,
           validate(value) {
-            if (self.isEdit) {
+            if (value === self.subject.subjectId) {
               return true;
             }
             return SubjectsService.subjectWithIdExists(self.subjectInternal.projectId, value);
