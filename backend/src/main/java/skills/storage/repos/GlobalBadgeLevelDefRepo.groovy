@@ -5,6 +5,8 @@ import skills.storage.model.GlobalBadgeLevelDef
 
 interface GlobalBadgeLevelDefRepo extends CrudRepository<GlobalBadgeLevelDef, Integer>{
 
-    List<GlobalBadgeLevelDef> findAllByBadgeId(Integer projectId)
+    List<GlobalBadgeLevelDef> findAllByBadgeId(String badgeId)
+
+    GlobalBadgeLevelDef findByBadgeIdAndProjectIdAndLevel(String badgeId, String projectId, Integer level)
 
 }

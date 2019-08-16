@@ -16,11 +16,11 @@ class GlobalBadgeLevelDef implements Serializable {
     int level
 
     @Column(name="project_id")
-    Integer projectId
+    String projectId
 
     @Column(name="project_name")
     String projectName
 
     @Column(name="skill_id")
-    Integer badgeId
+    String badgeId
 }

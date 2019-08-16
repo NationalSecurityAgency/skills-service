@@ -761,14 +761,14 @@
                 <constraints primaryKey="true" nullable="false"/>
             </column>
 
-            <column name="project_id" type="int">
+            <column name="project_id" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>
 
             <column name="project_name" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>
-            <column name="skill_id" type="int">
+            <column name="skill_id" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>
 
@@ -785,26 +785,12 @@
         </createTable>
         <createIndex indexName="index_global_badge_level_definition_project_id"
                      tableName="level_definition">
-            <column name="project_id" type="int"/>
+            <column name="project_id" type="varchar(255)"/>
         </createIndex>
         <createIndex indexName="index_global_badge_level_definition_skill_id"
                      tableName="global_badge_level_definition">
-            <column name="skill_id" type="int"/>
+            <column name="skill_id" type="varchar(255)"/>
         </createIndex>
-        <addForeignKeyConstraint baseColumnNames="skill_id"
-                                 baseTableName="global_badge_level_definition"
-                                 constraintName="fk_global_badge_level_definition_skill_id"
-                                 onDelete="CASCADE"
-                                 onUpdate="CASCADE"
-                                 referencedColumnNames="id"
-                                 referencedTableName="skill_definition"/>
-        <addForeignKeyConstraint baseColumnNames="project_id"
-                                 baseTableName="global_badge_level_definition"
-                                 constraintName="fk_global_badge_level_definition_project_id"
-                                 onDelete="CASCADE"
-                                 onUpdate="CASCADE"
-                                 referencedColumnNames="id"
-                                 referencedTableName="project_definition"/>
 
         <!-- ============================================================================
         SQL Modifications
