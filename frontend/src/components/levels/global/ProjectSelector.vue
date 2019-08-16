@@ -65,7 +65,7 @@
         if (this.value) {
           this.selectedInternal = Object.assign({}, this.value);
         } else {
-          this.selectedInternal  = null;
+          this.selectedInternal = null;
         }
       },
       removed(removedItem) {
