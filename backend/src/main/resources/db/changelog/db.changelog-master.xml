@@ -752,6 +752,60 @@
                                  referencedColumnNames="id"
                                  referencedTableName="users"/>
 
+
+        <!-- ============================================================================
+        Table: Global Badge Level Definition
+        ============================================================================-->
+        <createTable tableName="global_badge_level_definition">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="project_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="project_name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="skill_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="level" type="int">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex indexName="index_global_badge_level_definition_project_id"
+                     tableName="level_definition">
+            <column name="project_id" type="int"/>
+        </createIndex>
+        <createIndex indexName="index_global_badge_level_definition_skill_id"
+                     tableName="global_badge_level_definition">
+            <column name="skill_id" type="int"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="skill_id"
+                                 baseTableName="global_badge_level_definition"
+                                 constraintName="fk_global_badge_level_definition_skill_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="skill_definition"/>
+        <addForeignKeyConstraint baseColumnNames="project_id"
+                                 baseTableName="global_badge_level_definition"
+                                 constraintName="fk_global_badge_level_definition_project_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="project_definition"/>
+
         <!-- ============================================================================
         SQL Modifications
         ============================================================================-->
