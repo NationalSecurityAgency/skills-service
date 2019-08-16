@@ -67,4 +67,43 @@ class LevelUtils {
             lastEntry = entry
         }
     }
+
+    /**
+     * Fixes any gaps left betwee toEdit and the levels before or after. NOTE that that this is
+     * only relevant if levels have been configured to be points-based.
+     * @param allLevels
+     * @param toEdit
+     * @return The level before and after which should be persisted to account for any changes in the pointsFrom or pointsTo
+     */
+    public List<LevelDef> fixGaps(List<LevelDef> allLevels, LevelDef toEdit){
+        int index = allLevels.findIndexOf { it.level == toEdit.level }
+        return fixGaps(allLevels, toEdit, index)
+    }
+
+    public List<LevelDef> fixGaps(List<LevelDef> allLevels, LevelDef toEdit, int toEditIndex){
+        def res = []
+        switch(toEditIndex){
+            case 0:
+                LevelDef fixGap = allLevels.get(toEditIndex+1)
+                fixGap.pointsFrom = toEdit.pointsTo
+                res.add(fixGap)
+                break
+            case allLevels.size()-1:
+                LevelDef fixGap = allLevels.get(toEditIndex-1)
+                fixGap.pointsTo = toEdit.pointsFrom
+                res.add(fixGap)
+                break
+            default:
+                LevelDef before = allLevels.get(toEditIndex-1)
+                LevelDef after = allLevels.get(toEditIndex+1)
+                before.pointsTo = toEdit.pointsFrom
+                after.pointsFrom = toEdit.pointsTo
+                res.add(before)
+                res.add(after)
+                break
+        }
+
+        return res
+    }
+
 }
