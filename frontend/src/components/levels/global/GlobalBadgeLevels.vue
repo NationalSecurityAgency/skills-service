@@ -42,6 +42,7 @@
   import SubPageHeader from '../../utils/pages/SubPageHeader';
   import LoadingContainer from '../../utils/LoadingContainer';
   import SimpleCard from '../../utils/cards/SimpleCard';
+  import MsgBoxMixin from '../../utils/modal/MsgBoxMixin';
 
   const { mapActions } = createNamespacedHelpers('badges');
 
@@ -56,6 +57,7 @@
       SubPageHeader,
       NoContent2,
     },
+    mixins: [MsgBoxMixin],
     data() {
       return {
         selectedProject: null,
@@ -101,21 +103,38 @@
       addLevel() {
         GlobalBadgeService.assignProjectLevelToBadge(this.badgeId, this.selectedProject.projectId, this.selectedLevel)
           .then(() => {
-            const newLevel = { name: this.selectedProject.name, level: this.selectedLevel };
+            const newLevel = {
+              badgeId: this.badgeId,
+              projectId: this.selectedProject.projectId,
+              projectName: this.selectedProject.name,
+              level: this.selectedLevel,
+            };
             this.badgeLevels.push(newLevel);
-            this.selectedProject = null;
             this.selectedLevel = null;
             this.loadGlobalBadgeDetailsState({ badgeId: this.badgeId });
+            this.selectedProject = null;
             this.$emit('levels-changed', newLevel);
           });
       },
       deleteLevel(deletedLevel) {
-        console.log(`Deleting Level...[${deletedLevel}] - badgeId [${this.badgeId}}]`, deletedLevel);
+        const msg = `Are you sure you want to remove Level "${deletedLevel.level}" for project "${deletedLevel.projectName}" from Badge "${this.badge.name}"?`;
+        this.msgConfirm(msg, 'WARNING: Remove Required Level').then((res) => {
+          if (res) {
+            this.levelDeleted(deletedLevel);
+          }
+        });
+      },
+      levelDeleted(deletedItem) {
+        GlobalBadgeService.removeProjectLevelFromBadge(this.badgeId, deletedItem.projectId, deletedItem.level)
+          .then(() => {
+            this.badgeLevels = this.badgeLevels.filter(item => `${item.projectId}${item.level}` !== `${deletedItem.projectId}${deletedItem.level}`);
+            this.loadGlobalBadgeDetailsState({ badgeId: this.badgeId });
+            this.$emit('levels-changed', deletedItem);
+          });
       },
       projectAdded() {
         // this.selectedProject = addedProject;
         this.levelPlaceholder = 'Pick a Level';
-        this.selectedProject = null;
         this.selectedLevel = null;
       },
       projectRemoved() {

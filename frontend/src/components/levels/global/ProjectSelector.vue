@@ -55,10 +55,17 @@
           this.projects = response.map(entry => entry);
         });
     },
+    watch: {
+      value: function watchUpdatesToSelected() {
+        this.setSelectedInternal();
+      },
+    },
     methods: {
       setSelectedInternal() {
         if (this.value) {
           this.selectedInternal = Object.assign({}, this.value);
+        } else {
+          this.selectedInternal  = null;
         }
       },
       removed(removedItem) {

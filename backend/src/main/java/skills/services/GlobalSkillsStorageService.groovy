@@ -141,10 +141,10 @@ class GlobalSkillsStorageService {
 
     @Transactional()
     void addProjectLevelToBadge(String badgeId, String projectId, Integer level) {
-        SkillDefWithExtra badgeSkillDef = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(null, badgeId, SkillDef.ContainerType.GlobalBadge)
-        if (!badgeSkillDef) {
-            throw new SkillException("Failed to find global badge [${badgeId}]")
-        }
+//        SkillDefWithExtra badgeSkillDef = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(null, badgeId, SkillDef.ContainerType.GlobalBadge)
+//        if (!badgeSkillDef) {
+//            throw new SkillException("Failed to find global badge [${badgeId}]")
+//        }
         ProjDef projDef = projDefRepo.findByProjectId(projectId)
         if (!projDef) {
             throw new SkillException("Failed to find project [${projectId}]", projectId)
@@ -158,18 +158,22 @@ class GlobalSkillsStorageService {
         }
 
         GlobalBadgeLevelDef globalBadgeLevelDef = new GlobalBadgeLevelDef(
-                level: level, projectId: projDef.id, projectName: projDef.name, badgeId: badgeSkillDef.id
+                level: level, projectId: projectId, projectName: projDef.name, badgeId: badgeId
         )
         globalBadgeLevelDefRepo.save(globalBadgeLevelDef)
     }
 
     @Transactional()
     void removeProjectLevelFromBadge(String badgeId, projectId, Integer level) {
-        removeGraphRelationship(badgeId, SkillDef.ContainerType.GlobalBadge, projectId, skillId, RelationshipType.BadgeDependence)
+        GlobalBadgeLevelDef globalBadgeLevelDef = globalBadgeLevelDefRepo.findByBadgeIdAndProjectIdAndLevel(badgeId, projectId, level)
+        if (!globalBadgeLevelDef) {
+            throw new SkillException("Failed to find global badge project level for badge [${badgeId}], project [${projectId}] and level [${level}]", projectId, badgeId)
+        }
+        globalBadgeLevelDefRepo.delete(globalBadgeLevelDef)
     }
 
     @Transactional()
-    List<GlobalBadgeLevelRes> getGlobalBadgeLevels(Integer badgeId) {
+    List<GlobalBadgeLevelRes> getGlobalBadgeLevels(String badgeId) {
         List<GlobalBadgeLevelDef> globalBadgeLevelDefs = globalBadgeLevelDefRepo.findAllByBadgeId(badgeId)
         return globalBadgeLevelDefs.collect { new GlobalBadgeLevelRes(
                 badgeId: it.badgeId,
@@ -409,7 +413,7 @@ class GlobalSkillsStorageService {
                 res.totalPoints = 0
             }
         }
-        res.requiredProjectLevels = getGlobalBadgeLevels(skillDef.id)
+        res.requiredProjectLevels = getGlobalBadgeLevels(skillDef.skillId)
         return res
     }
     @Profile

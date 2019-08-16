@@ -59,4 +59,8 @@ export default {
     return axios.post(`/supervisor/badges/${badgeId}/projects/${projectId}/level/${levelId}`)
       .then(res => res.data);
   },
+  removeProjectLevelFromBadge(badgeId, projectId, level) {
+    return axios.delete(`/supervisor/badges/${badgeId}/projects/${projectId}/level/${level}`)
+      .then(res => res.data);
+  },
 };
