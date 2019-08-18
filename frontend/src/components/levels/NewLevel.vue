@@ -10,21 +10,21 @@
             <template v-if="isEdit">
               <label for="editLevel-level">Level</label>
               <b-form-input v-focus id="editLevel-level" v-model="levelInternal.level" name="level" :disabled="isEdit"
-                            v-validate="'required|min_value:0|max_value:100|numeric'" data-vv-delay="500"></b-form-input>
+                            v-validate="'optionalNumeric|required|min_value:0|max_value:100'" data-vv-delay="500"></b-form-input>
               <small class="form-text text-danger" v-show="errors.has('level')">{{ errors.first('level')}}</small>
 
               <template v-if="!this.levelAsPoints">
                 <label for="editLevel-percent" class="mt-3">Percent</label>
-                <b-form-input id="editLevel-percent" v-model="levelInternal.percent" name="percent" v-validate="'required|min_value:0|max_value:100|numeric|overlap'" data-vv-delay="500"></b-form-input>
+                <b-form-input id="editLevel-percent" v-model="levelInternal.percent" name="percent" v-validate="'optionalNumeric|required|min_value:0|max_value:100|overlap'" data-vv-delay="500"></b-form-input>
                 <small class="form-text text-danger" v-show="errors.has('percent')">{{ errors.first('percent')}}</small>
               </template>
               <template v-else>
                 <label for="editLevel-pointsFrom" class="mt-3">Points From</label>
-                <b-form-input id="editlevel-pointsFrom" v-model="levelInternal.pointsFrom" name="pointsFrom" v-validate="'required|min_value:0|numeric|overlap'" data-vv-delay="500"></b-form-input>
+                <b-form-input id="editlevel-pointsFrom" v-model="levelInternal.pointsFrom" name="pointsFrom" v-validate="'optionalNumeric|required|min_value:0|overlap'" data-vv-delay="500"></b-form-input>
                 <small class="form-text text-danger" v-show="errors.has('pointsFrom')">{{ errors.first('pointsFrom')}}</small>
 
                 <label for="editLevel-pointsTo" class="mt-3">Points To</label>
-                <b-form-input id="editLevel-pointsTo" v-model="levelInternal.pointsTo" name="pointsTo" v-validate="'required|min_value:0|numeric|overlap'" data-vv-delay="500"></b-form-input>
+                <b-form-input id="editLevel-pointsTo" v-model="levelInternal.pointsTo" name="pointsTo" v-validate="'optionalNumeric|required|min_value:0|overlap'" data-vv-delay="500"></b-form-input>
                 <small class="form-text text-danger" v-show="errors.has('pointsTo')">{{ errors.first('pointsTo')}}</small>
               </template>
 
@@ -36,12 +36,12 @@
               <template v-if="!this.levelAsPoints">
                 <label for="newLevel-percent">Percent %</label>
                 <b-form-input v-focus id="newLevel-percent" v-model="levelInternal.percent" name="percent"
-                              v-validate="'required|min_value:0|max_value:100|numeric|overlap'" data-vv-delay="500"></b-form-input>
+                              v-validate="'optionalNumeric|required|min_value:0|max_value:100|overlap'" data-vv-delay="500"></b-form-input>
                 <small class="form-text text-danger" v-show="errors.has('percent')">{{ errors.first('percent')}}</small>
               </template>
               <template v-else>
                 <label for="newLevel-points" class="mt-3">Points</label>
-                <b-form-input id="newlevel-points" v-model="levelInternal.points" name="points" v-validate="'required|min_value:0|numeric|overlap'" data-vv-delay="500"></b-form-input>
+                <b-form-input id="newlevel-points" v-model="levelInternal.points" name="points" v-validate="'optionalNumeric|required|min_value:0|overlap'" data-vv-delay="500"></b-form-input>
                 <small class="form-text text-danger" v-show="errors.has('points')">{{ errors.first('points')}}</small>
               </template>
               <label for="newLevel-name" class="mt-3">Name <span class="text-muted">(optional)</span></label>
