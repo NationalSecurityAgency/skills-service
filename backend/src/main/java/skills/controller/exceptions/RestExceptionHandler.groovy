@@ -6,6 +6,7 @@ import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
@@ -55,6 +56,16 @@ class RestExceptionHandler extends ResponseEntityExceptionHandler {
         String msg = "Access Denied"
         BasicErrBody body = new BasicErrBody(explanation: msg, errorCode: ErrorCode.AccessDenied)
         return handleExceptionInternal(accessDeniedException, body, new HttpHeaders(), HttpStatus.FORBIDDEN, webRequest)
+    }
+
+
+    @Override
+    ResponseEntity<Object> handleHttpMessageNotReadable(
+            HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
+        log.error("HttpMessageNotReadableException", ex)
+        String msg = ex.message
+        BasicErrBody body = new BasicErrBody(explanation: msg, errorCode: ErrorCode.BadParam)
+        return handleExceptionInternal(ex, body, new HttpHeaders(), HttpStatus.BAD_REQUEST, request)
     }
 
     /**
