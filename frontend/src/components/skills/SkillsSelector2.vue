@@ -31,7 +31,7 @@
         required: true,
       },
       selected: {
-        type: Object,
+        type: Array,
       },
       onlySingleSelectedValue: {
         type: Boolean,
