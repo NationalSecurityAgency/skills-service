@@ -242,6 +242,9 @@
 
         if (existingLevel) {
           this.levelToEdit = Object.assign({}, existingLevel);
+          if (this.levels[this.levels.length - 1].level === existingLevel.level) {
+            this.levelToEdit.isLast = true;
+          }
         } else if (!this.reachedMaxLevels) {
           this.levelToEdit = { iconClass: 'fas fa-user-ninja' };
         }
