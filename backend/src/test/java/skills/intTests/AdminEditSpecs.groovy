@@ -1,10 +1,18 @@
 package skills.intTests
 
+import org.apache.http.client.methods.HttpHead
+import org.springframework.http.HttpEntity
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
+import org.springframework.http.converter.HttpMessageNotReadableException
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
+import skills.intTests.utils.WSHelper
 
 class AdminEditSpecs extends DefaultIntSpec {
 
@@ -129,6 +137,25 @@ class AdminEditSpecs extends DefaultIntSpec {
         assert updatedResult.projectId == "TestProject47"
         !shouldBeNull
         shouldFail
+    }
+
+    def "Create project with invalid json"(){
+        when:
+
+        WSHelper wsHelper = skillsService.wsHelper
+
+        HttpHeaders headers = new HttpHeaders()
+        headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+        HttpEntity<String> jsonRequest = new HttpEntity<>('{"originalProjectId":"","name":"Sna"""ffulus","projectId":"aProject"}', headers)
+
+        println "${wsHelper.skillsService}/app/projects/aProject"
+        ResponseEntity result = wsHelper.restTemplateWrapper.postForEntity("${wsHelper.skillsService}/app/projects/aProject", jsonRequest, String.class)
+
+        println result.body.getClass()
+        then:
+        result.statusCodeValue == 400
+        result.body
+        result.body.contains('"explanation":"JSON parse error: ')
     }
 
     def "Must NOT be able to edit projects from /app/projects/{id} endpoint"(){
