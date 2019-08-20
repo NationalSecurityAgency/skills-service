@@ -11,8 +11,9 @@ import skills.storage.model.CustomIcon
 import skills.storage.model.ProjDef
 
 import javax.imageio.ImageIO
-import javax.transaction.Transactional
 import java.awt.image.BufferedImage
+
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 @CompileStatic
@@ -34,6 +35,7 @@ class CustomIconFacade {
      * @param projectId
      * @return css or an empty string if no custom icons are found
      */
+    @Transactional(readOnly = true)
     String generateCss(String projectId){
         Validate.notNull(projectId, "projectId is required")
         Collection<CustomIcon> icons = iconService.getIconsForProject(projectId)

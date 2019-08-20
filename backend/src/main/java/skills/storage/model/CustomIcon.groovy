@@ -25,6 +25,7 @@ class CustomIcon {
 
     String filename;
 
+    @Basic(fetch = FetchType.EAGER)
     @Lob
     @Column(columnDefinition = "text")
     String dataUri;
