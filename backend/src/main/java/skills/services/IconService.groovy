@@ -3,8 +3,10 @@ package skills.services
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import skills.storage.model.CustomIcon
 import skills.storage.repos.CustomIconRepo
+
 
 /**
  * Created with IntelliJ IDEA.
@@ -18,6 +20,7 @@ class IconService {
     @Autowired
     CustomIconRepo iconRepo
 
+    @Transactional(readOnly = true)
     Collection<CustomIcon> getIconsForProject(String projectId){
         return iconRepo.findAllByProjectId(projectId)
     }
