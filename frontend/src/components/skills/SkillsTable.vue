@@ -28,7 +28,7 @@
                         :disabled="!sortButtonEnabled || props.row.disabledDownButton">
                 <i class="fas fa-arrow-circle-down"/>
               </b-button>
-              <b-button @click="moveDisplayOrderUp(props.row)" variant="outline-info" :class="{disabled: props.row.disabledDownButton}"
+              <b-button @click="moveDisplayOrderUp(props.row)" variant="outline-info" :class="{disabled: props.row.disabledUpButton}"
                         :disabled="!sortButtonEnabled || props.row.disabledUpButton">
                 <i class="fas fa-arrow-circle-up"/>
               </b-button>
@@ -239,6 +239,7 @@
             tableData[i].disabledUpButton = false;
             tableData[i].disabledDownButton = false;
           }
+
           tableData[0].disabledUpButton = true;
           tableData[tableData.length - 1].disabledDownButton = true;
         }
