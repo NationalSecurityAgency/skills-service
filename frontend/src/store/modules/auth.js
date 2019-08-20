@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { SkillsConfiguration } from '@skills/skills-client-vue';
 import router from '../../router';
 
 const getters = {
@@ -24,6 +25,7 @@ const mutations = {
     localStorage.setItem('localAuth', 'true');
     if (authData.token) {
       state.token = authData.token;
+      SkillsConfiguration.setAuthToken(state.token);
       localStorage.setItem('token', authData.token);
       localStorage.setItem('expirationDate', authData.expirationDate.getTime().toString());
     }
@@ -41,6 +43,7 @@ const mutations = {
     state.userInfo = null;
     state.localAuth = false;
     state.oAuthAuth = false;
+    SkillsConfiguration.logout();
     localStorage.removeItem('localAuth');
     localStorage.removeItem('oAuthAuth');
     localStorage.removeItem('token');
@@ -86,7 +89,7 @@ const actions = {
           dispatch('fetchUser')
             .then(() => {
               resolve(result);
-          });
+            });
         })
         .catch(error => reject(error));
     });
