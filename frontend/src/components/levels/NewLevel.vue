@@ -23,9 +23,11 @@
                 <b-form-input id="editlevel-pointsFrom" v-model="levelInternal.pointsFrom" name="pointsFrom" v-validate="'optionalNumeric|required|min_value:0|overlap'" data-vv-delay="500"></b-form-input>
                 <small class="form-text text-danger" v-show="errors.has('pointsFrom')">{{ errors.first('pointsFrom')}}</small>
 
-                <label for="editLevel-pointsTo" class="mt-3">Points To</label>
-                <b-form-input id="editLevel-pointsTo" v-model="levelInternal.pointsTo" name="pointsTo" v-validate="'optionalNumeric|required|min_value:0|overlap'" data-vv-delay="500"></b-form-input>
-                <small class="form-text text-danger" v-show="errors.has('pointsTo')">{{ errors.first('pointsTo')}}</small>
+                <div v-if="!levelInternal.isLast">
+                  <label for="editLevel-pointsTo" class="mt-3">Points To</label>
+                  <b-form-input id="editLevel-pointsTo" v-model="levelInternal.pointsTo" name="pointsTo" v-validate="'optionalNumeric|required|min_value:0|overlap'" data-vv-delay="500"></b-form-input>
+                  <small class="form-text text-danger" v-show="errors.has('pointsTo')">{{ errors.first('pointsTo')}}</small>
+                </div>
               </template>
 
               <label for="editLevel-name" class="mt-3">Name <span class="text-muted">(optional)</span></label>
