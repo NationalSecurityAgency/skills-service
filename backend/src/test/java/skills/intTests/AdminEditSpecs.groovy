@@ -148,10 +148,8 @@ class AdminEditSpecs extends DefaultIntSpec {
         headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
         HttpEntity<String> jsonRequest = new HttpEntity<>('{"originalProjectId":"","name":"Sna"""ffulus","projectId":"aProject"}', headers)
 
-        println "${wsHelper.skillsService}/app/projects/aProject"
         ResponseEntity result = wsHelper.restTemplateWrapper.postForEntity("${wsHelper.skillsService}/app/projects/aProject", jsonRequest, String.class)
 
-        println result.body.getClass()
         then:
         result.statusCodeValue == 400
         result.body
