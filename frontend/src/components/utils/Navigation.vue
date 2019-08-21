@@ -71,8 +71,10 @@
       },
       buildNewMenuMapWhenPropsChange(navigationItems) {
         const routeName = this.$route.name;
-        const navItem = navigationItems.find(item => item.page === routeName);
-        this.menuSelections = this.buildNewMenuMap(navItem ? navItem.name : navigationItems[0].name);
+        if (navigationItems && navigationItems.length > 0) {
+          const navItem = navigationItems.find(item => item.page === routeName);
+          this.menuSelections = this.buildNewMenuMap(navItem ? navItem.name : navigationItems[0].name);
+        }
       },
       buildNewMenuMap(selectedKey) {
         const menuSelectionsTemp = new Map();
