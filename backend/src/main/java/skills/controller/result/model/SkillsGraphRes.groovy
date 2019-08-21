@@ -6,6 +6,6 @@ class SkillsGraphRes {
         Integer toId
     }
 
-    List<SkillDefRes> nodes
+    List<SkillDefGraphRes> nodes
     List<Edge> edges
 }

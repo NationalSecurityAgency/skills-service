@@ -29,6 +29,8 @@ import skills.storage.repos.*
 import skills.utils.ClientSecretGenerator
 import skills.utils.Props
 
+import java.util.concurrent.atomic.AtomicInteger
+
 @Service
 @Slf4j
 class AdminProjService {
@@ -782,23 +784,41 @@ class AdminProjService {
         return convertToSkillsGraphRes(edges)
     }
 
+    private static Comparator<SkillDef> skillDefComparator = new Comparator<SkillDef>() {
+        @Override
+        int compare(SkillDef o1, SkillDef o2) {
+            return o1.id.compareTo(o2.id)
+        }
+    }
+
     private SkillsGraphRes convertToSkillsGraphRes(List<GraphSkillDefEdge> edges) {
-        Set<SkillDef> distinctNodes = new TreeSet<>(new Comparator<SkillDef>() {
-            @Override
-            int compare(SkillDef o1, SkillDef o2) {
-                return o1.id.compareTo(o2.id)
-            }
-        })
+        AtomicInteger idCounter = new AtomicInteger(0)
+        Map<SkillDef, Integer> distinctNodesWithIdLookup = new TreeMap(skillDefComparator)
         List<SkillsGraphRes.Edge> edgesRes = []
         edges.each {
-            edgesRes.add(new SkillsGraphRes.Edge(fromId: it.from.id, toId: it.to.id))
-            distinctNodes.add(it.from)
-            distinctNodes.add(it.to)
+            int fromId = getIdInsertIfNeeded(distinctNodesWithIdLookup, it.from, idCounter)
+            int toId = getIdInsertIfNeeded(distinctNodesWithIdLookup, it.to, idCounter)
+            edgesRes.add(new SkillsGraphRes.Edge(fromId: fromId, toId: toId))
         }
 
-        List<SkillDefRes> nodes = distinctNodes.collect({ convertToSkillDefRes(it) })
+        List<SkillDefGraphRes> nodes = distinctNodesWithIdLookup.collect {
+            SkillDefRes skillDefRes = convertToSkillDefRes(it.key)
+            SkillDefGraphRes graphRes = new SkillDefGraphRes()
+            Props.copy(skillDefRes, graphRes)
+            graphRes.id = it.value
+            return graphRes
+        }
         SkillsGraphRes res = new SkillsGraphRes(nodes: nodes, edges: edgesRes)
         return res
+    }
+
+    private Integer getIdInsertIfNeeded(Map<SkillDef, Integer> distinctNodesWithIdLookup, SkillDef item, AtomicInteger idCounter) {
+        Integer resultId = distinctNodesWithIdLookup.get(item)
+        if (resultId == null) {
+            resultId = idCounter.incrementAndGet()
+            distinctNodesWithIdLookup.put(item, resultId)
+        }
+        return resultId
     }
 
     @Transactional(readOnly = true)
