@@ -13,7 +13,7 @@
   import Navigation from '../utils/Navigation';
   import PageHeader from '../utils/pages/PageHeader';
 
-  const { mapGetters } = createNamespacedHelpers('subjects');
+  const { mapGetters, mapActions } = createNamespacedHelpers('subjects');
 
   export default {
     name: 'SkillPage',
@@ -30,13 +30,16 @@
       };
     },
     mounted() {
-      this.loadSkill();
+      this.loadData();
     },
     computed: {
       ...mapGetters([
         'subject',
       ]),
       navItems() {
+        if (this.isLoading) {
+          return [];
+        }
         const items = [];
         items.push({ name: 'Overview', iconClass: 'fa-info-circle', page: 'SkillOverview' });
         items.push({ name: 'Dependencies', iconClass: 'fa-vector-square', page: 'SkillDependencies' });
@@ -58,17 +61,22 @@
       // but components will never get cached - caching maybe important for components that want to update
       // the url so the state can be re-build later (example include browsing a map or dependency graph in our case)
       '$route.params.skillId': function skillChange() {
-        this.loadSkill();
+        this.loadData();
       },
     },
     methods: {
-      loadSkill() {
+      ...mapActions([
+        'loadSubjectDetailsState',
+      ]),
+      async loadData() {
         this.isLoading = true;
         SkillsService.getSkillDetails(this.$route.params.projectId, this.$route.params.subjectId, this.$route.params.skillId)
           .then((response) => {
             this.skill = Object.assign(response, { subjectId: this.$route.params.subjectId });
             this.headerOptions = this.buildHeaderOptions(this.skill);
-            this.isLoading = false;
+            this.loadSubjectDetailsState({ projectId: this.$route.params.projectId, subjectId: this.$route.params.subjectId }).then(() => {
+              this.isLoading = false;
+            });
           });
       },
       buildHeaderOptions(skill) {
