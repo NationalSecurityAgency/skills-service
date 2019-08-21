@@ -68,15 +68,22 @@
       ...mapActions([
         'loadSubjectDetailsState',
       ]),
-      async loadData() {
+      loadData() {
         this.isLoading = true;
         SkillsService.getSkillDetails(this.$route.params.projectId, this.$route.params.subjectId, this.$route.params.skillId)
           .then((response) => {
             this.skill = Object.assign(response, { subjectId: this.$route.params.subjectId });
             this.headerOptions = this.buildHeaderOptions(this.skill);
-            this.loadSubjectDetailsState({ projectId: this.$route.params.projectId, subjectId: this.$route.params.subjectId }).then(() => {
+            if (this.subject ) {
               this.isLoading = false;
-            });
+            } else {
+              this.loadSubjectDetailsState({
+                projectId: this.$route.params.projectId,
+                subjectId: this.$route.params.subjectId
+              }).then(() => {
+                this.isLoading = false;
+              });
+            }
           });
       },
       buildHeaderOptions(skill) {
