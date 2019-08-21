@@ -52,7 +52,7 @@
 
         <dependants-graph :skill="skill" :dependent-skills="skills" :graph="graph" class="my-3"/>
 
-        <simple-skills-table :skills="skills" v-on:skill-removed="skillDeleted">
+        <simple-skills-table :skills="skills" v-on:skill-removed="deleteSkill">
             <span slot="name-cell" slot-scope="row">
               <i v-if="row.props.isFromAnotherProject" class="fas fa-w-16 fa-handshake text-primary mr-1"></i>
               <i v-else class="fas fa-w-16 fa-list-alt text-info mr-1"></i>
@@ -76,9 +76,11 @@
   import SubPageHeader from '../../utils/pages/SubPageHeader';
   import SimpleCard from '../../utils/cards/SimpleCard';
   import LoadingContainer from '../../utils/LoadingContainer';
+  import MsgBoxMixin from '../../utils/modal/MsgBoxMixin';
 
   export default {
     name: 'SkillDependencies',
+    mixins: [MsgBoxMixin],
     components: {
       LoadingContainer,
       SimpleCard,
@@ -111,7 +113,7 @@
       //    <router-view :key="$route.fullPath"/>
       // but components will never get cached - caching maybe important for components that want to update
       // the url so the state can be re-build later (example include browsing a map or dependency graph in our case)
-      skill: function skillChange() {
+      '$route.params.skillId': function skillChange() {
         this.initData();
       },
     },
@@ -128,11 +130,20 @@
         SkillsService.getSkillDetails(this.$route.params.projectId, this.$route.params.subjectId, this.$route.params.skillId)
           .then((response) => {
             this.skill = Object.assign(response, { subjectId: this.$route.params.subjectId });
+            this.initData();
           });
+      },
+      deleteSkill(deleteItem) {
+        const msg = `Are you sure you want to remove "${deleteItem.name}""?`;
+        this.msgConfirm(msg, 'WARNING', 'Yes, Please!').then((res) => {
+          if (res) {
+            this.skillDeleted(deleteItem);
+          }
+        });
       },
       skillDeleted(deletedItem) {
         this.loading.finishedDependents = false;
-        SkillsService.removeDependency(this.skill.projectId, this.skill.skillId, deletedItem.skillId, deletedItem.projectId)
+        SkillsService.removeDependency(this.$route.params.projectId, this.$route.params.skillId, deletedItem.skillId, deletedItem.projectId)
           .then(() => {
             this.errNotification.enable = false;
             this.loadDependentSkills();
@@ -140,7 +151,7 @@
       },
       skillAdded(newItem) {
         this.loading.finishedDependents = false;
-        SkillsService.assignDependency(this.skill.projectId, this.skill.skillId, newItem.skillId, newItem.otherProjectId)
+        SkillsService.assignDependency(this.$route.params.projectId, this.$route.params.skillId, newItem.skillId, newItem.otherProjectId)
           .then(() => {
             this.errNotification.enable = false;
             this.loadDependentSkills();
@@ -162,28 +173,31 @@
       },
       loadDependentSkills() {
         this.loading.finishedDependents = false;
-        SkillsService.getDependentSkillsGraphForSkill(this.skill.projectId, this.skill.skillId)
+        SkillsService.getDependentSkillsGraphForSkill(this.$route.params.projectId, this.$route.params.skillId)
           .then((response) => {
-            this.graph = Object.assign(response, { subjectId: this.skill.subjectId });
-            const myEdges = this.graph.edges.filter(entry => entry.fromId === this.skill.id);
-            const myChildren = this.graph.nodes.filter(item => myEdges.find(item1 => item1.toId === item.id));
-            this.skills = myChildren.map((entry) => {
-              const externalProject = entry.projectId !== this.skill.projectId;
-              const disableInfo = {
-                manageBtn: {
-                  disable: externalProject,
-                  msg: 'Cannot manage skills from external projects.',
-                },
-              };
-              return Object.assign(entry, {
-                subjectId: this.skill.subjectId,
-                disabledStatus: disableInfo,
-                isFromAnotherProject: externalProject,
+            this.graph = Object.assign(response, { subjectId: this.$route.params.subjectId });
+            if (this.graph.nodes && this.graph.nodes.length > 0) {
+              const mySkill = this.graph.nodes.find(entry => entry.skillId === this.$route.params.skillId && entry.projectId === this.$route.params.projectId);
+              this.skill.id = mySkill.id;
+              const myEdges = this.graph.edges.filter(entry => entry.fromId === mySkill.id);
+              const myChildren = this.graph.nodes.filter(item => myEdges.find(item1 => item1.toId === item.id));
+              this.skills = myChildren.map((entry) => {
+                const externalProject = entry.projectId !== this.skill.projectId;
+                const disableInfo = {
+                  manageBtn: {
+                    disable: externalProject,
+                    msg: 'Cannot manage skills from external projects.',
+                  },
+                };
+                return Object.assign(entry, {
+                  subjectId: this.skill.subjectId,
+                  disabledStatus: disableInfo,
+                  isFromAnotherProject: externalProject,
+                });
               });
-            });
-
-            // this.previousSkills = this.skills.map(entry => entry);
-            this.loading.finishedDependents = true;
+            } else {
+              this.skills = [];
+            }
           })
           .finally(() => {
             this.loading.finishedDependents = true;
@@ -191,9 +205,9 @@
       },
       loadAllSkills() {
         this.loading.finishedAllSkills = false;
-        SkillsService.getSkillsFroDependency(this.skill.projectId)
+        SkillsService.getSkillsFroDependency(this.$route.params.projectId)
           .then((skills) => {
-            this.allSkills = skills.filter(item => (item.skillId !== this.skill.skillId || item.otherProjectId));
+            this.allSkills = skills.filter(item => (item.skillId !== this.$route.params.skillId || item.otherProjectId));
             this.loading.finishedAllSkills = true;
           })
           .finally(() => {
