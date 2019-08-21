@@ -122,7 +122,7 @@
           name: '',
           subjectId: '',
           description: '',
-          iconClass: 'fab fa-pied-piper-alt',
+          iconClass: 'fas fa-book',
         };
       },
     },
