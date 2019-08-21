@@ -31,7 +31,7 @@
               </template>
 
               <label for="editLevel-name" class="mt-3">Name <span class="text-muted">(optional)</span></label>
-              <b-form-input id="editLevel-name" v-model="levelInternal.name" name="name" v-validate="'max:50'" data-vv-delay="500"></b-form-input>
+              <b-form-input id="editLevel-name" v-model="levelInternal.name" name="name" v-validate="'max:50|uniqueName'" data-vv-delay="500"></b-form-input>
               <small class="form-text text-danger" v-show="errors.has('name')">{{ errors.first('name')}}</small>
             </template>
             <template v-else>
@@ -47,7 +47,7 @@
                 <small class="form-text text-danger" v-show="errors.has('points')">{{ errors.first('points')}}</small>
               </template>
               <label for="newLevel-name" class="mt-3">Name <span class="text-muted">(optional)</span></label>
-              <b-form-input id="newLevel-name" v-model="levelInternal.name" name="name" v-validate="'max:50'" data-vv-delay="500"></b-form-input>
+              <b-form-input id="newLevel-name" v-model="levelInternal.name" name="name" v-validate="'max:50|uniqueName'" data-vv-delay="500"></b-form-input>
               <small class="form-text text-danger" v-show="errors.has('name')">{{ errors.first('name')}}</small>
             </template>
           </div>
@@ -88,6 +88,7 @@
       boundaries: Object,
       isEdit: Boolean,
       value: Boolean,
+      allLevels: Array,
     },
     data() {
       return {
@@ -118,6 +119,11 @@
         },
       };
 
+      const gte = (value, compareTo) => value >= compareTo;
+      const lte = (value, compareTo) => value <= compareTo;
+      const gt = (value, compareTo) => value > compareTo;
+      const lt = (value, compareTo) => value < compareTo;
+
       Validator.extend('overlap', {
         getMessage: 'Value must not overlap with other levels',
         validate(value) {
@@ -125,13 +131,31 @@
           if (self.boundaries) {
             let previousValid = true;
             let nextValid = true;
+            const gtOp = self.levelAsPoints ? gte : gt;
+            const ltOp = self.levelAsPoints ? lte : lt;
+
             if (self.boundaries.previous !== null) {
-              previousValid = value >= self.boundaries.previous;
+              previousValid = gtOp(value, self.boundaries.previous);
             }
             if (self.boundaries.next !== null) {
-              nextValid = value <= self.boundaries.next;
+              nextValid = ltOp(value, self.boundaries.next);
             }
             valid = nextValid && previousValid;
+          }
+          return valid;
+        },
+      });
+
+      Validator.extend('uniqueName', {
+        getMessage: field => `${field} is already taken.`,
+        validate(value) {
+          let valid = true;
+          if (self.allLevels) {
+            const lcVal = value.toLowerCase();
+            const existingLevelWithName = self.allLevels.find(elem => elem.name.toLowerCase() === lcVal);
+            if (existingLevelWithName) {
+              valid = false;
+            }
           }
           return valid;
         },

@@ -55,7 +55,8 @@
                :boundaries="bounds"
                :level="levelToEdit"
                :level-as-points="levelsAsPoints"
-               :is-edit="isEdit"></new-level>
+               :is-edit="isEdit"
+                :all-levels="levels"></new-level>
   </div>
 </template>
 
