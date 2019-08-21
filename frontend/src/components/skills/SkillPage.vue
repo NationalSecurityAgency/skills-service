@@ -74,12 +74,12 @@
           .then((response) => {
             this.skill = Object.assign(response, { subjectId: this.$route.params.subjectId });
             this.headerOptions = this.buildHeaderOptions(this.skill);
-            if (this.subject ) {
+            if (this.subject) {
               this.isLoading = false;
             } else {
               this.loadSubjectDetailsState({
                 projectId: this.$route.params.projectId,
-                subjectId: this.$route.params.subjectId
+                subjectId: this.$route.params.subjectId,
               }).then(() => {
                 this.isLoading = false;
               });
