@@ -92,7 +92,7 @@
     },
     data() {
       return {
-        levelInternal: this.level,
+        levelInternal: Object.assign({}, this.level),
         displayIconManager: false,
         show: this.value,
       };
@@ -150,7 +150,7 @@
         getMessage: field => `${field} is already taken.`,
         validate(value) {
           let valid = true;
-          if (self.allLevels) {
+          if (self.allLevels && value !== self.level.name) {
             const lcVal = value.toLowerCase();
             const existingLevelWithName = self.allLevels.find(elem => elem.name.toLowerCase() === lcVal);
             if (existingLevelWithName) {
