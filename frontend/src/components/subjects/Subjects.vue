@@ -76,7 +76,7 @@
         this.isLoading = true;
         SubjectsService.deleteSubject(subject)
           .then(() => {
-            this.subjects = this.subjects.filter(item => item.id !== subject.id);
+            this.subjects = this.subjects.filter(item => item.subjectId !== subject.subjectId);
             this.loadProjectDetailsState({ projectId: this.projectId });
             this.$emit('subjects-changed', subject.subjectId);
           })
