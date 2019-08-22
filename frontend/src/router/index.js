@@ -151,22 +151,22 @@ const router = new Router({
         name: 'SubjectSkills',
         path: '',
         component: Skills,
-        meta: { requiresAuth: true },
+        meta: { requiresAuth: true, reportSkillId: 'VisitSkillsForASubject' },
       }, {
         name: 'SubjectLevels',
         path: 'levels',
         component: Levels,
-        meta: { requiresAuth: true },
+        meta: { requiresAuth: true, reportSkillId: 'VisitSubjectLevels' },
       }, {
         name: 'SubjectUsers',
         path: 'users',
         component: Users,
-        meta: { requiresAuth: true },
+        meta: { requiresAuth: true, reportSkillId: 'VisitSubjectUsers' },
       }, {
         name: 'SubjectMetrics',
         path: 'metrics',
         component: SectionMetrics,
-        meta: { requiresAuth: true },
+        meta: { requiresAuth: true, reportSkillId: 'VisitSubjectMetrics' },
       }],
     },
     {
@@ -230,17 +230,17 @@ const router = new Router({
         name: 'ClientDisplayPreview',
         path: '',
         component: ClientDisplayPreview,
-        meta: { requiresAuth: true },
+        meta: { requiresAuth: true, reportSkillId: 'VisitClientDisplay' },
       }, {
         name: 'UserSkillEvents',
         path: 'skillEvents',
         component: UserSkillsPerformed,
-        meta: { requiresAuth: true },
+        meta: { requiresAuth: true, reportSkillId: 'VisitUserPerformedSkills' },
       }, {
         name: 'UserMetrics',
         path: 'metrics',
         component: SectionMetrics,
-        meta: { requiresAuth: true },
+        meta: { requiresAuth: true, reportSkillId: 'VisitUserStats' },
       }],
     },
     {
@@ -253,7 +253,7 @@ const router = new Router({
         name: 'GeneralSettings',
         path: '',
         component: GeneralSettings,
-        meta: { requiresAuth: true },
+        meta: { requiresAuth: true, reportSkillId: 'VisitUserSettings' },
       }, {
         name: 'SecuritySettings',
         path: 'security',
@@ -270,13 +270,13 @@ const router = new Router({
       path: '/markdown',
       name: 'MarkDownSupport',
       component: GFMDescription,
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: true, reportSkillId: 'VisitMarkdownDocs' },
     },
     {
       path: '/skills',
       name: 'InceptionSkills',
       component: InceptionSkills,
-      meta: { requiresAuth: true, breadcrumb: 'Dashboard Skills' },
+      meta: { requiresAuth: true, breadcrumb: 'Dashboard Skills', reportSkillId: 'VisitDashboardSkills' },
     },
     {
       path: '/globalBadges/:badgeId',
