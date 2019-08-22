@@ -161,6 +161,35 @@ class InceptionProjectService {
                         numPerformToCompletion: 20,
                         description: "Navigate to ``Project -> Subjects``",
                 ),
+                new skills.controller.request.model.SkillRequest(name: "Visit Subject's Skills", skillId: "VisitSkillsForASubject", subjectId: subjectProjectId, projectId: inceptionProjectId,
+                        pointIncrement: 2,
+                        pointIncrementInterval: 60 * 12, // 1 work day
+                        numMaxOccurrencesIncrementInterval: 4, // up-to 4 per day
+                        numPerformToCompletion: 30,
+                        description: "Navigate to ``Project -> Subjects -> Subject``",
+                        helpUrl: "/dashboard/user-guide/subjects.html"
+                ),
+                new skills.controller.request.model.SkillRequest(name: "Visit Subject Levels", skillId: "VisitSubjectLevels", subjectId: subjectProjectId, projectId: inceptionProjectId,
+                        pointIncrement: 5,
+                        pointIncrementInterval: 60 * 12, // 1 work day
+                        numMaxOccurrencesIncrementInterval: 1, // up-to 4 per day
+                        numPerformToCompletion: 2,
+                        description: "Navigate to ``Project -> Subjects -> Subject -> Levels``",
+                ),
+                new skills.controller.request.model.SkillRequest(name: "Visit Subject Users", skillId: "VisitSubjectUsers", subjectId: subjectProjectId, projectId: inceptionProjectId,
+                        pointIncrement: 5,
+                        pointIncrementInterval: 60 * 12, // 1 work day
+                        numMaxOccurrencesIncrementInterval: 1, // up-to 4 per day
+                        numPerformToCompletion: 2,
+                        description: "Navigate to ``Project -> Subjects -> Subject -> Users``",
+                ),
+                new skills.controller.request.model.SkillRequest(name: "Visit Subject Metrics", skillId: "VisitSubjectMetrics", subjectId: subjectProjectId, projectId: inceptionProjectId,
+                        pointIncrement: 5,
+                        pointIncrementInterval: 60 * 12, // 1 work day
+                        numMaxOccurrencesIncrementInterval: 1, // up-to 4 per day
+                        numPerformToCompletion: 2,
+                        description: "Navigate to ``Project -> Subjects -> Subejct -> Metrics``",
+                ),
                 new skills.controller.request.model.SkillRequest(name: "Visit Badges", skillId: "VisitBadges", subjectId: subjectProjectId, projectId: inceptionProjectId,
                         pointIncrement: 2,
                         pointIncrementInterval: 60 * 12, // 1 work day
@@ -304,6 +333,13 @@ We suggest to often visit Skills Display view while building skill profile to be
                         description: "Almost every page on the skill's dashboard exposes metrics and statistics about that particular entity/concept. These metrics are very much context aware so as an example graphs and charts you see on a subject page will be for that specific subject and metrics on the project page will be for the entire project.",
                         helpUrl: "/dashboard/user-guide/metrics.html",
                 ),
+                new skills.controller.request.model.SkillRequest(name: "Visit Markdown Documentation", skillId: "VisitMarkdownDocs", subjectId: subjectDashboardId, projectId: inceptionProjectId,
+                        pointIncrement: 10,
+                        pointIncrementInterval: 60 * 12, // 1 work day
+                        numMaxOccurrencesIncrementInterval: 1, // up-to 25 per day
+                        numPerformToCompletion: 2,
+                        description: "Descriptions support markdown for subjects and skills. When creating a subject or a skill description field has a link to the markdown documentation.",
+                ),
 
 
                 // ********************************************************************
@@ -321,19 +357,45 @@ A Skill definition specifies how many times a skill has to be performed and each
 To create skill navigate to a subject and then click ``Skill +`` button.''',
                         helpUrl: "/dashboard/user-guide/skills.html"
                 ),
+                new skills.controller.request.model.SkillRequest(name: "Create Skill with disabled Time Window", skillId: "CreateSkillDisabledTimeWindow", subjectId: subjectSkillsId, projectId: inceptionProjectId,
+                        pointIncrement: 5,
+                        numPerformToCompletion: 5,
+                        description: "When 'Time Window' is disabled skill events are applied immediately.",
+                        helpUrl: "/dashboard/user-guide/skills.html"
+                ),
+                new skills.controller.request.model.SkillRequest(name: "Create Skill with Max Occurrences Within Time Window", skillId: "CreateSkillMaxOccurrencesWithinTimeWindow", subjectId: subjectSkillsId, projectId: inceptionProjectId,
+                        pointIncrement: 5,
+                        numPerformToCompletion: 5,
+                        description: "",
+                        helpUrl: "/dashboard/user-guide/skills.html"
+                ),
+                new skills.controller.request.model.SkillRequest(name: "Create Skill with Help Url", skillId: "CreateSkillHelpUrl", subjectId: subjectSkillsId, projectId: inceptionProjectId,
+                        pointIncrement: 5,
+                        pointIncrementInterval: 60 * 12, // 1 work day
+                        numMaxOccurrencesIncrementInterval: 5, // up-to 1 per day
+                        numPerformToCompletion: 10,
+                        description: "URL pointing to a help article further depicting information about this skill or capability. Please note that this property works in conjunction with the Root Help Url project setting.",
+                        helpUrl: "/dashboard/user-guide/skills.html"
+                ),
+                new skills.controller.request.model.SkillRequest(name: "Create Skills with multiple versions", skillId: "CreateSkillVersion", subjectId: subjectSkillsId, projectId: inceptionProjectId,
+                        pointIncrement: 25,
+                        numPerformToCompletion: 1,
+                        description: "Skill versioning is a mechanism that allows addition of the new skills without affecting existing software running with an older skill profile. Versioning is mostly pertinent to the Display Libraries that visualize the skill profile for the version they were declared with.",
+                        helpUrl: "/dashboard/user-guide/skills.html#skills-versioning"
+                ),
                 new skills.controller.request.model.SkillRequest(name: "Visit Skill Overview", skillId: "VisitSkillOverview", subjectId: subjectSkillsId, projectId: inceptionProjectId,
                         pointIncrement: 2,
                         pointIncrementInterval: 60 * 12, // 1 work day
                         numMaxOccurrencesIncrementInterval: 4, // up-to 4 per day
-                        numPerformToCompletion: 20,
+                        numPerformToCompletion: 30,
                         description: "Visit ``Skill Overview``. Navigate to ``Project -> Subject -> Skill -> Overview``",
                         helpUrl: "/dashboard/user-guide/skills.html"
                 ),
                 new skills.controller.request.model.SkillRequest(name: "Visit Skill Dependencies", skillId: "VisitSkillDependencies", subjectId: subjectSkillsId, projectId: inceptionProjectId,
                         pointIncrement: 5,
                         pointIncrementInterval: 60 * 12, // 1 work day
-                        numMaxOccurrencesIncrementInterval: 1, // up-to 1 per day
-                        numPerformToCompletion: 3,
+                        numMaxOccurrencesIncrementInterval: 2, // up-to 1 per day
+                        numPerformToCompletion: 6,
                         description: "Dependencies add another facet to the overall gamification profile which forces users to complete skills in the specified order. If you set up Skill A to depend on the completion of Skill B then no points will be awarded toward Skill A until Skill B is fully accomplished.Keep in mind that Skill B must be fully completed first before any points will be awarded toward Skill A. Navigate to ``Project -> Subject -> Skill -> Dependencies``",
                         helpUrl: "/dashboard/user-guide/dependencies.html"
                 ),
@@ -374,7 +436,6 @@ To create skill navigate to a subject and then click ``Skill +`` button.''',
                         numMaxOccurrencesIncrementInterval: 1, // up-to 1 per day
                         numPerformToCompletion: 5,
                         description: "Visit ``Skill Dependencies``. Navigate to ``Project -> Subject -> Skill -> Metrics``",
-//                        helpUrl: "/dashboard/user-guide/skills.html"
                 ),
                 new skills.controller.request.model.SkillRequest(name: "Expand Skill Details on Skills Page", skillId: "ExpandSkillDetailsSkillsPage", subjectId: subjectSkillsId, projectId: inceptionProjectId,
                         pointIncrement: 5,
@@ -382,42 +443,8 @@ To create skill navigate to a subject and then click ``Skill +`` button.''',
                         numMaxOccurrencesIncrementInterval: 1, // up-to 1 per day
                         numPerformToCompletion: 5,
                         description: "On the Skills Page click on ``+`` to expand a single row. ",
-//                        helpUrl: "/dashboard/user-guide/skills.html"
                 ),
-                new skills.controller.request.model.SkillRequest(name: "Create Skill with disabled Time Window", skillId: "CreateSkillDisabledTimeWindow", subjectId: subjectSkillsId, projectId: inceptionProjectId,
-                        pointIncrement: 25,
-                        numPerformToCompletion: 1,
-                        description: "When 'Time Window' is disabled skill events are applied immediately.",
-                        helpUrl: "/dashboard/user-guide/skills.html"
-                ),
-                new skills.controller.request.model.SkillRequest(name: "Create Skill with Max Occurrences Within Time Window", skillId: "CreateSkillMaxOccurrencesWithinTimeWindow", subjectId: subjectSkillsId, projectId: inceptionProjectId,
-                        pointIncrement: 25,
-                        numPerformToCompletion: 1,
-                        description: "",
-                        helpUrl: "/dashboard/user-guide/skills.html"
-                ),
-                new skills.controller.request.model.SkillRequest(name: "Create Skill with Help Url", skillId: "CreateSkillHelpUrl", subjectId: subjectSkillsId, projectId: inceptionProjectId,
-                        pointIncrement: 5,
-                        pointIncrementInterval: 60 * 12, // 1 work day
-                        numMaxOccurrencesIncrementInterval: 5, // up-to 1 per day
-                        numPerformToCompletion: 2,
-                        description: "URL pointing to a help article further depicting information about this skill or capability. Please note that this property works in conjunction with the Root Help Url project setting.",
-                        helpUrl: "/dashboard/user-guide/skills.html"
-                ),
-                new skills.controller.request.model.SkillRequest(name: "Use Markup in Skill's description", skillId: "CreateSkillMarkup", subjectId: subjectSkillsId, projectId: inceptionProjectId,
-                        pointIncrement: 5,
-                        pointIncrementInterval: 60 * 12, // 1 work day
-                        numMaxOccurrencesIncrementInterval: 5, // up-to 1 per day
-                        numPerformToCompletion: 2,
-                        description: "The Description field supports markdown. Let's see how fancy you can make it!",
-                        helpUrl: "/dashboard/user-guide/skills.html"
-                ),
-                new skills.controller.request.model.SkillRequest(name: "Create Skills with multiple versions", skillId: "CreateSkillVersion", subjectId: subjectSkillsId, projectId: inceptionProjectId,
-                        pointIncrement: 25,
-                        numPerformToCompletion: 1,
-                        description: "Skill versioning is a mechanism that allows addition of the new skills without affecting existing software running with an older skill profile. Versioning is mostly pertinent to the Display Libraries that visualize the skill profile for the version they were declared with.",
-                        helpUrl: "/dashboard/user-guide/skills.html#skills-versioning"
-                ),
+
         ]
 
         skills.each {
