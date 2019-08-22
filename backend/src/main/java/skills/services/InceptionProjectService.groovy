@@ -328,7 +328,7 @@ To create skill navigate to a subject and then click ``Skill +`` button.''',
                         pointIncrementInterval: 60 * 24, // 1 day
                         numMaxOccurrencesIncrementInterval: 1, // up-to 1 per day
                         numPerformToCompletion: 3,
-                        description: "Visit ``Skill Dependencies``. Navigate to ``Project -> Subject -> Skill -> Dependencies``",
+                        description: "Dependencies add another facet to the overall gamification profile which forces users to complete skills in the specified order. If you set up Skill A to depend on the completion of Skill B then no points will be awarded toward Skill A until Skill B is fully accomplished.Keep in mind that Skill B must be fully completed first before any points will be awarded toward Skill A. Navigate to ``Project -> Subject -> Skill -> Dependencies``",
                         helpUrl: "/dashboard/user-guide/dependencies.html"
                 ),
                 new skills.controller.request.model.SkillRequest(name: "Visit Skill Users", skillId: "VisitSkillUsers", subjectId: subjectSkillsId, projectId: inceptionProjectId,
@@ -337,8 +337,23 @@ To create skill navigate to a subject and then click ``Skill +`` button.''',
                         numMaxOccurrencesIncrementInterval: 1, // up-to 1 per day
                         numPerformToCompletion: 5,
                         description: "Visit ``Skill Dependencies``. Navigate to ``Project -> Subject -> Skill -> Users``",
-//                        helpUrl: "/dashboard/user-guide/skills.html"
+                        helpUrl: "/dashboard/user-guide/users.html"
                 ),
+                new skills.controller.request.model.SkillRequest(name: "Create Skill Dependencies", skillId: "CreateSkillDependencies", subjectId: subjectSkillsId, projectId: inceptionProjectId,
+                        pointIncrement: 5,
+                        pointIncrementInterval: 60 * 24, // 1 day
+                        numMaxOccurrencesIncrementInterval: 3, // up-to 1 per day
+                        numPerformToCompletion: 6,
+                        description: "Dependencies add another facet to the overall gamification profile which forces users to complete skills in the specified order. If you set up Skill A to depend on the completion of Skill B then no points will be awarded toward Skill A until Skill B is fully accomplished.Keep in mind that Skill B must be fully completed first before any points will be awarded toward Skill A. To add a dependency navigate to ``Project -> Subject -> Skill -> Dependencies``",
+                        helpUrl: "/dashboard/user-guide/dependencies.html"
+                ),
+                new skills.controller.request.model.SkillRequest(name: "Create Cross-Project Skill Dependencies", skillId: "CreateSkillDependencies", subjectId: subjectSkillsId, projectId: inceptionProjectId,
+                        pointIncrement: 25,
+                        numPerformToCompletion: 1,
+                        description: "Cross-Project Dependencies facilitate cross-application training and enable users to become domain experts across several applications. These dependencies are critical when actions are required to be performed in more than one tool in order to complete a task.",
+                        helpUrl: "/dashboard/user-guide/dependencies.html#cross-project-dependencies"
+                ),
+
                 new skills.controller.request.model.SkillRequest(name: "Manually Add Skill Event", skillId: "ManuallyAddSkillEvent", subjectId: subjectSkillsId, projectId: inceptionProjectId,
                         pointIncrement: 20,
                         pointIncrementInterval: 60 * 24, // 1 day
@@ -360,43 +375,41 @@ To create skill navigate to a subject and then click ``Skill +`` button.''',
                         pointIncrementInterval: 60 * 24, // 1 day
                         numMaxOccurrencesIncrementInterval: 1, // up-to 1 per day
                         numPerformToCompletion: 5,
-                        description: "On the Skills Page click on + to expand a single row. ",
+                        description: "On the Skills Page click on ``+`` to expand a single row. ",
 //                        helpUrl: "/dashboard/user-guide/skills.html"
                 ),
                 new skills.controller.request.model.SkillRequest(name: "Create Skill with disabled Time Window", skillId: "CreateSkillDisabledTimeWindow", subjectId: subjectSkillsId, projectId: inceptionProjectId,
                         pointIncrement: 25,
-                        pointIncrementInterval: 60 * 24, // 1 day
-                        numMaxOccurrencesIncrementInterval: 1, // up-to 1 per day
                         numPerformToCompletion: 1,
-                        description: "",
-//                        helpUrl: "/dashboard/user-guide/skills.html"
+                        description: "When 'Time Window' is disabled skill events are applied immediately.",
+                        helpUrl: "/dashboard/user-guide/skills.html"
                 ),
                 new skills.controller.request.model.SkillRequest(name: "Create Skill with Max Occurrences Within Time Window", skillId: "CreateSkillMaxOccurrencesWithinTimeWindow", subjectId: subjectSkillsId, projectId: inceptionProjectId,
                         pointIncrement: 25,
                         numPerformToCompletion: 1,
                         description: "",
-//                        helpUrl: "/dashboard/user-guide/skills.html"
+                        helpUrl: "/dashboard/user-guide/skills.html"
                 ),
                 new skills.controller.request.model.SkillRequest(name: "Create Skill with Help Url", skillId: "CreateSkillHelpUrl", subjectId: subjectSkillsId, projectId: inceptionProjectId,
                         pointIncrement: 5,
                         pointIncrementInterval: 60 * 24, // 1 day
                         numMaxOccurrencesIncrementInterval: 5, // up-to 1 per day
                         numPerformToCompletion: 2,
-                        description: "",
-//                        helpUrl: "/dashboard/user-guide/skills.html"
+                        description: "URL pointing to a help article further depicting information about this skill or capability. Please note that this property works in conjunction with the Root Help Url project setting.",
+                        helpUrl: "/dashboard/user-guide/skills.html"
                 ),
                 new skills.controller.request.model.SkillRequest(name: "Use Markup in Skill's description", skillId: "CreateSkillMarkup", subjectId: subjectSkillsId, projectId: inceptionProjectId,
                         pointIncrement: 5,
                         pointIncrementInterval: 60 * 24, // 1 day
                         numMaxOccurrencesIncrementInterval: 5, // up-to 1 per day
                         numPerformToCompletion: 2,
-                        description: "",
-//                        helpUrl: "/dashboard/user-guide/skills.html"
+                        description: "The Description field supports markdown. Let's see how fancy you can make it!",
+                        helpUrl: "/dashboard/user-guide/skills.html"
                 ),
                 new skills.controller.request.model.SkillRequest(name: "Create Skills with multiple versions", skillId: "CreateSkillVersion", subjectId: subjectSkillsId, projectId: inceptionProjectId,
                         pointIncrement: 25,
                         numPerformToCompletion: 1,
-                        description: "",
+                        description: "Skill versioning is a mechanism that allows addition of the new skills without affecting existing software running with an older skill profile. Versioning is mostly pertinent to the Display Libraries that visualize the skill profile for the version they were declared with.",
                         helpUrl: "/dashboard/user-guide/skills.html#skills-versioning"
                 ),
         ]
