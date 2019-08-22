@@ -1,85 +1,22 @@
-import axios from 'axios';
-import createAuthRefreshInterceptor from 'axios-auth-refresh';
-import router from '@/router';
+import SkillsConfiguration from '@skills/skills-client-configuration';
 import store from '@/store';
+
+import axios from 'axios';
 
 import 'url-search-params-polyfill';
 
 axios.defaults.withCredentials = true;
 
-// eslint-disable-next-line
-let service = {};
-
-const refreshAuthorization = (failedRequest) => {
-  service.setToken(null);
-  return service.getAuthenticationToken()
-    .then((result) => {
-      service.setToken(result.access_token);
-      // eslint-disable-next-line no-param-reassign
-      failedRequest.response.config.headers.Authorization = `Bearer ${result.access_token}`;
-      axios.defaults.headers.common.Authorization = `Bearer ${result.access_token}`;
-      return Promise.resolve();
-    });
-};
-
-// Instantiate the interceptor (you can chain it as it returns the axios instance)
-createAuthRefreshInterceptor(axios, refreshAuthorization);
-
-axios.interceptors.response.use(response => response, (error) => {
-  if (error.response && error.response.status !== 401) {
-    router.push({
-      name: 'error',
-      params: {
-        errorMessage: error.response.statusText,
-      },
-    });
-  }
-  return Promise.reject(error);
-});
-
-service = {
+export default {
   authenticationUrl: null,
-
-  serviceUrl: null,
-
-  projectId: null,
-
-  token: null,
 
   userId: new URLSearchParams(window.location.search).get('userId'),
 
   version: null,
 
-  authenticatingPromise: null,
-
-  getAuthenticationToken() {
-    if (!store.state.isAuthenticating) {
-      store.commit('isAuthenticating', true);
-      if (process.env.NODE_ENV === 'development') {
-        this.authenticatingPromise = axios.get(this.authenticationUrl);
-      } else {
-        store.state.parentFrame.emit('needs-authentication');
-        this.authenticatingPromise = new Promise((resolve) => {
-          const unsubscribe = store.subscribe((mutation) => {
-            if (mutation.type === 'authToken') {
-              resolve({
-                access_token: mutation.payload,
-              });
-              unsubscribe();
-            }
-          });
-        });
-      }
-      this.authenticatingPromise
-        .then(result => result.data)
-        .finally(() => store.commit('isAuthenticating', false));
-    }
-    return this.authenticatingPromise;
-  },
-
   getUserSkills() {
     let response = null;
-    response = axios.get(`${this.serviceUrl}${this.getServicePath()}/${this.projectId}/summary`, {
+    response = axios.get(`${SkillsConfiguration.getServiceUrl()}${this.getServicePath()}/${SkillsConfiguration.getProjectId()}/summary`, {
       params: {
         userId: this.userId,
         version: this.version,
@@ -90,13 +27,13 @@ service = {
 
   getCustomIconCss() {
     let response = null;
-    response = axios.get(`${this.serviceUrl}${this.getServicePath()}/${this.projectId}/customIconCss`, {
+    response = axios.get(`${SkillsConfiguration.getServiceUrl()}${this.getServicePath()}/${SkillsConfiguration.getProjectId()}/customIconCss`, {
     }).then(result => result.data);
     return response;
   },
 
   getSubjectSummary(subjectId) {
-    return axios.get(`${this.serviceUrl}${this.getServicePath()}/${this.projectId}/subjects/${subjectId}/summary`, {
+    return axios.get(`${SkillsConfiguration.getServiceUrl()}${this.getServicePath()}/${SkillsConfiguration.getProjectId()}/subjects/${subjectId}/summary`, {
       params: {
         userId: this.userId,
         version: this.version,
@@ -105,7 +42,7 @@ service = {
   },
 
   getSkillDependencies(skillId) {
-    return axios.get(`${this.serviceUrl}${this.getServicePath()}/${this.projectId}/skills/${skillId}/dependencies`, {
+    return axios.get(`${SkillsConfiguration.getServiceUrl()}${this.getServicePath()}/${SkillsConfiguration.getProjectId()}/skills/${skillId}/dependencies`, {
       params: {
         userId: this.userId,
       },
@@ -113,9 +50,9 @@ service = {
   },
 
   getSkillSummary(skillId, optionalCrossProjectId) {
-    let url = `${this.serviceUrl}${this.getServicePath()}/${this.projectId}/skills/${skillId}/summary`;
+    let url = `${SkillsConfiguration.getServiceUrl()}${this.getServicePath()}/${SkillsConfiguration.getProjectId()}/skills/${skillId}/summary`;
     if (optionalCrossProjectId) {
-      url = `${this.serviceUrl}${this.getServicePath()}/${this.projectId}/projects/${optionalCrossProjectId}/skills/${skillId}/summary`;
+      url = `${SkillsConfiguration.getServiceUrl()}${this.getServicePath()}/${SkillsConfiguration.getProjectId()}/projects/${optionalCrossProjectId}/skills/${skillId}/summary`;
     }
     return axios.get(url, {
       params: {
@@ -126,7 +63,7 @@ service = {
   },
 
   getBadgeSkills(badgeId) {
-    return axios.get(`${this.serviceUrl}${this.getServicePath()}/${this.projectId}/badges/${badgeId}/summary`, {
+    return axios.get(`${SkillsConfiguration.getServiceUrl()}${this.getServicePath()}/${SkillsConfiguration.getProjectId()}/badges/${badgeId}/summary`, {
       params: {
         userId: this.userId,
         version: this.version,
@@ -135,7 +72,7 @@ service = {
   },
 
   getBadgeSummaries() {
-    return axios.get(`${this.serviceUrl}${this.getServicePath()}/${this.projectId}/badges/summary`, {
+    return axios.get(`${SkillsConfiguration.getServiceUrl()}${this.getServicePath()}/${SkillsConfiguration.getProjectId()}/badges/summary`, {
       params: {
         userId: this.userId,
         version: this.version,
@@ -145,9 +82,9 @@ service = {
 
   getPointsHistory(subjectId) {
     let response = null;
-    let url = `${this.serviceUrl}${this.getServicePath()}/${this.projectId}/subjects/${subjectId}/pointHistory`;
+    let url = `${SkillsConfiguration.getServiceUrl()}${this.getServicePath()}/${SkillsConfiguration.getProjectId()}/subjects/${subjectId}/pointHistory`;
     if (!subjectId) {
-      url = `${this.serviceUrl}${this.getServicePath()}/${this.projectId}/pointHistory`;
+      url = `${SkillsConfiguration.getServiceUrl()}${this.getServicePath()}/${SkillsConfiguration.getProjectId()}/pointHistory`;
     }
     response = axios.get(url, {
       params: {
@@ -160,7 +97,7 @@ service = {
 
   addUserSkill(userSkillId) {
     let response = null;
-    response = axios.get(`${this.serviceUrl}${this.getServicePath()}/${this.projectId}/addSkill/${userSkillId}`, {
+    response = axios.get(`${SkillsConfiguration.getServiceUrl()}${this.getServicePath()}/${SkillsConfiguration.getProjectId()}/addSkill/${userSkillId}`, {
       params: {
         userId: this.userId,
       },
@@ -170,9 +107,9 @@ service = {
 
   getUserSkillsRanking(subjectId) {
     let response = null;
-    let url = `${this.serviceUrl}${this.getServicePath()}/${this.projectId}/subjects/${subjectId}/rank`;
+    let url = `${SkillsConfiguration.getServiceUrl()}${this.getServicePath()}/${SkillsConfiguration.getProjectId()}/subjects/${subjectId}/rank`;
     if (!subjectId) {
-      url = `${this.serviceUrl}${this.getServicePath()}/${this.projectId}/rank`;
+      url = `${SkillsConfiguration.getServiceUrl()}${this.getServicePath()}/${SkillsConfiguration.getProjectId()}/rank`;
     }
     response = axios.get(url, {
       params: {
@@ -184,9 +121,9 @@ service = {
 
   getUserSkillsRankingDistribution(subjectId) {
     let response = null;
-    let url = `${this.serviceUrl}${this.getServicePath()}/${this.projectId}/subjects/${subjectId}/rankDistribution`;
+    let url = `${SkillsConfiguration.getServiceUrl()}${this.getServicePath()}/${SkillsConfiguration.getProjectId()}/subjects/${subjectId}/rankDistribution`;
     if (!subjectId) {
-      url = `${this.serviceUrl}${this.getServicePath()}/${this.projectId}/rankDistribution`;
+      url = `${SkillsConfiguration.getServiceUrl()}${this.getServicePath()}/${SkillsConfiguration.getProjectId()}/rankDistribution`;
     }
     response = axios.get(url, {
       params: {
@@ -199,9 +136,9 @@ service = {
 
   getRankingDistributionUsersPerLevel(subjectId) {
     let response = null;
-    let url = `${this.serviceUrl}${this.getServicePath()}/${this.projectId}/subjects/${subjectId}/rankDistribution/usersPerLevel`;
+    let url = `${SkillsConfiguration.getServiceUrl()}${this.getServicePath()}/${SkillsConfiguration.getProjectId()}/subjects/${subjectId}/rankDistribution/usersPerLevel`;
     if (!subjectId) {
-      url = `${this.serviceUrl}${this.getServicePath()}/${this.projectId}/rankDistribution/usersPerLevel`;
+      url = `${SkillsConfiguration.getServiceUrl()}${this.getServicePath()}/${SkillsConfiguration.getProjectId()}/rankDistribution/usersPerLevel`;
     }
     response = axios.get(url, {
       params: {
@@ -212,9 +149,9 @@ service = {
   },
 
   getDescriptions(parentId, type = 'subject') {
-    let url = `${this.serviceUrl}${this.getServicePath()}/${this.projectId}/subjects/${parentId}/descriptions`;
+    let url = `${SkillsConfiguration.getServiceUrl()}${this.getServicePath()}/${SkillsConfiguration.getProjectId()}/subjects/${parentId}/descriptions`;
     if (type === 'badge') {
-      url = `${this.serviceUrl}${this.getServicePath()}/${this.projectId}/badges/${parentId}/descriptions`;
+      url = `${SkillsConfiguration.getServiceUrl()}${this.getServicePath()}/${SkillsConfiguration.getProjectId()}/badges/${parentId}/descriptions`;
     }
     const response = axios.get(url, {
       params: {
@@ -233,30 +170,11 @@ service = {
     this.version = version;
   },
 
-  setAuthenticationUrl(authenticationUrl) {
-    this.authenticationUrl = authenticationUrl;
-  },
-
   setServiceUrl(serviceUrl) {
     this.serviceUrl = serviceUrl;
-  },
-
-  setProjectId(projectId) {
-    this.projectId = projectId;
   },
 
   setUserId(userId) {
     this.userId = userId;
   },
-
-  setToken(token) {
-    this.token = token;
-    if (token && token !== 'pki') {
-      axios.defaults.headers.common.Authorization = `Bearer ${token}`;
-    } else {
-      delete axios.defaults.headers.common.Authorization;
-    }
-  },
 };
-
-export default service;
