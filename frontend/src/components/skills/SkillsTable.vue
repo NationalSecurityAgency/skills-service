@@ -67,6 +67,7 @@
 </template>
 
 <script>
+  import { SkillsReporter } from '@skills/skills-client-vue';
   import EditSkill from './EditSkill';
   import NoContent2 from '../utils/NoContent2';
   import ChildRowSkillsDisplay from './ChildRowSkillsDisplay';
@@ -159,6 +160,7 @@
               this.skills.splice(item1Index, 1, createdSkill);
             } else {
               this.skills.push(createdSkill);
+              SkillsReporter.reportSkill('CreateSkill');
             }
 
             this.disableFirstAndLastButtons();
