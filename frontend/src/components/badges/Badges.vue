@@ -93,7 +93,7 @@
           .then(() => {
             this.isLoading = false;
             this.$emit('badge-deleted', this.badge);
-            this.badges = this.badges.filter(item => item.id !== badge.id);
+            this.badges = this.badges.filter(item => item.badgeId !== badge.badgeId);
             this.loadProjectDetailsState({ projectId: this.projectId });
             this.$emit('badges-changed', badge.badgeId);
           })
