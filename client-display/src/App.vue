@@ -8,6 +8,8 @@
 
 <script>
   import UserSkillsService from '@/userSkills/service/UserSkillsService';
+  import SkillsConfiguration from '@skills/skills-client-configuration';
+  import TokenReauthorizer from '@/userSkills/service/TokenReauthorizer';
   import store from '@/store';
 
   import Vue from 'vue';
@@ -54,7 +56,7 @@
         const handshake = new Postmate.Model({
           updateAuthenticationToken(authToken) {
             store.commit('authToken', authToken);
-            UserSkillsService.setToken(authToken);
+            SkillsConfiguration.setAuthToken(authToken);
           },
           updateVersion(newVersion) {
             UserSkillsService.setVersion(newVersion);
@@ -71,10 +73,11 @@
           window.addEventListener('resize', onHeightChanged);
           this.onHeightChange();
 
-          UserSkillsService.setServiceUrl(parent.model.serviceUrl);
-          UserSkillsService.setProjectId(parent.model.projectId);
           UserSkillsService.setVersion(parent.model.version);
           UserSkillsService.setUserId(parent.model.userId);
+
+          SkillsConfiguration.setProjectId(parent.model.projectId);
+          SkillsConfiguration.setServiceUrl(parent.model.serviceUrl);
 
           this.handleTheming(parent.model.theme);
 
@@ -217,9 +220,9 @@
           // eslint-disable-next-line no-alert
           alert(errorMessage);
         } else {
-          UserSkillsService.setAuthenticationUrl(process.env.VUE_APP_AUTHENTICATION_URL);
-          UserSkillsService.setServiceUrl(process.env.VUE_APP_SERVICE_URL);
-          UserSkillsService.setProjectId(process.env.VUE_APP_PROJECT_ID);
+          SkillsConfiguration.setAuthenticator(process.env.VUE_APP_AUTHENTICATION_URL);
+          SkillsConfiguration.setServiceUrl(process.env.VUE_APP_SERVICE_URL);
+          SkillsConfiguration.setProjectId(process.env.VUE_APP_PROJECT_ID);
           this.storeAuthToken();
         }
       },
@@ -233,10 +236,10 @@
       },
 
       storeAuthToken() {
-        UserSkillsService.getAuthenticationToken()
+        TokenReauthorizer.getAuthenticationToken()
           .then((result) => {
             this.$store.commit('authToken', result);
-            UserSkillsService.setToken(result.access_token);
+            SkillsConfiguration.setAuthToken(result.access_token);
           });
       },
     },
