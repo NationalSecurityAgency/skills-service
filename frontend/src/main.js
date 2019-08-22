@@ -14,6 +14,8 @@ import './filters/NumberFilter';
 import './filters/TruncateFilter';
 import './validators/MaxDescriptionLengthValidator';
 import './validators/OptionalNumericValidator';
+import './directives/SkillsOnMountDirective';
+import './directives/FocusDirective';
 import App from './App';
 import router from './router';
 import store from './store/store';
@@ -37,12 +39,6 @@ window.moment = require('moment');
 window.axios = require('axios');
 
 require('./errorHandler');
-
-Vue.directive('focus', {
-  inserted: (el) => {
-    setTimeout(() => el.focus(), 10);
-  },
-});
 
 require('vue-multiselect/dist/vue-multiselect.min.css');
 

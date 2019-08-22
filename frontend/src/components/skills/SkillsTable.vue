@@ -52,7 +52,7 @@
           </div>
 
           <div slot="child_row" slot-scope="props">
-            <ChildRowSkillsDisplay :project-id="projectId" :subject-id="subjectId"
+            <ChildRowSkillsDisplay :project-id="projectId" :subject-id="subjectId" v-skills-onMount="'ExpandSkillDetailsSkillsPage'"
                                    :parent-skill-id="props.row.skillId" class="mr-3 ml-5 mb-3"></ChildRowSkillsDisplay>
           </div>
         </v-client-table>
