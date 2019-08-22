@@ -97,6 +97,7 @@
         skillsColumns: ['name', 'displayOrder', 'created', 'edit'],
         sortButtonEnabled: false,
         options: {
+          uniqueKey: 'skillId',
           headings: {
             created: 'Created (GMT)',
             name: 'Skill Name',
