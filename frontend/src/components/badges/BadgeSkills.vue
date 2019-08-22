@@ -20,6 +20,7 @@
 
 <script>
   import { createNamespacedHelpers } from 'vuex';
+  import { SkillsReporter } from '@skills/skills-client-vue';
 
   import SkillsService from '../skills/SkillsService';
   import SkillsSelector2 from '../skills/SkillsSelector2';
@@ -111,6 +112,7 @@
             this.loadBadgeDetailsState({ projectId: this.projectId, badgeId: this.badgeId });
             this.loading.skillOp = false;
             this.$emit('skills-changed', newItem);
+            SkillsReporter.reportSkill('AssignGemOrBadgeSkills');
           });
       },
     },

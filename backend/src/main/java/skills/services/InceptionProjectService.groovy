@@ -102,7 +102,7 @@ class InceptionProjectService {
                 // ********************************************************************
 
                 new skills.controller.request.model.SkillRequest(name: "Create Project", skillId: "CreateProject", subjectId: subjectProjectId, projectId: inceptionProjectId,
-                        pointIncrement: 50, numPerformToCompletion: 1,
+                        pointIncrement: 20, numPerformToCompletion: 2,
                         description: "Project is an overall container that represents skills' ruleset for a single application with gamified training. " +
                                 "Project's administrator(s) manage training skills definitions, subjects, levels, dependencies and other attributes " +
                                 "that make up application's training profile. To create project click 'Project +' button.",
@@ -129,7 +129,7 @@ class InceptionProjectService {
                 new skills.controller.request.model.SkillRequest(name: "Create Badge", skillId: "CreateBadge", subjectId: subjectProjectId, projectId: inceptionProjectId,
                         pointIncrement: 20,
                         pointIncrementInterval: 0, // disable Time Window
-                        numPerformToCompletion: 2,
+                        numPerformToCompletion: 5,
                         description: "Badges add another facet to the overall gamificaiton profile and allows to further reward your users by providing these prestigious symbols. " +
                                 "Badges are a collection of skills and when all of the skills are accomplished that badge is earned. " +
                                 "To create a badge navigate to ``Project -> Badges`` and then click  ``Badge +`` button.",
@@ -137,8 +137,9 @@ class InceptionProjectService {
                 ),
                 new skills.controller.request.model.SkillRequest(name: "Create Gem", skillId: "CreateGem", subjectId: subjectProjectId, projectId: inceptionProjectId,
                         pointIncrement: 20,
-                        pointIncrementInterval: 0, // disable Time Window
-                        numPerformToCompletion: 1,
+                        pointIncrementInterval: 60 * 12, // 1 work day
+                        numMaxOccurrencesIncrementInterval: 1, // up-to 1 per day
+                        numPerformToCompletion: 2,
                         description: "Gems are special badges that are only available within configure time window. Users must complete all of the gem's skills within that window in order to earn this precious stone! " +
                                 "To create a gem navigate to ``Project -> Badges`` and then click  ``Badge +`` button. " +
                                 "You can then enable and configure a gem within badge edit modal by selecting Enable Gem Feature",
@@ -146,90 +147,95 @@ class InceptionProjectService {
                 ),
                 new skills.controller.request.model.SkillRequest(name: "Assign Badge or Gem Skills", skillId: "AssignGemOrBadgeSkills", subjectId: subjectProjectId, projectId: inceptionProjectId,
                         pointIncrement: 5,
-                        pointIncrementInterval: 0, // disable Time Window
-                        numPerformToCompletion: 5,
+                        pointIncrementInterval: 60 * 12, // 1 work day
+                        numMaxOccurrencesIncrementInterval: 5, // up-to 1 per day
+                        numPerformToCompletion: 10,
                         description: "Once a badge or a gem is created the next step is to assign skills to that badge/gem. " +
                                 "Badges are a collection of skills and when all of the skills are accomplished that badge is earned.",
                         helpUrl: "/dashboard/user-guide/badges.html"
                 ),
                 new skills.controller.request.model.SkillRequest(name: "Visit Subjects", skillId: "VisitSubjects", subjectId: subjectProjectId, projectId: inceptionProjectId,
                         pointIncrement: 2,
-                        pointIncrementInterval: 60 * 24, // 1 day
+                        pointIncrementInterval: 60 * 12, // 1 work day
                         numMaxOccurrencesIncrementInterval: 4, // up-to 4 per day
                         numPerformToCompletion: 20,
                         description: "Navigate to ``Project -> Subjects``",
                 ),
                 new skills.controller.request.model.SkillRequest(name: "Visit Badges", skillId: "VisitBadges", subjectId: subjectProjectId, projectId: inceptionProjectId,
                         pointIncrement: 2,
-                        pointIncrementInterval: 60 * 24, // 1 day
+                        pointIncrementInterval: 60 * 12, // 1 work day
                         numMaxOccurrencesIncrementInterval: 4, // up-to 4 per day
                         numPerformToCompletion: 20,
                         description: "Navigate to ``Project -> Badges``",
                 ),
                 new skills.controller.request.model.SkillRequest(name: "Visit Badge Page", skillId: "VisitSingleBadgePage", subjectId: subjectProjectId, projectId: inceptionProjectId,
                         pointIncrement: 2,
-                        pointIncrementInterval: 60 * 24, // 1 day
+                        pointIncrementInterval: 60 * 24, // 1 work day
                         numMaxOccurrencesIncrementInterval: 4, // up-to 4 per day
                         numPerformToCompletion: 20,
                         description: "Navigate to ``Project -> Badges -> Badge``",
                 ),
                 new skills.controller.request.model.SkillRequest(name: "Visit Badge Users", skillId: "VisitBadgeUsers", subjectId: subjectProjectId, projectId: inceptionProjectId,
                         pointIncrement: 2,
-                        pointIncrementInterval: 60 * 24, // 1 day
+                        pointIncrementInterval: 60 * 12, // 1 work day
                         numMaxOccurrencesIncrementInterval: 4, // up-to 4 per day
                         numPerformToCompletion: 20,
                         description: "Navigate to ``Project -> Badges -> Badge -> Users``",
                 ),
-                new skills.controller.request.model.SkillRequest(name: "Visit Badge Stats", skillId: "VisitBadgeStats", subjectId: subjectProjectId, projectId: inceptionProjectId,
+                new skills.controller.request.model.SkillRequest(name: "Visit Badge Metrics", skillId: "VisitBadgeStats", subjectId: subjectProjectId, projectId: inceptionProjectId,
                         pointIncrement: 2,
-                        pointIncrementInterval: 60 * 24, // 1 day
+                        pointIncrementInterval: 60 * 12, // 1 work day
                         numMaxOccurrencesIncrementInterval: 4, // up-to 4 per day
                         numPerformToCompletion: 20,
-                        description: "Navigate to ``Project -> Badges -> Badge -> Stats``",
+                        description: "Navigate to ``Project -> Badges -> Badge -> Metrics``",
                 ),
-                new skills.controller.request.model.SkillRequest(name: "Visit Dependencies", skillId: "VisitProjectDependencies", subjectId: subjectProjectId, projectId: inceptionProjectId,
-                        pointIncrement: 10,
-                        pointIncrementInterval: 60 * 24, // 1 day
-                        numMaxOccurrencesIncrementInterval: 1, // up-to 4 per day
-                        numPerformToCompletion: 2,
+                new skills.controller.request.model.SkillRequest(name: "Visit Project Dependencies", skillId: "VisitProjectDependencies", subjectId: subjectProjectId, projectId: inceptionProjectId,
+                        pointIncrement: 5,
+                        pointIncrementInterval: 60 * 12, // 1 work day
+                        numMaxOccurrencesIncrementInterval: 2, // up-to 4 per day
+                        numPerformToCompletion: 6,
                         description: "Navigate to ``Project -> Dependencies``",
                 ),
                 new skills.controller.request.model.SkillRequest(name: "Visit Cross Project Skills", skillId: "VisitProjectCrossProjectSkills", subjectId: subjectProjectId, projectId: inceptionProjectId,
-                        pointIncrement: 10,
-                        pointIncrementInterval: 60 * 24, // 1 day
-                        numMaxOccurrencesIncrementInterval: 1, // up-to 4 per day
-                        numPerformToCompletion: 2,
+                        pointIncrement: 5,
+                        pointIncrementInterval: 60 * 12, // 1 work day
+                        numMaxOccurrencesIncrementInterval: 2, // up-to 2 per day
+                        numPerformToCompletion: 6,
                         description: "Navigate to ``Project -> Cross Projects``",
                 ),
                 new skills.controller.request.model.SkillRequest(name: "Visit Project Levels", skillId: "VisitProjectLevels", subjectId: subjectProjectId, projectId: inceptionProjectId,
                         pointIncrement: 10,
-                        pointIncrementInterval: 60 * 24, // 1 day
-                        numMaxOccurrencesIncrementInterval: 1, // up-to 4 per day
+                        pointIncrementInterval: 60 * 12, // 1 work day
+                        numMaxOccurrencesIncrementInterval: 1, // up-to 1 per day
                         numPerformToCompletion: 2,
                         description: "Navigate to ``Project -> Levels``",
                 ),
                 new skills.controller.request.model.SkillRequest(name: "Visit Project Users", skillId: "VisitProjectUsers", subjectId: subjectProjectId, projectId: inceptionProjectId,
-                        pointIncrement: 10,
-                        pointIncrementInterval: 60 * 24, // 1 day
-                        numMaxOccurrencesIncrementInterval: 1, // up-to 4 per day
-                        numPerformToCompletion: 2,
+                        pointIncrement: 5,
+                        pointIncrementInterval: 60 * 12, // 1 work day
+                        numMaxOccurrencesIncrementInterval: 2, // up-to 2 per day
+                        numPerformToCompletion: 5,
                         description: "Navigate to ``Project -> Users``",
                 ),
-                new skills.controller.request.model.SkillRequest(name: "Visit Project Stats", skillId: "VisitProjectStats", subjectId: subjectProjectId, projectId: inceptionProjectId,
-                        pointIncrement: 10,
-                        pointIncrementInterval: 60 * 24, // 1 day
-                        numMaxOccurrencesIncrementInterval: 1, // up-to 4 per day
-                        numPerformToCompletion: 2,
-                        description: "Navigate to ``Project -> Stats``",
+                new skills.controller.request.model.SkillRequest(name: "Visit Project Metrics", skillId: "VisitProjectStats", subjectId: subjectProjectId, projectId: inceptionProjectId,
+                        pointIncrement: 5,
+                        pointIncrementInterval: 60 * 12, // 1 work day
+                        numMaxOccurrencesIncrementInterval: 2, // up-to 2 per day
+                        numPerformToCompletion: 5,
+                        description: "Navigate to ``Project -> Metrics``",
                 ),
                 new skills.controller.request.model.SkillRequest(name: "Visit Project Settings", skillId: "VisitProjectSettings", subjectId: subjectProjectId, projectId: inceptionProjectId,
-                        pointIncrement: 20,
-                        numPerformToCompletion: 1,
+                        pointIncrement: 15,
+                        pointIncrementInterval: 60 * 12, // 1 work day
+                        numMaxOccurrencesIncrementInterval: 1, // up-to 1 per day
+                        numPerformToCompletion: 2,
                         description: "Navigate to ``Project -> Settings``",
                 ),
                 new skills.controller.request.model.SkillRequest(name: "Visit Project Access Management", skillId: "VisitProjectAccessManagement", subjectId: subjectProjectId, projectId: inceptionProjectId,
-                        pointIncrement: 20,
-                        numPerformToCompletion: 1,
+                        pointIncrement: 15,
+                        numPerformToCompletion: 2,
+                        pointIncrementInterval: 60 * 12, // 1 work day
+                        numMaxOccurrencesIncrementInterval: 1, // up-to 1 per day
                         description: "Navigate to ``Project -> Settings``",
                 ),
 
@@ -263,7 +269,7 @@ To achieve this skill simply  please study available percentage based and point-
                 ),
                 new skills.controller.request.model.SkillRequest(name: "Visit Client Display", skillId: "VisitClientDisplay", subjectId: subjectDashboardId, projectId: inceptionProjectId,
                         pointIncrement: 10,
-                        pointIncrementInterval: 60 * 24, // 1 day
+                        pointIncrementInterval: 60 * 12, // 1 work day
                         numMaxOccurrencesIncrementInterval: 25, // up-to 25 per day
                         numPerformToCompletion: 50,
                         description: '''You can see what user's skills profile and progress display would like for a particular user by navigating to a specific user page ``Project -> Users -> Select a User -> Client Display``. 
@@ -276,7 +282,7 @@ We suggest to often visit Skills Display view while building skill profile to be
                 ),
                 new skills.controller.request.model.SkillRequest(name: "Visit Client Display with Non-Zero Version", skillId: "VisitClientDisplayNonZeroVersion", subjectId: subjectDashboardId, projectId: inceptionProjectId,
                         pointIncrement: 20,
-                        pointIncrementInterval: 60 * 24, // 1 day
+                        pointIncrementInterval: 60 * 12, // 1 work day
                         numMaxOccurrencesIncrementInterval: 25, // up-to 25 per day
                         numPerformToCompletion: 1,
                         description: "If your gamification profile is utilizing Skills Versioning then you can view what the Skills Display would look like for a specific version by selecting a different version in the drop-down located on the top-right of the page.",
@@ -284,7 +290,7 @@ We suggest to often visit Skills Display view while building skill profile to be
                 ),
                 new skills.controller.request.model.SkillRequest(name: "Visit User Performed Skills", skillId: "VisitUserPerformedSkills", subjectId: subjectDashboardId, projectId: inceptionProjectId,
                         pointIncrement: 10,
-                        pointIncrementInterval: 60 * 24, // 1 day
+                        pointIncrementInterval: 60 * 12, // 1 work day
                         numMaxOccurrencesIncrementInterval: 1, // up-to 25 per day
                         numPerformToCompletion: 2,
                         description: "To see a history of user's performed skill events please visit ``Project -> Users -> Select a User -> Performed Skills``. Furthermore you have an ability to remove a single skill event if needed.",
@@ -292,7 +298,7 @@ We suggest to often visit Skills Display view while building skill profile to be
                 ),
                 new skills.controller.request.model.SkillRequest(name: "Visit User Metrics", skillId: "VisitUserStats", subjectId: subjectDashboardId, projectId: inceptionProjectId,
                         pointIncrement: 10,
-                        pointIncrementInterval: 60 * 24, // 1 day
+                        pointIncrementInterval: 60 * 12, // 1 work day
                         numMaxOccurrencesIncrementInterval: 1, // up-to 25 per day
                         numPerformToCompletion: 2,
                         description: "Almost every page on the skill's dashboard exposes metrics and statistics about that particular entity/concept. These metrics are very much context aware so as an example graphs and charts you see on a subject page will be for that specific subject and metrics on the project page will be for the entire project.",
@@ -306,7 +312,7 @@ We suggest to often visit Skills Display view while building skill profile to be
 
                 new skills.controller.request.model.SkillRequest(name: "Create Skill", skillId: "CreateSkill", subjectId: subjectSkillsId, projectId: inceptionProjectId,
                         pointIncrement: 10,
-                        pointIncrementInterval: 60 * 24, // 1 day
+                        pointIncrementInterval: 60 * 12, // 1 work day
                         numMaxOccurrencesIncrementInterval: 25, // up-to 25 per day
                         numPerformToCompletion: 50,
                         description: '''Projects are composed of Subjects which are made of Skills and a single skill defines a training unit within the gamification framework. 
@@ -317,7 +323,7 @@ To create skill navigate to a subject and then click ``Skill +`` button.''',
                 ),
                 new skills.controller.request.model.SkillRequest(name: "Visit Skill Overview", skillId: "VisitSkillOverview", subjectId: subjectSkillsId, projectId: inceptionProjectId,
                         pointIncrement: 2,
-                        pointIncrementInterval: 60 * 24, // 1 day
+                        pointIncrementInterval: 60 * 12, // 1 work day
                         numMaxOccurrencesIncrementInterval: 4, // up-to 4 per day
                         numPerformToCompletion: 20,
                         description: "Visit ``Skill Overview``. Navigate to ``Project -> Subject -> Skill -> Overview``",
@@ -325,7 +331,7 @@ To create skill navigate to a subject and then click ``Skill +`` button.''',
                 ),
                 new skills.controller.request.model.SkillRequest(name: "Visit Skill Dependencies", skillId: "VisitSkillDependencies", subjectId: subjectSkillsId, projectId: inceptionProjectId,
                         pointIncrement: 5,
-                        pointIncrementInterval: 60 * 24, // 1 day
+                        pointIncrementInterval: 60 * 12, // 1 work day
                         numMaxOccurrencesIncrementInterval: 1, // up-to 1 per day
                         numPerformToCompletion: 3,
                         description: "Dependencies add another facet to the overall gamification profile which forces users to complete skills in the specified order. If you set up Skill A to depend on the completion of Skill B then no points will be awarded toward Skill A until Skill B is fully accomplished.Keep in mind that Skill B must be fully completed first before any points will be awarded toward Skill A. Navigate to ``Project -> Subject -> Skill -> Dependencies``",
@@ -333,7 +339,7 @@ To create skill navigate to a subject and then click ``Skill +`` button.''',
                 ),
                 new skills.controller.request.model.SkillRequest(name: "Visit Skill Users", skillId: "VisitSkillUsers", subjectId: subjectSkillsId, projectId: inceptionProjectId,
                         pointIncrement: 5,
-                        pointIncrementInterval: 60 * 24, // 1 day
+                        pointIncrementInterval: 60 * 12, // 1 work day
                         numMaxOccurrencesIncrementInterval: 1, // up-to 1 per day
                         numPerformToCompletion: 5,
                         description: "Visit ``Skill Dependencies``. Navigate to ``Project -> Subject -> Skill -> Users``",
@@ -341,7 +347,7 @@ To create skill navigate to a subject and then click ``Skill +`` button.''',
                 ),
                 new skills.controller.request.model.SkillRequest(name: "Create Skill Dependencies", skillId: "CreateSkillDependencies", subjectId: subjectSkillsId, projectId: inceptionProjectId,
                         pointIncrement: 5,
-                        pointIncrementInterval: 60 * 24, // 1 day
+                        pointIncrementInterval: 60 * 12, // 1 work day
                         numMaxOccurrencesIncrementInterval: 3, // up-to 1 per day
                         numPerformToCompletion: 6,
                         description: "Dependencies add another facet to the overall gamification profile which forces users to complete skills in the specified order. If you set up Skill A to depend on the completion of Skill B then no points will be awarded toward Skill A until Skill B is fully accomplished.Keep in mind that Skill B must be fully completed first before any points will be awarded toward Skill A. To add a dependency navigate to ``Project -> Subject -> Skill -> Dependencies``",
@@ -356,23 +362,23 @@ To create skill navigate to a subject and then click ``Skill +`` button.''',
 
                 new skills.controller.request.model.SkillRequest(name: "Manually Add Skill Event", skillId: "ManuallyAddSkillEvent", subjectId: subjectSkillsId, projectId: inceptionProjectId,
                         pointIncrement: 20,
-                        pointIncrementInterval: 60 * 24, // 1 day
+                        pointIncrementInterval: 60 * 12, // 1 work day
                         numMaxOccurrencesIncrementInterval: 1, // up-to 1 per day
                         numPerformToCompletion: 2,
                         description: "Manually Add Skill Events. Navigate to ``Project -> Subject -> Skill -> Add Event``",
                         helpUrl: "/dashboard/user-guide/skills.html#manually-add-skill-event"
                 ),
-                new skills.controller.request.model.SkillRequest(name: "Visit Skill Stats", skillId: "VisitSkillStats", subjectId: subjectSkillsId, projectId: inceptionProjectId,
+                new skills.controller.request.model.SkillRequest(name: "Visit Skill Metrics", skillId: "VisitSkillStats", subjectId: subjectSkillsId, projectId: inceptionProjectId,
                         pointIncrement: 5,
-                        pointIncrementInterval: 60 * 24, // 1 day
+                        pointIncrementInterval: 60 * 12, // 1 work day
                         numMaxOccurrencesIncrementInterval: 1, // up-to 1 per day
                         numPerformToCompletion: 5,
-                        description: "Visit ``Skill Dependencies``. Navigate to ``Project -> Subject -> Skill -> Users``",
+                        description: "Visit ``Skill Dependencies``. Navigate to ``Project -> Subject -> Skill -> Metrics``",
 //                        helpUrl: "/dashboard/user-guide/skills.html"
                 ),
                 new skills.controller.request.model.SkillRequest(name: "Expand Skill Details on Skills Page", skillId: "ExpandSkillDetailsSkillsPage", subjectId: subjectSkillsId, projectId: inceptionProjectId,
                         pointIncrement: 5,
-                        pointIncrementInterval: 60 * 24, // 1 day
+                        pointIncrementInterval: 60 * 12, // 1 work day
                         numMaxOccurrencesIncrementInterval: 1, // up-to 1 per day
                         numPerformToCompletion: 5,
                         description: "On the Skills Page click on ``+`` to expand a single row. ",
@@ -392,7 +398,7 @@ To create skill navigate to a subject and then click ``Skill +`` button.''',
                 ),
                 new skills.controller.request.model.SkillRequest(name: "Create Skill with Help Url", skillId: "CreateSkillHelpUrl", subjectId: subjectSkillsId, projectId: inceptionProjectId,
                         pointIncrement: 5,
-                        pointIncrementInterval: 60 * 24, // 1 day
+                        pointIncrementInterval: 60 * 12, // 1 work day
                         numMaxOccurrencesIncrementInterval: 5, // up-to 1 per day
                         numPerformToCompletion: 2,
                         description: "URL pointing to a help article further depicting information about this skill or capability. Please note that this property works in conjunction with the Root Help Url project setting.",
@@ -400,7 +406,7 @@ To create skill navigate to a subject and then click ``Skill +`` button.''',
                 ),
                 new skills.controller.request.model.SkillRequest(name: "Use Markup in Skill's description", skillId: "CreateSkillMarkup", subjectId: subjectSkillsId, projectId: inceptionProjectId,
                         pointIncrement: 5,
-                        pointIncrementInterval: 60 * 24, // 1 day
+                        pointIncrementInterval: 60 * 12, // 1 work day
                         numMaxOccurrencesIncrementInterval: 5, // up-to 1 per day
                         numPerformToCompletion: 2,
                         description: "The Description field supports markdown. Let's see how fancy you can make it!",

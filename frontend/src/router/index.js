@@ -99,48 +99,48 @@ const router = new Router({
         component: Subjects,
         meta: {
           requiresAuth: true,
-          // reportSkillId: 'ViewSubjects',
+          reportSkillId: 'VisitSubjects',
         },
       }, {
         name: 'Badges',
         path: 'badges',
         component: Badges,
-        meta: { requiresAuth: true },
+        meta: { requiresAuth: true, reportSkillId: 'VisitBadges' },
       }, {
         name: 'ProjectLevels',
         path: 'levels',
         component: Levels,
-        meta: { requiresAuth: true },
+        meta: { requiresAuth: true, reportSkillId: 'VisitProjectLevels' },
       }, {
         name: 'FullDependencyGraph',
         path: 'dependencies',
         component: FullDependencyGraph,
-        meta: { requiresAuth: true },
+        meta: { requiresAuth: true, reportSkillId: 'VisitProjectDependencies' },
       }, {
         name: 'CrossProjectsSkills',
         path: 'crossProject',
         component: CrossProjectsSkills,
-        meta: { requiresAuth: true },
+        meta: { requiresAuth: true, reportSkillId: 'VisitProjectCrossProjectSkills' },
       }, {
         name: 'ProjectUsers',
         path: 'users',
         component: Users,
-        meta: { requiresAuth: true },
+        meta: { requiresAuth: true, reportSkillId: 'VisitProjectUsers' },
       }, {
         name: 'ProjectAccess',
         path: 'access',
         component: AccessSettings,
-        meta: { requiresAuth: true },
+        meta: { requiresAuth: true, reportSkillId: 'VisitProjectAccessManagement' },
       }, {
         name: 'ProjectSettings',
         path: 'settings',
         component: ProjectSettings,
-        meta: { requiresAuth: true },
+        meta: { requiresAuth: true, reportSkillId: 'VisitProjectSettings' },
       }, {
         name: 'ProjectMetrics',
         path: 'metrics',
         component: SectionMetrics,
-        meta: { requiresAuth: true },
+        meta: { requiresAuth: true, reportSkillId: 'VisitProjectStats' },
       }],
     },
     {
@@ -177,17 +177,17 @@ const router = new Router({
         name: 'BadgeSkills',
         path: '',
         component: BadgeSkills,
-        meta: { requiresAuth: true },
+        meta: { requiresAuth: true, reportSkillId: 'VisitSingleBadgePage' },
       }, {
         name: 'BadgeUsers',
         path: 'users',
         component: Users,
-        meta: { requiresAuth: true },
+        meta: { requiresAuth: true, reportSkillId: 'VisitBadgeUsers' },
       }, {
         name: 'BadgeMetrics',
         path: 'metrics',
         component: SectionMetrics,
-        meta: { requiresAuth: true },
+        meta: { requiresAuth: true, reportSkillId: 'VisitBadgeStats' },
       }],
     },
     {
@@ -198,17 +198,17 @@ const router = new Router({
         name: 'SkillOverview',
         path: '',
         component: SkillOverview,
-        meta: { requiresAuth: true },
+        meta: { requiresAuth: true, reportSkillId: 'VisitSkillOverview' },
       }, {
         name: 'SkillDependencies',
         path: 'dependencies',
         component: SkillDependencies,
-        meta: { requiresAuth: true },
+        meta: { requiresAuth: true, reportSkillId: 'VisitSkillDependencies' },
       }, {
         name: 'SkillUsers',
         path: 'users',
         component: Users,
-        meta: { requiresAuth: true },
+        meta: { requiresAuth: true, reportSkillId: 'VisitSkillUsers' },
       }, {
         name: 'AddSkillEvent',
         path: 'addSkillEvent',
@@ -219,7 +219,7 @@ const router = new Router({
         name: 'SkillMetrics',
         path: 'metrics',
         component: SectionMetrics,
-        meta: { requiresAuth: true },
+        meta: { requiresAuth: true, reportSkillId: 'VisitSkillStats' },
       }],
     },
     {
