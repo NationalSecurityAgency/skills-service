@@ -282,7 +282,7 @@ class InceptionProjectService {
                                 "This button will also display your current level standing.",
                         helpUrl: "/dashboard/user-guide/inception.html"
                 ),
-                new skills.controller.request.model.SkillRequest(name: "Add or Modify Levels", skillId: "AddOrModifyProjectLevels", subjectId: subjectDashboardId, projectId: inceptionProjectId,
+                new skills.controller.request.model.SkillRequest(name: "Add or Modify Levels", skillId: "AddOrModifyLevels", subjectId: subjectDashboardId, projectId: inceptionProjectId,
                         pointIncrement: 50, numPerformToCompletion: 1,
                         description: '''Levels are users' achievement path - the overall goal of the application usage is to achieve the highest level. Levels are tracked for the entire project as well as for each subject which provides users many ways to progress forward.
 Skills dashboard supports two flexible ways to manage levels:
