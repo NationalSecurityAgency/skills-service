@@ -190,7 +190,7 @@ class AdminProjService {
         } else {
             ProjDef projDef = getProjDef(projectId)
 
-            Integer lastDisplayOrder = projDef.subjects?.collect({ it.displayOrder })?.max()
+            Integer lastDisplayOrder = skillDefRepo.calculateHighestDisplayOrderByProjectIdAndType(projectId, SkillDef.ContainerType.Subject)
             int displayOrder = lastDisplayOrder != null ? lastDisplayOrder + 1 : 0
 
             SkillDefWithExtra skillDef = new SkillDefWithExtra(
@@ -462,7 +462,7 @@ class AdminProjService {
         }
 
         if (!switchWith) {
-            assert switchWith, "Failed to find project definition to switch with [${toUpdate}] for action [$patchRequest.action]"
+            assert switchWith, "Failed to find definition to switch with [${toUpdate}] for action [$patchRequest.action]"
         }
         assert switchWith.skillId != toUpdate.skillId
 

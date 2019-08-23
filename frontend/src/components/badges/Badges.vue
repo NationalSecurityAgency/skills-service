@@ -26,6 +26,7 @@
 
 <script>
   import { createNamespacedHelpers } from 'vuex';
+  import { SkillsReporter } from '@skills/skills-client-vue';
 
   import BadgesService from './BadgesService';
   import Badge from './Badge';
@@ -114,6 +115,11 @@
           .finally(() => {
             this.isLoading = false;
           });
+        if (badge.startDate) {
+          SkillsReporter.reportSkill('CreateGem');
+        } else {
+          SkillsReporter.reportSkill('CreateBadge');
+        }
       },
       newBadge() {
         this.displayNewBadgeModal = true;

@@ -14,9 +14,12 @@ import './filters/NumberFilter';
 import './filters/TruncateFilter';
 import './validators/MaxDescriptionLengthValidator';
 import './validators/OptionalNumericValidator';
+import './directives/SkillsOnMountDirective';
+import './directives/FocusDirective';
 import App from './App';
 import router from './router';
 import store from './store/store';
+import InceptionConfigurer from './InceptionConfigurer';
 
 
 Vue.use(ClientTable, {}, false, 'bootstrap4', 'default');
@@ -38,15 +41,11 @@ window.axios = require('axios');
 
 require('./errorHandler');
 
-Vue.directive('focus', {
-  inserted: (el) => {
-    setTimeout(() => el.focus(), 10);
-  },
-});
-
 require('vue-multiselect/dist/vue-multiselect.min.css');
 
 store.dispatch('restoreSessionIfAvailable').finally(() => {
+   InceptionConfigurer.configure();
+
     /* eslint-disable no-new */
     const vm = new Vue({
       el: '#app',

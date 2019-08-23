@@ -62,12 +62,12 @@
     </b-container>
     <div slot="modal-footer" class="w-100">
       <div v-if="displayIconManager === false">
-        <b-button variant="success" size="sm" class="float-right" @click="saveLevel">
+        <b-button variant="success" size="sm" class="float-right" @click="saveLevel" v-skills="'AddOrModifyLevels'">
           Save
         </b-button>
         <b-button variant="secondary" size="sm" class="float-right mr-2" @click="closeMe">
           Cancel
-        </b-button>
+        </b-button>.
       </div>
     </div>
   </b-modal>
