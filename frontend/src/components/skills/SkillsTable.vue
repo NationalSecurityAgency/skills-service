@@ -52,7 +52,7 @@
           </div>
 
           <div slot="child_row" slot-scope="props">
-            <ChildRowSkillsDisplay :project-id="projectId" :subject-id="subjectId"
+            <ChildRowSkillsDisplay :project-id="projectId" :subject-id="subjectId" v-skills-onMount="'ExpandSkillDetailsSkillsPage'"
                                    :parent-skill-id="props.row.skillId" class="mr-3 ml-5 mb-3"></ChildRowSkillsDisplay>
           </div>
         </v-client-table>
@@ -67,6 +67,7 @@
 </template>
 
 <script>
+  import { SkillsReporter } from '@skills/skills-client-vue';
   import EditSkill from './EditSkill';
   import NoContent2 from '../utils/NoContent2';
   import ChildRowSkillsDisplay from './ChildRowSkillsDisplay';
@@ -159,7 +160,11 @@
               this.skills.splice(item1Index, 1, createdSkill);
             } else {
               this.skills.push(createdSkill);
+              // report CreateSkill on when new skill is created
+              SkillsReporter.reportSkill('CreateSkill');
             }
+            // attribute based skills should report on new or update operation
+            this.reportSkills(createdSkill);
 
             this.disableFirstAndLastButtons();
 
@@ -171,6 +176,21 @@
           .finally(() => {
             this.isLoading = false;
           });
+      },
+
+      reportSkills(createdSkill) {
+        if (createdSkill.pointIncrementInterval <= 0) {
+          SkillsReporter.reportSkill('CreateSkillDisabledTimeWindow');
+        }
+        if (createdSkill.numMaxOccurrencesIncrementInterval > 1) {
+          SkillsReporter.reportSkill('CreateSkillMaxOccurrencesWithinTimeWindow');
+        }
+        if (createdSkill.helpUrl) {
+          SkillsReporter.reportSkill('CreateSkillHelpUrl');
+        }
+        if (createdSkill.version > 0) {
+          SkillsReporter.reportSkill('CreateSkillVersion');
+        }
       },
 
       deleteSkill(row) {

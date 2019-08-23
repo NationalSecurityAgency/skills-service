@@ -11,7 +11,7 @@
         </div>
         <div class="col-auto">
           <div v-b-tooltip.hover="generateMinPointsTooltip">
-            <b-button variant="outline-primary" @click="addSkill" :disabled="errors.any() || disable">
+            <b-button variant="outline-primary" @click="addSkill" :disabled="errors.any() || disable" v-skills="'ManuallyAddSkillEvent'">
               Add <i v-if="projectTotalPoints >= minimumPoints" :class="[isSaving ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-arrow-circle-right']"></i>
               <i v-else class="icon-warning fa fa-exclamation-circle text-warning"></i>
             </b-button>

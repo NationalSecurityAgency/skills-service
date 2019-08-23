@@ -7,7 +7,8 @@
           id="version-select"
           class="version-select"
           v-model="selectedVersion"
-          :options="versionOptions" />
+          :options="versionOptions"
+          @change="versionChanged"/>
         <inline-help
           class="pl-2"
           msg="Multiple skills versions can be defined if you have multiple versions of your application deployed." />
@@ -22,7 +23,7 @@
 </template>
 
 <script>
-  import { SkillsDisplay } from '@skills/skills-client-vue';
+  import { SkillsDisplay, SkillsReporter } from '@skills/skills-client-vue';
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import UsersService from './UsersService';
   import InlineHelp from '../utils/InlineHelp';
@@ -88,6 +89,14 @@
           return 'pki';
         }
         return `${this.serviceUrl}/admin/projects/${encodeURIComponent(this.projectId)}/token/${encodeURIComponent(this.userId)}`;
+      },
+    },
+    methods: {
+      versionChanged(newValue) {
+        const maxVersion = Math.max(...this.versionOptions);
+        if (maxVersion !== newValue) {
+          SkillsReporter.reportSkill('VisitClientDisplayForEarlierVersion');
+        }
       },
     },
   };
