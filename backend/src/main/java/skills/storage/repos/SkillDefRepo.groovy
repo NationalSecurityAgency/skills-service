@@ -80,6 +80,10 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
     @Nullable
     Integer calculateChildSkillsHighestDisplayOrder(String projectId, String skillId)
 
+    @Query('''SELECT max(s.displayOrder) from SkillDef s where s.projectId=?1 and s.type=?2''')
+    @Nullable
+    Integer calculateHighestDisplayOrderByProjectIdAndType(String projectId, SkillDef.ContainerType type)
+
     @Query(value = '''SELECT sum(sdChild.totalPoints) from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
       where srd.parent=sdParent.id and srd.child=sdChild.id and 
       sdParent.projectId=?1 and sdParent.skillId=?2 and srd.type=?3 and sdChild.version<=?4 ''' )
