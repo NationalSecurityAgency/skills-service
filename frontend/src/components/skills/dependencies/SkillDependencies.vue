@@ -69,6 +69,7 @@
 </template>
 
 <script>
+  import { SkillsReporter } from '@skills/skills-client-vue';
   import SkillsService from '../SkillsService';
   import DependantsGraph from './DependantsGraph';
   import SkillsSelector2 from '../SkillsSelector2';
@@ -155,6 +156,10 @@
           .then(() => {
             this.errNotification.enable = false;
             this.loadDependentSkills();
+            SkillsReporter.reportSkill('CreateSkillDependencies');
+            if (newItem.otherProjectId && this.$route.params.projectId !== newItem.otherProjectId) {
+              SkillsReporter.reportSkill('CreateCrossProjectSkillDependencies');
+            }
           })
           .catch((e) => {
             if (e.response.data && e.response.data.errorCode && e.response.data.errorCode === 'FailedToAssignDependency') {

@@ -309,10 +309,10 @@ We suggest to often visit Skills Display view while building skill profile to be
 '''.toString(),
                         helpUrl: "/dashboard/user-guide/users.html#skills-display-client-display"
                 ),
-                new skills.controller.request.model.SkillRequest(name: "Visit Client Display with Non-Zero Version", skillId: "VisitClientDisplayNonZeroVersion", subjectId: subjectDashboardId, projectId: inceptionProjectId,
+                new skills.controller.request.model.SkillRequest(name: "Visit Client Display for Earlier Version", skillId: "VisitClientDisplayForEarlierVersion", subjectId: subjectDashboardId, projectId: inceptionProjectId,
                         pointIncrement: 20,
                         pointIncrementInterval: 60 * 12, // 1 work day
-                        numMaxOccurrencesIncrementInterval: 25, // up-to 25 per day
+                        numMaxOccurrencesIncrementInterval: 1, // up-to 25 per day
                         numPerformToCompletion: 1,
                         description: "If your gamification profile is utilizing Skills Versioning then you can view what the Skills Display would look like for a specific version by selecting a different version in the drop-down located on the top-right of the page.",
                         helpUrl: "/dashboard/user-guide/users.html#skills-display-client-display",
@@ -415,7 +415,8 @@ To create skill navigate to a subject and then click ``Skill +`` button.''',
                         description: "Dependencies add another facet to the overall gamification profile which forces users to complete skills in the specified order. If you set up Skill A to depend on the completion of Skill B then no points will be awarded toward Skill A until Skill B is fully accomplished.Keep in mind that Skill B must be fully completed first before any points will be awarded toward Skill A. To add a dependency navigate to ``Project -> Subject -> Skill -> Dependencies``",
                         helpUrl: "/dashboard/user-guide/dependencies.html"
                 ),
-                new skills.controller.request.model.SkillRequest(name: "Create Cross-Project Skill Dependencies", skillId: "CreateSkillDependencies", subjectId: subjectSkillsId, projectId: inceptionProjectId,
+
+                new skills.controller.request.model.SkillRequest(name: "Create Cross-Project Skill Dependencies", skillId: "CreateCrossProjectSkillDependencies", subjectId: subjectSkillsId, projectId: inceptionProjectId,
                         pointIncrement: 25,
                         numPerformToCompletion: 1,
                         description: "Cross-Project Dependencies facilitate cross-application training and enable users to become domain experts across several applications. These dependencies are critical when actions are required to be performed in more than one tool in order to complete a task.",
