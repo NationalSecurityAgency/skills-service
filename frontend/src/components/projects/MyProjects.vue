@@ -1,6 +1,8 @@
 <template>
   <div>
-    <sub-page-header title="My Projects" action="Project" @add-action="newProject.show=true"/>
+    <sub-page-header title="My Projects" action="Project"
+                     @add-action="newProject.show=true"
+                     :disabled="addProjectDisabled" :disabled-msg="addProjectsDisabledMsg"/>
 
     <loading-container v-bind:is-loading="isLoading">
       <div v-for="project of projects" :key="project.projectId" class="mb-3">
@@ -49,6 +51,17 @@
     },
     mounted() {
       this.loadProjects();
+    },
+    computed: {
+      addProjectDisabled() {
+        return this.projects && this.$store.getters.config && this.projects.length >= this.$store.getters.config.maxProjectsPerAdmin;
+      },
+      addProjectsDisabledMsg() {
+        if(this.$store.getters.config) {
+          return `The maximum number of Projects allowed is ${this.$store.getters.config.maxProjectsPerAdmin}`;
+        }
+        return '';
+      },
     },
     methods: {
       loadProjects() {

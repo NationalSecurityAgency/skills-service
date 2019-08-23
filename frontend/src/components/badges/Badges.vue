@@ -1,6 +1,6 @@
 <template>
   <div>
-    <sub-page-header title="Badges" action="Badge" @add-action="newBadge"/>
+    <sub-page-header title="Badges" action="Badge" @add-action="newBadge" :disabled="addBadgeDisabled" :disabled-msg="addBadgesDisabledMsg"/>
     <loading-container v-bind:is-loading="isLoading">
       <transition name="projectContainer" enter-active-class="animated fadeIn">
         <div>
@@ -68,6 +68,15 @@
           iconClass: 'fas fa-award',
           requiredSkills: [],
         };
+      },
+      addBadgeDisabled() {
+        return this.badges && this.$store.getters.config && this.badges.length >= this.$store.getters.config.maxBadgesPerProject;
+      },
+      addBadgesDisabledMsg() {
+        if(this.$store.getters.config) {
+          return `The maximum number of Badges allowed is ${this.$store.getters.config.maxBadgesPerProject}`;
+        }
+        return '';
       },
     },
     methods: {
