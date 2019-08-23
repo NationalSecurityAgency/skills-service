@@ -1,6 +1,6 @@
 <template>
   <div>
-    <sub-page-header title="Subjects" action="Subject" @add-action="openNewSubjectModal"/>
+    <sub-page-header title="Subjects" action="Subject" @add-action="openNewSubjectModal" :disabled="addSubjectDisabled" :disabled-msg="addSubjectsDisabledMsg"/>
     <loading-container v-bind:is-loading="isLoading">
       <div v-if="subjects && subjects.length" class="row justify-content-center">
         <div v-for="(subject) of subjects" :key="subject.subjectId" :id="subject.subjectId" class="col-lg-4 mb-3"
@@ -124,6 +124,15 @@
           description: '',
           iconClass: 'fas fa-book',
         };
+      },
+      addSubjectDisabled() {
+        return this.subjects && this.$store.getters.config && this.subjects.length >= this.$store.getters.config.maxSubjectsPerProject;
+      },
+      addSubjectsDisabledMsg() {
+        if(this.$store.getters.config) {
+          return `The maximum number of Subjects allowed is ${this.$store.getters.config.maxSubjectsPerProject}`;
+        }
+        return '';
       },
     },
   };

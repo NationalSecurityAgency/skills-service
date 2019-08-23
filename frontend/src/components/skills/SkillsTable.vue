@@ -1,7 +1,7 @@
 <template>
   <div id="skillsTable">
 
-    <sub-page-header title="Skills" action="Skill" @add-action="newSkill"/>
+    <sub-page-header title="Skills" action="Skill" @add-action="newSkill" :disabled="addSkillDisabled" :disabled-msg="addSkillsDisabledMsg"/>
 
 
     <div class="card">
@@ -132,6 +132,17 @@
     mounted() {
       this.skills = this.skillsProp.map(item => Object.assign({ subjectId: this.subjectId }, item));
       this.disableFirstAndLastButtons();
+    },
+    computed: {
+      addSkillDisabled() {
+        return this.skills && this.$store.getters.config && this.skills.length >= this.$store.getters.config.maxSkillsPerSubject;
+      },
+      addSkillsDisabledMsg() {
+        if(this.$store.getters.config) {
+          return `The maximum number of Skills allowed is ${this.$store.getters.config.maxSkillsPerSubject}`;
+        }
+        return '';
+      },
     },
     methods: {
       newSkill() {
