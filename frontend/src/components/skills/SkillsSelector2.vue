@@ -67,7 +67,7 @@
     },
     mounted() {
       this.setSelectedInternal();
-      this.optionsInternal = this.options.map(entry => Object.assign({ entryId: `${entry.projectId}_${entry.skillId}` }, entry));
+      this.setOptionsInternal();
       if (this.onlySingleSelectedValue) {
         this.multipleSelection = false;
       }
@@ -76,11 +76,19 @@
       selected: function watchUpdatesToSelected() {
         this.setSelectedInternal();
       },
+      options: function watchUpdatesToOptions() {
+        this.setOptionsInternal();
+      },
     },
     methods: {
       setSelectedInternal() {
         if (this.selected) {
           this.selectedInternal = this.selected.map(entry => Object.assign({ entryId: `${entry.projectId}_${entry.skillId}` }, entry));
+        }
+      },
+      setOptionsInternal() {
+        if (this.options) {
+          this.optionsInternal = this.options.map(entry => Object.assign({ entryId: `${entry.projectId}_${entry.skillId}` }, entry));
         }
       },
       considerRemoval(removedItem, removeMethod) {
