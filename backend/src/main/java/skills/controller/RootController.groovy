@@ -12,15 +12,13 @@ import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.GlobalSettingsRequest
 import skills.controller.result.model.RequestResult
-import skills.controller.result.model.SettingsResult
 import skills.controller.result.model.UserInfoRes
+import skills.controller.result.model.UserRoleRes
 import skills.services.AccessSettingsStorageService
 import skills.services.settings.SettingsService
 import skills.settings.EmailConnectionInfo
 import skills.settings.EmailSettingsService
 import skills.storage.model.auth.RoleName
-import skills.storage.model.auth.User
-import skills.storage.model.auth.UserRole
 
 import java.security.Principal
 
@@ -50,7 +48,7 @@ class RootController {
 
     @GetMapping('/rootUsers')
     @ResponseBody
-    List<UserRole> getRootUsers() {
+    List<UserRoleRes> getRootUsers() {
         return accessSettingsStorageService.getRootUsers()
     }
 
@@ -110,7 +108,7 @@ class RootController {
 
     @GetMapping('/users/roles/{roleName}')
     @ResponseBody
-    List<UserRole> getUserRolesWithRole(@PathVariable("roleName") RoleName roleName) {
+    List<UserRoleRes> getUserRolesWithRole(@PathVariable("roleName") RoleName roleName) {
         return accessSettingsStorageService.getUserRolesWithRole(roleName)
     }
 

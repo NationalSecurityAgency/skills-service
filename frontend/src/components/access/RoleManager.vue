@@ -117,7 +117,7 @@
       deleteUserRole(row) {
         AccessService.deleteUserRole(row.projectId, row.userId, row.roleName)
           .then(() => {
-            this.data = this.data.filter(item => item.id !== row.id);
+            this.data = this.data.filter(item => item.userId !== row.userId);
             this.userIds = this.userIds.filter(userId => userId !== row.userId);
           });
       },

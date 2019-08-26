@@ -3,7 +3,7 @@
     <sub-page-header title="Subjects" action="Subject" @add-action="openNewSubjectModal"/>
     <loading-container v-bind:is-loading="isLoading">
       <div v-if="subjects && subjects.length" class="row justify-content-center">
-        <div v-for="(subject) of subjects" :key="subject.id" :id="subject.id" class="col-lg-4 mb-3"
+        <div v-for="(subject) of subjects" :key="subject.subjectId" :id="subject.subjectId" class="col-lg-4 mb-3"
              style="min-width: 23rem;">
           <subject :subject="subject" v-on:subject-deleted="deleteSubject" v-on:move-subject-up="moveSubjectUp"
                    v-on:move-subject-down="moveSubjectDown"/>

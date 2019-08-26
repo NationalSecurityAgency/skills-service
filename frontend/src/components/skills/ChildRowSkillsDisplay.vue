@@ -132,35 +132,9 @@
     padding-left: 5px;
   }
 
-  .name {
-    font-size: 1.3rem;
-    font-weight: bold;
-  }
-
-  .id-label {
-    color: lightgray;
-    font-style: italic;
-    padding-left: 0.7rem;
-  }
-
-  .skill-id {
-
-  }
-
   div ol li {
     font-size: 1.1rem;
     padding: 0 1rem 0 0.5rem;
-  }
-
-  .description-container {
-    border: 1px dashed darkgray;
-    padding: 1rem;
-    margin-right: 1rem;
-  }
-
-  .child-row .title {
-    padding-bottom: 0px;
-    margin-bottom: 0.5rem;
   }
 
 </style>

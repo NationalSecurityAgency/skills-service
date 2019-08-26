@@ -97,11 +97,11 @@
       },
       doDeleteSkill(skill) {
         this.isLoading = true;
-        UsersService.deleteSkillEvent(this.projectId, skill)
+        UsersService.deleteSkillEvent(this.projectId, skill, this.userId)
           .then((data) => {
             if (data.success) {
-              const index = this.$refs.table.data.findIndex(item => item.id === skill.id);
-              this.$refs.table.data.splice(index, 1);
+              // server table must not manually remove items but rather refresh the table
+              this.$refs.table.refresh();
               this.loadUserDetailsState({ projectId: this.projectId, userId: this.userId });
               this.successToast('Removed Skill', `Skill '${skill.skillId}' was removed.`);
             } else {

@@ -215,7 +215,8 @@ class SkillsService {
         wsHelper.adminDelete(getSkillUrl(props.projectId, props.subjectId, props.skillId), props)
     }
     def deleteSkillEvent(Map props) {
-        wsHelper.adminDelete(getSkillUrl(props.projectId, null, props.skillEventId), props)
+        String url = "/projects/${props.projectId}/skills/${props.skillId}/users/${props.userId}/events/${props.timestamp}"
+        wsHelper.adminDelete(url, props)
     }
 
     def getSkill(Map props) {

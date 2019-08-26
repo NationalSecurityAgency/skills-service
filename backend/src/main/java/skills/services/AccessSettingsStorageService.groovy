@@ -14,6 +14,7 @@ import skills.controller.exceptions.SkillException
 import skills.controller.request.model.UserSettingsRequest
 import skills.controller.result.model.SettingsResult
 import skills.controller.result.model.UserInfoRes
+import skills.controller.result.model.UserRoleRes
 import skills.services.settings.SettingsService
 import skills.storage.model.Setting
 import skills.storage.model.auth.RoleName
@@ -56,41 +57,47 @@ class AccessSettingsStorageService {
     SortingService sortingService
 
     @Transactional(readOnly = true)
-    List<UserRole> getUserRolesForProjectId(String projectId) {
+    List<UserRoleRes> getUserRolesForProjectId(String projectId) {
         List<UserRole> res = userRoleRepository.findAllByProjectId(projectId)
-        return res
+        return res.collect { convert(it) }
     }
 
     @Transactional(readOnly = true)
-    List<UserRole> getUserRolesForProjectIdAndUserId(String projectId, String userId) {
+    List<UserRoleRes> getUserRolesForProjectIdAndUserId(String projectId, String userId) {
         List<UserRole> res = userRoleRepository.findAllByProjectIdAndUserId(projectId, userId)
+        return res.collect { convert(it) }
         return res
     }
 
     @Transactional(readOnly = true)
-    List<UserRole> getUserRolesWithRole(RoleName roleName) {
-        return userRoleRepository.findAllByRoleName(roleName)
+    List<UserRoleRes> getUserRolesWithRole(RoleName roleName) {
+        List<UserRole> roles = userRoleRepository.findAllByRoleName(roleName)
+        return roles.collect { convert(it) }
     }
 
     @Transactional(readOnly = true)
-    List<UserRole> getUserRolesWithoutRole(RoleName roleName) {
-        List<UserRole> usersWithRole = getUserRolesWithRole(roleName)
+    List<UserRoleRes> getUserRolesWithoutRole(RoleName roleName) {
+        List<UserRoleRes> usersWithRole = getUserRolesWithRole(roleName)
+        List<UserRole> res
         if (usersWithRole) {
-            return userRoleRepository.findAllByUserIdNotIn(usersWithRole.collect { it.userId }.unique())
+            res = userRoleRepository.findAllByUserIdNotIn(usersWithRole.collect { it.userId }.unique())
         } else {
-            return userRepository.findAll()
+            res = userRepository.findAll()
         }
+        return res.collect { convert(it) }
     }
 
     @Transactional(readOnly = true)
-    List<UserRole> getRootUsers() {
-        return userRoleRepository.findAllByRoleName(RoleName.ROLE_SUPER_DUPER_USER)
+    List<UserRoleRes> getRootUsers() {
+        List<UserRole> roles = userRoleRepository.findAllByRoleName(RoleName.ROLE_SUPER_DUPER_USER)
+        return roles.collect { convert(it) }
     }
 
     @Transactional(readOnly = true)
-    List<UserRole> getNonRootUsers() {
+    List<UserRoleRes> getNonRootUsers() {
         List<UserRole> rootUsers = getRootUsers()
-        return userRoleRepository.findAllByUserIdNotIn(rootUsers.collect {it.userId}.unique())
+        List<UserRole> roles = userRoleRepository.findAllByUserIdNotIn(rootUsers.collect {it.userId}.unique())
+        return roles.collect { convert(it) }
     }
 
     @Transactional(readOnly = true)
@@ -99,10 +106,10 @@ class AccessSettingsStorageService {
     }
 
     @Transactional
-    UserRole addRoot(String userId) {
+    UserRoleRes addRoot(String userId) {
         UserRole userRole = addUserRoleInternal(userId, null, RoleName.ROLE_SUPER_DUPER_USER)
         inceptionProjectService.createInceptionAndAssignUser(userId)
-        return userRole
+        return convert(userRole)
     }
 
     @Transactional
@@ -139,8 +146,9 @@ class AccessSettingsStorageService {
     }
 
     @Transactional()
-    UserRole addUserRole(String userId, String projectId, RoleName roleName) {
-        return addUserRoleInternal(userId, projectId, roleName)
+    UserRoleRes addUserRole(String userId, String projectId, RoleName roleName) {
+        UserRole role = addUserRoleInternal(userId, projectId, roleName)
+        return convert(role)
     }
 
     private UserRole addUserRoleInternal(String userId, String projectId, RoleName roleName) {
@@ -209,7 +217,7 @@ class AccessSettingsStorageService {
     }
 
     @Transactional
-    UserRole grantRoot(String userId) {
+    UserRoleRes grantRoot(String userId) {
         User user = userRepository.findByUserIdIgnoreCase(userId.toLowerCase())
         if (!user) {
             SkillException exception = new SkillException("User [${userId.toLowerCase()}] does not exist.")
@@ -223,12 +231,7 @@ class AccessSettingsStorageService {
 
         user.roles.add(role)
         userRepository.save(user)
-        return role
-    }
-
-    @Transactional(readOnly = true)
-    User findByUserIdIgnoreCase(String userId) {
-        return userRepository.findByUserIdIgnoreCase(userId)
+        return convert(role)
     }
 
     UserInfoRes loadUserInfo(String userId) {
@@ -295,5 +298,14 @@ class AccessSettingsStorageService {
             roles = [new UserRole(userId: userInfo.username?.toLowerCase(), roleName: RoleName.ROLE_APP_USER)]
         }
         return roles
+    }
+
+    private UserRoleRes convert(UserRole inputRole) {
+        UserRoleRes res = new UserRoleRes(
+                userId: inputRole.userId,
+                projectId: inputRole.projectId,
+                roleName: inputRole.roleName,
+        )
+        return res
     }
 }

@@ -5,6 +5,7 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
+import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.services.events.CompletionItem
 import skills.services.events.SkillEventResult
@@ -34,14 +35,11 @@ class SkillEventAdminService {
     LevelDefinitionStorageService levelDefService
 
     @Transactional
-    SkillEventResult deleteSkillEvent(Integer skillPkId) {
-        assert skillPkId
-        Optional<UserPerformedSkill> existing = performedSkillRepository.findById(skillPkId)
-        assert existing.present, "Skill [${skillPkId}] with id [${skillPkId}] does not exist"
-        UserPerformedSkill performedSkill = existing.get()
-        String projectId = performedSkill.projectId
-        String skillId = performedSkill.skillId
-        String userId = performedSkill.userId
+    SkillEventResult deleteSkillEvent(String projectId, String skillId, String userId, Long timestamp) {
+        UserPerformedSkill performedSkill = performedSkillRepository.findByProjectIdAndSkillIdAndUserIdAndPerformedOn(projectId, skillId, userId, new Date(timestamp))
+        if (!performedSkill) {
+            throw new SkillException("This skill event does not exist", projectId, skillId, ErrorCode.BadParam)
+        }
         log.debug("Deleting skill [{}] for user [{}]", performedSkill, userId)
 
         SkillEventResult res = new SkillEventResult()
