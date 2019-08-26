@@ -8,6 +8,7 @@
       <div class="col text-center text-sm-right mt-3 mt-sm-0">
         <inception-button class="mr-2"></inception-button>
         <settings-button class="mr-2"/>
+        <help-button/>
       </div>
     </div>
     <breadcrumb></breadcrumb>
@@ -18,10 +19,12 @@
   import SettingsButton from './SettingsButton';
   import Breadcrumb from './Breadcrumb';
   import InceptionButton from '../inception/InceptionButton';
+  import HelpButton from './HelpButton';
 
   export default {
     name: 'Header',
     components: {
+      HelpButton,
       InceptionButton,
       Breadcrumb,
       SettingsButton,

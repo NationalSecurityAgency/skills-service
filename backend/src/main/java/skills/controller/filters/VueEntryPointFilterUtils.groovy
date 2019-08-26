@@ -5,8 +5,8 @@ import org.springframework.stereotype.Component
 
 @Component
 class VueEntryPointFilterUtils {
-    @Value('#{"${skills.vue.entry.backend.resources:/api,/admin,/app,/static,/clientDisplay,/favicon.ico,/skills.ico,/icons,/performLogin,/createAccount,/createRootAccount,/grantFirstRoot,/userExists,/oauth,/login,/logout,/bootstrap,/root,/supervisor}".split(",")}')
-    private List<String> backendResources
+    private final List<String> backendResources =
+            Collections.unmodifiableList("/api,/admin,/app,/static,/clientDisplay,/favicon.ico,/skills.ico,/icons,/performLogin,/createAccount,/createRootAccount,/grantFirstRoot,/userExists,/oauth,/login,/logout,/bootstrap,/root,/supervisor,/public".split(",").toList())
 
     boolean isFrontendResource(String pathInfo) {
         return !isBackendResource(pathInfo)

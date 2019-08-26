@@ -9,14 +9,6 @@ import config from './modules/config';
 
 Vue.use(Vuex);
 
-const loadConfigAfterAuth = (store) => {
-  store.subscribe((mutation) => {
-    if (mutation.type === 'storeUser' && mutation.payload) {
-      store.dispatch('loadConfigState');
-    }
-  });
-};
-
 export default new Vuex.Store({
   state: {
     projectId: '',
@@ -32,9 +24,6 @@ export default new Vuex.Store({
       state.previousUrl = previousUrl;
     },
   },
-  plugins: [
-    loadConfigAfterAuth,
-  ],
   modules: {
     auth,
     users,
