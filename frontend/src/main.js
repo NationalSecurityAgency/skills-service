@@ -43,8 +43,9 @@ require('./errorHandler');
 
 require('vue-multiselect/dist/vue-multiselect.min.css');
 
-store.dispatch('restoreSessionIfAvailable').finally(() => {
-   InceptionConfigurer.configure();
+store.dispatch('loadConfigState').finally(() => {
+  store.dispatch('restoreSessionIfAvailable').finally(() => {
+    InceptionConfigurer.configure();
 
     /* eslint-disable no-new */
     const vm = new Vue({
@@ -55,4 +56,5 @@ store.dispatch('restoreSessionIfAvailable').finally(() => {
       store,
     });
     window.vm = vm;
+  });
 });

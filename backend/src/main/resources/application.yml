@@ -43,6 +43,7 @@ skills:
     ui:
       descriptionMaxLength: 2000
       maxTimeWindowInMinutes: 43200
+      docsHost: http://skillsasaservicedocs.com
   profiles:
     active: default
 #logging:

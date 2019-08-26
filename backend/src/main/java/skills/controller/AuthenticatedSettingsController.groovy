@@ -18,19 +18,10 @@ import skills.services.settings.SettingsService
 @RequestMapping("/app/public")
 @Slf4j
 @EnableCallStackProf
-class PublicSettingsController {
+class AuthenticatedSettingsController {
 
     @Autowired
     SettingsService settingsService
-
-    @Autowired
-    UIConfigProperties uiConfigProperties
-
-    @RequestMapping(value = "/config", method = RequestMethod.GET, produces = "application/json")
-    @ResponseBody
-    Map<String,String> getConfig(){
-        return uiConfigProperties.ui
-    }
 
     @RequestMapping(value = "/settings/group/{settingGroup}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     List<SettingsResult> getPublicSettings(@PathVariable("settingGroup") String settingGroup) {

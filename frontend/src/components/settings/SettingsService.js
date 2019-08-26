@@ -39,7 +39,7 @@ export default {
       .then(remoteRes => remoteRes.data);
   },
   getConfig() {
-    return axios.get('/app/public/config')
+    return axios.get('/public/config')
       .then(remoteRes => remoteRes.data);
   },
 };

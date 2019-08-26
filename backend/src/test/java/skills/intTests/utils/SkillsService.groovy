@@ -442,6 +442,10 @@ class SkillsService {
         return wsHelper.adminGet(getSettingsUrl(project))
     }
 
+    def getPublicConfigs() {
+        wsHelper.get("/public/config", "", [:])
+    }
+
     def getPublicSetting(String setting, String settingGroup){
         return wsHelper.appGet("/public/settings/${setting}/group/${settingGroup}")
     }
@@ -601,4 +605,5 @@ class SkillsService {
     private String getAddProjectAdminUrl(String project, String userId) {
         return "/projects/${project}/users/${userId}/roles/ROLE_PROJECT_ADMIN"
     }
+
 }
