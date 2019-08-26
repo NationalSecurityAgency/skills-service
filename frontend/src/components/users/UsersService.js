@@ -21,8 +21,9 @@ export default {
       .then(response => response.data);
   },
 
-  deleteSkillEvent(projectId, skill) {
-    return axios.delete(`/admin/projects/${projectId}/skills/${skill.id}`)
+  deleteSkillEvent(projectId, skill, userId) {
+    const timestamp = window.moment(skill.performedOn).valueOf();
+    return axios.delete(`/admin/projects/${projectId}/skills/${skill.skillId}/users/${userId}/events/${timestamp}`)
       .then(res => res.data);
   },
 };

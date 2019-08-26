@@ -4,6 +4,7 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import skills.auth.UserInfo
+import skills.controller.result.model.UserRoleRes
 import skills.storage.model.ProjDef
 import skills.storage.model.auth.RoleName
 import skills.storage.model.auth.UserRole
@@ -53,10 +54,10 @@ class InceptionProjectService {
     }
 
     private assignAllRootUsersToInception(){
-        List<UserRole> rootUsers = accessSettingsStorageService.getRootUsers()
+        List<UserRoleRes> rootUsers = accessSettingsStorageService.getRootUsers()
 
         rootUsers.each {
-            List<UserRole> inceptionRoles = accessSettingsStorageService.getUserRolesForProjectIdAndUserId(inceptionProjectId, it.userId)
+            List<UserRoleRes> inceptionRoles = accessSettingsStorageService.getUserRolesForProjectIdAndUserId(inceptionProjectId, it.userId)
             if (!inceptionRoles.find({it.roleName == RoleName.ROLE_PROJECT_ADMIN})) {
                 log.info("Making [{}] project admin of [{}]", it.userId, inceptionProjectId)
                 accessSettingsStorageService.addUserRole(it.userId, inceptionProjectId, RoleName.ROLE_PROJECT_ADMIN)

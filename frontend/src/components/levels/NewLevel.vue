@@ -168,7 +168,7 @@
         return this.isEdit ? 'Edit Level' : 'New Level';
       },
       levelId() {
-        return this.level.id ? `level-${this.level.id}` : 'newLevel';
+        return this.level.level ? `level-${this.level.level}` : 'newLevel';
       },
     },
     methods: {
@@ -185,7 +185,7 @@
                 pointsTo: this.levelInternal.pointsTo,
                 name: this.levelInternal.name,
                 iconClass: this.levelInternal.iconClass,
-                id: this.levelInternal.id,
+                id: this.levelInternal.level,
                 level: this.levelInternal.level,
               });
             } else {

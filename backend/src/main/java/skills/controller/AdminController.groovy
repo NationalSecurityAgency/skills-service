@@ -462,14 +462,18 @@ class AdminController {
         projectAdminStorageService.deleteSkill(projectId, subjectId, skillId)
     }
 
-    @RequestMapping(value = "/projects/{projectId}/skills/{skillEventId}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/users/{userId}/events/{timestamp}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     SkillEventResult deleteSkillEvent(@PathVariable("projectId") String projectId,
-                                      @PathVariable("skillEventId") Integer skillEventId) {
+                                      @PathVariable("skillId") String skillId,
+                                      @PathVariable("userId") String userId,
+                                      @PathVariable("timestamp") Long timestamp) {
         skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
-        skills.controller.exceptions.SkillsValidator.isNotNull(skillEventId, "Skill Event Id", "$skillEventId")
+        skills.controller.exceptions.SkillsValidator.isNotNull(skillId, "Skill Id", projectId)
+        skills.controller.exceptions.SkillsValidator.isNotNull(userId, "User Id", projectId)
+        skills.controller.exceptions.SkillsValidator.isNotNull(timestamp, "Timestamp", projectId)
 
-        return skillEventService.deleteSkillEvent(skillEventId)
+        return skillEventService.deleteSkillEvent(projectId, skillId, userId, timestamp)
     }
 
     @RequestMapping(value = "/projects/{projectId}/skills", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)

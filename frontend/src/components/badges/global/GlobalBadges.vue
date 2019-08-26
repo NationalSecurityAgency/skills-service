@@ -6,7 +6,7 @@
         <div>
           <div v-if="badges && badges.length" class="row justify-content-center ">
             <div v-for="(badge) of badges"
-                 :key="badge.id" class="col-lg-4 mb-3"  style="min-width: 23rem;">
+                 :key="badge.badgeId" class="col-lg-4 mb-3"  style="min-width: 23rem;">
               <badge :badge="badge" :global="true"
                      @badge-updated="saveBadge"
                      @badge-deleted="deleteBadge"
@@ -83,7 +83,7 @@
           .then(() => {
             this.isLoading = false;
             this.$emit('badge-deleted', this.badge);
-            this.badges = this.badges.filter(item => item.id !== badge.id);
+            this.badges = this.badges.filter(item => item.badgeId !== badge.badgeId);
             this.$emit('badges-changed', badge.badgeId);
           })
           .finally(() => {

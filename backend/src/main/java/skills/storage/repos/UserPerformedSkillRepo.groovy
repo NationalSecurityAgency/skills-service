@@ -15,14 +15,15 @@ import javax.validation.constraints.Null
 @CompileStatic
 interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integer> {
 
+    // find an exact performed event
+    @Nullable
+    UserPerformedSkill findByProjectIdAndSkillIdAndUserIdAndPerformedOn(String projectId, String skillId, String userId, Date performedOn)
+
     void deleteByProjectIdAndSkillId(String projectId, String skillId)
 
     Long countByUserIdAndProjectIdAndSkillIdContaining(String userId, String projectId, String skillId)
     Long countByUserIdAndProjectIdAndSkillId(String userId, String projectId, String skillId)
     Long countByUserIdAndProjectIdAndSkillIdAndPerformedOnGreaterThanAndPerformedOnLessThan(String userId, String projectId, String skillId, Date startDate, Date endDate)
-
-    @Query("SELECT DISTINCT(p.userId) from UserPerformedSkill p where p.projectId=?1" )
-    List<String> findDistinctUserIdsForProject(String projectId)
 
     @Query("SELECT DISTINCT(p.userId) from UserPerformedSkill p where p.projectId=?1 and lower(p.userId) LIKE %?2%" )
     List<String> findDistinctUserIdsForProject(String projectId, String userIdQuery, Pageable pageable)
@@ -48,14 +49,6 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
             sdChild.skillId=?3 and 
             srd.type='Dependence' ''')
     List<SkillDef> findPerformedParentSkills(String userId, String projectId, String skillId)
-
-//    @Query('''SELECT SUM(DISTINCT s.totalPoints)
-//            from UserPerformedSkill p, SkillDef s where s.skillId = p.skillId and s.projectId=?1 and p.projectId=?1 and p.userId = ?2 and s.skillId''')
-//    Integer calculateUserPointsByProjectIdAndUserIdAndSkillIdAndDayAndVersion(String projectId, String userId, @Nullable String skillId, @Nullable Date day, Integer version)
-
-//    static String QUERY_calculateUserPointsByProjectIdAndUserIdAndAndDayAndVersion = '''
-//'''
-
 
     @Nullable
     @Query('''select SUM(sdChild.pointIncrement)

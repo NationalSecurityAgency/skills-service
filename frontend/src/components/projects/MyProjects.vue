@@ -3,7 +3,7 @@
     <sub-page-header title="My Projects" action="Project" @add-action="newProject.show=true"/>
 
     <loading-container v-bind:is-loading="isLoading">
-      <div v-for="project of projects" :key="project.id" class="mb-3">
+      <div v-for="project of projects" :key="project.projectId" class="mb-3">
         <my-project :project="project" v-on:project-deleted="projectRemoved" v-on:move-project-up="moveProjectUp"
                     v-on:move-project-down="moveProjectDown"/>
       </div>

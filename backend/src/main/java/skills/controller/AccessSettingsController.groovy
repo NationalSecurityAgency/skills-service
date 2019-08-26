@@ -6,9 +6,10 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.web.bind.annotation.*
+import skills.controller.result.model.RequestResult
+import skills.controller.result.model.UserRoleRes
 import skills.services.AccessSettingsStorageService
 import skills.storage.model.auth.RoleName
-import skills.storage.model.auth.UserRole
 
 @RestController
 @RequestMapping("/admin")
@@ -30,12 +31,12 @@ class AccessSettingsController {
 
     @RequestMapping(value = "/projects/{projectId}/userRoles", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
-    List<UserRole> getProjectUserRoles(@PathVariable("projectId") String projectId) {
+    List<UserRoleRes> getProjectUserRoles(@PathVariable("projectId") String projectId) {
         return accessSettingsStorageService.getUserRolesForProjectId(projectId)
     }
 
     @RequestMapping(value = "/projects/{projectId}/users/{userId}/roles", method = RequestMethod.GET)
-    List<UserRole>  getUserRoles(
+    List<UserRoleRes> getUserRoles(
             @PathVariable("projectId") String projectId,
             @PathVariable("userId") String userId) {
         accessSettingsStorageService.getUserRolesForProjectIdAndUserId(projectId, userId)
@@ -49,7 +50,7 @@ class AccessSettingsController {
     }
 
     @RequestMapping(value = "/projects/{projectId}/users/{userKey}/roles/{roleName}", method = [RequestMethod.PUT, RequestMethod.POST])
-    skills.controller.result.model.RequestResult addUserRole(
+    RequestResult addUserRole(
             @PathVariable("projectId") String projectId,
             @PathVariable("userKey") String userKey, @PathVariable("roleName") RoleName roleName) {
         accessSettingsStorageService.addUserRole(getUserId(userKey), projectId, roleName)

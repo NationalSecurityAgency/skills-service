@@ -1,6 +1,8 @@
 package skills.intTests
 
+import org.springframework.http.HttpStatus
 import skills.intTests.utils.DefaultIntSpec
+import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
 import skills.intTests.utils.TestUtils
@@ -22,13 +24,15 @@ class DeleteSkillEventSpecs extends DefaultIntSpec {
     def "delete skill event"() {
         String subj = "testSubj"
         String skillId = "skillId"
+        String userId = "user1"
+        Long timestamp = new Date().time
 
         setup:
         skillsService.createProject([projectId: projId, name: "Test Project"])
         skillsService.createSubject([projectId: projId, subjectId: subj, name: "Test Subject"])
         skillsService.createSkill([projectId: projId, subjectId: subj, skillId: skillId, name: "Test Skill", type: "Skill", pointIncrement: 100, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1,
         ])
-        def res = skillsService.addSkill([projectId: projId, skillId: skillId])
+        def res = skillsService.addSkill([projectId: projId, skillId: skillId], userId, new Date(timestamp))
 
         assert res.body.skillApplied
         assert res.body.explanation == "Skill event was applied"
@@ -45,22 +49,51 @@ class DeleteSkillEventSpecs extends DefaultIntSpec {
         assert res.body.completed.find({ it.type == "Subject" }).name == "Test Subject"
         assert res.body.completed.find({ it.type == "Subject" }).level == 5
 
-        def addedSkills = skillsService.getPerformedSkills(skillsService.wsHelper.username, projId)
+        def addedSkills = skillsService.getPerformedSkills(userId, projId)
         assert addedSkills
-        String addedSkillEventId = addedSkills.data.find { it.skillId == 'skillId'}.id
-        assert addedSkillEventId
+        assert addedSkills.data.find { it.skillId == skillId}
 
         when:
-        skillsService.deleteSkillEvent([projectId: projId, skillEventId: addedSkillEventId])
+        skillsService.deleteSkillEvent([projectId: projId, skillId: skillId, userId: userId, timestamp: timestamp])
         addedSkills = skillsService.getPerformedSkills(skillsService.wsHelper.username, projId)
 
         then:
-        !addedSkills?.data?.find { it.id == addedSkillEventId }
+        !addedSkills?.data?.find { it.skillId == skillId }
     }
 
+    def "attempt to delete skill event that doesn't exist"() {
+        String subj = "testSubj"
+        String skillId = "skillId"
+        String userId = "user1"
+        Long timestamp = new Date().time
+
+        setup:
+        skillsService.createProject([projectId: projId, name: "Test Project"])
+        skillsService.createProject([projectId: "otherProjId", name: "Other Test Project"])
+        skillsService.createSubject([projectId: projId, subjectId: subj, name: "Test Subject"])
+        skillsService.createSkill([projectId: projId, subjectId: subj, skillId: skillId, name: "Test Skill", type: "Skill", pointIncrement: 100, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1,
+        ])
+        def res = skillsService.addSkill([projectId: projId, skillId: skillId], userId, new Date(timestamp))
+
+        assert res.body.skillApplied
+        assert res.body.explanation == "Skill event was applied"
+
+        def addedSkills = skillsService.getPerformedSkills(userId, projId)
+        assert addedSkills
+        assert addedSkills.data.find { it.skillId == skillId}
+
+        when:
+        skillsService.deleteSkillEvent([projectId: "otherProjId", skillId: skillId, userId: userId, timestamp: timestamp])
+        then:
+        SkillsClientException clientException = thrown()
+        clientException.httpStatus == HttpStatus.BAD_REQUEST
+        clientException.message.contains("This skill event does not exist")
+    }
 
     def "cannot delete skill event after a dependent skill was performed"() {
         List<Map> skills = SkillsFactory.createSkills(2)
+        String userId = "user1"
+        Date date = new Date()
 
         setup:
         skillsService.createProject(SkillsFactory.createProject())
@@ -68,8 +101,8 @@ class DeleteSkillEventSpecs extends DefaultIntSpec {
         skillsService.createSkills(skills)
         skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(1).skillId, dependentSkillId: skills.get(0).skillId])
 
-        def res0 = skillsService.addSkill([projectId: SkillsFactory.defaultProjId, skillId: skills.get(0).skillId])
-        def res = skillsService.addSkill([projectId: SkillsFactory.defaultProjId, skillId: skills.get(1).skillId])
+        def res0 = skillsService.addSkill([projectId: SkillsFactory.defaultProjId, skillId: skills.get(0).skillId], userId, date)
+        def res = skillsService.addSkill([projectId: SkillsFactory.defaultProjId, skillId: skills.get(1).skillId], userId, date)
 
         assert res0.body.skillApplied
         assert res0.body.explanation == "Skill event was applied"
@@ -77,13 +110,12 @@ class DeleteSkillEventSpecs extends DefaultIntSpec {
         assert res.body.skillApplied
         assert res.body.explanation == "Skill event was applied"
 
-        def addedSkills = skillsService.getPerformedSkills(skillsService.wsHelper.username, projId)
+        def addedSkills = skillsService.getPerformedSkills(userId, projId)
         assert addedSkills
-        String addedSkillEventId = addedSkills.data.find { it.skillId == skills.get(0).skillId}.id
-        assert addedSkillEventId
+        assert addedSkills.data.find { it.skillId == skills.get(0).skillId}
 
         when:
-        def response = skillsService.deleteSkillEvent([projectId: projId, skillEventId: addedSkillEventId])
+        def response = skillsService.deleteSkillEvent([projectId: projId, skillId: skills.get(0).skillId, userId: userId, timestamp: date.time])
 
         then:
         response.body.skillApplied == false
@@ -91,6 +123,9 @@ class DeleteSkillEventSpecs extends DefaultIntSpec {
     }
 
     def "deleting skill event required for a badge will removed the achieved badge"() {
+        String userId = "user1"
+        Date date = new Date()
+
         String subj = "testSubj"
         Map skill1 = [projectId: projId, subjectId: subj, skillId: "skill1", name  : "Test Skill 1", type: "Skill",
                       pointIncrement: 10, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1]
@@ -116,10 +151,10 @@ class DeleteSkillEventSpecs extends DefaultIntSpec {
             skillsService.assignSkillToBadge(projectId: projId, badgeId: badge.badgeId, skillId: skillId)
         }
 
-        def resSkill1 = skillsService.addSkill([projectId: projId, skillId: skill1.skillId]).body
-        def resSkill3 = skillsService.addSkill([projectId: projId, skillId: skill3.skillId]).body
-        def resSkill2 = skillsService.addSkill([projectId: projId, skillId: skill2.skillId]).body
-        def resSkill4 = skillsService.addSkill([projectId: projId, skillId: skill4.skillId]).body
+        def resSkill1 = skillsService.addSkill([projectId: projId, skillId: skill1.skillId], userId, date).body
+        def resSkill3 = skillsService.addSkill([projectId: projId, skillId: skill3.skillId], userId, date).body
+        def resSkill2 = skillsService.addSkill([projectId: projId, skillId: skill2.skillId], userId, date).body
+        def resSkill4 = skillsService.addSkill([projectId: projId, skillId: skill4.skillId], userId, date).body
 
         assert resSkill1.skillApplied && !resSkill1.completed.find { it.id == 'badge1'}
         assert resSkill2.skillApplied && !resSkill2.completed.find { it.id == 'badge1'}
@@ -127,11 +162,9 @@ class DeleteSkillEventSpecs extends DefaultIntSpec {
         assert resSkill4.skillApplied && resSkill4.completed.find { it.id == 'badge1'}
 
         when:
-        def addedSkills = skillsService.getPerformedSkills(skillsService.wsHelper.username, projId)
+        def addedSkills = skillsService.getPerformedSkills(userId, projId)
         assert addedSkills?.count == 4
-        String addedSkillEventId = addedSkills.data[2].id // grab the third skill performed, and delete it
-        assert addedSkillEventId
-        def badgesSummary = skillsService.getBadgesSummary(skillsService.wsHelper.username, projId)
+        def badgesSummary = skillsService.getBadgesSummary(userId, projId)
         assert badgesSummary.size() == 1
         badgesSummary = badgesSummary.first()
         assert badgesSummary.badgeId == 'badge1'
@@ -139,9 +172,9 @@ class DeleteSkillEventSpecs extends DefaultIntSpec {
         assert badgesSummary.numSkillsAchieved == 4
         assert badgesSummary.numTotalSkills == 4
 
-        skillsService.deleteSkillEvent([projectId: projId, skillEventId: addedSkillEventId])
-        addedSkills = skillsService.getPerformedSkills(skillsService.wsHelper.username, projId)
-        badgesSummary = skillsService.getBadgesSummary(skillsService.wsHelper.username, projId)
+        skillsService.deleteSkillEvent([projectId: projId, skillId: skill3.skillId, userId: userId, timestamp: date.time])
+        addedSkills = skillsService.getPerformedSkills(userId, projId)
+        badgesSummary = skillsService.getBadgesSummary(userId, projId)
         assert badgesSummary.size() == 1
         badgesSummary = badgesSummary.first()
 
@@ -156,13 +189,15 @@ class DeleteSkillEventSpecs extends DefaultIntSpec {
     def "incrementally achieve a single skill, then delete one event and validate level, achievements and points are properly decremented"(){
         List<Map> subj1 = (1..2).collect { [projectId: projId, subjectId: "subj1", skillId: "s1${it}".toString(), name: "subj1 ${it}".toString(), type: "Skill", pointIncrement: 10, numPerformToCompletion: 5, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1] }
 
+        String userId = "user1"
+        Date date = new Date()
+
         setup:
         skillsService.createSchema([subj1])
 
         List<Date> dates = testUtils.getLastNDays(5)
         List addSkillRes = []
         List subjSummaryRes = []
-        String userId = sampleUserIds.get(0)
         (0..4).each {
             addSkillRes << skillsService.addSkill([projectId: projId, skillId: subj1.get(1).skillId], userId, dates.get(it))
             subjSummaryRes << skillsService.getSkillSummary(userId, projId, subj1.get(1).subjectId)
@@ -209,17 +244,17 @@ class DeleteSkillEventSpecs extends DefaultIntSpec {
         when:
         def addedSkills = skillsService.getPerformedSkills(userId, projId)
         assert addedSkills?.count == 5
-        String addedSkillEventId = addedSkills.data[2].id // grab the third skill performed, and delete it
-        assert addedSkillEventId
+        String skillId = addedSkills.data[2].skillId // grab the third skill performed, and delete it
+        assert skillId
 
-        skillsService.deleteSkillEvent([projectId: projId, skillEventId: addedSkillEventId])
+        skillsService.deleteSkillEvent([projectId: projId, skillId: skillId, userId: userId, timestamp: dates.get(2).time])
         addedSkills = skillsService.getPerformedSkills(userId, projId)
         subjSummaryRes << skillsService.getSkillSummary(userId, projId, subj1.get(1).subjectId)
 
         then:
         // skill event has been removed
         assert addedSkills?.count == 4
-        !addedSkills?.data?.find { it.id == addedSkillEventId }
+        !addedSkills?.data?.find { it.id == skillId }
 
         // skill level should be reduced back to 2, levelPoints 15, levelTotalPoints 20, skill points 40 (so skill no longer completed)
         subjSummaryRes.get(5).skillsLevel == 2
