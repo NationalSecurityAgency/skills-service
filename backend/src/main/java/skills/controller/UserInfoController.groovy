@@ -104,7 +104,7 @@ class UserInfoController {
     @RequestMapping(value = "/users/suggestDashboardUsers/{query}", method = RequestMethod.GET, produces = "application/json")
     List<UserInfoRes> suggestExistingDashboardUsers(@PathVariable("query") String query,
                                                     @RequestParam(required = false) boolean includeSelf) {
-        List<User> matchingUsers = userRepo.getUserByUserIdOrPropWildcard(query, new PageRequest(0, 6))
+        List<User> matchingUsers = userRepo.getUserByUserIdOrPropWildcard(query.toLowerCase(), new PageRequest(0, 6))
         List<UserInfoRes> results = matchingUsers.collect {
             accessSettingsStorageService.loadUserInfo(it.userId)
         }

@@ -43,10 +43,11 @@ class AccessSettingsController {
     }
 
     @RequestMapping(value = "/projects/{projectId}/users/{userId}/roles/{roleName}", method = RequestMethod.DELETE)
-    void deleteUserRole(
+    RequestResult deleteUserRole(
             @PathVariable("projectId") String projectId,
             @PathVariable("userId") String userId, @PathVariable("roleName") RoleName roleName) {
         accessSettingsStorageService.deleteUserRole(userId, projectId, roleName)
+        return new RequestResult(success: true)
     }
 
     @RequestMapping(value = "/projects/{projectId}/users/{userKey}/roles/{roleName}", method = [RequestMethod.PUT, RequestMethod.POST])
@@ -54,7 +55,7 @@ class AccessSettingsController {
             @PathVariable("projectId") String projectId,
             @PathVariable("userKey") String userKey, @PathVariable("roleName") RoleName roleName) {
         accessSettingsStorageService.addUserRole(getUserId(userKey), projectId, roleName)
-        return new skills.controller.result.model.RequestResult(success: true)
+        return new RequestResult(success: true)
     }
 
     private String getUserId(String userKey) {
