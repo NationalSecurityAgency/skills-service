@@ -7,17 +7,17 @@
 </template>
 
 <script>
-  import UserSkillsService from '@/userSkills/service/UserSkillsService';
-  import SkillsConfiguration from '@skills/skills-client-configuration';
-  import TokenReauthorizer from '@/userSkills/service/TokenReauthorizer';
-  import store from '@/store';
-
   import Vue from 'vue';
 
   import Postmate from 'postmate';
 
   import debounce from 'lodash/debounce';
   import merge from 'lodash/merge';
+
+  import SkillsConfiguration from '@skills/skills-client-configuration';
+  import UserSkillsService from '@/userSkills/service/UserSkillsService';
+  import TokenReauthorizer from '@/userSkills/service/TokenReauthorizer';
+  import store from '@/store';
 
   const getDocumentHeight = () => {
     const { body } = document;
@@ -75,6 +75,11 @@
 
           UserSkillsService.setVersion(parent.model.version);
           UserSkillsService.setUserId(parent.model.userId);
+
+          SkillsConfiguration.configure({
+            projectId: parent.model.projectId,
+            serviceUrl: parent.model.serviceUrl,
+          });
 
           SkillsConfiguration.setProjectId(parent.model.projectId);
           SkillsConfiguration.setServiceUrl(parent.model.serviceUrl);
@@ -220,9 +225,11 @@
           // eslint-disable-next-line no-alert
           alert(errorMessage);
         } else {
-          SkillsConfiguration.setAuthenticator(process.env.VUE_APP_AUTHENTICATION_URL);
-          SkillsConfiguration.setServiceUrl(process.env.VUE_APP_SERVICE_URL);
-          SkillsConfiguration.setProjectId(process.env.VUE_APP_PROJECT_ID);
+          SkillsConfiguration.configure({
+            serviceUrl: process.env.VUE_APP_SERVICE_URL,
+            projectId: process.env.VUE_APP_PROJECT_ID,
+            authenticator: process.env.VUE_APP_AUTHENTICATION_URL,
+          });
           this.storeAuthToken();
         }
       },

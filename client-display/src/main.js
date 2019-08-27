@@ -1,3 +1,5 @@
+import VueApexCharts from 'vue-apexcharts';
+
 import Vue from 'vue';
 import App from '@/App.vue';
 
@@ -5,7 +7,6 @@ import router from '@/router';
 import store from '@/store';
 
 import 'apexcharts';
-import VueApexCharts from 'vue-apexcharts';
 
 Vue.config.productionTip = false;
 

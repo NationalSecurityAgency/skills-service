@@ -59,12 +59,12 @@
 </template>
 
 <script>
+  import ProgressBar from 'vue-simple-progress';
+
   import MyProgressSummary from '@/userSkills/MyProgressSummary.vue';
   import Ribbon from '@/common/ribbon/Ribbon.vue';
   import StarProgress from '@/common/progress/StarProgress.vue';
   import VerticalProgressBar from '@/common/progress/VerticalProgress.vue';
-
-  import ProgressBar from 'vue-simple-progress';
 
   /* Hack for ribbon color. Ultimately backend will send ribbon color */
   let index = 0;
