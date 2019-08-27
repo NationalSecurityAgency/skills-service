@@ -308,4 +308,65 @@ class AdminEditSpecs extends DefaultIntSpec {
         skillsAfter.data.size() == 2
         skillsAfter.data.collect { it.skillId }.sort() == ["TestSkill47", "skill2"]
     }
+
+    def "Project creation limited per user"(){
+        when:
+        (1..26).each {
+            def proj = SkillsFactory.createProject(it)
+            skillsService.createProject(proj)
+        }
+        then:
+        SkillsClientException e = thrown()
+        e.message.contains "Each user is limited to [25] Projects"
+    }
+
+    def "Subject creation limited per project"() {
+        def proj1 = SkillsFactory.createProject(1)
+        skillsService.createProject(proj1)
+
+        when:
+
+        (1..26).each {
+            def subj = SkillsFactory.createSubject(1, it)
+            skillsService.createSubject(subj)
+        }
+
+        then:
+        SkillsClientException e = thrown()
+        e.message.contains "Each Project is limited to [25] Subjects"
+    }
+
+    def "Badge creation limited per project"() {
+        def proj1 = SkillsFactory.createProject(1)
+        skillsService.createProject(proj1)
+
+        when:
+
+        (1..26).each {
+            def subj = SkillsFactory.createBadge(1, it)
+            skillsService.createBadge(subj)
+        }
+
+        then:
+        SkillsClientException e = thrown()
+        e.message.contains "Each Project is limited to [25] Badges"
+    }
+
+    def "Skill creation limited per subject"() {
+        def proj1 = SkillsFactory.createProject(1)
+        skillsService.createProject(proj1)
+        def subj = SkillsFactory.createSubject(1, 1)
+        skillsService.createSubject(subj)
+
+        when:
+
+        (1..101).each {
+            def skill = SkillsFactory.createSkill(1, 1, it)
+            skillsService.createSkill(skill)
+        }
+
+        then:
+        SkillsClientException e = thrown()
+        e.message.contains "Each Subject is limited to [100] Skills"
+    }
 }
