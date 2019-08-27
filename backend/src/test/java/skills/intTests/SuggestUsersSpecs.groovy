@@ -1,9 +1,11 @@
 package skills.intTests
 
 import skills.intTests.utils.DefaultIntSpec
+import spock.lang.Ignore
 
 class SuggestUsersSpecs extends DefaultIntSpec {
 
+    @Ignore
     def "suggest on dashboard users"() {
         createService("FirstUser")
         createService("SecondUser")
