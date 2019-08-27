@@ -161,7 +161,6 @@
           label: newTag,
         };
         this.userQuery = tag;
-        this.value = tag;
         this.suggestions.push(tag);
       },
 
