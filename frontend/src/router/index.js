@@ -37,7 +37,7 @@ import UserSkillsPerformed from '@//components/users/UserSkillsPerformed';
 import GeneralSettings from '@//components/settings/GeneralSettings';
 import SecuritySettings from '@//components/settings/SecuritySettings';
 import EmailSettings from '@//components/settings/EmailSettings';
-import { SkillsReporter } from '@skills/skills-client-vue';
+import { SkillsReporter, SkillsConfiguration } from '@skills/skills-client-vue';
 
 Vue.use(Router);
 
@@ -346,7 +346,10 @@ router.beforeEach((to, from, next) => {
 
 router.afterEach((to) => {
   if (to.meta.reportSkillId) {
-    SkillsReporter.reportSkill(to.meta.reportSkillId);
+    SkillsConfiguration.afterConfigure()
+      .then(() => {
+        SkillsReporter.reportSkill(to.meta.reportSkillId);
+      });
   }
 });
 
