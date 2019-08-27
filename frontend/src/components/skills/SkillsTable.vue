@@ -138,7 +138,7 @@
         return this.skills && this.$store.getters.config && this.skills.length >= this.$store.getters.config.maxSkillsPerSubject;
       },
       addSkillsDisabledMsg() {
-        if(this.$store.getters.config) {
+        if (this.$store.getters.config) {
           return `The maximum number of Skills allowed is ${this.$store.getters.config.maxSkillsPerSubject}`;
         }
         return '';

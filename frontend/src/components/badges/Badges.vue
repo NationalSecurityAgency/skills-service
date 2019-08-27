@@ -73,7 +73,7 @@
         return this.badges && this.$store.getters.config && this.badges.length >= this.$store.getters.config.maxBadgesPerProject;
       },
       addBadgesDisabledMsg() {
-        if(this.$store.getters.config) {
+        if (this.$store.getters.config) {
           return `The maximum number of Badges allowed is ${this.$store.getters.config.maxBadgesPerProject}`;
         }
         return '';
