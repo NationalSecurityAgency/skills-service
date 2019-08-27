@@ -227,7 +227,7 @@ class SkillsLoader {
     @Transactional(readOnly = true)
     SkillSubjectSummary loadSubject(String projectId, String userId, String subjectId, Integer version = -1) {
         ProjDef projDef = getProjDef(projectId)
-        SkillDef subjectDef = getSkillDef(projectId, subjectId, SkillDef.ContainerType.Subject)
+        SkillDefWithExtra subjectDef = getSkillDefWithExtra(projectId, subjectId, SkillDef.ContainerType.Subject)
 
         if (version == -1 || subjectDef.version <= version) {
             return loadSubjectSummary(projDef, userId, subjectDef, version, true)
@@ -283,7 +283,7 @@ class SkillsLoader {
     }
 
     @Profile
-    private SkillSubjectSummary loadSubjectSummary(ProjDef projDef, String userId, SkillDef subjectDefinition, Integer version, boolean loadSkills = false) {
+    private SkillSubjectSummary loadSubjectSummary(ProjDef projDef, String userId, SkillDefParent subjectDefinition, Integer version, boolean loadSkills = false) {
         List<SkillSummary> skillsRes = []
 
         // must compute total points so the provided version is taken into advantage
@@ -319,7 +319,7 @@ class SkillsLoader {
         return new SkillSubjectSummary(
                 subject: subjectDefinition.name,
                 subjectId: subjectDefinition.skillId,
-//                description: subjectDefinition.description,
+                description: subjectDefinition instanceof SkillDefWithExtra ? subjectDefinition.description : null,
                 points: points,
 
                 skillsLevel: levelInfo.level,
@@ -338,27 +338,25 @@ class SkillsLoader {
     }
 
     @Profile
-    private int calculateTotalForSkillDef(ProjDef projDef, SkillDef subjectDefinition, int version) {
+    private int calculateTotalForSkillDef(ProjDef projDef, SkillDefParent subjectDefinition, int version) {
         skillDefRepo.calculateTotalPointsForSkill(projDef.projectId, subjectDefinition.skillId, SkillRelDef.RelationshipType.RuleSetDefinition, version)
     }
 
     @Profile
-    private List<UserAchievement> locateAchievedLevels(String userId, ProjDef projDef, SkillDef subjectDefinition) {
+    private List<UserAchievement> locateAchievedLevels(String userId, ProjDef projDef, SkillDefParent subjectDefinition) {
         achievedLevelRepository.findAllByUserIdAndProjectIdAndSkillId(userId, projDef.projectId, subjectDefinition.skillId)
     }
 
     @Profile
-    private Integer calculateTodayPoints(ProjDef projDef, String userId, SkillDef subjectDefinition, int version) {
-//        userPerformedSkillRepo.calculateUserPointsByProjectIdAndUserIdAndAndDayAndVersion(projDef.projectId, userId, subjectDefinition.skillId, version, new Date().clearTime())
+    private Integer calculateTodayPoints(ProjDef projDef, String userId, SkillDefParent subjectDefinition, int version) {
         Integer res = userPointsRepo.getPointsByProjectIdAndUserIdAndSkillRefIdAndDay(projDef.projectId, userId, subjectDefinition.id, new Date().clearTime())
         return res ?: 0
     }
 
     @Profile
-    private Integer calculatePoints(ProjDef projDef, String userId, SkillDef subjectDefinition, int version) {
+    private Integer calculatePoints(ProjDef projDef, String userId, SkillDefParent subjectDefinition, int version) {
         Integer res = userPointsRepo.getPointsByProjectIdAndUserIdAndSkillRefId(projDef.projectId, userId, subjectDefinition.id)
         return res ?: 0
-//        userPerformedSkillRepo.calculateUserPointsByProjectIdAndUserIdAndAndDayAndVersion(projDef.projectId, userId, subjectDefinition.skillId, version, null)
     }
 
     @Profile
@@ -446,7 +444,7 @@ class SkillsLoader {
      * in that case we'll assign already achieved level and add the points from the previous levels + new level (total number till next level achievement)
      */
     @Profile
-    private LevelDefinitionStorageService.LevelInfo updateLevelBasedOnLastAchieved(ProjDef projDef, int points, UserAchievement lastAchievedLevel, LevelDefinitionStorageService.LevelInfo calculatedLevelInfo, SkillDef subjectDef) {
+    private LevelDefinitionStorageService.LevelInfo updateLevelBasedOnLastAchieved(ProjDef projDef, int points, UserAchievement lastAchievedLevel, LevelDefinitionStorageService.LevelInfo calculatedLevelInfo, SkillDefParent subjectDef) {
         LevelDefinitionStorageService.LevelInfo res = SerializationUtils.clone(calculatedLevelInfo)
 
         int maxLevel = Integer.MAX_VALUE

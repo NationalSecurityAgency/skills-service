@@ -49,7 +49,7 @@ class LevelDefinitionStorageService {
 
 
     @Profile
-    LevelInfo getLevelInfo(SkillDef skillDefinition, int currentScore) {
+    LevelInfo getLevelInfo(SkillDefParent skillDefinition, int currentScore) {
         return getLevelInfo(skillDefinition.projectId, skillDefinition.levelDefinitions, skillDefinition.totalPoints, currentScore)
     }
 
@@ -73,7 +73,7 @@ class LevelDefinitionStorageService {
         return levelInfo
     }
 
-    int getPointsRequiredForLevel(SkillDef skillDefinition, int level) {
+    int getPointsRequiredForLevel(SkillDefParent skillDefinition, int level) {
         SettingsResult setting = settingsService.getProjectSetting(skillDefinition.projectId, Settings.LEVEL_AS_POINTS.settingName)
 
         List<Integer> levelScores = []
