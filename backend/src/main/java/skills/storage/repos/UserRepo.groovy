@@ -12,8 +12,11 @@ interface UserRepo extends CrudRepository<User, Integer> {
     @Nullable
     User findByUserIdIgnoreCase(String userId)
 
-    @Query(value = "select DISTINCT u from User u, Setting s where u.id = s.userId and lower(u.userId) LIKE %?1% OR lower(s.value) LIKE %?1%")
-    List<User> getUserByUserIdOrPropWildcard(String userId, Pageable pageable)
+    @Query('''select DISTINCT u 
+        from User u, Setting s 
+        where lower(u.userId) LIKE %?1% OR  
+            (u.id = s.userId AND (s.settingGroup='user_info') AND lower(s.value) LIKE %?1%)''')
+    List<User> getUserByUserIdOrPropWildcard(String userIdInLowerCase, Pageable pageable)
 
     boolean existsByUserIdIgnoreCase(String userId)
 }

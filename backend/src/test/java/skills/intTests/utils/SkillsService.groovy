@@ -272,6 +272,11 @@ class SkillsService {
         wsHelper.adminPost(getAddSkillToBadgeUrl(props.projectId, props.badgeId, props.skillId), props)
     }
 
+    def suggestDashboardUsers(String query) {
+        String url = "/users/suggestDashboardUsers/${query}".toString()
+        wsHelper.appGet(url)
+    }
+
     def getSkillSummary(String userId, String projId, String subjId=null, int version = -1) {
         String url = "/projects/${projId}/${subjId ? "subjects/${subjId}/" : ''}summary?userId=${userId}"
         if (version >= 0) {

@@ -143,7 +143,7 @@
           .then((response) => {
             this.suggestions = response.data.filter(suggestedUser => !this.excludedSuggestions.includes(suggestedUser.userId));
             this.suggestions = this.suggestions.map((it) => {
-              const label = it.first && it.last ? `${it.last}, ${it.first} (${it.userId})` : it.userId;
+              const label = it.first && it.last ? `${it.first} ${it.last} (${it.userId})` : it.userId;
               const sug = {
                 ...it,
                 label,
