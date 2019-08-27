@@ -81,6 +81,18 @@ class AdminProjService {
     @Value('#{"${skills.config.ui.descriptionMaxLength}"}')
     int maxDescriptionLength
 
+    @Value('#{"${skills.config.ui.maxProjectsPerAdmin}"}')
+    int maxProjectsPerUser
+
+    @Value('#{"${skills.config.ui.maxSubjectsPerProject}"}')
+    int maxSubjectsPerProject
+
+    @Value('#{"${skills.config.ui.maxBadgesPerProject}"}')
+    int maxBadgesPerProject
+
+    @Value('#{"${skills.config.ui.maxSkillsPerSubject}"}')
+    int maxSkillsPerSubject
+
 
     private static DataIntegrityViolationExceptionHandler dataIntegrityViolationExceptionHandler =
             new DataIntegrityViolationExceptionHandler([
@@ -140,6 +152,11 @@ class AdminProjService {
                     clientSecret: clientSecret)
             log.debug("Created project [{}]", projectDefinition)
 
+            Integer projectsByUserCount = projDefRepo.getProjectsByUserCount(userIdParam ?: this.getUserId())
+            if(projectsByUserCount >= maxProjectsPerUser) {
+                throw new SkillException("Each user is limited to [${maxProjectsPerUser}] Projects")
+            }
+
             dataIntegrityViolationExceptionHandler.handle(projectDefinition.projectId){
                 projectDefinition = projDefRepo.save(projectDefinition)
             }
@@ -189,6 +206,11 @@ class AdminProjService {
             log.debug("Updated [{}]", existing)
         } else {
             ProjDef projDef = getProjDef(projectId)
+
+            long subjectCount = skillDefRepo.countByProjectIdAndType(projectId, SkillDef.ContainerType.Subject)
+            if(subjectCount >= maxSubjectsPerProject){
+                throw new SkillException("Each Project is limited to [${maxProjectsPerUser}] Subjects")
+            }
 
             Integer lastDisplayOrder = skillDefRepo.calculateHighestDisplayOrderByProjectIdAndType(projectId, SkillDef.ContainerType.Subject)
             int displayOrder = lastDisplayOrder != null ? lastDisplayOrder + 1 : 0
@@ -265,6 +287,11 @@ class AdminProjService {
             skillDefinition.skillId = badgeRequest.badgeId
         } else {
             ProjDef projDef = getProjDef(projectId)
+
+            long badgeCount = skillDefRepo.countByProjectIdAndType(projectId, SkillDef.ContainerType.Badge)
+            if (badgeCount >= maxBadgesPerProject) {
+                throw new SkillException("Each Project is limited to [${maxProjectsPerUser}] Badges")
+            }
 
             Integer lastDisplayOrder = projDef.badges?.collect({ it.displayOrder })?.max()
             int displayOrder = lastDisplayOrder != null ? lastDisplayOrder + 1 : 0
@@ -1014,6 +1041,7 @@ class AdminProjService {
 
         boolean isEdit = skillDefinition
         int totalPointsRequested = skillRequest.pointIncrement * skillRequest.numPerformToCompletion;
+        SkillDef subject = null
         if (isEdit) {
             shouldRebuildScores = skillDefinition.totalPoints != totalPointsRequested
 
@@ -1023,6 +1051,13 @@ class AdminProjService {
             skillDefinition.totalPoints = totalPointsRequested
         } else {
             String parentSkillId = skillRequest.subjectId
+            subject = skillDefRepo.findByProjectIdAndSkillIdAndType(skillRequest.projectId, parentSkillId, SkillDef.ContainerType.Subject)
+            assert subject, "Subject [${parentSkillId}] does not exist"
+
+            long skillCount = skillDefRepo.countChildSkillsByIdAndRelationshipType(subject.id, RelationshipType.RuleSetDefinition)
+            if(skillCount >= maxSkillsPerSubject){
+                throw new SkillException("Each Subject is limited to [${maxSkillsPerSubject}] Skills")
+            }
             Integer highestDisplayOrder = skillDefRepo.calculateChildSkillsHighestDisplayOrder(skillRequest.projectId, parentSkillId)
             int displayOrder = highestDisplayOrder == null ? 0 : highestDisplayOrder + 1
             skillDefinition = new SkillDefWithExtra(
@@ -1050,7 +1085,7 @@ class AdminProjService {
         SkillDef savedSkill = skillDefRepo.findByProjectIdAndSkillIdAndType(skillRequest.projectId, skillRequest.skillId, SkillDef.ContainerType.Skill)
 
         if (!isEdit) {
-            assignToParent(skillRequest, savedSkill)
+            assignToParent(skillRequest, savedSkill, subject)
         }
 
         if (shouldRebuildScores) {
@@ -1071,11 +1106,14 @@ class AdminProjService {
     }
 
 
-    private void assignToParent(SkillRequest skillRequest, SkillDef savedSkill) {
+    private void assignToParent(SkillRequest skillRequest, SkillDef savedSkill, SkillDef parent=null) {
         String parentSkillId = skillRequest.subjectId
         SkillDef.ContainerType containerType = SkillDef.ContainerType.Subject
 
-        SkillDef parent = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(skillRequest.projectId, parentSkillId, containerType)
+        if(parent == null) {
+            parent = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(skillRequest.projectId, parentSkillId, containerType)
+        }
+
         if (!parent) {
             throw new SkillException("Requested parent skill id [${parentSkillId}] doesn't exist for type [${containerType}].", skillRequest.projectId, skillRequest.skillId)
         }

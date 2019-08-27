@@ -279,6 +279,7 @@ class ConstraintViolationSpecs extends DefaultIntSpec {
 
         subj.subjectId = sameId
         skill.skillId = sameId
+        skill.subjectId = sameId
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
         when:

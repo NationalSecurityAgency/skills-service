@@ -24,6 +24,9 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
     @Query(value = "select p.* from project_definition p, user_roles u where p.project_id = u.project_id and u.user_id=?1", nativeQuery = true)
     List<ProjDef> getProjectsByUser(String userId)
 
+    @Query(value = "select count(p.id) from project_definition p, user_roles u where p.project_id = u.project_id and u.user_id=?1", nativeQuery = true)
+    Integer getProjectsByUserCount(String userId)
+
     @Query(value = "SELECT COUNT(DISTINCT s.userId) from UserPoints s where s.projectId=?1 and s.day is null")
     int calculateDistinctUsers(String projectId)
 
