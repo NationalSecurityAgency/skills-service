@@ -12,6 +12,8 @@
 </template>
 
 <script>
+  import ProgressBar from 'vue-simple-progress';
+
   import MyProgressSummary from '@/userSkills/MyProgressSummary.vue';
   import UserSkillsHeader from '@/userSkills/UserSkillsHeader.vue';
   import UserSkillsService from '@/userSkills/service/UserSkillsService';
@@ -22,7 +24,6 @@
   import '@/common/filter/NumberFilter';
   import '@/common/filter/PluralFilter';
 
-  import ProgressBar from 'vue-simple-progress';
   import VerticalProgressBar from '@/common/progress/VerticalProgress.vue';
 
   import SkillsTitle from '@/common/utilities/SkillsTitle.vue';

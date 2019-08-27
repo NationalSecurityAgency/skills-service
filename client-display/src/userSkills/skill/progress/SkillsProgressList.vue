@@ -29,9 +29,10 @@
 </template>
 
 <script>
+    import ToggleButton from 'vue-js-toggle-button/src/Button.vue';
+
     import UserSkillsService from '@/userSkills/service/UserSkillsService';
     import SkillsSubjectSkillRow from '@/userSkills/skill/progress/SkillsRow.vue';
-    import ToggleButton from 'vue-js-toggle-button/src/Button.vue';
     import NoDataYet from '@/common/utilities/NoDataYet.vue';
     import SkillsSpinner from '@/common/utilities/SkillsSpinner.vue';
 

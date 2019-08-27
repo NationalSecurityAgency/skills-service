@@ -1,7 +1,7 @@
+import axios from 'axios';
+
 import SkillsConfiguration from '@skills/skills-client-configuration';
 import store from '@/store';
-
-import axios from 'axios';
 
 import 'url-search-params-polyfill';
 
