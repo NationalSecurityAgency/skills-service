@@ -150,7 +150,7 @@
         getMessage: field => `${field} is already taken.`,
         validate(value) {
           let valid = true;
-          if (self.allLevels && value !== self.level.name) {
+          if (self.allLevels && value !== self.level.name && value) {
             const lcVal = value.toLowerCase();
             const existingLevelWithName = self.allLevels.find(elem => elem.name.toLowerCase() === lcVal);
             if (existingLevelWithName) {
