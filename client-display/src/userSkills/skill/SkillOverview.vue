@@ -20,7 +20,7 @@
                     <h4>{{ skill.skill }}</h4>
                 </div>
                 <div class="col-md-6 text-right" :class="{ 'text-success' : isSkillComplete, 'text-primary': !isSkillComplete }">
-                    <span v-if="isSkillComplete" class="pr-1"><i class="fa fa-check"/></span>{{ skill.points }} / {{ skill.totalPoints }} Points
+                    <span v-if="isSkillComplete" class="pr-1"><i class="fa fa-check"/></span>{{ skill.points | number }} / {{ skill.totalPoints | number }} Points
                 </div>
             </div>
             <div class="row">
