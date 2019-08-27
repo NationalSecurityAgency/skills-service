@@ -7,7 +7,7 @@
             </div>
         </div>
         <div v-else>
-            <skill-summary-cards class="mb-3" :skill="skill"/>
+            <skill-summary-cards class="mb-3" :skill="skill" :short-sub-titles="true"/>
         </div>
 
 

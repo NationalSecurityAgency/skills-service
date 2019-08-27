@@ -1,40 +1,62 @@
 <template>
     <div class="row mt-0 px-3 justify-content-center">
-        <div class="mb-2 my-lg-0 px-1" :class="{'col-lg-4': !isTimeWindowDisabled, 'col-lg-6': isTimeWindowDisabled}">
-            <progress-info-card :points="skill.points" label="Overall Points Earned" icon="fa fa-running text-primary"/>
+        <div class="mb-2 my-lg-0 px-1" :class="{'col-lg-3': !isTimeWindowDisabled, 'col-lg-4': isTimeWindowDisabled}">
+            <progress-info-card :title="skill.points" label="Overall Points Earned" :sub-title="overallPtsSubTitle" icon="fa fa-running text-success"/>
         </div>
 
-        <div class="mb-2 my-lg-0 px-1" :class="{'col-lg-4': !isTimeWindowDisabled, 'col-lg-6': isTimeWindowDisabled}">
-            <progress-info-card :points="skill.todaysPoints" label="Points Achieved Today"
+        <div class="mb-2 my-lg-0 px-1" :class="{'col-lg-3': !isTimeWindowDisabled, 'col-lg-4': isTimeWindowDisabled}">
+            <progress-info-card :title="skill.todaysPoints" label="Points Achieved Today" :sub-title="todayPtsSubTitle"
                                 icon="fa fa-clock text-warning"/>
         </div>
 
-        <div v-if="!isTimeWindowDisabled" class="col-lg-4 m-b2 my-lg-0 px-1">
-            <progress-info-card :points="timeWindowPoints" :label="pointIncrementLabel"
-                                icon="fa fa-user-clock text-success"/>
+        <div class="mb-2 my-lg-0 px-1" :class="{'col-lg-3': !isTimeWindowDisabled, 'col-lg-4': isTimeWindowDisabled}">
+            <progress-info-card :title="skill.pointIncrement" label="Points per occurrence" :sub-title="occurrenceSubTitle"
+                                icon="fas fa-flag-checkered text-info"/>
+        </div>
+
+        <div v-if="!isTimeWindowDisabled" class="col-lg-3 m-b2 my-lg-0 px-1">
+            <progress-info-card :title="timeWindowTitle" :sub-title="timeWindowSubTitle" :label="timeWindowLabel"
+                                icon="fas fa-hourglass-half text-danger"/>
         </div>
     </div>
 </template>
 
 <script>
     import ProgressInfoCard from '@/userSkills/skill/progress/ProgressInfoCard.vue';
+    import numberFormatter from '../../../common/filter/NumberFilter';
 
     export default {
         name: 'SkillSummaryCards',
         components: { ProgressInfoCard },
         props: {
             skill: Object,
+            shortSubTitles: {
+                type: Boolean,
+                default: false,
+            },
         },
         computed: {
-            pointIncrementLabel() {
-                if (this.skill.totalPoints / this.skill.pointIncrement === 1) {
-                    return '1 occurrence will complete the skill.';
-                }
-
+            overallPtsSubTitle() {
+                return this.shortSubTitles ? 'Total' : 'Points Total';
+            },
+            todayPtsSubTitle() {
+                return this.shortSubTitles ? 'Today' : 'Points Today';
+            },
+            occurrenceSubTitle() {
+                return this.shortSubTitles ? 'Occurrence' : 'Points/Occurrence';
+            },
+            timeWindowSubTitle() {
+                return this.shortSubTitles ? 'Window' : 'Time Window Pts.';
+            },
+            timeWindowTitle() {
+               return this.skill.pointIncrement * this.skill.maxOccurrencesWithinIncrementInterval;
+            },
+            timeWindowLabel() {
                 const hours = this.skill.pointIncrementInterval > 59 ? Math.floor(this.skill.pointIncrementInterval / 60) : 0;
                 const minutes = this.skill.pointIncrementInterval > 60 ? this.skill.pointIncrementInterval % 60 : this.skill.pointIncrementInterval;
                 const occur = this.skill.maxOccurrencesWithinIncrementInterval;
-                let res = `${occur} occurrence${this.sOrNothing(occur)} allowed within Time Window of`;
+                const points = occur * this.skill.pointIncrement;
+                let res = `Up-to ${numberFormatter(points, 1)} points within `;
                 if (hours) {
                     res = `${res} ${hours} hr${this.sOrNothing(hours)}`;
                 }
@@ -50,7 +72,7 @@
                 return this.skill.pointIncrement * this.skill.maxOccurrencesWithinIncrementInterval;
             },
             isTimeWindowDisabled() {
-                return this.skill.pointIncrementInterval <= 0;
+                return this.skill.pointIncrementInterval <= 0 || this.skill.pointIncrement === this.skill.totalPoints;
             },
         },
         methods: {
