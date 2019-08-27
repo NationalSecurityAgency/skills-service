@@ -57,7 +57,7 @@
         return this.projects && this.$store.getters.config && this.projects.length >= this.$store.getters.config.maxProjectsPerAdmin;
       },
       addProjectsDisabledMsg() {
-        if(this.$store.getters.config) {
+        if (this.$store.getters.config) {
           return `The maximum number of Projects allowed is ${this.$store.getters.config.maxProjectsPerAdmin}`;
         }
         return '';

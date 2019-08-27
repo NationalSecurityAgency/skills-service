@@ -129,7 +129,7 @@
         return this.subjects && this.$store.getters.config && this.subjects.length >= this.$store.getters.config.maxSubjectsPerProject;
       },
       addSubjectsDisabledMsg() {
-        if(this.$store.getters.config) {
+        if (this.$store.getters.config) {
           return `The maximum number of Subjects allowed is ${this.$store.getters.config.maxSubjectsPerProject}`;
         }
         return '';
