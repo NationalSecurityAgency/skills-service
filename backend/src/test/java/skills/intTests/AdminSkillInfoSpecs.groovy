@@ -32,21 +32,21 @@ class AdminSkillInfoSpecs extends DefaultIntSpec {
         skills.get(0).projectId == proj1.projectId
         skills.get(0).name == proj1_skills.get(0).name
         skills.get(0).version == proj1_skills.get(0).version
-        skills.get(0).displayOrder == 0
+        skills.get(0).displayOrder == 1
         skills.get(0).totalPoints == proj1_skills.get(0).pointIncrement * proj1_skills.get(0).numPerformToCompletion
 
         skills.get(1).skillId == proj1_skills.get(1).skillId
         skills.get(1).projectId == proj1.projectId
         skills.get(1).name == proj1_skills.get(1).name
         skills.get(1).version == proj1_skills.get(1).version
-        skills.get(1).displayOrder == 1
+        skills.get(1).displayOrder == 2
         skills.get(1).totalPoints == proj1_skills.get(1).pointIncrement * proj1_skills.get(1).numPerformToCompletion
 
         skills.get(2).skillId == proj1_skills.get(2).skillId
         skills.get(2).projectId == proj1.projectId
         skills.get(2).name == proj1_skills.get(2).name
         skills.get(2).version == proj1_skills.get(2).version
-        skills.get(2).displayOrder == 2
+        skills.get(2).displayOrder == 3
         skills.get(2).totalPoints == proj1_skills.get(2).pointIncrement * proj1_skills.get(2).numPerformToCompletion
     }
 
@@ -72,21 +72,21 @@ class AdminSkillInfoSpecs extends DefaultIntSpec {
         skills.get(0).projectId == proj1.projectId
         skills.get(0).name == proj1_skills.get(0).name
         skills.get(0).version == proj1_skills.get(0).version
-        skills.get(0).displayOrder == 0
+        skills.get(0).displayOrder == 1
         skills.get(0).totalPoints == proj1_skills.get(0).pointIncrement * proj1_skills.get(0).numPerformToCompletion
 
         skills.get(1).skillId == proj1_skills.get(1).skillId
         skills.get(1).projectId == proj1.projectId
         skills.get(1).name == proj1_skills.get(1).name
         skills.get(1).version == proj1_skills.get(1).version
-        skills.get(1).displayOrder == 1
+        skills.get(1).displayOrder == 2
         skills.get(1).totalPoints == proj1_skills.get(1).pointIncrement * proj1_skills.get(1).numPerformToCompletion
 
         skills.get(2).skillId == proj1_skills.get(2).skillId
         skills.get(2).projectId == proj1.projectId
         skills.get(2).name == proj1_skills.get(2).name
         skills.get(2).version == proj1_skills.get(2).version
-        skills.get(2).displayOrder == 2
+        skills.get(2).displayOrder == 3
         skills.get(2).totalPoints == proj1_skills.get(2).pointIncrement * proj1_skills.get(2).numPerformToCompletion
     }
 }
