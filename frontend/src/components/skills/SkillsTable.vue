@@ -36,7 +36,7 @@
           </div>
 
           <div slot="created" slot-scope="props" class="field has-addons">
-            {{ props.row.created }}
+            {{ props.row.created | date }}
           </div>
 
           <div slot="edit" slot-scope="props">
@@ -100,7 +100,7 @@
         options: {
           uniqueKey: 'skillId',
           headings: {
-            created: 'Created (GMT)',
+            created: 'Created',
             name: 'Skill Name',
             edit: '',
             displayOrder: 'Display Order',
@@ -163,9 +163,6 @@
         SkillsService.saveSkill(skill)
           .then((skillRes) => {
             let createdSkill = skillRes;
-            // this hack is required because vue-tables-2 doesn't run its toMomentFormat
-            // if object is added to the collection after the fact, sounds like a bug to me?
-            createdSkill.created = window.moment(createdSkill.created);
             createdSkill = Object.assign({ subjectId: this.subjectId }, createdSkill);
             if (item1Index >= 0) {
               this.skills.splice(item1Index, 1, createdSkill);
