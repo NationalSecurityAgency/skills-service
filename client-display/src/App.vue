@@ -81,9 +81,6 @@
             serviceUrl: parent.model.serviceUrl,
           });
 
-          SkillsConfiguration.setProjectId(parent.model.projectId);
-          SkillsConfiguration.setServiceUrl(parent.model.serviceUrl);
-
           this.handleTheming(parent.model.theme);
 
           this.$store.state.parentFrame.emit('needs-authentication');
