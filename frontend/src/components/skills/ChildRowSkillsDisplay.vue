@@ -56,7 +56,25 @@
   export default {
     name: 'ChildRowSkillsDisplay',
     components: { MediaInfoCard, LoadingContainer },
-    props: ['projectId', 'subjectId', 'parentSkillId', 'skill'],
+    props: {
+      projectId: {
+        type: String,
+      },
+      subjectId: {
+        type: String,
+      },
+      parentSkillId: {
+        type: String,
+      },
+      skill: {
+        type: Object,
+      },
+      // increment this counter to force component to reload data from the server
+      refreshCounter: {
+        type: Number,
+        default: 0,
+      },
+    },
     data() {
       return {
         isLoading: true,
@@ -65,6 +83,11 @@
     },
     mounted() {
       this.loadSkills();
+    },
+    watch: {
+      refreshCounter() {
+        this.loadSkills();
+      },
     },
     computed: {
       timeWindowTitle() {
@@ -108,6 +131,7 @@
     },
     methods: {
       loadSkills() {
+        this.isLoading = true;
         if (this.skill) {
           this.skillInfo = this.skill;
           this.isLoading = false;
