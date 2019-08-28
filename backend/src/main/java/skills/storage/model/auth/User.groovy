@@ -6,7 +6,7 @@ import skills.storage.model.Setting
 
 import javax.persistence.*
 
-@ToString
+@ToString(excludes = ['roles'])
 @Entity
 @Table(name = 'users')
 class User {

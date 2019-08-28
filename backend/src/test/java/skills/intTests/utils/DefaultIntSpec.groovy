@@ -26,7 +26,12 @@ class DefaultIntSpec extends Specification {
         skillsService.deleteAllMyProjects()
     }
 
-    SkillsService createService(String username = "skills@skills.org", String password = "p@ssw0rd", String url = "http://localhost:${localPort}".toString()){
-        new SkillsService(username, password, url)
+    SkillsService createService(
+            String username = "skills@skills.org",
+            String password = "p@ssw0rd",
+            String firstName = "Skills",
+            String lastName = "Test",
+            String url = "http://localhost:${localPort}".toString()){
+        new SkillsService(username, password, firstName, lastName, url)
     }
 }

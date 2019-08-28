@@ -97,11 +97,11 @@ class UserInfoSettingsSpecs extends DefaultIntSpec {
         exception.message.contains("errorCode:BadParam")
     }
 
-    def 'user nick cannot exceed 30 characters'() {
+    def 'user nick cannot exceed 70 characters'() {
 
-        String nameOver30Chars = "1234567890123456789012345678901"
-        assert currentUser.nickname != nameOver30Chars
-        currentUser.nickname = nameOver30Chars
+        String nameOver70Chars = (0..71).collect({"a"}).join("")
+        assert currentUser.nickname != nameOver70Chars
+        currentUser.nickname = nameOver70Chars
 
         when:
         skillsService.updateUserInfo(currentUser)
@@ -110,7 +110,7 @@ class UserInfoSettingsSpecs extends DefaultIntSpec {
 
         then:
         SkillsClientException exception = thrown()
-        exception.message.contains("explanation:Nickname cannot be over 30 characters")
+        exception.message.contains("explanation:Nickname cannot be over 70 characters")
         exception.message.contains("errorCode:BadParam")
     }
 

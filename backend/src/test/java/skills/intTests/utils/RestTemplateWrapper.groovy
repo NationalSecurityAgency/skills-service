@@ -87,8 +87,8 @@ class RestTemplateWrapper extends RestTemplate {
                 .build()
     }
 
-    void auth(String skillsServiceUrl, String username, String password) {
-        boolean  accountCreated = createAccount(skillsServiceUrl, username, password, 'Skills', 'Test')
+    void auth(String skillsServiceUrl, String username, String password, String firstName, lastName) {
+        boolean  accountCreated = createAccount(skillsServiceUrl, username, password, firstName, lastName)
         if (!accountCreated) {
             HttpHeaders headers = new HttpHeaders()
             headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED)

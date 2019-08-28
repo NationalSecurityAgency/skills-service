@@ -1,30 +1,28 @@
 package skills.intTests
 
 import skills.intTests.utils.DefaultIntSpec
-import spock.lang.Ignore
 
 class SuggestUsersSpecs extends DefaultIntSpec {
 
-    @Ignore
     def "suggest on dashboard users"() {
-        createService("FirstUser")
-        createService("SecondUser")
-        createService("ThirdUser")
+        // make unique enough lookups to avoid clashing with users created by other tests
+        createService("FirstSuggestUsersSpecsUser", "p@ssw0rd", "SuggestUsersSpecsBob", "SuggestUsersSpecsSmith")
+        createService("SecondSuggestUsersSpecsUser","p@ssw0rd", "SuggestUsersSpecsJane", "SuggestUsersSpecsDoe")
+        createService("ThirdSuggestUsersSpecsUser","p@ssw0rd", "SuggestUsersSpecsJames", "SuggestUsersSpecsHan")
 
         expect:
         skillsService.suggestDashboardUsers(query).collect({ it.userId }).sort() == userIds
         where:
         query  | userIds
         // by user id
-        "nd"   | ["seconduser"]
-        "ND"   | ["seconduser"]
-        "uSer" | ["firstuser", "seconduser", "thirduser"]
+        "ndSuggestUsersSpecs"   | ["secondsuggestusersspecsuser"]
+        "NDSuggestUsersSpecs"   | ["secondsuggestusersspecsuser"]
+        "SuggestUsersSpecsuSer" | ["firstsuggestusersspecsuser", "secondsuggestusersspecsuser", "thirdsuggestusersspecsuser"]
         // by last name
-        "TesT" | ["firstuser", "seconduser", "thirduser"]
-        "esT"  | ["firstuser", "seconduser", "thirduser"]
+        "SuggestUsersSpecsSm" | ["firstsuggestusersspecsuser"]
         // by first name
-        "ills" | ["firstuser", "seconduser", "thirduser"]
+        "SuggestUsersSpecsJane" | ["secondsuggestusersspecsuser"]
         // by nickname
-        "Skills Test" | ["firstuser", "seconduser", "thirduser"]
+        "SuggestUsersSpecsBob SuggestUsersSpecsSmith" | ["firstsuggestusersspecsuser"]
     }
 }
