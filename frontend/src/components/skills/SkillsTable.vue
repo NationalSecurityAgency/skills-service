@@ -53,7 +53,8 @@
 
           <div slot="child_row" slot-scope="props">
             <ChildRowSkillsDisplay :project-id="projectId" :subject-id="subjectId" v-skills-onMount="'ExpandSkillDetailsSkillsPage'"
-                                   :parent-skill-id="props.row.skillId" class="mr-3 ml-5 mb-3"></ChildRowSkillsDisplay>
+                                   :parent-skill-id="props.row.skillId" :refresh-counter="props.row.refreshCounter"
+                                   class="mr-3 ml-5 mb-3"></ChildRowSkillsDisplay>
           </div>
         </v-client-table>
 
@@ -130,7 +131,7 @@
       };
     },
     mounted() {
-      this.skills = this.skillsProp.map(item => Object.assign({ subjectId: this.subjectId }, item));
+      this.skills = this.skillsProp.map(item => Object.assign({ subjectId: this.subjectId, refreshCounter: 0 }, item));
       this.disableFirstAndLastButtons();
     },
     computed: {
@@ -165,8 +166,10 @@
             let createdSkill = skillRes;
             createdSkill = Object.assign({ subjectId: this.subjectId }, createdSkill);
             if (item1Index >= 0) {
+              createdSkill.refreshCounter = this.skills[item1Index].refreshCounter + 1;
               this.skills.splice(item1Index, 1, createdSkill);
             } else {
+              createdSkill.refreshCounter = 0;
               this.skills.push(createdSkill);
               // report CreateSkill on when new skill is created
               SkillsReporter.reportSkill('CreateSkill');
