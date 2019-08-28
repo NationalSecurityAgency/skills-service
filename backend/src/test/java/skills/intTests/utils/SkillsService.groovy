@@ -223,6 +223,10 @@ class SkillsService {
         wsHelper.adminGet(getSkillUrl(props.projectId, props.subjectId, props.skillId), props)
     }
 
+    def getSkillsForProject(String projectId) {
+        wsHelper.adminGet("/projects/${projectId}/skills")
+    }
+
     def getSkillsForSubject(String projectId, String subjectId) {
         wsHelper.adminGet("/projects/${projectId}/subjects/${subjectId}/skills")
     }

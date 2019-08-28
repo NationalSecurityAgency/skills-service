@@ -13,4 +13,6 @@ class SkillDefSkinnyRes {
     int displayOrder
 
     Date created
+
+    Integer totalPoints
 }
