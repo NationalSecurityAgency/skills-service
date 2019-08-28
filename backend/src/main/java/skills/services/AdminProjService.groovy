@@ -1039,7 +1039,7 @@ class AdminProjService {
             createdResourceLimitsValidator.validateNumSkillsCreated(subject)
 
             Integer highestDisplayOrder = skillDefRepo.calculateChildSkillsHighestDisplayOrder(skillRequest.projectId, parentSkillId)
-            int displayOrder = highestDisplayOrder == null ? 0 : highestDisplayOrder + 1
+            int displayOrder = highestDisplayOrder == null ? 1 : highestDisplayOrder + 1
             skillDefinition = new SkillDefWithExtra(
                     skillId: skillRequest.skillId,
                     projectId: skillRequest.projectId,
