@@ -1,5 +1,5 @@
 <template>
-  <div id="skills-selector">
+  <div id="skills-selector" class="skills-selector">
 
     <!-- see https://github.com/shentao/vue-multiselect/issues/421 for explanation of :blockKeys-->
     <multiselect v-model="selectedInternal" placeholder="Select skill(s)..."
@@ -9,7 +9,7 @@
       <template slot="option" slot-scope="props">
         <slot name="dropdown-item" v-bind:props="props">
           <h6>{{ props.option.name }}</h6>
-          <div class="text-secondary">ID: {{props.option.skillId}}</div>
+          <div class="" style="font-size: 0.8rem;">ID: {{props.option.skillId}}</div>
         </slot>
       </template>
       <template slot="tag" slot-scope="{ option, remove }">
@@ -120,5 +120,15 @@
   }
   .remove-x:hover {
     cursor: pointer;
+  }
+
+
+</style>
+
+<style>
+  .skills-selector .multiselect__content-wrapper {
+    background: #f8f9fa;
+    /*border-width: 2px;*/
+    border-color: #b1b1b1;
   }
 </style>

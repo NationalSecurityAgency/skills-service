@@ -187,8 +187,9 @@
 </script>
 
 <style>
-  .existingUserInput .multiselect__tag {
-    background-color: lightblue;
-    color: black;
+  .existingUserInput .multiselect__content-wrapper {
+    background: #f8f9fa;
+    /*border-width: 2px;*/
+    border-color: #b1b1b1;
   }
 </style>
