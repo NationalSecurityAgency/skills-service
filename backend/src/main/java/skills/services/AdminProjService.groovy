@@ -81,17 +81,8 @@ class AdminProjService {
     @Value('#{"${skills.config.ui.descriptionMaxLength}"}')
     int maxDescriptionLength
 
-    @Value('#{"${skills.config.ui.maxProjectsPerAdmin}"}')
-    int maxProjectsPerUser
-
-    @Value('#{"${skills.config.ui.maxSubjectsPerProject}"}')
-    int maxSubjectsPerProject
-
-    @Value('#{"${skills.config.ui.maxBadgesPerProject}"}')
-    int maxBadgesPerProject
-
-    @Value('#{"${skills.config.ui.maxSkillsPerSubject}"}')
-    int maxSkillsPerSubject
+    @Autowired
+    CreatedResourceLimitsValidator createdResourceLimitsValidator
 
 
     private static DataIntegrityViolationExceptionHandler dataIntegrityViolationExceptionHandler =
@@ -152,10 +143,7 @@ class AdminProjService {
                     clientSecret: clientSecret)
             log.debug("Created project [{}]", projectDefinition)
 
-            Integer projectsByUserCount = projDefRepo.getProjectsByUserCount(userIdParam ?: this.getUserId())
-            if(projectsByUserCount >= maxProjectsPerUser) {
-                throw new SkillException("Each user is limited to [${maxProjectsPerUser}] Projects")
-            }
+            createdResourceLimitsValidator.validateNumProjectsCreated(userIdParam ?: this.getUserId())
 
             dataIntegrityViolationExceptionHandler.handle(projectDefinition.projectId){
                 projectDefinition = projDefRepo.save(projectDefinition)
@@ -207,10 +195,7 @@ class AdminProjService {
         } else {
             ProjDef projDef = getProjDef(projectId)
 
-            long subjectCount = skillDefRepo.countByProjectIdAndType(projectId, SkillDef.ContainerType.Subject)
-            if(subjectCount >= maxSubjectsPerProject){
-                throw new SkillException("Each Project is limited to [${maxProjectsPerUser}] Subjects")
-            }
+            createdResourceLimitsValidator.validateNumSubjectsCreated(projectId)
 
             Integer lastDisplayOrder = skillDefRepo.calculateHighestDisplayOrderByProjectIdAndType(projectId, SkillDef.ContainerType.Subject)
             int displayOrder = lastDisplayOrder != null ? lastDisplayOrder + 1 : 0
@@ -288,10 +273,7 @@ class AdminProjService {
         } else {
             ProjDef projDef = getProjDef(projectId)
 
-            long badgeCount = skillDefRepo.countByProjectIdAndType(projectId, SkillDef.ContainerType.Badge)
-            if (badgeCount >= maxBadgesPerProject) {
-                throw new SkillException("Each Project is limited to [${maxProjectsPerUser}] Badges")
-            }
+            createdResourceLimitsValidator.validateNumBadgesCreated(projectId)
 
             Integer lastDisplayOrder = projDef.badges?.collect({ it.displayOrder })?.max()
             int displayOrder = lastDisplayOrder != null ? lastDisplayOrder + 1 : 0
@@ -1054,10 +1036,8 @@ class AdminProjService {
             subject = skillDefRepo.findByProjectIdAndSkillIdAndType(skillRequest.projectId, parentSkillId, SkillDef.ContainerType.Subject)
             assert subject, "Subject [${parentSkillId}] does not exist"
 
-            long skillCount = skillDefRepo.countChildSkillsByIdAndRelationshipType(subject.id, RelationshipType.RuleSetDefinition)
-            if(skillCount >= maxSkillsPerSubject){
-                throw new SkillException("Each Subject is limited to [${maxSkillsPerSubject}] Skills")
-            }
+            createdResourceLimitsValidator.validateNumSkillsCreated(subject)
+
             Integer highestDisplayOrder = skillDefRepo.calculateChildSkillsHighestDisplayOrder(skillRequest.projectId, parentSkillId)
             int displayOrder = highestDisplayOrder == null ? 0 : highestDisplayOrder + 1
             skillDefinition = new SkillDefWithExtra(
