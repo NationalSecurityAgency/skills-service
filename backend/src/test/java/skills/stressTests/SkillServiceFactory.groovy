@@ -14,7 +14,7 @@ class SkillServiceFactory {
         assert serviceUrl
         SkillsService service = cache.get(projectId)
         if (!service) {
-            service = new SkillsService("${projectId}user".toString(), "password", serviceUrl)
+            service = new SkillsService("${projectId}user".toString(), "password", "First", "Last", serviceUrl)
             cache.put(projectId, service)
         }
         return  service

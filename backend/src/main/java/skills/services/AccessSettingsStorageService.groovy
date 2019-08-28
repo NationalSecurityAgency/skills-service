@@ -206,8 +206,9 @@ class AccessSettingsStorageService {
         if (!userInfo.lastName || userInfo.lastName.length() > 30) {
             throw new SkillException("Last Name is required and can be no longer than 30 characters", NA, NA, ErrorCode.BadParam)
         }
-        if (userInfo.nickname && userInfo.nickname.length() > 30) {
-            throw new SkillException("Nickname cannot be over 30 characters", NA, NA, ErrorCode.BadParam)
+        // nickname by default is "firstName lastName"
+        if (userInfo.nickname && userInfo.nickname.length() > 70) {
+            throw new SkillException("Nickname cannot be over 70 characters", NA, NA, ErrorCode.BadParam)
         }
     }
 

@@ -22,8 +22,8 @@ class SkillsService {
         wsHelper = new WSHelper(username: username, password: password).init()
     }
 
-    SkillsService(String username, String password, String service) {
-        wsHelper = new WSHelper(username: username, password: password, skillsService: service).init()
+    SkillsService(String username, String password, String firstName, String lastName, String service) {
+        wsHelper = new WSHelper(username: username, password: password, skillsService: service, firstName: firstName, lastName: lastName).init()
     }
 
     String getClientSecret(String projectId){

@@ -22,10 +22,13 @@ class WSHelper {
     String username = "skills@skills.org"
     String password = "p@ssw0rd"
 
+    String firstName = 'Skills'
+    String lastName = 'Test'
+
     WSHelper init() {
         restTemplateWrapper = new RestTemplateWrapper()
         oAuthRestTemplate = new RestTemplate()
-        restTemplateWrapper.auth(skillsService, username, password)
+        restTemplateWrapper.auth(skillsService, username, password, firstName, lastName)
         return this
     }
 
