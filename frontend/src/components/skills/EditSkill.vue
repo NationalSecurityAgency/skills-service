@@ -56,21 +56,16 @@
             <div class="form-group mt-2 mt-lg-0">
               <label for="subjName">Occurrences to Completion</label>
               <ValidationProvider rules="optionalNumeric|required|min_value:1|max_value:10000|moreThanMaxWindowOccurrences" v-slot="{errors}" name="Occurrences to Completion" tag="div">
-              <div class="input-group">
-                <div class="input-group-prepend">
-                  <div class="input-group-text"><i class="fas fa-times"/></div>
-                </div>
-                  <input class="form-control" type="text" v-model="skillInternal.numPerformToCompletion"
+                <input class="form-control" type="text" v-model="skillInternal.numPerformToCompletion"
                          data-vv-name="numPerformToCompletion"/>
-              </div>
                 <small class="form-text text-danger">{{ errors[0]}}</small>
               </ValidationProvider>
             </div>
           </div>
-          <div class="col-12 col-lg-2">
+          <div class="col-12 col-lg-3">
             <div class="form-group">
               <label for="subjName">Total Points
-                <inline-help msg="Total points are derived and can't be entered directly."/>
+                <inline-help msg="Derived and can't be entered directly. Total Points = Increment x Occurrences."/>
               </label>
               <div class="input-group">
                 <div class="input-group-prepend">
@@ -93,7 +88,7 @@
 
               </label>
               <div class="row">
-                <div class="col">
+                <div class="col-12 col-sm">
                   <ValidationProvider rules="optionalNumeric|required|min_value:0|hoursMaxTimeWindow:timeWindowMinutes|cantBe0IfMins0" vid="timeWindowHours" v-slot="{errors}" name="Hours">
                     <div class="input-group">
                       <input class="form-control d-inline" type="text" v-model="skillInternal.pointIncrementIntervalHrs"
@@ -107,7 +102,7 @@
                     <small class="form-text text-danger">{{ errors[0] }}</small>
                   </ValidationProvider>
                 </div>
-                <div class="col">
+                <div class="col-12 col-sm">
                   <ValidationProvider rules="optionalNumeric|required|min_value:0|max_value:59|minutesMaxTimeWindow:timeWindowHours|cantBe0IfHours0" vid="timeWindowMinutes" v-slot="{errors}" name="Minutes">
                     <div class="input-group">
                       <input class="form-control d-inline"  type="text" v-model="skillInternal.pointIncrementIntervalMins"
@@ -125,9 +120,9 @@
             </div>
           </div>
           <div class="col-12 col-lg">
-            <ValidationProvider rules="optionalNumeric|min_value:1|max_value:999|lessThanTotalOccurrences" v-slot="{errors}" name="Max Occurrences Within Window">
+            <ValidationProvider rules="optionalNumeric|min_value:1|max_value:999|lessThanTotalOccurrences" v-slot="{errors}" name="Window's Max Occurrences">
               <div class="form-group">
-                <label>Max Occurrences Within Window
+                <label>Window's Max Occurrences
                   <inline-help
                     msg="Once this Max Occurrences has been reached, points will not be incremented until outside of the configured Time Window."/>
                 </label>
