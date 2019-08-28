@@ -12,6 +12,7 @@ import 'matchmedia-polyfill';
 import 'matchmedia-polyfill/matchMedia.addListener';
 import './filters/NumberFilter';
 import './filters/TruncateFilter';
+import './filters/DateFilter';
 import './validators/MaxDescriptionLengthValidator';
 import './validators/OptionalNumericValidator';
 import './directives/SkillsOnMountDirective';
