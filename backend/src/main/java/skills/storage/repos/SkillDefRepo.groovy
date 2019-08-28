@@ -18,13 +18,13 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
         Integer getVersion()
         Integer getDisplayOrder()
         Date getCreated()
+        Integer getTotalPoints()
     }
 
     static interface SkillDefPartial extends SkillDefSkinny{
         Integer getPointIncrement()
         Integer getPointIncrementInterval()
         Integer getNumMaxOccurrencesIncrementInterval()
-        Integer getTotalPoints()
         String getIconClass()
         SkillDef.ContainerType getSkillType()
         Date getUpdated()
@@ -41,12 +41,10 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
         s.projectId as projectId,
         s.displayOrder as displayOrder,
         s.created as created,
-        s.version as version
+        s.version as version,
+        s.totalPoints as totalPoints
         from SkillDef s where s.projectId = ?1 and s.type = ?2''')
     List<SkillDefSkinny> findAllSkinnySelectByProjectIdAndType(String id, SkillDef.ContainerType type)
-
-    @Nullable
-    List<SkillDef> findAllByType(SkillDef.ContainerType type)
 
     @Nullable
     @Query('''SELECT         

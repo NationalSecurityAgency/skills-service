@@ -1186,6 +1186,7 @@ class AdminProjService {
                 version: skinny.version,
                 displayOrder: skinny.displayOrder,
                 created: skinny.created,
+                totalPoints: skinny.totalPoints,
         )
         return res;
     }

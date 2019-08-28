@@ -33,12 +33,11 @@
     props: ['skills'],
     data() {
       return {
-        columns: ['name', 'skillId', 'pointIncrement', 'totalPoints', 'edit'],
+        columns: ['name', 'skillId', 'totalPoints', 'edit'],
         options: {
           headings: {
             name: 'Skill Name',
             skillId: 'Skill ID',
-            pointIncrement: 'Point Increment',
             totalPoints: 'Total Points',
             edit: '',
           },
