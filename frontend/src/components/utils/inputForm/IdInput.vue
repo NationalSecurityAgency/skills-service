@@ -1,33 +1,48 @@
 <template>
-  <div class="form-group mt-0 mb-0">
-    <div class="row">
-      <div class="col">
-        <label for="idInput">{{ label }}</label>
+  <ValidationProvider :rules="rules" v-slot="{ errors }" :name="label">
+    <div class="form-group mt-0 mb-0">
+      <div class="row">
+        <div class="col">
+          <label for="idInput">{{ label }}</label>
+        </div>
+        <div class="col text-right">
+          <i class="fas fa-question-circle mr-1 text-secondary"
+             v-b-tooltip.hover.left="'Enable to override auto-generated value.'"/>
+          <b-link v-if="!canEdit" @click="toggle">Enable</b-link>
+          <b-link v-else @click="toggle">Disable</b-link>
+        </div>
       </div>
-      <div class="col text-right">
-        <i class="fas fa-question-circle mr-1 text-secondary"
-           v-b-tooltip.hover.left="'Enable to override auto-generated value.'"/>
-        <b-link v-if="!canEdit" @click="toggle">Enable</b-link>
-        <b-link v-else @click="toggle">Disable</b-link>
-      </div>
+      <input type="text" class="form-control" id="idInput" v-model="internalValue" :disabled="!canEdit"
+             @input="dataChanged">
+      <small class="form-text text-danger">{{ errors[0]}}</small>
     </div>
-    <input type="text" class="form-control" id="idInput" v-model="internalValue" :disabled="!canEdit"
-           @input="dataChanged">
-  </div>
+  </ValidationProvider>
 </template>
 
 <script>
+  import { ValidationProvider } from 'vee-validate';
+
   export default {
     name: 'IdInput',
+    components: {
+      ValidationProvider,
+    },
     props: {
       label: String,
       value: String,
+      additionalValidationRules: [String],
     },
     data() {
       return {
+        rules: 'required|min:3|max:50|alpha_num',
         canEdit: false,
         internalValue: this.value,
       };
+    },
+    mounted() {
+      if (this.additionalValidationRules) {
+        this.rules = `${this.rules}|${this.additionalValidationRules}`;
+      }
     },
     methods: {
       toggle() {

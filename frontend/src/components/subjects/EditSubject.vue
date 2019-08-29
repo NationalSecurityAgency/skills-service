@@ -20,11 +20,8 @@
               </div>
             </div>
 
-            <ValidationProvider rules="required|min:3|max:50|alpha_num|uniqueId" v-slot="{errors}" name="Subject Id">
-              <id-input type="text" label="Subject ID" v-model="subjectInternal.subjectId" @input="canAutoGenerateId=false"
-                        data-vv-name="subjectId" />
-              <small class="form-text text-danger">{{ errors[0] }}</small>
-            </ValidationProvider>
+            <id-input type="text" label="Subject ID" v-model="subjectInternal.subjectId" @input="canAutoGenerateId=false"
+                      additional-validation-rules="uniqueId"/>
 
             <div class="mt-2">
               <label>Description</label>
