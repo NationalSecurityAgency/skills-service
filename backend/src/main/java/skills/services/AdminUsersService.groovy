@@ -5,6 +5,7 @@ import groovy.time.TimeCategory
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import skills.controller.result.model.LabelCountItem
 import skills.controller.result.model.ProjectUser
@@ -110,7 +111,7 @@ class AdminUsersService {
             UserAchievedLevelRepo.LabelCountInfo found = res.find ({
                 it.label == "${month.value}"
             })
-            countsPerMonth << new LabelCountItem(value: month.getDisplayName(TextStyle.SHORT, Locale.US), count: found?.count ?: 0)
+            countsPerMonth << new LabelCountItem(value: month.getDisplayName(TextStyle.SHORT, Locale.US), count: found?.countRes ?: 0)
         }
 
         return countsPerMonth
@@ -120,20 +121,20 @@ class AdminUsersService {
         List<UserAchievedLevelRepo.LabelCountInfo> res = userAchievedRepo.getUsageFacetedViaSubject(projectId, SkillDef.ContainerType.Subject)
 
         return res.collect {
-            new LabelCountItem(value: it.label, count: it.count)
+            new LabelCountItem(value: it.label, count: it.countRes)
         }
     }
 
-    List<LabelCountItem> getAchievementCountsPerSkill(String projectId, String subjectId) {
-        List<UserAchievedLevelRepo.LabelCountInfo> res = userAchievedRepo.getSubjectUsageFacetedViaSkill(projectId, subjectId, SkillDef.ContainerType.Subject)
+    List<LabelCountItem> getAchievementCountsPerSkill(String projectId, String subjectId, Pageable pageable) {
+        List<UserAchievedLevelRepo.LabelCountInfo> res = userAchievedRepo.getSubjectUsageFacetedViaSkill(projectId, subjectId, SkillDef.ContainerType.Subject, pageable)
 
         return res.collect {
-            new LabelCountItem(value: it.label, count: it.count)
+            new LabelCountItem(value: it.label, count: it.countRes)
         }
     }
 
     List<LabelCountItem> getUserCountsPerLevel(String projectId, subjectId = null) {
-        List<UsersPerLevel> levels = rankingLoader.getUserCountsPerLevel(projectId,true, subjectId)
+        List<UsersPerLevel> levels = rankingLoader.getUserCountsPerLevel(projectId,false, subjectId)
 
         return levels.collect{
             new LabelCountItem(value: "Level ${it.level}", count: it.numUsers)
