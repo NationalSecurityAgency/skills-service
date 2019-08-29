@@ -16,11 +16,8 @@
           </div>
 
           <div class="col-12">
-            <ValidationProvider rules="required|min:3|max:50|alpha_num|uniqueId" v-slot="{errors}" name="Project Id">
             <id-input type="text" label="Project ID" v-model="internalProject.projectId"
-                      data-vv-name="projectId"/>
-            <small class="form-text text-danger">{{ errors[0]}}</small>
-            </ValidationProvider>
+                      additional-validation-rules="uniqueId"/>
           </div>
         </div>
 

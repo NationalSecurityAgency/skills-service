@@ -16,12 +16,8 @@
             </div>
           </div>
           <div class="col-12 col-lg">
-            <ValidationProvider rule="required|min:3|max:50|alpha_num|uniqueId" v-slot="{errors}" name="Skill Id">
-              <id-input type="text" label="Skill ID"
-                        v-model="skillInternal.skillId" @input="canAutoGenerateId=false"
-                        data-vv-name="skillId"/>
-              <small class="form-text text-danger">{{ errors[0]}}</small>
-            </ValidationProvider>
+            <id-input type="text" label="Skill ID" additional-validation-rules="uniqueId"
+                      v-model="skillInternal.skillId" @input="canAutoGenerateId=false"/>
           </div>
           <div class="col-12 col-lg-2 mt-2 mt-lg-0">
             <div class="form-group">
