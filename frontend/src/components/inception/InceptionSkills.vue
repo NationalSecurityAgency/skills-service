@@ -26,6 +26,7 @@
           projectId: this.projectId,
           authenticator: this.authenticator,
           serviceUrl: this.serviceUrl,
+          autoScrollStrategy: 'top-of-page',
         };
       },
       serviceUrl() {
