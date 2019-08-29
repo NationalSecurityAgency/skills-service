@@ -20,8 +20,6 @@ import './directives/FocusDirective';
 import App from './App';
 import router from './router';
 import store from './store/store';
-import InceptionConfigurer from './InceptionConfigurer';
-
 
 Vue.use(ClientTable, {}, false, 'bootstrap4', 'default');
 Vue.use(ServerTable, {}, false, 'bootstrap4', 'default');
@@ -46,8 +44,6 @@ require('vue-multiselect/dist/vue-multiselect.min.css');
 
 store.dispatch('loadConfigState').finally(() => {
   store.dispatch('restoreSessionIfAvailable').finally(() => {
-    InceptionConfigurer.configure();
-
     /* eslint-disable no-new */
     const vm = new Vue({
       el: '#app',
