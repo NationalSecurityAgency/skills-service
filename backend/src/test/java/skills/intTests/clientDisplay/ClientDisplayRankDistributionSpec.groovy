@@ -93,6 +93,62 @@ class ClientDisplayRankDistributionSpec extends DefaultIntSpec {
         usr2Rank.numUsers == 2
     }
 
+    def "ranking distribution - two users"() {
+        List<String> users = (1..2).collect({ "user${it}".toString() })
+
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
+        proj1_skills.each { it.numPerformToCompletion = 10 }
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(proj1_skills)
+
+        skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_skills.get(0).skillId], users[0], new Date())
+        skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_skills.get(0).skillId], users[1], new Date())
+        skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_skills.get(1).skillId], users[1], new Date())
+
+        when:
+        def usr1Dist = skillsService.getRankDistribution(users.get(0), proj1.projectId)
+        def usr2Dist = skillsService.getRankDistribution(users.get(1), proj1.projectId)
+        then:
+        usr1Dist.myPoints == 10
+        usr1Dist.myLevel == 0
+        usr1Dist.pointsToPassNextUser == 10
+        usr1Dist.pointsAnotherUserToPassMe == -1
+
+        usr2Dist.myPoints == 20
+        usr2Dist.myLevel == 0
+        usr2Dist.pointsToPassNextUser == -1
+        usr2Dist.pointsAnotherUserToPassMe == 10
+    }
+
+    def "ranking distribution - brand new user"() {
+        List<String> users = (1..2).collect({ "user${it}".toString() })
+
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
+        proj1_skills.each { it.numPerformToCompletion = 10 }
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(proj1_skills)
+
+        skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_skills.get(0).skillId], users[0], new Date())
+        skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_skills.get(0).skillId], users[1], new Date())
+        skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_skills.get(1).skillId], users[1], new Date())
+
+        when:
+        def dist = skillsService.getRankDistribution("brandNewUser", proj1.projectId)
+        then:
+        dist.myPoints == 0
+        dist.myLevel == 0
+        dist.pointsToPassNextUser == 10
+        dist.pointsAnotherUserToPassMe == -1
+    }
+
     def "user's rank - two users have the same number of points"() {
         List<String> users = (1..4).collect({ "user${it}".toString() })
 
