@@ -73,16 +73,16 @@ class RankingLoader {
         List<UserAchievement> myLevels = loadUserAchievements(userId, projectId, subjectId)
         int myLevel = myLevels ? myLevels.collect({it.level}).max() : 0
 
-        Integer pointsToPassNextUser = -1
+        int currentPts = usersPoints?.points ?: 0
+        List<UserPoints> next = findHighestUserPoints(projectId, currentPts, subjectId)
+        Integer pointsToPassNextUser = next ? next.first().points - currentPts : -1
+
         Integer pointsAnotherUserToPassMe = -1
-
         if(usersPoints?.points){
-            List<UserPoints> next = findHighestUserPoints(projectId, usersPoints, subjectId)
-            pointsToPassNextUser = next ? next.first().points - usersPoints.points : -1
-
-            List<UserPoints> previous = findLowestUserPoints(projectId, usersPoints, subjectId)
+            List<UserPoints> previous = findLowestUserPoints(projectId, usersPoints.points, subjectId)
             pointsAnotherUserToPassMe = previous ? usersPoints.points - previous.first().points : -1
         }
+
         return new SkillsRankingDistribution(myLevel: myLevel, myPoints: usersPoints?.points ?: 0,
                 pointsToPassNextUser: pointsToPassNextUser, pointsAnotherUserToPassMe: pointsAnotherUserToPassMe)
     }
@@ -101,15 +101,15 @@ class RankingLoader {
 
     @CompileStatic
     @Profile
-    private List<UserPoints> findLowestUserPoints(String projectId, UserPoints usersPoints, String subjectId) {
-        List<UserPoints> previous = userPointsRepository.findByProjectIdAndSkillIdAndPointsLessThanAndDayIsNull(projectId, subjectId, usersPoints.points, new PageRequest(0, 1, Sort.Direction.DESC, "points"))
+    private List<UserPoints> findLowestUserPoints(String projectId, int points, String subjectId) {
+        List<UserPoints> previous = userPointsRepository.findByProjectIdAndSkillIdAndPointsLessThanAndDayIsNull(projectId, subjectId, points, new PageRequest(0, 1, Sort.Direction.DESC, "points"))
         previous
     }
 
     @CompileStatic
     @Profile
-    private List<UserPoints> findHighestUserPoints(String projectId, UserPoints usersPoints, String subjectId) {
-        List<UserPoints> next = userPointsRepository.findByProjectIdAndSkillIdAndPointsGreaterThanAndDayIsNull(projectId, subjectId, usersPoints.points, new PageRequest(0, 1, Sort.Direction.ASC, "points"))
+    private List<UserPoints> findHighestUserPoints(String projectId, int points, String subjectId) {
+        List<UserPoints> next = userPointsRepository.findByProjectIdAndSkillIdAndPointsGreaterThanAndDayIsNull(projectId, subjectId, points, new PageRequest(0, 1, Sort.Direction.ASC, "points"))
         next
     }
 
