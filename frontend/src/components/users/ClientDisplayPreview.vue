@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!loading.userToken && !loading.availableVersions">
+  <div v-if="!loading.availableVersions">
     <sub-page-header title="Client Display">
       <b-form class="float-right" inline>
         <label class="pr-3 d-none d-sm-inline font-weight-bold" for="version-select">Version: </label>
@@ -39,7 +39,6 @@
       return {
         projectId: '',
         userId: '',
-        authToken: '',
         loading: {
           userToken: true,
           availableVersions: true,
@@ -53,17 +52,6 @@
       this.userId = this.$route.params.userId;
       this.totalPoints = this.$route.params.totalPoints;
 
-      if (!this.$store.getters.isPkiAuthenticated) {
-        UsersService.getUserToken(this.projectId, this.userId)
-          .then((result) => {
-            this.authToken = result;
-          })
-          .finally(() => {
-            this.loading.userToken = false;
-          });
-      } else {
-        this.loading.userToken = false;
-      }
       UsersService.getAvailableVersions(this.projectId)
         .then((result) => {
           this.versionOptions = result;
