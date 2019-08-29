@@ -1,6 +1,7 @@
 package skills.storage.repos
 
 import groovy.transform.CompileStatic
+import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param
@@ -64,16 +65,16 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
       sdParent.projectId=?1 and sdParent.type=?2 group by sdParent.name''')
     List<LabelCountInfo> getUsageFacetedViaSubject(String projectId, SkillDef.ContainerType subjectType)
 
-    @Query('''select sdChild.name as label, count(ua) as count
+    @Query('''select sdChild.name as label, count(ua) as countRes
     from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
       left outer join UserAchievement ua ON sdChild.skillId=ua.skillId 
       where srd.parent=sdParent.id and srd.child=sdChild.id and ua.level is null and 
       sdParent.projectId=?1 and sdParent.skillId=?2 and sdParent.type=?3 group by sdChild.name''')
-    List<LabelCountInfo> getSubjectUsageFacetedViaSkill(String projectId, String subjectId, SkillDef.ContainerType subjectType)
+    List<LabelCountInfo> getSubjectUsageFacetedViaSkill(String projectId, String subjectId, SkillDef.ContainerType subjectType, Pageable pageable)
 
     static interface LabelCountInfo {
         String getLabel()
-        Integer getCount()
+        Integer getCountRes()
     }
 
     @Query('''select count(ua)
