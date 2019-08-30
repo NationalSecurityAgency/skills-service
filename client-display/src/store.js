@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
+import axios from 'axios';
 import UniqueIdGenerator from '@/common/utilities/UniqueIdGenerator';
 
 Vue.use(Vuex);
@@ -31,6 +32,7 @@ export default new Vuex.Store({
   },
   mutations: {
     authToken(state, authToken) {
+      axios.defaults.headers.common.Authorization = `Bearer ${authToken}`;
       // eslint-disable-next-line no-param-reassign
       state.authToken = authToken;
     },
