@@ -106,10 +106,9 @@ class AdminUsersService {
 
         (1..numMonths).each {
             Month month = startMonth+it
-            println "Month: $month"
 
             UserAchievedLevelRepo.LabelCountInfo found = res.find ({
-                it.label == "${month.value}"
+                Double.parseDouble(it.label).toInteger() == month.value
             })
             countsPerMonth << new LabelCountItem(value: month.getDisplayName(TextStyle.SHORT, Locale.US), count: found?.countRes ?: 0)
         }

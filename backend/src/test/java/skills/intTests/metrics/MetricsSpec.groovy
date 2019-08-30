@@ -9,6 +9,8 @@ class MetricsSpec extends DefaultIntSpec {
 
     TestUtils testUtils = new TestUtils()
 
+    def badge
+
     static final String projId = "TestProject1"
 
     static final Map<String, List<String>> sectionBuilders = [
@@ -53,7 +55,7 @@ class MetricsSpec extends DefaultIntSpec {
         List<Map> subj2 = (1..4).collect { [projectId: projId, subjectId: "subj2", skillId: "s2${it}".toString(), name: "subj2 ${it}".toString(), type: "Skill", pointIncrement: 5, numPerformToCompletion: 10, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1] }
         List<Map> subj3 = (1..5).collect { [projectId: projId, subjectId: "subj3", skillId: "23${it}".toString(), name: "subj3 ${it}".toString(), type: "Skill", pointIncrement: 20, numPerformToCompletion: 10, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1] }
 
-        Map badge = [projectId: projId, badgeId: 'badge1', name: 'Test Badge 1']
+        badge = [projectId: projId, badgeId: 'badge1', name: 'Test Badge 1']
 
         skillsService.createSchema([subj1, subj2, subj3])
         skillsService.createBadge(badge)
@@ -68,7 +70,7 @@ class MetricsSpec extends DefaultIntSpec {
             }
         }
     }
-    
+
     def "load individual chart via chart builder id for each section type"() {
 
         when:
@@ -193,7 +195,7 @@ class MetricsSpec extends DefaultIntSpec {
         when:
         String chartBuilderId = 'skills.metrics.builders.badges.AchievedPerMonthChartBuilder'
         String section = 'badges'
-        def chart = skillsService.getMetricsChart(projId, chartBuilderId, section, projId)
+        def chart = skillsService.getMetricsChart(projId, chartBuilderId, section, badge.badgeId)
 
         then:
         chart
@@ -206,7 +208,7 @@ class MetricsSpec extends DefaultIntSpec {
         String chartBuilderId = 'skills.metrics.builders.badges.AchievedPerMonthChartBuilder'
         String section = 'badges'
         Map<String, String> props = [numMonths : '3']
-        def chart = skillsService.getMetricsChart(projId, chartBuilderId, section, projId, props)
+        def chart = skillsService.getMetricsChart(projId, chartBuilderId, section, badge.badgeId, props)
 
         then:
         chart
