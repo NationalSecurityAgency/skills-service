@@ -33,7 +33,7 @@ class AchievedSkillsChartBuilder implements skills.metrics.builders.MetricsChart
         String subjectId = skills.metrics.ChartParams.getValue(props, skills.metrics.ChartParams.SECTION_ID)
         assert subjectId, "subjectId must be specified via ${skills.metrics.ChartParams.SECTION_ID} url param"
 
-        List<CountItem> dataItems = (loadData ? adminUsersService.getAchievementCountsPerSkill(projectId, subjectId, new PageRequest(0, 5, Sort.Direction.DESC, "countRes")) : []) as List<CountItem>
+        List<CountItem> dataItems = (loadData ? adminUsersService.getAchievementCountsPerSkill(projectId, subjectId, 5) : []) as List<CountItem>
         // filter empty
         dataItems = dataItems.findAll({it.count > 0})
 

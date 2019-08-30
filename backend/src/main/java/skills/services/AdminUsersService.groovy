@@ -5,7 +5,7 @@ import groovy.time.TimeCategory
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
-import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import skills.controller.result.model.LabelCountItem
 import skills.controller.result.model.ProjectUser
@@ -13,8 +13,8 @@ import skills.controller.result.model.TableResult
 import skills.controller.result.model.TimestampCountItem
 import skills.skillLoading.RankingLoader
 import skills.skillLoading.model.UsersPerLevel
-import skills.storage.model.SkillDef
 import skills.storage.model.DayCountItem
+import skills.storage.model.SkillDef
 import skills.storage.repos.UserAchievedLevelRepo
 import skills.storage.repos.UserPointsRepo
 
@@ -117,16 +117,16 @@ class AdminUsersService {
         return countsPerMonth
     }
 
-    List<LabelCountItem> getAchievementCountsPerSubject(String projectId) {
-        List<UserAchievedLevelRepo.LabelCountInfo> res = userAchievedRepo.getUsageFacetedViaSubject(projectId, SkillDef.ContainerType.Subject)
+    List<LabelCountItem> getAchievementCountsPerSubject(String projectId, int topNToLoad =5) {
+        List<UserAchievedLevelRepo.LabelCountInfo> res = userAchievedRepo.getUsageFacetedViaSubject(projectId, SkillDef.ContainerType.Subject, new PageRequest(0, topNToLoad, Sort.Direction.DESC, "countRes"))
 
         return res.collect {
             new LabelCountItem(value: it.label, count: it.countRes)
         }
     }
 
-    List<LabelCountItem> getAchievementCountsPerSkill(String projectId, String subjectId, Pageable pageable) {
-        List<UserAchievedLevelRepo.LabelCountInfo> res = userAchievedRepo.getSubjectUsageFacetedViaSkill(projectId, subjectId, SkillDef.ContainerType.Subject, pageable)
+    List<LabelCountItem> getAchievementCountsPerSkill(String projectId, String subjectId, int topNToLoad =5) {
+        List<UserAchievedLevelRepo.LabelCountInfo> res = userAchievedRepo.getSubjectUsageFacetedViaSkill(projectId, subjectId, SkillDef.ContainerType.Subject, new PageRequest(0, topNToLoad, Sort.Direction.DESC, "countRes"))
 
         return res.collect {
             new LabelCountItem(value: it.label, count: it.countRes)
