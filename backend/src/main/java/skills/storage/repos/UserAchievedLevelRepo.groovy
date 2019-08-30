@@ -109,7 +109,7 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
         group by ua.created''')
     List<DayCountItem> countAchievementsForProjectPerDay(@Param('projectId') String projectId, @Param('badgeId') String badgeId, @Param('type') SkillDef.ContainerType containerType, @Param('date') Date mustBeAfterThisDate)
 
-    @Query(value = '''select EXTRACT(MONTH FROM ua.created) as label, count(*) count
+    @Query(value = '''select EXTRACT(MONTH FROM ua.created) as label, count(*) countRes
       from skill_definition skillDef, user_achievement ua 
       where 
         ua.level is null and 
