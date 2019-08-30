@@ -1,6 +1,5 @@
 package skills.metrics.builders.projects
 
-
 import groovy.transform.CompileStatic
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -22,7 +21,7 @@ class AchievedSkillsChartBuilder implements skills.metrics.builders.MetricsChart
 
     @Override
     skills.metrics.model.MetricsChart build(String projectId, Map<String, String> props, boolean loadData=true) {
-        List<skills.controller.result.model.CountItem> dataItems = (loadData ? adminUsersService.getAchievementCountsPerSubject(projectId) : []) as List<skills.controller.result.model.CountItem>
+        List<skills.controller.result.model.CountItem> dataItems = (loadData ? adminUsersService.getAchievementCountsPerSubject(projectId, 5) : []) as List<skills.controller.result.model.CountItem>
 
         skills.metrics.model.MetricsChart metricsChart = new skills.metrics.model.MetricsChart(
                 chartType: skills.metrics.model.ChartType.HorizontalBar,
