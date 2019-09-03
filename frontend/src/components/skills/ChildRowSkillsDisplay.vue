@@ -3,9 +3,9 @@
 
     <div class="row">
       <div class="col-12 col-md-12 col-xl mb-md-3 mb-xl-0">
-        <media-info-card :title="`${skillInfo.totalPoints} Points`" icon-class="fas fa-calculator text-success">
-          <strong>{{ skillInfo.pointIncrement }}</strong> points <i class="fa fa-times text-muted"/>
-          <strong> {{ skillInfo.numPerformToCompletion }}</strong> repetition<span v-if="skillInfo.numPerformToCompletion>1">s</span> to Completion
+        <media-info-card :title="`${totalPoints} Points`" icon-class="fas fa-calculator text-success">
+          <strong>{{ skillInfo.pointIncrement | number }}</strong> points <i class="fa fa-times text-muted"/>
+          <strong> {{ skillInfo.numPerformToCompletion | number }}</strong> repetition<span v-if="skillInfo.numPerformToCompletion>1">s</span> to Completion
         </media-info-card>
       </div>
       <div class="col-12  col-md-6 col-xl my-3 my-md-0">
@@ -52,6 +52,7 @@
   import LoadingContainer from '../utils/LoadingContainer';
   import SkillsService from './SkillsService';
   import MediaInfoCard from '../utils/cards/MediaInfoCard';
+  import NumberFilter from '../../filters/NumberFilter';
 
   export default {
     name: 'ChildRowSkillsDisplay',
@@ -90,6 +91,9 @@
       },
     },
     computed: {
+      totalPoints() {
+        return NumberFilter(this.skillInfo.totalPoints);
+      },
       timeWindowTitle() {
         let title = '';
         if (!this.skillInfo.timeWindowEnabled) {
