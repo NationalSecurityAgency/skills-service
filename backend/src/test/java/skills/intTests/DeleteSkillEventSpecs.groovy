@@ -22,43 +22,45 @@ class DeleteSkillEventSpecs extends DefaultIntSpec {
     }
 
     def "delete skill event"() {
-        String subj = "testSubj"
-        String skillId = "skillId"
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(10, )
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
         String userId = "user1"
         Long timestamp = new Date().time
 
         setup:
-        skillsService.createProject([projectId: projId, name: "Test Project"])
-        skillsService.createSubject([projectId: projId, subjectId: subj, name: "Test Subject"])
-        skillsService.createSkill([projectId: projId, subjectId: subj, skillId: skillId, name: "Test Skill", type: "Skill", pointIncrement: 100, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1,
-        ])
-        def res = skillsService.addSkill([projectId: projId, skillId: skillId], userId, new Date(timestamp))
+        def res = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], userId, new Date(timestamp))
 
         assert res.body.skillApplied
         assert res.body.explanation == "Skill event was applied"
 
         assert res.body.completed.size() == 3
-        assert res.body.completed.find({ it.type == "Skill" }).id == "skillId"
-        assert res.body.completed.find({ it.type == "Skill" }).name == "Test Skill"
+        assert res.body.completed.find({ it.type == "Skill" }).id == skills[0].skillId
+        assert res.body.completed.find({ it.type == "Skill" }).name == skills[0].name
 
         assert res.body.completed.find({ it.type == "Overall" }).id == "OVERALL"
         assert res.body.completed.find({ it.type == "Overall" }).name == "OVERALL"
-        assert res.body.completed.find({ it.type == "Overall" }).level == 5
+        assert res.body.completed.find({ it.type == "Overall" }).level == 1
 
-        assert res.body.completed.find({ it.type == "Subject" }).id == "testSubj"
-        assert res.body.completed.find({ it.type == "Subject" }).name == "Test Subject"
-        assert res.body.completed.find({ it.type == "Subject" }).level == 5
+        assert res.body.completed.find({ it.type == "Subject" }).id == subj.subjectId
+        assert res.body.completed.find({ it.type == "Subject" }).name == subj.name
+        assert res.body.completed.find({ it.type == "Subject" }).level == 1
 
-        def addedSkills = skillsService.getPerformedSkills(userId, projId)
+        def addedSkills = skillsService.getPerformedSkills(userId, proj.projectId)
         assert addedSkills
-        assert addedSkills.data.find { it.skillId == skillId}
+        assert addedSkills.data.find { it.skillId == skills[0].skillId}
 
         when:
-        skillsService.deleteSkillEvent([projectId: projId, skillId: skillId, userId: userId, timestamp: timestamp])
-        addedSkills = skillsService.getPerformedSkills(skillsService.wsHelper.username, projId)
+        skillsService.deleteSkillEvent([projectId: proj.projectId, skillId: skills[0].skillId, userId: userId, timestamp: timestamp])
+        addedSkills = skillsService.getPerformedSkills(userId, proj.projectId)
 
         then:
-        !addedSkills?.data?.find { it.skillId == skillId }
+        !addedSkills?.data?.find { it.skillId == skills[0].skillId }
     }
 
     def "attempt to delete skill event that doesn't exist"() {
