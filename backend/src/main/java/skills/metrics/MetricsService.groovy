@@ -40,6 +40,9 @@ class MetricsService {
             boolean loadData = loadFirst < 0 || ++i <= loadFirst
             MetricsChart chart = builder.build(projectId, props, loadData)
             chart.dataLoaded = loadData
+            if (loadData) {
+                clearDataItemsIfAllValuesZero(chart)
+            }
             chart.chartOptions.put(ChartOption.chartBuilderId, builder.class.name)
             return chart
         }
@@ -55,6 +58,15 @@ class MetricsService {
         MetricsChart chart = chartBuilder.build(projectId, props, true)
         chart.chartOptions.put(ChartOption.chartBuilderId, chartBuilder.class.name)
         chart.dataLoaded = true
+        clearDataItemsIfAllValuesZero(chart)
         return chart
+    }
+
+    private void clearDataItemsIfAllValuesZero(MetricsChart chart) {
+        if (chart.dataItems) {
+            if (chart.dataItems?.collect({ it.count })?.unique() == [0]) {
+                chart.dataItems.clear()
+            }
+        }
     }
 }
