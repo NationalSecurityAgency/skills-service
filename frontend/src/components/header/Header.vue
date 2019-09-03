@@ -1,14 +1,14 @@
 <template>
   <div>
     <div class="row p-3">
-      <div class="col-sm text-center text-sm-left">
+      <div class="col-12 col-md text-center text-md-left">
         <router-link class="h2 text-primary" to="/"><i class="fas fa-users"/> User Skills</router-link>
       </div>
 
-      <div class="col text-center text-sm-right mt-3 mt-sm-0">
-        <inception-button class="mr-2"></inception-button>
-        <settings-button class="mr-2"/>
-        <help-button/>
+      <div class="col-12 col-md text-center text-md-right">
+        <inception-button class="mr-2 mt-3 mt-md-0"></inception-button>
+        <settings-button class="mr-2 mt-3 mt-md-0"/>
+        <help-button class="mt-3 mt-md-0"/>
       </div>
     </div>
     <breadcrumb></breadcrumb>
