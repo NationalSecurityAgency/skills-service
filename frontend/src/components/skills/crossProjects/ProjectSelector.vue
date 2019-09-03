@@ -38,7 +38,7 @@
     },
     mounted() {
       this.selectedValue = this.selected;
-      this.search("");
+      this.search('');
     },
     watch: {
       selected: function selectionChanged() {

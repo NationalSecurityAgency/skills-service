@@ -205,7 +205,7 @@
       },
 
       deleteSkill(row) {
-        this.msgConfirm(`Skill Id: [${row.skillId}]. Delete Action can not be undone and permanently removes users' performed skills.`)
+        this.msgConfirm('Delete Action can NOT be undone and permanently removes users\' performed skills and any dependency associations.', `DELETE [${row.skillId}]?`)
           .then((res) => {
             if (res) {
               this.doDeleteSkill(row);
