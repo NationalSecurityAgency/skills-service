@@ -632,9 +632,9 @@
             <column name="user_id" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>
-            <column name="project_id" type="varchar(255)">
-                <constraints nullable="false"/>
-            </column>
+
+            <!-- optional, can be null for 'global' badges -->
+            <column name="project_id" type="varchar(255)"/>
 
             <column name="skill_id" type="varchar(255)"/>
             <column name="skill_ref_id" type="int"/>
@@ -737,6 +737,7 @@
                      tableName="settings">
             <column name="type" type="varchar(255)"/>
         </createIndex>
+
         <addForeignKeyConstraint baseColumnNames="project_id"
                                  baseTableName="settings"
                                  constraintName="fk_settings_project_id"
@@ -761,6 +762,10 @@
                 <constraints primaryKey="true" nullable="false"/>
             </column>
 
+            <column name="proj_ref_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+
             <column name="project_id" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>
@@ -771,8 +776,14 @@
             <column name="skill_id" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>
+            <column name="skill_ref_id" type="int">
+                <constraints nullable="false"/>
+            </column>
 
             <column name="level" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="level_ref_id" type="int">
                 <constraints nullable="false"/>
             </column>
 
@@ -783,14 +794,42 @@
                 <constraints nullable="false"/>
             </column>
         </createTable>
-        <createIndex indexName="index_global_badge_level_definition_project_id"
+        <createIndex indexName="index_global_badge_level_definition_project_ref_id"
                      tableName="level_definition">
             <column name="project_id" type="varchar(255)"/>
         </createIndex>
-        <createIndex indexName="index_global_badge_level_definition_skill_id"
+        <createIndex indexName="index_global_badge_level_definition_skill_ref_id"
                      tableName="global_badge_level_definition">
             <column name="skill_id" type="varchar(255)"/>
         </createIndex>
+        <createIndex indexName="index_global_badge_level_definition_proj_skill_level"
+                     tableName="global_badge_level_definition" unique="true">
+            <column name="proj_ref_id" type="int"/>
+            <column name="skill_ref_id" type="int"/>
+            <column name="level_ref_id" type="int"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="proj_ref_id"
+                                 baseTableName="global_badge_level_definition"
+                                 constraintName="fk_global_badge_level_definition_proj_ref_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="project_definition"/>
+        <addForeignKeyConstraint baseColumnNames="skill_ref_id"
+                                 baseTableName="global_badge_level_definition"
+                                 constraintName="fk_global_badge_level_skill_ref_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="skill_definition"/>
+        <addForeignKeyConstraint baseColumnNames="level_ref_id"
+                                 baseTableName="global_badge_level_definition"
+                                 constraintName="fk_global_badge_level_level_ref_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="level_definition"/>
+
 
         <!-- ============================================================================
         SQL Modifications

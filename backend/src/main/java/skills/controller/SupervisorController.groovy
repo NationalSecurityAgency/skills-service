@@ -45,15 +45,38 @@ class SupervisorController {
     boolean doesBadgeNameExist(@PathVariable("badgeName") String badgeName) {
         SkillsValidator.isNotBlank(badgeName, "Badge Name")
         String decodedName = URLDecoder.decode(badgeName,  StandardCharsets.UTF_8.toString())
-        return projectAdminStorageService.existsByBadgeName(null, decodedName)
+        return globalSkillsStorageService.existsByBadgeName(decodedName)
     }
 
     @RequestMapping(value = "/badges/id/{badgeId}/exists", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     boolean doesBadgeIdExist(@PathVariable("badgeId") String badgeId) {
         SkillsValidator.isNotBlank(badgeId, "Badge Id")
-        String decodedName = URLDecoder.decode(badgeId,  StandardCharsets.UTF_8.toString())
-        return projectAdminStorageService.existsBySkillId(null, decodedName)
+        String decodedId = URLDecoder.decode(badgeId,  StandardCharsets.UTF_8.toString())
+        return globalSkillsStorageService.existsByBadgeId(decodedId)
+    }
+
+    @RequestMapping(value = "/badges/project/{projectId}/skill/{skillId}/exists", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    boolean isSkillReferencedByGlobalBadge(@PathVariable("projectId") String projectId, @PathVariable("skillId") String skillId) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(skillId, "Skill Id")
+        return globalSkillsStorageService.isSkillUsedInGlobalBadge(projectId, skillId)
+    }
+
+    @RequestMapping(value = "/badges/project/{projectId}/exists", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    boolean isProjectReferencedByGlobalBadge(@PathVariable("projectId") String projectId) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        return globalSkillsStorageService.isSkillUsedInGlobalBadge()
+    }
+
+    @RequestMapping(value = "/badges/project/{projectId}/skill/{level}/exists", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    boolean isProjectLevelReferencedByGlobalBadge(@PathVariable("projectId") String projectId, @PathVariable("level") Integer level) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(level, "Level")
+        return globalSkillsStorageService.isProjectLevelUsedInGlobalBadge(projectId, level)
     }
 
     @RequestMapping(value = "/badges/{badgeId}", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
@@ -64,8 +87,6 @@ class SupervisorController {
         SkillsValidator.isFirstOrMustEqualToSecond(badgeRequest.badgeId, badgeId, "Badge Id")
         badgeRequest.badgeId = badgeRequest.badgeId ?: badgeId
         SkillsValidator.isNotBlank(badgeRequest?.name, "Badge Name")
-        SkillsValidator.isTrue((badgeRequest.startDate && badgeRequest.endDate) || (!badgeRequest.startDate && !badgeRequest.endDate),
-                "If one date is provided then both start and end dates must be provided")
 
         globalSkillsStorageService.saveBadge(badgeId, badgeRequest)
         return new RequestResult(success: true)

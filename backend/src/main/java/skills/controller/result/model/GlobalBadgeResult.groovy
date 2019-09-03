@@ -6,5 +6,5 @@ import groovy.transform.Canonical
 @Canonical
 class GlobalBadgeResult extends BadgeResult {
 
-    List<LevelDefinitionRes> requiredProjectLevels = []
+    List<GlobalBadgeLevelRes> requiredProjectLevels = []
 }

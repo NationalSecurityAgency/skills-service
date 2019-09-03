@@ -44,6 +44,10 @@ class LevelDefinitionStorageService {
     @Autowired
     UserAchievedLevelRepo achievedLevelRepository
 
+    @Autowired
+    GlobalSkillsStorageService globalSkillsStorageService
+
+
     // this could also come from DB.. eventually
     Map<String,Integer> defaultPercentages = ["White Belt":10, "Blue Belt":25, "Purple Belt":45, "Brown Belt":67, "Black Belt":92]
 
@@ -270,6 +274,10 @@ class LevelDefinitionStorageService {
             int usersAtLevel = achievedLevelRepository.countByProjectIdAndSkillIdAndLevel(projectId, skillId, removed.level)
             if(usersAtLevel > 0){
                 throw new skills.controller.exceptions.SkillException("Unable to delete level ${removed.level}, $usersAtLevel ${usersAtLevel > 1 ? 'users have' : 'user has'} achieved this level")
+            }
+
+            if (globalSkillsStorageService.isProjectLevelUsedInGlobalBadge(projectId, removed.level)) {
+                throw new SkillException("Level [${removed.level}] for project with id [${projectId}] cannot be deleted as it is currently referenced by one or more global badges")
             }
 
             levelDefinitionRepository.deleteById(removed.id)

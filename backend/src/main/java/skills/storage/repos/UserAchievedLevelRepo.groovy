@@ -14,7 +14,7 @@ import skills.storage.model.UserAchievement
 @CompileStatic
 interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer> {
 
-    List<UserAchievement> findAllByUserIdAndProjectIdAndSkillId(String userId, String projectId, @Nullable String skillId)
+    List<UserAchievement> findAllByUserIdAndProjectIdAndSkillId(String userId, @Nullable String projectId, @Nullable String skillId)
 
     Integer countByProjectIdAndSkillIdAndLevel(String projectId, @Nullable String skillId, int level)
 
@@ -58,6 +58,13 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
       where srd.parent=sdParent.id and srd.child=sdChild.id and
       sdParent.projectId=?2 and sdParent.skillId=?3 and ua.id is null and srd.type=?4''')
     Long countNonAchievedChildren(String userId, String projectId, String skillId, SkillRelDef.RelationshipType type)
+
+    @Query(''' select count(sdChild.id)
+    from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
+    left join UserAchievement ua on sdChild.id = ua.skillRefId and ua.userId=?1
+      where srd.parent=sdParent.id and srd.child=sdChild.id and
+      sdParent.projectId is null and sdParent.skillId=?2 and ua.id is null and srd.type=?3''')
+    Long countNonAchievedGlobalSkills(String userId, String skillId, SkillRelDef.RelationshipType type)
 
     @Query('''select sdParent.name as label, count(ua) as countRes
     from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild, UserAchievement ua

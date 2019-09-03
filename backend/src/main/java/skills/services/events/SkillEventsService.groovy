@@ -17,6 +17,8 @@ import skills.storage.repos.SkillRelDefRepo
 import skills.storage.repos.UserAchievedLevelRepo
 import skills.storage.repos.UserPerformedSkillRepo
 
+import static skills.services.events.CompletionItem.*
+
 @Service
 @CompileStatic
 @Slf4j
@@ -42,6 +44,9 @@ class SkillEventsService {
 
     @Autowired
     AchievedBadgeHandler achievedBadgeHandler
+
+    @Autowired
+    AchievedGlobalBadgeHandler achievedGlobalBadgeHandler
 
     @Transactional
     @Profile
@@ -90,6 +95,12 @@ class SkillEventsService {
             achievedBadgeHandler.checkForBadges(res, userId, skillDefinition)
         }
 
+        // if requestedSkillCompleted OR overall level achieved, then need to check for global badges
+        boolean overallLevelAchieved = res.completed.find { it.level != null && it.type == CompletionItemType.Overall }
+        if (requestedSkillCompleted || overallLevelAchieved) {
+            achievedGlobalBadgeHandler.checkForGlobalBadges(res, userId, projectId, skillDefinition)
+        }
+
         return res
     }
 
@@ -118,7 +129,7 @@ class SkillEventsService {
         UserAchievement skillAchieved = new UserAchievement(userId: userId, projectId: skillDefinition.projectId, skillId: skillDefinition.skillId, skillRefId: skillDefinition?.id,
                 pointsWhenAchieved: ((numExistingSkills.intValue() + 1) * skillDefinition.pointIncrement))
         achievedLevelRepo.save(skillAchieved)
-        res.completed.add(new CompletionItem(type: CompletionItem.CompletionItemType.Skill, id: skillDefinition.skillId, name: skillDefinition.name))
+        res.completed.add(new CompletionItem(type: CompletionItemType.Skill, id: skillDefinition.skillId, name: skillDefinition.name))
     }
 
     private boolean hasReachedMaxPoints(long numSkills, SkillEventsSupportRepo.SkillDefMin skillDefinition) {

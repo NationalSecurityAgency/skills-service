@@ -82,7 +82,7 @@ class AccessSettingsStorageService {
         if (usersWithRole) {
             res = userRoleRepository.findAllByUserIdNotIn(usersWithRole.collect { it.userId }.unique())
         } else {
-            res = userRepository.findAll()
+            res = userRoleRepository.findAll()
         }
         return res.collect { convert(it) }
     }

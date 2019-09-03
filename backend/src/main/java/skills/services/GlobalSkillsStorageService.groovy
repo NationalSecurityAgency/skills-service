@@ -68,16 +68,15 @@ class GlobalSkillsStorageService {
     @Autowired
     ProjDefRepo projDefRepo
 
-    private static DataIntegrityViolationExceptionHandler badgeDataIntegrityViolationExceptionHandler = crateSkillDefBasedDataIntegrityViolationExceptionHandler("badge")
-    private static DataIntegrityViolationExceptionHandler crateSkillDefBasedDataIntegrityViolationExceptionHandler(String type) {
+    private static DataIntegrityViolationExceptionHandler dataIntegrityViolationExceptionHandler =
         new DataIntegrityViolationExceptionHandler([
-                "index_skill_definition_project_id_skill_id" : "Provided ${type} id already exist.".toString(),
-                "index_skill_definition_project_id_name": "Provided ${type} name already exist.".toString(),
-                "index_skill_definition_project_id_skill_id_type" : "Provided ${type} id already exist.".toString(),
-                "index_skill_definition_project_id_name_type": "Provided ${type} name already exist.".toString(),
+                "index_skill_definition_project_id_skill_id" : "Provided global badge id already exist.",
+                "index_skill_definition_project_id_name": "Provided global badge name already exist.",
+                "index_skill_definition_project_id_skill_id_type" : "Provided global badge id already exist.",
+                "index_skill_definition_project_id_name_type": "Provided global badge name already exist.",
+                "index_global_badge_level_definition_proj_skill_level" : "Provided project already has a level assigned for this global badge.",
+                "index_skill_relationship_definition_parent_child_type": "Provided skill id has already been added to this global badge.",
         ])
-    }
-
 
     @Transactional()
     void saveBadge(String originalBadgeId, BadgeRequest badgeRequest) {
@@ -86,16 +85,16 @@ class GlobalSkillsStorageService {
             throw new SkillException("Bad Name [${badgeRequest.name}] - must not exceed 50 chars.")
         }
 
-        SkillDefWithExtra skillDefinition = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(null, originalBadgeId, SkillDef.ContainerType.Badge)
+        SkillDefWithExtra skillDefinition = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(null, originalBadgeId, SkillDef.ContainerType.GlobalBadge)
 
         if (!skillDefinition || !skillDefinition.skillId.equalsIgnoreCase(badgeRequest.badgeId)) {
-            SkillDef idExists = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(null, badgeRequest.badgeId, SkillDef.ContainerType.Badge)
+            SkillDef idExists = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(null, badgeRequest.badgeId, SkillDef.ContainerType.GlobalBadge)
             if (idExists) {
                 throw new SkillException("Badge with id [${badgeRequest.badgeId}] already exists! Sorry!", null, null, ErrorCode.ConstraintViolation)
             }
         }
         if (!skillDefinition || !skillDefinition.name.equalsIgnoreCase(badgeRequest.name)) {
-            SkillDef nameExists = skillDefRepo.findByProjectIdAndNameIgnoreCaseAndType(null, badgeRequest.name, SkillDef.ContainerType.Badge)
+            SkillDef nameExists = skillDefRepo.findByProjectIdAndNameIgnoreCaseAndType(null, badgeRequest.name, SkillDef.ContainerType.GlobalBadge)
             if (nameExists) {
                 throw new SkillException("Badge with name [${badgeRequest.name}] already exists! Sorry!", null, null, ErrorCode.ConstraintViolation)
             }
@@ -105,21 +104,17 @@ class GlobalSkillsStorageService {
             Props.copy(badgeRequest, skillDefinition)
             skillDefinition.skillId = badgeRequest.badgeId
         } else {
-//            ProjDef projDef = getProjDef(projectId)
-
             Integer lastDisplayOrder = getBadges()?.collect({ it.displayOrder })?.max()
             int displayOrder = lastDisplayOrder != null ? lastDisplayOrder + 1 : 0
 
             skillDefinition = new SkillDefWithExtra(
                     type: SkillDef.ContainerType.GlobalBadge,
-//                    projectId: projectId,
                     skillId: badgeRequest.badgeId,
                     name: badgeRequest?.name,
                     description: badgeRequest?.description,
                     iconClass: badgeRequest?.iconClass ?: "fa fa-question-circle",
                     startDate: badgeRequest.startDate,
                     endDate: badgeRequest.endDate,
-//                    projDef: projDef,
                     displayOrder: displayOrder,
             )
             log.info("Saving [{}]", skillDefinition)
@@ -127,11 +122,20 @@ class GlobalSkillsStorageService {
 
         SkillDefWithExtra savedSkill
 
-        badgeDataIntegrityViolationExceptionHandler.handle(null) {
+        dataIntegrityViolationExceptionHandler.handle(null) {
             savedSkill = skillDefWithExtraRepo.save(skillDefinition)
         }
 
         log.info("Saved [{}]", savedSkill)
+    }
+    @Transactional(readOnly = true)
+    boolean existsByBadgeName(String subjectName) {
+        return skillDefRepo.existsByProjectIdAndNameAndTypeAllIgnoreCase(null, subjectName, SkillDef.ContainerType.GlobalBadge)
+    }
+
+    @Transactional(readOnly = true)
+    boolean existsByBadgeId(String skillId) {
+        return skillDefRepo.existsByProjectIdAndSkillIdAllIgnoreCase(null, skillId)
     }
 
     @Transactional()
@@ -141,10 +145,10 @@ class GlobalSkillsStorageService {
 
     @Transactional()
     void addProjectLevelToBadge(String badgeId, String projectId, Integer level) {
-//        SkillDefWithExtra badgeSkillDef = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(null, badgeId, SkillDef.ContainerType.GlobalBadge)
-//        if (!badgeSkillDef) {
-//            throw new SkillException("Failed to find global badge [${badgeId}]")
-//        }
+        SkillDefWithExtra badgeSkillDef = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(null, badgeId, SkillDef.ContainerType.GlobalBadge)
+        if (!badgeSkillDef) {
+            throw new SkillException("Failed to find global badge [${badgeId}]")
+        }
         ProjDef projDef = projDefRepo.findByProjectId(projectId)
         if (!projDef) {
             throw new SkillException("Failed to find project [${projectId}]", projectId)
@@ -158,9 +162,12 @@ class GlobalSkillsStorageService {
         }
 
         GlobalBadgeLevelDef globalBadgeLevelDef = new GlobalBadgeLevelDef(
-                level: level, projectId: projectId, projectName: projDef.name, badgeId: badgeId
+                levelRefId: toAdd.id, level: level, projectRefId: projDef.id, projectId: projectId,
+                projectName: projDef.name, badgeRefId: badgeSkillDef.id, badgeId: badgeId
         )
-        globalBadgeLevelDefRepo.save(globalBadgeLevelDef)
+        dataIntegrityViolationExceptionHandler.handle(null) {
+            globalBadgeLevelDefRepo.save(globalBadgeLevelDef)
+        }
     }
 
     @Transactional()
@@ -172,7 +179,7 @@ class GlobalSkillsStorageService {
         globalBadgeLevelDefRepo.delete(globalBadgeLevelDef)
     }
 
-    @Transactional()
+    @Transactional(readOnly = true)
     List<GlobalBadgeLevelRes> getGlobalBadgeLevels(String badgeId) {
         List<GlobalBadgeLevelDef> globalBadgeLevelDefs = globalBadgeLevelDefRepo.findAllByBadgeId(badgeId)
         return globalBadgeLevelDefs.collect { new GlobalBadgeLevelRes(
@@ -192,7 +199,9 @@ class GlobalSkillsStorageService {
                                  String relationshipSkillId, RelationshipType relationshipType) {
         SkillDef skill1 = getSkillDef(null, badgeSkillId, skillType)
         SkillDef skill2 = getSkillDef(projectId, relationshipSkillId)
-        skillRelDefRepo.save(new SkillRelDef(parent: skill1, child: skill2, type: relationshipType))
+        dataIntegrityViolationExceptionHandler.handle(null) {
+            skillRelDefRepo.save(new SkillRelDef(parent: skill1, child: skill2, type: relationshipType))
+        }
     }
 
     @Transactional
@@ -207,13 +216,6 @@ class GlobalSkillsStorageService {
         skillRelDefRepo.delete(relDef)
     }
 
-    private SkillDef getSkillDef(String projectId, String skillId, SkillDef.ContainerType containerType = SkillDef.ContainerType.Skill) {
-        SkillDef skillDef = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, skillId, containerType)
-        if (!skillDef) {
-            throw new SkillException("Failed to find skillId [$skillId] for [$projectId] with type [${containerType}]", projectId, skillId)
-        }
-        return skillDef
-    }
     @Transactional
     void deleteBadge(String badgeId) {
         log.info("Deleting global badge with badge id [{}]", badgeId)
@@ -230,49 +232,19 @@ class GlobalSkillsStorageService {
         log.info("Deleted badge with id [{}]", badgeDefinition)
     }
 
-    private void deleteSkillWithItsDescendants(SkillDef skillDef) {
-        List<SkillDef> toDelete = []
-
-        List<SkillDef> currentChildren = ruleSetDefGraphService.getChildrenSkills(skillDef)
-        while (currentChildren) {
-            toDelete.addAll(currentChildren)
-            currentChildren = currentChildren?.collect {
-                ruleSetDefGraphService.getChildrenSkills(it)
-            }?.flatten()
-        }
-        toDelete.add(skillDef)
-        log.info("Deleting [{}] skill definitions (descendants + me) under [{}]", toDelete.size(), skillDef.skillId)
-        skillDefRepo.deleteAll(toDelete)
-    }
-
-    private void resetDisplayOrder(List<SkillDef> skillDefs) {
-        if(skillDefs) {
-            List <SkillDef> copy = new ArrayList<>(skillDefs)
-            List<SkillDef> toSave = []
-            copy = copy.sort({ it.displayOrder })
-            copy.eachWithIndex { SkillDef entry, int i ->
-                if (entry.displayOrder != i) {
-                    toSave.add(entry)
-                    entry.displayOrder = i
-                }
-            }
-            if (toSave) {
-                skillDefRepo.saveAll(toSave)
-            }
-        }
-    }
-
     @Transactional(readOnly = true)
     List<GlobalBadgeResult> getBadges() {
         List<SkillDefWithExtra> badges = skillDefWithExtraRepo.findAllByProjectIdAndType(null, SkillDef.ContainerType.GlobalBadge)
-        List<BadgeResult> res = badges.collect { convertToBadge(it, true) }
+        List<GlobalBadgeResult> res = badges.collect { convertToBadge(it, true) }
         return res?.sort({ it.displayOrder })
     }
 
     @Transactional(readOnly = true)
     GlobalBadgeResult getBadge(String badgeId) {
         SkillDefWithExtra skillDef = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(null, badgeId, SkillDef.ContainerType.GlobalBadge)
-        return convertToBadge(skillDef, true)
+        if (skillDef) {
+            return convertToBadge(skillDef, true)
+        }
     }
 
     @Transactional
@@ -281,7 +253,7 @@ class GlobalSkillsStorageService {
         updateDisplayOrder(badgeId, badges, badgePatchRequest)
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     AvailableSkillsResult getAvailableSkillsForGlobalBadge(String badgeId, String query) {
         List<SkillDefPartial> allSkillDefs = skillDefRepo.findAllByTypeAndNameLike(SkillDef.ContainerType.Skill, query)
         Set<String> existingBadgeSkillIds = getSkillsForBadge(badgeId).collect { "${it.projectId}${it.skillId}" }
@@ -294,7 +266,7 @@ class GlobalSkillsStorageService {
         return res
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     List<SkillDefPartialRes> getSkillsForBadge(String badgeId) {
         return getSkillsByProjectSkillAndType(null, badgeId, SkillDef.ContainerType.GlobalBadge, RelationshipType.BadgeDependence)
     }
@@ -310,19 +282,38 @@ class GlobalSkillsStorageService {
         }
     }
 
-    private List<SkillDefPartialRes> getSkillsByProjectSkillAndType(String projectId, String skillId, SkillDef.ContainerType type, RelationshipType relationshipType) {
-        SkillDef parent = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, skillId, type)
-        if (!parent) {
-            throw new SkillException("There is no skill id [${skillId}] doesn't exist.", projectId, null)
-        }
+    @Transactional(readOnly = true)
+    boolean isSkillUsedInGlobalBadge(String projectId, String skillId) {
+        SkillDef skillDef = skillDefRepo.findByProjectIdAndSkillIdAndType(projectId, skillId, SkillDef.ContainerType.Skill)
+        assert skillDef, "Skill [${skillId}] for project [${projectId}] does not exist"
+        return isSkillUsedInGlobalBadge(skillDef)
+    }
 
-        List<SkillDefPartial> res = skillRelDefRepo.getGlobalChildrenPartial(parent.skillId, relationshipType)
-        return res.collect { convertToSkillDefPartialRes(it) }
+    @Transactional(readOnly = true)
+    boolean isSkillUsedInGlobalBadge(SkillDef skillDef) {
+        int numProjectSkillsUsedInGlobalBadge = skillRelDefRepo.getSkillUsedInGlobalBadgeCount(skillDef.skillId)
+        return numProjectSkillsUsedInGlobalBadge > 0
+    }
+
+    @Transactional(readOnly = true)
+    boolean isProjectLevelUsedInGlobalBadge(String projectId, Integer level) {
+        int numberOfLevels = globalBadgeLevelDefRepo.countByProjectIdAndLevel(projectId, level)
+        return numberOfLevels > 0
+    }
+
+    @Transactional(readOnly = true)
+    boolean isProjectUsedInGlobalBadge(String projectId) {
+        int numberOfLevels = globalBadgeLevelDefRepo.countByProjectId(projectId)
+        if (numberOfLevels > 0) {
+            return true
+        }
+        int numProjectSkillsUsedInGlobalBadge = skillRelDefRepo.getProjectUsedInGlobalBadgeCount(projectId)
+        return numProjectSkillsUsedInGlobalBadge > 0
     }
 
     @CompileStatic
     @Profile
-    private SkillDefPartialRes convertToSkillDefPartialRes(SkillDefPartial partial, boolean loadNumUsers = false) {
+    private SkillDefPartialRes convertToSkillDefPartialRes(SkillDefPartial partial) {
         SkillDefPartialRes res = new SkillDefPartialRes(
                 skillId: partial.skillId,
                 projectId: partial.projectId,
@@ -343,16 +334,7 @@ class GlobalSkillsStorageService {
         res.totalPoints = partial.totalPoints
         res.numMaxOccurrencesIncrementInterval = partial.numMaxOccurrencesIncrementInterval
 
-        if (loadNumUsers) {
-            res.numUsers = calculateDistinctUsersForSkill((SkillDefPartial)partial)
-        }
-
         return res;
-    }
-
-    @Profile
-    private int calculateDistinctUsersForSkill(SkillDefPartial partial) {
-        skillDefRepo.calculateDistinctUsersForASingleSkill(partial.projectId, partial.skillId)
     }
 
     private void updateDisplayOrder(String skillId, List<SkillDef> skills, ActionPatchRequest patchRequest) {
@@ -391,7 +373,6 @@ class GlobalSkillsStorageService {
     private GlobalBadgeResult convertToBadge(SkillDefWithExtra skillDef, boolean loadRequiredSkills = false) {
         GlobalBadgeResult res = new GlobalBadgeResult(
                 badgeId: skillDef.skillId,
-                projectId: skillDef.projectId,
                 name: skillDef.name,
                 description: skillDef.description,
                 displayOrder: skillDef.displayOrder,
@@ -417,17 +398,67 @@ class GlobalSkillsStorageService {
         return res
     }
     @Profile
-    private SkillDefRes convertToSkillDefRes(SkillDef skillDef, boolean loadNumUsers = false) {
+    private SkillDefRes convertToSkillDefRes(SkillDef skillDef) {
         SkillDefRes res = new SkillDefRes()
         Props.copy(skillDef, res)
         res.numPerformToCompletion = skillDef.totalPoints / res.pointIncrement
         res.totalPoints = skillDef.totalPoints
         res.numMaxOccurrencesIncrementInterval = skillDef.numMaxOccurrencesIncrementInterval
 
-        if (loadNumUsers) {
-//            res.numUsers = calculateDistinctUsersForSkill(skillDef.projectId, skillDef.skillId)
-        }
         return res
+    }
+
+    private SkillDef getSkillDef(String projectId, String skillId, SkillDef.ContainerType containerType = SkillDef.ContainerType.Skill) {
+        SkillDef skillDef = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, skillId, containerType)
+        if (!skillDef) {
+            throw new SkillException("Failed to find skillId [$skillId] for [$projectId] with type [${containerType}]", projectId, skillId)
+        }
+        return skillDef
+    }
+
+    private void deleteSkillWithItsDescendants(SkillDef skillDef) {
+        List<GlobalBadgeLevelDef> globalBadgeLevelDefs = globalBadgeLevelDefRepo.findAllByBadgeId(skillDef.skillId)
+        log.info("Deleting [{}] badge levels for badge [{}]", globalBadgeLevelDefs.size(), skillDef.skillId)
+        globalBadgeLevelDefRepo.deleteAll(globalBadgeLevelDefs)
+
+        List<SkillDef> toDelete = []
+        List<SkillDef> currentChildren = ruleSetDefGraphService.getChildrenSkills(skillDef)
+        while (currentChildren) {
+            toDelete.addAll(currentChildren)
+            currentChildren = currentChildren?.collect {
+                ruleSetDefGraphService.getChildrenSkills(it)
+            }?.flatten()
+        }
+        toDelete.add(skillDef)
+        log.info("Deleting [{}] skill definitions (descendants + me) under [{}]", toDelete.size(), skillDef.skillId)
+        skillDefRepo.deleteAll(toDelete)
+    }
+
+    private void resetDisplayOrder(List<SkillDef> skillDefs) {
+        if(skillDefs) {
+            List <SkillDef> copy = new ArrayList<>(skillDefs)
+            List<SkillDef> toSave = []
+            copy = copy.sort({ it.displayOrder })
+            copy.eachWithIndex { SkillDef entry, int i ->
+                if (entry.displayOrder != i) {
+                    toSave.add(entry)
+                    entry.displayOrder = i
+                }
+            }
+            if (toSave) {
+                skillDefRepo.saveAll(toSave)
+            }
+        }
+    }
+
+    private List<SkillDefPartialRes> getSkillsByProjectSkillAndType(String projectId, String skillId, SkillDef.ContainerType type, RelationshipType relationshipType) {
+        SkillDef parent = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, skillId, type)
+        if (!parent) {
+            throw new SkillException("There is no skill id [${skillId}] doesn't exist.", projectId, null)
+        }
+
+        List<SkillDefPartial> res = skillRelDefRepo.getGlobalChildrenPartial(parent.skillId, relationshipType)
+        return res.collect { convertToSkillDefPartialRes(it) }
     }
 
     static class AvailableSkillsResult {

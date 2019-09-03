@@ -2,6 +2,7 @@ package skills.storage.repos
 
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
+import org.springframework.lang.Nullable
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillRelDef
 
@@ -12,6 +13,12 @@ interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
     List<SkillRelDef> findAllByChildIdAndType(Integer childId, SkillRelDef.RelationshipType type)
     SkillRelDef findByChildAndParentAndType(SkillDef child, SkillDef parent, SkillRelDef.RelationshipType type)
     List<SkillRelDef> findAllByParentAndType(SkillDef parent, SkillRelDef.RelationshipType type)
+
+    @Query(value = '''select count(srd.id) from SkillRelDef srd where srd.child.skillId=?1 and srd.type='BadgeDependence' and srd.parent.type = 'GlobalBadge' ''')
+    Integer getSkillUsedInGlobalBadgeCount(String skillId)
+
+    @Query(value = '''select count(srd.id) from SkillRelDef srd where srd.child.projectId=?1 and srd.type='BadgeDependence' and srd.parent.type = 'GlobalBadge' ''')
+    Integer getProjectUsedInGlobalBadgeCount(String projectId)
 
     @Query('''SELECT 
         sd2.id as id,
@@ -55,7 +62,7 @@ interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
         from SkillDef sd1, SkillDef sd2, SkillRelDef srd 
         where sd1 = srd.parent and sd2 = srd.child and srd.type=?3 
               and sd1.projectId=?1 and sd1.skillId=?2''')
-    List<SkillDef> getChildren(String projectId, String parentSkillId, SkillRelDef.RelationshipType type)
+    List<SkillDef> getChildren(@Nullable String projectId, String parentSkillId, SkillRelDef.RelationshipType type)
 
     static interface SkillDefSkinny {
         Integer getId()

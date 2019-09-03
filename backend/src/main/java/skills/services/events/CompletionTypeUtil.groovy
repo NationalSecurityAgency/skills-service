@@ -12,6 +12,8 @@ class CompletionTypeUtil {
                 return CompletionItem.CompletionItemType.Subject
             case SkillDef.ContainerType.Badge:
                 return CompletionItem.CompletionItemType.Badge
+            case SkillDef.ContainerType.GlobalBadge:
+                return CompletionItem.CompletionItemType.GlobalBadge
             default:
                 throw new IllegalStateException("this method doesn't support type $type")
         }
