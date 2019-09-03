@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.PathVariable
@@ -555,8 +556,8 @@ class AdminProjService {
     }
 
     @Transactional()
-    List<SimpleProjectResult> searchProjects(String nameQuery) {
-        List<ProjDef> projDefs = projDefRepo.queryProjectsByNameQuery(nameQuery)
+    List<SimpleProjectResult> searchProjects(String projectId, String nameQuery) {
+        List<ProjDef> projDefs = projDefRepo.queryProjectsByNameQueryAndNotProjectId(nameQuery.toLowerCase(), projectId, new PageRequest(0, 5, Sort.Direction.ASC, "name"))
         return projDefs.collect {
             new SimpleProjectResult(name: it.name, projectId: it.projectId)
         }

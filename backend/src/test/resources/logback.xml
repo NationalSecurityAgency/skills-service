@@ -2,6 +2,6 @@
 <configuration>
     <include resource="org/springframework/boot/logging/logback/base.xml"/>
     <logger name="org.springframework.web" level="INFO"/>
-    <logger name="skills.intTests.utils.WSHelper" level="WARN"/>
+<!--    <logger name="skills.intTests.utils.WSHelper" level="WARN"/>-->
     <logger name="org.apache.http.client.protocol.ResponseProcessCookies" level="FATAL"/>
 </configuration>
