@@ -23,7 +23,7 @@
         </div>
       </div>
     </simple-card>
-    <no-content3 v-if="(!loadedCharts || loadedCharts.length==0 && !loadedCharts || loadedCharts.length==0)" title="No Metrics Yet" sub-title="Metrics coming soon!"/>
+    <no-content3 v-if="!isLoading && (!loadedCharts || loadedCharts.length == 0)" title="No Metrics Yet" sub-title="Metrics coming soon!"/>
 
     <skills-spinner :is-loading="isLoading"/>
   </div>
@@ -73,21 +73,29 @@
       };
     },
     mounted() {
-      if (this.$route.params.projectId) {
+      this.section = this.$route.meta.metricsSection;
+      if (this.section === SECTION.PROJECTS) {
         this.sectionIdParam = this.$route.params.projectId;
-        this.section = SECTION.PROJECTS;
-      } else if (this.$route.params.badgeId) {
-        this.section = SECTION.BADGES;
-        this.sectionIdParam = this.$route.params.badgeId;
-      } else if (this.$route.params.subjectId) {
-        this.section = SECTION.SUBJECTS;
+      }
+
+      switch (this.section) {
+      case SECTION.PROJECTS:
+        this.sectionIdParam = this.$route.params.projectId;
+        break;
+      case SECTION.SUBJECTS:
         this.sectionIdParam = this.$route.params.subjectId;
-      } else if (this.$route.params.skillId) {
-        this.section = SECTION.SKILLS;
+        break;
+      case SECTION.BADGES:
+        this.sectionIdParam = this.$route.params.badgeId;
+        break;
+      case SECTION.SKILLS:
         this.sectionIdParam = this.$route.params.skillId;
-      } else if (this.$route.params.userId) {
-        this.section = SECTION.USERS;
+        break;
+      case SECTION.USERS:
         this.sectionIdParam = this.$route.params.userId;
+        break;
+      default:
+        throw new Error(`Can't handle section type ${this.section}`);
       }
 
       this.loadInitialCharts();
@@ -122,7 +130,6 @@
               this.isLoading = false;
             });
         }
-        this.isLoading = false;
       },
       loadChart(chartBuilderId) {
         this.isLoading = true;

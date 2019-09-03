@@ -38,6 +38,7 @@ import GeneralSettings from '@//components/settings/GeneralSettings';
 import SecuritySettings from '@//components/settings/SecuritySettings';
 import EmailSettings from '@//components/settings/EmailSettings';
 import { SkillsReporter, SkillsConfiguration } from '@skills/skills-client-vue';
+import { SECTION } from '@//components/metrics/SectionHelper';
 
 Vue.use(Router);
 
@@ -140,7 +141,7 @@ const router = new Router({
         name: 'ProjectMetrics',
         path: 'metrics',
         component: SectionMetrics,
-        meta: { requiresAuth: true, reportSkillId: 'VisitProjectStats' },
+        meta: { requiresAuth: true, reportSkillId: 'VisitProjectStats', metricsSection: SECTION.PROJECTS },
       }],
     },
     {
@@ -166,7 +167,7 @@ const router = new Router({
         name: 'SubjectMetrics',
         path: 'metrics',
         component: SectionMetrics,
-        meta: { requiresAuth: true, reportSkillId: 'VisitSubjectMetrics' },
+        meta: { requiresAuth: true, reportSkillId: 'VisitSubjectMetrics', metricsSection: SECTION.SUBJECTS },
       }],
     },
     {
@@ -187,7 +188,7 @@ const router = new Router({
         name: 'BadgeMetrics',
         path: 'metrics',
         component: SectionMetrics,
-        meta: { requiresAuth: true, reportSkillId: 'VisitBadgeStats' },
+        meta: { requiresAuth: true, reportSkillId: 'VisitBadgeStats', metricsSection: SECTION.BADGES },
       }],
     },
     {
@@ -219,7 +220,7 @@ const router = new Router({
         name: 'SkillMetrics',
         path: 'metrics',
         component: SectionMetrics,
-        meta: { requiresAuth: true, reportSkillId: 'VisitSkillStats' },
+        meta: { requiresAuth: true, reportSkillId: 'VisitSkillStats', metricsSection: SECTION.SKILLS },
       }],
     },
     {
@@ -240,7 +241,7 @@ const router = new Router({
         name: 'UserMetrics',
         path: 'metrics',
         component: SectionMetrics,
-        meta: { requiresAuth: true, reportSkillId: 'VisitUserStats' },
+        meta: { requiresAuth: true, reportSkillId: 'VisitUserStats', metricsSection: SECTION.USERS },
       }],
     },
     {

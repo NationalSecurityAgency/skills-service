@@ -3,7 +3,14 @@ package skills.metrics.builders.subjects
 
 import groovy.transform.CompileStatic
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Component
+import skills.controller.result.model.CountItem
+import skills.metrics.model.ChartOption
+import skills.metrics.model.ChartType
+import skills.metrics.model.MetricsChart
+import skills.metrics.model.Section
 import skills.services.AdminUsersService
 
 @Component('subjects-AchievedSkillsChartBuilder')
@@ -16,36 +23,38 @@ class AchievedSkillsChartBuilder implements skills.metrics.builders.MetricsChart
     AdminUsersService adminUsersService
 
     @Override
-    skills.metrics.model.Section getSection() {
-        return skills.metrics.model.Section.subjects
+    Section getSection() {
+        return Section.subjects
     }
 
     @Override
-    skills.metrics.model.MetricsChart build(String projectId, Map<String, String> props, boolean loadData=true) {
+    MetricsChart build(String projectId, Map<String, String> props, boolean loadData=true) {
 
         String subjectId = skills.metrics.ChartParams.getValue(props, skills.metrics.ChartParams.SECTION_ID)
         assert subjectId, "subjectId must be specified via ${skills.metrics.ChartParams.SECTION_ID} url param"
 
-        List<skills.controller.result.model.CountItem> dataItems = (loadData ? adminUsersService.getAchievementCountsPerSkill(projectId, subjectId) : []) as List<skills.controller.result.model.CountItem>
+        List<CountItem> dataItems = (loadData ? adminUsersService.getAchievementCountsPerSkill(projectId, subjectId, 5) : []) as List<CountItem>
+        // filter empty
+        dataItems = dataItems.findAll({it.count > 0})
 
-        skills.metrics.model.MetricsChart metricsChart = new skills.metrics.model.MetricsChart(
-                chartType: skills.metrics.model.ChartType.HorizontalBar,
+        MetricsChart metricsChart = new MetricsChart(
+                chartType: ChartType.HorizontalBar,
                 dataItems: dataItems,
                 chartOptions: getChartOptions(),
         )
         return metricsChart
     }
 
-    private Map<skills.metrics.model.ChartOption, Object> getChartOptions() {
-        Map<skills.metrics.model.ChartOption, Object> chartOptions = [
-                (skills.metrics.model.ChartOption.title)            : 'Achieved Skills for Subject (for ALL users)',
-                (skills.metrics.model.ChartOption.showDataLabels)   : true,
-                (skills.metrics.model.ChartOption.dataLabel)        : 'Achieved Skills',
-                (skills.metrics.model.ChartOption.distributed)      : true,
-                (skills.metrics.model.ChartOption.dataLabelPosition): 'top',
-                (skills.metrics.model.ChartOption.sort)             : 'asc',
-                (skills.metrics.model.ChartOption.palette)          : 'palette2',
-        ] as Map<skills.metrics.model.ChartOption, Object>
+    private Map<ChartOption, Object> getChartOptions() {
+        Map<ChartOption, Object> chartOptions = [
+                (ChartOption.title)            : 'Top 5 Achieved Skills',
+                (ChartOption.showDataLabels)   : true,
+                (ChartOption.dataLabel)        : 'Achieved Skills',
+                (ChartOption.distributed)      : true,
+                (ChartOption.dataLabelPosition): 'top',
+                (ChartOption.sort)             : 'asc',
+                (ChartOption.palette)          : 'palette2',
+        ] as Map<ChartOption, Object>
         return chartOptions
     }
 }

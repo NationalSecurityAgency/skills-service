@@ -1,6 +1,7 @@
 package skills.storage.repos
 
 import groovy.transform.CompileStatic
+import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param
@@ -58,22 +59,22 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
       sdParent.projectId=?2 and sdParent.skillId=?3 and ua.id is null and srd.type=?4''')
     Long countNonAchievedChildren(String userId, String projectId, String skillId, SkillRelDef.RelationshipType type)
 
-    @Query('''select sdParent.name as label, count(ua) as count
+    @Query('''select sdParent.name as label, count(ua) as countRes
     from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild, UserAchievement ua
       where srd.parent=sdParent.id and srd.child=sdChild.id and sdChild.skillId=ua.skillId and ua.level is null and 
       sdParent.projectId=?1 and sdParent.type=?2 group by sdParent.name''')
-    List<LabelCountInfo> getUsageFacetedViaSubject(String projectId, SkillDef.ContainerType subjectType)
+    List<LabelCountInfo> getUsageFacetedViaSubject(String projectId, SkillDef.ContainerType subjectType, Pageable pageable)
 
-    @Query('''select sdChild.name as label, count(ua) as count
+    @Query('''select sdChild.name as label, count(ua) as countRes
     from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
       left outer join UserAchievement ua ON sdChild.skillId=ua.skillId 
       where srd.parent=sdParent.id and srd.child=sdChild.id and ua.level is null and 
       sdParent.projectId=?1 and sdParent.skillId=?2 and sdParent.type=?3 group by sdChild.name''')
-    List<LabelCountInfo> getSubjectUsageFacetedViaSkill(String projectId, String subjectId, SkillDef.ContainerType subjectType)
+    List<LabelCountInfo> getSubjectUsageFacetedViaSkill(String projectId, String subjectId, SkillDef.ContainerType subjectType, Pageable pageable)
 
     static interface LabelCountInfo {
         String getLabel()
-        Integer getCount()
+        Integer getCountRes()
     }
 
     @Query('''select count(ua)
@@ -108,7 +109,7 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
         group by ua.created''')
     List<DayCountItem> countAchievementsForProjectPerDay(@Param('projectId') String projectId, @Param('badgeId') String badgeId, @Param('type') SkillDef.ContainerType containerType, @Param('date') Date mustBeAfterThisDate)
 
-    @Query(value = '''select EXTRACT(MONTH FROM ua.created) as label, count(*) count
+    @Query(value = '''select EXTRACT(MONTH FROM ua.created) as label, count(*) countRes
       from skill_definition skillDef, user_achievement ua 
       where 
         ua.level is null and 
