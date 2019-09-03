@@ -9,4 +9,7 @@ interface GlobalBadgeLevelDefRepo extends CrudRepository<GlobalBadgeLevelDef, In
 
     GlobalBadgeLevelDef findByBadgeIdAndProjectIdAndLevel(String badgeId, String projectId, Integer level)
 
+    Integer countByProjectIdAndLevel(String projectId, int level)
+
+    Integer countByProjectId(String projectId)
 }

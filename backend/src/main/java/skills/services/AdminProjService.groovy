@@ -85,6 +85,8 @@ class AdminProjService {
     @Autowired
     CreatedResourceLimitsValidator createdResourceLimitsValidator
 
+    @Autowired
+    GlobalSkillsStorageService globalSkillsStorageService
 
     private static DataIntegrityViolationExceptionHandler dataIntegrityViolationExceptionHandler =
             new DataIntegrityViolationExceptionHandler([
@@ -551,6 +553,10 @@ class AdminProjService {
             throw new SkillException("Project with id [${projectId}] does NOT exist")
         }
 
+        if (globalSkillsStorageService.isProjectUsedInGlobalBadge(projectId)) {
+            throw new SkillException("Project with id [${projectId}] cannot be deleted as it is currently referenced by one or more global badges")
+        }
+
         projDefRepo.deleteByProjectIdIgnoreCase(projectId)
         log.debug("Deleted project with id [{}]", projectId)
     }
@@ -717,8 +723,11 @@ class AdminProjService {
         SkillDef skillDefinition = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, skillId, SkillDef.ContainerType.Skill)
         assert skillDefinition, "DELETE FAILED -> no skill with project find with projectId=[$projectId], subjectId=[$subjectId], skillId=[$skillId]"
 
-        SkillDef parentSkill = ruleSetDefGraphService.getParentSkill(skillDefinition)
+        if (globalSkillsStorageService.isSkillUsedInGlobalBadge(skillDefinition)) {
+            throw new SkillException("Skill with id [${skillId}] cannot be deleted as it is currently referenced by one or more global badges")
+        }
 
+        SkillDef parentSkill = ruleSetDefGraphService.getParentSkill(skillDefinition)
 
         ruleSetDefinitionScoreUpdater.skillToBeRemoved(skillDefinition)
         userPointsManagement.handleSkillRemoval(skillDefinition)

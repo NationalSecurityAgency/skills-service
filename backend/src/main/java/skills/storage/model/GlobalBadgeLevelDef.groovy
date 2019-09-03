@@ -13,7 +13,13 @@ class GlobalBadgeLevelDef implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id
 
-    int level
+    @Column(name="level_ref_id")
+    Integer levelRefId
+
+    Integer level
+
+    @Column(name="proj_ref_id")
+    Integer projectRefId
 
     @Column(name="project_id")
     String projectId
@@ -21,6 +27,10 @@ class GlobalBadgeLevelDef implements Serializable {
     @Column(name="project_name")
     String projectName
 
+    @Column(name="skill_ref_id")
+    Integer badgeRefId
+
     @Column(name="skill_id")
     String badgeId
+
 }

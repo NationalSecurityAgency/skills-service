@@ -16,6 +16,7 @@ interface SkillEventsSupportRepo extends CrudRepository<SkillDef, Long> {
 
     static interface TinyProjectDef {
         Integer getId()
+        String getProjectId()
         Integer getTotalPoints()
     }
 
@@ -96,6 +97,38 @@ interface SkillEventsSupportRepo extends CrudRepository<SkillDef, Long> {
     @Nullable
     SkillDefMin findByProjectIdAndSkillIdAndType(String projectId, String skillId, SkillDef.ContainerType type)
 
+    @Query('''SELECT
+        badge.id as id,
+        badge.projectId as projectId,
+        badge.skillId as skillId,
+        badge.name as name,
+        badge.pointIncrement as pointIncrement,
+        badge.pointIncrementInterval as pointIncrementInterval,
+        badge.numMaxOccurrencesIncrementInterval as numMaxOccurrencesIncrementInterval,
+        badge.totalPoints as totalPoints,
+        badge.type as type
+        from SkillDef badge 
+        where 
+            badge.projectId is null and 
+            badge.type = 'GlobalBadge'
+            AND (
+                EXISTS  (SELECT true
+                from SkillDef s1, SkillRelDef sr1
+                where
+                    badge.id = sr1.parent and
+                    s1.id = sr1.child and 
+                    sr1.type = 'BadgeDependence' and 
+                    s1.projectId = ?1 and 
+                    s1.skillId = ?2)
+            OR EXISTS (SELECT true
+                from GlobalBadgeLevelDef gbld
+                where
+                    badge.skillId = gbld.badgeId and
+                    gbld.projectId = ?1)
+            )''')
+    @Nullable
+    List<SkillDefMin> findGlobalBadgesForProjectIdAndSkillId(String projectId, String skillId)
+
     @Modifying
     @Query('''update UserPoints up set up.points = up.points + ?2 where up.id = ?1''')
     void addUserPoints(Integer id, int pointsToAdd)
@@ -123,6 +156,16 @@ interface SkillEventsSupportRepo extends CrudRepository<SkillDef, Long> {
             (ua.skillRefId in (?3) or ua.skillRefId is null) and
             ua.projectId = ?2 ''')
     List<TinyUserAchievement> findTinyUserAchievementsByUserIdAndProjectIdAndSkillIds(String userId, String projectId, List<Integer> skillIds)
+
+    @Query('''SELECT 
+        ua.skillRefId as skillRefId,
+        ua.level as level
+        from UserAchievement ua 
+        where 
+            ua.userId = ?1 and
+            ua.skillRefId is null and
+            ua.projectId = ?2 ''')
+    List<TinyUserAchievement> findTinyUserAchievementsByUserIdAndProjectId(String userId, String projectId)
 
     @Query('''SELECT l from LevelDef l, ProjDef p 
         where
@@ -152,8 +195,15 @@ interface SkillEventsSupportRepo extends CrudRepository<SkillDef, Long> {
 
     @Query('''SELECT 
         p.totalPoints as totalPoints,
-        p.id as id 
+        p.id as id,
+        p.projectId as projectId
         from ProjDef p where p.projectId = ?1''')
     TinyProjectDef getTinyProjectDef(String projectId)
 
+    @Query(value = '''SELECT 
+        p.totalPoints as totalPoints,
+        p.id as id,
+        p.projectId as projectId
+        from ProjDef p, UserRole u where p.projectId = u.projectId and u.userId=?1''')
+    List<TinyProjectDef> getTinyProjectDefForUserId(String userId)
 }

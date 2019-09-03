@@ -56,8 +56,23 @@ class WSHelper {
         put(endpoint, "admin", params)
     }
 
+    def supervisorGet(String endpoint, def params = null) {
+        get(endpoint, "supervisor", params)
+    }
+
+    def supervisorPut(String endpoint, def params = null) {
+        put(endpoint, "supervisor", params)
+    }
+    def supervisorDelete(String endpoint, def params = null) {
+        delete(endpoint, "supervisor", params)
+    }
+
     def adminPost(String endpoint, def params, boolean throwExceptionOnFailure = true) {
         post(endpoint, "admin", params, HttpStatus.OK, throwExceptionOnFailure )
+    }
+
+    def supervisorPost(String endpoint, def params, boolean throwExceptionOnFailure = true) {
+        post(endpoint, "supervisor", params, HttpStatus.OK, throwExceptionOnFailure )
     }
 
     def adminDelete(String endpoint, def params = null) {
@@ -87,6 +102,9 @@ class WSHelper {
         return put(endpoint, 'root', params)
     }
 
+    def rootDelete(String endpoint, Map params = null) {
+        return delete(endpoint, 'root', params)
+    }
     def createRootAccount(Map<String, String> userInfo) {
         return put('/createRootAccount', '', userInfo)
     }
