@@ -18,30 +18,32 @@ class ReportSkillsSpecs extends DefaultIntSpec {
     }
 
     def "complete very simple skill"() {
-        String subj = "testSubj"
-        String skillId = "skillId"
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(10, )
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
 
         when:
-        skillsService.createProject([projectId: projId, name: "Test Project"])
-        skillsService.createSubject([projectId: projId, subjectId: subj, name: "Test Subject"])
-        skillsService.createSkill([projectId     : projId, subjectId: subj, skillId: skillId, name: "Test Skill", type: "Skill", pointIncrement: 100, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1])
-        def res = skillsService.addSkill([projectId: projId, skillId: skillId])
+        def res = skillsService.addSkill([projectId: projId, skillId: skills[0].skillId])
 
         then:
         res.body.skillApplied
         res.body.explanation == "Skill event was applied"
 
         res.body.completed.size() == 3
-        res.body.completed.find({ it.type == "Skill" }).id == "skillId"
-        res.body.completed.find({ it.type == "Skill" }).name == "Test Skill"
+        res.body.completed.find({ it.type == "Skill" }).id == skills[0].skillId
+        res.body.completed.find({ it.type == "Skill" }).name == skills[0].name
 
         res.body.completed.find({ it.type == "Overall" }).id == "OVERALL"
         res.body.completed.find({ it.type == "Overall" }).name == "OVERALL"
-            res.body.completed.find({ it.type == "Overall" }).level == 5
+            res.body.completed.find({ it.type == "Overall" }).level == 1
 
-        res.body.completed.find({ it.type == "Subject" }).id == "testSubj"
-        res.body.completed.find({ it.type == "Subject" }).name == "Test Subject"
-        res.body.completed.find({ it.type == "Subject" }).level == 5
+        res.body.completed.find({ it.type == "Subject" }).id == subj.subjectId
+        res.body.completed.find({ it.type == "Subject" }).name == subj.name
+        res.body.completed.find({ it.type == "Subject" }).level == 1
     }
 
     def "incrementally achieve a single skill"(){
@@ -699,7 +701,7 @@ class ReportSkillsSpecs extends DefaultIntSpec {
         then:
         res.body.skillApplied
         res.body.explanation == "Skill event was applied"
-        res.body.completed.size() == 3
+        res.body.completed.size() > 0
 
         !res1.body.skillApplied
         res1.body.explanation == "This skill reached its maximum points"
@@ -708,54 +710,55 @@ class ReportSkillsSpecs extends DefaultIntSpec {
 
 
     def "skills from different projects with the same subject id do not intermingle"() {
-        String subj = "testSubj"
-        String skillId = "skillId"
-        String projId2 = "${SkillsFactory.defaultProjId}2"
+        def proj1 = SkillsFactory.createProject()
+        def subj1 = SkillsFactory.createSubject()
+        def skills1 = SkillsFactory.createSkills(10, )
+
+        def proj2 = SkillsFactory.createProject(2)
+        def subj2 = SkillsFactory.createSubject(2)
+        def skills2 = SkillsFactory.createSkills(10, 2)
 
         setup:
-        skillsService.deleteProjectIfExist(projId2)
+        skillsService.deleteProjectIfExist(proj2.projectId)
 
         when:
-        skillsService.createProject([projectId: projId, name: "Test Project"])
-        skillsService.createSubject([projectId: projId, subjectId: subj, name: "Test Subject"])
-        skillsService.createSkill([projectId     : projId, subjectId: subj, skillId: skillId, name: "Test Skill", type: "Skill", pointIncrement: 100, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1
-        ])
-        def res = skillsService.addSkill([projectId: projId, skillId: skillId])
+        skillsService.createProject(proj1)
+        skillsService.createSubject(subj1)
+        skillsService.createSkills(skills1)
+        def res = skillsService.addSkill([projectId: proj1.projectId, skillId: skills1[0].skillId])
 
+        skillsService.createProject(proj2)
+        skillsService.createSubject(subj2)
+        skillsService.createSkills(skills2)
 
+        def res2 = skillsService.addSkill([projectId: proj2.projectId, skillId: skills2[0].skillId])
 
-        skillsService.createProject([projectId: projId2, name: "Test Project2"])
-        skillsService.createSubject([projectId: projId2, subjectId: subj, name: "Test Subject"])
-        skillsService.createSkill([projectId     : projId2, subjectId: subj, skillId: skillId, name: "Test Skill", type: "Skill", pointIncrement: 100, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1
-        ])
-        def res2 = skillsService.addSkill([projectId: projId2, skillId: skillId])
-
-        def skillsResult1 = skillsService.getSkillsForSubject(projId, subj)
-        def skillsResult2 = skillsService.getSkillsForSubject(projId2, subj)
+        def skillsResult1 = skillsService.getSkillsForSubject(proj1.projectId, subj1.subjectId)
+        def skillsResult2 = skillsService.getSkillsForSubject(proj2.projectId, subj2.subjectId)
 
         then:
         res.body.skillApplied
         res.body.explanation == "Skill event was applied"
 
         res.body.completed.size() == 3
-        res.body.completed.find({ it.type == "Skill" }).id == "skillId"
-        res.body.completed.find({ it.type == "Skill" }).name == "Test Skill"
+        res.body.completed.find({ it.type == "Skill" }).id == skills1[0].skillId
+        res.body.completed.find({ it.type == "Skill" }).name == skills1[0].name
 
         res.body.completed.find({ it.type == "Overall" }).id == "OVERALL"
         res.body.completed.find({ it.type == "Overall" }).name == "OVERALL"
-        res.body.completed.find({ it.type == "Overall" }).level == 5
+        res.body.completed.find({ it.type == "Overall" }).level == 1
 
-        res.body.completed.find({ it.type == "Subject" }).id == "testSubj"
-        res.body.completed.find({ it.type == "Subject" }).name == "Test Subject"
-        res.body.completed.find({ it.type == "Subject" }).level == 5
+        res.body.completed.find({ it.type == "Subject" }).id == subj1.subjectId
+        res.body.completed.find({ it.type == "Subject" }).name == subj1.name
+        res.body.completed.find({ it.type == "Subject" }).level == 1
 
         res2.body.skillApplied
         res2.body.explanation == "Skill event was applied"
 
-        skillsResult1.size() == 1
-        skillsResult1.first().projectId == projId && skillsResult1.first().skillId == skillId
+        skillsResult1.size() == 10
+        skillsResult1.find { it.projectId == proj1.projectId && it.skillId == skills1[0].skillId }
 
-        skillsResult2.size() == 1
-        skillsResult2.first().projectId == projId2 && skillsResult2.first().skillId == skillId
+        skillsResult2.size() == 10
+        skillsResult2.find { it.projectId == proj2.projectId && it.skillId == skills2[0].skillId }
     }
 }

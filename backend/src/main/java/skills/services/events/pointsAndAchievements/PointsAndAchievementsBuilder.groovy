@@ -59,33 +59,37 @@ class PointsAndAchievementsBuilder {
 
 
     private void handleOverallAchievement() {
-        UserAchievement achievement = checkForAchievements(null, null, loadedData.tinyProjectDef.totalPoints)
-        if (achievement) {
-            dataToSave.userAchievements << achievement
-            completionItems << new CompletionItem(
-                    level: achievement.level,
-                    name: "OVERALL",
-                    id: "OVERALL",
-                    type: CompletionItem.CompletionItemType.Overall)
+        List<UserAchievement> achievements = checkForAchievements(null, null, loadedData.tinyProjectDef.totalPoints)
+        if (achievements) {
+            dataToSave.userAchievements.addAll(achievements)
+            completionItems.addAll(achievements.collect {
+                new CompletionItem(
+                        level: it.level,
+                        name: "OVERALL",
+                        id: "OVERALL",
+                        type: CompletionItem.CompletionItemType.Overall)
+            })
         }
     }
 
     private void handleSubjectAchievement(SkillEventsSupportRepo.TinySkillDef skillDef) {
         if (skillDef.type == SkillDef.ContainerType.Subject) {
-            UserAchievement achievement = checkForAchievements(skillDef.skillId, skillDef.id, skillDef.totalPoints)
-            if (achievement) {
-                dataToSave.userAchievements << achievement
-                completionItems << new CompletionItem(
-                        level: achievement.level, name: skillDef.name,
-                        id: skillDef.skillId,
-                        type: CompletionItem.CompletionItemType.Subject)
+            List<UserAchievement> achievements = checkForAchievements(skillDef.skillId, skillDef.id, skillDef.totalPoints)
+            if (achievements) {
+                dataToSave.userAchievements.addAll(achievements)
+                completionItems.addAll(achievements.collect {
+                    new CompletionItem(
+                            level: it.level, name: skillDef.name,
+                            id: skillDef.skillId,
+                            type: CompletionItem.CompletionItemType.Subject)
+                })
             }
         }
     }
 
     @Profile
-    private UserAchievement checkForAchievements(String skillId, Integer skillRefId, Integer totalPoints) {
-        UserAchievement res
+    private  List<UserAchievement> checkForAchievements(String skillId, Integer skillRefId, Integer totalPoints) {
+        List<UserAchievement> res
 
         SkillEventsSupportRepo.TinyUserPoints existingUserPoints = loadedData.getTotalUserPoints(skillRefId)
 
@@ -96,11 +100,16 @@ class PointsAndAchievementsBuilder {
         // first achieved level is 1, level 0 should not be documented
         if (levelInfo.level > 0) {
             List<SkillEventsSupportRepo.TinyUserAchievement> userAchievedLevels = loadedData.getUserAchievements(skillRefId)
-            boolean levelAlreadyAchieved = userAchievedLevels?.find { it.level == levelInfo.level }
-            if (!levelAlreadyAchieved) {
-                res = new UserAchievement(userId: userId, projectId: projectId, skillId: skillId, skillRefId: skillRefId,
-                        level: levelInfo.level, pointsWhenAchieved: currentScore)
-                log.debug("Achieved new level [{}]", res)
+            Integer maxAchieved = userAchievedLevels.collect({it.level}).max()
+            maxAchieved = maxAchieved ?: 0
+            // handle an edge case where user achieves multiple levels via one event
+            if (levelInfo.level > maxAchieved) {
+                res = (maxAchieved+1..levelInfo.level).collect {
+                    UserAchievement achievement = new UserAchievement(userId: userId, projectId: projectId, skillId: skillId, skillRefId: skillRefId,
+                            level: it, pointsWhenAchieved: currentScore)
+                    log.debug("Achieved new level [{}]", achievement)
+                    return achievement
+                }
             }
         }
 
