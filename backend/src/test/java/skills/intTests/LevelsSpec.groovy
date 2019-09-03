@@ -63,7 +63,7 @@ class LevelsSpec extends  DefaultIntSpec{
     def "change levels from percentage to points"(){
         when:
         def result = skillsService.addSkill([projectId: projId, skillId: skill1], "thing1", new Date())
-        def levelBeforeChange  = result.body.completed.find { it.type.toString().equalsIgnoreCase("Overall") }.level
+        def levelBeforeChange  = result.body.completed.findAll { it.type.toString().equalsIgnoreCase("Overall") }.collect { it.level }.max()
 
         skillsService.changeSetting(projId, projectPointsSetting, [projectId: projId, setting: projectPointsSetting, value: "true"])
 
