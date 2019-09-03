@@ -133,6 +133,9 @@
           }
           SkillsShareService.shareSkillToAnotherProject(this.projectId, selectedSkill.skillId, sharedProjectId)
             .then(() => {
+              this.loading.sharedSkills = true;
+              this.selectedProject = null;
+              this.selectedSkills = [];
               this.loadSharedSkills();
             });
         }
