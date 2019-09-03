@@ -38,6 +38,7 @@
     },
     mounted() {
       this.selectedValue = this.selected;
+      this.search('');
     },
     watch: {
       selected: function selectionChanged() {
@@ -56,7 +57,7 @@
         ProjectService.queryOtherProjectsByName(this.projectId, query)
           .then((response) => {
             this.isLoading = false;
-            this.projects = response.filter(entry => entry.projectId !== this.projectId);
+            this.projects = response;
           });
       },
     },

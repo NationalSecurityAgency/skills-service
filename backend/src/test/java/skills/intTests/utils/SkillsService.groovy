@@ -62,6 +62,10 @@ class SkillsService {
         wsHelper.appPost(getProjectUrl(originalProjectId ?: props.projectId), props)
     }
 
+    def searchOtherProjectsByName(String projectId, String query) {
+        wsHelper.adminGet("/projects/${projectId}/projectSearch?nameQuery=${query}")
+    }
+
     @Profile
     def moveProjectUp(Map props){
         wsHelper.adminPatch(getProjectUrl(props.projectId), '{"action": "DisplayOrderUp"}')
