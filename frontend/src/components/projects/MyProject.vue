@@ -5,7 +5,7 @@
         <edit-and-delete-dropdown v-on:deleted="deleteProject" v-on:edited="editProject" v-on:move-up="moveUp"
                                   v-on:move-down="moveDown"
                                   :is-first="projectInternal.isFirst" :is-last="projectInternal.isLast"
-                                  :is-loading="isLoading"
+                                  :is-loading="isLoading" :is-delete-disabled="deleteProjectDisabled" :delete-disabled-text="deleteProjectToolTip"
                                   class="project-settings"></edit-and-delete-dropdown>
       </div>
       <div slot="footer">
@@ -38,10 +38,13 @@
         projectInternal: Object.assign({}, this.project),
         cardOptions: {},
         showEditProjectModal: false,
+        deleteProjectDisabled: false,
+        deleteProjectToolTip: '',
       };
     },
     mounted() {
       this.createCardOptions();
+      this.checkIfProjectBelongsToGlobalBadge();
     },
     computed: {
       minimumPoints() {
@@ -71,7 +74,15 @@
           }],
         };
       },
-
+      checkIfProjectBelongsToGlobalBadge() {
+        ProjectService.checkIfProjectBelongsToGlobalBadge(this.projectInternal.projectId)
+          .then((res) => {
+            if (res) {
+              this.deleteProjectDisabled = true;
+              this.deleteProjectToolTip = 'Cannot delete this project as it belongs to one or more global badges. Please contact a Supervisor to remove this dependency.';
+            }
+          });
+      },
       deleteProject() {
         const msg = `Project ID [${this.projectInternal.projectId}]. Delete Action can not be undone and permanently removes its skill subject definitions, skill definitions and users' performed skills.`;
         this.msgConfirm(msg)

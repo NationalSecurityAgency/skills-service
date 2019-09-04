@@ -74,15 +74,6 @@ class AchievedGlobalBadgeHandler {
         }
     }
 
-//    private boolean withinActiveTimeframe(SkillDefMin skillDef) {
-//        boolean withinActiveTimeframe = true;
-//        if (skillDef.startDate && skillDef.endDate) {
-//            Date now = new Date()
-//            withinActiveTimeframe = skillDef.startDate.before(now) && skillDef.endDate.after(now)
-//        }
-//        return withinActiveTimeframe
-//    }
-
     @Profile
     private List<TinyUserAchievement> loadOverallLevelAchievements(String userId, String projectId, List<Integer> skillRefIds) {
         skillEventsSupportRepo.findTinyUserAchievementsByUserIdAndProjectId(userId, projectId)

@@ -6,9 +6,11 @@
       <span class="text-primary"> <i class="fas fa-edit pr-1"/>Edit</span>
     </b-dropdown-item>
 
-    <b-dropdown-item v-on:click="emit('deleted')">
-      <span class="text-danger"> <i class="fas fa-trash pr-1"/> Delete</span>
-    </b-dropdown-item>
+    <span v-b-tooltip.hover="deleteDisabledText">
+      <b-dropdown-item v-on:click="emit('deleted')" :disabled="isDeleteDisabled" >
+          <span class="text-danger"> <i class="fas fa-trash pr-1"/> Delete</span>
+      </b-dropdown-item>
+    </span>
 
     <hr class="my-2"/>
 
@@ -30,6 +32,8 @@
       isFirst: Boolean,
       isLast: Boolean,
       isLoading: Boolean,
+      isDeleteDisabled: Boolean,
+      deleteDisabledText: String,
     },
     methods: {
       emit(eventName) {

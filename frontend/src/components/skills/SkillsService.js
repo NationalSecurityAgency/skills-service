@@ -112,4 +112,8 @@ export default {
     return axios.put(`/api/projects/${projectId}/skills/${skillId}`, { userId, timestamp })
       .then(remoteRes => remoteRes.data);
   },
+  checkIfSkillBelongsToGlobalBadge(projectId, skillId) {
+    return axios.get(`/admin/projects/${projectId}/skills/${skillId}/globalBadge/exists`)
+      .then(response => response.data);
+  },
 };

@@ -205,10 +205,17 @@
       },
 
       deleteSkill(row) {
-        this.msgConfirm('Delete Action can NOT be undone and permanently removes users\' performed skills and any dependency associations.', `DELETE [${row.skillId}]?`)
-          .then((res) => {
-            if (res) {
-              this.doDeleteSkill(row);
+        SkillsService.checkIfSkillBelongsToGlobalBadge(row.projectId, row.skillId)
+          .then((belongsToGlobalBadge) => {
+            if (belongsToGlobalBadge) {
+              this.msgOk(`Unable to delete Skill Id: [${row.skillId}].  This skill belongs to one or more global badges. Please contact a Supervisor to remove this dependency.`);
+            } else {
+              this.msgConfirm('Delete Action can NOT be undone and permanently removes users\' performed skills and any dependency associations.', `DELETE [${row.skillId}]?`)
+                .then((res) => {
+                  if (res) {
+                    this.doDeleteSkill(row);
+                  }
+                });
             }
           });
       },

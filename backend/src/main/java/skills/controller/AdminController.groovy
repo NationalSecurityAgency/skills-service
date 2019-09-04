@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.PageRequest
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
+import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.ActionPatchRequest
 import skills.controller.request.model.BadgeRequest
 import skills.controller.request.model.EditLevelRequest
@@ -33,6 +34,7 @@ import skills.controller.result.model.TableResult
 import skills.controller.result.model.UserSkillsStats
 import skills.services.AdminProjService
 import skills.services.AdminUsersService
+import skills.services.GlobalBadgesService
 import skills.services.LevelDefinitionStorageService
 import skills.services.SkillEventAdminService
 import skills.services.UserAdminService
@@ -70,6 +72,9 @@ class AdminController {
 
     @Autowired
     SkillEventAdminService skillEventService
+
+    @Autowired
+    GlobalBadgesService globalBadgesService
 
     @Value('#{"${skills.config.ui.maxTimeWindowInMinutes}"}')
     int maxTimeWindowInMinutes
@@ -766,5 +771,30 @@ class AdminController {
     String getClientSecret(@PathVariable("projectId") String projectId) {
         skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
         return projectAdminStorageService.getProjectSecret(projectId)
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/globalBadge/exists", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    boolean isSkillReferencedByGlobalBadge(@PathVariable("projectId") String projectId,
+                                           @PathVariable("skillId") String skillId) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(skillId, "Skill Id")
+        return globalBadgesService.isSkillUsedInGlobalBadge(projectId, skillId)
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/globalBadge/exists", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    boolean isProjectReferencedByGlobalBadge(@PathVariable("projectId") String projectId) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        return globalBadgesService.isProjectUsedInGlobalBadge(projectId)
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/levels/{level}/globalBadge/exists", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    boolean isProjectLevelReferencedByGlobalBadge(@PathVariable("projectId") String projectId,
+                                                  @PathVariable("level") Integer level) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotNull(level, "Level")
+        return globalBadgesService.isProjectLevelUsedInGlobalBadge(projectId, level)
     }
 }
