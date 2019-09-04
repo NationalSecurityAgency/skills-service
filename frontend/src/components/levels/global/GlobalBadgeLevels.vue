@@ -6,7 +6,7 @@
       <loading-container v-model="isLoading">
         <div class="row mb-4">
           <div class="col-12 col-sm">
-            <project-selector v-model="selectedProject" @added="projectAdded" @removed="projectRemoved"></project-selector>
+            <project-selector ref="projectSelectorRef" v-model="selectedProject" @added="projectAdded" @removed="projectRemoved"></project-selector>
           </div>
           <div class="col-12 col-sm">
             <level-selector v-model="selectedLevel" :project-id="selectedProjectId" :disabled="!selectedProject" :placeholder="levelPlaceholder"></level-selector>
@@ -113,7 +113,8 @@
             this.selectedLevel = null;
             this.loadGlobalBadgeDetailsState({ badgeId: this.badgeId });
             this.selectedProject = null;
-            this.$emit('levels-changed', newLevel);
+            this.$refs.projectSelectorRef.loadProjectsForBadge();
+            this.$emit('global-badge-levels-changed', newLevel);
           });
       },
       deleteLevel(deletedLevel) {
@@ -129,7 +130,8 @@
           .then(() => {
             this.badgeLevels = this.badgeLevels.filter(item => `${item.projectId}${item.level}` !== `${deletedItem.projectId}${deletedItem.level}`);
             this.loadGlobalBadgeDetailsState({ badgeId: this.badgeId });
-            this.$emit('levels-changed', deletedItem);
+            this.$refs.projectSelectorRef.loadProjectsForBadge();
+            this.$emit('global-badge-levels-changed', deletedItem);
           });
       },
       projectAdded() {

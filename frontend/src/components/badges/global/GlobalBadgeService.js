@@ -47,8 +47,8 @@ export default {
     return axios.get(`/supervisor/badges/${badgeId}/skills/available?query=${search}`)
       .then(res => res.data);
   },
-  getAllProjects() {
-    return axios.get('/supervisor/projects')
+  getAllProjectsForBadge(badgeId) {
+    return axios.get(`/supervisor/badges/${badgeId}/projects/available`)
       .then(res => res.data);
   },
   getProjectLevels(projectId) {
