@@ -49,6 +49,11 @@
       ...mapGetters([
         'badge',
       ]),
+      uniqueProjectCount() {
+        const skillProjectIds = this.badge.requiredSkills.map(item => item.projectId);
+        const levelProjectIds = this.badge.requiredProjectLevels.map(item => item.projectId);
+        return new Set([...skillProjectIds, ...levelProjectIds]).size;
+      },
       headerOptions() {
         if (!this.badge) {
           return {};
@@ -61,8 +66,11 @@
             label: 'Skills',
             count: this.badge.numSkills,
           }, {
-            label: 'Points',
-            count: this.badge.totalPoints,
+            label: 'Levels',
+            count: this.badge.requiredProjectLevels.length,
+          }, {
+            label: 'Projects',
+            count: this.uniqueProjectCount,
           }],
         };
       },

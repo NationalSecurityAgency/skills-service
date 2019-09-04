@@ -160,15 +160,15 @@ class SupervisorController {
     @RequestMapping(value = "/badges/{badgeId}/skills/available", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     AvailableSkillsResult suggestBadgeSkills(@PathVariable("badgeId") String badgeId,
-                                                   @RequestParam String query) {
+                                             @RequestParam String query) {
         SkillsValidator.isNotBlank(badgeId, "Badge Id")
         return globalBadgesService.getAvailableSkillsForGlobalBadge(badgeId, query)
     }
 
-    @RequestMapping(value = "/projects", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/badges/{badgeId}/projects/available", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    List<ProjectResult> getAllProjects() {
-        return globalBadgesService.getAllProjects()
+    List<ProjectResult> getAllProjects(@PathVariable("badgeId") String badgeId) {
+        return globalBadgesService.getAllProjectsForBadge(badgeId)
     }
 
     @RequestMapping(value = "/projects/{projectId}/levels", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)

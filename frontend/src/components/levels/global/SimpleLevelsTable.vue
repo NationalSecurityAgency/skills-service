@@ -29,8 +29,8 @@
         columns: ['projectName', 'level', 'edit'],
         options: {
           headings: {
-            name: 'Project Name',
-            skillId: 'Level',
+            projectName: 'Project Name',
+            level: 'Level',
             edit: '',
           },
           perPage: 15,

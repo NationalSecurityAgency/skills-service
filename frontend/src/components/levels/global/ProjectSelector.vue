@@ -44,16 +44,14 @@
         isLoading: false,
         projects: [],
         selectedInternal: null,
+        badgeId: null,
       };
     },
     mounted() {
+      this.badgeId = this.$route.params.badgeId;
       this.isLoading = true;
       this.setSelectedInternal();
-      GlobalBadgeService.getAllProjects()
-        .then((response) => {
-          this.isLoading = false;
-          this.projects = response.map(entry => entry);
-        });
+      this.loadProjectsForBadge();
     },
     watch: {
       value: function watchUpdatesToSelected() {
@@ -77,6 +75,13 @@
       },
       searchChanged(query) {
         this.$emit('search-change', query);
+      },
+      loadProjectsForBadge() {
+        GlobalBadgeService.getAllProjectsForBadge(this.badgeId)
+          .then((response) => {
+            this.isLoading = false;
+            this.projects = response.map(entry => entry);
+          });
       },
     },
   };
