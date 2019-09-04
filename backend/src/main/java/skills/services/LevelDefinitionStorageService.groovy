@@ -45,7 +45,7 @@ class LevelDefinitionStorageService {
     UserAchievedLevelRepo achievedLevelRepository
 
     @Autowired
-    GlobalSkillsStorageService globalSkillsStorageService
+    GlobalBadgesService globalBadgesService
 
 
     // this could also come from DB.. eventually
@@ -276,7 +276,7 @@ class LevelDefinitionStorageService {
                 throw new skills.controller.exceptions.SkillException("Unable to delete level ${removed.level}, $usersAtLevel ${usersAtLevel > 1 ? 'users have' : 'user has'} achieved this level")
             }
 
-            if (globalSkillsStorageService.isProjectLevelUsedInGlobalBadge(projectId, removed.level)) {
+            if (globalBadgesService.isProjectLevelUsedInGlobalBadge(projectId, removed.level)) {
                 throw new SkillException("Level [${removed.level}] for project with id [${projectId}] cannot be deleted as it is currently referenced by one or more global badges")
             }
 

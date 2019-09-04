@@ -12,12 +12,12 @@ import skills.controller.result.model.*
 import skills.services.AccessSettingsStorageService
 import skills.services.AdminProjService
 import skills.services.AdminUsersService
-import skills.services.GlobalSkillsStorageService
+import skills.services.GlobalBadgesService
 import skills.services.LevelDefinitionStorageService
 
 import java.nio.charset.StandardCharsets
 
-import static skills.services.GlobalSkillsStorageService.*
+import static skills.services.GlobalBadgesService.*
 
 @RestController
 @RequestMapping("/supervisor")
@@ -35,7 +35,7 @@ class SupervisorController {
     AdminProjService projectAdminStorageService
 
     @Autowired
-    GlobalSkillsStorageService globalSkillsStorageService
+    GlobalBadgesService globalBadgesService
 
     @Autowired
     AdminUsersService adminUsersService
@@ -45,7 +45,7 @@ class SupervisorController {
     boolean doesBadgeNameExist(@PathVariable("badgeName") String badgeName) {
         SkillsValidator.isNotBlank(badgeName, "Badge Name")
         String decodedName = URLDecoder.decode(badgeName,  StandardCharsets.UTF_8.toString())
-        return globalSkillsStorageService.existsByBadgeName(decodedName)
+        return globalBadgesService.existsByBadgeName(decodedName)
     }
 
     @RequestMapping(value = "/badges/id/{badgeId}/exists", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -53,7 +53,7 @@ class SupervisorController {
     boolean doesBadgeIdExist(@PathVariable("badgeId") String badgeId) {
         SkillsValidator.isNotBlank(badgeId, "Badge Id")
         String decodedId = URLDecoder.decode(badgeId,  StandardCharsets.UTF_8.toString())
-        return globalSkillsStorageService.existsByBadgeId(decodedId)
+        return globalBadgesService.existsByBadgeId(decodedId)
     }
 
     @RequestMapping(value = "/badges/project/{projectId}/skill/{skillId}/exists", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -61,14 +61,14 @@ class SupervisorController {
     boolean isSkillReferencedByGlobalBadge(@PathVariable("projectId") String projectId, @PathVariable("skillId") String skillId) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(skillId, "Skill Id")
-        return globalSkillsStorageService.isSkillUsedInGlobalBadge(projectId, skillId)
+        return globalBadgesService.isSkillUsedInGlobalBadge(projectId, skillId)
     }
 
     @RequestMapping(value = "/badges/project/{projectId}/exists", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     boolean isProjectReferencedByGlobalBadge(@PathVariable("projectId") String projectId) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
-        return globalSkillsStorageService.isSkillUsedInGlobalBadge()
+        return globalBadgesService.isSkillUsedInGlobalBadge()
     }
 
     @RequestMapping(value = "/badges/project/{projectId}/skill/{level}/exists", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -76,7 +76,7 @@ class SupervisorController {
     boolean isProjectLevelReferencedByGlobalBadge(@PathVariable("projectId") String projectId, @PathVariable("level") Integer level) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(level, "Level")
-        return globalSkillsStorageService.isProjectLevelUsedInGlobalBadge(projectId, level)
+        return globalBadgesService.isProjectLevelUsedInGlobalBadge(projectId, level)
     }
 
     @RequestMapping(value = "/badges/{badgeId}", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
@@ -88,7 +88,7 @@ class SupervisorController {
         badgeRequest.badgeId = badgeRequest.badgeId ?: badgeId
         SkillsValidator.isNotBlank(badgeRequest?.name, "Badge Name")
 
-        globalSkillsStorageService.saveBadge(badgeId, badgeRequest)
+        globalBadgesService.saveBadge(badgeId, badgeRequest)
         return new RequestResult(success: true)
     }
 
@@ -101,7 +101,7 @@ class SupervisorController {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(skillId, "Skill Id")
 
-        globalSkillsStorageService.addSkillToBadge(badgeId, projectId, skillId)
+        globalBadgesService.addSkillToBadge(badgeId, projectId, skillId)
         return new RequestResult(success: true)
     }
 
@@ -114,7 +114,7 @@ class SupervisorController {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
 
-        globalSkillsStorageService.removeSkillFromBadge(badgeId, projectId, skillId)
+        globalBadgesService.removeSkillFromBadge(badgeId, projectId, skillId)
         return new RequestResult(success: true)
     }
 
@@ -122,13 +122,13 @@ class SupervisorController {
     void deleteBadge(@PathVariable("badgeId") String badgeId) {
         SkillsValidator.isNotBlank(badgeId, "Badge Id")
 
-        globalSkillsStorageService.deleteBadge(badgeId)
+        globalBadgesService.deleteBadge(badgeId)
     }
 
     @RequestMapping(value = "/badges", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     List<GlobalBadgeResult> getBadges() {
-        return globalSkillsStorageService.getBadges()
+        return globalBadgesService.getBadges()
     }
 
     @RequestMapping(value = "/badges/{badgeId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -136,7 +136,7 @@ class SupervisorController {
     GlobalBadgeResult getBadge(@PathVariable("badgeId") String badgeId) {
         SkillsValidator.isNotBlank(badgeId, "Badge Id")
 
-        return globalSkillsStorageService.getBadge(badgeId)
+        return globalBadgesService.getBadge(badgeId)
     }
 
     @RequestMapping(value = "/badges/{badgeId}", method = RequestMethod.PATCH, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -146,7 +146,7 @@ class SupervisorController {
         SkillsValidator.isNotBlank(badgeId, "Badge Id")
         SkillsValidator.isNotNull(badgePatchRequest.action, "Action must be provided")
 
-        globalSkillsStorageService.setBadgeDisplayOrder(badgeId, badgePatchRequest)
+        globalBadgesService.setBadgeDisplayOrder(badgeId, badgePatchRequest)
     }
 
     @RequestMapping(value = "/badges/{badgeId}/skills", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -154,7 +154,7 @@ class SupervisorController {
     List<SkillDefRes> getBadgeSkills(@PathVariable("badgeId") String badgeId) {
         SkillsValidator.isNotBlank(badgeId, "Badge Id")
 
-        return globalSkillsStorageService.getSkillsForBadge(badgeId)
+        return globalBadgesService.getSkillsForBadge(badgeId)
     }
 
     @RequestMapping(value = "/badges/{badgeId}/skills/available", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -162,13 +162,13 @@ class SupervisorController {
     AvailableSkillsResult suggestBadgeSkills(@PathVariable("badgeId") String badgeId,
                                                    @RequestParam String query) {
         SkillsValidator.isNotBlank(badgeId, "Badge Id")
-        return globalSkillsStorageService.getAvailableSkillsForGlobalBadge(badgeId, query)
+        return globalBadgesService.getAvailableSkillsForGlobalBadge(badgeId, query)
     }
 
     @RequestMapping(value = "/projects", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     List<ProjectResult> getAllProjects() {
-        return globalSkillsStorageService.getAllProjects()
+        return globalBadgesService.getAllProjects()
     }
 
     @RequestMapping(value = "/projects/{projectId}/levels", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -189,7 +189,7 @@ class SupervisorController {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotNull(level, "Level")
 
-        globalSkillsStorageService.addProjectLevelToBadge(badgeId, projectId, level)
+        globalBadgesService.addProjectLevelToBadge(badgeId, projectId, level)
         return new RequestResult(success: true)
     }
 
@@ -203,7 +203,7 @@ class SupervisorController {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotNull(level, "Level")
 
-        globalSkillsStorageService.removeProjectLevelFromBadge(badgeId, projectId, level)
+        globalBadgesService.removeProjectLevelFromBadge(badgeId, projectId, level)
         return new RequestResult(success: true)
     }
 
