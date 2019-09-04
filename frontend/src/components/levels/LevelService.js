@@ -37,4 +37,8 @@ export default {
     const url = `/api/projects/${projectId}/level`;
     return axios.get(url, { userId }).then(response => response.data);
   },
+  checkIfProjectLevelBelongsToGlobalBadge(projectId, level) {
+    return axios.get(`/admin/projects/${projectId}/levels/${level}/globalBadge/exists`)
+      .then(response => response.data);
+  },
 };

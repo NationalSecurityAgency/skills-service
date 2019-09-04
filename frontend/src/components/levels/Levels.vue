@@ -214,13 +214,28 @@
       },
       removeLastItem() {
         if (!this.onlyOneLevelLeft) {
-          const msg = 'Are you absolutely sure you want to delete the highest Level?';
-          this.msgConfirm(msg, 'WARNING: Delete Highest Level').then((res) => {
-            if (res) {
-              this.doRemoveLastItem();
-            }
-          });
+          if (!this.$route.params.subjectId && this.$route.params.projectId) {
+            const lastLevel = this.getLastItemLevel();
+            LevelService.checkIfProjectLevelBelongsToGlobalBadge(this.$route.params.projectId, lastLevel)
+              .then((belongsToGlobalBadge) => {
+                if (belongsToGlobalBadge) {
+                  this.msgOk(`Unable to remove level: [${lastLevel}].  This project level belongs to one or more global badges. Please contact a Supervisor to remove this dependency.`);
+                } else {
+                  this.confirmAndRemoveLastItem();
+                }
+              });
+          } else {
+            this.confirmAndRemoveLastItem();
+          }
         }
+      },
+      confirmAndRemoveLastItem() {
+        const msg = 'Are you absolutely sure you want to delete the highest Level?';
+        this.msgConfirm(msg, 'WARNING: Delete Highest Level').then((res) => {
+          if (res) {
+            this.doRemoveLastItem();
+          }
+        });
       },
       doRemoveLastItem() {
         this.isLoading = true;
@@ -237,6 +252,18 @@
               this.loadLevels();
             });
         }
+      },
+      getLastItemLevel() {
+        const lastLevel = [...this.levels].sort((a, b) => {
+          if (a.level > b.level) {
+            return 1;
+          }
+          if (b.level > a.level) {
+            return -1;
+          }
+          return 0;
+        })[this.levels.length - 1].level;
+        return lastLevel;
       },
       editLevel(existingLevel) {
         this.isEdit = !!existingLevel;

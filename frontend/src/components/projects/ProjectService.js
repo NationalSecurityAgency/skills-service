@@ -42,6 +42,8 @@ export default {
     return axios.get(`/app/projectExist?projectName=${encodeURIComponent(projectName)}`)
       .then(response => response.data);
   },
-
-
+  checkIfProjectBelongsToGlobalBadge(projectId) {
+    return axios.get(`/admin/projects/${projectId}/globalBadge/exists`)
+      .then(response => response.data);
+  },
 };

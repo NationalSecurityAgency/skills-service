@@ -15,6 +15,17 @@
           centered: true,
         });
       },
+      msgOk(msg, overallTitle = 'Message!', okButtonTitle = 'Ok') {
+        return this.$bvModal.msgBoxOk(msg, {
+          title: overallTitle,
+          size: 'sm',
+          buttonSize: 'sm',
+          okTitle: okButtonTitle,
+          footerClass: 'p-2',
+          hideHeaderClose: false,
+          centered: true,
+        });
+      },
     },
   };
 </script>
