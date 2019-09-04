@@ -6,7 +6,7 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import skills.controller.result.model.GlobalBadgeLevelRes
-import skills.services.GlobalSkillsStorageService
+import skills.services.GlobalBadgesService
 import skills.skillLoading.SkillsLoader
 import skills.storage.model.SkillRelDef
 import skills.storage.model.UserAchievement
@@ -31,7 +31,7 @@ class AchievedGlobalBadgeHandler {
     SkillEventsSupportRepo skillEventsSupportRepo
 
     @Autowired
-    GlobalSkillsStorageService globalSkillsStorageService
+    GlobalBadgesService globalBadgesService
 
     @Autowired
     SkillsLoader skillsLoader
@@ -45,7 +45,7 @@ class AchievedGlobalBadgeHandler {
             Map<String, Integer> projectLevels = [:]
             badgeCheckLoop: for (SkillDefMin globalBadge : globalBadges) {
                 // first check required project levels
-                List<GlobalBadgeLevelRes> requiredLevels = globalSkillsStorageService.getGlobalBadgeLevels(globalBadge.skillId)
+                List<GlobalBadgeLevelRes> requiredLevels = globalBadgesService.getGlobalBadgeLevels(globalBadge.skillId)
                 for (GlobalBadgeLevelRes requiredLevel : requiredLevels) {
                     if (projectsForUser.find { it.projectId == requiredLevel.projectId }) {
                         if (!projectLevels.containsKey(requiredLevel.projectId)) {
