@@ -242,8 +242,8 @@
       storeAuthToken() {
         TokenReauthorizer.getAuthenticationToken()
           .then((result) => {
-            this.$store.commit('authToken', result);
-            SkillsConfiguration.setAuthToken(result.access_token);
+            this.$store.commit('authToken', result.data.access_token);
+            SkillsConfiguration.setAuthToken(result.data.access_token);
           });
       },
     },
