@@ -87,6 +87,9 @@ class AdminProjService {
 
     @Autowired
     GlobalBadgesService globalBadgesService
+    @Autowired
+    CustomValidator customValidator
+
 
     private static DataIntegrityViolationExceptionHandler dataIntegrityViolationExceptionHandler =
             new DataIntegrityViolationExceptionHandler([
@@ -116,6 +119,11 @@ class AdminProjService {
         IdFormatValidator.validate(projectRequest.projectId)
         if(projectRequest.name.length() > 50){
             throw new SkillException("Bad Name [${projectRequest.name}] - must not exceed 50 chars.")
+        }
+
+        CustomValidationResult customValidationResult = customValidator.validate(projectRequest)
+        if(!customValidationResult.valid){
+            throw new SkillException(customValidationResult.msg)
         }
 
         ProjDef projectDefinition = originalProjectId ? projDefRepo.findByProjectIdIgnoreCase(originalProjectId) : null
@@ -171,6 +179,12 @@ class AdminProjService {
         }
         if(subjectRequest.description && subjectRequest.description.length() > maxDescriptionLength) {
             throw new SkillException("Bad Description - must not exceed [${maxDescriptionLength}] chars")
+        }
+
+
+        CustomValidationResult customValidationResult = customValidator.validate(subjectRequest)
+        if(!customValidationResult.valid){
+            throw new SkillException(customValidationResult.msg)
         }
 
         SkillDefWithExtra existing = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, origSubjectId, SkillDef.ContainerType.Subject)
@@ -255,6 +269,11 @@ class AdminProjService {
         }
         if(badgeRequest.description && badgeRequest.description.length() > maxDescriptionLength) {
             throw new SkillException("Bad Description - must not exceed [${maxDescriptionLength}] chars")
+        }
+
+        CustomValidationResult customValidationResult = customValidator.validate(badgeRequest)
+        if(!customValidationResult.valid){
+            throw new SkillException(customValidationResult.msg)
         }
 
         SkillDefWithExtra skillDefinition = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, originalBadgeId, type)
@@ -1052,6 +1071,11 @@ class AdminProjService {
         }
         SkillsValidator.isNotBlank(skillRequest.projectId, "Project Id")
         validateSkillVersion(skillRequest)
+
+        CustomValidationResult customValidationResult = customValidator.validate(skillRequest)
+        if(!customValidationResult.valid){
+            throw new SkillException(customValidationResult.msg)
+        }
 
         SkillDefWithExtra skillDefinition = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(skillRequest.projectId, originalSkillId, SkillDef.ContainerType.Skill)
 

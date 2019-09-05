@@ -25,7 +25,7 @@
 
             <div class="mt-2">
               <label>Description</label>
-              <ValidationProvider rules="maxDescriptionLength" v-slot="{errors}" name="Subject Description">
+              <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" v-slot="{errors}" name="Subject Description">
                 <markdown-editor v-model="subjectInternal.description"/>
                 <small class="form-text text-danger">{{ errors[0] }}</small>
               </ValidationProvider>

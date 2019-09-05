@@ -15,6 +15,8 @@ import './filters/TruncateFilter';
 import './filters/DateFilter';
 import './validators/MaxDescriptionLengthValidator';
 import './validators/OptionalNumericValidator';
+import './validators/CustomDescriptionValidator';
+import './validators/CustomNameValidator';
 import './directives/SkillsOnMountDirective';
 import './directives/FocusDirective';
 import App from './App';

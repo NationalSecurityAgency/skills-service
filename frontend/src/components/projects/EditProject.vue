@@ -7,7 +7,7 @@
           <div class="col-12">
             <div class="form-group">
               <label>Project Name</label>
-              <ValidationProvider rules="required|min:3|max:50|uniqueName" v-slot="{errors}" name="Project Name">
+              <ValidationProvider rules="required|min:3|max:50|uniqueName|customNameValidator" v-slot="{errors}" name="Project Name">
                 <input class="form-control" type="text" v-model="internalProject.name" v-on:input="updateProjectId"
                        data-vv-name="projectName" v-focus/>
                 <small class="form-text text-danger">{{ errors[0] }}</small>
