@@ -1,8 +1,9 @@
+import SkillsConfiguration from '@skills/skills-client-configuration';
+
 import axios from 'axios';
 import createAuthRefreshInterceptor from 'axios-auth-refresh';
 import router from '@/router';
 import store from '@/store';
-import SkillsConfiguration from '@skills/skills-client-configuration';
 
 // eslint-disable-next-line
 let service = {};
@@ -50,7 +51,9 @@ service = {
           const unsubscribe = store.subscribe((mutation) => {
             if (mutation.type === 'authToken') {
               resolve({
-                access_token: mutation.payload,
+                data: {
+                  access_token: mutation.payload,
+                },
               });
               unsubscribe();
             }
@@ -58,7 +61,6 @@ service = {
         });
       }
       this.authenticatingPromise
-        .then(result => result.data)
         .finally(() => store.commit('isAuthenticating', false));
     }
     return this.authenticatingPromise;
