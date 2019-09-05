@@ -56,14 +56,16 @@ class ProjectNameSearchSpecs extends DefaultIntSpec {
     }
 
     def "empty search should return first 5 projects"(){
-        skillsService.createProject([projectId: "proj4", name: "Name Search Proj 4"])
-        skillsService.createProject([projectId: "proj5", name: "Name Search Proj 5"])
-        skillsService.createProject([projectId: "proj6", name: "Name Search Proj 6"])
+        skillsService.createProject([projectId: "proj4", name: "A Name Search Proj 4"])
+        skillsService.createProject([projectId: "proj5", name: "A Name Search Proj 5"])
+        skillsService.createProject([projectId: "proj6", name: "A Name Search Proj 6"])
+        skillsService.createProject([projectId: "proj7", name: "A Name Search Proj 7"])
+        skillsService.createProject([projectId: "proj8", name: "A Name Search Proj 8"])
         when:
         def res = skillsService.searchOtherProjectsByName("proj0", "")
 
         then:
         res.size() == 5
-        res.collect {it.projectId} == ["proj1", "proj2", "proj3", "proj4", "proj5"]
+        res.collect {it.projectId} == ["proj4", "proj5", "proj6", "proj7", "proj8"]
     }
 }
