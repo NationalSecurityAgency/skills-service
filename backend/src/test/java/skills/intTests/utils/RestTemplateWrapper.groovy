@@ -117,7 +117,10 @@ class RestTemplateWrapper extends RestTemplate {
                     email    : username,
                     password : password,
             ]
-            restTemplate.put(skillsServiceUrl + '/createAccount', userInfo)
+            ResponseEntity response = putForEntity(skillsServiceUrl + '/createAccount', userInfo)
+            if ( response.statusCode != HttpStatus.OK) {
+                throw new SkillsClientException(response.body, skillsServiceUrl, response.statusCode)
+            }
             accountCreated = true
         }
         return accountCreated

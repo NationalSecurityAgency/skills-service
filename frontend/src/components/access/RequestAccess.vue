@@ -30,7 +30,7 @@
               <div class="form-group">
                 <label for="password">Password</label>
                 <input class="form-control" type="password" v-model="loginFields.password" id="password"
-                       name="password" v-validate="'required|min:8|max:15'" data-vv-delay="500" ref="password"/>
+                       name="password" v-validate="'required|minPasswordLength|maxPasswordLength'" data-vv-delay="500" ref="password"/>
                 <small class="form-text text-danger" v-show="errors.has('password')">{{ errors.first('password')}}</small>
               </div>
               <div class="form-group">

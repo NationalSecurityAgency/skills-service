@@ -116,11 +116,6 @@ class AdminProjService {
         assert projectRequest?.projectId
         assert projectRequest?.name
 
-        IdFormatValidator.validate(projectRequest.projectId)
-        if(projectRequest.name.length() > 50){
-            throw new SkillException("Bad Name [${projectRequest.name}] - must not exceed 50 chars.")
-        }
-
         CustomValidationResult customValidationResult = customValidator.validate(projectRequest)
         if(!customValidationResult.valid){
             throw new SkillException(customValidationResult.msg)
@@ -173,15 +168,6 @@ class AdminProjService {
 
     @Transactional()
     void saveSubject(String projectId, String origSubjectId, SubjectRequest subjectRequest) {
-        IdFormatValidator.validate(subjectRequest.subjectId)
-        if(subjectRequest.name.length() > 50){
-            throw new SkillException("Bad Name [${subjectRequest.name}] - must not exceed 50 chars.")
-        }
-        if(subjectRequest.description && subjectRequest.description.length() > maxDescriptionLength) {
-            throw new SkillException("Bad Description - must not exceed [${maxDescriptionLength}] chars")
-        }
-
-
         CustomValidationResult customValidationResult = customValidator.validate(subjectRequest)
         if(!customValidationResult.valid){
             throw new SkillException(customValidationResult.msg)
@@ -263,14 +249,6 @@ class AdminProjService {
 
     @Transactional()
     void saveBadge(String projectId, String originalBadgeId, BadgeRequest badgeRequest, SkillDef.ContainerType type = SkillDef.ContainerType.Badge) {
-        IdFormatValidator.validate(badgeRequest.badgeId)
-        if(badgeRequest.name.length() > 50){
-            throw new SkillException("Bad Name [${badgeRequest.name}] - must not exceed 50 chars.")
-        }
-        if(badgeRequest.description && badgeRequest.description.length() > maxDescriptionLength) {
-            throw new SkillException("Bad Description - must not exceed [${maxDescriptionLength}] chars")
-        }
-
         CustomValidationResult customValidationResult = customValidator.validate(badgeRequest)
         if(!customValidationResult.valid){
             throw new SkillException(customValidationResult.msg)
@@ -1062,14 +1040,7 @@ class AdminProjService {
 
     @Transactional()
     SkillDefRes saveSkill(String originalSkillId, SkillRequest skillRequest) {
-        IdFormatValidator.validate(skillRequest.skillId)
-        if (skillRequest.name.length() > 100) {
-            throw new SkillException("Bad Name [${skillRequest.name}] - must not exceed 100 chars.")
-        }
-        if(skillRequest.description && skillRequest.description.length() > maxDescriptionLength) {
-            throw new SkillException("Bad Description - must not exceed [${maxDescriptionLength}] chars")
-        }
-        SkillsValidator.isNotBlank(skillRequest.projectId, "Project Id")
+
         validateSkillVersion(skillRequest)
 
         CustomValidationResult customValidationResult = customValidator.validate(skillRequest)

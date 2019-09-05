@@ -22,8 +22,44 @@ class ValidationSpecs extends DefaultIntSpec {
 
         then:
         SkillsClientException e = thrown()
-        e.message.contains("explanation:Project name was not provided.")
+        e.message.contains("Project Name was not provided.")
         e.message.contains("errorCode:BadParam")
+    }
+
+    def "validate project id > 50 characters"(){
+        when:
+        skillsService.createProject([projectId: (1..51).collect({"a"}).join(""), name: 'name'])
+        then:
+        SkillsClientException exception = thrown()
+        exception.httpStatus == HttpStatus.BAD_REQUEST
+        exception.message.contains('[Project Id] must not exceed [50] chars.')
+    }
+
+    def "validate project id < 3 characters"(){
+        when:
+        skillsService.createProject([projectId: "aa", name: 'name' ])
+        then:
+        SkillsClientException exception = thrown()
+        exception.httpStatus == HttpStatus.BAD_REQUEST
+        exception.message.contains('[Project Id] must not be less than [3] chars.')
+    }
+
+    def "validate project name > 50 characters"(){
+        when:
+        skillsService.createProject([projectId: "pojectId", name: (1..51).collect({"a"}).join("") ])
+        then:
+        SkillsClientException exception = thrown()
+        exception.httpStatus == HttpStatus.BAD_REQUEST
+        exception.message.contains('[Project Name] must not exceed [50] chars.')
+    }
+
+    def "validate project name < 3 characters"(){
+        when:
+        skillsService.createProject([projectId: "aaaaaaa", name: 'me' ])
+        then:
+        SkillsClientException exception = thrown()
+        exception.httpStatus == HttpStatus.BAD_REQUEST
+        exception.message.contains('[Project Name] must not be less than [3] chars.')
     }
 
     def 'validate saving subjects without a subject name'() {
@@ -45,17 +81,52 @@ class ValidationSpecs extends DefaultIntSpec {
         result
         result.statusCode == HttpStatus.BAD_REQUEST
         result.body.explanation.contains('Subject Id was not provided.')
+    }
 
+    def "validate saving subject id > 50 characters"(){
+        when:
+        skillsService.createSubject([projectId: 'myProject', name: 'name' , subjectId: (1..51).collect({"a"}).join("")])
+        then:
+        SkillsClientException exception = thrown()
+        exception.httpStatus == HttpStatus.BAD_REQUEST
+        exception.message.contains('[Subject Id] must not exceed [50] chars.')
+    }
+
+    def "validate saving subject ID < 3 characters"(){
+        when:
+        skillsService.createSubject([projectId: 'myProject', name: "aaaa" , subjectId: 'an'])
+        then:
+        SkillsClientException exception = thrown()
+        exception.httpStatus == HttpStatus.BAD_REQUEST
+        exception.message.contains('[Subject Id] must not be less than [3] chars.')
     }
 
     def "validate saving subject with name > 50 characters"(){
         when:
-        def result = skillsService.createSubject([projectId: 'myProject', name: 'iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii', subjectId: 'anid'], false)
+        skillsService.createSubject([projectId: 'myProject', name: (1..51).collect({"a"}).join("") , subjectId: 'anid'])
+        then:
+        SkillsClientException exception = thrown()
+        exception.httpStatus == HttpStatus.BAD_REQUEST
+        exception.message.contains('[Subject Name] must not exceed [50] chars.')
+    }
+
+    def "validate saving subject with name < 3 characters"(){
+        when:
+        skillsService.createSubject([projectId: 'myProject', name: "aa" , subjectId: 'anid'])
+        then:
+        SkillsClientException exception = thrown()
+        exception.httpStatus == HttpStatus.BAD_REQUEST
+        exception.message.contains('[Subject Name] must not be less than [3] chars.')
+    }
+
+    def "validate saving subject with description > 2000 characters"(){
+        when:
+        def result = skillsService.createSubject([projectId: 'myProject', name: '99aa', subjectId: 'anid', description: (1..2001).collect({"a"}).join("") ])
 
         then:
-        result
-        result.statusCode == HttpStatus.BAD_REQUEST
-        result.body.explanation.contains('Bad Name')
+        SkillsClientException exception = thrown()
+        exception.httpStatus == HttpStatus.BAD_REQUEST
+        exception.message.contains('[Subject Description] must not exceed [2000] chars.')
     }
 
     def 'validate saving skills without an id'() {
@@ -98,6 +169,55 @@ class ValidationSpecs extends DefaultIntSpec {
         result
         result.statusCode == HttpStatus.BAD_REQUEST
         result.body.explanation.contains('numMaxOccurrencesIncrementInterval must be > 0')
+    }
+
+    def "create skill: numPerformToCompletion <= 10000"() {
+        Map skill = SkillsFactory.createSkill()
+        skill.projectId = projId
+        skill.numPerformToCompletion = 10001
+
+        def subject = SkillsFactory.createSubject()
+        subject.projectId = projId
+        skillsService.createSubject(subject)
+        when:
+        skillsService.createSkill(skill)
+        then:
+        SkillsClientException exception = thrown()
+        exception.httpStatus == HttpStatus.BAD_REQUEST
+        exception.message.contains('[numPerformToCompletion] must be <= [10000]')
+    }
+
+    def "create skill: pointIncrement <= 10000"() {
+        Map skill = SkillsFactory.createSkill()
+        skill.projectId = projId
+        skill.pointIncrement = 10001
+
+        def subject = SkillsFactory.createSubject()
+        subject.projectId = projId
+        skillsService.createSubject(subject)
+        when:
+        skillsService.createSkill(skill)
+        then:
+        SkillsClientException exception = thrown()
+        exception.httpStatus == HttpStatus.BAD_REQUEST
+        exception.message.contains('[pointIncrement] must be <= [10000]')
+    }
+
+    def "create skill: numMaxOccurrencesIncrementInterval <= 999"() {
+        Map skill = SkillsFactory.createSkill()
+        skill.projectId = projId
+        skill.numPerformToCompletion = 5000
+        skill.numMaxOccurrencesIncrementInterval = 1000
+
+        def subject = SkillsFactory.createSubject()
+        subject.projectId = projId
+        skillsService.createSubject(subject)
+        when:
+        skillsService.createSkill(skill)
+        then:
+        SkillsClientException exception = thrown()
+        exception.httpStatus == HttpStatus.BAD_REQUEST
+        exception.message.contains('[numMaxOccurrencesIncrementInterval] must be <= [999]')
     }
 
     def "create skill: if Time Window enabled then numMaxOccurrencesIncrementInterval must be <= numPerformToCompletion"() {
@@ -166,14 +286,14 @@ class ValidationSpecs extends DefaultIntSpec {
         result.body.explanation.contains('version must be >= 0')
     }
 
-    def 'validate saving skills with a too-large version'() {
+    def 'validate saving skills with version > 999'() {
         when:
         def result = skillsService.createSkill([projectId: 'myProject', subjectId: 'subjectId1', skillId: 'id1', name: 'name1', pointIncrement: 1, pointIncrementInterval: 60, numMaxOccurrencesIncrementInterval: 1, numPerformToCompletion: 1, version: 1000], false )
 
         then:
         result
         result.statusCode == HttpStatus.BAD_REQUEST
-        result.body.explanation.contains('version exceeds max version')
+        result.body.explanation.contains('[Skill Version] must be <= [999]')
     }
 
     def 'validate a skill version cannot be edited'() {
@@ -198,12 +318,45 @@ class ValidationSpecs extends DefaultIntSpec {
     def 'validate a skill name > 100 characters'(){
         when:
         def r = skillsService.createSubject([projectId: 'myProject', subjectId: 'subj', name:'aname'], false)
-        def result = skillsService.createSkill([projectId: 'myProject', subjectId: 'subj', skillId: 'id1', name: 'name: iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii', pointIncrement: 1, pointIncrementInterval: 60, numMaxOccurrencesIncrementInterval: 1, numPerformToCompletion: 5], false )
+        def result = skillsService.createSkill([projectId: 'myProject', subjectId: 'subj', skillId: 'id1', name: (1..101).collect {"a"}.join(""), pointIncrement: 1, pointIncrementInterval: 60, numMaxOccurrencesIncrementInterval: 1, numPerformToCompletion: 5], false )
 
         then:
         result
         result.statusCode == HttpStatus.BAD_REQUEST
-        result.body.explanation.contains('Bad Name')
+        result.body.explanation.contains('[Skill Name] must not exceed [100] chars.')
+    }
+
+    def 'validate a skill name < 3 characters'(){
+        when:
+        def r = skillsService.createSubject([projectId: 'myProject', subjectId: 'subj', name:'aname'], false)
+        def result = skillsService.createSkill([projectId: 'myProject', subjectId: 'subj', skillId: 'id1', name: "so", pointIncrement: 1, pointIncrementInterval: 60, numMaxOccurrencesIncrementInterval: 1, numPerformToCompletion: 5], false )
+
+        then:
+        result
+        result.statusCode == HttpStatus.BAD_REQUEST
+        result.body.explanation.contains('[Skill Name] must not be less than [3] chars.')
+    }
+
+    def 'validate a skill id > 50 characters'(){
+        when:
+        def r = skillsService.createSubject([projectId: 'myProject', subjectId: 'subj', name:'aname'], false)
+        def result = skillsService.createSkill([projectId: 'myProject', subjectId: 'subj', skillId: (1..51).collect {"a"}.join(""), name: "anem is", pointIncrement: 1, pointIncrementInterval: 60, numMaxOccurrencesIncrementInterval: 1, numPerformToCompletion: 5], false )
+
+        then:
+        result
+        result.statusCode == HttpStatus.BAD_REQUEST
+        result.body.explanation.contains('[Skill Id] must not exceed [50] chars.')
+    }
+
+    def 'validate a skill id < 3 characters'(){
+        when:
+        def r = skillsService.createSubject([projectId: 'myProject', subjectId: 'subj', name:'aname'], false)
+        def result = skillsService.createSkill([projectId: 'myProject', subjectId: 'subj', skillId: 'id', name: "soeaef", pointIncrement: 1, pointIncrementInterval: 60, numMaxOccurrencesIncrementInterval: 1, numPerformToCompletion: 5], false )
+
+        then:
+        result
+        result.statusCode == HttpStatus.BAD_REQUEST
+        result.body.explanation.contains('[Skill Id] must not be less than [3] chars.')
     }
 
     def 'validate badge name > 50 characters'(){
@@ -214,12 +367,86 @@ class ValidationSpecs extends DefaultIntSpec {
         Date oneWeekAgo = new Date()-7
         Date twoWeeksAgo = new Date()-14
 
-        Map badge = [projectId: projId, badgeId: 'badge1', name: 'Test Badge 1iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii', startDate: twoWeeksAgo, endDate: oneWeekAgo,
+        Map badge = [projectId: projId, badgeId: 'badge1', name: (1..51).collect {"a"}.join(""), startDate: twoWeeksAgo, endDate: oneWeekAgo,
                      requiredSkillsIds: ['id1']]
         skillsService.createBadge(badge)
 
         then:
-        thrown(SkillsClientException)
+        SkillsClientException exception = thrown()
+        exception.httpStatus == HttpStatus.BAD_REQUEST
+        exception.message.contains('[Badge Name] must not exceed [50] chars.')
+    }
+
+    def 'validate badge name < 3 characters'(){
+        when:
+        def r = skillsService.createSubject([projectId: 'myProject', subjectId: 'subj', name:'aname'], false)
+        def result = skillsService.createSkill([projectId: 'myProject', subjectId: 'subj', skillId: 'id1', name: 'name', pointIncrement: 1, pointIncrementInterval: 60, numMaxOccurrencesIncrementInterval: 1, numPerformToCompletion: 5], false )
+
+        Date oneWeekAgo = new Date()-7
+        Date twoWeeksAgo = new Date()-14
+
+        Map badge = [projectId: projId, badgeId: 'badge1', name: "aa", startDate: twoWeeksAgo, endDate: oneWeekAgo,
+                     requiredSkillsIds: ['id1']]
+        skillsService.createBadge(badge)
+
+        then:
+        SkillsClientException exception = thrown()
+        exception.httpStatus == HttpStatus.BAD_REQUEST
+        exception.message.contains('[Badge Name] must not be less than [3] chars')
+    }
+
+    def 'validate badge description > 2000 characters'(){
+        when:
+        def r = skillsService.createSubject([projectId: 'myProject', subjectId: 'subj', name:'aname'], false)
+        def result = skillsService.createSkill([projectId: 'myProject', subjectId: 'subj', skillId: 'id1', name: 'name', pointIncrement: 1, pointIncrementInterval: 60, numMaxOccurrencesIncrementInterval: 1, numPerformToCompletion: 5], false )
+
+        Date oneWeekAgo = new Date()-7
+        Date twoWeeksAgo = new Date()-14
+
+        Map badge = [projectId: projId, badgeId: 'badge1', name: "aaaa", startDate: twoWeeksAgo, endDate: oneWeekAgo, description: (1..2001).collect { "a" }.join(""),
+                     requiredSkillsIds: ['id1']]
+        skillsService.createBadge(badge)
+
+        then:
+        SkillsClientException exception = thrown()
+        exception.httpStatus == HttpStatus.BAD_REQUEST
+        exception.message.contains('[Badge Description] must not exceed [2000] chars.')
+    }
+
+    def 'validate badge id > 50 characters'(){
+        when:
+        def r = skillsService.createSubject([projectId: 'myProject', subjectId: 'subj', name:'aname'], false)
+        def result = skillsService.createSkill([projectId: 'myProject', subjectId: 'subj', skillId: 'id1', name: 'name', pointIncrement: 1, pointIncrementInterval: 60, numMaxOccurrencesIncrementInterval: 1, numPerformToCompletion: 5], false )
+
+        Date oneWeekAgo = new Date()-7
+        Date twoWeeksAgo = new Date()-14
+
+        Map badge = [projectId: projId, badgeId: (1..51).collect {"a"}.join(""), name: "badge 1", startDate: twoWeeksAgo, endDate: oneWeekAgo,
+                     requiredSkillsIds: ['id1']]
+        skillsService.createBadge(badge)
+
+        then:
+        SkillsClientException exception = thrown()
+        exception.httpStatus == HttpStatus.BAD_REQUEST
+        exception.message.contains('[Badge Id] must not exceed [50] chars.')
+    }
+
+    def 'validate badge id < 3 characters'(){
+        when:
+        def r = skillsService.createSubject([projectId: 'myProject', subjectId: 'subj', name:'aname'], false)
+        def result = skillsService.createSkill([projectId: 'myProject', subjectId: 'subj', skillId: 'id1', name: 'name', pointIncrement: 1, pointIncrementInterval: 60, numMaxOccurrencesIncrementInterval: 1, numPerformToCompletion: 5], false )
+
+        Date oneWeekAgo = new Date()-7
+        Date twoWeeksAgo = new Date()-14
+
+        Map badge = [projectId: projId, badgeId: "aa", name: "badge 1", startDate: twoWeeksAgo, endDate: oneWeekAgo,
+                     requiredSkillsIds: ['id1']]
+        skillsService.createBadge(badge)
+
+        then:
+        SkillsClientException exception = thrown()
+        exception.httpStatus == HttpStatus.BAD_REQUEST
+        exception.message.contains('[Badge Id] must not be less than [3] chars.')
     }
 
     def 'test userExists endpoint works correctly'() {
@@ -235,4 +462,21 @@ class ValidationSpecs extends DefaultIntSpec {
         !nonExistingUserExists
     }
 
+    def 'users password >= 8 chars'() {
+        when:
+        createService("veryUniqueIda0201", "aaaaaaa")
+        then:
+        SkillsClientException exception = thrown()
+        exception.httpStatus == HttpStatus.BAD_REQUEST
+        exception.message.contains('[password] must not be less than [8] chars')
+    }
+
+    def 'users password <= 40 chars'() {
+        when:
+        createService("veryUniqueIda0201", (1..41).collect { "a" }.join(""))
+        then:
+        SkillsClientException exception = thrown()
+        exception.httpStatus == HttpStatus.BAD_REQUEST
+        exception.message.contains('[password] must not exceed [40] chars')
+    }
 }

@@ -7,41 +7,15 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.PageRequest
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
+import skills.PublicProps
 import skills.controller.exceptions.SkillsValidator
-import skills.controller.request.model.ActionPatchRequest
-import skills.controller.request.model.BadgeRequest
-import skills.controller.request.model.EditLevelRequest
-import skills.controller.request.model.NextLevelRequest
-import skills.controller.request.model.ProjectSettingsRequest
-import skills.controller.request.model.SkillDefForDependencyRes
-import skills.controller.request.model.SkillRequest
-import skills.controller.request.model.SubjectRequest
-import skills.controller.result.model.BadgeResult
-import skills.controller.result.model.LevelDefinitionRes
-import skills.controller.result.model.NumUsersRes
-import skills.controller.result.model.ProjectResult
-import skills.controller.result.model.RequestResult
-import skills.controller.result.model.SettingsResult
-import skills.controller.result.model.SharedSkillResult
-import skills.controller.result.model.SimpleProjectResult
-import skills.controller.result.model.SkillDefRes
-import skills.controller.result.model.SkillDefPartialRes
-import skills.controller.result.model.SkillDefSkinnyRes
-import skills.controller.result.model.SkillsGraphRes
-import skills.controller.result.model.SubjectResult
-import skills.controller.result.model.TableResult
-import skills.controller.result.model.UserSkillsStats
-import skills.services.AdminProjService
-import skills.services.AdminUsersService
-import skills.services.GlobalBadgesService
-import skills.services.LevelDefinitionStorageService
-import skills.services.SkillEventAdminService
-import skills.services.UserAdminService
+import skills.controller.request.model.*
+import skills.controller.result.model.*
+import skills.services.*
 import skills.services.events.SkillEventResult
 import skills.services.settings.SettingsService
 import skills.services.settings.listeners.ValidationRes
 import skills.utils.ClientSecretGenerator
-import skills.utils.Constants
 
 import java.nio.charset.StandardCharsets
 
@@ -75,22 +49,38 @@ class AdminController {
     @Autowired
     GlobalBadgesService globalBadgesService
 
+    @Autowired
+    PublicPropsBasedValidator propsBasedValidator
+
     @Value('#{"${skills.config.ui.maxTimeWindowInMinutes}"}')
     int maxTimeWindowInMinutes
 
     @RequestMapping(value = "/projects/{id}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
     @ResponseBody
     RequestResult saveProject(@PathVariable("id") String projectId, @RequestBody skills.controller.request.model.ProjectRequest projectRequest) {
-        skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
-        skills.controller.exceptions.SkillsValidator.isNotBlank(projectRequest.projectId, "Project Id")
-        skills.controller.exceptions.SkillsValidator.isNotBlank(projectRequest.name, " Name")
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(projectRequest.projectId, "Project Id")
+        SkillsValidator.isNotBlank(projectRequest.name, " Name")
+
+        IdFormatValidator.validate(projectId)
+        IdFormatValidator.validate(projectRequest.projectId)
+
+        propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxIdLength, "Project Id", projectId)
+        propsBasedValidator.validateMinStrLength(PublicProps.UiProp.minIdLength, "Project Id", projectId)
+
+        propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxIdLength, "Project Id", projectRequest.projectId)
+        propsBasedValidator.validateMinStrLength(PublicProps.UiProp.minIdLength, "Project Id", projectRequest.projectId)
+
+        propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxProjectNameLength, "Project Name", projectRequest.name)
+        propsBasedValidator.validateMinStrLength(PublicProps.UiProp.minNameLength, "Project Name", projectRequest.name)
+
         projectAdminStorageService.saveProject(projectId, projectRequest)
         return new skills.controller.result.model.RequestResult(success: true)
     }
 
     @RequestMapping(value = "/projects/{id}", method = RequestMethod.DELETE)
     void deleteProject(@PathVariable("id") String projectId) {
-        skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(projectId, "Project Id")
         projectAdminStorageService.deleteProject(projectId)
     }
 
@@ -98,8 +88,8 @@ class AdminController {
     @ResponseBody
     RequestResult setProjectDisplayOrder(
             @PathVariable("projectId") String projectId, @RequestBody ActionPatchRequest projectPatchRequest) {
-        skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
-        skills.controller.exceptions.SkillsValidator.isNotNull(projectPatchRequest.action, "Action", projectId)
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotNull(projectPatchRequest.action, "Action", projectId)
 
         projectAdminStorageService.setProjectDisplayOrder(projectId, projectPatchRequest)
         return new RequestResult(success: true)
@@ -108,13 +98,13 @@ class AdminController {
     @RequestMapping(value = "/projects/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     ProjectResult getProject(@PathVariable("id") String projectId) {
-        skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(projectId, "Project Id")
         return projectAdminStorageService.getProject(projectId)
     }
 
     @RequestMapping(value = "/projects/{id}/projectSearch", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     List<SimpleProjectResult> searchProjects(@PathVariable("id") String projectId, @RequestParam("nameQuery") nameQuery) {
-        skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(projectId, "Project Id")
         return projectAdminStorageService.searchProjects(projectId, nameQuery)
     }
 
@@ -124,9 +114,18 @@ class AdminController {
                               @PathVariable("subjectId") String subjectId,
                               @RequestBody SubjectRequest subjectRequest) {
         subjectRequest.subjectId = subjectRequest.subjectId ?: subjectId
-        skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
-        skills.controller.exceptions.SkillsValidator.isNotBlank(subjectId, "Subject Id", projectId)
-        skills.controller.exceptions.SkillsValidator.isNotBlank(subjectRequest?.name, "Subject name", projectId)
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(subjectId, "Subject Id", projectId)
+        SkillsValidator.isNotBlank(subjectRequest?.name, "Subject name", projectId)
+
+        IdFormatValidator.validate(subjectRequest.subjectId)
+
+        propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxIdLength, "Subject Id", subjectRequest.subjectId)
+        propsBasedValidator.validateMinStrLength(PublicProps.UiProp.minIdLength, "Subject Id", subjectRequest.subjectId)
+
+        propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxSubjectNameLength, "Subject Name", subjectRequest.name)
+        propsBasedValidator.validateMinStrLength(PublicProps.UiProp.minNameLength, "Subject Name", subjectRequest.name)
+        propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.descriptionMaxLength, "Subject Description", subjectRequest.description)
 
         projectAdminStorageService.saveSubject(projectId, subjectId, subjectRequest)
         return new RequestResult(success: true)
@@ -136,8 +135,8 @@ class AdminController {
     @ResponseBody
     boolean doesSubjectNameExist(@PathVariable("projectId") String projectId,
                              @RequestParam(value = "subjectName", required = false) String subjectName) {
-        skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
-        skills.controller.exceptions.SkillsValidator.isNotBlank(subjectName, "Subject Name")
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(subjectName, "Subject Name")
         String decodedName = URLDecoder.decode(subjectName,  StandardCharsets.UTF_8.toString())
         return projectAdminStorageService.existsBySubjectName(projectId, decodedName)
     }
@@ -146,8 +145,8 @@ class AdminController {
     @ResponseBody
     boolean doesBadgeExist(@PathVariable("projectId") String projectId,
                              @RequestParam(value = "badgeName", required = false) String badgeName) {
-        skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
-        skills.controller.exceptions.SkillsValidator.isNotBlank(badgeName, "Badge Name")
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(badgeName, "Badge Name")
         String decodedName = URLDecoder.decode(badgeName,  StandardCharsets.UTF_8.toString())
         return projectAdminStorageService.existsByBadgeName(projectId, decodedName)
     }
@@ -155,8 +154,8 @@ class AdminController {
     @ResponseBody
     boolean doesSkillNameExist(@PathVariable("projectId") String projectId,
                            @RequestParam(value = "skillName", required = false) String skillName) {
-        skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
-        skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Skill Name")
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(projectId, "Skill Name")
         String decodedName = URLDecoder.decode(skillName,  StandardCharsets.UTF_8.toString())
         return projectAdminStorageService.existsBySkillName(projectId, decodedName)
     }
@@ -171,16 +170,16 @@ class AdminController {
     @ResponseBody
     boolean doesProjectEntityIdExist(@PathVariable("projectId") String projectId,
                                     @RequestParam(value = "id") String id) {
-        skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
-        skills.controller.exceptions.SkillsValidator.isNotBlank(id, "Entity Id")
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(id, "Entity Id")
 
         return projectAdminStorageService.existsBySkillId(projectId, id)
     }
 
     @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}", method = RequestMethod.DELETE)
     void deleteSubject(@PathVariable("projectId") String projectId, @PathVariable("subjectId") String subjectId) {
-        skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
-        skills.controller.exceptions.SkillsValidator.isNotBlank(subjectId, "Subject Id", projectId)
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(subjectId, "Subject Id", projectId)
 
         projectAdminStorageService.deleteSubject(projectId, subjectId)
     }
@@ -188,15 +187,15 @@ class AdminController {
     @RequestMapping(value = "/projects/{projectId}/subjects", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     List<SubjectResult> getSubjects(@PathVariable("projectId") String projectId) {
-        skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(projectId, "Project Id")
         return projectAdminStorageService.getSubjects(projectId)
     }
 
     @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     SubjectResult getSubject(@PathVariable("projectId") String projectId, @PathVariable("subjectId") String subjectId) {
-        skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
-        skills.controller.exceptions.SkillsValidator.isNotBlank(subjectId, "Subject Id", projectId)
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(subjectId, "Subject Id", projectId)
         return projectAdminStorageService.getSubject(projectId, subjectId)
     }
 
@@ -205,9 +204,9 @@ class AdminController {
     RequestResult setSubjectDisplayOrder(
             @PathVariable("projectId") String projectId,
             @PathVariable("subjectId") String subjectId, @RequestBody ActionPatchRequest subjectPatchRequest) {
-        skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
-        skills.controller.exceptions.SkillsValidator.isNotBlank(subjectId, "Subject Id", projectId)
-        skills.controller.exceptions.SkillsValidator.isNotNull(subjectPatchRequest.action, "Action must be provided", projectId)
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(subjectId, "Subject Id", projectId)
+        SkillsValidator.isNotNull(subjectPatchRequest.action, "Action must be provided", projectId)
         projectAdminStorageService.setSubjectDisplayOrder(projectId, subjectId, subjectPatchRequest)
         return new RequestResult(success: true)
     }
@@ -217,12 +216,21 @@ class AdminController {
     RequestResult saveBadge(@PathVariable("projectId") String projectId,
                             @PathVariable("badgeId") String badgeId,
                             @RequestBody BadgeRequest badgeRequest) {
-        skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
-        skills.controller.exceptions.SkillsValidator.isNotBlank(badgeId, "Badge Id", projectId)
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(badgeId, "Badge Id", projectId)
         badgeRequest.badgeId = badgeRequest.badgeId ?: badgeId
-        skills.controller.exceptions.SkillsValidator.isNotBlank(badgeRequest?.name, "Badge Name", projectId)
-        skills.controller.exceptions.SkillsValidator.isTrue((badgeRequest.startDate && badgeRequest.endDate) || (!badgeRequest.startDate && !badgeRequest.endDate),
+        SkillsValidator.isNotBlank(badgeRequest?.name, "Badge Name", projectId)
+        SkillsValidator.isTrue((badgeRequest.startDate && badgeRequest.endDate) || (!badgeRequest.startDate && !badgeRequest.endDate),
                 "If one date is provided then both start and end dates must be provided", projectId)
+
+        IdFormatValidator.validate(badgeRequest.badgeId)
+
+        propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxIdLength, "Badge Id", badgeRequest.badgeId)
+        propsBasedValidator.validateMinStrLength(PublicProps.UiProp.minIdLength, "Badge Id", badgeRequest.badgeId)
+
+        propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxBadgeNameLength, "Badge Name", badgeRequest.name)
+        propsBasedValidator.validateMinStrLength(PublicProps.UiProp.minNameLength, "Badge Name", badgeRequest.name)
+        propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.descriptionMaxLength, "Badge Description", badgeRequest.description)
 
         projectAdminStorageService.saveBadge(projectId, badgeId, badgeRequest)
         return new RequestResult(success: true)
@@ -233,9 +241,9 @@ class AdminController {
     RequestResult assignSkillToBadge(@PathVariable("projectId") String projectId,
                                      @PathVariable("badgeId") String badgeId,
                                      @PathVariable("skillId") String skillId) {
-        skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
-        skills.controller.exceptions.SkillsValidator.isNotBlank(badgeId, "Badge Id", projectId)
-        skills.controller.exceptions.SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(badgeId, "Badge Id", projectId)
+        SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
 
         projectAdminStorageService.addSkillToBadge(projectId, badgeId, skillId)
         return new RequestResult(success: true)
@@ -247,17 +255,17 @@ class AdminController {
                                        @PathVariable("badgeId") String badgeId,
                                        @PathVariable("skillId") String skillId) {
         projectAdminStorageService.removeSkillFromBadge(projectId, badgeId, skillId)
-        skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
-        skills.controller.exceptions.SkillsValidator.isNotBlank(badgeId, "Badge Id", projectId)
-        skills.controller.exceptions.SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(badgeId, "Badge Id", projectId)
+        SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
 
         return new RequestResult(success: true)
     }
 
     @RequestMapping(value = "/projects/{projectId}/badges/{badgeId}", method = RequestMethod.DELETE)
     void deleteBadge(@PathVariable("projectId") String projectId, @PathVariable("badgeId") String badgeId) {
-        skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
-        skills.controller.exceptions.SkillsValidator.isNotBlank(badgeId, "Badge Id", projectId)
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(badgeId, "Badge Id", projectId)
 
         projectAdminStorageService.deleteBadge(projectId, badgeId)
     }
@@ -265,7 +273,7 @@ class AdminController {
     @RequestMapping(value = "/projects/{projectId}/badges", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     List<BadgeResult> getBadges(@PathVariable("projectId") String projectId) {
-        skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(projectId, "Project Id")
 
         return projectAdminStorageService.getBadges(projectId)
     }
@@ -274,8 +282,8 @@ class AdminController {
     @ResponseBody
     BadgeResult getBadge(@PathVariable("projectId") String projectId,
                          @PathVariable("badgeId") String badgeId) {
-        skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
-        skills.controller.exceptions.SkillsValidator.isNotBlank(badgeId, "Badge Id", projectId)
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(badgeId, "Badge Id", projectId)
 
         return projectAdminStorageService.getBadge(projectId, badgeId)
     }
@@ -285,9 +293,9 @@ class AdminController {
     void setBadgeDisplayOrder(
             @PathVariable("projectId") String projectId,
             @PathVariable("badgeId") String badgeId, @RequestBody ActionPatchRequest badgePatchRequest) {
-        skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
-        skills.controller.exceptions.SkillsValidator.isNotBlank(badgeId, "Badge Id", projectId)
-        skills.controller.exceptions.SkillsValidator.isNotNull(badgePatchRequest.action, "Action must be provided", projectId)
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(badgeId, "Badge Id", projectId)
+        SkillsValidator.isNotNull(badgePatchRequest.action, "Action must be provided", projectId)
 
         projectAdminStorageService.setBadgeDisplayOrder(projectId, badgeId, badgePatchRequest)
     }
@@ -295,8 +303,8 @@ class AdminController {
     @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/skills", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     List<SkillDefPartialRes> getSkills(
             @PathVariable("projectId") String projectId, @PathVariable("subjectId") String subjectId) {
-        skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
-        skills.controller.exceptions.SkillsValidator.isNotBlank(subjectId, "Subject Id", projectId)
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(subjectId, "Subject Id", projectId)
 
         return projectAdminStorageService.getSkills(projectId, subjectId)
     }
@@ -306,9 +314,9 @@ class AdminController {
     SkillDefRes getSkill(
             @PathVariable("projectId") String projectId,
             @PathVariable("subjectId") String subjectId, @PathVariable("skillId") String skillId) {
-        skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
-        skills.controller.exceptions.SkillsValidator.isNotBlank(subjectId, "Subject Id", projectId)
-        skills.controller.exceptions.SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(subjectId, "Subject Id", projectId)
+        SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
 
         return projectAdminStorageService.getSkill(projectId, subjectId, skillId)
     }
@@ -320,31 +328,42 @@ class AdminController {
                             @PathVariable("skillId") String skillId,
                             @RequestBody SkillRequest skillRequest) {
 
-        skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
-        skills.controller.exceptions.SkillsValidator.isNotBlank(subjectId, "Subject Id", projectId)
-        skills.controller.exceptions.SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(subjectId, "Subject Id", projectId)
+        SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
 
-        skills.controller.exceptions.SkillsValidator.isFirstOrMustEqualToSecond(skillRequest.projectId, projectId, "Project Id")
+        SkillsValidator.isFirstOrMustEqualToSecond(skillRequest.projectId, projectId, "Project Id")
         skillRequest.projectId = skillRequest.projectId ?: projectId
 
-        skills.controller.exceptions.SkillsValidator.isFirstOrMustEqualToSecond(skillRequest.subjectId, subjectId, "Subject Id")
+        SkillsValidator.isFirstOrMustEqualToSecond(skillRequest.subjectId, subjectId, "Subject Id")
         skillRequest.subjectId = skillRequest.subjectId ?: subjectId
         skillRequest.skillId = skillRequest.skillId ?: skillId
 
-        skills.controller.exceptions.SkillsValidator.isTrue(skillRequest.pointIncrement > 0, "pointIncrement must be > 0", projectId, skillId)
-        skills.controller.exceptions.SkillsValidator.isTrue(skillRequest.pointIncrementInterval >= 0, "pointIncrementInterval must be >= 0", projectId, skillId)
-        skills.controller.exceptions.SkillsValidator.isTrue(skillRequest.pointIncrementInterval <= maxTimeWindowInMinutes, "pointIncrementInterval must be <= $maxTimeWindowInMinutes", projectId, skillId)
-        skills.controller.exceptions.SkillsValidator.isTrue(skillRequest.numPerformToCompletion > 0, "numPerformToCompletion must be > 0", projectId, skillId)
-        skills.controller.exceptions.SkillsValidator.isTrue(skillRequest.numPerformToCompletion <= 10000, "numPerformToCompletion must be <= 10000", projectId, skillId)
+        SkillsValidator.isTrue(skillRequest.pointIncrement > 0, "pointIncrement must be > 0", projectId, skillId)
+        propsBasedValidator.validateMaxIntValue(PublicProps.UiProp.maxPointIncrement, "pointIncrement", skillRequest.pointIncrement)
+
+        SkillsValidator.isTrue(skillRequest.pointIncrementInterval >= 0, "pointIncrementInterval must be >= 0", projectId, skillId)
+        SkillsValidator.isTrue(skillRequest.pointIncrementInterval <= maxTimeWindowInMinutes, "pointIncrementInterval must be <= $maxTimeWindowInMinutes", projectId, skillId)
+        SkillsValidator.isTrue(skillRequest.numPerformToCompletion > 0, "numPerformToCompletion must be > 0", projectId, skillId)
+        propsBasedValidator.validateMaxIntValue(PublicProps.UiProp.maxNumPerformToCompletion, "numPerformToCompletion", skillRequest.numPerformToCompletion)
 
         if ( skillRequest.pointIncrementInterval > 0) {
             // if pointIncrementInterval is disabled then this validation is not needed
-            skills.controller.exceptions.SkillsValidator.isTrue(skillRequest.numMaxOccurrencesIncrementInterval > 0, "numMaxOccurrencesIncrementInterval must be > 0", projectId, skillId)
-            skills.controller.exceptions.SkillsValidator.isTrue(skillRequest.numPerformToCompletion >= skillRequest.numMaxOccurrencesIncrementInterval, "numPerformToCompletion must be >= numMaxOccurrencesIncrementInterval", projectId, skillId)
+            SkillsValidator.isTrue(skillRequest.numMaxOccurrencesIncrementInterval > 0, "numMaxOccurrencesIncrementInterval must be > 0", projectId, skillId)
+            SkillsValidator.isTrue(skillRequest.numPerformToCompletion >= skillRequest.numMaxOccurrencesIncrementInterval, "numPerformToCompletion must be >= numMaxOccurrencesIncrementInterval", projectId, skillId)
+            propsBasedValidator.validateMaxIntValue(PublicProps.UiProp.maxNumPointIncrementMaxOccurrences, "numMaxOccurrencesIncrementInterval", skillRequest.numMaxOccurrencesIncrementInterval)
         }
 
-        skills.controller.exceptions.SkillsValidator.isTrue(skillRequest.version >= 0, "version must be >= 0", projectId, skillId)
-        skills.controller.exceptions.SkillsValidator.isTrue(skillRequest.version < Constants.MAX_VERSION, "version exceeds max version", projectId, skillId)
+        SkillsValidator.isTrue(skillRequest.version >= 0, "version must be >= 0", projectId, skillId)
+        propsBasedValidator.validateMaxIntValue(PublicProps.UiProp.maxSkillVersion, "Skill Version", skillRequest.version)
+
+        IdFormatValidator.validate(skillRequest.skillId)
+        propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxIdLength, "Skill Id", skillRequest.skillId)
+        propsBasedValidator.validateMinStrLength(PublicProps.UiProp.minIdLength, "Skill Id", skillRequest.skillId)
+
+        propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxSkillNameLength, "Skill Name", skillRequest.name)
+        propsBasedValidator.validateMinStrLength(PublicProps.UiProp.minNameLength, "Skill Name", skillRequest.name)
+        propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.descriptionMaxLength, "Skill Description", skillRequest.description)
 
         projectAdminStorageService.saveSkill(skillId, skillRequest)
         return new RequestResult(success: true)
@@ -352,14 +371,14 @@ class AdminController {
 
     @GetMapping(value = '/projects/{projectId}/latestVersion', produces = 'application/json')
     Integer findLatestSkillVersion(@PathVariable('projectId') String projectId) {
-        skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(projectId, "Project Id")
         return projectAdminStorageService.findLatestSkillVersion(projectId)
     }
 
     @RequestMapping(value = "/projects/{projectId}/dependency/availableSkills", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     List<SkillDefForDependencyRes> getSkillsAvailableForDependency(@PathVariable("projectId") String projectId) {
-        skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(projectId, "Project Id")
         return projectAdminStorageService.getSkillsAvailableForDependency(projectId)
     }
 
@@ -368,9 +387,9 @@ class AdminController {
     RequestResult assignDependency(@PathVariable("projectId") String projectId,
                                    @PathVariable("skillId") String skillId,
                                    @PathVariable("dependentSkillId") String dependentSkillId) {
-        skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
-        skills.controller.exceptions.SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
-        skills.controller.exceptions.SkillsValidator.isNotBlank(dependentSkillId, "Dependent Skill Id", projectId)
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
+        SkillsValidator.isNotBlank(dependentSkillId, "Dependent Skill Id", projectId)
 
         projectAdminStorageService.assignSkillDependency(projectId, skillId, dependentSkillId)
         return new RequestResult(success: true)
@@ -383,10 +402,10 @@ class AdminController {
                                                      @PathVariable("skillId") String skillId,
                                                      @PathVariable("dependentProjectId") String dependentProjectId,
                                                      @PathVariable("dependentSkillId") String dependentSkillId) {
-        skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
-        skills.controller.exceptions.SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
-        skills.controller.exceptions.SkillsValidator.isNotBlank(dependentProjectId, "Dependent Project Id", projectId)
-        skills.controller.exceptions.SkillsValidator.isNotBlank(dependentSkillId, "Dependent Skill Id", projectId)
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
+        SkillsValidator.isNotBlank(dependentProjectId, "Dependent Project Id", projectId)
+        SkillsValidator.isNotBlank(dependentSkillId, "Dependent Skill Id", projectId)
 
         projectAdminStorageService.assignSkillDependency(projectId, skillId, dependentSkillId, dependentProjectId)
         return new RequestResult(success: true)
@@ -398,9 +417,9 @@ class AdminController {
     RequestResult removeDependency(@PathVariable("projectId") String projectId,
                                    @PathVariable("skillId") String skillId,
                                    @PathVariable("dependentSkillId") String dependentSkillId) {
-        skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
-        skills.controller.exceptions.SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
-        skills.controller.exceptions.SkillsValidator.isNotBlank(dependentSkillId, "Dependent Skill Id", projectId)
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
+        SkillsValidator.isNotBlank(dependentSkillId, "Dependent Skill Id", projectId)
 
         projectAdminStorageService.removeSkillDependency(projectId, skillId, dependentSkillId)
         return new RequestResult(success: true)
@@ -412,10 +431,10 @@ class AdminController {
                                                      @PathVariable("skillId") String skillId,
                                                      @PathVariable("dependentProjectId") String dependentProjectId,
                                                      @PathVariable("dependentSkillId") String dependentSkillId) {
-        skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
-        skills.controller.exceptions.SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
-        skills.controller.exceptions.SkillsValidator.isNotBlank(dependentProjectId, "Dependent Project Id", projectId)
-        skills.controller.exceptions.SkillsValidator.isNotBlank(dependentSkillId, "Dependent Skill Id", projectId)
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
+        SkillsValidator.isNotBlank(dependentProjectId, "Dependent Project Id", projectId)
+        SkillsValidator.isNotBlank(dependentSkillId, "Dependent Skill Id", projectId)
 
         projectAdminStorageService.removeSkillDependency(projectId, skillId, dependentSkillId, dependentProjectId)
         return new RequestResult(success: true)
@@ -425,8 +444,8 @@ class AdminController {
     @ResponseBody
     SkillsGraphRes getDependencyForSkill(@PathVariable("projectId") String projectId,
                                          @PathVariable("skillId") String skillId) {
-        skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
-        skills.controller.exceptions.SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
 
         return projectAdminStorageService.getDependentSkillsGraph(projectId, skillId)
     }
@@ -434,7 +453,7 @@ class AdminController {
     @RequestMapping(value = "/projects/{projectId}/dependency/graph", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     SkillsGraphRes getDependencyForProject(@PathVariable("projectId") String projectId) {
-        skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(projectId, "Project Id")
 
         return projectAdminStorageService.getDependentSkillsGraph(projectId)
     }
@@ -445,10 +464,10 @@ class AdminController {
                                           @PathVariable("subjectId") String subjectId,
                                           @PathVariable("skillId") String skillId,
                                           @RequestBody ActionPatchRequest patchRequest) {
-        skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
-        skills.controller.exceptions.SkillsValidator.isNotBlank(subjectId, "Subject Id", projectId)
-        skills.controller.exceptions.SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
-        skills.controller.exceptions.SkillsValidator.isNotNull(patchRequest.action, "Action must be provided", projectId)
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(subjectId, "Subject Id", projectId)
+        SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
+        SkillsValidator.isNotNull(patchRequest.action, "Action must be provided", projectId)
 
         projectAdminStorageService.updateSkillDisplayOrder(projectId, subjectId, skillId, patchRequest)
         return new RequestResult(success: true)
@@ -459,9 +478,9 @@ class AdminController {
     void deleteSkill(@PathVariable("projectId") String projectId,
                      @PathVariable("subjectId") String subjectId,
                      @PathVariable("skillId") String skillId) {
-        skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
-        skills.controller.exceptions.SkillsValidator.isNotBlank(subjectId, "Subject Id", projectId)
-        skills.controller.exceptions.SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(subjectId, "Subject Id", projectId)
+        SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
 
         projectAdminStorageService.deleteSkill(projectId, subjectId, skillId)
     }
@@ -472,10 +491,10 @@ class AdminController {
                                       @PathVariable("skillId") String skillId,
                                       @PathVariable("userId") String userId,
                                       @PathVariable("timestamp") Long timestamp) {
-        skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
-        skills.controller.exceptions.SkillsValidator.isNotNull(skillId, "Skill Id", projectId)
-        skills.controller.exceptions.SkillsValidator.isNotNull(userId, "User Id", projectId)
-        skills.controller.exceptions.SkillsValidator.isNotNull(timestamp, "Timestamp", projectId)
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotNull(skillId, "Skill Id", projectId)
+        SkillsValidator.isNotNull(userId, "User Id", projectId)
+        SkillsValidator.isNotNull(timestamp, "Timestamp", projectId)
 
         return skillEventService.deleteSkillEvent(projectId, skillId, userId, timestamp)
     }
@@ -483,7 +502,7 @@ class AdminController {
     @RequestMapping(value = "/projects/{projectId}/skills", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     List<SkillDefSkinnyRes> getAllSkillsForProject(
             @PathVariable("projectId") String projectId) {
-        skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(projectId, "Project Id")
 
         List<SkillDefSkinnyRes> res = projectAdminStorageService.getSkinnySkills(projectId)
         return res
@@ -493,7 +512,7 @@ class AdminController {
     @RequestMapping(value = "/projects/{projectId}/levels", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     List<LevelDefinitionRes> getLevels(
             @PathVariable("projectId") String projectId) {
-        skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(projectId, "Project Id")
 
         List<LevelDefinitionRes> res = levelDefinitionStorageService.getLevels(projectId)
         return res
@@ -502,8 +521,8 @@ class AdminController {
     @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/levels", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     List<LevelDefinitionRes> getLevels(
             @PathVariable("projectId") String projectId, @PathVariable("subjectId") String subjectId) {
-        skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
-        skills.controller.exceptions.SkillsValidator.isNotBlank(subjectId, "Subject Id", projectId)
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(subjectId, "Subject Id", projectId)
 
         List<LevelDefinitionRes> res = levelDefinitionStorageService.getLevels(projectId, subjectId)
         return res
@@ -511,21 +530,21 @@ class AdminController {
 
     @RequestMapping(value = "/projects/{projectId}/levels/last", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
     void deleteLastLevel(@PathVariable("projectId") String projectId) {
-        skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(projectId, "Project Id")
 
         levelDefinitionStorageService.deleteLastLevel(projectId)
     }
 
     @RequestMapping(value = "/projects/{projectId}/levels/next", method = [RequestMethod.PUT, RequestMethod.POST], produces = MediaType.APPLICATION_JSON_VALUE)
     RequestResult addNextLevel(@PathVariable("projectId") String projectId, @RequestBody NextLevelRequest nextLevelRequest) {
-        skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(projectId, "Project Id")
         levelDefinitionStorageService.addNextLevel(projectId, nextLevelRequest)
         return new RequestResult(success: true)
     }
 
     @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/levels/last", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
     void deleteLastLevel(@PathVariable("projectId") String projectId, @PathVariable("subjectId") String subjectId) {
-        skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(projectId, "Project Id")
         levelDefinitionStorageService.deleteLastLevel(projectId, subjectId)
     }
 
@@ -542,9 +561,9 @@ class AdminController {
     RequestResult editLevel(@PathVariable("projectId") String projectId,
                             @PathVariable("subjectId") String subjectId,
                             @PathVariable("level") Integer level, @RequestBody EditLevelRequest editLevelRequest) {
-        skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
-        skills.controller.exceptions.SkillsValidator.isNotBlank(subjectId, "Subject Id", projectId)
-        skills.controller.exceptions.SkillsValidator.isNotNull(level, "Level", projectId)
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(subjectId, "Subject Id", projectId)
+        SkillsValidator.isNotNull(level, "Level", projectId)
 
         levelDefinitionStorageService.editLevel(projectId, editLevelRequest, level, subjectId)
         return new RequestResult(success: true)
@@ -554,8 +573,8 @@ class AdminController {
     @RequestMapping(value = "/projects/{projectId}/levels/edit/{level}", method = [RequestMethod.PUT, RequestMethod.POST], produces = MediaType.APPLICATION_JSON_VALUE)
     RequestResult editLevel(@PathVariable("projectId") String projectId,
                             @PathVariable("level") Integer level, @RequestBody EditLevelRequest editLevelRequest) {
-        skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
-        skills.controller.exceptions.SkillsValidator.isNotNull(level, "Level", projectId)
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotNull(level, "Level", projectId)
         levelDefinitionStorageService.editLevel(projectId, editLevelRequest, level)
         return new RequestResult(success: true)
     }
@@ -570,8 +589,8 @@ class AdminController {
                                        @RequestParam int page,
                                        @RequestParam String orderBy,
                                        @RequestParam Boolean ascending) {
-        skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
-        skills.controller.exceptions.SkillsValidator.isNotBlank(userId, "User Id", projectId)
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(userId, "User Id", projectId)
 
         PageRequest pageRequest = new PageRequest(page - 1, limit, ascending ? ASC : DESC, orderBy)
         return userAdminService.loadUserPerformedSkillsPage(projectId, userId, query, pageRequest)
@@ -581,7 +600,7 @@ class AdminController {
     @ResponseBody
     @CompileStatic
     NumUsersRes getUserSkillsStats(@PathVariable('projectId') String projectId) {
-        skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(projectId, "Project Id")
         return projectAdminStorageService.getNumUsersByProjectId(projectId)
     }
 
@@ -590,8 +609,8 @@ class AdminController {
     @CompileStatic
     UserSkillsStats getUserSkillsStats(@PathVariable('projectId') String projectId,
                                        @PathVariable('userId') String userId) {
-        skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
-        skills.controller.exceptions.SkillsValidator.isNotBlank(userId, "User Id", projectId)
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(userId, "User Id", projectId)
 
         return userAdminService.getUserSkillsStats(projectId, userId)
     }
@@ -605,7 +624,7 @@ class AdminController {
                                 @RequestParam int page,
                                 @RequestParam String orderBy,
                                 @RequestParam Boolean ascending) {
-        skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(projectId, "Project Id")
 
         PageRequest pageRequest = new PageRequest(page - 1, limit, ascending ? ASC : DESC, orderBy)
         return adminUsersService.loadUsersPage(projectId, query, pageRequest)
@@ -620,8 +639,8 @@ class AdminController {
                                 @RequestParam int page,
                                 @RequestParam String orderBy,
                                 @RequestParam Boolean ascending) {
-        skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
-        skills.controller.exceptions.SkillsValidator.isNotBlank(subjectId, "Subject Id", projectId)
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(subjectId, "Subject Id", projectId)
 
         PageRequest pageRequest = new PageRequest(page - 1, limit, ascending ? ASC : DESC, orderBy)
         List<SkillDefRes> subjectSkills = getSkills(projectId, subjectId)
@@ -638,8 +657,8 @@ class AdminController {
                               @RequestParam int page,
                               @RequestParam String orderBy,
                               @RequestParam Boolean ascending) {
-        skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
-        skills.controller.exceptions.SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
 
         PageRequest pageRequest = new PageRequest(page - 1, limit, ascending ? ASC : DESC, orderBy)
         return adminUsersService.loadUsersPage(projectId, Collections.singletonList(skillId), query, pageRequest)
@@ -654,8 +673,8 @@ class AdminController {
                               @RequestParam int page,
                               @RequestParam String orderBy,
                               @RequestParam Boolean ascending) {
-        skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
-        skills.controller.exceptions.SkillsValidator.isNotBlank(badgeId, "Badge Id", projectId)
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(badgeId, "Badge Id", projectId)
 
         PageRequest pageRequest = new PageRequest(page - 1, limit, ascending ? ASC : DESC, orderBy)
         List<SkillDefRes> badgeSkills = getBadgeSkills(projectId, badgeId)
@@ -669,8 +688,8 @@ class AdminController {
     @RequestMapping(value = "/projects/{projectId}/badge/{badgeId}/skills", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     List<SkillDefRes> getBadgeSkills(@PathVariable("projectId") String projectId, @PathVariable("badgeId") String badgeId) {
-        skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
-        skills.controller.exceptions.SkillsValidator.isNotBlank(badgeId, "Badge Id", projectId)
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(badgeId, "Badge Id", projectId)
 
         return projectAdminStorageService.getSkillsForBadge(projectId, badgeId)
     }
@@ -679,9 +698,9 @@ class AdminController {
     void shareSkillToAnotherProject(@PathVariable("projectId") String projectId,
                                     @PathVariable("skillId") String skillId,
                                     @PathVariable("sharedProjectId") String sharedProjectId) {
-        skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
-        skills.controller.exceptions.SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
-        skills.controller.exceptions.SkillsValidator.isNotBlank(sharedProjectId, "Shared Project Id", projectId)
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
+        SkillsValidator.isNotBlank(sharedProjectId, "Shared Project Id", projectId)
 
         projectAdminStorageService.shareSkillToExternalProject(projectId, skillId, sharedProjectId)
     }
@@ -690,44 +709,44 @@ class AdminController {
     void deleteSkillShare(@PathVariable("projectId") String projectId,
                           @PathVariable("skillId") String skillId,
                           @PathVariable("sharedProjectId") String sharedProjectId) {
-        skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
-        skills.controller.exceptions.SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
-        skills.controller.exceptions.SkillsValidator.isNotBlank(sharedProjectId, "Shared Project Id", projectId)
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
+        SkillsValidator.isNotBlank(sharedProjectId, "Shared Project Id", projectId)
 
         projectAdminStorageService.deleteSkillShare(projectId, skillId, sharedProjectId)
     }
 
     @RequestMapping(value = "/projects/{projectId}/shared", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     List<SharedSkillResult> getSharedSkills(@PathVariable("projectId") String projectId) {
-        skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(projectId, "Project Id")
         return projectAdminStorageService.getSharedSkillsWithOtherProjects(projectId)
     }
 
     @RequestMapping(value = "/projects/{projectId}/sharedWithMe", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     List<SharedSkillResult> getSharedWithMeSkills(@PathVariable("projectId") String projectId) {
-        skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(projectId, "Project Id")
         return projectAdminStorageService.getSharedSkillsFromOtherProjects(projectId)
     }
 
     @RequestMapping(value = "/projects/{projectId}/settings", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     List<SettingsResult> getProjectSettings(@PathVariable("projectId") String projectId) {
-        skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(projectId, "Project Id")
         return settingsService.loadSettingsForProject(projectId)
     }
 
     @RequestMapping(value = "/projects/{projectId}/settings/{setting}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     SettingsResult getProjectSetting(@PathVariable("projectId") String projectId, @PathVariable("setting") String setting) {
-        skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
-        skills.controller.exceptions.SkillsValidator.isNotBlank(setting, "Setting Id", projectId)
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(setting, "Setting Id", projectId)
         return settingsService.getProjectSetting(projectId, setting)
     }
 
     @RequestMapping(value = "/projects/{projectId}/settings/{setting}", method = [RequestMethod.PUT, RequestMethod.POST], produces = MediaType.APPLICATION_JSON_VALUE)
     RequestResult saveProjectSetting(@PathVariable("projectId") String projectId, @PathVariable("setting") String setting, @RequestBody ProjectSettingsRequest value) {
-        skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
-        skills.controller.exceptions.SkillsValidator.isNotBlank(setting, "Setting Id", projectId)
-        skills.controller.exceptions.SkillsValidator.isTrue(projectId == value.projectId, "Project Id must equal", projectId)
-        skills.controller.exceptions.SkillsValidator.isTrue(setting == value.setting, "Setting Id must equal", projectId)
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(setting, "Setting Id", projectId)
+        SkillsValidator.isTrue(projectId == value.projectId, "Project Id must equal", projectId)
+        SkillsValidator.isTrue(setting == value.setting, "Setting Id must equal", projectId)
 
         settingsService.saveSetting(value)
         return new RequestResult(success: true)
@@ -735,8 +754,8 @@ class AdminController {
 
     @RequestMapping(value = "/projects/{projectId}/settings/checkValidity", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     def checkSettingsValidity(@PathVariable("projectId") String projectId, @RequestBody List<ProjectSettingsRequest> values) {
-        skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
-        skills.controller.exceptions.SkillsValidator.isNotNull(values, "Settings")
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotNull(values, "Settings")
 
         ValidationRes validationRes = settingsService.isValid(values)
         return [
@@ -748,8 +767,8 @@ class AdminController {
 
     @RequestMapping(value = "/projects/{projectId}/settings", method = [RequestMethod.PUT, RequestMethod.POST], produces = MediaType.APPLICATION_JSON_VALUE)
     RequestResult saveProjectSettings(@PathVariable("projectId") String projectId, @RequestBody List<ProjectSettingsRequest> values) {
-        skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
-        skills.controller.exceptions.SkillsValidator.isNotNull(values, "Settings")
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotNull(values, "Settings")
 
         settingsService.saveSettings(values)
         return new RequestResult(success: true)
@@ -758,7 +777,7 @@ class AdminController {
     @RequestMapping(value = "/projects/{projectId}/resetClientSecret", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     RequestResult resetClientSecret(@PathVariable("projectId") String projectId) {
-        skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(projectId, "Project Id")
 
         String clientSecret = new ClientSecretGenerator().generateClientSecret()
         projectAdminStorageService.updateClientSecret(projectId, clientSecret)
@@ -768,7 +787,7 @@ class AdminController {
     @RequestMapping(value = "/projects/{projectId}/clientSecret", method = [RequestMethod.GET], produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     String getClientSecret(@PathVariable("projectId") String projectId) {
-        skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(projectId, "Project Id")
         return projectAdminStorageService.getProjectSecret(projectId)
     }
 

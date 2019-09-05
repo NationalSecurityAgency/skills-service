@@ -9,7 +9,7 @@
             <div class="media-body">
               <div class="form-group">
                 <label for="badgeName">Badge Name</label>
-                <ValidationProvider rules="required|min:3|max:50|uniqueName|customNameValidator" v-slot="{errors}" name="Badge Name">
+                <ValidationProvider rules="required|minNameLength|maxBadgeNameLength|uniqueName|customNameValidator" v-slot="{errors}" name="Badge Name">
                   <input v-focus class="form-control" id="badgeName" type="text" v-model="badgeInternal.name"
                          @input="updateBadgeId"
                          data-vv-name="badgeName"/>

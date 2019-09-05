@@ -10,7 +10,7 @@
               <div class="media-body">
                 <div class="form-group">
                   <label for="subjName">Subject Name</label>
-                  <ValidationProvider rules="required|min:3|max:50|uniqueName" v-slot="{errors}" name="Subject Name">
+                  <ValidationProvider rules="required|minNameLength|maxSubjectNameLength|uniqueName" v-slot="{errors}" name="Subject Name">
                   <input type="text" class="form-control" id="subjName" @input="updateSubjectId"
                          v-model="subjectInternal.name" v-on:input="updateSubjectId"
                          data-vv-name="subjectName" v-focus>
