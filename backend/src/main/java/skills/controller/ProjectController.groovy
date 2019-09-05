@@ -4,6 +4,7 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.web.bind.annotation.*
+import skills.PublicProps
 import skills.auth.UserInfoService
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
@@ -15,6 +16,7 @@ import skills.controller.result.model.RequestResult
 import skills.icons.CustomIconFacade
 import skills.profile.EnableCallStackProf
 import skills.services.AdminProjService
+import skills.services.IdFormatValidator
 
 import java.nio.charset.StandardCharsets
 
@@ -35,6 +37,9 @@ class ProjectController {
     @Autowired
     UserInfoService userInfoService
 
+    @Autowired
+    PublicPropsBasedValidator propsBasedValidator
+
     static final RESERVERED_PROJECT_ID = AdminProjService.ALL_SKILLS_PROJECTS
 
     @RequestMapping(value = "/projects", method = RequestMethod.GET, produces = "application/json")
@@ -50,9 +55,22 @@ class ProjectController {
         if (projectRequest.projectId && projectId != projectRequest.projectId) {
             throw new SkillException("Project id in the request doesn't equal to project id in the URL [${projectRequest?.projectId}]<>[${projectId}]. Cannot edit project id using /app/projects/{id} endpoint. Please use /admin/projects/{id}", null, null, ErrorCode.AccessDenied)
         }
+        IdFormatValidator.validate(projectId)
+
+        propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxIdLength, "Project Id", projectId)
+        propsBasedValidator.validateMinStrLength(PublicProps.UiProp.minIdLength, "Project Id", projectId)
+
         if (!projectRequest.projectId) {
             projectRequest.projectId = projectId
+        } else {
+            IdFormatValidator.validate(projectRequest.projectId)
+            propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxIdLength, "Project Id", projectRequest.projectId)
+            propsBasedValidator.validateMinStrLength(PublicProps.UiProp.minIdLength, "Project Id", projectRequest.projectId)
         }
+
+        propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxProjectNameLength, "Project Name", projectRequest.name)
+        propsBasedValidator.validateMinStrLength(PublicProps.UiProp.minNameLength, "Project Name", projectRequest.name)
+
         if (projectRequest.projectId == RESERVERED_PROJECT_ID) {
             throw new SkillException("Project id uses a reserved id, please choose a different project id.", projectId, null, ErrorCode.BadParam)
         }

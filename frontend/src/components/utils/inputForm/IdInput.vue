@@ -34,7 +34,7 @@
     },
     data() {
       return {
-        rules: 'required|min:3|max:50|alpha_num',
+        rules: 'required|minIdLength|maxIdLength|alpha_num',
         canEdit: false,
         internalValue: this.value,
       };

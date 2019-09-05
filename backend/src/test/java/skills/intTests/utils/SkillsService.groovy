@@ -198,7 +198,7 @@ class SkillsService {
     }
 
     def createBadge(Map props, String originalBadgeId = null) {
-        wsHelper.adminPut(getBadgeUrl(props.projectId, originalBadgeId ?: props.badgeId), props)
+        wsHelper.adminPost(getBadgeUrl(props.projectId, originalBadgeId ?: props.badgeId), props)
     }
 
     def createGlobalBadge(Map props, String originalBadgeId = null) {

@@ -10,6 +10,8 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
 import org.springframework.stereotype.Component
 import org.springframework.web.bind.annotation.*
+import skills.PublicProps
+import skills.controller.PublicPropsBasedValidator
 import skills.storage.model.auth.RoleName
 import skills.storage.model.auth.UserRole
 
@@ -34,10 +36,16 @@ class CreateAccountController {
     @Autowired(required = false)
     OAuth2ProviderProperties oAuth2ProviderProperties
 
+    @Autowired
+    PublicPropsBasedValidator propsBasedValidator
+
     @Conditional(skills.auth.SecurityConfiguration.FormAuth)
     @PutMapping("createAccount")
     void createAppUser(@RequestBody skills.auth.UserInfo userInfo, HttpServletResponse response) {
         String password = userInfo.password
+        propsBasedValidator.validateMinStrLength(PublicProps.UiProp.minPasswordLength, "password", password)
+        propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxPasswordLength, "password", password)
+
         userInfo.password = passwordEncoder.encode(password)
         if (!userInfo.username) {
             userInfo.username = userInfo.email
@@ -54,6 +62,9 @@ class CreateAccountController {
     void createRootUser(@RequestBody skills.auth.UserInfo userInfo, HttpServletResponse response) {
         skills.controller.exceptions.SkillsValidator.isTrue(!userAuthService.rootExists(), 'A root user already exists! Granting additional root privileges requires a root user to grant them!')
         String password = userInfo.password
+        propsBasedValidator.validateMinStrLength(PublicProps.UiProp.minPasswordLength, "password", password)
+        propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxPasswordLength, "password", password)
+
         userInfo.password = passwordEncoder.encode(password)
         if (!userInfo.username) {
             userInfo.username = userInfo.email
