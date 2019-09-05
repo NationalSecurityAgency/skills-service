@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken
+import skills.auth.SkillsAuthorizationException
 
 import javax.persistence.EntityManager
 import javax.persistence.PersistenceContext
@@ -50,7 +51,7 @@ class PkiUserDetailsService implements UserDetailsService, AuthenticationUserDet
                 }
                 userInfo = userAuthService.createOrUpdateUser(userInfo)
             } else {
-                throw new skills.auth.SkillsAuthorizationException("Unknown user [$dn]")
+                throw new SkillsAuthorizationException("Unknown user [$dn]")
             }
         } catch (Exception e) {
             log.error("Error occurred looking up user info for DN [${dn}]", e)

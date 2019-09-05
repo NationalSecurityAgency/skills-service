@@ -6,12 +6,14 @@ import org.springframework.context.annotation.Conditional
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.AuthenticationException
 import org.springframework.security.oauth2.client.resource.OAuth2AccessDeniedException
+import org.springframework.security.oauth2.common.exceptions.InvalidTokenException
 import org.springframework.security.oauth2.provider.OAuth2Authentication
 import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationManager
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices
 import org.springframework.stereotype.Component
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
+import skills.auth.UserInfo
 
 import javax.servlet.http.HttpServletRequest
 
@@ -33,10 +35,10 @@ class SkillsOAuth2AuthenticationManager extends OAuth2AuthenticationManager {
         if (auth.isAuthenticated() && auth instanceof OAuth2Authentication) {
             String projectId = skills.auth.AuthUtils.getProjectIdFromRequest(servletRequest)
             auth = oAuthUtils.convertToSkillsAuth(auth)
-            if (projectId && auth && auth.principal instanceof skills.auth.UserInfo) {
+            if (projectId && auth && auth.principal instanceof UserInfo) {
                 String proxyingSystemId = auth.principal.proxyingSystemId
                 if (projectId != proxyingSystemId) {
-                    throw new OAuth2AccessDeniedException("Invalid token - proxyingSystemId [${proxyingSystemId}] does not match resource projectId [${projectId}]");
+                    throw new InvalidTokenException("Invalid token - proxyingSystemId [${proxyingSystemId}] does not match resource projectId [${projectId}]");
                 }
             }
         }

@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.context.request.WebRequest
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
+import skills.auth.SkillsAuthorizationException
 
 @ControllerAdvice
 @Slf4j
@@ -58,6 +59,13 @@ class RestExceptionHandler extends ResponseEntityExceptionHandler {
         return handleExceptionInternal(accessDeniedException, body, new HttpHeaders(), HttpStatus.FORBIDDEN, webRequest)
     }
 
+    @ExceptionHandler(SkillsAuthorizationException)
+    protected ResponseEntity<Object> handleSkillsAuthorizationException(SkillsAuthorizationException skillsAuthorizationException, WebRequest webRequest) {
+        log.warn("Access is denied - programmatic exception", skillsAuthorizationException)
+        String msg = "Access Denied"
+        BasicErrBody body = new BasicErrBody(explanation: msg, errorCode: ErrorCode.AccessDenied)
+        return handleExceptionInternal(skillsAuthorizationException, body, new HttpHeaders(), HttpStatus.UNAUTHORIZED, webRequest)
+    }
 
     @Override
     ResponseEntity<Object> handleHttpMessageNotReadable(

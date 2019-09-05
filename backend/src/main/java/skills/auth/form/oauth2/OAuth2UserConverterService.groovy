@@ -4,33 +4,39 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Conditional
 import org.springframework.security.oauth2.core.user.OAuth2User
 import org.springframework.stereotype.Component
+import skills.auth.SecurityConfiguration
+import skills.auth.SkillsAuthorizationException
+import skills.auth.UserAuthService
+import skills.auth.UserInfo
 
 import javax.annotation.Resource
 
+import static skills.auth.SecurityConfiguration.*
+
 @Component
-@Conditional(skills.auth.SecurityConfiguration.FormAuth)
+@Conditional(FormAuth)
 class OAuth2UserConverterService {
 
     @Autowired
-    skills.auth.UserAuthService userAuthService
+    UserAuthService userAuthService
 
     @Resource(name='oauth2UserConverters')
     Map<String, OAuth2UserConverter> lookup = [:]
 
-    skills.auth.UserInfo convert(String clientId, OAuth2User oAuth2User) {
-        skills.auth.UserInfo userInfo
+    UserInfo convert(String clientId, OAuth2User oAuth2User) {
+        UserInfo userInfo
         OAuth2UserConverter converter = lookup.get(clientId.toLowerCase())
         if (converter) {
             userInfo = converter.convert(clientId, oAuth2User)
         } else {
-            throw new skills.auth.SkillsAuthorizationException("No OAuth2UserConverter configured for clientId [${clientId}]")
+            throw new SkillsAuthorizationException("No OAuth2UserConverter configured for clientId [${clientId}]")
         }
         return userInfo
     }
 
     static interface OAuth2UserConverter {
         String getClientId()
-        skills.auth.UserInfo convert(String clientId, OAuth2User oAuth2User)
+        UserInfo convert(String clientId, OAuth2User oAuth2User)
     }
 
     static class GitHubUserConverter implements OAuth2UserConverter {
@@ -40,22 +46,22 @@ class OAuth2UserConverterService {
         String clientId = 'github'
 
         @Override
-        skills.auth.UserInfo convert(String clientId, OAuth2User oAuth2User) {
+        UserInfo convert(String clientId, OAuth2User oAuth2User) {
             String username = oAuth2User.getName()
             assert username, "Error getting name attribute of oAuth2User [${oAuth2User}] from clientId [$clientId]"
             String email =  oAuth2User.attributes.get(EMAIL)
             if (!email) {
-                throw new skills.auth.SkillsAuthorizationException("Email must be available in your public Github profile")
+                throw new SkillsAuthorizationException("Email must be available in your public Github profile")
             }
             String name = oAuth2User.attributes.get(NAME)
             if (!name) {
-                throw new skills.auth.SkillsAuthorizationException("Name must be available in your public Github profile")
+                throw new SkillsAuthorizationException("Name must be available in your public Github profile")
             }
             String firstName = name?.tokenize()?.first()
             List tokens = name?.tokenize()
             tokens?.pop()
             String lastName = tokens?.join(' ')
-            return new skills.auth.UserInfo(
+            return new UserInfo(
                     username: "${username}-${clientId}",
                     email:email,
                     firstName: firstName,
@@ -72,7 +78,7 @@ class OAuth2UserConverterService {
         String clientId = 'google'
 
         @Override
-        skills.auth.UserInfo convert(String clientId, OAuth2User oAuth2User) {
+        UserInfo convert(String clientId, OAuth2User oAuth2User) {
             String username = oAuth2User.getName()
             assert username, "Error getting name attribute of oAuth2User [${oAuth2User}] from clientId [$clientId]"
             String firstName =  oAuth2User.attributes.get(FIRST_NAME)
@@ -80,7 +86,7 @@ class OAuth2UserConverterService {
             String email =  oAuth2User.attributes.get(EMAIL)
             assert firstName && lastName && email, "First Name [$firstName], Last Name [$lastName], and email [$email] must be available in your public Google profile"
 
-            return new skills.auth.UserInfo(
+            return new UserInfo(
                     username: "${username}-${clientId}",
                     email:email,
                     firstName: firstName,

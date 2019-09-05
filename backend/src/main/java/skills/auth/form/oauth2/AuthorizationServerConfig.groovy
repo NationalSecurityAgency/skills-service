@@ -13,6 +13,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken
 import org.springframework.security.oauth2.common.OAuth2AccessToken
+import org.springframework.security.oauth2.common.exceptions.InvalidRequestException
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer
@@ -132,6 +133,7 @@ class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
                 result.setAdditionalInformation(info)
             } else {
                 log.warn("No $SKILLS_PROXY_USER found on OAuth2 request.")
+                throw new InvalidRequestException(("client_credentials grant_type must specify $SKILLS_PROXY_USER field"))
             }
             return result
         }
