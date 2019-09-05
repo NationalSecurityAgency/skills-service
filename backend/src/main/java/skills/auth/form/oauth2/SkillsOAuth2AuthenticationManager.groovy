@@ -6,7 +6,6 @@ import org.springframework.context.annotation.Conditional
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.AuthenticationException
 import org.springframework.security.oauth2.client.resource.OAuth2AccessDeniedException
-import org.springframework.security.oauth2.common.exceptions.InvalidTokenException
 import org.springframework.security.oauth2.provider.OAuth2Authentication
 import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationManager
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices
@@ -38,7 +37,7 @@ class SkillsOAuth2AuthenticationManager extends OAuth2AuthenticationManager {
             if (projectId && auth && auth.principal instanceof UserInfo) {
                 String proxyingSystemId = auth.principal.proxyingSystemId
                 if (projectId != proxyingSystemId) {
-                    throw new InvalidTokenException("Invalid token - proxyingSystemId [${proxyingSystemId}] does not match resource projectId [${projectId}]");
+                    throw new OAuth2AccessDeniedException("Invalid token - proxyingSystemId [${proxyingSystemId}] does not match resource projectId [${projectId}]");
                 }
             }
         }
