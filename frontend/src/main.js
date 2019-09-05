@@ -13,11 +13,8 @@ import 'matchmedia-polyfill/matchMedia.addListener';
 import './filters/NumberFilter';
 import './filters/TruncateFilter';
 import './filters/DateFilter';
-import './validators/MaxDescriptionLengthValidator';
-import './validators/OptionalNumericValidator';
-import './validators/CustomDescriptionValidator';
-import './validators/CustomNameValidator';
 import './directives/SkillsOnMountDirective';
+import RegisterValidators from './validators/RegisterValidators';
 import './directives/FocusDirective';
 import App from './App';
 import router from './router';
@@ -45,6 +42,7 @@ require('./errorHandler');
 require('vue-multiselect/dist/vue-multiselect.min.css');
 
 store.dispatch('loadConfigState').finally(() => {
+  RegisterValidators.init();
   store.dispatch('restoreSessionIfAvailable').finally(() => {
     /* eslint-disable no-new */
     const vm = new Vue({

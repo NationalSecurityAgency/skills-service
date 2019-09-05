@@ -52,6 +52,23 @@ skills:
       paragraphValidationMessage:
       nameValidationRegex:
       nameValidationMessage:
+      maxFirstNameLength: 30
+      maxLastNameLength: 30
+      maxNicknameLength: 70
+      minPasswordLength: 8
+      maxPasswordLength: 15
+      minNameLength: 3
+      maxBadgeNameLength: 50
+      maxProjectNameLength: 50
+      maxSkillNameLength: 100
+      maxSubjectNameLength: 50
+      maxLevelNameLength: 50
+      minIdLength: 3
+      maxIdLength: 50
+      maxSkillVersion: 999
+      maxPointIncrement: 10000
+      maxNumPerformToCompletion: 10000
+      maxNumPointIncrementMaxOccurrences: 999
   profiles:
     active: default
 #logging:

@@ -56,6 +56,9 @@ class AccessSettingsStorageService {
     @Autowired
     SortingService sortingService
 
+    @Autowired
+    UserInfoValidator userInfoValidator
+
     @Transactional(readOnly = true)
     List<UserRoleRes> getUserRolesForProjectId(String projectId) {
         List<UserRole> res = userRoleRepository.findAllByProjectId(projectId)
@@ -174,7 +177,7 @@ class AccessSettingsStorageService {
 
     @Transactional()
     User createAppUser(UserInfo userInfo, boolean createOrUpdate) {
-        validateUserInfo(userInfo)
+        userInfoValidator.validate(userInfo)
         User user = userRepository.findByUserIdIgnoreCase(userInfo.username?.toLowerCase())
         if (!createOrUpdate) {
             if (user) {
@@ -197,19 +200,6 @@ class AccessSettingsStorageService {
         saveSettings(user.userId, userInfo)
 
         return user
-    }
-
-    private void validateUserInfo(UserInfo userInfo) {
-        if (!userInfo.firstName || userInfo.firstName.length() > 30) {
-            throw new SkillException("First Name is required and can be no longer than 30 characters", NA, NA, ErrorCode.BadParam)
-        }
-        if (!userInfo.lastName || userInfo.lastName.length() > 30) {
-            throw new SkillException("Last Name is required and can be no longer than 30 characters", NA, NA, ErrorCode.BadParam)
-        }
-        // nickname by default is "firstName lastName"
-        if (userInfo.nickname && userInfo.nickname.length() > 70) {
-            throw new SkillException("Nickname cannot be over 70 characters", NA, NA, ErrorCode.BadParam)
-        }
     }
 
     @Transactional(readOnly = true)
