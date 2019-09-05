@@ -7,14 +7,6 @@ import org.apache.commons.lang3.StringUtils
 class IdFormatValidator {
 
     static void validate(String id) {
-        if (!id || id.length() < 3) {
-            throw new skills.controller.exceptions.SkillException("Bad Id [$id] - must be as least 3 chars.")
-        }
-
-        if (id.length() > 50) {
-            throw new skills.controller.exceptions.SkillException("Bad Id [$id] - must not exceed 50 chars.")
-        }
-
         if (!isAlphanumericOrUnderscore(id)) {
             throw new skills.controller.exceptions.SkillException("Bad Id [$id] - must be alpha numeric - no spaces or special characters.")
         }
