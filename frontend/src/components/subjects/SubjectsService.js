@@ -31,4 +31,8 @@ export default {
   deleteSubject(subject) {
     return axios.delete(`/admin/projects/${subject.projectId}/subjects/${subject.subjectId}`);
   },
+  checkIfSubjectBelongsToGlobalBadge(projectId, subjectId) {
+    return axios.get(`/admin/projects/${projectId}/subjects/${subjectId}/globalBadge/exists`)
+      .then(response => response.data);
+  },
 };
