@@ -48,6 +48,10 @@ skills:
       maxSubjectsPerProject: 25
       maxBadgesPerProject: 25
       maxSkillsPerSubject: 100
+      paragraphValidationRegex:
+      paragraphValidationMessage:
+      nameValidationRegex:
+      nameValidationMessage:
   profiles:
     active: default
 #logging:
