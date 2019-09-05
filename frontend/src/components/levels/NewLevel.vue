@@ -31,7 +31,7 @@
               </template>
 
               <label for="editLevel-name" class="mt-3">Name <span class="text-muted">(optional)</span></label>
-              <b-form-input id="editLevel-name" v-model="levelInternal.name" name="name" v-validate="'max:50|uniqueName'" data-vv-delay="500"></b-form-input>
+              <b-form-input id="editLevel-name" v-model="levelInternal.name" name="name" v-validate="'maxLevelNameLength|uniqueName'" data-vv-delay="500"></b-form-input>
               <small class="form-text text-danger" v-show="errors.has('name')">{{ errors.first('name')}}</small>
             </template>
             <template v-else>
@@ -47,7 +47,7 @@
                 <small class="form-text text-danger" v-show="errors.has('points')">{{ errors.first('points')}}</small>
               </template>
               <label for="newLevel-name" class="mt-3">Name <span class="text-muted">(optional)</span></label>
-              <b-form-input id="newLevel-name" v-model="levelInternal.name" name="name" v-validate="'max:50|uniqueName'" data-vv-delay="500"></b-form-input>
+              <b-form-input id="newLevel-name" v-model="levelInternal.name" name="name" v-validate="'maxLevelNameLength|uniqueName'" data-vv-delay="500"></b-form-input>
               <small class="form-text text-danger" v-show="errors.has('name')">{{ errors.first('name')}}</small>
             </template>
           </div>

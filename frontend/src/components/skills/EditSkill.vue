@@ -8,7 +8,7 @@
           <div class="col-12 col-lg">
             <div class="form-group">
               <label for="subjName">Skill Name</label>
-              <ValidationProvider rules="required|min:3|max:100|uniqueName" v-slot="{errors}" name="Skill Name">
+              <ValidationProvider rules="required|minNameLength|maxSkillNameLength|uniqueName" v-slot="{errors}" name="Skill Name">
                 <input type="text" class="form-control" id="subjName" @input="updateSkillId"
                        v-model="skillInternal.name" data-vv-name="name" v-focus>
                 <small class="form-text text-danger">{{ errors[0] }}</small>
@@ -25,7 +25,7 @@
                 <inline-help
                   msg="An optional version for this skill to allow filtering of available skills for different versions of an application"/>
               </label>
-              <ValidationProvider rules="optionalNumeric|min_value:0|max_value:999|maxVersion" v-slot="{errors}" name="Version">
+              <ValidationProvider rules="optionalNumeric|min_value:0|maxSkillVersion|maxVersion" v-slot="{errors}" name="Version">
                 <input class="form-control" type="text"
                        v-model="skillInternal.version" :disabled="isEdit"
                        data-vv-name="version"/>
@@ -41,7 +41,7 @@
           <div class="col-12 col-lg">
             <div class="form-group mb-1">
               <label for="subjName">Point Increment</label>
-              <ValidationProvider rules="optionalNumeric|required|min_value:1|max_value:10000" v-slot="{errors}" name="Point Increment">
+              <ValidationProvider rules="optionalNumeric|required|min_value:1|maxPointIncrement" v-slot="{errors}" name="Point Increment">
                 <input class="form-control" type="text"  v-model="skillInternal.pointIncrement"
                        data-vv-name="pointIncrement"/>
                 <small class="form-text text-danger">{{ errors[0]}}</small>
@@ -51,7 +51,7 @@
           <div class="col-12 col-lg">
             <div class="form-group mt-2 mt-lg-0">
               <label for="subjName">Occurrences to Completion</label>
-              <ValidationProvider rules="optionalNumeric|required|min_value:1|max_value:10000|moreThanMaxWindowOccurrences" v-slot="{errors}" name="Occurrences to Completion" tag="div">
+              <ValidationProvider rules="optionalNumeric|required|min_value:1|maxNumPerformToCompletion|moreThanMaxWindowOccurrences" v-slot="{errors}" name="Occurrences to Completion" tag="div">
                 <input class="form-control" type="text" v-model="skillInternal.numPerformToCompletion"
                          data-vv-name="numPerformToCompletion"/>
                 <small class="form-text text-danger">{{ errors[0]}}</small>
@@ -116,7 +116,7 @@
             </div>
           </div>
           <div class="col-12 col-lg">
-            <ValidationProvider rules="optionalNumeric|min_value:1|max_value:999|lessThanTotalOccurrences" v-slot="{errors}" name="Window's Max Occurrences">
+            <ValidationProvider rules="optionalNumeric|min_value:1|lessThanTotalOccurrences|maxNumPointIncrementMaxOccurrences" v-slot="{errors}" name="Window's Max Occurrences">
               <div class="form-group">
                 <label>Window's Max Occurrences
                   <inline-help

@@ -35,7 +35,7 @@
               </div>
               <input type="password" class="form-control" id="inputPassword" tabindex="2" placeholder="Password"
                      v-model="loginFields.password" name="password" aria-describedby="passwordHelp"
-                     @animationstart="onAnimationStart" v-validate="'required|min:8|max:15'" data-vv-delay="500" data-vv-name="password">
+                     @animationstart="onAnimationStart" v-validate="'required|minPasswordLength|maxPasswordLength'" data-vv-delay="500" data-vv-name="password">
               <small id="passwordHelp" class="form-text text-danger" v-show="errors.has('password')">{{
                 errors.first('password')}}
               </small>
