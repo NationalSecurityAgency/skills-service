@@ -56,7 +56,7 @@ skills:
       maxLastNameLength: 30
       maxNicknameLength: 70
       minPasswordLength: 8
-      maxPasswordLength: 15
+      maxPasswordLength: 40
       minNameLength: 3
       maxBadgeNameLength: 50
       maxProjectNameLength: 50
