@@ -73,14 +73,14 @@ class RankingLoader {
         List<UserAchievement> myLevels = loadUserAchievements(userId, projectId, subjectId)
         int myLevel = myLevels ? myLevels.collect({it.level}).max() : 0
 
-        int currentPts = usersPoints?.points ?: 0
+        final int currentPts = usersPoints?.points ?: 0
         List<UserPoints> next = findHighestUserPoints(projectId, currentPts, subjectId)
         Integer pointsToPassNextUser = next ? next.first().points - currentPts : -1
 
         Integer pointsAnotherUserToPassMe = -1
-        if(usersPoints?.points){
-            List<UserPoints> previous = findLowestUserPoints(projectId, usersPoints.points, subjectId)
-            pointsAnotherUserToPassMe = previous ? usersPoints.points - previous.first().points : -1
+        if(currentPts){
+            List<UserPoints> previous = findLowestUserPoints(projectId, currentPts, subjectId)
+            pointsAnotherUserToPassMe = previous ? currentPts - previous.first().points : -1
         }
 
         return new SkillsRankingDistribution(myLevel: myLevel, myPoints: usersPoints?.points ?: 0,
