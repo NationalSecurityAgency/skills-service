@@ -345,6 +345,10 @@ class AdminProjService {
         assert subjectDefinition, "DELETE FAILED -> no subject with project id [$projectId] and subjet id [$subjectId]"
         assert subjectDefinition.type == SkillDef.ContainerType.Subject
 
+        if (globalBadgesService.isSubjectUsedInGlobalBadge(subjectDefinition)) {
+            throw new SkillException("Subject with id [${subjectId}] cannot be deleted as it is currently referenced by one or more global badges")
+        }
+
         deleteSkillWithItsDescendants(subjectDefinition)
 
         ProjDef projDef = getProjDef(projectId)

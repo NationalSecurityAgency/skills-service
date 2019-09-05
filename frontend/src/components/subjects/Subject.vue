@@ -7,6 +7,7 @@
                                   v-on:move-up="moveUp"
                                   v-on:move-down="moveDown"
                                   :isFirst="subjectInternal.isFirst" :isLast="subjectInternal.isLast" :isLoading="isLoading"
+                                  :is-delete-disabled="deleteSubjectDisabled" :delete-disabled-text="deleteSubjectToolTip"
                                   class="subject-settings"></edit-and-delete-dropdown>
       </div>
       <div slot="footer">
@@ -47,10 +48,13 @@
         showEditSubject: false,
         cardOptions: {},
         subjectInternal: Object.assign({}, this.subject),
+        deleteSubjectDisabled: false,
+        deleteSubjectToolTip: '',
       };
     },
     mounted() {
       this.buildCardOptions();
+      this.checkIfSubjectBelongsToGlobalBadge();
     },
     watch: {
       subject(newVal) {
@@ -87,6 +91,15 @@
             count: this.subjectInternal.pointsPercentage,
           }],
         };
+      },
+      checkIfSubjectBelongsToGlobalBadge() {
+        SubjectsService.checkIfSubjectBelongsToGlobalBadge(this.subjectInternal.projectId, this.subjectInternal.subjectId)
+          .then((res) => {
+            if (res) {
+              this.deleteSubjectDisabled = true;
+              this.deleteSubjectToolTip = 'Cannot delete this subject as it belongs to one or more global badges. Please contact a Supervisor to remove this dependency.';
+            }
+          });
       },
       deleteSubject() {
         const msg = `Subject with id [${this.subjectInternal.subjectId}] will be removed. Delete Action can not be undone and permanently removes its skill definitions and users' performed skills.`;

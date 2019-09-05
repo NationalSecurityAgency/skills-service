@@ -270,6 +270,32 @@ class ReportSkills_GlobalBadgeSkillsSpecs extends DefaultIntSpec {
         skillsService.deleteGlobalBadge(badgeId)
     }
 
+    def 'project admin cannot delete subject referenced by global badge'() {
+        String subj = "testSubj"
+
+        Map skill1 = [projectId: projId, subjectId: subj, skillId: "skill1", name  : "Test Skill 1", type: "Skill",
+                      pointIncrement: 10, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1]
+
+        Map badge = [badgeId: badgeId, name: 'Test Global Badge 1']
+
+        skillsService.createProject([projectId: projId, name: "Test Project"])
+        skillsService.createSubject([projectId: projId, subjectId: subj, name: "Test Subject"])
+        skillsService.createSkill(skill1)
+        skillsService.createGlobalBadge(badge)
+        skillsService.assignProjectLevelToGlobalBadge(projectId: projId, badgeId: badge.badgeId, level: "3")
+        skillsService.assignSkillToGlobalBadge(projectId: projId, badgeId: badge.badgeId, skillId: skill1.skillId)
+
+        when:
+        skillsService.deleteSubject([projectId: projId, subjectId: subj])
+
+        then:
+        SkillsClientException ex = thrown()
+        ex.message.contains("Subject with id [${subj}] cannot be deleted as it is currently referenced by one or more global badges")
+
+        cleanup:
+        skillsService.deleteGlobalBadge(badgeId)
+    }
+
     def 'project admin cannot delete project level referenced by global badge'() {
         String subj = "testSubj"
 

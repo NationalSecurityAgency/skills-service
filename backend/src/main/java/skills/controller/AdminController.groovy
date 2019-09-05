@@ -13,7 +13,6 @@ import skills.controller.request.model.BadgeRequest
 import skills.controller.request.model.EditLevelRequest
 import skills.controller.request.model.NextLevelRequest
 import skills.controller.request.model.ProjectSettingsRequest
-import skills.controller.request.model.SettingsRequest
 import skills.controller.request.model.SkillDefForDependencyRes
 import skills.controller.request.model.SkillRequest
 import skills.controller.request.model.SubjectRequest
@@ -780,6 +779,15 @@ class AdminController {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(skillId, "Skill Id")
         return globalBadgesService.isSkillUsedInGlobalBadge(projectId, skillId)
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/globalBadge/exists", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    boolean isSubjectReferencedByGlobalBadge(@PathVariable("projectId") String projectId,
+                                           @PathVariable("subjectId") String subjectId) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(subjectId, "Subject Id")
+        return globalBadgesService.isSubjectUsedInGlobalBadge(projectId, subjectId)
     }
 
     @RequestMapping(value = "/projects/{projectId}/globalBadge/exists", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)

@@ -217,6 +217,19 @@ class GlobalBadgesService {
     }
 
     @Transactional(readOnly = true)
+    boolean isSubjectUsedInGlobalBadge(String projectId, String skillId) {
+        SkillDef subjectSkillDef = skillDefRepo.findByProjectIdAndSkillIdAndType(projectId, skillId, SkillDef.ContainerType.Subject)
+        assert subjectSkillDef, "Skill [${skillId}] for project [${projectId}] does not exist"
+        return isSubjectUsedInGlobalBadge(subjectSkillDef)
+    }
+
+    @Transactional(readOnly = true)
+    boolean isSubjectUsedInGlobalBadge(SkillDef skillDef) {
+        int numProjectSkillsUsedInGlobalBadge = skillRelDefRepo.getSkillsFromSubjectUsedInGlobalBadgeCount(skillDef.skillId)
+        return numProjectSkillsUsedInGlobalBadge > 0
+    }
+
+    @Transactional(readOnly = true)
     boolean isProjectLevelUsedInGlobalBadge(String projectId, Integer level) {
         int numberOfLevels = globalBadgeLevelDefRepo.countByProjectIdAndLevel(projectId, level)
         return numberOfLevels > 0
