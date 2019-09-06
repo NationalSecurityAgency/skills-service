@@ -17,7 +17,7 @@
                             <div v-else>
                                 <div>Earn up to <strong>{{ displayData.userSkills.totalPoints | number }}</strong> points</div>
                                 <div>
-                                    <strong>{{ displayData.userSkills.todaysPoints }}</strong> Points earned Today
+                                    <strong>{{ displayData.userSkills.todaysPoints | number }}</strong> Points earned Today
                                 </div>
                             </div>
                         </div>
@@ -47,7 +47,7 @@
                                     levelStats.nextLevel }}
                                 </div>
                                 <div>
-                                    <strong>{{ displayData.userSkills.todaysPoints }}</strong> Points earned Today
+                                    <strong>{{ displayData.userSkills.todaysPoints | number}}</strong> Points earned Today
                                 </div>
                             </div>
                         </div>

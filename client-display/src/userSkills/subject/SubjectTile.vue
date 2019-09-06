@@ -37,7 +37,7 @@
           </label>
         </div>
         <div v-if="progress.allLevelsComplete" class="col-12">
-          <label class="skill-label text-center">All levels complete</label>
+          <label class="skill-label text-center text-uppercase"><i class="fas fa-check text-success"/> All levels complete</label>
         </div>
         <div class="col-12">
           <progress-bar
@@ -45,8 +45,8 @@
             :val="progress.level"
             :size="18"
             :bar-color="completeColor"
-            class="complete-total"/>
-          <vertical-progress-bar
+            class="progress-border"/>
+          <vertical-progress-bar v-else
             :before-today-bar-color="beforeTodayColor"
             :total-progress-bar-color="earnedTodayColor"
             :total-progress="progress.level"
@@ -154,5 +154,9 @@
   .skill-tile-label {
     font-size: 1.3rem;
     width: 100%;
+  }
+
+  .progress-border {
+    border: lightgrey solid 2px;
   }
 </style>
