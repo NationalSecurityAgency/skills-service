@@ -47,9 +47,8 @@
         }],
         chartOptions: {
           annotations: {
-            // points: [],
             points: [{
-              x: 'Level 0',
+              x: 'Level 1',
               seriesIndex: 0,
               label: {
                 borderColor: '#775DD0',
@@ -58,7 +57,7 @@
                   color: '#fff',
                   background: '#775DD0',
                 },
-                text: 'You are Level 0!',
+                text: '',
               },
             }],
           },
@@ -113,9 +112,11 @@
         },
       };
     },
-    // mounted() {
-    //   this.computeRankingDistributionChartSeries();
-    // },
+    mounted() {
+      if (this.usersPerLevel) {
+        this.computeChartSeries();
+      }
+    },
     watch: {
       usersPerLevel() {
         this.computeChartSeries();
