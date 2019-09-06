@@ -62,14 +62,19 @@
                         </span>
                     </my-rank-encouragement-card>
 
-                    <my-rank-encouragement-card icon="fa fa-glass-cheers text-primary">
-                        <span v-if="numUsersBehindMe <= 0">
-                            <h4 class="mb-2">Earn those point riches!</h4>
-                            <div class="">Earn skills and you will pass your fellow app users in no time!</div>
+                    <my-rank-encouragement-card icon="fa fa-glass-cheers text-info">
+                        <span v-if="myRank">
+                            <span v-if="numUsersBehindMe <= 0">
+                                <h4 class="mb-2">Earn those point riches!</h4>
+                                <div class="">Earn skills and you will pass your fellow app users in no time!</div>
+                            </span>
+                            <span v-else>
+                                <h4 class="mb-2"><strong>{{ numUsersBehindMe }}</strong> reasons to celebrate</h4>
+                                <div class="">That's how many fellow app users have less points than you. Be Proud!!!</div>
+                            </span>
                         </span>
-                        <span v-else>
-                            <h4 class="mb-2"><strong>{{ numUsersBehindMe }}</strong> reasons to celebrate</h4>
-                            <div class="">That's how many fellow app users have less points than you. Be Proud!!!</div>
+                        <span v-else class="text-left" style="width: 4rem;">
+                            <vue-simple-spinner size="medium" line-bg-color="#333" line-fg-color="#17a2b8" message="Get Excited! Results are on their way!"/>
                         </span>
                     </my-rank-encouragement-card>
                 </div>
@@ -80,6 +85,7 @@
 </template>
 
 <script>
+    import Spinner from 'vue-simple-spinner';
     import MyRankDetailStatCard from '@/userSkills/myRank/MyRankDetailStatCard.vue';
     import LevelsBreakdownChart from '@/userSkills/myRank/LevelsBreakdownChart.vue';
     import MyRankEncouragementCard from '@/userSkills/myRank/MyRankEncouragementCard.vue';
@@ -96,6 +102,7 @@
             MyRankDetailStatCard,
             LevelsBreakdownChart,
             MyRankEncouragementCard,
+            'vue-simple-spinner': Spinner,
         },
         props: {
             subject: String,
@@ -118,6 +125,8 @@
                 UserSkillsService.getUserSkillsRankingDistribution(subjectId)
                     .then((response) => {
                         this.rankingDistribution = response;
+                    })
+                    .finally(() => {
                         this.loading = false;
                     });
                 UserSkillsService.getRankingDistributionUsersPerLevel(subjectId)
@@ -132,7 +141,7 @@
         },
         computed: {
             numUsersBehindMe() {
-                return this.rankingDistribution.totalUsers - this.rankingDistribution.myPosition;
+                return this.myRank ? this.myRank.numUsers - this.myRank.position : -1;
             },
             myRankPosition() {
                 return this.myRank ? this.myRank.position : -1;
