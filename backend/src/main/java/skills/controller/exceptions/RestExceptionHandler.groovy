@@ -40,15 +40,15 @@ class RestExceptionHandler extends ResponseEntityExceptionHandler {
         } else {
             log.error("Unexpected exception type [${ex?.class?.simpleName}]", ex)
         }
-        return handleExceptionInternal(ex, body, new HttpHeaders(), HttpStatus.BAD_REQUEST, webRequest)
+        return new ResponseEntity(body, HttpStatus.BAD_REQUEST)
     }
 
     @ExceptionHandler(DataIntegrityViolationException)
     protected ResponseEntity<Object> handleDataIntegrityViolation(DataIntegrityViolationException violationException, WebRequest webRequest) {
-        log.error("Violation Exception", violationException)
         String msg = "Data Integrity Violation"
+        log.error(msg, violationException)
         BasicErrBody body = new BasicErrBody(explanation: msg, errorCode: ErrorCode.ConstraintViolation)
-        return handleExceptionInternal(violationException, body, new HttpHeaders(), HttpStatus.BAD_REQUEST, webRequest)
+        return new ResponseEntity(body, HttpStatus.BAD_REQUEST)
     }
 
     @ExceptionHandler(AccessDeniedException)
@@ -56,7 +56,7 @@ class RestExceptionHandler extends ResponseEntityExceptionHandler {
         log.warn("Access is denied - programmatic exception", accessDeniedException)
         String msg = "Access Denied"
         BasicErrBody body = new BasicErrBody(explanation: msg, errorCode: ErrorCode.AccessDenied)
-        return handleExceptionInternal(accessDeniedException, body, new HttpHeaders(), HttpStatus.FORBIDDEN, webRequest)
+        return new ResponseEntity(body, HttpStatus.FORBIDDEN)
     }
 
     @ExceptionHandler(SkillsAuthorizationException)
@@ -64,7 +64,7 @@ class RestExceptionHandler extends ResponseEntityExceptionHandler {
         log.warn("Access is denied - programmatic exception", skillsAuthorizationException)
         String msg = "Access Denied"
         BasicErrBody body = new BasicErrBody(explanation: msg, errorCode: ErrorCode.AccessDenied)
-        return handleExceptionInternal(skillsAuthorizationException, body, new HttpHeaders(), HttpStatus.UNAUTHORIZED, webRequest)
+        return new ResponseEntity(body, HttpStatus.UNAUTHORIZED)
     }
 
     @Override
@@ -73,7 +73,7 @@ class RestExceptionHandler extends ResponseEntityExceptionHandler {
         log.error("HttpMessageNotReadableException", ex)
         String msg = ex.message
         BasicErrBody body = new BasicErrBody(explanation: msg, errorCode: ErrorCode.BadParam)
-        return handleExceptionInternal(ex, body, new HttpHeaders(), HttpStatus.BAD_REQUEST, request)
+        return new ResponseEntity(body, HttpStatus.BAD_REQUEST)
     }
 
     /**
@@ -83,7 +83,7 @@ class RestExceptionHandler extends ResponseEntityExceptionHandler {
     protected ResponseEntity<Object> handleResponseStatusException(ResponseStatusException ex, WebRequest webRequest) {
         BasicErrBody body = new BasicErrBody(explanation: ex.message)
         log.error(ex.message, ex)
-        return handleExceptionInternal(ex, body, new HttpHeaders(), ex.status, webRequest)
+        return new ResponseEntity(body, ex.status);
     }
 
     /**
@@ -91,7 +91,7 @@ class RestExceptionHandler extends ResponseEntityExceptionHandler {
      * defined above.  This method will also support Exceptions that have the @ResponseStatus
      * annotation.
      */
-    @ExceptionHandler([Throwable, Error])
+    @ExceptionHandler([Throwable, Error, Exception])
     protected ResponseEntity<Object> handleOtherExceptions(Exception ex, WebRequest webRequest) {
         BasicErrBody body
         HttpStatus httpStatus = HttpStatus.INTERNAL_SERVER_ERROR
@@ -104,11 +104,12 @@ class RestExceptionHandler extends ResponseEntityExceptionHandler {
             message = "${httpStatus}${(reason ? " \"${reason}\"" : "")}"
             body = new BasicErrBody(explanation: message)
         } else {
-            message = 'Unexpected Exception'
+            message = 'Unexpected Error'
             body = new BasicErrBody(explanation: message)
         }
         log.error(message, ex)
-        return handleExceptionInternal(ex, body, new HttpHeaders(), httpStatus, webRequest)
+        // when calling handleExceptionInternal stack trace and err is added the response
+        return new ResponseEntity(body, httpStatus);
     }
 
 }
