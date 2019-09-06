@@ -24,8 +24,13 @@
         },
         computed: {
             progress() {
+                let totalPts = Math.trunc((this.skill.points / this.skill.totalPoints) * 100);
+                // this can happen when project admin adjusts skill definition after the points were achieved.
+                if (totalPts > 100) {
+                    totalPts = 100;
+                }
                 return {
-                    total: (this.skill.points / this.skill.totalPoints) * 100,
+                    total: totalPts,
                     totalBeforeToday: ((this.skill.points - this.skill.todaysPoints) / this.skill.totalPoints) * 100,
                 };
             },
