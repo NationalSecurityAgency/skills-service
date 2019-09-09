@@ -1,6 +1,7 @@
 package skills.intTests
 
 import org.springframework.http.HttpStatus
+import org.springframework.web.client.HttpClientErrorException
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsService
@@ -146,6 +147,36 @@ class AuthorizationSpecs extends DefaultIntSpec {
         then:
         SkillsClientException ex = thrown()
         ex.httpStatus == HttpStatus.FORBIDDEN
+    }
+
+    def "requesting a token without a proxy_user attribute will return an error"() {
+        when:
+        String secret = skillsService.getClientSecret(projId)
+        skillsService.setProxyCredentials(projId, secret)
+        Map subj1 = [projectId: projId, subjectId: "subj1", skillId: "skill11".toString(), name: "Test Subject 1".toString(), type: "Skill", pointIncrement: 100, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1]
+        skillsService.createSubject(subj1)
+        skillsService.createSkill(subj1)
+        skillsService.addSkillAsProxy([projectId: projId, skillId: subj1.skillId], 'bob', true, false)
+
+        then:
+        HttpClientErrorException.BadRequest ex = thrown()
+        ex.getStatusCode() == HttpStatus.BAD_REQUEST
+        ex.responseBodyAsString.contains('client_credentials grant_type must specify proxy_user field')
+    }
+
+    def "requesting a token without a grant_type attribute will return an error"() {
+        when:
+        String secret = skillsService.getClientSecret(projId)
+        skillsService.setProxyCredentials(projId, secret)
+        Map subj1 = [projectId: projId, subjectId: "subj1", skillId: "skill11".toString(), name: "Test Subject 1".toString(), type: "Skill", pointIncrement: 100, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1]
+        skillsService.createSubject(subj1)
+        skillsService.createSkill(subj1)
+        skillsService.addSkillAsProxy([projectId: projId, skillId: subj1.skillId], 'bob', false, true)
+
+        then:
+        HttpClientErrorException.BadRequest ex = thrown()
+        ex.getStatusCode() == HttpStatus.BAD_REQUEST
+        ex.responseBodyAsString.contains('Missing grant type')
     }
 
     def 'admin - user cannot get another user\'s project level if they are not an admin for said project'() {
