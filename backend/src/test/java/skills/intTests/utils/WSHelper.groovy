@@ -175,15 +175,26 @@ class WSHelper {
         return responseEntity.getBody()
     }
 
-    String getTokenForUser(String userId) {
+    String getTokenForUser(String userId, boolean includeGrantType=true, boolean includeProxyUser=true) {
         log.info("Getting token for user [$userId]")
         String tokenUrl = "${skillsService}/oauth/token"
         HttpHeaders headers = new HttpHeaders()
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED)
 
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>()
-        body.add('grant_type', 'client_credentials')
-        body.add('proxy_user', userId)
+        if (includeGrantType) {
+            body.add('grant_type', 'client_credentials')
+        } else {
+            // do not include proxy_user attribute for testing purposes
+            log.warn("not including grant_type attribute")
+        }
+
+        if (includeProxyUser) {
+            body.add('proxy_user', userId)
+        } else {
+            // do not include proxy_user attribute for testing purposes
+            log.warn("not including proxy_user attribute")
+        }
 
         ResponseEntity<OAuth2Response> responseEntity = oAuthRestTemplate.postForEntity(tokenUrl, new HttpEntity<>(body, headers), OAuth2Response)
 

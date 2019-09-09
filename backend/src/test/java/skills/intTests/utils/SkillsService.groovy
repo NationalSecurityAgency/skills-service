@@ -278,8 +278,8 @@ class SkillsService {
         }
     }
 
-    def addSkillAsProxy(Map props, String userId) {
-        wsHelper.proxyApiPut(wsHelper.getTokenForUser(userId), "/projects/${props.projectId}/skills/${props.skillId}", null)
+    def addSkillAsProxy(Map props, String userId, boolean includeGrantType=true, boolean includeProxyUser=true) {
+        wsHelper.proxyApiPut(wsHelper.getTokenForUser(userId, includeGrantType, includeProxyUser), "/projects/${props.projectId}/skills/${props.skillId}", null)
     }
 
     def getSkillSummaryAsProxy(String userId, String projId, String subjId=null, int version = -1) {
