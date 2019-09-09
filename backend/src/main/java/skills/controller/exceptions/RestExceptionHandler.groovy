@@ -7,6 +7,7 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageNotReadableException
+import org.springframework.lang.Nullable
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
@@ -110,6 +111,12 @@ class RestExceptionHandler extends ResponseEntityExceptionHandler {
         log.error(message, ex)
         // when calling handleExceptionInternal stack trace and err is added the response
         return new ResponseEntity(body, httpStatus);
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleExceptionInternal(Exception ex, @Nullable Object body, HttpHeaders headers, HttpStatus status, WebRequest request) {
+        log.error("Handling exception", ex)
+        return new ResponseEntity(body, headers, status);
     }
 
 }
