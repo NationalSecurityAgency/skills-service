@@ -9,7 +9,6 @@ const validator = {
       return true;
     }
 
-    console.log(`validating [${value}] against endpoint`);
     return CustomValidatorService.validateDescription(value).then(result => result.valid);
   },
 };
