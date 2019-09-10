@@ -96,11 +96,13 @@ class CreateAccountController {
     @GetMapping("/app/oAuthProviders")
     List<skills.controller.result.model.OAuth2Provider> getOAuthProviders() {
         List<skills.controller.result.model.OAuth2Provider> providers = []
-        clientRegistrationRepository.iterator().each { ClientRegistration clientRegistration ->
-            skills.controller.result.model.OAuth2Provider oAuth2Provider = oAuth2ProviderProperties.registration.get(clientRegistration.registrationId)
-            oAuth2Provider.registrationId = oAuth2Provider.registrationId ?: clientRegistration.registrationId
-            oAuth2Provider.clientName = oAuth2Provider.clientName ?: clientRegistration.clientName
-            providers.add(oAuth2Provider)
+        if (clientRegistrationRepository && oAuth2ProviderProperties) {
+            clientRegistrationRepository.iterator().each { ClientRegistration clientRegistration ->
+                skills.controller.result.model.OAuth2Provider oAuth2Provider = oAuth2ProviderProperties.registration.get(clientRegistration.registrationId)
+                oAuth2Provider.registrationId = oAuth2Provider.registrationId ?: clientRegistration.registrationId
+                oAuth2Provider.clientName = oAuth2Provider.clientName ?: clientRegistration.clientName
+                providers.add(oAuth2Provider)
+            }
         }
         return providers
     }
