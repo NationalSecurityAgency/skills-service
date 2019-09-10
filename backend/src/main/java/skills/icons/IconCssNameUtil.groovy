@@ -9,6 +9,6 @@ class IconCssNameUtil {
     static final Pattern CLEAN = Pattern.compile("(?i)[^a-z0-9]")
 
     public static String getCssClass(String projectId, String filename) {
-        return "${projectId}-"+CLEAN.matcher(filename).replaceAll("")
+        return "${projectId ?: 'GLOBAL'}-"+CLEAN.matcher(filename).replaceAll("")
     }
 }

@@ -2,8 +2,12 @@ import axios from 'axios';
 
 export default {
   getCustomIconCss(projectId) {
+    let url = `/api/projects/${projectId}/customIconCss`;
+    if (!projectId) {
+      url = '/supervisor/customIconCss';
+    }
     return axios
-      .get(`/api/projects/${projectId}/customIconCss`)
+      .get(url)
       .then(response => response.data);
   },
 };
