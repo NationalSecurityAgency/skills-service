@@ -1,5 +1,6 @@
 package skills.intTests.supervisor
 
+import org.springframework.core.io.ClassPathResource
 import org.springframework.http.HttpStatus
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
@@ -25,6 +26,8 @@ class SupervisorEditSpecs extends DefaultIntSpec {
                 rootSkillsService.grantRoot()
             }
             rootSkillsService.grantSupervisorRole(skillsService.wsHelper.username)
+
+            skillsService.deleteGlobalIcon([filename: "dot2.png"])
         }
 
         def cleanup() {
@@ -301,5 +304,43 @@ class SupervisorEditSpecs extends DefaultIntSpec {
 
         cleanup:
         skillsService.deleteGlobalBadge(badgeId)
+    }
+    def "upload global icon"(){
+        ClassPathResource resource = new ClassPathResource("/dot2.png")
+
+        when:
+        def file = resource.getFile()
+        def result = skillsService.uploadGlobalIcon(file)
+
+        then:
+        result
+        result.success
+        result.cssClassName == "GLOBAL-dot2png"
+        result.name == "dot2.png"
+    }
+
+    def "delete global icon"(){
+        ClassPathResource resource = new ClassPathResource("/dot2.png")
+
+        when:
+        def file = resource.getFile()
+        skillsService.uploadGlobalIcon(file)
+        skillsService.deleteGlobalIcon([filename: "dot2.png"])
+        def result = skillsService.getIconCssForGlobalIcons()
+
+        then:
+        !result
+    }
+
+    def "get css for global icons"(){
+        ClassPathResource resource = new ClassPathResource("/dot2.png")
+
+        when:
+        def file = resource.getFile()
+        skillsService.uploadGlobalIcon(file)
+        def result = skillsService.getIconCssForGlobalIcons()
+
+        then:
+        result == [[filename:'dot2.png', cssClassname:"GLOBAL-dot2png"]]
     }
 }

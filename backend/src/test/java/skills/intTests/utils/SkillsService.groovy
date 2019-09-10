@@ -380,17 +380,26 @@ class SkillsService {
         body.put("customIcon", icon)
         wsHelper.adminUpload("/projects/${props.projectId}/icons/upload", body)
     }
+    def uploadGlobalIcon(File icon){
+        Map body = [:]
+        body.put("customIcon", icon)
+        wsHelper.supervisorUpload("/icons/upload", body)
+    }
 
     def deleteIcon(Map props){
         wsHelper.adminDelete("/projects/${props.projectId}/icons/${props.filename}")
     }
 
-    def getIcon(Map props){
-        wsHelper.iconsGetImage("/icon/${props.projectId}/${props.filename}")
+    def deleteGlobalIcon(Map props){
+        wsHelper.supervisorDelete("/icons/${props.filename}")
     }
 
     def getIconCssForProject(Map props){
         wsHelper.appGet("/projects/${props.projectId}/customIcons")
+    }
+
+    def getIconCssForGlobalIcons(){
+        wsHelper.supervisorGet("/icons/customIcons")
     }
 
     def getPerformedSkills(String userId, String project) {

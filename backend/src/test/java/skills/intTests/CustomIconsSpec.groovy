@@ -38,7 +38,7 @@ class CustomIconsSpec extends DefaultIntSpec {
         def file = resource.getFile()
         skillsService.uploadIcon([projectId:(projId)], file)
         skillsService.deleteIcon([projectId:(projId), filename: "dot2.png"])
-        def result = skillsService.getIcon([projectId:(projId), filename: "dot2.png"])
+        def result = skillsService.getIconCssForProject([projectId:(projId)])
 
         then:
         !result
