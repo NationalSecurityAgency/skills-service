@@ -32,7 +32,7 @@
           .then((response) => {
             this.isRoot = response;
             if (this.isRoot) {
-              this.navItems.splice(1, 0, { name: 'Badges', iconClass: 'fa-award', page: 'GlobalBadges' });
+              this.navItems.splice(1, 0, { name: 'Badges', iconClass: 'fa-globe-americas', page: 'GlobalBadges' });
             }
           });
       },

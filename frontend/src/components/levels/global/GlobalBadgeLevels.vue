@@ -5,16 +5,16 @@
     <simple-card>
       <loading-container v-model="isLoading">
         <div class="row mb-4">
-          <div class="col-12 col-sm">
+          <div class="col-12 col-sm-6">
             <project-selector ref="projectSelectorRef" v-model="selectedProject" @added="projectAdded" @removed="projectRemoved"></project-selector>
           </div>
-          <div class="col-12 col-sm">
+          <div class="col-12 col-sm-4">
             <level-selector v-model="selectedLevel" :project-id="selectedProjectId" :disabled="!selectedProject" :placeholder="levelPlaceholder"></level-selector>
           </div>
-          <div class="col-12 col-sm-1 mt-2 mt-sm-0">
+          <div class="col-12 col-sm mt-2 mt-sm-0">
             <span v-b-tooltip.hover="'Add Project and Level to Global Badge.'">
               <button :disabled="!(selectedProject && selectedLevel)" type="button" class="btn btn-outline-primary" @click="addLevel">
-                <span class="d-none d-sm-inline"></span> <i class="fas fa-plus-circle"/>
+                <span class="d-none d-sm-inline"></span>Add <i class="fas fa-plus-circle"/>
               </button>
             </span>
           </div>
