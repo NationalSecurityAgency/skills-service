@@ -315,7 +315,7 @@ class AdminProjService {
     private List<SkillDef> getBadgesInternal(ProjDef projDef, SkillDef.ContainerType type) {
         List<SkillDef> badges
         if (type == SkillDef.ContainerType.GlobalBadge) {
-            badges = skillDefWithExtraRepo.findAllByProjectIdAndType(null, SkillDef.ContainerType.GlobalBadge)
+            badges = skillDefRepo.findAllByProjectIdAndType(null, SkillDef.ContainerType.GlobalBadge)
         } else {
             badges  = projDef.badges
         }

@@ -50,8 +50,8 @@
             <column name="id" type="int" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
+            <!-- optional, can be null for 'global' badges -->
             <column name="project_id" type="varchar(255)">
-                <constraints nullable="false"/>
             </column>
             <column name="proj_ref_id" type="int"/>
             <column name="filename" type="varchar(255)">

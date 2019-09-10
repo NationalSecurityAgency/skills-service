@@ -34,12 +34,10 @@
     data() {
       return {
         isLoading: true,
-        projectId: '',
         badgeId: '',
       };
     },
     created() {
-      this.projectId = this.$route.params.projectId;
       this.badgeId = this.$route.params.badgeId;
     },
     mounted() {

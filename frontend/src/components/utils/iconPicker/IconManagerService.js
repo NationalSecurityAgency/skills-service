@@ -18,10 +18,18 @@ const createCustomIconStyleElementIfNotExist = () => {
 
 export default {
   getIconIndex(projectId) {
-    return axios.get(`/app/projects/${projectId}/customIcons`).then(response => response.data);
+    let url = `/app/projects/${projectId}/customIcons`;
+    if (!projectId) {
+      url = '/supervisor/icons/customIcons';
+    }
+    return axios.get(url).then(response => response.data);
   },
   deleteIcon(iconName, projectId) {
-    return axios.delete(`/admin/projects/${projectId}/icons/${iconName}`);
+    let url = `/admin/projects/${projectId}/icons/${iconName}`;
+    if (!projectId) {
+      url = `/supervisor/icons/${iconName}`;
+    }
+    return axios.delete(url);
   },
   addCustomIconCSS(css) {
     const existingStyles = createCustomIconStyleElementIfNotExist();

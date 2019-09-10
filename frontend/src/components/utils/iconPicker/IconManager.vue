@@ -288,7 +288,11 @@
         return this.$store.state.projectId;
       },
       uploadUrl() {
-        return `/admin/projects/${this.activeProjectId}/icons/upload`;
+        let uploadUrl = `/admin/projects/${this.activeProjectId}/icons/upload`;
+        if (!this.activeProjectId) {
+          uploadUrl = '/supervisor/icons/upload';
+        }
+        return uploadUrl;
       },
     },
     mounted() {

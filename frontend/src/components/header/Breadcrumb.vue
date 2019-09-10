@@ -59,6 +59,12 @@
             if (index === res.length - 1 && lastItemInPathCustomName) {
               key = null;
               value = lastItemInPathCustomName;
+            } else {
+              value = value
+                // insert a space before all caps
+                .replace(/([A-Z])/g, ' $1')
+                // uppercase the first character
+                .replace(/^./, str => str.toUpperCase());
             }
 
             if (key) {

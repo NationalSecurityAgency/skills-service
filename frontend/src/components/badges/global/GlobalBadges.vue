@@ -1,6 +1,6 @@
 <template>
   <div>
-    <sub-page-header title="Badges" action="Badge" @add-action="newBadge"/>
+    <sub-page-header title="Global Badges" action="Badge" @add-action="newBadge"/>
     <loading-container v-bind:is-loading="isLoading">
       <transition name="projectContainer" enter-active-class="animated fadeIn">
         <div>

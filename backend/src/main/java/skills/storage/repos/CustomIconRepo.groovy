@@ -1,6 +1,7 @@
 package skills.storage.repos
 
 import org.springframework.data.repository.CrudRepository
+import org.springframework.lang.Nullable
 import skills.storage.model.CustomIcon
 
 import org.springframework.transaction.annotation.Transactional
@@ -12,10 +13,13 @@ interface CustomIconRepo extends CrudRepository<CustomIcon, Integer> {
     @Transactional(readOnly = true)
     List<CustomIcon> findAllByProjectId(String projectId)
 
+    @Transactional(readOnly = true)
+    List<CustomIcon> findAllByProjectIdIsNull()
+
     CustomIcon findByProjectIdAndFilename(String projectId, String filename)
 
     void delete(CustomIcon toDelete)
 
     @Transactional
-    void deleteByProjectIdAndFilename(String projectId, String filename)
+    void deleteByProjectIdAndFilename(@Nullable String projectId, String filename)
 }

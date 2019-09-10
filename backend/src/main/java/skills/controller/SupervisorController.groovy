@@ -2,13 +2,20 @@ package skills.controller
 
 
 import groovy.util.logging.Slf4j
+import org.apache.commons.io.FileUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.multipart.MultipartFile
+import skills.controller.exceptions.InvalidContentTypeException
+import skills.controller.exceptions.MaxIconSizeExceeded
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.ActionPatchRequest
 import skills.controller.request.model.BadgeRequest
 import skills.controller.result.model.*
+import skills.icons.CustomIconFacade
+import skills.icons.UploadedIcon
 import skills.services.AccessSettingsStorageService
 import skills.services.AdminProjService
 import skills.services.AdminUsersService
@@ -39,6 +46,9 @@ class SupervisorController {
 
     @Autowired
     AdminUsersService adminUsersService
+
+    @Autowired
+    CustomIconFacade iconFacade
 
     @RequestMapping(value = "/badges/name/{badgeName}/exists", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
@@ -184,4 +194,41 @@ class SupervisorController {
         return new RequestResult(success: true)
     }
 
+    @RequestMapping(value = "/icons/customIcons", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    List<CustomIconResult> getGlobalCustomIcons() {
+        return iconFacade.getGlobalCustomIcons()
+    }
+
+    @RequestMapping(value = "/icons/upload", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
+    @ResponseBody
+    UploadedIcon addGlobalCustomIcon(@RequestParam("customIcon") MultipartFile icon) {
+        String iconFilename = icon.originalFilename
+        byte[] file = icon.bytes
+        icon.contentType
+
+        if (!icon.contentType?.toLowerCase()?.startsWith("image/")) {
+            throw new InvalidContentTypeException("content-type [${icon.contentType}] is unacceptable, only image/ content-types are allowed")
+        }
+
+        if (file.length > CustomIconAdminController.maxIconFileSize) {
+            throw new MaxIconSizeExceeded("[${file.length}] exceeds the maximum icon size of [${FileUtils.byteCountToDisplaySize(maxIconFileSize)}]")
+        }
+
+        UploadedIcon result = iconFacade.saveIcon(null, iconFilename, icon.contentType, file)
+
+        return result
+    }
+
+    @RequestMapping(value = "/icons/{filename}", method = RequestMethod.DELETE)
+    ResponseEntity<Boolean> deleteGlobal(@PathVariable("filename") String filename) {
+        iconFacade.deleteGlobalIcon(filename)
+        return ResponseEntity.ok(true)
+    }
+
+    @RequestMapping(value = "/customIconCss", method = RequestMethod.GET, produces = "text/css")
+    @ResponseBody
+    String getCustomIconCss() {
+        return iconFacade.generateGlobalCss()
+    }
 }

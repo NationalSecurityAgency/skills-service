@@ -51,10 +51,8 @@
       },
     },
     watch: {
-      activeProjectId(projectId) {
-        if (projectId) {
-          this.addCustomIconCSS();
-        }
+      activeProjectId() {
+        this.addCustomIconCSS();
       },
       userInfo(newUserInfo) {
         if (newUserInfo) {
@@ -63,7 +61,7 @@
       },
     },
     created() {
-      if (this.isAuthenticatedUser && this.activeProjectId) {
+      if (this.isAuthenticatedUser) {
         this.addCustomIconCSS();
       }
     },
