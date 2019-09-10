@@ -57,7 +57,7 @@
           return {};
         }
         return {
-          icon: 'fas fa-award',
+          icon: 'fas fa-globe-americas',
           title: `BADGE: ${this.badge.name}`,
           subTitle: `ID: ${this.badge.badgeId}`,
           stats: [{

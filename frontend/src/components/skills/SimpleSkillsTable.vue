@@ -30,17 +30,45 @@
 <script>
   export default {
     name: 'SimpleSkillsTable',
-    props: ['skills'],
+    props: {
+      skills: {
+        type: Array,
+        required: true,
+      },
+      showProject: {
+        type: Boolean,
+        default: false,
+      },
+    },
     data() {
+      let columns;
+      let headings;
+      // let columnsDisplay;
+      let sortable;
+      if (this.showProject) {
+        columns = ['name', 'skillId', 'projectId', 'totalPoints', 'edit'];
+        headings = {
+          name: 'Skill Name',
+          skillId: 'Skill ID',
+          projectId: 'Project ID',
+          totalPoints: 'Total Points',
+          edit: '',
+        };
+        sortable = ['name', 'skillId', 'projectId', 'pointIncrement', 'totalPoints'];
+      } else {
+        columns = ['name', 'skillId', 'totalPoints', 'edit'];
+        headings = {
+          name: 'Skill Name',
+          skillId: 'Skill ID',
+          totalPoints: 'Total Points',
+          edit: '',
+        };
+        sortable = ['name', 'skillId', 'pointIncrement', 'totalPoints'];
+      }
       return {
-        columns: ['name', 'skillId', 'totalPoints', 'edit'],
+        columns,
         options: {
-          headings: {
-            name: 'Skill Name',
-            skillId: 'Skill ID',
-            totalPoints: 'Total Points',
-            edit: '',
-          },
+          headings,
           perPage: 15,
           columnsClasses: {
             edit: 'control-column',
@@ -51,7 +79,7 @@
             totalPoints: 'not_mobile',
           },
           pagination: { dropdown: false, edge: false },
-          sortable: ['name', 'skillId', 'pointIncrement', 'totalPoints'],
+          sortable,
           sortIcon: {
             base: 'fa fa-sort', up: 'fa fa-sort-up', down: 'fa fa-sort-down', is: 'fa fa-sort',
           },

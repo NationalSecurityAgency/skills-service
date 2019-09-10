@@ -9,7 +9,7 @@
       <template slot="option" slot-scope="props">
         <slot name="dropdown-item" v-bind:props="props">
           <h6>{{ props.option.name }}</h6>
-          <div class="" style="font-size: 0.8rem;">ID: {{props.option.skillId}}</div>
+          <div class="" style="font-size: 0.8rem;">{{dropDownItemSlot(props)}}</div>
         </slot>
       </template>
       <template slot="tag" slot-scope="{ option, remove }">
@@ -56,6 +56,10 @@
       afterListSlotText: {
         type: String,
         default: '',
+      },
+      showProject: {
+        type: Boolean,
+        default: false,
       },
     },
     data() {
@@ -108,6 +112,13 @@
       },
       searchChanged(query) {
         this.$emit('search-change', query);
+      },
+      dropDownItemSlot(props) {
+        let slotText = `ID: ${props.option.skillId}`;
+        if (this.showProject) {
+          slotText = ` Project ID: ${props.option.projectId}`;
+        }
+        return slotText;
       },
     },
   };
