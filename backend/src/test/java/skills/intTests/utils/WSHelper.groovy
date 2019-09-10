@@ -90,6 +90,13 @@ class WSHelper {
         return multipartPost(url, params)
     }
 
+    def supervisorUpload(String endpoint, Map params = null) {
+        String url = "${skillsService}/supervisor${endpoint}"
+        log.info("MULTIPART POST: {}", url)
+        return multipartPost(url, params)
+    }
+
+
     def adminPatch(String endpoint, def params, boolean throwExceptionOnFailure = true, MediaType mediaType = MediaType.APPLICATION_JSON) {
         patch(endpoint, "admin", params, HttpStatus.OK, throwExceptionOnFailure, mediaType)
     }
@@ -152,27 +159,6 @@ class WSHelper {
 
     def apiGet(String endpoint, Map params = null) {
         return get(endpoint, "api", params)
-    }
-
-    def iconsGetImage(String endpoint, def params = null){
-        String url = "${skillsService}/icons${endpoint}${getUrlFromParams(params)}"
-        log.info("GET: {}", url)
-        ResponseEntity<byte[]> responseEntity = restTemplateWrapper.getForEntity(url, byte[].class)
-
-        if (responseEntity.getStatusCode() == HttpStatus.OK) {
-            return responseEntity.getBody()
-        }else{
-            log.warn("unable to retrieve icon from ${url}, status code is ${responseEntity.getStatusCode()}")
-            return null
-        }
-    }
-
-    def iconsGet(String endpoint, Map params = null) {
-        String url = "${skillsService}/icons${endpoint}${getUrlFromParams(params)}"
-        log.info("GET: {}", url)
-
-        ResponseEntity<String> responseEntity = restTemplateWrapper.getForEntity(url, String)
-        return responseEntity.getBody()
     }
 
     String getTokenForUser(String userId, boolean includeGrantType=true, boolean includeProxyUser=true) {
