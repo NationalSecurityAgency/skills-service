@@ -56,6 +56,9 @@
       activeProjectId() {
         this.addCustomIconCSS();
       },
+      isSupervisor() {
+        this.addCustomIconCSS();
+      },
       userInfo(newUserInfo) {
         if (newUserInfo) {
           InceptionConfigurer.configure();
