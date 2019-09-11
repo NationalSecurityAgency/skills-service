@@ -46,15 +46,14 @@
       // let columnsDisplay;
       let sortable;
       if (this.showProject) {
-        columns = ['name', 'skillId', 'projectId', 'totalPoints', 'edit'];
+        columns = ['name', 'skillId', 'projectId', 'edit'];
         headings = {
           name: 'Skill Name',
           skillId: 'Skill ID',
           projectId: 'Project ID',
-          totalPoints: 'Total Points',
           edit: '',
         };
-        sortable = ['name', 'skillId', 'projectId', 'pointIncrement', 'totalPoints'];
+        sortable = ['name', 'skillId', 'projectId'];
       } else {
         columns = ['name', 'skillId', 'totalPoints', 'edit'];
         headings = {
@@ -63,7 +62,7 @@
           totalPoints: 'Total Points',
           edit: '',
         };
-        sortable = ['name', 'skillId', 'pointIncrement', 'totalPoints'];
+        sortable = ['name', 'skillId', 'totalPoints'];
       }
       return {
         columns,

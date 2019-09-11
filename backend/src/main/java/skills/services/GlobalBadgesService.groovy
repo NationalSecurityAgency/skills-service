@@ -258,10 +258,15 @@ class GlobalBadgesService {
         )
 
         if (loadRequiredSkills) {
+            Set<String> uniqueProjectIds = []
             List<SkillDef> dependentSkills = skillDefRepo.findChildSkillsByIdAndRelationshipType(skillDef.id, SkillRelDef.RelationshipType.BadgeDependence)
+            uniqueProjectIds.addAll(dependentSkills*.projectId)
             res.requiredSkills = dependentSkills?.collect { adminProjService.convertToSkillDefRes(it) }
             res.numSkills = dependentSkills ? dependentSkills.size() : 0
             res.totalPoints = dependentSkills ? dependentSkills?.collect({ it.totalPoints })?.sum() : 0
+            res.requiredProjectLevels = getGlobalBadgeLevels(skillDef.skillId)
+            uniqueProjectIds.addAll(res.requiredProjectLevels*.projectId)
+            res.uniqueProjectCount = uniqueProjectIds.size()
         } else {
             res.numSkills = skillDefRepo.countChildSkillsByIdAndRelationshipType(skillDef.id, SkillRelDef.RelationshipType.BadgeDependence)
             if (res.numSkills > 0) {
@@ -270,7 +275,6 @@ class GlobalBadgesService {
                 res.totalPoints = 0
             }
         }
-        res.requiredProjectLevels = getGlobalBadgeLevels(skillDef.skillId)
         return res
     }
 

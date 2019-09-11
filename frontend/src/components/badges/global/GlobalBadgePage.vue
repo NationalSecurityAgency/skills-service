@@ -26,7 +26,7 @@
   const { mapActions, mapGetters, mapMutations } = createNamespacedHelpers('badges');
 
   export default {
-    name: 'BadgePage',
+    name: 'GlobalBadgePage',
     components: {
       PageHeader,
       Navigation,
@@ -47,11 +47,6 @@
       ...mapGetters([
         'badge',
       ]),
-      uniqueProjectCount() {
-        const skillProjectIds = this.badge.requiredSkills.map(item => item.projectId);
-        const levelProjectIds = this.badge.requiredProjectLevels.map(item => item.projectId);
-        return new Set([...skillProjectIds, ...levelProjectIds]).size;
-      },
       headerOptions() {
         if (!this.badge) {
           return {};
@@ -68,7 +63,7 @@
             count: this.badge.requiredProjectLevels.length,
           }, {
             label: 'Projects',
-            count: this.uniqueProjectCount,
+            count: this.badge.uniqueProjectCount,
           }],
         };
       },

@@ -7,4 +7,5 @@ import groovy.transform.Canonical
 class GlobalBadgeResult extends BadgeResult {
 
     List<GlobalBadgeLevelRes> requiredProjectLevels = []
+    int uniqueProjectCount = 0
 }

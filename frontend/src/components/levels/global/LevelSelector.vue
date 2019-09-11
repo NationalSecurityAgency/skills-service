@@ -2,7 +2,7 @@
   <div id="level-selector">
 
     <multiselect :disabled="disabled" v-model="selectedInternal" :options="projectLevels"
-                 :show-labels="false" :is-loading="isLoading"
+                 :show-labels="false" :hide-selected="true" :is-loading="isLoading"
                  :placeholder="placeholder" v-on:select="selected"></multiselect>
   </div>
 </template>
