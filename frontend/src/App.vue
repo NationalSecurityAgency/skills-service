@@ -24,6 +24,7 @@
   import CustomizableFooter from './components/customization/CustomizableFooter';
   import IconManagerService from './components/utils/iconPicker/IconManagerService';
   import InceptionConfigurer from './InceptionConfigurer';
+  import AccessService from './components/access/AccessService';
 
   export default {
     name: 'App',
@@ -36,6 +37,7 @@
     data() {
       return {
         isLoading: false,
+        isSupervisor: false,
         serverErrors: [],
       };
     },
@@ -62,12 +64,16 @@
     },
     created() {
       if (this.isAuthenticatedUser) {
-        this.addCustomIconCSS();
+        AccessService.hasRole('ROLE_SUPERVISOR')
+          .then((response) => {
+            this.isSupervisor = response;
+            this.addCustomIconCSS();
+          });
       }
     },
     methods: {
       addCustomIconCSS() { // This must be done here AFTER authentication
-        IconManagerService.refreshCustomIconCss(this.activeProjectId);
+        IconManagerService.refreshCustomIconCss(this.activeProjectId, this.isSupervisor);
       },
     },
   };

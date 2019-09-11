@@ -16,7 +16,7 @@
     },
     data() {
       return {
-        isRoot: false,
+        isSupervisor: false,
         navItems: [
           { name: 'Projects', iconClass: 'fa-project-diagram', page: 'HomePage' },
           { name: 'Metrics', iconClass: 'fa-cogs', page: 'GlobalMetrics' },
@@ -30,8 +30,8 @@
       loadNavItems() {
         AccessService.hasRole('ROLE_SUPERVISOR')
           .then((response) => {
-            this.isRoot = response;
-            if (this.isRoot) {
+            this.isSupervisor = response;
+            if (this.isSupervisor) {
               this.navItems.splice(1, 0, { name: 'Badges', iconClass: 'fa-globe-americas', page: 'GlobalBadges' });
             }
           });
