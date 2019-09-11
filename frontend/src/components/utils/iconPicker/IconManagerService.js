@@ -35,12 +35,14 @@ export default {
     const existingStyles = createCustomIconStyleElementIfNotExist();
     existingStyles.innerText += css;
   },
-  refreshCustomIconCss(projectId) {
+  refreshCustomIconCss(projectId, isSupervisor) {
     const existingStyles = createCustomIconStyleElementIfNotExist();
 
-    CustomIconService.getCustomIconCss(projectId)
+    CustomIconService.getCustomIconCss(projectId, isSupervisor)
       .then((response) => {
-        existingStyles.innerText = response;
+        if (response) {
+          existingStyles.innerText = response;
+        }
     });
   },
 };
