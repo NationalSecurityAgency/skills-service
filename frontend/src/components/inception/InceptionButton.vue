@@ -1,23 +1,28 @@
 <template>
-  <b-button v-if="level > -1" to="/skills" variant="outline-info">
-    Level {{ level }}
+  <b-button v-if="isConfigurationInitialized" to="/skills" variant="outline-info">
+    <skills-level project-id="Inception" />
+<!--    Level {{ level }}-->
   </b-button>
 </template>
 
 <script>
+  import { SkillsLevel, SkillsConfiguration } from '@skills/skills-client-vue';
   import LevelService from '../levels/LevelService';
 
   export default {
     name: 'InceptionButton',
+    components: {
+      SkillsLevel,
+    },
     data() {
       return {
-        level: -1,
+        isConfigurationInitialized: false,
       };
     },
     mounted() {
-      LevelService.getUserLevel('Inception', this.userId)
-        .then((res) => {
-          this.level = res;
+      SkillsConfiguration.afterConfigure()
+        .then(() => {
+          this.isConfigurationInitialized = true;
         });
     },
     computed: {

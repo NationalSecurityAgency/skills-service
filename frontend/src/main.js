@@ -7,6 +7,7 @@ import { SkillsDirective } from '@skills/skills-client-vue';
 import VeeValidate from 'vee-validate';
 import VueApexCharts from 'vue-apexcharts';
 import Vuex from 'vuex';
+import InceptionConfigurer from './InceptionConfigurer';
 import 'babel-polyfill';
 import 'matchmedia-polyfill';
 import 'matchmedia-polyfill/matchMedia.addListener';
@@ -44,6 +45,7 @@ require('vue-multiselect/dist/vue-multiselect.min.css');
 store.dispatch('loadConfigState').finally(() => {
   RegisterValidators.init();
   store.dispatch('restoreSessionIfAvailable').finally(() => {
+    InceptionConfigurer.configure();
     /* eslint-disable no-new */
     const vm = new Vue({
       el: '#app',
