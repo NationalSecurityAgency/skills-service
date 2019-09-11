@@ -1,13 +1,11 @@
 <template>
   <b-button v-if="isConfigurationInitialized" to="/skills" variant="outline-info">
     <skills-level project-id="Inception" />
-<!--    Level {{ level }}-->
   </b-button>
 </template>
 
 <script>
   import { SkillsLevel, SkillsConfiguration } from '@skills/skills-client-vue';
-  import LevelService from '../levels/LevelService';
 
   export default {
     name: 'InceptionButton',
