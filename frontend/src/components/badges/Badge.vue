@@ -57,17 +57,26 @@
     },
     methods: {
       buildCardOptions() {
+        const stats = [{
+          label: 'Number Skills',
+          count: this.badgeInternal.numSkills,
+        }];
+        if (!this.global) {
+          stats.push({
+            label: 'Total Points',
+            count: this.badgeInternal.totalPoints,
+          });
+        } else {
+          stats.push({
+            label: 'Total Projects',
+            count: this.badgeInternal.uniqueProjectCount,
+          });
+        }
         this.cardOptions = {
           icon: this.badgeInternal.iconClass,
           title: this.badgeInternal.name,
           subTitle: `ID: ${this.badgeInternal.badgeId}`,
-          stats: [{
-            label: 'Number Skills',
-            count: this.badgeInternal.numSkills,
-          }, {
-            label: 'Total Points',
-            count: this.badgeInternal.totalPoints,
-          }],
+          stats,
         };
       },
       buildManageLink() {

@@ -4,7 +4,7 @@
     <!-- see https://github.com/shentao/vue-multiselect/issues/421 for explanation of :blockKeys-->
     <multiselect v-model="selectedInternal" placeholder="Select Project..."
                  :options="projects" :multiple="false" :taggable="false" :blockKeys="['Delete']"
-                 :hide-selected="false" label="name" track-by="projectId" :is-loading="isLoading"
+                 :hide-selected="true" label="name" track-by="projectId" :is-loading="isLoading"
                  v-on:remove="removed" v-on:select="added" v-on:search-change="searchChanged" :internal-search="internalSearch">
       <template slot="option" slot-scope="props">
         <slot name="dropdown-item" v-bind:props="props">
