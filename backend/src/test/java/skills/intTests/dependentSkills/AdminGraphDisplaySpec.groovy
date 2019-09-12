@@ -59,27 +59,18 @@ class AdminGraphDisplaySpec extends DefaultIntSpec {
         def graph = skillsService.getDependencyGraph(SkillsFactory.defaultProjId)
 
         then:
+        def idMap = graph.nodes.collectEntries {[it.skillId, it.id]}
         graph.nodes.collect { it.skillId }.sort() == (0..6).collect { skills.get(it).skillId }
 
         graph.edges.size() == 6
-        def sortedEdges = graph.edges.sort { a,b -> a.fromId <=> b.fromId ?: a.toId <=> b.toId }
-        sortedEdges.get(0).fromId == graph.nodes.find{ it.skillId == skills.get(0).skillId}.id
-        sortedEdges.get(0).toId == graph.nodes.find{ it.skillId == skills.get(1).skillId}.id
-
-        sortedEdges.get(1).fromId == graph.nodes.find{ it.skillId == skills.get(0).skillId}.id
-        sortedEdges.get(1).toId == graph.nodes.find{ it.skillId == skills.get(2).skillId}.id
-
-        sortedEdges.get(2).fromId == graph.nodes.find{ it.skillId == skills.get(0).skillId}.id
-        sortedEdges.get(2).toId == graph.nodes.find{ it.skillId == skills.get(3).skillId}.id
-
-        sortedEdges.get(3).fromId == graph.nodes.find{ it.skillId == skills.get(3).skillId}.id
-        sortedEdges.get(3).toId == graph.nodes.find{ it.skillId == skills.get(4).skillId}.id
-
-        sortedEdges.get(4).fromId == graph.nodes.find{ it.skillId == skills.get(3).skillId}.id
-        sortedEdges.get(4).toId == graph.nodes.find{ it.skillId == skills.get(5).skillId}.id
-
-        sortedEdges.get(5).fromId == graph.nodes.find{ it.skillId == skills.get(5).skillId}.id
-        sortedEdges.get(5).toId == graph.nodes.find{ it.skillId == skills.get(6).skillId}.id
+        def edges = graph.edges.collect { "${it.fromId}->${it.toId}" }
+        edges.remove("${idMap.get(skills.get(0).skillId)}->${idMap.get(skills.get(1).skillId)}")
+        edges.remove("${idMap.get(skills.get(0).skillId)}->${idMap.get(skills.get(2).skillId)}")
+        edges.remove("${idMap.get(skills.get(0).skillId)}->${idMap.get(skills.get(3).skillId)}")
+        edges.remove("${idMap.get(skills.get(3).skillId)}->${idMap.get(skills.get(4).skillId)}")
+        edges.remove("${idMap.get(skills.get(3).skillId)}->${idMap.get(skills.get(5).skillId)}")
+        edges.remove("${idMap.get(skills.get(5).skillId)}->${idMap.get(skills.get(6).skillId)}")
+        !edges
     }
 
     def "project graph - verify attributes are populated in the nodes"() {
@@ -170,26 +161,15 @@ class AdminGraphDisplaySpec extends DefaultIntSpec {
 
         then:
         graphSkill0.nodes.collect { it.skillId }.sort() == (0..6).collect { skills.get(it).skillId }
-
-        graphSkill0.edges.size() == 6
-        def sortedEdgesSkill0 = graphSkill0.edges.sort { a,b -> a.fromId <=> b.fromId ?: a.toId <=> b.toId }
-        sortedEdgesSkill0.get(0).fromId == graphSkill0.nodes.find{ it.skillId == skills.get(0).skillId}.id
-        sortedEdgesSkill0.get(0).toId == graphSkill0.nodes.find{ it.skillId == skills.get(1).skillId}.id
-
-        sortedEdgesSkill0.get(1).fromId == graphSkill0.nodes.find{ it.skillId == skills.get(0).skillId}.id
-        sortedEdgesSkill0.get(1).toId == graphSkill0.nodes.find{ it.skillId == skills.get(2).skillId}.id
-
-        sortedEdgesSkill0.get(2).fromId == graphSkill0.nodes.find{ it.skillId == skills.get(0).skillId}.id
-        sortedEdgesSkill0.get(2).toId == graphSkill0.nodes.find{ it.skillId == skills.get(3).skillId}.id
-
-        sortedEdgesSkill0.get(3).fromId == graphSkill0.nodes.find{ it.skillId == skills.get(3).skillId}.id
-        sortedEdgesSkill0.get(3).toId == graphSkill0.nodes.find{ it.skillId == skills.get(4).skillId}.id
-
-        sortedEdgesSkill0.get(4).fromId == graphSkill0.nodes.find{ it.skillId == skills.get(3).skillId}.id
-        sortedEdgesSkill0.get(4).toId == graphSkill0.nodes.find{ it.skillId == skills.get(5).skillId}.id
-
-        sortedEdgesSkill0.get(5).fromId == graphSkill0.nodes.find{ it.skillId == skills.get(5).skillId}.id
-        sortedEdgesSkill0.get(5).toId == graphSkill0.nodes.find{ it.skillId == skills.get(6).skillId}.id
+        def idMap0 = graphSkill0.nodes.collectEntries {[it.skillId, it.id]}
+        def edges0 = graphSkill0.edges.collect { "${it.fromId}->${it.toId}" }
+        edges0.remove("${idMap0.get(skills.get(0).skillId)}->${idMap0.get(skills.get(1).skillId)}")
+        edges0.remove("${idMap0.get(skills.get(0).skillId)}->${idMap0.get(skills.get(2).skillId)}")
+        edges0.remove("${idMap0.get(skills.get(0).skillId)}->${idMap0.get(skills.get(3).skillId)}")
+        edges0.remove("${idMap0.get(skills.get(3).skillId)}->${idMap0.get(skills.get(4).skillId)}")
+        edges0.remove("${idMap0.get(skills.get(3).skillId)}->${idMap0.get(skills.get(5).skillId)}")
+        edges0.remove("${idMap0.get(skills.get(5).skillId)}->${idMap0.get(skills.get(6).skillId)}")
+        !edges0
 
         // -------------------------
         !graphSkill1.nodes
@@ -198,15 +178,12 @@ class AdminGraphDisplaySpec extends DefaultIntSpec {
         // -------------------------
         graphSkill3.nodes.collect { it.skillId }.sort() == (3..6).collect { skills.get(it).skillId }
         graphSkill3.edges.size() == 3
-        def sortedEdgesSkill3 = graphSkill3.edges.sort { a,b -> a.fromId <=> b.fromId ?: a.toId <=> b.toId }
-        sortedEdgesSkill3.get(0).fromId == graphSkill3.nodes.find{ it.skillId == skills.get(3).skillId}.id
-        sortedEdgesSkill3.get(0).toId == graphSkill3.nodes.find{ it.skillId == skills.get(4).skillId}.id
-
-        sortedEdgesSkill3.get(1).fromId == graphSkill3.nodes.find{ it.skillId == skills.get(3).skillId}.id
-        sortedEdgesSkill3.get(1).toId == graphSkill3.nodes.find{ it.skillId == skills.get(5).skillId}.id
-
-        sortedEdgesSkill3.get(2).fromId == graphSkill3.nodes.find{ it.skillId == skills.get(5).skillId}.id
-        sortedEdgesSkill3.get(2).toId == graphSkill3.nodes.find{ it.skillId == skills.get(6).skillId}.id
+        def idMap3 = graphSkill3.nodes.collectEntries {[it.skillId, it.id]}
+        def edges3= graphSkill3.edges.collect { "${it.fromId}->${it.toId}" }
+        edges3.remove("${idMap3.get(skills.get(3).skillId)}->${idMap3.get(skills.get(4).skillId)}")
+        edges3.remove("${idMap3.get(skills.get(3).skillId)}->${idMap3.get(skills.get(5).skillId)}")
+        edges3.remove("${idMap3.get(skills.get(5).skillId)}->${idMap3.get(skills.get(6).skillId)}")
+        !edges3
 
         // -------------------------
         graphSkill5.nodes.collect { it.skillId }.sort() == (5..6).collect { skills.get(it).skillId }

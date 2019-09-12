@@ -19,12 +19,14 @@ class AdminSkillInfoSpecs extends DefaultIntSpec {
         def proj2_subj = SkillsFactory.createSubject(2, 1)
         List<Map> proj2_skills = SkillsFactory.createSkills(3, 2, 1)
 
+
         skillsService.createProject(proj2)
         skillsService.createSubject(proj2_subj)
         skillsService.createSkills(proj2_skills)
 
         when:
         def skills = skillsService.getSkillsForProject(proj1.projectId)
+        skills.sort() { it.skillId }
         then:
         skills.size() == 3
 
@@ -65,6 +67,7 @@ class AdminSkillInfoSpecs extends DefaultIntSpec {
 
         when:
         def skills = skillsService.getSkillsForSubject(proj1.projectId, proj1_subj.subjectId)
+        skills.sort() { it.skillId }
         then:
         skills.size() == 3
 
