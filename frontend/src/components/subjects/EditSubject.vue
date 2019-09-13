@@ -57,12 +57,12 @@
 
 <script>
   import { Validator, ValidationProvider, ValidationObserver } from 'vee-validate';
-  import DOMPurify from 'dompurify';
   import SubjectsService from './SubjectsService';
   import IconPicker from '../utils/iconPicker/IconPicker';
   import MarkdownEditor from '../utils/MarkdownEditor';
   import IdInput from '../utils/inputForm/IdInput';
   import IconManager from '../utils/iconPicker/IconManager';
+  import InputSanitizer from '../utils/InputSanitizer';
 
 
   export default {
@@ -113,8 +113,8 @@
               this.overallErrMsg = 'Form did NOT pass validation, please fix and try to Save again';
             } else {
               this.close();
-              this.subjectInternal.subjectName = DOMPurify.sanitize(this.subjectInternal.subjectName);
-              this.subjectInternal.subjectId = DOMPurify.sanitize(this.subjectInternal.subjectId);
+              this.subjectInternal.subjectName = InputSanitizer.sanitize(this.subjectInternal.subjectName);
+              this.subjectInternal.subjectId = InputSanitizer.sanitize(this.subjectInternal.subjectId);
               this.$emit('subject-saved', this.subjectInternal);
             }
           });

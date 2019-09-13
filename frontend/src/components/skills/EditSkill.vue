@@ -172,12 +172,12 @@
 
 <script>
   import { Validator, ValidationProvider, ValidationObserver } from 'vee-validate';
-  import DOMPurify from 'dompurify';
   import SkillsService from './SkillsService';
   import MarkdownEditor from '../utils/MarkdownEditor';
   import IdInput from '../utils/inputForm/IdInput';
   import InlineHelp from '../utils/InlineHelp';
   import LoadingContainer from '../utils/LoadingContainer';
+  import InputSanitizer from '../utils/InputSanitizer';
 
   export default {
     name: 'EditSkill',
@@ -408,11 +408,9 @@
             if (!res) {
               this.overallErrMsg = 'Form did NOT pass validation, please fix and try to Save again';
             } else {
-              this.skillInternal.name = DOMPurify.sanitize(this.skillInternal.name);
-              this.skillInternal.skillId = DOMPurify.sanitize(this.skillInternal.skillId);
-              if (this.skillInternal.helpUrl) {
-                this.skillInternal.helpUrl = DOMPurify.sanitize(this.skillInternal.helpUrl);
-              }
+              this.skillInternal.name = InputSanitizer.sanitize(this.skillInternal.name);
+              this.skillInternal.skillId = InputSanitizer.sanitize(this.skillInternal.skillId);
+              this.skillInternal.helpUrl = InputSanitizer.sanitize(this.skillInternal.helpUrl);
               this.$emit('skill-saved', this.skillInternal);
               this.close();
             }

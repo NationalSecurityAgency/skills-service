@@ -2,6 +2,8 @@ package skills.controller
 
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
+import org.jsoup.Jsoup
+import org.jsoup.safety.Whitelist
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.PageRequest
@@ -16,7 +18,9 @@ import skills.services.events.SkillEventResult
 import skills.services.settings.SettingsService
 import skills.services.settings.listeners.ValidationRes
 import skills.utils.ClientSecretGenerator
+import skills.utils.InputSanitizer
 
+import javax.persistence.criteria.CriteriaBuilder
 import java.nio.charset.StandardCharsets
 
 import static org.springframework.data.domain.Sort.Direction.ASC
@@ -74,6 +78,9 @@ class AdminController {
         propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxProjectNameLength, "Project Name", projectRequest.name)
         propsBasedValidator.validateMinStrLength(PublicProps.UiProp.minNameLength, "Project Name", projectRequest.name)
 
+        projectRequest.name = InputSanitizer.sanitize(projectRequest.name)
+        projectRequest.projectId = InputSanitizer.sanitize(projectRequest.projectId)
+
         projectAdminStorageService.saveProject(projectId, projectRequest)
         return new skills.controller.result.model.RequestResult(success: true)
     }
@@ -126,6 +133,11 @@ class AdminController {
         propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxSubjectNameLength, "Subject Name", subjectRequest.name)
         propsBasedValidator.validateMinStrLength(PublicProps.UiProp.minNameLength, "Subject Name", subjectRequest.name)
         propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.descriptionMaxLength, "Subject Description", subjectRequest.description)
+
+        subjectRequest.subjectId = InputSanitizer.sanitize(subjectRequest.subjectId)
+        subjectRequest.description = InputSanitizer.sanitize(subjectRequest.description)
+        subjectRequest.name = InputSanitizer.sanitize(subjectRequest.name)
+        subjectRequest.iconClass = InputSanitizer.sanitize(subjectRequest.iconClass)
 
         projectAdminStorageService.saveSubject(projectId, subjectId, subjectRequest)
         return new RequestResult(success: true)
@@ -231,6 +243,10 @@ class AdminController {
         propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxBadgeNameLength, "Badge Name", badgeRequest.name)
         propsBasedValidator.validateMinStrLength(PublicProps.UiProp.minNameLength, "Badge Name", badgeRequest.name)
         propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.descriptionMaxLength, "Badge Description", badgeRequest.description)
+
+        badgeRequest.name = InputSanitizer.sanitize(badgeRequest.name)
+        badgeRequest.badgeId = InputSanitizer.sanitize(badgeRequest.badgeId)
+        badgeRequest.description = InputSanitizer.sanitize(badgeRequest.description)
 
         projectAdminStorageService.saveBadge(projectId, badgeId, badgeRequest)
         return new RequestResult(success: true)
@@ -364,6 +380,13 @@ class AdminController {
         propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxSkillNameLength, "Skill Name", skillRequest.name)
         propsBasedValidator.validateMinStrLength(PublicProps.UiProp.minNameLength, "Skill Name", skillRequest.name)
         propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.descriptionMaxLength, "Skill Description", skillRequest.description)
+
+        skillRequest.name = InputSanitizer.sanitize(skillRequest.name)
+        skillRequest.projectId = InputSanitizer.sanitize(skillRequest.projectId)
+        skillRequest.skillId = InputSanitizer.sanitize(skillRequest.skillId)
+        skillRequest.description = InputSanitizer.sanitize(skillRequest.description)
+        skillRequest.subjectId = InputSanitizer.sanitize(skillRequest.subjectId)
+        skillRequest.helpUrl = InputSanitizer.sanitize(skillRequest.helpUrl)
 
         projectAdminStorageService.saveSkill(skillId, skillRequest)
         return new RequestResult(success: true)
