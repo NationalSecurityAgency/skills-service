@@ -39,9 +39,9 @@
 
 <script>
   import { Validator, ValidationProvider, ValidationObserver } from 'vee-validate';
-  import DOMPurify from 'dompurify';
   import ProjectService from './ProjectService';
   import IdInput from '../utils/inputForm/IdInput';
+  import InputSanitizer from '../utils/InputSanitizer';
 
   export default {
     name: 'EditProject',
@@ -88,7 +88,8 @@
             this.overallErrMsg = 'Form did NOT pass validation, please fix and try to Save again';
           } else {
             this.close();
-            this.internalProject.name = DOMPurify.sanitize(this.internalProject.name);
+            this.internalProject.name = InputSanitizer.sanitize(this.internalProject.name);
+            this.internalProject.projectId = InputSanitizer.sanitize(this.internalProject.projectId);
             this.$emit('project-saved', this.internalProject);
           }
         });

@@ -369,4 +369,51 @@ class AdminEditSpecs extends DefaultIntSpec {
         SkillsClientException e = thrown()
         e.message.contains "Each Subject is limited to [100] Skills"
     }
+
+    def "Prevent injection in Subject description"(){
+        def proj1 = SkillsFactory.createProject(1)
+        skillsService.createProject(proj1)
+
+        when:
+        def subj = SkillsFactory.createSubject(1, 1)
+        subj.subjectId = 'mySubj'
+        subj.description = "this is a description <a href='http://somewhere' onclick='doNefariousStuff()'>I'm a link</a>"
+        skillsService.createSubject(subj)
+
+        def subject = skillsService.getSubject([subjectId: 'mySubj', projectId: proj1.projectId])
+        then:
+        subject.description == 'this is a description <a href="http://somewhere" rel="nofollow">I\'m a link</a>'
+    }
+
+    def "Prevent injection in Skill description"(){
+        def proj1 = SkillsFactory.createProject(1)
+        skillsService.createProject(proj1)
+        def subj = SkillsFactory.createSubject(1, 1)
+        skillsService.createSubject(subj)
+
+        when:
+        def sk = SkillsFactory.createSkill()
+        sk.skillId = 'mySkill'
+        sk.description = "this is a description <a href='http://somewhere' onclick='doNefariousStuff()'>I'm a link</a>"
+        skillsService.createSkill(sk)
+
+        def skill = skillsService.getSkill([skillId: 'mySkill', subjectId: subj.subjectId, projectId: proj1.projectId])
+        then:
+        skill.description == 'this is a description <a href="http://somewhere" rel="nofollow">I\'m a link</a>'
+    }
+
+    def "Prevent injection in Badge description"(){
+        def proj1 = SkillsFactory.createProject(1)
+        skillsService.createProject(proj1)
+
+        when:
+        def badge = SkillsFactory.createBadge(1, 1)
+        badge.badgeId = 'myBadge'
+        badge.description = "this is a description <a href='http://somewhere' onclick='doNefariousStuff()'>I'm a link</a>"
+        skillsService.createBadge(badge)
+
+        badge = skillsService.getBadge([badgeId: 'myBadge', projectId: proj1.projectId])
+        then:
+        badge.description == 'this is a description <a href="http://somewhere" rel="nofollow">I\'m a link</a>'
+    }
 }
