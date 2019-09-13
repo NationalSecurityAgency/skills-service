@@ -172,6 +172,7 @@
 
 <script>
   import { Validator, ValidationProvider, ValidationObserver } from 'vee-validate';
+  import DOMPurify from 'dompurify';
   import SkillsService from './SkillsService';
   import MarkdownEditor from '../utils/MarkdownEditor';
   import IdInput from '../utils/inputForm/IdInput';
@@ -407,6 +408,11 @@
             if (!res) {
               this.overallErrMsg = 'Form did NOT pass validation, please fix and try to Save again';
             } else {
+              this.skillInternal.name = DOMPurify.sanitize(this.skillInternal.name);
+              this.skillInternal.skillId = DOMPurify.sanitize(this.skillInternal.skillId);
+              if (this.skillInternal.helpUrl) {
+                this.skillInternal.helpUrl = DOMPurify.sanitize(this.skillInternal.helpUrl);
+              }
               this.$emit('skill-saved', this.skillInternal);
               this.close();
             }

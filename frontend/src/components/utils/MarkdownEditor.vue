@@ -25,6 +25,7 @@
 <script>
   import marked from 'marked';
   import debounce from 'lodash.debounce';
+  import DOMPurify from 'dompurify';
 
   export default {
     name: 'MarkdownEditor',
@@ -44,7 +45,7 @@
     computed: {
       compiledMarkdown: function compileMarkdown() {
         if (this.valueInternal) {
-          const compiled = marked(this.valueInternal, { sanitize: true, smartLists: true, gfm: true });
+          const compiled = DOMPurify.sanitize(marked(this.valueInternal, { sanitize: true, smartLists: true, gfm: true }));
           return compiled;
         }
 

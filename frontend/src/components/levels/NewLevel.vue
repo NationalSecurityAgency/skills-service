@@ -75,6 +75,7 @@
 
 <script>
   import { Validator } from 'vee-validate';
+  import DOMPurify from 'dompurify';
   import IconPicker from '../utils/iconPicker/IconPicker';
   import IconManager from '../utils/iconPicker/IconManager';
 
@@ -178,6 +179,9 @@
       saveLevel() {
         this.$validator.validateAll().then((res) => {
           if (res) {
+            if (this.levelInternal.name) {
+              this.levelInternal.name = DOMPurify.sanitize(this.levelInternal.name);
+            }
             if (this.isEdit === true) {
               this.$emit('edited-level', {
                 percent: this.levelInternal.percent,

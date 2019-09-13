@@ -4,6 +4,7 @@
 
 <script>
     import marked from 'marked';
+    import DOMPurify from 'dompurify';
 
     export default {
         name: 'MarkdownText',
@@ -12,7 +13,7 @@
         },
         methods: {
             parseMarkdown(text) {
-                return marked(text);
+                return DOMPurify.sanitize(marked(text));
             },
         },
     };
