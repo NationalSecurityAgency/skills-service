@@ -85,6 +85,7 @@
 <script>
   import { Validator, ValidationProvider, ValidationObserver } from 'vee-validate';
   import Datepicker from 'vuejs-datepicker';
+  import DOMPurify from 'dompurify';
   import MarkdownEditor from '../utils/MarkdownEditor';
   import IconPicker from '../utils/iconPicker/IconPicker';
   import IconManager from '../utils/iconPicker/IconManager';
@@ -169,6 +170,8 @@
             this.overallErrMsg = 'Form did NOT pass validation, please fix and try to Save again';
           } else {
             this.show = false;
+            this.badgeInternal.badgeId = DOMPurify.sanitize(this.badgeInternal.badgeId);
+            this.badgeInternal.name = DOMPurify.sanitize(this.badgeInternal.name);
             this.$emit('badge-updated', this.badgeInternal);
           }
         });
