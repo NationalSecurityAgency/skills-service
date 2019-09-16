@@ -63,10 +63,24 @@ class SkillEventAdminService {
             checkForBadgesAchieved(userId, skillDefinitionMin)
             achievedLevelRepo.deleteByProjectIdAndSkillIdAndUserIdAndLevel(performedSkill.projectId, performedSkill.skillId, userId, null)
         }
+        deleteProjectLevelIfNecessary(performedSkill.projectId, userId)
         checkParentGraph(performedSkill.performedOn, res, userId, skillDefinitionMin)
         performedSkillRepository.delete(performedSkill)
 
         return res
+    }
+
+    private void deleteProjectLevelIfNecessary(String projectId, String userId) {
+        //get user points for Project, if less then UserAchievement.pointsWhenAchieved for highest project level, remove UserAchievement
+        Integer userProjectPoints = userPointsRepo.getPointsByProjectIdAndUserId(projectId, userId)
+        List<UserAchievement> achievements = achievedLevelRepo.findAllByUserIdAndProjectIdAndSkillId(userId, projectId, null)
+        def orderedLevels = achievements.findAll(){ it.level }.sort() { it.level }
+
+        def last = orderedLevels.last()
+        if (last.pointsWhenAchieved > userProjectPoints) {
+            log.debug("deleting achievement ${last}, User no longer has enough points")
+            achievedLevelRepo.delete(last)
+        }
     }
 
     private void checkForBadgesAchieved(String userId, SkillEventsSupportRepo.SkillDefMin currentSkillDef) {

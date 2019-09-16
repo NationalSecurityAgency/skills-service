@@ -761,4 +761,94 @@ class ReportSkillsSpecs extends DefaultIntSpec {
         skillsResult2.size() == 10
         skillsResult2.find { it.projectId == proj2.projectId && it.skillId == skills2[0].skillId }
     }
+
+    def "deleting skill events should decrease project level"(){
+        def proj1 = SkillsFactory.createProject()
+        def subj1 = SkillsFactory.createSubject()
+        def skills1 = SkillsFactory.createSkills(10, )
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(subj1)
+        skillsService.createSkills(skills1)
+
+        when:
+
+        def skillsLevelAfter3
+        Date date = new Date()
+        for(int i=0; i<5; i++){
+            if(i==3) {
+                def summary = skillsService.getSkillSummary("aUser", proj1.projectId, subj1.subjectId)
+                skillsLevelAfter3 = summary.skillsLevel
+            }
+            skillsService.addSkill([projectId: proj1.projectId, skillId: skills1[i].skillId], "aUser", date)
+        }
+
+        def skillsLevelAfter5 = skillsService.getSkillSummary("aUser", proj1.projectId, subj1.subjectId).skillsLevel
+
+        for(int i=3; i<5; i++) {
+            skillsService.deleteSkillEvent([projectId: proj1.projectId, skillId: skills1[i].skillId, userId: 'aUser', timestamp: date.time])
+        }
+
+        def skillsLevelAfterDelete = skillsService.getSkillSummary("aUser", proj1.projectId, subj1.subjectId).skillsLevel
+
+        then:
+        skillsLevelAfter3 != skillsLevelAfter5
+        skillsLevelAfterDelete == skillsLevelAfter3
+    }
+
+    def "deleting all skill events should decrease project level to zero"(){
+        def proj1 = SkillsFactory.createProject()
+        def subj1 = SkillsFactory.createSubject()
+        def skills1 = SkillsFactory.createSkills(10, )
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(subj1)
+        skillsService.createSkills(skills1)
+
+        when:
+
+        Date date = new Date()
+        for(int i=0; i<10; i++){
+            skillsService.addSkill([projectId: proj1.projectId, skillId: skills1[i].skillId], "aUser", date)
+        }
+
+        def skillsLevelAfterInsert = skillsService.getSkillSummary("aUser", proj1.projectId, subj1.subjectId).skillsLevel
+
+        for(int i=0; i<10; i++) {
+            skillsService.deleteSkillEvent([projectId: proj1.projectId, skillId: skills1[i].skillId, userId: 'aUser', timestamp: date.time])
+        }
+
+        def skillsLevelAfterDelete = skillsService.getSkillSummary("aUser", proj1.projectId, subj1.subjectId).skillsLevel
+
+        then:
+        skillsLevelAfterInsert > 0
+        skillsLevelAfterDelete == 0
+    }
+
+    def "Project level should not change if deleting skill event over threshold"() {
+        def proj1 = SkillsFactory.createProject()
+        def subj1 = SkillsFactory.createSubject()
+        def skills1 = SkillsFactory.createSkills(10, )
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(subj1)
+        skillsService.createSkills(skills1)
+
+        when:
+
+        Date date = new Date()
+        for(int i=0; i<6; i++){
+            skillsService.addSkill([projectId: proj1.projectId, skillId: skills1[i].skillId], "aUser", date)
+        }
+
+        def skillsLevelAfterInsert = skillsService.getSkillSummary("aUser", proj1.projectId, subj1.subjectId).skillsLevel
+
+        skillsService.deleteSkillEvent([projectId: proj1.projectId, skillId: skills1[0].skillId, userId: 'aUser', timestamp: date.time])
+
+        def skillsLevelAfterDelete = skillsService.getSkillSummary("aUser", proj1.projectId, subj1.subjectId).skillsLevel
+
+        then:
+        skillsLevelAfterInsert > 0
+        skillsLevelAfterDelete == skillsLevelAfterInsert
+    }
 }

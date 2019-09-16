@@ -116,7 +116,11 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
 
     @Nullable
     @Query('SELECT up.points from UserPoints up where up.projectId=?1 and up.userId=?2 and up.skillRefId=?3 and up.day is null')
-    Integer getPointsByProjectIdAndUserIdAndSkillRefId(String projectId, String userId, Integer skillRefId)
+    Integer getPointsByProjectIdAndUserIdAndSkillRefId(String projectId, String userId, @Nullable Integer skillRefId)
+
+    @Nullable
+    @Query('SELECT up.points from UserPoints up where up.projectId=?1 and up.userId=?2 and up.skillRefId is null and up.day is null')
+    Integer getPointsByProjectIdAndUserId(String projectId, String userId)
 
     @Nullable
     @Query('SELECT up.points from UserPoints up where up.projectId=?1 and up.userId=?2 and up.skillRefId=?3 and up.day=?4')
