@@ -1,5 +1,5 @@
 <template>
-    <div v-on:click="progressBarClicked">
+    <div @click="progressBarClicked">
         <vertical-progress v-if="progress.total === 100"
                            total-progress-bar-color="#59ad52" before-today-bar-color="#59ad52"
                            :total-progress="progress.total"
