@@ -16,6 +16,7 @@
           Oh no, something went wrong! An error occurred and we are unable to process your request, please try again
           later.
         </p>
+        <p><strong>{{ errorMessage }}</strong></p>
       </div>
     </div>
   </div>
