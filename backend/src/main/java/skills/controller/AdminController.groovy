@@ -7,7 +7,10 @@ import org.jsoup.safety.Whitelist
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.PageRequest
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import skills.PublicProps
 import skills.controller.exceptions.SkillsValidator
@@ -758,10 +761,19 @@ class AdminController {
     }
 
     @RequestMapping(value = "/projects/{projectId}/settings/{setting}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    SettingsResult getProjectSetting(@PathVariable("projectId") String projectId, @PathVariable("setting") String setting) {
+    ResponseEntity<SettingsResult> getProjectSetting(@PathVariable("projectId") String projectId, @PathVariable("setting") String setting) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(setting, "Setting Id", projectId)
-        return settingsService.getProjectSetting(projectId, setting)
+
+        SettingsResult result = settingsService.getProjectSetting(projectId, setting)
+        HttpHeaders headers = new HttpHeaders()
+        headers.setContentType(MediaType.APPLICATION_JSON)
+
+        if(!result) {
+            headers.setContentLength(0)
+        }
+        ResponseEntity<SettingsResult> response = new ResponseEntity<>(result, headers, HttpStatus.OK)
+        return response
     }
 
     @RequestMapping(value = "/projects/{projectId}/settings/{setting}", method = [RequestMethod.PUT, RequestMethod.POST], produces = MediaType.APPLICATION_JSON_VALUE)
