@@ -89,6 +89,19 @@
               head.appendChild(customIconStyles);
             }
           });
+
+        UserSkillsService.getCustomGlobalIconCss()
+          .then((css) => {
+            if (css) {
+              const head = document.getElementsByTagName('head')[0];
+
+              const customGlobalIconStyles = document.createElement('style');
+              customGlobalIconStyles.id = 'skill-custom-global-icons';
+              customGlobalIconStyles.type = 'text/css';
+              customGlobalIconStyles.innerText = css;
+              head.appendChild(customGlobalIconStyles);
+            }
+          });
       },
     },
   };

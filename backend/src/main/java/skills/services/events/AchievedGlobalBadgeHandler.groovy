@@ -61,7 +61,7 @@ class AchievedGlobalBadgeHandler {
                 }
 
                 // all project level requirements met, check required skills
-                Long nonAchievedChildren = achievedLevelRepo.countNonAchievedGlobalSkills(userId, globalBadge.skillId, SkillRelDef.RelationshipType.BadgeDependence)
+                Long nonAchievedChildren = achievedLevelRepo.countNonAchievedGlobalSkills(userId, globalBadge.skillId, SkillRelDef.RelationshipType.BadgeRequirement)
                 if (nonAchievedChildren == 0) {
                     List<UserAchievement> badges = achievedLevelRepo.findAllByUserIdAndProjectIdAndSkillId(userId, globalBadge.projectId, globalBadge.skillId)
                     if (!badges) {

@@ -17,4 +17,5 @@ class SkillBadgeSummary {
     List<SkillSummary> skills
 
     String iconClass
+    boolean global = false
 }

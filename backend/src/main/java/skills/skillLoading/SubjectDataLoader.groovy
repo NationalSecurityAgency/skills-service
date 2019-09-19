@@ -72,7 +72,11 @@ class SubjectDataLoader {
 
     @Profile
     private List<UserPointsRepo.SkillWithChildAndAchievementIndicator> loadAllDepsWithAchievementIndicator(String userId, String projectId, int version) {
-        userPointsRepo.findAllChildrenAndTheirAchievementsForProject(userId, projectId, SkillRelDef.RelationshipType.Dependence, version)
+        if (projectId) {
+            userPointsRepo.findAllChildrenAndTheirAchievementsForProject(userId, projectId, SkillRelDef.RelationshipType.Dependence, version)
+        } else {
+            userPointsRepo.findAllChildrenAndTheirAchievementsForGlobal(userId, SkillRelDef.RelationshipType.BadgeRequirement, version)
+        }
     }
 
     private static class SkillDefAndUserPoints {
@@ -98,12 +102,20 @@ class SubjectDataLoader {
 
     @Profile
     private List<Object[]> findChildrenPoints(String userId, String projectId, String skillId, SkillRelDef.RelationshipType relationshipType, int version) {
-        userPointsRepo.findChildrenAndTheirUserPoints(userId, projectId, skillId, relationshipType, version)
+        if (projectId) {
+            return userPointsRepo.findChildrenAndTheirUserPoints(userId, projectId, skillId, relationshipType, version)
+        } else {
+            return userPointsRepo.findGlobalChildrenAndTheirUserPoints(userId, skillId, relationshipType, version)
+        }
     }
 
     @Profile
     private List<Object[]> findChildrenPointsByDay(String userId, String projectId, String skillId, SkillRelDef.RelationshipType relationshipType, int version, Date day) {
-        userPointsRepo.findChildrenAndTheirUserPoints(userId, projectId, skillId, relationshipType, version, day)
+        if (projectId) {
+            return userPointsRepo.findChildrenAndTheirUserPoints(userId, projectId, skillId, relationshipType, version, day)
+        } else {
+            return userPointsRepo.findGlobalChildrenAndTheirUserPoints(userId, skillId, relationshipType, version, day)
+        }
     }
 
 }

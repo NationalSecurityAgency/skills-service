@@ -349,10 +349,13 @@ class SkillsService {
         wsHelper.apiGet(url)
     }
 
-    def getBadgeSummary(String userId, String projId, String badgeId, int version = -1){
+    def getBadgeSummary(String userId, String projId, String badgeId, int version = -1, boolean global = false){
         String url = "/projects/${projId}/badges/${badgeId}/summary?userId=${userId}"
         if (version >= 0) {
             url += "&version=${version}"
+        }
+        if (global) {
+            url += "&global=${global}"
         }
         wsHelper.apiGet(url)
     }

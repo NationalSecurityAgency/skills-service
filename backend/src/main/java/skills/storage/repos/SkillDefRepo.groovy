@@ -102,7 +102,7 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
              order by c.displayOrder desc''')
     List<SkillDef> findPreviousSkillDefs(String projectId, String skillId, int beforeDisplayOrder, RelationshipType relationshipType, Pageable pageable)
 
-    long countByProjectIdAndType(String projectId, SkillDef.ContainerType type)
+    long countByProjectIdAndType(@Nullable String projectId, SkillDef.ContainerType type)
 
     @Query(value='''select count(c) 
         from SkillRelDef r, SkillDef c 
@@ -136,7 +136,15 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
             s.id = r.parent and c.id = r.child and 
             s.projectId=?1 and c.projectId=?1 and
             s.skillId=?2 and r.type=?3''')
-    Integer countChildren(String projectId, String skillId, RelationshipType relationshipType)
+    Integer countChildren(@Nullable String projectId, String skillId, RelationshipType relationshipType)
+
+    @Query(value='''SELECT count(c) 
+        from SkillDef s, SkillRelDef r, SkillDef c 
+        where 
+            s.id = r.parent and c.id = r.child and 
+            s.projectId is null and
+            s.skillId=?1 and r.type=?2''')
+    Integer countGlobalChildren(String skillId, RelationshipType relationshipType)
 
     @Query("SELECT DISTINCT s.version from SkillDef s where s.projectId=?1 ORDER BY s.version ASC")
     List<Integer> getUniqueVersionList(String projectId)

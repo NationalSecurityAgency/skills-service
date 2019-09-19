@@ -16,6 +16,8 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
 
     List<UserAchievement> findAllByUserIdAndProjectIdAndSkillId(String userId, @Nullable String projectId, @Nullable String skillId)
 
+    List<UserAchievement> findAllByUserIdAndSkillId(String userId, @Nullable String skillId)
+
     Integer countByProjectIdAndSkillIdAndLevel(String projectId, @Nullable String skillId, int level)
 
     void deleteByProjectIdAndSkillId(String projectId, String skillId)
@@ -93,6 +95,15 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
         skillDef.type=?3''')
     int countAchievedForUser(String userId, String projectId, SkillDef.ContainerType containerType)
 
+    @Query('''select count(ua)
+      from SkillDef skillDef, UserAchievement ua 
+      where 
+        ua.level is null and ua.userId=?1 and 
+        skillDef.skillId = ua.skillId and 
+        skillDef.projectId is null and 
+        skillDef.type=?2''')
+    int countAchievedGlobalForUser(String userId, SkillDef.ContainerType containerType)
+
 
     @Query('''select count(ua) 
     from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild, UserAchievement ua
@@ -100,7 +111,16 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
       srd.parent=sdParent.id and  srd.child=sdChild.id and
       sdChild.projectId = ua.projectId and sdChild.skillId = ua.skillId and ua.userId=?1 and 
       sdParent.projectId=?2 and sdParent.skillId=?3 and srd.type=?4''')
-    int countAchievedChildren(String userId, String projectId, String skillId, SkillRelDef.RelationshipType type)
+    int countAchievedChildren(String userId, @Nullable String projectId, String skillId, SkillRelDef.RelationshipType type)
+
+
+    @Query('''select count(ua) 
+    from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild, UserAchievement ua
+      where 
+      srd.parent=sdParent.id and  srd.child=sdChild.id and
+      sdChild.projectId = ua.projectId and sdChild.skillId = ua.skillId and ua.userId=?1 and 
+      sdParent.projectId is null and sdParent.skillId=?2 and srd.type=?3''')
+    int countAchievedGlobalSkills(String userId, String skillId, SkillRelDef.RelationshipType type)
 
 
     @Query(value = '''select ua.created AS day, count(ua) AS count

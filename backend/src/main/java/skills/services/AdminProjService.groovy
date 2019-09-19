@@ -17,7 +17,6 @@ import skills.auth.UserInfoService
 import skills.controller.exceptions.DataIntegrityViolationExceptionHandler
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
-import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.*
 import skills.controller.result.model.*
 import skills.icons.IconCssNameUtil
@@ -325,13 +324,13 @@ class AdminProjService {
 
     @Transactional()
     void addSkillToBadge(String projectId, String badgeId, String skillid) {
-        assignGraphRelationship(projectId, badgeId, SkillDef.ContainerType.Badge, skillid, RelationshipType.BadgeDependence)
+        assignGraphRelationship(projectId, badgeId, SkillDef.ContainerType.Badge, skillid, RelationshipType.BadgeRequirement)
     }
 
     @Transactional()
     void removeSkillFromBadge(String projectId, String badgeId, String skillid) {
         removeGraphRelationship(projectId, badgeId, SkillDef.ContainerType.Badge,
-                projectId, skillid, RelationshipType.BadgeDependence)
+                projectId, skillid, RelationshipType.BadgeRequirement)
     }
 
 
@@ -698,14 +697,14 @@ class AdminProjService {
         )
 
         if (loadRequiredSkills) {
-            List<SkillDef> dependentSkills = skillDefRepo.findChildSkillsByIdAndRelationshipType(skillDef.id, SkillRelDef.RelationshipType.BadgeDependence)
+            List<SkillDef> dependentSkills = skillDefRepo.findChildSkillsByIdAndRelationshipType(skillDef.id, SkillRelDef.RelationshipType.BadgeRequirement)
             res.requiredSkills = dependentSkills?.collect { convertToSkillDefRes(it) }
             res.numSkills = dependentSkills ? dependentSkills.size() : 0
             res.totalPoints = dependentSkills ? dependentSkills?.collect({ it.totalPoints })?.sum() : 0
         } else {
-            res.numSkills = skillDefRepo.countChildSkillsByIdAndRelationshipType(skillDef.id, SkillRelDef.RelationshipType.BadgeDependence)
+            res.numSkills = skillDefRepo.countChildSkillsByIdAndRelationshipType(skillDef.id, SkillRelDef.RelationshipType.BadgeRequirement)
             if (res.numSkills > 0) {
-                res.totalPoints = skillDefRepo.sumChildSkillsTotalPointsBySkillAndRelationshipType(skillDef.id, SkillRelDef.RelationshipType.BadgeDependence)
+                res.totalPoints = skillDefRepo.sumChildSkillsTotalPointsBySkillAndRelationshipType(skillDef.id, SkillRelDef.RelationshipType.BadgeRequirement)
             } else {
                 res.totalPoints = 0
             }
@@ -1297,7 +1296,7 @@ class AdminProjService {
 
     @Transactional
     List<SkillDefPartialRes> getSkillsForBadge(String projectId, String badgeId) {
-        return getSkillsByProjectSkillAndType(projectId, badgeId, SkillDef.ContainerType.Badge, RelationshipType.BadgeDependence)
+        return getSkillsByProjectSkillAndType(projectId, badgeId, SkillDef.ContainerType.Badge, RelationshipType.BadgeRequirement)
     }
 
 

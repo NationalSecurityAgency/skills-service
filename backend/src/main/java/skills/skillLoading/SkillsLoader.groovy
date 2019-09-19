@@ -9,8 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
+import skills.controller.result.model.GlobalBadgeLevelRes
 import skills.controller.result.model.SettingsResult
 import skills.services.DependencyValidator
+import skills.services.GlobalBadgesService
 import skills.services.LevelDefinitionStorageService
 import skills.services.settings.SettingsService
 import skills.skillLoading.model.*
@@ -75,6 +77,15 @@ class SkillsLoader {
     @Autowired
     DependencyValidator dependencyValidator
 
+    @Autowired
+    SkillEventsSupportRepo skillEventsSupportRepo
+
+    @Autowired
+    SkillsLoader skillsLoader
+
+    @Autowired
+    GlobalBadgesService globalBadgesService
+
     private static String PROP_HELP_URL_ROOT = "help.url.root"
 
     @Transactional(readOnly = true)
@@ -132,6 +143,11 @@ class SkillsLoader {
         int numBadgesAchieved = achievedLevelRepository.countAchievedForUser(userId, projectId, SkillDef.ContainerType.Badge)
         long numTotalBadges = skillDefRepo.countByProjectIdAndType(projectId, SkillDef.ContainerType.Badge)
 
+        // add in global badge counts
+        numBadgesAchieved += achievedLevelRepository.countAchievedGlobalForUser(userId, SkillDef.ContainerType.GlobalBadge)
+        numTotalBadges += skillDefRepo.countByProjectIdAndType(null, SkillDef.ContainerType.GlobalBadge)
+
+
         OverallSkillSummary res = new OverallSkillSummary(
                 projectName: projDef.name,
                 skillsLevel: skillLevel,
@@ -180,6 +196,17 @@ class SkillsLoader {
         return badges
     }
 
+    @Transactional(readOnly = true)
+    List<SkillGlobalBadgeSummary> loadGlobalBadgeSummaries(String userId, Integer version = Integer.MAX_VALUE){
+        List<SkillDefWithExtra> badgeDefs = skillDefWithExtraRepo.findAllByProjectIdAndType(null, SkillDef.ContainerType.GlobalBadge)
+        if ( version >= 0 ) {
+            badgeDefs = badgeDefs.findAll { it.version <= version }
+        }
+        List<SkillGlobalBadgeSummary> globalBadges = badgeDefs.sort({ it.skillId }).collect { SkillDefWithExtra badgeDefinition ->
+            loadGlobalBadgeSummary(userId, badgeDefinition, version)
+        }
+        return globalBadges
+    }
 
     @Transactional(readOnly = true)
     UserPointHistorySummary loadPointHistorySummary(String projectId, String userId, int showHistoryForNumDays, String skillId = null, Integer version = Integer.MAX_VALUE) {
@@ -242,7 +269,7 @@ class SkillsLoader {
     }
     @Transactional(readOnly = true)
     List<SkillDescription> loadBadgeDescriptions(String projectId, String badgeId, Integer version = -1) {
-        return loadDescriptions(projectId, badgeId, SkillRelDef.RelationshipType.BadgeDependence, version)
+        return loadDescriptions(projectId, badgeId, SkillRelDef.RelationshipType.BadgeRequirement, version)
     }
 
     private List<SkillDescription> loadDescriptions(String projectId, String subjectId, SkillRelDef.RelationshipType relationshipType, int version) {
@@ -263,6 +290,14 @@ class SkillsLoader {
         SkillDefWithExtra badgeDef = getSkillDefWithExtra(projectId, subjectId, SkillDef.ContainerType.Badge)
 
         return loadBadgeSummary(projDef, userId, badgeDef, version,true)
+    }
+
+
+    @Transactional(readOnly = true)
+    SkillGlobalBadgeSummary loadGlobalBadge(String userId, String badgeSkillId, Integer version = Integer.MAX_VALUE) {
+        SkillDefWithExtra badgeDef = getSkillDefWithExtra(null, badgeSkillId, SkillDef.ContainerType.GlobalBadge)
+
+        return loadGlobalBadgeSummary(userId, badgeDef, version,true)
     }
 
     @Transactional(readOnly = true)
@@ -364,18 +399,18 @@ class SkillsLoader {
         List<SkillSummary> skillsRes = []
 
         if (loadSkills) {
-            SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, projDef.projectId, badgeDefinition.skillId, version, SkillRelDef.RelationshipType.BadgeDependence)
+            SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, projDef?.projectId, badgeDefinition.skillId, version, SkillRelDef.RelationshipType.BadgeRequirement)
             skillsRes = createSkillSummaries(projDef, groupChildrenMeta.childrenWithPoints)
         }
 
-        List<UserAchievement> achievements = achievedLevelRepository.findAllByUserIdAndProjectIdAndSkillId(userId, projDef.projectId, badgeDefinition.skillId)
+        List<UserAchievement> achievements = achievedLevelRepository.findAllByUserIdAndProjectIdAndSkillId(userId, projDef?.projectId, badgeDefinition.skillId)
         if (achievements) {
             // for badges, there should only be one UserAchievement
             assert achievements.size() == 1
         }
 
-        int numAchievedSkills = achievedLevelRepository.countAchievedChildren(userId, projDef.projectId, badgeDefinition.skillId, SkillRelDef.RelationshipType.BadgeDependence)
-        int numChildSkills = skillDefRepo.countChildren(projDef.projectId, badgeDefinition.skillId, SkillRelDef.RelationshipType.BadgeDependence)
+        int numAchievedSkills = achievedLevelRepository.countAchievedChildren(userId, projDef?.projectId, badgeDefinition.skillId, SkillRelDef.RelationshipType.BadgeRequirement)
+        int numChildSkills = skillDefRepo.countChildren(projDef?.projectId, badgeDefinition.skillId, SkillRelDef.RelationshipType.BadgeRequirement)
 
         return new SkillBadgeSummary(
                 badge: badgeDefinition.name,
@@ -389,6 +424,71 @@ class SkillsLoader {
                 endDate: badgeDefinition.endDate,
                 skills: skillsRes,
                 iconClass: badgeDefinition.iconClass
+        )
+    }
+
+    @Profile
+    private SkillGlobalBadgeSummary loadGlobalBadgeSummary(String userId, SkillDefWithExtra badgeDefinition, Integer version = Integer.MAX_VALUE, boolean loadSkills = false) {
+        List<SkillSummary> skillsRes = []
+
+        if (loadSkills) {
+            SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, null, badgeDefinition.skillId, version, SkillRelDef.RelationshipType.BadgeRequirement)
+            skillsRes = createSkillSummaries(null, groupChildrenMeta.childrenWithPoints)
+        }
+
+        List<UserAchievement> achievements = achievedLevelRepository.findAllByUserIdAndSkillId(userId, badgeDefinition.skillId)
+        if (achievements) {
+            // for badges, there should only be one UserAchievement
+            assert achievements.size() == 1
+        }
+
+        int numAchievedSkills = achievedLevelRepository.countAchievedGlobalSkills(userId, badgeDefinition.skillId, SkillRelDef.RelationshipType.BadgeRequirement)
+        int numChildSkills = skillDefRepo.countGlobalChildren(badgeDefinition.skillId, SkillRelDef.RelationshipType.BadgeRequirement)
+
+        List<SkillEventsSupportRepo.TinyProjectDef> projectsForUser = skillEventsSupportRepo.getTinyProjectDefForUserId(userId)
+        List<GlobalBadgeLevelRes> requiredLevels = globalBadgesService.getGlobalBadgeLevels(badgeDefinition.skillId)
+        List<ProjectLevelSummary> projectLevels = []
+        for (GlobalBadgeLevelRes requiredLevel : requiredLevels) {
+            ProjectLevelSummary projectLevelSummary = new ProjectLevelSummary(projectId: requiredLevel.projectId, projectName: requiredLevel.projectName, requiredLevel: requiredLevel.level)
+            projectLevels.add(projectLevelSummary)
+            if (projectsForUser.find { it.projectId == requiredLevel.projectId }) {
+                Integer achievedProjectLevel = skillsLoader.getUserLevel(requiredLevel.projectId, userId)
+                projectLevelSummary.achievedLevel = achievedProjectLevel
+                if (achievedProjectLevel >= requiredLevel.level) {
+                    numAchievedSkills++
+                }
+            }
+        }
+        numChildSkills += requiredLevels.size()
+
+        Map<String, ProjectLevelsAndSkillsSummary> byProject = [:]
+        skillsRes.groupBy { it.projectId }.each { projectId, skills ->
+            byProject[projectId] = new ProjectLevelsAndSkillsSummary(projectId: projectId, projectName: skills.first().projectName, skills: skills)
+        }
+        projectLevels.groupBy { it.projectId }.each { projectId, levels ->
+            assert levels.size() == 1
+            ProjectLevelSummary projectLevel = levels.first()
+            ProjectLevelsAndSkillsSummary projectLevelsAndSkillsSummary = byProject.get(projectId)
+            if (projectLevelsAndSkillsSummary) {
+                projectLevelsAndSkillsSummary.projectLevel = projectLevel
+            } else {
+                byProject[projectId] = new ProjectLevelsAndSkillsSummary(projectId: projectId, projectName: projectLevel.projectName, projectLevel: projectLevel)
+            }
+        }
+
+        return new SkillGlobalBadgeSummary(
+                badge: badgeDefinition.name,
+                badgeId: badgeDefinition.skillId,
+                description: badgeDefinition.description,
+                badgeAchieved: achievements?.size() > 0,
+                dateAchieved: achievements ? achievements.first().created : null,
+                numSkillsAchieved: numAchievedSkills,
+                numTotalSkills: numChildSkills,
+                startDate: badgeDefinition.startDate,
+                endDate: badgeDefinition.endDate,
+                skills: skillsRes,
+                iconClass: badgeDefinition.iconClass,
+                projectLevelsAndSkillsSummaries: byProject.values(),
         )
     }
 
@@ -410,7 +510,7 @@ class SkillsLoader {
     private List<SkillSummary> createSkillSummaries(ProjDef thisProjDef, List<SubjectDataLoader.SkillsAndPoints> childrenWithPoints) {
         List<SkillSummary> skillsRes = []
 
-        SettingsResult helpUrlRootSetting = settingsService.getProjectSetting(thisProjDef.projectId, PROP_HELP_URL_ROOT)
+        SettingsResult helpUrlRootSetting = settingsService.getProjectSetting(thisProjDef?.projectId, PROP_HELP_URL_ROOT)
 
         Map<String,ProjDef> projDefMap = [:]
         childrenWithPoints.each { SubjectDataLoader.SkillsAndPoints skillDefAndUserPoints ->
@@ -495,7 +595,7 @@ class SkillsLoader {
     }
 
     private SkillDefWithExtra getSkillDefWithExtra(String projectId, String skillId, SkillDef.ContainerType containerType) {
-        SkillDefWithExtra skillDef = skillDefWithExtraRepo.findByProjectIdAndSkillIdAndType(projectId, skillId, containerType)
+        SkillDefWithExtra skillDef = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, skillId, containerType)
         if (!skillDef) {
             throw new skills.controller.exceptions.SkillException("Skill with id [${skillId}] doesn't exist", projectId, skillId)
         }

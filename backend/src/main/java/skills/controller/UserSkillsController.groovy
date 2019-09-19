@@ -108,14 +108,17 @@ class UserSkillsController {
         return skillsLoader.loadSkillSummary(projectId, getUserId(userIdParam), crossProjectId, skillId)
     }
 
-
     @RequestMapping(value = "/projects/{projectId}/badges/summary", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     @CompileStatic
     List<SkillBadgeSummary>  getAllBadgesSummary(@PathVariable("projectId") String projectId,
                                                  @RequestParam(name = "userId", required = false) String userIdParam,
                                                  @RequestParam(name = 'version', required = false) Integer version) {
-        return skillsLoader.loadBadgeSummaries(projectId, getUserId(userIdParam), getProvidedVersionOrReturnDefault(version))
+        List<SkillBadgeSummary> badgeSummaries = skillsLoader.loadBadgeSummaries(projectId, getUserId(userIdParam), getProvidedVersionOrReturnDefault(version))
+
+        // add any global badges as well
+        badgeSummaries.addAll(skillsLoader.loadGlobalBadgeSummaries(getUserId(userIdParam), getProvidedVersionOrReturnDefault(version)))
+        return badgeSummaries
     }
 
     @RequestMapping(value = "/projects/{projectId}/badges/{badgeId}/descriptions", method = RequestMethod.GET, produces = "application/json")
@@ -133,8 +136,13 @@ class UserSkillsController {
     SkillBadgeSummary getBadgeSummary(@PathVariable("projectId") String projectId,
                                       @PathVariable("badgeId") String badgeId,
                                       @RequestParam(name = "userId", required = false) String userIdParam,
-                                      @RequestParam(name = 'version', required = false) Integer version) {
-        return skillsLoader.loadBadge(projectId, getUserId(userIdParam), badgeId, getProvidedVersionOrReturnDefault(version))
+                                      @RequestParam(name = 'version', required = false) Integer version,
+                                      @RequestParam(name = 'global', required = false) Boolean isGlobal) {
+        if (isGlobal) {
+            return skillsLoader.loadGlobalBadge(getUserId(userIdParam), badgeId, getProvidedVersionOrReturnDefault(version))
+        } else {
+            return skillsLoader.loadBadge(projectId, getUserId(userIdParam), badgeId, getProvidedVersionOrReturnDefault(version))
+        }
     }
 
     @RequestMapping(value = "/projects/{projectId}/pointHistory", method = RequestMethod.GET, produces = "application/json")
@@ -227,6 +235,12 @@ class UserSkillsController {
     @ResponseBody
     String getCustomIconCss(@PathVariable("id") String projectId) {
         return customIconFacade.generateCss(projectId)
+    }
+
+    @RequestMapping(value = "/icons/customIconCss", method = RequestMethod.GET, produces = "text/css")
+    @ResponseBody
+    String getCustomGlogbalIconCss() {
+        return customIconFacade.generateGlobalCss()
     }
 
     private String getUserId(String userIdParam) {

@@ -8,6 +8,7 @@ import SubjectDetails from '@/userSkills/subject/SubjectDetails.vue';
 import MyRankDetails from '@/userSkills/myRank/MyRankDetails.vue';
 import SkillDetails from '@/userSkills/skill/SkillDetails.vue';
 import BadgesDetails from '@/userSkills/badge/BadgesDetails.vue';
+import GlobalBadgeDetails from '@/userSkills/badge/GlobalBadgeDetails.vue';
 import BadgeDetails from '@/userSkills/badge/BadgeDetails.vue';
 import ErrorPage from '@/userSkills/ErrorPage.vue';
 import store from '@/store';
@@ -45,6 +46,12 @@ const router = new VueRouter({
       path: '/badges/:badgeId',
       component: BadgeDetails,
       name: 'badgeDetails',
+      props: true,
+    },
+    {
+      path: '/badges/global/:badgeId',
+      component: GlobalBadgeDetails,
+      name: 'globalBadgeDetails',
       props: true,
     },
     {

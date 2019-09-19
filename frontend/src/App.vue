@@ -52,19 +52,6 @@
         return this.$store.getters.userInfo;
       },
     },
-    watch: {
-      activeProjectId() {
-        this.addCustomIconCSS();
-      },
-      isSupervisor() {
-        this.addCustomIconCSS();
-      },
-      userInfo(newUserInfo) {
-        if (newUserInfo) {
-          InceptionConfigurer.configure();
-        }
-      },
-    },
     created() {
       if (this.isAuthenticatedUser) {
         AccessService.hasRole('ROLE_SUPERVISOR')
@@ -73,6 +60,25 @@
             this.addCustomIconCSS();
           });
       }
+    },
+    watch: {
+      activeProjectId() {
+        this.addCustomIconCSS();
+      },
+      isAuthenticatedUser() {
+        if (this.isAuthenticatedUser) {
+          AccessService.hasRole('ROLE_SUPERVISOR')
+            .then((response) => {
+              this.isSupervisor = response;
+              this.addCustomIconCSS();
+            });
+        }
+      },
+      userInfo(newUserInfo) {
+        if (newUserInfo) {
+          InceptionConfigurer.configure();
+        }
+      },
     },
     methods: {
       addCustomIconCSS() { // This must be done here AFTER authentication
