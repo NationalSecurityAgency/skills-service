@@ -8,6 +8,7 @@ import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
+import skills.PublicProps
 import skills.controller.exceptions.InvalidContentTypeException
 import skills.controller.exceptions.MaxIconSizeExceeded
 import skills.controller.exceptions.SkillsValidator
@@ -20,7 +21,9 @@ import skills.services.AccessSettingsStorageService
 import skills.services.AdminProjService
 import skills.services.AdminUsersService
 import skills.services.GlobalBadgesService
+import skills.services.IdFormatValidator
 import skills.services.LevelDefinitionStorageService
+import skills.utils.InputSanitizer
 
 import java.nio.charset.StandardCharsets
 
@@ -50,6 +53,9 @@ class SupervisorController {
     @Autowired
     CustomIconFacade iconFacade
 
+    @Autowired
+    PublicPropsBasedValidator propsBasedValidator
+
     @RequestMapping(value = "/badges/name/{badgeName}/exists", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     boolean doesBadgeNameExist(@PathVariable("badgeName") String badgeName) {
@@ -71,9 +77,21 @@ class SupervisorController {
     RequestResult saveBadge(@PathVariable("badgeId") String badgeId,
                             @RequestBody BadgeRequest badgeRequest) {
         SkillsValidator.isNotBlank(badgeId, "Badge Id")
-        SkillsValidator.isFirstOrMustEqualToSecond(badgeRequest.badgeId, badgeId, "Badge Id")
         badgeRequest.badgeId = badgeRequest.badgeId ?: badgeId
         SkillsValidator.isNotBlank(badgeRequest?.name, "Badge Name")
+
+        IdFormatValidator.validate(badgeRequest.badgeId)
+
+        propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxIdLength, "Badge Id", badgeRequest.badgeId)
+        propsBasedValidator.validateMinStrLength(PublicProps.UiProp.minIdLength, "Badge Id", badgeRequest.badgeId)
+
+        propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxBadgeNameLength, "Badge Name", badgeRequest.name)
+        propsBasedValidator.validateMinStrLength(PublicProps.UiProp.minNameLength, "Badge Name", badgeRequest.name)
+        propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.descriptionMaxLength, "Badge Description", badgeRequest.description)
+
+        badgeRequest.name = InputSanitizer.sanitize(badgeRequest.name)
+        badgeRequest.badgeId = InputSanitizer.sanitize(badgeRequest.badgeId)
+        badgeRequest.description = InputSanitizer.sanitize(badgeRequest.description)
 
         globalBadgesService.saveBadge(badgeId, badgeRequest)
         return new RequestResult(success: true)

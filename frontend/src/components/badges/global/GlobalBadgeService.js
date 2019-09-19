@@ -10,6 +10,10 @@ export default {
       .then(response => response.data);
   },
   saveBadge(badgeReq) {
+    if (badgeReq.isEdit) {
+      return axios.put(`/supervisor/badges/${badgeReq.originalBadgeId}`, badgeReq)
+        .then(() => this.getBadge(badgeReq.badgeId));
+    }
     return axios.put(`/supervisor/badges/${badgeReq.badgeId}`, badgeReq)
       .then(() => this.getBadge(badgeReq.badgeId));
   },
@@ -28,7 +32,7 @@ export default {
       .then(remoteRes => !remoteRes.data);
   },
   badgeWithIdExists(badgeId) {
-    return axios.get(`/supervisor/badges/name/${encodeURIComponent(badgeId)}/exists`)
+    return axios.get(`/supervisor/badges/id/${encodeURIComponent(badgeId)}/exists`)
       .then(remoteRes => !remoteRes.data);
   },
   assignSkillToBadge(badgeId, projectId, skillId) {

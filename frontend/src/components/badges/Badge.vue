@@ -14,7 +14,7 @@
       </router-link>
 
       <edit-badge v-if="showEditBadge" v-model="showEditBadge" :id="badge.badgeId" :badge="badge" :is-edit="true"
-                  @badge-updated="badgeEdited"></edit-badge>
+                  :global="global" @badge-updated="badgeEdited"></edit-badge>
     </div>
   </page-preview-card>
 </template>
