@@ -10,6 +10,7 @@ import skills.services.events.SkillEventsService
 import skills.skillLoading.RankingLoader
 import skills.skillLoading.SkillsLoader
 import skills.skillLoading.model.*
+import skills.utils.RetryUtil
 
 @CrossOrigin(allowCredentials = 'true')
 @RestController
@@ -180,7 +181,9 @@ class UserSkillsController {
                               @PathVariable("skillId") String skillId,
                               @RequestBody(required = false) skills.controller.request.model.SkillEventRequest skillEventRequest) {
         Date incomingDate = skillEventRequest?.timestamp != null ? new Date(skillEventRequest.timestamp) : new Date()
-        skillsManagementFacade.reportSkill(projectId, skillId,  getUserId(skillEventRequest?.userId), incomingDate)
+        (SkillEventResult) RetryUtil.withRetry(3) {
+            skillsManagementFacade.reportSkill(projectId, skillId,  getUserId(skillEventRequest?.userId), incomingDate)
+        }
     }
 
     @RequestMapping(value = "/projects/{projectId}/rank", method = RequestMethod.GET, produces = "application/json")

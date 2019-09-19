@@ -2,6 +2,7 @@ package skills.intTests.utils
 
 import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
+import spock.lang.Retry
 
 import java.nio.charset.StandardCharsets
 
@@ -276,6 +277,11 @@ class SkillsService {
         } else {
             return wsHelper.apiPut("/projects/${props.projectId}/skills/${props.skillId}", null)
         }
+    }
+
+    def addSkillAndOptionallyThrowExceptionAtTheEnd(Map props, String userId, Date date, boolean throwException) {
+            return wsHelper.apiPost("/projects/${props.projectId}/skills/${props.skillId}/throwException/${throwException}".toString(),
+                    [ userId : userId, timestamp:date.time])
     }
 
     def addSkillAsProxy(Map props, String userId, boolean includeGrantType=true, boolean includeProxyUser=true) {
