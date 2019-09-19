@@ -28,12 +28,12 @@ class AchievedBadgeHandler {
 
     @Profile
     void checkForBadges(SkillEventResult res, String userId, SkillEventsSupportRepo.SkillDefMin currentSkillDef) {
-        List<SkillEventsSupportRepo.SkillDefMin> parents = skillEventsSupportRepo.findParentSkillsByChildIdAndType(currentSkillDef.id, SkillRelDef.RelationshipType.BadgeDependence)
+        List<SkillEventsSupportRepo.SkillDefMin> parents = skillEventsSupportRepo.findParentSkillsByChildIdAndType(currentSkillDef.id, SkillRelDef.RelationshipType.BadgeRequirement)
 
         parents.each { SkillEventsSupportRepo.SkillDefMin skillDefMin ->
             if (skillDefMin.type == SkillDef.ContainerType.Badge && withinActiveTimeframe(skillDefMin)) {
                 SkillEventsSupportRepo.SkillDefMin badge = skillDefMin
-                Long nonAchievedChildren = achievedLevelRepo.countNonAchievedChildren(userId, badge.projectId, badge.skillId, SkillRelDef.RelationshipType.BadgeDependence)
+                Long nonAchievedChildren = achievedLevelRepo.countNonAchievedChildren(userId, badge.projectId, badge.skillId, SkillRelDef.RelationshipType.BadgeRequirement)
                 if (nonAchievedChildren == 0) {
                     List<UserAchievement> badges = achievedLevelRepo.findAllByUserIdAndProjectIdAndSkillId(userId, badge.projectId, badge.skillId)
                     if (!badges) {

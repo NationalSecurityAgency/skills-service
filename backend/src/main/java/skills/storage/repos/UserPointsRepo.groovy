@@ -43,6 +43,19 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
     List<Object []> findChildrenAndTheirUserPoints(String userId, String projectId, String skillId, SkillRelDef.RelationshipType type, Integer version, Date day)
 
     /**
+     *  NOTE: this is query is identical to the below query the only difference is userPoints.day=?5, if you change this query you MUST change the one below
+     *
+     *  the reason for duplication is that when null is provided for the 'day' parameter JPA doesn't properly generate SQL statement, I am guessing the bug is because
+     *  the parameter is withing left join clause and they didn't handle that properly
+     */
+    @Query('''select sdChild, userPoints
+    from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
+    left join UserPoints userPoints on sdChild.projectId = userPoints.projectId and sdChild.skillId = userPoints.skillId and userPoints.day=?5 and userPoints.userId=?1
+      where srd.parent=sdParent.id and  srd.child=sdChild.id and
+      sdParent.projectId is null and sdParent.skillId=?2 and srd.type=?3 and sdChild.version<=?4''')
+    List<Object []> findGlobalChildrenAndTheirUserPoints(String userId, String skillId, SkillRelDef.RelationshipType type, Integer version, Date day)
+
+    /**
      *  NOTE: this is query is identical to the above query the only difference is 'userPoints.day is null', if you change this query you MUST change the one above
      *
      *  the reason for duplication is that when null is provided for the 'day' parameter JPA doesn't properly generate SQL statement, I am guessing the bug is because
@@ -55,6 +68,19 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
       sdParent.projectId=?2 and sdParent.skillId=?3 and srd.type=?4 and sdChild.version<=?5''')
     List<Object []> findChildrenAndTheirUserPoints(String userId, String projectId, String skillId, SkillRelDef.RelationshipType type, Integer version)
 
+
+    /**
+     *  NOTE: this is query is identical to the above query the only difference is 'userPoints.day is null', if you change this query you MUST change the one above
+     *
+     *  the reason for duplication is that when null is provided for the 'day' parameter JPA doesn't properly generate SQL statement, I am guessing the bug is because
+     *      *  the parameter is withing left join clause and they didn't handle that properly
+     */
+    @Query('''select sdChild, userPoints
+    from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
+    left join UserPoints userPoints on sdChild.projectId = userPoints.projectId and sdChild.skillId = userPoints.skillId and userPoints.day is null and userPoints.userId=?1
+      where srd.parent=sdParent.id and  srd.child=sdChild.id and
+      sdParent.projectId is null and sdParent.skillId=?2 and srd.type=?3 and sdChild.version<=?4''')
+    List<Object []> findGlobalChildrenAndTheirUserPoints(String userId, String skillId, SkillRelDef.RelationshipType type, Integer version)
 
     @Query('''select sdChild.id, achievement.id
     from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
@@ -69,6 +95,13 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
       where srd.parent=sdParent.id and  srd.child=sdChild.id and
       sdParent.projectId=?2 and srd.type=?3 and sdChild.version<=?4''')
     List<SkillWithChildAndAchievementIndicator> findAllChildrenAndTheirAchievementsForProject(String userId, String projectId, SkillRelDef.RelationshipType type, Integer version)
+
+    @Query('''select sdParent.id as parentId, sdChild.id as childId, achievement.id as achievementId
+    from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
+    left join UserAchievement achievement on sdChild.projectId = achievement.projectId and sdChild.skillId = achievement.skillId and achievement.userId=?1
+      where srd.parent=sdParent.id and  srd.child=sdChild.id and
+      sdParent.projectId is null and srd.type=?2 and sdChild.version<=?3''')
+    List<SkillWithChildAndAchievementIndicator> findAllChildrenAndTheirAchievementsForGlobal(String userId, SkillRelDef.RelationshipType type, Integer version)
 
     static interface SkillWithChildAndAchievementIndicator {
         Integer getParentId()

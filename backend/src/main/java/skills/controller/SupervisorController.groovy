@@ -225,10 +225,4 @@ class SupervisorController {
         iconFacade.deleteGlobalIcon(filename)
         return ResponseEntity.ok(true)
     }
-
-    @RequestMapping(value = "/customIconCss", method = RequestMethod.GET, produces = "text/css")
-    @ResponseBody
-    String getCustomIconCss() {
-        return iconFacade.generateGlobalCss()
-    }
 }

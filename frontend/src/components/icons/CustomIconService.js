@@ -6,7 +6,7 @@ export default {
     if (projectId) {
       url = `/api/projects/${projectId}/customIconCss`;
     } else if (isSupervisor) {
-      url = '/supervisor/customIconCss';
+      url = '/api/icons/customIconCss';
     }
     if (url) {
       return axios

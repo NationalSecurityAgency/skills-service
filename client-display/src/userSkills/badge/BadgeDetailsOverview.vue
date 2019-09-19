@@ -5,6 +5,7 @@
                 <div class="card-body">
                     <i :class="badge.iconClass" class="text-success fa-4x" style="min-width: 3rem;, max-width: 4rem;"/>
                     <i v-if="badge.gem" class="fas fa-gem position-absolute" style="top: 5px; right: 5px; color: purple"></i>
+                    <i v-if="badge.global" class="fas fa-globe position-absolute" style="top: 5px; right: 5px; color: blue"></i>
                     <div v-if="badge.gem" class="text-muted">
                         <small>Expires {{ badge.endDate | moment("from", "now") }}</small>
                     </div>

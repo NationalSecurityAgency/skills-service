@@ -117,7 +117,7 @@ interface SkillEventsSupportRepo extends CrudRepository<SkillDef, Long> {
                 where
                     badge.id = sr1.parent and
                     s1.id = sr1.child and 
-                    sr1.type = 'BadgeDependence' and 
+                    sr1.type = 'BadgeRequirement' and 
                     s1.projectId = ?1 and 
                     s1.skillId = ?2)
             OR EXISTS (SELECT true

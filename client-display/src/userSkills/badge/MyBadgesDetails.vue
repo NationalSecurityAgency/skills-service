@@ -17,6 +17,7 @@
                         <router-link  :to="{ name: 'badgeDetails', params: { badgeId: badge.badgeId }}" tag="div" class="card-body">
                             <i class="fa fa-check-circle position-absolute text-success" style="right: 10px; top: 10px;"/>
                             <i v-if="badge.gem" class="fas fa-gem position-absolute" style="top: 10px; left: 10px; color: purple"></i>
+                            <i v-if="badge.global" class="fas fa-globe position-absolute" style="top: 10px; left: 10px; color: blue"></i>
                             <i :class="badge.iconClass" class="text-primary fa-5x"/>
                             <div class="card-title mb-0 text-truncate">
                                 {{ badge.badge }}

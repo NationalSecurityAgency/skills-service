@@ -32,6 +32,14 @@ export default {
     return response;
   },
 
+  getCustomGlobalIconCss() {
+    let response = null;
+    response = axios.get(`${SkillsConfiguration.getServiceUrl()}/api/icons/customIconCss`, {
+    }).then(result => result.data);
+    return response;
+  },
+
+
   getSubjectSummary(subjectId) {
     return axios.get(`${SkillsConfiguration.getServiceUrl()}${this.getServicePath()}/${SkillsConfiguration.getProjectId()}/subjects/${subjectId}/summary`, {
       params: {
@@ -62,11 +70,12 @@ export default {
     }).then(result => result.data);
   },
 
-  getBadgeSkills(badgeId) {
+  getBadgeSkills(badgeId, global) {
     return axios.get(`${SkillsConfiguration.getServiceUrl()}${this.getServicePath()}/${SkillsConfiguration.getProjectId()}/badges/${badgeId}/summary`, {
       params: {
         userId: this.userId,
         version: this.version,
+        global,
       },
     }).then(result => result.data);
   },
