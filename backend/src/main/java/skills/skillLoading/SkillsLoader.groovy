@@ -127,7 +127,7 @@ class SkillsLoader {
 
             List<UserAchievement> achievedLevels = getProjectsAchievedLevels(userId, projectId)
             if (achievedLevels) {
-                achievedLevels = achievedLevels.sort({ it.created })
+                achievedLevels = achievedLevels.sort({ it.level })
                 levelInfo = updateLevelBasedOnLastAchieved(projDef, points, achievedLevels.last(), levelInfo, null)
             }
 
