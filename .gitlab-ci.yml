@@ -3,8 +3,6 @@ stages:
   - deploy
 
 build:
-  except:
-    - schedules
   image: maven:3.6.0-jdk-11
   stage: build
   script:
@@ -19,7 +17,8 @@ build:
 
 postgres-test:on-schedule:
   only:
-    - schedules
+    variables:
+      - $TYPE == "postgrestest"
   image: maven:3.6.0-jdk-11
   stage: build
   services:
@@ -35,8 +34,6 @@ postgres-test:on-schedule:
     - mvn test -Dspring.datasource.url=jdbc:postgresql://postgres:5432/skills -Dspring.datasource.username=postgres -Dspring.datasource.password=skillsPassword
 
 deploy:
-  except:
-    - schedules
   image: alpine:latest
   stage: deploy
   before_script:
