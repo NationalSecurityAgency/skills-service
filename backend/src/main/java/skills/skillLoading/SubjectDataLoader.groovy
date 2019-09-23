@@ -75,7 +75,7 @@ class SubjectDataLoader {
         if (projectId) {
             userPointsRepo.findAllChildrenAndTheirAchievementsForProject(userId, projectId, SkillRelDef.RelationshipType.Dependence, version)
         } else {
-            userPointsRepo.findAllChildrenAndTheirAchievementsForGlobal(userId, SkillRelDef.RelationshipType.BadgeRequirement, version)
+            userPointsRepo.findAllChildrenAndTheirAchievementsForGlobal(userId, SkillRelDef.RelationshipType.Dependence, version)
         }
     }
 

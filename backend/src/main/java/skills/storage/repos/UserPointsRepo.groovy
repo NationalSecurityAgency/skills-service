@@ -99,8 +99,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
     @Query('''select sdParent.id as parentId, sdChild.id as childId, achievement.id as achievementId
     from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
     left join UserAchievement achievement on sdChild.projectId = achievement.projectId and sdChild.skillId = achievement.skillId and achievement.userId=?1
-      where srd.parent=sdParent.id and  srd.child=sdChild.id and
-      sdParent.projectId is null and srd.type=?2 and sdChild.version<=?3''')
+      where srd.parent=sdParent.id and  srd.child=sdChild.id and srd.type=?2 and sdChild.version<=?3''')
     List<SkillWithChildAndAchievementIndicator> findAllChildrenAndTheirAchievementsForGlobal(String userId, SkillRelDef.RelationshipType type, Integer version)
 
     static interface SkillWithChildAndAchievementIndicator {
