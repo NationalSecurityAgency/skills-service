@@ -242,7 +242,7 @@
           // rebuild the display order from 0..N
           const tableData = this.skills.sort((a, b) => a.displayOrder - b.displayOrder);
           for (let i = 0; i < tableData.length; i += 1) {
-            tableData[i].displayOrder = i;
+            tableData[i].displayOrder = i + 1;
           }
         }
       },
