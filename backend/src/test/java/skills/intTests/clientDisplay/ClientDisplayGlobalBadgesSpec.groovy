@@ -239,86 +239,86 @@ class ClientDisplayGlobalBadgesSpec extends DefaultIntSpec {
         skill3.points == 0
     }
 
-//    def "single badge summary - with dependency info"() {
-//        String userId = "user1"
-//
-//        def proj1 = SkillsFactory.createProject(1)
-//        def proj1_subj = SkillsFactory.createSubject(1, 1)
-//        List<Map> proj1_skills = SkillsFactory.createSkills(4, 1, 1)
-//
-//        skillsService.createProject(proj1)
-//        skillsService.createSubject(proj1_subj)
-//        skillsService.createSkills(proj1_skills)
-//
-////        String badge1 = "badge1"
-////        skillsService.addBadge([projectId: proj1.projectId, badgeId: badge1, name: 'Badge 1', description: 'This is a first badge', iconClass: "fa fa-seleted-icon",])
-////        skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badge1, skillId: proj1_skills.get(0).skillId])
-////        skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badge1, skillId: proj1_skills.get(1).skillId])
-//
-//
-//        Map badge = [badgeId: globalBadgeId, name: 'Badge 1', description: 'This is a first badge', iconClass: "fa fa-seleted-icon",]
-//        supervisorSkillsService.createGlobalBadge(badge)
-//
-//        supervisorSkillsService.assignSkillToGlobalBadge([projectId: proj1.projectId, badgeId: globalBadgeId, skillId: proj1_skills.get(0).skillId])
-//        supervisorSkillsService.assignSkillToGlobalBadge([projectId: proj1.projectId, badgeId: globalBadgeId, skillId: proj1_skills.get(1).skillId])
-//
-//
-//
-//
-//        skillsService.assignDependency([projectId: proj1.projectId, skillId: proj1_skills.get(1).skillId, dependentSkillId: proj1_skills.get(2).skillId])
-//        skillsService.assignDependency([projectId: proj1.projectId, skillId: proj1_skills.get(1).skillId, dependentSkillId: proj1_skills.get(3).skillId])
-//
-//        skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_skills.get(0).skillId], userId, new Date())
-//
-//        when:
-//        def summary = skillsService.getBadgeSummary(userId, proj1.projectId, globalBadgeId, -1, true)
-//        then:
-//        summary.badge == "Badge 1"
-//        summary.badgeId == globalBadgeId
-//        summary.global
-//
-//        !summary.skills.find { it.skillId == proj1_skills.get(0).skillId }.dependencyInfo
-//
-//        def skill1 = summary.skills.find { it.skillId == proj1_skills.get(1).skillId }
-//        skill1.dependencyInfo.numDirectDependents == 2
-//        !skill1.dependencyInfo.achieved
-//    }
-//
-//    def "single badge summary - with achieved dependency info"() {
-//        String userId = "user1"
-//
-//        def proj1 = SkillsFactory.createProject(1)
-//        def proj1_subj = SkillsFactory.createSubject(1, 1)
-//        List<Map> proj1_skills = SkillsFactory.createSkills(4, 1, 1)
-//
-//        skillsService.createProject(proj1)
-//        skillsService.createSubject(proj1_subj)
-//        skillsService.createSkills(proj1_skills)
-//
+    def "single badge summary - with dependency info"() {
+        String userId = "user1"
+
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> proj1_skills = SkillsFactory.createSkills(4, 1, 1)
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(proj1_skills)
+
 //        String badge1 = "badge1"
 //        skillsService.addBadge([projectId: proj1.projectId, badgeId: badge1, name: 'Badge 1', description: 'This is a first badge', iconClass: "fa fa-seleted-icon",])
 //        skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badge1, skillId: proj1_skills.get(0).skillId])
 //        skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badge1, skillId: proj1_skills.get(1).skillId])
-//
-//        skillsService.assignDependency([projectId: proj1.projectId, skillId: proj1_skills.get(1).skillId, dependentSkillId: proj1_skills.get(2).skillId])
-//        skillsService.assignDependency([projectId: proj1.projectId, skillId: proj1_skills.get(1).skillId, dependentSkillId: proj1_skills.get(3).skillId])
-//
-//        skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_skills.get(2).skillId], userId, new Date())
-//        skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_skills.get(3).skillId], userId, new Date())
-//
-//        when:
-//        def summary = skillsService.getBadgeSummary(userId, proj1.projectId, badge1)
-//        then:
-//        summary.badge == "Badge 1"
-//        summary.badgeId == "badge1"
-//
-//        !summary.skills.find { it.skillId == proj1_skills.get(0).skillId }.dependencyInfo
-//
-//        def skill1 = summary.skills.find { it.skillId == proj1_skills.get(1).skillId }
-//        skill1.dependencyInfo.numDirectDependents == 2
-//        skill1.dependencyInfo.achieved
-//    }
-//
+
+
+        Map badge = [badgeId: globalBadgeId, name: 'Badge 1', description: 'This is a first badge', iconClass: "fa fa-seleted-icon",]
+        supervisorSkillsService.createGlobalBadge(badge)
+
+        supervisorSkillsService.assignSkillToGlobalBadge([projectId: proj1.projectId, badgeId: globalBadgeId, skillId: proj1_skills.get(0).skillId])
+        supervisorSkillsService.assignSkillToGlobalBadge([projectId: proj1.projectId, badgeId: globalBadgeId, skillId: proj1_skills.get(1).skillId])
+
+
+
+
+        skillsService.assignDependency([projectId: proj1.projectId, skillId: proj1_skills.get(1).skillId, dependentSkillId: proj1_skills.get(2).skillId])
+        skillsService.assignDependency([projectId: proj1.projectId, skillId: proj1_skills.get(1).skillId, dependentSkillId: proj1_skills.get(3).skillId])
+
+        skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_skills.get(0).skillId], userId, new Date())
+
+        when:
+        def summary = skillsService.getBadgeSummary(userId, proj1.projectId, globalBadgeId, -1, true)
+        then:
+        summary.badge == "Badge 1"
+        summary.badgeId == globalBadgeId
+        summary.global
+
+        !summary.skills.find { it.skillId == proj1_skills.get(0).skillId }.dependencyInfo
+
+        def skill1 = summary.skills.find { it.skillId == proj1_skills.get(1).skillId }
+        skill1.dependencyInfo.numDirectDependents == 2
+        !skill1.dependencyInfo.achieved
+    }
+
+    def "single badge summary - with achieved dependency info"() {
+        String userId = "user1"
+
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> proj1_skills = SkillsFactory.createSkills(4, 1, 1)
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(proj1_skills)
+
+        String badge1 = "badge1"
+        skillsService.addBadge([projectId: proj1.projectId, badgeId: badge1, name: 'Badge 1', description: 'This is a first badge', iconClass: "fa fa-seleted-icon",])
+        skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badge1, skillId: proj1_skills.get(0).skillId])
+        skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badge1, skillId: proj1_skills.get(1).skillId])
+
+        skillsService.assignDependency([projectId: proj1.projectId, skillId: proj1_skills.get(1).skillId, dependentSkillId: proj1_skills.get(2).skillId])
+        skillsService.assignDependency([projectId: proj1.projectId, skillId: proj1_skills.get(1).skillId, dependentSkillId: proj1_skills.get(3).skillId])
+
+        skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_skills.get(2).skillId], userId, new Date())
+        skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_skills.get(3).skillId], userId, new Date())
+
+        when:
+        def summary = skillsService.getBadgeSummary(userId, proj1.projectId, badge1)
+        then:
+        summary.badge == "Badge 1"
+        summary.badgeId == "badge1"
+
+        !summary.skills.find { it.skillId == proj1_skills.get(0).skillId }.dependencyInfo
+
+        def skill1 = summary.skills.find { it.skillId == proj1_skills.get(1).skillId }
+        skill1.dependencyInfo.numDirectDependents == 2
+        skill1.dependencyInfo.achieved
+    }
+
 
     def "project summary should return achieved badges summary"(){
         String userId = "user1"
