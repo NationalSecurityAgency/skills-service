@@ -76,10 +76,12 @@ class SkillEventAdminService {
         List<UserAchievement> achievements = achievedLevelRepo.findAllByUserIdAndProjectIdAndSkillId(userId, projectId, null)
         def orderedLevels = achievements.findAll(){ it.level }.sort() { it.level }
 
-        def last = orderedLevels.last()
-        if (last.pointsWhenAchieved > userProjectPoints) {
-            log.debug("deleting achievement ${last}, User no longer has enough points")
-            achievedLevelRepo.delete(last)
+        if (orderedLevels) {
+            def last = orderedLevels.last()
+            if (last.pointsWhenAchieved > userProjectPoints) {
+                log.debug("deleting achievement ${last}, User no longer has enough points")
+                achievedLevelRepo.delete(last)
+            }
         }
     }
 
