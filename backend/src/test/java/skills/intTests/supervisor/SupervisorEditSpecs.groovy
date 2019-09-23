@@ -148,6 +148,62 @@ class SupervisorEditSpecs extends DefaultIntSpec {
         skillsService.deleteGlobalBadge(badgeId)
     }
 
+    def 'update global badge id'() {
+        String origBadgeId = 'origBadgeId'
+        Map badge = [badgeId: origBadgeId, name: 'Test Global Badge 1']
+        skillsService.createGlobalBadge(badge)
+
+        when:
+        badge['badgeId'] = badgeId
+        def res = skillsService.createGlobalBadge(badge, origBadgeId)
+        def res2 = skillsService.getGlobalBadge(badgeId)
+
+        then:
+        res
+        res2
+
+        cleanup:
+        skillsService.deleteGlobalBadge(badgeId)
+    }
+
+    def 'update global badge name'() {
+        Map badge = [badgeId: badgeId, name: 'Test Global Badge 1']
+        skillsService.createGlobalBadge(badge)
+
+        when:
+        String newName = 'new name'
+        badge['name'] = newName
+        def res = skillsService.createGlobalBadge(badge, badgeId)
+        def res2 = skillsService.getGlobalBadge(badgeId)
+
+        then:
+        res
+        res2.name == newName
+
+        cleanup:
+        skillsService.deleteGlobalBadge(badgeId)
+    }
+
+    def 'update global badge name and id'() {
+        String origBadgeId = 'origBadgeId'
+        Map badge = [badgeId: origBadgeId, name: 'Test Global Badge 1']
+        skillsService.createGlobalBadge(badge)
+
+        when:
+        String newName = 'new name'
+        badge['name'] = newName
+        badge['badgeId'] = badgeId
+        def res = skillsService.createGlobalBadge(badge, origBadgeId)
+        def res2 = skillsService.getGlobalBadge(badgeId)
+
+        then:
+        res
+        res2.name == newName
+
+        cleanup:
+        skillsService.deleteGlobalBadge(badgeId)
+    }
+
     def 'global badge cannot have the same skill added twice'() {
         String subj = "testSubj"
 
