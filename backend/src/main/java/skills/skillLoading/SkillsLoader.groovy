@@ -374,7 +374,8 @@ class SkillsLoader {
 
     @Profile
     private int calculateTotalForSkillDef(ProjDef projDef, SkillDefParent subjectDefinition, int version) {
-        skillDefRepo.calculateTotalPointsForSkill(projDef.projectId, subjectDefinition.skillId, SkillRelDef.RelationshipType.RuleSetDefinition, version)
+        Integer res = skillDefRepo.calculateTotalPointsForSkill(projDef.projectId, subjectDefinition.skillId, SkillRelDef.RelationshipType.RuleSetDefinition, version)
+        return res ?: 0
     }
 
     @Profile
