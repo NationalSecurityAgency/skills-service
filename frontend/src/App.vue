@@ -25,9 +25,11 @@
   import IconManagerService from './components/utils/iconPicker/IconManagerService';
   import InceptionConfigurer from './InceptionConfigurer';
   import AccessService from './components/access/AccessService';
+  import InceptionProgressMessagesMixin from './components/inception/InceptionProgressMessagesMixin';
 
   export default {
     name: 'App',
+    mixins: [InceptionProgressMessagesMixin],
     components: {
       CustomizableFooter,
       CustomizableHeader,
@@ -60,6 +62,9 @@
             this.addCustomIconCSS();
           });
       }
+    },
+    mounted() {
+      this.registerToDisplayProgress();
     },
     watch: {
       activeProjectId() {
