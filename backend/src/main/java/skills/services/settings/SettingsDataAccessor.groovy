@@ -57,6 +57,10 @@ class SettingsDataAccessor {
 
     List<Setting> getUserSettingsForGroup(String userId, String settingGroup) {
         User user = userId ? userRepo.findByUserIdIgnoreCase(userId) : null
+        return getUserSettingsForGroup(user, settingGroup)
+    }
+
+    List<Setting> getUserSettingsForGroup(User user, String settingGroup) {
         settingRepo.findAllByTypeAndUserIdAndSettingGroup(Setting.SettingType.User, user?.id, settingGroup)
     }
 
