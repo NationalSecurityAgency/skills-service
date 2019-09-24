@@ -18,6 +18,10 @@
                     <skills-progress-list v-if="projectSummary && projectSummary.skills" :subject="projectSummary" :show-descriptions="showDescriptions" :helpTipHref="helpTipHref" type="badge"/>
                 </div>
             </div>
+            <div v-if="!(projectSummaries && projectSummaries.length > 0)">
+                <no-data-yet class="my-2"
+                             title="No Skills or Project Levels have not been added yet." sub-title="Please contact a Skills Supervisor."/>
+            </div>
         </div>
     </div>
 </template>
@@ -27,10 +31,9 @@
     import SkillsProgressList from '@/userSkills/skill/progress/SkillsProgressList.vue';
     import ProjectLevelRow from '@/userSkills/badge/ProjectLevelRow.vue';
     import SkillsSpinner from '@/common/utilities/SkillsSpinner.vue';
-
     import UserSkillsService from '@/userSkills/service/UserSkillsService';
-
     import SkillsTitle from '@/common/utilities/SkillsTitle.vue';
+    import NoDataYet from '@/common/utilities/NoDataYet.vue';
 
     export default {
         components: {
@@ -39,6 +42,7 @@
             BadgeDetailsOverview,
             SkillsSpinner,
             ProjectLevelRow,
+            NoDataYet,
         },
         data() {
             return {
