@@ -53,7 +53,7 @@ class UserAuthService {
         UserInfo userInfo
         User user = userRepository.findByUserIdIgnoreCase(userId)
         if (user) {
-            List<SettingsResult> userInfoSettings = settingsService.getUserSettingsForGroup(user.userId, AccessSettingsStorageService.USER_INFO_SETTING_GROUP)
+            List<SettingsResult> userInfoSettings = settingsService.getUserSettingsForGroup(user, AccessSettingsStorageService.USER_INFO_SETTING_GROUP)
             userInfo = new UserInfo (
                     username: user.userId,
                     password: user.password,
@@ -62,7 +62,7 @@ class UserAuthService {
                     email: userInfoSettings.find {it.setting =='email'}?.value,
                     userDn: userInfoSettings.find {it.setting =='DN'}?.value,
                     nickname: userInfoSettings.find {it.setting =='nickname'}?.value,
-                    authorities: convertRoles(userRepository.findByUserIdIgnoreCase(userId)?.roles)
+                    authorities: convertRoles(user.roles)
             )
         }
         return userInfo

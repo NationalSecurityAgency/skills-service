@@ -137,6 +137,12 @@ class SettingsService {
     }
 
     @Transactional(readOnly = true)
+    List<SettingsResult> getUserSettingsForGroup(User user, String settingGroup){
+        List<Setting> settings = settingsDataAccessor.getUserSettingsForGroup(user, settingGroup)
+        return convertToResList(settings)
+    }
+
+    @Transactional(readOnly = true)
     List<SettingsResult> getUserProjectSettingsForGroup(String userId, String settingGroup){
         List<Setting> settings = settingsDataAccessor.getUserProjectSettingsForGroup(userId, settingGroup)
         return convertToResList(settings)
