@@ -177,7 +177,7 @@ class GlobalBadgesService {
     AvailableSkillsResult getAvailableSkillsForGlobalBadge(String badgeId, String query) {
         List<SkillDefPartial> allSkillDefs = skillDefRepo.findAllByTypeAndNameLike(SkillDef.ContainerType.Skill, query)
         Set<String> existingBadgeSkillIds = getSkillsForBadge(badgeId).collect { "${it.projectId}${it.skillId}" }
-        List<SkillDefPartial> suggestedSkillDefs = allSkillDefs.findAll { !("${it.projectId}${it.skillId}" in existingBadgeSkillIds) }
+        List<SkillDefPartial> suggestedSkillDefs = allSkillDefs.findAll { !("${it.projectId}${it.skillId}" in existingBadgeSkillIds) &&  it.projectId != InceptionProjectService.inceptionProjectId }
         AvailableSkillsResult res = new AvailableSkillsResult()
         if (suggestedSkillDefs) {
             res.totalAvailable = suggestedSkillDefs.size()
@@ -194,7 +194,7 @@ class GlobalBadgesService {
     @Transactional(readOnly = true)
     List<ProjectResult> getAllProjectsForBadge(String badgeId) {
         List<String> projectIdsAlreadyInBadge = globalBadgeLevelDefRepo.findAllByBadgeId(badgeId).collect { it.projectId }.unique()
-        return projDefRepo.findAll().findAll { !(it.projectId in projectIdsAlreadyInBadge) }.collect { definition ->
+        return projDefRepo.findAll().findAll { !(it.projectId in projectIdsAlreadyInBadge) && it.projectId != InceptionProjectService.inceptionProjectId }.collect { definition ->
             ProjectResult res = new ProjectResult(
                     projectId: definition.projectId, name: definition.name, totalPoints: definition.totalPoints,
                     numSubjects: definition.subjects ? definition.subjects.size() : 0,
