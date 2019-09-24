@@ -340,10 +340,6 @@ const fontAwesomeIcons = {
       cssClass: 'fas fa-bone',
     },
     {
-      name: 'bong',
-      cssClass: 'fas fa-bong',
-    },
-    {
       name: 'book',
       cssClass: 'fas fa-book',
     },
@@ -498,10 +494,6 @@ const fontAwesomeIcons = {
     {
       name: 'candy-cane',
       cssClass: 'fas fa-candy-cane',
-    },
-    {
-      name: 'cannabis',
-      cssClass: 'fas fa-cannabis',
     },
     {
       name: 'capsules',
