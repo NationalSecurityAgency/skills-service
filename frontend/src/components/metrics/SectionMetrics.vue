@@ -94,6 +94,9 @@
       case SECTION.USERS:
         this.sectionIdParam = this.$route.params.userId;
         break;
+      case SECTION.GLOBAL:
+        this.sectionIdParam = 'global';
+        break;
       default:
         throw new Error(`Can't handle section type ${this.section}`);
       }
@@ -115,21 +118,26 @@
         return `${icon} ${color}`;
       },
       loadInitialCharts() {
-        if (this.section !== SECTION.GLOBAL) {
-          const sectionParams = new SectionParams.Builder(this.section, this.$route.params.projectId)
-            .withSectionIdParam(this.sectionIdParam)
-            .withNumMonths(this.numMonthsToShow)
-            .withNumDays(this.numDaysToShow)
-            .withLoadDataForFirst(this.loadDataForFirst)
-            .build();
-          MetricsService.getChartsForSection(sectionParams)
-            .then((response) => {
-              this.charts = response;
-            })
-            .finally(() => {
-              this.isLoading = false;
-            });
+        const sectionParams = new SectionParams.Builder(this.section, this.$route.params.projectId)
+          .withSectionIdParam(this.sectionIdParam)
+          .withNumMonths(this.numMonthsToShow)
+          .withNumDays(this.numDaysToShow)
+          .withLoadDataForFirst(this.loadDataForFirst)
+          .build();
+
+        let promise = null;
+        if (this.section === SECTION.GLOBAL) {
+          promise = MetricsService.getGlobalChartsForSection(sectionParams);
+        } else {
+          promise = MetricsService.getChartsForSection(sectionParams);
         }
+
+        promise.then((response) => {
+          this.charts = response;
+        })
+          .finally(() => {
+            this.isLoading = false;
+          });
       },
       loadChart(chartBuilderId) {
         this.isLoading = true;
@@ -139,11 +147,18 @@
           .withNumDays(this.numDaysToShow)
           .withChartBuilderId(chartBuilderId)
           .build();
-        MetricsService.getChartForSection(sectionParams)
-          .then((response) => {
-            this.charts.splice(this.charts.findIndex(it => it.chartMeta.chartBuilderId === chartBuilderId), 1);
-            this.charts.push(Object.assign({ scrollIntoView: true }, response));
-          })
+
+        let promise = null;
+        if (this.section === SECTION.GLOBAL) {
+          promise = MetricsService.getGlobalChartForSection(sectionParams);
+        } else {
+          promise = MetricsService.getChartForSection(sectionParams);
+        }
+
+        promise.then((response) => {
+          this.charts.splice(this.charts.findIndex(it => it.chartMeta.chartBuilderId === chartBuilderId), 1);
+          this.charts.push(Object.assign({ scrollIntoView: true }, response));
+        })
           .finally(() => {
             this.isLoading = false;
           });

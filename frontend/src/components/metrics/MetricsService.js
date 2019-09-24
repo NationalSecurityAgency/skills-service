@@ -7,6 +7,19 @@ export default {
       .then(response => Promise.resolve(this.buildCharts(response.data)));
   },
 
+  getGlobalChartsForSection(sectionParams) {
+    const url = `/metrics/${sectionParams.section}?numDays=${sectionParams.numDays}&numMonths=${sectionParams.numMonths}&loadDataForFirst=${sectionParams.loadDataForFirst}`;
+    const self = this;
+    return axios.get(url)
+      .then(response => Promise.resolve(self.buildCharts(response.data)));
+  },
+
+  getGlobalChartForSection(sectionParams) {
+    const url = `/metrics/${sectionParams.section}/${sectionParams.sectionIdParam}/metric/${sectionParams.chartBuilderId}?numDays=${sectionParams.numDays}&numMonths=${sectionParams.numMonths}&loadDataForFirst=${sectionParams.loadDataForFirst}`;
+    return axios.get(url)
+      .then(response => Promise.resolve(this.buildCharts(response.data)));
+  },
+
   getChartForSection(sectionParams) {
     const url = `/admin/projects/${sectionParams.projectId}/${sectionParams.section}/${sectionParams.sectionIdParam}/metrics/${sectionParams.chartBuilderId}?numDays=${sectionParams.numDays}&numMonths=${sectionParams.numMonths}`;
     return axios.get(url)
@@ -35,13 +48,25 @@ export default {
   },
 
   buildSeries(chartData) {
-    let seriesPairs = chartData.dataItems.map(dataItem => ({ x: dataItem.value, y: dataItem.count }));
-    if (chartData.chartOptions.sort === 'asc') {
-      seriesPairs = seriesPairs.sort((a, b) => a.y - b.y);
-    } else if (chartData.chartOptions.sort === 'desc') {
-      seriesPairs = seriesPairs.sort((a, b) => b.y - a.y);
+    let seriesData = null;
+
+    if (chartData.chartType.toLowerCase() === 'pie') {
+      seriesData = chartData.dataItems.map(dataItem => dataItem.count);
+      return seriesData;
     }
-    return [{ name: (chartData.chartOptions.dataLabel || ''), data: seriesPairs }];
+
+    seriesData = chartData.dataItems.map(dataItem => ({ x: dataItem.value, y: dataItem.count }));
+    const sortAsc = (a, b) => a.y - b.y;
+    const sortDsc = (a, b) => b.y - a.y;
+
+    if (chartData.chartOptions.sort === 'asc') {
+      seriesData = seriesData.sort(sortAsc);
+    } else if (chartData.chartOptions.sort === 'desc') {
+      seriesData = seriesData.sort(sortDsc);
+    }
+
+    const series = { name: (chartData.chartOptions.dataLabel || ''), data: seriesData };
+    return [series];
   },
 
   buildOptions(chartType, chartOptions) {
@@ -89,6 +114,8 @@ export default {
           position: chartOptions.dataLabelPosition || 'center',
         },
       };
+    } else if (chartType === 'Pie') {
+      options.labels = chartOptions.labels;
     }
 
     return options;

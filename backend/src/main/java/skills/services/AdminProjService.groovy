@@ -817,6 +817,12 @@ class AdminProjService {
 
         return convertToSkillsGraphRes(collectedRes)
     }
+
+    @Transactional(readOnly = true)
+    long countNumberOfSkills(String projectId) {
+        return skillDefRepo.countByProjectIdAndType(projectId, SkillDef.ContainerType.Skill)
+    }
+
     @Profile
     private void collectDescendants(List<GraphSkillDefEdge> allEdges, List<GraphSkillDefEdge> currentLevel, List<GraphSkillDefEdge> collectedRes){
         if(currentLevel){

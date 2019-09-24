@@ -47,6 +47,7 @@ module.exports = {
       '/userExists': proxyConf,
       '/supervisor': proxyConf,
       '/public': proxyConf,
+      '/metrics' : proxyConf,
     },
   },
   configureWebpack: {

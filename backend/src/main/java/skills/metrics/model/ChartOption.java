@@ -19,4 +19,5 @@ public enum ChartOption {
     sort, // asc, desc
     palette, // ex. palette2
     icon,
+    labels
 }

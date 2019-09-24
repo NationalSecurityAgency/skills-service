@@ -40,4 +40,5 @@ class AdminMetricsController {
         chartProps.put(ChartParams.SECTION_ID, sectionId)
         return metricsService.loadChartForSection(chartBuilderId, section, projectId, chartProps)
     }
+
 }

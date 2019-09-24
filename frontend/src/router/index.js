@@ -63,7 +63,7 @@ const router = new Router({
         name: 'GlobalMetrics',
         path: 'metrics',
         component: SectionMetrics,
-        meta: { requiresAuth: true },
+        meta: { requiresAuth: true, metricsSection: SECTION.GLOBAL },
       }],
     },
     {
