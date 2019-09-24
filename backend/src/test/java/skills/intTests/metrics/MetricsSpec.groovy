@@ -12,6 +12,7 @@ class MetricsSpec extends DefaultIntSpec {
     def badge
 
     static final String projId = "TestProject1"
+    static final String projId2 = "TestProject2"
 
     static final Map<String, List<String>> sectionBuilders = [
             projects : [
@@ -55,9 +56,21 @@ class MetricsSpec extends DefaultIntSpec {
         List<Map> subj2 = (1..4).collect { [projectId: projId, subjectId: "subj2", skillId: "s2${it}".toString(), name: "subj2 ${it}".toString(), type: "Skill", pointIncrement: 5, numPerformToCompletion: 10, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1] }
         List<Map> subj3 = (1..5).collect { [projectId: projId, subjectId: "subj3", skillId: "23${it}".toString(), name: "subj3 ${it}".toString(), type: "Skill", pointIncrement: 20, numPerformToCompletion: 10, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1] }
 
+
         badge = [projectId: projId, badgeId: 'badge1', name: 'Test Badge 1']
 
         skillsService.createSchema([subj1, subj2, subj3])
+        subj1.each {
+            it.projectId = projId2
+        }
+        subj2.each{
+            it.projectId = projId2
+        }
+        subj3.each{
+            it.projectId = projId2
+        }
+        skillsService.createSchema([subj1, subj2, subj3])
+
         skillsService.createBadge(badge)
         skillsService.assignSkillToBadge(projectId: projId, badgeId: badge.badgeId, skillId: subj1.get(1).skillId)
 
@@ -67,6 +80,9 @@ class MetricsSpec extends DefaultIntSpec {
             String userId = "User${userNum}"
             (0..4).each {
                 addSkillRes << skillsService.addSkill([projectId: projId, skillId: subj1.get(1).skillId], userId, dates.get(it))
+                if (userNum == 2) {
+                    skillsService.addSkill([projectId: projId2, skillId: subj1.get(1).skillId], userId, dates.get(it))
+                }
             }
         }
     }
@@ -214,6 +230,35 @@ class MetricsSpec extends DefaultIntSpec {
         chart
         chart.dataLoaded == true
         chart.dataItems.size() == 3
+    }
+
+    def "Loads all global charts for section type"() {
+        when:
+        def charts = skillsService.getAllGlobalMetricsChartsForSection("global")
+
+        then:
+        charts
+        charts.size() == 2
+        charts[0].dataLoaded == true
+        charts[0].dataItems.size() == 2
+        charts[0].dataItems[0].count == 4
+        charts[0].dataItems[1].count == 1
+        charts[1].dataLoaded == true
+        charts[1].dataItems.size() == 2
+        charts[1].dataItems[0].count == 14
+        charts[1].dataItems[1].count == 14
+    }
+
+    def "Loads global chart for chart builder id and section"() {
+        when:
+        def chart = skillsService.getGlobalMetricsChart("skills.metrics.builders.global.SkillCountPerProjectBuilder", "global","global")
+
+        then:
+        chart
+        chart.dataLoaded == true
+        chart.dataItems.size() == 2
+        chart.dataItems[0].count == 14
+        chart.dataItems[1].count == 14
     }
 
 }

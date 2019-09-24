@@ -499,6 +499,14 @@ class SkillsService {
         wsHelper.adminGet(endpoint, props)
     }
 
+    def getAllGlobalMetricsChartsForSection(String section, Map props=null) {
+        wsHelper.get("/${section}", "metrics", props)
+    }
+
+    def getGlobalMetricsChart(String chartBuilderId, String section, String sectionId, Map props = null) {
+        wsHelper.get("/${section}/${sectionId}/metric/${chartBuilderId}", "metrics", props)
+    }
+
     def getSetting(String projectId, String setting){
         return wsHelper.adminGet(getSettingUrl(projectId, setting))
     }

@@ -3,11 +3,17 @@ package skills.metrics.builders.projects
 import groovy.transform.CompileStatic
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
+import skills.controller.result.model.CountItem
+import skills.metrics.builders.MetricsChartBuilder
+import skills.metrics.model.ChartOption
+import skills.metrics.model.ChartType
+import skills.metrics.model.MetricsChart
+import skills.metrics.model.Section
 import skills.services.AdminUsersService
 
 @Component
 @CompileStatic
-class ContinuedUsageChartBuilder implements skills.metrics.builders.MetricsChartBuilder {
+class ContinuedUsageChartBuilder implements MetricsChartBuilder {
 
     final Integer displayOrder = 6
 
@@ -15,30 +21,30 @@ class ContinuedUsageChartBuilder implements skills.metrics.builders.MetricsChart
     AdminUsersService adminUsersService
 
     @Override
-    skills.metrics.model.Section getSection() {
-        return skills.metrics.model.Section.projects
+    Section getSection() {
+        return Section.projects
     }
 
     @Override
-    skills.metrics.model.MetricsChart build(String projectId, Map<String, String> props, boolean loadData=true) {
-        List<skills.controller.result.model.CountItem> dataItems = [] //(loadData ? adminUsersService.getUserCountsPerLevel(projectId) : []) as List<CountItem>
+    MetricsChart build(String projectId, Map<String, String> props, boolean loadData=true) {
+        List<CountItem> dataItems = [] //(loadData ? adminUsersService.getUserCountsPerLevel(projectId) : []) as List<CountItem>
 
-        skills.metrics.model.MetricsChart metricsChart = new skills.metrics.model.MetricsChart(
-                chartType: skills.metrics.model.ChartType.VerticalBar,
+        MetricsChart metricsChart = new MetricsChart(
+                chartType: ChartType.VerticalBar,
                 dataItems: dataItems,
                 chartOptions: getChartOptions(),
         )
         return metricsChart
     }
 
-    private Map<skills.metrics.model.ChartOption, Object> getChartOptions() {
-        Map<skills.metrics.model.ChartOption, Object> chartOptions = [
-                (skills.metrics.model.ChartOption.title)      : 'Continued Usage',
-                (skills.metrics.model.ChartOption.subtitle)   : 'Do they stick around?',
-                (skills.metrics.model.ChartOption.icon)       : 'fa fa-suitcase',
-                (skills.metrics.model.ChartOption.description): 'Once a particular skill is achieve, do users continue using that skill?',
-                (skills.metrics.model.ChartOption.sort)       : 'asc',
-        ] as Map<skills.metrics.model.ChartOption, Object>
+    private Map<ChartOption, Object> getChartOptions() {
+        Map<ChartOption, Object> chartOptions = [
+                (ChartOption.title)      : 'Continued Usage',
+                (ChartOption.subtitle)   : 'Do they stick around?',
+                (ChartOption.icon)       : 'fa fa-suitcase',
+                (ChartOption.description): 'Once a particular skill is achieve, do users continue using that skill?',
+                (ChartOption.sort)       : 'asc',
+        ] as Map<ChartOption, Object>
         return chartOptions
     }
 }

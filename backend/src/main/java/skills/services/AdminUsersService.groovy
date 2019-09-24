@@ -162,7 +162,7 @@ class AdminUsersService {
     }
 
     @Profile
-    private long countTotalProjUsers(String projectId) {
+    public long countTotalProjUsers(String projectId) {
         userPointsRepo.countDistinctUserIdByProjectId(projectId)
     }
 
