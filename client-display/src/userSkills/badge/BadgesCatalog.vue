@@ -23,6 +23,18 @@
                required: true,
            },
         },
+        data() {
+            return {
+                colors: ['text-success', 'text-warning', 'text-danger', 'text-info'],
+            };
+        },
+        methods: {
+            getIconColor(index) {
+                const colorIndex = index % this.colors.length;
+                const color = this.colors[colorIndex];
+                return color;
+            },
+        },
     };
 </script>
 
