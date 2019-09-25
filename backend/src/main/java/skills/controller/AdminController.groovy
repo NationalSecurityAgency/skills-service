@@ -141,6 +141,7 @@ class AdminController {
         subjectRequest.description = InputSanitizer.sanitize(subjectRequest.description)
         subjectRequest.name = InputSanitizer.sanitize(subjectRequest.name)
         subjectRequest.iconClass = InputSanitizer.sanitize(subjectRequest.iconClass)
+        subjectRequest.helpUrl = InputSanitizer.sanitize(subjectRequest.helpUrl)
 
         projectAdminStorageService.saveSubject(projectId, subjectId, subjectRequest)
         return new RequestResult(success: true)
@@ -250,6 +251,7 @@ class AdminController {
         badgeRequest.name = InputSanitizer.sanitize(badgeRequest.name)
         badgeRequest.badgeId = InputSanitizer.sanitize(badgeRequest.badgeId)
         badgeRequest.description = InputSanitizer.sanitize(badgeRequest.description)
+        badgeRequest.helpUrl = InputSanitizer.sanitize(badgeRequest.helpUrl)
 
         projectAdminStorageService.saveBadge(projectId, badgeId, badgeRequest)
         return new RequestResult(success: true)

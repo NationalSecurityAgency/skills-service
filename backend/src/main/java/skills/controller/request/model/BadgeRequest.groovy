@@ -11,4 +11,6 @@ class BadgeRequest {
 
     Date startDate
     Date endDate
+
+    String helpUrl
 }

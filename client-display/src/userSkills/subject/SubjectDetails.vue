@@ -19,7 +19,7 @@
                 </div>
             </div>
 
-            <skills-progress-list :subject="displayData.userSkills"/>
+            <skills-progress-list :subject="displayData.userSkills" :helpTipHref="displayData.userSkills.helpUrl"/>
         </div>
     </section>
 </template>
