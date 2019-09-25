@@ -31,6 +31,15 @@
             </ValidationProvider>
           </div>
 
+          <div>
+            <label>Help URL/Path
+              <inline-help
+                msg="If project level 'Root Help Url' is specified then this path will be relative to 'Root Help Url'"/>
+            </label>
+            <input class="form-control" type="text" v-model="badgeInternal.helpUrl" data-vv-name="helpUrl"/>
+            <small class="form-text text-danger">{{ errors.first('helpUrl')}}</small>
+          </div>
+
           <div v-if="!global">
             <b-form-checkbox v-model="limitTimeframe" class="mt-4"
                              @change="onEnableGemFeature">

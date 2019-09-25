@@ -22,4 +22,6 @@ class SubjectResult {
     int displayOrder
 
     String iconClass
+
+    String helpUrl
 }
