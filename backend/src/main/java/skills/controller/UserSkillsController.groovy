@@ -5,6 +5,7 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
 import skills.PublicProps
+import skills.controller.exceptions.SkillsValidator
 import skills.services.events.SkillEventResult
 import skills.services.events.SkillEventsService
 import skills.skillLoading.RankingLoader
@@ -180,7 +181,15 @@ class UserSkillsController {
     SkillEventResult addSkill(@PathVariable("projectId") String projectId,
                               @PathVariable("skillId") String skillId,
                               @RequestBody(required = false) skills.controller.request.model.SkillEventRequest skillEventRequest) {
-        Date incomingDate = skillEventRequest?.timestamp != null ? new Date(skillEventRequest.timestamp) : new Date()
+        Date incomingDate = null
+
+        if (skillEventRequest?.timestamp){
+            SkillsValidator.isTrue(skillEventRequest.timestamp <= System.currentTimeMillis(), "Skill Events may not be in the future", projectId, skillId)
+            incomingDate = new Date(skillEventRequest.timestamp)
+        } else {
+            incomingDate = new Date()
+        }
+
         (SkillEventResult) RetryUtil.withRetry(3) {
             skillsManagementFacade.reportSkill(projectId, skillId,  getUserId(skillEventRequest?.userId), incomingDate)
         }
