@@ -28,4 +28,6 @@ class BadgeResult {
     Date endDate
 
     List<SkillDefRes> requiredSkills = []
+
+    String helpUrl
 }

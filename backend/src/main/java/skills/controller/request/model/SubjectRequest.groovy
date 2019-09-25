@@ -8,4 +8,5 @@ class SubjectRequest {
     String name
     String description
     String iconClass
+    String helpUrl
 }

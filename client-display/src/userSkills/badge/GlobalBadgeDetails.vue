@@ -54,7 +54,7 @@
         },
         computed: {
             helpTipHref() {
-                return 'http://url';
+                return this.badge ? this.badge.helpUrl : '';
             },
             projectSummaries() {
                 return this.badge.projectLevelsAndSkillsSummaries.map(item => ({

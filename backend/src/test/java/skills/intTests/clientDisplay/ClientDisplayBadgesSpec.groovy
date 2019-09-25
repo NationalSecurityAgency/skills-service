@@ -82,7 +82,7 @@ class ClientDisplayBadgesSpec extends DefaultIntSpec {
         skillsService.createSkills(proj1_skills)
 
         String badge1 = "badge1"
-        skillsService.addBadge([projectId: proj1.projectId, badgeId: badge1, name: 'Badge 1', description: 'This is a first badge', iconClass: "fa fa-seleted-icon",])
+        skillsService.addBadge([projectId: proj1.projectId, badgeId: badge1, name: 'Badge 1', description: 'This is a first badge', iconClass: "fa fa-seleted-icon", helpUrl: "http://foo.org"])
         skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badge1, skillId: proj1_skills.get(0).skillId])
         skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_skills.get(0).skillId], userId, new Date())
 
@@ -99,6 +99,7 @@ class ClientDisplayBadgesSpec extends DefaultIntSpec {
         summary.numTotalSkills == 1
         summary.numSkillsAchieved == 1
         summary.iconClass == "fa fa-seleted-icon"
+        summary.helpUrl == "http://foo.org"
     }
 
     def "badges summary for a project - few badges"() {

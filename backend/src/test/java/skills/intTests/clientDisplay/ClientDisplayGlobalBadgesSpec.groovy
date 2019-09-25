@@ -43,7 +43,8 @@ class ClientDisplayGlobalBadgesSpec extends DefaultIntSpec {
         skillsService.createSubject(proj1_subj)
         skillsService.createSkills(proj1_skills)
 
-        Map badge = [badgeId: globalBadgeId, name: 'Badge 1', description: 'This is a first badge', iconClass: "fa fa-seleted-icon",]
+        Map badge = [badgeId: globalBadgeId, name: 'Badge 1', description: 'This is a first badge', iconClass: "fa fa-seleted-icon"]
+        badge.helpUrl = "http://foo.org"
         supervisorSkillsService.createGlobalBadge(badge)
         supervisorSkillsService.assignProjectLevelToGlobalBadge(projectId: projId, badgeId: badge.badgeId, level: "3")
         supervisorSkillsService.assignSkillToGlobalBadge(projectId: projId, badgeId: badge.badgeId, skillId: proj1_skills.get(0).skillId)
@@ -62,6 +63,7 @@ class ClientDisplayGlobalBadgesSpec extends DefaultIntSpec {
         summary.numTotalSkills == 2
         summary.numSkillsAchieved == 0
         summary.iconClass == "fa fa-seleted-icon"
+        summary.helpUrl == "http://foo.org"
     }
 
     def "badges summary for a project - one badge - achieved"() {

@@ -31,6 +31,15 @@
               </ValidationProvider>
             </div>
 
+            <div>
+              <label>Help URL/Path
+                <inline-help
+                  msg="If project level 'Root Help Url' is specified then this path will be relative to 'Root Help Url'"/>
+              </label>
+              <input class="form-control" type="text" v-model="subjectInternal.helpUrl" data-vv-name="helpUrl"/>
+              <small class="form-text text-danger">{{ errors.first('helpUrl')}}</small>
+            </div>
+
             <p v-if="invalid && overallErrMsg" class="text-center text-danger">***{{ overallErrMsg }}***</p>
         </div>
         <div v-else>
@@ -63,6 +72,7 @@
   import IdInput from '../utils/inputForm/IdInput';
   import IconManager from '../utils/iconPicker/IconManager';
   import InputSanitizer from '../utils/InputSanitizer';
+  import InlineHelp from '../utils/InlineHelp';
 
 
   export default {
@@ -72,6 +82,7 @@
       IconPicker,
       MarkdownEditor,
       IconManager,
+      InlineHelp,
       ValidationProvider,
       ValidationObserver,
     },

@@ -351,6 +351,12 @@ class SkillsLoader {
             levelInfo.level = 0
         }
 
+        String helpUrl = null
+        if(subjectDefinition instanceof SkillDefWithExtra) {
+            SettingsResult helpUrlRootSetting = settingsService.getProjectSetting(projDef.projectId, PROP_HELP_URL_ROOT)
+            helpUrl = getHelpUrl(helpUrlRootSetting, subjectDefinition)
+        }
+
         return new SkillSubjectSummary(
                 subject: subjectDefinition.name,
                 subjectId: subjectDefinition.skillId,
@@ -368,7 +374,9 @@ class SkillsLoader {
 
                 skills: skillsRes,
 
-                iconClass: subjectDefinition.iconClass
+                iconClass: subjectDefinition.iconClass,
+
+                helpUrl: helpUrl
         )
     }
 
@@ -413,6 +421,9 @@ class SkillsLoader {
         int numAchievedSkills = achievedLevelRepository.countAchievedChildren(userId, projDef?.projectId, badgeDefinition.skillId, SkillRelDef.RelationshipType.BadgeRequirement)
         int numChildSkills = skillDefRepo.countChildren(projDef?.projectId, badgeDefinition.skillId, SkillRelDef.RelationshipType.BadgeRequirement)
 
+        SettingsResult helpUrlRootSetting = settingsService.getProjectSetting(projDef.projectId, PROP_HELP_URL_ROOT)
+        String helpUrl = getHelpUrl(helpUrlRootSetting, badgeDefinition)
+
         return new SkillBadgeSummary(
                 badge: badgeDefinition.name,
                 badgeId: badgeDefinition.skillId,
@@ -424,7 +435,8 @@ class SkillsLoader {
                 startDate: badgeDefinition.startDate,
                 endDate: badgeDefinition.endDate,
                 skills: skillsRes,
-                iconClass: badgeDefinition.iconClass
+                iconClass: badgeDefinition.iconClass,
+                helpUrl: helpUrl
         )
     }
 
@@ -490,6 +502,7 @@ class SkillsLoader {
                 skills: skillsRes,
                 iconClass: badgeDefinition.iconClass,
                 projectLevelsAndSkillsSummaries: byProject.values(),
+                helpUrl: badgeDefinition.helpUrl
         )
     }
 

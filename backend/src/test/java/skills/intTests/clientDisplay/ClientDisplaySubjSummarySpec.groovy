@@ -8,6 +8,7 @@ class ClientDisplaySubjSummarySpec extends DefaultIntSpec {
     def "load subject summary"(){
         def proj1 = SkillsFactory.createProject(1)
         def proj1_subj = SkillsFactory.createSubject(1, 1)
+        proj1_subj.helpUrl = "http://foo.org"
         proj1_subj.description = "This is a description"
         List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
 
@@ -23,5 +24,6 @@ class ClientDisplaySubjSummarySpec extends DefaultIntSpec {
             it.maxOccurrencesWithinIncrementInterval == 1
         }
         summary.description == "This is a description"
+        summary.helpUrl == "http://foo.org"
     }
 }

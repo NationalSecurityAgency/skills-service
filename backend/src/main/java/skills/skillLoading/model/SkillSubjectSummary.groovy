@@ -19,4 +19,6 @@ class SkillSubjectSummary {
     List<SkillSummary> skills
 
     String iconClass
+
+    String helpUrl
 }
