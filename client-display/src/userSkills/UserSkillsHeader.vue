@@ -4,7 +4,6 @@
             <div class="row card-body ml-0 mr-0">
                 <div class="text-center col-md-4">
                     <circle-progress
-                            :user-skills="displayData.userSkills"
                             :total-completed-points="displayData.userSkills.points"
                             :points-completed-today="displayData.userSkills.todaysPoints"
                             :total-possible-points="displayData.userSkills.totalPoints"
