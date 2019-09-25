@@ -18,4 +18,6 @@ class SkillBadgeSummary {
 
     String iconClass
     boolean global = false
+
+    String helpUrl
 }

@@ -212,7 +212,8 @@ class AdminProjService {
                     description: subjectRequest?.description,
                     iconClass: subjectRequest?.iconClass ?: "fa fa-question-circle",
                     projDef: projDef,
-                    displayOrder: displayOrder
+                    displayOrder: displayOrder,
+                    helpUrl: subjectRequest.helpUrl
             )
 
             subjectDataIntegrityViolationExceptionHandler.handle(projectId) {
@@ -291,6 +292,7 @@ class AdminProjService {
                     endDate: badgeRequest.endDate,
                     projDef: projDef,
                     displayOrder: displayOrder,
+                    helpUrl: badgeRequest.helpUrl
             )
             log.debug("Saving [{}]", skillDefinition)
         }
@@ -672,6 +674,7 @@ class AdminProjService {
                 displayOrder: skillDef.displayOrder,
                 totalPoints: skillDef.totalPoints,
                 iconClass: skillDef.iconClass,
+                helpUrl: skillDef.helpUrl
         )
 
         res.numSkills = calculateNumChildSkills(skillDef)
@@ -694,6 +697,7 @@ class AdminProjService {
                 iconClass: skillDef.iconClass,
                 startDate: skillDef.startDate,
                 endDate: skillDef.endDate,
+                helpUrl: skillDef.helpUrl
         )
 
         if (loadRequiredSkills) {

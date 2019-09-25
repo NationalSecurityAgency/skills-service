@@ -92,6 +92,7 @@ class SupervisorController {
         badgeRequest.name = InputSanitizer.sanitize(badgeRequest.name)
         badgeRequest.badgeId = InputSanitizer.sanitize(badgeRequest.badgeId)
         badgeRequest.description = InputSanitizer.sanitize(badgeRequest.description)
+        badgeRequest.helpUrl = InputSanitizer.sanitize(badgeRequest.helpUrl)
 
         globalBadgesService.saveBadge(badgeId, badgeRequest)
         return new RequestResult(success: true)

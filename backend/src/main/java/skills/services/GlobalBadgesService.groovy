@@ -255,6 +255,7 @@ class GlobalBadgesService {
                 iconClass: skillDef.iconClass,
                 startDate: skillDef.startDate,
                 endDate: skillDef.endDate,
+                helpUrl: skillDef.helpUrl
         )
 
         if (loadRequiredSkills) {
