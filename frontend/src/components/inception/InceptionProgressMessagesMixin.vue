@@ -5,12 +5,9 @@
     name: 'InceptionProgressMessagesMixin',
     methods: {
       registerToDisplayProgress() {
-        const myGlobalSuccessHandler = (event) => {
-          const det = event.detail;
-          if (det.completed) {
-            det.completed.forEach((completedItem) => {
-              this.handleEvent(completedItem);
-            });
+        const myGlobalSuccessHandler = (details) => {
+          if (details.completed) {
+            details.completed.forEach(this.handleEvent);
           }
         };
         SkillsReporter.addSuccessHandler(myGlobalSuccessHandler);
