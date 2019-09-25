@@ -39,7 +39,11 @@
         return `${this.serviceUrl}/app/projects/${encodeURIComponent(this.projectId)}/users/${encodeURIComponent(this.userId)}/token`;
       },
       userId() {
-        return this.$store.getters.userInfo.userId;
+        let id = null;
+        if (this.$store.getters.userInfo) {
+          id = this.$store.getters.userInfo.userId;
+        }
+        return id;
       },
     },
   };
