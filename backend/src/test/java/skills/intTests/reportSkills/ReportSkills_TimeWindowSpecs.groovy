@@ -1,5 +1,6 @@
 package skills.intTests.reportSkills
 
+import groovy.time.BaseDuration
 import groovy.time.TimeCategory
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
@@ -22,7 +23,7 @@ class ReportSkills_TimeWindowSpecs extends DefaultIntSpec {
         Date afterEnd
         Date beforeStart
         use(TimeCategory) {
-            theDate = new Date()
+            theDate = new Date().minus(1)
             atTheStartOfIncrement = theDate - 1.hour + 1.second
             atTheEndOfIncrement = theDate + 1.hour - 1.second
             afterEnd = theDate + 1.hour + 1.second
@@ -139,7 +140,7 @@ class ReportSkills_TimeWindowSpecs extends DefaultIntSpec {
         List<Date> minutes = []
         use(TimeCategory) {
             (0..30).each {
-                minutes.add(new Date() + it.minutes)
+                minutes.add(new Date().minus(1) + it.minutes)
             }
         }
 

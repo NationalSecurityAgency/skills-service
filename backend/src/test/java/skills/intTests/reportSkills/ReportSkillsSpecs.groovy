@@ -1,6 +1,7 @@
 package skills.intTests.reportSkills
 
 import skills.intTests.utils.DefaultIntSpec
+import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.TestUtils
 
@@ -850,5 +851,22 @@ class ReportSkillsSpecs extends DefaultIntSpec {
         then:
         skillsLevelAfterInsert > 0
         skillsLevelAfterDelete == skillsLevelAfterInsert
+    }
+
+    def "Skill Events may not be reported for future times"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(10, )
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        when:
+        def res = skillsService.addSkill([projectId: projId, skillId: skills[0].skillId], "usera", new Date().plus(1))
+
+        then:
+        SkillsClientException ex = thrown()
+        ex.message.contains("Skill Events may not be in the future")
     }
 }
