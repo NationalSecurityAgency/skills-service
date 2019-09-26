@@ -21,7 +21,7 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
 
     void deleteByProjectIdAndSkillId(String projectId, String skillId)
 
-    Long countByUserIdAndProjectIdAndSkillIdContaining(String userId, String projectId, String skillId)
+    Long countByUserIdAndProjectIdAndSkillIdIgnoreCaseContaining(String userId, String projectId, String skillId)
     Long countByUserIdAndProjectIdAndSkillId(String userId, String projectId, String skillId)
     Long countByUserIdAndProjectIdAndSkillIdAndPerformedOnGreaterThanAndPerformedOnLessThan(String userId, String projectId, String skillId, Date startDate, Date endDate)
 
@@ -34,7 +34,7 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
     Boolean existsByUserId(String userId)
     Boolean existsByProjectIdAndUserId(String userId, String projectId)
 
-    List<UserPerformedSkill> findByUserIdAndProjectIdAndSkillIdContaining(String userId, String projectId, String skillId, Pageable pageable)
+    List<UserPerformedSkill> findByUserIdAndProjectIdAndSkillIdIgnoreCaseContaining(String userId, String projectId, String skillId, Pageable pageable)
 
     @Query('SELECT COUNT(DISTINCT p.skillId) from UserPerformedSkill p where p.projectId=?1 and p.userId = ?2')
     Integer countDistinctSkillIdByProjectIdAndUserId(String projectId, String userId)
