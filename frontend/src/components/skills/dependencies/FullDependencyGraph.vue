@@ -13,7 +13,7 @@
             <graph-legend class="graph-legend" :items="legendItems"/>
           </div>
           <div class="col text-left text-sm-right mt-2">
-            <graph-node-sort-method-selector @:value-changed="onSortNodeStrategyChange"/>
+            <graph-node-sort-method-selector @value-changed="onSortNodeStrategyChange"/>
           </div>
         </div>
       </loading-container>

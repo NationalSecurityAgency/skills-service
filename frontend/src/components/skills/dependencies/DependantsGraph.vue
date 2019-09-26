@@ -18,7 +18,7 @@
             ]"></graph-legend>
         </div>
         <div class="col text-left text-sm-right mt-2">
-          <graph-node-sort-method-selector v-on:value-changed="onSortNodeStrategyChange"></graph-node-sort-method-selector>
+          <graph-node-sort-method-selector @value-changed="onSortNodeStrategyChange"></graph-node-sort-method-selector>
         </div>
       </div>
     </div>
