@@ -25,9 +25,9 @@ class UserAdminService {
     @Transactional(readOnly = true)
     skills.controller.result.model.TableResult loadUserPerformedSkillsPage(String projectId, String userId, String query, PageRequest pageRequest){
         skills.controller.result.model.TableResult result = new skills.controller.result.model.TableResult()
-        Long totalPerformedSkills = performedSkillRepository.countByUserIdAndProjectIdAndSkillIdContaining(userId, projectId, query)
+        Long totalPerformedSkills = performedSkillRepository.countByUserIdAndProjectIdAndSkillIdIgnoreCaseContaining(userId, projectId, query)
         if(totalPerformedSkills) {
-            List<UserPerformedSkill> performedSkills = performedSkillRepository.findByUserIdAndProjectIdAndSkillIdContaining(userId, projectId, query, pageRequest)
+            List<UserPerformedSkill> performedSkills = performedSkillRepository.findByUserIdAndProjectIdAndSkillIdIgnoreCaseContaining(userId, projectId, query, pageRequest)
             result.data = performedSkills.collect({
                 new SkillPerfomed(skillId: it.skillId, performedOn: it.performedOn)
             })
