@@ -43,7 +43,4 @@ class UserAdminMetricsSpec extends DefaultIntSpec {
         metrics.numSkills == 2
         metrics.userTotalPoints == 20
     }
-
-
 }
-

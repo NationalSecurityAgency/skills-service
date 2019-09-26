@@ -21,6 +21,7 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
 
     void deleteByProjectIdAndSkillId(String projectId, String skillId)
 
+    Long countByUserIdAndProjectId(String userId, String projectId)
     Long countByUserIdAndProjectIdAndSkillIdIgnoreCaseContaining(String userId, String projectId, String skillId)
     Long countByUserIdAndProjectIdAndSkillId(String userId, String projectId, String skillId)
     Long countByUserIdAndProjectIdAndSkillIdAndPerformedOnGreaterThanAndPerformedOnLessThan(String userId, String projectId, String skillId, Date startDate, Date endDate)

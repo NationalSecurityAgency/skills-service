@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import skills.controller.result.model.TableResult
 import skills.controller.result.model.UserSkillsStats
 import skills.skillLoading.model.SkillPerfomed
 import skills.storage.model.UserPerformedSkill
@@ -24,15 +25,17 @@ class UserAdminService {
 
     @Transactional(readOnly = true)
     skills.controller.result.model.TableResult loadUserPerformedSkillsPage(String projectId, String userId, String query, PageRequest pageRequest){
-        skills.controller.result.model.TableResult result = new skills.controller.result.model.TableResult()
-        Long totalPerformedSkills = performedSkillRepository.countByUserIdAndProjectIdAndSkillIdIgnoreCaseContaining(userId, projectId, query)
+        TableResult result = new TableResult()
+        Long totalPerformedSkills = performedSkillRepository.countByUserIdAndProjectId(userId, projectId)
         if(totalPerformedSkills) {
+            Long filteredPerformedSkillsCount = performedSkillRepository.countByUserIdAndProjectIdAndSkillIdIgnoreCaseContaining(userId, projectId, query)
             List<UserPerformedSkill> performedSkills = performedSkillRepository.findByUserIdAndProjectIdAndSkillIdIgnoreCaseContaining(userId, projectId, query, pageRequest)
             result.data = performedSkills.collect({
                 new SkillPerfomed(skillId: it.skillId, performedOn: it.performedOn)
             })
-            result.count = totalPerformedSkills
+            result.count = filteredPerformedSkillsCount
         }
+        result.totalCount = totalPerformedSkills
         return result
     }
 

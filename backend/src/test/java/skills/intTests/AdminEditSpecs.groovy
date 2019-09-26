@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageNotReadableException
+import skills.controller.result.model.TableResult
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
@@ -277,6 +278,49 @@ class AdminEditSpecs extends DefaultIntSpec {
         e.httpStatus == HttpStatus.FORBIDDEN
     }
 
+    def "#293 Searching for skills the user has performed is case insensitive"() {
+        String userId = 'user1'
+
+        def project = SkillsFactory.createProject(1)
+        def subject = SkillsFactory.createSubject(1, 1)
+        List<Map> subjectSkills = SkillsFactory.createSkills(5, 1, 1)
+        def subject2 = SkillsFactory.createSubject(1, 2)
+        List<Map> subjectSkills2 = SkillsFactory.createSkills(5, 1, 2)
+
+        def expectedSkill1 = subjectSkills.get(0)
+        def expectedSkill2 = subjectSkills2.get(1)
+
+        String expectedMatchHit = "matchThisString"
+
+        expectedSkill1.skillId = "AAAAAAAAAA${expectedMatchHit}ZZZZZZZZZZZ".toString()
+        expectedSkill2.skillId = "asdfasdf${expectedMatchHit}AAasdfasdfaf".toString()
+
+        skillsService.createProject(project)
+        skillsService.createSubject(subject)
+        skillsService.createSubject(subject2)
+        skillsService.createSkills(subjectSkills)
+        skillsService.createSkills(subjectSkills2)
+
+        skillsService.addSkill([projectId: project.projectId, skillId: subjectSkills.get(0).skillId], userId, new Date())
+        skillsService.addSkill([projectId: project.projectId, skillId: subjectSkills2.get(1).skillId], userId, new Date())
+        skillsService.addSkill([projectId: project.projectId, skillId: subjectSkills2.get(2).skillId], userId, new Date()) // Will not match filter
+
+        when:
+        TableResult expected = new TableResult(
+            count: 2,
+            totalCount: 3,
+            data: [subjectSkills.get(0), subjectSkills2.get(1)]
+        )
+        String query = expectedMatchHit.collect { Character.isLowerCase((char) it) ? it.toUpperCase() : it.toLowerCase() }.join('')
+        TableResult result = skillsService.getPerformedSkills(userId, project.projectId, query)
+
+        then:
+        result.count == expected.count
+        result.totalCount == expected.totalCount
+        result.data.size() == 2
+        result.data.any { it.skillId == expectedSkill1.skillId }
+        result.data.any { it.skillId == expectedSkill2.skillId }
+    }
 
     def "When skill id is updated it should persist to 'performed skills'"(){
         String userId = "user1"

@@ -411,8 +411,8 @@ class SkillsService {
         wsHelper.supervisorGet("/icons/customIcons")
     }
 
-    def getPerformedSkills(String userId, String project) {
-        return wsHelper.adminGet("${getProjectUrl(project)}/performedSkills/${userId}?query=&limit=10&ascending=0&page=1&byColumn=0&orderBy=performedOn".toString())
+    def getPerformedSkills(String userId, String project, String query = '') {
+        return wsHelper.adminGet("${getProjectUrl(project)}/performedSkills/${userId}?query=${query}&limit=10&ascending=0&page=1&byColumn=0&orderBy=performedOn".toString())
     }
 
     def getUsersPerLevel(String projectId, String subjectId = null){
