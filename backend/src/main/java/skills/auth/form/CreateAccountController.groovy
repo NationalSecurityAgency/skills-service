@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.context.annotation.Conditional
 import org.springframework.context.annotation.Configuration
+import org.springframework.http.MediaType
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.oauth2.client.registration.ClientRegistration
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
@@ -80,7 +81,7 @@ class CreateAccountController {
     }
 
     @Conditional(SecurityMode.PkiAuth)
-    @PostMapping('grantFirstRoot')
+    @RequestMapping(value = "/grantFirstRoot", method = [RequestMethod.POST, RequestMethod.PUT])
     void grantFirstRoot(HttpServletRequest request) {
         skills.controller.exceptions.SkillsValidator.isTrue(!userAuthService.rootExists(), 'A root user already exists! Granting additional root privileges requires a root user to grant them!')
         skills.controller.exceptions.SkillsValidator.isNotNull(request.getUserPrincipal(), 'Granting the first root user is only available in PKI mode, but it looks like the request was not made by an authenticated account!')
