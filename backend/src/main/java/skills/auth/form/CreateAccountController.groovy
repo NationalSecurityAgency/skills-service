@@ -11,6 +11,7 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.stereotype.Component
 import org.springframework.web.bind.annotation.*
 import skills.PublicProps
+import skills.auth.SecurityMode
 import skills.controller.PublicPropsBasedValidator
 import skills.storage.model.auth.RoleName
 import skills.storage.model.auth.UserRole
@@ -39,7 +40,7 @@ class CreateAccountController {
     @Autowired
     PublicPropsBasedValidator propsBasedValidator
 
-    @Conditional(skills.auth.SecurityConfiguration.FormAuth)
+    @Conditional(SecurityMode.FormAuth)
     @PutMapping("createAccount")
     void createAppUser(@RequestBody skills.auth.UserInfo userInfo, HttpServletResponse response) {
         String password = userInfo.password
@@ -57,7 +58,7 @@ class CreateAccountController {
         userAuthService.autologin(userInfo, password)
     }
 
-    @Conditional(skills.auth.SecurityConfiguration.FormAuth)
+    @Conditional(SecurityMode.FormAuth)
     @PutMapping("createRootAccount")
     void createRootUser(@RequestBody skills.auth.UserInfo userInfo, HttpServletResponse response) {
         skills.controller.exceptions.SkillsValidator.isTrue(!userAuthService.rootExists(), 'A root user already exists! Granting additional root privileges requires a root user to grant them!')
@@ -78,7 +79,7 @@ class CreateAccountController {
         userAuthService.createUser(userInfo, true)
     }
 
-    @Conditional(skills.auth.SecurityConfiguration.PkiAuth)
+    @Conditional(SecurityMode.PkiAuth)
     @PostMapping('grantFirstRoot')
     void grantFirstRoot(HttpServletRequest request) {
         skills.controller.exceptions.SkillsValidator.isTrue(!userAuthService.rootExists(), 'A root user already exists! Granting additional root privileges requires a root user to grant them!')
@@ -86,13 +87,13 @@ class CreateAccountController {
         userAuthService.grantRoot(request.getUserPrincipal().name)
     }
 
-    @Conditional(skills.auth.SecurityConfiguration.FormAuth)
+    @Conditional(SecurityMode.FormAuth)
     @GetMapping('userExists/{user}')
     boolean userExists(@PathVariable('user') String user) {
         return userAuthService.userExists(user)
     }
 
-    @Conditional(skills.auth.SecurityConfiguration.FormAuth)
+    @Conditional(SecurityMode.FormAuth)
     @GetMapping("/app/oAuthProviders")
     List<skills.controller.result.model.OAuth2Provider> getOAuthProviders() {
         List<skills.controller.result.model.OAuth2Provider> providers = []
@@ -110,7 +111,7 @@ class CreateAccountController {
     @Component
     @Configuration
     @ConfigurationProperties(prefix = "spring.security.oauth2.client")
-    @Conditional(skills.auth.SecurityConfiguration.FormAuth)
+    @Conditional(SecurityMode.FormAuth)
     static class OAuth2ProviderProperties {
         final Map<String, skills.controller.result.model.OAuth2Provider> registration = new HashMap<>()
     }

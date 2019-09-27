@@ -12,9 +12,11 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.R
 import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices
 import org.springframework.security.oauth2.provider.token.TokenStore
+import skills.auth.PortalWebSecurityHelper
 import skills.auth.SecurityConfiguration
+import skills.auth.SecurityMode
 
-@Conditional(SecurityConfiguration.FormAuth)
+@Conditional(SecurityMode.FormAuth)
 @Configuration
 @EnableResourceServer
 class ResourceServerConfig extends ResourceServerConfigurerAdapter {
@@ -31,7 +33,7 @@ class ResourceServerConfig extends ResourceServerConfigurerAdapter {
     private TokenStore tokenStore
 
     @Autowired
-    SecurityConfiguration.PortalWebSecurityHelper portalWebSecurityHelper
+    PortalWebSecurityHelper portalWebSecurityHelper
 
     @Autowired
     skills.auth.form.SkillsHttpSessionSecurityContextRepository securityContextRepository

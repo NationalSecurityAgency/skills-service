@@ -4,17 +4,15 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Conditional
 import org.springframework.security.oauth2.core.user.OAuth2User
 import org.springframework.stereotype.Component
-import skills.auth.SecurityConfiguration
+import skills.auth.SecurityMode
 import skills.auth.SkillsAuthorizationException
 import skills.auth.UserAuthService
 import skills.auth.UserInfo
 
 import javax.annotation.Resource
 
-import static skills.auth.SecurityConfiguration.*
-
 @Component
-@Conditional(FormAuth)
+@Conditional(SecurityMode.FormAuth)
 class OAuth2UserConverterService {
 
     @Autowired

@@ -13,6 +13,7 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication
 import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetails
 import org.springframework.security.web.util.matcher.RequestMatcher
 import org.springframework.stereotype.Component
+import skills.auth.SecurityMode
 import skills.auth.SkillsAuthorizationException
 import skills.auth.UserInfo
 
@@ -24,7 +25,7 @@ import javax.transaction.Transactional
 import static AuthorizationServerConfig.SKILLS_PROXY_USER
 
 @Component
-@Conditional(skills.auth.SecurityConfiguration.FormAuth)
+@Conditional(SecurityMode.FormAuth)
 @Slf4j
 class OAuthUtils {
 

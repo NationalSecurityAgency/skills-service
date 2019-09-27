@@ -2,10 +2,7 @@ package skills.auth.pki
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Conditional
-import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.Primary
+import org.springframework.context.annotation.*
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
@@ -14,10 +11,11 @@ import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.web.context.NullSecurityContextRepository
 import org.springframework.stereotype.Component
-import skills.auth.SecurityConfiguration
+import skills.auth.PortalWebSecurityHelper
+import skills.auth.SecurityMode
 
 @Slf4j
-@Conditional(SecurityConfiguration.PkiAuth)
+@Conditional(SecurityMode.PkiAuth)
 @Component
 @Configuration
 class PkiSecurityConfiguration extends WebSecurityConfigurerAdapter {
@@ -26,19 +24,14 @@ class PkiSecurityConfiguration extends WebSecurityConfigurerAdapter {
 //    UserDetailsService userDetailsService
 
     @Bean
-    @Conditional(SecurityConfiguration.PkiAuth)
+    @Conditional(SecurityMode.PkiAuth)
+    @DependsOn('pkiUserLookup')
     UserDetailsService pkiUserDetailsService() {
         new PkiUserDetailsService()
     }
 
-    @Bean
-    @Conditional(SecurityConfiguration.PkiAuth)
-    PkiUserLookup pkiUserLookup() {
-        new PkiUserLookup()
-    }
-
     @Autowired
-    SecurityConfiguration.PortalWebSecurityHelper portalWebSecurityHelper
+    PortalWebSecurityHelper portalWebSecurityHelper
 
     @Autowired
     void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
