@@ -120,7 +120,7 @@ class UserSkillsController {
         List<SkillBadgeSummary> badgeSummaries = skillsLoader.loadBadgeSummaries(projectId, getUserId(userIdParam), getProvidedVersionOrReturnDefault(version))
 
         // add any global badges as well
-        badgeSummaries.addAll(skillsLoader.loadGlobalBadgeSummaries(getUserId(userIdParam), getProvidedVersionOrReturnDefault(version)))
+        badgeSummaries.addAll(skillsLoader.loadGlobalBadgeSummaries(getUserId(userIdParam), projectId, getProvidedVersionOrReturnDefault(version)))
         return badgeSummaries
     }
 

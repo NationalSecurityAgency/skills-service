@@ -197,14 +197,15 @@ class SkillsLoader {
     }
 
     @Transactional(readOnly = true)
-    List<SkillGlobalBadgeSummary> loadGlobalBadgeSummaries(String userId, Integer version = Integer.MAX_VALUE){
+    List<SkillGlobalBadgeSummary> loadGlobalBadgeSummaries(String userId, String projectId, Integer version = Integer.MAX_VALUE){
         List<SkillDefWithExtra> badgeDefs = skillDefWithExtraRepo.findAllByProjectIdAndType(null, SkillDef.ContainerType.GlobalBadge)
         if ( version >= 0 ) {
             badgeDefs = badgeDefs.findAll { it.version <= version }
         }
         List<SkillGlobalBadgeSummary> globalBadges = badgeDefs.sort({ it.skillId }).collect { SkillDefWithExtra badgeDefinition ->
-            loadGlobalBadgeSummary(userId, badgeDefinition, version)
+            loadGlobalBadgeSummary(userId, badgeDefinition, version, true)
         }
+        globalBadges = globalBadges.findAll { it.projectLevelsAndSkillsSummaries.find { it.projectId == projectId } }
         return globalBadges
     }
 

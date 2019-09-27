@@ -19,6 +19,7 @@ class SupervisorEditSpecs extends DefaultIntSpec {
 
         def setup(){
             skillsService.deleteProjectIfExist(projId)
+            skillsService.deleteProjectIfExist("${projId}2")
             rootSkillsService = createService(ultimateRoot, 'aaaaaaaa')
             nonSupervisorSkillsService = createService(nonRootUserId)
 
@@ -398,5 +399,60 @@ class SupervisorEditSpecs extends DefaultIntSpec {
 
         then:
         result == [[filename:'dot2.png', cssClassname:"GLOBAL-dot2png"]]
+    }
+
+    def 'global badge lookups do not return inception project or skills'() {
+        String subj = "testSubj"
+
+        Map skill1 = [projectId: projId, subjectId: subj, skillId: "skill1", name  : "Test Skill 1", type: "Skill",
+                      pointIncrement: 10, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1]
+        Map skill2 = [projectId: projId, subjectId: subj, skillId: "skill2", name  : "Test Skill 2", type: "Skill",
+                      pointIncrement: 10, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1]
+        Map skill3 = [projectId: projId, subjectId: subj, skillId: "skill3", name  : "Test Skill 3", type: "Skill",
+                      pointIncrement: 10, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1]
+        Map skill4 = [projectId: projId, subjectId: subj, skillId: "skill4", name  : "Test Skill 4", type: "Skill",
+                      pointIncrement: 10, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1*60, numMaxOccurrencesIncrementInterval: 1, dependentSkillsIds: [skill1.skillId, skill2.skillId, skill3.skillId]]
+        Map skill5 = [projectId: projId, subjectId: subj, skillId: "skill5", name  : "Test Skill 5", type: "Skill",
+                      pointIncrement: 10, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1]
+
+        Map badge = [badgeId: badgeId, name: 'Test Global Badge 1']
+        List<String> requiredSkillsIds = [skill1.skillId, skill2.skillId, skill3.skillId, skill4.skillId]
+
+        when:
+        skillsService.createProject([projectId: projId, name: "Test Project"])
+        skillsService.createProject([projectId: "${projId}2".toString(), name: "Test Project 2"])
+        skillsService.createSubject([projectId: projId, subjectId: subj, name: "Test Subject"])
+        skillsService.createSkill(skill1)
+        skillsService.createSkill(skill2)
+        skillsService.createSkill(skill3)
+        skillsService.createSkill(skill4)
+        skillsService.createSkill(skill5)
+        skillsService.createGlobalBadge(badge)
+        skillsService.assignProjectLevelToGlobalBadge(projectId: projId, badgeId: badge.badgeId, level: "3")
+        requiredSkillsIds.each { skillId ->
+            skillsService.assignSkillToGlobalBadge(projectId: projId, badgeId: badge.badgeId, skillId: skillId)
+        }
+
+        def res = skillsService.getGlobalBadge(badgeId)
+        def inception = rootSkillsService.getProject("Inception")
+        def availableProjects = skillsService.getAvailableProjectsForGlobalBadge(badgeId)
+        def availableSkills = skillsService.getAvailableSkillsForGlobalBadge(badgeId, "")
+
+        then:
+        res
+        res.badgeId == badgeId
+        res.projectId == null
+        res.name == 'Test Global Badge 1'
+        res.numSkills == 4
+        res.requiredSkills.size() == 4
+        res.requiredProjectLevels.size() == 1
+        inception
+        availableProjects
+        !availableProjects.find { it.projectId == 'Inception'}
+        availableSkills
+        !availableSkills.suggestedSkills.find { it.projectId == "Inception" }
+
+        cleanup:
+        skillsService.deleteGlobalBadge(badgeId)
     }
 }
