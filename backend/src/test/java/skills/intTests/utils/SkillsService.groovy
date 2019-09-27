@@ -250,6 +250,14 @@ class SkillsService {
         wsHelper.adminGet("/projects/${props.projectId}/badges/${props.badgeId}")
     }
 
+    def getAvailableProjectsForGlobalBadge(String badgeId) {
+        wsHelper.supervisorGet("${getGlobalBadgeUrl(badgeId)}/projects/available")
+    }
+
+    def getAvailableSkillsForGlobalBadge(String badgeId, String query) {
+        wsHelper.supervisorGet("${getGlobalBadgeUrl(badgeId)}/skills/available?query=${query}")
+    }
+
     def getGlobalBadge(String badgeId) {
         wsHelper.supervisorGet(getGlobalBadgeUrl(badgeId))
     }
