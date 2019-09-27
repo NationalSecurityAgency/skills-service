@@ -7,7 +7,8 @@
           <existing-user-input :project-id="projectId" v-model="currentSelectedUser" :can-enter-new-user="!pkiAuthenticated"/>
         </div>
         <div class="col-auto">
-          <datepicker input-class="border-0" wrapper-class="form-control" v-model="dateAdded" name="Event Date" v-validate="'required'"/>
+          <datepicker input-class="border-0" wrapper-class="form-control" v-model="dateAdded" name="Event Date" v-validate="'required'"
+                      :use-utc="true" :disabled-dates="datePickerState.disabledDates"/>
         </div>
         <div class="col-auto">
           <div v-b-tooltip.hover="generateMinPointsTooltip">
@@ -58,6 +59,14 @@
   };
   Validator.localize(dictionary);
 
+  const disabledDates = date => date.getTime() > Date.now();
+
+  const datePickerState = {
+    disabledDates: {
+      customPredictor: disabledDates,
+    },
+  };
+
   export default {
     name: 'AddSkillEvent',
     components: {
@@ -83,6 +92,7 @@
         currentSelectedUser: null,
         projectTotalPoints: 0,
         pkiAuthenticated: false,
+        datePickerState,
       };
     },
     mounted() {
