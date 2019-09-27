@@ -37,24 +37,6 @@ class SecurityConfiguration {
     AuthMode authMode
 
     @Component
-    static class PortalWebSecurityHelper {
-        HttpSecurity configureHttpSecurity(HttpSecurity http) {
-            http
-                    .csrf().disable()
-                    .authorizeRequests()
-                    .antMatchers("/", "/favicon.ico", "/icons/**", "/static/**", "/skills.ico", "/skills.jpeg", "/error", "/oauth/**", "/app/oAuthProviders", "/login*", "/bootstrap/**", "/performLogin", "/createAccount", "/createRootAccount", '/grantFirstRoot', '/userExists/**', "/app/userInfo", "/app/users/validExistingDashboardUserId/*", "/app/oAuthProviders", "index.html", "/public/**").permitAll()
-                    .antMatchers('/admin/**').hasRole('PROJECT_ADMIN')
-                    .antMatchers('/supervisor/**').hasAnyAuthority(RoleName.ROLE_SUPERVISOR.name(), RoleName.ROLE_SUPER_DUPER_USER.name())
-                    .antMatchers('/root/isRoot').hasAnyAuthority(RoleName.values().collect {it.name()}.toArray(new String[0]))
-                    .antMatchers('/root/**').hasRole('SUPER_DUPER_USER')
-                    .anyRequest().authenticated()
-            http.headers().frameOptions().disable()
-
-            return http
-        }
-    }
-
-    @Component
     @Configuration
     @Order(99)
     static class CorsSecurityConfiguration extends WebSecurityConfigurerAdapter {
@@ -109,22 +91,6 @@ class SecurityConfiguration {
     @Bean
     PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder()
-    }
-
-    static class PkiAuth implements Condition {
-        @Override
-        boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
-            AuthMode authMode = AuthMode.getFromContext(context)
-            return authMode == AuthMode.PKI
-        }
-    }
-
-    static class FormAuth implements Condition {
-        @Override
-        boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
-            AuthMode authMode = AuthMode.getFromContext(context)
-            return authMode == AuthMode.FORM
-        }
     }
 
     @Bean

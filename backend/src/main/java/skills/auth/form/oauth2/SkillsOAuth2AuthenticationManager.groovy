@@ -12,12 +12,13 @@ import org.springframework.security.oauth2.provider.token.DefaultTokenServices
 import org.springframework.stereotype.Component
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
+import skills.auth.SecurityMode
 import skills.auth.UserInfo
 
 import javax.servlet.http.HttpServletRequest
 
 @Component('skillsOAuth2AuthManager')
-@Conditional(skills.auth.SecurityConfiguration.FormAuth)
+@Conditional(SecurityMode.FormAuth)
 @Slf4j
 class SkillsOAuth2AuthenticationManager extends OAuth2AuthenticationManager {
 

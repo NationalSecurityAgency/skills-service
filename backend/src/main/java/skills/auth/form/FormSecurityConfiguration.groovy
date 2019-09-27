@@ -23,21 +23,23 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationFa
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler
 import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler
 import org.springframework.stereotype.Component
+import skills.auth.PortalWebSecurityHelper
 import skills.auth.SecurityConfiguration
+import skills.auth.SecurityMode
 import skills.auth.form.oauth2.OAuth2UserConverterService
 
 import javax.servlet.ServletException
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
-@Conditional(SecurityConfiguration.FormAuth)
+@Conditional(SecurityMode.FormAuth)
 @Component
 @Configuration
 @Slf4j
 class FormSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Autowired
-    private SecurityConfiguration.PortalWebSecurityHelper portalWebSecurityHelper
+    private PortalWebSecurityHelper portalWebSecurityHelper
 
     @Autowired
     private RestAccessDeniedHandler restAccessDeniedHandler
