@@ -376,6 +376,67 @@ class ClientDisplayGlobalBadgesSpec extends DefaultIntSpec {
         summary.badges.enabled
     }
 
+    def "badges summaries are returned sorted by displayOrder"() {
+        String userId = "user1"
+
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> proj1_skills = SkillsFactory.createSkills(5, 1, 1)
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(proj1_skills)
+
+        List<String> badgeIds = (1..3).collect({ "${globalBadgeId}${it}".toString()})
+        badgeIds.each {
+            Map badge = [badgeId: it, name: it, description: "This is ${it}".toString(), iconClass: "fa fa-${it}".toString(),]
+            supervisorSkillsService.createGlobalBadge(badge)
+        }
+
+        supervisorSkillsService.moveGlobalBadgeDown([badgeId: badgeIds[0]])
+        supervisorSkillsService.moveGlobalBadgeDown([badgeId: badgeIds[0]])
+        supervisorSkillsService.moveGlobalBadgeUp([badgeId: badgeIds[2]])
+
+        supervisorSkillsService.assignSkillToGlobalBadge([projectId: proj1.projectId, badgeId: badgeIds.get(0), skillId: proj1_skills.get(0).skillId])
+        supervisorSkillsService.assignSkillToGlobalBadge([projectId: proj1.projectId, badgeId: badgeIds.get(0), skillId: proj1_skills.get(1).skillId])
+        skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_skills.get(0).skillId], userId, new Date())
+
+        supervisorSkillsService.assignProjectLevelToGlobalBadge(projectId: proj1.projectId, badgeId: badgeIds.get(1), level: "3")
+
+        supervisorSkillsService.assignSkillToGlobalBadge([projectId: proj1.projectId, badgeId: badgeIds.get(2), skillId: proj1_skills.get(0).skillId])
+        supervisorSkillsService.assignSkillToGlobalBadge([projectId: proj1.projectId, badgeId: badgeIds.get(2), skillId: proj1_skills.get(1).skillId])
+        supervisorSkillsService.assignSkillToGlobalBadge([projectId: proj1.projectId, badgeId: badgeIds.get(2), skillId: proj1_skills.get(2).skillId])
+        supervisorSkillsService.assignSkillToGlobalBadge([projectId: proj1.projectId, badgeId: badgeIds.get(2), skillId: proj1_skills.get(3).skillId])
+        supervisorSkillsService.assignSkillToGlobalBadge([projectId: proj1.projectId, badgeId: badgeIds.get(2), skillId: proj1_skills.get(4).skillId])
+
+        when:
+        def summaries = skillsService.getBadgesSummary(userId, proj1.projectId)
+        then:
+        summaries.size() == 3
+        summaries.get(2).badge == badgeIds[0]
+        summaries.get(2).badgeId == badgeIds[0]
+        summaries.get(2).iconClass == "fa fa-${badgeIds[0]}"
+        summaries.get(2).numSkillsAchieved == 1
+        summaries.get(2).numTotalSkills == 2
+
+        summaries.get(1).badge == badgeIds[1]
+        summaries.get(1).badgeId == badgeIds[1]
+        summaries.get(1).iconClass == "fa fa-${badgeIds[1]}"
+        summaries.get(1).numSkillsAchieved == 0
+        summaries.get(1).numTotalSkills == 1
+
+        summaries.get(0).badge == badgeIds[2]
+        summaries.get(0).badgeId == badgeIds[2]
+        summaries.get(0).iconClass == "fa fa-${badgeIds[2]}"
+        summaries.get(0).numSkillsAchieved == 1
+        summaries.get(0).numTotalSkills == 5
+
+        cleanup:
+        badgeIds.each {
+            deleteGlobalBadgeIfExists(it)
+        }
+    }
+
     private deleteGlobalBadgeIfExists(String badgeId) {
         try {
             if (supervisorSkillsService?.getGlobalBadge(badgeId)) {

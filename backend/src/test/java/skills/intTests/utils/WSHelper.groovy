@@ -96,6 +96,9 @@ class WSHelper {
         return multipartPost(url, params)
     }
 
+    def supervisorPatch(String endpoint, def params, boolean throwExceptionOnFailure = true, MediaType mediaType = MediaType.APPLICATION_JSON) {
+        patch(endpoint, "supervisor", params, HttpStatus.OK, throwExceptionOnFailure, mediaType)
+    }
 
     def adminPatch(String endpoint, def params, boolean throwExceptionOnFailure = true, MediaType mediaType = MediaType.APPLICATION_JSON) {
         patch(endpoint, "admin", params, HttpStatus.OK, throwExceptionOnFailure, mediaType)

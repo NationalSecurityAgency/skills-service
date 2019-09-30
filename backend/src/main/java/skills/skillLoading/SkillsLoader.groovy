@@ -190,7 +190,7 @@ class SkillsLoader {
         if ( version >= 0 ) {
             badgeDefs = badgeDefs.findAll { it.version <= version }
         }
-        List<SkillBadgeSummary> badges = badgeDefs.sort({ it.skillId }).collect { SkillDefWithExtra badgeDefinition ->
+        List<SkillBadgeSummary> badges = badgeDefs.sort({ it.displayOrder }).collect { SkillDefWithExtra badgeDefinition ->
             loadBadgeSummary(projDef, userId, badgeDefinition, version)
         }
         return badges
@@ -202,7 +202,7 @@ class SkillsLoader {
         if ( version >= 0 ) {
             badgeDefs = badgeDefs.findAll { it.version <= version }
         }
-        List<SkillGlobalBadgeSummary> globalBadges = badgeDefs.sort({ it.skillId }).collect { SkillDefWithExtra badgeDefinition ->
+        List<SkillGlobalBadgeSummary> globalBadges = badgeDefs.sort({ it.displayOrder }).collect { SkillDefWithExtra badgeDefinition ->
             loadGlobalBadgeSummary(userId, badgeDefinition, version, true)
         }
         globalBadges = globalBadges.findAll { it.projectLevelsAndSkillsSummaries.find { it.projectId == projectId } }

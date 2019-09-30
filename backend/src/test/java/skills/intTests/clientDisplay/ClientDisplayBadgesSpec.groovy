@@ -414,4 +414,57 @@ class ClientDisplayBadgesSpec extends DefaultIntSpec {
         then:
         !summary.badges.enabled
     }
+
+    def "badges summaries are returned sorted by displayOrder"() {
+        String userId = "user1"
+
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> proj1_skills = SkillsFactory.createSkills(5, 1, 1)
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(proj1_skills)
+
+        List<String> badgeIds = (1..3).collect({ "badge${it}".toString()})
+        badgeIds.each {
+            skillsService.addBadge([projectId: proj1.projectId, badgeId: it, name: it, description: "This is ${it}".toString(), iconClass: "fa fa-${it}".toString()])
+        }
+
+        skillsService.moveBadgeDown([projectId: proj1.projectId, badgeId: badgeIds[0]])
+        skillsService.moveBadgeDown([projectId: proj1.projectId, badgeId: badgeIds[0]])
+        skillsService.moveBadgeUp([projectId: proj1.projectId, badgeId: badgeIds[2]])
+
+        skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badgeIds.get(0), skillId: proj1_skills.get(0).skillId])
+        skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badgeIds.get(0), skillId: proj1_skills.get(1).skillId])
+        skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_skills.get(0).skillId], userId, new Date())
+
+        skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badgeIds.get(2), skillId: proj1_skills.get(0).skillId])
+        skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badgeIds.get(2), skillId: proj1_skills.get(1).skillId])
+        skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badgeIds.get(2), skillId: proj1_skills.get(2).skillId])
+        skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badgeIds.get(2), skillId: proj1_skills.get(3).skillId])
+        skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badgeIds.get(2), skillId: proj1_skills.get(4).skillId])
+
+        when:
+        def summaries = skillsService.getBadgesSummary(userId, proj1.projectId)
+        then:
+        summaries.size() == 3
+        summaries.get(2).badge == "badge1"
+        summaries.get(2).badgeId == "badge1"
+        summaries.get(2).iconClass == "fa fa-badge1"
+        summaries.get(2).numSkillsAchieved == 1
+        summaries.get(2).numTotalSkills == 2
+
+        summaries.get(1).badge == "badge2"
+        summaries.get(1).badgeId == "badge2"
+        summaries.get(1).iconClass == "fa fa-badge2"
+        summaries.get(1).numSkillsAchieved == 0
+        summaries.get(1).numTotalSkills == 0
+
+        summaries.get(0).badge == "badge3"
+        summaries.get(0).badgeId == "badge3"
+        summaries.get(0).iconClass == "fa fa-badge3"
+        summaries.get(0).numSkillsAchieved == 1
+        summaries.get(0).numTotalSkills == 5
+    }
 }
