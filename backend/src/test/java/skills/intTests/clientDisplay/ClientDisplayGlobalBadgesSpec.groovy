@@ -120,6 +120,8 @@ class ClientDisplayGlobalBadgesSpec extends DefaultIntSpec {
         supervisorSkillsService.assignSkillToGlobalBadge([projectId: proj1.projectId, badgeId: badgeIds.get(0), skillId: proj1_skills.get(1).skillId])
         skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_skills.get(0).skillId], userId, new Date())
 
+        supervisorSkillsService.assignProjectLevelToGlobalBadge(projectId: proj1.projectId, badgeId: badgeIds.get(1), level: "3")
+
         supervisorSkillsService.assignSkillToGlobalBadge([projectId: proj1.projectId, badgeId: badgeIds.get(2), skillId: proj1_skills.get(0).skillId])
         supervisorSkillsService.assignSkillToGlobalBadge([projectId: proj1.projectId, badgeId: badgeIds.get(2), skillId: proj1_skills.get(1).skillId])
         supervisorSkillsService.assignSkillToGlobalBadge([projectId: proj1.projectId, badgeId: badgeIds.get(2), skillId: proj1_skills.get(2).skillId])
@@ -140,7 +142,7 @@ class ClientDisplayGlobalBadgesSpec extends DefaultIntSpec {
         summaries.get(1).badgeId == badgeIds[1]
         summaries.get(1).iconClass == "fa fa-${badgeIds[1]}"
         summaries.get(1).numSkillsAchieved == 0
-        summaries.get(1).numTotalSkills == 0
+        summaries.get(1).numTotalSkills == 1
 
         summaries.get(2).badge == badgeIds[2]
         summaries.get(2).badgeId == badgeIds[2]
