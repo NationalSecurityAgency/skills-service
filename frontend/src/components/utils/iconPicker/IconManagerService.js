@@ -1,6 +1,6 @@
-import CustomIconService from '@/components/icons/CustomIconService';
-
 import axios from 'axios';
+
+import CustomIconService from '@/components/icons/CustomIconService';
 
 const createCustomIconStyleElementIfNotExist = () => {
   const head = document.getElementsByTagName('head')[0];
