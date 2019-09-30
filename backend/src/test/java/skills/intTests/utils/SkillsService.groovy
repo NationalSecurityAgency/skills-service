@@ -78,6 +78,26 @@ class SkillsService {
     }
 
     @Profile
+    def moveBadgeUp(Map props){
+        wsHelper.adminPatch(getBadgeUrl(props.projectId, props.badgeId), '{"action": "DisplayOrderUp"}')
+    }
+
+    @Profile
+    def moveBadgeDown(Map props){
+        wsHelper.adminPatch(getBadgeUrl(props.projectId, props.badgeId), '{"action": "DisplayOrderDown"}')
+    }
+
+    @Profile
+    def moveGlobalBadgeUp(Map props){
+        wsHelper.supervisorPatch(getGlobalBadgeUrl(props.badgeId), '{"action": "DisplayOrderUp"}')
+    }
+
+    @Profile
+    def moveGlobalBadgeDown(Map props){
+        wsHelper.supervisorPatch(getGlobalBadgeUrl(props.badgeId), '{"action": "DisplayOrderDown"}')
+    }
+
+    @Profile
     def updateProject(Map props, String oldProjectId = null) {
         wsHelper.adminPost(getProjectUrl( oldProjectId ?: props.projectId), props)
     }
