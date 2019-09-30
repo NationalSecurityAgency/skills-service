@@ -3,7 +3,7 @@
     <multiselect v-model="userQuery" :placeholder="placeholder" tag-placeholder="Enter to select"
                  :options="suggestions" :multiple="allowMultipleSelections" :taggable="canEnterNewUser" @tag="addTag"
                  :hide-selected="true" track-by="userId" label="label"
-                 @search-change="suggestUsers" :loading="isFetching" :internal-search="false"
+                 @search-change="suggestUsers" @open="suggestUsers" :loading="isFetching" :internal-search="false"
                  :clear-on-select="true">
     </multiselect>
 
@@ -133,12 +133,11 @@
     methods: {
       suggestUsers: debounce(function debouncedSuggestUsers(query) {
         this.isFetching = true;
-        if (!query) {
-          this.suggestions = [];
-          this.isFetching = false;
-          return;
+        let q = query;
+        if (!q) {
+          q = '';
         }
-        const url = `${this.suggestUrl}/${query}`;
+        const url = `${this.suggestUrl}/${q}`;
         axios.get(url)
           .then((response) => {
             this.suggestions = response.data.filter(suggestedUser => !this.excludedSuggestions.includes(suggestedUser.userId));

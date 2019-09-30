@@ -1,6 +1,7 @@
 package skills.intTests
 
 import skills.intTests.utils.DefaultIntSpec
+import skills.intTests.utils.SkillsFactory
 
 class SuggestUsersSpecs extends DefaultIntSpec {
 
@@ -11,7 +12,8 @@ class SuggestUsersSpecs extends DefaultIntSpec {
         createService("ThirdSuggestUsersSpecsUser","p@ssw0rd", "SuggestUsersSpecsJames", "SuggestUsersSpecsHan")
 
         expect:
-        skillsService.suggestDashboardUsers(query).collect({ it.userId }).sort() == userIds
+        //one of the other tests, when run in a suite, results in extra users not added by this test, thus the change to containsAll
+        skillsService.suggestDashboardUsers(query).collect({ it.userId }).sort().containsAll(userIds)
         where:
         query  | userIds
         // by user id
@@ -24,5 +26,28 @@ class SuggestUsersSpecs extends DefaultIntSpec {
         "SuggestUsersSpecsJane" | ["secondsuggestusersspecsuser"]
         // by nickname
         "SuggestUsersSpecsBob SuggestUsersSpecsSmith" | ["firstsuggestusersspecsuser"]
+        "" | ["firstsuggestusersspecsuser", "secondsuggestusersspecsuser", "thirdsuggestusersspecsuser"]
+    }
+
+    def "suggest client users for project"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(10, )
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        skills.each{
+            skillsService.addSkill([projectId:proj.projectId, skillId: it.skillId], "user-${it.skillId}", new Date())
+        }
+
+        expect:
+        skillsService.suggestClientUsersForProject(proj.projectId, query).collect({ it. userId }).sort() == userIds
+
+        where:
+        query | userIds
+        "skill5" | ["user-skill5"]
+        "" | ["user-skill1", "user-skill2", "user-skill3", "user-skill4", "user-skill5"]
     }
 }

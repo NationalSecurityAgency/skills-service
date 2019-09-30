@@ -115,6 +115,19 @@ class UserInfoController {
         return results.take(5)
     }
 
+    @RequestMapping(value = "/users/suggestDashboardUsers/", method = RequestMethod.GET, produces = "application/json")
+    List<UserInfoRes> suggestAllExistingDashboardUsers(@RequestParam(required = false) boolean includeSelf) {
+        List<User> matchingUsers = userRepo.getUserByUserIdOrPropWildcard("", new PageRequest(0, 6))
+        List<UserInfoRes> results = matchingUsers.collect {
+            accessSettingsStorageService.loadUserInfo(it.userId)
+        }
+        if (!includeSelf) {
+            String currentUserId = userInfoService.currentUser.username
+            results = results.findAll { it.userId != currentUserId }
+        }
+        return results.take(5)
+    }
+
     @RequestMapping(value = "/users/validExistingDashboardUserId/{userId}", method = RequestMethod.GET, produces = "application/json")
     Boolean isValidExistingDashboardUserId(@PathVariable("userId") String userId) {
         return userRepo.findByUserIdIgnoreCase(userId) != null
@@ -125,9 +138,19 @@ class UserInfoController {
         return userAdminService.suggestUsersForProject(projectId, query, new PageRequest(0, 5)).collect { new UserInfoRes(userId: it) }
     }
 
+    @RequestMapping(value = "/users/projects/{projectId}/suggestClientUsers/", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    List<UserInfoRes> suggestAllExistingClientUsersForProject(@PathVariable("projectId") String projectId) {
+        return userAdminService.suggestUsersForProject(projectId, "", new PageRequest(0, 5)).collect { new UserInfoRes(userId: it) }
+    }
+
     @RequestMapping(value = "/users/suggestClientUsers/{query}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     List<UserInfoRes> suggestExistingClientUsers(@PathVariable("query") String query) {
         return userAdminService.suggestUsers(query, new PageRequest(0, 5)).collect { new UserInfoRes(userId: it) }
+    }
+
+    @RequestMapping(value = "/users/suggestClientUsers/", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    List<UserInfoRes> suggestAllExistingClientUsers() {
+        return userAdminService.suggestUsers("", new PageRequest(0, 5)).collect { new UserInfoRes(userId: it) }
     }
 
     @RequestMapping(value = "/users/projects/{projectId}/validExistingClientUserId/{userId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
