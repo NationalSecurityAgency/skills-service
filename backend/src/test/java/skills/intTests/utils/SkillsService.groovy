@@ -329,6 +329,16 @@ class SkillsService {
         wsHelper.appGet(url)
     }
 
+    def suggestClientUsersForProject(String projectId, String query){
+        String url = "/users/projects/${projectId}/suggestClientUsers/${query}".toString()
+        wsHelper.appGet(url)
+    }
+
+    def suggestClientUsers(String query){
+        String url = "/users/suggestClientUsers/${query}".toString()
+        wsHelper.appGet(url)
+    }
+
     def getSkillSummary(String userId, String projId, String subjId=null, int version = -1) {
         String url = "/projects/${projId}/${subjId ? "subjects/${subjId}/" : ''}summary?userId=${userId}"
         if (version >= 0) {
