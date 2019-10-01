@@ -52,13 +52,15 @@ class LevelUtils {
         levelDefs.eachWithIndex { LevelDef entry, int i ->
             if (entry.pointsFrom != null) {
                 double scaled = entry.pointsFrom * scaler
-                entry.percent = (int) ((scaled / totalPoints) * 100d)
-                if (entry.percent == 0) {
+                double percentage = ((scaled / totalPoints) * 100d)
+                if (percentage < 1.0) {
                     //this can happen if someone adds a skill with a very large range of points after
                     //a conversion to points happens. The first few level points could be such a small percentage
                     //of the total that they would be effectively zero. Lets prevent that and use some sort of sensible default
                     //in those cases
                     entry.percent += 10 + (lastEntry?.percent ? lastEntry.percent : 0)
+                } else {
+                    entry.percent = Math.round(percentage)
                 }
             } else {
                 //this could happen if there is an empty subject with no skills
