@@ -7,9 +7,9 @@ class SuggestUsersSpecs extends DefaultIntSpec {
 
     def "suggest on dashboard users"() {
         // make unique enough lookups to avoid clashing with users created by other tests
-        createService("FirstSuggestUsersSpecsUser", "p@ssw0rd", "SuggestUsersSpecsBob", "SuggestUsersSpecsSmith")
-        createService("SecondSuggestUsersSpecsUser","p@ssw0rd", "SuggestUsersSpecsJane", "SuggestUsersSpecsDoe")
-        createService("ThirdSuggestUsersSpecsUser","p@ssw0rd", "SuggestUsersSpecsJames", "SuggestUsersSpecsHan")
+        createService("aaFirstSuggestUsersSpecsUser", "p@ssw0rd", "SuggestUsersSpecsBob", "SuggestUsersSpecsSmith")
+        createService("bbSecondSuggestUsersSpecsUser","p@ssw0rd", "SuggestUsersSpecsJane", "SuggestUsersSpecsDoe")
+        createService("ccThirdSuggestUsersSpecsUser","p@ssw0rd", "SuggestUsersSpecsJames", "SuggestUsersSpecsHan")
 
         expect:
         //one of the other tests, when run in a suite, results in extra users not added by this test, thus the change to containsAll
@@ -17,16 +17,16 @@ class SuggestUsersSpecs extends DefaultIntSpec {
         where:
         query  | userIds
         // by user id
-        "ndSuggestUsersSpecs"   | ["secondsuggestusersspecsuser"]
-        "NDSuggestUsersSpecs"   | ["secondsuggestusersspecsuser"]
-        "SuggestUsersSpecsuSer" | ["firstsuggestusersspecsuser", "secondsuggestusersspecsuser", "thirdsuggestusersspecsuser"]
+        "ndSuggestUsersSpecs"   | ["bbsecondsuggestusersspecsuser"]
+        "NDSuggestUsersSpecs"   | ["bbsecondsuggestusersspecsuser"]
+        "SuggestUsersSpecsuSer" | ["aafirstsuggestusersspecsuser", "bbsecondsuggestusersspecsuser", "ccthirdsuggestusersspecsuser"]
         // by last name
-        "SuggestUsersSpecsSm" | ["firstsuggestusersspecsuser"]
+        "SuggestUsersSpecsSm" | ["aafirstsuggestusersspecsuser"]
         // by first name
-        "SuggestUsersSpecsJane" | ["secondsuggestusersspecsuser"]
+        "SuggestUsersSpecsJane" | ["bbsecondsuggestusersspecsuser"]
         // by nickname
-        "SuggestUsersSpecsBob SuggestUsersSpecsSmith" | ["firstsuggestusersspecsuser"]
-        "" | ["firstsuggestusersspecsuser", "secondsuggestusersspecsuser", "thirdsuggestusersspecsuser"]
+        "SuggestUsersSpecsBob SuggestUsersSpecsSmith" | ["aafirstsuggestusersspecsuser"]
+        "" | ["aafirstsuggestusersspecsuser", "bbsecondsuggestusersspecsuser", "ccthirdsuggestusersspecsuser"]
     }
 
     def "suggest client users for project"() {

@@ -125,6 +125,7 @@ class UserInfoController {
             String currentUserId = userInfoService.currentUser.username
             results = results.findAll { it.userId != currentUserId }
         }
+        results?.sort(){it.userId}
         return results.take(5)
     }
 
