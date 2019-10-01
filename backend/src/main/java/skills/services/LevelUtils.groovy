@@ -58,7 +58,7 @@ class LevelUtils {
                     //a conversion to points happens. The first few level points could be such a small percentage
                     //of the total that they would be effectively zero. Lets prevent that and use some sort of sensible default
                     //in those cases
-                    entry.percent += 10 + (lastEntry?.percent ? lastEntry.percent : 0)
+                    entry.percent = 10 + (lastEntry?.percent ? lastEntry.percent : 0)
                 } else {
                     entry.percent = Math.round(percentage)
                 }
