@@ -26,10 +26,10 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
     Long countByUserIdAndProjectIdAndSkillId(String userId, String projectId, String skillId)
     Long countByUserIdAndProjectIdAndSkillIdAndPerformedOnGreaterThanAndPerformedOnLessThan(String userId, String projectId, String skillId, Date startDate, Date endDate)
 
-    @Query("SELECT DISTINCT(p.userId) from UserPerformedSkill p where p.projectId=?1 and lower(p.userId) LIKE %?2%" )
+    @Query("SELECT DISTINCT(p.userId) from UserPerformedSkill p where p.projectId=?1 and lower(p.userId) LIKE %?2% order by p.userId asc" )
     List<String> findDistinctUserIdsForProject(String projectId, String userIdQuery, Pageable pageable)
 
-    @Query("SELECT DISTINCT(p.userId) from UserPerformedSkill p where lower(p.userId) LIKE %?1%" )
+    @Query("SELECT DISTINCT(p.userId) from UserPerformedSkill p where lower(p.userId) LIKE %?1% order by p.userId asc" )
     List<String> findDistinctUserIds(String userIdQuery, Pageable pageable)
 
     Boolean existsByUserId(String userId)

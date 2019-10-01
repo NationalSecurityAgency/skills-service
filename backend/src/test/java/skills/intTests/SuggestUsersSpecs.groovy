@@ -48,6 +48,6 @@ class SuggestUsersSpecs extends DefaultIntSpec {
         where:
         query | userIds
         "skill5" | ["user-skill5"]
-        "" | ["user-skill1", "user-skill2", "user-skill3", "user-skill4", "user-skill5"]
+        "" | ["user-skill1", "user-skill10", "user-skill2", "user-skill3", "user-skill4"]
     }
 }
