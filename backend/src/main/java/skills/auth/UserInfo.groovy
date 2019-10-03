@@ -6,6 +6,8 @@ import org.springframework.security.core.userdetails.UserDetails
 
 @Canonical
 class UserInfo implements UserDetails {
+    private static final long serialVersionUID = 1L
+
     String firstName
     String lastName
     String nickname
