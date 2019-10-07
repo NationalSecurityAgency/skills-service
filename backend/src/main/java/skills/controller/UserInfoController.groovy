@@ -170,7 +170,7 @@ class UserInfoController {
     }
 
     @RequestMapping(value = "/users/suggestPkiUsers/", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    List<UserInfoRes> suggestAllExistingPkiUsers(@PathVariable("query") String query) {
+    List<UserInfoRes> suggestAllExistingPkiUsers() {
         return pkiUserLookup?.suggestUsers("a")?.take(5).collect { new UserInfoRes(it) }
     }
 
