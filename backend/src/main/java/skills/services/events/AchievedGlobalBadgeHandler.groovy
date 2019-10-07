@@ -41,17 +41,17 @@ class AchievedGlobalBadgeHandler {
     void checkForGlobalBadges(SkillEventResult res, String userId, String projectId, SkillDefMin currentSkillDef) {
         List<SkillDefMin> globalBadges = skillEventsSupportRepo.findGlobalBadgesForProjectIdAndSkillId(projectId, currentSkillDef.skillId)
         if (globalBadges) {
-            List<TinyProjectDef> projectsForUser = skillEventsSupportRepo.getTinyProjectDefForUserId(userId)
-            Map<String, Integer> projectLevels = [:]
+
+            List<UserAchievement> achievements = achievedLevelRepo.findAllLevelsByUserId(userId)
+            Map<String, Integer> userProjectLevels = (Map<String, Integer>)achievements?.groupBy { it.projectId }
+                    ?.collectEntries {String key, List<UserAchievement> val -> [key,val.collect{it.level}.max()]}
+
             badgeCheckLoop: for (SkillDefMin globalBadge : globalBadges) {
                 // first check required project levels
                 List<GlobalBadgeLevelRes> requiredLevels = globalBadgesService.getGlobalBadgeLevels(globalBadge.skillId)
                 for (GlobalBadgeLevelRes requiredLevel : requiredLevels) {
-                    if (projectsForUser.find { it.projectId == requiredLevel.projectId }) {
-                        if (!projectLevels.containsKey(requiredLevel.projectId)) {
-                            projectLevels[requiredLevel.projectId] = skillsLoader.getUserLevel(requiredLevel.projectId, userId)
-                        }
-                        Integer achievedProjectLevel = projectLevels.get(requiredLevel.projectId)
+                    if (userProjectLevels.containsKey(requiredLevel.projectId)) {
+                        Integer achievedProjectLevel = userProjectLevels.get(requiredLevel.projectId)
                         if (!(achievedProjectLevel >= requiredLevel.level)) {
                             break badgeCheckLoop
                         }

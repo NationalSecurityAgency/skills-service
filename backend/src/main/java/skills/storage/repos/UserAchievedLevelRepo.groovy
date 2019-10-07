@@ -16,6 +16,12 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
 
     List<UserAchievement> findAllByUserIdAndProjectIdAndSkillId(String userId, @Nullable String projectId, @Nullable String skillId)
 
+    @Query('''select ua from UserAchievement ua where ua.userId = ?1 and ua.projectId in ?2''')
+    List<UserAchievement> findAllByUserAndProjectIds(String userId, Collection<String> projectId)
+
+    @Query('''select ua from UserAchievement ua where ua.userId= ?1 and ua.level is not null''')
+    List<UserAchievement> findAllLevelsByUserId(String userId)
+
     List<UserAchievement> findAllByUserIdAndSkillId(String userId, @Nullable String skillId)
 
     Integer countByProjectIdAndSkillIdAndLevel(String projectId, @Nullable String skillId, int level)
