@@ -22,7 +22,13 @@ class UserInfoService {
         def principal = SecurityContextHolder.getContext()?.authentication?.principal
         if (principal) {
             if (principal instanceof UserInfo) {
+                log.trace("User principal {}", principal)
                 currentUser = principal
+
+                if (authMode == AuthMode.PKI) {
+                    currentUser = pkiUserLookup.lookupUserDn(principal.userDn)
+                    log.trace("Pki user {} for [{}] dn", currentUser, principal)
+                }
             } else {
                 log.info("Unexpected/Unauthenticated princial [${principal}]")
             }
