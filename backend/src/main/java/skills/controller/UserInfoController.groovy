@@ -103,21 +103,19 @@ class UserInfoController {
 
     @RequestMapping(value = "/users/suggestDashboardUsers/{query}", method = RequestMethod.GET, produces = "application/json")
     List<UserInfoRes> suggestExistingDashboardUsers(@PathVariable("query") String query,
-                                                    @RequestParam(required = false) boolean includeSelf) {
-        List<User> matchingUsers = userRepo.getUserByUserIdOrPropWildcard(query.toLowerCase(), new PageRequest(0, 6))
-        List<UserInfoRes> results = matchingUsers.collect {
-            accessSettingsStorageService.loadUserInfo(it.userId)
-        }
-        if (!includeSelf) {
-            String currentUserId = userInfoService.currentUser.username
-            results = results.findAll { it.userId != currentUserId }
-        }
-        return results.take(5)
+                                                    @RequestParam(required = false, defaultValue = "true") boolean includeSelf) {
+        return suggestDashboardUsersInternal(query, includeSelf)
     }
 
     @RequestMapping(value = "/users/suggestDashboardUsers/", method = RequestMethod.GET, produces = "application/json")
-    List<UserInfoRes> suggestAllExistingDashboardUsers(@RequestParam(required = false) boolean includeSelf) {
-        List<User> matchingUsers = userRepo.getUserByUserIdOrPropWildcard("", new PageRequest(0, 6))
+    List<UserInfoRes> suggestAllExistingDashboardUsers(@RequestParam(required = false, defaultValue = "true") boolean includeSelf) {
+        return suggestDashboardUsersInternal("", includeSelf)
+    }
+
+    private List<UserInfoRes> suggestDashboardUsersInternal(String query, boolean includeSelf) {
+        query = query ? query.toLowerCase() : ""
+
+        List<User> matchingUsers = userRepo.getUserByUserIdOrPropWildcard(query, new PageRequest(0, 6))
         List<UserInfoRes> results = matchingUsers.collect {
             accessSettingsStorageService.loadUserInfo(it.userId)
         }
