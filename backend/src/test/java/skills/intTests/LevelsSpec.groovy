@@ -77,6 +77,27 @@ class LevelsSpec extends  DefaultIntSpec{
         validateLevels(projectLevelsAfterChange)
     }
 
+    def "change levels from percentage to points and back to percentage"(){
+        when:
+        def projectLevelsBeforeChange = skillsService.getLevels(projId)
+        projectLevelsBeforeChange.sort { it.level}
+
+        skillsService.changeSetting(projId, projectPointsSetting, [projectId: projId, setting: projectPointsSetting, value: "true"])
+        skillsService.changeSetting(projId, projectPointsSetting, [projectId: projId, setting: projectPointsSetting, value: "false"])
+
+
+        def projectLevelsAfterChange = skillsService.getLevels(projId, null)
+        projectLevelsAfterChange.sort {it.level}
+
+        then:
+        projectLevelsAfterChange[0].percent == projectLevelsBeforeChange[0].percent
+        projectLevelsAfterChange[1].percent == projectLevelsBeforeChange[1].percent
+        projectLevelsAfterChange[2].percent == projectLevelsBeforeChange[2].percent
+        projectLevelsAfterChange[3].percent == projectLevelsBeforeChange[3].percent
+        projectLevelsAfterChange[4].percent == projectLevelsBeforeChange[4].percent
+        validateLevels(projectLevelsAfterChange)
+    }
+
     def "change levels from points to percentage"(){
         when:
         def settingResult = skillsService.changeSetting(projId, projectPointsSetting, [projectId: projId, setting: projectPointsSetting, value: "true"])
