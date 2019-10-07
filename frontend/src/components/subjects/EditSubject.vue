@@ -20,7 +20,7 @@
               </div>
             </div>
 
-            <id-input type="text" label="Subject ID" v-model="subjectInternal.subjectId" @input="canAutoGenerateId=false"
+            <id-input type="text" label="Subject ID" v-model="subjectInternal.subjectId" @can-edit="canAutoGenerateId=!$event"
                       additional-validation-rules="uniqueId"/>
 
             <div class="mt-2">
