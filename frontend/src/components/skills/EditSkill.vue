@@ -17,7 +17,7 @@
           </div>
           <div class="col-12 col-lg">
             <id-input type="text" label="Skill ID" additional-validation-rules="uniqueId"
-                      v-model="skillInternal.skillId" @input="canAutoGenerateId=false"/>
+                      v-model="skillInternal.skillId" @can-edit="canEditSkillId=$event"/>
           </div>
           <div class="col-12 col-lg-2 mt-2 mt-lg-0">
             <div class="form-group">

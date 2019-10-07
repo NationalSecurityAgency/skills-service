@@ -47,6 +47,7 @@
     methods: {
       toggle() {
         this.canEdit = !this.canEdit;
+        this.$emit('can-edit', this.canEdit);
       },
       dataChanged() {
         this.$emit('input', this.internalValue);

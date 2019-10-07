@@ -17,7 +17,7 @@
 
           <div class="col-12">
             <id-input type="text" label="Project ID" v-model="internalProject.projectId"
-                      additional-validation-rules="uniqueId"/>
+                      additional-validation-rules="uniqueId" @can-edit="canEditProjectId=$event"/>
           </div>
         </div>
 
@@ -79,6 +79,9 @@
       },
     },
     methods: {
+      handleIdToggle(canEdit) {
+        this.canEditProjectId = canEdit;
+      },
       close() {
         this.show = false;
       },
