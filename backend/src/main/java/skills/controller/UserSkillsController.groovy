@@ -5,6 +5,7 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
 import skills.PublicProps
+import skills.auth.UserInfo
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.SkillEventRequest
 import skills.services.events.SkillEventResult
@@ -258,10 +259,6 @@ class UserSkillsController {
     }
 
     private String getUserId(String userIdParam) {
-        if (userIdParam) {
-            return userIdParam
-        } else {
-            return userInfoService.getCurrentUser().username
-        }
+        return userInfoService.getUserName(userIdParam)
     }
 }

@@ -4,6 +4,7 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.stereotype.Component
 import skills.auth.pki.PkiUserLookup
 
@@ -34,6 +35,24 @@ class UserInfoService {
             }
         }
         return currentUser
+    }
+
+    /**
+     * Abstracts dealing with PKI vs Password/Form modes when user id param is provided
+     */
+    String getUserName(String userIdParam) {
+        if (!userIdParam) {
+            return getCurrentUser().username
+        }
+        if (authMode == AuthMode.PKI) {
+            try {
+                return pkiUserLookup.lookupUserDn(userIdParam).username
+            } catch (UsernameNotFoundException e) {
+                throw new skills.controller.exceptions.SkillException("User [$userIdParam] does not exist")
+            }
+        }
+
+        return userIdParam
     }
 
     /**
