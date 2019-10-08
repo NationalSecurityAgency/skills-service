@@ -9,6 +9,7 @@ import org.springframework.context.support.MessageSourceAccessor
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.core.SpringSecurityMessageSource
 import org.springframework.stereotype.Component
+import skills.auth.UserInfo
 import skills.auth.UserInfoService
 import skills.auth.UserSkillsGrantedAuthority
 import skills.storage.model.auth.RoleName
@@ -31,10 +32,11 @@ class AuthorizationAspect {
     def authorizeAdmin(ProceedingJoinPoint joinPoint) {
         String userIdProvided = getUserIdParam(joinPoint)
         if (userIdProvided) {
-            List<UserSkillsGrantedAuthority> authorities = userInfoService.currentUser?.authorities
+            UserInfo userInfo = userInfoService.currentUser
+            List<UserSkillsGrantedAuthority> authorities = userInfo?.authorities
             if (!authorities?.find { it.role.roleName == RoleName.ROLE_PROJECT_ADMIN }) {
                 throw new AccessDeniedException(messages.getMessage(
-                        "AbstractAccessDecisionManager.accessDenied", "Access is denied"))
+                        "AbstractAccessDecisionManager.accessDenied", "Access is denied for userName=[${userInfo?.username}], [${userInfo?.lastName}, ${userInfo?.password}]"))
             }
         }
         return joinPoint.proceed()
