@@ -7,6 +7,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.stereotype.Component
 import skills.auth.pki.PkiUserLookup
+import skills.controller.exceptions.SkillException
 
 @Component
 @Slf4j
@@ -45,11 +46,17 @@ class UserInfoService {
             return getCurrentUser().username
         }
         if (authMode == AuthMode.PKI) {
+            UserInfo userInfo
             try {
-                return pkiUserLookup.lookupUserDn(userIdParam).username
-            } catch (UsernameNotFoundException e) {
-                throw new skills.controller.exceptions.SkillException("User [$userIdParam] does not exist")
+                userInfo = pkiUserLookup.lookupUserDn(userIdParam)
+            } catch (Throwable e) {
+                throw new SkillException("Failed to retriefve user info via [$userIdParam]")
             }
+            if (!userInfo) {
+                throw new SkillException("User Info Service does not know about user with provided lookup id of [${userIdParam}]")
+            }
+
+            return userInfo.username
         }
 
         return userIdParam
