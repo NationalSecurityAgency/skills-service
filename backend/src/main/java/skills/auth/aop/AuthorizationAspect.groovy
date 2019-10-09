@@ -1,5 +1,6 @@
 package skills.auth.aop
 
+import groovy.util.logging.Slf4j
 import org.aspectj.lang.ProceedingJoinPoint
 import org.aspectj.lang.annotation.Around
 import org.aspectj.lang.annotation.Aspect
@@ -16,6 +17,7 @@ import skills.storage.model.auth.RoleName
 
 @Aspect
 @Component
+@Slf4j
 class AuthorizationAspect {
 
     static final String USER_ID_PARAM = 'userIdParam'
@@ -35,8 +37,9 @@ class AuthorizationAspect {
             UserInfo userInfo = userInfoService.currentUser
             List<UserSkillsGrantedAuthority> authorities = userInfo?.authorities
             if (!authorities?.find { it.role.roleName == RoleName.ROLE_PROJECT_ADMIN }) {
+                log.trace("Access is denied for userName=[{}]", userInfo?.username)
                 throw new AccessDeniedException(messages.getMessage(
-                        "AbstractAccessDecisionManager.accessDenied", "Access is denied for userName=[${userInfo?.username}], [${userInfo?.lastName}, ${userInfo?.password}]"))
+                        "AbstractAccessDecisionManager.accessDenied", "Access is denied"))
             }
         }
         return joinPoint.proceed()
