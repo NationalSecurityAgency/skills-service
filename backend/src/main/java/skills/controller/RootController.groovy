@@ -89,6 +89,21 @@ class RootController {
         }
     }
 
+    @GetMapping('/users/without/role/{roleName}')
+    @ResponseBody
+    List<UserInfoRes> suggestUsersWithoutRole(@PathVariable("roleName") RoleName roleName) {
+        if (authMode == AuthMode.FORM) {
+            return accessSettingsStorageService.getUserRolesWithoutRole(roleName).collect {
+                accessSettingsStorageService.loadUserInfo(it.userId)
+            }.unique()?.take(5)
+        } else {
+            List<String> usersWithRole = accessSettingsStorageService.getUserRolesWithRole(roleName).collect { it.userId.toLowerCase() }
+            return pkiUserLookup?.suggestUsers("a")?.findAll {
+                !usersWithRole.contains(it.username.toLowerCase())
+            }?.unique()?.take(5)?.collect { new UserInfoRes(it) }
+        }
+    }
+
     @GetMapping('/isRoot')
     boolean isRoot(Principal principal) {
         return accessSettingsStorageService.isRoot(principal.name)

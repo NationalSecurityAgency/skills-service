@@ -593,6 +593,10 @@ class SkillsService {
         return wsHelper.rootPut("/addRoot/${userId}")
     }
 
+    def getUsersWithoutRole(String role, String usernameQuery) {
+        return wsHelper.rootGet("/users/without/role/${role}/${usernameQuery}")
+    }
+
     def removeRootRole(String userId) {
         return wsHelper.delete("/deleteRoot/${userId}", 'root', null)
     }
