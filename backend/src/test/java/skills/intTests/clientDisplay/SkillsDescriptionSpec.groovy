@@ -82,6 +82,30 @@ class SkillsDescriptionSpec extends DefaultIntSpec {
         res[2].href == "http://${proj1_subj2_skills[2].skillId}".toString()
     }
 
+    def "descriptions should respect root url settings"(){
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj1 = SkillsFactory.createSubject(1, 1)
+        List<Map> proj1_subj1_skills = SkillsFactory.createSkills(3, 1, 1)
+
+        proj1_subj1_skills.each {
+            it.description = "Desc [${it.skillId}]".toString()
+            it.helpUrl = "/${it.skillId}".toString()
+        }
+
+
+        skillsService.createProject(proj1)
+        skillsService.changeSetting(proj1.projectId, "help.url.root", [projectId: proj1.projectId, setting: 'help.url.root', value:"https://fakeurl.foo"])
+        skillsService.createSubject(proj1_subj1)
+        skillsService.createSkills(proj1_subj1_skills)
+
+        when:
+        def res = skillsService.getSubjectDescriptions(proj1.projectId, proj1_subj1.subjectId).sort { it.skillId }
+        then:
+        res.each {
+            assert it.href.startsWith("https://fakeurl.foo")
+        }
+    }
+
     def "badge has no skills - no descriptions for you!"(){
         def proj1 = SkillsFactory.createProject(1)
         def proj1_subj1 = SkillsFactory.createSubject(1, 1)
