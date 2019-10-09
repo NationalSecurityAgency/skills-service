@@ -102,7 +102,7 @@
           title = 'Time Window N/A';
         } else {
           title = `${this.skillInfo.pointIncrementIntervalHrs} Hour`;
-          if (this.skillInfo.pointIncrementIntervalHrs > 1) {
+          if (this.skillInfo.pointIncrementIntervalHrs === 0 || this.skillInfo.pointIncrementIntervalHrs > 1) {
             title = `${title}s`;
           }
           if (this.skillInfo.pointIncrementIntervalMins > 0) {
