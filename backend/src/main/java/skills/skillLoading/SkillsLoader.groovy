@@ -246,7 +246,7 @@ class SkillsLoader {
                 description: new SkillDescription(
                         skillId: skillDef.skillId,
                         description: skillDef.description,
-                        href: getHelpUrl(helpUrlRootSetting, skillDef)),
+                        href: getHelpUrl(helpUrlRootSetting, skillDef.helpUrl)),
                 dependencyInfo: skillDependencySummary,
                 crossProject: crossProjectId != null
         )
@@ -274,12 +274,14 @@ class SkillsLoader {
     }
 
     private List<SkillDescription> loadDescriptions(String projectId, String subjectId, SkillRelDef.RelationshipType relationshipType, int version) {
+        SettingsResult helpUrlRootSetting = settingsService.getProjectSetting(projectId, PROP_HELP_URL_ROOT)
+
         List<SkillDefWithExtraRepo.SkillDescDBRes> dbRes = skillDefWithExtraRepo.findAllChildSkillsDescriptions(projectId, subjectId, relationshipType, version)
         List<SkillDescription> res = dbRes.collect {
             new SkillDescription(
                     skillId: it.getSkillId(),
                     description: it.getDescription(),
-                    href: it.getHelpUrl()
+                    href: getHelpUrl(helpUrlRootSetting, it.getHelpUrl())
             )
         }
         return res;
@@ -355,7 +357,7 @@ class SkillsLoader {
         String helpUrl = null
         if(subjectDefinition instanceof SkillDefWithExtra) {
             SettingsResult helpUrlRootSetting = settingsService.getProjectSetting(projDef.projectId, PROP_HELP_URL_ROOT)
-            helpUrl = getHelpUrl(helpUrlRootSetting, subjectDefinition)
+            helpUrl = getHelpUrl(helpUrlRootSetting, subjectDefinition.helpUrl)
         }
 
         return new SkillSubjectSummary(
@@ -423,7 +425,7 @@ class SkillsLoader {
         int numChildSkills = skillDefRepo.countChildren(projDef?.projectId, badgeDefinition.skillId, SkillRelDef.RelationshipType.BadgeRequirement)
 
         SettingsResult helpUrlRootSetting = settingsService.getProjectSetting(projDef.projectId, PROP_HELP_URL_ROOT)
-        String helpUrl = getHelpUrl(helpUrlRootSetting, badgeDefinition)
+        String helpUrl = getHelpUrl(helpUrlRootSetting, badgeDefinition.helpUrl)
 
         return new SkillBadgeSummary(
                 badge: badgeDefinition.name,
@@ -507,10 +509,10 @@ class SkillsLoader {
         )
     }
 
-    private String getHelpUrl(SettingsResult helpUrlRootSetting, SkillDefWithExtra skillDef) {
-        String res = skillDef.helpUrl
+    private String getHelpUrl(SettingsResult helpUrlRootSetting, String helpUrl) {
+        String res = helpUrl
 
-        if (skillDef.helpUrl && helpUrlRootSetting && !skillDef.helpUrl.toLowerCase().startsWith("http")) {
+        if (helpUrl && helpUrlRootSetting && !helpUrl.toLowerCase().startsWith("http")) {
             String rootUrl = helpUrlRootSetting.value
             if (rootUrl.endsWith("/") && res.startsWith("/")) {
                 rootUrl = rootUrl.substring(0, rootUrl.length() - 1)
