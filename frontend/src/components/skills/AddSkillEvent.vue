@@ -129,7 +129,7 @@
       },
       addSkill() {
         this.isSaving = true;
-        SkillsService.saveSkillEvent(this.$route.params.projectId, this.$route.params.skillId, this.currentSelectedUser.userId, this.dateAdded.getTime(), this.pkiAuthenticated)
+        SkillsService.saveSkillEvent(this.$route.params.projectId, this.$route.params.skillId, this.currentSelectedUser, this.dateAdded.getTime(), this.pkiAuthenticated)
           .then((data) => {
             this.isSaving = false;
             const historyObj = {

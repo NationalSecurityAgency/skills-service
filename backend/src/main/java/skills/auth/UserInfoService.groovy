@@ -50,7 +50,7 @@ class UserInfoService {
             try {
                 userInfo = pkiUserLookup.lookupUserDn(userIdParam)
             } catch (Throwable e) {
-                throw new SkillException("Failed to retriefve user info via [$userIdParam]")
+                throw new SkillException("Failed to retrieve user info via [$userIdParam]")
             }
             if (!userInfo) {
                 throw new SkillException("User Info Service does not know about user with provided lookup id of [${userIdParam}]")
