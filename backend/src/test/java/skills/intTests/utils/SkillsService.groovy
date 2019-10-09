@@ -43,6 +43,13 @@ class SkillsService {
         }
     }
 
+    def deleteAllUsers() {
+        def users = getRootUsers()
+        def nonrootUsers = getNonRootUsers()
+
+        deleteUserRole()
+    }
+
     /**
      * high level utility to quickly construct rule-set schema
      * @param subjects list of subjects, where each item in the subject is props for a skill
