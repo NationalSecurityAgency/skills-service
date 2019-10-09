@@ -15,7 +15,6 @@ import java.util.TimeZone;
 @EnableWebSecurity
 @SpringBootApplication
 @EnableJpaRepositories(basePackages = {"skills.storage.repos"})
-@ImportResource(locations = {"classpath:app-context-db.xml"})
 public class SpringBootApp {
 
     static final String DISABLE_HOSTNAME_VERIFIER_PROP = "skills.disableHostnameVerifier";

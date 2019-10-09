@@ -128,4 +128,30 @@ class SettingsSpecs extends DefaultIntSpec {
         res.body.explanation == "Use Points For Levels: Project has [0] total points. [100] total points required to switch to points based levels"
     }
 
+    def "validate that configured props under skills.store.settings.* are stored as settings"() {
+        when:
+        def res = skillsService.getPublicSettings("public_groupName1")
+        def res1 = skillsService.getPublicSettings("public_groupName2")
+        def res2 = skillsService.getPublicSettings("public_groupName3")
+        then:
+        res.size() == 2
+        res.find { it.setting == "settingId1" }.settingGroup == "public_groupName1"
+        res.find { it.setting == "settingId1" }.value == "valuea"
+        !res.find { it.setting == "settingId1" }.projectId
+        !res.find { it.setting == "settingId1" }.userId
+
+        res.find { it.setting == "settingId2" }.settingGroup == "public_groupName1"
+        res.find { it.setting == "settingId2" }.value == "valueb"
+        !res.find { it.setting == "settingId2" }.projectId
+        !res.find { it.setting == "settingId2" }.userId
+
+        res1.size() == 1
+        res1.find { it.setting == "settingId3" }.settingGroup == "public_groupName2"
+        res1.find { it.setting == "settingId3" }.value == "valuec"
+        !res1.find { it.setting == "settingId3" }.projectId
+        !res1.find { it.setting == "settingId3" }.userId
+
+        !res2
+    }
+
 }
