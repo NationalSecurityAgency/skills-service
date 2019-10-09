@@ -244,4 +244,19 @@ class RootAccessSpec extends DefaultIntSpec {
         settingsResult2[0].setting == "classification"
         settingsResult2[0].value == "MY_CLASS2"
     }
+
+    def 'get users without role'() {
+        expect:
+        rootSkillsService.getUsersWithoutRole(role, usernameQuery) == result
+
+        where:
+        role                    | usernameQuery | result
+        'ROLE_SUPER_DUPER_USER' | ''            | [[userId:'skills@skills.org', first:'Skills', last:'Test', nickname:'Skills Test', dn:''], [userId:'foo@bar.com', first:'Skills', last:'Test', nickname:'Skills Test', dn:'']]
+        'ROLE_SUPER_DUPER_USER' | 'foo'         | [[userId:'foo@bar.com', first:'Skills', last:'Test', nickname:'Skills Test', dn:'']]
+        'ROLE_SUPER_DUPER_USER' | 'bar'         | [[userId:'foo@bar.com', first:'Skills', last:'Test', nickname:'Skills Test', dn:'']]
+        'ROLE_SUPER_DUPER_USER' | 'bar'         | [[userId:'foo@bar.com', first:'Skills', last:'Test', nickname:'Skills Test', dn:'']]
+        'ROLE_SUPERVISOR'       | ''            | [[userId:'skills@skills.org', first:'Skills', last:'Test', nickname:'Skills Test', dn:''], [userId:'jh@dojo.com', first:'Skills', last:'Test', nickname:'Skills Test', dn:''], [userId:'foo@bar.com', first:'Skills', last:'Test', nickname:'Skills Test', dn:'']]
+        'ROLE_SUPERVISOR'       | 'dojo'        | [[userId:'jh@dojo.com', first:'Skills', last:'Test', nickname:'Skills Test', dn:'']]
+        'ROLE_SUPERVISOR'       | 'foo'         | [[userId:'foo@bar.com', first:'Skills', last:'Test', nickname:'Skills Test', dn:'']]
+    }
 }
