@@ -1,5 +1,6 @@
 package skills.services.settings
 
+import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.context.event.ApplicationStartedEvent
 import org.springframework.context.event.EventListener
@@ -17,6 +18,7 @@ import skills.controller.request.model.SettingsRequest
  *      group=public_groupName1, setting=settingId1, value=valuea
  */
 @Component
+@Slf4j
 class SettingsInitializingBean {
 
     @Autowired
@@ -39,6 +41,7 @@ class SettingsInitializingBean {
                     String prop = setting.key
                     String value = setting.value
                     toSave.add(new GlobalSettingsRequest(settingGroup: groupName, setting: prop, value: value))
+                    log.info("Adding [settingGroup: $groupName, setting: $prop, value: $value]")
                 }
             }
         }
