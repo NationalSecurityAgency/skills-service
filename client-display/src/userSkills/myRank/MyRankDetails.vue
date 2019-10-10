@@ -105,7 +105,7 @@
             'vue-simple-spinner': Spinner,
         },
         props: {
-            subject: String,
+            subjectId: String,
         },
         data() {
             return {
@@ -116,12 +116,13 @@
             };
         },
         mounted() {
+            console.log('wtf');
             this.getData();
         },
         methods: {
             getData() {
                 this.loading = true;
-                const subjectId = this.subject ? this.subject.subjectId : null;
+                const subjectId = this.subjectId ? this.subjectId : null;
                 UserSkillsService.getUserSkillsRankingDistribution(subjectId)
                     .then((response) => {
                         this.rankingDistribution = response;

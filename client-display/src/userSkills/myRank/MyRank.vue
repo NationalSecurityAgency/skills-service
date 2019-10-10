@@ -37,7 +37,7 @@
         this.$router.push({
           name: 'myRankDetails',
           params: {
-            subject: this.displayData.userSkills.subject,
+            subjectId: this.displayData.userSkills.subjectId,
           },
         });
       },
