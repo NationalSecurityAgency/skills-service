@@ -909,6 +909,36 @@ class LevelsSpec extends  DefaultIntSpec{
         levels[levels.size()-2].pointsTo == 1500
     }
 
+    def "can switch to points based once project has 100 points"() {
+        skillsService.deleteProjectIfExist(projId)
+        skillsService.createProject([projectId: projId, name: "Level Project"])
+        skillsService.createSubject([projectId: projId, subjectId: subject, name: "Test Subject 1"])
+        createSkill(skill1, 'Test SKill 1', 100)
+
+        when:
+
+        skillsService.changeSetting(projId, projectPointsSetting, [projectId: projId, setting: projectPointsSetting, value: "true"])
+        def setting = skillsService.getSetting(projId, projectPointsSetting)
+
+        then:
+        setting
+        setting.value == "true"
+    }
+
+    def "cannot switch to points based until project has 100 points"() {
+        skillsService.deleteProjectIfExist(projId)
+        skillsService.createProject([projectId: projId, name: "Level Project"])
+        skillsService.createSubject([projectId: projId, subjectId: subject, name: "Test Subject 1"])
+        createSkill(skill1, 'Test SKill 1', 99)
+
+        when:
+
+        skillsService.changeSetting(projId, projectPointsSetting, [projectId: projId, setting: projectPointsSetting, value: "true"])
+
+        then:
+        thrown(SkillsClientException)
+    }
+
     private List<List<String>> setupProjectWithSkills(List<String> subjects = ['testSubject1', 'testSubject2']) {
         List<List<String>> skillIds = []
         skillsService.createProject([projectId: projId, name: "Test Project"])
