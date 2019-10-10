@@ -34,7 +34,7 @@ class LevelPointsSettingListener implements SettingChangedListener{
     @Override
     ValidationRes isValid(skills.controller.request.model.SettingsRequest setting){
         ProjDef project = projDefRepo.findByProjectId(setting.projectId)
-        boolean isValid = project?.totalPoints > MIN_TOTAL_POINTS_REQUIRED_TO_SWITCH
+        boolean isValid = project?.totalPoints >= MIN_TOTAL_POINTS_REQUIRED_TO_SWITCH
         return new ValidationRes(isValid: isValid, explanation: !isValid ? getErrExplanation(project) : null)
     }
 
