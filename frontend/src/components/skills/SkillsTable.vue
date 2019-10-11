@@ -3,64 +3,63 @@
 
     <sub-page-header title="Skills" action="Skill" @add-action="newSkill" :disabled="addSkillDisabled" :disabled-msg="addSkillsDisabledMsg"/>
 
+    <loading-container v-bind:is-loading="isLoading">
+      <div class="card">
+        <div class="card-body" style="min-height: 400px;">
 
-    <div class="card">
-      <div class="card-body" style="min-height: 400px;">
-        <div v-if="isLoading" class="modal-card-body">
-        </div>
+          <v-client-table class="vue-table-2" :data="skills" :columns="skillsColumns"
+                          :options="options" v-if="this.skills && this.skills.length" v-on:sorted="handleColumnSort">
 
-        <v-client-table class="vue-table-2" :data="skills" :columns="skillsColumns"
-                        :options="options" v-if="this.skills && this.skills.length" v-on:sorted="handleColumnSort">
-
-          <div slot="name" slot-scope="props" class="field has-addons">
-            <div>
-              <h5>{{ props.row.name }}</h5>
-              <div class="text-muted" style="font-size: 0.9rem;">ID: {{ props.row.skillId }}</div>
+            <div slot="name" slot-scope="props" class="field has-addons">
+              <div>
+                <h5>{{ props.row.name }}</h5>
+                <div class="text-muted" style="font-size: 0.9rem;">ID: {{ props.row.skillId }}</div>
+              </div>
             </div>
-          </div>
 
-          <div slot="displayOrder" slot-scope="props">
-            <span>{{props.row.displayOrder}}</span>
+            <div slot="displayOrder" slot-scope="props">
+              <span>{{props.row.displayOrder}}</span>
 
-            <b-button-group size="sm" class="ml-1"
-                            v-b-popover.hover="'Sorting controls are enabled only when Display Order column is sorted in the ascending order.'">
-              <b-button @click="moveDisplayOrderDown(props.row)" variant="outline-info" :class="{disabled:props.row.disabledDownButton}"
-                        :disabled="!sortButtonEnabled || props.row.disabledDownButton">
-                <i class="fas fa-arrow-circle-down"/>
-              </b-button>
-              <b-button @click="moveDisplayOrderUp(props.row)" variant="outline-info" :class="{disabled: props.row.disabledUpButton}"
-                        :disabled="!sortButtonEnabled || props.row.disabledUpButton">
-                <i class="fas fa-arrow-circle-up"/>
-              </b-button>
-            </b-button-group>
-          </div>
+              <b-button-group size="sm" class="ml-1"
+                              v-b-popover.hover="'Sorting controls are enabled only when Display Order column is sorted in the ascending order.'">
+                <b-button @click="moveDisplayOrderDown(props.row)" variant="outline-info" :class="{disabled:props.row.disabledDownButton}"
+                          :disabled="!sortButtonEnabled || props.row.disabledDownButton">
+                  <i class="fas fa-arrow-circle-down"/>
+                </b-button>
+                <b-button @click="moveDisplayOrderUp(props.row)" variant="outline-info" :class="{disabled: props.row.disabledUpButton}"
+                          :disabled="!sortButtonEnabled || props.row.disabledUpButton">
+                  <i class="fas fa-arrow-circle-up"/>
+                </b-button>
+              </b-button-group>
+            </div>
 
-          <div slot="created" slot-scope="props" class="field has-addons">
-            {{ props.row.created | date }}
-          </div>
+            <div slot="created" slot-scope="props" class="field has-addons">
+              {{ props.row.created | date }}
+            </div>
 
-          <div slot="edit" slot-scope="props">
-            <b-button-group size="sm" class="mr-1">
-              <b-button @click="editSkill(props.row)" variant="outline-primary"><i class="fas fa-edit"/></b-button>
-              <b-button @click="deleteSkill(props.row)" variant="outline-primary"><i class="fas fa-trash"/></b-button>
-            </b-button-group>
-            <router-link :to="{ name:'SkillOverview',
-                            params: { projectId: props.row.projectId, subjectId: props.row.subjectId, skillId: props.row.skillId }}"
-                         class="btn btn-outline-primary btn-sm">
-              <span class="d-none d-sm-inline">Manage </span> <i class="fas fa-arrow-circle-right"/>
-            </router-link>
-          </div>
+            <div slot="edit" slot-scope="props">
+              <b-button-group size="sm" class="mr-1">
+                <b-button @click="editSkill(props.row)" variant="outline-primary"><i class="fas fa-edit"/></b-button>
+                <b-button @click="deleteSkill(props.row)" variant="outline-primary"><i class="fas fa-trash"/></b-button>
+              </b-button-group>
+              <router-link :to="{ name:'SkillOverview',
+                              params: { projectId: props.row.projectId, subjectId: props.row.subjectId, skillId: props.row.skillId }}"
+                           class="btn btn-outline-primary btn-sm">
+                <span class="d-none d-sm-inline">Manage </span> <i class="fas fa-arrow-circle-right"/>
+              </router-link>
+            </div>
 
-          <div slot="child_row" slot-scope="props">
-            <ChildRowSkillsDisplay :project-id="projectId" :subject-id="subjectId" v-skills-onMount="'ExpandSkillDetailsSkillsPage'"
-                                   :parent-skill-id="props.row.skillId" :refresh-counter="props.row.refreshCounter"
-                                   class="mr-3 ml-5 mb-3"></ChildRowSkillsDisplay>
-          </div>
-        </v-client-table>
+            <div slot="child_row" slot-scope="props">
+              <ChildRowSkillsDisplay :project-id="projectId" :subject-id="subjectId" v-skills-onMount="'ExpandSkillDetailsSkillsPage'"
+                                     :parent-skill-id="props.row.skillId" :refresh-counter="props.row.refreshCounter"
+                                     class="mr-3 ml-5 mb-3"></ChildRowSkillsDisplay>
+            </div>
+          </v-client-table>
 
-        <no-content2 v-else title="No Skills Yet" message="Start creating skills today!"/>
+          <no-content2 v-else title="No Skills Yet" message="Start creating skills today!"/>
+        </div>
       </div>
-    </div>
+    </loading-container>
 
     <edit-skill v-if="editSkillInfo.show" v-model="editSkillInfo.show" :skillId="editSkillInfo.skill.skillId" :is-edit="editSkillInfo.isEdit"
                 :project-id="projectId" :subject-id="subjectId" @skill-saved="skillCreatedOrUpdated"/>
@@ -76,6 +75,7 @@
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import MsgBoxMixin from '../utils/modal/MsgBoxMixin';
   import ToastSupport from '../utils/ToastSupport';
+  import LoadingContainer from '../utils/LoadingContainer';
 
   export default {
     name: 'SkillsTable',
@@ -85,6 +85,7 @@
       EditSkill,
       SubPageHeader,
       ChildRowSkillsDisplay,
+      LoadingContainer,
       NoContent2,
     },
     data() {
