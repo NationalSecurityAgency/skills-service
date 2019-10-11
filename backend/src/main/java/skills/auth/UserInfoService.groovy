@@ -8,6 +8,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.stereotype.Component
 import skills.auth.pki.PkiUserLookup
 import skills.controller.exceptions.SkillException
+import skills.services.UserAttrsService
 
 @Component
 @Slf4j
@@ -18,6 +19,12 @@ class UserInfoService {
 
     @Autowired(required = false)
     PkiUserLookup pkiUserLookup
+
+    @Autowired
+    UserAuthService userAuthService
+
+    @Autowired
+    UserAttrsService userAttrsService
 
     UserInfo getCurrentUser() {
         UserInfo currentUser
@@ -37,13 +44,15 @@ class UserInfoService {
      * Abstracts dealing with PKI vs Password/Form modes when user id param is provided
      */
     String getUserName(String userIdParam) {
+        String res = userIdParam
         if (!userIdParam) {
-            return getCurrentUser().username
-        }
-        if (authMode == AuthMode.PKI) {
+            UserInfo userInfo = getCurrentUser()
+            res =  userInfo.username
+        } else if (authMode == AuthMode.PKI) {
             UserInfo userInfo
             try {
                 userInfo = pkiUserLookup.lookupUserDn(userIdParam)
+                userAuthService.createOrUpdateUser(userInfo)
             } catch (Throwable e) {
                 throw new SkillException("Failed to retrieve user info via [$userIdParam]")
             }
@@ -51,10 +60,17 @@ class UserInfoService {
                 throw new SkillException("User Info Service does not know about user with provided lookup id of [${userIdParam}]")
             }
 
-            return userInfo.username
+            res = userInfo.username
         }
 
-        return userIdParam
+        /**
+         * Save UserAttrs as loading of user relies on those records to be present
+         */
+        if (!(authMode == AuthMode.PKI)) {
+            userAttrsService.saveUserAttrs(userIdParam, new UserInfo(username: userIdParam, usernameForDisplay: userIdParam))
+        }
+
+        return res?.toLowerCase()
     }
 
     /**

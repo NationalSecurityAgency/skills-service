@@ -39,14 +39,14 @@ class AccessSettingsController {
     List<UserRoleRes> getUserRoles(
             @PathVariable("projectId") String projectId,
             @PathVariable("userId") String userId) {
-        accessSettingsStorageService.getUserRolesForProjectIdAndUserId(projectId, userId)
+        accessSettingsStorageService.getUserRolesForProjectIdAndUserId(projectId, userId?.toLowerCase())
     }
 
     @RequestMapping(value = "/projects/{projectId}/users/{userId}/roles/{roleName}", method = RequestMethod.DELETE)
     RequestResult deleteUserRole(
             @PathVariable("projectId") String projectId,
             @PathVariable("userId") String userId, @PathVariable("roleName") RoleName roleName) {
-        accessSettingsStorageService.deleteUserRole(userId, projectId, roleName)
+        accessSettingsStorageService.deleteUserRole(userId?.toLowerCase(), projectId, roleName)
         return new RequestResult(success: true)
     }
 
@@ -66,12 +66,12 @@ class AccessSettingsController {
         // to already have a portal user account in the database
         if (authMode == skills.auth.AuthMode.PKI) {
             try {
-                return userDetailsService.loadUserByUsername(userKey).username
+                return userDetailsService.loadUserByUsername(userKey?.toLowerCase()).username
             } catch (UsernameNotFoundException e) {
                 throw new skills.controller.exceptions.SkillException("User [$userKey] does not exist")
             }
         } else {
-            return userKey
+            return userKey?.toLowerCase()
         }
     }
 

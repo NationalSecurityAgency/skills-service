@@ -13,13 +13,17 @@
           <v-server-table ref="table" :columns="columns" :url="getUrl()" :options="options"
                           class="vue-table-2"
                           v-on:loaded="emit('loaded', $event)" v-on:error="emit('error', $event)">
+            <div slot="userId" slot-scope="props" class="field has-addons">
+              {{ getUserDisplay(props) }}
+            </div>
+
             <div slot="lastUpdated" slot-scope="props" class="field has-addons">
               {{ getDate(props) }}
             </div>
 
             <div slot="viewDetail" slot-scope="props" class="">
               <router-link :to="{ name:'ClientDisplayPreview',
-                      params: { projectId: $route.params.projectId, userId: props.row.userId }}"
+                      params: { projectId: $route.params.projectId, userId: props.row.userId, dn: props.row.dn }}"
                            tag="button" class="btn btn-outline-primary">
                 <span class="d-none d-sm-inline">Details</span><i class="fas fa-arrow-circle-right ml-sm-1"/>
               </router-link>
@@ -59,7 +63,7 @@
         columns: ['userId', 'totalPoints', 'lastUpdated', 'viewDetail'],
         options: {
           headings: {
-            userId: 'User ID',
+            userId: 'User',
             totalPoints: 'Total Points',
             lastUpdated: 'Last Updated',
             viewDetail: '',
@@ -120,6 +124,9 @@
       },
       getDate(props) {
         return window.moment(props.row.lastUpdated).format('LLL');
+      },
+      getUserDisplay(props) {
+        return props.row.lastName && props.row.firstName ? `${props.row.firstName} ${props.row.lastName} (${props.row.userIdForDisplay})` : props.row.userIdForDisplay;
       },
     },
   };

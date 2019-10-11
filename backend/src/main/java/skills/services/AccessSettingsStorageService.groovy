@@ -16,21 +16,16 @@ import skills.controller.result.model.SettingsResult
 import skills.controller.result.model.UserInfoRes
 import skills.controller.result.model.UserRoleRes
 import skills.services.settings.SettingsService
-import skills.storage.model.Setting
+import skills.storage.model.UserAttrs
 import skills.storage.model.auth.RoleName
 import skills.storage.model.auth.User
-
 import skills.storage.model.auth.UserRole
 import skills.storage.repos.UserRepo
 import skills.storage.repos.UserRoleRepo
 
-import static skills.controller.exceptions.SkillException.NA
-
 @Service
 @Slf4j
 class AccessSettingsStorageService {
-
-    static String USER_INFO_SETTING_GROUP = "user_info"
 
     @Autowired
     UserRoleRepo userRoleRepository
@@ -58,6 +53,9 @@ class AccessSettingsStorageService {
 
     @Autowired
     UserInfoValidator userInfoValidator
+
+    @Autowired
+    UserAttrsService userAttrsService
 
     @Transactional(readOnly = true)
     List<UserRoleRes> getUserRolesForProjectId(String projectId) {
@@ -196,8 +194,8 @@ class AccessSettingsStorageService {
             log.debug("Creating new app user for ID [{}], DN [{}]", userInfo.username, userInfo.userDn)
             user = createNewUser(userInfo)
         }
-        userRepository.save(user)
-        saveSettings(user.userId, userInfo)
+
+        userAttrsService.saveUserAttrs(user.userId, userInfo)
 
         return user
     }
@@ -226,15 +224,8 @@ class AccessSettingsStorageService {
     }
 
     UserInfoRes loadUserInfo(String userId) {
-        User user = userRepository.findByUserIdIgnoreCase(userId)
-        List<SettingsResult> settings = settingsService.getUserSettingsForGroup(user, USER_INFO_SETTING_GROUP)
-        new UserInfoRes(
-                userId: user.userId,
-                first: settings.find({it.setting == "firstName"})?.value ?: "",
-                last: settings.find({it.setting == "lastName"})?.value ?: "",
-                nickname: settings.find({it.setting == "nickname"})?.value ?: "",
-                dn: settings.find({it.setting == "DN"})?.value ?: "",
-        )
+        UserAttrs userAttrs = userAttrsService.findByUserId(userId)
+        new UserInfoRes(userAttrs)
     }
 
     private User createNewUser(UserInfo userInfo) {
@@ -244,38 +235,16 @@ class AccessSettingsStorageService {
                 password: userInfo.password,
                 roles: getRoles(userInfo),
         )
+        userRepository.save(user)
         return user
     }
 
-
-
     private void updateUser(UserInfo userInfo, User user) {
-        user.userId = userInfo.username?.toLowerCase()
-        user.password = userInfo.password
-
-        saveSettings(user.userId, userInfo)
-    }
-
-    void saveSettings(String userId, UserInfo userInfo) {
-        List<UserSettingsRequest> settingsRequests = [
-                createSetting(userId, 'DN', userInfo.userDn ?: ""),
-                createSetting(userId, 'email', userInfo.email ?: ""),
-                createSetting(userId, 'firstName', userInfo.firstName ?: ""),
-                createSetting(userId, 'lastName', userInfo.lastName ?: ""),
-                createSetting(userId, 'nickname', userInfo.nickname ?: ""),
-        ]
-        settingsService.saveSettings(settingsRequests)
-    }
-
-    private UserSettingsRequest createSetting(String userId, String prop, String value) {
-        UserSettingsRequest settingsRequest =
-                new UserSettingsRequest(
-                        userId: userId,
-                        settingGroup: USER_INFO_SETTING_GROUP,
-                        setting: prop,
-                        value: value
-                )
-        return settingsRequest
+        if ( !user.userId?.equalsIgnoreCase(userInfo.username) || !user.password.equalsIgnoreCase(userInfo.password)) {
+            user.userId = userInfo.username?.toLowerCase()
+            user.password = userInfo.password
+            userRepository.save(user)
+        }
     }
 
     private List<UserRole> getRoles(UserInfo userInfo) {

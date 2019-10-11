@@ -13,6 +13,7 @@ class UserInfo implements UserDetails {
     String nickname
     String email
     String username
+    String usernameForDisplay
     String userDn
     String password
     List<GrantedAuthority> authorities

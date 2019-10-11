@@ -55,6 +55,7 @@ class CreateAccountController {
         if (!userInfo.nickname) {
             userInfo.nickname = "${userInfo.firstName} ${userInfo.lastName}"
         }
+        userInfo.usernameForDisplay = userInfo.username
         userInfo = userAuthService.createUser(userInfo)
         userAuthService.autologin(userInfo, password)
     }
