@@ -37,13 +37,15 @@
       loadSkills() {
         SkillsService.getSubjectSkills(this.projectId, this.subjectId)
           .then((skills) => {
-            this.isLoading = false;
             const loadedSkills = skills;
             this.skills = loadedSkills.map((loadedSkill) => {
               const copy = Object.assign({}, loadedSkill);
               copy.created = window.moment(loadedSkill.created);
               return copy;
             });
+          })
+          .finally(() => {
+            this.isLoading = false;
           });
       },
       skillsChanged(skillId) {
