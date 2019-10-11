@@ -39,6 +39,8 @@ spring:
             redirectUriTemplate: 'http://localhost:8080/{action}/oauth2/code/{registrationId}'
             iconClass: fab fa-github
 skills:
+  artificialDelay:
+    enabled: false
   config:
     ui:
       descriptionMaxLength: 2000
