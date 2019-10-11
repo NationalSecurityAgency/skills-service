@@ -17,6 +17,7 @@ class SecretsUtil {
     final String TS_SERVER_PW_PROP_KEY = 'server.ssl.trust-store-password'
 
     void updateSecrets() {
+        log.info("Checking for external secrets...")
         String dbPasswordFile = System.getProperty(DB_PW_FILE_KEY)
         if (dbPasswordFile) {
             log.info("Setting database password using file [$dbPasswordFile]")
