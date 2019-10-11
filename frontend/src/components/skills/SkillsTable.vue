@@ -58,7 +58,7 @@
           </div>
         </v-client-table>
 
-        <no-content2 v-if="!skills || skills.length==0" title="No Skills Yet" message="Start creating skills today!"/>
+        <no-content2 v-else title="No Skills Yet" message="Start creating skills today!"/>
       </div>
     </div>
 
@@ -179,8 +179,6 @@
 
             this.disableFirstAndLastButtons();
 
-            this.isLoading = false;
-
             this.$emit('skills-change', skill.skillId);
             this.successToast('Skill Saved', `Saved '${skill.name}' skill.`);
           })
@@ -228,7 +226,6 @@
 
             this.rebuildDisplayOrder();
             this.disableFirstAndLastButtons();
-            this.isLoading = false;
             this.$emit('skills-change', skill.skillId);
 
             this.successToast('Removed Skill', `Skill '${skill.name}' was removed.`);
