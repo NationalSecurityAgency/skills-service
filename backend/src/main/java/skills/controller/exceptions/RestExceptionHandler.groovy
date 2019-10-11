@@ -55,6 +55,7 @@ class RestExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(AccessDeniedException)
     protected ResponseEntity<Object> handleAccessDeniedException(AccessDeniedException accessDeniedException, WebRequest webRequest) {
         log.warn("Access is denied - programmatic exception", accessDeniedException)
+        log.warn("Acesss is Denied to [${webRequest.getDescription(true)}]")
         String msg = "Access Denied"
         BasicErrBody body = new BasicErrBody(explanation: msg, errorCode: ErrorCode.AccessDenied)
         return new ResponseEntity(body, HttpStatus.FORBIDDEN)

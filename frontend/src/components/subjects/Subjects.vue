@@ -10,7 +10,7 @@
         </div>
       </div>
 
-      <no-content3 v-if="!subjects || subjects.length==0"
+      <no-content3 v-else
                    title="No Subjects Yet" sub-title="Create a project to get started!"></no-content3>
     </loading-container>
 
@@ -61,7 +61,6 @@
       loadSubjects() {
         SubjectsService.getSubjects(this.projectId)
           .then((response) => {
-            this.isLoading = false;
             this.subjects = response;
             if (this.subjects.length) {
               this.subjects[0].isFirst = true;
@@ -93,9 +92,6 @@
             this.loadProjectDetailsState({ projectId: this.projectId });
             this.$emit('subjects-changed', subject.subjectId);
             SkillsReporter.reportSkill('CreateSubject');
-          })
-          .finally(() => {
-            this.isLoading = false;
           });
       },
       moveSubjectDown(subject) {
@@ -109,9 +105,6 @@
         SubjectsService.patchSubject(subject, actionToSubmit)
           .then(() => {
             this.loadSubjects();
-          })
-          .finally(() => {
-            this.isLoading = false;
           });
       },
     },

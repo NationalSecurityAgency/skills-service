@@ -15,7 +15,7 @@
             </div>
           </div>
 
-          <no-content3 v-if="!badges || badges.length === 0" title="No Badges Yet" sub-title="Start creating badges today!"/>
+          <no-content3 v-else title="No Badges Yet" sub-title="Start creating badges today!"/>
         </div>
       </transition>
     </loading-container>
@@ -101,7 +101,6 @@
         this.isLoading = true;
         BadgesService.deleteBadge(badge.projectId, badge.badgeId)
           .then(() => {
-            this.isLoading = false;
             this.$emit('badge-deleted', this.badge);
             this.badges = this.badges.filter(item => item.badgeId !== badge.badgeId);
             this.loadProjectDetailsState({ projectId: this.projectId });
@@ -120,9 +119,6 @@
             this.loadBadges();
             this.loadProjectDetailsState({ projectId: this.projectId });
             this.$emit('badges-changed', badge.badgeId);
-          })
-          .finally(() => {
-            this.isLoading = false;
           });
         if (badge.startDate) {
           SkillsReporter.reportSkill('CreateGem');
@@ -144,9 +140,6 @@
         BadgesService.moveBadge(badge.projectId, badge.badgeId, actionToSubmit)
           .then(() => {
             this.loadBadges();
-          })
-          .finally(() => {
-            this.isLoading = false;
           });
       },
 

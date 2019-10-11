@@ -15,7 +15,7 @@
             </div>
           </div>
 
-          <no-content3 v-if="!badges || badges.length === 0" title="No Badges Yet" sub-title="Start creating badges today!"/>
+          <no-content3 v-else title="No Badges Yet" sub-title="Start creating badges today!"/>
         </div>
       </transition>
     </loading-container>
@@ -66,7 +66,6 @@
       loadBadges() {
         GlobalBadgeService.getBadges()
           .then((badgesResponse) => {
-            this.isLoading = false;
             this.badges = badgesResponse;
             if (this.badges && this.badges.length) {
               this.badges[0].isFirst = true;
@@ -81,7 +80,6 @@
         this.isLoading = true;
         GlobalBadgeService.deleteBadge(badge.badgeId)
           .then(() => {
-            this.isLoading = false;
             this.$emit('badge-deleted', this.badge);
             this.badges = this.badges.filter(item => item.badgeId !== badge.badgeId);
             this.$emit('badges-changed', badge.badgeId);
@@ -98,9 +96,6 @@
           .then(() => {
             this.loadBadges();
             this.$emit('global-badges-changed', badge.badgeId);
-          })
-          .finally(() => {
-            this.isLoading = false;
           });
       },
       newBadge() {
@@ -117,9 +112,6 @@
         GlobalBadgeService.moveBadge(badge.badgeId, actionToSubmit)
           .then(() => {
             this.loadBadges();
-          })
-          .finally(() => {
-            this.isLoading = false;
           });
       },
 
