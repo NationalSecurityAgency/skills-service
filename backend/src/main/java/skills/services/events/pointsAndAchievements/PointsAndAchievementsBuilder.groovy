@@ -105,7 +105,7 @@ class PointsAndAchievementsBuilder {
             // handle an edge case where user achieves multiple levels via one event
             if (levelInfo.level > maxAchieved) {
                 res = (maxAchieved+1..levelInfo.level).collect {
-                    UserAchievement achievement = new UserAchievement(userId: userId, projectId: projectId, skillId: skillId, skillRefId: skillRefId,
+                    UserAchievement achievement = new UserAchievement(userId: userId.toLowerCase(), projectId: projectId, skillId: skillId, skillRefId: skillRefId,
                             level: it, pointsWhenAchieved: currentScore)
                     log.debug("Achieved new level [{}]", achievement)
                     return achievement
@@ -138,7 +138,7 @@ class PointsAndAchievementsBuilder {
 
     private UserPoints constructUserPoints(String userId, String projectId, Integer skillRefId, String skillId, Date day, Integer pointIncrement) {
         return new UserPoints(
-                userId: userId,
+                userId: userId.toLowerCase(),
                 projectId: projectId,
                 skillId: skillId,
                 skillRefId: skillRefId,

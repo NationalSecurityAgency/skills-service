@@ -15,9 +15,11 @@ import skills.controller.result.model.SettingsResult
 import skills.services.AccessSettingsStorageService
 import skills.services.InceptionProjectService
 import skills.services.settings.SettingsService
+import skills.storage.model.UserAttrs
 import skills.storage.model.auth.RoleName
 import skills.storage.model.auth.User
 import skills.storage.model.auth.UserRole
+import skills.storage.repos.UserAttrsRepo
 import skills.storage.repos.UserRepo
 
 import javax.servlet.http.HttpServletRequest
@@ -30,6 +32,9 @@ class UserAuthService {
 
     @Autowired
     UserRepo userRepository
+
+    @Autowired
+    UserAttrsRepo userAttrsRepo
 
     @Autowired
     AccessSettingsStorageService accessSettingsStorageService
@@ -53,16 +58,17 @@ class UserAuthService {
         UserInfo userInfo
         User user = userRepository.findByUserIdIgnoreCase(userId)
         if (user) {
-            List<SettingsResult> userInfoSettings = settingsService.getUserSettingsForGroup(user, AccessSettingsStorageService.USER_INFO_SETTING_GROUP)
+            UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(userId)
             userInfo = new UserInfo (
                     username: user.userId,
                     password: user.password,
-                    firstName: userInfoSettings.find {it.setting =='firstName'}?.value,
-                    lastName: userInfoSettings.find {it.setting =='lastName'}?.value,
-                    email: userInfoSettings.find {it.setting =='email'}?.value,
-                    userDn: userInfoSettings.find {it.setting =='DN'}?.value,
-                    nickname: userInfoSettings.find {it.setting =='nickname'}?.value,
-                    authorities: convertRoles(user.roles)
+                    firstName: userAttrs.firstName,
+                    lastName: userAttrs.lastName,
+                    email: userAttrs.email,
+                    userDn: userAttrs.dn,
+                    nickname: userAttrs.nickname,
+                    authorities: convertRoles(user.roles),
+                    usernameForDisplay: userAttrs.userIdForDisplay
             )
         }
         return userInfo

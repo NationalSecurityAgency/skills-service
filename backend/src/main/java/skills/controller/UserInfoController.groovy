@@ -16,7 +16,9 @@ import skills.controller.result.model.RequestResult
 import skills.controller.result.model.UserInfoRes
 import skills.services.AccessSettingsStorageService
 import skills.services.UserAdminService
+import skills.storage.model.UserAttrs
 import skills.storage.model.auth.User
+import skills.storage.repos.UserAttrsRepo
 import skills.storage.repos.UserRepo
 
 @RestController
@@ -33,6 +35,9 @@ class UserInfoController {
 
     @Autowired
     UserRepo userRepo
+
+    @Autowired
+    UserAttrsRepo userAttrsRepo
 
     @Value('#{securityConfig.authMode}}')
     AuthMode authMode = AuthMode.DEFAULT_AUTH_MODE
@@ -104,32 +109,17 @@ class UserInfoController {
     @RequestMapping(value = "/users/suggestDashboardUsers/{query}", method = RequestMethod.GET, produces = "application/json")
     List<UserInfoRes> suggestExistingDashboardUsers(@PathVariable("query") String query,
                                                     @RequestParam(required = false, defaultValue = "true") boolean includeSelf) {
-        return suggestDashboardUsersInternal(query, includeSelf)
+        return userAdminService.suggestDashboardUsers(query, includeSelf)
     }
 
     @RequestMapping(value = "/users/suggestDashboardUsers/", method = RequestMethod.GET, produces = "application/json")
     List<UserInfoRes> suggestAllExistingDashboardUsers(@RequestParam(required = false, defaultValue = "true") boolean includeSelf) {
-        return suggestDashboardUsersInternal("", includeSelf)
-    }
-
-    private List<UserInfoRes> suggestDashboardUsersInternal(String query, boolean includeSelf) {
-        query = query ? query.toLowerCase() : ""
-
-        List<User> matchingUsers = userRepo.getUserByUserIdOrPropWildcard(query, new PageRequest(0, 6))
-        List<UserInfoRes> results = matchingUsers.collect {
-            accessSettingsStorageService.loadUserInfo(it.userId)
-        }
-        if (!includeSelf) {
-            String currentUserId = userInfoService.currentUser.username
-            results = results.findAll { it.userId != currentUserId }
-        }
-        results?.sort(){it.userId}
-        return results.take(5)
+        return userAdminService.suggestDashboardUsers("", includeSelf)
     }
 
     @RequestMapping(value = "/users/validExistingDashboardUserId/{userId}", method = RequestMethod.GET, produces = "application/json")
     Boolean isValidExistingDashboardUserId(@PathVariable("userId") String userId) {
-        return userRepo.findByUserIdIgnoreCase(userId) != null
+        return userRepo.findByUserIdIgnoreCase(userId?.toLowerCase()) != null
     }
 
     @RequestMapping(value = "/users/projects/{projectId}/suggestClientUsers/{query}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -154,12 +144,12 @@ class UserInfoController {
 
     @RequestMapping(value = "/users/projects/{projectId}/validExistingClientUserId/{userId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     Boolean isValidExistingClientUserIdForProject(@PathVariable("projectId") String projectId, @PathVariable("userId") String userId) {
-        return userAdminService.isValidExistingUserIdForProject(projectId, userId)
+        return userAdminService.isValidExistingUserIdForProject(projectId, userId?.toLowerCase())
     }
 
     @RequestMapping(value = "/users/validExistingClientUserId/{userId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     Boolean isValidExistingClientUserId(@PathVariable("userId") String userId) {
-        return userAdminService.isValidExistingUserId(userId)
+        return userAdminService.isValidExistingUserId(userId?.toLowerCase())
     }
 
     @RequestMapping(value = "/users/suggestPkiUsers/{query}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
