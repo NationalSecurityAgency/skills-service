@@ -59,7 +59,7 @@
   };
   Validator.localize(dictionary);
 
-  const disabledDates = date => date.getTime() > Date.now();
+  const disabledDates = date => date > new Date();
 
   const datePickerState = {
     disabledDates: {
