@@ -166,9 +166,9 @@ class AdminProjService {
     }
 
     @Transactional()
-    void saveSubject(String projectId, String origSubjectId, SubjectRequest subjectRequest) {
+    void saveSubject(String projectId, String origSubjectId, SubjectRequest subjectRequest, boolean performCustomValidation = true) {
         CustomValidationResult customValidationResult = customValidator.validate(subjectRequest)
-        if(!customValidationResult.valid){
+        if(performCustomValidation && !customValidationResult.valid){
             throw new SkillException(customValidationResult.msg)
         }
 
@@ -248,9 +248,9 @@ class AdminProjService {
     }
 
     @Transactional()
-    void saveBadge(String projectId, String originalBadgeId, BadgeRequest badgeRequest, SkillDef.ContainerType type = SkillDef.ContainerType.Badge) {
+    void saveBadge(String projectId, String originalBadgeId, BadgeRequest badgeRequest, SkillDef.ContainerType type = SkillDef.ContainerType.Badge, boolean performCustomValidation=true) {
         CustomValidationResult customValidationResult = customValidator.validate(badgeRequest)
-        if(!customValidationResult.valid){
+        if(performCustomValidation && !customValidationResult.valid){
             throw new SkillException(customValidationResult.msg)
         }
 
@@ -1048,12 +1048,12 @@ class AdminProjService {
     }
 
     @Transactional()
-    SkillDefRes saveSkill(String originalSkillId, SkillRequest skillRequest) {
+    SkillDefRes saveSkill(String originalSkillId, SkillRequest skillRequest, boolean performCustomValidation=true) {
 
         validateSkillVersion(skillRequest)
 
         CustomValidationResult customValidationResult = customValidator.validate(skillRequest)
-        if(!customValidationResult.valid){
+        if(performCustomValidation && !customValidationResult.valid){
             throw new SkillException(customValidationResult.msg)
         }
 

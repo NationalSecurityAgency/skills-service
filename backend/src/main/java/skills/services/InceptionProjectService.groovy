@@ -97,7 +97,7 @@ class InceptionProjectService {
                         description: "Number of ancillary dashboard features including user management."),
         ]
         subs.each {
-            projectAdminStorageService.saveSubject(inceptionProjectId, it.subjectId, it)
+            projectAdminStorageService.saveSubject(inceptionProjectId, it.subjectId, it, false)
         }
 
         List<SkillRequest> skills = [
@@ -453,7 +453,7 @@ To create skill navigate to a subject and then click ``Skill +`` button.''',
         ]
 
         skills.each {
-            projectAdminStorageService.saveSkill(it.skillId, it)
+            projectAdminStorageService.saveSkill(it.skillId, it, false)
         }
 
     }
