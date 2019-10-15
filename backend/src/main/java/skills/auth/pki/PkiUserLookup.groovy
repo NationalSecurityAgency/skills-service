@@ -27,7 +27,7 @@ class PkiUserLookup {
     @Profile
     UserInfo lookupUserDn(String dn) {
         UserInfo userInfo = restTemplate.getForObject(userInfoUri, UserInfo, dn)
-        validate(userInfo)
+        validate(userInfo, dn)
         return userInfo
     }
 
@@ -41,7 +41,7 @@ class PkiUserLookup {
                 query)
         List<UserInfo> matches = response.getBody()
         for (UserInfo userInfo : matches) {
-            validate(userInfo)
+            validate(userInfo, query)
         }
         return matches
     }
