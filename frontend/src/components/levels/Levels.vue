@@ -127,8 +127,8 @@
               this.options.headings = {
                 level: 'Level',
                 name: 'Name',
-                pointsFrom: 'From Points',
-                pointsTo: 'To Points',
+                pointsFrom: 'From Points (>)',
+                pointsTo: 'To Points (<=)',
                 edit: '',
                 iconClass: '',
               };
@@ -138,8 +138,8 @@
                 level: 'Level',
                 name: 'Name',
                 percent: 'Percent',
-                pointsFrom: 'From Points',
-                pointsTo: 'To Points',
+                pointsFrom: 'From Points (>)',
+                pointsTo: 'To Points (<=)',
                 edit: '',
                 iconClass: '',
               };

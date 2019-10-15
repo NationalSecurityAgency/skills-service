@@ -132,15 +132,20 @@
           if (self.boundaries) {
             let previousValid = true;
             let nextValid = true;
-            const gtOp = self.levelAsPoints ? gte : gt;
+            let gtOp = self.levelAsPoints ? gte : gt;
             const ltOp = self.levelAsPoints ? lte : lt;
 
             if (self.boundaries.previous !== null) {
+              if (self.boundaries.next === null) {
+                // use gt regardless of points configuration if it's the last level
+                gtOp = gt;
+              }
               previousValid = gtOp(value, self.boundaries.previous);
             }
             if (self.boundaries.next !== null) {
               nextValid = ltOp(value, self.boundaries.next);
             }
+
             valid = nextValid && previousValid;
           }
           return valid;
