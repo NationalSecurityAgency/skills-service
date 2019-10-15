@@ -408,7 +408,6 @@
             </column>
             <column name="password" type="varchar(255)"/>
 
-
             <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
                 <constraints nullable="false"/>
             </column>
@@ -478,6 +477,36 @@
                                  onUpdate="CASCADE"
                                  referencedColumnNames="project_id"
                                  referencedTableName="project_definition"/>
+
+        <!-- ============================================================================
+        Table: User Attributes
+        ============================================================================-->
+        <createTable tableName="user_attrs">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="user_id" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="first_name" type="varchar(255)"/>
+            <column name="last_name" type="varchar(255)"/>
+            <column name="dn" type="varchar(255)"/>
+            <column name="email" type="varchar(255)"/>
+            <column name="nickname" type="varchar(255)"/>
+            <column name="user_id_for_display" type="varchar(255)"/>
+
+            <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex indexName="index_users_attrs_user_id"
+                     tableName="users" unique="true">
+            <column name="user_id" type="varchar(255)"/>
+        </createIndex>
 
         <!-- ============================================================================
         Table: User Performed Skill

@@ -2,7 +2,7 @@
   <div>
     <page-header :loading="isLoading" :options="headerOptions"/>
 
-    <navigation v-if="userId" :nav-items="[
+    <navigation v-if="userIdForDisplay" :nav-items="[
           {name: 'Client Display', iconClass: 'fa-user', page: 'ClientDisplayPreview'},
           {name: 'Performed Skills', iconClass: 'fa-award', page: 'UserSkillEvents'},
           {name: 'Metrics', iconClass: 'fa-chart-bar', page: 'UserMetrics'},
@@ -16,6 +16,7 @@
 
   import Navigation from '../utils/Navigation';
   import PageHeader from '../utils/pages/PageHeader';
+  import UsersService from './UsersService';
 
   const { mapActions, mapGetters } = createNamespacedHelpers('users');
 
@@ -27,14 +28,24 @@
     },
     data() {
       return {
-        projectId: '',
-        userId: '',
+        userTitle: '',
+        userIdForDisplay: '',
         isLoading: true,
       };
     },
     created() {
-      this.projectId = this.$route.params.projectId;
-      this.userId = this.$route.params.userId;
+      this.userTitle = this.$route.params.userId;
+      this.userIdForDisplay = this.$route.params.userId;
+      if (this.$store.getters.isPkiAuthenticated) {
+        UsersService.getUserInfo(this.$route.params.projectId, this.$route.params.userId)
+          .then((result) => {
+            this.userIdForDisplay = result.userIdForDisplay;
+            this.userTitle = result.first && result.last ? `${result.first} ${result.last}` : result.userIdForDisplay;
+            this.loadUserDetails();
+          });
+      } else {
+        this.loadUserDetails();
+      }
       this.loadUserDetails();
     },
     computed: {
@@ -45,8 +56,8 @@
       headerOptions() {
         return {
           icon: 'fas fa-user',
-          title: `USER: ${this.userId}`,
-          subTitle: `ID: ${this.userId}`,
+          title: `USER: ${this.userTitle}`,
+          subTitle: `ID: ${this.userIdForDisplay}`,
           stats: [{
             label: 'Skills',
             count: this.numSkills,
@@ -63,7 +74,7 @@
       ]),
       loadUserDetails() {
         this.isLoading = true;
-        this.loadUserDetailsState({ projectId: this.projectId, userId: this.userId })
+        this.loadUserDetailsState({ projectId: this.$route.params.projectId, userId: this.$route.params.userId })
           .finally(() => {
             this.isLoading = false;
           });

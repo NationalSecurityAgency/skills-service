@@ -7,14 +7,17 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import skills.controller.result.model.LabelCountItem
 import skills.controller.result.model.ProjectUser
 import skills.controller.result.model.TableResult
 import skills.controller.result.model.TimestampCountItem
+import skills.controller.result.model.UserInfoRes
 import skills.skillLoading.RankingLoader
 import skills.skillLoading.model.UsersPerLevel
 import skills.storage.model.DayCountItem
 import skills.storage.model.SkillDef
+import skills.storage.model.UserPoints
 import skills.storage.repos.UserAchievedLevelRepo
 import skills.storage.repos.UserPointsRepo
 
@@ -34,6 +37,9 @@ class AdminUsersService {
 
     @Autowired
     RankingLoader rankingLoader
+
+    @Autowired
+    AccessSettingsStorageService accessSettingsStorageService
 
     List<TimestampCountItem> getProjectUsage(String projectId, Integer numDays) {
         Date startDate
@@ -144,10 +150,13 @@ class AdminUsersService {
         TableResult result = new TableResult()
         Long totalProjectUsers = countTotalProjUsers(projectId)
         if (totalProjectUsers) {
+            query = query ? query.trim() : ''
             result.totalCount = totalProjectUsers
             List<ProjectUser> projectUsers = findDistinctUsers(projectId, query, pageRequest)
             result.data = projectUsers
-            if (query) {
+            if (!projectUsers) {
+                result.count = 0
+            } else if (query) {
                 result.count = userPointsRepo.countDistinctUserIdByProjectIdAndUserIdLike(projectId, query)
             } else {
                 result.count = totalProjectUsers
@@ -173,15 +182,28 @@ class AdminUsersService {
         }
         Long totalProjectUsersWithSkills = userPointsRepo.countDistinctUserIdByProjectIdAndSkillIdIn(projectId, skillIds)
         if (totalProjectUsersWithSkills) {
+            query = query ? query.trim() : ''
             result.totalCount = totalProjectUsersWithSkills
             List<ProjectUser> projectUsers = userPointsRepo.findDistinctProjectUsersByProjectIdAndSkillIdInAndUserIdLike(projectId, skillIds, query, pageRequest)
             result.data = projectUsers
-            if (query) {
+            if (!projectUsers) {
+                result.count = 0
+            } else if (query) {
                 result.count = userPointsRepo.countDistinctUserIdByProjectIdAndSkillIdInAndUserIdLike(projectId, skillIds, query)
             } else {
                 result.count = totalProjectUsersWithSkills
             }
         }
         return result
+    }
+
+    @Transactional
+    UserInfoRes getUserForProject(String projectId, String userId) {
+        // check to see if the user actually achieved any points against this project
+        UserPoints userPoints = userPointsRepo.findByProjectIdAndUserIdAndSkillIdAndDay(projectId, userId, null, null)
+        if (!userPoints) {
+            return null
+        }
+        return accessSettingsStorageService.loadUserInfo(userId)
     }
 }

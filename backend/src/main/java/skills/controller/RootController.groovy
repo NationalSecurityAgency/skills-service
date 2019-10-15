@@ -118,7 +118,7 @@ class RootController {
     @DeleteMapping('/deleteRoot/{userId}')
     void deleteRoot(@PathVariable('userId') String userId) {
         SkillsValidator.isTrue(accessSettingsStorageService.getRootAdminCount() > 1, 'At least one root user must exist at all times! Deleting another user will cause no root users to exist!')
-        accessSettingsStorageService.deleteRoot(userId)
+        accessSettingsStorageService.deleteRoot(userId?.toLowerCase())
     }
 
     @GetMapping('/users/roles/{roleName}')
@@ -141,6 +141,7 @@ class RootController {
     @DeleteMapping('/users/{userId}/roles/{roleName}')
     void deleteRole(@PathVariable('userId') String userId,
                     @PathVariable("roleName") RoleName roleName) {
+        userId = userId?.toLowerCase()
         if (roleName == RoleName.ROLE_SUPER_DUPER_USER) {
             deleteRoot(userId)
         } else {

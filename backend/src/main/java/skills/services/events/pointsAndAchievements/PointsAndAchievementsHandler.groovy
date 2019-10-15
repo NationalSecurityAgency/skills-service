@@ -108,7 +108,7 @@ class PointsAndAchievementsHandler {
         UserPoints userPoints = getUserPoints(requestedSkill, userId, skillId, day)
         if (!userPoints) {
             assert !decrement
-            userPoints = new UserPoints(userId: userId, projectId: requestedSkill.projectId,
+            userPoints = new UserPoints(userId: userId?.toLowerCase(), projectId: requestedSkill.projectId,
                     skillId: skillId,
                     skillRefId: skillId ? requestedSkill.id : null,
                     points: requestedSkill.pointIncrement, day: day)
@@ -123,7 +123,7 @@ class PointsAndAchievementsHandler {
         UserPoints res
         if (decrement && userPoints.points <= 0) {
             userPointsRepo.delete(userPoints)
-            res = new UserPoints(userId: userId, projectId: requestedSkill.projectId,
+            res = new UserPoints(userId: userId?.toLowerCase(), projectId: requestedSkill.projectId,
                     skillId: skillId,
                     skillRefId: skillId ? requestedSkill.id : null,
                     points: 0, day: day)
@@ -155,7 +155,7 @@ class PointsAndAchievementsHandler {
             List<LevelDef> levelDefs = skillEventsSupportRepo.findLevelsBySkillId(currentDef.id)
             if (!levelDefs) {
                 if (!decrement && updatedPoints.points >= currentDef.totalPoints) {
-                    UserAchievement groupAchievement = new UserAchievement(userId: userId, projectId: currentDef.projectId, skillId: currentDef.skillId, skillRefId: currentDef?.id,
+                    UserAchievement groupAchievement = new UserAchievement(userId: userId.toLowerCase(), projectId: currentDef.projectId, skillId: currentDef.skillId, skillRefId: currentDef?.id,
                             pointsWhenAchieved: updatedPoints.points)
                     achievedLevelRepo.save(groupAchievement)
 
@@ -192,7 +192,7 @@ class PointsAndAchievementsHandler {
         List<UserAchievement> userAchievedLevels = achievedLevelRepo.findAllByUserIdAndProjectIdAndSkillId(userId, userPts.projectId, userPts.skillId)
         boolean levelAlreadyAchieved = userAchievedLevels?.find { it.level == levelInfo.level }
         if (!levelAlreadyAchieved && !decrement) {
-            UserAchievement newLevel = new UserAchievement(userId: userId, projectId: userPts.projectId, skillId: userPts.skillId, skillRefId: skillDef?.id,
+            UserAchievement newLevel = new UserAchievement(userId: userId.toLowerCase(), projectId: userPts.projectId, skillId: userPts.skillId, skillRefId: skillDef?.id,
                     level: levelInfo.level, pointsWhenAchieved: userPts.points)
             achievedLevelRepo.save(newLevel)
             log.debug("Achieved new level [{}]", newLevel)

@@ -65,7 +65,7 @@ class AchievedGlobalBadgeHandler {
                 if (nonAchievedChildren == 0) {
                     List<UserAchievement> badges = achievedLevelRepo.findAllByUserIdAndProjectIdAndSkillId(userId, globalBadge.projectId, globalBadge.skillId)
                     if (!badges) {
-                        UserAchievement groupAchievement = new UserAchievement(userId: userId, projectId: globalBadge.projectId, skillId: globalBadge.skillId, skillRefId: globalBadge?.id)
+                        UserAchievement groupAchievement = new UserAchievement(userId: userId.toLowerCase(), projectId: globalBadge.projectId, skillId: globalBadge.skillId, skillRefId: globalBadge?.id)
                         achievedLevelRepo.save(groupAchievement)
                         res.completed.add(new CompletionItem(type: CompletionTypeUtil.getCompletionType(globalBadge.type), id: globalBadge.skillId, name: globalBadge.name))
                     }
