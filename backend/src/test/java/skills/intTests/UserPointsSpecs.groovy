@@ -10,14 +10,13 @@ class UserPointsSpecs extends DefaultIntSpec {
 
     String projId = SkillsFactory.defaultProjId
 
-    List<String> sampleUserIds // loaded from system props
+    List<String> sampleUserIds = ['haNson', 'haRry', 'tom']
     List<String> subjects
     List<List<String>> allSkillIds
     String badgeId
 
     def setup(){
         skillsService.deleteProjectIfExist(projId)
-        sampleUserIds = System.getProperty("sampleUserIds", "tom|||dick|||harry")?.split("\\|\\|\\|").sort()
 
         subjects = ['testSubject1', 'testSubject2', 'testSubject3']
         allSkillIds = setupProjectWithSkills(subjects)
@@ -40,9 +39,9 @@ class UserPointsSpecs extends DefaultIntSpec {
         results.count == 2
         results.totalCount == 2
         results.data.size() == 2
-        results.data.get(0).userId == sampleUserIds.get(0)
+        results.data.get(0).userId == sampleUserIds.get(0)?.toLowerCase()
         results.data.get(0).totalPoints == 20
-        results.data.get(1).userId == sampleUserIds.get(1)
+        results.data.get(1).userId == sampleUserIds.get(1)?.toLowerCase()
         results.data.get(1).totalPoints == 10
     }
 
@@ -56,32 +55,34 @@ class UserPointsSpecs extends DefaultIntSpec {
         results1.count == 2
         results1.totalCount == 2
         results1.data.size() == 1
-        results1.data.get(0).userId == sampleUserIds.get(0)
+        results1.data.get(0).userId == sampleUserIds.get(0)?.toLowerCase()
         results1.data.get(0).totalPoints == 20
         results2
         results2.count == 2
         results2.totalCount == 2
         results2.data.size() == 1
-        results2.data.get(0).userId == sampleUserIds.get(1)
+        results2.data.get(0).userId == sampleUserIds.get(1)?.toLowerCase()
         results2.data.get(0).totalPoints == 10
     }
 
     def 'get project users with paging and query'() {
         when:
-        def results1 = skillsService.getProjectUsers(projId, 1, 1, "userId", true, "d")
-        def results2 = skillsService.getProjectUsers(projId, 1, 2, "userId", true, "d")
+        def results1 = skillsService.getProjectUsers(projId, 1, 1, "userId", true, "h")
+        def results2 = skillsService.getProjectUsers(projId, 1, 2, "userId", true, "h")
 
         then:
         results1
-        results1.count == 1  // result count
+        results1.count == 2 // result count
         results1.totalCount == 2  // total user count
         results1.data.size() == 1
-        results1.data.get(0).userId == sampleUserIds.get(0)
+        results1.data.get(0).userId == sampleUserIds.get(0)?.toLowerCase()
         results1.data.get(0).totalPoints == 20
         results2
-        results2.count == 1
+        results2.count == 2
         results2.totalCount == 2
-        results2.data.size() == 0
+        results2.data.size() == 1
+        results2.data.get(0).userId == sampleUserIds.get(1)?.toLowerCase()
+        results2.data.get(0).totalPoints == 10
     }
 
     def 'get subject users when project exists'() {
@@ -95,16 +96,16 @@ class UserPointsSpecs extends DefaultIntSpec {
         results1.count == 1
         results1.totalCount == 1
         results1.data.size() == 1
-        results1.data.get(0).userId == sampleUserIds.get(0)
+        results1.data.get(0).userId == sampleUserIds.get(0)?.toLowerCase()
         results1.data.get(0).totalPoints == 10
 
         results2
         results2.count == 2
         results2.totalCount == 2
         results2.data.size() == 2
-        results2.data.get(0).userId == sampleUserIds.get(0)
+        results2.data.get(0).userId == sampleUserIds.get(0)?.toLowerCase()
         results2.data.get(0).totalPoints == 10
-        results2.data.get(1).userId == sampleUserIds.get(1)
+        results2.data.get(1).userId == sampleUserIds.get(1)?.toLowerCase()
         results2.data.get(1).totalPoints == 10
 
         results3
@@ -124,16 +125,16 @@ class UserPointsSpecs extends DefaultIntSpec {
         results1.count == 1
         results1.totalCount == 1
         results1.data.size() == 1
-        results1.data.get(0).userId == sampleUserIds.get(0)
+        results1.data.get(0).userId == sampleUserIds.get(0)?.toLowerCase()
         results1.data.get(0).totalPoints == 10
 
         results2
         results2.count == 2
         results2.totalCount == 2
         results2.data.size() == 2
-        results2.data.get(0).userId == sampleUserIds.get(0)
+        results2.data.get(0).userId == sampleUserIds.get(0)?.toLowerCase()
         results2.data.get(0).totalPoints == 10
-        results2.data.get(1).userId == sampleUserIds.get(1)
+        results2.data.get(1).userId == sampleUserIds.get(1)?.toLowerCase()
         results2.data.get(1).totalPoints == 10
 
         results3
@@ -144,23 +145,23 @@ class UserPointsSpecs extends DefaultIntSpec {
 
     def 'get skill users with paging when project exists'() {
         when:
-        def results1 = skillsService.getSkillUsers(projId, allSkillIds.get(0).get(0), 1, 1, "userId", true, "d")
-        def results2 = skillsService.getSkillUsers(projId, allSkillIds.get(1).get(0), 1, 1, "userId", true, "d")
-        def results3 = skillsService.getSkillUsers(projId, allSkillIds.get(1).get(1), 1, 1, "userId", true, "d")
+        def results1 = skillsService.getSkillUsers(projId, allSkillIds.get(0).get(0), 1, 1, "userId", true, "h")
+        def results2 = skillsService.getSkillUsers(projId, allSkillIds.get(1).get(0), 1, 1, "userId", true, "h")
+        def results3 = skillsService.getSkillUsers(projId, allSkillIds.get(1).get(1), 1, 1, "userId", true, "h")
 
         then:
         results1
         results1.count == 1
         results1.totalCount == 1
         results1.data.size() == 1
-        results1.data.get(0).userId == sampleUserIds.get(0)
+        results1.data.get(0).userId == sampleUserIds.get(0)?.toLowerCase()
         results1.data.get(0).totalPoints == 10
 
         results2
-        results2.count == 1
+        results2.count == 2
         results2.totalCount == 2
         results2.data.size() == 1
-        results2.data.get(0).userId == sampleUserIds.get(0)
+        results2.data.get(0).userId == sampleUserIds.get(0)?.toLowerCase()
         results2.data.get(0).totalPoints == 10
 
         results3
@@ -178,7 +179,7 @@ class UserPointsSpecs extends DefaultIntSpec {
         results1.count == 1
         results1.totalCount == 1
         results1.data.size() == 1
-        results1.data.get(0).userId == sampleUserIds.get(0)
+        results1.data.get(0).userId == sampleUserIds.get(0)?.toLowerCase()
         results1.data.get(0).totalPoints == 10
     }
 

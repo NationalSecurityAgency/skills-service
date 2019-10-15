@@ -5,11 +5,15 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import skills.auth.UserInfoService
 import skills.controller.result.model.TableResult
+import skills.controller.result.model.UserInfoRes
 import skills.controller.result.model.UserSkillsStats
 import skills.skillLoading.model.SkillPerfomed
+import skills.storage.model.UserAttrs
 import skills.storage.model.UserPerformedSkill
 import skills.storage.model.UserPoints
+import skills.storage.repos.UserAttrsRepo
 import skills.storage.repos.UserPerformedSkillRepo
 import skills.storage.repos.UserPointsRepo
 
@@ -22,6 +26,12 @@ class UserAdminService {
 
     @Autowired
     UserPointsRepo userPointsRepo
+
+    @Autowired
+    UserAttrsRepo userAttrsRepo
+
+    @Autowired
+    UserInfoService userInfoService
 
     @Transactional(readOnly = true)
     skills.controller.result.model.TableResult loadUserPerformedSkillsPage(String projectId, String userId, String query, PageRequest pageRequest){
@@ -39,6 +49,21 @@ class UserAdminService {
         return result
     }
 
+
+    @Transactional(readOnly = true)
+    List<UserInfoRes> suggestDashboardUsers(String query, boolean includeSelf) {
+        query = query ? query.toLowerCase() : ""
+
+        List<UserAttrs> userAttrs = userAttrsRepo.searchForUser(query, new PageRequest(0, 6))
+        List<UserInfoRes> results = userAttrs.collect { new UserInfoRes(it) }
+
+        if (!includeSelf) {
+            String currentUserId = userInfoService.currentUser.username
+            results = results.findAll { it.userId != currentUserId }
+        }
+        results?.sort() { it.userId }
+        return results.take(5)
+    }
 
     @Transactional(readOnly = true)
     List<String> suggestUsersForProject(String projectId, String userQuery, PageRequest pageRequest) {

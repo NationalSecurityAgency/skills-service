@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!loading.availableVersions">
+  <div v-if="!loading.availableVersions && !loading.userInfo">
     <sub-page-header title="Client Display">
       <b-form class="float-right" inline>
         <label class="pr-3 d-none d-sm-inline font-weight-bold" for="version-select">Version: </label>
@@ -40,7 +40,7 @@
         projectId: '',
         userId: '',
         loading: {
-          userToken: true,
+          userInfo: true,
           availableVersions: true,
         },
         selectedVersion: 0,
@@ -49,7 +49,27 @@
     },
     created() {
       this.projectId = this.$route.params.projectId;
-      this.userId = this.$route.params.userId;
+      if (this.$store.getters.isPkiAuthenticated) {
+        // dn is provided when routed form other pages
+        if (this.$route.params.dn) {
+          this.userId = this.$route.params.dn;
+          this.loading.userInfo = false;
+        } else {
+          UsersService.getUserInfo(this.projectId, this.$route.params.userId)
+            .then((result) => {
+              this.userId = result.dn;
+            })
+            .finally(() => {
+              this.loading.userInfo = false;
+            });
+        }
+
+        this.userId = this.$route.params.dn ? this.$route.params.dn : this.$route.params.userId;
+      } else {
+        this.userId = this.$route.params.userId;
+        this.loading.userInfo = false;
+      }
+
       this.totalPoints = this.$route.params.totalPoints;
 
       UsersService.getAvailableVersions(this.projectId)

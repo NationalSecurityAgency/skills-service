@@ -126,11 +126,36 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
     Long countDistinctUserIdByProjectId(String projectId)
 
     @Query(value ='''SELECT COUNT(*)
-        FROM (SELECT DISTINCT usr.user_id FROM user_performed_skill usr where usr.project_id = ?1 and upper(usr.user_id) like UPPER(CONCAT('%', ?2, '%'))) AS temp''',
+        FROM (SELECT DISTINCT usattr.user_id 
+                FROM user_performed_skill usr, user_attrs usattr 
+                where 
+                    usr.user_id = usattr.user_id and 
+                    usr.project_id = ?1 and 
+                    (upper(CONCAT(usattr.first_name, ' ', usattr.last_name, ' (', usattr.user_id_for_display, ')')) like UPPER(CONCAT('%', ?2, '%')) OR
+                     upper(usattr.user_id_for_display) like UPPER(CONCAT('%', ?2, '%')))) 
+                AS temp''',
             nativeQuery = true)
     Long countDistinctUserIdByProjectIdAndUserIdLike(String projectId, String userId)
 
-    @Query('SELECT userId as userId, max(updated) as lastUpdated, sum(points) as totalPoints from UserPoints up where up.projectId=?1 and upper(up.userId) like UPPER(CONCAT(\'%\', ?2, \'%\')) and up.day is null and up.skillId is null GROUP BY userId')
+    @Query('''SELECT 
+                up.userId as userId, 
+                max(up.updated) as lastUpdated, 
+                sum(up.points) as totalPoints,
+                max(ua.firstName) as firstName,
+                max(ua.lastName) as lastName,
+                max(ua.dn) as dn,
+                max(ua.email) as email,
+                max(ua.userIdForDisplay) as userIdForDisplay 
+            from UserPoints up, UserAttrs ua 
+            where 
+                up.userId = ua.userId and
+                up.projectId=?1 and 
+                (upper(CONCAT(ua.firstName, ' ', ua.lastName, ' (',  ua.userIdForDisplay, ')')) like UPPER(CONCAT(\'%\', ?2, \'%\'))  OR
+                 upper(ua.userIdForDisplay) like UPPER(CONCAT('%', ?2, '%'))
+                )and 
+                up.day is null and 
+                up.skillId is null 
+            GROUP BY up.userId''')
     List<ProjectUser> findDistinctProjectUsersAndUserIdLike(String projectId, String query, Pageable pageable)
 
     @Query(value='''SELECT COUNT(*)
@@ -139,11 +164,37 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
     Long countDistinctUserIdByProjectIdAndSkillIdIn(String projectId, List<String> skillIds)
 
     @Query(value='''SELECT COUNT(*)
-        FROM (SELECT DISTINCT up.user_id from user_points up where up.project_id=?1 and up.skill_id in (?2) and upper(up.user_id) like UPPER(CONCAT(\'%\', ?3, \'%\')) and up.day is null) AS temp''',
+        FROM (SELECT DISTINCT up.user_id 
+            from user_points up, user_attrs usattr 
+            where 
+                up.user_id = usattr.user_id and
+                up.project_id=?1 and 
+                up.skill_id in (?2) and 
+                (upper(CONCAT(usattr.first_name, ' ', usattr.last_name, ' (', usattr.user_id_for_display, ')')) like UPPER(CONCAT('%', ?3, '%')) OR
+                 upper(usattr.user_id_for_display) like UPPER(CONCAT('%', ?3, '%'))) and   
+                up.day is null) 
+            AS temp''',
             nativeQuery = true)
-    Long countDistinctUserIdByProjectIdAndSkillIdInAndUserIdLike(String projectId, List<String> skillIds, String userId)
+    Long countDistinctUserIdByProjectIdAndSkillIdInAndUserIdLike(String projectId, List<String> skillIds, String query)
 
-    @Query('SELECT userId as userId, max(updated) as lastUpdated, sum(points) as totalPoints from UserPoints up where up.projectId=?1 and up.skillId in (?2) and upper(up.userId) like UPPER(CONCAT(\'%\', ?3, \'%\')) and up.day is null GROUP BY userId')
+    @Query('''SELECT 
+                up.userId as userId, 
+                max(up.updated) as lastUpdated, 
+                sum(up.points) as totalPoints,
+                max(ua.firstName) as firstName,
+                max(ua.lastName) as lastName,
+                max(ua.dn) as dn,
+                max(ua.email) as email,
+                max(ua.userIdForDisplay) as userIdForDisplay  
+            from UserPoints up, UserAttrs ua 
+            where 
+                up.userId = ua.userId and
+                up.projectId=?1 and 
+                up.skillId in (?2) and
+                (upper(CONCAT(ua.firstName, ' ', ua.lastName, ' (',  ua.userIdForDisplay, ')')) like UPPER(CONCAT('%', ?3, '%')) OR 
+                 upper(ua.userIdForDisplay) like UPPER(CONCAT('%', ?3, '%'))) and 
+                up.day is null 
+            GROUP BY up.userId''')
     List<ProjectUser> findDistinctProjectUsersByProjectIdAndSkillIdInAndUserIdLike(String projectId, List<String> skillIds, String userId, Pageable pageable)
 
     @Nullable

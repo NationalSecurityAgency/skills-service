@@ -30,7 +30,7 @@
             <span v-else>
               Wasn't able to add points for
             </span>
-            <span>[{{user.userId}}]</span>
+            <span>[{{user.userIdForDisplay ? user.userIdForDisplay : user.userId }}]</span>
           </span><span v-if="!user.success"> - {{user.msg}}</span>
         </div>
       </div>
@@ -136,6 +136,7 @@
               success: data.skillApplied,
               msg: data.explanation,
               userId: this.currentSelectedUser.userId,
+              userIdForDisplay: this.currentSelectedUser.userIdForDisplay,
               key: this.currentSelectedUser.userId + new Date().getTime() + data.skillApplied,
             };
             this.usersAdded.push(historyObj);

@@ -60,6 +60,8 @@ class AdminController {
     @Autowired
     PublicPropsBasedValidator propsBasedValidator
 
+
+
     @Value('#{"${skills.config.ui.maxTimeWindowInMinutes}"}')
     int maxTimeWindowInMinutes
 
@@ -525,7 +527,7 @@ class AdminController {
         SkillsValidator.isNotNull(userId, "User Id", projectId)
         SkillsValidator.isNotNull(timestamp, "Timestamp", projectId)
 
-        return skillEventService.deleteSkillEvent(projectId, skillId, userId, timestamp)
+        return skillEventService.deleteSkillEvent(projectId, skillId, userId?.toLowerCase(), timestamp)
     }
 
     @RequestMapping(value = "/projects/{projectId}/skills", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -622,7 +624,7 @@ class AdminController {
         SkillsValidator.isNotBlank(userId, "User Id", projectId)
 
         PageRequest pageRequest = new PageRequest(page - 1, limit, ascending ? ASC : DESC, orderBy)
-        return userAdminService.loadUserPerformedSkillsPage(projectId, userId, query, pageRequest)
+        return userAdminService.loadUserPerformedSkillsPage(projectId, userId?.toLowerCase(), query, pageRequest)
     }
 
     @GetMapping(value = '/projects/{projectId}/users/count', produces = 'application/json')
@@ -641,7 +643,7 @@ class AdminController {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(userId, "User Id", projectId)
 
-        return userAdminService.getUserSkillsStats(projectId, userId)
+        return userAdminService.getUserSkillsStats(projectId, userId?.toLowerCase())
     }
 
     @GetMapping(value = "/projects/{projectId}/users", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -659,6 +661,13 @@ class AdminController {
         return adminUsersService.loadUsersPage(projectId, query, pageRequest)
     }
 
+    @RequestMapping(value = "/projects/{projectId}/users/{userId}", method = RequestMethod.GET)
+    UserInfoRes getUserInfo(
+            @PathVariable("projectId") String projectId,
+            @PathVariable("userId") String userId) {
+        return adminUsersService.getUserForProject(projectId, userId?.toLowerCase())
+    }
+
     @GetMapping(value = "/projects/{projectId}/subjects/{subjectId}/users", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     TableResult getSubjectUsers(@PathVariable("projectId") String projectId,
@@ -672,7 +681,7 @@ class AdminController {
         SkillsValidator.isNotBlank(subjectId, "Subject Id", projectId)
 
         PageRequest pageRequest = new PageRequest(page - 1, limit, ascending ? ASC : DESC, orderBy)
-        List<SkillDefRes> subjectSkills = getSkills(projectId, subjectId)
+        List<SkillDefPartialRes> subjectSkills = getSkills(projectId, subjectId)
         List<String> skillIds = subjectSkills.collect { it.skillId }
         return adminUsersService.loadUsersPage(projectId, skillIds, query, pageRequest)
     }

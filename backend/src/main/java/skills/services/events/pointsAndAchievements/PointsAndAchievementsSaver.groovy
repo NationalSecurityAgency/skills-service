@@ -45,6 +45,12 @@ class PointsAndAchievementsSaver {
     }
     @Profile
     private Iterable<UserPoints> saveNewPoints(DataToSave dataToSave) {
-        userPointsRepo.saveAll(dataToSave.toSave)
+        try {
+            userPointsRepo.saveAll(dataToSave.toSave)
+        } catch (Throwable t) {
+            dataToSave.toSave.each {
+                log.info("Failed ---> {}", it)
+            }
+        }
     }
 }

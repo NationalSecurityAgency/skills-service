@@ -16,6 +16,11 @@ export default {
       .then(response => `${response.data.access_token}`);
   },
 
+  getUserInfo(projectId, userId) {
+    return axios.get(`/admin/projects/${projectId}/users/${userId}`)
+      .then(response => response.data);
+  },
+
   getAvailableVersions(projectId) {
     return axios.get(`/app/projects/${projectId}/versions`)
       .then(response => response.data);
