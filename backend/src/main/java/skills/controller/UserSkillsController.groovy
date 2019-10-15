@@ -129,9 +129,14 @@ class UserSkillsController {
     @ResponseBody
     @CompileStatic
     List<SkillDescription> getBadgeSkillsDescriptions(@PathVariable("projectId") String projectId,
-                                                        @PathVariable("badgeId") String badgeId,
-                                                        @RequestParam(name = 'version', required = false) Integer version) {
-        return skillsLoader.loadBadgeDescriptions(projectId, badgeId, getProvidedVersionOrReturnDefault(version))
+                                                      @PathVariable("badgeId") String badgeId,
+                                                      @RequestParam(name = 'version', required = false) Integer version,
+                                                      @RequestParam(name = 'global', required = false) Boolean isGlobal) {
+        if (isGlobal) {
+            return skillsLoader.loadGlobalBadgeDescriptions(badgeId, getProvidedVersionOrReturnDefault(version))
+        } else {
+            return skillsLoader.loadBadgeDescriptions(projectId, badgeId, getProvidedVersionOrReturnDefault(version))
+        }
     }
 
     @RequestMapping(value = "/projects/{projectId}/badges/{badgeId}/summary", method = RequestMethod.GET, produces = "application/json")

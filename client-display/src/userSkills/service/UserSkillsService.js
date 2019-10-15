@@ -159,12 +159,13 @@ export default {
 
   getDescriptions(parentId, type = 'subject') {
     let url = `${SkillsConfiguration.getServiceUrl()}${this.getServicePath()}/${SkillsConfiguration.getProjectId()}/subjects/${parentId}/descriptions`;
-    if (type === 'badge') {
+    if (type === 'badge' || type === 'global-badge') {
       url = `${SkillsConfiguration.getServiceUrl()}${this.getServicePath()}/${SkillsConfiguration.getProjectId()}/badges/${parentId}/descriptions`;
     }
     const response = axios.get(url, {
       params: {
         version: this.version,
+        global: type === 'global-badge',
       },
     }).then(result => result.data);
     return response;

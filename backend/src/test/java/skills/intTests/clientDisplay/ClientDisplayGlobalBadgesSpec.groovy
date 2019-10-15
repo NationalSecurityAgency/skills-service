@@ -99,6 +99,42 @@ class ClientDisplayGlobalBadgesSpec extends DefaultIntSpec {
         summary.iconClass == "fa fa-seleted-icon"
     }
 
+    def "badges summary for a project level - one badge - achieved"() {
+        String userId = "user1"
+
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(proj1_skills)
+
+        Map badge = [badgeId: globalBadgeId, name: 'Badge 1', description: 'This is a first badge', iconClass: "fa fa-seleted-icon",]
+        supervisorSkillsService.createGlobalBadge(badge)
+//        supervisorSkillsService.assignSkillToGlobalBadge(projectId: projId, badgeId: badge.badgeId, skillId: proj1_skills.get(0).skillId)
+
+        supervisorSkillsService.assignProjectLevelToGlobalBadge(projectId: proj1.projectId, badgeId: badge.badgeId, level: "1")
+
+        skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_skills.get(0).skillId], userId, new Date())
+
+        when:
+        def summaries = skillsService.getBadgesSummary(userId, proj1.projectId)
+        then:
+        summaries.size() == 1
+        def summary = summaries.first()
+        summary.badge == "Badge 1"
+        summary.badgeId == globalBadgeId
+        summary.global
+        !summary.gem
+        !summary.startDate
+        !summary.endDate
+        summary.numTotalSkills == 1
+        summary.numSkillsAchieved == 1
+        summary.iconClass == "fa fa-seleted-icon"
+    }
+
+
     def "badges summary for a project - few badges"() {
         String userId = "user1"
 
