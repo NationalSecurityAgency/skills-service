@@ -118,7 +118,7 @@ class AdminController {
     @RequestMapping(value = "/projects/{id}/projectSearch", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     List<SimpleProjectResult> searchProjects(@PathVariable("id") String projectId, @RequestParam("nameQuery") nameQuery) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
-        return projectAdminStorageService.searchProjects(projectId, nameQuery)
+        return projectAdminStorageService.searchProjects(projectId, nameQuery)?.findAll {it.projectId != InceptionProjectService.inceptionProjectId}
     }
 
     @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}", method = [RequestMethod.PUT, RequestMethod.POST], produces = MediaType.APPLICATION_JSON_VALUE)
