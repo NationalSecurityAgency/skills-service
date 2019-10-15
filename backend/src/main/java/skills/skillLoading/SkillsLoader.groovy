@@ -86,6 +86,9 @@ class SkillsLoader {
     @Autowired
     GlobalBadgesService globalBadgesService
 
+    @Autowired
+    UserAchievedLevelRepo achievedLevelRepo
+
     private static String PROP_HELP_URL_ROOT = "help.url.root"
 
     @Transactional(readOnly = true)
@@ -272,11 +275,20 @@ class SkillsLoader {
     List<SkillDescription> loadBadgeDescriptions(String projectId, String badgeId, Integer version = -1) {
         return loadDescriptions(projectId, badgeId, SkillRelDef.RelationshipType.BadgeRequirement, version)
     }
+    @Transactional(readOnly = true)
+    List<SkillDescription> loadGlobalBadgeDescriptions(String badgeId, Integer version = -1) {
+        return loadDescriptions(null, badgeId, SkillRelDef.RelationshipType.BadgeRequirement, version)
+    }
 
     private List<SkillDescription> loadDescriptions(String projectId, String subjectId, SkillRelDef.RelationshipType relationshipType, int version) {
         SettingsResult helpUrlRootSetting = settingsService.getProjectSetting(projectId, PROP_HELP_URL_ROOT)
 
-        List<SkillDefWithExtraRepo.SkillDescDBRes> dbRes = skillDefWithExtraRepo.findAllChildSkillsDescriptions(projectId, subjectId, relationshipType, version)
+        List<SkillDefWithExtraRepo.SkillDescDBRes> dbRes
+        if (projectId) {
+            dbRes = skillDefWithExtraRepo.findAllChildSkillsDescriptions(projectId, subjectId, relationshipType, version)
+        } else {
+            dbRes = skillDefWithExtraRepo.findAllGlobalChildSkillsDescriptions(subjectId, relationshipType, version)
+        }
         List<SkillDescription> res = dbRes.collect {
             new SkillDescription(
                     skillId: it.getSkillId(),
@@ -461,15 +473,17 @@ class SkillsLoader {
         int numAchievedSkills = achievedLevelRepository.countAchievedGlobalSkills(userId, badgeDefinition.skillId, SkillRelDef.RelationshipType.BadgeRequirement)
         int numChildSkills = skillDefRepo.countGlobalChildren(badgeDefinition.skillId, SkillRelDef.RelationshipType.BadgeRequirement)
 
-        List<SkillEventsSupportRepo.TinyProjectDef> projectsForUser = skillEventsSupportRepo.getTinyProjectDefForUserId(userId)
+        List<UserAchievement> achievedLevels = achievedLevelRepo.findAllLevelsByUserId(userId)
+        Map<String, Integer> userProjectLevels = (Map<String, Integer>)achievedLevels?.groupBy { it.projectId }
+                ?.collectEntries {String key, List<UserAchievement> val -> [key,val.collect{it.level}.max()]}
+
         List<GlobalBadgeLevelRes> requiredLevels = globalBadgesService.getGlobalBadgeLevels(badgeDefinition.skillId)
         List<ProjectLevelSummary> projectLevels = []
         for (GlobalBadgeLevelRes requiredLevel : requiredLevels) {
             ProjectLevelSummary projectLevelSummary = new ProjectLevelSummary(projectId: requiredLevel.projectId, projectName: requiredLevel.projectName, requiredLevel: requiredLevel.level)
             projectLevels.add(projectLevelSummary)
-            if (projectsForUser.find { it.projectId == requiredLevel.projectId }) {
-                Integer achievedProjectLevel = skillsLoader.getUserLevel(requiredLevel.projectId, userId)
-                projectLevelSummary.achievedLevel = achievedProjectLevel
+            if (userProjectLevels.containsKey(requiredLevel.projectId)) {
+                Integer achievedProjectLevel = userProjectLevels.get(requiredLevel.projectId)
                 if (achievedProjectLevel >= requiredLevel.level) {
                     numAchievedSkills++
                 }

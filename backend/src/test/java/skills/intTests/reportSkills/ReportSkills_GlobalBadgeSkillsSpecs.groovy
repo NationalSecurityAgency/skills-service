@@ -62,8 +62,8 @@ class ReportSkills_GlobalBadgeSkillsSpecs extends DefaultIntSpec {
 
         def resSkill1 = skillsService.addSkill([projectId: projId, skillId: skill1.skillId], "user1", dt.toDate()).body
         def resSkill3 = skillsService.addSkill([projectId: projId, skillId: skill3.skillId], "user1", dt.plusDays(1).toDate()).body
-        def resSkill2 = skillsService.addSkill([projectId: projId, skillId: skill2.skillId], "user1", dt.plusDays(1).toDate()).body
-        def resSkill4 = skillsService.addSkill([projectId: projId, skillId: skill4.skillId], "user1", dt.plusDays(1).toDate()).body
+        def resSkill2 = skillsService.addSkill([projectId: projId, skillId: skill2.skillId], "user1", dt.plusDays(2).toDate()).body
+        def resSkill4 = skillsService.addSkill([projectId: projId, skillId: skill4.skillId], "user1", dt.plusDays(3).toDate()).body
 
         then:
         resSkill1.skillApplied && !resSkill1.completed.find { it.id == badgeId}

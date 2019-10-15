@@ -147,8 +147,7 @@ class SupervisorController {
 
     @RequestMapping(value = "/badges/{badgeId}", method = RequestMethod.PATCH, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    void setBadgeDisplayOrder(
-            @PathVariable("badgeId") String badgeId, @RequestBody ActionPatchRequest badgePatchRequest) {
+    void setBadgeDisplayOrder(@PathVariable("badgeId") String badgeId, @RequestBody ActionPatchRequest badgePatchRequest) {
         SkillsValidator.isNotBlank(badgeId, "Badge Id")
         SkillsValidator.isNotNull(badgePatchRequest.action, "Action must be provided")
 
