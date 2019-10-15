@@ -44,10 +44,10 @@ class UserInfoService {
      * Abstracts dealing with PKI vs Password/Form modes when user id param is provided
      */
     String getUserName(String userIdParam) {
-        String res = userIdParam
+        String userNameRes = userIdParam
         if (!userIdParam) {
             UserInfo userInfo = getCurrentUser()
-            res =  userInfo.username
+            userNameRes =  userInfo.username
         } else if (authMode == AuthMode.PKI) {
             UserInfo userInfo
             try {
@@ -60,17 +60,17 @@ class UserInfoService {
                 throw new SkillException("User Info Service does not know about user with provided lookup id of [${userIdParam}]")
             }
 
-            res = userInfo.username
+            userNameRes = userInfo.username
         }
 
         /**
          * Save UserAttrs as loading of user relies on those records to be present
          */
         if (!(authMode == AuthMode.PKI)) {
-            userAttrsService.saveUserAttrs(userIdParam, new UserInfo(username: userIdParam, usernameForDisplay: userIdParam))
+            userAttrsService.saveUserAttrs(userNameRes, new UserInfo(username: userNameRes, usernameForDisplay: userNameRes))
         }
 
-        return res?.toLowerCase()
+        return userNameRes?.toLowerCase()
     }
 
     /**

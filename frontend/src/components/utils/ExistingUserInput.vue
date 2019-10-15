@@ -142,7 +142,7 @@
           .then((response) => {
             this.suggestions = response.data.filter(suggestedUser => !this.excludedSuggestions.includes(suggestedUser.userId));
             this.suggestions = this.suggestions.map((it) => {
-              const label = it.first && it.last ? `${it.first} ${it.last} (${it.userIdForDisplay})` : it.userIdForDisplay;
+              const label = this.getUserIdFroDisplay(it);
               const sug = {
                 ...it,
                 label,
@@ -161,6 +161,16 @@
         };
         this.userQuery = tag;
         this.suggestions.push(tag);
+      },
+
+      getUserIdFroDisplay(user) {
+        if (!user.userIdForDisplay) {
+          return user.userId;
+        }
+        if (user.first && user.last) {
+          return `${user.first} ${user.last} (${user.userIdForDisplay})`;
+        }
+        return user.userIdForDisplay;
       },
 
       validateUserId(userId) {

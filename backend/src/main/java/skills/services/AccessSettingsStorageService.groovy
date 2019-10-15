@@ -1,5 +1,6 @@
 package skills.services
 
+import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.core.GrantedAuthority
@@ -228,6 +229,7 @@ class AccessSettingsStorageService {
         new UserInfoRes(userAttrs)
     }
 
+    @Profile
     private User createNewUser(UserInfo userInfo) {
         String userId = userInfo.username?.toLowerCase()
         User user = new User(
@@ -239,8 +241,10 @@ class AccessSettingsStorageService {
         return user
     }
 
+    @Profile
     private void updateUser(UserInfo userInfo, User user) {
-        if ( !user.userId?.equalsIgnoreCase(userInfo.username) || !user.password.equalsIgnoreCase(userInfo.password)) {
+        if ( !user.userId?.equalsIgnoreCase(userInfo.username) ||
+                (!(user.password == null && userInfo?.password == null) && !user.password?.equalsIgnoreCase(userInfo?.password))) {
             user.userId = userInfo.username?.toLowerCase()
             user.password = userInfo.password
             userRepository.save(user)

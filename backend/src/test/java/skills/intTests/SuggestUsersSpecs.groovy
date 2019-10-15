@@ -27,7 +27,7 @@ class SuggestUsersSpecs extends DefaultIntSpec {
         // by nickname
         "SuggestUsersSpecsBob SuggestUsersSpecsSmith" | ["aafirstsuggestusersspecsuser"]
         // current user - includeSelf should default to true
-        "skills" | ["skills@skills.org"]
+        "skills@" | ["skills@skills.org"]
 //        this consistently fails in gitlab-ci but not locally (in either h2 or postgres)
 //        "" | ["aafirstsuggestusersspecsuser", "bbsecondsuggestusersspecsuser", "ccthirdsuggestusersspecsuser"]
     }
