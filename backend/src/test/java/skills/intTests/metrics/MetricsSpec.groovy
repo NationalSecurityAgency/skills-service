@@ -3,6 +3,7 @@ package skills.intTests.metrics
 import org.springframework.http.HttpStatus
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
+import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.TestUtils
 
 class MetricsSpec extends DefaultIntSpec {
@@ -247,6 +248,18 @@ class MetricsSpec extends DefaultIntSpec {
         charts[1].dataItems.size() == 2
         charts[1].dataItems[0].count == 14
         charts[1].dataItems[1].count == 14
+    }
+
+    def "Does not load global charts if less then 2 projects"() {
+
+        skillsService.deleteAllMyProjects()
+        skillsService.createProject(SkillsFactory.createProject(99))
+
+        when:
+        def charts = skillsService.getAllGlobalMetricsChartsForSection("global")
+
+        then:
+        !charts
     }
 
     def "Loads global chart for chart builder id and section"() {

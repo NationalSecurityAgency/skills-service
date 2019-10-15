@@ -37,6 +37,9 @@ class SkillCountPerProjectBuilder implements MetricsChartBuilder{
     MetricsChart build(String projectId, Map<String, String> props, boolean loadData) {
 
         def projectResults = projService.getProjects()
+        if (projectResults.size() < 2){
+            return null
+        }
 
         List<CountItem> chartData = []
 

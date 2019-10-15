@@ -9,7 +9,7 @@
       </div>
     </div>
 
-    <simple-card v-if="loadableCharts.length > 0">
+    <simple-card v-if="canDisplayCharts">
       <h5>Available Metrics</h5>
 
       <div class="row justify-content-center">
@@ -23,7 +23,7 @@
         </div>
       </div>
     </simple-card>
-    <no-content3 v-if="!isLoading && (!loadedCharts || loadedCharts.length == 0)" title="No Metrics Yet" sub-title="Metrics coming soon!"/>
+    <no-content3 v-if="!isLoading && (!canDisplayCharts)" title="No Metrics Yet" :sub-title="noChartsMsg"/>
 
     <skills-spinner :is-loading="isLoading"/>
   </div>
@@ -109,6 +109,15 @@
       },
       loadableCharts() {
         return this.charts.filter(chart => !chart.dataLoaded);
+      },
+      canDisplayCharts() {
+        return this.loadedCharts && this.loadedCharts.length > 0;
+      },
+      noChartsMsg() {
+        if (this.section === SECTION.GLOBAL) {
+          return 'Cross project metrics compare projects. These metrics will be available once you have access to least two projects.';
+        }
+        return 'Metrics coming soon!';
       },
     },
     methods: {

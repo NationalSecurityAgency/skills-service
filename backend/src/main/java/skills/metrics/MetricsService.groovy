@@ -39,13 +39,15 @@ class MetricsService {
         return chartBuildersMap.get(section)?.collect { builder ->
             boolean loadData = loadFirst < 0 || ++i <= loadFirst
             MetricsChart chart = builder.build(projectId, props, loadData)
-            chart.dataLoaded = loadData
-            if (loadData) {
-                clearDataItemsIfAllValuesZero(chart)
+            if(chart != null) {
+                chart.dataLoaded = loadData
+                if (loadData) {
+                    clearDataItemsIfAllValuesZero(chart)
+                }
+                chart.chartOptions.put(ChartOption.chartBuilderId, builder.class.name)
             }
-            chart.chartOptions.put(ChartOption.chartBuilderId, builder.class.name)
             return chart
-        }
+        }?.findAll { it != null }
     }
 
     MetricsChart loadChartForSection(String builderId, Section section, String projectId, Map<String, String> props) {
@@ -56,9 +58,11 @@ class MetricsService {
             throw ex
         }
         MetricsChart chart = chartBuilder.build(projectId, props, true)
-        chart.chartOptions.put(ChartOption.chartBuilderId, chartBuilder.class.name)
-        chart.dataLoaded = true
-        clearDataItemsIfAllValuesZero(chart)
+        if (chart != null) {
+            chart.chartOptions.put(ChartOption.chartBuilderId, chartBuilder.class.name)
+            chart.dataLoaded = true
+            clearDataItemsIfAllValuesZero(chart)
+        }
         return chart
     }
 
