@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
 import skills.auth.SecurityMode
 import skills.auth.UserInfo
+import skills.controller.exceptions.SkillException
 
 @Component
 @Conditional(SecurityMode.PkiAuth)
@@ -25,7 +26,9 @@ class PkiUserLookup {
 
     @Profile
     UserInfo lookupUserDn(String dn) {
-        return restTemplate.getForObject(userInfoUri, UserInfo, dn)
+        UserInfo userInfo = restTemplate.getForObject(userInfoUri, UserInfo, dn)
+        validate(userInfo)
+        return userInfo
     }
 
     @Profile
@@ -37,6 +40,18 @@ class PkiUserLookup {
                 new ParameterizedTypeReference<List<UserInfo>>(){},
                 query)
         List<UserInfo> matches = response.getBody()
+        for (UserInfo userInfo : matches) {
+            validate(userInfo)
+        }
         return matches
+    }
+
+    private void validate(UserInfo userInfo, String requestValue) {
+        if (!userInfo.username) {
+            throw new SkillException("User info service result must contain username. request value=[${requestValue}]")
+        }
+        if (!userInfo.usernameForDisplay) {
+            throw new SkillException("User info service result must contain usernameForDisplay. request value=[${requestValue}]")
+        }
     }
 }

@@ -460,6 +460,11 @@ class SkillsService {
         return wsHelper.adminGet("${getProjectUrl(project)}/performedSkills/${userId}?query=${query}&limit=10&ascending=0&page=1&byColumn=0&orderBy=performedOn".toString())
     }
 
+    def getUserInfoForProject(String projectId, String userId){
+        String endpoint = "/projects/${projectId}/users/${userId}".toString()
+        return wsHelper.adminGet(endpoint)
+    }
+
     def getUsersPerLevel(String projectId, String subjectId = null){
         String endpoint = subjectId ? "/projects/${projectId}/subjects/${subjectId}/rankDistribution/usersPerLevel" : "/projects/${projectId}/rankDistribution/usersPerLevel"
         return wsHelper.apiGet(endpoint)
