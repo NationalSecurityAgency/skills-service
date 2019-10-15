@@ -18,7 +18,7 @@ class UserAttrsService {
         UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(userId)
         boolean doSave = true
         if (!userAttrs) {
-            userAttrs = new UserAttrs(userId: userId)
+            userAttrs = new UserAttrs(userId: userId?.toLowerCase())
         } else {
             doSave = userAttrs.firstName != userInfo.firstName ||
                     userAttrs.lastName != userInfo.lastName ||

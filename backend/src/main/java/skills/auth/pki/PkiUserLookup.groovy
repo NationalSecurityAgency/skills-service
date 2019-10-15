@@ -1,5 +1,6 @@
 package skills.auth.pki
 
+import callStack.profiler.Profile
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Conditional
 import org.springframework.core.ParameterizedTypeReference
@@ -22,10 +23,12 @@ class PkiUserLookup {
     @Value('${skills.authorization.userQueryUri}')
     String userQueryUri
 
+    @Profile
     UserInfo lookupUserDn(String dn) {
         return restTemplate.getForObject(userInfoUri, UserInfo, dn)
     }
 
+    @Profile
     List<UserInfo> suggestUsers(String query) {
         ResponseEntity<List<UserInfo>> response = restTemplate.exchange(
                 userQueryUri,

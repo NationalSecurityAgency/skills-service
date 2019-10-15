@@ -131,8 +131,8 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                 where 
                     usr.user_id = usattr.user_id and 
                     usr.project_id = ?1 and 
-                    (upper(CONCAT(usattr.first_name, ' ', usattr.last_name, ' (', usattr.user_id_for_display, ')')) like UPPER(CONCAT('%', ?2, '%'))) OR
-                     upper(usattr.user_id_for_display) like UPPER(CONCAT('%', ?2, '%'))) 
+                    (upper(CONCAT(usattr.first_name, ' ', usattr.last_name, ' (', usattr.user_id_for_display, ')')) like UPPER(CONCAT('%', ?2, '%')) OR
+                     upper(usattr.user_id_for_display) like UPPER(CONCAT('%', ?2, '%')))) 
                 AS temp''',
             nativeQuery = true)
     Long countDistinctUserIdByProjectIdAndUserIdLike(String projectId, String userId)

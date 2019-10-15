@@ -30,7 +30,7 @@
             <span v-else>
               Wasn't able to add points for
             </span>
-            <span>[{{user.userIdForDisplay}}]</span>
+            <span>[{{user.userIdForDisplay ? user.userIdForDisplay : user.userId }}]</span>
           </span><span v-if="!user.success"> - {{user.msg}}</span>
         </div>
       </div>
