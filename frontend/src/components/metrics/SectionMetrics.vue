@@ -115,7 +115,7 @@
       },
       noChartsMsg() {
         if (this.section === SECTION.GLOBAL) {
-          return 'Cross project metrics compare projects. These metrics will be available once you have access to least two projects.';
+          return 'Cross project metrics compare projects. These metrics will be available once you have access to at least two projects.';
         }
         return 'Metrics coming soon!';
       },
