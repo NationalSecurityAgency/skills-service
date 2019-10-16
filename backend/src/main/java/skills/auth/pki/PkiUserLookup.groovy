@@ -47,10 +47,14 @@ class PkiUserLookup {
     }
 
     private void validate(UserInfo userInfo, String requestValue) {
-        if (!userInfo.username) {
+        if (!userInfo) {
+            throw new SkillException("User info service does not have key [${requestValue}]")
+        }
+
+        if (!userInfo?.username) {
             throw new SkillException("User info service result must contain username. request value=[${requestValue}]")
         }
-        if (!userInfo.usernameForDisplay) {
+        if (!userInfo?.usernameForDisplay) {
             throw new SkillException("User info service result must contain usernameForDisplay. request value=[${requestValue}]")
         }
     }

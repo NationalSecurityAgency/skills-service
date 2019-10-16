@@ -142,6 +142,14 @@ class SkillsService {
         wsHelper.adminDelete("/projects/${projectId}/users/${userId}/roles/${role}")
     }
 
+    def getUserRolesForProject(String projectId) {
+        wsHelper.adminGet("/projects/${projectId}/userRoles")
+    }
+
+    def getUserRolesForProjectAndUser(String projectId, String userId) {
+        wsHelper.adminGet("/projects/${projectId}/users/${userId}/roles")
+    }
+
     def addUserRole(String userId, String projectId, String role) {
         wsHelper.adminPost("/projects/${projectId}/users/${userId}/roles/${role}", [:])
     }

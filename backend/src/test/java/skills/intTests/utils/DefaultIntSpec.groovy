@@ -1,9 +1,12 @@
 package skills.intTests.utils
 
 import groovy.util.logging.Slf4j
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.web.server.LocalServerPort
 import skills.SpringBootApp
+import skills.storage.repos.ProjDefRepo
+import skills.storage.repos.UserAttrsRepo
 import spock.lang.Specification
 
 @Slf4j
@@ -21,9 +24,20 @@ class DefaultIntSpec extends Specification {
     @LocalServerPort
     int localPort
 
+    @Autowired
+    ProjDefRepo projDefRepo
+
+    @Autowired
+    UserAttrsRepo userAttrsRepo
+
     def setup() {
+        /**
+         * deleting projects and users will wipe the entire db clean due to cascading
+         */
+        projDefRepo.deleteAll()
+        userAttrsRepo.deleteAll()
+
         skillsService = createService()
-        skillsService.deleteAllMyProjects()
     }
 
     SkillsService createService(

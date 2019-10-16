@@ -7,6 +7,9 @@ import skills.storage.model.auth.RoleName
 class UserRoleRes {
 
     String userId
+    String userIdForDisplay
+    String firstName
+    String lastName
 
     String projectId
 
