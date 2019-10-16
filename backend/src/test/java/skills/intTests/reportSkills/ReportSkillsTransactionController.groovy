@@ -3,6 +3,7 @@ package skills.intTests.reportSkills
 import groovy.transform.CompileStatic
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
+import skills.controller.request.model.SkillEventRequest
 import skills.services.events.SkillEventResult
 
 @RestController
@@ -18,11 +19,13 @@ class ReportSkillsTransactionController {
     SkillEventResult addSkill(@PathVariable("projectId") String projectId,
                               @PathVariable("skillId") String skillId,
                               @PathVariable("shouldThrow") Boolean shouldThrow,
-                              @RequestBody(required = false) skills.controller.request.model.SkillEventRequest skillEventRequest) {
+                              @RequestBody(required = false) SkillEventRequest skillEventRequest) {
         assert skillEventRequest.userId
         assert skillEventRequest.timestamp
         return service.reportSkill(projectId, skillId, skillEventRequest, shouldThrow)
     }
+
+
 
 
 
