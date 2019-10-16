@@ -16,6 +16,10 @@
     <loading-container v-bind:is-loading="isLoading">
       <transition name="userRolesContainer" enter-active-class="animated fadeIn">
         <v-client-table :data="data" :columns="columns" :options="options">
+          <div slot="userId" slot-scope="props">
+            {{ getUserDisplay(props.row) }}
+          </div>
+
           <div slot="edit" slot-scope="props" class="field has-addons">
             <b-button v-if="notCurrentUser(props.row.userId)" @click="deleteUserRoleConfirm(props.row)"
                       variant="outline-primary">
@@ -135,6 +139,9 @@
             this.isSaving = false;
             this.selectedUser = null;
           });
+      },
+      getUserDisplay(item) {
+        return item.lastName && item.firstName ? `${item.firstName} ${item.lastName} (${item.userIdForDisplay})` : item.userIdForDisplay;
       },
     },
   };

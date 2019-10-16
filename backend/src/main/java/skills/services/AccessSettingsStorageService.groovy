@@ -60,27 +60,27 @@ class AccessSettingsStorageService {
 
     @Transactional(readOnly = true)
     List<UserRoleRes> getUserRolesForProjectId(String projectId) {
-        List<UserRole> res = userRoleRepository.findAllByProjectId(projectId)
+        List<UserRoleRepo.UserRoleWithAttrs> res = userRoleRepository.findRoleWithAttrsByProjectId(projectId)
         return res.collect { convert(it) }
     }
 
     @Transactional(readOnly = true)
     List<UserRoleRes> getUserRolesForProjectIdAndUserId(String projectId, String userId) {
-        List<UserRole> res = userRoleRepository.findAllByProjectIdAndUserId(projectId, userId)
+        List<UserRoleRepo.UserRoleWithAttrs> res = userRoleRepository.findAllByProjectIdAndUserId(projectId, userId)
         return res.collect { convert(it) }
         return res
     }
 
     @Transactional(readOnly = true)
     List<UserRoleRes> getUserRolesWithRole(RoleName roleName) {
-        List<UserRole> roles = userRoleRepository.findAllByRoleName(roleName)
+        List<UserRoleRepo.UserRoleWithAttrs> roles = userRoleRepository.findAllByRoleName(roleName)
         return roles.collect { convert(it) }
     }
 
     @Transactional(readOnly = true)
     List<UserRoleRes> getUserRolesWithoutRole(RoleName roleName) {
         List<UserRoleRes> usersWithRole = getUserRolesWithRole(roleName)
-        List<UserRole> res
+        List<UserRoleRepo.UserRoleWithAttrs> res
         if (usersWithRole) {
             res = userRoleRepository.findAllByUserIdNotIn(usersWithRole.collect { it.userId }.unique())
         } else {
@@ -91,7 +91,7 @@ class AccessSettingsStorageService {
 
     @Transactional(readOnly = true)
     List<UserRoleRes> getRootUsers() {
-        List<UserRole> roles = userRoleRepository.findAllByRoleName(RoleName.ROLE_SUPER_DUPER_USER)
+        List<UserRoleRepo.UserRoleWithAttrs> roles = userRoleRepository.findAllByRoleName(RoleName.ROLE_SUPER_DUPER_USER)
         return roles.collect { convert(it) }
     }
 
@@ -270,6 +270,18 @@ class AccessSettingsStorageService {
                 userId: inputRole.userId,
                 projectId: inputRole.projectId,
                 roleName: inputRole.roleName,
+        )
+        return res
+    }
+
+    private UserRoleRes convert(UserRoleRepo.UserRoleWithAttrs input) {
+        UserRoleRes res = new UserRoleRes(
+                userId: input.role.userId,
+                userIdForDisplay: input.attrs.userIdForDisplay,
+                projectId: input.role.projectId,
+                roleName: input.role.roleName,
+                firstName: input.attrs.firstName,
+                lastName: input.attrs.lastName,
         )
         return res
     }
