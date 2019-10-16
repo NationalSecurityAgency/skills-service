@@ -73,7 +73,10 @@ class CreateAccountController {
             userInfo.username = userInfo.email
         }
         if (!userInfo.nickname) {
-            userInfo.nickname = "${userInfo.firstName} ${userInfo.lastName}"
+            userInfo.nickname = "${userInfo.firstName} ${userInfo.lastName}".toString()
+        }
+        if (!userInfo.usernameForDisplay) {
+            userInfo.usernameForDisplay = userInfo.username
         }
         userInfo.authorities = [new skills.auth.UserSkillsGrantedAuthority(new UserRole(
                 roleName: RoleName.ROLE_SUPER_DUPER_USER
