@@ -9,7 +9,7 @@
       </div>
     </div>
 
-    <simple-card v-if="canDisplayCharts">
+    <simple-card v-if="canDisplayCharts && loadableCharts.length > 0">
       <h5>Available Metrics</h5>
 
       <div class="row justify-content-center">
