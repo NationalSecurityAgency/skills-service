@@ -8,7 +8,7 @@
         <div class="card-body" style="min-height: 400px;">
 
           <v-client-table class="vue-table-2" :data="skills" :columns="skillsColumns"
-                          :options="options" v-if="this.skills && this.skills.length" v-on:sorted="handleColumnSort">
+                          :options="options" v-if="this.skills && this.skills.length" v-on:sorted="handleColumnSort" ref="table">
 
             <div slot="name" slot-scope="props" class="field has-addons">
               <div>
@@ -161,11 +161,10 @@
       skillCreatedOrUpdated(skill) {
         this.isLoading = true;
         const item1Index = this.skills.findIndex(item => item.skillId === skill.originalSkillId);
-
         SkillsService.saveSkill(skill)
           .then((skillRes) => {
             let createdSkill = skillRes;
-            createdSkill = Object.assign({ subjectId: this.subjectId }, createdSkill);
+            createdSkill = Object.assign({ subjectId: this.subjectId }, createdSkill, { created: new Date(skill.created) });
             if (item1Index >= 0) {
               createdSkill.refreshCounter = this.skills[item1Index].refreshCounter + 1;
               this.skills.splice(item1Index, 1, createdSkill);
