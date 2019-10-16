@@ -177,7 +177,10 @@ class AccessSettingsStorageService {
     @Transactional()
     User createAppUser(UserInfo userInfo, boolean createOrUpdate) {
         userInfoValidator.validate(userInfo)
-        User user = userRepository.findByUserIdIgnoreCase(userInfo.username?.toLowerCase())
+        String userId = userInfo.username?.toLowerCase()
+        userAttrsService.saveUserAttrs(userId, userInfo)
+
+        User user = userRepository.findByUserIdIgnoreCase(userId)
         if (!createOrUpdate) {
             if (user) {
                 SkillException exception = new SkillException("User [${userInfo.username?.toLowerCase()}] already exists.")
@@ -195,8 +198,6 @@ class AccessSettingsStorageService {
             log.debug("Creating new app user for ID [{}], DN [{}]", userInfo.username, userInfo.userDn)
             user = createNewUser(userInfo)
         }
-
-        userAttrsService.saveUserAttrs(user.userId, userInfo)
 
         return user
     }

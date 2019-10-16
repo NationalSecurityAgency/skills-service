@@ -396,6 +396,38 @@
                                  referencedTableName="project_definition"/>
 
         <!-- ============================================================================
+        Table: User Attributes
+        ============================================================================-->
+        <createTable tableName="user_attrs">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="user_id" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="first_name" type="varchar(255)"/>
+            <column name="last_name" type="varchar(255)"/>
+            <column name="dn" type="varchar(255)"/>
+            <column name="email" type="varchar(255)"/>
+            <column name="nickname" type="varchar(255)"/>
+            <column name="user_id_for_display" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex indexName="index_users_attrs_user_id"
+                     tableName="user_attrs" unique="true">
+            <column name="user_id" type="varchar(255)"/>
+        </createIndex>
+
+        <!-- ============================================================================
         Table: Users
         ============================================================================-->
         <createTable tableName="users">
@@ -419,6 +451,13 @@
                      tableName="users" unique="true">
             <column name="user_id" type="varchar(255)"/>
         </createIndex>
+        <addForeignKeyConstraint baseColumnNames="user_id"
+                                 baseTableName="users"
+                                 constraintName="fk_users_user_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="user_id"
+                                 referencedTableName="user_attrs"/>
 
         <!-- ============================================================================
         Table: User Roles
@@ -477,36 +516,6 @@
                                  onUpdate="CASCADE"
                                  referencedColumnNames="project_id"
                                  referencedTableName="project_definition"/>
-
-        <!-- ============================================================================
-        Table: User Attributes
-        ============================================================================-->
-        <createTable tableName="user_attrs">
-            <column name="id" type="int" autoIncrement="true">
-                <constraints primaryKey="true" nullable="false"/>
-            </column>
-
-            <column name="user_id" type="varchar(255)">
-                <constraints nullable="false"/>
-            </column>
-            <column name="first_name" type="varchar(255)"/>
-            <column name="last_name" type="varchar(255)"/>
-            <column name="dn" type="varchar(255)"/>
-            <column name="email" type="varchar(255)"/>
-            <column name="nickname" type="varchar(255)"/>
-            <column name="user_id_for_display" type="varchar(255)"/>
-
-            <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
-                <constraints nullable="false"/>
-            </column>
-            <column name="updated" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
-                <constraints nullable="false"/>
-            </column>
-        </createTable>
-        <createIndex indexName="index_users_attrs_user_id"
-                     tableName="users" unique="true">
-            <column name="user_id" type="varchar(255)"/>
-        </createIndex>
 
         <!-- ============================================================================
         Table: User Performed Skill
@@ -574,6 +583,13 @@
                                  onUpdate="CASCADE"
                                  referencedColumnNames="project_id,skill_id"
                                  referencedTableName="skill_definition"/>
+        <addForeignKeyConstraint baseColumnNames="user_id"
+                                 baseTableName="user_performed_skill"
+                                 constraintName="fk_user_performed_skill_user_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="user_id"
+                                 referencedTableName="user_attrs"/>
 
         <!-- ============================================================================
         Table: User Points
@@ -649,6 +665,14 @@
                                  onUpdate="CASCADE"
                                  referencedColumnNames="project_id,skill_id"
                                  referencedTableName="skill_definition"/>
+        <addForeignKeyConstraint baseColumnNames="user_id"
+                                 baseTableName="user_points"
+                                 constraintName="fk_user_points_user_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="user_id"
+                                 referencedTableName="user_attrs"/>
+
         <createIndex indexName="user_points_proj_skill_user_day"
                      tableName="user_points" unique="true">
             <column name="project_id" type="varchar(255)"/>
@@ -656,6 +680,7 @@
             <column name="user_id" type="varchar(255)"/>
             <column name="day" type="date"/>
         </createIndex>
+
 
         <!-- ============================================================================
         Table: User Achievement
@@ -724,6 +749,13 @@
                                  onUpdate="CASCADE"
                                  referencedColumnNames="project_id,skill_id"
                                  referencedTableName="skill_definition"/>
+        <addForeignKeyConstraint baseColumnNames="user_id"
+                                 baseTableName="user_achievement"
+                                 constraintName="fk_user_achievement_user_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="user_id"
+                                 referencedTableName="user_attrs"/>
 
        <!-- ============================================================================
        Table: Settings

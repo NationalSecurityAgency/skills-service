@@ -64,7 +64,9 @@ class UserInfoService {
         }
 
         /**
-         * Save UserAttrs as loading of user relies on those records to be present
+         * Save UserAttrs as loading of user relies on those records to be present;
+         * also it was decided to use db fk constraints to map to this table to ensure valid userId and to provide simple way to
+         * remove users
          */
         if (!(authMode == AuthMode.PKI)) {
             userAttrsService.saveUserAttrs(userNameRes, new UserInfo(username: userNameRes, usernameForDisplay: userNameRes))

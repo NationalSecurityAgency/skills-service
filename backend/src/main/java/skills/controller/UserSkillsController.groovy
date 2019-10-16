@@ -6,8 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
 import skills.PublicProps
 import skills.auth.UserInfo
+import skills.auth.UserInfoService
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.SkillEventRequest
+import skills.icons.CustomIconFacade
 import skills.services.events.SkillEventResult
 import skills.services.events.SkillEventsService
 import skills.skillLoading.RankingLoader
@@ -31,10 +33,10 @@ class UserSkillsController {
     SkillsLoader skillsLoader
 
     @Autowired
-    skills.auth.UserInfoService userInfoService
+    UserInfoService userInfoService
 
     @Autowired
-    skills.icons.CustomIconFacade customIconFacade
+    CustomIconFacade customIconFacade
 
     @Autowired
     RankingLoader rankingLoader
