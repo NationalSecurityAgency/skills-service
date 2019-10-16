@@ -116,7 +116,6 @@
             };
         },
         mounted() {
-            console.log('wtf');
             this.getData();
         },
         methods: {
