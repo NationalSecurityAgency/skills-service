@@ -12,7 +12,7 @@
         this.$bvToast.toast(msg, {
           title: toastTitle,
           autoHideDelay: 4000,
-          toaster: 'b-toaster-top-right',
+          toaster: 'b-toaster-top-center',
           solid: true,
           appendToast: true,
           variant: toastVairant,
