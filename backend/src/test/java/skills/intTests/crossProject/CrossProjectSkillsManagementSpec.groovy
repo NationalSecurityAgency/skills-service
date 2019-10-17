@@ -624,4 +624,27 @@ class CrossProjectSkillsManagementSpec extends DefaultIntSpec {
         skillsClientException.httpStatus == HttpStatus.BAD_REQUEST
     }
 
+    def "cannot share with Inception project"() {
+        def proj1 = SkillsFactory.createProject(999)
+        proj1.projectId = "noInception"
+
+        def proj2 = SkillsFactory.createProject(998)
+        proj2.projectId = "noInception2"
+
+        def proj3 = SkillsFactory.createProject(997)
+        proj3.projectId = "Inception"
+        proj3.name = "Inception"
+
+        skillsService.createProject(proj1)
+        skillsService.createProject(proj2)
+        skillsService.createProject(proj3)
+
+        when:
+        def results = skillsService.searchOtherProjectsByName(proj1.projectId, "")
+
+        then:
+        !results.find() { it.projectId.toLowerCase() == "inception" }
+        results.size() == 1
+    }
+
 }
