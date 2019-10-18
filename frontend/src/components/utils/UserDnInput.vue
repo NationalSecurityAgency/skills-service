@@ -44,6 +44,8 @@
         suggestions: [],
         selected: null,
         validating: true,
+        requestId: 0,
+        lastRendered: 0,
       };
     },
     computed: {
@@ -59,10 +61,14 @@
         }
 
         this.isFetching = true;
+        this.requestId = this.requestId + 1;
+        const rid = this.requestId;
         axios.get(`/app/users/suggestDns/${encodeURIComponent(this.userDn)}`)
           .then((response) => {
-            this.suggestions = response.data;
-            this.isFetching = false;
+            if (rid > this.lastRendered) {
+              this.lastRendered = rid;
+              this.suggestions = response.data;
+            }
           })
           .finally(() => {
             this.isFetching = false;
