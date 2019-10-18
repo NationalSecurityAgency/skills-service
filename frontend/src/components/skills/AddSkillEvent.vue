@@ -11,7 +11,7 @@
                       :use-utc="true" :disabled-dates="datePickerState.disabledDates"/>
         </div>
         <div class="col-auto">
-          <div v-b-tooltip.hover="generateMinPointsTooltip">
+          <div v-b-tooltip.hover :title="minPointsTooltip">
             <b-button variant="outline-primary" @click="addSkill" :disabled="errors.any() || disable" v-skills="'ManuallyAddSkillEvent'">
               Add <i v-if="projectTotalPoints >= minimumPoints" :class="[isSaving ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-arrow-circle-right']"></i>
               <i v-else class="icon-warning fa fa-exclamation-circle text-warning"></i>
@@ -113,15 +113,15 @@
       disable() {
         return (!this.currentSelectedUser || !this.currentSelectedUser.userId || this.currentSelectedUser.userId.length === 0) || this.projectTotalPoints < this.minimumPoints;
       },
-    },
-    methods: {
-      generateMinPointsTooltip() {
+      minPointsTooltip() {
         let text = '';
         if (this.projectTotalPoints < this.minimumPoints) {
           text = 'Unable to add skill for user. Insufficient available points in project.';
         }
         return text;
       },
+    },
+    methods: {
       loadProject() {
         ProjectService.getProject(this.projectId).then((res) => {
           this.projectTotalPoints = res.totalPoints;
