@@ -2,12 +2,17 @@ package skills.services
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import skills.auth.UserInfo
 import skills.controller.request.model.ProjectRequest
+import skills.controller.request.model.ProjectSettingsRequest
+import skills.controller.request.model.SettingsRequest
 import skills.controller.request.model.SkillRequest
 import skills.controller.request.model.SubjectRequest
 import skills.controller.result.model.UserRoleRes
+import skills.services.settings.SettingsService
+import skills.settings.CommonSettings
 import skills.storage.model.ProjDef
 import skills.storage.model.auth.RoleName
 import skills.storage.model.auth.UserRole
@@ -26,7 +31,13 @@ class InceptionProjectService {
     AccessSettingsStorageService accessSettingsStorageService
 
     @Autowired
+    SettingsService settingsService
+
+    @Autowired
     ProjDefRepo projDefRepo
+
+    @Value('#{"${skills.config.ui.docsHost}"}')
+    String docsRootHost = ""
 
     static final String inceptionProjectId = "Inception"
 
@@ -83,6 +94,15 @@ class InceptionProjectService {
 
     private void createProject(String userId) {
         projectAdminStorageService.saveProject(inceptionProjectId, new ProjectRequest(projectId: inceptionProjectId, name: inceptionProjectId), userId)
+
+        if (docsRootHost) {
+            log.info("setting Inception setting ${CommonSettings.HELP_URL_ROOT} to $docsRootHost")
+            ProjectSettingsRequest docRootRequest = new ProjectSettingsRequest()
+            docRootRequest.projectId = inceptionProjectId
+            docRootRequest.setting = CommonSettings.HELP_URL_ROOT
+            docRootRequest.value = docsRootHost
+            settingsService.saveSetting(docRootRequest)
+        }
 
         String subjectProjectId = "Projects"
         String subjectSkillsId = "Skills"

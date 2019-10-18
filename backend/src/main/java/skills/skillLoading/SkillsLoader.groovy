@@ -15,6 +15,7 @@ import skills.services.DependencyValidator
 import skills.services.GlobalBadgesService
 import skills.services.LevelDefinitionStorageService
 import skills.services.settings.SettingsService
+import skills.settings.CommonSettings
 import skills.skillLoading.model.*
 import skills.storage.model.*
 import skills.storage.repos.*
@@ -89,7 +90,7 @@ class SkillsLoader {
     @Autowired
     UserAchievedLevelRepo achievedLevelRepo
 
-    private static String PROP_HELP_URL_ROOT = "help.url.root"
+    private static String PROP_HELP_URL_ROOT = CommonSettings.HELP_URL_ROOT
 
     @Transactional(readOnly = true)
     Integer getUserLevel(String projectId, String userId) {
