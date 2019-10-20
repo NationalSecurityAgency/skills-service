@@ -12,8 +12,6 @@ import skills.auth.UserInfoService
 import skills.auth.pki.PkiUserLookup
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
-import skills.controller.request.model.UserSettingsRequest
-import skills.controller.result.model.SettingsResult
 import skills.controller.result.model.UserInfoRes
 import skills.controller.result.model.UserRoleRes
 import skills.services.settings.SettingsService
