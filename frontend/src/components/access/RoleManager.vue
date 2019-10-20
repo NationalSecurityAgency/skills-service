@@ -110,7 +110,7 @@
         this.userIds.push(userRole.userId);
       },
       deleteUserRoleConfirm(row) {
-        const msg = `Are you absolutely sure you want to remove [${row.userId}] as a ${this.roleDescription}?`;
+        const msg = `Are you absolutely sure you want to remove ${this.getUserDisplay(row)} as a ${this.roleDescription}?`;
         this.msgConfirm(msg)
           .then((res) => {
             if (res) {
