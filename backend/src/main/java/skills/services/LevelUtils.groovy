@@ -84,6 +84,9 @@ class LevelUtils {
 
     public List<LevelDef> fixGaps(List<LevelDef> allLevels, LevelDef toEdit, int toEditIndex){
         def res = []
+        if(allLevels.size() <= 1) {
+            return res
+        }
         switch(toEditIndex){
             case 0:
                 LevelDef fixGap = allLevels.get(toEditIndex+1)
