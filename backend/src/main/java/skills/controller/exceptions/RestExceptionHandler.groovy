@@ -66,7 +66,7 @@ class RestExceptionHandler extends ResponseEntityExceptionHandler {
         log.warn("Access is denied - programmatic exception", skillsAuthorizationException)
         String msg = "Access Denied"
         BasicErrBody body = new BasicErrBody(explanation: msg, errorCode: ErrorCode.AccessDenied)
-        return new ResponseEntity(body, HttpStatus.UNAUTHORIZED)
+        return new ResponseEntity(body, HttpStatus.FORBIDDEN)
     }
 
     @Override
