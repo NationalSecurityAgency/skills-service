@@ -939,6 +939,33 @@ class LevelsSpec extends  DefaultIntSpec{
         thrown(SkillsClientException)
     }
 
+    def "single level with from points greater then project total points"(){
+        skillsService.deleteProjectIfExist(projId)
+        skillsService.createProject([projectId: projId, name: "Level Project"])
+        skillsService.createSubject([projectId: projId, subjectId: subject, name: "Test Subject 1"])
+        createSkill(skill1, 'Test SKill 1', 200)
+
+        skillsService.deleteLevel(projId)
+        skillsService.deleteLevel(projId)
+        skillsService.deleteLevel(projId)
+        skillsService.deleteLevel(projId)
+
+        when:
+        skillsService.changeSetting(projId, projectPointsSetting, [projectId: projId, setting: projectPointsSetting, value: "true"])
+        def levels = skillsService.getLevels(projId, null).sort(){it.level}
+        def levelToEdit = levels[0]
+        levelToEdit.pointsFrom = 999999
+
+        skillsService.editLevel(projId, null, levelToEdit.level as String, levelToEdit)
+
+        levels = skillsService.getLevels(projId, null).sort(){it.level}
+
+        then:
+        levels
+        levels.size() == 1
+        levels[0].pointsFrom == 999999
+    }
+
     private List<List<String>> setupProjectWithSkills(List<String> subjects = ['testSubject1', 'testSubject2']) {
         List<List<String>> skillIds = []
         skillsService.createProject([projectId: projId, name: "Test Project"])
