@@ -15,6 +15,7 @@
   import axios from 'axios';
   import debounce from 'lodash.debounce';
   import Multiselect from 'vue-multiselect';
+  import RequestOrderMixin from './RequestOrderMixin';
 
   // user type constants
   const DASHBOARD = 'DASHBOARD';
@@ -24,6 +25,7 @@
 
   export default {
     name: 'ExistingUserInput',
+    mixins: [RequestOrderMixin],
     components: { Multiselect },
     props: {
       fieldLabel: {
@@ -87,8 +89,6 @@
         selectedUser: null,
         theError: '',
         userQuery: this.value,
-        requestId: 0,
-        lastRendered: 0,
       };
     },
     computed: {
@@ -140,12 +140,10 @@
           q = '';
         }
         const url = `${this.suggestUrl}/${q}`;
-        this.requestId = this.requestId + 1;
-        const rid = this.requestId;
+        const rid = this.getRequestId();
         axios.get(url)
           .then((response) => {
-            if (rid > this.lastRendered) {
-              this.lastRendered = rid;
+            this.ensureOrderlyResultHandling(rid, () => {
               this.suggestions = response.data.filter(suggestedUser => !this.excludedSuggestions.includes(suggestedUser.userId));
               this.suggestions = this.suggestions.map((it) => {
                 const label = this.getUserIdFroDisplay(it);
@@ -155,7 +153,7 @@
                 };
                 return sug;
               });
-            }
+            });
           })
           .finally(() => {
             this.isFetching = false;

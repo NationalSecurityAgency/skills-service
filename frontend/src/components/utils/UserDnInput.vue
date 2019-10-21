@@ -26,10 +26,12 @@
   import axios from 'axios';
   import { Validator } from 'vee-validate';
   import debounce from 'lodash.debounce';
+  import RequestOrderMixin from './RequestOrderMixin';
 
   export default {
     name: 'UserDnInput',
     inject: { $validator: '$validator' },
+    mixins: [RequestOrderMixin],
     props: {
       user: String,
       fieldLabel: {
@@ -44,8 +46,6 @@
         suggestions: [],
         selected: null,
         validating: true,
-        requestId: 0,
-        lastRendered: 0,
       };
     },
     computed: {
@@ -61,14 +61,12 @@
         }
 
         this.isFetching = true;
-        this.requestId = this.requestId + 1;
-        const rid = this.requestId;
+        const rid = this.getRequestId();
         axios.get(`/app/users/suggestDns/${encodeURIComponent(this.userDn)}`)
           .then((response) => {
-            if (rid > this.lastRendered) {
-              this.lastRendered = rid;
+            this.ensureOrderlyResultHandling(rid, () => {
               this.suggestions = response.data;
-            }
+            });
           })
           .finally(() => {
             this.isFetching = false;
