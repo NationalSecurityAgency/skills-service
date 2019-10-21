@@ -6,7 +6,6 @@ import org.springframework.context.annotation.Conditional
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken
-import org.springframework.security.oauth2.client.resource.OAuth2AccessDeniedException
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException
 import org.springframework.security.oauth2.core.user.OAuth2User
 import org.springframework.security.oauth2.provider.OAuth2Authentication
@@ -14,11 +13,8 @@ import org.springframework.security.oauth2.provider.authentication.OAuth2Authent
 import org.springframework.security.web.util.matcher.RequestMatcher
 import org.springframework.stereotype.Component
 import skills.auth.SecurityMode
-import skills.auth.SkillsAuthorizationException
 import skills.auth.UserInfo
 
-import javax.persistence.EntityManager
-import javax.persistence.PersistenceContext
 import javax.servlet.http.HttpServletRequest
 import javax.transaction.Transactional
 
@@ -37,9 +33,6 @@ class OAuthUtils {
 
     @Autowired
     OAuthRequestedMatcher oAuthRequestedMatcher
-
-    @PersistenceContext
-    protected EntityManager em
 
     Authentication convertToSkillsAuth(OAuth2Authentication auth) {
         // OAuth2Authentication is used when then the OAuth2 client uses the client_credentials grant_type we
@@ -74,9 +67,6 @@ class OAuthUtils {
             UserInfo currentUser = userConverter.convert(clientId, oAuth2User)
 
             // also create/update the UserInfo in the database.
-            if (!em.isJoinedToTransaction()) {
-                em.joinTransaction()
-            }
             currentUser = userAuthService.createOrUpdateUser(currentUser)
 
             // Create new Authentication using UserInfo
