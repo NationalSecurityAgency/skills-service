@@ -11,8 +11,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken
 import skills.auth.SkillsAuthorizationException
 
-import javax.persistence.EntityManager
-import javax.persistence.PersistenceContext
 import javax.transaction.Transactional
 
 @Slf4j
@@ -26,9 +24,6 @@ class PkiUserDetailsService implements UserDetailsService, AuthenticationUserDet
 
     @Autowired
     PkiUserLookup pkiUserLookup
-
-    @PersistenceContext
-    protected EntityManager em
 
     @Override
     @Transactional
@@ -46,9 +41,6 @@ class PkiUserDetailsService implements UserDetailsService, AuthenticationUserDet
                 }
 
                 // update user properties and load user roles, or create the account if this is the first time the user has connected
-                if (!em.isJoinedToTransaction()) {
-                    em.joinTransaction()
-                }
                 userInfo = userAuthService.createOrUpdateUser(userInfo)
             } else {
                 throw new SkillsAuthorizationException("Unknown user [$dn]")
