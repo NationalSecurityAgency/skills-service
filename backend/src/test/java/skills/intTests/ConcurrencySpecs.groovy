@@ -4,8 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
-import skills.storage.model.LevelDef
-import skills.storage.model.Setting
 import skills.storage.repos.LevelDefRepo
 import skills.storage.repos.ProjDefRepo
 import skills.storage.repos.SettingRepo
