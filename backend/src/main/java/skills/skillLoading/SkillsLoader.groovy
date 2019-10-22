@@ -238,7 +238,7 @@ class SkillsLoader {
             skillDependencySummary = dependencySummaryLoader.loadDependencySummary(userId, projectId, skillId)
         }
 
-        SettingsResult helpUrlRootSetting = settingsService.getProjectSetting(projectId, PROP_HELP_URL_ROOT)
+        SettingsResult helpUrlRootSetting = settingsService.getProjectSetting(crossProjectId ?: projectId, PROP_HELP_URL_ROOT)
 
         return new SkillSummary(
                 projectId: skillDef.projectId, projectName: projDef.name,
