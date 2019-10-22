@@ -31,6 +31,10 @@ class SkillsService {
         wsHelper.get("/projects/${projectId}/clientSecret", "admin", null, false)
     }
 
+    String getUserName() {
+        wsHelper.username
+    }
+
     void setProxyCredentials(String clientId, String secretCode) {
         wsHelper.setProxyCredentials(clientId, secretCode)
     }
