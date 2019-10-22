@@ -85,6 +85,44 @@ class ReportSkillsTransactionSpecs extends DefaultIntSpec {
         achievements.collect({it.level}).sort() == achievements.collect({it.level}).unique().sort()
     }
 
+    def "multi threaded insert skill for many different users"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(1, )
+        skills[0].numPerformToCompletion=1
+        skills[0].pointIncrementInterval=0 // disable
+        skills[0].pointIncrement=1000
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        AtomicInteger atomicInteger = new AtomicInteger()
+        int numThreads = 8
+        int expectedCount = numThreads*200
+        CountDownLatch countDownLatch = new CountDownLatch(expectedCount)
+        when:
+        numThreads.times {
+            Thread.start {
+                200.times {
+                    skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "ConcSkillInsertTest${it}", new Date())
+                    int addedSkills = atomicInteger.incrementAndGet()
+                    countDownLatch.countDown()
+                    if ( addedSkills% 25 == 0 || addedSkills == expectedCount) {
+                        log.info("Reported {}/{} skills", atomicInteger.get(), expectedCount)
+                    }
+                }
+            }
+        }
+        countDownLatch.await(1, TimeUnit.MINUTES)
+
+        then:
+        atomicInteger.get() == expectedCount
+
+        List<String> ussrAttrs = userAttrsRepo.findAll().findAll({it.userId.toLowerCase().startsWith("ConcSkillInsertTest".toLowerCase())}).collect({ it.userId })
+        ussrAttrs.size() == 200
+        ussrAttrs.sort() == ussrAttrs.unique().sort()
+    }
+
     def "test transaction when reporting skill - no rollback"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
