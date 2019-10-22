@@ -60,6 +60,36 @@ class CrossProjectSkillsManagementSpec extends DefaultIntSpec {
         proj2SharedWithMeSkills.get(0).projectId == "TestProject1"
     }
 
+    def "shared skills must use doc root from project from which they are shared"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> proj1_skills = SkillsFactory.createSkills(2, 1, 1)
+
+        def proj2 = SkillsFactory.createProject(2)
+        def proj2_subj = SkillsFactory.createSubject(2, 2)
+        List<Map> proj2_skills = SkillsFactory.createSkills(2, 2, 2)
+        proj1_skills.get(0).helpUrl = "/helpDocs"
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(proj1_skills)
+
+        skillsService.createProject(proj2)
+        skillsService.createSubject(proj2_subj)
+        skillsService.createSkills(proj2_skills)
+
+        skillsService.changeSetting(proj1.projectId, "help.url.root",
+                [projectId: proj1.projectId, setting: 'help.url.root', value: 'http://testcrossprojectdocs.org'])
+
+        when:
+        skillsService.shareSkill(proj1.projectId, proj1_skills.get(0).skillId, proj2.projectId)
+        def sharedSkillSummary = skillsService.getSharedSkillSummary(proj2.projectId, proj1.projectId,  proj1_skills.get(0).skillId)
+
+        then:
+        sharedSkillSummary
+        sharedSkillSummary.description.href == "http://testcrossprojectdocs.org/helpDocs"
+    }
+
     def "share skill with ALL other projects"() {
         def proj1 = SkillsFactory.createProject(1)
         def proj1_subj = SkillsFactory.createSubject(1, 1)

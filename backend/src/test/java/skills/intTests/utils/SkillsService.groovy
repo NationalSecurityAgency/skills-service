@@ -224,6 +224,12 @@ class SkillsService {
         wsHelper.adminGet(url)
     }
 
+    def getSharedSkillSummary(String projectIdTo, String projectIdFrom, String skillId){
+        ///projects/{projectId}/projects/{crossProjectId}/skills/{skillId}/summary
+        String url = "/projects/${projectIdTo}/projects/${projectIdFrom}/skills/${skillId}/summary"
+        wsHelper.apiGet(url)
+    }
+
     @Profile
     def createSkill(Map props, boolean throwExceptionOnFailure = true) {
         wsHelper.adminPost(getSkillUrl(props.projectId, props.subjectId, props.skillId), props, throwExceptionOnFailure)
