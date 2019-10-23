@@ -52,6 +52,7 @@
       const vm = this;
       if (this.isDevelopmentMode()) {
         this.configureDevelopmentMode();
+        this.$store.commit('isSummaryOnly', false);
       } else {
         const handshake = new Postmate.Model({
           updateAuthenticationToken(authToken) {
@@ -72,6 +73,9 @@
           this.$store.commit('parentFrame', Object.freeze(parent));
           window.addEventListener('resize', onHeightChanged);
           this.onHeightChange();
+
+          // will only display summary and component will not be interactive
+          this.$store.commit('isSummaryOnly', parent.model.isSummaryOnly ? parent.model.isSummaryOnly : false);
 
           UserSkillsService.setVersion(parent.model.version);
           UserSkillsService.setUserId(parent.model.userId);

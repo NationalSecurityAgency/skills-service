@@ -14,7 +14,7 @@
         </strong>
       </span>
       <div>
-        <button class="btn btn-info btn-sm mr-1 text-uppercase" @click.stop="openMyRankDetails()">
+        <button v-if="!isSummaryOnly" class="btn btn-info btn-sm mr-1 text-uppercase" @click.stop="openMyRankDetails()">
           Ranking Stats
         </button>
       </div>
@@ -40,6 +40,11 @@
             subjectId: this.displayData.userSkills.subjectId,
           },
         });
+      },
+    },
+    computed: {
+      isSummaryOnly() {
+        return this.$store.state.isSummaryOnly;
       },
     },
   };
