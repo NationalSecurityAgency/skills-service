@@ -5,14 +5,22 @@ import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.lang.Nullable
 import skills.storage.model.ProjDef
+import skills.storage.model.SkillsDBLock
 import skills.storage.model.UserAttrs
 import skills.storage.model.UserPoints
 
 import javax.persistence.LockModeType
 
-interface LockTransactionRepo extends CrudRepository<ProjDef, Long> {
+interface SkillsDBLockRepo extends CrudRepository<SkillsDBLock, Integer> {
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
+    SkillsDBLock findByLock(String lock)
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query('''select p 
+        from ProjDef p 
+        where
+            lower(p.projectId) = lower(?1)''')
     ProjDef findByProjectIdIgnoreCase(String projectId)
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
