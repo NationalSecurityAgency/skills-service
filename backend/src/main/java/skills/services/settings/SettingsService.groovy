@@ -65,7 +65,7 @@ class SettingsService {
         } else if (request instanceof UserSettingsRequest) {
             lockingService.lockUser(request.userId)
         } else if(request instanceof GlobalSettingsRequest){
-            // todo: figure out a good global resource to lock on!
+            lockingService.lockGlobally()
         }else if(request instanceof ProjectSettingsRequest){
             lockingService.lockProject(request.projectId)
         } else{
