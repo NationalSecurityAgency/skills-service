@@ -7,10 +7,10 @@
             <span class="fa-stack skills-icon user-rank-stack">
                 <i class="fa fa-award fa-stack-2x watermark-icon"/>
                 <strong class="fa-stack-1x text-primary user-rank-text">
-                  {{ numBadgesCompleted }} <span>Badge{{numBadgesCompleted > 1 ? 's' : ''}}</span>
+                  {{ numBadgesCompleted }} <span>Badge{{(numBadgesCompleted > 1 || numBadgesCompleted == 0) ? 's' : ''}}</span>
                 </strong>
             </span>
-            <router-link to="/badges" tag="button" class="btn btn-info btn-sm mr-1 text-uppercase">
+            <router-link v-if="!isSummaryOnly" to="/badges" tag="button" class="btn btn-info btn-sm mr-1 text-uppercase">
                 View Badges
             </router-link>
         </div>
@@ -24,6 +24,11 @@
             numBadgesCompleted: {
                 type: Number,
                 required: true,
+            },
+        },
+        computed: {
+            isSummaryOnly() {
+                return this.$store.state.isSummaryOnly;
             },
         },
     };

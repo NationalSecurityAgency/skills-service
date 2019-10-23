@@ -6,7 +6,7 @@
       <skills-title>User Skills</skills-title>
 
       <user-skills-header :display-data="displayData" />
-      <subjects-container :subjects="displayData.userSkills.subjects" />
+      <subjects-container v-if="!isSummaryOnly" :subjects="displayData.userSkills.subjects" />
     </div>
   </div>
 </template>
@@ -63,6 +63,9 @@
     computed: {
       version() {
         return this.$store.state.version;
+      },
+      isSummaryOnly() {
+        return this.$store.state.isSummaryOnly;
       },
     },
     mounted() {

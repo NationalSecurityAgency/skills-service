@@ -29,6 +29,7 @@ export default new Vuex.Store({
     parentFrame: null,
     version: null,
     themeStyleId: UniqueIdGenerator.uniqueId('custom-theme-style-node-'),
+    isSummaryOnly: false,
   },
   mutations: {
     authToken(state, authToken) {
@@ -47,6 +48,10 @@ export default new Vuex.Store({
     version(state, version) {
       // eslint-disable-next-line no-param-reassign
       state.version = version;
+    },
+    isSummaryOnly(state, isSummaryOnly) {
+      // eslint-disable-next-line no-param-reassign
+      state.isSummaryOnly = isSummaryOnly;
     },
   },
 });
