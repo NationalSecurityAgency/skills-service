@@ -1,5 +1,6 @@
 package skills.intTests
 
+import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
@@ -8,6 +9,9 @@ import skills.storage.repos.LevelDefRepo
 import skills.storage.repos.ProjDefRepo
 import skills.storage.repos.SettingRepo
 
+import java.util.concurrent.atomic.AtomicInteger
+
+@Slf4j
 class ConcurrencySpecs extends DefaultIntSpec {
 
     def "do not create duplicates when changing project setting concurrently"() {
@@ -78,5 +82,44 @@ class ConcurrencySpecs extends DefaultIntSpec {
         settingsAsStrings.sort() == settingsAsStrings.unique().sort()
         projectIds.sort() == projectIds.unique().sort()
         levels.sort() == levels.unique().sort()
+    }
+
+
+    def "/api endpoints for non-existent users create UserAttr rows, concurrent requests should not cause errors"() {
+        def proj = SkillsFactory.createProject()
+        def subject = SkillsFactory.createSubject()
+        List<Map> skills = SkillsFactory.createSkills(2)
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subject)
+        skillsService.createSkills(skills)
+
+        int numUsers = 100
+        List<String> users = (1..numUsers).collect { "CreateNewUserAttrTestsUser${it}".toString() }
+        int numThreads = 5
+        AtomicInteger exceptionCount = new AtomicInteger()
+        when:
+        List<Thread> threads = (1..numThreads).collect {
+            Thread.start {
+                users.each {
+                    try {
+                        skillsService.getRank(it, proj.projectId)
+                    } catch (SkillsClientException e) {
+                        exceptionCount.incrementAndGet()
+                        log.error(e)
+                    }
+                }
+            }
+        }
+        threads.each {
+            it.join(5000)
+        }
+
+        then:
+        exceptionCount.get() == 0
+
+        List<String> ussrAttrs = userAttrsRepo.findAll().findAll({it.userId.toLowerCase().startsWith("CreateNewUserAttrTestsUser".toLowerCase())}).collect({ it.userId })
+        ussrAttrs.size() == numUsers
+        ussrAttrs.sort() == ussrAttrs.unique().sort()
     }
 }
