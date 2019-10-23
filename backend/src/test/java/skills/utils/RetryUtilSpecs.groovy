@@ -50,6 +50,20 @@ class RetryUtilSpecs extends Specification {
         RuntimeException r = thrown(RuntimeException)
         r.message == "hi"
         numRuns == 6 // retries = runs + 1
+    }
 
+
+    def "retry multiple times and still fail - log as code executes"() {
+        when:
+        int numRuns = 0
+        RetryUtil.withRetry(5, false) {
+            numRuns++
+            throw new RuntimeException("hi")
+        }
+
+        then:
+        RuntimeException r = thrown(RuntimeException)
+        r.message == "hi"
+        numRuns == 6 // retries = runs + 1
     }
 }
