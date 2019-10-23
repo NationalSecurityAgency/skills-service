@@ -64,7 +64,6 @@ class SkillEventAdminService {
             //this removes the skill achievements
             achievedLevelRepo.deleteByProjectIdAndSkillIdAndUserIdAndLevel(performedSkill.projectId, performedSkill.skillId, userId, null)
         }
-        //this deletes subject levels if necessary, but it ONLY deletes the highest level
         checkParentGraph(performedSkill.performedOn, res, userId, skillDefinitionMin)
         deleteProjectLevelIfNecessary(performedSkill.projectId, userId)
         performedSkillRepository.delete(performedSkill)
@@ -148,8 +147,7 @@ class SkillEventAdminService {
             UserPoints updatedPoints = updateUserPoints(userId, requesterDef, incomingSkillDate, currentDef.skillId)
 
             List<LevelDef> levelDefs = skillEventsSupportRepo.findLevelsBySkillId(currentDef.id)
-            //why are we doing this?
-            int currentScore = updatedPoints.points// + requesterDef.pointIncrement
+            int currentScore = updatedPoints.points
             LevelDefinitionStorageService.LevelInfo levelInfo = levelDefService.getLevelInfo(currentDef.projectId, levelDefs, currentDef.totalPoints, currentScore)
             calculateLevels(levelInfo, updatedPoints, userId)
         }
@@ -165,10 +163,9 @@ class SkillEventAdminService {
 
         List<UserAchievement> userAchievedLevels = achievedLevelRepo.findAllByUserIdAndProjectIdAndSkillId(userId, userPts.projectId, userPts.skillId)
 
-        // we are decrementing, so we need to remove any level that is greater than the current level (there should only be one)
+        // we are decrementing, so we need to remove any level that is greater than the current level
         List<UserAchievement> levelsToRemove = userAchievedLevels?.findAll { it.level > levelInfo.level }
         if (levelsToRemove) {
-//            assert levelsToRemove.size() == 1, "we are decrementing a single skill so we should not be remove multiple (${levelsToRemove.size()} levels)"
             achievedLevelRepo.delete(levelsToRemove.first())
         }
 
