@@ -61,10 +61,12 @@ class SkillEventAdminService {
         boolean requestedSkillCompleted = hasReachedMaxPoints(numExistingSkills, skillDefinitionMin)
         if (requestedSkillCompleted) {
             checkForBadgesAchieved(userId, skillDefinitionMin)
+            //this removes the skill achievements
             achievedLevelRepo.deleteByProjectIdAndSkillIdAndUserIdAndLevel(performedSkill.projectId, performedSkill.skillId, userId, null)
         }
-        deleteProjectLevelIfNecessary(performedSkill.projectId, userId)
+        //this deletes subject levels if necessary, but it ONLY deletes the highest level
         checkParentGraph(performedSkill.performedOn, res, userId, skillDefinitionMin)
+        deleteProjectLevelIfNecessary(performedSkill.projectId, userId)
         performedSkillRepository.delete(performedSkill)
 
         return res
@@ -77,10 +79,11 @@ class SkillEventAdminService {
         def orderedLevels = achievements.findAll(){ it.level }.sort() { it.level }
 
         if (orderedLevels) {
-            def last = orderedLevels.last()
-            if (last.pointsWhenAchieved > userProjectPoints) {
-                log.debug("deleting achievement ${last}, User no longer has enough points")
-                achievedLevelRepo.delete(last)
+            orderedLevels.reverse().each {
+                if (it.pointsWhenAchieved > userProjectPoints) {
+                    log.debug("deleting achievement ${it}, User no longer has enough points")
+                    achievedLevelRepo.delete(it)
+                }
             }
         }
     }
@@ -123,6 +126,8 @@ class SkillEventAdminService {
 
         if (userPoints.points <= 0) {
             userPointsRepo.delete(userPoints)
+        } else {
+            userPointsRepo.save(userPoints)
         }
 
         return userPoints
@@ -143,7 +148,8 @@ class SkillEventAdminService {
             UserPoints updatedPoints = updateUserPoints(userId, requesterDef, incomingSkillDate, currentDef.skillId)
 
             List<LevelDef> levelDefs = skillEventsSupportRepo.findLevelsBySkillId(currentDef.id)
-            int currentScore = updatedPoints.points + requesterDef.pointIncrement
+            //why are we doing this?
+            int currentScore = updatedPoints.points// + requesterDef.pointIncrement
             LevelDefinitionStorageService.LevelInfo levelInfo = levelDefService.getLevelInfo(currentDef.projectId, levelDefs, currentDef.totalPoints, currentScore)
             calculateLevels(levelInfo, updatedPoints, userId)
         }
@@ -160,9 +166,9 @@ class SkillEventAdminService {
         List<UserAchievement> userAchievedLevels = achievedLevelRepo.findAllByUserIdAndProjectIdAndSkillId(userId, userPts.projectId, userPts.skillId)
 
         // we are decrementing, so we need to remove any level that is greater than the current level (there should only be one)
-        List<UserAchievement> levelsToRemove = userAchievedLevels?.findAll { it.level >= levelInfo.level }
+        List<UserAchievement> levelsToRemove = userAchievedLevels?.findAll { it.level > levelInfo.level }
         if (levelsToRemove) {
-            assert levelsToRemove.size() == 1, "we are decrementing a single skill so we should not be remove multiple (${levelsToRemove.size()} levels)"
+//            assert levelsToRemove.size() == 1, "we are decrementing a single skill so we should not be remove multiple (${levelsToRemove.size()} levels)"
             achievedLevelRepo.delete(levelsToRemove.first())
         }
 
