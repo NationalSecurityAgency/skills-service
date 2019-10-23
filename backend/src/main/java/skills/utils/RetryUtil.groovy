@@ -35,14 +35,20 @@ class RetryUtil {
                 if (!logOnlyOnCompleteFailure) {
                     log.error("Retry [${attemptsId}] - attempt ${i + 1}/${numRetries}", t)
                 } else {
+                    String msg = "Retry [${attemptsId}] - attempt ${i + 1}/${numRetries}:\n"
                     if (!errMsBuilder) {
                         errMsBuilder = new StringBuilder()
-                        errMsBuilder.append("Retry [${attemptsId}] - attempt ${i + 1}/${numRetries}:\n")
-                        errMsBuilder.append(ExceptionUtils.getMessage(t))
                         errMsBuilder.append("\n")
                     }
+                    appendMsg(errMsBuilder, msg, t)
                 }
             }
         }
+    }
+
+    private static void appendMsg(StringBuilder errMsBuilder, String msg, Throwable t) {
+        errMsBuilder.append(msg)
+        errMsBuilder.append(ExceptionUtils.getStackTrace(t))
+        errMsBuilder.append("\n")
     }
 }
