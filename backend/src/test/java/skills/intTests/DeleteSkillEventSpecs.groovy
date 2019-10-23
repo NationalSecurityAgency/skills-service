@@ -253,6 +253,13 @@ class DeleteSkillEventSpecs extends DefaultIntSpec {
         addedSkills = skillsService.getPerformedSkills(userId, projId)
         subjSummaryRes << skillsService.getSkillSummary(userId, projId, subj1.get(1).subjectId)
 
+        skillsService.getLevels(projId, subj1.get(1).subjectId).each {
+            println it
+        }
+        subjSummaryRes.get(5).skills.each {
+            println "skill: ${it.skillId}, points: ${it.points}, todaysPoints: ${it.todaysPoints}, totalPoints: ${it.totalPoints}"
+        }
+
         then:
         // skill event has been removed
         assert addedSkills?.count == 4
@@ -265,5 +272,34 @@ class DeleteSkillEventSpecs extends DefaultIntSpec {
 
         subjSummaryRes.get(5).skills.find { it.skillId == subj1.get(1).skillId }.points == 40
         subjSummaryRes.get(5).skills.find { it.skillId == subj1.get(1).skillId }.totalPoints == 50
+    }
+
+    def "deleting skill event should remove level achievements" () {
+        String userId = "user1"
+        Date date = new Date()
+
+        String subj = "testSubj"
+        Map skill1 = [projectId: projId, subjectId: subj, skillId: "skill1", name  : "Test Skill 1", type: "Skill",
+                      pointIncrement: 100, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1]
+
+        skillsService.createProject([projectId: projId, name: "Test Project"])
+        skillsService.createSubject([projectId: projId, subjectId: subj, name: "Test Subject"])
+        skillsService.createSkill(skill1)
+        def subjSummaryPreAddSkill = skillsService.getSkillSummary(userId, projId, subj)
+        skillsService.addSkill([projectId: projId, skillId: skill1.skillId], userId, date)
+        def subjSummaryPostAddSkillEvent = skillsService.getSkillSummary(userId, projId, subj)
+
+        when:
+        skillsService.deleteSkillEvent([projectId: projId, skillId: skill1.skillId, userId: userId, timestamp: date.time])
+        def subjSummaryPostDelete = skillsService.getSkillSummary(userId, projId, subj)
+
+        then:
+        subjSummaryPreAddSkill.skillsLevel == 0
+        subjSummaryPreAddSkill.skills[0].points == 0
+        subjSummaryPostAddSkillEvent.skillsLevel == 5
+        subjSummaryPostAddSkillEvent.skills[0].points == 100
+        subjSummaryPostDelete.skillsLevel == 0
+        subjSummaryPostDelete.skills[0].points == 0
+
     }
 }
