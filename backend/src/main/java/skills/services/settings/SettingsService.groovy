@@ -1,15 +1,13 @@
 package skills.services.settings
 
-
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.controller.exceptions.SkillException
-import skills.controller.request.model.SettingsRequest
-import skills.controller.request.model.UserProjectSettingsRequest
-import skills.controller.request.model.UserSettingsRequest
+import skills.controller.request.model.*
 import skills.controller.result.model.SettingsResult
+import skills.services.LockingService
 import skills.services.settings.listeners.ValidationRes
 import skills.storage.model.Setting
 import skills.storage.model.auth.User
@@ -27,6 +25,9 @@ class SettingsService {
     UserRepo userRepo
 
     @Autowired
+    LockingService lockingService
+
+    @Autowired
     List<SettingChangedListener> listeners = [];
 
     @Transactional
@@ -38,6 +39,7 @@ class SettingsService {
 
     @Transactional
     SettingsResult saveSetting(SettingsRequest request) {
+        lockTransaction(request)
         Setting setting = settingsDataAccessor.loadSetting(request)
         if (setting) {
             applyListeners(setting, request)
@@ -51,12 +53,27 @@ class SettingsService {
             applyListeners(null, request)
         }
 
-
         settingsDataAccessor.save(setting)
         log.debug("saved [{}]", setting)
 
         return convertToRes(setting)
     }
+
+    private void lockTransaction(SettingsRequest request) {
+        if(request instanceof UserProjectSettingsRequest){
+            lockingService.lockUser(request.userId)
+        } else if (request instanceof UserSettingsRequest) {
+            lockingService.lockUser(request.userId)
+        } else if(request instanceof GlobalSettingsRequest){
+            lockingService.lockGlobally()
+        }else if(request instanceof ProjectSettingsRequest){
+            lockingService.lockProject(request.projectId)
+        } else{
+            log.error("unable SettingRequest [${request.getClass()}]")
+            throw new SkillException("Unrecognized Setting type")
+        }
+    }
+
 
     private void handlerUserSettingsRequest(SettingsRequest request, Setting setting) {
         if (request instanceof UserSettingsRequest || request instanceof UserProjectSettingsRequest) {
@@ -106,7 +123,7 @@ class SettingsService {
         return convertToRes(settingDB)
     }
 
-    @Transactional(readOnly = true)
+    @Transactional()
     SettingsResult getGlobalSetting(String setting){
         Setting settingDB = settingsDataAccessor.getGlobalSetting(setting)
         return convertToRes(settingDB)
@@ -118,7 +135,7 @@ class SettingsService {
         return convertToRes(settingDB)
     }
 
-    @Transactional(readOnly = true)
+    @Transactional()
     SettingsResult getProjectSetting(String projectId, String setting){
         Setting settingDB = settingsDataAccessor.getProjectSetting(projectId, setting)
         return convertToRes(settingDB)

@@ -3,17 +3,16 @@ package skills.services
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import skills.auth.UserInfo
 import skills.auth.UserInfoService
 import skills.controller.request.model.UserProjectSettingsRequest
-import skills.controller.request.model.UserSettingsRequest
 import skills.controller.result.model.SettingsResult
 import skills.services.settings.SettingsDataAccessor
 import skills.services.settings.SettingsService
 import skills.storage.model.Setting
 import skills.storage.model.auth.User
 import skills.storage.repos.UserRepo
-import org.springframework.transaction.annotation.Transactional
 
 @Service
 @Slf4j
@@ -86,17 +85,6 @@ class SortingService {
     }
 
     @Transactional
-    void setNewProjectDisplayOrder(String projectId){
-        //check for existing sort order for this projectId, just to be sure
-        if(getProjectSortOrder(projectId) != null){
-            return
-        }
-        Integer currentHighest = getHighestSortForUserProjects()
-
-        setProjectSortOrder(projectId, currentHighest == null ? 0 : currentHighest+1)
-    }
-
-    @Transactional
     void setNewProjectDisplayOrder(String projectId, String userId){
         //check for existing sort order for this projectId, just to be sure
         if (getProjectSortOrder(projectId, userId) != null){
@@ -105,14 +93,6 @@ class SortingService {
         Integer currentHighest = getHighestSortForUserProjects(userId)
 
         setProjectSortOrder(projectId, currentHighest == null ? 0 : currentHighest+1, userId)
-    }
-
-
-    @Transactional
-    void setProjectSortOrder(String projectId, Integer order){
-        UserInfo userInfo = userInfoService.getCurrentUser()
-
-        setProjectSortOrder(projectId, order, userInfo.username)
     }
 
     @Transactional

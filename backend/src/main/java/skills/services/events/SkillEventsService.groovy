@@ -7,17 +7,17 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.controller.exceptions.SkillException
+import skills.services.LockingService
 import skills.services.events.pointsAndAchievements.PointsAndAchievementsHandler
 import skills.storage.model.SkillDef
-import skills.storage.model.SkillRelDef
 import skills.storage.model.UserAchievement
 import skills.storage.model.UserPerformedSkill
+import skills.storage.model.UserPoints
 import skills.storage.repos.SkillEventsSupportRepo
-import skills.storage.repos.SkillRelDefRepo
 import skills.storage.repos.UserAchievedLevelRepo
 import skills.storage.repos.UserPerformedSkillRepo
 
-import static skills.services.events.CompletionItem.*
+import static skills.services.events.CompletionItem.CompletionItemType
 
 @Service
 @CompileStatic
@@ -48,6 +48,9 @@ class SkillEventsService {
     @Autowired
     AchievedGlobalBadgeHandler achievedGlobalBadgeHandler
 
+    @Autowired
+    LockingService lockingService
+
     @Transactional
     @Profile
     SkillEventResult reportSkill(String projectId, String skillId, String userId, Date incomingSkillDate = new Date()) {
@@ -58,26 +61,24 @@ class SkillEventsService {
 
         SkillEventsSupportRepo.SkillDefMin skillDefinition = getSkillDef(projectId, skillId)
 
-        Long numExistingSkills = getNumExistingSkills(userId, projectId, skillId)
-        numExistingSkills = numExistingSkills ?: 0 // account for null
-
-        if (hasReachedMaxPoints(numExistingSkills, skillDefinition)) {
-            res.skillApplied = false
-            res.explanation = "This skill reached its maximum points"
+        long numExistingSkills = getNumExistingSkills(userId, projectId, skillId)
+        AppliedCheckRes checkRes = checkIfSkillApplied(userId, numExistingSkills, incomingSkillDate, skillDefinition)
+        if (!checkRes.skillApplied) {
+            res.skillApplied = checkRes.skillApplied
+            res.explanation = checkRes.explanation
             return res
         }
 
-        TimeWindowHelper.TimeWindowRes timeWindowRes = timeWindowHelper.checkTimeWindow(skillDefinition, userId, incomingSkillDate)
-        if (timeWindowRes.isFull()) {
-            res.skillApplied = false
-            res.explanation = timeWindowRes.msg
-            return res
-        }
-
-        CheckDependenciesHelper.DependencyCheckRes dependencyCheckRes = checkDependenciesHelper.check(userId, projectId, skillId)
-        if (dependencyCheckRes.hasNotAchievedDependents) {
-            res.skillApplied = false
-            res.explanation = dependencyCheckRes.msg
+        /**
+         * Check if skill needs to be applied, if so then we'll need to db-lock to enforce cross-service lock;
+         * once transaction is locked must redo all of the checks
+         */
+        lockTransaction(projectId, userId)
+        numExistingSkills = getNumExistingSkills(userId, projectId, skillId)
+        checkRes = checkIfSkillApplied(userId, numExistingSkills, incomingSkillDate, skillDefinition)
+        if (!checkRes.skillApplied) {
+            res.skillApplied = checkRes.skillApplied
+            res.explanation = checkRes.explanation
             return res
         }
 
@@ -105,6 +106,44 @@ class SkillEventsService {
     }
 
     @Profile
+    private void lockTransaction(String projectId, String userId) {
+        UserPoints userPoints = lockingService.lockUserPoints(projectId, userId)
+        if (!userPoints) {
+            lockingService.lockUser(userId)
+        }
+    }
+
+    class AppliedCheckRes {
+        boolean skillApplied = true
+        String explanation
+    }
+
+    @Profile
+    private AppliedCheckRes checkIfSkillApplied(String userId, long numExistingSkills, Date incomingSkillDate, SkillEventsSupportRepo.SkillDefMin skillDefinition) {
+        AppliedCheckRes res = new AppliedCheckRes()
+        if (hasReachedMaxPoints(numExistingSkills, skillDefinition)) {
+            res.skillApplied = false
+            res.explanation = "This skill reached its maximum points"
+            return res
+        }
+
+        TimeWindowHelper.TimeWindowRes timeWindowRes = timeWindowHelper.checkTimeWindow(skillDefinition, userId, incomingSkillDate)
+        if (timeWindowRes.isFull()) {
+            res.skillApplied = false
+            res.explanation = timeWindowRes.msg
+            return res
+        }
+
+        CheckDependenciesHelper.DependencyCheckRes dependencyCheckRes = checkDependenciesHelper.check(userId, skillDefinition.projectId, skillDefinition.skillId)
+        if (dependencyCheckRes.hasNotAchievedDependents) {
+            res.skillApplied = false
+            res.explanation = dependencyCheckRes.msg
+            return res
+        }
+        return  res
+    }
+
+    @Profile
     private void savePerformedSkill(UserPerformedSkill performedSkill) {
         performedSkillRepository.save(performedSkill)
         log.debug("Saved skill [{}]", performedSkill)
@@ -112,7 +151,8 @@ class SkillEventsService {
 
     @Profile
     private long getNumExistingSkills(String userId, String projectId, String skillId) {
-        performedSkillRepository.countByUserIdAndProjectIdAndSkillId(userId, projectId, skillId)
+        Long numExistingSkills = performedSkillRepository.countByUserIdAndProjectIdAndSkillId(userId, projectId, skillId)
+        return numExistingSkills ?: 0 // account for null
     }
 
     @Profile

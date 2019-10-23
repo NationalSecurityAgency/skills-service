@@ -9,6 +9,31 @@
     <changeSet id="1" author="skills team">
 
         <!-- ============================================================================
+        Table: Skills Locks
+        ============================================================================-->
+        <createTable tableName="skills_db_locks">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="lock" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex indexName="index_skills_db_locks_lock"
+                     tableName="skills_db_locks" unique="true">
+            <column name="lock" type="varchar(255)"/>
+        </createIndex>
+        <insert tableName="skills_db_locks">
+            <column name="lock" type="varchar(255)" value="global_lock"/>
+        </insert>
+
+        <!-- ============================================================================
         Table: Project Definition
         ============================================================================-->
         <createTable tableName="project_definition">
