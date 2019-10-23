@@ -6,9 +6,11 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.stereotype.Component
+import org.springframework.transaction.annotation.Transactional
 import skills.auth.pki.PkiUserLookup
 import skills.controller.exceptions.SkillException
 import skills.services.UserAttrsService
+import skills.utils.RetryUtil
 
 @Component
 @Slf4j
@@ -44,6 +46,13 @@ class UserInfoService {
      * Abstracts dealing with PKI vs Password/Form modes when user id param is provided
      */
     String getUserName(String userIdParam) {
+        return RetryUtil.withRetry(3) {
+            return doGetUserName(userIdParam)
+        }
+    }
+
+    @Transactional
+    protected String doGetUserName(String userIdParam) {
         String userNameRes = userIdParam
         if (!userIdParam) {
             UserInfo userInfo = getCurrentUser()

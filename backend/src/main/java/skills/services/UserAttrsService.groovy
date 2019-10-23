@@ -3,6 +3,7 @@ package skills.services
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import skills.auth.UserInfo
 import skills.storage.model.UserAttrs
 import skills.storage.repos.UserAttrsRepo
@@ -14,6 +15,7 @@ class UserAttrsService {
     @Autowired
     UserAttrsRepo userAttrsRepo
 
+    @Transactional
     void saveUserAttrs(String userId, UserInfo userInfo) {
         UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(userId)
         boolean doSave = true
