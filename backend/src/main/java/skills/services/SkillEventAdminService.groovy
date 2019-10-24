@@ -166,7 +166,7 @@ class SkillEventAdminService {
         // we are decrementing, so we need to remove any level that is greater than the current level
         List<UserAchievement> levelsToRemove = userAchievedLevels?.findAll { it.level > levelInfo.level }
         if (levelsToRemove) {
-            achievedLevelRepo.delete(levelsToRemove.first())
+            achievedLevelRepo.deleteAll(levelsToRemove)
         }
 
         return res
