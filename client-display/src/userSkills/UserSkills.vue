@@ -5,7 +5,7 @@
     <div v-if="!loading.userSkills">
       <skills-title>User Skills</skills-title>
 
-      <user-skills-header :display-data="displayData" />
+      <user-skills-header :display-data="displayData" class="mb-3"/>
       <subjects-container v-if="!isSummaryOnly" :subjects="displayData.userSkills.subjects" />
     </div>
   </div>

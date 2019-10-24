@@ -1,5 +1,5 @@
 <template>
-  <div class="row py-3">
+  <div class="row pb-3">
     <div v-for="(subject, index) in subjects" :key="`unique-subject-${index}`"
       class="btn user-skill-subject-tile col-md-4"
       @click="openUserSkillSubject(subject, index)" >
