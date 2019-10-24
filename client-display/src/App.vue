@@ -177,7 +177,7 @@
               if (isCSSConfig && (obj[key].value || obj[key].selector || obj[key].styleName)) {
                 const { selector, styleName, value } = obj[key];
                 if (!selector || !styleName) {
-                  throw new Error(`Invalid custom theme defined by ${key}`);
+                  throw new Error(`Skills Theme Error! Failed to process provided custom theme due to invalid format! Invalid custom theme defined by [${key}]. Theme is ${JSON.stringify(theme)}`);
                 } else if (value) {
                   const sanitizedValue = value.split(';')[0]; // No injection
                   css += `${selector} { ${styleName}: ${sanitizedValue} !important }`;
