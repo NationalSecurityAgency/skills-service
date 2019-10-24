@@ -337,7 +337,7 @@ class SkillsLoader {
     private SkillSubjectSummary loadSubjectSummary(ProjDef projDef, String userId, SkillDefParent subjectDefinition, Integer version, boolean loadSkills = false) {
         List<SkillSummary> skillsRes = []
 
-        // must compute total points so the provided version is taken into advantage
+        // must compute total points so the provided version is taken into account
         // subjectDefinition.totalPoints is total overall regardless of the version
         int totalPoints
         if (loadSkills) {

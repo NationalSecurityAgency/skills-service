@@ -79,9 +79,6 @@
             label: 'Number Skills',
             count: this.subjectInternal.numSkills,
           }, {
-            label: 'Number Users',
-            count: this.subjectInternal.numUsers,
-          }, {
             label: 'Total Points',
             count: this.subjectInternal.totalPoints,
             warn: this.subjectInternal.totalPoints < this.minimumPoints,
