@@ -164,7 +164,7 @@
         SkillsService.saveSkill(skill)
           .then((skillRes) => {
             let createdSkill = skillRes;
-            createdSkill = Object.assign({ subjectId: this.subjectId }, createdSkill, { created: new Date(skill.created) });
+            createdSkill = Object.assign({ subjectId: this.subjectId }, createdSkill, { created: new Date(createdSkill.created) });
             if (item1Index >= 0) {
               createdSkill.refreshCounter = this.skills[item1Index].refreshCounter + 1;
               this.skills.splice(item1Index, 1, createdSkill);
@@ -174,6 +174,7 @@
               // report CreateSkill on when new skill is created
               SkillsReporter.reportSkill('CreateSkill');
             }
+
             // attribute based skills should report on new or update operation
             this.reportSkills(createdSkill);
 
