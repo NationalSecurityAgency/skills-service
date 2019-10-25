@@ -9,6 +9,7 @@ server:
   servlet:
     session:
       timeout: 24h
+      persistent: false
 spring:
   main:
     allow-bean-definition-overriding: true
