@@ -22,20 +22,20 @@ class UserAttrsService {
         if (!userAttrs) {
             userAttrs = new UserAttrs(userId: userId?.toLowerCase())
         } else {
-            doSave = userAttrs.firstName != userInfo.firstName ||
-                    userAttrs.lastName != userInfo.lastName ||
-                    userAttrs.email != userInfo.email ||
-                    userAttrs.dn != userInfo.userDn ||
-                    userAttrs.nickname != (userInfo.nickname ?: "") ||
-                    userAttrs.userIdForDisplay != userInfo.usernameForDisplay
+            doSave = (userInfo.firstName && userAttrs.firstName != userInfo.firstName) ||
+                    (userInfo.lastName && userAttrs.lastName != userInfo.lastName) ||
+                    (userInfo.email && userAttrs.email != userInfo.email) ||
+                    (userInfo.userDn && userAttrs.dn != userInfo.userDn) ||
+                    (userInfo.nickname && userAttrs.nickname != (userInfo.nickname ?: "")) ||
+                    (userInfo.usernameForDisplay && userAttrs.userIdForDisplay != userInfo.usernameForDisplay)
         }
         if (doSave) {
-            userAttrs.firstName = userInfo.firstName
-            userAttrs.lastName = userInfo.lastName
-            userAttrs.email = userInfo.email
-            userAttrs.dn = userInfo.userDn
-            userAttrs.nickname = userInfo.nickname ?: ""
-            userAttrs.userIdForDisplay = userInfo.usernameForDisplay
+            userAttrs.firstName = userInfo.firstName ?: userAttrs.firstName
+            userAttrs.lastName = userInfo.lastName ?: userAttrs.lastName
+            userAttrs.email = userInfo.email ?: userAttrs.email
+            userAttrs.dn = userInfo.userDn ?: userAttrs.dn
+            userAttrs.nickname = (userInfo.nickname ?: userAttrs.nickname) ?: ""
+            userAttrs.userIdForDisplay = userInfo.usernameForDisplay ?: userAttrs.userIdForDisplay
             userAttrsRepo.save(userAttrs)
         }
     }
