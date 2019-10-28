@@ -460,4 +460,90 @@ class AdminEditSpecs extends DefaultIntSpec {
         then:
         badge.description == 'this is a description <a href="http://somewhere" rel="nofollow">I\'m a link</a>'
     }
+
+    def "increasing skill point increment post achievement causes user points to be updated"() {
+        def proj1 = SkillsFactory.createProject(1)
+        skillsService.createProject(proj1)
+        def subj = SkillsFactory.createSubject(1)
+        skillsService.createSubject(subj)
+
+        List<Map> skills = SkillsFactory.createSkills(3)
+        skillsService.createSkills(skills)
+
+
+        skillsService.addSkill([projectId: proj1.projectId, skillId: skills.get(0).skillId], "u123", new Date())
+        skillsService.addSkill([projectId: proj1.projectId, skillId: skills.get(1).skillId], "u123", new Date())
+
+        when:
+        def skillSummaryBeforeEdit = skillsService.getSkillSummary("u123", proj1.projectId, subj.subjectId)
+
+        skillsService.updateSkill([projectId: proj1.projectId,
+                                  subjectId: subj.subjectId,
+                                  skillId: skills.get(0).skillId,
+                                  numPerformToCompletion: skills.get(0).numPerformToCompletion,
+                                  pointIncrement: 100,
+                                  pointIncrementInterval: skills.get(0).pointIncrementInterval,
+                                  numMaxOccurrencesIncrementInterval: skills.get(0).numMaxOccurrencesIncrementInterval,
+                                  version: skills.get(0).version,
+                                  name: skills.get(0).name], skills.get(0).skillId)
+
+
+        def skillSummaryAfterEdit = skillsService.getSkillSummary("u123", proj1.projectId, subj.subjectId)
+
+        then:
+        skillSummaryBeforeEdit.skills[0].points == 10
+        skillSummaryBeforeEdit.skills[0].totalPoints == 10
+        skillSummaryBeforeEdit.skillsLevel == 4
+        skillSummaryBeforeEdit.points == 20
+        skillSummaryBeforeEdit.totalPoints == 30
+
+        skillSummaryAfterEdit.skills[0].points == 100
+        skillSummaryAfterEdit.skills[0].totalPoints == 100
+        skillSummaryAfterEdit.skillsLevel == 5
+        skillSummaryAfterEdit.points == 110
+        skillSummaryAfterEdit.totalPoints == 120
+    }
+
+    def "decreasing skill point increment post achievement causes user points to be updated"() {
+        def proj1 = SkillsFactory.createProject(1)
+        skillsService.createProject(proj1)
+        def subj = SkillsFactory.createSubject(1)
+        skillsService.createSubject(subj)
+
+        List<Map> skills = SkillsFactory.createSkills(3)
+        skillsService.createSkills(skills)
+
+
+        skillsService.addSkill([projectId: proj1.projectId, skillId: skills.get(0).skillId], "u123", new Date())
+        skillsService.addSkill([projectId: proj1.projectId, skillId: skills.get(1).skillId], "u123", new Date())
+
+        when:
+        def skillSummaryBeforeEdit = skillsService.getSkillSummary("u123", proj1.projectId, subj.subjectId)
+
+        skillsService.updateSkill([projectId: proj1.projectId,
+                                   subjectId: subj.subjectId,
+                                   skillId: skills.get(0).skillId,
+                                   numPerformToCompletion: skills.get(0).numPerformToCompletion,
+                                   pointIncrement: 5,
+                                   pointIncrementInterval: skills.get(0).pointIncrementInterval,
+                                   numMaxOccurrencesIncrementInterval: skills.get(0).numMaxOccurrencesIncrementInterval,
+                                   version: skills.get(0).version,
+                                   name: skills.get(0).name], skills.get(0).skillId)
+
+
+        def skillSummaryAfterEdit = skillsService.getSkillSummary("u123", proj1.projectId, subj.subjectId)
+
+        then:
+        skillSummaryBeforeEdit.skills[0].points == 10
+        skillSummaryBeforeEdit.skills[0].totalPoints == 10
+        skillSummaryBeforeEdit.skillsLevel == 4
+        skillSummaryBeforeEdit.points == 20
+        skillSummaryBeforeEdit.totalPoints == 30
+
+        skillSummaryAfterEdit.skills[0].points == 5
+        skillSummaryAfterEdit.skills[0].totalPoints == 5
+        skillSummaryAfterEdit.skillsLevel == 4
+        skillSummaryAfterEdit.points == 15
+        skillSummaryAfterEdit.totalPoints == 25
+    }
 }

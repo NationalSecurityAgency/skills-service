@@ -253,13 +253,6 @@ class DeleteSkillEventSpecs extends DefaultIntSpec {
         addedSkills = skillsService.getPerformedSkills(userId, projId)
         subjSummaryRes << skillsService.getSkillSummary(userId, projId, subj1.get(1).subjectId)
 
-        skillsService.getLevels(projId, subj1.get(1).subjectId).each {
-            println it
-        }
-        subjSummaryRes.get(5).skills.each {
-            println "skill: ${it.skillId}, points: ${it.points}, todaysPoints: ${it.todaysPoints}, totalPoints: ${it.totalPoints}"
-        }
-
         then:
         // skill event has been removed
         assert addedSkills?.count == 4

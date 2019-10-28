@@ -669,6 +669,11 @@
                      tableName="user_points">
             <column name="points" type="int"/>
         </createIndex>
+        <createIndex indexName="index_user_points_day_skill_id"
+                     tableName="user_points">
+            <column name="skill_id" type="varchar(255)"/>
+            <column name="day" type="date"/>
+        </createIndex>
         <addForeignKeyConstraint baseColumnNames="project_id"
                                  baseTableName="user_points"
                                  constraintName="fk_user_points_project_id"
@@ -752,6 +757,17 @@
         <createIndex indexName="index_user_achievement_project_id"
                      tableName="user_achievement">
             <column name="project_id" type="varchar(255)"/>
+        </createIndex>
+        <createIndex indexName="index_user_achievement_project_id_skill_id"
+                     tableName="user_achievement">
+            <column name="project_id" type="varchar(255)"/>
+            <column name="skill_id" type="varchar(255)"/>
+        </createIndex>
+        <createIndex indexName="index_user_achievement_project_id_skill_id_user_id"
+                     tableName="user_achievement">
+            <column name="project_id" type="varchar(255)"/>
+            <column name="skill_id" type="varchar(255)"/>
+            <column name="user_id" type="varchar(255)"/>
         </createIndex>
         <addForeignKeyConstraint baseColumnNames="skill_ref_id"
                                  baseTableName="user_achievement"

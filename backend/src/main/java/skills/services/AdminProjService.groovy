@@ -89,6 +89,9 @@ class AdminProjService {
     @Autowired
     CustomValidator customValidator
 
+    @Autowired
+    UserPointsRepo userPointsRepo
+
 
     private static DataIntegrityViolationExceptionHandler dataIntegrityViolationExceptionHandler =
             new DataIntegrityViolationExceptionHandler([
@@ -1074,14 +1077,18 @@ class AdminProjService {
         }
 
         boolean shouldRebuildScores
+        boolean updateUserPoints
+        int pointsDelta
 
         boolean isEdit = skillDefinition
         int totalPointsRequested = skillRequest.pointIncrement * skillRequest.numPerformToCompletion;
         SkillDef subject = null
         if (isEdit) {
             shouldRebuildScores = skillDefinition.totalPoints != totalPointsRequested
+            updateUserPoints = shouldRebuildScores
 
             Props.copy(skillRequest, skillDefinition, "childSkills", 'version')
+            pointsDelta = totalPointsRequested - skillDefinition.totalPoints
             //totalPoints is not a prop on skillRequest, it is a calculated value so we
             //need to manually update it in the case of edits.
             skillDefinition.totalPoints = totalPointsRequested
@@ -1125,6 +1132,10 @@ class AdminProjService {
         if (shouldRebuildScores) {
             log.debug("Rebuilding scores")
             ruleSetDefinitionScoreUpdater.updateFromLeaf(savedSkill)
+        }
+
+        if (updateUserPoints) {
+            userPointsRepo.updateAchievedSkillPoints(savedSkill.projectId, skillRequest.subjectId, savedSkill.skillId, pointsDelta)
         }
 
         log.debug("Saved [{}]", savedSkill)

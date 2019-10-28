@@ -2,6 +2,7 @@ package skills.storage.repos
 
 import groovy.transform.CompileStatic
 import org.springframework.data.domain.Pageable
+import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.lang.Nullable
@@ -208,4 +209,26 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
     @Nullable
     @Query('SELECT up.points from UserPoints up where up.projectId=?1 and up.userId=?2 and up.skillRefId=?3 and up.day=?4')
     Integer getPointsByProjectIdAndUserIdAndSkillRefIdAndDay(String projectId, String userId, Integer skillRefId, Date day)
+
+    @Modifying
+    @Query(value = '''UPDATE 
+                        user_points up 
+                        SET points = points+?4 
+                    WHERE 
+                        up.project_id=?1 
+                        AND 
+                            (
+                                up.skill_id=?2 
+                                OR up.skill_id=?3 
+                                OR up.skill_id IS NULL
+                            ) 
+                        AND up.day IS NULL 
+                        AND EXISTS 
+                            (
+                                SELECT 1 FROM user_achievement ua 
+                                WHERE ua.project_id=?1 
+                                    AND ua.skill_id=?3 
+                                    AND ua.user_id = up.user_id
+                            )''', nativeQuery = true)
+    void updateAchievedSkillPoints(String projectId, String subjectId, String skillId, int pointDelta)
 }
