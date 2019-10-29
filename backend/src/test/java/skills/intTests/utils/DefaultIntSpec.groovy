@@ -6,6 +6,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.web.server.LocalServerPort
 import skills.SpringBootApp
 import skills.storage.repos.ProjDefRepo
+import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.UserAttrsRepo
 import spock.lang.Specification
 
@@ -30,12 +31,17 @@ class DefaultIntSpec extends Specification {
     @Autowired
     UserAttrsRepo userAttrsRepo
 
+    @Autowired
+    SkillDefRepo skillDefRepo
+
     def setup() {
         /**
          * deleting projects and users will wipe the entire db clean due to cascading
          */
         projDefRepo.deleteAll()
         userAttrsRepo.deleteAll()
+        // global badges don't have references to a project so must delete those manually
+        skillDefRepo.deleteAll()
 
         skillsService = createService()
     }

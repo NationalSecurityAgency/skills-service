@@ -92,6 +92,9 @@ class AdminProjService {
     @Autowired
     UserPointsRepo userPointsRepo
 
+    @Autowired
+    LockingService lockingService
+
 
     private static DataIntegrityViolationExceptionHandler dataIntegrityViolationExceptionHandler =
             new DataIntegrityViolationExceptionHandler([
@@ -117,6 +120,8 @@ class AdminProjService {
     void saveProject(String originalProjectId, ProjectRequest projectRequest, String userIdParam = null) {
         assert projectRequest?.projectId
         assert projectRequest?.name
+
+        lockingService.lockGlobally()
 
         CustomValidationResult customValidationResult = customValidator.validate(projectRequest)
         if(!customValidationResult.valid){
@@ -170,6 +175,8 @@ class AdminProjService {
 
     @Transactional()
     void saveSubject(String projectId, String origSubjectId, SubjectRequest subjectRequest, boolean performCustomValidation = true) {
+        lockingService.lockProject(projectId)
+
         CustomValidationResult customValidationResult = customValidator.validate(subjectRequest)
         if(performCustomValidation && !customValidationResult.valid){
             throw new SkillException(customValidationResult.msg)
@@ -255,6 +262,13 @@ class AdminProjService {
         CustomValidationResult customValidationResult = customValidator.validate(badgeRequest)
         if(performCustomValidation && !customValidationResult.valid){
             throw new SkillException(customValidationResult.msg)
+        }
+
+        // project id will be null for global badges
+        if (projectId) {
+            lockingService.lockProject(projectId)
+        } else {
+            lockingService.lockGlobally()
         }
 
         SkillDefWithExtra skillDefinition = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, originalBadgeId, type)
@@ -1054,6 +1068,8 @@ class AdminProjService {
     SkillDefRes saveSkill(String originalSkillId, SkillRequest skillRequest, boolean performCustomValidation=true) {
 
         validateSkillVersion(skillRequest)
+
+        lockingService.lockProject(skillRequest.projectId)
 
         CustomValidationResult customValidationResult = customValidator.validate(skillRequest)
         if(performCustomValidation && !customValidationResult.valid){
