@@ -7,7 +7,7 @@
             <div v-if="options.icon" class="d-inline-block mr-2 border rounded text-info text-center" style="min-width: 3.2rem;">
               <i :class="[`${options.icon}`]" class="m-1"/>
             </div>
-            <div class="media-body">
+            <div class="media-body" style="min-width: 0px;">
               <div class="text-truncate text-info mb-0 pb-0 preview-card-title">{{ options.title }}</div>
               <div class="text-truncate text-secondary preview-card-subTitle">{{ options.subTitle }}</div>
             </div>
@@ -52,7 +52,6 @@
 
 <style scoped>
   .preview-card-title {
-    max-width: 12rem;
     font-size: 1.4rem;
     font-weight: bold;
   }
