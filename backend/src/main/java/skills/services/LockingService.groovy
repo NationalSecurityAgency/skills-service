@@ -21,14 +21,18 @@ class LockingService {
     }
 
     ProjDef lockProject(String projectId) {
+        assert projectId
         return skillsDBLockRepo.findByProjectIdIgnoreCase(projectId)
     }
 
     UserAttrs lockUser(String userId) {
+        assert userId
         return skillsDBLockRepo.findUserAttrsByUserId(userId?.toLowerCase())
     }
 
     UserPoints lockUserPoints(String projectId, String userId) {
+        assert projectId
+        assert userId
         return skillsDBLockRepo.findUserPointsByProjectIdAndUserId(projectId, userId)
     }
 
