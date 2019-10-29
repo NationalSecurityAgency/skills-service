@@ -3,17 +3,17 @@
         <div class="card-header">
             <h6 class="card-title mb-0 float-left">Dependencies</h6>
         </div>
-        <div class="card-body px-0">
-            <div class="row justify-content-between px-2">
-                <div class="col-lg-3 mb-2 mb-lg-0">
-                    <graph-legend :items="legendItems"/>
+        <div class="card-body">
+            <div class="row legend-row">
+                <div class="col-12 mb-2 m-sm-0 col-sm-6">
+                    <graph-legend :items="legendItems" class="legend-component"/>
                 </div>
 
-                <div class="col-lg-4 text-right">
+                <div class="col-12 col-sm-6">
                     <skill-dependency-summary
                         v-if="dependencies && dependencies.length > 0"
                         :dependencies="dependencies"
-                        class="graph-legend"/>
+                        class="legend-component float-md-right"/>
                 </div>
             </div>
             <div id="dependent-skills-network" style="height: 500px"></div>
@@ -228,15 +228,19 @@
 
 <style scoped>
     #dependent-skills-network {
-        /*padding-bottom: 1rem;*/
         margin-bottom: 2rem;
     }
 
-    .graph-legend {
-        position: absolute;
-        z-index: 10;
-        /*margin-left: 1rem;*/
-        margin-top: 1rem;
+    @media (min-width: 721px) {
+        .legend-component {
+            max-width: 18rem;
+            min-width: 14rem;
+        }
+        .legend-row {
+            position: absolute;
+            z-index: 99;
+            width: 100%;
+        }
     }
 </style>
 
