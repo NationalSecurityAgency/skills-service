@@ -12,6 +12,7 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication
 import org.springframework.security.web.context.HttpRequestResponseHolder
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository
 import org.springframework.security.web.context.NullSecurityContextRepository
+import skills.auth.UserInfo
 import skills.auth.form.oauth2.OAuthUtils
 
 import javax.servlet.http.HttpServletRequest
@@ -42,9 +43,7 @@ class SkillsHttpSessionSecurityContextRepository extends HttpSessionSecurityCont
             context = nullSecurityContextRepository.loadContext(requestResponseHolder)
         } else {
             // Let the parent class actually get the SecurityContext from the HTTPSession first.
-            context = super.loadContext(requestResponseHolder)
-
-            Authentication auth = context.getAuthentication()
+            Authentication auth = super.loadContext(requestResponseHolder)?.getAuthentication()
             if (auth && auth instanceof OAuth2Authentication) {
                 // OAuth2Authentication is used when then the OAuth2 client uses the client_credentials grant_type we
                 // look for a custom "proxy_user" field where the trusted client must specify the skills user that the
@@ -52,13 +51,13 @@ class SkillsHttpSessionSecurityContextRepository extends HttpSessionSecurityCont
                 auth = oAuthUtils.convertToSkillsAuth(auth)
             } else if (auth && auth instanceof OAuth2AuthenticationToken && auth.principal instanceof OAuth2User) {
                 auth = oAuthUtils.convertToSkillsAuth(auth)
-            } else if (auth && auth.principal instanceof skills.auth.UserInfo) {
+            } else if (auth && auth.principal instanceof UserInfo) {
                 // reload the granted_authorities for this skills user if loaded from the HTTP Session)
-                skills.auth.UserInfo userInfo = auth.principal
+                UserInfo userInfo = auth.principal
                 userInfo.authorities = userAuthService.loadAuthorities(userInfo.username)
                 auth = new UsernamePasswordAuthenticationToken(userInfo, auth.credentials, userInfo.authorities)
             }
-
+            context = SecurityContextHolder.createEmptyContext();
             context.setAuthentication(auth)
         }
         return context

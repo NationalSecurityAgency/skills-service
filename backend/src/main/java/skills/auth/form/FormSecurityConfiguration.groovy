@@ -15,6 +15,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
 import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.core.Authentication
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.access.AccessDeniedHandler
@@ -129,6 +130,8 @@ class FormSecurityConfiguration extends WebSecurityConfigurerAdapter {
     static class RestAccessDeniedHandler implements AccessDeniedHandler {
         @Override
         void handle(final HttpServletRequest request, final HttpServletResponse response, final AccessDeniedException ex) throws IOException, ServletException {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            log.warn("Access Denied User [${authentication}], reqested resource [${request.getServletPath()}]")
             response.setStatus(HttpServletResponse.SC_FORBIDDEN)
         }
     }
