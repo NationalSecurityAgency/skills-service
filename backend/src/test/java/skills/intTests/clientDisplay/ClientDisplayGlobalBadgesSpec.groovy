@@ -474,6 +474,39 @@ class ClientDisplayGlobalBadgesSpec extends DefaultIntSpec {
         }
     }
 
+    def "badge skill summaries from within a different project"() {
+
+        String userId = "user1"
+
+        def proj1 = SkillsFactory.createProject(1)
+        def proj2 = SkillsFactory.createProject(2)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        def proj2_subj = SkillsFactory.createSubject(2, 2)
+        List<Map> proj1_skills = SkillsFactory.createSkills(2, 1, 1)
+        List<Map> proj2_skills = SkillsFactory.createSkills(2, 2, 2)
+
+        skillsService.createProject(proj1)
+        skillsService.createProject(proj2)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSubject(proj2_subj)
+        skillsService.createSkills(proj1_skills)
+        skillsService.createSkills(proj2_skills)
+
+        Map badge = [badgeId: "bid1", name: "global badge", description: "gbadge".toString(), iconClass: "fa fa-foo".toString(),]
+        supervisorSkillsService.createGlobalBadge(badge)
+
+        supervisorSkillsService.assignSkillToGlobalBadge([projectId: proj1.projectId, badgeId: "bid1", skillId: proj1_skills.get(0).skillId])
+        supervisorSkillsService.assignSkillToGlobalBadge([projectId: proj2.projectId, badgeId: "bid1", skillId: proj2_skills.get(0).skillId])
+        skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_skills.get(0).skillId], userId, new Date())
+
+        when:
+        def summaries = skillsService.getBadgesSummary(userId, proj1.projectId)
+        def skillSummary = skillsService.getCrossProjectSkillSummary(userId, proj1.projectId, proj2.projectId, proj2_skills.get(0).skillId)
+
+        then:
+        skillSummary
+    }
+
     private deleteGlobalBadgeIfExists(String badgeId) {
         try {
             if (supervisorSkillsService?.getGlobalBadge(badgeId)) {
