@@ -485,6 +485,7 @@ class SkillsLoader {
             projectLevels.add(projectLevelSummary)
             if (userProjectLevels.containsKey(requiredLevel.projectId)) {
                 Integer achievedProjectLevel = userProjectLevels.get(requiredLevel.projectId)
+                projectLevelSummary.achievedLevel = achievedProjectLevel
                 if (achievedProjectLevel >= requiredLevel.level) {
                     numAchievedSkills++
                 }
