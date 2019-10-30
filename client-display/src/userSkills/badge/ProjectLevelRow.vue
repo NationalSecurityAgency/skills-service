@@ -48,6 +48,9 @@
     },
     computed: {
       percent() {
+        if (this.projectLevel.achievedLevel >= this.projectLevel.requiredLevel) {
+          return 100;
+        }
         return Math.trunc((this.projectLevel.achievedLevel / this.projectLevel.requiredLevel) * 100);
       },
     },

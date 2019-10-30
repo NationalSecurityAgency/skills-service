@@ -131,6 +131,7 @@ class ClientDisplayGlobalBadgesSpec extends DefaultIntSpec {
         !summary.endDate
         summary.numTotalSkills == 1
         summary.numSkillsAchieved == 1
+        summary.projectLevelsAndSkillsSummaries.projectLevel.achievedLevel[0] >= summary.projectLevelsAndSkillsSummaries.projectLevel.requiredLevel[0]
         summary.iconClass == "fa fa-seleted-icon"
     }
 
