@@ -283,5 +283,43 @@ class ConcurrencySpecs extends DefaultIntSpec {
         ussrAttrs.sort() == ussrAttrs.unique().sort()
     }
 
+    def "/api endpoints with concurrent admin endpoints do not affect permissions"() {
+        def proj = SkillsFactory.createProject()
+        def subject = SkillsFactory.createSubject()
+        List<Map> skills = SkillsFactory.createSkills(2)
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subject)
+        skillsService.createSkills(skills)
+
+        int numUsers = 100
+        List<String> users = (1..numUsers).collect { "CreateNewUserAttrTestsUser${it}".toString() }
+        int numThreads = 5
+        AtomicInteger exceptionCount = new AtomicInteger()
+        when:
+        List<Thread> threads = (1..numThreads).collect {
+            int threadNum = it
+            Thread.start {
+                users.each {
+                    try {
+                        if (threadNum % 2 != 0) {
+                            skillsService.getProjectUsers(proj.projectId)
+                        } else {
+                            skillsService.suggestClientUsers('CreateNewUserAttrTestsUser')
+                        }
+                    } catch (SkillsClientException e) {
+                        exceptionCount.incrementAndGet()
+                        log.error("Error in thread [${threadNum}]", e)
+                    }
+                }
+            }
+        }
+        threads.each {
+            it.join(5000)
+        }
+
+        then:
+        exceptionCount.get() == 0
+    }
 
 }
