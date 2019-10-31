@@ -109,7 +109,7 @@
             },
             levelStats() {
                 return {
-                    title: `Level ${this.displayData.userSkills.skillsLevel + 1} Progress`,
+                    title: this.isLevelComplete ? 'Level Progress' : `Level ${this.displayData.userSkills.skillsLevel + 1} Progress`,
                     nextLevel: this.displayData.userSkills.skillsLevel + 1,
                     pointsTillNextLevel: this.displayData.userSkills.levelTotalPoints - this.displayData.userSkills.levelPoints,
                 };
