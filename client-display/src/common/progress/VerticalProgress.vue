@@ -5,6 +5,13 @@
       <i class="fas fa-lock"></i>
     </span>
     <progress-bar
+      v-if="totalProgress === 100"
+      :val="totalProgress"
+      :size="barSize"
+      :bar-color="completeColor"
+      class="complete-total"/>
+    <progress-bar
+      v-if="totalProgress !== 100"
       :val="totalProgress"
       :size="barSize"
       :bar-color="totalProgressBeforeToday ? totalProgressBarColor : beforeTodayBarColor"
@@ -43,6 +50,11 @@
       barSize: {
         type: Number,
         default: 22,
+      },
+    },
+    computed: {
+      completeColor() {
+        return this.$store.state.themeModule.progressIndicators.completeColor;
       },
     },
   };
