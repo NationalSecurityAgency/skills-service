@@ -156,7 +156,7 @@
         getMessage: field => `${field} is already taken.`,
         validate(value) {
           let valid = true;
-          if (self.allLevels && value !== self.level.name && value) {
+          if (self.allLevels && value && value.localeCompare(self.level.name, 'en', { sensitivity: 'base' }) !== 0) {
             const lcVal = value.toLowerCase();
             const existingLevelWithName = self.allLevels.find(elem => elem.name.toLowerCase() === lcVal);
             if (existingLevelWithName) {

@@ -297,7 +297,7 @@
         Validator.extend('uniqueName', {
           getMessage: field => `The value for the ${field} is already taken.`,
           validate(value) {
-            if (self.isEdit && self.initial.skillName === value) {
+            if (self.isEdit && (value === self.initial.skillName || self.initial.skillName.localeCompare(value, 'en', { sensitivity: 'base' }) === 0)) {
               return true;
             }
             return SkillsService.skillWithNameExists(self.projectId, value);
