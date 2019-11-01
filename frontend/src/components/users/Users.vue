@@ -3,16 +3,25 @@
     <sub-page-header title="Users"/>
 
       <simple-card style="min-height: 30rem;">
-        <skills-spinner :is-loading="loading"/>
-        <div v-show="!loading">
+        <div>
           <h4 class="border-bottom text-center text-lg-left text-secondary">
             <i class="fa fa-users mr-2"/>
-            <span class=""><strong>{{ totalNumUsers | number}}</strong> Total Users</span>
+            <span class="">
+            <template v-if="initialLoad">
+              <b-spinner label="Loading..." style="width: 1rem; height: 1rem;" variant="info"/>
+            </template>
+            <template v-else>
+              <strong>{{ totalNumUsers | number}}</strong>
+            </template>
+             Total Users</span>
           </h4>
 
           <v-server-table ref="table" :columns="columns" :url="getUrl()" :options="options"
                           class="vue-table-2"
-                          v-on:loaded="emit('loaded', $event)" v-on:error="emit('error', $event)">
+                          @loaded="onLoaded" @loading="onLoading" v-on:error="emit('error', $event)">
+
+            <server-table-loading-mask v-if="loading" slot="afterBody" />
+
             <div slot="userId" slot-scope="props" class="field has-addons">
               {{ getUserDisplay(props) }}
             </div>
@@ -40,7 +49,7 @@
   import { Validator } from 'vee-validate';
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import SimpleCard from '../utils/cards/SimpleCard';
-  import SkillsSpinner from '../utils/SkillsSpinner';
+  import ServerTableLoadingMask from '../utils/ServerTableLoadingMask';
 
   const dictionary = {
     en: {
@@ -53,13 +62,16 @@
 
   export default {
     name: 'Users',
-    components: { SkillsSpinner, SimpleCard, SubPageHeader },
+    components: {
+      SimpleCard, SubPageHeader, ServerTableLoadingMask,
+    },
     data() {
       const self = this;
       return {
         loading: true,
+        initialLoad: true,
         data: [],
-        totalNumUsers: -1,
+        totalNumUsers: '...',
         columns: ['userId', 'totalPoints', 'lastUpdated', 'viewDetail'],
         options: {
           headings: {
@@ -102,7 +114,17 @@
         },
       };
     },
+    mounted() {
+    },
     methods: {
+      onLoading() {
+        this.loading = true;
+      },
+      onLoaded(event) {
+        this.loading = false;
+        this.initialLoad = false;
+        this.$emit('loaded', event);
+      },
       getUrl() {
         let url = `/admin/projects/${this.$route.params.projectId}`;
         if (this.$route.params.skillId) {
@@ -142,5 +164,10 @@
     .usersTable .control-column {
       width: unset;
     }
+  }
+
+  .usersTable table {
+    width: 100%;
+    position: relative;
   }
 </style>

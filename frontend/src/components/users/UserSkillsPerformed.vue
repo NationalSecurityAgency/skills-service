@@ -4,7 +4,8 @@
 
     <simple-card>
       <v-server-table class="vue-table-2" ref="table" :columns="columns" :url="getUrl()" :options="options"
-                      v-on:loaded="emit('loaded', $event)" v-on:error="emit('error', $event)">
+                      @loaded="onLoaded" @loading="onLoading" v-on:error="emit('error', $event)">
+        <server-table-loading-mask v-if="isLoading" slot="afterBody" />
         <div slot="performedOn" slot-scope="props">
           {{ getDate(props.row) }}
         </div>
@@ -25,6 +26,7 @@
   import MsgBoxMixin from '../utils/modal/MsgBoxMixin';
   import ToastSupport from '../utils/ToastSupport';
   import UsersService from './UsersService';
+  import ServerTableLoadingMask from '../utils/ServerTableLoadingMask';
 
   const { mapActions } = createNamespacedHelpers('users');
 
@@ -34,6 +36,7 @@
     components: {
       SimpleCard,
       SubPageHeader,
+      ServerTableLoadingMask,
     },
     data() {
       return {
@@ -73,6 +76,13 @@
       ...mapActions([
         'loadUserDetailsState',
       ]),
+      onLoading() {
+        this.isLoading = true;
+      },
+      onLoaded(event) {
+        this.isLoading = false;
+        this.$emit('loaded', event);
+      },
       getUrl() {
         return `/admin/projects/${this.projectId}/performedSkills/${this.userId}`;
       },
@@ -117,5 +127,8 @@
 </script>
 
 <style scoped>
-
+  .vue-table-2 table {
+    width: 100%;
+    position: relative;
+  }
 </style>
