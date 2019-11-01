@@ -67,7 +67,7 @@
         </b-button>
         <b-button variant="secondary" size="sm" class="float-right mr-2" @click="closeMe">
           Cancel
-        </b-button>.
+        </b-button>
       </div>
     </div>
   </b-modal>
