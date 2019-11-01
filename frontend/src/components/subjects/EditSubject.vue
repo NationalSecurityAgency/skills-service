@@ -167,7 +167,7 @@
         Validator.extend('uniqueName', {
           getMessage: field => `${field} is already taken.`,
           validate(value) {
-            if (value === self.subject.name) {
+            if (value === self.subject.name || (value && value.localeCompare(self.subject.name, 'en', { sensitivity: 'base' }) === 0)) {
               return true;
             }
             return SubjectsService.subjectWithNameExists(self.subjectInternal.projectId, value);

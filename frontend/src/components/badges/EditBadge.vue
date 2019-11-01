@@ -230,7 +230,7 @@
         Validator.extend('uniqueName', {
           getMessage: field => `The value for ${field} is already taken.`,
           validate(value) {
-            if (self.isEdit && self.badge.name === value) {
+            if (self.isEdit && (value === self.badge.name || self.badge.name.localeCompare(value, 'en', { sensitivity: 'base' }) === 0)) {
               return true;
             }
             if (self.global) {
