@@ -487,12 +487,14 @@ class AdminProjService {
 
     @Transactional
     void setSubjectDisplayOrder(String projectId, String subjectId, ActionPatchRequest subjectPatchRequest) {
+        lockingService.lockProject(projectId)
         ProjDef projDef = getProjDef(projectId)
         updateDisplayOrder(subjectId, projDef.subjects, subjectPatchRequest)
     }
 
     @Transactional
     void setBadgeDisplayOrder(String projectId, String badgeId, ActionPatchRequest badgePatchRequest) {
+        lockingService.lockProject(projectId)
         ProjDef projDef = getProjDef(projectId)
         updateDisplayOrder(badgeId, projDef.badges, badgePatchRequest)
     }
@@ -517,7 +519,7 @@ class AdminProjService {
         }
 
         if (!switchWith) {
-            assert switchWith, "Failed to find definition to switch with [${toUpdate}] for action [$patchRequest.action]"
+            assert switchWith, "Failed to find definition to switch with [${toUpdate?.skillId}] for action [$patchRequest.action]"
         }
         assert switchWith.skillId != toUpdate.skillId
 

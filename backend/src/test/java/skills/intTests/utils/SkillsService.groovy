@@ -89,6 +89,16 @@ class SkillsService {
     }
 
     @Profile
+    def moveSubjectUp(Map props){
+        wsHelper.adminPatch(getSubjectUrl(props.projectId, props.subjectId), '{"action": "DisplayOrderUp"}')
+    }
+
+    @Profile
+    def moveSubjectDown(Map props){
+        wsHelper.adminPatch(getSubjectUrl(props.projectId, props.subjectId), '{"action": "DisplayOrderDown"}')
+    }
+
+    @Profile
     def moveBadgeUp(Map props){
         wsHelper.adminPatch(getBadgeUrl(props.projectId, props.badgeId), '{"action": "DisplayOrderUp"}')
     }
@@ -291,6 +301,11 @@ class SkillsService {
     def getBadge(String projectId, String badgeId) {
         this.getBadge([projectId: projectId, badgeId: badgeId])
     }
+
+    def getBadges(String projectId) {
+        wsHelper.adminGet("/projects/${projectId}/badges")
+    }
+
     def getBadge(Map props) {
         wsHelper.adminGet("/projects/${props.projectId}/badges/${props.badgeId}")
     }
