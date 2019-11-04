@@ -207,7 +207,7 @@ class SkillsLoader {
             badgeDefs = badgeDefs.findAll { it.version <= version }
         }
         List<SkillGlobalBadgeSummary> globalBadges = badgeDefs.sort({ it.displayOrder }).collect { SkillDefWithExtra badgeDefinition ->
-            loadGlobalBadgeSummary(userId, badgeDefinition, version, true)
+            loadGlobalBadgeSummary(userId, projectId, badgeDefinition, version, true)
         }
         globalBadges = globalBadges.findAll { it.projectLevelsAndSkillsSummaries.find { it.projectId == projectId } }
         return globalBadges
@@ -310,10 +310,10 @@ class SkillsLoader {
 
 
     @Transactional(readOnly = true)
-    SkillGlobalBadgeSummary loadGlobalBadge(String userId, String badgeSkillId, Integer version = Integer.MAX_VALUE) {
+    SkillGlobalBadgeSummary loadGlobalBadge(String userId, String originatingProject, String badgeSkillId, Integer version = Integer.MAX_VALUE) {
         SkillDefWithExtra badgeDef = getSkillDefWithExtra(null, badgeSkillId, SkillDef.ContainerType.GlobalBadge)
 
-        return loadGlobalBadgeSummary(userId, badgeDef, version,true)
+        return loadGlobalBadgeSummary(userId, originatingProject, badgeDef, version,true)
     }
 
     @Transactional(readOnly = true)
@@ -457,16 +457,18 @@ class SkillsLoader {
     }
 
     @Profile
-    private SkillGlobalBadgeSummary loadGlobalBadgeSummary(String userId, SkillDefWithExtra badgeDefinition, Integer version = Integer.MAX_VALUE, boolean loadSkills = false) {
+    private SkillGlobalBadgeSummary loadGlobalBadgeSummary(String userId, String originatingProject, SkillDefWithExtra badgeDefinition, Integer version = Integer.MAX_VALUE, boolean loadSkills = false) {
         List<SkillSummary> skillsRes = []
 
         if (loadSkills) {
             SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, null, badgeDefinition.skillId, version, SkillRelDef.RelationshipType.BadgeRequirement)
             skillsRes = createSkillSummaries(null, groupChildrenMeta.childrenWithPoints)
             if (skillsRes) {
-                // all the skills are "cross-project" when it comes to global badges
+                // all the skills are "cross-project" if they don't belong to the project that originated this reqest
                 skillsRes.each {
-                    it.crossProject = true
+                    if (it.projectId != originatingProject) {
+                        it.crossProject = true
+                    }
                 }
             }
         }
