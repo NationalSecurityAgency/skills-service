@@ -95,7 +95,6 @@ class AdminProjService {
     @Autowired
     LockingService lockingService
 
-
     private static DataIntegrityViolationExceptionHandler dataIntegrityViolationExceptionHandler =
             new DataIntegrityViolationExceptionHandler([
                     "index_project_definition_name" : "Provided project name already exist.",
