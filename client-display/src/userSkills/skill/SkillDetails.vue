@@ -64,10 +64,11 @@
                 }
             },
             loadSkillSummary() {
-                const projectId = this.$route.params.crossProjectId ? this.$route.params.crossProjectId : this.$route.params.projectId;
-                console.log(`loading skill summary using projectId [${projectId}`);
-                console.log(this.$route.params);
-                UserSkillsService.getSkillSummary(this.$route.params.skillId, projectId)
+                // const projectId = this.$route.params.crossProjectId ? this.$route.params.crossProjectId : this.$route.params.projectId;
+                // console.log(`loading skill summary using projectId [${projectId}`);
+                // console.log(this.$route.params);
+                // UserSkillsService.getSkillSummary(this.$route.params.skillId, projectId)
+                UserSkillsService.getSkillSummary(this.$route.params.skillId, this.$route.params.crossProjectId)
                     .then((res) => {
                         this.skill = res;
                         this.loading.skill = false;
