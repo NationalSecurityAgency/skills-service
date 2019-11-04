@@ -6,6 +6,9 @@ import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
+import skills.services.SortingService
+import skills.services.settings.SettingsDataAccessor
+import skills.storage.model.Setting
 import skills.storage.model.SkillDef
 import skills.storage.repos.LevelDefRepo
 import skills.storage.repos.ProjDefRepo
@@ -92,12 +95,88 @@ class ConcurrencySpecs extends DefaultIntSpec {
         List<String> levels = levelDefRepo.findAll().collect { "${it.projectId}-${it.level}" }
         then:
         settingsAsStrings.sort() == settingsAsStrings.unique().sort()
-        projectIds.collect {it.toLowerCase()}.sort() == projectIds.collect {it.toLowerCase()}.unique().sort()
+        projectIds.collect { it.toLowerCase() }.sort() == projectIds.collect { it.toLowerCase() }.unique().sort()
         projectNames.sort() == projectNames.unique().sort()
-        levels.collect {it.toLowerCase()}.sort() == levels.collect {it.toLowerCase()}.unique().sort()
+        levels.collect { it.toLowerCase() }.sort() == levels.collect { it.toLowerCase() }.unique().sort()
         projectIds.size() == numProj
     }
 
+    @Autowired
+    SettingsDataAccessor settingsDataAccessor
+
+    def "move projects' order concurrently - move down"() {
+        int numThreads = 2
+        int numProj = 25
+
+        (1..numProj).collect {
+            def proj = SkillsFactory.createProject(it)
+            skillsService.createProject(proj)
+            return proj
+        }
+        AtomicInteger numExceptions = new AtomicInteger()
+        when:
+        List<Thread> threads = (1..numThreads).collect { int threadNum ->
+            Thread.start {
+                (1..20).each {
+                    def project = skillsService.getProjects().first()
+                    try {
+                        skillsService.moveProjectDown(project)
+                    } catch (Exception e) {
+                        numExceptions.incrementAndGet()
+                    }
+                }
+            }
+        }
+        threads.each {
+            it.join(5000)
+        }
+
+        List<Setting> sortOrder = settingsDataAccessor.getUserProjectSettingsForGroup(skillsService.userName, SortingService.PROJECT_SORT_GROUP)
+        sortOrder.each {
+            println it
+        }
+
+        then:
+        sortOrder.collect({it.value}).sort() == sortOrder.collect({it.value}).unique().sort()
+        numExceptions.get() == 0
+    }
+
+    def "move projects' order concurrently - move up"() {
+        int numThreads = 2
+        int numProj = 25
+
+        (1..numProj).collect {
+            def proj = SkillsFactory.createProject(it)
+            skillsService.createProject(proj)
+            return proj
+        }
+        AtomicInteger numExceptions = new AtomicInteger()
+        when:
+        List<Thread> threads = (1..numThreads).collect { int threadNum ->
+            Thread.start {
+                (1..20).each {
+                    def project = skillsService.getProjects().last()
+                    try {
+                        skillsService.moveProjectUp(project)
+                    } catch (Exception e) {
+                        numExceptions.incrementAndGet()
+                    }
+                }
+            }
+        }
+        threads.each {
+            it.join(5000)
+        }
+
+        List<Setting> sortOrder = settingsDataAccessor.getUserProjectSettingsForGroup(skillsService.userName, SortingService.PROJECT_SORT_GROUP)
+        sortOrder.each {
+            println it
+        }
+
+        then:
+        sortOrder.collect({it.value}).sort() == sortOrder.collect({it.value}).unique().sort()
+        numExceptions.get() == 0
+    }
 
     private String uppperCaseOneChar(String str, int charToUpper) {
         String res = str.toLowerCase()
@@ -134,7 +213,9 @@ class ConcurrencySpecs extends DefaultIntSpec {
 
         List<SkillDef> subjects = skillDefRepo.findAllByProjectIdAndType(proj.projectId, SkillDef.ContainerType.Subject)
         then:
-        subjects.collect({ it.skillId.toLowerCase() }).sort() == subjects.collect({ it.skillId.toLowerCase() }).unique().sort()
+        subjects.collect({ it.skillId.toLowerCase() }).sort() == subjects.collect({
+            it.skillId.toLowerCase()
+        }).unique().sort()
         subjects.size() == numSubjects
     }
 
@@ -166,7 +247,9 @@ class ConcurrencySpecs extends DefaultIntSpec {
 
         List<SkillDef> badges = skillDefRepo.findAllByProjectIdAndType(proj.projectId, SkillDef.ContainerType.Badge)
         then:
-        badges.collect({ it.skillId.toLowerCase() }).sort() == badges.collect({ it.skillId.toLowerCase() }).unique().sort()
+        badges.collect({ it.skillId.toLowerCase() }).sort() == badges.collect({
+            it.skillId.toLowerCase()
+        }).unique().sort()
         badges.size() == numberBadges
     }
 
@@ -205,7 +288,9 @@ class ConcurrencySpecs extends DefaultIntSpec {
 
         List<SkillDef> badges = skillDefRepo.findAllByProjectIdAndType(null, SkillDef.ContainerType.GlobalBadge)
         then:
-        badges.collect({ it.skillId.toLowerCase() }).sort() == badges.collect({ it.skillId.toLowerCase() }).unique().sort()
+        badges.collect({ it.skillId.toLowerCase() }).sort() == badges.collect({
+            it.skillId.toLowerCase()
+        }).unique().sort()
         badges.size() == numberBadges
     }
 
@@ -239,7 +324,9 @@ class ConcurrencySpecs extends DefaultIntSpec {
 
         List<SkillDef> skills = skillDefRepo.findAllByProjectIdAndType(proj.projectId, SkillDef.ContainerType.Skill)
         then:
-        skills.collect({ it.skillId.toLowerCase() }).sort() == skills.collect({ it.skillId.toLowerCase() }).unique().sort()
+        skills.collect({ it.skillId.toLowerCase() }).sort() == skills.collect({
+            it.skillId.toLowerCase()
+        }).unique().sort()
         skills.size() == numSkills
     }
 

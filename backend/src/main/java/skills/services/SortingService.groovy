@@ -35,6 +35,9 @@ class SortingService {
     @Autowired
     SettingsDataAccessor settingsDataAccessor
 
+    @Autowired
+    LockingService lockingService
+
     @Transactional(readOnly = true)
     Integer getProjectSortOrder(String projectId){
         UserInfo userInfo = userInfoService.getCurrentUser()
@@ -120,7 +123,9 @@ class SortingService {
     @Transactional
     void changeProjectOrder(String moveMeProjectId, Move direction){
         UserInfo userInfo = userInfoService.getCurrentUser()
+        lockingService.lockUser(userInfo.username)
         User user = userRepo.findByUserIdIgnoreCase(userInfo.username)
+
         List<Setting> sortOrder = settingsDataAccessor.getUserProjectSettingsForGroup(userInfo.username, PROJECT_SORT_GROUP)
 
         sortOrder.sort() { Setting one, Setting two -> one.value.toInteger() <=> two.value.toInteger() }
