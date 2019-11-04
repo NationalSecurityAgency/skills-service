@@ -21,6 +21,11 @@ class DependencyValidator {
     SkillRelDefRepo skillRelDefRepo
 
     void validateDependencyEligibility(String projectId, SkillDefParent skill) {
+        if ( projectId?.equalsIgnoreCase(skill.projectId)){
+            // can dependent on skills from your project without any restrictions
+            return
+        }
+
         SkillShareDef skillShareDef = skillShareDefRepo.findBySharedToProjectIdAndSkillId(projectId, skill.id)
         if (!skillShareDef) {
             // check if the dependency is shared with ALL projects (null shared_to_project_id)

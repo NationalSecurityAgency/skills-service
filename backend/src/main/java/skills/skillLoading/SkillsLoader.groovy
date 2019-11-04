@@ -463,6 +463,12 @@ class SkillsLoader {
         if (loadSkills) {
             SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, null, badgeDefinition.skillId, version, SkillRelDef.RelationshipType.BadgeRequirement)
             skillsRes = createSkillSummaries(null, groupChildrenMeta.childrenWithPoints)
+            if (skillsRes) {
+                // all the skills are "cross-project" when it comes to global badges
+                skillsRes.each {
+                    it.crossProject = true
+                }
+            }
         }
 
         List<UserAchievement> achievements = achievedLevelRepository.findAllByUserIdAndSkillId(userId, badgeDefinition.skillId)
