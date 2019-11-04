@@ -55,17 +55,19 @@ class CustomValidator {
         return validationResult
     }
 
-    public CustomValidationResult validateDescription(String description) {
+    CustomValidationResult validateDescription(String description) {
         if (StringUtils.isBlank(paragraphValidationRegex) || description == null) {
             return new CustomValidationResult(valid: true)
         }
+        String validationMsg = paragraphValidationMessage ?: "Description failed validation"
+        log.info("Configuring paragraph validator. regex=[{}], message=[{}]", paragraphValidationRegex, validationMsg)
 
         String[] paragraphs = description.split("\n\n")
         Pattern pattern = compileRegex(paragraphValidationRegex)
 
         CustomValidationResult validationResult = null
         for (String s : paragraphs) {
-            validationResult = validateInternal(pattern, s.trim(), paragraphValidationMessage ?: "Description failed validation")
+            validationResult = validateInternal(pattern, s.trim(), validationMsg)
             if (!validationResult.valid) {
                 break
             }
