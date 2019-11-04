@@ -1,6 +1,7 @@
 package skills.intTests
 
 import org.apache.http.client.methods.HttpHead
+import org.joda.time.DateTime
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
@@ -545,5 +546,136 @@ class AdminEditSpecs extends DefaultIntSpec {
         skillSummaryAfterEdit.skillsLevel == 4
         skillSummaryAfterEdit.points == 15
         skillSummaryAfterEdit.totalPoints == 25
+    }
+
+    def "decrease skill point increment after multiple users have achieved occurrences"(){
+        def proj1 = SkillsFactory.createProject(1)
+        skillsService.createProject(proj1)
+        def subj = SkillsFactory.createSubject(1)
+        skillsService.createSubject(subj)
+
+        List<Map> skills = SkillsFactory.createSkills(3)
+        skillsService.createSkills(skills)
+
+
+        skillsService.addSkill([projectId: proj1.projectId, skillId: skills.get(0).skillId], "u123", new Date())
+        skillsService.addSkill([projectId: proj1.projectId, skillId: skills.get(1).skillId], "u123", new Date())
+
+        skillsService.addSkill([projectId: proj1.projectId, skillId: skills.get(0).skillId], "u124", new Date())
+
+        //this user should be unaffected
+        skillsService.addSkill([projectId: proj1.projectId, skillId: skills.get(2).skillId], "u125", new Date())
+
+        when:
+        def skillSummaryBeforeEdit = skillsService.getSkillSummary("u123", proj1.projectId, subj.subjectId)
+        def u124SummaryBeforeEdit = skillsService.getSkillSummary("u124", proj1.projectId, subj.subjectId)
+        def u125SummaryBeforeEdit = skillsService.getSkillSummary("u125", proj1.projectId, subj.subjectId)
+
+        skillsService.updateSkill([projectId: proj1.projectId,
+                                   subjectId: subj.subjectId,
+                                   skillId: skills.get(0).skillId,
+                                   numPerformToCompletion: skills.get(0).numPerformToCompletion,
+                                   pointIncrement: 5,
+                                   pointIncrementInterval: skills.get(0).pointIncrementInterval,
+                                   numMaxOccurrencesIncrementInterval: skills.get(0).numMaxOccurrencesIncrementInterval,
+                                   version: skills.get(0).version,
+                                   name: skills.get(0).name], skills.get(0).skillId)
+
+
+        def skillSummaryAfterEdit = skillsService.getSkillSummary("u123", proj1.projectId, subj.subjectId)
+        def u124SummaryAfterEdit = skillsService.getSkillSummary("u124", proj1.projectId, subj.subjectId)
+        def u125SummaryAfterEdit = skillsService.getSkillSummary("u125", proj1.projectId, subj.subjectId)
+
+        then:
+        skillSummaryBeforeEdit.skills[0].points == 10
+        skillSummaryBeforeEdit.skills[0].totalPoints == 10
+        skillSummaryBeforeEdit.skillsLevel == 4
+        skillSummaryBeforeEdit.points == 20
+        skillSummaryBeforeEdit.totalPoints == 30
+
+        skillSummaryAfterEdit.skills[0].points == 5
+        skillSummaryAfterEdit.skills[0].totalPoints == 5
+        skillSummaryAfterEdit.skillsLevel == 4
+        skillSummaryAfterEdit.points == 15
+        skillSummaryAfterEdit.totalPoints == 25
+
+        u124SummaryBeforeEdit.skills[0].points == 10
+        u124SummaryBeforeEdit.skills[0].totalPoints == 10
+        u124SummaryBeforeEdit.skillsLevel == 2
+        u124SummaryBeforeEdit.points == 10
+        u124SummaryBeforeEdit.totalPoints == 30
+
+        u124SummaryAfterEdit.skills[0].points == 5
+        u124SummaryAfterEdit.skills[0].totalPoints == 5
+        u124SummaryAfterEdit.skillsLevel == 2
+        u124SummaryAfterEdit.points == 5
+        u124SummaryAfterEdit.totalPoints == 25
+
+        u125SummaryBeforeEdit.skills[0].points == 0
+        u125SummaryBeforeEdit.skills[0].totalPoints == 10
+        u125SummaryBeforeEdit.skills[1].points == 0
+        u125SummaryBeforeEdit.skills[1].totalPoints == 10
+        u125SummaryBeforeEdit.skills[2].points == 10
+        u125SummaryBeforeEdit.skills[2].totalPoints == 10
+        u125SummaryBeforeEdit.totalPoints == 30
+
+        u125SummaryAfterEdit.skills[0].points == 0
+        u125SummaryAfterEdit.skills[0].totalPoints == 5
+        u125SummaryAfterEdit.skills[1].points == 0
+        u125SummaryAfterEdit.skills[1].totalPoints == 10
+        u125SummaryAfterEdit.skills[2].points == 10
+        u125SummaryAfterEdit.skills[2].totalPoints == 10
+
+        u125SummaryAfterEdit.skillsLevel == u125SummaryBeforeEdit.skillsLevel
+        u125SummaryAfterEdit.points == u125SummaryBeforeEdit.points
+        u125SummaryAfterEdit.totalPoints == 25
+    }
+
+    def "changes to skill points causes users's point history to be updated"(){
+        def proj1 = SkillsFactory.createProject(1)
+        skillsService.createProject(proj1)
+        def subj = SkillsFactory.createSubject(1)
+        skillsService.createSubject(subj)
+
+        List<Map> skills = SkillsFactory.createSkills(3)
+        skillsService.createSkills(skills)
+
+        skillsService.updateSkill([projectId: proj1.projectId,
+                                   subjectId: subj.subjectId,
+                                   skillId: skills.get(0).skillId,
+                                   numPerformToCompletion: 3,
+                                   pointIncrement: 10,
+                                   pointIncrementInterval: 60,
+                                   numMaxOccurrencesIncrementInterval: 1,
+                                   version: skills.get(0).version,
+                                   name: skills.get(0).name], skills.get(0).skillId)
+
+        skillsService.addSkill([projectId: proj1.projectId, skillId: skills.get(0).skillId], "u123", new Date())
+        skillsService.addSkill([projectId: proj1.projectId, skillId: skills.get(0).skillId], "u123", new DateTime().minusDays(1).toDate())
+
+        when:
+
+
+        def pointHistoryBeforeEdit = skillsService.getPointHistory("u123", proj1.projectId, subj.subjectId)
+
+        skillsService.updateSkill([projectId: proj1.projectId,
+                                   subjectId: subj.subjectId,
+                                   skillId: skills.get(0).skillId,
+                                   numPerformToCompletion: skills.get(0).numPerformToCompletion,
+                                   pointIncrement: 5,
+                                   pointIncrementInterval: skills.get(0).pointIncrementInterval,
+                                   numMaxOccurrencesIncrementInterval: skills.get(0).numMaxOccurrencesIncrementInterval,
+                                   version: skills.get(0).version,
+                                   name: skills.get(0).name], skills.get(0).skillId)
+
+
+        def pointHistoryAfterEdit = skillsService.getPointHistory("u123", proj1.projectId, subj.subjectId)
+
+        println pointHistoryBeforeEdit
+        println "--------------- AFTER -------------------"
+        println pointHistoryAfterEdit
+
+        then:
+        false
     }
 }
