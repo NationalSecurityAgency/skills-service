@@ -150,7 +150,7 @@ class UserSkillsController {
                                       @RequestParam(name = 'version', required = false) Integer version,
                                       @RequestParam(name = 'global', required = false) Boolean isGlobal) {
         if (isGlobal) {
-            return skillsLoader.loadGlobalBadge(getUserId(userIdParam), badgeId, getProvidedVersionOrReturnDefault(version))
+            return skillsLoader.loadGlobalBadge(getUserId(userIdParam), projectId, badgeId, getProvidedVersionOrReturnDefault(version))
         } else {
             return skillsLoader.loadBadge(projectId, getUserId(userIdParam), badgeId, getProvidedVersionOrReturnDefault(version))
         }

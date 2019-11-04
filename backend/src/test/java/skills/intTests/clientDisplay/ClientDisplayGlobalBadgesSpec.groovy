@@ -228,6 +228,7 @@ class ClientDisplayGlobalBadgesSpec extends DefaultIntSpec {
         summary.skills.get(0).totalPoints == proj1_skills.get(0).numPerformToCompletion * proj1_skills.get(0).pointIncrement
         summary.skills.get(0).points == 0
         summary.skills.get(0).todaysPoints == 0
+        !summary.skills.get(0).crossProject
         !summary.skills.get(0).description
         !summary.dependencyInfo
     }
@@ -502,9 +503,18 @@ class ClientDisplayGlobalBadgesSpec extends DefaultIntSpec {
         when:
         def summaries = skillsService.getBadgesSummary(userId, proj1.projectId)
         def skillSummary = skillsService.getCrossProjectSkillSummary(userId, proj1.projectId, proj2.projectId, proj2_skills.get(0).skillId)
+        def globalBadge = skillsService.getBadgeSummary(userId, proj1.projectId, badge.badgeId, -1, true)
 
         then:
+        summaries
         skillSummary
+        List proj1Skills = globalBadge.skills.findAll { it.projectId == proj1.projectId }
+        proj1Skills.size() == 1
+        !proj1Skills.get(0).crossProject
+
+        List proj2Skills = globalBadge.skills.findAll { it.projectId == proj2.projectId }
+        proj2Skills.size() == 1
+        proj2Skills.get(0).crossProject
     }
 
     private deleteGlobalBadgeIfExists(String badgeId) {
