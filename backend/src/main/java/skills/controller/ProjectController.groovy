@@ -15,9 +15,10 @@ import skills.controller.result.model.ProjectResult
 import skills.controller.result.model.RequestResult
 import skills.icons.CustomIconFacade
 import skills.profile.EnableCallStackProf
-import skills.services.AdminProjService
 import skills.services.IdFormatValidator
 import skills.services.admin.ProjAdminService
+import skills.services.admin.ShareSkillsService
+import skills.services.admin.SkillsAdminService
 
 import java.nio.charset.StandardCharsets
 
@@ -26,8 +27,6 @@ import java.nio.charset.StandardCharsets
 @Slf4j
 @EnableCallStackProf
 class ProjectController {
-    @Autowired
-    AdminProjService projectAdminStorageService
 
     @Autowired
     ProjAdminService projAdminService
@@ -44,7 +43,10 @@ class ProjectController {
     @Autowired
     PublicPropsBasedValidator propsBasedValidator
 
-    static final RESERVERED_PROJECT_ID = AdminProjService.ALL_SKILLS_PROJECTS
+    @Autowired
+    SkillsAdminService skillsAdminService
+
+    static final RESERVERED_PROJECT_ID = ShareSkillsService.ALL_SKILLS_PROJECTS
 
     @RequestMapping(value = "/projects", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
@@ -112,12 +114,12 @@ class ProjectController {
     @RequestMapping(value = "/projects/{id}/customIcons", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     List<CustomIconResult> getCustomIcons(@PathVariable("id") String projectId) {
-        return projectAdminStorageService.getCustomIcons(projectId)
+        return projAdminService.getCustomIcons(projectId)
     }
 
     @RequestMapping(value = "/projects/{id}/versions", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     List<Integer> listVersions(@PathVariable("id") String projectId) {
-        return projectAdminStorageService.getUniqueVersionList(projectId)
+        return skillsAdminService.getUniqueSkillVersionList(projectId)
     }
 }

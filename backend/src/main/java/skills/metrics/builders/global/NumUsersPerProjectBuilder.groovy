@@ -11,7 +11,6 @@ import skills.metrics.model.ChartOption
 import skills.metrics.model.ChartType
 import skills.metrics.model.MetricsChart
 import skills.metrics.model.Section
-import skills.services.AdminProjService
 import skills.services.AdminUsersService
 import skills.services.admin.ProjAdminService
 

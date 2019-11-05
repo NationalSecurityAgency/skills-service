@@ -20,7 +20,6 @@ import skills.services.CreatedResourceLimitsValidator
 import skills.services.CustomValidationResult
 import skills.services.CustomValidator
 import skills.services.GlobalBadgesService
-import skills.services.LevelDefinitionStorageService
 import skills.services.LockingService
 import skills.services.RuleSetDefGraphService
 import skills.services.RuleSetDefinitionScoreUpdater
@@ -28,9 +27,7 @@ import skills.services.UserAchievementsAndPointsManagement
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillDefWithExtra
 import skills.storage.model.SkillRelDef
-import skills.storage.repos.ProjDefAccessor
-import skills.storage.repos.ProjDefRepo
-import skills.storage.repos.SkillDefAccessor
+import skills.storage.accessors.SkillDefAccessor
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.SkillDefWithExtraRepo
 import skills.storage.repos.SkillRelDefRepo
@@ -347,6 +344,16 @@ class SkillsAdminService {
         }
 
         return res;
+    }
+
+    @Transactional()
+    List<Integer> getUniqueSkillVersionList(String projectId) {
+        skillDefRepo.getUniqueVersionList(projectId)
+    }
+
+    @Transactional(readOnly = true)
+    boolean existsBySkillId(String projectId, String skillId) {
+        return skillDefRepo.existsByProjectIdAndSkillIdAllIgnoreCase(projectId, skillId)
     }
 
     @Profile

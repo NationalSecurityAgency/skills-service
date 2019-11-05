@@ -15,8 +15,7 @@ import skills.storage.model.ProjDef
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillDefWithExtra
 import skills.storage.model.SkillRelDef
-import skills.storage.repos.ProjDefAccessor
-import skills.storage.repos.ProjDefRepo
+import skills.storage.accessors.ProjDefAccessor
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.SkillDefWithExtraRepo
 import skills.utils.Props

@@ -7,10 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.controller.result.model.CustomIconResult
-import skills.services.AdminProjService
 import skills.services.IconService
 import skills.storage.model.CustomIcon
 import skills.storage.model.ProjDef
+import skills.storage.accessors.ProjDefAccessor
 
 import javax.imageio.ImageIO
 import java.awt.image.BufferedImage
@@ -24,7 +24,7 @@ class CustomIconFacade {
     IconService iconService
 
     @Autowired
-    AdminProjService projectAdminStorageService
+    ProjDefAccessor projDefAccessor
 
     @Autowired
     CssGenerator cssGenerator
@@ -82,7 +82,7 @@ class CustomIconFacade {
                 dataUri: dataUri)
 
             if (projectId) {
-                ProjDef project = projectAdminStorageService.getProjDef(projectId)
+                ProjDef project = projDefAccessor.getProjDef(projectId)
                 customIcon.setProjDef(project)
             }
 

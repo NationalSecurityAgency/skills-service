@@ -10,7 +10,6 @@ import skills.metrics.model.ChartOption
 import skills.metrics.model.ChartType
 import skills.metrics.model.MetricsChart
 import skills.metrics.model.Section
-import skills.services.AdminProjService
 import skills.services.AdminUsersService
 import skills.services.admin.ProjAdminService
 
@@ -20,9 +19,6 @@ class SkillCountPerProjectBuilder implements MetricsChartBuilder{
 
     @Autowired
     AdminUsersService usersService
-
-    @Autowired
-    AdminProjService projService
 
     @Autowired
     ProjAdminService projAdminService
@@ -48,7 +44,7 @@ class SkillCountPerProjectBuilder implements MetricsChartBuilder{
         List<CountItem> chartData = []
 
         projectResults.each{
-            def item = new LabelCountItem(count: (int) projService.countNumberOfSkills(it.projectId), value: it.name)
+            def item = new LabelCountItem(count: (int) projAdminService.countNumberOfSkills(it.projectId), value: it.name)
             chartData.add(item)
         }
 
