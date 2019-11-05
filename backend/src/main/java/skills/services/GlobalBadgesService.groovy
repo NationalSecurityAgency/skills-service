@@ -14,6 +14,7 @@ import skills.controller.result.model.ProjectResult
 import skills.controller.result.model.SkillDefPartialRes
 import skills.services.admin.BadgeAdminService
 import skills.services.admin.DisplayOrderService
+import skills.services.admin.SkillsAdminService
 import skills.services.settings.SettingsService
 import skills.storage.model.*
 import skills.storage.model.SkillRelDef.RelationshipType
@@ -75,6 +76,9 @@ class GlobalBadgesService {
 
     @Autowired
     DisplayOrderService displayOrderService
+
+    @Autowired
+    SkillsAdminService skillsAdminService
 
     @Transactional()
     void saveBadge(String originalBadgeId, BadgeRequest badgeRequest) {
@@ -193,14 +197,14 @@ class GlobalBadgesService {
         AvailableSkillsResult res = new AvailableSkillsResult()
         if (suggestedSkillDefs) {
             res.totalAvailable = suggestedSkillDefs.size()
-            res.suggestedSkills = suggestedSkillDefs.sort().take(10).collect { adminProjService.convertToSkillDefPartialRes(it) }
+            res.suggestedSkills = suggestedSkillDefs.sort().take(10).collect { skillsAdminService.convertToSkillDefPartialRes(it) }
         }
         return res
     }
 
     @Transactional(readOnly = true)
     List<SkillDefPartialRes> getSkillsForBadge(String badgeId) {
-        return adminProjService.getSkillsByProjectSkillAndType(null, badgeId, SkillDef.ContainerType.GlobalBadge, RelationshipType.BadgeRequirement)
+        return skillsAdminService.getSkillsByProjectSkillAndType(null, badgeId, SkillDef.ContainerType.GlobalBadge, RelationshipType.BadgeRequirement)
     }
 
     @Transactional(readOnly = true)

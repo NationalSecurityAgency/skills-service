@@ -19,6 +19,7 @@ import skills.controller.result.model.*
 import skills.services.*
 import skills.services.admin.BadgeAdminService
 import skills.services.admin.ProjAdminService
+import skills.services.admin.SkillsAdminService
 import skills.services.admin.SubjAdminService
 import skills.services.events.SkillEventResult
 import skills.services.settings.SettingsService
@@ -71,6 +72,9 @@ class AdminController {
 
     @Autowired
     BadgeAdminService badgeAdminService
+
+    @Autowired
+    SkillsAdminService skillsAdminService
 
     @Value('#{"${skills.config.ui.maxTimeWindowInMinutes}"}')
     int maxTimeWindowInMinutes
@@ -186,7 +190,7 @@ class AdminController {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(projectId, "Skill Name")
         String decodedName = URLDecoder.decode(skillName,  StandardCharsets.UTF_8.toString())
-        return projectAdminStorageService.existsBySkillName(projectId, decodedName)
+        return skillsAdminService.existsBySkillName(projectId, decodedName)
     }
 
     /**
@@ -340,7 +344,7 @@ class AdminController {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(subjectId, "Subject Id", projectId)
 
-        return projectAdminStorageService.getSkills(projectId, subjectId)
+        return skillsAdminService.getSkills(projectId, subjectId)
     }
 
     @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/skills/{skillId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -352,7 +356,8 @@ class AdminController {
         SkillsValidator.isNotBlank(subjectId, "Subject Id", projectId)
         SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
 
-        return projectAdminStorageService.getSkill(projectId, subjectId, skillId)
+        return skillsAdminService
+                .getSkill(projectId, subjectId, skillId)
     }
 
     @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/skills/{skillId}", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
@@ -406,14 +411,14 @@ class AdminController {
         skillRequest.subjectId = InputSanitizer.sanitize(skillRequest.subjectId)
         skillRequest.helpUrl = InputSanitizer.sanitize(skillRequest.helpUrl)
 
-        projectAdminStorageService.saveSkill(skillId, skillRequest)
+        skillsAdminService.saveSkill(skillId, skillRequest)
         return new RequestResult(success: true)
     }
 
     @GetMapping(value = '/projects/{projectId}/latestVersion', produces = 'application/json')
     Integer findLatestSkillVersion(@PathVariable('projectId') String projectId) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
-        return projectAdminStorageService.findLatestSkillVersion(projectId)
+        return skillsAdminService.findLatestSkillVersion(projectId)
     }
 
     @RequestMapping(value = "/projects/{projectId}/dependency/availableSkills", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -510,7 +515,7 @@ class AdminController {
         SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
         SkillsValidator.isNotNull(patchRequest.action, "Action must be provided", projectId)
 
-        projectAdminStorageService.updateSkillDisplayOrder(projectId, subjectId, skillId, patchRequest)
+        skillsAdminService.updateSkillDisplayOrder(projectId, subjectId, skillId, patchRequest)
         return new RequestResult(success: true)
     }
 
@@ -523,7 +528,7 @@ class AdminController {
         SkillsValidator.isNotBlank(subjectId, "Subject Id", projectId)
         SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
 
-        projectAdminStorageService.deleteSkill(projectId, subjectId, skillId)
+        skillsAdminService.deleteSkill(projectId, subjectId, skillId)
     }
 
     @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/users/{userId}/events/{timestamp}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -545,7 +550,7 @@ class AdminController {
             @PathVariable("projectId") String projectId) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
 
-        List<SkillDefSkinnyRes> res = projectAdminStorageService.getSkinnySkills(projectId)
+        List<SkillDefSkinnyRes> res = skillsAdminService.getSkinnySkills(projectId)
         return res
     }
 
@@ -739,7 +744,7 @@ class AdminController {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(badgeId, "Badge Id", projectId)
 
-        return projectAdminStorageService.getSkillsForBadge(projectId, badgeId)
+        return skillsAdminService.getSkillsForBadge(projectId, badgeId)
     }
 
     @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/shared/projects/{sharedProjectId}", method = [RequestMethod.PUT, RequestMethod.POST], produces = MediaType.APPLICATION_JSON_VALUE)
