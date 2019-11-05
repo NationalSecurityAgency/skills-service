@@ -48,6 +48,9 @@ class BadgeAdminService {
     @Autowired
     DisplayOrderService displayOrderService
 
+    @Autowired
+    SkillsAdminService skillsAdminService
+
     @Transactional()
     void saveBadge(String projectId, String originalBadgeId, BadgeRequest badgeRequest, SkillDef.ContainerType type = SkillDef.ContainerType.Badge, boolean performCustomValidation=true) {
         CustomValidationResult customValidationResult = customValidator.validate(badgeRequest)
@@ -187,7 +190,7 @@ class BadgeAdminService {
 
         if (loadRequiredSkills) {
             List<SkillDef> dependentSkills = skillDefRepo.findChildSkillsByIdAndRelationshipType(skillDef.id, SkillRelDef.RelationshipType.BadgeRequirement)
-            res.requiredSkills = dependentSkills?.collect { convertToSkillDefRes(it) }
+            res.requiredSkills = dependentSkills?.collect { skillsAdminService.convertToSkillDefRes(it) }
             res.numSkills = dependentSkills ? dependentSkills.size() : 0
             res.totalPoints = dependentSkills ? dependentSkills?.collect({ it.totalPoints })?.sum() : 0
         } else {
