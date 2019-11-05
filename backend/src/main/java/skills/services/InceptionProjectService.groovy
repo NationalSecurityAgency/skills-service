@@ -12,6 +12,7 @@ import skills.controller.request.model.SkillRequest
 import skills.controller.request.model.SubjectRequest
 import skills.controller.result.model.UserRoleRes
 import skills.services.admin.ProjAdminService
+import skills.services.admin.SkillsAdminService
 import skills.services.admin.SubjAdminService
 import skills.services.settings.SettingsService
 import skills.settings.CommonSettings
@@ -27,7 +28,7 @@ import javax.transaction.Transactional
 class InceptionProjectService {
 
     @Autowired
-    AdminProjService projectAdminStorageService
+    SkillsAdminService skillsAdminService
 
     @Autowired
     SubjAdminService subjAdminService
@@ -481,7 +482,7 @@ To create skill navigate to a subject and then click ``Skill +`` button.''',
         ]
 
         skills.each {
-            projectAdminStorageService.saveSkill(it.skillId, it, false)
+            skillsAdminService.saveSkill(it.skillId, it, false)
         }
 
     }
