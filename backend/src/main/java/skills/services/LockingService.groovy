@@ -16,9 +16,19 @@ class LockingService {
     @Autowired
     SkillsDBLockRepo skillsDBLockRepo
 
-    SkillsDBLock lockGlobally() {
-        return skillsDBLockRepo.findByLock("global_lock")
+    SkillsDBLock lockGlobalSettings() {
+        return skillsDBLockRepo.findByLock("global_settings_lock")
     }
+
+    SkillsDBLock lockProjects() {
+        return skillsDBLockRepo.findByLock("projects_lock")
+    }
+
+    SkillsDBLock lockGlobalBadges() {
+        return skillsDBLockRepo.findByLock("global_badges_lock")
+    }
+
+
 
     ProjDef lockProject(String projectId) {
         assert projectId

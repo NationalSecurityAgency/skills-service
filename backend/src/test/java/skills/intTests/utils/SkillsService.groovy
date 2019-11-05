@@ -99,6 +99,16 @@ class SkillsService {
     }
 
     @Profile
+    def moveSkillUp(Map props){
+        wsHelper.adminPatch(getSkillUrl(props.projectId, props.subjectId, props.skillId), '{"action": "DisplayOrderUp"}')
+    }
+
+    @Profile
+    def moveSkillDown(Map props){
+        wsHelper.adminPatch(getSkillUrl(props.projectId, props.subjectId, props.skillId), '{"action": "DisplayOrderDown"}')
+    }
+
+    @Profile
     def moveBadgeUp(Map props){
         wsHelper.adminPatch(getBadgeUrl(props.projectId, props.badgeId), '{"action": "DisplayOrderUp"}')
     }

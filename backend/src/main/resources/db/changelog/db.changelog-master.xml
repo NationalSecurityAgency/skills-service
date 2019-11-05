@@ -30,7 +30,13 @@
             <column name="lock" type="varchar(255)"/>
         </createIndex>
         <insert tableName="skills_db_locks">
-            <column name="lock" type="varchar(255)" value="global_lock"/>
+            <column name="lock" type="varchar(255)" value="projects_lock"/>
+        </insert>
+        <insert tableName="skills_db_locks">
+            <column name="lock" type="varchar(255)" value="global_badges_lock"/>
+        </insert>
+        <insert tableName="skills_db_locks">
+            <column name="lock" type="varchar(255)" value="global_settings_lock"/>
         </insert>
 
         <!-- ============================================================================

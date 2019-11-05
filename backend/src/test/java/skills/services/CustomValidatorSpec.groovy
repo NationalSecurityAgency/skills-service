@@ -8,6 +8,7 @@ class CustomValidatorSpec extends Specification{
         CustomValidator validator = new CustomValidator();
         validator.nameValidationRegex = '^A.*$'
         validator.nameValidationMessage = 'fail'
+        validator.init()
 
         when:
         CustomValidationResult result = validator.validateName("Aname")
@@ -22,6 +23,7 @@ class CustomValidatorSpec extends Specification{
         CustomValidator validator = new CustomValidator();
         validator.nameValidationRegex = ''
         validator.nameValidationMessage = 'fail'
+        validator.init()
 
         when:
         CustomValidationResult result = validator.validateName("Aname")
@@ -34,6 +36,7 @@ class CustomValidatorSpec extends Specification{
         CustomValidator validator = new CustomValidator();
         validator.paragraphValidationRegex = '^A.*$'
         validator.paragraphValidationMessage = 'fail'
+        validator.init()
 
         when:
 
@@ -66,6 +69,7 @@ A paragraph four
         CustomValidator validator = new CustomValidator();
         validator.paragraphValidationRegex = ''
         validator.paragraphValidationMessage = 'fail'
+        validator.init()
 
         when:
 

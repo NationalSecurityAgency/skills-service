@@ -120,7 +120,7 @@ class AdminProjService {
         assert projectRequest?.projectId
         assert projectRequest?.name
 
-        lockingService.lockGlobally()
+        lockingService.lockProjects()
 
         CustomValidationResult customValidationResult = customValidator.validate(projectRequest)
         if(!customValidationResult.valid){
@@ -267,7 +267,7 @@ class AdminProjService {
         if (projectId) {
             lockingService.lockProject(projectId)
         } else {
-            lockingService.lockGlobally()
+            lockingService.lockGlobalBadges()
         }
 
         SkillDefWithExtra skillDefinition = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, originalBadgeId, type)
@@ -804,7 +804,7 @@ class AdminProjService {
         } else {
             res = skillRelDefRepo.getChildrenPartial(parent.projectId, parent.skillId, relationshipType)
         }
-        return res.collect { convertToSkillDefPartialRes(it) }
+        return res.collect { convertToSkillDefPartialRes(it) }.sort({ it.displayOrder })
     }
 
     @Transactional(readOnly = true)
@@ -1189,6 +1189,8 @@ class AdminProjService {
                                      @PathVariable("subjectId") String subjectId,
                                      @PathVariable("skillId") String skillId,
                                      @RequestBody ActionPatchRequest patchRequest) {
+        lockingService.lockProject(projectId)
+
         SkillDef moveMe = getSkillDef(projectId, skillId)
         if (!moveMe) {
             assert moveMe, "Failed to find skill for id [$skillId], projectId=[$projectId], subjectId=[$subjectId]"
@@ -1199,17 +1201,19 @@ class AdminProjService {
         SkillDef switchWith
         switch (patchRequest.action) {
             case ActionPatchRequest.ActionType.DisplayOrderDown:
-                switchWith = skillDefRepo.findNextSkillDefs(projectId, parent.skillId, moveMe.displayOrder, RelationshipType.RuleSetDefinition, new PageRequest(0, 1))?.first()
+                List<SkillDef> foundSkills = skillDefRepo.findNextSkillDefs(projectId, parent.skillId, moveMe.displayOrder, RelationshipType.RuleSetDefinition, new PageRequest(0, 1))
+                switchWith = foundSkills ? foundSkills?.first() : null
                 break;
             case ActionPatchRequest.ActionType.DisplayOrderUp:
-                switchWith = skillDefRepo.findPreviousSkillDefs(projectId, parent.skillId, moveMe.displayOrder, RelationshipType.RuleSetDefinition, new PageRequest(0, 1))?.first()
+                List<SkillDef> foundSkills = skillDefRepo.findPreviousSkillDefs(projectId, parent.skillId, moveMe.displayOrder, RelationshipType.RuleSetDefinition, new PageRequest(0, 1))
+                switchWith = foundSkills ? foundSkills?.first() : null
                 break;
             default:
-                throw new IllegalArgumentException("Unknown action ${patchRequest.action}")
+                throw new SkillException("Unknown action ${patchRequest.action}", projectId, skillId)
         }
 
         if (!switchWith) {
-            assert switchWith, "Failed to find skill to switch with [${moveMe}] for action [$patchRequest.action]"
+            throw new SkillException("Failed to find skill to switch with [${moveMe.skillId}] for action [$patchRequest.action]", projectId, skillId)
         }
         assert switchWith.skillId != moveMe.skillId
 

@@ -65,6 +65,9 @@ class GlobalBadgesService {
     @Autowired
     AdminProjService adminProjService
 
+    @Autowired
+    LockingService lockingService
+
     @Transactional()
     void saveBadge(String originalBadgeId, BadgeRequest badgeRequest) {
         adminProjService.saveBadge(null, originalBadgeId, badgeRequest, SkillDef.ContainerType.GlobalBadge)
@@ -169,6 +172,7 @@ class GlobalBadgesService {
 
     @Transactional
     void setBadgeDisplayOrder(String badgeId, ActionPatchRequest badgePatchRequest) {
+        lockingService.lockGlobalBadges()
         List<SkillDef> badges = skillDefRepo.findAllByProjectIdAndType(null,  SkillDef.ContainerType.GlobalBadge)
         adminProjService.updateDisplayOrder(badgeId, badges, badgePatchRequest)
     }

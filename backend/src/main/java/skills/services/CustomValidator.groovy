@@ -9,13 +9,12 @@ import skills.controller.request.model.ProjectRequest
 import skills.controller.request.model.SkillRequest
 import skills.controller.request.model.SubjectRequest
 
+import javax.annotation.PostConstruct
 import java.util.regex.Pattern
 
 @Slf4j
 @Service
 class CustomValidator {
-
-    private Map<String, Pattern> regexCache = [:]
 
     @Value('#{"${skills.config.ui.paragraphValidationRegex}"}')
     String paragraphValidationRegex
@@ -29,19 +28,42 @@ class CustomValidator {
     @Value('#{"${skills.config.ui.nameValidationMessage}"}')
     String nameValidationMessage
 
-    public CustomValidationResult validate(ProjectRequest projectRequest) {
+    private String paragraphValidationMsg
+    private Pattern paragraphPattern
+
+    private String nameValidationMsg
+    private Pattern nameRegex
+
+    @PostConstruct
+    CustomValidator init() {
+        paragraphValidationMsg = paragraphValidationMessage ?: "Description failed validation"
+        if ( StringUtils.isNotBlank(paragraphValidationRegex)){
+            log.info("Configuring paragraph validator. regex=[{}], message=[{}]", paragraphValidationRegex, paragraphValidationMsg)
+            paragraphPattern = Pattern.compile(paragraphValidationRegex)
+        }
+
+        nameValidationMsg = nameValidationMessage ?: "Name failed validation"
+        if ( StringUtils.isNotBlank(nameValidationRegex)) {
+            log.info("Configuring name validator. regex=[{}], message=[{}]", nameValidationRegex, nameValidationMsg)
+            nameRegex = Pattern.compile(nameValidationRegex)
+        }
+
+        return this
+    }
+
+    CustomValidationResult validate(ProjectRequest projectRequest) {
         return validateName(projectRequest.name)
     }
 
-    public CustomValidationResult validate(SubjectRequest subjectRequest) {
+    CustomValidationResult validate(SubjectRequest subjectRequest) {
         return validateDescriptionAndName(subjectRequest.description, subjectRequest.name)
     }
 
-    public CustomValidationResult validate(SkillRequest skillRequest) {
+    CustomValidationResult validate(SkillRequest skillRequest) {
         return validateDescriptionAndName(skillRequest.description, skillRequest.name)
     }
 
-    public CustomValidationResult validate(BadgeRequest badgeRequest) {
+    CustomValidationResult validate(BadgeRequest badgeRequest) {
         return validateDescriptionAndName(badgeRequest.description, badgeRequest.name)
     }
 
@@ -56,18 +78,14 @@ class CustomValidator {
     }
 
     CustomValidationResult validateDescription(String description) {
-        if (StringUtils.isBlank(paragraphValidationRegex) || description == null) {
+        if (!paragraphPattern || description == null) {
             return new CustomValidationResult(valid: true)
         }
-        String validationMsg = paragraphValidationMessage ?: "Description failed validation"
-        log.info("Configuring paragraph validator. regex=[{}], message=[{}]", paragraphValidationRegex, validationMsg)
-
         String[] paragraphs = description.split("\n\n")
-        Pattern pattern = compileRegex(paragraphValidationRegex)
 
         CustomValidationResult validationResult = null
         for (String s : paragraphs) {
-            validationResult = validateInternal(pattern, s.trim(), validationMsg)
+            validationResult = validateInternal(paragraphPattern, s.trim(), paragraphValidationMsg)
             if (!validationResult.valid) {
                 break
             }
@@ -76,13 +94,12 @@ class CustomValidator {
         return validationResult
     }
 
-    public CustomValidationResult validateName(String name) {
-        if (StringUtils.isBlank(nameValidationRegex) || name == null) {
+    CustomValidationResult validateName(String name) {
+        if (!nameRegex || name == null) {
             return new CustomValidationResult(valid: true)
         }
 
-        Pattern regex = compileRegex(nameValidationRegex)
-        CustomValidationResult validationResult = validateInternal(regex, name, nameValidationMessage ?: "Name failed validation")
+        CustomValidationResult validationResult = validateInternal(nameRegex, name, nameValidationMsg)
         return validationResult
     }
 
@@ -94,13 +111,5 @@ class CustomValidator {
             validationResult = new CustomValidationResult(true)
         }
         return validationResult;
-    }
-
-    private Pattern compileRegex(String regex) {
-        if (!regexCache.containsKey(regex)) {
-            regexCache.put(regex, Pattern.compile(regex))
-        }
-
-        return regexCache.get(regex)
     }
 }

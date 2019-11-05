@@ -391,18 +391,11 @@ class ConcurrencySpecs extends DefaultIntSpec {
 
 
     def "do not create duplicate global badges"() {
-        String ultimateRoot = 'jh@dojo.com'
-        SkillsService rootSkillsService = createService(ultimateRoot, 'aaaaaaaa')
-        rootSkillsService.grantRoot()
-        String supervisorUserId = 'foo@bar.com'
-        SkillsService supervisorSkillsService = createService(supervisorUserId)
-        rootSkillsService.grantSupervisorRole(supervisorUserId)
+        SkillsService supervisorSkillsService = createSupervisorService()
 
-        def proj = SkillsFactory.createProject()
         int numThreads = 5
         int numberBadges = 25
 
-        skillsService.createProject(proj)
         when:
         List<Thread> threads = (1..numThreads).collect { int threadNum ->
             Thread.start {
@@ -429,6 +422,84 @@ class ConcurrencySpecs extends DefaultIntSpec {
             it.skillId.toLowerCase()
         }).unique().sort()
         badges.size() == numberBadges
+    }
+
+    private SkillsService createSupervisorService() {
+        String ultimateRoot = 'jh@dojo.com'
+        SkillsService rootSkillsService = createService(ultimateRoot, 'aaaaaaaa')
+        rootSkillsService.grantRoot()
+        String supervisorUserId = 'foo@bar.com'
+        SkillsService supervisorSkillsService = createService(supervisorUserId)
+        rootSkillsService.grantSupervisorRole(supervisorUserId)
+        return supervisorSkillsService
+    }
+
+    def "move global badges' order concurrently - move down"() {
+        SkillsService supervisorSkillsService = createSupervisorService()
+
+        int numThreads = 5
+        int numItems = 25
+
+        (1..numItems).each {
+            def badge = SkillsFactory.createBadge(1, it)
+            supervisorSkillsService.createGlobalBadge(badge)
+        }
+        AtomicInteger exceptionCount = new AtomicInteger()
+        when:
+        List<Thread> threads = (1..numThreads).collect { int threadNum ->
+            Thread.start {
+                (1..20).each {
+                    def badges = supervisorSkillsService.getAllGlobalBadges()
+                    try {
+                        supervisorSkillsService.moveGlobalBadgeDown(badges.first())
+                    } catch (SkillsClientException e) {
+                        exceptionCount.incrementAndGet()
+                    }
+                }
+            }
+        }
+        threads.each {
+            it.join(5000)
+        }
+
+        List<SkillDef> badges = skillDefRepo.findAllByProjectIdAndType(null, SkillDef.ContainerType.GlobalBadge)
+        then:
+        exceptionCount.get() == 0
+        badges.collect({ it.displayOrder}).sort() == badges.collect({ it.displayOrder}).unique().sort()
+    }
+
+    def "move global badges' order concurrently - move up"() {
+        SkillsService supervisorSkillsService = createSupervisorService()
+
+        int numThreads = 5
+        int numItems = 25
+
+        (1..numItems).each {
+            def badge = SkillsFactory.createBadge(1, it)
+            supervisorSkillsService.createGlobalBadge(badge)
+        }
+        AtomicInteger exceptionCount = new AtomicInteger()
+        when:
+        List<Thread> threads = (1..numThreads).collect { int threadNum ->
+            Thread.start {
+                (1..20).each {
+                    def badges = supervisorSkillsService.getAllGlobalBadges()
+                    try {
+                        supervisorSkillsService.moveGlobalBadgeUp(badges.last())
+                    } catch (SkillsClientException e) {
+                        exceptionCount.incrementAndGet()
+                    }
+                }
+            }
+        }
+        threads.each {
+            it.join(5000)
+        }
+
+        List<SkillDef> badges = skillDefRepo.findAllByProjectIdAndType(null, SkillDef.ContainerType.GlobalBadge)
+        then:
+        exceptionCount.get() == 0
+        badges.collect({ it.displayOrder}).sort() == badges.collect({ it.displayOrder}).unique().sort()
     }
 
     def "do not create duplicate skills"() {
@@ -465,6 +536,80 @@ class ConcurrencySpecs extends DefaultIntSpec {
             it.skillId.toLowerCase()
         }).unique().sort()
         skills.size() == numSkills
+    }
+
+    def "move skills' order concurrently - move down"() {
+        def proj = SkillsFactory.createProject()
+        def subject = SkillsFactory.createSubject()
+        skillsService.createProject(proj)
+        skillsService.createSubject(subject)
+
+        int numThreads = 5
+        int numSkills = 20
+        (1..numSkills).each {
+            def skill = SkillsFactory.createSkill(1, 1, it)
+            skillsService.createSkill(skill)
+        }
+        AtomicInteger exceptionCount = new AtomicInteger()
+        when:
+        List<Thread> threads = (1..numThreads).collect { int threadNum ->
+            Thread.start {
+                (1..20).each {
+                    def skills = skillsService.getSkillsForSubject(proj.projectId, subject.subjectId)
+                    skills.first().subjectId = subject.subjectId
+                    try {
+                        skillsService.moveSkillDown(skills.first())
+                    } catch (SkillsClientException e) {
+                        exceptionCount.incrementAndGet()
+                    }
+                }
+            }
+        }
+        threads.each {
+            it.join(5000)
+        }
+
+        List<SkillDef> skills = skillDefRepo.findAllByProjectIdAndType(proj.projectId, SkillDef.ContainerType.Skill)
+        then:
+        exceptionCount.get() == 0
+        skills.collect({ it.displayOrder}).sort() == skills.collect({ it.displayOrder}).unique().sort()
+    }
+
+    def "move skills' order concurrently - move up"() {
+        def proj = SkillsFactory.createProject()
+        def subject = SkillsFactory.createSubject()
+        skillsService.createProject(proj)
+        skillsService.createSubject(subject)
+
+        int numThreads = 5
+        int numSkills = 20
+        (1..numSkills).each {
+            def skill = SkillsFactory.createSkill(1, 1, it)
+            skillsService.createSkill(skill)
+        }
+        AtomicInteger exceptionCount = new AtomicInteger()
+        when:
+        List<Thread> threads = (1..numThreads).collect { int threadNum ->
+            Thread.start {
+                (1..20).each {
+                    def skills = skillsService.getSkillsForSubject(proj.projectId, subject.subjectId)
+                    skills.last().subjectId = subject.subjectId
+                    try {
+                        skillsService.moveSkillUp(skills.last())
+                    } catch (SkillsClientException e) {
+                        exceptionCount.incrementAndGet()
+                    }
+                }
+            }
+        }
+        threads.each {
+            it.join(5000)
+        }
+
+        List<SkillDef> skills = skillDefRepo.findAllByProjectIdAndType(proj.projectId, SkillDef.ContainerType.Skill)
+        then:
+        exceptionCount.get() == 0
+        skills.collect({ it.displayOrder}).sort() == skills.collect({ it.displayOrder}).unique().sort()
     }
 
     def "/api endpoints for non-existent users create UserAttr rows, concurrent requests should not cause errors"() {
