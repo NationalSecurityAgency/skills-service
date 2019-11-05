@@ -16,7 +16,7 @@ import skills.storage.repos.UserRepo
 
 @Service
 @Slf4j
-class SortingService {
+class ProjectSortingService {
 
     enum Move { UP, DOWN }
 
@@ -55,11 +55,6 @@ class SortingService {
         }
 
         return setting.value.toInteger()
-    }
-
-    private Integer getHighestSortForUserProjects(){
-        UserInfo userInfo = userInfoService.getCurrentUser()
-        return getHighestSortForUserProjects(userInfo.username)
     }
 
     private Integer getHighestSortForUserProjects(String userId){

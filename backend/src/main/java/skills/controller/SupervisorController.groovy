@@ -1,6 +1,5 @@
 package skills.controller
 
-
 import groovy.util.logging.Slf4j
 import org.apache.commons.io.FileUtils
 import org.springframework.beans.factory.annotation.Autowired
@@ -17,17 +16,12 @@ import skills.controller.request.model.BadgeRequest
 import skills.controller.result.model.*
 import skills.icons.CustomIconFacade
 import skills.icons.UploadedIcon
-import skills.services.AccessSettingsStorageService
-import skills.services.AdminProjService
-import skills.services.AdminUsersService
-import skills.services.GlobalBadgesService
-import skills.services.IdFormatValidator
-import skills.services.LevelDefinitionStorageService
+import skills.services.*
 import skills.utils.InputSanitizer
 
 import java.nio.charset.StandardCharsets
 
-import static skills.services.GlobalBadgesService.*
+import static skills.services.GlobalBadgesService.AvailableSkillsResult
 
 @RestController
 @RequestMapping("/supervisor")
@@ -40,9 +34,6 @@ class SupervisorController {
 
     @Autowired
     LevelDefinitionStorageService levelDefinitionStorageService
-
-    @Autowired
-    AdminProjService projectAdminStorageService
 
     @Autowired
     GlobalBadgesService globalBadgesService

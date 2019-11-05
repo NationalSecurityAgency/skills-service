@@ -11,6 +11,9 @@ import skills.controller.request.model.SettingsRequest
 import skills.controller.request.model.SkillRequest
 import skills.controller.request.model.SubjectRequest
 import skills.controller.result.model.UserRoleRes
+import skills.services.admin.ProjAdminService
+import skills.services.admin.SkillsAdminService
+import skills.services.admin.SubjAdminService
 import skills.services.settings.SettingsService
 import skills.settings.CommonSettings
 import skills.storage.model.ProjDef
@@ -25,7 +28,10 @@ import javax.transaction.Transactional
 class InceptionProjectService {
 
     @Autowired
-    AdminProjService projectAdminStorageService
+    SkillsAdminService skillsAdminService
+
+    @Autowired
+    SubjAdminService subjAdminService
 
     @Autowired
     AccessSettingsStorageService accessSettingsStorageService
@@ -35,6 +41,9 @@ class InceptionProjectService {
 
     @Autowired
     ProjDefRepo projDefRepo
+
+    @Autowired
+    ProjAdminService projAdminService
 
     @Value('#{"${skills.config.ui.docsHost}"}')
     String docsRootHost = ""
@@ -93,7 +102,7 @@ class InceptionProjectService {
     }
 
     private void createProject(String userId) {
-        projectAdminStorageService.saveProject(inceptionProjectId, new ProjectRequest(projectId: inceptionProjectId, name: inceptionProjectId), userId)
+        projAdminService.saveProject(inceptionProjectId, new ProjectRequest(projectId: inceptionProjectId, name: inceptionProjectId), userId)
 
         if (docsRootHost) {
             log.info("setting Inception setting ${CommonSettings.HELP_URL_ROOT} to $docsRootHost")
@@ -117,7 +126,7 @@ class InceptionProjectService {
                         description: "Number of ancillary dashboard features including user management."),
         ]
         subs.each {
-            projectAdminStorageService.saveSubject(inceptionProjectId, it.subjectId, it, false)
+            subjAdminService.saveSubject(inceptionProjectId, it.subjectId, it, false)
         }
 
         List<SkillRequest> skills = [
@@ -473,7 +482,7 @@ To create skill navigate to a subject and then click ``Skill +`` button.''',
         ]
 
         skills.each {
-            projectAdminStorageService.saveSkill(it.skillId, it, false)
+            skillsAdminService.saveSkill(it.skillId, it, false)
         }
 
     }
