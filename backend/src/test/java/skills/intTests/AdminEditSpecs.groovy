@@ -567,7 +567,7 @@ class AdminEditSpecs extends DefaultIntSpec {
         skillsService.addSkill([projectId: proj1.projectId, skillId: skills.get(2).skillId], "u125", new Date())
 
         when:
-        def skillSummaryBeforeEdit = skillsService.getSkillSummary("u123", proj1.projectId, subj.subjectId)
+        def u123SummaryBeforeEdit = skillsService.getSkillSummary("u123", proj1.projectId, subj.subjectId)
         def u124SummaryBeforeEdit = skillsService.getSkillSummary("u124", proj1.projectId, subj.subjectId)
         def u125SummaryBeforeEdit = skillsService.getSkillSummary("u125", proj1.projectId, subj.subjectId)
 
@@ -582,22 +582,24 @@ class AdminEditSpecs extends DefaultIntSpec {
                                    name: skills.get(0).name], skills.get(0).skillId)
 
 
-        def skillSummaryAfterEdit = skillsService.getSkillSummary("u123", proj1.projectId, subj.subjectId)
+        def u123SummaryAfterEdit = skillsService.getSkillSummary("u123", proj1.projectId, subj.subjectId)
         def u124SummaryAfterEdit = skillsService.getSkillSummary("u124", proj1.projectId, subj.subjectId)
         def u125SummaryAfterEdit = skillsService.getSkillSummary("u125", proj1.projectId, subj.subjectId)
 
         then:
-        skillSummaryBeforeEdit.skills[0].points == 10
-        skillSummaryBeforeEdit.skills[0].totalPoints == 10
-        skillSummaryBeforeEdit.skillsLevel == 4
-        skillSummaryBeforeEdit.points == 20
-        skillSummaryBeforeEdit.totalPoints == 30
+        u123SummaryBeforeEdit.skills[0].points == 10
+        u123SummaryBeforeEdit.skills[0].totalPoints == 10
+        u123SummaryBeforeEdit.skillsLevel == 4
+        u123SummaryBeforeEdit.points == 20
+        u123SummaryBeforeEdit.totalPoints == 30
 
-        skillSummaryAfterEdit.skills[0].points == 5
-        skillSummaryAfterEdit.skills[0].totalPoints == 5
-        skillSummaryAfterEdit.skillsLevel == 4
-        skillSummaryAfterEdit.points == 15
-        skillSummaryAfterEdit.totalPoints == 25
+        u123SummaryAfterEdit.skills[0].points == 5
+        u123SummaryAfterEdit.skills[0].totalPoints == 5
+        u123SummaryAfterEdit.skills[1].points == 10
+        u123SummaryAfterEdit.skills[1].totalPoints == 10
+        u123SummaryAfterEdit.skillsLevel == 4
+        u123SummaryAfterEdit.points == 15
+        u123SummaryAfterEdit.totalPoints == 25
 
         u124SummaryBeforeEdit.skills[0].points == 10
         u124SummaryBeforeEdit.skills[0].totalPoints == 10
@@ -638,44 +640,46 @@ class AdminEditSpecs extends DefaultIntSpec {
         skillsService.createSubject(subj)
 
         List<Map> skills = SkillsFactory.createSkills(3)
-        skillsService.createSkills(skills)
+        def skill1 = SkillsFactory.createSkill(1, 1, 1, 0, 3, 60)
+        def skill2 = SkillsFactory.createSkill(1, 1, 2)
+        def skill3 = SkillsFactory.createSkill(1, 1, 3)
 
-        skillsService.updateSkill([projectId: proj1.projectId,
-                                   subjectId: subj.subjectId,
-                                   skillId: skills.get(0).skillId,
-                                   numPerformToCompletion: 3,
-                                   pointIncrement: 10,
-                                   pointIncrementInterval: 60,
-                                   numMaxOccurrencesIncrementInterval: 1,
-                                   version: skills.get(0).version,
-                                   name: skills.get(0).name], skills.get(0).skillId)
+        skillsService.createSkills([skill1, skill2, skill3])
 
-        skillsService.addSkill([projectId: proj1.projectId, skillId: skills.get(0).skillId], "u123", new Date())
-        skillsService.addSkill([projectId: proj1.projectId, skillId: skills.get(0).skillId], "u123", new DateTime().minusDays(1).toDate())
+        skillsService.addSkill([projectId: proj1.projectId, skillId: skill1.skillId], "u123", new Date())
+        skillsService.addSkill([projectId: proj1.projectId, skillId: skill1.skillId], "u123", new DateTime().minusDays(1).toDate())
 
         when:
 
-
+        def skillSummaryBeforeEdit = skillsService.getSkillSummary("u123", proj1.projectId, subj.subjectId)
         def pointHistoryBeforeEdit = skillsService.getPointHistory("u123", proj1.projectId, subj.subjectId)
 
         skillsService.updateSkill([projectId: proj1.projectId,
                                    subjectId: subj.subjectId,
-                                   skillId: skills.get(0).skillId,
-                                   numPerformToCompletion: skills.get(0).numPerformToCompletion,
+                                   skillId: skill1.skillId,
+                                   numPerformToCompletion: skill1.numPerformToCompletion,
                                    pointIncrement: 5,
-                                   pointIncrementInterval: skills.get(0).pointIncrementInterval,
-                                   numMaxOccurrencesIncrementInterval: skills.get(0).numMaxOccurrencesIncrementInterval,
-                                   version: skills.get(0).version,
-                                   name: skills.get(0).name], skills.get(0).skillId)
+                                   pointIncrementInterval: skill1.pointIncrementInterval,
+                                   numMaxOccurrencesIncrementInterval: skill1.numMaxOccurrencesIncrementInterval,
+                                   version: skill1.version,
+                                   name: skill1.name], skill1.skillId)
 
 
         def pointHistoryAfterEdit = skillsService.getPointHistory("u123", proj1.projectId, subj.subjectId)
+        def skillSummaryAfterEdit = skillsService.getSkillSummary("u123", proj1.projectId, subj.subjectId)
 
         println pointHistoryBeforeEdit
         println "--------------- AFTER -------------------"
         println pointHistoryAfterEdit
 
         then:
-        false
+        skillSummaryBeforeEdit.points == 20
+        skillSummaryBeforeEdit.totalPoints == 50
+        pointHistoryBeforeEdit.pointsHistory[0].points == 10
+        pointHistoryBeforeEdit.pointsHistory[1].points == 20
+        skillSummaryAfterEdit.totalPoints == 35
+        skillSummaryAfterEdit.points == 10
+        pointHistoryAfterEdit.pointsHistory[0].points == 5
+        pointHistoryAfterEdit.pointsHistory[1].points == 10
     }
 }

@@ -21,12 +21,12 @@ class SkillsFactory {
         return "Test Subject #${subjNumber}".toString()
     }
 
-    static Map createSkill(int projNumber = 1, int subjNumber = 1, int skillNumber = 1, int version = 0) {
+    static Map createSkill(int projNumber = 1, int subjNumber = 1, int skillNumber = 1, int version = 0, int numPerformToCompletion = 1, pointIncrementInterval = 480, pointIncrement = 10) {
         return [projectId: getDefaultProjId(projNumber), subjectId: getSubjectId(subjNumber),
                 skillId: "skill${skillNumber}${subjNumber > 1 ? "subj" + subjNumber : ""}".toString(),
                 name     : "Test Skill ${skillNumber}${subjNumber > 1 ? " Subject" + subjNumber : "" }".toString(),
-                type     : "Skill", pointIncrement: 10, numPerformToCompletion: 1,
-                pointIncrementInterval: 480, numMaxOccurrencesIncrementInterval: 1,
+                type     : "Skill", pointIncrement: pointIncrement, numPerformToCompletion: numPerformToCompletion,
+                pointIncrementInterval: pointIncrementInterval, numMaxOccurrencesIncrementInterval: 1,
                 description: "This skill [skill${skillNumber}] belongs to project [${getDefaultProjId(projNumber)}]".toString(),
                 helpUrl: "http://veryhelpfulwebsite-${skillNumber}".toString(),
                 version  : version]
