@@ -16,6 +16,9 @@ class RuleSetDefGraphService {
     @Autowired
     SkillRelDefRepo skillRelDefRepo
 
+    @Autowired
+    SkillDefRepo skillDefRepo
+
     SkillDef getParentSkill(SkillDef skillDef) {
         List<SkillRelDef> parents = skillRelDefRepo.findAllByChildAndType(skillDef, RelationshipType.RuleSetDefinition)
         // assume that I only have one parent
@@ -29,5 +32,20 @@ class RuleSetDefGraphService {
 
     List<SkillDef> getChildrenSkills(SkillDef skillDef, RelationshipType relationshipType) {
         return skillRelDefRepo.getChildren(skillDef.projectId, skillDef.skillId, relationshipType)
+    }
+
+    void deleteSkillWithItsDescendants(SkillDef skillDef) {
+        List<SkillDef> toDelete = []
+
+        List<SkillDef> currentChildren = getChildrenSkills(skillDef)
+        while (currentChildren) {
+            toDelete.addAll(currentChildren)
+            currentChildren = currentChildren?.collect {
+                getChildrenSkills(it)
+            }?.flatten()
+        }
+        toDelete.add(skillDef)
+        log.debug("Deleting [{}] skill definitions (descendants + me) under [{}]", toDelete.size(), skillDef.skillId)
+        skillDefRepo.deleteAll(toDelete)
     }
 }

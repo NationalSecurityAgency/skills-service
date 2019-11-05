@@ -59,7 +59,7 @@ class ProjAdminService {
     ProjDefAccessor projDefAccessor
 
     @Autowired
-    SortingService sortingService
+    ProjectSortingService sortingService
 
     @Autowired
     SettingsService settingsService
@@ -184,10 +184,10 @@ class ProjAdminService {
 
         switch (projectPatchRequest.action) {
             case ActionPatchRequest.ActionType.DisplayOrderDown:
-                sortingService.changeProjectOrder(projectId, SortingService.Move.DOWN)
+                sortingService.changeProjectOrder(projectId, ProjectSortingService.Move.DOWN)
                 break;
             case ActionPatchRequest.ActionType.DisplayOrderUp:
-                sortingService.changeProjectOrder(projectId, SortingService.Move.UP)
+                sortingService.changeProjectOrder(projectId, ProjectSortingService.Move.UP)
                 break;
             default:
                 throw new IllegalArgumentException("Unknown action ${projectPatchRequest.action}")

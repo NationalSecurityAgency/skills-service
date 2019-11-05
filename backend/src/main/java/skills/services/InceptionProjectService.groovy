@@ -12,6 +12,7 @@ import skills.controller.request.model.SkillRequest
 import skills.controller.request.model.SubjectRequest
 import skills.controller.result.model.UserRoleRes
 import skills.services.admin.ProjAdminService
+import skills.services.admin.SubjAdminService
 import skills.services.settings.SettingsService
 import skills.settings.CommonSettings
 import skills.storage.model.ProjDef
@@ -27,6 +28,9 @@ class InceptionProjectService {
 
     @Autowired
     AdminProjService projectAdminStorageService
+
+    @Autowired
+    SubjAdminService subjAdminService
 
     @Autowired
     AccessSettingsStorageService accessSettingsStorageService
@@ -121,7 +125,7 @@ class InceptionProjectService {
                         description: "Number of ancillary dashboard features including user management."),
         ]
         subs.each {
-            projectAdminStorageService.saveSubject(inceptionProjectId, it.subjectId, it, false)
+            subjAdminService.saveSubject(inceptionProjectId, it.subjectId, it, false)
         }
 
         List<SkillRequest> skills = [
