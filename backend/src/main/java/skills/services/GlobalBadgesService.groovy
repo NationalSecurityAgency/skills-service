@@ -12,6 +12,7 @@ import skills.controller.result.model.GlobalBadgeLevelRes
 import skills.controller.result.model.GlobalBadgeResult
 import skills.controller.result.model.ProjectResult
 import skills.controller.result.model.SkillDefPartialRes
+import skills.services.admin.DisplayOrderService
 import skills.services.settings.SettingsService
 import skills.storage.model.*
 import skills.storage.model.SkillRelDef.RelationshipType
@@ -57,7 +58,7 @@ class GlobalBadgesService {
     SettingsService settingsService
 
     @Autowired
-    SortingService sortingService
+    ProjectSortingService sortingService
 
     @Autowired
     ProjDefRepo projDefRepo
@@ -67,6 +68,9 @@ class GlobalBadgesService {
 
     @Autowired
     LockingService lockingService
+
+    @Autowired
+    DisplayOrderService displayOrderService
 
     @Transactional()
     void saveBadge(String originalBadgeId, BadgeRequest badgeRequest) {
@@ -174,7 +178,7 @@ class GlobalBadgesService {
     void setBadgeDisplayOrder(String badgeId, ActionPatchRequest badgePatchRequest) {
         lockingService.lockGlobalBadges()
         List<SkillDef> badges = skillDefRepo.findAllByProjectIdAndType(null,  SkillDef.ContainerType.GlobalBadge)
-        adminProjService.updateDisplayOrder(badgeId, badges, badgePatchRequest)
+        displayOrderService.updateDisplayOrder(badgeId, badges, badgePatchRequest)
     }
 
     @Transactional(readOnly = true)

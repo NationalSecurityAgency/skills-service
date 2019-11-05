@@ -3,12 +3,10 @@ package skills.services
 import callStack.profiler.Profile
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
-import org.apache.commons.collections.CollectionUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.data.domain.PageRequest
-import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.PathVariable
@@ -17,16 +15,17 @@ import skills.auth.UserInfoService
 import skills.controller.exceptions.DataIntegrityViolationExceptionHandler
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
-import skills.controller.request.model.*
+import skills.controller.request.model.ActionPatchRequest
+import skills.controller.request.model.BadgeRequest
+import skills.controller.request.model.SkillDefForDependencyRes
+import skills.controller.request.model.SkillRequest
 import skills.controller.result.model.*
 import skills.icons.IconCssNameUtil
-import skills.services.settings.Settings
+import skills.services.admin.DisplayOrderService
 import skills.services.settings.SettingsService
 import skills.storage.model.*
 import skills.storage.model.SkillRelDef.RelationshipType
-import skills.storage.model.auth.RoleName
 import skills.storage.repos.*
-import skills.utils.ClientSecretGenerator
 import skills.utils.Props
 
 import java.util.concurrent.atomic.AtomicInteger
@@ -39,6 +38,9 @@ class AdminProjService {
 
     @Autowired
     ProjDefRepo projDefRepo
+
+    @Autowired
+    DisplayOrderService displayOrderService
 
     @Autowired
     UserInfoService userInfoService
@@ -76,7 +78,7 @@ class AdminProjService {
     @Autowired
     DependencyValidator dependencyValidator
     @Autowired
-    SortingService sortingService
+    ProjectSortingService sortingService
 
     @Value('#{"${skills.config.ui.descriptionMaxLength}"}')
     int maxDescriptionLength
@@ -113,68 +115,6 @@ class AdminProjService {
                 "index_global_badge_level_definition_proj_skill_level" : "Provided project already has a level assigned for this global badge.",
                 "index_skill_relationship_definition_parent_child_type": "Provided skill id has already been added to this global badge.",
         ])
-    }
-
-    @Transactional()
-    void saveSubject(String projectId, String origSubjectId, SubjectRequest subjectRequest, boolean performCustomValidation = true) {
-        lockingService.lockProject(projectId)
-
-        CustomValidationResult customValidationResult = customValidator.validate(subjectRequest)
-        if(performCustomValidation && !customValidationResult.valid){
-            throw new SkillException(customValidationResult.msg)
-        }
-
-        SkillDefWithExtra existing = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, origSubjectId, SkillDef.ContainerType.Subject)
-
-        if (!existing || !existing.skillId.equalsIgnoreCase(subjectRequest.subjectId)) {
-            SkillDef idExists = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, subjectRequest.subjectId, SkillDef.ContainerType.Subject)
-            if (idExists) {
-                throw new SkillException("Subject with id [${subjectRequest.subjectId}] already exists! Sorry!", projectId, null, ErrorCode.ConstraintViolation)
-            }
-        }
-        if (!existing || !existing.name.equalsIgnoreCase(subjectRequest.name)) {
-            SkillDef nameExists = skillDefRepo.findByProjectIdAndNameIgnoreCaseAndType(projectId, subjectRequest.name, SkillDef.ContainerType.Subject)
-            if (nameExists) {
-                throw new SkillException("Subject with name [${subjectRequest.name}] already exists! Sorry!", projectId, null, ErrorCode.ConstraintViolation)
-            }
-        }
-
-        SkillDefWithExtra res
-        if (existing) {
-            Props.copy(subjectRequest, existing)
-            //we need to manually copy subjectId into skillId
-            existing.skillId = subjectRequest.subjectId
-            subjectDataIntegrityViolationExceptionHandler.handle(projectId) {
-                res = skillDefWithExtraRepo.save(existing)
-            }
-            log.debug("Updated [{}]", existing)
-        } else {
-            ProjDef projDef = getProjDef(projectId)
-
-            createdResourceLimitsValidator.validateNumSubjectsCreated(projectId)
-
-            Integer lastDisplayOrder = skillDefRepo.calculateHighestDisplayOrderByProjectIdAndType(projectId, SkillDef.ContainerType.Subject)
-            int displayOrder = lastDisplayOrder != null ? lastDisplayOrder + 1 : 0
-
-            SkillDefWithExtra skillDef = new SkillDefWithExtra(
-                    type: SkillDef.ContainerType.Subject,
-                    projectId: projectId,
-                    skillId: subjectRequest.subjectId,
-                    name: subjectRequest?.name,
-                    description: subjectRequest?.description,
-                    iconClass: subjectRequest?.iconClass ?: "fa fa-question-circle",
-                    projDef: projDef,
-                    displayOrder: displayOrder,
-                    helpUrl: subjectRequest.helpUrl
-            )
-
-            subjectDataIntegrityViolationExceptionHandler.handle(projectId) {
-                res = skillDefWithExtraRepo.save(skillDef)
-            }
-            levelDefService.createDefault(projectId, null, skillDef)
-
-            log.debug("Created [{}]", res)
-        }
     }
 
     @Transactional()
@@ -294,33 +234,6 @@ class AdminProjService {
                 projectId, skillid, RelationshipType.BadgeRequirement)
     }
 
-
-    @Transactional
-    void deleteSubject(String projectId, String subjectId) {
-        log.debug("Deleting subject with project id [{}] and subject id [{}]", projectId, subjectId)
-        SkillDef subjectDefinition = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, subjectId, SkillDef.ContainerType.Subject)
-        assert subjectDefinition, "DELETE FAILED -> no subject with project id [$projectId] and subjet id [$subjectId]"
-        assert subjectDefinition.type == SkillDef.ContainerType.Subject
-
-        if (globalBadgesService.isSubjectUsedInGlobalBadge(subjectDefinition)) {
-            throw new SkillException("Subject with id [${subjectId}] cannot be deleted as it is currently referenced by one or more global badges")
-        }
-
-        deleteSkillWithItsDescendants(subjectDefinition)
-
-        ProjDef projDef = getProjDef(projectId)
-        // reset display order attribute - make sure the order is continuous - 0...N
-        List<SkillDef> subjects = projDef.subjects
-        subjects = subjects?.findAll({ it.id != subjectDefinition.id }) // need to remove because of JPA level caching?
-        resetDisplayOrder(subjects)
-
-        projDef.totalPoints = CollectionUtils.isEmpty(subjects) ? 0 : subjects.collect({it.totalPoints}).sum()
-        projDefRepo.save(projDef)
-        userPointsManagement.handleSubjectRemoval(subjectDefinition)
-
-        log.debug("Deleted subject with id [{}]", subjectDefinition.skillId)
-    }
-
     @Transactional
     void deleteBadge(String projectId, String badgeId, SkillDef.ContainerType type = SkillDef.ContainerType.Badge) {
         log.debug("Deleting badge with project id [{}] and badge id [{}]", projectId, badgeId)
@@ -328,7 +241,7 @@ class AdminProjService {
         assert badgeDefinition, "DELETE FAILED -> no badge with project id [$projectId] and badge id [$badgeId]"
         assert badgeDefinition.type == type
 
-        deleteSkillWithItsDescendants(badgeDefinition)
+        ruleSetDefGraphService.deleteSkillWithItsDescendants(badgeDefinition)
 
         // reset display order attribute - make sure the order is continuous - 0...N
         ProjDef projDef
@@ -337,56 +250,10 @@ class AdminProjService {
         }
         List<SkillDef> badges = getBadgesInternal(projDef, type)
         badges = badges?.findAll({ it.id != badgeDefinition.id }) // need to remove because of JPA level caching?
-        resetDisplayOrder(badges)
+        displayOrderService.resetDisplayOrder(badges)
         log.debug("Deleted badge with id [{}]", badgeDefinition)
     }
 
-    private void resetDisplayOrder(List<SkillDef> skillDefs) {
-        if(skillDefs) {
-            List <SkillDef> copy = new ArrayList<>(skillDefs)
-            List<SkillDef> toSave = []
-            copy = copy.sort({ it.displayOrder })
-            copy.eachWithIndex { SkillDef entry, int i ->
-                if (entry.displayOrder != i) {
-                    toSave.add(entry)
-                    entry.displayOrder = i
-                }
-            }
-            if (toSave) {
-                skillDefRepo.saveAll(toSave)
-            }
-        }
-    }
-
-    private void deleteSkillWithItsDescendants(SkillDef skillDef) {
-        List<SkillDef> toDelete = []
-
-        List<SkillDef> currentChildren = ruleSetDefGraphService.getChildrenSkills(skillDef)
-        while (currentChildren) {
-            toDelete.addAll(currentChildren)
-            currentChildren = currentChildren?.collect {
-                ruleSetDefGraphService.getChildrenSkills(it)
-            }?.flatten()
-        }
-        toDelete.add(skillDef)
-        log.debug("Deleting [{}] skill definitions (descendants + me) under [{}]", toDelete.size(), skillDef.skillId)
-        skillDefRepo.deleteAll(toDelete)
-    }
-
-    @Transactional(readOnly = true)
-    skills.controller.result.model.SubjectResult getSubject(String projectId, String subjectId) {
-        SkillDefWithExtra skillDef = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, subjectId, SkillDef.ContainerType.Subject)
-        convertToSubject(skillDef)
-    }
-
-    @Transactional(readOnly = true)
-    List<skills.controller.result.model.SubjectResult> getSubjects(String projectId) {
-//        List<SkillDef> subjects = skillDefRepo.findAllByProjectIdAndType(projectId, SkillDef.ContainerType.Subject)
-        List<SkillDefWithExtra> subjects = skillDefWithExtraRepo.findAllByProjectIdAndType(projectId, SkillDef.ContainerType.Subject)
-        List<skills.controller.result.model.SubjectResult> res = subjects.collect { convertToSubject(it) }
-        calculatePercentages(res)
-        return res?.sort({ it.displayOrder })
-    }
 
     @Transactional(readOnly = true)
     List<skills.controller.result.model.BadgeResult> getBadges(String projectId) {
@@ -401,78 +268,11 @@ class AdminProjService {
         return convertToBadge(skillDef, true)
     }
 
-    private void calculatePercentages(List<SubjectResult> res) {
-        // make a shallow copy so we can sort it
-        // sorting will make percentage calculation consistent since we don't ask db to sort
-        List<SubjectResult> copy = new ArrayList<>(res)
-        copy = copy.sort { it.name }
-        if (copy) {
-            // calculate percentage
-            if (copy.size() == 1) {
-                copy.first().pointsPercentage = 100
-            } else {
-                int overallPoints = copy.collect({ it.totalPoints }).sum()
-                if (overallPoints == 0) {
-                    copy.each {
-                        it.pointsPercentage = 0
-                    }
-                } else {
-                    List<SubjectResult> withoutLastOne = copy[0..copy.size() - 2]
-
-                    withoutLastOne.each {
-                        it.pointsPercentage = (int) ((it.totalPoints / overallPoints) * 100)
-                    }
-                    copy.last().pointsPercentage = 100 - (withoutLastOne.collect({ it.pointsPercentage }).sum())
-                }
-            }
-        }
-    }
-
-    @Transactional
-    void setSubjectDisplayOrder(String projectId, String subjectId, ActionPatchRequest subjectPatchRequest) {
-        lockingService.lockProject(projectId)
-        ProjDef projDef = getProjDef(projectId)
-        updateDisplayOrder(subjectId, projDef.subjects, subjectPatchRequest)
-    }
-
     @Transactional
     void setBadgeDisplayOrder(String projectId, String badgeId, ActionPatchRequest badgePatchRequest) {
         lockingService.lockProject(projectId)
         ProjDef projDef = getProjDef(projectId)
-        updateDisplayOrder(badgeId, projDef.badges, badgePatchRequest)
-    }
-
-    @Transactional
-    void updateDisplayOrder(String skillId, List<SkillDef> skills, ActionPatchRequest patchRequest) {
-        SkillDef toUpdate = skills.find({ it.skillId == skillId })
-
-        SkillDef switchWith
-
-        switch (patchRequest.action) {
-            case ActionPatchRequest.ActionType.DisplayOrderDown:
-                skills = skills.sort({ it.displayOrder })
-                switchWith = skills.find({ it.displayOrder > toUpdate.displayOrder })
-                break;
-            case ActionPatchRequest.ActionType.DisplayOrderUp:
-                skills = skills.sort({ it.displayOrder }).reverse()
-                switchWith = skills.find({ it.displayOrder < toUpdate.displayOrder })
-                break;
-            default:
-                throw new IllegalArgumentException("Unknown action ${patchRequest.action}")
-        }
-
-        if (!switchWith) {
-            assert switchWith, "Failed to find definition to switch with [${toUpdate?.skillId}] for action [$patchRequest.action]"
-        }
-        assert switchWith.skillId != toUpdate.skillId
-
-        int switchWithDisplayOrderTmp = toUpdate.displayOrder
-
-        toUpdate.displayOrder = switchWith.displayOrder
-        switchWith.displayOrder = switchWithDisplayOrderTmp
-        skillDefRepo.saveAll([toUpdate, switchWith])
-
-        log.debug("Switched order of [{}] and [{}]", toUpdate.skillId, switchWith.skillId)
+        displayOrderService.updateDisplayOrder(badgeId, projDef.badges, badgePatchRequest)
     }
 
     @Transactional()
@@ -537,28 +337,6 @@ class AdminProjService {
     NumUsersRes getNumUsersByProjectId(String projectId) {
         int numUsers = projDefRepo.calculateDistinctUsers(projectId)
         return  new NumUsersRes(numUsers: numUsers)
-    }
-
-    @Profile
-    private SubjectResult convertToSubject(SkillDefWithExtra skillDef) {
-        SubjectResult res = new SubjectResult(
-                subjectId: skillDef.skillId,
-                projectId: skillDef.projectId,
-                name: skillDef.name,
-                description: skillDef.description,
-                displayOrder: skillDef.displayOrder,
-                totalPoints: skillDef.totalPoints,
-                iconClass: skillDef.iconClass,
-                helpUrl: skillDef.helpUrl
-        )
-
-        res.numSkills = calculateNumChildSkills(skillDef)
-        return res
-    }
-
-    @Profile
-    private long calculateNumChildSkills(SkillDefParent skillDef) {
-        skillDefRepo.countChildSkillsByIdAndRelationshipType(skillDef.id, RelationshipType.RuleSetDefinition)
     }
 
     @Profile
@@ -628,7 +406,7 @@ class AdminProjService {
         ruleSetDefinitionScoreUpdater.skillToBeRemoved(skillDefinition)
         userPointsManagement.handleSkillRemoval(skillDefinition)
 
-        deleteSkillWithItsDescendants(skillDefinition)
+        ruleSetDefGraphService.deleteSkillWithItsDescendants(skillDefinition)
         log.debug("Deleted skill [{}]", skillDefinition.skillId)
 
         resetDisplayOrderAttributes(parentSkill, skillDefinition.skillId)
@@ -1141,11 +919,6 @@ class AdminProjService {
         skillDefRepo.calculateDistinctUsersForASingleSkill(partial.projectId, partial.skillId)
     }
 
-
-    @Transactional(readOnly = true)
-    boolean existsBySubjectName(String projectId, String subjectName) {
-        return skillDefRepo.existsByProjectIdAndNameAndTypeAllIgnoreCase(projectId, subjectName, SkillDef.ContainerType.Subject)
-    }
 
     @Transactional(readOnly = true)
     boolean existsByBadgeName(String projectId, String subjectName) {

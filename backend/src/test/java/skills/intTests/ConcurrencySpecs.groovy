@@ -6,7 +6,7 @@ import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
-import skills.services.SortingService
+import skills.services.ProjectSortingService
 import skills.services.settings.SettingsDataAccessor
 import skills.storage.model.Setting
 import skills.storage.model.SkillDef
@@ -131,7 +131,7 @@ class ConcurrencySpecs extends DefaultIntSpec {
             it.join(5000)
         }
 
-        List<Setting> sortOrder = settingsDataAccessor.getUserProjectSettingsForGroup(skillsService.userName, SortingService.PROJECT_SORT_GROUP)
+        List<Setting> sortOrder = settingsDataAccessor.getUserProjectSettingsForGroup(skillsService.userName, ProjectSortingService.PROJECT_SORT_GROUP)
         sortOrder.each {
             println it
         }
@@ -168,7 +168,7 @@ class ConcurrencySpecs extends DefaultIntSpec {
             it.join(5000)
         }
 
-        List<Setting> sortOrder = settingsDataAccessor.getUserProjectSettingsForGroup(skillsService.userName, SortingService.PROJECT_SORT_GROUP)
+        List<Setting> sortOrder = settingsDataAccessor.getUserProjectSettingsForGroup(skillsService.userName, ProjectSortingService.PROJECT_SORT_GROUP)
         sortOrder.each {
             println it
         }
