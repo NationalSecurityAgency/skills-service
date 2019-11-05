@@ -1,4 +1,4 @@
-package skills.intTests
+package skills.intTests.adminDisplayOrder
 
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
@@ -6,17 +6,21 @@ import skills.intTests.utils.SkillsFactory
 
 class SubjectsOrderSpecs extends DefaultIntSpec {
 
-    def "move subject down"() {
-        def proj = SkillsFactory.createProject()
+    def proj
+    List subjects
+    def setup() {
+        proj = SkillsFactory.createProject()
         int numSubjects = 5
 
         skillsService.createProject(proj)
-        List subjects = (1..numSubjects).collect {
+        subjects = (1..numSubjects).collect {
             def subject = SkillsFactory.createSubject(1, it)
             skillsService.createSubject(subject)
             return subject
         }
+    }
 
+    def "move subject down"() {
         when:
         def beforeMove = skillsService.getSubjects(proj.projectId)
         skillsService.moveSubjectDown(subjects.first())
@@ -27,16 +31,6 @@ class SubjectsOrderSpecs extends DefaultIntSpec {
     }
 
     def "should not be able to move down the last subject"() {
-        def proj = SkillsFactory.createProject()
-        int numSubjects = 5
-
-        skillsService.createProject(proj)
-        List subjects = (1..numSubjects).collect {
-            def subject = SkillsFactory.createSubject(1, it)
-            skillsService.createSubject(subject)
-            return subject
-        }
-
         when:
         def beforeMove = skillsService.getSubjects(proj.projectId)
         skillsService.moveSubjectDown(subjects.last())
@@ -47,16 +41,6 @@ class SubjectsOrderSpecs extends DefaultIntSpec {
     }
 
     def "move subject up"() {
-        def proj = SkillsFactory.createProject()
-        int numSubjects = 5
-
-        skillsService.createProject(proj)
-        List subjects = (1..numSubjects).collect {
-            def subject = SkillsFactory.createSubject(1, it)
-            skillsService.createSubject(subject)
-            return subject
-        }
-
         when:
         def beforeMove = skillsService.getSubjects(proj.projectId)
         skillsService.moveSubjectUp(subjects.get(1))
@@ -67,16 +51,6 @@ class SubjectsOrderSpecs extends DefaultIntSpec {
     }
 
     def "should not be able to move the first subject up"() {
-        def proj = SkillsFactory.createProject()
-        int numSubjects = 5
-
-        skillsService.createProject(proj)
-        List subjects = (1..numSubjects).collect {
-            def subject = SkillsFactory.createSubject(1, it)
-            skillsService.createSubject(subject)
-            return subject
-        }
-
         when:
         def beforeMove = skillsService.getSubjects(proj.projectId)
         skillsService.moveSubjectUp(subjects.first())
