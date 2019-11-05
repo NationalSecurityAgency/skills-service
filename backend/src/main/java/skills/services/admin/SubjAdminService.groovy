@@ -152,15 +152,15 @@ class SubjAdminService {
     }
 
     @Transactional(readOnly = true)
-    skills.controller.result.model.SubjectResult getSubject(String projectId, String subjectId) {
+    SubjectResult getSubject(String projectId, String subjectId) {
         SkillDefWithExtra skillDef = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, subjectId, SkillDef.ContainerType.Subject)
         convertToSubject(skillDef)
     }
 
     @Transactional(readOnly = true)
-    List<skills.controller.result.model.SubjectResult> getSubjects(String projectId) {
+    List<SubjectResult> getSubjects(String projectId) {
         List<SkillDefWithExtra> subjects = skillDefWithExtraRepo.findAllByProjectIdAndType(projectId, SkillDef.ContainerType.Subject)
-        List<skills.controller.result.model.SubjectResult> res = subjects.collect { convertToSubject(it) }
+        List<SubjectResult> res = subjects.collect { convertToSubject(it) }
         calculatePercentages(res)
         return res?.sort({ it.displayOrder })
     }

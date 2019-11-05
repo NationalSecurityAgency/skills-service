@@ -12,6 +12,7 @@ import skills.controller.result.model.GlobalBadgeLevelRes
 import skills.controller.result.model.GlobalBadgeResult
 import skills.controller.result.model.ProjectResult
 import skills.controller.result.model.SkillDefPartialRes
+import skills.services.admin.BadgeAdminService
 import skills.services.admin.DisplayOrderService
 import skills.services.settings.SettingsService
 import skills.storage.model.*
@@ -67,6 +68,9 @@ class GlobalBadgesService {
     AdminProjService adminProjService
 
     @Autowired
+    BadgeAdminService badgeAdminService
+
+    @Autowired
     LockingService lockingService
 
     @Autowired
@@ -74,7 +78,7 @@ class GlobalBadgesService {
 
     @Transactional()
     void saveBadge(String originalBadgeId, BadgeRequest badgeRequest) {
-        adminProjService.saveBadge(null, originalBadgeId, badgeRequest, SkillDef.ContainerType.GlobalBadge)
+        badgeAdminService.saveBadge(null, originalBadgeId, badgeRequest, SkillDef.ContainerType.GlobalBadge)
     }
     @Transactional(readOnly = true)
     boolean existsByBadgeName(String subjectName) {
@@ -145,18 +149,18 @@ class GlobalBadgesService {
     @Transactional
     void assignGraphRelationship(String badgeSkillId, SkillDef.ContainerType skillType, String projectId,
                                  String relationshipSkillId, RelationshipType relationshipType) {
-        adminProjService.assignGraphRelationship(null, badgeSkillId, skillType, projectId, relationshipSkillId, relationshipType)
+        ruleSetDefGraphService.assignGraphRelationship(null, badgeSkillId, skillType, projectId, relationshipSkillId, relationshipType)
     }
 
     @Transactional
     void removeGraphRelationship(String skillId, SkillDef.ContainerType skillType, String projectId,
                                  String relationshipSkillId, RelationshipType relationshipType){
-        adminProjService.removeGraphRelationship(null, skillId, skillType, projectId, relationshipSkillId, relationshipType)
+        ruleSetDefGraphService.removeGraphRelationship(null, skillId, skillType, projectId, relationshipSkillId, relationshipType)
     }
 
     @Transactional
     void deleteBadge(String badgeId) {
-        adminProjService.deleteBadge(null, badgeId, SkillDef.ContainerType.GlobalBadge)
+        badgeAdminService.deleteBadge(null, badgeId, SkillDef.ContainerType.GlobalBadge)
     }
 
     @Transactional(readOnly = true)

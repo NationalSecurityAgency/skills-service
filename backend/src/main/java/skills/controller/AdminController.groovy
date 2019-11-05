@@ -17,6 +17,7 @@ import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.*
 import skills.controller.result.model.*
 import skills.services.*
+import skills.services.admin.BadgeAdminService
 import skills.services.admin.ProjAdminService
 import skills.services.admin.SubjAdminService
 import skills.services.events.SkillEventResult
@@ -67,6 +68,9 @@ class AdminController {
 
     @Autowired
     SubjAdminService subjAdminService
+
+    @Autowired
+    BadgeAdminService badgeAdminService
 
     @Value('#{"${skills.config.ui.maxTimeWindowInMinutes}"}')
     int maxTimeWindowInMinutes
@@ -173,7 +177,7 @@ class AdminController {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(badgeName, "Badge Name")
         String decodedName = URLDecoder.decode(badgeName,  StandardCharsets.UTF_8.toString())
-        return projectAdminStorageService.existsByBadgeName(projectId, decodedName)
+        return badgeAdminService.existsByBadgeName(projectId, decodedName)
     }
     @RequestMapping(value = "/projects/{projectId}/skillNameExists", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
@@ -262,7 +266,7 @@ class AdminController {
         badgeRequest.description = InputSanitizer.sanitize(badgeRequest.description)
         badgeRequest.helpUrl = InputSanitizer.sanitize(badgeRequest.helpUrl)
 
-        projectAdminStorageService.saveBadge(projectId, badgeId, badgeRequest)
+        badgeAdminService.saveBadge(projectId, badgeId, badgeRequest)
         return new RequestResult(success: true)
     }
 
@@ -275,7 +279,7 @@ class AdminController {
         SkillsValidator.isNotBlank(badgeId, "Badge Id", projectId)
         SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
 
-        projectAdminStorageService.addSkillToBadge(projectId, badgeId, skillId)
+        badgeAdminService.addSkillToBadge(projectId, badgeId, skillId)
         return new RequestResult(success: true)
     }
 
@@ -284,11 +288,11 @@ class AdminController {
     RequestResult removeSkillFromBadge(@PathVariable("projectId") String projectId,
                                        @PathVariable("badgeId") String badgeId,
                                        @PathVariable("skillId") String skillId) {
-        projectAdminStorageService.removeSkillFromBadge(projectId, badgeId, skillId)
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(badgeId, "Badge Id", projectId)
         SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
 
+        badgeAdminService.removeSkillFromBadge(projectId, badgeId, skillId)
         return new RequestResult(success: true)
     }
 
@@ -297,7 +301,7 @@ class AdminController {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(badgeId, "Badge Id", projectId)
 
-        projectAdminStorageService.deleteBadge(projectId, badgeId)
+        badgeAdminService.deleteBadge(projectId, badgeId)
     }
 
     @RequestMapping(value = "/projects/{projectId}/badges", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -305,7 +309,7 @@ class AdminController {
     List<BadgeResult> getBadges(@PathVariable("projectId") String projectId) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
 
-        return projectAdminStorageService.getBadges(projectId)
+        return badgeAdminService.getBadges(projectId)
     }
 
     @RequestMapping(value = "/projects/{projectId}/badges/{badgeId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -315,7 +319,7 @@ class AdminController {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(badgeId, "Badge Id", projectId)
 
-        return projectAdminStorageService.getBadge(projectId, badgeId)
+        return badgeAdminService.getBadge(projectId, badgeId)
     }
 
     @RequestMapping(value = "/projects/{projectId}/badges/{badgeId}", method = RequestMethod.PATCH, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -327,7 +331,7 @@ class AdminController {
         SkillsValidator.isNotBlank(badgeId, "Badge Id", projectId)
         SkillsValidator.isNotNull(badgePatchRequest.action, "Action must be provided", projectId)
 
-        projectAdminStorageService.setBadgeDisplayOrder(projectId, badgeId, badgePatchRequest)
+        badgeAdminService.setBadgeDisplayOrder(projectId, badgeId, badgePatchRequest)
     }
 
     @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/skills", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
