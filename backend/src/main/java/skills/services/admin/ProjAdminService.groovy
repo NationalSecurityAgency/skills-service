@@ -12,16 +12,20 @@ import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.request.model.ActionPatchRequest
 import skills.controller.request.model.ProjectRequest
+import skills.controller.result.model.CustomIconResult
+import skills.controller.result.model.NumUsersRes
 import skills.controller.result.model.ProjectResult
 import skills.controller.result.model.SettingsResult
 import skills.controller.result.model.SimpleProjectResult
+import skills.icons.IconCssNameUtil
 import skills.services.*
 import skills.services.settings.Settings
 import skills.services.settings.SettingsService
+import skills.storage.model.CustomIcon
 import skills.storage.model.ProjDef
 import skills.storage.model.SkillDef
 import skills.storage.model.auth.RoleName
-import skills.storage.repos.ProjDefAccessor
+import skills.storage.accessors.ProjDefAccessor
 import skills.storage.repos.ProjDefRepo
 import skills.storage.repos.SkillDefRepo
 import skills.utils.ClientSecretGenerator
@@ -178,6 +182,17 @@ class ProjAdminService {
         return projDefRepo.existsByNameIgnoreCase(projectName)
     }
 
+    @Profile
+    NumUsersRes getNumUsersByProjectId(String projectId) {
+        int numUsers = projDefRepo.calculateDistinctUsers(projectId)
+        return  new NumUsersRes(numUsers: numUsers)
+    }
+
+    @Transactional(readOnly = true)
+    long countNumberOfSkills(String projectId) {
+        return skillDefRepo.countByProjectIdAndType(projectId, SkillDef.ContainerType.Skill)
+    }
+
     @Transactional()
     void setProjectDisplayOrder(String projectId, ActionPatchRequest projectPatchRequest) {
         assert projectPatchRequest.action
@@ -199,6 +214,27 @@ class ProjAdminService {
         List<ProjDef> projDefs = projDefRepo.queryProjectsByNameQueryAndNotProjectId(nameQuery.toLowerCase(), projectId, new PageRequest(0, 5, Sort.Direction.ASC, "name"))
         return projDefs.collect {
             new SimpleProjectResult(name: it.name, projectId: it.projectId)
+        }
+    }
+
+    @Transactional(readOnly = true)
+    String getProjectSecret(String projectId) {
+        ProjDef projectDefinition = projDefAccessor.getProjDef(projectId)
+        return projectDefinition.clientSecret
+    }
+
+    @Transactional
+    void updateClientSecret(String projectId, String clientSecret) {
+        ProjDef projDef = projDefAccessor.getProjDef(projectId)
+        projDef.clientSecret = clientSecret
+    }
+
+    @Transactional(readOnly = true)
+    List<CustomIconResult> getCustomIcons(String projectId){
+        ProjDef project = projDefAccessor.getProjDef(projectId)
+        return project.getCustomIcons().collect { CustomIcon icon ->
+            String cssClassname = IconCssNameUtil.getCssClass(icon.projectId, icon.filename)
+            return new CustomIconResult(filename: icon.filename, cssClassname: cssClassname)
         }
     }
 

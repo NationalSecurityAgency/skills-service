@@ -8,7 +8,7 @@ import skills.controller.exceptions.SkillException
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillRelDef
 import skills.storage.model.SkillRelDef.RelationshipType
-import skills.storage.repos.SkillDefAccessor
+import skills.storage.accessors.SkillDefAccessor
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.SkillRelDefRepo
 

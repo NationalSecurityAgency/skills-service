@@ -1,4 +1,4 @@
-package skills.storage.repos
+package skills.storage.accessors
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -7,6 +7,7 @@ import skills.controller.exceptions.SkillException
 import skills.controller.result.model.SkillDefPartialRes
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillRelDef
+import skills.storage.repos.SkillDefRepo
 
 @Service
 class SkillDefAccessor {

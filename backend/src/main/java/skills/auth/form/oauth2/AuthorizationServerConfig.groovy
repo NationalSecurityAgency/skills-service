@@ -24,17 +24,13 @@ import org.springframework.security.oauth2.provider.ClientDetailsService
 import org.springframework.security.oauth2.provider.ClientRegistrationException
 import org.springframework.security.oauth2.provider.OAuth2Authentication
 import org.springframework.security.oauth2.provider.client.BaseClientDetails
-import org.springframework.security.oauth2.provider.token.DefaultAccessTokenConverter
-import org.springframework.security.oauth2.provider.token.DefaultTokenServices
-import org.springframework.security.oauth2.provider.token.TokenEnhancer
-import org.springframework.security.oauth2.provider.token.TokenEnhancerChain
-import org.springframework.security.oauth2.provider.token.TokenStore
+import org.springframework.security.oauth2.provider.token.*
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore
 import org.springframework.security.oauth2.provider.token.store.KeyStoreKeyFactory
 import skills.auth.SecurityMode
-import skills.services.AdminProjService
 import skills.storage.model.ProjDef
+import skills.storage.accessors.ProjDefAccessor
 
 @Configuration
 @Conditional(SecurityMode.FormAuth)
@@ -145,14 +141,14 @@ class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
         private String resourceId
 
         @Autowired
-        private AdminProjService projService
+        private ProjDefAccessor projDefAccessor
 
         @Autowired
         PasswordEncoder passwordEncoder
 
         @Override
         ClientDetails loadClientByClientId(String clientId) throws ClientRegistrationException {
-            ProjDef projDef = projService.getProjDef(clientId)
+            ProjDef projDef = projDefAccessor.getProjDef(clientId)
 
             BaseClientDetails result = new BaseClientDetails()
             result.setClientId(clientId)

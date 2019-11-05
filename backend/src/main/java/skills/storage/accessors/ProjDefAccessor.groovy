@@ -1,10 +1,11 @@
-package skills.storage.repos
+package skills.storage.accessors
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.controller.exceptions.SkillException
 import skills.storage.model.ProjDef
+import skills.storage.repos.ProjDefRepo
 
 @Service
 class ProjDefAccessor {
