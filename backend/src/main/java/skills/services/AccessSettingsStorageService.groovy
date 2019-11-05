@@ -48,7 +48,7 @@ class AccessSettingsStorageService {
     SettingsService settingsService
 
     @Autowired
-    SortingService sortingService
+    ProjectSortingService sortingService
 
     @Autowired
     UserInfoValidator userInfoValidator

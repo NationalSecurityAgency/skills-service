@@ -12,6 +12,11 @@ import skills.controller.result.model.GlobalBadgeLevelRes
 import skills.controller.result.model.GlobalBadgeResult
 import skills.controller.result.model.ProjectResult
 import skills.controller.result.model.SkillDefPartialRes
+import skills.services.admin.BadgeAdminService
+import skills.services.admin.DataIntegrityExceptionHandlers
+import skills.services.admin.DisplayOrderService
+import skills.services.admin.SkillsAdminService
+import skills.services.admin.SkillsDepsService
 import skills.services.settings.SettingsService
 import skills.storage.model.*
 import skills.storage.model.SkillRelDef.RelationshipType
@@ -57,20 +62,29 @@ class GlobalBadgesService {
     SettingsService settingsService
 
     @Autowired
-    SortingService sortingService
+    ProjectSortingService sortingService
 
     @Autowired
     ProjDefRepo projDefRepo
 
     @Autowired
-    AdminProjService adminProjService
+    BadgeAdminService badgeAdminService
 
     @Autowired
     LockingService lockingService
 
+    @Autowired
+    DisplayOrderService displayOrderService
+
+    @Autowired
+    SkillsAdminService skillsAdminService
+
+    @Autowired
+    SkillsDepsService skillsDepsService
+
     @Transactional()
     void saveBadge(String originalBadgeId, BadgeRequest badgeRequest) {
-        adminProjService.saveBadge(null, originalBadgeId, badgeRequest, SkillDef.ContainerType.GlobalBadge)
+        badgeAdminService.saveBadge(null, originalBadgeId, badgeRequest, SkillDef.ContainerType.GlobalBadge)
     }
     @Transactional(readOnly = true)
     boolean existsByBadgeName(String subjectName) {
@@ -109,7 +123,7 @@ class GlobalBadgesService {
                 levelRefId: toAdd.id, level: level, projectRefId: projDef.id, projectId: projectId,
                 projectName: projDef.name, badgeRefId: badgeSkillDef.id, badgeId: badgeId
         )
-        adminProjService.dataIntegrityViolationExceptionHandler.handle(null) {
+        DataIntegrityExceptionHandlers.dataIntegrityViolationExceptionHandler.handle(null) {
             globalBadgeLevelDefRepo.save(globalBadgeLevelDef)
         }
     }
@@ -141,18 +155,18 @@ class GlobalBadgesService {
     @Transactional
     void assignGraphRelationship(String badgeSkillId, SkillDef.ContainerType skillType, String projectId,
                                  String relationshipSkillId, RelationshipType relationshipType) {
-        adminProjService.assignGraphRelationship(null, badgeSkillId, skillType, projectId, relationshipSkillId, relationshipType)
+        ruleSetDefGraphService.assignGraphRelationship(null, badgeSkillId, skillType, projectId, relationshipSkillId, relationshipType)
     }
 
     @Transactional
     void removeGraphRelationship(String skillId, SkillDef.ContainerType skillType, String projectId,
                                  String relationshipSkillId, RelationshipType relationshipType){
-        adminProjService.removeGraphRelationship(null, skillId, skillType, projectId, relationshipSkillId, relationshipType)
+        ruleSetDefGraphService.removeGraphRelationship(null, skillId, skillType, projectId, relationshipSkillId, relationshipType)
     }
 
     @Transactional
     void deleteBadge(String badgeId) {
-        adminProjService.deleteBadge(null, badgeId, SkillDef.ContainerType.GlobalBadge)
+        badgeAdminService.deleteBadge(null, badgeId, SkillDef.ContainerType.GlobalBadge)
     }
 
     @Transactional(readOnly = true)
@@ -174,7 +188,7 @@ class GlobalBadgesService {
     void setBadgeDisplayOrder(String badgeId, ActionPatchRequest badgePatchRequest) {
         lockingService.lockGlobalBadges()
         List<SkillDef> badges = skillDefRepo.findAllByProjectIdAndType(null,  SkillDef.ContainerType.GlobalBadge)
-        adminProjService.updateDisplayOrder(badgeId, badges, badgePatchRequest)
+        displayOrderService.updateDisplayOrder(badgeId, badges, badgePatchRequest)
     }
 
     @Transactional(readOnly = true)
@@ -185,14 +199,14 @@ class GlobalBadgesService {
         AvailableSkillsResult res = new AvailableSkillsResult()
         if (suggestedSkillDefs) {
             res.totalAvailable = suggestedSkillDefs.size()
-            res.suggestedSkills = suggestedSkillDefs.sort().take(10).collect { adminProjService.convertToSkillDefPartialRes(it) }
+            res.suggestedSkills = suggestedSkillDefs.sort().take(10).collect { skillsAdminService.convertToSkillDefPartialRes(it) }
         }
         return res
     }
 
     @Transactional(readOnly = true)
     List<SkillDefPartialRes> getSkillsForBadge(String badgeId) {
-        return adminProjService.getSkillsByProjectSkillAndType(null, badgeId, SkillDef.ContainerType.GlobalBadge, RelationshipType.BadgeRequirement)
+        return skillsAdminService.getSkillsByProjectSkillAndType(null, badgeId, SkillDef.ContainerType.GlobalBadge, RelationshipType.BadgeRequirement)
     }
 
     @Transactional(readOnly = true)
@@ -266,7 +280,7 @@ class GlobalBadgesService {
             Set<String> uniqueProjectIds = []
             List<SkillDef> dependentSkills = skillDefRepo.findChildSkillsByIdAndRelationshipType(skillDef.id, SkillRelDef.RelationshipType.BadgeRequirement)
             uniqueProjectIds.addAll(dependentSkills*.projectId)
-            res.requiredSkills = dependentSkills?.collect { adminProjService.convertToSkillDefRes(it) }
+            res.requiredSkills = dependentSkills?.collect { skillsDepsService.convertToSkillDefRes(it) }
             res.numSkills = dependentSkills ? dependentSkills.size() : 0
             res.totalPoints = dependentSkills ? dependentSkills?.collect({ it.totalPoints })?.sum() : 0
             res.requiredProjectLevels = getGlobalBadgeLevels(skillDef.skillId)
