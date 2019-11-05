@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import skills.controller.result.model.CountItem
 import skills.controller.result.model.LabelCountItem
+import skills.controller.result.model.ProjectResult
 import skills.metrics.builders.MetricsChartBuilder
 import skills.metrics.model.ChartOption
 import skills.metrics.model.ChartType
@@ -12,6 +13,7 @@ import skills.metrics.model.MetricsChart
 import skills.metrics.model.Section
 import skills.services.AdminProjService
 import skills.services.AdminUsersService
+import skills.services.admin.ProjAdminService
 
 @Component
 @CompileStatic
@@ -21,7 +23,7 @@ class NumUsersPerProjectBuilder implements MetricsChartBuilder{
     AdminUsersService usersService
 
     @Autowired
-    AdminProjService projService
+    ProjAdminService projAdminService
 
     @Override
     Section getSection() {
@@ -36,13 +38,13 @@ class NumUsersPerProjectBuilder implements MetricsChartBuilder{
     @Override
     MetricsChart build(String projectId, Map<String, String> props, boolean loadData) {
 
-        def projectResults = projService.getProjects()
+        List<ProjectResult> projectResults = projAdminService.getProjects()
         if (projectResults.size() < 2){
             return null
         }
 
         List<CountItem> chartData = []
-        projectResults.each{
+        projectResults.each {
             LabelCountItem item = new LabelCountItem()
             item.value = it.name
             item.count = (int)usersService.countTotalProjUsers(it.projectId)

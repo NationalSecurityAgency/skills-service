@@ -42,6 +42,10 @@ class UserInfoService {
         return currentUser
     }
 
+    String getCurrentUserId() {
+        return getCurrentUser().username
+    }
+
     /**
      * Abstracts dealing with PKI vs Password/Form modes when user id param is provided
      */
