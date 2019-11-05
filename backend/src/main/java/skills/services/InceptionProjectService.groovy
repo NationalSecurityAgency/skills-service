@@ -11,6 +11,7 @@ import skills.controller.request.model.SettingsRequest
 import skills.controller.request.model.SkillRequest
 import skills.controller.request.model.SubjectRequest
 import skills.controller.result.model.UserRoleRes
+import skills.services.admin.ProjAdminService
 import skills.services.settings.SettingsService
 import skills.settings.CommonSettings
 import skills.storage.model.ProjDef
@@ -35,6 +36,9 @@ class InceptionProjectService {
 
     @Autowired
     ProjDefRepo projDefRepo
+
+    @Autowired
+    ProjAdminService projAdminService
 
     @Value('#{"${skills.config.ui.docsHost}"}')
     String docsRootHost = ""
@@ -93,7 +97,7 @@ class InceptionProjectService {
     }
 
     private void createProject(String userId) {
-        projectAdminStorageService.saveProject(inceptionProjectId, new ProjectRequest(projectId: inceptionProjectId, name: inceptionProjectId), userId)
+        projAdminService.saveProject(inceptionProjectId, new ProjectRequest(projectId: inceptionProjectId, name: inceptionProjectId), userId)
 
         if (docsRootHost) {
             log.info("setting Inception setting ${CommonSettings.HELP_URL_ROOT} to $docsRootHost")

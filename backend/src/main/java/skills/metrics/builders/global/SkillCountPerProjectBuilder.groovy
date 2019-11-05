@@ -12,6 +12,7 @@ import skills.metrics.model.MetricsChart
 import skills.metrics.model.Section
 import skills.services.AdminProjService
 import skills.services.AdminUsersService
+import skills.services.admin.ProjAdminService
 
 @Component
 @CompileStatic
@@ -22,6 +23,9 @@ class SkillCountPerProjectBuilder implements MetricsChartBuilder{
 
     @Autowired
     AdminProjService projService
+
+    @Autowired
+    ProjAdminService projAdminService
 
     @Override
     Section getSection() {
@@ -36,7 +40,7 @@ class SkillCountPerProjectBuilder implements MetricsChartBuilder{
     @Override
     MetricsChart build(String projectId, Map<String, String> props, boolean loadData) {
 
-        def projectResults = projService.getProjects()
+        def projectResults = projAdminService.getProjects()
         if (projectResults.size() < 2){
             return null
         }

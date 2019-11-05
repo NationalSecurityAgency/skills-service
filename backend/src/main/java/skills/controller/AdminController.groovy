@@ -17,6 +17,7 @@ import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.*
 import skills.controller.result.model.*
 import skills.services.*
+import skills.services.admin.ProjAdminService
 import skills.services.events.SkillEventResult
 import skills.services.settings.SettingsService
 import skills.services.settings.listeners.ValidationRes
@@ -60,7 +61,8 @@ class AdminController {
     @Autowired
     PublicPropsBasedValidator propsBasedValidator
 
-
+    @Autowired
+    ProjAdminService projAdminService
 
     @Value('#{"${skills.config.ui.maxTimeWindowInMinutes}"}')
     int maxTimeWindowInMinutes
@@ -87,14 +89,14 @@ class AdminController {
         projectRequest.name = InputSanitizer.sanitize(projectRequest.name)
         projectRequest.projectId = InputSanitizer.sanitize(projectRequest.projectId)
 
-        projectAdminStorageService.saveProject(projectId, projectRequest)
+        projAdminService.saveProject(projectId, projectRequest)
         return new skills.controller.result.model.RequestResult(success: true)
     }
 
     @RequestMapping(value = "/projects/{id}", method = RequestMethod.DELETE)
     void deleteProject(@PathVariable("id") String projectId) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
-        projectAdminStorageService.deleteProject(projectId)
+        projAdminService.deleteProject(projectId)
     }
 
     @RequestMapping(value = "/projects/{projectId}", method = RequestMethod.PATCH, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -104,7 +106,7 @@ class AdminController {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotNull(projectPatchRequest.action, "Action", projectId)
 
-        projectAdminStorageService.setProjectDisplayOrder(projectId, projectPatchRequest)
+        projAdminService.setProjectDisplayOrder(projectId, projectPatchRequest)
         return new RequestResult(success: true)
     }
 
@@ -112,13 +114,13 @@ class AdminController {
     @ResponseBody
     ProjectResult getProject(@PathVariable("id") String projectId) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
-        return projectAdminStorageService.getProject(projectId)
+        return projAdminService.getProject(projectId)
     }
 
     @RequestMapping(value = "/projects/{id}/projectSearch", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     List<SimpleProjectResult> searchProjects(@PathVariable("id") String projectId, @RequestParam("nameQuery") nameQuery) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
-        return projectAdminStorageService.searchProjects(projectId, nameQuery)?.findAll {it.projectId != InceptionProjectService.inceptionProjectId}
+        return projAdminService.searchProjects(projectId, nameQuery)?.findAll {it.projectId != InceptionProjectService.inceptionProjectId}
     }
 
     @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}", method = [RequestMethod.PUT, RequestMethod.POST], produces = MediaType.APPLICATION_JSON_VALUE)

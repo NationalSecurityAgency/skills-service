@@ -17,6 +17,7 @@ import skills.icons.CustomIconFacade
 import skills.profile.EnableCallStackProf
 import skills.services.AdminProjService
 import skills.services.IdFormatValidator
+import skills.services.admin.ProjAdminService
 
 import java.nio.charset.StandardCharsets
 
@@ -27,6 +28,9 @@ import java.nio.charset.StandardCharsets
 class ProjectController {
     @Autowired
     AdminProjService projectAdminStorageService
+
+    @Autowired
+    ProjAdminService projAdminService
 
     @Autowired
     CustomIconFacade customIconFacade
@@ -45,7 +49,7 @@ class ProjectController {
     @RequestMapping(value = "/projects", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     List<ProjectResult> getProjects() {
-        return projectAdminStorageService.getProjects()
+        return projAdminService.getProjects()
     }
 
     @RequestMapping(value = "/projects/{id}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
@@ -78,7 +82,7 @@ class ProjectController {
             throw new SkillException("Project name was not provided.", projectId, null, ErrorCode.BadParam)
         }
 
-        projectAdminStorageService.saveProject(null, projectRequest)
+        projAdminService.saveProject(null, projectRequest)
         return new RequestResult(success: true)
     }
 
@@ -86,7 +90,7 @@ class ProjectController {
     @ResponseBody
     ProjectResult getProject(@PathVariable("id") String projectId){
         SkillsValidator.isNotBlank(projectId, "id")
-        return projectAdminStorageService.getProject(projectId)
+        return projAdminService.getProject(projectId)
     }
 
     @RequestMapping(value = "/projectExist", method = RequestMethod.GET, produces = "application/json")
@@ -98,11 +102,11 @@ class ProjectController {
 
         if (projectId) {
             projectId = URLDecoder.decode(projectId, StandardCharsets.UTF_8.toString())
-            return projectAdminStorageService.existsByProjectId(projectId)
+            return projAdminService.existsByProjectId(projectId)
         }
 
         projectName = URLDecoder.decode(projectName, StandardCharsets.UTF_8.toString())
-        return projectAdminStorageService.existsByProjectName(projectName)
+        return projAdminService.existsByProjectName(projectName)
     }
 
     @RequestMapping(value = "/projects/{id}/customIcons", method = RequestMethod.GET, produces = "application/json")
