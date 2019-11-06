@@ -182,11 +182,6 @@ class ProjAdminService {
         return projDefRepo.existsByNameIgnoreCase(projectName)
     }
 
-    @Profile
-    NumUsersRes getNumUsersByProjectId(String projectId) {
-        int numUsers = projDefRepo.calculateDistinctUsers(projectId)
-        return  new NumUsersRes(numUsers: numUsers)
-    }
 
     @Transactional(readOnly = true)
     long countNumberOfSkills(String projectId) {

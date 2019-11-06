@@ -192,13 +192,13 @@ class SkillsDepsService {
         return res
     }
 
-    @Profile
-    private SkillDefRes convertToSkillDefRes(SkillDefWithExtra skillDef) {
-        SkillDefRes res = new SkillDefRes()
-        Props.copy(skillDef, res)
-        res.numPerformToCompletion = skillDef.totalPoints / res.pointIncrement
-        return res
-    }
+//    @Profile
+//    private SkillDefRes convertToSkillDefRes(SkillDefWithExtra skillDef) {
+//        SkillDefRes res = new SkillDefRes()
+//        Props.copy(skillDef, res)
+//        res.numPerformToCompletion = skillDef.totalPoints / res.pointIncrement
+//        return res
+//    }
 
     @Profile
     private List<GraphSkillDefEdge> loadGraphEdges(String projectId, SkillRelDef.RelationshipType type){

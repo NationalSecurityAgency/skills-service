@@ -175,7 +175,7 @@ class BadgeAdminService {
     }
 
     @Profile
-    private skills.controller.result.model.BadgeResult convertToBadge(SkillDefWithExtra skillDef, boolean loadRequiredSkills = false) {
+    private BadgeResult convertToBadge(SkillDefWithExtra skillDef, boolean loadRequiredSkills = false) {
         skills.controller.result.model.BadgeResult res = new skills.controller.result.model.BadgeResult(
                 badgeId: skillDef.skillId,
                 projectId: skillDef.projectId,

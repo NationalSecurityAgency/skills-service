@@ -264,6 +264,35 @@ class LevelsSpec extends  DefaultIntSpec{
     }
 
 
+    def "edit existing subject level"(){
+        when:
+        def levels = skillsService.getLevels(projId, subject).sort(){it.level}
+        def levelToEdit = levels[0]
+        levelToEdit.name = "TwoEagles"
+        levelToEdit.iconClass = "two-eagles"
+        def props = [:]
+        props.projectId = levelToEdit.projectId
+        props.skillId = levelToEdit.skillId
+        props.level = levelToEdit.level
+        props.percent = levelToEdit.percent
+        props.pointsFrom = levelToEdit.pointsFrom
+        props.pointsTo = levelToEdit.pointsTo
+        props.name = "TwoEagles"
+        props.iconClass = "two-eagles"
+
+        skillsService.editLevel(projId, subject, props.level as String, props)
+
+        def levelsPostEdit = skillsService.getLevels(projId, subject).sort(){it.level}
+
+        then:
+        levelsPostEdit[0].level == 1
+        levelsPostEdit[0].name == "TwoEagles"
+        levelsPostEdit[0].iconClass == "two-eagles"
+        levelsPostEdit[0].percent == levelToEdit.percent
+        levelsPostEdit[0].pointsFrom == levelToEdit.pointsFrom
+        levelsPostEdit[0].pointsTo == levelToEdit.pointsTo
+    }
+
     def "edit existing level with invalid parameters for points"(){
         when:
 
@@ -288,6 +317,31 @@ class LevelsSpec extends  DefaultIntSpec{
         thrown(SkillsClientException)
     }
 
+    def "edit existing subject level with invalid parameters for points"(){
+        when:
+
+        skillsService.changeSetting(projId, projectPointsSetting, [projectId: projId, setting: projectPointsSetting, value: "true"])
+        def levels = skillsService.getLevels(projId, subject).sort(){it.level}
+        def levelToEdit = levels[0]
+        def props = [:]
+        props.projectId = levelToEdit.projectId
+        props.skillId = levelToEdit.skillId
+        props.level = levelToEdit.level
+        props.percent = levelToEdit.percent
+        props.pointsFrom = levelToEdit.pointsFrom
+        props.pointsTo = 100000
+        props.name = levelToEdit.name
+        props.iconClass = levelToEdit.iconClass
+
+        ResponseEntity response = skillsService.editLevel(projId, subject, props.level as String, props)
+        assert response
+        println response.statusCode
+
+        then:
+        thrown(SkillsClientException)
+    }
+
+
     def "edit existing level with points overlapping previous level"(){
         when:
 
@@ -305,6 +359,30 @@ class LevelsSpec extends  DefaultIntSpec{
         props.iconClass = levelToEdit.iconClass
 
         ResponseEntity response = skillsService.editLevel(projId, null, props.level as String, props)
+        assert response
+        println response.statusCode
+
+        then:
+        thrown(SkillsClientException)
+    }
+
+    def "edit existing subject level with points overlapping previous level"(){
+        when:
+
+        skillsService.changeSetting(projId, projectPointsSetting, [projectId: projId, setting: projectPointsSetting, value: "true"])
+        def levels = skillsService.getLevels(projId, subject).sort(){it.level}
+        def levelToEdit = levels[1]
+        def props = [:]
+        props.projectId = levelToEdit.projectId
+        props.skillId = levelToEdit.skillId
+        props.level = levelToEdit.level
+        props.percent = levelToEdit.percent
+        props.pointsFrom = levels[0].pointsTo-5
+        props.pointsTo = levels[2].pointsFrom
+        props.name = levelToEdit.name
+        props.iconClass = levelToEdit.iconClass
+
+        ResponseEntity response = skillsService.editLevel(projId, subject, props.level as String, props)
         assert response
         println response.statusCode
 
@@ -336,6 +414,31 @@ class LevelsSpec extends  DefaultIntSpec{
         thrown(SkillsClientException)
     }
 
+
+    def "edit existing subject level with points overlapping next level"(){
+        when:
+
+        skillsService.changeSetting(projId, projectPointsSetting, [projectId: projId, setting: projectPointsSetting, value: "true"])
+        def levels = skillsService.getLevels(projId, subject).sort(){it.level}
+        def levelToEdit = levels[1]
+        def props = [:]
+        props.projectId = levelToEdit.projectId
+        props.skillId = levelToEdit.skillId
+        props.level = levelToEdit.level
+        props.percent = levelToEdit.percent
+        props.pointsFrom = levels[0].pointsTo
+        props.pointsTo = levels[2].pointsFrom+5
+        props.name = levelToEdit.name
+        props.iconClass = levelToEdit.iconClass
+
+        ResponseEntity response = skillsService.editLevel(projId, subject, props.level as String, props)
+        assert response
+        println response.statusCode
+
+        then:
+        thrown(SkillsClientException)
+    }
+
     def "edit existing level with invalid parameters for percent"(){
         when:
 
@@ -358,6 +461,31 @@ class LevelsSpec extends  DefaultIntSpec{
         then:
         thrown(SkillsClientException)
     }
+
+
+    def "edit existing subject level with invalid parameters for percent"(){
+        when:
+
+        def levels = skillsService.getLevels(projId, subject).sort(){it.level}
+        def levelToEdit = levels[0]
+        def props = [:]
+        props.projectId = levelToEdit.projectId
+        props.skillId = levelToEdit.skillId
+        props.level = levelToEdit.level
+        props.percent = 1000
+        props.pointsFrom = levelToEdit.pointsFrom
+        props.pointsTo = levelToEdit.pointsTo
+        props.name = levelToEdit.name
+        props.iconClass = levelToEdit.iconClass
+
+        ResponseEntity response = skillsService.editLevel(projId, subject, props.level as String, props)
+        assert response
+        println response.statusCode
+
+        then:
+        thrown(SkillsClientException)
+    }
+
 
     def "add next level"(){
         when:
@@ -448,6 +576,18 @@ class LevelsSpec extends  DefaultIntSpec{
         levelsAfter.size() < levelsBefore.size()
         !levelsAfter.find() { it.level == levelsBefore.last().level}
     }
+
+    def "delete subject's level"(){
+        when:
+        def levelsBefore = skillsService.getLevels(projId, subject).sort(){it.level}
+        skillsService.deleteLevel(projId, subject )
+        def levelsAfter = skillsService.getLevels(projId, subject).sort(){it.level}
+
+        then:
+        levelsAfter.size() < levelsBefore.size()
+        !levelsAfter.find() { it.level == levelsBefore.last().level}
+    }
+
 
     def "delete level after changing to points"(){
         when:

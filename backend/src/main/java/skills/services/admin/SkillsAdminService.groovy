@@ -251,10 +251,6 @@ class SkillsAdminService {
         lockingService.lockProject(projectId)
 
         SkillDef moveMe = skillDefAccessor.getSkillDef(projectId, skillId)
-        if (!moveMe) {
-            assert moveMe, "Failed to find skill for id [$skillId], projectId=[$projectId], subjectId=[$subjectId]"
-        }
-
         SkillDef parent = ruleSetDefGraphService.getParentSkill(moveMe)
 
         SkillDef switchWith
@@ -286,16 +282,17 @@ class SkillsAdminService {
     }
 
     @Profile
-    private skills.controller.result.model.SkillDefRes convertToSkillDefRes(SkillDef skillDef) {
+    private SkillDefRes convertToSkillDefRes(SkillDef skillDef) {
         skills.controller.result.model.SkillDefRes res = new skills.controller.result.model.SkillDefRes()
         Props.copy(skillDef, res)
         res.numPerformToCompletion = skillDef.totalPoints / res.pointIncrement
         return res
     }
 
+
     @Profile
-    private skills.controller.result.model.SkillDefRes convertToSkillDefRes(SkillDefWithExtra skillDef) {
-        skills.controller.result.model.SkillDefRes res = new skills.controller.result.model.SkillDefRes()
+    private SkillDefRes convertToSkillDefRes(SkillDefWithExtra skillDef) {
+        SkillDefRes res = new SkillDefRes()
         Props.copy(skillDef, res)
         res.numPerformToCompletion = skillDef.totalPoints / res.pointIncrement
         return res

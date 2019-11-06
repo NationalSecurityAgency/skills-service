@@ -138,6 +138,49 @@ class AuthorizationSpecs extends DefaultIntSpec {
         summary2.subjects.find {it.subject == subj2.name && it.skillsLevel == 5 && it.totalPoints == 200 && it.todaysPoints == 200}
     }
 
+    def "reset client secret"() {
+        when:
+        List<String> sampleUserIds = ['jim@email.com', 'bob@email.com']
+        Map subj1 = [projectId: projId, subjectId: "subj1", skillId: "skill11".toString(), name: "Test Subject 1".toString(), type: "Skill", pointIncrement: 100, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1]
+        Map subj2 = [projectId: projId, subjectId: "subj2", skillId: "skill21".toString(), name: "Test Subject 2".toString(), type: "Skill", pointIncrement: 200, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1]
+        skillsService.createSubject(subj1)
+        skillsService.createSubject(subj2)
+
+        skillsService.createSkill(subj1)
+        skillsService.createSkill(subj2)
+
+        String secretOld = skillsService.getClientSecret(projId)
+        skillsService.resetClientSecret(projId)
+        String secret = skillsService.getClientSecret(projId)
+        skillsService.setProxyCredentials(projId, secret)
+
+        // subj1 - 2 users
+        skillsService.addSkillAsProxy([projectId: projId, skillId: subj1.skillId], sampleUserIds.get(0))
+        skillsService.addSkillAsProxy([projectId: projId, skillId: subj1.skillId], sampleUserIds.get(1))
+        skillsService.addSkillAsProxy([projectId: projId, skillId: subj1.skillId], sampleUserIds.get(1))
+
+        // subj2 - 1 users
+        skillsService.addSkillAsProxy([projectId: projId, skillId: subj2.skillId], sampleUserIds.get(1))
+        skillsService.addSkillAsProxy([projectId: projId, skillId: subj2.skillId], sampleUserIds.get(1))
+
+        // load summary for user1 and user2
+        def summary1 = skillsService.getSkillSummaryAsProxy(sampleUserIds.get(0), projId)
+        def summary2 = skillsService.getSkillSummaryAsProxy(sampleUserIds.get(1), projId)
+
+        // now make sure the original admin user is still logged in via the http session and can hit an admin endpoint
+        def adminResult = skillsService.getProject(projId)
+
+        then:
+        secretOld != secret
+        adminResult
+        summary1
+        summary1.subjects.find {it.subject == subj1.name && it.skillsLevel == 5 && it.totalPoints == 100 && it.todaysPoints == 100}
+        summary1.subjects.find {it.subject == subj2.name && it.skillsLevel == 0 && it.totalPoints == 200 && it.todaysPoints == 0}
+        summary2
+        summary2.subjects.find {it.subject ==  subj1.name && it.skillsLevel == 5 && it.totalPoints == 100 && it.todaysPoints == 100}
+        summary2.subjects.find {it.subject == subj2.name && it.skillsLevel == 5 && it.totalPoints == 200 && it.todaysPoints == 200}
+    }
+
     def "a proxied user from project A cannot use their token for a request to project B"() {
         when:
         String secret = skillsService.getClientSecret(projId)
