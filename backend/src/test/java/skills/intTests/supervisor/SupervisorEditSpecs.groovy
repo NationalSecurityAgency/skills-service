@@ -78,6 +78,69 @@ class SupervisorEditSpecs extends DefaultIntSpec {
         skillsService.deleteGlobalBadge(badgeId)
     }
 
+    def "remove skill from a global badge"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        List<Map> skills = SkillsFactory.createSkills(3,)
+        def badge = SkillsFactory.createBadge()
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        skillsService.createGlobalBadge(badge)
+
+        def globalAssingment = [projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills.get(1).skillId]
+        when:
+        skillsService.assignSkillToGlobalBadge(projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills.get(0).skillId)
+        skillsService.assignSkillToGlobalBadge(globalAssingment)
+        def beforeBadge = skillsService.getGlobalBadge(badge.badgeId)
+        def skillsBefore = skillsService.getGlobalBadgeSkills(badge.badgeId)
+        skillsService.removeSkillFromGlobalBadge(globalAssingment)
+        def afterBadge = skillsService.getGlobalBadge(badge.badgeId)
+        def skillsAfter = skillsService.getGlobalBadgeSkills(badge.badgeId)
+        then:
+        beforeBadge.requiredSkills.collect { it.skillId }.sort() == ["skill1", "skill2"]
+        afterBadge.requiredSkills.collect { it.skillId }.sort() == ["skill1"]
+
+        skillsBefore.collect { it.skillId }.sort() == ["skill1", "skill2"]
+        skillsAfter.collect { it.skillId }.sort() == ["skill1"]
+    }
+
+    def "remove level from a global badge"() {
+        def proj = SkillsFactory.createProject()
+        def proj2 = SkillsFactory.createProject(2)
+        def badge = SkillsFactory.createBadge()
+
+        skillsService.createProject(proj)
+        skillsService.createProject(proj2)
+
+        skillsService.createGlobalBadge(badge)
+
+        def globalAssingment = [projectId: proj2.projectId, badgeId: badge.badgeId, level: "3"]
+
+        when:
+        skillsService.assignProjectLevelToGlobalBadge(projectId: proj.projectId, badgeId: badge.badgeId, level: "1")
+        skillsService.assignProjectLevelToGlobalBadge(globalAssingment)
+
+        def beforeBadge = skillsService.getGlobalBadge(badge.badgeId)
+        skillsService.removeProjectLevelFromGlobalBadge(globalAssingment)
+        def afterBadge = skillsService.getGlobalBadge(badge.badgeId)
+        then:
+        beforeBadge.requiredProjectLevels.collect({"${it.projectId}-${it.level}".toString()}) == ["TestProject1-1", "TestProject2-3"]
+        afterBadge.requiredProjectLevels.collect({"${it.projectId}-${it.level}".toString()}) == ["TestProject1-1"]
+    }
+
+    def "get project's levels"() {
+        def proj = SkillsFactory.createProject()
+        skillsService.createProject(proj)
+
+        when:
+        def res = skillsService.getLevelsForProject(proj.projectId)
+        then:
+        res.collect { it.level } == [1, 2, 3, 4, 5]
+    }
+
     def 'users without SUPERVISOR role cannot create global badges'() {
 
         Map badge = [badgeId: badgeId, name: 'Test Global Badge 1']

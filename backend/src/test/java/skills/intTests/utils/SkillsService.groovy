@@ -353,6 +353,14 @@ class SkillsService {
         wsHelper.supervisorGet(getGlobalBadgeUrl(badgeId))
     }
 
+    def getGlobalBadgeSkills(String badgeId) {
+        wsHelper.supervisorGet("/badges/${badgeId}/skills")
+    }
+
+    def getLevelsForProject(String projectId) {
+        wsHelper.supervisorGet("/projects/${projectId}/levels")
+    }
+
     def getAllGlobalBadges() {
         wsHelper.supervisorGet("/badges")
     }
@@ -415,8 +423,16 @@ class SkillsService {
         wsHelper.supervisorPost(getAddSkillToGlobalBadgeUrl(props.badgeId, props.projectId, props.skillId), props)
     }
 
+    def removeSkillFromGlobalBadge(Map props) {
+        wsHelper.supervisorDelete(getAddSkillToGlobalBadgeUrl(props.badgeId, props.projectId, props.skillId), props)
+    }
+
     def assignProjectLevelToGlobalBadge(Map props) {
         wsHelper.supervisorPost(getAddProjectLevelToGlobalBadgeUrl(props.badgeId, props.projectId, props.level), props)
+    }
+
+    def removeProjectLevelFromGlobalBadge(Map props) {
+        wsHelper.supervisorDelete(getAddProjectLevelToGlobalBadgeUrl(props.badgeId, props.projectId, props.level), props)
     }
 
     def suggestDashboardUsers(String query) {
