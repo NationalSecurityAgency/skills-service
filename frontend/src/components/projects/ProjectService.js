@@ -6,7 +6,7 @@ export default {
       .then(response => response.data);
   },
   getProject(projectId) {
-    return axios.get(`/app/projects/${projectId}`).then(response => response.data);
+    return axios.get(`/admin/projects/${projectId}`).then(response => response.data);
   },
   getProjectDetails(projectId) {
     return axios.get(`/admin/projects/${projectId}`)

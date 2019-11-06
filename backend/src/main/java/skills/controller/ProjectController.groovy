@@ -88,13 +88,6 @@ class ProjectController {
         return new RequestResult(success: true)
     }
 
-    @RequestMapping(value="/projects/{id}", method = RequestMethod.GET, produces = "application/json")
-    @ResponseBody
-    ProjectResult getProject(@PathVariable("id") String projectId){
-        SkillsValidator.isNotBlank(projectId, "id")
-        return projAdminService.getProject(projectId)
-    }
-
     @RequestMapping(value = "/projectExist", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     boolean doesProjectExist(@RequestParam(value = "projectId", required = false) String projectId,
