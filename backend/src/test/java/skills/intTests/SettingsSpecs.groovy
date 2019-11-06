@@ -154,4 +154,26 @@ class SettingsSpecs extends DefaultIntSpec {
         !res2
     }
 
+    def "get public settings"() {
+        when:
+        def res = skillsService.getPublicSettings("public_groupName1")
+        def res1 = skillsService.getPublicSetting( "settingId1", "public_groupName1")
+        then:
+        res.size() == 2
+        res.find { it.setting == "settingId1" }.settingGroup == "public_groupName1"
+        res.find { it.setting == "settingId1" }.value == "valuea"
+        !res.find { it.setting == "settingId1" }.projectId
+        !res.find { it.setting == "settingId1" }.userId
+
+        res.find { it.setting == "settingId2" }.settingGroup == "public_groupName1"
+        res.find { it.setting == "settingId2" }.value == "valueb"
+        !res.find { it.setting == "settingId2" }.projectId
+        !res.find { it.setting == "settingId2" }.userId
+
+        res1
+        res1.value == "valuea"
+        res1.setting ==  "settingId1"
+        res1.settingGroup == "public_groupName1"
+    }
+
 }

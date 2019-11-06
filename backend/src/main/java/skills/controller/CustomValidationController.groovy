@@ -23,7 +23,7 @@ class CustomValidationController {
 
     @RequestMapping(value = "/description", method = RequestMethod.POST, produces = "application/json")
     @ResponseBody
-    public ValidationResult validateDescription(@RequestBody Map<String,String> body){
+    ValidationResult validateDescription(@RequestBody Map<String,String> body){
         log.info("validating description");
         CustomValidationResult vr = customValidator.validateDescription(body.value)
         ValidationResult validationResult = new ValidationResult(vr.valid, vr.msg)
@@ -32,7 +32,7 @@ class CustomValidationController {
 
     @RequestMapping(value = "/name", method = RequestMethod.POST, produces = "application/json")
     @ResponseBody
-    public ValidationResult validateName(@RequestBody Map<String,String> body){
+    ValidationResult validateName(@RequestBody Map<String,String> body){
         CustomValidationResult vr = customValidator.validateName(body.value)
         ValidationResult validationResult = new ValidationResult(vr.valid, vr.msg)
         return validationResult

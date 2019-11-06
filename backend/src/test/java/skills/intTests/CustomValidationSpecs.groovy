@@ -14,7 +14,7 @@ class CustomValidationSpecs extends DefaultIntSpec {
 
         then:
         def exception = thrown(SkillsClientException)
-        exception.message.contains("names may  not contain jabberwocky")
+        exception.message.contains("names may not contain jabberwocky")
     }
 
     def "subject name custom validation"(){
@@ -28,7 +28,7 @@ class CustomValidationSpecs extends DefaultIntSpec {
 
         then:
         def exception = thrown(SkillsClientException)
-        exception.message.contains("names may  not contain jabberwocky")
+        exception.message.contains("names may not contain jabberwocky")
     }
 
     def "subject paragraph custom validation"(){
@@ -66,7 +66,7 @@ paragraph"""
 
         then:
         def exception = thrown(SkillsClientException)
-        exception.message.contains("names may  not contain jabberwocky")
+        exception.message.contains("names may not contain jabberwocky")
     }
 
     def "skill paragraph custom validation"(){
@@ -104,7 +104,7 @@ paragraph"""
 
         then:
         def exception = thrown(SkillsClientException)
-        exception.message.contains("names may  not contain jabberwocky")
+        exception.message.contains("names may not contain jabberwocky")
     }
 
     def "badge paragraph custom validation"(){
@@ -127,5 +127,27 @@ paragraph"""
         then:
         def exception = thrown(SkillsClientException)
         exception.message.contains("paragraphs may not contain jabberwocky")
+    }
+
+    def "check against description validation endpoint"() {
+        when:
+        def res = skillsService.checkCustomDescriptionValidation("should not jabberwocky have")
+        def resGood = skillsService.checkCustomDescriptionValidation("this one is fine")
+        then:
+        !res.body.valid
+        res.body.msg == "paragraphs may not contain jabberwocky"
+
+        resGood.body.valid
+    }
+
+    def "check against name validation endpoint"() {
+        when:
+        def res = skillsService.checkCustomNameValidation("should not jabberwocky have")
+        def resGood = skillsService.checkCustomNameValidation("this one is fine")
+        then:
+        !res.body.valid
+        res.body.msg == "names may not contain jabberwocky"
+
+        resGood.body.valid
     }
 }
