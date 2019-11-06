@@ -206,9 +206,12 @@ class SkillsService {
         wsHelper.apiGet(url)
     }
 
-    def getBadgeDescriptions(String projectId, String badgeId) {
-        String url = "/projects/${projectId}/badges/${badgeId}/descriptions".toString()
-        wsHelper.apiGet(url)
+    def getBadgeDescriptions(String projectId, String badgeId, boolean isGlobal = false) {
+        String url = "/projects/${projectId}/badges/${badgeId}/descriptions"
+        if (isGlobal){
+            url = "${url}?global=true"
+        }
+        wsHelper.apiGet(url.toString())
     }
 
     def badgeNameExists(Map props){
@@ -429,6 +432,21 @@ class SkillsService {
     def suggestClientUsers(String query){
         String url = "/users/suggestClientUsers/${query}".toString()
         wsHelper.appGet(url)
+    }
+
+    def getUserLevel(String projectId, String userId = null) {
+        String url = "/projects/${projectId}/level"
+        if (userId) {
+            url = "${url}?userId=${userId}"
+        }
+
+        wsHelper.apiGet(url)
+    }
+
+
+    def getCustomClientDisplayCss(String projectId = null){
+        String url = projectId ? "/projects/${projectId}/customIconCss" : "/icons/customIconCss"
+        wsHelper.get(url.toString(), "api", null, false)
     }
 
     def getSkillSummary(String userId, String projId, String subjId=null, int version = -1) {
@@ -813,6 +831,7 @@ class SkillsService {
             return "${getProjectUrl(project)}/levels".toString()
         }
     }
+
 
     private String getUserLevelForProjectUrl(String project, String userId){
         return "${getProjectUrl(project)}/level?userId=${userId}".toString()

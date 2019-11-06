@@ -396,9 +396,11 @@ class SupervisorEditSpecs extends DefaultIntSpec {
         def file = resource.getFile()
         skillsService.uploadGlobalIcon(file)
         def result = skillsService.getIconCssForGlobalIcons()
+        def clientDisplayCssResult = skillsService.getCustomClientDisplayCss()
 
         then:
         result == [[filename:'dot2.png', cssClassname:"GLOBAL-dot2png"]]
+        clientDisplayCssResult.toString().startsWith(".GLOBAL-dot2png {\tbackground-image: url(")
     }
 
     def 'global badge lookups do not return inception project or skills'() {
