@@ -52,8 +52,10 @@ class CustomIconsSpec extends DefaultIntSpec {
         def file = resource.getFile()
         skillsService.uploadIcon([projectId:(projId)], file)
         def result = skillsService.getIconCssForProject([projectId:(projId)])
-
+        def clientDisplayRes = skillsService.getCustomClientDisplayCss(projId)
         then:
         result == [[filename:'dot2.png', cssClassname:"${projId}-dot2png"]]
+        clientDisplayRes.toString().startsWith(".TestProject1-dot2png {\tbackground-image: url(")
     }
+
 }

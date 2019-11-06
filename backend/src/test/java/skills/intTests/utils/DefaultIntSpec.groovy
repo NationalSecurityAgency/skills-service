@@ -54,4 +54,14 @@ class DefaultIntSpec extends Specification {
             String url = "http://localhost:${localPort}".toString()){
         new SkillsService(username, password, firstName, lastName, url)
     }
+
+    SkillsService createSupervisor(){
+        String ultimateRoot = 'jh@dojo.com'
+        SkillsService rootSkillsService = createService(ultimateRoot, 'aaaaaaaa')
+        rootSkillsService.grantRoot()
+        String supervisorUserId = 'foo@bar.com'
+        SkillsService supervisorService = createService(supervisorUserId)
+        rootSkillsService.grantSupervisorRole(supervisorUserId)
+        return supervisorService
+    }
 }

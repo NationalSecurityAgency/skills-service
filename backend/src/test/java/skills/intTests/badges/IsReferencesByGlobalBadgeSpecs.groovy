@@ -9,12 +9,7 @@ class IsReferencesByGlobalBadgeSpecs extends DefaultIntSpec {
     SkillsService supervisorService
 
     def setup() {
-        String ultimateRoot = 'jh@dojo.com'
-        SkillsService rootSkillsService = createService(ultimateRoot, 'aaaaaaaa')
-        rootSkillsService.grantRoot()
-        String supervisorUserId = 'foo@bar.com'
-        supervisorService = createService(supervisorUserId)
-        rootSkillsService.grantSupervisorRole(supervisorUserId)
+        supervisorService = createSupervisor()
     }
 
     def "is skill referenced by global badge"() {
