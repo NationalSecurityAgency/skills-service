@@ -61,4 +61,13 @@ class SkillsOrderSpecs extends DefaultIntSpec {
         beforeMove.collect({it.skillId}) == ["skill1", "skill2", "skill3", "skill4", "skill5"]
         skillsService.getSkillsForSubject(proj.projectId, subj.subjectId).collect({it.skillId}) == ["skill1", "skill2", "skill3", "skill4", "skill5"]
     }
+
+    def "attempt to move skill that doesn't exist"(){
+        when:
+        skillsService.moveSkillUp(projectId: skills.first().projectId, subjectId: skills.first().subjectId, skillId: "doesntexist")
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.message.contains("Failed to find skillId")
+    }
+
 }

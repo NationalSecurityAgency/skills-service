@@ -31,6 +31,10 @@ class SkillsService {
         wsHelper.get("/projects/${projectId}/clientSecret", "admin", null, false)
     }
 
+    String resetClientSecret(String projectId){
+        wsHelper.adminPost("/projects/${projectId}/resetClientSecret".toString(), null)
+    }
+
     String getUserName() {
         wsHelper.username
     }
@@ -275,13 +279,23 @@ class SkillsService {
     }
 
     def assignDependency(Map props) {
+        String url = getSkillDependencyUrl(props)
+        wsHelper.adminPost(url, props, false)
+    }
+
+    def removeDependency(Map props) {
+        String url = getSkillDependencyUrl(props)
+        wsHelper.adminDelete(url, props)
+    }
+
+    String getSkillDependencyUrl(Map props) {
         String url
         if(props.dependentProjectId){
             url = "/projects/${props.projectId}/skills/${props.skillId}/dependency/projects/${props.dependentProjectId}/skills/${props.dependentSkillId}"
         } else {
             url = "/projects/${props.projectId}/skills/${props.skillId}/dependency/${props.dependentSkillId}"
         }
-        wsHelper.adminPost(url, props, false)
+        return url
     }
 
     def deleteSkill(Map props) {
@@ -318,6 +332,10 @@ class SkillsService {
 
     def getBadge(Map props) {
         wsHelper.adminGet("/projects/${props.projectId}/badges/${props.badgeId}")
+    }
+
+    def removeBadge(Map props) {
+        wsHelper.adminDelete("/projects/${props.projectId}/badges/${props.badgeId}")
     }
 
     def getAvailableProjectsForGlobalBadge(String badgeId) {
@@ -384,6 +402,10 @@ class SkillsService {
 
     def assignSkillToBadge(Map props) {
         wsHelper.adminPost(getAddSkillToBadgeUrl(props.projectId, props.badgeId, props.skillId), props)
+    }
+
+    def removeSkillFromBadge(Map props) {
+        wsHelper.adminDelete(getAddSkillToBadgeUrl(props.projectId, props.badgeId, props.skillId), props)
     }
 
     def assignSkillToGlobalBadge(Map props) {
@@ -713,6 +735,22 @@ class SkillsService {
 
     boolean doesEntityExist(String projectId, String id) {
         return wsHelper.adminGet("/projects/${projectId}/entityIdExists?id=${id}")
+    }
+
+    boolean isSkillReferencedByGlobalBadge(String projectId, String skillId) {
+        return wsHelper.adminGet("/projects/${projectId}/skills/${skillId}/globalBadge/exists".toString())
+    }
+
+    boolean isSubjectReferencedByGlobalBadge(String projectId, String subjectId) {
+        return wsHelper.adminGet("/projects/${projectId}/subjects/${subjectId}/globalBadge/exists".toString())
+    }
+
+    boolean isProjectReferencedByGlobalBadge(String projectId) {
+        return wsHelper.adminGet("/projects/${projectId}/globalBadge/exists")
+    }
+
+    boolean isProjectLevelReferencedByGlobalBadge(String projectId, Integer level) {
+        return wsHelper.adminGet("/projects/${projectId}/levels/${level}/globalBadge/exists")
     }
 
     private String getProjectUrl(String project) {

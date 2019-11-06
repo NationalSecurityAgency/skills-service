@@ -205,4 +205,49 @@ class CrossProjectDepsAndAchievementsSpec extends DefaultIntSpec {
         res1E.body.explanation == "Skill event was applied"
     }
 
+    def "remove cross-project dependency"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
+
+        def proj2 = SkillsFactory.createProject(2)
+        def proj2_subj = SkillsFactory.createSubject(2, 2)
+        List<Map> proj2_skills = SkillsFactory.createSkills(2, 2, 2)
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(proj1_skills)
+
+        skillsService.createProject(proj2)
+        skillsService.createSubject(proj2_subj)
+        skillsService.createSkills(proj2_skills)
+
+        skillsService.shareSkill(proj2.projectId, proj2_skills.get(0).skillId, proj1.projectId)
+
+        skillsService.assignDependency([projectId: proj1.projectId, skillId: proj1_skills.get(0).skillId, dependentSkillId: proj1_skills.get(1).skillId])
+
+        Map crossProjectDep = [projectId         : proj1.projectId, skillId: proj1_skills.get(0).skillId,
+                               dependentProjectId: proj2.projectId, dependentSkillId: proj2_skills.get(0).skillId,]
+        skillsService.assignDependency(crossProjectDep)
+
+        when:
+        def graph = skillsService.getDependencyGraph(proj1.projectId)
+        skillsService.removeDependency(crossProjectDep)
+        def graphAfterRemoval = skillsService.getDependencyGraph(proj1.projectId)
+
+        then:
+        graph.nodes.collect { it.skillId }.sort() == [proj1_skills.get(0).skillId, proj1_skills.get(1).skillId, proj2_skills.get(0).skillId,].sort()
+
+        graph.edges.size() == 2
+        graph.edges.collect { it.toId }.sort() == [
+                graph.nodes.find{ it.skillId == proj1_skills.get(1).skillId}.id,
+                graph.nodes.find{ it.skillId == proj2_skills.get(0).skillId}.id
+        ].sort()
+
+        graphAfterRemoval.nodes.collect { it.skillId }.sort() == [proj1_skills.get(0).skillId, proj1_skills.get(1).skillId].sort()
+        graphAfterRemoval.edges.size() == 1
+        graphAfterRemoval.edges.collect { it.toId }.sort() == [
+                graph.nodes.find{ it.skillId == proj1_skills.get(1).skillId}.id,
+        ]
+    }
 }

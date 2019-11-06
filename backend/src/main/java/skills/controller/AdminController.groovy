@@ -638,14 +638,6 @@ class AdminController {
         return userAdminService.loadUserPerformedSkillsPage(projectId, userId?.toLowerCase(), query, pageRequest)
     }
 
-    @GetMapping(value = '/projects/{projectId}/users/count', produces = 'application/json')
-    @ResponseBody
-    @CompileStatic
-    NumUsersRes getUserSkillsStats(@PathVariable('projectId') String projectId) {
-        SkillsValidator.isNotBlank(projectId, "Project Id")
-        return projAdminService.getNumUsersByProjectId(projectId)
-    }
-
     @GetMapping(value = '/projects/{projectId}/users/{userId}/stats', produces = 'application/json')
     @ResponseBody
     @CompileStatic
