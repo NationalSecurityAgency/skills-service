@@ -118,4 +118,99 @@ class H2NativeRepo implements NativeQueriesRepo {
         }
         return resList
     }
+
+    void updatePointTotalsForSkill(String projectId, String subjectId, String skillId, int incrementDelta){
+        String eventCountSql = '''
+            SELECT 
+                user_id, COUNT(id) eventCount
+            FROM 
+                user_performed_skill
+            WHERE 
+                skill_id = :skillId
+                AND project_id = :projectId
+            GROUP BY 
+                user_id
+           '''
+
+        Query query = entityManager.createNativeQuery(eventCountSql);
+        query.setParameter("projectId", projectId);
+        query.setParameter("skillId", skillId)
+        List<PerformedSkillEventCount> eventCounts = query.getResultList().collect{
+            new PerformedSkillEventCount(userId: it[0], eventCount: it[1])
+        }
+
+
+        String updateSql = '''
+            UPDATE
+                user_points points
+            SET
+                points = points + (:eventCount * :incrementDelta)
+            WHERE
+                points.user_id = :userId
+                AND points.day IS NULL
+                AND points.project_id=:projectId
+                AND (points.skill_id = :subjectId OR points.skill_id = :skillId OR points.skill_id IS NULL)
+        '''
+
+        eventCounts?.each {
+            Query updateQ = entityManager.createNativeQuery(updateSql)
+            updateQ.setParameter("eventCount", it.eventCount)
+            updateQ.setParameter("userId", it.userId)
+            updateQ.setParameter("projectId", projectId)
+            updateQ.setParameter("skillId", skillId)
+            updateQ.setParameter("subjectId", subjectId)
+            updateQ.setParameter("incrementDelta", incrementDelta)
+            updateQ.executeUpdate()
+        }
+    }
+
+    void updatePointHistoryForSkill(String projectId, String subjectId, String skillId, int incrementDelta){
+        String eventCountSql = '''
+            SELECT
+                user_id, COUNT(id) eventCount, FORMATDATETIME(performed_on,'yyyy-MM-dd') performedOn
+            FROM
+                user_performed_skill
+            WHERE
+                skill_id = :skillId AND project_id = :projectId
+            GROUP BY
+                user_id, FORMATDATETIME(performed_on,'yyyy-MM-dd')
+           '''
+
+        Query eventCountQuery = entityManager.createNativeQuery(eventCountSql);
+        eventCountQuery.setParameter("projectId", projectId);
+        eventCountQuery.setParameter("skillId", skillId)
+        List<PerformedSkillEventCount> eventCounts = eventCountQuery.getResultList().collect{
+            new PerformedSkillEventCount(userId: it[0], eventCount: it[1], performedOn: it[2])
+        }
+
+        String updateSql = '''
+            UPDATE 
+                user_points points
+            SET 
+                points = points + (:eventCount * :incrementDelta) 
+            WHERE
+                points.user_id = :userId
+                AND points.day = :performedOn
+                AND points.project_id = :projectId
+                AND (points.skill_id = :subjectId OR points.skill_id = :skillId OR points.skill_id IS NULL)
+        '''
+        eventCounts?.each{
+            Query updateQ = entityManager.createNativeQuery(updateSql)
+            updateQ.setParameter("eventCount", it.eventCount)
+            updateQ.setParameter("userId", it.userId)
+            updateQ.setParameter("projectId", projectId)
+            updateQ.setParameter("skillId", skillId)
+            updateQ.setParameter("subjectId", subjectId)
+            updateQ.setParameter("performedOn", it.performedOn)
+            updateQ.setParameter("incrementDelta", incrementDelta)
+            updateQ.executeUpdate()
+        }
+
+    }
+
+    private static class PerformedSkillEventCount{
+        String userId
+        int eventCount
+        String performedOn
+    }
 }

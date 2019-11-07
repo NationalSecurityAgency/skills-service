@@ -45,4 +45,16 @@ class UserAchievementsAndPointsManagement {
         nativeQueriesRepo.updateOverallScoresBySummingUpAllChildSubjects(subject.projectId, SkillDef.ContainerType.Subject)
     }
 
+    @Transactional
+    void handlePointHistoryUpdate(String projectId, String subjectId, String skillId, int incrementDelta){
+        nativeQueriesRepo.updatePointHistoryForSkill(projectId, subjectId, skillId, incrementDelta)
+    }
+
+    @Transactional
+    void handlePointTotalsUpdate(String projectId, String subjectId, String skillId, int incrementDelta){
+        nativeQueriesRepo.updatePointTotalsForSkill(projectId, subjectId, skillId, incrementDelta)
+    }
+
+
+
 }

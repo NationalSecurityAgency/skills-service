@@ -5,6 +5,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
+import org.springframework.data.repository.query.Param
 import org.springframework.lang.Nullable
 import skills.controller.result.model.ProjectUser
 import skills.storage.model.SkillRelDef
@@ -231,4 +232,54 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                                     AND ua.user_id = up.user_id
                             )''', nativeQuery = true)
     void updateAchievedSkillPoints(String projectId, String subjectId, String skillId, int pointDelta)
+
+
+    @Modifying
+    @Query(value = '''
+        WITH
+            eventsRes AS (
+                SELECT 
+                    user_id, COUNT(id) eventCount
+                FROM 
+                    user_performed_skill
+                WHERE 
+                    skill_id = :skillId
+                    AND project_id = :projectId
+                GROUP BY 
+                    user_id
+            )
+        UPDATE
+            user_points points
+        SET
+            points = points + (eventsRes.eventCount * :incrementDelta)
+        WHERE 
+            eventsRes.user_id = points.user_id
+            AND points.day IS NULL 
+            AND points.project_id=:projectId 
+            AND (points.skill_id = :subjectId OR points.skill_id = :skillId OR points.skill_id IS NULL)''', nativeQuery = true)
+    void updatePointTotalsForSkill(@Param("projectId") String projectId, @Param("subjectId") String subjectId, @Param("skillId") String skillId, @Param("incrementDelta") int incrementDelta)
+
+    @Modifying
+    @Query(value = '''
+            WITH
+                eventsRes AS (
+                    SELECT 
+                        user_id, DATE(performed_on) performedOn, COUNT(id) eventCount
+                    FROM 
+                        user_performed_skill
+                    WHERE 
+                        skill_id = :skillId AND project_id = :projectId 
+                    GROUP BY 
+                        user_id, DATE(performed_on)
+                )
+            UPDATE 
+                user_points points
+            SET 
+                points = points + (eventsRes.eventCount * :incrementDelta) 
+            WHERE
+                eventsRes.user_id = points.user_id
+                AND eventsRes.performedOn = points.day
+                AND points.skill_id = :skillId 
+                AND points.project_id = :projectId''', nativeQuery=true)
+    void updatePointHistoryForSkill(@Param("projectId") String projectId, @Param("skillId") String skillId, @Param("incrementDelta") int incrementDelta)
 }

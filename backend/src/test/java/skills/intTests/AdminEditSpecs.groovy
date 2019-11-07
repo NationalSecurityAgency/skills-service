@@ -548,7 +548,7 @@ class AdminEditSpecs extends DefaultIntSpec {
         skillSummaryAfterEdit.totalPoints == 25
     }
 
-    def "decrease skill point increment after multiple users have achieved occurrences"(){
+    def "decrease skill point increment after multiple users have performed occurrences"(){
         def proj1 = SkillsFactory.createProject(1)
         skillsService.createProject(proj1)
         def subj = SkillsFactory.createSubject(1)
@@ -646,7 +646,11 @@ class AdminEditSpecs extends DefaultIntSpec {
 
         skillsService.createSkills([skill1, skill2, skill3])
 
+
+        //outstanding questions: How does it work if multiple skills achieved on the same day? Do we get multiple
+        //rows or just one?
         skillsService.addSkill([projectId: proj1.projectId, skillId: skill1.skillId], "u123", new Date())
+        skillsService.addSkill([projectId: proj1.projectId, skillId: skill1.skillId], "u123", new DateTime().minusHours(2).toDate())
         skillsService.addSkill([projectId: proj1.projectId, skillId: skill1.skillId], "u123", new DateTime().minusDays(1).toDate())
 
         when:
@@ -668,18 +672,16 @@ class AdminEditSpecs extends DefaultIntSpec {
         def pointHistoryAfterEdit = skillsService.getPointHistory("u123", proj1.projectId, subj.subjectId)
         def skillSummaryAfterEdit = skillsService.getSkillSummary("u123", proj1.projectId, subj.subjectId)
 
-        println pointHistoryBeforeEdit
-        println "--------------- AFTER -------------------"
-        println pointHistoryAfterEdit
-
         then:
-        skillSummaryBeforeEdit.points == 20
+        skillSummaryBeforeEdit.points == 30
         skillSummaryBeforeEdit.totalPoints == 50
+        skillSummaryBeforeEdit.todaysPoints == 20
         pointHistoryBeforeEdit.pointsHistory[0].points == 10
-        pointHistoryBeforeEdit.pointsHistory[1].points == 20
+        pointHistoryBeforeEdit.pointsHistory[1].points == 30
         skillSummaryAfterEdit.totalPoints == 35
-        skillSummaryAfterEdit.points == 10
+        skillSummaryAfterEdit.points == 15
+        skillSummaryAfterEdit.todaysPoints == 10
         pointHistoryAfterEdit.pointsHistory[0].points == 5
-        pointHistoryAfterEdit.pointsHistory[1].points == 10
+        pointHistoryAfterEdit.pointsHistory[1].points == 15
     }
 }
