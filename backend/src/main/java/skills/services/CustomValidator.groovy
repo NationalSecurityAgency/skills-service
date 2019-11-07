@@ -78,7 +78,7 @@ class CustomValidator {
     }
 
     CustomValidationResult validateDescription(String description) {
-        if (!paragraphPattern || description == null) {
+        if (!paragraphPattern || StringUtils.isBlank(description)) {
             return new CustomValidationResult(valid: true)
         }
         String[] paragraphs = description.split("\n\n")
@@ -95,7 +95,7 @@ class CustomValidator {
     }
 
     CustomValidationResult validateName(String name) {
-        if (!nameRegex || name == null) {
+        if (!nameRegex || StringUtils.isBlank(name)) {
             return new CustomValidationResult(valid: true)
         }
 

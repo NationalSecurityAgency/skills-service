@@ -87,4 +87,25 @@ A paragraph four
         result.valid
     }
 
+
+    def "ignore blank values"() {
+        CustomValidator validator = new CustomValidator();
+        validator.paragraphValidationRegex = '^A.*$'
+        validator.paragraphValidationMessage = 'fail'
+
+        validator.nameValidationRegex = '^A.*$'
+        validator.paragraphValidationMessage = 'fail'
+
+        when:
+        validator.init()
+
+        then:
+        validator.validateDescription("   ").valid
+        validator.validateDescription("").valid
+        validator.validateDescription(null).valid
+
+        validator.validateName("   ").valid
+        validator.validateName("").valid
+        validator.validateName(null).valid
+    }
 }
