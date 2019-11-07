@@ -83,7 +83,7 @@ class SkillsAdminService {
 
         validateSkillVersion(skillRequest)
 
-        CustomValidationResult customValidationResult = customValidator.validate(skillRequest)
+        final CustomValidationResult customValidationResult = customValidator.validate(skillRequest)
         if(performCustomValidation && !customValidationResult.valid){
             throw new SkillException(customValidationResult.msg)
         }
@@ -106,17 +106,20 @@ class SkillsAdminService {
 
         boolean shouldRebuildScores
         boolean updateUserPoints
-        int pointsDelta
+        int incrementDelta
 
-        boolean isEdit = skillDefinition
-        int totalPointsRequested = skillRequest.pointIncrement * skillRequest.numPerformToCompletion;
+        final boolean isEdit = skillDefinition
+        final int totalPointsRequested = skillRequest.pointIncrement * skillRequest.numPerformToCompletion
+        final int incrementRequested = skillRequest.pointIncrement
+
         SkillDef subject = null
         if (isEdit) {
             shouldRebuildScores = skillDefinition.totalPoints != totalPointsRequested
             updateUserPoints = shouldRebuildScores
+            incrementDelta = incrementRequested - skillDefinition.pointIncrement
 
             Props.copy(skillRequest, skillDefinition, "childSkills", 'version')
-            pointsDelta = totalPointsRequested - skillDefinition.totalPoints
+
             //totalPoints is not a prop on skillRequest, it is a calculated value so we
             //need to manually update it in the case of edits.
             skillDefinition.totalPoints = totalPointsRequested
@@ -163,7 +166,8 @@ class SkillsAdminService {
         }
 
         if (updateUserPoints) {
-            userPointsRepo.updateAchievedSkillPoints(savedSkill.projectId, skillRequest.subjectId, savedSkill.skillId, pointsDelta)
+            userPointsManagement.handlePointTotalsUpdate(savedSkill.projectId, skillRequest.subjectId, savedSkill.skillId, incrementDelta)
+            userPointsManagement.handlePointHistoryUpdate(savedSkill.projectId, skillRequest.subjectId, savedSkill.skillId, incrementDelta)
         }
 
         log.debug("Saved [{}]", savedSkill)

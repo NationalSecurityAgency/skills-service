@@ -8,5 +8,9 @@ interface NativeQueriesRepo {
     void updateOverallScoresBySummingUpAllChildSubjects(String projectId, SkillDef.ContainerType subjectType)
 
     List<GraphRelWithAchievement> getDependencyGraphWithAchievedIndicator(String projectId, String skillId, String userId)
+
+    void updatePointTotalsForSkill(String projectId, String subjectId, String skillId, int incrementDelta)
+
+    void updatePointHistoryForSkill(String projectId, String subjectId, String skillId, int incrementDelta)
 }
 
