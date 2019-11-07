@@ -150,4 +150,21 @@ paragraph"""
 
         resGood.body.valid
     }
+
+    def "create badge with empty description"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        subj.description = ""
+        def badge = SkillsFactory.createBadge()
+        badge.description = ""
+
+        skillsService.createProject(proj)
+        when:
+        skillsService.createSubject(subj)
+        skillsService.createBadge(badge)
+
+        then:
+        true
+
+    }
 }
