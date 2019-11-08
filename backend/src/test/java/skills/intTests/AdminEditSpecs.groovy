@@ -650,7 +650,7 @@ class AdminEditSpecs extends DefaultIntSpec {
         //outstanding questions: How does it work if multiple skills achieved on the same day? Do we get multiple
         //rows or just one?
         skillsService.addSkill([projectId: proj1.projectId, skillId: skill1.skillId], "u123", new Date())
-        skillsService.addSkill([projectId: proj1.projectId, skillId: skill1.skillId], "u123", new DateTime().minusHours(2).toDate())
+        skillsService.addSkill([projectId: proj1.projectId, skillId: skill1.skillId], "u123", new DateTime().withTimeAtStartOfDay().plusHours(2).toDate())
         skillsService.addSkill([projectId: proj1.projectId, skillId: skill1.skillId], "u123", new DateTime().minusDays(1).toDate())
 
         when:
@@ -683,5 +683,93 @@ class AdminEditSpecs extends DefaultIntSpec {
         skillSummaryAfterEdit.todaysPoints == 10
         pointHistoryAfterEdit.pointsHistory[0].points == 5
         pointHistoryAfterEdit.pointsHistory[1].points == 15
+    }
+
+    def "changes to skill points causes multiple users's point history to be updated"(){
+        def proj1 = SkillsFactory.createProject(1)
+        skillsService.createProject(proj1)
+        def subj = SkillsFactory.createSubject(1)
+        skillsService.createSubject(subj)
+
+        def skill1 = SkillsFactory.createSkill(1, 1, 1, 0, 3, 60)
+        def skill2 = SkillsFactory.createSkill(1, 1, 2)
+        def skill3 = SkillsFactory.createSkill(1, 1, 3)
+
+        skillsService.createSkills([skill1, skill2, skill3])
+
+        skillsService.addSkill([projectId: proj1.projectId, skillId: skill1.skillId], "u123", new Date())
+        skillsService.addSkill([projectId: proj1.projectId, skillId: skill1.skillId], "u123", new DateTime().withTimeAtStartOfDay().plusHours(2).toDate())
+        skillsService.addSkill([projectId: proj1.projectId, skillId: skill1.skillId], "u123", new DateTime().minusDays(1).toDate())
+
+        skillsService.addSkill([projectId: proj1.projectId, skillId: skill1.skillId], "u124", new DateTime().withTimeAtStartOfDay().plusHours(5).toDate())
+        skillsService.addSkill([projectId: proj1.projectId, skillId: skill1.skillId], "u124", new DateTime().withTimeAtStartOfDay().plusHours(3).toDate())
+        skillsService.addSkill([projectId: proj1.projectId, skillId: skill1.skillId], "u124", new DateTime().minusDays(1).toDate())
+
+        skillsService.addSkill([projectId: proj1.projectId, skillId: skill1.skillId], "u125", new Date())
+        skillsService.addSkill([projectId: proj1.projectId, skillId: skill2.skillId], "u125", new DateTime().minusDays(1).toDate())
+        skillsService.addSkill([projectId: proj1.projectId, skillId: skill3.skillId], "u125", new DateTime().minusDays(2).toDate())
+
+        when:
+
+        def u123SkillSummaryBeforeEdit = skillsService.getSkillSummary("u123", proj1.projectId, subj.subjectId)
+        def u123PointHistoryBeforeEdit = skillsService.getPointHistory("u123", proj1.projectId, subj.subjectId)
+        def u124SkillSummaryBeforeEdit = skillsService.getSkillSummary("u124", proj1.projectId, subj.subjectId)
+        def u124PointHistoryBeforeEdit = skillsService.getPointHistory("u124", proj1.projectId, subj.subjectId)
+        def u125SkillSummaryBeforeEdit = skillsService.getSkillSummary("u125", proj1.projectId, subj.subjectId)
+        def u125PointHistoryBeforeEdit = skillsService.getPointHistory("u125", proj1.projectId, subj.subjectId)
+
+        skillsService.updateSkill([projectId: proj1.projectId,
+                                   subjectId: subj.subjectId,
+                                   skillId: skill1.skillId,
+                                   numPerformToCompletion: skill1.numPerformToCompletion,
+                                   pointIncrement: 5,
+                                   pointIncrementInterval: skill1.pointIncrementInterval,
+                                   numMaxOccurrencesIncrementInterval: skill1.numMaxOccurrencesIncrementInterval,
+                                   version: skill1.version,
+                                   name: skill1.name], skill1.skillId)
+
+
+        def u123pointHistoryAfterEdit = skillsService.getPointHistory("u123", proj1.projectId, subj.subjectId)
+        def u123SkillSummaryAfterEdit = skillsService.getSkillSummary("u123", proj1.projectId, subj.subjectId)
+        def u124pointHistoryAfterEdit = skillsService.getPointHistory("u124", proj1.projectId, subj.subjectId)
+        def u124SkillSummaryAfterEdit = skillsService.getSkillSummary("u124", proj1.projectId, subj.subjectId)
+        def u125pointHistoryAfterEdit = skillsService.getPointHistory("u125", proj1.projectId, subj.subjectId)
+        def u125SkillSummaryAfterEdit = skillsService.getSkillSummary("u125", proj1.projectId, subj.subjectId)
+
+        then:
+        u123SkillSummaryBeforeEdit.points == 30
+        u123SkillSummaryBeforeEdit.totalPoints == 50
+        u123SkillSummaryBeforeEdit.todaysPoints == 20
+        u123PointHistoryBeforeEdit.pointsHistory[0].points == 10
+        u123PointHistoryBeforeEdit.pointsHistory[1].points == 30
+        u123SkillSummaryAfterEdit.totalPoints == 35
+        u123SkillSummaryAfterEdit.points == 15
+        u123SkillSummaryAfterEdit.todaysPoints == 10
+        u123pointHistoryAfterEdit.pointsHistory[0].points == 5
+        u123pointHistoryAfterEdit.pointsHistory[1].points == 15
+
+        u124SkillSummaryBeforeEdit.points == 30
+        u124SkillSummaryBeforeEdit.totalPoints == 50
+        u124SkillSummaryBeforeEdit.todaysPoints == 20
+        u124PointHistoryBeforeEdit.pointsHistory[0].points == 10
+        u124PointHistoryBeforeEdit.pointsHistory[1].points == 30
+        u124SkillSummaryAfterEdit.totalPoints == 35
+        u124SkillSummaryAfterEdit.points == 15
+        u124SkillSummaryAfterEdit.todaysPoints == 10
+        u124pointHistoryAfterEdit.pointsHistory[0].points == 5
+        u124pointHistoryAfterEdit.pointsHistory[1].points == 15
+
+        u125SkillSummaryBeforeEdit.points == 30
+        u125SkillSummaryBeforeEdit.totalPoints == 50
+        u125SkillSummaryBeforeEdit.todaysPoints == 10
+        u125PointHistoryBeforeEdit.pointsHistory[0].points == 10
+        u125PointHistoryBeforeEdit.pointsHistory[1].points == 20
+        u125PointHistoryBeforeEdit.pointsHistory[2].points == 30
+        u125SkillSummaryAfterEdit.totalPoints == 35
+        u125SkillSummaryAfterEdit.points == 25
+        u125SkillSummaryAfterEdit.todaysPoints == 5
+        u125pointHistoryAfterEdit.pointsHistory[0].points == 10
+        u125pointHistoryAfterEdit.pointsHistory[1].points == 20
+        u125pointHistoryAfterEdit.pointsHistory[2].points == 25
     }
 }
