@@ -77,8 +77,8 @@ paragraph"""
 
         when:
         def skill = SkillsFactory.createSkill()
-        subj.name = "acceptable name"
-        subj.description = """paragaraph
+        skill.name = "acceptable name"
+        skill.description = """paragaraph
 
 paragraph
 
@@ -86,7 +86,7 @@ jabberwocky
 
 paragraph"""
 
-        skillsService.createSubject(subj)
+        skillsService.createSkill(skill)
 
         then:
         def exception = thrown(SkillsClientException)

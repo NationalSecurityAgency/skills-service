@@ -85,7 +85,8 @@ class SkillsAdminService {
 
         final CustomValidationResult customValidationResult = customValidator.validate(skillRequest)
         if(performCustomValidation && !customValidationResult.valid){
-            throw new SkillException(customValidationResult.msg)
+            String msg = "Custom validation failed: msg=[${customValidationResult.msg}], type=[skill], skillId=[${skillRequest.skillId}], name=[${skillRequest.name}], description=[${skillRequest.description}]"
+            throw new SkillException(msg)
         }
 
         SkillDefWithExtra skillDefinition = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(skillRequest.projectId, originalSkillId, SkillDef.ContainerType.Skill)
