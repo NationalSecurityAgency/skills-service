@@ -117,7 +117,7 @@
         Validator.extend('uniqueName', {
           getMessage: field => `The value for the ${field} is already taken.`,
           validate(value) {
-            if (self.isEdit && (self.original.name === value || self.localeCompare(self.original.name, 'en', { sensitivity: 'base' }) === 0)) {
+            if (self.isEdit && (self.original.name === value || self.original.name.localeCompare(value, 'en', { sensitivity: 'base' }) === 0)) {
               return true;
             }
             return ProjectService.checkIfProjectNameExist(value)
