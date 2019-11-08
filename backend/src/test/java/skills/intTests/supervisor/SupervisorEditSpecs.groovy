@@ -127,8 +127,8 @@ class SupervisorEditSpecs extends DefaultIntSpec {
         skillsService.removeProjectLevelFromGlobalBadge(globalAssingment)
         def afterBadge = skillsService.getGlobalBadge(badge.badgeId)
         then:
-        beforeBadge.requiredProjectLevels.collect({"${it.projectId}-${it.level}".toString()}) == ["TestProject1-1", "TestProject2-3"]
-        afterBadge.requiredProjectLevels.collect({"${it.projectId}-${it.level}".toString()}) == ["TestProject1-1"]
+        beforeBadge.requiredProjectLevels.sort(){it.projectId}.collect({"${it.projectId}-${it.level}".toString()}) == ["TestProject1-1", "TestProject2-3"]
+        afterBadge.requiredProjectLevels.sort(){it.projectId}.collect({"${it.projectId}-${it.level}".toString()}) == ["TestProject1-1"]
     }
 
     def "get project's levels"() {
