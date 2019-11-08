@@ -108,4 +108,177 @@ A paragraph four
         validator.validateName("").valid
         validator.validateName(null).valid
     }
+
+    def "support markdown lists"() {
+        CustomValidator validator = new CustomValidator();
+        validator.paragraphValidationRegex = '^A.*$'
+        validator.paragraphValidationMessage = 'fail'
+
+
+        when:
+        validator.init()
+
+        then:
+        validator.validateDescription("""A Paragraph one
+* item 1
+* item 2
+
+A paragraph two
+""").valid
+
+        validator.validateDescription("""A Paragraph one
+* item 1
+* item 2
+
+A paragraph two
+- item 1
+- item 2
+""").valid
+
+        validator.validateDescription("""A Paragraph one
+* item 1
+* item 2
+
+
+
+
+A paragraph two
+- item 1
+- item 2
+
+
+""").valid
+
+        !validator.validateDescription("""A Paragraph one
+
+* item 1
+* item 2
+
+A paragraph two
+- item 1
+- item 2
+""").valid
+
+
+        validator.validateDescription("""A Paragraph one
+
+A
+* item 1
+* item 2
+
+A paragraph two
+- item 1
+- item 2
+""").valid
+    }
+
+    def "support markdown tables"() {
+        CustomValidator validator = new CustomValidator();
+        validator.paragraphValidationRegex = '^A.*$'
+        validator.paragraphValidationMessage = 'fail'
+
+
+        when:
+        validator.init()
+
+        then:
+        validator.validateDescription("""A Paragraph one
+| header 1 | header 2 | header 3 |
+| ---      |  ------  |---------:|
+| cell 1   | cell 2   | cell 3   |
+| cell 4 | cell 5 is longer | cell 6 is much longer than the others, but that's ok. It will eventually wrap the text when the cell is too large for the display size. |
+| cell 7   |          | cell <br> 9 |
+
+A paragraph two
+""").valid
+
+        !validator.validateDescription("""A Paragraph one
+
+| header 1 | header 2 | header 3 |
+| ---      |  ------  |---------:|
+| cell 1   | cell 2   | cell 3   |
+| cell 4 | cell 5 is longer | cell 6 is much longer than the others, but that's ok. It will eventually wrap the text when the cell is too large for the display size. |
+| cell 7   |          | cell <br> 9 |
+
+A paragraph two
+""").valid
+
+        validator.validateDescription("""A Paragraph one
+A
+| header 1 | header 2 | header 3 |
+| ---      |  ------  |---------:|
+| cell 1   | cell 2   | cell 3   |
+| cell 4 | cell 5 is longer | cell 6 is much longer than the others, but that's ok. It will eventually wrap the text when the cell is too large for the display size. |
+| cell 7   |          | cell <br> 9 |
+
+A paragraph two
+""").valid
+    }
+
+    def "support markdown headers"() {
+        CustomValidator validator = new CustomValidator();
+        validator.paragraphValidationRegex = '^A.*$'
+        validator.paragraphValidationMessage = 'fail'
+
+        when:
+        validator.init()
+
+        then:
+        validator.validateDescription("""# A Paragraph one""").valid
+        validator.validateDescription("""## A Paragraph one""").valid
+        validator.validateDescription("""### A Paragraph one""").valid
+        validator.validateDescription("""#### A Paragraph one""").valid
+        validator.validateDescription("""#### A ## Paragraph ## one ###""").valid
+
+        !validator.validateDescription("""# Paragraph one""").valid
+        !validator.validateDescription("""## Paragraph one""").valid
+        !validator.validateDescription("""### Paragraph one""").valid
+        !validator.validateDescription("""#### Paragraph one""").valid
+    }
+
+    def "ignore markdown separators"() {
+        CustomValidator validator = new CustomValidator();
+        validator.paragraphValidationRegex = '^A.*$'
+        validator.paragraphValidationMessage = 'fail'
+
+        when:
+        validator.init()
+
+        then:
+        validator.validateDescription("""A Separate me
+        ___
+        A Separate me
+        ---
+        A Separate me
+        ***""").valid
+
+        !validator.validateDescription("""A Separate me
+        ___
+        Separate me
+        ---
+        A Separate me
+        ***""").valid
+
+        !validator.validateDescription("""A Separate me
+        ___
+        A Separate me
+        ---
+        A Separate me
+        ***
+        no go""").valid
+    }
+
+    def "markdown Blockquotes should be considered during validation"() {
+        CustomValidator validator = new CustomValidator();
+        validator.paragraphValidationRegex = '^A.*$'
+        validator.paragraphValidationMessage = 'fail'
+
+        when:
+        validator.init()
+
+        then:
+        validator.validateDescription("""> A This is a block quote""").valid
+        !validator.validateDescription("""> This is a block quote""").valid
+    }
 }
+

@@ -69,7 +69,8 @@ class SubjAdminService {
 
         CustomValidationResult customValidationResult = customValidator.validate(subjectRequest)
         if (performCustomValidation && !customValidationResult.valid) {
-            throw new SkillException(customValidationResult.msg)
+            String msg = "Custom validation failed: msg=[${customValidationResult.msg}], type=[subject], subjectId=[${subjectRequest.subjectId}], name=[${subjectRequest.name}], description=[${subjectRequest.description}]"
+            throw new SkillException(msg)
         }
 
         SkillDefWithExtra existing = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, origSubjectId, SkillDef.ContainerType.Subject)

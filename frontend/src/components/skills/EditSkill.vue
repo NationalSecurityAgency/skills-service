@@ -138,7 +138,7 @@
         <div class="">
           <label class="label">Description</label>
           <div class="control">
-            <ValidationProvider rules="maxDescriptionLength" v-slot="{errors}" name="Skill Description">
+            <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" v-slot="{errors}" name="Skill Description">
               <markdown-editor v-if="skillInternal" v-model="skillInternal.description"/>
               <small class="form-text text-danger">{{ errors[0] }}</small>
             </ValidationProvider>

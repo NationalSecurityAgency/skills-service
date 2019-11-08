@@ -55,7 +55,8 @@ class BadgeAdminService {
     void saveBadge(String projectId, String originalBadgeId, BadgeRequest badgeRequest, SkillDef.ContainerType type = SkillDef.ContainerType.Badge, boolean performCustomValidation=true) {
         CustomValidationResult customValidationResult = customValidator.validate(badgeRequest)
         if(performCustomValidation && !customValidationResult.valid){
-            throw new SkillException(customValidationResult.msg)
+            String msg = "Custom validation failed: msg=[${customValidationResult.msg}], type=[badge], badgeId=[${badgeRequest.badgeId}], badgeName=[${badgeRequest.name}], description=[${badgeRequest.description}]"
+            throw new SkillException(msg)
         }
 
         // project id will be null for global badges

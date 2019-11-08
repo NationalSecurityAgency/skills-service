@@ -24,7 +24,6 @@ class CustomValidationController {
     @RequestMapping(value = "/description", method = RequestMethod.POST, produces = "application/json")
     @ResponseBody
     ValidationResult validateDescription(@RequestBody Map<String,String> body){
-        log.info("validating description");
         CustomValidationResult vr = customValidator.validateDescription(body.value)
         ValidationResult validationResult = new ValidationResult(vr.valid, vr.msg)
         return validationResult

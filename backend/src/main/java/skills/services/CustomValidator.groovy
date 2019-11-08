@@ -81,17 +81,45 @@ class CustomValidator {
         if (!paragraphPattern || StringUtils.isBlank(description)) {
             return new CustomValidationResult(valid: true)
         }
-        String[] paragraphs = description.split("\n\n")
+
+        // split if
+        // - there is at least 2 new lines
+        // - markdown separator (3 underscores, 3 dashes, 3 stars)
+        String[] paragraphs = description.split("([\n]{2,})|(\n[\\s]*[-_*]{3,})")
 
         CustomValidationResult validationResult = null
         for (String s : paragraphs) {
-            validationResult = validateInternal(paragraphPattern, s.trim(), paragraphValidationMsg)
+            if (!s){
+                continue
+            }
+
+            String toValidate = adjustForMarkdownSupport(s)
+            validationResult = validateInternal(paragraphPattern, toValidate, paragraphValidationMsg)
             if (!validationResult.valid) {
                 break
             }
         }
 
         return validationResult
+    }
+
+    private String adjustForMarkdownSupport(String s) {
+
+        String toValidate = s.trim()
+        // remove a single newline so the provided regex does not need check for newlines themselves
+        // since regex . doesn't match \n
+        // this important since description allows the use of markdown, for example is an input for the markdown list:
+        // "some paragraph\n*item1 *item2
+        toValidate = toValidate.replaceAll("\n", "")
+
+        // support markdown headers and blockquotes
+        // # Header
+        // ## Header
+        // ### Header
+        // > quote
+        toValidate = toValidate.replaceAll("^[#>]{1,}", "")
+
+        return toValidate.trim()
     }
 
     CustomValidationResult validateName(String name) {
