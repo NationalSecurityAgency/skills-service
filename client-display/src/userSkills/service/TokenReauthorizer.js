@@ -28,8 +28,8 @@ const refreshAuthorization = (failedRequest) => {
 createAuthRefreshInterceptor(axios, refreshAuthorization);
 
 axios.interceptors.response.use(response => response, (error) => {
-  if (error.response && error.response.status !== 401) {
-    const errorMessage = error.response.data ? error.response.data.error_description : '';
+  if (!error.response || (error.response && error.response.status !== 401)) {
+    const errorMessage = (error.response && error.response.data) ? error.response.data.error_description : '';
     router.push({
       name: 'error',
       params: {
