@@ -477,6 +477,7 @@ class AdminEditSpecs extends DefaultIntSpec {
 
         when:
         def skillSummaryBeforeEdit = skillsService.getSkillSummary("u123", proj1.projectId, subj.subjectId)
+        def projectSummaryBeforeEdit = skillsService.getSkillSummary("u123", proj1.projectId)
 
         skillsService.updateSkill([projectId: proj1.projectId,
                                   subjectId: subj.subjectId,
@@ -490,6 +491,7 @@ class AdminEditSpecs extends DefaultIntSpec {
 
 
         def skillSummaryAfterEdit = skillsService.getSkillSummary("u123", proj1.projectId, subj.subjectId)
+        def projectSummaryAfterEdit = skillsService.getSkillSummary("u123", proj1.projectId)
 
         then:
         skillSummaryBeforeEdit.skills[0].points == 10
@@ -497,12 +499,26 @@ class AdminEditSpecs extends DefaultIntSpec {
         skillSummaryBeforeEdit.skillsLevel == 4
         skillSummaryBeforeEdit.points == 20
         skillSummaryBeforeEdit.totalPoints == 30
+        skillSummaryBeforeEdit.todaysPoints == 20
+        projectSummaryBeforeEdit.points == 20
+        projectSummaryBeforeEdit.totalPoints == 30
+        projectSummaryBeforeEdit.todaysPoints == 20
+        projectSummaryBeforeEdit.subjects[0].points == 20
+        projectSummaryBeforeEdit.subjects[0].totalPoints == 30
+        projectSummaryBeforeEdit.subjects[0].todaysPoints == 20
 
         skillSummaryAfterEdit.skills[0].points == 100
         skillSummaryAfterEdit.skills[0].totalPoints == 100
         skillSummaryAfterEdit.skillsLevel == 5
         skillSummaryAfterEdit.points == 110
         skillSummaryAfterEdit.totalPoints == 120
+        skillSummaryAfterEdit.todaysPoints == 110
+        projectSummaryAfterEdit.points == 110
+        projectSummaryAfterEdit.totalPoints == 120
+        projectSummaryAfterEdit.todaysPoints == 110
+        projectSummaryAfterEdit.subjects[0].points == 110
+        projectSummaryAfterEdit.subjects[0].totalPoints == 120
+        projectSummaryAfterEdit.subjects[0].todaysPoints == 110
     }
 
     def "decreasing skill point increment post achievement causes user points to be updated"() {
