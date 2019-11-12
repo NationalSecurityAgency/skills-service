@@ -361,6 +361,10 @@ class SkillsService {
         wsHelper.supervisorGet("/projects/${projectId}/levels")
     }
 
+    def getServiceStatus() {
+        wsHelper.get("/public/status", "public")
+    }
+
     def getAllGlobalBadges() {
         wsHelper.supervisorGet("/badges")
     }
