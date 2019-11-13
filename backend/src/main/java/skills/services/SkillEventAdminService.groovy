@@ -36,10 +36,13 @@ class SkillEventAdminService {
 
     @Transactional
     SkillEventResult deleteSkillEvent(String projectId, String skillId, String userId, Long timestamp) {
-        UserPerformedSkill performedSkill = performedSkillRepository.findByProjectIdAndSkillIdAndUserIdAndPerformedOn(projectId, skillId, userId, new Date(timestamp))
-        if (!performedSkill) {
+        List<UserPerformedSkill> performedSkills = performedSkillRepository.findAllByProjectIdAndSkillIdAndUserIdAndPerformedOn(projectId, skillId, userId, new Date(timestamp))
+        if (!performedSkills) {
             throw new SkillException("This skill event does not exist", projectId, skillId, ErrorCode.BadParam)
         }
+        // may have more than 1 event with the same exact timestamp, this happens when multiple events may fall
+        // within configured time window and client send the same timestamp (example UI calendar control)
+        UserPerformedSkill performedSkill = performedSkills.first()
         log.debug("Deleting skill [{}] for user [{}]", performedSkill, userId)
 
         SkillEventResult res = new SkillEventResult()
