@@ -7,7 +7,7 @@
             <vue-simple-spinner v-if="loading" line-bg-color="#333" line-fg-color="#17a2b8" size="small" message="Loading Chart ..."/>
             <div v-else>
               <div style="font-size: 1rem;" class="text-uppercase"><i class="fa fa-lock"></i> Locked</div>
-              <small class="text-black-50">*** Earn more points to unlock this chart! ***</small>
+              <small class="text-black-50">*** <b>2 days</b> of usage will unlock this chart! ***</small>
             </div>
           </div>
         </div>
