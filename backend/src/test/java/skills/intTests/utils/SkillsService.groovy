@@ -362,7 +362,7 @@ class SkillsService {
     }
 
     def getServiceStatus() {
-        wsHelper.get("/public/status", "public")
+        wsHelper.get("/status", "public", null)
     }
 
     def getAllGlobalBadges() {
