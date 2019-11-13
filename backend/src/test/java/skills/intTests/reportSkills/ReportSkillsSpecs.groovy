@@ -1,9 +1,12 @@
 package skills.intTests.reportSkills
 
+import org.springframework.beans.factory.annotation.Autowired
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.TestUtils
+import skills.storage.model.UserAchievement
+import skills.storage.repos.UserAchievedLevelRepo
 
 class ReportSkillsSpecs extends DefaultIntSpec {
 
@@ -797,6 +800,9 @@ class ReportSkillsSpecs extends DefaultIntSpec {
         skillsLevelAfterDelete == skillsLevelAfter3
     }
 
+    @Autowired
+    UserAchievedLevelRepo userAchievementsRepo
+
     def "deleting all skill events should decrease project level to zero"(){
         def proj1 = SkillsFactory.createProject()
         def subj1 = SkillsFactory.createSubject()
@@ -806,24 +812,57 @@ class ReportSkillsSpecs extends DefaultIntSpec {
         skillsService.createSubject(subj1)
         skillsService.createSkills(skills1)
 
+        String userId = "aUser"
+
         when:
 
         Date date = new Date()
         for(int i=0; i<10; i++){
-            skillsService.addSkill([projectId: proj1.projectId, skillId: skills1[i].skillId], "aUser", date)
+            skillsService.addSkill([projectId: proj1.projectId, skillId: skills1[i].skillId], userId, date)
         }
 
-        def skillsLevelAfterInsert = skillsService.getSkillSummary("aUser", proj1.projectId, subj1.subjectId).skillsLevel
+        def skillsLevelAfterInsert = skillsService.getSkillSummary(userId, proj1.projectId, subj1.subjectId).skillsLevel
 
         for(int i=0; i<10; i++) {
-            skillsService.deleteSkillEvent([projectId: proj1.projectId, skillId: skills1[i].skillId, userId: 'aUser', timestamp: date.time])
+            skillsService.deleteSkillEvent([projectId: proj1.projectId, skillId: skills1[i].skillId, userId: userId, timestamp: date.time])
         }
 
-        def skillsLevelAfterDelete = skillsService.getSkillSummary("aUser", proj1.projectId, subj1.subjectId).skillsLevel
+        def skillsLevelAfterDelete = skillsService.getSkillSummary(userId, proj1.projectId, subj1.subjectId).skillsLevel
 
         then:
         skillsLevelAfterInsert > 0
         skillsLevelAfterDelete == 0
+
+        List<UserAchievement> userAchievements = userAchievementsRepo.findAll().findAll({it.userId == userId && it.projectId == proj1.projectId})
+        !userAchievements
+    }
+
+    def "deleting all skill events should decrease project level to zero - one skill achieves all levels"(){
+        def proj1 = SkillsFactory.createProject()
+        def subj1 = SkillsFactory.createSubject()
+        def skills1 = SkillsFactory.createSkills(1, )
+        skills1[0].pointIncrement = 200
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(subj1)
+        skillsService.createSkills(skills1)
+
+        String userId = "aUser"
+
+        when:
+
+        Date date = new Date()
+        skillsService.addSkill([projectId: proj1.projectId, skillId: skills1[0].skillId], userId, date)
+        def skillsLevelAfterInsert = skillsService.getSkillSummary(userId, proj1.projectId, subj1.subjectId).skillsLevel
+        skillsService.deleteSkillEvent([projectId: proj1.projectId, skillId: skills1[0].skillId, userId: userId, timestamp: date.time])
+        def skillsLevelAfterDelete = skillsService.getSkillSummary(userId, proj1.projectId, subj1.subjectId).skillsLevel
+
+        then:
+        skillsLevelAfterInsert > 0
+        skillsLevelAfterDelete == 0
+
+        List<UserAchievement> userAchievements = userAchievementsRepo.findAll().findAll({it.userId == userId.toLowerCase() && it.projectId == proj1.projectId})
+        !userAchievements
     }
 
     def "Project level should not change if deleting skill event over threshold"() {
