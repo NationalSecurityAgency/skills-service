@@ -47,11 +47,13 @@ class UserAchievementsAndPointsManagement {
 
     @Transactional
     void handlePointHistoryUpdate(String projectId, String subjectId, String skillId, int incrementDelta){
+        assert subjectId, "subjectId is required"
         nativeQueriesRepo.updatePointHistoryForSkill(projectId, subjectId, skillId, incrementDelta)
     }
 
     @Transactional
     void handlePointTotalsUpdate(String projectId, String subjectId, String skillId, int incrementDelta){
+        assert subjectId, "subjectId is required"
         nativeQueriesRepo.updatePointTotalsForSkill(projectId, subjectId, skillId, incrementDelta)
     }
 
