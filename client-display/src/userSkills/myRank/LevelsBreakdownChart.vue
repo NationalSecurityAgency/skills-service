@@ -28,6 +28,7 @@
 <script>
   import VueApexCharts from 'vue-apexcharts';
   import Spinner from 'vue-simple-spinner';
+  import numberFormatter from '../../common/filter/NumberFilter';
 
   export default {
     name: 'LevelsBreakdownChart',
@@ -84,6 +85,8 @@
             },
           },
           yaxis: {
+            min: 0,
+            forceNiceScale: true,
             title: {
               text: '# of Users',
               style: {
@@ -94,6 +97,12 @@
               style: {
                 color: this.$store.state.themeModule.charts.axisLabelColor,
               },
+              formatter: function format(val) {
+                return numberFormatter(val);
+              },
+            },
+            axisTicks: {
+              show: false,
             },
           },
           fill: {
