@@ -1,18 +1,18 @@
 <template>
-    <small v-if="skill" class="font-italic text-left text-muted pb-md-2">
+    <div v-if="skill" class="text-left text-muted pb-md-2">
         <div v-if="locked" class="row justify-content-center pb-3 locked-text">
             <div class="col-12 col-md-9 text-muted">
                 *** Skill has <b>{{ skill.dependencyInfo.numDirectDependents}}</b> direct dependent(s).
                 Click <i class="fas fa-lock icon"></i> to see its dependencies. ***
             </div>
         </div>
-        <div v-else>
+        <small v-else>
             <skill-summary-cards class="mb-3" :skill="skill" :short-sub-titles="true"/>
-        </div>
+        </small>
 
 
         <div v-if="skill.description">
-            <p v-if="skill.description.description">
+            <p v-if="skill.description.description" class="text-primary skills-text-description">
                 <markdown-text :text="skill.description.description"/>
             </p>
             <ul v-if="skill.description.examples">
@@ -30,7 +30,7 @@
         </div>
 
         <hr class="mb-2"/>
-    </small>
+    </div>
 </template>
 
 <script>
