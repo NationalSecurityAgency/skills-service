@@ -63,6 +63,37 @@ class DeleteSkillEventSpecs extends DefaultIntSpec {
         !addedSkills?.data?.find { it.skillId == skills[0].skillId }
     }
 
+    def "delete skill event when there more than 1 events fall within the configured time window"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(2 )
+        skills[0].numPerformToCompletion = 5
+        skills[0].numMaxOccurrencesIncrementInterval = 3
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        String userId = "user1"
+        Long timestamp = new Date().time
+
+        setup:
+        def res1 = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], userId, new Date(timestamp))
+        def res2 = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], userId, new Date(timestamp))
+        when:
+        def before = skillsService.getPerformedSkills(userId, proj.projectId)
+        skillsService.deleteSkillEvent([projectId: proj.projectId, skillId: skills[0].skillId, userId: userId, timestamp: timestamp])
+        def after = skillsService.getPerformedSkills(userId, proj.projectId)
+
+        then:
+        res1.body.skillApplied
+        res2.body.skillApplied
+
+        before.data.size() == 2
+        after.data.size() == 1
+    }
+
+
     def "attempt to delete skill event that doesn't exist"() {
         String subj = "testSubj"
         String skillId = "skillId"

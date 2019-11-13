@@ -15,9 +15,11 @@ import javax.validation.constraints.Null
 @CompileStatic
 interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integer> {
 
-    // find an exact performed event
+    // find an "exact" performed event;
+    // may have more than 1 event with the same exact timestamp, this happens when multiple events may fall
+    // within configured time window and client send the same timestamp (example UI calendar control)
     @Nullable
-    UserPerformedSkill findByProjectIdAndSkillIdAndUserIdAndPerformedOn(String projectId, String skillId, String userId, Date performedOn)
+    List<UserPerformedSkill> findAllByProjectIdAndSkillIdAndUserIdAndPerformedOn(String projectId, String skillId, String userId, Date performedOn)
 
     void deleteByProjectIdAndSkillId(String projectId, String skillId)
 
