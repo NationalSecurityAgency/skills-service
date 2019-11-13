@@ -9,6 +9,7 @@ import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.services.events.CompletionItem
 import skills.services.events.SkillEventResult
+import skills.storage.accessors.ProjDefAccessor
 import skills.storage.model.*
 import skills.storage.repos.*
 
@@ -30,6 +31,9 @@ class SkillEventAdminService {
 
     @Autowired
     SkillRelDefRepo skillRelDefRepo
+
+    @Autowired
+    ProjDefAccessor projDefAccessor
 
     @Autowired
     LevelDefinitionStorageService levelDefService
@@ -68,25 +72,32 @@ class SkillEventAdminService {
             achievedLevelRepo.deleteByProjectIdAndSkillIdAndUserIdAndLevel(performedSkill.projectId, performedSkill.skillId, userId, null)
         }
         checkParentGraph(performedSkill.performedOn, res, userId, skillDefinitionMin)
-        deleteProjectLevelIfNecessary(performedSkill.projectId, userId)
+        deleteProjectLevelIfNecessary(performedSkill.projectId, userId, numExistingSkills.toInteger())
         performedSkillRepository.delete(performedSkill)
 
         return res
     }
 
-    private void deleteProjectLevelIfNecessary(String projectId, String userId) {
-        //get user points for Project, if less then UserAchievement.pointsWhenAchieved for highest project level, remove UserAchievement
+    private void deleteProjectLevelIfNecessary(String projectId, String userId, int numberOfExistingEvents) {
+        List<UserAchievement> projAchievements = achievedLevelRepo.findAllByUserIdAndProjectIdAndSkillId(userId, projectId, null)
         Integer userProjectPoints = userPointsRepo.getPointsByProjectIdAndUserId(projectId, userId)
-        List<UserAchievement> achievements = achievedLevelRepo.findAllByUserIdAndProjectIdAndSkillId(userId, projectId, null)
-        def orderedLevels = achievements.findAll(){ it.level }.sort() { it.level }
-
-        if (orderedLevels) {
-            orderedLevels.reverse().each {
-                if (it.pointsWhenAchieved > userProjectPoints) {
-                    log.debug("deleting achievement ${it}, User no longer has enough points")
-                    achievedLevelRepo.delete(it)
-                }
+        if (userProjectPoints == null && (numberOfExistingEvents - 1) <= 0 ){
+            log.info("There are no skill events for user [{}] proj [{}]. Will remove all of them", userId, projectId)
+            deleteAchievements(projAchievements)
+        } else {
+            if (projAchievements && userProjectPoints != null) {
+                ProjDef projDef = projDefAccessor.getProjDef(projectId)
+                LevelDefinitionStorageService.LevelInfo userCurrentLevelShouldBe = levelDefService.getOverallLevelInfo(projDef, userProjectPoints)
+                List<UserAchievement> toDelete = projAchievements.findAll { it.level > userCurrentLevelShouldBe.level }
+                deleteAchievements(toDelete)
             }
+        }
+    }
+
+    private void deleteAchievements(List<UserAchievement> toDelete) {
+        for (UserAchievement achievement in toDelete) {
+            log.debug("deleting achievement ${achievement}, User no longer has enough points")
+            achievedLevelRepo.delete(achievement)
         }
     }
 
