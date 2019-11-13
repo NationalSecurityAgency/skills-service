@@ -411,6 +411,7 @@
               this.skillInternal.name = InputSanitizer.sanitize(this.skillInternal.name);
               this.skillInternal.skillId = InputSanitizer.sanitize(this.skillInternal.skillId);
               this.skillInternal.helpUrl = InputSanitizer.sanitize(this.skillInternal.helpUrl);
+              this.skillInternal = Object.assign({ subjectId: this.subjectId }, this.skillInternal);
               this.$emit('skill-saved', this.skillInternal);
               this.close();
             }
