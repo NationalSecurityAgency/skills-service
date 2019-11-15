@@ -264,6 +264,10 @@ class WSHelper {
         String url = "${skillsService}/${type}${endpoint}${getUrlFromParams(params)}"
         log.info("GET: {}", url)
         ResponseEntity<String> responseEntity = restTemplateWrapper.getForEntity(url, String)
+
+        // every response must set client lib version
+        assert responseEntity.headers.get("skills-client-lib-version")
+
         String resBody = responseEntity.body
         if(!resBody || responseEntity.statusCode != HttpStatus.OK){
             String msg = "Bad request for [$url] code=${responseEntity.statusCode}"

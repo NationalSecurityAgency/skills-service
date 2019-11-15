@@ -1,5 +1,15 @@
 <template>
   <div id="app" class="container-fluid">
+    <b-alert
+      v-model="showNewVersionAlert"
+      class="position-fixed fixed-top m-0 rounded-0"
+      style="z-index: 2000;"
+      variant="success"
+      dismissible
+    >
+      New Software Version is Available!! Please click <a href="" @click="window.location.reload()">Here</a> to reload.
+    </b-alert>
+
     <customizable-header></customizable-header>
 
     <div class="overall-container">
@@ -38,12 +48,17 @@
     },
     data() {
       return {
+        showNewVersionAlert: false,
+        currentLibVersion: undefined,
         isLoading: false,
         isSupervisor: false,
         serverErrors: [],
       };
     },
     computed: {
+      libVersion() {
+          return this.$store.getters.libVersion;
+      },
       isAuthenticatedUser() {
         return this.$store.getters.isAuthenticated;
       },
@@ -67,6 +82,13 @@
       this.registerToDisplayProgress();
     },
     watch: {
+      libVersion() {
+        if (this.currentLibVersion === undefined) {
+          this.currentLibVersion = this.libVersion;
+        } else if (this.currentLibVersion !== this.libVersion) {
+          this.showNewVersionAlert = true;
+        }
+      },
       activeProjectId() {
         this.addCustomIconCSS();
       },

@@ -1,6 +1,6 @@
 import axios from 'axios';
-import router from './router';
-import store from './store/store';
+import router from '../router';
+import store from '../store/store';
 
 function errorResponseHandler(error) {
   // check if the caller wants to handle the error with displaying the errorPage/dialog
