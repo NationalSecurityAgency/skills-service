@@ -2,6 +2,8 @@
   <div
     id="app"
     :style="appStyleObject">
+    <div>V1</div>
+    <new-software-version-component/>
     <router-view />
   </div>
 </template>
@@ -18,6 +20,7 @@
   import UserSkillsService from '@/userSkills/service/UserSkillsService';
   import TokenReauthorizer from '@/userSkills/service/TokenReauthorizer';
   import store from '@/store';
+  import NewSoftwareVersionComponent from '@/common/softwareVersion/NewSoftwareVersion.vue';
 
   const getDocumentHeight = () => {
     const { body } = document;
@@ -41,14 +44,13 @@
   });
 
   export default {
+    components: { NewSoftwareVersionComponent },
     data() {
       return {
         appStyleObject: {},
       };
     },
-    mounted() {
-      // this.handleTheming();
-
+    created() {
       const vm = this;
       if (this.isDevelopmentMode()) {
         this.configureDevelopmentMode();

@@ -30,6 +30,7 @@ export default new Vuex.Store({
     version: null,
     themeStyleId: UniqueIdGenerator.uniqueId('custom-theme-style-node-'),
     isSummaryOnly: false,
+    softwareVersion: undefined,
   },
   mutations: {
     authToken(state, authToken) {
@@ -48,6 +49,10 @@ export default new Vuex.Store({
     version(state, version) {
       // eslint-disable-next-line no-param-reassign
       state.version = version;
+    },
+    softwareVersion(state, version) {
+      // eslint-disable-next-line no-param-reassign
+      state.softwareVersion = version;
     },
     isSummaryOnly(state, isSummaryOnly) {
       // eslint-disable-next-line no-param-reassign
