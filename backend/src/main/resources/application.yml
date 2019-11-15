@@ -42,6 +42,7 @@ spring:
 skills:
   artificialDelay:
     enabled: false
+  clientLibVersion: @maven.build.timestamp@
   config:
     ui:
       descriptionMaxLength: 2000

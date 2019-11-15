@@ -38,7 +38,8 @@ Vue.config.productionTip = false;
 window.moment = require('moment');
 window.axios = require('axios');
 
-require('./errorHandler');
+require('./interceptors/errorHandler');
+require('./interceptors/clientVersionInterceptor');
 
 require('vue-multiselect/dist/vue-multiselect.min.css');
 
