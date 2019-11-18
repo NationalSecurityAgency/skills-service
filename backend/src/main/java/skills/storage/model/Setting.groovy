@@ -35,7 +35,7 @@ class Setting {
     String value
 
     //nullable
-    Integer userId
+    Integer userRefId
 
     // reliably differentiate between different setting types
     @Enumerated(EnumType.STRING)

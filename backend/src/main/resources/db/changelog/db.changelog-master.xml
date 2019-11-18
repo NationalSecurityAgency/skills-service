@@ -183,7 +183,7 @@
             </column>
 
             <!-- optional -->
-            <column name="custom_icon_id" type="int"/>
+            <column name="custom_icon_ref_id" type="int"/>
             <column name="icon_class" type="varchar(255)"/>
 
             <!-- optional, only used for 'gem' badges currently -->
@@ -254,7 +254,7 @@
                                  onUpdate="CASCADE"
                                  referencedColumnNames="id"
                                  referencedTableName="project_definition"/>
-        <addForeignKeyConstraint baseColumnNames="custom_icon_id"
+        <addForeignKeyConstraint baseColumnNames="custom_icon_ref_id"
                                  baseTableName="skill_definition"
                                  constraintName="fk_skill_definition_custom_icon_id_custom_icons_id"
                                  onDelete="CASCADE"
@@ -269,10 +269,10 @@
             <column name="id" type="int" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="parent_id" type="int">
+            <column name="parent_ref_id" type="int">
                 <constraints nullable="false"/>
             </column>
-            <column name="child_id" type="int">
+            <column name="child_ref_id" type="int">
                 <constraints nullable="false"/>
             </column>
             <column name="type" type="varchar(255)">
@@ -288,11 +288,11 @@
         </createTable>
         <createIndex indexName="index_skill_relationship_definition_parent"
                      tableName="skill_relationship_definition">
-            <column name="parent_id" type="int"/>
+            <column name="parent_ref_id" type="int"/>
         </createIndex>
         <createIndex indexName="index_skill_relationship_definition_child"
                      tableName="skill_relationship_definition">
-            <column name="child_id" type="int"/>
+            <column name="child_ref_id" type="int"/>
         </createIndex>
         <createIndex indexName="index_skill_relationship_definition_type"
                      tableName="skill_relationship_definition">
@@ -300,30 +300,30 @@
         </createIndex>
         <createIndex indexName="index_skill_relationship_definition_parent_type"
                      tableName="skill_relationship_definition" unique="false">
-            <column name="parent_id" type="int"/>
+            <column name="parent_ref_id" type="int"/>
             <column name="type" type="int"/>
         </createIndex>
         <createIndex indexName="index_skill_relationship_definition_child_type"
                      tableName="skill_relationship_definition" unique="false">
-            <column name="child_id" type="int"/>
+            <column name="child_ref_id" type="int"/>
             <column name="type" type="int"/>
         </createIndex>
         <createIndex indexName="index_skill_relationship_definition_parent_child_type"
                      tableName="skill_relationship_definition" unique="true">
-            <column name="parent_id" type="int"/>
-            <column name="child_id" type="int"/>
+            <column name="parent_ref_id" type="int"/>
+            <column name="child_ref_id" type="int"/>
             <column name="type" type="int"/>
         </createIndex>
-        <addForeignKeyConstraint baseColumnNames="parent_id"
+        <addForeignKeyConstraint baseColumnNames="parent_ref_id"
                                  baseTableName="skill_relationship_definition"
-                                 constraintName="fk_skill_relationship_definition_parent_id_skill_definition_id"
+                                 constraintName="fk_skill_rel_parent_id_skill_def_id"
                                  onDelete="CASCADE"
                                  onUpdate="CASCADE"
                                  referencedColumnNames="id"
                                  referencedTableName="skill_definition"/>
-        <addForeignKeyConstraint baseColumnNames="child_id"
+        <addForeignKeyConstraint baseColumnNames="child_ref_id"
                                  baseTableName="skill_relationship_definition"
-                                 constraintName="fk_skill_relationship_definition_child_id_skill_definition_id"
+                                 constraintName="fk_skill_rel_child_ref_id_skill_def_id"
                                  onDelete="CASCADE"
                                  onUpdate="CASCADE"
                                  referencedColumnNames="id"
@@ -336,10 +336,10 @@
             <column name="id" type="int" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="skill_id" type="int">
+            <column name="skill_ref_id" type="int">
                 <constraints nullable="false"/>
             </column>
-            <column name="shared_to_project_id" type="int">
+            <column name="shared_to_project_ref_id" type="int">
                 <constraints nullable="true"/>
             </column>
 
@@ -352,17 +352,17 @@
         </createTable>
         <createIndex indexName="index_skill_share_definition_skill_id_shared_to_project_id"
                      tableName="skill_share_definition" unique="true">
-            <column name="skill_id" type="int"/>
-            <column name="shared_to_project_id" type="int"/>
+            <column name="skill_ref_id" type="int"/>
+            <column name="shared_to_project_ref_id" type="int"/>
         </createIndex>
-        <addForeignKeyConstraint baseColumnNames="skill_id"
+        <addForeignKeyConstraint baseColumnNames="skill_ref_id"
                                  baseTableName="skill_share_definition"
                                  constraintName="fk_skill_id_skill_share_definition_skill_id"
                                  onDelete="CASCADE"
                                  onUpdate="CASCADE"
                                  referencedColumnNames="id"
                                  referencedTableName="skill_definition"/>
-        <addForeignKeyConstraint baseColumnNames="shared_to_project_id"
+        <addForeignKeyConstraint baseColumnNames="shared_to_project_ref_id"
                                  baseTableName="skill_share_definition"
                                  constraintName="fk_skill_id_skill_share_definition_shared_to_project_id"
                                  onDelete="CASCADE"
@@ -379,8 +379,8 @@
             </column>
 
             <!-- optional, either belong to project or skill -->
-            <column name="project_id" type="int"/>
-            <column name="skill_id" type="int"/>
+            <column name="project_ref_id" type="int"/>
+            <column name="skill_ref_id" type="int"/>
 
             <column name="level" type="int">
                 <constraints nullable="false"/>
@@ -392,7 +392,7 @@
             <column name="points_to" type="int"/>
 
             <!-- optional -->
-            <column name="custom_icon_id" type="int"/>
+            <column name="custom_icon_ref_id" type="int"/>
             <column name="icon_class" type="varchar(255)"/>
             <column name="logical_name" type="varchar(255)"/>
 
@@ -405,20 +405,20 @@
         </createTable>
         <createIndex indexName="index_level_definition_project_id"
                      tableName="level_definition">
-            <column name="project_id" type="int"/>
+            <column name="project_ref_id" type="int"/>
         </createIndex>
         <createIndex indexName="index_level_definition_skill_id"
                      tableName="level_definition">
-            <column name="skill_id" type="int"/>
+            <column name="skill_ref_id" type="int"/>
         </createIndex>
-        <addForeignKeyConstraint baseColumnNames="skill_id"
+        <addForeignKeyConstraint baseColumnNames="skill_ref_id"
                                  baseTableName="level_definition"
                                  constraintName="fk_skill_definition_skill_id"
                                  onDelete="CASCADE"
                                  onUpdate="CASCADE"
                                  referencedColumnNames="id"
                                  referencedTableName="skill_definition"/>
-        <addForeignKeyConstraint baseColumnNames="project_id"
+        <addForeignKeyConstraint baseColumnNames="project_ref_id"
                                  baseTableName="level_definition"
                                  constraintName="fk_skill_definition_project_id"
                                  onDelete="CASCADE"
@@ -807,7 +807,7 @@
             </column>
             <column name="project_id" type="varchar(255)"/>
             <column name="setting_group" type="varchar(255)"/>
-            <column name="user_id" type="int" />
+            <column name="user_ref_id" type="int" />
 
             <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
                 <constraints nullable="false"/>
@@ -830,7 +830,7 @@
         </createIndex>
         <createIndex indexName="index_settings_user_id"
                      tableName="settings">
-            <column name="user_id" type="int"/>
+            <column name="user_ref_id" type="int"/>
         </createIndex>
         <createIndex indexName="index_settings_type"
                      tableName="settings">
@@ -844,7 +844,7 @@
                                  onUpdate="CASCADE"
                                  referencedColumnNames="project_id"
                                  referencedTableName="project_definition"/>
-        <addForeignKeyConstraint baseColumnNames="user_id"
+        <addForeignKeyConstraint baseColumnNames="user_ref_id"
                                  baseTableName="settings"
                                  constraintName="fk_settings_user_id"
                                  onDelete="CASCADE"
@@ -894,7 +894,7 @@
             </column>
         </createTable>
         <createIndex indexName="index_global_badge_level_definition_project_ref_id"
-                     tableName="level_definition">
+                     tableName="global_badge_level_definition">
             <column name="project_id" type="varchar(255)"/>
         </createIndex>
         <createIndex indexName="index_global_badge_level_definition_skill_ref_id"

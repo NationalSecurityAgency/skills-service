@@ -59,7 +59,7 @@ class LevelDefinitionStorageService {
 
     @Profile
     LevelInfo getOverallLevelInfo(ProjDef projDef, int currentScore) {
-        List<LevelDef> levelDefinitions = levelDefinitionRepository.findAllByProjectId(projDef.id)
+        List<LevelDef> levelDefinitions = levelDefinitionRepository.findAllByProjectRefId(projDef.id)
         LevelInfo levelInfo = getLevelInfo(projDef.projectId, levelDefinitions, projDef.totalPoints, currentScore)
         return levelInfo
     }
@@ -104,7 +104,7 @@ class LevelDefinitionStorageService {
 
     @Profile
     private List<LevelDef> getProjLevelDefs(ProjDef projDef) {
-        levelDefinitionRepository.findAllByProjectId(projDef.id)
+        levelDefinitionRepository.findAllByProjectRefId(projDef.id)
     }
 
     private List<Integer> loadPercentLevels(List<LevelDefInterface> levelDefinitions, int currentScore) {
@@ -391,7 +391,7 @@ class LevelDefinitionStorageService {
             }
 
             created = new LevelDef(level: lastOne.level + 1,
-                    projectId: project?.id,
+                    projectRefId: project?.id,
                     percent: nextLevelRequest.percent,
                     skillRefId: skill?.id,
                     name: nextLevelRequest.name,
@@ -418,7 +418,7 @@ class LevelDefinitionStorageService {
         int i=0
         defaultPercentages.each { String name, Integer percentage ->
             def levelDef = new LevelDef(
-                    projectId: skillDef ? null : projDef?.id,
+                    projectRefId: skillDef ? null : projDef?.id,
                     skillRefId: skillDef?.id,
                     level: ++i,
                     percent: percentage,

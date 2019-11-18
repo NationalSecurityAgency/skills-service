@@ -18,11 +18,11 @@ class SkillShareDef {
     Integer id
 
     @ManyToOne
-    @JoinColumn(name="skill_id")
+    @JoinColumn(name="skill_ref_id")
     SkillDef skill
 
     @ManyToOne
-    @JoinColumn(name="shared_to_project_id", nullable = true)
+    @JoinColumn(name="shared_to_project_ref_id", nullable = true)
     ProjDef sharedToProject
 
     @Temporal(TemporalType.TIMESTAMP)

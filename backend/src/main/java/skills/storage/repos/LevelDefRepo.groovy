@@ -5,6 +5,6 @@ import skills.storage.model.LevelDef
 
 interface LevelDefRepo extends CrudRepository<LevelDef, Integer>{
 
-    List<LevelDef> findAllByProjectId(Integer projectId)
+    List<LevelDef> findAllByProjectRefId(Integer projectId)
 
 }

@@ -81,7 +81,7 @@ class SettingsService {
             if (!user) {
                 throw new SkillException("Failed to find user with id [${request.userId}]")
             }
-            setting.userId = user.id
+            setting.userRefId = user.id
         }
     }
 
