@@ -5,6 +5,6 @@ interface LevelDefInterface {
     Integer getPercent()
     Integer getPointsFrom()
     Integer getPointsTo()
-    Integer getProjectId()
+    Integer getProjectRefId()
     Integer getSkillRefId()
 }

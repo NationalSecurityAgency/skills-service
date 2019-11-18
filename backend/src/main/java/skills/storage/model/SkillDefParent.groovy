@@ -42,7 +42,7 @@ class SkillDefParent {
     Date endDate  // optional, used for "gem" badges only currently
 
     @OneToMany(fetch = FetchType.LAZY)
-    @JoinColumn(name="skill_id", insertable = false, updatable = false)
+    @JoinColumn(name="skillRefId", insertable = false, updatable = false)
     List<LevelDef> levelDefinitions
 
     @ManyToOne(fetch = FetchType.LAZY)

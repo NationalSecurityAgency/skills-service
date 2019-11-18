@@ -62,8 +62,8 @@ class MySQLNativeRepo implements NativeQueriesRepo {
               from skill_definition sd,
                    skill_relationship_definition srd,
                    skill_definition sd1
-              where sd.id = srd.parent_id
-                and sd1.id = srd.child_id
+              where sd.id = srd.parent_ref_id
+                and sd1.id = srd.child_ref_id
                 and srd.type = 'Dependence'
                 and sd.project_id=:projectId and sd.skill_id=:skillId 
               UNION ALL
@@ -72,8 +72,8 @@ class MySQLNativeRepo implements NativeQueriesRepo {
               from  skill_deps_path,
                    skill_relationship_definition srd,
                    skill_definition sd1
-              where skill_deps_path.childId = srd.parent_id
-                and sd1.id = srd.child_id
+              where skill_deps_path.childId = srd.parent_ref_id
+                and sd1.id = srd.child_ref_id
                 and srd.type = 'Dependence'
                 and skill_deps_path.childProjectId=:projectId
             )

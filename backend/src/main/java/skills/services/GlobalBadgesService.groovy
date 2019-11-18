@@ -111,7 +111,7 @@ class GlobalBadgesService {
         if (!projDef) {
             throw new SkillException("Failed to find project [${projectId}]", projectId)
         }
-        List<LevelDef> projectLevels = levelDefinitionRepository.findAllByProjectId(projDef.id)
+        List<LevelDef> projectLevels = levelDefinitionRepository.findAllByProjectRefId(projDef.id)
         projectLevels.sort({it.level})
 
         LevelDef toAdd = projectLevels.find { it.level == level }

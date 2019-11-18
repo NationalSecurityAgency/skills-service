@@ -137,13 +137,13 @@ interface SkillEventsSupportRepo extends CrudRepository<SkillDef, Long> {
     List<LevelDef> findLevelsBySkillId(Integer skillId)
 
     @Query('''SELECT 
-        l.projectId as projectId,
+        l.projectRefId as projectRefId,
         l.skillRefId as skillRefId,
         l.level as level,
         l.percent as percent,
         l.pointsFrom as pointsFrom,
         l.pointsTo as pointsTo 
-        from LevelDef l where l.skillRefId in (?1) or l.projectId = ?2''')
+        from LevelDef l where l.skillRefId in (?1) or l.projectRefId = ?2''')
     List<LevelDefInterface> findLevelsBySkillIdsOrByProjectId(List<Integer> skillIds, Integer projectId)
 
 
@@ -169,7 +169,7 @@ interface SkillEventsSupportRepo extends CrudRepository<SkillDef, Long> {
 
     @Query('''SELECT l from LevelDef l, ProjDef p 
         where
-            l.projectId = p.id and 
+            l.projectRefId = p.id and 
             p.projectId = ?1''')
     List<LevelDef> findLevelsByProjectId(String projectId)
 

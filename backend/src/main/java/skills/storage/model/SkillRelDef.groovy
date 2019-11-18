@@ -20,11 +20,11 @@ class SkillRelDef {
     Integer id
 
     @ManyToOne
-    @JoinColumn(name="parentId")
+    @JoinColumn(name="parentRefId")
     SkillDef parent
 
     @ManyToOne
-    @JoinColumn(name="childId")
+    @JoinColumn(name="childRefId")
     SkillDef child
 
     @Enumerated(EnumType.STRING)

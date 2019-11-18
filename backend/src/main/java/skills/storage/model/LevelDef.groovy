@@ -25,9 +25,7 @@ class LevelDef implements Serializable, LevelDefInterface{
     Integer percent
 
     // either belongs to a project or to skill
-    @Column(name="project_id")
-    Integer projectId
-    @Column(name="skill_id")
+    Integer projectRefId
     Integer skillRefId
 
     Integer pointsFrom

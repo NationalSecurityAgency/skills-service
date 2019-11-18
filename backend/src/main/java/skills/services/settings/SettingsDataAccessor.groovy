@@ -30,29 +30,29 @@ class SettingsDataAccessor {
     UserRepo userRepo
 
     Setting getGlobalSetting(String setting, String settingGroup){
-        settingRepo.findByTypeAndUserIdAndProjectIdAndSettingGroupAndSetting(Setting.SettingType.Global, null, null, settingGroup, setting)
+        settingRepo.findByTypeAndUserRefIdAndProjectIdAndSettingGroupAndSetting(Setting.SettingType.Global, null, null, settingGroup, setting)
     }
 
     Setting getGlobalSetting(String setting){
-        settingRepo.findByTypeAndUserIdAndProjectIdAndSettingGroupAndSetting(Setting.SettingType.Global, null, null, null, setting)
+        settingRepo.findByTypeAndUserRefIdAndProjectIdAndSettingGroupAndSetting(Setting.SettingType.Global, null, null, null, setting)
     }
 
     Setting getProjectSetting(String projectId, String setting){
-        settingRepo.findByTypeAndUserIdAndProjectIdAndSettingGroupAndSetting(Setting.SettingType.Project, null, projectId, null, setting)
+        settingRepo.findByTypeAndUserRefIdAndProjectIdAndSettingGroupAndSetting(Setting.SettingType.Project, null, projectId, null, setting)
     }
 
     Setting getProjectSetting(String projectId, String setting, String settingGroup){
-        settingRepo.findByTypeAndUserIdAndProjectIdAndSettingGroupAndSetting(Setting.SettingType.Project, null, projectId, settingGroup, setting)
+        settingRepo.findByTypeAndUserRefIdAndProjectIdAndSettingGroupAndSetting(Setting.SettingType.Project, null, projectId, settingGroup, setting)
     }
 
     Setting getUserProjectSetting(String userId, String projectId, String setting, String settingGroup){
         User user = userId ? userRepo.findByUserIdIgnoreCase(userId) : null
-        settingRepo.findByTypeAndUserIdAndProjectIdAndSettingGroupAndSetting(Setting.SettingType.User, user?.id, projectId, settingGroup, setting)
+        settingRepo.findByTypeAndUserRefIdAndProjectIdAndSettingGroupAndSetting(Setting.SettingType.User, user?.id, projectId, settingGroup, setting)
     }
 
     Setting getUserSetting(String userId, String setting, String settingGroup){
         User user = userId ? userRepo.findByUserIdIgnoreCase(userId) : null
-        settingRepo.findByTypeAndUserIdAndProjectIdAndSettingGroupAndSetting(Setting.SettingType.User, user?.id, null, settingGroup, setting)
+        settingRepo.findByTypeAndUserRefIdAndProjectIdAndSettingGroupAndSetting(Setting.SettingType.User, user?.id, null, settingGroup, setting)
     }
 
     List<Setting> getUserSettingsForGroup(String userId, String settingGroup) {
@@ -61,12 +61,12 @@ class SettingsDataAccessor {
     }
 
     List<Setting> getUserSettingsForGroup(User user, String settingGroup) {
-        settingRepo.findAllByTypeAndUserIdAndSettingGroup(Setting.SettingType.User, user?.id, settingGroup)
+        settingRepo.findAllByTypeAndUserRefIdAndSettingGroup(Setting.SettingType.User, user?.id, settingGroup)
     }
 
     List<Setting> getUserProjectSettingsForGroup(String userId, String settingGroup) {
         User user = userId ? userRepo.findByUserIdIgnoreCase(userId) : null
-        settingRepo.findAllByTypeAndUserIdAndSettingGroup(Setting.SettingType.UserProject, user?.id, settingGroup)
+        settingRepo.findAllByTypeAndUserRefIdAndSettingGroup(Setting.SettingType.UserProject, user?.id, settingGroup)
     }
 
     List<Setting> getProjectSettings(String projectId) {

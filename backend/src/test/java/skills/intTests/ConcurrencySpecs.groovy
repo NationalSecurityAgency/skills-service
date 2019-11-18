@@ -89,10 +89,10 @@ class ConcurrencySpecs extends DefaultIntSpec {
             it.join(5000)
         }
 
-        List<String> settingsAsStrings = settingRepo.findAll().collect({ "${it.projectId}-${it.userId}" })
+        List<String> settingsAsStrings = settingRepo.findAll().collect({ "${it.projectId}-${it.userRefId}" })
         List<String> projectIds = projDefRepo.findAll().collect({ it.projectId })
         List<String> projectNames = projDefRepo.findAll().collect({ it.name })
-        List<String> levels = levelDefRepo.findAll().collect { "${it.projectId}-${it.level}" }
+        List<String> levels = levelDefRepo.findAll().collect { "${it.projectRefId}-${it.level}" }
         then:
         settingsAsStrings.sort() == settingsAsStrings.unique().sort()
         projectIds.collect { it.toLowerCase() }.sort() == projectIds.collect { it.toLowerCase() }.unique().sort()

@@ -30,9 +30,9 @@ class DataCleanupSpecs extends DefaultIntSpec {
         skillsService.createSubject(subject)
 
         ProjDef projDef = projDefRepo.findByProjectId(proj.projectId)
-        long countBefore = levelDefRepo.findAllByProjectId(projDef.id).size()
+        long countBefore = levelDefRepo.findAllByProjectRefId(projDef.id).size()
         skillsService.deleteProject(proj.projectId)
-        long countAfter = levelDefRepo.findAllByProjectId(projDef.id).size()
+        long countAfter = levelDefRepo.findAllByProjectRefId(projDef.id).size()
 
         then:
         countBefore > 0
