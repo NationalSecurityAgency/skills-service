@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestMethod
 import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.bind.annotation.RestController
+import skills.HealthChecker
 import skills.UIConfigProperties
 import skills.profile.EnableCallStackProf
 
@@ -15,6 +16,9 @@ import skills.profile.EnableCallStackProf
 @Slf4j
 @EnableCallStackProf
 class PublicConfigController {
+
+    @Autowired
+    HealthChecker healthChecker
 
     @Autowired
     UIConfigProperties uiConfigProperties
@@ -33,6 +37,7 @@ class PublicConfigController {
     @RequestMapping(value = "/status", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     def status() {
+        healthChecker.checkRequiredServices()
         return statusRes
     }
 }
