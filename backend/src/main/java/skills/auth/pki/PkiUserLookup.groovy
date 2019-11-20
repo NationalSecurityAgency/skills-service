@@ -24,6 +24,9 @@ class PkiUserLookup {
     @Value('${skills.authorization.userQueryUri}')
     String userQueryUri
 
+    @Value('${skills.authorization.userInfoHealthCheckUri}')
+    String userInfoHealthCheckUri
+
     @Profile
     UserInfo lookupUserDn(String dn) {
         UserInfo userInfo = restTemplate.getForObject(userInfoUri, UserInfo, dn)
@@ -46,6 +49,11 @@ class PkiUserLookup {
         return matches
     }
 
+    @Profile
+    boolean isServiceAvailable() {
+        return restTemplate.getForObject(userInfoHealthCheckUri, Status).status == Status.STATUS.UP
+    }
+
     private void validate(UserInfo userInfo, String requestValue) {
         if (!userInfo) {
             throw new SkillException("User info service does not have key [${requestValue}]")
@@ -57,5 +65,10 @@ class PkiUserLookup {
         if (!userInfo?.usernameForDisplay) {
             throw new SkillException("User info service result must contain usernameForDisplay. request value=[${requestValue}]")
         }
+    }
+
+    static class Status {
+        enum STATUS { UP }
+        STATUS status
     }
 }
