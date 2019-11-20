@@ -108,8 +108,20 @@
               selector: 'body #app',
               styleName: 'background-color',
             },
+            trophyIconColor: {
+              selector: 'body #app .fa.fa-trophy',
+              styleName: 'color',
+            },
+            subjectTileIconColor: {
+              selector: 'body #app .subject-tile-icon',
+              styleName: 'color',
+            },
             pageTitleTextColor: {
               selector: 'body #app .skills-page-title-text-color',
+              styleName: 'color',
+            },
+            circleProgressInteriorTextColor: {
+              selector: 'body #app .circle-number span',
               styleName: 'color',
             },
             textPrimaryColor: {
