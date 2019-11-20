@@ -3,7 +3,7 @@
     id="app"
     :style="appStyleObject">
     <div>V1</div>
-    <new-software-version-component/>
+    <new-software-version-component :refresh-url="$store.state.indexUrl"/>
     <router-view />
   </div>
 </template>
@@ -74,6 +74,7 @@
           // CORs won't allow this because parent object can't be changed from an iframe
           this.$store.commit('parentFrame', Object.freeze(parent));
           window.addEventListener('resize', onHeightChanged);
+          this.$store.commit('indexUrl', location.href);
           this.onHeightChange();
 
           // will only display summary and component will not be interactive
