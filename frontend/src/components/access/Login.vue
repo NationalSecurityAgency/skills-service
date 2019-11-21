@@ -105,6 +105,7 @@
         this.$validator.validate()
           .then((valid) => {
             if (valid) {
+              this.$validator.pause();
               this.loginFailed = false;
               const formData = new FormData();
               formData.append('username', this.loginFields.username);
