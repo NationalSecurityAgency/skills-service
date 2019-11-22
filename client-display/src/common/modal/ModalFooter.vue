@@ -8,7 +8,8 @@
       Need help?
       <a
         :href="helpUrl"
-        target="_blank">Click here!</a>
+        target="_blank"
+        rel="noopener">Click here!</a>
     </div>
 
     <button

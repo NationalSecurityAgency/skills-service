@@ -38,7 +38,7 @@
         <div class="input-group-text"><i class="fas fa-link mr-1"></i> Help URL: </div>
       </div>
       <span class="form-control">
-        <a v-if="skillInfo.helpUrl" :href="skillInfo.helpUrl" target="_blank">{{ skillInfo.helpUrl }}</a>
+        <a v-if="skillInfo.helpUrl" :href="skillInfo.helpUrl" target="_blank" rel="noopener">{{ skillInfo.helpUrl }}</a>
         <span v-else class="text-muted">
           Not Specified
         </span>

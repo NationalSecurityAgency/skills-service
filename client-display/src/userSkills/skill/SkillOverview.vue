@@ -39,7 +39,7 @@
             <div class="row">
                 <div v-show="skill.description.href" class="col text-left">
                     <span class="text-secondary">Need help?</span>
-                    <a :href="skill.description.href" target="_blank">
+                    <a :href="skill.description.href" target="_blank" rel="noopener">
                         Click here!
                     </a>
                 </div>

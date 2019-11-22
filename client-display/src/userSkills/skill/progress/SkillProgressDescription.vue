@@ -23,7 +23,7 @@
 
             <div v-if="skill.description.href" class="user-skill-description-href mb-3 text-center text-md-left">
                 <strong>Need help?</strong>
-                <a :href="skill.description.href" target="_blank">
+                <a :href="skill.description.href" target="_blank" rel="noopener">
                     Click here!
                 </a>
             </div>
