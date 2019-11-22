@@ -15,7 +15,7 @@
             <div class="row">
                 <div class="col">
                         <span v-if="helpTipHref" class="float-left text-muted">
-                            Need help? <a :href="helpTipHref" target="_blank">Click here!</a>
+                            Need help? <a :href="helpTipHref" target="_blank" rel="noopener">Click here!</a>
                         </span>
                 </div>
                 <div class="col text-right">
