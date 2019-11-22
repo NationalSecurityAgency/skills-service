@@ -10,14 +10,13 @@ import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken
 import skills.auth.SkillsAuthorizationException
+import skills.auth.UserInfo
+import skills.utils.RetryUtil
 
 import javax.transaction.Transactional
 
 @Slf4j
 class PkiUserDetailsService implements UserDetailsService, AuthenticationUserDetailsService<PreAuthenticatedAuthenticationToken> {
-
-    @Value('${skills.authorization.userInfoUri}')
-    String userInfoUri
 
     @Autowired
     skills.auth.UserAuthService userAuthService
@@ -28,11 +27,17 @@ class PkiUserDetailsService implements UserDetailsService, AuthenticationUserDet
     @Override
     @Transactional
     UserDetails loadUserByUsername(String dn) throws UsernameNotFoundException {
+        return RetryUtil.withRetry(3, {
+            this.doLoadUserByUsername(dn)
+        })
+    }
+
+    private UserDetails  doLoadUserByUsername(String dn) throws UsernameNotFoundException {
         skills.auth.UserInfo userInfo
         try {
             userInfo = pkiUserLookup.lookupUserDn(dn)
             if (userInfo) {
-                skills.auth.UserInfo existingUserInfo = userAuthService.loadByUserId(userInfo.username?.toLowerCase())
+                UserInfo existingUserInfo = userAuthService.loadByUserId(userInfo.username?.toLowerCase())
                 if (existingUserInfo) {
                     userInfo.password = existingUserInfo.password
                     userInfo.nickname = existingUserInfo.nickname

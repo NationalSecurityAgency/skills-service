@@ -29,12 +29,12 @@ class AdminDepManagementSpecs extends DefaultIntSpec {
         graph.edges.collect { it.toId }.sort() == [
                 graph.nodes.find{ it.skillId == skills.get(1).skillId}.id,
                 graph.nodes.find{ it.skillId == skills.get(2).skillId}.id
-        ]
+        ].sort()
 
         graphAfterRemoval.nodes.collect { it.skillId }.sort() == [skills.get(0).skillId, skills.get(1).skillId]
         graphAfterRemoval.edges.size() == 1
         graphAfterRemoval.edges.collect { it.toId }.sort() == [
-                graph.nodes.find{ it.skillId == skills.get(1).skillId}.id,
+                graphAfterRemoval.nodes.find{ it.skillId == skills.get(1).skillId}.id,
         ]
     }
 

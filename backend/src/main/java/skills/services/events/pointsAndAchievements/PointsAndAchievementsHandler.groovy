@@ -4,20 +4,12 @@ import callStack.profiler.Profile
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
-import skills.controller.exceptions.SkillException
 import skills.services.LevelDefinitionStorageService
 import skills.services.events.CompletionItem
 import skills.services.events.CompletionTypeUtil
 import skills.services.events.SkillEventResult
-import skills.storage.model.LevelDef
-import skills.storage.model.LevelDefInterface
-import skills.storage.model.SkillDef
-import skills.storage.model.SkillRelDef
-import skills.storage.model.UserAchievement
-import skills.storage.model.UserPoints
-import skills.storage.repos.ProjDefRepo
+import skills.storage.model.*
 import skills.storage.repos.SkillEventsSupportRepo
 import skills.storage.repos.SkillRelDefRepo
 import skills.storage.repos.UserAchievedLevelRepo
@@ -27,9 +19,6 @@ import skills.storage.repos.UserPointsRepo
 @Slf4j
 @CompileStatic
 class PointsAndAchievementsHandler {
-
-    @Autowired
-    ProjDefRepo projDefRepo
 
     @Autowired
     UserPointsRepo userPointsRepo
