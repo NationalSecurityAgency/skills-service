@@ -605,17 +605,20 @@ class AdminEditSpecs extends DefaultIntSpec {
         then:
         u123SummaryBeforeEdit.skills[0].points == 10
         u123SummaryBeforeEdit.skills[0].totalPoints == 10
-        u123SummaryBeforeEdit.skillsLevel == 4
+        u123SummaryBeforeEdit.skills[1].points == 10
+        u123SummaryBeforeEdit.skills[1].totalPoints == 10
         u123SummaryBeforeEdit.points == 20
         u123SummaryBeforeEdit.totalPoints == 30
+        u123SummaryBeforeEdit.skillsLevel == 4
 
         u123SummaryAfterEdit.skills[0].points == 5
         u123SummaryAfterEdit.skills[0].totalPoints == 5
         u123SummaryAfterEdit.skills[1].points == 10
         u123SummaryAfterEdit.skills[1].totalPoints == 10
-        u123SummaryAfterEdit.skillsLevel == 4
         u123SummaryAfterEdit.points == 15
         u123SummaryAfterEdit.totalPoints == 25
+        u123SummaryAfterEdit.skillsLevel == 4
+
 
         u124SummaryBeforeEdit.skills[0].points == 10
         u124SummaryBeforeEdit.skills[0].totalPoints == 10

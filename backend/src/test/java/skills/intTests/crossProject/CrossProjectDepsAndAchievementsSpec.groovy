@@ -247,7 +247,8 @@ class CrossProjectDepsAndAchievementsSpec extends DefaultIntSpec {
         graphAfterRemoval.nodes.collect { it.skillId }.sort() == [proj1_skills.get(0).skillId, proj1_skills.get(1).skillId].sort()
         graphAfterRemoval.edges.size() == 1
         graphAfterRemoval.edges.collect { it.toId }.sort() == [
-                graph.nodes.find{ it.skillId == proj1_skills.get(1).skillId}.id,
+                graphAfterRemoval.nodes.find{ it.skillId == proj1_skills.get(1).skillId}.id,
         ]
     }
+
 }
