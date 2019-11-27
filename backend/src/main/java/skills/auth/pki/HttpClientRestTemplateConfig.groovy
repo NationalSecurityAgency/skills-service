@@ -1,11 +1,9 @@
 package skills.auth.pki
 
 import groovy.util.logging.Slf4j
-import org.apache.http.HttpHost
 import org.apache.http.client.HttpClient
 import org.apache.http.client.config.RequestConfig
 import org.apache.http.config.RegistryBuilder
-import org.apache.http.conn.routing.HttpRoute
 import org.apache.http.conn.socket.PlainConnectionSocketFactory
 import org.apache.http.conn.ssl.NoopHostnameVerifier
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory
@@ -21,11 +19,8 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory
 import org.springframework.web.client.RestTemplate
 
-import javax.annotation.PostConstruct
 import javax.net.ssl.HostnameVerifier
 import javax.net.ssl.SSLContext
-
-import static org.apache.commons.lang3.StringUtils.*
 
 /**
  * This Configuration exposes a RestTemplate the uses a apache HttpClient 4.5.  This RestTemplate can be @Autowrired
@@ -49,14 +44,6 @@ class HttpClientRestTemplateConfig {
         Integer connectionRequestTimeout = 2000
         Integer connectTimeout = 2000
         Integer socketTimeout = 2000
-        List<HttpHostConfiguration> maxPerRoutes
-
-        static class HttpHostConfiguration {
-            String scheme
-            String host
-            Integer port
-            Integer maxPerRoute = 20
-        }
     }
 
     @Bean
@@ -76,12 +63,6 @@ class HttpClientRestTemplateConfig {
 
         result.setMaxTotal(this.httpClientConfig.getMaxTotal())
         result.setDefaultMaxPerRoute(this.httpClientConfig.getDefaultMaxPerRoute())
-        // and / or
-        httpClientConfig.maxPerRoutes.each { httpHostConfig ->
-            HttpHost host = new HttpHost(httpHostConfig.host, httpHostConfig.port, httpHostConfig.scheme)
-            // Max per route for a specific host route
-            result.setMaxPerRoute(new HttpRoute(host), httpHostConfig.maxPerRoute)
-        }
         return result
     }
 
@@ -111,18 +92,5 @@ class HttpClientRestTemplateConfig {
         HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory()
         requestFactory.setHttpClient(httpClient)
         return new RestTemplate(requestFactory)
-    }
-
-    @PostConstruct
-    void debug() {
-        if (!httpClientConfig.maxPerRoutes) {
-            httpClientConfig.maxPerRoutes = [
-                    new HttpClientConfig.HttpHostConfiguration(
-                            scheme: substringBefore(userInfoUri, ':'),
-                            host: substringBetween(userInfoUri, '//', ':'),
-                            port: substringBefore(substringAfterLast(userInfoUri, ':'), '/')?.toInteger(),
-                    )
-            ]
-        }
     }
 }
