@@ -13,6 +13,8 @@ Vue.config.productionTip = false;
 Vue.use(VueApexCharts);
 Vue.use(require('vue-moment'));
 
+require('@/common/softwareVersion/softwareVersionInterceptor');
+
 new Vue({
   router,
   store,
