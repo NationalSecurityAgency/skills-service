@@ -36,7 +36,13 @@ class PkiUserLookup {
     @Value('${skills.authorization.userInfoHealthCheckUri}')
     String userInfoHealthCheckUri
 
-    LoadingCache userInfoCache = CacheBuilder.newBuilder().expireAfterWrite(24, TimeUnit.HOURS).maximumSize(1000).recordStats().build(new CacheLoader<String, UserInfo>() {
+    @Value('#{"${skills.authorization.userInfoCache.expiration.hours:24}"}')
+    Long cacheExpirationHours
+
+    @Value('#{"${skills.authorization.userInfoCache.maxSize:10000}"}')
+    Long cacheMaxSize
+
+    LoadingCache userInfoCache = CacheBuilder.newBuilder().expireAfterWrite(cacheExpirationHours, TimeUnit.HOURS).maximumSize(cacheMaxSize).recordStats().build(new CacheLoader<String, UserInfo>() {
         @Override
         UserInfo load(String dn) throws Exception {
             return restTemplate.getForObject(userInfoUri, UserInfo, dn)
