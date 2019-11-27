@@ -1,6 +1,11 @@
 package skills.auth.pki
 
 import callStack.profiler.Profile
+import com.google.common.cache.CacheBuilder
+import com.google.common.cache.CacheLoader
+import com.google.common.cache.CacheStats
+import com.google.common.cache.LoadingCache
+import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Conditional
 import org.springframework.core.ParameterizedTypeReference
@@ -12,10 +17,14 @@ import skills.auth.SecurityMode
 import skills.auth.UserInfo
 import skills.controller.exceptions.SkillException
 
+import java.util.concurrent.TimeUnit
+
 @Component
 @Conditional(SecurityMode.PkiAuth)
+@Slf4j
 class PkiUserLookup {
 
+//    use @Autowired if you want to utilize apache HttpClient (see HttpClientRestTemplateConfig)
     RestTemplate restTemplate = new RestTemplate()
 
     @Value('${skills.authorization.userInfoUri}')
@@ -27,11 +36,23 @@ class PkiUserLookup {
     @Value('${skills.authorization.userInfoHealthCheckUri}')
     String userInfoHealthCheckUri
 
+    LoadingCache userInfoCache = CacheBuilder.newBuilder().expireAfterWrite(24, TimeUnit.HOURS).maximumSize(1000).recordStats().build(new CacheLoader<String, UserInfo>() {
+        @Override
+        UserInfo load(String dn) throws Exception {
+            return restTemplate.getForObject(userInfoUri, UserInfo, dn)
+        }
+    })
+
     @Profile
     UserInfo lookupUserDn(String dn) {
-        UserInfo userInfo = restTemplate.getForObject(userInfoUri, UserInfo, dn)
+        UserInfo userInfo = userInfoCache.get(dn)
         validate(userInfo, dn)
         return userInfo
+    }
+
+    void printCacheStats() {
+        CacheStats stats = userInfoCache.stats()
+        log.info("\n\nCacheStats: \n${stats}\n\n")
     }
 
     @Profile
