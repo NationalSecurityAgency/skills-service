@@ -31,13 +31,8 @@ export default new Vuex.Store({
     themeStyleId: UniqueIdGenerator.uniqueId('custom-theme-style-node-'),
     isSummaryOnly: false,
     softwareVersion: undefined,
-    indexUrl: null,
   },
   mutations: {
-    indexUrl(state, indexUrl) {
-      // eslint-disable-next-line no-param-reassign
-      state.indexUrl = indexUrl;
-    },
     authToken(state, authToken) {
       axios.defaults.headers.common.Authorization = `Bearer ${authToken}`;
       // eslint-disable-next-line no-param-reassign

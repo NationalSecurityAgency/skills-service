@@ -1,7 +1,7 @@
 <template>
   <div class="container mt-2" v-if="showNewVersionAlert">
         <div class="alert alert-warning alert-dismissible fade show" role="alert">
-    New Skills Software Version is Available!! Please click <a href="javascript:void(0)" @click="reload()">Here</a>
+    New Skills Software Version is Available!! Please click <a href="" @click="window.location.reload()">Here</a>
     to reload.
   </div>
   </div>
@@ -10,12 +10,6 @@
 <script>
     export default {
         name: 'NewSoftwareVersionComponent',
-        props: {
-          refreshUrl: {
-            type: String,
-            required: false,
-          },
-        },
         data() {
             return {
                 showNewVersionAlert: false,
@@ -34,15 +28,6 @@
                 } else if (this.currentLibVersion !== this.libVersion) {
                     this.showNewVersionAlert = true;
                 }
-            },
-        },
-        methods: {
-            reload() {
-              if (this.refreshUrl) {
-                location.href = this.refreshUrl;
-              } else {
-                location.reload();
-              }
             },
         },
     };
