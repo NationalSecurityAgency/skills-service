@@ -23,20 +23,13 @@ public class ClientLibVersionFilter extends OncePerRequestFilter {
     @Value("${skills.clientLibVersion}")
     String clientLibVersion;
 
-    long lastRefresh = -1;
-    String verison;
     private static String HEADER_SKILLS_CLIENT_LIB_VERSION = "Skills-Client-Lib-Version".toLowerCase();
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
-//        response.addHeader(HEADER_SKILLS_CLIENT_LIB_VERSION, clientLibVersion);
-        if (lastRefresh == -1 || (System.currentTimeMillis() - lastRefresh) > 10000) {
-            lastRefresh = System.currentTimeMillis();
-            verison = UUID.randomUUID().toString();
-        }
-        response.addHeader(HEADER_SKILLS_CLIENT_LIB_VERSION, verison);
+        response.addHeader(HEADER_SKILLS_CLIENT_LIB_VERSION, clientLibVersion);
         response.addHeader("Access-Control-Expose-Headers", HEADER_SKILLS_CLIENT_LIB_VERSION);
 
         filterChain.doFilter(request, response);

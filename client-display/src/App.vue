@@ -2,7 +2,6 @@
   <div
     id="app"
     :style="appStyleObject">
-    <div>V1</div>
     <new-software-version-component/>
     <router-view />
   </div>

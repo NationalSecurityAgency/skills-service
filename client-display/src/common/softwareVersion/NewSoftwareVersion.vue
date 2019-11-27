@@ -1,8 +1,7 @@
 <template>
   <div class="container mt-2" v-if="showNewVersionAlert">
         <div class="alert alert-warning alert-dismissible fade show" role="alert">
-    New Skills Software Version is Available!! Please click <a href="" @click="window.location.reload()">Here</a>
-    to reload.
+    New Skills Software Version is Available!! Please refresh the page.
   </div>
   </div>
 </template>
