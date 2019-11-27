@@ -17,6 +17,7 @@ import skills.auth.SecurityMode
 import skills.auth.UserInfo
 import skills.controller.exceptions.SkillException
 
+import javax.annotation.PostConstruct
 import java.util.concurrent.TimeUnit
 
 @Component
@@ -42,12 +43,17 @@ class PkiUserLookup {
     @Value('#{"${skills.authorization.userInfoCache.maxSize:10000}"}')
     Long cacheMaxSize
 
-    LoadingCache userInfoCache = CacheBuilder.newBuilder().expireAfterWrite(cacheExpirationHours, TimeUnit.HOURS).maximumSize(cacheMaxSize).recordStats().build(new CacheLoader<String, UserInfo>() {
-        @Override
-        UserInfo load(String dn) throws Exception {
-            return restTemplate.getForObject(userInfoUri, UserInfo, dn)
-        }
-    })
+    LoadingCache userInfoCache
+
+    @PostConstruct
+    void configureCache() {
+        userInfoCache = CacheBuilder.newBuilder().expireAfterWrite(cacheExpirationHours, TimeUnit.HOURS).maximumSize(cacheMaxSize).recordStats().build(new CacheLoader<String, UserInfo>() {
+            @Override
+            UserInfo load(String dn) throws Exception {
+                return restTemplate.getForObject(userInfoUri, UserInfo, dn)
+            }
+        })
+    }
 
     @Profile
     UserInfo lookupUserDn(String dn) {
