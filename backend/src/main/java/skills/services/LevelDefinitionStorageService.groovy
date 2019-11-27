@@ -64,6 +64,7 @@ class LevelDefinitionStorageService {
         return levelInfo
     }
 
+    @Profile
     LevelInfo getLevelInfo(String projectId, List<? extends LevelDefInterface> levelDefinitions, int totalPoints, int currentScore) {
         SettingsResult setting = settingsService.getProjectSetting(projectId, Settings.LEVEL_AS_POINTS.settingName)
 
