@@ -15,9 +15,11 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Conditional
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory
 import org.springframework.web.client.RestTemplate
+import skills.auth.SecurityMode
 
 import javax.net.ssl.HostnameVerifier
 import javax.net.ssl.SSLContext
@@ -28,6 +30,7 @@ import javax.net.ssl.SSLContext
  */
 @Slf4j
 @Configuration
+@Conditional(SecurityMode.PkiAuth)
 class HttpClientRestTemplateConfig {
 
     @Value('${skills.authorization.userInfoUri}')
