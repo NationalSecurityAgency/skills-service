@@ -69,7 +69,7 @@
         };
       },
       minimumPoints() {
-        return this.$store.state.minimumProjectPoints;
+        return this.$store.getters.config.minimumProjectPoints;
       },
     },
     methods: {

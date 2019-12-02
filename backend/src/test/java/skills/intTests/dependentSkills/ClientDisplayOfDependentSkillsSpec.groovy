@@ -54,6 +54,9 @@ class ClientDisplayOfDependentSkillsSpec extends DefaultIntSpec {
     def "document achievement of dependent skill(s)"() {
         String userId = "user1"
         List<Map> skills = SkillsFactory.createSkills(2)
+        skills.each{
+            it.pointIncrement = 50
+        }
         def subject = SkillsFactory.createSubject()
 
         skillsService.createProject(SkillsFactory.createProject())
@@ -79,6 +82,9 @@ class ClientDisplayOfDependentSkillsSpec extends DefaultIntSpec {
     def "all skills must be achieved before achieved flag is set to true"() {
         String userId = "user1"
         List<Map> skills = SkillsFactory.createSkills(3)
+        skills.each{
+            it.pointIncrement = 40
+        }
         def subject = SkillsFactory.createSubject()
 
         skillsService.createProject(SkillsFactory.createProject())
@@ -108,6 +114,9 @@ class ClientDisplayOfDependentSkillsSpec extends DefaultIntSpec {
     def "all dependents have been achieved so achieved flag should be set to true"() {
         String userId = "user1"
         List<Map> skills = SkillsFactory.createSkills(3)
+        skills.each{
+            it.pointIncrement = 40
+        }
         def subject = SkillsFactory.createSubject()
 
         skillsService.createProject(SkillsFactory.createProject())
@@ -138,6 +147,9 @@ class ClientDisplayOfDependentSkillsSpec extends DefaultIntSpec {
     def "not achieved if transitive dependency is achieved but not direct dependency"() {
         String userId = "user1"
         List<Map> skills = SkillsFactory.createSkills(3)
+        skills.each{
+            it.pointIncrement = 40
+        }
         def subject = SkillsFactory.createSubject()
 
         skillsService.createProject(SkillsFactory.createProject())

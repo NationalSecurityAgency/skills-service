@@ -549,10 +549,16 @@ class CrossProjectSkillsManagementSpec extends DefaultIntSpec {
         def proj1 = SkillsFactory.createProject(1)
         def proj1_subj = SkillsFactory.createSubject(1, 1)
         List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
+        proj1_skills.each{
+            it.pointIncrement = 40
+        }
 
         def proj2 = SkillsFactory.createProject(2)
         def proj2_subj = SkillsFactory.createSubject(2, 2)
         List<Map> proj2_skills = SkillsFactory.createSkills(2, 2, 2)
+        proj2_skills.each{
+            it.pointIncrement = 50
+        }
 
         skillsService.createProject(proj1)
         skillsService.createSubject(proj1_subj)

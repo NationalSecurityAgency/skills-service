@@ -55,6 +55,9 @@ class ReportSkills_DependentSkillsSpecs extends DefaultIntSpec {
 
     def "do not give credit if only some dependencies were fulfilled"(){
         List<Map> skills = SkillsFactory.createSkills(4)
+        skills.each{
+            it.pointIncrement = 25
+        }
 
         when:
         skillsService.createProject(SkillsFactory.createProject())
@@ -78,6 +81,9 @@ class ReportSkills_DependentSkillsSpecs extends DefaultIntSpec {
 
     def "give credit if dependency was fulfilled"(){
         List<Map> skills = SkillsFactory.createSkills(2)
+        skills.each{
+            it.pointIncrement = 50
+        }
 
         when:
         skillsService.createProject(SkillsFactory.createProject())
@@ -98,6 +104,9 @@ class ReportSkills_DependentSkillsSpecs extends DefaultIntSpec {
 
     def "make sure that other users achievements don't affect requested users"(){
         List<Map> skills = SkillsFactory.createSkills(2)
+        skills.each{
+            it.pointIncrement = 50
+        }
 
         when:
         skillsService.createProject(SkillsFactory.createProject())
@@ -124,6 +133,9 @@ class ReportSkills_DependentSkillsSpecs extends DefaultIntSpec {
 
     def "give credit if all dependencies were fulfilled"(){
         List<Map> skills = SkillsFactory.createSkills(4)
+        skills.each{
+            it.pointIncrement = 25
+        }
 
         when:
         skillsService.createProject(SkillsFactory.createProject())

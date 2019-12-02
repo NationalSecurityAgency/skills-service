@@ -32,8 +32,8 @@ class SkillsFactory {
                 version  : version]
     }
 
-    static List<Map> createSkills(int numSkills, int projNumber = 1, int subjNumer = 1) {
-        return (1..numSkills).collect { createSkill(projNumber, subjNumer, it) }
+    static List<Map> createSkills(int numSkills, int projNumber = 1, int subjNumer = 1l, int pointIncrement = 10) {
+        return (1..numSkills).collect { createSkill(projNumber, subjNumer, it, 0, 1, 480, pointIncrement) }
     }
 
     static List<Map> createSkillsWithDifferentVersions(List<Integer> skillVersions, int projNumber = 1, int subjNumber = 1) {

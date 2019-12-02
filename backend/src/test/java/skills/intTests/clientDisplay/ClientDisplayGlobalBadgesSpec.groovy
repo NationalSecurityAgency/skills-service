@@ -72,6 +72,9 @@ class ClientDisplayGlobalBadgesSpec extends DefaultIntSpec {
         def proj1 = SkillsFactory.createProject(1)
         def proj1_subj = SkillsFactory.createSubject(1, 1)
         List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
+        proj1_skills.each{
+            it.pointIncrement = 40
+        }
 
         skillsService.createProject(proj1)
         skillsService.createSubject(proj1_subj)
@@ -105,6 +108,9 @@ class ClientDisplayGlobalBadgesSpec extends DefaultIntSpec {
         def proj1 = SkillsFactory.createProject(1)
         def proj1_subj = SkillsFactory.createSubject(1, 1)
         List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
+        proj1_skills.each{
+            it.pointIncrement = 40
+        }
 
         skillsService.createProject(proj1)
         skillsService.createSubject(proj1_subj)
@@ -142,6 +148,9 @@ class ClientDisplayGlobalBadgesSpec extends DefaultIntSpec {
         def proj1 = SkillsFactory.createProject(1)
         def proj1_subj = SkillsFactory.createSubject(1, 1)
         List<Map> proj1_skills = SkillsFactory.createSkills(5, 1, 1)
+        proj1_skills.each{
+            it.pointIncrement = 40
+        }
 
         skillsService.createProject(proj1)
         skillsService.createSubject(proj1_subj)
@@ -239,6 +248,9 @@ class ClientDisplayGlobalBadgesSpec extends DefaultIntSpec {
         def proj1 = SkillsFactory.createProject(1)
         def proj1_subj = SkillsFactory.createSubject(1, 1)
         List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
+        proj1_skills.each{
+            it.pointIncrement = 40
+        }
 
         skillsService.createProject(proj1)
         skillsService.createSubject(proj1_subj)
@@ -267,9 +279,9 @@ class ClientDisplayGlobalBadgesSpec extends DefaultIntSpec {
         summary.iconClass == "fa fa-seleted-icon"
         summary.skills.size() == 3
         def skill1 = summary.skills.find { it.skillId == proj1_skills.get(0).skillId }
-        skill1.totalPoints == 10
-        skill1.todaysPoints == 10
-        skill1.points == 10
+        skill1.totalPoints == 40
+        skill1.todaysPoints == 40
+        skill1.points == 40
         !summary.dependencyInfo
 
         def skill2 = summary.skills.find { it.skillId == proj1_skills.get(1).skillId }
@@ -287,6 +299,9 @@ class ClientDisplayGlobalBadgesSpec extends DefaultIntSpec {
         def proj1 = SkillsFactory.createProject(1)
         def proj1_subj = SkillsFactory.createSubject(1, 1)
         List<Map> proj1_skills = SkillsFactory.createSkills(4, 1, 1)
+        proj1_skills.each{
+            it.pointIncrement = 40
+        }
 
         skillsService.createProject(proj1)
         skillsService.createSubject(proj1_subj)
@@ -332,6 +347,9 @@ class ClientDisplayGlobalBadgesSpec extends DefaultIntSpec {
         def proj1 = SkillsFactory.createProject(1)
         def proj1_subj = SkillsFactory.createSubject(1, 1)
         List<Map> proj1_skills = SkillsFactory.createSkills(4, 1, 1)
+        proj1_skills.each{
+            it.pointIncrement=25
+        }
 
         skillsService.createProject(proj1)
         skillsService.createSubject(proj1_subj)
@@ -392,6 +410,9 @@ class ClientDisplayGlobalBadgesSpec extends DefaultIntSpec {
         def proj1 = SkillsFactory.createProject(1)
         def proj1_subj = SkillsFactory.createSubject(1, 1)
         List<Map> proj1_skills = SkillsFactory.createSkills(4, 1, 1)
+        proj1_skills.each{
+            it.pointIncrement = 25
+        }
 
         skillsService.createProject(proj1)
         skillsService.createSubject(proj1_subj)
@@ -419,7 +440,7 @@ class ClientDisplayGlobalBadgesSpec extends DefaultIntSpec {
 
         def proj1 = SkillsFactory.createProject(1)
         def proj1_subj = SkillsFactory.createSubject(1, 1)
-        List<Map> proj1_skills = SkillsFactory.createSkills(5, 1, 1)
+        List<Map> proj1_skills = SkillsFactory.createSkills(5, 1, 1, 20)
 
         skillsService.createProject(proj1)
         skillsService.createSubject(proj1_subj)
@@ -483,8 +504,8 @@ class ClientDisplayGlobalBadgesSpec extends DefaultIntSpec {
         def proj2 = SkillsFactory.createProject(2)
         def proj1_subj = SkillsFactory.createSubject(1, 1)
         def proj2_subj = SkillsFactory.createSubject(2, 2)
-        List<Map> proj1_skills = SkillsFactory.createSkills(2, 1, 1)
-        List<Map> proj2_skills = SkillsFactory.createSkills(2, 2, 2)
+        List<Map> proj1_skills = SkillsFactory.createSkills(2, 1, 1, 50)
+        List<Map> proj2_skills = SkillsFactory.createSkills(2, 2, 2, 50)
 
         skillsService.createProject(proj1)
         skillsService.createProject(proj2)

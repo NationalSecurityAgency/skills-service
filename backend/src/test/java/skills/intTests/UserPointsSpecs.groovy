@@ -40,9 +40,9 @@ class UserPointsSpecs extends DefaultIntSpec {
         results.totalCount == 2
         results.data.size() == 2
         results.data.get(0).userId == sampleUserIds.get(0)?.toLowerCase()
-        results.data.get(0).totalPoints == 20
+        results.data.get(0).totalPoints == 70
         results.data.get(1).userId == sampleUserIds.get(1)?.toLowerCase()
-        results.data.get(1).totalPoints == 10
+        results.data.get(1).totalPoints == 35
     }
 
     def 'get project users with paging'() {
@@ -56,13 +56,13 @@ class UserPointsSpecs extends DefaultIntSpec {
         results1.totalCount == 2
         results1.data.size() == 1
         results1.data.get(0).userId == sampleUserIds.get(0)?.toLowerCase()
-        results1.data.get(0).totalPoints == 20
+        results1.data.get(0).totalPoints == 70
         results2
         results2.count == 2
         results2.totalCount == 2
         results2.data.size() == 1
         results2.data.get(0).userId == sampleUserIds.get(1)?.toLowerCase()
-        results2.data.get(0).totalPoints == 10
+        results2.data.get(0).totalPoints == 35
     }
 
     def 'get project users with paging and query'() {
@@ -76,13 +76,13 @@ class UserPointsSpecs extends DefaultIntSpec {
         results1.totalCount == 2  // total user count
         results1.data.size() == 1
         results1.data.get(0).userId == sampleUserIds.get(0)?.toLowerCase()
-        results1.data.get(0).totalPoints == 20
+        results1.data.get(0).totalPoints == 70
         results2
         results2.count == 2
         results2.totalCount == 2
         results2.data.size() == 1
         results2.data.get(0).userId == sampleUserIds.get(1)?.toLowerCase()
-        results2.data.get(0).totalPoints == 10
+        results2.data.get(0).totalPoints == 35
     }
 
     def 'get subject users when project exists'() {
@@ -97,16 +97,16 @@ class UserPointsSpecs extends DefaultIntSpec {
         results1.totalCount == 1
         results1.data.size() == 1
         results1.data.get(0).userId == sampleUserIds.get(0)?.toLowerCase()
-        results1.data.get(0).totalPoints == 10
+        results1.data.get(0).totalPoints == 35
 
         results2
         results2.count == 2
         results2.totalCount == 2
         results2.data.size() == 2
         results2.data.get(0).userId == sampleUserIds.get(0)?.toLowerCase()
-        results2.data.get(0).totalPoints == 10
+        results2.data.get(0).totalPoints == 35
         results2.data.get(1).userId == sampleUserIds.get(1)?.toLowerCase()
-        results2.data.get(1).totalPoints == 10
+        results2.data.get(1).totalPoints == 35
 
         results3
         results3.count == 0
@@ -126,16 +126,16 @@ class UserPointsSpecs extends DefaultIntSpec {
         results1.totalCount == 1
         results1.data.size() == 1
         results1.data.get(0).userId == sampleUserIds.get(0)?.toLowerCase()
-        results1.data.get(0).totalPoints == 10
+        results1.data.get(0).totalPoints == 35
 
         results2
         results2.count == 2
         results2.totalCount == 2
         results2.data.size() == 2
         results2.data.get(0).userId == sampleUserIds.get(0)?.toLowerCase()
-        results2.data.get(0).totalPoints == 10
+        results2.data.get(0).totalPoints == 35
         results2.data.get(1).userId == sampleUserIds.get(1)?.toLowerCase()
-        results2.data.get(1).totalPoints == 10
+        results2.data.get(1).totalPoints == 35
 
         results3
         results3.count == 0
@@ -155,14 +155,14 @@ class UserPointsSpecs extends DefaultIntSpec {
         results1.totalCount == 1
         results1.data.size() == 1
         results1.data.get(0).userId == sampleUserIds.get(0)?.toLowerCase()
-        results1.data.get(0).totalPoints == 10
+        results1.data.get(0).totalPoints == 35
 
         results2
         results2.count == 2
         results2.totalCount == 2
         results2.data.size() == 1
         results2.data.get(0).userId == sampleUserIds.get(0)?.toLowerCase()
-        results2.data.get(0).totalPoints == 10
+        results2.data.get(0).totalPoints == 35
 
         results3
         results3.count == 0
@@ -180,7 +180,7 @@ class UserPointsSpecs extends DefaultIntSpec {
         results1.totalCount == 1
         results1.data.size() == 1
         results1.data.get(0).userId == sampleUserIds.get(0)?.toLowerCase()
-        results1.data.get(0).totalPoints == 10
+        results1.data.get(0).totalPoints == 35
     }
 
 
@@ -216,7 +216,7 @@ class UserPointsSpecs extends DefaultIntSpec {
                             subjectId: subject,
                             skillId: skillId,
                             name: 'Test Skill ' + RandomStringUtils.randomAlphabetic(8),
-                            pointIncrement: 10,
+                            pointIncrement: 35,
                             numPerformToCompletion: 1,
                             pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1,
                             dependenctSkillsIds: dependentSkillIds

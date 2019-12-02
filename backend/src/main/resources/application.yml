@@ -45,6 +45,8 @@ skills:
   clientLibVersion: @maven.build.timestamp@
   config:
     ui:
+      minimumSubjectPoints: 100
+      minimumProjectPoints: 100
       descriptionMaxLength: 2000
       maxTimeWindowInMinutes: 43200
       docsHost: http://skillsasaservicedocs.com

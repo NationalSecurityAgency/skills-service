@@ -834,7 +834,7 @@ class LevelsSpec extends  DefaultIntSpec{
         userSummary = skillsService.getSkillSummary("thing1", projId)
         def userAfterDelete = userSummary.skillsLevel
 
-        createSkill('skills3', 'Test SKill 3', 1)
+        createSkill('skills3', 'Test SKill 3', 80)
         //we need to trigger achievement
         skillsService.addSkill([projectId: projId, skillId: 'skills3'], "thing1", new Date())
         userSummary = skillsService.getSkillSummary("thing1", projId)

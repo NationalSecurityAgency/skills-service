@@ -23,7 +23,7 @@ class PointHistorySpecs extends DefaultIntSpec {
     }
 
     def "history only appears after 2 days of usage"() {
-        List<Map> skills = SkillsFactory.createSkills(2)
+        List<Map> skills = SkillsFactory.createSkills(2, 1, 1,50)
         skills = skills.collect { it.numPerformToCompletion = 2; return it; }
         def subject = SkillsFactory.createSubject()
 
@@ -47,16 +47,16 @@ class PointHistorySpecs extends DefaultIntSpec {
         !res.pointsHistory
 
         res1.pointsHistory.size() == 2
-        res1.pointsHistory.get(0).points == 10
+        res1.pointsHistory.get(0).points == 50
         parseDate(res1.pointsHistory.get(0).dayPerformed) == yesterday.clearTime()
 
-        res1.pointsHistory.get(1).points == 20
+        res1.pointsHistory.get(1).points == 100
         parseDate(res1.pointsHistory.get(1).dayPerformed) == today.clearTime()
     }
 
 
     def "add up points from different skills"() {
-        List<Map> skills = SkillsFactory.createSkills(2)
+        List<Map> skills = SkillsFactory.createSkills(2, 1, 1, 50)
         skills = skills.collect { it.numPerformToCompletion = 2; return it; }
         def subject = SkillsFactory.createSubject()
 
@@ -77,10 +77,10 @@ class PointHistorySpecs extends DefaultIntSpec {
 
         then:
         res1.pointsHistory.size() == 2
-        res1.pointsHistory.get(0).points == 20 // 2 skills added together
+        res1.pointsHistory.get(0).points == 100 // 2 skills added together
         parseDate(res1.pointsHistory.get(0).dayPerformed) == yesterday.clearTime()
 
-        res1.pointsHistory.get(1).points == 30
+        res1.pointsHistory.get(1).points == 150
         parseDate(res1.pointsHistory.get(1).dayPerformed) == today.clearTime()
     }
 
@@ -174,7 +174,7 @@ class PointHistorySpecs extends DefaultIntSpec {
     }
 
     def "SUBJECTS: history only appears after 2 days of usage"() {
-        List<Map> skills = SkillsFactory.createSkills(2)
+        List<Map> skills = SkillsFactory.createSkills(2, 1, 1, 50)
         skills = skills.collect { it.numPerformToCompletion = 2; return it; }
         def subject = SkillsFactory.createSubject()
 
@@ -198,17 +198,17 @@ class PointHistorySpecs extends DefaultIntSpec {
         !res.pointsHistory
 
         res1.pointsHistory.size() == 2
-        res1.pointsHistory.get(0).points == 10
+        res1.pointsHistory.get(0).points == 50
         parseDate(res1.pointsHistory.get(0).dayPerformed) == yesterday.clearTime()
 
-        res1.pointsHistory.get(1).points == 20
+        res1.pointsHistory.get(1).points == 100
         parseDate(res1.pointsHistory.get(1).dayPerformed) == today.clearTime()
     }
 
 
 
     def "SUBJECTS: add up points from different skills"() {
-        List<Map> skills = SkillsFactory.createSkills(2)
+        List<Map> skills = SkillsFactory.createSkills(2, 1, 1, 50)
         skills = skills.collect { it.numPerformToCompletion = 2; return it; }
         def subject = SkillsFactory.createSubject()
 
@@ -229,10 +229,10 @@ class PointHistorySpecs extends DefaultIntSpec {
 
         then:
         res1.pointsHistory.size() == 2
-        res1.pointsHistory.get(0).points == 20 // 2 skills added together
+        res1.pointsHistory.get(0).points == 100 // 2 skills added together
         parseDate(res1.pointsHistory.get(0).dayPerformed) == yesterday.clearTime()
 
-        res1.pointsHistory.get(1).points == 30
+        res1.pointsHistory.get(1).points == 150
         parseDate(res1.pointsHistory.get(1).dayPerformed) == today.clearTime()
     }
 

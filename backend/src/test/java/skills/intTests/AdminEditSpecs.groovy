@@ -287,6 +287,12 @@ class AdminEditSpecs extends DefaultIntSpec {
         List<Map> subjectSkills = SkillsFactory.createSkills(5, 1, 1)
         def subject2 = SkillsFactory.createSubject(1, 2)
         List<Map> subjectSkills2 = SkillsFactory.createSkills(5, 1, 2)
+        subjectSkills.each{
+            it.pointIncrement = 20
+        }
+        subjectSkills2.each{
+            it.pointIncrement = 20
+        }
 
         def expectedSkill1 = subjectSkills.get(0)
         def expectedSkill2 = subjectSkills2.get(1)
@@ -329,6 +335,9 @@ class AdminEditSpecs extends DefaultIntSpec {
         def proj1 = SkillsFactory.createProject(1)
         def proj1_subj = SkillsFactory.createSubject(1, 1)
         List<Map> proj1_skills = SkillsFactory.createSkills(5, 1, 1)
+        proj1_skills.each {
+            it.pointIncrement = 20
+        }
 
         skillsService.createProject(proj1)
         skillsService.createSubject(proj1_subj)
@@ -469,6 +478,8 @@ class AdminEditSpecs extends DefaultIntSpec {
         skillsService.createSubject(subj)
 
         List<Map> skills = SkillsFactory.createSkills(3)
+        skills[2].pointIncrement = 80
+
         skillsService.createSkills(skills)
 
 
@@ -496,28 +507,28 @@ class AdminEditSpecs extends DefaultIntSpec {
         then:
         skillSummaryBeforeEdit.skills[0].points == 10
         skillSummaryBeforeEdit.skills[0].totalPoints == 10
-        skillSummaryBeforeEdit.skillsLevel == 4
+        skillSummaryBeforeEdit.skillsLevel == 1
         skillSummaryBeforeEdit.points == 20
-        skillSummaryBeforeEdit.totalPoints == 30
+        skillSummaryBeforeEdit.totalPoints == 100
         skillSummaryBeforeEdit.todaysPoints == 20
         projectSummaryBeforeEdit.points == 20
-        projectSummaryBeforeEdit.totalPoints == 30
+        projectSummaryBeforeEdit.totalPoints == 100
         projectSummaryBeforeEdit.todaysPoints == 20
         projectSummaryBeforeEdit.subjects[0].points == 20
-        projectSummaryBeforeEdit.subjects[0].totalPoints == 30
+        projectSummaryBeforeEdit.subjects[0].totalPoints == 100
         projectSummaryBeforeEdit.subjects[0].todaysPoints == 20
 
         skillSummaryAfterEdit.skills[0].points == 100
         skillSummaryAfterEdit.skills[0].totalPoints == 100
-        skillSummaryAfterEdit.skillsLevel == 5
+        skillSummaryAfterEdit.skillsLevel == 3
         skillSummaryAfterEdit.points == 110
-        skillSummaryAfterEdit.totalPoints == 120
+        skillSummaryAfterEdit.totalPoints == 190
         skillSummaryAfterEdit.todaysPoints == 110
         projectSummaryAfterEdit.points == 110
-        projectSummaryAfterEdit.totalPoints == 120
+        projectSummaryAfterEdit.totalPoints == 190
         projectSummaryAfterEdit.todaysPoints == 110
         projectSummaryAfterEdit.subjects[0].points == 110
-        projectSummaryAfterEdit.subjects[0].totalPoints == 120
+        projectSummaryAfterEdit.subjects[0].totalPoints == 190
         projectSummaryAfterEdit.subjects[0].todaysPoints == 110
     }
 
@@ -528,6 +539,7 @@ class AdminEditSpecs extends DefaultIntSpec {
         skillsService.createSubject(subj)
 
         List<Map> skills = SkillsFactory.createSkills(3)
+        skills[2].pointIncrement = 80
         skillsService.createSkills(skills)
 
 
@@ -553,15 +565,15 @@ class AdminEditSpecs extends DefaultIntSpec {
         then:
         skillSummaryBeforeEdit.skills[0].points == 10
         skillSummaryBeforeEdit.skills[0].totalPoints == 10
-        skillSummaryBeforeEdit.skillsLevel == 4
+        skillSummaryBeforeEdit.skillsLevel == 1
         skillSummaryBeforeEdit.points == 20
-        skillSummaryBeforeEdit.totalPoints == 30
+        skillSummaryBeforeEdit.totalPoints == 100
 
         skillSummaryAfterEdit.skills[0].points == 5
         skillSummaryAfterEdit.skills[0].totalPoints == 5
-        skillSummaryAfterEdit.skillsLevel == 4
+        skillSummaryAfterEdit.skillsLevel == 1
         skillSummaryAfterEdit.points == 15
-        skillSummaryAfterEdit.totalPoints == 25
+        skillSummaryAfterEdit.totalPoints == 95
     }
 
     def "decrease skill point increment after multiple users have performed occurrences"(){
@@ -571,6 +583,7 @@ class AdminEditSpecs extends DefaultIntSpec {
         skillsService.createSubject(subj)
 
         List<Map> skills = SkillsFactory.createSkills(3)
+        skills[2].pointIncrement = 80
         skillsService.createSkills(skills)
 
 
@@ -608,48 +621,47 @@ class AdminEditSpecs extends DefaultIntSpec {
         u123SummaryBeforeEdit.skills[1].points == 10
         u123SummaryBeforeEdit.skills[1].totalPoints == 10
         u123SummaryBeforeEdit.points == 20
-        u123SummaryBeforeEdit.totalPoints == 30
-        u123SummaryBeforeEdit.skillsLevel == 4
+        u123SummaryBeforeEdit.totalPoints == 100
+        u123SummaryBeforeEdit.skillsLevel == 1
 
         u123SummaryAfterEdit.skills[0].points == 5
         u123SummaryAfterEdit.skills[0].totalPoints == 5
         u123SummaryAfterEdit.skills[1].points == 10
         u123SummaryAfterEdit.skills[1].totalPoints == 10
         u123SummaryAfterEdit.points == 15
-        u123SummaryAfterEdit.totalPoints == 25
-        u123SummaryAfterEdit.skillsLevel == 4
+        u123SummaryAfterEdit.totalPoints == 95
+        u123SummaryAfterEdit.skillsLevel == 1
 
 
         u124SummaryBeforeEdit.skills[0].points == 10
         u124SummaryBeforeEdit.skills[0].totalPoints == 10
-        u124SummaryBeforeEdit.skillsLevel == 2
+        u124SummaryBeforeEdit.skillsLevel == 1
         u124SummaryBeforeEdit.points == 10
-        u124SummaryBeforeEdit.totalPoints == 30
+        u124SummaryBeforeEdit.totalPoints == 100
 
         u124SummaryAfterEdit.skills[0].points == 5
         u124SummaryAfterEdit.skills[0].totalPoints == 5
-        u124SummaryAfterEdit.skillsLevel == 2
+        u124SummaryAfterEdit.skillsLevel == 1
         u124SummaryAfterEdit.points == 5
-        u124SummaryAfterEdit.totalPoints == 25
+        u124SummaryAfterEdit.totalPoints == 95
 
         u125SummaryBeforeEdit.skills[0].points == 0
         u125SummaryBeforeEdit.skills[0].totalPoints == 10
         u125SummaryBeforeEdit.skills[1].points == 0
         u125SummaryBeforeEdit.skills[1].totalPoints == 10
-        u125SummaryBeforeEdit.skills[2].points == 10
-        u125SummaryBeforeEdit.skills[2].totalPoints == 10
-        u125SummaryBeforeEdit.totalPoints == 30
+        u125SummaryBeforeEdit.skills[2].points == 80
+        u125SummaryBeforeEdit.skills[2].totalPoints == 80
+        u125SummaryBeforeEdit.totalPoints == 100
 
         u125SummaryAfterEdit.skills[0].points == 0
         u125SummaryAfterEdit.skills[0].totalPoints == 5
         u125SummaryAfterEdit.skills[1].points == 0
         u125SummaryAfterEdit.skills[1].totalPoints == 10
-        u125SummaryAfterEdit.skills[2].points == 10
-        u125SummaryAfterEdit.skills[2].totalPoints == 10
-
+        u125SummaryAfterEdit.skills[2].points == 80
+        u125SummaryAfterEdit.skills[2].totalPoints == 80
         u125SummaryAfterEdit.skillsLevel == u125SummaryBeforeEdit.skillsLevel
         u125SummaryAfterEdit.points == u125SummaryBeforeEdit.points
-        u125SummaryAfterEdit.totalPoints == 25
+        u125SummaryAfterEdit.totalPoints == 95
     }
 
     def "changes to skill points causes users's point history to be updated"(){
@@ -662,6 +674,8 @@ class AdminEditSpecs extends DefaultIntSpec {
         def skill1 = SkillsFactory.createSkill(1, 1, 1, 0, 3, 60)
         def skill2 = SkillsFactory.createSkill(1, 1, 2)
         def skill3 = SkillsFactory.createSkill(1, 1, 3)
+
+        skill3.pointIncrement = 60
 
         skillsService.createSkills([skill1, skill2, skill3])
 
@@ -693,11 +707,11 @@ class AdminEditSpecs extends DefaultIntSpec {
 
         then:
         skillSummaryBeforeEdit.points == 30
-        skillSummaryBeforeEdit.totalPoints == 50
+        skillSummaryBeforeEdit.totalPoints == 100
         skillSummaryBeforeEdit.todaysPoints == 20
         pointHistoryBeforeEdit.pointsHistory[0].points == 10
         pointHistoryBeforeEdit.pointsHistory[1].points == 30
-        skillSummaryAfterEdit.totalPoints == 35
+        skillSummaryAfterEdit.totalPoints == 85
         skillSummaryAfterEdit.points == 15
         skillSummaryAfterEdit.todaysPoints == 10
         pointHistoryAfterEdit.pointsHistory[0].points == 5
@@ -713,6 +727,7 @@ class AdminEditSpecs extends DefaultIntSpec {
         def skill1 = SkillsFactory.createSkill(1, 1, 1, 0, 3, 60)
         def skill2 = SkillsFactory.createSkill(1, 1, 2)
         def skill3 = SkillsFactory.createSkill(1, 1, 3)
+        skill3.pointIncrement = 60
 
         skillsService.createSkills([skill1, skill2, skill3])
 
@@ -757,38 +772,38 @@ class AdminEditSpecs extends DefaultIntSpec {
 
         then:
         u123SkillSummaryBeforeEdit.points == 30
-        u123SkillSummaryBeforeEdit.totalPoints == 50
+        u123SkillSummaryBeforeEdit.totalPoints == 100
         u123SkillSummaryBeforeEdit.todaysPoints == 20
         u123PointHistoryBeforeEdit.pointsHistory[0].points == 10
         u123PointHistoryBeforeEdit.pointsHistory[1].points == 30
-        u123SkillSummaryAfterEdit.totalPoints == 35
+        u123SkillSummaryAfterEdit.totalPoints == 85
         u123SkillSummaryAfterEdit.points == 15
         u123SkillSummaryAfterEdit.todaysPoints == 10
         u123pointHistoryAfterEdit.pointsHistory[0].points == 5
         u123pointHistoryAfterEdit.pointsHistory[1].points == 15
 
         u124SkillSummaryBeforeEdit.points == 30
-        u124SkillSummaryBeforeEdit.totalPoints == 50
+        u124SkillSummaryBeforeEdit.totalPoints == 100
         u124SkillSummaryBeforeEdit.todaysPoints == 20
         u124PointHistoryBeforeEdit.pointsHistory[0].points == 10
         u124PointHistoryBeforeEdit.pointsHistory[1].points == 30
-        u124SkillSummaryAfterEdit.totalPoints == 35
+        u124SkillSummaryAfterEdit.totalPoints == 85
         u124SkillSummaryAfterEdit.points == 15
         u124SkillSummaryAfterEdit.todaysPoints == 10
         u124pointHistoryAfterEdit.pointsHistory[0].points == 5
         u124pointHistoryAfterEdit.pointsHistory[1].points == 15
 
-        u125SkillSummaryBeforeEdit.points == 30
-        u125SkillSummaryBeforeEdit.totalPoints == 50
+        u125SkillSummaryBeforeEdit.points == 80
+        u125SkillSummaryBeforeEdit.totalPoints == 100
         u125SkillSummaryBeforeEdit.todaysPoints == 10
-        u125PointHistoryBeforeEdit.pointsHistory[0].points == 10
-        u125PointHistoryBeforeEdit.pointsHistory[1].points == 20
-        u125PointHistoryBeforeEdit.pointsHistory[2].points == 30
-        u125SkillSummaryAfterEdit.totalPoints == 35
-        u125SkillSummaryAfterEdit.points == 25
+        u125PointHistoryBeforeEdit.pointsHistory[0].points == 60
+        u125PointHistoryBeforeEdit.pointsHistory[1].points == 70
+        u125PointHistoryBeforeEdit.pointsHistory[2].points == 80
+        u125SkillSummaryAfterEdit.totalPoints == 85
+        u125SkillSummaryAfterEdit.points == 75
         u125SkillSummaryAfterEdit.todaysPoints == 5
-        u125pointHistoryAfterEdit.pointsHistory[0].points == 10
-        u125pointHistoryAfterEdit.pointsHistory[1].points == 20
-        u125pointHistoryAfterEdit.pointsHistory[2].points == 25
+        u125pointHistoryAfterEdit.pointsHistory[0].points == 60
+        u125pointHistoryAfterEdit.pointsHistory[1].points == 70
+        u125pointHistoryAfterEdit.pointsHistory[2].points == 75
     }
 }

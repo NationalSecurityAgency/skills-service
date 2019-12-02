@@ -45,6 +45,9 @@ class DataCleanupSpecs extends DefaultIntSpec {
         def proj1 = SkillsFactory.createProject(1)
         def proj1_subj = SkillsFactory.createSubject(1, 1)
         List<Map> proj1_skills = SkillsFactory.createSkills(5, 1, 1)
+        proj1_skills.each{
+            it.pointIncrement = 25
+        }
 
         skillsService.createProject(proj1)
         skillsService.createSubject(proj1_subj)
@@ -69,6 +72,9 @@ class DataCleanupSpecs extends DefaultIntSpec {
         def proj1 = SkillsFactory.createProject(1)
         def proj1_subj = SkillsFactory.createSubject(1, 1)
         List<Map> proj1_skills = SkillsFactory.createSkills(5, 1, 1)
+        proj1_skills.each{
+            it.pointIncrement = 20
+        }
 
         skillsService.createProject(proj1)
         skillsService.createSubject(proj1_subj)

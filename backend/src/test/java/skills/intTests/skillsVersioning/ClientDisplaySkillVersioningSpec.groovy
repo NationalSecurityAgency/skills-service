@@ -9,6 +9,9 @@ class ClientDisplaySkillVersioningSpec extends DefaultIntSpec {
     def "create skills with different versions; only the correct skills are returned when filtered by version 1"() {
         String userId = "user1"
         List<Map> skills = SkillsFactory.createSkillsWithDifferentVersions([0, 0, 1, 1, 1, 2])
+        skills.each{
+            it.pointIncrement = 20
+        }
         def subject = SkillsFactory.createSubject()
 
         skillsService.createProject(SkillsFactory.createProject())
@@ -25,11 +28,11 @@ class ClientDisplaySkillVersioningSpec extends DefaultIntSpec {
 
         then:
         skillSummary0.skills.size() == 2
-        skillSummary0.totalPoints == 20
+        skillSummary0.totalPoints == 40
         skillSummary0.skills.collect({ it.skillId }).sort() == ["skill1", "skill2"]
 
         skillSummary1.skills.size() == 5
-        skillSummary1.totalPoints == 50
+        skillSummary1.totalPoints == 100
         skillSummary1.skills.collect({ it.skillId }).sort() == ["skill1", "skill2", "skill3", "skill4", "skill5"]
 
         def skill1 = skillSummary1.skills.find { it.skillId == "skill1" }
@@ -41,15 +44,18 @@ class ClientDisplaySkillVersioningSpec extends DefaultIntSpec {
         skill2.dependencyInfo.achieved
 
         skillSummary2.skills.size() == 6
-        skillSummary2.totalPoints == 60
+        skillSummary2.totalPoints == 120
         skillSummary2.skills.collect({
             it.skillId
         }).sort() == ["skill1", "skill2", "skill3", "skill4", "skill5", "skill6"]
     }
 
-    def "user points DO NOT respect the version - if user ends those points they are proudly displayed in all versions"() {
+    def "user points DO NOT respect the version - if user earns those points they are proudly displayed in all versions"() {
         String userId = "user1"
         List<Map> skills = SkillsFactory.createSkillsWithDifferentVersions([0, 0, 1, 1, 1, 2])
+        skills.each{
+            it.pointIncrement = 20
+        }
         def subject = SkillsFactory.createSubject()
 
         skillsService.createProject(SkillsFactory.createProject())
@@ -70,24 +76,24 @@ class ClientDisplaySkillVersioningSpec extends DefaultIntSpec {
 
         then:
         skillSummary0.skills.size() == 2
-        skillSummary0.totalPoints == 20
+        skillSummary0.totalPoints == 40
         skillSummary0.skills.collect({ it.skillId }).sort() == ["skill1", "skill2"]
-        skillSummary0.points == 60
-        skillSummary0.todaysPoints == 30
+        skillSummary0.points == 120
+        skillSummary0.todaysPoints == 60
 
         skillSummary1.skills.size() == 5
-        skillSummary1.totalPoints == 50
+        skillSummary1.totalPoints == 100
         skillSummary1.skills.collect({ it.skillId }).sort() == ["skill1", "skill2", "skill3", "skill4", "skill5"]
-        skillSummary1.points == 60
-        skillSummary1.todaysPoints == 30
+        skillSummary1.points == 120
+        skillSummary1.todaysPoints == 60
 
         skillSummary2.skills.size() == 6
-        skillSummary2.totalPoints == 60
+        skillSummary2.totalPoints == 120
         skillSummary2.skills.collect({
             it.skillId
         }).sort() == ["skill1", "skill2", "skill3", "skill4", "skill5", "skill6"]
-        skillSummary2.points == 60
-        skillSummary2.todaysPoints == 30
+        skillSummary2.points == 120
+        skillSummary2.todaysPoints == 60
     }
 
     def "user points to NOT respect the version (skills with numPerformToCompletion > 1) - if user ends those points they are proudly displayed in all versions"() {
