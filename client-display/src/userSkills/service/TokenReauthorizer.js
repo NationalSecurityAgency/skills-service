@@ -1,24 +1,34 @@
 import SkillsConfiguration from '@skills/skills-client-configuration';
 
 import axios from 'axios';
-import createAuthRefreshInterceptor from 'axios-auth-refresh';
+import createAuthRefreshInterceptor from 'axios-auth-refresh/src/index.js';
 import router from '@/router';
 import store from '@/store';
 
 // eslint-disable-next-line
 let service = {};
 
+
 const refreshAuthorization = (failedRequest) => {
-  SkillsConfiguration.setAuthToken(null);
+  if (SkillsConfiguration.getAuthToken() === 'pki') {
+    router.push({
+      name: 'error',
+      params: {
+        errorMessage: 'Authentication failed',
+      },
+    });
+    return Promise.reject();
+  }
   return service.getAuthenticationToken()
     .then((result) => {
-      if (!result.access_token || result.access_token === 'pki') {
+      if (!result.data.access_token || result.data.access_token === 'pki') {
         delete axios.defaults.headers.common.Authorization;
       } else {
-        SkillsConfiguration.setAuthToken(result.access_token);
+        const accessToken = result.data.access_token;
+        SkillsConfiguration.setAuthToken(accessToken);
         // eslint-disable-next-line no-param-reassign
-        failedRequest.response.config.headers.Authorization = `Bearer ${result.access_token}`;
-        axios.defaults.headers.common.Authorization = `Bearer ${result.access_token}`;
+        failedRequest.response.config.headers.Authorization = `Bearer ${accessToken}`;
+        axios.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
       }
       return Promise.resolve();
     });
@@ -28,8 +38,8 @@ const refreshAuthorization = (failedRequest) => {
 createAuthRefreshInterceptor(axios, refreshAuthorization);
 
 axios.interceptors.response.use(response => response, (error) => {
-  if (!error.response || (error.response && error.response.status !== 401)) {
-    const errorMessage = (error.response && error.response.data) ? error.response.data.error_description : '';
+  if (!error || !error.response || (error.response && error.response.status !== 401)) {
+    const errorMessage = (error && error.response && error.response.data) ? error.response.data.error_description : '';
     router.push({
       name: 'error',
       params: {
