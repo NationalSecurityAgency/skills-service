@@ -1,5 +1,6 @@
 package skills.auth.aop
 
+import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
 import org.aspectj.lang.ProceedingJoinPoint
 import org.aspectj.lang.annotation.Around
@@ -30,21 +31,28 @@ class AuthorizationAspect {
     @Autowired
     UserInfoService userInfoService
 
+    @Profile
     @Around(value='@within(AdminUsersOnlyWhenUserIdSupplied) || @annotation(AdminUsersOnlyWhenUserIdSupplied)')
     def authorizeAdmin(ProceedingJoinPoint joinPoint) {
         String userIdProvided = getUserIdParam(joinPoint)
         if (userIdProvided) {
             UserInfo userInfo = userInfoService.currentUser
-            List<UserSkillsGrantedAuthority> authorities = userInfo?.authorities
-            if (!authorities?.find { it.role.roleName == RoleName.ROLE_PROJECT_ADMIN }) {
-                log.trace("Access is denied for userName=[{}]", userInfo?.username)
-                throw new AccessDeniedException(messages.getMessage(
-                        "AbstractAccessDecisionManager.accessDenied", "Access is denied"))
-            }
+            checkAdminAccess(userInfo)
         }
         return joinPoint.proceed()
     }
 
+    @Profile
+    void checkAdminAccess(UserInfo userInfo) {
+        List<UserSkillsGrantedAuthority> authorities = userInfo?.authorities
+        if (!authorities?.find { it.role.roleName == RoleName.ROLE_PROJECT_ADMIN }) {
+            log.trace("Access is denied for userName=[{}]", userInfo?.username)
+            throw new AccessDeniedException(messages.getMessage(
+                    "AbstractAccessDecisionManager.accessDenied", "Access is denied"))
+        }
+    }
+
+    @Profile
     private String getUserIdParam(ProceedingJoinPoint joinPoint) {
         String userId
         CodeSignature codeSignature = joinPoint.getSignature()
