@@ -64,7 +64,7 @@
         };
       },
       minimumPoints() {
-        return this.$store.state.minimumSubjectPoints;
+        return this.$store.getters.config.minimumSubjectPoints;
       },
     },
     methods: {

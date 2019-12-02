@@ -66,7 +66,7 @@ class DeleteSkillEventSpecs extends DefaultIntSpec {
     def "delete skill event when there more than 1 events fall within the configured time window"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
-        def skills = SkillsFactory.createSkills(2 )
+        def skills = SkillsFactory.createSkills(2, 1, 1, 20 )
         skills[0].numPerformToCompletion = 5
         skills[0].numMaxOccurrencesIncrementInterval = 3
 
@@ -124,7 +124,7 @@ class DeleteSkillEventSpecs extends DefaultIntSpec {
     }
 
     def "cannot delete skill event after a dependent skill was performed"() {
-        List<Map> skills = SkillsFactory.createSkills(2)
+        List<Map> skills = SkillsFactory.createSkills(2, 1, 1, 50)
         String userId = "user1"
         Date date = new Date()
 
@@ -161,13 +161,13 @@ class DeleteSkillEventSpecs extends DefaultIntSpec {
 
         String subj = "testSubj"
         Map skill1 = [projectId: projId, subjectId: subj, skillId: "skill1", name  : "Test Skill 1", type: "Skill",
-                      pointIncrement: 10, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1]
+                      pointIncrement: 25, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1]
         Map skill2 = [projectId: projId, subjectId: subj, skillId: "skill2", name  : "Test Skill 2", type: "Skill",
-                      pointIncrement: 10, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1]
+                      pointIncrement: 25, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1]
         Map skill3 = [projectId: projId, subjectId: subj, skillId: "skill3", name  : "Test Skill 3", type: "Skill",
-                      pointIncrement: 10, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1]
+                      pointIncrement: 25, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1]
         Map skill4 = [projectId: projId, subjectId: subj, skillId: "skill4", name  : "Test Skill 4", type: "Skill",
-                      pointIncrement: 10, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1, dependentSkillsIds: [skill1.skillId, skill2.skillId, skill3.skillId]]
+                      pointIncrement: 25, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1, dependentSkillsIds: [skill1.skillId, skill2.skillId, skill3.skillId]]
 
         Map badge = [projectId: projId, badgeId: 'badge1', name: 'Test Badge 1']
         List<String> requiredSkillsIds = [skill1.skillId, skill2.skillId, skill3.skillId, skill4.skillId]

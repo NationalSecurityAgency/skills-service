@@ -105,10 +105,10 @@
           .reverse();
       },
       minimumPoints() {
-        return this.$store.state.minimumProjectPoints;
+        return this.$store.getters.config.minimumProjectPoints;
       },
       minimumSubjectPoints() {
-        return this.$store.state.minimumSubjectPoints;
+        return this.$store.getters.config.minimumSubjectPoints;
       },
       disable() {
         return (!this.currentSelectedUser || !this.currentSelectedUser.userId || this.currentSelectedUser.userId.length === 0) || this.projectTotalPoints < this.minimumPoints;

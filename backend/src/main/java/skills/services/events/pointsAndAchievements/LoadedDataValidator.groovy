@@ -13,10 +13,10 @@ import skills.storage.repos.SkillEventsSupportRepo
 @CompileStatic
 class LoadedDataValidator {
 
-    @Value('#{"${skills.subjects.minimumPoints:20}"}')
+    @Value('#{"${skills.config.ui.minimumSubjectPoints}"}')
     int minimumSubjectPoints
 
-    @Value('#{"${skills.project.minimumPoints:20}"}')
+    @Value('#{"${skills.config.ui.minimumProjectPoints}"}')
     int minimumProjectPoints
 
     void validate(LoadedData loadedData) {

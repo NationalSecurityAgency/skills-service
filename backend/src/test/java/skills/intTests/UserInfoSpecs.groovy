@@ -11,7 +11,7 @@ class UserInfoSpecs extends DefaultIntSpec {
 
         def proj1 = SkillsFactory.createProject(1)
         def proj1_subj = SkillsFactory.createSubject(1, 1)
-        List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
+        List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1, 40)
 
         skillsService.createProject(proj1)
         skillsService.createSubject(proj1_subj)

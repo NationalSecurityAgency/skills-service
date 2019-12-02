@@ -81,9 +81,11 @@ class ReportSkills_TimeWindowSpecs extends DefaultIntSpec {
 
         skills.get(0).pointIncrementInterval = 0 // disable
         skills.get(0).numPerformToCompletion = 3
+        skills.get(0).pointIncrement = 40
 
         skills.get(1).pointIncrementInterval = 5 // 5 minutes
         skills.get(1).numPerformToCompletion = 3
+        skills.get(1).pointIncrement = 40
 
         skillsService.createProject(proj)
         skillsService.createSubject(subject)

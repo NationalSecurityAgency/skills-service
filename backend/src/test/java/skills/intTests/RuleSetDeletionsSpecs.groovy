@@ -253,7 +253,7 @@ class RuleSetDeletionsSpecs  extends DefaultIntSpec {
     }
 
     def "when skill is removed properly adjust points for users that achieved points for that skill"(){
-        List<Map> subj1 = [10,20,30].collect { [projectId: projId, subjectId: "subj1", skillId: "s1${it}".toString(), name: "subj1 ${it}".toString(), type: "Skill", pointIncrement: it, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1] }
+        List<Map> subj1 = [10,30,60].collect { [projectId: projId, subjectId: "subj1", skillId: "s1${it}".toString(), name: "subj1 ${it}".toString(), type: "Skill", pointIncrement: it, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1] }
         List<Map> subj2 = [10,20,30,40].collect { [projectId: projId, subjectId: "subj2", skillId: "s2${it}".toString(), name: "subj2 ${it}".toString(), type: "Skill", pointIncrement: it, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1] }
 
         skillsService.createProject([projectId: projId, name: "Test Project"])
@@ -274,16 +274,16 @@ class RuleSetDeletionsSpecs  extends DefaultIntSpec {
         // SUBJECT 1
         // user 1 has skills in all 3
         skillsService.addSkill([projectId: projId, skillId: subj1.get(0).skillId], user1Id, new Date()) //1 //10
-        skillsService.addSkill([projectId: projId, skillId: subj1.get(1).skillId], user1Id, new Date()) //2+1 // 20 + 10
-        skillsService.addSkill([projectId: projId, skillId: subj1.get(2).skillId], user1Id, new Date()) //3+2+1 // 30 + 20 + 10
-        skillsService.addSkill([projectId: projId, skillId: "s15"], user1Id, new Date()) //3+2+1 // 30 + 20 + 10 + 5
+        skillsService.addSkill([projectId: projId, skillId: subj1.get(1).skillId], user1Id, new Date()) //2+1 // 20 + 30
+        skillsService.addSkill([projectId: projId, skillId: subj1.get(2).skillId], user1Id, new Date()) //3+2+1 // 60 + 30 + 10
+        skillsService.addSkill([projectId: projId, skillId: "s15"], user1Id, new Date()) //3+2+1 // 60 + 30 + 10 + 5
 
         // user 2 has 1s and 2nd only
         skillsService.addSkill([projectId: projId, skillId: subj1.get(0).skillId], user2Id, new Date()) //1 // 10
         skillsService.addSkill([projectId: projId, skillId: subj1.get(1).skillId], user2Id, new Date()) //2+1 // 20 + 10
 
         // SUBJECT 2
-        skillsService.addSkill([projectId: projId, skillId: subj2.get(0).skillId], user1Id, new Date()) //3+2+1+1 // 30 + 20 + 10 + 10
+        skillsService.addSkill([projectId: projId, skillId: subj2.get(0).skillId], user1Id, new Date()) //3+2+1+1 // 60 + 30 + 10 + 10
         skillsService.addSkill([projectId: projId, skillId: subj2.get(0).skillId], user2Id, new Date()) //2+1+1 // 20 + 10 + 10 + 5
 
 
@@ -319,25 +319,25 @@ class RuleSetDeletionsSpecs  extends DefaultIntSpec {
 
         // ----- user 1 -----
         user1OverallSummary.skillsLevel == 3
-        user1OverallSummary.points == 75
-        user1OverallSummary.totalPoints == 165
-        user1OverallSummary.levelTotalPoints == 36
-        user1OverallSummary.todaysPoints == 75
+        user1OverallSummary.points == 115
+        user1OverallSummary.totalPoints == 205
+        user1OverallSummary.levelTotalPoints == 45
+        user1OverallSummary.todaysPoints == 115
         user1OverallSummary.subjects.size() == 2
         user1OverallSummary.subjects.find { it.subjectId == "subj1" }.skillsLevel == 5
-        user1OverallSummary.subjects.find { it.subjectId == "subj1" }.points == 65
+        user1OverallSummary.subjects.find { it.subjectId == "subj1" }.points == 105
         user1OverallSummary.subjects.find { it.subjectId == "subj1" }.levelTotalPoints == -1
-        user1OverallSummary.subjects.find { it.subjectId == "subj1" }.todaysPoints == 65
+        user1OverallSummary.subjects.find { it.subjectId == "subj1" }.todaysPoints == 105
         user1OverallSummary.subjects.find { it.subjectId == "subj2" }.skillsLevel == 1
         user1OverallSummary.subjects.find { it.subjectId == "subj2" }.points == 10
         user1OverallSummary.subjects.find { it.subjectId == "subj2" }.levelTotalPoints == 15
         user1OverallSummary.subjects.find { it.subjectId == "subj2" }.todaysPoints == 10
 
         user1Subj1Summary.skillsLevel == 5
-        user1Subj1Summary.points == 65
+        user1Subj1Summary.points == 105
         user1Subj1Summary.levelTotalPoints == -1
-        user1Subj1Summary.todaysPoints == 65
-        user1Subj1Summary.skills.collect { it.skillId }.sort() == ["s110", "s120", "s130", "s15"]
+        user1Subj1Summary.todaysPoints == 105
+        user1Subj1Summary.skills.collect { it.skillId }.sort() == ["s110", "s130", "s15", "s160"]
 
         user1Subj2Summary.skillsLevel == 1
         user1Subj2Summary.points == 10
@@ -345,28 +345,28 @@ class RuleSetDeletionsSpecs  extends DefaultIntSpec {
         user1Subj2Summary.todaysPoints == 10
         user1Subj2Summary.skills.collect { it.skillId }.sort() == ["s210", "s220", "s230", "s240"]
 
-        user1PerformedSkills.data.collect { it.skillId }.sort() == ["s110", "s120", "s130", "s15", "s210"]
+        user1PerformedSkills.data.collect { it.skillId }.sort() == ["s110", "s130", "s15", "s160", "s210"]
 
         afterDeletionUser1OverallSummary.skillsLevel == 3
-        afterDeletionUser1OverallSummary.points == 65
-        afterDeletionUser1OverallSummary.levelTotalPoints == 38 // should count up to the 4th level since 3rd level was already achieved
-        afterDeletionUser1OverallSummary.levelPoints == 0
-        afterDeletionUser1OverallSummary.todaysPoints == 65
+        afterDeletionUser1OverallSummary.points == 105
+        afterDeletionUser1OverallSummary.levelTotalPoints == 43 // should count up to the 4th level since 3rd level was already achieved
+        afterDeletionUser1OverallSummary.levelPoints == 18
+        afterDeletionUser1OverallSummary.todaysPoints == 105
         afterDeletionUser1OverallSummary.subjects.size() == 2
         afterDeletionUser1OverallSummary.subjects.find { it.subjectId == "subj1" }.skillsLevel == 5
-        afterDeletionUser1OverallSummary.subjects.find { it.subjectId == "subj1" }.points == 55
+        afterDeletionUser1OverallSummary.subjects.find { it.subjectId == "subj1" }.points == 95
         afterDeletionUser1OverallSummary.subjects.find { it.subjectId == "subj1" }.levelTotalPoints == -1
-        afterDeletionUser1OverallSummary.subjects.find { it.subjectId == "subj1" }.todaysPoints == 55
+        afterDeletionUser1OverallSummary.subjects.find { it.subjectId == "subj1" }.todaysPoints == 95
         afterDeletionUser1OverallSummary.subjects.find { it.subjectId == "subj2" }.skillsLevel == 1
         afterDeletionUser1OverallSummary.subjects.find { it.subjectId == "subj2" }.points == 10
         afterDeletionUser1OverallSummary.subjects.find { it.subjectId == "subj2" }.levelTotalPoints == 15
         afterDeletionUser1OverallSummary.subjects.find { it.subjectId == "subj2" }.todaysPoints == 10
 
         afterDeletionUser1Subj1Summary.skillsLevel == 5
-        afterDeletionUser1Subj1Summary.points == 55
+        afterDeletionUser1Subj1Summary.points == 95
         afterDeletionUser1Subj1Summary.levelTotalPoints == -1
-        afterDeletionUser1Subj1Summary.todaysPoints == 55
-        afterDeletionUser1Subj1Summary.skills.collect { it.skillId }.sort() == ["s120", "s130", "s15"]
+        afterDeletionUser1Subj1Summary.todaysPoints == 95
+        afterDeletionUser1Subj1Summary.skills.collect { it.skillId }.sort() == ["s130", "s15", "s160"]
 
         afterDeletionUser1Subj2Summary.skillsLevel == 1
         afterDeletionUser1Subj2Summary.points == 10
@@ -374,20 +374,20 @@ class RuleSetDeletionsSpecs  extends DefaultIntSpec {
         afterDeletionUser1Subj2Summary.todaysPoints == 10
         afterDeletionUser1Subj2Summary.skills.collect { it.skillId }.sort() == ["s210", "s220", "s230", "s240"]
 
-        afterDeletionUser1PerformedSkills.data.collect { it.skillId }.sort() == ["s120", "s130", "s15", "s210"]
+        afterDeletionUser1PerformedSkills.data.collect { it.skillId }.sort() == ["s130", "s15", "s160", "s210"]
 
         // ----- user 2 -----
         user2OverallSummary.skillsLevel == 1
-        user2OverallSummary.points == 40
-        user2OverallSummary.totalPoints == 165
-        user2OverallSummary.levelTotalPoints == 25
-        user2OverallSummary.todaysPoints == 40
+        user2OverallSummary.points == 50
+        user2OverallSummary.totalPoints == 205
+        user2OverallSummary.levelTotalPoints == 31
+        user2OverallSummary.todaysPoints == 50
         user2OverallSummary.subjects.size() == 2
-        user2OverallSummary.subjects.find { it.subjectId == "subj1" }.skillsLevel == 3
-        user2OverallSummary.subjects.find { it.subjectId == "subj1" }.points == 30
-        user2OverallSummary.subjects.find { it.subjectId == "subj1" }.levelTotalPoints == 14
-        user2OverallSummary.subjects.find { it.subjectId == "subj1" }.levelPoints == 1
-        user2OverallSummary.subjects.find { it.subjectId == "subj1" }.todaysPoints == 30
+        user2OverallSummary.subjects.find { it.subjectId == "subj1" }.skillsLevel == 2
+        user2OverallSummary.subjects.find { it.subjectId == "subj1" }.points == 40
+        user2OverallSummary.subjects.find { it.subjectId == "subj1" }.levelTotalPoints == 21
+        user2OverallSummary.subjects.find { it.subjectId == "subj1" }.levelPoints == 14
+        user2OverallSummary.subjects.find { it.subjectId == "subj1" }.todaysPoints == 40
         user2OverallSummary.subjects.find { it.subjectId == "subj2" }.skillsLevel == 1
         user2OverallSummary.subjects.find { it.subjectId == "subj2" }.points == 10
         user2OverallSummary.subjects.find { it.subjectId == "subj2" }.levelTotalPoints == 15
@@ -395,12 +395,12 @@ class RuleSetDeletionsSpecs  extends DefaultIntSpec {
         user2OverallSummary.subjects.find { it.subjectId == "subj2" }.todaysPoints == 10
 
 
-        user2Subj1Summary.skillsLevel == 3
-        user2Subj1Summary.points == 30
-        user2Subj1Summary.levelTotalPoints == 14
-        user2Subj1Summary.levelPoints == 1
-        user2Subj1Summary.todaysPoints == 30
-        user2Subj1Summary.skills.collect { it.skillId }.sort() == ["s110", "s120", "s130", "s15"]
+        user2Subj1Summary.skillsLevel == 2
+        user2Subj1Summary.points == 40
+        user2Subj1Summary.levelTotalPoints == 21
+        user2Subj1Summary.levelPoints == 14
+        user2Subj1Summary.todaysPoints == 40
+        user2Subj1Summary.skills.collect { it.skillId }.sort() == ["s110", "s130", "s15", "s160"]
 
         user2Subj2Summary.skillsLevel == 1
         user2Subj2Summary.points == 10
@@ -409,30 +409,30 @@ class RuleSetDeletionsSpecs  extends DefaultIntSpec {
         user2Subj2Summary.todaysPoints == 10
         user2Subj2Summary.skills.collect { it.skillId }.sort() == ["s210", "s220", "s230", "s240"]
 
-        user2PerformedSkills.data.collect { it.skillId }.sort() == ["s110", "s120", "s210"]
+        user2PerformedSkills.data.collect { it.skillId }.sort() == ["s110", "s130", "s210"]
 
         afterDeletionUser2OverallSummary.skillsLevel == 1
-        afterDeletionUser2OverallSummary.points == 30
-        afterDeletionUser2OverallSummary.levelTotalPoints == 23 // should count up to the 4th level since 3rd level was already achieved
-        afterDeletionUser2OverallSummary.levelPoints == 15
-        afterDeletionUser2OverallSummary.todaysPoints == 30
+        afterDeletionUser2OverallSummary.points == 40
+        afterDeletionUser2OverallSummary.levelTotalPoints == 29 // should count up to the 4th level since 3rd level was already achieved
+        afterDeletionUser2OverallSummary.levelPoints == 21
+        afterDeletionUser2OverallSummary.todaysPoints == 40
         afterDeletionUser2OverallSummary.subjects.size() == 2
-        afterDeletionUser2OverallSummary.subjects.find { it.subjectId == "subj1" }.skillsLevel == 3
-        afterDeletionUser2OverallSummary.subjects.find { it.subjectId == "subj1" }.points == 20
-        afterDeletionUser2OverallSummary.subjects.find { it.subjectId == "subj1" }.levelTotalPoints == 16
-        afterDeletionUser2OverallSummary.subjects.find { it.subjectId == "subj1" }.levelPoints == 0
-        afterDeletionUser2OverallSummary.subjects.find { it.subjectId == "subj1" }.todaysPoints == 20
+        afterDeletionUser2OverallSummary.subjects.find { it.subjectId == "subj1" }.skillsLevel == 2
+        afterDeletionUser2OverallSummary.subjects.find { it.subjectId == "subj1" }.points == 30
+        afterDeletionUser2OverallSummary.subjects.find { it.subjectId == "subj1" }.levelTotalPoints == 19
+        afterDeletionUser2OverallSummary.subjects.find { it.subjectId == "subj1" }.levelPoints == 7
+        afterDeletionUser2OverallSummary.subjects.find { it.subjectId == "subj1" }.todaysPoints == 30
         afterDeletionUser2OverallSummary.subjects.find { it.subjectId == "subj2" }.skillsLevel == 1
         afterDeletionUser2OverallSummary.subjects.find { it.subjectId == "subj2" }.points == 10
         afterDeletionUser2OverallSummary.subjects.find { it.subjectId == "subj2" }.levelTotalPoints == 15
         afterDeletionUser2OverallSummary.subjects.find { it.subjectId == "subj2" }.todaysPoints == 10
 
-        afterDeletionUser2Subj1Summary.skillsLevel == 3
-        afterDeletionUser2Subj1Summary.points == 20
-        afterDeletionUser2Subj1Summary.levelTotalPoints == 16
-        afterDeletionUser2Subj1Summary.levelPoints == 0
-        afterDeletionUser2Subj1Summary.todaysPoints == 20
-        afterDeletionUser2Subj1Summary.skills.collect { it.skillId }.sort() == ["s120", "s130", "s15"]
+        afterDeletionUser2Subj1Summary.skillsLevel == 2
+        afterDeletionUser2Subj1Summary.points == 30
+        afterDeletionUser2Subj1Summary.levelTotalPoints == 19
+        afterDeletionUser2Subj1Summary.levelPoints == 7
+        afterDeletionUser2Subj1Summary.todaysPoints == 30
+        afterDeletionUser2Subj1Summary.skills.collect { it.skillId }.sort() == ["s130", "s15", "s160"]
 
         afterDeletionUser2Subj2Summary.skillsLevel == 1
         afterDeletionUser2Subj2Summary.points == 10
@@ -440,16 +440,12 @@ class RuleSetDeletionsSpecs  extends DefaultIntSpec {
         afterDeletionUser2Subj2Summary.todaysPoints == 10
         afterDeletionUser2Subj2Summary.skills.collect { it.skillId }.sort() == ["s210", "s220", "s230", "s240"]
 
-        afterDeletionUser2PerformedSkills.data.collect { it.skillId }.sort() == ["s120", "s210"]
+        afterDeletionUser2PerformedSkills.data.collect { it.skillId }.sort() == ["s130", "s210"]
     }
 
     def "when subject is removed properly adjust points for users that achieved points for that skill"() {
-        List<Map> subj1 = [10,20,30].withIndex().collect { points, index ->
-            [projectId: projId, subjectId: "subj1", skillId: "s1${index+1}".toString(), name: "subj1 ${index+1}".toString(), type: "Skill", pointIncrement: points, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1]
-        }
-        List<Map> subj2 = [10,20,30,40].withIndex().collect { points, index ->
-            [projectId: projId, subjectId: "subj2", skillId: "s2${index+1}".toString(), name: "subj2 ${index+1}".toString(), type: "Skill", pointIncrement: points, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1]
-        }
+        List<Map> subj1 = [10,30,60].collect { [projectId: projId, subjectId: "subj1", skillId: "s1${it}".toString(), name: "subj1 ${it}".toString(), type: "Skill", pointIncrement: it, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1] }
+        List<Map> subj2 = [10,20,30,40].collect { [projectId: projId, subjectId: "subj2", skillId: "s2${it}".toString(), name: "subj2 ${it}".toString(), type: "Skill", pointIncrement: it, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1] }
 
         skillsService.createProject([projectId: projId, name: "Test Project"])
         skillsService.createSubject([projectId: projId, subjectId: subj1.first().subjectId, name: "Test Subject 1"])
@@ -509,33 +505,33 @@ class RuleSetDeletionsSpecs  extends DefaultIntSpec {
 
         // ----- user 1 -----
         user1OverallSummary.skillsLevel == 3
-        user1OverallSummary.points == 75
-        user1OverallSummary.totalPoints == 165
-        user1OverallSummary.levelTotalPoints == 36
-        user1OverallSummary.todaysPoints == 75
+        user1OverallSummary.points == 115
+        user1OverallSummary.totalPoints == 205
+        user1OverallSummary.levelTotalPoints == 45
+        user1OverallSummary.todaysPoints == 115
         user1OverallSummary.subjects.size() == 2
         user1OverallSummary.subjects.find { it.subjectId == "subj1" }.skillsLevel == 5
-        user1OverallSummary.subjects.find { it.subjectId == "subj1" }.points == 65
+        user1OverallSummary.subjects.find { it.subjectId == "subj1" }.points == 105
         user1OverallSummary.subjects.find { it.subjectId == "subj1" }.levelTotalPoints == -1
-        user1OverallSummary.subjects.find { it.subjectId == "subj1" }.todaysPoints == 65
+        user1OverallSummary.subjects.find { it.subjectId == "subj1" }.todaysPoints == 105
         user1OverallSummary.subjects.find { it.subjectId == "subj2" }.skillsLevel == 1
         user1OverallSummary.subjects.find { it.subjectId == "subj2" }.points == 10
         user1OverallSummary.subjects.find { it.subjectId == "subj2" }.levelTotalPoints == 15
         user1OverallSummary.subjects.find { it.subjectId == "subj2" }.todaysPoints == 10
 
         user1Subj1Summary.skillsLevel == 5
-        user1Subj1Summary.points == 65
+        user1Subj1Summary.points == 105
         user1Subj1Summary.levelTotalPoints == -1
-        user1Subj1Summary.todaysPoints == 65
-        user1Subj1Summary.skills.collect { it.skillId }.sort() == ["s11", "s12", "s13", "s15"]
+        user1Subj1Summary.todaysPoints == 105
+        user1Subj1Summary.skills.collect { it.skillId }.sort() == ["s110", "s130", "s15", "s160"]
 
         user1Subj2Summary.skillsLevel == 1
         user1Subj2Summary.points == 10
         user1Subj2Summary.levelTotalPoints == 15
         user1Subj2Summary.todaysPoints == 10
-        user1Subj2Summary.skills.collect { it.skillId }.sort() == ["s21", "s22", "s23", "s24"]
+        user1Subj2Summary.skills.collect { it.skillId }.sort() == ["s210", "s220", "s230", "s240"]
 
-        user1PerformedSkills.data.collect { it.skillId }.sort() == ["s11", "s12", "s13", "s15", "s21"]
+        user1PerformedSkills.data.collect { it.skillId }.sort() == ["s110", "s130", "s15", "s160", "s210"]
 
         afterDeletionUser1OverallSummary.skillsLevel == 3
         afterDeletionUser1OverallSummary.points == 10
@@ -552,22 +548,22 @@ class RuleSetDeletionsSpecs  extends DefaultIntSpec {
         afterDeletionUser1Subj2Summary.points == 10
         afterDeletionUser1Subj2Summary.levelTotalPoints == 15
         afterDeletionUser1Subj2Summary.todaysPoints == 10
-        afterDeletionUser1Subj2Summary.skills.collect { it.skillId }.sort() == ["s21", "s22", "s23", "s24"]
+        afterDeletionUser1Subj2Summary.skills.collect { it.skillId }.sort() == ["s210", "s220", "s230", "s240"]
 
-        afterDeletionUser1PerformedSkills.data.collect { it.skillId }.sort() == ["s21"]
+        afterDeletionUser1PerformedSkills.data.collect { it.skillId }.sort() == ["s210"]
 
         // ----- user 2 -----
         user2OverallSummary.skillsLevel == 1
-        user2OverallSummary.points == 40
-        user2OverallSummary.totalPoints == 165
-        user2OverallSummary.levelTotalPoints == 25
-        user2OverallSummary.todaysPoints == 40
+        user2OverallSummary.points == 50
+        user2OverallSummary.totalPoints == 205
+        user2OverallSummary.levelTotalPoints == 31
+        user2OverallSummary.todaysPoints == 50
         user2OverallSummary.subjects.size() == 2
-        user2OverallSummary.subjects.find { it.subjectId == "subj1" }.skillsLevel == 3
-        user2OverallSummary.subjects.find { it.subjectId == "subj1" }.points == 30
-        user2OverallSummary.subjects.find { it.subjectId == "subj1" }.levelTotalPoints == 14
-        user2OverallSummary.subjects.find { it.subjectId == "subj1" }.levelPoints == 1
-        user2OverallSummary.subjects.find { it.subjectId == "subj1" }.todaysPoints == 30
+        user2OverallSummary.subjects.find { it.subjectId == "subj1" }.skillsLevel == 2
+        user2OverallSummary.subjects.find { it.subjectId == "subj1" }.points == 40
+        user2OverallSummary.subjects.find { it.subjectId == "subj1" }.levelTotalPoints == 21
+        user2OverallSummary.subjects.find { it.subjectId == "subj1" }.levelPoints == 14
+        user2OverallSummary.subjects.find { it.subjectId == "subj1" }.todaysPoints == 40
         user2OverallSummary.subjects.find { it.subjectId == "subj2" }.skillsLevel == 1
         user2OverallSummary.subjects.find { it.subjectId == "subj2" }.points == 10
         user2OverallSummary.subjects.find { it.subjectId == "subj2" }.levelTotalPoints == 15
@@ -575,21 +571,21 @@ class RuleSetDeletionsSpecs  extends DefaultIntSpec {
         user2OverallSummary.subjects.find { it.subjectId == "subj2" }.todaysPoints == 10
 
 
-        user2Subj1Summary.skillsLevel == 3
-        user2Subj1Summary.points == 30
-        user2Subj1Summary.levelTotalPoints == 14
-        user2Subj1Summary.levelPoints == 1
-        user2Subj1Summary.todaysPoints == 30
-        user2Subj1Summary.skills.collect { it.skillId }.sort() == ["s11", "s12", "s13", "s15"]
+        user2Subj1Summary.skillsLevel == 2
+        user2Subj1Summary.points == 40
+        user2Subj1Summary.levelTotalPoints == 21
+        user2Subj1Summary.levelPoints == 14
+        user2Subj1Summary.todaysPoints == 40
+        user2Subj1Summary.skills.collect { it.skillId }.sort() == ["s110", "s130", "s15", "s160"]
 
         user2Subj2Summary.skillsLevel == 1
         user2Subj2Summary.points == 10
         user2Subj2Summary.levelTotalPoints == 15
         user2Subj2Summary.levelPoints == 0
         user2Subj2Summary.todaysPoints == 10
-        user2Subj2Summary.skills.collect { it.skillId }.sort() == ["s21", "s22", "s23", "s24"]
+        user2Subj2Summary.skills.collect { it.skillId }.sort() == ["s210", "s220", "s230", "s240"]
 
-        user2PerformedSkills.data.collect { it.skillId }.sort() == ["s11", "s12", "s21"]
+        user2PerformedSkills.data.collect { it.skillId }.sort() == ["s110", "s130", "s210"]
 
         afterDeletionUser2OverallSummary.skillsLevel == 1
         afterDeletionUser2OverallSummary.points == 10
@@ -606,9 +602,9 @@ class RuleSetDeletionsSpecs  extends DefaultIntSpec {
         afterDeletionUser2Subj2Summary.points == 10
         afterDeletionUser2Subj2Summary.levelTotalPoints == 15
         afterDeletionUser2Subj2Summary.todaysPoints == 10
-        afterDeletionUser2Subj2Summary.skills.collect { it.skillId }.sort() == ["s21", "s22", "s23", "s24"]
+        afterDeletionUser2Subj2Summary.skills.collect { it.skillId }.sort() == ["s210", "s220", "s230", "s240"]
 
-        afterDeletionUser2PerformedSkills.data.collect { it.skillId }.sort() == ["s21"]
+        afterDeletionUser2PerformedSkills.data.collect { it.skillId }.sort() == ["s210"]
     }
 
 
