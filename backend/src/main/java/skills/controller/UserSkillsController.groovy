@@ -1,5 +1,6 @@
 package skills.controller
 
+import callStack.profiler.Profile
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
@@ -62,6 +63,7 @@ class UserSkillsController {
     @RequestMapping(value = "/projects/{projectId}/summary", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     @CompileStatic
+    @Profile
     OverallSkillSummary getSkillsSummary(@PathVariable("projectId") String projectId,
                                          @RequestParam(name = "userId", required = false) String userIdParam,
                                          @RequestParam(name = 'version', required = false) Integer version) {
@@ -187,6 +189,7 @@ class UserSkillsController {
     @RequestMapping(value = "/projects/{projectId}/skills/{skillId}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
     @ResponseBody
     @CompileStatic
+    @Profile
     SkillEventResult addSkill(@PathVariable("projectId") String projectId,
                               @PathVariable("skillId") String skillId,
                               @RequestBody(required = false) SkillEventRequest skillEventRequest) {

@@ -1,5 +1,6 @@
 package skills.auth
 
+import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -27,6 +28,7 @@ class UserInfoService {
     @Autowired
     UserAttrsService userAttrsService
 
+    @Profile
     UserInfo getCurrentUser() {
         UserInfo currentUser
         def principal = SecurityContextHolder.getContext()?.authentication?.principal
