@@ -1,5 +1,6 @@
 package skills.controller
 
+import callStack.profiler.CProf
 import callStack.profiler.Profile
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
@@ -193,6 +194,7 @@ class UserSkillsController {
     SkillEventResult addSkill(@PathVariable("projectId") String projectId,
                               @PathVariable("skillId") String skillId,
                               @RequestBody(required = false) SkillEventRequest skillEventRequest) {
+
         Date incomingDate = null
 
         if (skillEventRequest?.timestamp){
@@ -203,9 +205,13 @@ class UserSkillsController {
             incomingDate = new Date()
         }
 
-        (SkillEventResult) RetryUtil.withRetry(3) {
-            skillsManagementFacade.reportSkill(projectId, skillId,  getUserId(skillEventRequest?.userId), incomingDate)
+        SkillEventResult result
+        CProf.prof('retry-reportSkill') {
+            result = (SkillEventResult) RetryUtil.withRetry(3, false) {
+                skillsManagementFacade.reportSkill(projectId, skillId,  getUserId(skillEventRequest?.userId), incomingDate)
+            }
         }
+        return result
     }
 
     @RequestMapping(value = "/projects/{projectId}/rank", method = RequestMethod.GET, produces = "application/json")
