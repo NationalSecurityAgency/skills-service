@@ -31,7 +31,6 @@ class AuthorizationAspect {
     @Autowired
     UserInfoService userInfoService
 
-    @Profile
     @Around(value='@within(AdminUsersOnlyWhenUserIdSupplied) || @annotation(AdminUsersOnlyWhenUserIdSupplied)')
     def authorizeAdmin(ProceedingJoinPoint joinPoint) {
         String userIdProvided = getUserIdParam(joinPoint)
