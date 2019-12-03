@@ -18,7 +18,7 @@ class UserAttrsService {
 
     @Transactional
     @Profile
-    void saveUserAttrs(String userId, UserInfo userInfo) {
+    UserAttrs saveUserAttrs(String userId, UserInfo userInfo) {
         UserAttrs userAttrs = loadUserAttrsFromLocalDb(userId)
         boolean doSave = true
         if (!userAttrs) {
@@ -49,6 +49,11 @@ class UserAttrsService {
             userAttrs.userIdForDisplay = userInfo.usernameForDisplay ?: userAttrs.userIdForDisplay
             saveUserAttrsInLocalDb(userAttrs)
         }
+        return userAttrs
+    }
+
+    UserAttrs findByUserId(String userId) {
+        return loadUserAttrsFromLocalDb(userId)
     }
 
     @Profile

@@ -174,10 +174,10 @@ class AccessSettingsStorageService {
 
     @Transactional()
     @Profile
-    User createAppUser(UserInfo userInfo, boolean createOrUpdate) {
+    UserAndUserAttrsHolder createAppUser(UserInfo userInfo, boolean createOrUpdate) {
         userInfoValidator.validate(userInfo)
         String userId = userInfo.username?.toLowerCase()
-        userAttrsService.saveUserAttrs(userId, userInfo)
+        UserAttrs userAttrs = userAttrsService.saveUserAttrs(userId, userInfo)
 
         User user = loadUserFromLocalDb(userId)
         if (!createOrUpdate) {
@@ -198,7 +198,7 @@ class AccessSettingsStorageService {
             user = createNewUser(userInfo)
         }
 
-        return user
+        return new UserAndUserAttrsHolder(user: user, userAttrs: userAttrs)
     }
 
     @Profile
@@ -288,5 +288,10 @@ class AccessSettingsStorageService {
                 lastName: input.attrs.lastName,
         )
         return res
+    }
+
+    static class UserAndUserAttrsHolder {
+        User user
+        UserAttrs userAttrs
     }
 }

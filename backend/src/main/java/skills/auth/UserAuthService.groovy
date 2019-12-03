@@ -60,19 +60,23 @@ class UserAuthService {
         User user = userRepository.findByUserIdIgnoreCase(userId)
         if (user) {
             UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(userId)
-            userInfo = new UserInfo (
-                    username: user.userId,
-                    password: user.password,
-                    firstName: userAttrs.firstName,
-                    lastName: userAttrs.lastName,
-                    email: userAttrs.email,
-                    userDn: userAttrs.dn,
-                    nickname: userAttrs.nickname,
-                    authorities: convertRoles(user.roles),
-                    usernameForDisplay: userAttrs.userIdForDisplay
-            )
+            userInfo = createUserInfo(user, userAttrs)
         }
         return userInfo
+    }
+
+    private UserInfo createUserInfo(User user, UserAttrs userAttrs) {
+        return new UserInfo (
+                username: user.userId,
+                password: user.password,
+                firstName: userAttrs.firstName,
+                lastName: userAttrs.lastName,
+                email: userAttrs.email,
+                userDn: userAttrs.dn,
+                nickname: userAttrs.nickname,
+                authorities: convertRoles(user.roles),
+                usernameForDisplay: userAttrs.userIdForDisplay
+        )
     }
 
     @Transactional
@@ -90,8 +94,8 @@ class UserAuthService {
     @Transactional
     @Profile
     UserInfo createOrUpdateUser(UserInfo userInfo) {
-        accessSettingsStorageService.createAppUser(userInfo, true)
-        return loadByUserId(userInfo.username)
+        AccessSettingsStorageService.UserAndUserAttrsHolder userAndUserAttrs = accessSettingsStorageService.createAppUser(userInfo, true)
+        return createUserInfo(userAndUserAttrs.user, userAndUserAttrs.userAttrs)
     }
 
     void autologin(UserInfo userInfo, String password) {
