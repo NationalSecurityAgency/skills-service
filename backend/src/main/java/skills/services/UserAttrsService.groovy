@@ -19,7 +19,7 @@ class UserAttrsService {
     @Transactional
     @Profile
     void saveUserAttrs(String userId, UserInfo userInfo) {
-        UserAttrs userAttrs = findByUserId(userId)
+        UserAttrs userAttrs = loadUserAttrsFromLocalDb(userId)
         boolean doSave = true
         if (!userAttrs) {
             userAttrs = new UserAttrs(userId: userId?.toLowerCase())
@@ -31,7 +31,7 @@ class UserAttrsService {
                     (userInfo.nickname && userAttrs.nickname != (userInfo.nickname ?: "")) ||
                     (userInfo.usernameForDisplay && userAttrs.userIdForDisplay != userInfo.usernameForDisplay)
 
-            log.trace('UserInfo/UserAttrs: firstName [{}/{}]\n\tlastName [{}]/[{}]\n\temail [{}]/[{}]\n\tuserDn [{}]/[{}]\n\tnickname [{}]/[{}]\n\tusernameForDisplay [{}]/[{}]',
+            log.trace('UserInfo/UserAttrs: \n\tfirstName [{}/{}]\n\tlastName [{}]/[{}]\n\temail [{}]/[{}]\n\tuserDn [{}]/[{}]\n\tnickname [{}]/[{}]\n\tusernameForDisplay [{}]/[{}]',
                     userInfo.firstName, userAttrs.firstName,
                     userInfo.lastName, userAttrs.lastName,
                     userInfo.email, userAttrs.email,
@@ -47,17 +47,17 @@ class UserAttrsService {
             userAttrs.dn = userInfo.userDn ?: userAttrs.dn
             userAttrs.nickname = (userInfo.nickname ?: userAttrs.nickname) ?: ""
             userAttrs.userIdForDisplay = userInfo.usernameForDisplay ?: userAttrs.userIdForDisplay
-            doSaveOperation(userAttrs)
+            saveUserAttrsInLocalDb(userAttrs)
         }
     }
 
     @Profile
-    private void doSaveOperation(UserAttrs userAttrs) {
+    private void saveUserAttrsInLocalDb(UserAttrs userAttrs) {
         userAttrsRepo.save(userAttrs)
     }
 
     @Profile
-    private UserAttrs findByUserId(String userId) {
+    private UserAttrs loadUserAttrsFromLocalDb(String userId) {
         return userAttrsRepo.findByUserIdIgnoreCase(userId)
     }
 

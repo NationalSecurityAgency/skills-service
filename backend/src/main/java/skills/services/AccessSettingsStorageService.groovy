@@ -179,7 +179,7 @@ class AccessSettingsStorageService {
         String userId = userInfo.username?.toLowerCase()
         userAttrsService.saveUserAttrs(userId, userInfo)
 
-        User user = userRepository.findByUserIdIgnoreCase(userId)
+        User user = loadUserFromLocalDb(userId)
         if (!createOrUpdate) {
             if (user) {
                 SkillException exception = new SkillException("User [${userInfo.username?.toLowerCase()}] already exists.")
@@ -199,6 +199,11 @@ class AccessSettingsStorageService {
         }
 
         return user
+    }
+
+    @Profile
+    private User loadUserFromLocalDb(String userId) {
+        return userRepository.findByUserIdIgnoreCase(userId)
     }
 
     @Transactional(readOnly = true)
