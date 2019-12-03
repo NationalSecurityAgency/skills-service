@@ -54,6 +54,7 @@ class UserAuthService {
     }
 
     @Transactional(readOnly = true)
+    @Profile
     UserInfo loadByUserId(String userId) {
         UserInfo userInfo
         User user = userRepository.findByUserIdIgnoreCase(userId)
