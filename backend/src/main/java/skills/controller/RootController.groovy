@@ -111,7 +111,8 @@ class RootController {
 
     @PutMapping('/addRoot/{userKey}')
     RequestResult addRoot(@PathVariable('userKey') String userKey) {
-        accessSettingsStorageService.addRoot(getUserId(userKey))
+        String userId = getUserId(userKey)
+        accessSettingsStorageService.addRoot(userId)
         return new RequestResult(success: true)
     }
 
@@ -133,7 +134,8 @@ class RootController {
         if (roleName == RoleName.ROLE_SUPER_DUPER_USER) {
             addRoot(userKey)
         } else {
-            accessSettingsStorageService.addUserRole(getUserId(userKey), null, roleName)
+            String userId = getUserId(userKey)
+            accessSettingsStorageService.addUserRole(userId, null, roleName)
         }
         return new RequestResult(success: true)
     }

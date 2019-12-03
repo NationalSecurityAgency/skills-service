@@ -173,6 +173,7 @@ class AccessSettingsStorageService {
     }
 
     @Transactional()
+    @Profile
     User createAppUser(UserInfo userInfo, boolean createOrUpdate) {
         userInfoValidator.validate(userInfo)
         String userId = userInfo.username?.toLowerCase()

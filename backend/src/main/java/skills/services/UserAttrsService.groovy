@@ -1,5 +1,6 @@
 package skills.services
 
+import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -16,8 +17,9 @@ class UserAttrsService {
     UserAttrsRepo userAttrsRepo
 
     @Transactional
+    @Profile
     void saveUserAttrs(String userId, UserInfo userInfo) {
-        UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(userId)
+        UserAttrs userAttrs = findByUserId(userId)
         boolean doSave = true
         if (!userAttrs) {
             userAttrs = new UserAttrs(userId: userId?.toLowerCase())
@@ -28,6 +30,15 @@ class UserAttrsService {
                     (userInfo.userDn && userAttrs.dn != userInfo.userDn) ||
                     (userInfo.nickname && userAttrs.nickname != (userInfo.nickname ?: "")) ||
                     (userInfo.usernameForDisplay && userAttrs.userIdForDisplay != userInfo.usernameForDisplay)
+
+            log.trace('UserInfo/UserAttrs: firstName [{}/{}]\n\tlastName [{}]/[{}]\n\temail [{}]/[{}]\n\tuserDn [{}]/[{}]\n\tnickname [{}]/[{}]\n\tusernameForDisplay [{}]/[{}]',
+                    userInfo.firstName, userAttrs.firstName,
+                    userInfo.lastName, userAttrs.lastName,
+                    userInfo.email, userAttrs.email,
+                    userInfo.userDn, userAttrs.dn,
+                    userInfo.nickname, userAttrs.nickname,
+                    userInfo.usernameForDisplay, userAttrs.userIdForDisplay,
+            )
         }
         if (doSave) {
             userAttrs.firstName = userInfo.firstName ?: userAttrs.firstName
@@ -36,11 +47,17 @@ class UserAttrsService {
             userAttrs.dn = userInfo.userDn ?: userAttrs.dn
             userAttrs.nickname = (userInfo.nickname ?: userAttrs.nickname) ?: ""
             userAttrs.userIdForDisplay = userInfo.usernameForDisplay ?: userAttrs.userIdForDisplay
-            userAttrsRepo.save(userAttrs)
+            doSaveOperation(userAttrs)
         }
     }
 
-    UserAttrs findByUserId(String userId) {
+    @Profile
+    private void doSaveOperation(UserAttrs userAttrs) {
+        userAttrsRepo.save(userAttrs)
+    }
+
+    @Profile
+    private UserAttrs findByUserId(String userId) {
         return userAttrsRepo.findByUserIdIgnoreCase(userId)
     }
 
