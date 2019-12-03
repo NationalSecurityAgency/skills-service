@@ -46,17 +46,17 @@ class SettingsDataAccessor {
     }
 
     Setting getUserProjectSetting(String userId, String projectId, String setting, String settingGroup){
-        User user = userId ? userRepo.findByUserIdIgnoreCase(userId) : null
+        User user = userId ? userRepo.findByUserId(userId?.toLowerCase()) : null
         settingRepo.findByTypeAndUserRefIdAndProjectIdAndSettingGroupAndSetting(Setting.SettingType.User, user?.id, projectId, settingGroup, setting)
     }
 
     Setting getUserSetting(String userId, String setting, String settingGroup){
-        User user = userId ? userRepo.findByUserIdIgnoreCase(userId) : null
+        User user = userId ? userRepo.findByUserId(userId?.toLowerCase()) : null
         settingRepo.findByTypeAndUserRefIdAndProjectIdAndSettingGroupAndSetting(Setting.SettingType.User, user?.id, null, settingGroup, setting)
     }
 
     List<Setting> getUserSettingsForGroup(String userId, String settingGroup) {
-        User user = userId ? userRepo.findByUserIdIgnoreCase(userId) : null
+        User user = userId ? userRepo.findByUserId(userId?.toLowerCase()) : null
         return getUserSettingsForGroup(user, settingGroup)
     }
 
@@ -65,7 +65,7 @@ class SettingsDataAccessor {
     }
 
     List<Setting> getUserProjectSettingsForGroup(String userId, String settingGroup) {
-        User user = userId ? userRepo.findByUserIdIgnoreCase(userId) : null
+        User user = userId ? userRepo.findByUserId(userId?.toLowerCase()) : null
         settingRepo.findAllByTypeAndUserRefIdAndSettingGroup(Setting.SettingType.UserProject, user?.id, settingGroup)
     }
 

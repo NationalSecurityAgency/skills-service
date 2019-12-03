@@ -8,7 +8,7 @@ import skills.storage.model.auth.User
 interface UserRepo extends CrudRepository<User, Integer> {
 
     @Nullable
-    User findByUserIdIgnoreCase(String userId)
+    User findByUserId(String userId)
 
     boolean existsByUserIdIgnoreCase(String userId)
 }
