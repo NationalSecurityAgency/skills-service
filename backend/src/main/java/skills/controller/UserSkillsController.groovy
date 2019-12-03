@@ -58,7 +58,8 @@ class UserSkillsController {
     @ResponseBody
     Integer getUserLevel(@PathVariable(name = "projectId") String projectId,
                          @RequestParam(name = "userId", required = false) String userIdParam) {
-        return skillsLoader.getUserLevel(projectId, getUserId(userIdParam))
+        String userId = getUserId(userIdParam)
+        return skillsLoader.getUserLevel(projectId, userId)
     }
 
     @RequestMapping(value = "/projects/{projectId}/summary", method = RequestMethod.GET, produces = "application/json")
@@ -68,7 +69,8 @@ class UserSkillsController {
     OverallSkillSummary getSkillsSummary(@PathVariable("projectId") String projectId,
                                          @RequestParam(name = "userId", required = false) String userIdParam,
                                          @RequestParam(name = 'version', required = false) Integer version) {
-        return skillsLoader.loadOverallSummary(projectId, getUserId(userIdParam), getProvidedVersionOrReturnDefault(version))
+        String userId = getUserId(userIdParam)
+        return skillsLoader.loadOverallSummary(projectId, userId, getProvidedVersionOrReturnDefault(version))
     }
 
     @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/summary", method = RequestMethod.GET, produces = "application/json")
@@ -78,7 +80,8 @@ class UserSkillsController {
                                           @PathVariable("subjectId") String subjectId,
                                           @RequestParam(name = "userId", required = false) String userIdParam,
                                           @RequestParam(name = 'version', required = false) Integer version) {
-        return skillsLoader.loadSubject(projectId, getUserId(userIdParam), subjectId, getProvidedVersionOrReturnDefault(version))
+        String userId = getUserId(userIdParam)
+        return skillsLoader.loadSubject(projectId, userId, subjectId, getProvidedVersionOrReturnDefault(version))
     }
 
     @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/descriptions", method = RequestMethod.GET, produces = "application/json")
@@ -100,7 +103,8 @@ class UserSkillsController {
     SkillSummary getSkillSummary(@PathVariable("projectId") String projectId,
                                  @PathVariable("skillId") String skillId,
                                  @RequestParam(name = "userId", required = false) String userIdParam) {
-        return skillsLoader.loadSkillSummary(projectId, getUserId(userIdParam), null, skillId)
+        String userId = getUserId(userIdParam)
+        return skillsLoader.loadSkillSummary(projectId, userId, null, skillId)
     }
 
     /**
@@ -114,7 +118,8 @@ class UserSkillsController {
                                              @PathVariable("crossProjectId") String crossProjectId,
                                              @PathVariable("skillId") String skillId,
                                              @RequestParam(name = "userId", required = false) String userIdParam) {
-        return skillsLoader.loadSkillSummary(projectId, getUserId(userIdParam), crossProjectId, skillId)
+        String userId = getUserId(userIdParam)
+        return skillsLoader.loadSkillSummary(projectId, userId, crossProjectId, skillId)
     }
 
     @RequestMapping(value = "/projects/{projectId}/badges/summary", method = RequestMethod.GET, produces = "application/json")
@@ -123,10 +128,11 @@ class UserSkillsController {
     List<SkillBadgeSummary>  getAllBadgesSummary(@PathVariable("projectId") String projectId,
                                                  @RequestParam(name = "userId", required = false) String userIdParam,
                                                  @RequestParam(name = 'version', required = false) Integer version) {
-        List<SkillBadgeSummary> badgeSummaries = skillsLoader.loadBadgeSummaries(projectId, getUserId(userIdParam), getProvidedVersionOrReturnDefault(version))
+        String userId = getUserId(userIdParam)
+        List<SkillBadgeSummary> badgeSummaries = skillsLoader.loadBadgeSummaries(projectId, userId, getProvidedVersionOrReturnDefault(version))
 
         // add any global badges as well
-        badgeSummaries.addAll(skillsLoader.loadGlobalBadgeSummaries(getUserId(userIdParam), projectId, getProvidedVersionOrReturnDefault(version)))
+        badgeSummaries.addAll(skillsLoader.loadGlobalBadgeSummaries(userId, projectId, getProvidedVersionOrReturnDefault(version)))
         return badgeSummaries
     }
 
@@ -152,10 +158,11 @@ class UserSkillsController {
                                       @RequestParam(name = "userId", required = false) String userIdParam,
                                       @RequestParam(name = 'version', required = false) Integer version,
                                       @RequestParam(name = 'global', required = false) Boolean isGlobal) {
+        String userId = getUserId(userIdParam)
         if (isGlobal) {
-            return skillsLoader.loadGlobalBadge(getUserId(userIdParam), projectId, badgeId, getProvidedVersionOrReturnDefault(version))
+            return skillsLoader.loadGlobalBadge(userId, projectId, badgeId, getProvidedVersionOrReturnDefault(version))
         } else {
-            return skillsLoader.loadBadge(projectId, getUserId(userIdParam), badgeId, getProvidedVersionOrReturnDefault(version))
+            return skillsLoader.loadBadge(projectId, userId, badgeId, getProvidedVersionOrReturnDefault(version))
         }
     }
 
@@ -165,7 +172,8 @@ class UserSkillsController {
     UserPointHistorySummary getProjectsPointHistory(@PathVariable("projectId") String projectId,
                                                     @RequestParam(name = "userId", required = false) String userIdParam,
                                                     @RequestParam(name = 'version', required = false) Integer version) {
-        return skillsLoader.loadPointHistorySummary(projectId, getUserId(userIdParam), 365, null, getProvidedVersionOrReturnDefault(version))
+        String userId = getUserId(userIdParam)
+        return skillsLoader.loadPointHistorySummary(projectId, userId, 365, null, getProvidedVersionOrReturnDefault(version))
     }
 
     @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/pointHistory", method = RequestMethod.GET, produces = "application/json")
@@ -175,7 +183,8 @@ class UserSkillsController {
                                                     @PathVariable("subjectId") String subjectId,
                                                     @RequestParam(name = "userId", required = false) String userIdParam,
                                                     @RequestParam(name = 'version', required = false) Integer version) {
-        return skillsLoader.loadPointHistorySummary(projectId, getUserId(userIdParam), 365, subjectId, getProvidedVersionOrReturnDefault(version))
+        String userId = getUserId(userIdParam)
+        return skillsLoader.loadPointHistorySummary(projectId, userId, 365, subjectId, getProvidedVersionOrReturnDefault(version))
     }
 
     @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/dependencies", method = RequestMethod.GET, produces = "application/json")
@@ -184,7 +193,8 @@ class UserSkillsController {
     SkillDependencyInfo loadSkillDependencyInfo(@PathVariable("projectId") String projectId,
                                                 @PathVariable("skillId") String skillId,
                                                 @RequestParam(name = "userId", required = false) String userIdParam) {
-        return skillsLoader.loadSkillDependencyInfo(projectId, getUserId(userIdParam), skillId)
+        String userId = getUserId(userIdParam)
+        return skillsLoader.loadSkillDependencyInfo(projectId, userId, skillId)
     }
 
     @RequestMapping(value = "/projects/{projectId}/skills/{skillId}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
@@ -204,11 +214,11 @@ class UserSkillsController {
         } else {
             incomingDate = new Date()
         }
-
+        String userId = getUserId(skillEventRequest?.userId)
         SkillEventResult result
         CProf.prof('retry-reportSkill') {
             result = (SkillEventResult) RetryUtil.withRetry(3, false) {
-                skillsManagementFacade.reportSkill(projectId, skillId,  getUserId(skillEventRequest?.userId), incomingDate)
+                skillsManagementFacade.reportSkill(projectId, skillId,  userId, incomingDate)
             }
         }
         return result
@@ -219,7 +229,8 @@ class UserSkillsController {
     @CompileStatic
     SkillsRanking getRanking(@PathVariable("projectId") String projectId,
                              @RequestParam(name = "userId", required = false) String userIdParam) {
-        return rankingLoader.getUserSkillsRanking(projectId, getUserId(userIdParam))
+        String userId = getUserId(userIdParam)
+        return rankingLoader.getUserSkillsRanking(projectId, userId)
     }
 
     @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/rank", method = RequestMethod.GET, produces = "application/json")
@@ -228,7 +239,8 @@ class UserSkillsController {
     SkillsRanking getRankingBySubject(@PathVariable("projectId") String projectId,
                                       @PathVariable("subjectId") String subjectId,
                                       @RequestParam(name = "userId", required = false) String userIdParam) {
-        return rankingLoader.getUserSkillsRanking(projectId, getUserId(userIdParam), subjectId)
+        String userId = getUserId(userIdParam)
+        return rankingLoader.getUserSkillsRanking(projectId, userId, subjectId)
     }
     @RequestMapping(value = "/projects/{projectId}/rankDistribution/usersPerLevel", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
@@ -250,7 +262,8 @@ class UserSkillsController {
     @CompileStatic
     SkillsRankingDistribution getRankingDistribution(@PathVariable("projectId") String projectId,
                                                      @RequestParam(name = "userId", required = false) String userIdParam) {
-        return rankingLoader.getRankingDistribution(projectId, getUserId(userIdParam))
+        String userId = getUserId(userIdParam)
+        return rankingLoader.getRankingDistribution(projectId, userId)
     }
 
     @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/rankDistribution", method = RequestMethod.GET, produces = "application/json")
@@ -259,7 +272,8 @@ class UserSkillsController {
     SkillsRankingDistribution getRankingDistributionBySubject(@PathVariable("projectId") String projectId,
                                                               @PathVariable("subjectId") String subjectId,
                                                               @RequestParam(name = "userId", required = false) String userIdParam) {
-        return rankingLoader.getRankingDistribution(projectId, getUserId(userIdParam), subjectId)
+        String userId = getUserId(userIdParam)
+        return rankingLoader.getRankingDistribution(projectId, userId, subjectId)
     }
 
     @RequestMapping(value = "/projects/{id}/customIconCss", method = RequestMethod.GET, produces = "text/css")

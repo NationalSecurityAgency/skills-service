@@ -54,7 +54,8 @@ class AccessSettingsController {
     RequestResult addUserRole(
             @PathVariable("projectId") String projectId,
             @PathVariable("userKey") String userKey, @PathVariable("roleName") RoleName roleName) {
-        accessSettingsStorageService.addUserRole(getUserId(userKey), projectId, roleName)
+        String userId = getUserId(userKey)
+        accessSettingsStorageService.addUserRole(userId, projectId, roleName)
         return new RequestResult(success: true)
     }
 

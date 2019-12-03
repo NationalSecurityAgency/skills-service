@@ -50,15 +50,16 @@ class PkiUserLookup {
         userInfoCache = CacheBuilder.newBuilder().expireAfterWrite(cacheExpirationHours, TimeUnit.HOURS).maximumSize(cacheMaxSize).recordStats().build(new CacheLoader<String, UserInfo>() {
             @Override
             UserInfo load(String dn) throws Exception {
-                return restTemplate.getForObject(userInfoUri, UserInfo, dn)
+                UserInfo userInfo = restTemplate.getForObject(userInfoUri, UserInfo, dn)
+                validate(userInfo, dn)
+                return userInfo
             }
         })
     }
 
     @Profile
     UserInfo lookupUserDn(String dn) {
-        UserInfo userInfo = userInfoCache.get(dn)
-        validate(userInfo, dn)
+        UserInfo userInfo = userInfoCache.getUnchecked(dn)
         return userInfo
     }
 

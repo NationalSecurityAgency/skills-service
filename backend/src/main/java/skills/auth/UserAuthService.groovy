@@ -1,5 +1,6 @@
 package skills.auth
 
+import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
 import org.apache.commons.collections.CollectionUtils
 import org.springframework.beans.factory.annotation.Autowired
@@ -11,7 +12,6 @@ import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
-import skills.controller.result.model.SettingsResult
 import skills.services.AccessSettingsStorageService
 import skills.services.InceptionProjectService
 import skills.services.settings.SettingsService
@@ -87,6 +87,7 @@ class UserAuthService {
     }
 
     @Transactional
+    @Profile
     UserInfo createOrUpdateUser(UserInfo userInfo) {
         accessSettingsStorageService.createAppUser(userInfo, true)
         return loadByUserId(userInfo.username)
