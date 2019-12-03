@@ -50,16 +50,16 @@ class UserAuthService {
 
     @Transactional(readOnly = true)
     Collection<GrantedAuthority> loadAuthorities(String userId) {
-        return convertRoles(userRepository.findByUserIdIgnoreCase(userId)?.roles)
+        return convertRoles(userRepository.findByUserId(userId?.toLowerCase())?.roles)
     }
 
     @Transactional(readOnly = true)
     @Profile
     UserInfo loadByUserId(String userId) {
         UserInfo userInfo
-        User user = userRepository.findByUserIdIgnoreCase(userId)
+        User user = userRepository.findByUserId(userId?.toLowerCase())
         if (user) {
-            UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(userId)
+            UserAttrs userAttrs = userAttrsRepo.findByUserId(userId?.toLowerCase())
             userInfo = createUserInfo(user, userAttrs)
         }
         return userInfo

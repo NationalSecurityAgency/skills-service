@@ -136,7 +136,7 @@ class AccessSettingsStorageService {
 
     private void deleteUserRoleInternal(String userId, String projectId, RoleName roleName) {
         log.debug('Deleting user-role for userId [{}] and role [{}] on project [{}]', userId, roleName, projectId)
-        User user = userRepository.findByUserIdIgnoreCase(userId)
+        User user = userRepository.findByUserId(userId?.toLowerCase())
         UserRole userRole = user?.roles?.find {it.projectId == projectId && it.roleName == roleName}
         assert userRole, "DELETE FAILED -> no user-role with project id [$projectId], userId [$userId] and roleName [$roleName]"
 
@@ -153,7 +153,7 @@ class AccessSettingsStorageService {
 
     private UserRole addUserRoleInternal(String userId, String projectId, RoleName roleName) {
         log.debug('Creating user-role for ID [{}] and role [{}] on project [{}]', userId, roleName, projectId)
-        User user = userRepository.findByUserIdIgnoreCase(userId)
+        User user = userRepository.findByUserId(userId?.toLowerCase())
         if (user) {
             // check that the new user role does not already exist
             UserRole existingUserRole = user?.roles?.find {it.projectId == projectId && it.roleName == roleName}
@@ -203,7 +203,7 @@ class AccessSettingsStorageService {
 
     @Profile
     private User loadUserFromLocalDb(String userId) {
-        return userRepository.findByUserIdIgnoreCase(userId)
+        return userRepository.findByUserId(userId.toLowerCase())
     }
 
     @Transactional(readOnly = true)
@@ -213,7 +213,7 @@ class AccessSettingsStorageService {
 
     @Transactional
     UserRoleRes grantRoot(String userId) {
-        User user = userRepository.findByUserIdIgnoreCase(userId.toLowerCase())
+        User user = userRepository.findByUserId(userId?.toLowerCase())
         if (!user) {
             SkillException exception = new SkillException("User [${userId.toLowerCase()}] does not exist.")
             exception.errorCode = ErrorCode.BadParam

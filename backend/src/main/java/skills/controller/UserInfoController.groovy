@@ -16,8 +16,6 @@ import skills.controller.result.model.RequestResult
 import skills.controller.result.model.UserInfoRes
 import skills.services.AccessSettingsStorageService
 import skills.services.UserAdminService
-import skills.storage.model.UserAttrs
-import skills.storage.model.auth.User
 import skills.storage.repos.UserAttrsRepo
 import skills.storage.repos.UserRepo
 
@@ -119,7 +117,7 @@ class UserInfoController {
 
     @RequestMapping(value = "/users/validExistingDashboardUserId/{userId}", method = RequestMethod.GET, produces = "application/json")
     Boolean isValidExistingDashboardUserId(@PathVariable("userId") String userId) {
-        return userRepo.findByUserIdIgnoreCase(userId?.toLowerCase()) != null
+        return userRepo.findByUserId(userId?.toLowerCase()) != null
     }
 
     @RequestMapping(value = "/users/projects/{projectId}/suggestClientUsers/{query}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)

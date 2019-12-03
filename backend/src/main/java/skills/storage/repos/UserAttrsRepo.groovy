@@ -9,7 +9,7 @@ import skills.storage.model.UserAttrs
 interface UserAttrsRepo extends CrudRepository<UserAttrs, Integer> {
 
     @Nullable
-    UserAttrs findByUserIdIgnoreCase(String userId)
+    UserAttrs findByUserId(String userId)
 
     @Query('''select attrs 
         from User u, UserAttrs attrs 

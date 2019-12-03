@@ -63,7 +63,7 @@ class UserAttrsService {
 
     @Profile
     private UserAttrs loadUserAttrsFromLocalDb(String userId) {
-        return userAttrsRepo.findByUserIdIgnoreCase(userId)
+        return userAttrsRepo.findByUserId(userId?.toLowerCase())
     }
 
 }

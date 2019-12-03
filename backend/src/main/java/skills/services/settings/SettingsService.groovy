@@ -77,9 +77,9 @@ class SettingsService {
 
     private void handlerUserSettingsRequest(SettingsRequest request, Setting setting) {
         if (request instanceof UserSettingsRequest || request instanceof UserProjectSettingsRequest) {
-            User user = userRepo.findByUserIdIgnoreCase(request.userId)
+            User user = userRepo.findByUserId(request.userId?.toLowerCase())
             if (!user) {
-                throw new SkillException("Failed to find user with id [${request.userId}]")
+                throw new SkillException("Failed to find user with id [${request.userId?.toLowerCase()}]")
             }
             setting.userRefId = user.id
         }
