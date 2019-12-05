@@ -1,0 +1,11 @@
+<configuration>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <Pattern>access.skills-service %h %l %u [%t] "%r" %s %b "%i{Referer}" "%i{User-Agent}"</Pattern>
+<!--            <Pattern>%fullRequest%n%n%fullResponse</Pattern>-->
+        </encoder>
+    </appender>
+
+    <appender-ref ref="STDOUT" />
+
+</configuration>
