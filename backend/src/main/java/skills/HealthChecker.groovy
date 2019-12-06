@@ -25,15 +25,15 @@ class HealthChecker {
 
     @PostConstruct
     void checkRequiredServices() {
-        log.info("Running initialization check...")
-        log.info("Verifying database access...")
+        log.debug("Running initialization check...")
+        log.debug("Verifying database access...")
         projDefRepo.findByProjectId("")
-        log.info("done.")
+        log.debug("done.")
 
         if (authMode == AuthMode.PKI) {
-            log.info("Checking if PKI user service is available...")
+            log.debug("Checking if PKI user service is available...")
             boolean userServiceAvailable = pkiUserLookup.isServiceAvailable()
-            log.info("userServiceAvailable [${userServiceAvailable}]")
+            log.debug("userServiceAvailable [${userServiceAvailable}]")
         }
     }
 }
