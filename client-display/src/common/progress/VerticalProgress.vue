@@ -14,7 +14,7 @@
       v-if="totalProgress !== 100"
       :val="totalProgress"
       :size="barSize"
-      :bar-color="totalProgressBeforeToday ? totalProgressBarColor : beforeTodayBarColor"
+      :bar-color="totalProgressBarColor"
       :bg-color="isLocked ? 'E6E6E6' : 'aeaeae'"
       class="complete-total"/>
     <progress-bar
