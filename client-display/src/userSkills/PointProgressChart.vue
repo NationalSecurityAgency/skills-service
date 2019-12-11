@@ -58,7 +58,6 @@
             },
           },
           yaxis: {
-            min: 0,
             forceNiceScale: true,
             labels: {
               style: {
