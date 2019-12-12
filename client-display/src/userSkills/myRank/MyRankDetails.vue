@@ -45,7 +45,7 @@
                             <div class="">That's one small step for man, one giant leap for mankind. </div>
                         </span>
                         <span v-else>
-                            <h4 class="mb-2">Just <strong>{{rankingDistribution.pointsToPassNextUser}}</strong> more points...</h4>
+                            <h4 class="mb-2">Just <strong>{{rankingDistribution.pointsToPassNextUser | number }}</strong> more points...</h4>
                             <div class="">to pass the next participant. That's one small step for man, one giant leap for mankind. </div>
                         </span>
 
