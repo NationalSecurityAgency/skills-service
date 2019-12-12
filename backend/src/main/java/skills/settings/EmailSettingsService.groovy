@@ -48,7 +48,7 @@ class EmailSettingsService {
         try {
             configureMailSender(emailConnectionInfo)
         } catch (SkillException e) {
-            log.error('Email connection failed. No email can be sent without updating the configuration', e)
+            log.warn('Email connection failed. No email can be sent without updating the configuration', e)
         }
     }
 
@@ -68,7 +68,7 @@ class EmailSettingsService {
             updateMailSender(tmpMailSender)
         } catch (MessagingException e) {
             log.warn('Email connection failed!', e)
-            throw new SkillException('Could not connect with the email settings ' + emailConnectionInfo, e)
+//            throw new SkillException('Could not connect with the email settings ' + emailConnectionInfo, e)
         }
     }
 
