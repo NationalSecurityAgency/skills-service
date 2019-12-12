@@ -30,14 +30,19 @@ class RestExceptionHandler extends ResponseEntityExceptionHandler {
     static class DomainSpecificErrBody extends BasicErrBody {
         String projectId
         String skillId
+        String userId
     }
 
     @ExceptionHandler(SkillException)
     protected ResponseEntity<Object> handleSkillException(Exception ex, WebRequest webRequest) {
         Object body
         if (ex instanceof SkillException) {
-            body = new DomainSpecificErrBody(projectId: ex.projectId, skillId: ex.skillId, explanation: ex.message, errorCode: ex.errorCode.name())
-            log.error("Exception for: projectId=[${ex.projectId}], skillId=${ex.skillId}", ex)
+            body = new DomainSpecificErrBody(userId: ex.userId, projectId: ex.projectId, skillId: ex.skillId, explanation: ex.message, errorCode: ex.errorCode.name())
+            String msg = "Exception for: projectId=[${ex.projectId}], skillId=${ex.skillId}"
+            if (ex.userId) {
+                msg = "${msg}, userId=[${ex.userId}]"
+            }
+            log.error(msg.toString(), ex)
         } else {
             log.error("Unexpected exception type [${ex?.class?.simpleName}]", ex)
         }

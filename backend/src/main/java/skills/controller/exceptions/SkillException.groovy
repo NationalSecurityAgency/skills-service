@@ -8,6 +8,7 @@ class SkillException extends RuntimeException {
 
     String projectId
     String skillId
+    String userId
     ErrorCode errorCode = ErrorCode.InternalError
 
     SkillException(String msg) {

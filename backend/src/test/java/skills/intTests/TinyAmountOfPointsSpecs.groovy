@@ -23,11 +23,11 @@ class TinyAmountOfPointsSpecs extends DefaultIntSpec {
                                    version  : 0])
 
         when:
-        def res1 = skillsService.addSkill([projectId: proj1.projectId, skillId: "skill1"])
-        println res1
+        skillsService.addSkill([projectId: proj1.projectId, skillId: "skill1"])
 
         then:
-        thrown(SkillsClientException)
+        SkillsClientException skillsClientException = thrown(SkillsClientException)
+        skillsClientException.message.contains("Insufficient project points, skill achievement is disallowed, errorCode:InternalError, success:false, projectId:${proj1.projectId}, skillId:null, userId:${skillsService.userName}")
     }
 
     def "user level should be zero if project has insufficient points"(){
@@ -60,7 +60,7 @@ class TinyAmountOfPointsSpecs extends DefaultIntSpec {
     }
 
     def "skills may not be achieved if subject has insufficient points (even if project does)"(){
-        when:
+
         String user = "user1"
 
         def proj1 = SkillsFactory.createProject(1)
@@ -77,10 +77,11 @@ class TinyAmountOfPointsSpecs extends DefaultIntSpec {
                                    name     : "Test Skill 11111111111111".toString(),
                                    type     : "Skill", pointIncrement: 10, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1,
                                    version  : 0])
-
+        when:
         def result = skillsService.addSkill([projectId:proj1.projectId, skillId:"skill111"])
 
         then:
-        thrown(SkillsClientException)
+        SkillsClientException skillsClientException = thrown(SkillsClientException)
+        skillsClientException.message.contains("Insufficient Subject points, skill achievement is disallowed, errorCode:InternalError, success:false, projectId:${proj1.projectId}, skillId:null, userId:${skillsService.userName}".toString())
     }
 }

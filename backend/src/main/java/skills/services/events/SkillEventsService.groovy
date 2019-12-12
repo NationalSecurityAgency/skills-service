@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.controller.exceptions.SkillException
+import skills.controller.exceptions.SkillExceptionBuilder
 import skills.services.LockingService
 import skills.services.events.pointsAndAchievements.PointsAndAchievementsHandler
 import skills.storage.model.SkillDef
@@ -59,7 +60,7 @@ class SkillEventsService {
 
         SkillEventResult res = new SkillEventResult()
 
-        SkillEventsSupportRepo.SkillDefMin skillDefinition = getSkillDef(projectId, skillId)
+        SkillEventsSupportRepo.SkillDefMin skillDefinition = getSkillDef(userId, projectId, skillId)
 
         long numExistingSkills = getNumExistingSkills(userId, projectId, skillId)
         AppliedCheckRes checkRes = checkIfSkillApplied(userId, numExistingSkills, incomingSkillDate, skillDefinition)
@@ -156,10 +157,12 @@ class SkillEventsService {
     }
 
     @Profile
-    private SkillEventsSupportRepo.SkillDefMin getSkillDef(String projectId, String skillId) {
+    private SkillEventsSupportRepo.SkillDefMin getSkillDef(String userId, String projectId, String skillId) {
         SkillEventsSupportRepo.SkillDefMin skillDefinition = skillEventsSupportRepo.findByProjectIdAndSkillIdAndType(projectId, skillId, SkillDef.ContainerType.Skill)
         if (!skillDefinition) {
-            throw new SkillException("Skill definition does not exist. Must create the skill definition first!", projectId, skillId)
+            throw new SkillExceptionBuilder()
+                    .msg("!Skill definition does not exist. Must create the skill definition first!")
+                    .projectId(projectId).skillId(skillId).userId(userId).build()
         }
         return skillDefinition
     }

@@ -87,13 +87,13 @@ class ProjAdminService {
         if (!projectDefinition || !projectRequest.projectId.equalsIgnoreCase(originalProjectId)) {
             ProjDef idExist = projDefRepo.findByProjectIdIgnoreCase(projectRequest.projectId)
             if (idExist) {
-                throw new SkillException("Project with id [${projectRequest.projectId}] already exists! Sorry!", null, null, ErrorCode.ConstraintViolation)
+                throw new SkillException("Project with id [${projectRequest.projectId}] already exists! Sorry!", projectRequest.projectId, null, ErrorCode.ConstraintViolation)
             }
         }
         if (!projectDefinition || !projectRequest.name.equalsIgnoreCase(projectDefinition.name)) {
             ProjDef nameExist = projDefRepo.findByNameIgnoreCase(projectRequest.name)
             if (nameExist) {
-                throw new SkillException("Project with name [${projectRequest.name}] already exists! Sorry!", null, null, ErrorCode.ConstraintViolation)
+                throw new SkillException("Project with name [${projectRequest.name}] already exists! Sorry!", projectRequest.projectId, null, ErrorCode.ConstraintViolation)
             }
         }
         if (projectDefinition) {
