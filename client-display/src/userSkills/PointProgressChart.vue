@@ -58,6 +58,9 @@
             },
           },
           yaxis: {
+            min: function calculateMin(min) {
+              return min < 100 ? 0 : min;
+            },
             forceNiceScale: true,
             labels: {
               style: {
