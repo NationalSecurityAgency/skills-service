@@ -57,4 +57,4 @@ deploy:
     - sshpass -p $CI_PASSWORD scp -r user-info-service ${CI_USERNAME}@${CI_IP}:${DEST_PATH}/skills-deploy
     - sshpass -p $CI_PASSWORD ssh -o StrictHostKeyChecking=no -o PreferredAuthentications=password -o PubkeyAuthentication=no $CI_USERNAME@$CI_IP "cd ${DEST_PATH}/skills-deploy && ./runDeploy.sh"
   only:
-    - master
+    - 1.0.X
