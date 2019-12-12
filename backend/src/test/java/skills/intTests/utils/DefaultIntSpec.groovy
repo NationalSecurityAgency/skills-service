@@ -35,6 +35,10 @@ class DefaultIntSpec extends Specification {
     SkillDefRepo skillDefRepo
 
     def setup() {
+        String msg = "\n-------------------------------------------------------------\n" +
+                "START: [${specificationContext.currentIteration.name}]\n" +
+                "-------------------------------------------------------------"
+        log.info(msg)
         /**
          * deleting projects and users will wipe the entire db clean due to cascading
          */
@@ -44,6 +48,13 @@ class DefaultIntSpec extends Specification {
         skillDefRepo.deleteAll()
 
         skillsService = createService()
+    }
+
+    def cleanup() {
+        String msg = "\n-------------------------------------------------------------\n" +
+                "END: [${specificationContext.currentIteration.name}]\n" +
+                "-------------------------------------------------------------"
+        log.info(msg)
     }
 
     SkillsService createService(
