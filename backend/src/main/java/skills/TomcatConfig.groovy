@@ -3,6 +3,7 @@ package skills
 import ch.qos.logback.access.pattern.AccessConverter
 import ch.qos.logback.access.spi.IAccessEvent
 import ch.qos.logback.access.tomcat.LogbackValve
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory
 import org.springframework.boot.web.server.WebServerFactoryCustomizer
 import org.springframework.context.annotation.Configuration
@@ -12,9 +13,14 @@ import java.security.cert.X509Certificate
 @Configuration
 class TomcatConfig implements WebServerFactoryCustomizer<TomcatServletWebServerFactory> {
 
+    @Value('#{"${server.tomcat.accesslog.enabled:false}"}')
+    boolean enabledAccessLog
+
     @Override
     void customize(TomcatServletWebServerFactory factory) {
-        factory.addContextValves(new LogbackValve())
+        if (enabledAccessLog) {
+            factory.addContextValves(new LogbackValve())
+        }
     }
 
     static class DnConverter extends AccessConverter {
