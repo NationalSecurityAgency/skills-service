@@ -50,6 +50,22 @@ class ReportSkillsSpecs extends DefaultIntSpec {
         res.body.completed.find({ it.type == "Subject" }).level == 1
     }
 
+    def "attempt to report skill event for skill definition does not exist"(){
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(1, )
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        when:
+        skillsService.addSkill([projectId: projId, skillId: "nope"])
+        then:
+        SkillsClientException exception = thrown(SkillsClientException)
+        exception.message.contains("Skill definition does not exist. Must create the skill definition first!, errorCode:InternalError, success:false, projectId:TestProject1, skillId:nope")
+    }
+
     def "incrementally achieve a single skill"(){
         List<Map> subj1 = (1..2).collect { [projectId: projId, subjectId: "subj1", skillId: "s1${it}".toString(), name: "subj1 ${it}".toString(), type: "Skill", pointIncrement: 10, numPerformToCompletion: 5, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1] }
 
