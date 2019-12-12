@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <include resource="org/springframework/boot/logging/logback/base.xml"/>
-    <logger name="org.springframework.web" level="INFO"/>
-    <logger name="skills.intTests.utils.WSHelper" level="WARN"/>
-    <logger name="org.apache.http.client.protocol.ResponseProcessCookies" level="FATAL"/>
+    <appender name="fileAppender" class="ch.qos.logback.core.FileAppender">
+        <file>target/skills-service-tests.log</file>
+        <encoder>
+            <pattern>%d [%thread] %level %mdc %logger{50} - %msg%n</pattern>
+        </encoder>
+    </appender>
+    <root level="info">
+        <appender-ref ref="fileAppender"/>
+    </root>
 </configuration>
