@@ -77,7 +77,7 @@ class ReportSkillsSpecs extends DefaultIntSpec {
         List subjSummaryRes = []
         String userId = sampleUserIds.get(0)
         (0..4).each {
-            log.info("Adding ${subj1.get(1).skillId} on ${dates.get(it)}")
+            println "Adding ${subj1.get(1).skillId} on ${dates.get(it)}"
             addSkillRes << skillsService.addSkill([projectId: projId, skillId: subj1.get(1).skillId], userId, dates.get(it))
             subjSummaryRes << skillsService.getSkillSummary(userId, projId, subj1.get(1).subjectId)
         }
@@ -242,13 +242,13 @@ class ReportSkillsSpecs extends DefaultIntSpec {
         skillsService.createSchema([subj1, subj2, subj3])
 
         skillsService.getLevels(projId, "subj1").each{
-            log.info("${it.skillId} :: ${it.level} :: ${it.pointsFrom}")
+            println "${it.skillId} :: ${it.level} :: ${it.pointsFrom}"
         }
         skillsService.getLevels(projId, "subj2").each{
-            log.info("${it.skillId} :: ${it.level} :: ${it.pointsFrom}")
+            println "${it.skillId} :: ${it.level} :: ${it.pointsFrom}"
         }
         skillsService.getLevels(projId, "subj3").each{
-            log.info("${it.skillId} :: ${it.level} :: ${it.pointsFrom}")
+            println "${it.skillId} :: ${it.level} :: ${it.pointsFrom}"
         }
 
         List<Date> dates = testUtils.getLastNDays(4)

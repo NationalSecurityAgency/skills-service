@@ -311,6 +311,7 @@ class LevelsSpec extends  DefaultIntSpec{
 
         ResponseEntity response = skillsService.editLevel(projId, null, props.level as String, props)
         assert response
+        println response.statusCode
 
         then:
         thrown(SkillsClientException)
@@ -334,6 +335,7 @@ class LevelsSpec extends  DefaultIntSpec{
 
         ResponseEntity response = skillsService.editLevel(projId, subject, props.level as String, props)
         assert response
+        println response.statusCode
 
         then:
         thrown(SkillsClientException)
@@ -358,6 +360,7 @@ class LevelsSpec extends  DefaultIntSpec{
 
         ResponseEntity response = skillsService.editLevel(projId, null, props.level as String, props)
         assert response
+        println response.statusCode
 
         then:
         thrown(SkillsClientException)
@@ -381,6 +384,7 @@ class LevelsSpec extends  DefaultIntSpec{
 
         ResponseEntity response = skillsService.editLevel(projId, subject, props.level as String, props)
         assert response
+        println response.statusCode
 
         then:
         thrown(SkillsClientException)
@@ -404,6 +408,7 @@ class LevelsSpec extends  DefaultIntSpec{
 
         ResponseEntity response = skillsService.editLevel(projId, null, props.level as String, props)
         assert response
+        println response.statusCode
 
         then:
         thrown(SkillsClientException)
@@ -428,6 +433,7 @@ class LevelsSpec extends  DefaultIntSpec{
 
         ResponseEntity response = skillsService.editLevel(projId, subject, props.level as String, props)
         assert response
+        println response.statusCode
 
         then:
         thrown(SkillsClientException)
@@ -450,6 +456,7 @@ class LevelsSpec extends  DefaultIntSpec{
 
         ResponseEntity response = skillsService.editLevel(projId, null, props.level as String, props)
         assert response
+        println response.statusCode
 
         then:
         thrown(SkillsClientException)
@@ -473,6 +480,7 @@ class LevelsSpec extends  DefaultIntSpec{
 
         ResponseEntity response = skillsService.editLevel(projId, subject, props.level as String, props)
         assert response
+        println response.statusCode
 
         then:
         thrown(SkillsClientException)
@@ -878,6 +886,8 @@ class LevelsSpec extends  DefaultIntSpec{
         skillsService.deleteLevel(projId, null)
         skillsService.deleteLevel(projId, null)
         def result = skillsService.deleteLevel(projId, null)
+
+        println result
 
         then:
         thrown(SkillsClientException)

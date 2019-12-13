@@ -132,6 +132,9 @@ class ConcurrencySpecs extends DefaultIntSpec {
         }
 
         List<Setting> sortOrder = settingsDataAccessor.getUserProjectSettingsForGroup(skillsService.userName, ProjectSortingService.PROJECT_SORT_GROUP)
+        sortOrder.each {
+            println it
+        }
 
         then:
         sortOrder.collect({it.value}).sort() == sortOrder.collect({it.value}).unique().sort()
@@ -166,6 +169,9 @@ class ConcurrencySpecs extends DefaultIntSpec {
         }
 
         List<Setting> sortOrder = settingsDataAccessor.getUserProjectSettingsForGroup(skillsService.userName, ProjectSortingService.PROJECT_SORT_GROUP)
+        sortOrder.each {
+            println it
+        }
 
         then:
         sortOrder.collect({it.value}).sort() == sortOrder.collect({it.value}).unique().sort()

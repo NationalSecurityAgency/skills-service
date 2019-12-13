@@ -65,7 +65,7 @@ class HitSkillsHard {
 
     void reportEvents() {
         try {
-            log.info("Thread [{}] started", Thread.currentThread().name)
+            println "Thread started"
             while (true) {
                 CreateSkillsDef.RandomLookupKey randomLookupKey = createSkillsDef.randomLookupKey()
                 while (randomLookupKey.projId == "Project90") {
