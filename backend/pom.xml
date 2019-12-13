@@ -182,7 +182,7 @@
                     <artifactId>groovy-all</artifactId>
                 </exclusion>
             </exclusions>
-        </dependency>s
+        </dependency>
 
         <dependency>
             <groupId>profile</groupId>
