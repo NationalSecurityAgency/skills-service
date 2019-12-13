@@ -93,7 +93,7 @@ class MetricsSpec extends DefaultIntSpec {
         when:
         Map<String, Object> resultsForSections = [:]
         sectionBuilders.each { section, builders ->
-            log.info("Building section ${section}...")
+            println "Building section ${section}..."
             List results = []
             builders.each { builder ->
                 def chart = skillsService.getMetricsChart(projId, builder, section, sectionIds[section])
@@ -120,7 +120,7 @@ class MetricsSpec extends DefaultIntSpec {
         Set<String> sections = sectionBuilders.keySet()
         Map<String, Object> resultsForSections = [:]
         sections.each { section ->
-            log.info("Building section ${section}...")
+            println "Building section ${section}..."
             def charts = skillsService.getAllMetricsChartsForSection(projId, section, sectionIds[section])
             resultsForSections[section] = charts
         }
@@ -144,7 +144,7 @@ class MetricsSpec extends DefaultIntSpec {
         Map<String, String> props = [loadDataForFirst : '2']
         Map<String, Object> resultsForSections = [:]
         sections.each { section ->
-            log.info("Building section ${section}...")
+            println "Building section ${section}..."
             def charts = skillsService.getAllMetricsChartsForSection(projId, section, sectionIds[section], props)
             resultsForSections[section] = charts
         }
