@@ -499,8 +499,6 @@ class RuleSetDeletionsSpecs  extends DefaultIntSpec {
         def afterDeletionUser2Subj2Summary = skillsService.getSkillSummary(user2Id, projId, subj2.get(0).subjectId)
         def afterDeletionUser2PerformedSkills = skillsService.getPerformedSkills(user2Id, projId)
 
-        println afterDeletionUser2Subj2Summary
-
         then:
 
         // ----- user 1 -----
