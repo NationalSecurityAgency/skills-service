@@ -8,7 +8,15 @@ class SkillException extends RuntimeException {
 
     String projectId
     String skillId
+    String userId
     ErrorCode errorCode = ErrorCode.InternalError
+    boolean printStackTrace = true
+    static enum SkillExceptionLogLevel { ERROR, WARN, INFO }
+
+    // will be used by skills.controller.exceptions.RestExceptionHandler
+    SkillExceptionLogLevel logLevel = SkillExceptionLogLevel.ERROR
+    // only applicable is exception is caught in skills.utils.RetryUtil
+    boolean doNotRetry = false
 
     SkillException(String msg) {
         this(msg, NA, NA)

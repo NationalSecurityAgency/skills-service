@@ -4,6 +4,8 @@ import callStack.profiler.CProf
 import callStack.profiler.Profile
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
+import org.joda.time.format.DateTimeFormatter
+import org.joda.time.format.ISODateTimeFormat
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
 import skills.PublicProps
@@ -27,6 +29,8 @@ import skills.utils.RetryUtil
 @skills.auth.aop.AdminUsersOnlyWhenUserIdSupplied
 @skills.profile.EnableCallStackProf
 class UserSkillsController {
+
+    static final DateTimeFormatter DTF = ISODateTimeFormat.dateTimeNoMillis().withLocale(Locale.ENGLISH).withZoneUTC()
 
     @Autowired
     SkillEventsService skillsManagementFacade
@@ -215,6 +219,9 @@ class UserSkillsController {
             incomingDate = new Date()
         }
         String userId = getUserId(skillEventRequest?.userId)
+        if (log.isInfoEnabled()) {
+            log.info("ReportSkill (ProjectId=[${projectId}], SkillId=[${skillId}], CurrentUser=[${userInfoService.getCurrentUserId()}], RequestUser=[${skillEventRequest?.userId}], RequestDate=[${toDateString(skillEventRequest?.timestamp)}])")
+        }
         SkillEventResult result
         CProf.prof('retry-reportSkill') {
             result = (SkillEventResult) RetryUtil.withRetry(3, false) {
@@ -290,5 +297,11 @@ class UserSkillsController {
 
     private String getUserId(String userIdParam) {
         return userInfoService.getUserName(userIdParam)
+    }
+
+    private String toDateString(Long timestamp) {
+        if (timestamp != null) {
+            return DTF.print(timestamp)
+        }
     }
 }

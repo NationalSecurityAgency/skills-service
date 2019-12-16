@@ -3,6 +3,7 @@ package skills.utils
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.exception.ExceptionUtils
+import skills.controller.exceptions.SkillException
 
 @CompileStatic
 @Slf4j
@@ -15,7 +16,7 @@ class RetryUtil {
     static Object withRetry(int numRetries, boolean logOnlyOnCompleteFailure, Closure closure) {
         String attemptsId = null;
         StringBuilder errMsBuilder
-        for (int i = 0; i <= numRetries; i++) {
+        for (int i = 0; (i <= numRetries); i++) {
             try {
                 Object res = closure.call()
                 if (attemptsId && !logOnlyOnCompleteFailure) {
@@ -23,6 +24,12 @@ class RetryUtil {
                 }
                 return res
             } catch (Throwable t) {
+                if (t instanceof SkillException) {
+                    if (t.doNotRetry){
+                        throw t
+                    }
+                }
+
                 if (!attemptsId) {
                     attemptsId = UUID.randomUUID().toString()
                 }

@@ -8,6 +8,7 @@ import skills.storage.repos.SkillEventsSupportRepo
 @Canonical
 @CompileStatic
 class LoadedData {
+    String userId
     String projectId
     List<SkillEventsSupportRepo.TinySkillDef> parentDefs
     List<SkillEventsSupportRepo.TinyUserPoints> tinyUserPoints

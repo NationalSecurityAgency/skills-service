@@ -1,5 +1,6 @@
 package skills.intTests.reportSkills
 
+import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
@@ -8,6 +9,7 @@ import skills.intTests.utils.TestUtils
 import skills.storage.model.UserAchievement
 import skills.storage.repos.UserAchievedLevelRepo
 
+@Slf4j
 class ReportSkillsSpecs extends DefaultIntSpec {
 
     TestUtils testUtils = new TestUtils()
@@ -50,6 +52,22 @@ class ReportSkillsSpecs extends DefaultIntSpec {
         res.body.completed.find({ it.type == "Subject" }).level == 1
     }
 
+    def "attempt to report skill event for skill definition does not exist"(){
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(1, )
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        when:
+        skillsService.addSkill([projectId: projId, skillId: "nope"])
+        then:
+        SkillsClientException exception = thrown(SkillsClientException)
+        exception.message.contains("Failed to report skill event because skill definition does not exist., errorCode:InternalError, success:false, projectId:TestProject1, skillId:nope")
+    }
+
     def "incrementally achieve a single skill"(){
         List<Map> subj1 = (1..2).collect { [projectId: projId, subjectId: "subj1", skillId: "s1${it}".toString(), name: "subj1 ${it}".toString(), type: "Skill", pointIncrement: 10, numPerformToCompletion: 5, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1] }
 
@@ -61,7 +79,7 @@ class ReportSkillsSpecs extends DefaultIntSpec {
         List subjSummaryRes = []
         String userId = sampleUserIds.get(0)
         (0..4).each {
-            println "Adding ${subj1.get(1).skillId} on ${dates.get(it)}"
+            log.info("Adding ${subj1.get(1).skillId} on ${dates.get(it)}")
             addSkillRes << skillsService.addSkill([projectId: projId, skillId: subj1.get(1).skillId], userId, dates.get(it))
             subjSummaryRes << skillsService.getSkillSummary(userId, projId, subj1.get(1).subjectId)
         }
@@ -226,13 +244,13 @@ class ReportSkillsSpecs extends DefaultIntSpec {
         skillsService.createSchema([subj1, subj2, subj3])
 
         skillsService.getLevels(projId, "subj1").each{
-            println "${it.skillId} :: ${it.level} :: ${it.pointsFrom}"
+            log.info("${it.skillId} :: ${it.level} :: ${it.pointsFrom}")
         }
         skillsService.getLevels(projId, "subj2").each{
-            println "${it.skillId} :: ${it.level} :: ${it.pointsFrom}"
+            log.info("${it.skillId} :: ${it.level} :: ${it.pointsFrom}")
         }
         skillsService.getLevels(projId, "subj3").each{
-            println "${it.skillId} :: ${it.level} :: ${it.pointsFrom}"
+            log.info("${it.skillId} :: ${it.level} :: ${it.pointsFrom}")
         }
 
         List<Date> dates = testUtils.getLastNDays(4)

@@ -1,5 +1,7 @@
 package skills.utils
 
+import skills.controller.exceptions.SkillException
+import skills.controller.exceptions.SkillExceptionBuilder
 import spock.lang.Specification
 
 class RetryUtilSpecs extends Specification {
@@ -65,5 +67,20 @@ class RetryUtilSpecs extends Specification {
         RuntimeException r = thrown(RuntimeException)
         r.message == "hi"
         numRuns == 6 // retries = runs + 1
+    }
+
+    def "do not retry if SkillException.doNotRetry=true"() {
+        when:
+        int count = 0
+        Integer res = RetryUtil.withRetry(1) {
+            count++
+            throw new SkillExceptionBuilder().msg("hi").doNotRetry(true).build()
+            return 5
+        }
+
+        then:
+        SkillException e = thrown(SkillException)
+        e.message == "hi"
+        count == 1
     }
 }

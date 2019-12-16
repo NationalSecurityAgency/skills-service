@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
+import skills.controller.exceptions.SkillExceptionBuilder
 import skills.controller.result.model.GlobalBadgeLevelRes
 import skills.controller.result.model.SettingsResult
 import skills.services.DependencyValidator
@@ -111,7 +112,7 @@ class SkillsLoader {
     @Profile
     @Transactional(readOnly = true)
     OverallSkillSummary loadOverallSummary(String projectId, String userId, Integer version = -1) {
-        ProjDef projDef = getProjDef(projectId)
+        ProjDef projDef = getProjDef(userId, projectId)
 
         List<SkillSubjectSummary> subjects = loadSubjectsSummaries(projDef, userId, version)
 
@@ -189,7 +190,7 @@ class SkillsLoader {
 
     @Transactional(readOnly = true)
     List<SkillBadgeSummary> loadBadgeSummaries(String projectId, String userId, Integer version = Integer.MAX_VALUE){
-        ProjDef projDef = getProjDef(projectId)
+        ProjDef projDef = getProjDef(userId, projectId)
         List<SkillDefWithExtra> badgeDefs = skillDefWithExtraRepo.findAllByProjectIdAndType(projectId, SkillDef.ContainerType.Badge)
         if ( version >= 0 ) {
             badgeDefs = badgeDefs.findAll { it.version <= version }
@@ -223,8 +224,8 @@ class SkillsLoader {
 
     @Transactional(readOnly = true)
     SkillSummary loadSkillSummary(String projectId, String userId, String crossProjectId, String skillId) {
-        ProjDef projDef = getProjDef(crossProjectId ?: projectId)
-        SkillDefWithExtra skillDef = getSkillDefWithExtra(crossProjectId ?: projectId, skillId, SkillDef.ContainerType.Skill)
+        ProjDef projDef = getProjDef(userId, crossProjectId ?: projectId)
+        SkillDefWithExtra skillDef = getSkillDefWithExtra(userId, crossProjectId ?: projectId, skillId, SkillDef.ContainerType.Skill)
 
         if(crossProjectId) {
             dependencyValidator.validateDependencyEligibility(projectId, skillDef)
@@ -258,8 +259,8 @@ class SkillsLoader {
 
     @Transactional(readOnly = true)
     SkillSubjectSummary loadSubject(String projectId, String userId, String subjectId, Integer version = -1) {
-        ProjDef projDef = getProjDef(projectId)
-        SkillDefWithExtra subjectDef = getSkillDefWithExtra(projectId, subjectId, SkillDef.ContainerType.Subject)
+        ProjDef projDef = getProjDef(userId, projectId)
+        SkillDefWithExtra subjectDef = getSkillDefWithExtra(userId, projectId, subjectId, SkillDef.ContainerType.Subject)
 
         if (version == -1 || subjectDef.version <= version) {
             return loadSubjectSummary(projDef, userId, subjectDef, version, true)
@@ -302,8 +303,8 @@ class SkillsLoader {
 
     @Transactional(readOnly = true)
     SkillBadgeSummary loadBadge(String projectId, String userId, String subjectId, Integer version = Integer.MAX_VALUE) {
-        ProjDef projDef = getProjDef(projectId)
-        SkillDefWithExtra badgeDef = getSkillDefWithExtra(projectId, subjectId, SkillDef.ContainerType.Badge)
+        ProjDef projDef = getProjDef(userId, projectId)
+        SkillDefWithExtra badgeDef = getSkillDefWithExtra(userId, projectId, subjectId, SkillDef.ContainerType.Badge)
 
         return loadBadgeSummary(projDef, userId, badgeDef, version,true)
     }
@@ -311,7 +312,7 @@ class SkillsLoader {
 
     @Transactional(readOnly = true)
     SkillGlobalBadgeSummary loadGlobalBadge(String userId, String originatingProject, String badgeSkillId, Integer version = Integer.MAX_VALUE) {
-        SkillDefWithExtra badgeDef = getSkillDefWithExtra(null, badgeSkillId, SkillDef.ContainerType.GlobalBadge)
+        SkillDefWithExtra badgeDef = getSkillDefWithExtra(userId, null, badgeSkillId, SkillDef.ContainerType.GlobalBadge)
 
         return loadGlobalBadgeSummary(userId, originatingProject, badgeDef, version,true)
     }
@@ -551,15 +552,14 @@ class SkillsLoader {
     private List<SkillSummary> createSkillSummaries(ProjDef thisProjDef, List<SubjectDataLoader.SkillsAndPoints> childrenWithPoints) {
         List<SkillSummary> skillsRes = []
 
-        SettingsResult helpUrlRootSetting = settingsService.getProjectSetting(thisProjDef?.projectId, PROP_HELP_URL_ROOT)
-
         Map<String,ProjDef> projDefMap = [:]
         childrenWithPoints.each { SubjectDataLoader.SkillsAndPoints skillDefAndUserPoints ->
             SkillDef skillDef = skillDefAndUserPoints.skillDef
             int points = skillDefAndUserPoints.points
             int todayPoints = skillDefAndUserPoints.todaysPoints
 
-            ProjDef projDef = projDefMap[skillDef.projectId]
+            // support skill summaries from other projects
+            ProjDef projDef = thisProjDef && thisProjDef.projectId == skillDef.projectId ? thisProjDef : projDefMap[skillDef.projectId]
             if(!projDef){
                 projDef = projDefRepo.findByProjectId(skillDef.projectId)
                 projDefMap[skillDef.projectId] = projDef
@@ -619,26 +619,27 @@ class SkillsLoader {
         return res
     }
 
-    private ProjDef getProjDef(String projectId) {
+    private ProjDef getProjDef(String userId, String projectId) {
         ProjDef projDef = projDefRepo.findByProjectId(projectId)
         if(!projDef){
-            throw new skills.controller.exceptions.SkillException("Failed to find project [$projectId]", projectId)
+            throw new SkillExceptionBuilder()
+                    .msg("Project definition with id [${projectId}] doesn't exist")
+                    .userId(userId)
+                    .projectId(projectId)
+                    .build()
         }
         return projDef
     }
 
-    private SkillDef getSkillDef(String projectId, String skillId, SkillDef.ContainerType containerType) {
-        SkillDef skillDef = skillDefRepo.findByProjectIdAndSkillIdAndType(projectId, skillId, containerType)
-        if (!skillDef) {
-            throw new skills.controller.exceptions.SkillException("Skill with id [${skillId}] doesn't exist", projectId, skillId)
-        }
-        return skillDef
-    }
-
-    private SkillDefWithExtra getSkillDefWithExtra(String projectId, String skillId, SkillDef.ContainerType containerType) {
+    private SkillDefWithExtra getSkillDefWithExtra(String userId, String projectId, String skillId, SkillDef.ContainerType containerType) {
         SkillDefWithExtra skillDef = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, skillId, containerType)
         if (!skillDef) {
-            throw new skills.controller.exceptions.SkillException("Skill with id [${skillId}] doesn't exist", projectId, skillId)
+            throw new SkillExceptionBuilder()
+                    .msg("Skill definition with id [${skillId}] doesn't exist")
+                    .userId(userId)
+                    .projectId(projectId)
+                    .skillId(skillId)
+                    .build()
         }
         return skillDef
     }

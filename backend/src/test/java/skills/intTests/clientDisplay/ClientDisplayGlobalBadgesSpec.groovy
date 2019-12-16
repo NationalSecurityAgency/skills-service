@@ -426,7 +426,6 @@ class ClientDisplayGlobalBadgesSpec extends DefaultIntSpec {
 
         skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_skills.get(0).skillId], userId, new Date())
         def res = skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_skills.get(1).skillId], userId, new Date())
-        println res
 
         when:
         def summary = skillsService.getSkillSummary(userId, proj1.projectId)
