@@ -1,7 +1,9 @@
 <configuration>
+
+    <conversionRule conversionWord="callerDn" converterClass="skills.TomcatConfig$DnConverter"/>
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <Pattern>access.skills-service %h %l %u [%t] "%r" %s %b "%i{Referer}" "%i{User-Agent}"</Pattern>
+            <Pattern>access.skills-service [%callerDn] %h %l %u [%t] "%r" %s %b %D "%i{Referer}" "%i{User-Agent} %q"</Pattern>
 <!--            <Pattern>%fullRequest%n%n%fullResponse</Pattern>-->
         </encoder>
     </appender>

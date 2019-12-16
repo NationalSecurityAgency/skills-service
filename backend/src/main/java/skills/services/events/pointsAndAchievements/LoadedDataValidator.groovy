@@ -5,6 +5,7 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import skills.controller.exceptions.SkillException
+import skills.controller.exceptions.SkillExceptionBuilder
 import skills.storage.model.SkillDef
 import skills.storage.repos.SkillEventsSupportRepo
 
@@ -21,13 +22,21 @@ class LoadedDataValidator {
 
     void validate(LoadedData loadedData) {
         if (loadedData.tinyProjectDef.totalPoints < minimumProjectPoints) {
-            throw new SkillException("Insufficient project points, skill achievement is disallowed", loadedData.projectId)
+            throw new SkillExceptionBuilder()
+                .msg("Insufficient project points, skill achievement is disallowed")
+                .projectId(loadedData.projectId)
+                .userId(loadedData.userId)
+                .build()
         }
 
         loadedData.parentDefs.each { SkillEventsSupportRepo.TinySkillDef parentSkillDef ->
             if (parentSkillDef.type == SkillDef.ContainerType.Subject) {
                 if (parentSkillDef.totalPoints < minimumSubjectPoints) {
-                    throw new SkillException("Insufficient Subject points, skill achievement is disallowed", parentSkillDef.skillId)
+                    throw new SkillExceptionBuilder()
+                            .msg("Insufficient Subject points, skill achievement is disallowed")
+                            .projectId(loadedData.projectId)
+                            .userId(loadedData.userId)
+                            .build()
                 }
             }
         }

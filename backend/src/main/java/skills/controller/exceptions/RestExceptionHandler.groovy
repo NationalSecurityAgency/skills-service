@@ -16,6 +16,7 @@ import org.springframework.web.context.request.WebRequest
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
 import skills.auth.SkillsAuthorizationException
+import skills.controller.exceptions.SkillException.SkillExceptionLogLevel
 
 @ControllerAdvice
 @Slf4j
@@ -30,14 +31,39 @@ class RestExceptionHandler extends ResponseEntityExceptionHandler {
     static class DomainSpecificErrBody extends BasicErrBody {
         String projectId
         String skillId
+        String userId
     }
 
     @ExceptionHandler(SkillException)
     protected ResponseEntity<Object> handleSkillException(Exception ex, WebRequest webRequest) {
         Object body
         if (ex instanceof SkillException) {
-            body = new DomainSpecificErrBody(projectId: ex.projectId, skillId: ex.skillId, explanation: ex.message, errorCode: ex.errorCode.name())
-            log.error("Exception for: projectId=[${ex.projectId}], skillId=${ex.skillId}", ex)
+            body = new DomainSpecificErrBody(userId: ex.userId, projectId: ex.projectId, skillId: ex.skillId, explanation: ex.message, errorCode: ex.errorCode.name())
+            String msg = "Exception for: projectId=[${ex.projectId}], skillId=${ex.skillId}"
+            if (ex.userId) {
+                msg = "${msg}, userId=[${ex.userId}]"
+            }
+
+            if ( ex.logLevel == SkillException.SkillExceptionLogLevel.ERROR){
+                if (ex.printStackTrace) {
+                    log.error(msg.toString(), ex)
+                } else {
+                    log.error(msg.toString() + ", exception message: [" + ex.message + "]")
+                }
+            } else if (ex.logLevel == SkillException.SkillExceptionLogLevel.WARN) {
+                if (ex.printStackTrace) {
+                    log.warn(msg.toString(), ex)
+                } else {
+                    log.warn(msg.toString() + ", exception message: [" + ex.message + "]")
+                }
+            } else if (ex.logLevel == SkillException.SkillExceptionLogLevel.INFO) {
+                if (ex.printStackTrace) {
+                    log.info(msg.toString(), ex)
+                } else {
+                    log.info(msg.toString() + ", exception message: [" + ex.message + "]")
+                }
+            }
+
         } else {
             log.error("Unexpected exception type [${ex?.class?.simpleName}]", ex)
         }

@@ -34,7 +34,7 @@ class PointsAndAchievementsDataLoader {
 
         List<SkillEventsSupportRepo.TinyUserAchievement> tinyUserAchievements = loadAchievements(userId, projectId, skillRefIds)
 
-        LoadedData res = new LoadedData(projectId: projectId, parentDefs: parentDefs, tinyUserPoints: tinyUserPoints,
+        LoadedData res = new LoadedData(userId: userId, projectId: projectId, parentDefs: parentDefs, tinyUserPoints: tinyUserPoints,
                 levels: tinyLevels, tinyUserAchievements: tinyUserAchievements, tinyProjectDef:tinyProjectDef)
         validator.validate(res)
 
