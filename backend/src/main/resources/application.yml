@@ -21,6 +21,7 @@ spring:
     cache:
       cachecontrol:
         cache-private: true
+        #in seconds
         max-age: 172800
         no-cache: false
         no-store: false
