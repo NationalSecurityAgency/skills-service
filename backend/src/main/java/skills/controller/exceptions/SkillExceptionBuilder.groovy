@@ -8,6 +8,22 @@ class SkillExceptionBuilder {
     private String _skillId
     private String _userId
     private ErrorCode _errorCode = ErrorCode.InternalError
+    SkillException.SkillExceptionLogLevel _logLevel = SkillException.SkillExceptionLogLevel.ERROR
+    private boolean _printStackTrace = true
+    private boolean _doNotRetry = false
+
+    SkillExceptionBuilder logLevel(SkillException.SkillExceptionLogLevel logLevel){
+        this._logLevel = logLevel
+        return this
+    }
+    SkillExceptionBuilder doNotRetry(boolean doNotRetry){
+        this._doNotRetry = doNotRetry
+        return this
+    }
+    SkillExceptionBuilder printStackTrace(boolean printStackTrace){
+        this._printStackTrace = printStackTrace
+        return this
+    }
 
     SkillExceptionBuilder msg(String msg){
         this._msg = msg
@@ -47,6 +63,9 @@ class SkillExceptionBuilder {
         exception.projectId = _projectId
         exception.skillId = _skillId
         exception.errorCode = _errorCode
+        exception.logLevel = _logLevel
+        exception.doNotRetry = _doNotRetry
+        exception.printStackTrace = _printStackTrace
         return exception
     }
 }

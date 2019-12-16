@@ -16,6 +16,7 @@ import org.springframework.web.context.request.WebRequest
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
 import skills.auth.SkillsAuthorizationException
+import skills.controller.exceptions.SkillException.SkillExceptionLogLevel
 
 @ControllerAdvice
 @Slf4j
@@ -42,7 +43,27 @@ class RestExceptionHandler extends ResponseEntityExceptionHandler {
             if (ex.userId) {
                 msg = "${msg}, userId=[${ex.userId}]"
             }
-            log.error(msg.toString(), ex)
+
+            if ( ex.logLevel == SkillException.SkillExceptionLogLevel.ERROR){
+                if (ex.printStackTrace) {
+                    log.error(msg.toString(), ex)
+                } else {
+                    log.error(msg.toString() + ", exception message: [" + ex.message + "]")
+                }
+            } else if (ex.logLevel == SkillException.SkillExceptionLogLevel.WARN) {
+                if (ex.printStackTrace) {
+                    log.warn(msg.toString(), ex)
+                } else {
+                    log.warn(msg.toString() + ", exception message: [" + ex.message + "]")
+                }
+            } else if (ex.logLevel == SkillException.SkillExceptionLogLevel.INFO) {
+                if (ex.printStackTrace) {
+                    log.info(msg.toString(), ex)
+                } else {
+                    log.info(msg.toString() + ", exception message: [" + ex.message + "]")
+                }
+            }
+
         } else {
             log.error("Unexpected exception type [${ex?.class?.simpleName}]", ex)
         }

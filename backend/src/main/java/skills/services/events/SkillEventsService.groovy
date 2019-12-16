@@ -161,7 +161,10 @@ class SkillEventsService {
         SkillEventsSupportRepo.SkillDefMin skillDefinition = skillEventsSupportRepo.findByProjectIdAndSkillIdAndType(projectId, skillId, SkillDef.ContainerType.Skill)
         if (!skillDefinition) {
             throw new SkillExceptionBuilder()
-                    .msg("Skill definition does not exist. Must create the skill definition first!")
+                    .msg("Failed to report skill event because skill definition does not exist.")
+                    .logLevel(SkillException.SkillExceptionLogLevel.WARN)
+                    .printStackTrace(false)
+                    .doNotRetry(true)
                     .projectId(projectId).skillId(skillId).userId(userId).build()
         }
         return skillDefinition

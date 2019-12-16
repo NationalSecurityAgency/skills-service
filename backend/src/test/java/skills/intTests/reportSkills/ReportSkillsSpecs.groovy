@@ -65,7 +65,7 @@ class ReportSkillsSpecs extends DefaultIntSpec {
         skillsService.addSkill([projectId: projId, skillId: "nope"])
         then:
         SkillsClientException exception = thrown(SkillsClientException)
-        exception.message.contains("Skill definition does not exist. Must create the skill definition first!, errorCode:InternalError, success:false, projectId:TestProject1, skillId:nope")
+        exception.message.contains("Failed to report skill event because skill definition does not exist., errorCode:InternalError, success:false, projectId:TestProject1, skillId:nope")
     }
 
     def "incrementally achieve a single skill"(){
