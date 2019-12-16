@@ -10,7 +10,21 @@ server:
     session:
       timeout: 24h
       persistent: false
+  http2:
+    enabled: true
+  compression:
+    enabled: true
+    min-response-size: 2048
+    mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json,images/x-icon
 spring:
+  resources:
+    cache:
+      cachecontrol:
+        cache-private: true
+        max-age: 172800
+        no-cache: false
+        no-store: false
+        must-revalidate: true
   main:
     allow-bean-definition-overriding: true
   jpa:
