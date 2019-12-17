@@ -219,7 +219,7 @@
             LevelService.checkIfProjectLevelBelongsToGlobalBadge(this.$route.params.projectId, lastLevel)
               .then((belongsToGlobalBadge) => {
                 if (belongsToGlobalBadge) {
-                  this.msgOk(`Unable to remove level: [${lastLevel}].  This project level belongs to one or more global badges. Please contact a Supervisor to remove this dependency.`);
+                  this.msgOk(`Cannot remove level: [${lastLevel}].  This project level belongs to one or more global badges. Please contact a Supervisor to remove this dependency.`, 'Unable to delete');
                 } else {
                   this.confirmAndRemoveLastItem();
                 }
