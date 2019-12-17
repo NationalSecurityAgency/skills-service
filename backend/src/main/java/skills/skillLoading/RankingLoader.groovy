@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Component
+import skills.services.LevelDefinitionStorageService
 import skills.storage.repos.UserAchievedLevelRepo
 import skills.storage.repos.UserPointsRepo
 import skills.storage.model.UserAchievement
@@ -27,9 +28,25 @@ class RankingLoader {
     UserAchievedLevelRepo achievedLevelRepository
 
     @Autowired
-    skills.services.LevelDefinitionStorageService levelDefinitionStorageService
+    LevelDefinitionStorageService levelDefinitionStorageService
 
     SkillsRanking getUserSkillsRanking(String projectId, String userId, String subjectId = null){
+        /*List<Object[]> userRankings = null
+        if(subjectId == null){
+            userRankings = userPointsRepository.getUserRankingsForProject(projectId)
+        } else {
+            userRankings = userPointsRepository.getUserRankingsForSubject(projectId, subjectId)
+        }
+
+        Integer myRankIdx = userRankings?.findIndexOf { it[0].toString().equalsIgnoreCase(userId) }
+        Object[] myRank = userRankings?.get(myRankIdx)
+
+        SkillsRanking skillsRanking = null
+        if (myRank) {
+            skillsRanking = new SkillsRanking(numUsers: userRankings.size(), position: (Integer)myRank[1])
+        }
+
+        return skillsRanking*/
         UserPoints usersPoints = findUserPoints(projectId, userId, subjectId)
         return doGetUserSkillsRanking(projectId, usersPoints, subjectId)
     }
@@ -45,8 +62,8 @@ class RankingLoader {
         // always calculate total number of users
         SkillsRanking ranking
         if (usersPoints) {
-            int numUsersWithLessScore = calculateNumberOfUsersWithLessScore(subjectId, projectId, usersPoints)
-            int position = numUsers - numUsersWithLessScore
+            int numUsersWithMorePoints = calculateNumberOfUsersWithGreaterPoints(subjectId, projectId, usersPoints)
+            int position = numUsersWithMorePoints+1
             ranking = new SkillsRanking(numUsers: numUsers, position: position)
         } else {
             // last one
@@ -57,7 +74,7 @@ class RankingLoader {
     }
 
     @Profile
-    private int calculateNumberOfUsersWithLessScore(String subjectId, String projectId, UserPoints usersPoints) {
+    private int calculateNumberOfUsersWithGreaterPoints(String subjectId, String projectId, UserPoints usersPoints) {
         subjectId ? userPointsRepository.calculateNumUsersWithLessScore(projectId, subjectId, usersPoints.points)
                 : userPointsRepository.calculateNumUsersWithLessScore(projectId, usersPoints.points)
     }

@@ -182,10 +182,10 @@ class ClientDisplayRankDistributionSpec extends DefaultIntSpec {
         usr1Rank.position == 4
         usr1Rank.numUsers == 4
 
-        usr2Rank.position == 3
+        usr2Rank.position == 2
         usr2Rank.numUsers == 4
 
-        usr3Rank.position == 3
+        usr3Rank.position == 2
         usr3Rank.numUsers == 4
 
         usr4Rank.position == 1
@@ -225,10 +225,10 @@ class ClientDisplayRankDistributionSpec extends DefaultIntSpec {
         usr1Rank.position == 4
         usr1Rank.numUsers == 4
 
-        usr2Rank.position == 3
+        usr2Rank.position == 2
         usr2Rank.numUsers == 4
 
-        usr3Rank.position == 3
+        usr3Rank.position == 2
         usr3Rank.numUsers == 4
 
         usr4Rank.position == 1
@@ -435,19 +435,19 @@ class ClientDisplayRankDistributionSpec extends DefaultIntSpec {
         usrRes.each {
             it.rank.numUsers == 15
         }
-        usrRes.rank.get(0).position == 15
+        usrRes.rank.get(0).position == 13
         usrRes.rankDist.get(0).myPoints == 30
         usrRes.rankDist.get(0).myLevel == 1
         usrRes.rankDist.get(0).pointsAnotherUserToPassMe == -1
         usrRes.rankDist.get(0).pointsToPassNextUser == 10
 
-        usrRes.rank.get(1).position == 15
+        usrRes.rank.get(1).position == 13
         usrRes.rankDist.get(1).myPoints == 30
         usrRes.rankDist.get(1).myLevel == 1
         usrRes.rankDist.get(1).pointsAnotherUserToPassMe == -1
         usrRes.rankDist.get(1).pointsToPassNextUser == 10
 
-        usrRes.rank.get(2).position == 15
+        usrRes.rank.get(2).position == 13
         usrRes.rankDist.get(2).myPoints == 30
         usrRes.rankDist.get(2).myLevel == 1
         usrRes.rankDist.get(2).pointsAnotherUserToPassMe == -1
@@ -465,13 +465,13 @@ class ClientDisplayRankDistributionSpec extends DefaultIntSpec {
         usrRes.rankDist.get(4).pointsAnotherUserToPassMe == 20
         usrRes.rankDist.get(4).pointsToPassNextUser == 10
 
-        usrRes.rank.get(5).position == 10
+        usrRes.rank.get(5).position == 9
         usrRes.rankDist.get(5).myPoints == 70
         usrRes.rankDist.get(5).myLevel == 2
         usrRes.rankDist.get(5).pointsAnotherUserToPassMe == 10
         usrRes.rankDist.get(5).pointsToPassNextUser == 30
 
-        usrRes.rank.get(6).position == 10
+        usrRes.rank.get(6).position == 9
         usrRes.rankDist.get(6).myPoints == 70
         usrRes.rankDist.get(6).myLevel == 2
         usrRes.rankDist.get(6).pointsAnotherUserToPassMe == 10
@@ -489,25 +489,25 @@ class ClientDisplayRankDistributionSpec extends DefaultIntSpec {
         usrRes.rankDist.get(8).pointsAnotherUserToPassMe == 10
         usrRes.rankDist.get(8).pointsToPassNextUser == 40
 
-        usrRes.rank.get(9).position == 6
+        usrRes.rank.get(9).position == 5
         usrRes.rankDist.get(9).myPoints == 150
         usrRes.rankDist.get(9).myLevel == 4
         usrRes.rankDist.get(9).pointsAnotherUserToPassMe == 40
         usrRes.rankDist.get(9).pointsToPassNextUser == 10
 
-        usrRes.rank.get(10).position == 6
+        usrRes.rank.get(10).position == 5
         usrRes.rankDist.get(10).myPoints == 150
         usrRes.rankDist.get(10).myLevel == 4
         usrRes.rankDist.get(10).pointsAnotherUserToPassMe == 40
         usrRes.rankDist.get(10).pointsToPassNextUser == 10
 
-        usrRes.rank.get(11).position == 4
+        usrRes.rank.get(11).position == 3
         usrRes.rankDist.get(11).myPoints == 160
         usrRes.rankDist.get(11).myLevel == 4
         usrRes.rankDist.get(11).pointsAnotherUserToPassMe == 10
         usrRes.rankDist.get(11).pointsToPassNextUser == 40
 
-        usrRes.rank.get(12).position == 4
+        usrRes.rank.get(12).position == 3
         usrRes.rankDist.get(12).myPoints == 160
         usrRes.rankDist.get(12).myLevel == 4
         usrRes.rankDist.get(12).pointsAnotherUserToPassMe == 10
@@ -645,7 +645,7 @@ class ClientDisplayRankDistributionSpec extends DefaultIntSpec {
                 [level: 5, numUsers: 0]
         ]
 
-        rankSubj2_res1.position == 7
+        rankSubj2_res1.position == 4
         rankSubj2_res1.numUsers == 7
         usersPerLevelSubj2_res1 == [
                 [level: 1, numUsers: 0],
