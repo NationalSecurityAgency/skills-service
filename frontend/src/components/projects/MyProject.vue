@@ -44,7 +44,7 @@
     },
     mounted() {
       this.createCardOptions();
-      this.checkIfProjectBelongsToGlobalBadge();
+      // this.checkIfProjectBelongsToGlobalBadge();
     },
     computed: {
       minimumPoints() {
@@ -84,11 +84,19 @@
           });
       },
       deleteProject() {
-        const msg = `Project ID [${this.projectInternal.projectId}]. Delete Action can not be undone and permanently removes its skill subject definitions, skill definitions and users' performed skills.`;
-        this.msgConfirm(msg)
-          .then((res) => {
-            if (res) {
-              this.$emit('project-deleted', this.projectInternal);
+        ProjectService.checkIfProjectBelongsToGlobalBadge(this.projectInternal.projectId)
+          .then((belongsToGlobal) => {
+            if (belongsToGlobal) {
+              const msg = 'Cannot delete this project as it belongs to one or more global badges. Please contact a Supervisor to remove this dependency.';
+              this.msgOk(msg, 'Unable to delete');
+            } else {
+              const msg = `Project ID [${this.projectInternal.projectId}]. Delete Action can not be undone and permanently removes its skill subject definitions, skill definitions and users' performed skills.`;
+              this.msgConfirm(msg)
+                .then((res) => {
+                  if (res) {
+                    this.$emit('project-deleted', this.projectInternal);
+                  }
+                });
             }
           });
       },

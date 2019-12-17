@@ -54,7 +54,6 @@
     },
     mounted() {
       this.buildCardOptions();
-      this.checkIfSubjectBelongsToGlobalBadge();
     },
     watch: {
       subject(newVal) {
@@ -89,21 +88,20 @@
           }],
         };
       },
-      checkIfSubjectBelongsToGlobalBadge() {
-        SubjectsService.checkIfSubjectBelongsToGlobalBadge(this.subjectInternal.projectId, this.subjectInternal.subjectId)
-          .then((res) => {
-            if (res) {
-              this.deleteSubjectDisabled = true;
-              this.deleteSubjectToolTip = 'Cannot delete this subject as it belongs to one or more global badges. Please contact a Supervisor to remove this dependency.';
-            }
-          });
-      },
       deleteSubject() {
-        const msg = `Subject with id [${this.subjectInternal.subjectId}] will be removed. Delete Action can not be undone and permanently removes its skill definitions and users' performed skills.`;
-        this.msgConfirm(msg)
-          .then((res) => {
-            if (res) {
-              this.$emit('subject-deleted', this.subjectInternal);
+        SubjectsService.checkIfSubjectBelongsToGlobalBadge(this.subjectInternal.projectId, this.subjectInternal.subjectId)
+          .then((belongsToGlobal) => {
+            if (belongsToGlobal) {
+              const msg = 'Cannot delete this subject as it belongs to one or more global badges. Please contact a Supervisor to remove this dependency.';
+              this.msgOk(msg, 'Unable to delete');
+            } else {
+              const msg = `Subject with id [${this.subjectInternal.subjectId}] will be removed. Delete Action can not be undone and permanently removes its skill definitions and users' performed skills.`;
+              this.msgConfirm(msg)
+                .then((res) => {
+                  if (res) {
+                    this.$emit('subject-deleted', this.subjectInternal);
+                  }
+                });
             }
           });
       },
