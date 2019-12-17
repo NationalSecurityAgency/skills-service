@@ -18,14 +18,43 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
     @Nullable
     UserPoints findByProjectIdAndUserIdAndSkillIdAndDay(String projectId, String userId, @Nullable String skillId, @Nullable Date day)
 
+    static interface UserRanking {
+        public String getUserId()
+        public int getRank()
+    }
+
+    @Query(value = '''
+        SELECT user_id, rank 
+        FROM (
+         SELECT user_id, 
+           rank() OVER w AS rank 
+           FROM user_points 
+           WHERE project_id = ?1 and day is null and skill_id is null  
+           WINDOW w AS (ORDER BY points DESC)
+           ) user_rank;
+''', nativeQuery = true)
+    List<Object[]> getUserRankingsForProject(String projectId)
+
+    @Query(value = '''
+        SELECT user_id, rank  
+        FROM (
+         SELECT user_id, 
+           rank() OVER w AS rank 
+           FROM user_points 
+           WHERE day is null and project_id = ?1 and skill_id = ?2 
+           WINDOW w AS (ORDER BY points DESC)
+           ) user_rank;
+''', nativeQuery = true)
+    List<Object[]> getUserRankingsForSubject(String projectId, String subjectId)
+
     long countByProjectIdAndSkillIdAndDay(String projectId, @Nullable String skillId, @Nullable Date day)
 
     void deleteByProjectIdAndSkillId(String projectId, String skillId)
 
-    @Query("SELECT count(p) from UserPoints p where p.projectId=?1 and p.skillId=?2 and p.points<?3 and p.day is null" )
+    @Query("SELECT count(p) from UserPoints p where p.projectId=?1 and p.skillId=?2 and p.points > ?3 and p.day is null" )
     Integer calculateNumUsersWithLessScore(String projectId, String skillId, int points)
 
-    @Query("SELECT count(p) from UserPoints p where p.projectId=?1 and p.skillId is null and p.points<?2 and p.day is null" )
+    @Query("SELECT count(p) from UserPoints p where p.projectId=?1 and p.skillId is null and p.points > ?2 and p.day is null" )
     Integer calculateNumUsersWithLessScore(String projectId, int points)
 
     List<UserPoints> findByProjectIdAndSkillIdAndPointsGreaterThanAndDayIsNull(String projectId, @Nullable String skillId, int points, Pageable pageable)
@@ -282,4 +311,5 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                 AND points.skill_id = :skillId 
                 AND points.project_id = :projectId''', nativeQuery=true)
     void updatePointHistoryForSkill(@Param("projectId") String projectId, @Param("skillId") String skillId, @Param("incrementDelta") int incrementDelta)
+
 }

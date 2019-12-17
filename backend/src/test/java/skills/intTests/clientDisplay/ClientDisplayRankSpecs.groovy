@@ -52,16 +52,16 @@ class ClientDisplayRankSpecs extends DefaultIntSpec {
         def summaryUsr2Subj = skillsService.getRank(users.get(1), proj1.projectId, proj1_subj.subjectId)
         then:
         summaryUsr1.numUsers == 2
-        summaryUsr1.position == 2
+        summaryUsr1.position == 1
 
         summaryUsr2.numUsers == 2
-        summaryUsr2.position == 2
+        summaryUsr2.position == 1
 
         summaryUsr1Subj.numUsers == 2
-        summaryUsr1Subj.position == 2
+        summaryUsr1Subj.position == 1
 
         summaryUsr2Subj.numUsers == 2
-        summaryUsr2Subj.position == 2
+        summaryUsr2Subj.position == 1
     }
 
     def "get rank - users with various ranks"(){
@@ -197,10 +197,10 @@ class ClientDisplayRankSpecs extends DefaultIntSpec {
         usr3.position == 3
 
         usr4.numUsers == 5
-        usr4.position == 2
+        usr4.position == 1
 
         usr5.numUsers == 5
-        usr5.position == 2
+        usr5.position == 1
 
         usr1Subj.numUsers == 5
         usr1Subj.position == 5
@@ -212,10 +212,10 @@ class ClientDisplayRankSpecs extends DefaultIntSpec {
         usr3Subj.position == 3
 
         usr4Subj.numUsers == 5
-        usr4Subj.position == 2
+        usr4Subj.position == 1
 
         usr5Subj.numUsers == 5
-        usr5Subj.position == 2
+        usr5Subj.position == 1
     }
 
     def "users from other projects should not affect each other"(){
@@ -291,18 +291,18 @@ class ClientDisplayRankSpecs extends DefaultIntSpec {
         summaryUsr1Proj2.position == 3
 
         summaryUsr2Proj2.numUsers == 2
-        summaryUsr2Proj2.position == 2
+        summaryUsr2Proj2.position == 1
 
         summaryUsr3Proj2.numUsers == 2
-        summaryUsr3Proj2.position == 2
+        summaryUsr3Proj2.position == 1
 
         summaryUsr1Proj2Subj.numUsers == 3
         summaryUsr1Proj2Subj.position == 3
 
         summaryUsr2Proj2Subj.numUsers == 2
-        summaryUsr2Proj2Subj.position == 2
+        summaryUsr2Proj2Subj.position == 1
 
         summaryUsr3Proj2Subj.numUsers == 2
-        summaryUsr3Proj2Subj.position == 2
+        summaryUsr3Proj2Subj.position == 1
     }
 }
