@@ -11,7 +11,7 @@ server:
       timeout: 24h
       persistent: false
   http2:
-    enabled: true
+    enabled: false
   compression:
     enabled: true
     min-response-size: 2048
