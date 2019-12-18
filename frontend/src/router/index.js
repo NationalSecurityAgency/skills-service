@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import Router from 'vue-router';
+import { SkillsReporter, SkillsConfiguration } from '@skills/skills-client-vue';
 import HomePage from '@/components/HomePage';
 import MyProjects from '@/components/projects/MyProjects';
 import LoginForm from '@/components/access/Login';
@@ -37,7 +38,6 @@ import UserSkillsPerformed from '@//components/users/UserSkillsPerformed';
 import GeneralSettings from '@//components/settings/GeneralSettings';
 import SecuritySettings from '@//components/settings/SecuritySettings';
 import EmailSettings from '@//components/settings/EmailSettings';
-import { SkillsReporter, SkillsConfiguration } from '@skills/skills-client-vue';
 import { SECTION } from '@//components/metrics/SectionHelper';
 
 Vue.use(Router);
@@ -119,7 +119,7 @@ const router = new Router({
         meta: { requiresAuth: true, reportSkillId: 'VisitProjectDependencies' },
       }, {
         name: 'CrossProjectsSkills',
-        path: 'crossProject',
+        path: 'cross Project',
         component: CrossProjectsSkills,
         meta: { requiresAuth: true, reportSkillId: 'VisitProjectCrossProjectSkills' },
       }, {
