@@ -1,0 +1,47 @@
+describe('Login Tests', () => {
+
+  beforeEach(() => {
+    cy.server()
+      .route('GET', '/app/projects').as('getProjects')
+      .route('GET', '/api/icons/customIconCss').as('getProjectsCustomIcons')
+      .route('GET', '/app/userInfo').as('getUserInfo')
+      .route('POST', '/performLogin').as('postPerformLogin');
+  });
+
+  it('form: successful dashboard login', () => {
+    cy.visit('/');
+
+    cy.get('#username').type('dimay@evoforge.org');
+    cy.get('#inputPassword').type('password');
+    cy.contains('Login').click();
+
+    cy.wait('@getProjects').its('status').should('be', 200)
+      .wait('@getUserInfo').its('status').should('be', 200);
+
+    cy.contains('Project');
+    cy.contains('My Projects');
+    cy.contains('ProjectA');
+  });
+
+  it('form: bad password', () => {
+    cy.visit('/');
+
+    cy.get('#username').type('dimay@evoforge.org');
+    cy.get('#inputPassword').type('password1');
+    cy.contains('Login').click();
+    cy.wait('@postPerformLogin');
+
+    cy.contains('Invalid');
+  });
+
+  it('form: bad user', () => {
+    cy.visit('/');
+
+    cy.get('#username').type('dimay1@evoforge.org');
+    cy.get('#inputPassword').type('password');
+    cy.contains('Login').click();
+    cy.wait('@postPerformLogin');
+
+    cy.contains('Invalid');
+  });
+});
