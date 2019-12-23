@@ -9,7 +9,8 @@
     "deploy": "npm run build && rm -rf ../backend/src/main/resources/public/static/js && cp -rT dist ../backend/src/main/resources/public/ && cp -rT dist ../backend/target/classes/public/",
     "lint": "vue-cli-service lint",
     "test:e2e": "vue-cli-service test:e2e",
-    "test:unit": "vue-cli-service test:unit"
+    "test:unit": "vue-cli-service test:unit",
+    "cypress:open": "cypress open"
   },
   "dependencies": {
     "@skills/skills-client-vue": "1.0.5",
@@ -52,6 +53,7 @@
     "babel-core": "7.0.0-bridge.0",
     "babel-eslint": "10.0.3",
     "babel-jest": "24.9.0",
+    "cypress": "^3.8.0",
     "eslint": "6.5.0",
     "eslint-plugin-vue": "5.2.3",
     "node-sass": "4.12.0",
