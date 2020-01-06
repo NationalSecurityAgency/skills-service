@@ -71,7 +71,7 @@ installCypress:
     # useful to make sure we are not carrying around old versions
     - npx cypress cache path
     - npx cypress cache list
-    - $(npm bin)/print-env CI
+    - npx print-env CI
     - npm run cy:verify
 
 # all jobs that actually run tests can use the same definition
@@ -81,7 +81,7 @@ testCypress:
   script:
     - cd e2e-tests
     # print CI environment variables for reference
-    - $(npm bin)/print-env CI
+    - npx print-env CI
     # start the server in the background
     - npm run backend:start &
     - npm run backend:waitToStart
