@@ -64,6 +64,8 @@ installCypress:
   stage: installCypress
 
   script:
+    - echo "@skills:registry=http://$NEXUS_SERVER/repository/skills-registry/" > ~/.npmrc
+    - cat ~/.npmrc
     - cd frontend
     - npm install
     # check Cypress binary path and cached versions
