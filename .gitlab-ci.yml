@@ -76,7 +76,7 @@ installCypress:
 
 # all jobs that actually run tests can use the same definition
 testCypress:
-  image: maven:3.6.0-jdk-11
+  image: olehsrh/cypress:1
   stage: testCypress
   script:
     - cd e2e-tests
