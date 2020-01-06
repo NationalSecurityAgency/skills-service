@@ -1,5 +1,4 @@
 stages:
-#  - build
   - installCypress
   - testCypress
 #  - deploy
@@ -110,25 +109,25 @@ testCypress:
 #  extends: .job_template
 
 
-deploy:
-  except:
-    variables:
-      - $TYPE == "postgrestest"
-  image: alpine:latest
-  stage: deploy
-  before_script:
-    - apk --update --no-cache add sshpass openssh git
-  script:
-    - git clone https://${GITLAB_DEPLOY_USERNAME}:${GITLAB_DEPLOY_PASSWORD}@gitlab.evoforge.org/skills/skills-deploy.git
-    - git clone https://${GITLAB_USER_SVC_USERNAME}:${GITLAB_USER_SVC_PASSWORD}@gitlab.evoforge.org/skills/user-info-service.git
-    - TIMESTAMP=`date +%s`
-    - TMP_DIR="deploy_${TIMESTAMP}"
-    - DEST_PATH="/home/${CI_USERNAME}/$TMP_DIR"
-    - sshpass -p $CI_PASSWORD ssh -o StrictHostKeyChecking=no -o PreferredAuthentications=password -o PubkeyAuthentication=no $CI_USERNAME@$CI_IP "rm -rf /home/${CI_USERNAME}/deploy_* && mkdir -p ${DEST_PATH}"
-    - cp backend/target/backend-*.jar backend.jar
-    - sshpass -p $CI_PASSWORD scp -r skills-deploy ${CI_USERNAME}@${CI_IP}:${DEST_PATH}
-    - sshpass -p $CI_PASSWORD scp -r backend.jar ${CI_USERNAME}@${CI_IP}:${DEST_PATH}/skills-deploy
-    - sshpass -p $CI_PASSWORD scp -r user-info-service ${CI_USERNAME}@${CI_IP}:${DEST_PATH}/skills-deploy
-    - sshpass -p $CI_PASSWORD ssh -o StrictHostKeyChecking=no -o PreferredAuthentications=password -o PubkeyAuthentication=no $CI_USERNAME@$CI_IP "cd ${DEST_PATH}/skills-deploy && ./runDeploy.sh"
-  only:
-    - 1.0.X
+#deploy:
+#  except:
+#    variables:
+#      - $TYPE == "postgrestest"
+#  image: alpine:latest
+#  stage: deploy
+#  before_script:
+#    - apk --update --no-cache add sshpass openssh git
+#  script:
+#    - git clone https://${GITLAB_DEPLOY_USERNAME}:${GITLAB_DEPLOY_PASSWORD}@gitlab.evoforge.org/skills/skills-deploy.git
+#    - git clone https://${GITLAB_USER_SVC_USERNAME}:${GITLAB_USER_SVC_PASSWORD}@gitlab.evoforge.org/skills/user-info-service.git
+#    - TIMESTAMP=`date +%s`
+#    - TMP_DIR="deploy_${TIMESTAMP}"
+#    - DEST_PATH="/home/${CI_USERNAME}/$TMP_DIR"
+#    - sshpass -p $CI_PASSWORD ssh -o StrictHostKeyChecking=no -o PreferredAuthentications=password -o PubkeyAuthentication=no $CI_USERNAME@$CI_IP "rm -rf /home/${CI_USERNAME}/deploy_* && mkdir -p ${DEST_PATH}"
+#    - cp backend/target/backend-*.jar backend.jar
+#    - sshpass -p $CI_PASSWORD scp -r skills-deploy ${CI_USERNAME}@${CI_IP}:${DEST_PATH}
+#    - sshpass -p $CI_PASSWORD scp -r backend.jar ${CI_USERNAME}@${CI_IP}:${DEST_PATH}/skills-deploy
+#    - sshpass -p $CI_PASSWORD scp -r user-info-service ${CI_USERNAME}@${CI_IP}:${DEST_PATH}/skills-deploy
+#    - sshpass -p $CI_PASSWORD ssh -o StrictHostKeyChecking=no -o PreferredAuthentications=password -o PubkeyAuthentication=no $CI_USERNAME@$CI_IP "cd ${DEST_PATH}/skills-deploy && ./runDeploy.sh"
+#  only:
+#    - 1.0.X
