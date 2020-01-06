@@ -64,6 +64,7 @@ installCypress:
   stage: installCypress
 
   script:
+    - cd frontend
     - npm ci
     # check Cypress binary path and cached versions
     # useful to make sure we are not carrying around old versions
@@ -81,10 +82,9 @@ installCypress:
     # print CI environment variables for reference
     - $(npm bin)/print-env CI
     # start the server in the background
-    - java -Dspring.datasource.url=jdbc:h2:mem:skills -Dspring.datasource.driverClassName=org.h2.Driver -Dspring.datasource.username=sa -Dspring.datasource.password= -jar backend/target/backend-1.0.3-SNAPSHOT.jar && if [ $? -eq 143 ]; then exit -1; else exit 0; fi
+    - java -Dspring.datasource.url=jdbc:h2:mem:skills -Dspring.datasource.driverClassName=org.h2.Driver -Dspring.datasource.username=sa -Dspring.datasource.password= -jar backend/target/backend-*-SNAPSHOT.jar && if [ $? -eq 143 ]; then exit -1; else exit 0; fi
     # run Cypress test in load balancing mode
-    - npm run cypress:run
-#    - npm run e2e:record -- --parallel --group "electrons on GitLab CI"
+    - npm run e2e:record -- --parallel --group "electrons on GitLab CI"
   artifacts:
     when: always
     paths:
@@ -98,12 +98,12 @@ electrons-1:
   extends: .job_template
 electrons-2:
   extends: .job_template
-electrons-3:
-  extends: .job_template
-electrons-4:
-  extends: .job_template
-electrons-5:
-  extends: .job_template
+#electrons-3:
+#  extends: .job_template
+#electrons-4:
+#  extends: .job_template
+#electrons-5:
+#  extends: .job_template
 
 
 deploy:
@@ -127,4 +127,4 @@ deploy:
     - sshpass -p $CI_PASSWORD scp -r user-info-service ${CI_USERNAME}@${CI_IP}:${DEST_PATH}/skills-deploy
     - sshpass -p $CI_PASSWORD ssh -o StrictHostKeyChecking=no -o PreferredAuthentications=password -o PubkeyAuthentication=no $CI_USERNAME@$CI_IP "cd ${DEST_PATH}/skills-deploy && ./runDeploy.sh"
   only:
-    - 1.0.X
+    - 1.0.D
