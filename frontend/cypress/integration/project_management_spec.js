@@ -1,18 +1,6 @@
 describe('Project Tests', () => {
 
   beforeEach(() => {
-    // this is workaround, because command fails the very first time,
-    cy.exec('npm version', {failOnNonZeroExit: false})
-    cy.exec('npm run backend:clearDb')
-    cy.request('PUT', '/createAccount', {
-      firstName: 'Person',
-      lastName : 'OneTwo',
-      email    : 'root@skills.org',
-      password : 'password',
-    })
-    cy.request('POST', '/grantFirstRoot');
-    cy.request('POST', '/logout');
-
     cy.request('PUT', '/createAccount', {
       firstName: 'Person',
       lastName : 'Three',
