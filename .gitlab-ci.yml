@@ -80,9 +80,8 @@ testCypress:
   stage: testCypress
   script:
     - cd e2e-tests
-    - ls
     # print CI environment variables for reference
-#    - npx print-env CI
+    - npx print-env CI
     # start the server in the background
     - npm run backend:start:ci &
     - npm run backend:waitToStart
@@ -92,8 +91,8 @@ testCypress:
   artifacts:
     when: always
     paths:
-      - cypress/videos/**/*.mp4
-      - cypress/screenshots/**/*.png
+      - e2e-tests/cypress/videos/**/*.mp4
+      - e2e-tests/cypress/screenshots/**/*.png
     expire_in: 1 day
 
 # actual job definitions
