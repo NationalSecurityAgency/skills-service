@@ -378,6 +378,16 @@
 
                 <executions>
                     <execution>
+                        <id>DEBUG INFO</id>
+                        <goals>
+                            <goal>npm</goal>
+                        </goals>
+                        <phase>test</phase>
+                        <configuration>
+                            <arguments>version</arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
                         <id>npm run test:cypress</id>
                         <goals>
                             <goal>npm</goal>
