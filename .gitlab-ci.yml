@@ -4,6 +4,7 @@ stages:
   - testCypress
   - deploy
 
+
 # to cache both npm modules and Cypress binary we use environment variables
 # to point at the folders we can list as paths in "cache" job settings
 variables:
