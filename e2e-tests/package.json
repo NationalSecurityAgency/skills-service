@@ -1,0 +1,24 @@
+{
+  "name": "e2e-tests",
+  "version": "1.0.0",
+  "description": "End to End Tests",
+  "main": "index.js",
+  "scripts": {
+    "cy:open": "cypress open",
+    "cy:run": "cypress run",
+    "cy:verify": "cypress verify",
+    "cy:run:record": "cypress run --record",
+    "backend:start": "java -Dspring.datasource.url=jdbc:h2:mem:skills -Dspring.datasource.driverClassName=org.h2.Driver -Dspring.datasource.username=sa -Dspring.datasource.password= -jar ../backend/target/backend-*.jar",
+    "backend:start:ci": "java -Dspring.datasource.url=jdbc:h2:mem:skills -Dspring.datasource.driverClassName=org.h2.Driver -Dspring.datasource.username=sa -Dspring.datasource.password= -jar ./cypress/backend-*.jar",
+    "backend:waitToStart": "npx wait-on http://localhost:8080",
+    "backend:resetDb": "java -cp ./cypress/db/h2-1.4.200.jar org.h2.tools.RunScript -url jdbc:h2:tcp://localhost:9090/mem:skills -user sa -script ./cypress/db/reset.sql",
+    "print-env": "print-env"
+  },
+  "author": "Skills Team",
+  "license": "ISC",
+  "devDependencies": {
+    "cypress": "^3.8.1",
+    "@bahmutov/print-env": "^1.2.0",
+    "wait-on": "^3.3.0"
+  }
+}
