@@ -55,7 +55,7 @@ cache:
   paths:
     - .npm
     - cache/Cypress
-    - node_modules
+    - e2e-tests/node_modules
 
 # this job installs NPM dependencies and Cypress
 installCypress:
@@ -81,7 +81,7 @@ testCypress:
   script:
     - cd e2e-tests
     # print CI environment variables for reference
-    - npx print-env CI
+#    - npx print-env CI
     # start the server in the background
     - npm run backend:start &
     - npm run backend:waitToStart
