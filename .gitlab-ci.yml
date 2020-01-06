@@ -65,7 +65,7 @@ installCypress:
 
   script:
     - cd frontend
-    - npm ci
+    - npm install
     # check Cypress binary path and cached versions
     # useful to make sure we are not carrying around old versions
     - npx cypress cache path
@@ -84,8 +84,8 @@ testCypress:
     # start the server in the background
     - java -Dspring.datasource.url=jdbc:h2:mem:skills -Dspring.datasource.driverClassName=org.h2.Driver -Dspring.datasource.username=sa -Dspring.datasource.password= -jar backend/target/backend-*-SNAPSHOT.jar &
     # run Cypress test in load balancing mode
-    - npm run cypress:run
-#    - npm run e2e:record -- --parallel --group "electrons on GitLab CI"
+#    - npm run cypress:run
+    - npm run e2e:record -- --parallel --group "electrons on GitLab CI"
   artifacts:
     when: always
     paths:
@@ -95,10 +95,10 @@ testCypress:
 
 # actual job definitions
 # all steps are the same, they come from the template above
-#electrons-1:
-#  extends: .job_template
-#electrons-2:
-#  extends: .job_template
+electrons-1:
+  extends: .job_template
+electrons-2:
+  extends: .job_template
 #electrons-3:
 #  extends: .job_template
 #electrons-4:
