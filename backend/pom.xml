@@ -284,12 +284,12 @@
                 <version>3.0.0-M3</version>
                 <configuration>
                     <includes>
-                        <include>**/*Spec*.java</include>
-                        <include>**/*Test.java</include>
-                        <include>**/*Tests.java</include>
-                        <include>**/*Spec*.groovy</include>
-                        <include>**/*Test.groovy</include>
-                        <include>**/*Tests.groovy</include>
+                        <include>**/*AdminBadgesSpec*.java</include>
+<!--                        <include>**/*Test.java</include>-->
+<!--                        <include>**/*Tests.java</include>-->
+<!--                        <include>**/*Spec*.groovy</include>-->
+<!--                        <include>**/*Test.groovy</include>-->
+<!--                        <include>**/*Tests.groovy</include>-->
                     </includes>
                 </configuration>
             </plugin>
