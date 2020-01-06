@@ -75,7 +75,7 @@ installCypress:
     - npm run cy:verify
 
 # all jobs that actually run tests can use the same definition
-testCypress:
+.cypress_job_template:
   image: olehsrh/cypress:1
   stage: testCypress
   script:
@@ -86,8 +86,8 @@ testCypress:
     - npm run backend:start:ci &
     - npm run backend:waitToStart
     # run Cypress test in load balancing mode
-    - npm run cy:run
-#    - npm run e2e:record -- --parallel --group "electrons on GitLab CI"
+#    - npm run cy:run
+    - npm run cy:run:record -- --parallel --group "electrons on GitLab CI"
   artifacts:
     when: always
     paths:
@@ -97,10 +97,10 @@ testCypress:
 
 # actual job definitions
 # all steps are the same, they come from the template above
-#electrons-1:
-#  extends: .job_template
-#electrons-2:
-#  extends: .job_template
+electrons-1:
+  extends: .cypress_job_template
+electrons-2:
+  extends: .cypress_job_template
 #electrons-3:
 #  extends: .job_template
 #electrons-4:
