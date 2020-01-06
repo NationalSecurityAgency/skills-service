@@ -84,7 +84,7 @@ testCypress:
     # print CI environment variables for reference
 #    - npx print-env CI
     # start the server in the background
-    - npm run backend:start &
+    - npm run backend:start:ci &
     - npm run backend:waitToStart
     # run Cypress test in load balancing mode
     - npm run cy:run
