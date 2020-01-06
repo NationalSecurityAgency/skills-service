@@ -76,10 +76,11 @@ installCypress:
 
 # all jobs that actually run tests can use the same definition
 testCypress:
-  image: cypress/base:10
+  image: maven:3.6.0-jdk-11
   stage: testCypress
   script:
     - cd e2e-tests
+    - ls
     # print CI environment variables for reference
 #    - npx print-env CI
     # start the server in the background
