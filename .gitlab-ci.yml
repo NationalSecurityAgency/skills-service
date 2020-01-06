@@ -1,5 +1,7 @@
 stages:
   - build
+  - installCypress
+  - testCypress
   - deploy
 
 build:
@@ -39,6 +41,71 @@ postgres-test:on-schedule:
   artifacts:
     paths:
       - backend/target/skills-service-tests.log
+
+
+# to cache both npm modules and Cypress binary we use environment variables
+# to point at the folders we can list as paths in "cache" job settings
+variables:
+  npm_config_cache: "$CI_PROJECT_DIR/.npm"
+  CYPRESS_CACHE_FOLDER: "$CI_PROJECT_DIR/cache/Cypress"
+
+# cache using branch name
+# https://gitlab.com/help/ci/caching/index.md
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - .npm
+    - cache/Cypress
+    - node_modules
+
+# this job installs NPM dependencies and Cypress
+installCypress:
+  image: cypress/base:10
+  stage: installCypress
+
+  script:
+    - npm ci
+    # check Cypress binary path and cached versions
+    # useful to make sure we are not carrying around old versions
+    - npx cypress cache path
+    - npx cypress cache list
+    - $(npm bin)/print-env CI
+    - npm run cy:verify
+
+# all jobs that actually run tests can use the same definition
+.job_template:
+  image: cypress/base:10
+  stage: testCypress
+  script:
+    - cd frontend
+    # print CI environment variables for reference
+    - $(npm bin)/print-env CI
+    # start the server in the background
+    - java -Dspring.datasource.url=jdbc:h2:mem:skills -Dspring.datasource.driverClassName=org.h2.Driver -Dspring.datasource.username=sa -Dspring.datasource.password= -jar backend/target/backend-1.0.3-SNAPSHOT.jar && if [ $? -eq 143 ]; then exit -1; else exit 0; fi
+    # run Cypress test in load balancing mode
+    - npm run cypress:run
+#    - npm run e2e:record -- --parallel --group "electrons on GitLab CI"
+  artifacts:
+    when: always
+    paths:
+      - cypress/videos/**/*.mp4
+      - cypress/screenshots/**/*.png
+    expire_in: 1 day
+
+# actual job definitions
+# all steps are the same, they come from the template above
+electrons-1:
+  extends: .job_template
+electrons-2:
+  extends: .job_template
+electrons-3:
+  extends: .job_template
+electrons-4:
+  extends: .job_template
+electrons-5:
+  extends: .job_template
+
+
 deploy:
   except:
     variables:
