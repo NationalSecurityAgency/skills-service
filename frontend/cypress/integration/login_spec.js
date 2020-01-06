@@ -1,17 +1,6 @@
 describe('Login Tests', () => {
 
   beforeEach(() => {
-    cy.exec('npm version', {failOnNonZeroExit: false})
-    cy.exec('npm run backend:clearDb')
-    cy.request('PUT', '/createAccount', {
-      firstName: 'Person',
-      lastName : 'OneTwo',
-      email    : 'root@skills.org',
-      password : 'password',
-    })
-    cy.request('POST', '/grantFirstRoot');
-    cy.request('POST', '/logout');
-
     cy.server()
       .route('GET', '/app/projects').as('getProjects')
       .route('GET', '/api/icons/customIconCss').as('getProjectsCustomIcons')
