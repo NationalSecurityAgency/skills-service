@@ -1,8 +1,8 @@
 stages:
-  - build
+#  - build
   - installCypress
   - testCypress
-  - deploy
+#  - deploy
 
 build:
   except:
@@ -66,28 +66,28 @@ installCypress:
   script:
     - echo "@skills:registry=http://$NEXUS_SERVER/repository/skills-registry/" > ~/.npmrc
     - cat ~/.npmrc
-    - cd frontend
+    - cd e2e-tests
     - npm install
     # check Cypress binary path and cached versions
     # useful to make sure we are not carrying around old versions
     - npx cypress cache path
     - npx cypress cache list
     - $(npm bin)/print-env CI
-    - npm run cypress:verify
+    - npm run cy:verify
 
 # all jobs that actually run tests can use the same definition
 testCypress:
   image: cypress/base:10
   stage: testCypress
   script:
-    - cd frontend
+    - cd e2e-tests
     # print CI environment variables for reference
     - $(npm bin)/print-env CI
     # start the server in the background
     - npm run backend:start &
     - npm run backend:waitToStart
     # run Cypress test in load balancing mode
-    - npm run cypress:run
+    - npm run cy:run
 #    - npm run e2e:record -- --parallel --group "electrons on GitLab CI"
   artifacts:
     when: always
