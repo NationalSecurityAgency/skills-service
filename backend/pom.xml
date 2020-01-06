@@ -382,7 +382,7 @@
                         <goals>
                             <goal>npm</goal>
                         </goals>
-                        <phase>test</phase>
+                        <phase>verify</phase>
                         <configuration>
                             <arguments>version</arguments>
                         </configuration>
@@ -392,7 +392,7 @@
                         <goals>
                             <goal>npm</goal>
                         </goals>
-                        <phase>test</phase>
+                        <phase>verify</phase>
                         <configuration>
                             <arguments>run test:cypress</arguments>
                         </configuration>
