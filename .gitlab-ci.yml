@@ -84,7 +84,8 @@ testCypress:
     # print CI environment variables for reference
     - $(npm bin)/print-env CI
     # start the server in the background
-    - java -Dspring.datasource.url=jdbc:h2:mem:skills -Dspring.datasource.driverClassName=org.h2.Driver -Dspring.datasource.username=sa -Dspring.datasource.password= -jar backend/target/backend-*-SNAPSHOT.jar &
+    - npm run backend:start &
+    - npm run backend:waitToStart
     # run Cypress test in load balancing mode
     - npm run cypress:run
 #    - npm run e2e:record -- --parallel --group "electrons on GitLab CI"
