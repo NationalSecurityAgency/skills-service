@@ -12,6 +12,7 @@
     "test:unit": "vue-cli-service test:unit",
     "cypress:open": "cypress open",
     "cypress:run": "cypress run",
+    "cypress:verify": "cypress verify",
     "e2e:record": "cypress run --record",
     "// COMMENT: for backend:start": "When the JVM exits due to a signal, its exit code is 128 plus the signal. SIGTERM is 15 so the exit code is 143. start-server-and-test expects 0 success code",
     "backend:start": "java -Dspring.datasource.url=jdbc:h2:mem:skills -Dspring.datasource.driverClassName=org.h2.Driver -Dspring.datasource.username=sa -Dspring.datasource.password= -jar ../backend/target/backend-*.jar && if [ $? -eq 143 ]; then exit -1; else exit 0; fi",

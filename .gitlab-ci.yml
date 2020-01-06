@@ -71,7 +71,7 @@ installCypress:
     - npx cypress cache path
     - npx cypress cache list
     - $(npm bin)/print-env CI
-    - npm run cy:verify
+    - npm run cypress:verify
 
 # all jobs that actually run tests can use the same definition
 testCypress:
