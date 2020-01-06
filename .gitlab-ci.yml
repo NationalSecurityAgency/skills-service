@@ -87,7 +87,7 @@ installCypress:
     - npm run backend:waitToStart
     # run Cypress test in load balancing mode
 #    - npm run cy:run
-    - npm run cy:run:record -- --parallel --group "electrons on GitLab CI"
+    - npm run cy:run -- --parallel --group "electrons on GitLab CI"
   artifacts:
     when: always
     paths:
