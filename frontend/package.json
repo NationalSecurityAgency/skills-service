@@ -12,8 +12,9 @@
     "test:unit": "vue-cli-service test:unit",
     "cypress:open": "cypress open",
     "cypress:run": "cypress run",
+    "e2e:record": "cypress run --record",
     "// COMMENT: for backend:start": "When the JVM exits due to a signal, its exit code is 128 plus the signal. SIGTERM is 15 so the exit code is 143. start-server-and-test expects 0 success code",
-    "backend:start": "java -Dspring.datasource.url=jdbc:h2:mem:skills -Dspring.datasource.driverClassName=org.h2.Driver -Dspring.datasource.username=sa -Dspring.datasource.password= -jar ../backend/target/backend-1.0.3-SNAPSHOT.jar && if [ $? -eq 143 ]; then exit -1; else exit 0; fi",
+    "backend:start": "java -Dspring.datasource.url=jdbc:h2:mem:skills -Dspring.datasource.driverClassName=org.h2.Driver -Dspring.datasource.username=sa -Dspring.datasource.password= -jar ../backend/target/backend-*.jar && if [ $? -eq 143 ]; then exit -1; else exit 0; fi",
     "backend:resetDb": "java -cp ./cypress/db/h2-1.4.200.jar org.h2.tools.RunScript -url jdbc:h2:tcp://localhost:9090/mem:skills -user sa -script ./cypress/db/reset.sql",
     "test:cypress": "start-server-and-test backend:start http://localhost:8080 cypress:run"
   },
