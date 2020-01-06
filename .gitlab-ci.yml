@@ -57,6 +57,7 @@ cache:
     - .npm
     - cache/Cypress
     - e2e-tests/node_modules
+    - backend/target/backend-*.jar
 
 # this job installs NPM dependencies and Cypress
 installCypress:
@@ -64,6 +65,7 @@ installCypress:
   stage: installCypress
 
   script:
+    - ls backend/target/
     - echo "@skills:registry=http://$NEXUS_SERVER/repository/skills-registry/" > ~/.npmrc
     - cat ~/.npmrc
     - cd e2e-tests
@@ -80,6 +82,7 @@ cypress_test:
   image: olehsrh/cypress:1
   stage: testCypress
   script:
+    - ls backend/target/
     - cd e2e-tests
     # print CI environment variables for reference
     - npx print-env CI

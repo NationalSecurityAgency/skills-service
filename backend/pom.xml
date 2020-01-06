@@ -284,12 +284,12 @@
                 <version>3.0.0-M3</version>
                 <configuration>
                     <includes>
-                        <include>**/*AdminBadgesSpec*.java</include>
-<!--                        <include>**/*Test.java</include>-->
-<!--                        <include>**/*Tests.java</include>-->
-<!--                        <include>**/*Spec*.groovy</include>-->
-<!--                        <include>**/*Test.groovy</include>-->
-<!--                        <include>**/*Tests.groovy</include>-->
+                        <include>**/*Spec*.java</include>
+                        <include>**/*Test.java</include>
+                        <include>**/*Tests.java</include>
+                        <include>**/*Spec*.groovy</include>
+                        <include>**/*Test.groovy</include>
+                        <include>**/*Tests.groovy</include>
                     </includes>
                 </configuration>
             </plugin>
@@ -365,40 +365,6 @@
                     </execution>
                 </executions>
             </plugin>
-
-<!--            <plugin>-->
-<!--                <groupId>com.github.eirslett</groupId>-->
-<!--                <artifactId>frontend-maven-plugin</artifactId>-->
-<!--                <version>${frontend-maven-plugin.version}</version>-->
-
-<!--                <configuration>-->
-<!--                    <installDirectory>${project.parent.basedir}/frontend/target</installDirectory>-->
-<!--                    <workingDirectory>${project.parent.basedir}/frontend</workingDirectory>-->
-<!--                </configuration>-->
-
-<!--                <executions>-->
-<!--                    <execution>-->
-<!--                        <id>DEBUG INFO</id>-->
-<!--                        <goals>-->
-<!--                            <goal>npm</goal>-->
-<!--                        </goals>-->
-<!--                        <phase>verify</phase>-->
-<!--                        <configuration>-->
-<!--                            <arguments>version</arguments>-->
-<!--                        </configuration>-->
-<!--                    </execution>-->
-<!--                    <execution>-->
-<!--                        <id>npm run test:cypress</id>-->
-<!--                        <goals>-->
-<!--                            <goal>npm</goal>-->
-<!--                        </goals>-->
-<!--                        <phase>verify</phase>-->
-<!--                        <configuration>-->
-<!--                            <arguments>run test:cypress</arguments>-->
-<!--                        </configuration>-->
-<!--                    </execution>-->
-<!--                </executions>-->
-<!--            </plugin>-->
         </plugins>
     </build>
 
