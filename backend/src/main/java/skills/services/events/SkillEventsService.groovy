@@ -52,9 +52,18 @@ class SkillEventsService {
     @Autowired
     LockingService lockingService
 
+    @Autowired
+    SkillEventPublisher skillEventPublisher
+
     @Transactional
     @Profile
     SkillEventResult reportSkill(String projectId, String skillId, String userId, Date incomingSkillDate = new Date()) {
+        SkillEventResult result = reportSkillInternal(projectId, skillId, userId, incomingSkillDate)
+        skillEventPublisher.publishSkillUpdate(result, userId)
+        return result
+    }
+
+    private SkillEventResult reportSkillInternal(String projectId, String skillId, String userId, Date incomingSkillDate) {
         assert projectId
         assert skillId
 

@@ -12,29 +12,29 @@
 </template>
 
 <script>
-    export default {
-        name: 'NewSoftwareVersionComponent',
-        data() {
-            return {
-                showNewVersionAlert: false,
-                currentLibVersion: undefined,
-            };
-        },
-        computed: {
-            libVersion() {
-                return this.$store.getters.libVersion;
-            },
-        },
-        watch: {
-            libVersion() {
-                if (this.currentLibVersion === undefined) {
-                    this.currentLibVersion = this.libVersion;
-                } else if (this.currentLibVersion !== this.libVersion) {
-                    this.showNewVersionAlert = true;
-                }
-            },
-        },
-    };
+  export default {
+    name: 'NewSoftwareVersionComponent',
+    data() {
+      return {
+        showNewVersionAlert: false,
+        currentLibVersion: undefined,
+      };
+    },
+    computed: {
+      libVersion() {
+        return this.$store.getters.libVersion;
+      },
+    },
+    watch: {
+      libVersion() {
+        if (this.currentLibVersion === undefined) {
+          this.currentLibVersion = this.libVersion;
+        } else if (this.currentLibVersion !== this.libVersion) {
+          this.showNewVersionAlert = true;
+        }
+      },
+    },
+  };
 </script>
 
 <style scoped>
