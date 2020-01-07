@@ -27,6 +27,7 @@ class ConstraintViolationSpecs extends DefaultIntSpec {
 
     def "check for existing project name"(){
         Map proj = SkillsFactory.createProject()
+        proj.name = "Test Project 1"
         skillsService.createProject(proj)
 
         when:
