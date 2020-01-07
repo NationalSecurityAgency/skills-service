@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "cy:open": "cypress open",
+    "cy:open:dev": "cypress open --config baseUrl=http://localhost:8082",
     "cy:run": "cypress run",
     "cy:verify": "cypress verify",
     "backend:start": "java -Dspring.datasource.url=jdbc:h2:mem:skills -Dspring.datasource.driverClassName=org.h2.Driver -Dspring.datasource.username=sa -Dspring.datasource.password= -jar ../backend/target/backend-*.jar",
