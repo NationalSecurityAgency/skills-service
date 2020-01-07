@@ -138,13 +138,13 @@ class SkillsService {
     }
 
     def projectIdExists(Map props){
-        def id = URLEncoder.encode(props.projectId, 'UTF-8')
+        String id = props.projectId
         wsHelper.appGet("/projectExist?projectId=${id}")
     }
 
     def projectNameExists(Map props){
-        def name = URLEncoder.encode(props.projectName, 'UTF-8')
-        wsHelper.appGet("/projectExist?projectName=${name}")
+        String name = props.projectName
+        wsHelper.appGet("/projectExist?projectName=${name}".toString())
     }
 
     def getProjects() {

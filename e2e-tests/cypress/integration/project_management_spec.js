@@ -78,6 +78,30 @@ describe('Project Tests', () => {
     cy.contains(`ID: ${expectedId}`)
   });
 
+  it.only('Validate that cannot create project with the same name in lowercase', () => {
+    const expectedId = 'TestProject1';
+    const providedName = "Test Project #1";
+
+    cy.route('POST', `/app/projects/${expectedId}`)
+        .as('postNewProject');
+
+    cy.visit('/');
+    cy.get('button:contains(\'Project\')').click()
+    cy.get('[data-vv-name="projectName"]').type(providedName)
+    cy.get('#idInput').should('have.value', expectedId)
+
+    cy.get("button:contains('Save')").click()
+    cy.wait('@postNewProject');
+
+    cy.get('button:contains(\'Project\')').click()
+    cy.get('[data-vv-name="projectName"]').type(providedName.toLowerCase())
+
+    cy.contains('The value for the Project Name is already taken')
+
+    cy.get("button:contains('Save')").click()
+    cy.contains('***Form did NOT pass validation, please fix and try to Save again***')
+  });
+
   it('Once project id is enabled name-to-id autofill should be turned off', () => {
     cy.visit('/');
 
