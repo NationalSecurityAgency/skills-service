@@ -48,6 +48,7 @@ module.exports = {
       '/supervisor': proxyConf,
       '/public': proxyConf,
       '/metrics' : proxyConf,
+      '/skills-websocket' : proxyConf,
     },
   },
   configureWebpack: {

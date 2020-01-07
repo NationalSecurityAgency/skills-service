@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.services.events.CompletionItem
+import skills.services.events.SkillEventPublisher
 import skills.services.events.SkillEventResult
 import skills.storage.accessors.ProjDefAccessor
 import skills.storage.model.*
@@ -38,8 +39,17 @@ class SkillEventAdminService {
     @Autowired
     LevelDefinitionStorageService levelDefService
 
+    @Autowired
+    SkillEventPublisher skillEventPublisher
+
     @Transactional
     SkillEventResult deleteSkillEvent(String projectId, String skillId, String userId, Long timestamp) {
+        SkillEventResult result = deleteSkillEventInternal(projectId, skillId, userId, timestamp)
+        skillEventPublisher.publishSkillUpdate(result, userId)
+        return result
+    }
+
+    SkillEventResult deleteSkillEventInternal(String projectId, String skillId, String userId, Long timestamp) {
         List<UserPerformedSkill> performedSkills = performedSkillRepository.findAllByProjectIdAndSkillIdAndUserIdAndPerformedOn(projectId, skillId, userId, new Date(timestamp))
         if (!performedSkills) {
             throw new SkillException("This skill event does not exist", projectId, skillId, ErrorCode.BadParam)
