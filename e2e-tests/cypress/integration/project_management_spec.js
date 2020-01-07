@@ -78,7 +78,7 @@ describe('Project Tests', () => {
     cy.contains(`ID: ${expectedId}`)
   });
 
-  it.only('Validate that cannot create project with the same name in lowercase', () => {
+  it('Validate that cannot create project with the same name in lowercase', () => {
     const expectedId = 'TestProject1';
     const providedName = "Test Project #1";
 
