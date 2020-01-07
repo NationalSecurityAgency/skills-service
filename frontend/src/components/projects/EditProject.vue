@@ -99,7 +99,7 @@
       },
       updateProjectId() {
         if (!this.isEdit && !this.canEditProjectId) {
-          this.internalProject.projectId = this.internalProject.name.replace(/[^\w]/gi, '');
+          this.internalProject.projectId = this.internalProject.name.replace(/[\W_]/gi, '');
         }
       },
       registerValidation() {

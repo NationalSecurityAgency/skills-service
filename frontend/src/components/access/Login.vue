@@ -19,9 +19,9 @@
               <label for="username">Email address</label>
               <input type="text" class="form-control" id="username" tabindex="1" placeholder="Enter email"
                      aria-describedby="emailHelp"
-                     v-model="loginFields.username" v-validate="'required|min:5'" data-vv-delay="500" data-vv-name="username">
-              <small id="emailHelp" class="form-text text-danger" v-show="errors.has('username')">{{
-                errors.first('username')}}
+                     v-model="loginFields.username" v-validate="'required|minUsernameLength|email'" data-vv-delay="500" data-vv-name="email">
+              <small id="emailHelp" class="form-text text-danger" v-show="errors.has('email')">{{
+                errors.first('email')}}
               </small>
             </div>
             <div class="form-group">
