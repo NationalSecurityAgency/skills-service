@@ -1,4 +1,4 @@
-describe('Project Tests', () => {
+describe('Projects Tests', () => {
 
   beforeEach(() => {
     cy.request('PUT', '/createAccount', {

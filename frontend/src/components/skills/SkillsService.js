@@ -43,7 +43,7 @@ export default {
     if (skill.isEdit) {
       requestSkillId = skill.originalSkillId;
     }
-    return axios.put(`/admin/projects/${skill.projectId}/subjects/${skill.subjectId}/skills/${requestSkillId}`, copy)
+    return axios.post(`/admin/projects/${skill.projectId}/subjects/${skill.subjectId}/skills/${requestSkillId}`, copy)
       .then(() => this.getSkillDetails(skill.projectId, skill.subjectId, skill.skillId));
   },
   deleteSkill(skill) {
