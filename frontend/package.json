@@ -10,14 +10,6 @@
     "lint": "vue-cli-service lint",
     "test:e2e": "vue-cli-service test:e2e",
     "test:unit": "vue-cli-service test:unit",
-    "cypress:open": "cypress open",
-    "cypress:run": "cypress run",
-    "cypress:verify": "cypress verify",
-    "e2e:record": "cypress run --record",
-    "// COMMENT: for backend:start": "When the JVM exits due to a signal, its exit code is 128 plus the signal. SIGTERM is 15 so the exit code is 143. start-server-and-test expects 0 success code",
-    "backend:start": "java -Dspring.datasource.url=jdbc:h2:mem:skills -Dspring.datasource.driverClassName=org.h2.Driver -Dspring.datasource.username=sa -Dspring.datasource.password= -jar ../backend/target/backend-*.jar && if [ $? -eq 143 ]; then exit -1; else exit 0; fi",
-    "backend:resetDb": "java -cp ./cypress/db/h2-1.4.200.jar org.h2.tools.RunScript -url jdbc:h2:tcp://localhost:9090/mem:skills -user sa -script ./cypress/db/reset.sql",
-    "test:cypress": "start-server-and-test backend:start http://localhost:8080 cypress:run"
   },
   "dependencies": {
     "@skills/skills-client-vue": "1.0.5",
@@ -60,12 +52,10 @@
     "babel-core": "7.0.0-bridge.0",
     "babel-eslint": "10.0.3",
     "babel-jest": "24.9.0",
-    "cypress": "3.8.1",
     "eslint": "6.5.0",
     "eslint-plugin-vue": "5.2.3",
     "node-sass": "4.12.0",
     "sass-loader": "8.0.0",
-    "start-server-and-test": "1.10.6",
     "vue-template-compiler": "2.6.10"
   }
 }
