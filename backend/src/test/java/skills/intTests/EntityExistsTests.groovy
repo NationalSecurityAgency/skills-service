@@ -8,6 +8,7 @@ class EntityExistsTests extends DefaultIntSpec {
     def "does subject name exist"() {
         def proj = SkillsFactory.createProject(1)
         def subj = SkillsFactory.createSubject(1, 1)
+        subj.name = "Test Subject 1"
 
         when:
         skillsService.createProject(proj)
