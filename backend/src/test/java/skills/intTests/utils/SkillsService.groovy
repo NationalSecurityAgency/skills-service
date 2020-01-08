@@ -765,8 +765,8 @@ class SkillsService {
     }
 
     boolean doesSubjectNameExist(String projectId, String subjectName) {
-        String encoded = URLEncoder.encode(subjectName, StandardCharsets.UTF_8.toString())
-        return wsHelper.adminGet("/projects/${projectId}/subjectNameExists?subjectName=${encoded}")
+//        String encoded = URLEncoder.encode(subjectName, StandardCharsets.UTF_8.toString())
+        return wsHelper.adminGet("/projects/${projectId}/subjectNameExists?subjectName=${subjectName}")
     }
 
     boolean doesBadgeNameExist(String projectId, String subjectName) {
