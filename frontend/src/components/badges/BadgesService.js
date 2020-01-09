@@ -11,10 +11,10 @@ export default {
   },
   saveBadge(badgeReq) {
     if (badgeReq.isEdit) {
-      return axios.put(`/admin/projects/${badgeReq.projectId}/badges/${badgeReq.originalBadgeId}`, badgeReq)
+      return axios.post(`/admin/projects/${badgeReq.projectId}/badges/${badgeReq.originalBadgeId}`, badgeReq)
         .then(() => this.getBadge(badgeReq.projectId, badgeReq.badgeId));
     }
-    return axios.put(`/admin/projects/${badgeReq.projectId}/badges/${badgeReq.badgeId}`, badgeReq)
+    return axios.post(`/admin/projects/${badgeReq.projectId}/badges/${badgeReq.badgeId}`, badgeReq)
       .then(() => this.getBadge(badgeReq.projectId, badgeReq.badgeId));
   },
   deleteBadge(projectId, badgeId) {

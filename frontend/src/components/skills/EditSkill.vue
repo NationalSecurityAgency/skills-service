@@ -7,9 +7,9 @@
         <div class="row">
           <div class="col-12 col-lg">
             <div class="form-group">
-              <label for="subjName">Skill Name</label>
+              <label for="skillName">Skill Name</label>
               <ValidationProvider rules="required|minNameLength|maxSkillNameLength|uniqueName" v-slot="{errors}" name="Skill Name">
-                <input type="text" class="form-control" id="subjName" @input="updateSkillId"
+                <input type="text" class="form-control" id="skillName" @input="updateSkillId"
                        v-model="skillInternal.name" data-vv-name="name" v-focus>
                 <small class="form-text text-danger">{{ errors[0] }}</small>
               </ValidationProvider>
@@ -440,7 +440,7 @@
       },
       updateSkillId() {
         if (!this.isEdit && !this.canEditSkillId) {
-          let id = this.skillInternal.name.replace(/[^\w]/gi, '');
+          let id = InputSanitizer.removeSpecialChars(this.skillInternal.name);
           // Subjects, skills and badges can not have same id under a project
           // by default append Skill to avoid id collision with other entities,
           // user can always override in edit mode
