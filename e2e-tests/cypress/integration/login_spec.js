@@ -1,6 +1,8 @@
 describe('Login Tests', () => {
 
   beforeEach(() => {
+    cy.logout();
+
     cy.server()
       .route('GET', '/app/projects').as('getProjects')
       .route('GET', '/api/icons/customIconCss').as('getProjectsCustomIcons')

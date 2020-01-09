@@ -1,12 +1,6 @@
 describe('Subjects Tests', () => {
 
     beforeEach(() => {
-        cy.request('PUT', '/createAccount', {
-            firstName: 'Person',
-            lastName: 'Three',
-            email: 'skills@skills.org',
-            password: 'password',
-        });
         cy.request('POST', '/app/projects/proj1', {
             projectId: 'proj1',
             name: "proj1"
@@ -19,12 +13,12 @@ describe('Subjects Tests', () => {
         cy.server().route('POST', `/admin/projects/proj1/subjects/${expectedId}`).as('postNewSubject');
 
         cy.visit('/projects/proj1');
-        cy.get('button:contains(\'Subject\')').click()
+        cy.clickButton('Subject');
 
         cy.get('#subjName').type(providedName)
-        cy.get('#idInput').should('have.value', expectedId)
+        cy.getIdField().should('have.value', expectedId)
 
-        cy.get("button:contains('Save')").click()
+        cy.clickSave();
         cy.wait('@postNewSubject');
 
         cy.contains('ID: Lotsofspecial')

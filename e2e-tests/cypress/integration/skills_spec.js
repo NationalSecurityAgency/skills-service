@@ -1,12 +1,6 @@
 describe('Skills Tests', () => {
 
     beforeEach(() => {
-        cy.request('PUT', '/createAccount', {
-            firstName: 'Person',
-            lastName: 'Three',
-            email: 'skills@skills.org',
-            password: 'password',
-        });
         cy.request('POST', '/app/projects/proj1', {
             projectId: 'proj1',
             name: "proj1"
@@ -24,13 +18,13 @@ describe('Skills Tests', () => {
         cy.server().route('POST', `/admin/projects/proj1/subjects/subj1/skills/${expectedId}`).as('postNewSkill');
 
         cy.visit('/projects/proj1/subjects/subj1');
-        cy.get('button:contains(\'Skill\')').click()
+        cy.clickButton('Skill')
 
         cy.get('#skillName').type(providedName)
 
-        cy.get('#idInput').should('have.value', expectedId)
+        cy.getIdField().should('have.value', expectedId)
 
-        cy.get("button:contains('Save')").click()
+        cy.clickSave()
         cy.wait('@postNewSkill');
 
         cy.contains('ID: Lotsofspecial')
