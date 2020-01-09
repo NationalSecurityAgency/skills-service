@@ -89,7 +89,7 @@ cypress_test:
     - ls backend/target/
     - cd e2e-tests
     # print CI environment variables for reference
-    - npx print-env CI
+#    - npx print-env CI
     # start the server in the background
     - npm run backend:start &
     - npm run backend:waitToStart
