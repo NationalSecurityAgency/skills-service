@@ -1,27 +1,19 @@
 describe('Projects Tests', () => {
-
   beforeEach(() => {
-    cy.request('PUT', '/createAccount', {
-      firstName: 'Person',
-      lastName : 'Three',
-      email    : 'skills@skills.org',
-      password : 'password',
-    })
-
     cy.server()
       .route('GET', '/app/projects').as('getProjects')
       .route('GET', '/api/icons/customIconCss').as('getProjectsCustomIcons')
       .route('GET', '/app/userInfo').as('getUserInfo')
   });
 
-  it('Create new projects', () => {
+  it('Create new projects', function () {
     cy.visit('/');
 
     cy.route('POST', '/app/projects/MyNewtestProject').as('postNewProject');
 
-    cy.get('button:contains(\'Project\')').click()
+    cy.clickButton('Project');
     cy.get('[data-vv-name="projectName"]').type("My New test Project")
-    cy.get("button:contains('Save')").click()
+    cy.clickSave();
 
     cy.wait('@postNewProject');
 
@@ -36,11 +28,11 @@ describe('Projects Tests', () => {
     })
     cy.visit('/');
 
-    cy.get('button:contains(\'Project\')').click()
+    cy.clickButton('Project');
     cy.get('[data-vv-name="projectName"]').type("My New test Project")
 
     cy.contains('The value for the Project Name is already taken')
-    cy.get("button:contains('Save')").click()
+    cy.clickSave();
     cy.contains('***Form did NOT pass validation, please fix and try to Save again***')
   });
 
@@ -51,13 +43,13 @@ describe('Projects Tests', () => {
       name: "My New test Project"
     })
     cy.visit('/');
-    cy.get('button:contains(\'Project\')').click()
+    cy.clickButton('Project');
     cy.get('[data-vv-name="projectName"]').type("Other Project Name")
     cy.contains('Enable').click();
-    cy.get("#idInput").clear().type("MyNewtestProject")
+    cy.getIdField().clear().type("MyNewtestProject")
 
     cy.contains('The value for the Project ID is already taken')
-    cy.get("button:contains('Save')").click()
+    cy.clickSave();
     cy.contains('***Form did NOT pass validation, please fix and try to Save again***')
   });
 
@@ -68,11 +60,11 @@ describe('Projects Tests', () => {
     cy.route('POST', `/app/projects/${expectedId}`).as('postNewProject');
 
     cy.visit('/');
-    cy.get('button:contains(\'Project\')').click()
+    cy.clickButton('Project');
     cy.get('[data-vv-name="projectName"]').type(providedName)
-    cy.get('#idInput').should('have.value', expectedId)
+    cy.getIdField().should('have.value', expectedId)
 
-    cy.get("button:contains('Save')").click()
+    cy.clickSave();
     cy.wait('@postNewProject');
 
     cy.contains(`ID: ${expectedId}`)
@@ -86,46 +78,46 @@ describe('Projects Tests', () => {
         .as('postNewProject');
 
     cy.visit('/');
-    cy.get('button:contains(\'Project\')').click()
+    cy.clickButton('Project');
     cy.get('[data-vv-name="projectName"]').type(providedName)
-    cy.get('#idInput').should('have.value', expectedId)
+    cy.getIdField().should('have.value', expectedId)
 
-    cy.get("button:contains('Save')").click()
+    cy.clickSave();
     cy.wait('@postNewProject');
 
-    cy.get('button:contains(\'Project\')').click()
+    cy.clickButton('Project');
     cy.get('[data-vv-name="projectName"]').type(providedName.toLowerCase())
 
     cy.contains('The value for the Project Name is already taken')
 
-    cy.get("button:contains('Save')").click()
+    cy.clickSave();
     cy.contains('***Form did NOT pass validation, please fix and try to Save again***')
   });
 
   it('Once project id is enabled name-to-id autofill should be turned off', () => {
     cy.visit('/');
 
-    cy.get('button:contains(\'Project\')').click();
+    cy.clickButton('Project');;
     cy.get('[data-vv-name="projectName"]').type('InitValue');
-    cy.get('#idInput').should('have.value', 'InitValue');
+    cy.getIdField().should('have.value', 'InitValue');
 
     cy.contains('Enable').click();
     cy.contains('Enabled').not('a');
 
     cy.get('[data-vv-name="projectName"]').type('MoreValue');
-    cy.get('#idInput').should('have.value', 'InitValue');
+    cy.getIdField().should('have.value', 'InitValue');
 
     cy.get('[data-vv-name="projectName"]').clear();
-    cy.get('#idInput').should('have.value', 'InitValue');
+    cy.getIdField().should('have.value', 'InitValue');
   });
 
   it('Project name is required', () => {
     cy.visit('/')
-    cy.get('button:contains(\'Project\')').click();
+    cy.clickButton('Project');;
     cy.contains('Enable').click();
-    cy.get('#idInput').type('InitValue');
+    cy.getIdField().type('InitValue');
 
-    cy.get("button:contains('Save')").click()
+    cy.clickSave();
 
     cy.contains('The Project Name field is required')
     cy.contains('***Form did NOT pass validation, please fix and try to Save again***')
@@ -133,12 +125,12 @@ describe('Projects Tests', () => {
 
   it('Project id is required', () => {
     cy.visit('/')
-    cy.get('button:contains(\'Project\')').click();
+    cy.clickButton('Project');;
     cy.get('[data-vv-name="projectName"]').type('New Project');
     cy.contains('Enable').click();
-    cy.get('#idInput').clear()
+    cy.getIdField().clear()
 
-    cy.get("button:contains('Save')").click()
+    cy.clickSave();
 
     cy.contains('The Project ID field is required')
     cy.contains('***Form did NOT pass validation, please fix and try to Save again***')
@@ -152,9 +144,9 @@ describe('Projects Tests', () => {
     cy.route('POST', `/app/projects/${projId}`).as('postNewProject');
 
     cy.visit('/')
-    cy.get('button:contains(\'Project\')').click();
+    cy.clickButton('Project');;
     cy.contains('Enable').click();
-    cy.get('#idInput').type('ProjectId')
+    cy.getIdField().type('ProjectId')
     cy.get('[data-vv-name="projectName"]').type('12');
     cy.contains(minLenMsg)
 
@@ -170,7 +162,7 @@ describe('Projects Tests', () => {
     cy.get('[data-vv-name="projectName"]').clear().type(longValid);
     cy.contains(maxLenMsg).should('not.exist')
 
-    cy.get("button:contains('Save')").click()
+    cy.clickSave();
     cy.wait('@postNewProject');
 
     cy.contains(`ID: ${projId}`)
@@ -187,22 +179,22 @@ describe('Projects Tests', () => {
     cy.route('POST', `/app/projects/${longValid}`).as('postNewProject');
 
     cy.visit('/')
-    cy.get('button:contains(\'Project\')').click();
+    cy.clickButton('Project');;
     cy.contains('Enable').click();
-    cy.get('#idInput').type('12')
+    cy.getIdField().type('12')
     cy.get('[data-vv-name="projectName"]').type(projName);
     cy.contains(minLenMsg)
 
-    cy.get('#idInput').type('3');
+    cy.getIdField().type('3');
     cy.contains(minLenMsg).should('not.exist')
 
-    cy.get('#idInput').clear().type(longInvalid);
+    cy.getIdField().clear().type(longInvalid);
     cy.contains(maxLenMsg)
 
-    cy.get('#idInput').clear().type(longValid);
+    cy.getIdField().clear().type(longValid);
     cy.contains(maxLenMsg).should('not.exist')
 
-    cy.get("button:contains('Save')").click()
+    cy.clickSave();
     cy.wait('@postNewProject');
 
     cy.contains('ID: aaaaa')

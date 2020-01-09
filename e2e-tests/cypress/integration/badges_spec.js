@@ -1,12 +1,6 @@
 describe('Badges Tests', () => {
 
     beforeEach(() => {
-        cy.request('PUT', '/createAccount', {
-            firstName: 'Person',
-            lastName: 'Three',
-            email: 'skills@skills.org',
-            password: 'password',
-        });
         cy.request('POST', '/app/projects/proj1', {
             projectId: 'proj1',
             name: "proj1"
@@ -19,16 +13,17 @@ describe('Badges Tests', () => {
         cy.server().route('POST', `/admin/projects/proj1/badges/${expectedId}`).as('postNewBadge');
 
         cy.visit('/projects/proj1/badges');
-        cy.get('button:contains(\'Badge\')').click()
+        cy.clickButton('Badge')
 
         cy.get('#badgeName').type(providedName)
 
-        cy.get('#idInput').should('have.value', expectedId)
+        cy.getIdField().should('have.value', expectedId)
 
-        cy.get("button:contains('Save')").click()
+        cy.clickSave()
         cy.wait('@postNewBadge');
 
         cy.contains('ID: Lotsofspecial')
     });
+
 
 })

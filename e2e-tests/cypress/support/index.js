@@ -19,29 +19,19 @@ import './commands'
 // Alternatively you can use CommonJS syntax:
 // require('./commands')
 
-
 before(function () {
-    const rootUserId = 'root@skills.org';
-    cy.request(`/app/users/validExistingDashboardUserId/${rootUserId}`)
-        .then((response) => {
-            if (response.body !== true) {
-                cy.log(`Creating root user [${rootUserId}]`)
-                cy.request('PUT', '/createAccount', {
-                    firstName: 'Person',
-                    lastName: 'OneTwo',
-                    email: rootUserId,
-                    password: 'password',
-                });
-                cy.request('POST', '/grantFirstRoot');
-                cy.request('POST', '/logout');
-            } else {
-                cy.log(`Root user [${rootUserId}] already exist`)
-            }
-        });
+    cy.fixture('vars.json').then((vars) => {
+        cy.register(vars.rootUser, vars.defaultPass, true);
+        cy.register(vars.defaultUser, vars.defaultPass);
+    })
 })
 
 beforeEach(function () {
     // first call to npm fails, looks like this may be the bug: https://github.com/cypress-io/cypress/issues/6081
     cy.exec('npm version', {failOnNonZeroExit: false})
     cy.exec('npm run backend:resetDb')
+
+    cy.fixture('vars.json').then((vars) => {
+        cy.login(vars.defaultUser, vars.defaultPass);
+    });
 })

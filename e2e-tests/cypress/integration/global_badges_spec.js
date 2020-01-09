@@ -1,33 +1,13 @@
 describe('Global Badges Tests', () => {
 
     beforeEach(() => {
-        cy.request('PUT', '/createAccount', {
-            firstName: 'Person',
-            lastName: 'Three',
-            email: 'skills@skills.org',
-            password: 'password',
-        });
-        cy.request('POST', '/logout');
-        cy.request( {
-            method: 'POST',
-            url: '/performLogin',
-            body: {
-                username: 'root@skills.org',
-                password: 'password'
-            },
-            form: true,
-        })
-        cy.request('PUT', '/root/users/skills@skills.org/roles/ROLE_SUPERVISOR');
-        cy.request('POST', '/logout');
-        cy.request( {
-            method: 'POST',
-            url: '/performLogin',
-            body: {
-                username: 'skills@skills.org',
-                password: 'password'
-            },
-            form: true,
-        })
+        cy.logout();
+        const supervisorUser = 'supervisor@skills.org';
+        cy.register(supervisorUser, 'password');
+        cy.login('root@skills.org', 'password');
+        cy.request('PUT', `/root/users/${supervisorUser}/roles/ROLE_SUPERVISOR`);
+        cy.logout();
+        cy.login(supervisorUser, 'password');
     });
 
     it('create badge with special chars', () => {
@@ -38,11 +18,11 @@ describe('Global Badges Tests', () => {
 
         cy.visit('/globalBadges');
         cy.wait('@getGlobalBadges')
-        cy.get('button:contains(\'Badge\')').click()
+        cy.clickButton('Badge')
 
         cy.get('#badgeName').type(providedName)
 
-        cy.get("button:contains('Save')").click()
+        cy.clickSave()
         cy.wait('@postGlobalBadge');
 
         cy.contains(`ID: ${expectedId}`);
@@ -57,12 +37,12 @@ describe('Global Badges Tests', () => {
     //
     //     cy.visit('/globalBadges');
     //     cy.wait('@getGlobalBadges')
-    //     cy.get('button:contains(\'Badge\')').click()
+    //     cy.clickButton('Badge')
     //
     //     cy.get('#badgeName').type(providedName)
-    //     cy.get('#idInput').should('have.value', expectedId)
+    //     cy.getIdField().should('have.value', expectedId)
     //
-    //     // cy.get("button:contains('Save')").click()
+    //     // cy.clickSave()
     //     // cy.wait('@postNewBadge');
     //     //
     //     // cy.contains('ID: Lotsofspecial')
