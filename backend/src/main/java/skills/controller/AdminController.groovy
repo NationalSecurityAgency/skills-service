@@ -166,8 +166,7 @@ class AdminController {
                              @RequestParam(value = "subjectName", required = false) String subjectName) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(subjectName, "Subject Name")
-        String decodedName = URLDecoder.decode(subjectName,  StandardCharsets.UTF_8.toString())
-        return subjAdminService.existsBySubjectName(projectId, decodedName)
+        return subjAdminService.existsBySubjectName(projectId, subjectName)
     }
 
     @RequestMapping(value = "/projects/{projectId}/badgeNameExists", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -176,8 +175,7 @@ class AdminController {
                              @RequestParam(value = "badgeName", required = false) String badgeName) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(badgeName, "Badge Name")
-        String decodedName = URLDecoder.decode(badgeName,  StandardCharsets.UTF_8.toString())
-        return badgeAdminService.existsByBadgeName(projectId, decodedName)
+        return badgeAdminService.existsByBadgeName(projectId, badgeName)
     }
     @RequestMapping(value = "/projects/{projectId}/skillNameExists", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
@@ -185,8 +183,7 @@ class AdminController {
                            @RequestParam(value = "skillName", required = false) String skillName) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(projectId, "Skill Name")
-        String decodedName = URLDecoder.decode(skillName,  StandardCharsets.UTF_8.toString())
-        return skillsAdminService.existsBySkillName(projectId, decodedName)
+        return skillsAdminService.existsBySkillName(projectId, skillName)
     }
 
     /**

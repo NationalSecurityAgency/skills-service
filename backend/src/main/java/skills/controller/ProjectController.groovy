@@ -96,11 +96,9 @@ class ProjectController {
         SkillsValidator.isTrue(!(projectId && projectName), "Only Project Id or Project Name may be provided, not both.")
 
         if (projectId) {
-            projectId = URLDecoder.decode(projectId, StandardCharsets.UTF_8.toString())
             return projAdminService.existsByProjectId(projectId)
         }
 
-        projectName = URLDecoder.decode(projectName, StandardCharsets.UTF_8.toString())
         return projAdminService.existsByProjectName(projectName)
     }
 

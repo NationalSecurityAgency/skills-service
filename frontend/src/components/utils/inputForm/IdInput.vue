@@ -9,7 +9,7 @@
           <i class="fas fa-question-circle mr-1 text-secondary"
              v-b-tooltip.hover.left="'Enable to override auto-generated value.'"/>
           <b-link v-if="!canEdit" @click="toggle">Enable</b-link>
-          <b-link v-else @click="toggle">Disable</b-link>
+          <span v-else>Enabled <i class="fa fa-check fa-sm text-muted"/></span>
         </div>
       </div>
       <input type="text" class="form-control" id="idInput" v-model="internalValue" :disabled="!canEdit"
