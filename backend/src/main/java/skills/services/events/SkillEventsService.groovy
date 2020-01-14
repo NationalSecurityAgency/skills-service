@@ -67,9 +67,9 @@ class SkillEventsService {
         assert projectId
         assert skillId
 
-        SkillEventResult res = new SkillEventResult()
-
         SkillEventsSupportRepo.SkillDefMin skillDefinition = getSkillDef(userId, projectId, skillId)
+
+        SkillEventResult res = new SkillEventResult(skillId: skillDefinition.skillId, name: skillDefinition.name)
 
         long numExistingSkills = getNumExistingSkills(userId, projectId, skillId)
         AppliedCheckRes checkRes = checkIfSkillApplied(userId, numExistingSkills, incomingSkillDate, skillDefinition)
@@ -94,6 +94,8 @@ class SkillEventsService {
 
         UserPerformedSkill performedSkill = new UserPerformedSkill(userId: userId, skillId: skillId, projectId: projectId, performedOn: incomingSkillDate, skillRefId: skillDefinition.id)
         savePerformedSkill(performedSkill)
+
+        res.pointsEarned = skillDefinition.pointIncrement
 
         List<CompletionItem> achievements = pointsAndAchievementsHandler.updatePointsAndAchievements(userId, skillDefinition, incomingSkillDate)
         if (achievements) {

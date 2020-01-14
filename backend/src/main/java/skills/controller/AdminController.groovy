@@ -526,7 +526,7 @@ class AdminController {
 
     @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/users/{userId}/events/{timestamp}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    SkillEventResult deleteSkillEvent(@PathVariable("projectId") String projectId,
+    RequestResult deleteSkillEvent(@PathVariable("projectId") String projectId,
                                       @PathVariable("skillId") String skillId,
                                       @PathVariable("userId") String userId,
                                       @PathVariable("timestamp") Long timestamp) {

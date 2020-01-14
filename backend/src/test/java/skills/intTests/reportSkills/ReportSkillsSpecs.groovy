@@ -200,30 +200,45 @@ class ReportSkillsSpecs extends DefaultIntSpec {
             assert it.body.explanation == "Skill event was applied"
         }
         !addSkillRes.get(0).body.completed
+        addSkillRes.get(0).body.skillId == "${subj1.get(0).skillId}"
+        addSkillRes.get(0).body.name == "${subj1.get(0).name}"
+        addSkillRes.get(0).body.pointsEarned == 10
         subjSummaryRes.get(0).skillsLevel == 0
         subjSummaryRes.get(0).points == 10
         subjSummaryRes.get(0).todaysPoints == 0
         subjSummaryRes.get(0).levelPoints == 10
 
         !addSkillRes.get(1).body.completed
+        addSkillRes.get(1).body.skillId == "${subj1.get(1).skillId}"
+        addSkillRes.get(1).body.name == "${subj1.get(1).name}"
+        addSkillRes.get(1).body.pointsEarned == 10
         subjSummaryRes.get(1).skillsLevel == 0
         subjSummaryRes.get(1).points == 20
         subjSummaryRes.get(1).todaysPoints == 0
         subjSummaryRes.get(1).levelPoints == 20
 
         !addSkillRes.get(2).body.completed
+        addSkillRes.get(2).body.skillId == "${subj1.get(2).skillId}"
+        addSkillRes.get(2).body.name == "${subj1.get(2).name}"
+        addSkillRes.get(2).body.pointsEarned == 10
         subjSummaryRes.get(2).skillsLevel == 0
         subjSummaryRes.get(2).points == 30
         subjSummaryRes.get(2).todaysPoints == 0
         subjSummaryRes.get(2).levelPoints == 30
 
         !addSkillRes.get(3).body.completed
+        addSkillRes.get(3).body.skillId == "${subj1.get(3).skillId}"
+        addSkillRes.get(3).body.name == "${subj1.get(3).name}"
+        addSkillRes.get(3).body.pointsEarned == 10
         subjSummaryRes.get(3).skillsLevel == 0
         subjSummaryRes.get(3).points == 40
         subjSummaryRes.get(3).todaysPoints == 0
         subjSummaryRes.get(3).levelPoints == 40
 
         addSkillRes.get(4).body.completed.size() == 1
+        addSkillRes.get(4).body.skillId == "${subj1.get(4).skillId}"
+        addSkillRes.get(4).body.name == "${subj1.get(4).name}"
+        addSkillRes.get(4).body.pointsEarned == 10
         addSkillRes.get(4).body.completed.get(0).type == "Subject"
         addSkillRes.get(4).body.completed.get(0).level == 1
         addSkillRes.get(4).body.completed.get(0).id == "subj1"
