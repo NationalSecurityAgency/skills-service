@@ -1,14 +1,13 @@
 package skills.services
 
-
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
+import skills.controller.result.model.RequestResult
 import skills.services.events.CompletionItem
-import skills.services.events.SkillEventPublisher
 import skills.services.events.SkillEventResult
 import skills.storage.accessors.ProjDefAccessor
 import skills.storage.model.*
@@ -39,17 +38,8 @@ class SkillEventAdminService {
     @Autowired
     LevelDefinitionStorageService levelDefService
 
-    @Autowired
-    SkillEventPublisher skillEventPublisher
-
     @Transactional
-    SkillEventResult deleteSkillEvent(String projectId, String skillId, String userId, Long timestamp) {
-        SkillEventResult result = deleteSkillEventInternal(projectId, skillId, userId, timestamp)
-        skillEventPublisher.publishSkillUpdate(result, userId)
-        return result
-    }
-
-    SkillEventResult deleteSkillEventInternal(String projectId, String skillId, String userId, Long timestamp) {
+    RequestResult deleteSkillEvent(String projectId, String skillId, String userId, Long timestamp) {
         List<UserPerformedSkill> performedSkills = performedSkillRepository.findAllByProjectIdAndSkillIdAndUserIdAndPerformedOn(projectId, skillId, userId, new Date(timestamp))
         if (!performedSkills) {
             throw new SkillException("This skill event does not exist", projectId, skillId, ErrorCode.BadParam)
@@ -59,16 +49,16 @@ class SkillEventAdminService {
         UserPerformedSkill performedSkill = performedSkills.first()
         log.debug("Deleting skill [{}] for user [{}]", performedSkill, userId)
 
-        SkillEventResult res = new SkillEventResult()
-
         SkillEventsSupportRepo.SkillDefMin skillDefinitionMin = getSkillDef(projectId, skillId)
+
+        RequestResult res = new RequestResult()
 
         Long numExistingSkills = performedSkillRepository.countByUserIdAndProjectIdAndSkillId(userId, projectId, skillId)
         numExistingSkills = numExistingSkills ?: 0 // account for null
 
         List<SkillDef> performedDependencies = performedSkillRepository.findPerformedParentSkills(userId, projectId, skillId)
         if (performedDependencies) {
-            res.skillApplied = false
+            res.success = false
             res.explanation = "You cannot delete a skill event when a parent skill dependency has already been performed. You must first delete " +
                     "the performed skills for the parent dependencies: ${performedDependencies.collect({ it.projectId + ":" + it.skillId })}."
             return res
@@ -81,7 +71,10 @@ class SkillEventAdminService {
             //this removes the skill achievements
             achievedLevelRepo.deleteByProjectIdAndSkillIdAndUserIdAndLevel(performedSkill.projectId, performedSkill.skillId, userId, null)
         }
-        checkParentGraph(performedSkill.performedOn, res, userId, skillDefinitionMin)
+        SkillEventResult skillEventResult = new SkillEventResult()
+        checkParentGraph(performedSkill.performedOn, skillEventResult, userId, skillDefinitionMin)
+        res.success = skillEventResult.skillApplied
+        res.explanation = skillEventResult.explanation
         deleteProjectLevelIfNecessary(performedSkill.projectId, userId, numExistingSkills.toInteger())
         performedSkillRepository.delete(performedSkill)
 

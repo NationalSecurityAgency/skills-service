@@ -151,7 +151,7 @@ class DeleteSkillEventSpecs extends DefaultIntSpec {
         def response = skillsService.deleteSkillEvent([projectId: projId, skillId: skills.get(0).skillId, userId: userId, timestamp: date.time])
 
         then:
-        response.body.skillApplied == false
+        response.body.success == false
         response.body.explanation == 'You cannot delete a skill event when a parent skill dependency has already been performed. You must first delete the performed skills for the parent dependencies: [TestProject1:skill2].'
     }
 

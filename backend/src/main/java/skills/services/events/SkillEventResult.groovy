@@ -8,7 +8,9 @@ import groovy.transform.builder.Builder
 @Builder
 @CompileStatic
 class SkillEventResult {
-    boolean success = true
+    String skillId
+    String name
+    int pointsEarned = 0
     boolean skillApplied = true
     // only really applicable if it wasn't performed
     String explanation = "Skill event was applied"
