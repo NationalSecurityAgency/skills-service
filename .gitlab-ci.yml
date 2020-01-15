@@ -43,7 +43,6 @@ postgres-test:on-schedule:
     paths:
       - backend/target/skills-service-tests.log
 
-
 ##################################################################
 # CYPRESS TESTS
 # use cache and 2 steps to eventually support concurrent and distributed runs via gitlab
