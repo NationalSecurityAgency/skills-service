@@ -18,6 +18,7 @@ describe('Global Badges Tests', () => {
 
         cy.visit('/globalBadges');
         cy.wait('@getGlobalBadges')
+        cy.wait('@getGlobalBadges') // TODO: why is it being called twice?? #456
         cy.clickButton('Badge')
 
         cy.get('#badgeName').type(providedName)
