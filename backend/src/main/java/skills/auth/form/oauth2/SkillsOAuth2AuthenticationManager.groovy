@@ -62,7 +62,7 @@ class SkillsOAuth2AuthenticationManager extends OAuth2AuthenticationManager {
             ServletRequestAttributes currentRequestAttributes = RequestContextHolder.currentRequestAttributes() as ServletRequestAttributes
             httpServletRequest = currentRequestAttributes.getRequest()
         } catch (Exception e) {
-            log.warn("Unable to current request attributes. Error Recieved [$e]")
+            log.debug("Unable to current request attributes. Error Recieved [$e]")
         }
         return httpServletRequest
     }
