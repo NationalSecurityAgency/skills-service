@@ -22,6 +22,7 @@ import org.springframework.security.web.UnsupportedOperationExceptionInvocationH
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer
+import skills.auth.AuthMode
 import skills.auth.form.oauth2.SkillsOAuth2AuthenticationManager
 
 import javax.servlet.http.HttpServletRequest
@@ -48,6 +49,9 @@ class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     // injected by the SkillsOAuth2AuthenticationManager itself (only when using SecurityMode.FormAuth)
     SkillsOAuth2AuthenticationManager oAuth2AuthenticationManager
 
+    @Value('${skills.authorization.authMode:#{T(skills.auth.AuthMode).DEFAULT_AUTH_MODE}}')
+    AuthMode authMode
+
     @Override
     void configureMessageBroker(MessageBrokerRegistry registry) {
         if (enableStompBrokerRelay) {
@@ -71,7 +75,7 @@ class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     void configureClientInboundChannel(ChannelRegistration registration) {
-        if (oAuth2AuthenticationManager) { // only injected when using SecurityMode.FormAuth
+        if (authMode == AuthMode.FORM) { // only injected when using SecurityMode.FormAuth
             registration.interceptors(new ChannelInterceptor() {
                 TokenExtractor tokenExtractor = new BearerTokenExtractor()
                 AuthenticationDetailsSource<HttpServletRequest, ?> authenticationDetailsSource = new OAuth2AuthenticationDetailsSource();
