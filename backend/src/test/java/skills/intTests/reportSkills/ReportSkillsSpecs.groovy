@@ -307,6 +307,7 @@ class ReportSkillsSpecs extends DefaultIntSpec {
         WebSocketHttpHeaders headers = new WebSocketHttpHeaders()
         headers.add('Authorization', "Bearer ${token}")
         stompClient.connect("ws://localhost:${localPort}/skills-websocket", headers, sessionHandler)
+        Thread.sleep(2000)
 
         List<Date> dates = testUtils.getLastNDays(5)
         List addSkillRes = []
@@ -316,6 +317,7 @@ class ReportSkillsSpecs extends DefaultIntSpec {
             addSkillRes << skillsService.addSkill([projectId: projId, skillId: subj1.get(it).skillId], userId, dates.get(it))
             subjSummaryRes << skillsService.getSkillSummary(userId, projId, subj1.get(it).subjectId)
         }
+        Thread.sleep(2000)
 
         then:
         wsResults.sort {it.skillId}
