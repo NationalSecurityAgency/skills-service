@@ -1,5 +1,6 @@
 package skills
 
+import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.annotation.Order
@@ -31,6 +32,7 @@ import javax.servlet.http.HttpSession
 import java.lang.reflect.Proxy
 
 @Configuration
+@Slf4j
 @Order(-2147483549)  // Ordered.HIGHEST_PRECEDENCE + 99 (see https://github.com/spring-projects/spring-framework/blob/master/src/docs/asciidoc/web/websocket.adoc#token-authentication)
 @EnableWebSocketMessageBroker
 class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
@@ -76,6 +78,7 @@ class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     void configureClientInboundChannel(ChannelRegistration registration) {
         if (authMode == AuthMode.FORM) { // only injected when using SecurityMode.FormAuth
+            log.info('Initializing websocket registration interceptor.')
             registration.interceptors(new ChannelInterceptor() {
                 TokenExtractor tokenExtractor = new BearerTokenExtractor()
                 AuthenticationDetailsSource<HttpServletRequest, ?> authenticationDetailsSource = new OAuth2AuthenticationDetailsSource();
@@ -86,6 +89,7 @@ class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                     if (StompCommand.CONNECT == accessor.getCommand()) {
                         List<String> authHeaders = accessor.getNativeHeader(AUTHORIZATION)
                         if (authHeaders) {
+                            log.info("Found Authorization headers on websocket connection: [${authHeaders}]")
                             WebSocketHttpServletRequest request = new WebSocketHttpServletRequest(headers: [(AUTHORIZATION): Collections.enumeration(authHeaders)])
                             Authentication authentication = tokenExtractor.extract(request)
                             if (authentication) {
@@ -96,6 +100,7 @@ class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                                 }
                                 Authentication authResult = oAuth2AuthenticationManager.authenticate(authentication);
                                 if (authResult.authenticated) {
+                                    log.info("Setting OAuth user [${authResult}] on websocket connection")
                                     accessor.setUser(authResult)
                                 }
                             }
