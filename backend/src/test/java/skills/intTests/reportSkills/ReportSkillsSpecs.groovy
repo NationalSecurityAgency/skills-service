@@ -318,6 +318,7 @@ class ReportSkillsSpecs extends DefaultIntSpec {
         }
 
         then:
+        wsResults.sort {it.skillId}
         wsResults.each {
             assert it.skillApplied
             assert it.explanation == "Skill event was applied"
