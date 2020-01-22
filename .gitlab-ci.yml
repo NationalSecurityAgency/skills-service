@@ -79,6 +79,7 @@ installCypress:
     - npx print-env CI
     - npm run cy:verify
 
+
 # all jobs that actually run tests can use the same definition
 cypress_test:
   image: olehsrh/cypress:1
