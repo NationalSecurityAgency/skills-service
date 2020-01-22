@@ -68,7 +68,6 @@ installCypress:
   stage: installCypress
 
   script:
-    - ls backend/target/
     - echo "@skills:registry=http://$NEXUS_SERVER/repository/skills-registry/" > ~/.npmrc
     - cat ~/.npmrc
     - cd e2e-tests
