@@ -96,8 +96,8 @@ cypress_test:
     - cd ../client-display
     - npm install
     - npm run serve &
-    - npx wait-on -t 40000 http://localhost:8090
     - cd ../e2e-tests
+    - npx wait-on -t 40000 http://localhost:8083
     # run tests
     - npm run cy:run
   artifacts:
