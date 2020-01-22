@@ -92,11 +92,12 @@ cypress_test:
 #    - npx print-env CI
     # start the server in the background
     - npm run backend:start &
-    - npm run backend:waitToStart
     - cd ../client-display
     - npm install
     - npm run serve &
     - cd ../e2e-tests
+    - npm install
+    - npm run backend:waitToStart
     - npx wait-on -t 40000 http://localhost:8083
     # run tests
     - npm run cy:run
