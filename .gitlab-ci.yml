@@ -1,47 +1,47 @@
 stages:
-  - build
+#  - build
   - installCypress
   - testCypress
   - pushToNexus
   - deploy
 
-build:
-  except:
-    variables:
-      - $TYPE == "postgrestest"
-  image: maven:3.6.0-jdk-11
-  stage: build
-  script:
-    - echo "@skills:registry=http://$NEXUS_SERVER/repository/skills-registry/" > ~/.npmrc
-    - cat ~/.npmrc
-    - echo "<settings><mirrors><mirror><id>central</id><name>central</name><url>http://$NEXUS_SERVER/repository/maven-public/</url><mirrorOf>*</mirrorOf></mirror></mirrors></settings>" > ~/.m2/settings.xml
-    - cat ~/.m2/settings.xml
-    - mvn install
-  artifacts:
-    paths:
-      - backend/target/backend-*.jar
-      - backend/target/skills-service-tests.log
-
-postgres-test:on-schedule:
-  only:
-    variables:
-      - $TYPE == "postgrestest"
-  image: maven:3.6.0-jdk-11
-  stage: build
-  services:
-    - postgres:latest
-  variables:
-    POSTGRES_PASSWORD: skillsPassword
-    POSTGRES_DB: skills
-  script:
-    - echo "@skills:registry=http://$NEXUS_SERVER/repository/skills-registry/" > ~/.npmrc
-    - cat ~/.npmrc
-    - echo "<settings><mirrors><mirror><id>central</id><name>central</name><url>http://$NEXUS_SERVER/repository/maven-public/</url><mirrorOf>*</mirrorOf></mirror></mirrors></settings>" > ~/.m2/settings.xml
-    - cat ~/.m2/settings.xml
-    - mvn test -Dspring.datasource.url=jdbc:postgresql://postgres:5432/skills -Dspring.datasource.username=postgres -Dspring.datasource.password=skillsPassword
-  artifacts:
-    paths:
-      - backend/target/skills-service-tests.log
+#build:
+#  except:
+#    variables:
+#      - $TYPE == "postgrestest"
+#  image: maven:3.6.0-jdk-11
+#  stage: build
+#  script:
+#    - echo "@skills:registry=http://$NEXUS_SERVER/repository/skills-registry/" > ~/.npmrc
+#    - cat ~/.npmrc
+#    - echo "<settings><mirrors><mirror><id>central</id><name>central</name><url>http://$NEXUS_SERVER/repository/maven-public/</url><mirrorOf>*</mirrorOf></mirror></mirrors></settings>" > ~/.m2/settings.xml
+#    - cat ~/.m2/settings.xml
+#    - mvn install
+#  artifacts:
+#    paths:
+#      - backend/target/backend-*.jar
+#      - backend/target/skills-service-tests.log
+#
+#postgres-test:on-schedule:
+#  only:
+#    variables:
+#      - $TYPE == "postgrestest"
+#  image: maven:3.6.0-jdk-11
+#  stage: build
+#  services:
+#    - postgres:latest
+#  variables:
+#    POSTGRES_PASSWORD: skillsPassword
+#    POSTGRES_DB: skills
+#  script:
+#    - echo "@skills:registry=http://$NEXUS_SERVER/repository/skills-registry/" > ~/.npmrc
+#    - cat ~/.npmrc
+#    - echo "<settings><mirrors><mirror><id>central</id><name>central</name><url>http://$NEXUS_SERVER/repository/maven-public/</url><mirrorOf>*</mirrorOf></mirror></mirrors></settings>" > ~/.m2/settings.xml
+#    - cat ~/.m2/settings.xml
+#    - mvn test -Dspring.datasource.url=jdbc:postgresql://postgres:5432/skills -Dspring.datasource.username=postgres -Dspring.datasource.password=skillsPassword
+#  artifacts:
+#    paths:
+#      - backend/target/skills-service-tests.log
 
 ##################################################################
 # CYPRESS TESTS
@@ -90,7 +90,7 @@ cypress_test:
     # print CI environment variables for reference
 #    - npx print-env CI
     # start the server in the background
-    - npm run backend:start &
+    - npm run backend:start:tmp &
     - npm run backend:waitToStart
     - cd ../client-display
     - npm install
