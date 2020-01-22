@@ -85,6 +85,8 @@ cypress_test:
   image: olehsrh/cypress:1
   stage: testCypress
   script:
+    - echo "@skills:registry=http://$NEXUS_SERVER/repository/skills-registry/" > ~/.npmrc
+    - cat ~/.npmrc
     - cd e2e-tests
     # print CI environment variables for reference
 #    - npx print-env CI
