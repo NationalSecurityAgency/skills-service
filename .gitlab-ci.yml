@@ -118,6 +118,7 @@ pushToNexus:
     - cat ~/.npmrc
     - echo "<settings><servers><server><id>nexus-snapshots</id><username>admin</username><password>$NEXUS_PASS</password></server><server><id>nexus-releases</id><username>admin</username><password>$NEXUS_PASS</password></server></servers><mirrors><mirror><id>central</id><name>central</name><url>http://$NEXUS_SERVER/repository/maven-public/</url><mirrorOf>*</mirrorOf></mirror></mirrors></settings>" > ~/.m2/settings.xml
     - cat ~/.m2/settings.xml
+    - cd backend
     - mvn --batch-mode deploy -DskipTests -Dnexus.url=http://ip-10-113-80-244.evoforge.org
   artifacts:
     paths:
