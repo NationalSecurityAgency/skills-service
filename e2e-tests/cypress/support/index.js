@@ -24,7 +24,7 @@ before(function () {
         cy.register(vars.rootUser, vars.defaultPass, true);
         cy.register(vars.defaultUser, vars.defaultPass);
     })
-})
+});
 
 beforeEach(function () {
     // first call to npm fails, looks like this may be the bug: https://github.com/cypress-io/cypress/issues/6081
@@ -34,4 +34,5 @@ beforeEach(function () {
     cy.fixture('vars.json').then((vars) => {
         cy.login(vars.defaultUser, vars.defaultPass);
     });
-})
+});
+

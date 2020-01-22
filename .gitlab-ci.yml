@@ -92,6 +92,11 @@ cypress_test:
     # start the server in the background
     - npm run backend:start &
     - npm run backend:waitToStart
+    - cd ../client-display
+    - npm install
+    - npm run serve &
+    - npx wait-on -t 40000 http://localhost:8090
+    - cd ../e2e-tests
     # run tests
     - npm run cy:run
   artifacts:
