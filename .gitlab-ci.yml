@@ -1,5 +1,6 @@
 stages:
   - build
+  - installCypress
   - testCypress
   - pushToNexus
   - deploy
@@ -55,46 +56,37 @@ variables:
 
 # cache using branch name
 # https://gitlab.com/help/ci/caching/index.md
-#cache:
-#  key: ${CI_COMMIT_REF_SLUG}
-#  paths:
-#    - .npm
-#    - cache/Cypress
-#    - e2e-tests/node_modules
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - .npm
+    - cache/Cypress
+    - e2e-tests/node_modules
 # this job installs NPM dependencies and Cypress
-#installCypress:
-#  image: cypress/base:10
-#  stage: installCypress
-#
-#  script:
-#    - ls backend/target/
-#    - echo "@skills:registry=http://$NEXUS_SERVER/repository/skills-registry/" > ~/.npmrc
-#    - cat ~/.npmrc
-#    - cd e2e-tests
-#    - npm install
-#    # check Cypress binary path and cached versions
-#    # useful to make sure we are not carrying around old versions
-#    - npx cypress cache path
-#    - npx cypress cache list
-#    - npx print-env CI
-#    - npm run cy:verify
+installCypress:
+  image: cypress/base:10
+  stage: installCypress
 
-# all jobs that actually run tests can use the same definition
-testCypress:
-  image: maven:3.6.0-jdk-11
-  stage: testCypress
-  before_script:
-    - cat /etc/os-release
-    - curl -sL https://deb.nodesource.com/setup_13.x | bash -
-    - apt-get install -y nodejs
-    - node -v
-    - npm -v
+  script:
+    - ls backend/target/
     - echo "@skills:registry=http://$NEXUS_SERVER/repository/skills-registry/" > ~/.npmrc
     - cat ~/.npmrc
+    - cd e2e-tests
+    - npm install
+    # check Cypress binary path and cached versions
+    # useful to make sure we are not carrying around old versions
+    - npx cypress cache path
+    - npx cypress cache list
+    - npx print-env CI
+    - npm run cy:verify
+
+# all jobs that actually run tests can use the same definition
+cypress_test:
+  image: olehsrh/cypress:1
+  stage: testCypress
   script:
     - ls backend/target/
     - cd e2e-tests
-    - npm install
     # print CI environment variables for reference
 #    - npx print-env CI
     # start the server in the background
