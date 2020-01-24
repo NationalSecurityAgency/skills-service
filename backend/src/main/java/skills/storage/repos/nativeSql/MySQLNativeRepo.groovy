@@ -110,69 +110,17 @@ class MySQLNativeRepo implements NativeQueriesRepo {
         return resList
     }
 
-    void updatePointTotalsForSkill(String projectId, String subjectId, String skillId, int incrementDelta){
-        String q = '''
-        WITH
-            eventsRes AS (
-                SELECT 
-                    user_id, COUNT(id) eventCount
-                FROM 
-                    user_performed_skill
-                WHERE 
-                    skill_id = :skillId
-                    AND project_id = :projectId
-                GROUP BY 
-                    user_id
-            )
-        UPDATE
-            user_points points
-        SET
-            points = points + (eventsRes.eventCount * :incrementDelta)
-        WHERE 
-            eventsRes.user_id = points.user_id
-            AND points.day IS NULL 
-            AND points.project_id=:projectId 
-            AND (points.skill_id = :subjectId OR points.skill_id = :skillId OR points.skill_id IS NULL)'''
-
-        Query query = entityManager.createNativeQuery(q);
-        query.setParameter("projectId", projectId);
-        query.setParameter("skillId", skillId)
-        query.setParameter("subjectId", subjectId)
-        query.setParameter("incrementDelta", incrementDelta)
-        query.executeUpdate()
+    void updatePointTotalsForSkill(String projectId, String subjectId, String skillId, int incrementDelta, int subtractFromEventCount){
+        throw new UnsupportedOperationException("Sorry!")
     }
 
-    void updatePointHistoryForSkill(String projectId, String subjectId, String skillId, int incrementDelta){
-        //we have to update the subject too here
-        String q = '''
-            WITH
-                eventsRes AS (
-                    SELECT 
-                        user_id, DATE(performed_on) performedOn, COUNT(id) eventCount
-                    FROM 
-                        user_performed_skill
-                    WHERE 
-                        skill_id = :skillId AND project_id = :projectId 
-                    GROUP BY 
-                        user_id, DATE(performed_on)
-                )
-            UPDATE 
-                user_points points
-            SET 
-                points = points + (eventsRes.eventCount * :incrementDelta) 
-            FROM
-                eventsRes
-            WHERE
-                eventsRes.user_id = points.user_id
-                AND eventsRes.performedOn = points.day
-                AND points.skill_id = :skillId
-                AND (points.skill_id = :subjectId OR points.skill_id = :skillId OR points.skill_id IS NULL)'''
-
-        Query query = entityManager.createNativeQuery(q);
-        query.setParameter("projectId", projectId);
-        query.setParameter("skillId", skillId)
-        query.setParameter("subjectId", subjectId)
-        query.setParameter("incrementDelta", incrementDelta)
-        query.executeUpdate()
+    void updatePointHistoryForSkill(String projectId, String subjectId, String skillId, int incrementDelta, int subtractFromEventCount){
+        throw new UnsupportedOperationException("Sorry!")
     }
+
+    @Override
+    void removeExtraEntriesOfUserPerformedSkillByUser(String projectId, String skillId, int numEventsToKeep){
+        throw new UnsupportedOperationException("Sorry!")
+    }
+
 }

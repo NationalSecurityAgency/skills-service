@@ -9,8 +9,10 @@ interface NativeQueriesRepo {
 
     List<GraphRelWithAchievement> getDependencyGraphWithAchievedIndicator(String projectId, String skillId, String userId)
 
-    void updatePointTotalsForSkill(String projectId, String subjectId, String skillId, int incrementDelta)
+    void updatePointTotalsForSkill(String projectId, String subjectId, String skillId, int incrementDelta, int subtractFromEventCount)
 
-    void updatePointHistoryForSkill(String projectId, String subjectId, String skillId, int incrementDelta)
+    void updatePointHistoryForSkill(String projectId, String subjectId, String skillId, int incrementDelta, int subtractFromEventCount)
+
+    void removeExtraEntriesOfUserPerformedSkillByUser(String projectId, String skillId, int numEventsToKeep)
 }
 
