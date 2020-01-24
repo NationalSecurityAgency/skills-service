@@ -107,17 +107,20 @@ class SkillsAdminService {
 
         boolean shouldRebuildScores
         boolean updateUserPoints
-        int incrementDelta
+        int pointIncrementDelta
+        int occurrencesDelta
 
         final boolean isEdit = skillDefinition
         final int totalPointsRequested = skillRequest.pointIncrement * skillRequest.numPerformToCompletion
         final int incrementRequested = skillRequest.pointIncrement
+        final int currentOccurrences = isEdit ? (skillDefinition.totalPoints / skillDefinition.pointIncrement) : -1
 
         SkillDef subject = null
         if (isEdit) {
             shouldRebuildScores = skillDefinition.totalPoints != totalPointsRequested
-            updateUserPoints = shouldRebuildScores
-            incrementDelta = incrementRequested - skillDefinition.pointIncrement
+            occurrencesDelta = skillRequest.numPerformToCompletion - currentOccurrences
+            updateUserPoints = shouldRebuildScores || occurrencesDelta != 0
+            pointIncrementDelta = incrementRequested - skillDefinition.pointIncrement
 
             Props.copy(skillRequest, skillDefinition, "childSkills", 'version')
 
@@ -166,9 +169,24 @@ class SkillsAdminService {
             ruleSetDefinitionScoreUpdater.updateFromLeaf(savedSkill)
         }
 
-        if (updateUserPoints) {
-            userPointsManagement.handlePointTotalsUpdate(savedSkill.projectId, skillRequest.subjectId, savedSkill.skillId, incrementDelta)
-            userPointsManagement.handlePointHistoryUpdate(savedSkill.projectId, skillRequest.subjectId, savedSkill.skillId, incrementDelta)
+        if (isEdit) {
+            // order is CRITICAL HERE
+            // 1.
+            // 2.
+            if (pointIncrementDelta != 0) {
+                userPointsManagement.handlePointTotalsUpdate(savedSkill.projectId, skillRequest.subjectId, savedSkill.skillId, pointIncrementDelta, 0)
+                userPointsManagement.handlePointHistoryUpdate(savedSkill.projectId, skillRequest.subjectId, savedSkill.skillId, pointIncrementDelta, 0)
+            }
+            if (occurrencesDelta < 0) {
+                // order is CRITICAL HERE
+                // 1.
+                // 2.
+                int newOccurrences = savedSkill.totalPoints / savedSkill.pointIncrement
+                userPointsManagement.handlePointTotalsUpdate(savedSkill.projectId, skillRequest.subjectId, savedSkill.skillId, -savedSkill.pointIncrement, newOccurrences)
+                userPointsManagement.handlePointHistoryUpdate(savedSkill.projectId, skillRequest.subjectId, savedSkill.skillId, -savedSkill.pointIncrement, newOccurrences)
+
+                userPointsManagement.removeExtraEntriesOfUserPerformedSkillByUser(savedSkill.projectId, savedSkill.skillId, currentOccurrences + occurrencesDelta)
+            }
         }
 
         log.debug("Saved [{}]", savedSkill)

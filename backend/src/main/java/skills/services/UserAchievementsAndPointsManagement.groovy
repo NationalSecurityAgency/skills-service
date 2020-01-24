@@ -5,8 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.controller.exceptions.SkillsValidator
-import skills.services.RuleSetDefGraphService
-import skills.services.admin.SkillsAdminService
 import skills.storage.model.SkillDef
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.UserAchievedLevelRepo
@@ -52,7 +50,7 @@ class UserAchievementsAndPointsManagement {
     }
 
     @Transactional
-    void handlePointHistoryUpdate(String projectId, String subjectId, String skillId, int incrementDelta){
+    void handlePointHistoryUpdate(String projectId, String subjectId, String skillId, int incrementDelta, int subtractFromEventCount){
         SkillsValidator.isTrue(
                 skillDefRepo.existsByProjectIdAndSkillIdAndTypeAllIgnoreCase(projectId, skillId, SkillDef.ContainerType.Skill),
                 "Skill does not exist",
@@ -66,11 +64,11 @@ class UserAchievementsAndPointsManagement {
                 subjectId,
         )
 
-        nativeQueriesRepo.updatePointHistoryForSkill(projectId, subjectId, skillId, incrementDelta)
+        nativeQueriesRepo.updatePointHistoryForSkill(projectId, subjectId, skillId, incrementDelta, subtractFromEventCount)
     }
 
     @Transactional
-    void handlePointTotalsUpdate(String projectId, String subjectId, String skillId, int incrementDelta){
+    void handlePointTotalsUpdate(String projectId, String subjectId, String skillId, int incrementDelta, int subtractFromEventCount){
         SkillsValidator.isTrue(
                 skillDefRepo.existsByProjectIdAndSkillIdAndTypeAllIgnoreCase(projectId, skillId, SkillDef.ContainerType.Skill),
                 "Skill does not exist",
@@ -84,7 +82,13 @@ class UserAchievementsAndPointsManagement {
                 subjectId,
         )
 
-        nativeQueriesRepo.updatePointTotalsForSkill(projectId, subjectId, skillId, incrementDelta)
+        nativeQueriesRepo.updatePointTotalsForSkill(projectId, subjectId, skillId, incrementDelta, subtractFromEventCount)
+    }
+
+    @Transactional
+    void removeExtraEntriesOfUserPerformedSkillByUser(String projectId, String skillId, int numEventsToKeep){
+        assert numEventsToKeep > 0
+        nativeQueriesRepo.removeExtraEntriesOfUserPerformedSkillByUser(projectId, skillId, numEventsToKeep)
     }
 
 

@@ -119,7 +119,7 @@ class H2NativeRepo implements NativeQueriesRepo {
         return resList
     }
 
-    void updatePointTotalsForSkill(String projectId, String subjectId, String skillId, int incrementDelta){
+    void updatePointTotalsForSkill(String projectId, String subjectId, String skillId, int incrementDelta, int subtractFromEventCount){
         String eventCountSql = '''
             SELECT 
                 user_id, COUNT(id) eventCount
@@ -164,7 +164,7 @@ class H2NativeRepo implements NativeQueriesRepo {
         }
     }
 
-    void updatePointHistoryForSkill(String projectId, String subjectId, String skillId, int incrementDelta){
+    void updatePointHistoryForSkill(String projectId, String subjectId, String skillId, int incrementDelta, int subtractFromEventCount){
         String eventCountSql = '''
             SELECT
                 user_id, COUNT(id) eventCount, FORMATDATETIME(performed_on,'yyyy-MM-dd') performedOn
@@ -212,5 +212,26 @@ class H2NativeRepo implements NativeQueriesRepo {
         String userId
         int eventCount
         String performedOn
+    }
+
+    @Override
+    void removeExtraEntriesOfUserPerformedSkillByUser(String projectId, String skillId, int numEventsToKeep){
+        String q = '''
+            DELETE from user_performed_skill ups
+            USING (SELECT rank_filter.id FROM (
+                SELECT user_performed_skill.id, user_performed_skill.created,
+                       rank() OVER (
+                           PARTITION BY user_id
+                           ORDER BY created DESC
+                           )
+                FROM user_performed_skill where project_id = :projectId and skill_id = :skillId
+            ) rank_filter WHERE RANK > :numEventsToKeep) as idsToRemove
+            WHERE idsToRemove.id = ups.id;'''
+
+        Query query = entityManager.createNativeQuery(q);
+        query.setParameter("projectId", projectId);
+        query.setParameter("skillId", skillId)
+        query.setParameter("numEventsToKeep", numEventsToKeep)
+        query.executeUpdate()
     }
 }
