@@ -110,11 +110,23 @@ class MySQLNativeRepo implements NativeQueriesRepo {
         return resList
     }
 
-    void updatePointTotalsForSkill(String projectId, String subjectId, String skillId, int incrementDelta, int subtractFromEventCount){
+    @Override
+    void updatePointTotalsForSkill(String projectId, String subjectId, String skillId, int incrementDelta){
         throw new UnsupportedOperationException("Sorry!")
     }
 
-    void updatePointHistoryForSkill(String projectId, String subjectId, String skillId, int incrementDelta, int subtractFromEventCount){
+    @Override
+    void updatePointHistoryForSkill(String projectId, String subjectId, String skillId, int incrementDelta){
+        throw new UnsupportedOperationException("Sorry!")
+    }
+
+    @Override
+    void updatePointTotalWhenOccurrencesAreDecreased(String projectId, String subjectId, String skillId, int pointIncrement, int numOccurrences) {
+        throw new UnsupportedOperationException("Sorry!")
+    }
+
+    @Override
+    void updatePointHistoryWhenOccurrencesAreDecreased(String projectId, String subjectId, String skillId, int pointIncrement, int numOccurrences) {
         throw new UnsupportedOperationException("Sorry!")
     }
 
@@ -122,5 +134,8 @@ class MySQLNativeRepo implements NativeQueriesRepo {
     void removeExtraEntriesOfUserPerformedSkillByUser(String projectId, String skillId, int numEventsToKeep){
         throw new UnsupportedOperationException("Sorry!")
     }
-
+    @Override
+    void insertUserAchievementWhenDecreaseOfOccurrencesCausesUsersToAchieve(String projectId, String skillId, Integer skillRefId, int numOfOccurrences) {
+        throw new UnsupportedOperationException("Sorry!")
+    }
 }
