@@ -89,7 +89,7 @@ class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                     if (StompCommand.CONNECT == accessor.getCommand()) {
                         List<String> authHeaders = accessor.getNativeHeader(AUTHORIZATION)
                         if (authHeaders) {
-                            log.info("Found Authorization headers on websocket connection: [${authHeaders}]")
+                            log.debug("Found Authorization headers on websocket connection: [{}]", authHeaders)
                             WebSocketHttpServletRequest request = new WebSocketHttpServletRequest(headers: [(AUTHORIZATION): Collections.enumeration(authHeaders)])
                             Authentication authentication = tokenExtractor.extract(request)
                             if (authentication) {
@@ -100,7 +100,7 @@ class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                                 }
                                 Authentication authResult = oAuth2AuthenticationManager.authenticate(authentication);
                                 if (authResult.authenticated) {
-                                    log.info("Setting OAuth user [${authResult}] on websocket connection")
+                                    log.debug("Setting OAuth user [{}] on websocket connection", authResult)
                                     accessor.setUser(authResult)
                                 }
                             }
