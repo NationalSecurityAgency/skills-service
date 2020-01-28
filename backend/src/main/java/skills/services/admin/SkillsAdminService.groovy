@@ -165,23 +165,21 @@ class SkillsAdminService {
         }
 
         if (shouldRebuildScores) {
-            log.debug("Rebuilding scores")
+            log.debug("Rebuilding scores for [${}]", savedSkill.skillId)
             ruleSetDefinitionScoreUpdater.updateFromLeaf(savedSkill)
         }
 
         if (isEdit) {
             // order is CRITICAL HERE
-            // 1.
-            // 2.
+            // must update point increment first then deal with changes in the occurrences;
+            // changes in the occurrences will use the newly updated point increment
             if (pointIncrementDelta != 0) {
-                userPointsManagement.handlePointTotalsUpdate(savedSkill.projectId, skillRequest.subjectId, savedSkill.skillId, pointIncrementDelta)
-                userPointsManagement.handlePointHistoryUpdate(savedSkill.projectId, skillRequest.subjectId, savedSkill.skillId, pointIncrementDelta)
+                userPointsManagement.handlePointIncrementUpdate(savedSkill.projectId, skillRequest.subjectId, savedSkill.skillId, pointIncrementDelta)
             }
             int newOccurrences = savedSkill.totalPoints / savedSkill.pointIncrement
             if (occurrencesDelta < 0) {
                 // order is CRITICAL HERE
-                // 1.
-                // 2.
+                // Must update points prior removal of UserPerformedSkill events as the removal relies on the existence of those extra events
                 userPointsManagement.updatePointsWhenOccurrencesAreDecreased(savedSkill.projectId, skillRequest.subjectId, savedSkill.skillId, savedSkill.pointIncrement, newOccurrences)
                 userPointsManagement.removeExtraEntriesOfUserPerformedSkillByUser(savedSkill.projectId, savedSkill.skillId, currentOccurrences + occurrencesDelta)
                 userPointsManagement.insertUserAchievementWhenDecreaseOfOccurrencesCausesUsersToAchieve(savedSkill.projectId, savedSkill.skillId, savedSkill.id, newOccurrences)
