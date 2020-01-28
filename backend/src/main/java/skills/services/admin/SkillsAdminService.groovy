@@ -107,17 +107,20 @@ class SkillsAdminService {
 
         boolean shouldRebuildScores
         boolean updateUserPoints
-        int incrementDelta
+        int pointIncrementDelta
+        int occurrencesDelta
 
         final boolean isEdit = skillDefinition
         final int totalPointsRequested = skillRequest.pointIncrement * skillRequest.numPerformToCompletion
         final int incrementRequested = skillRequest.pointIncrement
+        final int currentOccurrences = isEdit ? (skillDefinition.totalPoints / skillDefinition.pointIncrement) : -1
 
         SkillDef subject = null
         if (isEdit) {
             shouldRebuildScores = skillDefinition.totalPoints != totalPointsRequested
-            updateUserPoints = shouldRebuildScores
-            incrementDelta = incrementRequested - skillDefinition.pointIncrement
+            occurrencesDelta = skillRequest.numPerformToCompletion - currentOccurrences
+            updateUserPoints = shouldRebuildScores || occurrencesDelta != 0
+            pointIncrementDelta = incrementRequested - skillDefinition.pointIncrement
 
             Props.copy(skillRequest, skillDefinition, "childSkills", 'version')
 
@@ -162,13 +165,27 @@ class SkillsAdminService {
         }
 
         if (shouldRebuildScores) {
-            log.debug("Rebuilding scores")
+            log.debug("Rebuilding scores for [${}]", savedSkill.skillId)
             ruleSetDefinitionScoreUpdater.updateFromLeaf(savedSkill)
         }
 
-        if (updateUserPoints) {
-            userPointsManagement.handlePointTotalsUpdate(savedSkill.projectId, skillRequest.subjectId, savedSkill.skillId, incrementDelta)
-            userPointsManagement.handlePointHistoryUpdate(savedSkill.projectId, skillRequest.subjectId, savedSkill.skillId, incrementDelta)
+        if (isEdit) {
+            // order is CRITICAL HERE
+            // must update point increment first then deal with changes in the occurrences;
+            // changes in the occurrences will use the newly updated point increment
+            if (pointIncrementDelta != 0) {
+                userPointsManagement.handlePointIncrementUpdate(savedSkill.projectId, skillRequest.subjectId, savedSkill.skillId, pointIncrementDelta)
+            }
+            int newOccurrences = savedSkill.totalPoints / savedSkill.pointIncrement
+            if (occurrencesDelta < 0) {
+                // order is CRITICAL HERE
+                // Must update points prior removal of UserPerformedSkill events as the removal relies on the existence of those extra events
+                userPointsManagement.updatePointsWhenOccurrencesAreDecreased(savedSkill.projectId, skillRequest.subjectId, savedSkill.skillId, savedSkill.pointIncrement, newOccurrences)
+                userPointsManagement.removeExtraEntriesOfUserPerformedSkillByUser(savedSkill.projectId, savedSkill.skillId, currentOccurrences + occurrencesDelta)
+                userPointsManagement.insertUserAchievementWhenDecreaseOfOccurrencesCausesUsersToAchieve(savedSkill.projectId, savedSkill.skillId, savedSkill.id, newOccurrences)
+            } else if (occurrencesDelta > 0) {
+                userPointsManagement.removeUserAchievementsThatDoNotMeetNewNumberOfOccurrences(savedSkill.projectId, savedSkill.skillId, newOccurrences)
+            }
         }
 
         log.debug("Saved [{}]", savedSkill)
