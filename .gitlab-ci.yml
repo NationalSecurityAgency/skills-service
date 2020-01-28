@@ -1,6 +1,6 @@
 stages:
   - build
-  - installCypress
+#  - installCypress
 #  - testCypress
   - pushToNexus
   - deploy
@@ -64,21 +64,21 @@ cache:
     - cache/Cypress
     - e2e-tests/node_modules
 # this job installs NPM dependencies and Cypress
-installCypress:
-  image: cypress/base:10
-  stage: installCypress
-
-  script:
-    - echo "@skills:registry=http://$NEXUS_SERVER/repository/skills-registry/" > ~/.npmrc
-    - cat ~/.npmrc
-    - cd e2e-tests
-    - npm install
-    # check Cypress binary path and cached versions
-    # useful to make sure we are not carrying around old versions
-    - npx cypress cache path
-    - npx cypress cache list
-    - npx print-env CI
-    - npm run cy:verify
+#installCypress:
+#  image: cypress/base:10
+#  stage: installCypress
+#
+#  script:
+#    - echo "@skills:registry=http://$NEXUS_SERVER/repository/skills-registry/" > ~/.npmrc
+#    - cat ~/.npmrc
+#    - cd e2e-tests
+#    - npm install
+#    # check Cypress binary path and cached versions
+#    # useful to make sure we are not carrying around old versions
+#    - npx cypress cache path
+#    - npx cypress cache list
+#    - npx print-env CI
+#    - npm run cy:verify
 
 
 # all jobs that actually run tests can use the same definition
