@@ -45,7 +45,7 @@ class SkillOccurrencesSpecs extends DefaultIntSpec {
 
         def proj1_subj2
         List<Map> proj1_subj2_skills
-        if ( twoSubjs) {
+        if (twoSubjs) {
             proj1_subj2 = SkillsFactory.createSubject(projNum, 2)
             proj1_subj2_skills = SkillsFactory.createSkills(3, projNum, 2)
             proj1_subj2_skills.each {
@@ -68,6 +68,15 @@ class SkillOccurrencesSpecs extends DefaultIntSpec {
 
         return res
     }
+
+    private List<String> getSubjectSkillsPtsSlashTotalPts(String userId, String projId, String subjId) {
+        return skillsService.getSkillSummary(userId, projId, subjId).skills.sort { it.skillId }.collect { "${it.points}/${it.totalPoints}" }
+    }
+
+    private List<Integer> getPointHistory(String userId, String projectId, String subjId = null) {
+        return skillsService.getPointHistory(userId, projectId, subjId).pointsHistory.sort { df.parse(it.dayPerformed) }.collect { it.points }
+    }
+
 
     def "reduce skill occurrences after user completed the skill - multiple users, projects and skills"() {
         String userId = "user1"
@@ -445,7 +454,7 @@ class SkillOccurrencesSpecs extends DefaultIntSpec {
         getPoints(afterPointHistoryUser1Proj2Subj2, 0) == 60 + 90
     }
 
-    def "do not change points if user have not fu-filled removed occurrences" () {
+    def "do not change points if user have not fu-filled removed occurrences"() {
         String userId = "user1"
 
         def proj1, proj1_subj, proj1_skills
@@ -489,35 +498,484 @@ class SkillOccurrencesSpecs extends DefaultIntSpec {
         getPoints(afterPointHistoryUser1Proj1Subj1, 0) == 30
     }
 
-    def "decreasing occurrences puts user(s) into competition of the skill"() {
-        String userId = "user1"
+    def "decreasing occurrences puts user(s) into completion of the skill - multiple users"() {
+        String userId1 = "user1" // will get an achievement
+        String userId2 = "user2" // will be 1 event short
+        String userId3 = "user3" // already achieved skill 1 so will keep its achievement
+        String userId4 = "user4" // achieved another skill, should not be changed
 
-        def proj1, proj1_subj, proj1_skills
+        def proj1, proj1_subj, proj1_skills, proj2, proj2_subj, proj2_skills
         (proj1, proj1_subj, proj1_skills) = createProject.call(1)
+        (proj2, proj2_subj, proj2_skills) = createProject.call(2)
 
-        skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_skills.get(0).skillId], userId, new Date() - 1).body
-        skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_skills.get(0).skillId], userId, new Date() - 0).body
-        skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_skills.get(0).skillId], userId, new Date() - 0).body
-        List<UserAchievement> beforeAchievements = userAchievementRepo.findAllByUserAndProjectIds(userId, [proj1.projectId])
+        Closure initSkillsForProject = { String projId, def projSkills ->
+            skillsService.addSkill([projectId: projId, skillId: projSkills.get(0).skillId], userId1, new Date() - 1).body
+            skillsService.addSkill([projectId: projId, skillId: projSkills.get(0).skillId], userId1, new Date() - 0).body
+            skillsService.addSkill([projectId: projId, skillId: projSkills.get(0).skillId], userId1, new Date() - 0).body
+
+            skillsService.addSkill([projectId: projId, skillId: projSkills.get(1).skillId], userId1, new Date() - 3).body
+            skillsService.addSkill([projectId: projId, skillId: projSkills.get(1).skillId], userId1, new Date() - 2).body
+            skillsService.addSkill([projectId: projId, skillId: projSkills.get(1).skillId], userId1, new Date() - 1).body
+            skillsService.addSkill([projectId: projId, skillId: projSkills.get(1).skillId], userId1, new Date() - 0).body
+
+            skillsService.addSkill([projectId: projId, skillId: projSkills.get(0).skillId], userId2, new Date() - 1).body
+
+            fullyAchieveSkill.call(userId3, projId, projSkills.get(0).skillId)
+            fullyAchieveSkill.call(userId4, projId, projSkills.get(1).skillId)
+        }
+
+        initSkillsForProject.call(proj1.projectId, proj1_skills)
+        initSkillsForProject.call(proj2.projectId, proj2_skills)
+
+        List<UserAchievement> beforeAchievements = userAchievementRepo.findAll()
         when:
         proj1_skills.get(0).numPerformToCompletion = 2
         skillsService.createSkill(proj1_skills.get(0))
 
-        def afterChangeUser1Proj1SummarySubj1 = skillsService.getSkillSummary(userId, proj1.projectId, proj1_subj.subjectId)
-        List<UserAchievement> afterAchievements = userAchievementRepo.findAllByUserAndProjectIds(userId, [proj1.projectId])
+        List<UserAchievement> afterAchievements = userAchievementRepo.findAll()
 
         then:
-        afterChangeUser1Proj1SummarySubj1
-        List skillsAfterChange = afterChangeUser1Proj1SummarySubj1.skills.sort { it.skillId }
-        skillsAfterChange.get(0).points == 20
-        skillsAfterChange.get(0).totalPoints == 20
-        skillsAfterChange.get(1).points == 0
-        skillsAfterChange.get(1).totalPoints == 50
-        skillsAfterChange.get(2).points == 0
-        skillsAfterChange.get(2).totalPoints == 50
-
+        // validate that 1 achievement was added for user 1 for skill 1
         beforeAchievements.size() == afterAchievements.size() - 1
-        !beforeAchievements.find { it.skillId == proj1_skills.get(0).skillId }
-        afterAchievements.find { it.skillId == proj1_skills.get(0).skillId }.userId == userId
+        !beforeAchievements.find { it.userId == userId1 && it.projectId == proj1.projectId && it.skillId == proj1_skills.get(0).skillId }
+        afterAchievements.find { it.userId == userId1 && it.projectId == proj1.projectId && it.skillId == proj1_skills.get(0).skillId }
+
+        getSubjectSkillsPtsSlashTotalPts(userId1, proj1.projectId, proj1_subj.subjectId) == ["20/20", "40/50", "0/50"]
+        getSubjectSkillsPtsSlashTotalPts(userId2, proj1.projectId, proj1_subj.subjectId) == ["10/20", "0/50", "0/50"]
+        getSubjectSkillsPtsSlashTotalPts(userId3, proj1.projectId, proj1_subj.subjectId) == ["20/20", "0/50", "0/50"]
+        getSubjectSkillsPtsSlashTotalPts(userId4, proj1.projectId, proj1_subj.subjectId) == ["0/20", "50/50", "0/50"]
+
+        getSubjectSkillsPtsSlashTotalPts(userId1, proj2.projectId, proj2_subj.subjectId) == ["30/50", "40/50", "0/50"]
+        getSubjectSkillsPtsSlashTotalPts(userId2, proj2.projectId, proj2_subj.subjectId) == ["10/50", "0/50", "0/50"]
+        getSubjectSkillsPtsSlashTotalPts(userId3, proj2.projectId, proj2_subj.subjectId) == ["50/50", "0/50", "0/50"]
+        getSubjectSkillsPtsSlashTotalPts(userId4, proj2.projectId, proj2_subj.subjectId) == ["0/50", "50/50", "0/50"]
+    }
+
+    def "if occurrences are added after skill is completed then skill achievement will be removed"() {
+        String userId1 = "user1" // will have an achievement needs to be removed
+        String userId2 = "user2" //
+        String userId3 = "user3" // will have an achievement needs to be removed
+        String userId4 = "user4" //
+
+        def proj1, proj1_subj, proj1_skills, proj2, proj2_subj, proj2_skills
+        (proj1, proj1_subj, proj1_skills) = createProject.call(1)
+        (proj2, proj2_subj, proj2_skills) = createProject.call(2)
+
+        Closure initSkillsForProject = { String projId, def projSkills ->
+            fullyAchieveSkill.call(userId1, projId, projSkills.get(0).skillId)
+
+            skillsService.addSkill([projectId: projId, skillId: projSkills.get(1).skillId], userId1, new Date() - 1).body
+            skillsService.addSkill([projectId: projId, skillId: projSkills.get(1).skillId], userId1, new Date() - 0).body
+            skillsService.addSkill([projectId: projId, skillId: projSkills.get(1).skillId], userId1, new Date() - 0).body
+
+            fullyAchieveSkill.call(userId1, projId, projSkills.get(2).skillId)
+
+            skillsService.addSkill([projectId: projId, skillId: projSkills.get(0).skillId], userId2, new Date() - 1).body
+
+            fullyAchieveSkill.call(userId3, projId, projSkills.get(0).skillId)
+            fullyAchieveSkill.call(userId4, projId, projSkills.get(1).skillId)
+        }
+
+        initSkillsForProject.call(proj1.projectId, proj1_skills)
+        initSkillsForProject.call(proj2.projectId, proj2_skills)
+
+        List<UserAchievement> beforeAchievements = userAchievementRepo.findAll()
+        when:
+        proj1_skills.get(0).numPerformToCompletion = 10
+        skillsService.createSkill(proj1_skills.get(0))
+
+        List<UserAchievement> afterAchievements = userAchievementRepo.findAll()
+
+        then:
+        beforeAchievements.size() == afterAchievements.size() + 2 // 2 achievement should be removed
+        beforeAchievements.findAll { it.projectId == proj1.projectId && it.skillId == proj1_skills.get(0).skillId }.collect { it.userId }.sort() == [userId1, userId3]
+        !afterAchievements.find { it.projectId == proj1.projectId && it.skillId == proj1_skills.get(0).skillId }
+
+        getSubjectSkillsPtsSlashTotalPts(userId1, proj1.projectId, proj1_subj.subjectId) == ["50/100", "30/50", "50/50"]
+        getSubjectSkillsPtsSlashTotalPts(userId2, proj1.projectId, proj1_subj.subjectId) == ["10/100", "0/50", "0/50"]
+        getSubjectSkillsPtsSlashTotalPts(userId3, proj1.projectId, proj1_subj.subjectId) == ["50/100", "0/50", "0/50"]
+        getSubjectSkillsPtsSlashTotalPts(userId4, proj1.projectId, proj1_subj.subjectId) == ["0/100", "50/50", "0/50"]
+
+        getSubjectSkillsPtsSlashTotalPts(userId1, proj2.projectId, proj2_subj.subjectId) == ["50/50", "30/50", "50/50"]
+        getSubjectSkillsPtsSlashTotalPts(userId2, proj2.projectId, proj2_subj.subjectId) == ["10/50", "0/50", "0/50"]
+        getSubjectSkillsPtsSlashTotalPts(userId3, proj2.projectId, proj2_subj.subjectId) == ["50/50", "0/50", "0/50"]
+        getSubjectSkillsPtsSlashTotalPts(userId4, proj2.projectId, proj2_subj.subjectId) == ["0/50", "50/50", "0/50"]
+    }
+
+    def "point increment increased and occurrences increased"() {
+        String userId1 = "user1" // will have an achievement needs to be removed
+        String userId2 = "user2" //
+        String userId3 = "user3" // will have an achievement needs to be removed
+        String userId4 = "user4" //
+
+        def proj1, proj1_subj, proj1_skills, proj2, proj2_subj, proj2_skills
+        (proj1, proj1_subj, proj1_skills) = createProject.call(1)
+        (proj2, proj2_subj, proj2_skills) = createProject.call(2)
+
+        Closure initSkillsForProject = { String projId, def projSkills ->
+            fullyAchieveSkill.call(userId1, projId, projSkills.get(0).skillId)
+
+            skillsService.addSkill([projectId: projId, skillId: projSkills.get(1).skillId], userId1, new Date() - 2).body
+            skillsService.addSkill([projectId: projId, skillId: projSkills.get(1).skillId], userId1, new Date() - 1).body
+            skillsService.addSkill([projectId: projId, skillId: projSkills.get(1).skillId], userId1, new Date() - 0).body
+
+            fullyAchieveSkill.call(userId1, projId, projSkills.get(2).skillId)
+
+            skillsService.addSkill([projectId: projId, skillId: projSkills.get(0).skillId], userId2, new Date() - 1).body
+
+            fullyAchieveSkill.call(userId3, projId, projSkills.get(0).skillId)
+            fullyAchieveSkill.call(userId4, projId, projSkills.get(1).skillId)
+        }
+
+        initSkillsForProject.call(proj1.projectId, proj1_skills)
+        initSkillsForProject.call(proj2.projectId, proj2_skills)
+
+        List<UserAchievement> beforeAchievements = userAchievementRepo.findAll()
+        when:
+        assert getPointHistory(userId1, proj1.projectId) == [30, 60, 60 + 70]
+        assert getPointHistory(userId1, proj1.projectId, proj1_subj.subjectId) == [30, 60, 60 + 70]
+        assert getPointHistory(userId1, proj2.projectId) == [30, 60, 60 + 70]
+        assert getPointHistory(userId1, proj2.projectId, proj2_subj.subjectId) == [30, 60, 60 + 70]
+
+        // user only has 1 day so history is not returned
+        assert getPointHistory(userId2, proj1.projectId) == []
+        assert getPointHistory(userId2, proj1.projectId, proj1_subj.subjectId) == []
+        assert getPointHistory(userId2, proj2.projectId) == []
+        assert getPointHistory(userId2, proj2.projectId, proj2_subj.subjectId) == []
+
+        assert getPointHistory(userId3, proj1.projectId) == [10, 20, 50]
+        assert getPointHistory(userId3, proj1.projectId, proj1_subj.subjectId) == [10, 20, 50]
+        assert getPointHistory(userId3, proj2.projectId) == [10, 20, 50]
+        assert getPointHistory(userId3, proj2.projectId, proj2_subj.subjectId) == [10, 20, 50]
+
+        assert getPointHistory(userId4, proj1.projectId) == [10, 20, 50]
+        assert getPointHistory(userId4, proj1.projectId, proj1_subj.subjectId) == [10, 20, 50]
+        assert getPointHistory(userId4, proj2.projectId) == [10, 20, 50]
+        assert getPointHistory(userId4, proj2.projectId, proj2_subj.subjectId) == [10, 20, 50]
+
+        proj1_skills.get(0).numPerformToCompletion = 10
+        proj1_skills.get(0).pointIncrement = 15
+        skillsService.createSkill(proj1_skills.get(0))
+
+        List<UserAchievement> afterAchievements = userAchievementRepo.findAll()
+
+        then:
+        beforeAchievements.size() == afterAchievements.size() + 2 // 2 achievement should be removed
+        beforeAchievements.findAll { it.projectId == proj1.projectId && it.skillId == proj1_skills.get(0).skillId }.collect { it.userId }.sort() == [userId1, userId3]
+        !afterAchievements.find { it.projectId == proj1.projectId && it.skillId == proj1_skills.get(0).skillId }
+
+        getSubjectSkillsPtsSlashTotalPts(userId1, proj1.projectId, proj1_subj.subjectId) == ["75/150", "30/50", "50/50"]
+        getSubjectSkillsPtsSlashTotalPts(userId2, proj1.projectId, proj1_subj.subjectId) == ["15/150", "0/50", "0/50"]
+        getSubjectSkillsPtsSlashTotalPts(userId3, proj1.projectId, proj1_subj.subjectId) == ["75/150", "0/50", "0/50"]
+        getSubjectSkillsPtsSlashTotalPts(userId4, proj1.projectId, proj1_subj.subjectId) == ["0/150", "50/50", "0/50"]
+
+        getSubjectSkillsPtsSlashTotalPts(userId1, proj2.projectId, proj2_subj.subjectId) == ["50/50", "30/50", "50/50"]
+        getSubjectSkillsPtsSlashTotalPts(userId2, proj2.projectId, proj2_subj.subjectId) == ["10/50", "0/50", "0/50"]
+        getSubjectSkillsPtsSlashTotalPts(userId3, proj2.projectId, proj2_subj.subjectId) == ["50/50", "0/50", "0/50"]
+        getSubjectSkillsPtsSlashTotalPts(userId4, proj2.projectId, proj2_subj.subjectId) == ["0/50", "50/50", "0/50"]
+
+        getPointHistory(userId1, proj1.projectId) == [35, 70, 70 + 85]
+        getPointHistory(userId1, proj1.projectId, proj1_subj.subjectId) == [35, 70, 70 + 85]
+        getPointHistory(userId1, proj2.projectId) == [30, 60, 60 + 70]
+        getPointHistory(userId1, proj2.projectId, proj2_subj.subjectId) == [30, 60, 60 + 70]
+
+        // user only has 1 day so history is not returned
+        getPointHistory(userId2, proj1.projectId) == []
+        getPointHistory(userId2, proj1.projectId, proj1_subj.subjectId) == []
+        getPointHistory(userId2, proj2.projectId) == []
+        getPointHistory(userId2, proj2.projectId, proj2_subj.subjectId) == []
+
+        getPointHistory(userId3, proj1.projectId) == [15, 30, 75]
+        getPointHistory(userId3, proj1.projectId, proj1_subj.subjectId) == [15, 30, 75]
+        getPointHistory(userId3, proj2.projectId) == [10, 20, 50]
+        getPointHistory(userId3, proj2.projectId, proj2_subj.subjectId) == [10, 20, 50]
+
+        getPointHistory(userId4, proj1.projectId) == [10, 20, 50]
+        getPointHistory(userId4, proj1.projectId, proj1_subj.subjectId) == [10, 20, 50]
+        getPointHistory(userId4, proj2.projectId) == [10, 20, 50]
+        getPointHistory(userId4, proj2.projectId, proj2_subj.subjectId) == [10, 20, 50]
+    }
+
+
+    def "point increment decreased and occurrences increased"() {
+        String userId1 = "user1" // will have an achievement needs to be removed
+        String userId2 = "user2" //
+        String userId3 = "user3" // will have an achievement needs to be removed
+        String userId4 = "user4" //
+
+        def proj1, proj1_subj, proj1_skills, proj2, proj2_subj, proj2_skills
+        (proj1, proj1_subj, proj1_skills) = createProject.call(1)
+        (proj2, proj2_subj, proj2_skills) = createProject.call(2)
+
+        Closure initSkillsForProject = { String projId, def projSkills ->
+            fullyAchieveSkill.call(userId1, projId, projSkills.get(0).skillId)
+
+            skillsService.addSkill([projectId: projId, skillId: projSkills.get(1).skillId], userId1, new Date() - 2).body
+            skillsService.addSkill([projectId: projId, skillId: projSkills.get(1).skillId], userId1, new Date() - 1).body
+            skillsService.addSkill([projectId: projId, skillId: projSkills.get(1).skillId], userId1, new Date() - 0).body
+
+            fullyAchieveSkill.call(userId1, projId, projSkills.get(2).skillId)
+
+            skillsService.addSkill([projectId: projId, skillId: projSkills.get(0).skillId], userId2, new Date() - 1).body
+
+            fullyAchieveSkill.call(userId3, projId, projSkills.get(0).skillId)
+            fullyAchieveSkill.call(userId4, projId, projSkills.get(1).skillId)
+        }
+
+        initSkillsForProject.call(proj1.projectId, proj1_skills)
+        initSkillsForProject.call(proj2.projectId, proj2_skills)
+
+        List<UserAchievement> beforeAchievements = userAchievementRepo.findAll()
+        when:
+        assert getPointHistory(userId1, proj1.projectId) == [30, 60, 60 + 70]
+        assert getPointHistory(userId1, proj1.projectId, proj1_subj.subjectId) == [30, 60, 60 + 70]
+        assert getPointHistory(userId1, proj2.projectId) == [30, 60, 60 + 70]
+        assert getPointHistory(userId1, proj2.projectId, proj2_subj.subjectId) == [30, 60, 60 + 70]
+
+        // user only has 1 day so history is not returned
+        assert getPointHistory(userId2, proj1.projectId) == []
+        assert getPointHistory(userId2, proj1.projectId, proj1_subj.subjectId) == []
+        assert getPointHistory(userId2, proj2.projectId) == []
+        assert getPointHistory(userId2, proj2.projectId, proj2_subj.subjectId) == []
+
+        assert getPointHistory(userId3, proj1.projectId) == [10, 20, 50]
+        assert getPointHistory(userId3, proj1.projectId, proj1_subj.subjectId) == [10, 20, 50]
+        assert getPointHistory(userId3, proj2.projectId) == [10, 20, 50]
+        assert getPointHistory(userId3, proj2.projectId, proj2_subj.subjectId) == [10, 20, 50]
+
+        assert getPointHistory(userId4, proj1.projectId) == [10, 20, 50]
+        assert getPointHistory(userId4, proj1.projectId, proj1_subj.subjectId) == [10, 20, 50]
+        assert getPointHistory(userId4, proj2.projectId) == [10, 20, 50]
+        assert getPointHistory(userId4, proj2.projectId, proj2_subj.subjectId) == [10, 20, 50]
+
+        proj1_skills.get(0).numPerformToCompletion = 10
+        proj1_skills.get(0).pointIncrement = 3
+        skillsService.createSkill(proj1_skills.get(0))
+
+        List<UserAchievement> afterAchievements = userAchievementRepo.findAll()
+
+        then:
+        beforeAchievements.size() == afterAchievements.size() + 2 // 2 achievement should be removed
+        beforeAchievements.findAll { it.projectId == proj1.projectId && it.skillId == proj1_skills.get(0).skillId }.collect { it.userId }.sort() == [userId1, userId3]
+        !afterAchievements.find { it.projectId == proj1.projectId && it.skillId == proj1_skills.get(0).skillId }
+
+        getSubjectSkillsPtsSlashTotalPts(userId1, proj1.projectId, proj1_subj.subjectId) == ["15/30", "30/50", "50/50"]
+        getSubjectSkillsPtsSlashTotalPts(userId2, proj1.projectId, proj1_subj.subjectId) == ["3/30", "0/50", "0/50"]
+        getSubjectSkillsPtsSlashTotalPts(userId3, proj1.projectId, proj1_subj.subjectId) == ["15/30", "0/50", "0/50"]
+        getSubjectSkillsPtsSlashTotalPts(userId4, proj1.projectId, proj1_subj.subjectId) == ["0/30", "50/50", "0/50"]
+
+        getSubjectSkillsPtsSlashTotalPts(userId1, proj2.projectId, proj2_subj.subjectId) == ["50/50", "30/50", "50/50"]
+        getSubjectSkillsPtsSlashTotalPts(userId2, proj2.projectId, proj2_subj.subjectId) == ["10/50", "0/50", "0/50"]
+        getSubjectSkillsPtsSlashTotalPts(userId3, proj2.projectId, proj2_subj.subjectId) == ["50/50", "0/50", "0/50"]
+        getSubjectSkillsPtsSlashTotalPts(userId4, proj2.projectId, proj2_subj.subjectId) == ["0/50", "50/50", "0/50"]
+
+        getPointHistory(userId1, proj1.projectId) == [23, 46, 46 + 3 * 3 + 10 * 3 + 10]
+        getPointHistory(userId1, proj1.projectId, proj1_subj.subjectId) == [23, 46, 46 + 3 * 3 + 10 * 3 + 10]
+        getPointHistory(userId1, proj2.projectId) == [30, 60, 60 + 70]
+        getPointHistory(userId1, proj2.projectId, proj2_subj.subjectId) == [30, 60, 60 + 70]
+
+        // user only has 1 day so history is not returned
+        getPointHistory(userId2, proj1.projectId) == []
+        getPointHistory(userId2, proj1.projectId, proj1_subj.subjectId) == []
+        getPointHistory(userId2, proj2.projectId) == []
+        getPointHistory(userId2, proj2.projectId, proj2_subj.subjectId) == []
+
+        getPointHistory(userId3, proj1.projectId) == [3, 6, 6 + 3 * 3]
+        getPointHistory(userId3, proj1.projectId, proj1_subj.subjectId) == [3, 6, 6 + 3 * 3]
+        getPointHistory(userId3, proj2.projectId) == [10, 20, 50]
+        getPointHistory(userId3, proj2.projectId, proj2_subj.subjectId) == [10, 20, 50]
+
+        getPointHistory(userId4, proj1.projectId) == [10, 20, 50]
+        getPointHistory(userId4, proj1.projectId, proj1_subj.subjectId) == [10, 20, 50]
+        getPointHistory(userId4, proj2.projectId) == [10, 20, 50]
+        getPointHistory(userId4, proj2.projectId, proj2_subj.subjectId) == [10, 20, 50]
+    }
+
+    def "point increment increased and occurrences decreased"() {
+        String userId1 = "user1"
+        String userId2 = "user2"
+        String userId3 = "user3"
+        String userId4 = "user4"
+
+        def proj1, proj1_subj, proj1_skills, proj2, proj2_subj, proj2_skills
+        (proj1, proj1_subj, proj1_skills) = createProject.call(1)
+        (proj2, proj2_subj, proj2_skills) = createProject.call(2)
+
+        Closure initSkillsForProject = { String projId, def projSkills ->
+            fullyAchieveSkill.call(userId1, projId, projSkills.get(0).skillId)
+
+            skillsService.addSkill([projectId: projId, skillId: projSkills.get(1).skillId], userId1, new Date() - 2).body
+            skillsService.addSkill([projectId: projId, skillId: projSkills.get(1).skillId], userId1, new Date() - 1).body
+            skillsService.addSkill([projectId: projId, skillId: projSkills.get(1).skillId], userId1, new Date() - 0).body
+
+            fullyAchieveSkill.call(userId1, projId, projSkills.get(2).skillId)
+
+            skillsService.addSkill([projectId: projId, skillId: projSkills.get(0).skillId], userId2, new Date() - 1).body
+
+            fullyAchieveSkill.call(userId3, projId, projSkills.get(0).skillId)
+            fullyAchieveSkill.call(userId4, projId, projSkills.get(1).skillId)
+        }
+
+        initSkillsForProject.call(proj1.projectId, proj1_skills)
+        initSkillsForProject.call(proj2.projectId, proj2_skills)
+
+        List<UserAchievement> beforeAchievements = userAchievementRepo.findAll()
+        when:
+        assert getPointHistory(userId1, proj1.projectId) == [30, 60, 60 + 70]
+        assert getPointHistory(userId1, proj1.projectId, proj1_subj.subjectId) == [30, 60, 60 + 70]
+        assert getPointHistory(userId1, proj2.projectId) == [30, 60, 60 + 70]
+        assert getPointHistory(userId1, proj2.projectId, proj2_subj.subjectId) == [30, 60, 60 + 70]
+
+        // user only has 1 day so history is not returned
+        assert getPointHistory(userId2, proj1.projectId) == []
+        assert getPointHistory(userId2, proj1.projectId, proj1_subj.subjectId) == []
+        assert getPointHistory(userId2, proj2.projectId) == []
+        assert getPointHistory(userId2, proj2.projectId, proj2_subj.subjectId) == []
+
+        assert getPointHistory(userId3, proj1.projectId) == [10, 20, 50]
+        assert getPointHistory(userId3, proj1.projectId, proj1_subj.subjectId) == [10, 20, 50]
+        assert getPointHistory(userId3, proj2.projectId) == [10, 20, 50]
+        assert getPointHistory(userId3, proj2.projectId, proj2_subj.subjectId) == [10, 20, 50]
+
+        assert getPointHistory(userId4, proj1.projectId) == [10, 20, 50]
+        assert getPointHistory(userId4, proj1.projectId, proj1_subj.subjectId) == [10, 20, 50]
+        assert getPointHistory(userId4, proj2.projectId) == [10, 20, 50]
+        assert getPointHistory(userId4, proj2.projectId, proj2_subj.subjectId) == [10, 20, 50]
+
+        proj1_skills.get(1).numPerformToCompletion = 3
+        proj1_skills.get(1).pointIncrement = 15
+        skillsService.createSkill(proj1_skills.get(1))
+
+        List<UserAchievement> afterAchievements = userAchievementRepo.findAll()
+
+        then:
+        beforeAchievements.size() == afterAchievements.size() - 1 // 1 achievement should be added
+        !beforeAchievements.findAll { it.projectId == proj1.projectId && it.skillId == proj1_skills.get(1).skillId && it.userId == userId1 }
+        afterAchievements.find { it.projectId == proj1.projectId && it.skillId == proj1_skills.get(1).skillId && it.userId == userId1 }
+
+        getSubjectSkillsPtsSlashTotalPts(userId1, proj1.projectId, proj1_subj.subjectId) == ["50/50", "45/45", "50/50"]
+        getSubjectSkillsPtsSlashTotalPts(userId2, proj1.projectId, proj1_subj.subjectId) == ["10/50", "0/45", "0/50"]
+        getSubjectSkillsPtsSlashTotalPts(userId3, proj1.projectId, proj1_subj.subjectId) == ["50/50", "0/45", "0/50"]
+        getSubjectSkillsPtsSlashTotalPts(userId4, proj1.projectId, proj1_subj.subjectId) == ["0/50", "45/45", "0/50"]
+
+        getSubjectSkillsPtsSlashTotalPts(userId1, proj2.projectId, proj2_subj.subjectId) == ["50/50", "30/50", "50/50"]
+        getSubjectSkillsPtsSlashTotalPts(userId2, proj2.projectId, proj2_subj.subjectId) == ["10/50", "0/50", "0/50"]
+        getSubjectSkillsPtsSlashTotalPts(userId3, proj2.projectId, proj2_subj.subjectId) == ["50/50", "0/50", "0/50"]
+        getSubjectSkillsPtsSlashTotalPts(userId4, proj2.projectId, proj2_subj.subjectId) == ["0/50", "50/50", "0/50"]
+
+        getPointHistory(userId1, proj1.projectId) == [35, 70, 70 + 75]
+        getPointHistory(userId1, proj1.projectId, proj1_subj.subjectId) == [35, 70, 70 + 75]
+        getPointHistory(userId1, proj2.projectId) == [30, 60, 60 + 70]
+        getPointHistory(userId1, proj2.projectId, proj2_subj.subjectId) == [30, 60, 60 + 70]
+
+        // user only has 1 day so history is not returned
+        getPointHistory(userId2, proj1.projectId) == []
+        getPointHistory(userId2, proj1.projectId, proj1_subj.subjectId) == []
+        getPointHistory(userId2, proj2.projectId) == []
+        getPointHistory(userId2, proj2.projectId, proj2_subj.subjectId) == []
+
+        getPointHistory(userId3, proj1.projectId) == [10, 20, 50]
+        getPointHistory(userId3, proj1.projectId, proj1_subj.subjectId) == [10, 20, 50]
+        getPointHistory(userId3, proj2.projectId) == [10, 20, 50]
+        getPointHistory(userId3, proj2.projectId, proj2_subj.subjectId) == [10, 20, 50]
+
+        getPointHistory(userId4, proj1.projectId) == [15, 30, 45]
+        getPointHistory(userId4, proj1.projectId, proj1_subj.subjectId) == [15, 30, 45]
+        getPointHistory(userId4, proj2.projectId) == [10, 20, 50]
+        getPointHistory(userId4, proj2.projectId, proj2_subj.subjectId) == [10, 20, 50]
+    }
+
+    def "point increment decreased and occurrences decreased"() {
+        String userId1 = "user1"
+        String userId2 = "user2"
+        String userId3 = "user3"
+        String userId4 = "user4"
+
+        def proj1, proj1_subj, proj1_skills, proj2, proj2_subj, proj2_skills
+        (proj1, proj1_subj, proj1_skills) = createProject.call(1)
+        (proj2, proj2_subj, proj2_skills) = createProject.call(2)
+
+        Closure initSkillsForProject = { String projId, def projSkills ->
+            fullyAchieveSkill.call(userId1, projId, projSkills.get(0).skillId)
+
+            skillsService.addSkill([projectId: projId, skillId: projSkills.get(1).skillId], userId1, new Date() - 2).body
+            skillsService.addSkill([projectId: projId, skillId: projSkills.get(1).skillId], userId1, new Date() - 1).body
+            skillsService.addSkill([projectId: projId, skillId: projSkills.get(1).skillId], userId1, new Date() - 0).body
+
+            fullyAchieveSkill.call(userId1, projId, projSkills.get(2).skillId)
+
+            skillsService.addSkill([projectId: projId, skillId: projSkills.get(0).skillId], userId2, new Date() - 1).body
+
+            fullyAchieveSkill.call(userId3, projId, projSkills.get(0).skillId)
+            fullyAchieveSkill.call(userId4, projId, projSkills.get(1).skillId)
+        }
+
+        initSkillsForProject.call(proj1.projectId, proj1_skills)
+        initSkillsForProject.call(proj2.projectId, proj2_skills)
+
+        List<UserAchievement> beforeAchievements = userAchievementRepo.findAll()
+        when:
+        assert getPointHistory(userId1, proj1.projectId) == [30, 60, 60 + 70]
+        assert getPointHistory(userId1, proj1.projectId, proj1_subj.subjectId) == [30, 60, 60 + 70]
+        assert getPointHistory(userId1, proj2.projectId) == [30, 60, 60 + 70]
+        assert getPointHistory(userId1, proj2.projectId, proj2_subj.subjectId) == [30, 60, 60 + 70]
+
+        // user only has 1 day so history is not returned
+        assert getPointHistory(userId2, proj1.projectId) == []
+        assert getPointHistory(userId2, proj1.projectId, proj1_subj.subjectId) == []
+        assert getPointHistory(userId2, proj2.projectId) == []
+        assert getPointHistory(userId2, proj2.projectId, proj2_subj.subjectId) == []
+
+        assert getPointHistory(userId3, proj1.projectId) == [10, 20, 50]
+        assert getPointHistory(userId3, proj1.projectId, proj1_subj.subjectId) == [10, 20, 50]
+        assert getPointHistory(userId3, proj2.projectId) == [10, 20, 50]
+        assert getPointHistory(userId3, proj2.projectId, proj2_subj.subjectId) == [10, 20, 50]
+
+        assert getPointHistory(userId4, proj1.projectId) == [10, 20, 50]
+        assert getPointHistory(userId4, proj1.projectId, proj1_subj.subjectId) == [10, 20, 50]
+        assert getPointHistory(userId4, proj2.projectId) == [10, 20, 50]
+        assert getPointHistory(userId4, proj2.projectId, proj2_subj.subjectId) == [10, 20, 50]
+
+        proj1_skills.get(1).numPerformToCompletion = 3
+        proj1_skills.get(1).pointIncrement = 3
+        skillsService.createSkill(proj1_skills.get(1))
+
+        List<UserAchievement> afterAchievements = userAchievementRepo.findAll()
+
+        then:
+        beforeAchievements.size() == afterAchievements.size() - 1 // 1 achievement should be added
+        !beforeAchievements.findAll { it.projectId == proj1.projectId && it.skillId == proj1_skills.get(1).skillId && it.userId == userId1 }
+        afterAchievements.find { it.projectId == proj1.projectId && it.skillId == proj1_skills.get(1).skillId && it.userId == userId1 }
+
+        getSubjectSkillsPtsSlashTotalPts(userId1, proj1.projectId, proj1_subj.subjectId) == ["50/50", "9/9", "50/50"]
+        getSubjectSkillsPtsSlashTotalPts(userId2, proj1.projectId, proj1_subj.subjectId) == ["10/50", "0/9", "0/50"]
+        getSubjectSkillsPtsSlashTotalPts(userId3, proj1.projectId, proj1_subj.subjectId) == ["50/50", "0/9", "0/50"]
+        getSubjectSkillsPtsSlashTotalPts(userId4, proj1.projectId, proj1_subj.subjectId) == ["0/50", "9/9", "0/50"]
+
+        getSubjectSkillsPtsSlashTotalPts(userId1, proj2.projectId, proj2_subj.subjectId) == ["50/50", "30/50", "50/50"]
+        getSubjectSkillsPtsSlashTotalPts(userId2, proj2.projectId, proj2_subj.subjectId) == ["10/50", "0/50", "0/50"]
+        getSubjectSkillsPtsSlashTotalPts(userId3, proj2.projectId, proj2_subj.subjectId) == ["50/50", "0/50", "0/50"]
+        getSubjectSkillsPtsSlashTotalPts(userId4, proj2.projectId, proj2_subj.subjectId) == ["0/50", "50/50", "0/50"]
+
+        getPointHistory(userId1, proj1.projectId) == [23, 46, 46 + 63]
+        getPointHistory(userId1, proj1.projectId, proj1_subj.subjectId) == [23, 46, 46 + 63]
+        getPointHistory(userId1, proj2.projectId) == [30, 60, 60 + 70]
+        getPointHistory(userId1, proj2.projectId, proj2_subj.subjectId) == [30, 60, 60 + 70]
+
+        // user only has 1 day so history is not returned
+        getPointHistory(userId2, proj1.projectId) == []
+        getPointHistory(userId2, proj1.projectId, proj1_subj.subjectId) == []
+        getPointHistory(userId2, proj2.projectId) == []
+        getPointHistory(userId2, proj2.projectId, proj2_subj.subjectId) == []
+
+        getPointHistory(userId3, proj1.projectId) == [10, 20, 50]
+        getPointHistory(userId3, proj1.projectId, proj1_subj.subjectId) == [10, 20, 50]
+        getPointHistory(userId3, proj2.projectId) == [10, 20, 50]
+        getPointHistory(userId3, proj2.projectId, proj2_subj.subjectId) == [10, 20, 50]
+
+        getPointHistory(userId4, proj1.projectId) == [3, 6, 9]
+        getPointHistory(userId4, proj1.projectId, proj1_subj.subjectId) == [3, 6, 9]
+        getPointHistory(userId4, proj2.projectId) == [10, 20, 50]
+        getPointHistory(userId4, proj2.projectId, proj2_subj.subjectId) == [10, 20, 50]
     }
 }

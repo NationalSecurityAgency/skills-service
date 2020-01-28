@@ -339,4 +339,29 @@ class H2NativeRepo implements NativeQueriesRepo {
         query.setParameter("numOfOccurrences", numOfOccurrences)
         query.executeUpdate()
     }
+
+    @Override
+    void removeUserAchievementsThatDoNotMeetNewNumberOfOccurrences(String projectId, String skillId, int numOfOccurrences) {
+        String q = '''
+            SELECT *
+            FROM user_achievement ua,
+                 (
+                     SELECT user_id, count(id) eventCount
+                     FROM user_performed_skill
+                     WHERE
+                         skill_id = :skillId and
+                         project_id = :projectId
+                     GROUP BY user_id
+                 ) eventsByUserId
+            WHERE ua.project_id = :projectId and 
+                ua.skill_id = :skillId and 
+                ua.user_id = eventsByUserId.user_id and 
+                eventsByUserId.eventCount < :numOfOccurrences'''
+
+        Query query = entityManager.createNativeQuery(q);
+        query.setParameter("projectId", projectId);
+        query.setParameter("skillId", skillId)
+        query.setParameter("numOfOccurrences", numOfOccurrences)
+        query.executeUpdate()
+    }
 }

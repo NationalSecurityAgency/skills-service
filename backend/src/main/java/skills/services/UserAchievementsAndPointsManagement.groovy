@@ -50,7 +50,7 @@ class UserAchievementsAndPointsManagement {
     }
 
     @Transactional
-    void handlePointHistoryUpdate(String projectId, String subjectId, String skillId, int incrementDelta, int subtractFromEventCount){
+    void handlePointHistoryUpdate(String projectId, String subjectId, String skillId, int incrementDelta){
         SkillsValidator.isTrue(
                 skillDefRepo.existsByProjectIdAndSkillIdAndTypeAllIgnoreCase(projectId, skillId, SkillDef.ContainerType.Skill),
                 "Skill does not exist",
@@ -64,11 +64,11 @@ class UserAchievementsAndPointsManagement {
                 subjectId,
         )
 
-        nativeQueriesRepo.updatePointHistoryForSkill(projectId, subjectId, skillId, incrementDelta, subtractFromEventCount)
+        nativeQueriesRepo.updatePointHistoryForSkill(projectId, subjectId, skillId, incrementDelta)
     }
 
     @Transactional
-    void handlePointTotalsUpdate(String projectId, String subjectId, String skillId, int incrementDelta, int subtractFromEventCount){
+    void handlePointTotalsUpdate(String projectId, String subjectId, String skillId, int incrementDelta){
         SkillsValidator.isTrue(
                 skillDefRepo.existsByProjectIdAndSkillIdAndTypeAllIgnoreCase(projectId, skillId, SkillDef.ContainerType.Skill),
                 "Skill does not exist",
@@ -82,7 +82,7 @@ class UserAchievementsAndPointsManagement {
                 subjectId,
         )
 
-        nativeQueriesRepo.updatePointTotalsForSkill(projectId, subjectId, skillId, incrementDelta, subtractFromEventCount)
+        nativeQueriesRepo.updatePointTotalsForSkill(projectId, subjectId, skillId, incrementDelta)
     }
 
     @Transactional
@@ -101,6 +101,12 @@ class UserAchievementsAndPointsManagement {
     void insertUserAchievementWhenDecreaseOfOccurrencesCausesUsersToAchieve(String projectId, String skillId, Integer skillRefId, int numOfOccurrences) {
         assert numOfOccurrences > 0
         nativeQueriesRepo.insertUserAchievementWhenDecreaseOfOccurrencesCausesUsersToAchieve(projectId, skillId, skillRefId, numOfOccurrences)
+    }
+
+    @Transactional
+    void removeUserAchievementsThatDoNotMeetNewNumberOfOccurrences(String projectId, String skillId, int numOfOccurrences) {
+        assert numOfOccurrences > 0
+        nativeQueriesRepo.removeUserAchievementsThatDoNotMeetNewNumberOfOccurrences(projectId, skillId, numOfOccurrences)
     }
 
 }

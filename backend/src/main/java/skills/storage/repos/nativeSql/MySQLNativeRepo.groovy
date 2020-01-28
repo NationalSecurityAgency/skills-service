@@ -138,4 +138,9 @@ class MySQLNativeRepo implements NativeQueriesRepo {
     void insertUserAchievementWhenDecreaseOfOccurrencesCausesUsersToAchieve(String projectId, String skillId, Integer skillRefId, int numOfOccurrences) {
         throw new UnsupportedOperationException("Sorry!")
     }
+
+    @Override
+    void removeUserAchievementsThatDoNotMeetNewNumberOfOccurrences(String projectId, String skillId, int numOfOccurrences) {
+        throw new UnsupportedOperationException("Sorry!")
+    }
 }
