@@ -280,33 +280,6 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
     }
 
     @Override
-    void insertUserAchievementWhenDecreaseOfOccurrencesCausesUsersToAchieve(String projectId, String skillId, Integer skillRefId, int numOfOccurrences) {
-        String q = '''
-            INSERT INTO user_achievement(user_id, project_id, skill_id, skill_ref_id, points_when_achieved)
-            SELECT eventsByUserId.user_id, :projectId, :skillId, :skillRefId, -1
-            FROM (
-                SELECT user_id, count(id) eventCount
-                FROM user_performed_skill
-                WHERE
-                      skill_id = :skillId and
-                      project_id = :projectId
-                GROUP BY user_id
-                ) eventsByUserId
-            WHERE
-                  eventsByUserId.eventCount >= :numOfOccurrences and
-                NOT EXISTS (
-                        SELECT id FROM user_achievement WHERE project_id = :projectId and skill_id = :skillId and user_id = eventsByUserId.user_id
-                    )'''
-
-        Query query = entityManager.createNativeQuery(q);
-        query.setParameter("projectId", projectId);
-        query.setParameter("skillId", skillId)
-        query.setParameter("skillRefId", skillRefId)
-        query.setParameter("numOfOccurrences", numOfOccurrences)
-        query.executeUpdate()
-    }
-
-    @Override
     void removeUserAchievementsThatDoNotMeetNewNumberOfOccurrences(String projectId, String skillId, int numOfOccurrences) {
         String q = '''
             DELETE
