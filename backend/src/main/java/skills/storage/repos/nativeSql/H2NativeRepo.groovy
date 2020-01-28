@@ -165,23 +165,7 @@ class H2NativeRepo implements NativeQueriesRepo {
     }
 
     void updatePointHistoryForSkill(String projectId, String subjectId, String skillId, int incrementDelta){
-        String eventCountSql = '''
-            SELECT
-                user_id, COUNT(id) eventCount, FORMATDATETIME(performed_on,'yyyy-MM-dd') performedOn
-            FROM
-                user_performed_skill
-            WHERE
-                skill_id = :skillId AND project_id = :projectId
-            GROUP BY
-                user_id, FORMATDATETIME(performed_on,'yyyy-MM-dd')
-           '''
-
-        Query eventCountQuery = entityManager.createNativeQuery(eventCountSql);
-        eventCountQuery.setParameter("projectId", projectId);
-        eventCountQuery.setParameter("skillId", skillId)
-        List<PerformedSkillEventCount> eventCounts = eventCountQuery.getResultList().collect{
-            new PerformedSkillEventCount(userId: it[0], eventCount: it[1], performedOn: it[2])
-        }
+        List<PerformedSkillEventCount> eventCounts = getGroupedEventCountsByUserIdAndDate(projectId, skillId)
 
         String updateSql = '''
             UPDATE 
@@ -208,6 +192,27 @@ class H2NativeRepo implements NativeQueriesRepo {
 
     }
 
+    private List<PerformedSkillEventCount> getGroupedEventCountsByUserIdAndDate(String projectId, String skillId) {
+        String eventCountSql = '''
+            SELECT
+                user_id, COUNT(id) eventCount, FORMATDATETIME(performed_on,'yyyy-MM-dd') performedOn
+            FROM
+                user_performed_skill
+            WHERE
+                skill_id = :skillId AND project_id = :projectId
+            GROUP BY
+                user_id, FORMATDATETIME(performed_on,'yyyy-MM-dd')
+           '''
+
+        Query eventCountQuery = entityManager.createNativeQuery(eventCountSql);
+        eventCountQuery.setParameter("projectId", projectId);
+        eventCountQuery.setParameter("skillId", skillId)
+        List<PerformedSkillEventCount> eventCounts = eventCountQuery.getResultList().collect {
+            new PerformedSkillEventCount(userId: it[0], eventCount: it[1], performedOn: it[2])
+        }
+        eventCounts
+    }
+
     private static class PerformedSkillEventCount{
         String userId
         int eventCount
@@ -216,152 +221,146 @@ class H2NativeRepo implements NativeQueriesRepo {
 
     @Override
     void updatePointTotalWhenOccurrencesAreDecreased(String projectId, String subjectId, String skillId, int pointIncrement, int numOccurrences) {
-        String q = '''
-            WITH
-                eventsRes AS (
-                    SELECT rank_filter.user_id userId, count(rank_filter.id) count
-                    FROM (
-                        SELECT user_performed_skill.id, user_performed_skill.user_id
-                            rank() OVER (
-                                PARTITION BY user_id
-                                ORDER BY created DESC
-                            )
-                        FROM user_performed_skill
-                        where project_id = :projectId and skill_id = :skillId
-                    ) rank_filter
-                    WHERE RANK > :numOccurrences
-                    group by userId
-                )
-            UPDATE 
-                user_points points
-            SET 
-                points = points - (eventsRes.eventCount * :pointIncrement) 
-            FROM
-                eventsRes
-            WHERE
-                eventsRes.user_id = points.user_id
-                AND points.day IS NULL 
-                AND points.project_id=:projectId 
-                AND (points.skill_id = :subjectId OR points.skill_id = :skillId OR points.skill_id IS NULL)'''
+        List<PerformedSkillEventCount> eventCounts = getGroupedEventCountsByUserId(projectId, skillId)
+        List<PerformedSkillEventCount> eventsCountsToEdit = eventCounts.findAll({it.eventCount > numOccurrences})
 
-        Query query = entityManager.createNativeQuery(q);
-        query.setParameter("projectId", projectId);
-        query.setParameter("skillId", skillId)
-        query.setParameter("subjectId", subjectId)
-        query.setParameter("numOccurrences", numOccurrences)
-        query.setParameter("pointIncrement", pointIncrement)
-        query.executeUpdate()
+        String updateSql = '''
+            UPDATE
+                user_points points
+            SET
+                points = points - :decrementDelta
+            WHERE
+                points.user_id = :userId
+                AND points.day IS NULL
+                AND points.project_id=:projectId
+                AND (points.skill_id = :subjectId OR points.skill_id = :skillId OR points.skill_id IS NULL)
+        '''
+        eventsCountsToEdit?.each{
+            Query updateQ = entityManager.createNativeQuery(updateSql)
+            updateQ.setParameter("userId", it.userId)
+            updateQ.setParameter("projectId", projectId)
+            updateQ.setParameter("skillId", skillId)
+            updateQ.setParameter("subjectId", subjectId)
+            updateQ.setParameter("decrementDelta", (it.eventCount - numOccurrences) * pointIncrement)
+            updateQ.executeUpdate()
+        }
+    }
+
+    private List<PerformedSkillEventCount> getGroupedEventCountsByUserId(String projectId, String skillId) {
+        String eventCountSql = '''
+            SELECT
+                user_id, COUNT(id) eventCount
+            FROM
+                user_performed_skill
+            WHERE
+                skill_id = :skillId AND project_id = :projectId
+            GROUP BY
+                user_id
+           '''
+
+        Query eventCountQuery = entityManager.createNativeQuery(eventCountSql);
+        eventCountQuery.setParameter("projectId", projectId);
+        eventCountQuery.setParameter("skillId", skillId)
+        List<PerformedSkillEventCount> eventCounts = eventCountQuery.getResultList().collect {
+            new PerformedSkillEventCount(userId: it[0], eventCount: it[1])
+        }
+        return eventCounts
     }
 
     @Override
     void updatePointHistoryWhenOccurrencesAreDecreased(String projectId, String subjectId, String skillId, int pointIncrement, int numOccurrences) {
-        String q = '''
-            WITH
-                eventsRes AS (
-                    SELECT rank_filter.user_id userId, DATE(performed_on) performedOn, count(rank_filter.id) count
-                    FROM (
-                        SELECT user_performed_skill.id, user_performed_skill.user_id, user_performed_skill.performed_on,
-                            rank() OVER (
-                                PARTITION BY user_id
-                                ORDER BY created DESC
-                            )
-                        FROM user_performed_skill
-                        where project_id = :projectId and skill_id = :skillId
-                    ) rank_filter
-                    WHERE RANK > :numOccurrences
-                    group by userId, DATE(performed_on)
-                )
+
+        List<PerformedSkillEventCount> eventCounts = getGroupedEventCountsByUserId(projectId, skillId)
+        List<PerformedSkillEventCount> eventsCountsToEdit = eventCounts.findAll({it.eventCount > numOccurrences})
+
+        String getRowsToRemoveSql = '''SELECT id, FORMATDATETIME(performed_on,'yyyy-MM-dd') FROM user_performed_skill 
+                WHERE 
+                    project_id = :projectId and 
+                    skill_id = :skillId and 
+                    user_id = :userId
+                ORDER BY performed_on DESC
+                limit :numToRemove'''
+
+        String updateSql = '''
             UPDATE 
                 user_points points
             SET 
-                points = points - (eventsRes.eventCount * :pointIncrement) 
-            FROM
-                eventsRes
+                points = points - :decrementDelta 
             WHERE
-                eventsRes.user_id = points.user_id
-                AND eventsRes.performedOn = points.day
+                points.user_id = :userId
+                AND points.day = :performedOn
                 AND points.project_id = :projectId
-                AND (points.skill_id = :subjectId OR points.skill_id = :skillId OR points.skill_id IS NULL)'''
+                AND (points.skill_id = :subjectId OR points.skill_id = :skillId OR points.skill_id IS NULL)
+        '''
 
-        Query query = entityManager.createNativeQuery(q);
-        query.setParameter("projectId", projectId);
-        query.setParameter("skillId", skillId)
-        query.setParameter("subjectId", subjectId)
-        query.setParameter("numOccurrences", numOccurrences)
-        query.setParameter("pointIncrement", pointIncrement)
-        query.executeUpdate()
+        eventsCountsToEdit?.each { eventCountItem ->
+            Query query = entityManager.createNativeQuery(getRowsToRemoveSql)
+            query.setParameter("userId", eventCountItem.userId)
+            query.setParameter("projectId", projectId)
+            query.setParameter("skillId", skillId)
+            query.setParameter("numToRemove", (eventCountItem.eventCount - numOccurrences))
+            // group by date
+            query.getResultList().groupBy { it[1] }.each {
+                Query updateQ = entityManager.createNativeQuery(updateSql)
+                updateQ.setParameter("userId", eventCountItem.userId)
+                updateQ.setParameter("projectId", projectId)
+                updateQ.setParameter("skillId", skillId)
+                updateQ.setParameter("subjectId", subjectId)
+                updateQ.setParameter("performedOn", it.key)
+                updateQ.setParameter("decrementDelta", it.value.size() * pointIncrement)
+                updateQ.executeUpdate()
+            }
+        }
     }
 
     @Override
     void removeExtraEntriesOfUserPerformedSkillByUser(String projectId, String skillId, int numEventsToKeep){
+        List<PerformedSkillEventCount> eventCounts = getGroupedEventCountsByUserId(projectId, skillId)
+        List<PerformedSkillEventCount> eventsCountsToEdit = eventCounts.findAll({it.eventCount > numEventsToKeep})
+
         String q = '''
-            DELETE from user_performed_skill ups
-            USING (SELECT rank_filter.id FROM (
-                SELECT user_performed_skill.id, user_performed_skill.created,
-                       rank() OVER (
-                           PARTITION BY user_id
-                           ORDER BY created DESC
-                           )
-                FROM user_performed_skill where project_id = :projectId and skill_id = :skillId
-            ) rank_filter WHERE RANK > :numEventsToKeep) as idsToRemove
-            WHERE idsToRemove.id = ups.id;'''
+            DELETE 
+            FROM user_performed_skill 
+            WHERE id in (
+                SELECT id FROM user_performed_skill 
+                WHERE 
+                    project_id = :projectId and 
+                    skill_id = :skillId and 
+                    user_id = :userId
+                ORDER BY performed_on DESC
+                limit :numToRemove
+            )
+            '''
 
-        Query query = entityManager.createNativeQuery(q);
-        query.setParameter("projectId", projectId);
-        query.setParameter("skillId", skillId)
-        query.setParameter("numEventsToKeep", numEventsToKeep)
-        query.executeUpdate()
-    }
-
-    @Override
-    void insertUserAchievementWhenDecreaseOfOccurrencesCausesUsersToAchieve(String projectId, String skillId, Integer skillRefId, int numOfOccurrences) {
-        String q = '''
-            INSERT INTO user_achievement(user_id, project_id, skill_id, skill_ref_id, points_when_achieved)
-            SELECT eventsByUserId.user_id, :projectId, :skillId, :skillRefId, -1
-            FROM (
-                SELECT user_id, count(id) eventCount
-                FROM user_performed_skill
-                WHERE
-                      skill_id = :skillId and
-                      project_id = :projectId
-                GROUP BY user_id
-                ) eventsByUserId
-            WHERE
-                  eventsByUserId.eventCount >= :numOfOccurrences and
-                NOT EXISTS (
-                        SELECT id FROM user_achievement WHERE project_id = :projectId and skill_id = :skillId and eventsByUserId.user_id = eventsByUserId.user_id
-                    )'''
-
-        Query query = entityManager.createNativeQuery(q);
-        query.setParameter("projectId", projectId);
-        query.setParameter("skillId", skillId)
-        query.setParameter("skillRefId", skillRefId)
-        query.setParameter("numOfOccurrences", numOfOccurrences)
-        query.executeUpdate()
+        eventsCountsToEdit.each {
+            Query query = entityManager.createNativeQuery(q);
+            query.setParameter("projectId", projectId);
+            query.setParameter("skillId", skillId)
+            query.setParameter("userId", it.userId)
+            query.setParameter("numToRemove", it.eventCount - numEventsToKeep)
+            query.executeUpdate()
+        }
     }
 
     @Override
     void removeUserAchievementsThatDoNotMeetNewNumberOfOccurrences(String projectId, String skillId, int numOfOccurrences) {
-        String q = '''
-            SELECT *
-            FROM user_achievement ua,
-                 (
-                     SELECT user_id, count(id) eventCount
-                     FROM user_performed_skill
-                     WHERE
-                         skill_id = :skillId and
-                         project_id = :projectId
-                     GROUP BY user_id
-                 ) eventsByUserId
-            WHERE ua.project_id = :projectId and 
-                ua.skill_id = :skillId and 
-                ua.user_id = eventsByUserId.user_id and 
-                eventsByUserId.eventCount < :numOfOccurrences'''
+        List<PerformedSkillEventCount> eventCounts = getGroupedEventCountsByUserId(projectId, skillId)
+        List<PerformedSkillEventCount> eventsCountsToEdit = eventCounts.findAll({it.eventCount < numOfOccurrences})
 
-        Query query = entityManager.createNativeQuery(q);
-        query.setParameter("projectId", projectId);
-        query.setParameter("skillId", skillId)
-        query.setParameter("numOfOccurrences", numOfOccurrences)
-        query.executeUpdate()
+        String updateSql = '''
+            DELETE 
+            FROM user_achievement ua
+            WHERE
+                ua.project_id = :projectId and 
+                ua.skill_id = :skillId and 
+                ua.user_id = :userId
+        '''
+        eventsCountsToEdit?.each{
+            Query updateQ = entityManager.createNativeQuery(updateSql)
+            updateQ.setParameter("userId", it.userId)
+            updateQ.setParameter("projectId", projectId)
+            updateQ.setParameter("skillId", skillId)
+            updateQ.executeUpdate()
+        }
     }
 }
