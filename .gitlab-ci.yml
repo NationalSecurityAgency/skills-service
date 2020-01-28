@@ -19,6 +19,7 @@ build:
     - mvn --batch-mode install
   artifacts:
     paths:
+      - backend/pom.xml
       - backend/target/backend-*.jar
       - backend/target/skills-service-tests.log
 
@@ -119,7 +120,10 @@ pushToNexus:
     - cat ~/.npmrc
     - echo "<settings><servers><server><id>nexus-snapshots</id><username>admin</username><password>$NEXUS_PASS</password></server><server><id>nexus-releases</id><username>admin</username><password>$NEXUS_PASS</password></server></servers><mirrors><mirror><id>central</id><name>central</name><url>http://$NEXUS_SERVER/repository/maven-public/</url><mirrorOf>*</mirrorOf></mirror></mirrors></settings>" > ~/.m2/settings.xml
     - cat ~/.m2/settings.xml
-    - mvn --batch-mode deploy -DskipTests -Dnexus.url=http://ip-10-113-80-244.evoforge.org
+    - backendJar=$(ls backend/target/backend-*.jar)
+    - echo $backendJar
+#    - mvn --batch-mode deploy -DskipTests -Dnexus.url=http://ip-10-113-80-244.evoforge.org
+    - mvn --batch-mode deploy:deploy-file -DpomFile=backend/pom.xml -Dfile=backend/target/backend-*.jar -Durl=https://ip-10-113-80-244.evoforge.org/repository/maven-snapshots/ -DrepositoryId=nexus-snapshots
   artifacts:
     paths:
       - backend/target/backend-*.jar
