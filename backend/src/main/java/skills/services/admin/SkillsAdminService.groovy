@@ -174,18 +174,19 @@ class SkillsAdminService {
             // 1.
             // 2.
             if (pointIncrementDelta != 0) {
-                userPointsManagement.handlePointTotalsUpdate(savedSkill.projectId, skillRequest.subjectId, savedSkill.skillId, pointIncrementDelta, 0)
-                userPointsManagement.handlePointHistoryUpdate(savedSkill.projectId, skillRequest.subjectId, savedSkill.skillId, pointIncrementDelta, 0)
+                userPointsManagement.handlePointTotalsUpdate(savedSkill.projectId, skillRequest.subjectId, savedSkill.skillId, pointIncrementDelta)
+                userPointsManagement.handlePointHistoryUpdate(savedSkill.projectId, skillRequest.subjectId, savedSkill.skillId, pointIncrementDelta)
             }
+            int newOccurrences = savedSkill.totalPoints / savedSkill.pointIncrement
             if (occurrencesDelta < 0) {
                 // order is CRITICAL HERE
                 // 1.
                 // 2.
-                int newOccurrences = savedSkill.totalPoints / savedSkill.pointIncrement
                 userPointsManagement.updatePointsWhenOccurrencesAreDecreased(savedSkill.projectId, skillRequest.subjectId, savedSkill.skillId, savedSkill.pointIncrement, newOccurrences)
                 userPointsManagement.removeExtraEntriesOfUserPerformedSkillByUser(savedSkill.projectId, savedSkill.skillId, currentOccurrences + occurrencesDelta)
                 userPointsManagement.insertUserAchievementWhenDecreaseOfOccurrencesCausesUsersToAchieve(savedSkill.projectId, savedSkill.skillId, savedSkill.id, newOccurrences)
-                //
+            } else if (occurrencesDelta > 0) {
+                userPointsManagement.removeUserAchievementsThatDoNotMeetNewNumberOfOccurrences(savedSkill.projectId, savedSkill.skillId, newOccurrences)
             }
         }
 
