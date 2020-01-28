@@ -122,8 +122,7 @@ pushToNexus:
     - cat ~/.m2/settings.xml
     - backendJar=$(ls backend/target/backend-*.jar)
     - echo $backendJar
-#    - mvn --batch-mode deploy -DskipTests -Dnexus.url=http://ip-10-113-80-244.evoforge.org
-    - mvn --batch-mode deploy:deploy-file -DpomFile=backend/pom.xml -Dfile=backend/target/backend-*.jar -Durl=https://ip-10-113-80-244.evoforge.org/repository/maven-snapshots/ -DrepositoryId=nexus-snapshots
+    - mvn --batch-mode deploy:deploy-file -DpomFile=backend/pom.xml -Dfile=${backendJar} -Durl=https://ip-10-113-80-244.evoforge.org/repository/maven-snapshots/ -DrepositoryId=nexus-snapshots
   artifacts:
     paths:
       - backend/target/backend-*.jar
