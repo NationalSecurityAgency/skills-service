@@ -30,4 +30,38 @@ describe('Skills Tests', () => {
         cy.contains('ID: Lotsofspecial')
     });
 
+    it('edit number of occurrences', () => {
+        cy.server().route('POST', `/admin/projects/proj1/subjects/subj1/skills/Skill1Skill`).as('postNewSkill');
+        cy.server().route('GET', `/admin/projects/proj1/subjects/subj1/skills/Skill1Skill`).as('getSkill');
+
+        const selectorOccurrencesToCompletion = '[data-vv-name="numPerformToCompletion"]';
+        const selectorSkillsRowToggle = 'table .VueTables__child-row-toggler';
+        cy.visit('/projects/proj1/subjects/subj1');
+        cy.clickButton('Skill')
+        cy.get(selectorOccurrencesToCompletion).should('have.value', '5')
+        cy.get('#skillName').type('Skill 1')
+
+        cy.clickSave()
+        cy.wait('@postNewSkill');
+
+
+        cy.get(selectorSkillsRowToggle).click()
+        cy.contains('50 Points')
+
+        cy.get('table .control-column .fa-edit').click()
+        cy.wait('@getSkill')
+
+        // close toast
+        cy.get('.toast-header button').click()
+        cy.get(selectorOccurrencesToCompletion).should('have.value', '5')
+        cy.get(selectorOccurrencesToCompletion).type('{backspace}10')
+        cy.get(selectorOccurrencesToCompletion).should('have.value', '10')
+
+        cy.clickSave()
+        cy.wait('@postNewSkill');
+
+        cy.get(selectorSkillsRowToggle).click()
+        cy.contains('100 Points')
+    });
+
 })
