@@ -16,8 +16,8 @@
   "author": "Skills Team",
   "license": "ISC",
   "devDependencies": {
-    "cypress": "^3.8.1",
     "@bahmutov/print-env": "^1.2.0",
+    "cypress": "^3.8.3",
     "wait-on": "^3.3.0"
   }
 }

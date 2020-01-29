@@ -1,7 +1,7 @@
 import SkillsConfiguration from '@skills/skills-client-configuration';
 
 import axios from 'axios';
-import createAuthRefreshInterceptor from 'axios-auth-refresh/src/index.js';
+import createAuthRefreshInterceptor from 'axios-auth-refresh';
 import router from '@/router';
 import store from '@/store';
 

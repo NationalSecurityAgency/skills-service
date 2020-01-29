@@ -53,7 +53,7 @@
               <label for="subjName">Occurrences to Completion</label>
               <ValidationProvider rules="optionalNumeric|required|min_value:1|maxNumPerformToCompletion|moreThanMaxWindowOccurrences" v-slot="{errors}" name="Occurrences to Completion" tag="div">
                 <input class="form-control" type="text" v-model="skillInternal.numPerformToCompletion"
-                         data-vv-name="numPerformToCompletion" :readonly="isEdit"/>
+                         data-vv-name="numPerformToCompletion"/>
                 <small class="form-text text-danger">{{ errors[0]}}</small>
               </ValidationProvider>
             </div>
