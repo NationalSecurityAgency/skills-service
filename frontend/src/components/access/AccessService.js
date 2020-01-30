@@ -13,10 +13,11 @@ export default {
     throw new Error(`unexpected user role [${roleName}]`);
   },
   saveUserRole(projectId, userInfo, roleName, isPkiAuthenticated) {
-    const { userId } = userInfo;
+    let { userId } = userInfo;
     let userKey = userId;
     if (isPkiAuthenticated) {
       userKey = userInfo.dn;
+      userId = userKey;
     }
     if (projectId) {
       return axios.put(`/admin/projects/${projectId}/users/${userKey}/roles/${roleName}`)

@@ -151,13 +151,13 @@ class UserInfoController {
     }
 
     @RequestMapping(value = "/users/suggestPkiUsers/{query}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    List<UserInfoRes> suggestExistingPkiUsers(@PathVariable("query") String query) {
-        return pkiUserLookup?.suggestUsers(query)?.take(5).collect { new UserInfoRes(it) }
+    List<UserInfoRes> suggestExistingPkiUsers(@PathVariable("query") String query, @RequestParam(value="userSuggestOption", required = false, defaultValue = '') String userSuggestOption ) {
+        return pkiUserLookup?.suggestUsers(query, userSuggestOption)?.take(5)?.collect { new UserInfoRes(it) }
     }
 
     @RequestMapping(value = "/users/suggestPkiUsers/", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    List<UserInfoRes> suggestAllExistingPkiUsers() {
-        return pkiUserLookup?.suggestUsers("a")?.take(5).collect { new UserInfoRes(it) }
+    List<UserInfoRes> suggestAllExistingPkiUsers(@RequestParam(value="userSuggestOption", required = false, defaultValue = '') String userSuggestOption) {
+        return pkiUserLookup?.suggestUsers("a", userSuggestOption)?.take(5)?.collect { new UserInfoRes(it) }
     }
 
 }

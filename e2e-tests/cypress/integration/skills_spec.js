@@ -64,4 +64,27 @@ describe('Skills Tests', () => {
         cy.contains('100 Points')
     });
 
+    it('Add Skill Event', () => {
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1', {
+            projectId: 'proj1',
+            subjectId: "subj1",
+            skillId: "skill1",
+            name: "Skill 1",
+            pointIncrement: '50',
+            numPerformToCompletion: '5'
+        });
+
+       cy.visit('/projects/proj1/subjects/subj1/skills/skill1');
+       cy.contains('Add Event').click();
+
+       cy.contains('ONE').click();
+       cy.contains('TWO').click();
+       cy.get('.existingUserInput button').contains('TWO');
+
+       cy.contains('Enter user id').type('foo{enter}');
+       cy.clickButton('Add');
+       cy.get('.text-success', {timeout: 5*1000}).contains('Added points for');
+
+    });
+
 })

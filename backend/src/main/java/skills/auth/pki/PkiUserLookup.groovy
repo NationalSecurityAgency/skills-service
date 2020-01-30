@@ -34,6 +34,9 @@ class PkiUserLookup {
     @Value('${skills.authorization.userQueryUri}')
     String userQueryUri
 
+    @Value('${skills.authorization.suggestOptionParam:""}')
+    String suggestOptionParam
+
     @Value('${skills.authorization.userInfoHealthCheckUri}')
     String userInfoHealthCheckUri
 
@@ -69,9 +72,21 @@ class PkiUserLookup {
     }
 
     @Profile
-    List<UserInfo> suggestUsers(String query) {
+    List<UserInfo> suggestUsers(String query, String suggestOption) {
+        String uri = userQueryUri
+        if(suggestOption && suggestOptionParam) {
+            if (uri.endsWith("/")){
+                uri = uri.substring(0, uri.length()-1)
+            }
+            if (uri.contains("?")){
+                uri += "&$suggestOptionParam=$suggestOption"
+            } else {
+                uri += "?$suggestOptionParam=$suggestOption"
+            }
+        }
+
         ResponseEntity<List<UserInfo>> response = restTemplate.exchange(
-                userQueryUri,
+                uri,
                 HttpMethod.GET,
                 null,
                 new ParameterizedTypeReference<List<UserInfo>>(){},

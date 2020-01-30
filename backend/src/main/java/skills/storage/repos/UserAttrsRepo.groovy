@@ -19,4 +19,5 @@ interface UserAttrsRepo extends CrudRepository<UserAttrs, Integer> {
              upper(attrs.userIdForDisplay) like UPPER(CONCAT('%', ?1, '%')))
         order by attrs.firstName asc''')
     List<UserAttrs> searchForUser(String userIdQuery, Pageable pageable)
+
 }
