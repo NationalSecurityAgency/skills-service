@@ -39,7 +39,8 @@ class AccessSettingsController {
     List<UserRoleRes> getUserRoles(
             @PathVariable("projectId") String projectId,
             @PathVariable("userId") String userId) {
-        accessSettingsStorageService.getUserRolesForProjectIdAndUserId(projectId, userId?.toLowerCase())
+        String uid = getUserId(userId)
+        accessSettingsStorageService.getUserRolesForProjectIdAndUserId(projectId, uid?.toLowerCase())
     }
 
     @RequestMapping(value = "/projects/{projectId}/users/{userId}/roles/{roleName}", method = RequestMethod.DELETE)
