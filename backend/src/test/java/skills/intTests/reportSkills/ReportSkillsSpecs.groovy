@@ -1130,4 +1130,22 @@ class ReportSkillsSpecs extends DefaultIntSpec {
         SkillsClientException ex = thrown()
         ex.message.contains("Skill Events may not be in the future")
     }
+
+    def "Skill Events - user ids cannot have spaces"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(10, )
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        when:
+        skillsService.addSkill([projectId: projId, skillId: skills[0].skillId], "user a", new Date())
+
+        then:
+        SkillsClientException ex = thrown()
+        ex.message.contains("Spaces are not allowed in user id. Provided [user a]")
+    }
+
 }

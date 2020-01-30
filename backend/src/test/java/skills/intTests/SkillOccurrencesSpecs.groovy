@@ -77,6 +77,35 @@ class SkillOccurrencesSpecs extends DefaultIntSpec {
         return skillsService.getPointHistory(userId, projectId, subjId).pointsHistory.sort { df.parse(it.dayPerformed) }.collect { it.points }
     }
 
+    def "reduce skill occurrences from 2 to 1"() {
+        String userId = "user1"
+        def proj1 = SkillsFactory.createProject(5)
+        def proj1_subj1 = SkillsFactory.createSubject(5, 1)
+
+        List<Map> proj1_skills = SkillsFactory.createSkills(3, 5, 1)
+        proj1_skills.each {
+            it.pointIncrement = 100
+            it.numPerformToCompletion = 2
+            it.pointIncrementInterval = 0 // ability to achieve right away
+        }
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj1)
+        skillsService.createSkills(proj1_skills)
+
+
+        skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_skills.get(0).skillId], userId, new Date()).body
+        skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_skills.get(0).skillId], userId, new Date()).body
+
+        def eventsResBefore = skillsService.getPerformedSkills(userId, proj1.projectId)
+
+        when:
+        proj1_skills.get(0).numPerformToCompletion = 1
+        skillsService.createSkill(proj1_skills.get(0))
+
+        then:
+        def eventsResAfter = skillsService.getPerformedSkills(userId, proj1.projectId)
+        eventsResAfter.totalCount == eventsResBefore.totalCount -1
+    }
 
     def "reduce skill occurrences after user completed the skill - multiple users, projects and skills"() {
         String userId = "user1"
