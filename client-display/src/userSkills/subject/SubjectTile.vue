@@ -1,5 +1,5 @@
 <template>
-  <div class="card" style="height: 100%">
+  <div class="card subject-tile skills-navigable-item" style="height: 100%" data-cy="subjectTile">
     <div class="card-body text-primary">
       <ribbon :color="ribbonColor" class="subject-tile-ribbon">
         {{ subject.subject }}
@@ -142,7 +142,7 @@
 </style>
 
 <style scoped>
-  .subject-tile-icon {
+  .subject-tile .subject-tile-icon {
     font-size: 60px;
     height: 60px;
     width: 60px;
@@ -151,12 +151,12 @@
     background-size: 60px 60px;
   }
 
-  .skill-tile-label {
+  .subject-tile .skill-tile-label {
     font-size: 1.3rem;
     width: 100%;
   }
 
-  .progress-border {
+  .subject-tile .progress-border {
     border: lightgrey solid 2px;
   }
 </style>

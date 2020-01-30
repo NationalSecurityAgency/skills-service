@@ -53,7 +53,8 @@
       const vm = this;
       if (this.isDevelopmentMode()) {
         this.configureDevelopmentMode();
-        this.$store.commit('isSummaryOnly', false);
+        const isSummaryOnly = this.$route.query.isSummaryOnly ? this.$route.query.isSummaryOnly : false;
+        this.$store.commit('isSummaryOnly', isSummaryOnly);
       } else {
         const handshake = new Postmate.Model({
           updateAuthenticationToken(authToken) {

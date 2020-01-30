@@ -1,5 +1,6 @@
 <template>
-  <div class="card h-100 skills-my-rank" :class="{ 'skills-cursor-pointer': !isSummaryOnly }" @click.stop="openMyRankDetails()">
+  <div class="card h-100 skills-my-rank" @click.stop="openMyRankDetails()"
+       :class="{ 'skills-navigable-item': !isSummaryOnly }" data-cy="myRank">
     <div class="card-header">
       <h6 class="card-title mb-0 float-left">My Rank</h6>
     </div>
@@ -48,10 +49,6 @@
 </script>
 
 <style scoped>
-  .skills-my-rank:hover {
-    /*border-color: #3273dc;*/
-    box-shadow: 0 0 2px 1px #17a2b8 ;
-  }
 
   .skills-my-rank .skills-icon {
     display: inline-block;
@@ -61,7 +58,7 @@
 
   .skills-my-rank .skills-icon.user-rank-stack {
     margin: 14px 0;
-    font-size: 4.5rem;
+    font-size: 4.1rem;
     width: 100%;
     color: #0fcc15d1;
   }
