@@ -6,8 +6,12 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.auth.UserInfo
+import skills.controller.exceptions.ErrorCode
+import skills.controller.exceptions.SkillException
 import skills.storage.model.UserAttrs
 import skills.storage.repos.UserAttrsRepo
+
+import static skills.controller.exceptions.SkillException.NA
 
 @Service
 @Slf4j
@@ -19,6 +23,8 @@ class UserAttrsService {
     @Transactional
     @Profile
     UserAttrs saveUserAttrs(String userId, UserInfo userInfo) {
+        validateUserId(userId)
+
         UserAttrs userAttrs = loadUserAttrsFromLocalDb(userId)
         boolean doSave = true
         if (!userAttrs) {
@@ -50,6 +56,16 @@ class UserAttrsService {
             saveUserAttrsInLocalDb(userAttrs)
         }
         return userAttrs
+    }
+
+    private void validateUserId(String userId) {
+        if (!userId) {
+            throw new SkillException("userId must be present", NA, NA, ErrorCode.BadParam)
+        }
+
+        if (userId.contains(" ")) {
+            throw new SkillException("Spaces are not allowed in user id. Provided [${userId}]", NA, NA, ErrorCode.BadParam)
+        }
     }
 
     UserAttrs findByUserId(String userId) {
