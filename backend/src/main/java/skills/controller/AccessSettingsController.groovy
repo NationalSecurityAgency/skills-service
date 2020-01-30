@@ -3,9 +3,12 @@ package skills.controller
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.client.RestClientException
+import skills.controller.exceptions.SkillException
 import skills.controller.result.model.RequestResult
 import skills.controller.result.model.UserRoleRes
 import skills.services.AccessSettingsStorageService
@@ -69,8 +72,11 @@ class AccessSettingsController {
         if (authMode == skills.auth.AuthMode.PKI) {
             try {
                 return userDetailsService.loadUserByUsername(userKey?.toLowerCase()).username
-            } catch (UsernameNotFoundException e) {
-                throw new skills.controller.exceptions.SkillException("User [$userKey] does not exist")
+            } catch (UsernameNotFoundException|BadCredentialsException e) {
+                if (e.getCause() instanceof RestClientException){
+                    throw new SkillException(e.getCause().getMessage())
+                }
+                throw new SkillException("User [$userKey] does not exist")
             }
         } else {
             return userKey?.toLowerCase()
