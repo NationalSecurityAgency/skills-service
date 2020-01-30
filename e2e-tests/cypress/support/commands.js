@@ -24,6 +24,7 @@
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
 
+import './cliend-display-commands';
 
 Cypress.Commands.add("register", (user, pass, grantRoot) => {
     return cy.request(`/app/users/validExistingDashboardUserId/${user}`)
