@@ -45,8 +45,31 @@ describe('Client Display Tests', () => {
     });
 
     it('visit home page', () => {
-        cy.visit('http://localhost:8083/');
+        cy.cdVisit('/');
         cy.contains('Overall Points');
+    });
+
+    it.only('back button', () => {
+        cy.cdVisit('/');
+        cy.contains('User Skills');
+        cy.get('[data-cy=back]').should('not.exist');
+
+        // to ranking page and back
+        cy.contains('Ranking Stats').click()
+        cy.contains('Rank Overview');
+        cy.cdBack();
+
+        // to subject page and back
+        cy.cdClickSubj(1, 'Subject 2');
+        cy.cdBack();
+
+        // to subject page (2nd subject card), then to skill page, back, back to home page
+        cy.cdClickSubj(0, 'Subject 1');
+        cy.cdClickSkill(0);
+        // cy.get('.user-skill-progress-layers:nth-child(1)').click()
+        // cy.contains('Skill Overview')
+        cy.cdBack('Subject 1');
+        cy.cdBack();
     });
 
 });
