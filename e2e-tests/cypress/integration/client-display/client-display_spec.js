@@ -1,5 +1,7 @@
 describe('Client Display Tests', () => {
 
+    const cssAttachedToNavigableCards = 'skills-navigable-item';
+
     before(() => {
         cy.disableUILogin();
     });
@@ -49,13 +51,13 @@ describe('Client Display Tests', () => {
         cy.contains('Overall Points');
     });
 
-    it.only('back button', () => {
+    it('back button', () => {
         cy.cdVisit('/');
         cy.contains('User Skills');
         cy.get('[data-cy=back]').should('not.exist');
 
         // to ranking page and back
-        cy.contains('Ranking Stats').click()
+        cy.get('[data-cy=myRank]').click()
         cy.contains('Rank Overview');
         cy.cdBack();
 
@@ -66,10 +68,50 @@ describe('Client Display Tests', () => {
         // to subject page (2nd subject card), then to skill page, back, back to home page
         cy.cdClickSubj(0, 'Subject 1');
         cy.cdClickSkill(0);
-        // cy.get('.user-skill-progress-layers:nth-child(1)').click()
-        // cy.contains('Skill Overview')
         cy.cdBack('Subject 1');
         cy.cdBack();
     });
 
+    it('clearly represent navigable components', () => {
+        cy.request('POST', '/admin/projects/proj1/badges/badge1', {
+            projectId: 'proj1',
+            badgeId: 'badge1',
+            name: 'Badge 1'
+        });
+        cy.cdVisit('/');
+
+        cy.get('[data-cy=myRank]').should('have.class', 'skills-navigable-item');
+        cy.get('[data-cy=myBadges]').should('have.class', 'skills-navigable-item');
+        cy.get('[data-cy=subjectTile]').eq(0).should('have.class', cssAttachedToNavigableCards);
+        cy.get('[data-cy=subjectTile]').eq(1).should('have.class', cssAttachedToNavigableCards);
+        cy.get('[data-cy=subjectTile]').eq(2).should('have.class', cssAttachedToNavigableCards);
+    });
+
+    it('components should not be clickable in the summary only option', () => {
+        cy.request('POST', '/admin/projects/proj1/badges/badge1', {
+            projectId: 'proj1',
+            badgeId: 'badge1',
+            name: 'Badge 1'
+        });
+        cy.cdVisit('/?isSummaryOnly=true');
+
+        cy.get('[data-cy=myRank]').contains("1")
+        cy.get('[data-cy=myBadges]').contains("0 Badges")
+
+        // make sure click doesn't take us anywhere
+        cy.get('[data-cy=myRank]').click()
+        cy.contains("User Skills")
+
+        cy.get('[data-cy=myBadges]').click()
+        cy.contains("User Skills")
+
+        // make sure css is not attached
+        cy.get('[data-cy=myRank]').should('not.have.class', cssAttachedToNavigableCards);
+        cy.get('[data-cy=myBadges]').should('not.have.class', cssAttachedToNavigableCards);
+
+        // summaries should not be displayed at all
+        cy.get('[data-cy=subjectTile]').should('not.exist');
+    });
+
 });
+
