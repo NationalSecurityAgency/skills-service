@@ -11,6 +11,9 @@ build:
       - $TYPE == "postgrestest"
   image: maven:3.6.0-jdk-11
   stage: build
+  before_script:
+    - cat /etc/os-release
+    - apt-get install build-essential
   script:
     - echo "@skills:registry=http://$NEXUS_SERVER/repository/skills-registry/" > ~/.npmrc
     - cat ~/.npmrc
