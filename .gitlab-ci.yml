@@ -13,6 +13,7 @@ build:
   stage: build
   before_script:
     - cat /etc/os-release
+    # Need to install make/g++ so node v13 can be built
     - apt-get update
     - apt-get install -y build-essential
   script:
