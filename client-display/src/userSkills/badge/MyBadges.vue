@@ -2,7 +2,7 @@
     <div class="card h-100" @click.stop="openMyBadges"
          :class="{ 'skills-navigable-item': !isSummaryOnly }" data-cy="myBadges">
         <div class="card-header">
-            <h6 class="card-title mb-0 float-left">My Badges</h6>
+            <h6 class="card-title mb-0 text-uppercase">My Badges</h6>
         </div>
         <div class="card-body">
             <span class="fa-stack skills-icon user-rank-stack">
@@ -53,7 +53,7 @@
 
     .skills-icon.user-rank-stack {
         margin: 14px 0;
-        font-size: 60px;
+        font-size: 4.1rem;
         width: 100%;
         color: #0fcc15d1;
     }
