@@ -51,7 +51,6 @@
 
 <script>
     import ProgressBar from '@/userSkills/skill/progress/ProgressBar.vue';
-    import SkillProgressDescription from '@/userSkills/skill/progress/SkillProgressDescription.vue';
     import SkillSummaryCards from '@/userSkills/skill/progress/SkillSummaryCards.vue';
     import MarkdownText from '@/common/utilities/MarkdownText.vue';
 
@@ -59,7 +58,6 @@
         name: 'SkillOverview',
         components: {
             SkillSummaryCards,
-            SkillProgressDescription,
             ProgressBar,
             MarkdownText,
         },

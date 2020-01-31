@@ -3,9 +3,10 @@
         <div class="card-body">
             <skills-spinner :loading="loading"/>
             <div v-if="!loading">
-                <skills-subject-skill-row v-if="skillsInternal && skillsInternal.length > 0"
-                                          v-for="(skill, index) in skillsInternal" :key="`unique-skill-${index}`"
+                <div v-if="skillsInternal && skillsInternal.length > 0">
+                    <skills-subject-skill-row v-for="(skill, index) in skillsInternal" :key="`unique-skill-${index}`"
                                           :skill="skill" :show-description="showDescriptionsInternal"/>
+                </div>
                 <no-data-yet v-if="!(skillsInternal && skillsInternal.length > 0)" class="my-2"
                         title="Skills have not been added yet." sub-title="Please contact this project's administrator."/>
             </div>
