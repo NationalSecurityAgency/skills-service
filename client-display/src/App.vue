@@ -126,7 +126,7 @@
               styleName: 'color',
             },
             textPrimaryColor: {
-              selector: 'body #app .text-primary, body #app',
+              selector: 'body #app .text-primary, body #app, body #app .skills-navigable-item',
               styleName: 'color',
             },
             textPrimaryMutedColor: {
