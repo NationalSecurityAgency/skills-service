@@ -74,11 +74,9 @@
 </template>
 
 <script>
-    import MyProgressSummary from '@/userSkills/MyProgressSummary.vue';
     import PointProgressChart from '@/userSkills/PointProgressChart.vue';
 
     import CircleProgress from '@/common/progress/CircleProgress.vue';
-    import StarProgress from '@/common/progress/StarProgress.vue';
     import MyRank from '@/userSkills/myRank/MyRank.vue';
     import MySkillLevel from '@/userSkills/MySkillLevel.vue';
     import MyBadges from '@/userSkills/badge/MyBadges.vue';
@@ -87,9 +85,7 @@
         components: {
             MyBadges,
             PointProgressChart,
-            MyProgressSummary,
             CircleProgress,
-            StarProgress,
             MyRank,
             MySkillLevel,
         },

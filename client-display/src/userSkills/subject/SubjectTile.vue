@@ -61,7 +61,6 @@
 <script>
   import ProgressBar from 'vue-simple-progress';
 
-  import MyProgressSummary from '@/userSkills/MyProgressSummary.vue';
   import Ribbon from '@/common/ribbon/Ribbon.vue';
   import StarProgress from '@/common/progress/StarProgress.vue';
   import VerticalProgressBar from '@/common/progress/VerticalProgress.vue';
@@ -73,7 +72,6 @@
     components: {
       Ribbon,
       StarProgress,
-      MyProgressSummary,
       VerticalProgressBar,
       ProgressBar,
     },

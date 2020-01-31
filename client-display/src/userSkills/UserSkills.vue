@@ -12,9 +12,6 @@
 </template>
 
 <script>
-  import ProgressBar from 'vue-simple-progress';
-
-  import MyProgressSummary from '@/userSkills/MyProgressSummary.vue';
   import UserSkillsHeader from '@/userSkills/UserSkillsHeader.vue';
   import UserSkillsService from '@/userSkills/service/UserSkillsService';
   import SubjectsContainer from '@/userSkills/subject/SubjectsContainer.vue';
@@ -24,21 +21,14 @@
   import '@/common/filter/NumberFilter';
   import '@/common/filter/PluralFilter';
 
-  import VerticalProgressBar from '@/common/progress/VerticalProgress.vue';
-
   import SkillsTitle from '@/common/utilities/SkillsTitle.vue';
-  import StarProgress from '@/common/progress/StarProgress.vue';
 
   export default {
     mixins: [SkillDisplayDataLoadingMixin],
 
     components: {
-      MyProgressSummary,
       UserSkillsHeader,
-      ProgressBar,
-      VerticalProgressBar,
       SkillsTitle,
-      StarProgress,
       SubjectsContainer,
       SkillsSpinner,
     },
