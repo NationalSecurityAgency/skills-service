@@ -13,6 +13,7 @@ build:
   stage: build
   before_script:
     - cat /etc/os-release
+    - apt-get update
     - apt-get install build-essential
   script:
     - echo "@skills:registry=http://$NEXUS_SERVER/repository/skills-registry/" > ~/.npmrc
