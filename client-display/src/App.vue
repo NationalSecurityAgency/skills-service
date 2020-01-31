@@ -17,9 +17,9 @@
 
   import SkillsConfiguration from '@skills/skills-client-configuration';
   import UserSkillsService from '@/userSkills/service/UserSkillsService';
-  import TokenReauthorizer from '@/userSkills/service/TokenReauthorizer';
   import store from '@/store';
   import NewSoftwareVersionComponent from '@/common/softwareVersion/NewSoftwareVersion.vue';
+  import DevModeMixin from '@/dev/DevModeMixin.vue';
 
   const getDocumentHeight = () => {
     const { body } = document;
@@ -43,6 +43,7 @@
   });
 
   export default {
+    mixins: [DevModeMixin],
     components: { NewSoftwareVersionComponent },
     data() {
       return {
@@ -53,8 +54,6 @@
       const vm = this;
       if (this.isDevelopmentMode()) {
         this.configureDevelopmentMode();
-        const isSummaryOnly = this.$route.query.isSummaryOnly ? this.$route.query.isSummaryOnly : false;
-        this.$store.commit('isSummaryOnly', isSummaryOnly);
       } else {
         const handshake = new Postmate.Model({
           updateAuthenticationToken(authToken) {
@@ -222,47 +221,6 @@
 
       onHeightChange() {
         onHeightChanged();
-      },
-
-      configureDevelopmentMode() {
-        if (!this.isValidDevelopmentMode()) {
-          const errorMessage = `
-            Development mode is not properly configured
-            You must create a local file '.env.development.local' that defines:
-
-            VUE_APP_AUTHENTICATION_URL
-            VUE_APP_PROJECT_ID
-            VUE_APP_SERVICE_URL
-
-            For an example see .env.development.local.example
-          `;
-
-          // eslint-disable-next-line no-alert
-          alert(errorMessage);
-        } else {
-          SkillsConfiguration.configure({
-            serviceUrl: process.env.VUE_APP_SERVICE_URL,
-            projectId: process.env.VUE_APP_PROJECT_ID,
-            authenticator: process.env.VUE_APP_AUTHENTICATION_URL,
-          });
-          this.storeAuthToken();
-        }
-      },
-
-      isDevelopmentMode() {
-        return process.env.NODE_ENV === 'development';
-      },
-
-      isValidDevelopmentMode() {
-        return process.env.VUE_APP_AUTHENTICATION_URL && process.env.VUE_APP_PROJECT_ID && process.env.VUE_APP_SERVICE_URL;
-      },
-
-      storeAuthToken() {
-        TokenReauthorizer.getAuthenticationToken()
-          .then((result) => {
-            this.$store.commit('authToken', result.data.access_token);
-            SkillsConfiguration.setAuthToken(result.data.access_token);
-          });
       },
     },
   };

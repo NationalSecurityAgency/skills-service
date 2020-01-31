@@ -49,6 +49,10 @@ describe('Client Display Tests', () => {
     it('visit home page', () => {
         cy.cdVisit('/');
         cy.contains('Overall Points');
+
+        // some basic default theme validation
+        cy.get("#app").should('have.css', 'background-color')
+            .and('equal', 'rgba(0, 0, 0, 0)');
     });
 
     it('back button', () => {
@@ -85,6 +89,14 @@ describe('Client Display Tests', () => {
         cy.get('[data-cy=subjectTile]').eq(0).should('have.class', cssAttachedToNavigableCards);
         cy.get('[data-cy=subjectTile]').eq(1).should('have.class', cssAttachedToNavigableCards);
         cy.get('[data-cy=subjectTile]').eq(2).should('have.class', cssAttachedToNavigableCards);
+    });
+
+    it.only('test theming', () => {
+        cy.cdVisit('/?enableTheme=true')
+        // hex #626d7d = rgb(98, 109, 125)
+        cy.get("#app").should('have.css', 'background-color')
+            .and('equal', 'rgb(98, 109, 125)');
+
     });
 
     it('components should not be clickable in the summary only option', () => {

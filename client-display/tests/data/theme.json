@@ -1,0 +1,24 @@
+{
+  "backgroundColor": "#626d7d",
+  "pageTitleTextColor": "white",
+  "textSecondaryColor": "white",
+  "textPrimaryColor": "white",
+  "stars": {
+    "unearnedColor": "#787886",
+    "earnedColor": "gold"
+  },
+  "progressIndicators": {
+    "beforeTodayColor": "#3e4d44",
+    "earnedTodayColor": "#667da4",
+    "completeColor": "#59ad52",
+    "incompleteColor": "#cdcdcd"
+  },
+  "charts": {
+    "axisLabelColor": "white"
+  },
+  "tiles": {
+    "backgroundColor": "#152E4d",
+    "watermarkIconColor": "#a6c5f7"
+  },
+  "graphLegendBorderColor": "1px solid grey"
+}
