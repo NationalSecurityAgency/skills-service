@@ -24,3 +24,10 @@ Cypress.Commands.add("cdClickSkill", (skillIndex) => {
     cy.get(`.user-skill-progress-layers:nth-child(${skillIndex+1})`).click()
     cy.contains('Skill Overview')
 });
+
+Cypress.Commands.add("cdClickRank", () => {
+    cy.get('[data-cy=myRank]').click();
+    cy.contains('Rank Overview');
+});
+
+

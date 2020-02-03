@@ -13,13 +13,13 @@
   import Postmate from 'postmate';
 
   import debounce from 'lodash/debounce';
-  import merge from 'lodash/merge';
 
   import SkillsConfiguration from '@skills/skills-client-configuration';
   import UserSkillsService from '@/userSkills/service/UserSkillsService';
   import store from '@/store';
   import NewSoftwareVersionComponent from '@/common/softwareVersion/NewSoftwareVersion.vue';
   import DevModeMixin from '@/dev/DevModeMixin.vue';
+  import ThemeHelper from './common/theme/ThemeHelper';
 
   const getDocumentHeight = () => {
     const { body } = document;
@@ -102,119 +102,20 @@
     methods: {
       handleTheming(theme) {
         if (theme) {
-          const nonCSSConfig = ['progressIndicators', 'charts'];
+          const themeResArtifacts = ThemeHelper.build(theme);
 
-          const selectorKey = {
-            backgroundColor: {
-              selector: 'body #app',
-              styleName: 'background-color',
-            },
-            trophyIconColor: {
-              selector: 'body #app .fa.fa-trophy',
-              styleName: 'color',
-            },
-            subjectTileIconColor: {
-              selector: 'body #app .subject-tile-icon',
-              styleName: 'color',
-            },
-            pageTitleTextColor: {
-              selector: 'body #app .skills-page-title-text-color',
-              styleName: 'color',
-            },
-            circleProgressInteriorTextColor: {
-              selector: 'body #app .circle-number span',
-              styleName: 'color',
-            },
-            textPrimaryColor: {
-              selector: 'body #app .text-primary, body #app, body #app .skills-navigable-item',
-              styleName: 'color',
-            },
-            textPrimaryMutedColor: {
-              selector: 'body #app .text-primary .text-muted, body #app .text-primary.text-muted',
-              styleName: 'color',
-            },
-            textSecondaryColor: {
-              selector: 'body #app .text-muted, body #app .text-secondary',
-              styleName: 'color',
-            },
-            tiles: {
-              backgroundColor: {
-                selector: 'body #app .card, body #app .card-header, body #app .card-body, body #app .card-footer',
-                styleName: 'background-color',
-              },
-              watermarkIconColor: {
-                selector: 'body #app .card-body .watermark-icon',
-                styleName: 'color',
-              },
-            },
-            stars: {
-              unearnedColor: {
-                selector: 'body #app .star-empty',
-                styleName: 'color',
-              },
-              earnedColor: {
-                selector: 'body #app .star-filled',
-                styleName: 'color',
-              },
-            },
-            graphLegendBorderColor: {
-              selector: 'body #app .graph-legend .card-header, body #app .graph-legend .card-body',
-              styleName: 'border',
-            },
-          };
-
-          const { body } = document;
-
-          const expandValue = (object, key) => {
-            const isCSSConfig = !nonCSSConfig.includes(key);
-            if (isCSSConfig && typeof object[key] === 'object') {
-              Object.keys(object[key]).forEach((childKey) => {
-                expandValue(object[key], childKey);
-              });
-            } else if (isCSSConfig) {
-              // eslint-disable-next-line no-param-reassign
-              object[key] = { value: object[key] };
-            }
-          };
-
-          Object.keys(theme).forEach((key) => {
-            expandValue(theme, key);
+          // populate store so JS can subscribe to those values and update styles
+          const self = this;
+          themeResArtifacts.themeModule.forEach((value, key) => {
+            self.$store.state.themeModule[key] = { ...self.$store.state.themeModule[key], ...value };
           });
-
-          const themeKey = merge(JSON.parse(JSON.stringify(selectorKey)), theme);
-
-          let css = '';
-          const buildCss = (obj, keys) => {
-            keys.forEach((key) => {
-              const isCSSConfig = !nonCSSConfig.includes(key);
-              if (isCSSConfig && (obj[key].value || obj[key].selector || obj[key].styleName)) {
-                const { selector, styleName, value } = obj[key];
-                if (!selector || !styleName) {
-                  throw new Error(`Skills Theme Error! Failed to process provided custom theme due to invalid format! Invalid custom theme defined by [${key}]. Theme is ${JSON.stringify(theme)}`);
-                } else if (value) {
-                  const sanitizedValue = value.split(';')[0]; // No injection
-                  css += `${selector} { ${styleName}: ${sanitizedValue} !important }`;
-                }
-              } else if (isCSSConfig) {
-                buildCss(themeKey[key], Object.keys(themeKey[key]));
-              } else {
-                this.$store.state.themeModule[key] = { ...this.$store.state.themeModule[key], ...themeKey[key] };
-              }
-            });
-          };
-
-          buildCss(themeKey, Object.keys(themeKey));
-
-          // Some CSS may mess up some things, fix those here
-          // Apex charts context menu
-          css += 'body #app .apexcharts-menu.open { color: black !important; }';
-          css += 'body #app .apexcharts-tooltip { color: black !important; }';
 
           const style = document.createElement('style');
 
           style.id = this.$store.state.themeStyleId;
-          style.appendChild(document.createTextNode(css));
+          style.appendChild(document.createTextNode(themeResArtifacts.css));
 
+          const { body } = document;
           body.appendChild(style);
         }
       },

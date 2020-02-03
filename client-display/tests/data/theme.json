@@ -1,8 +1,8 @@
 {
   "backgroundColor": "#626d7d",
-  "pageTitleTextColor": "white",
-  "textSecondaryColor": "white",
-  "textPrimaryColor": "white",
+  "pageTitleTextColor": "#fdfbfb",
+  "textSecondaryColor": "#fdfdff",
+  "textPrimaryColor": "#fdf9f9",
   "stars": {
     "unearnedColor": "#787886",
     "earnedColor": "gold"
@@ -14,7 +14,7 @@
     "incompleteColor": "#cdcdcd"
   },
   "charts": {
-    "axisLabelColor": "white"
+    "axisLabelColor": "#f9f1f1"
   },
   "tiles": {
     "backgroundColor": "#152E4d",

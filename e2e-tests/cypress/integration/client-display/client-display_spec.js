@@ -37,7 +37,7 @@ describe('Client Display Tests', () => {
             skillId: 'skill1',
             name: `This is 1`,
             type: 'Skill',
-            pointIncrement: 10,
+            pointIncrement: 100,
             numPerformToCompletion: 5,
             pointIncrementInterval: 0,
             numMaxOccurrencesIncrementInterval: -1,
@@ -61,6 +61,21 @@ describe('Client Display Tests', () => {
         cy.get("#app").should('have.css', 'background-color')
             .and('equal', 'rgb(98, 109, 125)');
 
+        // back button - border color
+        cy.cdClickRank();
+        // THEME: "pageTitleTextColor": "#fdfbfb",
+        cy.get('[data-cy=back]').should('have.css', 'border-color')
+            .and('equal', 'rgb(253, 251, 251)');
+        cy.get('[data-cy=back]').should('have.css', 'color')
+            .and('equal', 'rgb(253, 251, 251)');
+
+    });
+
+    it('test theming - Point History Chart has data', () => {
+        cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'user0', timestamp: new Date().getTime()})
+        cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'user0', timestamp: new Date().getTime() - 1000*60*60*24})
+
+        cy.cdVisit('/?enableTheme=true')
     });
 
     it('back button', () => {
@@ -69,8 +84,7 @@ describe('Client Display Tests', () => {
         cy.get('[data-cy=back]').should('not.exist');
 
         // to ranking page and back
-        cy.get('[data-cy=myRank]').click()
-        cy.contains('Rank Overview');
+        cy.cdClickRank();
         cy.cdBack();
 
         // to subject page and back
