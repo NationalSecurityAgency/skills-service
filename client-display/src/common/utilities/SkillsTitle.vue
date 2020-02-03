@@ -28,13 +28,4 @@
 </script>
 
 <style>
-    /*.skills-page-title-text-color button {*/
-    /*    color: white;*/
-    /*    border-color: white;*/
-    /*}*/
-    /*.skills-page-title-text-color button:hover {*/
-    /*    color: #626d7d;*/
-    /*    background-color: white;*/
-    /*    border-color: white;*/
-    /*}*/
 </style>

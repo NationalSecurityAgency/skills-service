@@ -30,4 +30,10 @@ Cypress.Commands.add("cdClickRank", () => {
     cy.contains('Rank Overview');
 });
 
+Cypress.Commands.add("cdClickBadges", () => {
+    cy.get('[data-cy=myBadges]').click()
+    cy.contains('Badges');
+});
+
+
 

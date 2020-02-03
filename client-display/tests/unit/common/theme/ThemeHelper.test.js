@@ -30,14 +30,14 @@ describe('ThemeHelper', () => {
         const expected =
             'body #app { background-color: #626d7d !important } ' +
             'body #app .skills-page-title-text-color, body #app .skills-page-title-text-color button { color: #fdfbfb !important } ' +
-            'body #app .skills-page-title-text-color button { border-color: #fdfbfb !important } ' +
+            'body #app .skills-page-title-text-color button, body #app .skills-badge .skills-badge-icon { border-color: #fdfbfb !important } ' +
             'body #app .skills-page-title-text-color button:hover { background-color: #fdfbfb !important } ' +
             'body #app .text-muted, body #app .text-secondary { color: #fdfdff !important } ' +
             'body #app .text-primary, body #app, body #app .skills-navigable-item { color: #fdf9f9 !important } ' +
             'body #app .star-empty { color: #787886 !important } ' +
             'body #app .star-filled { color: gold !important } ' +
             'body #app .card, body #app .card-header, body #app .card-body, body #app .card-footer { background-color: #152E4d !important } ' +
-            'body #app .skills-page-title-text-color button:hover { color: #152E4d !important } ' +
+            'body #app .skills-page-title-text-color button:hover, body #app .skills-no-data-yet .fa-inverse { color: #152E4d !important } ' +
             'body #app .card-body .watermark-icon { color: #a6c5f7 !important } ' +
             'body #app .graph-legend .card-header, ' +
             'body #app .graph-legend .card-body { border: 1px solid grey !important } ' +

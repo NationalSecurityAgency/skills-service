@@ -17,7 +17,7 @@ export default {
       selector: 'body #app .skills-page-title-text-color, body #app .skills-page-title-text-color button',
       styleName: 'color',
     }, {
-      selector: 'body #app .skills-page-title-text-color button',
+      selector: 'body #app .skills-page-title-text-color button, body #app .skills-badge .skills-badge-icon',
       styleName: 'border-color',
     }, {
       selector: 'body #app .skills-page-title-text-color button:hover',
@@ -44,7 +44,7 @@ export default {
         selector: 'body #app .card, body #app .card-header, body #app .card-body, body #app .card-footer',
         styleName: 'background-color',
       }, {
-        selector: 'body #app .skills-page-title-text-color button:hover',
+        selector: 'body #app .skills-page-title-text-color button:hover, body #app .skills-no-data-yet .fa-inverse',
         styleName: 'color',
       }],
       watermarkIconColor: {

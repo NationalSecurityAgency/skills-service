@@ -47,6 +47,11 @@ describe('Client Display Tests', () => {
     });
 
     it('visit home page', () => {
+        cy.request('POST', '/admin/projects/proj1/badges/badge1', {
+            projectId: 'proj1',
+            badgeId: 'badge1',
+            name: 'Badge 1'
+        });
         cy.cdVisit('/');
         cy.contains('Overall Points');
 
@@ -56,6 +61,12 @@ describe('Client Display Tests', () => {
     });
 
     it('test theming', () => {
+        cy.request('POST', '/admin/projects/proj1/badges/badge1', {
+            projectId: 'proj1',
+            badgeId: 'badge1',
+            name: 'Badge 1',
+            description: "This is a very important badge! It consist of many things, for example: \n- Very important thing #1\n-And also this important thing!\n\nAfter that there maybe even another paragraph!"
+        });
         cy.cdVisit('/?enableTheme=true')
         // hex #626d7d = rgb(98, 109, 125)
         cy.get("#app").should('have.css', 'background-color')
@@ -68,6 +79,9 @@ describe('Client Display Tests', () => {
             .and('equal', 'rgb(253, 251, 251)');
         cy.get('[data-cy=back]').should('have.css', 'color')
             .and('equal', 'rgb(253, 251, 251)');
+
+        cy.cdBack();
+        cy.cdClickBadges();
 
     });
 
