@@ -1,5 +1,17 @@
 <template>
     <div class="card mt-2">
+        <div class="card-header float-left">
+            <div class="row">
+                <div class="col">
+                    <h6 class="card-title mb-0 float-left">Skills</h6>
+                </div>
+                <div class="col text-right">
+                    <span class="text-muted pr-1">Skill Details:</span>
+                    <toggle-button class="" v-model="showDescriptionsInternal" @change="onDetailsToggle"
+                                   :labels="{ checked: 'On', unchecked: 'Off' }" data-cy="toggleSkillDetails"/>
+                </div>
+            </div>
+        </div>
         <div class="card-body">
             <skills-spinner :loading="loading"/>
             <div v-if="!loading">
@@ -18,11 +30,6 @@
                         <span v-if="helpTipHref" class="float-left text-muted">
                             Need help? <a :href="helpTipHref" target="_blank" rel="noopener">Click here!</a>
                         </span>
-                </div>
-                <div class="col text-right">
-                    <span class="text-muted pr-1">Skill details:</span>
-                    <toggle-button class="" v-model="showDescriptionsInternal" @change="onDetailsToggle"
-                                   :labels="{ checked: 'On', unchecked: 'Off' }"/>
                 </div>
             </div>
         </div>

@@ -17,7 +17,7 @@ export default {
       selector: 'body #app .skills-page-title-text-color, body #app .skills-page-title-text-color button',
       styleName: 'color',
     }, {
-      selector: 'body #app .skills-page-title-text-color button, body #app .skills-badge .skills-badge-icon',
+      selector: 'body #app .skills-page-title-text-color button, body #app .skills-badge .skills-badge-icon, body #app .skills-progress-info-card, body #app .skills-card-theme-border',
       styleName: 'border-color',
     }, {
       selector: 'body #app .skills-page-title-text-color button:hover',

@@ -1,5 +1,5 @@
 <template>
-    <div class="card">
+    <div class="card skills-card-theme-border">
         <div class="card-header">
             <h6 class="card-title mb-0 float-left">Progress</h6>
         </div>

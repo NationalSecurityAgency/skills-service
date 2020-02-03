@@ -19,7 +19,9 @@ describe('Client Display Tests', () => {
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
             projectId: 'proj1',
             subjectId: 'subj1',
-            name: 'Subject 1'
+            name: 'Subject 1',
+            helpUrl: 'http://doHelpOnThisSubject.com',
+            description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
         });
         cy.request('POST', '/admin/projects/proj1/subjects/subj2', {
             projectId: 'proj1',
@@ -41,8 +43,66 @@ describe('Client Display Tests', () => {
             numPerformToCompletion: 5,
             pointIncrementInterval: 0,
             numMaxOccurrencesIncrementInterval: -1,
-            description: 'This skill a skill!',
+            description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
             version: 0,
+            helpUrl: 'http://doHelpOnThisSkill.com'
+        });
+
+        cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill2`, {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            skillId: 'skill2',
+            name: `This is 2`,
+            type: 'Skill',
+            pointIncrement: 100,
+            numPerformToCompletion: 5,
+            pointIncrementInterval: 0,
+            numMaxOccurrencesIncrementInterval: -1,
+            description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+            version: 0,
+            helpUrl: 'http://doHelpOnThisSkill.com'
+        });
+        cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill3`, {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            skillId: 'skill3',
+            name: `This is 3`,
+            type: 'Skill',
+            pointIncrement: 100,
+            numPerformToCompletion: 2,
+            pointIncrementInterval: 0,
+            numMaxOccurrencesIncrementInterval: -1,
+            description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+            version: 0,
+            helpUrl: 'http://doHelpOnThisSkill.com'
+        });
+
+        cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill4`, {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            skillId: 'skill4',
+            name: `This is 4`,
+            type: 'Skill',
+            pointIncrement: 100,
+            numPerformToCompletion: 2,
+            pointIncrementInterval: 0,
+            numMaxOccurrencesIncrementInterval: -1,
+            description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+            version: 0,
+            helpUrl: 'http://doHelpOnThisSkill.com'
+        });
+        cy.request('POST', `/admin/projects/proj1/skills/skill4/dependency/skill2`)
+
+        cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'user0', timestamp: new Date().getTime()})
+        cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'user0', timestamp: new Date().getTime() - 1000*60*60*24})
+
+        cy.request('POST', `/api/projects/proj1/skills/skill3`, {userId: 'user0', timestamp: new Date().getTime()})
+        cy.request('POST', `/api/projects/proj1/skills/skill3`, {userId: 'user0', timestamp: new Date().getTime() - 1000*60*60*24})
+
+        cy.request('POST', '/admin/projects/proj1/badges/badge1', {
+            projectId: 'proj1',
+            badgeId: 'badge1',
+            name: 'Badge 1'
         });
     });
 
@@ -60,13 +120,17 @@ describe('Client Display Tests', () => {
             .and('equal', 'rgba(0, 0, 0, 0)');
     });
 
+    it('ability to expand skill details from subject page', () => {
+        cy.cdVisit('/')
+        cy.cdClickSubj(0);
+        cy.get('[data-cy=toggleSkillDetails]').click()
+        cy.contains('Lorem ipsum dolor sit amet')
+        // 1 skill is locked
+        cy.contains('Skill has 1 direct dependent(s).')
+
+    });
+
     it('test theming', () => {
-        cy.request('POST', '/admin/projects/proj1/badges/badge1', {
-            projectId: 'proj1',
-            badgeId: 'badge1',
-            name: 'Badge 1',
-            description: "This is a very important badge! It consist of many things, for example: \n- Very important thing #1\n-And also this important thing!\n\nAfter that there maybe even another paragraph!"
-        });
         cy.cdVisit('/?enableTheme=true')
         // hex #626d7d = rgb(98, 109, 125)
         cy.get("#app").should('have.css', 'background-color')
@@ -81,8 +145,10 @@ describe('Client Display Tests', () => {
             .and('equal', 'rgb(253, 251, 251)');
 
         cy.cdBack();
-        cy.cdClickBadges();
+        cy.cdClickSubj(0);
 
+        cy.cdBack();
+        cy.cdClickBadges();
     });
 
     it('test theming - Point History Chart has data', () => {
@@ -113,11 +179,6 @@ describe('Client Display Tests', () => {
     });
 
     it('clearly represent navigable components', () => {
-        cy.request('POST', '/admin/projects/proj1/badges/badge1', {
-            projectId: 'proj1',
-            badgeId: 'badge1',
-            name: 'Badge 1'
-        });
         cy.cdVisit('/');
 
         cy.get('[data-cy=myRank]').should('have.class', 'skills-navigable-item');
@@ -125,6 +186,34 @@ describe('Client Display Tests', () => {
         cy.get('[data-cy=subjectTile]').eq(0).should('have.class', cssAttachedToNavigableCards);
         cy.get('[data-cy=subjectTile]').eq(1).should('have.class', cssAttachedToNavigableCards);
         cy.get('[data-cy=subjectTile]').eq(2).should('have.class', cssAttachedToNavigableCards);
+
+        cy.cdClickSubj(0);
+
+        // make sure progress bars have proper css attached
+        cy.get('[data-cy=skillProgress]:nth-child(1) [data-cy=skillProgressBar]').should('have.class', cssAttachedToNavigableCards);
+        cy.get('[data-cy=skillProgress]:nth-child(2) [data-cy=skillProgressBar]').should('have.class', cssAttachedToNavigableCards);
+        cy.get('[data-cy=skillProgress]:nth-child(3) [data-cy=skillProgressBar]').should('have.class', cssAttachedToNavigableCards);
+        cy.get('[data-cy=skillProgress]:nth-child(4) [data-cy=skillProgressBar]').should('have.class', cssAttachedToNavigableCards);
+
+        // make sure it can navigate into each skill via title
+        cy.cdClickSkill(0, false);
+        cy.cdBack('Subject 1');
+        cy.cdClickSkill(1, false);
+        cy.cdBack('Subject 1');
+        cy.cdClickSkill(2, false);
+        cy.cdBack('Subject 1');
+        cy.cdClickSkill(3, false);
+        cy.cdBack('Subject 1');
+
+        // make sure it can navigate into each skill via progress bar
+        cy.cdClickSkill(0);
+        cy.cdBack('Subject 1');
+        cy.cdClickSkill(1);
+        cy.cdBack('Subject 1');
+        cy.cdClickSkill(2);
+        cy.cdBack('Subject 1');
+        cy.cdClickSkill(3);
+        cy.cdBack('Subject 1');
     });
 
     it('components should not be clickable in the summary only option', () => {
