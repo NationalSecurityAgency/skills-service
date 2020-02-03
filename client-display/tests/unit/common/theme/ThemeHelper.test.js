@@ -30,7 +30,7 @@ describe('ThemeHelper', () => {
         const expected =
             'body #app { background-color: #626d7d !important } ' +
             'body #app .skills-page-title-text-color, body #app .skills-page-title-text-color button { color: #fdfbfb !important } ' +
-            'body #app .skills-page-title-text-color button, body #app .skills-badge .skills-badge-icon { border-color: #fdfbfb !important } ' +
+            'body #app .skills-page-title-text-color button, body #app .skills-badge .skills-badge-icon, body #app .skills-progress-info-card, body #app .skills-card-theme-border { border-color: #fdfbfb !important } ' +
             'body #app .skills-page-title-text-color button:hover { background-color: #fdfbfb !important } ' +
             'body #app .text-muted, body #app .text-secondary { color: #fdfdff !important } ' +
             'body #app .text-primary, body #app, body #app .skills-navigable-item { color: #fdf9f9 !important } ' +
