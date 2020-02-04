@@ -1,11 +1,11 @@
 describe('Client Display Tests', () => {
 
     const snapshotOptions = {
-        blackout: ['[data-cy=pointHistoryChart]'],
-        failureThreshold: 0.03, // threshold for entire image
-        customDiffConfig: { threshold: 0.1 }, // threshold for each pixel
+        // blackout: ['[data-cy=pointHistoryChart]'],
+        // failureThreshold: 0.03, // threshold for entire image
+        // customDiffConfig: { threshold: 0.5 }, // threshold for each pixel
     };
-    const resolution = [1000, 2000];
+    const resolution = 'ipad-2'; // [1000, 2000];
     const sizes = [
         ['iphone-6', 'landscape'],
         'iphone-6',
@@ -148,6 +148,7 @@ describe('Client Display Tests', () => {
             name: 'proj1'
         });
         // cy.setResolution(resolution);
+        // cy.viewport(resolution);
     });
 
     it('test theming', () => {
