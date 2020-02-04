@@ -1,6 +1,8 @@
 describe('Client Display Tests', () => {
 
-    const cssAttachedToNavigableCards = 'skills-navigable-item';
+    const snapshotOptions = {
+        blackout: ['[data-cy=pointHistoryChart]'],
+    };
 
     before(() => {
         cy.disableUILogin();
@@ -21,12 +23,14 @@ describe('Client Display Tests', () => {
             subjectId: 'subj1',
             name: 'Subject 1',
             helpUrl: 'http://doHelpOnThisSubject.com',
+            iconClass: "fas fa-jedi",
             description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
         });
         cy.request('POST', '/admin/projects/proj1/subjects/subj2', {
             projectId: 'proj1',
             subjectId: 'subj2',
-            name: 'Subject 2'
+            name: 'Subject 2',
+            iconClass: "fas fa-ghost",
         });
         cy.request('POST', '/admin/projects/proj1/subjects/subj3', {
             projectId: 'proj1',
@@ -93,126 +97,102 @@ describe('Client Display Tests', () => {
         });
         cy.request('POST', `/admin/projects/proj1/skills/skill4/dependency/skill2`)
 
+        cy.request('POST', '/admin/projects/proj1/badges/badge1', {
+            projectId: 'proj1',
+            badgeId: 'badge1',
+            name: 'Badge 1',
+            "iconClass":"fas fa-ghost",
+            description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+        });
+
+        cy.request('POST', '/admin/projects/proj1/badges/badge2', {
+            projectId: 'proj1',
+            badgeId: 'badge2',
+            name: 'Badge 2',
+            "iconClass":"fas fa-monument",
+            description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+        });
+
+        cy.request('POST', '/admin/projects/proj1/badges/badge3', {
+            projectId: 'proj1',
+            badgeId: 'badge3',
+            name: 'Badge 3',
+            "iconClass":"fas fa-jedi",
+            description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+        });
+
+        cy.request('POST', '/admin/projects/proj1/badge/badge1/skills/skill1')
+        cy.request('POST', '/admin/projects/proj1/badge/badge1/skills/skill2')
+        cy.request('POST', '/admin/projects/proj1/badge/badge1/skills/skill3')
+
+        cy.request('POST', '/admin/projects/proj1/badge/badge2/skills/skill3')
+
         cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'user0', timestamp: new Date().getTime()})
         cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'user0', timestamp: new Date().getTime() - 1000*60*60*24})
 
         cy.request('POST', `/api/projects/proj1/skills/skill3`, {userId: 'user0', timestamp: new Date().getTime()})
         cy.request('POST', `/api/projects/proj1/skills/skill3`, {userId: 'user0', timestamp: new Date().getTime() - 1000*60*60*24})
-
-        cy.request('POST', '/admin/projects/proj1/badges/badge1', {
-            projectId: 'proj1',
-            badgeId: 'badge1',
-            name: 'Badge 1'
-        });
     });
 
-    it.only('visit home page', () => {
-        cy.request('POST', '/admin/projects/proj1/badges/badge1', {
-            projectId: 'proj1',
-            badgeId: 'badge1',
-            name: 'Badge 1'
-        });
-        cy.cdVisit('/');
-        cy.contains('Overall Points');
 
-        // some basic default theme validation
+    it.only('test theming', () => {
+        cy.cdVisit('/?enableTheme=true')
+        // hex #626d7d = rgb(98, 109, 125)
         cy.get("#app").should('have.css', 'background-color')
-            .and('equal', 'rgba(0, 0, 0, 0)');
-    });
+            .and('equal', 'rgb(98, 109, 125)');
 
-    it('ability to expand skill details from subject page', () => {
-        cy.cdVisit('/')
+        cy.get('[data-cy=pointHistoryChart]')
+
+        cy.matchImageSnapshot('Project-Overview', snapshotOptions);
+
+        // back button - border color
+        cy.cdClickRank();
+        // THEME: "pageTitleTextColor": "#fdfbfb",
+        cy.get('[data-cy=back]').should('have.css', 'border-color')
+            .and('equal', 'rgb(253, 251, 251)');
+        cy.get('[data-cy=back]').should('have.css', 'color')
+            .and('equal', 'rgb(253, 251, 251)');
+
+        // wait for the bar (on the bar chart) to render
+        cy.wait(1000);
+        cy.contains('You are Level 2!');
+        cy.matchImageSnapshot('Project-Rank', snapshotOptions);
+
+        cy.cdBack();
+        cy.cdClickBadges();
+        cy.matchImageSnapshot('Badges', snapshotOptions);
+
+        cy.contains('View Details').click()
+        cy.matchImageSnapshot('Badge-Details', snapshotOptions);
+
+        cy.cdBack('Badges');
+        cy.cdBack();
         cy.cdClickSubj(0);
+        cy.contains('Subject 1')
+        cy.matchImageSnapshot('Subject0-Overview', snapshotOptions);
+
         cy.get('[data-cy=toggleSkillDetails]').click()
         cy.contains('Lorem ipsum dolor sit amet')
-        // 1 skill is locked
-        cy.contains('Skill has 1 direct dependent(s).')
+        cy.matchImageSnapshot('Subject0-Overview-WithSkillDetails', snapshotOptions);
 
-    });
-
-    it('back button', () => {
-        cy.cdVisit('/');
-        cy.contains('User Skills');
-        cy.get('[data-cy=back]').should('not.exist');
-
-        // to ranking page and back
-        cy.cdClickRank();
-        cy.cdBack();
-
-        // to subject page and back
-        cy.cdClickSubj(1, 'Subject 2');
-        cy.cdBack();
-
-        // to subject page (2nd subject card), then to skill page, back, back to home page
-        cy.cdClickSubj(0, 'Subject 1');
         cy.cdClickSkill(0);
-        cy.cdBack('Subject 1');
-        cy.cdBack();
-    });
+        cy.contains('Skill Overview')
+        cy.matchImageSnapshot('Subject0-Skill0-Details', snapshotOptions);
 
-    it('clearly represent navigable components', () => {
-        cy.cdVisit('/');
-
-        cy.get('[data-cy=myRank]').should('have.class', 'skills-navigable-item');
-        cy.get('[data-cy=myBadges]').should('have.class', 'skills-navigable-item');
-        cy.get('[data-cy=subjectTile]').eq(0).should('have.class', cssAttachedToNavigableCards);
-        cy.get('[data-cy=subjectTile]').eq(1).should('have.class', cssAttachedToNavigableCards);
-        cy.get('[data-cy=subjectTile]').eq(2).should('have.class', cssAttachedToNavigableCards);
-
-        cy.cdClickSubj(0);
-
-        // make sure progress bars have proper css attached
-        cy.get('[data-cy=skillProgress]:nth-child(1) [data-cy=skillProgressBar]').should('have.class', cssAttachedToNavigableCards);
-        cy.get('[data-cy=skillProgress]:nth-child(2) [data-cy=skillProgressBar]').should('have.class', cssAttachedToNavigableCards);
-        cy.get('[data-cy=skillProgress]:nth-child(3) [data-cy=skillProgressBar]').should('have.class', cssAttachedToNavigableCards);
-        cy.get('[data-cy=skillProgress]:nth-child(4) [data-cy=skillProgressBar]').should('have.class', cssAttachedToNavigableCards);
-
-        // make sure it can navigate into each skill via title
-        cy.cdClickSkill(0, false);
-        cy.cdBack('Subject 1');
-        cy.cdClickSkill(1, false);
-        cy.cdBack('Subject 1');
-        cy.cdClickSkill(2, false);
-        cy.cdBack('Subject 1');
-        cy.cdClickSkill(3, false);
-        cy.cdBack('Subject 1');
-
-        // make sure it can navigate into each skill via progress bar
-        cy.cdClickSkill(0);
-        cy.cdBack('Subject 1');
-        cy.cdClickSkill(1);
-        cy.cdBack('Subject 1');
-        cy.cdClickSkill(2);
         cy.cdBack('Subject 1');
         cy.cdClickSkill(3);
-        cy.cdBack('Subject 1');
+        cy.contains('Skill Overview')
+        cy.matchImageSnapshot('Subject0-Skill3-Details', snapshotOptions);
+
     });
 
-    it('components should not be clickable in the summary only option', () => {
-        cy.request('POST', '/admin/projects/proj1/badges/badge1', {
-            projectId: 'proj1',
-            badgeId: 'badge1',
-            name: 'Badge 1'
-        });
-        cy.cdVisit('/?isSummaryOnly=true');
+    it('test theming - Point History Chart has data', () => {
+        cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'user0', timestamp: new Date().getTime()})
+        cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'user0', timestamp: new Date().getTime() - 1000*60*60*24})
 
-        cy.get('[data-cy=myRank]').contains("1")
-        cy.get('[data-cy=myBadges]').contains("0 Badges")
-
-        // make sure click doesn't take us anywhere
-        cy.get('[data-cy=myRank]').click()
-        cy.contains("User Skills")
-
-        cy.get('[data-cy=myBadges]').click()
-        cy.contains("User Skills")
-
-        // make sure css is not attached
-        cy.get('[data-cy=myRank]').should('not.have.class', cssAttachedToNavigableCards);
-        cy.get('[data-cy=myBadges]').should('not.have.class', cssAttachedToNavigableCards);
-
-        // summaries should not be displayed at all
-        cy.get('[data-cy=subjectTile]').should('not.exist');
+        cy.cdVisit('/?enableTheme=true')
     });
+
+
 
 });
-
