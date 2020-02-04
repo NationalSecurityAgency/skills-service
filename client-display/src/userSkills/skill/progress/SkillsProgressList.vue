@@ -5,7 +5,7 @@
                 <div class="col">
                     <h6 class="card-title mb-0 float-left">Skills</h6>
                 </div>
-                <div class="col text-right">
+                <div class="col text-right" v-if="skillsInternal && skillsInternal.length > 0">
                     <span class="text-muted pr-1">Skill Details:</span>
                     <toggle-button class="" v-model="showDescriptionsInternal" @change="onDetailsToggle"
                                    :labels="{ checked: 'On', unchecked: 'Off' }" data-cy="toggleSkillDetails"/>

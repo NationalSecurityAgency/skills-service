@@ -1,32 +1,32 @@
 stages:
-  - build
+#  - build
   - installCypress
   - testCypress
   - pushToNexus
   - deploy
 
-build:
-  except:
-    variables:
-      - $TYPE == "postgrestest"
-  image: maven:3.6.0-jdk-11
-  stage: build
-  before_script:
-    - cat /etc/os-release
-    # Need to install make/g++ so node v13 can be built
-    - apt-get update
-    - apt-get install -y build-essential
-  script:
-    - echo "@skills:registry=http://$NEXUS_SERVER/repository/skills-registry/" > ~/.npmrc
-    - cat ~/.npmrc
-    - echo "<settings><mirrors><mirror><id>central</id><name>central</name><url>http://$NEXUS_SERVER/repository/maven-public/</url><mirrorOf>*</mirrorOf></mirror></mirrors></settings>" > ~/.m2/settings.xml
-    - cat ~/.m2/settings.xml
-    - mvn --batch-mode install
-  artifacts:
-    paths:
-      - backend/pom.xml
-      - backend/target/backend-*.jar
-      - backend/target/skills-service-tests.log
+#build:
+#  except:
+#    variables:
+#      - $TYPE == "postgrestest"
+#  image: maven:3.6.0-jdk-11
+#  stage: build
+#  before_script:
+#    - cat /etc/os-release
+#    # Need to install make/g++ so node v13 can be built
+#    - apt-get update
+#    - apt-get install -y build-essential
+#  script:
+#    - echo "@skills:registry=http://$NEXUS_SERVER/repository/skills-registry/" > ~/.npmrc
+#    - cat ~/.npmrc
+#    - echo "<settings><mirrors><mirror><id>central</id><name>central</name><url>http://$NEXUS_SERVER/repository/maven-public/</url><mirrorOf>*</mirrorOf></mirror></mirrors></settings>" > ~/.m2/settings.xml
+#    - cat ~/.m2/settings.xml
+#    - mvn --batch-mode install
+#  artifacts:
+#    paths:
+#      - backend/pom.xml
+#      - backend/target/backend-*.jar
+#      - backend/target/skills-service-tests.log
 
 postgres-test:on-schedule:
   only:
