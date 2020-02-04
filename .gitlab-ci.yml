@@ -94,13 +94,13 @@ cypress_test:
     - cat /etc/os-release
     - uname -a
     # install packaged fonts
+    - yum install -y fontconfig
     - cp -r e2e-tests/cypress/fonts/* /usr/share/fonts/
     - fc-cache -fv
     - fc-list | wc
     - fc-list
 #    - yum install -y gtk2.x86_64
     - yum update -y
-    - yum install -y fontconfig
     - yum install -y gtk3
     - yum install -y libnotify-devel
     - yum install -y GConf2
