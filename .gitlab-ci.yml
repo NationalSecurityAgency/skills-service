@@ -91,15 +91,16 @@ cypress_test:
   image: amazonlinux:2
   stage: testCypress
   before_script:
-    - yum install -y fontconfig
+    - cat /etc/os-release
+    - uname -a
+    # install packaged fonts
     - cp -r e2e-tests/cypress/fonts/* /usr/share/fonts/
     - fc-cache -fv
     - fc-list | wc
     - fc-list
-    - cat /etc/os-release
-    - uname -a
 #    - yum install -y gtk2.x86_64
     - yum update -y
+    - yum install -y fontconfig
     - yum install -y gtk3
     - yum install -y libnotify-devel
     - yum install -y GConf2
@@ -118,11 +119,9 @@ cypress_test:
     - npm -v
     - echo "@skills:registry=http://$NEXUS_SERVER/repository/skills-registry/" > ~/.npmrc
     - cat ~/.npmrc
-    - cat /etc/os-release
-    - uname -a
   script:
-    - cd e2e-tests
     # start the server in the background
+    - cd e2e-tests
     - npm run backend:start:ci &
     - cd ../client-display
     - npm install
