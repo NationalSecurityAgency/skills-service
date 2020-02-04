@@ -7,5 +7,6 @@ enum ErrorCode {
     UserAlreadyExists,
     ConstraintViolation,
     BadParam,
-    AccessDenied
+    AccessDenied,
+    UserNotFound
 }

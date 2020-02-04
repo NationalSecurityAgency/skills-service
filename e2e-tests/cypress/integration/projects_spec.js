@@ -200,5 +200,35 @@ describe('Projects Tests', () => {
     cy.contains('ID: aaaaa')
   })
 
+  it('Add Admin - User Not Found', () => {
+    cy.request('POST', '/app/projects/proj1', {
+      projectId: 'proj1',
+      name: "proj1"
+    });
+
+    cy.route({
+      method: 'PUT',
+      url: '/admin/projects/proj1/users/foo/roles/ROLE_PROJECT_ADMIN',
+      status: 400,
+      response: {errorCode: 'UserNotFound', explanation: 'User was not found'}
+    }).as('addAdmin');
+
+    cy.route({
+      method: 'GET',
+      url: '/app/users/suggest*/*',
+      status: 200,
+      response: [{userId:'foo', userIdForDisplay: 'foo', first: 'foo', last: 'foo', dn: 'foo'}]
+    }).as('suggest');
+
+    cy.visit('/projects/proj1/access');
+
+    cy.contains('Enter user id').type('foo');
+    cy.wait('@suggest');
+    cy.get('.multiselect__input').type('{enter}');
+    cy.clickButton('Add');
+    cy.wait('@addAdmin');
+    cy.get('.alert-danger').contains('User was not found');
+  });
+
 
 });

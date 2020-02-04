@@ -82,10 +82,10 @@ export default {
   },
   assignDependency(projectId, skillId, dependentSkillId, dependentProjectId) {
     if (dependentProjectId) {
-      return axios.post(`/admin/projects/${projectId}/skills/${skillId}/dependency/projects/${dependentProjectId}/skills/${dependentSkillId}`, null, { handleError: false })
+      return axios.post(`/admin/projects/${projectId}/skills/${skillId}/dependency/projects/${dependentProjectId}/skills/${dependentSkillId}`, null, { headers: {'x-handleError': false }})
         .then(createdRuleResult => createdRuleResult.data);
     }
-    return axios.post(`/admin/projects/${projectId}/skills/${skillId}/dependency/${dependentSkillId}`, null, { handleError: false })
+    return axios.post(`/admin/projects/${projectId}/skills/${skillId}/dependency/${dependentSkillId}`, null, { headers: {'x-handleError': false }})
       .then(createdRuleResult => createdRuleResult.data);
   },
   removeDependency(projectId, skillId, dependentSkillId, dependentProjectId) {
