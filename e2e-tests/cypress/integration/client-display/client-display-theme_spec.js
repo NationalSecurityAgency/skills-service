@@ -5,7 +5,14 @@ describe('Client Display Tests', () => {
         failureThreshold: 0.03, // threshold for entire image
         customDiffConfig: { threshold: 0.1 }, // threshold for each pixel
     };
-    const resolution = [1200, 1080];
+    const resolution = [1000, 2000];
+    const sizes = [
+        ['iphone-6', 'landscape'],
+        'iphone-6',
+        'ipad-2',
+        ['ipad-2', 'landscape'],
+        [1200, 1080],
+    ];
 
     before(() => {
         cy.disableUILogin();
@@ -153,6 +160,7 @@ describe('Client Display Tests', () => {
 
         cy.get('[data-cy=pointHistoryChart]')
 
+        cy.wait(1000);
         cy.matchImageSnapshot('Project-Overview', snapshotOptions);
 
         // back button - border color
@@ -170,35 +178,45 @@ describe('Client Display Tests', () => {
 
         cy.cdBack();
         cy.cdClickBadges();
+        cy.wait(1000);
         cy.matchImageSnapshot('Badges', snapshotOptions);
 
         cy.contains('View Details').click()
+        cy.wait(1000);
         cy.matchImageSnapshot('Badge-Details', snapshotOptions);
 
         cy.cdBack('Badges');
         cy.cdBack();
         cy.cdClickSubj(0);
         cy.contains('Subject 1')
+        cy.wait(1000);
         cy.matchImageSnapshot('Subject0-Overview', snapshotOptions);
 
         cy.get('[data-cy=toggleSkillDetails]').click()
         cy.contains('Lorem ipsum dolor sit amet')
+        cy.wait(1000);
         cy.matchImageSnapshot('Subject0-Overview-WithSkillDetails', snapshotOptions);
 
         cy.cdClickSkill(0);
         cy.contains('Skill Overview')
+        cy.wait(1000);
         cy.matchImageSnapshot('Subject0-Skill0-Details', snapshotOptions);
 
         cy.cdBack('Subject 1');
         cy.cdClickSkill(3);
         cy.contains('Skill Overview')
+        cy.wait(1000);
         cy.matchImageSnapshot('Subject0-Skill3-Details', snapshotOptions);
 
     });
 
+    // sizes.forEach((size) => {
+    //
+    // };
     it('test theming - No Subjects', () => {
         cy.cdVisit('/?enableTheme=true')
         cy.contains('User Skills');
+        cy.wait(1000);
         cy.matchImageSnapshot('Project-Overview-No_Subjects', snapshotOptions);
     });
 
@@ -219,6 +237,7 @@ describe('Client Display Tests', () => {
         cy.cdClickSubj(0);
         cy.contains('Subject 1');
         cy.contains('Skills have not been added yet.')
+        cy.wait(1000);
         cy.matchImageSnapshot('Project-Overview-Empty_Subject', snapshotOptions);
     });
 
