@@ -211,15 +211,17 @@ describe('Client Display Tests', () => {
 
     });
 
-    // sizes.forEach((size) => {
-    //
-    // };
-    it('test theming - No Subjects', () => {
-        cy.cdVisit('/?enableTheme=true')
-        cy.contains('User Skills');
-        cy.wait(1000);
-        cy.matchImageSnapshot('Project-Overview-No_Subjects', snapshotOptions);
+    sizes.forEach((size) => {
+        it(`test theming - No Subjects - ${size}`, () => {
+            cy.setResolution(size);
+
+            cy.cdVisit('/?enableTheme=true')
+            cy.contains('User Skills');
+            cy.wait(1000);
+            cy.matchImageSnapshot(`Project-Overview-No_Subjects_${size}`, snapshotOptions);
+        });
     });
+
 
     it('test theming - Empty Subject', () => {
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
