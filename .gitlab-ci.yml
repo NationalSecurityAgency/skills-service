@@ -93,7 +93,7 @@ cypress_test:
   before_script:
     - yum install -y gcc-c++ make
     - curl -sL https://rpm.nodesource.com/setup_13.x | sudo -E bash -
-    - sudo yum install -y nodejs
+    - yum install -y nodejs
     - node -v
     - npm -v
     - echo "@skills:registry=http://$NEXUS_SERVER/repository/skills-registry/" > ~/.npmrc
