@@ -91,6 +91,7 @@ cypress_test:
   image: amazonlinux:2
   stage: testCypress
   before_script:
+    - amazon-linux-extras install -y java-openjdk11
     - java --version
     - yum install -y gcc-c++ make
     - curl -sL https://rpm.nodesource.com/setup_13.x | bash -
