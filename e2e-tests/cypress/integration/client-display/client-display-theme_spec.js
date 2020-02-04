@@ -2,7 +2,10 @@ describe('Client Display Tests', () => {
 
     const snapshotOptions = {
         blackout: ['[data-cy=pointHistoryChart]'],
+        failureThreshold: 0.03, // threshold for entire image
+        customDiffConfig: { threshold: 0.1 }, // threshold for each pixel
     };
+    const resolution = [1200, 1080];
 
     before(() => {
         cy.disableUILogin();
@@ -137,6 +140,7 @@ describe('Client Display Tests', () => {
             projectId: 'proj1',
             name: 'proj1'
         });
+        cy.setResolution(resolution);
     });
 
     it('test theming', () => {
