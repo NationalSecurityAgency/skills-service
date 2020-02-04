@@ -96,6 +96,7 @@ cypress_test:
     - yum install -y GConf2.x86_64
 #    - yum install -y libnss3
 #    - yum install -y libxss1
+    - yum install -y nss.x86_64
 #    - yum install -y libasound2
     - yum install -y xorg-x11-server-Xvfb.x86_64
     - amazon-linux-extras install -y java-openjdk11
@@ -115,7 +116,7 @@ cypress_test:
 #    - npm install
 #    - npm run serve &
 #    - cd ../e2e-tests
-#    - npm install
+    - npm install
 #    - npm run backend:waitToStart
 #    - npx wait-on -t 40000 http://localhost:8083
     # run tests
