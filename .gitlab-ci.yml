@@ -1,90 +1,52 @@
 stages:
-#  - build
-#  - installCypress
+  - build
   - testCypress
   - pushToNexus
   - deploy
 
-#build:
-#  except:
-#    variables:
-#      - $TYPE == "postgrestest"
-#  image: maven:3.6.0-jdk-11
-#  stage: build
-#  before_script:
-#    - cat /etc/os-release
-#    # Need to install make/g++ so node v13 can be built
-#    - apt-get update
-#    - apt-get install -y build-essential
-#  script:
-#    - echo "@skills:registry=http://$NEXUS_SERVER/repository/skills-registry/" > ~/.npmrc
-#    - cat ~/.npmrc
-#    - echo "<settings><mirrors><mirror><id>central</id><name>central</name><url>http://$NEXUS_SERVER/repository/maven-public/</url><mirrorOf>*</mirrorOf></mirror></mirrors></settings>" > ~/.m2/settings.xml
-#    - cat ~/.m2/settings.xml
-#    - mvn --batch-mode install
-#  artifacts:
-#    paths:
-#      - backend/pom.xml
-#      - backend/target/backend-*.jar
-#      - backend/target/skills-service-tests.log
-#
-#postgres-test:on-schedule:
-#  only:
-#    variables:
-#      - $TYPE == "postgrestest"
-#  image: maven:3.6.0-jdk-11
-#  stage: build
-#  services:
-#    - postgres:latest
-#  variables:
-#    POSTGRES_PASSWORD: skillsPassword
-#    POSTGRES_DB: skills
-#  script:
-#    - echo "@skills:registry=http://$NEXUS_SERVER/repository/skills-registry/" > ~/.npmrc
-#    - cat ~/.npmrc
-#    - echo "<settings><mirrors><mirror><id>central</id><name>central</name><url>http://$NEXUS_SERVER/repository/maven-public/</url><mirrorOf>*</mirrorOf></mirror></mirrors></settings>" > ~/.m2/settings.xml
-#    - cat ~/.m2/settings.xml
-#    - mvn --batch-mode test -Dspring.datasource.url=jdbc:postgresql://postgres:5432/skills -Dspring.datasource.username=postgres -Dspring.datasource.password=skillsPassword
-#  artifacts:
-#    paths:
-#      - backend/target/skills-service-tests.log
+build:
+  except:
+    variables:
+      - $TYPE == "postgrestest"
+  image: maven:3.6.0-jdk-11
+  stage: build
+  before_script:
+    - cat /etc/os-release
+    # Need to install make/g++ so node v13 can be built
+    - apt-get update
+    - apt-get install -y build-essential
+  script:
+    - echo "@skills:registry=http://$NEXUS_SERVER/repository/skills-registry/" > ~/.npmrc
+    - cat ~/.npmrc
+    - echo "<settings><mirrors><mirror><id>central</id><name>central</name><url>http://$NEXUS_SERVER/repository/maven-public/</url><mirrorOf>*</mirrorOf></mirror></mirrors></settings>" > ~/.m2/settings.xml
+    - cat ~/.m2/settings.xml
+    - mvn --batch-mode install
+  artifacts:
+    paths:
+      - backend/pom.xml
+      - backend/target/backend-*.jar
+      - backend/target/skills-service-tests.log
 
-##################################################################
-# CYPRESS TESTS
-# use cache and 2 steps to eventually support concurrent and distributed runs via gitlab
-# for more examples see cypress example of ci via gitlab
-#################################################################
-# to cache both npm modules and Cypress binary we use environment variables
-# to point at the folders we can list as paths in "cache" job settings
-#variables:
-#  npm_config_cache: "$CI_PROJECT_DIR/.npm"
-#  CYPRESS_CACHE_FOLDER: "$CI_PROJECT_DIR/cache/Cypress"
-
-# cache using branch name
-# https://gitlab.com/help/ci/caching/index.md
-#cache:
-#  key: ${CI_COMMIT_REF_SLUG}
-#  paths:
-#    - .npm
-#    - cache/Cypress
-#    - e2e-tests/node_modules
-## this job installs NPM dependencies and Cypress
-#installCypress:
-#  image: cypress/base:10
-#  stage: installCypress
-#
-#  script:
-#    - echo "@skills:registry=http://$NEXUS_SERVER/repository/skills-registry/" > ~/.npmrc
-#    - cat ~/.npmrc
-#    - cd e2e-tests
-#    - npm install
-#    # check Cypress binary path and cached versions
-#    # useful to make sure we are not carrying around old versions
-#    - npx cypress cache path
-#    - npx cypress cache list
-#    - npx print-env CI
-#    - npm run cy:verify
-
+postgres-test:on-schedule:
+  only:
+    variables:
+      - $TYPE == "postgrestest"
+  image: maven:3.6.0-jdk-11
+  stage: build
+  services:
+    - postgres:latest
+  variables:
+    POSTGRES_PASSWORD: skillsPassword
+    POSTGRES_DB: skills
+  script:
+    - echo "@skills:registry=http://$NEXUS_SERVER/repository/skills-registry/" > ~/.npmrc
+    - cat ~/.npmrc
+    - echo "<settings><mirrors><mirror><id>central</id><name>central</name><url>http://$NEXUS_SERVER/repository/maven-public/</url><mirrorOf>*</mirrorOf></mirror></mirrors></settings>" > ~/.m2/settings.xml
+    - cat ~/.m2/settings.xml
+    - mvn --batch-mode test -Dspring.datasource.url=jdbc:postgresql://postgres:5432/skills -Dspring.datasource.username=postgres -Dspring.datasource.password=skillsPassword
+  artifacts:
+    paths:
+      - backend/target/skills-service-tests.log
 
 # all jobs that actually run tests can use the same definition
 cypress_test:
