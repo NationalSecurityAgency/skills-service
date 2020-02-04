@@ -2,6 +2,7 @@ describe('Client Display Tests', () => {
 
     const snapshotOptions = {
         blackout: ['[data-cy=pointHistoryChart]'],
+        customDiffConfig: { threshold: 0.2 }, // threshold for each pixel
     };
 
     before(() => {
@@ -195,7 +196,7 @@ describe('Client Display Tests', () => {
     it('test theming - No Subjects', () => {
         cy.cdVisit('/?enableTheme=true')
         cy.contains('User Skills');
-        cy.matchImageSnapshot('Project-Overview-No_Subjects');
+        cy.matchImageSnapshot('Project-Overview-No_Subjects', snapshotOptions);
     });
 
     it('test theming - Empty Subject', () => {
@@ -215,7 +216,7 @@ describe('Client Display Tests', () => {
         cy.cdClickSubj(0);
         cy.contains('Subject 1');
         cy.contains('Skills have not been added yet.')
-        cy.matchImageSnapshot('Project-Overview-Empty_Subject');
+        cy.matchImageSnapshot('Project-Overview-Empty_Subject', snapshotOptions);
     });
 
 
