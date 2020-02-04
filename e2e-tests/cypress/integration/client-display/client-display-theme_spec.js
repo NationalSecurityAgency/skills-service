@@ -147,7 +147,7 @@ describe('Client Display Tests', () => {
             projectId: 'proj1',
             name: 'proj1'
         });
-        cy.setResolution(resolution);
+        // cy.setResolution(resolution);
     });
 
     it('test theming', () => {
