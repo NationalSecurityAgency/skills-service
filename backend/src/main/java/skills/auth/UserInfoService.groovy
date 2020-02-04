@@ -69,17 +69,22 @@ class UserInfoService {
             UserInfo userInfo
             try {
                 userInfo = pkiUserLookup.lookupUserDn(userIdParam)
-                userAuthService.createOrUpdateUser(userInfo)
             } catch (Throwable e) {
-                if (e instanceof RestClientException){
-                    SkillException ske = new SkillException(e.getCause().getMessage())
-                    ske.errorCode = ErrorCode.UserNotFound
-                    throw ske
-                }
-                throw new SkillException("Failed to retrieve user info via [$userIdParam]")
+                log.error("user-info-service lookup failed")
+                SkillException ske = new SkillException(e.getCause().getMessage())
+                ske.errorCode = ErrorCode.UserNotFound
+                throw ske
             }
             if (!userInfo) {
+                log.error("received empty user information from lookup")
                 throw new SkillException("User Info Service does not know about user with provided lookup id of [${userIdParam}]")
+            }
+
+            try {
+                userAuthService.createOrUpdateUser(userInfo)
+            } catch(Throwable e) {
+                log.error("error during createOrUpdateUser", e);
+                throw new SkillException("Failed to retrieve user info via [$userIdParam]")
             }
 
             userNameRes = userInfo.username
