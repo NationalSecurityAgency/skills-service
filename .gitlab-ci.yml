@@ -92,6 +92,8 @@ cypress_test:
   stage: testCypress
   before_script:
     - yum install -y fontconfig
+    - cp -r e2e-tests/cypress/fonts/* /usr/share/fonts/
+    - fc-cache -fv
     - fc-list | wc
     - fc-list
     - cat /etc/os-release
