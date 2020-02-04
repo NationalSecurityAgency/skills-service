@@ -20,7 +20,7 @@ export default {
       userId = userKey;
     }
     if (projectId) {
-      return axios.put(`/admin/projects/${projectId}/users/${userKey}/roles/${roleName}`, null, { headers:{'x-handleError': false }})
+      return axios.put(`/admin/projects/${projectId}/users/${userKey}/roles/${roleName}`, null, { headers: { 'x-handleError': false } })
         .then(() => axios.get(`/admin/projects/${projectId}/users/${userId}/roles`)
           .then(response => response.data.find(element => element.roleName === roleName)));
     }

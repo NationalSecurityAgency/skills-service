@@ -146,9 +146,6 @@
             this.userAdded(userInfo);
           }).catch((e) => {
             if (e.response.data && e.response.data.errorCode && e.response.data.errorCode === 'UserNotFound') {
-              console.log(e.response.data);
-              console.log('show mesage not errorpage');
-              console.log(this.errNotification);
               this.errNotification.msg = e.response.data.explanation;
               this.errNotification.enable = true;
             } else {
