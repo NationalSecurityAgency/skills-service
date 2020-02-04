@@ -230,5 +230,35 @@ describe('Projects Tests', () => {
     cy.get('.alert-danger').contains('User was not found');
   });
 
+  it('Add Admin - InternalError', () => {
+    cy.request('POST', '/app/projects/proj1', {
+      projectId: 'proj1',
+      name: "proj1"
+    });
+
+    cy.route({
+      method: 'PUT',
+      url: '/admin/projects/proj1/users/foo/roles/ROLE_PROJECT_ADMIN',
+      status: 400,
+      response: {errorCode: 'InternalError', explanation: 'Some Error Occurred'}
+    }).as('addAdmin');
+
+    cy.route({
+      method: 'GET',
+      url: '/app/users/suggest*/*',
+      status: 200,
+      response: [{userId:'foo', userIdForDisplay: 'foo', first: 'foo', last: 'foo', dn: 'foo'}]
+    }).as('suggest');
+
+    cy.visit('/projects/proj1/access');
+
+    cy.contains('Enter user id').type('foo');
+    cy.wait('@suggest');
+    cy.get('.multiselect__input').type('{enter}');
+    cy.clickButton('Add');
+    cy.wait('@addAdmin');
+    cy.get('h4').contains('Tiny-bit of an error!');
+  });
+
 
 });

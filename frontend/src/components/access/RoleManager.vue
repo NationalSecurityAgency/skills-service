@@ -152,7 +152,8 @@
               this.errNotification.msg = e.response.data.explanation;
               this.errNotification.enable = true;
             } else {
-              throw e;
+              const errorMessage = (e.response && e.response.data && e.response.data.message) ? e.response.data.message : undefined;
+              this.$router.push({ name: 'ErrorPage', query: { errorMessage } });
             }
           })
           .finally(() => {
