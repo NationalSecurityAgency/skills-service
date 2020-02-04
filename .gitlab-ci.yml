@@ -91,7 +91,8 @@ cypress_test:
   image: amazonlinux:2
   stage: testCypress
   before_script:
-    - yum install -y gtk2.x86_64
+#    - yum install -y gtk2.x86_64
+    - yum install -y gtk3.x86_64
     - yum install -y libnotify-devel.x86_64
     - yum install -y GConf2.x86_64
 #    - yum install -y libnss3
