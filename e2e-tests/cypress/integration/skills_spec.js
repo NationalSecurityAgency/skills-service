@@ -87,4 +87,71 @@ describe('Skills Tests', () => {
 
     });
 
+    it('Add Skill Event User Not Found', () => {
+       cy.server();
+       cy.route({
+           method: 'PUT',
+           url: '/api/projects/*/skills/*',
+           status: 200,
+           response: {skillApplied: false, explanation: 'User was not found'}
+       }).as('addUser');
+
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1', {
+            projectId: 'proj1',
+            subjectId: "subj1",
+            skillId: "skill1",
+            name: "Skill 1",
+            pointIncrement: '50',
+            numPerformToCompletion: '5'
+        });
+
+        cy.visit('/projects/proj1/subjects/subj1/skills/skill1');
+        cy.contains('Add Event').click();
+
+        cy.contains('Enter user id').type('foo{enter}');
+
+        cy.clickButton('Add');
+        cy.wait('@addUser');
+        cy.get('.text-danger', {timeout: 5*1000}).contains("Wasn't able to add points for");
+    });
+
+    it('Add Dependency failure', () => {
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1', {
+            projectId: 'proj1',
+            subjectId: "subj1",
+            skillId: "skill1",
+            name: "Skill 1",
+            pointIncrement: '50',
+            numPerformToCompletion: '5'
+        });
+
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill2', {
+            projectId: 'proj1',
+            subjectId: "subj1",
+            skillId: "skill2",
+            name: "Skill 2",
+            pointIncrement: '50',
+            numPerformToCompletion: '5'
+        });
+
+        cy.server();
+
+        cy.route({
+            method: 'POST',
+            status: 400,
+            url: '/admin/projects/proj1/skills/skill1/dependency/*',
+            response: {errorCode: 'FailedToAssignDependency', explanation: 'Error Adding Dependency'}
+        });
+
+        cy.visit('/projects/proj1/subjects/subj1/skills/skill1');
+
+        cy.get('div#menu-collapse-control li').contains('Dependencies').click();
+
+        cy.get('.multiselect__tags').click();
+        cy.get('.multiselect__tags input').type('{enter}')
+
+        cy.get('div .alert').contains('Error! Request could not be completed! Error Adding Dependency');
+
+    })
+
 })

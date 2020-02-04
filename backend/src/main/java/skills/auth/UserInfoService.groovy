@@ -7,7 +7,9 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.web.client.RestClientException
 import skills.auth.pki.PkiUserLookup
+import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.services.UserAttrsService
 import skills.utils.RetryUtil
@@ -69,6 +71,11 @@ class UserInfoService {
                 userInfo = pkiUserLookup.lookupUserDn(userIdParam)
                 userAuthService.createOrUpdateUser(userInfo)
             } catch (Throwable e) {
+                if (e instanceof RestClientException){
+                    SkillException ske = new SkillException(e.getCause().getMessage())
+                    ske.errorCode = ErrorCode.UserNotFound
+                    throw ske
+                }
                 throw new SkillException("Failed to retrieve user info via [$userIdParam]")
             }
             if (!userInfo) {

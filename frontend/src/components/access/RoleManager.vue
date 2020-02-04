@@ -13,6 +13,11 @@
       </div>
     </div>
 
+    <b-alert v-if="errNotification.enable" variant="danger" class="mt-2" show dismissible>
+      <i class="fa fa-exclamation-circle mr-1"></i> <strong>Error!</strong> Request could not be completed! <strong>{{
+      errNotification.msg }}</strong>
+    </b-alert>
+
     <loading-container v-bind:is-loading="isLoading">
       <transition name="userRolesContainer" enter-active-class="animated fadeIn">
         <v-client-table :data="data" :columns="columns" :options="options">
@@ -79,6 +84,10 @@
         columns: ['userId', 'edit'],
         selectedUser: null,
         isSaving: false,
+        errNotification: {
+          enable: false,
+          msg: '',
+        },
         options: {
           headings: {
             userId: this.roleDescription,
@@ -131,9 +140,20 @@
       addUserRole() {
         this.isSaving = true;
         const pkiAuthenticated = this.$store.getters.isPkiAuthenticated;
+
         AccessService.saveUserRole(this.project.projectId, this.selectedUser, this.role, pkiAuthenticated)
           .then((userInfo) => {
             this.userAdded(userInfo);
+          }).catch((e) => {
+            if (e.response.data && e.response.data.errorCode && e.response.data.errorCode === 'UserNotFound') {
+              console.log(e.response.data);
+              console.log('show mesage not errorpage');
+              console.log(this.errNotification);
+              this.errNotification.msg = e.response.data.explanation;
+              this.errNotification.enable = true;
+            } else {
+              throw e;
+            }
           })
           .finally(() => {
             this.isSaving = false;

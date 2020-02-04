@@ -26,6 +26,7 @@
 
 import { addMatchImageSnapshotCommand } from 'cypress-image-snapshot/command';
 import './cliend-display-commands';
+import 'cypress-file-upload';
 
 addMatchImageSnapshotCommand();
 

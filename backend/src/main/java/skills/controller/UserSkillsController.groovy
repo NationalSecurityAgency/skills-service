@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.*
 import skills.PublicProps
 import skills.auth.UserInfo
 import skills.auth.UserInfoService
+import skills.controller.exceptions.ErrorCode
+import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.SkillEventRequest
 import skills.icons.CustomIconFacade
@@ -223,9 +225,17 @@ class UserSkillsController {
             log.info("ReportSkill (ProjectId=[${projectId}], SkillId=[${skillId}], CurrentUser=[${userInfoService.getCurrentUserId()}], RequestUser=[${skillEventRequest?.userId}], RequestDate=[${toDateString(skillEventRequest?.timestamp)}])")
         }
         SkillEventResult result
-        CProf.prof('retry-reportSkill') {
-            result = (SkillEventResult) RetryUtil.withRetry(3, false) {
-                skillsManagementFacade.reportSkill(projectId, skillId,  userId, incomingDate)
+        try {
+            CProf.prof('retry-reportSkill') {
+                result = (SkillEventResult) RetryUtil.withRetry(3, false) {
+                    skillsManagementFacade.reportSkill(projectId, skillId, userId, incomingDate)
+                }
+            }
+        } catch (SkillException se){
+            if(se.errorCode == ErrorCode.UserNotFound) {
+                result = new SkillEventResult(skillApplied: false, explanation: se.getMessage())
+            } else {
+                throw se
             }
         }
         return result
