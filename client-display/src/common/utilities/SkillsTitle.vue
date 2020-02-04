@@ -7,7 +7,7 @@
             </h2>
         </div>
 
-        <h2 class="ml-5">
+        <h2 :class="{'ml-5': backButton}">
             <slot/>
         </h2>
     </div>
