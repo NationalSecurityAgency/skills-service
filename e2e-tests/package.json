@@ -6,9 +6,9 @@
   "scripts": {
     "cy:open": "cypress open",
     "cy:open:dev": "cypress open --config baseUrl=http://localhost:8082",
-    "cy:run": "cypress run",
+    "cy:run": "cypress run --spec \"cypress/integration/client-display/client-display-theme_spec.js\"",
     "cy:verify": "cypress verify",
-    "backend:start:ci": "java  -Dspring.config.location=classpath:/application.yml,file:serverConfigs/backend_application.properties -jar ../backend/target/backend-*.jar",
+    "backend:start:ci": "java  -Dspring.config.location=classpath:/application.yml,file:serverConfigs/backend_application.properties -jar ./backend-*.jar",
     "backend:start": "java -Dspring.config.location=classpath:/application.yml,file:serverConfigs/backend_application.properties -jar ../backend/target/backend-*.jar",
     "backend:waitToStart": "npx wait-on -t 40000 http://localhost:8080",
     "backend:resetDb": "java -cp ./cypress/db/h2-1.4.200.jar org.h2.tools.RunScript -url jdbc:h2:tcp://localhost:9090/mem:skills -user sa -script ./cypress/db/reset.sql",

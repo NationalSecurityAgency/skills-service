@@ -18,7 +18,7 @@
             :stop-color="beforeTodayProgressVal ? totalCompletedColor : completedBeforeTodayColor"
             :stroke-width="strokeWidth"
             :completed-steps="isCompleted ? 100 : totalCompletedPoints"
-            :total-steps="isCompleted ? 100 : totalPossiblePoints"
+            :total-steps="isCompleted || totalPossiblePoints == 0 ? 100 : totalPossiblePoints"
             :inner-stroke-color="incompleteColor" />
           <radial-progress-bar
             v-if="!isCompleted && totalCompletedPoints !== totalPossiblePoints"
@@ -27,7 +27,7 @@
             :stop-color="completedBeforeTodayColor"
             :stroke-width="strokeWidth"
             :completed-steps="beforeTodayProgressVal"
-            :total-steps="totalPossiblePoints"
+            :total-steps="totalPossiblePoints > 0 ? totalPossiblePoints : 100"
             inner-stroke-color="transparent"
             class="complete-before-today"/>
         </div>

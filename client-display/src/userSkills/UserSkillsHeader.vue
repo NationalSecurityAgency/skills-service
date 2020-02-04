@@ -12,7 +12,7 @@
                             :total-completed-color="displayData.userSkills.points === displayData.userSkills.totalPoints ? completeColor : earnedTodayColor"
                             title="Overall Points">
                         <div slot="footer">
-                            <p v-if="displayData.userSkills.points === displayData.userSkills.totalPoints">Total points earned</p>
+                            <p v-if="displayData.userSkills.points > 0 && displayData.userSkills.points === displayData.userSkills.totalPoints">All Points earned</p>
                             <div v-else>
                                 <div>Earn up to <strong>{{ displayData.userSkills.totalPoints | number }}</strong> points</div>
                                 <div>

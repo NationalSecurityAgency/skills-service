@@ -106,7 +106,7 @@ describe('Client Display Tests', () => {
         });
     });
 
-    it.only('visit home page', () => {
+    it('visit home page', () => {
         cy.request('POST', '/admin/projects/proj1/badges/badge1', {
             projectId: 'proj1',
             badgeId: 'badge1',
