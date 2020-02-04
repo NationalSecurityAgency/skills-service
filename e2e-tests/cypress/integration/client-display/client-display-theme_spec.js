@@ -2,7 +2,6 @@ describe('Client Display Tests', () => {
 
     const snapshotOptions = {
         blackout: ['[data-cy=pointHistoryChart]'],
-        customDiffConfig: { threshold: 0.2 }, // threshold for each pixel
     };
 
     before(() => {
