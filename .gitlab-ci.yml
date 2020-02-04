@@ -91,7 +91,10 @@ cypress_test:
   image: amazonlinux:2
   stage: testCypress
   before_script:
+    - cat /etc/os-release
+    - uname -a
 #    - yum install -y gtk2.x86_64
+    - yum update -y
     - yum install -y gtk3
     - yum install -y libnotify-devel
     - yum install -y GConf2
@@ -110,6 +113,8 @@ cypress_test:
     - npm -v
     - echo "@skills:registry=http://$NEXUS_SERVER/repository/skills-registry/" > ~/.npmrc
     - cat ~/.npmrc
+    - cat /etc/os-release
+    - uname -a
   script:
     - cd e2e-tests
     # start the server in the background
