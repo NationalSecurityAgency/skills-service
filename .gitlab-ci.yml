@@ -92,14 +92,15 @@ cypress_test:
   stage: testCypress
   before_script:
 #    - yum install -y gtk2.x86_64
-    - yum install -y gtk3.x86_64
-    - yum install -y libnotify-devel.x86_64
-    - yum install -y GConf2.x86_64
+    - yum install -y gtk3
+    - yum install -y libnotify-devel
+    - yum install -y GConf2
+    - yum install -y libXScrnSaver
 #    - yum install -y libnss3
 #    - yum install -y libxss1
-    - yum install -y nss.x86_64
+    - yum install -y nss
 #    - yum install -y libasound2
-    - yum install -y xorg-x11-server-Xvfb.x86_64
+    - yum install -y xorg-x11-server-Xvfb
     - amazon-linux-extras install -y java-openjdk11
     - java --version
     - yum install -y gcc-c++ make
