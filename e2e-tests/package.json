@@ -17,10 +17,10 @@
   "author": "Skills Team",
   "license": "ISC",
   "devDependencies": {
-    "@bahmutov/print-env": "^1.2.0",
-    "cypress": "^3.8.3",
+    "@bahmutov/print-env": "1.2.0",
+    "cypress": "3.8.3",
     "cypress-file-upload": "3.5.3",
-    "cypress-image-snapshot": "^3.1.1",
-    "wait-on": "^3.3.0"
+    "cypress-image-snapshot": "3.1.1",
+    "wait-on": "3.3.0"
   }
 }
