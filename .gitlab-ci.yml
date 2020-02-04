@@ -97,7 +97,7 @@ cypress_test:
 #    - yum install -y libnss3
 #    - yum install -y libxss1
 #    - yum install -y libasound2
-    - yum install -y xvfb
+    - yum install -y xorg-x11-server-Xvfb.x86_64
     - amazon-linux-extras install -y java-openjdk11
     - java --version
     - yum install -y gcc-c++ make
