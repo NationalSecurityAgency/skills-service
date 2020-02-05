@@ -115,6 +115,48 @@ describe('Skills Tests', () => {
         cy.get('.text-danger', {timeout: 5*1000}).contains("Wasn't able to add points for");
     });
 
+    it('Add Skill Event - user names cannot have spaces', () => {
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1', {
+            projectId: 'proj1',
+            subjectId: "subj1",
+            skillId: "skill1",
+            name: "Skill 1",
+            pointIncrement: '50',
+            numPerformToCompletion: '5'
+        });
+
+        cy.visit('/projects/proj1/subjects/subj1/skills/skill1');
+        cy.contains('Add Event').click();
+
+        const expectedErrMsg = 'The User Id field may not contain spaces';
+        const userIdSelector = '[data-cy=userIdInput]';
+        const addButtonSelector = '[data-cy=addSkillEventButton]';
+
+        cy.get(userIdSelector).type('user a{enter}');
+        cy.contains(expectedErrMsg)
+        cy.get(addButtonSelector).should('be.disabled')
+
+        cy.get(userIdSelector).type('userd{enter}');
+        cy.contains(expectedErrMsg).should('not.exist');
+        cy.get(addButtonSelector).should('not.be.disabled')
+
+        cy.get(userIdSelector).type('user d{enter}');
+        cy.contains(expectedErrMsg)
+        cy.get(addButtonSelector).should('be.disabled')
+
+        cy.get(userIdSelector).type('userOK{enter}');
+        cy.contains(expectedErrMsg).should('not.exist');
+        cy.get(addButtonSelector).should('not.be.disabled')
+        cy.get(addButtonSelector).click();
+        cy.contains('userOK');
+
+        cy.get(userIdSelector).type('user@#$&*{enter}');
+        cy.contains(expectedErrMsg).should('not.exist');
+        cy.get(addButtonSelector).should('not.be.disabled')
+        cy.get(addButtonSelector).click();
+        cy.contains('user@#$&*');
+    });
+
     it('Add Dependency failure', () => {
         cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1', {
             projectId: 'proj1',
