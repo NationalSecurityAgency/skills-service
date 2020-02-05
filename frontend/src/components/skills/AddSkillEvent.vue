@@ -144,6 +144,23 @@
             this.usersAdded.push(historyObj);
             this.currentSelectedUser = null;
           })
+          .catch((e) => {
+            if (e.response.data && e.response.data.errorCode && e.response.data.errorCode === 'UserNotFound') {
+              this.isSaving = false;
+              const historyObj = {
+                success: false,
+                msg: e.response.data.explanation,
+                userId: this.currentSelectedUser.userId,
+                userIdForDisplay: this.currentSelectedUser.userIdForDisplay,
+                key: this.currentSelectedUser.userId + new Date().getTime() + false,
+              };
+              this.usersAdded.push(historyObj);
+              this.currentSelectedUser = null;
+            } else {
+              const errorMessage = (e.response && e.response.data && e.response.data.message) ? e.response.data.message : undefined;
+              this.$router.push({ name: 'ErrorPage', query: { errorMessage } });
+            }
+          })
           .finally(() => {
             this.isSaving = false;
           });

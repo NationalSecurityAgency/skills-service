@@ -87,13 +87,13 @@ describe('Skills Tests', () => {
 
     });
 
-    it('Add Skill Event User Not Found', () => {
+    it.only('Add Skill Event User Not Found', () => {
        cy.server();
        cy.route({
            method: 'PUT',
            url: '/api/projects/*/skills/*',
-           status: 200,
-           response: {skillApplied: false, explanation: 'User was not found'}
+           status: 400,
+           response: {errorCode: 'UserNotFound', explanation: 'Some Error Occurred'}
        }).as('addUser');
 
         cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1', {
