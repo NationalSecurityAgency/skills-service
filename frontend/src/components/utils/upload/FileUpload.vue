@@ -46,11 +46,8 @@
         return this.formData;
       },
       filesChange(fieldName, fileList) {
-        console.log('filesChange event called');
         const formData = new FormData();
 
-        console.log(`${fieldName} - ${fileList.length}`);
-        console.log(fileList);
         if (!fileList.length) return;
 
         Array.from(Array(fileList.length).keys())
