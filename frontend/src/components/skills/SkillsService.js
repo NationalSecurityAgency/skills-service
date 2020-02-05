@@ -110,7 +110,7 @@ export default {
   },
   saveSkillEvent(projectId, skillId, user, timestamp) {
     const userId = user.dn ? user.dn : user.userId;
-    return axios.put(`/api/projects/${projectId}/skills/${skillId}`, { userId, timestamp })
+    return axios.put(`/api/projects/${projectId}/skills/${skillId}`, { userId, timestamp }, { headers: { 'x-handleError': false } })
       .then(remoteRes => remoteRes.data);
   },
   checkIfSkillBelongsToGlobalBadge(projectId, skillId) {
