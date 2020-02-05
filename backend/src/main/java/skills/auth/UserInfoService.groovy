@@ -70,7 +70,7 @@ class UserInfoService {
             try {
                 userInfo = pkiUserLookup.lookupUserDn(userIdParam)
             } catch (Throwable e) {
-                log.error("user-info-service lookup failed")
+                log.error("user-info-service lookup failed: ${e.getMessage()}")
                 SkillException ske = new SkillException(e.getCause().getMessage())
                 ske.errorCode = ErrorCode.UserNotFound
                 throw ske
