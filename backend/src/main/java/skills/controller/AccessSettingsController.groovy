@@ -8,6 +8,7 @@ import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.client.RestClientException
+import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.result.model.RequestResult
 import skills.controller.result.model.UserRoleRes
@@ -73,10 +74,9 @@ class AccessSettingsController {
             try {
                 return userDetailsService.loadUserByUsername(userKey?.toLowerCase()).username
             } catch (UsernameNotFoundException|BadCredentialsException e) {
-                if (e.getCause() instanceof RestClientException){
-                    throw new SkillException(e.getCause().getMessage())
-                }
-                throw new SkillException("User [$userKey] does not exist")
+                def e1 = new SkillException(e.getMessage())
+                e1.errorCode = ErrorCode.UserNotFound
+                throw e1
             }
         } else {
             return userKey?.toLowerCase()
