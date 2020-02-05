@@ -220,12 +220,14 @@ class UserSkillsController {
         } else {
             incomingDate = new Date()
         }
-        String userId = getUserId(skillEventRequest?.userId)
-        if (log.isInfoEnabled()) {
-            log.info("ReportSkill (ProjectId=[${projectId}], SkillId=[${skillId}], CurrentUser=[${userInfoService.getCurrentUserId()}], RequestUser=[${skillEventRequest?.userId}], RequestDate=[${toDateString(skillEventRequest?.timestamp)}])")
-        }
+
         SkillEventResult result
         try {
+            String userId = getUserId(skillEventRequest?.userId)
+            if (log.isInfoEnabled()) {
+                log.info("ReportSkill (ProjectId=[${projectId}], SkillId=[${skillId}], CurrentUser=[${userInfoService.getCurrentUserId()}], RequestUser=[${skillEventRequest?.userId}], RequestDate=[${toDateString(skillEventRequest?.timestamp)}])")
+            }
+
             CProf.prof('retry-reportSkill') {
                 result = (SkillEventResult) RetryUtil.withRetry(3, false) {
                     skillsManagementFacade.reportSkill(projectId, skillId, userId, incomingDate)
