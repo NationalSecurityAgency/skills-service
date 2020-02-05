@@ -4,6 +4,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.web.client.HttpClientErrorException
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
+import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
 import spock.lang.Specification
 
@@ -37,7 +38,7 @@ class AuthorizationSpecs extends DefaultIntSpec {
         ex.httpStatus == HttpStatus.FORBIDDEN
     }
 
-    def 'user cannot create skill for project they are not an admin for'() {
+    def 'user cannot create subject for project they are not an admin for'() {
         when:
 
         SkillsService skillsServiceUser2 = createService("newUser")
@@ -251,5 +252,60 @@ class AuthorizationSpecs extends DefaultIntSpec {
         then:
         SkillsClientException e = thrown()
         e.httpStatus == HttpStatus.FORBIDDEN
+    }
+
+    def "admin can complete a skill for themself"() {
+        Map subj1 = [projectId: projId, subjectId: "subj1", skillId: "skill11".toString(), name: "Test Subject 1".toString(), type: "Skill", pointIncrement: 100, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1]
+        skillsService.createSubject(subj1)
+        skillsService.createSkill(subj1)
+
+        when:
+        def res = skillsService.addSkill([projectId: projId, skillId: subj1.skillId])
+
+        then:
+        res.body.skillApplied
+        res.body.explanation == "Skill event was applied"
+    }
+
+    def "admin can complete a skill for another user"() {
+        Map subj1 = [projectId: projId, subjectId: "subj1", skillId: "skill11".toString(), name: "Test Subject 1".toString(), type: "Skill", pointIncrement: 100, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1]
+        skillsService.createSubject(subj1)
+        skillsService.createSkill(subj1)
+
+        when:
+        def res = skillsService.addSkill([projectId: projId, skillId: subj1.skillId], 'jim@email.com', new Date()-1)
+
+        then:
+        res.body.skillApplied
+        res.body.explanation == "Skill event was applied"
+    }
+
+    def "non admin can complete a skill for themself"() {
+        Map subj1 = [projectId: projId, subjectId: "subj1", skillId: "skill11".toString(), name: "Test Subject 1".toString(), type: "Skill", pointIncrement: 100, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1]
+        skillsService.createSubject(subj1)
+        skillsService.createSkill(subj1)
+
+        SkillsService skillsServiceUser2 = createService("newUser")
+
+        when:
+        def res = skillsServiceUser2.addSkill([projectId: projId, skillId: subj1.skillId])
+
+        then:
+        res.body.skillApplied
+        res.body.explanation == "Skill event was applied"
+    }
+
+    def "non admin CANNOT complete a skill for another user"() {
+        Map subj1 = [projectId: projId, subjectId: "subj1", skillId: "skill11".toString(), name: "Test Subject 1".toString(), type: "Skill", pointIncrement: 100, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1]
+        skillsService.createSubject(subj1)
+        skillsService.createSkill(subj1)
+
+        SkillsService skillsServiceUser2 = createService("newUser")
+        when:
+        def res = skillsServiceUser2.addSkill([projectId: projId, skillId: subj1.skillId], 'jim@email.com', new Date()-1)
+
+        then:
+        SkillsClientException ex = thrown()
+        ex.httpStatus == HttpStatus.FORBIDDEN
     }
 }

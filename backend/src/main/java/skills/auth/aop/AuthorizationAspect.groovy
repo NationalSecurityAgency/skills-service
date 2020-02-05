@@ -22,6 +22,7 @@ import skills.storage.model.auth.RoleName
 class AuthorizationAspect {
 
     static final String USER_ID_PARAM = 'userIdParam'
+    static final String SKILL_EVENT_REQUEST_PARAM = 'skillEventRequest'
 
     MessageSourceAccessor messages = SpringSecurityMessageSource.getAccessor()
 
@@ -57,9 +58,12 @@ class AuthorizationAspect {
         CodeSignature codeSignature = joinPoint.getSignature()
         def parameterNames = codeSignature.parameterNames
         paramLoop: for (int i = 0; i < codeSignature.parameterNames.length; i++) {
-            if (USER_ID_PARAM == parameterNames[i]) {
+            String paramName = parameterNames[i]
+            if (USER_ID_PARAM == paramName) {
                 userId = joinPoint.getArgs()[i]
                 break paramLoop
+            } else if (SKILL_EVENT_REQUEST_PARAM == paramName) {
+                userId = joinPoint.getArgs()[i]?.userId
             }
         }
         return  userId
