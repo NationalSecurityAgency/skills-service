@@ -52,7 +52,7 @@ class PkiUserDetailsService implements UserDetailsService, AuthenticationUserDet
             }
         } catch (Exception e) {
             log.error("Error occurred looking up user info for DN [${dn}]", e)
-            throw new BadCredentialsException("Unable to retrieve user info for [${dn}]", e)
+            throw new BadCredentialsException("Unable to retrieve user info for [${dn}] - ${e.getCause().getMessage()}", e)
         }
         return userInfo
     }
