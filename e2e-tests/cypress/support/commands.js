@@ -104,10 +104,15 @@ Cypress.Commands.add("getIdField", () => {
 
 
 Cypress.Commands.add("setResolution", (size) => {
-    if (Cypress._.isArray(size)) {
-        cy.viewport(size[0], size[1]);
+    if (size !== 'default') {
+        if (Cypress._.isArray(size)) {
+            cy.viewport(size[0], size[1]);
+        } else {
+            cy.viewport(size);
+        }
+        cy.log(`Set viewport to ${size}`);
     } else {
-        cy.viewport(size);
+        cy.log(`Using default viewport`);
     }
 });
 
