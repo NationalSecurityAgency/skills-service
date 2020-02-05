@@ -154,7 +154,7 @@
         if (!q) {
           q = '';
         }
-        let url = `${this.suggestUrl}/${q}`;
+        let url = `${this.suggestUrl}/${encodeURIComponent(q)}`;
         if (q && this.selectedSuggestOption) {
           url += `?userSuggestOption=${this.selectedSuggestOption}`;
         }
