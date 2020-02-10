@@ -228,7 +228,8 @@ class UserSkillsController {
         }
 
         CProf.prof('retry-reportSkill') {
-            result = (SkillEventResult) RetryUtil.withRetry(3, false) {skillsManagementFacade.reportSkill(projectId, skillId, userId, skillEventRequest?.notifyIfNotApplied, incomingDate)
+            result = (SkillEventResult) RetryUtil.withRetry(3, false) {
+                skillsManagementFacade.reportSkill(projectId, skillId, userId, skillEventRequest?.notifyIfNotApplied, incomingDate)
             }
         }
         return result
