@@ -220,22 +220,15 @@ class UserSkillsController {
         } else {
             incomingDate = new Date()
         }
+
+        SkillEventResult result
         String userId = getUserId(skillEventRequest?.userId)
         if (log.isInfoEnabled()) {
             log.info("ReportSkill (ProjectId=[${projectId}], SkillId=[${skillId}], CurrentUser=[${userInfoService.getCurrentUserId()}], RequestUser=[${skillEventRequest?.userId}], RequestDate=[${toDateString(skillEventRequest?.timestamp)}])")
         }
-        SkillEventResult result
-        try {
-            CProf.prof('retry-reportSkill') {
-                result = (SkillEventResult) RetryUtil.withRetry(3, false) {
-                    skillsManagementFacade.reportSkill(projectId, skillId, userId, skillEventRequest?.notifyIfNotApplied, incomingDate)
-                }
-            }
-        } catch (SkillException se){
-            if(se.errorCode == ErrorCode.UserNotFound) {
-                result = new SkillEventResult(skillApplied: false, explanation: se.getMessage())
-            } else {
-                throw se
+
+        CProf.prof('retry-reportSkill') {
+            result = (SkillEventResult) RetryUtil.withRetry(3, false) {skillsManagementFacade.reportSkill(projectId, skillId, userId, skillEventRequest?.notifyIfNotApplied, incomingDate)
             }
         }
         return result
