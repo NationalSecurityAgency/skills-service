@@ -57,9 +57,11 @@ class SkillEventsService {
 
     @Transactional
     @Profile
-    SkillEventResult reportSkill(String projectId, String skillId, String userId, Date incomingSkillDate = new Date()) {
+    SkillEventResult reportSkill(String projectId, String skillId, String userId, Boolean notifyIfNotApplied, Date incomingSkillDate = new Date()) {
         SkillEventResult result = reportSkillInternal(projectId, skillId, userId, incomingSkillDate)
-        skillEventPublisher.publishSkillUpdate(result, userId)
+        if (notifyIfNotApplied || result.skillApplied) {
+            skillEventPublisher.publishSkillUpdate(result, userId)
+        }
         return result
     }
 
