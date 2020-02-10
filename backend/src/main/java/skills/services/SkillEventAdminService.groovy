@@ -71,7 +71,7 @@ class SkillEventAdminService {
             //this removes the skill achievements
             achievedLevelRepo.deleteByProjectIdAndSkillIdAndUserIdAndLevel(performedSkill.projectId, performedSkill.skillId, userId, null)
         }
-        SkillEventResult skillEventResult = new SkillEventResult()
+        SkillEventResult skillEventResult = new SkillEventResult(projectId: projectId, skillId: skillId, name: skillDefinitionMin.name)
         checkParentGraph(performedSkill.performedOn, skillEventResult, userId, skillDefinitionMin)
         res.success = skillEventResult.skillApplied
         res.explanation = skillEventResult.explanation

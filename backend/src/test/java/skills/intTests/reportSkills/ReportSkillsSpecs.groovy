@@ -292,7 +292,7 @@ class ReportSkillsSpecs extends DefaultIntSpec {
 
             @Override
             void afterConnected(StompSession session, StompHeaders connectedHeaders) {
-                session.subscribe('/user/queue/skill-updates', this)
+                session.subscribe("/user/queue/${projId}/skill-updates", this)
             }
         }
 
