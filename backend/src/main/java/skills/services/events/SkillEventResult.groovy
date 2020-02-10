@@ -8,6 +8,7 @@ import groovy.transform.builder.Builder
 @Builder
 @CompileStatic
 class SkillEventResult {
+    String projectId
     String skillId
     String name
     int pointsEarned = 0

@@ -9,13 +9,11 @@ import org.springframework.stereotype.Component
 @Slf4j
 class SkillEventPublisher {
 
-    final static String SKILL_UPDATE_DEST = '/queue/skill-updates'
-
     @Autowired
     final SimpMessagingTemplate messagingTemplate;
 
     void publishSkillUpdate(SkillEventResult result, String userId) {
         log.debug("Reporting user skill for user [$userId], result [$result]")
-        messagingTemplate.convertAndSendToUser(userId, SKILL_UPDATE_DEST, result)
+        messagingTemplate.convertAndSendToUser(userId, "/queue/${result.projectId}/skill-updates", result)
     }
 }
