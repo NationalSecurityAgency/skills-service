@@ -38,12 +38,11 @@ postgres-test:on-schedule:
   variables:
     POSTGRES_PASSWORD: skillsPassword
     POSTGRES_DB: skills
-  before_script:
+  script:
     - cat /etc/os-release
     # Need to install make/g++ so node v13 can be built
     - apt-get update
     - apt-get install -y build-essential
-  script:
     - echo "@skills:registry=http://$NEXUS_SERVER/repository/skills-registry/" > ~/.npmrc
     - cat ~/.npmrc
     - echo "<settings><mirrors><mirror><id>central</id><name>central</name><url>http://$NEXUS_SERVER/repository/maven-public/</url><mirrorOf>*</mirrorOf></mirror></mirrors></settings>" > ~/.m2/settings.xml
