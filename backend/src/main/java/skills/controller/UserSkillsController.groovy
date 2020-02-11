@@ -9,10 +9,7 @@ import org.joda.time.format.ISODateTimeFormat
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
 import skills.PublicProps
-import skills.auth.UserInfo
 import skills.auth.UserInfoService
-import skills.controller.exceptions.ErrorCode
-import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.SkillEventRequest
 import skills.icons.CustomIconFacade
@@ -229,7 +226,7 @@ class UserSkillsController {
 
         CProf.prof('retry-reportSkill') {
             result = (SkillEventResult) RetryUtil.withRetry(3, false) {
-                skillsManagementFacade.reportSkill(projectId, skillId, userId, skillEventRequest?.notifyIfNotApplied, incomingDate)
+                skillsManagementFacade.reportSkill(projectId, skillId, userId, skillEventRequest?.notifyIfSkillNotApplied, incomingDate)
             }
         }
         return result
