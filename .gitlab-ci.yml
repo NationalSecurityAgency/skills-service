@@ -66,6 +66,7 @@ cypress_test:
     - fc-list | wc
     - fc-list
 #    - yum install -y gtk2.x86_64
+    - yum install -y which
     - yum update -y
     - yum install -y gtk3
     - yum install -y libnotify-devel
