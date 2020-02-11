@@ -7,6 +7,7 @@
     "cy:open": "cypress open",
     "cy:open:dev": "cypress open --config baseUrl=http://localhost:8082",
     "cy:run": "cypress run",
+    "cy:run:dev": "cypress run --config baseUrl=http://localhost:8082",
     "cy:verify": "cypress verify",
     "backend:start:ci": "java  -Dspring.config.location=classpath:/application.yml,file:serverConfigs/backend_application.properties -jar ../backend/target/backend-*.jar",
     "backend:start": "java -Dspring.config.location=classpath:/application.yml,file:serverConfigs/backend_application.properties -jar ../backend/target/backend-*.jar",
@@ -18,7 +19,7 @@
   "license": "ISC",
   "devDependencies": {
     "@bahmutov/print-env": "1.2.0",
-    "cypress": "3.8.3",
+    "cypress": "4.0.1",
     "cypress-file-upload": "3.5.3",
     "cypress-image-snapshot": "3.1.1",
     "wait-on": "3.3.0"

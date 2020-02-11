@@ -12,24 +12,6 @@ describe('Skills Tests', () => {
         })
     });
 
-    it('create skill with special chars', () => {
-        const expectedId = 'LotsofspecialPcharsSkill';
-        const providedName = "!L@o#t$s of %s^p&e*c(i)a_l++_|}{P c'ha'rs";
-        cy.server().route('POST', `/admin/projects/proj1/subjects/subj1/skills/${expectedId}`).as('postNewSkill');
-
-        cy.visit('/projects/proj1/subjects/subj1');
-        cy.clickButton('Skill')
-
-        cy.get('#skillName').type(providedName)
-
-        cy.getIdField().should('have.value', expectedId)
-
-        cy.clickSave()
-        cy.wait('@postNewSkill');
-
-        cy.contains('ID: Lotsofspecial')
-    });
-
     it('edit number of occurrences', () => {
         cy.server().route('POST', `/admin/projects/proj1/subjects/subj1/skills/Skill1Skill`).as('postNewSkill');
         cy.server().route('GET', `/admin/projects/proj1/subjects/subj1/skills/Skill1Skill`).as('getSkill');
@@ -52,7 +34,7 @@ describe('Skills Tests', () => {
         cy.wait('@getSkill')
 
         // close toast
-        cy.get('.toast-header button').click()
+        cy.get('.toast-header button').click({ multiple: true })
         cy.get(selectorOccurrencesToCompletion).should('have.value', '5')
         cy.get(selectorOccurrencesToCompletion).type('{backspace}10')
         cy.get(selectorOccurrencesToCompletion).should('have.value', '10')
@@ -62,6 +44,24 @@ describe('Skills Tests', () => {
 
         cy.get(selectorSkillsRowToggle).click()
         cy.contains('100 Points')
+    });
+
+    it('create skill with special chars', () => {
+        const expectedId = 'LotsofspecialPcharsSkill';
+        const providedName = "!L@o#t$s of %s^p&e*c(i)a_l++_|}{P c'ha'rs";
+        cy.server().route('POST', `/admin/projects/proj1/subjects/subj1/skills/${expectedId}`).as('postNewSkill');
+
+        cy.visit('/projects/proj1/subjects/subj1');
+        cy.clickButton('Skill')
+
+        cy.get('#skillName').type(providedName)
+
+        cy.getIdField().should('have.value', expectedId)
+
+        cy.clickSave()
+        cy.wait('@postNewSkill');
+
+        cy.contains('ID: Lotsofspecial')
     });
 
     it('Add Skill Event', () => {
@@ -87,7 +87,7 @@ describe('Skills Tests', () => {
 
     });
 
-    it.only('Add Skill Event User Not Found', () => {
+    it('Add Skill Event User Not Found', () => {
        cy.server();
        cy.route({
            method: 'PUT',
