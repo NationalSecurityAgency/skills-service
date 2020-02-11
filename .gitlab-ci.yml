@@ -1,56 +1,56 @@
 stages:
-#  - build
+  - build
   - testCypress
   - pushToNexus
   - deploy
 
-#build:
-#  except:
-#    variables:
-#      - $TYPE == "postgrestest"
-#  image: maven:3.6.0-jdk-11
-#  stage: build
-#  before_script:
-#    - cat /etc/os-release
-#    # Need to install make/g++ so node v13 can be built
-#    - apt-get update
-#    - apt-get install -y build-essential
-#  script:
-#    - echo "@skills:registry=http://$NEXUS_SERVER/repository/skills-registry/" > ~/.npmrc
-#    - cat ~/.npmrc
-#    - echo "<settings><mirrors><mirror><id>central</id><name>central</name><url>http://$NEXUS_SERVER/repository/maven-public/</url><mirrorOf>*</mirrorOf></mirror></mirrors></settings>" > ~/.m2/settings.xml
-#    - cat ~/.m2/settings.xml
-#    - mvn --batch-mode install
-#  artifacts:
-#    paths:
-#      - backend/pom.xml
-#      - backend/target/backend-*.jar
-#      - backend/target/skills-service-tests.log
-#
-#postgres-test:on-schedule:
-#  only:
-#    variables:
-#      - $TYPE == "postgrestest"
-#  image: maven:3.6.0-jdk-11
-#  stage: build
-#  services:
-#    - postgres:latest
-#  variables:
-#    POSTGRES_PASSWORD: skillsPassword
-#    POSTGRES_DB: skills
-#  script:
-#    - cat /etc/os-release
-#    # Need to install make/g++ so node v13 can be built
-#    - apt-get update
-#    - apt-get install -y build-essential
-#    - echo "@skills:registry=http://$NEXUS_SERVER/repository/skills-registry/" > ~/.npmrc
-#    - cat ~/.npmrc
-#    - echo "<settings><mirrors><mirror><id>central</id><name>central</name><url>http://$NEXUS_SERVER/repository/maven-public/</url><mirrorOf>*</mirrorOf></mirror></mirrors></settings>" > ~/.m2/settings.xml
-#    - cat ~/.m2/settings.xml
-#    - mvn --batch-mode test -Dspring.datasource.url=jdbc:postgresql://postgres:5432/skills -Dspring.datasource.username=postgres -Dspring.datasource.password=skillsPassword
-#  artifacts:
-#    paths:
-#      - backend/target/skills-service-tests.log
+build:
+  except:
+    variables:
+      - $TYPE == "postgrestest"
+  image: maven:3.6.0-jdk-11
+  stage: build
+  before_script:
+    - cat /etc/os-release
+    # Need to install make/g++ so node v13 can be built
+    - apt-get update
+    - apt-get install -y build-essential
+  script:
+    - echo "@skills:registry=http://$NEXUS_SERVER/repository/skills-registry/" > ~/.npmrc
+    - cat ~/.npmrc
+    - echo "<settings><mirrors><mirror><id>central</id><name>central</name><url>http://$NEXUS_SERVER/repository/maven-public/</url><mirrorOf>*</mirrorOf></mirror></mirrors></settings>" > ~/.m2/settings.xml
+    - cat ~/.m2/settings.xml
+    - mvn --batch-mode install
+  artifacts:
+    paths:
+      - backend/pom.xml
+      - backend/target/backend-*.jar
+      - backend/target/skills-service-tests.log
+
+postgres-test:on-schedule:
+  only:
+    variables:
+      - $TYPE == "postgrestest"
+  image: maven:3.6.0-jdk-11
+  stage: build
+  services:
+    - postgres:latest
+  variables:
+    POSTGRES_PASSWORD: skillsPassword
+    POSTGRES_DB: skills
+  script:
+    - cat /etc/os-release
+    # Need to install make/g++ so node v13 can be built
+    - apt-get update
+    - apt-get install -y build-essential
+    - echo "@skills:registry=http://$NEXUS_SERVER/repository/skills-registry/" > ~/.npmrc
+    - cat ~/.npmrc
+    - echo "<settings><mirrors><mirror><id>central</id><name>central</name><url>http://$NEXUS_SERVER/repository/maven-public/</url><mirrorOf>*</mirrorOf></mirror></mirrors></settings>" > ~/.m2/settings.xml
+    - cat ~/.m2/settings.xml
+    - mvn --batch-mode test -Dspring.datasource.url=jdbc:postgresql://postgres:5432/skills -Dspring.datasource.username=postgres -Dspring.datasource.password=skillsPassword
+  artifacts:
+    paths:
+      - backend/target/skills-service-tests.log
 
 # all jobs that actually run tests can use the same definition
 cypress_test:
@@ -86,7 +86,6 @@ cypress_test:
     - npm -v
     - echo "@skills:registry=http://$NEXUS_SERVER/repository/skills-registry/" > ~/.npmrc
     - cat ~/.npmrc
-    - /bin/sh -c which bash
   script:
     # start the server in the background
     - cd e2e-tests
