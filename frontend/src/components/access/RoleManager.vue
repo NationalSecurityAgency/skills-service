@@ -110,13 +110,13 @@
         .then((result) => {
           this.isLoading = false;
           this.data = result;
-          this.userIds = result.map(({ userId }) => userId);
+          this.userIds = result.map(({ userIdForDisplay }) => userIdForDisplay);
         });
     },
     methods: {
       userAdded(userRole) {
         this.data.push(userRole);
-        this.userIds.push(userRole.userId);
+        this.userIds.push(userRole.userIdForDisplay);
       },
       deleteUserRoleConfirm(row) {
         const msg = `Are you absolutely sure you want to remove ${this.getUserDisplay(row)} as a ${this.roleDescription}?`;
@@ -131,7 +131,7 @@
         AccessService.deleteUserRole(row.projectId, row.userId, row.roleName)
           .then(() => {
             this.data = this.data.filter(item => item.userId !== row.userId);
-            this.userIds = this.userIds.filter(userId => userId !== row.userId);
+            this.userIds = this.userIds.filter(userId => userId !== row.userIdForDisplay);
           });
       },
       notCurrentUser(userId) {
