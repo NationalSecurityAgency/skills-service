@@ -8,6 +8,7 @@ import groovy.transform.builder.Builder
 @Builder
 @CompileStatic
 class SkillEventResult {
+    boolean success = true
     String projectId
     String skillId
     String name
