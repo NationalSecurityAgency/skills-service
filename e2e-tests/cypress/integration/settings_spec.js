@@ -9,7 +9,7 @@ describe('Settings Tests', () => {
 
     it('Add Root User', () => {
         cy.visit('/');
-        cy.get('button.dropdown-toggle').first().click();
+        cy.get('button.dropdown-toggle').first().click({force: true});
         cy.contains('Settings').click();
         cy.contains('Security').click();
         cy.contains('Enter user id').first().type('sk{enter}');
