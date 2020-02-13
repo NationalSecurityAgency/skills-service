@@ -11,7 +11,7 @@
     "beforeTodayColor": "#3e4d44",
     "earnedTodayColor": "#667da4",
     "completeColor": "#59ad52",
-    "incompleteColor": "#cdcdcd"
+    "incompleteColor": "#f6eec7"
   },
   "charts": {
     "axisLabelColor": "#f9f1f1"
