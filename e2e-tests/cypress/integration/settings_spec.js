@@ -17,6 +17,6 @@ describe('Settings Tests', () => {
         cy.contains('Add').first().click();
         cy.get('div.table-responsive').contains('Firstname LastName (skills@skills.org)');
 
-        
+
     })
 });
