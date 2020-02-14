@@ -18,3 +18,12 @@ $card-cap-bg: white !default;
   line-height: 1.5;
   color: #4f565d;
 }
+
+.skills-navigable-item {
+  cursor: pointer;
+}
+
+.skills-navigable-item:hover {
+  color: #17a2b8;
+  box-shadow: 0 0 0px 1px;
+}

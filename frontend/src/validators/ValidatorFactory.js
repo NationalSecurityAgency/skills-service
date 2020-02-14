@@ -34,4 +34,18 @@ export default {
       },
     };
   },
+  newUserObjNoSpacesValidatorInNonPkiMode(isPkiMode) {
+    return {
+      getMessage: field => `The ${field} field may not contain spaces`,
+      validate(value) {
+        if (isPkiMode || !value.userId) {
+          return true;
+        }
+        // const isValid = !value.userId.match(/^[0-9a-zA-Z]+$/);
+        // return !isValid;
+        const hasSpaces = value.userId.indexOf(' ') >= 0;
+        return !hasSpaces;
+      },
+    };
+  },
 };

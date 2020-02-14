@@ -1,7 +1,8 @@
 <template>
-    <div class="card h-100">
+    <div class="card h-100" @click.stop="openMyBadges"
+         :class="{ 'skills-navigable-item': !isSummaryOnly }" data-cy="myBadges">
         <div class="card-header">
-            <h6 class="card-title mb-0 float-left">My Badges</h6>
+            <h6 class="card-title mb-0 text-uppercase">My Badges</h6>
         </div>
         <div class="card-body">
             <span class="fa-stack skills-icon user-rank-stack">
@@ -10,9 +11,6 @@
                   {{ numBadgesCompleted }} <span>Badge{{(numBadgesCompleted > 1 || numBadgesCompleted == 0) ? 's' : ''}}</span>
                 </strong>
             </span>
-            <router-link v-if="!isSummaryOnly" to="/badges" tag="button" class="btn btn-info btn-sm mr-1 text-uppercase">
-                View Badges
-            </router-link>
         </div>
     </div>
 </template>
@@ -24,6 +22,13 @@
             numBadgesCompleted: {
                 type: Number,
                 required: true,
+            },
+        },
+        methods: {
+            openMyBadges() {
+                if (!this.isSummaryOnly) {
+                    this.$router.push('/badges');
+                }
             },
         },
         computed: {
@@ -48,7 +53,7 @@
 
     .skills-icon.user-rank-stack {
         margin: 14px 0;
-        font-size: 60px;
+        font-size: 4.1rem;
         width: 100%;
         color: #0fcc15d1;
     }

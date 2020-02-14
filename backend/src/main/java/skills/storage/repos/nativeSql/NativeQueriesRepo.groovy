@@ -12,5 +12,13 @@ interface NativeQueriesRepo {
     void updatePointTotalsForSkill(String projectId, String subjectId, String skillId, int incrementDelta)
 
     void updatePointHistoryForSkill(String projectId, String subjectId, String skillId, int incrementDelta)
+
+    void updatePointTotalWhenOccurrencesAreDecreased(String projectId, String subjectId, String skillId, int pointIncrement, int numOccurrences)
+
+    void updatePointHistoryWhenOccurrencesAreDecreased(String projectId, String subjectId, String skillId, int pointIncrement, int numOccurrences)
+
+    void removeExtraEntriesOfUserPerformedSkillByUser(String projectId, String skillId, int numEventsToKeep)
+
+    void removeUserAchievementsThatDoNotMeetNewNumberOfOccurrences(String projectId, String skillId, int numOfOccurrences)
 }
 

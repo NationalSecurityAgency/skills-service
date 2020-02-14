@@ -13,6 +13,11 @@
       </div>
     </div>
 
+    <b-alert v-if="errNotification.enable" variant="danger" class="mt-2" show dismissible>
+      <i class="fa fa-exclamation-circle mr-1"></i> <strong>Error!</strong> Request could not be completed! <strong>{{
+      errNotification.msg }}</strong>
+    </b-alert>
+
     <loading-container v-bind:is-loading="isLoading">
       <transition name="userRolesContainer" enter-active-class="animated fadeIn">
         <v-client-table :data="data" :columns="columns" :options="options">
@@ -79,6 +84,10 @@
         columns: ['userId', 'edit'],
         selectedUser: null,
         isSaving: false,
+        errNotification: {
+          enable: false,
+          msg: '',
+        },
         options: {
           headings: {
             userId: this.roleDescription,
@@ -101,13 +110,13 @@
         .then((result) => {
           this.isLoading = false;
           this.data = result;
-          this.userIds = result.map(({ userId }) => userId);
+          this.userIds = result.map(({ userIdForDisplay }) => userIdForDisplay);
         });
     },
     methods: {
       userAdded(userRole) {
         this.data.push(userRole);
-        this.userIds.push(userRole.userId);
+        this.userIds.push(userRole.userIdForDisplay);
       },
       deleteUserRoleConfirm(row) {
         const msg = `Are you absolutely sure you want to remove ${this.getUserDisplay(row)} as a ${this.roleDescription}?`;
@@ -122,7 +131,7 @@
         AccessService.deleteUserRole(row.projectId, row.userId, row.roleName)
           .then(() => {
             this.data = this.data.filter(item => item.userId !== row.userId);
-            this.userIds = this.userIds.filter(userId => userId !== row.userId);
+            this.userIds = this.userIds.filter(userId => userId !== row.userIdForDisplay);
           });
       },
       notCurrentUser(userId) {
@@ -131,9 +140,18 @@
       addUserRole() {
         this.isSaving = true;
         const pkiAuthenticated = this.$store.getters.isPkiAuthenticated;
+
         AccessService.saveUserRole(this.project.projectId, this.selectedUser, this.role, pkiAuthenticated)
           .then((userInfo) => {
             this.userAdded(userInfo);
+          }).catch((e) => {
+            if (e.response.data && e.response.data.errorCode && e.response.data.errorCode === 'UserNotFound') {
+              this.errNotification.msg = e.response.data.explanation;
+              this.errNotification.enable = true;
+            } else {
+              const errorMessage = (e.response && e.response.data && e.response.data.message) ? e.response.data.message : undefined;
+              this.$router.push({ name: 'ErrorPage', query: { errorMessage } });
+            }
           })
           .finally(() => {
             this.isSaving = false;

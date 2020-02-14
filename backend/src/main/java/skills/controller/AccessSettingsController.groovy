@@ -3,9 +3,13 @@ package skills.controller
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.client.RestClientException
+import skills.controller.exceptions.ErrorCode
+import skills.controller.exceptions.SkillException
 import skills.controller.result.model.RequestResult
 import skills.controller.result.model.UserRoleRes
 import skills.services.AccessSettingsStorageService
@@ -39,7 +43,8 @@ class AccessSettingsController {
     List<UserRoleRes> getUserRoles(
             @PathVariable("projectId") String projectId,
             @PathVariable("userId") String userId) {
-        accessSettingsStorageService.getUserRolesForProjectIdAndUserId(projectId, userId?.toLowerCase())
+        String uid = getUserId(userId)
+        accessSettingsStorageService.getUserRolesForProjectIdAndUserId(projectId, uid?.toLowerCase())
     }
 
     @RequestMapping(value = "/projects/{projectId}/users/{userId}/roles/{roleName}", method = RequestMethod.DELETE)
@@ -68,8 +73,10 @@ class AccessSettingsController {
         if (authMode == skills.auth.AuthMode.PKI) {
             try {
                 return userDetailsService.loadUserByUsername(userKey?.toLowerCase()).username
-            } catch (UsernameNotFoundException e) {
-                throw new skills.controller.exceptions.SkillException("User [$userKey] does not exist")
+            } catch (UsernameNotFoundException|BadCredentialsException e) {
+                def e1 = new SkillException(e.getMessage())
+                e1.errorCode = ErrorCode.UserNotFound
+                throw e1
             }
         } else {
             return userKey?.toLowerCase()

@@ -1,5 +1,8 @@
 package skills;
 
+import groovy.util.logging.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ImportResource;
@@ -18,6 +21,8 @@ import java.util.TimeZone;
 @EnableJpaRepositories(basePackages = {"skills.storage.repos"})
 public class SpringBootApp {
 
+    static final Logger log = LoggerFactory.getLogger(SpringBootApp.class);
+
     static final String DISABLE_HOSTNAME_VERIFIER_PROP = "skills.disableHostnameVerifier";
 
     public static void main(String[] args) {
@@ -30,6 +35,7 @@ public class SpringBootApp {
 
         boolean disableHostnameVerifier = Boolean.parseBoolean(System.getProperty(DISABLE_HOSTNAME_VERIFIER_PROP));
         if (disableHostnameVerifier) {
+            log.info("disabling hostname verification");
             HttpsURLConnection.setDefaultHostnameVerifier((s, sslSession) -> true);
         }
 

@@ -1,11 +1,11 @@
 <template>
-    <div>
+    <div data-cy="skillProgress">
         <div class="row my-3 my-md-2 skill-progress">
             <div class="col-sm-12 col-md-3 text-sm-center text-md-right d-inline-block text-truncate">
-                <span class="skill-name" data-toggle="tooltip" :title=skill.skill>{{ skill.skill }}</span>
+                <span class="skill-name" data-toggle="tooltip" :title="skill.skill" @click="progressBarClicked(skill)" data-cy="skillProgressTitle">{{ skill.skill }}</span>
             </div>
             <div class="col-md-7">
-                <progress-bar :skill="skill" @progressbar-clicked="progressBarClicked" :is-clickable="true"/>
+                <progress-bar :skill="skill" @progressbar-clicked="progressBarClicked" :is-clickable="true" class="skills-navigable-item" data-cy="skillProgressBar"/>
             </div>
             <div class="col-sm-12 col-md-2 text-right text-md-center">
                 <small>{{ skill.points | number }} / {{ skill.totalPoints | number }}</small>
@@ -52,6 +52,11 @@
 <style>
     .skill-progress .skill-name {
         font-size: 1.1rem;
+    }
+
+    .skill-progress .skill-name:hover {
+        text-decoration: underline;
+        cursor: pointer;
     }
 
     @media screen and (min-width: 768px) {

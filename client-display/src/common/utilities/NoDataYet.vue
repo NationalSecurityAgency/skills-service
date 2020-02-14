@@ -1,5 +1,5 @@
 <template>
-    <div class="row text-secondary">
+    <div class="row text-secondary skills-no-data-yet">
         <div class="col">
                     <span class="fa-stack fa-3x " style="vertical-align: top;">
                       <i class="fas fa-circle fa-stack-2x"></i>
@@ -29,5 +29,7 @@
 </script>
 
 <style scoped>
-
+    /*.skills-no-data-yet .fa-inverse {*/
+    /*    color: yellow !important;*/
+    /*}*/
 </style>

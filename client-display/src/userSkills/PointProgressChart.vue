@@ -1,5 +1,5 @@
 <template>
-  <div :class="{'disabled': !hasData}" class="card position-relative">
+  <div :class="{'disabled': !hasData}" class="card position-relative" data-cy="pointHistoryChart">
     <div v-if="!hasData" class="disabled-overlay" />
     <div v-if="!hasData" class="text-center user-skills-no-data-icon-text text-danger">
         <div class="row justify-content-center">

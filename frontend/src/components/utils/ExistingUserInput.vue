@@ -1,10 +1,14 @@
 <template>
-  <div class="existingUserInput">
+  <div class="existingUserInput row no-gutters">
+    <b-dropdown v-if="userSuggestOptions && userSuggestOptions.length > 0" variant="split" :text="selectedSuggestOption" class="col-md-auto">
+      <b-dropdown-item-button v-for="opt in userSuggestOptions" :key="opt.value" :active="opt.value === selectedSuggestOption" @click="selectedSuggestOption=opt.value">{{opt.value}}</b-dropdown-item-button>
+    </b-dropdown>
+
     <multiselect v-model="userQuery" :placeholder="placeholder" tag-placeholder="Enter to select"
                  :options="suggestions" :multiple="allowMultipleSelections" :taggable="canEnterNewUser" @tag="addTag"
                  :hide-selected="true" track-by="userId" label="label"
                  @search-change="suggestUsers" @open="suggestUsers" :loading="isFetching" :internal-search="false"
-                 :clear-on-select="true">
+                 :clear-on-select="true" :class="{'col-9': (userSuggestOptions && userSuggestOptions.length > 0)}">
     </multiselect>
 
     <p class="text-danger" v-show="validate && theError">{{ theError }}</p>
@@ -66,6 +70,15 @@
         default: false,
       },
     },
+    mounted() {
+      if (this.$store.getters.config && this.$store.getters.config.userSuggestOptions) {
+        const opts = this.$store.getters.config.userSuggestOptions.split(',');
+        opts.forEach((opt) => {
+          this.userSuggestOptions.push({ text: opt, value: opt });
+        });
+        this.selectedSuggestOption = this.userSuggestOptions[0].value;
+      }
+    },
     watch: {
       userQuery(newVal) {
         // must be able to handle string or an array as the multiselect lib will place
@@ -89,6 +102,8 @@
         selectedUser: null,
         theError: '',
         userQuery: this.value,
+        userSuggestOptions: [],
+        selectedSuggestOption: null,
       };
     },
     computed: {
@@ -139,14 +154,17 @@
         if (!q) {
           q = '';
         }
-        const url = `${this.suggestUrl}/${q}`;
+        let url = `${this.suggestUrl}/${encodeURIComponent(q)}`;
+        if (q && this.selectedSuggestOption) {
+          url += `?userSuggestOption=${this.selectedSuggestOption}`;
+        }
         const rid = this.getRequestId();
         axios.get(url)
           .then((response) => {
             this.ensureOrderlyResultHandling(rid, () => {
               this.suggestions = response.data.filter(suggestedUser => !this.excludedSuggestions.includes(suggestedUser.userId));
               this.suggestions = this.suggestions.map((it) => {
-                const label = this.getUserIdFroDisplay(it);
+                const label = this.getUserIdForDisplay(it);
                 const sug = {
                   ...it,
                   label,
@@ -168,7 +186,7 @@
         this.suggestions.push(tag);
       },
 
-      getUserIdFroDisplay(user) {
+      getUserIdForDisplay(user) {
         if (!user.userIdForDisplay) {
           return user.userId;
         }

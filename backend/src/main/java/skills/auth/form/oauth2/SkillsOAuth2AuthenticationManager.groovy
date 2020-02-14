@@ -12,9 +12,11 @@ import org.springframework.security.oauth2.provider.token.DefaultTokenServices
 import org.springframework.stereotype.Component
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
+import skills.WebSocketConfig
 import skills.auth.SecurityMode
 import skills.auth.UserInfo
 
+import javax.annotation.PostConstruct
 import javax.servlet.http.HttpServletRequest
 
 @Component('skillsOAuth2AuthManager')
@@ -25,8 +27,17 @@ class SkillsOAuth2AuthenticationManager extends OAuth2AuthenticationManager {
     @Autowired
     OAuthUtils oAuthUtils
 
+    @Autowired
+    WebSocketConfig webSocketConfig
+
     SkillsOAuth2AuthenticationManager(DefaultTokenServices tokenServices) {
         setTokenServices(tokenServices)
+    }
+
+    @PostConstruct
+    void postConstruct() {
+        // inject into WebSocketConfig (@Autowired caused a circular reference)
+        webSocketConfig.oAuth2AuthenticationManager = this
     }
 
     @Override
@@ -51,7 +62,7 @@ class SkillsOAuth2AuthenticationManager extends OAuth2AuthenticationManager {
             ServletRequestAttributes currentRequestAttributes = RequestContextHolder.currentRequestAttributes() as ServletRequestAttributes
             httpServletRequest = currentRequestAttributes.getRequest()
         } catch (Exception e) {
-            log.warn("Unable to current request attributes. Error Recieved [$e]")
+            log.debug("Unable to current request attributes. Error Recieved [$e]")
         }
         return httpServletRequest
     }

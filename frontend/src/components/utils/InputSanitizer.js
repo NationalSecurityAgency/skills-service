@@ -7,4 +7,8 @@ export default class InputSanitizer {
     }
     return input;
   }
+
+  static removeSpecialChars(input) {
+    return input.replace(/[\W_]/gi, '');
+  }
 }

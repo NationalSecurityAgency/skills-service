@@ -4,7 +4,9 @@
     <simple-card style="min-height: 20rem;">
       <div id="add-user-div" class="row mt-2 mb-4">
         <div class="col-12 col-md-6 pb-2 pb-md-0">
-          <existing-user-input :project-id="projectId" v-model="currentSelectedUser" :can-enter-new-user="!pkiAuthenticated"/>
+          <existing-user-input :project-id="projectId" v-model="currentSelectedUser" :can-enter-new-user="!pkiAuthenticated"
+                               v-validate="'userNoSpaceInUserIdInNonPkiMode'" name="User Id" data-cy="userIdInput"/>
+          <small class="form-text text-danger" v-show="errors.has('User Id')">{{ errors.first('User Id')}}</small>
         </div>
         <div class="col-auto">
           <datepicker input-class="border-0" wrapper-class="form-control" v-model="dateAdded" name="Event Date" v-validate="'required'"
@@ -12,7 +14,7 @@
         </div>
         <div class="col-auto">
           <div v-b-tooltip.hover :title="minPointsTooltip">
-            <b-button variant="outline-primary" @click="addSkill" :disabled="errors.any() || disable" v-skills="'ManuallyAddSkillEvent'">
+            <b-button variant="outline-primary" @click="addSkill" :disabled="errors.any() || disable" v-skills="'ManuallyAddSkillEvent'" data-cy="addSkillEventButton">
               Add <i v-if="projectTotalPoints >= minimumPoints" :class="[isSaving ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-arrow-circle-right']"></i>
               <i v-else class="icon-warning fa fa-exclamation-circle text-warning"></i>
             </b-button>
@@ -141,6 +143,23 @@
             };
             this.usersAdded.push(historyObj);
             this.currentSelectedUser = null;
+          })
+          .catch((e) => {
+            if (e.response.data && e.response.data.errorCode && e.response.data.errorCode === 'UserNotFound') {
+              this.isSaving = false;
+              const historyObj = {
+                success: false,
+                msg: e.response.data.explanation,
+                userId: this.currentSelectedUser.userId,
+                userIdForDisplay: this.currentSelectedUser.userIdForDisplay,
+                key: this.currentSelectedUser.userId + new Date().getTime() + false,
+              };
+              this.usersAdded.push(historyObj);
+              this.currentSelectedUser = null;
+            } else {
+              const errorMessage = (e.response && e.response.data && e.response.data.message) ? e.response.data.message : undefined;
+              this.$router.push({ name: 'ErrorPage', query: { errorMessage } });
+            }
           })
           .finally(() => {
             this.isSaving = false;

@@ -187,7 +187,7 @@
       },
       updateBadgeId() {
         if (!this.isEdit && this.canAutoGenerateId) {
-          let id = this.badgeInternal.name.replace(/[^\w]/gi, '');
+          let id = InputSanitizer.removeSpecialChars(this.badgeInternal.name);
           // Subjects, skills and badges can not have same id under a project
           // by default append Badge to avoid id collision with other entities,
           // user can always override in edit mode

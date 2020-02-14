@@ -52,15 +52,26 @@ class SkillEventsService {
     @Autowired
     LockingService lockingService
 
+    @Autowired
+    SkillEventPublisher skillEventPublisher
+
     @Transactional
     @Profile
-    SkillEventResult reportSkill(String projectId, String skillId, String userId, Date incomingSkillDate = new Date()) {
+    SkillEventResult reportSkill(String projectId, String skillId, String userId, Boolean notifyIfNotApplied, Date incomingSkillDate = new Date()) {
+        SkillEventResult result = reportSkillInternal(projectId, skillId, userId, incomingSkillDate)
+        if (notifyIfNotApplied || result.skillApplied) {
+            skillEventPublisher.publishSkillUpdate(result, userId)
+        }
+        return result
+    }
+
+    private SkillEventResult reportSkillInternal(String projectId, String skillId, String userId, Date incomingSkillDate) {
         assert projectId
         assert skillId
 
-        SkillEventResult res = new SkillEventResult()
-
         SkillEventsSupportRepo.SkillDefMin skillDefinition = getSkillDef(userId, projectId, skillId)
+
+        SkillEventResult res = new SkillEventResult(projectId: projectId, skillId: skillId, name: skillDefinition.name)
 
         long numExistingSkills = getNumExistingSkills(userId, projectId, skillId)
         AppliedCheckRes checkRes = checkIfSkillApplied(userId, numExistingSkills, incomingSkillDate, skillDefinition)
@@ -85,6 +96,8 @@ class SkillEventsService {
 
         UserPerformedSkill performedSkill = new UserPerformedSkill(userId: userId, skillId: skillId, projectId: projectId, performedOn: incomingSkillDate, skillRefId: skillDefinition.id)
         savePerformedSkill(performedSkill)
+
+        res.pointsEarned = skillDefinition.pointIncrement
 
         List<CompletionItem> achievements = pointsAndAchievementsHandler.updatePointsAndAchievements(userId, skillDefinition, incomingSkillDate)
         if (achievements) {

@@ -174,7 +174,7 @@ class WSHelper {
         if (includeGrantType) {
             body.add('grant_type', 'client_credentials')
         } else {
-            // do not include proxy_user attribute for testing purposes
+            // do not include grant_type attribute for testing purposes
             log.warn("not including grant_type attribute")
         }
 
