@@ -12,14 +12,15 @@
     "test:unit": "vue-cli-service test:unit"
   },
   "dependencies": {
-    "@skills/skills-client-vue": "1.0.4",
     "@fortawesome/fontawesome-free": "5.11.2",
+    "@skills/skills-client-vue": "1.1.0",
     "animate.css": "3.7.2",
     "apexcharts": "3.8.6",
     "axios": "0.19.0",
     "babel-polyfill": "6.26.0",
     "bootstrap": "4.3.1",
     "bootstrap-vue": "2.0.2",
+    "dompurify": "2.0.3",
     "enquire.js": "2.1.6",
     "font-awesome-picker": "2.0.0",
     "lodash.debounce": "4.0.8",
@@ -28,6 +29,7 @@
     "material-icons": "0.3.1",
     "moment": "2.24.0",
     "numeral": "2.0.6",
+    "sockjs-client": "1.4.0",
     "vee-validate": "2.2.15",
     "vis": "4.21.0",
     "vue": "2.6.10",
@@ -39,7 +41,7 @@
     "vue-virtual-scroll-list": "1.4.2",
     "vuejs-datepicker": "1.6.2",
     "vuex": "3.1.1",
-    "dompurify": "2.0.3"
+    "webstomp-client": "1.2.6"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "3.11.0",

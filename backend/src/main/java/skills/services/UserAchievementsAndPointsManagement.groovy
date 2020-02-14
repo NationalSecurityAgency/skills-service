@@ -5,8 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.controller.exceptions.SkillsValidator
-import skills.services.RuleSetDefGraphService
-import skills.services.admin.SkillsAdminService
 import skills.storage.model.SkillDef
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.UserAchievedLevelRepo
@@ -52,7 +50,7 @@ class UserAchievementsAndPointsManagement {
     }
 
     @Transactional
-    void handlePointHistoryUpdate(String projectId, String subjectId, String skillId, int incrementDelta){
+    void handlePointIncrementUpdate(String projectId, String subjectId, String skillId, int incrementDelta){
         SkillsValidator.isTrue(
                 skillDefRepo.existsByProjectIdAndSkillIdAndTypeAllIgnoreCase(projectId, skillId, SkillDef.ContainerType.Skill),
                 "Skill does not exist",
@@ -66,27 +64,47 @@ class UserAchievementsAndPointsManagement {
                 subjectId,
         )
 
+        if (log.isDebugEnabled()){
+            log.debug("Updating existing UserPoints. projectId=[${projectId}], subjectId=[${subjectId}], skillId=[${skillId}], incrementDelta=[${incrementDelta}], ")
+        }
         nativeQueriesRepo.updatePointHistoryForSkill(projectId, subjectId, skillId, incrementDelta)
-    }
-
-    @Transactional
-    void handlePointTotalsUpdate(String projectId, String subjectId, String skillId, int incrementDelta){
-        SkillsValidator.isTrue(
-                skillDefRepo.existsByProjectIdAndSkillIdAndTypeAllIgnoreCase(projectId, skillId, SkillDef.ContainerType.Skill),
-                "Skill does not exist",
-                projectId,
-                skillId
-        )
-        SkillsValidator.isTrue(
-                skillDefRepo.existsByProjectIdAndSkillIdAndTypeAllIgnoreCase(projectId, subjectId, SkillDef.ContainerType.Subject),
-                "Subject does not exist",
-                projectId,
-                subjectId,
-        )
-
         nativeQueriesRepo.updatePointTotalsForSkill(projectId, subjectId, skillId, incrementDelta)
     }
 
+    @Transactional
+    void updatePointsWhenOccurrencesAreDecreased(String projectId, String subjectId, String skillId, int pointIncrement, int numOccurrences){
+        if (log.isDebugEnabled()){
+            log.debug("Update points as occurrences were decreased. projectId=[${projectId}], subjectId=[${subjectId}], skillId=[${skillId}], pointIncrement=[${pointIncrement}], numOccurrences=[$numOccurrences]")
+        }
+        nativeQueriesRepo.updatePointTotalWhenOccurrencesAreDecreased(projectId, subjectId, skillId, pointIncrement, numOccurrences)
+        nativeQueriesRepo.updatePointHistoryWhenOccurrencesAreDecreased(projectId, subjectId, skillId, pointIncrement, numOccurrences)
+    }
 
+    @Transactional
+    void removeExtraEntriesOfUserPerformedSkillByUser(String projectId, String skillId, int numEventsToKeep){
+        assert numEventsToKeep > 0
+        if (log.isDebugEnabled()){
+            log.debug("Remove extra entries from UserPerformedSkill. projectId=[${projectId}], numEventsToKeep=[${numEventsToKeep}], skillId=[${skillId}]")
+        }
+        nativeQueriesRepo.removeExtraEntriesOfUserPerformedSkillByUser(projectId, skillId, numEventsToKeep)
+    }
+
+    @Transactional
+    void insertUserAchievementWhenDecreaseOfOccurrencesCausesUsersToAchieve(String projectId, String skillId, Integer skillRefId, int numOfOccurrences) {
+        assert numOfOccurrences > 0
+        if (log.isDebugEnabled()){
+            log.debug("Insert User Achievements. projectId=[${projectId}], skillId=[${skillId}], skillRefId=[${skillRefId}], numOfOccurrences=[$numOfOccurrences]")
+        }
+        userAchievedLevelRepo.insertUserAchievementWhenDecreaseOfOccurrencesCausesUsersToAchieve(projectId, skillId, skillRefId, numOfOccurrences)
+    }
+
+    @Transactional
+    void removeUserAchievementsThatDoNotMeetNewNumberOfOccurrences(String projectId, String skillId, int numOfOccurrences) {
+        assert numOfOccurrences > 0
+        if (log.isDebugEnabled()){
+            log.debug("Remove User achievements that do not meet number of occurences. projectId=[${projectId}], skillId=[${skillId}], numOfOccurrences=[$numOfOccurrences]")
+        }
+        nativeQueriesRepo.removeUserAchievementsThatDoNotMeetNewNumberOfOccurrences(projectId, skillId, numOfOccurrences)
+    }
 
 }

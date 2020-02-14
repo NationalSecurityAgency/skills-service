@@ -9,7 +9,6 @@ import org.joda.time.format.ISODateTimeFormat
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
 import skills.PublicProps
-import skills.auth.UserInfo
 import skills.auth.UserInfoService
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.SkillEventRequest
@@ -218,14 +217,16 @@ class UserSkillsController {
         } else {
             incomingDate = new Date()
         }
+
+        SkillEventResult result
         String userId = getUserId(skillEventRequest?.userId)
         if (log.isInfoEnabled()) {
             log.info("ReportSkill (ProjectId=[${projectId}], SkillId=[${skillId}], CurrentUser=[${userInfoService.getCurrentUserId()}], RequestUser=[${skillEventRequest?.userId}], RequestDate=[${toDateString(skillEventRequest?.timestamp)}])")
         }
-        SkillEventResult result
+
         CProf.prof('retry-reportSkill') {
             result = (SkillEventResult) RetryUtil.withRetry(3, false) {
-                skillsManagementFacade.reportSkill(projectId, skillId,  userId, incomingDate)
+                skillsManagementFacade.reportSkill(projectId, skillId, userId, skillEventRequest?.notifyIfSkillNotApplied, incomingDate)
             }
         }
         return result

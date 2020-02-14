@@ -2,6 +2,7 @@ package skills.storage.repos
 
 import groovy.transform.CompileStatic
 import org.springframework.data.domain.Pageable
+import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param
@@ -153,4 +154,23 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
         ua.created >= :date 
         group by EXTRACT(MONTH FROM ua.created)''', nativeQuery = true)
     List<LabelCountInfo> countAchievementsForProjectPerMonth(@Param('projectId') String projectId, @Param('badgeId') String badgeId, @Param('type') SkillDef.ContainerType containerType, @Param('date') Date mustBeAfterThisDate)
+
+
+    @Query(value = '''INSERT INTO user_achievement(user_id, project_id, skill_id, skill_ref_id, points_when_achieved)
+            SELECT eventsByUserId.user_id, :projectId, :skillId, :skillRefId, -1
+            FROM (
+                SELECT user_id, count(id) eventCount
+                FROM user_performed_skill
+                WHERE
+                      skill_id = :skillId and
+                      project_id = :projectId
+                GROUP BY user_id
+                ) eventsByUserId
+            WHERE
+                  eventsByUserId.eventCount >= :numOfOccurrences and
+                NOT EXISTS (
+                        SELECT id FROM user_achievement WHERE project_id = :projectId and skill_id = :skillId and user_id = eventsByUserId.user_id
+                    )''', nativeQuery = true)
+    @Modifying
+    void insertUserAchievementWhenDecreaseOfOccurrencesCausesUsersToAchieve(@Param('projectId') String projectId, @Param('skillId') String skillId, @Param('skillRefId') Integer skillRefId, @Param('numOfOccurrences') int numOfOccurrences)
 }

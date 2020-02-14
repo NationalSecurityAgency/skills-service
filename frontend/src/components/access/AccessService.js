@@ -13,20 +13,22 @@ export default {
     throw new Error(`unexpected user role [${roleName}]`);
   },
   saveUserRole(projectId, userInfo, roleName, isPkiAuthenticated) {
-    const { userId } = userInfo;
+    let { userId } = userInfo;
     let userKey = userId;
+    const origUserId = userId;
     if (isPkiAuthenticated) {
       userKey = userInfo.dn;
+      userId = userKey;
     }
     if (projectId) {
-      return axios.put(`/admin/projects/${projectId}/users/${userKey}/roles/${roleName}`)
+      return axios.put(`/admin/projects/${projectId}/users/${userKey}/roles/${roleName}`, null, { headers: { 'x-handleError': false } })
         .then(() => axios.get(`/admin/projects/${projectId}/users/${userId}/roles`)
           .then(response => response.data.find(element => element.roleName === roleName)));
     }
     if (roleName === 'ROLE_SUPER_DUPER_USER' || roleName === 'ROLE_SUPERVISOR') {
-      return axios.put(`/root/users/${userKey}/roles/${roleName}`)
+      return axios.put(`/root/users/${userKey}/roles/${roleName}`, null, { headers: { 'x-handleError': false } })
         .then(() => axios.get(`/root/users/roles/${roleName}`)
-          .then(response => response.data.find(element => element.userId.toLowerCase() === userId.toLowerCase())));
+          .then(response => response.data.find(element => element.userIdForDisplay.toLowerCase() === origUserId.toLowerCase())));
     }
     throw new Error(`unexpected user role [${roleName}]`);
   },

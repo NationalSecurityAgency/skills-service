@@ -1,5 +1,7 @@
 stages:
   - build
+  - testCypress
+  - pushToNexus
   - deploy
 
 build:
@@ -8,14 +10,20 @@ build:
       - $TYPE == "postgrestest"
   image: maven:3.6.0-jdk-11
   stage: build
+  before_script:
+    - cat /etc/os-release
+    # Need to install make/g++ so node v13 can be built
+    - apt-get update
+    - apt-get install -y build-essential
   script:
     - echo "@skills:registry=http://$NEXUS_SERVER/repository/skills-registry/" > ~/.npmrc
     - cat ~/.npmrc
     - echo "<settings><mirrors><mirror><id>central</id><name>central</name><url>http://$NEXUS_SERVER/repository/maven-public/</url><mirrorOf>*</mirrorOf></mirror></mirrors></settings>" > ~/.m2/settings.xml
     - cat ~/.m2/settings.xml
-    - mvn install
+    - mvn --batch-mode install
   artifacts:
     paths:
+      - backend/pom.xml
       - backend/target/backend-*.jar
       - backend/target/skills-service-tests.log
 
@@ -31,14 +39,94 @@ postgres-test:on-schedule:
     POSTGRES_PASSWORD: skillsPassword
     POSTGRES_DB: skills
   script:
+    - cat /etc/os-release
+    # Need to install make/g++ so node v13 can be built
+    - apt-get update
+    - apt-get install -y build-essential
     - echo "@skills:registry=http://$NEXUS_SERVER/repository/skills-registry/" > ~/.npmrc
     - cat ~/.npmrc
     - echo "<settings><mirrors><mirror><id>central</id><name>central</name><url>http://$NEXUS_SERVER/repository/maven-public/</url><mirrorOf>*</mirrorOf></mirror></mirrors></settings>" > ~/.m2/settings.xml
     - cat ~/.m2/settings.xml
-    - mvn test -Dspring.datasource.url=jdbc:postgresql://postgres:5432/skills -Dspring.datasource.username=postgres -Dspring.datasource.password=skillsPassword
+    - mvn --batch-mode test -Dspring.datasource.url=jdbc:postgresql://postgres:5432/skills -Dspring.datasource.username=postgres -Dspring.datasource.password=skillsPassword
   artifacts:
     paths:
       - backend/target/skills-service-tests.log
+
+# all jobs that actually run tests can use the same definition
+cypress_test:
+  image: amazonlinux:2
+  stage: testCypress
+  before_script:
+    - cat /etc/os-release
+    - uname -a
+    # install packaged fonts
+    - yum install -y fontconfig
+    - cp -r e2e-tests/cypress/fonts/* /usr/share/fonts/
+    - fc-cache -fv
+    - fc-list | wc
+    - fc-list
+#    - yum install -y gtk2.x86_64
+    - yum install -y which
+    - yum update -y
+    - yum install -y gtk3
+    - yum install -y libnotify-devel
+    - yum install -y GConf2
+    - yum install -y libXScrnSaver
+#    - yum install -y libnss3
+#    - yum install -y libxss1
+    - yum install -y nss
+#    - yum install -y libasound2
+    - yum install -y xorg-x11-server-Xvfb
+    - amazon-linux-extras install -y java-openjdk11
+    - java --version
+    - yum install -y gcc-c++ make
+    - curl -sL https://rpm.nodesource.com/setup_12.x | bash -
+    - yum install -y nodejs
+    - node -v
+    - npm -v
+    - echo "@skills:registry=http://$NEXUS_SERVER/repository/skills-registry/" > ~/.npmrc
+    - cat ~/.npmrc
+  script:
+    # start the server in the background
+    - cd e2e-tests
+    - npm run backend:start:ci &
+    - cd ../client-display
+    - npm install
+    - npm run serve &
+    - cd ../e2e-tests
+    - npm install
+    - npm run backend:waitToStart
+    - npx wait-on -t 40000 http://localhost:8083
+    # run tests
+    - npm run cy:run
+  artifacts:
+    when: always
+    paths:
+      - e2e-tests/cypress/videos/**/*.mp4
+      - e2e-tests/cypress/screenshots/**/*.png
+      - e2e-tests/cypress/snapshots/client-display/**/*
+      - e2e-tests/cypress/snapshots/client-display/**/__diff_output__/*
+    expire_in: 1 day
+
+pushToNexus:
+  except:
+    variables:
+      - $TYPE == "postgrestest"
+  image: maven:3.6.0-jdk-11
+  stage: pushToNexus
+  script:
+    - echo "@skills:registry=http://$NEXUS_SERVER/repository/skills-registry/" > ~/.npmrc
+    - cat ~/.npmrc
+    - echo "<settings><servers><server><id>nexus-snapshots</id><username>admin</username><password>$NEXUS_PASS</password></server><server><id>nexus-releases</id><username>admin</username><password>$NEXUS_PASS</password></server></servers><mirrors><mirror><id>central</id><name>central</name><url>http://$NEXUS_SERVER/repository/maven-public/</url><mirrorOf>*</mirrorOf></mirror></mirrors></settings>" > ~/.m2/settings.xml
+    - cat ~/.m2/settings.xml
+    - backendJar=$(ls backend/target/backend-*.jar)
+    - echo $backendJar
+    - mvn --batch-mode deploy:deploy-file -DpomFile=backend/pom.xml -Dfile=${backendJar} -Durl=http://ip-10-113-80-244.evoforge.org/repository/maven-snapshots/ -DrepositoryId=nexus-snapshots
+  artifacts:
+    paths:
+      - backend/target/backend-*.jar
+      - backend/target/skills-service-tests.log
+
 deploy:
   except:
     variables:
@@ -49,7 +137,6 @@ deploy:
     - apk --update --no-cache add sshpass openssh git
   script:
     - git clone https://${GITLAB_DEPLOY_USERNAME}:${GITLAB_DEPLOY_PASSWORD}@gitlab.evoforge.org/skills/skills-deploy.git
-    - git clone https://${GITLAB_USER_SVC_USERNAME}:${GITLAB_USER_SVC_PASSWORD}@gitlab.evoforge.org/skills/user-info-service.git
     - TIMESTAMP=`date +%s`
     - TMP_DIR="deploy_${TIMESTAMP}"
     - DEST_PATH="/home/${CI_USERNAME}/$TMP_DIR"
@@ -57,7 +144,6 @@ deploy:
     - cp backend/target/backend-*.jar backend.jar
     - sshpass -p $CI_PASSWORD scp -r skills-deploy ${CI_USERNAME}@${CI_IP}:${DEST_PATH}
     - sshpass -p $CI_PASSWORD scp -r backend.jar ${CI_USERNAME}@${CI_IP}:${DEST_PATH}/skills-deploy
-    - sshpass -p $CI_PASSWORD scp -r user-info-service ${CI_USERNAME}@${CI_IP}:${DEST_PATH}/skills-deploy
     - sshpass -p $CI_PASSWORD ssh -o StrictHostKeyChecking=no -o PreferredAuthentications=password -o PubkeyAuthentication=no $CI_USERNAME@$CI_IP "cd ${DEST_PATH}/skills-deploy && ./runDeploy.sh"
   only:
     - 1.0.X

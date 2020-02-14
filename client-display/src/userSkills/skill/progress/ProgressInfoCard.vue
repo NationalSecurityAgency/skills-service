@@ -1,5 +1,5 @@
 <template>
-    <div class="card h-100">
+    <div class="card h-100 skills-progress-info-card">
             <div class="card-body px-2 bg-light">
                 <div class="media">
                     <div class="d-inline-block mt-2 mr-3">

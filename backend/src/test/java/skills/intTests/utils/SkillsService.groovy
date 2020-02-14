@@ -138,13 +138,13 @@ class SkillsService {
     }
 
     def projectIdExists(Map props){
-        def id = URLEncoder.encode(props.projectId, 'UTF-8')
+        String id = props.projectId
         wsHelper.appGet("/projectExist?projectId=${id}")
     }
 
     def projectNameExists(Map props){
-        def name = URLEncoder.encode(props.projectName, 'UTF-8')
-        wsHelper.appGet("/projectExist?projectName=${name}")
+        String name = props.projectName
+        wsHelper.appGet("/projectExist?projectName=${name}".toString())
     }
 
     def getProjects() {
@@ -765,8 +765,8 @@ class SkillsService {
     }
 
     boolean doesSubjectNameExist(String projectId, String subjectName) {
-        String encoded = URLEncoder.encode(subjectName, StandardCharsets.UTF_8.toString())
-        return wsHelper.adminGet("/projects/${projectId}/subjectNameExists?subjectName=${encoded}")
+//        String encoded = URLEncoder.encode(subjectName, StandardCharsets.UTF_8.toString())
+        return wsHelper.adminGet("/projects/${projectId}/subjectNameExists?subjectName=${subjectName}")
     }
 
     boolean doesBadgeNameExist(String projectId, String subjectName) {

@@ -42,4 +42,17 @@ class DBConditions {
             return false;
         }
     }
+
+    static class H2_IN_MEMORY implements Condition {
+        @Override
+        boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
+            String dbSource = context.environment.getProperty(PROP_DB_URL)
+            // default to H2 is url is not provided
+            if (!dbSource || dbSource.toLowerCase().contains("jdbc:h2:mem")) {
+
+                return true
+            }
+            return false;
+        }
+    }
 }

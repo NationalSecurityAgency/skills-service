@@ -33,7 +33,7 @@
     name: 'App',
     mixins: [InceptionProgressMessagesMixin],
     components: {
-        NewSoftwareVersionComponent,
+      NewSoftwareVersionComponent,
       CustomizableFooter,
       CustomizableHeader,
       HeaderView,
@@ -70,7 +70,9 @@
     },
     watch: {
       activeProjectId() {
-        this.addCustomIconCSS();
+        if (this.isAuthenticatedUser) {
+          this.addCustomIconCSS();
+        }
       },
       isAuthenticatedUser() {
         if (this.isAuthenticatedUser) {

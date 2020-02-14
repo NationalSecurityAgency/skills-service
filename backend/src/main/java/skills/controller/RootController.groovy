@@ -73,7 +73,8 @@ class RootController {
     @GetMapping('/users/without/role/{roleName}/{query}')
     @ResponseBody
     List<UserInfoRes> suggestUsersWithoutRole(@PathVariable("roleName") RoleName roleName,
-                                              @PathVariable('query') String query) {
+                                              @PathVariable('query') String query,
+                                              @RequestParam(required = false, value = "userSuggestOption") String userSuggestOption) {
         query = query.toLowerCase()
         if (authMode == AuthMode.FORM) {
             return accessSettingsStorageService.getUserRolesWithoutRole(roleName).findAll {
@@ -83,7 +84,7 @@ class RootController {
             }.unique()
         } else {
             List<String> usersWithRole = accessSettingsStorageService.getUserRolesWithRole(roleName).collect { it.userId.toLowerCase() }
-            return pkiUserLookup?.suggestUsers(query)?.findAll {
+            return pkiUserLookup?.suggestUsers(query, userSuggestOption)?.findAll {
                 !usersWithRole.contains(it.username.toLowerCase())
             }?.unique()?.take(5)?.collect { new UserInfoRes(it) }
         }
@@ -91,14 +92,15 @@ class RootController {
 
     @GetMapping('/users/without/role/{roleName}')
     @ResponseBody
-    List<UserInfoRes> suggestUsersWithoutRole(@PathVariable("roleName") RoleName roleName) {
+    List<UserInfoRes> suggestUsersWithoutRole(@PathVariable("roleName") RoleName roleName,
+                                                     @RequestParam(required = false, value = "userSuggestOption") String userSuggestOption) {
         if (authMode == AuthMode.FORM) {
             return accessSettingsStorageService.getUserRolesWithoutRole(roleName).collect {
                 accessSettingsStorageService.loadUserInfo(it.userId)
             }.unique()?.take(5)
         } else {
             List<String> usersWithRole = accessSettingsStorageService.getUserRolesWithRole(roleName).collect { it.userId.toLowerCase() }
-            return pkiUserLookup?.suggestUsers("a")?.findAll {
+            return pkiUserLookup?.suggestUsers("a", userSuggestOption)?.findAll {
                 !usersWithRole.contains(it.username.toLowerCase())
             }?.unique()?.take(5)?.collect { new UserInfoRes(it) }
         }

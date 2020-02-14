@@ -79,6 +79,7 @@ skills:
       maxFirstNameLength: 30
       maxLastNameLength: 30
       maxNicknameLength: 70
+      minUsernameLength: 5
       minPasswordLength: 8
       maxPasswordLength: 40
       minNameLength: 3
@@ -93,6 +94,7 @@ skills:
       maxPointIncrement: 10000
       maxNumPerformToCompletion: 10000
       maxNumPointIncrementMaxOccurrences: 999
+      userSuggestOptions:
   profiles:
     active: default
 #logging:

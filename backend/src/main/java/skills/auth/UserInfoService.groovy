@@ -7,7 +7,10 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.web.client.HttpClientErrorException
+import org.springframework.web.client.RestClientException
 import skills.auth.pki.PkiUserLookup
+import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.services.UserAttrsService
 import skills.utils.RetryUtil
@@ -67,12 +70,29 @@ class UserInfoService {
             UserInfo userInfo
             try {
                 userInfo = pkiUserLookup.lookupUserDn(userIdParam)
-                userAuthService.createOrUpdateUser(userInfo)
             } catch (Throwable e) {
-                throw new SkillException("Failed to retrieve user info via [$userIdParam]")
+                String msg = e.getMessage()
+                if(e instanceof HttpClientErrorException){
+                    msg = ((HttpClientErrorException)e).getResponseBodyAsString()
+                } else if (e.getCause() instanceof HttpClientErrorException) {
+                    msg = ((HttpClientErrorException)e.getCause()).getResponseBodyAsString()
+                }
+                log.error("user-info-service lookup failed: ${msg}")
+                SkillException ske = new SkillException(msg)
+                ske.errorCode = ErrorCode.UserNotFound
+                throw ske
             }
+
             if (!userInfo) {
+                log.error("received empty user information from lookup")
                 throw new SkillException("User Info Service does not know about user with provided lookup id of [${userIdParam}]")
+            }
+
+            try {
+                userAuthService.createOrUpdateUser(userInfo)
+            } catch(Throwable e) {
+                log.error("error during createOrUpdateUser", e);
+                throw new SkillException("Failed to retrieve user info via [$userIdParam]")
             }
 
             userNameRes = userInfo.username

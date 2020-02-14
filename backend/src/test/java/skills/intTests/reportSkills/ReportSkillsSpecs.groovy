@@ -2,12 +2,29 @@ package skills.intTests.reportSkills
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.lang.Nullable
+import org.springframework.messaging.converter.MappingJackson2MessageConverter
+import org.springframework.messaging.simp.stomp.StompHeaders
+import org.springframework.messaging.simp.stomp.StompSession
+import org.springframework.messaging.simp.stomp.StompSessionHandler
+import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter
+import org.springframework.web.socket.WebSocketHttpHeaders
+import org.springframework.web.socket.client.WebSocketClient
+import org.springframework.web.socket.client.standard.StandardWebSocketClient
+import org.springframework.web.socket.messaging.WebSocketStompClient
+import org.springframework.web.socket.sockjs.client.SockJsClient
+import org.springframework.web.socket.sockjs.client.Transport
+import org.springframework.web.socket.sockjs.client.WebSocketTransport
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.TestUtils
+import skills.services.events.CompletionItem
+import skills.services.events.SkillEventResult
 import skills.storage.model.UserAchievement
 import skills.storage.repos.UserAchievedLevelRepo
+
+import java.lang.reflect.Type
 
 @Slf4j
 class ReportSkillsSpecs extends DefaultIntSpec {
@@ -200,30 +217,45 @@ class ReportSkillsSpecs extends DefaultIntSpec {
             assert it.body.explanation == "Skill event was applied"
         }
         !addSkillRes.get(0).body.completed
+        addSkillRes.get(0).body.skillId == "${subj1.get(0).skillId}"
+        addSkillRes.get(0).body.name == "${subj1.get(0).name}"
+        addSkillRes.get(0).body.pointsEarned == 10
         subjSummaryRes.get(0).skillsLevel == 0
         subjSummaryRes.get(0).points == 10
         subjSummaryRes.get(0).todaysPoints == 0
         subjSummaryRes.get(0).levelPoints == 10
 
         !addSkillRes.get(1).body.completed
+        addSkillRes.get(1).body.skillId == "${subj1.get(1).skillId}"
+        addSkillRes.get(1).body.name == "${subj1.get(1).name}"
+        addSkillRes.get(1).body.pointsEarned == 10
         subjSummaryRes.get(1).skillsLevel == 0
         subjSummaryRes.get(1).points == 20
         subjSummaryRes.get(1).todaysPoints == 0
         subjSummaryRes.get(1).levelPoints == 20
 
         !addSkillRes.get(2).body.completed
+        addSkillRes.get(2).body.skillId == "${subj1.get(2).skillId}"
+        addSkillRes.get(2).body.name == "${subj1.get(2).name}"
+        addSkillRes.get(2).body.pointsEarned == 10
         subjSummaryRes.get(2).skillsLevel == 0
         subjSummaryRes.get(2).points == 30
         subjSummaryRes.get(2).todaysPoints == 0
         subjSummaryRes.get(2).levelPoints == 30
 
         !addSkillRes.get(3).body.completed
+        addSkillRes.get(3).body.skillId == "${subj1.get(3).skillId}"
+        addSkillRes.get(3).body.name == "${subj1.get(3).name}"
+        addSkillRes.get(3).body.pointsEarned == 10
         subjSummaryRes.get(3).skillsLevel == 0
         subjSummaryRes.get(3).points == 40
         subjSummaryRes.get(3).todaysPoints == 0
         subjSummaryRes.get(3).levelPoints == 40
 
         addSkillRes.get(4).body.completed.size() == 1
+        addSkillRes.get(4).body.skillId == "${subj1.get(4).skillId}"
+        addSkillRes.get(4).body.name == "${subj1.get(4).name}"
+        addSkillRes.get(4).body.pointsEarned == 10
         addSkillRes.get(4).body.completed.get(0).type == "Subject"
         addSkillRes.get(4).body.completed.get(0).level == 1
         addSkillRes.get(4).body.completed.get(0).id == "subj1"
@@ -234,6 +266,114 @@ class ReportSkillsSpecs extends DefaultIntSpec {
         subjSummaryRes.get(4).levelPoints == 0
     }
 
+    def "achieve subject's level by progressing through several skill results via websocket connection"(){
+        List<Map> subj1 = (1..5).collect { [projectId: projId, subjectId: "subj1", skillId: "s1${it}".toString(), name: "subj1 ${it}".toString(), type: "Skill", pointIncrement: 10, numPerformToCompletion: 10, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1] }
+        List<Map> subj2 = (1..4).collect { [projectId: projId, subjectId: "subj2", skillId: "s2${it}".toString(), name: "subj2 ${it}".toString(), type: "Skill", pointIncrement: 5, numPerformToCompletion: 10, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1] }
+        List<Map> subj3 = (1..5).collect { [projectId: projId, subjectId: "subj3", skillId: "s3${it}".toString(), name: "subj3 ${it}".toString(), type: "Skill", pointIncrement: 20, numPerformToCompletion: 10, totalPoints: 200, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1] }
+
+        List<SkillEventResult> wsResults = []
+        WebSocketClient client = new StandardWebSocketClient()
+        List<Transport> transports = []
+        transports.add(new WebSocketTransport(client))
+        SockJsClient sockJsClient = new SockJsClient(transports)
+        WebSocketStompClient stompClient = new WebSocketStompClient(sockJsClient)
+        stompClient.setMessageConverter(new MappingJackson2MessageConverter())
+        StompSessionHandler sessionHandler = new StompSessionHandlerAdapter() {
+            @Override
+            Type getPayloadType(StompHeaders headers) {
+                return SkillEventResult
+            }
+
+            @Override
+            void handleFrame(StompHeaders headers, @Nullable Object payload) {
+                SkillEventResult result = (SkillEventResult) payload
+                wsResults.add(result)
+            }
+
+            @Override
+            void afterConnected(StompSession session, StompHeaders connectedHeaders) {
+                session.subscribe("/user/queue/${projId}/skill-updates", this)
+            }
+        }
+
+        when:
+        skillsService.createSchema([subj1, subj2, subj3])
+
+        // setup websocket connection for sampleUserIds[0]
+        String userId = sampleUserIds.get(0)
+        String secret = skillsService.getClientSecret(projId)
+        skillsService.setProxyCredentials(projId, secret)
+        String token = skillsService.wsHelper.getTokenForUser(userId)
+        WebSocketHttpHeaders headers = new WebSocketHttpHeaders()
+        headers.add('Authorization', "Bearer ${token}")
+        stompClient.connect("ws://localhost:${localPort}/skills-websocket", headers, sessionHandler)
+        Thread.sleep(2000)
+
+        List<Date> dates = testUtils.getLastNDays(5)
+        List addSkillRes = []
+        List subjSummaryRes = []
+
+        (0..4).each {
+            addSkillRes << skillsService.addSkill([projectId: projId, skillId: subj1.get(it).skillId], userId, dates.get(it))
+            subjSummaryRes << skillsService.getSkillSummary(userId, projId, subj1.get(it).subjectId)
+        }
+        Thread.sleep(2000)
+
+        then:
+        wsResults.sort {it.skillId}
+        wsResults.each {
+            assert it.skillApplied
+            assert it.explanation == "Skill event was applied"
+        }
+        !wsResults.get(0).completed
+        wsResults.get(0).skillId == "${subj1.get(0).skillId}"
+        wsResults.get(0).name == "${subj1.get(0).name}"
+        wsResults.get(0).pointsEarned == 10
+        subjSummaryRes.get(0).skillsLevel == 0
+        subjSummaryRes.get(0).points == 10
+        subjSummaryRes.get(0).todaysPoints == 0
+        subjSummaryRes.get(0).levelPoints == 10
+
+        !wsResults.get(1).completed
+        wsResults.get(1).skillId == "${subj1.get(1).skillId}"
+        wsResults.get(1).name == "${subj1.get(1).name}"
+        wsResults.get(1).pointsEarned == 10
+        subjSummaryRes.get(1).skillsLevel == 0
+        subjSummaryRes.get(1).points == 20
+        subjSummaryRes.get(1).todaysPoints == 0
+        subjSummaryRes.get(1).levelPoints == 20
+
+        !wsResults.get(2).completed
+        wsResults.get(2).skillId == "${subj1.get(2).skillId}"
+        wsResults.get(2).name == "${subj1.get(2).name}"
+        wsResults.get(2).pointsEarned == 10
+        subjSummaryRes.get(2).skillsLevel == 0
+        subjSummaryRes.get(2).points == 30
+        subjSummaryRes.get(2).todaysPoints == 0
+        subjSummaryRes.get(2).levelPoints == 30
+
+        !wsResults.get(3).completed
+        wsResults.get(3).skillId == "${subj1.get(3).skillId}"
+        wsResults.get(3).name == "${subj1.get(3).name}"
+        wsResults.get(3).pointsEarned == 10
+        subjSummaryRes.get(3).skillsLevel == 0
+        subjSummaryRes.get(3).points == 40
+        subjSummaryRes.get(3).todaysPoints == 0
+        subjSummaryRes.get(3).levelPoints == 40
+
+        wsResults.get(4).completed.size() == 1
+        wsResults.get(4).skillId == "${subj1.get(4).skillId}"
+        wsResults.get(4).name == "${subj1.get(4).name}"
+        wsResults.get(4).pointsEarned == 10
+        wsResults.get(4).completed.get(0).type == CompletionItem.CompletionItemType.Subject
+        wsResults.get(4).completed.get(0).level == 1
+        wsResults.get(4).completed.get(0).id == "subj1"
+
+        subjSummaryRes.get(4).skillsLevel == 1
+        subjSummaryRes.get(4).points == 50
+        subjSummaryRes.get(4).todaysPoints == 10
+        subjSummaryRes.get(4).levelPoints == 0
+    }
 
     def "fully achieve a subject"(){
         List<Map> subj1 = (1..2).collect { [projectId: projId, subjectId: "subj1", skillId: "s1${it}".toString(), name: "subj1 ${it}".toString(), type: "Skill", pointIncrement: 15, numPerformToCompletion: 4, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1] }
@@ -990,4 +1130,22 @@ class ReportSkillsSpecs extends DefaultIntSpec {
         SkillsClientException ex = thrown()
         ex.message.contains("Skill Events may not be in the future")
     }
+
+    def "Skill Events - user ids cannot have spaces"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(10, )
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        when:
+        skillsService.addSkill([projectId: projId, skillId: skills[0].skillId], "user a", new Date())
+
+        then:
+        SkillsClientException ex = thrown()
+        ex.message.contains("Spaces are not allowed in user id. Provided [user a]")
+    }
+
 }

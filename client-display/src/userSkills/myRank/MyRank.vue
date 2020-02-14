@@ -1,7 +1,8 @@
 <template>
-  <div class="card h-100">
+  <div class="card h-100 skills-my-rank" @click.stop="openMyRankDetails()"
+       :class="{ 'skills-navigable-item': !isSummaryOnly }" data-cy="myRank">
     <div class="card-header">
-      <h6 class="card-title mb-0 float-left">My Rank</h6>
+      <h6 class="card-title mb-0 text-uppercase">My Rank</h6>
     </div>
     <div class="card-body">
       <span class="fa-stack skills-icon user-rank-stack">
@@ -13,11 +14,6 @@
           <vue-simple-spinner v-else line-bg-color="#333" line-fg-color="#17a2b8"/>
         </strong>
       </span>
-      <div>
-        <button v-if="!isSummaryOnly" class="btn btn-info btn-sm mr-1 text-uppercase" @click.stop="openMyRankDetails()">
-          Ranking Stats
-        </button>
-      </div>
     </div>
   </div>
 </template>
@@ -34,12 +30,14 @@
     },
     methods: {
       openMyRankDetails() {
-        this.$router.push({
-          name: 'myRankDetails',
-          params: {
-            subjectId: this.displayData.userSkills.subjectId,
-          },
-        });
+        if (!this.isSummaryOnly) {
+          this.$router.push({
+            name: 'myRankDetails',
+            params: {
+              subjectId: this.displayData.userSkills.subjectId,
+            },
+          });
+        }
       },
     },
     computed: {
@@ -51,23 +49,24 @@
 </script>
 
 <style scoped>
-  .skills-icon {
+
+  .skills-my-rank .skills-icon {
     display: inline-block;
     color: #b1b1b1;
     margin: 5px 0;
   }
 
-  .skills-icon.user-rank-stack {
+  .skills-my-rank .skills-icon.user-rank-stack {
     margin: 14px 0;
-    font-size: 60px;
+    font-size: 4.1rem;
     width: 100%;
     color: #0fcc15d1;
   }
-  .skills-icon.user-rank-stack i{
+  .skills-my-rank .skills-icon.user-rank-stack i{
     opacity: 0.38;
   }
 
-  .user-rank-text {
+  .skills-my-rank .user-rank-text {
     font-size: 0.5em;
     line-height: 1.2em;
     margin-top: 1.8em;

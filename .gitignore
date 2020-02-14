@@ -35,6 +35,7 @@ target
 *.class
 *.log
 /node_modules
+/node_modules/**
 rebel.xml
 rebel.xml.lock
 package-lock.json

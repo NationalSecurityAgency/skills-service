@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken
+import org.springframework.web.client.HttpClientErrorException
 import skills.auth.SkillsAuthorizationException
 import skills.auth.UserInfo
 import skills.utils.RetryUtil
@@ -52,7 +53,13 @@ class PkiUserDetailsService implements UserDetailsService, AuthenticationUserDet
             }
         } catch (Exception e) {
             log.error("Error occurred looking up user info for DN [${dn}]", e)
-            throw new BadCredentialsException("Unable to retrieve user info for [${dn}]", e)
+            String msg = "Unable to retrieve user info for [${dn}] - ${e.getMessage()}"
+            if (e.getCause() instanceof HttpClientErrorException) {
+                msg = ((HttpClientErrorException)e.getCause()).getResponseBodyAsString()
+            } else if (e instanceof  HttpClientErrorException) {
+                msg = ((HttpClientErrorException)e).getResponseBodyAsString()
+            }
+            throw new BadCredentialsException(msg, e)
         }
         return userInfo
     }

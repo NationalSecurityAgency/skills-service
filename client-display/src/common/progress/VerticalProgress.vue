@@ -14,14 +14,14 @@
       v-if="totalProgress !== 100"
       :val="totalProgress"
       :size="barSize"
-      :bar-color="totalProgressBarColor"
-      :bg-color="isLocked ? 'E6E6E6' : 'aeaeae'"
+      :bar-color="earnedTodayColor"
+      :bg-color="incompleteColor"
       class="complete-total"/>
     <progress-bar
       v-if="totalProgress !== 100"
       :val="totalProgressBeforeToday"
       :size="barSize"
-      :bar-color="beforeTodayBarColor"
+      :bar-color="beforeTodayColor"
       bg-color="transparent"
       class="complete-before-today" />
   </div>
@@ -55,6 +55,27 @@
     computed: {
       completeColor() {
         return this.$store.state.themeModule.progressIndicators.completeColor;
+      },
+      incompleteColor() {
+        let res = this.$store.state.themeModule.progressIndicators.incompleteColor;
+        if (!res) {
+          res = this.isLocked ? 'E6E6E6' : 'aeaeae';
+        }
+        return res;
+      },
+      beforeTodayColor() {
+        let res = this.$store.state.themeModule.progressIndicators.beforeTodayColor;
+        if (!res) {
+          res = this.beforeTodayBarColor;
+        }
+        return res;
+      },
+      earnedTodayColor() {
+        let res = this.$store.state.themeModule.progressIndicators.earnedTodayColor;
+        if (!res) {
+          res = this.beforeTodayBarColor;
+        }
+        return res;
       },
     },
   };

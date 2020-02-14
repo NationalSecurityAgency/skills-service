@@ -27,6 +27,7 @@ class ConstraintViolationSpecs extends DefaultIntSpec {
 
     def "check for existing project name"(){
         Map proj = SkillsFactory.createProject()
+        proj.name = "Test Project 1"
         skillsService.createProject(proj)
 
         when:
@@ -79,6 +80,7 @@ class ConstraintViolationSpecs extends DefaultIntSpec {
     def "check existing subject name"() {
         Map proj = SkillsFactory.createProject()
         Map subject = SkillsFactory.createSubject()
+        subject.name = "Subject 1"
         skillsService.createProject(proj)
         skillsService.createSubject(subject)
 
