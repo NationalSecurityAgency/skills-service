@@ -14,6 +14,6 @@ class SkillEventPublisher {
 
     void publishSkillUpdate(SkillEventResult result, String userId) {
         log.debug("Reporting user skill for user [$userId], result [$result]")
-        messagingTemplate.convertAndSendToUser(userId, "/queue/${result.projectId}/skill-updates", result)
+        messagingTemplate.convertAndSendToUser(userId, "/queue/${result.projectId}-skill-updates", result)
     }
 }
