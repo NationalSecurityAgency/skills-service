@@ -25,7 +25,6 @@
   import CustomizableFooter from './components/customization/CustomizableFooter';
   import IconManagerService from './components/utils/iconPicker/IconManagerService';
   import InceptionConfigurer from './InceptionConfigurer';
-  import AccessService from './components/access/AccessService';
   import InceptionProgressMessagesMixin from './components/inception/InceptionProgressMessagesMixin';
   import NewSoftwareVersionComponent from './components/header/NewSoftwareVersion';
 
@@ -58,11 +57,10 @@
     },
     created() {
       if (this.isAuthenticatedUser) {
-        AccessService.hasRole('ROLE_SUPERVISOR')
-          .then((response) => {
-            this.isSupervisor = response;
-            this.addCustomIconCSS();
-          });
+        this.$store.dispatch('access/isSupervisor').then((result) => {
+          this.isSupervisor = result;
+          this.addCustomIconCSS();
+        });
       }
     },
     mounted() {
@@ -76,11 +74,8 @@
       },
       isAuthenticatedUser() {
         if (this.isAuthenticatedUser) {
-          AccessService.hasRole('ROLE_SUPERVISOR')
-            .then((response) => {
-              this.isSupervisor = response;
-              this.addCustomIconCSS();
-            });
+          this.isSupervisor = this.$store.getters['access/isSupervisor'];
+          this.addCustomIconCSS();
         }
       },
       userInfo(newUserInfo) {

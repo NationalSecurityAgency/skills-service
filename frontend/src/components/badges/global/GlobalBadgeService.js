@@ -2,6 +2,7 @@ import axios from 'axios';
 
 export default {
   getBadges() {
+    console.log('GlobalBadgeService.getBadges called');
     return axios.get('/supervisor/badges')
       .then(response => response.data);
   },

@@ -7,6 +7,7 @@ import projects from './modules/projects';
 import badges from './modules/badges';
 import config from './modules/config';
 import libVersion from './modules/libVersion';
+import access from './modules/access';
 
 Vue.use(Vuex);
 
@@ -31,5 +32,6 @@ export default new Vuex.Store({
     badges,
     config,
     libVersion,
+    access,
   },
 });

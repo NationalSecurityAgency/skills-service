@@ -6,8 +6,10 @@
 </template>
 
 <script>
+  import { createNamespacedHelpers } from 'vuex';
   import Navigation from './utils/Navigation';
-  import AccessService from './access/AccessService';
+
+  const { mapGetters } = createNamespacedHelpers('access');
 
   export default {
     name: 'HomePage',
@@ -16,25 +18,28 @@
     },
     data() {
       return {
-        isSupervisor: false,
         navItems: [
           { name: 'Projects', iconClass: 'fa-project-diagram', page: 'HomePage' },
           { name: 'Metrics', iconClass: 'fa-cogs', page: 'GlobalMetrics' },
         ],
       };
     },
-    mounted() {
-      this.loadNavItems();
+    computed: {
+      ...mapGetters(['isSupervisor']),
+    },
+    watch: {
+      isSupervisor(newValue) {
+        if (newValue) {
+          this.navItems.splice(1, 0, { name: 'Badges', iconClass: 'fa-globe-americas', page: 'GlobalBadges' });
+        }
+      },
     },
     methods: {
       loadNavItems() {
-        AccessService.hasRole('ROLE_SUPERVISOR')
-          .then((response) => {
-            this.isSupervisor = response;
-            if (this.isSupervisor) {
-              this.navItems.splice(1, 0, { name: 'Badges', iconClass: 'fa-globe-americas', page: 'GlobalBadges' });
-            }
-          });
+        this.isSupervisor = this.$store.getters.isSupervisor;
+        if (this.isSupervisor) {
+          this.navItems.splice(1, 0, { name: 'Badges', iconClass: 'fa-globe-americas', page: 'GlobalBadges' });
+        }
       },
     },
   };

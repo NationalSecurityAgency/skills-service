@@ -66,10 +66,13 @@
       loadBadges() {
         GlobalBadgeService.getBadges()
           .then((badgesResponse) => {
-            this.badges = badgesResponse;
-            if (this.badges && this.badges.length) {
-              this.badges[0].isFirst = true;
-              this.badges[this.badges.length - 1].isLast = true;
+            const badges = badgesResponse;
+            if (badges && badges.length) {
+              badges[0].isFirst = true;
+              badges[badges.length - 1].isLast = true;
+              this.badges = badges;
+            } else {
+              this.badges = [];
             }
           })
           .finally(() => {
