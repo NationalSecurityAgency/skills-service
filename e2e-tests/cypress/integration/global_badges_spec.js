@@ -11,6 +11,7 @@ describe('Global Badges Tests', () => {
     });
 
     it('create badge with special chars', () => {
+
         const expectedId = 'JustABadgeBadge';
         const providedName = "JustABadge";
         cy.server().route('GET', `/supervisor/badges`).as('getGlobalBadges');
@@ -18,7 +19,7 @@ describe('Global Badges Tests', () => {
 
         cy.visit('/globalBadges');
         cy.wait('@getGlobalBadges')
-        cy.wait('@getGlobalBadges') // TODO: why is it being called twice?? #456
+
         cy.clickButton('Badge')
 
         cy.get('#badgeName').type(providedName)
