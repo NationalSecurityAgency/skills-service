@@ -18,7 +18,7 @@ build:
 #    - curl -sL https://rpm.nodesource.com/setup_12.x | bash -
     - curl -sL https://deb.nodesource.com/setup_12.x -o nodesource_setup.sh
     - apt-get install -y nodejs
-    - node -v
+    - nodejs -v
     - npm -v
   script:
     - echo "@skills:registry=http://$NEXUS_SERVER/repository/skills-registry/" > ~/.npmrc
