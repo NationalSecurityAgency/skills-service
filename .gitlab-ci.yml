@@ -18,8 +18,8 @@ build:
 #    - curl -sL https://rpm.nodesource.com/setup_12.x | bash -
 #    - curl -sL https://deb.nodesource.com/setup_12.x -o nodesource_setup.sh
 #    - apt-get install -y nodejs
-    - apt-get install nodejs
-    - apt-get install npm
+    - apt-get install -y nodejs
+    - apt-get install -y npm
     - nodejs -v
     - npm -v
   script:
