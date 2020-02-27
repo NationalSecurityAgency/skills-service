@@ -83,6 +83,12 @@
             <artifactId>groovy-all</artifactId>
             <version>${groovy.version}</version>
             <type>pom</type>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.codehaus.groovy</groupId>
+                    <artifactId>groovy-test-junit5</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
@@ -189,12 +195,13 @@
                     <artifactId>groovy-all</artifactId>
                 </exclusion>
             </exclusions>
+            <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>profile</groupId>
             <artifactId>call-stack-profiler</artifactId>
-            <version>1.0.1</version>
+            <version>1.0.2</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
@@ -392,6 +399,112 @@
                     <nexusUrl>${nexusServer}</nexusUrl>
                     <skipStaging>true</skipStaging>
                 </configuration>
+            </plugin>
+
+            <plugin>
+<!--                mvn license:add-third-party-->
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <version>2.0.0</version>
+                <executions>
+                    <execution>
+                        <id>default-cli</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>add-third-party</goal>
+                        </goals>
+                        <configuration>
+                            <!-- will use backend/src/license/THIRD-PARTY.properties -->
+                            <useMissingFile>true</useMissingFile>
+
+                            <!--  If true enforces excluding transitive dependencies of the excluded artifacts in the reactor;
+                                    otherwise only artifacts that match exclude filters are excluded.
+                                       works in conjunction with excludedScopes-->
+                            <excludeTransitiveDependencies>true</excludeTransitiveDependencies>
+                            <excludedScopes>test,provided</excludedScopes>
+
+                            <!-- white list of licenses, build will fail if a 3rd party licences is not found in this list -->
+                            <failIfWarning>true</failIfWarning>
+                            <failOnMissing>true</failOnMissing>
+                            <includedLicenses>
+                                <includedLicense>The Apache Software License, Version 2.0</includedLicense>
+                                <includedLicense>The MIT License</includedLicense>
+                                <includedLicense>The GNU General Public License (GPL) Version 2 with the Classpath Exception</includedLicense>
+                                <includedLicense>Eclipse Public License - Version 1.0</includedLicense>
+                                <includedLicense>Dual license: Common Development and Distribution License 1.1 (CDDL-1.1) and The GNU General Public License (GPL) Version 2</includedLicense>
+                                <includedLicense>Common Development and Distribution License 1.1 (CDDL-1.1) + The GNU General Public License (GPL) Version 2</includedLicense>
+                                <includedLicense>Common Development and Distribution License 1.1 (CDDL-1.1) + The GNU General Public License (GPL) Version 2 with the Classpath Exception</includedLicense>
+                                <includedLicense>Mozilla Public License, Version 2.0 or Eclipse Public License - Version 1.0</includedLicense>
+                                <includedLicense>The GNU General Public License (GPL) Version 2 with FOSS exception</includedLicense>
+                                <includedLicense>Common Development and Distribution License / The GNU General Public License (GPL) Version 2 with the Classpath Exception</includedLicense>
+                                <includedLicense>CC0 1.0 Universal</includedLicense>
+                                <includedLicense>The 2-Clause BSD License</includedLicense>
+                                <includedLicense>The 3-Clause BSD License</includedLicense>
+                                <includedLicense>Common Development and Distribution License 1.0 (CDDL-1.0)</includedLicense>
+                                <includedLicense>The GNU General Public License (GPL) Version 2.1</includedLicense>
+                                <includedLicense>ICU License</includedLicense>
+                                <includedLicense>Bouncy Castle Licence</includedLicense>
+                            </includedLicenses>
+                            <licenseMerges>
+                                <licenseMerge>The Apache Software License, Version 2.0|Apache License, Version 2.0</licenseMerge>
+                                <licenseMerge>The Apache Software License, Version 2.0|Apache Public License 2.0</licenseMerge>
+                                <licenseMerge>The Apache Software License, Version 2.0|Apache 2.0</licenseMerge>
+                                <licenseMerge>The Apache Software License, Version 2.0|The Apache License, Version 2.0</licenseMerge>
+                                <licenseMerge>The Apache Software License, Version 2.0|Apache License, version 2.0</licenseMerge>
+                                <licenseMerge>The Apache Software License, Version 2.0|Apache License 2.0</licenseMerge>
+                                <licenseMerge>The Apache Software License, Version 2.0|The Apache Software License, version 2.0</licenseMerge>
+                                <licenseMerge>The MIT License|The MIT License (MIT)</licenseMerge>
+                                <licenseMerge>The MIT License|MIT License</licenseMerge>
+                                <licenseMerge>The MIT License|MIT license</licenseMerge>
+                                <licenseMerge>The GNU General Public License (GPL) Version 2 with the Classpath Exception|GPL2 w/ CPE</licenseMerge>
+                                <licenseMerge>Eclipse Public License - Version 1.0|Eclipse Public License - v 1.0</licenseMerge>
+                                <licenseMerge>The BSD License|BSD</licenseMerge>
+                                <licenseMerge>The BSD License|BSD License</licenseMerge>
+                                <licenseMerge>MPL 2.0|Mozilla Public License, version 2.0</licenseMerge>
+                                <licenseMerge>Common Development and Distribution License / The GNU General Public License (GPL) Version 2 with the Classpath Exception|CDDL/GPLv2+CE</licenseMerge>
+                                <licenseMerge>Dual license: Common Development and Distribution License 1.1 (CDDL-1.1) and The GNU General Public License (GPL) Version 2|Dual license consisting of the CDDL v1.1 and GPL v2</licenseMerge>
+                                <licenseMerge>CC0 1.0 Universal|CC0</licenseMerge>
+                                <licenseMerge>CC0 1.0 Universal|Public Domain, per Creative Commons CC0</licenseMerge>
+                                <licenseMerge>The 2-Clause BSD License|BSD-2-Clause</licenseMerge>
+                                <licenseMerge>The 3-Clause BSD License|BSD 3-clause New License</licenseMerge>
+                                <licenseMerge>Common Development and Distribution License 1.0 (CDDL-1.0)|Common Development and Distribution License (CDDL) v1.0</licenseMerge>
+                                <licenseMerge>The GNU General Public License (GPL) Version 2.1|GNU Lesser General Public License v2.1 or later</licenseMerge>
+                                <licenseMerge>The GNU General Public License (GPL) Version 2.1|GNU Library General Public License v2.1 or later</licenseMerge>
+                                <licenseMerge>Eclipse Public License - Version 1.0|Eclipse Public License v1.0</licenseMerge>
+                                <licenseMerge>Common Development and Distribution License (CDDL) + GNU General Public License (GPL)|CDDL+GPL License</licenseMerge>
+                                <licenseMerge>Common Development and Distribution License (CDDL) + The GNU General Public License (GPL) Version 2 with the Classpath Exception|CDDL + GPLv2 with classpath exception</licenseMerge>
+                                <licenseMerge>The GNU General Public License (GPL) Version 2 with FOSS exception|The GNU General Public License, v2 with FOSS exception</licenseMerge>
+                                <licenseMerge>Mozilla Public License, Version 2.0 or Eclipse Public License - Version 1.0|MPL 2.0 or EPL 1.0</licenseMerge>
+                            </licenseMerges>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+<!--                mvn com.mycila:license-maven-plugin:3.0:check
+                    mvn com.mycila:license-maven-plugin:3.0:format-->
+                <groupId>com.mycila</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <version>3.0</version>
+                <configuration>
+                    <header>${basedir}/../license-add/LICENSE-HEADER.txt</header>
+                    <excludes>
+                        <exclude>**/*.xml</exclude>
+                        <exclude>**/*.jks</exclude>
+                        <exclude>**/*.ftl</exclude>
+                        <exclude>src/main/resources/public/**</exclude>
+                        <exclude>**/license/*.properties</exclude>
+                    </excludes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
