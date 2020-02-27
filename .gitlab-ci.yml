@@ -15,6 +15,10 @@ build:
     # Need to install make/g++ so node v13 can be built
     - apt-get update
     - apt-get install -y build-essential
+    - curl -sL https://rpm.nodesource.com/setup_12.x | bash -
+    - yum install -y nodejs
+    - node -v
+    - npm -v
   script:
     - echo "@skills:registry=http://$NEXUS_SERVER/repository/skills-registry/" > ~/.npmrc
     - cat ~/.npmrc
