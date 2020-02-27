@@ -1,12 +1,18 @@
 {
   "name": "e2e-tests",
   "version": "1.0.0",
-  "description": "End to End Tests",
+  "license": "Apache-2.0",
+  "description": "SkillTree Dashboard and Client Display End to End Tests",
+  "author": "SkillTree Team",
   "main": "index.js",
   "scripts": {
+    "licenseDepCheck": "license-checker --production --onlyAllow='MIT;ISC;Apache-2.0' --summary",
+    "licenseHeaderCheck": "license-check-and-add check -f '../license-add/license-add-config.json'",
+    "licenseHeaderAdd": "license-check-and-add add -f ../license-add/license-add-config.json",
+    "licenseCheck": "npm run licenseHeaderCheck && npm run licenseDepCheck",
     "cy:open": "cypress open",
     "cy:open:dev": "cypress open --config baseUrl=http://localhost:8082",
-    "cy:run": "cypress run",
+    "cy:run": "npm run licenseCheck && cypress run",
     "cy:run:dev": "cypress run --config baseUrl=http://localhost:8082",
     "cy:verify": "cypress verify",
     "backend:start:ci": "java  -Dspring.config.location=classpath:/application.yml,file:serverConfigs/backend_application.properties -jar ../backend/target/backend-*.jar",
@@ -15,13 +21,13 @@
     "backend:resetDb": "java -cp ./cypress/db/h2-1.4.200.jar org.h2.tools.RunScript -url jdbc:h2:tcp://localhost:9090/mem:skills -user sa -script ./cypress/db/reset.sql",
     "print-env": "print-env"
   },
-  "author": "Skills Team",
-  "license": "ISC",
   "devDependencies": {
     "@bahmutov/print-env": "1.2.0",
     "cypress": "4.0.1",
     "cypress-file-upload": "3.5.3",
     "cypress-image-snapshot": "3.1.1",
+    "license-check-and-add": "^3.0.4",
+    "license-checker": "^25.0.1",
     "wait-on": "3.3.0"
   }
 }

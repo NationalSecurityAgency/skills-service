@@ -1,11 +1,16 @@
 {
   "name": "frontend",
   "version": "1.0.0",
-  "private": true,
-  "author": "User Skills Team",
+  "license": "Apache-2.0",
+  "description": "SkillTree Dashboard UI",
+  "author": "SkillTree Team",
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
+    "licenseDepCheck": "license-checker --production --onlyAllow='MIT;ISC;Apache-2.0;BSD-2-Clause;Custom: https://travis-ci.org/component/emitter.png' --summary",
+    "licenseHeaderCheck": "license-check-and-add check -f '../license-add/license-add-config.json'",
+    "licenseHeaderAdd": "license-check-and-add add -f ../license-add/license-add-config.json",
+    "licenseCheck": "npm run licenseHeaderCheck && npm run licenseDepCheck",
+    "build": "npm run licenseCheck && vue-cli-service build",
     "deploy": "npm run build && rm -rf ../backend/src/main/resources/public/static/js && cp -rT dist ../backend/src/main/resources/public/ && cp -rT dist ../backend/target/classes/public/",
     "lint": "vue-cli-service lint",
     "test:e2e": "vue-cli-service test:e2e",
@@ -56,6 +61,8 @@
     "babel-jest": "24.9.0",
     "eslint": "6.5.0",
     "eslint-plugin-vue": "5.2.3",
+    "license-check-and-add": "3.0.4",
+    "license-checker": "25.0.1",
     "node-sass": "4.12.0",
     "sass-loader": "8.0.0",
     "vue-template-compiler": "2.6.10"
