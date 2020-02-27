@@ -15,6 +15,7 @@ build:
     # Need to install make/g++ so node v13 can be built
     - apt-get update
     - apt-get install -y build-essential
+    - yum install -y gcc-c++ make
     - curl -sL https://rpm.nodesource.com/setup_12.x | bash -
     - yum install -y nodejs
     - node -v
