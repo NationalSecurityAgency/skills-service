@@ -16,8 +16,10 @@ build:
     - apt-get update
     - apt-get install -y build-essential
 #    - curl -sL https://rpm.nodesource.com/setup_12.x | bash -
-    - curl -sL https://deb.nodesource.com/setup_12.x -o nodesource_setup.sh
-    - apt-get install -y nodejs
+#    - curl -sL https://deb.nodesource.com/setup_12.x -o nodesource_setup.sh
+#    - apt-get install -y nodejs
+    - apt-get install nodejs
+    - apt-get install npm
     - nodejs -v
     - npm -v
   script:
