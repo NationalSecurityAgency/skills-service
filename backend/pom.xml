@@ -13,13 +13,6 @@
     <artifactId>backend</artifactId>
 
     <dependencies>
-        <!-- TEMP -->
-        <dependency>
-            <groupId>fr.opensagres.xdocreport.sfntly</groupId>
-            <artifactId>sfntly</artifactId>
-            <version>1.0.0</version>
-        </dependency>
-
         <dependency>
             <groupId>com.auth0</groupId>
             <artifactId>java-jwt</artifactId>
@@ -70,8 +63,9 @@
         <dependency>
             <groupId>org.springframework.security.oauth.boot</groupId>
             <artifactId>spring-security-oauth2-autoconfigure</artifactId>
-            <version>2.0.0.RELEASE</version>
-            <!--<version>${springboot.version}</version>-->
+            <version>2.1.12.RELEASE</version>
+<!--            Can not use the same version and they don't line up-->
+<!--            <version>${springboot.version}</version>-->
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -87,6 +81,14 @@
                 <exclusion>
                     <groupId>org.codehaus.groovy</groupId>
                     <artifactId>groovy-test-junit5</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.codehaus.groovy</groupId>
+                    <artifactId>groovy-test</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.codehaus.groovy</groupId>
+                    <artifactId>groovy-testng</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -109,11 +111,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-devtools</artifactId>
-            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
