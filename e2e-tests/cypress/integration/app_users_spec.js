@@ -44,12 +44,33 @@ describe('App Users Tests', () => {
             return result;
         }
 
+        // for (let i = 0; i < 2000; i++) {
+        //     const randomUser = createUser(8); Math.random().toString(36).substring(7);
+        //     cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: randomUser, timestamp: new Date().getTime()})
+        //     // cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: `user${i}`, timestamp: new Date().getTime() - 1000*60*60*24})
+        // }
+    });
+
+    it.only('report event for project i am not an admin', () => {
+        cy.register("userOther", "password");
+
+        const createUser = (length) => {
+            var result           = '';
+            var characters       = 'abcdefghijklmnopqrstuvwxyz';
+            var charactersLength = characters.length;
+            for ( var i = 0; i < length; i++ ) {
+                result += characters.charAt(Math.floor(Math.random() * charactersLength));
+            }
+            return result;
+        }
+
         for (let i = 0; i < 2000; i++) {
             const randomUser = createUser(8); Math.random().toString(36).substring(7);
             cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: randomUser, timestamp: new Date().getTime()})
             // cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: `user${i}`, timestamp: new Date().getTime() - 1000*60*60*24})
         }
-    });
+
+    })
 
     it('filter user table by username', () => {
         cy.visit("/projects/proj1/users")

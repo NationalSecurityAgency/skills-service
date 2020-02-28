@@ -1,0 +1,349 @@
+/**
+ * Copyright 2020 SkillTree
+ * <p>
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p>
+ * https://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package skills.controller;
+
+import callStack.profiler.CProf;
+import callStack.profiler.Profile;
+import groovy.lang.Closure;
+import groovy.transform.CompileStatic;
+import groovy.util.logging.Slf4j;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+import skills.PublicProps;
+import skills.auth.UserInfoService;
+import skills.controller.exceptions.SkillsValidator;
+import skills.controller.request.model.SkillEventRequest;
+import skills.icons.CustomIconFacade;
+import skills.services.events.SkillEventResult;
+import skills.services.events.SkillEventsService;
+import skills.skillLoading.RankingLoader;
+import skills.skillLoading.SkillsLoader;
+import skills.skillLoading.model.*;
+import skills.utils.RetryUtil;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+
+@CrossOrigin(allowCredentials = "true")
+@RestController
+@RequestMapping("/api")
+@Slf4j
+@CompileStatic
+@skills.auth.aop.AdminUsersOnlyWhenUserIdSupplied
+@skills.profile.EnableCallStackProf
+class UserSkillsController {
+    private Logger log = LoggerFactory.getLogger(UserSkillsController.class);
+
+    static final DateTimeFormatter DTF = ISODateTimeFormat.dateTimeNoMillis().withLocale(Locale.ENGLISH).withZoneUTC();
+
+    @Autowired
+    private SkillEventsService skillsManagementFacade;
+
+    @Autowired
+    private SkillsLoader skillsLoader;
+
+    @Autowired
+    private UserInfoService userInfoService;
+
+    @Autowired
+    private CustomIconFacade customIconFacade;
+
+    @Autowired
+    private RankingLoader rankingLoader;
+
+    @Autowired
+    private PublicProps publicProps;
+
+    private int getProvidedVersionOrReturnDefault(Integer versionParam) {
+        if (versionParam != null) {
+            return versionParam;
+        }
+
+        return publicProps.getInt(PublicProps.UiProp.maxSkillVersion);
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/level", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    public Integer getUserLevel(@PathVariable(name = "projectId") String projectId,
+                                @RequestParam(name = "userId", required = false) String userIdParam) {
+        String userId = getUserId(userIdParam);
+        return skillsLoader.getUserLevel(projectId, userId);
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/summary", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    @CompileStatic
+    @Profile
+    public OverallSkillSummary getSkillsSummary(@PathVariable("projectId") String projectId,
+                                                @RequestParam(name = "userId", required = false) String userIdParam,
+                                                @RequestParam(name = "version", required = false) Integer version) {
+        String userId = getUserId(userIdParam);
+        return skillsLoader.loadOverallSummary(projectId, userId, getProvidedVersionOrReturnDefault(version));
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/summary", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    @CompileStatic
+    public SkillSubjectSummary getSubjectSummary(@PathVariable("projectId") String projectId,
+                                                 @PathVariable("subjectId") String subjectId,
+                                                 @RequestParam(name = "userId", required = false) String userIdParam,
+                                                 @RequestParam(name = "version", required = false) Integer version) {
+        String userId = getUserId(userIdParam);
+        return skillsLoader.loadSubject(projectId, userId, subjectId, getProvidedVersionOrReturnDefault(version));
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/descriptions", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    @CompileStatic
+    public List<SkillDescription> getSubjectSkillsDescriptions(@PathVariable("projectId") String projectId,
+                                                               @PathVariable("subjectId") String subjectId,
+                                                               @RequestParam(name = "version", required = false) Integer version) {
+        return skillsLoader.loadSubjectDescriptions(projectId, subjectId, getProvidedVersionOrReturnDefault(version));
+    }
+
+    /**
+     * Note: skill version is not applicable to a single skill;
+     * there is no reason exclude dependency skills as the system will not allow to dependent skills with later version
+     */
+    @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/summary", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    @CompileStatic
+    public SkillSummary getSkillSummary(@PathVariable("projectId") String projectId,
+                                        @PathVariable("skillId") String skillId,
+                                        @RequestParam(name = "userId", required = false) String userIdParam) {
+        String userId = getUserId(userIdParam);
+        return skillsLoader.loadSkillSummary(projectId, userId, null, skillId);
+    }
+
+    /**
+     * Note: skill version is not applicable to a single skill;
+     * there is no reason exclude dependency skills as the system will not allow to dependent skills with later version
+     */
+    @RequestMapping(value = "/projects/{projectId}/projects/{crossProjectId}/skills/{skillId}/summary", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    @CompileStatic
+    public SkillSummary getCrossProjectSkillSummary(@PathVariable("projectId") String projectId,
+                                                    @PathVariable("crossProjectId") String crossProjectId,
+                                                    @PathVariable("skillId") String skillId,
+                                                    @RequestParam(name = "userId", required = false) String userIdParam) {
+        String userId = getUserId(userIdParam);
+        return skillsLoader.loadSkillSummary(projectId, userId, crossProjectId, skillId);
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/badges/summary", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    @CompileStatic
+    public List<SkillBadgeSummary> getAllBadgesSummary(@PathVariable("projectId") String projectId,
+                                                       @RequestParam(name = "userId", required = false) String userIdParam,
+                                                       @RequestParam(name = "version", required = false) Integer version) {
+        String userId = getUserId(userIdParam);
+        List<SkillBadgeSummary> badgeSummaries = skillsLoader.loadBadgeSummaries(projectId, userId, getProvidedVersionOrReturnDefault(version));
+
+        // add any global badges as well
+        badgeSummaries.addAll(skillsLoader.loadGlobalBadgeSummaries(userId, projectId, getProvidedVersionOrReturnDefault(version)));
+        return badgeSummaries;
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/badges/{badgeId}/descriptions", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    @CompileStatic
+    public List<SkillDescription> getBadgeSkillsDescriptions(@PathVariable("projectId") String projectId,
+                                                             @PathVariable("badgeId") String badgeId,
+                                                             @RequestParam(name = "version", required = false) Integer version,
+                                                             @RequestParam(name = "global", required = false) Boolean isGlobal) {
+        if (isGlobal != null && isGlobal) {
+            return skillsLoader.loadGlobalBadgeDescriptions(badgeId, getProvidedVersionOrReturnDefault(version));
+        } else {
+            return skillsLoader.loadBadgeDescriptions(projectId, badgeId, getProvidedVersionOrReturnDefault(version));
+        }
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/badges/{badgeId}/summary", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    @CompileStatic
+    public SkillBadgeSummary getBadgeSummary(@PathVariable("projectId") String projectId,
+                                             @PathVariable("badgeId") String badgeId,
+                                             @RequestParam(name = "userId", required = false) String userIdParam,
+                                             @RequestParam(name = "version", required = false) Integer version,
+                                             @RequestParam(name = "global", required = false) Boolean isGlobal) {
+        String userId = getUserId(userIdParam);
+        if (isGlobal != null && isGlobal) {
+            return skillsLoader.loadGlobalBadge(userId, projectId, badgeId, getProvidedVersionOrReturnDefault(version));
+        } else {
+            return skillsLoader.loadBadge(projectId, userId, badgeId, getProvidedVersionOrReturnDefault(version));
+        }
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/pointHistory", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    @CompileStatic
+    public UserPointHistorySummary getProjectsPointHistory(@PathVariable("projectId") String projectId,
+                                                           @RequestParam(name = "userId", required = false) String userIdParam,
+                                                           @RequestParam(name = "version", required = false) Integer version) {
+        String userId = getUserId(userIdParam);
+        return skillsLoader.loadPointHistorySummary(projectId, userId, 365, null, getProvidedVersionOrReturnDefault(version));
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/pointHistory", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    @CompileStatic
+    public UserPointHistorySummary getSubjectsPointHistory(@PathVariable("projectId") String projectId,
+                                                           @PathVariable("subjectId") String subjectId,
+                                                           @RequestParam(name = "userId", required = false) String userIdParam,
+                                                           @RequestParam(name = "version", required = false) Integer version) {
+        String userId = getUserId(userIdParam);
+        return skillsLoader.loadPointHistorySummary(projectId, userId, 365, subjectId, getProvidedVersionOrReturnDefault(version));
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/dependencies", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    @CompileStatic
+    public SkillDependencyInfo loadSkillDependencyInfo(@PathVariable("projectId") String projectId,
+                                                       @PathVariable("skillId") String skillId,
+                                                       @RequestParam(name = "userId", required = false) String userIdParam) {
+        String userId = getUserId(userIdParam);
+        return skillsLoader.loadSkillDependencyInfo(projectId, userId, skillId);
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/skills/{skillId}", method = {RequestMethod.PUT, RequestMethod.POST}, produces = "application/json")
+    @ResponseBody
+    @CompileStatic
+    @Profile
+    public SkillEventResult addSkill(@PathVariable("projectId") String projectId,
+                                     @PathVariable("skillId") String skillId,
+                                     @RequestBody(required = false) SkillEventRequest skillEventRequest) {
+
+        String requestedUserId = skillEventRequest != null ? skillEventRequest.getUserId() : null;
+        Long requestedTimestamp = skillEventRequest != null ? skillEventRequest.getTimestamp() : null;
+        Boolean notifyIfSkillNotApplied = skillEventRequest != null ? skillEventRequest.getNotifyIfSkillNotApplied() : false;
+
+        Date incomingDate = null;
+
+        if (skillEventRequest != null && requestedTimestamp != null && requestedTimestamp > 0) {
+            //let's account for some possible clock drift
+            SkillsValidator.isTrue(requestedTimestamp <= (System.currentTimeMillis() + 30000), "Skill Events may not be in the future", projectId, skillId);
+            incomingDate = new Date(requestedTimestamp);
+        } else {
+            incomingDate = new Date();
+        }
+
+        SkillEventResult result;
+        String userId = getUserId(requestedUserId);
+        if (log.isInfoEnabled()) {
+            log.info("ReportSkill (ProjectId=[{}], SkillId=[{}], CurrentUser=[{}], RequestUser=[{}], RequestDate=[{}])",
+                    new String[]{projectId, skillId, userInfoService.getCurrentUserId(), requestedUserId, toDateString(requestedTimestamp)});
+        }
+
+        String prof = "retry-reportSkill";
+        CProf.start(prof);
+        try {
+            final Date dataParam = incomingDate;
+            Closure<SkillEventResult> closure = new Closure<SkillEventResult>(null) {
+                @Override
+                public SkillEventResult call() {
+                    return skillsManagementFacade.reportSkill(projectId, skillId, userId, notifyIfSkillNotApplied, dataParam);
+                }
+            };
+            result = (SkillEventResult) RetryUtil.withRetry(3, false, closure);
+        } finally {
+            CProf.stop(prof);
+        }
+        return result;
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/rank", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    @CompileStatic
+    public SkillsRanking getRanking(@PathVariable("projectId") String projectId,
+                                    @RequestParam(name = "userId", required = false) String userIdParam) {
+        String userId = getUserId(userIdParam);
+        return rankingLoader.getUserSkillsRanking(projectId, userId);
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/rank", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    @CompileStatic
+    public SkillsRanking getRankingBySubject(@PathVariable("projectId") String projectId,
+                                             @PathVariable("subjectId") String subjectId,
+                                             @RequestParam(name = "userId", required = false) String userIdParam) {
+        String userId = getUserId(userIdParam);
+        return rankingLoader.getUserSkillsRanking(projectId, userId, subjectId);
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/rankDistribution/usersPerLevel", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    @CompileStatic
+    public List<UsersPerLevel> getUsersPerLevel(@PathVariable("projectId") String projectId) {
+        return rankingLoader.getUserCountsPerLevel(projectId);
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/rankDistribution/usersPerLevel", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    @CompileStatic
+    public List<UsersPerLevel> getUsersPerLevelForSubject(@PathVariable("projectId") String projectId, @PathVariable("subjectId") String subjectId) {
+        return rankingLoader.getUserCountsPerLevel(projectId, false, subjectId);
+    }
+
+
+    @RequestMapping(value = "/projects/{projectId}/rankDistribution", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    @CompileStatic
+    public SkillsRankingDistribution getRankingDistribution(@PathVariable("projectId") String projectId,
+                                                            @RequestParam(name = "userId", required = false) String userIdParam) {
+        String userId = getUserId(userIdParam);
+        return rankingLoader.getRankingDistribution(projectId, userId);
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/rankDistribution", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    @CompileStatic
+    public SkillsRankingDistribution getRankingDistributionBySubject(@PathVariable("projectId") String projectId,
+                                                                     @PathVariable("subjectId") String subjectId,
+                                                                     @RequestParam(name = "userId", required = false) String userIdParam) {
+        String userId = getUserId(userIdParam);
+        return rankingLoader.getRankingDistribution(projectId, userId, subjectId);
+    }
+
+    @RequestMapping(value = "/projects/{id}/customIconCss", method = RequestMethod.GET, produces = "text/css")
+    @ResponseBody
+    public String getCustomIconCss(@PathVariable("id") String projectId) {
+        return customIconFacade.generateCss(projectId);
+    }
+
+    @RequestMapping(value = "/icons/customIconCss", method = RequestMethod.GET, produces = "text/css")
+    @ResponseBody
+    public String getCustomGlogbalIconCss() {
+        return customIconFacade.generateGlobalCss();
+    }
+
+    private String getUserId(String userIdParam) {
+        return userInfoService.getUserName(userIdParam);
+    }
+
+    private String toDateString(Long timestamp) {
+        if (timestamp != null) {
+            return DTF.print(timestamp);
+        }
+
+        return "";
+    }
+
+}

@@ -33,6 +33,7 @@ import org.springframework.web.socket.sockjs.client.WebSocketTransport
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
+import skills.intTests.utils.SkillsService
 import skills.intTests.utils.TestUtils
 import skills.services.events.CompletionItem
 import skills.services.events.SkillEventResult
@@ -1160,7 +1161,27 @@ class ReportSkillsSpecs extends DefaultIntSpec {
 
         then:
         SkillsClientException ex = thrown()
+        ex.httpStatus == org.springframework.http.HttpStatus.BAD_REQUEST
         ex.message.contains("Spaces are not allowed in user id. Provided [user a]")
+    }
+
+    def "admin can not report skills for another project"() {
+        SkillsService otherUser = createService("otherUser")
+
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(10, )
+
+        otherUser.createProject(proj)
+        otherUser.createSubject(subj)
+        otherUser.createSkills(skills)
+
+        when:
+        skillsService.addSkill([projectId: projId, skillId: skills[0].skillId], "user", new Date())
+
+        then:
+        SkillsClientException ex = thrown()
+        ex.httpStatus == org.springframework.http.HttpStatus.FORBIDDEN
     }
 
 }
