@@ -87,6 +87,8 @@ Cypress.Commands.add("login", (user, pass) => {
         cy.get('#username').type(user);
         cy.get('#inputPassword').type(pass);
         cy.contains('Login').click();
+        // wait for login to finish
+        cy.contains('My Projects');
     }
 
     // this will allow to execute endpoint request directly to the backend
