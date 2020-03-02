@@ -87,9 +87,11 @@ limitations under the License.
           this.addCustomIconCSS();
         }
       },
-      isAuthenticatedUser() {
-        if (this.isAuthenticatedUser) {
-          this.isSupervisor = this.$store.getters['access/isSupervisor'];
+      isAuthenticatedUser(newVal) {
+        if (newVal) {
+          this.$store.dispatch('access/isSupervisor').then((result) => {
+            this.isSupervisor = result;
+          });
           this.addCustomIconCSS();
         }
       },

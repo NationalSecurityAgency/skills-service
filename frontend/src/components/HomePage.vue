@@ -21,10 +21,7 @@ limitations under the License.
 </template>
 
 <script>
-  import { createNamespacedHelpers } from 'vuex';
   import Navigation from './utils/Navigation';
-
-  const { mapGetters } = createNamespacedHelpers('access');
 
   export default {
     name: 'HomePage',
@@ -40,20 +37,30 @@ limitations under the License.
       };
     },
     computed: {
-      ...mapGetters(['isSupervisor']),
+      isSupervisor() {
+        return this.$store.getters['access/isSupervisor'];
+      },
+    },
+    mounted() {
+      this.loadNavItems();
     },
     watch: {
-      isSupervisor(newValue) {
-        if (newValue) {
-          this.navItems.splice(1, 0, { name: 'Badges', iconClass: 'fa-globe-americas', page: 'GlobalBadges' });
-        }
+      isSupervisor() {
+        this.loadNavItems();
       },
     },
     methods: {
       loadNavItems() {
-        this.isSupervisor = this.$store.getters.isSupervisor;
+        const globalBadges = this.navItems.find(element => element.name === 'Badges');
         if (this.isSupervisor) {
-          this.navItems.splice(1, 0, { name: 'Badges', iconClass: 'fa-globe-americas', page: 'GlobalBadges' });
+          if (!globalBadges) {
+            this.navItems.splice(1, 0, { name: 'Badges', iconClass: 'fa-globe-americas', page: 'GlobalBadges' });
+          }
+        } else if (globalBadges) {
+          const idx = this.navItems.indexOf(globalBadges);
+          if (idx >= 0) {
+            this.navItems.splice(idx, 1);
+          }
         }
       },
     },

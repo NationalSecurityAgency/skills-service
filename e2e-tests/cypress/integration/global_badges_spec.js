@@ -25,7 +25,7 @@ describe('Global Badges Tests', () => {
         cy.login(supervisorUser, 'password');
     });
 
-    it('create badge with special chars', () => {
+    it('Create badge with special chars', () => {
 
         const expectedId = 'JustABadgeBadge';
         const providedName = "JustABadge";
@@ -33,16 +33,122 @@ describe('Global Badges Tests', () => {
         cy.server().route('PUT', `/supervisor/badges/${expectedId}`).as('postGlobalBadge');
 
         cy.visit('/globalBadges');
-        cy.wait('@getGlobalBadges')
+        cy.wait('@getGlobalBadges');
 
-        cy.clickButton('Badge')
+        cy.clickButton('Badge');
 
-        cy.get('#badgeName').type(providedName)
+        cy.get('#badgeName').type(providedName);
 
-        cy.clickSave()
+        cy.clickSave();
         cy.wait('@postGlobalBadge');
 
         cy.contains(`ID: ${expectedId}`);
+    });
+
+    it('Delete badge', () => {
+        const expectedId = 'JustABadgeBadge';
+        const providedName = "JustABadge";
+
+        cy.request('PUT', `/supervisor/badges/${expectedId}`, {
+            badgeId: expectedId,
+            description: "",
+            iconClass: 'fas fa-award',
+            isEdit: false,
+            name: providedName,
+            originalBadgeId: ''
+        });
+
+        cy.server().route('GET', `/supervisor/badges`).as('getGlobalBadges');
+        cy.server().route('DELETE', `/supervisor/badges/${expectedId}`).as('deleteGlobalBadge');
+
+        cy.visit('/globalBadges');
+        cy.wait('@getGlobalBadges');
+
+        cy.get('.card-body button.dropdown-toggle').click();
+        cy.get('.card-body div.dropdown').contains('Delete').click();
+        cy.get('.btn-danger').contains('YES, Delete It!').click();
+        cy.wait('@deleteGlobalBadge');
+        cy.contains('No Badges Yet').should('be.visible');
+    });
+
+    it('Add dependencies to badge', () => {
+        //proj/subj/skill1
+        cy.request('POST', '/app/projects/proj1', {
+            projectId: 'proj1',
+            name: "proj1"
+        });
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            name: "Subject 1"
+        });
+        cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill1`, {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            skillId: 'skill1',
+            name: `This is 1`,
+            type: 'Skill',
+            pointIncrement: 100,
+            numPerformToCompletion: 5,
+            pointIncrementInterval: 0,
+            numMaxOccurrencesIncrementInterval: -1,
+            version: 0,
+        });
+        //proj/subj/skill2
+        cy.request('POST', '/app/projects/proj2', {
+            projectId: 'proj2',
+            name: "proj2"
+        });
+        cy.request('POST', '/admin/projects/proj2/subjects/subj1', {
+            projectId: 'proj2',
+            subjectId: 'subj1',
+            name: "Subject 1"
+        });
+        cy.request('POST', `/admin/projects/proj2/subjects/subj1/skills/skill1`, {
+            projectId: 'proj2',
+            subjectId: 'subj1',
+            skillId: 'skill1',
+            name: `This is 1`,
+            type: 'Skill',
+            pointIncrement: 100,
+            numPerformToCompletion: 5,
+            pointIncrementInterval: 0,
+            numMaxOccurrencesIncrementInterval: -1,
+            version: 0,
+        });
+
+        const badgeId = 'a_badge';
+        cy.request('PUT', `/supervisor/badges/${badgeId}`, {
+            badgeId: badgeId,
+            description: "",
+            iconClass: 'fas fa-award',
+            isEdit: false,
+            name: 'A Badge',
+            originalBadgeId: ''
+        });
+
+        cy.contains('Badges').click();
+        cy.contains('Manage').click();
+        cy.get('.multiselect__tags').click();
+        cy.get('.multiselect__tags input').type('{enter}');
+        cy.get('div.table-responsive').should('be.visible');
+        cy.get('li').contains('Levels').click();
+
+        cy.get('.multiselect__tags').first().click();
+        cy.get('.multiselect__tags input').first().type('proj2{enter}');
+
+        cy.get('.multiselect__tags').last().click();
+        cy.get('.multiselect__tags input').last().type('5{enter}');
+
+        cy.contains('Add').click();
+        cy.get('#simple-levels-table').should('be.visible');
+    });
+
+    it('Navigate to global badges menu entry', () => {
+        cy.server().route('GET', `/supervisor/badges`).as('getGlobalBadges');
+
+        cy.contains('Badges').click();
+        cy.wait('@getGlobalBadges');
     });
 
 
