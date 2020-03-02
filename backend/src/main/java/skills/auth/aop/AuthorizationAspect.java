@@ -1,12 +1,12 @@
 /**
  * Copyright 2020 SkillTree
- * <p>
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * <p>
- * https://www.apache.org/licenses/LICENSE-2.0
- * <p>
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -50,9 +50,6 @@ class AuthorizationAspect {
     private MessageSourceAccessor messages = SpringSecurityMessageSource.getAccessor();
 
     @Autowired
-    private skills.auth.UserAuthService userAuthService;
-
-    @Autowired
     private UserInfoService userInfoService;
 
     @Around(value = "@within(AdminUsersOnlyWhenUserIdSupplied) || @annotation(AdminUsersOnlyWhenUserIdSupplied)")
@@ -88,16 +85,7 @@ class AuthorizationAspect {
     @Profile
     private String getUserIdParam(ProceedingJoinPoint joinPoint) {
         String userId = null;
-        if (joinPoint == null) {
-            String username = "";
-            if (userInfoService != null){
-                UserInfo userInfo = userInfoService.getCurrentUser();
-                if (userInfo != null){
-                    username = userInfo.getUsername();
-                }
-            }
-            throw new IllegalArgumentException("Provided ProceedingJoinPoint was null. How can that be??? Username=[" + username + "]");
-        }
+        validateJoinPoint(joinPoint);
         CodeSignature codeSignature = (CodeSignature) joinPoint.getSignature();
         String[] parameterNames = codeSignature.getParameterNames();
         paramLoop:
@@ -116,5 +104,24 @@ class AuthorizationAspect {
             }
         }
         return userId;
+    }
+
+    /**
+     * This looks like a Spring Framework bug as a NullPointerException
+     * was observed on joinPoint.getSignature() on several occasions now.
+     * We've tried to replicate the issue but without any luck.
+     * This check is added in hopes to shed some light if the issue happens again in the future.
+     */
+    private void validateJoinPoint(ProceedingJoinPoint joinPoint) {
+        if (joinPoint == null) {
+            String username = "";
+            if (userInfoService != null){
+                UserInfo userInfo = userInfoService.getCurrentUser();
+                if (userInfo != null){
+                    username = userInfo.getUsername();
+                }
+            }
+            throw new IllegalArgumentException("Provided ProceedingJoinPoint was null. How can that be??? Username=[" + username + "]");
+        }
     }
 }
