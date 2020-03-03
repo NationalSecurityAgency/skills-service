@@ -16,6 +16,9 @@
 package skills.intTests
 
 import org.apache.commons.lang3.RandomStringUtils
+import org.joda.time.DateTime
+import org.joda.time.format.DateTimeFormat
+import org.joda.time.format.DateTimeFormatter
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
@@ -196,6 +199,30 @@ class UserPointsSpecs extends DefaultIntSpec {
         results1.data.size() == 1
         results1.data.get(0).userId == sampleUserIds.get(0)?.toLowerCase()
         results1.data.get(0).totalPoints == 35
+    }
+
+    def "user updated date is updated when a skill is achieved"() {
+
+        //testSubject1, testSubject2
+        final uid = sampleUserIds.get(0).toLowerCase()
+
+        when:
+        def users = skillsService.getProjectUsers(projId, 100).data
+
+        def userBeforeSkillAdd = users.find() {it.userId == uid}
+        DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+
+        def res = skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(1)], uid, new DateTime().toDate())
+        assert res.body.skillApplied
+
+        def users2 = skillsService.getProjectUsers(projId, 100).data
+
+        def userAfterSkillAdd = users2.find() {it.userId == uid}
+
+
+        then:
+        formatter.parseDateTime(userBeforeSkillAdd.lastUpdated).isBefore(formatter.parseDateTime(userAfterSkillAdd.lastUpdated))
+
     }
 
 
