@@ -1,5 +1,5 @@
 {
-  "ignore": [ ".git", "coverage", ".*", "*.iml", "babel.config.js", "rollup.config.js", "app/assets/**", "target/**",
+  "ignore": [ ".git", "coverage", ".*/**", ".*", "*.iml", "babel.config.js", "rollup.config.js", "app/assets/**", "target/**",
     "pom.xml", "build/**", "**/robots.txt", "**.svg", "**.config.js", "**/**/*.conf.js", "**/**/.*",
     "cypress/videos/**", "**/*.jar", "**.xml", "cypress/fonts/**", "cypress/fixtures/**"
   ],
