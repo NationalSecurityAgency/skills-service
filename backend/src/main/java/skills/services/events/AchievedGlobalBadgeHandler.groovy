@@ -58,7 +58,7 @@ class AchievedGlobalBadgeHandler {
         if (globalBadges) {
 
             List<UserAchievement> achievements = achievedLevelRepo.findAllLevelsByUserId(userId)
-            Map<String, Integer> userProjectLevels = (Map<String, Integer>)achievements?.groupBy { it.projectId }
+            Map<String, Integer> userProjectLevels = (Map<String, Integer>)achievements?.findAll {!it.skillId}?.groupBy { it.projectId }
                     ?.collectEntries {String key, List<UserAchievement> val -> [key,val.collect{it.level}.max()]}
 
             badgeCheckLoop: for (SkillDefMin globalBadge : globalBadges) {
