@@ -183,25 +183,39 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
             nativeQuery = true)
     Long countDistinctUserIdByProjectIdAndUserIdLike(String projectId, String userId)
 
-    @Query('''SELECT 
-                up.userId as userId, 
-                max(up.updated) as lastUpdated, 
+    @Query(value = '''SELECT 
+                up.user_id as userId, 
+                max(upa.performedOn) as lastUpdated, 
                 sum(up.points) as totalPoints,
                 max(ua.firstName) as firstName,
                 max(ua.lastName) as lastName,
                 max(ua.dn) as dn,
                 max(ua.email) as email,
                 max(ua.userIdForDisplay) as userIdForDisplay 
-            from UserPoints up, UserAttrs ua 
-            where 
-                up.userId = ua.userId and
-                up.projectId=?1 and 
+            FROM user_points up
+            LEFT JOIN (
+                SELECT user_id, 
+                max(performed_on) AS performedOn 
+                FROM user_performed_skill upa GROUP BY user_id
+                ) upa ON upa.user_id = up.user_id
+            LEFT JOIN (
+                SELECT 
+                user_id, 
+                max(first_name) AS firstName, 
+                max(last_name) AS lastName, 
+                max(dn) AS dn, 
+                max(email) AS email, 
+                max(user_id_for_display) AS userIdForDisplay 
+                FROM user_attrs ua GROUP BY user_id
+                ) ua ON ua.user_id=up.user_id
+            WHERE 
+                up.project_id=?1 and 
                 (upper(CONCAT(ua.firstName, ' ', ua.lastName, ' (',  ua.userIdForDisplay, ')')) like UPPER(CONCAT(\'%\', ?2, \'%\'))  OR
                  upper(ua.userIdForDisplay) like UPPER(CONCAT('%', ?2, '%'))
-                )and 
+                ) and 
                 up.day is null and 
-                up.skillId is null 
-            GROUP BY up.userId''')
+                up.skill_id is null 
+            GROUP BY up.user_id''', nativeQuery = true)
     List<ProjectUser> findDistinctProjectUsersAndUserIdLike(String projectId, String query, Pageable pageable)
 
     @Query(value='''SELECT COUNT(*)
