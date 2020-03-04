@@ -30,6 +30,9 @@ limitations under the License.
                 currentLibVersion: undefined,
             };
         },
+        mounted() {
+            this.updateStorageIfNeeded();
+        },
         computed: {
             libVersion() {
                 return this.$store.state.softwareVersion;
@@ -37,10 +40,19 @@ limitations under the License.
         },
         watch: {
             libVersion() {
-                if (this.currentLibVersion === undefined) {
-                    this.currentLibVersion = this.libVersion;
-                } else if (this.currentLibVersion !== this.libVersion) {
+                if (localStorage.skillsClientDisplayLibVersion === undefined || this.libVersion.localeCompare(localStorage.skillsClientDisplayLibVersion) > 0) {
+                    this.updateStorageIfNeeded();
                     this.showNewVersionAlert = true;
+                }
+            },
+        },
+        methods: {
+            updateStorageIfNeeded() {
+                const storedVal = localStorage.skillsClientDisplayLibVersion;
+                const currentVersion = this.libVersion;
+                if (currentVersion !== undefined && (storedVal === undefined || currentVersion.localeCompare(storedVal) > 0)) {
+                    localStorage.skillsClientDisplayLibVersion = currentVersion;
+                    console.log(`Updated: ${localStorage.skillsClientDisplayLibVersion}`);
                 }
             },
         },
