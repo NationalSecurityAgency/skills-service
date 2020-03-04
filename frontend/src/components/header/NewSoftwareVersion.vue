@@ -21,7 +21,7 @@ limitations under the License.
     variant="success"
     dismissible
   >
-    New Software Version is Available!! Please click <a href="" @click="window.location.reload()">Here</a>
+    New Software Version is Available!! Please click <a href="" @click="refresh">Here</a>
     to reload.
   </b-alert>
 </template>
@@ -35,6 +35,9 @@ limitations under the License.
         currentLibVersion: undefined,
       };
     },
+    mounted() {
+      this.updateStorageIfNeeded();
+    },
     computed: {
       libVersion() {
         return this.$store.getters.libVersion;
@@ -42,10 +45,21 @@ limitations under the License.
     },
     watch: {
       libVersion() {
-        if (this.currentLibVersion === undefined) {
-          this.currentLibVersion = this.libVersion;
-        } else if (this.currentLibVersion !== this.libVersion) {
+        if (localStorage.skillsDashboardLibVersion === undefined || this.libVersion.localeCompare(localStorage.skillsDashboardLibVersion) > 0) {
+          this.updateStorageIfNeeded();
           this.showNewVersionAlert = true;
+        }
+      },
+    },
+    methods: {
+      refresh() {
+        window.location.reload();
+      },
+      updateStorageIfNeeded() {
+        const storedVal = localStorage.skillsDashboardLibVersion;
+        const currentVersion = this.libVersion;
+        if (currentVersion !== undefined && (storedVal === undefined || currentVersion.localeCompare(storedVal) > 0)) {
+          localStorage.skillsDashboardLibVersion = currentVersion;
         }
       },
     },
