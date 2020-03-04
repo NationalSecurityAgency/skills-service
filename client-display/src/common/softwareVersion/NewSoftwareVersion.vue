@@ -52,7 +52,6 @@ limitations under the License.
                 const currentVersion = this.libVersion;
                 if (currentVersion !== undefined && (storedVal === undefined || currentVersion.localeCompare(storedVal) > 0)) {
                     localStorage.skillsClientDisplayLibVersion = currentVersion;
-                    console.log(`Updated: ${localStorage.skillsClientDisplayLibVersion}`);
                 }
             },
         },
