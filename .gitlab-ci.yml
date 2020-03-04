@@ -11,22 +11,9 @@ build:
   image: maven:3.6.0-jdk-11
   stage: build
   before_script:
-    - cat /etc/os-release
-    # Need to install make/g++ so node v13 can be built
-    - apt-get update
-    - apt-get install -y build-essential
-#    - curl -sL https://rpm.nodesource.com/setup_12.x | bash -
-#    - curl -sL https://deb.nodesource.com/setup_12.x -o nodesource_setup.sh
-#    - apt-get install -y nodejs
-    - curl -sL https://deb.nodesource.com/setup_12.x | bash -
-    - apt-get install -y nodejs
-    - nodejs -v
-    - npm -v
+    - ./ci/installNode.sh
+    - ./ci/setupRepos.sh
   script:
-    - echo "@skills:registry=http://$NEXUS_SERVER/repository/skills-registry/" > ~/.npmrc
-    - cat ~/.npmrc
-    - echo "<settings><mirrors><mirror><id>central</id><name>central</name><url>http://$NEXUS_SERVER/repository/maven-public/</url><mirrorOf>*</mirrorOf></mirror></mirrors></settings>" > ~/.m2/settings.xml
-    - cat ~/.m2/settings.xml
     - mvn --batch-mode install
   artifacts:
     paths:
@@ -45,15 +32,10 @@ postgres-test:on-schedule:
   variables:
     POSTGRES_PASSWORD: skillsPassword
     POSTGRES_DB: skills
+  before_script:
+    - ./ci/installNode.sh
+    - ./ci/setupRepos.sh
   script:
-    - cat /etc/os-release
-    # Need to install make/g++ so node v13 can be built
-    - apt-get update
-    - apt-get install -y build-essential
-    - echo "@skills:registry=http://$NEXUS_SERVER/repository/skills-registry/" > ~/.npmrc
-    - cat ~/.npmrc
-    - echo "<settings><mirrors><mirror><id>central</id><name>central</name><url>http://$NEXUS_SERVER/repository/maven-public/</url><mirrorOf>*</mirrorOf></mirror></mirrors></settings>" > ~/.m2/settings.xml
-    - cat ~/.m2/settings.xml
     - mvn --batch-mode test -Dspring.datasource.url=jdbc:postgresql://postgres:5432/skills -Dspring.datasource.username=postgres -Dspring.datasource.password=skillsPassword
   artifacts:
     paths:
