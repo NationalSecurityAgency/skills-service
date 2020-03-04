@@ -24,7 +24,7 @@ describe('App Features Tests', () => {
         })
     });
 
-    it('display new version banner when software is updated', () => {
+    it.only('display new version banner when software is updated', () => {
         const dateFormatter = value => moment(value).format('YYYYMMDD-HHmm');
 
         cy.server().route({
@@ -36,6 +36,8 @@ describe('App Features Tests', () => {
             },
         }).as('getSubjects');
         cy.visit('/');
+        cy.contains('My Projects')
+        cy.contains('New Software Version is Available').should('not.exist')
         cy.contains('Manage').click()
         cy.wait('@getSubjects')
 

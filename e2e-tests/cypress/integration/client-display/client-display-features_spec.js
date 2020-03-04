@@ -66,6 +66,8 @@ describe('Client Display Features Tests', () => {
             },
         }).as('getSubjectSummary');
         cy.cdVisit('/');
+        cy.contains('Overall Points');
+        cy.contains('New Skills Software Version is Available').should('not.exist')
         cy.cdClickSubj(0, 'Subject 1');
         cy.wait('@getSubjectSummary')
 
