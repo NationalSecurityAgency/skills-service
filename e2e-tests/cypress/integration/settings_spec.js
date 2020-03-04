@@ -45,8 +45,8 @@ describe('Settings Tests', () => {
         cy.get('[data-cy=supervisorrm]').contains('root@skills.org').click();
         cy.get('[data-cy=supervisorrm]').contains('Add').click();
         cy.get('div.table-responsive').contains('Firstname LastName (root@skills.org)');
+        cy.wait(2500);
         cy.contains('Home').click();
-        cy.wait(500);
-        cy.get('li').contains('Badges').should('be.visible');
+        cy.contains('Badges').should('be.visible');
     });
 });
