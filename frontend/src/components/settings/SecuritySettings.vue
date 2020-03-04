@@ -20,14 +20,18 @@ limitations under the License.
     <div class="card">
       <div class="card-header">Root Users Management</div>
       <div class="card-body">
-        <role-manager :role="root.role" :user-type="root.userType" :role-description="root.roleDescription" />
+        <role-manager data-cy="rootrm" :role="root.role" :user-type="root.userType" :role-description="root.roleDescription" />
       </div>
     </div>
 
     <div class="card mt-2">
       <div class="card-header">Supervisor Users Management</div>
       <div class="card-body">
-        <role-manager :role="supervisor.role" :user-type="supervisor.userType" :role-description="supervisor.roleDescription" />
+        <role-manager data-cy="supervisorrm" :role="supervisor.role"
+                      :user-type="supervisor.userType"
+                      :role-description="supervisor.roleDescription"
+                      @role-added="handleRoleAdded"
+                      @role-deleted="handleRoleDeleted"/>
       </div>
     </div>
   </div>
@@ -53,6 +57,22 @@ limitations under the License.
           userType: 'SUPERVISOR',
         },
       };
+    },
+    methods: {
+      handleRoleAdded(event) {
+        if (this.$store.getters.userInfo
+          && event.userId === this.$store.getters.userInfo.userId
+          && event.role === 'ROLE_SUPERVISOR') {
+          this.$store.commit('access/supervisor', true);
+        }
+      },
+      handleRoleDeleted(event) {
+        if (this.$store.getters.userInfo
+          && event.userId === this.$store.getters.userInfo.userId
+          && event.role === 'ROLE_SUPERVISOR') {
+          this.$store.commit('access/supervisor', false);
+        }
+      },
     },
   };
 </script>
