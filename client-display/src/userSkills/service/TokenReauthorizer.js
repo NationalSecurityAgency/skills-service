@@ -13,8 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import SkillsConfiguration from '@skills/skills-client-configuration';
-
 import axios from 'axios';
 import createAuthRefreshInterceptor from 'axios-auth-refresh';
 import router from '@/router';
@@ -25,7 +23,7 @@ let service = {};
 
 
 const refreshAuthorization = (failedRequest) => {
-  if (SkillsConfiguration.getAuthToken() === 'pki') {
+  if (store.state.authToken === 'pki') {
     router.push({
       name: 'error',
       params: {
@@ -40,7 +38,7 @@ const refreshAuthorization = (failedRequest) => {
         delete axios.defaults.headers.common.Authorization;
       } else {
         const accessToken = result.data.access_token;
-        SkillsConfiguration.setAuthToken(accessToken);
+        this.$store.commit('authToken', accessToken);
         // eslint-disable-next-line no-param-reassign
         failedRequest.response.config.headers.Authorization = `Bearer ${accessToken}`;
         axios.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
@@ -70,7 +68,7 @@ service = {
     if (!store.state.isAuthenticating) {
       store.commit('isAuthenticating', true);
       if (process.env.NODE_ENV === 'development') {
-        this.authenticatingPromise = axios.get(SkillsConfiguration.getAuthenticator());
+        this.authenticatingPromise = axios.get(store.state.authenticator);
       } else {
         store.state.parentFrame.emit('needs-authentication');
         this.authenticatingPromise = new Promise((resolve) => {

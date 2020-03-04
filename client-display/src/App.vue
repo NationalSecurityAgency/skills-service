@@ -29,7 +29,6 @@ limitations under the License.
 
   import debounce from 'lodash/debounce';
 
-  import SkillsConfiguration from '@skills/skills-client-configuration';
   import UserSkillsService from '@/userSkills/service/UserSkillsService';
   import store from '@/store';
   import NewSoftwareVersionComponent from '@/common/softwareVersion/NewSoftwareVersion.vue';
@@ -73,7 +72,6 @@ limitations under the License.
         const handshake = new Postmate.Model({
           updateAuthenticationToken(authToken) {
             store.commit('authToken', authToken);
-            SkillsConfiguration.setAuthToken(authToken);
           },
           updateVersion(newVersion) {
             UserSkillsService.setVersion(newVersion);
@@ -93,13 +91,11 @@ limitations under the License.
           // will only display summary and component will not be interactive
           this.$store.commit('isSummaryOnly', parent.model.isSummaryOnly ? parent.model.isSummaryOnly : false);
 
+          this.$store.commit('projectId', parent.model.projectId);
+          this.$store.commit('serviceUrl', parent.model.serviceUrl);
+
           UserSkillsService.setVersion(parent.model.version);
           UserSkillsService.setUserId(parent.model.userId);
-
-          SkillsConfiguration.configure({
-            projectId: parent.model.projectId,
-            serviceUrl: parent.model.serviceUrl,
-          });
 
           this.handleTheming(parent.model.theme);
 

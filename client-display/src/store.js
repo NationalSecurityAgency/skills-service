@@ -46,6 +46,9 @@ export default new Vuex.Store({
     themeStyleId: UniqueIdGenerator.uniqueId('custom-theme-style-node-'),
     isSummaryOnly: false,
     softwareVersion: undefined,
+    projectId: null,
+    serviceUrl: null,
+    authenticator: null,
   },
   mutations: {
     authToken(state, authToken) {
@@ -72,6 +75,18 @@ export default new Vuex.Store({
     isSummaryOnly(state, isSummaryOnly) {
       // eslint-disable-next-line no-param-reassign
       state.isSummaryOnly = isSummaryOnly;
+    },
+    projectId(state, projectId) {
+      // eslint-disable-next-line no-param-reassign
+      state.projectId = projectId;
+    },
+    serviceUrl(state, serviceUrl) {
+      // eslint-disable-next-line no-param-reassign
+      state.serviceUrl = serviceUrl;
+    },
+    authenticator(state, authenticator) {
+      // eslint-disable-next-line no-param-reassign
+      state.authenticator = authenticator;
     },
   },
 });

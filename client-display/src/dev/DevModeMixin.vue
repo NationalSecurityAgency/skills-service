@@ -14,7 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script>
-  import SkillsConfiguration from '@skills/skills-client-configuration';
   import TokenReauthorizer from '@/userSkills/service/TokenReauthorizer';
 
   export default {
@@ -39,11 +38,9 @@ limitations under the License.
                 // eslint-disable-next-line no-alert
                 alert(errorMessage);
             } else {
-                SkillsConfiguration.configure({
-                    serviceUrl: process.env.VUE_APP_SERVICE_URL,
-                    projectId: process.env.VUE_APP_PROJECT_ID,
-                    authenticator: process.env.VUE_APP_AUTHENTICATION_URL,
-                });
+                this.$store.commit('projectId', process.env.VUE_APP_PROJECT_ID);
+                this.$store.commit('serviceUrl', process.env.VUE_APP_SERVICE_URL);
+                this.$store.commit('authenticator', process.env.VUE_APP_AUTHENTICATION_URL);
                 this.storeAuthToken();
 
                 const isSummaryOnly = this.$route.query.isSummaryOnly ? this.$route.query.isSummaryOnly : false;
@@ -64,7 +61,6 @@ limitations under the License.
             TokenReauthorizer.getAuthenticationToken()
                 .then((result) => {
                     this.$store.commit('authToken', result.data.access_token);
-                    SkillsConfiguration.setAuthToken(result.data.access_token);
                 });
         },
     },
