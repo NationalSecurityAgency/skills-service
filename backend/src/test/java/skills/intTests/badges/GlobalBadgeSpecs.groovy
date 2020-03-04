@@ -15,7 +15,7 @@
  */
 package skills.intTests.badges
 
-import org.joda.time.DateTime
+
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
@@ -55,6 +55,7 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
 
         then:
 
+        res1.body.completed.find{ it.type == 'Subject' && it.level == 1}
         !res1.body.completed.find{ it.type == 'GlobalBadge' }
         !res2.body.completed.find{ it.type == 'GlobalBadge' }
         !res3.body.completed.find{ it.type == 'GlobalBadge' }
@@ -84,8 +85,6 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
         skillsService.addSkill(['projectId': proj.projectId, skillId: subj2Skills[0].skillId], "user1", new Date())
         skillsService.addSkill(['projectId': proj.projectId, skillId: subj2Skills[1].skillId], "user1", new Date())
         def result = skillsService.addSkill(['projectId': proj.projectId, skillId: subj2Skills[2].skillId], "user1", new Date())
-
-        println result
 
         then:
 
