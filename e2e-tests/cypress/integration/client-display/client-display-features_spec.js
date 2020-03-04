@@ -101,9 +101,36 @@ describe('Client Display Features Tests', () => {
                 'skills-client-lib-version': dateFormatter(new Date() - 1000 * 60 * 60 * 24)
             },
         }).as('getSubjectSummary');
+
+        cy.server().route({
+            url: '/api/projects/proj1/subjects/subj1/rank',
+            status: 200,
+            response: {
+                'numUsers': 1,
+                'position': 1
+            },
+            headers: {
+                'skills-client-lib-version': dateFormatter(new Date() - 1000 * 60 * 60 * 24)
+            },
+        }).as('getRank');
+
+        cy.server().route({
+            url: '/api/projects/proj1/subjects/subj1/pointHistory',
+            status: 200,
+            response: { 'pointsHistory': [] },
+            headers: {
+                'skills-client-lib-version': dateFormatter(new Date() - 1000 * 60 * 60 * 24)
+            },
+        }).as('getPointHistory');
+
         cy.cdVisit('/');
+        cy.contains('Overall Points');
+        cy.contains('New Skills Software Version is Available').should('not.exist')
+
         cy.cdClickSubj(0, 'Subject 1');
         cy.wait('@getSubjectSummary')
+        cy.wait('@getRank')
+        cy.wait('@getPointHistory')
 
         cy.contains('New Skills Software Version is Available').should('not.exist')
     });
