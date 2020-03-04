@@ -147,6 +147,7 @@ limitations under the License.
           .then(() => {
             this.data = this.data.filter(item => item.userId !== row.userId);
             this.userIds = this.userIds.filter(userId => userId !== row.userIdForDisplay);
+            this.$emit('role-deleted', { userId: row.userId, role: row.roleName });
           });
       },
       notCurrentUser(userId) {
@@ -159,6 +160,7 @@ limitations under the License.
         AccessService.saveUserRole(this.project.projectId, this.selectedUser, this.role, pkiAuthenticated)
           .then((userInfo) => {
             this.userAdded(userInfo);
+            this.$emit('role-added', { userId: this.selectedUser.userId, role: this.role });
           }).catch((e) => {
             if (e.response.data && e.response.data.errorCode && e.response.data.errorCode === 'UserNotFound') {
               this.errNotification.msg = e.response.data.explanation;

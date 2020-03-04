@@ -31,7 +31,21 @@ describe('Settings Tests', () => {
         cy.contains('skills@skills.org').click();
         cy.contains('Add').first().click();
         cy.get('div.table-responsive').contains('Firstname LastName (skills@skills.org)');
+    });
 
+    it('Add Supervisor User', () => {
 
-    })
+        cy.visit('/');
+        cy.get('li').contains('Badges').should('not.exist');
+        cy.get('button.dropdown-toggle').first().click({force: true});
+        cy.contains('Settings').click();
+        cy.contains('Security').click();
+        cy.get('[data-cy=supervisorrm]  div.multiselect__tags').type('root');
+        cy.wait(500);
+        cy.get('[data-cy=supervisorrm]').contains('root@skills.org').click();
+        cy.get('[data-cy=supervisorrm]').contains('Add').click();
+        cy.get('div.table-responsive').contains('Firstname LastName (root@skills.org)');
+        cy.contains('Home').click();
+        cy.get('li').contains('Badges').should('be.visible');
+    });
 });
