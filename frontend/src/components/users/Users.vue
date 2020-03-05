@@ -92,7 +92,7 @@ limitations under the License.
           headings: {
             userId: 'User',
             totalPoints: 'Total Points',
-            lastUpdated: 'Last Updated',
+            lastUpdated: 'Last Reported Skill',
             viewDetail: '',
           },
           columnsClasses: {

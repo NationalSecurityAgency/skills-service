@@ -93,6 +93,11 @@ class SkillsService {
         wsHelper.appPost(getProjectUrl(originalProjectId ?: props.projectId), props)
     }
 
+    def createUser(Map props){
+        //props: firstName, lastName, email, password
+        wsHelper.put("createAccount", "", props)
+    }
+
     def searchOtherProjectsByName(String projectId, String query) {
         wsHelper.adminGet("/projects/${projectId}/projectSearch?nameQuery=${query}")
     }
