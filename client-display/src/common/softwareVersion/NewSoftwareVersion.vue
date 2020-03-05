@@ -14,11 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div class="container mt-2" v-if="showNewVersionAlert">
+    <div class="container mt-2" v-if="showNewVersionAlert">
         <div class="alert alert-warning alert-dismissible fade show" role="alert">
-    New Skills Software Version is Available!! Please refresh the page.
-  </div>
-  </div>
+            New Skills Software Version is Available!! Please refresh the page.
+            <br/>
+            {{ JSON.stringify(events)}}
+        </div>
+    </div>
 </template>
 
 <script>
@@ -28,6 +30,7 @@ limitations under the License.
             return {
                 showNewVersionAlert: false,
                 currentLibVersion: undefined,
+                events: [],
             };
         },
         mounted() {
@@ -40,7 +43,17 @@ limitations under the License.
         },
         watch: {
             libVersion() {
+                this.events.push({
+                    type: 'Consider Display',
+                    before: localStorage.skillsClientDisplayLibVersion,
+                    after: this.libVersion,
+                });
                 if (localStorage.skillsClientDisplayLibVersion !== undefined && this.libVersion.localeCompare(localStorage.skillsClientDisplayLibVersion) > 0) {
+                    this.events.push({
+                        type: 'Displayed',
+                        before: localStorage.skillsClientDisplayLibVersion,
+                        after: this.libVersion,
+                    });
                     this.showNewVersionAlert = true;
                 }
                 this.updateStorageIfNeeded();
@@ -50,7 +63,17 @@ limitations under the License.
             updateStorageIfNeeded() {
                 const storedVal = localStorage.skillsClientDisplayLibVersion;
                 const currentVersion = this.libVersion;
+                this.events.push({
+                    type: 'Consider Updated',
+                    before: storedVal,
+                    after: currentVersion,
+                });
                 if (currentVersion !== undefined && (storedVal === undefined || currentVersion.localeCompare(storedVal) > 0)) {
+                    this.events.push({
+                        type: 'Updated',
+                        before: storedVal,
+                        after: currentVersion,
+                    });
                     localStorage.skillsClientDisplayLibVersion = currentVersion;
                 }
             },
