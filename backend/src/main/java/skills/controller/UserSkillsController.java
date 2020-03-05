@@ -231,6 +231,7 @@ class UserSkillsController {
                                      @PathVariable("skillId") String skillId,
                                      @RequestBody(required = false) SkillEventRequest skillEventRequest) {
 
+
         String requestedUserId = skillEventRequest != null ? skillEventRequest.getUserId() : null;
         Long requestedTimestamp = skillEventRequest != null ? skillEventRequest.getTimestamp() : null;
         Boolean notifyIfSkillNotApplied = skillEventRequest != null ? skillEventRequest.getNotifyIfSkillNotApplied() : false;
@@ -246,7 +247,7 @@ class UserSkillsController {
         }
 
         SkillEventResult result;
-        String userId = userInfoService.getUserName(requestedUserId, 0);
+        String userId = userInfoService.getUserName(requestedUserId, false);
         if (log.isInfoEnabled()) {
             log.info("ReportSkill (ProjectId=[{}], SkillId=[{}], CurrentUser=[{}], RequestUser=[{}], RequestDate=[{}])",
                     new String[]{projectId, skillId, userInfoService.getCurrentUserId(), requestedUserId, toDateString(requestedTimestamp)});
