@@ -71,6 +71,7 @@ describe('Client Display Features Tests', () => {
         cy.wait('@getSubjectSummary')
 
         cy.contains('New Skills Software Version is Available')
+
         cy.cdVisit('/');
         cy.contains('New Skills Software Version is Available').should('not.exist')
     });
