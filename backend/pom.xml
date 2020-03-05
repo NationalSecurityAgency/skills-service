@@ -12,6 +12,13 @@
 
     <artifactId>backend</artifactId>
 
+    <properties>
+        <!--
+           This format will be used to version the build and to set clientLibVersion via
+           clientLibVersion: @maven.build.timestamp@
+           -->
+        <maven.build.timestamp.format>yyyy-MM-dd'T'HH:mm:ss'Z'</maven.build.timestamp.format>
+    </properties>
     <dependencies>
         <dependency>
             <groupId>com.auth0</groupId>
