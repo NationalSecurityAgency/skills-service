@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import moment from 'moment';
-
+const dateFormatter = value => moment(value).format('YYYY-MM-DD[T]HH:mm:ss[Z]');
 describe('App Features Tests', () => {
 
     beforeEach(() => {
@@ -25,8 +25,6 @@ describe('App Features Tests', () => {
     });
 
     it.only('display new version banner when software is updated', () => {
-        const dateFormatter = value => moment(value).format('YYYYMMDD-HHmm');
-
         cy.server().route({
             url: '/admin/projects/proj1/subjects',
             status: 200,
@@ -48,8 +46,6 @@ describe('App Features Tests', () => {
     });
 
     it('do not display new version banner if lib version in headers is older than lib version in local storage', () => {
-        const dateFormatter = value => moment(value).format('YYYYMMDD-HHmm');
-
         cy.server().route({
             url: '/admin/projects/proj1/subjects',
             status: 200,
