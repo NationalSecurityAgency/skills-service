@@ -68,8 +68,8 @@ class UserInfoService {
     /**
      * Abstracts dealing with PKI vs Password/Form modes when user id param is provided
      */
-    String getUserName(String userIdParam) {
-        return RetryUtil.withRetry(3) {
+    String getUserName(String userIdParam, int numRetries=3) {
+        return RetryUtil.withRetry(numRetries) {
             return doGetUserName(userIdParam)
         }
     }
