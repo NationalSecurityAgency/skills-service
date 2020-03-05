@@ -68,15 +68,15 @@ class UserInfoService {
     /**
      * Abstracts dealing with PKI vs Password/Form modes when user id param is provided
      */
-    String getUserName(String userIdParam, int numRetries=3) {
-        return RetryUtil.withRetry(numRetries) {
-            return doGetUserName(userIdParam)
+    String getUserName(String userIdParam, boolean retry=true) {
+        return RetryUtil.withRetry(3) {
+            return doGetUserName(userIdParam, retry)
         }
     }
 
     @Transactional
     @Profile
-    protected String doGetUserName(String userIdParam) {
+    protected String doGetUserName(String userIdParam, boolean retry) {
         String userNameRes = userIdParam
         if (!userIdParam) {
             UserInfo userInfo = getCurrentUser()
@@ -95,12 +95,15 @@ class UserInfoService {
                 log.error("user-info-service lookup failed: ${msg}")
                 SkillException ske = new SkillException(msg)
                 ske.errorCode = ErrorCode.UserNotFound
+                ske.doNotRetry = !retry
                 throw ske
             }
 
             if (!userInfo) {
                 log.error("received empty user information from lookup")
-                throw new SkillException("User Info Service does not know about user with provided lookup id of [${userIdParam}]")
+                SkillException ske = new SkillException("User Info Service does not know about user with provided lookup id of [${userIdParam}]")
+                ske.doNotRetry = !retry
+                throw ske
             }
 
             try {

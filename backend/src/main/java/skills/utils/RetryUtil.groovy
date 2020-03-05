@@ -50,6 +50,10 @@ class RetryUtil {
                 }
                 if (i == numRetries) {
                     if (logOnlyOnCompleteFailure) {
+                        if(!errMsBuilder) { //this happens if numRetries is 0
+                            String msg = "Retry [${attemptsId}] - attempt ${i + 1}/${numRetries}:\n"
+                            errMsBuilder = appendMsg(errMsBuilder, msg, t)
+                        }
                         log.error(errMsBuilder.toString())
                     }
                     throw t
@@ -58,19 +62,21 @@ class RetryUtil {
                     log.error("Retry [${attemptsId}] - attempt ${i + 1}/${numRetries}", t)
                 } else {
                     String msg = "Retry [${attemptsId}] - attempt ${i + 1}/${numRetries}:\n"
-                    if (!errMsBuilder) {
-                        errMsBuilder = new StringBuilder()
-                        errMsBuilder.append("\n")
-                    }
-                    appendMsg(errMsBuilder, msg, t)
+                    errMsBuilder = appendMsg(errMsBuilder, msg, t)
                 }
             }
         }
     }
 
-    private static void appendMsg(StringBuilder errMsBuilder, String msg, Throwable t) {
+    private static StringBuilder appendMsg(StringBuilder errMsBuilder, String msg, Throwable t) {
+        if (!errMsBuilder) {
+            errMsBuilder = new StringBuilder()
+            errMsBuilder.append("\n")
+        }
         errMsBuilder.append(msg)
         errMsBuilder.append(ExceptionUtils.getStackTrace(t))
         errMsBuilder.append("\n")
+
+        return errMsBuilder
     }
 }

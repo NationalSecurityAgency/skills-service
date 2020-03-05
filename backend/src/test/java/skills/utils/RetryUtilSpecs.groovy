@@ -84,6 +84,20 @@ class RetryUtilSpecs extends Specification {
         numRuns == 6 // retries = runs + 1
     }
 
+    def "retry 0 times"() {
+        when:
+        int numRuns = 0
+        RetryUtil.withRetry(0, false) {
+            numRuns++
+            throw new RuntimeException("hi")
+        }
+
+        then:
+        RuntimeException r = thrown(RuntimeException)
+        r.message == "hi"
+        numRuns == 1 // retries = runs + 1
+    }
+
     def "do not retry if SkillException.doNotRetry=true"() {
         when:
         int count = 0
@@ -98,4 +112,5 @@ class RetryUtilSpecs extends Specification {
         e.message == "hi"
         count == 1
     }
+
 }
