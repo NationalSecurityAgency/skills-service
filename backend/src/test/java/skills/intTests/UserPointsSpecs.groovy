@@ -225,6 +225,123 @@ class UserPointsSpecs extends DefaultIntSpec {
 
     }
 
+    def "filter users by name"(){
+
+        SkillsService createAcctService = createService()
+        createAcctService.createUser([firstName: "John", lastName: "Doe", email: "jdoe@email.foo", password: "password"])
+        createAcctService.createUser([firstName: "Jane", lastName: "Doe", email: "jadoe@email.foo", password: "password"])
+        createAcctService.createUser([firstName: "Foo", lastName: "Bar", email: "fbar@email.foo", password: "password"])
+
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "jdoe@email.foo", new Date())
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "jadoe@email.foo", new Date())
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "fbar@email.foo", new Date())
+
+        when:
+
+        def control = skillsService.getProjectUsers(projId)
+        def result1 = skillsService.getProjectUsers(projId, 10, 1, "userId", true, "Jane")
+        def result2 = skillsService.getProjectUsers(projId, 10, 1, "userId", true, "jadoe")
+        def result3 = skillsService.getProjectUsers(projId, 10, 1, "userId", true, "Doe")
+
+        then:
+
+        control.data.size() == 5
+
+        result1.data.size() == 1
+        result1.data.find{it.userId == 'jadoe@email.foo'}
+
+        result2.data.size() == 1
+        result2.data.find{it.userId == 'jadoe@email.foo'}
+
+        result3.data.size() == 2
+        result3.data.find{it.userId == 'jadoe@email.foo'}
+        result3.data.find{it.userId == 'jdoe@email.foo'}
+    }
+
+    def "sort users" () {
+        SkillsService createAcctService = createService()
+        createAcctService.createUser([firstName: "John", lastName: "Doe", email: "jdoe@email.foo", password: "password"])
+        createAcctService.createUser([firstName: "Jane", lastName: "Doe", email: "jadoe@email.foo", password: "password"])
+        createAcctService.createUser([firstName: "Foo", lastName: "Bar", email: "fbar@email.foo", password: "password"])
+
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "jdoe@email.foo", new Date())
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "jadoe@email.foo", new Date())
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "fbar@email.foo", new Date())
+
+        when:
+        def allUsers = skillsService.getProjectUsers(projId)
+        def fooUsers = skillsService.getProjectUsers(projId, 10, 1, "userId", true, "foo")
+        def fooUsersDesc = skillsService.getProjectUsers(projId, 10, 1, "userId", false, "foo")
+        def fooUsersSortByFirstName = skillsService.getProjectUsers(projId, 10, 1, "firstName", true, "foo")
+        def fooUsersSortByLastName = skillsService.getProjectUsers(projId, 10, 1, "lastName", true, "foo")
+
+        then:
+        allUsers.data.size() == 5
+        allUsers.data[0].userId == 'fbar@email.foo'
+        allUsers.data[1].userId == 'hanson'
+        allUsers.data[2].userId == 'harry'
+        allUsers.data[3].userId == 'jadoe@email.foo'
+        allUsers.data[4].userId == 'jdoe@email.foo'
+
+        fooUsers.data.size() == 3
+        fooUsers.data[0].userId == 'fbar@email.foo'
+        fooUsers.data[1].userId == 'jadoe@email.foo'
+        fooUsers.data[2].userId == 'jdoe@email.foo'
+
+        fooUsersDesc.data.size() == 3
+        fooUsersDesc.data[2].userId == 'fbar@email.foo'
+        fooUsersDesc.data[1].userId == 'jadoe@email.foo'
+        fooUsersDesc.data[0].userId == 'jdoe@email.foo'
+
+        fooUsersSortByFirstName.data.size() == 3
+        fooUsersSortByFirstName.data[0].userId == 'fbar@email.foo'
+        fooUsersSortByFirstName.data[1].userId == 'jadoe@email.foo'
+        fooUsersSortByFirstName.data[2].userId == 'jdoe@email.foo'
+
+        fooUsersSortByLastName.data.size() == 3
+        fooUsersSortByLastName.data[0].lastName == 'Bar'
+        fooUsersSortByLastName.data[1].lastName == 'Doe'
+        fooUsersSortByLastName.data[2].lastName == 'Doe'
+    }
+
+    def "user paging" () {
+        SkillsService createAcctService = createService()
+        createAcctService.createUser([firstName: "Aaa", lastName: "Aaa", email: "aaa@email.foo", password: "password"])
+        createAcctService.createUser([firstName: "Bbb", lastName: "Bbb", email: "bbb@email.foo", password: "password"])
+        createAcctService.createUser([firstName: "Ccc", lastName: "Ccc", email: "ccc@email.foo", password: "password"])
+        createAcctService.createUser([firstName: "Ddd", lastName: "Ddd", email: "ddd@email.foo", password: "password"])
+        createAcctService.createUser([firstName: "Eee", lastName: "Eee", email: "eee@email.foo", password: "password"])
+        createAcctService.createUser([firstName: "Fff", lastName: "Fff", email: "fff@email.foo", password: "password"])
+        createAcctService.createUser([firstName: "Ggg", lastName: "Ggg", email: "ggg@email.foo", password: "password"])
+        createAcctService.createUser([firstName: "Hhh", lastName: "Hhh", email: "hhh@email.foo", password: "password"])
+
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "aaa@email.foo", new Date())
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "bbb@email.foo", new Date())
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "ccc@email.foo", new Date())
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "ddd@email.foo", new Date())
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "eee@email.foo", new Date())
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "fff@email.foo", new Date())
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "ggg@email.foo", new Date())
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], "hhh@email.foo", new Date())
+
+        when:
+        def firstPage = skillsService.getProjectUsers(projId, 5, 1, "userId", true, "foo")
+        def secondPage = skillsService.getProjectUsers(projId, 5, 2, "userId", true, "foo")
+
+        then:
+        firstPage.data.size() == 5
+        firstPage.data[0].userId == 'aaa@email.foo'
+        firstPage.data[1].userId == 'bbb@email.foo'
+        firstPage.data[2].userId == 'ccc@email.foo'
+        firstPage.data[3].userId == 'ddd@email.foo'
+        firstPage.data[4].userId == 'eee@email.foo'
+
+        secondPage.data.size() == 3
+        secondPage.data[0].userId == 'fff@email.foo'
+        secondPage.data[1].userId == 'ggg@email.foo'
+        secondPage.data[2].userId == 'hhh@email.foo'
+    }
+
 
 
     private List<List<String>> setupProjectWithSkills(List<String> subjects = ['testSubject1', 'testSubject2']) {
