@@ -13,6 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import moment from 'moment';
+const dateFormatter = value => moment(value).format('YYYY-MM-DD[T]HH:mm:ss[Z]');
+
 describe('Client Display Tests', () => {
 
     const snapshotOptions = {
@@ -241,6 +244,29 @@ describe('Client Display Tests', () => {
             cy.matchImageSnapshot(`Subject0-Skill3-Details_${size}`, snapshotOptions);
         });
 
+        it(`test theming - new version notification  - ${size}`, () => {
+            cy.setResolution(size);
+            cy.server().route({
+                url: '/api/projects/proj1/rank',
+                status: 200,
+                response: {
+                    'numUsers': 1,
+                    'position': 1
+                },
+                headers: {
+                    'skills-client-lib-version': dateFormatter(new Date())
+                },
+            }).as('getRank')
+
+            cy.cdVisit('/?enableTheme=true')
+            cy.contains('User Skills');
+
+            cy.cdClickRank();
+            cy.wait('@getRank');
+
+            cy.matchImageSnapshot(`Subject0-NewVersionNotification_${size}`, snapshotOptions);
+        });
+
     });
 
     it(`test theming - No Subjects`, () => {
@@ -275,6 +301,7 @@ describe('Client Display Tests', () => {
         cy.contains('Description');
         cy.matchImageSnapshot('Project-Overview-Empty_Subject', snapshotOptions);
     });
+
 
 
 });
