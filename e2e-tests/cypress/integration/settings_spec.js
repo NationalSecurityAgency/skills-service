@@ -35,7 +35,7 @@ describe('Settings Tests', () => {
         cy.get('div.table-responsive').contains('Firstname LastName (skills@skills.org)');
     });
 
-    it.only('Add Supervisor User', () => {
+    it('Add Supervisor User', () => {
         cy.visit('/');
         cy.server();
         cy.route('PUT', '/root/users/root@skills.org/roles/ROLE_SUPERVISOR').as('addSupervisor');
