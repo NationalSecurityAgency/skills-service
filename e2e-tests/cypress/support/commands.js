@@ -133,4 +133,8 @@ Cypress.Commands.add("setResolution", (size) => {
     }
 });
 
+Cypress.Commands.add('vuex', () => {
+   return cy.window().its('vm.$store');
+});
+
 
