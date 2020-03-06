@@ -62,14 +62,14 @@ limitations under the License.
       handleRoleAdded(event) {
         if (this.$store.getters.userInfo
           && event.userId === this.$store.getters.userInfo.userId
-          && event.role === 'ROLE_SUPERVISOR') {
+          && event.role === this.supervisor.role) {
           this.$store.commit('access/supervisor', true);
         }
       },
       handleRoleDeleted(event) {
         if (this.$store.getters.userInfo
           && event.userId === this.$store.getters.userInfo.userId
-          && event.role === 'ROLE_SUPERVISOR') {
+          && event.role === this.supervisor.role) {
           this.$store.commit('access/supervisor', false);
         }
       },
