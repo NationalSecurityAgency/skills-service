@@ -113,4 +113,13 @@ class RetryUtilSpecs extends Specification {
         count == 1
     }
 
+    def "num retries must be >= 0"() {
+        when:
+        RetryUtil.withRetry(-1) { return true }
+
+        then:
+        IllegalArgumentException e = thrown(IllegalArgumentException)
+        e.message == "numRetries >= 0"
+    }
+
 }
