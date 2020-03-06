@@ -33,20 +33,21 @@ describe('Settings Tests', () => {
         cy.get('div.table-responsive').contains('Firstname LastName (skills@skills.org)');
     });
 
-    it('Add Supervisor User', () => {
-
+    it.only('Add Supervisor User', () => {
         cy.visit('/');
+        cy.server();
+        cy.route('PUT', '/root/users/root@skills.org/roles/ROLE_SUPERVISOR').as('addSupervisor');
+
         cy.get('li').contains('Badges').should('not.exist');
         cy.get('button.dropdown-toggle').first().click({force: true});
         cy.contains('Settings').click();
         cy.contains('Security').click();
         cy.get('[data-cy=supervisorrm]  div.multiselect__tags').type('root');
-        cy.wait(500);
         cy.get('[data-cy=supervisorrm]').contains('root@skills.org').click();
         cy.get('[data-cy=supervisorrm]').contains('Add').click();
+        cy.wait('@addSupervisor');
         cy.get('div.table-responsive').contains('Firstname LastName (root@skills.org)');
-        cy.wait(2500);
         cy.contains('Home').click();
-        cy.contains('Badges').should('be.visible');
+        cy.get('li').contains('Badges', {timeout: 5000}).should('be.visible');
     });
 });
