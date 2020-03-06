@@ -20,7 +20,9 @@ describe('Settings Tests', () => {
         cy.fixture('vars.json').then((vars) => {
             cy.login(vars.rootUser, vars.defaultPass);
         });
-    })
+    });
+
+    const getStore =  () => cy.window().its('vm.$store');
 
     it('Add Root User', () => {
         cy.visit('/');
@@ -33,12 +35,13 @@ describe('Settings Tests', () => {
         cy.get('div.table-responsive').contains('Firstname LastName (skills@skills.org)');
     });
 
-    it('Add Supervisor User', () => {
+    it.only('Add Supervisor User', () => {
         cy.visit('/');
         cy.server();
         cy.route('PUT', '/root/users/root@skills.org/roles/ROLE_SUPERVISOR').as('addSupervisor');
 
         cy.get('li').contains('Badges').should('not.exist');
+        getStore().its('state.access.isSupervisor').should('equal', false);
         cy.get('button.dropdown-toggle').first().click({force: true});
         cy.contains('Settings').click();
         cy.contains('Security').click();
@@ -47,7 +50,8 @@ describe('Settings Tests', () => {
         cy.get('[data-cy=supervisorrm]').contains('Add').click();
         cy.wait('@addSupervisor');
         cy.get('div.table-responsive').contains('Firstname LastName (root@skills.org)');
+        getStore().its('state.access.isSupervisor').should('equal', true);
         cy.contains('Home').click();
-        cy.get('li').contains('Badges', {timeout: 5000}).should('be.visible');
+        cy.get('[data-cy=navigationmenu]').contains('Badges', {timeout: 5000}).should('be.visible');
     });
 });
