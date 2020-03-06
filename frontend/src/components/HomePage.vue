@@ -15,7 +15,7 @@ limitations under the License.
 */
 <template>
   <div>
-    <navigation :nav-items="navItems">
+    <navigation :nav-items="navItems" data-cy="navigationmenu">
     </navigation>
   </div>
 </template>
