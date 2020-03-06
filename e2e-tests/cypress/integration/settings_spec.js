@@ -25,7 +25,7 @@ describe('Settings Tests', () => {
     it('Add Root User', () => {
         cy.server();
         cy.route('GET', '/root/users/without/role/ROLE_SUPER_DUPER_USER/sk?userSuggestOption=ONE').as('getEligibleForRoot');
-        cy.route('PUT', '/root/users/skills@skills.org/roles/ROLE_SUPER_DUPER_USE').as('addRoot');
+        cy.route('PUT', '/root/users/skills@skills.org/roles/ROLE_SUPER_DUPER_USER').as('addRoot');
         cy.visit('/');
         cy.get('button.dropdown-toggle').first().click({force: true});
         cy.contains('Settings').click();
