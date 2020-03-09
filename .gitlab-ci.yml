@@ -39,7 +39,8 @@ postgres-test:on-schedule:
     - mvn --batch-mode test -Dspring.datasource.url=jdbc:postgresql://postgres:5432/skills -Dspring.datasource.username=postgres -Dspring.datasource.password=skillsPassword
   artifacts:
     paths:
-      - backend/target/skills-service-tests.log
+    - backend/target/backend-*.jar
+    - backend/target/skills-service-tests.log
 
 # all jobs that actually run tests can use the same definition
 cypress_test:
