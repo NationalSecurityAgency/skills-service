@@ -44,6 +44,9 @@ postgres-test:on-schedule:
 
 # all jobs that actually run tests can use the same definition
 cypress_test:
+  except:
+    variables:
+      - $TYPE == "postgrestest"
   image: amazonlinux:2
   stage: testCypress
   before_script:
