@@ -28,13 +28,27 @@ export default {
 
   version: null,
 
+  getUserIdParams() {
+    if (typeof this.userId === 'string') {
+      return { userId: this.userId };
+    }
+    return {
+      userId: this.userId.id,
+      idType: this.userId.idType,
+    };
+  },
+
+  getUserIdAndVersionParams() {
+    const params = this.getUserIdParams();
+    params.version = this.version;
+
+    return params;
+  },
+
   getUserSkills() {
     let response = null;
     response = axios.get(`${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/summary`, {
-      params: {
-        userId: this.userId,
-        version: this.version,
-      },
+      params: this.getUserIdAndVersionParams(),
     }).then(result => result.data);
     return response;
   },
@@ -53,21 +67,15 @@ export default {
     return response;
   },
 
-
   getSubjectSummary(subjectId) {
     return axios.get(`${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/subjects/${subjectId}/summary`, {
-      params: {
-        userId: this.userId,
-        version: this.version,
-      },
+      params: this.getUserIdAndVersionParams(),
     }).then(result => result.data);
   },
 
   getSkillDependencies(skillId) {
     return axios.get(`${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/skills/${skillId}/dependencies`, {
-      params: {
-        userId: this.userId,
-      },
+      params: this.getUserIdParams(),
     }).then(result => result.data);
   },
 
@@ -77,29 +85,22 @@ export default {
       url = `${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/projects/${optionalCrossProjectId}/skills/${skillId}/summary`;
     }
     return axios.get(url, {
-      params: {
-        userId: this.userId,
-      },
+      params: this.getUserIdParams(),
       withCredentials: true,
     }).then(result => result.data);
   },
 
   getBadgeSkills(badgeId, global) {
+    const requestParams = this.getUserIdAndVersionParams();
+    requestParams.global = global;
     return axios.get(`${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/badges/${badgeId}/summary`, {
-      params: {
-        userId: this.userId,
-        version: this.version,
-        global,
-      },
+      params: requestParams,
     }).then(result => result.data);
   },
 
   getBadgeSummaries() {
     return axios.get(`${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/badges/summary`, {
-      params: {
-        userId: this.userId,
-        version: this.version,
-      },
+      params: this.getUserIdAndVersionParams(),
     }).then(result => result.data);
   },
 
@@ -110,10 +111,7 @@ export default {
       url = `${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/pointHistory`;
     }
     response = axios.get(url, {
-      params: {
-        userId: this.userId,
-        version: this.version,
-      },
+      params: this.getUserIdAndVersionParams(),
     }).then(result => result.data.pointsHistory);
     return response;
   },
@@ -121,9 +119,7 @@ export default {
   addUserSkill(userSkillId) {
     let response = null;
     response = axios.get(`${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/addSkill/${userSkillId}`, {
-      params: {
-        userId: this.userId,
-      },
+      params: this.getUserIdParams(),
     }).then(result => result.data);
     return response;
   },
@@ -135,9 +131,7 @@ export default {
       url = `${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/rank`;
     }
     response = axios.get(url, {
-      params: {
-        userId: this.userId,
-      },
+      params: this.getUserIdParams(),
     }).then(result => result.data);
     return response;
   },
@@ -148,11 +142,10 @@ export default {
     if (!subjectId) {
       url = `${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/rankDistribution`;
     }
+    const requestParams = this.getUserIdParams();
+    requestParams.subjectId = subjectId;
     response = axios.get(url, {
-      params: {
-        subjectId,
-        userId: this.userId,
-      },
+      params: requestParams,
     }).then(result => result.data);
     return response;
   },
