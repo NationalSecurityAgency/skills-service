@@ -1,3 +1,18 @@
+/**
+ * Copyright 2020 SkillTree
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package skills.auth
 
 import callStack.profiler.Profile
@@ -53,15 +68,15 @@ class UserInfoService {
     /**
      * Abstracts dealing with PKI vs Password/Form modes when user id param is provided
      */
-    String getUserName(String userIdParam) {
+    String getUserName(String userIdParam, boolean retry=true) {
         return RetryUtil.withRetry(3) {
-            return doGetUserName(userIdParam)
+            return doGetUserName(userIdParam, retry)
         }
     }
 
     @Transactional
     @Profile
-    protected String doGetUserName(String userIdParam) {
+    protected String doGetUserName(String userIdParam, boolean retry) {
         String userNameRes = userIdParam
         if (!userIdParam) {
             UserInfo userInfo = getCurrentUser()
@@ -80,12 +95,15 @@ class UserInfoService {
                 log.error("user-info-service lookup failed: ${msg}")
                 SkillException ske = new SkillException(msg)
                 ske.errorCode = ErrorCode.UserNotFound
+                ske.doNotRetry = !retry
                 throw ske
             }
 
             if (!userInfo) {
                 log.error("received empty user information from lookup")
-                throw new SkillException("User Info Service does not know about user with provided lookup id of [${userIdParam}]")
+                SkillException ske = new SkillException("User Info Service does not know about user with provided lookup id of [${userIdParam}]")
+                ske.doNotRetry = !retry
+                throw ske
             }
 
             try {

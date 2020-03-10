@@ -1,3 +1,18 @@
+/*
+Copyright 2020 SkillTree
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 <template>
   <div
     id="app"
@@ -14,7 +29,6 @@
 
   import debounce from 'lodash/debounce';
 
-  import SkillsConfiguration from '@skills/skills-client-configuration';
   import UserSkillsService from '@/userSkills/service/UserSkillsService';
   import store from '@/store';
   import NewSoftwareVersionComponent from '@/common/softwareVersion/NewSoftwareVersion.vue';
@@ -58,7 +72,6 @@
         const handshake = new Postmate.Model({
           updateAuthenticationToken(authToken) {
             store.commit('authToken', authToken);
-            SkillsConfiguration.setAuthToken(authToken);
           },
           updateVersion(newVersion) {
             UserSkillsService.setVersion(newVersion);
@@ -78,13 +91,11 @@
           // will only display summary and component will not be interactive
           this.$store.commit('isSummaryOnly', parent.model.isSummaryOnly ? parent.model.isSummaryOnly : false);
 
+          this.$store.commit('projectId', parent.model.projectId);
+          this.$store.commit('serviceUrl', parent.model.serviceUrl);
+
           UserSkillsService.setVersion(parent.model.version);
           UserSkillsService.setUserId(parent.model.userId);
-
-          SkillsConfiguration.configure({
-            projectId: parent.model.projectId,
-            serviceUrl: parent.model.serviceUrl,
-          });
 
           this.handleTheming(parent.model.theme);
 
