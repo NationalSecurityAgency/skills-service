@@ -41,6 +41,7 @@ public class SpringBootApp {
     static final String DISABLE_HOSTNAME_VERIFIER_PROP = "skills.disableHostnameVerifier";
 
     public static void main(String[] args) {
+        eljaflejafklj
         // must call in the main method and not in @PostConstruct method as H2 jdbc driver will cache timezone prior @PostConstruct method is called
         // alternatively we could pass in -Duser.timezone=UTC
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
