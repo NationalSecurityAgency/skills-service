@@ -34,6 +34,9 @@ import skills.utils.RetryUtil
 @Slf4j
 class UserInfoService {
 
+    private static final String ID_IDTYPE = "ID"
+    private static final String DN_IDTYPE = "DN"
+
     @Value('${skills.authorization.authMode:#{T(skills.auth.AuthMode).DEFAULT_AUTH_MODE}}')
     AuthMode authMode
 
@@ -68,52 +71,54 @@ class UserInfoService {
     /**
      * Abstracts dealing with PKI vs Password/Form modes when user id param is provided
      */
-    String getUserName(String userIdParam, boolean retry=true) {
+    String getUserName(String userIdParam, boolean retry=true, String idType=DN_IDTYPE) {
         return RetryUtil.withRetry(3) {
-            return doGetUserName(userIdParam, retry)
+            return doGetUserName(userIdParam, retry, idType)
         }
     }
 
     @Transactional
     @Profile
-    protected String doGetUserName(String userIdParam, boolean retry) {
+    protected String doGetUserName(String userIdParam, boolean retry, String idType) {
         String userNameRes = userIdParam
         if (!userIdParam) {
             UserInfo userInfo = getCurrentUser()
             userNameRes =  userInfo.username
         } else if (authMode == AuthMode.PKI) {
-            UserInfo userInfo
-            try {
-                userInfo = pkiUserLookup.lookupUserDn(userIdParam)
-            } catch (Throwable e) {
-                String msg = e.getMessage()
-                if(e instanceof HttpClientErrorException){
-                    msg = ((HttpClientErrorException)e).getResponseBodyAsString()
-                } else if (e.getCause() instanceof HttpClientErrorException) {
-                    msg = ((HttpClientErrorException)e.getCause()).getResponseBodyAsString()
+            if (ID_IDTYPE != idType?.toUpperCase()) {
+                UserInfo userInfo
+                try {
+                    userInfo = pkiUserLookup.lookupUserDn(userIdParam)
+                } catch (Throwable e) {
+                    String msg = e.getMessage()
+                    if (e instanceof HttpClientErrorException) {
+                        msg = ((HttpClientErrorException) e).getResponseBodyAsString()
+                    } else if (e.getCause() instanceof HttpClientErrorException) {
+                        msg = ((HttpClientErrorException) e.getCause()).getResponseBodyAsString()
+                    }
+                    log.error("user-info-service lookup failed: ${msg}")
+                    SkillException ske = new SkillException(msg)
+                    ske.errorCode = ErrorCode.UserNotFound
+                    ske.doNotRetry = !retry
+                    throw ske
                 }
-                log.error("user-info-service lookup failed: ${msg}")
-                SkillException ske = new SkillException(msg)
-                ske.errorCode = ErrorCode.UserNotFound
-                ske.doNotRetry = !retry
-                throw ske
-            }
 
-            if (!userInfo) {
-                log.error("received empty user information from lookup")
-                SkillException ske = new SkillException("User Info Service does not know about user with provided lookup id of [${userIdParam}]")
-                ske.doNotRetry = !retry
-                throw ske
-            }
+                if (!userInfo) {
+                    log.error("received empty user information from lookup")
+                    SkillException ske = new SkillException("User Info Service does not know about user with provided lookup id of [${userIdParam}]")
+                    ske.doNotRetry = !retry
+                    throw ske
+                }
 
-            try {
-                userAuthService.createOrUpdateUser(userInfo)
-            } catch(Throwable e) {
-                log.error("error during createOrUpdateUser", e);
-                throw new SkillException("Failed to retrieve user info via [$userIdParam]")
-            }
+                try {
+                    userAuthService.createOrUpdateUser(userInfo)
+                } catch (Throwable e) {
+                    log.error("error during createOrUpdateUser", e);
+                    throw new SkillException("Failed to retrieve user info via [$userIdParam]")
+                }
 
-            userNameRes = userInfo.username
+                userNameRes = userInfo.username
+            }
         }
 
         /**
