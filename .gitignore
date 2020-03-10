@@ -40,3 +40,5 @@ rebel.xml
 rebel.xml.lock
 package-lock.json
 backend/src/main/resources/public/**
+
+.vscode

@@ -1,3 +1,18 @@
+/**
+ * Copyright 2020 SkillTree
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package skills.intTests.reportSkills
 
 import groovy.util.logging.Slf4j
@@ -18,6 +33,7 @@ import org.springframework.web.socket.sockjs.client.WebSocketTransport
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
+import skills.intTests.utils.SkillsService
 import skills.intTests.utils.TestUtils
 import skills.services.events.CompletionItem
 import skills.services.events.SkillEventResult
@@ -292,7 +308,7 @@ class ReportSkillsSpecs extends DefaultIntSpec {
 
             @Override
             void afterConnected(StompSession session, StompHeaders connectedHeaders) {
-                session.subscribe("/user/queue/${projId}/skill-updates", this)
+                session.subscribe("/user/queue/${projId}-skill-updates", this)
             }
         }
 
@@ -1145,7 +1161,27 @@ class ReportSkillsSpecs extends DefaultIntSpec {
 
         then:
         SkillsClientException ex = thrown()
+        ex.httpStatus == org.springframework.http.HttpStatus.BAD_REQUEST
         ex.message.contains("Spaces are not allowed in user id. Provided [user a]")
+    }
+
+    def "admin can not report skills for another project"() {
+        SkillsService otherUser = createService("otherUser")
+
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(10, )
+
+        otherUser.createProject(proj)
+        otherUser.createSubject(subj)
+        otherUser.createSkills(skills)
+
+        when:
+        skillsService.addSkill([projectId: projId, skillId: skills[0].skillId], "user", new Date())
+
+        then:
+        SkillsClientException ex = thrown()
+        ex.httpStatus == org.springframework.http.HttpStatus.FORBIDDEN
     }
 
 }

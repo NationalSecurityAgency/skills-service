@@ -1,3 +1,18 @@
+/*
+Copyright 2020 SkillTree
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 <template>
   <div class="role-manager">
     <div id="add-user-div" class="row mt-2 mb-5">
@@ -132,6 +147,7 @@
           .then(() => {
             this.data = this.data.filter(item => item.userId !== row.userId);
             this.userIds = this.userIds.filter(userId => userId !== row.userIdForDisplay);
+            this.$emit('role-deleted', { userId: row.userId, role: row.roleName });
           });
       },
       notCurrentUser(userId) {
@@ -144,6 +160,7 @@
         AccessService.saveUserRole(this.project.projectId, this.selectedUser, this.role, pkiAuthenticated)
           .then((userInfo) => {
             this.userAdded(userInfo);
+            this.$emit('role-added', { userId: this.selectedUser.userId, role: this.role });
           }).catch((e) => {
             if (e.response.data && e.response.data.errorCode && e.response.data.errorCode === 'UserNotFound') {
               this.errNotification.msg = e.response.data.explanation;

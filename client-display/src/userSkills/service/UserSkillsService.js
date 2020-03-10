@@ -1,6 +1,20 @@
+/*
+ * Copyright 2020 SkillTree
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 import axios from 'axios';
 
-import SkillsConfiguration from '@skills/skills-client-configuration';
 import store from '@/store';
 
 import 'url-search-params-polyfill';
@@ -16,7 +30,7 @@ export default {
 
   getUserSkills() {
     let response = null;
-    response = axios.get(`${SkillsConfiguration.getServiceUrl()}${this.getServicePath()}/${SkillsConfiguration.getProjectId()}/summary`, {
+    response = axios.get(`${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/summary`, {
       params: {
         userId: this.userId,
         version: this.version,
@@ -27,21 +41,21 @@ export default {
 
   getCustomIconCss() {
     let response = null;
-    response = axios.get(`${SkillsConfiguration.getServiceUrl()}${this.getServicePath()}/${SkillsConfiguration.getProjectId()}/customIconCss`, {
+    response = axios.get(`${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/customIconCss`, {
     }).then(result => result.data);
     return response;
   },
 
   getCustomGlobalIconCss() {
     let response = null;
-    response = axios.get(`${SkillsConfiguration.getServiceUrl()}/api/icons/customIconCss`, {
+    response = axios.get(`${store.state.serviceUrl}/api/icons/customIconCss`, {
     }).then(result => result.data);
     return response;
   },
 
 
   getSubjectSummary(subjectId) {
-    return axios.get(`${SkillsConfiguration.getServiceUrl()}${this.getServicePath()}/${SkillsConfiguration.getProjectId()}/subjects/${subjectId}/summary`, {
+    return axios.get(`${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/subjects/${subjectId}/summary`, {
       params: {
         userId: this.userId,
         version: this.version,
@@ -50,7 +64,7 @@ export default {
   },
 
   getSkillDependencies(skillId) {
-    return axios.get(`${SkillsConfiguration.getServiceUrl()}${this.getServicePath()}/${SkillsConfiguration.getProjectId()}/skills/${skillId}/dependencies`, {
+    return axios.get(`${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/skills/${skillId}/dependencies`, {
       params: {
         userId: this.userId,
       },
@@ -58,9 +72,9 @@ export default {
   },
 
   getSkillSummary(skillId, optionalCrossProjectId) {
-    let url = `${SkillsConfiguration.getServiceUrl()}${this.getServicePath()}/${SkillsConfiguration.getProjectId()}/skills/${skillId}/summary`;
+    let url = `${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/skills/${skillId}/summary`;
     if (optionalCrossProjectId) {
-      url = `${SkillsConfiguration.getServiceUrl()}${this.getServicePath()}/${SkillsConfiguration.getProjectId()}/projects/${optionalCrossProjectId}/skills/${skillId}/summary`;
+      url = `${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/projects/${optionalCrossProjectId}/skills/${skillId}/summary`;
     }
     return axios.get(url, {
       params: {
@@ -71,7 +85,7 @@ export default {
   },
 
   getBadgeSkills(badgeId, global) {
-    return axios.get(`${SkillsConfiguration.getServiceUrl()}${this.getServicePath()}/${SkillsConfiguration.getProjectId()}/badges/${badgeId}/summary`, {
+    return axios.get(`${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/badges/${badgeId}/summary`, {
       params: {
         userId: this.userId,
         version: this.version,
@@ -81,7 +95,7 @@ export default {
   },
 
   getBadgeSummaries() {
-    return axios.get(`${SkillsConfiguration.getServiceUrl()}${this.getServicePath()}/${SkillsConfiguration.getProjectId()}/badges/summary`, {
+    return axios.get(`${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/badges/summary`, {
       params: {
         userId: this.userId,
         version: this.version,
@@ -91,9 +105,9 @@ export default {
 
   getPointsHistory(subjectId) {
     let response = null;
-    let url = `${SkillsConfiguration.getServiceUrl()}${this.getServicePath()}/${SkillsConfiguration.getProjectId()}/subjects/${subjectId}/pointHistory`;
+    let url = `${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/subjects/${subjectId}/pointHistory`;
     if (!subjectId) {
-      url = `${SkillsConfiguration.getServiceUrl()}${this.getServicePath()}/${SkillsConfiguration.getProjectId()}/pointHistory`;
+      url = `${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/pointHistory`;
     }
     response = axios.get(url, {
       params: {
@@ -106,7 +120,7 @@ export default {
 
   addUserSkill(userSkillId) {
     let response = null;
-    response = axios.get(`${SkillsConfiguration.getServiceUrl()}${this.getServicePath()}/${SkillsConfiguration.getProjectId()}/addSkill/${userSkillId}`, {
+    response = axios.get(`${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/addSkill/${userSkillId}`, {
       params: {
         userId: this.userId,
       },
@@ -116,9 +130,9 @@ export default {
 
   getUserSkillsRanking(subjectId) {
     let response = null;
-    let url = `${SkillsConfiguration.getServiceUrl()}${this.getServicePath()}/${SkillsConfiguration.getProjectId()}/subjects/${subjectId}/rank`;
+    let url = `${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/subjects/${subjectId}/rank`;
     if (!subjectId) {
-      url = `${SkillsConfiguration.getServiceUrl()}${this.getServicePath()}/${SkillsConfiguration.getProjectId()}/rank`;
+      url = `${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/rank`;
     }
     response = axios.get(url, {
       params: {
@@ -130,9 +144,9 @@ export default {
 
   getUserSkillsRankingDistribution(subjectId) {
     let response = null;
-    let url = `${SkillsConfiguration.getServiceUrl()}${this.getServicePath()}/${SkillsConfiguration.getProjectId()}/subjects/${subjectId}/rankDistribution`;
+    let url = `${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/subjects/${subjectId}/rankDistribution`;
     if (!subjectId) {
-      url = `${SkillsConfiguration.getServiceUrl()}${this.getServicePath()}/${SkillsConfiguration.getProjectId()}/rankDistribution`;
+      url = `${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/rankDistribution`;
     }
     response = axios.get(url, {
       params: {
@@ -145,9 +159,9 @@ export default {
 
   getRankingDistributionUsersPerLevel(subjectId) {
     let response = null;
-    let url = `${SkillsConfiguration.getServiceUrl()}${this.getServicePath()}/${SkillsConfiguration.getProjectId()}/subjects/${subjectId}/rankDistribution/usersPerLevel`;
+    let url = `${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/subjects/${subjectId}/rankDistribution/usersPerLevel`;
     if (!subjectId) {
-      url = `${SkillsConfiguration.getServiceUrl()}${this.getServicePath()}/${SkillsConfiguration.getProjectId()}/rankDistribution/usersPerLevel`;
+      url = `${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/rankDistribution/usersPerLevel`;
     }
     response = axios.get(url, {
       params: {
@@ -158,9 +172,9 @@ export default {
   },
 
   getDescriptions(parentId, type = 'subject') {
-    let url = `${SkillsConfiguration.getServiceUrl()}${this.getServicePath()}/${SkillsConfiguration.getProjectId()}/subjects/${parentId}/descriptions`;
+    let url = `${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/subjects/${parentId}/descriptions`;
     if (type === 'badge' || type === 'global-badge') {
-      url = `${SkillsConfiguration.getServiceUrl()}${this.getServicePath()}/${SkillsConfiguration.getProjectId()}/badges/${parentId}/descriptions`;
+      url = `${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/badges/${parentId}/descriptions`;
     }
     const response = axios.get(url, {
       params: {
