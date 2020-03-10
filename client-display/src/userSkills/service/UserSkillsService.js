@@ -29,6 +29,10 @@ export default {
   version: null,
 
   getUserIdParams() {
+    if (!this.userId) {
+      return {};
+    }
+
     if (typeof this.userId === 'string') {
       return { userId: this.userId };
     }
