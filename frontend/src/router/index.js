@@ -22,6 +22,7 @@ import LoginForm from '@/components/access/Login';
 import RequestAccountForm from '@/components/access/RequestAccess';
 import ProjectPage from '@/components/projects/ProjectPage';
 import ErrorPage from '@/components/utils/ErrorPage';
+import NotAuthorizedPage from '@/components/utils/NotAuthorizedPage';
 import SubjectPage from '@/components/subjects/SubjectPage';
 import BadgePage from '@/components/badges/BadgePage';
 import GlobalBadgePage from '@/components/badges/global/GlobalBadgePage';
@@ -101,6 +102,14 @@ const router = new Router({
       path: '/error',
       name: 'ErrorPage',
       component: ErrorPage,
+      meta: {
+        requiresAuth: false,
+      },
+    },
+    {
+      path: '/not-authorized',
+      name: 'NotAuthorizedPage',
+      component: NotAuthorizedPage,
       meta: {
         requiresAuth: false,
       },
