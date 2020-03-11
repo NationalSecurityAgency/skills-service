@@ -84,6 +84,7 @@ Cypress.Commands.add("login", (user, pass) => {
         cy.log('Disabled UI Login')
     } else {
         cy.visit('/skills-login');
+        cy.contains('Sign in');
         cy.get('#username').type(user);
         cy.get('#inputPassword').type(pass);
         cy.contains('Login').click();

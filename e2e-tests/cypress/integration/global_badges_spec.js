@@ -29,11 +29,14 @@ describe('Global Badges Tests', () => {
 
         const expectedId = 'JustABadgeBadge';
         const providedName = "JustABadge";
-        cy.server().route('GET', `/supervisor/badges`).as('getGlobalBadges');
-        cy.server().route('PUT', `/supervisor/badges/${expectedId}`).as('postGlobalBadge');
+        cy.server();
+        cy.route('GET', `/supervisor/badges`).as('getGlobalBadges');
+        cy.route('GET', '/app/userInfo/hasRole/ROLE_SUPERVISOR').as('checkSupervisorRole')
+        cy.route('PUT', `/supervisor/badges/${expectedId}`).as('postGlobalBadge');
 
         cy.visit('/globalBadges');
         cy.wait('@getGlobalBadges');
+        cy.wait('@checkSupervisorRole');
 
         cy.clickButton('Badge');
 
@@ -58,11 +61,14 @@ describe('Global Badges Tests', () => {
             originalBadgeId: ''
         });
 
-        cy.server().route('GET', `/supervisor/badges`).as('getGlobalBadges');
-        cy.server().route('DELETE', `/supervisor/badges/${expectedId}`).as('deleteGlobalBadge');
+        cy.server();
+        cy.route('GET', `/supervisor/badges`).as('getGlobalBadges');
+        cy.route('GET', '/app/userInfo/hasRole/ROLE_SUPERVISOR').as('checkSupervisorRole')
+        cy.route('DELETE', `/supervisor/badges/${expectedId}`).as('deleteGlobalBadge');
 
         cy.visit('/globalBadges');
         cy.wait('@getGlobalBadges');
+        cy.wait('@checkSupervisorRole');
 
         cy.get('.card-body button.dropdown-toggle').click();
         cy.get('.card-body div.dropdown').contains('Delete').click();
@@ -145,7 +151,8 @@ describe('Global Badges Tests', () => {
     });
 
     it('Navigate to global badges menu entry', () => {
-        cy.server().route('GET', `/supervisor/badges`).as('getGlobalBadges');
+        cy.server();
+        cy.route('GET', `/supervisor/badges`).as('getGlobalBadges');
 
         cy.contains('Badges').click();
         cy.wait('@getGlobalBadges');

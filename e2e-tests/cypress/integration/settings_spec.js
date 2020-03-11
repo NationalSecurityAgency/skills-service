@@ -27,6 +27,7 @@ describe('Settings Tests', () => {
         cy.route('GET', '/root/users/without/role/ROLE_SUPER_DUPER_USER/sk?userSuggestOption=ONE').as('getEligibleForRoot');
         cy.route('PUT', '/root/users/skills@skills.org/roles/ROLE_SUPER_DUPER_USER').as('addRoot');
         cy.visit('/');
+        cy.contains('My Projects');
         cy.get('button.dropdown-toggle').first().click({force: true});
         cy.contains('Settings').click();
         cy.contains('Security').click();
@@ -40,6 +41,7 @@ describe('Settings Tests', () => {
 
     it('Add Supervisor User', () => {
         cy.visit('/');
+        cy.contains('My Projects');
         cy.server();
         cy.route('PUT', '/root/users/root@skills.org/roles/ROLE_SUPERVISOR').as('addSupervisor');
         cy.route('GET', 'root/users/without/role/ROLE_SUPERVISOR/root?userSuggestOption=ONE').as('getEligibleForSupervisor');
