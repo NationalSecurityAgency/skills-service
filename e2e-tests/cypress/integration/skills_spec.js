@@ -79,7 +79,7 @@ describe('Skills Tests', () => {
         cy.contains('ID: Lotsofspecial')
     });
 
-    it('Add Skill Event', () => {
+    it.only('Add Skill Event', () => {
         cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1', {
             projectId: 'proj1',
             subjectId: "subj1",
@@ -123,6 +123,33 @@ describe('Skills Tests', () => {
         cy.contains('Enter user id').type('fo');
         cy.wait('@suggestUsers');
         cy.get('li.multiselect__element').contains('foo').click();
+    });
+
+    it('Add Skill Event - suggest user with slash character does not cause error', () => {
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1', {
+            projectId: 'proj1',
+            subjectId: "subj1",
+            skillId: "skill1",
+            name: "Skill 1",
+            pointIncrement: '50',
+            numPerformToCompletion: '5'
+        });
+
+        cy.server();
+        cy.route({
+            method: 'POST',
+            url: '/app/users/projects/proj1/suggestClientUsers?userSuggestOption=TWO'
+        }).as('suggestUsers');
+
+        cy.visit('/projects/proj1/subjects/subj1/skills/skill1');
+        cy.contains('Add Event').click();
+
+        cy.contains('ONE').click();
+        cy.contains('TWO').click();
+        cy.get('.existingUserInput button').contains('TWO');
+
+        cy.contains('Enter user id').type('foo/bar{enter}');
+        cy.wait('@suggestUsers');
     });
 
     it('Add Skill Event User Not Found', () => {
