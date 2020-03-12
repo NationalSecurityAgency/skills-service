@@ -89,6 +89,12 @@ describe('Skills Tests', () => {
             numPerformToCompletion: '5'
         });
 
+        cy.server();
+        cy.route({
+            method: 'POST',
+            url: '/app/users/projects/proj1/suggestClientUsers?userSuggestOption=TWO'
+        }).as('suggestUsers');
+
        cy.visit('/projects/proj1/subjects/subj1/skills/skill1');
        cy.contains('Add Event').click();
 
@@ -97,9 +103,26 @@ describe('Skills Tests', () => {
        cy.get('.existingUserInput button').contains('TWO');
 
        cy.contains('Enter user id').type('foo{enter}');
+       cy.wait('@suggestUsers');
        cy.clickButton('Add');
        cy.get('.text-success', {timeout: 5*1000}).contains('Added points for');
+       cy.get('.text-success', {timeout: 5*1000}).contains('[foo]');
 
+        cy.contains('Enter user id').type('bar{enter}');
+        cy.wait('@suggestUsers');
+        cy.clickButton('Add');
+        cy.get('.text-success', {timeout: 5*1000}).contains('Added points for');
+        cy.get('.text-success', {timeout: 5*1000}).contains('[bar]');
+
+        cy.contains('Enter user id').type('baz{enter}');
+        cy.wait('@suggestUsers');
+        cy.clickButton('Add');
+        cy.get('.text-success', {timeout: 5*1000}).contains('Added points for');
+        cy.get('.text-success', {timeout: 5*1000}).contains('[baz]');
+
+        cy.contains('Enter user id').type('fo');
+        cy.wait('@suggestUsers');
+        cy.get('li.multiselect__element').contains('foo').click();
     });
 
     it('Add Skill Event User Not Found', () => {

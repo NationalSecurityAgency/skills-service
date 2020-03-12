@@ -28,7 +28,8 @@ class SuggestUsersSpecs extends DefaultIntSpec {
 
         expect:
         //one of the other tests, when run in a suite, results in extra users not added by this test, thus the change to containsAll
-        skillsService.suggestDashboardUsers(query).collect({ it.userId }).sort().containsAll(userIds)
+        def res = skillsService.suggestDashboardUsers(query)
+        res.collect({ it.userId }).sort().containsAll(userIds)
         where:
         query  | userIds
         // by user id
