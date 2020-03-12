@@ -21,4 +21,8 @@ import groovy.transform.Canonical
 class RequestResult {
     boolean success
     String  explanation
+
+    static RequestResult success() {
+        return new RequestResult(success: true)
+    }
 }
