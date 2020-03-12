@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div>
+  <div data-cy="projectCard">
     <page-preview-card :options="cardOptions">
       <div slot="header-top-right">
         <edit-and-delete-dropdown v-on:deleted="deleteProject" v-on:edited="editProject" v-on:move-up="moveUp"

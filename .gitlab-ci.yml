@@ -99,6 +99,7 @@ cypress_test:
       - e2e-tests/cypress/videos/**/*.mp4
       - e2e-tests/cypress/screenshots/*.png
       - e2e-tests/cypress/screenshots/**/*.png
+      - e2e-tests/cypress/snapshots/**/*
       - e2e-tests/cypress/snapshots/client-display/**/*
       - e2e-tests/cypress/snapshots/client-display/**/__diff_output__/*
     expire_in: 1 day
