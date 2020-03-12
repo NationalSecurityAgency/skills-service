@@ -79,7 +79,7 @@ describe('Skills Tests', () => {
         cy.contains('ID: Lotsofspecial')
     });
 
-    it.only('Add Skill Event', () => {
+    it('Add Skill Event', () => {
         cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1', {
             projectId: 'proj1',
             subjectId: "subj1",
