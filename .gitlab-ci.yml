@@ -128,7 +128,7 @@ pushToNexus:
       - branches
     variables:
       - $BRANCH_TO_DEPLOY == $CI_COMMIT_REF_NAME
-      - "master" == $CI_COMMIT_REF_NAME
+
 deploy:
   except:
     variables:
