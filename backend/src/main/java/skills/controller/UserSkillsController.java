@@ -20,6 +20,7 @@ import callStack.profiler.Profile;
 import groovy.lang.Closure;
 import groovy.transform.CompileStatic;
 import groovy.util.logging.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
@@ -30,6 +31,8 @@ import skills.PublicProps;
 import skills.auth.UserInfoService;
 import skills.controller.exceptions.SkillsValidator;
 import skills.controller.request.model.SkillEventRequest;
+import skills.controller.request.model.SkillsClientVersionRequest;
+import skills.controller.result.model.RequestResult;
 import skills.icons.CustomIconFacade;
 import skills.services.events.SkillEventResult;
 import skills.services.events.SkillEventsService;
@@ -38,6 +41,7 @@ import skills.skillLoading.SkillsLoader;
 import skills.skillLoading.model.*;
 import skills.utils.RetryUtil;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -78,6 +82,21 @@ class UserSkillsController {
         }
 
         return publicProps.getInt(PublicProps.UiProp.maxSkillVersion);
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/skillsClientVersion", method = {RequestMethod.PUT, RequestMethod.POST}, produces = "application/json")
+    @ResponseBody
+    RequestResult setSkillsClientVersion(@PathVariable(name = "projectId") String projectId,
+                                         @RequestBody SkillsClientVersionRequest skillsClientVersion,
+                                         @RequestHeader(value = "User-Agent") String userAgent,
+                                         @RequestHeader(value = "X-FORWARDED-FOR", required = false) String remoteAddr,
+                                         HttpServletRequest request) {
+        String remoteIp = StringUtils.isNotBlank(remoteAddr) ? remoteAddr : request.getRemoteAddr();
+        log.info("SkillsClient ["+skillsClientVersion.getSkillsClientVersion()+"], " +
+                "projectId ["+projectId+"], " +
+                "User-Agent ["+userAgent+"], " +
+                "remoteIp ["+remoteIp+"]");
+        return new RequestResult(true);
     }
 
     @RequestMapping(value = "/projects/{projectId}/level", method = RequestMethod.GET, produces = "application/json")
