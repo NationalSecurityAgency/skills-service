@@ -96,7 +96,9 @@ class UserSkillsController {
                 "projectId ["+projectId+"], " +
                 "User-Agent ["+userAgent+"], " +
                 "remoteIp ["+remoteIp+"]");
-        return new RequestResult(true);
+        RequestResult result = new RequestResult();
+        result.setSuccess(true);
+        return result;
     }
 
     @RequestMapping(value = "/projects/{projectId}/level", method = RequestMethod.GET, produces = "application/json")
