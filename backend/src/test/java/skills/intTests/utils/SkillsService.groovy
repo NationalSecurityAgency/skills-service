@@ -17,6 +17,7 @@ package skills.intTests.utils
 
 import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
+import org.apache.commons.lang3.StringUtils
 import spock.lang.Retry
 
 import java.nio.charset.StandardCharsets
@@ -460,18 +461,18 @@ class SkillsService {
     }
 
     def suggestDashboardUsers(String query) {
-        String url = "/users/suggestDashboardUsers/${query}".toString()
-        wsHelper.appGet(url)
+        String url = "/users/suggestDashboardUsers/"
+        wsHelper.appPost(url, [suggestQuery: query])?.body
     }
 
     def suggestClientUsersForProject(String projectId, String query){
-        String url = "/users/projects/${projectId}/suggestClientUsers/${query}".toString()
-        wsHelper.appGet(url)
+        String url = "/users/projects/${projectId}/suggestClientUsers/".toString()
+        wsHelper.appPost(url, [suggestQuery: query])?.body
     }
 
     def suggestClientUsers(String query){
-        String url = "/users/suggestClientUsers/${query}".toString()
-        wsHelper.appGet(url)
+        String url = "/users/suggestClientUsers/".toString()
+        wsHelper.appPost(url, [suggestQuery: query])?.body
     }
 
     def getUserLevel(String projectId, String userId = null) {
@@ -709,7 +710,7 @@ class SkillsService {
     }
 
     def getNonRootUsers(String query) {
-        return wsHelper.rootGet("/users/${query}")
+        return wsHelper.rootPost("/users/", [suggestQuery: query])?.body
     }
 
     def getCurrentUser() {
@@ -729,7 +730,8 @@ class SkillsService {
     }
 
     def getUsersWithoutRole(String role, String usernameQuery) {
-        return wsHelper.rootGet("/users/without/role/${role}/${usernameQuery}")
+        String url = "/users/without/role/${role}/"
+        return wsHelper.rootPost(url, [suggestQuery: usernameQuery])?.body
     }
 
     def removeRootRole(String userId) {

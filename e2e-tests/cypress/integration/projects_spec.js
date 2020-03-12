@@ -229,8 +229,8 @@ describe('Projects Tests', () => {
     }).as('addAdmin');
 
     cy.route({
-      method: 'GET',
-      url: '/app/users/suggest*/*',
+      method: 'POST',
+      url: '/app/users/suggest*',
       status: 200,
       response: [{userId:'foo', userIdForDisplay: 'foo', first: 'foo', last: 'foo', dn: 'foo'}]
     }).as('suggest');
@@ -259,8 +259,8 @@ describe('Projects Tests', () => {
     }).as('addAdmin');
 
     cy.route({
-      method: 'GET',
-      url: '/app/users/suggest*/*',
+      method: 'POST',
+      url: '/app/users/suggest*',
       status: 200,
       response: [{userId:'foo', userIdForDisplay: 'foo', first: 'foo', last: 'foo', dn: 'foo'}]
     }).as('suggest');
@@ -273,6 +273,58 @@ describe('Projects Tests', () => {
     cy.clickButton('Add');
     cy.wait('@addAdmin');
     cy.get('h4').contains('Tiny-bit of an error!');
+  });
+
+  it('Add Admin No Query', () => {
+    cy.request('POST', '/app/projects/proj1', {
+      projectId: 'proj1',
+      name: "proj1"
+    });
+
+    cy.route({
+      method: 'PUT',
+      url: '/admin/projects/proj1/users/root@skills.org/roles/ROLE_PROJECT_ADMIN',
+    }).as('addAdmin');
+
+    cy.route({
+      method: 'POST',
+      url: '/app/users/suggestDashboardUsers*',
+    }).as('suggest');
+
+    cy.visit('/projects/proj1/access');
+
+    cy.contains('Enter user id').type('{enter}');
+    cy.wait('@suggest');
+    cy.contains('root@skills.org').click();
+    cy.clickButton('Add');
+    cy.wait('@addAdmin');
+    cy.contains('Firstname LastName (root@skills.org)').should('exist');
+  });
+
+  it('Add Admin', () => {
+    cy.request('POST', '/app/projects/proj1', {
+      projectId: 'proj1',
+      name: "proj1"
+    });
+
+    cy.route({
+      method: 'PUT',
+      url: '/admin/projects/proj1/users/root@skills.org/roles/ROLE_PROJECT_ADMIN',
+    }).as('addAdmin');
+
+    cy.route({
+      method: 'POST',
+      url: '/app/users/suggestDashboardUsers*',
+    }).as('suggest');
+
+    cy.visit('/projects/proj1/access');
+
+    cy.contains('Enter user id').type('root{enter}');
+    cy.wait('@suggest');
+    cy.contains('root@skills.org').click();
+    cy.clickButton('Add');
+    cy.wait('@addAdmin');
+    cy.contains('Firstname LastName (root@skills.org)').should('be.visible');
   });
 
 
