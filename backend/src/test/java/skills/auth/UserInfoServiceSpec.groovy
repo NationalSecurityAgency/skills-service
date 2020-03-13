@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2020 SkillTree
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,7 +27,7 @@ import spock.lang.Specification
 
 class UserInfoServiceSpec extends Specification {
 
-    def "Get id of current user"( ){
+    def "Get id of current user"() {
         SecurityContext context = Mock()
         Authentication authentication = Mock()
         UserInfo userInfo = Mock()
@@ -45,7 +45,7 @@ class UserInfoServiceSpec extends Specification {
         userId == "foo"
     }
 
-    def "in pki auth mode, do not look up user by dn if userId is supplied with a type of ID" (){
+    def "in pki auth mode, do not look up user by dn if userId is supplied with a type of ID"() {
         PkiUserLookup userLookup = Mock()
         0 * userLookup.lookupUserDn("simpleId")
 
@@ -139,7 +139,7 @@ class UserInfoServiceSpec extends Specification {
         e.errorCode == ErrorCode.UserNotFound
     }
 
-    def "in pki auth mode, throws SkillException if lookup returns no result"(){
+    def "in pki auth mode, throws SkillException if lookup returns no result"() {
         UserInfo userInfo = Mock()
         PkiUserLookup userLookup = Mock()
         UserAuthService authService = Mock()
