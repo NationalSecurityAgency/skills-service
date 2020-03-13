@@ -62,4 +62,19 @@ describe('App Features Tests', () => {
         cy.contains('New Software Version is Available').should('not.exist')
     });
 
+    it.only('access denied should show authorization failure page not error page', () => {
+        cy.server();
+        cy.route({
+            method: 'GET',
+            url: '/admin/projects/proj1/subjects/subj1',
+            status: 403,
+            response: {errorCode: 'NotAuthorized', explanation: 'Not authorized to view this resource'}
+        }).as('loadSubject');
+
+        cy.visit('/projects/proj1/subjects/subj1');
+        cy.wait('@loadSubject');
+        cy.url().should('include', '/not-authorized');
+        cy.contains('User Not Authorized').should('be.visible')
+    });
+
 })
