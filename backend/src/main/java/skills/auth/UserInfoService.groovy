@@ -90,11 +90,13 @@ class UserInfoService {
                 try {
                     userInfo = pkiUserLookup.lookupUserDn(userIdParam)
                 } catch (Throwable e) {
-                    String msg = e.getMessage()
+                    String msg = ""
                     if (e instanceof HttpClientErrorException) {
                         msg = ((HttpClientErrorException) e).getResponseBodyAsString()
                     } else if (e.getCause() instanceof HttpClientErrorException) {
                         msg = ((HttpClientErrorException) e.getCause()).getResponseBodyAsString()
+                    } else {
+                        msg = e.getMessage()
                     }
                     log.error("user-info-service lookup failed: ${msg}")
                     SkillException ske = new SkillException(msg)
