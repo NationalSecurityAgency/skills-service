@@ -190,7 +190,7 @@ class UserInfoServiceSpec extends Specification {
         userInfoService.authMode = AuthMode.FORM
         userInfoService.userAttrsService = userAttrsService
 
-        String userId = userInfoService.getUserName("simpleId")
+        String userId = userInfoService.getUserName(null)
 
         then:
         userId == "simpleid"
