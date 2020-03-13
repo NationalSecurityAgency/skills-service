@@ -35,7 +35,7 @@
         <commons.io.version>2.6</commons.io.version>
 
         <frontend-maven-plugin.version>1.7.6</frontend-maven-plugin.version>
-        <node.version>v13.6.0</node.version>
+        <node.version>v12.16.1</node.version>
 
         <httpclient.version>4.5.6</httpclient.version>
         <guava.version>28.1-jre</guava.version>
