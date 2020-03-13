@@ -127,7 +127,13 @@ describe('Projects Tests', () => {
   });
 
   it('Project name is required', () => {
+    cy.server();
+    cy.route({
+      method: 'GET',
+      url: '/app/projects'
+    }).as('loadProjects');
     cy.visit('/')
+    cy.wait('@loadProjects');
     cy.clickButton('Project');;
     cy.contains('Enable').click();
     cy.getIdField().type('InitValue');
@@ -325,6 +331,28 @@ describe('Projects Tests', () => {
     cy.clickButton('Add');
     cy.wait('@addAdmin');
     cy.contains('Firstname LastName (root@skills.org)').should('be.visible');
+  });
+
+  it('Add Admin - forward slash character does not cause error', () => {
+    cy.request('POST', '/app/projects/proj1', {
+      projectId: 'proj1',
+      name: "proj1"
+    });
+
+    cy.route({
+      method: 'PUT',
+      url: '/admin/projects/proj1/users/root@skills.org/roles/ROLE_PROJECT_ADMIN',
+    }).as('addAdmin');
+
+    cy.route({
+      method: 'POST',
+      url: '/app/users/suggestDashboardUsers*',
+    }).as('suggest');
+
+    cy.visit('/projects/proj1/access');
+
+    cy.contains('Enter user id').type('root/foo{enter}');
+    cy.wait('@suggest');
   });
 
 
