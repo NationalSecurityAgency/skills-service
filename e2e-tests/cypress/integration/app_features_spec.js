@@ -62,7 +62,7 @@ describe('App Features Tests', () => {
         cy.contains('New Software Version is Available').should('not.exist')
     });
 
-    it.only('access denied should show authorization failure page not error page', () => {
+    it('access denied should show authorization failure page not error page', () => {
         cy.server();
         cy.route({
             method: 'GET',
