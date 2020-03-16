@@ -821,6 +821,10 @@ class SkillsService {
         return wsHelper.adminGet("/projects/${projectId}/levels/${level}/globalBadge/exists")
     }
 
+    def reportClientVersion(String projectId, String version) {
+        return wsHelper.apiPost("/projects/${projectId}/skillsClientVersion", [ skillsClientVersion: version ])
+    }
+
     private String getProjectUrl(String project) {
         return "/projects/${project}".toString()
     }
