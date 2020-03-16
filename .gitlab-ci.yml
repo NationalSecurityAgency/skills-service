@@ -127,7 +127,7 @@ pushToNexus:
     refs:
       - branches
     variables:
-      - $BRANCH_TO_DEPLOY == $CI_COMMIT_REF_NAME
+      - $BRANCH_TO_DEPLOY_SKILLS_SERVICE == $CI_COMMIT_REF_NAME
 
 deploy:
   except:
@@ -151,4 +151,4 @@ deploy:
     refs:
       - branches
     variables:
-      - $BRANCH_TO_DEPLOY == $CI_COMMIT_REF_NAME
+      - $BRANCH_TO_DEPLOY_SKILLS_SERVICE == $CI_COMMIT_REF_NAME
