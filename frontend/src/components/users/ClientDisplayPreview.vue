@@ -66,20 +66,16 @@ limitations under the License.
       this.projectId = this.$route.params.projectId;
       if (this.$store.getters.isPkiAuthenticated) {
         // dn is provided when routed form other pages
-        if (this.$route.params.dn) {
+        if (this.$route.params.dn && !this.$route.params.userId) {
           this.userId = this.$route.params.dn;
           this.loading.userInfo = false;
         } else {
-          UsersService.getUserInfo(this.projectId, this.$route.params.userId)
-            .then((result) => {
-              this.userId = result.dn;
-            })
-            .finally(() => {
-              this.loading.userInfo = false;
-            });
+          this.userId = {
+            id: this.$route.params.userId,
+            idType: 'ID',
+          };
+          this.loading.userInfo = false;
         }
-
-        this.userId = this.$route.params.dn ? this.$route.params.dn : this.$route.params.userId;
       } else {
         this.userId = this.$route.params.userId;
         this.loading.userInfo = false;

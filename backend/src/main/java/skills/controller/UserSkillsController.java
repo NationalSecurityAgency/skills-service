@@ -20,6 +20,7 @@ import callStack.profiler.Profile;
 import groovy.lang.Closure;
 import groovy.transform.CompileStatic;
 import groovy.util.logging.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
@@ -30,6 +31,8 @@ import skills.PublicProps;
 import skills.auth.UserInfoService;
 import skills.controller.exceptions.SkillsValidator;
 import skills.controller.request.model.SkillEventRequest;
+import skills.controller.request.model.SkillsClientVersionRequest;
+import skills.controller.result.model.RequestResult;
 import skills.icons.CustomIconFacade;
 import skills.services.events.SkillEventResult;
 import skills.services.events.SkillEventsService;
@@ -38,6 +41,7 @@ import skills.skillLoading.SkillsLoader;
 import skills.skillLoading.model.*;
 import skills.utils.RetryUtil;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -80,6 +84,21 @@ class UserSkillsController {
         return publicProps.getInt(PublicProps.UiProp.maxSkillVersion);
     }
 
+    @RequestMapping(value = "/projects/{projectId}/skillsClientVersion", method = {RequestMethod.PUT, RequestMethod.POST}, produces = "application/json")
+    @ResponseBody
+    RequestResult setSkillsClientVersion(@PathVariable(name = "projectId") String projectId,
+                                         @RequestBody SkillsClientVersionRequest skillsClientVersion,
+                                         @RequestHeader(value = "User-Agent") String userAgent,
+                                         @RequestHeader(value = "X-FORWARDED-FOR", required = false) String remoteAddr,
+                                         HttpServletRequest request) {
+        String remoteIp = StringUtils.isNotBlank(remoteAddr) ? remoteAddr : request.getRemoteAddr();
+        log.info("SkillsClient ["+skillsClientVersion.getSkillsClientVersion()+"], " +
+                "projectId ["+projectId+"], " +
+                "User-Agent ["+userAgent+"], " +
+                "remoteIp ["+remoteIp+"]");
+        return RequestResult.success();
+    }
+
     @RequestMapping(value = "/projects/{projectId}/level", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     public Integer getUserLevel(@PathVariable(name = "projectId") String projectId,
@@ -94,8 +113,9 @@ class UserSkillsController {
     @Profile
     public OverallSkillSummary getSkillsSummary(@PathVariable("projectId") String projectId,
                                                 @RequestParam(name = "userId", required = false) String userIdParam,
-                                                @RequestParam(name = "version", required = false) Integer version) {
-        String userId = userInfoService.getUserName(userIdParam);
+                                                @RequestParam(name = "version", required = false) Integer version,
+                                                @RequestParam(name = "idType", required = false) String idType) {
+        String userId = userInfoService.getUserName(userIdParam, true, idType);
         return skillsLoader.loadOverallSummary(projectId, userId, getProvidedVersionOrReturnDefault(version));
     }
 
@@ -105,8 +125,9 @@ class UserSkillsController {
     public SkillSubjectSummary getSubjectSummary(@PathVariable("projectId") String projectId,
                                                  @PathVariable("subjectId") String subjectId,
                                                  @RequestParam(name = "userId", required = false) String userIdParam,
-                                                 @RequestParam(name = "version", required = false) Integer version) {
-        String userId = userInfoService.getUserName(userIdParam);
+                                                 @RequestParam(name = "version", required = false) Integer version,
+                                                 @RequestParam(name = "idType", required = false) String idType) {
+        String userId = userInfoService.getUserName(userIdParam, true, idType);
         return skillsLoader.loadSubject(projectId, userId, subjectId, getProvidedVersionOrReturnDefault(version));
     }
 
@@ -128,8 +149,9 @@ class UserSkillsController {
     @CompileStatic
     public SkillSummary getSkillSummary(@PathVariable("projectId") String projectId,
                                         @PathVariable("skillId") String skillId,
-                                        @RequestParam(name = "userId", required = false) String userIdParam) {
-        String userId = userInfoService.getUserName(userIdParam);
+                                        @RequestParam(name = "userId", required = false) String userIdParam,
+                                        @RequestParam(name = "idType", required = false) String idType) {
+        String userId = userInfoService.getUserName(userIdParam, true, idType);
         return skillsLoader.loadSkillSummary(projectId, userId, null, skillId);
     }
 
@@ -143,8 +165,9 @@ class UserSkillsController {
     public SkillSummary getCrossProjectSkillSummary(@PathVariable("projectId") String projectId,
                                                     @PathVariable("crossProjectId") String crossProjectId,
                                                     @PathVariable("skillId") String skillId,
-                                                    @RequestParam(name = "userId", required = false) String userIdParam) {
-        String userId = userInfoService.getUserName(userIdParam);
+                                                    @RequestParam(name = "userId", required = false) String userIdParam,
+                                                    @RequestParam(name = "idType", required = false) String idType) {
+        String userId = userInfoService.getUserName(userIdParam, true, idType);
         return skillsLoader.loadSkillSummary(projectId, userId, crossProjectId, skillId);
     }
 
@@ -153,8 +176,9 @@ class UserSkillsController {
     @CompileStatic
     public List<SkillBadgeSummary> getAllBadgesSummary(@PathVariable("projectId") String projectId,
                                                        @RequestParam(name = "userId", required = false) String userIdParam,
-                                                       @RequestParam(name = "version", required = false) Integer version) {
-        String userId = userInfoService.getUserName(userIdParam);
+                                                       @RequestParam(name = "version", required = false) Integer version,
+                                                       @RequestParam(name = "idType", required = false) String idType) {
+        String userId = userInfoService.getUserName(userIdParam, true, idType);
         List<SkillBadgeSummary> badgeSummaries = skillsLoader.loadBadgeSummaries(projectId, userId, getProvidedVersionOrReturnDefault(version));
 
         // add any global badges as well
@@ -183,8 +207,9 @@ class UserSkillsController {
                                              @PathVariable("badgeId") String badgeId,
                                              @RequestParam(name = "userId", required = false) String userIdParam,
                                              @RequestParam(name = "version", required = false) Integer version,
-                                             @RequestParam(name = "global", required = false) Boolean isGlobal) {
-        String userId = userInfoService.getUserName(userIdParam);
+                                             @RequestParam(name = "global", required = false) Boolean isGlobal,
+                                             @RequestParam(name = "idType", required = false) String idType) {
+        String userId = userInfoService.getUserName(userIdParam, true, idType);
         if (isGlobal != null && isGlobal) {
             return skillsLoader.loadGlobalBadge(userId, projectId, badgeId, getProvidedVersionOrReturnDefault(version));
         } else {
@@ -197,8 +222,10 @@ class UserSkillsController {
     @CompileStatic
     public UserPointHistorySummary getProjectsPointHistory(@PathVariable("projectId") String projectId,
                                                            @RequestParam(name = "userId", required = false) String userIdParam,
-                                                           @RequestParam(name = "version", required = false) Integer version) {
-        String userId = userInfoService.getUserName(userIdParam);
+                                                           @RequestParam(name = "version", required = false) Integer version,
+                                                           @RequestParam(name = "idType", required = false) String idType
+                                                           ) {
+        String userId = userInfoService.getUserName(userIdParam, true, idType);
         return skillsLoader.loadPointHistorySummary(projectId, userId, 365, null, getProvidedVersionOrReturnDefault(version));
     }
 
@@ -208,8 +235,9 @@ class UserSkillsController {
     public UserPointHistorySummary getSubjectsPointHistory(@PathVariable("projectId") String projectId,
                                                            @PathVariable("subjectId") String subjectId,
                                                            @RequestParam(name = "userId", required = false) String userIdParam,
-                                                           @RequestParam(name = "version", required = false) Integer version) {
-        String userId = userInfoService.getUserName(userIdParam);
+                                                           @RequestParam(name = "version", required = false) Integer version,
+                                                           @RequestParam(name = "idType", required = false) String idType) {
+        String userId = userInfoService.getUserName(userIdParam, true, idType);
         return skillsLoader.loadPointHistorySummary(projectId, userId, 365, subjectId, getProvidedVersionOrReturnDefault(version));
     }
 
@@ -218,8 +246,9 @@ class UserSkillsController {
     @CompileStatic
     public SkillDependencyInfo loadSkillDependencyInfo(@PathVariable("projectId") String projectId,
                                                        @PathVariable("skillId") String skillId,
-                                                       @RequestParam(name = "userId", required = false) String userIdParam) {
-        String userId = userInfoService.getUserName(userIdParam);
+                                                       @RequestParam(name = "userId", required = false) String userIdParam,
+                                                       @RequestParam(name = "idType", required = false) String idType) {
+        String userId = userInfoService.getUserName(userIdParam, true, idType);
         return skillsLoader.loadSkillDependencyInfo(projectId, userId, skillId);
     }
 
@@ -274,8 +303,9 @@ class UserSkillsController {
     @ResponseBody
     @CompileStatic
     public SkillsRanking getRanking(@PathVariable("projectId") String projectId,
-                                    @RequestParam(name = "userId", required = false) String userIdParam) {
-        String userId = userInfoService.getUserName(userIdParam);
+                                    @RequestParam(name = "userId", required = false) String userIdParam,
+                                    @RequestParam(name = "idType", required = false) String idType) {
+        String userId = userInfoService.getUserName(userIdParam, true, idType);
         return rankingLoader.getUserSkillsRanking(projectId, userId);
     }
 
@@ -284,8 +314,9 @@ class UserSkillsController {
     @CompileStatic
     public SkillsRanking getRankingBySubject(@PathVariable("projectId") String projectId,
                                              @PathVariable("subjectId") String subjectId,
-                                             @RequestParam(name = "userId", required = false) String userIdParam) {
-        String userId = userInfoService.getUserName(userIdParam);
+                                             @RequestParam(name = "userId", required = false) String userIdParam,
+                                             @RequestParam(name = "idType", required = false) String idType) {
+        String userId = userInfoService.getUserName(userIdParam, true, idType);
         return rankingLoader.getUserSkillsRanking(projectId, userId, subjectId);
     }
 
@@ -308,8 +339,9 @@ class UserSkillsController {
     @ResponseBody
     @CompileStatic
     public SkillsRankingDistribution getRankingDistribution(@PathVariable("projectId") String projectId,
-                                                            @RequestParam(name = "userId", required = false) String userIdParam) {
-        String userId = userInfoService.getUserName(userIdParam);
+                                                            @RequestParam(name = "userId", required = false) String userIdParam,
+                                                            @RequestParam(name = "idType", required = false) String idType) {
+        String userId = userInfoService.getUserName(userIdParam, true, idType);
         return rankingLoader.getRankingDistribution(projectId, userId);
     }
 
@@ -318,8 +350,9 @@ class UserSkillsController {
     @CompileStatic
     public SkillsRankingDistribution getRankingDistributionBySubject(@PathVariable("projectId") String projectId,
                                                                      @PathVariable("subjectId") String subjectId,
-                                                                     @RequestParam(name = "userId", required = false) String userIdParam) {
-        String userId = userInfoService.getUserName(userIdParam);
+                                                                     @RequestParam(name = "userId", required = false) String userIdParam,
+                                                                     @RequestParam(name = "idType", required = false) String idType) {
+        String userId = userInfoService.getUserName(userIdParam, true, idType);
         return rankingLoader.getRankingDistribution(projectId, userId, subjectId);
     }
 

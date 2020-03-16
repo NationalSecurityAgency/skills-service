@@ -13,16 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.controller.result.model
+package skills.controller.request.model
 
-import groovy.transform.Canonical
+import groovy.transform.Immutable
 
-@Canonical
-class RequestResult {
-    boolean success
-    String  explanation
-
-    static RequestResult success() {
-        return new RequestResult(success: true)
-    }
+@Immutable
+class SkillsClientVersionRequest {
+    String skillsClientVersion
 }

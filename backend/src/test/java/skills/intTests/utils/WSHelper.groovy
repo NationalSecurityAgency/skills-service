@@ -123,6 +123,10 @@ class WSHelper {
         return get(endpoint, 'root', null)
     }
 
+    def rootPost(String endpoint, Map params = null) {
+        return post(endpoint, 'root', params)
+    }
+
     def rootPut(String endpoint, Map params = null) {
         return put(endpoint, 'root', params)
     }

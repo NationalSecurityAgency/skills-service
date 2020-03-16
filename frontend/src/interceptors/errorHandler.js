@@ -38,6 +38,8 @@ function errorResponseHandler(error) {
       }
       router.push(loginRoute);
     }
+  } else if (errorCode === 403) {
+    router.push({ name: 'NotAuthorizedPage' });
   } else {
     router.push({ name: 'ErrorPage' });
   }
