@@ -50,9 +50,25 @@ const refreshAuthorization = (failedRequest) => {
 // Instantiate the interceptor (you can chain it as it returns the axios instance)
 createAuthRefreshInterceptor(axios, refreshAuthorization);
 
+const getErrorMsg = (errorResponse) => {
+  let response = '';
+  if (!errorResponse || !errorResponse.response || !errorResponse.response.data) {
+    return response;
+  }
+
+  const { data } = errorResponse.response;
+  if (data.error_description) {
+    response = data.error_description;
+  } else if (data.errorCode && data.explanation) {
+    response = data.explanation;
+  }
+
+  return response;
+};
+
 axios.interceptors.response.use(response => response, (error) => {
   if (!error || !error.response || (error.response && error.response.status !== 401)) {
-    const errorMessage = (error && error.response && error.response.data) ? error.response.data.error_description : '';
+    const errorMessage = getErrorMsg(error);
     router.push({
       name: 'error',
       params: {

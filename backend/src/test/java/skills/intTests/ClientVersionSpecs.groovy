@@ -13,16 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.controller.result.model
+package skills.intTests
 
-import groovy.transform.Canonical
+import org.springframework.http.HttpStatus
+import skills.intTests.utils.DefaultIntSpec
+import skills.intTests.utils.SkillsFactory
 
-@Canonical
-class RequestResult {
-    boolean success
-    String  explanation
+class ClientVersionSpecs extends DefaultIntSpec {
 
-    static RequestResult success() {
-        return new RequestResult(success: true)
+    def "report skills-client version"() {
+        when:
+        def result = skillsService.reportClientVersion(SkillsFactory.defaultProjId, "skill-fake-version-1.0.0")
+        then:
+        result
+        result.statusCode == HttpStatus.OK
+        result.body.success == true
     }
 }

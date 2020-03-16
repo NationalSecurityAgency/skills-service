@@ -28,12 +28,20 @@ describe('Skills Tests', () => {
     });
 
     it('edit number of occurrences', () => {
-        cy.server().route('POST', `/admin/projects/proj1/subjects/subj1/skills/Skill1Skill`).as('postNewSkill');
-        cy.server().route('GET', `/admin/projects/proj1/subjects/subj1/skills/Skill1Skill`).as('getSkill');
+        cy.server()
+        cy.route('POST', `/admin/projects/proj1/subjects/subj1/skills/Skill1Skill`).as('postNewSkill');
+        cy.route('GET', `/admin/projects/proj1/subjects/subj1/skills/Skill1Skill`).as('getSkill');
+        cy.route({
+            method: 'GET',
+            url: '/admin/projects/proj1/subjects/subj1'
+        }).as('loadSubject');
 
         const selectorOccurrencesToCompletion = '[data-vv-name="numPerformToCompletion"]';
         const selectorSkillsRowToggle = 'table .VueTables__child-row-toggler';
         cy.visit('/projects/proj1/subjects/subj1');
+
+        cy.wait('@loadSubject');
+
         cy.clickButton('Skill')
         cy.get(selectorOccurrencesToCompletion).should('have.value', '5')
         cy.get('#skillName').type('Skill 1')
@@ -66,7 +74,13 @@ describe('Skills Tests', () => {
         const providedName = "!L@o#t$s of %s^p&e*c(i)a_l++_|}{P c'ha'rs";
         cy.server().route('POST', `/admin/projects/proj1/subjects/subj1/skills/${expectedId}`).as('postNewSkill');
 
+        cy.route({
+            method: 'GET',
+            url: '/admin/projects/proj1/subjects/subj1'
+        }).as('loadSubject');
+
         cy.visit('/projects/proj1/subjects/subj1');
+        cy.wait('@loadSubject');
         cy.clickButton('Skill')
 
         cy.get('#skillName').type(providedName)
@@ -89,7 +103,22 @@ describe('Skills Tests', () => {
             numPerformToCompletion: '5'
         });
 
+        cy.server();
+        cy.route({
+            method: 'POST',
+            url: '/app/users/projects/proj1/suggestClientUsers?userSuggestOption=TWO'
+        }).as('suggestUsers');
+        cy.route({
+            method: 'GET',
+            url: '/admin/projects/proj1/subjects/subj1/skills/skill1'
+        }).as('loadSkill');
+        cy.route({
+            method: 'POST',
+            url: '/api/projects/Inception/skills/ManuallyAddSkillEvent'
+        }).as('addSkillEvent');
+
        cy.visit('/projects/proj1/subjects/subj1/skills/skill1');
+       cy.wait('@loadSkill');
        cy.contains('Add Event').click();
 
        cy.contains('ONE').click();
@@ -97,9 +126,61 @@ describe('Skills Tests', () => {
        cy.get('.existingUserInput button').contains('TWO');
 
        cy.contains('Enter user id').type('foo{enter}');
+       cy.wait('@suggestUsers');
        cy.clickButton('Add');
+       cy.wait('@addSkillEvent');
        cy.get('.text-success', {timeout: 5*1000}).contains('Added points for');
+       cy.get('.text-success', {timeout: 5*1000}).contains('[foo]');
 
+        cy.contains('Enter user id').type('bar{enter}');
+        cy.wait('@suggestUsers');
+        cy.clickButton('Add');
+        cy.wait('@addSkillEvent');
+        cy.get('.text-success', {timeout: 5*1000}).contains('Added points for');
+        cy.get('.text-success', {timeout: 5*1000}).contains('[bar]');
+
+        cy.contains('Enter user id').type('baz{enter}');
+        cy.wait('@suggestUsers');
+        cy.clickButton('Add');
+        cy.wait('@addSkillEvent');
+        cy.get('.text-success', {timeout: 5*1000}).contains('Added points for');
+        cy.get('.text-success', {timeout: 5*1000}).contains('[baz]');
+
+        cy.contains('Enter user id').type('fo');
+        cy.wait('@suggestUsers');
+        cy.get('li.multiselect__element').contains('foo').click();
+    });
+
+    it('Add Skill Event - suggest user with slash character does not cause error', () => {
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1', {
+            projectId: 'proj1',
+            subjectId: "subj1",
+            skillId: "skill1",
+            name: "Skill 1",
+            pointIncrement: '50',
+            numPerformToCompletion: '5'
+        });
+
+        cy.server();
+        cy.route({
+            method: 'POST',
+            url: '/app/users/projects/proj1/suggestClientUsers?userSuggestOption=TWO'
+        }).as('suggestUsers');
+        cy.route({
+            method: 'GET',
+            url: '/admin/projects/proj1/subjects/subj1/skills/skill1'
+        }).as('loadSkill');
+
+        cy.visit('/projects/proj1/subjects/subj1/skills/skill1');
+        cy.wait('@loadSkill');
+        cy.contains('Add Event').click();
+
+        cy.contains('ONE').click();
+        cy.contains('TWO').click();
+        cy.get('.existingUserInput button').contains('TWO');
+
+        cy.contains('Enter user id').type('foo/bar{enter}');
+        cy.wait('@suggestUsers');
     });
 
     it('Add Skill Event User Not Found', () => {
@@ -120,7 +201,15 @@ describe('Skills Tests', () => {
             numPerformToCompletion: '5'
         });
 
+        cy.route({
+            method: 'GET',
+            url: '/admin/projects/proj1/subjects/subj1/skills/skill1'
+        }).as('loadSkill')
+
         cy.visit('/projects/proj1/subjects/subj1/skills/skill1');
+        cy.wait('@loadSkill')
+
+
         cy.contains('Add Event').click();
 
         cy.contains('Enter user id').type('foo{enter}');
@@ -139,8 +228,14 @@ describe('Skills Tests', () => {
             pointIncrement: '50',
             numPerformToCompletion: '5'
         });
+        cy.server();
+        cy.route({
+            method: 'GET',
+            url: '/admin/projects/proj1/subjects/subj1/skills/skill1'
+        }).as('loadSkill');
 
         cy.visit('/projects/proj1/subjects/subj1/skills/skill1');
+        cy.wait('@loadSkill');
         cy.contains('Add Event').click();
 
         const expectedErrMsg = 'The User Id field may not contain spaces';
@@ -200,7 +295,13 @@ describe('Skills Tests', () => {
             response: {errorCode: 'FailedToAssignDependency', explanation: 'Error Adding Dependency'}
         });
 
+        cy.route({
+            method: 'GET',
+            url: '/admin/projects/proj1/subjects/subj1/skills/skill1'
+        }).as('loadSkill');
+
         cy.visit('/projects/proj1/subjects/subj1/skills/skill1');
+        cy.wait('@loadSkill')
 
         cy.get('div#menu-collapse-control li').contains('Dependencies').click();
 
@@ -211,4 +312,4 @@ describe('Skills Tests', () => {
 
     })
 
-})
+});

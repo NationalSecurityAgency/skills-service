@@ -16,6 +16,7 @@
 package skills.controller
 
 import groovy.util.logging.Slf4j
+import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.MediaType
@@ -23,12 +24,15 @@ import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.web.bind.annotation.*
 import skills.auth.AuthMode
+import skills.auth.pki.PkiUserLookup
 import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.GlobalSettingsRequest
+import skills.controller.request.model.SuggestRequest
 import skills.controller.result.model.RequestResult
 import skills.controller.result.model.UserInfoRes
 import skills.controller.result.model.UserRoleRes
+import skills.profile.EnableCallStackProf
 import skills.services.AccessSettingsStorageService
 import skills.services.settings.SettingsService
 import skills.settings.EmailConnectionInfo
@@ -40,7 +44,7 @@ import java.security.Principal
 @RestController
 @RequestMapping('/root')
 @Slf4j
-@skills.profile.EnableCallStackProf
+@EnableCallStackProf
 class RootController {
 
     @Autowired
@@ -50,10 +54,10 @@ class RootController {
     EmailSettingsService emailSettingsService
 
     @Value('#{securityConfig.authMode}}')
-    skills.auth.AuthMode authMode = skills.auth.AuthMode.DEFAULT_AUTH_MODE
+    AuthMode authMode = AuthMode.DEFAULT_AUTH_MODE
 
     @Autowired(required = false)
-    skills.auth.pki.PkiUserLookup pkiUserLookup
+    PkiUserLookup pkiUserLookup
 
     @Autowired
     UserDetailsService userDetailsService
@@ -67,13 +71,14 @@ class RootController {
         return accessSettingsStorageService.getRootUsers()
     }
 
-    @GetMapping('/users/{query}')
+    @PostMapping('/users/')
     @ResponseBody
-    List<UserInfoRes> getNonRootUsers(@PathVariable('query') String query) {
-        query = query.toLowerCase()
+    List<UserInfoRes> getNonRootUsers(@RequestBody SuggestRequest suggestRequest) {
+        String query = suggestRequest.suggestQuery.toLowerCase()
         if (authMode == AuthMode.FORM) {
+            boolean emptyQuery = StringUtils.isBlank(query)
             return accessSettingsStorageService.getNonRootUsers().findAll {
-                it.userId.toLowerCase().contains(query)
+                !emptyQuery ? it.userId.toLowerCase().contains(query) : true
             }.collect {
                 accessSettingsStorageService.loadUserInfo(it.userId)
             }.unique()
@@ -85,19 +90,23 @@ class RootController {
         }
     }
 
-    @GetMapping('/users/without/role/{roleName}/{query}')
+    @PostMapping('/users/without/role/{roleName}')
     @ResponseBody
     List<UserInfoRes> suggestUsersWithoutRole(@PathVariable("roleName") RoleName roleName,
-                                              @PathVariable('query') String query,
+                                              @RequestBody SuggestRequest suggestRequest,
                                               @RequestParam(required = false, value = "userSuggestOption") String userSuggestOption) {
-        query = query.toLowerCase()
+       String query = suggestRequest.suggestQuery.toLowerCase()
         if (authMode == AuthMode.FORM) {
+            boolean emptyQuery = StringUtils.isBlank(query)
             return accessSettingsStorageService.getUserRolesWithoutRole(roleName).findAll {
-                it.userId.toLowerCase().contains(query)
+                !emptyQuery ? it.userId.toLowerCase().contains(query) : true
             }.collect {
                 accessSettingsStorageService.loadUserInfo(it.userId)
             }.unique()
         } else {
+            if (StringUtils.isBlank(query)) {
+                query = "a"
+            }
             List<String> usersWithRole = accessSettingsStorageService.getUserRolesWithRole(roleName).collect { it.userId.toLowerCase() }
             return pkiUserLookup?.suggestUsers(query, userSuggestOption)?.findAll {
                 !usersWithRole.contains(it.username.toLowerCase())
@@ -105,21 +114,6 @@ class RootController {
         }
     }
 
-    @GetMapping('/users/without/role/{roleName}')
-    @ResponseBody
-    List<UserInfoRes> suggestUsersWithoutRole(@PathVariable("roleName") RoleName roleName,
-                                                     @RequestParam(required = false, value = "userSuggestOption") String userSuggestOption) {
-        if (authMode == AuthMode.FORM) {
-            return accessSettingsStorageService.getUserRolesWithoutRole(roleName).collect {
-                accessSettingsStorageService.loadUserInfo(it.userId)
-            }.unique()?.take(5)
-        } else {
-            List<String> usersWithRole = accessSettingsStorageService.getUserRolesWithRole(roleName).collect { it.userId.toLowerCase() }
-            return pkiUserLookup?.suggestUsers("a", userSuggestOption)?.findAll {
-                !usersWithRole.contains(it.username.toLowerCase())
-            }?.unique()?.take(5)?.collect { new UserInfoRes(it) }
-        }
-    }
 
     @GetMapping('/isRoot')
     boolean isRoot(Principal principal) {

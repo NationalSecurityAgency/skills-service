@@ -24,7 +24,7 @@ describe('App Features Tests', () => {
         })
     });
 
-    it.only('display new version banner when software is updated', () => {
+    it('display new version banner when software is updated', () => {
         cy.server().route({
             url: '/admin/projects/proj1/subjects',
             status: 200,
@@ -36,7 +36,7 @@ describe('App Features Tests', () => {
         cy.visit('/');
         cy.contains('My Projects')
         cy.contains('New Software Version is Available').should('not.exist')
-        cy.contains('Manage').click()
+        cy.get('[data-cy=projectCard]').last().contains('Manage').click()
         cy.wait('@getSubjects')
 
         cy.contains('New Software Version is Available')
@@ -51,14 +51,30 @@ describe('App Features Tests', () => {
             status: 200,
             response: [],
             headers: {
-                'skills-client-lib-version': dateFormatter(new Date() - 1000 * 60 * 60 * 24)
+                'skills-client-lib-version': dateFormatter(new Date() - 1000 * 60 * 60 * 24 * 30)
             },
         }).as('getSubjects');
         cy.visit('/');
-        cy.contains('Manage').click()
+        cy.contains('My Projects')
+        cy.get('[data-cy=projectCard]').last().contains('Manage').click()
         cy.wait('@getSubjects')
 
         cy.contains('New Software Version is Available').should('not.exist')
+    });
+
+    it('access denied should show authorization failure page not error page', () => {
+        cy.server();
+        cy.route({
+            method: 'GET',
+            url: '/admin/projects/proj1/subjects/subj1',
+            status: 403,
+            response: {errorCode: 'NotAuthorized', explanation: 'Not authorized to view this resource'}
+        }).as('loadSubject');
+
+        cy.visit('/projects/proj1/subjects/subj1');
+        cy.wait('@loadSubject');
+        cy.url().should('include', '/not-authorized');
+        cy.contains('User Not Authorized').should('be.visible')
     });
 
 })

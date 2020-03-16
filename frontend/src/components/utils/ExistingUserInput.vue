@@ -133,7 +133,7 @@ limitations under the License.
           } else if (this.projectId) {
             suggestUrl = `/app/users/projects/${this.projectId}/suggestClientUsers`;
           } else {
-            suggestUrl = '/app/users/suggestClientUsers/';
+            suggestUrl = '/app/users/suggestClientUsers';
           }
         } else if (this.userType === SUPERVISOR) {
           suggestUrl = '/root/users/without/role/ROLE_SUPERVISOR';
@@ -166,15 +166,20 @@ limitations under the License.
       suggestUsers: debounce(function debouncedSuggestUsers(query) {
         this.isFetching = true;
         let q = query;
+        const postBody = {};
         if (!q) {
           q = '';
+        } else {
+          postBody.suggestQuery = q;
         }
-        let url = `${this.suggestUrl}/${encodeURIComponent(q)}`;
-        if (q && this.selectedSuggestOption) {
+
+        let url = `${this.suggestUrl}`;
+        if (this.selectedSuggestOption) {
           url += `?userSuggestOption=${this.selectedSuggestOption}`;
         }
         const rid = this.getRequestId();
-        axios.get(url)
+
+        axios.post(url, postBody)
           .then((response) => {
             this.ensureOrderlyResultHandling(rid, () => {
               this.suggestions = response.data.filter(suggestedUser => !this.excludedSuggestions.includes(suggestedUser.userId));

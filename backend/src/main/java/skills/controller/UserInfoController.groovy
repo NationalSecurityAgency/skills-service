@@ -27,6 +27,7 @@ import skills.auth.UserAuthService
 import skills.auth.UserInfo
 import skills.auth.UserInfoService
 import skills.auth.pki.PkiUserLookup
+import skills.controller.request.model.SuggestRequest
 import skills.controller.result.model.RequestResult
 import skills.controller.result.model.UserInfoRes
 import skills.services.AccessSettingsStorageService
@@ -119,15 +120,9 @@ class UserInfoController {
     @Autowired
     AccessSettingsStorageService accessSettingsStorageService
 
-    @RequestMapping(value = "/users/suggestDashboardUsers/{query}", method = RequestMethod.GET, produces = "application/json")
-    List<UserInfoRes> suggestExistingDashboardUsers(@PathVariable("query") String query,
-                                                    @RequestParam(required = false, defaultValue = "true") boolean includeSelf) {
-        return userAdminService.suggestDashboardUsers(query, includeSelf)
-    }
-
-    @RequestMapping(value = "/users/suggestDashboardUsers/", method = RequestMethod.GET, produces = "application/json")
-    List<UserInfoRes> suggestAllExistingDashboardUsers(@RequestParam(required = false, defaultValue = "true") boolean includeSelf) {
-        return userAdminService.suggestDashboardUsers("", includeSelf)
+    @RequestMapping(value = "/users/suggestDashboardUsers", method = RequestMethod.POST, produces = "application/json")
+    List<UserInfoRes> suggestExistingDashboardUsers(@RequestBody SuggestRequest suggestRequest) {
+        return userAdminService.suggestDashboardUsers(suggestRequest.suggestQuery, suggestRequest.includeSelf)
     }
 
     @RequestMapping(value = "/users/validExistingDashboardUserId/{userId}", method = RequestMethod.GET, produces = "application/json")
@@ -135,24 +130,14 @@ class UserInfoController {
         return userRepo.findByUserId(userId?.toLowerCase()) != null
     }
 
-    @RequestMapping(value = "/users/projects/{projectId}/suggestClientUsers/{query}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    List<UserInfoRes> suggestExistingClientUsersForProject(@PathVariable("projectId") String projectId, @PathVariable("query") String query) {
-        return userAdminService.suggestUsersForProject(projectId, query, new PageRequest(0, 5)).collect { new UserInfoRes(userId: it) }
+    @RequestMapping(value = "/users/projects/{projectId}/suggestClientUsers", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    List<UserInfoRes> suggestExistingClientUsersForProject(@PathVariable("projectId") String projectId, @RequestBody SuggestRequest suggestRequest) {
+        return userAdminService.suggestUsersForProject(projectId, suggestRequest.suggestQuery, new PageRequest(0, 5)).collect { new UserInfoRes(userId: it) }
     }
 
-    @RequestMapping(value = "/users/projects/{projectId}/suggestClientUsers/", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    List<UserInfoRes> suggestAllExistingClientUsersForProject(@PathVariable("projectId") String projectId) {
-        return userAdminService.suggestUsersForProject(projectId, "", new PageRequest(0, 5)).collect { new UserInfoRes(userId: it) }
-    }
-
-    @RequestMapping(value = "/users/suggestClientUsers/{query}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    List<UserInfoRes> suggestExistingClientUsers(@PathVariable("query") String query) {
-        return userAdminService.suggestUsers(query, new PageRequest(0, 5)).collect { new UserInfoRes(userId: it) }
-    }
-
-    @RequestMapping(value = "/users/suggestClientUsers/", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    List<UserInfoRes> suggestAllExistingClientUsers() {
-        return userAdminService.suggestUsers("", new PageRequest(0, 5)).collect { new UserInfoRes(userId: it) }
+    @RequestMapping(value = "/users/suggestClientUsers/", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    List<UserInfoRes> suggestExistingClientUsers(@RequestBody SuggestRequest suggestRequest) {
+        return userAdminService.suggestUsers(suggestRequest.suggestQuery, new PageRequest(0, 5)).collect { new UserInfoRes(userId: it) }
     }
 
     @RequestMapping(value = "/users/projects/{projectId}/validExistingClientUserId/{userId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -165,14 +150,13 @@ class UserInfoController {
         return userAdminService.isValidExistingUserId(userId?.toLowerCase())
     }
 
-    @RequestMapping(value = "/users/suggestPkiUsers/{query}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    List<UserInfoRes> suggestExistingPkiUsers(@PathVariable("query") String query, @RequestParam(value="userSuggestOption", required = false, defaultValue = '') String userSuggestOption ) {
+    @RequestMapping(value = "/users/suggestPkiUsers", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    List<UserInfoRes> suggestExistingPkiUsers(@RequestBody SuggestRequest suggestRequest, @RequestParam(value="userSuggestOption", required = false, defaultValue = '') String userSuggestOption ) {
+        String query = suggestRequest.suggestQuery
+        if (!query) {
+            query = "a"
+        }
         return pkiUserLookup?.suggestUsers(query, userSuggestOption)?.take(5)?.collect { new UserInfoRes(it) }
-    }
-
-    @RequestMapping(value = "/users/suggestPkiUsers/", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    List<UserInfoRes> suggestAllExistingPkiUsers(@RequestParam(value="userSuggestOption", required = false, defaultValue = '') String userSuggestOption) {
-        return pkiUserLookup?.suggestUsers("a", userSuggestOption)?.take(5)?.collect { new UserInfoRes(it) }
     }
 
 }
