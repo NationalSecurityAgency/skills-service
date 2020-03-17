@@ -153,20 +153,19 @@ class UserInfoSettingsSpecs extends DefaultIntSpec {
         skillsService.createProject([projectId: userProj1, name: 'proj1'])
         skillsService.createProject([projectId: userProj2, name: 'proj2'])
         skillsService.createProject([projectId: userProj3, name: 'proj3'])
-        def result = skillsService.getProjects()
-
-        def preMoveProj2 = result.find{ it.projectId == userProj2 }
-        def preMoveProj3 = result.find{ it.projectId == userProj3 }
+        def beforeMove = skillsService.getProjects()
 
         when:
         skillsService.moveProjectDown([projectId: userProj2])
-        def projects = skillsService.getProjects()
-        def postMoveProj2 = projects.find{ it.projectId == userProj2 }
-        def postMoveProj3 = projects.find{ it.projectId == userProj3 }
+        def afterMove = skillsService.getProjects()
+        skillsService.moveProjectDown([projectId: userProj1])
+        skillsService.moveProjectDown([projectId: userProj1])
+        def afterMove1 = skillsService.getProjects()
 
         then:
-        postMoveProj2.displayOrder == preMoveProj3.displayOrder
-        postMoveProj3.displayOrder == preMoveProj2.displayOrder
+        beforeMove.collect({it.name}) == ['proj1', 'proj2', 'proj3']
+        afterMove.collect({it.name}) == ['proj1', 'proj3', 'proj2']
+        afterMove1.collect({it.name}) == ['proj3', 'proj2', 'proj1']
     }
 
     def 'validate project sort is per user'(){
