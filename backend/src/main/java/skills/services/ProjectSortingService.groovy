@@ -134,7 +134,6 @@ class ProjectSortingService {
     void changeProjectOrder(String moveMeProjectId, Move direction){
         UserInfo userInfo = userInfoService.getCurrentUser()
         lockingService.lockUser(userInfo.username)
-        User user = userRepo.findByUserId(userInfo.username?.toLowerCase())
 
         List<Setting> sortOrder = settingsDataAccessor.getUserProjectSettingsForGroup(userInfo.username, PROJECT_SORT_GROUP)
 
@@ -163,7 +162,7 @@ class ProjectSortingService {
         moveMe.value = swapWithOrder
         swapWith.value = moveMeOrder
 
-        userRepo.save(user)
+        settingsDataAccessor.saveAll([moveMe, swapWith])
     }
 
 }

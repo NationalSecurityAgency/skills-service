@@ -21,6 +21,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.web.server.LocalServerPort
 import skills.SpringBootApp
 import skills.storage.repos.ProjDefRepo
+import skills.storage.repos.SettingRepo
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.UserAttrsRepo
 import spock.lang.Specification
@@ -49,6 +50,9 @@ class DefaultIntSpec extends Specification {
     @Autowired
     SkillDefRepo skillDefRepo
 
+    @Autowired
+    SettingRepo settingRepo
+
     def setup() {
         String msg = "\n-------------------------------------------------------------\n" +
                 "START: [${specificationContext.currentIteration.name}]\n" +
@@ -61,6 +65,12 @@ class DefaultIntSpec extends Specification {
         userAttrsRepo.deleteAll()
         // global badges don't have references to a project so must delete those manually
         skillDefRepo.deleteAll()
+
+        settingRepo.findAll().each {
+            if (!it.settingGroup.startsWith("public_")){
+                settingRepo.delete(it)
+            }
+        }
 
         skillsService = createService()
     }

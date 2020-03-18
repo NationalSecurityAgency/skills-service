@@ -49,6 +49,7 @@ class ConcurrencySpecs extends DefaultIntSpec {
     SkillDefRepo skillDefRepo
 
     def "do not create duplicates when changing project setting concurrently"() {
+        assert settingRepo.count() == 3
         def proj1 = SkillsFactory.createProject(1)
         skillsService.createProject(proj1)
 
@@ -82,6 +83,7 @@ class ConcurrencySpecs extends DefaultIntSpec {
     }
 
     def "do not create duplicates projects or settings when concurrently inserting projects"() {
+        assert settingRepo.count() == 3
         int numThreads = 5
         int numProj = 25
         when:
@@ -120,6 +122,7 @@ class ConcurrencySpecs extends DefaultIntSpec {
     SettingsDataAccessor settingsDataAccessor
 
     def "move projects' order concurrently - move down"() {
+        assert settingRepo.count() == 3
         int numThreads = 2
         int numProj = 25
 

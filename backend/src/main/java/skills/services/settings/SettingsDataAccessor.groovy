@@ -96,6 +96,10 @@ class SettingsDataAccessor {
         settingRepo.save(setting)
     }
 
+    void saveAll(Iterable<Setting> settings){
+        settingRepo.saveAll(settings)
+    }
+
     Setting loadSetting(SettingsRequest request){
         if(request instanceof UserProjectSettingsRequest){
             return getUserProjectSetting(request.userId, request.projectId, request.setting, request.settingGroup)
