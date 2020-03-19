@@ -26,4 +26,12 @@ class PublicConfigSpecs extends DefaultIntSpec {
         config
         config.descriptionMaxLength == "2000"
     }
+
+    def "public configs should return install mode"() {
+        when:
+        def config = skillsService.getPublicConfigs()
+        then:
+        config
+        config.authMode == "FORM"
+    }
 }
