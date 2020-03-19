@@ -24,6 +24,7 @@ import skills.auth.UserInfoService
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
+import skills.controller.request.model.ProjectExistsRequest
 import skills.controller.request.model.ProjectRequest
 import skills.controller.result.model.CustomIconResult
 import skills.controller.result.model.ProjectResult
@@ -34,6 +35,7 @@ import skills.services.IdFormatValidator
 import skills.services.admin.ProjAdminService
 import skills.services.admin.ShareSkillsService
 import skills.services.admin.SkillsAdminService
+import skills.utils.InputSanitizer
 
 import java.nio.charset.StandardCharsets
 
@@ -99,22 +101,27 @@ class ProjectController {
             throw new SkillException("Project name was not provided.", projectId, null, ErrorCode.BadParam)
         }
 
+        projectRequest.projectId = InputSanitizer.sanitize(projectRequest.projectId)
+        projectRequest.name = InputSanitizer.sanitize(projectRequest.name)
+
         projAdminService.saveProject(null, projectRequest)
         return new RequestResult(success: true)
     }
 
-    @RequestMapping(value = "/projectExist", method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value = "/projectExist", method = RequestMethod.POST, produces = "application/json")
     @ResponseBody
-    boolean doesProjectExist(@RequestParam(value = "projectId", required = false) String projectId,
-                             @RequestParam(value = "projectName", required = false) String projectName) {
+    boolean doesProjectExist(@RequestBody ProjectExistsRequest existsRequest) {
+        String projectId = existsRequest.projectId
+        String projectName = existsRequest.name
+
         SkillsValidator.isTrue((projectId || projectName), "One of Project Id or Project Name must be provided.")
         SkillsValidator.isTrue(!(projectId && projectName), "Only Project Id or Project Name may be provided, not both.")
 
         if (projectId) {
-            return projAdminService.existsByProjectId(projectId)
+            return projAdminService.existsByProjectId(InputSanitizer.sanitize(projectId))
         }
 
-        return projAdminService.existsByProjectName(projectName)
+        return projAdminService.existsByProjectName(InputSanitizer.sanitize(projectName))
     }
 
     @RequestMapping(value = "/projects/{id}/customIcons", method = RequestMethod.GET, produces = "application/json")

@@ -70,13 +70,16 @@ describe('Projects Tests', () => {
 
   it('Project id autofill strips out special characters and spaces', () => {
     const expectedId = 'LotsofspecialPchars';
-    const providedName = "!L@o#t$s of %s^p&e*c(i)a_l++_|}{P c'ha'rs";
+    const providedName = "!L@o#t$s of %s^p&e*c(i)a_l++_|}/[]#?{P c'ha'rs";
 
     cy.route('POST', `/app/projects/${expectedId}`).as('postNewProject');
+    cy.route('POST', '/app/projectExist').as('projectExists');
 
     cy.visit('/');
+    cy.wait('@getProjects');
     cy.clickButton('Project');
-    cy.get('[data-vv-name="projectName"]').type(providedName)
+    cy.get('[data-vv-name="projectName"]').type(providedName);
+    cy.wait('@projectExists');
     cy.getIdField().should('have.value', expectedId)
 
     cy.clickSave();

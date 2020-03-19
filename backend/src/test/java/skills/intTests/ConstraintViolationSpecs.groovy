@@ -40,6 +40,24 @@ class ConstraintViolationSpecs extends DefaultIntSpec {
         exception.message.contains("errorCode:ConstraintViolation")
     }
 
+    def "special characters in project name"() {
+        Map proj = SkillsFactory.createProject()
+        proj.name = "special 123456789_-#()[]/*%;"
+
+        skillsService.createProject(proj)
+        when:
+        def origIdExists = skillsService.projectIdExists([projectId: proj.projectId])
+        def origNameExists = skillsService.projectNameExists([projectName: proj.name])
+        def project = skillsService.getProject(proj.projectId)
+
+        then:
+        origIdExists
+        origNameExists
+        project
+        project.name == "special 123456789_-#()[]/*%;"
+
+    }
+
     def "check for existing project name"(){
         Map proj = SkillsFactory.createProject()
         proj.name = "Test Project 1"
@@ -106,6 +124,25 @@ class ConstraintViolationSpecs extends DefaultIntSpec {
         then:
         lowerExists
         upperExists
+    }
+
+    def "special characters in subject name"() {
+        Map proj = SkillsFactory.createProject()
+        Map subject = SkillsFactory.createSubject()
+        subject.name = "special 123456789_-#()[]/*%;"
+        skillsService.createProject(proj)
+        skillsService.createSubject(subject)
+
+        when:
+        def existsOriginal = skillsService.subjectNameExists([projectId: proj.projectId, subjectName: subject.name])
+        def existsWithoutRestrictedCharacters = skillsService.subjectNameExists([projectId: proj.projectId, subjectName: "special 123456789_-#()[]/"])
+        def subj = skillsService.getSubject([projectId: proj.projectId, subjectId: subject.subjectId])
+
+        then:
+        existsOriginal
+        existsWithoutRestrictedCharacters
+        subj
+        subj.name == 'special 123456789_-#()[]/*%;'
     }
 
     def "duplicate subject id - will belong to another user and will fail auth"() {
@@ -185,6 +222,26 @@ class ConstraintViolationSpecs extends DefaultIntSpec {
         upperExists
     }
 
+    def "skill name with special characters"() {
+        Map proj = SkillsFactory.createProject()
+        Map subject = SkillsFactory.createSubject()
+        Map skill = SkillsFactory.createSkill()
+        skill.name = "special 123456789_-#()[]/*%;"
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subject)
+        skillsService.createSkill(skill)
+
+        when:
+        def originalNameExists = skillsService.skillNameExists([projectId: proj.projectId, skillName: skill.name.toLowerCase()])
+        def retrievedSkill = skillsService.getSkill([projectId: proj.projectId, subjectId: subject.subjectId, skillId: skill.skillId])
+
+        then:
+        originalNameExists
+        retrievedSkill
+        retrievedSkill.name == 'special 123456789_-#()[]/*%;'
+    }
+
     def "duplicate skill id"() {
         Map proj = SkillsFactory.createProject()
         Map subject = SkillsFactory.createSubject()
@@ -243,6 +300,27 @@ class ConstraintViolationSpecs extends DefaultIntSpec {
         then:
         lower
         upper
+    }
+
+    def "badge name with special characters"() {
+        Map proj = SkillsFactory.createProject()
+        Map subject = SkillsFactory.createSubject()
+        Map badge = SkillsFactory.createBadge()
+        String badgeName = "foo 123456789_-#()[]/*%;"
+        badge.name = badgeName
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subject)
+        skillsService.createBadge(badge)
+
+        when:
+        def exists = skillsService.badgeNameExists([projectId: proj.projectId, badgeName: badgeName])
+        def existingBadge = skillsService.getBadge([projectId: proj.projectId, badgeId: badge.badgeId])
+
+        then:
+        exists
+        existingBadge
+        existingBadge.name == 'foo 123456789_-#()[]/*%;'
     }
 
     def "duplicate badge id - project belongs to another user and will fail auth"() {

@@ -17,7 +17,7 @@ import axios from 'axios';
 
 export default {
   subjectWithNameExists(projectId, subjectName) {
-    return axios.get(`/admin/projects/${projectId}/subjectNameExists?subjectName=${encodeURIComponent(subjectName)}`)
+    return axios.post(`/admin/projects/${projectId}/subjectNameExists`, { name: subjectName })
       .then(remoteRes => !remoteRes.data);
   },
   subjectWithIdExists(projectId, subjectId) {

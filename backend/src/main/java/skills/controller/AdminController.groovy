@@ -109,8 +109,8 @@ class AdminController {
         projectRequest.name = InputSanitizer.sanitize(projectRequest.name)
         projectRequest.projectId = InputSanitizer.sanitize(projectRequest.projectId)
 
-        projAdminService.saveProject(projectId, projectRequest)
-        return new skills.controller.result.model.RequestResult(success: true)
+        projAdminService.saveProject(InputSanitizer.sanitize(projectId), projectRequest)
+        return new RequestResult(success: true)
     }
 
     @RequestMapping(value = "/projects/{id}", method = RequestMethod.DELETE)
@@ -168,34 +168,37 @@ class AdminController {
         subjectRequest.iconClass = InputSanitizer.sanitize(subjectRequest.iconClass)
         subjectRequest.helpUrl = InputSanitizer.sanitize(subjectRequest.helpUrl)
 
-        subjAdminService.saveSubject(projectId, subjectId, subjectRequest)
+        subjAdminService.saveSubject(InputSanitizer.sanitize(projectId), subjectId, subjectRequest)
         return new RequestResult(success: true)
     }
 
-    @RequestMapping(value = "/projects/{projectId}/subjectNameExists", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/projects/{projectId}/subjectNameExists", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     boolean doesSubjectNameExist(@PathVariable("projectId") String projectId,
-                             @RequestParam(value = "subjectName", required = false) String subjectName) {
+                             @RequestBody NameExistsRequest existsRequest) {
+        String subjectName = existsRequest.name
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(subjectName, "Subject Name")
-        return subjAdminService.existsBySubjectName(projectId, subjectName)
+        return subjAdminService.existsBySubjectName(InputSanitizer.sanitize(projectId), InputSanitizer.sanitize(subjectName))
     }
 
-    @RequestMapping(value = "/projects/{projectId}/badgeNameExists", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/projects/{projectId}/badgeNameExists", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     boolean doesBadgeExist(@PathVariable("projectId") String projectId,
-                             @RequestParam(value = "badgeName", required = false) String badgeName) {
+                             @RequestBody NameExistsRequest nameExistsRequest) {
+        String badgeName = nameExistsRequest.name
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(badgeName, "Badge Name")
-        return badgeAdminService.existsByBadgeName(projectId, badgeName)
+        return badgeAdminService.existsByBadgeName(InputSanitizer.sanitize(projectId), InputSanitizer.sanitize(badgeName))
     }
-    @RequestMapping(value = "/projects/{projectId}/skillNameExists", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/projects/{projectId}/skillNameExists", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     boolean doesSkillNameExist(@PathVariable("projectId") String projectId,
-                           @RequestParam(value = "skillName", required = false) String skillName) {
+                           @RequestBody NameExistsRequest existsRequest) {
+        String skillName = existsRequest.name
         SkillsValidator.isNotBlank(projectId, "Project Id")
-        SkillsValidator.isNotBlank(projectId, "Skill Name")
-        return skillsAdminService.existsBySkillName(projectId, skillName)
+        SkillsValidator.isNotBlank(skillName, "Skill Name")
+        return skillsAdminService.existsBySkillName(InputSanitizer.sanitize(projectId), InputSanitizer.sanitize(skillName))
     }
 
     /**
@@ -211,7 +214,7 @@ class AdminController {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(id, "Entity Id")
 
-        return skillsAdminService.existsBySkillId(projectId, id)
+        return skillsAdminService.existsBySkillId(InputSanitizer.sanitize(projectId), InputSanitizer.sanitize(id))
     }
 
     @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}", method = RequestMethod.DELETE)
@@ -856,7 +859,7 @@ class AdminController {
                                            @PathVariable("skillId") String skillId) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(skillId, "Skill Id")
-        return globalBadgesService.isSkillUsedInGlobalBadge(projectId, skillId)
+        return globalBadgesService.isSkillUsedInGlobalBadge(InputSanitizer.sanitize(projectId), InputSanitizer.sanitize(skillId))
     }
 
     @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/globalBadge/exists", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -865,14 +868,14 @@ class AdminController {
                                            @PathVariable("subjectId") String subjectId) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(subjectId, "Subject Id")
-        return globalBadgesService.isSubjectUsedInGlobalBadge(projectId, subjectId)
+        return globalBadgesService.isSubjectUsedInGlobalBadge(InputSanitizer.sanitize(projectId), InputSanitizer.sanitize(subjectId))
     }
 
     @RequestMapping(value = "/projects/{projectId}/globalBadge/exists", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     boolean isProjectReferencedByGlobalBadge(@PathVariable("projectId") String projectId) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
-        return globalBadgesService.isProjectUsedInGlobalBadge(projectId)
+        return globalBadgesService.isProjectUsedInGlobalBadge(InputSanitizer.sanitize(projectId))
     }
 
     @RequestMapping(value = "/projects/{projectId}/levels/{level}/globalBadge/exists", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -881,6 +884,6 @@ class AdminController {
                                                   @PathVariable("level") Integer level) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotNull(level, "Level")
-        return globalBadgesService.isProjectLevelUsedInGlobalBadge(projectId, level)
+        return globalBadgesService.isProjectLevelUsedInGlobalBadge(InputSanitizer.sanitize(projectId), level)
     }
 }
