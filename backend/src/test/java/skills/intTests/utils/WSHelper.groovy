@@ -56,7 +56,8 @@ class WSHelper {
     }
 
     def appPost(String endpoint, def params) {
-        post(endpoint, "app", params)
+        def res = post(endpoint, "app", params)
+        return res
     }
 
     def appGet(String endpoint, Map params = null) {

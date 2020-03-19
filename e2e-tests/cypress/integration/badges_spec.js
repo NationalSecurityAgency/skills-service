@@ -24,17 +24,23 @@ describe('Badges Tests', () => {
 
     it('create badge with special chars', () => {
         const expectedId = 'LotsofspecialPcharsBadge';
-        const providedName = "!L@o#t$s of %s^p&e*c(i)a_l++_|}{P c'ha'rs";
-        cy.server().route('POST', `/admin/projects/proj1/badges/${expectedId}`).as('postNewBadge');
+        const providedName = "!L@o#t$s of %s^p&e*c(i)a_l++_|}{P/ c'ha'rs";
+        cy.server();
+        cy.route('POST', `/admin/projects/proj1/badges/${expectedId}`).as('postNewBadge');
+        cy.route('POST', '/admin/projects/proj1/badgeNameExists').as('nameExistsCheck');
+        cy.route('GET', '/admin/projects/proj1/badges').as('loadBadges');
 
         cy.visit('/projects/proj1/badges');
-        cy.clickButton('Badge')
+        cy.wait('@loadBadges');
+        cy.clickButton('Badge');
 
-        cy.get('#badgeName').type(providedName)
+        cy.get('#badgeName').type(providedName);
 
-        cy.getIdField().should('have.value', expectedId)
+        cy.wait('@nameExistsCheck');
 
-        cy.clickSave()
+        cy.getIdField().should('have.value', expectedId);
+
+        cy.clickSave();
         cy.wait('@postNewBadge');
 
         cy.contains('ID: Lotsofspecial')
