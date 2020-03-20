@@ -135,7 +135,9 @@ describe('Projects Tests', () => {
       method: 'GET',
       url: '/app/projects'
     }).as('loadProjects');
-    cy.visit('/')
+    cy.route({method: 'GET', url: '/app/userInfo'}).as('loadUserInfo');
+    cy.visit('/');
+    cy.wait('@loadUserInfo');
     cy.wait('@loadProjects');
     cy.clickButton('Project');;
     cy.contains('Enable').click();

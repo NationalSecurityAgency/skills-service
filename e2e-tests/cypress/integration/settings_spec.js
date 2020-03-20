@@ -53,6 +53,7 @@ describe('Settings Tests', () => {
         cy.route('GET', '/app/projects').as('loadProjects');
         cy.route('GET', '/app/userInfo/hasRole/ROLE_SUPERVISOR').as('isSupervisor');
         cy.route('GET', '/app/userInfo').as('loadUserInfo');
+        cy.route('GET', '/public/config').as('loadConfig');
         cy.route({
             method: 'GET',
             url: '/app/projects'
@@ -60,9 +61,10 @@ describe('Settings Tests', () => {
         cy.route({method: 'GET', url: '/root/isRoot'}).as('checkRoot');
 
         cy.visit('/');
+        cy.wait('@loadConfig');
+        cy.wait('@loadUserInfo');
         cy.wait('@loadProjects');
         cy.wait('@isSupervisor');
-        cy.wait('@loadUserInfo');
         cy.contains('My Projects');
         cy.get('button.dropdown-toggle').first().click({force: true});
         cy.contains('Settings').click();
