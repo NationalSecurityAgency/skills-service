@@ -43,7 +43,7 @@ export default {
       .then(response => response.data);
   },
   badgeWithNameExists(projectId, badgeName) {
-    return axios.get(`/admin/projects/${projectId}/badgeNameExists?badgeName=${encodeURIComponent(badgeName)}`)
+    return axios.post(`/admin/projects/${projectId}/badgeNameExists`, { name: badgeName })
       .then(remoteRes => !remoteRes.data);
   },
   badgeWithIdExists(projectId, badgeId) {

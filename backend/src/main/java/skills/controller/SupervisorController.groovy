@@ -28,6 +28,7 @@ import skills.controller.exceptions.MaxIconSizeExceeded
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.ActionPatchRequest
 import skills.controller.request.model.BadgeRequest
+import skills.controller.request.model.NameExistsRequest
 import skills.controller.result.model.*
 import skills.icons.CustomIconFacade
 import skills.icons.UploadedIcon
@@ -62,11 +63,12 @@ class SupervisorController {
     @Autowired
     PublicPropsBasedValidator propsBasedValidator
 
-    @RequestMapping(value = "/badges/name/{badgeName}/exists", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/badges/name/exists", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    boolean doesBadgeNameExist(@PathVariable("badgeName") String badgeName) {
+    boolean doesBadgeNameExist(@RequestBody() NameExistsRequest nameExistsRequest) {
+        String badgeName = nameExistsRequest.name
         SkillsValidator.isNotBlank(badgeName, "Badge Name")
-        String decodedName = URLDecoder.decode(badgeName,  StandardCharsets.UTF_8.toString())
+        String decodedName = InputSanitizer.sanitize(badgeName)
         return globalBadgesService.existsByBadgeName(decodedName)
     }
 
@@ -74,7 +76,7 @@ class SupervisorController {
     @ResponseBody
     boolean doesBadgeIdExist(@PathVariable("badgeId") String badgeId) {
         SkillsValidator.isNotBlank(badgeId, "Badge Id")
-        String decodedId = URLDecoder.decode(badgeId,  StandardCharsets.UTF_8.toString())
+        String decodedId = InputSanitizer.sanitize(URLDecoder.decode(badgeId,  StandardCharsets.UTF_8.toString()))
         return globalBadgesService.existsByBadgeId(decodedId)
     }
 

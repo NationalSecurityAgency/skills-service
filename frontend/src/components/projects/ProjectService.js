@@ -50,11 +50,11 @@ export default {
     if (projectId && projectId.toUpperCase() === 'ALL_SKILLS_PROJECTS') {
       return true;
     }
-    return axios.get(`/app/projectExist?projectId=${encodeURIComponent(projectId)}`)
+    return axios.post('/app/projectExist', { projectId })
       .then(response => response.data);
   },
   checkIfProjectNameExist(projectName) {
-    return axios.get(`/app/projectExist?projectName=${encodeURIComponent(projectName)}`)
+    return axios.post('/app/projectExist', { name: projectName })
       .then(response => response.data);
   },
   checkIfProjectBelongsToGlobalBadge(projectId) {

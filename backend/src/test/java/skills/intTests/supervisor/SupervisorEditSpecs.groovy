@@ -197,6 +197,23 @@ class SupervisorEditSpecs extends DefaultIntSpec {
         skillsService.deleteGlobalBadge(badgeId)
     }
 
+    def 'global badge name special characters'() {
+        String badgeName = "foo 123456789_-#()[]/*%;"
+        Map badge = [badgeId: badgeId, name: badgeName]
+        skillsService.createGlobalBadge(badge)
+
+        when:
+        def res = skillsService.doesGlobalBadgeNameExists(badge.name)
+        def globalBadge = skillsService.getGlobalBadge(badge.badgeId)
+
+        then:
+        res
+        globalBadge.name == 'foo 123456789_-#()[]/*%;'
+
+        cleanup:
+        skillsService.deleteGlobalBadge(badgeId)
+    }
+
     def 'cannot create global badge where the name already exists'() {
         Map badge = [badgeId: badgeId, name: 'Test Global Badge 1']
         skillsService.createGlobalBadge(badge)

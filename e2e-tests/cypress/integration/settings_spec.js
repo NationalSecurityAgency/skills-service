@@ -46,10 +46,14 @@ describe('Settings Tests', () => {
         cy.get('div.table-responsive').contains('Firstname LastName (skills@skills.org)');
     });
 
-    it('Add Root User - forward slash character does not cause error', () => {
+    it.only('Add Root User - forward slash character does not cause error', () => {
         cy.server();
         cy.route('POST', '/root/users/without/role/ROLE_SUPER_DUPER_USER?userSuggestOption=ONE').as('getEligibleForRoot');
         cy.route('PUT', '/root/users/skills@skills.org/roles/ROLE_SUPER_DUPER_USER').as('addRoot');
+        cy.route('GET', '/app/projects').as('loadProjects');
+        cy.route('GET', '/app/userInfo/hasRole/ROLE_SUPERVISOR').as('isSupervisor');
+        cy.route('GET', '/app/userInfo').as('loadUserInfo');
+        cy.route('GET', '/public/config').as('loadConfig');
         cy.route({
             method: 'GET',
             url: '/app/projects'
@@ -57,6 +61,10 @@ describe('Settings Tests', () => {
         cy.route({method: 'GET', url: '/root/isRoot'}).as('checkRoot');
 
         cy.visit('/');
+        cy.wait('@loadConfig');
+        cy.wait('@loadUserInfo');
+        cy.wait('@loadProjects');
+        cy.wait('@isSupervisor');
         cy.contains('My Projects');
         cy.get('button.dropdown-toggle').first().click({force: true});
         cy.contains('Settings').click();
@@ -65,6 +73,7 @@ describe('Settings Tests', () => {
         cy.contains('Enter user id').first().type('sk/foo{enter}');
         cy.wait('@getEligibleForRoot');
     });
+
 
     it('Add Root User With No Query', () => {
         cy.server();

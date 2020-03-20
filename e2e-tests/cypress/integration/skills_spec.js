@@ -71,8 +71,10 @@ describe('Skills Tests', () => {
 
     it('create skill with special chars', () => {
         const expectedId = 'LotsofspecialPcharsSkill';
-        const providedName = "!L@o#t$s of %s^p&e*c(i)a_l++_|}{P c'ha'rs";
-        cy.server().route('POST', `/admin/projects/proj1/subjects/subj1/skills/${expectedId}`).as('postNewSkill');
+        const providedName = "!L@o#t$s of %s^p&e*c(i)/#?a_l++_|}{P c'ha'rs";
+        cy.server();
+        cy.route('POST', `/admin/projects/proj1/subjects/subj1/skills/${expectedId}`).as('postNewSkill');
+        cy.route('POST', `/admin/projects/proj1/skillNameExists`).as('nameExists');
 
         cy.route({
             method: 'GET',
@@ -81,13 +83,14 @@ describe('Skills Tests', () => {
 
         cy.visit('/projects/proj1/subjects/subj1');
         cy.wait('@loadSubject');
-        cy.clickButton('Skill')
+        cy.clickButton('Skill');
 
-        cy.get('#skillName').type(providedName)
+        cy.get('#skillName').type(providedName);
 
-        cy.getIdField().should('have.value', expectedId)
+        cy.getIdField().should('have.value', expectedId);
+        cy.wait('@nameExists');
 
-        cy.clickSave()
+        cy.clickSave();
         cy.wait('@postNewSkill');
 
         cy.contains('ID: Lotsofspecial')
