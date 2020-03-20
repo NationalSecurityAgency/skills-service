@@ -18,7 +18,7 @@
 import Vue from 'vue';
 import BootstrapVue from 'bootstrap-vue';
 import { ClientTable, ServerTable } from 'vue-tables-2';
-import { SkillsDirective } from '@skills/skills-client-vue';
+import { SkillsConfiguration, SkillsDirective, SkillsReporter } from '@skills/skills-client-vue';
 import VeeValidate from 'vee-validate';
 import VueApexCharts from 'vue-apexcharts';
 import Vuex from 'vuex';
@@ -57,6 +57,43 @@ require('./interceptors/errorHandler');
 require('./interceptors/clientVersionInterceptor');
 
 require('vue-multiselect/dist/vue-multiselect.min.css');
+
+const isActiveProjectIdChange = (to, from) => to.params.projectId !== from.params.projectId;
+const isLoggedIn = () => store.getters.isAuthenticated;
+
+router.beforeEach((to, from, next) => {
+  if (from.path !== '/error') {
+    store.commit('previousUrl', from.fullPath);
+  }
+  if (isActiveProjectIdChange(to, from)) {
+    store.commit('currentProjectId', to.params.projectId);
+  }
+  if (to.matched.some(record => record.meta.requiresAuth)) {
+    // this route requires auth, check if logged in if not, redirect to login page.
+    if (!isLoggedIn()) {
+      const newRoute = { query: { redirect: to.fullPath } };
+      if (store.getters.isPkiAuthenticated) {
+        newRoute.name = 'HomePage';
+      } else {
+        newRoute.name = 'Login';
+      }
+      next(newRoute);
+    } else {
+      next();
+    }
+  } else {
+    next();
+  }
+});
+
+router.afterEach((to) => {
+  if (to.meta.reportSkillId) {
+    SkillsConfiguration.afterConfigure()
+      .then(() => {
+        SkillsReporter.reportSkill(to.meta.reportSkillId);
+      });
+  }
+});
 
 store.dispatch('loadConfigState').finally(() => {
   RegisterValidators.init();

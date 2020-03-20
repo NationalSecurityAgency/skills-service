@@ -15,7 +15,6 @@
  */
 import Vue from 'vue';
 import Router from 'vue-router';
-import { SkillsReporter, SkillsConfiguration } from '@skills/skills-client-vue';
 import HomePage from '@/components/HomePage';
 import MyProjects from '@/components/projects/MyProjects';
 import LoginForm from '@/components/access/Login';
@@ -28,7 +27,6 @@ import BadgePage from '@/components/badges/BadgePage';
 import GlobalBadgePage from '@/components/badges/global/GlobalBadgePage';
 import SkillPage from '@/components/skills/SkillPage';
 import UserPage from '@/components/users/UserPage';
-import store from '@/store/store';
 import GlobalSettings from '@/components/settings/GlobalSettings';
 import GFMDescription from '@//components/utils/GFMDescription';
 import InceptionSkills from '@//components/inception/InceptionSkills';
@@ -339,43 +337,6 @@ const router = new Router({
       meta: { requiresAuth: false },
     },
   ],
-});
-
-const isActiveProjectIdChange = (to, from) => to.params.projectId !== from.params.projectId;
-const isLoggedIn = () => store.getters.isAuthenticated;
-
-router.beforeEach((to, from, next) => {
-  if (from.path !== '/error') {
-    store.commit('previousUrl', from.fullPath);
-  }
-  if (isActiveProjectIdChange(to, from)) {
-    store.commit('currentProjectId', to.params.projectId);
-  }
-  if (to.matched.some(record => record.meta.requiresAuth)) {
-    // this route requires auth, check if logged in if not, redirect to login page.
-    if (!isLoggedIn()) {
-      const newRoute = { query: { redirect: to.fullPath } };
-      if (store.getters.isPkiAuthenticated) {
-        newRoute.name = 'HomePage';
-      } else {
-        newRoute.name = 'Login';
-      }
-      next(newRoute);
-    } else {
-      next();
-    }
-  } else {
-    next();
-  }
-});
-
-router.afterEach((to) => {
-  if (to.meta.reportSkillId) {
-    SkillsConfiguration.afterConfigure()
-      .then(() => {
-        SkillsReporter.reportSkill(to.meta.reportSkillId);
-      });
-  }
 });
 
 export default router;
