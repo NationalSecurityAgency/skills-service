@@ -160,12 +160,12 @@ class SkillsService {
 
     def projectIdExists(Map props){
         String id = props.projectId
-        wsHelper.appGet("/projectExist?projectId=${id}")
+        wsHelper.appPost("/projectExist", props)
     }
 
     def projectNameExists(Map props){
         String name = props.projectName
-        wsHelper.appGet("/projectExist?projectName=${name}".toString())
+        wsHelper.appPost("/projectExist", [name: name])?.body
     }
 
     def getProjects() {
@@ -177,8 +177,9 @@ class SkillsService {
     }
 
     def deleteProjectIfExist(String projectId) {
-        Boolean res = wsHelper.appGet("/projectExist", [projectId: projectId])
-        if(res ) {
+        def res = wsHelper.appPost("/projectExist", [projectId: projectId])
+        Boolean exists = res.body
+        if(exists) {
             deleteProject(projectId)
         }
     }
@@ -218,8 +219,7 @@ class SkillsService {
     }
 
     def subjectNameExists(Map props){
-        def subjName = URLEncoder.encode(props.subjectName, 'UTF-8')
-        wsHelper.adminGet("/projects/${props.projectId}/subjectNameExists?subjectName=${subjName}")
+        wsHelper.adminPost("/projects/${props.projectId}/subjectNameExists", [name:props.subjectName])
     }
 
     def getSubjectDescriptions(String projectId, String subjectId) {
@@ -236,13 +236,11 @@ class SkillsService {
     }
 
     def badgeNameExists(Map props){
-        def badgeName = URLEncoder.encode(props.badgeName, 'UTF-8')
-        wsHelper.adminGet("/projects/${props.projectId}/badgeNameExists?badgeName=${badgeName}")
+        wsHelper.adminPost("/projects/${props.projectId}/badgeNameExists", [name:props.badgeName])?.body
     }
 
     def skillNameExists(Map props){
-        def skillName = URLEncoder.encode(props.skillName, 'UTF-8')
-        wsHelper.adminGet("/projects/${props.projectId}/skillNameExists?skillName=${skillName}")
+        wsHelper.adminPost("/projects/${props.projectId}/skillNameExists", [name: props.skillName])?.body
     }
 
     def deleteSubject(Map props) {
@@ -391,7 +389,7 @@ class SkillsService {
     }
 
     def doesGlobalBadgeNameExists(String name) {
-        wsHelper.supervisorGet("/badges/name/${name}/exists")
+        wsHelper.supervisorPost("/badges/name/exists", [name:name])?.body
     }
     def doesGlobalBadgeIdExists(String id) {
         wsHelper.supervisorGet("/badges/id/${id}/exists")
@@ -788,17 +786,15 @@ class SkillsService {
 
     boolean doesSubjectNameExist(String projectId, String subjectName) {
 //        String encoded = URLEncoder.encode(subjectName, StandardCharsets.UTF_8.toString())
-        return wsHelper.adminGet("/projects/${projectId}/subjectNameExists?subjectName=${subjectName}")
+        return wsHelper.adminPost("/projects/${projectId}/subjectNameExists", [name:subjectName])?.body
     }
 
-    boolean doesBadgeNameExist(String projectId, String subjectName) {
-        String encoded = URLEncoder.encode(subjectName, StandardCharsets.UTF_8.toString())
-        return wsHelper.adminGet("/projects/${projectId}/badgeNameExists?badgeName=${encoded}")
+    boolean doesBadgeNameExist(String projectId, String badgeName) {
+        return wsHelper.adminPost("/projects/${projectId}/badgeNameExists",[name:badgeName])?.body
     }
 
     boolean doesSkillNameExist(String projectId, String skillName) {
-        String encoded = URLEncoder.encode(skillName, StandardCharsets.UTF_8.toString())
-        return wsHelper.adminGet("/projects/${projectId}/skillNameExists?skillName=${encoded}")
+        return wsHelper.adminPost("/projects/${projectId}/skillNameExists", [name:skillName])?.body
     }
 
     boolean doesEntityExist(String projectId, String id) {

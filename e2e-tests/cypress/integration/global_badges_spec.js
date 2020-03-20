@@ -16,6 +16,7 @@
 describe('Global Badges Tests', () => {
 
     beforeEach(() => {
+        cy.server();
         cy.logout();
         const supervisorUser = 'supervisor@skills.org';
         cy.register(supervisorUser, 'password');
@@ -27,12 +28,14 @@ describe('Global Badges Tests', () => {
 
     it('Create badge with special chars', () => {
 
-        const expectedId = 'JustABadgeBadge';
-        const providedName = "JustABadge";
+        const expectedId = 'LotsofspecialPcharsBadge';
+        const providedName = "!L@o#t$s of %s^p&e*c/?#(i)a_l++_|}{P c'ha'rs";
         cy.server();
         cy.route('GET', `/supervisor/badges`).as('getGlobalBadges');
-        cy.route('GET', '/app/userInfo/hasRole/ROLE_SUPERVISOR').as('checkSupervisorRole')
         cy.route('PUT', `/supervisor/badges/${expectedId}`).as('postGlobalBadge');
+        cy.route('GET', `/supervisor/badges/id/${expectedId}/exists`).as('idExists');
+        cy.route('POST', '/supervisor/badges/name/exists').as('nameExists');
+        cy.route('GET', '/app/userInfo/hasRole/ROLE_SUPERVISOR').as('checkSupervisorRole')
 
         cy.visit('/globalBadges');
         cy.wait('@getGlobalBadges');
@@ -41,8 +44,9 @@ describe('Global Badges Tests', () => {
         cy.clickButton('Badge');
 
         cy.get('#badgeName').type(providedName);
-
+        cy.wait('@nameExists');
         cy.clickSave();
+        cy.wait('@idExists');
         cy.wait('@postGlobalBadge');
 
         cy.contains(`ID: ${expectedId}`);
@@ -158,24 +162,4 @@ describe('Global Badges Tests', () => {
         cy.wait('@getGlobalBadges');
     });
 
-
-    // THIS DOES NOT PASS: will be handled bia #449
-    // it('create badge with special chars', () => {
-    //     const expectedId = 'LotsofspecialPcharsBadge';
-    //     const providedName = "!L@o#t$s of %s^p&e*c(i)a_l++_|}{P c'ha'rs";
-    //     cy.server().route('GET', `/supervisor/badges`).as('getGlobalBadges');
-    //
-    //     cy.visit('/globalBadges');
-    //     cy.wait('@getGlobalBadges')
-    //     cy.clickButton('Badge')
-    //
-    //     cy.get('#badgeName').type(providedName)
-    //     cy.getIdField().should('have.value', expectedId)
-    //
-    //     // cy.clickSave()
-    //     // cy.wait('@postNewBadge');
-    //     //
-    //     // cy.contains('ID: Lotsofspecial')
-    // });
-
-})
+});
