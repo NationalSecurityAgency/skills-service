@@ -16,6 +16,8 @@
 describe('Global Badges Tests', () => {
 
     beforeEach(() => {
+        cy.server();
+        cy.route('POST', '/performLogin').as('login');
         cy.logout();
         const supervisorUser = 'supervisor@skills.org';
         cy.register(supervisorUser, 'password');
@@ -23,6 +25,7 @@ describe('Global Badges Tests', () => {
         cy.request('PUT', `/root/users/${supervisorUser}/roles/ROLE_SUPERVISOR`);
         cy.logout();
         cy.login(supervisorUser, 'password');
+        cy.wait('@performLogin');
     });
 
     it('Create badge with special chars', () => {
