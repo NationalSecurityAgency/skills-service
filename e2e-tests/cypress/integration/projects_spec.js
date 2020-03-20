@@ -22,9 +22,14 @@ describe('Projects Tests', () => {
   });
 
   it('Create new projects', function () {
-    cy.visit('/');
+    cy.route('GET', '/app/projects').as('loadProjects');
+    cy.route('GET', '/app/userInfo').as('loadUserInfo');
 
     cy.route('POST', '/app/projects/MyNewtestProject').as('postNewProject');
+
+    cy.visit('/');
+    cy.wait('@loadUserInfo');
+    cy.wait('@loadProjects');
 
     cy.clickButton('Project');
     cy.get('[data-vv-name="projectName"]').type("My New test Project")
@@ -41,7 +46,12 @@ describe('Projects Tests', () => {
       projectId: 'MyNewtestProject',
       name: "My New test Project"
     })
+    cy.route('GET', '/app/projects').as('loadProjects');
+    cy.route('GET', '/app/userInfo').as('loadUserInfo');
+
     cy.visit('/');
+    cy.wait('@loadUserInfo');
+    cy.wait('@loadProjects');
 
     cy.clickButton('Project');
     cy.get('[data-vv-name="projectName"]').type("My New test Project")
@@ -57,7 +67,12 @@ describe('Projects Tests', () => {
       projectId: 'MyNewtestProject',
       name: "My New test Project"
     })
+    cy.route('GET', '/app/projects').as('loadProjects');
+    cy.route('GET', '/app/userInfo').as('loadUserInfo');
+
     cy.visit('/');
+    cy.wait('@loadUserInfo');
+    cy.wait('@loadProjects');
     cy.clickButton('Project');
     cy.get('[data-vv-name="projectName"]').type("Other Project Name")
     cy.contains('Enable').click();
@@ -74,9 +89,12 @@ describe('Projects Tests', () => {
 
     cy.route('POST', `/app/projects/${expectedId}`).as('postNewProject');
     cy.route('POST', '/app/projectExist').as('projectExists');
+    cy.route('GET', '/app/projects').as('loadProjects');
+    cy.route('GET', '/app/userInfo').as('loadUserInfo');
 
     cy.visit('/');
-    cy.wait('@getProjects');
+    cy.wait('@loadUserInfo');
+    cy.wait('@loadProjects');
     cy.clickButton('Project');
     cy.get('[data-vv-name="projectName"]').type(providedName);
     cy.wait('@projectExists');
@@ -95,7 +113,12 @@ describe('Projects Tests', () => {
     cy.route('POST', `/app/projects/${expectedId}`)
         .as('postNewProject');
 
+    cy.route('GET', '/app/projects').as('loadProjects');
+    cy.route('GET', '/app/userInfo').as('loadUserInfo');
+
     cy.visit('/');
+    cy.wait('@loadUserInfo');
+    cy.wait('@loadProjects');
     cy.clickButton('Project');
     cy.get('[data-vv-name="projectName"]').type(providedName)
     cy.getIdField().should('have.value', expectedId)
@@ -113,7 +136,12 @@ describe('Projects Tests', () => {
   });
 
   it('Once project id is enabled name-to-id autofill should be turned off', () => {
+    cy.route('GET', '/app/projects').as('loadProjects');
+    cy.route('GET', '/app/userInfo').as('loadUserInfo');
+
     cy.visit('/');
+    cy.wait('@loadUserInfo');
+    cy.wait('@loadProjects');
 
     cy.clickButton('Project');;
     cy.get('[data-vv-name="projectName"]').type('InitValue');
@@ -131,15 +159,13 @@ describe('Projects Tests', () => {
 
   it('Project name is required', () => {
     cy.server();
-    cy.route({
-      method: 'GET',
-      url: '/app/projects'
-    }).as('loadProjects');
-    cy.route({method: 'GET', url: '/app/userInfo'}).as('loadUserInfo');
+    cy.route('GET', '/app/projects').as('loadProjects');
+    cy.route('GET', '/app/userInfo').as('loadUserInfo');
+
     cy.visit('/');
     cy.wait('@loadUserInfo');
     cy.wait('@loadProjects');
-    cy.clickButton('Project');;
+    cy.clickButton('Project');
     cy.contains('Enable').click();
     cy.getIdField().type('InitValue');
 
@@ -150,7 +176,12 @@ describe('Projects Tests', () => {
   })
 
   it('Project id is required', () => {
-    cy.visit('/')
+    cy.route('GET', '/app/projects').as('loadProjects');
+    cy.route('GET', '/app/userInfo').as('loadUserInfo');
+
+    cy.visit('/');
+    cy.wait('@loadUserInfo');
+    cy.wait('@loadProjects');
     cy.clickButton('Project');;
     cy.get('[data-vv-name="projectName"]').type('New Project');
     cy.contains('Enable').click();
@@ -168,8 +199,13 @@ describe('Projects Tests', () => {
     const maxLenMsg = 'Project Name cannot exceed 50 characters';
     const projId = 'ProjectId'
     cy.route('POST', `/app/projects/${projId}`).as('postNewProject');
+    cy.route('GET', '/app/projects').as('loadProjects');
+    cy.route('GET', '/app/userInfo').as('loadUserInfo');
 
-    cy.visit('/')
+    cy.visit('/');
+    cy.wait('@loadUserInfo');
+    cy.wait('@loadProjects');
+
     cy.clickButton('Project');;
     cy.contains('Enable').click();
     cy.getIdField().type('ProjectId')
@@ -203,8 +239,12 @@ describe('Projects Tests', () => {
     const longInvalid = Array(51).fill('a').join('');
     const longValid = Array(50).fill('a').join('');
     cy.route('POST', `/app/projects/${longValid}`).as('postNewProject');
+    cy.route('GET', '/app/projects').as('loadProjects');
+    cy.route('GET', '/app/userInfo').as('loadUserInfo');
 
-    cy.visit('/')
+    cy.visit('/');
+    cy.wait('@loadUserInfo');
+    cy.wait('@loadProjects');
     cy.clickButton('Project');;
     cy.contains('Enable').click();
     cy.getIdField().type('12')
@@ -245,8 +285,12 @@ describe('Projects Tests', () => {
       status: 200,
       response: [{userId:'foo', userIdForDisplay: 'foo', first: 'foo', last: 'foo', dn: 'foo'}]
     }).as('suggest');
+    cy.route('GET', '/app/userInfo').as('loadUserInfo');
+    cy.route('GET', '/admin/projects/proj1').as('loadProject');
 
     cy.visit('/projects/proj1/access');
+    cy.wait('@loadUserInfo');
+    cy.wait('@loadProject');
 
     cy.contains('Enter user id').type('foo');
     cy.wait('@suggest');
@@ -275,8 +319,12 @@ describe('Projects Tests', () => {
       status: 200,
       response: [{userId:'foo', userIdForDisplay: 'foo', first: 'foo', last: 'foo', dn: 'foo'}]
     }).as('suggest');
+    cy.route('GET', '/app/userInfo').as('loadUserInfo');
+    cy.route('GET', '/admin/projects/proj1').as('loadProject');
 
     cy.visit('/projects/proj1/access');
+    cy.wait('@loadUserInfo');
+    cy.wait('@loadProject');
 
     cy.contains('Enter user id').type('foo');
     cy.wait('@suggest');
@@ -301,8 +349,12 @@ describe('Projects Tests', () => {
       method: 'POST',
       url: '/app/users/suggestDashboardUsers*',
     }).as('suggest');
+    cy.route('GET', '/app/userInfo').as('loadUserInfo');
+    cy.route('GET', '/admin/projects/proj1').as('loadProject');
 
     cy.visit('/projects/proj1/access');
+    cy.wait('@loadUserInfo');
+    cy.wait('@loadProject');
 
     cy.contains('Enter user id').type('{enter}');
     cy.wait('@suggest');
@@ -327,8 +379,12 @@ describe('Projects Tests', () => {
       method: 'POST',
       url: '/app/users/suggestDashboardUsers*',
     }).as('suggest');
+    cy.route('GET', '/app/userInfo').as('loadUserInfo');
+    cy.route('GET', '/admin/projects/proj1').as('loadProject');
 
     cy.visit('/projects/proj1/access');
+    cy.wait('@loadUserInfo');
+    cy.wait('@loadProject');
 
     cy.contains('Enter user id').type('root{enter}');
     cy.wait('@suggest');
@@ -353,8 +409,12 @@ describe('Projects Tests', () => {
       method: 'POST',
       url: '/app/users/suggestDashboardUsers*',
     }).as('suggest');
+    cy.route('GET', '/app/userInfo').as('loadUserInfo');
+    cy.route('GET', '/admin/projects/proj1').as('loadProject');
 
     cy.visit('/projects/proj1/access');
+    cy.wait('@loadUserInfo');
+    cy.wait('@loadProject');
 
     cy.contains('Enter user id').type('root/foo{enter}');
     cy.wait('@suggest');
