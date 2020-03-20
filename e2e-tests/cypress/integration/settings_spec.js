@@ -73,6 +73,7 @@ describe('Settings Tests', () => {
         cy.contains('Enter user id').first().type('sk/foo{enter}');
         cy.wait('@getEligibleForRoot');
     });
+    
 
     it('Add Root User With No Query', () => {
         cy.server();
