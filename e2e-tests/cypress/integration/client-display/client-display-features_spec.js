@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import moment from 'moment';
-const dateFormatter = value => moment(value).format('YYYY-MM-DD[T]HH:mm:ss[Z]');
+const dateFormatter = value => moment.utc(value).format('YYYY-MM-DD[T]HH:mm:ss[Z]');
 
 describe('Client Display Features Tests', () => {
 

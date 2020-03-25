@@ -17,6 +17,7 @@ package skills.controller
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestMethod
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.bind.annotation.RestController
 import skills.HealthChecker
 import skills.UIConfigProperties
+import skills.auth.AuthMode
 import skills.profile.EnableCallStackProf
 
 @RestController
@@ -38,10 +40,15 @@ class PublicConfigController {
     @Autowired
     UIConfigProperties uiConfigProperties
 
+    @Value('${skills.authorization.authMode:#{T(skills.auth.AuthMode).DEFAULT_AUTH_MODE}}')
+    AuthMode authMode
+
     @RequestMapping(value = "/config", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     Map<String,String> getConfig(){
-        return uiConfigProperties.ui
+        Map<String,String> res = new HashMap<>(uiConfigProperties.ui)
+        res["authMode"] = authMode.name()
+        return res
     }
 
     final private static Map statusRes = [
