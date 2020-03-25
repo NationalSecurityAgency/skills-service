@@ -42,7 +42,9 @@ limitations under the License.
         },
         watch: {
             libVersion() {
-                if (localStorage.skillsClientDisplayLibVersion !== undefined && this.libVersion.localeCompare(localStorage.skillsClientDisplayLibVersion) > 0) {
+                if (localStorage.skillsClientDisplayLibVersion !== undefined
+                    && this.libVersion !== undefined
+                    && this.libVersion.localeCompare(localStorage.skillsClientDisplayLibVersion) > 0) {
                     this.showNewVersionAlert = true;
                 }
                 this.updateStorageIfNeeded();

@@ -137,6 +137,7 @@ describe('Global Badges Tests', () => {
             originalBadgeId: ''
         });
 
+        cy.visit('/');
         cy.contains('Badges').click();
         cy.contains('Manage').click();
         cy.get('.multiselect__tags').click();
@@ -158,6 +159,7 @@ describe('Global Badges Tests', () => {
         cy.server();
         cy.route('GET', `/supervisor/badges`).as('getGlobalBadges');
 
+        cy.visit('/');
         cy.contains('Badges').click();
         cy.wait('@getGlobalBadges');
     });

@@ -21,16 +21,13 @@ const getters = {
   userInfo(state) {
     return state.userInfo;
   },
-  isAuthenticated(state) {
+  isAuthenticated(state, gettersParam) {
     return (
       state.token !== null
-      || state.pkiAuth
+      || gettersParam.isPkiAuthenticated
       || state.localAuth
       || state.oAuthAuth
     ) && state.userInfo !== null;
-  },
-  isPkiAuthenticated(state) {
-    return state.pkiAuth;
   },
 };
 
@@ -145,11 +142,7 @@ const actions = {
         dispatch('fetchUser', false).then(() => {
           if (state.userInfo) {
             reAuthenticated = true;
-            if (!localAuth && !oAuthAuth) {
-              state.pkiAuth = true;
-            } else {
-              state.localAuth = true;
-            }
+            state.localAuth = !getters.isPkiAuthenticated;
           } else {
             // cannot obtain userInfo, so clear any other lingering auth data
             commit('clearAuthData');
@@ -188,7 +181,6 @@ const actions = {
 const state = {
   token: null,
   userInfo: null,
-  pkiAuth: false,
   localAuth: false,
   oAuthAuth: false,
 };
