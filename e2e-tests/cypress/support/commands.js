@@ -78,19 +78,19 @@ Cypress.Commands.add("enableUILogin", () => {
 });
 
 Cypress.Commands.add("login", (user, pass) => {
-    const disableUILogin = Cypress.env('disabledUILoginProp')
-    cy.log(`UI Login enabled: [${disableUILogin}]`)
-    if ( disableUILogin === true){
-        cy.log('Disabled UI Login')
-    } else {
-        cy.visit('/skills-login');
-        cy.contains('Sign in');
-        cy.get('#username').type(user);
-        cy.get('#inputPassword').type(pass);
-        cy.contains('Login').click();
-        // wait for login to finish
-        cy.contains('My Projects');
-    }
+    // const disableUILogin = Cypress.env('disabledUILoginProp')
+    // cy.log(`UI Login enabled: [${disableUILogin}]`)
+    // if ( disableUILogin === true){
+    //     cy.log('Disabled UI Login')
+    // } else {
+    //     cy.visit('/skills-login');
+    //     cy.contains('Sign in');
+    //     cy.get('#username').type(user);
+    //     cy.get('#inputPassword').type(pass);
+    //     cy.contains('Login').click();
+    //     // wait for login to finish
+    //     cy.contains('My Projects');
+    // }
 
     // this will allow to execute endpoint request directly to the backend
     cy.request( {

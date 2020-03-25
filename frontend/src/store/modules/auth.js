@@ -142,9 +142,7 @@ const actions = {
         dispatch('fetchUser', false).then(() => {
           if (state.userInfo) {
             reAuthenticated = true;
-            if (localAuth || oAuthAuth) {
-              state.localAuth = true;
-            }
+            state.localAuth = !getters.isPkiAuthenticated;
           } else {
             // cannot obtain userInfo, so clear any other lingering auth data
             commit('clearAuthData');
