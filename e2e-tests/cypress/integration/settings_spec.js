@@ -46,7 +46,7 @@ describe('Settings Tests', () => {
         cy.get('div.table-responsive').contains('Firstname LastName (skills@skills.org)');
     });
 
-    it.only('Add Root User - forward slash character does not cause error', () => {
+    it('Add Root User - forward slash character does not cause error', () => {
         cy.server();
         cy.route('POST', '/root/users/without/role/ROLE_SUPER_DUPER_USER?userSuggestOption=ONE').as('getEligibleForRoot');
         cy.route('PUT', '/root/users/skills@skills.org/roles/ROLE_SUPER_DUPER_USER').as('addRoot');
