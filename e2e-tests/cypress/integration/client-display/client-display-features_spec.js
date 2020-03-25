@@ -18,14 +18,6 @@ const dateFormatter = value => moment.utc(value).format('YYYY-MM-DD[T]HH:mm:ss[Z
 
 describe('Client Display Features Tests', () => {
 
-    before(() => {
-        cy.disableUILogin();
-    });
-
-    after(function () {
-        cy.enableUILogin();
-    });
-
     beforeEach(() => {
         Cypress.env('disabledUILoginProp', true);
         cy.request('POST', '/app/projects/proj1', {
