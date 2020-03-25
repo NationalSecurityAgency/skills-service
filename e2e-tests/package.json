@@ -15,10 +15,20 @@
     "cy:run": "npm run licenseCheck && cypress run",
     "cy:run:dev": "cypress run --config baseUrl=http://localhost:8082",
     "cy:verify": "cypress verify",
-    "backend:start:ci": "java  -Dspring.config.location=classpath:/application.yml,file:serverConfigs/backend_application.properties -jar ../backend/target/backend-*.jar",
     "backend:start": "java -Dspring.config.location=classpath:/application.yml,file:serverConfigs/backend_application.properties -jar ../backend/target/backend-*.jar",
+    "backend:start:ci": "npm run backend:start &",
     "backend:waitToStart": "npx wait-on -t 40000 http://localhost:8080",
     "backend:resetDb": "java -cp ./cypress/db/h2-1.4.200.jar org.h2.tools.RunScript -url jdbc:h2:tcp://localhost:9090/mem:skills -user sa -script ./cypress/db/reset.sql",
+    "client-display:serve": "cd ../client-display && npm prune && npm install && npm run serve",
+    "client-display:serve:ci": "npm run client-display:serve &",
+    "client-display:waitToStart": "npx wait-on -t 80000 http://localhost:8083",
+    "cyServices:start:skills-service": "run-s backend:start:ci backend:waitToStart",
+    "cyServices:start:client-display": "run-s client-display:serve:ci client-display:waitToStart",
+    "cyServices:start": "run-s cyServices:start:skills-service cyServices:start:client-display",
+    "cyServices:kill:skills-service": "for procid in $(ps -aux | grep \"serverConfigs/.*properties\" | grep \"jar$\" | awk '{print $2}'); do kill -9 $procid; done",
+    "cyServices:kill:client-display": "for procid in $(ps -aux | grep \"client-display\" | grep \"npm run serve\" | grep -v \"grep\" | awk '{print $2}'); do echo \"killing ${procid}\"; kill -9 $procid; done",
+    "cyServices:kill:client-display:1": "for procid in $(ps -aux | grep \"client-display\" | grep \"vue-cli-service serve\" | grep -v \"grep\" | awk '{print $2}'); do echo \"killing ${procid}\"; kill -9 $procid; done",
+    "cyServices:kill": "run-s cyServices:kill:skills-service cyServices:kill:client-display cyServices:kill:client-display:1",
     "print-env": "print-env"
   },
   "devDependencies": {
@@ -29,6 +39,7 @@
     "license-check-and-add": "3.0.4",
     "license-checker": "25.0.1",
     "moment": "2.24.0",
+    "npm-run-all": "4.1.5",
     "wait-on": "3.3.0"
   }
 }
