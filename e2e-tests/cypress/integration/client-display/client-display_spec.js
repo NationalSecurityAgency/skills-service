@@ -17,14 +17,6 @@ describe('Client Display Tests', () => {
 
     const cssAttachedToNavigableCards = 'skills-navigable-item';
 
-    before(() => {
-        cy.disableUILogin();
-    });
-
-    after(function () {
-        cy.enableUILogin();
-    });
-
     beforeEach(() => {
         Cypress.env('disabledUILoginProp', true);
         cy.request('POST', '/app/projects/proj1', {
