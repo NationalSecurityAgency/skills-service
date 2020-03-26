@@ -98,6 +98,7 @@ cypress_test:
       - e2e-tests/cypress/snapshots/**/*
       - e2e-tests/cypress/snapshots/client-display/**/*
       - e2e-tests/cypress/snapshots/client-display/**/__diff_output__/*
+      - e2e-tests/logs/*
     expire_in: 1 day
 
 pushToNexus:
