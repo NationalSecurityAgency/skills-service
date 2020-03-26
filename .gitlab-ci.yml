@@ -15,7 +15,7 @@ build:
     - ./ci/installNode.sh
     - ./ci/setupRepos.sh
   script:
-    - mvn --batch-mode install
+    - mvn --batch-mode install -DskipTests
   artifacts:
     paths:
       - backend/pom.xml
