@@ -114,8 +114,6 @@ const actions = {
     return new Promise((resolve, reject) => {
       let reAuthenticated = false;
       const token = localStorage.getItem('token');
-      const localAuth = (localStorage.getItem('localAuth') === 'true');
-      const oAuthAuth = (localStorage.getItem('oAuthAuth') === 'true');
       if (token) {
         let tokenExpired = true;
         let expirationDate = localStorage.getItem('expirationDate');
