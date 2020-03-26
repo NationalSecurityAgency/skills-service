@@ -78,6 +78,8 @@ cypress_test:
     - yum install -y nodejs
     - node -v
     - npm -v
+    - npm install -g npm
+    - npm -v
     - echo "@skills:registry=http://$NEXUS_SERVER/repository/skills-registry/" > ~/.npmrc
     - cat ~/.npmrc
   script:
