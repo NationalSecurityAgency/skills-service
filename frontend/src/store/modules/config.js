@@ -19,6 +19,9 @@ const getters = {
   config(state) {
     return state.config;
   },
+  isPkiAuthenticated(state) {
+    return state.config.authMode === 'PKI';
+  },
 };
 
 const mutations = {

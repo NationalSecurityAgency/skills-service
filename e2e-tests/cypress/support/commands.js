@@ -67,32 +67,7 @@ Cypress.Commands.add("register", (user, pass, grantRoot) => {
 
 });
 
-Cypress.Commands.add("disableUILogin", () => {
-    Cypress.env('disabledUILoginProp', true);
-    cy.log(`UI Login: [${Cypress.env('disabledUILoginProp')}] (enabled)`)
-});
-
-Cypress.Commands.add("enableUILogin", () => {
-    Cypress.env('disabledUILoginProp', false)
-    cy.log(`UI Login: [${Cypress.env('disabledUILoginProp')}] (disabled)`)
-});
-
 Cypress.Commands.add("login", (user, pass) => {
-    const disableUILogin = Cypress.env('disabledUILoginProp')
-    cy.log(`UI Login enabled: [${disableUILogin}]`)
-    if ( disableUILogin === true){
-        cy.log('Disabled UI Login')
-    } else {
-        cy.visit('/skills-login');
-        cy.contains('Sign in');
-        cy.get('#username').type(user);
-        cy.get('#inputPassword').type(pass);
-        cy.contains('Login').click();
-        // wait for login to finish
-        cy.contains('My Projects');
-    }
-
-    // this will allow to execute endpoint request directly to the backend
     cy.request( {
         method: 'POST',
         url: '/performLogin',
