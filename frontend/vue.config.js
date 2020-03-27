@@ -66,6 +66,7 @@ module.exports = {
       '/logout': proxyConf,
       '/createAccount': proxyConf,
       '/grantFirstRoot': proxyConf,
+      '/createRootAccount': proxyConf,
       '/oauth2': proxyConf,
       '/login': proxyConf,
       '/static': proxyConf,
