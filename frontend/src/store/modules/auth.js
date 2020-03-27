@@ -65,22 +65,40 @@ const mutations = {
   },
 };
 
+const handleLogin = (commit, dispatch, result) => {
+  const token = result.headers.authorization;
+  let expirationDate;
+  // special handling for oAuth
+  if (result.headers.tokenexpirationtimestamp) {
+    expirationDate = new Date(Number(result.headers.tokenexpirationtimestamp));
+    dispatch('setLogoutTimer', expirationDate);
+  }
+  commit('authUser', {
+    token,
+    expirationDate,
+  });
+};
+
 const actions = {
   signup({ commit, dispatch }, authData) {
     return new Promise((resolve, reject) => {
-      axios.put('/createAccount', authData)
+      const url = authData.isRootAccount ? '/createRootAccount' : '/createAccount';
+      axios.put(url, authData)
         .then((result) => {
           if (result) {
-            const token = result.headers.authorization;
-            let expirationDate;
-            if (result.headers.tokenexpirationtimestamp) {
-              expirationDate = new Date(Number(result.headers.tokenexpirationtimestamp));
-              dispatch('setLogoutTimer', expirationDate);
-            }
-            commit('authUser', { token, expirationDate });
+            handleLogin(commit, dispatch, result);
             dispatch('fetchUser')
               .then(() => {
-                resolve(result);
+                if (authData.isRootAccount) {
+                  // when creating root account for the first time, reload the config state
+                  // at a minimum it will update the flag indicating whether root user needs to be created
+                  dispatch('loadConfigState')
+                    .then(() => {
+                      resolve(result);
+                    });
+                } else {
+                  resolve(result);
+                }
             });
           }
         })
@@ -91,13 +109,7 @@ const actions = {
     return new Promise((resolve, reject) => {
       axios.post('/performLogin', authData, { handleError: false })
         .then((result) => {
-          const token = result.headers.authorization;
-          let expirationDate;
-          if (result.headers.tokenexpirationtimestamp) {
-            expirationDate = new Date(Number(result.headers.tokenexpirationtimestamp));
-            dispatch('setLogoutTimer', expirationDate);
-          }
-          commit('authUser', { token, expirationDate });
+          handleLogin(commit, dispatch, result);
           dispatch('fetchUser')
             .then(() => {
               resolve(result);

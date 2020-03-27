@@ -60,29 +60,37 @@ require('vue-multiselect/dist/vue-multiselect.min.css');
 
 const isActiveProjectIdChange = (to, from) => to.params.projectId !== from.params.projectId;
 const isLoggedIn = () => store.getters.isAuthenticated;
+const isPki = () => store.getters.isPkiAuthenticated;
 
 router.beforeEach((to, from, next) => {
-  if (from.path !== '/error') {
-    store.commit('previousUrl', from.fullPath);
-  }
-  if (isActiveProjectIdChange(to, from)) {
-    store.commit('currentProjectId', to.params.projectId);
-  }
-  if (to.matched.some(record => record.meta.requiresAuth)) {
-    // this route requires auth, check if logged in if not, redirect to login page.
-    if (!isLoggedIn()) {
-      const newRoute = { query: { redirect: to.fullPath } };
-      if (store.getters.isPkiAuthenticated) {
-        newRoute.name = 'HomePage';
+  const requestAccountPath = '/request-root-account';
+  if (!isPki() && !isLoggedIn() && to.path !== requestAccountPath && store.getters.config.needToBootstrap) {
+    next({ path: requestAccountPath });
+  } else if (!isPki() && to.path === requestAccountPath && !store.getters.config.needToBootstrap) {
+    next({ path: '/' });
+  } else {
+    if (from.path !== '/error') {
+      store.commit('previousUrl', from.fullPath);
+    }
+    if (isActiveProjectIdChange(to, from)) {
+      store.commit('currentProjectId', to.params.projectId);
+    }
+    if (to.matched.some(record => record.meta.requiresAuth)) {
+      // this route requires auth, check if logged in if not, redirect to login page.
+      if (!isLoggedIn()) {
+        const newRoute = { query: { redirect: to.fullPath } };
+        if (isPki()) {
+          newRoute.name = 'HomePage';
+        } else {
+          newRoute.name = 'Login';
+        }
+        next(newRoute);
       } else {
-        newRoute.name = 'Login';
+        next();
       }
-      next(newRoute);
     } else {
       next();
     }
-  } else {
-    next();
   }
 });
 

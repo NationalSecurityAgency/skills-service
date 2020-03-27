@@ -17,8 +17,8 @@ limitations under the License.
   <div class="row justify-content-center text-center">
     <div class="col col-md-8 col-lg-7 col-xl-4 mt-3" style="min-width: 20rem;">
       <div class="mt-5">
-        <i class="fa fa-users fa-4x"></i>
-        <h2 class="mt-4">Sign in to Skills Dashboard</h2>
+        <i class="fa fa-users fa-4x text-secondary"></i>
+        <h2 class="mt-4 text-info">Sign in to SkillTree Dashboard</h2>
       </div>
       <form @submit.prevent="login()">
         <transition name="fade" mode="out-in">
@@ -31,7 +31,7 @@ limitations under the License.
           <div class="card-body p-4">
 
             <div class="form-group">
-              <label for="username">Email address</label>
+              <label for="username" class="text-secondary"><b>Email Address</b></label>
               <input type="text" class="form-control" id="username" tabindex="1" placeholder="Enter email"
                      aria-describedby="emailHelp"
                      v-model="loginFields.username" v-validate="'required|minUsernameLength|email'" data-vv-delay="500" data-vv-name="email">
@@ -42,7 +42,7 @@ limitations under the License.
             <div class="form-group">
               <div class="row">
                 <div class="col">
-                  <label for="inputPassword">Password</label>
+                  <label for="inputPassword" class="text-secondary"><b>Password</b></label>
                 </div>
                 <div class="col text-right">
                   <small class="text-muted"><b-link tabindex="4" @click="forgotPassword">Forgot Password?</b-link></small>
@@ -60,7 +60,7 @@ limitations under the License.
             </button>
 
             <hr/>
-            <p class="text-center"><small>Don't have a User Skills account?
+            <p class="text-center"><small>Don't have a SkillTree account?
               <strong><b-link @click="requestAccountPage">Sign up</b-link></strong>
             </small>
             </p>
@@ -71,9 +71,9 @@ limitations under the License.
           <div class="card-body">
             <div v-if="oAuthProviders" class="row">
               <div v-for="oAuthProvider in oAuthProviders" :key="oAuthProvider.registrationId" class="col">
-                <button class="btn btn-outline-dark w-100 h-100"
+                <button class="btn btn-outline-secondary w-100 h-100 text-dark"
                         @click="oAuth2Login(oAuthProvider.registrationId)">
-                  <small><i :class="oAuthProvider.iconClass" aria-hidden="true"/>
+                  <small><i :class="oAuthProvider.iconClass" aria-hidden="true" class="text-info"/>
                   Continue with {{ oAuthProvider.clientName }}
                   </small>
                 </button>

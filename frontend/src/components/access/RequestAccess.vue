@@ -18,52 +18,56 @@ limitations under the License.
     <div class="row justify-content-center">
       <div class="col-md-6 mt-3">
         <div class="text-center mt-5">
-          <i class="fa fa-users fa-4x"></i>
-          <h2 class="mt-4">Create Skills Dashboard Account</h2>
+          <i class="fa fa-users fa-4x text-secondary"></i>
+          <h2 class="mt-4 text-info">
+            <span v-if="isRootAccount">New SkillTree Root Account</span>
+            <span v-else>New SkillTree Account</span>
+          </h2>
         </div>
         <form @submit.prevent="login()">
           <div class="card">
             <div class="card-body p-4">
               <div class="form-group">
-                <label for="firstName">First Name</label>
-                <input class="form-control" type="text" v-model="loginFields.firstName" id="firstName"
-                       name="firstName" v-validate="'required'" data-vv-delay="500"/>
+                <label for="firstName" class="text-secondary"><b>First Name</b></label>
+                <input class="form-control" type="text" v-model="loginFields.firstName" id="firstName" :disabled="createInProgress"
+                       name="firstName" v-validate="'required|maxFirstNameLength'" data-vv-delay="500"/>
                 <small class="form-text text-danger" v-show="errors.has('firstName')">{{ errors.first('firstName')}}</small>
               </div>
               <div class="form-group">
                 <label for="lastName">Last Name</label>
-                <input class="form-control" type="text" v-model="loginFields.lastName" id="lastName"
-                       name="lastName" v-validate="'required'" data-vv-delay="500"/>
+                <input class="form-control" type="text" v-model="loginFields.lastName" id="lastName" :disabled="createInProgress"
+                       name="lastName" v-validate="'required|maxLastNameLength'" data-vv-delay="500"/>
                 <small class="form-text text-danger" v-show="errors.has('lastName')">{{ errors.first('lastName')}}</small>
               </div>
               <div class="form-group">
                 <label for="email">Email</label>
-                <input class="form-control" type="text" v-model="loginFields.email" id="email"
+                <input class="form-control" type="text" v-model="loginFields.email" id="email" :disabled="createInProgress"
                        name="email" v-validate="'required|email|uniqueEmail'" data-vv-delay="500"/>
                 <small class="form-text text-danger" v-show="errors.has('email')">{{ errors.first('email')}}</small>
               </div>
               <div class="form-group">
                 <label for="password">Password</label>
-                <input class="form-control" type="password" v-model="loginFields.password" id="password"
+                <input class="form-control" type="password" v-model="loginFields.password" id="password" :disabled="createInProgress"
                        name="password" v-validate="'required|minPasswordLength|maxPasswordLength'" data-vv-delay="500" ref="password"/>
                 <small class="form-text text-danger" v-show="errors.has('password')">{{ errors.first('password')}}</small>
               </div>
               <div class="form-group">
                 <label for="password_confirmation">Confirm Password</label>
-                <input class="form-control" type="password" id="password_confirmation"
+                <input class="form-control" type="password" id="password_confirmation" :disabled="createInProgress"
                        name="password_confirmation" v-validate="'required|confirmed:password'" data-vv-delay="500" data-vv-as="Password Confirmation"/>
                 <small class="form-text text-danger" v-show="errors.has('password_confirmation')">{{ errors.first('password_confirmation')}}</small>
               </div>
               <div class="field is-grouped">
                 <div class="control">
-                  <button type="submit" class="btn btn-outline-primary" :disabled="errors.any() || missingRequiredValues()">
-                    Create Account <i class="fas fa-arrow-circle-right"/>
+                  <button type="submit" class="btn btn-outline-primary" :disabled="errors.any() || missingRequiredValues() || createInProgress">
+                    Create Account <i v-if="!createInProgress" class="fas fa-arrow-circle-right"/>
+                    <b-spinner v-if="createInProgress" label="Loading..." style="width: 1rem; height: 1rem;" variant="primary"/>
                   </button>
                 </div>
               </div>
-              <div class="skills-pad-bottom-1-rem">
+              <div v-if="!isRootAccount" class="skills-pad-bottom-1-rem">
                 <hr/>
-                <p class="text-center"><small>Already have a User Skills account?
+                <p class="text-center"><small>Already have an account?
                   <strong><b-link @click="loginPage">Sign in</b-link></strong></small>
                 </p>
               </div>
@@ -102,6 +106,12 @@ limitations under the License.
 
   export default {
     name: 'RequestAccount',
+    props: {
+      isRootAccount: {
+        type: Boolean,
+        default: false,
+      },
+    },
     data() {
       return {
         loginFields: {
@@ -110,13 +120,15 @@ limitations under the License.
           email: '',
           password: '',
         },
+        createInProgress: false,
       };
     },
     methods: {
       login() {
         this.$validator.validate().then((valid) => {
           if (valid) {
-            this.$store.dispatch('signup', this.loginFields).then(() => {
+            this.createInProgress = true;
+            this.$store.dispatch('signup', Object.assign({ isRootAccount: this.isRootAccount }, this.loginFields)).then(() => {
               this.$router.push({ name: 'HomePage' });
             });
           }
