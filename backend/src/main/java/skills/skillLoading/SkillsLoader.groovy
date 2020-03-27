@@ -614,6 +614,7 @@ class SkillsLoader {
             if (lastAchievedLevel.level >= maxLevel) {
                 res.currentPoints = 0
                 res.nextLevelPoints = -1
+                res.level = maxLevel
             } else {
                 int nextLevelPointsToAchievel
 

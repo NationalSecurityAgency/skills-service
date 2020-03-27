@@ -201,6 +201,94 @@ class LevelsSpec extends  DefaultIntSpec{
         userLevelBeforeEdit == userLevelAfterEdit
     }
 
+    def "user retains achieved level if points range changes (because new skill added to subject) after achieving max level"(){
+        when:
+
+        def levels = skillsService.getLevels(projId, null).sort {it.level}
+
+        skillsService.addSkill([projectId: projId, skillId: skill1], "thing1", new Date())
+        skillsService.addSkill([projectId: projId, skillId: skill2], "thing1", new Date())
+        skillsService.addSkill([projectId: projId, skillId: skill3], "thing1", new Date())
+
+        def userLevelBeforeEdit = skillsService.getSkillSummary("thing1", projId).skillsLevel
+        //should be level 3 or 4?
+
+        skillsService.createSkill(
+                [
+                        projectId: projId,
+                        subjectId: subject,
+                        skillId: 'skill4',
+                        name: 'Test Skill 4',
+                        pointIncrement: 100,
+                        numPerformToCompletion: 10,
+                        pointIncrementInterval: 60, numMaxOccurrencesIncrementInterval: 1
+                ]
+        )
+
+        def skillSummary = skillsService.getSkillSummary("thing1", projId)
+        def userLevelAfterEdit = skillSummary.skillsLevel
+        def levelsAfterEdit = skillsService.getLevels(projId, null).sort {it.level}
+
+        then:
+        userLevelBeforeEdit == userLevelAfterEdit
+    }
+
+    def "user retains achieved level if points range changes after achieving max level"(){
+        when:
+
+        def settingResult = skillsService.changeSetting(projId, projectPointsSetting, [projectId: projId, setting: projectPointsSetting, value: "true"])
+        def levels = skillsService.getLevels(projId, null).sort {it.level}
+
+        skillsService.addSkill([projectId: projId, skillId: skill1], "thing1", new Date())
+        skillsService.addSkill([projectId: projId, skillId: skill2], "thing1", new Date())
+        skillsService.addSkill([projectId: projId, skillId: skill3], "thing1", new Date())
+
+        def userLevelBeforeEdit = skillsService.getSkillSummary("thing1", projId).skillsLevel
+        //should be level5
+
+
+        def props = [:]
+        props.projectId = levels.last().projectId
+        props.skillId = levels.last().skillId
+        props.level = levels.last().level
+        props.percent = levels.last().percent
+        props.pointsFrom = levels.last().pointsFrom+50
+        props.pointsTo = levels.last().pointsTo
+        props.name = "TwoEagles"
+        props.iconClass = "two-eagles"
+        skillsService.editLevel(projId, null, props.level as String, props)
+
+        props = [:]
+        props.projectId = levels.get(levels.size()-2).projectId
+        props.skillId = levels.get(levels.size()-2).skillId
+        props.level = levels.get(levels.size()-2).level
+        props.percent = levels.get(levels.size()-2).percent
+        props.pointsFrom = levels.get(levels.size()-2).pointsFrom+50
+        props.pointsTo = levels.get(levels.size()-2).pointsTo+50
+        props.name = "TwoEagles"
+        props.iconClass = "two-eagles"
+        skillsService.editLevel(projId, null, props.level as String, props)
+
+        props = [:]
+        props.projectId = levels.get(levels.size()-3).projectId
+        props.skillId = levels.get(levels.size()-3).skillId
+        props.level = levels.get(levels.size()-3).level
+        props.percent = levels.get(levels.size()-3).percent
+        props.pointsFrom = levels.get(levels.size()-3).pointsFrom+50
+        props.pointsTo = levels.get(levels.size()-3).pointsTo+50
+        props.name = "TwoEagles"
+        props.iconClass = "two-eagles"
+        skillsService.editLevel(projId, null, props.level as String, props)
+
+        def skillSummary = skillsService.getSkillSummary("thing1", projId)
+        def userLevelAfterEdit = skillSummary.skillsLevel
+        def levelsAfterEdit = skillsService.getLevels(projId, null).sort {it.level}
+
+        then:
+        userLevelBeforeEdit == userLevelAfterEdit
+    }
+
+
     def "switch to points based, edit level points, user should not achieve based on old percentage"(){
         when:
 
