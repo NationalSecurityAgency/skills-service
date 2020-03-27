@@ -25,6 +25,11 @@ describe('Register Root Users', () => {
     cy.logout();
     cy.exec('npm version', {failOnNonZeroExit: false})
     cy.exec('npm run backend:clearDb')
+
+    cy.fixture('vars.json').then((vars) => {
+      cy.register(vars.rootUser, vars.defaultPass, true);
+      cy.register(vars.defaultUser, vars.defaultPass);
+    })
   });
 
   it('register root user', () => {
