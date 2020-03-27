@@ -133,4 +133,53 @@ describe('Client Display Features Tests', () => {
         cy.contains('New Skills Software Version is Available').should('not.exist')
     });
 
+    it('achieve level 5, then add new skill', () => {
+        cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill1`, {
+          projectId: 'proj1',
+          subjectId: 'subj1',
+          skillId: 'skill1',
+          name: `This is 1`,
+          type: 'Skill',
+          pointIncrement: 50,
+          numPerformToCompletion: 2,
+          pointIncrementInterval: 0,
+          numMaxOccurrencesIncrementInterval: -1,
+          description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+          version: 0,
+          helpUrl: 'http://doHelpOnThisSkill.com'
+        });
+
+        cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'user0', timestamp: new Date().getTime()})
+        cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'user0', timestamp: new Date().getTime() - 1000*60*60*24})
+
+        cy.cdVisit('/');
+
+        cy.contains('Overall Points');
+
+        cy.get('[data-cy=subjectTile]').eq(0).contains('Subject 1')
+        cy.get('[data-cy=subjectTile]').eq(0).contains('Level 5')
+
+        cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill2`, {
+          projectId: 'proj1',
+          subjectId: 'subj1',
+          skillId: 'skill2',
+          name: `This is 2`,
+          type: 'Skill',
+          pointIncrement: 50,
+          numPerformToCompletion: 2,
+          pointIncrementInterval: 0,
+          numMaxOccurrencesIncrementInterval: -1,
+          description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+          version: 0,
+          helpUrl: 'http://doHelpOnThisSkill.com'
+        });
+
+        cy.cdVisit('/');
+
+        cy.contains('Overall Points');
+
+        cy.get('[data-cy=subjectTile]').eq(0).contains('Subject 1')
+        cy.get('[data-cy=subjectTile]').eq(0).contains('Level 5')
+  });
+
 })
