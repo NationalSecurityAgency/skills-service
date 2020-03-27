@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-describe('Register Root Users', () => {
+describe('Register Dashboard Users', () => {
 
   beforeEach(() => {
     cy.logout();
