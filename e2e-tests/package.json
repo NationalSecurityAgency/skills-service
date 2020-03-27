@@ -36,6 +36,7 @@
     "cypress": "4.1.0",
     "cypress-file-upload": "3.5.3",
     "cypress-image-snapshot": "3.1.1",
+    "eslint": "6.8.0",
     "license-check-and-add": "3.0.4",
     "license-checker": "25.0.1",
     "moment": "2.24.0",
