@@ -42,3 +42,4 @@ package-lock.json
 backend/src/main/resources/public/**
 
 .vscode
+.history
