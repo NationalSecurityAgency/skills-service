@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import moment from 'moment';
-const dateFormatter = value => moment(value).format('YYYY-MM-DD[T]HH:mm:ss[Z]');
+const dateFormatter = value => moment.utc(value).format('YYYY-MM-DD[T]HH:mm:ss[Z]');
 
 describe('Client Display Tests', () => {
 
@@ -33,8 +33,6 @@ describe('Client Display Tests', () => {
     ];
 
     before(() => {
-        cy.disableUILogin();
-
         Cypress.Commands.add("cdInitProjWithSkills", () => {
             cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
                 projectId: 'proj1',
@@ -153,10 +151,6 @@ describe('Client Display Tests', () => {
         });
 
 
-    });
-
-    after(function () {
-        cy.enableUILogin();
     });
 
     beforeEach(() => {

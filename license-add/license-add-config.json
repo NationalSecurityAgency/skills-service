@@ -1,7 +1,7 @@
 {
   "ignore": [ ".git", "coverage", ".*/**", ".*", "*.iml", "babel.config.js", "rollup.config.js", "app/assets/**", "target/**",
     "pom.xml", "build/**", "**/robots.txt", "**.svg", "**.config.js", "**/**/*.conf.js", "**/**/.*",
-    "cypress/videos/**", "**/*.jar", "**.xml", "cypress/fonts/**", "cypress/fixtures/**"
+    "cypress/videos/**", "**/*.jar", "**.xml", "cypress/fonts/**", "cypress/fixtures/**", "logs/*"
   ],
   "license": "../license-add/LICENSE-HEADER.txt",
   "licenseFormats": {
