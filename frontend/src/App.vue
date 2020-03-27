@@ -19,7 +19,8 @@ limitations under the License.
     <customizable-header></customizable-header>
 
     <div class="overall-container">
-      <loading-container v-bind:is-loading="isLoading">
+      <pki-app-bootstrap v-if="isPkiAndNeedsToBootstrap"/>
+      <loading-container v-else v-bind:is-loading="isLoading">
         <div v-if="!isLoading">
           <header-view v-if="isAuthenticatedUser"/>
           <div>
@@ -42,6 +43,7 @@ limitations under the License.
   import InceptionConfigurer from './InceptionConfigurer';
   import InceptionProgressMessagesMixin from './components/inception/InceptionProgressMessagesMixin';
   import NewSoftwareVersionComponent from './components/header/NewSoftwareVersion';
+  import PkiAppBootstrap from '@//components/access/PkiAppBootstrap';
 
   export default {
     name: 'App',
@@ -52,6 +54,7 @@ limitations under the License.
       CustomizableHeader,
       HeaderView,
       LoadingContainer,
+      PkiAppBootstrap,
     },
     data() {
       return {
@@ -68,6 +71,9 @@ limitations under the License.
       },
       userInfo() {
         return this.$store.getters.userInfo;
+      },
+      isPkiAndNeedsToBootstrap() {
+        return this.$store.getters.isPkiAuthenticated && this.$store.getters.config.needToBootstrap;
       },
     },
     created() {
