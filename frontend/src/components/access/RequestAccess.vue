@@ -63,6 +63,9 @@ limitations under the License.
                     Create Account <i v-if="!createInProgress" class="fas fa-arrow-circle-right"/>
                     <b-spinner v-if="createInProgress" label="Loading..." style="width: 1rem; height: 1rem;" variant="primary"/>
                   </button>
+                  <div v-if="createInProgress && isRootAccount" class="mt-2 text-info">
+                    Bootstrapping! May take a second...
+                  </div>
                 </div>
               </div>
               <div v-if="!isRootAccount" class="skills-pad-bottom-1-rem">
