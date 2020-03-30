@@ -27,6 +27,7 @@ import skills.HealthChecker
 import skills.UIConfigProperties
 import skills.auth.AuthMode
 import skills.profile.EnableCallStackProf
+import skills.services.AccessSettingsStorageService
 
 @RestController
 @RequestMapping("/public")
@@ -40,14 +41,18 @@ class PublicConfigController {
     @Autowired
     UIConfigProperties uiConfigProperties
 
+    @Autowired
+    AccessSettingsStorageService accessSettingsStorageService
+
     @Value('${skills.authorization.authMode:#{T(skills.auth.AuthMode).DEFAULT_AUTH_MODE}}')
     AuthMode authMode
 
     @RequestMapping(value = "/config", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
-    Map<String,String> getConfig(){
+    Map<String,Object> getConfig(){
         Map<String,String> res = new HashMap<>(uiConfigProperties.ui)
         res["authMode"] = authMode.name()
+        res["needToBootstrap"] = !accessSettingsStorageService.rootAdminExists()
         return res
     }
 

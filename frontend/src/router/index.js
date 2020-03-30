@@ -97,6 +97,15 @@ const router = new Router({
       },
     },
     {
+      path: '/request-root-account',
+      name: 'RequestRootAccount',
+      component: RequestAccountForm,
+      props: { isRootAccount: true },
+      meta: {
+        requiresAuth: false,
+      },
+    },
+    {
       path: '/error',
       name: 'ErrorPage',
       component: ErrorPage,

@@ -34,4 +34,17 @@ class PublicConfigSpecs extends DefaultIntSpec {
         config
         config.authMode == "FORM"
     }
+
+    def "needToBootstrap should be true if root user doesn't exist"() {
+        when:
+        def noRootConfig = skillsService.getPublicConfigs()
+        skillsService.grantRoot()
+        def withRootConfig = skillsService.getPublicConfigs()
+        then:
+        noRootConfig
+        noRootConfig.needToBootstrap == true
+
+        withRootConfig
+        withRootConfig.needToBootstrap == false
+    }
 }
