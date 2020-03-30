@@ -355,25 +355,6 @@
                             </resources>
                         </configuration>
                     </execution>
-                    <execution>
-                        <id>copy Vue.js boostrap content</id>
-                        <phase>generate-resources</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${basedir}/src/main/resources/public/bootstrap</outputDirectory>
-                            <overwrite>true</overwrite>
-                            <resources>
-                                <resource>
-                                    <directory>${project.parent.basedir}/skills-bootstrap/dist/</directory>
-                                    <includes>
-                                        <include>/*/</include>
-                                    </includes>
-                                </resource>
-                            </resources>
-                        </configuration>
-                    </execution>
                 </executions>
             </plugin>
 

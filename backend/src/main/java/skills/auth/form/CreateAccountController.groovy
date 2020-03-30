@@ -97,6 +97,7 @@ class CreateAccountController {
                 roleName: RoleName.ROLE_SUPER_DUPER_USER
         ))]
         userAuthService.createUser(userInfo, true)
+        userAuthService.autologin(userInfo, password)
     }
 
     @Conditional(SecurityMode.PkiAuth)
