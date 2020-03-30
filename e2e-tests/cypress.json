@@ -1,4 +1,6 @@
 {
   "projectId": "skillstests1",
-  "baseUrl": "http://localhost:8080"
+  "baseUrl": "http://localhost:8080",
+  "requestTimeout": 10000,
+  "defaultCommandTimeout": 10000
 }
