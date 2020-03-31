@@ -1,0 +1,255 @@
+/**
+ * Copyright 2020 SkillTree
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package skills.intTests
+
+import groovy.util.logging.Slf4j
+import org.springframework.lang.Nullable
+import org.springframework.messaging.converter.MappingJackson2MessageConverter
+import org.springframework.messaging.simp.stomp.StompHeaders
+import org.springframework.messaging.simp.stomp.StompSession
+import org.springframework.messaging.simp.stomp.StompSessionHandler
+import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter
+import org.springframework.web.socket.WebSocketHttpHeaders
+import org.springframework.web.socket.client.standard.StandardWebSocketClient
+import org.springframework.web.socket.messaging.WebSocketStompClient
+import org.springframework.web.socket.sockjs.client.RestTemplateXhrTransport
+import org.springframework.web.socket.sockjs.client.SockJsClient
+import org.springframework.web.socket.sockjs.client.Transport
+import org.springframework.web.socket.sockjs.client.WebSocketTransport
+import skills.intTests.utils.DefaultIntSpec
+import skills.intTests.utils.SkillsFactory
+import skills.intTests.utils.TestUtils
+import skills.services.events.CompletionItem
+import skills.services.events.SkillEventResult
+
+import java.lang.reflect.Type
+import java.util.concurrent.CountDownLatch
+
+@Slf4j
+class WebsocketSpecs extends DefaultIntSpec {
+
+    TestUtils testUtils = new TestUtils()
+    String projId = SkillsFactory.defaultProjId
+    List<String> sampleUserIds // loaded from system props
+    StompSession stompSession
+    List<Map> subj1, subj2, subj3
+
+    def setup() {
+        skillsService.deleteProjectIfExist(projId)
+        sampleUserIds = System.getProperty("sampleUserIds", "tom|||dick|||harry")?.split("\\|\\|\\|").sort()
+        subj1 = (1..5).collect { [projectId: projId, subjectId: "subj1", skillId: "s1${it}".toString(), name: "subj1 ${it}".toString(), type: "Skill", pointIncrement: 10, numPerformToCompletion: 10, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1] }
+        subj2 = (1..4).collect { [projectId: projId, subjectId: "subj2", skillId: "s2${it}".toString(), name: "subj2 ${it}".toString(), type: "Skill", pointIncrement: 5, numPerformToCompletion: 10, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1] }
+        subj3 = (1..5).collect { [projectId: projId, subjectId: "subj3", skillId: "s3${it}".toString(), name: "subj3 ${it}".toString(), type: "Skill", pointIncrement: 20, numPerformToCompletion: 10, totalPoints: 200, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1] }
+        skillsService.createSchema([subj1, subj2, subj3])
+    }
+
+    def cleanup() {
+        stompSession?.disconnect()
+    }
+
+    def "achieve subject's level - validate via websocket"(){
+        given:
+        List subjSummaryRes = []
+        List<SkillEventResult> wsResults = []
+        boolean skillsAdded = false
+
+//        List<Map> subj1 = (1..5).collect { [projectId: projId, subjectId: "subj1", skillId: "s1${it}".toString(), name: "subj1 ${it}".toString(), type: "Skill", pointIncrement: 10, numPerformToCompletion: 10, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1] }
+//        List<Map> subj2 = (1..4).collect { [projectId: projId, subjectId: "subj2", skillId: "s2${it}".toString(), name: "subj2 ${it}".toString(), type: "Skill", pointIncrement: 5, numPerformToCompletion: 10, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1] }
+//        List<Map> subj3 = (1..5).collect { [projectId: projId, subjectId: "subj3", skillId: "s3${it}".toString(), name: "subj3 ${it}".toString(), type: "Skill", pointIncrement: 20, numPerformToCompletion: 10, totalPoints: 200, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1] }
+//        skillsService.createSchema([subj1, subj2, subj3])
+
+        CountDownLatch messagesReceived = setupWebsocketConnection(wsResults)
+        when:
+
+        List<Date> dates = testUtils.getLastNDays(5)
+        List addSkillRes = []
+
+        (0..4).each {
+            addSkillRes << skillsService.addSkill([projectId: projId, skillId: subj1.get(it).skillId], sampleUserIds.get(0), dates.get(it))
+            subjSummaryRes << skillsService.getSkillSummary(sampleUserIds.get(0), projId, subj1.get(it).subjectId)
+        }
+        skillsAdded = true
+        messagesReceived.await()
+        then:
+        interaction {
+            if (skillsAdded) { // interaction closure seemed to be getting called before the "when:" block
+                validateResults(subjSummaryRes, wsResults)
+            }
+        }
+    }
+
+    def "achieve subject's level - validate via xhr streaming"(){
+        given:
+        List subjSummaryRes = []
+        List<SkillEventResult> wsResults = []
+        boolean skillsAdded = false
+
+//        List<Map> subj1 = (1..5).collect { [projectId: projId, subjectId: "subj1", skillId: "s1${it}".toString(), name: "subj1 ${it}".toString(), type: "Skill", pointIncrement: 10, numPerformToCompletion: 10, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1] }
+//        List<Map> subj2 = (1..4).collect { [projectId: projId, subjectId: "subj2", skillId: "s2${it}".toString(), name: "subj2 ${it}".toString(), type: "Skill", pointIncrement: 5, numPerformToCompletion: 10, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1] }
+//        List<Map> subj3 = (1..5).collect { [projectId: projId, subjectId: "subj3", skillId: "s3${it}".toString(), name: "subj3 ${it}".toString(), type: "Skill", pointIncrement: 20, numPerformToCompletion: 10, totalPoints: 200, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1] }
+//        skillsService.createSchema([subj1, subj2, subj3])
+
+        CountDownLatch messagesReceived = setupWebsocketConnection(wsResults, true)
+        when:
+
+        List<Date> dates = testUtils.getLastNDays(5)
+        List addSkillRes = []
+        (0..4).each {
+            addSkillRes << skillsService.addSkill([projectId: projId, skillId: subj1.get(it).skillId], sampleUserIds.get(0), dates.get(it))
+            subjSummaryRes << skillsService.getSkillSummary(sampleUserIds.get(0), projId, subj1.get(it).subjectId)
+        }
+        skillsAdded = true
+        messagesReceived.await()
+
+        then:
+        interaction {
+            if (skillsAdded) { // interaction closure seemed to be getting called before the "when:" block
+                validateResults(subjSummaryRes, wsResults)
+            }
+        }
+    }
+
+    def "achieve subject's level - validate via xhr polling"(){
+        given:
+        List subjSummaryRes = []
+        List<SkillEventResult> wsResults = []
+        boolean skillsAdded = false
+
+//        List<Map> subj1 = (1..5).collect { [projectId: projId, subjectId: "subj1", skillId: "s1${it}".toString(), name: "subj1 ${it}".toString(), type: "Skill", pointIncrement: 10, numPerformToCompletion: 10, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1] }
+//        List<Map> subj2 = (1..4).collect { [projectId: projId, subjectId: "subj2", skillId: "s2${it}".toString(), name: "subj2 ${it}".toString(), type: "Skill", pointIncrement: 5, numPerformToCompletion: 10, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1] }
+//        List<Map> subj3 = (1..5).collect { [projectId: projId, subjectId: "subj3", skillId: "s3${it}".toString(), name: "subj3 ${it}".toString(), type: "Skill", pointIncrement: 20, numPerformToCompletion: 10, totalPoints: 200, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1] }
+//        skillsService.createSchema([subj1, subj2, subj3])
+
+        CountDownLatch messagesReceived = setupWebsocketConnection(wsResults, true, true)
+        when:
+
+        List<Date> dates = testUtils.getLastNDays(5)
+        List addSkillRes = []
+        (0..4).each {
+            addSkillRes << skillsService.addSkill([projectId: projId, skillId: subj1.get(it).skillId], sampleUserIds.get(0), dates.get(it))
+            subjSummaryRes << skillsService.getSkillSummary(sampleUserIds.get(0), projId, subj1.get(it).subjectId)
+        }
+        skillsAdded = true
+        messagesReceived.await()
+
+        then:
+        interaction {
+            if (skillsAdded) { // interaction closure seemed to be getting called before the "when:" block
+                validateResults(subjSummaryRes, wsResults)
+            }
+        }
+    }
+
+    private CountDownLatch setupWebsocketConnection(List<SkillEventResult> wsResults, boolean xhr=false, boolean xhrPolling=false) {
+        CountDownLatch messagesReceived = new CountDownLatch(5)
+        List<Transport> transports = []
+        if (xhr) {
+            RestTemplateXhrTransport xhrTransport = new RestTemplateXhrTransport()
+            xhrTransport.xhrStreamingDisabled = xhrPolling
+            transports.add(xhrTransport)
+        } else {
+            transports.add(new WebSocketTransport(new StandardWebSocketClient()))
+        }
+        SockJsClient sockJsClient = new SockJsClient(transports)
+        WebSocketStompClient stompClient = new WebSocketStompClient(sockJsClient)
+        stompClient.setMessageConverter(new MappingJackson2MessageConverter())
+        StompSessionHandler sessionHandler = new StompSessionHandlerAdapter() {
+            @Override
+            Type getPayloadType(StompHeaders headers) {
+                return SkillEventResult
+            }
+
+            @Override
+            void handleFrame(StompHeaders headers, @Nullable Object payload) {
+                SkillEventResult result = (SkillEventResult) payload
+                wsResults.add(result)
+                messagesReceived.countDown()
+            }
+
+            @Override
+            void afterConnected(StompSession session, StompHeaders connectedHeaders) {
+                session.subscribe("/user/queue/${projId}-skill-updates", this)
+            }
+        }
+
+        // setup websocket connection for sampleUserIds[0]
+        String userId = sampleUserIds.get(0)
+        String secret = skillsService.getClientSecret(projId)
+        skillsService.setProxyCredentials(projId, secret)
+        String token = skillsService.wsHelper.getTokenForUser(userId)
+        WebSocketHttpHeaders headers = new WebSocketHttpHeaders()
+        headers.add('Authorization', "Bearer ${token}")
+        String protocol = xhr ? 'http' : 'ws'
+        stompSession = stompClient.connect("${protocol}://localhost:${localPort}/skills-websocket", headers, sessionHandler).get()
+        return messagesReceived
+    }
+
+    private validateResults(List subjSummaryRes, List<SkillEventResult> wsResults) {
+        wsResults.sort {it.skillId}
+        wsResults.each {
+            assert it.skillApplied
+            assert it.explanation == "Skill event was applied"
+        }
+        !wsResults.get(0).completed
+        wsResults.get(0).skillId == "${subj1.get(0).skillId}"
+        wsResults.get(0).name == "${subj1.get(0).name}"
+        wsResults.get(0).pointsEarned == 10
+        subjSummaryRes.get(0).skillsLevel == 0
+        subjSummaryRes.get(0).points == 10
+        subjSummaryRes.get(0).todaysPoints == 0
+        subjSummaryRes.get(0).levelPoints == 10
+
+        !wsResults.get(1).completed
+        wsResults.get(1).skillId == "${subj1.get(1).skillId}"
+        wsResults.get(1).name == "${subj1.get(1).name}"
+        wsResults.get(1).pointsEarned == 10
+        subjSummaryRes.get(1).skillsLevel == 0
+        subjSummaryRes.get(1).points == 20
+        subjSummaryRes.get(1).todaysPoints == 0
+        subjSummaryRes.get(1).levelPoints == 20
+
+        !wsResults.get(2).completed
+        wsResults.get(2).skillId == "${subj1.get(2).skillId}"
+        wsResults.get(2).name == "${subj1.get(2).name}"
+        wsResults.get(2).pointsEarned == 10
+        subjSummaryRes.get(2).skillsLevel == 0
+        subjSummaryRes.get(2).points == 30
+        subjSummaryRes.get(2).todaysPoints == 0
+        subjSummaryRes.get(2).levelPoints == 30
+
+        !wsResults.get(3).completed
+        wsResults.get(3).skillId == "${subj1.get(3).skillId}"
+        wsResults.get(3).name == "${subj1.get(3).name}"
+        wsResults.get(3).pointsEarned == 10
+        subjSummaryRes.get(3).skillsLevel == 0
+        subjSummaryRes.get(3).points == 40
+        subjSummaryRes.get(3).todaysPoints == 0
+        subjSummaryRes.get(3).levelPoints == 40
+
+        wsResults.get(4).completed.size() == 1
+        wsResults.get(4).skillId == "${subj1.get(4).skillId}"
+        wsResults.get(4).name == "${subj1.get(4).name}"
+        wsResults.get(4).pointsEarned == 10
+        wsResults.get(4).completed.get(0).type == CompletionItem.CompletionItemType.Subject
+        wsResults.get(4).completed.get(0).level == 1
+        wsResults.get(4).completed.get(0).id == "subj1"
+
+        subjSummaryRes.get(4).skillsLevel == 1
+        subjSummaryRes.get(4).points == 50
+        subjSummaryRes.get(4).todaysPoints == 10
+        subjSummaryRes.get(4).levelPoints == 0
+    }
+}
