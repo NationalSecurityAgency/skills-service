@@ -34,7 +34,12 @@ class TomcatConfig implements WebServerFactoryCustomizer<TomcatServletWebServerF
     @Override
     void customize(TomcatServletWebServerFactory factory) {
         if (enabledAccessLog) {
-            factory.addContextValves(new LogbackValve())
+            LogbackValve valve = new LogbackValve()
+            // must set to true on the logback valve otherwise servlet async
+            // support will be disabled, which is required for web-socket
+            // HTTP-based transport fallback options (HTTP polling/streaming)
+            valve.setAsyncSupported(true)
+            factory.addContextValves(valve)
         }
     }
 
