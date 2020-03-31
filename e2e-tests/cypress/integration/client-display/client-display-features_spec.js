@@ -19,9 +19,9 @@ const dateFormatter = value => moment.utc(value).format('YYYY-MM-DD[T]HH:mm:ss[Z
 describe('Client Display Features Tests', () => {
     const snapshotOptions = {
         blackout: ['[data-cy=pointHistoryChart]'],
-        failureThreshold: 0.03, // threshold for entire image
-        failureThresholdType: 'percent', // percent of image or number of pixels
-        customDiffConfig: { threshold: 0.1 }, // threshold for each pixel
+        // failureThreshold: 0.03, // threshold for entire image
+        // failureThresholdType: 'percent', // percent of image or number of pixels
+        // customDiffConfig: { threshold: 0.1 }, // threshold for each pixel
         // capture: 'viewport', // capture viewport in screenshot
     };
 
@@ -93,6 +93,7 @@ describe('Client Display Features Tests', () => {
     });
 
     it('do not display new version banner if lib version in headers is older than lib version in local storage', () => {
+        const mockedLibVersion = dateFormatter(new Date() - 1000 * 60 * 60 * 24 * 5);
         cy.server().route({
             url: '/api/projects/proj1/subjects/subj1/summary',
             status: 200,
@@ -112,7 +113,7 @@ describe('Client Display Features Tests', () => {
                 'helpUrl': 'http://doHelpOnThisSubject.com'
             },
             headers: {
-                'skills-client-lib-version': dateFormatter(new Date() - 1000 * 60 * 60 * 24)
+                'skills-client-lib-version': mockedLibVersion
             },
         }).as('getSubjectSummary');
 
@@ -124,7 +125,7 @@ describe('Client Display Features Tests', () => {
                 'position': 1
             },
             headers: {
-                'skills-client-lib-version': dateFormatter(new Date() - 1000 * 60 * 60 * 24)
+                'skills-client-lib-version': mockedLibVersion
             },
         }).as('getRank');
 
@@ -133,7 +134,7 @@ describe('Client Display Features Tests', () => {
             status: 200,
             response: { 'pointsHistory': [] },
             headers: {
-                'skills-client-lib-version': dateFormatter(new Date() - 1000 * 60 * 60 * 24)
+                'skills-client-lib-version': mockedLibVersion
             },
         }).as('getPointHistory');
 
