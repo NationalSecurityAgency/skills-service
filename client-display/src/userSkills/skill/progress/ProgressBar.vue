@@ -45,17 +45,20 @@ limitations under the License.
                     totalPts = 100;
                 }
                 return {
-                    total: totalPts,
+                    total: this.isLocked() ? 0 : totalPts,
                     totalBeforeToday: ((this.skill.points - this.skill.todaysPoints) / this.skill.totalPoints) * 100,
                 };
             },
             locked() {
-                return this.skill.dependencyInfo && !this.skill.dependencyInfo.achieved;
+                return this.isLocked();
             },
         },
         methods: {
             progressBarClicked(skill) {
                 this.$emit('progressbar-clicked', skill);
+            },
+            isLocked() {
+                return this.skill.dependencyInfo && !this.skill.dependencyInfo.achieved;
             },
         },
     };
