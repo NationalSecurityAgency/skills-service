@@ -42,7 +42,7 @@ limitations under the License.
             <label>Description</label>
             <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" v-slot="{errors}" name="Badge Description">
               <markdown-editor v-model="badgeInternal.description" @input="updateDescription"></markdown-editor>
-              <small class="form-text text-danger">{{ errors[0] }}</small>
+              <small class="form-text text-danger mb-3">{{ errors[0] }}</small>
             </ValidationProvider>
           </div>
 
@@ -55,9 +55,9 @@ limitations under the License.
             <small class="form-text text-danger">{{ errors.first('helpUrl')}}</small>
           </div>
 
-          <div v-if="!global">
+          <div v-if="!global" data-cy="gemEditContainer">
             <b-form-checkbox v-model="limitTimeframe" class="mt-4"
-                             @change="onEnableGemFeature">
+                             @change="onEnableGemFeature" data-cy="enableGemCheckbox">
                 Enable Gem Feature <inline-help msg="The Gem feature allows for the badge to only be achievable during the specified time frame."/>
             </b-form-checkbox>
 
@@ -65,17 +65,17 @@ limitations under the License.
                 <b-row v-if="limitTimeframe" no-gutters class="justify-content-md-center mt-3" key="gemTimeFields">
                   <b-col cols="12" md="4" style="min-width: 20rem;">
                     <label class="label mt-2">Start Date</label>
-                    <ValidationProvider rules="required|dateOrder" v-slot="{errors}" name="Start Date">
-                      <datepicker :inline="true" v-model="badgeInternal.startDate" name="startDate" key="gemFrom"></datepicker>
+                    <ValidationProvider rules="required|dateOrder" v-slot="{errors}" name="Start Date" ref="startDateValidationProvider">
+                      <datepicker :inline="true" v-model="badgeInternal.startDate" name="startDate" key="gemFrom" data-cy="startDatePicker"></datepicker>
                       <small class="form-text text-danger" v-show="errors[0]">{{ errors[0] }}
                       </small>
                     </ValidationProvider>
                   </b-col>
                   <b-col cols="12" md="4"  style="min-width: 20rem;">
                     <label class="label mt-2">End Date</label>
-                    <ValidationProvider rules="required|dateOrder|noHistoricalEnd" v-slot="{errors}" name="End Date">
+                    <ValidationProvider rules="required|dateOrder|noHistoricalEnd" v-slot="{errors}" name="End Date" ref="endDateValidationProvider">
                       <datepicker :inline="true" v-model="badgeInternal.endDate" name="endDate"
-                                  key="gemTo"></datepicker>
+                                  key="gemTo" data-cy="endDatePicker"></datepicker>
                       <small class="form-text text-danger" v-show="errors[0]">{{ errors[0] }}</small>
                     </ValidationProvider>
                   </b-col>
@@ -276,15 +276,14 @@ limitations under the License.
           getMessage: 'Start Date must come before End Date',
           validate() {
             let valid = true;
-            if (self.limitTimeframe) {
-              if (self.badgeInternal.startDate && self.badgeInternal.endDate) {
-                valid = self.badgeInternal.startDate < self.badgeInternal.endDate;
-                if (valid) {
-                  // manually clear errors in case the orig error occurred when setting startDate,
-                  // but was fixed by updating endDate (or vise-versa)
-                  self.errors.remove('startDate');
-                  self.errors.remove('endDate');
-                }
+            if (self.limitTimeframe && self.badgeInternal.startDate && self.badgeInternal.endDate) {
+              valid = window.moment(self.badgeInternal.startDate).isBefore(self.badgeInternal.endDate);
+              console.log(`${JSON.stringify(self.$validator.errors)}`);
+              if (valid) {
+                // manually clear errors in case the orig error occurred when setting startDate,
+                // but was fixed by updating endDate (or vise-versa)
+                self.$refs.startDateValidationProvider.reset();
+                self.$refs.endDateValidationProvider.reset();
               }
             }
             return valid;
@@ -297,15 +296,9 @@ limitations under the License.
           getMessage: 'End Date cannot be in the past',
           validate() {
             let valid = true;
-            if (self.limitTimeframe) {
-              // only trigger this validation on new badge entry, not edits
-              if (self.badgeInternal.endDate && !self.badge.badgeId) {
-                const now = new Date();
-                const nowStr = `${now.getFullYear()}${now.getMonth()}${now.getDate()}`;
-                const endStr = `${self.badgeInternal.endDate.getFullYear()}${self.badgeInternal.endDate.getMonth()}${self.badgeInternal.endDate.getDate()}`;
-
-                valid = parseInt(endStr, 10) >= parseInt(nowStr, 10);
-              }
+            // only trigger this validation on new badge entry, not edits
+            if (self.limitTimeframe && self.badgeInternal.endDate && !self.badge.badgeId) {
+              valid = window.moment(self.badgeInternal.endDate).isAfter(new Date());
             }
             return valid;
           },
