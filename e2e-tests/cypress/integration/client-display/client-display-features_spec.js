@@ -38,6 +38,23 @@ describe('Client Display Features Tests', () => {
             helpUrl: 'http://doHelpOnThisSubject.com',
             description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
         });
+
+        Cypress.Commands.add("createSkill", (num) => {
+            cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill${num}`, {
+                projectId: 'proj1',
+                subjectId: 'subj1',
+                skillId: `skill${num}`,
+                name: `This is ${num}`,
+                type: 'Skill',
+                pointIncrement: 50,
+                numPerformToCompletion: 2,
+                pointIncrementInterval: 0,
+                numMaxOccurrencesIncrementInterval: -1,
+                description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+                version: 0,
+                helpUrl: 'http://doHelpOnThisSkill.com'
+            });
+        });
     })
 
     it('display new version banner when software is updated', () => {
@@ -182,24 +199,6 @@ describe('Client Display Features Tests', () => {
   });
 
     it('deps are added to partially achieved skill', () => {
-        cy.cdVisit('/');
-        Cypress.Commands.add("createSkill", (num) => {
-            cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill${num}`, {
-                projectId: 'proj1',
-                subjectId: 'subj1',
-                skillId: `skill${num}`,
-                name: `This is ${num}`,
-                type: 'Skill',
-                pointIncrement: 50,
-                numPerformToCompletion: 2,
-                pointIncrementInterval: 0,
-                numMaxOccurrencesIncrementInterval: -1,
-                description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-                version: 0,
-                helpUrl: 'http://doHelpOnThisSkill.com'
-            });
-        });
-
         cy.createSkill(1);
         cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'user0', timestamp: new Date().getTime()})
         cy.createSkill(2);
@@ -207,13 +206,15 @@ describe('Client Display Features Tests', () => {
         cy.request('POST', `/admin/projects/proj1/skills/skill1/dependency/skill2`)
         cy.request('POST', `/admin/projects/proj1/skills/skill2/dependency/skill3`)
 
+        cy.cdVisit('/');
+
         cy.cdClickSubj(0, 'Subject 1');
 
         cy.matchImageSnapshot(`Subject-WithLockedSkills-ThatWerePartiallyAchieved`, snapshotOptions);
 
         cy.cdClickSkill(0);
         cy.contains('This is 1');
-        const expectedMsg = 'You were able to earn partial points before dependencies were added';
+        const expectedMsg = 'You were able to earn partial points before the dependencies were added';
         cy.contains(expectedMsg);
         // should render dependencies section
         cy.contains('Dependencies');
@@ -231,6 +232,52 @@ describe('Client Display Features Tests', () => {
         cy.cdClickSkill(2);
         cy.contains('This is 3');
         cy.contains(expectedMsg).should('not.exist');
+    });
+
+    it('deps are added to fully achieved skill', () => {
+        cy.createSkill(1);
+        cy.request('POST', `/api/projects/proj1/skills/skill1`, {
+            userId: 'user0',
+            timestamp: new Date().getTime()
+        })
+        cy.request('POST', `/api/projects/proj1/skills/skill1`, {
+            userId: 'user0',
+            timestamp: new Date().getTime() - 1000 * 60 * 24
+        })
+        cy.createSkill(2);
+        cy.request('POST', `/admin/projects/proj1/skills/skill1/dependency/skill2`)
+
+        cy.cdVisit('/');
+        cy.cdClickSubj(0, 'Subject 1');
+
+        cy.matchImageSnapshot(`Subject-WithLockedSkills-ThatWereFullyAchieved`, snapshotOptions);
+
+        cy.cdClickSkill(0);
+        cy.contains('This is 1');
+        const msg = "Congrats! You completed this skill before the dependencies were added";
+        cy.contains(msg);
+
+        cy.matchImageSnapshot(`LockedSkill-ThatWasFullyAchieved`, snapshotOptions);
+
+        // other skill should not have the message
+        cy.cdBack('Subject 1');
+        cy.cdClickSkill(1);
+        cy.contains('This is 2');
+        cy.contains(msg).should('not.exist');
+
+        // now let's achieve the dependent skill
+        cy.request('POST', `/api/projects/proj1/skills/skill2`, {
+            userId: 'user0',
+            timestamp: new Date().getTime()
+        })
+        cy.request('POST', `/api/projects/proj1/skills/skill2`, {
+            userId: 'user0',
+            timestamp: new Date().getTime() - 1000 * 60 * 24
+        })
+        cy.cdBack('Subject 1');
+        cy.cdClickSkill(0);
+        cy.contains('This is 1');
+        cy.contains(msg).should('not.exist');
     });
 
 })
