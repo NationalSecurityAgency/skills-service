@@ -17,6 +17,13 @@ import moment from 'moment';
 const dateFormatter = value => moment.utc(value).format('YYYY-MM-DD[T]HH:mm:ss[Z]');
 
 describe('Client Display Features Tests', () => {
+    const snapshotOptions = {
+        blackout: ['[data-cy=pointHistoryChart]'],
+        failureThreshold: 0.03, // threshold for entire image
+        failureThresholdType: 'percent', // percent of image or number of pixels
+        customDiffConfig: { threshold: 0.1 }, // threshold for each pixel
+        // capture: 'viewport', // capture viewport in screenshot
+    };
 
     beforeEach(() => {
         Cypress.env('disabledUILoginProp', true);
@@ -173,5 +180,57 @@ describe('Client Display Features Tests', () => {
         cy.get('[data-cy=subjectTile]').eq(0).contains('Subject 1')
         cy.get('[data-cy=subjectTile]').eq(0).contains('Level 5')
   });
+
+    it('deps are added to partially achieved skill', () => {
+        cy.cdVisit('/');
+        Cypress.Commands.add("createSkill", (num) => {
+            cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill${num}`, {
+                projectId: 'proj1',
+                subjectId: 'subj1',
+                skillId: `skill${num}`,
+                name: `This is ${num}`,
+                type: 'Skill',
+                pointIncrement: 50,
+                numPerformToCompletion: 2,
+                pointIncrementInterval: 0,
+                numMaxOccurrencesIncrementInterval: -1,
+                description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+                version: 0,
+                helpUrl: 'http://doHelpOnThisSkill.com'
+            });
+        });
+
+        cy.createSkill(1);
+        cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'user0', timestamp: new Date().getTime()})
+        cy.createSkill(2);
+        cy.createSkill(3);
+        cy.request('POST', `/admin/projects/proj1/skills/skill1/dependency/skill2`)
+        cy.request('POST', `/admin/projects/proj1/skills/skill2/dependency/skill3`)
+
+        cy.cdClickSubj(0, 'Subject 1');
+
+        cy.matchImageSnapshot(`Subject-WithLockedSkills-ThatWerePartiallyAchieved`, snapshotOptions);
+
+        cy.cdClickSkill(0);
+        cy.contains('This is 1');
+        const expectedMsg = 'You were able to earn partial points before dependencies were added';
+        cy.contains(expectedMsg);
+        // should render dependencies section
+        cy.contains('Dependencies');
+
+        cy.matchImageSnapshot(`LockedSkill-ThatWasPartiallyAchieved`, snapshotOptions);
+
+        // make sure the other locked skill doesn't contain the same message
+        cy.cdBack('Subject 1');
+        cy.cdClickSkill(1);
+        cy.contains('This is 2');
+        cy.contains(expectedMsg).should('not.exist');
+
+        // make sure the skill without deps doesn't have the message
+        cy.cdBack('Subject 1');
+        cy.cdClickSkill(2);
+        cy.contains('This is 3');
+        cy.contains(expectedMsg).should('not.exist');
+    });
 
 })
