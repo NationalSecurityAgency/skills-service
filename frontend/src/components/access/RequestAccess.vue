@@ -28,31 +28,31 @@ limitations under the License.
           <div class="card">
             <div class="card-body p-4">
               <div class="form-group">
-                <label for="firstName" class="text-secondary"><b>First Name</b></label>
+                <label for="firstName" class="text-secondary font-weight-bold">First Name</label>
                 <input class="form-control" type="text" v-model="loginFields.firstName" id="firstName" :disabled="createInProgress"
                        name="firstName" v-validate="'required|maxFirstNameLength'" data-vv-delay="500"/>
                 <small class="form-text text-danger" v-show="errors.has('firstName')">{{ errors.first('firstName')}}</small>
               </div>
               <div class="form-group">
-                <label for="lastName">Last Name</label>
+                <label for="lastName" class="text-secondary font-weight-bold">Last Name</label>
                 <input class="form-control" type="text" v-model="loginFields.lastName" id="lastName" :disabled="createInProgress"
                        name="lastName" v-validate="'required|maxLastNameLength'" data-vv-delay="500"/>
                 <small class="form-text text-danger" v-show="errors.has('lastName')">{{ errors.first('lastName')}}</small>
               </div>
               <div class="form-group">
-                <label for="email">Email</label>
+                <label for="email" class="text-secondary font-weight-bold">Email</label>
                 <input class="form-control" type="text" v-model="loginFields.email" id="email" :disabled="createInProgress"
                        name="email" v-validate="'required|email|uniqueEmail'" data-vv-delay="500"/>
                 <small class="form-text text-danger" v-show="errors.has('email')">{{ errors.first('email')}}</small>
               </div>
               <div class="form-group">
-                <label for="password">Password</label>
+                <label for="password" class="text-secondary font-weight-bold">Password</label>
                 <input class="form-control" type="password" v-model="loginFields.password" id="password" :disabled="createInProgress"
                        name="password" v-validate="'required|minPasswordLength|maxPasswordLength'" data-vv-delay="500" ref="password"/>
                 <small class="form-text text-danger" v-show="errors.has('password')">{{ errors.first('password')}}</small>
               </div>
               <div class="form-group">
-                <label for="password_confirmation">Confirm Password</label>
+                <label for="password_confirmation" class="text-secondary font-weight-bold">Confirm Password</label>
                 <input class="form-control" type="password" id="password_confirmation" :disabled="createInProgress"
                        name="password_confirmation" v-validate="'required|confirmed:password'" data-vv-delay="500" data-vv-as="Password Confirmation"/>
                 <small class="form-text text-danger" v-show="errors.has('password_confirmation')">{{ errors.first('password_confirmation')}}</small>
