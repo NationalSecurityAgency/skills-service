@@ -44,6 +44,7 @@ limitations under the License.
                 </div>
             </div>
 
+            <partial-points-alert :skill="skill" :is-locked="locked"/>
             <skill-summary-cards v-if="!locked" :skill="skill" class="mt-3"></skill-summary-cards>
 
             <p class="skills-text-description text-primary mx-2 mt-3">
@@ -68,10 +69,12 @@ limitations under the License.
     import ProgressBar from '@/userSkills/skill/progress/ProgressBar.vue';
     import SkillSummaryCards from '@/userSkills/skill/progress/SkillSummaryCards.vue';
     import MarkdownText from '@/common/utilities/MarkdownText.vue';
+    import PartialPointsAlert from '@/userSkills/skill/PartialPointsAlert.vue';
 
     export default {
         name: 'SkillOverview',
         components: {
+            PartialPointsAlert,
             SkillSummaryCards,
             ProgressBar,
             MarkdownText,
