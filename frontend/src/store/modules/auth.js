@@ -122,7 +122,7 @@ const actions = {
     commit('oAuth2AuthUser');
     window.location = `/oauth2/authorization/${oAuthId}`;
   },
-  restoreSessionIfAvailable({ commit, dispatch, state }) {
+  restoreSessionIfAvailable({ commit, dispatch, state, getters }) {
     return new Promise((resolve, reject) => {
       let reAuthenticated = false;
       const token = localStorage.getItem('token');
