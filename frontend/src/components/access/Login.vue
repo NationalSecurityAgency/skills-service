@@ -31,7 +31,7 @@ limitations under the License.
           <div class="card-body p-4">
 
             <div class="form-group">
-              <label for="username" class="text-secondary"><b>Email Address</b></label>
+              <label for="username" class="text-secondary font-weight-bold">Email Address</label>
               <input type="text" class="form-control" id="username" tabindex="1" placeholder="Enter email"
                      aria-describedby="emailHelp"
                      v-model="loginFields.username" v-validate="'required|minUsernameLength|email'" data-vv-delay="500" data-vv-name="email">
@@ -42,7 +42,7 @@ limitations under the License.
             <div class="form-group">
               <div class="row">
                 <div class="col">
-                  <label for="inputPassword" class="text-secondary"><b>Password</b></label>
+                  <label for="inputPassword" class="text-secondary font-weight-bold">Password</label>
                 </div>
                 <div class="col text-right">
                   <small class="text-muted"><b-link tabindex="4" @click="forgotPassword">Forgot Password?</b-link></small>
