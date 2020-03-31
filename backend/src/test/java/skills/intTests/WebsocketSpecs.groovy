@@ -65,15 +65,9 @@ class WebsocketSpecs extends DefaultIntSpec {
         List subjSummaryRes = []
         List<SkillEventResult> wsResults = []
         boolean skillsAdded = false
-
-//        List<Map> subj1 = (1..5).collect { [projectId: projId, subjectId: "subj1", skillId: "s1${it}".toString(), name: "subj1 ${it}".toString(), type: "Skill", pointIncrement: 10, numPerformToCompletion: 10, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1] }
-//        List<Map> subj2 = (1..4).collect { [projectId: projId, subjectId: "subj2", skillId: "s2${it}".toString(), name: "subj2 ${it}".toString(), type: "Skill", pointIncrement: 5, numPerformToCompletion: 10, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1] }
-//        List<Map> subj3 = (1..5).collect { [projectId: projId, subjectId: "subj3", skillId: "s3${it}".toString(), name: "subj3 ${it}".toString(), type: "Skill", pointIncrement: 20, numPerformToCompletion: 10, totalPoints: 200, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1] }
-//        skillsService.createSchema([subj1, subj2, subj3])
-
         CountDownLatch messagesReceived = setupWebsocketConnection(wsResults)
-        when:
 
+        when:
         List<Date> dates = testUtils.getLastNDays(5)
         List addSkillRes = []
 
@@ -96,15 +90,9 @@ class WebsocketSpecs extends DefaultIntSpec {
         List subjSummaryRes = []
         List<SkillEventResult> wsResults = []
         boolean skillsAdded = false
-
-//        List<Map> subj1 = (1..5).collect { [projectId: projId, subjectId: "subj1", skillId: "s1${it}".toString(), name: "subj1 ${it}".toString(), type: "Skill", pointIncrement: 10, numPerformToCompletion: 10, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1] }
-//        List<Map> subj2 = (1..4).collect { [projectId: projId, subjectId: "subj2", skillId: "s2${it}".toString(), name: "subj2 ${it}".toString(), type: "Skill", pointIncrement: 5, numPerformToCompletion: 10, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1] }
-//        List<Map> subj3 = (1..5).collect { [projectId: projId, subjectId: "subj3", skillId: "s3${it}".toString(), name: "subj3 ${it}".toString(), type: "Skill", pointIncrement: 20, numPerformToCompletion: 10, totalPoints: 200, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1] }
-//        skillsService.createSchema([subj1, subj2, subj3])
-
         CountDownLatch messagesReceived = setupWebsocketConnection(wsResults, true)
-        when:
 
+        when:
         List<Date> dates = testUtils.getLastNDays(5)
         List addSkillRes = []
         (0..4).each {
@@ -127,15 +115,9 @@ class WebsocketSpecs extends DefaultIntSpec {
         List subjSummaryRes = []
         List<SkillEventResult> wsResults = []
         boolean skillsAdded = false
-
-//        List<Map> subj1 = (1..5).collect { [projectId: projId, subjectId: "subj1", skillId: "s1${it}".toString(), name: "subj1 ${it}".toString(), type: "Skill", pointIncrement: 10, numPerformToCompletion: 10, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1] }
-//        List<Map> subj2 = (1..4).collect { [projectId: projId, subjectId: "subj2", skillId: "s2${it}".toString(), name: "subj2 ${it}".toString(), type: "Skill", pointIncrement: 5, numPerformToCompletion: 10, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1] }
-//        List<Map> subj3 = (1..5).collect { [projectId: projId, subjectId: "subj3", skillId: "s3${it}".toString(), name: "subj3 ${it}".toString(), type: "Skill", pointIncrement: 20, numPerformToCompletion: 10, totalPoints: 200, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1] }
-//        skillsService.createSchema([subj1, subj2, subj3])
-
         CountDownLatch messagesReceived = setupWebsocketConnection(wsResults, true, true)
-        when:
 
+        when:
         List<Date> dates = testUtils.getLastNDays(5)
         List addSkillRes = []
         (0..4).each {
