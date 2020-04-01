@@ -19,10 +19,10 @@ const dateFormatter = value => moment.utc(value).format('YYYY-MM-DD[T]HH:mm:ss[Z
 describe('Client Display Tests', () => {
 
     const snapshotOptions = {
-        blackout: ['[data-cy=pointHistoryChart]'],
-        failureThreshold: 0.03, // threshold for entire image
+        blackout: ['[data-cy=pointHistoryChart]', '#dependent-skills-network'],
+        failureThreshold: 0.0005, // threshold for entire image
         failureThresholdType: 'percent', // percent of image or number of pixels
-        customDiffConfig: { threshold: 0.1 }, // threshold for each pixel
+        customDiffConfig: { threshold: 0.01 }, // threshold for each pixel
         // capture: 'viewport', // capture viewport in screenshot
     };
     const sizes = [
@@ -233,8 +233,6 @@ describe('Client Display Tests', () => {
             cy.contains('This is 4');
             cy.contains('Lorem ipsum dolor sit amet');
             cy.contains('Achieved Dependencies');
-            // wait for graph to finish animating
-            cy.wait(4000);
             cy.matchImageSnapshot(`Subject0-Skill3-Details_${size}`, snapshotOptions);
         });
 
