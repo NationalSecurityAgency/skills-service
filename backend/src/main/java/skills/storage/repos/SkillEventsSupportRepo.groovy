@@ -96,6 +96,7 @@ interface SkillEventsSupportRepo extends CrudRepository<SkillDef, Long> {
         SkillDef.ContainerType getType()
         Date getStartDate()
         Date getEndDate()
+        String getEnabled()
     }
 
     @Query('''SELECT
@@ -107,7 +108,8 @@ interface SkillEventsSupportRepo extends CrudRepository<SkillDef, Long> {
         s.pointIncrementInterval as pointIncrementInterval,
         s.numMaxOccurrencesIncrementInterval as numMaxOccurrencesIncrementInterval,
         s.totalPoints as totalPoints,
-        s.type as type
+        s.type as type,
+        s.enabled as enabled
         from SkillDef s where s.projectId = ?1 and s.skillId=?2 and s.type = ?3''')
     @Nullable
     SkillDefMin findByProjectIdAndSkillIdAndType(String projectId, String skillId, SkillDef.ContainerType type)
@@ -121,7 +123,8 @@ interface SkillEventsSupportRepo extends CrudRepository<SkillDef, Long> {
         badge.pointIncrementInterval as pointIncrementInterval,
         badge.numMaxOccurrencesIncrementInterval as numMaxOccurrencesIncrementInterval,
         badge.totalPoints as totalPoints,
-        badge.type as type
+        badge.type as type,
+        badge.enabled as enabled
         from SkillDef badge 
         where 
             badge.projectId is null and 
@@ -199,7 +202,8 @@ interface SkillEventsSupportRepo extends CrudRepository<SkillDef, Long> {
         s.totalPoints as totalPoints,
         s.type as type,
         s.startDate as startDate,
-        s.endDate as endDate
+        s.endDate as endDate,
+        s.enabled as enabled
         from SkillDef s, SkillRelDef srd 
         where
             s.id = srd.parent and  

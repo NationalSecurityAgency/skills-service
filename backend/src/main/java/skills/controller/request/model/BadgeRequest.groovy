@@ -28,4 +28,6 @@ class BadgeRequest {
     Date endDate
 
     String helpUrl
+
+    String enabled
 }

@@ -71,4 +71,6 @@ class SkillDefParent {
     @Temporal(TemporalType.TIMESTAMP)
     @LastModifiedDate
     Date updated
+
+    String enabled
 }

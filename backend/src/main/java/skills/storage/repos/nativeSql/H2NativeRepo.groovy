@@ -154,7 +154,6 @@ class H2NativeRepo implements NativeQueriesRepo {
             new PerformedSkillEventCount(userId: it[0], eventCount: it[1])
         }
 
-
         String updateSql = '''
             UPDATE
                 user_points points
@@ -376,6 +375,157 @@ class H2NativeRepo implements NativeQueriesRepo {
             updateQ.setParameter("projectId", projectId)
             updateQ.setParameter("skillId", skillId)
             updateQ.executeUpdate()
+        }
+    }
+
+    @Override
+    List<String> findUsersEligibleForBadge(String projectId, String badgeId, Date start, Date end) {
+        String badgeSkillsQ = '''
+        SELECT sr.child_ref_id 
+        FROM skill_relationship_definition sr
+        INNER JOIN skill_definition sd ON sr.parent_ref_id = sd.id AND
+        sd.skill_id = :badgeId AND
+        sd.project_id = :projectId
+        '''
+
+        Query selectBadgeSkills = entityManager.createNativeQuery(badgeSkillsQ)
+        selectBadgeSkills.setParameter("badgeId", badgeId)
+        selectBadgeSkills.setParameter("projectId", projectId)
+        List<String> badgeSkillIds = selectBadgeSkills.getResultList()
+
+        String selectUsersQ = '''
+        SELECT ua.user_id
+        FROM user_achievement ua
+        WHERE ua.skill_ref_id IN (:badgeSkillIds) AND
+        NOT EXISTS (
+            SELECT 1
+            FROM user_achievement
+            WHERE skill_id = :badgeId AND
+            user_id = ua.user_id AND
+            project_id = :projectId
+        )
+        GROUP BY ua.user_id 
+        HAVING COUNT(*) = :numBadgeSkills'''
+
+        String dateFrag = '''
+        AND 
+        (
+            SELECT MAX(performed_on) 
+            FROM user_performed_skill 
+            WHERE user_id=ua.user_id AND 
+            skill_ref_id IN (:badgeSkillIds) 
+        ) BETWEEN :start AND :end
+        '''
+
+        List<String> results = []
+        if(badgeSkillIds) {
+            boolean dateCheck = start != null && end != null
+            if(dateCheck) {
+                selectUsersQ += dateFrag
+            }
+
+            Query getUsers = entityManager.createNativeQuery(selectUsersQ)
+            getUsers.setParameter("badgeSkillIds", badgeSkillIds)
+            getUsers.setParameter("projectId", projectId)
+            getUsers.setParameter("badgeId", badgeId)
+            getUsers.setParameter("numBadgeSkills", badgeSkillIds.size())
+            if(dateCheck) {
+                getUsers.setParameter("start", start)
+                getUsers.setParameter("end", end)
+            }
+            List<String> r = getUsers.getResultList()
+
+            if(r) {
+                results.addAll(r)
+            }
+        }
+
+        return results
+    }
+
+    List<String> findUsersEligbleForGlobalBadge(String badgeId,
+                                                Integer requiredSklls,
+                                                Integer requiredLevels,
+                                                Date start,
+                                                Date end) {
+
+        boolean requireSkills = requiredSklls != null && requiredSklls > 0
+        boolean requireLevels = requiredLevels != null && requiredLevels > 0
+
+        String badgeSkillsQ = '''
+        SELECT sr.child_ref_id 
+        FROM skill_relationship_definition sr
+        INNER JOIN skill_definition sd ON sr.parent_ref_id = sd.id AND
+        sd.skill_id = :badgeId AND
+        sd.project_id is null
+        '''
+
+        String levelsQ = '''
+            SELECT 
+            ua.user_id 
+            FROM USER_ACHIEVEMENT ua
+            INNER JOIN GLOBAL_BADGE_LEVEL_DEFINITION g ON g.level=ua.level 
+            AND g.project_id = ua.project_id
+            WHERE ua.SKILL_ID is null 
+            GROUP BY ua.user_id having count(ua.project_id) >= (SELECT count(*) FROM global_badge_level_definition WHERE skill_id = :badgeId)
+        '''
+
+        List<String> usersWithRequiredLevel = []
+        if (requireLevels) {
+            Query selectBadgeLevels = entityManager.createNativeQuery(levelsQ)
+            selectBadgeLevels.setParameter("badgeId", badgeId)
+            usersWithRequiredLevel = selectBadgeLevels.getResultList()
+        }
+
+        List<String> usersWithRequiredSkills = []
+        if (requireSkills) {
+            Query skills = entityManager.createNativeQuery(badgeSkillsQ)
+            skills.setParameter("badgeId", badgeId)
+            List<String> badgeSkills = skills.getResultList()
+
+            if (badgeSkills) {
+                String usersWithSkills = '''
+                SELECT ua.user_id
+                FROM user_achievement ua
+                WHERE ua.skill_ref_id IN (:badgeSkillIds) AND
+                NOT EXISTS (
+                    SELECT 1
+                    FROM user_achievement
+                    WHERE skill_id = :badgeId AND
+                    user_id = ua.user_id AND
+                    project_id is null
+                )
+               GROUP BY ua.user_id 
+               HAVING COUNT(*) = :numBadgeSkills'''
+
+                boolean dateRange = start != null && end != null
+                if (dateRange) {
+                    usersWithSkills += '''
+                     AND 
+                    (
+                        SELECT MAX(performed_on) 
+                        FROM user_performed_skill 
+                        WHERE user_id=ua.user_id AND 
+                        skill_ref_id IN (:badgeSkillIds) 
+                    ) BETWEEN :start AND :end
+                '''
+                }
+
+                Query usersWithBadgeSkills = entityManager.createNativeQuery(usersWithSkills)
+                usersWithBadgeSkills.setParameter("badgeSkillIds", badgeSkills)
+                usersWithBadgeSkills.setParameter("badgeId", badgeId)
+                usersWithBadgeSkills.setParameter("numBadgeSkills", badgeSkills.size())
+                usersWithBadgeSkills.setParameter("badgeSkillIds", badgeSkills)
+                usersWithRequiredSkills = usersWithBadgeSkills.getResultList()
+            }
+        }
+
+        if (!requireLevels) {
+            return usersWithRequiredSkills
+        } else if (!requireSkills) {
+            return usersWithRequiredLevel
+        } else {
+            return usersWithRequiredSkills.intersect(usersWithRequiredLevel)
         }
     }
 }
