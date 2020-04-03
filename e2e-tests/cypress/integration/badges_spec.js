@@ -19,7 +19,7 @@ describe('Badges Tests', () => {
         cy.request('POST', '/app/projects/proj1', {
             projectId: 'proj1',
             name: "proj1"
-        })
+        }).as('createProject');
 
         Cypress.Commands.add("gemStartNextMonth", () => {
             cy.get('[data-cy="startDatePicker"] header .next').first().click()
@@ -51,6 +51,12 @@ describe('Badges Tests', () => {
         const providedName = "!L@o#t$s of %s^p&e*c(i)a_l++_|}{P/ c'ha'rs";
 
         cy.route('POST', `/admin/projects/proj1/badges/${expectedId}`).as('postNewBadge');
+        cy.route('POST', '/admin/projects/proj1/badgeNameExists').as('nameExistsCheck');
+        cy.route('GET', '/admin/projects/proj1/badges').as('loadBadges');
+
+        cy.get('@createProject').should((response) => {
+            expect(response.status).to.eql(200)
+        });
 
         cy.visit('/projects/proj1/badges');
         cy.wait('@loadBadges');
@@ -227,5 +233,36 @@ describe('Badges Tests', () => {
         cy.contains('Test Badge');
     }) ;
 
+    it('inactive badge displays warning', () => {
+        const expectedId = 'InactiveBadge';
+        const providedName = 'Inactive';
+        cy.server();
+        cy.route('GET', '/app/userInfo').as('getUserInfo');
+        cy.route('GET', '/app/userInfo/hasRole/ROLE_SUPERVISOR').as('hasSupervisor');
+        cy.route('POST', `/admin/projects/proj1/badges/${expectedId}`).as('postNewBadge');
+        cy.route('POST', '/admin/projects/proj1/badgeNameExists').as('nameExistsCheck');
+        cy.route('GET', '/admin/projects/proj1/badges').as('loadBadges');
 
-})
+        cy.get('@createProject').should((response) => {
+            expect(response.status).to.eql(200)
+        });
+
+        cy.visit('/projects/proj1/badges');
+
+        cy.wait('@loadBadges');
+        cy.wait('@getUserInfo');
+        cy.wait('@hasSupervisor');
+        cy.clickButton('Badge');
+
+        cy.get('#badgeName').type(providedName);
+
+        cy.wait('@nameExistsCheck');
+
+        cy.clickSave();
+        cy.wait('@postNewBadge');
+
+        cy.get('div.card-body i.fa-exclamation-circle').should('be.visible');
+    })
+
+
+});

@@ -174,4 +174,30 @@ class ReportSkills_BadgeSkillsSpecs extends DefaultIntSpec {
         e.message.contains("explanation:If one date is provided then both start and end dates must be provided")
         e.message.contains("errorCode:BadParam")
     }
+
+    def 'badge not awarded if inactive'() {
+        String subj = "testSubj"
+
+        Map skill1 = [projectId: projId, subjectId: subj, skillId: "skill1", name  : "Test Skill 1", type: "Skill",
+                      pointIncrement: 100, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1]
+
+        Map badge = [projectId: projId, badgeId: 'badge1', name: 'Test Badge 1']
+        badge.enable = false
+        List<String> requiredSkillsIds = [skill1.skillId]
+
+
+        when:
+        skillsService.createProject([projectId: projId, name: "Test Project"])
+        skillsService.createSubject([projectId: projId, subjectId: subj, name: "Test Subject"])
+        skillsService.createSkill(skill1)
+        skillsService.createBadge(badge)
+        requiredSkillsIds.each { skillId ->
+            skillsService.assignSkillToBadge(projectId: projId, badgeId: badge.badgeId, skillId: skillId)
+        }
+
+        def resSkill1 = skillsService.addSkill([projectId: projId, skillId: skill1.skillId]).body
+
+        then:
+        resSkill1.skillApplied && !resSkill1.completed.find { it.id == 'badge1'}
+    }
 }

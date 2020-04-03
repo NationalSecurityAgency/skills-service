@@ -31,8 +31,13 @@ import skills.storage.model.SkillDef
 import skills.storage.model.SkillDefWithExtra
 import skills.storage.model.SkillRelDef
 import skills.storage.accessors.ProjDefAccessor
+import skills.storage.model.UserAchievement
+import skills.storage.repos.GlobalBadgeLevelDefRepo
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.SkillDefWithExtraRepo
+import skills.storage.repos.SkillRelDefRepo
+import skills.storage.repos.UserAchievedLevelRepo
+import skills.storage.repos.nativeSql.NativeQueriesRepo
 import skills.utils.Props
 
 @Service
@@ -66,6 +71,18 @@ class BadgeAdminService {
     @Autowired
     SkillsAdminService skillsAdminService
 
+    @Autowired
+    NativeQueriesRepo nativeQueriesRepo
+
+    @Autowired
+    UserAchievedLevelRepo achievedLevelRepo
+
+    @Autowired
+    GlobalBadgeLevelDefRepo globalBadgeLevelDefRepo
+
+    @Autowired
+    SkillRelDefRepo skillRelDefRepo
+
     @Transactional()
     void saveBadge(String projectId, String originalBadgeId, BadgeRequest badgeRequest, SkillDef.ContainerType type = SkillDef.ContainerType.Badge, boolean performCustomValidation=true) {
         CustomValidationResult customValidationResult = customValidator.validate(badgeRequest)
@@ -96,7 +113,16 @@ class BadgeAdminService {
             }
         }
 
+        boolean identifyEligibleUsers = false
+
         if (skillDefinition) {
+            //TODO: if previous value of enable was false and badgeRequest.enable is true
+            //then we need to trigger evaluation of user dependencies and award achievements
+            //...wait...how does this work with notifications? Users not logged in wouldn't know that
+            //they were awarded the badge would they?
+            if (!Boolean.valueOf(skillDefinition.enabled) && Boolean.valueOf(badgeRequest.enabled)) {
+                identifyEligibleUsers = true
+            }
             Props.copy(badgeRequest, skillDefinition)
             skillDefinition.skillId = badgeRequest.badgeId
         } else {
@@ -119,7 +145,8 @@ class BadgeAdminService {
                     endDate: badgeRequest.endDate,
                     projDef: projDef,
                     displayOrder: displayOrder,
-                    helpUrl: badgeRequest.helpUrl
+                    helpUrl: badgeRequest.helpUrl,
+                    enabled: badgeRequest.enabled
             )
             log.debug("Saving [{}]", skillDefinition)
         }
@@ -130,7 +157,38 @@ class BadgeAdminService {
             savedSkill = skillDefWithExtraRepo.save(skillDefinition)
         }
 
+        if (identifyEligibleUsers) {
+            identifyUsersMeetingBadgeRequirements(projectId, originalBadgeId, savedSkill.startDate, savedSkill.endDate)?.each {
+                saveBadgeAchievement(it, projectId, savedSkill.skillId, savedSkill.id, Boolean.FALSE.toString())
+            }
+        }
+
         log.debug("Saved [{}]", savedSkill)
+    }
+
+    private List<String> identifyUsersMeetingBadgeRequirements(String projectId, String badgeId, Date startDate, Date endDate){
+        List<String> userIds
+        if(projectId == null) {
+            userIds = nativeQueriesRepo.findUsersEligbleForGlobalBadge(badgeId,
+                    countNumberOfRequiredSkills(badgeId),
+                    countNumberOfRequiredLevels(badgeId),
+                    startDate,
+                    endDate)
+        } else {
+            userIds = nativeQueriesRepo.findUsersEligibleForBadge(projectId, badgeId, startDate, endDate)
+        }
+
+        return userIds
+    }
+
+    @Transactional
+    public void saveBadgeAchievement(String userId, String projectId, String badgeId, Integer badgeRefId, String notified=Boolean.TRUE.toString()) {
+        UserAchievement groupAchievement = new UserAchievement(userId: userId.toLowerCase(),
+                projectId: projectId,
+                skillId: badgeId,
+                skillRefId: badgeRefId,
+                notified: notified)
+        achievedLevelRepo.save(groupAchievement)
     }
 
 
@@ -192,7 +250,7 @@ class BadgeAdminService {
 
     @Profile
     private BadgeResult convertToBadge(SkillDefWithExtra skillDef, boolean loadRequiredSkills = false) {
-        skills.controller.result.model.BadgeResult res = new skills.controller.result.model.BadgeResult(
+        BadgeResult res = new BadgeResult(
                 badgeId: skillDef.skillId,
                 projectId: skillDef.projectId,
                 name: skillDef.name,
@@ -201,7 +259,8 @@ class BadgeAdminService {
                 iconClass: skillDef.iconClass,
                 startDate: skillDef.startDate,
                 endDate: skillDef.endDate,
-                helpUrl: skillDef.helpUrl
+                helpUrl: skillDef.helpUrl,
+                enabled: skillDef.enabled,
         )
 
         if (loadRequiredSkills) {
@@ -234,5 +293,15 @@ class BadgeAdminService {
             badges  = projDef.badges
         }
         return badges
+    }
+
+    private Integer countNumberOfRequiredSkills(String badgeId){
+        Integer badgeSkillCount = skillRelDefRepo.getGlobalBadgeSkillCount(badgeId)
+        return badgeSkillCount
+    }
+
+    private Integer countNumberOfRequiredLevels(String badgeId){
+        Integer badgeLevelCount =  globalBadgeLevelDefRepo.countByBadgeId(badgeId)
+        return badgeLevelCount
     }
 }

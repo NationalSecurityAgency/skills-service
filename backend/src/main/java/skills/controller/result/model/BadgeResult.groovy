@@ -45,4 +45,6 @@ class BadgeResult {
     List<SkillDefRes> requiredSkills = []
 
     String helpUrl
+
+    String enabled
 }

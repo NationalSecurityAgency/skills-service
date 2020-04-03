@@ -29,8 +29,9 @@ export default {
       return axios.put(`/supervisor/badges/${badgeReq.originalBadgeId}`, badgeReq)
         .then(() => this.getBadge(badgeReq.badgeId));
     }
-    return axios.put(`/supervisor/badges/${badgeReq.badgeId}`, badgeReq)
-      .then(() => this.getBadge(badgeReq.badgeId));
+    const req = Object.assign({ enabled: false }, badgeReq);
+    return axios.put(`/supervisor/badges/${req.badgeId}`, req)
+      .then(() => this.getBadge(req.badgeId));
   },
   deleteBadge(badgeId) {
     return axios.delete(`/supervisor/badges/${badgeId}`)

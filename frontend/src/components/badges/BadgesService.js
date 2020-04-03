@@ -29,8 +29,10 @@ export default {
       return axios.post(`/admin/projects/${badgeReq.projectId}/badges/${badgeReq.originalBadgeId}`, badgeReq)
         .then(() => this.getBadge(badgeReq.projectId, badgeReq.badgeId));
     }
-    return axios.post(`/admin/projects/${badgeReq.projectId}/badges/${badgeReq.badgeId}`, badgeReq)
-      .then(() => this.getBadge(badgeReq.projectId, badgeReq.badgeId));
+
+    const req = Object.assign({ enabled: false }, badgeReq);
+    return axios.post(`/admin/projects/${req.projectId}/badges/${req.badgeId}`, req)
+      .then(() => this.getBadge(req.projectId, req.badgeId));
   },
   deleteBadge(projectId, badgeId) {
     return axios.delete(`/admin/projects/${projectId}/badges/${badgeId}`)
