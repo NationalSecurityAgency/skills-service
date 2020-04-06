@@ -93,7 +93,7 @@ const router = new VueRouter({
 });
 
 router.afterEach(debounce(() => {
-  if (process.env.NODE_ENV !== 'development') {
+  if (process.env.NODE_ENV !== 'development' && store.state.parentFrame) {
     store.state.parentFrame.emit('route-changed');
   }
 }, 250));
