@@ -62,7 +62,7 @@ class AdminBadgesSpecs extends DefaultIntSpec {
         skillsService.assignDependency([projectId: proj.projectId, skillId: skills.get(0).skillId, dependentSkillId: skills.get(1).skillId])
         skillsService.assignDependency([projectId: proj.projectId, skillId: skills.get(0).skillId, dependentSkillId: skills.get(2).skillId])
 
-        badge.enable = false
+        badge.enabled = false
         skillsService.createBadge(badge)
         skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills.get(0).skillId])
         skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills.get(3).skillId])
@@ -79,7 +79,7 @@ class AdminBadgesSpecs extends DefaultIntSpec {
         res.badgeId == badge.badgeId
         res.name == badge.name
         res.projectId == proj.projectId
-        res.enable == 'false'
+        res.enabled == 'false'
     }
 
     def "badge awarded to users with requirements after enabling"() {
