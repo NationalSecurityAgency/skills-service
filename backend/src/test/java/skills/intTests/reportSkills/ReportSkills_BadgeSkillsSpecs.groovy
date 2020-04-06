@@ -182,7 +182,7 @@ class ReportSkills_BadgeSkillsSpecs extends DefaultIntSpec {
                       pointIncrement: 100, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1]
 
         Map badge = [projectId: projId, badgeId: 'badge1', name: 'Test Badge 1']
-        badge.enable = false
+        badge.enabled = false
         List<String> requiredSkillsIds = [skill1.skillId]
 
 
