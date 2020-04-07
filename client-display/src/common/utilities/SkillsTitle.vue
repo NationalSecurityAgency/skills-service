@@ -33,11 +33,11 @@ limitations under the License.
         name: 'SkillsTitle',
         props: {
             backButton: { type: Boolean, default: true },
-            previousRoute: { type: String, default: 'home' },
         },
         methods: {
             navigateBack() {
-                this.$router.push({ name: this.previousRoute });
+                const previousRoute = this.$route.params.previousRoute || { name: 'home' };
+                this.$router.push(previousRoute);
             },
         },
     };
