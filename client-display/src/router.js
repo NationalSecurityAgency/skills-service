@@ -62,22 +62,26 @@ const router = new VueRouter({
       component: BadgeDetails,
       name: 'badgeDetails',
       props: true,
+      meta: { setPreviousRoute: true },
     },
     {
       path: '/badges/global/:badgeId',
       component: GlobalBadgeDetails,
       name: 'globalBadgeDetails',
       props: true,
+      meta: { setPreviousRoute: true },
     },
     {
       path: '/skills/:skillId',
       component: SkillDetails,
       name: 'skillDetails',
+      meta: { setPreviousRoute: true },
     },
     {
       path: '/skills/crossProject/:crossProjectId/:skillId',
       component: SkillDetails,
       name: 'crossProjectSkillDetails',
+      meta: { setPreviousRoute: true },
     },
     {
       path: '/rank',
@@ -92,8 +96,19 @@ const router = new VueRouter({
   ],
 });
 
+router.beforeEach((to, from, next) => {
+  if (to.meta.setPreviousRoute && !to.params.previousRoute) {
+    const previousRoute = { ...from };
+    const params = { ...to.params, ...{ previousRoute } };
+    const updatedTo = { ...to, ...{ params } };
+    next(updatedTo);
+  } else {
+    next();
+  }
+});
+
 router.afterEach(debounce(() => {
-  if (process.env.NODE_ENV !== 'development') {
+  if (process.env.NODE_ENV !== 'development' && store.state.parentFrame) {
     store.state.parentFrame.emit('route-changed');
   }
 }, 250));

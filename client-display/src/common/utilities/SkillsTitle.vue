@@ -36,7 +36,8 @@ limitations under the License.
         },
         methods: {
             navigateBack() {
-                this.$router.go(-1);
+                const previousRoute = this.$route.params.previousRoute || { name: 'home' };
+                this.$router.push(previousRoute);
             },
         },
     };
