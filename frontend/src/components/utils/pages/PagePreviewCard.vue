@@ -23,7 +23,9 @@ limitations under the License.
               <i :class="[`${options.icon}`]" class="m-1"/>
             </div>
             <div class="media-body" style="min-width: 0px;">
-              <div class="text-truncate text-info mb-0 pb-0 preview-card-title">{{ options.title }}</div>
+              <div class="text-truncate text-info mb-0 pb-0 preview-card-title">{{ options.title }}
+              <i v-if="options.warn" class="fas fa-exclamation-circle text-warning ml-1" style="font-size: 1.5rem;" v-b-tooltip.hover="options.warnMsg"/>
+              </div>
               <div class="text-truncate text-secondary preview-card-subTitle">{{ options.subTitle }}</div>
             </div>
           </div>
@@ -58,6 +60,8 @@ limitations under the License.
       options: {
         icon: String,
         title: String,
+        warn: Boolean,
+        warnMsg: String,
         subTitle: String,
         stats: [],
       },

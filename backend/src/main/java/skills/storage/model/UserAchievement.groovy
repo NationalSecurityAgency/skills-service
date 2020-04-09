@@ -66,4 +66,6 @@ class UserAchievement {
     @Temporal(TemporalType.TIMESTAMP)
     @LastModifiedDate
     Date updated
+
+    String notified
 }

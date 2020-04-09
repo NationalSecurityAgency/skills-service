@@ -174,4 +174,108 @@ class ReportSkills_BadgeSkillsSpecs extends DefaultIntSpec {
         e.message.contains("explanation:If one date is provided then both start and end dates must be provided")
         e.message.contains("errorCode:BadParam")
     }
+
+    def 'badge not awarded if inactive'() {
+        String subj = "testSubj"
+
+        Map skill1 = [projectId: projId, subjectId: subj, skillId: "skill1", name  : "Test Skill 1", type: "Skill",
+                      pointIncrement: 100, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1]
+
+        Map badge = [projectId: projId, badgeId: 'badge1', name: 'Test Badge 1']
+        badge.enabled = false
+        List<String> requiredSkillsIds = [skill1.skillId]
+
+
+        when:
+        skillsService.createProject([projectId: projId, name: "Test Project"])
+        skillsService.createSubject([projectId: projId, subjectId: subj, name: "Test Subject"])
+        skillsService.createSkill(skill1)
+        skillsService.createBadge(badge)
+        requiredSkillsIds.each { skillId ->
+            skillsService.assignSkillToBadge(projectId: projId, badgeId: badge.badgeId, skillId: skillId)
+        }
+
+        def resSkill1 = skillsService.addSkill([projectId: projId, skillId: skill1.skillId]).body
+
+        then:
+        resSkill1.skillApplied && !resSkill1.completed.find { it.id == 'badge1'}
+    }
+
+    def "badge awarded to users with requirements after enabling"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(20)
+        def badge = SkillsFactory.createBadge()
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        badge.enabled = false
+        skillsService.createBadge(badge)
+        skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills.get(0).skillId])
+        skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills.get(1).skillId])
+
+        skillsService.addSkill([skillId: skills.get(0).skillId, projectId: proj.projectId], "user1", new Date())
+        skillsService.addSkill([skillId: skills.get(0).skillId, projectId: proj.projectId], "user2", new Date())
+        skillsService.addSkill([skillId: skills.get(1).skillId, projectId: proj.projectId], "user1", new Date())
+
+        when:
+        def user1SummaryBeforeEnable = skillsService.getBadgeSummary("user1", proj.projectId, badge.badgeId)
+        skillsService.updateBadge([projectId: proj.projectId, badgeId: badge.badgeId, enabled: true, name: badge.name], badge.badgeId)
+
+        def user1Summary = skillsService.getBadgeSummary("user1", proj.projectId, badge.badgeId)
+        def user2Summary = skillsService.getBadgeSummary("user2", proj.projectId, badge.badgeId)
+
+        then:
+        !user1SummaryBeforeEnable.badgeAchieved
+        user1Summary.badgeAchieved
+        !user2Summary.badgeAchieved
+    }
+
+    def "gem awarded to users with requirements after enabling"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(20)
+        def badge = SkillsFactory.createBadge()
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        Date twoWeeksAgo = new Date() - 14
+        Date nextWeek = new Date() + 7
+
+        badge.enabled = false
+        badge.startDate = twoWeeksAgo
+        badge.endDate = nextWeek
+
+        //add start/end dates
+        skillsService.createBadge(badge)
+        skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills.get(0).skillId])
+        skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills.get(1).skillId])
+
+        skillsService.addSkill([skillId: skills.get(0).skillId, projectId: proj.projectId], "user1", new Date())
+        skillsService.addSkill([skillId: skills.get(0).skillId, projectId: proj.projectId], "user2", new Date()-60)
+        skillsService.addSkill([skillId: skills.get(1).skillId, projectId: proj.projectId], "user1", new Date()-7)
+        skillsService.addSkill([skillId: skills.get(1).skillId, projectId: proj.projectId], "user2", new Date()-35)
+
+        when:
+        def user1SummaryBeforeEnable = skillsService.getBadgeSummary("user1", proj.projectId, badge.badgeId)
+
+        skillsService.updateBadge([projectId: proj.projectId,
+                                   badgeId: badge.badgeId,
+                                   enabled: true,
+                                   name: badge.name,
+                                   startDate: twoWeeksAgo,
+                                   endDate: nextWeek], badge.badgeId)
+
+        def user1Summary = skillsService.getBadgeSummary("user1", proj.projectId, badge.badgeId)
+        def user2Summary = skillsService.getBadgeSummary("user2", proj.projectId, badge.badgeId)
+
+        then:
+        !user1SummaryBeforeEnable.badgeAchieved
+        user1Summary.badgeAchieved
+        !user2Summary.badgeAchieved
+    }
 }

@@ -27,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional
 import skills.controller.exceptions.SkillExceptionBuilder
 import skills.controller.result.model.GlobalBadgeLevelRes
 import skills.controller.result.model.SettingsResult
+import skills.services.BadgeUtils
 import skills.services.DependencyValidator
 import skills.services.GlobalBadgesService
 import skills.services.LevelDefinitionStorageService
@@ -210,7 +211,9 @@ class SkillsLoader {
         if ( version >= 0 ) {
             badgeDefs = badgeDefs.findAll { it.version <= version }
         }
-        List<SkillBadgeSummary> badges = badgeDefs.sort({ it.displayOrder }).collect { SkillDefWithExtra badgeDefinition ->
+        List<SkillBadgeSummary> badges = badgeDefs.sort({ it.displayOrder }).findAll {
+            (it.enabled == null || Boolean.valueOf(it.enabled)) && BadgeUtils.afterStartTime(it)
+        }.collect { SkillDefWithExtra badgeDefinition ->
             loadBadgeSummary(projDef, userId, badgeDefinition, version)
         }
         return badges

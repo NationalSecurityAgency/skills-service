@@ -91,6 +91,8 @@ limitations under the License.
           icon: this.badgeInternal.iconClass,
           title: this.badgeInternal.name,
           subTitle: `ID: ${this.badgeInternal.badgeId}`,
+          warn: this.badgeInternal.enabled === 'false',
+          warnMsg: this.badgeInternal.enabled === 'false' ? 'This badge cannot be achieved until it is activated' : '',
           stats,
         };
       },

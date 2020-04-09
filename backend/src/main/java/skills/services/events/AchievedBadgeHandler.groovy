@@ -20,6 +20,7 @@ import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
+import skills.services.BadgeUtils
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillRelDef
 import skills.storage.model.UserAchievement
@@ -46,7 +47,8 @@ class AchievedBadgeHandler {
         List<SkillEventsSupportRepo.SkillDefMin> parents = skillEventsSupportRepo.findParentSkillsByChildIdAndType(currentSkillDef.id, SkillRelDef.RelationshipType.BadgeRequirement)
 
         parents.each { SkillEventsSupportRepo.SkillDefMin skillDefMin ->
-            if (skillDefMin.type == SkillDef.ContainerType.Badge && withinActiveTimeframe(skillDefMin)) {
+            if (skillDefMin.type == SkillDef.ContainerType.Badge && BadgeUtils.withinActiveTimeframe(skillDefMin) &&
+                    (skillDefMin.enabled == null || Boolean.valueOf(skillDefMin.enabled)) ) {
                 SkillEventsSupportRepo.SkillDefMin badge = skillDefMin
                 Long nonAchievedChildren = achievedLevelRepo.countNonAchievedChildren(userId, badge.projectId, badge.skillId, SkillRelDef.RelationshipType.BadgeRequirement)
                 if (nonAchievedChildren == 0) {
@@ -59,15 +61,6 @@ class AchievedBadgeHandler {
                 }
             }
         }
-    }
-
-    private boolean withinActiveTimeframe(SkillEventsSupportRepo.SkillDefMin skillDef) {
-        boolean withinActiveTimeframe = true;
-        if (skillDef.startDate && skillDef.endDate) {
-            Date now = new Date()
-            withinActiveTimeframe = skillDef.startDate.before(now) && skillDef.endDate.after(now)
-        }
-        return withinActiveTimeframe
     }
 
 }

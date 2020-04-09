@@ -154,4 +154,14 @@ class MySQLNativeRepo implements NativeQueriesRepo {
     void removeUserAchievementsThatDoNotMeetNewNumberOfOccurrences(String projectId, String skillId, int numOfOccurrences) {
         throw new UnsupportedOperationException("Sorry!")
     }
+
+    @Override
+    List<String> findUsersEligibleForBadge(String projectId, String badgeId, Date start, Date end) {
+        throw new UnsupportedOperationException("Sorry!")
+    }
+
+    @Override
+    List<String> findUsersEligbleForGlobalBadge(String badgeId, Integer requiredSklls, Integer requiredLevels, Date start, Date end) {
+        return null
+    }
 }
