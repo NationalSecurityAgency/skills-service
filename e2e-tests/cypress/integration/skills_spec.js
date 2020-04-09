@@ -186,7 +186,7 @@ describe('Skills Tests', () => {
         cy.wait('@suggestUsers');
     });
 
-    it.only('Add Skill Event User Not Found', () => {
+    it('Add Skill Event User Not Found', () => {
        cy.server();
        cy.route({
            method: 'PUT',
