@@ -315,7 +315,7 @@ describe('Skills Tests', () => {
 
     })
     
-    it.only('create skill and then update skillId', () => {
+    it('create skill and then update skillId', () => {
       const initialId = 'myid1Skill';
       const newId = 'MyId1Skill';
       const providedName = "my id 1";
