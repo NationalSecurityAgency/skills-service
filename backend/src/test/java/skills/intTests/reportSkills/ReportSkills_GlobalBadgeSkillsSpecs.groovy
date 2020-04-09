@@ -90,5 +90,158 @@ class ReportSkills_GlobalBadgeSkillsSpecs extends DefaultIntSpec {
         skillsService.deleteGlobalBadge(badgeId)
     }
 
+    def "global badge awarded to users meeting level requirements after enabling"() {
+        def proj = SkillsFactory.createProject()
+        def proj2 = SkillsFactory.createProject(2)
+        def subj = SkillsFactory.createSubject()
+        def subj2 = SkillsFactory.createSubject(2)
+        def skills = SkillsFactory.createSkills(20)
+        def skills2 = SkillsFactory.createSkills(10, 2)
+        def badge = [badgeId: badgeId, name: 'Test Global Badge 1', enabled: 'false']
+
+        skillsService.createProject(proj)
+        skillsService.createProject(proj2)
+        skillsService.createSubject(subj)
+        skillsService.createSubject(subj2)
+        skillsService.createSkills(skills)
+        skillsService.createSkills(skills2)
+
+        skillsService.createGlobalBadge(badge)
+        skillsService.assignProjectLevelToGlobalBadge(projectId: proj.projectId, badgeId: badge.badgeId, level: "1")
+        skillsService.assignProjectLevelToGlobalBadge(projectId: proj2.projectId, badgeId: badge.badgeId, level: "1")
+
+        (0..9).each {
+            if (it == 0) {
+                skillsService.addSkill([skillId: skills.get(it).skillId, projectId: proj.projectId], "user2", new Date())
+                skillsService.addSkill([skillId: skills2.get(it).skillId, projectId: proj2.projectId], "user2", new Date())
+            }
+            skillsService.addSkill([skillId: skills.get(it).skillId, projectId: proj.projectId], "user1", new Date())
+            skillsService.addSkill([skillId: skills2.get(it).skillId, projectId: proj2.projectId], "user1", new Date())
+        }
+
+        def proj1Level = skillsService.getUserLevel(proj.projectId, "user1")
+        def proj2Level = skillsService.getUserLevel(proj2.projectId, "user1")
+
+        assert proj1Level > 0
+        assert proj2Level > 0
+
+        when:
+        def user1SummaryBeforeEnable = skillsService.getBadgesSummary("user1", proj.projectId)
+        badge.enabled = true
+        skillsService.createGlobalBadge(badge, badge.badgeId)
+
+        def user1Summary = skillsService.getBadgesSummary("user1", proj.projectId)
+        def user2Summary = skillsService.getBadgesSummary("user2", proj.projectId)
+
+        then:
+        !user1SummaryBeforeEnable[0].badgeAchieved
+        user1Summary[0].badgeId == 'GlobalBadge1'
+        user1Summary[0].badgeAchieved
+        user2Summary[0].badgeId == 'GlobalBadge1'
+        !user2Summary[0].badgeAchieved
+    }
+
+    def "global badge awarded to users meeting skill requirements after enabling"() {
+        def proj = SkillsFactory.createProject()
+        def proj2 = SkillsFactory.createProject(2)
+        def subj = SkillsFactory.createSubject()
+        def subj2 = SkillsFactory.createSubject(2)
+        def skills = SkillsFactory.createSkills(20)
+        def skills2 = SkillsFactory.createSkills(10, 2)
+        def badge = [badgeId: badgeId, name: 'Test Global Badge 1', enabled: 'false']
+
+        skillsService.createProject(proj)
+        skillsService.createProject(proj2)
+        skillsService.createSubject(subj)
+        skillsService.createSubject(subj2)
+        skillsService.createSkills(skills)
+        skillsService.createSkills(skills2)
+
+        skillsService.createGlobalBadge(badge)
+        skillsService.assignSkillToGlobalBadge(projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills[0].skillId)
+        skillsService.assignSkillToGlobalBadge(projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills[1].skillId)
+        skillsService.assignSkillToGlobalBadge(projectId: proj2.projectId, badgeId: badge.badgeId, skillId: skills2[0].skillId)
+
+        skillsService.addSkill([skillId: skills.get(0).skillId, projectId: proj.projectId], "user2", new Date())
+        skillsService.addSkill([skillId: skills.get(1).skillId, projectId: proj2.projectId], "user2", new Date())
+
+        skillsService.addSkill([skillId: skills.get(0).skillId, projectId: proj.projectId], "user1", new Date())
+        skillsService.addSkill([skillId: skills.get(1).skillId, projectId: proj.projectId], "user1", new Date())
+        skillsService.addSkill([skillId: skills2.get(0).skillId, projectId: proj2.projectId], "user1", new Date())
+
+        when:
+        def user1SummaryBeforeEnable = skillsService.getBadgesSummary("user1", proj.projectId)
+        badge.enabled = true
+        skillsService.createGlobalBadge(badge, badge.badgeId)
+
+        def user1Summary = skillsService.getBadgesSummary("user1", proj.projectId)
+        def user2Summary = skillsService.getBadgesSummary("user2", proj.projectId)
+
+        then:
+        !user1SummaryBeforeEnable[0].badgeAchieved
+        user1Summary[0].badgeId == 'GlobalBadge1'
+        user1Summary[0].badgeAchieved
+        user2Summary[0].badgeId == 'GlobalBadge1'
+        !user2Summary[0].badgeAchieved
+    }
+
+    def "global badge awarded to users meeting skill and level requirements after enabling"() {
+        def proj = SkillsFactory.createProject()
+        def proj2 = SkillsFactory.createProject(2)
+        def proj3 = SkillsFactory.createProject(3)
+        def subj = SkillsFactory.createSubject()
+        def subj2 = SkillsFactory.createSubject(2)
+        def subj3 = SkillsFactory.createSubject(3)
+
+        def skills = SkillsFactory.createSkills(20)
+        def skills2 = SkillsFactory.createSkills(10, 2)
+        def skills3 = SkillsFactory.createSkills(10, 3)
+
+        def badge = [badgeId: badgeId, name: 'Test Global Badge 1', enabled: 'false']
+
+        skillsService.createProject(proj)
+        skillsService.createProject(proj2)
+        skillsService.createProject(proj3)
+        skillsService.createSubject(subj)
+        skillsService.createSubject(subj2)
+        skillsService.createSubject(subj3)
+        skillsService.createSkills(skills)
+        skillsService.createSkills(skills2)
+        skillsService.createSkills(skills3)
+
+        skillsService.createGlobalBadge(badge)
+        skillsService.assignSkillToGlobalBadge(projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills[0].skillId)
+        skillsService.assignSkillToGlobalBadge(projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills[1].skillId)
+        skillsService.assignSkillToGlobalBadge(projectId: proj2.projectId, badgeId: badge.badgeId, skillId: skills2[0].skillId)
+        skillsService.assignProjectLevelToGlobalBadge([projectId: proj3.projectId, badgeId: badge.badgeId, level: "1"])
+
+        skillsService.addSkill([skillId: skills.get(0).skillId, projectId: proj.projectId], "user2", new Date())
+        skillsService.addSkill([skillId: skills.get(1).skillId, projectId: proj2.projectId], "user2", new Date())
+        skillsService.addSkill([skillId: skills3.get(0).skillId, projectId: proj3.projectId], "user2", new Date())
+
+        skillsService.addSkill([skillId: skills.get(0).skillId, projectId: proj.projectId], "user1", new Date())
+        skillsService.addSkill([skillId: skills.get(1).skillId, projectId: proj.projectId], "user1", new Date())
+        skillsService.addSkill([skillId: skills2.get(0).skillId, projectId: proj2.projectId], "user1", new Date())
+
+        (0..6).each {
+            skillsService.addSkill([skillId: skills3.get(it).skillId, projectId: proj3.projectId], "user1", new Date())
+        }
+
+        when:
+        def user1SummaryBeforeEnable = skillsService.getBadgesSummary("user1", proj.projectId)
+
+        badge.enabled = true
+        skillsService.createGlobalBadge(badge, badge.badgeId)
+
+        def user1Summary = skillsService.getBadgesSummary("user1", proj.projectId)
+        def user2Summary = skillsService.getBadgesSummary("user2", proj.projectId)
+
+        then:
+        !user1SummaryBeforeEnable[0].badgeAchieved
+        user1Summary[0].badgeId == 'GlobalBadge1'
+        user1Summary[0].badgeAchieved
+        user2Summary[0].badgeId == 'GlobalBadge1'
+        !user2Summary[0].badgeAchieved
+    }
 
 }
