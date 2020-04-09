@@ -387,7 +387,7 @@ class SkillsAdminService {
 
     @Transactional(readOnly = true)
     boolean existsBySkillId(String projectId, String skillId) {
-        return skillDefRepo.existsByProjectIdAndSkillIdAllIgnoreCase(projectId, skillId)
+        return skillDefRepo.existsByProjectIdIgnoreCaseAndSkillId(projectId, skillId)
     }
 
     @Profile

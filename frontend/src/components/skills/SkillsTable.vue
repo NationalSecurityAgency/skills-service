@@ -54,8 +54,8 @@ limitations under the License.
 
             <div slot="edit" slot-scope="props">
               <b-button-group size="sm" class="mr-1">
-                <b-button @click="editSkill(props.row)" variant="outline-primary"><i class="fas fa-edit"/></b-button>
-                <b-button @click="deleteSkill(props.row)" variant="outline-primary"><i class="fas fa-trash"/></b-button>
+                <b-button @click="editSkill(props.row)" variant="outline-primary" data-cy="editSkillButton"><i class="fas fa-edit"/></b-button>
+                <b-button @click="deleteSkill(props.row)" variant="outline-primary" data-cy="deleteSkillButton"><i class="fas fa-trash"/></b-button>
               </b-button-group>
               <router-link :to="{ name:'SkillOverview',
                               params: { projectId: props.row.projectId, subjectId: props.row.subjectId, skillId: props.row.skillId }}"
