@@ -314,5 +314,48 @@ describe('Skills Tests', () => {
         cy.get('div .alert').contains('Error! Request could not be completed! Error Adding Dependency');
 
     })
+    
+    it.only('create skill and then update skillId', () => {
+      const initialId = 'myid1Skill';
+      const newId = 'MyId1Skill';
+      const providedName = "my id 1";
+      cy.server();
+      cy.route('POST', `/admin/projects/proj1/subjects/subj1/skills/${initialId}`).as('postNewSkill');
+      cy.route('POST', `/admin/projects/proj1/skillNameExists`).as('nameExists');
+      cy.route('GET', `/admin/projects/proj1/entityIdExists?id=*`).as('skillIdExists');
+      
+
+      cy.route({
+          method: 'GET',
+          url: '/admin/projects/proj1/subjects/subj1'
+      }).as('loadSubject');
+
+      cy.visit('/projects/proj1/subjects/subj1');
+      cy.wait('@loadSubject');
+      cy.clickButton('Skill');
+
+      cy.get('#skillName').type(providedName);
+
+      cy.getIdField().should('have.value', initialId);
+      cy.wait('@nameExists');
+      cy.wait('@skillIdExists');
+
+      cy.clickSave();
+      cy.wait('@postNewSkill');
+
+      cy.contains(`ID: ${initialId}`)
+
+      const editButtonSelector = '[data-cy=editSkillButton]';
+      cy.get(editButtonSelector).click()
+
+      cy.contains("Enable").click()
+      cy.getIdField().clear().type(newId);
+      cy.wait('@skillIdExists');
+
+      cy.clickSave();
+      cy.wait('@postNewSkill');
+
+      cy.contains(`ID: ${newId}`)
+  });
 
 });
