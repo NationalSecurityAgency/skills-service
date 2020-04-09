@@ -97,10 +97,10 @@ export default {
   },
   assignDependency(projectId, skillId, dependentSkillId, dependentProjectId) {
     if (dependentProjectId) {
-      return axios.post(`/admin/projects/${projectId}/skills/${skillId}/dependency/projects/${dependentProjectId}/skills/${dependentSkillId}`, null, { headers: { 'x-handleError': false } })
+      return axios.post(`/admin/projects/${projectId}/skills/${skillId}/dependency/projects/${dependentProjectId}/skills/${dependentSkillId}`, null, { handleError: false })
         .then(createdRuleResult => createdRuleResult.data);
     }
-    return axios.post(`/admin/projects/${projectId}/skills/${skillId}/dependency/${dependentSkillId}`, null, { headers: { 'x-handleError': false } })
+    return axios.post(`/admin/projects/${projectId}/skills/${skillId}/dependency/${dependentSkillId}`, null, { handleError: false })
       .then(createdRuleResult => createdRuleResult.data);
   },
   removeDependency(projectId, skillId, dependentSkillId, dependentProjectId) {
@@ -125,7 +125,7 @@ export default {
   },
   saveSkillEvent(projectId, skillId, user, timestamp) {
     const userId = user.dn ? user.dn : user.userId;
-    return axios.put(`/api/projects/${projectId}/skills/${skillId}`, { userId, timestamp }, { headers: { 'x-handleError': false } })
+    return axios.put(`/api/projects/${projectId}/skills/${skillId}`, { userId, timestamp }, { handleError: false })
       .then(remoteRes => remoteRes.data);
   },
   checkIfSkillBelongsToGlobalBadge(projectId, skillId) {
