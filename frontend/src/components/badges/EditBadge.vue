@@ -38,6 +38,18 @@ limitations under the License.
           <id-input type="text" label="Badge ID" v-model="badgeInternal.badgeId" @input="canAutoGenerateId=false"
                     additional-validation-rules="uniqueId"/>
 
+          <div class="row mt-2 text-left">
+            <div class="col-sm-auto">
+              Badge Active
+              <inline-help
+                msg="Badge cannot be achieved unless it is active. This allows the badge dependencies to be fully populated before making the badge available for achievement."/>
+              </div>
+            <div class="col">
+              <b-form-checkbox v-model="badgeInternal.enabled" name="check-button" switch>
+              </b-form-checkbox>
+            </div>
+          </div>
+
           <div class="mt-2">
             <label>Description</label>
             <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" v-slot="{errors}" name="Badge Description">

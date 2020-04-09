@@ -62,6 +62,10 @@ class AchievedGlobalBadgeHandler {
                     ?.collectEntries {String key, List<UserAchievement> val -> [key,val.collect{it.level}.max()]}
 
             badgeCheckLoop: for (SkillDefMin globalBadge : globalBadges) {
+                if(globalBadge.enabled != null && !Boolean.valueOf(globalBadge.enabled)) {
+                    log.debug("global badge [{}] isn't enabled yet, cannot be checked for achievement", globalBadge.skillId)
+                    continue;
+                }
                 // first check required project levels
                 List<GlobalBadgeLevelRes> requiredLevels = globalBadgesService.getGlobalBadgeLevels(globalBadge.skillId)
                 for (GlobalBadgeLevelRes requiredLevel : requiredLevels) {

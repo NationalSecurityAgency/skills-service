@@ -940,4 +940,16 @@
 
     </changeSet>
 
+    <changeSet id="2" author="skills team">
+        <addColumn tableName="skill_definition">
+            <column name="enabled" type="varchar(255)" defaultValueBoolean="true"/>
+        </addColumn>
+        <addColumn tableName="user_achievement">
+            <column name="notified" type="varchar(255)" defaultValueBoolean="true" />
+        </addColumn>
+        <sql>
+            UPDATE user_achievement SET notified = 'true';
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>

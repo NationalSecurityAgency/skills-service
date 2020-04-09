@@ -319,4 +319,143 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
         query.setParameter("numOfOccurrences", numOfOccurrences)
         query.executeUpdate()
     }
+
+    @Override
+    List<String> findUsersEligibleForBadge(String projectId, String badgeId, Date start, Date end) {
+        String q = '''
+        WITH badgeSkills AS (
+            SELECT sr.child_ref_id childId 
+            FROM skill_relationship_definition sr 
+            INNER JOIN skill_definition sd ON sr.parent_ref_id = sd.id AND 
+            sd.skill_id = :badgeId AND
+            sd.project_id = :projectId
+        )
+        SELECT ua.user_id 
+        FROM user_achievement ua 
+        WHERE ua.skill_ref_id IN (SELECT childId FROM badgeSkills) AND
+        NOT EXISTS (
+            SELECT 1 
+            FROM user_achievement 
+            WHERE skill_id = :badgeId AND 
+            user_id = ua.user_id AND
+            project_id = :projectId
+        )
+        GROUP BY ua.user_id 
+        HAVING COUNT(*) = (SELECT COUNT(*) FROM badgeSkills)'''
+
+        String dateFrag = '''
+        AND 
+        (
+            SELECT MAX(performed_on) 
+            FROM user_performed_skill 
+            WHERE user_id=ua.user_id AND 
+            skill_ref_id IN (SELECT childId FROM badgeSkills) 
+        ) BETWEEN :start AND :end
+        '''
+
+        boolean dateCheck = start != null && end != null
+
+        if(dateCheck) {
+            q += dateFrag
+        }
+
+        Query query = entityManager.createNativeQuery(q);
+        query.setParameter("projectId", projectId)
+        query.setParameter("badgeId", badgeId)
+
+        if(dateCheck) {
+            query.setParameter("start", start)
+            query.setParameter("end", end)
+        }
+
+        return query.getResultList()
+    }
+
+    List<String> findUsersEligbleForGlobalBadge(String badgeId,
+                                                Integer requiredSklls,
+                                                Integer requiredLevels,
+                                                Date start,
+                                                Date end) {
+        String cteFrag = '''
+        WITH badgeSkills AS (
+            SELECT sr.child_ref_id childId
+            FROM skill_relationship_definition sr
+            INNER JOIN skill_definition sd ON sr.parent_ref_id = sd.id AND
+            sd.skill_id = :badgeId AND
+            sd.project_id is null
+        )
+        '''
+
+        String skillDateFrag = '''
+        AND
+        (
+            SELECT MAX(performed_on)
+            FROM user_performed_skill
+            WHERE user_id=ua.user_id AND
+            skill_ref_id IN (SELECT childId FROM badgeSkills)
+        ) BETWEEN :start AND :end
+        '''
+
+        boolean includeLevels = requiredLevels != null && requiredLevels > 0
+        boolean includeSkills = requiredSklls != null && requiredSklls > 0
+        boolean includeDates = start != null && end != null
+
+        String q = ''
+        String levels = ''
+        String skills = ''
+        if (includeLevels) {
+            levels = '''
+            SELECT 
+            ua.user_id 
+            FROM USER_ACHIEVEMENT ua
+            INNER JOIN GLOBAL_BADGE_LEVEL_DEFINITION g ON g.level=ua.level 
+            AND g.project_id = ua.project_id
+            WHERE ua.SKILL_ID is null 
+            GROUP BY ua.user_id having count(ua.project_id) >= (SELECT count(*) FROM global_badge_level_definition WHERE skill_id = :badgeId)
+        '''
+        }
+
+        if (includeSkills) {
+            skills = '''
+            SELECT ua.user_id 
+            FROM user_achievement ua 
+            WHERE ua.skill_ref_id IN (SELECT childId FROM badgeSkills) AND
+            NOT EXISTS (
+                SELECT 1 
+                FROM user_achievement 
+                WHERE skill_id = :badgeId AND 
+                user_id = ua.user_id AND
+                project_id is null
+            )
+            GROUP BY ua.user_id 
+            HAVING COUNT(*) = (SELECT COUNT(*) FROM badgeSkills)
+            '''
+        }
+
+        if (includeSkills) {
+            q = cteFrag + skills
+            if (includeDates) {
+                q += skillDateFrag
+            }
+        }
+
+        if (includeLevels) {
+            if (includeSkills) {
+                q += '''
+                INTERSECT
+                '''
+            }
+
+            q += levels
+        }
+
+        Query query = entityManager.createNativeQuery(q);
+        query.setParameter("badgeId", badgeId)
+        if(includeDates) {
+            query.setParameter("start", start)
+            query.setParameter("end", end)
+        }
+
+        return query.getResultList()
+    }
 }
