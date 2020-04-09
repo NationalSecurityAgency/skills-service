@@ -16,6 +16,7 @@
 package skills.services
 
 import skills.storage.model.SkillDef
+import skills.storage.model.SkillDefParent
 import skills.storage.model.SkillDefWithExtra
 import skills.storage.repos.SkillEventsSupportRepo
 
@@ -30,16 +31,7 @@ class BadgeUtils {
         return withinActiveTimeframe
     }
 
-    public static boolean withinActiveTimeframe(SkillDef skillDef) {
-        boolean withinActiveTimeframe = true;
-        if (skillDef.startDate && skillDef.endDate) {
-            Date now = new Date()
-            withinActiveTimeframe = skillDef.startDate.before(now) && skillDef.endDate.after(now)
-        }
-        return withinActiveTimeframe
-    }
-
-    public static boolean withinActiveTimeframe(SkillDefWithExtra skillDef) {
+    public static boolean withinActiveTimeframe(SkillDefParent skillDef) {
         boolean withinActiveTimeframe = true;
         if (skillDef.startDate && skillDef.endDate) {
             Date now = new Date()
