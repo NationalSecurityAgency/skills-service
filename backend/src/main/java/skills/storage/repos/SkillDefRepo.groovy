@@ -139,6 +139,7 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
 
     boolean existsByProjectIdAndSkillIdAndTypeAllIgnoreCase(String id, String skillId, SkillDef.ContainerType type)
     boolean existsByProjectIdAndSkillIdAllIgnoreCase(@Nullable String id, String skillId)
+    boolean existsByProjectIdIgnoreCaseAndSkillId(@Nullable String id, String skillId)
 
     boolean existsByProjectIdAndNameAndTypeAllIgnoreCase(@Nullable String id, String name, SkillDef.ContainerType type)
 

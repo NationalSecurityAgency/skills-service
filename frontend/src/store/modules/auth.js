@@ -122,7 +122,9 @@ const actions = {
     commit('oAuth2AuthUser');
     window.location = `/oauth2/authorization/${oAuthId}`;
   },
-  restoreSessionIfAvailable({ commit, dispatch, state, getters }) {
+  restoreSessionIfAvailable({
+    commit, dispatch, state, getters: gettersParam,
+  }) {
     return new Promise((resolve, reject) => {
       let reAuthenticated = false;
       const token = localStorage.getItem('token');
@@ -152,7 +154,7 @@ const actions = {
         dispatch('fetchUser', false).then(() => {
           if (state.userInfo) {
             reAuthenticated = true;
-            state.localAuth = !getters.isPkiAuthenticated;
+            state.localAuth = !gettersParam.isPkiAuthenticated;
           } else {
             // cannot obtain userInfo, so clear any other lingering auth data
             commit('clearAuthData');
