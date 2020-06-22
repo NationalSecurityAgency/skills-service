@@ -174,7 +174,7 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
 
 
     @Query(value = '''INSERT INTO user_achievement(user_id, project_id, skill_id, skill_ref_id, points_when_achieved, notified)
-            SELECT eventsByUserId.user_id, :projectId, :skillId, :skillRefId, :notified, -1
+            SELECT eventsByUserId.user_id, :projectId, :skillId, :skillRefId, -1, :notified
             FROM (
                 SELECT user_id, count(id) eventCount
                 FROM user_performed_skill
