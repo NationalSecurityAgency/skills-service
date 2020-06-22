@@ -19,6 +19,7 @@ import callStack.profiler.Profile
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.controller.exceptions.SkillException
@@ -32,6 +33,7 @@ import skills.storage.model.UserPoints
 import skills.storage.repos.SkillEventsSupportRepo
 import skills.storage.repos.UserAchievedLevelRepo
 import skills.storage.repos.UserPerformedSkillRepo
+import skills.storage.repos.UserPointsRepo
 
 import static skills.services.events.CompletionItem.CompletionItemType
 
@@ -70,6 +72,9 @@ class SkillEventsService {
     @Autowired
     SkillEventPublisher skillEventPublisher
 
+    @Autowired
+    UserPointsRepo userPointsRepo
+
     @Transactional
     @Profile
     SkillEventResult reportSkill(String projectId, String skillId, String userId, Boolean notifyIfNotApplied, Date incomingSkillDate = new Date()) {
@@ -78,6 +83,53 @@ class SkillEventsService {
             skillEventPublisher.publishSkillUpdate(result, userId)
         }
         return result
+    }
+
+    @Transactional
+    protected void notifyUserOfAchievements(String userId){
+        List<UserAchievement> pendingNotificationAchievements = achievedLevelRepo.findAllByUserIdAndNotified(userId, Boolean.FALSE.toString())
+
+        SkillEventResult ser
+
+        pendingNotificationAchievements?.each {
+            SkillEventsSupportRepo.SkillDefMin skill = skillEventsSupportRepo.findByProjectIdAndSkillId(it.projectId, it.skillId)
+
+            if(!ser) {
+                ser = new SkillEventResult(projectId: it.projectId, skillId: it.skillId, name: skill.name)
+                ser.completed = []
+            }
+
+            CompletionItem completionItem
+            if (it.level != null) {
+                Date day = it.created.clearTime()
+                UserPoints points = userPointsRepo.findByProjectIdAndUserIdAndSkillIdAndDay(it.projectId, userId, it.skillId, day)
+
+                if(points) {
+                    completionItem = new CompletionItem(
+                            level: it.level, name: skill.name,
+                            id: points.skillId ?: "OVERALL",
+                            type: points.skillId ? CompletionItem.CompletionItemType.Subject : CompletionItem.CompletionItemType.Overall)
+                }
+            } else {
+                completionItem = new CompletionItem(type: CompletionTypeUtil.getCompletionType(skill.type), id: skill.skillId, name: skill.name)
+            }
+
+            if (completionItem) {
+                ser.completed.add(completionItem)
+            }
+
+            it.notified = Boolean.TRUE.toString()
+        }
+
+        if (ser) {
+            skillEventPublisher.publishSkillUpdate(ser, userId)
+            achievedLevelRepo.saveAll(pendingNotificationAchievements)
+        }
+    }
+
+    @Async
+    public void identifyPendingNotifications(String userId) {
+        notifyUserOfAchievements(userId)
     }
 
     private SkillEventResult reportSkillInternal(String projectId, String skillId, String userId, Date incomingSkillDate) {

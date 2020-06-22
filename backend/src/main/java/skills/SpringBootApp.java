@@ -22,6 +22,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import skills.utils.SecretsUtil;
@@ -30,6 +31,7 @@ import javax.annotation.PostConstruct;
 import javax.net.ssl.HttpsURLConnection;
 import java.util.TimeZone;
 
+@EnableAsync
 @EnableScheduling
 @EnableWebSecurity
 @SpringBootApplication

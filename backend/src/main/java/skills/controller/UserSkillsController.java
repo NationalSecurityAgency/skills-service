@@ -76,6 +76,9 @@ class UserSkillsController {
     @Autowired
     private PublicProps publicProps;
 
+    @Autowired
+    private SkillEventsService skillEventsService;
+
     private int getProvidedVersionOrReturnDefault(Integer versionParam) {
         if (versionParam != null) {
             return versionParam;
@@ -116,6 +119,10 @@ class UserSkillsController {
                                                 @RequestParam(name = "version", required = false) Integer version,
                                                 @RequestParam(name = "idType", required = false) String idType) {
         String userId = userInfoService.getUserName(userIdParam, true, idType);
+        if (userId != null && userIdParam == null) {
+            //only identify pending notifications if the user is accessing the summary and it's not coming from the dashboard
+            skillEventsService.identifyPendingNotifications(userId);
+        }
         return skillsLoader.loadOverallSummary(projectId, userId, getProvidedVersionOrReturnDefault(version));
     }
 

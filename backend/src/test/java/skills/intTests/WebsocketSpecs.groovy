@@ -85,6 +85,52 @@ class WebsocketSpecs extends DefaultIntSpec {
         }
     }
 
+    def "Non-notified achievements are notified when overall skills summary requested" () {
+        given:
+
+        List<SkillEventResult> wsResults = []
+        boolean skillsAdded = false
+        CountDownLatch messagesReceived = setupWebsocketConnection(wsResults, false, false, 1, 'skills@skills.org')
+
+        def badge = SkillsFactory.createBadge()
+
+        when:
+
+        badge.enabled = false
+        skillsService.createBadge(badge)
+        skillsService.assignSkillToBadge([projectId: projId, badgeId: badge.badgeId, skillId: subj1.get(0).skillId])
+        skillsService.assignSkillToBadge([projectId: projId, badgeId: badge.badgeId, skillId: subj2.get(0).skillId])
+
+        (0..9).each {
+            skillsService.addSkill([projectId: projId, skillId: subj1.get(0).skillId], 'skills@skills.org', new Date()-it)
+            skillsService.addSkill([projectId: projId, skillId: subj2.get(0).skillId], 'skills@skills.org', new Date()-it)
+        }
+
+        skillsService.updateBadge([projectId: projId, badgeId: badge.badgeId, enabled: true, name: badge.name], badge.badgeId)
+
+        skillsAdded = true
+
+        def summaryResult = skillsService.getSkillsSummaryForCurrentUser(projId)
+
+        messagesReceived.await()
+
+        then:
+        interaction {
+            if (skillsAdded) {
+                wsResults[0].success == true
+                wsResults[0].completed
+                wsResults[0].completed.size() == 0
+                wsResults[0].completed[0].type == CompletionItem.CompletionItemType.Badge
+                wsResults[0].completed[0].name == badge.name
+            }
+        }
+
+
+
+
+        //assign skills to user skills@skills.org
+    }
+
     def "achieve subject's level - validate via xhr streaming"(){
         given:
         List subjSummaryRes = []
@@ -135,8 +181,8 @@ class WebsocketSpecs extends DefaultIntSpec {
         }
     }
 
-    private CountDownLatch setupWebsocketConnection(List<SkillEventResult> wsResults, boolean xhr=false, boolean xhrPolling=false) {
-        CountDownLatch messagesReceived = new CountDownLatch(5)
+    private CountDownLatch setupWebsocketConnection(List<SkillEventResult> wsResults, boolean xhr=false, boolean xhrPolling=false, int count=5, String userId=null) {
+        CountDownLatch messagesReceived = new CountDownLatch(count)
         List<Transport> transports = []
         if (xhr) {
             RestTemplateXhrTransport xhrTransport = new RestTemplateXhrTransport()
@@ -168,7 +214,9 @@ class WebsocketSpecs extends DefaultIntSpec {
         }
 
         // setup websocket connection for sampleUserIds[0]
-        String userId = sampleUserIds.get(0)
+        if(userId == null) {
+            userId = sampleUserIds.get(0)
+        }
         String secret = skillsService.getClientSecret(projId)
         skillsService.setProxyCredentials(projId, secret)
         String token = skillsService.wsHelper.getTokenForUser(userId)
