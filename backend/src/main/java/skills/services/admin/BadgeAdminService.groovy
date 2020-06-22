@@ -122,10 +122,6 @@ class BadgeAdminService {
             if (StringUtils.isNotBlank(existingEnabled) && StringUtils.equals(existingEnabled, Boolean.TRUE.toString()) && StringUtils.equals(badgeRequest.enabled, Boolean.FALSE.toString())){
                 throw new SkillException("Once a Badge has been published, the only allowable value for enabled is [${Boolean.TRUE.toString()}]", projectId, null, ErrorCode.BadParam)
             }
-            //TODO: if previous value of enable was false and badgeRequest.enable is true
-            //then we need to trigger evaluation of user dependencies and award achievements
-            //...wait...how does this work with notifications? Users not logged in wouldn't know that
-            //they were awarded the badge would they?
             if (!Boolean.valueOf(skillDefinition.enabled) && Boolean.valueOf(badgeRequest.enabled)) {
                 identifyEligibleUsers = true
             }
