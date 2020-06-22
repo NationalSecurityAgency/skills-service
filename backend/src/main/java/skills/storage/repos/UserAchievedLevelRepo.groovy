@@ -173,7 +173,7 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
     List<LabelCountInfo> countAchievementsForProjectPerMonth(@Param('projectId') String projectId, @Param('badgeId') String badgeId, @Param('type') SkillDef.ContainerType containerType, @Param('date') Date mustBeAfterThisDate)
 
 
-    @Query(value = '''INSERT INTO user_achievement(user_id, project_id, skill_id, skill_ref_id, points_when_achieved)
+    @Query(value = '''INSERT INTO user_achievement(user_id, project_id, skill_id, skill_ref_id, points_when_achieved, notified)
             SELECT eventsByUserId.user_id, :projectId, :skillId, :skillRefId, -1
             FROM (
                 SELECT user_id, count(id) eventCount
@@ -189,5 +189,9 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
                         SELECT id FROM user_achievement WHERE project_id = :projectId and skill_id = :skillId and user_id = eventsByUserId.user_id
                     )''', nativeQuery = true)
     @Modifying
-    void insertUserAchievementWhenDecreaseOfOccurrencesCausesUsersToAchieve(@Param('projectId') String projectId, @Param('skillId') String skillId, @Param('skillRefId') Integer skillRefId, @Param('numOfOccurrences') int numOfOccurrences)
+    void insertUserAchievementWhenDecreaseOfOccurrencesCausesUsersToAchieve(@Param('projectId') String projectId,
+                                                                            @Param('skillId') String skillId,
+                                                                            @Param('skillRefId') Integer skillRefId,
+                                                                            @Param('numOfOccurrences') int numOfOccurrences,
+                                                                            @Param('notified') String notified)
 }
