@@ -496,6 +496,14 @@ class SkillsService {
         wsHelper.apiGet(url)
     }
 
+    def getSkillsSummaryForCurrentUser(String projId, int version = -1) {
+        String url = "/projects/${projId}/summary"
+        if (version >= 0) {
+            url += "&version=${version}"
+        }
+        wsHelper.apiGet(url)
+    }
+
     def getDependencyGraph(String projId, String skillId=null) {
         String url = skillId ? "/projects/${projId}/skills/${skillId}/dependency/graph" : "/projects/${projId}/dependency/graph"
         wsHelper.adminGet(url)

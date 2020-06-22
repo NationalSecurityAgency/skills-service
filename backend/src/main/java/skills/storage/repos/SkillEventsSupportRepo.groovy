@@ -115,6 +115,21 @@ interface SkillEventsSupportRepo extends CrudRepository<SkillDef, Long> {
     SkillDefMin findByProjectIdAndSkillIdAndType(String projectId, String skillId, SkillDef.ContainerType type)
 
     @Query('''SELECT
+        s.id as id,
+        s.projectId as projectId,
+        s.skillId as skillId,
+        s.name as name,
+        s.pointIncrement as pointIncrement,
+        s.pointIncrementInterval as pointIncrementInterval,
+        s.numMaxOccurrencesIncrementInterval as numMaxOccurrencesIncrementInterval,
+        s.totalPoints as totalPoints,
+        s.type as type,
+        s.enabled as enabled
+        from SkillDef s where s.projectId = ?1 and s.skillId=?2''')
+    @Nullable
+    SkillDefMin findByProjectIdAndSkillId(String projectId, String skillId)
+
+    @Query('''SELECT
         badge.id as id,
         badge.projectId as projectId,
         badge.skillId as skillId,
