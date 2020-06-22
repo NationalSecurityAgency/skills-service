@@ -89,13 +89,9 @@ class WebsocketSpecs extends DefaultIntSpec {
         given:
 
         List<SkillEventResult> wsResults = []
-        boolean skillsAdded = false
         CountDownLatch messagesReceived = setupWebsocketConnection(wsResults, false, false, 1, 'skills@skills.org')
 
         def badge = SkillsFactory.createBadge()
-
-        when:
-
         badge.enabled = false
         skillsService.createBadge(badge)
         skillsService.assignSkillToBadge([projectId: projId, badgeId: badge.badgeId, skillId: subj1.get(0).skillId])
@@ -108,27 +104,17 @@ class WebsocketSpecs extends DefaultIntSpec {
 
         skillsService.updateBadge([projectId: projId, badgeId: badge.badgeId, enabled: true, name: badge.name], badge.badgeId)
 
-        skillsAdded = true
 
+        when:
         def summaryResult = skillsService.getSkillsSummaryForCurrentUser(projId)
-
         messagesReceived.await()
 
         then:
-        interaction {
-            if (skillsAdded) {
-                wsResults[0].success == true
-                wsResults[0].completed
-                wsResults[0].completed.size() == 0
-                wsResults[0].completed[0].type == CompletionItem.CompletionItemType.Badge
-                wsResults[0].completed[0].name == badge.name
-            }
-        }
-
-
-
-
-        //assign skills to user skills@skills.org
+        wsResults.find{it.skillId=='badge1'}.success
+        wsResults.find{it.skillId=='badge1'}.completed
+        wsResults.find{it.skillId=='badge1'}.completed.size() == 1
+        wsResults.find{it.skillId=='badge1'}.completed[0].type == CompletionItem.CompletionItemType.Badge
+        wsResults.find{it.skillId=='badge1'}.completed[0].name == badge.name
     }
 
     def "achieve subject's level - validate via xhr streaming"(){
