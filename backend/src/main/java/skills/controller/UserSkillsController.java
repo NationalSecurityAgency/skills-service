@@ -42,6 +42,8 @@ import skills.skillLoading.model.*;
 import skills.utils.RetryUtil;
 
 import javax.servlet.http.HttpServletRequest;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -114,16 +116,35 @@ class UserSkillsController {
     @ResponseBody
     @CompileStatic
     @Profile
-    public OverallSkillSummary getSkillsSummary(@PathVariable("projectId") String projectId,
+    public OverallSkillSummary getSkillsSummary(HttpServletRequest request,
+                                                @PathVariable("projectId") String projectId,
                                                 @RequestParam(name = "userId", required = false) String userIdParam,
                                                 @RequestParam(name = "version", required = false) Integer version,
                                                 @RequestParam(name = "idType", required = false) String idType) {
         String userId = userInfoService.getUserName(userIdParam, true, idType);
-        if (userId != null && userIdParam == null) {
-            //only identify pending notifications if the user is accessing the summary and it's not coming from the dashboard
-            skillEventsService.identifyPendingNotifications(userId);
+
+        log.debug("userId is {} and userIdParam is {}", userId, userIdParam);
+
+        //this does not actually stop the admin dashboard from trigger notification when an admin
+        //views a user's ClientDisplay. How do we differentiate between the request types??
+        try {
+            if (userId != null && !isRequestFromDashboard(request)) {
+                log.debug("user [{}] requesting skillSummary, is not coming from the dashboard, trigger any pending notifications", userId);
+                //can we check for remoteHost and say don't do this if it's local host?
+                //only identify pending notifications if the user is accessing the summary and it's not coming from the dashboard
+                skillEventsService.identifyPendingNotifications(userId);
+            }
+        }catch(UnknownHostException uhe){
+            log.error("unable to notify of pending notifications for user ["+userId+"]", uhe);
         }
         return skillsLoader.loadOverallSummary(projectId, userId, getProvidedVersionOrReturnDefault(version));
+    }
+
+    private boolean isRequestFromDashboard(HttpServletRequest request) throws UnknownHostException{
+            InetAddress requestorIp = InetAddress.getByName(request.getRemoteAddr());
+            log.debug("remote port: [{}], local port: [{}]", request.getRemotePort(), request.getLocalPort());
+            return (requestorIp.isAnyLocalAddress() || requestorIp.isLoopbackAddress())
+                    && (request.getRemotePort() == request.getLocalPort());
     }
 
     @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/summary", method = RequestMethod.GET, produces = "application/json")
