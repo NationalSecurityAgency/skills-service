@@ -290,7 +290,6 @@ limitations under the License.
             let valid = true;
             if (self.limitTimeframe && self.badgeInternal.startDate && self.badgeInternal.endDate) {
               valid = window.moment(self.badgeInternal.startDate).isBefore(self.badgeInternal.endDate);
-              console.log(`${JSON.stringify(self.$validator.errors)}`);
               if (valid) {
                 // manually clear errors in case the orig error occurred when setting startDate,
                 // but was fixed by updating endDate (or vise-versa)
