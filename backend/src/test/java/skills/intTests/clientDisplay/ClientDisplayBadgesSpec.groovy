@@ -18,8 +18,24 @@ package skills.intTests.clientDisplay
 
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
+import skills.intTests.utils.SkillsService
 
 class ClientDisplayBadgesSpec extends DefaultIntSpec {
+
+    String ultimateRoot = 'jh@dojo.com'
+    SkillsService rootSkillsService
+    String supervisorUserId = 'foo@bar.com'
+    SkillsService supervisorSkillsService
+
+    def setup(){
+        rootSkillsService = createService(ultimateRoot, 'aaaaaaaa')
+        supervisorSkillsService = createService(supervisorUserId)
+
+        if (!rootSkillsService.isRoot()) {
+            rootSkillsService.grantRoot()
+        }
+        rootSkillsService.grantSupervisorRole(supervisorUserId)
+    }
 
     def "badges summary for a project - one badge"() {
         String userId = "user1"
@@ -502,5 +518,84 @@ class ClientDisplayBadgesSpec extends DefaultIntSpec {
         summaries.get(0).iconClass == "fa fa-badge3"
         summaries.get(0).numSkillsAchieved == 1
         summaries.get(0).numTotalSkills == 5
+    }
+
+    def "user badge achievement should not leak into another project"() {
+        String userId = "user1"
+        String userId2 = "user2"
+        String badge1 = "badge1"
+
+        // proj1
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> proj1_skills = SkillsFactory.createSkills(2, 1, 1)
+        proj1_skills.get(0).pointIncrement=100
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(proj1_skills)
+
+        skillsService.addBadge([projectId: proj1.projectId, badgeId: badge1, name: 'Badge 1', description: 'This is a first badge', iconClass: "fa fa-seleted-icon",])
+        skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badge1, skillId: proj1_skills.get(0).skillId])
+
+        // proj2
+        def proj2 = SkillsFactory.createProject(2)
+        def proj2_subj = SkillsFactory.createSubject(2, 1)
+        List<Map> proj2_skills = SkillsFactory.createSkills(2, 2, 1)
+        proj2_skills.get(0).pointIncrement=100
+
+        skillsService.createProject(proj2)
+        skillsService.createSubject(proj2_subj)
+        skillsService.createSkills(proj2_skills)
+
+        skillsService.addBadge([projectId: proj2.projectId, badgeId: badge1, name: 'Badge 1', description: 'This is a first badge', iconClass: "fa fa-seleted-icon",])
+        skillsService.assignSkillToBadge([projectId: proj2.projectId, badgeId: badge1, skillId: proj2_skills.get(0).skillId])
+
+        // global badge
+        Map badge = [badgeId: "globalBadge", name: 'Badge 1', description: 'This is a first badge', iconClass: "fa fa-seleted-icon"]
+        badge.helpUrl = "http://foo.org"
+        supervisorSkillsService.createGlobalBadge(badge)
+        supervisorSkillsService.assignSkillToGlobalBadge(projectId: proj1.projectId, badgeId: badge.badgeId, skillId: proj1_skills.get(0).skillId)
+
+        // add skill
+        skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_skills.get(0).skillId], userId, new Date())
+        skillsService.addSkill([projectId: proj2.projectId, skillId: proj2_skills.get(1).skillId], userId, new Date())
+
+        skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_skills.get(1).skillId], userId2, new Date())
+        skillsService.addSkill([projectId: proj2.projectId, skillId: proj2_skills.get(0).skillId], userId2, new Date())
+
+        when:
+        def summary = skillsService.getSkillSummary(userId, proj1.projectId)
+        def summaries = skillsService.getBadgesSummary(userId, proj1.projectId)
+
+        def summary2 = skillsService.getSkillSummary(userId, proj2.projectId)
+        def summaries2 = skillsService.getBadgesSummary(userId, proj2.projectId)
+
+        def summaryUser2 = skillsService.getSkillSummary(userId2, proj1.projectId)
+        def summariesUser2 = skillsService.getBadgesSummary(userId2, proj1.projectId)
+
+        def summary2User2 = skillsService.getSkillSummary(userId2, proj2.projectId)
+        def summaries2User2 = skillsService.getBadgesSummary(userId2, proj2.projectId)
+
+        then:
+        // user 1
+        summary.badges.numBadgesCompleted == 2
+        summaries.size() == 2
+        summaries.find { it.badgeId == "globalBadge" }.numSkillsAchieved == 1
+        summaries.find { it.badgeId == "badge1" }.numSkillsAchieved == 1
+
+        summary2.badges.numBadgesCompleted == 1
+        summaries2.size() == 1
+        summaries2.find { it.badgeId == "badge1" }.numSkillsAchieved == 0
+
+        // user 2
+        summaryUser2.badges.numBadgesCompleted == 0
+        summariesUser2.size() == 2
+        summariesUser2.find { it.badgeId == "globalBadge" }.numSkillsAchieved == 0
+        summariesUser2.find { it.badgeId == "badge1" }.numSkillsAchieved == 0
+
+        summary2User2.badges.numBadgesCompleted == 1
+        summaries2User2.size() == 1
+        summaries2User2.find { it.badgeId == "badge1" }.numSkillsAchieved == 1
     }
 }
