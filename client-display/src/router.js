@@ -62,26 +62,22 @@ const router = new VueRouter({
       component: BadgeDetails,
       name: 'badgeDetails',
       props: true,
-      meta: { setPreviousRoute: true },
     },
     {
       path: '/badges/global/:badgeId',
       component: GlobalBadgeDetails,
       name: 'globalBadgeDetails',
       props: true,
-      meta: { setPreviousRoute: true },
     },
     {
       path: '/skills/:skillId',
       component: SkillDetails,
       name: 'skillDetails',
-      meta: { setPreviousRoute: true },
     },
     {
       path: '/skills/crossProject/:crossProjectId/:skillId',
       component: SkillDetails,
       name: 'crossProjectSkillDetails',
-      meta: { setPreviousRoute: true },
     },
     {
       path: '/rank',
@@ -96,8 +92,10 @@ const router = new VueRouter({
   ],
 });
 
+const isWildcardMatch = matched => matched.filter(item => item.path === '*').length > 0;
+
 router.beforeEach((to, from, next) => {
-  if (to.meta.setPreviousRoute && !to.params.previousRoute) {
+  if (!to.params.previousRoute && to.meta.setPreviousRoute !== false && !isWildcardMatch(to.matched)) {
     const previousRoute = { ...from };
     const params = { ...to.params, ...{ previousRoute } };
     const updatedTo = { ...to, ...{ params } };
