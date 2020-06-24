@@ -38,6 +38,7 @@ import skills.storage.model.*
 import skills.storage.repos.*
 import skills.storage.repos.nativeSql.GraphRelWithAchievement
 import skills.storage.repos.nativeSql.NativeQueriesRepo
+import skills.utils.InputSanitizer
 
 @Component
 @CompileStatic
@@ -268,7 +269,7 @@ class SkillsLoader {
                 totalPoints: skillDef.totalPoints,
                 description: new SkillDescription(
                         skillId: skillDef.skillId,
-                        description: skillDef.description,
+                        description: InputSanitizer.unsanitizeForMarkdown(skillDef.description),
                         href: getHelpUrl(helpUrlRootSetting, skillDef.helpUrl)),
                 dependencyInfo: skillDependencySummary,
                 crossProject: crossProjectId != null
@@ -312,7 +313,7 @@ class SkillsLoader {
         List<SkillDescription> res = dbRes.collect {
             new SkillDescription(
                     skillId: it.getSkillId(),
-                    description: it.getDescription(),
+                    description: InputSanitizer.unsanitizeForMarkdown(it.getDescription()),
                     href: getHelpUrl(helpUrlRootSetting, it.getHelpUrl())
             )
         }
@@ -392,10 +393,13 @@ class SkillsLoader {
             helpUrl = getHelpUrl(helpUrlRootSetting, subjectDefinition.helpUrl)
         }
 
+        String description = subjectDefinition instanceof SkillDefWithExtra ? subjectDefinition.description : null
+        description = InputSanitizer.unsanitizeForMarkdown(description)
+
         return new SkillSubjectSummary(
                 subject: subjectDefinition.name,
                 subjectId: subjectDefinition.skillId,
-                description: subjectDefinition instanceof SkillDefWithExtra ? subjectDefinition.description : null,
+                description: description,
                 points: points,
 
                 skillsLevel: levelInfo.level,
@@ -462,7 +466,7 @@ class SkillsLoader {
         return new SkillBadgeSummary(
                 badge: badgeDefinition.name,
                 badgeId: badgeDefinition.skillId,
-                description: badgeDefinition.description,
+                description: InputSanitizer.unsanitizeForMarkdown(badgeDefinition.description),
                 badgeAchieved: achievements?.size() > 0,
                 dateAchieved: achievements ? achievements.first().created : null,
                 numSkillsAchieved: numAchievedSkills,
@@ -538,7 +542,7 @@ class SkillsLoader {
         return new SkillGlobalBadgeSummary(
                 badge: badgeDefinition.name,
                 badgeId: badgeDefinition.skillId,
-                description: badgeDefinition.description,
+                description: InputSanitizer.unsanitizeForMarkdown(badgeDefinition.description),
                 badgeAchieved: achievements?.size() > 0,
                 dateAchieved: achievements ? achievements.first().created : null,
                 numSkillsAchieved: numAchievedSkills,
