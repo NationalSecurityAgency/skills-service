@@ -21,6 +21,7 @@ limitations under the License.
 
 <script>
     import marked from 'marked';
+    import DOMPurify from 'dompurify';
 
     export default {
         name: 'MarkdownText',
@@ -29,7 +30,7 @@ limitations under the License.
         },
         methods: {
             parseMarkdown(text) {
-                return marked(text);
+                return DOMPurify.sanitize(marked(text));
             },
         },
     };
