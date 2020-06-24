@@ -77,6 +77,7 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
         skillsService.createSubject(subj2)
         skillsService.createSkills(skills)
         skillsService.createSkills(subj2Skills)
+        badge.enabled = 'true'
         supervisorService.createGlobalBadge(badge)
 
         supervisorService.assignProjectLevelToGlobalBadge(projectId: proj.projectId, badgeId: badge.badgeId, level: "1")

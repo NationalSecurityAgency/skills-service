@@ -118,7 +118,8 @@ class BadgeAdminService {
         boolean identifyEligibleUsers = false
 
         if (skillDefinition) {
-            if (StringUtils.isNotBlank(badgeRequest.enabled) && !StringUtils.equals(badgeRequest.enabled, Boolean.TRUE.toString())){
+            String existingEnabled = skillDefinition.enabled;
+            if (StringUtils.isNotBlank(existingEnabled) && StringUtils.equals(existingEnabled, Boolean.TRUE.toString()) && StringUtils.equals(badgeRequest.enabled, Boolean.FALSE.toString())){
                 throw new SkillException("Once a Badge has been published, the only allowable value for enabled is [${Boolean.TRUE.toString()}]", projectId, null, ErrorCode.BadParam)
             }
             //TODO: if previous value of enable was false and badgeRequest.enable is true
@@ -136,12 +137,6 @@ class BadgeAdminService {
                 projDef = projDefAccessor.getProjDef(projectId)
                 createdResourceLimitsValidator.validateNumBadgesCreated(projectId)
             }
-
-            if (StringUtils.isNotEmpty(badgeRequest.enabled) && !StringUtils.equals(badgeRequest.enabled, Boolean.FALSE.toString())) {
-                throw new SkillException("The only allowable value for enabled is [${Boolean.FALSE.toString()}] on Badge creation", projectId, null, ErrorCode.BadParam)
-            }
-
-            badgeRequest.enabled = Boolean.FALSE.toString()
 
             int displayOrder = getBadgeDisplayOrder(projDef, type)
 
