@@ -293,8 +293,12 @@ limitations under the License.
               if (valid) {
                 // manually clear errors in case the orig error occurred when setting startDate,
                 // but was fixed by updating endDate (or vise-versa)
-                self.$refs.startDateValidationProvider.reset();
-                self.$refs.endDateValidationProvider.reset();
+                if (self.$refs.startDateValidationProvider) {
+                  self.$refs.startDateValidationProvider.reset();
+                }
+                if (self.$refs.endDateValidationProvider) {
+                  self.$refs.endDateValidationProvider.reset();
+                }
               }
             }
             return valid;
