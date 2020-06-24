@@ -47,6 +47,7 @@ import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.SkillDefWithExtraRepo
 import skills.storage.repos.SkillRelDefRepo
 import skills.storage.repos.UserPointsRepo
+import skills.utils.InputSanitizer
 import skills.utils.Props
 
 @Service
@@ -331,6 +332,7 @@ class SkillsAdminService {
     private SkillDefRes convertToSkillDefRes(SkillDefWithExtra skillDef) {
         SkillDefRes res = new SkillDefRes()
         Props.copy(skillDef, res)
+        res.description = InputSanitizer.unsanitizeForMarkdown(res.description)
         res.numPerformToCompletion = skillDef.totalPoints / res.pointIncrement
         return res
     }

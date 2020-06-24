@@ -30,7 +30,7 @@ limitations under the License.
                     <h6 class="card-title mb-0 float-left">Description</h6>
                 </div>
                 <div class="card-body">
-                    <markdown-text :text="displayData.userSkills.description" class="font-italic d-block text-left"/>
+                    <markdown-text :text="displayData.userSkills.description" class="d-block text-left"/>
                 </div>
             </div>
 
