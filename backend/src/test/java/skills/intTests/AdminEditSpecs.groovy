@@ -92,6 +92,7 @@ class AdminEditSpecs extends DefaultIntSpec {
         def res = skillsService.getBadge(badge)
         def originalBadgeId = res.badgeId
         res.badgeId = "TestBadge47"
+        res.enabled = 'true'
         skillsService.createBadge(res, originalBadgeId)
 
         def updatedResult = skillsService.getBadge(res)
