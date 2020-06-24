@@ -128,6 +128,33 @@ describe('Settings Tests', () => {
         cy.get('[data-cy=navigationmenu]').contains('Badges', {timeout: 5000}).should('be.visible');
     });
 
+    it.only('Add Supervisor User Not Found', () => {
+        cy.server();
+        // cy.route('PUT', '/root/users/root@skills.org/roles/ROLE_SUPERVISOR').as('addSupervisor');
+        cy.route('POST', 'root/users/without/role/ROLE_SUPERVISOR?userSuggestOption=ONE', [{"userId":"blah@skills.org","userIdForDisplay":"blah@skills.org","first":"Firstname","last":"LastName","nickname":"Firstname LastName","dn":null}]).as('getEligibleForSupervisor');
+        cy.route({
+            method: 'GET',
+            url: '/app/projects'
+        }).as('loadProjects');
+        cy.route({method: 'GET', url: '/root/isRoot'}).as('checkRoot');
+
+        cy.visit('/');
+        cy.contains('My Projects');
+
+        cy.get('li').contains('Badges').should('not.exist');
+        cy.vuex().its('state.access.isSupervisor').should('equal', false);
+        cy.get('button.dropdown-toggle').first().click({force: true});
+        cy.contains('Settings').click();
+        cy.wait('@checkRoot');
+        cy.contains('Security').click();
+        cy.get('[data-cy=supervisorrm]  div.multiselect__tags').type('root');
+        cy.wait('@getEligibleForSupervisor');
+        cy.get('[data-cy=supervisorrm]').contains('blah@skills.org').click();
+        cy.get('[data-cy=supervisorrm]').contains('Add').click();
+        cy.get('[data-cy=error-msg]').contains('Error! Request could not be completed! User [blah@skills.org] does not exist')
+        cy.vuex().its('state.access.isSupervisor').should('equal', false);
+    });
+
     it('Add Supervisor User No Query', () => {
 
         cy.server();
