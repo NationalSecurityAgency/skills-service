@@ -164,7 +164,7 @@ describe('Global Badges Tests', () => {
         cy.wait('@getGlobalBadges');
     });
 
-    it('Global Badge is disabled when created, can only be enabled once', () => {
+    it.only('Global Badge is disabled when created, can only be enabled once', () => {
         const expectedId = 'TestBadgeBadge';
         cy.route('GET', `/supervisor/badges`).as('getGlobalBadges');
         cy.route('PUT', `/supervisor/badges/${expectedId}`).as('postGlobalBadge');
@@ -181,12 +181,12 @@ describe('Global Badges Tests', () => {
         cy.get('#badgeName').type('Test Badge');
         cy.wait('@nameExists');
         cy.clickSave();
-        cy.wait('@idExists');
         cy.wait('@postGlobalBadge');
 
         cy.contains('Test Badge').should('exist');
         cy.get('[data-cy=badgeStatus]').contains('Status: Disabled').should('exist');
         cy.get('[data-cy=goLive]').click();
+        cy.wait('@postGlobalBadge');
         cy.wait('@getGlobalBadges');
         cy.contains('Test Badge');
         cy.get('[data-cy=badgeStatus]').contains('Status: Live');
