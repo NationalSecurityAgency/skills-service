@@ -174,7 +174,7 @@ class AccessSettingsStorageService {
             UserRole existingUserRole = user?.roles?.find {it.projectId == projectId && it.roleName == roleName}
             assert !existingUserRole, "CREATE FAILED -> user-role with project id [$projectId], userId [$userId] and roleName [$roleName] already exists"
         } else {
-            throw new SkillException("User [$userId]  does not exist", (String) projectId)
+            throw new SkillException("User [$userId]  does not exist", (String) projectId ?: SkillException.NA, SkillException.NA, ErrorCode.UserNotFound)
         }
 
         UserRole userRole = new UserRole(userId: userId, roleName: roleName, projectId: projectId)

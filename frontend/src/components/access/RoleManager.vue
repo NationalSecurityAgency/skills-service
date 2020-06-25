@@ -28,7 +28,8 @@ limitations under the License.
       </div>
     </div>
 
-    <b-alert v-if="errNotification.enable" variant="danger" class="mt-2" show dismissible>
+    <b-alert v-if="errNotification.enable" data-cy="error-msg" variant="danger" class="mt-2" show
+             dismissible>
       <i class="fa fa-exclamation-circle mr-1"></i> <strong>Error!</strong> Request could not be completed! <strong>{{
       errNotification.msg }}</strong>
     </b-alert>

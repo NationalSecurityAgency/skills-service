@@ -20,10 +20,7 @@ import store from '../store/store';
 
 function errorResponseHandler(error) {
   // check if the caller wants to handle the error with displaying the errorPage/dialog
-  if ((Object.prototype.hasOwnProperty.call(error.config, 'handleError') && error.config.handleError === false)
-    || (error.config && error.config.headers && error.config.headers['x-handleError'] === false)) {
-    // config.handleError does not appear to be propagated here regardless of whether or not it's set on the axios call
-    // only properties defined on AxiosRequestConfig make it here
+  if (Object.prototype.hasOwnProperty.call(error.config, 'handleError') && error.config.handleError === false) {
     return Promise.reject(error);
   }
 
