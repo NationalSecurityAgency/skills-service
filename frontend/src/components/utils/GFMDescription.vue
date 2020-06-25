@@ -40,13 +40,13 @@ limitations under the License.
           <pre class="bg-light"><code>
         italics: *italicized* or _italicized_
         bold: **bolded** or __bolded__
-        combination **_bolde&italicized_**
+        combination **_bolded & italicized_**
         strikethrough: ~~struck~~
         </code></pre>
 
           <h3>Inline</h3>
           <pre class="bg-light"><code>
-        Inline `code` hs `back-ticks around` it.
+        Inline `code` has `back-ticks around` it.
         </code></pre>
 
           <h3>Lists</h3>

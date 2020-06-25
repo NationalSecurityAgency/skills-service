@@ -38,6 +38,7 @@ import skills.storage.repos.SkillDefWithExtraRepo
 import skills.storage.repos.SkillRelDefRepo
 import skills.storage.repos.UserAchievedLevelRepo
 import skills.storage.repos.nativeSql.NativeQueriesRepo
+import skills.utils.InputSanitizer
 import skills.utils.Props
 
 @Service
@@ -254,7 +255,7 @@ class BadgeAdminService {
                 badgeId: skillDef.skillId,
                 projectId: skillDef.projectId,
                 name: skillDef.name,
-                description: skillDef.description,
+                description: InputSanitizer.unsanitizeForMarkdown(skillDef.description),
                 displayOrder: skillDef.displayOrder,
                 iconClass: skillDef.iconClass,
                 startDate: skillDef.startDate,

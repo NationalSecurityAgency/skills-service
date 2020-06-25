@@ -36,6 +36,7 @@ import skills.storage.accessors.ProjDefAccessor
 import skills.storage.repos.ProjDefRepo
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.SkillDefWithExtraRepo
+import skills.utils.InputSanitizer
 import skills.utils.Props
 
 @Service
@@ -188,7 +189,7 @@ class SubjAdminService {
                 subjectId: skillDef.skillId,
                 projectId: skillDef.projectId,
                 name: skillDef.name,
-                description: skillDef.description,
+                description: InputSanitizer.unsanitizeForMarkdown(skillDef.description),
                 displayOrder: skillDef.displayOrder,
                 totalPoints: skillDef.totalPoints,
                 iconClass: skillDef.iconClass,

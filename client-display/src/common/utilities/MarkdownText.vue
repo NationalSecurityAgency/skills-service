@@ -14,7 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-    <span v-html="parseMarkdown(text)"/>
+    <span class="markdown">
+        <span v-html="parseMarkdown(text)"/>
+    </span>
 </template>
 
 <script>
@@ -34,6 +36,13 @@ limitations under the License.
     };
 </script>
 
-<style scoped>
-
+<style>
+    .markdown blockquote {
+        padding: 10px 20px;
+        margin: 0 0 20px;
+        font-size: 1rem;
+        border-left: 5px solid #eeeeee;
+        color: #888;
+        line-height: 1.5;
+    }
 </style>

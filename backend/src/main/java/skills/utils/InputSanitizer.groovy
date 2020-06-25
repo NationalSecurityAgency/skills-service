@@ -21,14 +21,25 @@ import org.jsoup.safety.Whitelist
 
 class InputSanitizer {
 
-
     public static final Document.OutputSettings print = new Document.OutputSettings().prettyPrint(false)
 
-    public static String sanitize(String input) {
+    static String sanitize(String input) {
         if (!input) {
             return input;
         }
 
         return Jsoup.clean(input, "", Whitelist.basic(), print)
+    }
+
+    /**
+     * is #sanitize method is used for markdown before returning the payload back
+     * to the client remove sanitizion that breaks proper display of markdown
+     */
+    static String unsanitizeForMarkdown(String input) {
+        if (!input) {
+            return input;
+        }
+
+        return input.replaceAll("&gt;", ">")
     }
 }
