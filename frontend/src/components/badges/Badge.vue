@@ -25,17 +25,17 @@ limitations under the License.
       <i v-if="badgeInternal.endDate" class="fas fa-gem position-absolute" style="font-size: 1rem; top: 1rem; left: 1rem; color: purple"></i>
       <div>
         <router-link :to="buildManageLink()"
-                     class="btn btn-outline-primary btn-sm">
+                     class="btn btn-outline-primary btn-sm" data-cy="manageBadge">
           Manage <i class="fas fa-arrow-circle-right"/>
         </router-link>
       </div>
       <hr/>
       <div class="float-md-right" style="font-size: 0.8rem;">
-        <span v-if="!this.live">
-          <span class="text-secondary">
-            Status: </span> <span class="text-uppercase">Disabled <span class="far fa-stop-circle text-warning"></span></span> | <a href="#0" @click.stop="handlePublish">Go Live</a>
+        <span v-if="!this.live" data-cy="badgeStatus">
+          <span class="text-secondary">Status: </span>
+          <span class="text-uppercase">Disabled <span class="far fa-stop-circle text-warning"></span></span> | <a href="#0" @click.stop="handlePublish" data-cy="goLive">Go Live</a>
         </span>
-        <span v-else>
+        <span v-else data-cy="badgeStatus">
           <span class="text-secondary">Status: </span> <span class="text-uppercase">Live <span class="far fa-check-circle text-success"></span></span>
         </span>
       </div>
