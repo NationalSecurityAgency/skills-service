@@ -193,7 +193,7 @@ describe('Global Badges Tests', () => {
         cy.get('[data-cy=goLive]').should('not.exist');
     });
 
-    it.only('Can add Skill and Level requirements to disabled Global Badge', () => {
+    it('Can add Skill and Level requirements to disabled Global Badge', () => {
         cy.route('GET', `/supervisor/badges`).as('getGlobalBadges');
         cy.route('PUT', `/supervisor/badges/ABadgeBadge`).as('postGlobalBadge');
         cy.route('GET', `/supervisor/badges/id/ABadgeBadge/exists`).as('idExists');
@@ -280,7 +280,7 @@ describe('Global Badges Tests', () => {
         cy.get('[data-cy=badgeStatus]').contains('Status: Disabled').should('exist');
         cy.get('[data-cy=goLive]').click();
         cy.wait('@getGlobalBadges');
-        cy.contains('Test Badge').should('exist');
+        cy.contains('A Badge').should('exist');
         cy.get('[data-cy=badgeStatus]').contains('Status: Live').should('exist');
         cy.get('[data-cy=goLive]').should('not.exist');
     });
