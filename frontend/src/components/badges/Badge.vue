@@ -147,6 +147,9 @@ limitations under the License.
       handlePublish() {
         this.badgeInternal.enabled = 'true';
         const toSave = Object.assign({}, this.badgeInternal);
+        if (!toSave.originalBadgeId) {
+          toSave.originalBadgeId = toSave.badgeId;
+        }
         toSave.startDate = this.toDate(toSave.startDate);
         toSave.endDate = this.toDate(toSave.endDate);
         this.badgeEdited(toSave);

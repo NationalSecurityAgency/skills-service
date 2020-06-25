@@ -449,8 +449,14 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
             q += levels
         }
 
+        if(!includeSkills && !includeLevels){
+            return Collections.emptyList();
+        }
+
         Query query = entityManager.createNativeQuery(q);
-        query.setParameter("badgeId", badgeId)
+        if (includeSkills) {
+            query.setParameter("badgeId", badgeId)
+        }
         if(includeDates) {
             query.setParameter("start", start)
             query.setParameter("end", end)
