@@ -16,8 +16,8 @@ limitations under the License.
 <template>
   <b-dropdown right variant="outline-info">
     <template slot="button-content">
-      <i class="fas fa-user-astronaut pr-1"/>
-      <span class="d-inline-block text-truncate" style="max-width: 9rem; vertical-align: top">{{ displayName }}</span>
+      <i class="fas fa-user-astronaut pr-1 d-none d-sm-inlin" />
+      <span class="d-inline-block text-truncate userName">{{ displayName }}</span>
     </template>
     <b-dropdown-item href="#"  @click="gotoSettings">
       <span class="text-info"> <i class="fas fa-cog" style="width: 1.5rem;"/>Settings</span>
@@ -67,6 +67,21 @@ limitations under the License.
 </script>
 
 <style scoped>
+  .userName {
+    max-width: 4rem;
+    vertical-align: top
+  }
 
+  @media (min-width: 576px) {
+    .userName {
+      max-width: 9rem;
+    }
+  }
+
+  @media (min-width: 1200px) {
+    .userName {
+      max-width: 12rem;
+    }
+  }
 
 </style>
