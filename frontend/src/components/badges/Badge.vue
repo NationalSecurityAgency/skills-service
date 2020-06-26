@@ -23,10 +23,22 @@ limitations under the License.
     </div>
     <div slot="footer">
       <i v-if="badgeInternal.endDate" class="fas fa-gem position-absolute" style="font-size: 1rem; top: 1rem; left: 1rem; color: purple"></i>
-      <router-link :to="buildManageLink()"
-                   class="btn btn-outline-primary btn-sm">
-        Manage <i class="fas fa-arrow-circle-right"/>
-      </router-link>
+      <div>
+        <router-link :to="buildManageLink()"
+                     class="btn btn-outline-primary btn-sm" data-cy="manageBadge">
+          Manage <i class="fas fa-arrow-circle-right"/>
+        </router-link>
+      </div>
+      <hr/>
+      <div class="float-md-right" style="font-size: 0.8rem;">
+        <span v-if="!this.live" data-cy="badgeStatus">
+          <span class="text-secondary">Status: </span>
+          <span class="text-uppercase">Disabled <span class="far fa-stop-circle text-warning"></span></span> | <a href="#0" @click.stop="handlePublish" data-cy="goLive">Go Live</a>
+        </span>
+        <span v-else data-cy="badgeStatus">
+          <span class="text-secondary">Status: </span> <span class="text-uppercase">Live <span class="far fa-check-circle text-success"></span></span>
+        </span>
+      </div>
 
       <edit-badge v-if="showEditBadge" v-model="showEditBadge" :id="badge.badgeId" :badge="badge" :is-edit="true"
                   :global="global" @badge-updated="badgeEdited"></edit-badge>
@@ -58,6 +70,11 @@ limitations under the License.
         cardOptions: {},
         showEditBadge: false,
       };
+    },
+    computed: {
+      live() {
+        return this.badgeInternal.enabled !== 'false';
+      },
     },
     watch: {
       badge: function badgeWatch(newBadge, oldBadge) {
@@ -92,7 +109,7 @@ limitations under the License.
           title: this.badgeInternal.name,
           subTitle: `ID: ${this.badgeInternal.badgeId}`,
           warn: this.badgeInternal.enabled === 'false',
-          warnMsg: this.badgeInternal.enabled === 'false' ? 'This badge cannot be achieved until it is activated' : '',
+          warnMsg: this.badgeInternal.enabled === 'false' ? 'This badge cannot be achieved until it is live' : '',
           stats,
         };
       },
@@ -127,11 +144,30 @@ limitations under the License.
       moveDown() {
         this.$emit('move-badge-down', this.badgeInternal);
       },
+      handlePublish() {
+        this.badgeInternal.enabled = 'true';
+        const toSave = Object.assign({}, this.badgeInternal);
+        if (!toSave.originalBadgeId) {
+          toSave.originalBadgeId = toSave.badgeId;
+        }
+        toSave.startDate = this.toDate(toSave.startDate);
+        toSave.endDate = this.toDate(toSave.endDate);
+        this.badgeEdited(toSave);
+      },
+      toDate(value) {
+        let dateVal = value;
+        if (value && !(value instanceof Date)) {
+          dateVal = new Date(Date.parse(value.replace(/-/g, '/')));
+        }
+        return dateVal;
+      },
     },
   };
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
+  @import "../../styles/palette";
+
   .badge-settings {
     position: relative;
     display: inline-block;
@@ -148,5 +184,13 @@ limitations under the License.
     border: 1px solid #ddd;
     border-radius: 5px;
     box-shadow: 0 22px 35px -16px rgba(0, 0, 0, 0.1);
+  }
+
+  .badge-footer-icon-green {
+    color: $green-palette-color5;
+  }
+
+  .badge-footer-icon-red {
+    color: $red-palette-color3;
   }
 </style>

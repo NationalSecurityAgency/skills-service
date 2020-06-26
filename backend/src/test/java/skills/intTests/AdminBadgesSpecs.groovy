@@ -16,6 +16,7 @@
 package skills.intTests
 
 import skills.intTests.utils.DefaultIntSpec
+import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 
 class AdminBadgesSpecs extends DefaultIntSpec {
@@ -135,5 +136,28 @@ class AdminBadgesSpecs extends DefaultIntSpec {
 
         resAfterDeletion
         resAfterDeletion.collect { it.badgeId } == [badge.badgeId]
+    }
+
+    def "cannot disable a badge after it has been enabled"(){
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(4)
+        def badge = SkillsFactory.createBadge()
+        badge.enabled = 'true'
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        skillsService.createBadge(badge)
+
+        when:
+        badge = skillsService.getBadge(badge)
+        badge.enabled = 'false'
+        skillsService.createBadge(badge)
+
+        then:
+        SkillsClientException ex = thrown()
+        ex.getMessage().contains("Once a Badge has been published, the only allowable value for enabled is [true]")
     }
 }

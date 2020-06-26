@@ -17,6 +17,7 @@ package skills.services.admin
 
 import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
+import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -117,6 +118,10 @@ class BadgeAdminService {
         boolean identifyEligibleUsers = false
 
         if (skillDefinition) {
+            String existingEnabled = skillDefinition.enabled;
+            if (StringUtils.isNotBlank(existingEnabled) && StringUtils.equals(existingEnabled, Boolean.TRUE.toString()) && StringUtils.equals(badgeRequest.enabled, Boolean.FALSE.toString())){
+                throw new SkillException("Once a Badge has been published, the only allowable value for enabled is [${Boolean.TRUE.toString()}]", projectId, null, ErrorCode.BadParam)
+            }
             //TODO: if previous value of enable was false and badgeRequest.enable is true
             //then we need to trigger evaluation of user dependencies and award achievements
             //...wait...how does this work with notifications? Users not logged in wouldn't know that
