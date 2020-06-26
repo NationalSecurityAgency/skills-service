@@ -17,6 +17,7 @@ package skills.intTests.badges
 
 
 import skills.intTests.utils.DefaultIntSpec
+import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
 
@@ -77,6 +78,7 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
         skillsService.createSubject(subj2)
         skillsService.createSkills(skills)
         skillsService.createSkills(subj2Skills)
+        badge.enabled = 'true'
         supervisorService.createGlobalBadge(badge)
 
         supervisorService.assignProjectLevelToGlobalBadge(projectId: proj.projectId, badgeId: badge.badgeId, level: "1")
@@ -89,5 +91,28 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
         then:
 
         result.body.completed.find{ it.type == 'GlobalBadge' }
+    }
+
+    def "cannot disable a badge after it has been enabled"(){
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(4)
+        def badge = SkillsFactory.createBadge()
+        badge.enabled = 'true'
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        supervisorService.createGlobalBadge(badge)
+
+        when:
+        badge = supervisorService.getGlobalBadge(badge.badgeId)
+        badge.enabled = 'false'
+        supervisorService.createGlobalBadge(badge)
+
+        then:
+        SkillsClientException ex = thrown()
+        ex.getMessage().contains("Once a Badge has been published, the only allowable value for enabled is [true]")
     }
 }

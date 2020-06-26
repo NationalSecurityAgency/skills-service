@@ -195,6 +195,9 @@ class DeleteSkillEventSpecs extends DefaultIntSpec {
         skillsService.createSkill(skill3)
         skillsService.createSkill(skill4)
         skillsService.createBadge(badge)
+        badge = skillsService.getBadge(badge)
+        badge.enabled = 'true'
+        skillsService.createBadge(badge)
         requiredSkillsIds.each { skillId ->
             skillsService.assignSkillToBadge(projectId: projId, badgeId: badge.badgeId, skillId: skillId)
         }
