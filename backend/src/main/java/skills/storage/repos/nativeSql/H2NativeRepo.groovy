@@ -389,8 +389,8 @@ class H2NativeRepo implements NativeQueriesRepo {
         '''
 
         Query selectBadgeSkills = entityManager.createNativeQuery(badgeSkillsQ)
-        selectBadgeSkills.setParameter("badgeId", badgeId)
-        selectBadgeSkills.setParameter("projectId", projectId)
+        selectBadgeSkills.setParameter('badgeId', badgeId)
+        selectBadgeSkills.setParameter('projectId', projectId)
         List<String> badgeSkillIds = selectBadgeSkills.getResultList()
 
         String selectUsersQ = '''
@@ -425,13 +425,13 @@ class H2NativeRepo implements NativeQueriesRepo {
             }
 
             Query getUsers = entityManager.createNativeQuery(selectUsersQ)
-            getUsers.setParameter("badgeSkillIds", badgeSkillIds)
-            getUsers.setParameter("projectId", projectId)
-            getUsers.setParameter("badgeId", badgeId)
-            getUsers.setParameter("numBadgeSkills", badgeSkillIds.size())
+            getUsers.setParameter('badgeSkillIds', badgeSkillIds)
+            getUsers.setParameter('projectId', projectId)
+            getUsers.setParameter('badgeId', badgeId)
+            getUsers.setParameter('numBadgeSkills', badgeSkillIds.size())
             if(dateCheck) {
-                getUsers.setParameter("start", start)
-                getUsers.setParameter("end", end)
+                getUsers.setParameter('start', start)
+                getUsers.setParameter('end', end)
             }
             List<String> r = getUsers.getResultList()
 

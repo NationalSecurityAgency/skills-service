@@ -16,6 +16,8 @@
 package skills
 
 import groovy.util.logging.Slf4j
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.annotation.Order
@@ -34,7 +36,6 @@ import org.springframework.security.oauth2.provider.authentication.BearerTokenEx
 import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetails
 import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetailsSource
 import org.springframework.security.oauth2.provider.authentication.TokenExtractor
-import org.springframework.security.web.UnsupportedOperationExceptionInvocationHandler
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer
@@ -42,9 +43,6 @@ import skills.auth.AuthMode
 import skills.auth.form.oauth2.SkillsOAuth2AuthenticationManager
 
 import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletRequestWrapper
-import javax.servlet.http.HttpSession
-import java.lang.reflect.Proxy
 
 @Configuration
 @Slf4j
@@ -63,11 +61,14 @@ class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Value('#{"${skills.websocket.relayPort:61613}"}')
     Integer relayPort
 
-    // injected by the SkillsOAuth2AuthenticationManager itself (only when using SecurityMode.FormAuth)
-    SkillsOAuth2AuthenticationManager oAuth2AuthenticationManager
-
     @Value('${skills.authorization.authMode:#{T(skills.auth.AuthMode).DEFAULT_AUTH_MODE}}')
     AuthMode authMode
+
+    @Autowired
+    //List<ChannelInterceptor> channelInterceptors
+    ChainedChannelInterceptor chainedChannelInterceptor
+
+//    SkillsOAuth2AuthenticationManager oAuth2AuthenticationManager
 
     @Override
     void configureMessageBroker(MessageBrokerRegistry registry) {
@@ -92,58 +93,10 @@ class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     void configureClientInboundChannel(ChannelRegistration registration) {
-        if (authMode == AuthMode.FORM) { // only injected when using SecurityMode.FormAuth
-            log.info('Initializing websocket registration interceptor.')
-            registration.interceptors(new ChannelInterceptor() {
-                TokenExtractor tokenExtractor = new BearerTokenExtractor()
-                AuthenticationDetailsSource<HttpServletRequest, ?> authenticationDetailsSource = new OAuth2AuthenticationDetailsSource();
-
-                @Override
-                Message<?> preSend(Message<?> message, MessageChannel channel) {
-                    StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class)
-                    if (StompCommand.CONNECT == accessor.getCommand()) {
-                        List<String> authHeaders = accessor.getNativeHeader(AUTHORIZATION)
-                        if (authHeaders) {
-                            log.debug("Found Authorization headers on websocket connection: [{}]", authHeaders)
-                            WebSocketHttpServletRequest request = new WebSocketHttpServletRequest(headers: [(AUTHORIZATION): Collections.enumeration(authHeaders)])
-                            Authentication authentication = tokenExtractor.extract(request)
-                            if (authentication) {
-                                request.setAttribute(OAuth2AuthenticationDetails.ACCESS_TOKEN_VALUE, authentication.getPrincipal());
-                                if (authentication instanceof AbstractAuthenticationToken) {
-                                    AbstractAuthenticationToken needsDetails = (AbstractAuthenticationToken) authentication;
-                                    needsDetails.setDetails(authenticationDetailsSource.buildDetails(request));
-                                }
-                                Authentication authResult = oAuth2AuthenticationManager.authenticate(authentication);
-                                if (authResult.authenticated) {
-                                    log.debug("Setting OAuth user [{}] on websocket connection", authResult)
-                                    accessor.setUser(authResult)
-                                }
-                            }
-                        }
-                    }
-                    return message
-                }
-            })
+        if(chainedChannelInterceptor) {
+            //registration.interceptors(channelInterceptors.toArray(new ChannelInterceptor[channelInterceptors.size()]))
+            registration.interceptors(chainedChannelInterceptor)
         }
     }
 
-    static class WebSocketHttpServletRequest extends HttpServletRequestWrapper {
-        private static final HttpServletRequest UNSUPPORTED_REQUEST = (HttpServletRequest) Proxy
-                .newProxyInstance(WebSocketHttpServletRequest.class.getClassLoader(),
-                        [ HttpServletRequest.class ] as Class<?>[],
-                        new UnsupportedOperationExceptionInvocationHandler())
-
-        String remoteAddr
-        Map<String, Object> attributes = [:]
-        Map<String, Enumeration<String>> headers = [:]
-
-        WebSocketHttpServletRequest() { super(UNSUPPORTED_REQUEST) }
-
-        Object getAttribute(String attributeName) { return attributes.get(attributeName) }
-        void setAttribute(String name, Object o) { attributes.put(name, o) }
-
-        Enumeration<String> getHeaders(String name) { return headers.get(name) }
-
-        HttpSession getSession(boolean create) { return null }
-    }
 }
