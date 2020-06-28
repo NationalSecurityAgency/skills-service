@@ -124,19 +124,6 @@ class UserSkillsController {
         String userId = userInfoService.getUserName(userIdParam, true, idType);
 
         log.debug("userId is {} and userIdParam is {}", userId, userIdParam);
-
-        //this does not actually stop the admin dashboard from trigger notification when an admin
-        //views a user's ClientDisplay. How do we differentiate between the request types??
-        try {
-            if (userId != null && !isRequestFromDashboard(request)) {
-                log.debug("user [{}] requesting skillSummary, is not coming from the dashboard, trigger any pending notifications", userId);
-                //can we check for remoteHost and say don't do this if it's local host?
-                //only identify pending notifications if the user is accessing the summary and it's not coming from the dashboard
-                skillEventsService.identifyPendingNotifications(userId);
-            }
-        }catch(UnknownHostException uhe){
-            log.error("unable to notify of pending notifications for user ["+userId+"]", uhe);
-        }
         return skillsLoader.loadOverallSummary(projectId, userId, getProvidedVersionOrReturnDefault(version));
     }
 

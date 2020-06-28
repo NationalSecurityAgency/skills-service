@@ -85,11 +85,8 @@ class WebsocketSpecs extends DefaultIntSpec {
         }
     }
 
-    def "Non-notified achievements are notified when overall skills summary requested" () {
+    def "Non-notified badge achievements are notified when user connects to websocket" () {
         given:
-
-        List<SkillEventResult> wsResults = []
-        CountDownLatch messagesReceived = setupWebsocketConnection(wsResults, false, false, 1, 'skills@skills.org')
 
         def badge = SkillsFactory.createBadge()
         badge.enabled = false
@@ -104,6 +101,8 @@ class WebsocketSpecs extends DefaultIntSpec {
 
         skillsService.updateBadge([projectId: projId, badgeId: badge.badgeId, enabled: true, name: badge.name], badge.badgeId)
 
+        List<SkillEventResult> wsResults = []
+        CountDownLatch messagesReceived = setupWebsocketConnection(wsResults, false, false, 1, 'skills@skills.org')
 
         when:
         def summaryResult = skillsService.getSkillsSummaryForCurrentUser(projId)

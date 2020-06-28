@@ -42,8 +42,8 @@ class SkillsOAuth2AuthenticationManager extends OAuth2AuthenticationManager {
     @Autowired
     OAuthUtils oAuthUtils
 
-    @Autowired
-    WebSocketConfig webSocketConfig
+    /*@Autowired
+    WebSocketConfig webSocketConfig*/
 
     SkillsOAuth2AuthenticationManager(DefaultTokenServices tokenServices) {
         setTokenServices(tokenServices)
@@ -52,7 +52,7 @@ class SkillsOAuth2AuthenticationManager extends OAuth2AuthenticationManager {
     @PostConstruct
     void postConstruct() {
         // inject into WebSocketConfig (@Autowired caused a circular reference)
-        webSocketConfig.oAuth2AuthenticationManager = this
+//        webSocketConfig.oAuth2AuthenticationManager = this
     }
 
     @Override
