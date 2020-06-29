@@ -17,7 +17,7 @@ limitations under the License.
   <div>
     <div class="row p-3">
       <div class="col-12 col-md text-center text-md-left">
-        <router-link class="h2 text-primary" to="/"><i class="fas fa-users"/> User Skills</router-link>
+        <router-link class="h2 text-primary" to="/"><i class="fas fa-users"/> SkillTree <span class="d-none d-sm-inline">Dashboard</span></router-link>
       </div>
 
       <div class="col-12 col-md text-center text-md-right">

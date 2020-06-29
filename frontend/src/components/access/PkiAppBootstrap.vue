@@ -35,7 +35,7 @@ limitations under the License.
               <p><i class="far fa-check-square text-success"></i> Inception self-training project
                 created!
               </p>
-              <p style="margin-top:2em">Please proceed the User Skills Dashboard.</p>
+              <p style="margin-top:2em">Please proceed to the SkillTree Dashboard.</p>
               <a class="btn btn-outline-primary" href="/">Let's Get Started!</a>
             </div>
           </div>
