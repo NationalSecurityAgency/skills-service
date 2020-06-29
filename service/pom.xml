@@ -3,14 +3,14 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>skills-service</artifactId>
-        <groupId>skills</groupId>
+        <artifactId>skills-service-parent</artifactId>
+        <groupId>skill-tree</groupId>
         <version>1.2.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
 
-    <artifactId>backend</artifactId>
+    <artifactId>skills-service</artifactId>
 
     <properties>
         <!--
@@ -321,7 +321,7 @@
                 <artifactId>maven-resources-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>copy Vue.js frontend content</id>
+                        <id>copy Vue.js dashboard content</id>
                         <phase>generate-resources</phase>
                         <goals>
                             <goal>copy-resources</goal>
@@ -331,7 +331,7 @@
                             <overwrite>true</overwrite>
                             <resources>
                                 <resource>
-                                    <directory>${project.parent.basedir}/frontend/dist</directory>
+                                    <directory>${project.parent.basedir}/dashboard/dist</directory>
                                 </resource>
                             </resources>
                         </configuration>
