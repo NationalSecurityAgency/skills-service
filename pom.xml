@@ -4,14 +4,14 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>skills</groupId>
-    <artifactId>skills-service</artifactId>
+    <groupId>skill-tree</groupId>
+    <artifactId>skills-service-parent</artifactId>
     <packaging>pom</packaging>
     <version>1.2.0-SNAPSHOT</version>
     <modules>
-        <module>frontend</module>
+        <module>dashboard</module>
         <module>client-display</module>
-        <module>backend</module>
+        <module>service</module>
     </modules>
     <properties>
         <!--suppress UnresolvedMavenProperty -->
