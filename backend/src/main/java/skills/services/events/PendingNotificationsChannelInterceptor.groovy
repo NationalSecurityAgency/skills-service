@@ -47,7 +47,7 @@ class PendingNotificationsChannelInterceptor implements ChannelInterceptor {
     void afterSendCompletion(Message<?> message, MessageChannel channel, boolean sent, @Nullable Exception ex) {
         if(ex == null) {
             StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class)
-            if (StompCommand.CONNECT == accessor.getCommand()) {
+            if (StompCommand.SUBSCRIBE == accessor.getCommand()) {
                 Principal user = accessor.getUser()
                 if (user != null && ((Authentication)user).isAuthenticated()) {
                     log.debug("sending any pending notifications to user [${user.getName()}]")
