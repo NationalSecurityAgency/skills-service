@@ -87,9 +87,4 @@ limitations under the License.
     margin-top: 1.8em;
     background: rgba(255, 255, 255, 0.6);
   }
-
-  .skills-my-rank:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 4px 17px rgba(0, 0, 0, 0.35);
-  }
 </style>
