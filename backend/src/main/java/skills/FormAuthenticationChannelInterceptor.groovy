@@ -46,6 +46,7 @@ import javax.servlet.http.HttpServletRequestWrapper
 import javax.servlet.http.HttpSession
 import java.lang.reflect.Proxy
 
+@Qualifier("WebSocketConfig")
 @Lazy
 @Slf4j
 @Component
