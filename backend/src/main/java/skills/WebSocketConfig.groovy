@@ -17,40 +17,21 @@ package skills
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.annotation.Order
-import org.springframework.messaging.Message
-import org.springframework.messaging.MessageChannel
 import org.springframework.messaging.simp.config.ChannelRegistration
 import org.springframework.messaging.simp.config.MessageBrokerRegistry
-import org.springframework.messaging.simp.stomp.StompCommand
-import org.springframework.messaging.simp.stomp.StompHeaderAccessor
-import org.springframework.messaging.support.ChannelInterceptor
-import org.springframework.messaging.support.MessageHeaderAccessor
-import org.springframework.security.authentication.AbstractAuthenticationToken
-import org.springframework.security.authentication.AuthenticationDetailsSource
-import org.springframework.security.core.Authentication
-import org.springframework.security.oauth2.provider.authentication.BearerTokenExtractor
-import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetails
-import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetailsSource
-import org.springframework.security.oauth2.provider.authentication.TokenExtractor
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer
 import skills.auth.AuthMode
-import skills.auth.form.oauth2.SkillsOAuth2AuthenticationManager
-
-import javax.servlet.http.HttpServletRequest
 
 @Configuration
 @Slf4j
 @Order(-2147483549)  // Ordered.HIGHEST_PRECEDENCE + 99 (see https://github.com/spring-projects/spring-framework/blob/master/src/docs/asciidoc/web/websocket.adoc#token-authentication)
 @EnableWebSocketMessageBroker
 class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
-
-    static final String AUTHORIZATION = 'Authorization'
 
     @Value('#{"${skills.websocket.enableStompBrokerRelay:false}"}')
     Boolean enableStompBrokerRelay
@@ -65,10 +46,8 @@ class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     AuthMode authMode
 
     @Autowired
-    //List<ChannelInterceptor> channelInterceptors
     ChainedChannelInterceptor chainedChannelInterceptor
 
-//    SkillsOAuth2AuthenticationManager oAuth2AuthenticationManager
 
     @Override
     void configureMessageBroker(MessageBrokerRegistry registry) {
@@ -94,7 +73,6 @@ class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     void configureClientInboundChannel(ChannelRegistration registration) {
         if(chainedChannelInterceptor) {
-            //registration.interceptors(channelInterceptors.toArray(new ChannelInterceptor[channelInterceptors.size()]))
             registration.interceptors(chainedChannelInterceptor)
         }
     }

@@ -27,11 +27,9 @@ import org.springframework.security.oauth2.provider.token.DefaultTokenServices
 import org.springframework.stereotype.Component
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
-import skills.WebSocketConfig
 import skills.auth.SecurityMode
 import skills.auth.UserInfo
 
-import javax.annotation.PostConstruct
 import javax.servlet.http.HttpServletRequest
 
 @Component('skillsOAuth2AuthManager')
@@ -42,17 +40,8 @@ class SkillsOAuth2AuthenticationManager extends OAuth2AuthenticationManager {
     @Autowired
     OAuthUtils oAuthUtils
 
-    /*@Autowired
-    WebSocketConfig webSocketConfig*/
-
     SkillsOAuth2AuthenticationManager(DefaultTokenServices tokenServices) {
         setTokenServices(tokenServices)
-    }
-
-    @PostConstruct
-    void postConstruct() {
-        // inject into WebSocketConfig (@Autowired caused a circular reference)
-//        webSocketConfig.oAuth2AuthenticationManager = this
     }
 
     @Override
