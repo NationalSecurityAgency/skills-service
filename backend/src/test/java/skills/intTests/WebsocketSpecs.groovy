@@ -102,10 +102,9 @@ class WebsocketSpecs extends DefaultIntSpec {
         skillsService.updateBadge([projectId: projId, badgeId: badge.badgeId, enabled: true, name: badge.name], badge.badgeId)
 
         List<SkillEventResult> wsResults = []
-        CountDownLatch messagesReceived = setupWebsocketConnection(wsResults, false, false, 1, 'skills@skills.org')
 
         when:
-        def summaryResult = skillsService.getSkillsSummaryForCurrentUser(projId)
+        CountDownLatch messagesReceived = setupWebsocketConnection(wsResults, false, false, 1, 'skills@skills.org')
         messagesReceived.await()
 
         then:
@@ -114,6 +113,32 @@ class WebsocketSpecs extends DefaultIntSpec {
         wsResults.find{it.skillId=='badge1'}.completed.size() == 1
         wsResults.find{it.skillId=='badge1'}.completed[0].type == CompletionItem.CompletionItemType.Badge
         wsResults.find{it.skillId=='badge1'}.completed[0].name == badge.name
+    }
+
+    def "non-notified skill achievements are notified when user connects to websocket" () {
+        def subj = SkillsFactory.createSubject(1, 1)
+        def skill = SkillsFactory.createSkill(1, 1, 1, 0, 4, 0, 150)
+        skillsService.createSubject(subj)
+        skillsService.createSkill(skill)
+
+        skillsService.addSkill([projectId: projId, skillId: skill.skillId], 'skills@skills.org', new Date())
+
+
+        skill.numPerformToCompletion = 1
+        skillsService.updateSkill(skill, skill.skillId)
+
+        List<SkillEventResult> wsResults = []
+
+        when:
+        CountDownLatch messagesReceived = setupWebsocketConnection(wsResults, false, false, 1, 'skills@skills.org')
+        messagesReceived.await()
+
+        then:
+        wsResults.find{it.skillId=='skill1'}.success
+        wsResults.find{it.skillId=='skill1'}.completed
+        wsResults.find{it.skillId=='skill1'}.completed.size() == 1
+        wsResults.find{it.skillId=='skill1'}.completed[0].type == CompletionItem.CompletionItemType.Skill
+        wsResults.find{it.skillId=='skill1'}.completed[0].name == skill.name
     }
 
     def "achieve subject's level - validate via xhr streaming"(){
@@ -165,6 +190,8 @@ class WebsocketSpecs extends DefaultIntSpec {
             }
         }
     }
+
+
 
     private CountDownLatch setupWebsocketConnection(List<SkillEventResult> wsResults, boolean xhr=false, boolean xhrPolling=false, int count=5, String userId=null) {
         CountDownLatch messagesReceived = new CountDownLatch(count)

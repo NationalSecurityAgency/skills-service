@@ -87,43 +87,53 @@ class SkillEventsService {
 
     @Transactional
     protected void notifyUserOfAchievements(String userId){
-        List<UserAchievement> pendingNotificationAchievements = achievedLevelRepo.findAllByUserIdAndNotified(userId, Boolean.FALSE.toString())
+        try {
+            List<UserAchievement> pendingNotificationAchievements = achievedLevelRepo.findAllByUserIdAndNotified(userId, Boolean.FALSE.toString())
 
-        SkillEventResult ser
+            SkillEventResult ser
 
-        pendingNotificationAchievements?.each {
-            SkillEventsSupportRepo.SkillDefMin skill = skillEventsSupportRepo.findByProjectIdAndSkillId(it.projectId, it.skillId)
+            pendingNotificationAchievements?.each {
+                SkillEventsSupportRepo.SkillDefMin skill = skillEventsSupportRepo.findByProjectIdAndSkillId(it.projectId, it.skillId)
 
-            if(!ser) {
-                ser = new SkillEventResult(projectId: it.projectId, skillId: it.skillId, name: skill.name)
-                ser.completed = []
-            }
-
-            CompletionItem completionItem
-            if (it.level != null) {
-                Date day = it.created.clearTime()
-                UserPoints points = userPointsRepo.findByProjectIdAndUserIdAndSkillIdAndDay(it.projectId, userId, it.skillId, day)
-
-                if(points) {
-                    completionItem = new CompletionItem(
-                            level: it.level, name: skill.name,
-                            id: points.skillId ?: "OVERALL",
-                            type: points.skillId ? CompletionItem.CompletionItemType.Subject : CompletionItem.CompletionItemType.Overall)
+                if (!ser) {
+                    ser = new SkillEventResult(projectId: it.projectId, skillId: it.skillId, name: skill.name)
+                    ser.completed = []
                 }
-            } else {
-                completionItem = new CompletionItem(type: CompletionTypeUtil.getCompletionType(skill.type), id: skill.skillId, name: skill.name)
+
+                CompletionItem completionItem
+                if (it.level != null) {
+                    Date day = it.created.clearTime()
+                    UserPoints points = userPointsRepo.findByProjectIdAndUserIdAndSkillIdAndDay(it.projectId, userId, it.skillId, day)
+
+                    if (points) {
+                        completionItem = new CompletionItem(
+                                level: it.level, name: skill.name,
+                                id: points.skillId ?: "OVERALL",
+                                type: points.skillId ? CompletionItem.CompletionItemType.Subject : CompletionItem.CompletionItemType.Overall)
+                    }
+                } else {
+                    if(SkillDef.ContainerType.Skill == skill.type) {
+                        completionItem = new CompletionItem(type: CompletionItem.CompletionItemType.Skill, id: skill.skillId, name: skill.name)
+                    } else {
+                        //why doesn't CompletionTypeUtil support Skill?
+                        completionItem = new CompletionItem(type: CompletionTypeUtil.getCompletionType(skill.type), id: skill.skillId, name: skill.name)
+                    }
+                }
+
+                if (completionItem) {
+                    ser.completed.add(completionItem)
+                }
+
+                it.notified = Boolean.TRUE.toString()
             }
 
-            if (completionItem) {
-                ser.completed.add(completionItem)
+            if (ser) {
+                skillEventPublisher.publishSkillUpdate(ser, userId)
+                achievedLevelRepo.saveAll(pendingNotificationAchievements)
             }
-
-            it.notified = Boolean.TRUE.toString()
-        }
-
-        if (ser) {
-            skillEventPublisher.publishSkillUpdate(ser, userId)
-            achievedLevelRepo.saveAll(pendingNotificationAchievements)
+        } catch (Exception e) {
+            log.error("unable to notify user [${userId}] of pending achievements", e)
+            throw e
         }
     }
 
