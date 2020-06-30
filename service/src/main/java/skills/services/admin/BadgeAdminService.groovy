@@ -27,17 +27,9 @@ import skills.controller.request.model.ActionPatchRequest
 import skills.controller.request.model.BadgeRequest
 import skills.controller.result.model.BadgeResult
 import skills.services.*
-import skills.storage.model.ProjDef
-import skills.storage.model.SkillDef
-import skills.storage.model.SkillDefWithExtra
-import skills.storage.model.SkillRelDef
 import skills.storage.accessors.ProjDefAccessor
-import skills.storage.model.UserAchievement
-import skills.storage.repos.GlobalBadgeLevelDefRepo
-import skills.storage.repos.SkillDefRepo
-import skills.storage.repos.SkillDefWithExtraRepo
-import skills.storage.repos.SkillRelDefRepo
-import skills.storage.repos.UserAchievedLevelRepo
+import skills.storage.model.*
+import skills.storage.repos.*
 import skills.storage.repos.nativeSql.NativeQueriesRepo
 import skills.utils.InputSanitizer
 import skills.utils.Props
@@ -182,6 +174,14 @@ class BadgeAdminService {
 
         return userIds
     }
+
+    @Transactional
+    public void awardBadgeToUsersMeetingRequirements(SkillDefParent badge) {
+        identifyUsersMeetingBadgeRequirements(badge.projectId, badge.skillId, badge.startDate, badge.endDate)?.each{
+            saveBadgeAchievement(it, badge.projectId, badge.skillId, badge.id, Boolean.FALSE.toString())
+        }
+    }
+
 
     @Transactional
     public void saveBadgeAchievement(String userId, String projectId, String badgeId, Integer badgeRefId, String notified=Boolean.TRUE.toString()) {
