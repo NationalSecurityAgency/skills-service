@@ -275,10 +275,33 @@ describe('Badges Tests', () => {
         cy.contains('Test Badge');
         cy.get('[data-cy=badgeStatus]').contains('Status: Disabled').should('exist');
         cy.get('[data-cy=goLive]').click();
+        cy.contains('Please Confirm!').should('exist');
+        cy.contains('Yes, Go Live!').click();
+
         cy.wait('@loadBadges');
         cy.contains('Test Badge');
         cy.get('[data-cy=badgeStatus]').contains('Status: Live').should('exist');
         cy.get('[data-cy=goLive]').should('not.exist');
+    });
+
+    it('Badge is disabled when created, canceling confirm dialog leaves badge disabled', () => {
+        cy.visit('/projects/proj1/badges');
+        cy.clickButton('Badge');
+        cy.contains('New Badge');
+        cy.get('#badgeName').type('Test Badge');
+        cy.clickSave();
+        cy.wait('@loadBadges');
+
+        cy.contains('Test Badge');
+        cy.get('[data-cy=badgeStatus]').contains('Status: Disabled').should('exist');
+        cy.get('[data-cy=goLive]').click();
+        cy.contains('Please Confirm!').should('exist');
+        cy.contains('Cancel').click();
+
+        cy.contains('Test Badge');
+        cy.get('[data-cy=badgeStatus]').contains('Status: Disabled').should('exist');
+        cy.get('[data-cy=badgeStatus]').contains('Status: Live').should('not.exist');
+        cy.get('[data-cy=goLive]').should('exist');
     });
 
     it('Can add Skill requirements to disabled badge', () => {
@@ -309,6 +332,8 @@ describe('Badges Tests', () => {
         cy.contains('Test Badge').should('exist');
         cy.get('[data-cy=badgeStatus]').contains('Status: Disabled').should('exist');
         cy.get('[data-cy=goLive]').click();
+        cy.contains('Please Confirm!').should('exist');
+        cy.contains('Yes, Go Live!').click();
         cy.wait('@loadBadges');
         cy.contains('Test Badge');
         cy.get('[data-cy=badgeStatus]').contains('Status: Live').should('exist');

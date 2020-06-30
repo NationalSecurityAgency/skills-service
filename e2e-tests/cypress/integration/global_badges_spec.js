@@ -164,7 +164,7 @@ describe('Global Badges Tests', () => {
         cy.wait('@getGlobalBadges');
     });
 
-    it.only('Global Badge is disabled when created, can only be enabled once', () => {
+    it('Global Badge is disabled when created, can only be enabled once', () => {
         const expectedId = 'TestBadgeBadge';
         cy.route('GET', `/supervisor/badges`).as('getGlobalBadges');
         cy.route('PUT', `/supervisor/badges/${expectedId}`).as('postGlobalBadge');
@@ -186,11 +186,42 @@ describe('Global Badges Tests', () => {
         cy.contains('Test Badge').should('exist');
         cy.get('[data-cy=badgeStatus]').contains('Status: Disabled').should('exist');
         cy.get('[data-cy=goLive]').click();
+        cy.contains('Please Confirm!').should('exist');
+        cy.contains('Yes, Go Live!').click();
         cy.wait('@postGlobalBadge');
         cy.wait('@getGlobalBadges');
         cy.contains('Test Badge');
-        cy.get('[data-cy=badgeStatus]').contains('Status: Live');
+        cy.get('[data-cy=badgeStatus]').contains('Status: Live').should('exist');
         cy.get('[data-cy=goLive]').should('not.exist');
+    });
+
+    it('Canceling go live dialog should leave global badge disabled', () => {
+        const expectedId = 'TestBadgeBadge';
+        cy.route('GET', `/supervisor/badges`).as('getGlobalBadges');
+        cy.route('PUT', `/supervisor/badges/${expectedId}`).as('postGlobalBadge');
+        cy.route('GET', `/supervisor/badges/id/${expectedId}/exists`).as('idExists');
+        cy.route('POST', '/supervisor/badges/name/exists').as('nameExists');
+        cy.route('GET', '/app/userInfo/hasRole/ROLE_SUPERVISOR').as('checkSupervisorRole');
+
+        cy.visit('/globalBadges');
+        cy.wait('@getGlobalBadges');
+        cy.wait('@checkSupervisorRole');
+
+        cy.clickButton('Badge');
+
+        cy.get('#badgeName').type('Test Badge');
+        cy.wait('@nameExists');
+        cy.clickSave();
+        cy.wait('@postGlobalBadge');
+
+        cy.contains('Test Badge').should('exist');
+        cy.get('[data-cy=badgeStatus]').contains('Status: Disabled').should('exist');
+        cy.get('[data-cy=goLive]').click();
+        cy.contains('Please Confirm!').should('exist');
+        cy.contains('Cancel').click();
+        cy.contains('Test Badge');
+        cy.get('[data-cy=badgeStatus]').contains('Status: Live').should('not.exist');
+        cy.get('[data-cy=goLive]').should('exist');
     });
 
     it('Can add Skill and Level requirements to disabled Global Badge', () => {
@@ -279,6 +310,8 @@ describe('Global Badges Tests', () => {
 
         cy.get('[data-cy=badgeStatus]').contains('Status: Disabled').should('exist');
         cy.get('[data-cy=goLive]').click();
+        cy.contains('Please Confirm!').should('exist');
+        cy.contains('Yes, Go Live!').click();
         cy.wait('@getGlobalBadges');
         cy.contains('A Badge').should('exist');
         cy.get('[data-cy=badgeStatus]').contains('Status: Live').should('exist');
