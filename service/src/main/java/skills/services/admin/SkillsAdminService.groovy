@@ -22,6 +22,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.transaction.support.TransactionSynchronization
+import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestBody
 import skills.controller.exceptions.ErrorCode
@@ -92,6 +94,9 @@ class SkillsAdminService {
 
     @Autowired
     SkillDefAccessor skillDefAccessor
+
+    @Autowired
+    BadgeAdminService badgeAdminService
 
     @Transactional()
     void saveSkill(String originalSkillId, SkillRequest skillRequest, boolean performCustomValidation=true) {
@@ -198,7 +203,16 @@ class SkillsAdminService {
                 // Must update points prior removal of UserPerformedSkill events as the removal relies on the existence of those extra events
                 userPointsManagement.updatePointsWhenOccurrencesAreDecreased(savedSkill.projectId, skillRequest.subjectId, savedSkill.skillId, savedSkill.pointIncrement, newOccurrences)
                 userPointsManagement.removeExtraEntriesOfUserPerformedSkillByUser(savedSkill.projectId, savedSkill.skillId, currentOccurrences + occurrencesDelta)
+                //identify what badge (or badges) this skill belongs to.
+                //if any, look for users who qualify for the badge now after this change is persisted See BadgeAdminService.identifyUsersMeetingBadgeRequirements
                 userPointsManagement.insertUserAchievementWhenDecreaseOfOccurrencesCausesUsersToAchieve(savedSkill.projectId, savedSkill.skillId, savedSkill.id, newOccurrences)
+
+                //identify any badges that this skill belongs to and award the badge if any users now qualify for this badge
+                List<SkillDef> badges = findAllBadgesSkillBelongsTo(savedSkill.skillId)
+                badges?.each {
+                    badgeAdminService.awardBadgeToUsersMeetingRequirements(it)
+                }
+
             } else if (occurrencesDelta > 0) {
                 userPointsManagement.removeUserAchievementsThatDoNotMeetNewNumberOfOccurrences(savedSkill.projectId, savedSkill.skillId, newOccurrences)
             }
@@ -219,15 +233,41 @@ class SkillsAdminService {
 
         SkillDef parentSkill = ruleSetDefGraphService.getParentSkill(skillDefinition)
 
+        //we need to check to see if this skill belongs to any badges, if so we need to look for any users who now qualify
+        //for those badges
         ruleSetDefinitionScoreUpdater.skillToBeRemoved(skillDefinition)
         userPointsManagement.handleSkillRemoval(skillDefinition)
+
+        //identify any badges that this skill belonged to and award the badge if any users now qualify for this badge
+        List<SkillDef> badges = findAllBadgesSkillBelongsTo(skillDefinition.skillId)
 
         ruleSetDefGraphService.deleteSkillWithItsDescendants(skillDefinition)
         log.debug("Deleted skill [{}]", skillDefinition.skillId)
 
+        badges?.each {
+            badgeAdminService.awardBadgeToUsersMeetingRequirements(it)
+        }
 
-        List<SkillDef> ciblings = ruleSetDefGraphService.getChildrenSkills(parentSkill)
-        displayOrderService.resetDisplayOrder(ciblings)
+        List<SkillDef> siblings = ruleSetDefGraphService.getChildrenSkills(parentSkill)
+        displayOrderService.resetDisplayOrder(siblings)
+    }
+
+    @Transactional(readOnly = true)
+    private List<SkillDef> findAllBadgesSkillBelongsTo(String skillId, boolean includeGlobal = true) {
+        List<SkillDef> badges = []
+        def res = skillRelDefRepo.findAllChildrenByChildSkillIdAndParentType(skillId, SkillDef.ContainerType.Badge)
+        if (res) {
+            badges.addAll(res)
+        }
+
+        if (includeGlobal) {
+            res = skillRelDefRepo.findAllChildrenByChildSkillIdAndParentType(skillId, SkillDef.ContainerType.GlobalBadge)
+            if (res) {
+                badges.addAll(res)
+            }
+        }
+
+        return badges
     }
 
     @Transactional(readOnly = true)

@@ -17,6 +17,7 @@ package skills.intTests.reportSkills
 
 import org.joda.time.DateTime
 import skills.intTests.utils.DefaultIntSpec
+import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
 
@@ -242,6 +243,92 @@ class ReportSkills_GlobalBadgeSkillsSpecs extends DefaultIntSpec {
         user1Summary[0].badgeAchieved
         user2Summary[0].badgeId == 'GlobalBadge1'
         !user2Summary[0].badgeAchieved
+    }
+
+    def "changes to skill occurrence causes global badge to be awarded"() {
+        def proj1 = SkillsFactory.createProject(1)
+        skillsService.createProject(proj1)
+        def subj = SkillsFactory.createSubject(1)
+        skillsService.createSubject(subj)
+
+        def proj2 = SkillsFactory.createProject(2)
+        skillsService.createProject(proj2)
+        def subj2 = SkillsFactory.createSubject(2)
+        skillsService.createSubject(subj2)
+
+
+        def skill1 = SkillsFactory.createSkill(1, 1, 1, 0, 3, 90, 100)
+        def skill2 = SkillsFactory.createSkill(2, 1, 2, 0, 1, 0, 100)
+
+
+        skillsService.createSkills([skill1, skill2])
+
+        def badge = SkillsFactory.createBadge()
+        skillsService.createGlobalBadge(badge)
+        skillsService.assignSkillToGlobalBadge([projectId: proj1.projectId, badgeId: badge.badgeId, skillId: skill1.skillId])
+        skillsService.assignSkillToGlobalBadge([projectId: proj2.projectId, badgeId: badge.badgeId, skillId: skill2.skillId])
+
+        skillsService.addSkill([projectId: proj1.projectId, skillId: skill1.skillId], "u123", new Date())
+        skillsService.addSkill([projectId: proj2.projectId, skillId: skill2.skillId], "u123", new Date())
+
+        when:
+        //get history for user123 and assert that badge is not awarded
+        def u123SummaryBeforeEdit = skillsService.getBadgesSummary("u123", proj1.projectId)
+
+
+        skillsService.updateSkill([projectId: proj1.projectId,
+                                   subjectId: subj.subjectId,
+                                   skillId: skill1.skillId,
+                                   numPerformToCompletion: 1,
+                                   pointIncrement: skill1.pointIncrement,
+                                   pointIncrementInterval: skill1.pointIncrementInterval,
+                                   numMaxOccurrencesIncrementInterval: skill1.numMaxOccurrencesIncrementInterval,
+                                   version: skill1.version,
+                                   name: skill1.name], skill1.skillId)
+
+        def u123SummaryAfterEditOccurrences = skillsService.getBadgesSummary("u123", proj1.projectId)
+
+        then:
+        !u123SummaryBeforeEdit[0].badgeAchieved
+        u123SummaryAfterEditOccurrences[0].badgeAchieved
+    }
+
+    def "deletion of a skill causes global badge to be awarded"() {
+        def proj1 = SkillsFactory.createProject(1)
+        skillsService.createProject(proj1)
+        def subj = SkillsFactory.createSubject(1)
+        skillsService.createSubject(subj)
+
+        def proj2 = SkillsFactory.createProject(2)
+        skillsService.createProject(proj2)
+        def subj2 = SkillsFactory.createSubject(2)
+        skillsService.createSubject(subj2)
+
+
+        def skill1 = SkillsFactory.createSkill(1, 1, 1, 0, 1, 90, 100)
+        def skill2 = SkillsFactory.createSkill(2, 1, 2, 0, 1, 0, 100)
+
+
+        skillsService.createSkills([skill1, skill2])
+
+        def badge = SkillsFactory.createBadge()
+        skillsService.createGlobalBadge(badge)
+        skillsService.assignSkillToGlobalBadge([projectId: proj1.projectId, badgeId: badge.badgeId, skillId: skill1.skillId])
+        skillsService.assignSkillToGlobalBadge([projectId: proj2.projectId, badgeId: badge.badgeId, skillId: skill2.skillId])
+
+        skillsService.addSkill([projectId: proj1.projectId, skillId: skill1.skillId], "u123", new Date())
+
+        when:
+        //get history for user123 and assert that badge is not awarded
+        def u123SummaryBeforeEdit = skillsService.getBadgesSummary("u123", proj1.projectId)
+
+        skillsService.deleteSkill([projectId: proj2.projectId, subjectId: subj.subjectId, skillId: skill2.skillId])
+
+        def u123SummaryAfterSkillDeletion = skillsService.getBadgesSummary("u123", proj1.projectId)
+
+        then:
+        SkillsClientException ex = thrown(SkillsClientException)
+        ex.message.contains('cannot be deleted as it is currently referenced by one or more global badges')
     }
 
 }
