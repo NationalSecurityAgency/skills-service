@@ -33,7 +33,7 @@ limitations under the License.
       <div class="float-md-right" style="font-size: 0.8rem;">
         <span v-if="!this.live" data-cy="badgeStatus">
           <span class="text-secondary">Status: </span>
-          <span class="text-uppercase">Disabled <span class="far fa-stop-circle text-warning"></span></span> | <a href="#0" @click.stop="handlePublish" data-cy="goLive">Go Live</a>
+          <span class="text-uppercase">Disabled <span class="far fa-stop-circle text-warning"></span></span> | <a href="#0" @click.stop="handlePublish" class="btn btn-outline-primary btn-sm" data-cy="goLive">Go Live</a>
         </span>
         <span v-else data-cy="badgeStatus">
           <span class="text-secondary">Status: </span> <span class="text-uppercase">Live <span class="far fa-check-circle text-success"></span></span>
@@ -145,14 +145,21 @@ limitations under the License.
         this.$emit('move-badge-down', this.badgeInternal);
       },
       handlePublish() {
-        this.badgeInternal.enabled = 'true';
-        const toSave = Object.assign({}, this.badgeInternal);
-        if (!toSave.originalBadgeId) {
-          toSave.originalBadgeId = toSave.badgeId;
-        }
-        toSave.startDate = this.toDate(toSave.startDate);
-        toSave.endDate = this.toDate(toSave.endDate);
-        this.badgeEdited(toSave);
+        const msg = `While this Badge is disabled, user's cannot see the Badge or achieve it. Once the Badge is live, it will be visible to users.
+        Please note that once the badge is live, it cannot be disabled.`;
+        this.msgConfirm(msg, 'Please Confirm!', 'Yes, Go Live!')
+          .then((res) => {
+            if (res) {
+              this.badgeInternal.enabled = 'true';
+              const toSave = Object.assign({}, this.badgeInternal);
+              if (!toSave.originalBadgeId) {
+                toSave.originalBadgeId = toSave.badgeId;
+              }
+              toSave.startDate = this.toDate(toSave.startDate);
+              toSave.endDate = this.toDate(toSave.endDate);
+              this.badgeEdited(toSave);
+            }
+          });
       },
       toDate(value) {
         let dateVal = value;

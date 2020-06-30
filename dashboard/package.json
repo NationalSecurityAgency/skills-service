@@ -1,5 +1,5 @@
 {
-  "name": "frontend",
+  "name": "dashboard",
   "version": "1.0.0",
   "license": "Apache-2.0",
   "description": "SkillTree Dashboard UI",
@@ -11,7 +11,7 @@
     "licenseHeaderAdd": "license-check-and-add add -f ../license-add/license-add-config.json",
     "licenseCheck": "npm run licenseHeaderCheck && npm run licenseDepCheck",
     "build": "npm run licenseCheck && vue-cli-service build",
-    "deploy": "npm run build && rm -rf ../backend/src/main/resources/public/static/js && cp -rT dist ../backend/src/main/resources/public/ && cp -rT dist ../backend/target/classes/public/",
+    "deploy": "npm run build && rm -rf ../skills-service/src/main/resources/public/static/js && cp -rT dist ../skills-service/src/main/resources/public/ && cp -rT dist ../skills-service/target/classes/public/",
     "lint": "vue-cli-service lint",
     "test:e2e": "vue-cli-service test:e2e",
     "test:unit": "vue-cli-service test:unit"
