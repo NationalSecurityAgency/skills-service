@@ -360,12 +360,12 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
         }
 
         Query query = entityManager.createNativeQuery(q);
-        query.setParameter("projectId", projectId)
-        query.setParameter("badgeId", badgeId)
+        query.setParameter('projectId', projectId)
+        query.setParameter('badgeId', badgeId)
 
         if(dateCheck) {
-            query.setParameter("start", start)
-            query.setParameter("end", end)
+            query.setParameter('start', start)
+            query.setParameter('end', end)
         }
 
         return query.getResultList()
@@ -454,12 +454,12 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
         }
 
         Query query = entityManager.createNativeQuery(q);
-        if (includeSkills) {
-            query.setParameter("badgeId", badgeId)
+        if (includeSkills || includeLevels) {
+            query.setParameter('badgeId', badgeId)
         }
         if(includeDates) {
-            query.setParameter("start", start)
-            query.setParameter("end", end)
+            query.setParameter('start', start)
+            query.setParameter('end', end)
         }
 
         return query.getResultList()
