@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.services.events
+package skills.websocket
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
@@ -29,6 +29,7 @@ import org.springframework.messaging.support.ChannelInterceptor
 import org.springframework.messaging.support.MessageHeaderAccessor
 import org.springframework.security.core.Authentication
 import org.springframework.stereotype.Component
+import skills.services.events.SkillEventsService
 
 import java.security.Principal
 
