@@ -44,9 +44,9 @@ class H2NativeRepo implements NativeQueriesRepo {
           and a.project_id = :projectId'''.toString()
 
         Query query = entityManager.createNativeQuery(q);
-        query.setParameter("projectId", projectId);
-        query.setParameter("parentSubjectSkillId", parentSubjectSkillId)
-        query.setParameter("deletedSkillId", deletedSkillId)
+        query.setParameter('projectId', projectId);
+        query.setParameter('parentSubjectSkillId', parentSubjectSkillId)
+        query.setParameter('deletedSkillId', deletedSkillId)
         query.executeUpdate();
     }
 

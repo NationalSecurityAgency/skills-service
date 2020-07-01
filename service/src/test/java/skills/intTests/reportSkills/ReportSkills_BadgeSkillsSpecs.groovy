@@ -233,6 +233,52 @@ class ReportSkills_BadgeSkillsSpecs extends DefaultIntSpec {
         !user2Summary.badgeAchieved
     }
 
+    def "badge awarded to users with requirements after enabling, does not impact other badges"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(20)
+        def badge = SkillsFactory.createBadge()
+
+        def badge2 = SkillsFactory.createBadge(1, 2)
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        badge.enabled = false
+        skillsService.createBadge(badge)
+        skillsService.createBadge(badge2)
+        skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills.get(0).skillId])
+        skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills.get(1).skillId])
+
+        skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: badge2.badgeId, skillId: skills[0].skillId])
+        skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: badge2.badgeId, skillId: skills[5].skillId])
+
+        skillsService.addSkill([skillId: skills.get(0).skillId, projectId: proj.projectId], "user1", new Date())
+        skillsService.addSkill([skillId: skills.get(0).skillId, projectId: proj.projectId], "user2", new Date())
+        skillsService.addSkill([skillId: skills.get(1).skillId, projectId: proj.projectId], "user1", new Date())
+
+        skillsService.addSkill([skillId: skills[0].skillId, projectId: proj.projectId], "user3", new Date())
+
+        when:
+        def user1SummaryBeforeEnable = skillsService.getBadgeSummary("user1", proj.projectId, badge.badgeId)
+        skillsService.updateBadge([projectId: proj.projectId, badgeId: badge.badgeId, enabled: true, name: badge.name], badge.badgeId)
+
+        def user1Summary = skillsService.getBadgeSummary("user1", proj.projectId, badge.badgeId)
+        def user1SummaryBadge2 = skillsService.getBadgeSummary("user1", proj.projectId, badge2.badgeId)
+        def user2Summary = skillsService.getBadgeSummary("user2", proj.projectId, badge.badgeId)
+        def user3SummaryBadge1 = skillsService.getBadgeSummary("user3", proj.projectId, badge.badgeId)
+        def user3SummaryBadge2 = skillsService.getBadgeSummary("user3", proj.projectId, badge2.badgeId)
+
+        then:
+        !user1SummaryBeforeEnable.badgeAchieved
+        user1Summary.badgeAchieved
+        !user1SummaryBadge2.badgeAchieved
+        !user2Summary.badgeAchieved
+        !user3SummaryBadge1.badgeAchieved
+        !user3SummaryBadge2.badgeAchieved
+    }
+
     def "gem awarded to users with requirements after enabling"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
@@ -277,5 +323,88 @@ class ReportSkills_BadgeSkillsSpecs extends DefaultIntSpec {
         !user1SummaryBeforeEnable.badgeAchieved
         user1Summary.badgeAchieved
         !user2Summary.badgeAchieved
+    }
+
+    def "changes to skill occurrence causes badge to be awarded"() {
+        def proj1 = SkillsFactory.createProject(1)
+        skillsService.createProject(proj1)
+        def subj = SkillsFactory.createSubject(1)
+        skillsService.createSubject(subj)
+
+        def skill1 = SkillsFactory.createSkill(1, 1, 1, 0, 3, 90, 100)
+        def skill2 = SkillsFactory.createSkill(1, 1, 2, 0, 1, 0, 100)
+
+        skillsService.createSkills([skill1, skill2])
+
+        def badge = SkillsFactory.createBadge()
+        skillsService.createBadge(badge)
+        skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badge.badgeId, skillId: skill1.skillId])
+        skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badge.badgeId, skillId: skill2.skillId])
+
+        skillsService.addSkill([projectId: proj1.projectId, skillId: skill1.skillId], "u123", new Date())
+        skillsService.addSkill([projectId: proj1.projectId, skillId: skill2.skillId], "u123", new Date())
+
+        skillsService.addSkill([projectId: proj1.projectId, skillId: skill1.skillId], "u124", new Date())
+
+        when:
+        //get history for user123 and assert that badge is not awarded
+        def u123SummaryBeforeEdit = skillsService.getBadgeSummary("u123", proj1.projectId, badge.badgeId)
+        def u124SummaryBeforeEdit = skillsService.getBadgeSummary("u124", proj1.projectId, badge.badgeId)
+
+
+        skillsService.updateSkill([projectId: proj1.projectId,
+                                   subjectId: subj.subjectId,
+                                   skillId: skill1.skillId,
+                                   numPerformToCompletion: 1,
+                                   pointIncrement: skill1.pointIncrement,
+                                   pointIncrementInterval: skill1.pointIncrementInterval,
+                                   numMaxOccurrencesIncrementInterval: skill1.numMaxOccurrencesIncrementInterval,
+                                   version: skill1.version,
+                                   name: skill1.name], skill1.skillId)
+
+        def u123SummaryAfterEditOccurrences = skillsService.getBadgeSummary("u123", proj1.projectId, badge.badgeId)
+        def u124SummaryAfterEditOccurrences = skillsService.getBadgeSummary("u124", proj1.projectId, badge.badgeId)
+
+        then:
+        !u123SummaryBeforeEdit.badgeAchieved
+        u123SummaryAfterEditOccurrences.badgeAchieved
+        !u124SummaryBeforeEdit.badgeAchieved
+        !u124SummaryAfterEditOccurrences.badgeAchieved
+    }
+
+    def "deletion of a skill causes badge to be awarded"() {
+        def proj1 = SkillsFactory.createProject(1)
+        skillsService.createProject(proj1)
+        def subj = SkillsFactory.createSubject(1)
+        skillsService.createSubject(subj)
+
+        def skill1 = SkillsFactory.createSkill(1, 1, 1, 0, 1, 90, 100)
+        def skill2 = SkillsFactory.createSkill(1, 1, 2, 0, 1, 0, 100)
+
+        skillsService.createSkills([skill1, skill2])
+
+        def badge = SkillsFactory.createBadge()
+        skillsService.createBadge(badge)
+        skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badge.badgeId, skillId: skill1.skillId])
+        skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badge.badgeId, skillId: skill2.skillId])
+
+        skillsService.addSkill([projectId: proj1.projectId, skillId: skill1.skillId], "u123", new Date())
+        skillsService.addSkill([projectId: proj1.projectId, skillId: skill2.skillId], "u124", new Date())
+
+        when:
+        //get history for user123 and assert that badge is not awarded
+        def u123SummaryBeforeEdit = skillsService.getBadgeSummary("u123", proj1.projectId, badge.badgeId)
+        def u124SummaryBeforeEdit = skillsService.getBadgeSummary("u124", proj1.projectId, badge.badgeId)
+
+        skillsService.deleteSkill([projectId: proj1.projectId, subjectId: subj.subjectId, skillId: skill2.skillId])
+
+        def u123SummaryAfterSkillDeletion = skillsService.getBadgeSummary("u123", proj1.projectId, badge.badgeId)
+        def u124SummaryAfterEdit = skillsService.getBadgeSummary("u124", proj1.projectId, badge.badgeId)
+
+        then:
+        !u123SummaryBeforeEdit.badgeAchieved
+        u123SummaryAfterSkillDeletion.badgeAchieved
+        !u124SummaryBeforeEdit.badgeAchieved
+        !u124SummaryAfterEdit.badgeAchieved
     }
 }
