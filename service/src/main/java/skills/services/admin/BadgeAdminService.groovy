@@ -184,7 +184,7 @@ class BadgeAdminService {
 
 
     @Transactional
-    public void saveBadgeAchievement(String userId, String projectId, String badgeId, Integer badgeRefId, String notified=Boolean.TRUE.toString()) {
+    private void saveBadgeAchievement(String userId, String projectId, String badgeId, Integer badgeRefId, String notified=Boolean.TRUE.toString()) {
         UserAchievement groupAchievement = new UserAchievement(userId: userId.toLowerCase(),
                 projectId: projectId,
                 skillId: badgeId,
@@ -192,7 +192,6 @@ class BadgeAdminService {
                 notified: notified)
         achievedLevelRepo.save(groupAchievement)
     }
-
 
     @Transactional
     void deleteBadge(String projectId, String badgeId, SkillDef.ContainerType type = SkillDef.ContainerType.Badge) {
