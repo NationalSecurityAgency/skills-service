@@ -19,13 +19,15 @@ import store from '../store/store';
 
 
 function errorResponseHandler(error) {
+  console.log('Received Error', error);
   // check if the caller wants to handle the error with displaying the errorPage/dialog
   if (Object.prototype.hasOwnProperty.call(error.config, 'handleError') && error.config.handleError === false) {
+    console.log('Caller has set handleError attribute, propagating to the caller', error); // TODO - remove me
     return Promise.reject(error);
   }
 
   const errorCode = error.response ? error.response.status : undefined;
-  console.log(`Received Error with code [${errorCode}]`, error);
+  console.log(`Received Error with code [${errorCode}]`, error); // TODO - remove me
   if (errorCode === 401) {
     store.commit('clearAuthData');
     const path = window.location.pathname;
@@ -34,14 +36,18 @@ function errorResponseHandler(error) {
       if (store.getters.isPkiAuthenticated) {
         loginRoute = path !== '/' ? { name: 'HomePage', query: { redirect: path } } : { name: 'HomePage' };
       }
+      console.log(`401 - re-routing to loginRoute [${loginRoute}], path [${path}]`, error); // TODO - remove me
       router.push(loginRoute);
     }
   } else if (errorCode === 403) {
+    console.log('re-routing to NotAuthorizedPage', error); // TODO - remove me
     router.push({ name: 'NotAuthorizedPage' });
   } else {
+    console.log('re-routing to ErrorPage', error); // TODO - remove me
     router.push({ name: 'ErrorPage' });
   }
-  return Promise.reject(error);
+  console.log('rejecting error', error); // TODO - remove me
+  return Promise.reject(error).then(result => console.log('resolved', result), result => console.error('rejected', result));
 }
 
 // apply interceptor on response
