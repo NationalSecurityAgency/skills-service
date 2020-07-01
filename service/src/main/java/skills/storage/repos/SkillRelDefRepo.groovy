@@ -98,8 +98,8 @@ interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
     SkillDef findGlobalBadgeByChildSkillId(String skillId)
 
     @Nullable
-    @Query(value= '''select srd.parent from SkillRelDef srd where srd.child.skillId=?1 and srd.type='BadgeRequirement' and srd.parent.type=?2 ''')
-    List<SkillDef> findAllChildrenByChildSkillIdAndParentType(String skillId, SkillDef.ContainerType type)
+    @Query(value= '''select srd.parent from SkillRelDef srd where srd.child.skillId=?1 and srd.type=?2 and srd.parent.type=?3 ''')
+    List<SkillDef> findAllChildrenByChildSkillIdAndRelationshipTypeAndParentType(String skillId, SkillRelDef.RelationshipType relType, SkillDef.ContainerType parentType)
 
 
     static interface SkillDefSkinny {

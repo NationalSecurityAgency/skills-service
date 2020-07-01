@@ -22,8 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.transaction.support.TransactionSynchronization
-import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestBody
 import skills.controller.exceptions.ErrorCode
@@ -255,13 +253,17 @@ class SkillsAdminService {
     @Transactional(readOnly = true)
     private List<SkillDef> findAllBadgesSkillBelongsTo(String skillId, boolean includeGlobal = true) {
         List<SkillDef> badges = []
-        def res = skillRelDefRepo.findAllChildrenByChildSkillIdAndParentType(skillId, SkillDef.ContainerType.Badge)
+        def res = skillRelDefRepo.findAllChildrenByChildSkillIdAndRelationshipTypeAndParentType(skillId,
+                SkillRelDef.RelationshipType.BadgeRequirement,
+                SkillDef.ContainerType.Badge)
         if (res) {
             badges.addAll(res)
         }
 
         if (includeGlobal) {
-            res = skillRelDefRepo.findAllChildrenByChildSkillIdAndParentType(skillId, SkillDef.ContainerType.GlobalBadge)
+            res = skillRelDefRepo.findAllChildrenByChildSkillIdAndRelationshipTypeAndParentType(skillId,
+                    SkillRelDef.RelationshipType.BadgeRequirement,
+                    SkillDef.ContainerType.GlobalBadge)
             if (res) {
                 badges.addAll(res)
             }

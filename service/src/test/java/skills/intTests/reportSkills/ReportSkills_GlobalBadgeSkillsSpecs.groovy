@@ -151,6 +151,8 @@ class ReportSkills_GlobalBadgeSkillsSpecs extends DefaultIntSpec {
         def skills2 = SkillsFactory.createSkills(10, 2)
         def badge = [badgeId: badgeId, name: 'Test Global Badge 1', enabled: 'false']
 
+        def badge2 = [badgeId: 'GlobalBadge2', name: 'Test Global Badge 2', enabled: 'false']
+
         skillsService.createProject(proj)
         skillsService.createProject(proj2)
         skillsService.createSubject(subj)
@@ -159,9 +161,14 @@ class ReportSkills_GlobalBadgeSkillsSpecs extends DefaultIntSpec {
         skillsService.createSkills(skills2)
 
         skillsService.createGlobalBadge(badge)
+        skillsService.createGlobalBadge(badge2)
         skillsService.assignSkillToGlobalBadge(projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills[0].skillId)
         skillsService.assignSkillToGlobalBadge(projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills[1].skillId)
         skillsService.assignSkillToGlobalBadge(projectId: proj2.projectId, badgeId: badge.badgeId, skillId: skills2[0].skillId)
+
+        skillsService.assignSkillToGlobalBadge(projectId: proj.projectId, badgeId: badge2.badgeId, skillId: skills[0].skillId)
+        skillsService.assignSkillToGlobalBadge(projectId: proj.projectId, badgeId: badge2.badgeId, skillId: skills[1].skillId)
+        skillsService.assignSkillToGlobalBadge(projectId: proj2.projectId, badgeId: badge2.badgeId, skillId: skills2[0].skillId)
 
         skillsService.addSkill([skillId: skills.get(0).skillId, projectId: proj.projectId], "user2", new Date())
         skillsService.addSkill([skillId: skills.get(1).skillId, projectId: proj2.projectId], "user2", new Date())
@@ -179,11 +186,14 @@ class ReportSkills_GlobalBadgeSkillsSpecs extends DefaultIntSpec {
         def user2Summary = skillsService.getBadgesSummary("user2", proj.projectId)
 
         then:
-        !user1SummaryBeforeEnable[0].badgeAchieved
-        user1Summary[0].badgeId == 'GlobalBadge1'
-        user1Summary[0].badgeAchieved
-        user2Summary[0].badgeId == 'GlobalBadge1'
-        !user2Summary[0].badgeAchieved
+        !user1SummaryBeforeEnable.find{it.badgeId=='GlobalBadge1'}.badgeAchieved
+        user1Summary.find{ it.badgeId == 'GlobalBadge1'}
+        user1Summary.find{it.badgeId == 'GlobalBadge2'}
+        !user1Summary.find{it.badgeId == 'GlobalBadge2'}.badgeAchieved
+        user1Summary.find{ it.badgeId == 'GlobalBadge1'}.badgeAchieved
+        user2Summary.find{it.badgeId == 'GlobalBadge1'}
+        !user2Summary.find{it.badgeId == 'GlobalBadge1'}.badgeAchieved
+        !user2Summary.find{it.badgeId == 'GlobalBadge2'}.badgeAchieved
     }
 
     def "global badge awarded to users meeting skill and level requirements after enabling"() {
