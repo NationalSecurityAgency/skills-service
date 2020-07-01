@@ -25,6 +25,7 @@ function errorResponseHandler(error) {
   }
 
   const errorCode = error.response ? error.response.status : undefined;
+  console.log(`Received Error with code [${errorCode}]`, error);
   if (errorCode === 401) {
     store.commit('clearAuthData');
     const path = window.location.pathname;
