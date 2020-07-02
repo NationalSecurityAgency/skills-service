@@ -61,13 +61,13 @@ spring:
       client:
         registration:
           google:
-            client-id:
-            client-secret:
+            client-id: 12345
+            client-secret: 67890
             redirectUriTemplate: 'http://localhost:8080/{action}/oauth2/code/{registrationId}'
             iconClass: fab fa-google
           github:
-            client-id:
-            client-secret:
+            client-id: 98765
+            client-secret: ABCDEF
             redirectUriTemplate: 'http://localhost:8080/{action}/oauth2/code/{registrationId}'
             iconClass: fab fa-github
 skills:
