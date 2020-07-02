@@ -39,3 +39,6 @@ jobs:
       run: |
         mvn --version
         java -version
+
+    - name: Build
+      run: mvn --batch-mode install
