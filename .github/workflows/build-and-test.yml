@@ -27,7 +27,7 @@ jobs:
         node-version: '12'
 
     # Runs a single command using the runners shell
-    - name: Run a one-line script
+    - name: Run a one-line script yes
       run: echo Hello, world!
 
     # Runs a set of commands using the runners shell
