@@ -152,45 +152,30 @@ class BadgeAdminService {
         }
 
         if (identifyEligibleUsers) {
-            identifyUsersMeetingBadgeRequirements(projectId, originalBadgeId, savedSkill.startDate, savedSkill.endDate)?.each {
-                saveBadgeAchievement(it, projectId, savedSkill.skillId, savedSkill.id, Boolean.FALSE.toString())
-            }
+            awardBadgeToUsersMeetingRequirements(savedSkill)
         }
 
         log.debug("Saved [{}]", savedSkill)
     }
 
-    private List<String> identifyUsersMeetingBadgeRequirements(String projectId, String badgeId, Date startDate, Date endDate){
-        List<String> userIds
-        if(projectId == null) {
-            userIds = nativeQueriesRepo.findUsersEligbleForGlobalBadge(badgeId,
-                    countNumberOfRequiredSkills(badgeId),
-                    countNumberOfRequiredLevels(badgeId),
-                    startDate,
-                    endDate)
-        } else {
-            userIds = nativeQueriesRepo.findUsersEligibleForBadge(projectId, badgeId, startDate, endDate)
-        }
-
-        return userIds
-    }
-
     @Transactional
     public void awardBadgeToUsersMeetingRequirements(SkillDefParent badge) {
-        identifyUsersMeetingBadgeRequirements(badge.projectId, badge.skillId, badge.startDate, badge.endDate)?.each{
-            saveBadgeAchievement(it, badge.projectId, badge.skillId, badge.id, Boolean.FALSE.toString())
+        if(!badge.projectId) {
+            nativeQueriesRepo.findUsersEligbleForGlobalBadgeAndAddAchievement(badge.skillId,
+                    badge.id,
+                    Boolean.FALSE,
+                    countNumberOfRequiredSkills(badge.skillId),
+                    countNumberOfRequiredLevels(badge.skillId),
+                    badge.startDate,
+                    badge.endDate)
+        } else {
+            nativeQueriesRepo.findUsersEligibleForBadgeAndAddAchievement(badge.projectId,
+                    badge.skillId,
+                    badge.id,
+                    Boolean.FALSE,
+                    badge.startDate,
+                    badge.endDate)
         }
-    }
-
-
-    @Transactional
-    private void saveBadgeAchievement(String userId, String projectId, String badgeId, Integer badgeRefId, String notified=Boolean.TRUE.toString()) {
-        UserAchievement groupAchievement = new UserAchievement(userId: userId.toLowerCase(),
-                projectId: projectId,
-                skillId: badgeId,
-                skillRefId: badgeRefId,
-                notified: notified)
-        achievedLevelRepo.save(groupAchievement)
     }
 
     @Transactional

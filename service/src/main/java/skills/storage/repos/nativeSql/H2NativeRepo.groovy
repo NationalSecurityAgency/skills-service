@@ -379,7 +379,7 @@ class H2NativeRepo implements NativeQueriesRepo {
     }
 
     @Override
-    List<String> findUsersEligibleForBadge(String projectId, String badgeId, Date start, Date end) {
+    int findUsersEligibleForBadgeAndAddAchievement(String projectId, String badgeId, Integer badgeRowId, Boolean notified, Date start, Date end) {
         String badgeSkillsQ = '''
         SELECT sr.child_ref_id 
         FROM skill_relationship_definition sr
@@ -440,15 +440,32 @@ class H2NativeRepo implements NativeQueriesRepo {
             }
         }
 
-        return results
+        int updated=0
+        results?.each{
+            String insert = '''
+            INSERT INTO user_achievement (user_id, project_id, skill_id, skill_ref_id, notified, points_when_achieved)
+            VALUES (:userId, :projectId, :skillId, :skillRefId, :notified, :pointsWhenAchieved )
+            '''
+            Query insertAchievement = entityManager.createNativeQuery(insert)
+            insertAchievement.setParameter("userId", it)
+            insertAchievement.setParameter("projectId", projectId)
+            insertAchievement.setParameter("skillId", badgeId)
+            insertAchievement.setParameter("skillRefId", badgeRowId)
+            insertAchievement.setParameter("notified", false)
+            insertAchievement.setParameter("pointsWhenAchieved", -1)
+            insertAchievement.executeUpdate()
+            updated++
+        }
+        return updated
     }
 
-    @Override
-    List<String> findUsersEligbleForGlobalBadge(String badgeId,
-                                                Integer requiredSklls,
-                                                Integer requiredLevels,
-                                                Date start,
-                                                Date end) {
+    int findUsersEligbleForGlobalBadgeAndAddAchievement(String badgeId,
+                                                        Integer badgeRowId,
+                                                        Boolean notified,
+                                                        Integer requiredSklls,
+                                                        Integer requiredLevels,
+                                                        Date start,
+                                                        Date end) {
 
         boolean requireSkills = requiredSklls != null && requiredSklls > 0
         boolean requireLevels = requiredLevels != null && requiredLevels > 0
@@ -521,13 +538,32 @@ class H2NativeRepo implements NativeQueriesRepo {
             }
         }
 
+        def users = []
         if (!requireLevels) {
-            return usersWithRequiredSkills
+            users = usersWithRequiredSkills
         } else if (!requireSkills) {
-            return usersWithRequiredLevel
+            users = usersWithRequiredLevel
         } else {
-            return usersWithRequiredSkills.intersect(usersWithRequiredLevel)
+            users = usersWithRequiredSkills.intersect(usersWithRequiredLevel)
         }
+
+        int updated=0
+        users?.each{
+            String insert = '''
+            INSERT INTO user_achievement (user_id, project_id, skill_id, skill_ref_id, notified, points_when_achieved)
+            VALUES (:userId, :projectId, :skillId, :skillRefId, :notified, :pointsWhenAchieved )
+            '''
+            Query insertAchievement = entityManager.createNativeQuery(insert)
+            insertAchievement.setParameter("userId", it)
+            insertAchievement.setParameter("projectId", null)
+            insertAchievement.setParameter("skillId", badgeId)
+            insertAchievement.setParameter("skillRefId", badgeRowId)
+            insertAchievement.setParameter("notified", false)
+            insertAchievement.setParameter("pointsWhenAchieved", -1)
+            insertAchievement.executeUpdate()
+            updated++
+        }
+        return updated
     }
 
     @Override
