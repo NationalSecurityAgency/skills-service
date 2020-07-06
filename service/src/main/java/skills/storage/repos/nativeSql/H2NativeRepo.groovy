@@ -451,7 +451,7 @@ class H2NativeRepo implements NativeQueriesRepo {
             insertAchievement.setParameter("projectId", projectId)
             insertAchievement.setParameter("skillId", badgeId)
             insertAchievement.setParameter("skillRefId", badgeRowId)
-            insertAchievement.setParameter("notified", false)
+            insertAchievement.setParameter("notified", Boolean.FALSE.toString())
             insertAchievement.setParameter("pointsWhenAchieved", -1)
             insertAchievement.executeUpdate()
             updated++
