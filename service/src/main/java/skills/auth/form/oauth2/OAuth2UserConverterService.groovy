@@ -41,6 +41,9 @@ class OAuth2UserConverterService {
         OAuth2UserConverter converter = lookup.get(clientId.toLowerCase())
         if (converter) {
             userInfo = converter.convert(clientId, oAuth2User)
+            if (!userInfo.usernameForDisplay) {
+                userInfo.usernameForDisplay = userInfo.username
+            }
         } else {
             throw new SkillsAuthorizationException("No OAuth2UserConverter configured for clientId [${clientId}]")
         }
