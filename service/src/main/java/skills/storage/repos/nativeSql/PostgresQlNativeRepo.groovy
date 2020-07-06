@@ -381,6 +381,7 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
                                                 Integer requiredLevels,
                                                 Date start,
                                                 Date end) {
+
         final String cteFrag = '''
         WITH badgeSkills AS (
             SELECT sr.child_ref_id childId
@@ -394,6 +395,8 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
         final String insertStatement = '''
         INSERT INTO user_achievement (user_id, skill_id, skill_ref_id, notified, points_when_achieved)
         '''
+
+        final String selectFrag = '''SELECT ua.user_id, ''' +"'$badgeId', $badgeRowId, '${notified.toString()}', -1 "
 
         final String skillDateFrag = '''
         AND
@@ -413,8 +416,7 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
         String levels = ''
         String skills = ''
         if (includeLevels) {
-            levels = '''
-            SELECT ua.user_id, ''' +"'$badgeId', $badgeRowId, '${notified.toString()}', -1 "+
+            levels = selectFrag +
             '''
             FROM USER_ACHIEVEMENT ua
             INNER JOIN GLOBAL_BADGE_LEVEL_DEFINITION g ON g.level=ua.level 
@@ -425,8 +427,7 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
         }
 
         if (includeSkills) {
-            skills = '''
-            SELECT ua.user_id, ''' +"'$badgeId', $badgeRowId, '${notified.toString()}', -1 "+
+            skills = selectFrag +
             '''
             FROM USER_ACHIEVEMENT ua
             WHERE ua.skill_ref_id IN (SELECT childId FROM badgeSkills) AND
