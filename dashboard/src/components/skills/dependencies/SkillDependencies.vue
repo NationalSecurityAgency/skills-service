@@ -84,7 +84,7 @@ limitations under the License.
 </template>
 
 <script>
-  import { SkillsReporter } from '@skills/skills-client-vue';
+  import { SkillsReporter } from '@skilltree/skills-client-vue';
   import SkillsService from '../SkillsService';
   import DependantsGraph from './DependantsGraph';
   import SkillsSelector2 from '../SkillsSelector2';

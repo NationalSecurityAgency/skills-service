@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script>
-  import { SkillsReporter } from '@skills/skills-client-vue';
+  import { SkillsReporter } from '@skilltree/skills-client-vue';
 
   export default {
     name: 'InceptionProgressMessagesMixin',

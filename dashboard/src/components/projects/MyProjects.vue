@@ -37,7 +37,7 @@ limitations under the License.
 </template>
 
 <script>
-  import { SkillsReporter } from '@skills/skills-client-vue';
+  import { SkillsReporter } from '@skilltree/skills-client-vue';
   import MyProject from './MyProject';
   import EditProject from './EditProject';
   import LoadingContainer from '../utils/LoadingContainer';

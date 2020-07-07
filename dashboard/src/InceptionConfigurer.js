@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { SkillsConfiguration } from '@skills/skills-client-vue';
+import { SkillsConfiguration } from '@skilltree/skills-client-vue';
 import store from './store/store';
 
 export default {

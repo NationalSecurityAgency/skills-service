@@ -38,7 +38,7 @@ limitations under the License.
 </template>
 
 <script>
-  import { SkillsDisplay, SkillsReporter } from '@skills/skills-client-vue';
+  import { SkillsDisplay, SkillsReporter } from '@skilltree/skills-client-vue';
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import UsersService from './UsersService';
   import InlineHelp from '../utils/InlineHelp';

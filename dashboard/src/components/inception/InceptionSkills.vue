@@ -22,7 +22,7 @@ limitations under the License.
 </template>
 
 <script>
-  import { SkillsDisplay } from '@skills/skills-client-vue';
+  import { SkillsDisplay } from '@skilltree/skills-client-vue';
 
   export default {
     name: 'InceptionSkills',
