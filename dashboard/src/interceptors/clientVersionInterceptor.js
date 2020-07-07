@@ -17,7 +17,7 @@ import axios from 'axios';
 import store from '../store/store';
 
 function handleFunction(config) {
-  if (config) {
+  if (config && config.headers && config.headers['skills-client-lib-version']) {
     const incomingVersion = config.headers['skills-client-lib-version'];
     store.dispatch('updateLibVersionIfDifferent', incomingVersion);
   }
