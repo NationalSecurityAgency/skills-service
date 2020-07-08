@@ -1,7 +1,7 @@
 {
-  "name": "@skills/user-skills",
+  "name": "@skilltree/skills-client-display",
   "main": "./dist/userSkills.common.js",
-  "version": "0.0.6",
+  "version": "1.0.0",
   "license": "Apache-2.0",
   "description": "SkillTree Client Display UI",
   "author": "SkillTree Team",
