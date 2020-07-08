@@ -1,0 +1,308 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <artifactId>skills-service-parent</artifactId>
+        <groupId>skill-tree</groupId>
+        <version>1.2.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>call-stack-profiler</artifactId>
+
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <properties>
+        <groovy.version>2.5.7</groovy.version>
+        <spock.myVersion>1.3-groovy-2.5</spock.myVersion>
+
+        <groovy.eclipse.compiler.version>3.4.0-01</groovy.eclipse.compiler.version>
+        <!-- This should match groovy.version        -->
+        <groovy.eclipse.batch.version>2.5.7-01</groovy.eclipse.batch.version>
+
+        <maven.compiler.plugin.version>3.7.0</maven.compiler.plugin.version>
+        <commons.lang3.version>3.9</commons.lang3.version>
+        <joda.time.version>2.10.3</joda.time.version>
+        <slf4j.version>1.7.26</slf4j.version>
+        <log4j.version>1.2.17</log4j.version>
+
+        <versions.maven.plugin>2.7</versions.maven.plugin>
+        <maven.scm.plugin>1.11.2</maven.scm.plugin>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy-all</artifactId>
+            <version>${groovy.version}</version>
+            <scope>provided</scope>
+            <type>pom</type>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>${commons.lang3.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
+            <version>${joda.time.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>${log4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.spockframework</groupId>
+            <artifactId>spock-core</artifactId>
+            <version>${spock.myVersion}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.codehaus.groovy</groupId>
+                    <artifactId>groovy-all</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+    </dependencies>
+
+
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-deploy-plugin</artifactId>
+                    <version>2.8.2</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+
+            <!-- groovy plugin -->
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven.compiler.plugin.version}</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                    <compilerId>groovy-eclipse-compiler</compilerId>
+                    <compilerArguments>
+                        <indy/>
+                        <configScript>config.groovy</configScript>
+                    </compilerArguments>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.codehaus.groovy</groupId>
+                        <artifactId>groovy-eclipse-compiler</artifactId>
+                        <version>${groovy.eclipse.compiler.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.codehaus.groovy</groupId>
+                        <artifactId>groovy-eclipse-batch</artifactId>
+                        <version>${groovy.eclipse.batch.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.codehaus.groovy</groupId>
+                        <artifactId>groovy-all</artifactId>
+                        <version>${groovy.version}</version>
+                        <type>pom</type>
+                    </dependency>
+                </dependencies>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>versions-maven-plugin</artifactId>
+                <version>${versions.maven.plugin}</version>
+            </plugin>
+
+
+            <!-- shading had number of issues, specifically with shading slf4j, may revisit in the future -->
+            <!--<plugin>-->
+                <!--<groupId>org.apache.maven.plugins</groupId>-->
+                <!--<artifactId>maven-shade-plugin</artifactId>-->
+                <!--<version>3.1.0</version>-->
+                <!--<executions>-->
+                    <!--<execution>-->
+                        <!--<phase>package</phase>-->
+                        <!--<goals>-->
+                            <!--<goal>shade</goal>-->
+                        <!--</goals>-->
+                        <!--<configuration>-->
+                            <!--<filters>-->
+                                <!--<filter>-->
+                                    <!--<includes>-->
+                                        <!--<include>org.apache</include>-->
+                                        <!--<include>org.joda</include>-->
+                                    <!--</includes>-->
+                                <!--</filter>-->
+                            <!--</filters>-->
+                            <!--<minimizeJar>true</minimizeJar>-->
+                            <!--<relocations>-->
+                                <!--<relocation>-->
+                                    <!--<pattern>org.apache</pattern>-->
+                                    <!--<shadedPattern>orgShaded.apache</shadedPattern>-->
+                                <!--</relocation>-->
+                                <!--&lt;!&ndash;<relocation>&ndash;&gt;-->
+                                    <!--&lt;!&ndash;<pattern>org.slf4j</pattern>&ndash;&gt;-->
+                                    <!--&lt;!&ndash;<shadedPattern>orgShaded.slf4j</shadedPattern>&ndash;&gt;-->
+                                <!--&lt;!&ndash;</relocation>&ndash;&gt;-->
+                                <!--<relocation>-->
+                                    <!--<pattern>org.joda</pattern>-->
+                                    <!--<shadedPattern>orgShaded.joda</shadedPattern>-->
+                                <!--</relocation>-->
+                            <!--</relocations>-->
+                        <!--</configuration>-->
+                    <!--</execution>-->
+                <!--</executions>-->
+            <!--</plugin>-->
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.18.1</version>
+                <configuration>
+                    <includes>
+                        <include>**/*Spec*.java</include>
+                        <include>**/*Test.java</include>
+                        <include>**/*Tests.java</include>
+                        <include>**/*Spec*.groovy</include>
+                        <include>**/*Test.groovy</include>
+                        <include>**/*Tests.groovy</include>
+                    </includes>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+            </plugin>
+
+            <plugin>
+                <!--                mvn license:add-third-party-->
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <version>2.0.0</version>
+                <executions>
+                    <execution>
+                        <id>default-cli</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>add-third-party</goal>
+                        </goals>
+                        <configuration>
+                            <!-- will use backend/src/license/THIRD-PARTY.properties -->
+                            <useMissingFile>true</useMissingFile>
+
+                            <!--  If true enforces excluding transitive dependencies of the excluded artifacts in the reactor;
+                                    otherwise only artifacts that match exclude filters are excluded.
+                                       works in conjunction with excludedScopes-->
+                            <excludeTransitiveDependencies>true</excludeTransitiveDependencies>
+                            <excludedScopes>test,provided</excludedScopes>
+
+                            <!-- white list of licenses, build will fail if a 3rd party licences is not found in this list -->
+                            <failIfWarning>true</failIfWarning>
+                            <failOnMissing>true</failOnMissing>
+                            <includedLicenses>
+                                <includedLicense>The Apache Software License, Version 2.0</includedLicense>
+                                <includedLicense>MIT License</includedLicense>
+                                <includedLicense>Eclipse Public License - Version 1.0</includedLicense>
+                                <includedLicense>The 3-Clause BSD License</includedLicense>
+                            </includedLicenses>
+                            <licenseMerges>
+                                <licenseMerge>The Apache Software License, Version 2.0|Apache License, Version 2.0</licenseMerge>
+                                <licenseMerge>Eclipse Public License - Version 1.0|Eclipse Public License 1.0</licenseMerge>
+                                <licenseMerge>The 3-Clause BSD License|New BSD License</licenseMerge>
+                            </licenseMerges>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <!--                mvn com.mycila:license-maven-plugin:3.0:check
+                                    mvn com.mycila:license-maven-plugin:3.0:format-->
+                <groupId>com.mycila</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <version>3.0</version>
+                <configuration>
+                    <header>${basedir}/src/license/LICENSE-HEADER.txt</header>
+                    <excludes>
+                        <exclude>**/*.xml</exclude>
+                        <exclude>**/*.jks</exclude>
+                        <exclude>**/*.ftl</exclude>
+                        <exclude>src/main/resources/public/**</exclude>
+                        <exclude>**/license/*.properties</exclude>
+                        <exclude>LICENSE.txt</exclude>
+                    </excludes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+        </plugins>
+
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+    </build>
+
+    <!-- ******************* Distribution Management ******************* -->
+
+    <distributionManagement>
+        <repository>
+            <id>nexus-releases</id>
+            <name>Release Repository</name>
+            <url>
+                ${nexusServer}/repository/maven-releases/
+            </url>
+        </repository>
+        <snapshotRepository>
+            <id>nexus-snapshots</id>
+            <name>Snapshot Repository</name>
+            <url>
+                ${nexusServer}/repository/maven-snapshots/
+            </url>
+        </snapshotRepository>
+    </distributionManagement>
+
+</project>

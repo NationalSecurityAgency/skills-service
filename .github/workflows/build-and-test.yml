@@ -40,5 +40,5 @@ jobs:
         mvn --version
         java -version
 
-#    - name: Build
-#      run: mvn --batch-mode install
+    - name: Build skills service
+      run: mvn --batch-mode install

@@ -203,9 +203,9 @@
         </dependency>
 
         <dependency>
-            <groupId>profile</groupId>
+            <groupId>skill-tree</groupId>
             <artifactId>call-stack-profiler</artifactId>
-            <version>1.0.2</version>
+            <version>${project.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
