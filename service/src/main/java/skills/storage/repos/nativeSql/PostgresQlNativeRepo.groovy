@@ -355,7 +355,7 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
 
         boolean dateCheck = start != null && end != null
 
-        if(dateCheck) {
+        if (dateCheck) {
             q += dateFrag
         }
 
@@ -363,7 +363,7 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
         query.setParameter('projectId', projectId)
         query.setParameter('badgeId', badgeId)
 
-        if(dateCheck) {
+        if (dateCheck) {
             query.setParameter('start', start)
             query.setParameter('end', end)
         }
@@ -449,7 +449,7 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
             q += levels
         }
 
-        if(!includeSkills && !includeLevels){
+        if (!includeSkills && !includeLevels) {
             return Collections.emptyList();
         }
 
@@ -457,11 +457,91 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
         if (includeSkills || includeLevels) {
             query.setParameter('badgeId', badgeId)
         }
-        if(includeDates) {
+        if (includeDates) {
             query.setParameter('start', start)
             query.setParameter('end', end)
         }
 
         return query.getResultList()
     }
+
+    @Override
+    void identifyAndAddSubjectLevelAchievements(String projectId, String subjectId) {
+        String SQL = '''
+        WITH subject_score AS (
+            SELECT id, skill_id, total_points 
+            FROM skill_definition 
+            WHERE type = 'Subject' AND project_id = :projectId AND skill_id = :skillId
+        ),
+        subject_levels AS (
+            SELECT ld.id, ld.level, ((CAST(ld.percent AS FLOAT)/100)*subject_score.total_points) AS pointsRequired, subject_score.skill_id
+            FROM level_definition ld, subject_score
+            WHERE ld.skill_ref_id IN (SELECT max(id) from subject_score)
+        ),
+        user_totals AS (
+            SELECT user_id, MAX(points) as totalPoints 
+            FROM user_points
+            WHERE project_id = :projectId AND skill_id = :skillId AND day is null 
+            GROUP BY user_id
+        )
+        INSERT INTO user_achievement (user_id, skill_id, level, points_when_achieved, project_id, notified)
+        SELECT user_totals.user_id, subject_score.skill_id, subject_levels.level, user_totals.totalPoints, ''' + "'$projectId', 'false'" +
+        '''
+        FROM user_totals, subject_score, subject_levels
+        WHERE user_totals.totalPoints > subject_levels.pointsRequired 
+            AND NOT EXISTS 
+                (
+                    SELECT 1 
+                    FROM user_achievement 
+                    WHERE user_id = user_totals.user_id and project_id = :projectId AND skill_id = :skillId AND level = subject_levels.level
+                )
+        '''
+
+        Query query = entityManager.createNativeQuery(SQL)
+        query.setParameter('projectId', projectId)
+        query.setParameter('skillId', subjectId)
+
+        query.executeUpdate()
+    }
+
+    @Override
+    void identifyAndAddProjectLevelAchievements(String projectId){
+        String SQL = '''
+        WITH project_score AS (
+            SELECT SUM(total_points) AS totalPoints 
+            FROM skill_definition WHERE type = 'Skill' AND project_id = :projectId
+        ),
+        project_ref AS (
+            SELECT MAX(proj_ref_id) 
+            FROM skill_definition 
+            WHERE project_id = :projectId AND proj_ref_id IS NOT null
+        ),
+        project_levels AS (
+            SELECT id, level, ((CAST(percent AS FLOAT)/100)*project_score.totalPoints) AS pointsRequired 
+            FROM level_definition, project_score 
+            WHERE project_ref_id IN (SELECT max from project_ref)
+        ),
+        user_totals AS (
+            SELECT user_id, MAX(points) AS totalPoints 
+            FROM user_points 
+            WHERE project_id = :projectId AND skill_id is null AND day is null GROUP BY user_id
+        )
+        INSERT INTO user_achievement (user_id, level, points_when_achieved, project_id, notified)
+        SELECT user_totals.user_id, project_levels.level, user_totals.totalPoints, '''+"'$projectId', 'false'"+
+        '''
+        FROM project_levels, user_totals 
+        WHERE user_totals.totalPoints > project_levels.pointsRequired 
+            AND NOT EXISTS 
+                (
+                    SELECT 1 
+                    FROM user_achievement 
+                    WHERE user_id = user_totals.user_id AND project_id = :projectId AND skill_id is null AND level = project_levels.level
+                )
+        '''
+
+        Query query = entityManager.createNativeQuery(SQL)
+        query.setParameter('projectId', projectId)
+        query.executeUpdate()
+    }
+
 }

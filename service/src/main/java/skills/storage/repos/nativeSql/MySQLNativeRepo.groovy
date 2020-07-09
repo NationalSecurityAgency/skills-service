@@ -162,6 +162,16 @@ class MySQLNativeRepo implements NativeQueriesRepo {
 
     @Override
     List<String> findUsersEligbleForGlobalBadge(String badgeId, Integer requiredSklls, Integer requiredLevels, Date start, Date end) {
-        return null
+        throw new UnsupportedOperationException("Sorry!")
+    }
+
+    @Override
+    void identifyAndAddSubjectLevelAchievements(String projectId, String subjectId) {
+        throw new UnsupportedOperationException("Sorry!")
+    }
+
+    @Override
+    void identifyAndAddProjectLevelAchievements(String projectId) {
+        throw new UnsupportedOperationException("Sorry!")
     }
 }
