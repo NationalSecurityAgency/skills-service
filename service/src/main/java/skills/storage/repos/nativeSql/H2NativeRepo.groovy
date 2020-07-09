@@ -538,97 +538,164 @@ class H2NativeRepo implements NativeQueriesRepo {
                                                                         from skill_definition 
                                                                         WHERE type = 'Subject' AND project_id = :projectId AND skill_id = :skillId ''')
 
-        Object score = subjectScoreQ.getSingleResult()
-        //results type?
+        subjectScoreQ.setParameter("projectId", projectId)
+        subjectScoreQ.setParameter("skillId", subjectId)
+        Object score = subjectScoreQ.getSingleResult() //0: id, 1: skill_id, 2: total_points
 
-        //need to get total_points and skill_id out so that they can be included in the select
-        //statement of below
+        Number id = score[0]
+        String skillId = score[1]
+        Number totalSubjectPoints = score[2]
 
         Query subjectLevelsQ = entityManager.createNativeQuery(
             '''
-            SELECT ld.id, ld.level, ((CAST(ld.percent AS FLOAT)/100)*total_points) AS pointsRequired, subject_score.skill_id
-            FROM level_definition ld, subject_score
-            WHERE ld.skill_ref_id IN (SELECT max(id) from subject_score)
+            SELECT ld.id, ld.level, ((CAST(ld.percent AS FLOAT)/100)*'''+totalSubjectPoints+''') AS pointsRequired,
+            FROM level_definition ld
+            WHERE ld.skill_ref_id = :subjectId
             '''
         )
+        subjectLevelsQ.setParameter("subjectId", id)
+        List<Object[]> subjectLevels = subjectLevelsQ.getResultList() //0: id, 1: level, 2: pointsRequired
+        if(!subjectLevels) {
+            log.warn("unable to retrieve subject levels for [${projectId} - ${subjectId}]")
+            return
+        }
 
-        String SQL = '''
-        WITH subject_score AS (
-            SELECT id, skill_id, total_points 
-            FROM skill_definition 
-            WHERE type = 'Subject' AND project_id = :projectId AND skill_id = :skillId
-        ),
-        subject_levels AS (
-            SELECT ld.id, ld.level, ((CAST(ld.percent AS FLOAT)/100)*subject_score.total_points) AS pointsRequired, subject_score.skill_id
-            FROM level_definition ld, subject_score
-            WHERE ld.skill_ref_id IN (SELECT max(id) from subject_score)
-        ),
-        user_totals AS (
+        Query userTotalsQ = entityManager.createNativeQuery('''
             SELECT user_id, MAX(points) as totalPoints 
             FROM user_points
             WHERE project_id = :projectId AND skill_id = :skillId AND day is null 
             GROUP BY user_id
-        )
-        INSERT INTO user_achievement (user_id, skill_id, level, points_when_achieved, project_id, notified)
-        SELECT user_totals.user_id, subject_score.skill_id, subject_levels.level, user_totals.totalPoints, ''' + "'$projectId', 'false'" +
-                '''
-        FROM user_totals, subject_score, subject_levels
-        WHERE user_totals.totalPoints > subject_levels.pointsRequired 
-            AND NOT EXISTS 
-                (
-                    SELECT 1 
-                    FROM user_achievement 
-                    WHERE user_id = user_totals.user_id and project_id = :projectId AND skill_id = :skillId AND level = subject_levels.level
-                )
-        '''
+        ''')
+        userTotalsQ.setParameter("projectId", projectId)
+        userTotalsQ.setParameter("skillId", skillId)
+        List<Object[]> usersTotals = userTotalsQ.getResultList() //0: user_id, 1: totalPoints
+        if (!usersTotals) {
+            log.warn("unable to retrieve user point totals for [${projectId} - ${subjectId}]")
+            return
+        }
 
-        throw new UnsupportedOperationException("todo")
+        usersTotals?.each {
+            String userId = it[0]
+            Number userPoints = it[1]
+
+            subjectLevels?.each { Object[] level ->
+                Number levelId = level[0]
+                String levelValue = level[1]
+                Number pointsRequired = level[2]
+
+                if (userPoints > pointsRequired) {
+                    Query alreadyExists = entityManager.createNativeQuery('''
+                        SELECT 1 
+                        FROM user_achievement 
+                        WHERE user_id = :userId and project_id = :projectId AND skill_id = :skillId AND level = :level 
+                    ''')
+                    alreadyExists.setParameter("userId", userId)
+                    alreadyExists.setParameter("projectId", projectId)
+                    alreadyExists.setParameter("skillId", skillId)
+                    alreadyExists.setParameter("level", levelValue)
+                    def exists = alreadyExists.getResultList()
+
+                    if(exists.isEmpty() || exists[0] < 1) {
+                        Query insertAchievement = entityManager.createNativeQuery('''
+                             INSERT INTO user_achievement (user_id, skill_id, level, points_when_achieved, project_id, notified)
+                             VALUES (:userId, :skillId, :level, :userPoints, :projectId, 'false')
+                        ''')
+                        insertAchievement.setParameter("userId", userId)
+                        insertAchievement.setParameter("skillId", skillId)
+                        insertAchievement.setParameter("level", levelValue)
+                        insertAchievement.setParameter("userPoints", userPoints.toInteger())
+                        insertAchievement.setParameter("projectId", projectId)
+                        insertAchievement.executeUpdate()
+                    }
+                }
+            }
+        }
+
     }
 
     @Override
     void identifyAndAddProjectLevelAchievements(String projectId) {
-
         Query projectScore = entityManager.createNativeQuery('''
             SELECT SUM(total_points) AS totalPoints 
             FROM skill_definition WHERE type = 'Skill' AND project_id = :projectId
         ''')
 
         projectScore.setParameter("projectId", projectId)
-        Object result = projectScore.getSingleResult()
+        final Number totalPoints = projectScore.getSingleResult()
+        if (totalPoints == null) {
+            log.warn("unable to retrieve project total points for [${projectId}]")
+            return
+        } else if (totalPoints == 0) {
+            log.warn("received project total points of zero for [${projectId}]")
+            return
+        }
 
-        String SQL = '''
-        WITH project_score AS (
-            SELECT SUM(total_points) AS totalPoints 
-            FROM skill_definition WHERE type = 'Skill' AND project_id = :projectId
-        ),
-        project_ref AS (
+        Query projectRef = entityManager.createNativeQuery('''
             SELECT MAX(proj_ref_id) 
-            FROM skill_definition 
+            FROM skill_definition
             WHERE project_id = :projectId AND proj_ref_id IS NOT null
-        ),
-        project_levels AS (
-            SELECT id, level, ((CAST(percent AS FLOAT)/100)*project_score.totalPoints) AS pointsRequired 
-            FROM level_definition, project_score 
-            WHERE project_ref_id IN (SELECT max from project_ref)
-        ),
-        user_totals AS (
-            SELECT user_id, MAX(points) AS totalPoints 
-            FROM user_points 
-            WHERE project_id = :projectId AND skill_id is null AND day is null GROUP BY user_id
-        )
-        INSERT INTO user_achievement (user_id, level, points_when_achieved, project_id, notified)
-        SELECT user_totals.user_id, project_levels.level, user_totals.totalPoints, '''+"'$projectId', 'false'"+
-                '''
-        FROM project_levels, user_totals 
-        WHERE user_totals.totalPoints > project_levels.pointsRequired 
-            AND NOT EXISTS 
-                (
-                    SELECT 1 
-                    FROM user_achievement 
-                    WHERE user_id = user_totals.user_id AND project_id = :projectId AND skill_id is null AND level = project_levels.level
-                )
-        '''
+        ''')
+        projectRef.setParameter("projectId", projectId)
+        final String projRefId = projectRef.getSingleResult()
+        if (!projRefId) {
+            log.warn("unable to retrieve project ref id for [${projectId}]")
+            return
+        }
 
-        throw new UnsupportedOperationException("todo")
+        //this may only work for projects configured for percentages... Do we populate percentage for points?
+        Query projectLevels = entityManager.createNativeQuery(
+                'SELECT id, level, ((CAST(percent AS FLOAT)/100)*'+totalPoints+') AS pointsRequired'+'''
+                FROM level_definition
+                WHERE project_ref_id=:projRefId
+                ''')
+        projectLevels.setParameter("projRefId", projRefId)
+        List<String[]> levels = projectLevels.getResultList()
+        if (!levels) {
+            log.warn("unable to retrieve project levels for [${projectId}]")
+            return
+        }
+
+        Query userTotals = entityManager.createNativeQuery('''
+            SELECT user_id, MAX(points) as totalPoints
+            FROM user_points
+            WHERE project_id = :projectId AND skill_id is null AND day is null GROUP BY user_id
+        ''')
+        userTotals.setParameter("projectId", projectId)
+        List<Object> users = userTotals.getResultList()
+
+        users?.each {
+            String userId = it[0]
+            Number userPoints = it[1]
+
+            levels.each { Object[] level ->
+                //0: id, 1: level, 2: pointsRequired
+                Number levelId = level[0]
+                String levelValue = level[1]
+                Number pointsRequired = level[2]
+
+                if (userPoints > pointsRequired) {
+                    Query alreadyExists = entityManager.createNativeQuery('''
+                        SELECT 1 
+                        FROM user_achievement 
+                        WHERE user_id = :userId AND project_id = :projectId AND level = :level AND skill_id IS NULL 
+                    ''')
+                    alreadyExists.setParameter("userId", userId)
+                    alreadyExists.setParameter("projectId", projectId)
+                    alreadyExists.setParameter("level", levelValue)
+                    List exists = alreadyExists.getResultList()
+                    if(exists.isEmpty() || exists[0] < 1) {
+                        Query insertAchievement = entityManager.createNativeQuery('''
+                        INSERT INTO user_achievement (user_id, level, points_when_achieved, project_id, notified)
+                        VALUES (:userId, :level, :userPoints, :projectId, 'false')
+                        ''')
+                        insertAchievement.setParameter("userId", userId)
+                        insertAchievement.setParameter("level", levelValue)
+                        insertAchievement.setParameter("userPoints", userPoints.toInteger())
+                        insertAchievement.setParameter("projectId", projectId)
+                        insertAchievement.executeUpdate()
+                    }
+                }
+            }
+        }
     }
 }
