@@ -48,7 +48,7 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-maven-
 
-    - name: Build skills service
+    - name: Build skills-service
       run: mvn --batch-mode install
 
     - name: Run Cypress tests
