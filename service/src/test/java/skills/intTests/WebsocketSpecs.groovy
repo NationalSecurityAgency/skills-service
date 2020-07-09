@@ -37,6 +37,7 @@ import skills.services.events.SkillEventResult
 
 import java.lang.reflect.Type
 import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
 @Slf4j
 class WebsocketSpecs extends DefaultIntSpec {
@@ -76,7 +77,7 @@ class WebsocketSpecs extends DefaultIntSpec {
             subjSummaryRes << skillsService.getSkillSummary(sampleUserIds.get(0), projId, subj1.get(it).subjectId)
         }
         skillsAdded = true
-        messagesReceived.await()
+        messagesReceived.await(30, TimeUnit.SECONDS)
         then:
         interaction {
             if (skillsAdded) { // interaction closure seemed to be getting called before the "when:" block
@@ -105,7 +106,7 @@ class WebsocketSpecs extends DefaultIntSpec {
 
         when:
         CountDownLatch messagesReceived = setupWebsocketConnection(wsResults, false, false, 1, 'skills@skills.org')
-        messagesReceived.await()
+        messagesReceived.await(30, TimeUnit.SECONDS)
 
         then:
         wsResults.find{it.skillId=='badge1'}.success
@@ -131,7 +132,7 @@ class WebsocketSpecs extends DefaultIntSpec {
 
         when:
         CountDownLatch messagesReceived = setupWebsocketConnection(wsResults, false, false, 1, 'skills@skills.org')
-        messagesReceived.await()
+        messagesReceived.await(30, TimeUnit.SECONDS)
 
         then:
         wsResults.find{it.skillId=='skill1'}.success
@@ -156,7 +157,7 @@ class WebsocketSpecs extends DefaultIntSpec {
             subjSummaryRes << skillsService.getSkillSummary(sampleUserIds.get(0), projId, subj1.get(it).subjectId)
         }
         skillsAdded = true
-        messagesReceived.await()
+        messagesReceived.await(30, TimeUnit.SECONDS)
 
         then:
         interaction {
@@ -181,7 +182,7 @@ class WebsocketSpecs extends DefaultIntSpec {
             subjSummaryRes << skillsService.getSkillSummary(sampleUserIds.get(0), projId, subj1.get(it).subjectId)
         }
         skillsAdded = true
-        messagesReceived.await()
+        messagesReceived.await(30, TimeUnit.SECONDS)
 
         then:
         interaction {

@@ -50,3 +50,11 @@ jobs:
 
     - name: Build skills service
       run: mvn --batch-mode install
+
+    - name: Run Cypress tests
+      run: |
+        cd e2e-tests
+        npm install
+        npm run cyServices:start
+        npm run cy:run
+        cd ..
