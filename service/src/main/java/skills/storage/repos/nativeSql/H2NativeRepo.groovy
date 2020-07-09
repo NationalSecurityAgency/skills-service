@@ -531,7 +531,7 @@ class H2NativeRepo implements NativeQueriesRepo {
     }
 
     @Override
-    void identifyAndAddSubjectLevelAchievements(String projectId, String subjectId) {
+    void identifyAndAddSubjectLevelAchievements(String projectId, String subjectId, boolean pointsBasedLevels) {
 
         Query subjectScoreQ = entityManager.createNativeQuery('''
                                                                         select id, skill_id, total_points 
@@ -546,9 +546,14 @@ class H2NativeRepo implements NativeQueriesRepo {
         String skillId = score[1]
         Number totalSubjectPoints = score[2]
 
+        String pointsRequiredFragment = '((CAST(ld.percent AS FLOAT)/100)*'+totalSubjectPoints+')'
+        if (pointsBasedLevels) {
+            pointsRequiredFragment = 'points_from'
+        }
+
         Query subjectLevelsQ = entityManager.createNativeQuery(
             '''
-            SELECT ld.id, ld.level, ((CAST(ld.percent AS FLOAT)/100)*'''+totalSubjectPoints+''') AS pointsRequired,
+            SELECT ld.id, ld.level, '''+pointsRequiredFragment+''' AS pointsRequired,
             FROM level_definition ld
             WHERE ld.skill_ref_id = :subjectId
             '''
@@ -614,7 +619,7 @@ class H2NativeRepo implements NativeQueriesRepo {
     }
 
     @Override
-    void identifyAndAddProjectLevelAchievements(String projectId) {
+    void identifyAndAddProjectLevelAchievements(String projectId, boolean pointsBasedLevels) {
         Query projectScore = entityManager.createNativeQuery('''
             SELECT SUM(total_points) AS totalPoints 
             FROM skill_definition WHERE type = 'Skill' AND project_id = :projectId
@@ -630,6 +635,11 @@ class H2NativeRepo implements NativeQueriesRepo {
             return
         }
 
+        String pointsRequiredFragment = '((CAST(percent AS FLOAT)/100)*'+totalPoints+')'
+        if (pointsBasedLevels) {
+            pointsRequiredFragment = 'points_from'
+        }
+
         Query projectRef = entityManager.createNativeQuery('''
             SELECT MAX(proj_ref_id) 
             FROM skill_definition
@@ -642,9 +652,8 @@ class H2NativeRepo implements NativeQueriesRepo {
             return
         }
 
-        //this may only work for projects configured for percentages... Do we populate percentage for points?
         Query projectLevels = entityManager.createNativeQuery(
-                'SELECT id, level, ((CAST(percent AS FLOAT)/100)*'+totalPoints+') AS pointsRequired'+'''
+                '''SELECT id, level, '''+pointsRequiredFragment+''' AS pointsRequired
                 FROM level_definition
                 WHERE project_ref_id=:projRefId
                 ''')
@@ -668,7 +677,6 @@ class H2NativeRepo implements NativeQueriesRepo {
             Number userPoints = it[1]
 
             levels.each { Object[] level ->
-                //0: id, 1: level, 2: pointsRequired
                 Number levelId = level[0]
                 String levelValue = level[1]
                 Number pointsRequired = level[2]
@@ -683,6 +691,7 @@ class H2NativeRepo implements NativeQueriesRepo {
                     alreadyExists.setParameter("projectId", projectId)
                     alreadyExists.setParameter("level", levelValue)
                     List exists = alreadyExists.getResultList()
+
                     if(exists.isEmpty() || exists[0] < 1) {
                         Query insertAchievement = entityManager.createNativeQuery('''
                         INSERT INTO user_achievement (user_id, level, points_when_achieved, project_id, notified)

@@ -20,6 +20,9 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.controller.exceptions.SkillsValidator
+import skills.controller.result.model.SettingsResult
+import skills.services.settings.Settings
+import skills.services.settings.SettingsService
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillRelDef
 import skills.storage.repos.SkillDefRepo
@@ -53,6 +56,9 @@ class UserAchievementsAndPointsManagement {
 
     @Autowired
     SkillRelDefRepo skillRelDefRepo
+
+    @Autowired
+    SettingsService settingsService
 
     @Transactional
     void handleSkillRemoval(SkillDef skillDef) {
@@ -120,8 +126,12 @@ class UserAchievementsAndPointsManagement {
         List<SkillRelDef> parent = skillRelDefRepo.findAllByChildIdAndType(skillRefId, SkillRelDef.RelationshipType.RuleSetDefinition)
         assert parent.size() == 1
 
-        nativeQueriesRepo.identifyAndAddProjectLevelAchievements(projectId)
-        nativeQueriesRepo.identifyAndAddSubjectLevelAchievements(projectId, parent[0].parent.skillId)
+        SettingsResult settingsResult = settingsService.getProjectSetting(projectId, Settings.LEVEL_AS_POINTS.settingName)
+
+        boolean pointsBased = settingsResult ? settingsResult.isEnabled() : false
+
+        nativeQueriesRepo.identifyAndAddProjectLevelAchievements(projectId, pointsBased)
+        nativeQueriesRepo.identifyAndAddSubjectLevelAchievements(projectId, parent[0].parent.skillId, pointsBased)
     }
 
     @Transactional

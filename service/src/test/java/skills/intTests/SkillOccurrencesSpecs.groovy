@@ -893,7 +893,9 @@ class SkillOccurrencesSpecs extends DefaultIntSpec {
         List<UserAchievement> afterAchievements = userAchievementRepo.findAll()
 
         then:
-        beforeAchievements.size() == afterAchievements.size() - 1 // 1 achievement should be added
+        //1 skill achievement should be added, 1 subject level achievement should be added, one project level achievement should be added
+        beforeAchievements.size() == afterAchievements.size() - 3
+        afterAchievements.findAll { it.notified == 'false' }.size() == 3
         !beforeAchievements.findAll { it.projectId == proj1.projectId && it.skillId == proj1_skills.get(1).skillId && it.userId == userId1 }
         afterAchievements.find { it.projectId == proj1.projectId && it.skillId == proj1_skills.get(1).skillId && it.userId == userId1 }
 
@@ -987,7 +989,9 @@ class SkillOccurrencesSpecs extends DefaultIntSpec {
         List<UserAchievement> afterAchievements = userAchievementRepo.findAll()
 
         then:
-        beforeAchievements.size() == afterAchievements.size() - 1 // 1 achievement should be added
+        // 1 skill achievement should be added, 2 subject level achievements, and 2 project level achievements
+        beforeAchievements.size() == afterAchievements.size() - 5
+        afterAchievements.findAll { it.notified == 'false' }.size() == 5
         !beforeAchievements.findAll { it.projectId == proj1.projectId && it.skillId == proj1_skills.get(1).skillId && it.userId == userId1 }
         afterAchievements.find { it.projectId == proj1.projectId && it.skillId == proj1_skills.get(1).skillId && it.userId == userId1 }
 
@@ -1021,5 +1025,107 @@ class SkillOccurrencesSpecs extends DefaultIntSpec {
         getPointHistory(userId4, proj1.projectId, proj1_subj.subjectId) == [3, 6, 9]
         getPointHistory(userId4, proj2.projectId) == [10, 20, 50]
         getPointHistory(userId4, proj2.projectId, proj2_subj.subjectId) == [10, 20, 50]
+    }
+
+    def "decrease in occurrences causes project and subject level achievements"() {
+        def project = SkillsFactory.createProject()
+        skillsService.createProject(project)
+        def subject = SkillsFactory.createSubject(1)
+        skillsService.createSubject(subject)
+        def subject2 = SkillsFactory.createSubject(1, 2)
+        skillsService.createSubject(subject2)
+
+
+        def skill1_1 = SkillsFactory.createSkill(1, 1, 1, 0, 10, 0, 100)
+        skillsService.createSkill(skill1_1)
+        def skill1_2 = SkillsFactory.createSkill(1, 1, 2, 0, 10, 0, 10)
+        skillsService.createSkill(skill1_2)
+        def skill2_1 = SkillsFactory.createSkill(1, 2, 1, 0, 1, 0, 100)
+        skillsService.createSkill(skill2_1)
+
+        when:
+        skillsService.addSkill([projectId: project.projectId, skillId: skill1_1.skillId], "user1", new Date())
+        skillsService.addSkill([projectId: project.projectId, skillId: skill1_2.skillId], "user2", new Date())
+        def beforeEditAchievements = userAchievementRepo.findAllByUserAndProjectIds("user1", [project.projectId])
+        def beforeEditAchievementsU2 = userAchievementRepo.findAllByUserAndProjectIds("user2", [project.projectId])
+        skill1_1.numPerformToCompletion = 1
+        skillsService.updateSkill(skill1_1, skill1_1.skillId)
+        def afterEditAchievements = userAchievementRepo.findAllByUserAndProjectIds("user1", [project.projectId])
+        def afterEditAchievementsU2 = userAchievementRepo.findAllByUserAndProjectIds("user2", [project.projectId])
+        //1300 total, levels:
+        //1: 130
+        //2: 325
+        //3: 585
+        //4: 871
+        //5: 1196
+
+        //300 total, levels:
+        //1: 30
+        //2: 75
+        //3: 135
+        //4: 201
+        //5: 276
+
+        then:
+        beforeEditAchievements.size() == 0
+        afterEditAchievements.size() == 6
+        afterEditAchievements.findAll { it.notified == 'false' }.size() == 6
+        afterEditAchievements.find { it.projectId == project.projectId && it.skillId == 'skill1' }
+        afterEditAchievements.find { it.projectId == project.projectId && !it.skillId  && it.level == 1 }
+        afterEditAchievements.find { it.projectId == project.projectId && !it.skillId  && it.level == 2 }
+        afterEditAchievements.find { it.projectId == project.projectId && !it.skillId  && it.level == 1 }
+        afterEditAchievements.find { it.projectId == project.projectId && it.skillId == subject.subjectId && it.level == 1 }
+        afterEditAchievements.find { it.projectId == project.projectId && it.skillId == subject.subjectId && it.level == 2 }
+        afterEditAchievements.find { it.projectId == project.projectId && it.skillId == subject.subjectId && it.level == 3 }
+        beforeEditAchievementsU2.size() == 0
+        afterEditAchievementsU2.size() == 0
+    }
+
+    def "decrease in occurrences causes project and subject level achievements for points based levels"() {
+        def project = SkillsFactory.createProject()
+        skillsService.createProject(project)
+
+        def subject2 = SkillsFactory.createSubject(1, 2)
+        skillsService.createSubject(subject2)
+        def skill2_1 = SkillsFactory.createSkill(1, 2, 1, 0, 1, 0, 100)
+        skillsService.createSkill(skill2_1)
+
+        def subject = SkillsFactory.createSubject(1)
+        skillsService.createSubject(subject)
+        def skill1_1 = SkillsFactory.createSkill(1, 1, 1, 0, 10, 0, 100)
+        skillsService.createSkill(skill1_1)
+        def skill1_2 = SkillsFactory.createSkill(1, 1, 2, 0, 10, 0, 10)
+        skillsService.createSkill(skill1_2)
+
+        String projectPointsSetting = "level.points.enabled"
+        skillsService.changeSetting(project.projectId, projectPointsSetting, [projectId: project.projectId, setting: projectPointsSetting, value: "true"])
+
+
+        when:
+        skillsService.addSkill([projectId: project.projectId, skillId: skill1_1.skillId], "user1", new Date())
+        skillsService.addSkill([projectId: project.projectId, skillId: skill1_2.skillId], "user2", new Date())
+        def beforeEditAchievements = userAchievementRepo.findAllByUserAndProjectIds("user1", [project.projectId])
+        def beforeEditAchievementsU2 = userAchievementRepo.findAllByUserAndProjectIds("user2", [project.projectId])
+        skill1_1.numPerformToCompletion = 1
+        skillsService.updateSkill(skill1_1, skill1_1.skillId)
+
+        def afterEditAchievements = userAchievementRepo.findAllByUserAndProjectIds("user1", [project.projectId])
+        def afterEditAchievementsU2 = userAchievementRepo.findAllByUserAndProjectIds("user2", [project.projectId])
+
+        then:
+        beforeEditAchievements.size() == 0
+        afterEditAchievements.size() == 1
+        afterEditAchievements.findAll { it.notified == 'false' }.size() == 1
+        afterEditAchievements.find { it.projectId == project.projectId && it.skillId == 'skill1' }
+        //with change to points based levels, once the occurrences are deleted, the pointsFrom for levels still exceed the user's
+        //points
+        !afterEditAchievements.find { it.projectId == project.projectId && !it.skillId  && it.level == 1 }
+        !afterEditAchievements.find { it.projectId == project.projectId && !it.skillId  && it.level == 2 }
+        !afterEditAchievements.find { it.projectId == project.projectId && !it.skillId  && it.level == 1 }
+        !afterEditAchievements.find { it.projectId == project.projectId && it.skillId == subject.subjectId && it.level == 1 }
+        !afterEditAchievements.find { it.projectId == project.projectId && it.skillId == subject.subjectId && it.level == 2 }
+        !afterEditAchievements.find { it.projectId == project.projectId && it.skillId == subject.subjectId && it.level == 3 }
+        beforeEditAchievementsU2.size() == 0
+        afterEditAchievementsU2.size() == 0
     }
 }

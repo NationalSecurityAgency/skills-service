@@ -466,7 +466,12 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
     }
 
     @Override
-    void identifyAndAddSubjectLevelAchievements(String projectId, String subjectId) {
+    void identifyAndAddSubjectLevelAchievements(String projectId, String subjectId, boolean pointsBasedLevels) {
+
+        String pointsRequiredFragment = '((CAST(ld.percent AS FLOAT)/100)*subject_score.total_points)'
+        if (pointsBasedLevels) {
+            pointsRequiredFragment = 'points_from'
+        }
         String SQL = '''
         WITH subject_score AS (
             SELECT id, skill_id, total_points 
@@ -474,7 +479,7 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
             WHERE type = 'Subject' AND project_id = :projectId AND skill_id = :skillId
         ),
         subject_levels AS (
-            SELECT ld.id, ld.level, ((CAST(ld.percent AS FLOAT)/100)*subject_score.total_points) AS pointsRequired, subject_score.skill_id
+            SELECT ld.id, ld.level, '''+pointsRequiredFragment+''' AS pointsRequired, subject_score.skill_id
             FROM level_definition ld, subject_score
             WHERE ld.skill_ref_id IN (SELECT max(id) from subject_score)
         ),
@@ -505,7 +510,12 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
     }
 
     @Override
-    void identifyAndAddProjectLevelAchievements(String projectId){
+    void identifyAndAddProjectLevelAchievements(String projectId, boolean pointsBasedLevels){
+        String pointsRequiredFragment = '((CAST(ld.percent AS FLOAT)/100)*project_score.total_points)'
+        if (pointsBasedLevels) {
+            pointsRequiredFragment = 'points_from'
+        }
+
         String SQL = '''
         WITH project_score AS (
             SELECT SUM(total_points) AS totalPoints 
@@ -517,7 +527,7 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
             WHERE project_id = :projectId AND proj_ref_id IS NOT null
         ),
         project_levels AS (
-            SELECT id, level, ((CAST(percent AS FLOAT)/100)*project_score.totalPoints) AS pointsRequired 
+            SELECT id, level, '''+pointsRequiredFragment+''' AS pointsRequired 
             FROM level_definition, project_score 
             WHERE project_ref_id IN (SELECT max from project_ref)
         ),

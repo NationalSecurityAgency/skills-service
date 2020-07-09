@@ -166,12 +166,12 @@ class MySQLNativeRepo implements NativeQueriesRepo {
     }
 
     @Override
-    void identifyAndAddSubjectLevelAchievements(String projectId, String subjectId) {
+    void identifyAndAddSubjectLevelAchievements(String projectId, String subjectId, boolean pointsBasedLevels) {
         throw new UnsupportedOperationException("Sorry!")
     }
 
     @Override
-    void identifyAndAddProjectLevelAchievements(String projectId) {
+    void identifyAndAddProjectLevelAchievements(String projectId, boolean pointsBasedLevels) {
         throw new UnsupportedOperationException("Sorry!")
     }
 }
