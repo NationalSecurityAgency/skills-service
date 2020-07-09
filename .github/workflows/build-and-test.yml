@@ -4,11 +4,7 @@ name: CI
 
 # Controls when the action will run. Triggers the workflow on push or pull request
 # events but only for the master branch
-on:
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+on: [push, pull_request]
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -29,7 +25,7 @@ jobs:
     - name: Set up Maven
       uses: stCarolas/setup-maven@v3
       with:
-        maven-version: 3.6.0
+        maven-version: 3.6.3
 
     - uses: actions/setup-java@v1
       with:
@@ -49,7 +45,7 @@ jobs:
           ${{ runner.os }}-maven-
 
     - name: Build skills-service
-      run: mvn --batch-mode install
+      run: mvn --batch-mode install -DskipTests
 
     - name: Run Cypress tests
       run: |
