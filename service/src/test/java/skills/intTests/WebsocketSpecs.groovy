@@ -137,9 +137,10 @@ class WebsocketSpecs extends DefaultIntSpec {
         then:
         wsResults.find{it.skillId=='skill1'}.success
         wsResults.find{it.skillId=='skill1'}.completed
-        wsResults.find{it.skillId=='skill1'}.completed.size() == 1
+        wsResults.find{it.skillId=='skill1'}.completed.size() == 4
         wsResults.find{it.skillId=='skill1'}.completed[0].type == CompletionItem.CompletionItemType.Skill
         wsResults.find{it.skillId=='skill1'}.completed[0].name == skill.name
+        wsResults.find{it.skillId=='skill1'}.completed.findAll { it.type == CompletionItem.CompletionItemType.Subject }.size() == 3
     }
 
     def "achieve subject's level - validate via xhr streaming"(){
