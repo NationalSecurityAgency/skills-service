@@ -36,67 +36,67 @@ jobs:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
 
-    - uses: actions/setup-node@v2-beta
-      with:
-        node-version: '12'
-
-    - name: Set up Maven
-      uses: stCarolas/setup-maven@v3
-      with:
-        maven-version: 3.6.3
-
-    - uses: actions/setup-java@v1
-      with:
-        java-version: '11.X.X' # The JDK version to make available on the path.
-
-    - name: Print Versions
-      run: |
-        mvn --version
-        java -version
-
-    - name: Cache local Maven repository
-      uses: actions/cache@v2
-      with:
-        path: ~/.m2/repository
-        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-        restore-keys: |
-          ${{ runner.os }}-maven-
-
-    - name: Build skills-service
-      run: mvn --batch-mode install
-
-    - name: Run Cypress tests
-      run: |
-        cd e2e-tests
-        npm install
-        npm run cyServices:start
-        npm run cy:run
-        cd ..
-
-    - name: upload skills service jar
-      if: ${{ always() }}
-      uses: actions/upload-artifact@v2
-      with:
-        name: skills-service jar
-        path: ./service/target/*.jar
-
-    - name: upload skills service logs
-      if: ${{ always() }}
-      uses: actions/upload-artifact@v2
-      with:
-        name: skills-service logs
-        path: ./service/target/*.log
-
-    - name: upload cypress
-      if: ${{ always() }}
-      uses: actions/upload-artifact@v2
-      with:
-        name: cypress videos
-        path: ./e2e-tests/cypress
-
-    - name: upload services logs during cypress rung
-      if: ${{ always() }}
-      uses: actions/upload-artifact@v2
-      with:
-        name: services logs during cypress runs
-        path: ./e2e-tests/logs
+#    - uses: actions/setup-node@v2-beta
+#      with:
+#        node-version: '12'
+#
+#    - name: Set up Maven
+#      uses: stCarolas/setup-maven@v3
+#      with:
+#        maven-version: 3.6.3
+#
+#    - uses: actions/setup-java@v1
+#      with:
+#        java-version: '11.X.X' # The JDK version to make available on the path.
+#
+#    - name: Print Versions
+#      run: |
+#        mvn --version
+#        java -version
+#
+#    - name: Cache local Maven repository
+#      uses: actions/cache@v2
+#      with:
+#        path: ~/.m2/repository
+#        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+#        restore-keys: |
+#          ${{ runner.os }}-maven-
+#
+#    - name: Build skills-service
+#      run: mvn --batch-mode install
+#
+#    - name: Run Cypress tests
+#      run: |
+#        cd e2e-tests
+#        npm install
+#        npm run cyServices:start
+#        npm run cy:run
+#        cd ..
+#
+#    - name: upload skills service jar
+#      if: ${{ always() }}
+#      uses: actions/upload-artifact@v2
+#      with:
+#        name: skills-service jar
+#        path: ./service/target/*.jar
+#
+#    - name: upload skills service logs
+#      if: ${{ always() }}
+#      uses: actions/upload-artifact@v2
+#      with:
+#        name: skills-service logs
+#        path: ./service/target/*.log
+#
+#    - name: upload cypress
+#      if: ${{ always() }}
+#      uses: actions/upload-artifact@v2
+#      with:
+#        name: cypress videos
+#        path: ./e2e-tests/cypress
+#
+#    - name: upload services logs during cypress rung
+#      if: ${{ always() }}
+#      uses: actions/upload-artifact@v2
+#      with:
+#        name: services logs during cypress runs
+#        path: ./e2e-tests/logs
