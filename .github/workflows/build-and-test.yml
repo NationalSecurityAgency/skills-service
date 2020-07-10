@@ -23,14 +23,14 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
     - name: github event name
-      run: echo github.event
+      run: echo ${github.event}
 
     - name: only if push
-      if: github.event == 'push'
+      if: github.event_name == 'push'
       run: echo 'this is push'
 
     - name: only if schedule
-      if: github.event == 'schedule'
+      if: github.event_name == 'schedule'
       run: echo 'this is schedule'
 
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
