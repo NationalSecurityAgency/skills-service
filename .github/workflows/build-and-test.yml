@@ -26,7 +26,7 @@ jobs:
       run: echo ${GITHUB_EVENT_NAME}
 
     - name: only if push
-      if: ${GITHUB_EVENT_NAME} == 'push'
+      if: ${{ env.GITHUB_EVENT_NAME }} == 'push'
       run: echo 'this is push'
 
     - name: only if schedule
