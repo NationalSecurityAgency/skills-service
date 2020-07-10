@@ -3,11 +3,11 @@
 name: Test against PostgreSQL
 
 on:
-  push:
-    paths-ignore:
-      - 'README.md'
-#  schedule:
-#   - cron: '*/5 * * * *'
+#  push:
+#    paths-ignore:
+#      - 'README.md'
+  schedule:
+   - cron: '0 5 * * *'
 
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
