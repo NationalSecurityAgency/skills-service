@@ -62,23 +62,23 @@ jobs:
         name: skills-service jar
         path: ./service/target/*.jar
 
-    - name: upload skills service logs
-      if: ${{ always() }}
-      uses: actions/upload-artifact@v2
-      with:
-        name: skills-service logs
-        path: ./service/target/*.log
-
-    - name: upload cypress
-      if: ${{ always() }}
-      uses: actions/upload-artifact@v2
-      with:
-        name: cypress videos
-        path: e2e-tests/cypress
-
-    - name: upload services logs during cypress rung
-      if: ${{ always() }}
-      uses: actions/upload-artifact@v2
-      with:
-        name: services logs during cypress runs
-        path:e2e-tests/logs
+#    - name: upload skills service logs
+#      if: ${{ always() }}
+#      uses: actions/upload-artifact@v2
+#      with:
+#        name: skills-service logs
+#        path: ./service/target/*.log
+#
+#    - name: upload cypress
+#      if: ${{ always() }}
+#      uses: actions/upload-artifact@v2
+#      with:
+#        name: cypress videos
+#        path: e2e-tests/cypress
+#
+#    - name: upload services logs during cypress rung
+#      if: ${{ always() }}
+#      uses: actions/upload-artifact@v2
+#      with:
+#        name: services logs during cypress runs
+#        path:e2e-tests/logs
