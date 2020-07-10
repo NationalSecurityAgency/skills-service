@@ -22,9 +22,6 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-    - name: github event name
-      run: echo ${github.event}
-
     - name: only if push
       if: github.event_name == 'push'
       run: echo 'this is push'
