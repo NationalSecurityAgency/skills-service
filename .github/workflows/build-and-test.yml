@@ -9,8 +9,8 @@ on:
   pull_request:
     paths-ignore:
       - 'README.md'
-  schedule:
-   - cron: '*/5 * * * *'
+#  schedule:
+#   - cron: '*/5 * * * *'
 
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
@@ -47,14 +47,14 @@ jobs:
       if: github.event_name == 'schedule'
       run: echo 'this is schedule'
 
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+    - uses: actions/checkout@v2
+      -
     - name: Hello world action step
       id: hello
       uses: ./.github/actions/upload-res-artifacts
       with:
         who-to-greet: 'Mona the Octocat'
-
-    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-    - uses: actions/checkout@v2
 
 
 
