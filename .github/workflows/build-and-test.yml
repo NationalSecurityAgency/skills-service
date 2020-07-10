@@ -26,11 +26,11 @@ jobs:
       run: echo ${GITHUB_EVENT_NAME}
 
     - name: only if push
-      if: ${{ env.GITHUB_EVENT_NAME == 'push' }}
+      if: ${{ env.GITHUB_EVENT_NAME == push }}
       run: echo 'this is push'
 
     - name: only if schedule
-      if: ${{ env.GITHUB_EVENT_NAME == 'schedule' }}
+      if: ${{ env.GITHUB_EVENT_NAME == schedule }}
       run: echo 'this is schedule'
 
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
