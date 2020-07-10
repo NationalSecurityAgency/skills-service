@@ -49,9 +49,9 @@ jobs:
 
     - name: Hello world action step
       id: hello
-      uses: uses: ./.github/actions/upload-res-artifacts
+      uses: ./.github/actions/upload-res-artifacts
       with:
-        who-to-greet: 'Mona the Octocat
+        who-to-greet: 'Mona the Octocat'
 
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
