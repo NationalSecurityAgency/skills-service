@@ -33,6 +33,9 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+        ports:
+          # Maps tcp port 5432 on service container to the host
+          - 5432:5432
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -66,7 +69,7 @@ jobs:
           ${{ runner.os }}-maven-
 
     - name: Build skills-service
-      run: mvn --batch-mode test -Dspring.datasource.url=jdbc:postgresql://postgres:5432/skills -Dspring.datasource.username=postgres -Dspring.datasource.password=skillsPassword
+      run: mvn --batch-mode test -Dspring.datasource.url=jdbc:postgresql://localhost:5432/skills -Dspring.datasource.username=postgres -Dspring.datasource.password=skillsPassword
 
 #    - name: Run Cypress tests
 #      run: |
