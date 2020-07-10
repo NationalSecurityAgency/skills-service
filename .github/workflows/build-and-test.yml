@@ -21,20 +21,20 @@ jobs:
     runs-on: ubuntu-latest
 
     # Service containers to run with `container-job`
-    services:
-      # Label used to access the service container
-      postgres:
-        # Docker Hub image
-        image: postgres
-        # Provide the password for postgres
-        env:
-          POSTGRES_PASSWORD: postgres
-        # Set health checks to wait until postgres has started
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+#    services:
+#      # Label used to access the service container
+#      postgres:
+#        # Docker Hub image
+#        image: postgres
+#        # Provide the password for postgres
+#        env:
+#          POSTGRES_PASSWORD: postgres
+#        # Set health checks to wait until postgres has started
+#        options: >-
+#          --health-cmd pg_isready
+#          --health-interval 10s
+#          --health-timeout 5s
+#          --health-retries 5
 
 
     # Steps represent a sequence of tasks that will be executed as part of the job
@@ -46,6 +46,12 @@ jobs:
     - name: only if schedule
       if: github.event_name == 'schedule'
       run: echo 'this is schedule'
+
+    - name: Hello world action step
+      id: hello
+      uses: uses: ./.github/actions/upload-res-artifacts
+      with:
+        who-to-greet: 'Mona the Octocat
 
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
