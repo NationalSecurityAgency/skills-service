@@ -6,11 +6,6 @@ on:
   push:
     paths-ignore:
       - 'README.md'
-      - '.github/workflows/build-and-test-postgres.yml'
-  pull_request:
-    paths-ignore:
-      - 'README.md'
-      - '.github/workflows/build-and-test-postgres.yml'
 #  schedule:
 #   - cron: '*/5 * * * *'
 
@@ -21,6 +16,23 @@ jobs:
   ci:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
+
+    # Service containers to run with `container-job`
+    services:
+      # Label used to access the service container
+      postgres:
+        # Docker Hub image
+        image: postgres
+        # Provide the password for postgres
+        env:
+          POSTGRES_PASSWORD: skillsPassword
+          POSTGRES_DB: skills
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -54,15 +66,15 @@ jobs:
           ${{ runner.os }}-maven-
 
     - name: Build skills-service
-      run: mvn --batch-mode install
+      run: mvn --batch-mode test -Dspring.datasource.url=jdbc:postgresql://postgres:5432/skills -Dspring.datasource.username=postgres -Dspring.datasource.password=skillsPassword
 
-    - name: Run Cypress tests
-      run: |
-        cd e2e-tests
-        npm install
-        npm run cyServices:start
-        npm run cy:run
-        cd ..
+#    - name: Run Cypress tests
+#      run: |
+#        cd e2e-tests
+#        npm install
+#        npm run cyServices:start
+#        npm run cy:run
+#        cd ..
 
     - name: upload result artifacts
       if: ${{ always() }}
@@ -72,5 +84,5 @@ jobs:
         path: |
           ./service/target/*.jar
           ./service/target/*.log
-          ./e2e-tests/cypress
-          ./e2e-tests/logs
+#          ./e2e-tests/cypress
+#          ./e2e-tests/logs
