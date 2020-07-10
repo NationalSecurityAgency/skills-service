@@ -24,7 +24,6 @@ jobs:
     services:
       # Label used to access the service container
       postgres:
-      if: github.event_name == 'push'
         # Docker Hub image
         image: postgres
         # Provide the password for postgres
