@@ -3,9 +3,9 @@
 name: Test against PostgreSQL
 
 on:
-#  push:
-#    paths-ignore:
-#      - 'README.md'
+  push:
+    paths-ignore:
+      - 'README.md'
   schedule:
    - cron: '0 5 * * *'
 
@@ -69,15 +69,15 @@ jobs:
           ${{ runner.os }}-maven-
 
     - name: Build skills-service
-      run: mvn --batch-mode test -Dspring.datasource.url=jdbc:postgresql://localhost:5432/skills -Dspring.datasource.username=postgres -Dspring.datasource.password=skillsPassword
+      run: mvn --batch-mode install -Dspring.datasource.url=jdbc:postgresql://localhost:5432/skills -Dspring.datasource.username=postgres -Dspring.datasource.password=skillsPassword
 
-#    - name: Run Cypress tests
-#      run: |
-#        cd e2e-tests
-#        npm install
-#        npm run cyServices:start
-#        npm run cy:run
-#        cd ..
+    - name: Run Cypress tests
+      run: |
+        cd e2e-tests
+        npm install
+        npm run cyServices:start
+        npm run cy:run
+        cd ..
 
     - name: upload result artifacts
       if: ${{ always() }}
@@ -87,5 +87,5 @@ jobs:
         path: |
           ./service/target/*.jar
           ./service/target/*.log
-#          ./e2e-tests/cypress
-#          ./e2e-tests/logs
+          ./e2e-tests/cypress
+          ./e2e-tests/logs

@@ -4,8 +4,8 @@ SkillTree is an innovative approach to implementing application training.
 
 # Workflows Status
 
-![](https://github.com/NationalSecurityAgency/skills-service/workflows/Continuous%20Integration/badge.svg)
+[![CI Badge](https://github.com/NationalSecurityAgency/skills-service/workflows/Continuous%20Integration/badge.svg)](https://github.com/NationalSecurityAgency/skills-service/actions?query=workflow%3A%22Continuous+Integration%22)
 
 
-![](https://github.com/NationalSecurityAgency/skills-service/workflows/Test%20against%20PostgreSQL/badge.svg)
+[![DB Test Badge](https://github.com/NationalSecurityAgency/skills-service/workflows/Test%20against%20PostgreSQL/badge.svg)](https://github.com/NationalSecurityAgency/skills-service/actions?query=workflow%3A%22Test+against+PostgreSQL%22)
 
