@@ -20,5 +20,6 @@ triggerDownstreamPipeline:
   stage: triggerDownstreamPipeline
   script:
     - echo $CI_PROJECT_NAME
+    - echo $PIPELINE_TO_TRIGGER_URL
     - curl --request POST --form "variables[CI_PIPELINE_TRIGGER_BRANCH_NAME]=$CI_COMMIT_REF_NAME" --form "variables[CI_PIPELINE_TRIGGER_SOURCE]=$CI_PROJECT_NAME" --form "token=$PIPELINE_TO_TRIGGER_TOKEN" --form ref=master $PIPELINE_TO_TRIGGER_URL
     - echo 'Done'
