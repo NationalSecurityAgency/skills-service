@@ -1,60 +1,24 @@
+# Copyright 2020 SkillTree
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Provides ability to trigger another pipeline with this project is mirrored in GitLab
 stages:
-  - build
-  - pushToNexus
-  - deploy
+  - triggerDownstreamPipeline
 
-build:
-  image: maven:3.6.3-jdk-11
-  stage: build
-  before_script:
-    - ./ci/installNode.sh
-    - ./ci/setupRepos.sh
+triggerDownstreamPipeline:
+  stage: triggerDownstreamPipeline
   script:
-    - mvn --batch-mode install -DskipTests
-  artifacts:
-    paths:
-      - service/pom.xml
-      - service/target/skills-service-*.jar
-      - service/target/skills-service-tests.log
-
-pushToNexus:
-  image: maven:3.6.3-jdk-11
-  stage: pushToNexus
-  script:
-    - echo "@skills:registry=http://$NEXUS_SERVER/repository/skills-registry/" > ~/.npmrc
-    - cat ~/.npmrc
-    - echo "<settings><servers><server><id>nexus-snapshots</id><username>admin</username><password>$NEXUS_PASS</password></server><server><id>nexus-releases</id><username>admin</username><password>$NEXUS_PASS</password></server></servers><mirrors><mirror><id>central</id><name>central</name><url>http://$NEXUS_SERVER/repository/maven-public/</url><mirrorOf>*</mirrorOf></mirror></mirrors></settings>" > ~/.m2/settings.xml
-    - cat ~/.m2/settings.xml
-    - backendJar=$(ls service/target/skills-service-*.jar)
-    - echo $backendJar
-    - mvn --batch-mode deploy:deploy-file -DpomFile=service/pom.xml -Dfile=${backendJar} -Durl=http://ip-10-113-80-244.evoforge.org/repository/maven-snapshots/ -DrepositoryId=nexus-snapshots
-  artifacts:
-    paths:
-      - service/target/skills-service-*.jar
-      - service/target/skills-service-tests.log
-  only:
-    refs:
-      - branches
-    variables:
-      - $BRANCH_TO_DEPLOY_SKILLS_SERVICE == $CI_COMMIT_REF_NAME
-
-deploy:
-  image: alpine:latest
-  stage: deploy
-  before_script:
-    - apk --update --no-cache add sshpass openssh git
-  script:
-    - git clone https://${GITLAB_DEPLOY_USERNAME}:${GITLAB_DEPLOY_PASSWORD}@gitlab.evoforge.org/skills/skills-deploy.git
-    - TIMESTAMP=`date +%s`
-    - TMP_DIR="deploy_${TIMESTAMP}"
-    - DEST_PATH="/home/${CI_USERNAME}/$TMP_DIR"
-    - sshpass -p $CI_PASSWORD ssh -o StrictHostKeyChecking=no -o PreferredAuthentications=password -o PubkeyAuthentication=no $CI_USERNAME@$CI_IP "rm -rf /home/${CI_USERNAME}/deploy_* && mkdir -p ${DEST_PATH}"
-    - cp service/target/skills-service-*.jar skills-service.jar
-    - sshpass -p $CI_PASSWORD scp -r skills-deploy ${CI_USERNAME}@${CI_IP}:${DEST_PATH}
-    - sshpass -p $CI_PASSWORD scp -r skills-service.jar ${CI_USERNAME}@${CI_IP}:${DEST_PATH}/skills-deploy
-    - sshpass -p $CI_PASSWORD ssh -o StrictHostKeyChecking=no -o PreferredAuthentications=password -o PubkeyAuthentication=no $CI_USERNAME@$CI_IP "cd ${DEST_PATH}/skills-deploy && ./runDeploy.sh"
-  only:
-    refs:
-      - branches
-    variables:
-      - $BRANCH_TO_DEPLOY_SKILLS_SERVICE == $CI_COMMIT_REF_NAME
+    - echo $CI_PROJECT_NAME
+    - curl --request POST --form "variables[CI_PIPELINE_TRIGGER_BRANCH_NAME]=$CI_COMMIT_REF_NAME" --form "variables[CI_PIPELINE_TRIGGER_SOURCE]=$CI_PROJECT_NAME" --form "token=$PIPELINE_TO_TRIGGER_TOKEN" --form ref=master $PIPELINE_TO_TRIGGER_URL
+    - echo 'Done'
