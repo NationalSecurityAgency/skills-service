@@ -29,6 +29,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.core.io.ClassPathResource
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Component
+import skills.SpringBootApp
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
 import skills.storage.repos.LevelDefRepo
@@ -38,7 +39,7 @@ import skills.storage.repos.SkillRelDefRepo
 import javax.annotation.PostConstruct
 import javax.sql.DataSource
 
-@SpringBootTest(properties = ['skills.db.startup=false', 'spring.liquibase.enabled=false'], webEnvironment=SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(properties = ['skills.db.startup=false', 'spring.liquibase.enabled=false'], webEnvironment=SpringBootTest.WebEnvironment.RANDOM_PORT, classes = SpringBootApp)
 class DataMigrationSpecs extends DefaultIntSpec {
 
     @Autowired
