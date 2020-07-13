@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Conditional
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Lazy
 import org.springframework.context.annotation.Primary
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -113,6 +114,7 @@ class FormSecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Override
     @Bean(name = 'defaultAuthManager')
     @Primary
+    @Lazy
     AuthenticationManager authenticationManagerBean() throws Exception {
         // provides the default AuthenticationManager as a Bean
         return super.authenticationManagerBean()

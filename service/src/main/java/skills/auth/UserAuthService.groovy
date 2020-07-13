@@ -19,6 +19,7 @@ import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
 import org.apache.commons.collections.CollectionUtils
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Lazy
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.GrantedAuthority
@@ -55,6 +56,7 @@ class UserAuthService {
     AccessSettingsStorageService accessSettingsStorageService
 
     @Autowired
+    @Lazy
     private AuthenticationManager authenticationManager
 
     @Autowired
