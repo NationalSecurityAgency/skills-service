@@ -43,5 +43,9 @@ interface NativeQueriesRepo {
                                                 Integer requiredLevels,
                                                 Date start,
                                                 Date end)
+
+    void identifyAndAddSubjectLevelAchievements(String projectId, String subjectId, boolean pointsBasedLevels);
+
+    void identifyAndAddProjectLevelAchievements(String projectId, boolean pointsBasedLevels);
 }
 

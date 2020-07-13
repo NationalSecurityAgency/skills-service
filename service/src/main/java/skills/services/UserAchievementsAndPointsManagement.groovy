@@ -20,8 +20,13 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.controller.exceptions.SkillsValidator
+import skills.controller.result.model.SettingsResult
+import skills.services.settings.Settings
+import skills.services.settings.SettingsService
 import skills.storage.model.SkillDef
+import skills.storage.model.SkillRelDef
 import skills.storage.repos.SkillDefRepo
+import skills.storage.repos.SkillRelDefRepo
 import skills.storage.repos.UserAchievedLevelRepo
 import skills.storage.repos.UserPerformedSkillRepo
 import skills.storage.repos.UserPointsRepo
@@ -48,6 +53,12 @@ class UserAchievementsAndPointsManagement {
 
     @Autowired
     SkillDefRepo skillDefRepo
+
+    @Autowired
+    SkillRelDefRepo skillRelDefRepo
+
+    @Autowired
+    SettingsService settingsService
 
     @Transactional
     void handleSkillRemoval(SkillDef skillDef) {
@@ -111,6 +122,16 @@ class UserAchievementsAndPointsManagement {
             log.debug("Insert User Achievements. projectId=[${projectId}], skillId=[${skillId}], skillRefId=[${skillRefId}], numOfOccurrences=[$numOfOccurrences]")
         }
         userAchievedLevelRepo.insertUserAchievementWhenDecreaseOfOccurrencesCausesUsersToAchieve(projectId, skillId, skillRefId, numOfOccurrences, Boolean.FALSE.toString())
+
+        List<SkillRelDef> parent = skillRelDefRepo.findAllByChildIdAndType(skillRefId, SkillRelDef.RelationshipType.RuleSetDefinition)
+        assert parent.size() == 1
+
+        SettingsResult settingsResult = settingsService.getProjectSetting(projectId, Settings.LEVEL_AS_POINTS.settingName)
+
+        boolean pointsBased = settingsResult ? settingsResult.isEnabled() : false
+
+        nativeQueriesRepo.identifyAndAddProjectLevelAchievements(projectId, pointsBased)
+        nativeQueriesRepo.identifyAndAddSubjectLevelAchievements(projectId, parent[0].parent.skillId, pointsBased)
     }
 
     @Transactional
