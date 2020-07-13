@@ -40,7 +40,7 @@ import javax.annotation.PostConstruct
 import javax.sql.DataSource
 
 @SpringBootTest(properties = ['skills.db.startup=false', 'spring.liquibase.enabled=false'], webEnvironment=SpringBootTest.WebEnvironment.RANDOM_PORT, classes = SpringBootApp)
-class DataMigrationSpecs extends DefaultIntSpec {
+class DataMigrationDBIT extends DefaultIntSpec {
 
     @Autowired
     LevelDefRepo levelDefRepo
