@@ -940,7 +940,7 @@
 
     </changeSet>
 
-    <changeSet id="2" author="skills team">
+    <changeSet id="2" author="skills team" context="migration1">
         <addColumn tableName="skill_definition">
             <column name="enabled" type="varchar(255)" defaultValueBoolean="true"/>
         </addColumn>

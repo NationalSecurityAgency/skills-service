@@ -18,6 +18,7 @@ package skills.settings
 import groovy.transform.WithWriteLock
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.JavaMailSenderImpl
 import org.springframework.stereotype.Service
@@ -32,6 +33,10 @@ import javax.mail.MessagingException
 
 @Service
 @Slf4j
+@ConditionalOnProperty(
+        name = "skills.db.startup",
+        havingValue = "true",
+        matchIfMissing = true)
 class EmailSettingsService {
 
     static final String settingsGroup = 'GLOBAL.EMAIL'

@@ -54,6 +54,10 @@ class DefaultIntSpec extends Specification {
     SettingRepo settingRepo
 
     def setup() {
+        // allows for over-ridding the setup method
+        doSetup();
+    }
+    def doSetup() {
         String msg = "\n-------------------------------------------------------------\n" +
                 "START: [${specificationContext.currentIteration.name}]\n" +
                 "-------------------------------------------------------------"
@@ -61,16 +65,16 @@ class DefaultIntSpec extends Specification {
         /**
          * deleting projects and users will wipe the entire db clean due to cascading
          */
-        projDefRepo.deleteAll()
-        userAttrsRepo.deleteAll()
-        // global badges don't have references to a project so must delete those manually
-        skillDefRepo.deleteAll()
+            projDefRepo.deleteAll()
+            userAttrsRepo.deleteAll()
+            // global badges don't have references to a project so must delete those manually
+            skillDefRepo.deleteAll()
 
-        settingRepo.findAll().each {
-            if (!it.settingGroup.startsWith("public_")){
-                settingRepo.delete(it)
+            settingRepo.findAll().each {
+                if (!it.settingGroup.startsWith("public_")) {
+                    settingRepo.delete(it)
+                }
             }
-        }
 
         skillsService = createService()
     }

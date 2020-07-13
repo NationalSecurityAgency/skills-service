@@ -18,6 +18,7 @@ package skills
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
 import skills.auth.AuthMode
 import skills.auth.pki.PkiUserLookup
@@ -27,6 +28,10 @@ import javax.annotation.PostConstruct
 
 @Slf4j
 @Component
+@ConditionalOnProperty(
+        name = "skills.db.startup",
+        havingValue = "true",
+        matchIfMissing = true)
 class HealthChecker {
 
     @Value('#{securityConfig.authMode}}')
