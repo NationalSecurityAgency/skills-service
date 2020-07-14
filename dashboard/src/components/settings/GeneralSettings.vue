@@ -15,7 +15,7 @@ limitations under the License.
 */
 <template>
   <div>
-    <sub-page-header title="General"/>
+    <sub-page-header title="Profile"/>
 
     <loading-container v-bind:is-loading="isLoading">
       <div class="card">

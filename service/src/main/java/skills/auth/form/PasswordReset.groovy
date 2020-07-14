@@ -13,19 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.services.settings;
+package skills.auth.form
 
-public enum Settings {
-    LEVEL_AS_POINTS("level.points.enabled"),
-    GLOBAL_PUBLIC_URL("public_url");
-
-    private String settingName;
-
-    private Settings(String settingName){
-        this.settingName = settingName;
-    }
-
-    public String getSettingName(){
-        return this.settingName;
-    }
+class PasswordReset {
+    String userId
+    String password
+    String resetToken
 }

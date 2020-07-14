@@ -37,7 +37,7 @@ limitations under the License.
       return {
         isLoading: true,
         isRoot: false,
-        navItems: [{ name: 'General', iconClass: 'fa-address-card', page: 'GeneralSettings' }],
+        navItems: [{ name: 'Profile', iconClass: 'fa-address-card', page: 'GeneralSettings' }],
       };
     },
     mounted() {
@@ -52,6 +52,7 @@ limitations under the License.
               this.navItems.push(
                 { name: 'Security', iconClass: 'fa-lock', page: 'SecuritySettings' },
                 { name: 'Email', iconClass: 'fa-at', page: 'EmailSettings' },
+                { name: 'System', iconClass: 'fa-wrench', page: 'SystemSettings' },
               );
             }
           })

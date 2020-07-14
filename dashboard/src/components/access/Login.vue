@@ -153,7 +153,7 @@ limitations under the License.
         this.$router.push({ name: 'RequestAccount' });
       },
       forgotPassword() {
-        // TODO - add forgot password page
+        this.$router.push({ name: 'ForgotPassword' });
       },
       onAnimationStart(event) {
         // required to work around chrome auto-fill issue (see see https://stackoverflow.com/a/41530164)

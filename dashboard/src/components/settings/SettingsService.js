@@ -39,6 +39,9 @@ export default {
   saveEmailSettings(emailConnectionInfo) {
     return axios.post('/root/saveEmailSettings', emailConnectionInfo).then(response => response.data);
   },
+  saveSystemSettings(generalSettings) {
+    return axios.post('/root/saveSystemSettings', generalSettings).then(response => response.data);
+  },
   saveUserInfo(userInfo) {
     return axios.post('/app/userInfo', userInfo).then(() => this.getUserInfo());
   },

@@ -76,6 +76,8 @@ module.exports = {
       '/public': proxyConf,
       '/metrics' : proxyConf,
       '/skills-websocket' : proxyConf,
+      '/resetPassword' : proxyConf,
+      '/performPasswordReset' : proxyConf,
     },
   },
   configureWebpack: {

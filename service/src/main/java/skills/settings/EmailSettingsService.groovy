@@ -56,13 +56,13 @@ class EmailSettingsService {
     @PostConstruct
     void init() {
         EmailConnectionInfo emailConnectionInfo = new EmailConnectionInfo(
-                host: settingsService.getGlobalSetting(hostSetting)?.value,
-                port: settingsService.getGlobalSetting(portSetting)?.value?.toInteger() ?: -1,
-                protocol: settingsService.getGlobalSetting(protocolSetting)?.value,
-                username: settingsService.getGlobalSetting(usernameSetting)?.value,
-                password: settingsService.getGlobalSetting(passwordSetting)?.value,
-                authEnabled: settingsService.getGlobalSetting(authSetting)?.value?.toBoolean() ?: false,
-                tlsEnabled: settingsService.getGlobalSetting(tlsEnableSetting)?.value?.toBoolean() ?: false,
+                host: settingsService.getGlobalSetting(hostSetting, settingsGroup)?.value,
+                port: settingsService.getGlobalSetting(portSetting, settingsGroup)?.value?.toInteger() ?: -1,
+                protocol: settingsService.getGlobalSetting(protocolSetting, settingsGroup)?.value,
+                username: settingsService.getGlobalSetting(usernameSetting, settingsGroup)?.value,
+                password: settingsService.getGlobalSetting(passwordSetting, settingsGroup)?.value,
+                authEnabled: settingsService.getGlobalSetting(authSetting,settingsGroup)?.value?.toBoolean() ?: false,
+                tlsEnabled: settingsService.getGlobalSetting(tlsEnableSetting, settingsGroup)?.value?.toBoolean() ?: false,
         )
 
         try {
@@ -147,5 +147,9 @@ class EmailSettingsService {
     @WithWriteLock
     void updateMailSender(JavaMailSender mailSender) {
         this.mailSender = mailSender
+    }
+
+    JavaMailSender getMailSender() {
+        return this.mailSender;
     }
 }

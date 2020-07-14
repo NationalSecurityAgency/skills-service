@@ -52,7 +52,10 @@ import UserSkillsPerformed from '@//components/users/UserSkillsPerformed';
 import GeneralSettings from '@//components/settings/GeneralSettings';
 import SecuritySettings from '@//components/settings/SecuritySettings';
 import EmailSettings from '@//components/settings/EmailSettings';
+import SystemSettings from '@//components/settings/SystemSettings';
 import { SECTION } from '@//components/metrics/SectionHelper';
+import ResetPassword from '@//components/access/ResetPassword';
+import RequestPasswordReset from '@//components/access/RequestPasswordReset';
 
 Vue.use(Router);
 
@@ -92,6 +95,14 @@ const router = new Router({
       path: '/request-account',
       name: 'RequestAccount',
       component: RequestAccountForm,
+      meta: {
+        requiresAuth: false,
+      },
+    },
+    {
+      path: '/forgot-password',
+      name: 'ForgotPassword',
+      component: RequestPasswordReset,
       meta: {
         requiresAuth: false,
       },
@@ -295,6 +306,11 @@ const router = new Router({
         name: 'EmailSettings',
         path: 'email',
         component: EmailSettings,
+        meta: { requiresAuth: true },
+      }, {
+        name: 'SystemSettings',
+        path: 'system',
+        component: SystemSettings,
         meta: { requiresAuth: true },
       }],
     },

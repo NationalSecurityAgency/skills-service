@@ -34,9 +34,12 @@ import skills.controller.result.model.UserInfoRes
 import skills.controller.result.model.UserRoleRes
 import skills.profile.EnableCallStackProf
 import skills.services.AccessSettingsStorageService
+import skills.services.settings.Settings
 import skills.services.settings.SettingsService
 import skills.settings.EmailConnectionInfo
 import skills.settings.EmailSettingsService
+import skills.settings.SystemSettings
+import skills.storage.model.Setting
 import skills.storage.model.auth.RoleName
 
 import java.security.Principal
@@ -170,6 +173,13 @@ class RootController {
     @PostMapping('/saveEmailSettings')
     void saveEmailSettings(@RequestBody EmailConnectionInfo emailConnectionInfo) {
         emailSettingsService.updateConnectionInfo(emailConnectionInfo)
+    }
+
+    @PostMapping('/saveSystemSettings')
+    RequestResult saveGeneralSettings(@RequestBody SystemSettings settings){
+        GlobalSettingsRequest globalSettingsRequest = new GlobalSettingsRequest(setting: Settings.GLOBAL_PUBLIC_URL.settingName, value: settings.publicUrl)
+        settingsService.saveSetting(globalSettingsRequest)
+        return RequestResult.success()
     }
 
     @RequestMapping(value = "/global/settings/{setting}", method = [RequestMethod.PUT, RequestMethod.POST], produces = MediaType.APPLICATION_JSON_VALUE)
