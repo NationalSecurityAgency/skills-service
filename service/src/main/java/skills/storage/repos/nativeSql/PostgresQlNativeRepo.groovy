@@ -511,7 +511,7 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
 
     @Override
     void identifyAndAddProjectLevelAchievements(String projectId, boolean pointsBasedLevels){
-        String pointsRequiredFragment = '((CAST(ld.percent AS FLOAT)/100)*project_score.total_points)'
+        String pointsRequiredFragment = '((CAST(percent AS FLOAT)/100)*project_score.totalPoints)'
         if (pointsBasedLevels) {
             pointsRequiredFragment = 'points_from'
         }
