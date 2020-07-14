@@ -70,6 +70,7 @@ class PkiSecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Override
     @Bean(name = 'defaultAuthManager')
     @Primary
+    @Lazy
     AuthenticationManager authenticationManagerBean() throws Exception {
         // provides the default AuthenticationManager as a Bean
         return super.authenticationManagerBean()
