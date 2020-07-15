@@ -110,10 +110,10 @@ limitations under the License.
       countdown(val) {
         if (val > 0) {
           setTimeout(() => {
-            this.countdown--;
+            this.countdown -= 1;
           }, 1000);
         } else if (this.resetSuccessful) {
-          this.$router.push({name: 'Login'});
+          this.$router.push({ name: 'Login' });
         }
       },
     },
@@ -122,7 +122,7 @@ limitations under the License.
         this.$validator.validate().then((valid) => {
           if (valid) {
             this.resetInProgress = true;
-            const reset = { resetToken: this.resetToken, userId: this.resetFields.email,  password: this.resetFields.password};
+            const reset = { resetToken: this.resetToken, userId: this.resetFields.email, password: this.resetFields.password };
             this.resetFailed = false;
             this.resetSuccessful = false;
             this.error = null;

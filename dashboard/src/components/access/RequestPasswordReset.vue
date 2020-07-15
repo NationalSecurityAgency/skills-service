@@ -73,13 +73,13 @@ limitations under the License.
       };
     },
     watch: {
-      countDown(value){
+      countDown(value) {
         if (value > 0) {
           setTimeout(() => {
-            this.countDown--;
+            this.countDown -= 1;
           }, 1000);
         } else if (this.resetSent) {
-          this.$router.push({name: 'Login'});
+          this.$router.push({ name: 'Login' });
         }
       },
     },
