@@ -108,6 +108,15 @@ const router = new Router({
       },
     },
     {
+      path: '/reset-password/:resetToken',
+      name: 'ResetPassword',
+      component: ResetPassword,
+      props: true,
+      meta: {
+        requiresAuth: false,
+      },
+    },
+    {
       path: '/request-root-account',
       name: 'RequestRootAccount',
       component: RequestAccountForm,

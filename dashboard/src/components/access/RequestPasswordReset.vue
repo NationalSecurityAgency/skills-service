@@ -32,6 +32,9 @@ limitations under the License.
               <small id="emailHelp" class="form-text text-danger" v-show="errors.has('email')">{{
                 errors.first('email')}}
               </small>
+              <small class="text-center" data-cy="resetSent" v-if="this.resetSent">
+              A password reset link as been sent, you will be forwarded to the login page in {{countDown}} seconds
+              </small>
             </div>
             <button type="submit" class="btn btn-outline-primary" tabindex="3" :disabled="disabled">
               Reset Password <i class="fas fa-arrow-circle-right"/>
@@ -64,8 +67,21 @@ limitations under the License.
         resetFields: {
           username: '',
         },
+        resetSent: false,
         isAutoFilled: false,
+        countDown: -1,
       };
+    },
+    watch: {
+      countDown(value){
+        if (value > 0) {
+          setTimeout(() => {
+            this.countDown--;
+          }, 1000);
+        } else if (this.resetSent) {
+          this.$router.push({name: 'Login'});
+        }
+      },
     },
     methods: {
       reset() {
@@ -75,9 +91,10 @@ limitations under the License.
               this.$validator.pause();
 
               AccessService.requestPasswordReset(this.resetFields.username).then((response) => {
-                console.log(response);
-                console.log('password reset successful, redirecting to login page');
-                // this.$router.push('Login');
+                if (response.success) {
+                  this.resetSent = true;
+                  this.countDown = 15;
+                }
               });
             }
           });

@@ -23,32 +23,34 @@ limitations under the License.
             <span>Reset Account Password</span>
           </h2>
         </div>
-        <form @submit.prevent="login()">
+        <form @submit.prevent="changePassword()">
           <div class="card">
             <div class="card-body p-4">
               <div class="form-group">
                 <label for="email" class="text-secondary font-weight-bold">Email</label>
-                <input class="form-control" type="text" v-model="resetFields.email" id="email" :disabled="createInProgress"
-                       name="email" v-validate="'required|email|uniqueEmail'" data-vv-delay="500"/>
+                <input class="form-control" type="text" v-model="resetFields.email" id="email" :disabled="resetInProgress"
+                       name="email" v-validate="'required|email'" data-vv-delay="500"/>
                 <small class="form-text text-danger" v-show="errors.has('email')">{{ errors.first('email')}}</small>
               </div>
               <div class="form-group">
-                <label for="password" class="text-secondary font-weight-bold">Password</label>
-                <input class="form-control" type="password" v-model="resetFields.password" id="password" :disabled="createInProgress"
+                <label for="password" class="text-secondary font-weight-bold">New Password</label>
+                <input class="form-control" type="password" v-model="resetFields.password" id="password" :disabled="resetInProgress"
                        name="password" v-validate="'required|minPasswordLength|maxPasswordLength'" data-vv-delay="500" ref="password"/>
                 <small class="form-text text-danger" v-show="errors.has('password')">{{ errors.first('password')}}</small>
               </div>
               <div class="form-group">
-                <label for="password_confirmation" class="text-secondary font-weight-bold">Confirm Password</label>
-                <input class="form-control" type="password" id="password_confirmation" :disabled="createInProgress"
+                <label for="password_confirmation" class="text-secondary font-weight-bold">Confirm New Password</label>
+                <input class="form-control" type="password" id="password_confirmation" :disabled="resetInProgress"
                        name="password_confirmation" v-validate="'required|confirmed:password'" data-vv-delay="500" data-vv-as="Password Confirmation"/>
                 <small class="form-text text-danger" v-show="errors.has('password_confirmation')">{{ errors.first('password_confirmation')}}</small>
               </div>
+              <small class="text-center" v-if="this.resetSuccessful">Password reset was successful! Redirecting to login page in {{countdown}} seconds</small>
+              <small class="text-danger" v-if="this.resetFailed">Password reset failed due to {{error}}</small>
               <div class="field is-grouped">
                 <div class="control">
-                  <button type="submit" class="btn btn-outline-primary" :disabled="errors.any() || missingRequiredValues() || createInProgress">
-                    Reset Password <i v-if="!createInProgress" class="fas fa-arrow-circle-right"/>
-                    <b-spinner v-if="createInProgress" label="Loading..." style="width: 1rem; height: 1rem;" variant="primary"/>
+                  <button type="submit" class="btn btn-outline-primary" :disabled="errors.any() || missingRequiredValues() || resetInProgress">
+                    Reset Password <i v-if="!resetInProgress" class="fas fa-arrow-circle-right"/>
+                    <b-spinner v-if="resetInProgress" label="Loading..." style="width: 1rem; height: 1rem;" variant="primary"/>
                   </button>
                 </div>
               </div>
@@ -70,8 +72,6 @@ limitations under the License.
         password: 'Password',
         password_confirmation: 'Password Confirmation',
         email: 'Email',
-        firstName: 'First Name',
-        lastName: 'Last Name',
       },
     },
   };
@@ -98,28 +98,52 @@ limitations under the License.
         resetFields: {
           email: '',
           password: '',
-          _resetToken: this.resetToken,
         },
-        createInProgress: false,
+        resetInProgress: false,
+        resetFailed: false,
+        resetSuccessful: false,
+        countdown: -1,
+        error: null,
       };
     },
+    watch: {
+      countdown(val) {
+        if (val > 0) {
+          setTimeout(() => {
+            this.countdown--;
+          }, 1000);
+        } else if (this.resetSuccessful) {
+          this.$router.push({name: 'Login'});
+        }
+      },
+    },
     methods: {
-      login() {
+      changePassword() {
         this.$validator.validate().then((valid) => {
           if (valid) {
-            this.createInProgress = true;
-            //TODO: buh....?
-            this.$store.dispatch('???', Object.assign({}, this.resetFields)).then(() => {
-              this.$router.push({ name: 'HomePage' });
+            this.resetInProgress = true;
+            const reset = { resetToken: this.resetToken, userId: this.resetFields.email,  password: this.resetFields.password};
+            this.resetFailed = false;
+            this.resetSuccessful = false;
+            this.error = null;
+            AccessService.resetPassword(reset).then(() => {
+              this.resetSuccessful = true;
+              this.countdown = 15;
+              this.resetInProgress = false;
+            }).catch((err) => {
+              if (err && err.response && err.response.data && err.response.data.explanation) {
+                this.error = err.response.data.explanation;
+              } else {
+                this.error = err.response.status;
+              }
+              this.resetFailed = true;
+              this.resetInProgress = false;
             });
           }
         });
       },
       missingRequiredValues() {
         return !this.resetFields.email || !this.resetFields.password;
-      },
-      loginPage() {
-        this.$router.push({ name: 'Login' });
       },
     },
   };

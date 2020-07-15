@@ -79,4 +79,7 @@ export default {
     formData.append('userId', userId);
     return axios.post('/resetPassword', formData).then(response => response.data);
   },
+  resetPassword(reset) {
+    return axios.post('/performPasswordReset', reset, { handleError: false }).then(response => response.data);
+  },
 };

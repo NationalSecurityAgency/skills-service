@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Conditional
 import org.springframework.security.access.method.P
 import org.springframework.stereotype.Component
+import org.springframework.transaction.annotation.Transactional
 import org.thymeleaf.context.Context
 import org.thymeleaf.spring5.SpringTemplateEngine
 import skills.auth.SecurityMode
@@ -58,26 +59,27 @@ class PasswordResetService {
     @Autowired
     SettingsService settingsService
 
-
-    PasswordResetTokenRepo loadToken(String token) {
+    @Transactional(readOnly = true)
+    PasswordResetToken loadToken(String token) {
         return tokenRepo.findByToken(token)
     }
 
+    @Transactional()
     void createTokenAndNotifyUser(User user) {
         PasswordResetToken token = tokenRepo.findByUserId(user.userId)
         if (token) {
-            log.info("found existing reset token for user [${user.userId}], generating new token with extended expiration time")
+            log.debug("found existing reset token for user [${user.userId}], generating new token value with extended expiration time")
             token.setToken(UUID.randomUUID().toString())
             LocalDateTime expires = LocalDateTime.now()
-            expires.plusHours(tokenExpirationTimeInHrs)
+            expires = expires.plusHours(tokenExpirationTimeInHrs)
             token.setExpires(Date.from(expires.atZone(ZoneId.systemDefault()).toInstant()))
         } else {
-            log.info("no reset token exists for user [${user.userId}], creating one now")
+            log.debug("no reset token exists for user [${user.userId}], creating one now")
             token = new PasswordResetToken()
             token.user = user
             token.setToken(UUID.randomUUID().toString())
             LocalDateTime expires = LocalDateTime.now()
-            expires.plusHours(tokenExpirationTimeInHrs)
+            expires = expires.plusHours(tokenExpirationTimeInHrs)
 
             token.setExpires(Date.from(expires.atZone(ZoneId.systemDefault()).toInstant()))
 
@@ -101,27 +103,29 @@ class PasswordResetService {
         }
 
         String publicUrl = settingsResult.value
-        String join = ""
         if (!publicUrl.endsWith("/")){
-            join = "/"
+            publicUrl += "/"
         }
 
-        String url = "${publicUrl}${join}resetPassword/${token.token}"
+        String url = "${publicUrl}"
 
         Context templateContext = new Context()
         templateContext.setVariable("recipientName", name)
-        templateContext.setVariable("resetLink", url)
         templateContext.setVariable("senderName", "The team")
         templateContext.setVariable("validTime", validFor)
+        templateContext.setVariable("publicUrl", url)
+        templateContext.setVariable("resetToken", token.token)
 
         //TODO: Error Handling
         emailService.sendEmailWithThymeleafTemplate("SkillTree Password Reset", email, "password_reset.html", templateContext)
     }
 
+    @Transactional(readOnly = true)
     boolean isTokenForUserId(String token, String userId) {
         tokenRepo.findByTokenAndUserId(token, userId) != null
     }
 
+    @Transactional
     void deleteToken(String token) {
         tokenRepo.deleteByToken(token)
     }

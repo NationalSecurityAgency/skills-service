@@ -19,6 +19,7 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Conditional
 import org.springframework.context.annotation.Lazy
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestPart
@@ -48,6 +49,9 @@ class PasswordResetController {
     @Autowired
     PublicPropsBasedValidator propsBasedValidator
 
+    @Autowired
+    PasswordEncoder passwordEncoder
+
     @PostMapping("resetPassword")
     RequestResult requestPasswordReset(@RequestPart("userId") String userId) {
         log.info("requesting password reset for [${userId}]")
@@ -63,7 +67,7 @@ class PasswordResetController {
     @PostMapping("performPasswordReset")
     RequestResult resetPassword(@RequestBody PasswordReset reset) {
         PasswordResetToken token = resetService.loadToken(reset.resetToken)
-        if (token.getUser().getUserId() != reset.userId) {
+        if (token?.getUser()?.getUserId() != reset.userId) {
             throw new SkillException("Supplied reset token is not for the specified user")
         }
 
@@ -81,6 +85,5 @@ class PasswordResetController {
         resetService.deleteToken(token.token)
 
         return RequestResult.success()
-        //TODO: redirect to login page, client needs to handle error display
     }
 }

@@ -23,7 +23,8 @@ import skills.storage.model.auth.PasswordResetToken
 interface PasswordResetTokenRepo extends CrudRepository<PasswordResetToken, Integer> {
 
     @Nullable
-    PasswordResetTokenRepo findByToken(String token)
+    @Query("select p from PasswordResetToken p where p.token = ?1")
+    PasswordResetToken findByToken(String token)
 
     @Nullable
     @Query("select p from PasswordResetToken p where p.user.userId = ?1")

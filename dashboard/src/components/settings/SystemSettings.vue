@@ -61,7 +61,7 @@ limitations under the License.
     data() {
       return {
         publicUrl: '',
-        isSaveing: false,
+        isSaving: false,
       };
     },
     methods: {
