@@ -321,7 +321,8 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
     }
 
     @Override
-    List<String> findUsersEligibleForBadge(String projectId, String badgeId, Date start, Date end) {
+    int addBadgeAchievementForEligibleUsers(String projectId, String badgeId, Integer badgeRowId, Boolean notified, Date start, Date end) {
+
         String q = '''
         WITH badgeSkills AS (
             SELECT sr.child_ref_id childId 
@@ -330,7 +331,9 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
             sd.skill_id = :badgeId AND
             sd.project_id = :projectId
         )
-        SELECT ua.user_id 
+        INSERT INTO user_achievement (user_id, project_id, skill_id, skill_ref_id, notified, points_when_achieved)
+        SELECT ua.user_id, ''' +"'$projectId', '$badgeId', $badgeRowId, '${notified.toString()}', -1"+
+        '''
         FROM user_achievement ua 
         WHERE ua.skill_ref_id IN (SELECT childId FROM badgeSkills) AND
         NOT EXISTS (
@@ -343,7 +346,7 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
         GROUP BY ua.user_id 
         HAVING COUNT(*) = (SELECT COUNT(*) FROM badgeSkills)'''
 
-        String dateFrag = '''
+        final String dateFrag = '''
         AND 
         (
             SELECT MAX(performed_on) 
@@ -368,15 +371,18 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
             query.setParameter('end', end)
         }
 
-        return query.getResultList()
+        return query.executeUpdate()
     }
 
-    List<String> findUsersEligbleForGlobalBadge(String badgeId,
-                                                Integer requiredSklls,
-                                                Integer requiredLevels,
-                                                Date start,
-                                                Date end) {
-        String cteFrag = '''
+    int addGlobalBadgeAchievementForEligibleUsers(String badgeId,
+                                                  Integer badgeRowId,
+                                                  Boolean notified,
+                                                  Integer requiredSklls,
+                                                  Integer requiredLevels,
+                                                  Date start,
+                                                  Date end) {
+
+        final String cteFrag = '''
         WITH badgeSkills AS (
             SELECT sr.child_ref_id childId
             FROM skill_relationship_definition sr
@@ -386,7 +392,13 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
         )
         '''
 
-        String skillDateFrag = '''
+        final String insertStatement = '''
+        INSERT INTO user_achievement (user_id, skill_id, skill_ref_id, notified, points_when_achieved)
+        '''
+
+        final String selectFrag = '''SELECT ua.user_id, ''' +"'$badgeId', $badgeRowId, '${notified.toString()}', -1 "
+
+        final String skillDateFrag = '''
         AND
         (
             SELECT MAX(performed_on)
@@ -400,13 +412,12 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
         boolean includeSkills = requiredSklls != null && requiredSklls > 0
         boolean includeDates = start != null && end != null
 
-        String q = ''
+        String q = insertStatement
         String levels = ''
         String skills = ''
         if (includeLevels) {
-            levels = '''
-            SELECT 
-            ua.user_id 
+            levels = selectFrag +
+            '''
             FROM USER_ACHIEVEMENT ua
             INNER JOIN GLOBAL_BADGE_LEVEL_DEFINITION g ON g.level=ua.level 
             AND g.project_id = ua.project_id
@@ -416,9 +427,9 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
         }
 
         if (includeSkills) {
-            skills = '''
-            SELECT ua.user_id 
-            FROM user_achievement ua 
+            skills = selectFrag +
+            '''
+            FROM USER_ACHIEVEMENT ua
             WHERE ua.skill_ref_id IN (SELECT childId FROM badgeSkills) AND
             NOT EXISTS (
                 SELECT 1 
@@ -433,7 +444,7 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
         }
 
         if (includeSkills) {
-            q = cteFrag + skills
+            q = cteFrag + q + skills
             if (includeDates) {
                 q += skillDateFrag
             }
@@ -449,8 +460,8 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
             q += levels
         }
 
-        if (!includeSkills && !includeLevels) {
-            return Collections.emptyList();
+        if(!includeSkills && !includeLevels){
+            return 0;
         }
 
         Query query = entityManager.createNativeQuery(q);
@@ -462,7 +473,7 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
             query.setParameter('end', end)
         }
 
-        return query.getResultList()
+        return query.executeUpdate()
     }
 
     @Override
