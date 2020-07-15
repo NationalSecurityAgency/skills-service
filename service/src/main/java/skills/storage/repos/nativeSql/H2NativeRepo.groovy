@@ -379,7 +379,7 @@ class H2NativeRepo implements NativeQueriesRepo {
     }
 
     @Override
-    int findUsersEligibleForBadgeAndAddAchievement(String projectId, String badgeId, Integer badgeRowId, Boolean notified, Date start, Date end) {
+    int addBadgeAchievementForEligibleUsers(String projectId, String badgeId, Integer badgeRowId, Boolean notified, Date start, Date end) {
         String badgeSkillsQ = '''
         SELECT sr.child_ref_id 
         FROM skill_relationship_definition sr
@@ -459,13 +459,13 @@ class H2NativeRepo implements NativeQueriesRepo {
         return updated
     }
 
-    int findUsersEligbleForGlobalBadgeAndAddAchievement(String badgeId,
-                                                        Integer badgeRowId,
-                                                        Boolean notified,
-                                                        Integer requiredSklls,
-                                                        Integer requiredLevels,
-                                                        Date start,
-                                                        Date end) {
+    int addGlobalBadgeAchievementForEligibleUsers(String badgeId,
+                                                  Integer badgeRowId,
+                                                  Boolean notified,
+                                                  Integer requiredSklls,
+                                                  Integer requiredLevels,
+                                                  Date start,
+                                                  Date end) {
 
         boolean requireSkills = requiredSklls != null && requiredSklls > 0
         boolean requireLevels = requiredLevels != null && requiredLevels > 0

@@ -321,7 +321,7 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
     }
 
     @Override
-    int findUsersEligibleForBadgeAndAddAchievement(String projectId, String badgeId, Integer badgeRowId, Boolean notified, Date start, Date end) {
+    int addBadgeAchievementForEligibleUsers(String projectId, String badgeId, Integer badgeRowId, Boolean notified, Date start, Date end) {
 
         String q = '''
         WITH badgeSkills AS (
@@ -374,13 +374,13 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
         return query.executeUpdate()
     }
 
-    int findUsersEligbleForGlobalBadgeAndAddAchievement(String badgeId,
-                                                Integer badgeRowId,
-                                                Boolean notified,
-                                                Integer requiredSklls,
-                                                Integer requiredLevels,
-                                                Date start,
-                                                Date end) {
+    int addGlobalBadgeAchievementForEligibleUsers(String badgeId,
+                                                  Integer badgeRowId,
+                                                  Boolean notified,
+                                                  Integer requiredSklls,
+                                                  Integer requiredLevels,
+                                                  Date start,
+                                                  Date end) {
 
         final String cteFrag = '''
         WITH badgeSkills AS (

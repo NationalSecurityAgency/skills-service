@@ -36,15 +36,15 @@ interface NativeQueriesRepo {
 
     void removeUserAchievementsThatDoNotMeetNewNumberOfOccurrences(String projectId, String skillId, int numOfOccurrences)
 
-    int findUsersEligibleForBadgeAndAddAchievement(String projectId, String badgeId, Integer badgeRowId, Boolean notified, Date start, Date end)
+    int addBadgeAchievementForEligibleUsers(String projectId, String badgeId, Integer badgeRowId, Boolean notified, Date start, Date end)
 
-    int findUsersEligbleForGlobalBadgeAndAddAchievement(String globalBadgeId,
-                                                Integer globalBadgeRowId,
-                                                Boolean notified,
-                                                Integer requiredSklls,
-                                                Integer requiredLevels,
-                                                Date start,
-                                                Date end)
+    int addGlobalBadgeAchievementForEligibleUsers(String globalBadgeId,
+                                                  Integer globalBadgeRowId,
+                                                  Boolean notified,
+                                                  Integer requiredSklls,
+                                                  Integer requiredLevels,
+                                                  Date start,
+                                                  Date end)
 
     void identifyAndAddSubjectLevelAchievements(String projectId, String subjectId, boolean pointsBasedLevels);
 

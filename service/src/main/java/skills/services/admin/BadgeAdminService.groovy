@@ -161,7 +161,7 @@ class BadgeAdminService {
     @Transactional
     public void awardBadgeToUsersMeetingRequirements(SkillDefParent badge) {
         if(!badge.projectId) {
-            nativeQueriesRepo.findUsersEligbleForGlobalBadgeAndAddAchievement(badge.skillId,
+            nativeQueriesRepo.addGlobalBadgeAchievementForEligibleUsers(badge.skillId,
                     badge.id,
                     Boolean.FALSE,
                     countNumberOfRequiredSkills(badge.skillId),
@@ -169,7 +169,7 @@ class BadgeAdminService {
                     badge.startDate,
                     badge.endDate)
         } else {
-            nativeQueriesRepo.findUsersEligibleForBadgeAndAddAchievement(badge.projectId,
+            nativeQueriesRepo.addBadgeAchievementForEligibleUsers(badge.projectId,
                     badge.skillId,
                     badge.id,
                     Boolean.FALSE,
