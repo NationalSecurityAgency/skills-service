@@ -17,6 +17,7 @@ package skills.services.settings
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.context.event.ApplicationStartedEvent
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
@@ -34,6 +35,10 @@ import skills.controller.request.model.SettingsRequest
  */
 @Component
 @Slf4j
+@ConditionalOnProperty(
+        name = "skills.db.startup",
+        havingValue = "true",
+        matchIfMissing = true)
 class SettingsInitializingBean {
 
     @Autowired
