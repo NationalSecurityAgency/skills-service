@@ -28,7 +28,7 @@ limitations under the License.
             errors.first('publicUrl')}}</p>
         </div>
         <div>
-          <button class="btn btn-outline-primary" type="button" v-on:click="saveGeneralSettings" :disabled="errors.any()">
+          <button class="btn btn-outline-primary" type="button" v-on:click="saveSystemSettings" :disabled="errors.any()">
             Save
             <i :class="[isSaving ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-arrow-circle-right']"></i>
           </button>
@@ -64,8 +64,11 @@ limitations under the License.
         isSaving: false,
       };
     },
+    mounted() {
+      this.loadSystemSettings();
+    },
     methods: {
-      saveGeneralSettings() {
+      saveSystemSettings() {
         this.isSaving = true;
         SettingsService.saveSystemSettings({ publicUrl: this.publicUrl }).then(() => {
           this.successToast('Saved', 'System Settings Successful!');
@@ -77,6 +80,13 @@ limitations under the License.
             this.isSaving = false;
           });
       },
+      loadSystemSettings() {
+        SettingsService.loadSystemSettings().then((resp) => {
+          if (resp) {
+            this.publicUrl = resp.publicUrl;
+          }
+        });
+      }
     },
   };
 </script>

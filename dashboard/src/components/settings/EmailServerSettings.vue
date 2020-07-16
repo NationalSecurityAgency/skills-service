@@ -112,6 +112,9 @@ limitations under the License.
         isSaving: false,
       };
     },
+    mounted() {
+      this.loadEmailSettings();
+    },
     methods: {
       testConnection() {
         this.isTesting = true;
@@ -140,6 +143,12 @@ limitations under the License.
           .finally(() => {
             this.isSaving = false;
           });
+      },
+      loadEmailSettings() {
+        console.log('loading email settings');
+        SettingsService.loadEmailSettings().then((response) => {
+          this.emailInfo = Object.assign(this.emailInfo, response);
+        });
       },
       missingRequiredValues() {
         return !this.isAuthValid() || !this.emailInfo.host || !this.emailInfo.port || !this.emailInfo.protocol;

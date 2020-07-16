@@ -26,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional
 import skills.controller.exceptions.SkillException
 import skills.controller.request.model.GlobalSettingsRequest
 import skills.controller.request.model.SettingsRequest
+import skills.controller.result.model.SettingsResult
 import skills.services.settings.SettingsService
 
 import javax.annotation.PostConstruct
@@ -136,10 +137,44 @@ class EmailSettingsService {
         ])
     }
 
+    EmailConnectionInfo fetchEmailSettings(){
+        List<SettingsResult> emailSettings = settingsService.getGlobalSettingsByGroup(settingsGroup)
+        EmailConnectionInfo info = new EmailConnectionInfo()
+        if (emailSettings) {
+            def mappedSettings = emailSettings.collectEntries() {
+                [it.setting, it.value]
+            }
+            if(mappedSettings[(hostSetting)]) {
+                info.host = mappedSettings[(hostSetting)]
+            }
+            if(mappedSettings[(portSetting)]) {
+                info.port = Integer.valueOf(mappedSettings[(portSetting)])
+            }
+            if(mappedSettings[(protocolSetting)]) {
+                info.protocol = mappedSettings[(protocolSetting)]
+            }
+            if(mappedSettings[(usernameSetting)]) {
+                info.username = mappedSettings[(usernameSetting)]
+            }
+            if(mappedSettings[(passwordSetting)]) {
+                info.password = mappedSettings[(passwordSetting)]
+            }
+            if (mappedSettings[(authSetting)]) {
+                info.authEnabled = Boolean.valueOf(mappedSettings[(authSetting)])
+            }
+            if (mappedSettings[(tlsEnableSetting)]) {
+                info.tlsEnabled = Boolean.valueOf(mappedSettings[(tlsEnableSetting)])
+            }
+        }
+        return info
+    }
+
     private void saveOrUpdateGlobalGroup(String settingsGroup, Map<String, String> settingsMap) {
         List<SettingsRequest> settingsRequests = []
         settingsMap.each { String setting, String value ->
-            settingsRequests << new GlobalSettingsRequest(settingGroup: settingsGroup, setting: setting, value: value)
+            if (value) {
+                settingsRequests << new GlobalSettingsRequest(settingGroup: settingsGroup, setting: setting, value: value)
+            }
         }
         settingsService.saveSettings(settingsRequests)
     }
