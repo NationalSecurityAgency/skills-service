@@ -180,6 +180,11 @@ class SettingsService {
         return convertToResList(settings)
     }
 
+    @Transactional()
+    void deleteGlobalSetting(String setting) {
+        settingsDataAccessor.deleteGlobalSetting(setting)
+    }
+
     /**
      * Private helper methods
      */

@@ -171,12 +171,20 @@ class EmailSettingsService {
 
     private void saveOrUpdateGlobalGroup(String settingsGroup, Map<String, String> settingsMap) {
         List<SettingsRequest> settingsRequests = []
+        List<SettingsRequest> deleteIfExist = []
         settingsMap.each { String setting, String value ->
+            GlobalSettingsRequest gsr = new GlobalSettingsRequest(settingGroup: settingsGroup, setting: setting, value: value)
             if (value) {
-                settingsRequests << new GlobalSettingsRequest(settingGroup: settingsGroup, setting: setting, value: value)
+                settingsRequests << gsr
+            } else {
+                //if there's not value specified, we need to check if that setting previously had a value and delete it
+                deleteIfExist << gsr
             }
         }
         settingsService.saveSettings(settingsRequests)
+        deleteIfExist.each {
+            settingsService.deleteGlobalSetting(it.setting)
+        }
     }
 
     @WithWriteLock

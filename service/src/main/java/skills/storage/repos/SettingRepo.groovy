@@ -15,7 +15,8 @@
  */
 package skills.storage.repos
 
-
+import org.springframework.data.jpa.repository.Modifying
+import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.lang.Nullable
 import skills.storage.model.Setting
@@ -33,4 +34,10 @@ interface SettingRepo extends CrudRepository<Setting, Integer> {
 
     @Nullable
     List<Setting> findAllByTypeAndSettingGroup(Setting.SettingType type, String settingGroup)
+
+
+    @Modifying
+    @Query("delete from Setting s where s.setting = ?1 AND s.type = 'Global'")
+    void deleteGlobalSetting(String setting)
+
 }

@@ -134,6 +134,10 @@ limitations under the License.
       },
       saveEmailSettings() {
         this.isSaving = true;
+        if (this.emailInfo.authEnabled === false || this.emailInfo.authEnabled === 'false') {
+          this.emailInfo.username = '';
+          this.emailInfo.password = '';
+        }
         SettingsService.saveEmailSettings(this.emailInfo).then(() => {
           this.successToast('Saved', 'Email Connection Successful!');
         })
