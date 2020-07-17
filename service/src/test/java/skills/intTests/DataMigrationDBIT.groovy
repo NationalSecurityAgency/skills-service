@@ -15,6 +15,7 @@
  */
 package skills.intTests
 
+import groovy.util.logging.Slf4j
 import liquibase.Contexts
 import liquibase.LabelExpression
 import liquibase.Liquibase
@@ -26,6 +27,7 @@ import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.context.annotation.Conditional
 import org.springframework.core.io.ClassPathResource
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Component
@@ -35,10 +37,12 @@ import skills.intTests.utils.SkillsFactory
 import skills.storage.repos.LevelDefRepo
 import skills.storage.repos.ProjDefRepo
 import skills.storage.repos.SkillRelDefRepo
+import skills.storage.repos.nativeSql.DBConditions
 
 import javax.annotation.PostConstruct
 import javax.sql.DataSource
 
+@Slf4j
 @SpringBootTest(properties = ['skills.db.startup=false', 'spring.liquibase.enabled=false'], webEnvironment=SpringBootTest.WebEnvironment.RANDOM_PORT, classes = SpringBootApp)
 class DataMigrationDBIT extends DefaultIntSpec {
 
@@ -61,9 +65,13 @@ class DataMigrationDBIT extends DefaultIntSpec {
     @Value('${spring.liquibase.change-log}')
     ClassPathResource changeLog
 
+    @Autowired
+    DbDropper dbDropper
+
     @Override
     def doSetup() {
         // disable initial db setup in the base class
+        dbDropper.dropDb()
     }
 
     def "validate migration1"() {
@@ -155,5 +163,38 @@ class DataMigrationDBIT extends DefaultIntSpec {
         @PostConstruct
         @Override
         void init() { }
+    }
+
+    static interface DbDropper {
+        void dropDb()
+    }
+
+    @Conditional(DBConditions.PostgresQL)
+    @Component
+    static class PostgresqlDropper implements DbDropper {
+
+        @Autowired
+        JdbcTemplate jdbcTemplate
+
+        @Override
+        void dropDb() {
+            jdbcTemplate.execute('drop schema public cascade')
+            jdbcTemplate.execute('create schema public')
+            log.info("Dropped PostgreSQL database")
+        }
+    }
+
+    @Conditional(DBConditions.H2_IN_MEMORY)
+    @Component
+    static class H2Dropper implements DbDropper {
+
+        @Autowired
+        JdbcTemplate jdbcTemplate
+
+        @Override
+        void dropDb() {
+            jdbcTemplate.execute('DROP ALL OBJECTS')
+            log.info("Dropped H2 database")
+        }
     }
 }
