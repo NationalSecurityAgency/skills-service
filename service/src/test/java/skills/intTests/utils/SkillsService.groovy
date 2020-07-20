@@ -829,6 +829,10 @@ class SkillsService {
         return wsHelper.apiPost("/projects/${projectId}/skillsClientVersion", [ skillsClientVersion: version ])
     }
 
+    def requestPasswordReset(String userId) {
+        return wsHelper.post("/resetPassword", "", ["userId", userId])
+    }
+
     private String getProjectUrl(String project) {
         return "/projects/${project}".toString()
     }

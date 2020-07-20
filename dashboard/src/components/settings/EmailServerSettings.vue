@@ -149,7 +149,6 @@ limitations under the License.
           });
       },
       loadEmailSettings() {
-        console.log('loading email settings');
         SettingsService.loadEmailSettings().then((response) => {
           this.emailInfo = Object.assign(this.emailInfo, response);
         });

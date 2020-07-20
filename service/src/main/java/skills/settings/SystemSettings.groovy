@@ -21,4 +21,6 @@ import groovy.transform.Canonical
 class SystemSettings {
 
     String publicUrl
+    //iso 8601 period/duration string, e.g., PT2H30M45S
+    String resetTokenExpiration
 }

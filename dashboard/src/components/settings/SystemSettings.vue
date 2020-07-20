@@ -19,31 +19,44 @@ limitations under the License.
 
     <div class="card">
       <div class="card-header">System</div>
-      <div class="card-body">
-        <div class="form-group">
-          <label class="label">Public URL</label>
-          <input class="form-control" type="text" v-model="publicUrl" name="publicUrl"
-                 v-validate="'required'" data-vv-delay="500"/>
-          <p class="text-danger" v-show="errors.has('publicUrl')">{{
-            errors.first('publicUrl')}}</p>
+      <ValidationObserver ref="observer" v-slot="{invalid}" slim>
+        <div class="card-body">
+          <div class="form-group">
+            <label class="label">Public URL</label>
+            <ValidationProvider rules="required" name="publicUrl" v-slot="{ errors }">
+            <input class="form-control" type="text" v-model="publicUrl" name="publicUrl" data-vv-delay="500"/>
+            <p class="text-danger" v-show="errors[0]">{{errors[0]}}</p>
+            </ValidationProvider>
+          </div>
+          <div class="form-group">
+            <label class="label">Password Token Expiration</label>
+            <ValidationProvider rules="required|iso8601" name="resetTokenExpiration" v-slot="{ errors }">
+            <input class="form-control" type="text" v-model="resetTokenExpiration" name="resetTokenExpiration" data-vv-delay="500"/>
+            <small class="text-info">supports ISO 8601 time duration format, e.g., PT2H, PT30M, PT1H30M</small>
+            <p class="text-danger" v-show="errors[0]">{{errors[0]}}</p>
+            </ValidationProvider>
+          </div>
+
+          <p v-if="invalid && overallErrMsg" class="text-center text-danger">***{{ overallErrMsg }}***</p>
+          <div>
+            <button class="btn btn-outline-primary" type="button" v-on:click="saveSystemSettings" :disabled="invalid">
+              Save
+              <i :class="[isSaving ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-arrow-circle-right']"></i>
+            </button>
+          </div>
         </div>
-        <div>
-          <button class="btn btn-outline-primary" type="button" v-on:click="saveSystemSettings" :disabled="errors.any()">
-            Save
-            <i :class="[isSaving ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-arrow-circle-right']"></i>
-          </button>
-        </div>
-      </div>
+      </ValidationObserver>
     </div>
 
   </div>
 </template>
 
 <script>
-  import { Validator } from 'vee-validate';
+  import { Validator, ValidationProvider, ValidationObserver } from 'vee-validate';
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import SettingsService from './SettingsService';
   import ToastSupport from '../utils/ToastSupport';
+  import axios from "axios";
 
   const dictionary = {
     en: {
@@ -56,12 +69,14 @@ limitations under the License.
 
   export default {
     name: 'SystemSettings',
-    mixin: ToastSupport,
-    components: { SubPageHeader },
+    mixins: [ToastSupport],
+    components: { SubPageHeader, ValidationObserver, ValidationProvider },
     data() {
       return {
         publicUrl: '',
+        resetTokenExpiration: 'PT2H',
         isSaving: false,
+        overallErrMsg: '',
       };
     },
     mounted() {
@@ -69,16 +84,23 @@ limitations under the License.
     },
     methods: {
       saveSystemSettings() {
-        this.isSaving = true;
-        SettingsService.saveSystemSettings({ publicUrl: this.publicUrl }).then(() => {
-          this.successToast('Saved', 'System Settings Successful!');
-        })
-          .catch(() => {
-            this.errorToast('Failure', 'Failed to Save System Settings!');
-          })
-          .finally(() => {
-            this.isSaving = false;
-          });
+        this.$refs.observer.validate().then((res) => {
+          if(res) {
+            this.isSaving = true;
+            SettingsService.saveSystemSettings({
+              publicUrl: this.publicUrl,
+              resetTokenExpiration: this.resetTokenExpiration
+            }).then(() => {
+              this.successToast('Saved', 'System Settings Successful!');
+            }).catch(() => {
+                this.errorToast('Failure', 'Failed to Save System Settings!');
+            }).finally(() => {
+                this.isSaving = false;
+              });
+          } else {
+            this.overallErrMsg = 'Whoops, something is wrong with the information you entered. Please try again.';
+          }
+        });
       },
       loadSystemSettings() {
         SettingsService.loadSystemSettings().then((resp) => {
@@ -89,6 +111,21 @@ limitations under the License.
       }
     },
   };
+
+  const timePeriodRegex = /^PT(?=(?:0\.)?\d+[HMS])((?:0\.)?\d+H)?((?:0\.)?\d+M)?((?:0\.)?\d+S)?$/;
+  Validator.extend('iso8601', {
+    getMessage() {
+      return 'Invalid ISO 8601 Time Duration';
+    },
+    validate(value) {
+      if(value) {
+        return value.match(timePeriodRegex) !== null;
+      } else {
+        return false;
+      }
+    },
+  });
+
 </script>
 
 <style scoped>

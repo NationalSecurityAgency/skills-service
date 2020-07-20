@@ -17,6 +17,7 @@ package skills.services
 
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
+import org.apache.commons.lang3.time.DurationFormatUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Conditional
 import org.springframework.security.access.method.P
@@ -36,6 +37,7 @@ import skills.storage.model.auth.User
 import skills.storage.repos.PasswordResetTokenRepo
 
 import javax.annotation.PostConstruct
+import java.time.Duration
 import java.time.LocalDateTime
 import java.time.ZoneId
 
@@ -44,8 +46,7 @@ import java.time.ZoneId
 @Conditional(SecurityMode.FormAuth)
 class PasswordResetService {
 
-    //TODO: extract this to configuration
-    public static final int tokenExpirationTimeInHrs = 2
+    public static final String DEFAULT_TOKEN_EXPIRATION = "PT2H"
 
     @Autowired
     PasswordResetTokenRepo tokenRepo
@@ -67,25 +68,27 @@ class PasswordResetService {
     @Transactional()
     void createTokenAndNotifyUser(User user) {
         PasswordResetToken token = tokenRepo.findByUserId(user.userId)
-        if (token) {
-            log.debug("found existing reset token for user [${user.userId}], generating new token value with extended expiration time")
-            token.setToken(UUID.randomUUID().toString())
-            LocalDateTime expires = LocalDateTime.now()
-            expires = expires.plusHours(tokenExpirationTimeInHrs)
-            token.setExpires(Date.from(expires.atZone(ZoneId.systemDefault()).toInstant()))
+
+        SettingsResult expirationSetting = settingsService.getGlobalSetting(Settings.GLOBAL_RESET_TOKEN_EXPIRATION.settingName)
+        Duration expirationDuration = null
+        if(expirationSetting) {
+            expirationDuration = Duration.parse(expirationSetting.value)
         } else {
-            log.debug("no reset token exists for user [${user.userId}], creating one now")
-            token = new PasswordResetToken()
-            token.user = user
-            token.setToken(UUID.randomUUID().toString())
-            LocalDateTime expires = LocalDateTime.now()
-            expires = expires.plusHours(tokenExpirationTimeInHrs)
-
-            token.setExpires(Date.from(expires.atZone(ZoneId.systemDefault()).toInstant()))
-
-            tokenRepo.save(token)
+            expirationDuration = Duration.parse(DEFAULT_TOKEN_EXPIRATION)
         }
 
+        String validFor = DurationFormatUtils.formatDurationWords(expirationDuration.toMillis(), true, true)
+        LocalDateTime expires = LocalDateTime.now()
+        expirationDuration.addTo(expires)
+
+        if (!token) {
+            token = new PasswordResetToken()
+            token.user = user
+        }
+
+        token.setToken(UUID.randomUUID().toString())
+        token.setExpires(Date.from(expires.atZone(ZoneId.systemDefault()).toInstant()))
+        tokenRepo.save(token)
         UserAttrs attrs = attrsService.findByUserId(user.userId)
 
         if (StringUtils.isEmpty(attrs.email)) {
@@ -94,7 +97,6 @@ class PasswordResetService {
 
         String email = attrs.email
         String name = "${attrs.firstName} ${attrs.lastName}"
-        String validFor = "$tokenExpirationTimeInHrs hours"
 
         SettingsResult settingsResult = settingsService.getGlobalSetting(Settings.GLOBAL_PUBLIC_URL.settingName)
 

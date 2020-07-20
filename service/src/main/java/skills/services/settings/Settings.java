@@ -17,7 +17,8 @@ package skills.services.settings;
 
 public enum Settings {
     LEVEL_AS_POINTS("level.points.enabled"),
-    GLOBAL_PUBLIC_URL("public_url");
+    GLOBAL_PUBLIC_URL("public_url"),
+    GLOBAL_RESET_TOKEN_EXPIRATION("password_reset_token_expiration");
 
     private String settingName;
 

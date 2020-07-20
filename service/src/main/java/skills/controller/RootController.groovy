@@ -182,18 +182,29 @@ class RootController {
     }
 
     @PostMapping('/saveSystemSettings')
-    RequestResult saveGeneralSettings(@RequestBody SystemSettings settings){
-        GlobalSettingsRequest globalSettingsRequest = new GlobalSettingsRequest(setting: Settings.GLOBAL_PUBLIC_URL.settingName, value: settings.publicUrl)
-        settingsService.saveSetting(globalSettingsRequest)
+    RequestResult saveSystemSettings(@RequestBody SystemSettings settings){
+        List<GlobalSettingsRequest> toSave = []
+        toSave << new GlobalSettingsRequest(setting: Settings.GLOBAL_PUBLIC_URL.settingName, value: settings.publicUrl)
+
+        if (settings.resetTokenExpiration) {
+            toSave << new GlobalSettingsRequest(setting: Settings.GLOBAL_RESET_TOKEN_EXPIRATION.settingName, value: settings.resetTokenExpiration)
+        }
+
+        settingsService.saveSettings(toSave)
         return RequestResult.success()
     }
 
     @GetMapping('/getSystemSettings')
     SystemSettings getSystemSettings(){
+
         SystemSettings settings = new SystemSettings()
         SettingsResult result = settingsService.getGlobalSetting(Settings.GLOBAL_PUBLIC_URL.settingName)
         if (result) {
             settings.publicUrl = result.value
+        }
+        result = settingsService.getGlobalSetting(Settings.GLOBAL_RESET_TOKEN_EXPIRATION.settingName)
+        if (result) {
+            settings.resetTokenExpiration = result.value
         }
 
         return settings
