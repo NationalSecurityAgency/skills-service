@@ -16,12 +16,14 @@
 package callStack.profiler
 
 import callStack.profiler.AsyncProcess
+import groovy.util.logging.Slf4j
 import spock.lang.Specification
 
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 
 
+@Slf4j
 class AsyncProcessSpecification extends Specification{
 
     AsyncProcess asyncProcess
@@ -130,24 +132,34 @@ class AsyncProcessSpecification extends Specification{
 
     def "support drop-if-full option"(){
 
+        log.error("starting [support drop-if-full option] test")
         AtomicInteger count = new AtomicInteger(0)
 
         asyncProcess = new AsyncProcess(queueSize:1, dropIfFull:true)
         asyncProcess.start()
 
-        asyncProcess.async {
+        log.error("before async 1")
+        boolean res1 =asyncProcess.async {
             TimeUnit.SECONDS.sleep(6)
         }
-        asyncProcess.async {
-        }
-        asyncProcess.async {
-        }
+        log.error("async 1 res: ${res1}")
 
+        log.error("before async 2")
+        boolean res2 = asyncProcess.async {
+        }
+        log.error("async 2 res: ${res2}")
+
+        log.error("before async 3")
+        boolean res3 = asyncProcess.async {
+        }
+        log.error("async 3 res: ${res3}")
         when:
 
+        log.error("before async 4")
         boolean kept = asyncProcess.async {
             count.incrementAndGet()
         }
+        log.error("async 4 res: ${kept}")
 
         TimeUnit.SECONDS.sleep(10)
 
