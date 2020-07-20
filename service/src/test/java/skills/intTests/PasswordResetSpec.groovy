@@ -65,7 +65,7 @@ class PasswordResetSpec extends DefaultIntSpec {
         SkillsService aUser = createService("randomuser@skills.org", "somepassword",)
 
         when:
-        //post request with an unauthenticated client to ensure that the url is publically available
+        //post request with an unauthenticated client to ensure that the url is publicly available
         RestTemplate template = new RestTemplate()
         HttpHeaders headers = new HttpHeaders()
         headers.setContentType(MediaType.MULTIPART_FORM_DATA)
@@ -87,7 +87,7 @@ class PasswordResetSpec extends DefaultIntSpec {
 
     def "reset password with token from email"() {
         SkillsService aUser = createService("randomuser@skills.org", "somepassword")
-        //post request with an unauthenticated client to ensure that the url is publically available
+        //post request with an unauthenticated client to ensure that the url is publicly available
         RestTemplate template = new RestTemplate()
         HttpHeaders headers = new HttpHeaders()
         headers.setContentType(MediaType.MULTIPART_FORM_DATA)
@@ -122,7 +122,7 @@ class PasswordResetSpec extends DefaultIntSpec {
 
     def "reset password with invalid token fails"() {
         SkillsService aUser = createService("randomuser@skills.org", "somepassword")
-        //post request with an unauthenticated client to ensure that the url is publically available
+        //post request with an unauthenticated client to ensure that the url is publicly available
         RestTemplate template = new RestTemplate()
         HttpHeaders headers = new HttpHeaders()
         headers.setContentType(MediaType.MULTIPART_FORM_DATA)
@@ -149,12 +149,11 @@ class PasswordResetSpec extends DefaultIntSpec {
     }
 
     def "reset with expired token fails"(){
-        //need to implement configuration based expiration time
         rootSkillsService.addOrUpdateGlobalSetting("password_reset_token_expiration",
                 ["setting": "password_reset_token_expiration", "value": "PT0.001S"])
 
         SkillsService aUser = createService("randomuser@skills.org", "somepassword")
-        //post request with an unauthenticated client to ensure that the url is publically available
+        //post request with an unauthenticated client to ensure that the url is publicly available
         RestTemplate template = new RestTemplate()
         HttpHeaders headers = new HttpHeaders()
         headers.setContentType(MediaType.MULTIPART_FORM_DATA)
