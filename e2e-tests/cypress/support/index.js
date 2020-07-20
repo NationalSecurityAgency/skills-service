@@ -38,7 +38,7 @@ before(function () {
     cy.fixture('vars.json').then((vars) => {
         cy.register(vars.rootUser, vars.defaultPass, true);
         cy.register(vars.defaultUser, vars.defaultPass);
-    })
+    });
 });
 
 beforeEach(function () {

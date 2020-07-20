@@ -35,6 +35,8 @@ import skills.services.PasswordResetService
 import skills.storage.model.auth.PasswordResetToken
 import skills.storage.model.auth.User
 
+import javax.annotation.PostConstruct
+
 @Conditional(SecurityMode.FormAuth)
 @Slf4j
 @RestController("/")

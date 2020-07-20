@@ -29,26 +29,26 @@ limitations under the License.
               <div class="form-group">
                 <label for="email" class="text-secondary font-weight-bold">Email</label>
                 <input class="form-control" type="text" v-model="resetFields.email" id="email" :disabled="resetInProgress"
-                       name="email" v-validate="'required|email'" data-vv-delay="500"/>
+                       name="email" v-validate="'required|email'" data-vv-delay="500" data-cy="resetPasswordEmail"/>
                 <small class="form-text text-danger" v-show="errors.has('email')">{{ errors.first('email')}}</small>
               </div>
               <div class="form-group">
                 <label for="password" class="text-secondary font-weight-bold">New Password</label>
                 <input class="form-control" type="password" v-model="resetFields.password" id="password" :disabled="resetInProgress"
-                       name="password" v-validate="'required|minPasswordLength|maxPasswordLength'" data-vv-delay="500" ref="password"/>
+                       name="password" v-validate="'required|minPasswordLength|maxPasswordLength'" data-vv-delay="500" ref="password" data-cy="resetPasswordNewPassword"/>
                 <small class="form-text text-danger" v-show="errors.has('password')">{{ errors.first('password')}}</small>
               </div>
               <div class="form-group">
                 <label for="password_confirmation" class="text-secondary font-weight-bold">Confirm New Password</label>
                 <input class="form-control" type="password" id="password_confirmation" :disabled="resetInProgress"
-                       name="password_confirmation" v-validate="'required|confirmed:password'" data-vv-delay="500" data-vv-as="Password Confirmation"/>
+                       name="password_confirmation" v-validate="'required|confirmed:password'" data-vv-delay="500" data-vv-as="Password Confirmation" data-cy="resetPasswordConfirm"/>
                 <small class="form-text text-danger" v-show="errors.has('password_confirmation')">{{ errors.first('password_confirmation')}}</small>
               </div>
               <small class="text-center" v-if="this.resetSuccessful">Password reset was successful! Redirecting to login page in {{countdown}} seconds</small>
               <small class="text-danger" v-if="this.resetFailed">Password reset failed due to {{error}}</small>
               <div class="field is-grouped">
                 <div class="control">
-                  <button type="submit" class="btn btn-outline-primary" :disabled="errors.any() || missingRequiredValues() || resetInProgress">
+                  <button type="submit" class="btn btn-outline-primary" :disabled="errors.any() || missingRequiredValues() || resetInProgress" data-cy="resetPasswordSubmit">
                     Reset Password <i v-if="!resetInProgress" class="fas fa-arrow-circle-right"/>
                     <b-spinner v-if="resetInProgress" label="Loading..." style="width: 1rem; height: 1rem;" variant="primary"/>
                   </button>

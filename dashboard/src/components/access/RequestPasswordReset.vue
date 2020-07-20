@@ -28,7 +28,9 @@ limitations under the License.
               <label for="username" class="text-secondary font-weight-bold">Email Address</label>
               <input type="text" class="form-control" id="username" tabindex="1" placeholder="Enter email"
                      aria-describedby="emailHelp"
-                     v-model="resetFields.username" v-validate="'required|minUsernameLength|email'" data-vv-delay="500" data-vv-name="email">
+                     v-model="resetFields.username" v-validate="'required|minUsernameLength|email'"
+                     data-vv-delay="500" data-vv-name="email"
+                      data-cy="forgotPasswordEmail">
               <small id="emailHelp" class="form-text text-danger" v-show="errors.has('email')">{{
                 errors.first('email')}}
               </small>
@@ -36,7 +38,7 @@ limitations under the License.
               A password reset link as been sent, you will be forwarded to the login page in {{countDown}} seconds
               </small>
             </div>
-            <button type="submit" class="btn btn-outline-primary" tabindex="3" :disabled="disabled">
+            <button type="submit" class="btn btn-outline-primary" tabindex="3" :disabled="disabled" data-cy="resetPassword">
               Reset Password <i class="fas fa-arrow-circle-right"/>
             </button>
           </div>

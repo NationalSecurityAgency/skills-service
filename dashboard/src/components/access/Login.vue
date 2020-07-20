@@ -45,7 +45,7 @@ limitations under the License.
                   <label for="inputPassword" class="text-secondary font-weight-bold">Password</label>
                 </div>
                 <div class="col text-right">
-                  <small class="text-muted"><b-link tabindex="4" @click="forgotPassword">Forgot Password?</b-link></small>
+                  <small class="text-muted"><b-link tabindex="4" @click="forgotPassword" data-cy="forgotPassword">Forgot Password?</b-link></small>
                 </div>
               </div>
               <input type="password" class="form-control" id="inputPassword" tabindex="2" placeholder="Password"
@@ -55,7 +55,7 @@ limitations under the License.
                 errors.first('password')}}
               </small>
             </div>
-            <button type="submit" class="btn btn-outline-primary" tabindex="3" :disabled="disabled">
+            <button type="submit" class="btn btn-outline-primary" tabindex="3" :disabled="disabled" data-cy="login">
               Login <i class="fas fa-arrow-circle-right"/>
             </button>
 

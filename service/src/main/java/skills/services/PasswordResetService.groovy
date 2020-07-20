@@ -79,7 +79,7 @@ class PasswordResetService {
 
         String validFor = DurationFormatUtils.formatDurationWords(expirationDuration.toMillis(), true, true)
         LocalDateTime expires = LocalDateTime.now()
-        expirationDuration.addTo(expires)
+        expires = expirationDuration.addTo(expires)
 
         if (!token) {
             token = new PasswordResetToken()
@@ -118,7 +118,6 @@ class PasswordResetService {
         templateContext.setVariable("publicUrl", url)
         templateContext.setVariable("resetToken", token.token)
 
-        //TODO: Error Handling
         emailService.sendEmailWithThymeleafTemplate("SkillTree Password Reset", email, "password_reset.html", templateContext)
     }
 
