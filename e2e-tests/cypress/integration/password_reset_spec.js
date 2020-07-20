@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-describe('Login Tests', () => {
+describe('Password Reset Tests', () => {
 
   beforeEach(() => {
     cy.logout();
@@ -53,19 +53,17 @@ describe('Login Tests', () => {
     }).as('performReset');
     cy.route('GET', '/app/projects').as('getProjects')
     cy.route('GET', '/app/userInfo').as('getUserInfo')
-
   });
 
-  afterEach(() => {
-  });
-
-  it('form: reset password', () => {
+  it('reset password', () => {
     cy.register("test@skills.org", "apassword", false);
     cy.visit('/');
     cy.get('[data-cy=forgotPassword]').click();
+    cy.get('[data-cy=forgotPasswordEmail]').should('exist');
     cy.get('[data-cy=forgotPasswordEmail]').type('test@skills.org');
     cy.get('[data-cy=resetPassword').click();
     cy.wait(16*1000); //request rest page redirects to login after 15 seconds
+    cy.get('[data-cy=login]').should('exist');
     cy.getResetLink().then((resetLink) => {
       cy.visit(resetLink);
       cy.get('[data-cy=resetPasswordSubmit]').should('exist');
@@ -84,6 +82,29 @@ describe('Login Tests', () => {
 
       cy.contains('Project');
       cy.contains('My Projects');
+    });
+
+  });
+
+  it('reset password - wrong user', () => {
+    cy.register("test@skills.org", "apassword", false);
+    cy.visit('/');
+    cy.get('[data-cy=forgotPassword]').click();
+    cy.get('[data-cy=forgotPasswordEmail]').should('exist');
+    cy.get('[data-cy=forgotPasswordEmail]').type('test@skills.org');
+    cy.get('[data-cy=resetPassword').click();
+    cy.wait(16*1000); //request rest page redirects to login after 15 seconds
+    cy.get('[data-cy=login]').should('exist');
+    cy.getResetLink().then((resetLink) => {
+      cy.visit(resetLink);
+      cy.get('[data-cy=resetPasswordSubmit]').should('exist');
+      cy.get('[data-cy=resetPasswordEmail]').type('test2@skills.org');
+      cy.get('[data-cy=resetPasswordNewPassword]').type('password2')
+      cy.get('[data-cy=resetPasswordConfirm]').type('password2');
+      cy.get('[data-cy=resetPasswordSubmit]').click();
+
+      cy.wait('@performReset');
+      cy.get('[data-cy=resetError]').should('be.visible');
     });
 
   });

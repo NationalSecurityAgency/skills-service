@@ -45,7 +45,7 @@ limitations under the License.
                 <small class="form-text text-danger" v-show="errors.has('password_confirmation')">{{ errors.first('password_confirmation')}}</small>
               </div>
               <small class="text-center" v-if="this.resetSuccessful">Password reset was successful! Redirecting to login page in {{countdown}} seconds</small>
-              <small class="text-danger" v-if="this.resetFailed">Password reset failed due to {{error}}</small>
+              <small class="text-danger" v-if="this.resetFailed" data-cy="resetError">Password reset failed due to {{error}}</small>
               <div class="field is-grouped">
                 <div class="control">
                   <button type="submit" class="btn btn-outline-primary" :disabled="errors.any() || missingRequiredValues() || resetInProgress" data-cy="resetPasswordSubmit">
