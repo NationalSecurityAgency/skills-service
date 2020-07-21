@@ -26,6 +26,7 @@ import liquibase.resource.ClassLoaderResourceAccessor
 import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Conditional
 import org.springframework.core.io.ClassPathResource
@@ -151,6 +152,10 @@ class DataMigrationDBIT extends DefaultIntSpec {
     }
 
     // over-ride beans that interact with the database during spring context initialization
+    @ConditionalOnProperty(
+            name = "skills.db.startup",
+            havingValue = "false",
+            matchIfMissing = false)
     @Component
     static class HealthChecker extends skills.HealthChecker {
         @PostConstruct
@@ -158,6 +163,10 @@ class DataMigrationDBIT extends DefaultIntSpec {
         void checkRequiredServices() { }
     }
 
+    @ConditionalOnProperty(
+            name = "skills.db.startup",
+            havingValue = "false",
+            matchIfMissing = false)
     @Component
     static class EmailSettingsService extends skills.settings.EmailSettingsService {
         @PostConstruct
