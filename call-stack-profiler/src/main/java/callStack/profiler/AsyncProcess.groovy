@@ -56,9 +56,7 @@ class AsyncProcess {
         assert toProcess != null
         boolean res = true
         if(dropIfFull){
-            log.error("${Thread.currentThread().name}: offering")
             res = toProcess.offer(executeMe)
-            log.error("${Thread.currentThread().name}: res=[$res]")
             if(!res){
                 log.warn("Async queue is full!!!! \n" +
                         "    Investigate why internal thread isn't servicing requests in a timely manner.\n" +

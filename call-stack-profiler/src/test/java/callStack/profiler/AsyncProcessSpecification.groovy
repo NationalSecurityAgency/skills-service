@@ -131,41 +131,24 @@ class AsyncProcessSpecification extends Specification{
 
 
     def "support drop-if-full option"(){
-
-        log.error("starting [support drop-if-full option] test")
         AtomicInteger count = new AtomicInteger(0)
 
         asyncProcess = new AsyncProcess(queueSize:1, dropIfFull:true)
         asyncProcess.start()
 
-        log.error("before async 1")
-        boolean res1 =asyncProcess.async {
-            TimeUnit.SECONDS.sleep(6)
-        }
-        log.error("async 1 res: ${res1}")
-
-        log.error("before async 2")
-        boolean res2 = asyncProcess.async {
-        }
-        log.error("async 2 res: ${res2}")
-
-        log.error("before async 3")
-        boolean res3 = asyncProcess.async {
-        }
-        log.error("async 3 res: ${res3}")
+        int numAttempts = 100
         when:
-
-        log.error("before async 4")
-        boolean kept = asyncProcess.async {
-            count.incrementAndGet()
+        List<Boolean> res = (1..numAttempts).collect {
+            asyncProcess.async {
+                count.incrementAndGet()
+            }
         }
-        log.error("async 4 res: ${kept}")
 
-        TimeUnit.SECONDS.sleep(10)
-
+        // we need to sleep so async tasks execute
+        TimeUnit.SECONDS.sleep(5)
         then:
-        !kept
-        count.get().intValue() == 0
+        count.get().intValue() < numAttempts
+        res.findAll ( { it.equals(false) }).size() > 0
     }
 
 }
