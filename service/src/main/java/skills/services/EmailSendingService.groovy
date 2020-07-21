@@ -29,7 +29,6 @@ import javax.mail.internet.MimeMessage
 @Component
 class EmailSendingService {
 
-    //TODO: extract this out to configuration for Root account creation
     private static final String FROM = "no_reply@skilltree"
 
     @Autowired
