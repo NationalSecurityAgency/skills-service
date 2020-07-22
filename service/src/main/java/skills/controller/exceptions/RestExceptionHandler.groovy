@@ -37,6 +37,8 @@ import skills.controller.exceptions.SkillException.SkillExceptionLogLevel
 @Slf4j
 class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
+    static final List<ErrorCode> NOT_FOUND_CODES = [ErrorCode.SkillNotFound, ErrorCode.SubjectNotFound, ErrorCode.ProjectNotFound, ErrorCode.BadgeNotFound]
+
     static class BasicErrBody {
         String explanation
         String errorCode = ErrorCode.InternalError
@@ -52,6 +54,7 @@ class RestExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(SkillException)
     protected ResponseEntity<Object> handleSkillException(Exception ex, WebRequest webRequest) {
         Object body
+        HttpStatus status = HttpStatus.BAD_REQUEST
         if (ex instanceof SkillException) {
             body = new DomainSpecificErrBody(userId: ex.userId, projectId: ex.projectId, skillId: ex.skillId, explanation: ex.message, errorCode: ex.errorCode.name())
             String msg = "Exception for: projectId=[${ex.projectId}], skillId=${ex.skillId}"
@@ -79,10 +82,14 @@ class RestExceptionHandler extends ResponseEntityExceptionHandler {
                 }
             }
 
+            if (NOT_FOUND_CODES.contains(ex.errorCode)) {
+                status = HttpStatus.NOT_FOUND
+            }
+
         } else {
             log.error("Unexpected exception type [${ex?.class?.simpleName}]", ex)
         }
-        return new ResponseEntity(body, HttpStatus.BAD_REQUEST)
+        return new ResponseEntity(body, status)
     }
 
     @ExceptionHandler(DataIntegrityViolationException)

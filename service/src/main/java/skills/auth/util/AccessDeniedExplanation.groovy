@@ -13,19 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.controller.exceptions
+package skills.auth.util
 
-enum ErrorCode {
-    InternalError,
-    FailedToAssignDependency,
-    InsufficientPointsToConvertLevels,
-    UserAlreadyExists,
-    ConstraintViolation,
-    BadParam,
-    AccessDenied,
-    UserNotFound,
-    SkillNotFound,
-    BadgeNotFound,
-    SubjectNotFound,
-    ProjectNotFound
+class AccessDeniedExplanation {
+    String explanation;
 }

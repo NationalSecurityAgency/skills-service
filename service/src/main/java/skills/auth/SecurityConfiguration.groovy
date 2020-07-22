@@ -15,6 +15,7 @@
  */
 package skills.auth
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -25,6 +26,7 @@ import org.springframework.context.annotation.ConditionContext
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.annotation.Order
 import org.springframework.core.type.AnnotatedTypeMetadata
+import org.springframework.http.MediaType
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
@@ -41,6 +43,8 @@ import org.springframework.security.web.access.AccessDeniedHandlerImpl
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository
 import org.springframework.stereotype.Component
 import org.springframework.web.context.request.RequestContextListener
+import skills.auth.util.AccessDeniedExplanation
+import skills.auth.util.AccessDeniedExplanationGenerator
 import skills.storage.model.auth.RoleName
 
 import javax.servlet.ServletException
@@ -55,6 +59,9 @@ class SecurityConfiguration {
 
     @Value('${skills.authorization.authMode:#{T(skills.auth.AuthMode).DEFAULT_AUTH_MODE}}')
     AuthMode authMode
+
+    @Autowired
+    ObjectMapper objectMapper
 
     @Component
     @Configuration
@@ -78,6 +85,8 @@ class SecurityConfiguration {
 
         @Autowired
         UserDetailsService userDetailsService
+
+        AccessDeniedExplanationGenerator explanationGenerator = new AccessDeniedExplanationGenerator()
 
         @Override
         protected void configure(HttpSecurity http) throws Exception {
@@ -128,6 +137,15 @@ class SecurityConfiguration {
         void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
             log.warn("Received AccessDeniedException for [${request.getRequestURI()}]", accessDeniedException)
             super.handle(request, response, accessDeniedException)
+            AccessDeniedExplanation explanation = explanationGenerator.generateExplanation(request.getServerName())
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN)
+            if(explanation) {
+                String asJson = objectMapper.writeValueAsString(explanation)
+                response.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
+                response.setContentLength(asJson.bytes.length)
+                response.getWriter().print(asJson)
+                response.getWriter().flush()
+            }
         }
     }
 }

@@ -15,8 +15,10 @@
  */
 package skills.auth.form
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.autoconfigure.AutoConfigureOrder
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Conditional
 import org.springframework.context.annotation.Configuration
@@ -44,6 +46,8 @@ import skills.auth.PortalWebSecurityHelper
 import skills.auth.SecurityConfiguration
 import skills.auth.SecurityMode
 import skills.auth.form.oauth2.OAuth2UserConverterService
+import skills.auth.util.AccessDeniedExplanation
+import skills.auth.util.AccessDeniedExplanationGenerator
 
 import javax.servlet.ServletException
 import javax.servlet.http.HttpServletRequest
@@ -75,6 +79,9 @@ class FormSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Autowired
     PasswordEncoder passwordEncoder
+
+    @Autowired
+    ObjectMapper objectMapper
 
     @Autowired
     void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
@@ -141,16 +148,6 @@ class FormSecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Bean
     AuthenticationFailureHandler authenticationFailureHandler() {
         return new SimpleUrlAuthenticationFailureHandler()
-    }
-
-    @Component
-    static class RestAccessDeniedHandler implements AccessDeniedHandler {
-        @Override
-        void handle(final HttpServletRequest request, final HttpServletResponse response, final AccessDeniedException ex) throws IOException, ServletException {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            log.warn("Access Denied User [${authentication}], reqested resource [${request.getServletPath()}]")
-            response.setStatus(HttpServletResponse.SC_FORBIDDEN)
-        }
     }
 
     @Component

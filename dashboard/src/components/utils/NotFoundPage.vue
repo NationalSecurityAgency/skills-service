@@ -18,11 +18,11 @@ limitations under the License.
     <div class="text-center text-secondary">
       <span class="fa-stack fa-3x " style="vertical-align: top;">
                       <i class="fas fa-circle fa-stack-2x"></i>
-                      <i class="fas fa-shield-alt fa-stack-1x fa-inverse"></i>
+                      <i class="fas fa-exclamation-triangle fa-stack-1x fa-inverse"></i>
                     </span>
     </div>
     <div class="text-center text-secondary">
-      <h4 class="">User Not Authorized</h4>
+      <h4 class="">Resource Not Found</h4>
     </div>
 
     <div class="row justify-content-center text-danger mt-3">
@@ -31,7 +31,7 @@ limitations under the License.
           {{ explanation }}
         </p>
         <p v-else>
-          You are not authorized to view this resource.
+          The resource you requested cannot be located.
         </p>
       </div>
     </div>
@@ -42,7 +42,7 @@ limitations under the License.
 <script>
 
   export default {
-    name: 'NotAuthorized',
+    name: 'NotFound',
     props: {
       explanation: String,
     },

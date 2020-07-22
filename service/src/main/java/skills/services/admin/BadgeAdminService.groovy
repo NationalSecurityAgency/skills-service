@@ -208,6 +208,9 @@ class BadgeAdminService {
     @Transactional(readOnly = true)
     BadgeResult getBadge(String projectId, String badgeId) {
         SkillDefWithExtra skillDef = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, badgeId, SkillDef.ContainerType.Badge)
+        if (!skillDef) {
+            throw new SkillException("Badge [${badgeId}] doesn't exist.", projectId, null, ErrorCode.BadgeNotFound)
+        }
         return convertToBadge(skillDef, true)
     }
 
