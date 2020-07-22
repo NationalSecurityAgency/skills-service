@@ -21,7 +21,8 @@ limitations under the License.
           <i class="fa fa-edit mr-1"></i> <span>Write</span>
         </template>
         <div class="mt-2 content-height">
-          <b-form-textarea rows="5" max-rows="5" v-model="valueInternal" @input="dataChanged" no-resize/>
+          <b-form-textarea rows="5" max-rows="5" v-model="valueInternal" @input="dataChanged"
+                           data-cy="markdownEditorInput" no-resize/>
         </div>
       </b-tab>
       <b-tab>
@@ -82,11 +83,6 @@ limitations under the License.
 
   .markdown-preview ul {
     list-style: circle;
-    margin-left: 2rem;
-  }
-
-  .markdown-preview ol {
-    margin-left: 2rem;
   }
 
   .markdown-preview p {
@@ -149,6 +145,16 @@ limitations under the License.
 
   .markdown-preview table td {
     border: 1px solid #dddddd !important;
+  }
+
+  .markdown-preview pre {
+    border: 1px solid #dddddd !important;
+    margin: 1rem;
+    padding: 1rem;
+    overflow: auto;
+    font-size: 85%;
+    border-radius: 6px;
+    background-color: #f6f8fa;
   }
 
 </style>

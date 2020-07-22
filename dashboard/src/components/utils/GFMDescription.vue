@@ -49,6 +49,15 @@ limitations under the License.
         Inline `code` has `back-ticks around` it.
         </code></pre>
 
+          <h3>Multiline</h3>
+          Use ``` for multiline support:
+          <pre class="bg-light"><code>
+        ```
+        import { SkillsDirective } from '@skilltree/skills-client-vue';
+        Vue.use(SkillsDirective);
+        ```
+          </code></pre>
+
           <h3>Lists</h3>
           <p>Ordered Lists:</p>
           <pre class="bg-light"><code>
