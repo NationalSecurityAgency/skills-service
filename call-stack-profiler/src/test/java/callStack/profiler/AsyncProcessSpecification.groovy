@@ -16,12 +16,14 @@
 package callStack.profiler
 
 import callStack.profiler.AsyncProcess
+import groovy.util.logging.Slf4j
 import spock.lang.Specification
 
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 
 
+@Slf4j
 class AsyncProcessSpecification extends Specification{
 
     AsyncProcess asyncProcess
@@ -129,31 +131,24 @@ class AsyncProcessSpecification extends Specification{
 
 
     def "support drop-if-full option"(){
-
         AtomicInteger count = new AtomicInteger(0)
 
         asyncProcess = new AsyncProcess(queueSize:1, dropIfFull:true)
         asyncProcess.start()
 
-        asyncProcess.async {
-            TimeUnit.SECONDS.sleep(6)
-        }
-        asyncProcess.async {
-        }
-        asyncProcess.async {
-        }
-
+        int numAttempts = 100
         when:
-
-        boolean kept = asyncProcess.async {
-            count.incrementAndGet()
+        List<Boolean> res = (1..numAttempts).collect {
+            asyncProcess.async {
+                count.incrementAndGet()
+            }
         }
 
-        TimeUnit.SECONDS.sleep(10)
-
+        // we need to sleep so async tasks execute
+        TimeUnit.SECONDS.sleep(5)
         then:
-        !kept
-        count.get().intValue() == 0
+        count.get().intValue() < numAttempts
+        res.findAll ( { it.equals(false) }).size() > 0
     }
 
 }
