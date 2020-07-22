@@ -15,6 +15,13 @@
  */
 describe('Markdown Tests', () => {
 
+    const snapshotOptions = {
+        blackout: ['[data-cy=skillTableCellCreatedDate]'],
+        // failureThreshold: 0.03, // threshold for entire image
+        // failureThresholdType: 'percent', // percent of image or number of pixels
+        // customDiffConfig: { threshold: 0.1 }, // threshold for each pixel
+    };
+
     beforeEach(() => {
         cy.request('POST', '/app/projects/proj1', {
             projectId: 'proj1',
@@ -81,7 +88,7 @@ describe('Markdown Tests', () => {
         validateMarkdown(':star: :star: :star: :star:\n\n:squid:  :full_moon:  :gift_heart:', 'Markdown-emoji')
     });
 
-    it.only('on skills pages', () => {
+    it('on skills pages', () => {
         const markdown = "# Title1\n## Title2\n### Title 3\n#### Title 4\n##### Title 5\nTitle 6\n\n" +
             "---\n" +
             "# Emphasis\n" +
@@ -149,14 +156,16 @@ describe('Markdown Tests', () => {
 
         cy.contains('Description');
         cy.contains('Level 0');
-        cy.matchImageSnapshot('Markdown-SkillsPage-Overview');
+        cy.wait(500);
+        cy.matchImageSnapshot('Markdown-SkillsPage-Overview', snapshotOptions);
 
         cy.visit('/projects/proj1/subjects/subj1');
         cy.contains('Level 0');
         const selectorSkillsRowToggle = 'table .VueTables__child-row-toggler';
         cy.get(selectorSkillsRowToggle).click();
         cy.contains('Description');
-        cy.matchImageSnapshot('Markdown-SubjectPage-SkillPreview');
+        cy.wait(500);
+        cy.matchImageSnapshot('Markdown-SubjectPage-SkillPreview', snapshotOptions);
     });
 
 })

@@ -48,7 +48,7 @@ limitations under the License.
               </b-button-group>
             </div>
 
-            <div slot="created" slot-scope="props" class="field has-addons">
+            <div slot="created" slot-scope="props" class="field has-addons" data-cy="skillTableCellCreatedDate">
               {{ props.row.created | date }}
             </div>
 
