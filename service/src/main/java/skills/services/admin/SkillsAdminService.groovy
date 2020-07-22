@@ -315,7 +315,7 @@ class SkillsAdminService {
     SkillDefRes getSkill(String projectId, String subjectId, String skillId) {
         SkillDefWithExtra res = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, skillId, SkillDef.ContainerType.Skill)
         if (!res) {
-            throw new SkillException("Skill id [${skillId}] doesn't exist.", projectId, null, ErrorCode.SkillNotFound)
+            throw new SkillException("Skill [${skillId}] doesn't exist.", projectId, null, ErrorCode.SkillNotFound)
         }
         return convertToSkillDefRes(res)
     }

@@ -26,7 +26,7 @@ limitations under the License.
     </div>
 
     <div class="row justify-content-center text-danger mt-3">
-      <div class="col col-sm-8 col-md-6 col-lg-4 text-center">
+      <div class="col col-sm-8 col-md-6 col-lg-4 text-center" data-cy="notAuthorizedExplanation">
         <p v-if="explanation">
           {{ explanation }}
         </p>

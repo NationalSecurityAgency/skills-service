@@ -47,10 +47,8 @@ class RestAccessDeniedHandler implements AccessDeniedHandler {
         log.warn("Access Denied User [${authentication}], reqested resource [${request.getServletPath()}]")
         AccessDeniedExplanation explanation = new AccessDeniedExplanationGenerator().generateExplanation(request.getServletPath())
         response.setStatus(HttpServletResponse.SC_FORBIDDEN)
-        log.warn("############### Generated Explanation: ${explanation} ############")
         if(explanation) {
             String asJson = om.writeValueAsString(explanation)
-            log.warn("sending 403 explanation $asJson")
             response.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
             response.setContentLength(asJson.bytes.length)
             response.getWriter().print(asJson)

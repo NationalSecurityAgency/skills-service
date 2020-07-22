@@ -20,7 +20,7 @@ class AccessDeniedExplanationGenerator {
     AccessDeniedExplanation generateExplanation(String requestPath) {
         if (requestPath?.startsWith("/admin/projects")) {
             return new AccessDeniedExplanation(explanation: "You do not have permission to view/manage this Project OR this Project does not exist")
-        } else if (requestPath?.startsWith("/supervisor/globalBadges")) {
+        } else if (requestPath?.startsWith("/supervisor/badges")) {
             return new AccessDeniedExplanation(explanation: "You do not have permission to view/manage this Global Badge OR this Global Badge does not exist")
         } else {
             return null;
