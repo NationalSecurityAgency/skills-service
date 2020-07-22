@@ -44,6 +44,13 @@ describe('Client Display Markdown Tests', () => {
             "# Inline\n" +
             "Inline `code` has `back-ticks around` it\n\n" +
             "---\n" +
+            "# Multiline\n" +
+            "\n" +
+            "\n" +
+            "```\n" +
+            "import { SkillsDirective } from '@skilltree/skills-client-vue';\n" +
+            "Vue.use(SkillsDirective);\n" +
+            "```\n" +
             "# Lists\n" +
             "Ordered Lists:\n" +
             "1. Item one\n" +
@@ -74,7 +81,12 @@ describe('Client Display Markdown Tests', () => {
             "Separate me\n\n" +
             "---\n\n" +
             "Separate me\n\n" +
-            "***";
+            "***\n\n" +
+            "# Emojis\n" +
+            ":star: :star: :star: :star:\n" +
+            "\n" +
+            ":squid:  :full_moon:  :gift_heart:\n" +
+            "";
 
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
             projectId: 'proj1',

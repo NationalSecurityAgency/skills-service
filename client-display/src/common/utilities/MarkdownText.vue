@@ -21,6 +21,7 @@ limitations under the License.
 
 <script>
     import marked from 'marked';
+    import emoji from 'node-emoji';
     import DOMPurify from 'dompurify';
 
     export default {
@@ -30,7 +31,11 @@ limitations under the License.
         },
         methods: {
             parseMarkdown(text) {
-                return DOMPurify.sanitize(marked(text));
+                const compiled = marked(text);
+                const onMissing = name => name;
+                const emojified = emoji.emojify(compiled, onMissing);
+                const sanitized = DOMPurify.sanitize(emojified);
+                return sanitized;
             },
         },
     };
@@ -44,5 +49,15 @@ limitations under the License.
         border-left: 5px solid #eeeeee;
         color: #888;
         line-height: 1.5;
+    }
+
+    .markdown pre {
+        border: 1px solid #dddddd !important;
+        margin: 1rem;
+        padding: 1rem;
+        overflow: auto;
+        font-size: 85%;
+        border-radius: 6px;
+        background-color: #f6f8fa;
     }
 </style>

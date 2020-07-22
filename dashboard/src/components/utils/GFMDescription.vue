@@ -110,6 +110,19 @@ limitations under the License.
         Separate me
         ***
         </code></pre>
+
+          <h3>
+            Emojis
+          </h3>
+          Emojis are supported, for example:
+          <pre class="bg-light"><code>
+        :star: :star: :star: :star:
+
+        :squid:  :full_moon:  :gift_heart:
+          </code></pre>
+          Full list of the supported icons can be found
+          <a href="https://raw.githubusercontent.com/omnidan/node-emoji/master/lib/emoji.json" target="_blank">here <i class="fa fa-external-link-alt"/></a>
+
         </div>
       </div>
     </div>
