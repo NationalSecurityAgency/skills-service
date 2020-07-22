@@ -44,6 +44,8 @@ import skills.storage.model.Setting
 import skills.storage.model.auth.RoleName
 
 import java.security.Principal
+import java.time.Duration
+import java.time.format.DateTimeParseException
 
 @RestController
 @RequestMapping('/root')
@@ -187,6 +189,11 @@ class RootController {
         toSave << new GlobalSettingsRequest(setting: Settings.GLOBAL_PUBLIC_URL.settingName, value: settings.publicUrl)
 
         if (settings.resetTokenExpiration) {
+            try {
+                Duration.parse(settings.resetTokenExpiration);
+            } catch (DateTimeParseException dtpe) {
+                throw new SkillException("[${settings.resetTokenExpiration} is not a valid duration");
+            }
             toSave << new GlobalSettingsRequest(setting: Settings.GLOBAL_RESET_TOKEN_EXPIRATION.settingName, value: settings.resetTokenExpiration)
         }
 

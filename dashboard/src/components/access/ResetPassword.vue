@@ -44,8 +44,7 @@ limitations under the License.
                        name="password_confirmation" v-validate="'required|confirmed:password'" data-vv-delay="500" data-vv-as="Password Confirmation" data-cy="resetPasswordConfirm"/>
                 <small class="form-text text-danger" v-show="errors.has('password_confirmation')">{{ errors.first('password_confirmation')}}</small>
               </div>
-              <small class="text-center" v-if="this.resetSuccessful">Password reset was successful! Redirecting to login page in {{countdown}} seconds</small>
-              <small class="text-danger" v-if="this.resetFailed" data-cy="resetError">Password reset failed due to {{error}}</small>
+              <small class="text-danger" v-if="this.resetFailed" data-cy="resetError">{{error}}</small>
               <div class="field is-grouped">
                 <div class="control">
                   <button type="submit" class="btn btn-outline-primary" :disabled="errors.any() || missingRequiredValues() || resetInProgress" data-cy="resetPasswordSubmit">
@@ -102,20 +101,8 @@ limitations under the License.
         resetInProgress: false,
         resetFailed: false,
         resetSuccessful: false,
-        countdown: -1,
         error: null,
       };
-    },
-    watch: {
-      countdown(val) {
-        if (val > 0) {
-          setTimeout(() => {
-            this.countdown -= 1;
-          }, 1000);
-        } else if (this.resetSuccessful) {
-          this.$router.push({ name: 'Login' });
-        }
-      },
     },
     methods: {
       changePassword() {
@@ -127,14 +114,13 @@ limitations under the License.
             this.resetSuccessful = false;
             this.error = null;
             AccessService.resetPassword(reset).then(() => {
-              this.resetSuccessful = true;
-              this.countdown = 15;
               this.resetInProgress = false;
+              this.$router.push({ name: 'ResetConfirmation', params: { countDown: 30 } });
             }).catch((err) => {
               if (err && err.response && err.response.data && err.response.data.explanation) {
                 this.error = err.response.data.explanation;
               } else {
-                this.error = err.response.status;
+                this.error = `Password reset failed due to ${err.response.status}`;
               }
               this.resetFailed = true;
               this.resetInProgress = false;

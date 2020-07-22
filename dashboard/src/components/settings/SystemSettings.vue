@@ -22,17 +22,19 @@ limitations under the License.
       <ValidationObserver ref="observer" v-slot="{invalid}" slim>
         <div class="card-body">
           <div class="form-group">
-            <label class="label">Public URL</label>
+            <label class="label">Public URL <InlineHelp msg="Because it is possible for the SkillTree dashboard
+            to be deployed behind a load balancer or proxy, it is necessary to configure the public url so that email
+            based communications from the system can provide valid links back to the SkillTree dashboard."/></label>
             <ValidationProvider rules="required" name="publicUrl" v-slot="{ errors }">
             <input class="form-control" type="text" v-model="publicUrl" name="publicUrl" data-vv-delay="500"/>
             <p class="text-danger" v-show="errors[0]">{{errors[0]}}</p>
             </ValidationProvider>
           </div>
           <div class="form-group">
-            <label class="label">Password Token Expiration</label>
+            <label class="label">Password Token Expiration <InlineHelp msg="How long password reset tokens remain valid before they expire"/></label>
             <ValidationProvider rules="required|iso8601" name="resetTokenExpiration" v-slot="{ errors }">
             <input class="form-control" type="text" v-model="resetTokenExpiration" name="resetTokenExpiration" data-vv-delay="500"/>
-            <small class="text-info">supports ISO 8601 time duration format, e.g., PT2H, PT30M, PT1H30M</small>
+            <small class="text-info">supports ISO 8601 time duration format, e.g., 2H, 30M, 1H30M, 1M42S, etc</small>
             <p class="text-danger" v-show="errors[0]">{{errors[0]}}</p>
             </ValidationProvider>
           </div>
@@ -56,7 +58,7 @@ limitations under the License.
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import SettingsService from './SettingsService';
   import ToastSupport from '../utils/ToastSupport';
-  import axios from "axios";
+  import InlineHelp from '../utils/InlineHelp';
 
   const dictionary = {
     en: {
@@ -70,11 +72,16 @@ limitations under the License.
   export default {
     name: 'SystemSettings',
     mixins: [ToastSupport],
-    components: { SubPageHeader, ValidationObserver, ValidationProvider },
+    components: {
+      SubPageHeader,
+      ValidationObserver,
+      ValidationProvider,
+      InlineHelp,
+    },
     data() {
       return {
         publicUrl: '',
-        resetTokenExpiration: 'PT2H',
+        resetTokenExpiration: '',
         isSaving: false,
         overallErrMsg: '',
       };
@@ -85,18 +92,25 @@ limitations under the License.
     methods: {
       saveSystemSettings() {
         this.$refs.observer.validate().then((res) => {
-          if(res) {
+          if (res) {
             this.isSaving = true;
+
+            const { resetTokenExpiration } = this;
+            let { publicUrl } = this;
+            if (!publicUrl.toLowerCase().startsWith('pt')) {
+              publicUrl = `PT${publicUrl}`;
+            }
+
             SettingsService.saveSystemSettings({
-              publicUrl: this.publicUrl,
-              resetTokenExpiration: this.resetTokenExpiration
+              publicUrl,
+              resetTokenExpiration,
             }).then(() => {
               this.successToast('Saved', 'System Settings Successful!');
             }).catch(() => {
-                this.errorToast('Failure', 'Failed to Save System Settings!');
+              this.errorToast('Failure', 'Failed to Save System Settings!');
             }).finally(() => {
-                this.isSaving = false;
-              });
+              this.isSaving = false;
+            });
           } else {
             this.overallErrMsg = 'Whoops, something is wrong with the information you entered. Please try again.';
           }
@@ -108,21 +122,20 @@ limitations under the License.
             this.publicUrl = resp.publicUrl;
           }
         });
-      }
+      },
     },
   };
 
-  const timePeriodRegex = /^PT(?=(?:0\.)?\d+[HMS])((?:0\.)?\d+H)?((?:0\.)?\d+M)?((?:0\.)?\d+S)?$/;
+  const timePeriodRegex = /^(PT)?(?=(?:0\.)?\d+[HMS])((?:0\.)?\d+H)?((?:0\.)?\d+M)?((?:0\.)?\d+S)?$/;
   Validator.extend('iso8601', {
     getMessage() {
       return 'Invalid ISO 8601 Time Duration';
     },
     validate(value) {
-      if(value) {
+      if (value) {
         return value.match(timePeriodRegex) !== null;
-      } else {
-        return false;
       }
+      return false;
     },
   });
 

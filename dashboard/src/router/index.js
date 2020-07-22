@@ -56,6 +56,8 @@ import SystemSettings from '@//components/settings/SystemSettings';
 import { SECTION } from '@//components/metrics/SectionHelper';
 import ResetPassword from '@//components/access/ResetPassword';
 import RequestPasswordReset from '@//components/access/RequestPasswordReset';
+import RequestResetConfirmation from '@//components/access/RequestResetConfirmation';
+import ResetConfirmation from '@//components/access/ResetConfirmation';
 
 Vue.use(Router);
 
@@ -111,6 +113,24 @@ const router = new Router({
       path: '/reset-password/:resetToken',
       name: 'ResetPassword',
       component: ResetPassword,
+      props: true,
+      meta: {
+        requiresAuth: false,
+      },
+    },
+    {
+      path: '/forgot-password-confirmation',
+      name: 'RequestResetConfirmation',
+      component: RequestResetConfirmation,
+      props: true,
+      meta: {
+        requiresAuth: false,
+      },
+    },
+    {
+      path: '/reset-password-confirmation',
+      name: 'ResetConfirmation',
+      component: ResetConfirmation,
       props: true,
       meta: {
         requiresAuth: false,
