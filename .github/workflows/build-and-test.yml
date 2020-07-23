@@ -32,6 +32,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - name: Install Emoji Support
+      run: sudo apt-get install fonts-noto-color-emoji
+
     - uses: actions/checkout@v2
 
     - uses: actions/setup-node@v2-beta
