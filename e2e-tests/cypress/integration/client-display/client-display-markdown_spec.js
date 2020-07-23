@@ -84,8 +84,6 @@ describe('Client Display Markdown Tests', () => {
             "***\n\n" +
             "# Emojis\n" +
             ":star: :star: :star: :star:\n" +
-            "\n" +
-            ":squid:  :full_moon:  :gift_heart:\n" +
             "";
 
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
