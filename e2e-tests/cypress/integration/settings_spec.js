@@ -128,7 +128,7 @@ describe('Settings Tests', () => {
         cy.get('[data-cy=navigationmenu]').contains('Badges', {timeout: 5000}).should('be.visible');
     });
 
-    it.only('Add Supervisor User Not Found', () => {
+    it('Add Supervisor User Not Found', () => {
         cy.server();
         // cy.route('PUT', '/root/users/root@skills.org/roles/ROLE_SUPERVISOR').as('addSupervisor');
         cy.route('POST', 'root/users/without/role/ROLE_SUPERVISOR?userSuggestOption=ONE', [{"userId":"blah@skills.org","userIdForDisplay":"blah@skills.org","first":"Firstname","last":"LastName","nickname":"Firstname LastName","dn":null}]).as('getEligibleForSupervisor');
@@ -177,5 +177,52 @@ describe('Settings Tests', () => {
         cy.contains('Security').click();
         cy.get('[data-cy=supervisorrm]  div.multiselect__tags').type('foo/bar{enter}');
         cy.wait('@getEligibleForSupervisor');
+    });
+
+    it('Email Server Setings', () => {
+        cy.server();
+        cy.route('GET', '/root/getEmailSettings').as('loadEmailSettings');
+        cy.visit('/settings/email');
+        cy.wait('@loadEmailSettings');
+        cy.get('[data-cy=hostInput]').should('be.visible');
+        cy.get('[data-cy=hostInput]').type('{selectall}{backspace}localhost');
+        cy.get('[data-cy=portInput]').should('be.visible');
+        cy.get('[data-cy=portInput]').type('{selectall}{backspace}1026');
+        cy.get('[data-cy=protocolInput]').should('be.visible');
+        cy.get('[data-cy=protocolInput]').type('{selectall}{backspace}smtp');
+
+        cy.get('[data-cy=tlsSwitch]').next('.custom-control-label').click();
+        cy.get('[data-cy=authSwitch]').next('.custom-control-label').click();
+        cy.get('[data-cy=emailUsername]').should('be.visible');
+        cy.get('[data-cy=emailPassword]').should('be.visible');
+        cy.get('[data-cy=emailUsername]').type('username');
+        cy.get('[data-cy=emailPassword]').type('password');
+        cy.get('[data-cy=emailSettingsTest]').click();
+        cy.get('[data-cy=emailSettingsSave]').click();
+        //verify that appropriate saved data is loaded when form is loaded again
+        cy.contains('System').click();
+        cy.visit('/settings/email');
+        cy.wait('@loadEmailSettings');
+        cy.get('[data-cy=hostInput]').should('have.value', 'localhost');
+        cy.get('[data-cy=portInput]').should('have.value', '1026');
+        cy.get('[data-cy=protocolInput]').should('have.value', 'smtp');
+        cy.get('[data-cy=tlsSwitch]').should('have.value', 'true');
+        cy.get('[data-cy=authSwitch]').should('have.value', 'true');
+        cy.get('[data-cy=emailUsername]').should('have.value', 'username');
+        cy.get('[data-cy=emailPassword]').should('have.value', 'password');
+    });
+
+    it('System Settings', () => {
+        cy.server();
+        cy.route('GET', '/root/getSystemSettings').as('loadSystemSettings');
+        cy.visit('/settings/system');
+        cy.wait('@loadSystemSettings');
+        cy.get('[data-cy=publicUrl]').type('{selectall}{backspace}http://localhost:8082');
+        cy.get('[data-cy=resetTokenExpiration]').type('{selectall}{backspace}2H25M22S');
+        cy.get('[data-cy=saveSystemSettings]').click();
+        cy.visit('/settings/system');
+        cy.wait('@loadSystemSettings');
+        cy.get('[data-cy=publicUrl]').should('have.value', 'http://localhost:8082');
+        cy.get('[data-cy=resetTokenExpiration]').should('have.value', 'PT2H25M22S');
     });
 });

@@ -112,7 +112,7 @@ describe('Password Reset Tests', () => {
     });
   });
 
-  it.only('cannot use reset link twice', () => {
+  it('cannot use reset link twice', () => {
     cy.register("test@skills.org", "apassword", false);
     cy.visit('/');
     cy.get('[data-cy=forgotPassword]').click();

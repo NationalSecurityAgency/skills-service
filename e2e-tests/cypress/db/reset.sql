@@ -18,3 +18,4 @@ delete from USER_ROLES where USER_ID = 'skills@skills.org' and ROLE_NAME = 'ROLE
 delete from USER_ROLES where USER_ID = 'root@skills.org' and ROLE_NAME = 'ROLE_SUPERVISOR';
 delete from GLOBAL_BADGE_LEVEL_DEFINITION;
 delete from SKILL_DEFINITION where PROJECT_ID is null;
+delete from SETTINGS;

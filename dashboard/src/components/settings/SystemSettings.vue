@@ -26,14 +26,16 @@ limitations under the License.
             to be deployed behind a load balancer or proxy, it is necessary to configure the public url so that email
             based communications from the system can provide valid links back to the SkillTree dashboard."/></label>
             <ValidationProvider rules="required" name="publicUrl" v-slot="{ errors }">
-            <input class="form-control" type="text" v-model="publicUrl" name="publicUrl" data-vv-delay="500"/>
+            <input class="form-control" type="text" v-model="publicUrl" name="publicUrl" data-vv-delay="500"
+                   data-cy="publicUrl"/>
             <p class="text-danger" v-show="errors[0]">{{errors[0]}}</p>
             </ValidationProvider>
           </div>
           <div class="form-group">
             <label class="label">Password Token Expiration <InlineHelp msg="How long password reset tokens remain valid before they expire"/></label>
             <ValidationProvider rules="required|iso8601" name="resetTokenExpiration" v-slot="{ errors }">
-            <input class="form-control" type="text" v-model="resetTokenExpiration" name="resetTokenExpiration" data-vv-delay="500"/>
+            <input class="form-control" type="text" v-model="resetTokenExpiration" name="resetTokenExpiration" data-vv-delay="500"
+                   data-cy="resetTokenExpiration"/>
             <small class="text-info">supports ISO 8601 time duration format, e.g., 2H, 30M, 1H30M, 1M42S, etc</small>
             <p class="text-danger" v-show="errors[0]">{{errors[0]}}</p>
             </ValidationProvider>
@@ -41,7 +43,8 @@ limitations under the License.
 
           <p v-if="invalid && overallErrMsg" class="text-center text-danger">***{{ overallErrMsg }}***</p>
           <div>
-            <button class="btn btn-outline-primary" type="button" v-on:click="saveSystemSettings" :disabled="invalid">
+            <button class="btn btn-outline-primary" type="button" v-on:click="saveSystemSettings" :disabled="invalid"
+                    data-cy="saveSystemSettings">
               Save
               <i :class="[isSaving ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-arrow-circle-right']"></i>
             </button>
@@ -95,10 +98,10 @@ limitations under the License.
           if (res) {
             this.isSaving = true;
 
-            const { resetTokenExpiration } = this;
-            let { publicUrl } = this;
-            if (!publicUrl.toLowerCase().startsWith('pt')) {
-              publicUrl = `PT${publicUrl}`;
+            const { publicUrl } = this;
+            let { resetTokenExpiration } = this;
+            if (!resetTokenExpiration.toLowerCase().startsWith('pt')) {
+              resetTokenExpiration = `PT${resetTokenExpiration}`;
             }
 
             SettingsService.saveSystemSettings({
@@ -120,6 +123,7 @@ limitations under the License.
         SettingsService.loadSystemSettings().then((resp) => {
           if (resp) {
             this.publicUrl = resp.publicUrl;
+            this.resetTokenExpiration = resp.resetTokenExpiration;
           }
         });
       },
