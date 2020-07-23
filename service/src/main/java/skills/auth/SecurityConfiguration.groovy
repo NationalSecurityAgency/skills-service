@@ -137,7 +137,7 @@ class SecurityConfiguration {
         void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
             log.warn("Received AccessDeniedException for [${request.getRequestURI()}]", accessDeniedException)
             super.handle(request, response, accessDeniedException)
-            AccessDeniedExplanation explanation = explanationGenerator.generateExplanation(request.getServerName())
+            AccessDeniedExplanation explanation = new AccessDeniedExplanationGenerator().generateExplanation(request.getServerName())
             response.setStatus(HttpServletResponse.SC_FORBIDDEN)
             if(explanation) {
                 String asJson = objectMapper.writeValueAsString(explanation)

@@ -15,28 +15,20 @@
  */
 package skills.auth.form
 
-import com.fasterxml.jackson.databind.ObjectMapper
+
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.autoconfigure.AutoConfigureOrder
-import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Conditional
-import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.Lazy
-import org.springframework.context.annotation.Primary
+import org.springframework.context.annotation.*
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
-import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
 import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.core.Authentication
-import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.crypto.password.PasswordEncoder
-import org.springframework.security.web.access.AccessDeniedHandler
 import org.springframework.security.web.authentication.AuthenticationFailureHandler
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler
@@ -46,8 +38,6 @@ import skills.auth.PortalWebSecurityHelper
 import skills.auth.SecurityConfiguration
 import skills.auth.SecurityMode
 import skills.auth.form.oauth2.OAuth2UserConverterService
-import skills.auth.util.AccessDeniedExplanation
-import skills.auth.util.AccessDeniedExplanationGenerator
 
 import javax.servlet.ServletException
 import javax.servlet.http.HttpServletRequest
@@ -79,9 +69,6 @@ class FormSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Autowired
     PasswordEncoder passwordEncoder
-
-    @Autowired
-    ObjectMapper objectMapper
 
     @Autowired
     void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
