@@ -49,6 +49,15 @@ limitations under the License.
         Inline `code` has `back-ticks around` it.
         </code></pre>
 
+          <h3>Multiline</h3>
+          Use ``` for multiline support:
+          <pre class="bg-light"><code>
+        ```
+        import { SkillsDirective } from '@skilltree/skills-client-vue';
+        Vue.use(SkillsDirective);
+        ```
+          </code></pre>
+
           <h3>Lists</h3>
           <p>Ordered Lists:</p>
           <pre class="bg-light"><code>
@@ -101,6 +110,19 @@ limitations under the License.
         Separate me
         ***
         </code></pre>
+
+          <h3>
+            Emojis
+          </h3>
+          Emojis are supported, for example:
+          <pre class="bg-light"><code>
+        :star: :star: :star: :star:
+
+        :squid:  :full_moon:  :gift_heart:
+          </code></pre>
+          Full list of the supported icons can be found
+          <a href="https://raw.githubusercontent.com/omnidan/node-emoji/master/lib/emoji.json" target="_blank">here <i class="fa fa-external-link-alt"/></a>
+
         </div>
       </div>
     </div>

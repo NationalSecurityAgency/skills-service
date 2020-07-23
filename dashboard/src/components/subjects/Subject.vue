@@ -23,7 +23,7 @@ limitations under the License.
                                   v-on:move-down="moveDown"
                                   :isFirst="subjectInternal.isFirst" :isLast="subjectInternal.isLast" :isLoading="isLoading"
                                   :is-delete-disabled="deleteSubjectDisabled" :delete-disabled-text="deleteSubjectToolTip"
-                                  class="subject-settings"></edit-and-delete-dropdown>
+                                  class="subject-settings" data-cy="cardSettingsButton"></edit-and-delete-dropdown>
       </div>
       <div slot="footer">
         <router-link

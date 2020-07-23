@@ -41,7 +41,7 @@ limitations under the License.
         Description
       </div>
       <div class="card-body">
-        <p v-if="description" v-html="description"></p>
+        <markdown-text v-if="description" :text="description"/>
         <p v-else class="text-muted">
           Not Specified
         </p>
@@ -68,10 +68,11 @@ limitations under the License.
   import SkillsService from './SkillsService';
   import MediaInfoCard from '../utils/cards/MediaInfoCard';
   import NumberFilter from '../../filters/NumberFilter';
+  import MarkdownText from '../utils/MarkdownText';
 
   export default {
     name: 'ChildRowSkillsDisplay',
-    components: { MediaInfoCard, LoadingContainer },
+    components: { MarkdownText, MediaInfoCard, LoadingContainer },
     props: {
       projectId: {
         type: String,
@@ -178,6 +179,25 @@ limitations under the License.
   div ol li {
     font-size: 1.1rem;
     padding: 0 1rem 0 0.5rem;
+  }
+
+  .markdown blockquote {
+    padding: 10px 20px;
+    margin: 0 0 20px;
+    font-size: 1rem;
+    border-left: 5px solid #eeeeee;
+    color: #888;
+    line-height: 1.5;
+  }
+
+  .markdown pre {
+    border: 1px solid #dddddd !important;
+    margin: 1rem;
+    padding: 1rem;
+    overflow: auto;
+    font-size: 85%;
+    border-radius: 6px;
+    background-color: #f6f8fa;
   }
 
 </style>

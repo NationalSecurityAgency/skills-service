@@ -21,15 +21,16 @@ limitations under the License.
           <i class="fa fa-edit mr-1"></i> <span>Write</span>
         </template>
         <div class="mt-2 content-height">
-          <b-form-textarea rows="5" max-rows="5" v-model="valueInternal" @input="dataChanged" no-resize/>
+          <b-form-textarea rows="5" max-rows="5" v-model="valueInternal" @input="dataChanged"
+                           data-cy="markdownEditorInput" no-resize/>
         </div>
       </b-tab>
       <b-tab>
         <template slot="title">
           <i class="fa fa-eye mr-1"></i> <span>Preview</span>
         </template>
-        <div class="mt-2 content-height border rounded px-3" style="overflow-y: scroll;">
-          <span class="markdown-preview" v-if="valueInternal !== null" v-html="compiledMarkdown"></span>
+        <div class="mt-2 content-height border rounded p-3" style="overflow-y: scroll;">
+          <markdown-text v-if="valueInternal" :text="valueInternal"/>
         </div>
       </b-tab>
     </b-tabs>
@@ -38,12 +39,12 @@ limitations under the License.
 </template>
 
 <script>
-  import marked from 'marked';
   import debounce from 'lodash.debounce';
-  import InputSanitizer from './InputSanitizer';
+  import MarkdownText from './MarkdownText';
 
   export default {
     name: 'MarkdownEditor',
+    components: { MarkdownText },
     props: {
       value: String,
     },
@@ -57,16 +58,6 @@ limitations under the License.
         this.valueInternal = newValue;
       },
     },
-    computed: {
-      compiledMarkdown: function compileMarkdown() {
-        if (this.valueInternal) {
-          const compiled = InputSanitizer.sanitize(marked(this.valueInternal, { sanitize: true, smartLists: true, gfm: true }));
-          return compiled;
-        }
-
-        return '';
-      },
-    },
     methods: {
       dataChanged: debounce(function debouncedDataChanged() {
         this.$emit('input', this.valueInternal);
@@ -75,80 +66,8 @@ limitations under the License.
   };
 </script>
 
-<style>
+<style scoped>
   .content-height {
-    height: 9rem;
+    height: 10rem;
   }
-
-  .markdown-preview ul {
-    list-style: circle;
-    margin-left: 2rem;
-  }
-
-  .markdown-preview ol {
-    margin-left: 2rem;
-  }
-
-  .markdown-preview p {
-    margin-top: 1rem;
-    margin-bottom: 1rem;
-  }
-
-  .markdown-preview blockquote {
-    padding: 10px 20px;
-    margin: 0 0 20px;
-    font-size: 1rem;
-    border-left: 5px solid #eeeeee;
-    color: #888;
-    line-height: 1.5;
-  }
-
-  .markdown-preview h1 {
-    font-size: 2.5rem;
-    font-weight: bold;
-  }
-
-  .markdown-preview h2 {
-    font-size: 2.2rem;
-    font-weight: bold;
-  }
-
-  .markdown-preview h3 {
-    font-size: 1.9rem;
-    font-weight: bold;
-    padding-bottom: 5px;
-  }
-
-  .markdown-preview h4 {
-    font-size: 1.6rem;
-    font-weight: bold;
-  }
-
-  .markdown-preview h5 {
-    font-size: 1.3rem;
-    font-weight: bold;
-  }
-
-  .markdown-preview h6 {
-    font-size: 1rem;
-    font-weight: bold;
-  }
-
-  .markdown-preview table {
-    width: 100%;
-  }
-
-  .markdown-preview table thead tr {
-    border-bottom: 1px solid #e5e5e5 !important;
-    background-color: #eeeeee;
-  }
-
-  .markdown-preview table th {
-    border: 1px solid #dddddd;
-  }
-
-  .markdown-preview table td {
-    border: 1px solid #dddddd !important;
-  }
-
 </style>

@@ -15,9 +15,6 @@
 name: Test against PostgreSQL
 
 on:
-#  push:
-#    paths-ignore:
-#      - 'README.md'
   schedule:
    - cron: '0 5 * * *'
 
@@ -45,6 +42,9 @@ jobs:
           - 5432:5432
 
     steps:
+    - name: Install Emoji Support
+      run: sudo apt-get install fonts-noto-color-emoji
+
     - uses: actions/checkout@v2
 
     - uses: actions/setup-node@v2-beta
