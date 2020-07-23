@@ -282,11 +282,17 @@ class SkillsAdminService {
         return getSkillsByProjectSkillAndType(projectId, subjectId, SkillDef.ContainerType.Subject, SkillRelDef.RelationshipType.RuleSetDefinition)
     }
 
+    def errorCodeMapping = [(SkillDef.ContainerType.Badge) : ErrorCode.BadgeNotFound,
+                            (SkillDef.ContainerType.GlobalBadge) : ErrorCode.BadgeNotFound,
+                            (SkillDef.ContainerType.Subject) : ErrorCode.SubjectNotFound,
+                            (SkillDef.ContainerType.Skill) : ErrorCode.SkillNotFound]
+
     @Transactional(readOnly = true)
     List<SkillDefPartialRes> getSkillsByProjectSkillAndType(String projectId, String skillId, SkillDef.ContainerType type, SkillRelDef.RelationshipType relationshipType) {
         SkillDef parent = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, skillId, type)
         if (!parent) {
-            throw new SkillException("There is no skill id [${skillId}] doesn't exist.", projectId, null)
+            ErrorCode code = errorCodeMapping.get(type)
+            throw new SkillException("${type} [${skillId}] doesn't exist.", projectId, null, code)
         }
 
         List<SkillDefRepo.SkillDefPartial> res
@@ -308,7 +314,9 @@ class SkillsAdminService {
     @Transactional(readOnly = true)
     SkillDefRes getSkill(String projectId, String subjectId, String skillId) {
         SkillDefWithExtra res = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, skillId, SkillDef.ContainerType.Skill)
-        assert res
+        if (!res) {
+            throw new SkillException("Skill [${skillId}] doesn't exist.", projectId, null, ErrorCode.SkillNotFound)
+        }
         return convertToSkillDefRes(res)
     }
 

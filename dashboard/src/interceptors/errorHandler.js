@@ -36,7 +36,17 @@ function errorResponseHandler(error) {
       router.push(loginRoute);
     }
   } else if (errorCode === 403) {
-    router.push({ name: 'NotAuthorizedPage' });
+    let explanation;
+    if (error.response && error.response.data && error.response.data.explanation) {
+      ({ explanation } = error.response.data);
+    }
+    router.push({ name: 'NotAuthorizedPage', params: { explanation } });
+  } else if (errorCode === 404) {
+    let explanation;
+    if (error.response && error.response.data && error.response.data.explanation) {
+      ({ explanation } = error.response.data);
+    }
+    router.push({ name: 'NotFoundPage', params: { explanation } });
   } else {
     router.push({ name: 'ErrorPage' });
   }

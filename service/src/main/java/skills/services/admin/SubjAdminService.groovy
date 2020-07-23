@@ -171,6 +171,9 @@ class SubjAdminService {
     @Transactional(readOnly = true)
     SubjectResult getSubject(String projectId, String subjectId) {
         SkillDefWithExtra skillDef = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, subjectId, SkillDef.ContainerType.Subject)
+        if (!skillDef) {
+            throw new SkillException("Subject [${subjectId}] doesn't exist in project [${projectId}]", projectId, null, ErrorCode.SubjectNotFound)
+        }
         convertToSubject(skillDef)
     }
 
