@@ -41,11 +41,7 @@ describe('Markdown Tests', () => {
         cy.get('[data-cy=cardSettingsButton]').click();
         cy.contains('Edit').click();
 
-        // cy.get(markdownInput).type('# Title1\n## Title2\n### Title 3\n#### Title 4\n##### Title 5\nTitle 6\n\n')
-        // cy.contains('Preview').click();
-        // cy.matchImageSnapshot('Markdown-Titles');
-
-        const validateMarkdown = (markdown, snapshotName, clickWrite = true) => {
+        const validateMarkdown = (markdown, snapshotName, expectedText = null, clickWrite = true) => {
             if (clickWrite) {
                 cy.contains('Write').click();
             }
@@ -53,9 +49,12 @@ describe('Markdown Tests', () => {
             cy.contains('Preview').click();
             // move focus away from Preview
             cy.contains('Description').click();
+            if (expectedText) {
+                cy.contains(expectedText);
+            }
             cy.matchImageSnapshot(snapshotName);
         }
-        validateMarkdown('# Title1\n## Title2\n### Title 3\n#### Title 4\n##### Title 5\nTitle 6\n\n', 'Markdown-Titles', false);
+        validateMarkdown('# Title1\n## Title2\n### Title 3\n#### Title 4\n##### Title 5\nTitle 6\n\n', 'Markdown-Titles',  null,false);
 
         const emphasisMarkdown = "italics: *italicized* or _italicized_\n\n" +
         "bold: **bolded** or __bolded__\n\n" +
@@ -85,7 +84,7 @@ describe('Markdown Tests', () => {
 
         validateMarkdown('Separate me\n\n___\n\nSeparate me\n\n---\n\nSeparate me\n\n***', 'Markdown-Separator')
 
-        validateMarkdown(':star: :star: :star: :star:\n\n:squid:  :full_moon:  :gift_heart:', 'Markdown-emoji')
+        validateMarkdown(':star: :star: :star: :star:\n\n:squid:  :full_moon:  :gift_heart:', 'Markdown-emoji', '⭐ ⭐ ⭐ ⭐')
     });
 
     it('on skills pages', () => {
@@ -156,7 +155,8 @@ describe('Markdown Tests', () => {
 
         cy.contains('Description');
         cy.contains('Level 0');
-        cy.wait(500);
+        cy.contains('Emojis')
+        cy.contains('⭐ ⭐ ⭐ ⭐');
         cy.matchImageSnapshot('Markdown-SkillsPage-Overview', snapshotOptions);
 
         cy.visit('/projects/proj1/subjects/subj1');
@@ -164,7 +164,8 @@ describe('Markdown Tests', () => {
         const selectorSkillsRowToggle = 'table .VueTables__child-row-toggler';
         cy.get(selectorSkillsRowToggle).click();
         cy.contains('Description');
-        cy.wait(500);
+        cy.contains('Emojis')
+        cy.contains('⭐ ⭐ ⭐ ⭐');
         cy.matchImageSnapshot('Markdown-SubjectPage-SkillPreview', snapshotOptions);
     });
 
