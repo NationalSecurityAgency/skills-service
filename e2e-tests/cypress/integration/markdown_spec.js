@@ -84,7 +84,7 @@ describe('Markdown Tests', () => {
 
         validateMarkdown('Separate me\n\n___\n\nSeparate me\n\n---\n\nSeparate me\n\n***', 'Markdown-Separator')
 
-        validateMarkdown(':star: :star: :star: :star:\n\n:squid:  :full_moon:  :gift_heart:', 'Markdown-emoji', '⭐ ⭐ ⭐ ⭐')
+        validateMarkdown(':star: :star: :star: :star:', 'Markdown-emoji', '⭐ ⭐ ⭐ ⭐')
     });
 
     it('on skills pages', () => {
@@ -139,8 +139,6 @@ describe('Markdown Tests', () => {
             "***\n\n" +
             "# Emojis\n" +
             ":star: :star: :star: :star:\n" +
-            "\n" +
-            ":squid:  :full_moon:  :gift_heart:\n" +
             "";
         cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1', {
             projectId: 'proj1',
