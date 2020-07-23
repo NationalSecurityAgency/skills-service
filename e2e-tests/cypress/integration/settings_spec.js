@@ -217,7 +217,9 @@ describe('Settings Tests', () => {
         cy.route('GET', '/root/getSystemSettings').as('loadSystemSettings');
         cy.visit('/settings/system');
         cy.wait('@loadSystemSettings');
+        cy.get('[data-cy=publicUrl]').should('be.visible');
         cy.get('[data-cy=publicUrl]').type('{selectall}{backspace}http://localhost:8082');
+        cy.get('[data-cy=resetTokenExpiration]').should('be.visible');
         cy.get('[data-cy=resetTokenExpiration]').type('{selectall}{backspace}2H25M22S');
         cy.get('[data-cy=saveSystemSettings]').click();
         cy.visit('/settings/system');
