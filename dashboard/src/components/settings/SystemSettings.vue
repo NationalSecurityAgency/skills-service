@@ -84,7 +84,7 @@ limitations under the License.
     data() {
       return {
         publicUrl: '',
-        resetTokenExpiration: '',
+        resetTokenExpiration: '2H',
         isSaving: false,
         overallErrMsg: '',
       };
@@ -123,7 +123,9 @@ limitations under the License.
         SettingsService.loadSystemSettings().then((resp) => {
           if (resp) {
             this.publicUrl = resp.publicUrl;
-            this.resetTokenExpiration = resp.resetTokenExpiration;
+            if (resp.resetTokenExpiration) {
+              this.resetTokenExpiration = resp.resetTokenExpiration.replace('PT', '');
+            }
           }
         });
       },

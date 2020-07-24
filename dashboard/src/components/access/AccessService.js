@@ -77,9 +77,12 @@ export default {
   requestPasswordReset(userId) {
     const formData = new FormData();
     formData.append('userId', userId);
-    return axios.post('/resetPassword', formData).then(response => response.data);
+    return axios.post('/resetPassword', formData, { handleError: false }).then(response => response.data);
   },
   resetPassword(reset) {
     return axios.post('/performPasswordReset', reset, { handleError: false }).then(response => response.data);
+  },
+  isResetSupported() {
+    return axios.get('/isFeatureSupported?feature=passwordreset').then(response => response.data);
   },
 };

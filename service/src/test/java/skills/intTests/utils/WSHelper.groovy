@@ -143,6 +143,10 @@ class WSHelper {
         return post('/grantFirstRoot', '', null)
     }
 
+    def isFeatureEnabled(String featureName) {
+        return get('isFeatureSupported', '', [feature: featureName])
+    }
+
     def serverPut(String endpoint, def params) {
         put(endpoint, "server", params)
     }

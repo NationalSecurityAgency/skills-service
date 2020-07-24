@@ -857,6 +857,10 @@ class SkillsService {
         return wsHelper.rootGet('/getSystemSettings')
     }
 
+    def isFeatureEnabled(String featureName) {
+        return wsHelper.isFeatureEnabled(featureName)
+    }
+
     private String getProjectUrl(String project) {
         return "/projects/${project}".toString()
     }

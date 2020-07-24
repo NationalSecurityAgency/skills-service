@@ -58,6 +58,7 @@ import ResetPassword from '@//components/access/ResetPassword';
 import RequestPasswordReset from '@//components/access/RequestPasswordReset';
 import RequestResetConfirmation from '@//components/access/RequestResetConfirmation';
 import ResetConfirmation from '@//components/access/ResetConfirmation';
+import ResetNotSupportedPage from '@//components/access/ResetNotSupportedPage';
 
 Vue.use(Router);
 
@@ -132,6 +133,14 @@ const router = new Router({
       name: 'ResetConfirmation',
       component: ResetConfirmation,
       props: true,
+      meta: {
+        requiresAuth: false,
+      },
+    },
+    {
+      path: '/reset-not-supported',
+      name: 'ResetNotSupportedPage',
+      component: ResetNotSupportedPage,
       meta: {
         requiresAuth: false,
       },

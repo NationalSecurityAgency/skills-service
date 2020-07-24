@@ -22,6 +22,7 @@ import org.springframework.context.annotation.Lazy
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.bind.annotation.RestController
 import skills.PublicProps
@@ -39,7 +40,8 @@ import javax.annotation.PostConstruct
 
 @Conditional(SecurityMode.FormAuth)
 @Slf4j
-@RestController("/")
+@RestController()
+@RequestMapping("/")
 class PasswordResetController {
 
     @Autowired

@@ -34,7 +34,9 @@ limitations under the License.
               <small id="emailHelp" class="form-text text-danger" v-show="errors.has('email')">{{
                 errors.first('email')}}
               </small>
+              <small class="text-danger" v-if="this.error" data-cy="resetFailedError">{{error}}</small>
             </div>
+
             <button type="submit" class="btn btn-outline-primary" tabindex="3" :disabled="disabled" data-cy="resetPassword">
               Reset Password <i class="fas fa-arrow-circle-right"/>
             </button>
@@ -68,7 +70,15 @@ limitations under the License.
         },
         resetSent: false,
         isAutoFilled: false,
+        error: '',
       };
+    },
+    mounted() {
+      AccessService.isResetSupported().then((response) => {
+        if (response === false) {
+          this.$router.replace({ name: 'ResetNotSupportedPage' });
+        }
+      });
     },
     methods: {
       reset() {
@@ -79,7 +89,14 @@ limitations under the License.
 
               AccessService.requestPasswordReset(this.resetFields.username).then((response) => {
                 if (response.success) {
-                  this.$router.push({ name: 'RequestResetConfirmation', params: { countDown: 30, email: this.resetFields.username } });
+                  this.$router.push({ name: 'RequestResetConfirmation', params: { countDown: 10, email: this.resetFields.username } });
+                }
+              }).catch((err) => {
+                this.$validator.resume();
+                if (err && err.response && err.response.data && err.response.data.explanation) {
+                  this.error = err.response.data.explanation;
+                } else {
+                  this.error = `Password reset request failed due to ${err.response.status}`;
                 }
               });
             }

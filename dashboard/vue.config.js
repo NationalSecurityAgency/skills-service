@@ -78,6 +78,7 @@ module.exports = {
       '/skills-websocket' : proxyConf,
       '/resetPassword' : proxyConf,
       '/performPasswordReset' : proxyConf,
+      '/isFeatureSupported' : proxyConf,
     },
   },
   configureWebpack: {

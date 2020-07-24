@@ -115,7 +115,7 @@ limitations under the License.
             this.error = null;
             AccessService.resetPassword(reset).then(() => {
               this.resetInProgress = false;
-              this.$router.push({ name: 'ResetConfirmation', params: { countDown: 30 } });
+              this.$router.push({ name: 'ResetConfirmation', params: { countDown: 10 } });
             }).catch((err) => {
               if (err && err.response && err.response.data && err.response.data.explanation) {
                 this.error = err.response.data.explanation;
