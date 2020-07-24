@@ -49,5 +49,6 @@
     "moment": "2.24.0",
     "wait-on": "3.3.0",
     "fake-smtp-server": "0.8.0"
-  }
+  },
+  "dependencies": {}
 }

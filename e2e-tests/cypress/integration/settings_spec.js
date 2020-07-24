@@ -184,21 +184,18 @@ describe('Settings Tests', () => {
         cy.route('GET', '/root/getEmailSettings').as('loadEmailSettings');
         cy.visit('/settings/email');
         cy.wait('@loadEmailSettings');
-        cy.get('[data-cy=hostInput]').should('be.visible');
-        cy.get('[data-cy=hostInput]').type('{selectall}{backspace}localhost');
-        cy.get('[data-cy=portInput]').should('be.visible');
-        cy.get('[data-cy=portInput]').type('{selectall}{backspace}1026');
-        cy.get('[data-cy=protocolInput]').should('be.visible');
-        cy.get('[data-cy=protocolInput]').type('{selectall}{backspace}smtp');
+        cy.get$('[data-cy=hostInput]').type('{selectall}localhost');
+        cy.get$('[data-cy=portInput]').type('{selectall}1026');
+        cy.get$('[data-cy=protocolInput]').type('{selectall}smtp');
 
-        cy.get('[data-cy=tlsSwitch]').next('.custom-control-label').click();
-        cy.get('[data-cy=authSwitch]').next('.custom-control-label').click();
+        cy.get$('[data-cy=tlsSwitch]').next('.custom-control-label').click();
+        cy.get$('[data-cy=authSwitch]').next('.custom-control-label').click();
         cy.get('[data-cy=emailUsername]').should('be.visible');
         cy.get('[data-cy=emailPassword]').should('be.visible');
-        cy.get('[data-cy=emailUsername]').type('username');
-        cy.get('[data-cy=emailPassword]').type('password');
-        cy.get('[data-cy=emailSettingsTest]').click();
-        cy.get('[data-cy=emailSettingsSave]').click();
+        cy.get$('[data-cy=emailUsername]').type('username');
+        cy.get$('[data-cy=emailPassword]').type('password');
+        cy.get$('[data-cy=emailSettingsTest]').click();
+        cy.get$('[data-cy=emailSettingsSave]').click();
         //verify that appropriate saved data is loaded when form is loaded again
         cy.contains('System').click();
         cy.visit('/settings/email');
@@ -217,11 +214,9 @@ describe('Settings Tests', () => {
         cy.route('GET', '/root/getSystemSettings').as('loadSystemSettings');
         cy.visit('/settings/system');
         cy.wait('@loadSystemSettings');
-        cy.get('[data-cy=publicUrl]').should('be.visible');
-        cy.get('[data-cy=publicUrl]').type('{selectall}{backspace}http://localhost:8082');
-        cy.get('[data-cy=resetTokenExpiration]').should('be.visible');
-        cy.get('[data-cy=resetTokenExpiration]').type('{selectall}{backspace}2H25M22S');
-        cy.get('[data-cy=saveSystemSettings]').click();
+        cy.get$('[data-cy=publicUrl]').type('{selectall}http://localhost:8082');
+        cy.get$('[data-cy=resetTokenExpiration]').type('{selectall}2H25M22S');
+        cy.get$('[data-cy=saveSystemSettings]').click();
         cy.visit('/settings/system');
         cy.wait('@loadSystemSettings');
         cy.get('[data-cy=publicUrl]').should('have.value', 'http://localhost:8082');

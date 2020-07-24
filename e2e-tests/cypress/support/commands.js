@@ -137,4 +137,9 @@ Cypress.Commands.add('vuex', () => {
    return cy.window().its('vm.$store');
 });
 
+//see cypress-io #7306
+Cypress.Commands.add('get$', (selector) => {
+   return cy.wrap(Cypress.$(selector)).should('have.length.gte', 1);
+});
+
 
