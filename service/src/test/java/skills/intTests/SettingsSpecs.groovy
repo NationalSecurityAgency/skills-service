@@ -16,6 +16,7 @@
 package skills.intTests
 
 import org.springframework.http.HttpStatus
+import org.springframework.web.client.HttpClientErrorException
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
@@ -189,6 +190,53 @@ class SettingsSpecs extends DefaultIntSpec {
         res1.value == "valuea"
         res1.setting ==  "settingId1"
         res1.settingGroup == "public_groupName1"
+    }
+
+    def "save and retrieve email settings"() {
+        if (!skillsService.isRoot()) {
+            skillsService.grantRoot()
+        }
+
+        when:
+        skillsService.saveEmailSettings("somehost", "smtp", 1026, false, true, "fakeuser", "fakepassword")
+        def emailSettings = skillsService.getEmailSettings()
+
+        then:
+        emailSettings.host == "somehost"
+        emailSettings.protocol == "smtp"
+        emailSettings.port == 1026
+        emailSettings.tlsEnabled == false
+        emailSettings.authEnabled == true
+        emailSettings.username == "fakeuser"
+        emailSettings.password == "fakepassword"
+    }
+
+    def "save and retrieve system settings"() {
+        if (!skillsService.isRoot()) {
+            skillsService.grantRoot()
+        }
+
+        when:
+        skillsService.saveSystemSettings("http://public", "PT1H30M20S")
+        def systemSettings = skillsService.getSystemSettings()
+
+        then:
+        systemSettings.publicUrl == "http://public"
+        systemSettings.resetTokenExpiration == "PT1H30M20S"
+    }
+
+    def "save system settings with invalid token expiration duration"() {
+        if (!skillsService.isRoot()) {
+            skillsService.grantRoot()
+        }
+
+        when:
+        skillsService.saveSystemSettings("http://public", "1H30M20S")
+        def systemSettings = skillsService.getSystemSettings()
+
+        then:
+        def ex = thrown(SkillsClientException)
+        ex.message.contains("1H30M20S is not a valid duration")
     }
 
 }

@@ -182,7 +182,12 @@ describe('Settings Tests', () => {
     it('Email Server Setings', () => {
         cy.server();
         cy.route('GET', '/root/getEmailSettings').as('loadEmailSettings');
-        cy.visit('/settings/email');
+        cy.route('GET', '/app/userInfo').as('loadUserInfo');
+        cy.visit('/');
+        cy.wait('@loadUserInfo');
+        cy.get('.userName').parent().click();
+        cy.contains('Settings').click();
+        cy.contains('Email').click();
         cy.wait('@loadEmailSettings');
         cy.get$('[data-cy=hostInput]').type('{selectall}localhost');
         cy.get$('[data-cy=portInput]').type('{selectall}1026');
@@ -212,7 +217,13 @@ describe('Settings Tests', () => {
     it('System Settings', () => {
         cy.server();
         cy.route('GET', '/root/getSystemSettings').as('loadSystemSettings');
-        cy.visit('/settings/system');
+        cy.route('GET', '/app/userInfo').as('loadUserInfo');
+        cy.visit('/');
+        cy.wait('@loadUserInfo');
+        cy.get('.userName').parent().click();
+        cy.contains('Settings').click();
+        cy.contains('System').click();
+
         cy.wait('@loadSystemSettings');
         cy.get$('[data-cy=publicUrl]').type('{selectall}http://localhost:8082');
         cy.get$('[data-cy=resetTokenExpiration]').type('{selectall}2H25M22S');
