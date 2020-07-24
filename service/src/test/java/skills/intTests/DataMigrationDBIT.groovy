@@ -108,6 +108,7 @@ class DataMigrationDBIT extends DefaultIntSpec {
         skillsService.createSubject(subject2)
         skillsService.createSkills(subjectSkills2)
         def res = skillsService.addSkill([projectId: projectId, skillId: expectedSkill2.skillId], userId, new Date())
+        def resetTokensPostMigration = getPasswordResetTokens()
 
         then:
         existingSkillDefsPreMigration.findAll { it.containsKey('ENABLED') }.size() == 0
@@ -120,6 +121,8 @@ class DataMigrationDBIT extends DefaultIntSpec {
         existingUserAchievementsPostMigration.findAll { it.containsKey('NOTIFIED') }.size() == existingUserAchievementsPostMigration.size()
         existingSkillDefsPostMigration.findAll { new Boolean(it.ENABLED) == true }.size() == existingSkillDefsPostMigration.size()
         existingUserAchievementsPostMigration.findAll { new Boolean(it.NOTIFIED) == true }.size() == existingUserAchievementsPostMigration.size()
+        !resetTokensPostMigration
+
 
         res.body.skillApplied
         res.body.explanation == "Skill event was applied"
@@ -149,6 +152,10 @@ class DataMigrationDBIT extends DefaultIntSpec {
 
     private List<Map<String, Object>> getUserAchievementsFromDB(String projectId) {
         jdbcTemplate.queryForList("select * from user_achievement where project_id='${projectId}'")
+    }
+
+    private List<Map<String, Object>> getPasswordResetTokens() {
+        jdbcTemplate.queryForList("select * from password_reset_token")
     }
 
     // over-ride beans that interact with the database during spring context initialization

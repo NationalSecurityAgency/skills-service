@@ -950,9 +950,7 @@
         <sql>
             UPDATE user_achievement SET notified = 'true';
         </sql>
-    </changeSet>
 
-    <changeSet id="3" author="skills team">
         <createTable tableName="password_reset_token">
             <column name="id" type="int" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
