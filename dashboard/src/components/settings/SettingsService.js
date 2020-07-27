@@ -37,7 +37,7 @@ export default {
     return axios.post('/root/testEmailSettings', emailConnectionInfo).then(response => response.data);
   },
   saveEmailSettings(emailConnectionInfo) {
-    return axios.post('/root/saveEmailSettings', emailConnectionInfo).then(response => response.data);
+    return axios.post('/root/saveEmailSettings', emailConnectionInfo, { handleError: false }).then(response => response.data);
   },
   loadEmailSettings() {
     return axios.get('/root/getEmailSettings').then(response => response.data);

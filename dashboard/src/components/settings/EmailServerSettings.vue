@@ -63,12 +63,16 @@ limitations under the License.
       </div>
     </div>
 
+    <p v-if="connectionError" class="text-danger" data-cy="connectionError">
+      Connection to Email server failed due to: {{connectionError}}
+    </p>
+
     <div>
-      <button class="btn btn-outline-primary mr-1" type="button" v-on:click="testConnection" :disabled="errors.any() || missingRequiredValues()" data-cy="emailSettingsTest">
+      <button class="btn btn-outline-primary mr-1" type="button" v-on:click="testConnection" :disabled="errors.any() || missingRequiredValues() || isTesting || isSaving" data-cy="emailSettingsTest">
         Test
-        <i :class="[isTesting ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'far fa-check-circle']"></i>
+        <i :class="testButtonClass"></i>
       </button>
-      <button class="btn btn-outline-primary" type="button" v-on:click="saveEmailSettings" :disabled="errors.any() || missingRequiredValues()" data-cy="emailSettingsSave">
+      <button class="btn btn-outline-primary" type="button" v-on:click="saveEmailSettings" :disabled="errors.any() || missingRequiredValues() || isSaving || isTesting" data-cy="emailSettingsSave">
         Save
         <i :class="[isSaving ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-arrow-circle-right']"></i>
       </button>
@@ -110,10 +114,30 @@ limitations under the License.
         },
         isTesting: false,
         isSaving: false,
+        connectionError: '',
+        testFailed: false,
+        testSuccess: false,
       };
     },
     mounted() {
       this.loadEmailSettings();
+    },
+    computed: {
+      testButtonClass() {
+        if (this.isTesting) {
+          return ['fa fa-circle-notch fa-spin fa-3x-fa-fw'];
+        }
+
+        if (this.testSuccess) {
+          return ['fa fa-check-circle'];
+        }
+
+        if (this.testFailed) {
+          return ['fa fa-times-circle'];
+        }
+
+        return ['fa fa-question-circle'];
+      },
     },
     methods: {
       testConnection() {
@@ -121,8 +145,12 @@ limitations under the License.
         SettingsService.testConnection(this.emailInfo).then((response) => {
           if (response) {
             this.successToast('Connection Status', 'Email Connection Successful!');
+            this.testSuccess = true;
+            this.testFailed = false;
           } else {
             this.errorToast('Connection Status', 'Email Connection Failed');
+            this.testSuccess = false;
+            this.testFailed = true;
           }
         })
           .catch(() => {
@@ -138,8 +166,14 @@ limitations under the License.
           this.emailInfo.username = '';
           this.emailInfo.password = '';
         }
-        SettingsService.saveEmailSettings(this.emailInfo).then(() => {
-          this.successToast('Saved', 'Email Connection Successful!');
+        SettingsService.saveEmailSettings(this.emailInfo).then((result) => {
+          if (result) {
+            if (result.success) {
+              this.successToast('Saved', 'Email Connection Successful!');
+            } else {
+              this.connectionError = result.explanation;
+            }
+          }
         })
           .catch(() => {
             this.errorToast('Failure', 'Failed to Save the Connection Settings!');

@@ -22,7 +22,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.JavaMailSenderImpl
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 import skills.controller.exceptions.SkillException
 import skills.controller.request.model.GlobalSettingsRequest
 import skills.controller.request.model.SettingsRequest
@@ -31,6 +30,7 @@ import skills.services.settings.SettingsService
 
 import javax.annotation.PostConstruct
 import javax.mail.MessagingException
+import java.util.concurrent.TimeUnit
 
 @Service
 @Slf4j
@@ -39,6 +39,8 @@ import javax.mail.MessagingException
         havingValue = "true",
         matchIfMissing = true)
 class EmailSettingsService {
+
+    private static final String SMTP_CONNECTION_TIMEOUT = Long.toString(TimeUnit.SECONDS.toMillis(10))
 
     static final String settingsGroup = 'GLOBAL.EMAIL'
     static final String hostSetting = 'email.host'
@@ -73,23 +75,30 @@ class EmailSettingsService {
         }
     }
 
-    void updateConnectionInfo(EmailConnectionInfo emailConnectionInfo) {
-        configureMailSender(emailConnectionInfo)
+    EmailConfigurationResult updateConnectionInfo(EmailConnectionInfo emailConnectionInfo) {
+        EmailConfigurationResult configurationSuccessful = configureMailSender(emailConnectionInfo)
         storeSettings(emailConnectionInfo)
+        return configurationSuccessful;
     }
 
-    void configureMailSender(EmailConnectionInfo emailConnectionInfo) {
+    EmailConfigurationResult configureMailSender(EmailConnectionInfo emailConnectionInfo) {
         log.info('Configuring the email sender with properties [{}]', emailConnectionInfo)
         JavaMailSenderImpl tmpMailSender = createJavaMailSender(emailConnectionInfo)
-
         try {
             tmpMailSender.testConnection()
 
             log.info('Refreshing the email sender')
             updateMailSender(tmpMailSender)
+            return new EmailConfigurationResult(configurationSuccessful: true)
         } catch (MessagingException e) {
             log.warn('Email connection failed!', e)
+            String msg = e.message
+            Exception next = e.nextException
+            if (next instanceof SocketTimeoutException) {
+                msg = next.message
+            }
 //            throw new SkillException('Could not connect with the email settings ' + emailConnectionInfo, e)
+            return new EmailConfigurationResult(configurationSuccessful: false, explanation: msg)
         }
     }
 
@@ -107,6 +116,9 @@ class EmailSettingsService {
         props.put('mail.smtp.auth', emailConnectionInfo.authEnabled)
         props.put('mail.smtp.starttls.enable', emailConnectionInfo.tlsEnabled)
         props.put('mail.debug', 'false')
+
+        //connectiontimeout doesn't work if connecting to an open socket that is not an smtp server
+        props.put("mail.smtp.timeout", SMTP_CONNECTION_TIMEOUT)
 
         return tmpMailSender
     }
