@@ -25,7 +25,6 @@ limitations under the License.
           Password Reset is not currently enabled on this system. Please contact your SkillTree administrator. Return to the <router-link to="/skills-login" data-cy="loginPage">login page</router-link>?
         </div>
       </div>
-
     </div>
   </div>
 </template>
