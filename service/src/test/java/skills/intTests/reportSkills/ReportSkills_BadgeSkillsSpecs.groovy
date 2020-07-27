@@ -151,6 +151,54 @@ class ReportSkills_BadgeSkillsSpecs extends DefaultIntSpec {
         resSkill4.skillApplied && !resSkill4.completed.find { it.id == 'badge1'}
     }
 
+    def "gem not awarded if achieved after end date"(){
+        String subj = "testSubj"
+
+        Map skill1 = [projectId: projId, subjectId: subj, skillId: "skill1", name  : "Test Skill 1", type: "Skill",
+                      pointIncrement: 25, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1]
+        Map skill2 = [projectId: projId, subjectId: subj, skillId: "skill2", name  : "Test Skill 2", type: "Skill",
+                      pointIncrement: 25, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1]
+        Map skill3 = [projectId: projId, subjectId: subj, skillId: "skill3", name  : "Test Skill 3", type: "Skill",
+                      pointIncrement: 25, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1]
+        Map skill4 = [projectId: projId, subjectId: subj, skillId: "skill4", name  : "Test Skill 4", type: "Skill",
+                      pointIncrement: 25, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1, dependentSkillsIds: [skill1.skillId, skill2.skillId, skill3.skillId]]
+
+        Date oneWeekAgo = new Date()-7
+        Date fiveWeeksAgo = new Date()-35
+
+        Date threeWeeksAgo = new Date() -21
+
+        Map badge = [projectId: projId, badgeId: 'badge1', name: 'Test Badge 1', startDate: fiveWeeksAgo, endDate: oneWeekAgo]
+
+        when:
+        skillsService.createProject([projectId: projId, name: "Test Project"])
+        skillsService.createSubject([projectId: projId, subjectId: subj, name: "Test Subject"])
+        skillsService.createSkill(skill1)
+        skillsService.createSkill(skill2)
+        skillsService.createSkill(skill3)
+        skillsService.createSkill(skill4)
+        skillsService.createBadge(badge)
+
+        List<String> requiredSkillsIds = [skill1.skillId, skill2.skillId, skill3.skillId, skill4.skillId]
+        requiredSkillsIds.each { String skillId ->
+            skillsService.assignSkillToBadge(projectId: projId, badgeId: badge.badgeId, skillId: skillId)
+        }
+
+        def resSkill1 = skillsService.addSkill([projectId: projId, skillId: skill1.skillId], "someuser", threeWeeksAgo).body
+        def resSkill3 = skillsService.addSkill([projectId: projId, skillId: skill3.skillId], "someuser",threeWeeksAgo).body
+        def resSkill2 = skillsService.addSkill([projectId: projId, skillId: skill2.skillId], "someuser",threeWeeksAgo).body
+        def resSkill4 = skillsService.addSkill([projectId: projId, skillId: skill4.skillId], "someuser", new Date()).body
+
+        def badgeSummary = skillsService.getBadgeSummary("someuser", projId, badge.badgeId)
+
+        then:
+        resSkill1.skillApplied && !resSkill1.completed.find { it.id == 'badge1'}
+        resSkill2.skillApplied && !resSkill2.completed.find { it.id == 'badge1'}
+        resSkill3.skillApplied && !resSkill3.completed.find { it.id == 'badge1'}
+        resSkill4.skillApplied && !resSkill4.completed.find { it.id == 'badge1'}
+        !badgeSummary.badgeAchieved
+    }
+
     def 'validate that if one gem date is provided both dates need to be provided - start provided'() {
         when:
         skillsService.createProject([projectId: projId, name: "Test Project"])
