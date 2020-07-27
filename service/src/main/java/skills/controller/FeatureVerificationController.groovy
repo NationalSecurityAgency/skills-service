@@ -25,7 +25,7 @@ import skills.profile.EnableCallStackProf
 import skills.services.FeatureService
 
 @RestController
-@RequestMapping("/")
+@RequestMapping("/public")
 @Slf4j
 @EnableCallStackProf
 class FeatureVerificationController {
@@ -33,7 +33,7 @@ class FeatureVerificationController {
     @Autowired
     FeatureService featureService
 
-    @GetMapping("isFeatureSupported")
+    @GetMapping("/isFeatureSupported")
     public boolean isFeatureSupported(@RequestParam("feature") String feature) {
         if ("passwordreset" == feature?.toLowerCase()) {
             return featureService.isPasswordResetFeatureEnabled()

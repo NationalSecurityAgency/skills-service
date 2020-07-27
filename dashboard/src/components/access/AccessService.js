@@ -83,6 +83,6 @@ export default {
     return axios.post('/performPasswordReset', reset, { handleError: false }).then(response => response.data);
   },
   isResetSupported() {
-    return axios.get('/isFeatureSupported?feature=passwordreset').then(response => response.data);
+    return axios.get('/public/isFeatureSupported?feature=passwordreset').then(response => response.data);
   },
 };

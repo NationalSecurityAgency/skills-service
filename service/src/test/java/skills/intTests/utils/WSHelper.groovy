@@ -144,7 +144,7 @@ class WSHelper {
     }
 
     def isFeatureEnabled(String featureName) {
-        return get('isFeatureSupported', '', [feature: featureName])
+        return get('/isFeatureSupported', 'public', [feature: featureName])
     }
 
     def serverPut(String endpoint, def params) {

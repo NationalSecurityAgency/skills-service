@@ -168,7 +168,7 @@ describe('Password Reset Tests', () => {
       }
     });
     cy.logout();
-    cy.route('GET', '/isFeatureSupported?feature=passwordreset').as('isEnabled');
+    cy.route('GET', '/public/isFeatureSupported?feature=passwordreset').as('isEnabled');
     cy.visit('/');
     cy.get('[data-cy=forgotPassword]').click();
     cy.wait('@isEnabled');
