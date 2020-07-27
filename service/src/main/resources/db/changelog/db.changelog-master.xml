@@ -950,6 +950,40 @@
         <sql>
             UPDATE user_achievement SET notified = 'true';
         </sql>
+
+        <createTable tableName="password_reset_token">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="token" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="expires" type="DATETIME" >
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex indexName="index_password_reset_token_user_id"
+                     tableName="password_reset_token" unique="true">
+            <column name="user_id" type="varchar(255)"/>
+        </createIndex>
+        <createIndex indexName="index_password_reset_token_token"
+                     tableName="password_reset_token" unique="true">
+            <column name="token" type="varchar(255)"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="user_id"
+                                 baseTableName="password_reset_token"
+                                 constraintName="fk_password_reset_token_user_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="users"/>
     </changeSet>
 
 </databaseChangeLog>

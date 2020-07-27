@@ -829,6 +829,38 @@ class SkillsService {
         return wsHelper.apiPost("/projects/${projectId}/skillsClientVersion", [ skillsClientVersion: version ])
     }
 
+    def requestPasswordReset(String userId) {
+        return wsHelper.post("/resetPassword", "", ["userId", userId])
+    }
+
+    def saveEmailSettings(String host, String protocol, Integer port, boolean tlsEnabled, boolean authEnabled, String username, String password) {
+        return wsHelper.rootPost("/saveEmailSettings", [
+              host: host,
+                protocol: protocol,
+                port: port,
+                tlsEnabled: tlsEnabled,
+                authEnabled: authEnabled,
+                username: username,
+                password: password
+        ])
+    }
+
+    def getEmailSettings() {
+        return wsHelper.rootGet('/getEmailSettings')
+    }
+
+    def saveSystemSettings(String publicUrl, String resetTokenExpiration) {
+        return wsHelper.rootPost('/saveSystemSettings', [publicUrl: publicUrl, resetTokenExpiration: resetTokenExpiration])
+    }
+
+    def getSystemSettings() {
+        return wsHelper.rootGet('/getSystemSettings')
+    }
+
+    def isFeatureEnabled(String featureName) {
+        return wsHelper.isFeatureEnabled(featureName)
+    }
+
     private String getProjectUrl(String project) {
         return "/projects/${project}".toString()
     }

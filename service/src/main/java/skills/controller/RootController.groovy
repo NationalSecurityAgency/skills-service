@@ -30,16 +30,22 @@ import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.GlobalSettingsRequest
 import skills.controller.request.model.SuggestRequest
 import skills.controller.result.model.RequestResult
+import skills.controller.result.model.SettingsResult
 import skills.controller.result.model.UserInfoRes
 import skills.controller.result.model.UserRoleRes
 import skills.profile.EnableCallStackProf
 import skills.services.AccessSettingsStorageService
+import skills.services.settings.Settings
 import skills.services.settings.SettingsService
 import skills.settings.EmailConnectionInfo
 import skills.settings.EmailSettingsService
+import skills.settings.SystemSettings
+import skills.storage.model.Setting
 import skills.storage.model.auth.RoleName
 
 import java.security.Principal
+import java.time.Duration
+import java.time.format.DateTimeParseException
 
 @RestController
 @RequestMapping('/root')
@@ -170,6 +176,45 @@ class RootController {
     @PostMapping('/saveEmailSettings')
     void saveEmailSettings(@RequestBody EmailConnectionInfo emailConnectionInfo) {
         emailSettingsService.updateConnectionInfo(emailConnectionInfo)
+    }
+
+    @GetMapping('/getEmailSettings')
+    EmailConnectionInfo fetchEmailSettings(){
+        emailSettingsService.fetchEmailSettings()
+    }
+
+    @PostMapping('/saveSystemSettings')
+    RequestResult saveSystemSettings(@RequestBody SystemSettings settings){
+        List<GlobalSettingsRequest> toSave = []
+        toSave << new GlobalSettingsRequest(setting: Settings.GLOBAL_PUBLIC_URL.settingName, value: settings.publicUrl)
+
+        if (settings.resetTokenExpiration) {
+            try {
+                Duration.parse(settings.resetTokenExpiration);
+            } catch (DateTimeParseException dtpe) {
+                throw new SkillException("[${settings.resetTokenExpiration} is not a valid duration");
+            }
+            toSave << new GlobalSettingsRequest(setting: Settings.GLOBAL_RESET_TOKEN_EXPIRATION.settingName, value: settings.resetTokenExpiration)
+        }
+
+        settingsService.saveSettings(toSave)
+        return RequestResult.success()
+    }
+
+    @GetMapping('/getSystemSettings')
+    SystemSettings getSystemSettings(){
+
+        SystemSettings settings = new SystemSettings()
+        SettingsResult result = settingsService.getGlobalSetting(Settings.GLOBAL_PUBLIC_URL.settingName)
+        if (result) {
+            settings.publicUrl = result.value
+        }
+        result = settingsService.getGlobalSetting(Settings.GLOBAL_RESET_TOKEN_EXPIRATION.settingName)
+        if (result) {
+            settings.resetTokenExpiration = result.value
+        }
+
+        return settings
     }
 
     @RequestMapping(value = "/global/settings/{setting}", method = [RequestMethod.PUT, RequestMethod.POST], produces = MediaType.APPLICATION_JSON_VALUE)

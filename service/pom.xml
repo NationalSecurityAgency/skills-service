@@ -78,6 +78,10 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-mail</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-thymeleaf</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.codehaus.groovy</groupId>
@@ -242,6 +246,13 @@
             <groupId>org.spockframework</groupId>
             <artifactId>spock-spring</artifactId>
             <version>${spock.myVersion}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.icegreen</groupId>
+            <artifactId>greenmail</artifactId>
+            <version>${greenmail.version}</version>
             <scope>test</scope>
         </dependency>
 
@@ -489,6 +500,7 @@
                         <exclude>**/*.jks</exclude>
                         <exclude>**/*.ftl</exclude>
                         <exclude>src/main/resources/public/**</exclude>
+                        <exclude>src/main/resources/templates/**</exclude>
                         <exclude>**/license/*.properties</exclude>
                     </excludes>
                 </configuration>

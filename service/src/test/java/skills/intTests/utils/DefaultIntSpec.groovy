@@ -70,11 +70,11 @@ class DefaultIntSpec extends Specification {
             // global badges don't have references to a project so must delete those manually
             skillDefRepo.deleteAll()
 
-            settingRepo.findAll().each {
-                if (!it.settingGroup.startsWith("public_")) {
-                    settingRepo.delete(it)
-                }
+        settingRepo.findAll().each {
+            if (!it.settingGroup?.startsWith("public_")){
+                settingRepo.delete(it)
             }
+        }
 
         skillsService = createService()
     }

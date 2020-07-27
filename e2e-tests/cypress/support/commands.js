@@ -64,7 +64,6 @@ Cypress.Commands.add("register", (user, pass, grantRoot) => {
                 cy.log(`User [${user}] already exist`)
             }
         });
-
 });
 
 Cypress.Commands.add("login", (user, pass) => {
@@ -77,6 +76,31 @@ Cypress.Commands.add("login", (user, pass) => {
         },
         form: true,
     })
+});
+
+Cypress.Commands.add("resetEmail", () => {
+    cy.request({
+       method: "DELETE",
+       url: "http://localhost:1081/api/emails"
+    });
+});
+
+Cypress.Commands.add("getResetLink", () => {
+    cy.request({
+        "method":"GET",
+        "url": "http://localhost:1081/api/emails"
+    }).then((response) => {
+        if (response.isOkStatusCode && response.body) {
+            const localPart = /[http(?:s)?:\/\/^[:]+:\d+\/([^"]+)]/
+            const match = response.body[0].text.match(localPart)
+            if(match) {
+                return match[1]
+            }
+            return '';
+        } else {
+            return '';
+        }
+    });
 });
 
 Cypress.Commands.add("logout", () => {
@@ -111,6 +135,11 @@ Cypress.Commands.add("setResolution", (size) => {
 
 Cypress.Commands.add('vuex', () => {
    return cy.window().its('vm.$store');
+});
+
+//see cypress-io #7306
+Cypress.Commands.add('get$', (selector) => {
+   return cy.wrap(Cypress.$(selector)).should('have.length.gte', 1);
 });
 
 

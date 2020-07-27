@@ -74,4 +74,15 @@ export default {
   hasRole(roleName) {
     return axios.get(`/app/userInfo/hasRole/${roleName}`).then(response => response.data);
   },
+  requestPasswordReset(userId) {
+    const formData = new FormData();
+    formData.append('userId', userId);
+    return axios.post('/resetPassword', formData, { handleError: false }).then(response => response.data);
+  },
+  resetPassword(reset) {
+    return axios.post('/performPasswordReset', reset, { handleError: false }).then(response => response.data);
+  },
+  isResetSupported() {
+    return axios.get('/public/isFeatureSupported?feature=passwordreset').then(response => response.data);
+  },
 };

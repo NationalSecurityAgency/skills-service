@@ -53,7 +53,13 @@ import UserSkillsPerformed from '@//components/users/UserSkillsPerformed';
 import GeneralSettings from '@//components/settings/GeneralSettings';
 import SecuritySettings from '@//components/settings/SecuritySettings';
 import EmailSettings from '@//components/settings/EmailSettings';
+import SystemSettings from '@//components/settings/SystemSettings';
 import { SECTION } from '@//components/metrics/SectionHelper';
+import ResetPassword from '@//components/access/ResetPassword';
+import RequestPasswordReset from '@//components/access/RequestPasswordReset';
+import RequestResetConfirmation from '@//components/access/RequestResetConfirmation';
+import ResetConfirmation from '@//components/access/ResetConfirmation';
+import ResetNotSupportedPage from '@//components/access/ResetNotSupportedPage';
 
 Vue.use(Router);
 
@@ -93,6 +99,49 @@ const router = new Router({
       path: '/request-account',
       name: 'RequestAccount',
       component: RequestAccountForm,
+      meta: {
+        requiresAuth: false,
+      },
+    },
+    {
+      path: '/forgot-password',
+      name: 'ForgotPassword',
+      component: RequestPasswordReset,
+      meta: {
+        requiresAuth: false,
+      },
+    },
+    {
+      path: '/reset-password/:resetToken',
+      name: 'ResetPassword',
+      component: ResetPassword,
+      props: true,
+      meta: {
+        requiresAuth: false,
+      },
+    },
+    {
+      path: '/forgot-password-confirmation',
+      name: 'RequestResetConfirmation',
+      component: RequestResetConfirmation,
+      props: true,
+      meta: {
+        requiresAuth: false,
+      },
+    },
+    {
+      path: '/reset-password-confirmation',
+      name: 'ResetConfirmation',
+      component: ResetConfirmation,
+      props: true,
+      meta: {
+        requiresAuth: false,
+      },
+    },
+    {
+      path: '/reset-not-supported',
+      name: 'ResetNotSupportedPage',
+      component: ResetNotSupportedPage,
       meta: {
         requiresAuth: false,
       },
@@ -306,6 +355,11 @@ const router = new Router({
         name: 'EmailSettings',
         path: 'email',
         component: EmailSettings,
+        meta: { requiresAuth: true },
+      }, {
+        name: 'SystemSettings',
+        path: 'system',
+        component: SystemSettings,
         meta: { requiresAuth: true },
       }],
     },

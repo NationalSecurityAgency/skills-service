@@ -28,12 +28,15 @@
     "cyServices:start:skills-service": "npm run backend:start:ci && npm run backend:waitToStart",
     "cyServices:start:skills-service:postgresql": "npm run backend:start:postgresql:ci && npm run backend:waitToStart",
     "cyServices:start:client-display": "npm run client-display:serve:ci && npm run client-display:waitToStart",
-    "cyServices:start": "npm run cyServices:start:skills-service && npm run cyServices:start:client-display",
+    "cyServices:start": "npm run cyServices:start:skills-service && npm run fake-smtp:start:ci && npm run cyServices:start:client-display",
     "cyServices:kill:skills-service": "for procid in $(ps -aux | grep \"serverConfigs/.*properties\" | grep \"jar$\" | awk '{print $2}'); do echo \"killing skills-service ${procid}\"; kill -9 $procid; done",
     "cyServices:kill:client-display": "for procid in $(ps -aux | grep \"client-display\" | grep \"npm run serve\" | grep -v \"grep\" | awk '{print $2}'); do echo \"killing skills-display ${procid}\"; kill -9 $procid; done",
     "cyServices:kill:client-display:1": "for procid in $(ps -aux | grep \"client-display\" | grep \"vue-cli-service serve\" | grep -v \"grep\" | awk '{print $2}'); do echo \"killing skills-display  ${procid}\"; kill -9 $procid; done",
-    "cyServices:kill": "npm run cyServices:kill:skills-service && npm run cyServices:kill:client-display && npm run cyServices:kill:client-display:1",
-    "print-env": "print-env"
+    "cyServices:kill": "npm run cyServices:kill:skills-service && npm run cyServices:kill:client-display && npm run cyServices:kill:client-display:1 && npm run fake-smtp:stop",
+    "print-env": "print-env",
+    "fake-smtp:start": "fake-smtp-server --smtp-port 1026 --http-port 1081",
+    "fake-smtp:start:ci": "mkdir -p ./logs && nohup npm run fake-smtp:start &> ./logs/fake-smtp.log &",
+    "fake-smtp:stop": "fuser -k 1081/tcp"
   },
   "devDependencies": {
     "@bahmutov/print-env": "1.2.0",
@@ -44,6 +47,8 @@
     "license-check-and-add": "3.0.4",
     "license-checker": "25.0.1",
     "moment": "2.24.0",
-    "wait-on": "3.3.0"
-  }
+    "wait-on": "3.3.0",
+    "fake-smtp-server": "0.8.0"
+  },
+  "dependencies": {}
 }

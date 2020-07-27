@@ -18,3 +18,4 @@ delete from USER_ROLES;
 delete from USER_ROLES;
 delete from GLOBAL_BADGE_LEVEL_DEFINITION;
 delete from SKILL_DEFINITION;
+delete from SETTINGS;

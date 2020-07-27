@@ -18,6 +18,7 @@ package skills.auth.form
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.context.properties.ConfigurationProperties
+import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Conditional
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.MediaType
@@ -28,10 +29,17 @@ import org.springframework.stereotype.Component
 import org.springframework.web.bind.annotation.*
 import skills.PublicProps
 import skills.auth.SecurityMode
+import skills.auth.UserInfo
 import skills.controller.PublicPropsBasedValidator
+import skills.controller.exceptions.SkillException
+import skills.controller.result.model.RequestResult
+import skills.services.PasswordResetService
+import skills.storage.model.auth.PasswordResetToken
 import skills.storage.model.auth.RoleName
+import skills.storage.model.auth.User
 import skills.storage.model.auth.UserRole
 
+import javax.annotation.PostConstruct
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 

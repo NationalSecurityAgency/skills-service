@@ -13,20 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.services.settings;
+package skills.settings
 
-public enum Settings {
-    LEVEL_AS_POINTS("level.points.enabled"),
-    GLOBAL_PUBLIC_URL("public_url"),
-    GLOBAL_RESET_TOKEN_EXPIRATION("password_reset_token_expiration");
+import groovy.transform.Canonical
 
-    private String settingName;
+@Canonical
+class SystemSettings {
 
-    private Settings(String settingName){
-        this.settingName = settingName;
-    }
-
-    public String getSettingName(){
-        return this.settingName;
-    }
+    String publicUrl
+    //iso 8601 period/duration string, e.g., PT2H30M45S
+    String resetTokenExpiration
 }

@@ -15,29 +15,25 @@
  */
 package skills.storage.repos
 
-import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.lang.Nullable
-import skills.storage.model.Setting
+import skills.storage.model.auth.PasswordResetToken
 
-interface SettingRepo extends CrudRepository<Setting, Integer> {
-
-    @Nullable
-    Setting findByTypeAndUserRefIdAndProjectIdAndSettingGroupAndSetting(Setting.SettingType type, @Nullable Integer userRefId, @Nullable String projectId, @Nullable String settingGroup, String setting)
+interface PasswordResetTokenRepo extends CrudRepository<PasswordResetToken, Integer> {
 
     @Nullable
-    List<Setting> findAllByTypeAndUserRefIdAndSettingGroup(Setting.SettingType type, Integer userRefId, String settingGroup)
+    @Query("select p from PasswordResetToken p where p.token = ?1")
+    PasswordResetToken findByToken(String token)
 
     @Nullable
-    List<Setting> findAllByTypeAndProjectId(Setting.SettingType type, String projectId)
+    @Query("select p from PasswordResetToken p where p.user.userId = ?1")
+    PasswordResetToken findByUserId(String userId)
 
     @Nullable
-    List<Setting> findAllByTypeAndSettingGroup(Setting.SettingType type, String settingGroup)
+    @Query("select p from PasswordResetToken  p where p.token = ?1 and p.user.userId = ?2")
+    PasswordResetToken findByTokenAndUserId(String token, String userId)
 
-
-    @Modifying
-    @Query("delete from Setting s where s.setting = ?1 AND s.type = 'Global'")
-    void deleteGlobalSetting(String setting)
+    void deleteByToken(String token)
 
 }

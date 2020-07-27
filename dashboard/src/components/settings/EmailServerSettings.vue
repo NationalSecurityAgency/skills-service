@@ -18,31 +18,31 @@ limitations under the License.
     <div class="form-group">
             <label class="label">Host</label>
       <input class="form-control" type="text" v-model="emailInfo.host" name="host"
-             v-validate="'required'" data-vv-delay="500"/>
+             v-validate="'required'" data-vv-delay="500" data-cy="hostInput"/>
       <p class="text-danger" v-show="errors.has('host')">{{
         errors.first('host')}}</p>
     </div>
     <div class="form-group">
       <label class="label">Port</label>
       <input class="form-control" type="text" v-model="emailInfo.port" name="port"
-             v-validate="'required|min_value:1|max_value:65535'" data-vv-delay="500"/>
+             v-validate="'required|min_value:1|max_value:65535'" data-vv-delay="500" data-cy="portInput"/>
       <p class="text-danger" v-show="errors.has('port')">{{
         errors.first('port')}}</p>
     </div>
     <div class="form-group">
       <label class="label">Protocol</label>
       <input class="form-control" type="text" v-model="emailInfo.protocol" name="protocol"
-             v-validate="'required'" data-vv-delay="500"/>
+             v-validate="'required'" data-vv-delay="500" data-cy="protocolInput"/>
       <p class="text-danger" v-show="errors.has('protocol')">{{
         errors.first('protocol')}}</p>
     </div>
     <div class="form-group">
-      <b-form-checkbox v-model="emailInfo.tlsEnabled" switch>
+      <b-form-checkbox v-model="emailInfo.tlsEnabled" switch data-cy="tlsSwitch">
         {{ emailInfo.tlsEnabled ? 'TLS Enabled' : 'TLS Disabled' }}
       </b-form-checkbox>
     </div>
     <div class="form-group">
-      <b-form-checkbox v-model="emailInfo.authEnabled" switch>
+      <b-form-checkbox v-model="emailInfo.authEnabled" switch data-cy="authSwitch">
         {{ emailInfo.authEnabled ? 'Authentication Enabled' : 'Authentication Disabled' }}
       </b-form-checkbox>
     </div>
@@ -50,25 +50,25 @@ limitations under the License.
       <div class="form-group">
         <label class="label">Username</label>
         <input class="form-control" type="text" v-model="emailInfo.username" name="username"
-               v-validate="'required'" data-vv-delay="500"/>
+               v-validate="'required'" data-vv-delay="500" data-cy="emailUsername"/>
         <p class="text-danger" v-show="errors.has('username')">{{
           errors.first('username')}}</p>
       </div>
       <div class="form-group">
         <label class="label">Password</label>
         <input class="form-control" type="text" v-model="emailInfo.password" name="password"
-               v-validate="'required'" data-vv-delay="500"/>
+               v-validate="'required'" data-vv-delay="500" data-cy="emailPassword"/>
         <p class="text-danger" v-show="errors.has('password')">{{
           errors.first('password')}}</p>
       </div>
     </div>
 
     <div>
-      <button class="btn btn-outline-primary mr-1" type="button" v-on:click="testConnection" :disabled="errors.any() || missingRequiredValues()">
+      <button class="btn btn-outline-primary mr-1" type="button" v-on:click="testConnection" :disabled="errors.any() || missingRequiredValues()" data-cy="emailSettingsTest">
         Test
         <i :class="[isTesting ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'far fa-check-circle']"></i>
       </button>
-      <button class="btn btn-outline-primary" type="button" v-on:click="saveEmailSettings" :disabled="errors.any() || missingRequiredValues()">
+      <button class="btn btn-outline-primary" type="button" v-on:click="saveEmailSettings" :disabled="errors.any() || missingRequiredValues()" data-cy="emailSettingsSave">
         Save
         <i :class="[isSaving ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-arrow-circle-right']"></i>
       </button>
@@ -112,6 +112,9 @@ limitations under the License.
         isSaving: false,
       };
     },
+    mounted() {
+      this.loadEmailSettings();
+    },
     methods: {
       testConnection() {
         this.isTesting = true;
@@ -131,6 +134,10 @@ limitations under the License.
       },
       saveEmailSettings() {
         this.isSaving = true;
+        if (this.emailInfo.authEnabled === false || this.emailInfo.authEnabled === 'false') {
+          this.emailInfo.username = '';
+          this.emailInfo.password = '';
+        }
         SettingsService.saveEmailSettings(this.emailInfo).then(() => {
           this.successToast('Saved', 'Email Connection Successful!');
         })
@@ -140,6 +147,11 @@ limitations under the License.
           .finally(() => {
             this.isSaving = false;
           });
+      },
+      loadEmailSettings() {
+        SettingsService.loadEmailSettings().then((response) => {
+          this.emailInfo = Object.assign(this.emailInfo, response);
+        });
       },
       missingRequiredValues() {
         return !this.isAuthValid() || !this.emailInfo.host || !this.emailInfo.port || !this.emailInfo.protocol;

@@ -26,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional
 import skills.controller.exceptions.SkillException
 import skills.controller.request.model.GlobalSettingsRequest
 import skills.controller.request.model.SettingsRequest
+import skills.controller.result.model.SettingsResult
 import skills.services.settings.SettingsService
 
 import javax.annotation.PostConstruct
@@ -56,13 +57,13 @@ class EmailSettingsService {
     @PostConstruct
     void init() {
         EmailConnectionInfo emailConnectionInfo = new EmailConnectionInfo(
-                host: settingsService.getGlobalSetting(hostSetting)?.value,
-                port: settingsService.getGlobalSetting(portSetting)?.value?.toInteger() ?: -1,
-                protocol: settingsService.getGlobalSetting(protocolSetting)?.value,
-                username: settingsService.getGlobalSetting(usernameSetting)?.value,
-                password: settingsService.getGlobalSetting(passwordSetting)?.value,
-                authEnabled: settingsService.getGlobalSetting(authSetting)?.value?.toBoolean() ?: false,
-                tlsEnabled: settingsService.getGlobalSetting(tlsEnableSetting)?.value?.toBoolean() ?: false,
+                host: settingsService.getGlobalSetting(hostSetting, settingsGroup)?.value,
+                port: settingsService.getGlobalSetting(portSetting, settingsGroup)?.value?.toInteger() ?: -1,
+                protocol: settingsService.getGlobalSetting(protocolSetting, settingsGroup)?.value,
+                username: settingsService.getGlobalSetting(usernameSetting, settingsGroup)?.value,
+                password: settingsService.getGlobalSetting(passwordSetting, settingsGroup)?.value,
+                authEnabled: settingsService.getGlobalSetting(authSetting,settingsGroup)?.value?.toBoolean() ?: false,
+                tlsEnabled: settingsService.getGlobalSetting(tlsEnableSetting, settingsGroup)?.value?.toBoolean() ?: false,
         )
 
         try {
@@ -136,16 +137,62 @@ class EmailSettingsService {
         ])
     }
 
+    EmailConnectionInfo fetchEmailSettings(){
+        List<SettingsResult> emailSettings = settingsService.getGlobalSettingsByGroup(settingsGroup)
+        EmailConnectionInfo info = new EmailConnectionInfo()
+        if (emailSettings) {
+            def mappedSettings = emailSettings.collectEntries() {
+                [it.setting, it.value]
+            }
+            if(mappedSettings[(hostSetting)]) {
+                info.host = mappedSettings[(hostSetting)]
+            }
+            if(mappedSettings[(portSetting)]) {
+                info.port = Integer.valueOf(mappedSettings[(portSetting)])
+            }
+            if(mappedSettings[(protocolSetting)]) {
+                info.protocol = mappedSettings[(protocolSetting)]
+            }
+            if(mappedSettings[(usernameSetting)]) {
+                info.username = mappedSettings[(usernameSetting)]
+            }
+            if(mappedSettings[(passwordSetting)]) {
+                info.password = mappedSettings[(passwordSetting)]
+            }
+            if (mappedSettings[(authSetting)]) {
+                info.authEnabled = Boolean.valueOf(mappedSettings[(authSetting)])
+            }
+            if (mappedSettings[(tlsEnableSetting)]) {
+                info.tlsEnabled = Boolean.valueOf(mappedSettings[(tlsEnableSetting)])
+            }
+        }
+        return info
+    }
+
     private void saveOrUpdateGlobalGroup(String settingsGroup, Map<String, String> settingsMap) {
         List<SettingsRequest> settingsRequests = []
+        List<SettingsRequest> deleteIfExist = []
         settingsMap.each { String setting, String value ->
-            settingsRequests << new GlobalSettingsRequest(settingGroup: settingsGroup, setting: setting, value: value)
+            GlobalSettingsRequest gsr = new GlobalSettingsRequest(settingGroup: settingsGroup, setting: setting, value: value)
+            if (value) {
+                settingsRequests << gsr
+            } else {
+                //if there's not value specified, we need to check if that setting previously had a value and delete it
+                deleteIfExist << gsr
+            }
         }
         settingsService.saveSettings(settingsRequests)
+        deleteIfExist.each {
+            settingsService.deleteGlobalSetting(it.setting)
+        }
     }
 
     @WithWriteLock
     void updateMailSender(JavaMailSender mailSender) {
         this.mailSender = mailSender
+    }
+
+    JavaMailSender getMailSender() {
+        return this.mailSender;
     }
 }

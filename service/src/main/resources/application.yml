@@ -33,6 +33,7 @@ server:
     min-response-size: 2048
     mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json,images/x-icon
 spring:
+  #logging:
   resources:
     cache:
       cachecontrol:
@@ -113,7 +114,6 @@ skills:
       userSuggestOptions:
   profiles:
     active: default
-#logging:
 #  level:
 #    org.hibernate: INFO
 #    org.hibernate.type.descriptor.sql.BasicBinder: TRACE

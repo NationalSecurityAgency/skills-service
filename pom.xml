@@ -42,6 +42,8 @@
 
         <!-- !!!!!IMPORTANT!!!!!: when changing the springboot.version property, make sure you also change it in the parent definition -->
         <springboot.version>2.1.13.RELEASE</springboot.version>
+
+        <greenmail.version>1.5.14</greenmail.version>
     </properties>
 
     <parent>
