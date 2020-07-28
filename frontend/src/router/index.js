@@ -15,7 +15,7 @@
  */
 import Vue from 'vue';
 import Router from 'vue-router';
-import { SkillsReporter, SkillsConfiguration } from '@skills/skills-client-vue';
+import { SkillsReporter, SkillsConfiguration } from '@skilltree/skills-client-vue';
 import HomePage from '@/components/HomePage';
 import MyProjects from '@/components/projects/MyProjects';
 import LoginForm from '@/components/access/Login';

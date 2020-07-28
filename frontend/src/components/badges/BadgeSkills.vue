@@ -35,7 +35,7 @@ limitations under the License.
 
 <script>
   import { createNamespacedHelpers } from 'vuex';
-  import { SkillsReporter } from '@skills/skills-client-vue';
+  import { SkillsReporter } from '@skilltree/skills-client-vue';
 
   import SkillsService from '../skills/SkillsService';
   import SkillsSelector2 from '../skills/SkillsSelector2';

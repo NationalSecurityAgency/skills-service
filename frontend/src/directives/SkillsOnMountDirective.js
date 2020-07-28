@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import Vue from 'vue';
-import { SkillsReporter } from '@skills/skills-client-vue';
+import { SkillsReporter } from '@skilltree/skills-client-vue';
 
 // Register a global custom directive
 Vue.directive('skills-onMount', {

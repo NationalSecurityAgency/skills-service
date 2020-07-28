@@ -5,7 +5,7 @@
     <parent>
         <artifactId>skills-service</artifactId>
         <groupId>skills</groupId>
-        <version>1.1.4-SNAPSHOT</version>
+        <version>1.1.4</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -203,9 +203,9 @@
         </dependency>
 
         <dependency>
-            <groupId>profile</groupId>
+            <groupId>skilltree</groupId>
             <artifactId>call-stack-profiler</artifactId>
-            <version>1.0.2</version>
+            <version>1.1.1</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>

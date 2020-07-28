@@ -20,7 +20,7 @@ limitations under the License.
 </template>
 
 <script>
-  import { SkillsLevel, SkillsConfiguration } from '@skills/skills-client-vue';
+  import { SkillsLevel, SkillsConfiguration } from '@skilltree/skills-client-vue';
 
   export default {
     name: 'InceptionButton',

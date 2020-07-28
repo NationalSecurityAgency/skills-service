@@ -67,7 +67,7 @@ skills:
       minimumProjectPoints: 100
       descriptionMaxLength: 2000
       maxTimeWindowInMinutes: 43200
-      docsHost: http://skillsasaservicedocs.com
+      docsHost: https://code.nsa.gov/skills-docs
       maxProjectsPerAdmin: 25
       maxSubjectsPerProject: 25
       maxBadgesPerProject: 25
@@ -98,10 +98,10 @@ skills:
       userSuggestOptions:
   profiles:
     active: default
-#logging:
-#  level:
-#    org.hibernate: INFO
-#    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+logging:
+  level:
+    skills.auth.form.oauth2.OAuthUtils: WARN
+    skills.auth.UserInfoService: WARN
 ---
 spring:
   profiles: default

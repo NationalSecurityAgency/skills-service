@@ -34,7 +34,7 @@ target
 .idea
 *.class
 *.log
-/node_modules
+node_modules
 /node_modules/**
 rebel.xml
 rebel.xml.lock
@@ -42,3 +42,9 @@ package-lock.json
 backend/src/main/resources/public/**
 
 .vscode
+
+docker/*.jar
+/e2e-tests/cypress/screenshots/
+/e2e-tests/cypress/snapshots/
+/dashboard/dist/
+/service/src/main/resources/public/**
