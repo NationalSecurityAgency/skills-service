@@ -122,6 +122,9 @@ limitations under the License.
           </code></pre>
           Full list of the supported icons can be found
           <a href="https://raw.githubusercontent.com/omnidan/node-emoji/master/lib/emoji.json" target="_blank">here <i class="fa fa-external-link-alt"/></a>
+          <div class="alert alert-warning my-2">
+            <i class="fa fa-exclamation-triangle"/> Please note that specific emoji support is unique to each browser.
+          </div>
 
         </div>
       </div>
