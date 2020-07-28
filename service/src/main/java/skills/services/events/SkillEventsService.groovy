@@ -42,6 +42,9 @@ import static skills.services.events.CompletionItem.CompletionItemType
 @Slf4j
 class SkillEventsService {
 
+    private static final String PENDING_NOTIFICATION_EXPLANATION = "Achieved due to a modification " +
+            "in the training profile (such as: skill deleted, occurrences modified, badge published, etc..)"
+
     @Autowired
     UserPerformedSkillRepo performedSkillRepository
 
@@ -109,11 +112,11 @@ class SkillEventsService {
                         completionItem = new CompletionItem(
                                 level: it.level, name: skill.name,
                                 id: points.skillId ?: "OVERALL",
-                                type: points.skillId ? CompletionItem.CompletionItemType.Subject : CompletionItem.CompletionItemType.Overall)
+                                type: points.skillId ? CompletionItemType.Subject : CompletionItemType.Overall)
                     }
                 } else {
                     if(SkillDef.ContainerType.Skill == skill.type) {
-                        completionItem = new CompletionItem(type: CompletionItem.CompletionItemType.Skill, id: skill.skillId, name: skill.name)
+                        completionItem = new CompletionItem(type: CompletionItemType.Skill, id: skill.skillId, name: skill.name)
                     } else {
                         //why doesn't CompletionTypeUtil support Skill?
                         completionItem = new CompletionItem(type: CompletionTypeUtil.getCompletionType(skill.type), id: skill.skillId, name: skill.name)
@@ -128,6 +131,7 @@ class SkillEventsService {
             }
 
             if (ser) {
+                ser.explanation = PENDING_NOTIFICATION_EXPLANATION
                 skillEventPublisher.publishSkillUpdate(ser, userId)
                 achievedLevelRepo.saveAll(pendingNotificationAchievements)
             }

@@ -137,6 +137,7 @@ class WebsocketSpecs extends DefaultIntSpec {
         then:
         wsResults.find{it.skillId=='skill1'}.success
         wsResults.find{it.skillId=='skill1'}.completed
+        wsResults[0].explanation == 'Achieved due to a modification in the training profile (such as: skill deleted, occurrences modified, badge published, etc..)'
         wsResults.find{it.skillId=='skill1'}.completed.size() == 4
         wsResults.find{it.skillId=='skill1'}.completed[0].type == CompletionItem.CompletionItemType.Skill
         wsResults.find{it.skillId=='skill1'}.completed[0].name == skill.name
