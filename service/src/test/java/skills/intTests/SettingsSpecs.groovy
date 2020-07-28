@@ -20,6 +20,7 @@ import org.springframework.web.client.HttpClientErrorException
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
+import spock.lang.Timeout
 
 class SettingsSpecs extends DefaultIntSpec {
 
@@ -209,6 +210,20 @@ class SettingsSpecs extends DefaultIntSpec {
         emailSettings.authEnabled == true
         emailSettings.username == "fakeuser"
         emailSettings.password == "fakepassword"
+    }
+
+    @Timeout(12)
+    def "save and retrieve email settings with invalid smtp server"() {
+        if (!skillsService.isRoot()) {
+            skillsService.grantRoot()
+        }
+
+        when:
+        skillsService.saveEmailSettings("somehost", "smtp", 1026, false, true, "fakeuser", "fakepassword")
+        def emailSettings = skillsService.getEmailSettings()
+
+        then:
+        !emailSettings.success
     }
 
     def "save and retrieve system settings"() {

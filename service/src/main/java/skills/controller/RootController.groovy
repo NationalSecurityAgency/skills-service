@@ -37,6 +37,7 @@ import skills.profile.EnableCallStackProf
 import skills.services.AccessSettingsStorageService
 import skills.services.settings.Settings
 import skills.services.settings.SettingsService
+import skills.settings.EmailConfigurationResult
 import skills.settings.EmailConnectionInfo
 import skills.settings.EmailSettingsService
 import skills.settings.SystemSettings
@@ -174,8 +175,9 @@ class RootController {
     }
 
     @PostMapping('/saveEmailSettings')
-    void saveEmailSettings(@RequestBody EmailConnectionInfo emailConnectionInfo) {
-        emailSettingsService.updateConnectionInfo(emailConnectionInfo)
+    RequestResult saveEmailSettings(@RequestBody EmailConnectionInfo emailConnectionInfo) {
+        EmailConfigurationResult success = emailSettingsService.updateConnectionInfo(emailConnectionInfo)
+        return new RequestResult(success: success?.configurationSuccessful, explanation: success?.explanation)
     }
 
     @GetMapping('/getEmailSettings')

@@ -179,7 +179,7 @@ describe('Settings Tests', () => {
         cy.wait('@getEligibleForSupervisor');
     });
 
-    it('Email Server Setings', () => {
+    it('Email Server Settings', () => {
         cy.server();
         cy.route('GET', '/root/getEmailSettings').as('loadEmailSettings');
         cy.route('GET', '/app/userInfo').as('loadUserInfo');
@@ -214,6 +214,26 @@ describe('Settings Tests', () => {
         cy.get('[data-cy=emailPassword]').should('have.value', 'password');
     });
 
+    it('Email Settings reasonable timeout', () => {
+        cy.server();
+        cy.route('GET', '/root/getEmailSettings').as('loadEmailSettings');
+        cy.route('GET', '/app/userInfo').as('loadUserInfo');
+        cy.visit('/');
+        cy.wait('@loadUserInfo');
+        cy.get('.userName').parent().click();
+        cy.contains('Settings').click();
+        cy.contains('Email').click();
+        cy.wait('@loadEmailSettings');
+        cy.get$('[data-cy=hostInput]').type('{selectall}localhost');
+        //this needs to be an open port that is NOT an smtp server for the purposes of this test
+        cy.get$('[data-cy=portInput]').type('{selectall}8080');
+        cy.get$('[data-cy=protocolInput]').type('{selectall}smtp');
+
+        cy.get$('[data-cy=emailSettingsSave]').click();
+        cy.wait(12*1000);
+        cy.get('[data-cy=connectionError]').should('be.visible');
+    });
+
     it('System Settings', () => {
         cy.server();
         cy.route('GET', '/root/getSystemSettings').as('loadSystemSettings');
@@ -234,4 +254,5 @@ describe('Settings Tests', () => {
         cy.get('[data-cy=publicUrl]').should('have.value', 'http://localhost:8082');
         cy.get('[data-cy=resetTokenExpiration]').should('have.value', '2H25M22S');
     });
+
 });
