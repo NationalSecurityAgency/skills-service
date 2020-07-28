@@ -26,7 +26,7 @@
     "client-display:serve:ci": "mkdir -p ./logs && nohup npm run client-display:serve &> ./logs/client-display.out &",
     "client-display:waitToStart": "npx wait-on -t 80000 http://localhost:8083",
     "cyServices:start:skills-service": "npm run backend:start:ci && npm run backend:waitToStart",
-    "cyServices:start:skills-service:postgresql": "npm run backend:start:postgresql:ci && npm run backend:waitToStart",
+    "cyServices:start:skills-service:postgresql": "npm run fake-smtp:start:ci &&  npm run backend:start:postgresql:ci && npm run backend:waitToStart",
     "cyServices:start:client-display": "npm run client-display:serve:ci && npm run client-display:waitToStart",
     "cyServices:start": "npm run cyServices:start:skills-service && npm run fake-smtp:start:ci && npm run cyServices:start:client-display",
     "cyServices:kill:skills-service": "for procid in $(ps -aux | grep \"serverConfigs/.*properties\" | grep \"jar$\" | awk '{print $2}'); do echo \"killing skills-service ${procid}\"; kill -9 $procid; done",
