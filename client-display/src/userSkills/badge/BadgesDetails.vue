@@ -27,36 +27,36 @@ limitations under the License.
 </template>
 
 <script>
-    import MyBadgesDetails from '@/userSkills/badge/MyBadgesDetails.vue';
-    import BadgesCatalog from '@/userSkills/badge/BadgesCatalog.vue';
-    import UserSkillsService from '@/userSkills/service/UserSkillsService';
-    import SkillsSpinner from '@/common/utilities/SkillsSpinner.vue';
-    import SkillsTitle from '@/common/utilities/SkillsTitle.vue';
+  import MyBadgesDetails from '@/userSkills/badge/MyBadgesDetails';
+  import BadgesCatalog from '@/userSkills/badge/BadgesCatalog';
+  import UserSkillsService from '@/userSkills/service/UserSkillsService';
+  import SkillsSpinner from '@/common/utilities/SkillsSpinner';
+  import SkillsTitle from '@/common/utilities/SkillsTitle';
 
-    export default {
-        name: 'BadgesDetails',
-        components: {
-            SkillsTitle,
-            SkillsSpinner,
-            BadgesCatalog,
-            MyBadgesDetails,
-        },
-        data() {
-          return {
-              loading: true,
-              badges: [],
-              achievedBadges: [],
-          };
-        },
-        mounted() {
-            UserSkillsService.getBadgeSummaries()
-                .then((res) => {
-                    this.badges = res;
-                    this.achievedBadges = this.badges.filter(item => item.badgeAchieved);
-                    this.loading = false;
-                });
-        },
-    };
+  export default {
+    name: 'BadgesDetails',
+    components: {
+      SkillsTitle,
+      SkillsSpinner,
+      BadgesCatalog,
+      MyBadgesDetails,
+    },
+    data() {
+      return {
+        loading: true,
+        badges: [],
+        achievedBadges: [],
+      };
+    },
+    mounted() {
+      UserSkillsService.getBadgeSummaries()
+        .then((res) => {
+          this.badges = res;
+          this.achievedBadges = this.badges.filter(item => item.badgeAchieved);
+          this.loading = false;
+        });
+    },
+  };
 </script>
 
 <style scoped>

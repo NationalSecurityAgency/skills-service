@@ -10,7 +10,7 @@ const proxyConf = {
 
 if (process.env.NODE_ENV === 'production') {
   console.log('production mode detected');
-  exportObject.publicPath = '.'
+  exportObject.publicPath = '.';
 }
 
 exportObject.devServer = {
@@ -19,7 +19,7 @@ exportObject.devServer = {
   overlay: true,
   proxy: {
     '/admin': proxyConf,
-  }
+  },
 };
 
 module.exports = exportObject;

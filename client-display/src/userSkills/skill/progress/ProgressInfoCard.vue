@@ -33,16 +33,16 @@ limitations under the License.
 </template>
 
 <script>
-    export default {
-        name: 'ProgressInfoCard',
-        props: {
-            title: Number,
-            label: String,
-            icon: String,
-            subTitle: {
-                type: String,
-                default: 'Points',
-            },
-        },
-    };
+  export default {
+    name: 'ProgressInfoCard',
+    props: {
+      title: Number,
+      label: String,
+      icon: String,
+      subTitle: {
+        type: String,
+        default: 'Points',
+      },
+    },
+  };
 </script>

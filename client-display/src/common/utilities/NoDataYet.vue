@@ -34,13 +34,13 @@ limitations under the License.
 </template>
 
 <script>
-    export default {
-        name: 'NoDataYet',
-        props: {
-            title: String,
-            subTitle: String,
-        },
-    };
+  export default {
+    name: 'NoDataYet',
+    props: {
+      title: String,
+      subTitle: String,
+    },
+  };
 </script>
 
 <style scoped>

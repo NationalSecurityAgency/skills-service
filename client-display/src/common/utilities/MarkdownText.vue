@@ -20,25 +20,25 @@ limitations under the License.
 </template>
 
 <script>
-    import marked from 'marked';
-    import emoji from 'node-emoji';
-    import DOMPurify from 'dompurify';
+  import marked from 'marked';
+  import emoji from 'node-emoji';
+  import DOMPurify from 'dompurify';
 
-    export default {
-        name: 'MarkdownText',
-        props: {
-          text: String,
-        },
-        methods: {
-            parseMarkdown(text) {
-                const compiled = marked(text);
-                const onMissing = name => name;
-                const emojified = emoji.emojify(compiled, onMissing);
-                const sanitized = DOMPurify.sanitize(emojified);
-                return sanitized;
-            },
-        },
-    };
+  export default {
+    name: 'MarkdownText',
+    props: {
+      text: String,
+    },
+    methods: {
+      parseMarkdown(text) {
+        const compiled = marked(text);
+        const onMissing = name => name;
+        const emojified = emoji.emojify(compiled, onMissing);
+        const sanitized = DOMPurify.sanitize(emojified);
+        return sanitized;
+      },
+    },
+  };
 </script>
 
 <style>

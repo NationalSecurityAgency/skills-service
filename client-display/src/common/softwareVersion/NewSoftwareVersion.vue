@@ -24,42 +24,42 @@ limitations under the License.
 </template>
 
 <script>
-    export default {
-        name: 'NewSoftwareVersionComponent',
-        data() {
-            return {
-                showNewVersionAlert: false,
-                currentLibVersion: undefined,
-            };
-        },
-        mounted() {
-            this.updateStorageIfNeeded();
-        },
-        computed: {
-            libVersion() {
-                return this.$store.state.softwareVersion;
-            },
-        },
-        watch: {
-            libVersion() {
-                if (localStorage.skillsClientDisplayLibVersion !== undefined
-                    && this.libVersion !== undefined
-                    && this.libVersion.localeCompare(localStorage.skillsClientDisplayLibVersion) > 0) {
-                    this.showNewVersionAlert = true;
-                }
-                this.updateStorageIfNeeded();
-            },
-        },
-        methods: {
-            updateStorageIfNeeded() {
-                const storedVal = localStorage.skillsClientDisplayLibVersion;
-                const currentVersion = this.libVersion;
-                if (currentVersion !== undefined && (storedVal === undefined || currentVersion.localeCompare(storedVal) > 0)) {
-                    localStorage.skillsClientDisplayLibVersion = currentVersion;
-                }
-            },
-        },
-    };
+  export default {
+    name: 'NewSoftwareVersionComponent',
+    data() {
+      return {
+        showNewVersionAlert: false,
+        currentLibVersion: undefined,
+      };
+    },
+    mounted() {
+      this.updateStorageIfNeeded();
+    },
+    computed: {
+      libVersion() {
+        return this.$store.state.softwareVersion;
+      },
+    },
+    watch: {
+      libVersion() {
+        if (localStorage.skillsClientDisplayLibVersion !== undefined
+          && this.libVersion !== undefined
+          && this.libVersion.localeCompare(localStorage.skillsClientDisplayLibVersion) > 0) {
+          this.showNewVersionAlert = true;
+        }
+        this.updateStorageIfNeeded();
+      },
+    },
+    methods: {
+      updateStorageIfNeeded() {
+        const storedVal = localStorage.skillsClientDisplayLibVersion;
+        const currentVersion = this.libVersion;
+        if (currentVersion !== undefined && (storedVal === undefined || currentVersion.localeCompare(storedVal) > 0)) {
+          localStorage.skillsClientDisplayLibVersion = currentVersion;
+        }
+      },
+    },
+  };
 </script>
 
 <style scoped>

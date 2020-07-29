@@ -52,73 +52,73 @@ limitations under the License.
 </template>
 
 <script>
-    import ToggleButton from 'vue-js-toggle-button/src/Button.vue';
+  import ToggleButton from 'vue-js-toggle-button/src/Button';
 
-    import UserSkillsService from '@/userSkills/service/UserSkillsService';
-    import SkillsSubjectSkillRow from '@/userSkills/skill/progress/SkillsRow.vue';
-    import NoDataYet from '@/common/utilities/NoDataYet.vue';
-    import SkillsSpinner from '@/common/utilities/SkillsSpinner.vue';
+  import UserSkillsService from '@/userSkills/service/UserSkillsService';
+  import SkillsSubjectSkillRow from '@/userSkills/skill/progress/SkillsRow';
+  import NoDataYet from '@/common/utilities/NoDataYet';
+  import SkillsSpinner from '@/common/utilities/SkillsSpinner';
 
-    export default {
-        components: {
-            NoDataYet,
-            SkillsSubjectSkillRow,
-            ToggleButton,
-            SkillsSpinner,
-        },
-        props: {
-            subject: {
-                type: Object,
-                required: true,
-            },
-            showDescriptions: {
-                type: Boolean,
-                default: false,
-            },
-            helpTipHref: {
-                type: String,
-                required: false,
-            },
-            type: {
-                type: String,
-                default: 'subject',
-            },
-        },
-        data() {
-            return {
-                loading: false,
-                showDescriptionsInternal: false,
-                hasSkills: false,
-                descriptionsLoaded: false,
-                skillsInternal: [],
-            };
-        },
-        mounted() {
-            this.showDescriptionsInternal = this.showDescriptions;
-            this.skillsInternal = this.subject.skills.map(item => Object.assign({}, item));
-        },
-        methods: {
-            onDetailsToggle() {
-                if (!this.descriptionsLoaded) {
-                    this.loading = true;
-                    UserSkillsService.getDescriptions(this.subject.subjectId ? this.subject.subjectId : this.subject.badgeId, this.type)
-                        .then((res) => {
-                            this.descriptions = res;
-                            res.forEach((desc) => {
-                                const foundSkill = this.skillsInternal.find(skill => desc.skillId === skill.skillId);
-                                if (foundSkill) {
-                                    foundSkill.description = desc;
-                                }
-                            });
-                            this.descriptionsLoaded = true;
-                        })
-                        .finally(() => {
-                            this.loading = false;
-                        });
+  export default {
+    components: {
+      NoDataYet,
+      SkillsSubjectSkillRow,
+      ToggleButton,
+      SkillsSpinner,
+    },
+    props: {
+      subject: {
+        type: Object,
+        required: true,
+      },
+      showDescriptions: {
+        type: Boolean,
+        default: false,
+      },
+      helpTipHref: {
+        type: String,
+        required: false,
+      },
+      type: {
+        type: String,
+        default: 'subject',
+      },
+    },
+    data() {
+      return {
+        loading: false,
+        showDescriptionsInternal: false,
+        hasSkills: false,
+        descriptionsLoaded: false,
+        skillsInternal: [],
+      };
+    },
+    mounted() {
+      this.showDescriptionsInternal = this.showDescriptions;
+      this.skillsInternal = this.subject.skills.map(item => Object.assign({}, item));
+    },
+    methods: {
+      onDetailsToggle() {
+        if (!this.descriptionsLoaded) {
+          this.loading = true;
+          UserSkillsService.getDescriptions(this.subject.subjectId ? this.subject.subjectId : this.subject.badgeId, this.type)
+            .then((res) => {
+              this.descriptions = res;
+              res.forEach((desc) => {
+                const foundSkill = this.skillsInternal.find(skill => desc.skillId === skill.skillId);
+                if (foundSkill) {
+                  foundSkill.description = desc;
                 }
-            },
-        },
-    };
+              });
+              this.descriptionsLoaded = true;
+            })
+            .finally(() => {
+              this.loading = false;
+            });
+        }
+      },
+    },
+  };
 </script>
 
 <style scoped>

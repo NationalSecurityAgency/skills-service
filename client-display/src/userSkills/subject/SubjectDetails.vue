@@ -40,42 +40,42 @@ limitations under the License.
 </template>
 
 <script>
-    import UserSkillsHeader from '@/userSkills/UserSkillsHeader.vue';
-    import SkillDisplayDataLoadingMixin from '@/userSkills/SkillDisplayDataLoadingMixin.vue';
-    import SkillsTitle from '@/common/utilities/SkillsTitle.vue';
-    import SkillsProgressList from '@/userSkills/skill/progress/SkillsProgressList.vue';
-    import SkillsSpinner from '@/common/utilities/SkillsSpinner.vue';
-    import MarkdownText from '@/common/utilities/MarkdownText.vue';
+  import UserSkillsHeader from '@/userSkills/UserSkillsHeader';
+  import SkillDisplayDataLoadingMixin from '@/userSkills/SkillDisplayDataLoadingMixin';
+  import SkillsTitle from '@/common/utilities/SkillsTitle';
+  import SkillsProgressList from '@/userSkills/skill/progress/SkillsProgressList';
+  import SkillsSpinner from '@/common/utilities/SkillsSpinner';
+  import MarkdownText from '@/common/utilities/MarkdownText';
 
-    export default {
-        mixins: [SkillDisplayDataLoadingMixin],
-        components: {
-            MarkdownText,
-            UserSkillsHeader,
-            SkillsTitle,
-            SkillsProgressList,
-            SkillsSpinner,
-        },
-        watch: {
-            $route: 'fetchData',
-        },
-        computed: {
-            helpTipHref() {
-                return '';
-            },
-        },
-        mounted() {
-            this.fetchData();
-        },
-        methods: {
-            fetchData() {
-                this.resetLoading();
-                this.loadSubject();
-                this.loadUserSkillsRanking();
-                this.loadPointsHistory();
-            },
-        },
-    };
+  export default {
+    mixins: [SkillDisplayDataLoadingMixin],
+    components: {
+      MarkdownText,
+      UserSkillsHeader,
+      SkillsTitle,
+      SkillsProgressList,
+      SkillsSpinner,
+    },
+    watch: {
+      $route: 'fetchData',
+    },
+    computed: {
+      helpTipHref() {
+        return '';
+      },
+    },
+    mounted() {
+      this.fetchData();
+    },
+    methods: {
+      fetchData() {
+        this.resetLoading();
+        this.loadSubject();
+        this.loadUserSkillsRanking();
+        this.loadPointsHistory();
+      },
+    },
+  };
 </script>
 
 <style>

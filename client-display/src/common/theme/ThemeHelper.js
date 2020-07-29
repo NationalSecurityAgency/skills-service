@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 export default {
-  _nonCSSConfig: ['progressIndicators', 'charts'],
-  _selectorKey: {
+  nonCSSConfig: ['progressIndicators', 'charts'],
+  selectorKey: {
     backgroundColor: {
       selector: 'body #app',
       styleName: 'background-color',
@@ -108,7 +108,7 @@ export default {
     const populateResult = (selectorKey, inputTheme) => {
       Object.keys(inputTheme)
         .forEach((key) => {
-          const isCSSConfig = !this._nonCSSConfig.includes(key);
+          const isCSSConfig = !this.nonCSSConfig.includes(key);
           if (isCSSConfig) {
             const selectorKeyElement = selectorKey[key];
             validateInputElement(key, selectorKeyElement, 'is not supported (Is it misspelled?)');
@@ -130,7 +130,7 @@ export default {
           }
         });
     };
-    populateResult(this._selectorKey, theme);
+    populateResult(this.selectorKey, theme);
 
     // Some CSS may mess up some things, fix those here
     // Apex charts context menu

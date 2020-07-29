@@ -34,33 +34,33 @@ limitations under the License.
 </template>
 
 <script>
-    import ProgressBar from 'vue-simple-progress';
+  import ProgressBar from 'vue-simple-progress';
 
-    export default {
-        components: {
-            ProgressBar,
-        },
-        name: 'SkillDependencySummary',
-        props: {
-            dependencies: {
-                type: Array,
-                required: true,
-            },
-        },
-        data() {
-            return {
-                numDependencies: 0,
-                percentComplete: 0,
-            };
-        },
-        mounted() {
-            this.numDependencies = this.dependencies.length;
-            const numCompleted = this.dependencies.filter(item => item.achieved).length;
-            if (this.numDependencies > 0 && numCompleted > 0) {
-                this.percentComplete = Math.floor((numCompleted / this.numDependencies) * 100);
-            }
-        },
-    };
+  export default {
+    components: {
+      ProgressBar,
+    },
+    name: 'SkillDependencySummary',
+    props: {
+      dependencies: {
+        type: Array,
+        required: true,
+      },
+    },
+    data() {
+      return {
+        numDependencies: 0,
+        percentComplete: 0,
+      };
+    },
+    mounted() {
+      this.numDependencies = this.dependencies.length;
+      const numCompleted = this.dependencies.filter(item => item.achieved).length;
+      if (this.numDependencies > 0 && numCompleted > 0) {
+        this.percentComplete = Math.floor((numCompleted / this.numDependencies) * 100);
+      }
+    },
+  };
 </script>
 
 <style scoped>

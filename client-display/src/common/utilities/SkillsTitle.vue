@@ -29,18 +29,18 @@ limitations under the License.
 </template>
 
 <script>
-    export default {
-        name: 'SkillsTitle',
-        props: {
-            backButton: { type: Boolean, default: true },
-        },
-        methods: {
-            navigateBack() {
-                const previousRoute = this.$route.params.previousRoute || { name: 'home' };
-                this.$router.push(previousRoute);
-            },
-        },
-    };
+  export default {
+    name: 'SkillsTitle',
+    props: {
+      backButton: { type: Boolean, default: true },
+    },
+    methods: {
+      navigateBack() {
+        const previousRoute = this.$route.params.previousRoute || { name: 'home' };
+        this.$router.push(previousRoute);
+      },
+    },
+  };
 </script>
 
 <style>

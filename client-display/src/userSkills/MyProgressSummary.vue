@@ -64,24 +64,24 @@ limitations under the License.
       summaryInfo() {
         const summaryObject = { };
         switch (this.summaryType) {
-          case 'level':
-            summaryObject.title = 'Points Earned Toward Next Level';
-            summaryObject.overallPoints = this.userSkills.levelPoints;
-            summaryObject.todaysPoints = this.userSkills.todaysPoints < this.userSkills.levelPoints ? this.userSkills.todaysPoints : this.userSkills.levelPoints;
-            break;
-          case 'subject':
-          case 'skill':
-            summaryObject.title = this.type === 'skill' ? 'Points Earned Toward Skill' : 'Points Earned for this Subject';
-            summaryObject.overallPoints = this.userSkills.points;
-            summaryObject.todaysPoints = this.userSkills.todaysPoints;
-            break;
-          case 'total':
-            summaryObject.title = 'Total Points Earned';
-            summaryObject.overallPoints = this.userSkills.points;
-            summaryObject.todaysPoints = this.userSkills.todaysPoints;
-            break;
-          default:
-            throw new Error(`Unknown MyProgressSummary type [${this.summaryType}]`);
+        case 'level':
+          summaryObject.title = 'Points Earned Toward Next Level';
+          summaryObject.overallPoints = this.userSkills.levelPoints;
+          summaryObject.todaysPoints = this.userSkills.todaysPoints < this.userSkills.levelPoints ? this.userSkills.todaysPoints : this.userSkills.levelPoints;
+          break;
+        case 'subject':
+        case 'skill':
+          summaryObject.title = this.type === 'skill' ? 'Points Earned Toward Skill' : 'Points Earned for this Subject';
+          summaryObject.overallPoints = this.userSkills.points;
+          summaryObject.todaysPoints = this.userSkills.todaysPoints;
+          break;
+        case 'total':
+          summaryObject.title = 'Total Points Earned';
+          summaryObject.overallPoints = this.userSkills.points;
+          summaryObject.todaysPoints = this.userSkills.todaysPoints;
+          break;
+        default:
+          throw new Error(`Unknown MyProgressSummary type [${this.summaryType}]`);
         }
         return summaryObject;
       },

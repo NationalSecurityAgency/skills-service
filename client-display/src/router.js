@@ -18,14 +18,14 @@ import VueRouter from 'vue-router';
 
 import { debounce } from 'lodash';
 
-import SkillsEntry from '@/SkillsEntry.vue';
-import SubjectDetails from '@/userSkills/subject/SubjectDetails.vue';
-import MyRankDetails from '@/userSkills/myRank/MyRankDetails.vue';
-import SkillDetails from '@/userSkills/skill/SkillDetails.vue';
-import BadgesDetails from '@/userSkills/badge/BadgesDetails.vue';
-import GlobalBadgeDetails from '@/userSkills/badge/GlobalBadgeDetails.vue';
-import BadgeDetails from '@/userSkills/badge/BadgeDetails.vue';
-import ErrorPage from '@/userSkills/ErrorPage.vue';
+import SkillsEntry from '@/SkillsEntry';
+import SubjectDetails from '@/userSkills/subject/SubjectDetails';
+import MyRankDetails from '@/userSkills/myRank/MyRankDetails';
+import SkillDetails from '@/userSkills/skill/SkillDetails';
+import BadgesDetails from '@/userSkills/badge/BadgesDetails';
+import GlobalBadgeDetails from '@/userSkills/badge/GlobalBadgeDetails';
+import BadgeDetails from '@/userSkills/badge/BadgeDetails';
+import ErrorPage from '@/userSkills/ErrorPage';
 import store from '@/store';
 
 Vue.use(VueRouter);

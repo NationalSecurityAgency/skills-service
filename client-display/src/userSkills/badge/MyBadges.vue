@@ -31,27 +31,27 @@ limitations under the License.
 </template>
 
 <script>
-    export default {
-        name: 'MyBadges',
-        props: {
-            numBadgesCompleted: {
-                type: Number,
-                required: true,
-            },
-        },
-        methods: {
-            openMyBadges() {
-                if (!this.isSummaryOnly) {
-                    this.$router.push('/badges');
-                }
-            },
-        },
-        computed: {
-            isSummaryOnly() {
-                return this.$store.state.isSummaryOnly;
-            },
-        },
-    };
+  export default {
+    name: 'MyBadges',
+    props: {
+      numBadgesCompleted: {
+        type: Number,
+        required: true,
+      },
+    },
+    methods: {
+      openMyBadges() {
+        if (!this.isSummaryOnly) {
+          this.$router.push('/badges');
+        }
+      },
+    },
+    computed: {
+      isSummaryOnly() {
+        return this.$store.state.isSummaryOnly;
+      },
+    },
+  };
 </script>
 
 <style scoped>

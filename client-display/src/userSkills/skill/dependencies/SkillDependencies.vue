@@ -37,208 +37,208 @@ limitations under the License.
 </template>
 
 <script>
-    import vis from 'vis';
-    import 'vis/dist/vis.css';
-    import GraphLegend from '@/userSkills/skill/dependencies/GraphLegend.vue';
-    import SkillDependencySummary from '@/userSkills/skill/dependencies/SkillDependencySummary.vue';
+  import vis from 'vis';
+  import 'vis/dist/vis.css';
+  import GraphLegend from '@/userSkills/skill/dependencies/GraphLegend';
+  import SkillDependencySummary from '@/userSkills/skill/dependencies/SkillDependencySummary';
 
-    export default {
-        name: 'SkillDependencies',
-        components: {
-            SkillDependencySummary,
-            GraphLegend,
+  export default {
+    name: 'SkillDependencies',
+    components: {
+      SkillDependencySummary,
+      GraphLegend,
+    },
+    props: {
+      dependencies: Array,
+      skillId: String,
+    },
+    data() {
+      return {
+        thisSkill: {},
+        network: null,
+        legendItems: [
+          { label: 'This Skill', color: 'lightblue' },
+          { label: 'Dependencies', color: 'lightgray' },
+          { label: 'Achieved Dependencies', color: 'lightgreen' },
+        ],
+        displayOptions: {
+          layout: {
+            randomSeed: 419465,
+            hierarchical: {
+              enabled: true,
+              sortMethod: 'directed',
+              nodeSpacing: 350,
+            },
+          },
+          interaction: {
+            selectConnectedEdges: false,
+            navigationButtons: true,
+            hover: true,
+          },
+          physics: {
+            enabled: false,
+          },
+          nodes: {
+            font: {
+              size: 18,
+            },
+            color: {
+              border: '#868686',
+              background: '#e4e4e4',
+            },
+            mass: 20,
+          },
         },
-        props: {
-            dependencies: Array,
-            skillId: String,
-        },
-        data() {
-            return {
-                thisSkill: {},
-                network: null,
-                legendItems: [
-                    { label: 'This Skill', color: 'lightblue' },
-                    { label: 'Dependencies', color: 'lightgray' },
-                    { label: 'Achieved Dependencies', color: 'lightgreen' },
-                ],
-                displayOptions: {
-                    layout: {
-                        randomSeed: 419465,
-                        hierarchical: {
-                            enabled: true,
-                            sortMethod: 'directed',
-                            nodeSpacing: 350,
-                        },
-                    },
-                    interaction: {
-                        selectConnectedEdges: false,
-                        navigationButtons: true,
-                        hover: true,
-                    },
-                    physics: {
-                        enabled: false,
-                    },
-                    nodes: {
-                        font: {
-                            size: 18,
-                        },
-                        color: {
-                            border: '#868686',
-                            background: '#e4e4e4',
-                        },
-                        mass: 20,
-                    },
+      };
+    },
+    mounted() {
+      this.createGraph();
+    },
+    beforeDestroy() {
+      this.cleanUp();
+    },
+    methods: {
+      cleanUp() {
+        if (this.network) {
+          this.network.destroy();
+        }
+        this.thisSkill = {};
+      },
+      isSmallScreen() {
+        const width = window.innerWidth;
+        return width <= 768;
+      },
+      createGraph() {
+        this.cleanUp();
+
+        const data = this.buildData();
+        const container = document.getElementById('dependent-skills-network');
+        this.network = new vis.Network(container, data, this.displayOptions);
+        // const self = this;
+        this.network.on('click', (params) => {
+          const skillItem = this.locateSelectedSkill(params);
+          if (skillItem) {
+            if (skillItem.isCrossProject) {
+              this.$router.push({
+                name: 'crossProjectSkillDetails',
+                params: {
+                  crossProjectId: skillItem.projectId,
+                  skillId: skillItem.skillId,
                 },
-            };
-        },
-        mounted() {
-            this.createGraph();
-        },
-        beforeDestroy() {
-            this.cleanUp();
-        },
-        methods: {
-            cleanUp() {
-                if (this.network) {
-                    this.network.destroy();
-                }
-                this.thisSkill = {};
-            },
-            isSmallScreen() {
-                const width = window.innerWidth;
-                return width <= 768;
-            },
-            createGraph() {
-                this.cleanUp();
+              });
+            } else {
+              this.$router.push({
+                name: 'skillDetails',
+                params: {
+                  skillId: skillItem.skillId,
+                },
+              });
+            }
+          }
+        });
+        const networkCanvas = container.getElementsByTagName('canvas')[0];
+        this.network.on('hoverNode', () => {
+          networkCanvas.style.cursor = 'pointer';
+        });
+        this.network.on('blurNode', () => {
+          networkCanvas.style.cursor = 'default';
+        });
 
-                const data = this.buildData();
-                const container = document.getElementById('dependent-skills-network');
-                this.network = new vis.Network(container, data, this.displayOptions);
-                // const self = this;
-                this.network.on('click', (params) => {
-                    const skillItem = this.locateSelectedSkill(params);
-                    if (skillItem) {
-                        if (skillItem.isCrossProject) {
-                            this.$router.push({
-                                name: 'crossProjectSkillDetails',
-                                params: {
-                                    crossProjectId: skillItem.projectId,
-                                    skillId: skillItem.skillId,
-                                },
-                            });
-                        } else {
-                            this.$router.push({
-                                name: 'skillDetails',
-                                params: {
-                                    skillId: skillItem.skillId,
-                                },
-                            });
-                        }
-                    }
-                });
-                const networkCanvas = container.getElementsByTagName('canvas')[0];
-                this.network.on('hoverNode', () => {
-                    networkCanvas.style.cursor = 'pointer';
-                });
-                this.network.on('blurNode', () => {
-                    networkCanvas.style.cursor = 'default';
-                });
-
-                this.focusOnParentNode();
+        this.focusOnParentNode();
+      },
+      focusOnParentNode() {
+        if (this.isSmallScreen()) {
+          const options = {
+            scale: 0.7,
+            offset: { x: 0, y: 0 },
+            animation: {
+              duration: 1500,
+              easingFunction: 'easeInOutQuad',
             },
-            focusOnParentNode() {
-                if (this.isSmallScreen()) {
-                    const options = {
-                        scale: 0.7,
-                        offset: { x: 0, y: 0 },
-                        animation: {
-                            duration: 1500,
-                            easingFunction: 'easeInOutQuad',
-                        },
-                    };
-                    this.network.focus(this.getNodeId(this.thisSkill), options);
-                }
+          };
+          this.network.focus(this.getNodeId(this.thisSkill), options);
+        }
+      },
+      locateSelectedSkill(params) {
+        const skillId = params.nodes[0];
+        let skillItem = null;
+        let crossProj = false;
+        const depItem = this.dependencies.find(item => this.getNodeId(item.dependsOn) === skillId);
+        if (depItem) {
+          skillItem = depItem.dependsOn;
+          crossProj = depItem.crossProject;
+        } else {
+          const found = this.dependencies.find(item => this.getNodeId(item.skill) === skillId);
+          if (found) {
+            skillItem = found.skill;
+            crossProj = found.crossProject;
+          }
+        }
+
+        return { ...skillItem, ...{ isCrossProject: crossProj } };
+      },
+      buildData() {
+        const nodes = new vis.DataSet();
+        const edges = new vis.DataSet();
+        const createdSkillIds = [];
+
+        this.dependencies.forEach((item) => {
+          const isThisSkill = !item.crossProject && this.$route.params.skillId === item.skill.skillId;
+
+          if (isThisSkill) {
+            this.thisSkill = item.skill;
+          }
+
+          const extraParentProps = isThisSkill ? {
+            color: {
+              border: '#3273dc',
+              background: 'lightblue',
             },
-            locateSelectedSkill(params) {
-                const skillId = params.nodes[0];
-                let skillItem = null;
-                let crossProj = false;
-                const depItem = this.dependencies.find(item => this.getNodeId(item.dependsOn) === skillId);
-                if (depItem) {
-                    skillItem = depItem.dependsOn;
-                    crossProj = depItem.crossProject;
-                } else {
-                    const found = this.dependencies.find(item => this.getNodeId(item.skill) === skillId);
-                    if (found) {
-                        skillItem = found.skill;
-                        crossProj = found.crossProject;
-                    }
-                }
+          } : {};
+          this.buildNode(item.skill, false, createdSkillIds, nodes, extraParentProps);
 
-                return { ...skillItem, ...{ isCrossProject: crossProj } };
+          const extraChildProps = item.achieved ? {
+            color: {
+              border: 'green',
+              background: 'lightgreen',
             },
-            buildData() {
-                const nodes = new vis.DataSet();
-                const edges = new vis.DataSet();
-                const createdSkillIds = [];
+          } : {};
+          this.buildNode(item.dependsOn, item.crossProject, createdSkillIds, nodes, extraChildProps);
+          edges.add({
+            from: this.getNodeId(item.skill),
+            to: this.getNodeId(item.dependsOn),
+            arrows: 'to',
+          });
+        });
 
-                this.dependencies.forEach((item) => {
-                    const isThisSkill = !item.crossProject && this.$route.params.skillId === item.skill.skillId;
+        const data = { nodes, edges };
+        return data;
+      },
+      buildNode(skill, isCrossProject, createdSkillIds, nodes, extraProps = {}) {
+        if (!createdSkillIds.includes(skill.skillId)) {
+          createdSkillIds.push(skill.skillId);
 
-                    if (isThisSkill) {
-                        this.thisSkill = item.skill;
-                    }
-
-                    const extraParentProps = isThisSkill ? {
-                        color: {
-                            border: '#3273dc',
-                            background: 'lightblue',
-                        },
-                    } : {};
-                    this.buildNode(item.skill, false, createdSkillIds, nodes, extraParentProps);
-
-                    const extraChildProps = item.achieved ? {
-                        color: {
-                            border: 'green',
-                            background: 'lightgreen',
-                        },
-                    } : {};
-                    this.buildNode(item.dependsOn, item.crossProject, createdSkillIds, nodes, extraChildProps);
-                    edges.add({
-                        from: this.getNodeId(item.skill),
-                        to: this.getNodeId(item.dependsOn),
-                        arrows: 'to',
-                    });
-                });
-
-                const data = { nodes, edges };
-                return data;
-            },
-            buildNode(skill, isCrossProject, createdSkillIds, nodes, extraProps = {}) {
-                if (!createdSkillIds.includes(skill.skillId)) {
-                    createdSkillIds.push(skill.skillId);
-
-                    const node = {
-                        id: this.getNodeId(skill),
-                        label: this.getLabel(skill, isCrossProject),
-                        margin: 10,
-                        shape: 'box',
-                        chosen: false,
-                        font: { multi: 'html', size: 20 },
-                    };
-                    const res = Object.assign(node, extraProps);
-                    nodes.add(res);
-                }
-            },
-            getNodeId(skill) {
-                return `${skill.projectName}_${skill.skillId}`;
-            },
-            getLabel(skill, isCrossProject) {
-                const label = isCrossProject ? `CROSS-PROJECT SKILL\n<b>${skill.projectName}</b>\n${skill.skillName}` : skill.skillName;
-                return label;
-            },
-        },
-    };
+          const node = {
+            id: this.getNodeId(skill),
+            label: this.getLabel(skill, isCrossProject),
+            margin: 10,
+            shape: 'box',
+            chosen: false,
+            font: { multi: 'html', size: 20 },
+          };
+          const res = Object.assign(node, extraProps);
+          nodes.add(res);
+        }
+      },
+      getNodeId(skill) {
+        return `${skill.projectName}_${skill.skillId}`;
+      },
+      getLabel(skill, isCrossProject) {
+        const label = isCrossProject ? `CROSS-PROJECT SKILL\n<b>${skill.projectName}</b>\n${skill.skillName}` : skill.skillName;
+        return label;
+      },
+    },
+  };
 </script>
 
 <style scoped>

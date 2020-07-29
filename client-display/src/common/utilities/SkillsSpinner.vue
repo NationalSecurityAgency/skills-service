@@ -20,22 +20,22 @@ limitations under the License.
 </template>
 
 <script>
-    import Spinner from 'vue-simple-spinner';
+  import Spinner from 'vue-simple-spinner';
 
-    export default {
-        name: 'SkillsSpinner',
-        components: {
-            'vue-simple-spinner': Spinner,
-        },
-        props: {
-            loading: Boolean,
-            message: {
-                type: String,
-                required: false,
-                default: 'Loading...',
-            },
-        },
-    };
+  export default {
+    name: 'SkillsSpinner',
+    components: {
+      'vue-simple-spinner': Spinner,
+    },
+    props: {
+      loading: Boolean,
+      message: {
+        type: String,
+        required: false,
+        default: 'Loading...',
+      },
+    },
+  };
 </script>
 
 <style scoped>

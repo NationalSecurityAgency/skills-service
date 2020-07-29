@@ -21,15 +21,15 @@ limitations under the License.
 </template>
 
 <script>
-    export default {
-        name: 'SkillIsLockedMessage',
-        props: {
-            userSkill: {
-                type: Object,
-                required: true,
-            },
-        },
-    };
+  export default {
+    name: 'SkillIsLockedMessage',
+    props: {
+      userSkill: {
+        type: Object,
+        required: true,
+      },
+    },
+  };
 </script>
 
 <style scoped>

@@ -89,56 +89,56 @@ limitations under the License.
 </template>
 
 <script>
-    import PointProgressChart from '@/userSkills/PointProgressChart.vue';
+  import PointProgressChart from '@/userSkills/PointProgressChart';
 
-    import CircleProgress from '@/common/progress/CircleProgress.vue';
-    import MyRank from '@/userSkills/myRank/MyRank.vue';
-    import MySkillLevel from '@/userSkills/MySkillLevel.vue';
-    import MyBadges from '@/userSkills/badge/MyBadges.vue';
+  import CircleProgress from '@/common/progress/CircleProgress';
+  import MyRank from '@/userSkills/myRank/MyRank';
+  import MySkillLevel from '@/userSkills/MySkillLevel';
+  import MyBadges from '@/userSkills/badge/MyBadges';
 
-    export default {
-        components: {
-            MyBadges,
-            PointProgressChart,
-            CircleProgress,
-            MyRank,
-            MySkillLevel,
-        },
-        props: {
-            displayData: Object,
-            maxLevel: {
-                type: Number,
-                default: 5,
-            },
-        },
-        computed: {
-            isLevelComplete() {
-                return this.displayData.userSkills.levelTotalPoints === -1;
-            },
-            hasBadges() {
-                return this.displayData.userSkills && this.displayData.userSkills.badges && this.displayData.userSkills.badges.enabled;
-            },
-            levelStats() {
-                return {
-                    title: this.isLevelComplete ? 'Level Progress' : `Level ${this.displayData.userSkills.skillsLevel + 1} Progress`,
-                    nextLevel: this.displayData.userSkills.skillsLevel + 1,
-                    pointsTillNextLevel: this.displayData.userSkills.levelTotalPoints - this.displayData.userSkills.levelPoints,
-                };
-            },
-            beforeTodayColor() {
-                return this.$store.state.themeModule.progressIndicators.beforeTodayColor;
-            },
-            earnedTodayColor() {
-                return this.$store.state.themeModule.progressIndicators.earnedTodayColor;
-            },
-            completeColor() {
-                return this.$store.state.themeModule.progressIndicators.completeColor;
-            },
-            incompleteColor() {
-                return this.$store.state.themeModule.progressIndicators.incompleteColor;
-            },
-        },
-    };
+  export default {
+    components: {
+      MyBadges,
+      PointProgressChart,
+      CircleProgress,
+      MyRank,
+      MySkillLevel,
+    },
+    props: {
+      displayData: Object,
+      maxLevel: {
+        type: Number,
+        default: 5,
+      },
+    },
+    computed: {
+      isLevelComplete() {
+        return this.displayData.userSkills.levelTotalPoints === -1;
+      },
+      hasBadges() {
+        return this.displayData.userSkills && this.displayData.userSkills.badges && this.displayData.userSkills.badges.enabled;
+      },
+      levelStats() {
+        return {
+          title: this.isLevelComplete ? 'Level Progress' : `Level ${this.displayData.userSkills.skillsLevel + 1} Progress`,
+          nextLevel: this.displayData.userSkills.skillsLevel + 1,
+          pointsTillNextLevel: this.displayData.userSkills.levelTotalPoints - this.displayData.userSkills.levelPoints,
+        };
+      },
+      beforeTodayColor() {
+        return this.$store.state.themeModule.progressIndicators.beforeTodayColor;
+      },
+      earnedTodayColor() {
+        return this.$store.state.themeModule.progressIndicators.earnedTodayColor;
+      },
+      completeColor() {
+        return this.$store.state.themeModule.progressIndicators.completeColor;
+      },
+      incompleteColor() {
+        return this.$store.state.themeModule.progressIndicators.incompleteColor;
+      },
+    },
+  };
 </script>
 
 <style scoped>

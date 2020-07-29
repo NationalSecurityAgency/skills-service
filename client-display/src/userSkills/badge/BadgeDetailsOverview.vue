@@ -59,36 +59,36 @@ limitations under the License.
 </template>
 
 <script>
-    import ProgressBar from 'vue-simple-progress';
-    import MarkdownText from '@/common/utilities/MarkdownText.vue';
+  import ProgressBar from 'vue-simple-progress';
+  import MarkdownText from '@/common/utilities/MarkdownText';
 
-    export default {
-        name: 'BadgeDetailsOverview',
-        components: {
-            ProgressBar,
-            MarkdownText,
-        },
-        props: {
-            badge: {
-                type: Object,
-            },
-            iconColor: {
-                type: String,
-                default: 'text-success',
-            },
-        },
-        computed: {
-            percent() {
-                if (this.badge.numTotalSkills === 0) {
-                    return 0;
-                }
-                return Math.trunc((this.badge.numSkillsAchieved / this.badge.numTotalSkills) * 100);
-            },
-            iconCss() {
-                return `${this.badge.iconClass} ${this.iconColor}`;
-            },
-        },
-    };
+  export default {
+    name: 'BadgeDetailsOverview',
+    components: {
+      ProgressBar,
+      MarkdownText,
+    },
+    props: {
+      badge: {
+        type: Object,
+      },
+      iconColor: {
+        type: String,
+        default: 'text-success',
+      },
+    },
+    computed: {
+      percent() {
+        if (this.badge.numTotalSkills === 0) {
+          return 0;
+        }
+        return Math.trunc((this.badge.numSkillsAchieved / this.badge.numTotalSkills) * 100);
+      },
+      iconCss() {
+        return `${this.badge.iconClass} ${this.iconColor}`;
+      },
+    },
+  };
 </script>
 
 <style scoped>

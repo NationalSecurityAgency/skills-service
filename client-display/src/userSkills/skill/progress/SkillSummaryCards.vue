@@ -37,65 +37,65 @@ limitations under the License.
 </template>
 
 <script>
-    import ProgressInfoCard from '@/userSkills/skill/progress/ProgressInfoCard.vue';
-    import numberFormatter from '../../../common/filter/NumberFilter';
+  import ProgressInfoCard from '@/userSkills/skill/progress/ProgressInfoCard';
+  import numberFormatter from '../../../common/filter/NumberFilter';
 
-    export default {
-        name: 'SkillSummaryCards',
-        components: { ProgressInfoCard },
-        props: {
-            skill: Object,
-            shortSubTitles: {
-                type: Boolean,
-                default: false,
-            },
-        },
-        computed: {
-            overallPtsSubTitle() {
-                return this.shortSubTitles ? 'Total' : 'Points Total';
-            },
-            todayPtsSubTitle() {
-                return this.shortSubTitles ? 'Today' : 'Points Today';
-            },
-            occurrenceSubTitle() {
-                return this.shortSubTitles ? 'Occurrence' : 'Points/Occurrence';
-            },
-            timeWindowSubTitle() {
-                return this.shortSubTitles ? 'Window' : 'Time Window Pts.';
-            },
-            timeWindowTitle() {
-               return this.skill.pointIncrement * this.skill.maxOccurrencesWithinIncrementInterval;
-            },
-            timeWindowLabel() {
-                const hours = this.skill.pointIncrementInterval > 59 ? Math.floor(this.skill.pointIncrementInterval / 60) : 0;
-                const minutes = this.skill.pointIncrementInterval > 60 ? this.skill.pointIncrementInterval % 60 : this.skill.pointIncrementInterval;
-                const occur = this.skill.maxOccurrencesWithinIncrementInterval;
-                const points = occur * this.skill.pointIncrement;
-                let res = `Up-to ${numberFormatter(points, 1)} points within `;
-                if (hours) {
-                    res = `${res} ${hours} hr${this.sOrNothing(hours)}`;
-                }
-                if (minutes) {
-                    if (hours) {
-                        res = ` ${res} and`;
-                    }
-                    res = `${res} ${minutes} min${this.sOrNothing(minutes)}`;
-                }
-                return res;
-            },
-            timeWindowPoints() {
-                return this.skill.pointIncrement * this.skill.maxOccurrencesWithinIncrementInterval;
-            },
-            isTimeWindowDisabled() {
-                return this.skill.pointIncrementInterval <= 0 || this.skill.pointIncrement === this.skill.totalPoints;
-            },
-        },
-        methods: {
-            sOrNothing(num) {
-                return num > 1 ? 's' : '';
-            },
-        },
-    };
+  export default {
+    name: 'SkillSummaryCards',
+    components: { ProgressInfoCard },
+    props: {
+      skill: Object,
+      shortSubTitles: {
+        type: Boolean,
+        default: false,
+      },
+    },
+    computed: {
+      overallPtsSubTitle() {
+        return this.shortSubTitles ? 'Total' : 'Points Total';
+      },
+      todayPtsSubTitle() {
+        return this.shortSubTitles ? 'Today' : 'Points Today';
+      },
+      occurrenceSubTitle() {
+        return this.shortSubTitles ? 'Occurrence' : 'Points/Occurrence';
+      },
+      timeWindowSubTitle() {
+        return this.shortSubTitles ? 'Window' : 'Time Window Pts.';
+      },
+      timeWindowTitle() {
+        return this.skill.pointIncrement * this.skill.maxOccurrencesWithinIncrementInterval;
+      },
+      timeWindowLabel() {
+        const hours = this.skill.pointIncrementInterval > 59 ? Math.floor(this.skill.pointIncrementInterval / 60) : 0;
+        const minutes = this.skill.pointIncrementInterval > 60 ? this.skill.pointIncrementInterval % 60 : this.skill.pointIncrementInterval;
+        const occur = this.skill.maxOccurrencesWithinIncrementInterval;
+        const points = occur * this.skill.pointIncrement;
+        let res = `Up-to ${numberFormatter(points, 1)} points within `;
+        if (hours) {
+          res = `${res} ${hours} hr${this.sOrNothing(hours)}`;
+        }
+        if (minutes) {
+          if (hours) {
+            res = ` ${res} and`;
+          }
+          res = `${res} ${minutes} min${this.sOrNothing(minutes)}`;
+        }
+        return res;
+      },
+      timeWindowPoints() {
+        return this.skill.pointIncrement * this.skill.maxOccurrencesWithinIncrementInterval;
+      },
+      isTimeWindowDisabled() {
+        return this.skill.pointIncrementInterval <= 0 || this.skill.pointIncrement === this.skill.totalPoints;
+      },
+    },
+    methods: {
+      sOrNothing(num) {
+        return num > 1 ? 's' : '';
+      },
+    },
+  };
 </script>
 
 <style scoped>

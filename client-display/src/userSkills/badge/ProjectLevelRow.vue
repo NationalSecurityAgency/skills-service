@@ -49,7 +49,7 @@ limitations under the License.
 </template>
 
 <script>
-  import VerticalProgress from '@/common/progress/VerticalProgress.vue';
+  import VerticalProgress from '@/common/progress/VerticalProgress';
 
   export default {
     name: 'BadgeDetailsOverview',
