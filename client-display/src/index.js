@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import UserSkills from './userSkills/UserSkills.vue';
-import UserSkillsHeader from './userSkills/UserSkillsHeader.vue';
+import UserSkills from './userSkills/UserSkills';
+import UserSkillsHeader from './userSkills/UserSkillsHeader';
 
 const plugin = {
   install(Vue) {

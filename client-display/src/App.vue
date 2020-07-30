@@ -31,8 +31,8 @@ limitations under the License.
 
   import UserSkillsService from '@/userSkills/service/UserSkillsService';
   import store from '@/store';
-  import NewSoftwareVersionComponent from '@/common/softwareVersion/NewSoftwareVersion.vue';
-  import DevModeMixin from '@/dev/DevModeMixin.vue';
+  import NewSoftwareVersionComponent from '@/common/softwareVersion/NewSoftwareVersion';
+  import DevModeMixin from '@/dev/DevModeMixin';
   import ThemeHelper from './common/theme/ThemeHelper';
 
   const getDocumentHeight = () => {

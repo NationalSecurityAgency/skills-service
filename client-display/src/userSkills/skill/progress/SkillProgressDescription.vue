@@ -49,21 +49,21 @@ limitations under the License.
 </template>
 
 <script>
-    import SkillSummaryCards from '@/userSkills/skill/progress/SkillSummaryCards.vue';
-    import MarkdownText from '@/common/utilities/MarkdownText.vue';
+  import SkillSummaryCards from '@/userSkills/skill/progress/SkillSummaryCards';
+  import MarkdownText from '@/common/utilities/MarkdownText';
 
-    export default {
-        name: 'SkillProgressDescription',
-        components: { SkillSummaryCards, MarkdownText },
-        props: {
-            skill: Object,
-        },
-        computed: {
-            locked() {
-                return this.skill.dependencyInfo && !this.skill.dependencyInfo.achieved;
-            },
-        },
-    };
+  export default {
+    name: 'SkillProgressDescription',
+    components: { SkillSummaryCards, MarkdownText },
+    props: {
+      skill: Object,
+    },
+    computed: {
+      locked() {
+        return this.skill.dependencyInfo && !this.skill.dependencyInfo.achieved;
+      },
+    },
+  };
 </script>
 
 <style scoped>

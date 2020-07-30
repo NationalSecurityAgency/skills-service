@@ -25,24 +25,24 @@ limitations under the License.
 </template>
 
 <script>
-    import BadgeDetailsOverview from '@/userSkills/badge/BadgeDetailsOverview.vue';
+  import BadgeDetailsOverview from '@/userSkills/badge/BadgeDetailsOverview';
 
-    export default {
-        name: 'BadgeCatalogItem',
-        components: {
-            BadgeDetailsOverview,
-        },
-        props: {
-            badge: {
-                type: Object,
-                required: true,
-            },
-            iconColor: {
-                type: String,
-                default: 'text-success',
-            },
-        },
-    };
+  export default {
+    name: 'BadgeCatalogItem',
+    components: {
+      BadgeDetailsOverview,
+    },
+    props: {
+      badge: {
+        type: Object,
+        required: true,
+      },
+      iconColor: {
+        type: String,
+        default: 'text-success',
+      },
+    },
+  };
 </script>
 
 <style scoped>

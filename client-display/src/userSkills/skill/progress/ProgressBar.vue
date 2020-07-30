@@ -26,42 +26,42 @@ limitations under the License.
 </template>
 
 <script>
-    import VerticalProgress from '@/common/progress/VerticalProgress.vue';
+  import VerticalProgress from '@/common/progress/VerticalProgress';
 
-    export default {
-        name: 'ProgressBar',
-        components: {
-            VerticalProgress,
-        },
-        props: {
-            skill: Object,
-            isClickable: Boolean,
-        },
-        computed: {
-            progress() {
-                let totalPts = Math.trunc((this.skill.points / this.skill.totalPoints) * 100);
-                // this can happen when project admin adjusts skill definition after the points were achieved.
-                if (totalPts > 100) {
-                    totalPts = 100;
-                }
-                return {
-                    total: this.isLocked() && totalPts !== 100 ? 0 : totalPts,
-                    totalBeforeToday: ((this.skill.points - this.skill.todaysPoints) / this.skill.totalPoints) * 100,
-                };
-            },
-            locked() {
-                return this.isLocked();
-            },
-        },
-        methods: {
-            progressBarClicked(skill) {
-                this.$emit('progressbar-clicked', skill);
-            },
-            isLocked() {
-                return this.skill.dependencyInfo && !this.skill.dependencyInfo.achieved;
-            },
-        },
-    };
+  export default {
+    name: 'ProgressBar',
+    components: {
+      VerticalProgress,
+    },
+    props: {
+      skill: Object,
+      isClickable: Boolean,
+    },
+    computed: {
+      progress() {
+        let totalPts = Math.trunc((this.skill.points / this.skill.totalPoints) * 100);
+        // this can happen when project admin adjusts skill definition after the points were achieved.
+        if (totalPts > 100) {
+          totalPts = 100;
+        }
+        return {
+          total: this.isLocked() && totalPts !== 100 ? 0 : totalPts,
+          totalBeforeToday: ((this.skill.points - this.skill.todaysPoints) / this.skill.totalPoints) * 100,
+        };
+      },
+      locked() {
+        return this.isLocked();
+      },
+    },
+    methods: {
+      progressBarClicked(skill) {
+        this.$emit('progressbar-clicked', skill);
+      },
+      isLocked() {
+        return this.skill.dependencyInfo && !this.skill.dependencyInfo.achieved;
+      },
+    },
+  };
 </script>
 
 <style scoped>

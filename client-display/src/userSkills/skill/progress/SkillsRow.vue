@@ -18,7 +18,7 @@ limitations under the License.
 </template>
 
 <script>
-  import SkillProgress from '@/userSkills/skill/progress/SkillProgress.vue';
+  import SkillProgress from '@/userSkills/skill/progress/SkillProgress';
 
   export default {
     components: {

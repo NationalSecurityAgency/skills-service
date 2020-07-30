@@ -14,61 +14,61 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script>
-    import UserSkillsService from '@/userSkills/service/UserSkillsService';
+  import UserSkillsService from '@/userSkills/service/UserSkillsService';
 
-    export default {
-        name: 'SkillDisplayDataLoadingMixin',
-        data() {
-            return {
-                loading: {
-                    userSkills: true,
-                    pointsHistory: true,
-                    userSkillsRanking: true,
-                },
-                displayData: {
-                    userSkills: null,
-                    pointsHistory: null,
-                    userSkillsRanking: null,
-                },
-            };
+  export default {
+    name: 'SkillDisplayDataLoadingMixin',
+    data() {
+      return {
+        loading: {
+          userSkills: true,
+          pointsHistory: true,
+          userSkillsRanking: true,
         },
-        methods: {
-            loadUserSkills() {
-                UserSkillsService.getUserSkills()
-                    .then((response) => {
-                        this.displayData.userSkills = response;
-                        this.loading.userSkills = false;
-                    });
-            },
-            loadSubject() {
-                UserSkillsService.getSubjectSummary(this.$route.params.subjectId)
-                    .then((result) => {
-                        this.displayData.userSkills = result;
-                        this.loading.userSkills = false;
-                    });
-            },
-            loadUserSkillsRanking() {
-                UserSkillsService.getUserSkillsRanking(this.$route.params.subjectId)
-                    .then((response) => {
-                        this.displayData.userSkillsRanking = response;
-                        this.loading.userSkillsRanking = false;
-                    });
-            },
+        displayData: {
+          userSkills: null,
+          pointsHistory: null,
+          userSkillsRanking: null,
+        },
+      };
+    },
+    methods: {
+      loadUserSkills() {
+        UserSkillsService.getUserSkills()
+          .then((response) => {
+            this.displayData.userSkills = response;
+            this.loading.userSkills = false;
+          });
+      },
+      loadSubject() {
+        UserSkillsService.getSubjectSummary(this.$route.params.subjectId)
+          .then((result) => {
+            this.displayData.userSkills = result;
+            this.loading.userSkills = false;
+          });
+      },
+      loadUserSkillsRanking() {
+        UserSkillsService.getUserSkillsRanking(this.$route.params.subjectId)
+          .then((response) => {
+            this.displayData.userSkillsRanking = response;
+            this.loading.userSkillsRanking = false;
+          });
+      },
 
-            loadPointsHistory() {
-                UserSkillsService.getPointsHistory(this.$route.params.subjectId)
-                    .then((result) => {
-                        this.displayData.pointsHistory = result;
-                        this.loading.pointsHistory = false;
-                    });
-            },
-            resetLoading() {
-                this.loading.userSkills = true;
-                this.loading.pointsHistory = true;
-                this.loading.userSkillsRanking = true;
-            },
-        },
-    };
+      loadPointsHistory() {
+        UserSkillsService.getPointsHistory(this.$route.params.subjectId)
+          .then((result) => {
+            this.displayData.pointsHistory = result;
+            this.loading.pointsHistory = false;
+          });
+      },
+      resetLoading() {
+        this.loading.userSkills = true;
+        this.loading.pointsHistory = true;
+        this.loading.userSkillsRanking = true;
+      },
+    },
+  };
 </script>
 
 <style scoped>

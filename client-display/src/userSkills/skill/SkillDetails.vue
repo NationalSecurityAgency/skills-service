@@ -28,69 +28,69 @@ limitations under the License.
 </template>
 
 <script>
-    import UserSkillsService from '@/userSkills/service/UserSkillsService';
-    import SkillDependencies from '@/userSkills/skill/dependencies/SkillDependencies.vue';
-    import SkillOverview from '@/userSkills/skill/SkillOverview.vue';
-    import SkillsSpinner from '@/common/utilities/SkillsSpinner.vue';
-    import SkillsTitle from '@/common/utilities/SkillsTitle.vue';
+  import UserSkillsService from '@/userSkills/service/UserSkillsService';
+  import SkillDependencies from '@/userSkills/skill/dependencies/SkillDependencies';
+  import SkillOverview from '@/userSkills/skill/SkillOverview';
+  import SkillsSpinner from '@/common/utilities/SkillsSpinner';
+  import SkillsTitle from '@/common/utilities/SkillsTitle';
 
-    export default {
-        name: 'SkillDetails',
-        components: {
-            SkillsTitle,
-            SkillOverview,
-            SkillDependencies,
-            SkillsSpinner,
+  export default {
+    name: 'SkillDetails',
+    components: {
+      SkillsTitle,
+      SkillOverview,
+      SkillDependencies,
+      SkillsSpinner,
+    },
+    data() {
+      return {
+        loading: {
+          dependencies: true,
+          skill: true,
         },
-        data() {
-            return {
-                loading: {
-                    dependencies: true,
-                    skill: true,
-                },
-                dependencies: [],
-                skill: {},
-            };
-        },
-        mounted() {
-            this.loadData();
-        },
-        watch: {
-            $route: 'loadData',
-        },
-        methods: {
-            loadData() {
-                this.loading.dependencies = true;
-                this.loading.skill = true;
-                this.dependencies = [];
-                this.skill = {};
-                this.loadDependencies();
-                this.loadSkillSummary();
-            },
-            loadDependencies() {
-                if (!this.$route.params.crossProjectId) {
-                    UserSkillsService.getSkillDependencies(this.$route.params.skillId)
-                        .then((res) => {
-                            this.dependencies = res.dependencies;
-                            this.loading.dependencies = false;
-                        });
-                } else {
-                    this.loading.dependencies = false;
-                }
-            },
-            loadSkillSummary() {
-                // const projectId = this.$route.params.crossProjectId ? this.$route.params.crossProjectId : this.$route.params.projectId;
-                // console.log(`loading skill summary using projectId [${projectId}`);
-                // console.log(this.$route.params);
-                // UserSkillsService.getSkillSummary(this.$route.params.skillId, projectId)
-                UserSkillsService.getSkillSummary(this.$route.params.skillId, this.$route.params.crossProjectId)
-                    .then((res) => {
-                        this.skill = res;
-                        this.loading.skill = false;
-                    });
-            },
-        },
-    };
+        dependencies: [],
+        skill: {},
+      };
+    },
+    mounted() {
+      this.loadData();
+    },
+    watch: {
+      $route: 'loadData',
+    },
+    methods: {
+      loadData() {
+        this.loading.dependencies = true;
+        this.loading.skill = true;
+        this.dependencies = [];
+        this.skill = {};
+        this.loadDependencies();
+        this.loadSkillSummary();
+      },
+      loadDependencies() {
+        if (!this.$route.params.crossProjectId) {
+          UserSkillsService.getSkillDependencies(this.$route.params.skillId)
+            .then((res) => {
+              this.dependencies = res.dependencies;
+              this.loading.dependencies = false;
+            });
+        } else {
+          this.loading.dependencies = false;
+        }
+      },
+      loadSkillSummary() {
+        // const projectId = this.$route.params.crossProjectId ? this.$route.params.crossProjectId : this.$route.params.projectId;
+        // console.log(`loading skill summary using projectId [${projectId}`);
+        // console.log(this.$route.params);
+        // UserSkillsService.getSkillSummary(this.$route.params.skillId, projectId)
+        UserSkillsService.getSkillSummary(this.$route.params.skillId, this.$route.params.crossProjectId)
+          .then((res) => {
+            this.skill = res;
+            this.loading.skill = false;
+          });
+      },
+    },
+  };
 </script>
 
 <style scoped>

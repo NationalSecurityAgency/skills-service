@@ -23,7 +23,7 @@ limitations under the License.
 </template>
 
 <script>
-  import UserSkills from '@/userSkills/UserSkills.vue';
+  import UserSkills from '@/userSkills/UserSkills';
 
   export default {
     name: 'SkillsEntry',

@@ -66,31 +66,31 @@ limitations under the License.
 </template>
 
 <script>
-    import ProgressBar from '@/userSkills/skill/progress/ProgressBar.vue';
-    import SkillSummaryCards from '@/userSkills/skill/progress/SkillSummaryCards.vue';
-    import MarkdownText from '@/common/utilities/MarkdownText.vue';
-    import PartialPointsAlert from '@/userSkills/skill/PartialPointsAlert.vue';
+  import ProgressBar from '@/userSkills/skill/progress/ProgressBar';
+  import SkillSummaryCards from '@/userSkills/skill/progress/SkillSummaryCards';
+  import MarkdownText from '@/common/utilities/MarkdownText';
+  import PartialPointsAlert from '@/userSkills/skill/PartialPointsAlert';
 
-    export default {
-        name: 'SkillOverview',
-        components: {
-            PartialPointsAlert,
-            SkillSummaryCards,
-            ProgressBar,
-            MarkdownText,
-        },
-        props: {
-            skill: Object,
-        },
-        computed: {
-            locked() {
-                return this.skill.dependencyInfo && !this.skill.dependencyInfo.achieved;
-            },
-            isSkillComplete() {
-                return this.skill.points === this.skill.totalPoints;
-            },
-        },
-    };
+  export default {
+    name: 'SkillOverview',
+    components: {
+      PartialPointsAlert,
+      SkillSummaryCards,
+      ProgressBar,
+      MarkdownText,
+    },
+    props: {
+      skill: Object,
+    },
+    computed: {
+      locked() {
+        return this.skill.dependencyInfo && !this.skill.dependencyInfo.achieved;
+      },
+      isSkillComplete() {
+        return this.skill.points === this.skill.totalPoints;
+      },
+    },
+  };
 </script>
 
 <style scoped>

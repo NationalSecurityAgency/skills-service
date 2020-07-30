@@ -169,18 +169,18 @@ limitations under the License.
         }];
         if (this.usersPerLevel) {
           this.usersPerLevel.forEach((level) => {
-              const datum = { x: `Level ${level.level}`, y: level.numUsers };
-              series[0].data.push(datum);
-              if (level.level === this.myLevel) {
-                // const label = {
-                //   x: datum.x,
-                //   text: `You are ${datum.x}!`,
-                // };
-                // this.chartOptions.annotations.points = [label];
-                this.chartOptions.annotations.points[0].x = datum.x;
-                this.chartOptions.annotations.points[0].label.text = `You are ${datum.x}!`;
-              }
-            });
+            const datum = { x: `Level ${level.level}`, y: level.numUsers };
+            series[0].data.push(datum);
+            if (level.level === this.myLevel) {
+              // const label = {
+              //   x: datum.x,
+              //   text: `You are ${datum.x}!`,
+              // };
+              // this.chartOptions.annotations.points = [label];
+              this.chartOptions.annotations.points[0].x = datum.x;
+              this.chartOptions.annotations.points[0].label.text = `You are ${datum.x}!`;
+            }
+          });
         }
         this.chartOptions = { ...this.chartOptions }; // Trigger reactivity
         this.chartSeries = series;

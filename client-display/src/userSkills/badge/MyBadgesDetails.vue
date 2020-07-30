@@ -49,30 +49,30 @@ limitations under the License.
 </template>
 
 <script>
-    import NoDataYet from '@/common/utilities/NoDataYet.vue';
+  import NoDataYet from '@/common/utilities/NoDataYet';
 
-    export default {
-        name: 'MyBadgesDetails',
-        components: { NoDataYet },
-        data() {
-          return {
-              colors: ['text-info', 'text-warning', 'text-danger', 'text-primary'],
-          };
-        },
-        props: {
-            badges: {
-                type: Array,
-                required: true,
-            },
-        },
-        methods: {
-            getIconCss(icon, index) {
-                const colorIndex = index % this.colors.length;
-                const color = this.colors[colorIndex];
-                return `${icon} ${color}`;
-            },
-        },
-    };
+  export default {
+    name: 'MyBadgesDetails',
+    components: { NoDataYet },
+    data() {
+      return {
+        colors: ['text-info', 'text-warning', 'text-danger', 'text-primary'],
+      };
+    },
+    props: {
+      badges: {
+        type: Array,
+        required: true,
+      },
+    },
+    methods: {
+      getIconCss(icon, index) {
+        const colorIndex = index % this.colors.length;
+        const color = this.colors[colorIndex];
+        return `${icon} ${color}`;
+      },
+    },
+  };
 </script>
 
 <style>

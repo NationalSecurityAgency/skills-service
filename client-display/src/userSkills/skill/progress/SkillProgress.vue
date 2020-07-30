@@ -37,31 +37,31 @@ limitations under the License.
 </template>
 
 <script>
-    import SkillProgressDescription from '@/userSkills/skill/progress/SkillProgressDescription.vue';
-    import ProgressBar from '@/userSkills/skill/progress/ProgressBar.vue';
+  import SkillProgressDescription from '@/userSkills/skill/progress/SkillProgressDescription';
+  import ProgressBar from '@/userSkills/skill/progress/ProgressBar';
 
 
-    export default {
-        name: 'SkillProgress',
-        components: {
-            ProgressBar,
-            SkillProgressDescription,
-        },
-        props: {
-            skill: Object,
-            showDescription: Boolean,
-        },
-        methods: {
-            progressBarClicked(skill) {
-                this.$emit('progressbar-clicked', skill);
-            },
-        },
-        computed: {
-            locked() {
-                return this.skill.dependencyInfo && !this.skill.dependencyInfo.achieved;
-            },
-        },
-    };
+  export default {
+    name: 'SkillProgress',
+    components: {
+      ProgressBar,
+      SkillProgressDescription,
+    },
+    props: {
+      skill: Object,
+      showDescription: Boolean,
+    },
+    methods: {
+      progressBarClicked(skill) {
+        this.$emit('progressbar-clicked', skill);
+      },
+    },
+    computed: {
+      locked() {
+        return this.skill.dependencyInfo && !this.skill.dependencyInfo.achieved;
+      },
+    },
+  };
 </script>
 
 <style>

@@ -32,21 +32,21 @@ limitations under the License.
 </template>
 
 <script>
-    export default {
-        name: 'PartialPointsAlert',
-        props: {
-            skill: Object,
-            isLocked: Boolean,
-        },
-        computed: {
-            isPartiallyAchievedAndLocked() {
-                return this.isLocked && this.skill.points > 0 && this.skill.points !== this.skill.totalPoints;
-            },
-            isFullyAchievedAndLocked() {
-                return this.isLocked && this.skill.points === this.skill.totalPoints;
-            },
-        },
-    };
+  export default {
+    name: 'PartialPointsAlert',
+    props: {
+      skill: Object,
+      isLocked: Boolean,
+    },
+    computed: {
+      isPartiallyAchievedAndLocked() {
+        return this.isLocked && this.skill.points > 0 && this.skill.points !== this.skill.totalPoints;
+      },
+      isFullyAchievedAndLocked() {
+        return this.isLocked && this.skill.points === this.skill.totalPoints;
+      },
+    },
+  };
 </script>
 
 <style scoped>

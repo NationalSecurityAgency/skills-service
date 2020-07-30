@@ -15,7 +15,7 @@
  */
 import Vue from 'vue';
 
-import NumberFilter from '@/common/filter/NumberFilter.js';
+import NumberFilter from '@/common/filter/NumberFilter';
 
 describe('NumberFilter', () => {
   it('exists', () => {

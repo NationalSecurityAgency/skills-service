@@ -32,30 +32,30 @@ limitations under the License.
 </template>
 
 <script>
-    import BadgeCatalogItem from '@/userSkills/badge/BadgeCatalogItem.vue';
+  import BadgeCatalogItem from '@/userSkills/badge/BadgeCatalogItem';
 
-    export default {
-        name: 'BadgesCatalog',
-        components: { BadgeCatalogItem },
-        props: {
-           badges: {
-               type: Array,
-               required: true,
-           },
-        },
-        data() {
-            return {
-                colors: ['text-success', 'text-warning', 'text-danger', 'text-info'],
-            };
-        },
-        methods: {
-            getIconColor(index) {
-                const colorIndex = index % this.colors.length;
-                const color = this.colors[colorIndex];
-                return color;
-            },
-        },
-    };
+  export default {
+    name: 'BadgesCatalog',
+    components: { BadgeCatalogItem },
+    props: {
+      badges: {
+        type: Array,
+        required: true,
+      },
+    },
+    data() {
+      return {
+        colors: ['text-success', 'text-warning', 'text-danger', 'text-info'],
+      };
+    },
+    methods: {
+      getIconColor(index) {
+        const colorIndex = index % this.colors.length;
+        const color = this.colors[colorIndex];
+        return color;
+      },
+    },
+  };
 </script>
 
 <style scoped>

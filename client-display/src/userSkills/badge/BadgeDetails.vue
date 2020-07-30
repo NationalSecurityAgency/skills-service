@@ -32,50 +32,50 @@ limitations under the License.
 </template>
 
 <script>
-    import BadgeDetailsOverview from '@/userSkills/badge/BadgeDetailsOverview.vue';
-    import SkillsProgressList from '@/userSkills/skill/progress/SkillsProgressList.vue';
-    import SkillsSpinner from '@/common/utilities/SkillsSpinner.vue';
+  import BadgeDetailsOverview from '@/userSkills/badge/BadgeDetailsOverview';
+  import SkillsProgressList from '@/userSkills/skill/progress/SkillsProgressList';
+  import SkillsSpinner from '@/common/utilities/SkillsSpinner';
 
-    import UserSkillsService from '@/userSkills/service/UserSkillsService';
+  import UserSkillsService from '@/userSkills/service/UserSkillsService';
 
-    import SkillsTitle from '@/common/utilities/SkillsTitle.vue';
+  import SkillsTitle from '@/common/utilities/SkillsTitle';
 
-    export default {
-        components: {
-            SkillsTitle,
-            SkillsProgressList,
-            BadgeDetailsOverview,
-            SkillsSpinner,
-        },
-        data() {
-            return {
-                loading: true,
-                badge: null,
-                initialized: false,
-                showDescriptions: false,
-            };
-        },
-        computed: {
-            helpTipHref() {
-                return this.badge ? this.badge.helpUrl : '';
-            },
-        },
-        watch: {
-            $route: 'fetchData',
-        },
-        mounted() {
-            this.fetchData();
-        },
-        methods: {
-            fetchData() {
-                UserSkillsService.getBadgeSkills(this.$route.params.badgeId)
-                    .then((badgeSummary) => {
-                        this.badge = badgeSummary;
-                        this.loading = false;
-                    });
-            },
-        },
-    };
+  export default {
+    components: {
+      SkillsTitle,
+      SkillsProgressList,
+      BadgeDetailsOverview,
+      SkillsSpinner,
+    },
+    data() {
+      return {
+        loading: true,
+        badge: null,
+        initialized: false,
+        showDescriptions: false,
+      };
+    },
+    computed: {
+      helpTipHref() {
+        return this.badge ? this.badge.helpUrl : '';
+      },
+    },
+    watch: {
+      $route: 'fetchData',
+    },
+    mounted() {
+      this.fetchData();
+    },
+    methods: {
+      fetchData() {
+        UserSkillsService.getBadgeSkills(this.$route.params.badgeId)
+          .then((badgeSummary) => {
+            this.badge = badgeSummary;
+            this.loading = false;
+          });
+      },
+    },
+  };
 </script>
 
 <style scoped>

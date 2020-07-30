@@ -76,9 +76,9 @@ limitations under the License.
 <script>
   import ProgressBar from 'vue-simple-progress';
 
-  import Ribbon from '@/common/ribbon/Ribbon.vue';
-  import StarProgress from '@/common/progress/StarProgress.vue';
-  import VerticalProgressBar from '@/common/progress/VerticalProgress.vue';
+  import Ribbon from '@/common/ribbon/Ribbon';
+  import StarProgress from '@/common/progress/StarProgress';
+  import VerticalProgressBar from '@/common/progress/VerticalProgress';
 
   /* Hack for ribbon color. Ultimately backend will send ribbon color */
   let index = 0;

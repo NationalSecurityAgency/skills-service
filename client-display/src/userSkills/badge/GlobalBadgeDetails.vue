@@ -42,61 +42,61 @@ limitations under the License.
 </template>
 
 <script>
-    import BadgeDetailsOverview from '@/userSkills/badge/BadgeDetailsOverview.vue';
-    import SkillsProgressList from '@/userSkills/skill/progress/SkillsProgressList.vue';
-    import ProjectLevelRow from '@/userSkills/badge/ProjectLevelRow.vue';
-    import SkillsSpinner from '@/common/utilities/SkillsSpinner.vue';
-    import UserSkillsService from '@/userSkills/service/UserSkillsService';
-    import SkillsTitle from '@/common/utilities/SkillsTitle.vue';
-    import NoDataYet from '@/common/utilities/NoDataYet.vue';
+  import BadgeDetailsOverview from '@/userSkills/badge/BadgeDetailsOverview';
+  import SkillsProgressList from '@/userSkills/skill/progress/SkillsProgressList';
+  import ProjectLevelRow from '@/userSkills/badge/ProjectLevelRow';
+  import SkillsSpinner from '@/common/utilities/SkillsSpinner';
+  import UserSkillsService from '@/userSkills/service/UserSkillsService';
+  import SkillsTitle from '@/common/utilities/SkillsTitle';
+  import NoDataYet from '@/common/utilities/NoDataYet';
 
-    export default {
-        components: {
-            SkillsTitle,
-            SkillsProgressList,
-            BadgeDetailsOverview,
-            SkillsSpinner,
-            ProjectLevelRow,
-            NoDataYet,
-        },
-        data() {
-            return {
-                loading: true,
-                badge: null,
-                initialized: false,
-                showDescriptions: false,
-            };
-        },
-        computed: {
-            helpTipHref() {
-                return this.badge ? this.badge.helpUrl : '';
-            },
-            projectSummaries() {
-                return this.badge.projectLevelsAndSkillsSummaries.map(item => ({
-                    badgeId: this.badge.badgeId,
-                    projectId: item.projectId,
-                    projectName: item.projectName,
-                    skills: item.skills,
-                    projectLevel: item.projectLevel,
-                  }));
-            },
-        },
-        watch: {
-            $route: 'fetchData',
-        },
-        mounted() {
-            this.fetchData();
-        },
-        methods: {
-            fetchData() {
-              UserSkillsService.getBadgeSkills(this.$route.params.badgeId, true)
-                .then((badgeSummary) => {
-                  this.badge = badgeSummary;
-                  this.loading = false;
-                });
-            },
-        },
-    };
+  export default {
+    components: {
+      SkillsTitle,
+      SkillsProgressList,
+      BadgeDetailsOverview,
+      SkillsSpinner,
+      ProjectLevelRow,
+      NoDataYet,
+    },
+    data() {
+      return {
+        loading: true,
+        badge: null,
+        initialized: false,
+        showDescriptions: false,
+      };
+    },
+    computed: {
+      helpTipHref() {
+        return this.badge ? this.badge.helpUrl : '';
+      },
+      projectSummaries() {
+        return this.badge.projectLevelsAndSkillsSummaries.map(item => ({
+          badgeId: this.badge.badgeId,
+          projectId: item.projectId,
+          projectName: item.projectName,
+          skills: item.skills,
+          projectLevel: item.projectLevel,
+        }));
+      },
+    },
+    watch: {
+      $route: 'fetchData',
+    },
+    mounted() {
+      this.fetchData();
+    },
+    methods: {
+      fetchData() {
+        UserSkillsService.getBadgeSkills(this.$route.params.badgeId, true)
+          .then((badgeSummary) => {
+            this.badge = badgeSummary;
+            this.loading = false;
+          });
+      },
+    },
+  };
 </script>
 
 <style scoped>

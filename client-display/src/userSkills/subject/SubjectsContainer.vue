@@ -32,8 +32,8 @@ limitations under the License.
 </template>
 
 <script>
-  import SubjectTile from '@/userSkills/subject/SubjectTile.vue';
-  import NoDataYet from '@/common/utilities/NoDataYet.vue';
+  import SubjectTile from '@/userSkills/subject/SubjectTile';
+  import NoDataYet from '@/common/utilities/NoDataYet';
 
   export default {
     components: {

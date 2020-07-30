@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import UniqueIdGenerator from '@/common/utilities/UniqueIdGenerator.js';
+import UniqueIdGenerator from '@/common/utilities/UniqueIdGenerator';
 
 describe('UniqueIdGenerator', () => {
   describe('uniqueId', () => {

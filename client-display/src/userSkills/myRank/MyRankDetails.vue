@@ -100,72 +100,72 @@ limitations under the License.
 </template>
 
 <script>
-    import Spinner from 'vue-simple-spinner';
-    import MyRankDetailStatCard from '@/userSkills/myRank/MyRankDetailStatCard.vue';
-    import LevelsBreakdownChart from '@/userSkills/myRank/LevelsBreakdownChart.vue';
-    import MyRankEncouragementCard from '@/userSkills/myRank/MyRankEncouragementCard.vue';
+  import Spinner from 'vue-simple-spinner';
+  import MyRankDetailStatCard from '@/userSkills/myRank/MyRankDetailStatCard';
+  import LevelsBreakdownChart from '@/userSkills/myRank/LevelsBreakdownChart';
+  import MyRankEncouragementCard from '@/userSkills/myRank/MyRankEncouragementCard';
 
-    import UserSkillsService from '@/userSkills/service/UserSkillsService';
+  import UserSkillsService from '@/userSkills/service/UserSkillsService';
 
-    import SkillsTitle from '@/common/utilities/SkillsTitle.vue';
-    import SkillsSpinner from '@/common/utilities/SkillsSpinner.vue';
+  import SkillsTitle from '@/common/utilities/SkillsTitle';
+  import SkillsSpinner from '@/common/utilities/SkillsSpinner';
 
-    export default {
-        components: {
-            SkillsSpinner,
-            SkillsTitle,
-            MyRankDetailStatCard,
-            LevelsBreakdownChart,
-            MyRankEncouragementCard,
-            'vue-simple-spinner': Spinner,
-        },
-        props: {
-            subjectId: String,
-        },
-        data() {
-            return {
-                loading: true,
-                rankingDistribution: null,
-                usersPerLevel: null,
-                myRank: null,
-            };
-        },
-        mounted() {
-            this.getData();
-        },
-        methods: {
-            getData() {
-                this.loading = true;
-                const subjectId = this.subjectId ? this.subjectId : null;
-                UserSkillsService.getUserSkillsRankingDistribution(subjectId)
-                    .then((response) => {
-                        this.rankingDistribution = response;
-                    })
-                    .finally(() => {
-                        this.loading = false;
-                    });
-                UserSkillsService.getRankingDistributionUsersPerLevel(subjectId)
-                    .then((response) => {
-                        this.usersPerLevel = response;
-                    });
-                UserSkillsService.getUserSkillsRanking(subjectId)
-                    .then((response) => {
-                        this.myRank = response;
-                    });
-            },
-        },
-        computed: {
-            numUsersBehindMe() {
-                return this.myRank ? this.myRank.numUsers - this.myRank.position : -1;
-            },
-            myRankPosition() {
-                return this.myRank ? this.myRank.position : -1;
-            },
-            totalNumUsers() {
-                return this.myRank ? this.myRank.numUsers : -1;
-            },
-        },
-    };
+  export default {
+    components: {
+      SkillsSpinner,
+      SkillsTitle,
+      MyRankDetailStatCard,
+      LevelsBreakdownChart,
+      MyRankEncouragementCard,
+      'vue-simple-spinner': Spinner,
+    },
+    props: {
+      subjectId: String,
+    },
+    data() {
+      return {
+        loading: true,
+        rankingDistribution: null,
+        usersPerLevel: null,
+        myRank: null,
+      };
+    },
+    mounted() {
+      this.getData();
+    },
+    methods: {
+      getData() {
+        this.loading = true;
+        const subjectId = this.subjectId ? this.subjectId : null;
+        UserSkillsService.getUserSkillsRankingDistribution(subjectId)
+          .then((response) => {
+            this.rankingDistribution = response;
+          })
+          .finally(() => {
+            this.loading = false;
+          });
+        UserSkillsService.getRankingDistributionUsersPerLevel(subjectId)
+          .then((response) => {
+            this.usersPerLevel = response;
+          });
+        UserSkillsService.getUserSkillsRanking(subjectId)
+          .then((response) => {
+            this.myRank = response;
+          });
+      },
+    },
+    computed: {
+      numUsersBehindMe() {
+        return this.myRank ? this.myRank.numUsers - this.myRank.position : -1;
+      },
+      myRankPosition() {
+        return this.myRank ? this.myRank.position : -1;
+      },
+      totalNumUsers() {
+        return this.myRank ? this.myRank.numUsers : -1;
+      },
+    },
+  };
 </script>
 
 <style scoped>

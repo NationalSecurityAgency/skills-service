@@ -27,16 +27,16 @@ limitations under the License.
 </template>
 
 <script>
-  import UserSkillsHeader from '@/userSkills/UserSkillsHeader.vue';
+  import UserSkillsHeader from '@/userSkills/UserSkillsHeader';
   import UserSkillsService from '@/userSkills/service/UserSkillsService';
-  import SubjectsContainer from '@/userSkills/subject/SubjectsContainer.vue';
-  import SkillsSpinner from '@/common/utilities/SkillsSpinner.vue';
-  import SkillDisplayDataLoadingMixin from '@/userSkills/SkillDisplayDataLoadingMixin.vue';
+  import SubjectsContainer from '@/userSkills/subject/SubjectsContainer';
+  import SkillsSpinner from '@/common/utilities/SkillsSpinner';
+  import SkillDisplayDataLoadingMixin from '@/userSkills/SkillDisplayDataLoadingMixin';
 
   import '@/common/filter/NumberFilter';
   import '@/common/filter/PluralFilter';
 
-  import SkillsTitle from '@/common/utilities/SkillsTitle.vue';
+  import SkillsTitle from '@/common/utilities/SkillsTitle';
 
   export default {
     mixins: [SkillDisplayDataLoadingMixin],

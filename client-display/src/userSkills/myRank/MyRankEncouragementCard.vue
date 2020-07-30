@@ -29,12 +29,12 @@ limitations under the License.
 </template>
 
 <script>
-    export default {
-        name: 'MyRankEncouragementCard',
-        props: {
-            icon: String,
-        },
-    };
+  export default {
+    name: 'MyRankEncouragementCard',
+    props: {
+      icon: String,
+    },
+  };
 </script>
 
 <style scoped>

@@ -37,27 +37,27 @@ limitations under the License.
 </template>
 
 <script>
-    import ProgressBar from 'vue-simple-progress';
-    import StarProgress from '@/common/progress/StarProgress.vue';
+  import ProgressBar from 'vue-simple-progress';
+  import StarProgress from '@/common/progress/StarProgress';
 
-    export default {
-        components: {
-            StarProgress,
-            ProgressBar,
-        },
-        props: {
-            skillLevel: Number,
-            totalNumLevels: {
-                type: Number,
-                default: 5,
-            },
-        },
-        computed: {
-            progressPercent() {
-                return Math.floor((this.skillLevel / this.totalNumLevels) * 100);
-            },
-        },
-    };
+  export default {
+    components: {
+      StarProgress,
+      ProgressBar,
+    },
+    props: {
+      skillLevel: Number,
+      totalNumLevels: {
+        type: Number,
+        default: 5,
+      },
+    },
+    computed: {
+      progressPercent() {
+        return Math.floor((this.skillLevel / this.totalNumLevels) * 100);
+      },
+    },
+  };
 </script>
 
 <style scoped>
