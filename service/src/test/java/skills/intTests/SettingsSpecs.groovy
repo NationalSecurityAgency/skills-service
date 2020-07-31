@@ -232,12 +232,13 @@ class SettingsSpecs extends DefaultIntSpec {
         }
 
         when:
-        skillsService.saveSystemSettings("http://public", "PT1H30M20S")
+        skillsService.saveSystemSettings("http://public", "PT1H30M20S", "foo@skilltree")
         def systemSettings = skillsService.getSystemSettings()
 
         then:
         systemSettings.publicUrl == "http://public"
         systemSettings.resetTokenExpiration == "PT1H30M20S"
+        systemSettings.fromEmail == "foo@skilltree"
     }
 
     def "save system settings with invalid token expiration duration"() {
@@ -246,7 +247,7 @@ class SettingsSpecs extends DefaultIntSpec {
         }
 
         when:
-        skillsService.saveSystemSettings("http://public", "1H30M20S")
+        skillsService.saveSystemSettings("http://public", "1H30M20S", "foo@skilltree")
         def systemSettings = skillsService.getSystemSettings()
 
         then:

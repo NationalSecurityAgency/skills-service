@@ -37,13 +37,21 @@ class EmailSendingService {
     @Autowired
     SpringTemplateEngine thymeleafTemplateEngine;
 
+    @Autowired
+    SystemSettingsService systemSettingsService
+
     public void sendEmail(String subject, String to, String htmlBody) {
+
+        String fromEmail = systemSettingsService.get()?.fromEmail
+        if (!fromEmail) {
+            fromEmail = FROM
+        }
 
         MimeMessage message = emailSettings.mailSender.createMimeMessage()
         MimeMessageHelper helper = new MimeMessageHelper(message, "UTF-8")
         helper.setSubject(subject)
         helper.setTo(to)
-        helper.setFrom(FROM)
+        helper.setFrom(fromEmail)
         helper.setText(htmlBody, true)
         log.info("sending email to [${to}]")
         emailSettings.mailSender.send(message)

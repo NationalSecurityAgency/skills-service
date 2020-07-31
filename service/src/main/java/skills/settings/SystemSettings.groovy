@@ -23,4 +23,6 @@ class SystemSettings {
     String publicUrl
     //iso 8601 period/duration string, e.g., PT2H30M45S
     String resetTokenExpiration
+    //from address used in all outgoing emails from the system
+    String fromEmail
 }

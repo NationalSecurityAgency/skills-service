@@ -35,6 +35,7 @@ import skills.controller.result.model.UserInfoRes
 import skills.controller.result.model.UserRoleRes
 import skills.profile.EnableCallStackProf
 import skills.services.AccessSettingsStorageService
+import skills.services.SystemSettingsService
 import skills.services.settings.Settings
 import skills.services.settings.SettingsService
 import skills.settings.EmailConfigurationResult
@@ -71,6 +72,9 @@ class RootController {
 
     @Autowired
     SettingsService settingsService
+
+    @Autowired
+    SystemSettingsService systemSettingsService
 
     @GetMapping('/rootUsers')
     @ResponseBody
@@ -187,36 +191,13 @@ class RootController {
 
     @PostMapping('/saveSystemSettings')
     RequestResult saveSystemSettings(@RequestBody SystemSettings settings){
-        List<GlobalSettingsRequest> toSave = []
-        toSave << new GlobalSettingsRequest(setting: Settings.GLOBAL_PUBLIC_URL.settingName, value: settings.publicUrl)
-
-        if (settings.resetTokenExpiration) {
-            try {
-                Duration.parse(settings.resetTokenExpiration);
-            } catch (DateTimeParseException dtpe) {
-                throw new SkillException("[${settings.resetTokenExpiration} is not a valid duration");
-            }
-            toSave << new GlobalSettingsRequest(setting: Settings.GLOBAL_RESET_TOKEN_EXPIRATION.settingName, value: settings.resetTokenExpiration)
-        }
-
-        settingsService.saveSettings(toSave)
+        systemSettingsService.save(settings)
         return RequestResult.success()
     }
 
     @GetMapping('/getSystemSettings')
     SystemSettings getSystemSettings(){
-
-        SystemSettings settings = new SystemSettings()
-        SettingsResult result = settingsService.getGlobalSetting(Settings.GLOBAL_PUBLIC_URL.settingName)
-        if (result) {
-            settings.publicUrl = result.value
-        }
-        result = settingsService.getGlobalSetting(Settings.GLOBAL_RESET_TOKEN_EXPIRATION.settingName)
-        if (result) {
-            settings.resetTokenExpiration = result.value
-        }
-
-        return settings
+        return systemSettingsService.get()
     }
 
     @RequestMapping(value = "/global/settings/{setting}", method = [RequestMethod.PUT, RequestMethod.POST], produces = MediaType.APPLICATION_JSON_VALUE)

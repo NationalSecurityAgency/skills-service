@@ -55,6 +55,9 @@ class PasswordResetSpec extends DefaultIntSpec {
         ])
         rootSkillsService.addOrUpdateGlobalSetting("public_url",
                 ["setting": "public_url", "value": "http://localhost:${localPort}/".toString()])
+
+        rootSkillsService.addOrUpdateGlobalSetting("from_email",
+                ["setting": "from_email", "value": "resetspec@skilltreetests".toString()])
     }
 
     def cleanup(){
@@ -83,6 +86,7 @@ class PasswordResetSpec extends DefaultIntSpec {
         msg.getAllRecipients()[0].toString() == "randomuser@skills.org"
         msg.getSubject() == "SkillTree Password Reset"
         msg.getContent().toString().contains('href="http://localhost:' + localPort + '/reset-password/')
+        msg.getFrom()[0].toString() == "resetspec@skilltreetests"
     }
 
     def "reset password with token from email"() {
