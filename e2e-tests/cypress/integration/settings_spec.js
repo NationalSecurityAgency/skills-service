@@ -248,11 +248,13 @@ describe('Settings Tests', () => {
         cy.get('[data-cy=resetTokenExpiration]').should('have.value', '2H');
         cy.get$('[data-cy=publicUrl]').type('{selectall}http://localhost:8082');
         cy.get$('[data-cy=resetTokenExpiration]').type('{selectall}2H25M22S');
+        cy.get$('[data-cy=fromEmail]').type('{selectall}foo@skilltree');
         cy.get$('[data-cy=saveSystemSettings]').click();
         cy.visit('/settings/system');
         cy.wait('@loadSystemSettings');
         cy.get('[data-cy=publicUrl]').should('have.value', 'http://localhost:8082');
         cy.get('[data-cy=resetTokenExpiration]').should('have.value', '2H25M22S');
+        cy.get('[data-cy=fromEmail]').should('have.value', 'foo@skilltree');
     });
 
 });

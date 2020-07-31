@@ -32,13 +32,19 @@ limitations under the License.
             </ValidationProvider>
           </div>
           <div class="form-group">
-            <label class="label">Password Token Expiration <InlineHelp msg="How long password reset tokens remain valid before they expire"/></label>
+            <label class="label">Password Reset Token Expiration <InlineHelp msg="How long password reset tokens remain valid before they expire"/></label>
             <ValidationProvider rules="required|iso8601" name="resetTokenExpiration" v-slot="{ errors }">
             <input class="form-control" type="text" v-model="resetTokenExpiration" name="resetTokenExpiration" data-vv-delay="500"
                    data-cy="resetTokenExpiration"/>
             <small class="text-info">supports ISO 8601 time duration format, e.g., 2H, 30M, 1H30M, 1M42S, etc</small>
             <p class="text-danger" v-show="errors[0]">{{errors[0]}}</p>
             </ValidationProvider>
+          </div>
+          <div class="form-group">
+            <label class="label">From Email <InlineHelp msg="The From email address used in all email originating from the SkillTree application"/></label>
+            <input class="form-control" type="text" v-model="fromEmail" name="fromEmail" data-vv-delay="500"
+                   data-cy="fromEmail"/>
+            <p class="text-danger" v-show="errors[0]">{{errors[0]}}</p>
           </div>
 
           <p v-if="invalid && overallErrMsg" class="text-center text-danger">***{{ overallErrMsg }}***</p>
@@ -67,6 +73,8 @@ limitations under the License.
     en: {
       attributes: {
         publicUrl: 'Public URL',
+        resetTokenExpiration: 'Password Reset Token Expiration',
+        fromEmail: 'From Email',
       },
     },
   };
@@ -85,6 +93,7 @@ limitations under the License.
       return {
         publicUrl: '',
         resetTokenExpiration: '2H',
+        fromEmail: 'no_reply@skilltree',
         isSaving: false,
         overallErrMsg: '',
       };
@@ -98,7 +107,7 @@ limitations under the License.
           if (res) {
             this.isSaving = true;
 
-            const { publicUrl } = this;
+            const { publicUrl, fromEmail } = this;
             let { resetTokenExpiration } = this;
             if (!resetTokenExpiration.toLowerCase().startsWith('pt')) {
               resetTokenExpiration = `PT${resetTokenExpiration}`;
@@ -107,6 +116,7 @@ limitations under the License.
             SettingsService.saveSystemSettings({
               publicUrl,
               resetTokenExpiration,
+              fromEmail,
             }).then(() => {
               this.successToast('Saved', 'System Settings Successful!');
             }).catch(() => {
@@ -125,6 +135,9 @@ limitations under the License.
             this.publicUrl = resp.publicUrl;
             if (resp.resetTokenExpiration) {
               this.resetTokenExpiration = resp.resetTokenExpiration.replace('PT', '');
+            }
+            if (this.fromEmail) {
+              this.fromEmail = resp.fromEmail;
             }
           }
         });
