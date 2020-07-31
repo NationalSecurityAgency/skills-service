@@ -4,5 +4,5 @@ set -e
 
 ./build-docker-image.sh
 
-docker login --username=$GITHUB_USERNAME
+docker login
 docker push "skilltree/skills-service"
