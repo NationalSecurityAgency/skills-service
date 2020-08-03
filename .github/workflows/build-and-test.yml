@@ -166,8 +166,8 @@ jobs:
 
       - name: Build image
         env:
-          docker_username: ${{ secrets.DockerUsername }}
-          docker_password: ${{ secrets.DockerPassword }}
+          docker_username: ${{ secrets.DOCKERUSERNAME }}
+          docker_password: ${{ secrets.DOCKERPASSWORD }}
         run: |
           cd docker
           bash build-docker-image.sh "skilltree/skills-service-ci"
