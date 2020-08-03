@@ -170,7 +170,6 @@ jobs:
           docker_password: ${{ secrets.DOCKERPASSWORD }}
         run: |
           cd docker
-          bash build-docker-image.sh "skilltree/skills-service-ci"
           bash build-and-push.sh "skilltree/skills-service-ci"
 
 

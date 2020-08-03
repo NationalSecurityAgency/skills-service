@@ -21,6 +21,7 @@ echo "BUILD_DATE=[$BUILD_DATE]"
 echo "VERSION=[$VERSION]"
 echo "JAR_LOC=[$JAR_LOC]"
 echo "VCS_REF=[$VCS_REF]"
+echo "IMG_NAME=[$IMG_NAME]"
 echo "-------------------"
 
 docker build --no-cache=true --build-arg BUILD_DATE=$BUILD_DATE --build-arg VERSION=$VERSION --build-arg VCS_REF=$VCS_REF -t $IMG_NAME .
