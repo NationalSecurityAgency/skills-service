@@ -27,10 +27,15 @@ import skills.settings.SystemSettings
 
 import java.time.Duration
 import java.time.format.DateTimeParseException
+import java.util.regex.Pattern
 
 @Slf4j
 @Component
 class SystemSettingsService {
+
+    public static final String CUSTOMIZATION = 'customization'
+
+    private static final Pattern SCRIPT = ~/<[^>]*script/
 
     @Autowired
     SettingsService settingsService
@@ -50,6 +55,15 @@ class SystemSettingsService {
             settings.fromEmail = result.value
         }
 
+        List<SettingsResult> headerFooter = settingsService.getGlobalSettingsByGroup(CUSTOMIZATION)
+        headerFooter?.each {
+            if (Settings.GLOBAL_CUSTOM_HEADER.settingName == it.setting) {
+                settings.customHeader = it.value
+            } else if (Settings.GLOBAL_CUSTOM_FOOTER.settingName == it.setting) {
+                settings.customFooter = it.value
+            }
+        }
+
         return settings
     }
 
@@ -65,9 +79,20 @@ class SystemSettingsService {
             }
             toSave << new GlobalSettingsRequest(setting: Settings.GLOBAL_RESET_TOKEN_EXPIRATION.settingName, value: settings.resetTokenExpiration)
         }
+
         if (settings.fromEmail) {
             toSave << new GlobalSettingsRequest(setting: Settings.GLOBAL_FROM_EMAIL.settingName, value: settings.fromEmail)
         }
+
+        if (settings.customHeader?.value =~ SCRIPT) {
+            throw new SkillException("Script tags are not allowed in custom header")
+        }
+        if (settings.customFooter?.value =~ SCRIPT) {
+            throw new SkillException("Script tags are not allowed in custom footer")
+        }
+
+        toSave << new GlobalSettingsRequest(setting: Settings.GLOBAL_CUSTOM_HEADER.settingName, value: settings.customHeader, settingGroup: CUSTOMIZATION)
+        toSave << new GlobalSettingsRequest(setting: Settings.GLOBAL_CUSTOM_FOOTER.settingName, value: settings.customFooter, settingGroup: CUSTOMIZATION)
 
         settingsService.saveSettings(toSave)
     }

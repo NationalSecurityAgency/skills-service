@@ -26,18 +26,18 @@ limitations under the License.
             to be deployed behind a load balancer or proxy, it is necessary to configure the public url so that email
             based communications from the system can provide valid links back to the SkillTree dashboard."/></label>
             <ValidationProvider rules="required" name="publicUrl" v-slot="{ errors }">
-            <input class="form-control" type="text" v-model="publicUrl" name="publicUrl" data-vv-delay="500"
-                   data-cy="publicUrl"/>
-            <p class="text-danger" v-show="errors[0]">{{errors[0]}}</p>
+              <input class="form-control" type="text" v-model="publicUrl" name="publicUrl" data-vv-delay="500"
+                     data-cy="publicUrl"/>
+              <p class="text-danger" v-show="errors[0]">{{errors[0]}}</p>
             </ValidationProvider>
           </div>
           <div class="form-group">
             <label class="label">Password Reset Token Expiration <InlineHelp msg="How long password reset tokens remain valid before they expire"/></label>
             <ValidationProvider rules="required|iso8601" name="resetTokenExpiration" v-slot="{ errors }">
-            <input class="form-control" type="text" v-model="resetTokenExpiration" name="resetTokenExpiration" data-vv-delay="500"
-                   data-cy="resetTokenExpiration"/>
-            <small class="text-info">supports ISO 8601 time duration format, e.g., 2H, 30M, 1H30M, 1M42S, etc</small>
-            <p class="text-danger" v-show="errors[0]">{{errors[0]}}</p>
+              <input class="form-control" type="text" v-model="resetTokenExpiration" name="resetTokenExpiration" data-vv-delay="500"
+                     data-cy="resetTokenExpiration"/>
+              <small class="text-info">supports ISO 8601 time duration format, e.g., 2H, 30M, 1H30M, 1M42S, etc</small>
+              <p class="text-danger" v-show="errors[0]">{{errors[0]}}</p>
             </ValidationProvider>
           </div>
           <div class="form-group">
@@ -45,6 +45,22 @@ limitations under the License.
             <input class="form-control" type="text" v-model="fromEmail" name="fromEmail" data-vv-delay="500"
                    data-cy="fromEmail"/>
             <p class="text-danger" v-show="errors[0]">{{errors[0]}}</p>
+          </div>
+
+          <div class="form-group">
+            <label class="label">Custom Header <InlineHelp msg="HTML (and in-line css) to display as a header for the dashboard application"/></label>
+            <ValidationProvider rules="noscript" name="customHeader" v-slot="{ errors }">
+              <textarea class="form-control" name="customHeader" data-cy="customHeader" rows="3" v-model="customHeader"/>
+              <p class="text-danger" v-show="errors[0]">{{errors[0]}}</p>
+            </ValidationProvider>
+          </div>
+
+          <div class="form-group">
+            <label class="label">Custom Footer <InlineHelp msg="HTML (and in-line css) to display as a footer for the dashboard application"/></label>
+            <ValidationProvider rules="noscript" name="customFooter" v-slot="{ errors }">
+              <textarea class="form-control" name="customFooter" data-cy="customFooter" v-model="customFooter" rows="3"/>
+              <p class="text-danger" v-show="errors[0]">{{errors[0]}}</p>
+            </ValidationProvider>
           </div>
 
           <p v-if="invalid && overallErrMsg" class="text-center text-danger">***{{ overallErrMsg }}***</p>
@@ -75,6 +91,8 @@ limitations under the License.
         publicUrl: 'Public URL',
         resetTokenExpiration: 'Password Reset Token Expiration',
         fromEmail: 'From Email',
+        customHeader: 'Custom Header',
+        customFooter: 'Custom Footer',
       },
     },
   };
@@ -96,6 +114,8 @@ limitations under the License.
         fromEmail: 'no_reply@skilltree',
         isSaving: false,
         overallErrMsg: '',
+        customHeader: '',
+        customFooter: '',
       };
     },
     mounted() {
@@ -107,7 +127,12 @@ limitations under the License.
           if (res) {
             this.isSaving = true;
 
-            const { publicUrl, fromEmail } = this;
+            const {
+              publicUrl,
+              fromEmail,
+              customHeader,
+              customFooter,
+            } = this;
             let { resetTokenExpiration } = this;
             if (!resetTokenExpiration.toLowerCase().startsWith('pt')) {
               resetTokenExpiration = `PT${resetTokenExpiration}`;
@@ -117,8 +142,11 @@ limitations under the License.
               publicUrl,
               resetTokenExpiration,
               fromEmail,
+              customHeader,
+              customFooter,
             }).then(() => {
               this.successToast('Saved', 'System Settings Successful!');
+              this.$store.dispatch('loadConfigState');
             }).catch(() => {
               this.errorToast('Failure', 'Failed to Save System Settings!');
             }).finally(() => {
@@ -139,6 +167,12 @@ limitations under the License.
             if (this.fromEmail) {
               this.fromEmail = resp.fromEmail;
             }
+            if (resp.customHeader) {
+              this.customHeader = resp.customHeader;
+            }
+            if (resp.customFooter) {
+              this.customFooter = resp.customFooter;
+            }
           }
         });
       },
@@ -153,6 +187,19 @@ limitations under the License.
     validate(value) {
       if (value) {
         return value.match(timePeriodRegex) !== null;
+      }
+      return false;
+    },
+  });
+
+  const scriptRegex = /<[^>]*script/;
+  Validator.extend('noscript', {
+    getMessage() {
+      return '&lt;script&gt; tags are not allowed';
+    },
+    validate(value) {
+      if (value) {
+        return value.match(scriptRegex) === null;
       }
       return false;
     },

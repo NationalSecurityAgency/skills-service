@@ -17,6 +17,7 @@ package skills.settings
 
 import groovy.transform.Canonical
 
+
 @Canonical
 class SystemSettings {
 
@@ -25,4 +26,8 @@ class SystemSettings {
     String resetTokenExpiration
     //from address used in all outgoing emails from the system
     String fromEmail
+    //html and in-line css to display a custom header in the dashboard application
+    String customHeader
+    //html and in-line css to display a custom footer in the dashboard application
+    String customFooter
 }

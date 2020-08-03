@@ -19,7 +19,10 @@ public enum Settings {
     LEVEL_AS_POINTS("level.points.enabled"),
     GLOBAL_PUBLIC_URL("public_url"),
     GLOBAL_RESET_TOKEN_EXPIRATION("password_reset_token_expiration"),
-    GLOBAL_FROM_EMAIL("from_email");
+    GLOBAL_FROM_EMAIL("from_email"),
+    GLOBAL_CUSTOM_HEADER("custom_header"),
+    GLOBAL_CUSTOM_FOOTER("custom_footer");
+
 
     private String settingName;
 

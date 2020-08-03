@@ -26,8 +26,12 @@ import org.springframework.web.bind.annotation.RestController
 import skills.HealthChecker
 import skills.UIConfigProperties
 import skills.auth.AuthMode
+import skills.controller.result.model.SettingsResult
 import skills.profile.EnableCallStackProf
 import skills.services.AccessSettingsStorageService
+import skills.services.SystemSettingsService
+import skills.services.settings.Settings
+import skills.services.settings.SettingsService
 
 @RestController
 @RequestMapping("/public")
@@ -47,12 +51,23 @@ class PublicConfigController {
     @Value('${skills.authorization.authMode:#{T(skills.auth.AuthMode).DEFAULT_AUTH_MODE}}')
     AuthMode authMode
 
+    @Autowired
+    SettingsService settingsService
+
     @RequestMapping(value = "/config", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     Map<String,Object> getConfig(){
         Map<String,String> res = new HashMap<>(uiConfigProperties.ui)
         res["authMode"] = authMode.name()
         res["needToBootstrap"] = !accessSettingsStorageService.rootAdminExists()
+        List<SettingsResult> customizationSettings = settingsService.getGlobalSettingsByGroup(SystemSettingsService.CUSTOMIZATION)
+        customizationSettings?.each {
+            if (Settings.GLOBAL_CUSTOM_HEADER.settingName == it.setting) {
+                res["customHeader"] = it.value
+            } else if (Settings.GLOBAL_CUSTOM_FOOTER.settingName == it.setting) {
+                res["customFooter"] = it.value
+            }
+        }
         return res
     }
 

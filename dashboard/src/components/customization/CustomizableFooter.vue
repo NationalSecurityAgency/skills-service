@@ -15,12 +15,18 @@ limitations under the License.
 */
 <template>
   <!-- This footer will appear at the top of every page, update this component to customize for your app -->
-  <span></span>
+  <div v-html="customFooter">
+  </div>
 </template>
 
 <script>
   export default {
     name: 'CustomizableFooter',
+    computed: {
+      customFooter() {
+        return this.$store.getters.config.customFooter;
+      },
+    },
   };
 </script>
 
