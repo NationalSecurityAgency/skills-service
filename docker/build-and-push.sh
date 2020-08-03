@@ -2,7 +2,11 @@
 # exit if a command returns non-zero exit code
 set -e
 
+IMG_NAME=${1:-"skilltree/skills-service"}
+DOCKER_USER=${2:-"${docker_username}"}
+DOCKER_PASS=${3:-"${docker_password}"}
+
 ./build-docker-image.sh
 
-docker login
-docker push "skilltree/skills-service"
+docker login --user "${DOCKER_USER}" --password "${DOCKER_PASS}"
+docker push $IMG_NAME
