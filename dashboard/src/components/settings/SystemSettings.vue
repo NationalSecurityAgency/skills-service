@@ -51,7 +51,7 @@ limitations under the License.
             <label class="label">Custom Header <InlineHelp msg="HTML (and in-line css) to display as a header for the dashboard application"/></label>
             <ValidationProvider rules="noscript" name="customHeader" v-slot="{ errors }">
               <textarea class="form-control" name="customHeader" data-cy="customHeader" rows="3" v-model="customHeader"/>
-              <p class="text-danger" v-show="errors[0]">{{errors[0]}}</p>
+              <p class="text-danger" v-show="errors[0]" data-cy="customHeaderError">{{errors[0]}}</p>
             </ValidationProvider>
           </div>
 
@@ -59,7 +59,7 @@ limitations under the License.
             <label class="label">Custom Footer <InlineHelp msg="HTML (and in-line css) to display as a footer for the dashboard application"/></label>
             <ValidationProvider rules="noscript" name="customFooter" v-slot="{ errors }">
               <textarea class="form-control" name="customFooter" data-cy="customFooter" v-model="customFooter" rows="3"/>
-              <p class="text-danger" v-show="errors[0]">{{errors[0]}}</p>
+              <p class="text-danger" v-show="errors[0]" data-cy="customFooterError">{{errors[0]}}</p>
             </ValidationProvider>
           </div>
 
