@@ -146,3 +146,31 @@ jobs:
             ./service/target/*.log
             ./e2e-tests/cypress
             ./e2e-tests/logs
+
+  publish-snapshot-docker-image:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    needs: [service-and-ui-against-h2, service-against-postgresql]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Cache local Maven repository
+          uses: actions/cache@v2
+          with:
+            path: ~/.m2/repository
+            key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+            restore-keys: |
+              ${{ runner.os }}-maven-
+
+      - name: Build skills-service
+        run: mvn --batch-mode install -DskipTests=true
+
+      - name: Build image
+        env:
+          docker_username: ${{ secrets.DockerUsername }}
+          docker_password: ${{ secrets.DockerPassword }}
+        run: |
+          cd docker
+          bash build-docker-image.sh "skilltree/skills-service-ci"
+          bash build-and-push.sh "skilltree/skills-service-ci"
+
+
