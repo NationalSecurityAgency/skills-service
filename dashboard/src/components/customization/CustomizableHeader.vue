@@ -15,12 +15,18 @@ limitations under the License.
 */
 <template>
   <!-- This header will appear on the top of every page, update this component to customize for your app -->
-  <span></span>
+  <div v-html="customHeader">
+  </div>
 </template>
 
 <script>
   export default {
     name: 'CustomizableHeader',
+    computed: {
+      customHeader() {
+        return this.$store.getters.config.customHeader;
+      },
+    },
   };
 </script>
 

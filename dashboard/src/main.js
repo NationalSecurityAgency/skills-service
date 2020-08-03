@@ -22,6 +22,7 @@ import { SkillsConfiguration, SkillsDirective, SkillsReporter } from '@skilltree
 import VeeValidate from 'vee-validate';
 import VueApexCharts from 'vue-apexcharts';
 import Vuex from 'vuex';
+import VueDraggableResizable from 'vue-draggable-resizable';
 import InceptionConfigurer from './InceptionConfigurer';
 import 'babel-polyfill';
 import 'matchmedia-polyfill';
@@ -43,6 +44,7 @@ Vue.use(Vuex);
 Vue.use(VueApexCharts);
 Vue.use(BootstrapVue);
 Vue.use(SkillsDirective);
+Vue.use('vue-draggable-resizable', VueDraggableResizable);
 
 VeeValidate.setMode('betterEager', () => ({ on: ['input'], debounce: 500 }));
 
