@@ -22,6 +22,8 @@ import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import spock.lang.Timeout
 
+import java.util.regex.Pattern
+
 class SettingsSpecs extends DefaultIntSpec {
 
     def "save and get a single project setting"() {
@@ -232,13 +234,17 @@ class SettingsSpecs extends DefaultIntSpec {
         }
 
         when:
-        skillsService.saveSystemSettings("http://public", "PT1H30M20S", "foo@skilltree")
+        skillsService.saveSystemSettings("http://public",
+                "PT1H30M20S",
+                "foo@skilltree", "<div>header</div>", "<div>footer</div>")
         def systemSettings = skillsService.getSystemSettings()
 
         then:
         systemSettings.publicUrl == "http://public"
         systemSettings.resetTokenExpiration == "PT1H30M20S"
         systemSettings.fromEmail == "foo@skilltree"
+        systemSettings.customHeader == "<div>header</div>"
+        systemSettings.customFooter == "<div>footer</div>"
     }
 
     def "save system settings with invalid token expiration duration"() {
@@ -247,12 +253,48 @@ class SettingsSpecs extends DefaultIntSpec {
         }
 
         when:
-        skillsService.saveSystemSettings("http://public", "1H30M20S", "foo@skilltree")
+        skillsService.saveSystemSettings("http://public", "1H30M20S", "foo@skilltree", "<div/>", "<div/>")
         def systemSettings = skillsService.getSystemSettings()
 
         then:
         def ex = thrown(SkillsClientException)
         ex.message.contains("1H30M20S is not a valid duration")
+    }
+
+    def "save custom header setting with script tag"(){
+        if (!skillsService.isRoot()) {
+            skillsService.grantRoot()
+        }
+
+        when:
+        skillsService.saveSystemSettings("http://public",
+                "PT1H30M20S",
+                "foo@skilltree",
+                '<div><script type="text/javascript">alert("foo");</script></div>',
+                "<div/>")
+        def systemSettings = skillsService.getSystemSettings()
+
+        then:
+        def ex = thrown(SkillsClientException)
+        ex.message.contains("Script tags are not allowed in custom header")
+    }
+
+    def "save custom footer setting with script tag"(){
+        if (!skillsService.isRoot()) {
+            skillsService.grantRoot()
+        }
+
+        when:
+        skillsService.saveSystemSettings("http://public",
+                "PT1H30M20S",
+                "foo@skilltree",
+                '<div/>',
+                "<div><script type=\"text/javascript\">alert(\"foo\");</script></div>")
+        def systemSettings = skillsService.getSystemSettings()
+
+        then:
+        def ex = thrown(SkillsClientException)
+        ex.message.contains("Script tags are not allowed in custom footer")
     }
 
 }
