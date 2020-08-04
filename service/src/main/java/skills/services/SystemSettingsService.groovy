@@ -16,6 +16,7 @@
 package skills.services
 
 import groovy.util.logging.Slf4j
+import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import skills.controller.exceptions.SkillException
@@ -35,7 +36,7 @@ class SystemSettingsService {
 
     public static final String CUSTOMIZATION = 'customization'
 
-    private static final Pattern SCRIPT = ~/<[^>]*script/
+    private static final Pattern SCRIPT = ~/.*<[^>]*script.*/
 
     @Autowired
     SettingsService settingsService
@@ -75,7 +76,7 @@ class SystemSettingsService {
             try {
                 Duration.parse(settings.resetTokenExpiration);
             } catch (DateTimeParseException dtpe) {
-                throw new SkillException("[${settings.resetTokenExpiration} is not a valid duration");
+                throw new SkillException("${settings.resetTokenExpiration} is not a valid duration");
             }
             toSave << new GlobalSettingsRequest(setting: Settings.GLOBAL_RESET_TOKEN_EXPIRATION.settingName, value: settings.resetTokenExpiration)
         }
@@ -84,13 +85,15 @@ class SystemSettingsService {
             toSave << new GlobalSettingsRequest(setting: Settings.GLOBAL_FROM_EMAIL.settingName, value: settings.fromEmail)
         }
 
-        if (settings.customHeader?.value =~ SCRIPT) {
+        if (settings.customHeader ==~ SCRIPT) {
             throw new SkillException("Script tags are not allowed in custom header")
         }
-        if (settings.customFooter?.value =~ SCRIPT) {
+        if (settings.customFooter ==~ SCRIPT) {
             throw new SkillException("Script tags are not allowed in custom footer")
         }
 
+        settings.customFooter = StringUtils.defaultString(settings.customFooter)
+        settings.customHeader = StringUtils.defaultString(settings.customHeader)
         toSave << new GlobalSettingsRequest(setting: Settings.GLOBAL_CUSTOM_HEADER.settingName, value: settings.customHeader, settingGroup: CUSTOMIZATION)
         toSave << new GlobalSettingsRequest(setting: Settings.GLOBAL_CUSTOM_FOOTER.settingName, value: settings.customFooter, settingGroup: CUSTOMIZATION)
 
