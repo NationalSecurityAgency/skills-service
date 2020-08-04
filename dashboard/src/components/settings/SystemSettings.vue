@@ -195,7 +195,7 @@ limitations under the License.
   const scriptRegex = /<[^>]*script/;
   Validator.extend('noscript', {
     getMessage() {
-      return '&lt;script&gt; tags are not allowed';
+      return '<script> tags are not allowed';
     },
     validate(value) {
       if (value) {

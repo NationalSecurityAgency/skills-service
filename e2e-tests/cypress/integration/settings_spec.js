@@ -238,6 +238,7 @@ describe('Settings Tests', () => {
         cy.server();
         cy.route('GET', '/root/getSystemSettings').as('loadSystemSettings');
         cy.route('GET', '/app/userInfo').as('loadUserInfo');
+        cy.route('GET', '/public/config').as('loadConfig');
         cy.visit('/');
         cy.wait('@loadUserInfo');
         cy.get('.userName').parent().click();
@@ -249,12 +250,51 @@ describe('Settings Tests', () => {
         cy.get$('[data-cy=publicUrl]').type('{selectall}http://localhost:8082');
         cy.get$('[data-cy=resetTokenExpiration]').type('{selectall}2H25M22S');
         cy.get$('[data-cy=fromEmail]').type('{selectall}foo@skilltree');
+        cy.get$('[data-cy=customHeader').type('{selectall}<div id="customHeader" style="font-size:3em;color:red">HEADER</div>');
+        cy.get$('[data-cy=customFooter').type('{selectall}<div id="customFooter" style="font-size:3em;color:red">FOOTER</div>');
         cy.get$('[data-cy=saveSystemSettings]').click();
+        cy.wait('@loadConfig');
+        cy.get('#customHeader').contains('HEADER');
+        cy.get('#customFooter').contains('FOOTER');
         cy.visit('/settings/system');
         cy.wait('@loadSystemSettings');
         cy.get('[data-cy=publicUrl]').should('have.value', 'http://localhost:8082');
         cy.get('[data-cy=resetTokenExpiration]').should('have.value', '2H25M22S');
         cy.get('[data-cy=fromEmail]').should('have.value', 'foo@skilltree');
+        cy.get('[data-cy=customHeader').should('have.value','<div id="customHeader" style="font-size:3em;color:red">HEADER</div>');
+        cy.get('[data-cy=customFooter').should('have.value','<div id="customFooter" style="font-size:3em;color:red">FOOTER</div>');
+
+        //confirm that header/footer persist after logging out
+        cy.logout();
+        cy.visit('/');
+        cy.wait('@loadConfig');
+        cy.get('#customHeader').contains('HEADER');
+        cy.get('#customFooter').contains('FOOTER');
+    });
+
+    it.only('System Settings - script tags not allowed in footer/header', () => {
+        cy.server();
+        cy.route('GET', '/root/getSystemSettings').as('loadSystemSettings');
+        cy.route('GET', '/app/userInfo').as('loadUserInfo');
+        cy.route('GET', '/public/config').as('loadConfig');
+        cy.visit('/');
+        cy.wait('@loadUserInfo');
+        cy.get('.userName').parent().click();
+        cy.contains('Settings').click();
+        cy.contains('System').click();
+
+        cy.wait('@loadSystemSettings');
+        cy.get('[data-cy=resetTokenExpiration]').should('have.value', '2H');
+        cy.get$('[data-cy=publicUrl]').type('{selectall}http://localhost:8082');
+        cy.get$('[data-cy=resetTokenExpiration]').type('{selectall}2H25M22S');
+        cy.get$('[data-cy=fromEmail]').type('{selectall}foo@skilltree');
+        cy.get$('[data-cy=customHeader]').type('{selectall}<div id="customHeader" style="font-size:3em;color:red"><script src="somewhere"/>HEADER</div>');
+        cy.get$('[data-cy=customFooter]').type('{selectall}<div id="customFooter" style="font-size:3em;color:red"><script type="text/javascript">alert("foo");</script>FOOTER</div>');
+        cy.get('[data-cy=customHeaderError]').should('be.visible');
+        cy.get('[data-cy=customHeaderError]').contains('<script> tags are not allowed');
+        cy.get('[data-cy=customFooterError]').should('be.visible');
+        cy.get('[data-cy=customFooterError]').contains('<script> tags are not allowed');
+        cy.get('[data-cy=saveSystemSettings]').should('be.disabled');
     });
 
 });
