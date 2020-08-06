@@ -34,9 +34,12 @@ import java.util.regex.Pattern
 @Component
 class SystemSettingsService {
 
+    private static final int MAX_SETTING_VALUE = 3000
+
     public static final String CUSTOMIZATION = 'customization'
 
     private static final Pattern SCRIPT = ~/.*<[^>]*script.*/
+
 
     @Autowired
     SettingsService settingsService
@@ -88,8 +91,14 @@ class SystemSettingsService {
         if (settings.customHeader ==~ SCRIPT) {
             throw new SkillException("Script tags are not allowed in custom header")
         }
+        if (MAX_SETTING_VALUE < settings.customHeader?.length()) {
+            throw new SkillException("Custom Header may not be longer than [${MAX_SETTING_VALUE}")
+        }
         if (settings.customFooter ==~ SCRIPT) {
             throw new SkillException("Script tags are not allowed in custom footer")
+        }
+        if (MAX_SETTING_VALUE < settings.customFooter?.length()) {
+            throw new SkillException("Custom Footer may not be longer than [${MAX_SETTING_VALUE}]")
         }
 
         settings.customFooter = StringUtils.defaultString(settings.customFooter)
