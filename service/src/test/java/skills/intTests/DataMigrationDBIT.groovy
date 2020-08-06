@@ -86,16 +86,18 @@ class DataMigrationDBIT extends DefaultIntSpec {
         String projectId = 'TestProject1'
         String userId = 'user1'
 
-        // get skill_definition and user_achievement rows pre migration1
+        // get skill_definition, settings, and user_achievement rows pre migration1
         def existingSkillDefsPreMigration = getSkillDefinitionFromDB(projectId)
         def existingUserAchievementsPreMigration = getUserAchievementsFromDB(projectId)
+        def existingSettingsPreMigration = getSettingsFromDB()
 
         // apply migration1 changes
         liquibase.update(new Contexts('migration1'), new LabelExpression())
 
-        // get skill_definition and user_achievement rows post migration1
+        // get skill_definition, settings, and user_achievement rows post migration1
         def existingSkillDefsPostMigration = getSkillDefinitionFromDB(projectId)
         def existingUserAchievementsPostMigration = getUserAchievementsFromDB(projectId)
+        def settingsPostMigration = getSettingsFromDB()
 
         // also, create a new subject, skill and user_achievement post migration
         // and make sure everything works as expected
@@ -113,6 +115,8 @@ class DataMigrationDBIT extends DefaultIntSpec {
         then:
         existingSkillDefsPreMigration.findAll { it.containsKey('ENABLED') }.size() == 0
         existingUserAchievementsPreMigration.findAll { it.containsKey('NOTIFIED') }.size() == 0
+        //make sure existing setting value wasn't changed by column size alteration
+        existingSettingsPreMigration.find {it['id'] == 2}.value == settingsPostMigration.find {it['id'] ==2}.value
 
         existingSkillDefsPreMigration.size() == existingSkillDefsPostMigration.size()
         existingUserAchievementsPreMigration.size() == existingUserAchievementsPreMigration.size()
@@ -152,6 +156,10 @@ class DataMigrationDBIT extends DefaultIntSpec {
 
     private List<Map<String, Object>> getUserAchievementsFromDB(String projectId) {
         jdbcTemplate.queryForList("select * from user_achievement where project_id='${projectId}'")
+    }
+
+    private List<Map<String, Object>> getSettingsFromDB() {
+        jdbcTemplate.queryForList("select * from settings");
     }
 
     private List<Map<String, Object>> getPasswordResetTokens() {
