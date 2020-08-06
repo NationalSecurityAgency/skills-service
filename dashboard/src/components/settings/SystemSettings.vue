@@ -37,7 +37,7 @@ limitations under the License.
               <input class="form-control" type="text" v-model="resetTokenExpiration" name="resetTokenExpiration" data-vv-delay="500"
                      data-cy="resetTokenExpiration"/>
               <small class="text-info">supports ISO 8601 time duration format, e.g., 2H, 30M, 1H30M, 1M42S, etc</small>
-              <p class="text-danger" v-show="errors[0]">{{errors[0]}}</p>
+              <p class="text-danger" v-show="errors[0]" data-cy="resetTokenExpirationError">{{errors[0]}}</p>
             </ValidationProvider>
           </div>
           <div class="form-group">
@@ -45,7 +45,7 @@ limitations under the License.
             <ValidationProvider :rules="{email:{require_tld:false,allow_ip_domain:true}}" name="fromEmail" v-slot="{ errors }">
               <input class="form-control" type="text" v-model="fromEmail" name="fromEmail" data-vv-delay="500"
                      data-cy="fromEmail"/>
-              <p class="text-danger" v-show="errors[0]">{{errors[0]}}</p>
+              <p class="text-danger" v-show="errors[0]" data-cy="fromEmailError">{{errors[0]}}</p>
             </ValidationProvider>
           </div>
 

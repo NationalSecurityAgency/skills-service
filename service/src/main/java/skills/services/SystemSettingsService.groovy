@@ -92,7 +92,7 @@ class SystemSettingsService {
             throw new SkillException("Script tags are not allowed in custom header")
         }
         if (MAX_SETTING_VALUE < settings.customHeader?.length()) {
-            throw new SkillException("Custom Header may not be longer than [${MAX_SETTING_VALUE}")
+            throw new SkillException("Custom Header may not be longer than [${MAX_SETTING_VALUE}]")
         }
         if (settings.customFooter ==~ SCRIPT) {
             throw new SkillException("Script tags are not allowed in custom footer")
