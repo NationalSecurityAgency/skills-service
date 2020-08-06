@@ -37,19 +37,21 @@ limitations under the License.
               <input class="form-control" type="text" v-model="resetTokenExpiration" name="resetTokenExpiration" data-vv-delay="500"
                      data-cy="resetTokenExpiration"/>
               <small class="text-info">supports ISO 8601 time duration format, e.g., 2H, 30M, 1H30M, 1M42S, etc</small>
-              <p class="text-danger" v-show="errors[0]">{{errors[0]}}</p>
+              <p class="text-danger" v-show="errors[0]" data-cy="resetTokenExpirationError">{{errors[0]}}</p>
             </ValidationProvider>
           </div>
           <div class="form-group">
             <label class="label">From Email <InlineHelp msg="The From email address used in all email originating from the SkillTree application"/></label>
-            <input class="form-control" type="text" v-model="fromEmail" name="fromEmail" data-vv-delay="500"
-                   data-cy="fromEmail"/>
-            <p class="text-danger" v-show="errors[0]">{{errors[0]}}</p>
+            <ValidationProvider :rules="{email:{require_tld:false,allow_ip_domain:true}}" name="fromEmail" v-slot="{ errors }">
+              <input class="form-control" type="text" v-model="fromEmail" name="fromEmail" data-vv-delay="500"
+                     data-cy="fromEmail"/>
+              <p class="text-danger" v-show="errors[0]" data-cy="fromEmailError">{{errors[0]}}</p>
+            </ValidationProvider>
           </div>
 
           <div class="form-group">
             <label class="label">Custom Header <InlineHelp msg="HTML (and in-line css) to display as a header for the dashboard application"/></label>
-            <ValidationProvider rules="noscript" name="customHeader" v-slot="{ errors }">
+            <ValidationProvider rules="noscript|max:3000" name="customHeader" v-slot="{ errors }">
               <textarea class="form-control" name="customHeader" data-cy="customHeader" rows="3" v-model="customHeader"/>
               <p class="text-danger" v-show="errors[0]" data-cy="customHeaderError">{{errors[0]}}</p>
             </ValidationProvider>
@@ -57,7 +59,7 @@ limitations under the License.
 
           <div class="form-group">
             <label class="label">Custom Footer <InlineHelp msg="HTML (and in-line css) to display as a footer for the dashboard application"/></label>
-            <ValidationProvider rules="noscript" name="customFooter" v-slot="{ errors }">
+            <ValidationProvider rules="noscript|max:3000" name="customFooter" v-slot="{ errors }">
               <textarea class="form-control" name="customFooter" data-cy="customFooter" v-model="customFooter" rows="3"/>
               <p class="text-danger" v-show="errors[0]" data-cy="customFooterError">{{errors[0]}}</p>
             </ValidationProvider>

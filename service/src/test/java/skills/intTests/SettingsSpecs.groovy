@@ -297,4 +297,44 @@ class SettingsSpecs extends DefaultIntSpec {
         ex.message.contains("Script tags are not allowed in custom footer")
     }
 
+    def "save custom header setting with value exceeding max"(){
+        if (!skillsService.isRoot()) {
+            skillsService.grantRoot()
+        }
+
+        def header = (1..3001).collect{"A"}.join()
+
+        when:
+        skillsService.saveSystemSettings("http://public",
+                "PT1H30M20S",
+                "foo@skilltree",
+                header,
+                "<div/>")
+        def systemSettings = skillsService.getSystemSettings()
+
+        then:
+        def ex = thrown(SkillsClientException)
+        ex.message.contains("Custom Header may not be longer than [3000]")
+    }
+
+    def "save custom footer setting with value exceeding max"(){
+        if (!skillsService.isRoot()) {
+            skillsService.grantRoot()
+        }
+
+        def header = (1..3001).collect{"A"}.join()
+
+        when:
+        skillsService.saveSystemSettings("http://public",
+                "PT1H30M20S",
+                "foo@skilltree",
+                '<div/>',
+                header)
+        def systemSettings = skillsService.getSystemSettings()
+
+        then:
+        def ex = thrown(SkillsClientException)
+        ex.message.contains("Custom Footer may not be longer than [3000]")
+    }
+
 }

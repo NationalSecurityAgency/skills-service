@@ -984,6 +984,8 @@
                                  onUpdate="CASCADE"
                                  referencedColumnNames="id"
                                  referencedTableName="users"/>
+
+        <modifyDataType tableName="settings" columnName="value" newDataType="varchar(3000)" />
     </changeSet>
 
 </databaseChangeLog>
