@@ -13,7 +13,7 @@ echo "JAVA_OPTS=${JAVA_OPTS}"
 echo -e "SPRING_PROPS=${SPRING_PROPS}"
 
 # support both \n and , as a prop separator
-echo -e $SPRING_PROPS | sed 's$[,]$\n$g' >> application.properties
+echo -e $SPRING_PROPS | sed sed -r 's$([^\])[,]\s?$\1\n$g; s$\\,$,$g' >> application.properties
 
 pid=0
 term_handler() {
