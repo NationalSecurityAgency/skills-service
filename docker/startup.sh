@@ -28,7 +28,7 @@ term_handler() {
 }
 trap term_handler SIGTERM
 
-java ${DEBUG_OPTS} ${JAVA_OPTS} -jar skills.jar ${SPRING_PROPS} &
+java ${DEBUG_OPTS} ${JAVA_OPTS} -jar skills.jar &
 pid="$!"
 
 # wait forever
