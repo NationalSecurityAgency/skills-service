@@ -147,6 +147,12 @@ jobs:
             ./e2e-tests/cypress
             ./e2e-tests/logs
 
+      - name: upload service jar
+        uses: actions/upload-artifact@v2
+        with:
+          name: service jar
+          path: ./service/target/skills-service*.jar
+
   publish-snapshot-docker-image:
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
@@ -161,8 +167,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
-      - name: Build skills-service
-        run: mvn --batch-mode install -DskipTests=true
+      - uses: actions/download-artifact@v2
+        with:
+          name: service jar
+          path: ./service/target/
 
       - name: Build image
         env:
