@@ -330,7 +330,7 @@ describe('Settings Tests', () => {
         cy.get('[data-cy=saveSystemSettings]').should('not.be.disabled');
     });
 
-    it.only('from email validation', () => {
+    it('from email validation', () => {
         cy.server();
         cy.route('GET', '/root/getSystemSettings').as('loadSystemSettings');
         cy.route('GET', '/app/userInfo').as('loadUserInfo');
