@@ -357,7 +357,7 @@ describe('Settings Tests', () => {
         cy.get('[data-cy=saveSystemSettings]').should('not.be.disabled');
     });
 
-    it.only('custom header/footer should be full width', () => {
+    it('custom header/footer should be full width', () => {
         cy.server();
         cy.route('GET', '/root/getSystemSettings').as('loadSystemSettings');
         cy.route('GET', '/app/userInfo').as('loadUserInfo');
