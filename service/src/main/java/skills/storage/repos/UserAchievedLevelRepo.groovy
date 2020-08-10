@@ -32,7 +32,7 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
 
     List<UserAchievement> findAllByUserIdAndProjectIdAndSkillId(String userId, @Nullable String projectId, @Nullable String skillId)
 
-    List<UserAchievement> findAllByUserIdAndNotified(String userId, String notified)
+    List<UserAchievement> findAllByUserIdAndNotifiedOrderByCreatedAsc(String userId, String notified)
 
     @Query('''select ua from UserAchievement ua where ua.userId = ?1 and ua.projectId in ?2''')
     List<UserAchievement> findAllByUserAndProjectIds(String userId, Collection<String> projectId)

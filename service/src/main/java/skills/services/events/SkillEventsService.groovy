@@ -91,7 +91,7 @@ class SkillEventsService {
     @Transactional
     protected void notifyUserOfAchievements(String userId){
         try {
-            List<UserAchievement> pendingNotificationAchievements = achievedLevelRepo.findAllByUserIdAndNotified(userId, Boolean.FALSE.toString())
+            List<UserAchievement> pendingNotificationAchievements = achievedLevelRepo.findAllByUserIdAndNotifiedOrderByCreatedAsc(userId, Boolean.FALSE.toString())
 
             SkillEventResult ser
 

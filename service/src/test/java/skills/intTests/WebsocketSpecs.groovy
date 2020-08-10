@@ -135,13 +135,13 @@ class WebsocketSpecs extends DefaultIntSpec {
         messagesReceived.await(30, TimeUnit.SECONDS)
 
         then:
-        wsResults.find{it.skillId=='skill1'}.success
-        wsResults.find{it.skillId=='skill1'}.completed
+        wsResults[0].success
+        wsResults[0].completed
         wsResults[0].explanation == 'Achieved due to a modification in the training profile (such as: skill deleted, occurrences modified, badge published, etc..)'
-        wsResults.find{it.skillId=='skill1'}.completed.size() == 4
-        wsResults.find{it.skillId=='skill1'}.completed[0].type == CompletionItem.CompletionItemType.Skill
-        wsResults.find{it.skillId=='skill1'}.completed[0].name == skill.name
-        wsResults.find{it.skillId=='skill1'}.completed.findAll { it.type == CompletionItem.CompletionItemType.Subject }.size() == 3
+        wsResults[0].completed.size() == 4
+        wsResults[0].completed?.find{it.id=='skill1'}.type == CompletionItem.CompletionItemType.Skill
+        wsResults[0].completed?.find{it.id=='skill1'}.name == skill.name
+        wsResults[0].completed?.findAll { it.type == CompletionItem.CompletionItemType.Subject }.size() == 3
     }
 
     def "achieve subject's level - validate via xhr streaming"(){
