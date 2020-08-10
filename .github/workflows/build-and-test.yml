@@ -80,10 +80,15 @@ jobs:
       with:
         name: CI result artifacts
         path: |
-          ./service/target/*.jar
           ./service/target/*.log
           ./e2e-tests/cypress
           ./e2e-tests/logs
+
+    - name: upload service jar
+      uses: actions/upload-artifact@v2
+      with:
+        name: service jar
+        path: ./service/target/*.jar
 
   service-against-postgresql:
     runs-on: ubuntu-latest
@@ -146,12 +151,6 @@ jobs:
             ./service/target/*.log
             ./e2e-tests/cypress
             ./e2e-tests/logs
-
-      - name: upload service jar
-        uses: actions/upload-artifact@v2
-        with:
-          name: service jar
-          path: ./service/target/skills-service*.jar
 
   publish-snapshot-docker-image:
     runs-on: ubuntu-latest
