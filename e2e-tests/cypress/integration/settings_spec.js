@@ -330,7 +330,7 @@ describe('Settings Tests', () => {
         cy.get('[data-cy=saveSystemSettings]').should('not.be.disabled');
     });
 
-    it.only('from email validation', () => {
+    it('from email validation', () => {
         cy.server();
         cy.route('GET', '/root/getSystemSettings').as('loadSystemSettings');
         cy.route('GET', '/app/userInfo').as('loadUserInfo');
@@ -357,4 +357,51 @@ describe('Settings Tests', () => {
         cy.get('[data-cy=saveSystemSettings]').should('not.be.disabled');
     });
 
+    it('custom header/footer should be full width', () => {
+        cy.server();
+        cy.route('GET', '/root/getSystemSettings').as('loadSystemSettings');
+        cy.route('GET', '/app/userInfo').as('loadUserInfo');
+        cy.route('GET', '/public/config').as('loadConfig');
+        cy.visit('/');
+        cy.wait('@loadUserInfo');
+        cy.get('.userName').parent().click();
+        cy.contains('Settings').click();
+        cy.contains('System').click();
+
+        cy.wait('@loadSystemSettings');
+        cy.get$('[data-cy=publicUrl]').type('{selectall}http://localhost:8082');
+        cy.get$('[data-cy=customHeader').type('{selectall}<div id="customHeader" style="font-size:3em;color:red">HEADER</div>');
+        cy.get$('[data-cy=customFooter').type('{selectall}<div id="customFooter" style="font-size:3em;color:red">FOOTER</div>');
+        cy.get$('[data-cy=saveSystemSettings]').click();
+        cy.wait('@loadConfig');
+        cy.get('#customHeader').contains('HEADER');
+        cy.get('#customFooter').contains('FOOTER');
+
+        let bodyWidth;
+        cy.get('body').invoke('width').then((width) => {
+            bodyWidth = width;
+        });
+        let appWidth;
+        cy.get('#app').invoke('width').then((width) => {
+            appWidth = width;
+        }); //should be smaller due to padding applied to left and right of app
+
+        let headerWidth;
+        cy.get('#customHeader').invoke('width').then((width) => {
+            headerWidth = width;
+        });
+        let footerWidth;
+        cy.get('#customFooter').invoke('width').then((width) => {
+            footerWidth = width;
+        });
+
+        cy.get('body').then( () => {
+            cy.get('#customHeader').invoke('width').should('equal', bodyWidth);
+            cy.get('#customFooter').invoke('width').should('equal', bodyWidth);
+            cy.get('#customHeader').invoke('width').should('be.gt', appWidth);
+            cy.get('#customFooter').invoke('width').should('be.gt', appWidth);
+        });
+    });
+
 });
+

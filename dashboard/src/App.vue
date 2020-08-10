@@ -14,22 +14,23 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div id="app" class="container-fluid">
-    <new-software-version-component/>
+  <div>
     <customizable-header></customizable-header>
+    <div id="app" class="container-fluid">
+      <new-software-version-component/>
 
-    <div class="overall-container">
-      <pki-app-bootstrap v-if="isPkiAndNeedsToBootstrap"/>
-      <loading-container v-else v-bind:is-loading="isLoading">
-        <div v-if="!isLoading">
-          <header-view v-if="isAuthenticatedUser"/>
-          <div>
-            <router-view/>
+      <div class="overall-container">
+        <pki-app-bootstrap v-if="isPkiAndNeedsToBootstrap"/>
+        <loading-container v-else v-bind:is-loading="isLoading">
+          <div v-if="!isLoading">
+            <header-view v-if="isAuthenticatedUser"/>
+            <div>
+              <router-view/>
+            </div>
           </div>
-        </div>
-      </loading-container>
+        </loading-container>
+      </div>
     </div>
-
     <customizable-footer></customizable-footer>
   </div>
 </template>
