@@ -67,7 +67,7 @@ limitations under the License.
           </div>
         </div>
 
-        <div v-if="oAuthProviders && oAuthProviders.length > 0" class="card mt-3">
+        <div v-if="oAuthProviders && oAuthProviders.length > 0" class="card mt-3" data-cy="oAuthProviders">
           <div class="card-body">
             <div class="row">
               <div v-for="oAuthProvider in oAuthProviders" :key="oAuthProvider.registrationId" class="col">
