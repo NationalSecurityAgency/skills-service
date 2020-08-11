@@ -57,20 +57,20 @@ spring:
   liquibase:
     "change-log": "classpath:db/changelog/db.changelog-master.xml"
 
-  security:
-    oauth2:
-      client:
-        registration:
-          google:
-            client-id: 12345
-            client-secret: 67890
-            redirectUriTemplate: 'http://localhost:8080/{action}/oauth2/code/{registrationId}'
-            iconClass: fab fa-google
-          github:
-            client-id: 98765
-            client-secret: ABCDEF
-            redirectUriTemplate: 'http://localhost:8080/{action}/oauth2/code/{registrationId}'
-            iconClass: fab fa-github
+#  security:
+#    oauth2:
+#      client:
+#        registration:
+#          google:
+#            client-id: 12345
+#            client-secret: 67890
+#            redirectUriTemplate: 'http://localhost:8080/{action}/oauth2/code/{registrationId}'
+#            iconClass: fab fa-google
+#          github:
+#            client-id: 98765
+#            client-secret: ABCDEF
+#            redirectUriTemplate: 'http://localhost:8080/{action}/oauth2/code/{registrationId}'
+#            iconClass: fab fa-github
 skills:
   gracefulShutdown:
     timeoutSecs: 80

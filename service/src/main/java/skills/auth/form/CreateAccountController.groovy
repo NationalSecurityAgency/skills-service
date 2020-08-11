@@ -17,11 +17,13 @@ package skills.auth.form
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.autoconfigure.condition.ConditionOutcome
+import org.springframework.boot.autoconfigure.security.oauth2.client.ClientsConfiguredCondition
 import org.springframework.boot.context.properties.ConfigurationProperties
-import org.springframework.context.ApplicationContext
+import org.springframework.context.annotation.ConditionContext
 import org.springframework.context.annotation.Conditional
 import org.springframework.context.annotation.Configuration
-import org.springframework.http.MediaType
+import org.springframework.core.type.AnnotatedTypeMetadata
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.oauth2.client.registration.ClientRegistration
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
@@ -29,17 +31,10 @@ import org.springframework.stereotype.Component
 import org.springframework.web.bind.annotation.*
 import skills.PublicProps
 import skills.auth.SecurityMode
-import skills.auth.UserInfo
 import skills.controller.PublicPropsBasedValidator
-import skills.controller.exceptions.SkillException
-import skills.controller.result.model.RequestResult
-import skills.services.PasswordResetService
-import skills.storage.model.auth.PasswordResetToken
 import skills.storage.model.auth.RoleName
-import skills.storage.model.auth.User
 import skills.storage.model.auth.UserRole
 
-import javax.annotation.PostConstruct
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
@@ -143,5 +138,32 @@ class CreateAccountController {
     @Conditional(SecurityMode.FormAuth)
     static class OAuth2ProviderProperties {
         final Map<String, skills.controller.result.model.OAuth2Provider> registration = new HashMap<>()
+    }
+
+    @Component
+    @Configuration
+    @Conditional(NoClientsConfiguredCondition)
+    /*
+      EmptyOauth2ClientRegistrationRepository will only be created if there are not OAuth2 clients configured (i.e.
+      when there are no security.oauth2.client.registration.XXX properties configured)
+     */
+    static class EmptyOauth2ClientRegistrationRepository implements ClientRegistrationRepository, Iterable<ClientRegistration> {
+
+        @Override
+        Iterator<ClientRegistration> iterator() {
+            return null
+        }
+
+        @Override
+        ClientRegistration findByRegistrationId(String registrationId) {
+            return null
+        }
+    }
+
+    static class NoClientsConfiguredCondition extends ClientsConfiguredCondition {
+        @Override
+        ConditionOutcome getMatchOutcome(ConditionContext context, AnnotatedTypeMetadata metadata) {
+            return ConditionOutcome.inverse(super.getMatchOutcome(context, metadata))
+        }
     }
 }
