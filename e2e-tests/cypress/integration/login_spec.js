@@ -22,6 +22,7 @@ describe('Login Tests', () => {
       .route('GET', '/app/projects').as('getProjects')
       .route('GET', '/api/icons/customIconCss').as('getProjectsCustomIcons')
       .route('GET', '/app/userInfo').as('getUserInfo')
+      .route('GET', '/app/oAuthProviders').as('getOAuthProviders')
       .route('POST', '/performLogin').as('postPerformLogin');
   });
 
@@ -157,5 +158,13 @@ describe('Login Tests', () => {
     cy.get('#username').type('almost@dkda.org');
     cy.contains('Login').should('be.enabled');
     cy.contains(expectedText).should('not.exist');
+  })
+
+  it('OAuth login is not enabled', () => {
+    cy.visit('/');
+    cy.contains('Login').should('be.disabled');
+
+    cy.wait('@getOAuthProviders').its('status').should('be', 200)
+    cy.get('[data-cy=oAuthProviders]').should('not.exist');
   })
 });
