@@ -39,6 +39,9 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+        ports:
+          # Maps port 6379 on service container to the host
+          - 6379:6379
 
     steps:
     - name: Install Emoji Support
@@ -73,7 +76,7 @@ jobs:
           ${{ runner.os }}-maven-
 
     - name: Build skills-service
-      run: mvn --batch-mode install -Dspring.session.store-type=redis
+      run: mvn --batch-mode install -DskipTests
 
     - name: check all dirs
       run: ls -lR ./
