@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
 import org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -32,7 +33,7 @@ import java.util.TimeZone;
 @EnableAsync
 @EnableScheduling
 @EnableWebSecurity
-@SpringBootApplication(exclude = { RedisRepositoriesAutoConfiguration.class })
+@SpringBootApplication(exclude = { RedisRepositoriesAutoConfiguration.class, RedisAutoConfiguration.class})
 @EnableJpaRepositories(basePackages = {"skills.storage.repos"})
 public class SpringBootApp {
 
