@@ -76,12 +76,6 @@ jobs:
     - name: Build skills-service
       run: mvn --batch-mode install -Dspring.datasource.url=jdbc:postgresql://localhost:5432/skills -Dspring.datasource.username=postgres -Dspring.datasource.password=skillsPassword
 
-    - name: check all dirs
-      run: ls -lR ./
-
-    - name: check top level dir
-      run: ls -l ./
-
     - name: Run Cypress tests
       run: |
         cd e2e-tests
