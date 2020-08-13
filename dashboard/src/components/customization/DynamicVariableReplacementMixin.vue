@@ -28,8 +28,8 @@ limitations under the License.
           }
           const timestamp = this.$store.getters.config.buildTimestamp;
           if (timestamp) {
-            const [date] = timestamp.split('T');
-            result = result.replace(buildDate, date);
+            const dateString = window.moment(timestamp).format('ll');
+            result = result.replace(buildDate, dateString);
           }
         }
         return result;

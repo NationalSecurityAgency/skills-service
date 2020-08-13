@@ -403,5 +403,50 @@ describe('Settings Tests', () => {
         });
     });
 
+    it('custom header/footer dynamic variable replacement', () => {
+        cy.server();
+        cy.route('GET', '/root/getSystemSettings').as('loadSystemSettings');
+        cy.route('GET', '/app/userInfo').as('loadUserInfo');
+        cy.route('GET', '/public/config').as('loadConfig');
+        cy.visit('/');
+        cy.wait('@loadUserInfo');
+        cy.get('.userName').parent().click();
+        cy.contains('Settings').click();
+        cy.contains('System').click();
+
+        cy.wait('@loadSystemSettings');
+        cy.get$('[data-cy=publicUrl]').type('{selectall}http://localhost:8082');
+        cy.get$('[data-cy=customHeader').type('<div id="customHeader"><span id="chVersion">{{release.version}}</span> <span id="chBuildDate">{{build.date}}</span></div>', {parseSpecialCharSequences: false});
+        cy.get$('[data-cy=customFooter').type('<div id="customFooter"><span id="cfVersion">{{release.version}}</span> <span id="cfBuildDate">{{build.date}}</span></div>', {parseSpecialCharSequences: false});
+        cy.get$('[data-cy=saveSystemSettings]').click();
+        cy.wait('@loadConfig');
+        cy.get('#customHeader').contains(/\w{3} \d{1,2}, \d{4}/).should('be.visible');
+        cy.get('#customHeader').contains(/\d{1,3}\.\d{1,3}\.\d{1,3}(-SNAPSHOT)?/).should('be.visible');
+        cy.get('#customFooter').contains(/\w{3} \d{1,2}, \d{4}/).should('be.visible');
+        cy.get('#customFooter').contains(/\d{1,3}\.\d{1,3}\.\d{1,3}(-SNAPSHOT)?/).should('be.visible');
+
+        cy.get$('[data-cy=customHeader').type('{selectall}{backspace}');
+        cy.get$('[data-cy=customFooter').type('{selectall}{backspace}');
+        cy.get$('[data-cy=customHeader').type('<div id="customHeader"><span id="chVersion">{{ release.version }}</span> <span id="chBuildDate">{{ build.date }}</span></div>', {parseSpecialCharSequences: false});
+        cy.get$('[data-cy=customFooter').type('<div id="customFooter"><span id="cfVersion">{{ release.version }}</span> <span id="cfBuildDate">{{ build.date }}</span></div>', {parseSpecialCharSequences: false});
+        cy.get$('[data-cy=saveSystemSettings]').click();
+        cy.wait('@loadConfig');
+        cy.get('#customHeader').contains(/\w{3} \d{1,2}, \d{4}/).should('be.visible');
+        cy.get('#customHeader').contains(/\d{1,3}\.\d{1,3}\.\d{1,3}(-SNAPSHOT)?/).should('be.visible');
+        cy.get('#customFooter').contains(/\w{3} \d{1,2}, \d{4}/).should('be.visible');
+        cy.get('#customFooter').contains(/\d{1,3}\.\d{1,3}\.\d{1,3}(-SNAPSHOT)?/).should('be.visible');
+
+        cy.get$('[data-cy=customHeader').type('{selectall}{backspace}');
+        cy.get$('[data-cy=customFooter').type('{selectall}{backspace}');
+        cy.get$('[data-cy=customHeader').type('<div id="customHeader"><span id="chVersion">{{ ReLeASe.VerSion}}</span> <span id="chBuildDate">{{BUild.daTE }}</span></div>', {parseSpecialCharSequences: false});
+        cy.get$('[data-cy=customFooter').type('<div id="customFooter"><span id="cfVersion">{{RELease.VERsion }}</span> <span id="cfBuildDate">{{ build.DATE}}</span></div>', {parseSpecialCharSequences: false});
+        cy.get$('[data-cy=saveSystemSettings]').click();
+        cy.wait('@loadConfig');
+        cy.get('#customHeader').contains(/\w{3} \d{1,2}, \d{4}/).should('be.visible');
+        cy.get('#customHeader').contains(/\d{1,3}\.\d{1,3}\.\d{1,3}(-SNAPSHOT)?/).should('be.visible');
+        cy.get('#customFooter').contains(/\w{3} \d{1,2}, \d{4}/).should('be.visible');
+        cy.get('#customFooter').contains(/\d{1,3}\.\d{1,3}\.\d{1,3}(-SNAPSHOT)?/).should('be.visible');
+    });
+
 });
 
