@@ -15,26 +15,24 @@
  */
 package skills;
 
-import groovy.util.logging.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.ImportResource;
+import org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import skills.utils.SecretsUtil;
 
-import javax.annotation.PostConstruct;
 import javax.net.ssl.HttpsURLConnection;
 import java.util.TimeZone;
 
 @EnableAsync
 @EnableScheduling
 @EnableWebSecurity
-@SpringBootApplication
+@SpringBootApplication(exclude = { RedisRepositoriesAutoConfiguration.class })
 @EnableJpaRepositories(basePackages = {"skills.storage.repos"})
 public class SpringBootApp {
 

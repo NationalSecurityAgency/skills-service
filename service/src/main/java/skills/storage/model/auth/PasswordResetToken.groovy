@@ -16,25 +16,15 @@
 package skills.storage.model.auth
 
 import groovy.transform.ToString
-import org.springframework.data.annotation.CreatedDate
 
-import javax.persistence.CascadeType
-import javax.persistence.Entity
-import javax.persistence.GeneratedValue
-import javax.persistence.GenerationType
-import javax.persistence.Id
-import javax.persistence.JoinColumn
-import javax.persistence.ManyToOne
-import javax.persistence.OneToOne
-import javax.persistence.PrimaryKeyJoinColumn
-import javax.persistence.Table
-import javax.persistence.Temporal
-import javax.persistence.TemporalType
+import javax.persistence.*
 
 @ToString
 @Table(name="password_reset_token")
 @Entity
-class PasswordResetToken {
+class PasswordResetToken implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -15,16 +15,16 @@
  */
 package skills.storage.model.auth
 
-
 import groovy.transform.ToString
-import skills.storage.model.Setting
 
 import javax.persistence.*
 
 @ToString(excludes = ['roles'])
 @Entity
 @Table(name = 'users')
-class User {
+class User implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
