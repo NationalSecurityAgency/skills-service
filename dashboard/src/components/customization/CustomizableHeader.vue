@@ -20,11 +20,14 @@ limitations under the License.
 </template>
 
 <script>
+  import DynamicVariableReplacementMixin from './DynamicVariableReplacementMixin';
+
   export default {
     name: 'CustomizableHeader',
+    mixins: [DynamicVariableReplacementMixin],
     computed: {
       customHeader() {
-        return this.$store.getters.config.customHeader;
+        return this.populateDynamicVariables(this.$store.getters.config.customHeader);
       },
     },
   };
