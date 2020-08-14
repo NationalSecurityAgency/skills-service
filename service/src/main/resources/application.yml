@@ -79,6 +79,8 @@ skills:
   clientLibVersion: @maven.build.timestamp@
   config:
     ui:
+      dashboardVersion: @pom.version@
+      buildTimestamp: @maven.build.timestamp@
       minimumSubjectPoints: 100
       minimumProjectPoints: 100
       descriptionMaxLength: 2000

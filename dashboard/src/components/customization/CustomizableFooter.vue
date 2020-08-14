@@ -20,11 +20,14 @@ limitations under the License.
 </template>
 
 <script>
+  import DynamicVariableReplacementMixin from './DynamicVariableReplacementMixin';
+
   export default {
     name: 'CustomizableFooter',
+    mixins: [DynamicVariableReplacementMixin],
     computed: {
       customFooter() {
-        return this.$store.getters.config.customFooter;
+        return this.populateDynamicVariables(this.$store.getters.config.customFooter);
       },
     },
   };

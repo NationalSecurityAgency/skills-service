@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: Test against PostgreSQL
+name: Test storing HttpSession in Redis
 
 #on:
 #  push:
@@ -23,7 +23,7 @@ name: Test against PostgreSQL
 #      - 'README.md'
 on:
   schedule:
-   - cron: '0 5 * * *'
+   - cron: '0 6 * * *'
 
 
 jobs:
@@ -31,22 +31,17 @@ jobs:
     runs-on: ubuntu-latest
 
     services:
-      postgres:
-        # Docker Hub image
-        image: postgres
-        # Provide the password for postgres
-        env:
-          POSTGRES_PASSWORD: skillsPassword
-          POSTGRES_DB: skills
-        # Set health checks to wait until postgres has started
+      redis:
+        image: redis
+        # Set health checks to wait until redis has started
         options: >-
-          --health-cmd pg_isready
+          --health-cmd "redis-cli ping"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
         ports:
-          # Maps tcp port 5432 on service container to the host
-          - 5432:5432
+          # Maps port 6379 on service container to the host
+          - 6379:6379
 
     steps:
     - name: Install Emoji Support
@@ -81,18 +76,16 @@ jobs:
           ${{ runner.os }}-maven-
 
     - name: Build skills-service
-      run: mvn --batch-mode install -Dspring.datasource.url=jdbc:postgresql://localhost:5432/skills -Dspring.datasource.username=postgres -Dspring.datasource.password=skillsPassword
+      run: mvn --batch-mode install -DskipTests
 
-# Cypress Tests were not using postgresql as cyServices:start:skills-service:postgresql was actually running against h2;
-#    not it won't connect to db, this will need to be resolved in https://github.com/NationalSecurityAgency/skills-service/issues/53
-#    - name: Run Cypress tests
-#      run: |
-#        cd e2e-tests
-#        npm install
-#        npm run cyServices:start:skills-service:postgresql
-#        npm run cyServices:start:client-display
-#        npm run cy:run
-#        cd ..
+    - name: Run Cypress tests
+      run: |
+        cd e2e-tests
+        npm install
+        npm run cyServices:start:skills-service:redis
+        npm run cyServices:start:client-display
+        npm run cy:run
+        cd ..
 
     - name: upload result artifacts
       if: ${{ always() }}
