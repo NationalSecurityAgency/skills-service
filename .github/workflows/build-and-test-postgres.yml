@@ -15,8 +15,15 @@
 name: Test against PostgreSQL
 
 on:
-  schedule:
-   - cron: '0 5 * * *'
+  push:
+    paths-ignore:
+      - 'README.md'
+  pull_request:
+    paths-ignore:
+      - 'README.md'
+#on:
+#  schedule:
+#   - cron: '0 5 * * *'
 
 
 jobs:
