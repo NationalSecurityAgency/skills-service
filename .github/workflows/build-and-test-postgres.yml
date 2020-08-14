@@ -14,16 +14,16 @@
 
 name: Test against PostgreSQL
 
-#on:
-#  push:
-#    paths-ignore:
-#      - 'README.md'
-#  pull_request:
-#    paths-ignore:
-#      - 'README.md'
 on:
-  schedule:
-   - cron: '0 5 * * *'
+  push:
+    paths-ignore:
+      - 'README.md'
+  pull_request:
+    paths-ignore:
+      - 'README.md'
+#on:
+#  schedule:
+#   - cron: '0 5 * * *'
 
 
 jobs:
@@ -83,16 +83,14 @@ jobs:
     - name: Build skills-service
       run: mvn --batch-mode install -Dspring.datasource.url=jdbc:postgresql://localhost:5432/skills -Dspring.datasource.username=postgres -Dspring.datasource.password=skillsPassword
 
-# Cypress Tests were not using postgresql as cyServices:start:skills-service:postgresql was actually running against h2;
-#    not it won't connect to db, this will need to be resolved in https://github.com/NationalSecurityAgency/skills-service/issues/53
-#    - name: Run Cypress tests
-#      run: |
-#        cd e2e-tests
-#        npm install
-#        npm run cyServices:start:skills-service:postgresql
-#        npm run cyServices:start:client-display
-#        npm run cy:run
-#        cd ..
+    - name: Run Cypress tests
+      run: |
+        cd e2e-tests
+        npm install
+        npm run cyServices:start:skills-service:postgresql
+        npm run cyServices:start:client-display
+        npm run cy:run:postgres
+        cd ..
 
     - name: upload result artifacts
       if: ${{ always() }}

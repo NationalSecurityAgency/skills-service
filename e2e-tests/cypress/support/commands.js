@@ -42,6 +42,7 @@
 import { addMatchImageSnapshotCommand } from 'cypress-image-snapshot/command';
 import './cliend-display-commands';
 import 'cypress-file-upload';
+import LookupUtil from "./LookupUtil.js";
 
 addMatchImageSnapshotCommand();
 
@@ -141,5 +142,30 @@ Cypress.Commands.add('vuex', () => {
 Cypress.Commands.add('get$', (selector) => {
    return cy.wrap(Cypress.$(selector)).should('have.length.gte', 1);
 });
+
+Cypress.Commands.add('resetDb', () => {
+    const db = LookupUtil.getDb();
+
+    // first call to npm fails, looks like this may be the bug: https://github.com/cypress-io/cypress/issues/6081
+    cy.exec('npm version', {failOnNonZeroExit: false})
+    if (db && db === 'postgres') {
+        cy.exec('npm run backend:resetDb:postgres')
+    } else {
+        cy.exec('npm run backend:resetDb')
+    }
+});
+
+Cypress.Commands.add('clearDb', () => {
+    const db = LookupUtil.getDb();
+
+    // first call to npm fails, looks like this may be the bug: https://github.com/cypress-io/cypress/issues/6081
+    cy.exec('npm version', {failOnNonZeroExit: false})
+    if (db && db === 'postgres') {
+        cy.exec('npm run backend:clearDb:postgres')
+    } else {
+        cy.exec('npm run backend:clearDb')
+    }
+});
+
 
 
