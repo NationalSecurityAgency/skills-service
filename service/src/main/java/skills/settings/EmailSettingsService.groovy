@@ -69,7 +69,7 @@ class EmailSettingsService {
         )
 
         try {
-            configureMailSender(emailConnectionInfo)
+            configureMailSender(emailConnectionInfo, true)
         } catch (SkillException e) {
             log.warn('Email connection failed. No email can be sent without updating the configuration', e)
         }
@@ -81,7 +81,7 @@ class EmailSettingsService {
         return configurationSuccessful;
     }
 
-    EmailConfigurationResult configureMailSender(EmailConnectionInfo emailConnectionInfo) {
+    EmailConfigurationResult configureMailSender(EmailConnectionInfo emailConnectionInfo, boolean isInit = false) {
         log.info('Configuring the email sender with properties [{}]', emailConnectionInfo)
         JavaMailSenderImpl tmpMailSender = createJavaMailSender(emailConnectionInfo)
         try {
@@ -91,7 +91,12 @@ class EmailSettingsService {
             updateMailSender(tmpMailSender)
             return new EmailConfigurationResult(configurationSuccessful: true)
         } catch (MessagingException e) {
-            log.warn('Email connection failed!', e)
+            if (isInit) {
+                log.info("Email connection failed [${e.message}] . This is normal on start-up if email connection info was not configured!")
+            } else {
+                log.warn('Email connection failed!', e)
+            }
+
             String msg = e.message
             Exception next = e.nextException
             if (next instanceof SocketTimeoutException) {
