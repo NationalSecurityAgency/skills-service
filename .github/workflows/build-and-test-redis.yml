@@ -14,16 +14,16 @@
 
 name: Test storing HttpSession in Redis
 
-on:
-  push:
-    paths-ignore:
-      - 'README.md'
-  pull_request:
-    paths-ignore:
-      - 'README.md'
 #on:
-#  schedule:
-#   - cron: '0 5 * * *'
+#  push:
+#    paths-ignore:
+#      - 'README.md'
+#  pull_request:
+#    paths-ignore:
+#      - 'README.md'
+on:
+  schedule:
+   - cron: '0 6 * * *'
 
 
 jobs:
