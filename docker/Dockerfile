@@ -5,7 +5,7 @@ RUN apk update && apk add netcat-openbsd
 
 ARG BUILD_DATE
 ARG VERSION
-ARG VCS_REF
+ARG VCS_REF=unspecified
 
 LABEL org.label-schema.build-date=$BUILD_DATE
 LABEL org.label-schema.license=Apache-2.0
