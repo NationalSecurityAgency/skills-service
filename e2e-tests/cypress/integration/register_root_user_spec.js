@@ -17,14 +17,12 @@ describe('Register Root Users', () => {
 
   beforeEach(() => {
     cy.logout();
-    cy.exec('npm version', {failOnNonZeroExit: false})
-    cy.exec('npm run backend:clearDb')
+    cy.clearDb();
   });
 
   afterEach(() => {
     cy.logout();
-    cy.exec('npm version', {failOnNonZeroExit: false})
-    cy.exec('npm run backend:clearDb')
+    cy.clearDb();
 
     cy.fixture('vars.json').then((vars) => {
       cy.register(vars.rootUser, vars.defaultPass, true);

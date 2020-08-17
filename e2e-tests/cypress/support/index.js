@@ -42,9 +42,7 @@ before(function () {
 });
 
 beforeEach(function () {
-    // first call to npm fails, looks like this may be the bug: https://github.com/cypress-io/cypress/issues/6081
-    cy.exec('npm version', {failOnNonZeroExit: false})
-    cy.exec('npm run backend:resetDb')
+    cy.resetDb();
 
     cy.fixture('vars.json').then((vars) => {
         cy.login(vars.defaultUser, vars.defaultPass);
