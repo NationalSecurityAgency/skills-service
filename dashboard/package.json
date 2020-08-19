@@ -14,9 +14,7 @@
     "deploy": "npm run build && rm -rf ../skills-service/src/main/resources/public/static/js && cp -rT dist ../skills-service/src/main/resources/public/ && cp -rT dist ../skills-service/target/classes/public/",
     "lint": "vue-cli-service lint",
     "test:e2e": "vue-cli-service test:e2e",
-    "test:unit": "vue-cli-service test:unit",
-    "snyk-protect": "snyk protect",
-    "prepublish": "npm run snyk-protect"
+    "test:unit": "vue-cli-service test:unit"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "5.11.2",
@@ -49,8 +47,7 @@
     "vue-virtual-scroll-list": "1.4.2",
     "vuejs-datepicker": "1.6.2",
     "vuex": "3.1.1",
-    "webstomp-client": "1.2.6",
-    "snyk": "^1.379.2"
+    "webstomp-client": "1.2.6"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "3.11.0",
@@ -70,6 +67,5 @@
     "node-sass": "4.12.0",
     "sass-loader": "8.0.0",
     "vue-template-compiler": "2.6.10"
-  },
-  "snyk": true
+  }
 }
