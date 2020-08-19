@@ -6,7 +6,7 @@
   "author": "SkillTree Team",
   "scripts": {
     "serve": "vue-cli-service serve",
-    "licenseDepCheck": "license-checker --production --onlyAllow='MIT;ISC;Apache-2.0;BSD-2-Clause;Custom: https://travis-ci.org/component/emitter.png' --summary",
+    "licenseDepCheck": "license-checker --production --onlyAllow='MIT;ISC;Apache-2.0;BSD-2-Clause;BSD-3-Clause;Custom: https://travis-ci.org/component/emitter.png' --summary",
     "licenseHeaderCheck": "license-check-and-add check -f '../license-add/license-add-config.json'",
     "licenseHeaderAdd": "license-check-and-add add -f ../license-add/license-add-config.json",
     "licenseCheck": "npm run licenseHeaderCheck && npm run licenseDepCheck",
