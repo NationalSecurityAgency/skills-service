@@ -19,6 +19,7 @@ describe('Projects Tests', () => {
       .route('GET', '/app/projects').as('getProjects')
       .route('GET', '/api/icons/customIconCss').as('getProjectsCustomIcons')
       .route('GET', '/app/userInfo').as('getUserInfo')
+      .route('/admin/projects/proj1/users/root@skills.org/roles').as('getRolesForRoot');
   });
 
   it('Create new projects', function () {
@@ -361,6 +362,7 @@ describe('Projects Tests', () => {
     cy.contains('root@skills.org').click();
     cy.clickButton('Add');
     cy.wait('@addAdmin');
+    cy.wait('@getRolesForRoot');
     cy.contains('Firstname LastName (root@skills.org)').should('exist');
   });
 
@@ -391,7 +393,8 @@ describe('Projects Tests', () => {
     cy.contains('root@skills.org').click();
     cy.clickButton('Add');
     cy.wait('@addAdmin');
-    cy.contains('Firstname LastName (root@skills.org)').should('be.visible');
+    cy.wait('@getRolesForRoot');
+    cy.contains('Firstname LastName (root@skills.org)')
   });
 
   it('Add Admin - forward slash character does not cause error', () => {

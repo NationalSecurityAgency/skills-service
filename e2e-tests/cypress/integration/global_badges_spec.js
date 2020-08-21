@@ -138,12 +138,12 @@ describe('Global Badges Tests', () => {
         });
 
         cy.visit('/');
-        cy.contains('Badges').click();
+        cy.clickNav('Badges');
         cy.contains('Manage').click();
         cy.get('.multiselect__tags').click();
         cy.get('.multiselect__tags input').type('{enter}');
         cy.get('div.table-responsive').should('be.visible');
-        cy.get('li').contains('Levels').click();
+        cy.clickNav('Levels');
 
         cy.get('.multiselect__tags').first().click();
         cy.get('.multiselect__tags input').first().type('proj2{enter}');
@@ -160,17 +160,18 @@ describe('Global Badges Tests', () => {
         cy.route('GET', `/supervisor/badges`).as('getGlobalBadges');
 
         cy.visit('/');
-        cy.contains('Badges').click();
+        cy.clickNav('Badges');
         cy.wait('@getGlobalBadges');
     });
 
-    it('Global Badge is disabled when created, can only be enabled once', () => {
+    it.only('Global Badge is disabled when created, can only be enabled once', () => {
         const expectedId = 'TestBadgeBadge';
         cy.route('GET', `/supervisor/badges`).as('getGlobalBadges');
         cy.route('PUT', `/supervisor/badges/${expectedId}`).as('postGlobalBadge');
         cy.route('GET', `/supervisor/badges/id/${expectedId}/exists`).as('idExists');
         cy.route('POST', '/supervisor/badges/name/exists').as('nameExists');
         cy.route('GET', '/app/userInfo/hasRole/ROLE_SUPERVISOR').as('checkSupervisorRole');
+        cy.route('GET', `/supervisor/badges/${expectedId}`).as('getExpectedBadge');
 
         cy.visit('/globalBadges');
         cy.wait('@getGlobalBadges');
@@ -189,6 +190,7 @@ describe('Global Badges Tests', () => {
         cy.contains('Please Confirm!').should('exist');
         cy.contains('Yes, Go Live!').click();
         cy.wait('@postGlobalBadge');
+        cy.wait('@getExpectedBadge');
         cy.wait('@getGlobalBadges');
         cy.contains('Test Badge');
         cy.get('[data-cy=badgeStatus]').contains('Status: Live').should('exist');
@@ -276,7 +278,7 @@ describe('Global Badges Tests', () => {
 
         cy.visit('/');
 
-        cy.contains('Badges').click();
+        cy.clickNav('Badges');
         cy.wait('@getGlobalBadges');
 
         cy.clickButton('Badge');
@@ -292,7 +294,7 @@ describe('Global Badges Tests', () => {
         cy.get('.multiselect__tags').click();
         cy.get('.multiselect__tags input').type('{enter}');
         cy.get('div.table-responsive').should('be.visible');
-        cy.get('li').contains('Levels').click();
+        cy.clickNav('Levels');
 
         cy.get('.multiselect__tags').first().click();
         cy.get('.multiselect__tags input').first().type('proj2{enter}');
