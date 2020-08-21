@@ -138,12 +138,12 @@ describe('Global Badges Tests', () => {
         });
 
         cy.visit('/');
-        cy.contains('Badges').click();
+        cy.clickNav('Badges');
         cy.contains('Manage').click();
         cy.get('.multiselect__tags').click();
         cy.get('.multiselect__tags input').type('{enter}');
         cy.get('div.table-responsive').should('be.visible');
-        cy.get('li').contains('Levels').click();
+        cy.clickNav('Levels');
 
         cy.get('.multiselect__tags').first().click();
         cy.get('.multiselect__tags input').first().type('proj2{enter}');
@@ -160,7 +160,7 @@ describe('Global Badges Tests', () => {
         cy.route('GET', `/supervisor/badges`).as('getGlobalBadges');
 
         cy.visit('/');
-        cy.contains('Badges').click();
+        cy.clickNav('Badges');
         cy.wait('@getGlobalBadges');
     });
 
@@ -276,7 +276,7 @@ describe('Global Badges Tests', () => {
 
         cy.visit('/');
 
-        cy.contains('Badges').click();
+        cy.clickNav('Badges');
         cy.wait('@getGlobalBadges');
 
         cy.clickButton('Badge');
@@ -292,7 +292,7 @@ describe('Global Badges Tests', () => {
         cy.get('.multiselect__tags').click();
         cy.get('.multiselect__tags input').type('{enter}');
         cy.get('div.table-responsive').should('be.visible');
-        cy.get('li').contains('Levels').click();
+        cy.clickNav('Levels');
 
         cy.get('.multiselect__tags').first().click();
         cy.get('.multiselect__tags input').first().type('proj2{enter}');

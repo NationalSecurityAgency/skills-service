@@ -28,6 +28,7 @@ limitations under the License.
       <b-collapse id="menu-collapse-control" :visible="!smallScreenMode">
         <ul class="m-0 p-0" style="list-style: none;">
           <router-link :to="{ name: navItem.page }" tag="li" class="mb-1 p-2 text-primary" v-for="(navItem) of navItems" :key="navItem.name"
+              :data-cy="`nav-${navItem.name}`"
               @click.native="navigate(`${navItem.name}`)"
               :class="{'bg-primary': menuSelections.get(navItem.name), 'text-light': menuSelections.get(navItem.name), 'select-cursor': !menuSelections.get(navItem.name), 'disabled': navItem.isDisabled}">
             <div class="text-truncate">

@@ -167,5 +167,8 @@ Cypress.Commands.add('clearDb', () => {
     }
 });
 
+Cypress.Commands.add('clickNav', (navName) => {
+    cy.get(`[data-cy=nav-${navName}]`).click()
+});
 
 
