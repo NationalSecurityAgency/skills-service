@@ -70,7 +70,7 @@
         <dependency>
             <groupId>org.springframework.security.oauth.boot</groupId>
             <artifactId>spring-security-oauth2-autoconfigure</artifactId>
-            <version>2.2.0.RELEASE</version>
+            <version>2.3.1.RELEASE</version>
 <!--            Can not use the same version and they don't line up-->
 <!--            <version>${springboot.version}</version>-->
         </dependency>
