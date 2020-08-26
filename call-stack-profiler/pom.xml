@@ -30,7 +30,7 @@
 
         <maven.compiler.plugin.version>3.7.0</maven.compiler.plugin.version>
         <commons.lang3.version>3.9</commons.lang3.version>
-        <joda.time.version>2.10.3</joda.time.version>
+        <joda.time.version>2.10.6</joda.time.version>
         <log4j.version>2.13.3</log4j.version>
 
         <versions.maven.plugin>2.7</versions.maven.plugin>
