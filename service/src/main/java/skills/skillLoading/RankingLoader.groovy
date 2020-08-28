@@ -134,14 +134,14 @@ class RankingLoader {
     @CompileStatic
     @Profile
     private List<UserPoints> findLowestUserPoints(String projectId, int points, String subjectId) {
-        List<UserPoints> previous = userPointsRepository.findByProjectIdAndSkillIdAndPointsLessThanAndDayIsNull(projectId, subjectId, points, new PageRequest(0, 1, Sort.Direction.DESC, "points"))
+        List<UserPoints> previous = userPointsRepository.findByProjectIdAndSkillIdAndPointsLessThanAndDayIsNull(projectId, subjectId, points, PageRequest.of(0, 1, Sort.Direction.DESC, "points"))
         previous
     }
 
     @CompileStatic
     @Profile
     private List<UserPoints> findHighestUserPoints(String projectId, int points, String subjectId) {
-        List<UserPoints> next = userPointsRepository.findByProjectIdAndSkillIdAndPointsGreaterThanAndDayIsNull(projectId, subjectId, points, new PageRequest(0, 1, Sort.Direction.ASC, "points"))
+        List<UserPoints> next = userPointsRepository.findByProjectIdAndSkillIdAndPointsGreaterThanAndDayIsNull(projectId, subjectId, points, PageRequest.of(0, 1, Sort.Direction.ASC, "points"))
         next
     }
 
