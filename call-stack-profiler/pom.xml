@@ -29,9 +29,9 @@
         <groovy.eclipse.batch.version>2.5.7-01</groovy.eclipse.batch.version>
 
         <maven.compiler.plugin.version>3.7.0</maven.compiler.plugin.version>
-        <commons.lang3.version>3.9</commons.lang3.version>
-        <joda.time.version>2.10.3</joda.time.version>
-        <log4j.version>2.11.2</log4j.version>
+        <commons.lang3.version>3.11</commons.lang3.version>
+        <joda.time.version>2.10.6</joda.time.version>
+        <log4j.version>2.13.3</log4j.version>
 
         <versions.maven.plugin>2.7</versions.maven.plugin>
         <maven.scm.plugin>1.11.2</maven.scm.plugin>
