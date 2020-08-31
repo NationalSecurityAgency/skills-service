@@ -646,7 +646,7 @@ class AdminController {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(userId, "User Id", projectId)
 
-        PageRequest pageRequest = new PageRequest(page - 1, limit, ascending ? ASC : DESC, orderBy)
+        PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
         return userAdminService.loadUserPerformedSkillsPage(projectId, userId?.toLowerCase(), query, pageRequest)
     }
 
@@ -672,7 +672,7 @@ class AdminController {
                                 @RequestParam Boolean ascending) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
 
-        PageRequest pageRequest = new PageRequest(page - 1, limit, ascending ? ASC : DESC, orderBy)
+        PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
         return adminUsersService.loadUsersPage(projectId, query, pageRequest)
     }
 
@@ -695,7 +695,7 @@ class AdminController {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(subjectId, "Subject Id", projectId)
 
-        PageRequest pageRequest = new PageRequest(page - 1, limit, ascending ? ASC : DESC, orderBy)
+        PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
         List<SkillDefPartialRes> subjectSkills = getSkills(projectId, subjectId)
         List<String> skillIds = subjectSkills.collect { it.skillId }
         return adminUsersService.loadUsersPage(projectId, skillIds, query, pageRequest)
@@ -713,7 +713,7 @@ class AdminController {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
 
-        PageRequest pageRequest = new PageRequest(page - 1, limit, ascending ? ASC : DESC, orderBy)
+        PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
         return adminUsersService.loadUsersPage(projectId, Collections.singletonList(skillId), query, pageRequest)
     }
 
@@ -729,7 +729,7 @@ class AdminController {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(badgeId, "Badge Id", projectId)
 
-        PageRequest pageRequest = new PageRequest(page - 1, limit, ascending ? ASC : DESC, orderBy)
+        PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
         List<SkillDefRes> badgeSkills = getBadgeSkills(projectId, badgeId)
         List<String> skillIds = badgeSkills.collect { it.skillId }
         if (!skillIds) {

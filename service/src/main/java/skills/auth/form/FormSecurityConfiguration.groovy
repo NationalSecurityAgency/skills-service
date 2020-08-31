@@ -153,7 +153,7 @@ class FormSecurityConfiguration extends WebSecurityConfigurerAdapter {
         }
 
         @Override
-        void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
+        void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
             writeNullJson(response)
             super.onLogoutSuccess(request, response, authentication)
         }

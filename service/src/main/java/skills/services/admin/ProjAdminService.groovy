@@ -221,7 +221,7 @@ class ProjAdminService {
 
     @Transactional()
     List<SimpleProjectResult> searchProjects(String projectId, String nameQuery) {
-        List<ProjDef> projDefs = projDefRepo.queryProjectsByNameQueryAndNotProjectId(nameQuery.toLowerCase(), projectId, new PageRequest(0, 5, Sort.Direction.ASC, "name"))
+        List<ProjDef> projDefs = projDefRepo.queryProjectsByNameQueryAndNotProjectId(nameQuery.toLowerCase(), projectId, PageRequest.of(0, 5, Sort.Direction.ASC, "name"))
         return projDefs.collect {
             new SimpleProjectResult(name: it.name, projectId: it.projectId)
         }
