@@ -589,7 +589,7 @@ class H2NativeRepo implements NativeQueriesRepo {
 
         Query subjectLevelsQ = entityManager.createNativeQuery(
             '''
-            SELECT ld.id, ld.level, '''+pointsRequiredFragment+''' AS pointsRequired,
+            SELECT ld.id, ld.level, '''+pointsRequiredFragment+''' AS pointsRequired
             FROM level_definition ld
             WHERE ld.skill_ref_id = :subjectId
             '''

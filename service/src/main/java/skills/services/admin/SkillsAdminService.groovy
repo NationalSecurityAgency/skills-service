@@ -344,11 +344,11 @@ class SkillsAdminService {
         SkillDef switchWith
         switch (patchRequest.action) {
             case ActionPatchRequest.ActionType.DisplayOrderDown:
-                List<SkillDef> foundSkills = skillDefRepo.findNextSkillDefs(projectId, parent.skillId, moveMe.displayOrder, SkillRelDef.RelationshipType.RuleSetDefinition, new PageRequest(0, 1))
+                List<SkillDef> foundSkills = skillDefRepo.findNextSkillDefs(projectId, parent.skillId, moveMe.displayOrder, SkillRelDef.RelationshipType.RuleSetDefinition, PageRequest.of(0, 1))
                 switchWith = foundSkills ? foundSkills?.first() : null
                 break;
             case ActionPatchRequest.ActionType.DisplayOrderUp:
-                List<SkillDef> foundSkills = skillDefRepo.findPreviousSkillDefs(projectId, parent.skillId, moveMe.displayOrder, SkillRelDef.RelationshipType.RuleSetDefinition, new PageRequest(0, 1))
+                List<SkillDef> foundSkills = skillDefRepo.findPreviousSkillDefs(projectId, parent.skillId, moveMe.displayOrder, SkillRelDef.RelationshipType.RuleSetDefinition, PageRequest.of(0, 1))
                 switchWith = foundSkills ? foundSkills?.first() : null
                 break;
             default:

@@ -69,7 +69,7 @@ class UserAdminService {
     List<UserInfoRes> suggestDashboardUsers(String query, boolean includeSelf) {
         query = query ? query.toLowerCase() : ""
 
-        List<UserAttrs> userAttrs = userAttrsRepo.searchForUser(query, new PageRequest(0, 6))
+        List<UserAttrs> userAttrs = userAttrsRepo.searchForUser(query, PageRequest.of(0, 6))
         List<UserInfoRes> results = userAttrs.collect { new UserInfoRes(it) }
 
         if (!includeSelf) {

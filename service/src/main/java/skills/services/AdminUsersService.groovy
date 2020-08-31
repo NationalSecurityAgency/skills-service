@@ -138,7 +138,7 @@ class AdminUsersService {
     }
 
     List<LabelCountItem> getAchievementCountsPerSubject(String projectId, int topNToLoad =5) {
-        List<UserAchievedLevelRepo.LabelCountInfo> res = userAchievedRepo.getUsageFacetedViaSubject(projectId, SkillDef.ContainerType.Subject, new PageRequest(0, topNToLoad, Sort.Direction.DESC, "countRes"))
+        List<UserAchievedLevelRepo.LabelCountInfo> res = userAchievedRepo.getUsageFacetedViaSubject(projectId, SkillDef.ContainerType.Subject, PageRequest.of(0, topNToLoad, Sort.Direction.DESC, "countRes"))
 
         return res.collect {
             new LabelCountItem(value: it.label, count: it.countRes)
@@ -146,7 +146,7 @@ class AdminUsersService {
     }
 
     List<LabelCountItem> getAchievementCountsPerSkill(String projectId, String subjectId, int topNToLoad =5) {
-        List<UserAchievedLevelRepo.LabelCountInfo> res = userAchievedRepo.getSubjectUsageFacetedViaSkill(projectId, subjectId, SkillDef.ContainerType.Subject, new PageRequest(0, topNToLoad, Sort.Direction.DESC, "countRes"))
+        List<UserAchievedLevelRepo.LabelCountInfo> res = userAchievedRepo.getSubjectUsageFacetedViaSkill(projectId, subjectId, SkillDef.ContainerType.Subject, PageRequest.of(0, topNToLoad, Sort.Direction.DESC, "countRes"))
 
         return res.collect {
             new LabelCountItem(value: it.label, count: it.countRes)
