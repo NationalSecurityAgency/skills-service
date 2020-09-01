@@ -21,7 +21,7 @@
     </licenses>
 
     <properties>
-        <groovy.version>2.5.7</groovy.version>
+        <groovy.version>2.5.13</groovy.version>
         <spock.myVersion>1.3-groovy-2.5</spock.myVersion>
 
         <groovy.eclipse.compiler.version>3.4.0-01</groovy.eclipse.compiler.version>
@@ -238,7 +238,7 @@
                             <licenseMerges>
                                 <licenseMerge>The Apache Software License, Version 2.0|Apache License, Version 2.0</licenseMerge>
                                 <licenseMerge>Eclipse Public License - Version 1.0|Eclipse Public License 1.0</licenseMerge>
-                                <licenseMerge>The 3-Clause BSD License|New BSD License|BSD Licence 3</licenseMerge>
+                                <licenseMerge>The 3-Clause BSD License|New BSD License|BSD Licence 3|BSD License 3</licenseMerge>
                             </licenseMerges>
                         </configuration>
                     </execution>
