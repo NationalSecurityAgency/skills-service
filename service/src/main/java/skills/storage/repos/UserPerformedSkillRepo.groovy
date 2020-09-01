@@ -25,8 +25,6 @@ import skills.storage.model.DayCountItem
 import skills.storage.model.SkillDef
 import skills.storage.model.UserPerformedSkill
 
-import javax.validation.constraints.Null
-
 @CompileStatic
 interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integer> {
 
