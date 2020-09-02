@@ -29,7 +29,7 @@ limitations under the License.
             <div v-if="badges && badges.length > 0" class="row justify-content-md-center">
                 <div v-for="(badge, index) in badges" v-bind:key="badge.badgeId" class="col-lg-3 col-sm-6 my-2">
                     <div class="card h-100 skills-card-theme-border">
-                        <router-link  :to="{ name: badge.global ? 'globalBadgeDetails' : 'badgeDetails', params: { badgeId: badge.badgeId }}" tag="div" class="card-body">
+                        <router-link  :to="{ name: badge.global ? 'globalBadgeDetails' : 'badgeDetails', params: { badgeId: badge.badgeId }}" tag="div" class="card-body earned-badge">
                             <i class="fa fa-check-circle position-absolute text-success" style="right: 10px; top: 10px;"/>
                             <i v-if="badge.gem" class="fas fa-gem position-absolute" style="top: 10px; left: 10px; color: purple"></i>
                             <i v-if="badge.global" class="fas fa-globe position-absolute" style="top: 10px; left: 10px; color: blue"></i>
@@ -76,5 +76,7 @@ limitations under the License.
 </script>
 
 <style>
-
+  .earned-badge {
+    cursor: pointer;
+  }
 </style>
