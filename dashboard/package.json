@@ -64,7 +64,7 @@
     "eslint-plugin-vue": "5.2.3",
     "license-check-and-add": "3.0.4",
     "license-checker": "25.0.1",
-    "node-sass": "4.12.0",
+    "node-sass": "4.14.1",
     "sass-loader": "8.0.0",
     "vue-template-compiler": "2.6.10"
   }
