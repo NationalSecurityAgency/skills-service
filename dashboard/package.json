@@ -25,7 +25,7 @@
     "babel-polyfill": "6.26.0",
     "bootstrap": "4.3.1",
     "bootstrap-vue": "2.0.2",
-    "dompurify": "2.0.3",
+    "dompurify": "2.0.15",
     "enquire.js": "2.1.6",
     "font-awesome-picker": "2.0.0",
     "lodash.debounce": "4.0.8",
