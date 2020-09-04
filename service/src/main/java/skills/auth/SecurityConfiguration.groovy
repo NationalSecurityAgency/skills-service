@@ -129,22 +129,20 @@ class SecurityConfiguration {
 
     @Bean
     AccessDeniedHandler accessDeniedHandler() {
-        return new CustomHandler()
-    }
-
-    static class CustomHandler extends AccessDeniedHandlerImpl {
-        @Override
-        void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
-            log.warn("Received AccessDeniedException for [${request.getRequestURI()}]", accessDeniedException)
-            super.handle(request, response, accessDeniedException)
-            AccessDeniedExplanation explanation = new AccessDeniedExplanationGenerator().generateExplanation(request.getServerName())
-            response.setStatus(HttpServletResponse.SC_FORBIDDEN)
-            if(explanation) {
-                String asJson = objectMapper.writeValueAsString(explanation)
-                response.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
-                response.setContentLength(asJson.bytes.length)
-                response.getWriter().print(asJson)
-                response.getWriter().flush()
+        return new AccessDeniedHandlerImpl() {
+            @Override
+            void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
+                log.warn("Received AccessDeniedException for [${request.getRequestURI()}]", accessDeniedException)
+                super.handle(request, response, accessDeniedException)
+                AccessDeniedExplanation explanation = new AccessDeniedExplanationGenerator().generateExplanation(request.getServerName())
+                response.setStatus(HttpServletResponse.SC_FORBIDDEN)
+                if(explanation) {
+                    String asJson = objectMapper.writeValueAsString(explanation)
+                    response.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
+                    response.setContentLength(asJson.bytes.length)
+                    response.getWriter().print(asJson)
+                    response.getWriter().flush()
+                }
             }
         }
     }
