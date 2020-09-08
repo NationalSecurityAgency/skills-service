@@ -18,6 +18,7 @@ package skills.storage.repos
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
+import org.springframework.data.repository.query.Param
 import org.springframework.lang.Nullable
 import skills.storage.model.LevelDef
 import skills.storage.model.LevelDefInterface
@@ -125,9 +126,27 @@ interface SkillEventsSupportRepo extends CrudRepository<SkillDef, Long> {
         s.totalPoints as totalPoints,
         s.type as type,
         s.enabled as enabled
-        from SkillDef s where s.projectId = ?1 and s.skillId=?2''')
+        from SkillDef s where ( :projectId is null OR s.projectId = :projectId ) and s.skillId=:skillId''')
     @Nullable
-    SkillDefMin findByProjectIdAndSkillId(String projectId, String skillId)
+    SkillDefMin findByProjectIdAndSkillId(@Param("projectId") String projectId, @Param("skillId") String skillId)
+
+    @Query('''SELECT
+        s.id as id,
+        s.projectId as projectId,
+        s.skillId as skillId,
+        s.name as name,
+        s.pointIncrement as pointIncrement,
+        s.pointIncrementInterval as pointIncrementInterval,
+        s.numMaxOccurrencesIncrementInterval as numMaxOccurrencesIncrementInterval,
+        s.totalPoints as totalPoints,
+        s.type as type,
+        s.enabled as enabled
+        from SkillDef s where s.projectId is null and s.skillId=:skillId''')
+    @Nullable
+    SkillDefMin findBySkillIdWhereProjectIdIsNull(@Param("skillId") String skillId)
+
+
+
 
     @Query('''SELECT
         badge.id as id,
