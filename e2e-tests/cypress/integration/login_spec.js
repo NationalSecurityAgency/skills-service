@@ -33,8 +33,8 @@ describe('Login Tests', () => {
     cy.get('#inputPassword').type('password');
     cy.contains('Login').click();
 
-    cy.wait('@getProjects').its('status').should('be', 200)
-      .wait('@getUserInfo').its('status').should('be', 200);
+    cy.wait('@getProjects').its('status').should('equal', 200)
+      .wait('@getUserInfo').its('status').should('equal', 200);
 
     cy.contains('Project');
     cy.contains('My Projects');
@@ -164,7 +164,7 @@ describe('Login Tests', () => {
     cy.visit('/');
     cy.contains('Login').should('be.disabled');
 
-    cy.wait('@getOAuthProviders').its('status').should('be', 200)
+    cy.wait('@getOAuthProviders').its('status').should('equal', 200)
     cy.get('[data-cy=oAuthProviders]').should('not.exist');
   })
 });
