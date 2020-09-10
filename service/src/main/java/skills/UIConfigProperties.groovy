@@ -22,4 +22,5 @@ import org.springframework.context.annotation.Configuration
 @ConfigurationProperties("skills.config")
 class UIConfigProperties {
     Map<String,String> ui = [:]
+    Map<String,String> client = [:]
 }
