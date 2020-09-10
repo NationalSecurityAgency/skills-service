@@ -79,7 +79,7 @@ limitations under the License.
             forceNiceScale: true,
             labels: {
               style: {
-                color: this.$store.state.themeModule.charts.axisLabelColor,
+                colors: [this.$store.state.themeModule.charts.axisLabelColor],
               },
               formatter: function format(val) {
                 return numberFormatter(val);
