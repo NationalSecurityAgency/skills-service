@@ -134,7 +134,6 @@ class WebsocketSpecs extends DefaultIntSpec {
         skillsService.assignSkillToGlobalBadge([projectId: projId, badgeId: badge2.badgeId, skillId: subj1.get(1).skillId])
         skillsService.assignSkillToGlobalBadge([projectId: projId, badgeId: badge2.badgeId, skillId: subj2.get(1).skillId])
 
-
         (0..9).each {
             skillsService.addSkill([projectId: projId, skillId: subj1.get(0).skillId], 'skills@skills.org', new Date()-it)
             skillsService.addSkill([projectId: projId, skillId: subj2.get(0).skillId], 'skills@skills.org', new Date()-it)

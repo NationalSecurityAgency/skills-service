@@ -32,7 +32,7 @@ class SkillEventPublisher {
     final SimpMessagingTemplate messagingTemplate;
 
     void publishSkillUpdate(SkillEventResult result, String userId) {
-        log.debug("Reporting user skill for user [$userId], result [$result]")
+        log.debug("Reporting user skill for user [{}}], result [{}}]", userId, result)
         if (result.projectId) {
             messagingTemplate.convertAndSendToUser(userId, "/queue/${result.projectId}-skill-updates", result)
         } else {
