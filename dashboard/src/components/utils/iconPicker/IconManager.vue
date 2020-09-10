@@ -240,15 +240,11 @@ limitations under the License.
     let isValid = true;
 
     if (!width || !height) {
-      console.error('width and height are required dimensions');
       isValid = false;
     }
 
     if (isValid) {
       isValid = width / height === 1;
-      if (!isValid) {
-        console.error('Icon dimensions must be square');
-      }
     }
 
     return isValid;
