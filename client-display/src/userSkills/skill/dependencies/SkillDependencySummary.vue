@@ -55,7 +55,7 @@ limitations under the License.
     },
     mounted() {
       this.numDependencies = this.dependencies.length;
-      const numCompleted = this.dependencies.filter(item => item.achieved).length;
+      const numCompleted = this.dependencies.filter((item) => item.achieved).length;
       if (this.numDependencies > 0 && numCompleted > 0) {
         this.percentComplete = Math.floor((numCompleted / this.numDependencies) * 100);
       }

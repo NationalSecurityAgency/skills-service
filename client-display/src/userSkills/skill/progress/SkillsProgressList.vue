@@ -95,7 +95,7 @@ limitations under the License.
     },
     mounted() {
       this.showDescriptionsInternal = this.showDescriptions;
-      this.skillsInternal = this.subject.skills.map(item => Object.assign({}, item));
+      this.skillsInternal = this.subject.skills.map((item) => ({ ...item }));
     },
     methods: {
       onDetailsToggle() {
@@ -105,7 +105,7 @@ limitations under the License.
             .then((res) => {
               this.descriptions = res;
               res.forEach((desc) => {
-                const foundSkill = this.skillsInternal.find(skill => desc.skillId === skill.skillId);
+                const foundSkill = this.skillsInternal.find((skill) => desc.skillId === skill.skillId);
                 if (foundSkill) {
                   foundSkill.description = desc;
                 }

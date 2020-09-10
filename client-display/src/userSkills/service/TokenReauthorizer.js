@@ -21,7 +21,6 @@ import store from '@/store';
 // eslint-disable-next-line
 let service = {};
 
-
 const refreshAuthorization = (failedRequest) => {
   if (store.state.authToken === 'pki') {
     router.push({
@@ -66,7 +65,7 @@ const getErrorMsg = (errorResponse) => {
   return response;
 };
 
-axios.interceptors.response.use(response => response, (error) => {
+axios.interceptors.response.use((response) => response, (error) => {
   if (!error || !error.response || (error.response && error.response.status !== 401)) {
     const errorMessage = getErrorMsg(error);
     router.push({

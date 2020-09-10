@@ -92,7 +92,7 @@ const router = new VueRouter({
   ],
 });
 
-const isWildcardMatch = matched => matched.filter(item => item.path === '*').length > 0;
+const isWildcardMatch = (matched) => matched.filter((item) => item.path === '*').length > 0;
 
 router.beforeEach((to, from, next) => {
   if (!to.params.previousRoute && to.meta.setPreviousRoute !== false && !isWildcardMatch(to.matched)) {

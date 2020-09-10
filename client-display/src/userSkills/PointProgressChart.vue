@@ -114,7 +114,7 @@ limitations under the License.
 
         if (this.pointsHistory && this.pointsHistory.length > 0) {
           dataArray[0].data = this.pointsHistory
-            .map(value => ({
+            .map((value) => ({
               x: new Date(value.dayPerformed).getTime(),
               y: value.points,
             }));

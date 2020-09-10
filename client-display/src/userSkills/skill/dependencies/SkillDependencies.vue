@@ -163,12 +163,12 @@ limitations under the License.
         const skillId = params.nodes[0];
         let skillItem = null;
         let crossProj = false;
-        const depItem = this.dependencies.find(item => this.getNodeId(item.dependsOn) === skillId);
+        const depItem = this.dependencies.find((item) => this.getNodeId(item.dependsOn) === skillId);
         if (depItem) {
           skillItem = depItem.dependsOn;
           crossProj = depItem.crossProject;
         } else {
-          const found = this.dependencies.find(item => this.getNodeId(item.skill) === skillId);
+          const found = this.dependencies.find((item) => this.getNodeId(item.skill) === skillId);
           if (found) {
             skillItem = found.skill;
             crossProj = found.crossProject;

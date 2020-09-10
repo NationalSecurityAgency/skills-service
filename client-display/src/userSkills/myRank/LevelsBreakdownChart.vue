@@ -159,7 +159,7 @@ limitations under the License.
         return this.usersPerLevel === null;
       },
       hasData() {
-        const foundMoreThan0 = this.chartSeries[0].data.find(item => item.y > 0);
+        const foundMoreThan0 = this.chartSeries[0].data.find((item) => item.y > 0);
         return foundMoreThan0;
       },
       computeChartSeries() {

@@ -53,34 +53,34 @@ export default {
     let response = null;
     response = axios.get(`${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/summary`, {
       params: this.getUserIdAndVersionParams(),
-    }).then(result => result.data);
+    }).then((result) => result.data);
     return response;
   },
 
   getCustomIconCss() {
     let response = null;
     response = axios.get(`${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/customIconCss`, {
-    }).then(result => result.data);
+    }).then((result) => result.data);
     return response;
   },
 
   getCustomGlobalIconCss() {
     let response = null;
     response = axios.get(`${store.state.serviceUrl}/api/icons/customIconCss`, {
-    }).then(result => result.data);
+    }).then((result) => result.data);
     return response;
   },
 
   getSubjectSummary(subjectId) {
     return axios.get(`${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/subjects/${subjectId}/summary`, {
       params: this.getUserIdAndVersionParams(),
-    }).then(result => result.data);
+    }).then((result) => result.data);
   },
 
   getSkillDependencies(skillId) {
     return axios.get(`${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/skills/${skillId}/dependencies`, {
       params: this.getUserIdParams(),
-    }).then(result => result.data);
+    }).then((result) => result.data);
   },
 
   getSkillSummary(skillId, optionalCrossProjectId) {
@@ -91,7 +91,7 @@ export default {
     return axios.get(url, {
       params: this.getUserIdParams(),
       withCredentials: true,
-    }).then(result => result.data);
+    }).then((result) => result.data);
   },
 
   getBadgeSkills(badgeId, global) {
@@ -99,13 +99,13 @@ export default {
     requestParams.global = global;
     return axios.get(`${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/badges/${badgeId}/summary`, {
       params: requestParams,
-    }).then(result => result.data);
+    }).then((result) => result.data);
   },
 
   getBadgeSummaries() {
     return axios.get(`${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/badges/summary`, {
       params: this.getUserIdAndVersionParams(),
-    }).then(result => result.data);
+    }).then((result) => result.data);
   },
 
   getPointsHistory(subjectId) {
@@ -116,7 +116,7 @@ export default {
     }
     response = axios.get(url, {
       params: this.getUserIdAndVersionParams(),
-    }).then(result => result.data.pointsHistory);
+    }).then((result) => result.data.pointsHistory);
     return response;
   },
 
@@ -124,7 +124,7 @@ export default {
     let response = null;
     response = axios.get(`${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/addSkill/${userSkillId}`, {
       params: this.getUserIdParams(),
-    }).then(result => result.data);
+    }).then((result) => result.data);
     return response;
   },
 
@@ -136,7 +136,7 @@ export default {
     }
     response = axios.get(url, {
       params: this.getUserIdParams(),
-    }).then(result => result.data);
+    }).then((result) => result.data);
     return response;
   },
 
@@ -150,7 +150,7 @@ export default {
     requestParams.subjectId = subjectId;
     response = axios.get(url, {
       params: requestParams,
-    }).then(result => result.data);
+    }).then((result) => result.data);
     return response;
   },
 
@@ -164,7 +164,7 @@ export default {
       params: {
         subjectId,
       },
-    }).then(result => result.data);
+    }).then((result) => result.data);
     return response;
   },
 
@@ -178,7 +178,7 @@ export default {
         version: this.version,
         global: type === 'global-badge',
       },
-    }).then(result => result.data);
+    }).then((result) => result.data);
     return response;
   },
 
