@@ -55,6 +55,9 @@ class WebsocketSpecs extends DefaultIntSpec {
         subj2 = (1..4).collect { [projectId: projId, subjectId: "subj2", skillId: "s2${it}".toString(), name: "subj2 ${it}".toString(), type: "Skill", pointIncrement: 5, numPerformToCompletion: 10, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1] }
         subj3 = (1..5).collect { [projectId: projId, subjectId: "subj3", skillId: "s3${it}".toString(), name: "subj3 ${it}".toString(), type: "Skill", pointIncrement: 20, numPerformToCompletion: 10, totalPoints: 200, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1] }
         skillsService.createSchema([subj1, subj2, subj3])
+        if (!skillsService.isRoot()) {
+            skillsService.grantRoot()
+        }
     }
 
     def cleanup() {
@@ -114,6 +117,60 @@ class WebsocketSpecs extends DefaultIntSpec {
         wsResults.find{it.skillId=='badge1'}.completed.size() == 1
         wsResults.find{it.skillId=='badge1'}.completed[0].type == CompletionItem.CompletionItemType.Badge
         wsResults.find{it.skillId=='badge1'}.completed[0].name == badge.name
+    }
+
+    def "Non-notified global badge achievements are notified when user connects to websocket" () {
+        given:
+
+        def badge = SkillsFactory.createBadge()
+        badge.enabled = false
+        skillsService.createGlobalBadge(badge)
+        skillsService.assignSkillToGlobalBadge([projectId: projId, badgeId: badge.badgeId, skillId: subj1.get(0).skillId])
+        skillsService.assignSkillToGlobalBadge([projectId: projId, badgeId: badge.badgeId, skillId: subj2.get(0).skillId])
+
+        def badge2 = SkillsFactory.createBadge(1, 2)
+        badge2.enabled = false
+        skillsService.createGlobalBadge(badge2)
+        skillsService.assignSkillToGlobalBadge([projectId: projId, badgeId: badge2.badgeId, skillId: subj1.get(1).skillId])
+        skillsService.assignSkillToGlobalBadge([projectId: projId, badgeId: badge2.badgeId, skillId: subj2.get(1).skillId])
+
+        (0..9).each {
+            skillsService.addSkill([projectId: projId, skillId: subj1.get(0).skillId], 'skills@skills.org', new Date()-it)
+            skillsService.addSkill([projectId: projId, skillId: subj2.get(0).skillId], 'skills@skills.org', new Date()-it)
+        }
+
+        (0..9).each {
+            skillsService.addSkill([projectId: projId, skillId: subj1.get(1).skillId], 'skills2@skills.org', new Date()-it)
+            skillsService.addSkill([projectId: projId, skillId: subj2.get(1).skillId], 'skills2@skills.org', new Date()-it)
+        }
+
+        skillsService.createGlobalBadge([projectId: projId, badgeId: badge.badgeId, enabled: true, name: badge.name], badge.badgeId)
+        skillsService.createGlobalBadge([projectId: projId, badgeId: badge2.badgeId, enabled: true, name: badge2.name], badge2.badgeId)
+
+        List<SkillEventResult> wsResults = []
+        List<SkillEventResult> wsResults2 = []
+
+        when:
+        CountDownLatch messagesReceived = setupWebsocketConnection(wsResults, false, false, 1, 'skills@skills.org')
+        CountDownLatch messagesReceived2 = setupWebsocketConnection(wsResults2, false, false, 1, 'skills2@skills.org')
+        messagesReceived.await(30, TimeUnit.SECONDS)
+        messagesReceived2.await(30, TimeUnit.SECONDS)
+
+        then:
+        wsResults
+        wsResults2
+        wsResults.find{it.skillId=='badge1'}.success
+        wsResults.find{it.skillId=='badge1'}.completed
+        wsResults.find{it.skillId=='badge1'}.completed.size() == 1
+        wsResults.find{it.skillId=='badge1'}.completed[0].type == CompletionItem.CompletionItemType.GlobalBadge
+        wsResults.find{it.skillId=='badge1'}.completed[0].name == badge.name
+        !wsResults.find{it.skillId=='badge2'}
+        wsResults2.find{it.skillId=='badge2'}.success
+        wsResults2.find{it.skillId=='badge2'}.completed
+        wsResults2.find{it.skillId=='badge2'}.completed.size() == 1
+        wsResults2.find{it.skillId=='badge2'}.completed[0].type == CompletionItem.CompletionItemType.GlobalBadge
+        wsResults2.find{it.skillId=='badge2'}.completed[0].name == badge2.name
+        !wsResults2.find{it.skillId=='badge1'}
     }
 
     def "non-notified skill achievements are notified when user connects to websocket" () {

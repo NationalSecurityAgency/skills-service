@@ -19,16 +19,32 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.stereotype.Component
+import skills.websocket.SubscribedDestinationRegistry
 
 @Component
 @Slf4j
 class SkillEventPublisher {
 
     @Autowired
+    SubscribedDestinationRegistry destinationRegistry
+
+    @Autowired
     final SimpMessagingTemplate messagingTemplate;
 
     void publishSkillUpdate(SkillEventResult result, String userId) {
-        log.debug("Reporting user skill for user [$userId], result [$result]")
-        messagingTemplate.convertAndSendToUser(userId, "/queue/${result.projectId}-skill-updates", result)
+        log.debug("Reporting user skill for user [{}}], result [{}}]", userId, result)
+        if (result.projectId) {
+            messagingTemplate.convertAndSendToUser(userId, "/queue/${result.projectId}-skill-updates", result)
+        } else {
+            List<String> destinations = destinationRegistry.getAllDestinationsForUser(userId)
+            if (log.isDebugEnabled()) {
+                log.debug("got [${destinations?.size()}] subscribed destinations for user [$userId]")
+            }
+            destinations = destinations?.unique()
+            destinations?.each {
+                it = it.replace("/user", "")
+                messagingTemplate.convertAndSendToUser(userId, it, result)
+            }
+        }
     }
 }

@@ -96,7 +96,13 @@ class SkillEventsService {
             SkillEventResult ser
 
             pendingNotificationAchievements?.each {
-                SkillEventsSupportRepo.SkillDefMin skill = skillEventsSupportRepo.findByProjectIdAndSkillId(it.projectId, it.skillId)
+                SkillEventsSupportRepo.SkillDefMin skill
+
+                if(it.projectId) {
+                    skill = skillEventsSupportRepo.findByProjectIdAndSkillId(it.projectId, it.skillId)
+                } else {
+                    skill = skillEventsSupportRepo.findBySkillIdWhereProjectIdIsNull(it.skillId)
+                }
 
                 if (!ser) {
                     ser = new SkillEventResult(projectId: it.projectId, skillId: it.skillId, name: skill.name)
