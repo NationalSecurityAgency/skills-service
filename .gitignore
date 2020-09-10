@@ -45,3 +45,5 @@ service/src/main/resources/public/**
 .history
 /e2e-tests/cypress/screenshots/
 /e2e-tests/cypress/snapshots/
+
+/dashboard/build/
