@@ -33,11 +33,13 @@ class SkillEventPublisher {
 
     void publishSkillUpdate(SkillEventResult result, String userId) {
         log.debug("Reporting user skill for user [$userId], result [$result]")
-        if(result.projectId) {
+        if (result.projectId) {
             messagingTemplate.convertAndSendToUser(userId, "/queue/${result.projectId}-skill-updates", result)
         } else {
             List<String> destinations = destinationRegistry.getAllDestinationsForUser(userId)
-            log.debug("got [${destinations?.size()}] subscribed destinations for user [$userId]")
+            if (log.isDebugEnabled()) {
+                log.debug("got [${destinations?.size()}] subscribed destinations for user [$userId]")
+            }
             destinations = destinations?.unique()
             destinations?.each {
                 it = it.replace("/user", "")
