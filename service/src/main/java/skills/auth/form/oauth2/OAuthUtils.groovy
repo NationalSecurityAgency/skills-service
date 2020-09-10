@@ -33,8 +33,6 @@ import skills.auth.UserInfo
 import javax.servlet.http.HttpServletRequest
 import javax.transaction.Transactional
 
-import static AuthorizationServerConfig.SKILLS_PROXY_USER
-
 @Component
 @Conditional(SecurityMode.FormAuth)
 @Slf4j
@@ -56,8 +54,8 @@ class OAuthUtils {
         Authentication skillsAuth
         OAuth2AuthenticationDetails oauthDetails = (OAuth2AuthenticationDetails) auth.getDetails()
         Map claims = oauthDetails.getDecodedDetails()
-        if (claims && claims.get(SKILLS_PROXY_USER)) {
-            String proxyUserId = claims.get(SKILLS_PROXY_USER)
+        if (claims && claims.get(AuthorizationServerConfig.SKILLS_PROXY_USER)) {
+            String proxyUserId = claims.get(AuthorizationServerConfig.SKILLS_PROXY_USER)
             log.info("Loading proxyUser [${proxyUserId}]")
             UserInfo currentUser = new UserInfo(
                     username: proxyUserId,
@@ -67,7 +65,7 @@ class OAuthUtils {
             // Create new Authentication using UserInfo
             skillsAuth = new UsernamePasswordAuthenticationToken(currentUser, null, currentUser.authorities)
         } else {
-            throw new InvalidTokenException("client_credentials grant_type must specify $SKILLS_PROXY_USER field")
+            throw new InvalidTokenException("client_credentials grant_type must specify $AuthorizationServerConfig.SKILLS_PROXY_USER field")
         }
         return skillsAuth
     }
