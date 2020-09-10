@@ -49,15 +49,15 @@
     "fake-smtp:stop": "fuser -k 1081/tcp"
   },
   "devDependencies": {
-    "@bahmutov/print-env": "1.2.0",
-    "cypress": "4.1.0",
-    "cypress-file-upload": "3.5.3",
+    "@bahmutov/print-env": "2.1.2",
+    "cypress": "5.1.0",
+    "cypress-file-upload": "4.1.1",
     "cypress-image-snapshot": "3.1.1",
-    "eslint": "6.8.0",
+    "eslint": "7.8.1",
     "license-check-and-add": "3.0.4",
     "license-checker": "25.0.1",
-    "moment": "2.24.0",
-    "wait-on": "3.3.0",
+    "moment": "2.27.0",
+    "wait-on": "5.2.0",
     "fake-smtp-server": "0.8.0"
   },
   "dependencies": {}
