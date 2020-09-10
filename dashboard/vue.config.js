@@ -100,7 +100,7 @@ module.exports = {
         ...findLinkedModules(path.resolve('node_modules')),
       ],
     },
-    devtool: 'cheap-module-eval-source-map',
+    devtool: 'eval-nosources-source-map',
     // optimization: { minimize: false },
   },
 

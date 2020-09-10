@@ -55,7 +55,7 @@ limitations under the License.
   import NoContent3 from '../utils/NoContent3';
 
   export default {
-    name: 'SectionMetrics',
+    name: 'SectionMetricsNotUsed',
     components: {
       SkillsSpinner,
       SimpleCard,

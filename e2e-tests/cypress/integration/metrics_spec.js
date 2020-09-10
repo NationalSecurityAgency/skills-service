@@ -13,16 +13,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-describe('Metrics Specs', () => {
-  beforeEach(() => {
-    cy.server()
-      .route('GET', '/metrics/global').as('getMetrics')
-      .route('GET', '/app/userInfo').as('getUserInfo')
-  });
+describe('Metrics Tests', () => {
+    beforeEach(() => {
+        cy.request('POST', '/app/projects/proj1', {
+            projectId: 'proj1',
+            name: "proj1"
+        })
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            name: "Subject 1",
+        })
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1', {
+            projectId: 'proj1',
+            subjectId: "subj1",
+            skillId: "skill1",
+            name: "Skill 1",
+            pointIncrement: '50',
+            numPerformToCompletion: '5',
+        });
+        cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'user0', timestamp: new Date().getTime()})
+        cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'user1', timestamp: new Date().getTime()})
+        cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'user2', timestamp: new Date().getTime()})
+        cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'user0', timestamp: new Date().getTime() - 1000*60*60*24})
+        cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'user0', timestamp: new Date().getTime() - 1000*60*60*24 *2})
+    });
 
-  it('global metrics page loads', function () {
-    cy.visit('/metrics');
-    cy.contains('No Metrics Yet').should('be.visible');
-  });
+    it('markdown features', () => {
+        cy.visit('/projects/proj1/');
+        cy.clickNav('Metrics');
 
-});
+    })
+})

@@ -37,23 +37,33 @@ class AdminMetricsController {
     @Autowired
     MetricsService metricsService
 
-    @RequestMapping(value = "/projects/{projectId}/{section}/{sectionId}/metrics", method =  RequestMethod.GET, produces = "application/json")
-    List<MetricsChart> getAllSectionMetricsCharts(@PathVariable("projectId") String projectId,
-                                                  @PathVariable("section") Section section,
-                                                  @PathVariable(ChartParams.SECTION_ID) String sectionId,
+    @Autowired
+    skills.metricsNew.MetricsServiceNew metricsServiceNew
+
+//    @RequestMapping(value = "/projects/{projectId}/{section}/{sectionId}/metrics", method =  RequestMethod.GET, produces = "application/json")
+//    List<MetricsChart> getAllSectionMetricsCharts(@PathVariable("projectId") String projectId,
+//                                                  @PathVariable("section") Section section,
+//                                                  @PathVariable(ChartParams.SECTION_ID) String sectionId,
+//                                                  @RequestParam Map<String,String> chartProps) {
+//        chartProps.put(ChartParams.SECTION_ID, sectionId)
+//        return metricsService.loadChartsForSection(section, projectId, chartProps)
+//    }
+
+    @RequestMapping(value = "/projects/{projectId}/charts/{chartId}", method =  RequestMethod.GET, produces = "application/json")
+    def getChartData(@PathVariable("projectId") String projectId,
+                                                  @PathVariable("chartId") String chartId,
                                                   @RequestParam Map<String,String> chartProps) {
-        chartProps.put(ChartParams.SECTION_ID, sectionId)
-        return metricsService.loadChartsForSection(section, projectId, chartProps)
+        return metricsServiceNew.loadChart(projectId, chartId, chartProps)
     }
 
-    @RequestMapping(value = "/projects/{projectId}/{section}/{sectionId}/metrics/{chartBuilderId}", method =  RequestMethod.GET, produces = "application/json")
-    MetricsChart getSectionMetricsChart(@PathVariable("projectId") String projectId,
-                                        @PathVariable("section") Section section,
-                                        @PathVariable(ChartParams.SECTION_ID) String sectionId,
-                                        @PathVariable(ChartParams.CHART_BUILDER_ID) String chartBuilderId,
-                                        @RequestParam Map<String,String> chartProps) {
-        chartProps.put(ChartParams.SECTION_ID, sectionId)
-        return metricsService.loadChartForSection(chartBuilderId, section, projectId, chartProps)
-    }
+//    @RequestMapping(value = "/projects/{projectId}/{section}/{sectionId}/metrics/{chartBuilderId}", method =  RequestMethod.GET, produces = "application/json")
+//    MetricsChart getSectionMetricsChart(@PathVariable("projectId") String projectId,
+//                                        @PathVariable("section") Section section,
+//                                        @PathVariable(ChartParams.SECTION_ID) String sectionId,
+//                                        @PathVariable(ChartParams.CHART_BUILDER_ID) String chartBuilderId,
+//                                        @RequestParam Map<String,String> chartProps) {
+//        chartProps.put(ChartParams.SECTION_ID, sectionId)
+//        return metricsService.loadChartForSection(chartBuilderId, section, projectId, chartProps)
+//    }
 
 }
