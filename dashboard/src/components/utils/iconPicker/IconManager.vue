@@ -115,7 +115,6 @@ limitations under the License.
   import IconManagerService from './IconManagerService';
   import ToastSupport from '../ToastSupport';
 
-
   const faIconList = fontAwesomeIconsCanonical.icons.slice();
   const matIconList = materialIconsCanonical.icons.slice();
   const customIconList = [];
@@ -220,7 +219,7 @@ limitations under the License.
         if (value) {
           const file = value.get('customIcon');
 
-          const index = definitiveCustomIconList.findIndex(item => item.filename === file.name);
+          const index = definitiveCustomIconList.findIndex((item) => item.filename === file.name);
           if (index >= 0) {
             resolve({
               valid: false,
@@ -372,7 +371,7 @@ limitations under the License.
         const value = val.trim();
         const iconPack = this.activePack;
         const regex = new RegExp(value, 'gi');
-        const filter = icon => icon.name.match(regex);
+        const filter = (icon) => icon.name.match(regex);
 
         if (iconPack === fontAwesomeIconsCanonical.iconPack) {
           const filtered = value.length === 0 ? groupIntoRows(faIconList, rowLength) : groupIntoRows(faIconList.filter(filter), rowLength);
@@ -394,7 +393,7 @@ limitations under the License.
       },
       deleteIcon(iconName, projectId) {
         IconManagerService.deleteIcon(iconName, projectId).then(() => {
-          definitiveCustomIconList = definitiveCustomIconList.filter(element => element.filename !== iconName);
+          definitiveCustomIconList = definitiveCustomIconList.filter((element) => element.filename !== iconName);
           this.customIconList = definitiveCustomIconList;
         });
       },

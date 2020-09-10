@@ -75,7 +75,7 @@ router.beforeEach((to, from, next) => {
     if (isActiveProjectIdChange(to, from)) {
       store.commit('currentProjectId', to.params.projectId);
     }
-    if (to.matched.some(record => record.meta.requiresAuth)) {
+    if (to.matched.some((record) => record.meta.requiresAuth)) {
       // this route requires auth, check if logged in if not, redirect to login page.
       if (!isLoggedIn()) {
         const newRoute = { query: { redirect: to.fullPath } };

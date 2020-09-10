@@ -104,8 +104,8 @@ limitations under the License.
       loadAvailableBadgeSkills(query) {
         GlobalBadgeService.suggestProjectSkills(this.badgeId, query)
           .then((res) => {
-            const badgeSkillIds = this.badgeSkills.map(item => `${item.projectId}${item.skillId}`);
-            this.availableSkills = res.suggestedSkills.filter(item => !badgeSkillIds.includes(`${item.projectId}${item.skillId}`));
+            const badgeSkillIds = this.badgeSkills.map((item) => `${item.projectId}${item.skillId}`);
+            this.availableSkills = res.suggestedSkills.filter((item) => !badgeSkillIds.includes(`${item.projectId}${item.skillId}`));
             if (res.totalAvailable > res.suggestedSkills.length) {
               this.afterListSlotText = `Showing ${res.suggestedSkills.length} of ${res.totalAvailable} results.  Use search to narrow results.`;
             } else {
@@ -126,7 +126,7 @@ limitations under the License.
         this.loading.skillOp = true;
         GlobalBadgeService.removeSkillFromBadge(this.badgeId, deletedItem.projectId, deletedItem.skillId)
           .then(() => {
-            this.badgeSkills = this.badgeSkills.filter(item => `${item.projectId}${item.skillId}` !== `${deletedItem.projectId}${deletedItem.skillId}`);
+            this.badgeSkills = this.badgeSkills.filter((item) => `${item.projectId}${item.skillId}` !== `${deletedItem.projectId}${deletedItem.skillId}`);
             this.availableSkills.unshift(deletedItem);
             this.loadGlobalBadgeDetailsState({ badgeId: this.badgeId });
             this.loading.skillOp = false;
@@ -138,7 +138,7 @@ limitations under the License.
         GlobalBadgeService.assignSkillToBadge(this.badgeId, newItem.projectId, newItem.skillId)
           .then(() => {
             this.badgeSkills.push(newItem);
-            this.availableSkills = this.availableSkills.filter(item => `${item.projectId}${item.skillId}` !== `${newItem.projectId}${newItem.skillId}`);
+            this.availableSkills = this.availableSkills.filter((item) => `${item.projectId}${item.skillId}` !== `${newItem.projectId}${newItem.skillId}`);
             this.loadGlobalBadgeDetailsState({ badgeId: this.badgeId });
             this.loading.skillOp = false;
             this.$emit('skills-changed', newItem);

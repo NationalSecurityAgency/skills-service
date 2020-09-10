@@ -102,7 +102,7 @@ const actions = {
             });
           }
         })
-        .catch(error => reject(error));
+        .catch((error) => reject(error));
     });
   },
   login({ commit, dispatch }, authData) {
@@ -115,7 +115,7 @@ const actions = {
               resolve(result);
             });
         })
-        .catch(error => reject(error));
+        .catch((error) => reject(error));
     });
   },
   oAuth2Login({ commit }, oAuthId) {
@@ -160,7 +160,7 @@ const actions = {
             commit('clearAuthData');
           }
           resolve(reAuthenticated);
-        }).catch(error => reject(error));
+        }).catch((error) => reject(error));
       }
     });
   },
@@ -185,7 +185,7 @@ const actions = {
           }
           resolve(response);
         })
-        .catch(error => reject(error));
+        .catch((error) => reject(error));
     });
   },
 };

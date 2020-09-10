@@ -21,7 +21,6 @@ limitations under the License.
       </span>
     </page-header>
 
-
     <navigation :nav-items="[
           {name: 'Skills', iconClass: 'fa-graduation-cap', page: 'GlobalBadgeSkills'},
           {name: 'Levels', iconClass: 'fa-trophy', page: 'GlobalBadgeLevels'},

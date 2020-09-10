@@ -20,7 +20,6 @@ limitations under the License.
         <h4 class="text-white">Markdown Syntax</h4>
       </div>
 
-
       <div class="card-body">
         <div class="card-text">
           <p class="card-title">Descriptions support GFM (Git Flavored Markdown). Some limited examples of the supported
@@ -88,7 +87,6 @@ limitations under the License.
           <pre class="bg-light"><code>
         [in line link](https://www.somewebsite.com)
         </code></pre>
-
 
           <h3>
             Blockquotes

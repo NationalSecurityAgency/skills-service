@@ -120,7 +120,7 @@ limitations under the License.
       },
       updateUserInfo() {
         this.isSaving = true;
-        const userInfo = Object.assign({}, this.$store.getters.userInfo, this.loginFields);
+        const userInfo = { ...this.$store.getters.userInfo, ...this.loginFields };
         SettingsService.saveUserInfo(userInfo).then(() => {
           this.$store.commit('storeUser', userInfo);
           this.successToast('Saved', 'Updated User Info Successful!');

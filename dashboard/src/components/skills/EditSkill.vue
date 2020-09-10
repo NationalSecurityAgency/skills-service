@@ -258,7 +258,7 @@ limitations under the License.
       if (this.isEdit) {
         this.loadSkillDetails();
       } else {
-        this.skillInternal = Object.assign({ version: 0 }, this.skillInternal);
+        this.skillInternal = { version: 0, ...this.skillInternal };
         this.findLatestSkillVersion();
       }
       this.setupValidation();
@@ -310,7 +310,7 @@ limitations under the License.
 
         const self = this;
         Validator.extend('uniqueName', {
-          getMessage: field => `The value for the ${field} is already taken.`,
+          getMessage: (field) => `The value for the ${field} is already taken.`,
           validate(value) {
             if (self.isEdit && (value === self.initial.skillName || self.initial.skillName.localeCompare(value, 'en', { sensitivity: 'base' }) === 0)) {
               return true;
@@ -322,7 +322,7 @@ limitations under the License.
         });
 
         Validator.extend('uniqueId', {
-          getMessage: field => `The value for the ${field} is already taken.`,
+          getMessage: (field) => `The value for the ${field} is already taken.`,
           validate(value) {
             if (self.isEdit && self.initial.skillId === value) {
               return true;
@@ -350,7 +350,7 @@ limitations under the License.
           immediate: false,
         });
         Validator.extend('cantBe0IfHours0', {
-          getMessage: field => `${field} must be > 0 if Hours = 0`,
+          getMessage: (field) => `${field} must be > 0 if Hours = 0`,
           validate(value) {
             if (parseInt(value, 10) > 0 || parseInt(self.skillInternal.pointIncrementIntervalHrs, 10) > 0) {
               return true;
@@ -361,7 +361,7 @@ limitations under the License.
           immediate: false,
         });
         Validator.extend('cantBe0IfMins0', {
-          getMessage: field => `${field} must be > 0 if Minutes = 0`,
+          getMessage: (field) => `${field} must be > 0 if Minutes = 0`,
           validate(value) {
             if (parseInt(value, 10) > 0 || parseInt(self.skillInternal.pointIncrementIntervalMins, 10) > 0) {
               return true;
@@ -426,7 +426,7 @@ limitations under the License.
               this.skillInternal.name = InputSanitizer.sanitize(this.skillInternal.name);
               this.skillInternal.skillId = InputSanitizer.sanitize(this.skillInternal.skillId);
               this.skillInternal.helpUrl = InputSanitizer.sanitize(this.skillInternal.helpUrl);
-              this.skillInternal = Object.assign({ subjectId: this.subjectId }, this.skillInternal);
+              this.skillInternal = { subjectId: this.subjectId, ...this.skillInternal };
               this.$emit('skill-saved', this.skillInternal);
               this.close();
             }
@@ -435,7 +435,7 @@ limitations under the License.
       loadSkillDetails() {
         SkillsService.getSkillDetails(this.projectId, this.subjectId, this.skillId)
           .then((loadedSkill) => {
-            this.skillInternal = Object.assign({ originalSkillId: loadedSkill.skillId, isEdit: this.isEdit }, loadedSkill);
+            this.skillInternal = { originalSkillId: loadedSkill.skillId, isEdit: this.isEdit, ...loadedSkill };
             this.initial.skillId = this.skillInternal.skillId;
             this.initial.skillName = this.skillInternal.name;
           })

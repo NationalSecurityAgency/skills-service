@@ -26,8 +26,8 @@ export default {
     if (url) {
       return axios
         .get(url)
-        .then(response => response.data);
+        .then((response) => response.data);
     }
-    return new Promise(resolve => resolve(null));
+    return new Promise((resolve) => resolve(null));
   },
 };

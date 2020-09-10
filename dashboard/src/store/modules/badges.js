@@ -36,7 +36,7 @@ const actions = {
           commit('setBadge', response);
           resolve(response);
         })
-        .catch(error => reject(error));
+        .catch((error) => reject(error));
     });
   },
   loadGlobalBadgeDetailsState({ commit }, payload) {
@@ -46,7 +46,7 @@ const actions = {
           commit('setBadge', response);
           resolve(response);
         })
-        .catch(error => reject(error));
+        .catch((error) => reject(error));
     });
   },
 };

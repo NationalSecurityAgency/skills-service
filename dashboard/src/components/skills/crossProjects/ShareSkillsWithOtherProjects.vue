@@ -157,7 +157,7 @@ limitations under the License.
       },
       doesShareAlreadyExist() {
         const selectedSkill = this.selectedSkills[0];
-        const alreadyExist = this.sharedSkills.find(entry => entry.skillId === selectedSkill.skillId && (!entry.projectId || this.shareWithAllProjects || entry.projectId === this.selectedProject.projectId));
+        const alreadyExist = this.sharedSkills.find((entry) => entry.skillId === selectedSkill.skillId && (!entry.projectId || this.shareWithAllProjects || entry.projectId === this.selectedProject.projectId));
         if (alreadyExist) {
           if (alreadyExist.sharedWithAllProjects) {
             this.errorMessage = `Skill <strong>[${selectedSkill.name}]</strong> is already shared to <strong>[All Projects]</strong>.`;

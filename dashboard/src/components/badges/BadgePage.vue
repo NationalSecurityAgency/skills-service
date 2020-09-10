@@ -21,7 +21,6 @@ limitations under the License.
       </span>
     </page-header>
 
-
     <navigation :nav-items="[
           {name: 'Skills', iconClass: 'fa-graduation-cap', page: 'BadgeSkills'},
           {name: 'Users', iconClass: 'fa-users', page: 'BadgeUsers'},

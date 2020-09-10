@@ -124,17 +124,17 @@ limitations under the License.
     },
     methods: {
       updateNodes() {
-        const newItems = this.dependentSkills.filter(item => !this.nodes.get().find(item1 => item1.id === item.id));
+        const newItems = this.dependentSkills.filter((item) => !this.nodes.get().find((item1) => item1.id === item.id));
         newItems.forEach((newItem) => {
           const nodeEdgeData = this.buildNodeEdgeData(newItem);
           this.edges.add(nodeEdgeData.edge);
           this.nodes.add(nodeEdgeData.node);
         });
 
-        const removeItems = this.nodes.get().filter(item => !this.dependentSkills.find(item1 => item1.id === item.id) && item.id !== this.skill.id);
+        const removeItems = this.nodes.get().filter((item) => !this.dependentSkills.find((item1) => item1.id === item.id) && item.id !== this.skill.id);
         removeItems.forEach((item) => {
           this.nodes.remove(item.id);
-          const edgeToRemove = this.edges.get().find(edgeItem => edgeItem.to === item.id);
+          const edgeToRemove = this.edges.get().find((edgeItem) => edgeItem.to === item.id);
           this.edges.remove(edgeToRemove);
         });
       },
@@ -172,7 +172,7 @@ limitations under the License.
               background: 'lightgreen',
             };
             // newNode.shape = 'circle';
-          } else if (!this.dependentSkills.find(elem => elem.id === newNode.id)) {
+          } else if (!this.dependentSkills.find((elem) => elem.id === newNode.id)) {
             newNode.color = {
               border: 'darkgray',
               background: 'lightgray',

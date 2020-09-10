@@ -102,12 +102,12 @@ limitations under the License.
     methods: {
       setSelectedInternal() {
         if (this.selected) {
-          this.selectedInternal = this.selected.map(entry => Object.assign({ entryId: `${entry.projectId}_${entry.skillId}` }, entry));
+          this.selectedInternal = this.selected.map((entry) => ({ entryId: `${entry.projectId}_${entry.skillId}`, ...entry }));
         }
       },
       setOptionsInternal() {
         if (this.options) {
-          this.optionsInternal = this.options.map(entry => Object.assign({ entryId: `${entry.projectId}_${entry.skillId}` }, entry));
+          this.optionsInternal = this.options.map((entry) => ({ entryId: `${entry.projectId}_${entry.skillId}`, ...entry }));
         }
       },
       considerRemoval(removedItem, removeMethod) {
@@ -147,7 +147,6 @@ limitations under the License.
   .remove-x:hover {
     cursor: pointer;
   }
-
 
 </style>
 

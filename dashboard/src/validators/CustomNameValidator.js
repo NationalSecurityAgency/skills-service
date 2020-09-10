@@ -18,13 +18,13 @@ import store from '../store/store';
 import CustomValidatorService from './CustomValidatorsService';
 
 const validator = {
-  getMessage: field => `${field} - ${store.getters.config.nameValidationMessage}.`,
+  getMessage: (field) => `${field} - ${store.getters.config.nameValidationMessage}.`,
   validate(value) {
     if (!store.getters.config.nameValidationRegex) {
       return true;
     }
 
-    return CustomValidatorService.validateName(value).then(result => result.valid);
+    return CustomValidatorService.validateName(value).then((result) => result.valid);
   },
 };
 

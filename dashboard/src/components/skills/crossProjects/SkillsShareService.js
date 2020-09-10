@@ -24,11 +24,11 @@ export default {
   },
   getSharedSkills(projectId) {
     return axios.get(`/admin/projects/${projectId}/shared`)
-      .then(response => response.data);
+      .then((response) => response.data);
   },
   getSharedWithmeSkills(projectId) {
     return axios.get(`/admin/projects/${projectId}/sharedWithMe`)
-      .then(response => response.data);
+      .then((response) => response.data);
   },
 
 };

@@ -18,7 +18,7 @@ import VeeValidate from 'vee-validate';
 const numericRegex = /^[0-9]+$/;
 
 const validator = {
-  getMessage: field => `The ${field} field may only contain numeric characters.`,
+  getMessage: (field) => `The ${field} field may only contain numeric characters.`,
   validate(value) {
     const testValue = (val) => {
       const strValue = String(val);

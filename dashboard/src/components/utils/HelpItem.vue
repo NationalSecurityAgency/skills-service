@@ -26,7 +26,6 @@ limitations under the License.
   };
 </script>
 
-
 <style lang="scss" scoped>
   @import "../../styles/palette";
 

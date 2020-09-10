@@ -80,7 +80,7 @@ limitations under the License.
       role: {
         type: String,
         default: 'ROLE_PROJECT_ADMIN',
-        validator: value => ([ROLE_APP_USER, ROLE_PROJECT_ADMIN, ROLE_SUPERVISOR, ROLE_SUPER_DUPER_USER].indexOf(value) >= 0),
+        validator: (value) => ([ROLE_APP_USER, ROLE_PROJECT_ADMIN, ROLE_SUPERVISOR, ROLE_SUPER_DUPER_USER].indexOf(value) >= 0),
       },
       roleDescription: {
         type: String,
@@ -146,8 +146,8 @@ limitations under the License.
       deleteUserRole(row) {
         AccessService.deleteUserRole(row.projectId, row.userId, row.roleName)
           .then(() => {
-            this.data = this.data.filter(item => item.userId !== row.userId);
-            this.userIds = this.userIds.filter(userId => userId !== row.userIdForDisplay);
+            this.data = this.data.filter((item) => item.userId !== row.userId);
+            this.userIds = this.userIds.filter((userId) => userId !== row.userIdForDisplay);
             this.$emit('role-deleted', { userId: row.userId, role: row.roleName });
           });
       },

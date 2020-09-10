@@ -110,7 +110,7 @@ limitations under the License.
     },
     computed: {
       isDirty() {
-        const foundDirty = Object.values(this.settings).find(item => item.dirty);
+        const foundDirty = Object.values(this.settings).find((item) => item.dirty);
         return foundDirty;
       },
     },
@@ -128,9 +128,9 @@ limitations under the License.
               const entries = Object.entries(this.settings);
               entries.forEach((entry) => {
                 const [key, value] = entry;
-                const found = response.find(item => item.setting === value.setting);
+                const found = response.find((item) => item.setting === value.setting);
                 if (found) {
-                  this.settings[key] = Object.assign({ dirty: false, lastLoadedValue: found.value }, found);
+                  this.settings[key] = { dirty: false, lastLoadedValue: found.value, ...found };
                 }
               });
             }
@@ -140,7 +140,7 @@ limitations under the License.
           });
       },
       save() {
-        const dirtyChanges = Object.values(this.settings).filter(item => item.dirty);
+        const dirtyChanges = Object.values(this.settings).filter((item) => item.dirty);
         if (dirtyChanges) {
           this.isLoading = true;
           SettingService.checkSettingsValidity(this.$route.params.projectId, dirtyChanges)

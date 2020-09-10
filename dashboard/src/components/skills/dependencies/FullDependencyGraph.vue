@@ -37,7 +37,6 @@ limitations under the License.
   </div>
 </template>
 
-
 <script>
   import vis from 'vis';
   import 'vis/dist/vis.css';

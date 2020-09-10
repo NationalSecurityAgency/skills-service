@@ -143,7 +143,7 @@ limitations under the License.
       levelDeleted(deletedItem) {
         GlobalBadgeService.removeProjectLevelFromBadge(this.badgeId, deletedItem.projectId, deletedItem.level)
           .then(() => {
-            this.badgeLevels = this.badgeLevels.filter(item => `${item.projectId}${item.level}` !== `${deletedItem.projectId}${deletedItem.level}`);
+            this.badgeLevels = this.badgeLevels.filter((item) => `${item.projectId}${item.level}` !== `${deletedItem.projectId}${deletedItem.level}`);
             this.loadGlobalBadgeDetailsState({ badgeId: this.badgeId });
             this.$refs.projectSelectorRef.loadProjectsForBadge();
             this.$emit('global-badge-levels-changed', deletedItem);

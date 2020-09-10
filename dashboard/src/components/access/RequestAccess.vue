@@ -131,7 +131,7 @@ limitations under the License.
         this.$validator.validate().then((valid) => {
           if (valid) {
             this.createInProgress = true;
-            this.$store.dispatch('signup', Object.assign({ isRootAccount: this.isRootAccount }, this.loginFields)).then(() => {
+            this.$store.dispatch('signup', { isRootAccount: this.isRootAccount, ...this.loginFields }).then(() => {
               this.$router.push({ name: 'HomePage' });
             });
           }

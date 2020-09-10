@@ -38,7 +38,7 @@ const actions = {
           commit('setConfig', response);
           resolve(response);
         })
-        .catch(error => reject(error));
+        .catch((error) => reject(error));
     });
   },
 };

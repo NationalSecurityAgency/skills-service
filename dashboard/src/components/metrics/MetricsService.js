@@ -19,30 +19,30 @@ export default {
   getChartsForSection(sectionParams) {
     const url = `/admin/projects/${sectionParams.projectId}/${sectionParams.section}/${sectionParams.sectionIdParam}/metrics?numDays=${sectionParams.numDays}&numMonths=${sectionParams.numMonths}&loadDataForFirst=${sectionParams.loadDataForFirst}`;
     return axios.get(url)
-      .then(response => Promise.resolve(this.buildCharts(response.data)));
+      .then((response) => Promise.resolve(this.buildCharts(response.data)));
   },
 
   getGlobalChartsForSection(sectionParams) {
     const url = `/metrics/${sectionParams.section}?numDays=${sectionParams.numDays}&numMonths=${sectionParams.numMonths}&loadDataForFirst=${sectionParams.loadDataForFirst}`;
     const self = this;
     return axios.get(url)
-      .then(response => Promise.resolve(self.buildCharts(response.data)));
+      .then((response) => Promise.resolve(self.buildCharts(response.data)));
   },
 
   getGlobalChartForSection(sectionParams) {
     const url = `/metrics/${sectionParams.section}/${sectionParams.sectionIdParam}/metric/${sectionParams.chartBuilderId}?numDays=${sectionParams.numDays}&numMonths=${sectionParams.numMonths}&loadDataForFirst=${sectionParams.loadDataForFirst}`;
     return axios.get(url)
-      .then(response => Promise.resolve(this.buildCharts(response.data)));
+      .then((response) => Promise.resolve(this.buildCharts(response.data)));
   },
 
   getChartForSection(sectionParams) {
     const url = `/admin/projects/${sectionParams.projectId}/${sectionParams.section}/${sectionParams.sectionIdParam}/metrics/${sectionParams.chartBuilderId}?numDays=${sectionParams.numDays}&numMonths=${sectionParams.numMonths}`;
     return axios.get(url)
-      .then(response => Promise.resolve(this.buildChart(response.data)));
+      .then((response) => Promise.resolve(this.buildChart(response.data)));
   },
 
   buildCharts(data) {
-    return data.map(item => this.buildChart(item));
+    return data.map((item) => this.buildChart(item));
   },
 
   buildChart(chartData) {
@@ -66,11 +66,11 @@ export default {
     let seriesData = null;
 
     if (chartData.chartType.toLowerCase() === 'pie') {
-      seriesData = chartData.dataItems.map(dataItem => dataItem.count);
+      seriesData = chartData.dataItems.map((dataItem) => dataItem.count);
       return seriesData;
     }
 
-    seriesData = chartData.dataItems.map(dataItem => ({ x: dataItem.value, y: dataItem.count }));
+    seriesData = chartData.dataItems.map((dataItem) => ({ x: dataItem.value, y: dataItem.count }));
     const sortAsc = (a, b) => a.y - b.y;
     const sortDsc = (a, b) => b.y - a.y;
 

@@ -54,7 +54,7 @@ const actions = {
           commit('setUserTotalPoints', response.userTotalPoints);
           resolve(response);
         })
-        .catch(error => reject(error));
+        .catch((error) => reject(error));
     });
   },
 };

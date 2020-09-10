@@ -50,7 +50,7 @@ limitations under the License.
     data() {
       return {
         isLoading: false,
-        projectInternal: Object.assign({}, this.project),
+        projectInternal: { ...this.project },
         cardOptions: {},
         showEditProjectModal: false,
         deleteProjectDisabled: false,

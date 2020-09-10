@@ -51,7 +51,7 @@ limitations under the License.
     },
     methods: {
       loadNavItems() {
-        const globalBadges = this.navItems.find(element => element.name === 'Badges');
+        const globalBadges = this.navItems.find((element) => element.name === 'Badges');
         if (this.isSupervisor) {
           if (!globalBadges) {
             this.navItems.splice(1, 0, { name: 'Badges', iconClass: 'fa-globe-americas', page: 'GlobalBadges' });
@@ -66,7 +66,6 @@ limitations under the License.
     },
   };
 </script>
-
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>

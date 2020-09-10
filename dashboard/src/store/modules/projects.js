@@ -35,7 +35,7 @@ const actions = {
           commit('setProject', response);
           resolve(response);
         })
-        .catch(error => reject(error));
+        .catch((error) => reject(error));
     });
   },
 };

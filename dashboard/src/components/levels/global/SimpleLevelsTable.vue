@@ -93,7 +93,6 @@ limitations under the License.
     }
   }
 
-
   #simple-skills-table .notactive {
     cursor: not-allowed;
     pointer-events: none;

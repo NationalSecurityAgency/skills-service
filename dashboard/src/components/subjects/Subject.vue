@@ -62,7 +62,7 @@ limitations under the License.
         isLoading: false,
         showEditSubject: false,
         cardOptions: {},
-        subjectInternal: Object.assign({}, this.subject),
+        subjectInternal: { ...this.subject },
         deleteSubjectDisabled: false,
         deleteSubjectToolTip: '',
       };

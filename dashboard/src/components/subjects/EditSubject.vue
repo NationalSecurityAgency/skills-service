@@ -89,7 +89,6 @@ limitations under the License.
   import InputSanitizer from '../utils/InputSanitizer';
   import InlineHelp from '../utils/InlineHelp';
 
-
   export default {
     name: 'EditSubject',
     components: {
@@ -109,7 +108,7 @@ limitations under the License.
     data() {
       return {
         canAutoGenerateId: true,
-        subjectInternal: Object.assign({ originalSubjectId: this.subject.subjectId, isEdit: this.isEdit }, this.subject),
+        subjectInternal: { originalSubjectId: this.subject.subjectId, isEdit: this.isEdit, ...this.subject },
         overallErrMsg: '',
         show: this.value,
         displayIconManager: false,
@@ -175,12 +174,11 @@ limitations under the License.
         };
         Validator.localize(dictionary);
 
-
         // only want to validate for a new subject, existing subjects will override
         // name and subject id
         const self = this;
         Validator.extend('uniqueName', {
-          getMessage: field => `${field} is already taken.`,
+          getMessage: (field) => `${field} is already taken.`,
           validate(value) {
             if (value === self.subject.name || (value && value.localeCompare(self.subject.name, 'en', { sensitivity: 'base' }) === 0)) {
               return true;
@@ -192,7 +190,7 @@ limitations under the License.
         });
 
         Validator.extend('uniqueId', {
-          getMessage: field => `${field} is already taken.`,
+          getMessage: (field) => `${field} is already taken.`,
           validate(value) {
             if (value === self.subject.subjectId) {
               return true;
