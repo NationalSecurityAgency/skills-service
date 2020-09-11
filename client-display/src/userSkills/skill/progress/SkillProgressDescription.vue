@@ -25,7 +25,6 @@ limitations under the License.
             <skill-summary-cards class="mb-3" :skill="skill" :short-sub-titles="true"/>
         </small>
 
-
         <div v-if="skill.description">
             <p v-if="skill.description.description" class="text-primary skills-text-description">
                 <markdown-text :text="skill.description.description"/>

@@ -40,7 +40,6 @@ limitations under the License.
   import SkillProgressDescription from '@/userSkills/skill/progress/SkillProgressDescription';
   import ProgressBar from '@/userSkills/skill/progress/ProgressBar';
 
-
   export default {
     name: 'SkillProgress',
     components: {

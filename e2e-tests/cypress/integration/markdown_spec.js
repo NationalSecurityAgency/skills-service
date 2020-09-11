@@ -17,9 +17,10 @@ describe('Markdown Tests', () => {
 
     const snapshotOptions = {
         blackout: ['[data-cy=skillTableCellCreatedDate]'],
-        // failureThreshold: 0.03, // threshold for entire image
-        // failureThresholdType: 'percent', // percent of image or number of pixels
-        // customDiffConfig: { threshold: 0.1 }, // threshold for each pixel
+        failureThreshold: 0.03, // threshold for entire image
+        failureThresholdType: 'percent', // percent of image or number of pixels
+        customDiffConfig: { threshold: 0.01 }, // threshold for each pixel
+        capture: 'fullPage', // When fullPage, the application under test is captured in its entirety from top to bottom.
     };
 
     beforeEach(() => {

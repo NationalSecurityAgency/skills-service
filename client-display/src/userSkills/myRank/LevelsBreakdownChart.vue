@@ -19,7 +19,7 @@ limitations under the License.
     <div v-if="showOverlay" class="disabled-overlay" />
     <div v-if="showOverlay" class="overlay-msg">
       <div  class="row justify-content-center">
-        <div class="col-5 text-center border rounded bg-light p-2">
+        <div class="col-5 text-center border rounded bg-light p-2 text-dark">
           <vue-simple-spinner v-if="loading" line-bg-color="#333" line-fg-color="#17a2b8" message="Loading Chart ..."/>
           <div v-else>
             No one achieved <span class="text-info">Level 1</span> yet... You could be the <i><strong>first one</strong></i>!
@@ -31,7 +31,7 @@ limitations under the License.
     <div class="card-header">
       <h6 class="card-title mb-0 float-left">Level Breakdown</h6>
     </div>
-    <div class="card-body m-0 p-0 mr-1 mt-1">
+    <div class="card-body m-0 p-0 pl-2 mr-1 mt-1">
       <apexchart
         :options="chartOptions"
         :series="chartSeries"
@@ -110,7 +110,7 @@ limitations under the License.
             },
             labels: {
               style: {
-                color: this.$store.state.themeModule.charts.axisLabelColor,
+                colors: [this.$store.state.themeModule.charts.axisLabelColor],
               },
               formatter: function format(val) {
                 return numberFormatter(val);
@@ -159,7 +159,7 @@ limitations under the License.
         return this.usersPerLevel === null;
       },
       hasData() {
-        const foundMoreThan0 = this.chartSeries[0].data.find(item => item.y > 0);
+        const foundMoreThan0 = this.chartSeries[0].data.find((item) => item.y > 0);
         return foundMoreThan0;
       },
       computeChartSeries() {

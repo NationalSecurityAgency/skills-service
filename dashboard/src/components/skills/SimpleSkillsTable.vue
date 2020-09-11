@@ -31,7 +31,6 @@ limitations under the License.
         </div>
       </div>
 
-
       <div slot="name" slot-scope="props">
         <!-- allow to override how name field is rendered-->
         <slot name="name-cell" v-bind:props="props.row">
@@ -127,7 +126,6 @@ limitations under the License.
       width: unset;
     }
   }
-
 
   #simple-skills-table .notactive {
     cursor: not-allowed;

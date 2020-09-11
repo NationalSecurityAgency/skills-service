@@ -52,7 +52,7 @@ limitations under the License.
       UserSkillsService.getBadgeSummaries()
         .then((res) => {
           this.badges = res;
-          this.achievedBadges = this.badges.filter(item => item.badgeAchieved);
+          this.achievedBadges = this.badges.filter((item) => item.badgeAchieved);
           this.loading = false;
         });
     },

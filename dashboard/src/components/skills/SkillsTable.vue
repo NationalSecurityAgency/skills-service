@@ -147,7 +147,7 @@ limitations under the License.
       };
     },
     mounted() {
-      this.skills = this.skillsProp.map(item => Object.assign({ subjectId: this.subjectId, refreshCounter: 0 }, item));
+      this.skills = this.skillsProp.map((item) => ({ subjectId: this.subjectId, refreshCounter: 0, ...item }));
       this.disableFirstAndLastButtons();
     },
     computed: {
@@ -175,11 +175,11 @@ limitations under the License.
 
       skillCreatedOrUpdated(skill) {
         this.isLoading = true;
-        const item1Index = this.skills.findIndex(item => item.skillId === skill.originalSkillId);
+        const item1Index = this.skills.findIndex((item) => item.skillId === skill.originalSkillId);
         SkillsService.saveSkill(skill)
           .then((skillRes) => {
             let createdSkill = skillRes;
-            createdSkill = Object.assign({ subjectId: this.subjectId }, createdSkill, { created: new Date(createdSkill.created) });
+            createdSkill = { subjectId: this.subjectId, ...createdSkill, created: new Date(createdSkill.created) };
             if (item1Index >= 0) {
               createdSkill.refreshCounter = this.skills[item1Index].refreshCounter + 1;
               this.skills.splice(item1Index, 1, createdSkill);
@@ -237,7 +237,7 @@ limitations under the License.
         this.isLoading = true;
         SkillsService.deleteSkill(skill)
           .then(() => {
-            const index = this.skills.findIndex(item => item.skillId === skill.skillId);
+            const index = this.skills.findIndex((item) => item.skillId === skill.skillId);
             this.skills.splice(index, 1);
 
             this.rebuildDisplayOrder();
@@ -351,6 +351,5 @@ limitations under the License.
   #skillsTable .form-inline label {
     justify-content: left !important;
   }
-
 
 </style>

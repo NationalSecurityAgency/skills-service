@@ -79,7 +79,7 @@ limitations under the License.
             forceNiceScale: true,
             labels: {
               style: {
-                color: this.$store.state.themeModule.charts.axisLabelColor,
+                colors: [this.$store.state.themeModule.charts.axisLabelColor],
               },
               formatter: function format(val) {
                 return numberFormatter(val);
@@ -114,7 +114,7 @@ limitations under the License.
 
         if (this.pointsHistory && this.pointsHistory.length > 0) {
           dataArray[0].data = this.pointsHistory
-            .map(value => ({
+            .map((value) => ({
               x: new Date(value.dayPerformed).getTime(),
               y: value.points,
             }));

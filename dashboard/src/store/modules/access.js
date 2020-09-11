@@ -21,7 +21,7 @@ const actions = {
       AccessService.hasRole('ROLE_SUPERVISOR').then((result) => {
         commit('supervisor', result);
         resolve(result);
-      }).catch(error => reject(error));
+      }).catch((error) => reject(error));
     });
   },
 };

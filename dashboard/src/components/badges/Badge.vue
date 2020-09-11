@@ -66,7 +66,7 @@ limitations under the License.
     data() {
       return {
         isLoading: false,
-        badgeInternal: Object.assign({}, this.badge),
+        badgeInternal: { ...this.badge },
         cardOptions: {},
         showEditBadge: false,
       };
@@ -151,7 +151,7 @@ limitations under the License.
           .then((res) => {
             if (res) {
               this.badgeInternal.enabled = 'true';
-              const toSave = Object.assign({}, this.badgeInternal);
+              const toSave = { ...this.badgeInternal };
               if (!toSave.originalBadgeId) {
                 toSave.originalBadgeId = toSave.badgeId;
               }

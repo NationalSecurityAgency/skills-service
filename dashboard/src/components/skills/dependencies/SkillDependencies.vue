@@ -184,7 +184,7 @@ limitations under the License.
 
               // force reactivity on children - copy the data trick
               // specifically so the select component removes failed item from its list
-              this.skills = this.skills.map(entry => entry);
+              this.skills = this.skills.map((entry) => entry);
             } else {
               const errorMessage = (e.response && e.response.data && e.response.data.message) ? e.response.data.message : undefined;
               this.$router.push({ name: 'ErrorPage', query: { errorMessage } });
@@ -197,10 +197,10 @@ limitations under the License.
           .then((response) => {
             this.graph = Object.assign(response, { subjectId: this.$route.params.subjectId });
             if (this.graph.nodes && this.graph.nodes.length > 0) {
-              const mySkill = this.graph.nodes.find(entry => entry.skillId === this.$route.params.skillId && entry.projectId === this.$route.params.projectId);
+              const mySkill = this.graph.nodes.find((entry) => entry.skillId === this.$route.params.skillId && entry.projectId === this.$route.params.projectId);
               this.skill.id = mySkill.id;
-              const myEdges = this.graph.edges.filter(entry => entry.fromId === mySkill.id);
-              const myChildren = this.graph.nodes.filter(item => myEdges.find(item1 => item1.toId === item.id));
+              const myEdges = this.graph.edges.filter((entry) => entry.fromId === mySkill.id);
+              const myChildren = this.graph.nodes.filter((item) => myEdges.find((item1) => item1.toId === item.id));
               this.skills = myChildren.map((entry) => {
                 const externalProject = entry.projectId !== this.skill.projectId;
                 const disableInfo = {
@@ -227,7 +227,7 @@ limitations under the License.
         this.loading.finishedAllSkills = false;
         SkillsService.getSkillsFroDependency(this.$route.params.projectId)
           .then((skills) => {
-            this.allSkills = skills.filter(item => (item.skillId !== this.$route.params.skillId || item.otherProjectId));
+            this.allSkills = skills.filter((item) => (item.skillId !== this.$route.params.skillId || item.otherProjectId));
             this.loading.finishedAllSkills = true;
           })
           .finally(() => {

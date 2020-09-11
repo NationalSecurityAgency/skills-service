@@ -18,11 +18,11 @@ import axios from 'axios';
 export default {
   getLevelsForProject(projectId) {
     const url = `/admin/projects/${projectId}/levels`;
-    return axios.get(url).then(response => response.data);
+    return axios.get(url).then((response) => response.data);
   },
   getLevelsForSubject(projectId, subjectId) {
     const url = `/admin/projects/${projectId}/subjects/${subjectId}/levels`;
-    return axios.get(url).then(response => response.data);
+    return axios.get(url).then((response) => response.data);
   },
   deleteLastLevelForProject(projectId) {
     const url = `/admin/projects/${projectId}/levels/last`;
@@ -50,10 +50,10 @@ export default {
   },
   getUserLevel(projectId, userId) {
     const url = `/api/projects/${projectId}/level`;
-    return axios.get(url, { userId }).then(response => response.data);
+    return axios.get(url, { userId }).then((response) => response.data);
   },
   checkIfProjectLevelBelongsToGlobalBadge(projectId, level) {
     return axios.get(`/admin/projects/${projectId}/levels/${level}/globalBadge/exists`)
-      .then(response => response.data);
+      .then((response) => response.data);
   },
 };

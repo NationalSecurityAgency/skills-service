@@ -94,8 +94,8 @@ limitations under the License.
       loadAvailableBadgeSkills() {
         SkillsService.getProjectSkills(this.projectId)
           .then((loadedSkills) => {
-            const badgeSkillIds = this.badgeSkills.map(item => item.skillId);
-            this.availableSkills = loadedSkills.filter(item => !badgeSkillIds.includes(item.skillId));
+            const badgeSkillIds = this.badgeSkills.map((item) => item.skillId);
+            this.availableSkills = loadedSkills.filter((item) => !badgeSkillIds.includes(item.skillId));
             this.loading.availableSkills = false;
           });
       },
@@ -111,7 +111,7 @@ limitations under the License.
         this.loading.skillOp = true;
         SkillsService.removeSkillFromBadge(this.projectId, this.badgeId, deletedItem.skillId)
           .then(() => {
-            this.badgeSkills = this.badgeSkills.filter(entry => entry.skillId !== deletedItem.skillId);
+            this.badgeSkills = this.badgeSkills.filter((entry) => entry.skillId !== deletedItem.skillId);
             this.availableSkills.unshift(deletedItem);
             this.loadBadgeDetailsState({ projectId: this.projectId, badgeId: this.badgeId });
             this.loading.skillOp = false;
@@ -123,7 +123,7 @@ limitations under the License.
         SkillsService.assignSkillToBadge(this.projectId, this.badgeId, newItem.skillId)
           .then(() => {
             this.badgeSkills.push(newItem);
-            this.availableSkills = this.availableSkills.filter(item => item.skillId !== newItem.skillId);
+            this.availableSkills = this.availableSkills.filter((item) => item.skillId !== newItem.skillId);
             this.loadBadgeDetailsState({ projectId: this.projectId, badgeId: this.badgeId });
             this.loading.skillOp = false;
             this.$emit('skills-changed', newItem);

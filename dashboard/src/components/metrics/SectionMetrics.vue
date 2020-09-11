@@ -120,10 +120,10 @@ limitations under the License.
     },
     computed: {
       loadedCharts() {
-        return this.charts.filter(chart => chart.dataLoaded);
+        return this.charts.filter((chart) => chart.dataLoaded);
       },
       loadableCharts() {
-        return this.charts.filter(chart => !chart.dataLoaded);
+        return this.charts.filter((chart) => !chart.dataLoaded);
       },
       canDisplayCharts() {
         return this.loadedCharts && this.loadedCharts.length > 0;
@@ -180,8 +180,8 @@ limitations under the License.
         }
 
         promise.then((response) => {
-          this.charts.splice(this.charts.findIndex(it => it.chartMeta.chartBuilderId === chartBuilderId), 1);
-          this.charts.push(Object.assign({ scrollIntoView: true }, response));
+          this.charts.splice(this.charts.findIndex((it) => it.chartMeta.chartBuilderId === chartBuilderId), 1);
+          this.charts.push({ scrollIntoView: true, ...response });
         })
           .finally(() => {
             this.isLoading = false;

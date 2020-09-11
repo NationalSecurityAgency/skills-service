@@ -88,7 +88,7 @@ limitations under the License.
       buildNewMenuMapWhenPropsChange(navigationItems) {
         const routeName = this.$route.name;
         if (navigationItems && navigationItems.length > 0) {
-          const navItem = navigationItems.find(item => item.page === routeName);
+          const navItem = navigationItems.find((item) => item.page === routeName);
           this.menuSelections = this.buildNewMenuMap(navItem ? navItem.name : navigationItems[0].name);
         }
       },

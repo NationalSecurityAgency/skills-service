@@ -76,7 +76,7 @@ limitations under the License.
   };
   Validator.localize(dictionary);
 
-  const disabledDates = date => date > new Date();
+  const disabledDates = (date) => date > new Date();
 
   const datePickerState = {
     disabledDates: {
@@ -118,7 +118,7 @@ limitations under the License.
     },
     computed: {
       reversedUsersAdded: function reversedUsersAdded() {
-        return this.usersAdded.map(e => e)
+        return this.usersAdded.map((e) => e)
           .reverse();
       },
       minimumPoints() {

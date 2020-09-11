@@ -41,7 +41,6 @@ limitations under the License.
                 </div>
             </div>
 
-
             <div class="mb-2">
                 <progress-bar bar-color="lightgreen" :val="percent"></progress-bar>
             </div>
@@ -49,7 +48,6 @@ limitations under the License.
             <p v-if="badge && badge.description" class="">
                <markdown-text :text="badge.description"/>
             </p>
-
 
             <slot name="body-footer" v-bind:props="badge">
 

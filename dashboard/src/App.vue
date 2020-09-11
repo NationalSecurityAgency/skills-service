@@ -116,7 +116,6 @@ limitations under the License.
   };
 </script>
 
-
 <style lang="scss">
   @import "~bootstrap/scss/bootstrap";
   @import '~bootstrap-vue/src/index.scss';

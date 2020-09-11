@@ -118,7 +118,6 @@ limitations under the License.
   import GlobalBadgeService from './global/GlobalBadgeService';
   import InputSanitizer from '../utils/InputSanitizer';
 
-
   const dictionary = {
     en: {
       attributes: {
@@ -161,7 +160,7 @@ limitations under the License.
       return {
         canAutoGenerateId: true,
         canEditBadgeId: false,
-        badgeInternal: Object.assign({ originalBadgeId: this.badge.badgeId, isEdit: this.isEdit }, this.badge),
+        badgeInternal: { originalBadgeId: this.badge.badgeId, isEdit: this.isEdit, ...this.badge },
         overallErrMsg: '',
         limitTimeframe: limitedTimeframe,
         show: this.value,
@@ -243,7 +242,7 @@ limitations under the License.
         // name and badge id
         const self = this;
         Validator.extend('uniqueName', {
-          getMessage: field => `The value for ${field} is already taken.`,
+          getMessage: (field) => `The value for ${field} is already taken.`,
           validate(value) {
             if (self.isEdit && (value === self.badge.name || self.badge.name.localeCompare(value, 'en', { sensitivity: 'base' }) === 0)) {
               return true;
@@ -258,7 +257,7 @@ limitations under the License.
         });
 
         Validator.extend('uniqueId', {
-          getMessage: field => `The value for ${field} is already taken.`,
+          getMessage: (field) => `The value for ${field} is already taken.`,
           validate(value) {
             if (self.isEdit && self.badge.badgeId === value) {
               return true;

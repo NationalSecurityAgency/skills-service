@@ -33,7 +33,6 @@ const truncateFormatter = (strValue, truncateTo = 30) => {
 };
 Vue.filter('truncate', truncateFormatter);
 
-
 // this allows to call this function from an js code; to learn more about that read about javascript modules
 // import NumberFilter from 'src/NumberFilter.js'
 //    NumberFilter(myNumber)

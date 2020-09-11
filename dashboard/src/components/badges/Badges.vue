@@ -117,7 +117,7 @@ limitations under the License.
         BadgesService.deleteBadge(badge.projectId, badge.badgeId)
           .then(() => {
             this.$emit('badge-deleted', this.badge);
-            this.badges = this.badges.filter(item => item.badgeId !== badge.badgeId);
+            this.badges = this.badges.filter((item) => item.badgeId !== badge.badgeId);
             this.loadProjectDetailsState({ projectId: this.projectId });
             this.$emit('badges-changed', badge.badgeId);
           })
@@ -127,8 +127,8 @@ limitations under the License.
       },
       saveBadge(badge) {
         this.isLoading = true;
-        const requiredIds = badge.requiredSkills.map(item => item.skillId);
-        const badgeReq = Object.assign({ requiredSkillsIds: requiredIds }, badge);
+        const requiredIds = badge.requiredSkills.map((item) => item.skillId);
+        const badgeReq = { requiredSkillsIds: requiredIds, ...badge };
         BadgesService.saveBadge(badgeReq)
           .then(() => {
             this.loadBadges();

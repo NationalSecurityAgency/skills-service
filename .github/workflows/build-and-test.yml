@@ -29,7 +29,6 @@ on:
       - '.gitlab-ci.yml'
 
 jobs:
-
   service-and-ui-against-h2:
     runs-on: ubuntu-latest
 

@@ -35,7 +35,6 @@ limitations under the License.
       </div>
     </sub-page-header>
 
-
     <loading-container :is-loading="isLoading">
       <simple-card>
         <v-client-table v-if="levels && levels.length && !isLoading" :data="levels" :columns="levelsColumns"
@@ -173,7 +172,7 @@ limitations under the License.
         };
 
         if (this.isEdit) {
-          const existingIdx = this.levels.findIndex(level => this.levelToEdit.level === level.level);
+          const existingIdx = this.levels.findIndex((level) => this.levelToEdit.level === level.level);
           const byIndex = new Map(this.levels.map((level, index) => [index, level]));
 
           const previous = byIndex.get(existingIdx - 1);
@@ -284,7 +283,7 @@ limitations under the License.
         this.isEdit = !!existingLevel;
 
         if (existingLevel) {
-          this.levelToEdit = Object.assign({}, existingLevel);
+          this.levelToEdit = { ...existingLevel };
           if (this.levels[this.levels.length - 1].level === existingLevel.level) {
             this.levelToEdit.isLast = true;
           }

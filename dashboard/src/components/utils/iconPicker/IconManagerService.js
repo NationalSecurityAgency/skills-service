@@ -37,7 +37,7 @@ export default {
     if (!projectId) {
       url = '/supervisor/icons/customIcons';
     }
-    return axios.get(url).then(response => response.data);
+    return axios.get(url).then((response) => response.data);
   },
   deleteIcon(iconName, projectId) {
     let url = `/admin/projects/${projectId}/icons/${iconName}`;

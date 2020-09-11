@@ -72,7 +72,7 @@ limitations under the License.
         return this.badge ? this.badge.helpUrl : '';
       },
       projectSummaries() {
-        return this.badge.projectLevelsAndSkillsSummaries.map(item => ({
+        return this.badge.projectLevelsAndSkillsSummaries.map((item) => ({
           badgeId: this.badge.badgeId,
           projectId: item.projectId,
           projectName: item.projectName,

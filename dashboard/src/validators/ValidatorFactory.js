@@ -18,7 +18,7 @@ import NumConvertUtil from './NumConvertUtil';
 export default {
   newCharLengthValidator(maxLength) {
     return {
-      getMessage: field => `${field} cannot exceed ${maxLength} characters.`,
+      getMessage: (field) => `${field} cannot exceed ${maxLength} characters.`,
       validate(value) {
         if (value.length > NumConvertUtil.toInt(maxLength)) {
           return false;
@@ -29,7 +29,7 @@ export default {
   },
   newCharMinLengthValidator(maxLength) {
     return {
-      getMessage: field => `${field} cannot be less than ${maxLength} characters.`,
+      getMessage: (field) => `${field} cannot be less than ${maxLength} characters.`,
       validate(value) {
         if (value.length < NumConvertUtil.toInt(maxLength)) {
           return false;
@@ -40,7 +40,7 @@ export default {
   },
   newMaxNumValidator(maxNum) {
     return {
-      getMessage: field => `${field} cannot exceed ${maxNum}.`,
+      getMessage: (field) => `${field} cannot exceed ${maxNum}.`,
       validate(value) {
         if (NumConvertUtil.toInt(value) > NumConvertUtil.toInt(maxNum)) {
           return false;
@@ -51,7 +51,7 @@ export default {
   },
   newUserObjNoSpacesValidatorInNonPkiMode(isPkiMode) {
     return {
-      getMessage: field => `The ${field} field may not contain spaces`,
+      getMessage: (field) => `The ${field} field may not contain spaces`,
       validate(value) {
         if (isPkiMode || !value.userId) {
           return true;

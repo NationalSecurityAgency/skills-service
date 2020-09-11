@@ -108,7 +108,7 @@ limitations under the License.
     },
     data() {
       return {
-        levelInternal: Object.assign({}, this.level),
+        levelInternal: { ...this.level },
         displayIconManager: false,
         show: this.value,
       };
@@ -168,12 +168,12 @@ limitations under the License.
       });
 
       Validator.extend('uniqueName', {
-        getMessage: field => `${field} is already taken.`,
+        getMessage: (field) => `${field} is already taken.`,
         validate(value) {
           let valid = true;
           if (self.allLevels && value && value.localeCompare(self.level.name, 'en', { sensitivity: 'base' }) !== 0) {
             const lcVal = value.toLowerCase();
-            const existingLevelWithName = self.allLevels.find(elem => elem.name.toLowerCase() === lcVal);
+            const existingLevelWithName = self.allLevels.find((elem) => elem.name.toLowerCase() === lcVal);
             if (existingLevelWithName) {
               valid = false;
             }

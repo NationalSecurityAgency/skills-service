@@ -35,7 +35,6 @@ limitations under the License.
       </div>
     </div>
 
-
     <div class="card mt-3">
       <div class="card-header">
         Description

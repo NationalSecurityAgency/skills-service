@@ -76,7 +76,7 @@ limitations under the License.
     methods: {
       setSelectedInternal() {
         if (this.value) {
-          this.selectedInternal = Object.assign({}, this.value);
+          this.selectedInternal = { ...this.value };
         } else {
           this.selectedInternal = null;
         }
@@ -95,7 +95,7 @@ limitations under the License.
         GlobalBadgeService.getAllProjectsForBadge(this.badgeId)
           .then((response) => {
             this.isLoading = false;
-            this.projects = response.map(entry => entry);
+            this.projects = response.map((entry) => entry);
           });
       },
     },

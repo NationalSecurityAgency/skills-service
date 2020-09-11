@@ -32,7 +32,7 @@ limitations under the License.
     methods: {
       parseMarkdown(text) {
         const compiled = marked(text);
-        const onMissing = name => name;
+        const onMissing = (name) => name;
         const emojified = emoji.emojify(compiled, onMissing);
         const sanitized = DOMPurify.sanitize(emojified);
         return sanitized;

@@ -35,7 +35,7 @@ const actions = {
           commit('setSubject', response);
           resolve(response);
         })
-        .catch(error => reject(error));
+        .catch((error) => reject(error));
     });
   },
 };

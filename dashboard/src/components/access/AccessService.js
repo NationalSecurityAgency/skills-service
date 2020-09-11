@@ -19,11 +19,11 @@ export default {
   getUserRoles(projectId, roleName) {
     if (projectId) {
       return axios.get(`/admin/projects/${projectId}/userRoles`)
-        .then(response => response.data);
+        .then((response) => response.data);
     }
     if (roleName === 'ROLE_SUPER_DUPER_USER' || roleName === 'ROLE_SUPERVISOR') {
       return axios.get(`/root/users/roles/${roleName}`)
-        .then(response => response.data);
+        .then((response) => response.data);
     }
     throw new Error(`unexpected user role [${roleName}]`);
   },
@@ -38,12 +38,12 @@ export default {
     if (projectId) {
       return axios.put(`/admin/projects/${projectId}/users/${userKey}/roles/${roleName}`, null, { handleError: false })
         .then(() => axios.get(`/admin/projects/${projectId}/users/${userId}/roles`)
-          .then(response => response.data.find(element => element.roleName === roleName)));
+          .then((response) => response.data.find((element) => element.roleName === roleName)));
     }
     if (roleName === 'ROLE_SUPER_DUPER_USER' || roleName === 'ROLE_SUPERVISOR') {
       return axios.put(`/root/users/${userKey}/roles/${roleName}`, null, { handleError: false })
         .then(() => axios.get(`/root/users/roles/${roleName}`)
-          .then(response => response.data.find(element => element.userIdForDisplay.toLowerCase() === origUserId.toLowerCase())));
+          .then((response) => response.data.find((element) => element.userIdForDisplay.toLowerCase() === origUserId.toLowerCase())));
     }
     throw new Error(`unexpected user role [${roleName}]`);
   },
@@ -52,13 +52,13 @@ export default {
       return axios.delete(`/admin/projects/${projectId}/users/${userId}/roles/${encodeURIComponent(roleName)}`);
     }
     if (roleName === 'ROLE_SUPER_DUPER_USER' || roleName === 'ROLE_SUPERVISOR') {
-      return axios.delete(`/root/users/${userId}/roles/${roleName}`).then(response => response.data);
+      return axios.delete(`/root/users/${userId}/roles/${roleName}`).then((response) => response.data);
     }
     throw new Error(`unexpected user role [${roleName}]`);
   },
   getOAuthProviders() {
     return axios.get('/app/oAuthProviders')
-      .then(response => response.data);
+      .then((response) => response.data);
   },
   resetClientSecret(projectId) {
     return axios.put(`/admin/projects/${projectId}/resetClientSecret`)
@@ -66,23 +66,23 @@ export default {
   },
   getClientSecret(projectId) {
     return axios.get(`/admin/projects/${projectId}/clientSecret`)
-      .then(response => response.data);
+      .then((response) => response.data);
   },
   userWithEmailExists(email) {
-    return axios.get(`/userExists/${email}`).then(response => !response.data);
+    return axios.get(`/userExists/${email}`).then((response) => !response.data);
   },
   hasRole(roleName) {
-    return axios.get(`/app/userInfo/hasRole/${roleName}`).then(response => response.data);
+    return axios.get(`/app/userInfo/hasRole/${roleName}`).then((response) => response.data);
   },
   requestPasswordReset(userId) {
     const formData = new FormData();
     formData.append('userId', userId);
-    return axios.post('/resetPassword', formData, { handleError: false }).then(response => response.data);
+    return axios.post('/resetPassword', formData, { handleError: false }).then((response) => response.data);
   },
   resetPassword(reset) {
-    return axios.post('/performPasswordReset', reset, { handleError: false }).then(response => response.data);
+    return axios.post('/performPasswordReset', reset, { handleError: false }).then((response) => response.data);
   },
   isResetSupported() {
-    return axios.get('/public/isFeatureSupported?feature=passwordreset').then(response => response.data);
+    return axios.get('/public/isFeatureSupported?feature=passwordreset').then((response) => response.data);
   },
 };

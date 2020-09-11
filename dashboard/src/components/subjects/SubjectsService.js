@@ -18,19 +18,19 @@ import axios from 'axios';
 export default {
   subjectWithNameExists(projectId, subjectName) {
     return axios.post(`/admin/projects/${projectId}/subjectNameExists`, { name: subjectName })
-      .then(remoteRes => !remoteRes.data);
+      .then((remoteRes) => !remoteRes.data);
   },
   subjectWithIdExists(projectId, subjectId) {
     return axios.get(`/admin/projects/${projectId}/entityIdExists?id=${subjectId}`)
-      .then(remoteRes => !remoteRes.data);
+      .then((remoteRes) => !remoteRes.data);
   },
   getSubjectDetails(projectId, subjectId) {
     return axios.get(`/admin/projects/${projectId}/subjects/${subjectId}`)
-      .then(res => res.data);
+      .then((res) => res.data);
   },
   getSubjects(projectId) {
     return axios.get(`/admin/projects/${projectId}/subjects`)
-      .then(res => res.data);
+      .then((res) => res.data);
   },
   saveSubject(subject) {
     if (subject.isEdit) {
@@ -48,6 +48,6 @@ export default {
   },
   checkIfSubjectBelongsToGlobalBadge(projectId, subjectId) {
     return axios.get(`/admin/projects/${projectId}/subjects/${subjectId}/globalBadge/exists`)
-      .then(response => response.data);
+      .then((response) => response.data);
   },
 };

@@ -68,7 +68,7 @@ limitations under the License.
         this.isLoading = true;
         GlobalBadgeService.getProjectLevels(projectId)
           .then((response) => {
-            this.projectLevels = response.map(entry => entry.level);
+            this.projectLevels = response.map((entry) => entry.level);
           }).finally(() => {
             this.isLoading = false;
           });

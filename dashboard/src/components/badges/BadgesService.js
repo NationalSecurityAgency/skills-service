@@ -18,11 +18,11 @@ import axios from 'axios';
 export default {
   getBadges(projectId) {
     return axios.get(`/admin/projects/${projectId}/badges`)
-      .then(response => response.data);
+      .then((response) => response.data);
   },
   getBadge(projectId, badgeId) {
     return axios.get(`/admin/projects/${projectId}/badges/${badgeId}`)
-      .then(response => response.data);
+      .then((response) => response.data);
   },
   saveBadge(badgeReq) {
     if (badgeReq.isEdit) {
@@ -30,26 +30,26 @@ export default {
         .then(() => this.getBadge(badgeReq.projectId, badgeReq.badgeId));
     }
 
-    const req = Object.assign({ enabled: false }, badgeReq);
+    const req = { enabled: false, ...badgeReq };
     return axios.post(`/admin/projects/${req.projectId}/badges/${req.badgeId}`, req)
       .then(() => this.getBadge(req.projectId, req.badgeId));
   },
   deleteBadge(projectId, badgeId) {
     return axios.delete(`/admin/projects/${projectId}/badges/${badgeId}`)
-      .then(repsonse => repsonse.data);
+      .then((repsonse) => repsonse.data);
   },
   moveBadge(projectId, badgeId, actionToSubmit) {
     return axios.patch(`/admin/projects/${projectId}/badges/${badgeId}`, {
       action: actionToSubmit,
     })
-      .then(response => response.data);
+      .then((response) => response.data);
   },
   badgeWithNameExists(projectId, badgeName) {
     return axios.post(`/admin/projects/${projectId}/badgeNameExists`, { name: badgeName })
-      .then(remoteRes => !remoteRes.data);
+      .then((remoteRes) => !remoteRes.data);
   },
   badgeWithIdExists(projectId, badgeId) {
     return axios.get(`/admin/projects/${projectId}/entityIdExists?id=${badgeId}`)
-      .then(remoteRes => !remoteRes.data);
+      .then((remoteRes) => !remoteRes.data);
   },
 };

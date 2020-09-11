@@ -73,7 +73,7 @@ limitations under the License.
       userType: {
         type: String,
         default: CLIENT,
-        validator: value => ([DASHBOARD, CLIENT, ROOT, SUPERVISOR].indexOf(value) >= 0),
+        validator: (value) => ([DASHBOARD, CLIENT, ROOT, SUPERVISOR].indexOf(value) >= 0),
       },
       excludedSuggestions: {
         type: Array,
@@ -182,7 +182,7 @@ limitations under the License.
         axios.post(url, postBody)
           .then((response) => {
             this.ensureOrderlyResultHandling(rid, () => {
-              this.suggestions = response.data.filter(suggestedUser => !this.excludedSuggestions.includes(suggestedUser.userId));
+              this.suggestions = response.data.filter((suggestedUser) => !this.excludedSuggestions.includes(suggestedUser.userId));
               this.suggestions = this.suggestions.map((it) => {
                 const label = this.getUserIdForDisplay(it);
                 const sug = {
@@ -221,7 +221,7 @@ limitations under the License.
           if (this.validate) {
             this.theError = '';
             axios.get(`${this.validateUrl}${encodeURIComponent(userId)}`, { errorPage: false })
-              .then(response => response.data)
+              .then((response) => response.data)
               .then((result) => {
                 if (result) {
                   this.onUserSelected(userId);

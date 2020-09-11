@@ -40,7 +40,6 @@ limitations under the License.
       </b-container>
     </ValidationObserver>
 
-
     <div slot="modal-footer" class="w-100">
       <b-button variant="success" size="sm" class="float-right" @click="updateProject">
         Save
@@ -65,7 +64,7 @@ limitations under the License.
     data() {
       return {
         show: this.value,
-        internalProject: Object.assign({ originalProjectId: this.project.projectId, isEdit: this.isEdit }, this.project),
+        internalProject: { originalProjectId: this.project.projectId, isEdit: this.isEdit, ...this.project },
         canEditProjectId: false,
         overallErrMsg: '',
         original: {
@@ -130,26 +129,26 @@ limitations under the License.
 
         const self = this;
         Validator.extend('uniqueName', {
-          getMessage: field => `The value for the ${field} is already taken.`,
+          getMessage: (field) => `The value for the ${field} is already taken.`,
           validate(value) {
             if (self.isEdit && (self.original.name === value || self.original.name.localeCompare(value, 'en', { sensitivity: 'base' }) === 0)) {
               return true;
             }
             return ProjectService.checkIfProjectNameExist(value)
-              .then(remoteRes => !remoteRes);
+              .then((remoteRes) => !remoteRes);
           },
         }, {
           immediate: false,
         });
 
         Validator.extend('uniqueId', {
-          getMessage: field => `The value for the ${field} is already taken.`,
+          getMessage: (field) => `The value for the ${field} is already taken.`,
           validate(value) {
             if (self.isEdit && self.original.projectId === value) {
               return true;
             }
             return ProjectService.checkIfProjectIdExist(value)
-              .then(remoteRes => !remoteRes);
+              .then((remoteRes) => !remoteRes);
           },
         }, {
           immediate: false,

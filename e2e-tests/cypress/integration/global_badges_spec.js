@@ -164,7 +164,7 @@ describe('Global Badges Tests', () => {
         cy.wait('@getGlobalBadges');
     });
 
-    it.only('Global Badge is disabled when created, can only be enabled once', () => {
+    it('Global Badge is disabled when created, can only be enabled once', () => {
         const expectedId = 'TestBadgeBadge';
         cy.route('GET', `/supervisor/badges`).as('getGlobalBadges');
         cy.route('PUT', `/supervisor/badges/${expectedId}`).as('postGlobalBadge');

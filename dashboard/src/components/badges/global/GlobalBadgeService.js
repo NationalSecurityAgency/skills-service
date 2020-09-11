@@ -18,69 +18,69 @@ import axios from 'axios';
 export default {
   getBadges() {
     return axios.get('/supervisor/badges')
-      .then(response => response.data);
+      .then((response) => response.data);
   },
   getBadge(badgeId) {
     return axios.get(`/supervisor/badges/${badgeId}`)
-      .then(response => response.data);
+      .then((response) => response.data);
   },
   saveBadge(badgeReq) {
     if (badgeReq.isEdit) {
       return axios.put(`/supervisor/badges/${badgeReq.originalBadgeId}`, badgeReq)
         .then(() => this.getBadge(badgeReq.badgeId));
     }
-    const req = Object.assign({ enabled: false }, badgeReq);
+    const req = { enabled: false, ...badgeReq };
     return axios.put(`/supervisor/badges/${req.badgeId}`, req)
       .then(() => this.getBadge(req.badgeId));
   },
   deleteBadge(badgeId) {
     return axios.delete(`/supervisor/badges/${badgeId}`)
-      .then(response => response.data);
+      .then((response) => response.data);
   },
   moveBadge(badgeId, actionToSubmit) {
     return axios.patch(`/supervisor/badges/${badgeId}`, {
       action: actionToSubmit,
     })
-      .then(response => response.data);
+      .then((response) => response.data);
   },
   badgeWithNameExists(badgeName) {
     return axios.post('/supervisor/badges/name/exists', { name: badgeName })
-      .then(remoteRes => !remoteRes.data);
+      .then((remoteRes) => !remoteRes.data);
   },
   badgeWithIdExists(badgeId) {
     return axios.get(`/supervisor/badges/id/${encodeURIComponent(badgeId)}/exists`)
-      .then(remoteRes => !remoteRes.data);
+      .then((remoteRes) => !remoteRes.data);
   },
   assignSkillToBadge(badgeId, projectId, skillId) {
     return axios.post(`/supervisor/badges/${badgeId}/projects/${projectId}/skills/${skillId}`)
-      .then(res => res.data);
+      .then((res) => res.data);
   },
   removeSkillFromBadge(badgeId, projectId, skillId) {
     return axios.delete(`/supervisor/badges/${badgeId}/projects/${projectId}/skills/${skillId}`)
-      .then(res => res.data);
+      .then((res) => res.data);
   },
   getBadgeSkills(badgeId) {
     return axios.get(`/supervisor/badges/${badgeId}/skills`)
-      .then(res => res.data);
+      .then((res) => res.data);
   },
   suggestProjectSkills(badgeId, search) {
     return axios.get(`/supervisor/badges/${badgeId}/skills/available?query=${search}`)
-      .then(res => res.data);
+      .then((res) => res.data);
   },
   getAllProjectsForBadge(badgeId) {
     return axios.get(`/supervisor/badges/${badgeId}/projects/available`)
-      .then(res => res.data);
+      .then((res) => res.data);
   },
   getProjectLevels(projectId) {
     return axios.get(`/supervisor/projects/${projectId}/levels`)
-      .then(res => res.data);
+      .then((res) => res.data);
   },
   assignProjectLevelToBadge(badgeId, projectId, levelId) {
     return axios.post(`/supervisor/badges/${badgeId}/projects/${projectId}/level/${levelId}`)
-      .then(res => res.data);
+      .then((res) => res.data);
   },
   removeProjectLevelFromBadge(badgeId, projectId, level) {
     return axios.delete(`/supervisor/badges/${badgeId}/projects/${projectId}/level/${level}`)
-      .then(res => res.data);
+      .then((res) => res.data);
   },
 };

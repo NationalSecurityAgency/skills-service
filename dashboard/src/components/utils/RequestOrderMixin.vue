@@ -23,7 +23,7 @@ limitations under the License.
     },
     methods: {
       getRequestId() {
-        this.requestId = this.requestId + 1;
+        this.requestId += 1;
         return this.requestId;
       },
       ensureOrderlyResultHandling(requestId, closure) {

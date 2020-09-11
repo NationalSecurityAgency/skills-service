@@ -54,7 +54,7 @@ limitations under the License.
           .then((skills) => {
             const loadedSkills = skills;
             this.skills = loadedSkills.map((loadedSkill) => {
-              const copy = Object.assign({}, loadedSkill);
+              const copy = { ...loadedSkill };
               copy.created = window.moment(loadedSkill.created);
               return copy;
             });

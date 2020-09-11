@@ -44,4 +44,6 @@ service/src/main/resources/public/**
 .vscode
 .history
 /e2e-tests/cypress/screenshots/
-/e2e-tests/cypress/snapshots/
+/e2e-tests/cypress/snapshots/**/__diff_output__
+
+/dashboard/build/

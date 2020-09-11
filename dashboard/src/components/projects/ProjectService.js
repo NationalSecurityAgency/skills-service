@@ -18,18 +18,18 @@ import axios from 'axios';
 export default {
   getProjects() {
     return axios.get('/app/projects')
-      .then(response => response.data);
+      .then((response) => response.data);
   },
   getProject(projectId) {
-    return axios.get(`/admin/projects/${projectId}`).then(response => response.data);
+    return axios.get(`/admin/projects/${projectId}`).then((response) => response.data);
   },
   getProjectDetails(projectId) {
     return axios.get(`/admin/projects/${projectId}`)
-      .then(response => response.data);
+      .then((response) => response.data);
   },
   changeProjectOrder(projectId, actionToSubmit) {
     return axios.patch(`/admin/projects/${projectId}`, { action: actionToSubmit })
-      .then(response => response.data);
+      .then((response) => response.data);
   },
   saveProject(project) {
     if (project.isEdit) {
@@ -44,21 +44,21 @@ export default {
   },
   queryOtherProjectsByName(projectId, nameQuery) {
     return axios.get(`/admin/projects/${projectId}/projectSearch?nameQuery=${encodeURIComponent(nameQuery)}`)
-      .then(response => response.data);
+      .then((response) => response.data);
   },
   checkIfProjectIdExist(projectId) {
     if (projectId && projectId.toUpperCase() === 'ALL_SKILLS_PROJECTS') {
       return true;
     }
     return axios.post('/app/projectExist', { projectId })
-      .then(response => response.data);
+      .then((response) => response.data);
   },
   checkIfProjectNameExist(projectName) {
     return axios.post('/app/projectExist', { name: projectName })
-      .then(response => response.data);
+      .then((response) => response.data);
   },
   checkIfProjectBelongsToGlobalBadge(projectId) {
     return axios.get(`/admin/projects/${projectId}/globalBadge/exists`)
-      .then(response => response.data);
+      .then((response) => response.data);
   },
 };

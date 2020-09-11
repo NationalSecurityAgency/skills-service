@@ -123,7 +123,7 @@ limitations under the License.
         return value.charAt(0).toUpperCase() + value.slice(1);
       },
       shouldExclude(item) {
-        return this.idsToExcludeFromPath.some(searchForMe => item.toUpperCase() === searchForMe.toUpperCase());
+        return this.idsToExcludeFromPath.some((searchForMe) => item.toUpperCase() === searchForMe.toUpperCase());
       },
     },
   };
