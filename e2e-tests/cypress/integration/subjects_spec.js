@@ -52,6 +52,12 @@ describe('Subjects Tests', () => {
             subjectId: 'subj1',
             name: "Subject 1"
         });
+        cy.server();
+
+        cy.route({
+            method: 'POST',
+            url: '/admin/projects/proj1/icons/upload',
+        }).as('uploadIcon');
 
         cy.visit('/projects/proj1/');
 
@@ -68,8 +74,8 @@ describe('Subjects Tests', () => {
             .then(Cypress.Blob.binaryStringToBlob)
             .then((fileContent) => {
                 cy.get('input[type=file]').attachFile({ fileContent, filePath: filename, encoding: 'utf-8' });
+                cy.wait('@uploadIcon')
 
-                cy.contains('Subject 1');
                 cy.matchImageSnapshot();
             });
     });
