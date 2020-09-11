@@ -20,7 +20,7 @@
   "dependencies": {
     "@fortawesome/fontawesome-free": "5.14.0",
     "animate.css": "4.1.1",
-    "apexcharts": "3.20.1",
+    "apexcharts": "3.20.2",
     "axios": "0.20.0",
     "axios-auth-refresh": "3.0.0",
     "bootstrap": "4.5.2",
@@ -46,13 +46,13 @@
     "vuex": "3.5.1"
   },
   "devDependencies": {
-    "@vue/cli-plugin-babel": "4.5.5",
-    "@vue/cli-plugin-eslint": "4.5.5",
-    "@vue/cli-plugin-unit-jest": "4.5.5",
-    "@vue/cli-service": "4.5.5",
+    "@vue/cli-plugin-babel": "4.5.6",
+    "@vue/cli-plugin-eslint": "4.5.6",
+    "@vue/cli-plugin-unit-jest": "4.5.6",
+    "@vue/cli-service": "4.5.6",
     "@vue/eslint-config-airbnb": "5.1.0",
     "@vue/test-utils": "1.1.0",
-    "babel-core": "7.0.0-bridge.0",
+    "@babel/core": "7.11.6",
     "babel-eslint": "10.1.0",
     "babel-jest": "26.3.0",
     "eslint": "7.8.1",
