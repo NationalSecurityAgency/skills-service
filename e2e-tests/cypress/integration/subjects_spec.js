@@ -46,7 +46,7 @@ describe('Subjects Tests', () => {
         cy.contains('ID: Lotsofspecial')
     });
 
-    it.only('upload custom icon', () => {
+    it('upload custom icon', () => {
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
             projectId: 'proj1',
             subjectId: 'subj1',
@@ -76,7 +76,7 @@ describe('Subjects Tests', () => {
                 cy.get('input[type=file]').attachFile({ fileContent, filePath: filename, encoding: 'utf-8' });
                 cy.wait('@uploadIcon')
 
-                cy.matchImageSnapshot();
+                cy.get('#subj1___BV_modal_body_ .proj1-validiconpng');
             });
     });
 
