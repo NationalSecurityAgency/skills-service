@@ -687,7 +687,7 @@ class AdminEditSpecs extends DefaultIntSpec {
         skillsService.createSubject(subj)
 
         List<Map> skills = SkillsFactory.createSkills(3)
-        def skill1 = SkillsFactory.createSkill(1, 1, 1, 0, 3, 60)
+        def skill1 = SkillsFactory.createSkill(1, 1, 1, 0, 3, 0)
         def skill2 = SkillsFactory.createSkill(1, 1, 2)
         def skill3 = SkillsFactory.createSkill(1, 1, 3)
 
@@ -699,7 +699,7 @@ class AdminEditSpecs extends DefaultIntSpec {
         //outstanding questions: How does it work if multiple skills achieved on the same day? Do we get multiple
         //rows or just one?
         skillsService.addSkill([projectId: proj1.projectId, skillId: skill1.skillId], "u123", new Date())
-        skillsService.addSkill([projectId: proj1.projectId, skillId: skill1.skillId], "u123", new DateTime().withTimeAtStartOfDay().plusHours(2).toDate())
+        skillsService.addSkill([projectId: proj1.projectId, skillId: skill1.skillId], "u123", new Date())
         skillsService.addSkill([projectId: proj1.projectId, skillId: skill1.skillId], "u123", new DateTime().minusDays(1).toDate())
 
         when:
@@ -740,7 +740,7 @@ class AdminEditSpecs extends DefaultIntSpec {
         def subj = SkillsFactory.createSubject(1)
         skillsService.createSubject(subj)
 
-        def skill1 = SkillsFactory.createSkill(1, 1, 1, 0, 3, 60)
+        def skill1 = SkillsFactory.createSkill(1, 1, 1, 0, 3, 0)
         def skill2 = SkillsFactory.createSkill(1, 1, 2)
         def skill3 = SkillsFactory.createSkill(1, 1, 3)
         skill3.pointIncrement = 60
@@ -748,11 +748,11 @@ class AdminEditSpecs extends DefaultIntSpec {
         skillsService.createSkills([skill1, skill2, skill3])
 
         skillsService.addSkill([projectId: proj1.projectId, skillId: skill1.skillId], "u123", new Date())
-        skillsService.addSkill([projectId: proj1.projectId, skillId: skill1.skillId], "u123", new DateTime().withTimeAtStartOfDay().plusHours(2).toDate())
+        skillsService.addSkill([projectId: proj1.projectId, skillId: skill1.skillId], "u123", new Date())
         skillsService.addSkill([projectId: proj1.projectId, skillId: skill1.skillId], "u123", new DateTime().minusDays(1).toDate())
 
-        skillsService.addSkill([projectId: proj1.projectId, skillId: skill1.skillId], "u124", new DateTime().withTimeAtStartOfDay().plusHours(5).toDate())
-        skillsService.addSkill([projectId: proj1.projectId, skillId: skill1.skillId], "u124", new DateTime().withTimeAtStartOfDay().plusHours(3).toDate())
+        skillsService.addSkill([projectId: proj1.projectId, skillId: skill1.skillId], "u124", new Date())
+        skillsService.addSkill([projectId: proj1.projectId, skillId: skill1.skillId], "u124", new Date())
         skillsService.addSkill([projectId: proj1.projectId, skillId: skill1.skillId], "u124", new DateTime().minusDays(1).toDate())
 
         skillsService.addSkill([projectId: proj1.projectId, skillId: skill1.skillId], "u125", new Date())
