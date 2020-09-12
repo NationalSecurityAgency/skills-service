@@ -19,7 +19,7 @@ export default {
 
   loadChart(projectId, chartId) {
     const url = `/admin/projects/${projectId}/charts/${chartId}`;
-    return axios.get(url).then(response => response.data);
+    return axios.get(url).then((response) => response.data);
   },
   getChartsForSection(sectionParams) {
     const url = `/admin/projects/${sectionParams.projectId}/${sectionParams.section}/${sectionParams.sectionIdParam}/metrics?numDays=${sectionParams.numDays}&numMonths=${sectionParams.numMonths}&loadDataForFirst=${sectionParams.loadDataForFirst}`;

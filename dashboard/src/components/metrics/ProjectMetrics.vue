@@ -122,7 +122,7 @@ limitations under the License.
       MetricsService.loadChart(this.$route.params.projectId, 'distinctUsersOverTimeForProject')
         .then((response) => {
           this.distinctUsersOverTime = [{
-            data: response.map(item => [item.value, item.count]),
+            data: response.map((item) => [item.value, item.count]),
             name: 'Points',
           }];
         });

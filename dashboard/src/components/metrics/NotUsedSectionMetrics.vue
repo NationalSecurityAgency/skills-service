@@ -15,8 +15,10 @@ limitations under the License.
 */
 <template>
   <div>
-    <sub-page-header title="Metrics"/>
-
+    <sub-page-header title="Metrics1"/>
+    <div>
+      <metrics-table />
+    </div>
     <div v-if="!isLoading" class="row">
       <div v-for="(chart, index) in loadedCharts" :key="chart.options.chart.id"
            :class="index == 0 ? 'col-12' : 'col-md-6'" class="mb-3">
@@ -53,10 +55,12 @@ limitations under the License.
   import SimpleCard from '../utils/cards/SimpleCard';
   import SkillsSpinner from '../utils/SkillsSpinner';
   import NoContent3 from '../utils/NoContent3';
+  import MetricsTable from './MetricsTable';
 
   export default {
     name: 'SectionMetricsNotUsed',
     components: {
+      MetricsTable,
       SkillsSpinner,
       SimpleCard,
       SubPageHeader,

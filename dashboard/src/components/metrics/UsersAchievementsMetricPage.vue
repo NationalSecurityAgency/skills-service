@@ -15,16 +15,25 @@ limitations under the License.
 */
 <template>
   <div>
-    <sub-page-header title="Metrics | Users and Levels"/>
+    <sub-page-header title="Metrics | Achievements"/>
+
+    <div class="row mb-2">
+      <div class="col">
+        <overall-level-breakdown-metric />
+      </div>
+    </div>
+    <metrics-table />
   </div>
 </template>
 
 <script>
   import SubPageHeader from '@//components/utils/pages/SubPageHeader';
+  import MetricsTable from './MetricsTable';
+  import OverallLevelBreakdownMetric from './OverallLevelBreakdownMetric';
 
   export default {
-    name: 'UsersAndLevelsMetrics',
-    components: { SubPageHeader },
+    name: 'UsersAchievementsMetricPage',
+    components: { OverallLevelBreakdownMetric, MetricsTable, SubPageHeader },
   };
 </script>
 

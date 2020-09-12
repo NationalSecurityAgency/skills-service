@@ -60,7 +60,7 @@ import ResetConfirmation from '@//components/access/ResetConfirmation';
 import ResetNotSupportedPage from '@//components/access/ResetNotSupportedPage';
 import MetricsPageNav from '@//components/metrics/MetricsPageNav';
 import ProjectMetrics from '@//components/metrics/ProjectMetrics';
-import UsersAndLevelsMetrics from '@//components/metrics/UsersAndLevelsMetrics';
+import UsersAchievementsMetricPage from '@//components/metrics/UsersAchievementsMetricPage';
 
 Vue.use(Router);
 
@@ -236,7 +236,7 @@ const router = new Router({
         }, {
           name: 'UsersAndLevelsMetrics',
           path: 'usersAndLevels',
-          component: UsersAndLevelsMetrics,
+          component: UsersAchievementsMetricPage,
           meta: { requiresAuth: true },
         }],
       }],
