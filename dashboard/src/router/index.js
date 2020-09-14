@@ -60,7 +60,8 @@ import ResetConfirmation from '@//components/access/ResetConfirmation';
 import ResetNotSupportedPage from '@//components/access/ResetNotSupportedPage';
 import MetricsPageNav from '@//components/metrics/MetricsPageNav';
 import ProjectMetrics from '@//components/metrics/ProjectMetrics';
-import UsersAchievementsMetricPage from '@//components/metrics/UsersAchievementsMetricPage';
+import UsersAchievementsMetricPage from '@//components/metrics/achievements/UsersAchievementsMetricPage';
+import SubjectMetricsPage from '@//components/metrics/subjectMetrics/SubjectMetricsPage';
 
 Vue.use(Router);
 
@@ -235,8 +236,13 @@ const router = new Router({
           meta: { requiresAuth: true, reportSkillId: 'VisitProjectStats' },
         }, {
           name: 'UsersAndLevelsMetrics',
-          path: 'usersAndLevels',
+          path: 'achievements',
           component: UsersAchievementsMetricPage,
+          meta: { requiresAuth: true },
+        }, {
+          name: 'SubjectMetricsPage',
+          path: 'subjects',
+          component: SubjectMetricsPage,
           meta: { requiresAuth: true },
         }],
       }],

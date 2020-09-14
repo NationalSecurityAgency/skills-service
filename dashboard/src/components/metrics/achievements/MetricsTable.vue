@@ -23,13 +23,17 @@
       </div>
       <b-table striped :items="items" :busy="isLoading" :sort-by.sync="sortBy" :sort-desc.sync="sortDesc"
                :bordered="true" :outlined="true"
-               :fields="fields"  head-variant="light">
+               :fields="fields"  head-variant="light" class="mb-0">
         <template v-slot:cell(user_name)="data">
           <b-button-group>
-            <b-button variant="outline-info" size="sm" class="text-secondary"><i class="fa fa-eye"/></b-button>
-            <b-button variant="outline-info" size="sm" class="text-secondary"><i class="fa fa-chart-bar"/></b-button>
+            <b-button :to="{ name: 'ClientDisplayPreview', params: { projectId: projectId, userId: data.value } }"
+                      variant="outline-info" size="sm" class="text-secondary"
+                      v-b-tooltip.hover title="View User's Client Display"><i class="fa fa-eye"/></b-button>
+            <b-button variant="outline-info" size="sm" class="text-secondary"
+                      v-b-tooltip.hover title="View User's Metrics"><i class="fa fa-chart-bar"/></b-button>
           </b-button-group>
           <span class="ml-2">{{ data.value }}</span>
+
         </template>
         <template v-slot:cell(achievement)="data">
         <span class="border border-info rounded d-inline-block bg-white" style="width: 2rem; text-align: center">
@@ -51,9 +55,20 @@
           </div>
         </template>
       </b-table>
-      <b-pagination v-model="pagination.currentPage" :total-rows="pagination.totalRows" :per-page="pagination.perPage"
-                    pills align="center" size="sm" variant="info" class="customPagination">
-      </b-pagination>
+      <div class="row m-1 p-0 align-items-center">
+        <div class="col">
+        </div>
+        <div class="col">
+          <b-pagination v-model="pagination.currentPage" :total-rows="pagination.totalRows" :per-page="pagination.perPage"
+                        pills align="center" size="sm" variant="info" class="customPagination m-0 p-0">
+          </b-pagination>
+        </div>
+        <div class="col text-right">
+          <span class="text-muted">Rows:</span> <b-form-select v-model="pagination.perPage" :options="pagination.possiblePageSizes"
+                               size="sm" class="mx-2" style="width: 4rem;"/>
+          <b-button size="sm" v-b-tooltip.hover title="Download CSV" variant="outline-info"><i class="fas fa-download"></i></b-button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -65,6 +80,7 @@
     name: 'MetricsTable',
     data() {
       return {
+        projectId: this.$route.params.projectId,
         usernameFilter: '',
         isLoading: false,
         badges: {
@@ -79,6 +95,7 @@
           currentPage: 1,
           totalRows: 76,
           perPage: 5,
+          possiblePageSizes: [5, 10, 15, 20, 50],
         },
         sortBy: 'timestamp',
         sortDesc: true,
@@ -136,7 +153,7 @@
 </script>
 
 <style lang="scss" scoped>
-@import "~bootstrap/scss/bootstrap";
+@import "node_modules/bootstrap/scss/bootstrap";
 
 .customPagination /deep/ button {
   color: $info !important;

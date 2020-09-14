@@ -17,6 +17,9 @@ limitations under the License.
 <div class="mb-3">
   <sub-page-header title="Metrics"/>
   <div class="card">
+    <div class="card-header">
+      <h5>Distinct number of users over time</h5>
+    </div>
     <div class="card-body">
       <apexchart type="area" height="350" :options="chartOptions" :series="distinctUsersOverTime"></apexchart>
     </div>
@@ -24,6 +27,7 @@ limitations under the License.
   <div class="row">
     <div v-for="(navItem, index) in navCards" :key="navItem.title" class="col-sm-6 col-md-4 mt-2">
       <metric-nav-card :title="navItem.title" :subtitle="navItem.subtitle" :description="navItem.description"
+                       :path-name="navItem.pathName"
                        :icon="getMetricCardColorClass(navItem.icon,index)"/>
     </div>
   </div>
@@ -45,20 +49,23 @@ limitations under the License.
         metricCardIconsColors: ['text-warning', 'text-primary', 'text-info', 'text-danger'],
         distinctUsersOverTime: [],
         navCards: [{
-          title: 'Users And Levels',
-          subtitle: 'Explore users by Levels',
-          description: 'Ability to understand who your experts are and how they utilize your application',
+          title: 'Achievements',
+          subtitle: 'Explore users\' achievements',
+          description: 'Browse users\' achieved overall levels, subject level achievements as well as earned badges',
           icon: 'fa fa-trophy',
+          pathName: 'UsersAndLevelsMetrics',
+        }, {
+          title: 'Subjects',
+          subtitle: 'Achievements by Subjects',
+          description: 'Detailed breakdown how users are earning skills under each subject',
+          icon: 'fa fa-cubes',
+          pathName: 'SubjectMetricsPage',
         }, {
           title: 'Overlooked Skills',
           subtitle: 'Explore users by Levels',
           description: 'Ability to understand who your experts are and how they utilize your application',
-          icon: 'fa fa-trophy',
-        }, {
-          title: 'Time to Achieve',
-          subtitle: 'Explore users by Levels',
-          description: 'Ability to understand who your experts are and how they utilize your application',
-          icon: 'fa fa-trophy',
+          icon: 'fa fa-graduation-cap',
+          pathName: '',
         }],
         chartOptions: {
           chart: {
@@ -79,10 +86,6 @@ limitations under the License.
           },
           markers: {
             size: 0,
-          },
-          title: {
-            text: 'Distinct Number of Users',
-            align: 'left',
           },
           fill: {
             type: 'gradient',

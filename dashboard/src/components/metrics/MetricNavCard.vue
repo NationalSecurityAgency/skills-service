@@ -18,11 +18,11 @@ limitations under the License.
     <div class="card-body">
 
       <div class="media">
-        <div class="d-inline-block mt-1 mr-3">
+        <div class="d-inline-block mt-1 mr-3 border rounded p-2">
           <i class="fa-3x" :class="icon"/>
         </div>
         <div class="media-body">
-          <h4 class="mb-2 text-uppercase">{{ title }}</h4>
+          <h4 class="mb-2">{{ title }}</h4>
           <div style="font-size: 0.95rem;" class="text-secondary">
             <slot>
               {{ subtitle }}
@@ -36,7 +36,7 @@ limitations under the License.
     </div>
 
     <div class="card-footer text-center">
-      <router-link :to="{ name: 'UsersAndLevelsMetrics' }" class="btn btn-outline-primary">Explore <i class="fas fa-arrow-right"/></router-link>
+      <router-link :to="{ name: pathName }" class="btn btn-outline-primary">Explore <i class="fas fa-arrow-right"/></router-link>
     </div>
   </div>
 </template>
@@ -44,7 +44,7 @@ limitations under the License.
 <script>
   export default {
     name: 'MetricNavCard',
-    props: ['title', 'subtitle', 'description', 'icon'],
+    props: ['title', 'subtitle', 'description', 'icon', 'pathName'],
   };
 </script>
 

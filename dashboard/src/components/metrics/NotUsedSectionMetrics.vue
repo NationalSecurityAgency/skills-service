@@ -55,7 +55,7 @@ limitations under the License.
   import SimpleCard from '../utils/cards/SimpleCard';
   import SkillsSpinner from '../utils/SkillsSpinner';
   import NoContent3 from '../utils/NoContent3';
-  import MetricsTable from './MetricsTable';
+  import MetricsTable from './achievements/MetricsTable';
 
   export default {
     name: 'SectionMetricsNotUsed',

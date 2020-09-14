@@ -120,7 +120,17 @@ limitations under the License.
       buildNewMenuMapWhenPropsChange(navigationItems) {
         const routeName = this.$route.name;
         if (navigationItems && navigationItems.length > 0) {
-          const navItem = navigationItems.find((item) => item.page === routeName);
+          let navItem = navigationItems.find((item) => item.page === routeName);
+          if (!navItem) {
+            // Backup strategy:
+            // try parent by comparing path to the router item's name
+            const splitPath = this.$route.path.split('/');
+            if (splitPath.length > 2) {
+              const parentRouteName = splitPath[splitPath.length - 2];
+              navItem = navigationItems.find((item) => item.name.toLowerCase() === parentRouteName.toLowerCase());
+            }
+          }
+
           this.menuSelections = this.buildNewMenuMap(navItem ? navItem.name : navigationItems[0].name);
         }
       },
