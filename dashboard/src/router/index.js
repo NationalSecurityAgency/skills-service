@@ -62,6 +62,7 @@ import MetricsPageNav from '@//components/metrics/MetricsPageNav';
 import ProjectMetrics from '@//components/metrics/ProjectMetrics';
 import UsersAchievementsMetricPage from '@//components/metrics/achievements/UsersAchievementsMetricPage';
 import SubjectMetricsPage from '@//components/metrics/subjectMetrics/SubjectMetricsPage';
+import SkillsMetricsPage from '@//components/metrics/skills/SkillsMetricsPage';
 
 Vue.use(Router);
 
@@ -243,6 +244,11 @@ const router = new Router({
           name: 'SubjectMetricsPage',
           path: 'subjects',
           component: SubjectMetricsPage,
+          meta: { requiresAuth: true },
+        }, {
+          name: 'SkillsMetricsPage',
+          path: 'skills',
+          component: SkillsMetricsPage,
           meta: { requiresAuth: true },
         }],
       }],

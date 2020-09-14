@@ -43,6 +43,7 @@ Vue.use(ClientTable, {}, false, 'bootstrap4', 'default');
 Vue.use(ServerTable, {}, false, 'bootstrap4', 'default');
 Vue.component('ValidationProvider', ValidationProvider);
 Vue.component('ValidationObserver', ValidationObserver);
+Vue.use(VeeValidate, { fieldsBagName: 'veeFields' });
 Vue.use(Vuex);
 Vue.use(VueApexCharts);
 Vue.use(BootstrapVue);

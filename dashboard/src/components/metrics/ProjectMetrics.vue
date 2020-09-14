@@ -65,7 +65,7 @@ limitations under the License.
           subtitle: 'Explore users by Levels',
           description: 'Ability to understand who your experts are and how they utilize your application',
           icon: 'fa fa-graduation-cap',
-          pathName: '',
+          pathName: 'SkillsMetricsPage',
         }],
         chartOptions: {
           chart: {

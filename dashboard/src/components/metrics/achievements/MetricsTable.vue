@@ -21,9 +21,8 @@
           </b-form-group>
         </div>
       </div>
-      <b-table striped :items="items" :busy="isLoading" :sort-by.sync="sortBy" :sort-desc.sync="sortDesc"
-               :bordered="true" :outlined="true"
-               :fields="fields"  head-variant="light" class="mb-0">
+
+      <skills-b-table class="mb-5" :items="items" :options="tableOptions">
         <template v-slot:cell(user_name)="data">
           <b-button-group>
             <b-button :to="{ name: 'ClientDisplayPreview', params: { projectId: projectId, userId: data.value } }"
@@ -33,56 +32,34 @@
                       v-b-tooltip.hover title="View User's Metrics"><i class="fa fa-chart-bar"/></b-button>
           </b-button-group>
           <span class="ml-2">{{ data.value }}</span>
-
         </template>
         <template v-slot:cell(achievement)="data">
-        <span class="border border-info rounded d-inline-block bg-white" style="width: 2rem; text-align: center">
-          <i class="fa fa-trophy text-muted" v-if="data.value.startsWith('Level')"/>
-          <i class="fa fa-award text-muted" v-else/>
-        </span>
+          <span class="border border-info rounded d-inline-block bg-white" style="width: 2rem; text-align: center">
+            <i class="fa fa-trophy text-muted" v-if="data.value.startsWith('Level')"/>
+            <i class="fa fa-award text-muted" v-else/>
+          </span>
           <span class="ml-2">{{ data.value }}</span>
         </template>
         <template v-slot:cell(timestamp)="data">
           <span class="">{{ data.value | date }}</span>
           <b-badge v-if="isToday(data.value)" variant="info" class="ml-2">Today</b-badge>
         </template>
-        <template v-slot:table-busy>
-          <div class="text-center text-info my-2">
-            <b-spinner class="align-middle"></b-spinner>
-            <p>
-              <strong>Loading...</strong>
-            </p>
-          </div>
-        </template>
-      </b-table>
-      <div class="row m-1 p-0 align-items-center">
-        <div class="col">
-        </div>
-        <div class="col">
-          <b-pagination v-model="pagination.currentPage" :total-rows="pagination.totalRows" :per-page="pagination.perPage"
-                        pills align="center" size="sm" variant="info" class="customPagination m-0 p-0">
-          </b-pagination>
-        </div>
-        <div class="col text-right">
-          <span class="text-muted">Rows:</span> <b-form-select v-model="pagination.perPage" :options="pagination.possiblePageSizes"
-                               size="sm" class="mx-2" style="width: 4rem;"/>
-          <b-button size="sm" v-b-tooltip.hover title="Download CSV" variant="outline-info"><i class="fas fa-download"></i></b-button>
-        </div>
-      </div>
+      </skills-b-table>
     </div>
   </div>
 </template>
 
 <script>
   import moment from 'moment';
+  import SkillsBTable from '../../utils/table/SkillsBTable';
 
   export default {
     name: 'MetricsTable',
+    components: { SkillsBTable },
     data() {
       return {
         projectId: this.$route.params.projectId,
         usernameFilter: '',
-        isLoading: false,
         badges: {
           selected: 'All Badges',
           available: ['All Badges', 'Remove Badges', 'Badge 1', 'Badge 2'],
@@ -91,29 +68,33 @@
           selected: 'All Levels',
           available: ['All Levels', 'Level 1', 'Level 2', 'Level 3', 'Level 4', 'Level 5'],
         },
-        pagination: {
-          currentPage: 1,
-          totalRows: 76,
-          perPage: 5,
-          possiblePageSizes: [5, 10, 15, 20, 50],
+        tableOptions: {
+          busy: false,
+          sortBy: 'timestamp',
+          sortDesc: true,
+          fields: [
+            {
+              key: 'user_name',
+              sortable: true,
+              label: 'Username',
+            },
+            {
+              key: 'achievement',
+              sortable: true,
+            },
+            {
+              key: 'timestamp',
+              label: 'Date',
+              sortable: true,
+            },
+          ],
+          pagination: {
+            currentPage: 1,
+            totalRows: 76,
+            perPage: 5,
+            possiblePageSizes: [5, 10, 15, 20, 50],
+          },
         },
-        sortBy: 'timestamp',
-        sortDesc: true,
-        fields: [
-          {
-            key: 'user_name',
-            sortable: true,
-          },
-          {
-            key: 'achievement',
-            sortable: true,
-          },
-          {
-            key: 'timestamp',
-            label: 'Date',
-            sortable: true,
-          },
-        ],
         items: [
           {
             timestamp: 1599824550435,
