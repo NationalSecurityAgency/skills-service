@@ -21,7 +21,7 @@
     </licenses>
 
     <properties>
-        <groovy.version>3.0.4</groovy.version>
+        <groovy.version>3.0.5</groovy.version>
         <spock.myVersion>2.0-M3-groovy-3.0</spock.myVersion>
 
         <groovy.eclipse.compiler.version>3.6.0-03</groovy.eclipse.compiler.version>
