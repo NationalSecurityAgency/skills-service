@@ -14,61 +14,73 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-<div class="card mt-2">
-  <div class="card-header">
-    <h5>Number of users for each level over time</h5>
+  <div>
+    <apexchart type="line" height="350" :options="chartOptions" :series="series"></apexchart>
   </div>
-  <div class="card-body">
-    <b-form-select style="width: 20rem;" id="input-3" class="mb-2"
-                   v-model="subjects.selected" :options="subjects.available" required/>
-    <apexchart type="area" height="300" :options="chartOptions" :series="series"></apexchart>
-  </div>
-</div>
 </template>
 
 <script>
   export default {
-    name: 'SubjectLevelsOverTime',
+    name: 'SkillAchievedByUsersOverTime',
+    props: ['skillName'],
     data() {
       return {
-        subjects: {
-          selected: 'Subject 1',
-          available: ['Subject 1', 'Subject 2', 'Subject 3', 'Subject 4', 'Subject 5'],
-        },
+
         series: [{
-          name: 'Level 1',
-          data: this.generateDayWiseTimeSeries(new Date('11 Feb 2020').getTime(), 100, {
+          name: 'This Skills',
+          data: this.generateDayWiseTimeSeries(new Date('11 Mar 2020').getTime(), 91, {
             min: 10,
             max: 60,
           }),
         }, {
-          name: 'Level 2',
-          data: this.generateDayWiseTimeSeries(new Date('11 Mar 2020').getTime(), 71, {
+          name: 'Skill Achieved by Most Users',
+          data: this.generateDayWiseTimeSeries(new Date('11 Feb 2020').getTime(), 120, {
             min: 10,
-            max: 60,
+            max: 100,
           }),
         }, {
-          name: 'Level 3',
-          data: this.generateDayWiseTimeSeries(new Date('22 Apr 2020').getTime(), 29, {
+          name: 'Average Skill',
+          data: this.generateDayWiseTimeSeries(new Date('11 Jan 2020').getTime(), 151, {
             min: 10,
-            max: 60,
+            max: 20,
           }),
         }],
         chartOptions: {
           chart: {
+            height: 250,
             type: 'line',
+            id: 'areachart-2',
+            toolbar: {
+              show: false,
+            },
           },
-          colors: ['#008FFB', '#546E7A', '#00E396'],
-          yaxis: {
-            title: {
-              text: '# of users',
+          dataLabels: {
+            enabled: false,
+          },
+          stroke: {
+            curve: 'straight',
+          },
+          grid: {
+            padding: {
+              right: 30,
+              left: 20,
             },
           },
           xaxis: {
             type: 'datetime',
           },
-          dataLabels: {
-            enabled: false,
+          yaxis: {
+            labels: {
+              formatter(val) {
+                return (val / 1000000).toFixed(0);
+              },
+            },
+            title: {
+              text: '# Users',
+            },
+          },
+          legend: {
+            position: 'top',
           },
         },
       };
@@ -93,7 +105,6 @@ limitations under the License.
         return series;
       },
     },
-
   };
 </script>
 

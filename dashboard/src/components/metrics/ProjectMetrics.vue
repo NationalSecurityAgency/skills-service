@@ -61,9 +61,9 @@ limitations under the License.
           icon: 'fa fa-cubes',
           pathName: 'SubjectMetricsPage',
         }, {
-          title: 'Overlooked Skills',
-          subtitle: 'Explore users by Levels',
-          description: 'Ability to understand who your experts are and how they utilize your application',
+          title: 'Skills',
+          subtitle: 'Understand Skills Usage',
+          description: 'Find top-achieved skills and overlooked skills. Learn how much each skill is utilized within your applicaiton.',
           icon: 'fa fa-graduation-cap',
           pathName: 'SkillsMetricsPage',
         }],

@@ -1,3 +1,18 @@
+/*
+Copyright 2020 SkillTree
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 <template>
   <div class="card">
     <div class="card-header">
@@ -26,17 +41,18 @@
 
       <skills-b-table :items="items" :options="tableOptions">
         <template v-slot:cell(skill)="data">
-          <b-button size="sm" @click="data.toggleDetails" class="mr-2">
-            <i v-if="data.detailsShowing" class="fa fa-minus-square" />
-            <i v-else class="fa fa-plus-square" />
-          </b-button>
+<!--          <b-button size="sm" @click="data.toggleDetails" class="mr-2">-->
+<!--            <i v-if="data.detailsShowing" class="fa fa-minus-square" />-->
+<!--            <i v-else class="fa fa-plus-square" />-->
+<!--          </b-button>-->
           <span class="ml-2">{{ data.value }}</span>
 
           <b-button-group class="float-right">
-            <b-button :to="{ name: 'ClientDisplayPreview', params: { projectId: projectId, userId: data.value } }"
+            <b-button target="_blank" :to="{ name: 'SkillOverview', params: { projectId: projectId, subjectId: 'subj1', skillId: 'skill1' } }"
                       variant="outline-info" size="sm" class="text-secondary"
                       v-b-tooltip.hover title="View Skill's Configuration"><i class="fa fa-wrench"/></b-button>
-            <b-button variant="outline-info" size="sm" class="text-secondary"
+            <b-button target="_blank" :to="{ name: 'SkillMetrics', params: { projectId: projectId, subjectId: 'subj1', skillId: 'skill1' } }"
+                      variant="outline-info" size="sm" class="text-secondary"
                       v-b-tooltip.hover title="View User's Metrics"><i class="fa fa-chart-bar"/></b-button>
           </b-button-group>
         </template>
@@ -81,7 +97,7 @@
 
         <template v-slot:row-details="row">
           <b-card>
-            {{ row.item }}
+            <skill-achieved-by-users-over-time :skill-name="row.item.skill"/>
           </b-card>
         </template>
 
@@ -93,10 +109,11 @@
 <script>
   import SkillsBTable from '@/components/utils/table/SkillsBTable';
   import moment from 'moment';
+  import SkillAchievedByUsersOverTime from './SkillAchievedByUsersOverTime';
 
   export default {
     name: 'SkillsUsageMetrics',
-    components: { SkillsBTable },
+    components: { SkillAchievedByUsersOverTime, SkillsBTable },
     data() {
       return {
         projectId: this.$route.params.projectId,
@@ -108,6 +125,9 @@
           busy: false,
           sortBy: 'timestamp',
           sortDesc: true,
+          bordered: true,
+          outlined: true,
+          rowDetailsControls: true,
           fields: [
             {
               key: 'skill',
@@ -143,7 +163,7 @@
         },
         items: [
           {
-            skill: 'How to drive',
+            skill: 'How to fly',
             last_event_applied: 1599824550435,
             last_skill_achieved: 1599824550435,
             num_users_achieved_skill: 520,

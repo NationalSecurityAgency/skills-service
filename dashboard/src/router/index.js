@@ -63,6 +63,7 @@ import ProjectMetrics from '@//components/metrics/ProjectMetrics';
 import UsersAchievementsMetricPage from '@//components/metrics/achievements/UsersAchievementsMetricPage';
 import SubjectMetricsPage from '@//components/metrics/subjectMetrics/SubjectMetricsPage';
 import SkillsMetricsPage from '@//components/metrics/skills/SkillsMetricsPage';
+import SingleSkillMetricPage from '@//components/metrics/skills/SingleSkillMetricPage';
 
 Vue.use(Router);
 
@@ -315,6 +316,11 @@ const router = new Router({
         component: AddSkillEvent,
         meta: { requiresAuth: true, breadcrumb: 'Add Skill Event' },
         props: true,
+      }, {
+        name: 'SkillMetrics',
+        path: 'metrics',
+        component: SingleSkillMetricPage,
+        meta: { requiresAuth: true, reportSkillId: 'VisitSkillStats' },
       }],
     },
     {
