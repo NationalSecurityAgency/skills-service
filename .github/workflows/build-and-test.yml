@@ -147,7 +147,6 @@ jobs:
         name: CI result artifacts
         path: |
           ./service/target/*.log
-          ./e2e-tests/cypress
           ./e2e-tests/logs
 
     - name: upload service jar
