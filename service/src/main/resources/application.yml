@@ -114,6 +114,9 @@ skills:
       maxNumPerformToCompletion: 10000
       maxNumPointIncrementMaxOccurrences: 999
       userSuggestOptions:
+    client:
+      loggingEnabled: false
+      loggingLevel: DEBUG
   profiles:
     active: default
 #  level:

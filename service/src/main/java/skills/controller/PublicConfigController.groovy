@@ -80,6 +80,8 @@ class PublicConfigController {
     @ResponseBody
     def status() {
         healthChecker.checkRequiredServices()
-        return statusRes
+        Map<String,String> res = new HashMap<>(statusRes)
+        res['clientLib'] = uiConfigProperties.client
+        return res
     }
 }

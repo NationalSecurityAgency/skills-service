@@ -15,11 +15,23 @@
  */
 package skills
 
+import groovy.util.logging.Slf4j
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.context.annotation.Configuration
 
+import javax.annotation.PostConstruct
+
 @Configuration
 @ConfigurationProperties("skills.config")
+@Slf4j
 class UIConfigProperties {
     Map<String,String> ui = [:]
+    Map<String,String> client = [:]
+
+    @PostConstruct
+    void init() {
+        if(client['loggingEnabled']) {
+            log.info("Client Logging Enabled: ${client}")
+        }
+    }
 }
