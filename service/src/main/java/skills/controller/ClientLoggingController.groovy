@@ -17,9 +17,7 @@ package skills.controller
 
 import groovy.transform.ToString
 import groovy.util.logging.Slf4j
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
-import skills.UIConfigProperties
 import skills.profile.EnableCallStackProf
 
 @RestController
@@ -35,9 +33,6 @@ class ClientLoggingController {
 //    Logger.WARN = defineLogLevel(5, 'WARN');
 //    Logger.ERROR = defineLogLevel(8, 'ERROR');
 //    Logger.OFF = defineLogLevel(99, 'OFF');
-
-    @Autowired
-    UIConfigProperties uiConfigProperties
 
     @CrossOrigin
     @RequestMapping(value = "/log", method = [RequestMethod.PUT, RequestMethod.POST])
