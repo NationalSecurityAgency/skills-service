@@ -14,27 +14,35 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div class="card level-breakdown-container">
+  <div class="card" data-cy="projectOverallLevelsChart">
     <div class="card-header">
-      <h5># Users For Each Overall Level</h5>
+      Overall Levels
     </div>
     <div class="card-body p-0">
-      <apexchart type="bar" height="350" :options="chartOptions" :series="series"></apexchart>
+      <metrics-spinner v-if="isLoading"/>
+      <apexchart v-if="!isLoading" type="bar" height="350" :options="chartOptions" :series="series" />
+      <div v-if="!isLoading && isEmpty" class="card-img-overlay d-flex">
+        <div class="my-auto mx-auto text-center">
+          <div class="alert alert-info"><i class="fa fa-info-circle"/> No one reached <b-badge>Level 1</b-badge> yet...</div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
   import numberFormatter from '@/filters/NumberFilter';
+  import MetricsService from '../MetricsService';
+  import MetricsSpinner from '../utils/MetricsSpinner';
 
   export default {
     name: 'OverallLevelBreakdownMetric',
+    components: { MetricsSpinner },
     data() {
       return {
-        series: [{
-          name: 'Number of Users',
-          data: [6600, 5552, 570, 56, 12].reverse(),
-        }],
+        isLoading: true,
+        isEmpty: false,
+        series: [],
         chartOptions: {
           chart: {
             type: 'bar',
@@ -91,7 +99,7 @@ limitations under the License.
             colors: ['transparent'],
           },
           xaxis: {
-            categories: ['Level 1', 'Level 2', 'Level 3', 'Level 4', 'Level 5'].reverse(),
+            categories: [],
             labels: {
               formatter(val) {
                 return numberFormatter(val);
@@ -123,19 +131,26 @@ limitations under the License.
         },
       };
     },
+    mounted() {
+      MetricsService.loadChart(this.$route.params.projectId, 'numUsersPerLevelChartBuilder')
+        .then((response) => {
+          // sort by level
+          const sorted = response.sort((item) => item.value).reverse();
+
+          this.isEmpty = response.find((item) => item.count > 0) === undefined;
+          this.chartOptions.xaxis.categories = sorted.map((item) => item.value);
+          this.series = [{
+            name: 'Number of Users',
+            data: sorted.map((item) => item.count),
+          }];
+          this.isLoading = false;
+        });
+    },
   };
 </script>
 
-<style>
-/*.level-breakdown-container .apexcharts-menu-icon {*/
-/*  position: relative !important;*/
-/*  top: -2.3rem !important;*/
-/*}*/
-/*.level-breakdown-container .apexcharts-menu-open {*/
-/*  top: -1rem !important;*/
-/*}*/
-</style>
-
 <style scoped>
-
+.card-body {
+  min-height: 350px;
+}
 </style>

@@ -15,8 +15,6 @@ limitations under the License.
 */
 <template>
   <div>
-    <sub-page-header title="Metrics | Achievements"/>
-
     <div class="row mb-2">
       <div class="col">
         <overall-level-breakdown-metric />
@@ -27,13 +25,12 @@ limitations under the License.
 </template>
 
 <script>
-  import SubPageHeader from '@//components/utils/pages/SubPageHeader';
   import MetricsTable from './MetricsTable';
   import OverallLevelBreakdownMetric from './OverallLevelBreakdownMetric';
 
   export default {
     name: 'UsersAchievementsMetricPage',
-    components: { OverallLevelBreakdownMetric, MetricsTable, SubPageHeader },
+    components: { OverallLevelBreakdownMetric, MetricsTable },
   };
 </script>
 

@@ -66,9 +66,12 @@ class AdminUsersService {
         List<DayCountItem> res = userPointsRepo.findDistinctUserCountsByProject(projectId, startDate)
 
         List<TimestampCountItem> countsPerDay = []
-        startDate.upto(new Date().clearTime()) { Date theDate ->
-            DayCountItem found = res.find({it.day.clearTime() == theDate})
-            countsPerDay << new TimestampCountItem(value: theDate.time, count: found?.count ?: 0)
+        if (res) {
+            Date earliest = res.min { it.day }.day
+            earliest.upto(new Date().clearTime()) { Date theDate ->
+                DayCountItem found = res.find({ it.day.clearTime() == theDate })
+                countsPerDay << new TimestampCountItem(value: theDate.time, count: found?.count ?: 0)
+            }
         }
 
         return countsPerDay

@@ -14,8 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-<div class="mb-3">
-  <sub-page-header title="Metrics"/>
   <div class="card">
     <div class="card-header">
       <h5>Distinct number of users over time</h5>
@@ -24,49 +22,18 @@ limitations under the License.
       <apexchart type="area" height="350" :options="chartOptions" :series="distinctUsersOverTime"></apexchart>
     </div>
   </div>
-  <div class="row">
-    <div v-for="(navItem, index) in navCards" :key="navItem.title" class="col-sm-6 col-md-4 mt-2">
-      <metric-nav-card :title="navItem.title" :subtitle="navItem.subtitle" :description="navItem.description"
-                       :path-name="navItem.pathName"
-                       :icon="getMetricCardColorClass(navItem.icon,index)"/>
-    </div>
-  </div>
-</div>
 </template>
 
 <script>
-  import SubPageHeader from '@//components/utils/pages/SubPageHeader';
   import MetricsService from './MetricsService';
   import numberFormatter from '@//filters/NumberFilter';
-  import MetricNavCard from './MetricNavCard';
 
   export default {
     name: 'ProjectMetrics',
-    components: { MetricNavCard, SubPageHeader },
     data() {
       return {
         isLoading: true,
-        metricCardIconsColors: ['text-warning', 'text-primary', 'text-info', 'text-danger'],
         distinctUsersOverTime: [],
-        navCards: [{
-          title: 'Achievements',
-          subtitle: 'Explore users\' achievements',
-          description: 'Browse users\' achieved overall levels, subject level achievements as well as earned badges',
-          icon: 'fa fa-trophy',
-          pathName: 'UsersAndLevelsMetrics',
-        }, {
-          title: 'Subjects',
-          subtitle: 'Achievements by Subjects',
-          description: 'Detailed breakdown how users are earning skills under each subject',
-          icon: 'fa fa-cubes',
-          pathName: 'SubjectMetricsPage',
-        }, {
-          title: 'Skills',
-          subtitle: 'Understand Skills Usage',
-          description: 'Find top-achieved skills and overlooked skills. Learn how much each skill is utilized within your applicaiton.',
-          icon: 'fa fa-graduation-cap',
-          pathName: 'SkillsMetricsPage',
-        }],
         chartOptions: {
           chart: {
             type: 'area',
@@ -119,6 +86,25 @@ limitations under the License.
             },
           },
         },
+        navCards: [{
+          title: 'Achievements',
+          subtitle: 'Explore users\' achievements',
+          description: 'Browse users\' achieved overall levels, subject level achievements as well as earned badges',
+          icon: 'fa fa-trophy text-warning',
+          pathName: 'UsersAndLevelsMetrics',
+        }, {
+          title: 'Subjects',
+          subtitle: 'Achievements by Subjects',
+          description: 'Detailed breakdown how users are earning skills under each subject',
+          icon: 'fa fa-cubes text-primary',
+          pathName: 'SubjectMetricsPage',
+        }, {
+          title: 'Skills',
+          subtitle: 'Understand Skills Usage',
+          description: 'Find top-achieved skills and overlooked skills. Learn how much each skill is utilized within your applicaiton.',
+          icon: 'fa fa-graduation-cap text-info',
+          pathName: 'SkillsMetricsPage',
+        }],
       };
     },
     mounted() {
@@ -129,13 +115,6 @@ limitations under the License.
             name: 'Points',
           }];
         });
-    },
-    methods: {
-      getMetricCardColorClass(icon, index) {
-        const colorIndex = this.metricCardIconsColors.length < index ? index : index % this.metricCardIconsColors.length;
-        const color = this.metricCardIconsColors[colorIndex];
-        return `${icon} ${color}`;
-      },
     },
   };
 </script>

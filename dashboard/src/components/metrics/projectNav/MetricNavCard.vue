@@ -36,7 +36,8 @@ limitations under the License.
     </div>
 
     <div class="card-footer text-center">
-      <router-link :to="{ name: pathName }" class="btn btn-outline-primary">Explore <i class="fas fa-arrow-right"/></router-link>
+      <router-link :to="{ name: pathName }" :data-cy="`metricsNav-${title}`"
+                   class="btn btn-outline-primary">Explore <i class="fas fa-arrow-right"/></router-link>
     </div>
   </div>
 </template>

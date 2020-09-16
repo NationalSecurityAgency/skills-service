@@ -248,3 +248,25 @@ Cypress.Commands.add('loginBySingleSignOn', (projId = 'proj1') => {
 });
 
 
+Cypress.Commands.add('reportHistoryOfEvents', (projId, user, numDays=10, skipWeeDays = [5,6], availableSkillIds=['skill1', 'skill2', 'skill3']) => {
+    let skipDays = [...skipWeeDays];
+    for(let daysCounter=0; daysCounter < numDays; daysCounter++) {
+        let toSkip = false;
+        skipDays.forEach((skipNum, index) => {
+            if(daysCounter === skipNum) {
+                toSkip = true;
+                skipDays[index] += 7;
+            }
+        });
+        if(toSkip) {
+            continue;
+        }
+
+        const time = new Date().getTime() - (daysCounter)*1000*60*60*24;
+        const numSkillsToReport = Math.random() * (availableSkillIds.length-1);
+        for(let skillsCounter=0; skillsCounter < numSkillsToReport; skillsCounter++) {
+            const skillId = availableSkillIds[skillsCounter];
+            cy.request('POST', `/api/projects/${projId}/skills/${skillId}`, {userId: user, timestamp: time})
+        }
+    }
+});

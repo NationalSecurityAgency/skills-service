@@ -14,13 +14,49 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <router-view></router-view>
+  <div class="mb-3">
+    <sub-page-header title="Metrics">
+      <project-metrics-small-nav :nav-cards="navCards" />
+    </sub-page-header>
+
+    <router-view></router-view>
+    <project-metrics-nav-cards :nav-cards="navCards"/>
+  </div>
 </template>
 
 <script>
+  import SubPageHeader from '@//components/utils/pages/SubPageHeader';
+  import ProjectMetricsNavCards from './projectNav/ProjectMetricsNavCards';
+  import ProjectMetricsSmallNav from './projectNav/ProjectMetricsSmallNav';
+
   export default {
     name: 'MetricsPageNav',
+    components: { ProjectMetricsSmallNav, ProjectMetricsNavCards, SubPageHeader },
+    data() {
+      return {
+        navCards: [{
+          title: 'Achievements',
+          subtitle: 'Explore users\' achievements',
+          description: 'Browse users\' achieved overall levels, subject level achievements as well as earned badges',
+          icon: 'fa fa-trophy text-warning',
+          pathName: 'UsersAndLevelsMetrics',
+        }, {
+          title: 'Subjects',
+          subtitle: 'Achievements by Subjects',
+          description: 'Detailed breakdown how users are earning skills under each subject',
+          icon: 'fa fa-cubes text-primary',
+          pathName: 'SubjectMetricsPage',
+        }, {
+          title: 'Skills',
+          subtitle: 'Understand Skills Usage',
+          description: 'Find top-achieved skills and overlooked skills. Learn how much each skill is utilized within your applicaiton.',
+          icon: 'fa fa-graduation-cap text-info',
+          pathName: 'SkillsMetricsPage',
+        }],
+      };
+    },
   };
+
 </script>
 
 <style scoped>
