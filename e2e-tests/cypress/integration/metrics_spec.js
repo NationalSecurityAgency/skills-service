@@ -40,9 +40,62 @@ describe('Metrics Tests', () => {
             });
         };
 
-        cy.reportHistoryOfEvents('proj1', 'user0', 25, [6,7], ['skill1', 'skill2', 'skill3']);
-        cy.reportHistoryOfEvents('proj1', 'user1', 12, [3], ['skill1', 'skill2', 'skill3']);
-        cy.reportHistoryOfEvents('proj1', 'user2', 20, [5,6], ['skill1', 'skill2', 'skill3']);
+        cy.request('POST', '/admin/projects/proj1/badges/badge1', {
+            projectId: 'proj1',
+            badgeId: 'badge1',
+            name: 'This is a cool badge',
+            "iconClass":"fas fa-jedi",
+        });
+        cy.request('POST', '/admin/projects/proj1/badge/badge1/skills/skill1')
+
+        cy.reportHistoryOfEvents('proj1', 'user0Good@skills.org', 25, [6,7], ['skill1', 'skill2', 'skill3']);
+        cy.reportHistoryOfEvents('proj1', 'user1Long0@skills.org', 12, [3], ['skill1', 'skill2', 'skill3']);
+        cy.reportHistoryOfEvents('proj1', 'user2Smith0@skills.org', 20, [5,6], ['skill1', 'skill2', 'skill3']);
+
+        cy.reportHistoryOfEvents('proj1', 'user3Some0@skills.org', 25, [], ['skill1']);
+
+        cy.visit('/projects/proj1/');
+        cy.clickNav('Metrics');
+        cy.get('[data-cy=metricsNav-Achievements]').click();
+    })
+
+
+    it.only('achievements table', () => {
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            name: "Subject 1",
+        })
+
+        const numSkills =3;
+        for (let skillsCounter = 1; skillsCounter <= numSkills; skillsCounter += 1) {
+            cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill${skillsCounter}`, {
+                projectId: 'proj1',
+                subjectId: 'subj1',
+                skillId: `skill${skillsCounter}`,
+                name: `Skill ${skillsCounter}`,
+                pointIncrement: '50',
+                numPerformToCompletion: '1',
+            });
+        };
+
+        cy.request('POST', '/admin/projects/proj1/badges/badge1', {
+            projectId: 'proj1',
+            badgeId: 'badge1',
+            name: 'This is a cool badge',
+            "iconClass":"fas fa-jedi",
+        });
+        cy.request('POST', '/admin/projects/proj1/badge/badge1/skills/skill1')
+
+        cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'user0Good@skills.org', timestamp: new Date().getTime()})
+        cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: 'user0Good@skills.org', timestamp: new Date().getTime()})
+        cy.request('POST', `/api/projects/proj1/skills/skill3`, {userId: 'user0Good@skills.org', timestamp: new Date().getTime()})
+
+        cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'user1Long0@skills.org', timestamp: new Date().getTime()})
+        cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: 'user1Long0@skills.org', timestamp: new Date().getTime()})
+
+        cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: 'user2Smith0@skills.org', timestamp: new Date().getTime()})
+        cy.request('POST', `/api/projects/proj1/skills/skill3`, {userId: 'user2Smith0@skills.org', timestamp: new Date().getTime()})
 
         cy.visit('/projects/proj1/');
         cy.clickNav('Metrics');

@@ -30,7 +30,6 @@ limitations under the License.
           <b-form-group label="To Date:" label-for="input-1" label-class="text-muted">
             <b-form-datepicker id="example-datepicker" v-model="value" class="mb-2"></b-form-datepicker>
           </b-form-group>
-
         </div>
         <div class="col">
           <b-form-group id="input-group-3" label="Only Users With Min Level Achievement:" label-for="input-3" label-class="text-muted">

@@ -17,8 +17,16 @@ import axios from 'axios';
 
 export default {
 
-  loadChart(projectId, chartId) {
-    const url = `/admin/projects/${projectId}/charts/${chartId}`;
+  loadChart(projectId, chartId, params = {}) {
+    let url = `/admin/projects/${projectId}/charts/${chartId}`;
+    if (params) {
+      const paramsEntries = Object.entries(params);
+      if (paramsEntries && paramsEntries.length > 0) {
+        const paramsStr = paramsEntries.map((entry) => `${entry[0]}=${entry[1]}`)
+          .join('&');
+        url = `${url}?${paramsStr}`;
+      }
+    }
     return axios.get(url).then((response) => response.data);
   },
   getChartsForSection(sectionParams) {

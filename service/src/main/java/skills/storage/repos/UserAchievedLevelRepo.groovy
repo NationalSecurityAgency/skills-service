@@ -198,4 +198,51 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
                                                                             @Param('skillRefId') Integer skillRefId,
                                                                             @Param('numOfOccurrences') int numOfOccurrences,
                                                                             @Param('notified') String notified)
+
+    @Query('''select ua, sd, uAttrs from UserAchievement ua, UserAttrs uAttrs left join SkillDef sd on ua.skillId = sd.skillId 
+            where 
+                ua.userId = uAttrs.userId and
+                ua.projectId = :projectId and
+                ua.updated > :fromDate and
+                ua.updated < :toDate and 
+                upper(uAttrs.userId) like UPPER(CONCAT('%', :userNameFilter, '%')) and
+                (upper(sd.name) like UPPER(CONCAT('%', :skillNameFilter, '%')) OR (:skillNameFilter = 'ALL')) and
+                (ua.level >= :level OR (:level = -1)) and
+                (sd.type in (:types) OR (:disableTypes = 'true') OR (ua.skillId is null AND (:includeOverallType = 'true'))) and 
+                (ua.skillId is not null OR (:includeOverallType = 'true'))
+                ''')
+    List<Object[]> findAllForAchievementNavigator(
+            @Param("projectId") String projectId,
+            @Param("userNameFilter") String userNameFilter,
+            @Param("fromDate") Date fromDate,
+            @Param("toDate") Date toDate,
+            @Param("skillNameFilter") String skillNameFilter,
+            @Param("level") Integer level,
+            @Param("types") List<SkillDef.ContainerType> types,
+            @Param("disableTypes") String disableTypes,
+            @Param("includeOverallType") String includeOverallType,
+            @Param("pageable") Pageable pageable)
+
+    @Query('''select count(ua) from UserAchievement ua, UserAttrs uAttrs left join SkillDef sd on ua.skillId = sd.skillId 
+            where 
+                ua.userId = uAttrs.userId and
+                ua.projectId = :projectId and
+                ua.updated > :fromDate and
+                ua.updated < :toDate and 
+                upper(uAttrs.userId) like UPPER(CONCAT('%', :userNameFilter, '%')) and
+                (upper(sd.name) like UPPER(CONCAT('%', :skillNameFilter, '%')) OR (:skillNameFilter = 'ALL')) and
+                (ua.level >= :level OR (:level = -1)) and 
+                (sd.type in (:types) OR (:disableTypes = 'true') OR (ua.skillId is null AND (:includeOverallType = 'true'))) and 
+                (ua.skillId is not null OR (:includeOverallType = 'true'))
+                ''')
+    Integer countForAchievementNavigator(
+            @Param("projectId") String projectId,
+            @Param("userNameFilter") String userNameFilter,
+            @Param("fromDate") Date fromDate,
+            @Param("toDate") Date toDate,
+            @Param("skillNameFilter") String skillNameFilter,
+            @Param("level") Integer level,
+            @Param("types") List<SkillDef.ContainerType> types,
+            @Param("includeOverallType") String includeOverallType,
+            @Param("disableTypes") String disableTypes)
 }

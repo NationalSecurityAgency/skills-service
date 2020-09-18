@@ -20,17 +20,17 @@ limitations under the License.
         <overall-level-breakdown-metric />
       </div>
     </div>
-    <metrics-table />
+    <achievements-navigator />
   </div>
 </template>
 
 <script>
-  import MetricsTable from './MetricsTable';
   import OverallLevelBreakdownMetric from './OverallLevelBreakdownMetric';
+  import AchievementsNavigator from './AchievementsNavigator';
 
   export default {
     name: 'UsersAchievementsMetricPage',
-    components: { OverallLevelBreakdownMetric, MetricsTable },
+    components: { AchievementsNavigator, OverallLevelBreakdownMetric },
   };
 </script>
 

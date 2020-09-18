@@ -22,13 +22,34 @@ limitations under the License.
              :sort-desc.sync="options.sortDesc"
              :bordered="options.bordered"
              :outlined="options.outlined"
-             :fields="this.fieldsInternal">
+             :fields="this.fieldsInternal"
+             show-empty>
       <colgroup v-if="options.rowDetailsControls"><col style="width: 2rem;"><col></colgroup>
       <template v-if="options.rowDetailsControls" v-slot:cell(b_table_controls)="data">
         <b-button size="sm" @click="data.toggleDetails" class="mr-2">
           <i v-if="data.detailsShowing" class="fa fa-minus-square" />
           <i v-else class="fa fa-plus-square" />
         </b-button>
+      </template>
+
+      <template v-slot:table-busy>
+        <div class="text-center text-info my-5" style="min-height: 15rem; z-index: 9999">
+          <div>
+            <b-spinner class="align-middle"></b-spinner>
+          </div>
+          <div class="mt-1">
+            <strong>Loading...</strong>
+          </div>
+        </div>
+      </template>
+
+      <template v-slot:empty="scope">
+        <div class="text-center text-info my-5" style="min-height: 15rem">
+          <div class="mb-2">
+            <i class="fas fa-dragon fa-3x border border-info rounded p-4 bg-light text-muted" />
+          </div>
+          <h4 class="align-middle">{{ scope.emptyText }}</h4>
+        </div>
       </template>
 
       <!-- use named slots with b-table component -->
@@ -42,19 +63,22 @@ limitations under the License.
     </b-table>
     <div v-if="!options.busy" class="row m-1 p-0 align-items-center">
       <div class="col">
+        <span class="text-muted">Total Rows:</span> <strong>{{options.pagination.totalRows}}</strong>
       </div>
       <div class="col">
         <b-pagination v-model="options.pagination.currentPage" :total-rows="options.pagination.totalRows"
-                      :per-page="options.pagination.perPage" slot-scope=""
-                      pills align="center" size="sm" variant="info" class="customPagination m-0 p-0">
+                      :per-page="options.pagination.pageSize" slot-scope=""
+                      pills align="center" size="sm" variant="info" class="customPagination m-0 p-0"
+                      :disabled="disabled">
         </b-pagination>
       </div>
       <div class="col text-right">
-        <span class="text-muted">Rows:</span>
-        <b-form-select v-model="options.pagination.perPage" :options="options.pagination.possiblePageSizes"
-                       size="sm" class="mx-2" style="width: 4rem;"/>
-        <b-button size="sm" v-b-tooltip.hover title="Download CSV" variant="outline-info"><i
-          class="fas fa-download"></i></b-button>
+        <span class="text-muted">Page Size:</span>
+        <b-form-select v-model="options.pagination.pageSize" :options="options.pagination.possiblePageSizes"
+                       size="sm" class="mx-2" style="width: 4rem;" :disabled="disabled"/>
+        <b-button size="sm" v-b-tooltip.hover title="Download CSV" variant="outline-info" :disabled="disabled">
+          <i class="fas fa-download"></i>
+        </b-button>
       </div>
     </div>
   </div>
@@ -84,13 +108,16 @@ limitations under the License.
         fieldsInternal: [],
       };
     },
+    computed: {
+      disabled() {
+        return !this.items || this.items.length === 0;
+      },
+    },
   };
 </script>
 
 <style scoped>
 .skills-b-table /deep/ .control-column {
   max-width: 3rem !important;
-  /*margin-right: 0px !important;*/
-  /*padding-right: 0px !important;*/
 }
 </style>
