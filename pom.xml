@@ -21,29 +21,29 @@
         <java.version>1.11</java.version>
 
         <!-- can NOT name it groovy.version as spock's dependency picks it up-->
-        <groovy.version>2.5.13</groovy.version>
+        <groovy.version>3.0.5</groovy.version>
         <groovy.eclipse.compiler.version>3.6.0-03</groovy.eclipse.compiler.version>
-        <groovy.eclipse.batch.version>2.5.12-02</groovy.eclipse.batch.version>
+        <groovy.eclipse.batch.version>3.0.5-01</groovy.eclipse.batch.version>
 
-        <spock.myVersion>1.3-groovy-2.5</spock.myVersion>
-        <java.version>1.8</java.version>
+        <spock.myVersion>2.0-M3-groovy-3.0</spock.myVersion>
+        <java.version>11</java.version>
 
-        <flywaydb.version>5.2.1</flywaydb.version>
+        <flywaydb.version>6.5.5</flywaydb.version>
 
         <commons.lang.version>3.11</commons.lang.version>
-        <commons.collections.version>3.2.2</commons.collections.version>
-        <commons.io.version>2.6</commons.io.version>
+        <commons.collections.version>4.4</commons.collections.version>
+        <commons.io.version>2.7</commons.io.version>
 
-        <frontend-maven-plugin.version>1.7.6</frontend-maven-plugin.version>
+        <frontend-maven-plugin.version>1.10.0</frontend-maven-plugin.version>
         <node.version>v12.18.3</node.version>
 
         <httpclient.version>4.5.12</httpclient.version>
-        <guava.version>28.1-jre</guava.version>
+        <guava.version>29.0-jre</guava.version>
 
         <!-- !!!!!IMPORTANT!!!!!: when changing the springboot.version property, make sure you also change it in the parent definition -->
         <springboot.version>2.3.3.RELEASE</springboot.version>
 
-        <greenmail.version>1.5.14</greenmail.version>
+        <greenmail.version>1.6.0</greenmail.version>
     </properties>
 
     <parent>

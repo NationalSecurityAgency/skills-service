@@ -28,12 +28,12 @@
         <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
-            <version>1.13</version>
+            <version>1.15</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-text</artifactId>
-            <version>1.6</version>
+            <version>1.9</version>
         </dependency>
 
         <dependency>
@@ -46,7 +46,7 @@
         <dependency>
             <groupId>javax.xml.bind</groupId>
             <artifactId>jaxb-api</artifactId>
-            <version>2.3.0</version>
+            <version>2.3.1</version>
         </dependency>
         <dependency>
             <groupId>com.sun.xml.bind</groupId>
@@ -89,10 +89,6 @@
             <version>${groovy.version}</version>
             <type>pom</type>
             <exclusions>
-                <exclusion>
-                    <groupId>org.codehaus.groovy</groupId>
-                    <artifactId>groovy-test-junit5</artifactId>
-                </exclusion>
                 <exclusion>
                     <groupId>org.codehaus.groovy</groupId>
                     <artifactId>groovy-test</artifactId>
@@ -191,8 +187,8 @@
             <version>${commons.lang.version}</version>
         </dependency>
         <dependency>
-            <groupId>commons-collections</groupId>
-            <artifactId>commons-collections</artifactId>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-collections4</artifactId>
             <version>${commons.collections.version}</version>
         </dependency>
         <dependency>
@@ -205,12 +201,13 @@
             <groupId>org.spockframework</groupId>
             <artifactId>spock-core</artifactId>
             <version>${spock.myVersion}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.codehaus.groovy</groupId>
-                    <artifactId>groovy-all</artifactId>
-                </exclusion>
-            </exclusions>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy</artifactId>
+            <version>${groovy.version}</version>
             <scope>test</scope>
         </dependency>
 
@@ -263,6 +260,10 @@
             <version>${greenmail.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy</artifactId>
+        </dependency>
 
     </dependencies>
 
@@ -299,6 +300,12 @@
                         <artifactId>groovy-all</artifactId>
                         <version>${groovy.version}</version>
                         <type>pom</type>
+                        <exclusions>
+                            <exclusion>
+                                <groupId>org.codehaus.groovy</groupId>
+                                <artifactId>groovy-testng</artifactId>
+                            </exclusion>
+                        </exclusions>
                     </dependency>
                     <dependency>
                         <groupId>org.springframework.boot</groupId>
@@ -491,7 +498,7 @@
                                 <licenseMerge>Common Development and Distribution License (CDDL) + The GNU General Public License (GPL) Version 2 with the Classpath Exception|CDDL + GPLv2 with classpath exception</licenseMerge>
                                 <licenseMerge>The GNU General Public License (GPL) Version 2 with FOSS exception|The GNU General Public License, v2 with FOSS exception</licenseMerge>
                                 <licenseMerge>Mozilla Public License, Version 2.0 or Eclipse Public License - Version 1.0|MPL 2.0 or EPL 1.0</licenseMerge>
-                                <licenseMerge>Eclipse Public License - Version 2.0|Eclipse Public License v. 2.0</licenseMerge>
+                                <licenseMerge>Eclipse Public License - Version 2.0|Eclipse Public License v. 2.0|Eclipse Public License v2.0</licenseMerge>
                                 <licenseMerge>Eclipse Distribution License - Version 1.0|EDL 1.0|Eclipse Distribution License v. 1.0|Eclipse Distribution License - v 1.0</licenseMerge>
                             </licenseMerges>
                         </configuration>
