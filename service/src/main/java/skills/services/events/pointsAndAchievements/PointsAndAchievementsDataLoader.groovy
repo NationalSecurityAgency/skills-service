@@ -20,6 +20,7 @@ import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
+import skills.services.events.SkillDate
 import skills.storage.model.LevelDefInterface
 import skills.storage.model.SkillRelDef
 import skills.storage.repos.SkillEventsSupportRepo
@@ -36,12 +37,12 @@ class PointsAndAchievementsDataLoader {
     LoadedDataValidator validator
 
     @Profile
-    LoadedData loadData(String projectId, String userId, Date incomingSkillDate, SkillEventsSupportRepo.SkillDefMin skillDef){
+    LoadedData loadData(String projectId, String userId, SkillDate incomingSkillDate, SkillEventsSupportRepo.SkillDefMin skillDef){
         List<SkillEventsSupportRepo.TinySkillDef> parentDefs = loadParents(skillDef)
 
         List<Integer> skillRefIds = [skillDef.id]
         skillRefIds.addAll(parentDefs.collect { it.id })
-        List<SkillEventsSupportRepo.TinyUserPoints> tinyUserPoints = loadPoints(projectId, userId, skillRefIds, incomingSkillDate)
+        List<SkillEventsSupportRepo.TinyUserPoints> tinyUserPoints = loadPoints(projectId, userId, skillRefIds, incomingSkillDate.date)
 
         SkillEventsSupportRepo.TinyProjectDef tinyProjectDef = loadProject(projectId)
         List<Integer> parentIds = parentDefs.collect { it.id }

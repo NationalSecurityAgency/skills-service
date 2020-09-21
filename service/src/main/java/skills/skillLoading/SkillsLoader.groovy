@@ -272,7 +272,8 @@ class SkillsLoader {
                         description: InputSanitizer.unsanitizeForMarkdown(skillDef.description),
                         href: getHelpUrl(helpUrlRootSetting, skillDef.helpUrl)),
                 dependencyInfo: skillDependencySummary,
-                crossProject: crossProjectId != null
+                crossProject: crossProjectId != null,
+
         )
     }
 

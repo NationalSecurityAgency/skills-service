@@ -286,8 +286,6 @@ class UserSkillsController {
             //let's account for some possible clock drift
             SkillsValidator.isTrue(requestedTimestamp <= (System.currentTimeMillis() + 30000), "Skill Events may not be in the future", projectId, skillId);
             incomingDate = new Date(requestedTimestamp);
-        } else {
-            incomingDate = new Date();
         }
 
         SkillEventResult result;

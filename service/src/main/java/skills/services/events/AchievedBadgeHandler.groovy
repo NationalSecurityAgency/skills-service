@@ -43,7 +43,7 @@ class AchievedBadgeHandler {
     SkillEventsSupportRepo skillEventsSupportRepo
 
     @Profile
-    void checkForBadges(SkillEventResult res, String userId, SkillEventsSupportRepo.SkillDefMin currentSkillDef) {
+    void checkForBadges(SkillEventResult res, String userId, SkillEventsSupportRepo.SkillDefMin currentSkillDef, SkillDate skillDate) {
         List<SkillEventsSupportRepo.SkillDefMin> parents = skillEventsSupportRepo.findParentSkillsByChildIdAndType(currentSkillDef.id, SkillRelDef.RelationshipType.BadgeRequirement)
 
         parents.each { SkillEventsSupportRepo.SkillDefMin skillDefMin ->
@@ -54,13 +54,26 @@ class AchievedBadgeHandler {
                 if (nonAchievedChildren == 0) {
                     List<UserAchievement> badges = achievedLevelRepo.findAllByUserIdAndProjectIdAndSkillId(userId, badge.projectId, badge.skillId)
                     if (!badges) {
-                        UserAchievement groupAchievement = new UserAchievement(userId: userId.toLowerCase(), projectId: badge.projectId, skillId: badge.skillId, skillRefId: badge?.id)
+                        Date achievedOn = getAchievedOnDate(userId, badge, skillDate)
+                        UserAchievement groupAchievement = new UserAchievement(userId: userId.toLowerCase(), projectId: badge.projectId, skillId: badge.skillId, skillRefId: badge?.id, achievedOn: achievedOn)
                         achievedLevelRepo.save(groupAchievement)
                         res.completed.add(new CompletionItem(type: CompletionTypeUtil.getCompletionType(badge.type), id: badge.skillId, name: badge.name))
                     }
                 }
             }
         }
+    }
+
+    @Profile
+    private Date getAchievedOnDate(String userId, SkillEventsSupportRepo.SkillDefMin badge, SkillDate skillDate) {
+        if (!skillDate.isProvided) {
+            return skillDate.date
+        }
+        Date achievedOn = skillEventsSupportRepo.getUserPerformedSkillLatestDate(userId.toLowerCase(), badge.projectId, badge?.id, SkillRelDef.RelationshipType.BadgeRequirement)
+        if (!achievedOn || skillDate.date.after(achievedOn)) {
+            achievedOn = skillDate.date
+        }
+        return achievedOn
     }
 
 }

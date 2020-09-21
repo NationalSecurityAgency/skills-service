@@ -988,4 +988,17 @@
         <modifyDataType tableName="settings" columnName="value" newDataType="varchar(3000)" />
     </changeSet>
 
+    <changeSet id="3" author="skills team" context="migration2">
+        <addColumn tableName="user_achievement">
+            <column name="achieved_on" type="datetime" defaultValueComputed="CURRENT_TIMESTAMP"/>
+        </addColumn>
+        <sql>
+            UPDATE user_achievement ua SET achieved_on=created where project_id is not null;
+        </sql>
+        <addNotNullConstraint columnDataType="datetime" columnName="achieved_on" tableName="user_achievement"/>
+        <createIndex indexName="index_user_achievement_achieved_on" tableName="user_achievement">
+            <column name="achieved_on" type="datetime"/>
+        </createIndex>
+    </changeSet>
+
 </databaseChangeLog>

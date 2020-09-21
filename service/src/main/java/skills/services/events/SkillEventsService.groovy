@@ -27,6 +27,7 @@ import skills.controller.exceptions.SkillExceptionBuilder
 import skills.services.LockingService
 import skills.services.events.pointsAndAchievements.PointsAndAchievementsHandler
 import skills.storage.model.SkillDef
+import skills.storage.model.SkillRelDef
 import skills.storage.model.UserAchievement
 import skills.storage.model.UserPerformedSkill
 import skills.storage.model.UserPoints
@@ -80,7 +81,7 @@ class SkillEventsService {
 
     @Transactional
     @Profile
-    SkillEventResult reportSkill(String projectId, String skillId, String userId, Boolean notifyIfNotApplied, Date incomingSkillDate = new Date()) {
+    SkillEventResult reportSkill(String projectId, String skillId, String userId, Boolean notifyIfNotApplied, Date incomingSkillDate) {
         SkillEventResult result = reportSkillInternal(projectId, skillId, userId, incomingSkillDate)
         if (notifyIfNotApplied || result.skillApplied) {
             skillEventPublisher.publishSkillUpdate(result, userId)
@@ -152,16 +153,18 @@ class SkillEventsService {
         notifyUserOfAchievements(userId)
     }
 
-    private SkillEventResult reportSkillInternal(String projectId, String skillId, String userId, Date incomingSkillDate) {
+    private SkillEventResult reportSkillInternal(String projectId, String skillId, String userId, Date incomingSkillDateParam) {
         assert projectId
         assert skillId
+
+        SkillDate skillDate = new SkillDate(date: incomingSkillDateParam ?: new Date(), isProvided: incomingSkillDateParam != null)
 
         SkillEventsSupportRepo.SkillDefMin skillDefinition = getSkillDef(userId, projectId, skillId)
 
         SkillEventResult res = new SkillEventResult(projectId: projectId, skillId: skillId, name: skillDefinition.name)
 
         long numExistingSkills = getNumExistingSkills(userId, projectId, skillId)
-        AppliedCheckRes checkRes = checkIfSkillApplied(userId, numExistingSkills, incomingSkillDate, skillDefinition)
+        AppliedCheckRes checkRes = checkIfSkillApplied(userId, numExistingSkills, skillDate.date, skillDefinition)
         if (!checkRes.skillApplied) {
             res.skillApplied = checkRes.skillApplied
             res.explanation = checkRes.explanation
@@ -174,27 +177,27 @@ class SkillEventsService {
          */
         lockTransaction(projectId, userId)
         numExistingSkills = getNumExistingSkills(userId, projectId, skillId)
-        checkRes = checkIfSkillApplied(userId, numExistingSkills, incomingSkillDate, skillDefinition)
+        checkRes = checkIfSkillApplied(userId, numExistingSkills, skillDate.date, skillDefinition)
         if (!checkRes.skillApplied) {
             res.skillApplied = checkRes.skillApplied
             res.explanation = checkRes.explanation
             return res
         }
 
-        UserPerformedSkill performedSkill = new UserPerformedSkill(userId: userId, skillId: skillId, projectId: projectId, performedOn: incomingSkillDate, skillRefId: skillDefinition.id)
+        UserPerformedSkill performedSkill = new UserPerformedSkill(userId: userId, skillId: skillId, projectId: projectId, performedOn: skillDate.date, skillRefId: skillDefinition.id)
         savePerformedSkill(performedSkill)
 
         res.pointsEarned = skillDefinition.pointIncrement
 
-        List<CompletionItem> achievements = pointsAndAchievementsHandler.updatePointsAndAchievements(userId, skillDefinition, incomingSkillDate)
+        List<CompletionItem> achievements = pointsAndAchievementsHandler.updatePointsAndAchievements(userId, skillDefinition, skillDate)
         if (achievements) {
             res.completed.addAll(achievements)
         }
 
         boolean requestedSkillCompleted = hasReachedMaxPoints(numExistingSkills + 1, skillDefinition)
         if (requestedSkillCompleted) {
-            documentSkillAchieved(userId, numExistingSkills, skillDefinition, res)
-            achievedBadgeHandler.checkForBadges(res, userId, skillDefinition)
+            documentSkillAchieved(userId, numExistingSkills, skillDefinition, res, skillDate)
+            achievedBadgeHandler.checkForBadges(res, userId, skillDefinition, skillDate)
         }
 
         // if requestedSkillCompleted OR overall level achieved, then need to check for global badges
@@ -271,11 +274,24 @@ class SkillEventsService {
     }
 
     @Profile
-    private void documentSkillAchieved(String userId, long numExistingSkills, SkillEventsSupportRepo.SkillDefMin skillDefinition, SkillEventResult res) {
+    private void documentSkillAchieved(String userId, long numExistingSkills, SkillEventsSupportRepo.SkillDefMin skillDefinition, SkillEventResult res, SkillDate skillDate) {
+        Date achievedOn = getAchievedOnDate(userId, skillDefinition, skillDate)
         UserAchievement skillAchieved = new UserAchievement(userId: userId.toLowerCase(), projectId: skillDefinition.projectId, skillId: skillDefinition.skillId, skillRefId: skillDefinition?.id,
-                pointsWhenAchieved: ((numExistingSkills.intValue() + 1) * skillDefinition.pointIncrement))
+                pointsWhenAchieved: ((numExistingSkills.intValue() + 1) * skillDefinition.pointIncrement), achievedOn: achievedOn)
         achievedLevelRepo.save(skillAchieved)
         res.completed.add(new CompletionItem(type: CompletionItemType.Skill, id: skillDefinition.skillId, name: skillDefinition.name))
+    }
+
+    @Profile
+    private Date getAchievedOnDate(String userId, SkillEventsSupportRepo.SkillDefMin skillDefinition, SkillDate skillDate) {
+        if (!skillDate.isProvided) {
+            return skillDate.date
+        }
+        Date achievedOn = skillEventsSupportRepo.getUserPerformedSkillLatestDate(userId.toLowerCase(), skillDefinition.projectId, skillDefinition.skillId)
+        if (!achievedOn || skillDate.date.after(achievedOn)) {
+            achievedOn = skillDate.date
+        }
+        return achievedOn
     }
 
     private boolean hasReachedMaxPoints(long numSkills, SkillEventsSupportRepo.SkillDefMin skillDefinition) {
