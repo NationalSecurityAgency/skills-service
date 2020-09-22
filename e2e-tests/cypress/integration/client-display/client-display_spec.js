@@ -13,7 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import moment from 'moment';
+
 describe('Client Display Tests', () => {
+
+    const snapshotOptions = {
+        blackout: ['[data-cy=pointHistoryChart]', '[data-cy=time-passed]'],
+        failureThreshold: 0.03, // threshold for entire image
+        failureThresholdType: 'percent', // percent of image or number of pixels
+        customDiffConfig: { threshold: 0.01 }, // threshold for each pixel
+        capture: 'fullPage', // When fullPage, the application under test is captured in its entirety from top to bottom.
+    };
 
     const cssAttachedToNavigableCards = 'skills-navigable-item';
 
@@ -221,5 +231,38 @@ describe('Client Display Tests', () => {
         cy.get('[data-cy=subjectTile]').should('not.exist');
     });
 
+    it('display achieved date on skill overview page', () => {
+        const m = moment('2020-09-12 11', 'YYYY-MM-DD HH');
+        const orig = m.clone()
+        cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: 'user0', timestamp: m.format('x')})
+        cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: 'user0', timestamp: m.subtract(4, 'day').format('x')})
+        cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: 'user0', timestamp: m.subtract(3, 'day').format('x')})
+        cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: 'user0', timestamp: m.subtract(2, 'day').format('x')})
+        cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: 'user0', timestamp: m.subtract(1, 'day').format('x')})
+        cy.cdVisit('/');
+        cy.cdClickSubj(0);
+        cy.cdClickSkill(1);
+
+        cy.get('[data-cy=achievement-date]').contains(`Achieved on ${orig.format("MMMM Do YYYY")}`);
+        cy.get('[data-cy=achievement-date]').contains(`${orig.fromNow()}`);
+
+        cy.matchImageSnapshot(`Skill-Overview-Achieved`, snapshotOptions);
+    });
+
+    it('display achieved date on subject page when skill details are expanded', () => {
+        const m = moment('2020-09-12 11', 'YYYY-MM-DD HH');
+        const orig = m.clone()
+        cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: 'user0', timestamp: m.format('x')})
+        cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: 'user0', timestamp: m.subtract(4, 'day').format('x')})
+        cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: 'user0', timestamp: m.subtract(3, 'day').format('x')})
+        cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: 'user0', timestamp: m.subtract(2, 'day').format('x')})
+        cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: 'user0', timestamp: m.subtract(1, 'day').format('x')})
+        cy.cdVisit('/');
+        cy.cdClickSubj(0);
+
+        cy.get('[data-cy=toggleSkillDetails]').click();
+        cy.get('[data-cy=skillProgress]:nth-child(2) [data-cy=achievement-date]').contains(`Achieved on ${orig.format("MMMM Do YYYY")}`);
+        cy.get('[data-cy=skillProgress]:nth-child(2) [data-cy=achievement-date]').contains(`${orig.fromNow()}`);
+    });
 });
 

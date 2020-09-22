@@ -48,6 +48,114 @@ class SkillsDescriptionSpec extends DefaultIntSpec {
         }
     }
 
+    def "achievedOn is populated for the achieved skills under a subject"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj1 = SkillsFactory.createSubject(1, 1)
+        def proj1_subj2 = SkillsFactory.createSubject(1, 2)
+        List<Map> proj1_subj1_skills = SkillsFactory.createSkills(3, 1, 1, 100)
+        List<Map> proj1_subj2_skills = SkillsFactory.createSkills(3, 1, 2)
+
+        proj1_subj2_skills.each {
+            it.description = null
+            it.helpUrl = null
+        }
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj1)
+        skillsService.createSkills(proj1_subj1_skills)
+        skillsService.createSubject(proj1_subj2)
+        skillsService.createSkills(proj1_subj2_skills)
+
+        String user = "user1"
+        def addSkillRes = skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_subj1_skills[0].skillId], user, new Date())
+        when:
+        def res = skillsService.getSubjectDescriptions(proj1.projectId, proj1_subj2.subjectId, user)
+        def res1 = skillsService.getSubjectDescriptions(proj1.projectId, proj1_subj1.subjectId, user)
+        then:
+        addSkillRes.body.completed.find { it.type == "Skill" }
+        res1.find({ it.achievedOn }).skillId == proj1_subj1_skills[0].skillId
+        res1.findAll { it.skillId != proj1_subj1_skills[0].skillId }.each {
+            assert !it.achievedOn
+        }
+        res.each {
+            assert !it.achievedOn
+        }
+    }
+
+    def "achievedOn is populated for the achieved skills under a badge"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj1 = SkillsFactory.createSubject(1, 1)
+        def proj1_subj2 = SkillsFactory.createSubject(1, 2)
+        List<Map> proj1_subj1_skills = SkillsFactory.createSkills(3, 1, 1, 100)
+        List<Map> proj1_subj2_skills = SkillsFactory.createSkills(3, 1, 2)
+
+        proj1_subj2_skills.each {
+            it.description = null
+            it.helpUrl = null
+        }
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj1)
+        skillsService.createSkills(proj1_subj1_skills)
+        skillsService.createSubject(proj1_subj2)
+        skillsService.createSkills(proj1_subj2_skills)
+
+        Map badge1 = SkillsFactory.createBadge(1, 1)
+        skillsService.createBadge(badge1)
+        proj1_subj1_skills.each {
+            skillsService.assignSkillToBadge(proj1.projectId, badge1.badgeId, it.skillId)
+        }
+
+        String user = "user1"
+        def addSkillRes = skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_subj1_skills[0].skillId], user, new Date())
+        when:
+        def res1 = skillsService.getBadgeDescriptions(proj1.projectId, badge1.badgeId, false, user)
+        then:
+        addSkillRes.body.completed.find { it.type == "Skill" }
+        res1.find({ it.achievedOn }).skillId == proj1_subj1_skills[0].skillId
+        res1.findAll { it.skillId != proj1_subj1_skills[0].skillId }.each {
+            assert !it.achievedOn
+        }
+    }
+
+
+    def "achievedOn is populated for the achieved skills under a global badge"() {
+        SkillsService supervisorService = createSupervisor()
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj1 = SkillsFactory.createSubject(1, 1)
+        def proj1_subj2 = SkillsFactory.createSubject(1, 2)
+        List<Map> proj1_subj1_skills = SkillsFactory.createSkills(3, 1, 1, 100)
+        List<Map> proj1_subj2_skills = SkillsFactory.createSkills(3, 1, 2)
+
+        proj1_subj2_skills.each {
+            it.description = null
+            it.helpUrl = null
+        }
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj1)
+        skillsService.createSkills(proj1_subj1_skills)
+        skillsService.createSubject(proj1_subj2)
+        skillsService.createSkills(proj1_subj2_skills)
+
+        Map badge1 = SkillsFactory.createBadge(1, 1)
+        supervisorService.createGlobalBadge(badge1)
+        proj1_subj1_skills.each {
+            supervisorService.assignSkillToGlobalBadge([projectId: proj1.projectId, badgeId: badge1.badgeId, skillId: it.skillId])
+        }
+
+        String user = "user1"
+        def addSkillRes = skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_subj1_skills[0].skillId], user, new Date())
+        when:
+        def res1 = skillsService.getBadgeDescriptions(proj1.projectId, badge1.badgeId, true, user)
+        then:
+        addSkillRes.body.completed.find { it.type == "Skill" }
+        res1.find({ it.achievedOn }).skillId == proj1_subj1_skills[0].skillId
+        res1.findAll { it.skillId != proj1_subj1_skills[0].skillId }.each {
+            assert !it.achievedOn
+        }
+    }
+
     def "subject has no skills - no descriptions for you!"(){
         def proj1 = SkillsFactory.createProject(1)
         def proj1_subj1 = SkillsFactory.createSubject(1, 1)
