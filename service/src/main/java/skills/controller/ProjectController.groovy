@@ -67,8 +67,8 @@ class ProjectController {
 
     @RequestMapping(value = "/projects", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
-    List<ProjectResult> getProjects() {
-        return projAdminService.getProjects()
+    List<ProjectResult> getProjects(@RequestParam(required = false, defaultValue = "", name = "search") String search) {
+        return projAdminService.getProjects(search)
     }
 
     @RequestMapping(value = "/projects/{id}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
@@ -107,6 +107,13 @@ class ProjectController {
         projAdminService.saveProject(null, projectRequest)
         return new RequestResult(success: true)
     }
+
+    //need pin/unpin controller. Only permit if:
+    /*
+    boolean isRoot = userInfo.authorities?.find() {
+            it instanceof UserSkillsGrantedAuthority && RoleName.ROLE_SUPER_DUPER_USER == it.role?.roleName
+        }
+     */
 
     @RequestMapping(value = "/projectExist", method = RequestMethod.POST, produces = "application/json")
     @ResponseBody

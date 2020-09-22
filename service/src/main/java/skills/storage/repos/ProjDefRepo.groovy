@@ -40,6 +40,9 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
     @Query(value = "select p from ProjDef p, UserRole u where p.projectId = u.projectId and u.userId=?1")
     List<ProjDef> getProjectsByUser(String userId)
 
+    @Query("select p from ProjDef p where upper(p.name) like UPPER(CONCAT('%', ?1, '%'))")
+    List<ProjDef> findByNameLike(String search)
+
     @Query(value = "select count(p.id) from ProjDef p, UserRole u where p.projectId = u.projectId and u.userId=?1")
     Integer getProjectsByUserCount(String userId)
 

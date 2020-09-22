@@ -31,7 +31,7 @@ import javax.persistence.Table
 @ToString(includeNames = true)
 class Setting {
 
-    static enum SettingType { User, Project, Global, UserProject }
+    static enum SettingType { User, Project, Global, UserProject, RootUser }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

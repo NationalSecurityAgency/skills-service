@@ -22,11 +22,16 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import skills.auth.UserInfo
 import skills.auth.UserInfoService
+import skills.auth.UserSkillsGrantedAuthority
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.request.model.ActionPatchRequest
 import skills.controller.request.model.ProjectRequest
+import skills.controller.request.model.ProjectSettingsRequest
+import skills.controller.request.model.RootUserProjectSettingsRequest
+import skills.controller.request.model.SettingsRequest
 import skills.controller.result.model.CustomIconResult
 import skills.controller.result.model.NumUsersRes
 import skills.controller.result.model.ProjectResult
@@ -49,6 +54,8 @@ import skills.utils.Props
 @Service
 @Slf4j
 class ProjAdminService {
+
+    private static final String rootUserPinnedProjectGroup = "pinned_project"
 
     @Autowired
     ProjDefRepo projDefRepo
@@ -158,12 +165,65 @@ class ProjAdminService {
         log.debug("Deleted project with id [{}]", projectId)
     }
 
+    @Transactional()
+    void pinProjectForRootUser(String projectId) {
+        if (!existsByProjectId(projectId)) {
+            throw new SkillException("Project with id [${projectId}] does NOT exist")
+        }
+
+        SettingsRequest settingsRequest = new RootUserProjectSettingsRequest(
+                projectId:  projectId,
+                settingGroup: rootUserPinnedProjectGroup,
+                setting: "pinned"
+        )
+
+        settingsService.saveSetting(settingsRequest)
+    }
+
+    @Transactional()
+    void unpinProjectForRootUser(String projectId) {
+        if (existsByProjectId(projectId)) {
+            settingsService.deleteRootUserSetting("pinned", projectId)
+        }
+    }
+
+    private List<ProjectResult> loadProjectsForRoot(String search) {
+        List<ProjDef> results = []
+
+        if (search){
+            results = projDefRepo.findByNameLike(search)
+        } else {
+            List<SettingsResult> pinnedProjects = settingsService.getRootUserSettingsForGroup(rootUserPinnedProjectGroup)
+            pinnedProjects?.each {
+                ProjDef projDef = projDefRepo.findByProjectIdIgnoreCase(it.value)
+                if (projDef) {
+                    results.add(projDef)
+                }
+            }
+        }
+        return results
+    }
+
     @Transactional(readOnly = true)
-    List<ProjectResult> getProjects() {
-        String userId = userInfoService.getCurrentUserId()
+    List<ProjectResult> getProjects(String search) {
+        UserInfo userInfo = userInfoService.getCurrentUser()
+        boolean isRoot = userInfo.authorities?.find() {
+            it instanceof UserSkillsGrantedAuthority && RoleName.ROLE_SUPER_DUPER_USER == it.role?.roleName
+        }
+
+        String userId = userInfo.username
         Map<String, Integer> projectIdSortOrder = sortingService.getUserProjectsOrder(userId)
-        // sql join with UserRoles and ther is 1-many relationship that needs to be normalized
-        List<ProjectResult> finalRes = projDefRepo.getProjectsByUser(userId).unique({ it.projectId }).collect({
+        List<ProjDef> projects
+
+        if (isRoot) {
+            //get root roles
+            projects = loadProjectsForRoot(search)
+        } else {
+            // sql join with UserRoles and there is 1-many relationship that needs to be normalized
+            projects = projDefRepo.getProjectsByUser(userId)
+        }
+
+        List<ProjectResult> finalRes = projects?.unique({ it.projectId })?.collect({
             ProjectResult res = convert(it, projectIdSortOrder)
             return res
         })
