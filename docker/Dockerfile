@@ -3,6 +3,7 @@ FROM openjdk:14.0.2-slim-buster
 # install netcat so start script can use nc command to wait for DB to come up
 RUN apt-get update
 RUN apt-get -y install netcat-openbsd
+RUN apt-get -y install wget
 
 ARG BUILD_DATE
 ARG VERSION
