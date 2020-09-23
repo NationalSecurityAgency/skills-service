@@ -14,13 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div class="row" data-cy="achievement-date">
+  <div class="row" data-cy="achievementDate">
     <div class="col text-center text-md-left">
       <div class="m-0 p-0">
         <div class="text-white text-center badge badge-info" style="font-size: 1.7rem;"><i class="fas fa-medal"></i></div>
         <div class="d-inline-block ml-2 text-left">
-          <div data-cy="achievement-on">Achieved on <span class="text-dark">{{ date | moment("MMMM Do YYYY") }}</span></div>
-          <div class="text-black-50 small" data-cy="time-passed">{{ date | moment("from", "now")  }}</div>
+          <div>Achieved on <span class="text-dark skills-page-title-text-color" data-cy="achievementOn">{{ date | moment("MMMM Do YYYY") }}</span></div>
+          <div class="text-black-50 small skills-page-title-text-color" data-cy="timePassed">{{ date | moment("from", "now")  }}</div>
         </div>
       </div>
     </div>

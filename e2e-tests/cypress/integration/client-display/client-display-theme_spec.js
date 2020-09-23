@@ -19,7 +19,7 @@ const dateFormatter = value => moment.utc(value).format('YYYY-MM-DD[T]HH:mm:ss[Z
 describe('Client Display Tests', () => {
 
     const snapshotOptions = {
-        blackout: ['[data-cy=pointHistoryChart]', '#dependent-skills-network'],
+        blackout: ['[data-cy=pointHistoryChart]', '#dependent-skills-network', '[data-cy=achievementDate]'],
         failureThreshold: 0.03, // threshold for entire image
         failureThresholdType: 'percent', // percent of image or number of pixels
         customDiffConfig: { threshold: 0.01 }, // threshold for each pixel
@@ -27,8 +27,8 @@ describe('Client Display Tests', () => {
     };
     const sizes = [
         'iphone-6',
-        // 'ipad-2',
-        // 'default',
+        'ipad-2',
+        'default',
         // [1200, 1080],
     ];
 
@@ -162,7 +162,7 @@ describe('Client Display Tests', () => {
     });
 
     sizes.forEach((size) => {
-        it.only(`test theming - ${size}`, () => {
+        it(`test theming - ${size}`, () => {
             cy.setResolution(size);
 
             cy.cdInitProjWithSkills();

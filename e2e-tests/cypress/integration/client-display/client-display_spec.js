@@ -18,7 +18,7 @@ import moment from 'moment';
 describe('Client Display Tests', () => {
 
     const snapshotOptions = {
-        blackout: ['[data-cy=pointHistoryChart]', '[data-cy=time-passed]'],
+        blackout: ['[data-cy=pointHistoryChart]', '[data-cy=timePassed]'],
         failureThreshold: 0.03, // threshold for entire image
         failureThresholdType: 'percent', // percent of image or number of pixels
         customDiffConfig: { threshold: 0.01 }, // threshold for each pixel
@@ -243,10 +243,42 @@ describe('Client Display Tests', () => {
         cy.cdClickSubj(0);
         cy.cdClickSkill(1);
 
-        cy.get('[data-cy=achievement-date]').contains(`Achieved on ${orig.format("MMMM Do YYYY")}`);
-        cy.get('[data-cy=achievement-date]').contains(`${orig.fromNow()}`);
+        cy.get('[data-cy=achievementDate]').contains(`Achieved on ${orig.format("MMMM Do YYYY")}`);
+        cy.get('[data-cy=achievementDate]').contains(`${orig.fromNow()}`);
 
         cy.matchImageSnapshot(`Skill-Overview-Achieved`, snapshotOptions);
+
+        cy.cdVisit('/?enableTheme=true');
+        cy.cdClickSubj(0);
+        cy.cdClickSkill(1);
+
+        cy.get('[data-cy=achievementDate]').contains(`Achieved on ${orig.format("MMMM Do YYYY")}`);
+        cy.get('[data-cy=achievementDate]').contains(`${orig.fromNow()}`);
+
+        cy.matchImageSnapshot(`Skill-Overview-Achieved-Themed`, snapshotOptions);
+
+        cy.setResolution('iphone-6');
+
+        cy.cdVisit('/');
+        cy.cdClickSubj(0);
+        cy.cdClickSkill(1);
+
+        cy.get('[data-cy=achievementDate]').contains(`Achieved on ${orig.format("MMMM Do YYYY")}`);
+        cy.get('[data-cy=achievementDate]').contains(`${orig.fromNow()}`);
+
+        cy.matchImageSnapshot(`Skill-Overview-Achieved-iphone6`, snapshotOptions);
+
+        cy.setResolution('ipad-2');
+
+        cy.cdVisit('/');
+        cy.cdClickSubj(0);
+        cy.cdClickSkill(1);
+
+        cy.get('[data-cy=achievementDate]').contains(`Achieved on ${orig.format("MMMM Do YYYY")}`);
+        cy.get('[data-cy=achievementDate]').contains(`${orig.fromNow()}`);
+
+        cy.matchImageSnapshot(`Skill-Overview-Achieved-ipad2`, snapshotOptions);
+
     });
 
     it('display achieved date on subject page when skill details are expanded', () => {
@@ -261,8 +293,8 @@ describe('Client Display Tests', () => {
         cy.cdClickSubj(0);
 
         cy.get('[data-cy=toggleSkillDetails]').click();
-        cy.get('[data-cy=skillProgress]:nth-child(2) [data-cy=achievement-date]').contains(`Achieved on ${orig.format("MMMM Do YYYY")}`);
-        cy.get('[data-cy=skillProgress]:nth-child(2) [data-cy=achievement-date]').contains(`${orig.fromNow()}`);
+        cy.get('[data-cy=skillProgress]:nth-child(2) [data-cy=achievementDate]').contains(`Achieved on ${orig.format("MMMM Do YYYY")}`);
+        cy.get('[data-cy=skillProgress]:nth-child(2) [data-cy=achievementDate]').contains(`${orig.fromNow()}`);
     });
 });
 
