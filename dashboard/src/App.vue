@@ -83,6 +83,7 @@ limitations under the License.
           this.isSupervisor = result;
           this.addCustomIconCSS();
         });
+        this.$store.dispatch('access/isRoot');
       }
     },
     mounted() {
@@ -100,6 +101,7 @@ limitations under the License.
             this.isSupervisor = result;
           });
           this.addCustomIconCSS();
+          this.$store.dispatch('access/isRoot');
         }
       },
       userInfo(newUserInfo) {

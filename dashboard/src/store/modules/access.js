@@ -24,11 +24,22 @@ const actions = {
       }).catch((error) => reject(error));
     });
   },
+  isRoot({ commit }) {
+    return new Promise((resolve, reject) => {
+      AccessService.hasRole('ROLE_SUPER_DUPER_USER').then((result) => {
+        commit('root', result);
+        resolve(result);
+      }).catch((error) => reject(error));
+    });
+  },
 };
 
 const mutations = {
   supervisor(state, value) {
     state.isSupervisor = value;
+  },
+  root(state, value) {
+    state.isRoot = value;
   },
 };
 
@@ -36,10 +47,14 @@ const getters = {
   isSupervisor(state) {
     return state.isSupervisor;
   },
+  isRoot(state) {
+    return state.isRoot;
+  },
 };
 
 const state = {
   isSupervisor: null,
+  isRoot: null,
 };
 
 export default {

@@ -187,12 +187,15 @@ class ProjAdminService {
         }
     }
 
-    private List<ProjectResult> loadProjectsForRoot(String search) {
+    private List<ProjDef> loadProjectsForRoot(String search) {
         List<ProjDef> results = []
 
         if (search){
             results = projDefRepo.findByNameLike(search)
         } else {
+            //we need to be able to communicate to the dashboard
+            //that these projects are pinned so that the UI can render appropriate
+            //buttons/actions
             List<SettingsResult> pinnedProjects = settingsService.getRootUserSettingsForGroup(rootUserPinnedProjectGroup)
             pinnedProjects?.each {
                 ProjDef projDef = projDefRepo.findByProjectIdIgnoreCase(it.value)
@@ -205,7 +208,7 @@ class ProjAdminService {
     }
 
     @Transactional(readOnly = true)
-    List<ProjectResult> getProjects(String search) {
+    List<ProjectResult> getProjects(String search="") {
         UserInfo userInfo = userInfoService.getCurrentUser()
         boolean isRoot = userInfo.authorities?.find() {
             it instanceof UserSkillsGrantedAuthority && RoleName.ROLE_SUPER_DUPER_USER == it.role?.roleName

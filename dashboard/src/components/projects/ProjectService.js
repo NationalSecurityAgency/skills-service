@@ -16,8 +16,12 @@
 import axios from 'axios';
 
 export default {
-  getProjects() {
-    return axios.get('/app/projects')
+  getProjects(search) {
+    let url = '/app/projects';
+    if (search) {
+      url += `?search=${search}`;
+    }
+    return axios.get(url)
       .then((response) => response.data);
   },
   getProject(projectId) {

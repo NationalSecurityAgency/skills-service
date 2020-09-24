@@ -65,6 +65,16 @@ limitations under the License.
       minimumPoints() {
         return this.$store.getters.config.minimumProjectPoints;
       },
+      isRootUser() {
+        return this.$store.getters['access/isRoot'];
+      },
+    },
+    watch: {
+      isRootUser(newVal) {
+        if (newVal) {
+          this.enableSearch = true;
+        }
+      },
     },
     methods: {
       createCardOptions() {
