@@ -116,7 +116,7 @@ export default {
     }
     response = axios.get(url, {
       params: this.getUserIdAndVersionParams(),
-    }).then((result) => result.data.pointsHistory);
+    }).then((result) => result.data);
     return response;
   },
 

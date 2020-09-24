@@ -31,6 +31,7 @@ import skills.storage.model.UserAchievement
 interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer> {
 
     List<UserAchievement> findAllByUserIdAndProjectIdAndSkillId(String userId, @Nullable String projectId, @Nullable String skillId)
+    List<UserAchievement> findAllByUserIdAndProjectIdAndSkillIdAndLevelNotNull(String userId, @Nullable String projectId, @Nullable String skillId)
 
     List<UserAchievement> findAllByUserIdAndNotifiedOrderByCreatedAsc(String userId, String notified)
 

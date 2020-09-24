@@ -296,5 +296,6 @@ describe('Client Display Tests', () => {
         cy.get('[data-cy=skillProgress]:nth-child(2) [data-cy=achievementDate]').contains(`Achieved on ${orig.format("MMMM Do YYYY")}`);
         cy.get('[data-cy=skillProgress]:nth-child(2) [data-cy=achievementDate]').contains(`${orig.fromNow()}`);
     });
+
 });
 

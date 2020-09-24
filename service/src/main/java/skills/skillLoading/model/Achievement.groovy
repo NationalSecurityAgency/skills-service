@@ -15,7 +15,8 @@
  */
 package skills.skillLoading.model
 
-class UserPointHistorySummary {
-    List<SkillHistoryPoints> pointsHistory
-    List<Achievement> achievements
+class Achievement {
+    Date achievedOn
+    Integer points
+    String name
 }

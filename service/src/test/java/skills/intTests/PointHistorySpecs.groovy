@@ -116,13 +116,18 @@ class PointHistorySpecs extends DefaultIntSpec {
         }
         when:
         skillsService.addSkill([projectId: SkillsFactory.defaultProjId, skillId: skills.get(0).skillId], userId, dates.get(0))
-        skillsService.addSkill([projectId: SkillsFactory.defaultProjId, skillId: skills.get(0).skillId], userId, dates.get(1))
+        def res2 = skillsService.addSkill([projectId: SkillsFactory.defaultProjId, skillId: skills.get(0).skillId], userId, dates.get(1))
         skillsService.addSkill([projectId: SkillsFactory.defaultProjId, skillId: skills.get(1).skillId], userId, dates.get(1))
         skillsService.addSkill([projectId: SkillsFactory.defaultProjId, skillId: skills.get(1).skillId], userId, dates.get(2))
-        skillsService.addSkill([projectId: SkillsFactory.defaultProjId, skillId: skills.get(1).skillId], userId, dates.get(3))
+        def res5 = skillsService.addSkill([projectId: SkillsFactory.defaultProjId, skillId: skills.get(1).skillId], userId, dates.get(3))
         def res1 = skillsService.getPointHistory(userId, SkillsFactory.defaultProjId)
 
         then:
+        res2.body.completed.find { it.type == "Subject" }.level == 1
+        res2.body.completed.find { it.type == "Overall" }.level == 1
+        res5.body.completed.find { it.type == "Subject" }.level == 2
+        res5.body.completed.find { it.type == "Overall" }.level == 2
+
         res1.pointsHistory.size() == 4
         res1.pointsHistory.get(0).points == 10
         parseDate(res1.pointsHistory.get(0).dayPerformed) ==  dates.get(0).clearTime()
@@ -135,9 +140,17 @@ class PointHistorySpecs extends DefaultIntSpec {
 
         res1.pointsHistory.get(3).points == 50
         parseDate(res1.pointsHistory.get(3).dayPerformed) ==  dates.get(3).clearTime()
+
+        res1.achievements.size() == 2
+        res1.achievements.find { it.name == "Level 1" }.points == res1.pointsHistory.get(1).points
+        res1.achievements.find { it.name == "Level 1" }.achievedOn == res1.pointsHistory.get(1).dayPerformed
+
+        res1.achievements.find { it.name == "Level 2" }.points == res1.pointsHistory.get(3).points
+        res1.achievements.find { it.name == "Level 2" }.achievedOn == res1.pointsHistory.get(3).dayPerformed
     }
 
-    def "empty dates should carry points from prevous day"() {
+
+    def "empty dates should carry points from previous day"() {
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
 
         List<Map> skills = SkillsFactory.createSkills(2)
@@ -277,17 +290,103 @@ class PointHistorySpecs extends DefaultIntSpec {
         then:
         res1.pointsHistory.size() == 4
         res1.pointsHistory.get(0).points == 10
-        parseDate(res1.pointsHistory.get(0).dayPerformed) ==  dates.get(0).clearTime()
+        parseDate(res1.pointsHistory.get(0).dayPerformed) == dates.get(0).clearTime()
 
         res1.pointsHistory.get(1).points == 30
-        parseDate(res1.pointsHistory.get(1).dayPerformed) ==  dates.get(1).clearTime()
+        parseDate(res1.pointsHistory.get(1).dayPerformed) == dates.get(1).clearTime()
 
         res1.pointsHistory.get(2).points == 40
-        parseDate(res1.pointsHistory.get(2).dayPerformed) ==  dates.get(2).clearTime()
+        parseDate(res1.pointsHistory.get(2).dayPerformed) == dates.get(2).clearTime()
 
         res1.pointsHistory.get(3).points == 50
-        parseDate(res1.pointsHistory.get(3).dayPerformed) ==  dates.get(3).clearTime()
+        parseDate(res1.pointsHistory.get(3).dayPerformed) == dates.get(3).clearTime()
+
+        res1.achievements.size() == 2
+        res1.achievements.find { it.name == "Level 1" }.points == res1.pointsHistory.get(1).points
+        res1.achievements.find { it.name == "Level 1" }.achievedOn == res1.pointsHistory.get(1).dayPerformed
+
+        res1.achievements.find { it.name == "Level 2" }.points == res1.pointsHistory.get(3).points
+        res1.achievements.find { it.name == "Level 2" }.achievedOn == res1.pointsHistory.get(3).dayPerformed
     }
+
+    def "SUBJECTS: few days of history - multiple subjects"() {
+        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+
+        List<Map> skills = SkillsFactory.createSkills(2)
+        skills = skills.collect { it.numPerformToCompletion = 10; return it; }
+        def subject = SkillsFactory.createSubject()
+        def subject2 = SkillsFactory.createSubject(1, 2)
+        List<Map> skills2 = SkillsFactory.createSkills(2, 1, 2, 100)
+        skills2 = skills2.collect { it.numPerformToCompletion = 3; return it; }
+
+        skillsService.createProject(SkillsFactory.createProject())
+        skillsService.createSubject(subject)
+        skillsService.createSubject(subject2)
+        skillsService.createSkills(skills)
+        skillsService.createSkills(skills2)
+
+        List<Date> dates
+        use(TimeCategory) {
+            dates = [new Date(), 1.day.ago, 2.days.ago, 3.days.ago].sort()
+        }
+        when:
+        println skillsService.addSkill([projectId: SkillsFactory.defaultProjId, skillId: skills.get(0).skillId], userId, dates.get(0))
+        println skillsService.addSkill([projectId: SkillsFactory.defaultProjId, skillId: skills.get(0).skillId], userId, dates.get(1))
+        println skillsService.addSkill([projectId: SkillsFactory.defaultProjId, skillId: skills.get(1).skillId], userId, dates.get(1))
+        println skillsService.addSkill([projectId: SkillsFactory.defaultProjId, skillId: skills.get(1).skillId], userId, dates.get(2))
+        println skillsService.addSkill([projectId: SkillsFactory.defaultProjId, skillId: skills.get(1).skillId], userId, dates.get(3))
+
+        println "--------------------------------"
+
+        println skillsService.addSkill([projectId: SkillsFactory.defaultProjId, skillId: skills2.get(0).skillId], userId, dates.get(1))
+        println skillsService.addSkill([projectId: SkillsFactory.defaultProjId, skillId: skills2.get(0).skillId], userId, dates.get(2))
+        println skillsService.addSkill([projectId: SkillsFactory.defaultProjId, skillId: skills2.get(1).skillId], userId, dates.get(0))
+        println skillsService.addSkill([projectId: SkillsFactory.defaultProjId, skillId: skills2.get(1).skillId], userId, dates.get(1))
+        println skillsService.addSkill([projectId: SkillsFactory.defaultProjId, skillId: skills2.get(1).skillId], userId, dates.get(2))
+
+        def res1 = skillsService.getPointHistory(userId, SkillsFactory.defaultProjId, skills.get(0).subjectId)
+        def res2 = skillsService.getPointHistory(userId, SkillsFactory.defaultProjId, skills2.get(0).subjectId)
+
+        then:
+        res1.pointsHistory.size() == 4
+        res1.pointsHistory.get(0).points == 10
+        parseDate(res1.pointsHistory.get(0).dayPerformed) == dates.get(0).clearTime()
+
+        res1.pointsHistory.get(1).points == 30
+        parseDate(res1.pointsHistory.get(1).dayPerformed) == dates.get(1).clearTime()
+
+        res1.pointsHistory.get(2).points == 40
+        parseDate(res1.pointsHistory.get(2).dayPerformed) == dates.get(2).clearTime()
+
+        res1.pointsHistory.get(3).points == 50
+        parseDate(res1.pointsHistory.get(3).dayPerformed) == dates.get(3).clearTime()
+
+        res1.achievements.size() == 2
+        res1.achievements.find { it.name == "Level 1" }.points == res1.pointsHistory.get(1).points
+        res1.achievements.find { it.name == "Level 1" }.achievedOn == res1.pointsHistory.get(1).dayPerformed
+
+        res1.achievements.find { it.name == "Level 2" }.points == res1.pointsHistory.get(3).points
+        res1.achievements.find { it.name == "Level 2" }.achievedOn == res1.pointsHistory.get(3).dayPerformed
+
+        res2.pointsHistory.size() == 4
+        parseDate(res2.pointsHistory.get(0).dayPerformed) == dates.get(0).clearTime()
+        res2.pointsHistory.get(0).points == 100
+        parseDate(res2.pointsHistory.get(1).dayPerformed) == dates.get(1).clearTime()
+        res2.pointsHistory.get(1).points == 300
+        parseDate(res2.pointsHistory.get(2).dayPerformed) == dates.get(2).clearTime()
+        res2.pointsHistory.get(2).points == 500
+        parseDate(res2.pointsHistory.get(3).dayPerformed) == dates.get(3).clearTime()
+        res2.pointsHistory.get(3).points == 500
+
+        res2.achievements.size() == 2
+
+        parseDate(res2.achievements.find { it.name == "Level 1" }.achievedOn) == dates.get(1)
+        res2.achievements.find { it.name == "Level 1" }.points == 300
+
+        parseDate(res2.achievements.find { it.name == "Levels 2, 3, 4" }.achievedOn) == dates.get(2)
+        res2.achievements.find { it.name == "Levels 2, 3, 4" }.points == 500
+    }
+
 
     def "SUBJECTS: empty dates should carry points from prevous day"() {
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
