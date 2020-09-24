@@ -37,10 +37,10 @@ class SettingTypeUtil {
             return SettingType.User
         } else if(request instanceof GlobalSettingsRequest){
             return SettingType.Global
-        } else if(request instanceof ProjectSettingsRequest){
-            return SettingType.Project
         } else if(request instanceof RootUserProjectSettingsRequest) {
             return SettingType.RootUser
+        } else if(request instanceof ProjectSettingsRequest){
+            return SettingType.Project
         } else {
             log.error("unable SettingRequest [${request.getClass()}]")
             throw new SkillException("Unrecognized Setting type")

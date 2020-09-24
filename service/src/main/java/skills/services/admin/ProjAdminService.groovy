@@ -171,10 +171,11 @@ class ProjAdminService {
             throw new SkillException("Project with id [${projectId}] does NOT exist")
         }
 
-        SettingsRequest settingsRequest = new RootUserProjectSettingsRequest(
+        RootUserProjectSettingsRequest settingsRequest = new RootUserProjectSettingsRequest(
                 projectId:  projectId,
                 settingGroup: rootUserPinnedProjectGroup,
-                setting: "pinned"
+                setting: "pinned",
+                value: projectId
         )
 
         settingsService.saveSetting(settingsRequest)
@@ -187,8 +188,15 @@ class ProjAdminService {
         }
     }
 
-    private List<ProjDef> loadProjectsForRoot(String search) {
+    private static class RootProjectsResults {
+        List<ProjDef> projects
+        Set<String> pinnedProjects
+    }
+
+    private RootProjectsResults loadProjectsForRoot(String search) {
         List<ProjDef> results = []
+        List<SettingsResult> pinnedProjectSettings = settingsService.getRootUserSettingsForGroup(rootUserPinnedProjectGroup)
+        Set<String> pinnedProjects = pinnedProjectSettings.collect { it.value }.toSet()
 
         if (search){
             results = projDefRepo.findByNameLike(search)
@@ -196,15 +204,15 @@ class ProjAdminService {
             //we need to be able to communicate to the dashboard
             //that these projects are pinned so that the UI can render appropriate
             //buttons/actions
-            List<SettingsResult> pinnedProjects = settingsService.getRootUserSettingsForGroup(rootUserPinnedProjectGroup)
             pinnedProjects?.each {
-                ProjDef projDef = projDefRepo.findByProjectIdIgnoreCase(it.value)
+                ProjDef projDef = projDefRepo.findByProjectIdIgnoreCase(it)
                 if (projDef) {
                     results.add(projDef)
                 }
             }
         }
-        return results
+
+        return new RootProjectsResults(projects: results, pinnedProjects: pinnedProjects)
     }
 
     @Transactional(readOnly = true)
@@ -217,17 +225,20 @@ class ProjAdminService {
         String userId = userInfo.username
         Map<String, Integer> projectIdSortOrder = sortingService.getUserProjectsOrder(userId)
         List<ProjDef> projects
+        Set<String> pinnedProjectIds = Collections.emptySet()
 
         if (isRoot) {
             //get root roles
-            projects = loadProjectsForRoot(search)
+            RootProjectsResults rootProjectsResults = loadProjectsForRoot(search)
+            projects = rootProjectsResults.projects
+            pinnedProjectIds = rootProjectsResults.pinnedProjects
         } else {
             // sql join with UserRoles and there is 1-many relationship that needs to be normalized
             projects = projDefRepo.getProjectsByUser(userId)
         }
 
         List<ProjectResult> finalRes = projects?.unique({ it.projectId })?.collect({
-            ProjectResult res = convert(it, projectIdSortOrder)
+            ProjectResult res = convert(it, projectIdSortOrder, pinnedProjectIds)
             return res
         })
 
@@ -312,12 +323,13 @@ class ProjAdminService {
     }
 
     @Profile
-    private ProjectResult convert(ProjDef definition, Map<String, Integer> projectIdSortOrder) {
+    private ProjectResult convert(ProjDef definition, Map<String, Integer> projectIdSortOrder, Set<String> pinnedProjectIds = []) {
         Integer order = projectIdSortOrder?.get(definition.projectId)
         ProjectResult res = new ProjectResult(
                 projectId: definition.projectId, name: definition.name, totalPoints: definition.totalPoints,
                 numSubjects: definition.subjects ? definition.subjects.size() : 0,
                 displayOrder: order != null ? order : 0,
+                pinned: pinnedProjectIds?.contains(definition.projectId)
         )
         res.numBadges = skillDefRepo.countByProjectIdAndType(definition.projectId, SkillDef.ContainerType.Badge)
         res.numSkills = countNumSkillsForProject(definition)

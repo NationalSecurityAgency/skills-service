@@ -29,4 +29,6 @@ class ProjectResult extends SimpleProjectResult{
     boolean isLast
 
     boolean levelsArePoints
+
+    boolean pinned
 }
