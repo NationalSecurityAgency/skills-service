@@ -67,15 +67,11 @@ limitations under the License.
             },
             events: {
               zoomed(chartContext, { xaxis, yaxis }) {
-                console.log(`xaxis.min: ${xaxis.min}`);
                 if (xaxis.min === undefined && xaxis.max === undefined) {
                   self.chartWasZoomed = false;
-                  console.log('setting zoom to false');
                 } else {
                   self.chartWasZoomed = true;
-                  console.log('setting zoom to true');
                 }
-                console.log(`xaxis: ${JSON.stringify(xaxis)}`);
                 this.zoomedInfo = {
                   x: xaxis, y: yaxis,
                 };
