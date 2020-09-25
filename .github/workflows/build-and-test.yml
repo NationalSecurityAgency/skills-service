@@ -179,9 +179,10 @@ jobs:
       if: ${{ always() }}
       uses: actions/upload-artifact@v2
       with:
-        name: CI result artifacts
+        name: CI result artifacts ${{ matrix.container }}
         path: |
           ./service/target/*.log
+          ./e2e-tests/cypress
           ./e2e-tests/logs
 
   service-against-postgresql:
