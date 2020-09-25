@@ -17,7 +17,7 @@ limitations under the License.
   <div data-cy="projectCard">
     <page-preview-card :options="cardOptions">
       <div slot="header-top-right">
-        <span class="pr-2" v-if="isRootUser"><a href="#0" @click.stop="togglePin" class="btn btn-outline-primary btn-sm" data-cy="pin">{{ pinnedText }}<span :class="['ml-1', 'fas', 'fa-thumbtack', pinned ? 'pinned' : 'notpinned']"></span></a></span>
+        <span class="pr-2" v-if="isRootUser"><a href="#0" @click.stop="togglePin" class="btn btn-outline-primary btn-sm" data-cy="pin">{{ pinnedText }}<span data-cy="pinIcon" :class="['ml-1', 'fas', 'fa-thumbtack', pinned ? 'pinned' : 'notpinned']"></span></a></span>
         <edit-and-delete-dropdown v-on:deleted="deleteProject" v-on:edited="editProject" v-on:move-up="moveUp"
                                   v-on:move-down="moveDown"
                                   :is-first="projectInternal.isFirst" :is-last="projectInternal.isLast"
