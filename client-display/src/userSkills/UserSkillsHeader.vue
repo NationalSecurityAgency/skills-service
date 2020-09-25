@@ -78,7 +78,7 @@ limitations under the License.
 
             <div id="point-progress-container" class="pb-3 pb-lg-0"
                     :class="{ 'col-lg-6' : hasBadges, 'col-lg-9' : !hasBadges }">
-                <point-progress-chart :points-history="displayData.pointsHistory"/>
+                <point-progress-chart />
             </div>
 
             <div v-if="hasBadges" class="col-lg-3">
@@ -89,7 +89,7 @@ limitations under the License.
 </template>
 
 <script>
-  import PointProgressChart from '@/userSkills/PointProgressChart';
+  import PointProgressChart from '@/userSkills/pointProgress/PointProgressChart';
 
   import CircleProgress from '@/common/progress/CircleProgress';
   import MyRank from '@/userSkills/myRank/MyRank';

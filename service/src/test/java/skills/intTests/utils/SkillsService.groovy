@@ -222,17 +222,22 @@ class SkillsService {
         wsHelper.adminPost("/projects/${props.projectId}/subjectNameExists", [name:props.subjectName])
     }
 
-    def getSubjectDescriptions(String projectId, String subjectId) {
+    def getSubjectDescriptions(String projectId, String subjectId, String userId = null) {
         String url = "/projects/${projectId}/subjects/${subjectId}/descriptions".toString()
-        wsHelper.apiGet(url)
+        Map params = userId ? [userId: userId] : null
+        wsHelper.apiGet(url, params)
     }
 
-    def getBadgeDescriptions(String projectId, String badgeId, boolean isGlobal = false) {
+    def getBadgeDescriptions(String projectId, String badgeId, boolean isGlobal = false, String userId = null) {
         String url = "/projects/${projectId}/badges/${badgeId}/descriptions"
+        Map params = [:]
         if (isGlobal){
-            url = "${url}?global=true"
+            params["global"] = true
         }
-        wsHelper.apiGet(url.toString())
+        if (userId) {
+            params["userId"] = userId
+        }
+        wsHelper.apiGet(url.toString(), params)
     }
 
     def badgeNameExists(Map props){

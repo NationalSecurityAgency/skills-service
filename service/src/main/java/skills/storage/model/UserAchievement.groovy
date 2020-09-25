@@ -59,6 +59,8 @@ class UserAchievement {
 
     int pointsWhenAchieved
 
+    Date achievedOn
+
     @Temporal(TemporalType.TIMESTAMP)
     @CreatedDate
     Date created

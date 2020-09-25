@@ -340,7 +340,7 @@ class WSHelper {
         String url = ""
         if (params) {
             url += "?"
-            url += params.entrySet().collect({ "${it.key}=${it.value}" }).join(",")
+            url += params.entrySet().collect({ "${it.key}=${it.value}" }).join("&")
         }
         return url
     }

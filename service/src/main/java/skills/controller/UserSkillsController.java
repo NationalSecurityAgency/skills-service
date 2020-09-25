@@ -151,8 +151,10 @@ class UserSkillsController {
     @CompileStatic
     public List<SkillDescription> getSubjectSkillsDescriptions(@PathVariable("projectId") String projectId,
                                                                @PathVariable("subjectId") String subjectId,
+                                                               @RequestParam(name = "userId", required = false) String userIdParam,
                                                                @RequestParam(name = "version", required = false) Integer version) {
-        return skillsLoader.loadSubjectDescriptions(projectId, subjectId, getProvidedVersionOrReturnDefault(version));
+        String userId = userInfoService.getUserName(userIdParam, true);
+        return skillsLoader.loadSubjectDescriptions(projectId, subjectId, userId, getProvidedVersionOrReturnDefault(version));
     }
 
     /**
@@ -207,11 +209,13 @@ class UserSkillsController {
     public List<SkillDescription> getBadgeSkillsDescriptions(@PathVariable("projectId") String projectId,
                                                              @PathVariable("badgeId") String badgeId,
                                                              @RequestParam(name = "version", required = false) Integer version,
+                                                             @RequestParam(name = "userId", required = false) String userIdParam,
                                                              @RequestParam(name = "global", required = false) Boolean isGlobal) {
+        String userId = userInfoService.getUserName(userIdParam, true);
         if (isGlobal != null && isGlobal) {
-            return skillsLoader.loadGlobalBadgeDescriptions(badgeId, getProvidedVersionOrReturnDefault(version));
+            return skillsLoader.loadGlobalBadgeDescriptions(badgeId, userId, getProvidedVersionOrReturnDefault(version));
         } else {
-            return skillsLoader.loadBadgeDescriptions(projectId, badgeId, getProvidedVersionOrReturnDefault(version));
+            return skillsLoader.loadBadgeDescriptions(projectId, badgeId, userId, getProvidedVersionOrReturnDefault(version));
         }
     }
 
@@ -286,8 +290,6 @@ class UserSkillsController {
             //let's account for some possible clock drift
             SkillsValidator.isTrue(requestedTimestamp <= (System.currentTimeMillis() + 30000), "Skill Events may not be in the future", projectId, skillId);
             incomingDate = new Date(requestedTimestamp);
-        } else {
-            incomingDate = new Date();
         }
 
         SkillEventResult result;

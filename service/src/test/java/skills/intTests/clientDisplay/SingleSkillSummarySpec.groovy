@@ -16,6 +16,8 @@
 package skills.intTests.clientDisplay
 
 import groovy.time.TimeCategory
+import org.joda.time.format.DateTimeFormat
+import org.joda.time.format.DateTimeFormatter
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
 
@@ -156,6 +158,35 @@ class SingleSkillSummarySpec extends DefaultIntSpec {
         summary1.description.href == "https://keepMe.com/some/path"
     }
 
+    DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+    def "achieved date"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
+        proj1_skills[1].numPerformToCompletion = 2
+        proj1_skills.each {
+            it.pointIncrement = 100
+        }
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(proj1_skills)
+
+        Date date = new Date()
+        String userId = "user1"
+        when:
+        skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_skills.get(0).skillId], userId, date)
+        skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_skills.get(1).skillId], userId, date)
+
+        def summary = skillsService.getSingleSkillSummary(userId, proj1.projectId, proj1_skills.get(0).skillId)
+        def summary1 = skillsService.getSingleSkillSummary(userId, proj1.projectId, proj1_skills.get(1).skillId)
+        def summary2 = skillsService.getSingleSkillSummary(userId, proj1.projectId, proj1_skills.get(2).skillId)
+
+        then:
+        formatter.parseDateTime(summary.achievedOn).getMillis() == date.time
+        !summary1.achievedOn
+        !summary2.achievedOn
+    }
 
 
 }

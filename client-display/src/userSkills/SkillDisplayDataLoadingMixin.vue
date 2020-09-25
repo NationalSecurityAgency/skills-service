@@ -22,12 +22,10 @@ limitations under the License.
       return {
         loading: {
           userSkills: true,
-          pointsHistory: true,
           userSkillsRanking: true,
         },
         displayData: {
           userSkills: null,
-          pointsHistory: null,
           userSkillsRanking: null,
         },
       };
@@ -55,13 +53,6 @@ limitations under the License.
           });
       },
 
-      loadPointsHistory() {
-        UserSkillsService.getPointsHistory(this.$route.params.subjectId)
-          .then((result) => {
-            this.displayData.pointsHistory = result;
-            this.loading.pointsHistory = false;
-          });
-      },
       resetLoading() {
         this.loading.userSkills = true;
         this.loading.pointsHistory = true;

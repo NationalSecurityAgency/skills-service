@@ -72,7 +72,6 @@ limitations under the License.
         this.resetLoading();
         this.loadSubject();
         this.loadUserSkillsRanking();
-        this.loadPointsHistory();
       },
     },
   };

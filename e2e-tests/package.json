@@ -16,7 +16,7 @@
     "cy:open:dev:postgres": "cypress open --config baseUrl=http://localhost:8082 --env db=postgres",
     "cy:run": "npm run licenseCheck && cypress run",
     "cy:run:postgres": "npm run licenseCheck && cypress run --env db=postgres",
-    "cy:run:dev": "cypress run --config baseUrl=http://localhost:8082",
+    "cy:run:dev": "cypress run --config baseUrl=http://localhost:8082 --spec cypress/integration/client-display/client-display_point_history_chart_spec.js",
     "cy:run:dev:postgres": "cypress run --config baseUrl=http://localhost:8082 --env db=postgres",
     "cy:verify": "cypress verify",
     "backend:start": "java -Dspring.config.location=classpath:/application.yml,file:serverConfigs/backend_application.properties -jar ../service/target/skills-service-*.jar",
@@ -53,15 +53,16 @@
   },
   "devDependencies": {
     "@bahmutov/print-env": "2.1.2",
-    "cypress": "5.1.0",
+    "cypress": "5.2.0",
     "cypress-file-upload": "4.1.1",
     "cypress-image-snapshot": "3.1.1",
-    "eslint": "7.8.1",
+    "eslint": "7.9.0",
+    "fake-smtp-server": "0.8.0",
     "license-check-and-add": "3.0.4",
     "license-checker": "25.0.1",
-    "moment": "2.27.0",
-    "wait-on": "5.2.0",
-    "fake-smtp-server": "0.8.0"
+    "moment": "2.29.0",
+    "moment-timezone": "0.5.31",
+    "wait-on": "5.2.0"
   },
   "dependencies": {}
 }

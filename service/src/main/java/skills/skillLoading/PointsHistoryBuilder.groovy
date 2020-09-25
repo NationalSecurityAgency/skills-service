@@ -21,6 +21,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import skills.skillLoading.model.SkillHistoryPoints
 import skills.storage.model.DayCountItem
+import skills.storage.model.UserAchievement
+import skills.storage.repos.UserAchievedLevelRepo
 import skills.storage.repos.UserPerformedSkillRepo
 
 @Component
@@ -33,6 +35,9 @@ class PointsHistoryBuilder {
 
     @Autowired
     UserPerformedSkillRepo userPerformedSkillRepo
+
+    @Autowired
+    UserAchievedLevelRepo userAchievedRepo
 
     List<SkillHistoryPoints> buildHistory(String projectId, String userId, Integer showHistoryForNumDays, String skillId = null, Integer version = Integer.MAX_VALUE) {
         List<DayCountItem> userPoints

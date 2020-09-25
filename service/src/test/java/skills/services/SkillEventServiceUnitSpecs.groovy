@@ -27,9 +27,9 @@ import static skills.storage.repos.SkillEventsSupportRepo.SkillDefMin
 
 class SkillEventServiceUnitSpecs extends Specification {
 
-    final String userId = 'userId'
-    final String projId = 'projId'
-    final String skillId = 'skillId'
+    String userId = 'userId'
+    String projId = 'projId'
+    String skillId = 'skillId'
 
     def "test reportSkill will notify when skills is applied"() {
         SkillEventPublisher mockSkillEventPublisher = Mock()
@@ -70,7 +70,7 @@ class SkillEventServiceUnitSpecs extends Specification {
 
         when:
         Boolean notifyIfNotApplied = false
-        skillEventsService.reportSkill(projId, skillId, userId, notifyIfNotApplied)
+        skillEventsService.reportSkill(projId, skillId, userId, notifyIfNotApplied, null)
 
         then:
         true
@@ -97,7 +97,7 @@ class SkillEventServiceUnitSpecs extends Specification {
 
         when:
         Boolean notifyIfNotApplied = false
-        skillEventsService.reportSkill(projId, skillId, userId, notifyIfNotApplied)
+        skillEventsService.reportSkill(projId, skillId, userId, notifyIfNotApplied, null)
 
         then:
         0 * mockSkillEventPublisher.publishSkillUpdate(_, userId)
@@ -123,7 +123,7 @@ class SkillEventServiceUnitSpecs extends Specification {
 
         when:
         Boolean notifyIfNotApplied = true // notify even if skill is not applied
-        skillEventsService.reportSkill(projId, skillId, userId, notifyIfNotApplied)
+        skillEventsService.reportSkill(projId, skillId, userId, notifyIfNotApplied, null)
 
         then:
         1 * mockSkillEventPublisher.publishSkillUpdate(_, userId)

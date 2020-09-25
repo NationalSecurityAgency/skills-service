@@ -31,8 +31,13 @@ import skills.storage.model.UserAchievement
 interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer> {
 
     List<UserAchievement> findAllByUserIdAndProjectIdAndSkillId(String userId, @Nullable String projectId, @Nullable String skillId)
+    List<UserAchievement> findAllByUserIdAndProjectIdAndSkillIdAndLevelNotNull(String userId, @Nullable String projectId, @Nullable String skillId)
 
     List<UserAchievement> findAllByUserIdAndNotifiedOrderByCreatedAsc(String userId, String notified)
+
+    @Nullable
+    @Query('''select ua.achievedOn from UserAchievement ua where ua.userId= ?1 and ua.projectId=?2 and ua.skillId=?3''')
+    Date getAchievedDateByUserIdAndProjectIdAndSkillId(String userId, String projectId, String skillId)
 
     @Query('''select ua from UserAchievement ua where ua.userId = ?1 and ua.projectId in ?2''')
     List<UserAchievement> findAllByUserAndProjectIds(String userId, Collection<String> projectId)
@@ -62,7 +67,6 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
 
         String getChildAchievedSkillId()
     }
-
 
     @Query(''' select sdParent
     from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild

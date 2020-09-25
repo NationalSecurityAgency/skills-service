@@ -234,11 +234,44 @@ class SkillsLoader {
     }
 
     @Transactional(readOnly = true)
+    @Profile
     UserPointHistorySummary loadPointHistorySummary(String projectId, String userId, int showHistoryForNumDays, String skillId = null, Integer version = Integer.MAX_VALUE) {
         List<SkillHistoryPoints> historyPoints = pointsHistoryBuilder.buildHistory(projectId, userId, showHistoryForNumDays, skillId, version)
-        return new UserPointHistorySummary(
-                pointsHistory: historyPoints
+        List<Achievement> achievements = loadLevelAchievements(userId, projectId, skillId, historyPoints)
+
+        return new UserPointHistorySummary (
+                pointsHistory: historyPoints,
+                achievements: achievements
         )
+    }
+
+    @Profile
+    private List<Achievement> loadLevelAchievements(String userId, String projectId, String skillId, List<SkillHistoryPoints> historyPoints) {
+        List<Achievement> achievements
+        List<UserAchievement> userAchievements = achievedLevelRepo.findAllByUserIdAndProjectIdAndSkillIdAndLevelNotNull(userId, projectId, skillId)
+        if (userAchievements) {
+            Map<Date, List<SkillHistoryPoints>> ptsByDay = historyPoints?.groupBy { it.dayPerformed }
+            Map<Date, Achievement> achievementsByDay = [:]
+            userAchievements.each {
+                Date dayOfAchievement = new Date(it.achievedOn.time).clearTime()
+                List<SkillHistoryPoints> foundPts = ptsByDay.get(dayOfAchievement)
+                if (!foundPts) {
+                    log.warn("Failed to locate pts on [${it.achievedOn}] for userId=[${userId}], projecdtId=[${projectId}], skillId=[${skillId}]. This is likely a bug!")
+                } else {
+                    Achievement achievement = achievementsByDay[dayOfAchievement]
+                    if (achievement) {
+                        achievement.name += ", ${it.level}"
+                    } else {
+                        achievementsByDay[dayOfAchievement] = new Achievement(achievedOn: dayOfAchievement, points: foundPts.first().points, name: "${it.level}")
+                    }
+                }
+            }
+            achievements = achievementsByDay.values().collect {
+                it.name = "Level${it.name.contains(",") ? "s" : ""} ${it.name}"
+                return it
+            }
+        }
+        return achievements
     }
 
     @Transactional(readOnly = true)
@@ -252,6 +285,7 @@ class SkillsLoader {
 
         UserPoints points = userPointsRepo.findByProjectIdAndUserIdAndSkillIdAndDay(crossProjectId ?: projectId, userId, skillId, null)
         UserPoints todayPoints = userPointsRepo.findByProjectIdAndUserIdAndSkillIdAndDay(crossProjectId ?: projectId, userId, skillId, new Date().clearTime())
+        Date achievedOn = achievedLevelRepository.getAchievedDateByUserIdAndProjectIdAndSkillId(userId, projectId, skillId)
 
         SkillDependencySummary skillDependencySummary
         if (!crossProjectId) {
@@ -272,7 +306,8 @@ class SkillsLoader {
                         description: InputSanitizer.unsanitizeForMarkdown(skillDef.description),
                         href: getHelpUrl(helpUrlRootSetting, skillDef.helpUrl)),
                 dependencyInfo: skillDependencySummary,
-                crossProject: crossProjectId != null
+                crossProject: crossProjectId != null,
+                achievedOn: achievedOn
         )
     }
 
@@ -289,32 +324,33 @@ class SkillsLoader {
     }
 
     @Transactional(readOnly = true)
-    List<SkillDescription> loadSubjectDescriptions(String projectId, String subjectId, Integer version = -1) {
-        return loadDescriptions(projectId, subjectId, SkillRelDef.RelationshipType.RuleSetDefinition, version)
+    List<SkillDescription> loadSubjectDescriptions(String projectId, String subjectId, String userId, Integer version = -1) {
+        return loadDescriptions(projectId, subjectId, userId, SkillRelDef.RelationshipType.RuleSetDefinition, version)
     }
     @Transactional(readOnly = true)
-    List<SkillDescription> loadBadgeDescriptions(String projectId, String badgeId, Integer version = -1) {
-        return loadDescriptions(projectId, badgeId, SkillRelDef.RelationshipType.BadgeRequirement, version)
+    List<SkillDescription> loadBadgeDescriptions(String projectId, String badgeId, String userId, Integer version = -1) {
+        return loadDescriptions(projectId, badgeId, userId, SkillRelDef.RelationshipType.BadgeRequirement, version)
     }
     @Transactional(readOnly = true)
-    List<SkillDescription> loadGlobalBadgeDescriptions(String badgeId, Integer version = -1) {
-        return loadDescriptions(null, badgeId, SkillRelDef.RelationshipType.BadgeRequirement, version)
+    List<SkillDescription> loadGlobalBadgeDescriptions(String badgeId, String userId,Integer version = -1) {
+        return loadDescriptions(null, badgeId, userId, SkillRelDef.RelationshipType.BadgeRequirement, version)
     }
 
-    private List<SkillDescription> loadDescriptions(String projectId, String subjectId, SkillRelDef.RelationshipType relationshipType, int version) {
+    private List<SkillDescription> loadDescriptions(String projectId, String subjectId,  String userId, SkillRelDef.RelationshipType relationshipType, int version) {
         SettingsResult helpUrlRootSetting = settingsService.getProjectSetting(projectId, PROP_HELP_URL_ROOT)
 
         List<SkillDefWithExtraRepo.SkillDescDBRes> dbRes
         if (projectId) {
-            dbRes = skillDefWithExtraRepo.findAllChildSkillsDescriptions(projectId, subjectId, relationshipType, version)
+            dbRes = skillDefWithExtraRepo.findAllChildSkillsDescriptions(projectId, subjectId, relationshipType, version, userId)
         } else {
-            dbRes = skillDefWithExtraRepo.findAllGlobalChildSkillsDescriptions(subjectId, relationshipType, version)
+            dbRes = skillDefWithExtraRepo.findAllGlobalChildSkillsDescriptions(subjectId, relationshipType, version, userId)
         }
         List<SkillDescription> res = dbRes.collect {
             new SkillDescription(
                     skillId: it.getSkillId(),
                     description: InputSanitizer.unsanitizeForMarkdown(it.getDescription()),
-                    href: getHelpUrl(helpUrlRootSetting, it.getHelpUrl())
+                    href: getHelpUrl(helpUrlRootSetting, it.getHelpUrl()),
+                    achievedOn: it.getAchievedOn(),
             )
         }
         return res;

@@ -15,6 +15,7 @@
  */
 package skills.intTests
 
+import groovy.json.JsonOutput
 import groovy.util.logging.Slf4j
 import liquibase.Contexts
 import liquibase.LabelExpression
@@ -80,7 +81,7 @@ class DataMigrationDBIT extends DefaultIntSpec {
         Liquibase liquibase = new Liquibase(StringUtils.removeStart(changeLog.getPath(), "classpath:"), new ClassLoaderResourceAccessor(), database)
         liquibase.update(new Contexts('!migration1'), new LabelExpression())
 
-        insertPreMigration1TestData()
+        insertPreMigrationTestData("migration1.sql")
         skillsService = createService()
         when:
         String projectId = 'TestProject1'
@@ -109,7 +110,6 @@ class DataMigrationDBIT extends DefaultIntSpec {
         def expectedSkill2 = subjectSkills2.get(0)
         skillsService.createSubject(subject2)
         skillsService.createSkills(subjectSkills2)
-        def res = skillsService.addSkill([projectId: projectId, skillId: expectedSkill2.skillId], userId, new Date())
         def resetTokensPostMigration = getPasswordResetTokens()
 
         then:
@@ -126,27 +126,29 @@ class DataMigrationDBIT extends DefaultIntSpec {
         existingSkillDefsPostMigration.findAll { new Boolean(it.ENABLED) == true }.size() == existingSkillDefsPostMigration.size()
         existingUserAchievementsPostMigration.findAll { new Boolean(it.NOTIFIED) == true }.size() == existingUserAchievementsPostMigration.size()
         !resetTokensPostMigration
-
-
-        res.body.skillApplied
-        res.body.explanation == "Skill event was applied"
-
-        res.body.completed.size() == 6
-        res.body.completed.find({ it.type == "Skill" }).id == expectedSkill2.skillId
-        res.body.completed.find({ it.type == "Skill" }).name == expectedSkill2.name
-
-        res.body.completed.findAll({ it.type == "Subject" && it.id == subject2.subjectId }).size() == 5
-        res.body.completed.findAll({ it.type == "Subject" && it.name == subject2.name }).size() == 5
-        res.body.completed.findAll({ it.type == "Subject" && it.level == 1 })
-        res.body.completed.findAll({ it.type == "Subject" && it.level == 2 })
-        res.body.completed.findAll({ it.type == "Subject" && it.level == 3 })
-        res.body.completed.findAll({ it.type == "Subject" && it.level == 4 })
-        res.body.completed.findAll({ it.type == "Subject" && it.level == 5 })
     }
 
-    private insertPreMigration1TestData() {
-        new ClassPathResource("migration1.sql").getFile().eachLine { sqlStmt ->
+    private insertPreMigrationTestData(String sqlFilePath) {
+        new ClassPathResource(sqlFilePath).getFile().eachLine { sqlStmt ->
             jdbcTemplate.execute(sqlStmt)
+        }
+    }
+
+    def "validate migration2"() {
+        Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(dataSource.getConnection()))
+        Liquibase liquibase = new Liquibase(StringUtils.removeStart(changeLog.getPath(), "classpath:"), new ClassLoaderResourceAccessor(), database)
+        liquibase.update(new Contexts('migration1'), new LabelExpression())
+
+        insertPreMigrationTestData("migration2.sql")
+        def resBefore = jdbcTemplate.queryForList("select * from user_achievement")
+        when:
+        liquibase.update(new Contexts('migration2'), new LabelExpression())
+        def resAfter = jdbcTemplate.queryForList("select * from user_achievement")
+        then:
+        resBefore.findAll({it["achieved_on".toUpperCase()]}).size() == 0
+        resAfter.findAll({it["achieved_on".toUpperCase()]}).size() == 16
+        resAfter.each {
+            assert it["achieved_on".toUpperCase()] == it["created".toUpperCase()]
         }
     }
 

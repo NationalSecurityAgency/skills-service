@@ -81,7 +81,7 @@ limitations under the License.
       fetchData() {
         this.resetLoading();
         this.loadUserSkills();
-        this.loadPointsHistory();
+        // this.loadPointsHistory();
         this.loadUserSkillsRanking();
       },
       getCustomIconCss() {

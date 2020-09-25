@@ -19,4 +19,5 @@ class SkillDescription {
     String skillId
     String description
     String href
+    Date achievedOn
 }

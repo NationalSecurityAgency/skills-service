@@ -108,6 +108,7 @@ limitations under the License.
                 const foundSkill = this.skillsInternal.find((skill) => desc.skillId === skill.skillId);
                 if (foundSkill) {
                   foundSkill.description = desc;
+                  foundSkill.achievedOn = desc.achievedOn;
                 }
               });
               this.descriptionsLoaded = true;

@@ -43,6 +43,7 @@ limitations under the License.
                     <progress-bar :skill="skill"/>
                 </div>
             </div>
+            <achievement-date v-if="skill.achievedOn" :date="skill.achievedOn" class="mt-2"/>
 
             <partial-points-alert :skill="skill" :is-locked="locked"/>
             <skill-summary-cards v-if="!locked" :skill="skill" class="mt-3"></skill-summary-cards>
@@ -70,10 +71,12 @@ limitations under the License.
   import SkillSummaryCards from '@/userSkills/skill/progress/SkillSummaryCards';
   import MarkdownText from '@/common/utilities/MarkdownText';
   import PartialPointsAlert from '@/userSkills/skill/PartialPointsAlert';
+  import AchievementDate from '@/userSkills/skill/AchievementDate';
 
   export default {
     name: 'SkillOverview',
     components: {
+      AchievementDate,
       PartialPointsAlert,
       SkillSummaryCards,
       ProgressBar,

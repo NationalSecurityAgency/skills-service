@@ -36,4 +36,7 @@ class SkillSummary  {
     SkillDependencySummary dependencyInfo
 
     boolean crossProject
+
+    // null if the skill is NOT achieved
+    Date achievedOn
 }

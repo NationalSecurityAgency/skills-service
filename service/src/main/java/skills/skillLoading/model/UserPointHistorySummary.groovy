@@ -17,4 +17,5 @@ package skills.skillLoading.model
 
 class UserPointHistorySummary {
     List<SkillHistoryPoints> pointsHistory
+    List<Achievement> achievements
 }

@@ -259,4 +259,32 @@ interface SkillEventsSupportRepo extends CrudRepository<SkillDef, Long> {
         p.projectId as projectId
         from ProjDef p, UserRole u where p.projectId = u.projectId and u.userId=?1''')
     List<TinyProjectDef> getTinyProjectDefForUserId(String userId)
+
+
+    @Query('''select max(ups.performedOn)
+    from SkillRelDef srd, SkillDef sdChild, UserPerformedSkill ups
+      where
+      srd.child=sdChild and sdChild.skillId = ups.skillId and
+      ups.userId=?1 and 
+      ups.projectId=?2 and 
+      sdChild.projectId=?2 and
+      srd.parent.id=?3 and 
+      srd.type=?4''')
+    Date getUserPerformedSkillLatestDate(String userId, String projectId, Integer parentSkillId, SkillRelDef.RelationshipType type)
+
+    @Query('''select max(ups.performedOn)
+    from UserPerformedSkill ups
+      where
+      ups.userId=?1 and 
+      ups.projectId=?2''')
+    Date getUserPerformedSkillLatestDate(String userId, String projectId)
+
+
+    @Query('''select max(ups.performedOn)
+    from UserPerformedSkill ups
+      where
+      ups.userId=?1 and 
+      ups.projectId=?2 and 
+      ups.skillId=?3''')
+    Date getUserPerformedSkillLatestDate(String userId, String projectId, String skillId)
 }

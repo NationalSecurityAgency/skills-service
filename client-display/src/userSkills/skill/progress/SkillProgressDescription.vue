@@ -22,6 +22,7 @@ limitations under the License.
             </div>
         </div>
         <small v-else>
+            <achievement-date v-if="skill.achievedOn" :date="skill.achievedOn" class="mb-3"/>
             <skill-summary-cards class="mb-3" :skill="skill" :short-sub-titles="true"/>
         </small>
 
@@ -50,10 +51,11 @@ limitations under the License.
 <script>
   import SkillSummaryCards from '@/userSkills/skill/progress/SkillSummaryCards';
   import MarkdownText from '@/common/utilities/MarkdownText';
+  import AchievementDate from '@/userSkills/skill/AchievementDate';
 
   export default {
     name: 'SkillProgressDescription',
-    components: { SkillSummaryCards, MarkdownText },
+    components: { AchievementDate, SkillSummaryCards, MarkdownText },
     props: {
       skill: Object,
     },

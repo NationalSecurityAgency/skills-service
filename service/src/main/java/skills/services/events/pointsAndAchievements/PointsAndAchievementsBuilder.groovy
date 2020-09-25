@@ -20,8 +20,10 @@ import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import skills.services.LevelDefinitionStorageService
 import skills.services.events.CompletionItem
+import skills.services.events.SkillDate
 import skills.storage.model.LevelDefInterface
 import skills.storage.model.SkillDef
+import skills.storage.model.SkillRelDef
 import skills.storage.model.UserAchievement
 import skills.storage.model.UserPoints
 import skills.storage.repos.SkillEventsSupportRepo
@@ -35,8 +37,9 @@ class PointsAndAchievementsBuilder {
     Integer skillRefId
     LoadedData loadedData
     int pointIncrement
-    Date incomingSkillDate
+    SkillDate incomingSkillDate
     LevelDefinitionStorageService levelDefService
+    SkillEventsSupportRepo skillEventsSupportRepo
 
 
     class PointsAndAchievementsResult {
@@ -119,9 +122,10 @@ class PointsAndAchievementsBuilder {
             maxAchieved = maxAchieved ?: 0
             // handle an edge case where user achieves multiple levels via one event
             if (levelInfo.level > maxAchieved) {
+                Date achievedOn = getAchievedOnDate(skillRefId)
                 res = (maxAchieved+1..levelInfo.level).collect {
                     UserAchievement achievement = new UserAchievement(userId: userId.toLowerCase(), projectId: projectId, skillId: skillId, skillRefId: skillRefId,
-                            level: it, pointsWhenAchieved: currentScore)
+                            level: it, pointsWhenAchieved: currentScore, achievedOn: achievedOn)
                     log.debug("Achieved new level [{}]", achievement)
                     return achievement
                 }
@@ -129,6 +133,24 @@ class PointsAndAchievementsBuilder {
         }
 
         return res
+    }
+
+    @Profile
+    private Date getAchievedOnDate(Integer skillRefId) {
+        Date achievedOn = incomingSkillDate.date
+        // this work is only performed if the date was provided for the event that caused an achievement to happen;
+        // with that said the provided date may not be the latest date of all of the events that contributed to this achievement
+        if (incomingSkillDate.isProvided) {
+            // get the date of the latest event
+            achievedOn = skillRefId ?
+                    skillEventsSupportRepo.getUserPerformedSkillLatestDate(userId.toLowerCase(), projectId, skillRefId, SkillRelDef.RelationshipType.RuleSetDefinition) :
+                    skillEventsSupportRepo.getUserPerformedSkillLatestDate(userId.toLowerCase(), projectId)
+
+            if (!achievedOn || incomingSkillDate.date.after(achievedOn)) {
+                achievedOn = incomingSkillDate.date
+            }
+        }
+        return achievedOn
     }
 
 
@@ -142,7 +164,7 @@ class PointsAndAchievementsBuilder {
         }
 
         // add user points if a record doesn't exist for that day already
-        Date incomingDay = new Date(incomingSkillDate.time).clearTime()
+        Date incomingDay = new Date(incomingSkillDate.date.time).clearTime()
         if (!myExistingPoints?.find { it.getDay() == incomingDay }) {
             toSave << constructUserPoints(userId, projectId, skillRefId, skillId, incomingDay, pointIncrement)
         }
