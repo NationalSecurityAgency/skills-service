@@ -21,7 +21,7 @@ limitations under the License.
 
     <loading-container v-bind:is-loading="isLoading">
       <b-input class="mb-3 w-25" v-if="isRootUser" placeholder="Search all project names" debounce="500" type="search"
-               v-model="search"/>
+               v-model="search" data-cy="projectSearch"/>
       <div v-for="project of projects" :key="project.projectId" class="mb-3">
         <my-project :project="project" v-on:project-deleted="projectRemoved" v-on:move-project-up="moveProjectUp"
                     v-on:move-project-down="moveProjectDown"/>
