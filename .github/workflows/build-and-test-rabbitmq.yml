@@ -73,14 +73,27 @@ jobs:
     - name: Build skills-service
       run: mvn --batch-mode install -DskipTests
 
-    - name: Run Cypress tests
+    - name: Start services for Cypress tests
       run: |
         cd e2e-tests
         npm install
         npm run cyServices:start:skills-service:rabbitmq
         npm run cyServices:start:client-display
-        npm run cy:run
         cd ..
+
+    - name: Run Cypress tests
+      uses: cypress-io/github-action@v2
+      with:
+        working-directory: e2e-tests
+        record: true
+        parallel: false
+        group: 'skills-service with STOMP using RabbitMQ'
+      env:
+        # pass the Dashboard record key as an environment variable
+        CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+        # pass GitHub token to allow accurately detecting a build vs a re-run build
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 
     - name: upload result artifacts
       if: ${{ always() }}
