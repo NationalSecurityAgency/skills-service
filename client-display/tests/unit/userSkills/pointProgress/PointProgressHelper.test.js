@@ -112,7 +112,7 @@ describe('PointProgressHelper', () => {
     });
 
     it('tolerate up to 2% difference in points', () => {
-        const m = moment('2020-09-12 11', 'YYYY-MM-DD HH');
+        const m = moment.utc('2020-09-12 11', 'YYYY-MM-DD HH');
         const pointsHistoryList = [];
         for (let i = 0; i < 120; i += 1) {
             const day = m.clone()

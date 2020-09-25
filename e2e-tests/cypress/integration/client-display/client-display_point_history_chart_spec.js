@@ -575,7 +575,7 @@ describe('Client Display Tests', () => {
 
 
     function createTimeline(start, numDays, startScore, increaseBy, increaseEvery, stopIncreasingAfterDays = -1) {
-        const m = moment(start, 'YYYY-MM-DD HH');
+        const m = moment.utc(start, 'YYYY-MM-DD HH');
         const pointHistory = [];
         let score = startScore;
         for( let i=0; i <numDays; i+=1 ){
