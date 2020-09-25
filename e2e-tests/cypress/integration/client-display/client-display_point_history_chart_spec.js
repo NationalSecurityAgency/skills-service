@@ -17,7 +17,7 @@ import moment from 'moment';
 
 describe('Client Display Tests', () => {
 
-    const waitForAnimation = 2000;
+    const waitForAnimation = 3000;
 
     beforeEach(() => {
         Cypress.env('disabledUILoginProp', true);
