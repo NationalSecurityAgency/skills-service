@@ -15,7 +15,6 @@
  */
 package skills.auth
 
-import org.springframework.http.HttpMethod
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.stereotype.Component
 import skills.storage.model.auth.RoleName
@@ -38,7 +37,7 @@ class PortalWebSecurityHelper {
                     "index.html", "/public/**",
                     "/skills-websocket/**", "/requestPasswordReset",
                     "/resetPassword/**", "/performPasswordReset").permitAll()
-            .antMatchers('/admin/**').hasAnyAuthority('PROJECT_ADMIN', RoleName.ROLE_SUPER_DUPER_USER.name())
+            .antMatchers('/admin/**').hasAnyAuthority(RoleName.ROLE_PROJECT_ADMIN.name(), RoleName.ROLE_SUPER_DUPER_USER.name())
             .antMatchers('/supervisor/**').hasAnyAuthority(RoleName.ROLE_SUPERVISOR.name(), RoleName.ROLE_SUPER_DUPER_USER.name())
             .antMatchers('/root/isRoot').hasAnyAuthority(RoleName.values().collect {it.name()}.toArray(new String[0]))
             .antMatchers('/root/**').hasRole('SUPER_DUPER_USER')
