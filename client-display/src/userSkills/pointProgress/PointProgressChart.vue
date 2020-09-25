@@ -61,7 +61,6 @@ limitations under the License.
         chartOptions: {
           chart: {
             type: 'area',
-            // height: 250,
             toolbar: {
               offsetY: -30,
             },
