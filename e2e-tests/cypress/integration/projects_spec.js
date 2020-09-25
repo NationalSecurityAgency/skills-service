@@ -423,7 +423,7 @@ describe('Projects Tests', () => {
     cy.wait('@suggest');
   });
 
-  it.only('Root User Project Display', () => {
+  it('Root User Project Display', () => {
 
     cy.request('POST', '/app/projects/proj1', {
       projectId: 'proj1',
