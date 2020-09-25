@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import moment from 'moment';
+var moment = require('moment-timezone');
 
 describe('Client Display Tests', () => {
 
@@ -583,7 +583,7 @@ describe('Client Display Tests', () => {
                 score += increaseBy;
             }
             pointHistory.push({
-                'dayPerformed': m.clone().add(i, 'day').format(),
+                'dayPerformed': m.clone().add(i, 'day').tz('UTC').format(),
                 'points': score,
             });
         }
@@ -592,6 +592,9 @@ describe('Client Display Tests', () => {
 
     it('levels achieved on subsequent days with many days in the timeline', () => {
         const pointHistory = createTimeline('2019-09-12', 120, 10, 10, 10);
+        pointHistory.forEach((value) => {
+           cy.log(value);
+        });
         const data = {
             'pointsHistory': pointHistory,
             'achievements': [{
