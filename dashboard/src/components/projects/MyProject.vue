@@ -159,16 +159,12 @@ limitations under the License.
       togglePin() {
         if (this.projectInternal.pinned) {
           SettingsService.unpinProject(this.projectInternal.projectId).then(() => {
-            console.log('unpinning project');
-            // unpin this project
             this.projectInternal.pinned = false;
             this.pinned = false;
           });
         } else {
           SettingsService.pinProject(this.projectInternal.projectId).then(() => {
-            console.log('pinning project');
             this.projectInternal.pinned = true;
-            // pin this project
             this.pinned = true;
           });
         }
