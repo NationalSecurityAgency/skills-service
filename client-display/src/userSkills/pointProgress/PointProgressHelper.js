@@ -15,11 +15,11 @@
  */
 export default {
     calculateXAxisMaxTimestamp(histResult) {
-        const pointHistory = histResult.pointsHistory;
         // only perform this calculation if there are at least 2 months of points
-        if (!pointHistory || pointHistory.length < 60) {
+        if (!histResult || !histResult.pointsHistory || histResult.pointsHistory.length < 60) {
             return null;
         }
+        const pointHistory = histResult.pointsHistory;
         const maxAchievedTimeStamp = this.getMaxAchievedTimestamp(histResult);
 
         // start at the end
