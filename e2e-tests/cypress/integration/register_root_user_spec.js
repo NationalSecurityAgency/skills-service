@@ -40,6 +40,6 @@ describe('Register Root Users', () => {
     cy.get('#password_confirmation').type("password")
     cy.contains('Create Account').click()
 
-    cy.contains('Inception')
+    cy.get('[data-cy=projectSearch]').should('be.visible');
   });
 });
