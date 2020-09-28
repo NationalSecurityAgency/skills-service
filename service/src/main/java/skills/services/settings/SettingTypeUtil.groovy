@@ -20,6 +20,7 @@ import groovy.util.logging.Slf4j
 import skills.controller.exceptions.SkillException
 import skills.controller.request.model.GlobalSettingsRequest
 import skills.controller.request.model.ProjectSettingsRequest
+import skills.controller.request.model.RootUserProjectSettingsRequest
 import skills.controller.request.model.SettingsRequest
 import skills.controller.request.model.UserProjectSettingsRequest
 import skills.controller.request.model.UserSettingsRequest
@@ -36,9 +37,11 @@ class SettingTypeUtil {
             return SettingType.User
         } else if(request instanceof GlobalSettingsRequest){
             return SettingType.Global
+        } else if(request instanceof RootUserProjectSettingsRequest) {
+            return SettingType.RootUser
         } else if(request instanceof ProjectSettingsRequest){
             return SettingType.Project
-        } else{
+        } else {
             log.error("unable SettingRequest [${request.getClass()}]")
             throw new SkillException("Unrecognized Setting type")
         }

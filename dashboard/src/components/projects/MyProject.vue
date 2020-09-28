@@ -17,6 +17,7 @@ limitations under the License.
   <div data-cy="projectCard">
     <page-preview-card :options="cardOptions">
       <div slot="header-top-right">
+        <span class="pr-2" v-if="isRootUser"><a href="#0" @click.stop="togglePin" class="btn btn-outline-primary btn-sm" data-cy="pin">{{ pinnedText }}<span data-cy="pinIcon" :class="['ml-1', 'fas', 'fa-thumbtack', pinned ? 'pinned' : 'notpinned']"></span></a></span>
         <edit-and-delete-dropdown v-on:deleted="deleteProject" v-on:edited="editProject" v-on:move-up="moveUp"
                                   v-on:move-down="moveDown"
                                   :is-first="projectInternal.isFirst" :is-last="projectInternal.isLast"
@@ -41,6 +42,7 @@ limitations under the License.
   import ProjectService from './ProjectService';
   import PagePreviewCard from '../utils/pages/PagePreviewCard';
   import MsgBoxMixin from '../utils/modal/MsgBoxMixin';
+  import SettingsService from '../settings/SettingsService';
 
   export default {
     name: 'MyProject',
@@ -50,6 +52,7 @@ limitations under the License.
     data() {
       return {
         isLoading: false,
+        pinned: false,
         projectInternal: { ...this.project },
         cardOptions: {},
         showEditProjectModal: false,
@@ -58,12 +61,29 @@ limitations under the License.
       };
     },
     mounted() {
+      this.pinned = this.projectInternal.pinned;
       this.createCardOptions();
       // this.checkIfProjectBelongsToGlobalBadge();
     },
     computed: {
       minimumPoints() {
         return this.$store.getters.config.minimumProjectPoints;
+      },
+      isRootUser() {
+        return this.$store.getters['access/isRoot'];
+      },
+      pinnedText() {
+        if (this.pinned) {
+          return 'Unpin';
+        }
+        return 'Pin';
+      },
+    },
+    watch: {
+      isRootUser(newVal) {
+        if (newVal) {
+          this.enableSearch = true;
+        }
       },
     },
     methods: {
@@ -123,6 +143,7 @@ limitations under the License.
         ProjectService.saveProject(project)
           .then((res) => {
             this.projectInternal = res;
+            this.pinned = this.projectInternal.pinned;
             this.createCardOptions();
           })
           .finally(() => {
@@ -135,14 +156,30 @@ limitations under the License.
       moveDown() {
         this.$emit('move-project-down', this.projectInternal);
       },
+      togglePin() {
+        if (this.projectInternal.pinned) {
+          SettingsService.unpinProject(this.projectInternal.projectId).then(() => {
+            this.projectInternal.pinned = false;
+            this.pinned = false;
+          });
+        } else {
+          SettingsService.pinProject(this.projectInternal.projectId).then(() => {
+            this.projectInternal.pinned = true;
+            this.pinned = true;
+          });
+        }
+      },
     },
   };
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
   .project-settings {
     position: relative;
     display: inline-block;
     float: right;
+  }
+  .notpinned {
+    opacity: 0.3;
   }
 </style>

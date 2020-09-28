@@ -168,8 +168,10 @@ class SkillsService {
         wsHelper.appPost("/projectExist", [name: name])?.body
     }
 
-    def getProjects() {
-        wsHelper.appGet("/projects")
+    def getProjects(String search="") {
+        //note that search is only used if the requesting user is a root user
+        //otherwise whatever value is supplied for the parameter is ignored by the service
+        wsHelper.appGet("/projects?search=${search}")
     }
 
     def getProject(String projectId) {
@@ -738,6 +740,14 @@ class SkillsService {
 
     def addRootRole(String userId) {
         return wsHelper.rootPut("/addRoot/${userId}")
+    }
+
+    def pinProject(String projectId) {
+        return wsHelper.rootPost("/pin/${projectId}")
+    }
+
+    def unpinProject(String projecctId) {
+        return wsHelper.rootDelete("/pin/${projectId}")
     }
 
     def getUsersWithoutRole(String role, String usernameQuery) {

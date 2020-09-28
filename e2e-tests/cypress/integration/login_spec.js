@@ -38,7 +38,7 @@ describe('Login Tests', () => {
 
     cy.contains('Project');
     cy.contains('My Projects');
-    cy.contains('Inception');
+    cy.get('[data-cy=projectSearch]').should('be.visible');
   });
 
   it('form: bad password', () => {

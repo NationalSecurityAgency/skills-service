@@ -423,5 +423,87 @@ describe('Projects Tests', () => {
     cy.wait('@suggest');
   });
 
+  it('Root User Project Display', () => {
+
+    cy.request('POST', '/app/projects/proj1', {
+      projectId: 'proj1',
+      name: "one"
+    });
+
+    cy.request('POST', '/app/projects/proj2', {
+      projectId: 'proj2',
+      name: "two"
+    });
+
+    cy.request('POST', '/app/projects/proj3', {
+      projectId: 'proj3',
+      name: "three"
+    });
+
+    cy.request('POST', '/app/projects/proj4', {
+      projectId: 'proj4',
+      name: "four"
+    });
+    cy.logout();
+    cy.fixture('vars.json').then((vars) => {
+      cy.login(vars.rootUser, vars.defaultPass);
+      cy.route('GET', '/app/projects').as('default');
+      cy.route('GET', '/app/projects?search=one').as('searchOne');
+      cy.route('POST', '/root/pin/proj1').as('pinOne');
+      cy.route('DELETE', '/root/pin/proj1').as('unpinOne');
+      cy.route('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
+
+      cy.visit('/');
+      //confirm that default project loading returns no projects for root user
+      cy.wait('@default');
+      cy.contains('No Projects Yet...').should('be.visible');
+      cy.get('[data-cy=projectSearch]').should('be.visible');
+
+      //search should return matching project based on name
+      cy.get('[data-cy=projectSearch]').type('one');
+      cy.wait('@searchOne');
+      cy.contains('ID: proj1').should('be.visible');
+
+      //pin project resulting from search
+      cy.get('[data-cy=pin]').click();
+      cy.wait('@pinOne');
+      cy.get('[data-cy=pinIcon]').should('have.class', 'pinned').and('not.have.class', 'notpinned');
+
+      //make sure that the root user can view a pinned project belonging to another user
+      cy.contains('Manage').click();
+      cy.wait('@loadSubjects');
+
+      cy.contains('Home').click();
+      //project search should retain the last searched value until it's cleared or the page is refreshed
+      cy.get('[data-cy=projectSearch]').should('have.value', 'one');
+      cy.wait('@searchOne');
+      cy.contains('ID: proj1').should('be.visible');
+
+      //clearing the search should result in the default load projects being called
+      cy.get('[data-cy=projectSearch]').click().clear();
+      cy.wait('@default');
+      //root user should only have pinned projects returned by default
+      cy.contains('ID: proj1').should('be.visible');
+
+      //search results should contain already pinned projects
+      cy.get('[data-cy=projectSearch]').click().type('o');
+      cy.contains('ID: proj1').should('be.visible');
+      cy.contains('ID: proj2').should('be.visible');
+      cy.contains('ID: proj4').should('be.visible');
+
+      cy.get('[data-cy=projectSearch]').click().clear();
+      cy.wait('@default');
+      //unpin a project
+      cy.get('[data-cy=pin]').click();
+      cy.wait('@unpinOne');
+      cy.get('[data-cy=pinIcon]').should('have.class', 'notpinned').and('not.have.class', 'pinned')
+      cy.get('[data-cy=nav-Metrics]').click();
+      cy.get('[data-cy=nav-Projects]').click();
+      cy.wait('@default');
+      //after removing all pinned projects, default load projects should return no results for root user
+      cy.contains('No Projects Yet...').should('be.visible');
+    });
+  });
+
 
 });

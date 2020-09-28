@@ -22,6 +22,7 @@ import org.springframework.stereotype.Component
 import skills.controller.exceptions.SkillException
 import skills.controller.request.model.GlobalSettingsRequest
 import skills.controller.request.model.ProjectSettingsRequest
+import skills.controller.request.model.RootUserProjectSettingsRequest
 import skills.controller.request.model.SettingsRequest
 import skills.controller.request.model.UserProjectSettingsRequest
 import skills.controller.request.model.UserSettingsRequest
@@ -92,6 +93,14 @@ class SettingsDataAccessor {
         settingRepo.findAllByTypeAndSettingGroup(Setting.SettingType.Global, settingGroup)
     }
 
+    List<Setting> getRootUserSettingsByGroup(String settingGroup) {
+        settingRepo.findAllByTypeAndSettingGroup(Setting.SettingType.RootUser, settingGroup)
+    }
+
+    Setting getRootUserProjectSetting(String settingGroup, String setting, String projectId) {
+        settingRepo.findAllByTypeAndSettingGroupAndSettingAndProjectId(Setting.SettingType.RootUser, settingGroup, setting, projectId)
+    }
+
     void save(Setting setting){
         settingRepo.save(setting)
     }
@@ -104,6 +113,10 @@ class SettingsDataAccessor {
         settingRepo.deleteGlobalSetting(setting)
     }
 
+    void deleteRootUserSetting(String setting, String value) {
+        settingRepo.deleteRootUserSetting(setting, value)
+    }
+
     Setting loadSetting(SettingsRequest request){
         if(request instanceof UserProjectSettingsRequest){
             return getUserProjectSetting(request.userId, request.projectId, request.setting, request.settingGroup)
@@ -111,9 +124,11 @@ class SettingsDataAccessor {
             return getUserSetting(request.userId, request.setting, request.settingGroup)
         } else if(request instanceof GlobalSettingsRequest){
             return getGlobalSetting(request.setting, request.settingGroup)
-        }else if(request instanceof ProjectSettingsRequest){
+        } else if(request instanceof RootUserProjectSettingsRequest) {
+            return getRootUserProjectSetting(request.settingGroup, request.setting, request.projectId)
+        } else if(request instanceof ProjectSettingsRequest){
             return getProjectSetting(request.projectId, request.setting, request.settingGroup)
-        } else{
+        } else {
             log.error("unable SettingRequest [${request.getClass()}]")
             throw new SkillException("Unrecognized Setting type")
         }

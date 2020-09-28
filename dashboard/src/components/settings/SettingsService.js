@@ -48,6 +48,12 @@ export default {
   loadSystemSettings() {
     return axios.get('/root/getSystemSettings').then((response) => response.data);
   },
+  pinProject(projectId) {
+    return axios.post(`/root/pin/${projectId}`).then((response) => response.data);
+  },
+  unpinProject(projectId) {
+    return axios.delete(`/root/pin/${projectId}`).then((response) => response.data);
+  },
   saveUserInfo(userInfo) {
     return axios.post('/app/userInfo', userInfo).then(() => this.getUserInfo());
   },

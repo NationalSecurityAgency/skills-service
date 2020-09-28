@@ -180,9 +180,20 @@ class SettingsService {
         return convertToResList(settings)
     }
 
+    @Transactional(readOnly = true)
+    List<SettingsResult> getRootUserSettingsForGroup(String settingGroup) {
+        List<Setting> settings = settingsDataAccessor.getRootUserSettingsByGroup(settingGroup)
+        return convertToResList(settings)
+    }
+
     @Transactional()
     void deleteGlobalSetting(String setting) {
         settingsDataAccessor.deleteGlobalSetting(setting)
+    }
+
+    @Transactional()
+    void deleteRootUserSetting(String setting, String value) {
+        settingsDataAccessor.deleteRootUserSetting(setting, value)
     }
 
     /**

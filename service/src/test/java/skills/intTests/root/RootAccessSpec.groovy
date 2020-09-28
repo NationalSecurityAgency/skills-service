@@ -19,6 +19,7 @@ import org.apache.commons.lang3.RandomStringUtils
 import org.springframework.http.HttpStatus
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
+import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
 
 class RootAccessSpec extends DefaultIntSpec {
@@ -258,6 +259,87 @@ class RootAccessSpec extends DefaultIntSpec {
         settingsResult2.size() == 1
         settingsResult2[0].setting == "classification"
         settingsResult2[0].value == "MY_CLASS2"
+    }
+
+    def 'get projects for root returns zero by default'() {
+        def proj = SkillsFactory.createProject(1)
+        def proj2 = SkillsFactory.createProject(2)
+        def proj3 = SkillsFactory.createProject(3)
+        rootSkillsService.createProject(proj)
+        rootSkillsService.createProject(proj2)
+        rootSkillsService.createProject(proj3)
+
+        when:
+        def projects = rootSkillsService.getProjects()
+
+        then:
+        !projects
+    }
+
+    def 'get projects for root returns only pinned projects'() {
+        def proj = SkillsFactory.createProject(1)
+        def proj2 = SkillsFactory.createProject(2)
+        def proj3 = SkillsFactory.createProject(3)
+        rootSkillsService.createProject(proj)
+        rootSkillsService.createProject(proj2)
+        rootSkillsService.createProject(proj3)
+        rootSkillsService.pinProject(proj.projectId)
+
+        when:
+        def projects = rootSkillsService.getProjects()
+
+        then:
+        projects.size() == 1
+        projects.find { it.projectId == proj.projectId }
+    }
+
+    def 'get projects for root supports search'() {
+        def proj = SkillsFactory.createProject(1)
+        def proj2 = SkillsFactory.createProject(2)
+        def proj3 = SkillsFactory.createProject(3)
+        rootSkillsService.createProject(proj)
+        rootSkillsService.createProject(proj2)
+        rootSkillsService.createProject(proj3)
+
+        when:
+        def projects = rootSkillsService.getProjects("3")
+
+        then:
+        projects.size() == 1
+        projects.find { it.projectId == proj3.projectId }
+    }
+
+    def 'only root users can pin projects'() {
+        def proj = SkillsFactory.createProject(1)
+        def proj2 = SkillsFactory.createProject(2)
+        def proj3 = SkillsFactory.createProject(3)
+        nonRootSkillsService.createProject(proj)
+        nonRootSkillsService.createProject(proj2)
+        nonRootSkillsService.createProject(proj3)
+
+        when:
+        nonRootSkillsService.pinProject(proj.projectId)
+
+        then:
+        thrown(Exception)
+    }
+
+    def 'get projects search ignored for non root users'() {
+        def proj = SkillsFactory.createProject(1)
+        def proj2 = SkillsFactory.createProject(2)
+        def proj3 = SkillsFactory.createProject(3)
+        nonRootSkillsService.createProject(proj)
+        nonRootSkillsService.createProject(proj2)
+        nonRootSkillsService.createProject(proj3)
+
+        when:
+        def projects = nonRootSkillsService.getProjects("#3")
+
+        then:
+        projects.size() == 3
+        projects.find { it.projectId ==  proj.projectId }
+        projects.find { it.projectId ==  proj2.projectId }
+        projects.find { it.projectId ==  proj3.projectId }
     }
 
     def 'get users without role'() {

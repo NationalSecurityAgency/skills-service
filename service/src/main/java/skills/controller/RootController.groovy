@@ -36,6 +36,7 @@ import skills.controller.result.model.UserRoleRes
 import skills.profile.EnableCallStackProf
 import skills.services.AccessSettingsStorageService
 import skills.services.SystemSettingsService
+import skills.services.admin.ProjAdminService
 import skills.services.settings.Settings
 import skills.services.settings.SettingsService
 import skills.settings.EmailConfigurationResult
@@ -75,6 +76,9 @@ class RootController {
 
     @Autowired
     SystemSettingsService systemSettingsService
+
+    @Autowired
+    ProjAdminService projAdminService
 
     @GetMapping('/rootUsers')
     @ResponseBody
@@ -208,6 +212,20 @@ class RootController {
         settingsService.saveSetting(settingRequest)
         return new RequestResult(success: true)
     }
+
+    @PostMapping('/pin/{projectId}')
+    RequestResult pinProject(@PathVariable("projectId") String projectId) {
+        projAdminService.pinProjectForRootUser(projectId)
+        return new RequestResult(success: true)
+    }
+
+    @DeleteMapping('/pin/{projectId}')
+    RequestResult unpinProject(@PathVariable("projectId") String projectId) {
+        projAdminService.unpinProjectForRootUser(projectId)
+        return new RequestResult(success: true)
+    }
+
+
 
     private String getUserId(String userKey) {
         // userKey will be the userId when in FORM authMode, or the DN when in PKI auth mode.

@@ -35,9 +35,16 @@ interface SettingRepo extends CrudRepository<Setting, Integer> {
     @Nullable
     List<Setting> findAllByTypeAndSettingGroup(Setting.SettingType type, String settingGroup)
 
+    @Nullable
+    Setting findAllByTypeAndSettingGroupAndSettingAndProjectId(Setting.SettingType type, String settingGroup, String setting, String projectId)
+
 
     @Modifying
     @Query("delete from Setting s where s.setting = ?1 AND s.type = 'Global'")
     void deleteGlobalSetting(String setting)
+
+    @Modifying
+    @Query("delete from Setting  s where s.setting = ?1 AND s.value = ?2 AND s.type = 'RootUser' ")
+    void deleteRootUserSetting(String setting, String value)
 
 }
