@@ -18,7 +18,7 @@ import NumConvertUtil from './NumConvertUtil';
 export default {
   newCharLengthValidator(maxLength) {
     return {
-      getMessage: (field) => `${field} cannot exceed ${maxLength} characters.`,
+      message: (field) => `${field} cannot exceed ${maxLength} characters.`,
       validate(value) {
         if (value.length > NumConvertUtil.toInt(maxLength)) {
           return false;
@@ -29,7 +29,7 @@ export default {
   },
   newCharMinLengthValidator(maxLength) {
     return {
-      getMessage: (field) => `${field} cannot be less than ${maxLength} characters.`,
+      message: (field) => `${field} cannot be less than ${maxLength} characters.`,
       validate(value) {
         if (value.length < NumConvertUtil.toInt(maxLength)) {
           return false;
@@ -40,7 +40,7 @@ export default {
   },
   newMaxNumValidator(maxNum) {
     return {
-      getMessage: (field) => `${field} cannot exceed ${maxNum}.`,
+      message: (field) => `${field} cannot exceed ${maxNum}.`,
       validate(value) {
         if (NumConvertUtil.toInt(value) > NumConvertUtil.toInt(maxNum)) {
           return false;
@@ -51,13 +51,11 @@ export default {
   },
   newUserObjNoSpacesValidatorInNonPkiMode(isPkiMode) {
     return {
-      getMessage: (field) => `The ${field} field may not contain spaces`,
+      message: (field) => `The ${field} field may not contain spaces`,
       validate(value) {
         if (isPkiMode || !value.userId) {
           return true;
         }
-        // const isValid = !value.userId.match(/^[0-9a-zA-Z]+$/);
-        // return !isValid;
         const hasSpaces = value.userId.indexOf(' ') >= 0;
         return !hasSpaces;
       },

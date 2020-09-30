@@ -21,7 +21,7 @@ limitations under the License.
                              v-model="selectedUser"/>
       </div>
       <div class="col-auto">
-        <b-button variant="outline-primary" @click="addUserRole" :disabled="errors.any() || !selectedUser"
+        <b-button variant="outline-primary" @click="addUserRole" :disabled="!selectedUser"
                   class="h-100" v-skills="'AddAdmin'">
           Add <i :class="[isSaving ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-arrow-circle-right']"></i>
         </b-button>

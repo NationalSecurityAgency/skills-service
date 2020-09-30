@@ -17,25 +17,31 @@ limitations under the License.
   <div>
     <sub-page-header title="Add Skill Events"/>
     <simple-card style="min-height: 20rem;">
-      <div id="add-user-div" class="row mt-2 mb-4">
-        <div class="col-12 col-md-6 pb-2 pb-md-0">
-          <existing-user-input :project-id="projectId" v-model="currentSelectedUser" :can-enter-new-user="!pkiAuthenticated"
-                               v-validate="'userNoSpaceInUserIdInNonPkiMode'" name="User Id" data-cy="userIdInput"/>
-          <small class="form-text text-danger" v-show="errors.has('User Id')">{{ errors.first('User Id')}}</small>
-        </div>
-        <div class="col-auto">
-          <datepicker input-class="border-0" wrapper-class="form-control" v-model="dateAdded" name="Event Date" v-validate="'required'"
-                      :use-utc="true" :disabled-dates="datePickerState.disabledDates"/>
-        </div>
-        <div class="col-auto">
-          <div v-b-tooltip.hover :title="minPointsTooltip">
-            <b-button variant="outline-primary" @click="addSkill" :disabled="errors.any() || disable" v-skills="'ManuallyAddSkillEvent'" data-cy="addSkillEventButton">
-              Add <i v-if="projectTotalPoints >= minimumPoints" :class="[isSaving ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-arrow-circle-right']"></i>
-              <i v-else class="icon-warning fa fa-exclamation-circle text-warning"></i>
-            </b-button>
+      <ValidationObserver v-slot="{invalid}" slim>
+        <div id="add-user-div" class="row mt-2 mb-4">
+          <div class="col-12 col-md-6 pb-2 pb-md-0">
+            <ValidationProvider name="User Id" v-slot="{errors}" rules="userNoSpaceInUserIdInNonPkiMode">
+              <existing-user-input :project-id="projectId" v-model="currentSelectedUser" :can-enter-new-user="!pkiAuthenticated"
+                                   name="User Id" data-cy="userIdInput"/>
+              <small class="form-text text-danger" v-show="errors[0]">{{ errors[0]}}</small>
+            </ValidationProvider>
+          </div>
+          <div class="col-auto">
+            <ValidationProvider name="Event Date" rules="required">
+              <datepicker input-class="border-0" wrapper-class="form-control" v-model="dateAdded" name="Event Date"
+                          :use-utc="true" :disabled-dates="datePickerState.disabledDates"/>
+            </ValidationProvider>
+          </div>
+          <div class="col-auto">
+            <div v-b-tooltip.hover :title="minPointsTooltip">
+              <b-button variant="outline-primary" @click="addSkill" :disabled="invalid || disable" v-skills="'ManuallyAddSkillEvent'" data-cy="addSkillEventButton">
+                Add <i v-if="projectTotalPoints >= minimumPoints" :class="[isSaving ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-arrow-circle-right']"></i>
+                <i v-else class="icon-warning fa fa-exclamation-circle text-warning"></i>
+              </b-button>
+            </div>
           </div>
         </div>
-      </div>
+      </ValidationObserver>
 
       <div class="row mt-2" v-for="(user) in reversedUsersAdded" v-bind:key="user.key">
         <div class="col">
@@ -57,7 +63,8 @@ limitations under the License.
 </template>
 
 <script>
-  import { Validator } from 'vee-validate';
+  import { extend } from 'vee-validate';
+  import { required } from 'vee-validate/dist/rules';
   import Datepicker from 'vuejs-datepicker';
   import ExistingUserInput from '../utils/ExistingUserInput';
   import SubPageHeader from '../utils/pages/SubPageHeader';
@@ -65,16 +72,7 @@ limitations under the License.
   import SkillsService from './SkillsService';
   import ProjectService from '../projects/ProjectService';
 
-  const dictionary = {
-    en: {
-      attributes: {
-        user: 'User',
-        skillId: 'Skill ID',
-        date: 'Date',
-      },
-    },
-  };
-  Validator.localize(dictionary);
+  extend('required', required);
 
   const disabledDates = (date) => date > new Date();
 

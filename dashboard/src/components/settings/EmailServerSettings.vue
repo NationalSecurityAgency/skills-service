@@ -14,89 +14,91 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div>
-    <div class="form-group">
-            <label class="label">Host</label>
-      <input class="form-control" type="text" v-model="emailInfo.host" name="host"
-             v-validate="'required'" data-vv-delay="500" data-cy="hostInput"/>
-      <p class="text-danger" v-show="errors.has('host')">{{
-        errors.first('host')}}</p>
-    </div>
-    <div class="form-group">
-      <label class="label">Port</label>
-      <input class="form-control" type="text" v-model="emailInfo.port" name="port"
-             v-validate="'required|min_value:1|max_value:65535'" data-vv-delay="500" data-cy="portInput"/>
-      <p class="text-danger" v-show="errors.has('port')">{{
-        errors.first('port')}}</p>
-    </div>
-    <div class="form-group">
-      <label class="label">Protocol</label>
-      <input class="form-control" type="text" v-model="emailInfo.protocol" name="protocol"
-             v-validate="'required'" data-vv-delay="500" data-cy="protocolInput"/>
-      <p class="text-danger" v-show="errors.has('protocol')">{{
-        errors.first('protocol')}}</p>
-    </div>
-    <div class="form-group">
-      <b-form-checkbox v-model="emailInfo.tlsEnabled" switch data-cy="tlsSwitch">
-        {{ emailInfo.tlsEnabled ? 'TLS Enabled' : 'TLS Disabled' }}
-      </b-form-checkbox>
-    </div>
-    <div class="form-group">
-      <b-form-checkbox v-model="emailInfo.authEnabled" switch data-cy="authSwitch">
-        {{ emailInfo.authEnabled ? 'Authentication Enabled' : 'Authentication Disabled' }}
-      </b-form-checkbox>
-    </div>
-    <div id="auth-div" v-if="emailInfo.authEnabled">
-      <div class="form-group">
-        <label class="label">Username</label>
-        <input class="form-control" type="text" v-model="emailInfo.username" name="username"
-               v-validate="'required'" data-vv-delay="500" data-cy="emailUsername"/>
-        <p class="text-danger" v-show="errors.has('username')">{{
-          errors.first('username')}}</p>
-      </div>
-      <div class="form-group">
-        <label class="label">Password</label>
-        <input class="form-control" type="text" v-model="emailInfo.password" name="password"
-               v-validate="'required'" data-vv-delay="500" data-cy="emailPassword"/>
-        <p class="text-danger" v-show="errors.has('password')">{{
-          errors.first('password')}}</p>
-      </div>
-    </div>
-
-    <p v-if="connectionError" class="text-danger" data-cy="connectionError">
-      Connection to Email server failed due to: {{connectionError}}
-    </p>
-
+  <ValidationObserver ref="observer" v-slot="{invalid, pristine}" slim>
     <div>
-      <button class="btn btn-outline-primary mr-1" type="button" v-on:click="testConnection" :disabled="errors.any() || missingRequiredValues() || isTesting || isSaving" data-cy="emailSettingsTest">
-        Test
-        <i :class="testButtonClass"></i>
-      </button>
-      <button class="btn btn-outline-primary" type="button" v-on:click="saveEmailSettings" :disabled="errors.any() || missingRequiredValues() || isSaving || isTesting" data-cy="emailSettingsSave">
-        Save
-        <i :class="[isSaving ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-arrow-circle-right']"></i>
-      </button>
+      <div class="form-group">
+        <label class="label">Host</label>
+        <ValidationProvider name="Host" :debounce=500 v-slot="{errors}" rules="required">
+        <input class="form-control" type="text" v-model="emailInfo.host" name="host"
+               data-cy="hostInput"/>
+        <p class="text-danger" v-show="errors[0]">{{
+          errors[0]}}</p>
+        </ValidationProvider>
+      </div>
+      <div class="form-group">
+        <label class="label">Port</label>
+        <ValidationProvider name="Port" :debounce=500 v-slot="{errors}" rules="required|min_value:1|max_value:65535">
+          <input class="form-control" type="text" v-model="emailInfo.port" name="port" data-cy="portInput"/>
+          <p class="text-danger" v-show="errors[0]">{{
+            errors[0] }}</p>
+        </ValidationProvider>
+      </div>
+      <div class="form-group">
+        <label class="label">Protocol</label>
+        <ValidationProvider name="Protocol" :debounce=500 v-slot="{errors}" rules="required">
+          <input class="form-control" type="text" v-model="emailInfo.protocol" name="protocol" data-cy="protocolInput"/>
+          <p class="text-danger" v-show="errors[0]">{{
+            errors[0] }}</p>
+        </ValidationProvider>
+      </div>
+      <div class="form-group">
+        <b-form-checkbox v-model="emailInfo.tlsEnabled" switch data-cy="tlsSwitch">
+          {{ emailInfo.tlsEnabled ? 'TLS Enabled' : 'TLS Disabled' }}
+        </b-form-checkbox>
+      </div>
+      <div class="form-group">
+        <b-form-checkbox v-model="emailInfo.authEnabled" switch data-cy="authSwitch">
+          {{ emailInfo.authEnabled ? 'Authentication Enabled' : 'Authentication Disabled' }}
+        </b-form-checkbox>
+      </div>
+      <div id="auth-div" v-if="emailInfo.authEnabled">
+        <div class="form-group">
+          <label class="label">Username</label>
+          <ValidationProvider name="Username" :debounce=500 v-slot="{errors}" rules="required">
+            <input class="form-control" type="text" v-model="emailInfo.username" name="username" data-cy="emailUsername"/>
+            <p class="text-danger" v-show="errors[0]">{{
+              errors[0]}}</p>
+          </ValidationProvider>
+        </div>
+        <div class="form-group">
+          <label class="label">Password</label>
+          <ValidationProvider name="Password" :debounce=500 v-slot="{errors}" rules="required">
+            <input class="form-control" type="text" v-model="emailInfo.password" name="password"
+                   data-cy="emailPassword"/>
+            <p class="text-danger" v-show="errors[0]">{{
+              errors[0]}}</p>
+          </ValidationProvider>
+        </div>
+      </div>
+
+      <p v-if="connectionError" class="text-danger" data-cy="connectionError">
+        Connection to Email server failed due to: {{connectionError}}
+      </p>
+
+      <div>
+        <button class="btn btn-outline-primary mr-1" type="button" v-on:click="testConnection" :disabled="invalid || missingRequiredValues() || isTesting || isSaving" data-cy="emailSettingsTest">
+          Test
+          <i :class="testButtonClass"></i>
+        </button>
+        <button class="btn btn-outline-primary" type="button" v-on:click="saveEmailSettings" :disabled="invalid || pristine || missingRequiredValues() || isSaving || isTesting" data-cy="emailSettingsSave">
+          Save
+          <i :class="[isSaving ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-arrow-circle-right']"></i>
+        </button>
+      </div>
     </div>
-  </div>
+  </ValidationObserver>
 </template>
 
 <script>
-  import { Validator } from 'vee-validate';
+  import { extend } from 'vee-validate';
+  // eslint-disable-next-line camelcase
+  import { required, min_value, max_value } from 'vee-validate/dist/rules';
   import SettingsService from './SettingsService';
   import ToastSupport from '../utils/ToastSupport';
 
-  const dictionary = {
-    en: {
-      attributes: {
-        host: 'Hostname',
-        port: 'Port',
-        protocol: 'Protocol',
-        username: 'Username',
-        password: 'Password',
-      },
-    },
-  };
-  Validator.localize(dictionary);
+  extend('required', required);
+  extend('min_value', min_value);
+  extend('max_value', max_value);
 
   export default {
     name: 'EmailServerSettings',

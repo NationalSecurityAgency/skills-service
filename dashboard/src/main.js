@@ -19,7 +19,10 @@ import Vue from 'vue';
 import BootstrapVue from 'bootstrap-vue';
 import { ClientTable, ServerTable } from 'vue-tables-2';
 import { SkillsConfiguration, SkillsDirective, SkillsReporter } from '@skilltree/skills-client-vue';
-import VeeValidate from 'vee-validate';
+import {
+  localize, ValidationProvider, ValidationObserver, setInteractionMode,
+} from 'vee-validate';
+import en from 'vee-validate/dist/locale/en.json';
 import VueApexCharts from 'vue-apexcharts';
 import Vuex from 'vuex';
 import InceptionConfigurer from './InceptionConfigurer';
@@ -38,13 +41,22 @@ import store from './store/store';
 
 Vue.use(ClientTable, {}, false, 'bootstrap4', 'default');
 Vue.use(ServerTable, {}, false, 'bootstrap4', 'default');
-Vue.use(VeeValidate);
+Vue.component('ValidationProvider', ValidationProvider);
+Vue.component('ValidationObserver', ValidationObserver);
 Vue.use(Vuex);
 Vue.use(VueApexCharts);
 Vue.use(BootstrapVue);
 Vue.use(SkillsDirective);
 
-VeeValidate.setMode('betterEager', () => ({ on: ['input'], debounce: 500 }));
+// not sure if this is still necessary
+const betterEager = () => ({
+    on: ['input'],
+    debounce: 500,
+  });
+setInteractionMode('betterEager', betterEager);
+localize({
+  en,
+});
 
 Vue.component('apexchart', VueApexCharts);
 

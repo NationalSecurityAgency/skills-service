@@ -14,73 +14,73 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <b-modal :id="subjectInternal.subjectId" size="xl" :title="title" v-model="show" :no-close-on-backdrop="true"
-           header-bg-variant="info" header-text-variant="light" no-fade>
-    <ValidationObserver ref="observer" v-slot="{invalid}" slim>
-      <b-container fluid>
-        <div v-if="displayIconManager === false">
-            <div class="media mb-3">
-              <icon-picker :startIcon="subjectInternal.iconClass" @select-icon="toggleIconDisplay(true)"
-                           class="mr-3"></icon-picker>
-              <div class="media-body">
-                <div class="form-group">
-                  <label for="subjName">Subject Name</label>
-                  <ValidationProvider rules="required|minNameLength|maxSubjectNameLength|uniqueName" v-slot="{errors}" name="Subject Name">
-                  <input type="text" class="form-control" id="subjName" @input="updateSubjectId"
-                         v-model="subjectInternal.name" v-on:input="updateSubjectId"
-                         data-vv-name="subjectName" v-focus>
-                  <small class="form-text text-danger">{{ errors[0] }}</small>
-                  </ValidationProvider>
+  <ValidationObserver ref="observer" v-slot="{invalid}" slim>
+    <b-modal :id="subjectInternal.subjectId" size="xl" :title="title" v-model="show" :no-close-on-backdrop="true"
+             header-bg-variant="info" header-text-variant="light" no-fade>
+        <b-container fluid>
+          <div v-if="displayIconManager === false">
+              <div class="media mb-3">
+                <icon-picker :startIcon="subjectInternal.iconClass" @select-icon="toggleIconDisplay(true)"
+                             class="mr-3"></icon-picker>
+                <div class="media-body">
+                  <div class="form-group">
+                    <label for="subjName">Subject Name</label>
+                    <ValidationProvider rules="required|minNameLength|maxSubjectNameLength|uniqueName" v-slot="{ errors }" name="Subject Name">
+                      <input type="text" class="form-control" id="subjName" @input="updateSubjectId"
+                             v-model="subjectInternal.name" v-on:input="updateSubjectId"
+                             v-focus>
+                      <small class="form-text text-danger">{{ errors[0] }}</small>
+                    </ValidationProvider>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <id-input type="text" label="Subject ID" v-model="subjectInternal.subjectId" @can-edit="canAutoGenerateId=!$event"
-                      additional-validation-rules="uniqueId"/>
+              <id-input type="text" label="Subject ID" v-model="subjectInternal.subjectId" @can-edit="canAutoGenerateId=!$event"
+                        additional-validation-rules="uniqueId"/>
 
-            <div class="mt-2">
-              <label>Description</label>
-              <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" v-slot="{errors}" name="Subject Description">
-                <markdown-editor v-model="subjectInternal.description"/>
-                <small class="form-text text-danger">{{ errors[0] }}</small>
-              </ValidationProvider>
-            </div>
+              <div class="mt-2">
+                <label>Description</label>
+                <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" v-slot="{ errors }" name="Subject Description">
+                  <markdown-editor v-model="subjectInternal.description"/>
+                  <small class="form-text text-danger">{{ errors[0] }}</small>
+                </ValidationProvider>
+              </div>
 
-            <div>
-              <label>Help URL/Path
-                <inline-help
-                  msg="If project level 'Root Help Url' is specified then this path will be relative to 'Root Help Url'"/>
-              </label>
-              <input class="form-control" type="text" v-model="subjectInternal.helpUrl" data-vv-name="helpUrl"/>
-              <small class="form-text text-danger">{{ errors.first('helpUrl')}}</small>
-            </div>
+              <div>
+                <label>Help URL/Path
+                  <inline-help
+                    msg="If project level 'Root Help Url' is specified then this path will be relative to 'Root Help Url'"/>
+                </label>
+                <input class="form-control" type="text" v-model="subjectInternal.helpUrl" />
+              </div>
 
-            <p v-if="invalid && overallErrMsg" class="text-center text-danger">***{{ overallErrMsg }}***</p>
+              <p v-if="invalid && overallErrMsg" class="text-center text-danger">***{{ overallErrMsg }}***</p>
+          </div>
+          <div v-else>
+              <icon-manager @selected-icon="onSelectedIcon"></icon-manager>
+              <div class="text-right mr-2">
+                <b-button variant="secondary" @click="toggleIconDisplay(false)" class="mt-4">Cancel Icon Selection</b-button>
+              </div>
+          </div>
+        </b-container>
+
+      <div slot="modal-footer" class="w-100">
+        <div v-if="displayIconManager === false">
+          <b-button variant="success" size="sm" class="float-right" @click="updateSubject" :disabled="invalid" data-cy="saveSubjectButton">
+            Save
+          </b-button>
+          <b-button variant="secondary" size="sm" class="float-right mr-2" @click="close">
+            Cancel
+          </b-button>
         </div>
-        <div v-else>
-            <icon-manager @selected-icon="onSelectedIcon"></icon-manager>
-            <div class="text-right mr-2">
-              <b-button variant="secondary" @click="toggleIconDisplay(false)" class="mt-4">Cancel Icon Selection</b-button>
-            </div>
-        </div>
-      </b-container>
-    </ValidationObserver>
-
-    <div slot="modal-footer" class="w-100">
-      <div v-if="displayIconManager === false">
-        <b-button variant="success" size="sm" class="float-right" @click="updateSubject" data-cy="saveSubjectButton">
-          Save
-        </b-button>
-        <b-button variant="secondary" size="sm" class="float-right mr-2" @click="close">
-          Cancel
-        </b-button>
       </div>
-    </div>
-  </b-modal>
+    </b-modal>
+  </ValidationObserver>
 </template>
 
 <script>
-  import { Validator, ValidationProvider, ValidationObserver } from 'vee-validate';
+  import { extend } from 'vee-validate';
+  import { required } from 'vee-validate/dist/rules';
   import SubjectsService from './SubjectsService';
   import IconPicker from '../utils/iconPicker/IconPicker';
   import MarkdownEditor from '../utils/MarkdownEditor';
@@ -88,6 +88,8 @@ limitations under the License.
   import IconManager from '../utils/iconPicker/IconManager';
   import InputSanitizer from '../utils/InputSanitizer';
   import InlineHelp from '../utils/InlineHelp';
+
+  extend('required', required);
 
   export default {
     name: 'EditSubject',
@@ -97,8 +99,6 @@ limitations under the License.
       MarkdownEditor,
       IconManager,
       InlineHelp,
-      ValidationProvider,
-      ValidationObserver,
     },
     props: {
       subject: Object,
@@ -164,41 +164,27 @@ limitations under the License.
         this.displayIconManager = shouldDisplay;
       },
       assignCustomValidation() {
-        const dictionary = {
-          en: {
-            attributes: {
-              subjectName: 'Subject Name',
-              subjectId: 'ID',
-            },
-          },
-        };
-        Validator.localize(dictionary);
-
         // only want to validate for a new subject, existing subjects will override
         // name and subject id
         const self = this;
-        Validator.extend('uniqueName', {
-          getMessage: (field) => `${field} is already taken.`,
+        extend('uniqueName', {
+          message: (field) => `${field} is already taken.`,
           validate(value) {
             if (value === self.subject.name || (value && value.localeCompare(self.subject.name, 'en', { sensitivity: 'base' }) === 0)) {
               return true;
             }
             return SubjectsService.subjectWithNameExists(self.subjectInternal.projectId, value);
           },
-        }, {
-          immediate: false,
         });
 
-        Validator.extend('uniqueId', {
-          getMessage: (field) => `${field} is already taken.`,
+        extend('uniqueId', {
+          message: (field) => `${field} is already taken.`,
           validate(value) {
             if (value === self.subject.subjectId) {
               return true;
             }
             return SubjectsService.subjectWithIdExists(self.subjectInternal.projectId, value);
           },
-        }, {
-          immediate: false,
         });
       },
     },

@@ -14,185 +14,184 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <b-modal :id="skillInternal.skillId" size="xl" :title="title" v-model="show" :no-close-on-backdrop="true"
-           header-bg-variant="info" header-text-variant="light" no-fade>
-    <ValidationObserver ref="observer" v-slot="{invalid}" slim>
-      <b-container fluid>
-        <loading-container :is-loading="isLoading">
-        <div class="row">
-          <div class="col-12 col-lg">
-            <div class="form-group">
-              <label for="skillName">Skill Name</label>
-              <ValidationProvider rules="required|minNameLength|maxSkillNameLength|uniqueName" v-slot="{errors}" name="Skill Name">
-                <input type="text" class="form-control" id="skillName" @input="updateSkillId"
-                       v-model="skillInternal.name" data-vv-name="name" v-focus>
-                <small class="form-text text-danger">{{ errors[0] }}</small>
-              </ValidationProvider>
-            </div>
-          </div>
-          <div class="col-12 col-lg">
-            <id-input type="text" label="Skill ID" additional-validation-rules="uniqueId"
-                      v-model="skillInternal.skillId" @can-edit="canEditSkillId=$event"/>
-          </div>
-          <div class="col-12 col-lg-2 mt-2 mt-lg-0">
-            <div class="form-group">
-              <label>Version
-                <inline-help
-                  msg="An optional version for this skill to allow filtering of available skills for different versions of an application"/>
-              </label>
-              <ValidationProvider rules="optionalNumeric|min_value:0|maxSkillVersion|maxVersion" v-slot="{errors}" name="Version">
-                <input class="form-control" type="text"
-                       v-model="skillInternal.version" :disabled="isEdit"
-                       data-vv-name="version"/>
-                <small class="form-text text-danger">{{ errors[0]}}</small>
-              </ValidationProvider>
-            </div>
-          </div>
-        </div>
-        <hr class="mb-0 pb-1 mt-4 mt-lg-0"/>
-        <hr class="my-0 py-0"/>
-
-        <div class="row mt-3">
-          <div class="col-12 col-lg">
-            <div class="form-group mb-1">
-              <label for="subjName">Point Increment</label>
-              <ValidationProvider rules="optionalNumeric|required|min_value:1|maxPointIncrement" v-slot="{errors}" name="Point Increment">
-                <input class="form-control" type="text"  v-model="skillInternal.pointIncrement"
-                       data-vv-name="pointIncrement"/>
-                <small class="form-text text-danger">{{ errors[0]}}</small>
-              </ValidationProvider>
-            </div>
-          </div>
-          <div class="col-12 col-lg">
-            <div class="form-group mt-2 mt-lg-0">
-              <label for="subjName">Occurrences to Completion</label>
-              <ValidationProvider rules="optionalNumeric|required|min_value:1|maxNumPerformToCompletion|moreThanMaxWindowOccurrences" v-slot="{errors}" name="Occurrences to Completion" tag="div">
-                <input class="form-control" type="text" v-model="skillInternal.numPerformToCompletion"
-                         data-vv-name="numPerformToCompletion"/>
-                <small class="form-text text-danger">{{ errors[0]}}</small>
-              </ValidationProvider>
-            </div>
-          </div>
-          <div class="col-12 col-lg-3">
-            <div class="form-group">
-              <label for="subjName">Total Points
-                <inline-help msg="Derived and can't be entered directly. Total Points = Increment x Occurrences."/>
-              </label>
-              <div class="input-group">
-                <div class="input-group-prepend">
-                  <div class="input-group-text"><i class="fas fa-equals"/></div>
-                </div>
-                <div class="form-control font-italic" style="background: #eeeeee;">{{ totalPoints | number }}</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <hr class="my-0 pb-1"/>
-        <hr class="mt-0 pt-0"/>
-
-        <div class="row">
-          <div class="col-12 col-lg">
-            <div class="form-group">
-              <label><b-form-checkbox id="checkbox-1" class="d-inline" v-model="skillInternal.timeWindowEnabled" v-on:input="resetTimeWindow"/>Time Window
-                <inline-help msg="Uncheck to disable. When disabled skill events are applied immediately."/>
-
-              </label>
-              <div class="row">
-                <div class="col-12 col-sm">
-                  <ValidationProvider rules="optionalNumeric|required|min_value:0|hoursMaxTimeWindow:timeWindowMinutes|cantBe0IfMins0" vid="timeWindowHours" v-slot="{errors}" name="Hours">
-                    <div class="input-group">
-                      <input class="form-control d-inline" type="text" v-model="skillInternal.pointIncrementIntervalHrs"
-                             data-vv-name="pointIncrementIntervalHrs"
-                             value="8" :disabled="!skillInternal.timeWindowEnabled"
-                             ref="timeWindowHours"/>
-                      <div class="input-group-append">
-                        <span class="input-group-text" id="hours-append">Hours</span>
-                      </div>
-                    </div>
-                    <small class="form-text text-danger">{{ errors[0] }}</small>
-                  </ValidationProvider>
-                </div>
-                <div class="col-12 col-sm">
-                  <ValidationProvider rules="optionalNumeric|required|min_value:0|max_value:59|minutesMaxTimeWindow:timeWindowHours|cantBe0IfHours0" vid="timeWindowMinutes" v-slot="{errors}" name="Minutes">
-                    <div class="input-group">
-                      <input class="form-control d-inline"  type="text" v-model="skillInternal.pointIncrementIntervalMins"
-                             data-vv-name="pointIncrementIntervalMins"
-                             value="0" :disabled="!skillInternal.timeWindowEnabled" ref="timeWindowMinutes"/>
-                      <div class="input-group-append">
-                        <span class="input-group-text" id="minutes-append">Minutes</span>
-                      </div>
-                    </div>
-                    <small class="form-text text-danger">{{ errors[0] }}</small>
-                  </ValidationProvider>
-                </div>
-              </div>
-
-            </div>
-          </div>
-          <div class="col-12 col-lg">
-            <ValidationProvider rules="optionalNumeric|min_value:1|lessThanTotalOccurrences|maxNumPointIncrementMaxOccurrences" v-slot="{errors}" name="Window's Max Occurrences">
+  <ValidationObserver ref="observer" v-slot="{invalid}" slim>
+    <b-modal :id="skillInternal.skillId" size="xl" :title="title" v-model="show" :no-close-on-backdrop="true"
+             header-bg-variant="info" header-text-variant="light" no-fade>
+        <b-container fluid>
+          <loading-container :is-loading="isLoading">
+          <div class="row">
+            <div class="col-12 col-lg">
               <div class="form-group">
-                <label>Window's Max Occurrences
-                  <inline-help
-                    msg="Once this Max Occurrences has been reached, points will not be incremented until outside of the configured Time Window."/>
-                </label>
-
-                  <input class="form-control" type="text" v-model="skillInternal.numPointIncrementMaxOccurrences"
-                         data-vv-name="numPointIncrementMaxOccurrences"
-                         :disabled="!skillInternal.timeWindowEnabled"/>
-                  <small class="form-text text-danger">{{ errors[0]}}</small>
+                <label for="skillName">Skill Name</label>
+                <ValidationProvider rules="required|minNameLength|maxSkillNameLength|uniqueName" v-slot="{errors}" name="Skill Name">
+                  <input type="text" class="form-control" id="skillName" @input="updateSkillId"
+                         v-model="skillInternal.name" v-focus>
+                  <small class="form-text text-danger">{{ errors[0] }}</small>
+                </ValidationProvider>
               </div>
-            </ValidationProvider>
+            </div>
+            <div class="col-12 col-lg">
+              <id-input type="text" label="Skill ID" additional-validation-rules="uniqueId"
+                        v-model="skillInternal.skillId" @can-edit="canEditSkillId=$event"/>
+            </div>
+            <div class="col-12 col-lg-2 mt-2 mt-lg-0">
+              <div class="form-group">
+                <label>Version
+                  <inline-help
+                    msg="An optional version for this skill to allow filtering of available skills for different versions of an application"/>
+                </label>
+                <ValidationProvider rules="optionalNumeric|min_value:0|maxSkillVersion|maxVersion" v-slot="{errors}" name="Version">
+                  <input class="form-control" type="text"
+                         v-model="skillInternal.version" :disabled="isEdit"/>
+                  <small class="form-text text-danger">{{ errors[0] }}</small>
+                </ValidationProvider>
+              </div>
+            </div>
           </div>
-        </div>
+          <hr class="mb-0 pb-1 mt-4 mt-lg-0"/>
+          <hr class="my-0 py-0"/>
+
+          <div class="row mt-3">
+            <div class="col-12 col-lg">
+              <div class="form-group mb-1">
+                <label for="subjName">Point Increment</label>
+                <ValidationProvider rules="optionalNumeric|required|min_value:1|maxPointIncrement" v-slot="{errors}" name="Point Increment">
+                  <input class="form-control" type="text"  v-model="skillInternal.pointIncrement"/>
+                  <small class="form-text text-danger">{{ errors[0] }}</small>
+                </ValidationProvider>
+              </div>
+            </div>
+            <div class="col-12 col-lg">
+              <div class="form-group mt-2 mt-lg-0">
+                <label for="subjName">Occurrences to Completion</label>
+                <ValidationProvider rules="optionalNumeric|required|min_value:1|maxNumPerformToCompletion|moreThanMaxWindowOccurrences" v-slot="{errors}" name="Occurrences to Completion" tag="div">
+                  <input class="form-control" type="text" v-model="skillInternal.numPerformToCompletion"/>
+                  <small class="form-text text-danger">{{ errors[0] }}</small>
+                </ValidationProvider>
+              </div>
+            </div>
+            <div class="col-12 col-lg-3">
+              <div class="form-group">
+                <label for="subjName">Total Points
+                  <inline-help msg="Derived and can't be entered directly. Total Points = Increment x Occurrences."/>
+                </label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <div class="input-group-text"><i class="fas fa-equals"/></div>
+                  </div>
+                  <div class="form-control font-italic" style="background: #eeeeee;">{{ totalPoints | number }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
 
           <hr class="my-0 pb-1"/>
           <hr class="mt-0 pt-0"/>
 
-        <div class="">
-          <label class="label">Description</label>
-          <div class="control">
-            <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" v-slot="{errors}" name="Skill Description">
-              <markdown-editor v-if="skillInternal" v-model="skillInternal.description"/>
-              <small class="form-text text-danger">{{ errors[0] }}</small>
-            </ValidationProvider>
+          <div class="row">
+            <div class="col-12 col-lg">
+              <div class="form-group">
+                <label><b-form-checkbox id="checkbox-1" class="d-inline" v-model="skillInternal.timeWindowEnabled" v-on:input="resetTimeWindow"/>Time Window
+                  <inline-help msg="Uncheck to disable. When disabled skill events are applied immediately."/>
+
+                </label>
+                <div class="row">
+                  <div class="col-12 col-sm">
+                    <ValidationProvider rules="optionalNumeric|required|min_value:0|hoursMaxTimeWindow:@timeWindowMinutes|cantBe0IfMins0" vid="timeWindowHours" v-slot="{errors}" name="Hours">
+                      <div class="input-group">
+                        <input class="form-control d-inline" type="text" v-model="skillInternal.pointIncrementIntervalHrs"
+                               value="8" :disabled="!skillInternal.timeWindowEnabled"
+                               ref="timeWindowHours"/>
+                        <div class="input-group-append">
+                          <span class="input-group-text" id="hours-append">Hours</span>
+                        </div>
+                      </div>
+                      <small class="form-text text-danger">{{ errors[0] }}</small>
+                    </ValidationProvider>
+                  </div>
+                  <div class="col-12 col-sm">
+                    <ValidationProvider rules="optionalNumeric|required|min_value:0|max_value:59|minutesMaxTimeWindow:@timeWindowHours|cantBe0IfHours0" vid="timeWindowMinutes" v-slot="{errors}" name="Minutes">
+                      <div class="input-group">
+                        <input class="form-control d-inline"  type="text" v-model="skillInternal.pointIncrementIntervalMins"
+                               value="0" :disabled="!skillInternal.timeWindowEnabled" ref="timeWindowMinutes"/>
+                        <div class="input-group-append">
+                          <span class="input-group-text" id="minutes-append">Minutes</span>
+                        </div>
+                      </div>
+                      <small class="form-text text-danger">{{ errors[0] }}</small>
+                    </ValidationProvider>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+            <div class="col-12 col-lg">
+              <ValidationProvider rules="optionalNumeric|min_value:1|lessThanTotalOccurrences|maxNumPointIncrementMaxOccurrences" v-slot="{errors}" name="Window's Max Occurrences">
+                <div class="form-group">
+                  <label>Window's Max Occurrences
+                    <inline-help
+                      msg="Once this Max Occurrences has been reached, points will not be incremented until outside of the configured Time Window."/>
+                  </label>
+
+                    <input class="form-control" type="text" v-model="skillInternal.numPointIncrementMaxOccurrences"
+                           :disabled="!skillInternal.timeWindowEnabled"/>
+                    <small class="form-text text-danger">{{ errors[0] }}</small>
+                </div>
+              </ValidationProvider>
+            </div>
           </div>
-        </div>
 
-        <div class="form-group mt-3">
-          <label>Help URL/Path
-            <inline-help
-              msg="If project level 'Root Help Url' is specified then this path will be relative to 'Root Help Url'"/>
-          </label>
-          <input class="form-control" type="text" v-model="skillInternal.helpUrl" data-vv-name="helpUrl"/>
-          <small class="form-text text-danger">{{ errors.first('helpUrl')}}</small>
-        </div>
+            <hr class="my-0 pb-1"/>
+            <hr class="mt-0 pt-0"/>
 
-        <p v-if="invalid && overallErrMsg" class="text-center text-danger">***{{ overallErrMsg }}***</p>
-      </loading-container>
-      </b-container>
-    </ValidationObserver>
+          <div class="">
+            <label class="label">Description</label>
+            <div class="control">
+              <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" v-slot="{errors}" name="Skill Description">
+                <markdown-editor v-if="skillInternal" v-model="skillInternal.description"/>
+                <small class="form-text text-danger">{{ errors[0] }}</small>
+              </ValidationProvider>
+            </div>
+          </div>
 
-    <div slot="modal-footer" class="w-100">
-      <b-button variant="success" size="sm" class="float-right" @click="saveSkill" :disabled="isLoading">
-        Save
-      </b-button>
-      <b-button variant="secondary" size="sm" class="float-right mr-2" @click="close">
-        Cancel
-      </b-button>
-    </div>
-  </b-modal>
+          <div class="form-group mt-3">
+            <label>Help URL/Path
+              <inline-help
+                msg="If project level 'Root Help Url' is specified then this path will be relative to 'Root Help Url'"/>
+            </label>
+            <input class="form-control" type="text" v-model="skillInternal.helpUrl"/>
+          </div>
+
+          <p v-if="invalid && overallErrMsg" class="text-center text-danger">***{{ overallErrMsg }}***</p>
+        </loading-container>
+        </b-container>
+
+      <div slot="modal-footer" class="w-100">
+        <b-button variant="success" size="sm" class="float-right" @click="saveSkill" :disabled="invalid || isLoading">
+          Save
+        </b-button>
+        <b-button variant="secondary" size="sm" class="float-right mr-2" @click="close">
+          Cancel
+        </b-button>
+      </div>
+    </b-modal>
+  </ValidationObserver>
 </template>
 
 <script>
-  import { Validator, ValidationProvider, ValidationObserver } from 'vee-validate';
+  import { extend } from 'vee-validate';
+  // eslint-disable-next-line camelcase
+  import { required, min_value, max_value } from 'vee-validate/dist/rules';
   import SkillsService from './SkillsService';
   import MarkdownEditor from '../utils/MarkdownEditor';
   import IdInput from '../utils/inputForm/IdInput';
   import InlineHelp from '../utils/InlineHelp';
   import LoadingContainer from '../utils/LoadingContainer';
   import InputSanitizer from '../utils/InputSanitizer';
+
+  extend('required', required);
+  extend('min_value', min_value);
+  extend('max_value', max_value);
 
   export default {
     name: 'EditSkill',
@@ -201,8 +200,6 @@ limitations under the License.
       InlineHelp,
       IdInput,
       MarkdownEditor,
-      ValidationProvider,
-      ValidationObserver,
     },
     props: {
       projectId: {
@@ -290,98 +287,66 @@ limitations under the License.
         this.show = false;
       },
       setupValidation() {
-        const dictionary = {
-          en: {
-            attributes: {
-              name: 'Skill Name',
-              skillId: 'ID',
-              pointIncrement: 'Point Increment',
-              pointIncrementIntervalMins: 'Minutes',
-              pointIncrementIntervalHrs: 'Hours',
-              numPerformToCompletion: 'Number of Times to Complete',
-              numPointIncrementMaxOccurrences: 'Max Occurrences Within Window',
-              totalPoints: 'Total Points',
-              helpUrl: 'Help UrL',
-              version: 'Version',
-            },
-          },
-        };
-        Validator.localize(dictionary);
-
         const self = this;
-        Validator.extend('uniqueName', {
-          getMessage: (field) => `The value for the ${field} is already taken.`,
+        extend('uniqueName', {
+          message: (field) => `The value for the ${field} is already taken.`,
           validate(value) {
             if (self.isEdit && (value === self.initial.skillName || self.initial.skillName.localeCompare(value, 'en', { sensitivity: 'base' }) === 0)) {
               return true;
             }
             return SkillsService.skillWithNameExists(self.projectId, value);
           },
-        }, {
-          immediate: false,
         });
 
-        Validator.extend('uniqueId', {
-          getMessage: (field) => `The value for the ${field} is already taken.`,
+        extend('uniqueId', {
+          message: (field) => `The value for the ${field} is already taken.`,
           validate(value) {
             if (self.isEdit && self.initial.skillId === value) {
               return true;
             }
             return SkillsService.skillWithIdExists(self.projectId, value);
           },
-        }, {
-          immediate: false,
         });
 
-        Validator.extend('lessThanTotalOccurrences', {
-          getMessage: () => 'Must be less than or equals to \'Occurrences to Completion\' field',
+        extend('lessThanTotalOccurrences', {
+          message: () => 'Must be less than or equals to \'Occurrences to Completion\' field',
           validate(value) {
             return parseInt(self.skillInternal.numPerformToCompletion, 10) >= parseInt(value, 10);
           },
-        }, {
-          immediate: false,
         });
-        Validator.extend('moreThanMaxWindowOccurrences', {
-          getMessage: () => 'Must be more than or equals to \'Max Occurrences Within Window\' field',
+        extend('moreThanMaxWindowOccurrences', {
+          message: () => 'Must be more than or equals to \'Max Occurrences Within Window\' field',
           validate(value) {
             return parseInt(value, 10) >= parseInt(self.skillInternal.numPointIncrementMaxOccurrences, 10);
           },
-        }, {
-          immediate: false,
         });
-        Validator.extend('cantBe0IfHours0', {
-          getMessage: (field) => `${field} must be > 0 if Hours = 0`,
+        extend('cantBe0IfHours0', {
+          message: (field) => `${field} must be > 0 if Hours = 0`,
           validate(value) {
             if (parseInt(value, 10) > 0 || parseInt(self.skillInternal.pointIncrementIntervalHrs, 10) > 0) {
               return true;
             }
             return false;
           },
-        }, {
-          immediate: false,
         });
-        Validator.extend('cantBe0IfMins0', {
-          getMessage: (field) => `${field} must be > 0 if Minutes = 0`,
+        extend('cantBe0IfMins0', {
+          message: (field) => `${field} must be > 0 if Minutes = 0`,
           validate(value) {
             if (parseInt(value, 10) > 0 || parseInt(self.skillInternal.pointIncrementIntervalMins, 10) > 0) {
               return true;
             }
             return false;
           },
-        }, {
-          immediate: false,
         });
 
-        Validator.extend('maxVersion', {
-          getMessage: () => `Version ${self.initial.latestVersion} is the latest; max supported version is ${self.initial.latestVersion + 1} (latest + 1)`,
+        extend('maxVersion', {
+          message: () => `Version ${self.initial.latestVersion} is the latest; max supported version is ${self.initial.latestVersion + 1} (latest + 1)`,
           validate(value) {
             if (parseInt(value, 10) > (self.initial.latestVersion + 1)) {
               return false;
             }
             return true;
           },
-        }, {
-          immediate: true,
         });
 
         const validateWindow = (windowHours, windowMinutes) => {
@@ -398,23 +363,19 @@ limitations under the License.
           return ((hours * 60) + minutes) <= this.$store.getters.config.maxTimeWindowInMinutes;
         };
 
-        Validator.extend('hoursMaxTimeWindow', {
-          getMessage: () => `Time Window must be less then ${self.$store.getters.config.maxTimeWindowInMinutes / 60} hours`,
-          validate(value, [otherValue]) {
-            return validateWindow(value, otherValue);
+        extend('hoursMaxTimeWindow', {
+          message: () => `Time Window must be less then ${self.$store.getters.config.maxTimeWindowInMinutes / 60} hours`,
+          params: ['target'],
+          validate(value, { target }) {
+            return validateWindow(value, target);
           },
-        }, {
-          immediate: false,
-          hasTarget: true,
         });
-        Validator.extend('minutesMaxTimeWindow', {
-          getMessage: () => `Time Window must be less then ${self.$store.getters.config.maxTimeWindowInMinutes / 60} hours`,
-          validate(value, [otherValue]) {
-            return validateWindow(otherValue, value);
+        extend('minutesMaxTimeWindow', {
+          message: () => `Time Window must be less then ${self.$store.getters.config.maxTimeWindowInMinutes / 60} hours`,
+          params: ['target'],
+          validate(value, { target }) {
+            return validateWindow(target, value);
           },
-        }, {
-          immediate: false,
-          hasTarget: true,
         });
       },
       saveSkill() {

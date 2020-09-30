@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import VeeValidate from 'vee-validate';
+import { extend } from 'vee-validate';
 import store from '../store/store';
 import CustomValidatorService from './CustomValidatorsService';
 
 const validator = {
-  getMessage: (field) => `${field} - ${store.getters.config.paragraphValidationMessage}.`,
+  message: (field) => `${field} - ${store.getters.config.paragraphValidationMessage}.`,
   validate(value) {
     if (!store.getters.config.paragraphValidationRegex) {
       return true;
@@ -28,8 +28,6 @@ const validator = {
   },
 };
 
-VeeValidate.Validator.extend('customDescriptionValidator', validator, {
-  immediate: false,
-});
+extend('customDescriptionValidator', validator);
 
 export default validator;

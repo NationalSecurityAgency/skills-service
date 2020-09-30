@@ -14,9 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <b-modal :id="badgeInternal.badgeId" size="xl" :title="title" v-model="show" :no-close-on-backdrop="true"
+  <ValidationObserver ref="observer" v-slot="{invalid, handleSubmit}" slim>
+    <b-modal :id="badgeInternal.badgeId" size="xl" :title="title" v-model="show" :no-close-on-backdrop="true"
            header-bg-variant="info" header-text-variant="light" no-fade >
-    <ValidationObserver ref="observer" v-slot="{invalid}" slim>
       <b-container fluid>
         <div v-if="displayIconManager === false" class="text-left">
           <div class="media">
@@ -26,8 +26,7 @@ limitations under the License.
                 <label for="badgeName">Badge Name</label>
                 <ValidationProvider rules="required|minNameLength|maxBadgeNameLength|uniqueName|customNameValidator" v-slot="{errors}" name="Badge Name">
                   <input v-focus class="form-control" id="badgeName" type="text" v-model="badgeInternal.name"
-                         @input="updateBadgeId"
-                         data-vv-name="badgeName"/>
+                         @input="updateBadgeId"/>
                   <small class="form-text text-danger" v-show="errors[0]">{{ errors[0] }}
                   </small>
                 </ValidationProvider>
@@ -52,7 +51,6 @@ limitations under the License.
                 msg="If project level 'Root Help Url' is specified then this path will be relative to 'Root Help Url'"/>
             </label>
             <input class="form-control" type="text" v-model="badgeInternal.helpUrl" data-vv-name="helpUrl"/>
-            <small class="form-text text-danger">{{ errors.first('helpUrl')}}</small>
           </div>
 
           <div v-if="!global" data-cy="gemEditContainer">
@@ -82,7 +80,6 @@ limitations under the License.
                 </b-row>
             </b-collapse>
           </div>
-          <p v-if="invalid && overallErrMsg" class="text-center text-danger mt-3">***{{ overallErrMsg }}***</p>
         </div>
         <div v-else>
           <icon-manager @selected-icon="onSelectedIcon"></icon-manager>
@@ -91,23 +88,24 @@ limitations under the License.
           </div>
         </div>
       </b-container>
-    </ValidationObserver>
 
-    <div slot="modal-footer" class="w-100">
-      <div v-if="displayIconManager === false">
-        <b-button variant="success" size="sm" class="float-right" @click="updateBadge">
-          Save
-        </b-button>
-        <b-button variant="secondary" size="sm" class="float-right mr-2" @click="closeMe">
-          Cancel
-        </b-button>
+      <div slot="modal-footer" class="w-100">
+        <div v-if="displayIconManager === false">
+          <b-button variant="success" size="sm" class="float-right" @click="handleSubmit(updateBadge)" :disabled="invalid">
+            Save
+          </b-button>
+          <b-button variant="secondary" size="sm" class="float-right mr-2" @click="closeMe">
+            Cancel
+          </b-button>
+        </div>
       </div>
-    </div>
-  </b-modal>
+    </b-modal>
+  </ValidationObserver>
 </template>
 
 <script>
-  import { Validator, ValidationProvider, ValidationObserver } from 'vee-validate';
+  import { extend } from 'vee-validate';
+  import { required } from 'vee-validate/dist/rules';
   import Datepicker from 'vuejs-datepicker';
   import MarkdownEditor from '../utils/MarkdownEditor';
   import IconPicker from '../utils/iconPicker/IconPicker';
@@ -118,18 +116,7 @@ limitations under the License.
   import GlobalBadgeService from './global/GlobalBadgeService';
   import InputSanitizer from '../utils/InputSanitizer';
 
-  const dictionary = {
-    en: {
-      attributes: {
-        badgeName: 'Badge Name',
-        badgeId: 'ID',
-        requiredSkills: 'Required Skills',
-        startDate: 'Start Date',
-        endDate: 'End Date',
-      },
-    },
-  };
-  Validator.localize(dictionary);
+  extend('required', required);
 
   export default {
     name: 'EditBadge',
@@ -140,8 +127,6 @@ limitations under the License.
       Datepicker,
       IconManager,
       IdInput,
-      ValidationProvider,
-      ValidationObserver,
     },
     props: {
       badge: Object,
@@ -161,7 +146,6 @@ limitations under the License.
         canAutoGenerateId: true,
         canEditBadgeId: false,
         badgeInternal: { originalBadgeId: this.badge.badgeId, isEdit: this.isEdit, ...this.badge },
-        overallErrMsg: '',
         limitTimeframe: limitedTimeframe,
         show: this.value,
         displayIconManager: false,
@@ -188,16 +172,10 @@ limitations under the License.
         this.badgeInternal.description = event;
       },
       updateBadge() {
-        this.$refs.observer.validate().then((res) => {
-          if (!res) {
-            this.overallErrMsg = 'Form did NOT pass validation, please fix and try to Save again';
-          } else {
-            this.show = false;
-            this.badgeInternal.badgeId = InputSanitizer.sanitize(this.badgeInternal.badgeId);
-            this.badgeInternal.name = InputSanitizer.sanitize(this.badgeInternal.name);
-            this.$emit('badge-updated', this.badgeInternal);
-          }
-        });
+        this.show = false;
+        this.badgeInternal.badgeId = InputSanitizer.sanitize(this.badgeInternal.badgeId);
+        this.badgeInternal.name = InputSanitizer.sanitize(this.badgeInternal.name);
+        this.$emit('badge-updated', this.badgeInternal);
       },
       updateBadgeId() {
         if (!this.isEdit && this.canAutoGenerateId) {
@@ -241,8 +219,8 @@ limitations under the License.
         // only want to validate for a new badge, existing subjects will override
         // name and badge id
         const self = this;
-        Validator.extend('uniqueName', {
-          getMessage: (field) => `The value for ${field} is already taken.`,
+        extend('uniqueName', {
+          message: (field) => `The value for ${field} is already taken.`,
           validate(value) {
             if (self.isEdit && (value === self.badge.name || self.badge.name.localeCompare(value, 'en', { sensitivity: 'base' }) === 0)) {
               return true;
@@ -256,8 +234,8 @@ limitations under the License.
           immediate: false,
         });
 
-        Validator.extend('uniqueId', {
-          getMessage: (field) => `The value for ${field} is already taken.`,
+        extend('uniqueId', {
+          message: (field) => `The value for ${field} is already taken.`,
           validate(value) {
             if (self.isEdit && self.badge.badgeId === value) {
               return true;
@@ -271,8 +249,8 @@ limitations under the License.
           immediate: false,
         });
 
-        Validator.extend('dateOrder', {
-          getMessage: 'Start Date must come before End Date',
+        extend('dateOrder', {
+          message: 'Start Date must come before End Date',
           validate() {
             let valid = true;
             if (self.limitTimeframe && self.badgeInternal.startDate && self.badgeInternal.endDate) {
@@ -294,8 +272,8 @@ limitations under the License.
           immediate: false,
         });
 
-        Validator.extend('noHistoricalEnd', {
-          getMessage: 'End Date cannot be in the past',
+        extend('noHistoricalEnd', {
+          essage: 'End Date cannot be in the past',
           validate() {
             let valid = true;
             // only trigger this validation on new badge entry, not edits

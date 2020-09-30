@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import VeeValidate from 'vee-validate';
+import { extend } from 'vee-validate';
 
 const numericRegex = /^[0-9]+$/;
 
@@ -37,8 +37,6 @@ const validator = {
   },
 };
 
-VeeValidate.Validator.extend('optionalNumeric', validator, {
-  immediate: false,
-});
+extend('optionalNumeric', validator);
 
 export default validator;
