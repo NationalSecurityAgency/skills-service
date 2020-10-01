@@ -22,8 +22,13 @@ limitations under the License.
           <div class="col-12">
             <div class="form-group">
               <label>Project Name</label>
-              <ValidationProvider rules="required|minNameLength|maxProjectNameLength|uniqueName|customNameValidator" v-slot="{errors}" name="Project Name">
-                <input class="form-control" type="text" v-model="internalProject.name" v-on:input="updateProjectId" v-focus data-cy="projectName"/>
+              <ValidationProvider rules="required|minNameLength|maxProjectNameLength|uniqueName|customNameValidator"
+                                  v-slot="{errors}"
+                                  name="Project Name">
+                <input class="form-control" type="text" v-model="internalProject.name"
+                       v-on:input="updateProjectId"
+                       v-focus
+                       data-cy="projectName"/>
                 <small class="form-text text-danger">{{ errors[0] }}</small>
               </ValidationProvider>
             </div>
