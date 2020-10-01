@@ -65,7 +65,7 @@ limitations under the License.
               <div class="form-group mt-2 mt-lg-0">
                 <label for="subjName">Occurrences to Completion</label>
                 <ValidationProvider rules="optionalNumeric|required|min_value:1|maxNumPerformToCompletion|moreThanMaxWindowOccurrences" v-slot="{errors}" name="Occurrences to Completion" tag="div">
-                  <input class="form-control" type="text" v-model="skillInternal.numPerformToCompletion"/>
+                  <input class="form-control" type="text" v-model="skillInternal.numPerformToCompletion" data-cy="numPerformToCompletion"/>
                   <small class="form-text text-danger">{{ errors[0] }}</small>
                 </ValidationProvider>
               </div>

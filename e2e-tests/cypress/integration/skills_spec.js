@@ -36,7 +36,7 @@ describe('Skills Tests', () => {
             url: '/admin/projects/proj1/subjects/subj1'
         }).as('loadSubject');
 
-        const selectorOccurrencesToCompletion = '[data-vv-name="numPerformToCompletion"]';
+        const selectorOccurrencesToCompletion = '[data-cy="numPerformToCompletion"]';
         const selectorSkillsRowToggle = 'table .VueTables__child-row-toggler';
         cy.visit('/projects/proj1/subjects/subj1');
 
@@ -314,7 +314,7 @@ describe('Skills Tests', () => {
         cy.get('div .alert').contains('Error! Request could not be completed! Error Adding Dependency');
 
     })
-    
+
     it('create skill and then update skillId', () => {
       const initialId = 'myid1Skill';
       const newId = 'MyId1Skill';
@@ -323,7 +323,7 @@ describe('Skills Tests', () => {
       cy.route('POST', `/admin/projects/proj1/subjects/subj1/skills/${initialId}`).as('postNewSkill');
       cy.route('POST', `/admin/projects/proj1/skillNameExists`).as('nameExists');
       cy.route('GET', `/admin/projects/proj1/entityIdExists?id=*`).as('skillIdExists');
-      
+
 
       cy.route({
           method: 'GET',
