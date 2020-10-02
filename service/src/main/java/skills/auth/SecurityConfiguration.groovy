@@ -21,19 +21,14 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Condition
-import org.springframework.context.annotation.ConditionContext
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.annotation.Order
-import org.springframework.core.type.AnnotatedTypeMetadata
 import org.springframework.http.MediaType
 import org.springframework.security.access.AccessDeniedException
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
 import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.core.AuthenticationException
-import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -43,12 +38,8 @@ import org.springframework.security.web.access.AccessDeniedHandlerImpl
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository
 import org.springframework.stereotype.Component
 import org.springframework.web.context.request.RequestContextListener
-import org.springframework.web.cors.CorsConfiguration
-import org.springframework.web.cors.CorsConfigurationSource
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 import skills.auth.util.AccessDeniedExplanation
 import skills.auth.util.AccessDeniedExplanationGenerator
-import skills.storage.model.auth.RoleName
 
 import javax.servlet.ServletException
 import javax.servlet.http.HttpServletRequest
@@ -93,14 +84,7 @@ class SecurityConfiguration {
 
         @Override
         protected void configure(HttpSecurity http) throws Exception {
-//            http.requestMatchers().antMatchers("/app/oauth2/token", "/api/**", "/oauth2/**").and().cors()
-            http.requestMatchers().antMatchers("/app/oauth2/token", "/api/**").and().cors()
-//            http.antMatcher("/api/**").cors()
-//            .and()
-//                    .antMatcher("/app/oauth2/token").cors()
-//            http.antMatcher("/app/oauth2/token").cors()
-//            http.cors()
-//            http.antMatcher("/api/**")
+            http.antMatcher("/api/**").cors()
             portalWebSecurityHelper.configureHttpSecurity(http)
                     .securityContext().securityContextRepository(securityContextRepository)
             .and()
@@ -114,20 +98,6 @@ class SecurityConfiguration {
                         .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             }
         }
-    }
-
-    @Bean
-    CorsConfigurationSource corsConfigurationSource() {
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource()
-        CorsConfiguration configuration = new CorsConfiguration()
-        configuration.applyPermitDefaultValues()
-//        configuration.addAllowedOrigin('http://localhost:8091')
-//        configuration.addAllowedOrigin('*')
-        configuration.setAllowCredentials(true)
-        source.registerCorsConfiguration('/api/**', configuration)
-        source.registerCorsConfiguration('/app/oauth2/token', configuration)
-        source.registerCorsConfiguration('/oauth2/**', configuration)
-        return source
     }
 
     @Component
