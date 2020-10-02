@@ -29,42 +29,42 @@ limitations under the License.
             <div class="card">
               <div class="card-body p-4">
                 <div class="form-group">
-                  <label for="firstName" class="text-secondary font-weight-bold">First Name</label>
+                  <label for="firstName" class="text-secondary font-weight-bold">* First Name</label>
                   <ValidationProvider name="First Name" rules="required|maxFirstNameLength" v-slot="{errors}" :debounce=500>
                     <input class="form-control" type="text" v-model="loginFields.firstName" id="firstName" :disabled="createInProgress"
-                           name="firstName"/>
+                           name="firstName" aria-required="true"/>
                     <small class="form-text text-danger" v-show="errors[0]">{{ errors[0] }}</small>
                   </ValidationProvider>
                 </div>
                 <div class="form-group">
-                  <label for="lastName" class="text-secondary font-weight-bold">Last Name</label>
+                  <label for="lastName" class="text-secondary font-weight-bold">* Last Name</label>
                   <ValidationProvider name="Last Name" rules="required|maxLastNameLength" :debounce=500 v-slot="{errors}">
                     <input class="form-control" type="text" v-model="loginFields.lastName" id="lastName" :disabled="createInProgress"
-                           name="lastName"/>
+                           name="lastName" aria-required="true"/>
                     <small class="form-text text-danger" v-show="errors[0]">{{ errors[0] }}</small>
                   </ValidationProvider>
                 </div>
                 <div class="form-group">
-                  <label for="email" class="text-secondary font-weight-bold">Email</label>
+                  <label for="email" class="text-secondary font-weight-bold">* Email</label>
                   <ValidationProvider name="Email" rules="required|email|uniqueEmail" :debounce=500 v-slot="{errors}">
                     <input class="form-control" type="text" v-model="loginFields.email" id="email" :disabled="createInProgress"
-                           name="email"/>
+                           name="email" aria-required="true"/>
                     <small class="form-text text-danger" v-show="errors[0]">{{ errors[0] }}</small>
                   </ValidationProvider>
                 </div>
                 <div class="form-group">
-                  <label for="password" class="text-secondary font-weight-bold">Password</label>
+                  <label for="password" class="text-secondary font-weight-bold">* Password</label>
                   <ValidationProvider vid="password" name="Password" rules="required|minPasswordLength|maxPasswordLength" :debounce=500 v-slot="{errors}">
                     <input class="form-control" type="password" v-model="loginFields.password" id="password" :disabled="createInProgress"
-                           name="password" ref="password"/>
+                           name="password" ref="password" aria-required="true"/>
                     <small class="form-text text-danger" v-show="errors[0]">{{ errors[0] }}</small>
                   </ValidationProvider>
                 </div>
                 <div class="form-group">
-                  <label for="password_confirmation" class="text-secondary font-weight-bold">Confirm Password</label>
-                  <ValidationProvider vid="password_confirmation" name="Confirm Password" rules="required|confirmed:password" :debounce=500 v-slot="{errors}">
+                  <label for="password_confirmation" class="text-secondary font-weight-bold">* Confirm Password</label>
+                  <ValidationProvider vid="password_confirmation" name="Password" rules="required|confirmed:password" :debounce=500 v-slot="{errors}">
                     <input class="form-control" type="password" id="password_confirmation" v-model="passwordConfirmation" :disabled="createInProgress"
-                           name="password_confirmation"/>
+                           name="password_confirmation" aria-required="true"/>
                     <small class="form-text text-danger" v-show="errors[0]">{{ errors[0] }}</small>
                   </ValidationProvider>
                 </div>

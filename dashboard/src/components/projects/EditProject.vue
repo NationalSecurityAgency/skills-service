@@ -21,7 +21,7 @@ limitations under the License.
         <div class="row">
           <div class="col-12">
             <div class="form-group">
-              <label>Project Name</label>
+              <label>* Project Name</label>
               <ValidationProvider rules="required|minNameLength|maxProjectNameLength|uniqueName|customNameValidator"
                                   v-slot="{errors}"
                                   name="Project Name">
@@ -29,13 +29,13 @@ limitations under the License.
                        v-on:input="updateProjectId"
                        v-focus
                        data-cy="projectName"/>
-                <small class="form-text text-danger">{{ errors[0] }}</small>
+                <small class="form-text text-danger" data-cy="projectNameError">{{ errors[0] }}</small>
               </ValidationProvider>
             </div>
           </div>
 
           <div class="col-12">
-            <id-input type="text" label="Project ID" v-model="internalProject.projectId"
+            <id-input type="text" label="* Project ID" v-model="internalProject.projectId"
                       additional-validation-rules="uniqueId" @can-edit="canEditProjectId=$event"/>
           </div>
         </div>
@@ -44,7 +44,9 @@ limitations under the License.
       </b-container>
 
       <div slot="modal-footer" class="w-100">
-        <b-button variant="success" size="sm" class="float-right" @click="handleSubmit(updateProject)" :disabled="invalid">
+        <b-button variant="success" size="sm" class="float-right" @click="handleSubmit(updateProject)"
+                  :disabled="invalid"
+                  data-cy="saveProjectButton">
           Save
         </b-button>
         <b-button variant="secondary" size="sm" class="float-right mr-2" @click="close">

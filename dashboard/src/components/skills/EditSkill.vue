@@ -22,16 +22,17 @@ limitations under the License.
           <div class="row">
             <div class="col-12 col-lg">
               <div class="form-group">
-                <label for="skillName">Skill Name</label>
+                <label for="skillName">* Skill Name</label>
                 <ValidationProvider rules="required|minNameLength|maxSkillNameLength|uniqueName" v-slot="{errors}" name="Skill Name">
                   <input type="text" class="form-control" id="skillName" @input="updateSkillId"
-                         v-model="skillInternal.name" v-focus>
+                         v-model="skillInternal.name" v-focus
+                          aria-required="true">
                   <small class="form-text text-danger">{{ errors[0] }}</small>
                 </ValidationProvider>
               </div>
             </div>
             <div class="col-12 col-lg">
-              <id-input type="text" label="Skill ID" additional-validation-rules="uniqueId"
+              <id-input type="text" label="* Skill ID" additional-validation-rules="uniqueId"
                         v-model="skillInternal.skillId" @can-edit="canEditSkillId=$event"/>
             </div>
             <div class="col-12 col-lg-2 mt-2 mt-lg-0">
@@ -54,18 +55,19 @@ limitations under the License.
           <div class="row mt-3">
             <div class="col-12 col-lg">
               <div class="form-group mb-1">
-                <label for="subjName">Point Increment</label>
+                <label for="subjName">* Point Increment</label>
                 <ValidationProvider rules="optionalNumeric|required|min_value:1|maxPointIncrement" v-slot="{errors}" name="Point Increment">
-                  <input class="form-control" type="text"  v-model="skillInternal.pointIncrement"/>
+                  <input class="form-control" type="text"  v-model="skillInternal.pointIncrement" aria-required="true"/>
                   <small class="form-text text-danger">{{ errors[0] }}</small>
                 </ValidationProvider>
               </div>
             </div>
             <div class="col-12 col-lg">
               <div class="form-group mt-2 mt-lg-0">
-                <label for="subjName">Occurrences to Completion</label>
+                <label for="subjName">* Occurrences to Completion</label>
                 <ValidationProvider rules="optionalNumeric|required|min_value:1|maxNumPerformToCompletion|moreThanMaxWindowOccurrences" v-slot="{errors}" name="Occurrences to Completion" tag="div">
-                  <input class="form-control" type="text" v-model="skillInternal.numPerformToCompletion" data-cy="numPerformToCompletion"/>
+                  <input class="form-control" type="text" v-model="skillInternal.numPerformToCompletion"
+                         data-cy="numPerformToCompletion" aria-required="true"/>
                   <small class="form-text text-danger">{{ errors[0] }}</small>
                 </ValidationProvider>
               </div>
@@ -167,7 +169,9 @@ limitations under the License.
         </b-container>
 
       <div slot="modal-footer" class="w-100">
-        <b-button variant="success" size="sm" class="float-right" @click="saveSkill" :disabled="invalid || isLoading">
+        <b-button variant="success" size="sm" class="float-right" @click="saveSkill"
+                  :disabled="invalid || isLoading"
+                  data-cy="saveSkillButton">
           Save
         </b-button>
         <b-button variant="secondary" size="sm" class="float-right mr-2" @click="close">

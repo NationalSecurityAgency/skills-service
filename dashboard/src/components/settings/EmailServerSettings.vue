@@ -17,26 +17,28 @@ limitations under the License.
   <ValidationObserver ref="observer" v-slot="{invalid, pristine}" slim>
     <div>
       <div class="form-group">
-        <label class="label">Host</label>
+        <label class="label">* Host</label>
         <ValidationProvider name="Host" :debounce=500 v-slot="{errors}" rules="required">
         <input class="form-control" type="text" v-model="emailInfo.host" name="host"
-               data-cy="hostInput"/>
+               data-cy="hostInput" aria-required="true"/>
         <p class="text-danger" v-show="errors[0]">{{
           errors[0]}}</p>
         </ValidationProvider>
       </div>
       <div class="form-group">
-        <label class="label">Port</label>
+        <label class="label">* Port</label>
         <ValidationProvider name="Port" :debounce=500 v-slot="{errors}" rules="required|min_value:1|max_value:65535">
-          <input class="form-control" type="text" v-model="emailInfo.port" name="port" data-cy="portInput"/>
+          <input class="form-control" type="text" v-model="emailInfo.port" name="port"
+                 data-cy="portInput" aria-required="true"/>
           <p class="text-danger" v-show="errors[0]">{{
             errors[0] }}</p>
         </ValidationProvider>
       </div>
       <div class="form-group">
-        <label class="label">Protocol</label>
+        <label class="label">* Protocol</label>
         <ValidationProvider name="Protocol" :debounce=500 v-slot="{errors}" rules="required">
-          <input class="form-control" type="text" v-model="emailInfo.protocol" name="protocol" data-cy="protocolInput"/>
+          <input class="form-control" type="text" v-model="emailInfo.protocol" name="protocol"
+                 data-cy="protocolInput" aria-required="true"/>
           <p class="text-danger" v-show="errors[0]">{{
             errors[0] }}</p>
         </ValidationProvider>
@@ -53,18 +55,19 @@ limitations under the License.
       </div>
       <div id="auth-div" v-if="emailInfo.authEnabled">
         <div class="form-group">
-          <label class="label">Username</label>
+          <label class="label">* Username</label>
           <ValidationProvider name="Username" :debounce=500 v-slot="{errors}" rules="required">
-            <input class="form-control" type="text" v-model="emailInfo.username" name="username" data-cy="emailUsername"/>
+            <input class="form-control" type="text" v-model="emailInfo.username" name="username"
+                   data-cy="emailUsername" aria-required="true"/>
             <p class="text-danger" v-show="errors[0]">{{
               errors[0]}}</p>
           </ValidationProvider>
         </div>
         <div class="form-group">
-          <label class="label">Password</label>
+          <label class="label">* Password</label>
           <ValidationProvider name="Password" :debounce=500 v-slot="{errors}" rules="required">
             <input class="form-control" type="text" v-model="emailInfo.password" name="password"
-                   data-cy="emailPassword"/>
+                   data-cy="emailPassword" aria-required="true"/>
             <p class="text-danger" v-show="errors[0]">{{
               errors[0]}}</p>
           </ValidationProvider>

@@ -109,6 +109,27 @@ describe('Password Reset Tests', () => {
 
       cy.wait('@performReset');
       cy.get('[data-cy=resetError]').should('be.visible');
+      cy.get('[data-cy=resetPasswordSubmit]').should('be.disabled');
+    });
+  });
+
+  it('reset password - password confirmation mismatch', () => {
+    cy.register("test@skills.org", "apassword", false);
+    cy.visit('/');
+    cy.get('[data-cy=forgotPassword]').click();
+    cy.get('[data-cy=forgotPasswordEmail]').should('exist');
+    cy.get('[data-cy=forgotPasswordEmail]').type('test@skills.org');
+    cy.get('[data-cy=resetPassword').click();
+    cy.get('[data-cy=resetRequestConfirmation').should('exist');
+    cy.wait(11*1000); //request rest page redirects to login after 30 seconds
+    cy.get('[data-cy=login]').should('exist');
+    cy.getResetLink().then((resetLink) => {
+      cy.visit(resetLink);
+      cy.get('[data-cy=resetPasswordSubmit]').should('exist');
+      cy.get('[data-cy=resetPasswordEmail]').type('test2@skills.org');
+      cy.get('[data-cy=resetPasswordNewPassword]').type('password2')
+      cy.get('[data-cy=resetPasswordConfirm]').type('password');
+      cy.get('[data-cy=resetPasswordSubmit]').should('be.disabled');
     });
   });
 
@@ -154,6 +175,7 @@ describe('Password Reset Tests', () => {
 
       cy.wait('@performReset');
       cy.get('[data-cy=resetError]').should('be.visible');
+      cy.get('[data-cy=resetPasswordSubmit]').should('be.disabled');
     });
   });
 

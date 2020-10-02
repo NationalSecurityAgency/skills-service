@@ -26,12 +26,13 @@ limitations under the License.
             <div class="card-body p-4">
 
               <div class="form-group">
-                <label for="username" class="text-secondary font-weight-bold">Email Address</label>
+                <label for="username" class="text-secondary font-weight-bold">* Email Address</label>
                 <ValidationProvider name="Email Address" rules="required|minUsernameLength|email" :debounce=300 v-slot="{errors}">
                   <input type="text" class="form-control" id="username" tabindex="1" placeholder="Enter email"
                          aria-describedby="emailHelp"
                          v-model="username"
-                         data-cy="forgotPasswordEmail">
+                         data-cy="forgotPasswordEmail"
+                        aria-required="true">
                     <small id="emailHelp" class="form-text text-danger" v-show="errors[0]">{{
                       errors[0] }}
                     </small>

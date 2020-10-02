@@ -24,28 +24,29 @@ limitations under the License.
                          class="mr-3"></icon-picker>
             <div class="media-body">
                 <template v-if="isEdit">
-                  <label for="editLevel-level">Level</label>
+                  <label for="editLevel-level">* Level</label>
                   <ValidationProvider name="Level" :debounce=500 v-slot="{errors}" rules="optionalNumeric|required|min_value:0|max_value:100">
-                    <b-form-input v-focus id="editLevel-level" v-model="levelInternal.level" name="level" :disabled="isEdit"></b-form-input>
+                    <b-form-input v-focus id="editLevel-level" v-model="levelInternal.level" name="level" :disabled="isEdit"
+                    aria-required="true"></b-form-input>
                     <small class="form-text text-danger" v-show="errors[0]">{{ errors[0] }}</small>
                   </ValidationProvider>
                   <template v-if="!levelAsPoints">
-                    <label for="editLevel-percent" class="mt-3">Percent</label>
+                    <label for="editLevel-percent" class="mt-3">* Percent</label>
                     <ValidationProvider name="Percent" :debounce=500 v-slot="{errors}" rules="optionalNumeric|required|min_value:0|max_value:100|overlap">
-                      <b-form-input id="editLevel-percent" v-model="levelInternal.percent" name="percent"></b-form-input>
+                      <b-form-input id="editLevel-percent" v-model="levelInternal.percent" name="percent" aria-required="true"></b-form-input>
                       <small class="form-text text-danger" v-show="errors[0]">{{ errors[0] }}</small>
                     </ValidationProvider>
                   </template>
                   <template v-else>
-                    <label for="editLevel-pointsFrom" class="mt-3">Points From</label>
+                    <label for="editLevel-pointsFrom" class="mt-3">* Points From</label>
                     <ValidationProvider name="Points From" :debounce=500 v-slot="{errors}" rules="optionalNumeric|required|min_value:0|overlap">
-                      <b-form-input id="editlevel-pointsFrom" v-model="levelInternal.pointsFrom" name="pointsFrom"></b-form-input>
+                      <b-form-input id="editlevel-pointsFrom" v-model="levelInternal.pointsFrom" name="pointsFrom" aria-required="true"></b-form-input>
                       <small class="form-text text-danger" v-show="errors[0]">{{ errors[0] }}</small>
                     </ValidationProvider>
                     <div v-if="!levelInternal.isLast">
-                      <label for="editLevel-pointsTo" class="mt-3">Points To</label>
+                      <label for="editLevel-pointsTo" class="mt-3">* Points To</label>
                       <ValidationProvider name="Points To" :debounce=500 v-slot="{errors}" rules="optionalNumeric|required|min_value:0|overlap">
-                        <b-form-input id="editLevel-pointsTo" v-model="levelInternal.pointsTo" name="pointsTo"></b-form-input>
+                        <b-form-input id="editLevel-pointsTo" v-model="levelInternal.pointsTo" name="pointsTo" aria-required="true"></b-form-input>
                         <small class="form-text text-danger" v-show="errors[0]">{{ errors[0] }}</small>
                       </ValidationProvider>
                     </div>
@@ -59,16 +60,16 @@ limitations under the License.
                 </template>
                 <template v-else>
                   <template v-if="!levelAsPoints">
-                    <label for="newLevel-percent">Percent %</label>
+                    <label for="newLevel-percent">* Percent %</label>
                     <ValidationProvider name="Percent %" :debounce=500 v-slot="{errors}" rules="optionalNumeric|required|min_value:0|max_value:100|overlap">
-                      <b-form-input v-focus id="newLevel-percent" v-model="levelInternal.percent" name="percent"></b-form-input>
+                      <b-form-input v-focus id="newLevel-percent" v-model="levelInternal.percent" name="percent" aria-required="true"></b-form-input>
                       <small class="form-text text-danger" v-show="errors[0]">{{ errors[0] }}</small>
                     </ValidationProvider>
                   </template>
                   <template v-else>
-                    <label for="newLevel-points" class="mt-3">Points</label>
+                    <label for="newLevel-points" class="mt-3">* Points</label>
                     <ValidationProvider name="Points" :debounce=500 v-slot="{errors}" rules="optionalNumeric|required|min_value:0|overlap">
-                      <b-form-input id="newlevel-points" v-model="levelInternal.points" name="points"></b-form-input>
+                      <b-form-input id="newlevel-points" v-model="levelInternal.points" name="points" aria-required="true"></b-form-input>
                       <small class="form-text text-danger" v-show="errors[0]">{{ errors[0] }}</small>
                     </ValidationProvider>
                   </template>
@@ -95,7 +96,8 @@ limitations under the License.
                     class="float-right"
                     @click="handleSubmit(saveLevel)"
                     :disabled="invalid"
-                    v-skills="'AddOrModifyLevels'">
+                    v-skills="'AddOrModifyLevels'"
+                    data-cy="saveLevelButton">
             Save
           </b-button>
           <b-button variant="secondary" size="sm" class="float-right mr-2" @click="closeMe">

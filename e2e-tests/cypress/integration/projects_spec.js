@@ -56,10 +56,8 @@ describe('Projects Tests', () => {
 
     cy.clickButton('Project');
     cy.get('[data-cy="projectName"]').type("My New test Project")
-
-    cy.contains('The value for the Project Name is already taken')
-    cy.clickSave();
-    cy.contains('***Form did NOT pass validation, please fix and try to Save again***')
+    cy.get('[data-cy=projectNameError]').contains('The value for the Project Name is already taken').should('be.visible')
+    cy.get('[data-cy=saveProjectButton]').should('be.disabled');
   });
 
 
@@ -79,9 +77,8 @@ describe('Projects Tests', () => {
     cy.contains('Enable').click();
     cy.getIdField().clear().type("MyNewtestProject")
 
-    cy.contains('The value for the Project ID is already taken')
-    cy.clickSave();
-    cy.contains('***Form did NOT pass validation, please fix and try to Save again***')
+    cy.get('[data-cy=idError]').contains('The value for the Project ID is already taken').should('be.visible');
+    cy.get('[data-cy=saveProjectButton]').should('be.disabled');
   });
 
   it('Project id autofill strips out special characters and spaces', () => {
@@ -130,10 +127,9 @@ describe('Projects Tests', () => {
     cy.clickButton('Project');
     cy.get('[data-cy="projectName"]').type(providedName.toLowerCase())
 
-    cy.contains('The value for the Project Name is already taken')
+    cy.get('[data-cy=projectNameError').contains('The value for the Project Name is already taken').should('be.visible');
 
-    cy.clickSave();
-    cy.contains('***Form did NOT pass validation, please fix and try to Save again***')
+    cy.get('[data-cy=saveProjectButton]').should('be.disabled');
   });
 
   it('Once project id is enabled name-to-id autofill should be turned off', () => {
@@ -170,10 +166,7 @@ describe('Projects Tests', () => {
     cy.contains('Enable').click();
     cy.getIdField().type('InitValue');
 
-    cy.clickSave();
-
-    cy.contains('The Project Name field is required')
-    cy.contains('***Form did NOT pass validation, please fix and try to Save again***')
+    cy.get('[data-cy=saveProjectButton').should('be.disabled');
   })
 
   it('Project id is required', () => {
@@ -187,11 +180,8 @@ describe('Projects Tests', () => {
     cy.get('[data-cy="projectName"]').type('New Project');
     cy.contains('Enable').click();
     cy.getIdField().clear()
-
-    cy.clickSave();
-
-    cy.contains('The Project ID field is required')
-    cy.contains('***Form did NOT pass validation, please fix and try to Save again***')
+    cy.get('[data-cy=idError]').contains('The Project ID field is required').should('be.visible');
+    cy.get('[data-cy=saveProjectButton').should('be.disabled');
   })
 
 

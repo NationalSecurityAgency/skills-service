@@ -24,18 +24,18 @@ limitations under the License.
                              class="mr-3"></icon-picker>
                 <div class="media-body">
                   <div class="form-group">
-                    <label for="subjName">Subject Name</label>
+                    <label for="subjName">* Subject Name</label>
                     <ValidationProvider rules="required|minNameLength|maxSubjectNameLength|uniqueName" v-slot="{ errors }" name="Subject Name">
                       <input type="text" class="form-control" id="subjName" @input="updateSubjectId"
                              v-model="subjectInternal.name" v-on:input="updateSubjectId"
-                             v-focus>
+                             v-focus aria-required="true">
                       <small class="form-text text-danger">{{ errors[0] }}</small>
                     </ValidationProvider>
                   </div>
                 </div>
               </div>
 
-              <id-input type="text" label="Subject ID" v-model="subjectInternal.subjectId" @can-edit="canAutoGenerateId=!$event"
+              <id-input type="text" label="* Subject ID" v-model="subjectInternal.subjectId" @can-edit="canAutoGenerateId=!$event"
                         additional-validation-rules="uniqueId"/>
 
               <div class="mt-2">
