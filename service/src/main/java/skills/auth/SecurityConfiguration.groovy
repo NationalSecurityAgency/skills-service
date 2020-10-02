@@ -43,6 +43,9 @@ import org.springframework.security.web.access.AccessDeniedHandlerImpl
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository
 import org.springframework.stereotype.Component
 import org.springframework.web.context.request.RequestContextListener
+import org.springframework.web.cors.CorsConfiguration
+import org.springframework.web.cors.CorsConfigurationSource
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 import skills.auth.util.AccessDeniedExplanation
 import skills.auth.util.AccessDeniedExplanationGenerator
 import skills.storage.model.auth.RoleName
@@ -90,7 +93,14 @@ class SecurityConfiguration {
 
         @Override
         protected void configure(HttpSecurity http) throws Exception {
-            http.antMatcher("/api/**").cors()
+//            http.requestMatchers().antMatchers("/app/oauth2/token", "/api/**", "/oauth2/**").and().cors()
+            http.requestMatchers().antMatchers("/app/oauth2/token", "/api/**").and().cors()
+//            http.antMatcher("/api/**").cors()
+//            .and()
+//                    .antMatcher("/app/oauth2/token").cors()
+//            http.antMatcher("/app/oauth2/token").cors()
+//            http.cors()
+//            http.antMatcher("/api/**")
             portalWebSecurityHelper.configureHttpSecurity(http)
                     .securityContext().securityContextRepository(securityContextRepository)
             .and()
@@ -104,6 +114,20 @@ class SecurityConfiguration {
                         .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             }
         }
+    }
+
+    @Bean
+    CorsConfigurationSource corsConfigurationSource() {
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource()
+        CorsConfiguration configuration = new CorsConfiguration()
+        configuration.applyPermitDefaultValues()
+//        configuration.addAllowedOrigin('http://localhost:8091')
+//        configuration.addAllowedOrigin('*')
+        configuration.setAllowCredentials(true)
+        source.registerCorsConfiguration('/api/**', configuration)
+        source.registerCorsConfiguration('/app/oauth2/token', configuration)
+        source.registerCorsConfiguration('/oauth2/**', configuration)
+        return source
     }
 
     @Component

@@ -15,28 +15,61 @@
  */
 package skills.controller
 
+import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Conditional
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.Authentication
+import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.oauth2.client.InMemoryOAuth2AuthorizedClientService
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClient
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken
+import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken
 import org.springframework.security.oauth2.common.OAuth2AccessToken
+import org.springframework.security.oauth2.core.DefaultOAuth2AuthenticatedPrincipal
+import org.springframework.security.oauth2.provider.OAuth2Authentication
+import org.springframework.security.oauth2.provider.OAuth2Request
 import org.springframework.security.oauth2.provider.endpoint.TokenEndpoint
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestMethod
-import org.springframework.web.bind.annotation.ResponseBody
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.security.oauth2.provider.token.DefaultTokenServices
+import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter
+import org.springframework.web.bind.annotation.*
 import skills.auth.SecurityMode
+import skills.auth.form.jwt.JwtHelper
 import skills.services.InceptionProjectService
+
+import javax.annotation.PostConstruct
 
 @Conditional(SecurityMode.FormAuth)
 @RestController
 @skills.profile.EnableCallStackProf
+@Slf4j
 class UserTokenController {
 
     @Autowired
     TokenEndpoint tokenEndpoint
+
+    @Autowired
+    InMemoryOAuth2AuthorizedClientService authorizedClientService
+
+    @Autowired
+    JwtHelper jwtHelper
+
+    @Autowired
+    private JwtAccessTokenConverter jwtAccessTokenConverter;
+
+    @Autowired
+    private DefaultTokenServices tokenServices
+
+//    @PostConstruct
+//    void afterPropertiesSet() {
+//        tokenServices = new DefaultTokenServices()
+//        tokenServices.setTokenStore(jwtAccessTokenConverter)
+//        tokenServices.setTokenEnhancer(jwtAccessTokenConverter)
+//    }
 
     /**
      * token for inception
@@ -46,9 +79,49 @@ class UserTokenController {
     @RequestMapping(value = "/app/projects/Inception/users/{userId}/token", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     ResponseEntity<OAuth2AccessToken> getUserToken(@PathVariable("userId") String userId) {
-        return createToken(InceptionProjectService.inceptionProjectId, userId)
+        return createSkillsProxyToken(InceptionProjectService.inceptionProjectId, userId)
     }
 
+    /**
+     * token for current user already authenticated via third party OAuth2 provider (eg, google, gitlab, etc.)
+     * @param projectId
+     * @return
+     */
+    @RequestMapping(value = "/api/projects/{projectId}/token", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    @CrossOrigin(allowCredentials = 'true')
+    ResponseEntity getOAuth2UserToken(@PathVariable("projectId") String projectId) {
+        DefaultOAuth2AccessToken defaultAccessToken
+        Object authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication.credentials instanceof OAuth2AuthenticationToken && authentication.isAuthenticated()) {
+            OAuth2AuthenticationToken oAuth2AuthenticationToken = authentication.credentials
+            String oauthProvider = oAuth2AuthenticationToken.authorizedClientRegistrationId
+            String userId = authentication.name
+            log.debug("Creating self-proxy OAUth Token for [{}] or project [{}], authenticated via [{}] OAuth provider", userId, projectId, oauthProvider)
+//            OAuth2AuthorizedClient authorizedClient = authorizedClientService.loadAuthorizedClient(oAuth2AuthenticationToken.authorizedClientRegistrationId, oAuth2AuthenticationToken.name)
+//            org.springframework.security.oauth2.core.OAuth2AccessToken accessToken = authorizedClient?.accessToken
+//
+////            defaultAccessToken = new DefaultOAuth2AccessToken(jwtHelper.getToken(authentication.principal, accessToken.getExpiresAt().toDate()))
+////            defaultAccessToken = new DefaultOAuth2AccessToken(accessToken.tokenValue)
+////            defaultAccessToken.setScope(accessToken.getScopes())
+////            defaultAccessToken.setExpiration(accessToken.getExpiresAt().toDate())
+////            defaultAccessToken.setTokenType(accessToken.getTokenType().value)
+//
+//            OAuth2Authentication oAuth2Authentication = convertAuthentication(authentication, oAuth2AuthenticationToken.authorizedClientRegistrationId)
+//            defaultAccessToken = tokenServices.createAccessToken(oAuth2Authentication)
+            return createSkillsProxyToken(projectId, userId)
+        }
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Cache-Control", "no-store");
+        headers.set("Pragma", "no-cache");
+        headers.set("Content-Type", "application/json;charset=UTF-8");
+//        return new ResponseEntity(defaultAccessToken, headers, HttpStatus.OK);
+    }
+
+    private OAuth2Authentication convertAuthentication(Authentication authentication, String clientId) {
+        OAuth2Request request = new OAuth2Request(null, clientId, null, true, null, null, null, null, null)
+        return new OAuth2Authentication(request, authentication)
+    }
 
     /**
      * utilized by client-display within a project that previews that project's points
@@ -59,10 +132,10 @@ class UserTokenController {
     @RequestMapping(value = "/admin/projects/{projectId}/token/{userId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     ResponseEntity<OAuth2AccessToken> getUserToken(@PathVariable("projectId") String projectId, @PathVariable("userId") String userId) {
-        return createToken(projectId, userId)
+        return createSkillsProxyToken(projectId, userId)
     }
 
-    private ResponseEntity<OAuth2AccessToken> createToken(String projectId, String userId) {
+    private ResponseEntity<OAuth2AccessToken> createSkillsProxyToken(String projectId, String userId) {
         skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
         skills.controller.exceptions.SkillsValidator.isNotBlank(userId, "User Id")
 

@@ -83,7 +83,7 @@ class OAuthUtils {
             currentUser = userAuthService.createOrUpdateUser(currentUser)
 
             // Create new Authentication using UserInfo
-            skillsAuth = new UsernamePasswordAuthenticationToken(currentUser, null, currentUser.authorities)
+            skillsAuth = new UsernamePasswordAuthenticationToken(currentUser, auth, currentUser.authorities)
         }
         return skillsAuth
     }
