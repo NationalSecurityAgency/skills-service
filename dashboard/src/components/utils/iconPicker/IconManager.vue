@@ -15,7 +15,8 @@ limitations under the License.
 */
 <template xmlns:v-if="http://www.w3.org/1999/xlink">
     <div>
-      <input type="text" class="form-control mb-3" :placeholder="searchPlaceholder" @keyup="filter($event.target.value)" ref="iconFilterInput">
+      <input type="text" class="form-control mb-3" :placeholder="searchPlaceholder"
+             @keyup="filter($event.target.value)" ref="iconFilterInput" data-cy="icon-search">
       <b-card no-body>
       <b-tabs content-class="mt-3" @input="onChange($event)" card>
         <b-tab>
@@ -29,6 +30,7 @@ limitations under the License.
                             :data-sources="fontAwesomeIcons.icons"
                             :data-component="rowItemComponent"
                             wrap-class="scroll-container"
+                            data-cy="fontAwesomeVirtualList"
                             @icon-selected="getIcon($event, fontAwesomeIcons.iconPack)"
                             ref="fontAwesomeVirtualList">
             </virtual-list>
@@ -44,6 +46,7 @@ limitations under the License.
                           :data-sources="materialIcons.icons"
                           :data-component="rowItemComponent"
                           wrap-class="scroll-container"
+                          data-cy="materialVirtualList"
                           @icon-selected="getIcon($event, materialIcons.iconPack)"
                           ref="materialVirtualList">
             </virtual-list>

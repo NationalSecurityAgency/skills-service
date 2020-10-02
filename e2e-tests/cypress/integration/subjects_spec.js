@@ -46,6 +46,76 @@ describe('Subjects Tests', () => {
         cy.contains('ID: Lotsofspecial')
     });
 
+    it('select font awesome icon', () => {
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            name: "Subject 1"
+        });
+        cy.server();
+
+        cy.visit('/projects/proj1/');
+        cy.get('.subject-settings .dropdown-toggle').click();
+        cy.get('a.dropdown-item').contains('Edit').click();
+        cy.get('div.modal-content .text-info i.fa-question-circle').click();
+        cy.get('a.nav-link').contains('Font Awesome Free').click();
+        cy.get('[data-cy=fontAwesomeVirtualList]').scrollTo(0,540);
+        cy.get('[data-cy="fas fa-archway-link"]').click();
+        cy.get('[data-cy=saveSubjectButton]').should('be.visible').click();
+        cy.get('.preview-card-title').contains('Subject 1').should('be.visible');
+        cy.get(`i.fa-archway`).should('be.visible');
+    });
+
+    it('select material icon', () => {
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            name: "Subject 1"
+        });
+        cy.server();
+
+        cy.visit('/projects/proj1/');
+        cy.get('.subject-settings .dropdown-toggle').click();
+        cy.get('a.dropdown-item').contains('Edit').click();
+        cy.get('div.modal-content .text-info i.fa-question-circle').click();
+        cy.get('a.nav-link').contains('Material').click();
+        cy.get('[data-cy=materialVirtualList]').scrollTo(0,540);
+        cy.get('[data-cy="mi mi-arrow-drop-down-circle-link"]').click();
+        cy.get('[data-cy=saveSubjectButton]').should('be.visible').click();
+        cy.get('.preview-card-title').contains('Subject 1').should('be.visible');
+        cy.get(`i.mi-arrow-drop-down-circle`).should('be.visible');
+    });
+
+    it('search icons', () => {
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            name: "Subject 1"
+        });
+        cy.server();
+
+        cy.visit('/projects/proj1/');
+        cy.get('.subject-settings .dropdown-toggle').click();
+        cy.get('a.dropdown-item').contains('Edit').click();
+        cy.get('div.modal-content .text-info i.fa-question-circle').click();
+        cy.get('[data-cy=icon-search]').type('run');
+        cy.get('.fas.fa-running').should('be.visible');
+        //filter should persist between tab changes
+        cy.get('a.nav-link').contains('Material').click();
+        cy.get('.mi.mi-directions-run').should('be.visible');
+
+        cy.get('a.nav-link').contains('Font Awesome Free').click();
+        cy.get('.fas.fa-running').should('be.visible');
+
+        //filter should not persist when icon manager is re-opened
+        cy.contains('Cancel Icon Selection').click();
+        cy.get('div.modal-content .text-info i.fa-question-circle').click();
+        cy.get('[data-cy=icon-search]').should('have.value', '');
+        cy.get('i.fas.fa-ad').should('be.visible');
+        cy.get('a.nav-link').contains('Material').click();
+        cy.get('i.mi.mi-3d-rotation').should('be.visible');
+    });
+
     it('upload custom icon', () => {
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
             projectId: 'proj1',

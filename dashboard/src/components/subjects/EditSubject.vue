@@ -68,7 +68,7 @@ limitations under the License.
 
     <div slot="modal-footer" class="w-100">
       <div v-if="displayIconManager === false">
-        <b-button variant="success" size="sm" class="float-right" @click="updateSubject">
+        <b-button variant="success" size="sm" class="float-right" @click="updateSubject" data-cy="saveSubjectButton">
           Save
         </b-button>
         <b-button variant="secondary" size="sm" class="float-right mr-2" @click="close">

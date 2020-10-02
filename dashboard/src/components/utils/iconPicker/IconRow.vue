@@ -19,7 +19,8 @@ limitations under the License.
         <a
           href="#"
           @click.stop.prevent="handleClick(item.name, item.cssClass)"
-          :class="item">
+          :class="`icon-${item.name}`"
+          :data-cy="`${item.cssClass}-link`">
           <span class="icon is-large">
             <i :class="item.cssClass"></i>
           </span>
