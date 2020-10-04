@@ -56,14 +56,21 @@ describe('Subjects Tests', () => {
 
         cy.visit('/projects/proj1/');
         cy.get('.subject-settings .dropdown-toggle').click();
-        cy.get('a.dropdown-item').contains('Edit').click();
+        cy.get('a.dropdown-item').contains('Edit').click({force:true});
         cy.get('div.modal-content .text-info i.fa-question-circle').click();
         cy.get('a.nav-link').contains('Font Awesome Free').click();
         cy.get('[data-cy=fontAwesomeVirtualList]').scrollTo(0,540);
-        cy.get('[data-cy="fas fa-archway-link"]').click();
-        cy.get('[data-cy=saveSubjectButton]').should('be.visible').click();
-        cy.get('.preview-card-title').contains('Subject 1').should('be.visible');
-        cy.get(`i.fa-archway`).should('be.visible');
+        cy.get('.icon-item>a:visible').last().then(($el)=> {
+            const clazz = $el.attr('data-cy');
+            cy.get(`[data-cy="${clazz}"]`).click({force:true});
+            cy.get('[data-cy=saveSubjectButton]').should('be.visible').click();
+            cy.get('.preview-card-title').contains('Subject 1').should('be.visible');
+            const classes = clazz.split(' ');
+            let iconClass = classes[classes.length-1];
+            iconClass = iconClass.replace(/-link$/, '')
+            cy.get(`i.${iconClass}`).should('be.visible');
+        })
+
     });
 
     it('select material icon', () => {
@@ -80,10 +87,16 @@ describe('Subjects Tests', () => {
         cy.get('div.modal-content .text-info i.fa-question-circle').click();
         cy.get('a.nav-link').contains('Material').click();
         cy.get('[data-cy=materialVirtualList]').scrollTo(0,540);
-        cy.get('[data-cy="mi mi-arrow-drop-down-circle-link"]').click();
-        cy.get('[data-cy=saveSubjectButton]').should('be.visible').click();
-        cy.get('.preview-card-title').contains('Subject 1').should('be.visible');
-        cy.get(`i.mi-arrow-drop-down-circle`).should('be.visible');
+        cy.get('.icon-item>a:visible').last().then(($el)=> {
+            const clazz = $el.attr('data-cy');
+            cy.get(`[data-cy="${clazz}"]`).click({force:true});
+            cy.get('[data-cy=saveSubjectButton]').should('be.visible').click();
+            cy.get('.preview-card-title').contains('Subject 1').should('be.visible');
+            const classes = clazz.split(' ');
+            let iconClass = classes[classes.length-1];
+            iconClass = iconClass.replace(/-link$/, '')
+            cy.get(`i.${iconClass}`).should('be.visible');
+        })
     });
 
     it('search icons', () => {
