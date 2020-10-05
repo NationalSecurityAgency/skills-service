@@ -23,6 +23,7 @@ limitations under the License.
              :bordered="options.bordered"
              :outlined="options.outlined"
              :fields="this.fieldsInternal"
+             :stacked="options.stacked"
              show-empty>
       <colgroup v-if="options.rowDetailsControls"><col style="width: 2rem;"><col></colgroup>
       <template v-if="options.rowDetailsControls" v-slot:cell(b_table_controls)="data">
@@ -62,18 +63,18 @@ limitations under the License.
 
     </b-table>
     <div v-if="!options.busy" class="row m-1 p-0 align-items-center">
-      <div class="col">
+      <div class="col-md text-center text-md-left">
         <span class="text-muted">Total Rows:</span> <strong>{{options.pagination.totalRows}}</strong>
       </div>
-      <div class="col">
+      <div class="col-md my-3 my-md-0">
         <b-pagination v-model="options.pagination.currentPage" :total-rows="options.pagination.totalRows"
                       :per-page="options.pagination.pageSize" slot-scope=""
                       pills align="center" size="sm" variant="info" class="customPagination m-0 p-0"
                       :disabled="disabled">
         </b-pagination>
       </div>
-      <div class="col text-right">
-        <span class="text-muted">Page Size:</span>
+      <div class="col-md text-center text-md-right">
+        <span class="text-muted">Per page:</span>
         <b-form-select v-model="options.pagination.pageSize" :options="options.pagination.possiblePageSizes"
                        size="sm" class="mx-2" style="width: 4rem;" :disabled="disabled"/>
         <b-button size="sm" v-b-tooltip.hover title="Download CSV" variant="outline-info" :disabled="disabled">

@@ -16,6 +16,9 @@
 var moment = require('moment-timezone');
 
 describe('Metrics Tests', () => {
+
+    const waitForSnap = 4000;
+
     beforeEach(() => {
         cy.request('POST', '/app/projects/proj1', {
             projectId: 'proj1',
@@ -62,11 +65,11 @@ describe('Metrics Tests', () => {
     })
 
 
-    it.only('achievements table', () => {
+    it('achievements table', () => {
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
             projectId: 'proj1',
             subjectId: 'subj1',
-            name: "Subject 1",
+            name: "Interesting Subject 1",
         })
 
         const numSkills =3;
@@ -75,7 +78,7 @@ describe('Metrics Tests', () => {
                 projectId: 'proj1',
                 subjectId: 'subj1',
                 skillId: `skill${skillsCounter}`,
-                name: `Skill ${skillsCounter}`,
+                name: `Very Great Skill # ${skillsCounter}`,
                 pointIncrement: '50',
                 numPerformToCompletion: '1',
             });
@@ -106,6 +109,170 @@ describe('Metrics Tests', () => {
         cy.get('[data-cy=metricsNav-Achievements]').click();
     })
 
+    it('subjects - num users per level', () => {
+        cy.server().route({
+            url: '/admin/projects/proj1/charts/NumUsersPerSubjectPerLevelChartBuilder',
+            status: 200,
+        }).as('getChartData');
+
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            name: "Interesting Subject 1",
+        })
+
+        cy.request('POST', '/admin/projects/proj1/subjects/subj2', {
+            projectId: 'proj1',
+            subjectId: 'subj2',
+            name: "Interesting Subject 2",
+        })
+
+        cy.request('POST', '/admin/projects/proj1/subjects/subj3', {
+            projectId: 'proj1',
+            subjectId: 'subj3',
+            name: "Interesting Subject 3",
+        })
+
+        const numSkills =3;
+        for (let skillsCounter = 1; skillsCounter <= numSkills; skillsCounter += 1) {
+            cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill${skillsCounter}`, {
+                projectId: 'proj1',
+                subjectId: 'subj1',
+                skillId: `skill${skillsCounter}`,
+                name: `Very Great Skill # ${skillsCounter}`,
+                pointIncrement: '50',
+                numPerformToCompletion: '1',
+            });
+        };
+
+        cy.request('POST', '/admin/projects/proj1/badges/badge1', {
+            projectId: 'proj1',
+            badgeId: 'badge1',
+            name: 'This is a cool badge',
+            "iconClass":"fas fa-jedi",
+        });
+        cy.request('POST', '/admin/projects/proj1/badge/badge1/skills/skill1')
+
+        const m = moment.utc('2020-09-12 11', 'YYYY-MM-DD HH');
+
+        cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'user0Good@skills.org', timestamp: m.clone().format('x')})
+        cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: 'user0Good@skills.org', timestamp: m.clone().subtract(1, 'day').format('x')})
+        cy.request('POST', `/api/projects/proj1/skills/skill3`, {userId: 'user0Good@skills.org', timestamp: m.clone().subtract(2, 'day').format('x')})
+
+        cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'user1Long0@skills.org', timestamp: m.clone().subtract(3, 'day').format('x')})
+        cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: 'user1Long0@skills.org', timestamp: m.clone().subtract(4, 'day').format('x')})
+
+        cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: 'user2Smith0@skills.org', timestamp: m.clone().subtract(5, 'day').format('x')})
+        cy.request('POST', `/api/projects/proj1/skills/skill3`, {userId: 'user2Smith0@skills.org', timestamp: m.clone().subtract(6, 'day').format('x')})
+
+        cy.visit('/projects/proj1/');
+        cy.clickNav('Metrics');
+        cy.get('[data-cy=metricsNav-Subjects]').click();
+        cy.wait('@getChartData');
+
+        cy.wait(waitForSnap);
+        cy.get('[data-cy=userCountsBySubjectMetric]').matchImageSnapshot();
+    })
+
+    function createSubjectObj(name, numUsers) {
+        const res = {
+            subject: name,
+            numUsersPerLevels: [],
+        }
+        for (let i = 1; i <= numUsers.length; i+= 1) {
+            res.numUsersPerLevels.push({
+                level: i,
+                numberUsers: numUsers[i-1],
+            })
+        }
+        return res;
+    }
+
+    it('subjects - num users per level - typical 6 subjects', () => {
+        cy.server().route({
+            url: '/admin/projects/proj1/charts/NumUsersPerSubjectPerLevelChartBuilder',
+            status: 200,
+            response: [
+                createSubjectObj('First Cool Subject', [23,293,493,625,293]),
+                createSubjectObj('Awesome Subject', [1265,2352,493,625,293]),
+                createSubjectObj('Other Subject', [1254,1000,852,625,293]),
+                createSubjectObj('Where subjects no go', [856,293,493,625,293]),
+                createSubjectObj('Short', [325,293,493,625,293]),
+                createSubjectObj('Interesting Subject', [1568,859,493,625,293]),
+            ],
+        }).as('getChartData');
+
+        cy.visit('/projects/proj1/');
+        cy.clickNav('Metrics');
+        cy.get('[data-cy=metricsNav-Subjects]').click();
+        cy.wait('@getChartData');
+
+        cy.wait(waitForSnap);
+        cy.get('[data-cy=userCountsBySubjectMetric]').matchImageSnapshot();
+    })
+
+    it.only('subjects - num users per level - many subjects', () => {
+        const response = [];
+        for (let i=0; i < 15; i+=1) {
+            response.push(createSubjectObj(`Subject # ${i}`, [1265,852,493,625,293]))
+        }
+
+        cy.server().route({
+            url: '/admin/projects/proj1/charts/NumUsersPerSubjectPerLevelChartBuilder',
+            status: 200,
+            response,
+        }).as('getChartData');
+
+        cy.visit('/projects/proj1/');
+        cy.clickNav('Metrics');
+        cy.get('[data-cy=metricsNav-Subjects]').click();
+        cy.wait('@getChartData');
+
+        cy.wait(waitForSnap);
+        cy.get('[data-cy=userCountsBySubjectMetric]').matchImageSnapshot();
+    })
+
+    it('subjects - num users per level - many levels', () => {
+        const response = [];
+        for (let i=0; i < 6; i+=1) {
+            response.push(createSubjectObj(`Subject # ${i}`, [1265,852,493,625,293,392,293,983,1923,1209]))
+        }
+
+        cy.server().route({
+            url: '/admin/projects/proj1/charts/NumUsersPerSubjectPerLevelChartBuilder',
+            status: 200,
+            response,
+        }).as('getChartData');
+
+        cy.visit('/projects/proj1/');
+        cy.clickNav('Metrics');
+        cy.get('[data-cy=metricsNav-Subjects]').click();
+        cy.wait('@getChartData');
+
+        cy.get('[data-cy=userCountsBySubjectMetric]').get('.b-overlay').should('not.exist');
+        cy.contains("Subject # 5")
+        cy.wait(waitForSnap);
+        cy.get('[data-cy=userCountsBySubjectMetric]').matchImageSnapshot();
+    })
+
+    it('subjects - num users per level - empty', () => {
+        const response = [];
+        cy.server().route({
+            url: '/admin/projects/proj1/charts/NumUsersPerSubjectPerLevelChartBuilder',
+            status: 200,
+            response,
+        }).as('getChartData');
+
+        cy.visit('/projects/proj1/');
+        cy.clickNav('Metrics');
+        cy.get('[data-cy=metricsNav-Subjects]').click();
+        cy.wait('@getChartData');
+
+        cy.wait(waitForSnap);
+        cy.get('[data-cy=userCountsBySubjectMetric]').matchImageSnapshot();
+    })
+
+
     it('overall levels - empty', () => {
         cy.visit('/projects/proj1/');
         cy.clickNav('Metrics');
@@ -113,7 +280,7 @@ describe('Metrics Tests', () => {
 
         cy.contains("Level 5: 0 users");
         // we have to wait for background animation to complete
-        cy.wait(2000);
+        cy.wait(waitForSnap);
         cy.get('[data-cy=projectOverallLevelsChart]').matchImageSnapshot('projectOverallLevelsChart-empty');
     });
 
@@ -150,7 +317,7 @@ describe('Metrics Tests', () => {
         cy.contains("Level 1: 6,251 users");
 
         // we have to wait for background animation to complete
-        cy.wait(2000);
+        cy.wait(waitForSnap);
         cy.get('[data-cy=projectOverallLevelsChart]').matchImageSnapshot('projectOverallLevelsChart-allLevels');
     });
 

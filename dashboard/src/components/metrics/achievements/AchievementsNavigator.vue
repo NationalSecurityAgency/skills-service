@@ -20,24 +20,24 @@ limitations under the License.
     </div>
     <div class="card-body p-0">
       <div class="row p-3">
-        <div class="col border-right">
+        <div class="col-md border-right">
           <b-form-group label="User Name Filter:" label-for="input-1" label-class="text-muted">
             <b-form-input id="user-name-filter" v-model="usernameFilter" v-on:keydown.enter="reloadTable"/>
           </b-form-group>
         </div>
-        <div class="col border-right">
+        <div class="col-6 col-md border-right">
           <b-form-group label="From Date:" label-for="input-1" label-class="text-muted">
             <b-form-datepicker id="from-date-filter" v-model="fromDateFilter" class="mb-2"></b-form-datepicker>
           </b-form-group>
         </div>
-        <div class="col border-right">
+        <div class="col-6 col-md border-right">
           <b-form-group label="To Date:" label-for="input-1" label-class="text-muted">
             <b-form-datepicker id="to-date-filter" v-model="toDateFilter" class="mb-2"></b-form-datepicker>
           </b-form-group>
         </div>
       </div>
       <div class="row px-3">
-        <div class="col border-right">
+        <div class="col-xl border-right">
           <b-form-group label="Types:" label-class="text-muted" >
             <b-form-checkbox-group
               id="checkbox-group-1"
@@ -48,12 +48,12 @@ limitations under the License.
             </b-form-checkbox-group>
           </b-form-group>
         </div>
-        <div class="col border-right">
+        <div class="col-12 col-md-6 col-xl border-right">
           <b-form-group id="input-group-3" label="Minimum Level (Subject & Skill Only):" label-for="input-3" label-class="text-muted">
             <b-form-select id="input-3" v-model="levels.selected" :options="levels.available" required/>
           </b-form-group>
         </div>
-        <div class="col">
+        <div class="col-12 col-md-6 col-xl">
           <b-form-group label="Name (Subject, Skill and Badge Only):" label-for="input-3" label-class="text-muted">
             <b-form-input id="name-filter" v-model="nameFilter" v-on:keydown.enter="reloadTable" />
           </b-form-group>
@@ -68,17 +68,35 @@ limitations under the License.
 
       <skills-b-table class="mb-5" :items="items" :options="tableOptions">
         <template v-slot:cell(username)="data">
-          <span class="ml-2">{{ data.value }}</span>
-          <b-button-group class="float-right">
-            <b-button :to="{ name: 'ClientDisplayPreview', params: { projectId: projectId, userId: data.value } }"
-                      variant="outline-info" size="sm" class="text-secondary"
-                      v-b-tooltip.hover title="View User's Client Display"><i class="fa fa-eye"/></b-button>
-            <b-button variant="outline-info" size="sm" class="text-secondary"
-                      v-b-tooltip.hover title="View User's Metrics"><i class="fa fa-chart-bar"/></b-button>
-          </b-button-group>
+          <div class="row">
+            <div class="col-12 col-md-8">
+              <span>{{ data.value }}</span>
+            </div>
+            <div class="col-12 col-md-4 text-md-right">
+              <b-button-group>
+                <b-button :to="{ name: 'ClientDisplayPreview', params: { projectId: projectId, userId: data.value } }"
+                          variant="outline-info" size="sm" class="text-secondary"
+                          v-b-tooltip.hover title="View User's Client Display"><i class="fa fa-eye"/></b-button>
+                <b-button variant="outline-info" size="sm" class="text-secondary"
+                          v-b-tooltip.hover title="View User's Metrics"><i class="fa fa-chart-bar"/></b-button>
+              </b-button-group>
+            </div>
+          </div>
         </template>
-        <template v-slot:cell(achievement)="data">
-          <an-achievement :achievement="data.value" />
+        <template v-slot:cell(type)="data">
+          <achievement-type :type="data.value" />
+        </template>
+        <template v-slot:cell(name)="data">
+          <span v-if="data.value == 'Overall'" class="small text-muted">
+            N/A
+          </span>
+          <span v-else>{{ data.value }}</span>
+        </template>
+        <template v-slot:cell(level)="data">
+          <span v-if="!data.value" class="small text-muted">
+            N/A
+          </span>
+          <span v-else>{{ data.value }}</span>
         </template>
         <template v-slot:cell(timestamp)="data">
           <span class="">{{ data.value | date }}</span>
@@ -96,11 +114,11 @@ limitations under the License.
   import moment from 'moment';
   import SkillsBTable from '../../utils/table/SkillsBTable';
   import MetricsService from '../MetricsService';
-  import AnAchievement from './AnAchievement';
+  import AchievementType from './AchievementType';
 
   export default {
     name: 'AchievementsNavigator',
-    components: { AnAchievement, SkillsBTable },
+    components: { AchievementType, SkillsBTable },
     mounted() {
       this.reloadTable();
     },
@@ -134,6 +152,7 @@ limitations under the License.
           bordered: true,
           outlined: true,
           rowDetailsControls: false,
+          stacked: 'md',
           fields: [
             {
               key: 'userName',
@@ -141,7 +160,15 @@ limitations under the License.
               label: 'Username',
             },
             {
-              key: 'achievement',
+              key: 'type',
+              sortable: false,
+            },
+            {
+              key: 'name',
+              sortable: false,
+            },
+            {
+              key: 'level',
               sortable: false,
             },
             {

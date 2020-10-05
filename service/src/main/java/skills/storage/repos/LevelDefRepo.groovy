@@ -15,11 +15,29 @@
  */
 package skills.storage.repos
 
+import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import skills.storage.model.LevelDef
+import skills.storage.model.SkillDef.ContainerType
 
 interface LevelDefRepo extends CrudRepository<LevelDef, Integer>{
 
     List<LevelDef> findAllByProjectRefId(Integer projectId)
+
+    static interface SubjectLevelCount {
+        String getSubject()
+        Long getNumberLevels()
+    }
+
+    @Query('''select sd.name as subject,  count(ld.id) as numberLevels 
+            from LevelDef as ld, SkillDef as sd 
+            where 
+                ld.skillRefId = sd.id and
+                sd.projectId = ?1 and
+                sd.type = 'Subject'
+            group by sd.skillId    
+           ''')
+    List<SubjectLevelCount> countNumLevelsPerSubject(String projectId)
+
 
 }

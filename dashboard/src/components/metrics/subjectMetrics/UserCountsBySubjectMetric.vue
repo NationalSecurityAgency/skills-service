@@ -14,42 +14,44 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div class="card">
+  <div class="card" data-cy="userCountsBySubjectMetric">
     <div class="card-header">
       <h5>Number of users for each level for each subject</h5>
     </div>
     <div class="card-body">
-      <apexchart type="bar" height="350" :options="chartOptions" :series="series"></apexchart>
+      <b-overlay v-if="loading" :show="loading" opacity=".5">
+        <apexchart v-if="loading" type="bar" height="350" :options="{}" :series="[]"></apexchart>
+      </b-overlay>
+      <b-overlay v-if="!loading" :show="isEmpty" opacity=".5">
+        <apexchart v-if="!loading" type="bar" height="350" :options="chartOptions" :series="series"></apexchart>
+        <template v-slot:overlay>
+          <div class="alert alert-info">
+            <i class="fas fa-user-clock"></i> Users have not achieved any levels, yet...</div>
+        </template>
+      </b-overlay>
     </div>
   </div>
 </template>
 
 <script>
+  import MetricsService from '../MetricsService';
+
   export default {
     name: 'UserCountsBySubjectMetric',
     data() {
       return {
-
-        series: [{
-          name: 'Level 1',
-          data: [44, 55, 57, 56, 61, 58],
-        }, {
-          name: 'Level 2',
-          data: [76, 85, 101, 98, 87, 105],
-        }, {
-          name: 'Level 3',
-          data: [35, 41, 36, 26, 45, 48],
-        }, {
-          name: 'Level 4',
-          data: [63, 60, 66, 91, 114, 94],
-        }, {
-          name: 'Level 5',
-          data: [35, 41, 36, 52, 53, 41],
-        }],
+        loading: true,
+        isEmpty: true,
+        series: [],
         chartOptions: {
           chart: {
             type: 'bar',
             height: 350,
+            toolbar: {
+              show: true,
+              offsetX: 0,
+              offsetY: -60,
+            },
           },
           plotOptions: {
             bar: {
@@ -67,7 +69,7 @@ limitations under the License.
             colors: ['transparent'],
           },
           xaxis: {
-            categories: ['Subject 1', 'Subject 2', 'Subject 3', 'Subject 4', 'Subject 5', 'Subject 6'],
+            categories: [],
           },
           yaxis: {
             title: {
@@ -85,8 +87,40 @@ limitations under the License.
             },
           },
         },
-
       };
+    },
+    mounted() {
+      MetricsService.loadChart(this.$route.params.projectId, 'NumUsersPerSubjectPerLevelChartBuilder')
+        .then((res) => {
+          this.updateChart(res);
+          this.loading = false;
+        });
+    },
+    methods: {
+      updateChart(res) {
+        const series = [];
+        const sortedSubjects = res.sort((subj) => subj.subject);
+        this.chartOptions.xaxis.categories = sortedSubjects.map((subj) => subj.subject);
+        const allLevels = sortedSubjects.map((subj) => subj.numUsersPerLevels.length);
+        if (allLevels) {
+          const maxLevel = Math.max(...allLevels);
+          for (let i = 1; i <= maxLevel; i += 1) {
+            const data = sortedSubjects.map((subj) => {
+              const found = subj.numUsersPerLevels.find((item) => item.level === i);
+              const numUsers = found ? found.numberUsers : 0;
+              if (numUsers > 0) {
+                this.isEmpty = false;
+              }
+              return numUsers;
+            });
+            series.push({
+              name: `Level ${i}`,
+              data,
+            });
+          }
+        }
+        this.series = series;
+      },
     },
   };
 </script>

@@ -245,4 +245,24 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
             @Param("types") List<SkillDef.ContainerType> types,
             @Param("includeOverallType") String includeOverallType,
             @Param("disableTypes") String disableTypes)
+
+
+    static interface SkillAndLevelUserCount {
+        String getSkillId()
+        Integer getLevel()
+        Long getNumberUsers()
+    }
+
+    @Query('''select sd.name as skillId, ua.level as level, count(ua.id) as numberUsers 
+            from UserAchievement as ua, SkillDef as sd 
+            where 
+                ua.skillId = sd.skillId and
+                ua.projectId = :projectId and
+                sd.type = :containerType
+            group by ua.skillId, ua.level    
+           ''')
+    List<SkillAndLevelUserCount> countNumUsersPerContainerTypeAndLevel(
+            @Param("projectId") String projectId,
+            @Param("containerType") SkillDef.ContainerType containerType
+    )
 }

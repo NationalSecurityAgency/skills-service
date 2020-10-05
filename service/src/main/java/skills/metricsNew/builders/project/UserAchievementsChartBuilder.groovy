@@ -50,10 +50,6 @@ class UserAchievementsChartBuilder implements MetricsChartBuilder {
         String userId
         String userName
         Long timestamp
-        MetricAchievement achievement
-    }
-
-    static class MetricAchievement {
         String skillId
         String name
         String type
@@ -62,21 +58,22 @@ class UserAchievementsChartBuilder implements MetricsChartBuilder {
 
     DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd")
     static String OverallType = "Overall"
-    private static long oneDay = 1000*60*60*24
+    private static long oneDay = 1000 * 60 * 60 * 24
     private static long oneDayMinusASecond = oneDay - 1000
-    private static long thirtyDays = 30*oneDay
+    private static long thirtyDays = 30 * oneDay
+
     @Override
     UserAchievementsRes build(String projectId, String chartId, Map<String, String> props) {
         PageRequest pageRequest = pagingParamsHelper.createPageRequest(projectId, chartId, props)
         String usernameFilter = props["usernameFilter"] ?: ""
         Date fromDate = props["fromDateFilter"] ? dateFormat.parse(props["fromDateFilter"]) : new Date(1)
-        Date toDate = props["toDateFilter"] ? new Date(dateFormat.parse(props["toDateFilter"]).time+oneDayMinusASecond) : new Date(new Date().time + 30 * thirtyDays)
+        Date toDate = props["toDateFilter"] ? new Date(dateFormat.parse(props["toDateFilter"]).time + oneDayMinusASecond) : new Date(new Date().time + 30 * thirtyDays)
 
         String skillNameFilter = props["nameFilter"] ?: "ALL"
         Integer minLevel = props["minLevel"] ? Integer.parseInt(props["minLevel"]) : -1
 
         List<String> achievementTypes = props["achievementTypes"] ? props["achievementTypes"].split(",").toList() : []
-        List<SkillDef.ContainerType> achievementTypesWithoutOverall = achievementTypes.findAll({ !it.equalsIgnoreCase(OverallType) }).collect { SkillDef.ContainerType.valueOf(it)}
+        List<SkillDef.ContainerType> achievementTypesWithoutOverall = achievementTypes.findAll({ !it.equalsIgnoreCase(OverallType) }).collect { SkillDef.ContainerType.valueOf(it) }
         String allNonOverallTypes = achievementTypesWithoutOverall.size() < 3 ? "false" : true
         String includeOverallType = achievementTypes.contains(OverallType) ? "true" : "false"
 
@@ -88,26 +85,29 @@ class UserAchievementsChartBuilder implements MetricsChartBuilder {
         List items = achievements.collect {
             UserAchievement userAchievement = it[0]
             SkillDef skillDef = it[1]
-
-            return new MetricUserAchievement(
-                    timestamp: userAchievement.achievedOn.time,
-                    userId: userAchievement.userId,
-                    userName: userAchievement.userId,
-                    achievement: getAchievement(userAchievement, skillDef)
-            )
+            return buildMetricUserAchievement(userAchievement, skillDef)
         }
         return new UserAchievementsRes(totalNumItems: totalNumItems, items: items)
     }
 
-    private MetricAchievement getAchievement(UserAchievement achievement, SkillDef skillDef) {
+    private MetricUserAchievement buildMetricUserAchievement(UserAchievement achievement, SkillDef skillDef) {
+
+        MetricUserAchievement res = new MetricUserAchievement(
+                timestamp: achievement.achievedOn.time,
+                userId: achievement.userId,
+                userName: achievement.userId)
+
         if (!achievement.skillId) {
-            return new MetricAchievement(name: "Overall", type: "Overall", level: achievement.level)
+            res.name = "Overall"
+            res.type = "Overall"
+            res.level = achievement.level
+        } else {
+            res.skillId = skillDef.skillId
+            res.name = skillDef.name
+            res.type = skillDef.type.toString()
+            res.level = achievement.level
         }
-        return new MetricAchievement(
-                skillId: skillDef.skillId,
-                name: skillDef.name,
-                type: skillDef.type.toString(),
-                level: achievement.level,
-        )
+
+        return res
     }
 }
