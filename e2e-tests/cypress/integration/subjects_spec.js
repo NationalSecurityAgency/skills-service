@@ -59,8 +59,10 @@ describe('Subjects Tests', () => {
         cy.get('a.dropdown-item').contains('Edit').click({force:true});
         cy.get('div.modal-content .text-info i.fa-question-circle').click();
         cy.get('a.nav-link').contains('Font Awesome Free').click();
+        cy.wait(1500);
+        cy.get('[role=tabpanel][aria-hidden=false]').should('be.visible');
         cy.get('[data-cy=fontAwesomeVirtualList]').scrollTo(0,540);
-        cy.get('.icon-item>a:visible', {timeout:10000}).should('be.visible').last().then(($el)=> {
+        cy.get('div[role=group] .icon-item>a:visible', {timeout:10000}).should('be.visible').last().then(($el)=> {
             const clazz = $el.attr('data-cy');
             cy.get(`[data-cy="${clazz}"]`).should('have.length', '1').click({force:true});
             cy.get('[data-cy=saveSubjectButton]').should('be.visible').click();
