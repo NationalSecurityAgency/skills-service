@@ -110,4 +110,36 @@ class OAuth2UserConverterService {
             )
         }
     }
+    static class GitLabUserConverter implements OAuth2UserConverter {
+        static final String NAME = 'name'
+        static final String EMAIL = 'email'
+
+        String clientId = 'gitlab'
+
+        @Override
+        UserInfo convert(String clientId, OAuth2User oAuth2User) {
+            String username = oAuth2User.getName()
+            assert username, "Error getting name attribute of oAuth2User [${oAuth2User}] from clientId [$clientId]"
+            String email =  oAuth2User.attributes.get(EMAIL)
+            if (!email) {
+                throw new SkillsAuthorizationException("Email must be available in your public GitLab profile")
+            }
+            String name = oAuth2User.attributes.get(NAME)
+            if (!name) {
+                throw new SkillsAuthorizationException("Name must be available in your public GitLab profile")
+            }
+            String firstName = name?.tokenize()?.first()
+            List tokens = name?.tokenize()
+            tokens?.pop()
+            tokens?.remove(username)
+            String lastName = tokens?.join(' ')
+
+            return new UserInfo(
+                    username: "${username}-${clientId}",
+                    email:email,
+                    firstName: firstName,
+                    lastName: lastName,
+            )
+        }
+    }
 }

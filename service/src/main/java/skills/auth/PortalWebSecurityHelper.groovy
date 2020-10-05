@@ -29,7 +29,7 @@ class PortalWebSecurityHelper {
                     "/icons/**", "/static/**",
                     "/skills.ico", "/skills.jpeg",
                     "/error", "/oauth/**",
-                    "/app/oAuthProviders", "/login*",
+                    "/app/oAuthProviders", "/login*", "/login/**",
                     "/performLogin", "/createAccount",
                     "/createRootAccount", '/grantFirstRoot',
                     '/userExists/**', "/app/userInfo",
