@@ -46,7 +46,7 @@ describe('Subjects Tests', () => {
         cy.contains('ID: Lotsofspecial')
     });
 
-    it.only('select font awesome icon', () => {
+    it('select font awesome icon', () => {
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
             projectId: 'proj1',
             subjectId: 'subj1',
@@ -73,7 +73,7 @@ describe('Subjects Tests', () => {
 
     });
 
-    it.only('select material icon', () => {
+    it('select material icon', () => {
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
             projectId: 'proj1',
             subjectId: 'subj1',
