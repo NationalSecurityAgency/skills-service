@@ -349,7 +349,7 @@ limitations under the License.
       onChange(tabIndex) {
         const { value } = this.$refs.iconFilterInput;
         if (tabIndex === 0) {
-          this.$refs.materialVirtualList.reset();
+          this.$refs.fontAwesomeVirtualList.reset();
           this.activePack = fontAwesomeIconsCanonical.iconPack;
           this.filter(value);
         } else if (tabIndex === 1) {
