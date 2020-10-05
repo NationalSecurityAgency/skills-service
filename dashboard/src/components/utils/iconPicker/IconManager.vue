@@ -15,7 +15,8 @@ limitations under the License.
 */
 <template xmlns:v-if="http://www.w3.org/1999/xlink">
     <div>
-      <input type="text" class="form-control mb-3" :placeholder="searchPlaceholder" @keyup="filter($event.target.value)" ref="iconFilterInput">
+      <input type="text" class="form-control mb-3" :placeholder="searchPlaceholder"
+             @keyup="filter($event.target.value)" ref="iconFilterInput" data-cy="icon-search">
       <b-card no-body>
       <b-tabs content-class="mt-3" @input="onChange($event)" card>
         <b-tab>
@@ -23,21 +24,15 @@ limitations under the License.
             <i class="fab fa-font-awesome-flag"></i> {{ fontAwesomeIcons.iconPack }}
           </template>
             <span v-if="fontAwesomeIcons.icons.length === 0 && this.activePack === fontAwesomeIcons.iconPack">No icons matched your search</span>
-            <virtual-list :size="60" :remain="5" :bench="10" wclass="scroll-container">
-              <div class="icon-row" v-for="(row, index) in fontAwesomeIcons.icons" :key="`${row[0].cssClass}-${index}`">
-                  <div class="icon-item" v-for="item in row" :key="item.cssClass">
-                    <a
-                      href="#"
-                      @click.stop.prevent="getIcon(item.name, item.cssClass, fontAwesomeIcons.iconPack)"
-                      :class="`item ${selectedCss === item.cssClass ? 'selected' : ''}`"
-                    >
-                      <span class="icon is-large">
-                        <i :class="item.cssClass"></i>
-                      </span>
-                    </a><br/>
-                    <span class="iconName">{{ item.name }}</span>
-                  </div>
-              </div>
+              <virtual-list style="height: 360px; overflow-y: auto;"
+                            :keeps="5"
+                            :data-key="uniqueIdGenerator"
+                            :data-sources="fontAwesomeIcons.icons"
+                            :data-component="rowItemComponent"
+                            wrap-class="scroll-container"
+                            data-cy="fontAwesomeVirtualList"
+                            @icon-selected="getIcon($event, fontAwesomeIcons.iconPack)"
+                            ref="fontAwesomeVirtualList">
             </virtual-list>
         </b-tab>
         <b-tab>
@@ -45,21 +40,15 @@ limitations under the License.
             <i class="fas fa-file-alt"></i> {{ materialIcons.iconPack }}
           </template>
           <span v-if="materialIcons.icons.length === 0 && this.activePack === materialIcons.iconPack">No icons matched your search</span>
-            <virtual-list :size="60" :remain="5" :bench="10" wclass="scroll-container">
-              <div class="icon-row" v-for="(row, index) in materialIcons.icons" :key="index">
-                <div class="icon-item" v-for="item in row" :key="item.cssClass">
-                  <a
-                    href="#"
-                    @click.stop.prevent="getIcon(item.name, item.cssClass, materialIcons.iconPack)"
-                    :class="`item ${selectedCss === item.cssClass ? 'selected' : ''}`"
-                  >
-                      <span class="icon is-large">
-                        <i :class="item.cssClass"></i>
-                      </span>
-                  </a><br/>
-                  <span class="iconName">{{ item.name }}</span>
-                </div>
-              </div>
+            <virtual-list style="height: 360px; overflow-y: auto;"
+                          :keeps="5"
+                          :data-key="uniqueIdGenerator"
+                          :data-sources="materialIcons.icons"
+                          :data-component="rowItemComponent"
+                          wrap-class="scroll-container"
+                          data-cy="materialVirtualList"
+                          @icon-selected="getIcon($event, materialIcons.iconPack)"
+                          ref="materialVirtualList">
             </virtual-list>
         </b-tab>
         <b-tab>
@@ -81,7 +70,7 @@ limitations under the License.
               <div class="icon-item">
                 <a
                   href="#"
-                  @click.stop.prevent="getIcon(name, cssClassname, 'Custom Icons')"
+                  @click.stop.prevent="getIcon({name, cssClassname}, 'Custom Icons')"
                   :class="`item ${selectedCss === cssClassname ? 'selected' : ''}`">
                   <span class="icon is-large text-info">
                     <i :class="cssClassname"></i>
@@ -114,6 +103,8 @@ limitations under the License.
   import materialIconsCanonical from './material-index';
   import IconManagerService from './IconManagerService';
   import ToastSupport from '../ToastSupport';
+  import IconRow from './IconRow';
+  import GroupedIcons from './GroupedIcons';
 
   const faIconList = fontAwesomeIconsCanonical.icons.slice();
   const matIconList = materialIconsCanonical.icons.slice();
@@ -131,20 +122,20 @@ limitations under the License.
   let self = null;
 
   function groupIntoRows(array, rl) {
-    let subArr = [];
+    let grouped = new GroupedIcons([]);
     const result = [];
     for (let i = 0; i < array.length; i += 1) {
       if (i > 0 && i % rl === 0) {
-        result.push(subArr);
-        subArr = [];
+        result.push(grouped);
+        grouped = new GroupedIcons([]);
       }
 
       const item = array[i];
-      subArr.push(item);
+      grouped.row.push(item);
     }
 
-    if (subArr.length > 0) {
-      result.push(subArr);
+    if (grouped.row.length > 0) {
+      result.push(grouped);
     }
 
     return result;
@@ -288,6 +279,7 @@ limitations under the License.
         materialIcons: materialIconsCanonical,
         customIconList,
         disableCustomUpload: false,
+        rowItemComponent: IconRow,
       };
     },
     computed: {
@@ -344,19 +336,24 @@ limitations under the License.
       this.resetIcons();
     },
     methods: {
-      getIcon(icon, iconCss, iconPack) {
-        this.selected = icon;
-        this.selectedCss = iconCss;
+      uniqueIdGenerator(groupedIcons) {
+        return groupedIcons.id;
+      },
+      getIcon(event, iconPack) {
+        this.selected = event.icon;
+        this.selectedCss = event.cssClass;
         this.selectedIconPack = iconPack;
 
-        this.selectIcon(icon, iconCss, iconPack);
+        this.selectIcon(event.icon, event.cssClass, iconPack);
       },
       onChange(tabIndex) {
         const { value } = this.$refs.iconFilterInput;
         if (tabIndex === 0) {
+          this.$refs.fontAwesomeVirtualList.reset();
           this.activePack = fontAwesomeIconsCanonical.iconPack;
           this.filter(value);
         } else if (tabIndex === 1) {
+          this.$refs.materialVirtualList.reset();
           this.activePack = materialIconsCanonical.iconPack;
           this.filter(value);
         } else if (tabIndex === 2) {
@@ -428,7 +425,9 @@ limitations under the License.
             this.fontAwesomeIcons.icons = groupIntoRows(faIconList, rowLength);
             this.materialIcons.icons = groupIntoRows(matIconList, rowLength);
             this.customIconList = definitiveCustomIconList;
-            this.$refs.iconFilterInput.value = '';
+            if (this.$refs.iconFilterInput) {
+              this.$refs.iconFilterInput.value = '';
+            }
           }, 100);
         }
       },
@@ -489,5 +488,10 @@ limitations under the License.
     z-index: 1000;
     display: inline-block;
     visibility: visible;
+  }
+
+  .virtual-container {
+    height: 320px;
+    overflow-y: auto;
   }
 </style>
