@@ -35,14 +35,6 @@ limitations under the License.
   const DEFAULT_STATUS_MSG = 'Drag your file here to upload or click to browse';
 
   export default {
-    $_veeValidate: {
-      value() {
-        return this.getFormData();
-      },
-      name() {
-        return this.name;
-      },
-    },
     name: 'FileUpload',
     props: ['name', 'accept'],
     data() {

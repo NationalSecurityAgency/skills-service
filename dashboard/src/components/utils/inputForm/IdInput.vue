@@ -18,7 +18,7 @@ limitations under the License.
     <div class="form-group mt-0 mb-0">
       <div class="row">
         <div class="col">
-          <label for="idInput">{{ label }}</label>
+          <label for="idInput">* {{ label }}</label>
         </div>
         <div class="col text-right">
           <i class="fas fa-question-circle mr-1 text-secondary"

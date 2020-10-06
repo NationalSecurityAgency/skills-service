@@ -34,7 +34,7 @@ limitations under the License.
             </div>
           </div>
 
-          <id-input type="text" label="* Badge ID" v-model="badgeInternal.badgeId" @input="canAutoGenerateId=false"
+          <id-input type="text" label="Badge ID" v-model="badgeInternal.badgeId" @input="canAutoGenerateId=false"
                     additional-validation-rules="uniqueId"/>
 
           <div class="mt-2">

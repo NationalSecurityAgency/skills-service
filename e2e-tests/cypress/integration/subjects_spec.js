@@ -157,14 +157,10 @@ describe('Subjects Tests', () => {
         cy.get('a.nav-link').contains('Custom').click();
 
         const filename = 'valid_icon.png';
-        cy.fixture(filename, 'binary')
-            .then(Cypress.Blob.binaryStringToBlob)
-            .then((fileContent) => {
-                cy.get('input[type=file]').attachFile({ fileContent, filePath: filename, encoding: 'utf-8' });
-                cy.wait('@uploadIcon')
+        cy.get('input[type=file]').attachFile(filename);
+        cy.wait('@uploadIcon')
 
-                cy.get('#subj1___BV_modal_body_ .proj1-validiconpng');
-            });
+        cy.get('#subj1___BV_modal_body_ .proj1-validiconpng');
     });
 
 
@@ -186,13 +182,9 @@ describe('Subjects Tests', () => {
         cy.get('a.nav-link').contains('Custom').click();
 
         const filename = 'invalid_file.txt';
-        cy.fixture(filename, 'binary')
-            .then(Cypress.Blob.binaryStringToBlob)
-            .then((fileContent) => {
-                cy.get('input[type=file]').attachFile({ fileContent, filePath: filename, encoding: 'utf-8' });
+        cy.get('input[type=file]').attachFile(filename);
 
-                cy.get('.alert-danger').contains('File is not an image format');
-            });
+        cy.get('.alert-danger').contains('File is not an image format');
     });
 
     it('upload custom icon - server side error', () => {
@@ -222,13 +214,9 @@ describe('Subjects Tests', () => {
         cy.get('a.nav-link').contains('Custom').click();
 
         const filename = 'valid_icon.png';
-        cy.fixture(filename, 'binary')
-            .then(Cypress.Blob.binaryStringToBlob)
-            .then((fileContent) => {
-                cy.get('input[type=file]').attachFile({ fileContent, filePath: filename, encoding: 'utf-8' });
+        cy.get('input[type=file]').attachFile(filename);
 
-                cy.get('.toast-body').contains('Encountered error when uploading');
-            });
+        cy.get('.toast-body').contains('Encountered error when uploading');
     });
 
 
