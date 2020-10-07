@@ -105,7 +105,7 @@ describe('Badges Tests', () => {
         cy.get('div.card-body i.fa-exclamation-circle').should('be.visible');
     });
 
-    it('badge validation', () => {
+    it.only('badge validation', () => {
         // create existing badge
         cy.request('POST', '/admin/projects/proj1/badges/badgeExist', {
             projectId: 'proj1',

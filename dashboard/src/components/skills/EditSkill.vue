@@ -26,13 +26,14 @@ limitations under the License.
                 <ValidationProvider rules="required|minNameLength|maxSkillNameLength|uniqueName" v-slot="{errors}" name="Skill Name">
                   <input type="text" class="form-control" id="skillName" @input="updateSkillId"
                          v-model="skillInternal.name" v-focus
-                          aria-required="true">
-                  <small class="form-text text-danger">{{ errors[0] }}</small>
+                          aria-required="true"
+                          data-cy="skillName">
+                  <small class="form-text text-danger" data-cy="skillNameError">{{ errors[0] }}</small>
                 </ValidationProvider>
               </div>
             </div>
             <div class="col-12 col-lg">
-              <id-input type="text" label="* Skill ID" additional-validation-rules="uniqueId"
+              <id-input type="text" label="Skill ID" additional-validation-rules="uniqueId"
                         v-model="skillInternal.skillId" @can-edit="canEditSkillId=$event"/>
             </div>
             <div class="col-12 col-lg-2 mt-2 mt-lg-0">
@@ -43,8 +44,9 @@ limitations under the License.
                 </label>
                 <ValidationProvider rules="optionalNumeric|min_value:0|maxSkillVersion|maxVersion" v-slot="{errors}" name="Version">
                   <input class="form-control" type="text"
-                         v-model="skillInternal.version" :disabled="isEdit"/>
-                  <small class="form-text text-danger">{{ errors[0] }}</small>
+                         v-model="skillInternal.version" :disabled="isEdit"
+                        data-cy="skillVersion"/>
+                  <small class="form-text text-danger" data-cy="skillVersionError">{{ errors[0] }}</small>
                 </ValidationProvider>
               </div>
             </div>
@@ -55,26 +57,28 @@ limitations under the License.
           <div class="row mt-3">
             <div class="col-12 col-lg">
               <div class="form-group mb-1">
-                <label for="subjName">* Point Increment</label>
+                <label>* Point Increment</label>
                 <ValidationProvider rules="optionalNumeric|required|min_value:1|maxPointIncrement" v-slot="{errors}" name="Point Increment">
-                  <input class="form-control" type="text"  v-model="skillInternal.pointIncrement" aria-required="true"/>
-                  <small class="form-text text-danger">{{ errors[0] }}</small>
+                  <input class="form-control" type="text"  v-model="skillInternal.pointIncrement"
+                         aria-required="true"
+                          data-cy="skillPointIncrement"/>
+                  <small class="form-text text-danger" data-cy="skillPointIncrementError">{{ errors[0] }}</small>
                 </ValidationProvider>
               </div>
             </div>
             <div class="col-12 col-lg">
               <div class="form-group mt-2 mt-lg-0">
-                <label for="subjName">* Occurrences to Completion</label>
-                <ValidationProvider rules="optionalNumeric|required|min_value:1|maxNumPerformToCompletion|moreThanMaxWindowOccurrences" v-slot="{errors}" name="Occurrences to Completion" tag="div">
+                <label>* Occurrences to Completion</label>
+                <ValidationProvider vid="totalOccurrences" rules="optionalNumeric|required|min_value:1|maxNumPerformToCompletion|moreThanMaxWindowOccurrences:@windowMaxOccurrence" v-slot="{errors}" name="Occurrences to Completion" tag="div">
                   <input class="form-control" type="text" v-model="skillInternal.numPerformToCompletion"
                          data-cy="numPerformToCompletion" aria-required="true"/>
-                  <small class="form-text text-danger">{{ errors[0] }}</small>
+                  <small class="form-text text-danger" data-cy="skillOccurrencesError">{{ errors[0] }}</small>
                 </ValidationProvider>
               </div>
             </div>
             <div class="col-12 col-lg-3">
               <div class="form-group">
-                <label for="subjName">Total Points
+                <label>Total Points
                   <inline-help msg="Derived and can't be entered directly. Total Points = Increment x Occurrences."/>
                 </label>
                 <div class="input-group">
@@ -93,7 +97,7 @@ limitations under the License.
           <div class="row">
             <div class="col-12 col-lg">
               <div class="form-group">
-                <label><b-form-checkbox id="checkbox-1" class="d-inline" v-model="skillInternal.timeWindowEnabled" v-on:input="resetTimeWindow"/>Time Window
+                <label><b-form-checkbox data-cy="timeWindowCheckbox" id="checkbox-1" class="d-inline" v-model="skillInternal.timeWindowEnabled" v-on:input="resetTimeWindow"/>Time Window
                   <inline-help msg="Uncheck to disable. When disabled skill events are applied immediately."/>
 
                 </label>
@@ -103,24 +107,24 @@ limitations under the License.
                       <div class="input-group">
                         <input class="form-control d-inline" type="text" v-model="skillInternal.pointIncrementIntervalHrs"
                                value="8" :disabled="!skillInternal.timeWindowEnabled"
-                               ref="timeWindowHours"/>
+                               ref="timeWindowHours" data-cy="timeWindowHours"/>
                         <div class="input-group-append">
                           <span class="input-group-text" id="hours-append">Hours</span>
                         </div>
                       </div>
-                      <small class="form-text text-danger">{{ errors[0] }}</small>
+                      <small class="form-text text-danger" data-cy="skillHoursError">{{ errors[0] }}</small>
                     </ValidationProvider>
                   </div>
                   <div class="col-12 col-sm">
                     <ValidationProvider rules="optionalNumeric|required|min_value:0|max_value:59|minutesMaxTimeWindow:@timeWindowHours|cantBe0IfHours0" vid="timeWindowMinutes" v-slot="{errors}" name="Minutes">
                       <div class="input-group">
                         <input class="form-control d-inline"  type="text" v-model="skillInternal.pointIncrementIntervalMins"
-                               value="0" :disabled="!skillInternal.timeWindowEnabled" ref="timeWindowMinutes"/>
+                               value="0" :disabled="!skillInternal.timeWindowEnabled" ref="timeWindowMinutes" data-cy="timeWindowMinutes"/>
                         <div class="input-group-append">
                           <span class="input-group-text" id="minutes-append">Minutes</span>
                         </div>
                       </div>
-                      <small class="form-text text-danger">{{ errors[0] }}</small>
+                      <small class="form-text text-danger" data-cy="skillMinutesError">{{ errors[0] }}</small>
                     </ValidationProvider>
                   </div>
                 </div>
@@ -128,7 +132,7 @@ limitations under the License.
               </div>
             </div>
             <div class="col-12 col-lg">
-              <ValidationProvider rules="optionalNumeric|min_value:1|lessThanTotalOccurrences|maxNumPointIncrementMaxOccurrences" v-slot="{errors}" name="Window's Max Occurrences">
+              <ValidationProvider vid="windowMaxOccurrence" rules="optionalNumeric|min_value:1|lessThanTotalOccurrences:@totalOccurrences|maxNumPointIncrementMaxOccurrences" v-slot="{errors}" name="Window's Max Occurrences">
                 <div class="form-group">
                   <label>Window's Max Occurrences
                     <inline-help
@@ -136,8 +140,8 @@ limitations under the License.
                   </label>
 
                     <input class="form-control" type="text" v-model="skillInternal.numPointIncrementMaxOccurrences"
-                           :disabled="!skillInternal.timeWindowEnabled"/>
-                    <small class="form-text text-danger">{{ errors[0] }}</small>
+                           :disabled="!skillInternal.timeWindowEnabled" data-cy="maxOccurrences"/>
+                    <small class="form-text text-danger" data-cy="skillMaxOccurrencesError">{{ errors[0] }}</small>
                 </div>
               </ValidationProvider>
             </div>
@@ -150,8 +154,8 @@ limitations under the License.
             <label class="label">Description</label>
             <div class="control">
               <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" v-slot="{errors}" name="Skill Description">
-                <markdown-editor v-if="skillInternal" v-model="skillInternal.description"/>
-                <small class="form-text text-danger">{{ errors[0] }}</small>
+                <markdown-editor v-if="skillInternal" v-model="skillInternal.description" data-cy="skillDescription"/>
+                <small class="form-text text-danger" data-cy="skillDescriptionError">{{ errors[0] }}</small>
               </ValidationProvider>
             </div>
           </div>
@@ -194,8 +198,16 @@ limitations under the License.
   import InputSanitizer from '../utils/InputSanitizer';
 
   extend('required', required);
-  extend('min_value', min_value);
-  extend('max_value', max_value);
+  extend('min_value', {
+    // eslint-disable-next-line camelcase
+    ...min_value,
+    message: (fieldname, placeholders) => `${fieldname} must be ${placeholders.min} or more`,
+  });
+  extend('max_value', {
+    // eslint-disable-next-line camelcase
+    ...max_value,
+    message: (fieldname, placeholders) => `${fieldname} must be ${placeholders.max} or less`,
+  });
 
   export default {
     name: 'EditSkill',
@@ -314,14 +326,16 @@ limitations under the License.
 
         extend('lessThanTotalOccurrences', {
           message: () => 'Must be less than or equals to \'Occurrences to Completion\' field',
-          validate(value) {
-            return parseInt(self.skillInternal.numPerformToCompletion, 10) >= parseInt(value, 10);
+          params: ['target'],
+          validate(value, { target }) {
+            return parseInt(target, 10) >= parseInt(value, 10);
           },
         });
         extend('moreThanMaxWindowOccurrences', {
           message: () => 'Must be more than or equals to \'Max Occurrences Within Window\' field',
-          validate(value) {
-            return parseInt(value, 10) >= parseInt(self.skillInternal.numPointIncrementMaxOccurrences, 10);
+          params: ['target'],
+          validate(value, { target }) {
+            return parseInt(value, 10) >= parseInt(target, 10);
           },
         });
         extend('cantBe0IfHours0', {
@@ -353,7 +367,7 @@ limitations under the License.
           },
         });
 
-        const validateWindow = (windowHours, windowMinutes) => {
+        const validateWindow = (windowHours, windowMinutes, validator) => {
           let hours = 0;
           let minutes = 0;
           if (windowHours) {
@@ -364,6 +378,13 @@ limitations under the License.
             minutes = parseInt(windowMinutes, 10);
           }
 
+          if (validator === 'hoursMaxTimeWindow' && hours === 0) {
+            return true;
+          }
+          if (validator === 'minutesMaxTimeWindow' && minutes === 0) {
+            return true;
+          }
+
           return ((hours * 60) + minutes) <= this.$store.getters.config.maxTimeWindowInMinutes;
         };
 
@@ -371,14 +392,14 @@ limitations under the License.
           message: () => `Time Window must be less then ${self.$store.getters.config.maxTimeWindowInMinutes / 60} hours`,
           params: ['target'],
           validate(value, { target }) {
-            return validateWindow(value, target);
+            return validateWindow(value, target, 'hoursMaxTimeWindow');
           },
         });
         extend('minutesMaxTimeWindow', {
           message: () => `Time Window must be less then ${self.$store.getters.config.maxTimeWindowInMinutes / 60} hours`,
           params: ['target'],
           validate(value, { target }) {
-            return validateWindow(target, value);
+            return validateWindow(target, value, 'minutesMaxTimeWindow');
           },
         });
       },

@@ -27,6 +27,122 @@ describe('Skills Tests', () => {
         })
     });
 
+    it.only('validation', () => {
+      cy.server()
+      cy.route('POST', `/admin/projects/proj1/subjects/subj1/skills/Skill1Skill`).as('postNewSkill');
+      cy.route('GET', `/admin/projects/proj1/subjects/subj1/skills/Skill1Skill`).as('getSkill');
+      cy.route({
+        method: 'GET',
+        url: '/admin/projects/proj1/subjects/subj1'
+      }).as('loadSubject');
+
+      cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/duplicate', {
+        projectId: 'proj1',
+        subjectId: "subj1",
+        skillId: "duplicate",
+        name: "Duplicate",
+        pointIncrement: '50',
+        numPerformToCompletion: '5'
+      });
+
+      cy.visit('/projects/proj1/subjects/subj1');
+      cy.wait('@loadSubject');
+
+      cy.clickButton('Skill');
+      cy.get('[data-cy=skillName]').type('Skill123');
+      cy.get('[data-cy=skillDescription]').type('loremipsum');
+      cy.get('[data-cy=saveSkillButton]').should('be.enabled');
+      cy.get('[data-cy=skillName]').type('{selectall}Sk');
+      cy.get('[data-cy=skillNameError]').contains('Skill Name cannot be less than 3 characters.').should('be.visible');
+      cy.get('[data-cy=saveSkillButton]').should('be.disabled');
+      const invalidName = Array(101).fill('a').join('');
+      cy.get('[data-cy=skillName]').invoke('val', invalidName).trigger('input');
+      cy.get('[data-cy=skillNameError]').contains('Skill Name cannot exceed 100 characters.').should('be.visible');
+      cy.get('[data-cy=saveSkillButton]').should('be.disabled');
+      cy.get('[data-cy=skillName]').type('{selectall}Duplicate');
+      cy.get('[data-cy=skillNameError]').contains('The value for the Skill Name is already taken.').should('be.visible');
+      cy.get('[data-cy=saveSkillButton]').should('be.disabled');
+      cy.get('[data-cy=skillName]').type('{selectall}Skill123');
+      cy.get('[data-cy=skillNameError]').should('not.be.visible');
+
+      cy.get('[data-cy=skillVersion]').type('{selectall}-5');
+      cy.get('[data-cy=skillVersionError]').contains('Version is not valid').should('be.visible');
+      cy.get('[data-cy=saveSkillButton]').should('be.disabled');
+      cy.get('[data-cy=skillVersion]').type('{selectall}1000');
+      cy.get('[data-cy=skillVersionError]').contains('Version cannot exceed 999.').should('be.visible');
+      cy.get('[data-cy=saveSkillButton]').should('be.disabled');
+      cy.get('[data-cy=skillVersion]').type('{selectall}2');
+      cy.get('[data-cy=skillVersionError]').contains('Version 0 is the latest; max supported version is 1 (latest + 1)').should('be.visible');
+      cy.get('[data-cy=saveSkillButton]').should('be.disabled');
+      cy.get('[data-cy=skillVersion]').type('{selectall}1');
+      cy.get('[data-cy=skillVersionError]').should('not.be.visible');
+      cy.get('[data-cy=saveSkillButton]').should('be.enabled');
+
+      cy.get('[data-cy=skillPointIncrement]').type('{selectall}-42');
+      cy.get('[data-cy=skillPointIncrementError]').contains('Point Increment is not valid').should('be.visible');
+      cy.get('[data-cy=saveSkillButton]').should('be.disabled');
+      cy.get('[data-cy=skillPointIncrement]').type('{selectall}11111111111');
+      cy.get('[data-cy=skillPointIncrementError]').contains('Point Increment cannot exceed 10000.').should('be.visible');
+      cy.get('[data-cy=saveSkillButton]').should('be.disabled');
+      cy.get('[data-cy=skillPointIncrement]').type('{selectall}11');
+      cy.get('[data-cy=skillPointIncrementError]').should('not.be.visible');
+      cy.get('[data-cy=saveSkillButton]').should('be.enabled');
+
+      cy.get('[data-cy=numPerformToCompletion]').type('{selectall}-5');
+      cy.get('[data-cy=skillOccurrencesError]').contains('Occurrences to Completion is not valid').should('be.visible');
+      cy.get('[data-cy=saveSkillButton]').should('be.disabled');
+      cy.get('[data-cy=numPerformToCompletion]').type('{selectall}1000000');
+      cy.get('[data-cy=skillOccurrencesError]').contains('Occurrences to Completion cannot exceed 10000.').should('be.visible');
+      cy.get('[data-cy=saveSkillButton]').should('be.disabled');
+      cy.get('[data-cy=maxOccurrences]').type('{selectall}5')
+      cy.get('[data-cy=numPerformToCompletion]').type('{selectall}3');
+      cy.get('[data-cy=skillOccurrencesError]').contains('Must be more than or equals to \'Max Occurrences Within Window\' field').should('be.visible');
+      cy.get('[data-cy=skillMaxOccurrencesError]').contains( 'Must be less than or equals to \'Occurrences to Completion\' field');
+      cy.get('[data-cy=saveSkillButton]').should('be.disabled');
+      cy.get('[data-cy=maxOccurrences]').type('{selectall}2');
+      cy.get('[data-cy=skillOccurrencesError]').should('not.be.visible');
+      cy.get('[data-cy=skillMaxOccurrencesError]').should('not.be.visible');
+      cy.get('[data-cy=saveSkillButton]').should('be.enabled');
+      cy.get('[data-cy=numPerformToCompletion]').type('{selectall}1200');
+      cy.get('[data-cy=saveSkillButton]').should('be.enabled');
+      cy.get('[data-cy=maxOccurrences]').type('{selectall}1000')
+      cy.get('[data-cy=skillMaxOccurrencesError]').contains('Window\'s Max Occurrences cannot exceed 999.');
+      cy.get('[data-cy=saveSkillButton]').should('be.disabled');
+      cy.get('[data-cy=maxOccurrences]').type('{selectall}999')
+      cy.get('[data-cy=saveSkillButton]').should('be.enabled');
+
+      cy.get('[data-cy=timeWindowHours]').type('{selectall}0');
+      cy.get('[data-cy=skillHoursError]').contains('Hours must be > 0 if Minutes = 0');
+      cy.get('[data-cy=saveSkillButton]').should('be.disabled');
+      cy.get('[data-cy=timeWindowMinutes]').type('{selectall}90');
+      cy.get('[data-cy=skillHoursError]').should('not.be.visible');
+      cy.get('[data-cy=skillMinutesError]').should('not.be.visible');
+      cy.get('[data-cy=saveSkillButton]').should('be.enabled');
+      cy.get('[data-cy=timeWindowMinutes]').type('{selectall}0');
+      cy.get('[data-cy=skillMinutesError]').contains('Minutes must be > 0 if Hours = 0');
+      cy.get('[data-cy=saveSkillButton]').should('be.disabled');
+      cy.get('[data-cy=timeWindowHours]').type('{selectall}1');
+      cy.get('[data-cy=skillHoursError]').should('not.be.visible');
+      cy.get('[data-cy=skillMinutesError]').should('not.be.visible');
+      cy.get('[data-cy=saveSkillButton]').should('be.enabled');
+      //721hrs
+      //43200 mins + 1
+      cy.get('[data-cy=timeWindowHours]').type('{selectall}721');
+      cy.get('[data-cy=skillHoursError]').contains('Time Window must be less then 720 hours');
+      cy.get('[data-cy=skillMinutesError]').should('not.be.visible');
+      cy.get('[data-cy=saveSkillButton]').should('be.disabled');
+      cy.get('[data-cy=timeWindowHours]').type('{selectall}0');
+      cy.get('[data-cy=timeWindowMinutes]').type('{selectall}43201');
+      cy.get('[data-cy=skillMinutesError').contains('Minutes must be 59 or less');
+      cy.get('[data-cy=skillHoursError]').should('not.be.visible');
+      cy.get('[data-cy=saveSkillButton]').should('be.disabled');
+
+
+
+
+
+    });
+
     it('edit number of occurrences', () => {
         cy.server()
         cy.route('POST', `/admin/projects/proj1/subjects/subj1/skills/Skill1Skill`).as('postNewSkill');
