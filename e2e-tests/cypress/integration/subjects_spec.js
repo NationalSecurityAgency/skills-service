@@ -24,7 +24,7 @@ describe('Subjects Tests', () => {
         })
     });
 
-    it.only('subject levels validation', () => {
+    it('subject levels validation', () => {
         cy.server();
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
             projectId: 'proj1',
