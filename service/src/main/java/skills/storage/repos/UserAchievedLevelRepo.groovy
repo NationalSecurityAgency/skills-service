@@ -265,4 +265,23 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
             @Param("projectId") String projectId,
             @Param("containerType") SkillDef.ContainerType containerType
     )
+
+
+    static interface SkillAndDayUserCount {
+        Date getDay()
+        Integer getLevel()
+        Long getNumberUsers()
+    }
+
+    @Query('''select ua.achievedOn as day, ua.level as level, count(ua.id) as numberUsers 
+            from UserAchievement as ua 
+            where 
+                ua.skillId = :skillId and
+                ua.projectId = :projectId
+            group by ua.achievedOn, ua.level     
+           ''')
+    List<SkillAndDayUserCount> countNumUsersOverTimeByProjectIdAndSkillId(
+            @Param("projectId") String projectId,
+            @Param("skillId") String skillId
+    )
 }

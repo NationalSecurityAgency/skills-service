@@ -14,54 +14,79 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-<div class="card mt-2">
+<div class="card mt-2"  data-cy="subjectNumUsersPerLevelOverTime">
   <div class="card-header">
     <h5>Number of users for each level over time</h5>
   </div>
   <div class="card-body">
-    <b-form-select style="width: 20rem;" id="input-3" class="mb-2"
-                   v-model="subjects.selected" :options="subjects.available" required/>
-    <apexchart type="area" height="300" :options="chartOptions" :series="series"></apexchart>
+    <b-form inline class="mb-4">
+      <b-overlay :show="loading.subjects" rounded="sm" opacity="0.5"
+                 spinner-variant="info" spinner-type="grow" spinner-small>
+        <b-form-select v-model="subjects.selected" :options="subjects.available"
+                       data-cy="subjectNumUsersPerLevelOverTime-subjectSelector" required>
+          <template v-slot:first>
+            <b-form-select-option :value="null" disabled>-- Please select a subject --</b-form-select-option>
+          </template>
+        </b-form-select>
+      </b-overlay>
+      <b-button variant="outline-info" class="ml-2" :disabled="!subjects.selected"
+        @click="loadChart">
+        <i class="fas fa-paint-roller"></i> Generate
+      </b-button>
+    </b-form>
+    <b-overlay :show="loading.charts || isSeriesEmpty" opacity=".5">
+      <apexchart type="area" height="300" :options="chartOptions" :series="series"></apexchart>
+      <template v-slot:overlay>
+        <div v-if="loading.charts">
+          <b-spinner variant="info" label="Spinning"></b-spinner>
+        </div>
+        <div v-if="!loading.charts && !loading.generatedAtLeastOnce && isSeriesEmpty" class="alert alert-info">
+          <i class="fas fa-chart-line"></i> Generate the chart using controls above!
+        </div>
+        <div v-if="!loading.charts && loading.generatedAtLeastOnce && isSeriesEmpty" class="alert alert-info">
+          <i class="fas fa-cat"></i> Zero users achieved levels for this subject!
+        </div>
+      </template>
+    </b-overlay>
   </div>
 </div>
 </template>
 
 <script>
+  import numberFormatter from '@/filters/NumberFilter';
+  import MetricsService from '../MetricsService';
+  import SubjectsService from '../../subjects/SubjectsService';
+
   export default {
     name: 'SubjectLevelsOverTime',
     data() {
       return {
-        subjects: {
-          selected: 'Subject 1',
-          available: ['Subject 1', 'Subject 2', 'Subject 3', 'Subject 4', 'Subject 5'],
+        loading: {
+          subjects: true,
+          charts: false,
+          generatedAtLeastOnce: false,
         },
-        series: [{
-          name: 'Level 1',
-          data: this.generateDayWiseTimeSeries(new Date('11 Feb 2020').getTime(), 100, {
-            min: 10,
-            max: 60,
-          }),
-        }, {
-          name: 'Level 2',
-          data: this.generateDayWiseTimeSeries(new Date('11 Mar 2020').getTime(), 71, {
-            min: 10,
-            max: 60,
-          }),
-        }, {
-          name: 'Level 3',
-          data: this.generateDayWiseTimeSeries(new Date('22 Apr 2020').getTime(), 29, {
-            min: 10,
-            max: 60,
-          }),
-        }],
+        subjects: {
+          selected: null,
+          available: [],
+        },
+        series: [],
         chartOptions: {
           chart: {
             type: 'line',
+            toolbar: {
+              offsetY: -20,
+            },
           },
           colors: ['#008FFB', '#546E7A', '#00E396'],
           yaxis: {
             title: {
               text: '# of users',
+            },
+            labels: {
+              formatter(val) {
+                return numberFormatter(val);
+              },
             },
           },
           xaxis: {
@@ -70,27 +95,45 @@ limitations under the License.
           dataLabels: {
             enabled: false,
           },
+          legend: {
+            showForSingleSeries: true,
+          },
         },
       };
     },
+    mounted() {
+      this.loadSubjects();
+      // this.loadChart('subj1');
+    },
+    computed: {
+      isSeriesEmpty() {
+        return !this.series || this.series.length === 0;
+      },
+    },
     methods: {
-      generateDayWiseTimeSeries(xValStart, count, yrange) {
-        let baseXVal = xValStart;
-        let baseYVal = 0;
-        let i = 0;
-        const series = [];
-        while (i < count) {
-          const x = baseXVal;
-          const y = baseYVal;
-          series.push([x, y]);
+      loadSubjects() {
+        SubjectsService.getSubjects(this.$route.params.projectId)
+          .then((res) => {
+            this.subjects.available = res.map((subj) => ({ value: subj.subjectId, text: subj.name }));
+            this.loading.subjects = false;
+          });
+      },
+      loadChart() {
+        this.loading.charts = true;
+        const params = { subjectId: this.subjects.selected };
+        MetricsService.loadChart(this.$route.params.projectId, 'usersByLevelForSubjectOverTimeChartBuilder', params)
+          .then((res) => {
+            this.series = res.map((resItem) => {
+              const data = resItem.counts.map((dayCount) => [dayCount.value, dayCount.count]);
+              return {
+                name: `Level ${resItem.level}`,
+                data,
+              };
+            });
 
-          baseXVal += 86400000;
-          // console.log(`${xValStartGrowing} <> ${x}`);
-          const randomValue = Math.floor(Math.random() * (yrange.max - yrange.min + 1)) + yrange.min;
-          baseYVal += randomValue;
-          i += 1;
-        }
-        return series;
+            this.loading.charts = false;
+            this.loading.generatedAtLeastOnce = true;
+          });
       },
     },
 

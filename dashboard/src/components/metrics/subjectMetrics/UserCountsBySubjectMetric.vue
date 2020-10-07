@@ -90,7 +90,7 @@ limitations under the License.
       };
     },
     mounted() {
-      MetricsService.loadChart(this.$route.params.projectId, 'NumUsersPerSubjectPerLevelChartBuilder')
+      MetricsService.loadChart(this.$route.params.projectId, 'numUsersPerSubjectPerLevelChartBuilder')
         .then((res) => {
           this.updateChart(res);
           this.loading = false;

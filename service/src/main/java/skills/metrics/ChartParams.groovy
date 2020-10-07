@@ -20,6 +20,7 @@ import groovy.transform.CompileStatic
 @CompileStatic
 class ChartParams {
     public static final String CHART_BUILDER_ID = 'chartBuilderId'
+    public static final String SUBJECT_ID = 'subjectId'
     public static final String NUM_DAYS = 'numDays' // limit data to X days
     public static final String NUM_MONTHS = 'numMonths' // limit data to X months
     public static final String LOAD_DATA_FOR_FIRST = 'loadDataForFirst'  // only load the first X charts data for a section

@@ -20,7 +20,7 @@ class NumUsersPerSubjectPerLevelChartBuilder implements MetricsChartBuilder {
 
     @Override
     String getId() {
-        return "NumUsersPerSubjectPerLevelChartBuilder"
+        return "numUsersPerSubjectPerLevelChartBuilder"
     }
 
     static class SubjectLevelCounts {
