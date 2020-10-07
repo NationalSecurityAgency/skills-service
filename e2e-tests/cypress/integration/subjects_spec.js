@@ -72,7 +72,6 @@ describe('Subjects Tests', () => {
             iconClass = iconClass.replace(/-link$/, '')
             cy.get(`i.${iconClass}`).should('be.visible');
         })
-
     });
 
     it('select material icon', () => {

@@ -27,7 +27,7 @@ describe('Skills Tests', () => {
         })
     });
 
-    it.only('validation', () => {
+    it('validation', () => {
       cy.server()
       cy.route('POST', `/admin/projects/proj1/subjects/subj1/skills/Skill1Skill`).as('postNewSkill');
       cy.route('GET', `/admin/projects/proj1/subjects/subj1/skills/Skill1Skill`).as('getSkill');
