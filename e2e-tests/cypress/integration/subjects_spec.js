@@ -24,6 +24,50 @@ describe('Subjects Tests', () => {
         })
     });
 
+    it.only('subject levels validation', () => {
+        cy.server();
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            name: "Subject 1"
+        });
+        cy.route({
+            method: 'GET',
+            url: '/admin/projects/proj1/subjects/subj1'
+        }).as('loadSubject');
+
+        cy.visit('/projects/proj1/subjects/subj1');
+        cy.wait('@loadSubject');
+
+        cy.contains('Levels').click();
+        cy.get('[data-cy=editLevelButton]').first().click();
+        cy.get('[data-cy=levelPercent]').type('{selectall}1000');
+        cy.get('[data-cy=levelPercentError]').contains('Percent must be 100 or less');
+        cy.get('[data-cy=saveLevelButton]').should('be.disabled');
+        cy.get('[data-cy=levelPercent]').type('{selectall}-1000');
+        cy.get('[data-cy=levelPercentError]').contains('Percent may only contain numeric characters.');
+        cy.get('[data-cy=saveLevelButton]').should('be.disabled');
+        cy.get('[data-cy=levelPercent').type('{selectall}50')
+        cy.get('[data-cy=levelPercentError').contains('Percent must not overlap with other levels');
+        cy.get('[data-cy=saveLevelButton]').should('be.disabled');
+        cy.get('[data-cy=cancelLevel]').click();
+
+        cy.contains('Add Next').click();
+        cy.get('[data-cy=levelName]').type('Black Belt');
+        cy.get('[data-cy=levelNameError').contains('Name is already taken.');
+        cy.get('[data-cy=saveLevelButton]').should('be.disabled');
+        const invalidName = Array(1000).fill('a').join('');
+        cy.get('[data-cy=levelName]').invoke('val', invalidName).trigger('input');
+        cy.get('[data-cy=levelNameError').contains('Name cannot exceed 50 characters.');
+        cy.get('[data-cy=saveLevelButton]').should('be.disabled');
+
+        cy.get('[data-cy=levelName]').type('{selectall}Coral Belt');
+        cy.get('[data-cy=levelNameError]').should('not.be.visible');
+        cy.get('[data-cy=levelPercent]').type('{selectall}5');
+        cy.get('[data-cy=levelPercentError]').contains('Percent % must not overlap with other levels');
+        cy.get('[data-cy=saveLevelButton]').should('be.disabled');
+    });
+
     it('create subject with special chars', () => {
         const expectedId = 'LotsofspecialPcharsSubject';
         const providedName = "!L@o#t$s of %s^p&e*c(i)/?#a_l++_|}{P c'ha'rs";

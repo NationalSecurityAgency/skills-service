@@ -27,14 +27,14 @@ limitations under the License.
                   <label for="editLevel-level">* Level</label>
                   <ValidationProvider name="Level" :debounce=500 v-slot="{errors}" rules="optionalNumeric|required|min_value:0|max_value:100">
                     <b-form-input v-focus id="editLevel-level" v-model="levelInternal.level" name="level" :disabled="isEdit"
-                    aria-required="true"></b-form-input>
-                    <small class="form-text text-danger" v-show="errors[0]">{{ errors[0] }}</small>
+                    aria-required="true" data-cy="levelId"></b-form-input>
+                    <small class="form-text text-danger" v-show="errors[0]" data-cy="levelIdError">{{ errors[0] }}</small>
                   </ValidationProvider>
                   <template v-if="!levelAsPoints">
                     <label for="editLevel-percent" class="mt-3">* Percent</label>
                     <ValidationProvider name="Percent" :debounce=500 v-slot="{errors}" rules="optionalNumeric|required|min_value:0|max_value:100|overlap">
-                      <b-form-input id="editLevel-percent" v-model="levelInternal.percent" name="percent" aria-required="true"></b-form-input>
-                      <small class="form-text text-danger" v-show="errors[0]">{{ errors[0] }}</small>
+                      <b-form-input id="editLevel-percent" v-model="levelInternal.percent" name="percent" aria-required="true" data-cy="levelPercent"></b-form-input>
+                      <small class="form-text text-danger" v-show="errors[0]" data-cy="levelPercentError">{{ errors[0] }}</small>
                     </ValidationProvider>
                   </template>
                   <template v-else>
@@ -54,16 +54,17 @@ limitations under the License.
 
                   <label for="editLevel-name" class="mt-3">Name <span class="text-muted">(optional)</span></label>
                   <ValidationProvider name="Name" :debounce=500 v-slot="{errors}" rules="maxLevelNameLength|uniqueName">
-                    <b-form-input id="editLevel-name" v-model="levelInternal.name" name="name"></b-form-input>
-                    <small class="form-text text-danger" v-show="errors[0]">{{ errors[0] }}</small>
+                    <b-form-input id="editLevel-name" v-model="levelInternal.name" name="name" data-cy="levelName"></b-form-input>
+                    <small class="form-text text-danger" v-show="errors[0]" data-cy="levelNameError">{{ errors[0] }}</small>
                   </ValidationProvider>
                 </template>
                 <template v-else>
                   <template v-if="!levelAsPoints">
                     <label for="newLevel-percent">* Percent %</label>
                     <ValidationProvider name="Percent %" :debounce=500 v-slot="{errors}" rules="optionalNumeric|required|min_value:0|max_value:100|overlap">
-                      <b-form-input v-focus id="newLevel-percent" v-model="levelInternal.percent" name="percent" aria-required="true"></b-form-input>
-                      <small class="form-text text-danger" v-show="errors[0]">{{ errors[0] }}</small>
+                      <b-form-input v-focus id="newLevel-percent" v-model="levelInternal.percent"
+                                    name="percent" aria-required="true" data-cy="levelPercent"></b-form-input>
+                      <small class="form-text text-danger" v-show="errors[0]" data-cy="levelPercentError">{{ errors[0] }}</small>
                     </ValidationProvider>
                   </template>
                   <template v-else>
@@ -75,8 +76,8 @@ limitations under the License.
                   </template>
                   <label for="newLevel-name" class="mt-3">Name <span class="text-muted">(optional)</span></label>
                   <ValidationProvider name="Name" :debounce=500 v-slot="{errors}" rules="maxLevelNameLength|uniqueName">
-                    <b-form-input id="newLevel-name" v-model="levelInternal.name" name="name"></b-form-input>
-                    <small class="form-text text-danger" v-show="errors[0]">{{ errors[0] }}</small>
+                    <b-form-input id="newLevel-name" v-model="levelInternal.name" name="name" data-cy="levelName"></b-form-input>
+                    <small class="form-text text-danger" v-show="errors[0]" data-cy="levelNameError">{{ errors[0] }}</small>
                   </ValidationProvider>
                 </template>
             </div>
@@ -100,7 +101,7 @@ limitations under the License.
                     data-cy="saveLevelButton">
             Save
           </b-button>
-          <b-button variant="secondary" size="sm" class="float-right mr-2" @click="closeMe">
+          <b-button variant="secondary" size="sm" class="float-right mr-2" @click="closeMe" data-cy="cancelLevel">
             Cancel
           </b-button>
         </div>
@@ -118,8 +119,16 @@ limitations under the License.
   import InputSanitizer from '../utils/InputSanitizer';
 
   extend('required', required);
-  extend('min_value', min_value);
-  extend('max_value', max_value);
+  extend('min_value', {
+    // eslint-disable-next-line camelcase
+    ...min_value,
+    message: (fieldname, placeholders) => `${fieldname} must be ${placeholders.min} or greater`,
+  });
+  extend('max_value', {
+    // eslint-disable-next-line camelcase
+    ...max_value,
+    message: (fieldname, placeholders) => `${fieldname} must be ${placeholders.max} or less`,
+  });
 
   export default {
     name: 'NewLevel',
