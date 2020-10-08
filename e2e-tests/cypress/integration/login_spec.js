@@ -144,7 +144,7 @@ describe('Login Tests', () => {
     cy.visit('/');
     cy.contains('Login').should('be.disabled');
 
-    const expectedText = 'The Email Address field must be a valid email';
+    const expectedText = 'Email Address must be a valid email';
 
     cy.get('#username').type('notvalid');
     cy.get('#inputPassword').type('12345678');
