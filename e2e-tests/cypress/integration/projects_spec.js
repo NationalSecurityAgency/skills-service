@@ -180,7 +180,7 @@ describe('Projects Tests', () => {
     cy.get('[data-cy="projectName"]').type('New Project');
     cy.contains('Enable').click();
     cy.getIdField().clear()
-    cy.get('[data-cy=idError]').contains('The Project ID field is required').should('be.visible');
+    cy.get('[data-cy=idError]').contains('Project ID is required').should('be.visible');
     cy.get('[data-cy=saveProjectButton').should('be.disabled');
   })
 

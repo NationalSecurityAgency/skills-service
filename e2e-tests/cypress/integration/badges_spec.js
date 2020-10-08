@@ -155,7 +155,7 @@ describe('Badges Tests', () => {
         cy.get('[data-cy=idError]').should('not.be.visible');
 
         // id must not have special chars
-        msg = 'The Badge ID field may only contain alpha-numeric characters';
+        msg = 'Badge ID may only contain alpha-numeric characters';
         cy.getIdField().clear().type('With$Special');
         cy.get('[data-cy=idError]').contains(msg).should('be.visible');
         cy.getIdField().clear().type('GoodToGo');

@@ -351,7 +351,7 @@ describe('Skills Tests', () => {
         cy.wait('@loadSkill');
         cy.contains('Add Event').click();
 
-        const expectedErrMsg = 'The User Id field may not contain spaces';
+        const expectedErrMsg = 'User Id may not contain spaces';
         const userIdSelector = '[data-cy=userIdInput]';
         const addButtonSelector = '[data-cy=addSkillEventButton]';
 
