@@ -51,7 +51,7 @@ export default {
   },
   newUserObjNoSpacesValidatorInNonPkiMode(isPkiMode) {
     return {
-      message: (field) => `The ${field} field may not contain spaces`,
+      message: (field) => `${field} may not contain spaces`,
       validate(value) {
         if (isPkiMode || !value.userId) {
           return true;
