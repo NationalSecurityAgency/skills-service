@@ -113,12 +113,11 @@ limitations under the License.
 <script>
   import { extend } from 'vee-validate';
   // eslint-disable-next-line camelcase
-  import { required, min_value, max_value } from 'vee-validate/dist/rules';
+  import { min_value, max_value } from 'vee-validate/dist/rules';
   import IconPicker from '../utils/iconPicker/IconPicker';
   import IconManager from '../utils/iconPicker/IconManager';
   import InputSanitizer from '../utils/InputSanitizer';
 
-  extend('required', required);
   extend('min_value', {
     // eslint-disable-next-line camelcase
     ...min_value,

@@ -189,7 +189,7 @@ limitations under the License.
 <script>
   import { extend } from 'vee-validate';
   // eslint-disable-next-line camelcase
-  import { required, min_value, max_value } from 'vee-validate/dist/rules';
+  import { min_value, max_value } from 'vee-validate/dist/rules';
   import SkillsService from './SkillsService';
   import MarkdownEditor from '../utils/MarkdownEditor';
   import IdInput from '../utils/inputForm/IdInput';
@@ -197,7 +197,6 @@ limitations under the License.
   import LoadingContainer from '../utils/LoadingContainer';
   import InputSanitizer from '../utils/InputSanitizer';
 
-  extend('required', required);
   extend('min_value', {
     // eslint-disable-next-line camelcase
     ...min_value,

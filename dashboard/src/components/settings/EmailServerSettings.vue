@@ -21,8 +21,7 @@ limitations under the License.
         <ValidationProvider name="Host" :debounce=500 v-slot="{errors}" rules="required">
         <input class="form-control" type="text" v-model="emailInfo.host" name="host"
                data-cy="hostInput" aria-required="true"/>
-        <p class="text-danger" v-show="errors[0]">{{
-          errors[0]}}</p>
+        <p class="text-danger" v-show="errors[0]" data-cy="hostError">{{errors[0]}}</p>
         </ValidationProvider>
       </div>
       <div class="form-group">
@@ -30,8 +29,7 @@ limitations under the License.
         <ValidationProvider name="Port" :debounce=500 v-slot="{errors}" rules="required|min_value:1|max_value:65535">
           <input class="form-control" type="text" v-model="emailInfo.port" name="port"
                  data-cy="portInput" aria-required="true"/>
-          <p class="text-danger" v-show="errors[0]">{{
-            errors[0] }}</p>
+          <p class="text-danger" v-show="errors[0]" data-cy="portError">{{errors[0] }}</p>
         </ValidationProvider>
       </div>
       <div class="form-group">
@@ -39,7 +37,7 @@ limitations under the License.
         <ValidationProvider name="Protocol" :debounce=500 v-slot="{errors}" rules="required">
           <input class="form-control" type="text" v-model="emailInfo.protocol" name="protocol"
                  data-cy="protocolInput" aria-required="true"/>
-          <p class="text-danger" v-show="errors[0]">{{
+          <p class="text-danger" v-show="errors[0]" data-cy="protocolError">{{
             errors[0] }}</p>
         </ValidationProvider>
       </div>
@@ -59,8 +57,7 @@ limitations under the License.
           <ValidationProvider name="Username" :debounce=500 v-slot="{errors}" rules="required">
             <input class="form-control" type="text" v-model="emailInfo.username" name="username"
                    data-cy="emailUsername" aria-required="true"/>
-            <p class="text-danger" v-show="errors[0]">{{
-              errors[0]}}</p>
+            <p class="text-danger" v-show="errors[0]" data-cy="emailUsernameError">{{errors[0]}}</p>
           </ValidationProvider>
         </div>
         <div class="form-group">
@@ -68,8 +65,7 @@ limitations under the License.
           <ValidationProvider name="Password" :debounce=500 v-slot="{errors}" rules="required">
             <input class="form-control" type="text" v-model="emailInfo.password" name="password"
                    data-cy="emailPassword" aria-required="true"/>
-            <p class="text-danger" v-show="errors[0]">{{
-              errors[0]}}</p>
+            <p class="text-danger" v-show="errors[0]" data-cy="emailPasswordError">{{errors[0]}}</p>
           </ValidationProvider>
         </div>
       </div>
@@ -95,13 +91,20 @@ limitations under the License.
 <script>
   import { extend } from 'vee-validate';
   // eslint-disable-next-line camelcase
-  import { required, min_value, max_value } from 'vee-validate/dist/rules';
+  import { min_value, max_value } from 'vee-validate/dist/rules';
   import SettingsService from './SettingsService';
   import ToastSupport from '../utils/ToastSupport';
 
-  extend('required', required);
-  extend('min_value', min_value);
-  extend('max_value', max_value);
+  extend('min_value', {
+    // eslint-disable-next-line camelcase
+    ...min_value,
+    message: (fieldname, placeholders) => `${fieldname} must be ${placeholders.min} or greater`,
+  });
+  extend('max_value', {
+    // eslint-disable-next-line camelcase
+    ...max_value,
+    message: (fieldname, placeholders) => `${fieldname} must be ${placeholders.max} or less`,
+  });
 
   export default {
     name: 'EmailServerSettings',

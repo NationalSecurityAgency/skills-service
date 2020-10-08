@@ -59,12 +59,9 @@ limitations under the License.
 
 <script>
   import { extend } from 'vee-validate';
-  import { required } from 'vee-validate/dist/rules';
   import ProjectService from './ProjectService';
   import IdInput from '../utils/inputForm/IdInput';
   import InputSanitizer from '../utils/InputSanitizer';
-
-  extend('required', required);
 
   export default {
     name: 'EditProject',

@@ -37,9 +37,8 @@ limitations under the License.
 <script>
   import { extend, ValidationProvider } from 'vee-validate';
   // eslint-disable-next-line camelcase
-  import { required, alpha_num } from 'vee-validate/dist/rules';
+  import { alpha_num } from 'vee-validate/dist/rules';
 
-  extend('required', required);
   extend('alpha_num', alpha_num);
 
   export default {

@@ -109,7 +109,6 @@ limitations under the License.
 
 <script>
   import { extend } from 'vee-validate';
-  import { required } from 'vee-validate/dist/rules';
   import Datepicker from 'vuejs-datepicker';
   import MarkdownEditor from '../utils/MarkdownEditor';
   import IconPicker from '../utils/iconPicker/IconPicker';
@@ -119,8 +118,6 @@ limitations under the License.
   import BadgesService from './BadgesService';
   import GlobalBadgeService from './global/GlobalBadgeService';
   import InputSanitizer from '../utils/InputSanitizer';
-
-  extend('required', required);
 
   export default {
     name: 'EditBadge',

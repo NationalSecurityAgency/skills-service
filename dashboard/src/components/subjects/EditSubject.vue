@@ -85,7 +85,6 @@ limitations under the License.
 
 <script>
   import { extend } from 'vee-validate';
-  import { required } from 'vee-validate/dist/rules';
   import SubjectsService from './SubjectsService';
   import IconPicker from '../utils/iconPicker/IconPicker';
   import MarkdownEditor from '../utils/MarkdownEditor';
@@ -93,8 +92,6 @@ limitations under the License.
   import IconManager from '../utils/iconPicker/IconManager';
   import InputSanitizer from '../utils/InputSanitizer';
   import InlineHelp from '../utils/InlineHelp';
-
-  extend('required', required);
 
   export default {
     name: 'EditSubject',

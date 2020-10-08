@@ -189,9 +189,23 @@ describe('Settings Tests', () => {
         cy.contains('Settings').click();
         cy.contains('Email').click();
         cy.wait('@loadEmailSettings');
+        cy.get$('[data-cy=hostInput]').clear();
+        cy.get$('[data-cy=hostError]').contains('Host is required');
+        cy.get$('[data-cy=emailSettingsSave]').should('be.disabled');
         cy.get$('[data-cy=hostInput]').type('{selectall}localhost');
+        cy.get$('[data-cy=portInput]').clear();
+        cy.get$('[data-cy=portError]').contains('Port is required');
+        cy.get$('[data-cy=emailSettingsSave]').should('be.disabled');
+        cy.get$('[data-cy=portInput]').type('{selectall}-55');
+        cy.get$('[data-cy=portError]').contains('Port must be 1 or greater');
+        cy.get$('[data-cy=portInput]').type('{selectall}65536');
+        cy.get$('[data-cy=portError]').contains('Port must be 65535 or less');
         cy.get$('[data-cy=portInput]').type('{selectall}1026');
+        cy.get$('[data-cy=protocolInput]').clear();
+        cy.get$('[data-cy=protocolError').contains('Protocol is required');
+        cy.get$('[data-cy=emailSettingsSave]').should('be.disabled');
         cy.get$('[data-cy=protocolInput]').type('{selectall}smtp');
+
 
         cy.get$('[data-cy=tlsSwitch]').next('.custom-control-label').click();
         cy.get$('[data-cy=authSwitch]').next('.custom-control-label').click();

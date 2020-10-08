@@ -63,16 +63,12 @@ limitations under the License.
 </template>
 
 <script>
-  import { extend } from 'vee-validate';
-  import { required } from 'vee-validate/dist/rules';
   import Datepicker from 'vuejs-datepicker';
   import ExistingUserInput from '../utils/ExistingUserInput';
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import SimpleCard from '../utils/cards/SimpleCard';
   import SkillsService from './SkillsService';
   import ProjectService from '../projects/ProjectService';
-
-  extend('required', required);
 
   const disabledDates = (date) => date > new Date();
 

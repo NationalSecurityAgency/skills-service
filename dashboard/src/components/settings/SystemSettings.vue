@@ -82,13 +82,12 @@ limitations under the License.
 
 <script>
   import { extend } from 'vee-validate';
-  import { required, email, max } from 'vee-validate/dist/rules';
+  import { email, max } from 'vee-validate/dist/rules';
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import SettingsService from './SettingsService';
   import ToastSupport from '../utils/ToastSupport';
   import InlineHelp from '../utils/InlineHelp';
 
-  extend('required', required);
   extend('email', email);
   extend('max', max);
 

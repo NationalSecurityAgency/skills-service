@@ -98,7 +98,10 @@ limitations under the License.
   import { required, email } from 'vee-validate/dist/rules';
   import AccessService from './AccessService';
 
-  extend('required', required);
+  extend('required', {
+    ...required,
+    message: '{_field_} is required',
+  });
   extend('email', email);
 
   export default {

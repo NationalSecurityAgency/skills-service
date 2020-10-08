@@ -61,14 +61,10 @@ limitations under the License.
 </template>
 
 <script>
-  import { extend } from 'vee-validate';
-  import { required } from 'vee-validate/dist/rules';
   import SettingsService from './SettingsService';
   import LoadingContainer from '../utils/LoadingContainer';
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import ToastSupport from '../utils/ToastSupport';
-
-  extend('required', required);
 
   export default {
     name: 'GeneralSettings',
