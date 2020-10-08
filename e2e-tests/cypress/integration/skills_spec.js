@@ -66,7 +66,7 @@ describe('Skills Tests', () => {
       cy.get('[data-cy=skillNameError]').should('not.be.visible');
 
       cy.get('[data-cy=skillVersion]').type('{selectall}-5');
-      cy.get('[data-cy=skillVersionError]').contains('Version is not valid').should('be.visible');
+      cy.get('[data-cy=skillVersionError]').contains('Version may only contain numeric characters.').should('be.visible');
       cy.get('[data-cy=saveSkillButton]').should('be.disabled');
       cy.get('[data-cy=skillVersion]').type('{selectall}1000');
       cy.get('[data-cy=skillVersionError]').contains('Version cannot exceed 999.').should('be.visible');
@@ -79,7 +79,7 @@ describe('Skills Tests', () => {
       cy.get('[data-cy=saveSkillButton]').should('be.enabled');
 
       cy.get('[data-cy=skillPointIncrement]').type('{selectall}-42');
-      cy.get('[data-cy=skillPointIncrementError]').contains('Point Increment is not valid').should('be.visible');
+      cy.get('[data-cy=skillPointIncrementError]').contains('Point Increment may only contain numeric characters.').should('be.visible');
       cy.get('[data-cy=saveSkillButton]').should('be.disabled');
       cy.get('[data-cy=skillPointIncrement]').type('{selectall}11111111111');
       cy.get('[data-cy=skillPointIncrementError]').contains('Point Increment cannot exceed 10000.').should('be.visible');
@@ -89,7 +89,7 @@ describe('Skills Tests', () => {
       cy.get('[data-cy=saveSkillButton]').should('be.enabled');
 
       cy.get('[data-cy=numPerformToCompletion]').type('{selectall}-5');
-      cy.get('[data-cy=skillOccurrencesError]').contains('Occurrences to Completion is not valid').should('be.visible');
+      cy.get('[data-cy=skillOccurrencesError]').contains('Occurrences to Completion may only contain numeric characters.').should('be.visible');
       cy.get('[data-cy=saveSkillButton]').should('be.disabled');
       cy.get('[data-cy=numPerformToCompletion]').type('{selectall}1000000');
       cy.get('[data-cy=skillOccurrencesError]').contains('Occurrences to Completion cannot exceed 10000.').should('be.visible');
@@ -125,8 +125,7 @@ describe('Skills Tests', () => {
       cy.get('[data-cy=skillHoursError]').should('not.be.visible');
       cy.get('[data-cy=skillMinutesError]').should('not.be.visible');
       cy.get('[data-cy=saveSkillButton]').should('be.enabled');
-      //721hrs
-      //43200 mins + 1
+
       cy.get('[data-cy=timeWindowHours]').type('{selectall}721');
       cy.get('[data-cy=skillHoursError]').contains('Time Window must be less then 720 hours');
       cy.get('[data-cy=skillMinutesError]').should('not.be.visible');
@@ -136,11 +135,6 @@ describe('Skills Tests', () => {
       cy.get('[data-cy=skillMinutesError').contains('Minutes must be 59 or less');
       cy.get('[data-cy=skillHoursError]').should('not.be.visible');
       cy.get('[data-cy=saveSkillButton]').should('be.disabled');
-
-
-
-
-
     });
 
     it('edit number of occurrences', () => {
