@@ -116,8 +116,9 @@ describe('Skills Tests', () => {
       cy.get('[data-cy=saveSkillButton]').should('be.disabled');
       cy.get('[data-cy=timeWindowMinutes]').type('{selectall}90');
       cy.get('[data-cy=skillHoursError]').should('not.be.visible');
-      cy.get('[data-cy=skillMinutesError]').should('not.be.visible');
-      cy.get('[data-cy=saveSkillButton]').should('be.enabled');
+      cy.get('[data-cy=skillMinutesError]').should('be.visible');
+      cy.get('[data-cy=skillMinutesError]').contains('Minutes must be 59 or less');
+      cy.get('[data-cy=saveSkillButton]').should('be.disabled');
       cy.get('[data-cy=timeWindowMinutes]').type('{selectall}0');
       cy.get('[data-cy=skillMinutesError]').contains('Minutes must be > 0 if Hours = 0');
       cy.get('[data-cy=saveSkillButton]').should('be.disabled');
