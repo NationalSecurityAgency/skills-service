@@ -48,12 +48,6 @@ Vue.use(VueApexCharts);
 Vue.use(BootstrapVue);
 Vue.use(SkillsDirective);
 
-/* // not sure if this is still necessary
-const betterEager = () => ({
-    on: ['input'],
-    debounce: 500,
-  });
-setInteractionMode('betterEager', betterEager); */
 localize({
   en,
 });
