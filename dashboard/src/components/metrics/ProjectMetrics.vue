@@ -14,25 +14,25 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div class="card">
-    <div class="card-header">
-      <h5>Distinct number of users over time</h5>
-    </div>
-    <div class="card-body">
+  <metrics-card title="Distinct number of users over time" data-cy="distinctNumUsersOverTime">
+    <metrics-overlay :loading="loading" :has-data="hasDataEnoughData" no-data-msg="This chart needs at least 2 days of user activity.">
       <apexchart type="area" height="350" :options="chartOptions" :series="distinctUsersOverTime"></apexchart>
-    </div>
-  </div>
+    </metrics-overlay>
+  </metrics-card>
 </template>
 
 <script>
   import MetricsService from './MetricsService';
   import numberFormatter from '@//filters/NumberFilter';
+  import MetricsOverlay from './utils/MetricsOverlay';
+  import MetricsCard from './utils/MetricsCard';
 
   export default {
     name: 'ProjectMetrics',
+    components: { MetricsCard, MetricsOverlay },
     data() {
       return {
-        isLoading: true,
+        loading: true,
         distinctUsersOverTime: [],
         chartOptions: {
           chart: {
@@ -46,6 +46,7 @@ limitations under the License.
             },
             toolbar: {
               autoSelected: 'zoom',
+              offsetY: -52,
             },
           },
           dataLabels: {
@@ -107,6 +108,11 @@ limitations under the License.
         }],
       };
     },
+    computed: {
+      hasDataEnoughData() {
+        return this.distinctUsersOverTime && this.distinctUsersOverTime.length > 0 && this.distinctUsersOverTime[0].data && this.distinctUsersOverTime[0].data.length > 1;
+      },
+    },
     mounted() {
       MetricsService.loadChart(this.$route.params.projectId, 'distinctUsersOverTimeForProject')
         .then((response) => {
@@ -114,6 +120,7 @@ limitations under the License.
             data: response.map((item) => [item.value, item.count]),
             name: 'Points',
           }];
+          this.loading = false;
         });
     },
   };
