@@ -20,7 +20,7 @@ import BootstrapVue from 'bootstrap-vue';
 import { ClientTable, ServerTable } from 'vue-tables-2';
 import { SkillsConfiguration, SkillsDirective, SkillsReporter } from '@skilltree/skills-client-vue';
 import {
-  localize, ValidationProvider, ValidationObserver, setInteractionMode,
+  localize, ValidationProvider, ValidationObserver,
 } from 'vee-validate';
 import en from 'vee-validate/dist/locale/en.json';
 import VueApexCharts from 'vue-apexcharts';
@@ -48,12 +48,12 @@ Vue.use(VueApexCharts);
 Vue.use(BootstrapVue);
 Vue.use(SkillsDirective);
 
-// not sure if this is still necessary
+/* // not sure if this is still necessary
 const betterEager = () => ({
     on: ['input'],
     debounce: 500,
   });
-setInteractionMode('betterEager', betterEager);
+setInteractionMode('betterEager', betterEager); */
 localize({
   en,
 });
