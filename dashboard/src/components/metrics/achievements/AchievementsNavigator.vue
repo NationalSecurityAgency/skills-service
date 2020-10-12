@@ -14,31 +14,27 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div class="card mb-2">
-    <div class="card-header">
-      Achievements
-    </div>
-    <div class="card-body p-0">
+  <metrics-card title="Achievements" :no-padding="true" data-cy="achievementsNavigator">
       <div class="row p-3">
         <div class="col-md border-right">
           <b-form-group label="User Name Filter:" label-for="input-1" label-class="text-muted">
-            <b-form-input id="user-name-filter" v-model="usernameFilter" v-on:keydown.enter="reloadTable"/>
+            <b-form-input id="user-name-filter" v-model="usernameFilter" v-on:keydown.enter="reloadTable" data-cy="achievementsNavigator-usernameInput"/>
           </b-form-group>
         </div>
         <div class="col-6 col-md border-right">
           <b-form-group label="From Date:" label-for="input-1" label-class="text-muted">
-            <b-form-datepicker id="from-date-filter" v-model="fromDateFilter" class="mb-2"></b-form-datepicker>
+            <b-form-datepicker id="from-date-filter" v-model="fromDateFilter" class="mb-2" data-cy="achievementsNavigator-fromDateInput"></b-form-datepicker>
           </b-form-group>
         </div>
         <div class="col-6 col-md border-right">
           <b-form-group label="To Date:" label-for="input-1" label-class="text-muted">
-            <b-form-datepicker id="to-date-filter" v-model="toDateFilter" class="mb-2"></b-form-datepicker>
+            <b-form-datepicker id="to-date-filter" v-model="toDateFilter" class="mb-2" data-cy="achievementsNavigator-toDateInput"></b-form-datepicker>
           </b-form-group>
         </div>
       </div>
       <div class="row px-3">
         <div class="col-xl border-right">
-          <b-form-group label="Types:" label-class="text-muted" >
+          <b-form-group label="Types:" label-class="text-muted" data-cy="achievementsNavigator-typeInput">
             <b-form-checkbox-group
               id="checkbox-group-1"
               v-model="achievementTypes.selected"
@@ -49,24 +45,25 @@ limitations under the License.
           </b-form-group>
         </div>
         <div class="col-12 col-md-6 col-xl border-right">
-          <b-form-group id="input-group-3" label="Minimum Level (Subject & Skill Only):" label-for="input-3" label-class="text-muted">
-            <b-form-select id="input-3" v-model="levels.selected" :options="levels.available" required/>
+          <b-form-group id="levels-input-group" label="Minimum Level (Subject & Skill Only):" label-for="input-3" label-class="text-muted">
+            <b-form-select id="input-3" v-model="levels.selected" :options="levels.available" required data-cy="achievementsNavigator-levelsInput"/>
           </b-form-group>
         </div>
         <div class="col-12 col-md-6 col-xl">
           <b-form-group label="Name (Subject, Skill and Badge Only):" label-for="input-3" label-class="text-muted">
-            <b-form-input id="name-filter" v-model="nameFilter" v-on:keydown.enter="reloadTable" />
+            <b-form-input id="name-filter" v-model="nameFilter" v-on:keydown.enter="reloadTable" data-cy="achievementsNavigator-nameInput"/>
           </b-form-group>
         </div>
       </div>
       <div class="row pl-3 mb-2">
         <div class="col">
-          <b-button variant="outline-info" @click="reloadTable"><i class="fa fa-filter"/> Filter</b-button>
-          <b-button variant="outline-info" @click="reset" class="ml-1"><i class="fa fa-times"/> Reset</b-button>
+          <b-button variant="outline-info" @click="reloadTable" data-cy="achievementsNavigator-filterBtn"><i class="fa fa-filter"/> Filter</b-button>
+          <b-button variant="outline-info" @click="reset" class="ml-1" data-cy="achievementsNavigator-resetBtn"><i class="fa fa-times"/> Reset</b-button>
         </div>
       </div>
 
-      <skills-b-table class="mb-5" :items="items" :options="tableOptions">
+      <skills-b-table class="mb-5" data-cy="achievementsNavigator-table"
+                      :items="items" :options="tableOptions"  @sort-changed="sortTable">
         <template v-slot:cell(username)="data">
           <div class="row">
             <div class="col-12 col-md-8">
@@ -86,7 +83,7 @@ limitations under the License.
         <template v-slot:cell(type)="data">
           <achievement-type :type="data.value" />
         </template>
-        <template v-slot:cell(name)="data">
+        <template v-slot:cell(name)="data" data-cy="achievementsNavigator-table-skillName">
           <span v-if="data.value == 'Overall'" class="small text-muted">
             N/A
           </span>
@@ -98,7 +95,7 @@ limitations under the License.
           </span>
           <span v-else>{{ data.value }}</span>
         </template>
-        <template v-slot:cell(timestamp)="data">
+        <template v-slot:cell(achievedOn)="data">
           <span class="">{{ data.value | date }}</span>
           <b-badge v-if="isToday(data.value)" variant="info" class="ml-2">Today</b-badge>
           <div class="small text-muted">
@@ -106,8 +103,7 @@ limitations under the License.
           </div>
         </template>
       </skills-b-table>
-    </div>
-  </div>
+  </metrics-card>
 </template>
 
 <script>
@@ -115,10 +111,11 @@ limitations under the License.
   import SkillsBTable from '../../utils/table/SkillsBTable';
   import MetricsService from '../MetricsService';
   import AchievementType from './AchievementType';
+  import MetricsCard from '../utils/MetricsCard';
 
   export default {
     name: 'AchievementsNavigator',
-    components: { AchievementType, SkillsBTable },
+    components: { MetricsCard, AchievementType, SkillsBTable },
     mounted() {
       this.reloadTable();
     },
@@ -147,7 +144,7 @@ limitations under the License.
         },
         tableOptions: {
           busy: true,
-          sortBy: 'timestamp',
+          sortBy: 'achievedOn',
           sortDesc: true,
           bordered: true,
           outlined: true,
@@ -172,7 +169,7 @@ limitations under the License.
               sortable: false,
             },
             {
-              key: 'timestamp',
+              key: 'achievedOn',
               label: 'Date',
               sortable: true,
             },
@@ -188,6 +185,14 @@ limitations under the License.
       };
     },
     methods: {
+      sortTable(sortContext) {
+        this.tableOptions.sortBy = sortContext.sortBy;
+        this.tableOptions.sortDesc = sortContext.sortDesc;
+
+        // set to the first page
+        this.tableOptions.pagination.currentPage = 1;
+        this.reloadTable();
+      },
       reset() {
         this.usernameFilter = '';
         this.tableOptions.pagination.currentPage = 1;
@@ -209,6 +214,8 @@ limitations under the License.
           nameFilter: this.nameFilter,
           minLevel: this.levels.selected,
           achievementTypes: this.achievementTypes.selected,
+          sortBy: this.tableOptions.sortBy,
+          sortDesc: this.tableOptions.sortDesc,
         };
 
         MetricsService.loadChart(this.$route.params.projectId, 'userAchievementsChartBuilder', params)

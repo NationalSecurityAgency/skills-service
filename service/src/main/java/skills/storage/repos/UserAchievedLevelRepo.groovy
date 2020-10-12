@@ -203,8 +203,8 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
             where 
                 ua.userId = uAttrs.userId and
                 ua.projectId = :projectId and
-                ua.updated > :fromDate and
-                ua.updated < :toDate and 
+                ua.achievedOn > :fromDate and
+                ua.achievedOn < :toDate and 
                 upper(uAttrs.userId) like UPPER(CONCAT('%', :userNameFilter, '%')) and
                 (upper(sd.name) like UPPER(CONCAT('%', :skillNameFilter, '%')) OR (:skillNameFilter = 'ALL')) and
                 (ua.level >= :level OR (:level = -1)) and
@@ -227,8 +227,8 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
             where 
                 ua.userId = uAttrs.userId and
                 ua.projectId = :projectId and
-                ua.updated > :fromDate and
-                ua.updated < :toDate and 
+                ua.achievedOn > :fromDate and
+                ua.achievedOn < :toDate and 
                 upper(uAttrs.userId) like UPPER(CONCAT('%', :userNameFilter, '%')) and
                 (upper(sd.name) like UPPER(CONCAT('%', :skillNameFilter, '%')) OR (:skillNameFilter = 'ALL')) and
                 (ua.level >= :level OR (:level = -1)) and 
@@ -283,5 +283,25 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
     List<SkillAndDayUserCount> countNumUsersOverTimeByProjectIdAndSkillId(
             @Param("projectId") String projectId,
             @Param("skillId") String skillId
+    )
+
+
+    @Query('''select sd
+            from SkillDef sd
+            where 
+                sd.projectId = :projectId    
+           ''')
+    List<SkillAndDayUserCount> calculateSkillUsage(
+            @Param("projectId") String projectId
+    )
+
+    @Query('''select ua.skillId, count(ua)
+            from UserAchievement ua
+            where 
+                ua.projectId = :projectId
+            group by ua.skillId        
+           ''')
+    List<Object[]> calculateSkillUsage1(
+            @Param("projectId") String projectId
     )
 }

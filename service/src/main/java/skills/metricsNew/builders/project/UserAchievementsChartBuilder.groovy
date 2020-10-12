@@ -17,7 +17,10 @@ package skills.metricsNew.builders.project
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
+import org.springframework.data.jpa.domain.JpaSort
 import org.springframework.stereotype.Component
+import skills.controller.exceptions.SkillException
 import skills.metricsNew.builders.MetricsChartBuilder
 import skills.metricsNew.builders.MetricsPagingParamsHelper
 import skills.storage.model.SkillDef
@@ -27,14 +30,16 @@ import skills.storage.repos.UserAchievedLevelRepo
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 
+import static org.springframework.data.domain.Sort.Direction.ASC
+import static org.springframework.data.domain.Sort.Direction.ASC
+import static org.springframework.data.domain.Sort.Direction.DESC
+import static org.springframework.data.domain.Sort.Direction.DESC
+
 @Component
 class UserAchievementsChartBuilder implements MetricsChartBuilder {
 
     @Autowired
     UserAchievedLevelRepo userAchievedRepo
-
-    @Autowired
-    MetricsPagingParamsHelper pagingParamsHelper
 
     @Override
     String getId() {
@@ -49,7 +54,7 @@ class UserAchievementsChartBuilder implements MetricsChartBuilder {
     static class MetricUserAchievement {
         String userId
         String userName
-        Long timestamp
+        Long achievedOn
         String skillId
         String name
         String type
@@ -62,9 +67,13 @@ class UserAchievementsChartBuilder implements MetricsChartBuilder {
     private static long oneDayMinusASecond = oneDay - 1000
     private static long thirtyDays = 30 * oneDay
 
+    private final static String PROP_SORT_BY_USER_ID = "userName"
+    private final static List<String> supportedSortBy = ["achievedOn", PROP_SORT_BY_USER_ID]
     @Override
     UserAchievementsRes build(String projectId, String chartId, Map<String, String> props) {
-        PageRequest pageRequest = pagingParamsHelper.createPageRequest(projectId, chartId, props)
+
+        PageRequest pageRequest = getPageRequest(projectId, chartId, props)
+
         String usernameFilter = props["usernameFilter"] ?: ""
         Date fromDate = props["fromDateFilter"] ? dateFormat.parse(props["fromDateFilter"]) : new Date(1)
         Date toDate = props["toDateFilter"] ? new Date(dateFormat.parse(props["toDateFilter"]).time + oneDayMinusASecond) : new Date(new Date().time + 30 * thirtyDays)
@@ -76,6 +85,7 @@ class UserAchievementsChartBuilder implements MetricsChartBuilder {
         List<SkillDef.ContainerType> achievementTypesWithoutOverall = achievementTypes.findAll({ !it.equalsIgnoreCase(OverallType) }).collect { SkillDef.ContainerType.valueOf(it) }
         String allNonOverallTypes = achievementTypesWithoutOverall.size() < 3 ? "false" : true
         String includeOverallType = achievementTypes.contains(OverallType) ? "true" : "false"
+
 
         List<Object[]> achievements = userAchievedRepo.findAllForAchievementNavigator(
                 projectId, usernameFilter, fromDate, toDate, skillNameFilter, minLevel, achievementTypesWithoutOverall, allNonOverallTypes, includeOverallType, pageRequest)
@@ -90,10 +100,34 @@ class UserAchievementsChartBuilder implements MetricsChartBuilder {
         return new UserAchievementsRes(totalNumItems: totalNumItems, items: items)
     }
 
+    private PageRequest getPageRequest(String projectId, String chartId, Map<String, String> props) {
+        if (!supportedSortBy.contains(props[MetricsPagingParamsHelper.PROP_SORT_BY])) {
+            throw new SkillException("Chart[${chartId}]: Invalid value [${props[MetricsPagingParamsHelper.PROP_SORT_BY]}] for [${MetricsPagingParamsHelper.PROP_SORT_BY}] property. Suppored values are ${supportedSortBy}", projectId)
+        }
+
+        MetricsPagingParamsHelper metricsPagingParamsHelper = new MetricsPagingParamsHelper(projectId, chartId, props)
+        int currentPage = metricsPagingParamsHelper.currentPage
+        int pageSize = metricsPagingParamsHelper.pageSize
+        Boolean sortDesc = metricsPagingParamsHelper.sortDesc
+        String sortBy = metricsPagingParamsHelper.sortBy
+        if (sortBy == "userName") {
+            // looks like there is a bug in the Spring Data's
+            //  org.springframework.data.jpa.repository.query.QueryUtils.java
+            // where aliases are not respected in some JPQL joins and the default alias (first table in the join) is added
+            // no matter what is provided.
+            // It maybe fixed by https://jira.spring.io/browse/DATAJPA-1406 even though they scope it to Native Queries
+            // the issue is present on JPQL queries as well
+            //
+            // This is a workaround to "disable" aliasing
+            Sort sort = JpaSort.unsafe(sortDesc ?  DESC : ASC, "(uAttrs.userIdForDisplay)")
+            return PageRequest.of(currentPage, pageSize, sort)
+        }
+        return PageRequest.of(currentPage, pageSize, sortDesc ?  DESC : ASC, sortBy)
+    }
     private MetricUserAchievement buildMetricUserAchievement(UserAchievement achievement, SkillDef skillDef) {
 
         MetricUserAchievement res = new MetricUserAchievement(
-                timestamp: achievement.achievedOn.time,
+                achievedOn: achievement.achievedOn.time,
                 userId: achievement.userId,
                 userName: achievement.userId)
 

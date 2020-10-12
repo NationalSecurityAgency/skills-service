@@ -24,6 +24,7 @@ limitations under the License.
              :outlined="options.outlined"
              :fields="this.fieldsInternal"
              :stacked="options.stacked"
+             @sort-changed="sortingChanged"
              show-empty>
       <colgroup v-if="options.rowDetailsControls"><col style="width: 2rem;"><col></colgroup>
       <template v-if="options.rowDetailsControls" v-slot:cell(b_table_controls)="data">
@@ -64,13 +65,13 @@ limitations under the License.
     </b-table>
     <div v-if="!options.busy" class="row m-1 p-0 align-items-center">
       <div class="col-md text-center text-md-left">
-        <span class="text-muted">Total Rows:</span> <strong>{{options.pagination.totalRows}}</strong>
+        <span class="text-muted">Total Rows:</span> <strong data-cy="skillsBTableTotalRows">{{options.pagination.totalRows}}</strong>
       </div>
       <div class="col-md my-3 my-md-0">
         <b-pagination v-model="options.pagination.currentPage" :total-rows="options.pagination.totalRows"
                       :per-page="options.pagination.pageSize" slot-scope=""
                       pills align="center" size="sm" variant="info" class="customPagination m-0 p-0"
-                      :disabled="disabled">
+                      :disabled="disabled" data-cy="skillsBTablePaging">
         </b-pagination>
       </div>
       <div class="col-md text-center text-md-right">
@@ -112,6 +113,13 @@ limitations under the License.
     computed: {
       disabled() {
         return !this.items || this.items.length === 0;
+      },
+    },
+    methods: {
+      sortingChanged(ctx) {
+        // ctx.sortBy   ==> Field key for sorting by (or null for no sorting)
+        // ctx.sortDesc ==> true if sorting descending, false otherwise
+        this.$emit('sort-changed', ctx);
       },
     },
   };

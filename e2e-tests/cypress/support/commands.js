@@ -274,3 +274,35 @@ Cypress.Commands.add('reportHistoryOfEvents', (projId, user, numDays=10, skipWee
         }
     }
 });
+
+
+Cypress.Commands.add('validateTable', (tableSelector, expected, pageSize = 5) => {
+    cy.get(tableSelector).contains('Loading...').should('not.exist')
+    const rowSelector = `${tableSelector} tbody tr`
+    const numRows = expected.length;
+
+    cy.get('[data-cy=skillsBTableTotalRows]').contains(numRows);
+
+    cy.get(rowSelector).should('have.length', Math.min(pageSize, numRows)).as('cyRows');
+    for (let i = 0; i < numRows; i += 1) {
+        let rowIndex = i;
+        if (i + 1 >= pageSize) {
+            rowIndex = i - (pageSize * (Math.trunc(i / pageSize)));
+        }
+        if (i > 0 && i % pageSize === 0) {
+            const nextPage = (i / pageSize) + 1;
+            const nextPageSize = (i + pageSize <= numRows) ? pageSize : (numRows % pageSize);
+            cy.log(`Going to the next page #${nextPage}, next page size is [${nextPageSize}]`);
+            cy.get(tableSelector).get('[data-cy=skillsBTablePaging]').contains(nextPage).click();
+            cy.get(tableSelector).contains('Loading...').should('not.exist')
+            cy.get(rowSelector).should('have.length', nextPageSize).as('cyRows');
+        }
+
+        cy.get('@cyRows').eq(rowIndex).find('td').as('row1');
+        const toValidate = expected[i];
+        toValidate.forEach((item) => {
+            cy.get('@row1').eq(item.colIndex).should('contain', item.value);
+        })
+    }
+});
+

@@ -18,7 +18,7 @@ limitations under the License.
     <div class="card-header">
       <h6 class="m-0 font-weight-bold">{{ title }}</h6>
     </div>
-    <div class="card-body">
+    <div class="card-body" :class="{ 'p-0' : noPadding }">
       <slot />
     </div>
   </div>
@@ -31,6 +31,11 @@ limitations under the License.
       title: {
         type: String,
         required: true,
+      },
+      noPadding: {
+        type: Boolean,
+        required: false,
+        default: false,
       },
     },
   };

@@ -731,8 +731,14 @@ class SkillsService {
         return wsHelper.adminDelete(getDeleteLevelUrl(projectId, subjectId))
     }
 
-    def getMetricsChart(String projectId, chartBuilderId, String section, String sectionId, Map props=null) {
+    @Deprecated
+    def getMetricsChart(String projectId, String chartBuilderId, String section, String sectionId, Map props=null) {
         String endpoint = "/projects/${projectId}/${section}/${sectionId}/metrics/${chartBuilderId}"
+        wsHelper.adminGet(endpoint, props)
+    }
+
+    def getMetricsData(String projectId, String chartId, Map props=null) {
+        String endpoint = "/projects/${projectId}/charts/${chartId}"
         wsHelper.adminGet(endpoint, props)
     }
 

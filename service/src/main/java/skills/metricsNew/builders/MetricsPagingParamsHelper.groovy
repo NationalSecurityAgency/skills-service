@@ -15,32 +15,62 @@
  */
 package skills.metricsNew.builders
 
-import org.springframework.beans.factory.annotation.Value
-import org.springframework.data.domain.PageRequest
-import org.springframework.stereotype.Component
+
 import skills.controller.exceptions.SkillException
 
-@Component
 class MetricsPagingParamsHelper {
     static String PROP_PAGE_SIZE = "pageSize"
     static String PROP_CURRENT_PAGE = "currentPage"
-    @Value('#{"${skills.levels.max:25}"}')
-    private int maxLevels
+    static String PROP_SORT_BY = "sortBy"
+    static String PROP_SORT_DESC = "sortDesc"
 
-    PageRequest createPageRequest(String projectId, String chartId, Map<String,String> props) {
+    private String projectId
+    private String chartId
+    private Map<String,String> props
+    MetricsPagingParamsHelper(String projectId, String chartId, Map<String,String> props){
+        this.projectId = projectId
+        this.chartId = chartId
+        this.props = props
+    }
+
+    int getPageSize() {
         int pageSize = props[PROP_PAGE_SIZE] ? Integer.valueOf(props[PROP_PAGE_SIZE]) : 10
-        // client's page starts 1, dbs at 0
-        int currentPage = props[PROP_CURRENT_PAGE] ? Integer.valueOf(props[PROP_CURRENT_PAGE]) - 1 : 0
         if (pageSize > 100) {
             throw new SkillException("Chart[${chartId}]: page size must not exceed 100. Provided [${pageSize}]", projectId)
         }
         if (pageSize < 1) {
             throw new SkillException("Chart[${chartId}]: page size must not be less than 1. Provided [${pageSize}]", projectId)
         }
+
+        return pageSize
+    }
+
+    int getCurrentPage() {
+        // client's page starts 1, dbs at 0
+        int currentPage = props[PROP_CURRENT_PAGE] ? Integer.valueOf(props[PROP_CURRENT_PAGE]) - 1 : 0
         if (currentPage < 0) {
             throw new SkillException("Chart[${chartId}]: current page must not be less than 0. Provided [${currentPage}]", projectId)
         }
 
-        return PageRequest.of(currentPage, pageSize)
+        return currentPage
+    }
+
+    String getSortBy() {
+        String sortBy = props[PROP_SORT_BY]
+        if (!sortBy) {
+            throw new SkillException("Chart[${chartId}]: Must supply ${PROP_SORT_BY} param", projectId)
+        }
+
+        return sortBy
+    }
+
+    Boolean getSortDesc() {
+        String sortDescStr = props[PROP_SORT_DESC]
+        if (!sortDescStr || !(sortDescStr.equals("true") || sortDescStr.equals("false"))) {
+            throw new SkillException("Chart[${chartId}]: Must supply ${PROP_SORT_DESC} param with either 'true' or 'false' value", projectId)
+        }
+
+        Boolean sortDesc = Boolean.valueOf(sortDescStr)
+        return sortDesc
     }
 }
