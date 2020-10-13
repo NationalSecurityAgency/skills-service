@@ -144,6 +144,8 @@ class FormSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 google: new OAuth2UserConverterService.GoogleUserConverter(),
                 github: new OAuth2UserConverterService.GitHubUserConverter(),
                 gitlab: new OAuth2UserConverterService.GitLabUserConverter(),
+                auth0: new OAuth2UserConverterService.Auth0UserConverter(),
+                hydra: new OAuth2UserConverterService.HydraUserConverter(),
         ]
     }
 
