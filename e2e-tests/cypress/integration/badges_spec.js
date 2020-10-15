@@ -122,12 +122,10 @@ describe('Badges Tests', () => {
         // name is too short
         let msg = 'Badge Name cannot be less than 3 characters';
         cy.get('#badgeName').type('Te');
-        cy.contains(msg);
-        cy.clickSave();
-        cy.contains(overallFormValidationMsg);
+        cy.get('[data-cy=badgeNameError]').contains(msg).should('be.visible');
+        cy.get('[data-cy=saveBadgeButton]').should('be.disabled');
         cy.get('#badgeName').type('Tes');
-        cy.contains(msg).should('not.exist');
-        cy.contains(overallFormValidationMsg).should('not.exist');
+        cy.get('[data-cy=badgeNameError]').should('not.be.visible');
 
         // name too long
         msg = 'Badge Name cannot exceed 50 characters';
@@ -135,61 +133,57 @@ describe('Badges Tests', () => {
         cy.getIdField().clear().type("badgeId");
         const invalidName = Array(51).fill('a').join('');
         cy.get('#badgeName').clear().type(invalidName);
-        cy.contains(msg);
-        cy.clickSave();
-        cy.contains(overallFormValidationMsg);
+        cy.get('[data-cy=badgeNameError]').contains(msg).should('be.visible');
+        cy.get('[data-cy=saveBadgeButton]').should('be.disabled');
         cy.get('#badgeName').type('{backspace}');
-        cy.contains(msg).should('not.exist');
-        cy.contains(overallFormValidationMsg).should('not.exist');
+        cy.get('[data-cy=badgeNameError]').should('not.be.visible');
 
         // id too short
         msg = 'Badge ID cannot be less than 3 characters';
         cy.getIdField().clear().type("aa");
-        cy.contains(msg);
-        cy.clickSave();
-        cy.contains(overallFormValidationMsg);
+        cy.get('[data-cy=idError]').contains(msg).should('be.visible');
+        cy.get('[data-cy=saveBadgeButton]').should('be.disabled');
         cy.getIdField().type("a");
-        cy.contains(msg).should('not.exist');
-        cy.contains(overallFormValidationMsg).should('not.exist');
+        cy.get('[data-cy=idError]').should('not.be.visible');
 
         // id too long
         msg = 'Badge ID cannot exceed 50 characters';
         const invalidId = Array(51).fill('a').join('');
         cy.getIdField().clear().type(invalidId);
-        cy.contains(msg);
+        cy.get('[data-cy=idError]').contains(msg).should('be.visible');
         cy.getIdField().type('{backspace}');
-        cy.contains(msg).should('not.exist');
+        cy.get('[data-cy=idError]').should('not.be.visible');
 
         // id must not have special chars
-        msg = 'The Badge ID field may only contain alpha-numeric characters';
+        msg = 'Badge ID may only contain alpha-numeric characters';
         cy.getIdField().clear().type('With$Special');
-        cy.contains(msg);
+        cy.get('[data-cy=idError]').contains(msg).should('be.visible');
         cy.getIdField().clear().type('GoodToGo');
-        cy.contains(msg).should('not.exist');
+        cy.get('[data-cy=idError]').should('not.be.visible');
 
         cy.getIdField().clear().type('SomeId');
         // !L@o#t$s of %s^p&e*c(i)a_l++_|}{P/ c'ha'rs
         let specialChars = [' ', '_', '!', '@', '#', '%', '^', '&', '*', '(', ')', '-', '+', '='];
         specialChars.forEach((element) => {
             cy.getIdField().type(element);
-            cy.contains(msg);
+            cy.get('[data-cy=idError]').contains(msg).should('be.visible');
             cy.getIdField().type('{backspace}');
-            cy.contains(msg).should('not.exist');
+            cy.contains(msg).should('not.be.visible');
         })
 
         // badge name must not be already taken
         msg = 'The value for Badge Name is already taken';
         cy.get('#badgeName').clear().type('Badge Exist');
-        cy.contains(msg);
+        cy.get('[data-cy=badgeNameError]').contains(msg).should('be.visible');
         cy.get('#badgeName').type('1');
-        cy.contains(msg).should('not.exist');
+        cy.get('[data-cy=badgeNameError]').should('not.be.visible');
 
         // badge id must not already exist
         msg = 'The value for Badge ID is already taken';
         cy.getIdField().clear().type('badgeExist');
-        cy.contains(msg);
+        cy.get('[data-cy=idError]').contains(msg).should('be.visible');
         cy.getIdField().type('1');
-        cy.contains(msg).should('not.exist');
+        cy.get('[data-cy=idError]').should('not.be.visible');
 
         // max description
         msg='Badge Description cannot exceed 2000 characters';
@@ -197,9 +191,9 @@ describe('Badges Tests', () => {
         // it takes way too long using .type method
         cy.get('#markdown-editor textarea').invoke('val', invalidDescription).trigger('change');
         cy.get('#markdown-editor').type('a');
-        cy.contains(msg);
+        cy.get('[data-cy=badgeDescriptionError]').contains(msg).should('be.visible');
         cy.get('#markdown-editor').type('{backspace}');
-        cy.contains(msg).should('not.exist')
+        cy.get('[data-cy=badgeDescriptionError]').should('not.be.visible')
 
         // finally let's save
         cy.clickSave();
@@ -223,19 +217,18 @@ describe('Badges Tests', () => {
         cy.gemStartSetDay(1);
         cy.gemEndNextMonth();
         cy.gemEndSetDay(1);
-        cy.contains(msg);
+        cy.get('[data-cy=endDateError]').contains(msg).should('be.visible');
         cy.gemEndSetDay(2);
-        cy.contains(msg).should('not.exist');
+        cy.get('[data-cy=endDateError]').should('not.be.visible');
 
         // start date should be before end date
         msg = 'Start Date must come before End Date';
         cy.gemStartSetDay(3);
-        cy.contains(msg)
+        cy.get('[data-cy=startDateError]').contains(msg).should('be.visible');
         cy.gemEndSetDay(4);
-        cy.contains(msg).should('not.exist');
+        cy.get('[data-cy=startDateError]').should('not.be.visible');
 
         // dates should not be in the past
-        const overallFormValidationMsg = 'Form did NOT pass validation, please fix and try to Save again';
         msg = 'End Date cannot be in the past';
         cy.gemStartPrevMonth();
         cy.gemStartPrevMonth();
@@ -243,11 +236,10 @@ describe('Badges Tests', () => {
         cy.gemEndPrevMonth();
         cy.gemEndPrevMonth();
         cy.gemEndSetDay(2);
-        cy.contains(msg);
+        cy.get('[data-cy=endDateError]').contains(msg).should('be.visible');
 
         // should not save if there are validation errors
-        cy.clickSave();
-        cy.contains(overallFormValidationMsg);
+        cy.get('[data-cy=saveBadgeButton]').should('be.disabled');
 
         // fix the errors and save
         cy.gemStartNextMonth();
@@ -256,8 +248,8 @@ describe('Badges Tests', () => {
         cy.gemEndNextMonth();
         cy.gemStartSetDay(1);
         cy.gemEndSetDay(2);
-        cy.contains(msg).should('not.exist');
-        cy.contains(overallFormValidationMsg).should('not.exist');
+        cy.get('[data-cy=endDateError]').should('not.be.visible');
+        cy.get('[data-cy=saveBadgeButton]').should('be.enabled');
 
         cy.clickSave();
         cy.wait('@loadBadges');

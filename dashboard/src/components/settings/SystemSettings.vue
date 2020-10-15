@@ -19,31 +19,31 @@ limitations under the License.
 
     <div class="card">
       <div class="card-header">System</div>
-      <ValidationObserver ref="observer" v-slot="{invalid}" slim>
+      <ValidationObserver ref="observer" v-slot="{invalid, pristine}" slim>
         <div class="card-body">
           <div class="form-group">
-            <label class="label">Public URL <InlineHelp msg="Because it is possible for the SkillTree dashboard
+            <label class="label">* Public URL <InlineHelp msg="Because it is possible for the SkillTree dashboard
             to be deployed behind a load balancer or proxy, it is necessary to configure the public url so that email
             based communications from the system can provide valid links back to the SkillTree dashboard."/></label>
-            <ValidationProvider rules="required" name="publicUrl" v-slot="{ errors }">
-              <input class="form-control" type="text" v-model="publicUrl" name="publicUrl" data-vv-delay="500"
-                     data-cy="publicUrl"/>
+            <ValidationProvider rules="required" name="Public URL" v-slot="{ errors }" :debounce=500>
+              <input class="form-control" type="text" v-model="publicUrl" name="publicUrl"
+                     data-cy="publicUrl" aria-required="true"/>
               <p class="text-danger" v-show="errors[0]">{{errors[0]}}</p>
             </ValidationProvider>
           </div>
           <div class="form-group">
-            <label class="label">Password Reset Token Expiration <InlineHelp msg="How long password reset tokens remain valid before they expire"/></label>
-            <ValidationProvider rules="required|iso8601" name="resetTokenExpiration" v-slot="{ errors }">
-              <input class="form-control" type="text" v-model="resetTokenExpiration" name="resetTokenExpiration" data-vv-delay="500"
-                     data-cy="resetTokenExpiration"/>
+            <label class="label">* Password Reset Token Expiration <InlineHelp msg="How long password reset tokens remain valid before they expire"/></label>
+            <ValidationProvider rules="required|iso8601" name="Password Reset Token Expiration" v-slot="{ errors }" :debounce=500>
+              <input class="form-control" type="text" v-model="resetTokenExpiration" name="resetTokenExpiration"
+                     data-cy="resetTokenExpiration" aria-required="true"/>
               <small class="text-info">supports ISO 8601 time duration format, e.g., 2H, 30M, 1H30M, 1M42S, etc</small>
               <p class="text-danger" v-show="errors[0]" data-cy="resetTokenExpirationError">{{errors[0]}}</p>
             </ValidationProvider>
           </div>
           <div class="form-group">
             <label class="label">From Email <InlineHelp msg="The From email address used in all email originating from the SkillTree application"/></label>
-            <ValidationProvider :rules="{email:{require_tld:false,allow_ip_domain:true}}" name="fromEmail" v-slot="{ errors }">
-              <input class="form-control" type="text" v-model="fromEmail" name="fromEmail" data-vv-delay="500"
+            <ValidationProvider :rules="{email:{require_tld:false,allow_ip_domain:true}}" name="From Email" v-slot="{ errors }" :debounce=500>
+              <input class="form-control" type="text" v-model="fromEmail" name="fromEmail"
                      data-cy="fromEmail"/>
               <p class="text-danger" v-show="errors[0]" data-cy="fromEmailError">{{errors[0]}}</p>
             </ValidationProvider>
@@ -51,7 +51,7 @@ limitations under the License.
 
           <div class="form-group">
             <label class="label">Custom Header <InlineHelp msg="HTML (and in-line css) to display as a header for the dashboard application"/></label>
-            <ValidationProvider rules="noscript|max:3000" name="customHeader" v-slot="{ errors }">
+            <ValidationProvider rules="noscript|max:3000" name="Custom Header" v-slot="{ errors }">
               <textarea class="form-control" name="customHeader" data-cy="customHeader" rows="3" v-model="customHeader"/>
               <p class="text-danger" v-show="errors[0]" data-cy="customHeaderError">{{errors[0]}}</p>
             </ValidationProvider>
@@ -59,7 +59,7 @@ limitations under the License.
 
           <div class="form-group">
             <label class="label">Custom Footer <InlineHelp msg="HTML (and in-line css) to display as a footer for the dashboard application"/></label>
-            <ValidationProvider rules="noscript|max:3000" name="customFooter" v-slot="{ errors }">
+            <ValidationProvider rules="noscript|max:3000" name="Custom Footer" v-slot="{ errors }">
               <textarea class="form-control" name="customFooter" data-cy="customFooter" v-model="customFooter" rows="3"/>
               <p class="text-danger" v-show="errors[0]" data-cy="customFooterError">{{errors[0]}}</p>
             </ValidationProvider>
@@ -67,7 +67,7 @@ limitations under the License.
 
           <p v-if="invalid && overallErrMsg" class="text-center text-danger">***{{ overallErrMsg }}***</p>
           <div>
-            <button class="btn btn-outline-primary" type="button" v-on:click="saveSystemSettings" :disabled="invalid"
+            <button class="btn btn-outline-primary" type="button" v-on:click="saveSystemSettings" :disabled="invalid || (pristine===true)"
                     data-cy="saveSystemSettings">
               Save
               <i :class="[isSaving ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-arrow-circle-right']"></i>
@@ -81,32 +81,21 @@ limitations under the License.
 </template>
 
 <script>
-  import { Validator, ValidationProvider, ValidationObserver } from 'vee-validate';
+  import { extend } from 'vee-validate';
+  import { email, max } from 'vee-validate/dist/rules';
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import SettingsService from './SettingsService';
   import ToastSupport from '../utils/ToastSupport';
   import InlineHelp from '../utils/InlineHelp';
 
-  const dictionary = {
-    en: {
-      attributes: {
-        publicUrl: 'Public URL',
-        resetTokenExpiration: 'Password Reset Token Expiration',
-        fromEmail: 'From Email',
-        customHeader: 'Custom Header',
-        customFooter: 'Custom Footer',
-      },
-    },
-  };
-  Validator.localize(dictionary);
+  extend('email', email);
+  extend('max', max);
 
   export default {
     name: 'SystemSettings',
     mixins: [ToastSupport],
     components: {
       SubPageHeader,
-      ValidationObserver,
-      ValidationProvider,
       InlineHelp,
     },
     data() {
@@ -182,10 +171,8 @@ limitations under the License.
   };
 
   const timePeriodRegex = /^(PT)?(?=(?:0\.)?\d+[HMS])((?:0\.)?\d+H)?((?:0\.)?\d+M)?((?:0\.)?\d+S)?$/;
-  Validator.extend('iso8601', {
-    getMessage() {
-      return 'Invalid ISO 8601 Time Duration';
-    },
+  extend('iso8601', {
+    message: 'Invalid ISO 8601 Time Duration',
     validate(value) {
       if (value) {
         return value.match(timePeriodRegex) !== null;
@@ -195,10 +182,8 @@ limitations under the License.
   });
 
   const scriptRegex = /<[^>]*script/;
-  Validator.extend('noscript', {
-    getMessage() {
-      return '<script> tags are not allowed';
-    },
+  extend('noscript', {
+    message: '<script> tags are not allowed',
     validate(value) {
       if (value) {
         return value.match(scriptRegex) === null;

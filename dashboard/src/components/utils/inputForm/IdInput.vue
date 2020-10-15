@@ -18,7 +18,7 @@ limitations under the License.
     <div class="form-group mt-0 mb-0">
       <div class="row">
         <div class="col">
-          <label for="idInput">{{ label }}</label>
+          <label for="idInput">* {{ label }}</label>
         </div>
         <div class="col text-right">
           <i class="fas fa-question-circle mr-1 text-secondary"
@@ -28,14 +28,18 @@ limitations under the License.
         </div>
       </div>
       <input type="text" class="form-control" id="idInput" v-model="internalValue" :disabled="!canEdit"
-             @input="dataChanged">
-      <small class="form-text text-danger">{{ errors[0]}}</small>
+             @input="dataChanged" aria-required="true">
+      <small class="form-text text-danger" data-cy="idError">{{ errors[0]}}</small>
     </div>
   </ValidationProvider>
 </template>
 
 <script>
-  import { ValidationProvider } from 'vee-validate';
+  import { extend, ValidationProvider } from 'vee-validate';
+  // eslint-disable-next-line camelcase
+  import { alpha_num } from 'vee-validate/dist/rules';
+
+  extend('alpha_num', alpha_num);
 
   export default {
     name: 'IdInput',

@@ -55,15 +55,17 @@ limitations under the License.
           <template slot="title">
             <i class="fas fa-wrench"></i> Custom
           </template>
-          <file-upload data-vv-name="customIcon" v-validate.disable="'imageDimensions|duplicateFilename'"
-                       :name="'customIcon'"
-                       @file-selected="customIconUploadRequest"
-                      :disable-input="disableCustomUpload"/>
-          <p class="text-muted text-right text-primary font-italic">* custom icons must be between 48px X 48px and 100px X 100px</p>
+          <ValidationProvider vid="customIcon" ref="validationProvider" name="Custom Icon" v-slot="{ validate, errors }" rules="image|imageDimensions|duplicateFilename">
+            <file-upload
+                         :name="'customIcon'"
+                         @file-selected="customIconUploadRequest"
+                        :disable-input="disableCustomUpload"/>
+            <p class="text-muted text-right text-primary font-italic">* custom icons must be between 48px X 48px and 100px X 100px</p>
 
-          <b-alert show variant="danger" v-show="errors.has('customIcon')" class="text-center">
-            <i class="fas fa-exclamation-circle"/> {{ errors.first('customIcon') }} <i class="fas fa-exclamation-circle"/>
-          </b-alert>
+            <b-alert show variant="danger" v-show="errors[0]" class="text-center">
+              <i class="fas fa-exclamation-circle"/> {{ errors[0] }} <i class="fas fa-exclamation-circle"/>
+            </b-alert>
+          </ValidationProvider>
 
           <div class="row text-info justify-content-center mt-4">
             <div class="col-4 mb-4" v-for="{cssClassname, filename} in customIconList" :key="cssClassname">
@@ -96,7 +98,8 @@ limitations under the License.
   import debounce from 'lodash.debounce';
   import VirtualList from 'vue-virtual-scroll-list';
   import enquire from 'enquire.js';
-  import { Validator } from 'vee-validate';
+  import { extend } from 'vee-validate';
+  import { image } from 'vee-validate/dist/rules';
   import FileUpload from '../upload/FileUpload';
   import FileUploadService from '../upload/FileUploadService';
   import fontAwesomeIconsCanonical from './font-awesome-index';
@@ -153,43 +156,33 @@ limitations under the License.
     return isValid;
   };
 
-  Validator.extend('imageDimensions', {
-    getMessage(field, params, data) {
-      return (data && data.message) || `Custom Icon must be ${self.customIconHeight} X ${self.customIconWidth}`;
-    },
+  extend('image', {
+    ...image,
+    message: 'File is not an image format',
+  });
+  extend('imageDimensions', {
+    message: () => `Invalid image dimensions, dimensions must be square and must be between ${self.minCustomIconDimensions.width} x ${self.minCustomIconDimensions.width} and ${self.maxCustomIconDimensions.width} x ${self.maxCustomIconDimensions.width}`,
     validate(value) {
       return new Promise((resolve) => {
         if (value) {
-          const file = value.get('customIcon');
-          const isImageType = file.type.startsWith('image/');
-          if (!isImageType) {
-            resolve({
-              valid: false,
-              data: { message: 'File is not an image format' },
-            });
-          } else {
-            const image = new Image();
-            image.src = window.URL.createObjectURL(file);
-            image.onload = () => {
-              const width = image.naturalWidth;
-              const height = image.naturalHeight;
-              window.URL.revokeObjectURL(image.src);
+          const file = value.form.get('customIcon');
+          const customIcon = new Image();
+          customIcon.src = window.URL.createObjectURL(file);
+          customIcon.onload = () => {
+            const width = customIcon.naturalWidth;
+            const height = customIcon.naturalHeight;
+            window.URL.revokeObjectURL(customIcon.src);
 
-              if (!isValidCustomIconDimensions(self, width, height)) {
-                const dimensionRange = { min: self.minCustomIconDimensions.width, max: self.maxCustomIconDimensions.width };
-                resolve({
-                  valid: false,
-                  data: {
-                    message: `Invalid image dimensions, dimensions must be square and must be between ${dimensionRange.min} x ${dimensionRange.min} and ${dimensionRange.max} x ${dimensionRange.max} for ${file.name} `,
-                  },
-                });
-              } else {
-                resolve({
-                  valid: true,
-                });
-              }
-            };
-          }
+            if (!isValidCustomIconDimensions(self, width, height)) {
+              resolve({
+                valid: false,
+              });
+            } else {
+              resolve({
+                valid: true,
+              });
+            }
+          };
         } else {
           resolve({
             valid: true,
@@ -197,24 +190,19 @@ limitations under the License.
         }
       });
     },
-  }, {
-    immediate: false,
   });
 
-  Validator.extend('duplicateFilename', {
-    getMessage(field, params, data) {
-      return (data && data.message) || 'Custom Icon with this filename already exists';
-    },
+  extend('duplicateFilename', {
+    message: 'Custom Icon with this filename already exists',
     validate(value) {
       return new Promise((resolve) => {
         if (value) {
-          const file = value.get('customIcon');
+          const file = value.form.get('customIcon');
 
           const index = definitiveCustomIconList.findIndex((item) => item.filename === file.name);
           if (index >= 0) {
             resolve({
               valid: false,
-              data: { message: `Custom Icon with filename ${file.name} already exists` },
             });
             return;
           }
@@ -222,8 +210,6 @@ limitations under the License.
         resolve({ valid: true });
       });
     },
-  }, {
-    immediate: false,
   });
 
   const validateIconDimensions = (dimensions) => {
@@ -400,7 +386,7 @@ limitations under the License.
         this.$emit('selected-icon', result);
       },
       customIconUploadRequest(event) {
-        this.$validator.validate().then((res) => {
+        this.$refs.validationProvider.validate(event).then((res) => {
           if (res) {
             this.disableCustomUpload = true;
             FileUploadService.upload(this.uploadUrl, event.form, (response) => {

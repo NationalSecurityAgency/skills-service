@@ -55,7 +55,7 @@ limitations under the License.
         </span>
 
           <div slot="edit" slot-scope="props" class="">
-            <b-button @click="editLevel(props.row)" variant="outline-info" style="width: 5rem;">
+            <b-button @click="editLevel(props.row)" variant="outline-info" style="width: 5rem;" data-cy="editLevelButton">
                       <i class="fas fa-edit"/> Edit
             </b-button>
           </div>

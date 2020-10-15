@@ -20,86 +20,89 @@ limitations under the License.
         <i class="fa fa-users fa-4x text-secondary"></i>
         <h2 class="mt-4 text-info">Sign in to SkillTree Dashboard</h2>
       </div>
-      <form @submit.prevent="login()">
-        <transition name="fade" mode="out-in">
-          <b-alert v-if="loginFailed" variant="danger" @dismissed="loginFailed=false" show dismissible>Invalid Username
-            or Password
-          </b-alert>
-        </transition>
+      <ValidationObserver ref="form" slim v-slot="{invalid, handleSubmit}">
+        <form @submit.prevent="handleSubmit(login)">
+          <transition name="fade" mode="out-in">
+            <b-alert v-if="loginFailed" variant="danger" @dismissed="loginFailed=false" show dismissible>Invalid Username
+              or Password
+            </b-alert>
+          </transition>
 
-        <div class="card text-left">
-          <div class="card-body p-4">
+          <div class="card text-left">
+            <div class="card-body p-4">
 
-            <div class="form-group">
-              <label for="username" class="text-secondary font-weight-bold">Email Address</label>
-              <input type="text" class="form-control" id="username" tabindex="1" placeholder="Enter email"
-                     aria-describedby="emailHelp"
-                     v-model="loginFields.username" v-validate="'required|minUsernameLength|email'" data-vv-delay="500" data-vv-name="email">
-              <small id="emailHelp" class="form-text text-danger" v-show="errors.has('email')">{{
-                errors.first('email')}}
-              </small>
-            </div>
-            <div class="form-group">
-              <div class="row">
-                <div class="col">
-                  <label for="inputPassword" class="text-secondary font-weight-bold">Password</label>
-                </div>
-                <div class="col text-right">
-                  <small class="text-muted"><b-link tabindex="4" @click="forgotPassword" data-cy="forgotPassword">Forgot Password?</b-link></small>
-                </div>
-              </div>
-              <input type="password" class="form-control" id="inputPassword" tabindex="2" placeholder="Password"
-                     v-model="loginFields.password" name="password" aria-describedby="passwordHelp"
-                     @animationstart="onAnimationStart" v-validate="'required|minPasswordLength|maxPasswordLength'" data-vv-delay="500" data-vv-name="password">
-              <small id="passwordHelp" class="form-text text-danger" v-show="errors.has('password')">{{
-                errors.first('password')}}
-              </small>
-            </div>
-            <button type="submit" class="btn btn-outline-primary" tabindex="3" :disabled="disabled" data-cy="login">
-              Login <i class="fas fa-arrow-circle-right"/>
-            </button>
-
-            <hr/>
-            <p class="text-center"><small>Don't have a SkillTree account?
-              <strong><b-link @click="requestAccountPage">Sign up</b-link></strong>
-            </small>
-            </p>
-          </div>
-        </div>
-
-        <div v-if="oAuthProviders && oAuthProviders.length > 0" class="card mt-3" data-cy="oAuthProviders">
-          <div class="card-body">
-            <div class="row">
-              <div v-for="oAuthProvider in oAuthProviders" :key="oAuthProvider.registrationId" class="col">
-                <button type="button" class="btn btn-outline-secondary w-100 h-100 text-dark"
-                        @click="oAuth2Login(oAuthProvider.registrationId)">
-                  <small><i :class="oAuthProvider.iconClass" aria-hidden="true" class="text-info"/>
-                  Continue with {{ oAuthProvider.clientName }}
+              <div class="form-group">
+                <label for="username" class="text-secondary font-weight-bold">Email Address</label>
+                <ValidationProvider name="Email Address" rules="required|minUsernameLength|email" :debounce=500 v-slot="{errors}">
+                  <input type="text" class="form-control" id="username" tabindex="1" placeholder="Enter email"
+                         aria-describedby="emailHelp"
+                         v-model="loginFields.username">
+                  <small id="emailHelp" class="form-text text-danger" v-show="errors[0]">{{
+                    errors[0]}}
                   </small>
-                </button>
+                </ValidationProvider>
+              </div>
+              <div class="form-group">
+                <div class="row">
+                  <div class="col">
+                    <label for="inputPassword" class="text-secondary font-weight-bold">Password</label>
+                  </div>
+                  <div class="col text-right">
+                    <small class="text-muted"><b-link tabindex="4" @click="forgotPassword" data-cy="forgotPassword">Forgot Password?</b-link></small>
+                  </div>
+                </div>
+                <ValidationProvider name="Password" rules="required|minPasswordLength|maxPasswordLength" :debounce=500 v-slot="{errors}">
+                  <input type="password" class="form-control" id="inputPassword" tabindex="2" placeholder="Password"
+                         v-model="loginFields.password" name="password" aria-describedby="passwordHelp"
+                         @animationstart="onAnimationStart">
+                  <small id="passwordHelp" class="form-text text-danger" v-show="errors[0]">{{
+                    errors[0]}}
+                  </small>
+                </ValidationProvider>
+              </div>
+              <button type="submit" class="btn btn-outline-primary" tabindex="3" :disabled="invalid||disabled" data-cy="login">
+                Login <i class="fas fa-arrow-circle-right"/>
+              </button>
+
+              <hr/>
+              <p class="text-center"><small>Don't have a SkillTree account?
+                <strong><b-link @click="requestAccountPage">Sign up</b-link></strong>
+              </small>
+              </p>
+            </div>
+          </div>
+
+          <div v-if="oAuthProviders && oAuthProviders.length > 0" class="card mt-3" data-cy="oAuthProviders">
+            <div class="card-body">
+              <div class="row">
+                <div v-for="oAuthProvider in oAuthProviders" :key="oAuthProvider.registrationId" class="col">
+                  <button type="button" class="btn btn-outline-secondary w-100 h-100 text-dark"
+                          @click="oAuth2Login(oAuthProvider.registrationId)">
+                    <small><i :class="oAuthProvider.iconClass" aria-hidden="true" class="text-info"/>
+                    Continue with {{ oAuthProvider.clientName }}
+                    </small>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-      </form>
+        </form>
+      </ValidationObserver>
     </div>
   </div>
 </template>
 
 <script>
-  import { Validator } from 'vee-validate';
+  import { extend } from 'vee-validate';
+  import { required, email } from 'vee-validate/dist/rules';
   import AccessService from './AccessService';
 
-  const dictionary = {
-    en: {
-      attributes: {
-        password: 'Password',
-        username: 'Username',
-      },
-    },
-  };
-  Validator.localize(dictionary);
+  extend('required', {
+    ...required,
+    message: '{_field_} is required',
+  });
+  extend('email', email);
 
   export default {
     name: 'LoginForm',
@@ -116,27 +119,21 @@ limitations under the License.
     },
     methods: {
       login() {
-        this.$validator.validate()
-          .then((valid) => {
-            if (valid) {
-              this.$validator.pause();
-              this.loginFailed = false;
-              const formData = new FormData();
-              formData.append('username', this.loginFields.username);
-              formData.append('password', this.loginFields.password);
-              this.$store.dispatch('login', formData)
-                .then(() => {
-                  this.loginFailed = false;
-                  this.$router.push(this.$route.query.redirect || '/');
-                })
-                .catch((error) => {
-                  if (error.response.status === 401) {
-                    this.resetAfterFailedLogin();
-                  } else {
-                    const errorMessage = (error.response && error.response.data && error.response.data.message) ? error.response.data.message : undefined;
-                    this.$router.push({ name: 'ErrorPage', query: { errorMessage } });
-                  }
-                });
+        this.loginFailed = false;
+        const formData = new FormData();
+        formData.append('username', this.loginFields.username);
+        formData.append('password', this.loginFields.password);
+        this.$store.dispatch('login', formData)
+          .then(() => {
+            this.loginFailed = false;
+            this.$router.push(this.$route.query.redirect || '/');
+          })
+          .catch((error) => {
+            if (error.response.status === 401) {
+              this.resetAfterFailedLogin();
+            } else {
+              const errorMessage = (error.response && error.response.data && error.response.data.message) ? error.response.data.message : undefined;
+              this.$router.push({ name: 'ErrorPage', query: { errorMessage } });
             }
           });
       },
@@ -165,7 +162,7 @@ limitations under the License.
     },
     computed: {
       disabled() {
-        return this.errors.any() || (!this.isAutoFilled && (!this.loginFields.username || !this.loginFields.password));
+        return (!this.isAutoFilled && (!this.loginFields.username || !this.loginFields.password));
       },
     },
     created() {

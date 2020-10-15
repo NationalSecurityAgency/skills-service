@@ -18,60 +18,53 @@ limitations under the License.
     <sub-page-header title="Profile"/>
 
     <loading-container v-bind:is-loading="isLoading">
-      <div class="card">
-        <div class="card-body">
-          <div v-if="!pkiAuthenticated">
-            <label>First Name</label>
-            <div class="input-group">
-              <input id="first-name" aria-describedby="basic-addon1" class="form-control"
-                     type="text" v-model="loginFields.first" name="first" v-validate="'required|maxFirstNameLength'"
-                     data-vv-delay="500"/>
-            </div>
-            <p class="text-danger" v-show="errors.has('first')">{{ errors.first('first')}}</p>
+      <ValidationObserver v-slot="{invalid}" slim>
+        <div class="card">
+          <div class="card-body">
+            <div v-if="!pkiAuthenticated">
+              <label>* First Name</label>
+              <ValidationProvider name="First Name" :debounce=500 v-slot="{errors}" rules="required|maxFirstNameLength">
+                <div class="input-group">
+                  <input id="first-name" aria-describedby="basic-addon1" class="form-control"
+                         type="text" v-model="loginFields.first" name="first" aria-required="true"/>
+                </div>
+                <p class="text-danger" v-show="errors[0]">{{ errors[0]}}</p>
+              </ValidationProvider>
 
-            <label class="mt-2">Last Name</label>
-            <div class="input-group">
-              <input class="form-control" type="text" v-model="loginFields.last" name="last"
-                     v-validate="'required|maxLastNameLength'" data-vv-delay="500"/>
+              <label class="mt-2">* Last Name</label>
+              <ValidationProvider name="Last Name" :debounce=500 v-slot="{errors}" rules="required|maxLastNameLength">
+                <div class="input-group">
+                  <input class="form-control" type="text" v-model="loginFields.last" name="last" aria-required="true"/>
+                </div>
+                <p class="text-danger" v-show="errors[0]">{{ errors[0]}}</p>
+              </ValidationProvider>
             </div>
-            <p class="text-danger" v-show="errors.has('last')">{{ errors.first('last')}}</p>
-          </div>
-          <label class="mt-2">Nickname</label>
-          <div class="input-group">
-            <input class="form-control" type="text" v-model="loginFields.nickname" name="nickname"
-                   v-validate="'maxNicknameLength'" data-vv-delay="500"/>
-          </div>
-          <p class="text-danger" v-show="errors.has('nickname')">{{ errors.first('nickname')}}</p>
+            <label class="mt-2">Nickname</label>
+            <ValidationProvider name="Nickname" :debounce=500 v-slot="{errors}" rules="maxNicknameLength">
+              <div class="input-group">
+                <input class="form-control" type="text" v-model="loginFields.nickname" name="nickname"/>
+              </div>
+              <p class="text-danger" v-show="errors[0]">{{ errors[0]}}</p>
+            </ValidationProvider>
 
-          <div class="mt-2">
-            <button class="btn btn-outline-primary" @click="updateUserInfo" :disabled="errors.any() || !hasChangedValues()">
-              Save
-              <i :class="[isSaving ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-arrow-circle-right']"></i>
-            </button>
+            <div class="mt-2">
+              <button class="btn btn-outline-primary" @click="updateUserInfo" :disabled="invalid || !hasChangedValues()">
+                Save
+                <i :class="[isSaving ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-arrow-circle-right']"></i>
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      </ValidationObserver>
     </loading-container>
   </div>
 </template>
 
 <script>
-  import { Validator } from 'vee-validate';
   import SettingsService from './SettingsService';
   import LoadingContainer from '../utils/LoadingContainer';
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import ToastSupport from '../utils/ToastSupport';
-
-  const dictionary = {
-    en: {
-      attributes: {
-        nickname: 'Nickname',
-        first: 'First Name',
-        last: 'Last Name',
-      },
-    },
-  };
-  Validator.localize(dictionary);
 
   export default {
     name: 'GeneralSettings',

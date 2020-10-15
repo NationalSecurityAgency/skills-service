@@ -20,57 +20,53 @@ limitations under the License.
         <i class="fa fa-users fa-4x text-secondary"></i>
         <h2 class="mt-4 text-info">Reset Password For SkillTree Dashboard</h2>
       </div>
-      <form @submit.prevent="reset()">
-        <div class="card text-left">
-          <div class="card-body p-4">
+      <ValidationObserver ref="resetForm" v-slot="{invalid, handleSubmit}" slim>
+        <form @submit.prevent="handleSubmit(reset)">
+          <div class="card text-left">
+            <div class="card-body p-4">
 
-            <div class="form-group">
-              <label for="username" class="text-secondary font-weight-bold">Email Address</label>
-              <input type="text" class="form-control" id="username" tabindex="1" placeholder="Enter email"
-                     aria-describedby="emailHelp"
-                     v-model="resetFields.username" v-validate="'required|minUsernameLength|email'"
-                     data-vv-delay="500" data-vv-name="email"
-                      data-cy="forgotPasswordEmail">
-              <small id="emailHelp" class="form-text text-danger" v-show="errors.has('email')">{{
-                errors.first('email')}}
-              </small>
-              <small class="text-danger" v-if="this.error" data-cy="resetFailedError">{{error}}</small>
+              <div class="form-group">
+                <label for="username" class="text-secondary font-weight-bold">* Email Address</label>
+                <ValidationProvider name="Email Address" rules="required|minUsernameLength|email" :debounce=300 v-slot="{errors}">
+                  <input type="text" class="form-control" id="username" tabindex="1" placeholder="Enter email"
+                         aria-describedby="emailHelp"
+                         v-model="username"
+                         data-cy="forgotPasswordEmail"
+                        aria-required="true">
+                    <small id="emailHelp" class="form-text text-danger" v-show="errors[0]">{{
+                      errors[0] }}
+                    </small>
+                    <small class="text-danger" v-if="serverError" data-cy="resetFailedError">{{ serverError }}</small>
+                </ValidationProvider>
+              </div>
+              <button type="submit" class="btn btn-outline-primary" tabindex="3" :disabled="invalid || (disabled === true)" data-cy="resetPassword">
+                Reset Password <i class="fas fa-arrow-circle-right"/>
+              </button>
             </div>
-
-            <button type="submit" class="btn btn-outline-primary" tabindex="3" :disabled="disabled" data-cy="resetPassword">
-              Reset Password <i class="fas fa-arrow-circle-right"/>
-            </button>
           </div>
-        </div>
 
-      </form>
+        </form>
+      </ValidationObserver>
     </div>
   </div>
 </template>
 
 <script>
-  import { Validator } from 'vee-validate';
+  import { extend } from 'vee-validate';
+  import { required, email } from 'vee-validate/dist/rules';
   import AccessService from './AccessService';
 
-  const dictionary = {
-    en: {
-      attributes: {
-        username: 'Username',
-      },
-    },
-  };
-  Validator.localize(dictionary);
+  extend('required', required);
+  extend('email', email);
 
   export default {
     name: 'RequestPasswordResetForm',
     data() {
       return {
-        resetFields: {
-          username: '',
-        },
+        username: '',
         resetSent: false,
         isAutoFilled: false,
-        error: '',
+        serverError: '',
       };
     },
     mounted() {
@@ -80,27 +76,27 @@ limitations under the License.
         }
       });
     },
+    watch: {
+      username(newVal, oldVal) {
+        if (newVal.trim() !== oldVal.trim()) {
+          this.serverError = '';
+        }
+      },
+    },
     methods: {
       reset() {
-        this.$validator.validate()
-          .then((valid) => {
-            if (valid) {
-              this.$validator.pause();
-
-              AccessService.requestPasswordReset(this.resetFields.username).then((response) => {
-                if (response.success) {
-                  this.$router.push({ name: 'RequestResetConfirmation', params: { countDown: 10, email: this.resetFields.username } });
-                }
-              }).catch((err) => {
-                this.$validator.resume();
-                if (err && err.response && err.response.data && err.response.data.explanation) {
-                  this.error = err.response.data.explanation;
-                } else {
-                  this.error = `Password reset request failed due to ${err.response.status}`;
-                }
-              });
-            }
-          });
+        AccessService.requestPasswordReset(this.username).then((response) => {
+          this.serverError = '';
+          if (response.success) {
+            this.$router.push({ name: 'RequestResetConfirmation', params: { countDown: 10, email: this.username } });
+          }
+        }).catch((err) => {
+          if (err && err.response && err.response.data && err.response.data.explanation) {
+            this.serverError = err.response.data.explanation;
+          } else {
+            this.serverError = `Password reset request failed due to ${err.response.status}`;
+          }
+        });
       },
       onAnimationStart(event) {
         // required to work around chrome auto-fill issue (see see https://stackoverflow.com/a/41530164)
@@ -113,7 +109,7 @@ limitations under the License.
     },
     computed: {
       disabled() {
-        return this.errors.any() || (!this.isAutoFilled && (!this.resetFields.username));
+        return (!this.isAutoFilled && (!this.username)) || this.serverError !== '';
       },
     },
   };

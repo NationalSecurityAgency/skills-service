@@ -61,19 +61,9 @@ limitations under the License.
 
 <script>
   import axios from 'axios';
-  import { Validator } from 'vee-validate';
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import SimpleCard from '../utils/cards/SimpleCard';
   import ServerTableLoadingMask from '../utils/ServerTableLoadingMask';
-
-  const dictionary = {
-    en: {
-      attributes: {
-        user: 'User',
-      },
-    },
-  };
-  Validator.localize(dictionary);
 
   export default {
     name: 'Users',

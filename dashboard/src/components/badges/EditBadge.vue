@@ -14,21 +14,20 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <b-modal :id="badgeInternal.badgeId" size="xl" :title="title" v-model="show" :no-close-on-backdrop="true"
+  <ValidationObserver ref="observer" v-slot="{invalid, handleSubmit}" slim>
+    <b-modal :id="badgeInternal.badgeId" size="xl" :title="title" v-model="show" :no-close-on-backdrop="true"
            header-bg-variant="info" header-text-variant="light" no-fade >
-    <ValidationObserver ref="observer" v-slot="{invalid}" slim>
       <b-container fluid>
         <div v-if="displayIconManager === false" class="text-left">
           <div class="media">
             <icon-picker :startIcon="badgeInternal.iconClass" @select-icon="toggleIconDisplay(true)" class="mr-3"></icon-picker>
             <div class="media-body">
               <div class="form-group">
-                <label for="badgeName">Badge Name</label>
+                <label for="badgeName">* Badge Name</label>
                 <ValidationProvider rules="required|minNameLength|maxBadgeNameLength|uniqueName|customNameValidator" v-slot="{errors}" name="Badge Name">
                   <input v-focus class="form-control" id="badgeName" type="text" v-model="badgeInternal.name"
-                         @input="updateBadgeId"
-                         data-vv-name="badgeName"/>
-                  <small class="form-text text-danger" v-show="errors[0]">{{ errors[0] }}
+                         @input="updateBadgeId" aria-required="true"/>
+                  <small class="form-text text-danger" v-show="errors[0]" data-cy="badgeNameError">{{ errors[0] }}
                   </small>
                 </ValidationProvider>
               </div>
@@ -42,7 +41,7 @@ limitations under the License.
             <label>Description</label>
             <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" v-slot="{errors}" name="Badge Description">
               <markdown-editor v-model="badgeInternal.description" @input="updateDescription"></markdown-editor>
-              <small class="form-text text-danger mb-3">{{ errors[0] }}</small>
+              <small class="form-text text-danger mb-3" data-cy="badgeDescriptionError">{{ errors[0] }}</small>
             </ValidationProvider>
           </div>
 
@@ -52,7 +51,6 @@ limitations under the License.
                 msg="If project level 'Root Help Url' is specified then this path will be relative to 'Root Help Url'"/>
             </label>
             <input class="form-control" type="text" v-model="badgeInternal.helpUrl" data-vv-name="helpUrl"/>
-            <small class="form-text text-danger">{{ errors.first('helpUrl')}}</small>
           </div>
 
           <div v-if="!global" data-cy="gemEditContainer">
@@ -64,25 +62,26 @@ limitations under the License.
             <b-collapse id="gemCollapse" v-model="limitTimeframe">
                 <b-row v-if="limitTimeframe" no-gutters class="justify-content-md-center mt-3" key="gemTimeFields">
                   <b-col cols="12" md="4" style="min-width: 20rem;">
-                    <label class="label mt-2">Start Date</label>
+                    <label class="label mt-2">* Start Date</label>
                     <ValidationProvider rules="required|dateOrder" v-slot="{errors}" name="Start Date" ref="startDateValidationProvider">
-                      <datepicker :inline="true" v-model="badgeInternal.startDate" name="startDate" key="gemFrom" data-cy="startDatePicker"></datepicker>
-                      <small class="form-text text-danger" v-show="errors[0]">{{ errors[0] }}
+                      <datepicker :inline="true" v-model="badgeInternal.startDate" name="startDate"
+                                  key="gemFrom" data-cy="startDatePicker"
+                                  aria-required="true"></datepicker>
+                      <small class="form-text text-danger" v-show="errors[0]" data-cy="startDateError">{{ errors[0] }}
                       </small>
                     </ValidationProvider>
                   </b-col>
                   <b-col cols="12" md="4"  style="min-width: 20rem;">
-                    <label class="label mt-2">End Date</label>
+                    <label class="label mt-2">* End Date</label>
                     <ValidationProvider rules="required|dateOrder|noHistoricalEnd" v-slot="{errors}" name="End Date" ref="endDateValidationProvider">
                       <datepicker :inline="true" v-model="badgeInternal.endDate" name="endDate"
-                                  key="gemTo" data-cy="endDatePicker"></datepicker>
-                      <small class="form-text text-danger" v-show="errors[0]">{{ errors[0] }}</small>
+                                  key="gemTo" data-cy="endDatePicker" aria-required="true"></datepicker>
+                      <small class="form-text text-danger" v-show="errors[0]" data-cy="endDateError">{{ errors[0] }}</small>
                     </ValidationProvider>
                   </b-col>
                 </b-row>
             </b-collapse>
           </div>
-          <p v-if="invalid && overallErrMsg" class="text-center text-danger mt-3">***{{ overallErrMsg }}***</p>
         </div>
         <div v-else>
           <icon-manager @selected-icon="onSelectedIcon"></icon-manager>
@@ -91,23 +90,25 @@ limitations under the License.
           </div>
         </div>
       </b-container>
-    </ValidationObserver>
 
-    <div slot="modal-footer" class="w-100">
-      <div v-if="displayIconManager === false">
-        <b-button variant="success" size="sm" class="float-right" @click="updateBadge">
-          Save
-        </b-button>
-        <b-button variant="secondary" size="sm" class="float-right mr-2" @click="closeMe">
-          Cancel
-        </b-button>
+      <div slot="modal-footer" class="w-100">
+        <div v-if="displayIconManager === false">
+          <b-button variant="success" size="sm" class="float-right" @click="handleSubmit(updateBadge)"
+                    :disabled="invalid"
+                    data-cy="saveBadgeButton">
+            Save
+          </b-button>
+          <b-button variant="secondary" size="sm" class="float-right mr-2" @click="closeMe">
+            Cancel
+          </b-button>
+        </div>
       </div>
-    </div>
-  </b-modal>
+    </b-modal>
+  </ValidationObserver>
 </template>
 
 <script>
-  import { Validator, ValidationProvider, ValidationObserver } from 'vee-validate';
+  import { extend } from 'vee-validate';
   import Datepicker from 'vuejs-datepicker';
   import MarkdownEditor from '../utils/MarkdownEditor';
   import IconPicker from '../utils/iconPicker/IconPicker';
@@ -118,19 +119,6 @@ limitations under the License.
   import GlobalBadgeService from './global/GlobalBadgeService';
   import InputSanitizer from '../utils/InputSanitizer';
 
-  const dictionary = {
-    en: {
-      attributes: {
-        badgeName: 'Badge Name',
-        badgeId: 'ID',
-        requiredSkills: 'Required Skills',
-        startDate: 'Start Date',
-        endDate: 'End Date',
-      },
-    },
-  };
-  Validator.localize(dictionary);
-
   export default {
     name: 'EditBadge',
     components: {
@@ -140,8 +128,6 @@ limitations under the License.
       Datepicker,
       IconManager,
       IdInput,
-      ValidationProvider,
-      ValidationObserver,
     },
     props: {
       badge: Object,
@@ -161,7 +147,6 @@ limitations under the License.
         canAutoGenerateId: true,
         canEditBadgeId: false,
         badgeInternal: { originalBadgeId: this.badge.badgeId, isEdit: this.isEdit, ...this.badge },
-        overallErrMsg: '',
         limitTimeframe: limitedTimeframe,
         show: this.value,
         displayIconManager: false,
@@ -188,16 +173,10 @@ limitations under the License.
         this.badgeInternal.description = event;
       },
       updateBadge() {
-        this.$refs.observer.validate().then((res) => {
-          if (!res) {
-            this.overallErrMsg = 'Form did NOT pass validation, please fix and try to Save again';
-          } else {
-            this.show = false;
-            this.badgeInternal.badgeId = InputSanitizer.sanitize(this.badgeInternal.badgeId);
-            this.badgeInternal.name = InputSanitizer.sanitize(this.badgeInternal.name);
-            this.$emit('badge-updated', this.badgeInternal);
-          }
-        });
+        this.show = false;
+        this.badgeInternal.badgeId = InputSanitizer.sanitize(this.badgeInternal.badgeId);
+        this.badgeInternal.name = InputSanitizer.sanitize(this.badgeInternal.name);
+        this.$emit('badge-updated', this.badgeInternal);
       },
       updateBadgeId() {
         if (!this.isEdit && this.canAutoGenerateId) {
@@ -241,8 +220,8 @@ limitations under the License.
         // only want to validate for a new badge, existing subjects will override
         // name and badge id
         const self = this;
-        Validator.extend('uniqueName', {
-          getMessage: (field) => `The value for ${field} is already taken.`,
+        extend('uniqueName', {
+          message: (field) => `The value for ${field} is already taken.`,
           validate(value) {
             if (self.isEdit && (value === self.badge.name || self.badge.name.localeCompare(value, 'en', { sensitivity: 'base' }) === 0)) {
               return true;
@@ -256,8 +235,8 @@ limitations under the License.
           immediate: false,
         });
 
-        Validator.extend('uniqueId', {
-          getMessage: (field) => `The value for ${field} is already taken.`,
+        extend('uniqueId', {
+          message: (field) => `The value for ${field} is already taken.`,
           validate(value) {
             if (self.isEdit && self.badge.badgeId === value) {
               return true;
@@ -267,12 +246,26 @@ limitations under the License.
             }
             return BadgesService.badgeWithIdExists(self.badgeInternal.projectId, value);
           },
-        }, {
-          immediate: false,
         });
 
-        Validator.extend('dateOrder', {
-          getMessage: 'Start Date must come before End Date',
+        /*
+        Provider's reset() method triggers an infinite loop if we use it in dateOrder
+        we need to explicitly set the flags and manually clear errors
+         */
+        const resetProvider = (provider) => {
+          if (provider) {
+            provider.setErrors([]);
+            provider.setFlags({
+              valid: true,
+              invalid: false,
+              passed: true,
+              failed: false,
+            });
+          }
+        };
+
+        extend('dateOrder', {
+          message: 'Start Date must come before End Date',
           validate() {
             let valid = true;
             if (self.limitTimeframe && self.badgeInternal.startDate && self.badgeInternal.endDate) {
@@ -280,22 +273,16 @@ limitations under the License.
               if (valid) {
                 // manually clear errors in case the orig error occurred when setting startDate,
                 // but was fixed by updating endDate (or vise-versa)
-                if (self.$refs.startDateValidationProvider) {
-                  self.$refs.startDateValidationProvider.reset();
-                }
-                if (self.$refs.endDateValidationProvider) {
-                  self.$refs.endDateValidationProvider.reset();
-                }
+                resetProvider(self.$refs.startDateValidationProvider);
+                resetProvider(self.$refs.endDateValidationProvider);
               }
             }
             return valid;
           },
-        }, {
-          immediate: false,
         });
 
-        Validator.extend('noHistoricalEnd', {
-          getMessage: 'End Date cannot be in the past',
+        extend('noHistoricalEnd', {
+          message: 'End Date cannot be in the past',
           validate() {
             let valid = true;
             // only trigger this validation on new badge entry, not edits
@@ -304,8 +291,6 @@ limitations under the License.
             }
             return valid;
           },
-        }, {
-          immediate: false,
         });
       },
     },

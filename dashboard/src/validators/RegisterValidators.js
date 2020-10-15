@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Validator } from 'vee-validate';
+import { extend, localize } from 'vee-validate';
+import { required } from 'vee-validate/dist/rules';
 import './OptionalNumericValidator';
 import './CustomDescriptionValidator';
 import './CustomNameValidator';
@@ -22,32 +23,66 @@ import store from '../store/store';
 
 export default {
   init() {
-    Validator.extend('maxDescriptionLength', ValidatorFactory.newCharLengthValidator(store.getters.config.descriptionMaxLength));
-    Validator.extend('maxFirstNameLength', ValidatorFactory.newCharLengthValidator(store.getters.config.maxFirstNameLength));
-    Validator.extend('maxLastNameLength', ValidatorFactory.newCharLengthValidator(store.getters.config.maxLastNameLength));
-    Validator.extend('maxNicknameLength', ValidatorFactory.newCharLengthValidator(store.getters.config.maxNicknameLength));
+    extend('maxDescriptionLength', ValidatorFactory.newCharLengthValidator(store.getters.config.descriptionMaxLength));
+    extend('maxFirstNameLength', ValidatorFactory.newCharLengthValidator(store.getters.config.maxFirstNameLength));
+    extend('maxLastNameLength', ValidatorFactory.newCharLengthValidator(store.getters.config.maxLastNameLength));
+    extend('maxNicknameLength', ValidatorFactory.newCharLengthValidator(store.getters.config.maxNicknameLength));
 
-    Validator.extend('minUsernameLength', ValidatorFactory.newCharMinLengthValidator(store.getters.config.minUsernameLength));
+    extend('minUsernameLength', ValidatorFactory.newCharMinLengthValidator(store.getters.config.minUsernameLength));
 
-    Validator.extend('minPasswordLength', ValidatorFactory.newCharMinLengthValidator(store.getters.config.minPasswordLength));
-    Validator.extend('maxPasswordLength', ValidatorFactory.newCharLengthValidator(store.getters.config.maxPasswordLength));
+    extend('minPasswordLength', ValidatorFactory.newCharMinLengthValidator(store.getters.config.minPasswordLength));
+    extend('maxPasswordLength', ValidatorFactory.newCharLengthValidator(store.getters.config.maxPasswordLength));
 
-    Validator.extend('minIdLength', ValidatorFactory.newCharMinLengthValidator(store.getters.config.minIdLength));
-    Validator.extend('maxIdLength', ValidatorFactory.newCharLengthValidator(store.getters.config.maxIdLength));
+    extend('minIdLength', ValidatorFactory.newCharMinLengthValidator(store.getters.config.minIdLength));
+    extend('maxIdLength', ValidatorFactory.newCharLengthValidator(store.getters.config.maxIdLength));
 
-    Validator.extend('minNameLength', ValidatorFactory.newCharMinLengthValidator(store.getters.config.minNameLength));
+    extend('minNameLength', ValidatorFactory.newCharMinLengthValidator(store.getters.config.minNameLength));
 
-    Validator.extend('maxBadgeNameLength', ValidatorFactory.newCharLengthValidator(store.getters.config.maxBadgeNameLength));
-    Validator.extend('maxProjectNameLength', ValidatorFactory.newCharLengthValidator(store.getters.config.maxProjectNameLength));
-    Validator.extend('maxSkillNameLength', ValidatorFactory.newCharLengthValidator(store.getters.config.maxSkillNameLength));
-    Validator.extend('maxSubjectNameLength', ValidatorFactory.newCharLengthValidator(store.getters.config.maxSubjectNameLength));
-    Validator.extend('maxLevelNameLength', ValidatorFactory.newCharLengthValidator(store.getters.config.maxLevelNameLength));
+    extend('maxBadgeNameLength', ValidatorFactory.newCharLengthValidator(store.getters.config.maxBadgeNameLength));
+    extend('maxProjectNameLength', ValidatorFactory.newCharLengthValidator(store.getters.config.maxProjectNameLength));
+    extend('maxSkillNameLength', ValidatorFactory.newCharLengthValidator(store.getters.config.maxSkillNameLength));
+    extend('maxSubjectNameLength', ValidatorFactory.newCharLengthValidator(store.getters.config.maxSubjectNameLength));
+    extend('maxLevelNameLength', ValidatorFactory.newCharLengthValidator(store.getters.config.maxLevelNameLength));
 
-    Validator.extend('maxSkillVersion', ValidatorFactory.newMaxNumValidator(store.getters.config.maxSkillVersion));
-    Validator.extend('maxPointIncrement', ValidatorFactory.newMaxNumValidator(store.getters.config.maxPointIncrement));
-    Validator.extend('maxNumPerformToCompletion', ValidatorFactory.newMaxNumValidator(store.getters.config.maxNumPerformToCompletion));
-    Validator.extend('maxNumPointIncrementMaxOccurrences', ValidatorFactory.newMaxNumValidator(store.getters.config.maxNumPointIncrementMaxOccurrences));
+    extend('maxSkillVersion', ValidatorFactory.newMaxNumValidator(store.getters.config.maxSkillVersion));
+    extend('maxPointIncrement', ValidatorFactory.newMaxNumValidator(store.getters.config.maxPointIncrement));
+    extend('maxNumPerformToCompletion', ValidatorFactory.newMaxNumValidator(store.getters.config.maxNumPerformToCompletion));
+    extend('maxNumPointIncrementMaxOccurrences', ValidatorFactory.newMaxNumValidator(store.getters.config.maxNumPointIncrementMaxOccurrences));
 
-    Validator.extend('userNoSpaceInUserIdInNonPkiMode', ValidatorFactory.newUserObjNoSpacesValidatorInNonPkiMode(store.getters.isPkiAuthenticated));
+    extend('userNoSpaceInUserIdInNonPkiMode', ValidatorFactory.newUserObjNoSpacesValidatorInNonPkiMode(store.getters.isPkiAuthenticated));
+
+    extend('required', required);
+
+    localize({
+      en: {
+        messages: {
+          alpha: '{_field_} may only contain alphabetic characters',
+          alpha_num: '{_field_} may only contain alpha-numeric characters',
+          alpha_dash: '{_field_} may contain alpha-numeric characters as well as dashes and underscores',
+          alpha_spaces: '{_field_} may only contain alphabetic characters as well as spaces',
+          between: '{_field_} must be between {min} and {max}',
+          confirmed: '{_field_} confirmation does not match',
+          digits: '{_field_} must be numeric and exactly contain {length} digits',
+          dimensions: '{_field_} must be {width} pixels by {height} pixels',
+          email: '{_field_} must be a valid email',
+          excluded: '{_field_} is not a valid value',
+          ext: '{_field_} is not a valid file',
+          image: '{_field_} must be an image',
+          integer: '{_field_} must be an integer',
+          length: '{_field_} must be {length} long',
+          max_value: '{_field_} must be {max} or less',
+          max: '{_field_} may not be greater than {length} characters',
+          mimes: '{_field_} must have a valid file type',
+          min_value: '{_field_} must be {min} or more',
+          min: '{_field_} must be at least {length} characters',
+          numeric: '{_field_} may only contain numeric characters',
+          oneOf: '{_field_} is not a valid value',
+          regex: '{_field_} format is invalid',
+          required_if: '{_field_} is required',
+          required: '{_field_} is required',
+          size: '{_field_} size must be less than {size}KB',
+        },
+      },
+    });
   },
 };
