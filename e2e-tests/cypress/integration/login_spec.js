@@ -116,30 +116,6 @@ describe('Login Tests', () => {
     cy.contains(expectedText).should('not.exist');
   })
 
-  /*
-  vee-validate 3.x permits email addresses greater than 73 characters
-  it('disabled login - email must not exceed 73 chars', () => {
-    cy.visit('/');
-    cy.contains('Login').should('be.disabled');
-
-    // valid email must be less than 73 chars
-    const invalidEmail = Array(74-9).fill('a').join('');
-    const validEmail = Array(73-9).fill('a').join('');
-
-    // will be taken care of by email validator
-    const expectedText = 'The Email field must be a valid email';
-
-    cy.get('#username').type(`${invalidEmail}@mail.org`);
-    cy.get('#inputPassword').type('12345678');
-    cy.contains('Login').should('be.disabled');
-    cy.contains(expectedText);
-
-    cy.get('#username').clear();
-    cy.get('#username').type(`${validEmail}@mail.org`);
-    cy.contains('Login').should('be.enabled');
-    cy.contains(expectedText).should('not.exist');
-  })*/
-
   it('disabled login - valid email format', () => {
     cy.visit('/');
     cy.contains('Login').should('be.disabled');
