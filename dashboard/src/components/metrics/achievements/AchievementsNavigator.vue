@@ -63,7 +63,8 @@ limitations under the License.
       </div>
 
       <skills-b-table class="mb-5" data-cy="achievementsNavigator-table"
-                      :items="items" :options="tableOptions"  @sort-changed="sortTable">
+                      :items="items" :options="tableOptions"
+                      @sort-changed="sortTable" @page-changed="pageChanged" @page-size-changed="pageSizeChanged">
         <template v-slot:cell(username)="data">
           <div class="row">
             <div class="col-12 col-md-8">
@@ -175,6 +176,7 @@ limitations under the License.
             },
           ],
           pagination: {
+            server: true,
             currentPage: 1,
             totalRows: 0,
             pageSize: 5,
@@ -185,6 +187,14 @@ limitations under the License.
       };
     },
     methods: {
+      pageChanged(pageNum) {
+        this.tableOptions.pagination.currentPage = pageNum;
+        this.reloadTable();
+      },
+      pageSizeChanged(newSize) {
+        this.tableOptions.pagination.pageSize = newSize;
+        this.reloadTable();
+      },
       sortTable(sortContext) {
         this.tableOptions.sortBy = sortContext.sortBy;
         this.tableOptions.sortDesc = sortContext.sortDesc;
@@ -244,9 +254,6 @@ limitations under the License.
         } else {
           this.reloadTable();
         }
-      },
-      'tableOptions.pagination.currentPage': function currentPageUpdate() {
-        this.reloadTable();
       },
     },
   };

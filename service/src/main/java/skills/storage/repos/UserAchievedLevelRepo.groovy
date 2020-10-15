@@ -286,22 +286,33 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
     )
 
 
-    @Query('''select sd
-            from SkillDef sd
-            where 
-                sd.projectId = :projectId    
-           ''')
-    List<SkillAndDayUserCount> calculateSkillUsage(
-            @Param("projectId") String projectId
-    )
+    static interface SkillUsageItem {
+        String getSkillId()
+        String getSkillName()
+        Integer getNumUserAchieved()
+        Integer getNumUsersInProgress()
+        Date getLastReported()
+        Date getLastAchieved()
+    }
 
-    @Query('''select ua.skillId, count(ua)
-            from UserAchievement ua
-            where 
-                ua.projectId = :projectId
-            group by ua.skillId        
-           ''')
-    List<Object[]> calculateSkillUsage1(
-            @Param("projectId") String projectId
-    )
+    @Query(value = '''select 
+                sd.skill_id as skillId, 
+                sd.name as skillName, 
+                achievements.usersAchieved as numUserAchieved, 
+                performedSkills.userInProgress as numUsersInProgress, 
+                achievements.lastAchieved as lastAchieved, 
+                performedSkills.lastPerformed as lastReported
+            from (select skill_id, name from skill_definition where project_id = :projectId and type='Skill') sd
+            left join (
+                select skill_id, count(distinct user_id) as usersAchieved, max(created) as lastAchieved from user_achievement where project_id = :projectId group by skill_id
+            ) achievements
+                on achievements.skill_id = sd.skill_id
+            left join (
+                select skill_id, count(distinct user_id) as userInProgress, max(performed_on) as lastPerformed from user_performed_skill
+                where project_id = :projectId
+                group by skill_id
+            ) performedSkills
+                on sd.skill_id = performedSkills.skill_id
+           ''', nativeQuery = true)
+    List<SkillUsageItem> findAllForSkillsNavigator(@Param("projectId") String projectId)
 }

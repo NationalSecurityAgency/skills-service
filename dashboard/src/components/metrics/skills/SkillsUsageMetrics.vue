@@ -14,111 +14,112 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div class="card">
-    <div class="card-header">
-      <h5>Skills Usage Navigator</h5>
-    </div>
-    <div class="card-body mx-0 px-0">
-
-      <div class="row p-3">
-        <div class="col border-right">
-          <b-form-group id="input-group-1" label="From Date:" label-for="input-1" label-class="text-muted">
-            <b-form-datepicker id="example-datepicker" v-model="value" class="mb-2"></b-form-datepicker>
-          </b-form-group>
-        </div>
-        <div class="col border-right">
-          <b-form-group label="To Date:" label-for="input-1" label-class="text-muted">
-            <b-form-datepicker id="example-datepicker" v-model="value" class="mb-2"></b-form-datepicker>
-          </b-form-group>
-        </div>
-        <div class="col">
-          <b-form-group id="input-group-3" label="Only Users With Min Level Achievement:" label-for="input-3" label-class="text-muted">
-            <b-form-select id="input-3" v-model="levels.selected" :options="levels.available" required/>
-          </b-form-group>
-        </div>
+  <metrics-card title="Skills" :no-padding="true" data-cy="skillsNavigator">
+    <div class="row px-3 pt-3">
+      <div class="col-12 col-md border-right">
+        <b-form-group label="Skill Name Filter" label-class="text-muted">
+          <b-input v-model="filters.name" data-cy="skillsNavigator-skillNameFilter"/>
+        </b-form-group>
       </div>
-
-      <skills-b-table :items="items" :options="tableOptions">
-        <template v-slot:cell(skill)="data">
-<!--          <b-button size="sm" @click="data.toggleDetails" class="mr-2">-->
-<!--            <i v-if="data.detailsShowing" class="fa fa-minus-square" />-->
-<!--            <i v-else class="fa fa-plus-square" />-->
-<!--          </b-button>-->
-          <span class="ml-2">{{ data.value }}</span>
-
-          <b-button-group class="float-right">
-            <b-button target="_blank" :to="{ name: 'SkillOverview', params: { projectId: projectId, subjectId: 'subj1', skillId: 'skill1' } }"
-                      variant="outline-info" size="sm" class="text-secondary"
-                      v-b-tooltip.hover title="View Skill's Configuration"><i class="fa fa-wrench"/></b-button>
-            <b-button target="_blank" :to="{ name: 'SkillMetrics', params: { projectId: projectId, subjectId: 'subj1', skillId: 'skill1' } }"
-                      variant="outline-info" size="sm" class="text-secondary"
-                      v-b-tooltip.hover title="View User's Metrics"><i class="fa fa-chart-bar"/></b-button>
-          </b-button-group>
-        </template>
-
-        <template v-slot:cell(num_users_achieved_skill)="data">
-          <span class="ml-2">{{ data.value }}</span>
-          <b-badge v-if="data.value == 0" variant="danger" class="ml-2">Overlooked Skill</b-badge>
-          <b-badge v-if="data.value > 100" variant="info" class="ml-2">Top Skill</b-badge>
-        </template>
-
-        <template v-slot:cell(num_users_started_but_not_achieved)="data">
-          <span class="ml-2">{{ data.value }}</span>
-          <b-badge v-if="data.value > 600" variant="success" class="ml-2">High Activity</b-badge>
-          <!--          <span v-if="data.value > 100" class="border border-info rounded d-inline-block bg-white" style="width: 2rem; text-align: center">-->
-          <!--            <i class="fa fa-trophy text-muted"/>-->
-          <!--          </span>-->
-        </template>
-
-        <template v-slot:cell(last_skill_achieved)="data">
-          <b-badge v-if="!data.value" variant="warning" class="ml-2">Never</b-badge>
-          <div v-else>
-            <div>
-              <span>{{ relativeTime(data.value) }}</span>
-            </div>
-            <div class="text-muted" style="font-size: 0.8rem;">
-              {{ data.value | date }}
-            </div>
-          </div>
-        </template>
-
-        <template v-slot:cell(last_event_applied)="data">
-          <b-badge v-if="!data.value" variant="warning" class="ml-2">Never</b-badge>
-          <div v-else>
-            <div>
-              <span>{{ relativeTime(data.value) }}</span>
-            </div>
-            <div class="text-muted" style="font-size: 0.8rem;">
-              {{ data.value | date }}
-            </div>
-          </div>
-        </template>
-
-        <template v-slot:row-details="row">
-          <b-card>
-            <skill-achieved-by-users-over-time :skill-name="row.item.skill"/>
-          </b-card>
-        </template>
-
-      </skills-b-table>
+      <div class="col-md border-right" data-cy="skillsNavigator-filters">
+        <b-form-group label="Tag Filters"  label-class="text-muted">
+          <b-form-checkbox v-model="filters.overlookedTag" inline>
+            <b-badge variant="danger" class="ml-2">Overlooked Skill</b-badge>
+          </b-form-checkbox>
+          <b-form-checkbox v-model="filters.topSkillTag" inline>
+            <b-badge variant="info" class="ml-2">Top Skill</b-badge>
+          </b-form-checkbox>
+          <b-form-checkbox v-model="filters.highActivityTag" inline>
+            <b-badge variant="success" class="ml-2">High Activity</b-badge>
+          </b-form-checkbox>
+          <b-form-checkbox v-model="filters.neverAchieved" inline>
+            <b-badge variant="warning" class="ml-2">Never Achieved</b-badge>
+          </b-form-checkbox>
+          <b-form-checkbox v-model="filters.neverReported" inline>
+            <b-badge variant="warning" class="ml-2">Never Reported</b-badge>
+          </b-form-checkbox>
+          <div class="text-muted small">Please Note: Tags become more meaningful with extensive usage</div>
+        </b-form-group>
+      </div>
     </div>
-  </div>
+    <div class="row pl-3 mb-3">
+      <div class="col">
+        <b-button variant="outline-info" @click="applyFilters" data-cy="skillsNavigator-filterBtn"><i class="fa fa-filter"/> Filter</b-button>
+        <b-button variant="outline-info" @click="reset" class="ml-1" data-cy="skillsNavigator-resetBtn"><i class="fa fa-times"/> Reset</b-button>
+      </div>
+    </div>
+
+    <skills-b-table :items="items" :options="tableOptions" data-cy="skillsNavigator-table">
+      <template v-slot:cell(skillName)="data">
+        <span class="ml-2">{{ data.value }}</span>
+
+        <b-button-group class="float-right">
+          <b-button target="_blank" :to="{ name: 'SkillOverview', params: { projectId: projectId, subjectId: 'subj1', skillId: 'skill1' } }"
+                    variant="outline-info" size="sm" class="text-secondary"
+                    v-b-tooltip.hover="'View Skill Configuration'"><i class="fa fa-wrench"/></b-button>
+          <b-button id="b-skill-metrics" target="_blank" :to="{ name: 'SkillMetrics', params: { projectId: projectId, subjectId: 'subj1', skillId: 'skill1' } }"
+                    variant="outline-info" size="sm" class="text-secondary"
+                    v-b-tooltip.hover="'View Skill Metrics'"><i class="fa fa-chart-bar"/></b-button>
+        </b-button-group>
+      </template>
+
+      <template v-slot:cell(numUserAchieved)="data">
+        <span class="ml-2">{{ data.value }}</span>
+        <b-badge v-if="data.item.isOverlookedTag" variant="danger" class="ml-2">Overlooked Skill</b-badge>
+        <b-badge v-if="data.item.isTopSkillTag" variant="info" class="ml-2">Top Skill</b-badge>
+      </template>
+
+      <template v-slot:cell(numUsersInProgress)="data">
+        <span class="ml-2">{{ data.value }}</span>
+        <b-badge v-if="data.item.isHighActivityTag" variant="success" class="ml-2">High Activity</b-badge>
+      </template>
+
+      <template v-slot:cell(lastAchievedTimestamp)="data">
+        <b-badge v-if="data.item.isNeverAchievedTag" variant="warning" class="ml-2">Never</b-badge>
+        <div v-else>
+          <div>
+            {{ data.value | date }}
+          </div>
+          <div class="text-muted small">
+            <span>{{ relativeTime(data.value) }}</span>
+          </div>
+        </div>
+      </template>
+
+      <template v-slot:cell(lastReportedTimestamp)="data">
+        <b-badge v-if="data.item.isNeverReportedTag" variant="warning" class="ml-2">Never</b-badge>
+        <div v-else>
+          <div>
+            <span>{{ data.value | date }}</span>
+          </div>
+          <div class="text-muted small">
+            {{ relativeTime(data.value) }}
+          </div>
+        </div>
+      </template>
+    </skills-b-table>
+  </metrics-card>
 </template>
 
 <script>
-  import SkillsBTable from '@/components/utils/table/SkillsBTable';
   import moment from 'moment';
-  import SkillAchievedByUsersOverTime from './SkillAchievedByUsersOverTime';
+  import SkillsBTable from '@/components/utils/table/SkillsBTable';
+  import MetricsService from '../MetricsService';
+  import MetricsCard from '../utils/MetricsCard';
 
   export default {
     name: 'SkillsUsageMetrics',
-    components: { SkillAchievedByUsersOverTime, SkillsBTable },
+    components: { MetricsCard, SkillsBTable },
     data() {
       return {
         projectId: this.$route.params.projectId,
-        levels: {
-          selected: null,
-          available: ['Level 1', 'Level 2', 'Level 3', 'Level 4', 'Level 5'],
+        filters: {
+          name: '',
+          highActivityTag: false,
+          overlookedTag: false,
+          topSkillTag: false,
+          neverAchieved: false,
+          neverReported: false,
         },
         tableOptions: {
           busy: false,
@@ -126,85 +127,131 @@ limitations under the License.
           sortDesc: true,
           bordered: true,
           outlined: true,
-          rowDetailsControls: true,
+          rowDetailsControls: false,
+          stacked: 'md',
           fields: [
             {
-              key: 'skill',
+              key: 'skillName',
+              label: 'Skill',
               sortable: true,
             },
             {
-              key: 'num_users_achieved_skill',
+              key: 'numUserAchieved',
               sortable: true,
               label: '# Users Achieved',
             },
             {
-              key: 'num_users_started_but_not_achieved',
+              key: 'numUsersInProgress',
               sortable: true,
               label: '# Users In Progress',
             },
             {
-              key: 'last_event_applied',
+              key: 'lastReportedTimestamp',
               sortable: true,
-              label: 'Last Applied',
+              label: 'Last Reported',
             },
             {
-              key: 'last_skill_achieved',
+              key: 'lastAchievedTimestamp',
               sortable: true,
               label: 'Last Achieved',
             },
           ],
           pagination: {
             currentPage: 1,
-            totalRows: 76,
-            perPage: 5,
+            totalRows: 1,
+            pageSize: 5,
             possiblePageSizes: [5, 10, 15, 20, 50],
           },
         },
-        items: [
-          {
-            skill: 'How to fly',
-            last_event_applied: 1599824550435,
-            last_skill_achieved: 1599824550435,
-            num_users_achieved_skill: 520,
-            num_users_started_but_not_achieved: 40,
-            num_events_applied: 344,
-          },
-          {
-            skill: 'How to drive',
-            last_event_applied: 1599824550435,
-            last_skill_achieved: 1599824550435,
-            num_users_achieved_skill: 150,
-            num_users_started_but_not_achieved: 40,
-            num_events_applied: 344,
-          },
-          {
-            skill: 'How to own a boat',
-            last_event_applied: 1599824550435,
-            last_skill_achieved: null,
-            num_users_achieved_skill: 0,
-            num_users_started_but_not_achieved: 2,
-            num_events_applied: 0,
-          },
-          {
-            skill: 'How to say NO to everything',
-            last_event_applied: null,
-            last_skill_achieved: null,
-            num_users_achieved_skill: 0,
-            num_users_started_but_not_achieved: 0,
-            num_events_applied: 0,
-          },
-          {
-            skill: 'How to fight',
-            last_event_applied: 1600113998292,
-            last_skill_achieved: 1600113963711,
-            num_users_achieved_skill: 40,
-            num_users_started_but_not_achieved: 625,
-            num_events_applied: 344,
-          },
-        ],
+        items: [],
+        originalItems: [],
       };
     },
+    mounted() {
+      this.loadData();
+    },
     methods: {
+      applyFilters() {
+        this.items = this.originalItems.filter((item) => {
+          if (this.filters.name && !item.skillName.toLowerCase().includes(this.filters.name.toLowerCase())) {
+            return false;
+          }
+          if (this.filters.neverAchieved && !item.isNeverAchievedTag) {
+            return false;
+          }
+          if (this.filters.neverReported && !item.isNeverReportedTag) {
+            return false;
+          }
+          if (this.filters.topSkillTag && !item.isTopSkillTag) {
+            return false;
+          }
+          if (this.filters.overlookedTag && !item.isOverlookedTag) {
+            return false;
+          }
+          if (this.filters.highActivityTag && !item.isHighActivityTag) {
+            return false;
+          }
+          return true;
+        });
+      },
+      addTags(items) {
+        const numInTopPercent = Math.trunc(items.length * 0.1);
+        console.log(`numInTopPercent: ${numInTopPercent}`);
+        // up-to number of items in top or bottom skill tags
+        const adjustmentThreshold = Math.trunc(items.length * 0.2);
+        const enabled = items.length > 15;
+
+        const sortedByNumAchieved = items.map((item) => item.numUserAchieved).sort((a, b) => (a - b));
+        const minNumUserAchievedForTopSkillTag = sortedByNumAchieved[items.length - numInTopPercent];
+        const maxNumUserAchievedForOverlookedTag = sortedByNumAchieved[numInTopPercent];
+        console.log(`numTopSkill: ${sortedByNumAchieved}`);
+        console.log(`numTopSkill: ${minNumUserAchievedForTopSkillTag}`);
+
+        const numTopSkill = sortedByNumAchieved.length - sortedByNumAchieved.indexOf(minNumUserAchievedForTopSkillTag);
+        const topSkillsTabEnabled = numTopSkill < adjustmentThreshold;
+        console.log(`numTopSkill: ${numTopSkill}`);
+        console.log(`topSkillsTabEnabled: ${topSkillsTabEnabled}`);
+
+        const numOverlookedSkills = sortedByNumAchieved.lastIndexOf(maxNumUserAchievedForOverlookedTag) + 1;
+        const overlookedTagEnabled = numOverlookedSkills <= adjustmentThreshold;
+        console.log(`numOverlookedSkills: ${numOverlookedSkills}`);
+        console.log(`overlookedTagEnabled: ${overlookedTagEnabled}`);
+
+        const sortedByNumInProgress = items.map((item) => item.numUsersInProgress).sort((a, b) => (a - b));
+        const minNumUserProgressForHighActivityTag = sortedByNumInProgress[items.length - numInTopPercent];
+        const enabledHighActivity = minNumUserProgressForHighActivityTag > 0 && (minNumUserProgressForHighActivityTag - 10 > sortedByNumInProgress[0]);
+        console.log(`sortedByNumInProgress: ${sortedByNumInProgress}`);
+        console.log(`minNumUserProgressForHighActivityTag: ${minNumUserProgressForHighActivityTag}`);
+
+        return items.map((item) => ({
+          isTopSkillTag: (enabled && topSkillsTabEnabled && minNumUserAchievedForTopSkillTag <= item.numUserAchieved),
+          isNeverAchievedTag: !item.lastAchievedTimestamp,
+          isNeverReportedTag: !item.lastReportedTimestamp,
+          isOverlookedTag: overlookedTagEnabled && enabled && item.numUserAchieved <= maxNumUserAchievedForOverlookedTag,
+          isHighActivityTag: enabled && enabledHighActivity && (item.numUsersInProgress >= minNumUserProgressForHighActivityTag),
+          ...item,
+        }));
+      },
+      reset() {
+        this.filters.name = '';
+        this.filters.neverAchieved = false;
+        this.filters.neverReported = false;
+        this.filters.overlookedTag = false;
+        this.filters.topSkillTag = false;
+        this.filters.highActivityTag = false;
+        this.items = this.originalItems;
+      },
+      loadData() {
+        this.tableOptions.busy = true;
+        MetricsService.loadChart(this.$route.params.projectId, 'skillUsageNavigatorChartBuilder')
+          .then((dataFromServer) => {
+            this.items = this.addTags(dataFromServer);
+            // console.log(`items: ${JSON.stringify(this.items)}`);
+            this.originalItems = this.items;
+            this.tableOptions.pagination.totalRows = this.items.length;
+            this.tableOptions.busy = false;
+          });
+      },
       relativeTime(timestamp) {
         return moment(timestamp)
           .startOf('hour')

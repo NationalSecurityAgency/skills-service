@@ -19,6 +19,9 @@ class SkillUsageNavigatorChartBuilderSpec extends DefaultIntSpec {
 
         when:
         def res = skillsService.getMetricsData(skills[0].projectId, "skillUsageNavigatorChartBuilder")
+        res.each {
+            println it
+        }
         then:
         res
     }

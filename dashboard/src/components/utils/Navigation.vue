@@ -112,6 +112,7 @@ limitations under the License.
       },
       navigate(selectedKey) {
         if (this.smallScreenMode) {
+          // eslint-disable-next-line no-use-before-define
           this.$root.$emit('bv::toggle::collapse', 'menu-collapse-control');
         }
         const menuSelectionsTemp = this.buildNewMenuMap(selectedKey);

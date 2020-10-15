@@ -276,15 +276,17 @@ Cypress.Commands.add('reportHistoryOfEvents', (projId, user, numDays=10, skipWee
 });
 
 
-Cypress.Commands.add('validateTable', (tableSelector, expected, pageSize = 5) => {
+Cypress.Commands.add('validateTable', (tableSelector, expected, pageSize = 5, onlyVisiblePage = false, numRowsParam = null) => {
     cy.get(tableSelector).contains('Loading...').should('not.exist')
     const rowSelector = `${tableSelector} tbody tr`
-    const numRows = expected.length;
+    const numRows =  numRowsParam ? numRowsParam : expected.length;
 
     cy.get('[data-cy=skillsBTableTotalRows]').contains(numRows);
 
     cy.get(rowSelector).should('have.length', Math.min(pageSize, numRows)).as('cyRows');
-    for (let i = 0; i < numRows; i += 1) {
+
+    const numIterations = onlyVisiblePage ? Math.min(pageSize, numRows) : numRows
+    for (let i = 0; i < numIterations; i += 1) {
         let rowIndex = i;
         if (i + 1 >= pageSize) {
             rowIndex = i - (pageSize * (Math.trunc(i / pageSize)));

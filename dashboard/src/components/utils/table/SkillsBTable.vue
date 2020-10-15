@@ -24,6 +24,9 @@ limitations under the License.
              :outlined="options.outlined"
              :fields="this.fieldsInternal"
              :stacked="options.stacked"
+             :per-page="options.pagination.server ? 0 : pageSizeInternal"
+             :current-page="options.pagination.server ? null : currentPageInternal"
+             :hide-goto-end-buttons="options.pagination.server ? true : false"
              @sort-changed="sortingChanged"
              show-empty>
       <colgroup v-if="options.rowDetailsControls"><col style="width: 2rem;"><col></colgroup>
@@ -65,19 +68,20 @@ limitations under the License.
     </b-table>
     <div v-if="!options.busy" class="row m-1 p-0 align-items-center">
       <div class="col-md text-center text-md-left">
-        <span class="text-muted">Total Rows:</span> <strong data-cy="skillsBTableTotalRows">{{options.pagination.totalRows}}</strong>
+        <span class="text-muted">Total Rows:</span> <strong data-cy="skillsBTableTotalRows">{{totalRows}}</strong>
       </div>
       <div class="col-md my-3 my-md-0">
-        <b-pagination v-model="options.pagination.currentPage" :total-rows="options.pagination.totalRows"
-                      :per-page="options.pagination.pageSize" slot-scope=""
+        <b-pagination v-model="currentPageInternal" :total-rows="totalRows"
+                      :per-page="pageSizeInternal" slot-scope=""
                       pills align="center" size="sm" variant="info" class="customPagination m-0 p-0"
                       :disabled="disabled" data-cy="skillsBTablePaging">
         </b-pagination>
       </div>
       <div class="col-md text-center text-md-right">
         <span class="text-muted">Per page:</span>
-        <b-form-select v-model="options.pagination.pageSize" :options="options.pagination.possiblePageSizes"
-                       size="sm" class="mx-2" style="width: 4rem;" :disabled="disabled"/>
+        <b-form-select v-model="pageSizeInternal" :options="options.pagination.possiblePageSizes"
+                       size="sm" class="mx-2" style="width: 4rem;" :disabled="disabledPaging"
+                       data-cy="skillsBTablePageSize"/>
         <b-button size="sm" v-b-tooltip.hover title="Download CSV" variant="outline-info" :disabled="disabled">
           <i class="fas fa-download"></i>
         </b-button>
@@ -108,18 +112,40 @@ limitations under the License.
     data() {
       return {
         fieldsInternal: [],
+        currentPageInternal: this.options.pagination.currentPage,
+        pageSizeInternal: this.options.pagination.pageSize,
       };
     },
     computed: {
       disabled() {
-        return !this.items || this.items.length === 0;
+        return this.isDisabled();
+      },
+      disabledPaging() {
+        const minPageSizeAvailable = Math.min(...this.options.pagination.possiblePageSizes);
+        return this.isDisabled() || (this.options.pagination.totalRows <= minPageSizeAvailable);
+      },
+      totalRows() {
+        return this.options.pagination.server ? this.options.pagination.totalRows : this.items.length;
       },
     },
     methods: {
+      isDisabled() {
+        return !this.items || this.items.length === 0;
+      },
       sortingChanged(ctx) {
         // ctx.sortBy   ==> Field key for sorting by (or null for no sorting)
         // ctx.sortDesc ==> true if sorting descending, false otherwise
+        this.currentPageInternal = 1;
         this.$emit('sort-changed', ctx);
+      },
+    },
+    watch: {
+      currentPageInternal() {
+        this.$emit('page-changed', this.currentPageInternal);
+      },
+      pageSizeInternal() {
+        this.currentPageInternal = 1;
+        this.$emit('page-size-changed', this.pageSizeInternal);
       },
     },
   };
