@@ -15,6 +15,7 @@
  */
 package skills.auth.form.oauth2
 
+import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Conditional
 import org.springframework.security.oauth2.core.user.OAuth2User
@@ -101,6 +102,96 @@ class OAuth2UserConverterService {
             String lastName =  oAuth2User.attributes.get(LAST_NAME)
             String email =  oAuth2User.attributes.get(EMAIL)
             assert firstName && lastName && email, "First Name [$firstName], Last Name [$lastName], and email [$email] must be available in your public Google profile"
+
+            return new UserInfo(
+                    username: "${username}-${clientId}",
+                    email:email,
+                    firstName: firstName,
+                    lastName: lastName,
+            )
+        }
+    }
+
+    static class GitLabUserConverter implements OAuth2UserConverter {
+        static final String NAME = 'name'
+        static final String EMAIL = 'email'
+
+        String clientId = 'gitlab'
+
+        @Override
+        UserInfo convert(String clientId, OAuth2User oAuth2User) {
+            String username = oAuth2User.getName()
+            assert username, "Error getting name attribute of oAuth2User [${oAuth2User}] from clientId [$clientId]"
+            String email =  oAuth2User.attributes.get(EMAIL)
+            if (!email) {
+                throw new SkillsAuthorizationException("Email must be available in your public GitLab profile")
+            }
+            String name = oAuth2User.attributes.get(NAME)
+            if (!name) {
+                throw new SkillsAuthorizationException("Name must be available in your public GitLab profile")
+            }
+            String firstName = name?.tokenize()?.first()
+            List tokens = name?.tokenize()
+            tokens?.pop()
+            tokens?.remove(username)
+            String lastName = tokens?.join(' ')
+
+            return new UserInfo(
+                    username: "${username}-${clientId}",
+                    email:email,
+                    firstName: firstName,
+                    lastName: lastName,
+            )
+        }
+    }
+
+    static class Auth0UserConverter implements OAuth2UserConverter {
+        static final String USERNAME = 'nickname'
+        static final String NAME = 'name'
+        static final String EMAIL = 'email'
+
+        String clientId = 'auth0'
+
+        @Override
+        UserInfo convert(String clientId, OAuth2User oAuth2User) {
+            String username = oAuth2User.attributes.get(USERNAME)
+            assert username, "Error getting name attribute of oAuth2User [${oAuth2User}] from clientId [$clientId]"
+            String email =  oAuth2User.attributes.get(EMAIL)
+            if (!email) {
+                throw new SkillsAuthorizationException("Email must be available in your public GitLab profile")
+            }
+            String name = oAuth2User.attributes.get(NAME)
+            if (!name) {
+                throw new SkillsAuthorizationException("Name must be available in your public GitLab profile")
+            }
+            String firstName = name?.tokenize()?.first()
+            List tokens = name?.tokenize()
+            tokens?.pop()
+            tokens?.remove(username)
+            String lastName = tokens?.join(' ')
+
+            return new UserInfo(
+                    username: "${username}-${clientId}",
+                    email:email,
+                    firstName: firstName,
+                    lastName: lastName,
+            )
+        }
+    }
+
+    static class HydraUserConverter implements OAuth2UserConverter {
+        String clientId = 'hydra'
+        @Override
+        UserInfo convert(String clientId, OAuth2User oAuth2User) {
+            String email = oAuth2User.getName()
+            List tokens = email.tokenize('@')
+            String username = tokens.first()
+            String firstName = username;
+            String lastName = StringUtils.substringBeforeLast(tokens.last(), '.')
+            assert email, "Error getting email attribute of oAuth2User [${oAuth2User}] from clientId [$clientId]"
+            assert username, "Error getting username attribute of oAuth2User [${oAuth2User}] from clientId [$clientId]"
+            assert firstName, "Error getting firstName attribute of oAuth2User [${oAuth2User}] from clientId [$clientId]"
+            assert lastName, "Error getting lastName attribute of oAuth2User [${oAuth2User}] from clientId [$clientId]"
 
             return new UserInfo(
                     username: "${username}-${clientId}",

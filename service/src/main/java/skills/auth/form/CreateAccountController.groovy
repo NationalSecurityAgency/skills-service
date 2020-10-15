@@ -121,7 +121,7 @@ class CreateAccountController {
     @GetMapping("/app/oAuthProviders")
     List<skills.controller.result.model.OAuth2Provider> getOAuthProviders() {
         List<skills.controller.result.model.OAuth2Provider> providers = []
-        if (clientRegistrationRepository && oAuth2ProviderProperties) {
+        if (clientRegistrationRepository && oAuth2ProviderProperties?.registration) {
             clientRegistrationRepository.iterator().each { ClientRegistration clientRegistration ->
                 skills.controller.result.model.OAuth2Provider oAuth2Provider = oAuth2ProviderProperties.registration.get(clientRegistration.registrationId)
                 oAuth2Provider.registrationId = oAuth2Provider.registrationId ?: clientRegistration.registrationId
