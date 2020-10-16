@@ -81,7 +81,7 @@ limitations under the License.
             {{ data.value | date }}
           </div>
           <div class="text-muted small">
-            <span>{{ relativeTime(data.value) }}</span>
+            <span>{{ data.value | timeFromNow }}</span>
           </div>
         </div>
       </template>
@@ -93,7 +93,7 @@ limitations under the License.
             <span>{{ data.value | date }}</span>
           </div>
           <div class="text-muted small">
-            {{ relativeTime(data.value) }}
+            {{ data.value | timeFromNow }}
           </div>
         </div>
       </template>
@@ -102,10 +102,10 @@ limitations under the License.
 </template>
 
 <script>
-  import moment from 'moment';
   import SkillsBTable from '@/components/utils/table/SkillsBTable';
   import MetricsService from '../MetricsService';
   import MetricsCard from '../utils/MetricsCard';
+  import SkillsUsageHelper from './SkillsUsageHelper';
 
   export default {
     name: 'SkillsUsageMetrics',
@@ -172,65 +172,7 @@ limitations under the License.
     },
     methods: {
       applyFilters() {
-        this.items = this.originalItems.filter((item) => {
-          if (this.filters.name && !item.skillName.toLowerCase().includes(this.filters.name.toLowerCase())) {
-            return false;
-          }
-          if (this.filters.neverAchieved && !item.isNeverAchievedTag) {
-            return false;
-          }
-          if (this.filters.neverReported && !item.isNeverReportedTag) {
-            return false;
-          }
-          if (this.filters.topSkillTag && !item.isTopSkillTag) {
-            return false;
-          }
-          if (this.filters.overlookedTag && !item.isOverlookedTag) {
-            return false;
-          }
-          if (this.filters.highActivityTag && !item.isHighActivityTag) {
-            return false;
-          }
-          return true;
-        });
-      },
-      addTags(items) {
-        const numInTopPercent = Math.trunc(items.length * 0.1);
-        console.log(`numInTopPercent: ${numInTopPercent}`);
-        // up-to number of items in top or bottom skill tags
-        const adjustmentThreshold = Math.trunc(items.length * 0.2);
-        const enabled = items.length > 15;
-
-        const sortedByNumAchieved = items.map((item) => item.numUserAchieved).sort((a, b) => (a - b));
-        const minNumUserAchievedForTopSkillTag = sortedByNumAchieved[items.length - numInTopPercent];
-        const maxNumUserAchievedForOverlookedTag = sortedByNumAchieved[numInTopPercent];
-        console.log(`numTopSkill: ${sortedByNumAchieved}`);
-        console.log(`numTopSkill: ${minNumUserAchievedForTopSkillTag}`);
-
-        const numTopSkill = sortedByNumAchieved.length - sortedByNumAchieved.indexOf(minNumUserAchievedForTopSkillTag);
-        const topSkillsTabEnabled = numTopSkill < adjustmentThreshold;
-        console.log(`numTopSkill: ${numTopSkill}`);
-        console.log(`topSkillsTabEnabled: ${topSkillsTabEnabled}`);
-
-        const numOverlookedSkills = sortedByNumAchieved.lastIndexOf(maxNumUserAchievedForOverlookedTag) + 1;
-        const overlookedTagEnabled = numOverlookedSkills <= adjustmentThreshold;
-        console.log(`numOverlookedSkills: ${numOverlookedSkills}`);
-        console.log(`overlookedTagEnabled: ${overlookedTagEnabled}`);
-
-        const sortedByNumInProgress = items.map((item) => item.numUsersInProgress).sort((a, b) => (a - b));
-        const minNumUserProgressForHighActivityTag = sortedByNumInProgress[items.length - numInTopPercent];
-        const enabledHighActivity = minNumUserProgressForHighActivityTag > 0 && (minNumUserProgressForHighActivityTag - 10 > sortedByNumInProgress[0]);
-        console.log(`sortedByNumInProgress: ${sortedByNumInProgress}`);
-        console.log(`minNumUserProgressForHighActivityTag: ${minNumUserProgressForHighActivityTag}`);
-
-        return items.map((item) => ({
-          isTopSkillTag: (enabled && topSkillsTabEnabled && minNumUserAchievedForTopSkillTag <= item.numUserAchieved),
-          isNeverAchievedTag: !item.lastAchievedTimestamp,
-          isNeverReportedTag: !item.lastReportedTimestamp,
-          isOverlookedTag: overlookedTagEnabled && enabled && item.numUserAchieved <= maxNumUserAchievedForOverlookedTag,
-          isHighActivityTag: enabled && enabledHighActivity && (item.numUsersInProgress >= minNumUserProgressForHighActivityTag),
-          ...item,
-        }));
+        this.items = this.originalItems.filter((item) => SkillsUsageHelper.shouldKeep(this.filters, item));
       },
       reset() {
         this.filters.name = '';
@@ -245,17 +187,11 @@ limitations under the License.
         this.tableOptions.busy = true;
         MetricsService.loadChart(this.$route.params.projectId, 'skillUsageNavigatorChartBuilder')
           .then((dataFromServer) => {
-            this.items = this.addTags(dataFromServer);
-            // console.log(`items: ${JSON.stringify(this.items)}`);
+            this.items = SkillsUsageHelper.addTags(dataFromServer);
             this.originalItems = this.items;
             this.tableOptions.pagination.totalRows = this.items.length;
             this.tableOptions.busy = false;
           });
-      },
-      relativeTime(timestamp) {
-        return moment(timestamp)
-          .startOf('hour')
-          .fromNow();
       },
     },
   };

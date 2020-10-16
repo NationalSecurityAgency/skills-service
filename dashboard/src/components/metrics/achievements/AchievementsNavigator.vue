@@ -100,7 +100,7 @@ limitations under the License.
           <span class="">{{ data.value | date }}</span>
           <b-badge v-if="isToday(data.value)" variant="info" class="ml-2">Today</b-badge>
           <div class="small text-muted">
-            {{ relativeTime(data.value) }}
+            {{ data.value | timeFromNow }}
           </div>
         </template>
       </skills-b-table>
@@ -239,11 +239,6 @@ limitations under the License.
       isToday(timestamp) {
         return moment(timestamp)
           .isSame(new Date(), 'day');
-      },
-      relativeTime(timestamp) {
-        return moment(timestamp)
-          .startOf('hour')
-          .fromNow();
       },
     },
     watch: {

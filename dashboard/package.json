@@ -10,7 +10,7 @@
     "licenseHeaderCheck": "license-check-and-add check -f '../license-add/license-add-config.json'",
     "licenseHeaderAdd": "license-check-and-add add -f ../license-add/license-add-config.json",
     "licenseCheck": "npm run licenseHeaderCheck && npm run licenseDepCheck",
-    "build": "npm run licenseCheck && vue-cli-service build",
+    "build": "npm run licenseCheck && npm run test:unit && vue-cli-service build",
     "deploy": "npm run build && rm -rf ../skills-service/src/main/resources/public/static/js && cp -rT dist ../skills-service/src/main/resources/public/ && cp -rT dist ../skills-service/target/classes/public/",
     "lint": "vue-cli-service lint",
     "test:e2e": "vue-cli-service test:e2e",
@@ -51,6 +51,7 @@
     "webstomp-client": "1.2.6"
   },
   "devDependencies": {
+    "@babel/core": "7.11.6",
     "@vue/cli-plugin-babel": "4.5.7",
     "@vue/cli-plugin-e2e-nightwatch": "4.5.7",
     "@vue/cli-plugin-eslint": "4.5.7",
@@ -58,13 +59,13 @@
     "@vue/cli-service": "4.5.7",
     "@vue/eslint-config-airbnb": "5.1.0",
     "@vue/test-utils": "1.1.0",
-    "@babel/core": "7.11.6",
     "babel-eslint": "10.1.0",
     "babel-jest": "26.3.0",
     "eslint": "7.8.1",
     "eslint-plugin-vue": "6.2.2",
     "license-check-and-add": "3.0.4",
     "license-checker": "25.0.1",
+    "moment-timezone": "0.5.31",
     "node-sass": "4.14.1",
     "sass-loader": "10.0.3",
     "vue-template-compiler": "2.6.12"

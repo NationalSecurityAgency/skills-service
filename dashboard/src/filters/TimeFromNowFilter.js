@@ -13,14 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// import Vue from 'vue';
-// import HelloWorld from '@/components/HelloWorld';
-//
-// describe('HelloWorld.vue', () => {
-//   it('should render correct contents', () => {
-//     const Constructor = Vue.extend(HelloWorld);
-//     const vm = new Constructor().$mount();
-//     expect(vm.$el.querySelector('.hello h1').textContent)
-//       .toEqual('Welcome to Your Vue.js App');
-//   });
-// });
+import Vue from 'vue';
+import moment from 'moment';
+
+const timeFromNowFormatter = (value) => moment(value).startOf('hour').fromNow();
+Vue.filter('timeFromNow', timeFromNowFormatter);
+
+// this allows to call this function from an js code; to learn more about that read about javascript modules
+// import TimeFromNowFilter from 'src/TimeFromNowFilter.js'
+//    TimeFromNowFilter(dateStrVAlue)
+export default timeFromNowFormatter;
