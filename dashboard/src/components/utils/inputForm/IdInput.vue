@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <ValidationProvider :rules="rules" v-slot="{ errors }" :name="label">
+  <ValidationProvider :rules="rules" v-slot="{ errors }" :name="label" ref="idVp">
     <div class="form-group mt-0 mb-0">
       <div class="row">
         <div class="col">
@@ -28,7 +28,7 @@ limitations under the License.
         </div>
       </div>
       <input type="text" class="form-control" id="idInput" v-model="internalValue" :disabled="!canEdit"
-             @input="dataChanged" aria-required="true">
+              aria-required="true">
       <small class="form-text text-danger" data-cy="idError">{{ errors[0]}}</small>
     </div>
   </ValidationProvider>
@@ -75,6 +75,11 @@ limitations under the License.
     watch: {
       value(newVal) {
         this.internalValue = newVal;
+      },
+      internalValue() {
+        this.$refs.idVp.syncValue(this.internalValue);
+        this.$refs.idVp.validate();
+        this.$emit('input', this.internalValue);
       },
     },
   };
