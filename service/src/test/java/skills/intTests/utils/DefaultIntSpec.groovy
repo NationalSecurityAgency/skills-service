@@ -17,6 +17,7 @@ package skills.intTests.utils
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.web.server.LocalServerPort
 import skills.SpringBootApp
@@ -29,6 +30,7 @@ import spock.lang.Specification
 @Slf4j
 @SpringBootTest(webEnvironment= SpringBootTest.WebEnvironment.RANDOM_PORT, classes = SpringBootApp)
 class DefaultIntSpec extends Specification {
+
 
     static {
         // must call in the main method and not in @PostConstruct method as H2 jdbc driver will cache timezone prior @PostConstruct method is called
@@ -53,6 +55,12 @@ class DefaultIntSpec extends Specification {
     @Autowired
     SettingRepo settingRepo
 
+    @Autowired(required=false)
+    MockUserInfoService mockUserInfoService
+
+    @Autowired
+    CertificateRegistry certificateRegistry
+
     def setup() {
         // allows for over-ridding the setup method
         doSetup();
@@ -65,13 +73,13 @@ class DefaultIntSpec extends Specification {
         /**
          * deleting projects and users will wipe the entire db clean due to cascading
          */
-            projDefRepo.deleteAll()
-            userAttrsRepo.deleteAll()
-            // global badges don't have references to a project so must delete those manually
-            skillDefRepo.deleteAll()
+        projDefRepo.deleteAll()
+        userAttrsRepo.deleteAll()
+        // global badges don't have references to a project so must delete those manually
+        skillDefRepo.deleteAll()
 
         settingRepo.findAll().each {
-            if (!it.settingGroup?.startsWith("public_")){
+            if (!it.settingGroup?.startsWith("public_")) {
                 settingRepo.delete(it)
             }
         }
