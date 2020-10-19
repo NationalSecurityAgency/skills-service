@@ -28,7 +28,7 @@ limitations under the License.
         </div>
       </div>
       <input type="text" class="form-control" id="idInput" v-model="internalValue" :disabled="!canEdit"
-              aria-required="true">
+              @input="dataChanged" aria-required="true">
       <small class="form-text text-danger" data-cy="idError">{{ errors[0]}}</small>
     </div>
   </ValidationProvider>
@@ -76,10 +76,11 @@ limitations under the License.
       value(newVal) {
         this.internalValue = newVal;
       },
-      internalValue() {
-        this.$refs.idVp.syncValue(this.internalValue);
-        this.$refs.idVp.validate();
-        this.$emit('input', this.internalValue);
+      internalValue(newVal) {
+        this.$refs.idVp.syncValue(newVal);
+        this.$refs.idVp.validate().then((validationResult) => {
+          this.$refs.idVp.applyResult(validationResult);
+        });
       },
     },
   };

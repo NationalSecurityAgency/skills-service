@@ -26,7 +26,7 @@ limitations under the License.
                 <label for="badgeName">* Badge Name</label>
                 <ValidationProvider rules="required|minNameLength|maxBadgeNameLength|uniqueName|customNameValidator" v-slot="{errors}" name="Badge Name">
                   <input v-focus class="form-control" id="badgeName" type="text" v-model="badgeInternal.name"
-                         @input="updateBadgeId" aria-required="true"/>
+                         @input="updateBadgeId" aria-required="true" data-cy="badgeName"/>
                   <small class="form-text text-danger" v-show="errors[0]" data-cy="badgeNameError">{{ errors[0] }}
                   </small>
                 </ValidationProvider>
@@ -188,6 +188,8 @@ limitations under the License.
             id = `${id}Badge`;
           }
           this.badgeInternal.badgeId = id;
+
+          // we're going to need to trigger validation somehow here
         }
       },
       onSelectedIcon(selectedIcon) {
