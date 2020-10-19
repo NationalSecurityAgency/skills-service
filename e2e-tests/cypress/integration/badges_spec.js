@@ -173,7 +173,8 @@ describe('Badges Tests', () => {
         // id too long
         msg = 'Badge ID cannot exceed 50 characters';
         const invalidId = Array(51).fill('a').join('');
-        cy.getIdField().clear().type(invalidId);
+        cy.getIdField().clear()
+        cy.getIdField().invoke('val', invalidId).trigger('input');
         cy.get('[data-cy=idError]').contains(msg).should('be.visible');
         cy.getIdField().type('{backspace}');
         cy.get('[data-cy=idError]').should('not.be.visible');
