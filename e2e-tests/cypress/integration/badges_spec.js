@@ -105,6 +105,29 @@ describe('Badges Tests', () => {
         cy.get('div.card-body i.fa-exclamation-circle').should('be.visible');
     });
 
+    it('name causes id to fail validation', () => {
+        cy.request('POST', '/admin/projects/proj1/badges/badgeExist', {
+            projectId: 'proj1',
+            name: "Badge Exist",
+            badgeId: 'badgeExist'
+        })
+
+        cy.visit('/projects/proj1/badges');
+        cy.clickButton('Badge');
+        cy.contains('New Badge');
+
+        // name causes id to be too long
+        const msg = 'Badge ID cannot exceed 50 characters';
+        const validNameButInvalidId = Array(46).fill('a').join('');
+        cy.get('[data-cy=badgeName]').click();
+        cy.get('[data-cy=badgeName]').invoke('val', validNameButInvalidId).trigger('input');
+        cy.get('[data-cy=idError]').contains(msg).should('be.visible');
+        cy.get('[data-cy=saveBadgeButton]').should('be.disabled');
+        cy.get('[data-cy=badgeName]').type('{backspace}');
+        cy.get('[data-cy=idError]').contains(msg).should('not.be.visible');
+        cy.get('[data-cy=saveBadgeButton]').should('be.enabled');
+    });
+
     it('badge validation', () => {
         // create existing badge
         cy.request('POST', '/admin/projects/proj1/badges/badgeExist', {
@@ -132,7 +155,8 @@ describe('Badges Tests', () => {
         cy.contains('Enable').click();
         cy.getIdField().clear().type("badgeId");
         const invalidName = Array(51).fill('a').join('');
-        cy.get('#badgeName').clear().type(invalidName);
+        cy.get('#badgeName').clear();
+        cy.get('#badgeName').invoke('val', invalidName).trigger('input');
         cy.get('[data-cy=badgeNameError]').contains(msg).should('be.visible');
         cy.get('[data-cy=saveBadgeButton]').should('be.disabled');
         cy.get('#badgeName').type('{backspace}');
@@ -149,7 +173,8 @@ describe('Badges Tests', () => {
         // id too long
         msg = 'Badge ID cannot exceed 50 characters';
         const invalidId = Array(51).fill('a').join('');
-        cy.getIdField().clear().type(invalidId);
+        cy.getIdField().clear()
+        cy.getIdField().invoke('val', invalidId).trigger('input');
         cy.get('[data-cy=idError]').contains(msg).should('be.visible');
         cy.getIdField().type('{backspace}');
         cy.get('[data-cy=idError]').should('not.be.visible');

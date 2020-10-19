@@ -90,6 +90,27 @@ describe('Subjects Tests', () => {
         cy.contains('ID: Lotsofspecial')
     });
 
+    it('name causes id to fail validation', () => {
+        cy.server();
+        cy.route('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
+        cy.route('POST', '/admin/projects/proj1/subjectNameExists').as('nameExists');
+
+        cy.visit('/projects/proj1');
+        cy.wait('@loadSubjects');
+        cy.clickButton('Subject');
+
+        // name causes id to be too long
+        const msg = 'Subject ID cannot exceed 50 characters.';
+        const validNameButInvalidId = Array(44).fill('a').join('');
+        cy.get('#subjName').click();
+        cy.get('#subjName').invoke('val', validNameButInvalidId).trigger('input');
+        cy.get('[data-cy=idError]').contains(msg).should('be.visible');
+        cy.get('[data-cy=saveSubjectButton]').should('be.disabled');
+        cy.get('#subjName').type('{backspace}');
+        cy.get('[data-cy=idError]').contains(msg).should('not.be.visible');
+        cy.get('[data-cy=saveSubjectButton]').should('be.enabled');
+    });
+
     it('select font awesome icon', () => {
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
             projectId: 'proj1',

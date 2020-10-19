@@ -37,7 +37,7 @@
     "node-emoji": "1.10.0",
     "numeral": "2.0.6",
     "sockjs-client": "1.5.0",
-    "vee-validate": "3.4.0",
+    "vee-validate": "3.4.2",
     "vis": "4.21.0",
     "vue": "2.6.12",
     "vue-apexcharts": "1.6.0",

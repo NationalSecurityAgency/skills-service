@@ -27,6 +27,30 @@ describe('Skills Tests', () => {
         })
     });
 
+    it('name causes id to fail validation', () => {
+      cy.server();
+      cy.route({
+        method: 'GET',
+        url: '/admin/projects/proj1/subjects/subj1'
+      }).as('loadSubject');
+
+      cy.visit('/projects/proj1/subjects/subj1');
+      cy.wait('@loadSubject');
+
+      cy.clickButton('Skill');
+
+      // name causes id to be too long
+      const msg = 'Skill ID cannot exceed 50 characters.';
+      const validNameButInvalidId = Array(46).fill('a').join('');
+      cy.get('[data-cy=skillName]').click();
+      cy.get('[data-cy=skillName]').invoke('val', validNameButInvalidId).trigger('input');
+      cy.get('[data-cy=idError]').contains(msg).should('be.visible');
+      cy.get('[data-cy=saveSkillButton]').should('be.disabled');
+      cy.get('[data-cy=skillName]').type('{backspace}');
+      cy.get('[data-cy=idError]').contains(msg).should('not.be.visible');
+      cy.get('[data-cy=saveSkillButton]').should('be.enabled');
+    });
+
     it('validation', () => {
       cy.server()
       cy.route('POST', `/admin/projects/proj1/subjects/subj1/skills/Skill1Skill`).as('postNewSkill');
