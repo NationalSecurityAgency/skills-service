@@ -18,47 +18,22 @@ limitations under the License.
     <sub-page-header title="Metrics"/>
     <div class="row mb-2">
       <div class="col">
-        <b-card>
-          <div class="row align-items-center">
-            <div class="col">
-              <h5 class="text-uppercase text-muted">Achieved</h5>
-              <h3><strong>23,400</strong></h3>
-            </div>
-            <div class="col text-right text-info h-100">
-              <i class="fa fa-trophy" style="font-size: 3rem;"/>
-            </div>
-          </div>
-          <p class="text-muted small">Number of users that achieved this skill</p>
-        </b-card>
+        <stats-card title="Achieved" :statNum="23400" icon="fa fa-trophy text-info">
+          Number of users that achieved this skill
+        </stats-card>
       </div>
       <div class="col">
-        <b-card>
-          <div class="row align-items-center">
-            <div class="col">
-              <h5 class="text-uppercase text-muted">In Progress</h5>
-              <h3><strong>1,553</strong></h3>
-            </div>
-            <div class="col text-right text-primary h-100">
-              <i class="fa fa-running" style="font-size: 3rem;"/>
-            </div>
-          </div>
-          <p class="text-muted small">Number of Users with some points earned toward the skill</p>
-        </b-card>
+        <stats-card title="In Progress" :statNum="1453" icon="fa fa-running text-primary">
+          Number of Users with some points earned toward the skill
+        </stats-card>
       </div>
       <div class="col">
-        <b-card>
-          <div class="row align-items-center">
-            <div class="col">
-              <h5 class="text-uppercase text-muted">Last Achieved</h5>
-              <h3><strong>2 hrs ago</strong></h3>
-            </div>
-            <div class="col text-right h-100 text-warning">
-              <i class="fa fa-clock" style="font-size: 3rem;"/>
-            </div>
-          </div>
-          <p class="text-muted small">A user achieved this skill 2 hours ago</p>
-        </b-card>
+        <stats-card title="Last Achieved" :statNum="1603125996410" :calculate-time-from-now="true"
+                    icon="fa fa-clock text-warning">
+          This skill was last achieved on <span class="text-success">{{ 1603125996410 | date}}</span>.
+        </stats-card>
       </div>
+
     </div>
 
     <b-card header="Users that Achieved this Skill">
@@ -74,10 +49,12 @@ limitations under the License.
   import SubPageHeader from '@//components/utils/pages/SubPageHeader';
   import SkillAchievedByUsersOverTime from './SkillAchievedByUsersOverTime';
   import AppliedSkillEventsOverTime from './AppliedSkillEventsOverTime';
+  import StatsCard from '../utils/StatsCard';
 
   export default {
     name: 'SingleSkillMetricPage',
     components: {
+      StatsCard,
       AppliedSkillEventsOverTime,
       SkillAchievedByUsersOverTime,
       SubPageHeader,
