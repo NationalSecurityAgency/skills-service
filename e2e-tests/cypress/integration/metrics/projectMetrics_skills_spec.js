@@ -211,14 +211,14 @@ describe('Metrics Tests - Skills', () => {
 
         cy.get(`${tableSelector} th`).contains('Last Reported').click()
         const lastReportedExpected = [
-            [{ colIndex: 3,  value: '2020-09-05 07:00' }],
-            [{ colIndex: 3,  value: '2020-09-06 07:00' }],
-            [{ colIndex: 3,  value: '2020-09-07 07:00' }],
-            [{ colIndex: 3,  value: '2020-09-08 07:00' }],
-            [{ colIndex: 3,  value: '2020-09-09 07:00' }],
-            [{ colIndex: 3,  value: '2020-09-10 07:00' }],
-            [{ colIndex: 3,  value: '2020-09-11 07:00' }],
-            [{ colIndex: 3,  value: '2020-09-12 07:00' }],
+            [{ colIndex: 3,  value: '2020-09-05 11:00' }],
+            [{ colIndex: 3,  value: '2020-09-06 11:00' }],
+            [{ colIndex: 3,  value: '2020-09-07 11:00' }],
+            [{ colIndex: 3,  value: '2020-09-08 11:00' }],
+            [{ colIndex: 3,  value: '2020-09-09 11:00' }],
+            [{ colIndex: 3,  value: '2020-09-10 11:00' }],
+            [{ colIndex: 3,  value: '2020-09-11 11:00' }],
+            [{ colIndex: 3,  value: '2020-09-12 11:00' }],
         ]
         cy.validateTable(tableSelector, lastReportedExpected);
 

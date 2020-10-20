@@ -80,7 +80,7 @@ describe('Metrics Tests - Achievements', () => {
                 value: 'N/A'
             }, {
                 colIndex: 4,
-                value: '2020-09-11 07:00'
+                value: '2020-09-11 11:00'
             }],
             [{
                 colIndex: 0,
@@ -96,7 +96,7 @@ describe('Metrics Tests - Achievements', () => {
                 value: 'N/A'
             }, {
                 colIndex: 4,
-                value: '2020-09-08 07:00'
+                value: '2020-09-08 11:00'
             }],
         ]);
 
@@ -147,12 +147,12 @@ describe('Metrics Tests - Achievements', () => {
         // default is descending by date
         const tableSelector = '[data-cy=achievementsNavigator-table]'
         const expected = [
-            [{ colIndex: 4,  value: '2020-09-11 07:00' }],
-            [{ colIndex: 4,  value: '2020-09-11 07:00' }],
-            [{ colIndex: 4,  value: '2020-09-09 07:00' }],
-            [{ colIndex: 4,  value: '2020-09-09 07:00' }],
-            [{ colIndex: 4,  value: '2020-09-06 07:00' }],
-            [{ colIndex: 4,  value: '2020-09-06 07:00' }],
+            [{ colIndex: 4,  value: '2020-09-11 11:00' }],
+            [{ colIndex: 4,  value: '2020-09-11 11:00' }],
+            [{ colIndex: 4,  value: '2020-09-09 11:00' }],
+            [{ colIndex: 4,  value: '2020-09-09 11:00' }],
+            [{ colIndex: 4,  value: '2020-09-06 11:00' }],
+            [{ colIndex: 4,  value: '2020-09-06 11:00' }],
         ]
         cy.validateTable(tableSelector, expected);
 
@@ -319,12 +319,12 @@ describe('Metrics Tests - Achievements', () => {
         cy.get('[data-cy=achievementsNavigator-filterBtn]').click();
         cy.wait('@userAchievementsChartBuilder');
         cy.validateTable(tableSelector, [
-            [{ colIndex: 4,  value: '2020-09-11 07:00' }],
-            [{ colIndex: 4,  value: '2020-09-11 07:00' }],
-            [{ colIndex: 4,  value: '2020-09-11 07:00' }],
-            [{ colIndex: 4,  value: '2020-09-11 07:00' }],
-            [{ colIndex: 4,  value: '2020-09-09 07:00' }],
-            [{ colIndex: 4,  value: '2020-09-09 07:00' }],
+            [{ colIndex: 4,  value: '2020-09-11 11:00' }],
+            [{ colIndex: 4,  value: '2020-09-11 11:00' }],
+            [{ colIndex: 4,  value: '2020-09-11 11:00' }],
+            [{ colIndex: 4,  value: '2020-09-11 11:00' }],
+            [{ colIndex: 4,  value: '2020-09-09 11:00' }],
+            [{ colIndex: 4,  value: '2020-09-09 11:00' }],
         ]);
 
         cy.get('[data-cy=achievementsNavigator-toDateInput]').click();
@@ -332,8 +332,8 @@ describe('Metrics Tests - Achievements', () => {
         cy.get('[data-cy=achievementsNavigator-filterBtn]').click();
         cy.wait('@userAchievementsChartBuilder');
         cy.validateTable(tableSelector, [
-            [{ colIndex: 4,  value: '2020-09-09 07:00' }],
-            [{ colIndex: 4,  value: '2020-09-09 07:00' }],
+            [{ colIndex: 4,  value: '2020-09-09 11:00' }],
+            [{ colIndex: 4,  value: '2020-09-09 11:00' }],
         ]);
 
         //////////////////////////////
@@ -347,7 +347,7 @@ describe('Metrics Tests - Achievements', () => {
         cy.get('[data-cy=achievementsNavigator-filterBtn]').click();
         cy.wait('@userAchievementsChartBuilder');
         cy.validateTable(tableSelector, [
-            [{ colIndex: 2,  value: 'Interesting Subject 1' }, { colIndex: 4,  value: '2020-09-09 07:00' }],
+            [{ colIndex: 2,  value: 'Interesting Subject 1' }, { colIndex: 4,  value: '2020-09-09 11:00' }],
         ]);
     });
 
