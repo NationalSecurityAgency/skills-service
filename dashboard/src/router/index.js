@@ -60,10 +60,10 @@ import ResetConfirmation from '@//components/access/ResetConfirmation';
 import ResetNotSupportedPage from '@//components/access/ResetNotSupportedPage';
 import MetricsPageNav from '@//components/metrics/MetricsPageNav';
 import ProjectMetrics from '@//components/metrics/ProjectMetrics';
-import UsersAchievementsMetricPage from '@//components/metrics/achievements/UsersAchievementsMetricPage';
-import SubjectMetricsPage from '@//components/metrics/subjectMetrics/SubjectMetricsPage';
-import SkillsMetricsPage from '@//components/metrics/skills/SkillsMetricsPage';
-import SingleSkillMetricPage from '@//components/metrics/skills/SingleSkillMetricPage';
+import UsersAchievementsMetricPage from '@//components/metrics/projectAchievements/UsersAchievementsMetricPage';
+import SubjectMetricsPage from '@//components/metrics/projectSubjects/SubjectMetricsPage';
+import SkillsMetricsPage from '@//components/metrics/projectSkills/SkillsMetricsPage';
+import SkillMetricsPage from '@//components/metrics/skill/SkillMetricsPage';
 
 Vue.use(Router);
 
@@ -319,7 +319,7 @@ const router = new Router({
       }, {
         name: 'SkillMetrics',
         path: 'metrics',
-        component: SingleSkillMetricPage,
+        component: SkillMetricsPage,
         meta: { requiresAuth: true, reportSkillId: 'VisitSkillStats' },
       }],
     },

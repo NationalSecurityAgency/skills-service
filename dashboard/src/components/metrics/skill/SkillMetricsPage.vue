@@ -58,7 +58,7 @@ limitations under the License.
   import SkillsSpinner from '../../utils/SkillsSpinner';
 
   export default {
-    name: 'SingleSkillMetricPage',
+    name: 'SkillMetricsPage',
     components: {
       SkillsSpinner,
       StatsCard,
