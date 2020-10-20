@@ -304,7 +304,7 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
                 performedSkills.lastPerformed as lastReported
             from (select skill_id, name from skill_definition where project_id = :projectId and type='Skill') sd
             left join (
-                select skill_id, count(distinct user_id) as usersAchieved, max(created) as lastAchieved from user_achievement where project_id = :projectId group by skill_id
+                select skill_id, count(distinct user_id) as usersAchieved, max(achieved_on) as lastAchieved from user_achievement where project_id = :projectId group by skill_id
             ) achievements
                 on achievements.skill_id = sd.skill_id
             left join (
@@ -315,4 +315,16 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
                 on sd.skill_id = performedSkills.skill_id
            ''', nativeQuery = true)
     List<SkillUsageItem> findAllForSkillsNavigator(@Param("projectId") String projectId)
+
+    static interface SkillStatsItem {
+        Integer getNumUsersAchieved()
+        Date getLastAchieved()
+    }
+
+    @Query(value = '''
+select count(distinct ua) as numUsersAchieved, max(ua.achievedOn) as lastAchieved
+from UserAchievement ua
+where ua.projectId = :projectId and ua.skillId = :skillId
+''')
+    SkillStatsItem calculateNumAchievedAndLastAchieved(@Param("projectId") String projectId, @Param("skillId") String skillId)
 }

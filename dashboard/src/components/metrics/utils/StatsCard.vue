@@ -4,7 +4,7 @@
       <div class="row">
         <div class="col">
           <h5 class="text-uppercase text-muted card-title small mb-1">{{ title }}</h5>
-          <span class="h4 font-weight-bold mb-0">
+          <span class="h4 font-weight-bold mb-0" data-cy="statCardValue">
             <span v-if="!calculateTimeFromNow">{{ statNum | number }}</span>
             <span v-else>{{ statNum | timeFromNow }}</span>
           </span>
@@ -13,7 +13,7 @@
           <i :class="icon" style="font-size: 2.2rem;"/>
         </div>
       </div>
-      <p class="text-muted small mt-3 mb-0"><slot /></p>
+      <p class="text-muted small mt-3 mb-0" data-cy="statCardDescription"><slot /></p>
     </div>
   </div>
 </template>

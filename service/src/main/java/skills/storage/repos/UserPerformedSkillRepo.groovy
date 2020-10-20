@@ -55,6 +55,9 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
     @Query('SELECT COUNT(DISTINCT p.skillId) from UserPerformedSkill p where p.projectId=?1 and p.userId = ?2')
     Integer countDistinctSkillIdByProjectIdAndUserId(String projectId, String userId)
 
+    @Query('SELECT COUNT(DISTINCT p.userId) from UserPerformedSkill p where p.projectId=?1 and p.skillId = ?2')
+    Integer countDistinctUserIdByProjectIdAndSkillId(String projectId, String skillId)
+
     @Query(''' select DISTINCT(sdParent)
         from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
             inner join UserPerformedSkill ups on sdParent.id = ups.skillRefId and ups.userId=?1
@@ -104,4 +107,7 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
                                                                            @Param('userId') String userId,
                                                                            @Nullable @Param('skillId') String skillId,
                                                                            @Param('version') Integer version)
+
+
+
 }
