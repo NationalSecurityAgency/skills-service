@@ -38,6 +38,7 @@ limitations under the License.
   import { extend, ValidationProvider } from 'vee-validate';
   // eslint-disable-next-line camelcase
   import { alpha_num } from 'vee-validate/dist/rules';
+  import debounce from 'lodash.debounce';
 
   extend('alpha_num', alpha_num);
 
@@ -71,16 +72,19 @@ limitations under the License.
       dataChanged() {
         this.$emit('input', this.internalValue);
       },
+      validateOnChange: debounce(function validate(val) {
+        this.$refs.idVp.syncValue(val);
+        this.$refs.idVp.validate().then((validationResult) => {
+          this.$refs.idVp.applyResult(validationResult);
+        });
+      }, 200),
     },
     watch: {
       value(newVal) {
         this.internalValue = newVal;
       },
       internalValue(newVal) {
-        this.$refs.idVp.syncValue(newVal);
-        this.$refs.idVp.validate().then((validationResult) => {
-          this.$refs.idVp.applyResult(validationResult);
-        });
+        this.validateOnChange(newVal);
       },
     },
   };

@@ -245,10 +245,11 @@ describe('Projects Tests', () => {
     cy.getIdField().type('3');
     cy.contains(minLenMsg).should('not.exist')
 
-    cy.getIdField().clear().type(longInvalid);
+    cy.getIdField().clear().click()
+    cy.getIdField().invoke('val', longInvalid).trigger('input');
     cy.contains(maxLenMsg)
 
-    cy.getIdField().clear().type(longValid);
+    cy.getIdField().clear().click().invoke('val', longValid).trigger('input');
     cy.contains(maxLenMsg).should('not.exist')
 
     cy.clickSave();
