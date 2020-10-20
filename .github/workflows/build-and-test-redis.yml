@@ -107,5 +107,4 @@ jobs:
         path: |
           ./service/target/*.jar
           ./service/target/*.log
-          ./e2e-tests/cypress
           ./e2e-tests/logs

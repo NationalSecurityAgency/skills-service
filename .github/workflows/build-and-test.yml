@@ -182,7 +182,6 @@ jobs:
         name: CI result artifacts ${{ matrix.container }}
         path: |
           ./service/target/*.log
-          ./e2e-tests/cypress
           ./e2e-tests/logs
 
   service-against-postgresql:
@@ -244,7 +243,6 @@ jobs:
           name: CI result artifacts
           path: |
             ./service/target/*.log
-            ./e2e-tests/cypress
             ./e2e-tests/logs
 
   publish-snapshot-docker-image:
