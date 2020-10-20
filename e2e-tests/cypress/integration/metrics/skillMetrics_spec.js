@@ -24,7 +24,39 @@ describe('Metrics Tests - Skills', () => {
         })
     });
 
-    it('skills page metrics', () => {
+    it ('stat cards with zero activity', () => {
+        cy.server()
+            .route('/admin/projects/proj1/charts/singleSkillCountsChartBuilder**')
+            .as('singleSkillCountsChartBuilder');
+
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            name: 'Interesting Subject 1',
+        });
+
+        const numSkills = 2;
+        for (let skillsCounter = 1; skillsCounter <= numSkills; skillsCounter += 1) {
+            cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill${skillsCounter}`, {
+                projectId: 'proj1',
+                subjectId: 'subj1',
+                skillId: `skill${skillsCounter}`,
+                name: `Very Great Skill # ${skillsCounter}`,
+                pointIncrement: '1000',
+                numPerformToCompletion: '2',
+            });
+        }
+
+        cy.visit('/projects/proj1/subjects/subj1/skills/skill1');
+        cy.clickNav('Metrics');
+        cy.wait('@singleSkillCountsChartBuilder');
+
+        cy.get('[data-cy=numUserAchievedStatCard] [data-cy=statCardValue]').contains('0');
+        cy.get('[data-cy=inProgressStatCard] [data-cy=statCardValue]').contains('0');
+        cy.get('[data-cy=lastAchievedStatCard] [data-cy=statCardValue]').contains('Never');
+    });
+
+    it('stat cards have data', () => {
         cy.server()
             .route('/admin/projects/proj1/charts/singleSkillCountsChartBuilder**')
             .as('singleSkillCountsChartBuilder');
@@ -85,6 +117,56 @@ describe('Metrics Tests - Skills', () => {
         cy.get('[data-cy=numUserAchievedStatCard] [data-cy=statCardValue]').contains('5');
         cy.get('[data-cy=inProgressStatCard] [data-cy=statCardValue]').contains('3');
         cy.get('[data-cy=lastAchievedStatCard] [data-cy=statCardValue]').contains('2 months ago');
+
+    });
+
+    it.only('stat cards with large counts', () => {
+        const m = moment.utc().subtract(5, 'years');
+        const timestamp =  m.format('x');
+        cy.log(timestamp);
+        cy.server()
+            .route({
+                url: '/admin/projects/proj1/charts/singleSkillCountsChartBuilder**',
+                status: 200,
+                response: {
+                    'numUsersAchieved': 3828283,
+                    'lastAchieved': parseInt(timestamp),
+                    'numUsersInProgress': 5817714
+                },
+            })
+            .as('singleSkillCountsChartBuilder');
+
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            name: 'Interesting Subject 1',
+        });
+
+        const numSkills = 1;
+        for (let skillsCounter = 1; skillsCounter <= numSkills; skillsCounter += 1) {
+            cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill${skillsCounter}`, {
+                projectId: 'proj1',
+                subjectId: 'subj1',
+                skillId: `skill${skillsCounter}`,
+                name: `Very Great Skill # ${skillsCounter}`,
+                pointIncrement: '1000',
+                numPerformToCompletion: '2',
+            });
+        }
+
+        cy.visit('/projects/proj1/subjects/subj1/skills/skill1');
+        cy.clickNav('Metrics');
+        cy.wait('@singleSkillCountsChartBuilder');
+
+        cy.get('[data-cy=numUserAchievedStatCard] [data-cy=statCardValue]').contains('3,828,283');
+        cy.get('[data-cy=numUserAchievedStatCard] [data-cy=statCardDescription]').contains('Number of users that achieved this skill ');
+
+        cy.get('[data-cy=inProgressStatCard] [data-cy=statCardValue]').contains('5,817,714');
+        cy.get('[data-cy=inProgressStatCard] [data-cy=statCardDescription]').contains('Number of Users with some points earned toward the skill');
+
+        cy.get('[data-cy=lastAchievedStatCard] [data-cy=statCardValue]').contains('5 years ago');
+        cy.get('[data-cy=lastAchievedStatCard] [data-cy=statCardDescription]').contains(`This skill was last achieved on ${m.format('YYYY-MM-DD HH:mm')}`);
+
 
     });
 

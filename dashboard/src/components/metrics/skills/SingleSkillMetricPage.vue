@@ -32,7 +32,8 @@ limitations under the License.
         <div class="col">
           <stats-card title="Last Achieved" :statNum="lastAchieved" :calculate-time-from-now="true"
                       icon="fa fa-clock text-warning"  data-cy="lastAchievedStatCard">
-            This skill was last achieved on <span class="text-success">{{ lastAchieved | date}}</span>.
+            <span v-if="lastAchieved">This skill was last achieved on <span class="text-success">{{ lastAchieved | date}}</span></span>
+            <span v-else>This skill was <span class="text-info">never</span> achieved.</span>
           </stats-card>
         </div>
 
