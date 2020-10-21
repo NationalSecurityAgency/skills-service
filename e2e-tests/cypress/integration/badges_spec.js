@@ -128,7 +128,7 @@ describe('Badges Tests', () => {
         cy.get('[data-cy=saveBadgeButton]').should('be.enabled');
     });
 
-    it('badge validation', () => {
+    it.only('badge validation', () => {
         // create existing badge
         cy.request('POST', '/admin/projects/proj1/badges/badgeExist', {
             projectId: 'proj1',
@@ -174,7 +174,7 @@ describe('Badges Tests', () => {
         msg = 'Badge ID cannot exceed 50 characters';
         const invalidId = Array(51).fill('a').join('');
         cy.getIdField().clear()
-        cy.getIdField().invoke('val', invalidId).trigger('input');
+        cy.getIdField().click().type(invalidId);
         cy.get('[data-cy=idError]').contains(msg).should('be.visible');
         cy.getIdField().type('{backspace}');
         cy.get('[data-cy=idError]').should('not.be.visible');
