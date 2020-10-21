@@ -18,12 +18,9 @@ package skills.metricsNew.builders.subjects
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
-import skills.controller.result.model.CountItem
 import skills.controller.result.model.TimestampCountItem
 import skills.metrics.ChartParams
 import skills.metricsNew.builders.MetricsChartBuilder
-import skills.services.AdminUsersService
-import skills.storage.model.DayCountItem
 import skills.storage.repos.UserAchievedLevelRepo
 
 @Component
@@ -47,14 +44,14 @@ class UsersByLevelForSubjectOverTimeChartBuilder implements MetricsChartBuilder 
         String subjectId = ChartParams.getValue(props, ChartParams.SUBJECT_ID)
         assert subjectId, "Property [${ChartParams.SUBJECT_ID}] was not provided"
 
-        List<UserAchievedLevelRepo.SkillAndDayUserCount> counts =
-                userAchievedRepo.countNumUsersOverTimeByProjectIdAndSkillId(projectId, subjectId)
+        List<UserAchievedLevelRepo.SkillLevelDayUserCount> counts =
+                userAchievedRepo.countNumUsersOverTimeAndLevelByProjectIdAndSkillId(projectId, subjectId)
 
-        Map<Integer, List<UserAchievedLevelRepo.SkillAndDayUserCount>> byLevel =
+        Map<Integer, List<UserAchievedLevelRepo.SkillLevelDayUserCount>> byLevel =
                 counts.groupBy { it.getLevel() }
 
         List<UserCountsByLevel> res = byLevel.collect {
-            List<UserAchievedLevelRepo.SkillAndDayUserCount> countsByDay = it.value.sort({ it.getDay() })
+            List<UserAchievedLevelRepo.SkillLevelDayUserCount> countsByDay = it.value.sort({ it.getDay() })
 
             int currentNumUsers = 0
             Date minDate

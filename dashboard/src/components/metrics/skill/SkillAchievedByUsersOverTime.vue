@@ -14,42 +14,30 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div>
-    <apexchart type="line" height="350" :options="chartOptions" :series="series"></apexchart>
-  </div>
+  <metrics-card title="Number of users achieved over time"  data-cy="numUsersAchievedOverTimeMetric">
+    <metrics-overlay :loading="loading" :has-data="hasData" no-data-msg="This chart needs at least 1 day of user activity.">
+      <apexchart type="area" height="350" :options="chartOptions" :series="series"></apexchart>
+    </metrics-overlay>
+  </metrics-card>
 </template>
 
 <script>
+  import numberFormatter from '@//filters/NumberFilter';
+  import MetricsCard from '../utils/MetricsCard';
+  import MetricsService from '../MetricsService';
+  import MetricsOverlay from '../utils/MetricsOverlay';
+
   export default {
     name: 'SkillAchievedByUsersOverTime',
+    components: { MetricsOverlay, MetricsCard },
     props: ['skillName'],
     data() {
       return {
-
-        series: [{
-          name: 'This Skills',
-          data: this.generateDayWiseTimeSeries(new Date('11 Mar 2020').getTime(), 91, {
-            min: 10,
-            max: 60,
-          }),
-        }, {
-          name: 'Skill Achieved by Most Users',
-          data: this.generateDayWiseTimeSeries(new Date('11 Feb 2020').getTime(), 120, {
-            min: 10,
-            max: 100,
-          }),
-        }, {
-          name: 'Average Skill',
-          data: this.generateDayWiseTimeSeries(new Date('11 Jan 2020').getTime(), 151, {
-            min: 10,
-            max: 20,
-          }),
-        }],
+        series: [],
         chartOptions: {
           chart: {
             height: 250,
-            type: 'line',
-            id: 'areachart-2',
+            type: 'area',
             toolbar: {
               show: false,
             },
@@ -58,7 +46,19 @@ limitations under the License.
             enabled: false,
           },
           stroke: {
-            curve: 'straight',
+            curve: 'smooth',
+          },
+          fill: {
+            type: 'gradient',
+            gradient: {
+              shade: 'light',
+              gradientToColors: ['#17a2b8', '#28a745'],
+              shadeIntensity: 1,
+              type: 'horizontal',
+              opacityFrom: 0.3,
+              opacityTo: 0.8,
+              stops: [0, 100, 100, 100],
+            },
           },
           grid: {
             padding: {
@@ -72,7 +72,7 @@ limitations under the License.
           yaxis: {
             labels: {
               formatter(val) {
-                return (val / 1000000).toFixed(0);
+                return numberFormatter(val);
               },
             },
             title: {
@@ -83,9 +83,33 @@ limitations under the License.
             position: 'top',
           },
         },
+        loading: true,
+        hasData: false,
       };
     },
+    mounted() {
+      this.loadData();
+    },
     methods: {
+      loadData() {
+        this.loading = true;
+        MetricsService.loadChart(this.$route.params.projectId, 'numUserAchievedOverTimeChartBuilder', { skillId: this.$route.params.skillId })
+          .then((dataFromServer) => {
+            if (dataFromServer.achievementCounts) {
+              const datSeries = dataFromServer.achievementCounts.map((item) => [item.timestamp, item.num]);
+              this.hasData = datSeries.length > 0;
+              if (this.hasData) {
+                const dayAgo = dataFromServer.achievementCounts[0].timestamp - (1000 * 60 * 60 * 24);
+                datSeries.unshift([dayAgo, 0]);
+              }
+              this.series = [{
+                name: 'This Skills',
+                data: datSeries,
+              }];
+            }
+            this.loading = false;
+          });
+      },
       generateDayWiseTimeSeries(xValStart, count, yrange) {
         let baseXVal = xValStart;
         let baseYVal = 0;

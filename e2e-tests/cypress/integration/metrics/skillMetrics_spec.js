@@ -17,6 +17,8 @@ var moment = require('moment-timezone');
 
 describe('Metrics Tests - Skills', () => {
 
+    const waitForSnap = 4000;
+
     beforeEach(() => {
         cy.request('POST', '/app/projects/proj1', {
             projectId: 'proj1',
@@ -26,7 +28,7 @@ describe('Metrics Tests - Skills', () => {
 
     it ('stat cards with zero activity', () => {
         cy.server()
-            .route('/admin/projects/proj1/charts/singleSkillCountsChartBuilder**')
+            .route('/admin/projects/proj1/charts/singleSkillCountsChartBuilder?skillId=skill1')
             .as('singleSkillCountsChartBuilder');
 
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
@@ -117,10 +119,9 @@ describe('Metrics Tests - Skills', () => {
         cy.get('[data-cy=numUserAchievedStatCard] [data-cy=statCardValue]').contains('5');
         cy.get('[data-cy=inProgressStatCard] [data-cy=statCardValue]').contains('3');
         cy.get('[data-cy=lastAchievedStatCard] [data-cy=statCardValue]').contains('2 months ago');
-
     });
 
-    it.only('stat cards with large counts', () => {
+    it('stat cards with large counts', () => {
         const m = moment.utc().subtract(5, 'years');
         const timestamp =  m.format('x');
         cy.log(timestamp);
@@ -166,8 +167,122 @@ describe('Metrics Tests - Skills', () => {
 
         cy.get('[data-cy=lastAchievedStatCard] [data-cy=statCardValue]').contains('5 years ago');
         cy.get('[data-cy=lastAchievedStatCard] [data-cy=statCardDescription]').contains(`This skill was last achieved on ${m.format('YYYY-MM-DD HH:mm')}`);
-
-
     });
+
+    it('number of users over time', () => {
+        cy.server()
+            .route('/admin/projects/proj1/charts/numUserAchievedOverTimeChartBuilder**')
+            .as('singleSkillCountsChartBuilder');
+
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            name: 'Interesting Subject 1',
+        });
+
+        const numSkills = 1;
+        for (let skillsCounter = 1; skillsCounter <= numSkills; skillsCounter += 1) {
+            cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill${skillsCounter}`, {
+                projectId: 'proj1',
+                subjectId: 'subj1',
+                skillId: `skill${skillsCounter}`,
+                name: `Very Great Skill # ${skillsCounter}`,
+                pointIncrement: '1000',
+                numPerformToCompletion: '1',
+            });
+        }
+        ;
+
+        const m = moment.utc('2020-09-02 11', 'YYYY-MM-DD HH');
+        const numDays = 6;
+        for (let dayCounter = 1; dayCounter <= numDays; dayCounter += 1) {
+            for (let userCounter = 1; userCounter <= dayCounter; userCounter += 1) {
+                cy.request('POST', `/api/projects/proj1/skills/skill1`,
+                    {
+                        userId: `user${dayCounter}-${userCounter}achieved@skills.org`,
+                        timestamp: m.clone()
+                            .add(dayCounter, 'day')
+                            .format('x')
+                    });
+            }
+        }
+
+        cy.visit('/projects/proj1/subjects/subj1/skills/skill1');
+        cy.clickNav('Metrics');
+        cy.wait('@singleSkillCountsChartBuilder');
+
+        cy.wait(waitForSnap);
+        cy.get('[data-cy=numUsersAchievedOverTimeMetric]').matchImageSnapshot();
+    });
+
+    it('number of users over time - empty', () => {
+        cy.server()
+            .route('/admin/projects/proj1/charts/numUserAchievedOverTimeChartBuilder?skillId=skill1')
+            .as('singleSkillCountsChartBuilder');
+
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            name: 'Interesting Subject 1',
+        });
+
+        const numSkills = 1;
+        for (let skillsCounter = 1; skillsCounter <= numSkills; skillsCounter += 1) {
+            cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill${skillsCounter}`, {
+                projectId: 'proj1',
+                subjectId: 'subj1',
+                skillId: `skill${skillsCounter}`,
+                name: `Very Great Skill # ${skillsCounter}`,
+                pointIncrement: '1000',
+                numPerformToCompletion: '1',
+            });
+        }
+
+        cy.visit('/projects/proj1/subjects/subj1/skills/skill1');
+        cy.clickNav('Metrics');
+        cy.wait('@singleSkillCountsChartBuilder');
+
+        cy.get('[data-cy=numUsersAchievedOverTimeMetric]').contains('This chart needs at least 1 day of user activity');
+    });
+
+    it('number of users over time - 1 day', () => {
+        cy.server()
+            .route({
+                url: '/admin/projects/proj1/charts/numUserAchievedOverTimeChartBuilder?skillId=skill1',
+                response: {
+                    'achievementCounts': [{
+                        'num': 1,
+                        'timestamp': 1599130800000
+                    }]
+                },
+            })
+            .as('singleSkillCountsChartBuilder');
+
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            name: 'Interesting Subject 1',
+        });
+
+        const numSkills = 1;
+        for (let skillsCounter = 1; skillsCounter <= numSkills; skillsCounter += 1) {
+            cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill${skillsCounter}`, {
+                projectId: 'proj1',
+                subjectId: 'subj1',
+                skillId: `skill${skillsCounter}`,
+                name: `Very Great Skill # ${skillsCounter}`,
+                pointIncrement: '1000',
+                numPerformToCompletion: '1',
+            });
+        }
+
+        cy.visit('/projects/proj1/subjects/subj1/skills/skill1');
+        cy.clickNav('Metrics');
+        cy.wait('@singleSkillCountsChartBuilder');
+
+        cy.wait(waitForSnap);
+        cy.get('[data-cy=numUsersAchievedOverTimeMetric]').matchImageSnapshot();
+    });
+
 
 })

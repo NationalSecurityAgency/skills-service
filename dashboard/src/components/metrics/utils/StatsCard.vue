@@ -43,7 +43,7 @@ limitations under the License.
       },
       statNum: {
         type: Number,
-        required: true,
+        required: false,
       },
       icon: {
         type: String,

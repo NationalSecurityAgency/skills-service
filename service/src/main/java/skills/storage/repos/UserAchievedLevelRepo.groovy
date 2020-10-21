@@ -267,10 +267,13 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
     )
 
 
-    static interface SkillAndDayUserCount {
+    static interface SkillDayUserCount {
         Date getDay()
-        Integer getLevel()
         Long getNumberUsers()
+    }
+
+    static interface SkillLevelDayUserCount extends SkillDayUserCount {
+        Integer getLevel()
     }
 
     @Query('''select ua.achievedOn as day, ua.level as level, count(ua.id) as numberUsers 
@@ -280,11 +283,22 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
                 ua.projectId = :projectId
             group by ua.achievedOn, ua.level     
            ''')
-    List<SkillAndDayUserCount> countNumUsersOverTimeByProjectIdAndSkillId(
+    List<SkillLevelDayUserCount> countNumUsersOverTimeAndLevelByProjectIdAndSkillId(
             @Param("projectId") String projectId,
             @Param("skillId") String skillId
     )
 
+    @Query('''select ua.achievedOn as day, count(ua.id) as count 
+            from UserAchievement as ua 
+            where 
+                ua.skillId = :skillId and
+                ua.projectId = :projectId
+            group by ua.achievedOn     
+           ''')
+    List<DayCountItem> countNumUsersOverTimeByProjectIdAndSkillId(
+            @Param("projectId") String projectId,
+            @Param("skillId") String skillId
+    )
 
     static interface SkillUsageItem {
         String getSkillId()
