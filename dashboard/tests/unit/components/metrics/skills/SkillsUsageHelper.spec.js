@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 // var moment = require('moment-timezone');
-import SkillsUsageHelper from '@/components/metrics/skills/SkillsUsageHelper.js';
+import SkillsUsageHelper from '@/components/metrics/projectSkills/SkillsUsageHelper.js';
 
 describe('SkillsUsageHelper', () => {
   it('empty for empty', () => {
