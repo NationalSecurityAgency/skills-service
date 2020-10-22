@@ -14,24 +14,29 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div>
-    <apexchart type="line" height="350" :options="chartOptions" :series="series"></apexchart>
-  </div>
+  <metrics-card title="Applied skill events per day" data-cy="appliedSkillEventsOverTimeMetric">
+    <metrics-overlay :loading="loading" :has-data="hasData" no-data-msg="This chart needs at least 2 days of user activity.">
+      <apexchart type="line" height="350" :options="chartOptions" :series="series"></apexchart>
+    </metrics-overlay>
+    <div class="text-muted small">Please Note: Only 'applied' events contribute to users' points and achievements. An event will not be applied if that skill has already reached its maximum points or has unfulfilled dependencies.</div>
+  </metrics-card>
 </template>
 
 <script>
+  import numberFormatter from '@//filters/NumberFilter';
+  import MetricsCard from '../utils/MetricsCard';
+  import MetricsService from '../MetricsService';
+  import MetricsOverlay from '../utils/MetricsOverlay';
+
   export default {
     name: 'AppliedSkillEventsOverTime',
+    components: { MetricsOverlay, MetricsCard },
     props: ['skillName'],
     data() {
       return {
-        series: [{
-          name: 'Events',
-          data: this.generateDayWiseTimeSeries(new Date('11 Mar 2020').getTime(), 91, {
-            min: 10,
-            max: 60,
-          }),
-        }],
+        loading: true,
+        hasData: false,
+        series: [],
         chartOptions: {
           chart: {
             height: 250,
@@ -45,7 +50,8 @@ limitations under the License.
             enabled: false,
           },
           stroke: {
-            curve: 'straight',
+            curve: 'smooth',
+            colors: ['#28a745'],
           },
           grid: {
             padding: {
@@ -57,9 +63,10 @@ limitations under the License.
             type: 'datetime',
           },
           yaxis: {
+            min: 0,
             labels: {
               formatter(val) {
-                return (val / 1000000).toFixed(0);
+                return numberFormatter(val);
               },
             },
             title: {
@@ -72,7 +79,25 @@ limitations under the License.
         },
       };
     },
+    mounted() {
+      this.loadData();
+    },
     methods: {
+      loadData() {
+        this.loading = true;
+        MetricsService.loadChart(this.$route.params.projectId, 'skillEventsOverTimeChartBuilder', { skillId: this.$route.params.skillId })
+          .then((dataFromServer) => {
+            if (dataFromServer.countsByDay && dataFromServer.countsByDay.length > 1) {
+              this.hasData = true;
+              const datSeries = dataFromServer.countsByDay.map((item) => [item.timestamp, item.num]);
+              this.series = [{
+                name: '# Events',
+                data: datSeries,
+              }];
+            }
+            this.loading = false;
+          });
+      },
       generateDayWiseTimeSeries(xValStart, count, yrange) {
         let baseXVal = xValStart;
         let i = 0;

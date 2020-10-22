@@ -215,7 +215,7 @@ describe('Metrics Tests - Skills', () => {
         cy.get('[data-cy=numUsersAchievedOverTimeMetric]').matchImageSnapshot();
     });
 
-    it('number of users over time - empty', () => {
+    it('skill metrics - empty', () => {
         cy.server()
             .route('/admin/projects/proj1/charts/numUserAchievedOverTimeChartBuilder?skillId=skill1')
             .as('singleSkillCountsChartBuilder');
@@ -243,6 +243,8 @@ describe('Metrics Tests - Skills', () => {
         cy.wait('@singleSkillCountsChartBuilder');
 
         cy.get('[data-cy=numUsersAchievedOverTimeMetric]').contains('This chart needs at least 1 day of user activity');
+
+        cy.get('[data-cy=appliedSkillEventsOverTimeMetric]').contains('This chart needs at least 2 days of user activity');
     });
 
     it('number of users over time - 1 day', () => {
@@ -284,5 +286,95 @@ describe('Metrics Tests - Skills', () => {
         cy.get('[data-cy=numUsersAchievedOverTimeMetric]').matchImageSnapshot();
     });
 
+    it('applied skill events over time', () => {
+        cy.server()
+            .route('/admin/projects/proj1/charts/numUserAchievedOverTimeChartBuilder**')
+            .as('skillEventsOverTimeChartBuilder');
+
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            name: 'Interesting Subject 1',
+        });
+
+        const numSkills = 1;
+        for (let skillsCounter = 1; skillsCounter <= numSkills; skillsCounter += 1) {
+            cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill${skillsCounter}`, {
+                projectId: 'proj1',
+                subjectId: 'subj1',
+                skillId: `skill${skillsCounter}`,
+                name: `Very Great Skill # ${skillsCounter}`,
+                pointIncrement: '1000',
+                numPerformToCompletion: '1',
+            });
+        }
+
+        const m = moment.utc('2020-09-02 11', 'YYYY-MM-DD HH');
+        const numDays = 3;
+        for (let dayCounter = 1; dayCounter <= numDays; dayCounter += 1) {
+            const numUsers = ( dayCounter % 2 == 0) ? 2 : 4
+            for (let userCounter = 1; userCounter <= numUsers; userCounter += 1) {
+                cy.request('POST', `/api/projects/proj1/skills/skill1`,
+                    {
+                        userId: `user${dayCounter}-${userCounter}achieved@skills.org`,
+                        timestamp: m.clone()
+                            .add(dayCounter, 'day')
+                            .format('x')
+                    });
+            }
+        }
+
+        cy.visit('/projects/proj1/subjects/subj1/skills/skill1');
+        cy.clickNav('Metrics');
+        cy.wait('@skillEventsOverTimeChartBuilder');
+
+        cy.wait(waitForSnap);
+        cy.get('[data-cy=appliedSkillEventsOverTimeMetric]').matchImageSnapshot();
+    });
+
+    it('applied skill events over time - 1 skill', () => {
+        cy.server()
+            .route('/admin/projects/proj1/charts/skillEventsOverTimeChartBuilder**')
+            .as('skillEventsOverTimeChartBuilder');
+
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            name: 'Interesting Subject 1',
+        });
+
+        const numSkills = 1;
+        for (let skillsCounter = 1; skillsCounter <= numSkills; skillsCounter += 1) {
+            cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill${skillsCounter}`, {
+                projectId: 'proj1',
+                subjectId: 'subj1',
+                skillId: `skill${skillsCounter}`,
+                name: `Very Great Skill # ${skillsCounter}`,
+                pointIncrement: '1000',
+                numPerformToCompletion: '1',
+            });
+        }
+
+        const m = moment.utc('2020-09-02 11', 'YYYY-MM-DD HH');
+        const numDays = 1;
+        for (let dayCounter = 1; dayCounter <= numDays; dayCounter += 1) {
+            const numUsers = ( dayCounter % 2 == 0) ? 2 : 4
+            for (let userCounter = 1; userCounter <= numUsers; userCounter += 1) {
+                cy.request('POST', `/api/projects/proj1/skills/skill1`,
+                    {
+                        userId: `user${dayCounter}-${userCounter}achieved@skills.org`,
+                        timestamp: m.clone()
+                            .add(dayCounter, 'day')
+                            .format('x')
+                    });
+            }
+        }
+
+        cy.visit('/projects/proj1/subjects/subj1/skills/skill1');
+        cy.clickNav('Metrics');
+        cy.wait('@skillEventsOverTimeChartBuilder');
+
+        cy.get('[data-cy=appliedSkillEventsOverTimeMetric]').contains('This chart needs at least 2 days of user activity');
+    });
 
 })

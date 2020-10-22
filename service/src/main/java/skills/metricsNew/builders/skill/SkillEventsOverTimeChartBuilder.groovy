@@ -26,39 +26,34 @@ import skills.storage.repos.UserPerformedSkillRepo
 
 @Component
 @Slf4j
-class NumUserAchievedOverTimeChartBuilder implements MetricsChartBuilder {
+class SkillEventsOverTimeChartBuilder implements MetricsChartBuilder {
 
     @Autowired
-    UserAchievedLevelRepo userAchievedRepo
+    UserPerformedSkillRepo userPerformedSkillRepo
 
-    static class AchievementCount {
+    static class ResCount {
         Integer num
         Long timestamp
     }
 
-    static class AchievementCountRes {
-        List<AchievementCount> achievementCounts
+    static class FinalRes {
+        List<ResCount> countsByDay
     }
 
     @Override
     String getId() {
-        return "numUserAchievedOverTimeChartBuilder"
+        return "skillEventsOverTimeChartBuilder"
     }
 
-    AchievementCountRes build(String projectId, String chartId, Map<String, String> props) {
+    FinalRes build(String projectId, String chartId, Map<String, String> props) {
         String skillId = MetricsParams.getSkillId(projectId, chartId, props);
-        List<DayCountItem> skillDayUserCounts = userAchievedRepo.countNumUsersOverTimeByProjectIdAndSkillId(projectId, skillId)
+        List<DayCountItem> counts = userPerformedSkillRepo.countsByDay(projectId, skillId)
 
-        List<AchievementCount> achievementCounts = skillDayUserCounts.collect {
-            new AchievementCount(num: it.getCount(), timestamp: it.getDay().time)
+        List<ResCount> countsByDay = counts.collect {
+            new ResCount(num: it.getCount(), timestamp: it.getDay().time)
         }
-        achievementCounts = achievementCounts?.sort({ it.timestamp })
-        int count = 0;
-        achievementCounts.each {
-            count += it.num
-            it.num = count
-        }
-        return new AchievementCountRes(achievementCounts: achievementCounts
-        )
+        countsByDay = countsByDay?.sort({it.timestamp})
+
+        return new FinalRes(countsByDay: countsByDay)
     }
 }

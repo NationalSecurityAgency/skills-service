@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <metrics-card title="Number of users achieved over time"  data-cy="numUsersAchievedOverTimeMetric">
+  <metrics-card title="Achievements over time" data-cy="numUsersAchievedOverTimeMetric">
     <metrics-overlay :loading="loading" :has-data="hasData" no-data-msg="This chart needs at least 1 day of user activity.">
       <apexchart type="area" height="350" :options="chartOptions" :series="series"></apexchart>
     </metrics-overlay>
@@ -103,7 +103,7 @@ limitations under the License.
                 datSeries.unshift([dayAgo, 0]);
               }
               this.series = [{
-                name: 'This Skills',
+                name: '# Users Achieved',
                 data: datSeries,
               }];
             }

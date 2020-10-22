@@ -108,6 +108,13 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
                                                                            @Nullable @Param('skillId') String skillId,
                                                                            @Param('version') Integer version)
 
-
+    @Query('''select CAST(ups.performedOn as date) as day, count(ups.id) as count
+        from UserPerformedSkill ups
+        where
+        ups.projectId = :projectId and
+        ups.skillId=:skillId
+        group by CAST(ups.performedOn as date)
+    ''')
+    List<DayCountItem> countsByDay(@Param('projectId') String projectId, @Param('skillId') String skillId)
 
 }

@@ -39,10 +39,8 @@ limitations under the License.
 
       </div>
 
-      <skill-achieved-by-users-over-time/>
-      <b-card header="Applied Skill Events over time" class="mt-2">
-        <applied-skill-events-over-time />
-      </b-card>
+      <skill-achieved-by-users-over-time class="mb-3"/>
+      <applied-skill-events-over-time />
     </div>
   </div>
 </template>
