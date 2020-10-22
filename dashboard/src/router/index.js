@@ -64,6 +64,7 @@ import UsersAchievementsMetricPage from '@//components/metrics/projectAchievemen
 import SubjectMetricsPage from '@//components/metrics/projectSubjects/SubjectMetricsPage';
 import SkillsMetricsPage from '@//components/metrics/projectSkills/SkillsMetricsPage';
 import SkillMetricsPage from '@//components/metrics/skill/SkillMetricsPage';
+import MetricsOnSubjectPage from '@//components/metrics/subject/MetricsOnSubjectPage';
 
 Vue.use(Router);
 
@@ -273,6 +274,11 @@ const router = new Router({
         path: 'users',
         component: Users,
         meta: { requiresAuth: true, reportSkillId: 'VisitSubjectUsers' },
+      }, {
+        name: 'SubjectMetrics',
+        path: 'metrics',
+        component: MetricsOnSubjectPage,
+        meta: { requiresAuth: true },
       }],
     },
     {

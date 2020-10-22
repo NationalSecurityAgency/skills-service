@@ -19,11 +19,20 @@ import skills.controller.exceptions.SkillException
 
 class MetricsParams {
     final static String P_SKILL_ID = "skillId"
+    final static String P_SUBJECT_ID = "subjectId"
 
     static String getSkillId(String projectId, String chartId, Map<String, String> props) {
-        String sortBy = props[P_SKILL_ID]
+        return getParam(props, P_SKILL_ID, chartId, projectId)
+    }
+
+    static String getSubjectId(String projectId, String chartId, Map<String, String> props) {
+        return getParam(props, P_SUBJECT_ID, chartId, projectId)
+    }
+
+    private static String getParam(Map<String, String> props,String paramId, String chartId, String projectId) {
+        String sortBy = props[paramId]
         if (!sortBy) {
-            throw new SkillException("Chart[${chartId}]: Must supply ${P_SKILL_ID} param", projectId)
+            throw new SkillException("Chart[${chartId}]: Must supply ${paramId} param", projectId)
         }
         return sortBy
     }

@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import skills.controller.result.model.LabelCountItem
 import skills.metricsNew.builders.MetricsChartBuilder
+import skills.metricsNew.builders.MetricsParams
 import skills.services.AdminUsersService
 
 @Component
@@ -34,7 +35,11 @@ class NumberUsersPerLevelChartBuilderNew implements MetricsChartBuilder {
 
     @Override
     def build(String projectId, String chartId, Map<String, String> props) {
-        List<LabelCountItem> dataItems = adminUsersService.getUserCountsPerLevel(projectId)
+        String subjectId
+        if (props.containsKey(MetricsParams.P_SUBJECT_ID)) {
+            subjectId = MetricsParams.getSubjectId(projectId, chartId, props);
+        }
+        List<LabelCountItem> dataItems = adminUsersService.getUserCountsPerLevel(projectId, subjectId)
         return dataItems
     }
 }

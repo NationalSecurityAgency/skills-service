@@ -14,11 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div class="card" data-cy="projectOverallLevelsChart">
-    <div class="card-header">
-      Overall Levels
-    </div>
-    <div class="card-body p-0">
+  <metrics-card :title="title" :no-padding="true" data-cy="levelsChart" >
       <metrics-spinner v-if="isLoading"/>
       <apexchart v-if="!isLoading" type="bar" height="350" :options="chartOptions" :series="series" />
       <div v-if="!isLoading && isEmpty" class="card-img-overlay d-flex">
@@ -26,18 +22,30 @@ limitations under the License.
           <div class="alert alert-info"><i class="fa fa-info-circle"/> No one reached <b-badge>Level 1</b-badge> yet...</div>
         </div>
       </div>
-    </div>
-  </div>
+  </metrics-card>
 </template>
 
 <script>
   import numberFormatter from '@/filters/NumberFilter';
   import MetricsService from '../MetricsService';
   import MetricsSpinner from '../utils/MetricsSpinner';
+  import MetricsCard from '../utils/MetricsCard';
 
   export default {
-    name: 'OverallLevelBreakdownMetric',
-    components: { MetricsSpinner },
+    name: 'LevelBreakdownMetric',
+    components: { MetricsCard, MetricsSpinner },
+    props: {
+      title: {
+        type: String,
+        required: false,
+        default: 'Overall Levels',
+      },
+      isSubject: {
+        type: Boolean,
+        required: false,
+        default: false,
+      },
+    },
     data() {
       return {
         isLoading: true,
@@ -50,7 +58,7 @@ limitations under the License.
             toolbar: {
               show: true,
               offsetX: -20,
-              offsetY: -40,
+              offsetY: -35,
             },
           },
           plotOptions: {
@@ -132,7 +140,11 @@ limitations under the License.
       };
     },
     mounted() {
-      MetricsService.loadChart(this.$route.params.projectId, 'numUsersPerLevelChartBuilder')
+      let props = { };
+      if (this.isSubject) {
+        props = { subjectId: this.$route.params.subjectId };
+      }
+      MetricsService.loadChart(this.$route.params.projectId, 'numUsersPerLevelChartBuilder', props)
         .then((response) => {
           // sort by level
           const sorted = response.sort((item) => item.value).reverse();

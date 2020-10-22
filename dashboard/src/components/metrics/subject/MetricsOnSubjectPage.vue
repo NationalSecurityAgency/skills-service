@@ -15,22 +15,26 @@ limitations under the License.
 */
 <template>
   <div>
-    <div class="row mb-2">
-      <div class="col">
-        <level-breakdown-metric />
-      </div>
-    </div>
-    <achievements-navigator />
+    <sub-page-header title="Metrics"/>
+    <level-breakdown-metric title="Subject Levels" :is-subject="true"/>
   </div>
 </template>
 
 <script>
+  import SubPageHeader from '@//components/utils/pages/SubPageHeader';
   import LevelBreakdownMetric from '../common/LevelBreakdownMetric';
-  import AchievementsNavigator from './AchievementsNavigator';
 
   export default {
-    name: 'UsersAchievementsMetricPage',
-    components: { AchievementsNavigator, LevelBreakdownMetric },
+    name: 'MetricsOnSubjectPage',
+    components: {
+      LevelBreakdownMetric,
+      SubPageHeader,
+    },
+    data() {
+      return {
+        loading: true,
+      };
+    },
   };
 </script>
 

@@ -26,7 +26,12 @@ describe('Metrics Tests', () => {
         })
     });
 
-    it('projects - Distinct number of users over time', () => {
+    it('projects - Distinct number of users over time', {
+        retries: {
+            runMode: 0,
+            openMode: 0
+        }
+    },() => {
         cy.server().route({
             url: '/admin/projects/proj1/charts/distinctUsersOverTimeForProject',
             status: 200,
@@ -116,7 +121,12 @@ describe('Metrics Tests', () => {
         cy.get('[data-cy=distinctNumUsersOverTime]').matchImageSnapshot();
     })
 
-    it('projects - Distinct number of users over time - empty project', () => {
+    it('projects - Distinct number of users over time - empty project', {
+        retries: {
+            runMode: 0,
+            openMode: 0
+        }
+    },() => {
         cy.server().route('/admin/projects/proj1/charts/distinctUsersOverTimeForProject').as('distinctUsersOverTimeForProject');
 
         cy.visit('/projects/proj1/');
@@ -174,7 +184,12 @@ describe('Metrics Tests', () => {
             });
     })
 
-    it('projects - Distinct number of users over time - two days', () => {
+    it('projects - Distinct number of users over time - two days', {
+        retries: {
+            runMode: 0,
+            openMode: 0
+        }
+    },() => {
         cy.server().route({
             url: '/admin/projects/proj1/charts/distinctUsersOverTimeForProject',
             status: 200,
@@ -195,7 +210,12 @@ describe('Metrics Tests', () => {
         cy.get('[data-cy=distinctNumUsersOverTime]').matchImageSnapshot();
     })
 
-    it('projects - Distinct number of users over time - one days', () => {
+    it('projects - Distinct number of users over time - one days', {
+        retries: {
+            runMode: 0,
+            openMode: 0
+        }
+    },() => {
         cy.server().route({
             url: '/admin/projects/proj1/charts/distinctUsersOverTimeForProject',
             status: 200,

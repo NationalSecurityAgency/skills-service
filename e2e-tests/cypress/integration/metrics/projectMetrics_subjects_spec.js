@@ -27,7 +27,12 @@ describe('Metrics Tests', () => {
     });
 
 
-    it('subjects - num users per level over time - not subjects', () => {
+    it('subjects - num users per level over time - not subjects', {
+        retries: {
+            runMode: 0,
+            openMode: 0
+        }
+    },() => {
         cy.visit('/projects/proj1/');
         cy.clickNav('Metrics');
         cy.get('[data-cy=metricsNav-Subjects]').click();
@@ -39,7 +44,12 @@ describe('Metrics Tests', () => {
         cy.get('[data-cy=subjectNumUsersPerLevelOverTime]').matchImageSnapshot();
     });
 
-    it('subjects - num users per level over time - subject has no data', () => {
+    it('subjects - num users per level over time - subject has no data', {
+        retries: {
+            runMode: 0,
+            openMode: 0
+        }
+    },() => {
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
             projectId: 'proj1',
             subjectId: 'subj1',
@@ -62,7 +72,12 @@ describe('Metrics Tests', () => {
         cy.get('[data-cy=subjectNumUsersPerLevelOverTime]').matchImageSnapshot();
     });
 
-    it('subjects - num users per level over time - subject has little data', () => {
+    it('subjects - num users per level over time - subject has little data', {
+        retries: {
+            runMode: 0,
+            openMode: 0
+        }
+    },() => {
         cy.server()
             .route('/admin/projects/proj1/charts/usersByLevelForSubjectOverTimeChartBuilder?subjectId=subj1')
             .as('getLevelsOverTimeData');
@@ -124,7 +139,12 @@ describe('Metrics Tests', () => {
         return series;
     }
 
-    it('subjects - num users per level over time - multiple levels', () => {
+    it('subjects - num users per level over time - multiple levels', {
+        retries: {
+            runMode: 0,
+            openMode: 0
+        }
+    },() => {
         cy.server().route({
             url: '/admin/projects/proj1/subjects',
             status: 200,
@@ -140,13 +160,13 @@ describe('Metrics Tests', () => {
             status: 200,
             response: [{
                 'level': 1,
-                'counts': generateDayWiseTimeSeries(new Date('11 Mar 2020').getTime(), 30, 10),
+                'counts': generateDayWiseTimeSeries(moment.utc('11 Mar 2020', 'DD MMM YYY').valueOf(), 30, 10),
             }, {
                 'level': 2,
-                'counts': generateDayWiseTimeSeries(new Date('26 Mar 2020').getTime(), 15, 11),
+                'counts': generateDayWiseTimeSeries(moment.utc('26 Mar 2020', 'DD MMM YYY').valueOf(), 15, 11),
             }, {
                 'level': 3,
-                'counts': generateDayWiseTimeSeries(new Date('2 Apr 2020').getTime(), 8, 5),
+                'counts': generateDayWiseTimeSeries(moment.utc('26 Mar 2020', 'DD MMM YYY').valueOf(), 8, 5),
             }],
         }).as('getLevelsOverTimeData');
 
@@ -167,7 +187,12 @@ describe('Metrics Tests', () => {
         cy.get('[data-cy=subjectNumUsersPerLevelOverTime]').matchImageSnapshot();
     });
 
-    it('subjects - num users per level over time - long history', () => {
+    it('subjects - num users per level over time - long history', {
+        retries: {
+            runMode: 0,
+            openMode: 0
+        }
+    },() => {
         cy.server().route({
             url: '/admin/projects/proj1/subjects',
             status: 200,
@@ -178,24 +203,25 @@ describe('Metrics Tests', () => {
             }],
         }).as('getSubjects');
 
+
         cy.server().route({
             url: '/admin/projects/proj1/charts/usersByLevelForSubjectOverTimeChartBuilder?subjectId=subj1',
             status: 200,
             response: [{
                 'level': 1,
-                'counts': generateDayWiseTimeSeries(new Date('11 Mar 2020').getTime(), 126, 15),
+                'counts': generateDayWiseTimeSeries(moment.utc('11 Mar 2020', 'DD MMM YYY').valueOf(), 126, 15),
             }, {
                 'level': 2,
-                'counts': generateDayWiseTimeSeries(new Date('26 Mar 2020').getTime(), 111, 11),
+                'counts': generateDayWiseTimeSeries(moment.utc('26 Mar 2020', 'DD MMM YYY').valueOf(), 111, 11),
             }, {
                 'level': 3,
-                'counts': generateDayWiseTimeSeries(new Date('2 Apr 2020').getTime(), 104, 5),
+                'counts': generateDayWiseTimeSeries(moment.utc('2 Apr 2020', 'DD MMM YYY').valueOf(), 104, 5),
             }, {
                 'level': 4,
-                'counts': generateDayWiseTimeSeries(new Date('22 Apr 2020').getTime(), 84, 3),
+                'counts': generateDayWiseTimeSeries(moment.utc('22 Apr 2020', 'DD MMM YYY').valueOf(), 84, 3),
             }, {
                 'level': 5,
-                'counts': generateDayWiseTimeSeries(new Date('1 June 2020').getTime(), 44, 3),
+                'counts': generateDayWiseTimeSeries(moment.utc('1 June 2020', 'DD MMM YYY').valueOf(), 44, 3),
             }],
         }).as('getLevelsOverTimeData');
 
@@ -216,7 +242,12 @@ describe('Metrics Tests', () => {
         cy.get('[data-cy=subjectNumUsersPerLevelOverTime]').matchImageSnapshot();
     });
 
-    it('subjects - num users per level over time - many levels', () => {
+    it('subjects - num users per level over time - many levels', {
+        retries: {
+            runMode: 0,
+            openMode: 0
+        }
+    },() => {
         cy.server().route({
             url: '/admin/projects/proj1/subjects',
             status: 200,
@@ -233,7 +264,7 @@ describe('Metrics Tests', () => {
             response.push(
                 {
                     'level': i,
-                    'counts': generateDayWiseTimeSeries(new Date('11 Mar 2020').getTime() + 86400000 * i*10, 200-i*10, 40-i*2),
+                    'counts': generateDayWiseTimeSeries(moment.utc('11 Mar 2020', 'DD MMM YYY').valueOf() + 86400000 * i*10, 200-i*10, 40-i*2),
                 }
             )
         }
@@ -261,7 +292,12 @@ describe('Metrics Tests', () => {
         cy.get('[data-cy=subjectNumUsersPerLevelOverTime]').matchImageSnapshot();
     });
 
-    it('subjects - num users per level over time - higher levels have more users than lower', () => {
+    it('subjects - num users per level over time - higher levels have more users than lower', {
+        retries: {
+            runMode: 0,
+            openMode: 0
+        }
+    },() => {
         cy.server().route({
             url: '/admin/projects/proj1/subjects',
             status: 200,
@@ -306,7 +342,12 @@ describe('Metrics Tests', () => {
         cy.get('[data-cy=subjectNumUsersPerLevelOverTime]').matchImageSnapshot();
     });
 
-    it('subjects - num users per level', () => {
+    it('subjects - num users per level', {
+        retries: {
+            runMode: 0,
+            openMode: 0
+        }
+    },() => {
         cy.server().route({
             url: '/admin/projects/proj1/charts/numUsersPerSubjectPerLevelChartBuilder',
             status: 200,
@@ -385,7 +426,12 @@ describe('Metrics Tests', () => {
         return res;
     }
 
-    it('subjects - num users per level - typical 6 subjects', () => {
+    it('subjects - num users per level - typical 6 subjects', {
+        retries: {
+            runMode: 0,
+            openMode: 0
+        }
+    },() => {
         cy.server().route({
             url: '/admin/projects/proj1/charts/numUsersPerSubjectPerLevelChartBuilder',
             status: 200,
@@ -408,7 +454,12 @@ describe('Metrics Tests', () => {
         cy.get('[data-cy=userCountsBySubjectMetric]').matchImageSnapshot();
     })
 
-    it('subjects - num users per level - many subjects', () => {
+    it('subjects - num users per level - many subjects', {
+        retries: {
+            runMode: 0,
+            openMode: 0
+        }
+    },() => {
         const response = [];
         for (let i=0; i < 15; i+=1) {
             response.push(createSubjectObj(`Subject # ${i}`, [1265,852,493,625,293]))
@@ -429,7 +480,12 @@ describe('Metrics Tests', () => {
         cy.get('[data-cy=userCountsBySubjectMetric]').matchImageSnapshot();
     })
 
-    it('subjects - num users per level - many levels', () => {
+    it('subjects - num users per level - many levels', {
+        retries: {
+            runMode: 0,
+            openMode: 0
+        }
+    },() => {
         const response = [];
         for (let i=0; i < 6; i+=1) {
             response.push(createSubjectObj(`Subject # ${i}`, [1265,852,493,625,293,392,293,983,1923,1209]))
@@ -451,7 +507,12 @@ describe('Metrics Tests', () => {
         cy.get('[data-cy=userCountsBySubjectMetric]').matchImageSnapshot();
     })
 
-    it('subjects - num users per level - empty', () => {
+    it('subjects - num users per level - empty', {
+        retries: {
+            runMode: 0,
+            openMode: 0
+        }
+    },() => {
         const response = [];
         cy.server().route({
             url: '/admin/projects/proj1/charts/numUsersPerSubjectPerLevelChartBuilder',

@@ -34,6 +34,7 @@ limitations under the License.
       return {
         loading: true,
         distinctUsersOverTime: [],
+        hasDataEnoughData: false,
         chartOptions: {
           chart: {
             type: 'area',
@@ -108,18 +109,16 @@ limitations under the License.
         }],
       };
     },
-    computed: {
-      hasDataEnoughData() {
-        return this.distinctUsersOverTime && this.distinctUsersOverTime.length > 0 && this.distinctUsersOverTime[0].data && this.distinctUsersOverTime[0].data.length > 1;
-      },
-    },
     mounted() {
       MetricsService.loadChart(this.$route.params.projectId, 'distinctUsersOverTimeForProject')
         .then((response) => {
-          this.distinctUsersOverTime = [{
-            data: response.map((item) => [item.value, item.count]),
-            name: 'Points',
-          }];
+          if (response && response.length > 1) {
+            this.hasDataEnoughData = true;
+            this.distinctUsersOverTime = [{
+              data: response.map((item) => [item.value, item.count]),
+              name: 'Points',
+            }];
+          }
           this.loading = false;
         });
     },

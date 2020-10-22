@@ -26,7 +26,12 @@ describe('Metrics Tests', () => {
         })
     });
 
-    it('overall levels - empty', () => {
+    it('overall levels - empty', {
+        retries: {
+            runMode: 0,
+            openMode: 0
+        }
+    }, () => {
         cy.visit('/projects/proj1/');
         cy.clickNav('Metrics');
         cy.get('[data-cy=metricsNav-Achievements]').click();
@@ -34,10 +39,15 @@ describe('Metrics Tests', () => {
         cy.contains("Level 5: 0 users");
         // we have to wait for background animation to complete
         cy.wait(waitForSnap);
-        cy.get('[data-cy=projectOverallLevelsChart]').matchImageSnapshot('projectOverallLevelsChart-empty');
+        cy.get('[data-cy=levelsChart]').matchImageSnapshot('projectOverallLevelsChart-empty');
     });
 
-    it('overall levels - users in all levels', () => {
+    it('overall levels - users in all levels',{
+        retries: {
+            runMode: 0,
+            openMode: 0
+        }
+    }, () => {
         cy.server().route({
             url: '/admin/projects/proj1/charts/numUsersPerLevelChartBuilder',
             status: 200,
@@ -71,7 +81,7 @@ describe('Metrics Tests', () => {
 
         // we have to wait for background animation to complete
         cy.wait(waitForSnap);
-        cy.get('[data-cy=projectOverallLevelsChart]').matchImageSnapshot('projectOverallLevelsChart-allLevels');
+        cy.get('[data-cy=levelsChart]').matchImageSnapshot('projectOverallLevelsChart-allLevels');
     });
 
 })

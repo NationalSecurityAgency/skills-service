@@ -169,7 +169,12 @@ describe('Metrics Tests - Skills', () => {
         cy.get('[data-cy=lastAchievedStatCard] [data-cy=statCardDescription]').contains(`This skill was last achieved on ${m.format('YYYY-MM-DD HH:mm')}`);
     });
 
-    it('number of users over time', () => {
+    it('number of users over time', {
+        retries: {
+            runMode: 0,
+            openMode: 0
+        }
+    },() => {
         cy.server()
             .route('/admin/projects/proj1/charts/numUserAchievedOverTimeChartBuilder**')
             .as('singleSkillCountsChartBuilder');
@@ -247,7 +252,12 @@ describe('Metrics Tests - Skills', () => {
         cy.get('[data-cy=appliedSkillEventsOverTimeMetric]').contains('This chart needs at least 2 days of user activity');
     });
 
-    it('number of users over time - 1 day', () => {
+    it('number of users over time - 1 day', {
+        retries: {
+            runMode: 0,
+            openMode: 0
+        }
+    },() => {
         cy.server()
             .route({
                 url: '/admin/projects/proj1/charts/numUserAchievedOverTimeChartBuilder?skillId=skill1',
@@ -286,7 +296,12 @@ describe('Metrics Tests - Skills', () => {
         cy.get('[data-cy=numUsersAchievedOverTimeMetric]').matchImageSnapshot();
     });
 
-    it('applied skill events over time', () => {
+    it('applied skill events over time', {
+        retries: {
+            runMode: 0,
+            openMode: 0
+        }
+    },() => {
         cy.server()
             .route('/admin/projects/proj1/charts/numUserAchievedOverTimeChartBuilder**')
             .as('skillEventsOverTimeChartBuilder');
