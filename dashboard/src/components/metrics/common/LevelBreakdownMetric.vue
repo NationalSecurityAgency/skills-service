@@ -40,11 +40,6 @@ limitations under the License.
         required: false,
         default: 'Overall Levels',
       },
-      isSubject: {
-        type: Boolean,
-        required: false,
-        default: false,
-      },
     },
     data() {
       return {
@@ -141,7 +136,8 @@ limitations under the License.
     },
     mounted() {
       let props = { };
-      if (this.isSubject) {
+      // figure out if subjectId is passed based on the context (page it's being loaded from)
+      if (this.$route.params.subjectId) {
         props = { subjectId: this.$route.params.subjectId };
       }
       MetricsService.loadChart(this.$route.params.projectId, 'numUsersPerLevelChartBuilder', props)

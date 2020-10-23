@@ -16,12 +16,70 @@
 var moment = require('moment-timezone');
 
 describe('Metrics Tests - Achievements', () => {
+    const waitForSnap = 4000;
 
     beforeEach(() => {
         cy.request('POST', '/app/projects/proj1', {
             projectId: 'proj1',
             name: "proj1"
         })
+    });
+
+    it('overall levels - empty', {
+        retries: {
+            runMode: 0,
+            openMode: 0
+        }
+    }, () => {
+        cy.visit('/projects/proj1/');
+        cy.clickNav('Metrics');
+        cy.get('[data-cy=metricsNav-Achievements]').click();
+
+        cy.get('[data-cy=levelsChart]').contains("Level 5: 0 users");
+        cy.get('[data-cy=levelsChart]').contains("Level 4: 0 users");
+        cy.get('[data-cy=levelsChart]').contains("Level 3: 0 users");
+        cy.get('[data-cy=levelsChart]').contains("Level 2: 0 users");
+        cy.get('[data-cy=levelsChart]').contains("Level 1: 0 users");
+
+        cy.get('[data-cy=levelsChart]').contains("No one reached Level 1 yet...");
+    });
+
+    it('overall levels - users in all levels',{
+        retries: {
+            runMode: 0,
+            openMode: 0
+        }
+    }, () => {
+        cy.server().route({
+            url: '/admin/projects/proj1/charts/numUsersPerLevelChartBuilder',
+            status: 200,
+            response: [{
+                'value': 'Level 1',
+                'count': 6251
+            }, {
+                'value': 'Level 2',
+                'count': 4521
+            }, {
+                'value': 'Level 3',
+                'count': 3525
+            }, {
+                'value': 'Level 4',
+                'count': 1254
+            }, {
+                'value': 'Level 5',
+                'count': 754
+            }],
+        }).as('getLevels');
+
+        cy.visit('/projects/proj1/');
+        cy.clickNav('Metrics');
+        cy.get('[data-cy=metricsNav-Achievements]').click();
+
+        cy.contains("Level 5: 754 users");
+        cy.contains("Level 4: 1,254 users");
+        cy.contains("Level 3: 3,525 users");
+        cy.contains("Level 2: 4,521 users");
+        cy.contains("Level 1: 6,251 users");
     });
 
     it('achievements table - empty table', () => {

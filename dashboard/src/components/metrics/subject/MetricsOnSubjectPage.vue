@@ -16,17 +16,20 @@ limitations under the License.
 <template>
   <div>
     <sub-page-header title="Metrics"/>
-    <level-breakdown-metric title="Subject Levels" :is-subject="true"/>
+    <level-breakdown-metric title="Subject Levels"/>
+    <num-users-per-day class="my-3" title="Subject's users per day"/>
   </div>
 </template>
 
 <script>
   import SubPageHeader from '@//components/utils/pages/SubPageHeader';
   import LevelBreakdownMetric from '../common/LevelBreakdownMetric';
+  import NumUsersPerDay from '../common/NumUsersPerDay';
 
   export default {
     name: 'MetricsOnSubjectPage',
     components: {
+      NumUsersPerDay,
       LevelBreakdownMetric,
       SubPageHeader,
     },

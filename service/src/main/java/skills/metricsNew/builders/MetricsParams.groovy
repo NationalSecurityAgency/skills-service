@@ -15,11 +15,13 @@
  */
 package skills.metricsNew.builders
 
+import groovy.time.TimeCategory
 import skills.controller.exceptions.SkillException
 
 class MetricsParams {
     final static String P_SKILL_ID = "skillId"
     final static String P_SUBJECT_ID = "subjectId"
+    final static String P_START_TIMESTAMP = "start"
 
     static String getSkillId(String projectId, String chartId, Map<String, String> props) {
         return getParam(props, P_SKILL_ID, chartId, projectId)
@@ -29,7 +31,19 @@ class MetricsParams {
         return getParam(props, P_SUBJECT_ID, chartId, projectId)
     }
 
-    private static String getParam(Map<String, String> props,String paramId, String chartId, String projectId) {
+    static Date getStart(String projectId, String chartId, Map<String, String> props) {
+        String tStr = getParam(props, P_START_TIMESTAMP, chartId, projectId)
+        Long timestamp = Long.valueOf(tStr)
+        Date date = new Date(timestamp)
+        use(TimeCategory) {
+            if (date.before(3.years.ago)) {
+                throw new SkillException("Chart[${chartId}]: ${P_START_TIMESTAMP} param timestamp must be within last 4 years", projectId)
+            }
+        }
+        return date
+    }
+
+    private static String getParam(Map<String, String> props, String paramId, String chartId, String projectId) {
         String sortBy = props[paramId]
         if (!sortBy) {
             throw new SkillException("Chart[${chartId}]: Must supply ${paramId} param", projectId)

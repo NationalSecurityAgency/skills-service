@@ -21,12 +21,11 @@ import org.springframework.stereotype.Component
 import skills.controller.result.model.CountItem
 import skills.metrics.ChartParams
 import skills.metricsNew.builders.MetricsChartBuilder
+import skills.metricsNew.builders.MetricsParams
 import skills.services.AdminUsersService
 
 @Component
-class DistinctUsersOverTimeChartBuilderNew implements  MetricsChartBuilder{
-
-    static final Integer NUM_DAYS_DEFAULT = 120
+class DistinctUsersOverTimeChartBuilderNew implements MetricsChartBuilder {
 
     @Autowired
     AdminUsersService adminUsersService
@@ -38,10 +37,9 @@ class DistinctUsersOverTimeChartBuilderNew implements  MetricsChartBuilder{
 
     @Override
     def build(String projectId, String chartId, Map<String, String> props) {
-        Integer numDays = ChartParams.getIntValue(props, ChartParams.NUM_DAYS, NUM_DAYS_DEFAULT)
-        assert numDays > 1, "Property [${ChartParams.NUM_DAYS}] with value [${numDays}] must be greater than 1"
-
-        List<CountItem> dataItems = adminUsersService.getProjectUsage(projectId, numDays)
+        Date start = MetricsParams.getStart(projectId, chartId, props)
+        String skillId = props.containsKey(MetricsParams.P_SKILL_ID) ? MetricsParams.getSkillId(projectId, chartId, props) : null
+        List<CountItem> dataItems = adminUsersService.getUsage(projectId, skillId, start)
 
         return dataItems;
     }

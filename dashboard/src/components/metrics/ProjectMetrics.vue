@@ -14,114 +14,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <metrics-card title="Distinct number of users over time" data-cy="distinctNumUsersOverTime">
-    <metrics-overlay :loading="loading" :has-data="hasDataEnoughData" no-data-msg="This chart needs at least 2 days of user activity.">
-      <apexchart type="area" height="350" :options="chartOptions" :series="distinctUsersOverTime"></apexchart>
-    </metrics-overlay>
-  </metrics-card>
+  <num-users-per-day />
 </template>
 
 <script>
-  import MetricsService from './MetricsService';
-  import numberFormatter from '@//filters/NumberFilter';
-  import MetricsOverlay from './utils/MetricsOverlay';
-  import MetricsCard from './utils/MetricsCard';
+  import NumUsersPerDay from './common/NumUsersPerDay';
 
   export default {
     name: 'ProjectMetrics',
-    components: { MetricsCard, MetricsOverlay },
-    data() {
-      return {
-        loading: true,
-        distinctUsersOverTime: [],
-        hasDataEnoughData: false,
-        chartOptions: {
-          chart: {
-            type: 'area',
-            stacked: false,
-            height: 350,
-            zoom: {
-              type: 'x',
-              enabled: true,
-              autoScaleYaxis: true,
-            },
-            toolbar: {
-              autoSelected: 'zoom',
-              offsetY: -52,
-            },
-          },
-          dataLabels: {
-            enabled: false,
-          },
-          markers: {
-            size: 0,
-          },
-          fill: {
-            type: 'gradient',
-            gradient: {
-              shadeIntensity: 1,
-              inverseColors: false,
-              opacityFrom: 0.5,
-              opacityTo: 0,
-              stops: [0, 90, 100],
-            },
-          },
-          yaxis: {
-            labels: {
-              formatter(val) {
-                return numberFormatter(val);
-              },
-            },
-            title: {
-              text: 'Distinct # of Users',
-            },
-          },
-          xaxis: {
-            type: 'datetime',
-          },
-          tooltip: {
-            shared: false,
-            y: {
-              formatter(val) {
-                return numberFormatter(val);
-              },
-            },
-          },
-        },
-        navCards: [{
-          title: 'Achievements',
-          subtitle: 'Explore users\' achievements',
-          description: 'Browse users\' achieved overall levels, subject level achievements as well as earned badges',
-          icon: 'fa fa-trophy text-warning',
-          pathName: 'UsersAndLevelsMetrics',
-        }, {
-          title: 'Subjects',
-          subtitle: 'Achievements by Subjects',
-          description: 'Detailed breakdown how users are earning skills under each subject',
-          icon: 'fa fa-cubes text-primary',
-          pathName: 'SubjectMetricsPage',
-        }, {
-          title: 'Skills',
-          subtitle: 'Understand Skills Usage',
-          description: 'Find top-achieved skills and overlooked skills. Learn how much each skill is utilized within your applicaiton.',
-          icon: 'fa fa-graduation-cap text-info',
-          pathName: 'SkillsMetricsPage',
-        }],
-      };
-    },
-    mounted() {
-      MetricsService.loadChart(this.$route.params.projectId, 'distinctUsersOverTimeForProject')
-        .then((response) => {
-          if (response && response.length > 1) {
-            this.hasDataEnoughData = true;
-            this.distinctUsersOverTime = [{
-              data: response.map((item) => [item.value, item.count]),
-              name: 'Points',
-            }];
-          }
-          this.loading = false;
-        });
-    },
+    components: { NumUsersPerDay },
   };
 </script>
 
