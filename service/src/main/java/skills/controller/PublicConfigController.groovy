@@ -82,8 +82,9 @@ class PublicConfigController {
         healthChecker.checkRequiredServices()
         Map<String,String> res = new HashMap<>(statusRes)
         res['clientLib'] = uiConfigProperties.client
-        if (clientRegistrationRepository) {
-            res['oAuthProviders'] = clientRegistrationRepository.collect {it.registrationId }
+        def oAuthProviders = clientRegistrationRepository?.collect {it?.registrationId }
+        if (oAuthProviders) {
+            res['oAuthProviders'] = oAuthProviders
         }
         return res
     }

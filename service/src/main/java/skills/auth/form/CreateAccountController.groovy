@@ -151,7 +151,7 @@ class CreateAccountController {
 
         @Override
         Iterator<ClientRegistration> iterator() {
-            return null
+            return Collections.emptyIterator()
         }
 
         @Override
