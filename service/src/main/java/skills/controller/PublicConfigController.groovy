@@ -18,11 +18,8 @@ package skills.controller
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.web.bind.annotation.CrossOrigin
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestMethod
-import org.springframework.web.bind.annotation.ResponseBody
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
+import org.springframework.web.bind.annotation.*
 import skills.HealthChecker
 import skills.UIConfigProperties
 import skills.auth.AuthMode
@@ -54,6 +51,9 @@ class PublicConfigController {
     @Autowired
     SettingsService settingsService
 
+    @Autowired
+    private ClientRegistrationRepository clientRegistrationRepository;
+
     @RequestMapping(value = "/config", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     Map<String,Object> getConfig(){
@@ -82,6 +82,9 @@ class PublicConfigController {
         healthChecker.checkRequiredServices()
         Map<String,String> res = new HashMap<>(statusRes)
         res['clientLib'] = uiConfigProperties.client
+        if (clientRegistrationRepository) {
+            res['oAuthProviders'] = clientRegistrationRepository.collect {it.registrationId }
+        }
         return res
     }
 }
