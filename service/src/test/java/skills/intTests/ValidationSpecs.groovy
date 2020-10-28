@@ -16,10 +16,13 @@
 package skills.intTests
 
 import org.springframework.http.HttpStatus
+import org.springframework.web.client.RestClientResponseException
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
+import spock.lang.IgnoreIf
+import spock.lang.Requires
 import spock.lang.Specification
 
 class ValidationSpecs extends DefaultIntSpec {
@@ -464,19 +467,21 @@ class ValidationSpecs extends DefaultIntSpec {
         exception.message.contains('[Badge Id] must not be less than [3] chars.')
     }
 
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def 'test userExists endpoint works correctly'() {
         when:
         String existingUser = skillsService.wsHelper.username
         boolean existingUserExists = skillsService.doesUserExist(existingUser)
 
         String nonExistingUser = 'nonExistingUser'
-        boolean nonExistingUserExists = skillsService.doesUserExist(nonExistingUser)
+        boolean nonExistingUserExists = skillsService.doesUserExist(nonExistingUser, false)
 
         then:
         existingUserExists
         !nonExistingUserExists
     }
 
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def 'users password >= 8 chars'() {
         when:
         createService("veryUniqueIda0201", "aaaaaaa")
@@ -486,6 +491,7 @@ class ValidationSpecs extends DefaultIntSpec {
         exception.message.contains('[password] must not be less than [8] chars')
     }
 
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def 'users password <= 40 chars'() {
         when:
         createService("veryUniqueIda0201", (1..41).collect { "a" }.join(""))

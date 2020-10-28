@@ -16,8 +16,11 @@
 package skills.intTests.utils
 
 import callStack.profiler.Profile
+import com.github.jknack.handlebars.Options
+import com.github.jknack.handlebars.helper.StringHelpers
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
+import org.springframework.core.io.Resource
 import spock.lang.Retry
 
 import java.nio.charset.StandardCharsets
@@ -26,6 +29,9 @@ import java.nio.charset.StandardCharsets
 class SkillsService {
 
     WSHelper wsHelper
+
+    CertificateRegistry certificateRegistry = null
+    Options handlebarOptions = null
 
     SkillsService() {
         wsHelper = new WSHelper().init()
@@ -41,6 +47,12 @@ class SkillsService {
 
     SkillsService(String username, String password, String firstName, String lastName, String service) {
         wsHelper = new WSHelper(username: username, password: password, skillsService: service, firstName: firstName, lastName: lastName).init()
+    }
+
+    SkillsService(String username, String password, String firstName, String lastName, String service, CertificateRegistry certificateRegistry) {
+        this.certificateRegistry = certificateRegistry
+        handlebarOptions = new Options.Builder(null, null, null, null, null).build()
+        wsHelper = new WSHelper(username: username, password: password, skillsService: service, firstName: firstName, lastName: lastName, certificateRegistry: certificateRegistry).init(certificateRegistry != null)
     }
 
     String getClientSecret(String projectId){
@@ -96,7 +108,17 @@ class SkillsService {
 
     def createUser(Map props){
         //props: firstName, lastName, email, password
-        wsHelper.put("createAccount", "", props)
+        if (this.certificateRegistry == null) {
+            wsHelper.put("createAccount", "", props)
+        } else {
+            WSHelper temp = new WSHelper(username: props.email,
+                    password: props.password,
+                    skillsService: wsHelper.skillsService,
+                    firstName: props.firstName,
+                    lastName: props.lastName,
+                    certificateRegistry: certificateRegistry).init(certificateRegistry != null)
+            temp.get("", "", [:], false)
+        }
     }
 
     def searchOtherProjectsByName(String projectId, String query) {
@@ -191,6 +213,7 @@ class SkillsService {
     }
 
     def deleteUserRole(String userId, String projectId, String role) {
+//        userId = getUserId(userId)
         wsHelper.adminDelete("/projects/${projectId}/users/${userId}/roles/${role}")
     }
 
@@ -199,10 +222,12 @@ class SkillsService {
     }
 
     def getUserRolesForProjectAndUser(String projectId, String userId) {
+        userId = getUserId(userId)
         wsHelper.adminGet("/projects/${projectId}/users/${userId}/roles")
     }
 
     def addUserRole(String userId, String projectId, String role) {
+        userId = getUserId(userId)
         wsHelper.adminPost("/projects/${projectId}/users/${userId}/roles/${role}", [:])
     }
 
@@ -225,12 +250,14 @@ class SkillsService {
     }
 
     def getSubjectDescriptions(String projectId, String subjectId, String userId = null) {
+        userId = getUserId(userId)
         String url = "/projects/${projectId}/subjects/${subjectId}/descriptions".toString()
         Map params = userId ? [userId: userId] : null
         wsHelper.apiGet(url, params)
     }
 
     def getBadgeDescriptions(String projectId, String badgeId, boolean isGlobal = false, String userId = null) {
+        userId = getUserId(userId)
         String url = "/projects/${projectId}/badges/${badgeId}/descriptions"
         Map params = [:]
         if (isGlobal){
@@ -409,6 +436,7 @@ class SkillsService {
     @Profile
     def addSkill(Map props, String userId = null, Date date = null) {
         if (userId) {
+            userId = getUserId(userId)
             assert date
             return wsHelper.apiPost("/projects/${props.projectId}/skills/${props.skillId}", [ userId : userId, timestamp:date.time])
         } else {
@@ -417,15 +445,18 @@ class SkillsService {
     }
 
     def addSkillAndOptionallyThrowExceptionAtTheEnd(Map props, String userId, Date date, boolean throwException) {
-            return wsHelper.apiPost("/projects/${props.projectId}/skills/${props.skillId}/throwException/${throwException}".toString(),
-                    [ userId : userId, timestamp:date.time])
+        userId = getUserId(userId)
+        return wsHelper.apiPost("/projects/${props.projectId}/skills/${props.skillId}/throwException/${throwException}".toString(),
+                [ userId : userId, timestamp:date.time])
     }
 
     def addSkillAsProxy(Map props, String userId, boolean includeGrantType=true, boolean includeProxyUser=true) {
+//        userId = getUserId(userId)
         wsHelper.proxyApiPut(wsHelper.getTokenForUser(userId, includeGrantType, includeProxyUser), "/projects/${props.projectId}/skills/${props.skillId}", null)
     }
 
     def getSkillSummaryAsProxy(String userId, String projId, String subjId=null, int version = -1) {
+        userId = getUserId(userId)
         String url = "/projects/${projId}/${subjId ? "subjects/${subjId}/" : ''}summary"
         if (version >= 0) {
             url += "&version=${version}"
@@ -481,6 +512,7 @@ class SkillsService {
     }
 
     def getUserLevel(String projectId, String userId = null) {
+        userId = getUserId(userId)
         String url = "/projects/${projectId}/level"
         if (userId) {
             url = "${url}?userId=${userId}"
@@ -496,6 +528,7 @@ class SkillsService {
     }
 
     def getSkillSummary(String userId, String projId, String subjId=null, int version = -1) {
+        userId = getUserId(userId)
         String url = "/projects/${projId}/${subjId ? "subjects/${subjId}/" : ''}summary?userId=${userId}"
         if (version >= 0) {
             url += "&version=${version}"
@@ -517,6 +550,7 @@ class SkillsService {
     }
 
     def getSingleSkillSummary(String userId, String projId, String skillId, int version = -1) {
+        userId = getUserId(userId)
         String url = "/projects/${projId}/skills/${skillId}/summary?userId=${userId}"
         if (version >= 0) {
             url += "&version=${version}"
@@ -525,6 +559,7 @@ class SkillsService {
     }
 
     def getCrossProjectSkillSummary(String userId, String projId, String otherProjectId, String skillId, int version = -1) {
+        userId = getUserId(userId)
         String url = "/projects/${projId}/projects/${otherProjectId}/skills/${skillId}/summary?userId=${userId}"
         if (version >= 0) {
             url += "&version=${version}"
@@ -533,11 +568,13 @@ class SkillsService {
     }
 
     def getBadgesSummary(String userId, String projId){
+        userId = getUserId(userId)
         String url = "/projects/${projId}/badges/summary?userId=${userId}"
         wsHelper.apiGet(url)
     }
 
     def getBadgeSummary(String userId, String projId, String badgeId, int version = -1, boolean global = false){
+        userId = getUserId(userId)
         String url = "/projects/${projId}/badges/${badgeId}/summary?userId=${userId}"
         if (version >= 0) {
             url += "&version=${version}"
@@ -554,6 +591,7 @@ class SkillsService {
     }
 
     def getSkillDependencyInfo(String userId, String projId, String skillId, int version = -1) {
+        userId = getUserId(userId)
         String url = "/projects/${projId}/skills/${skillId}/dependencies?userId=${userId}"
         if (version >= 0) {
             url += "&version=${version}"
@@ -594,6 +632,7 @@ class SkillsService {
     }
 
     def getPerformedSkills(String userId, String project, String query = '') {
+        userId = getUsername(userId)
         return wsHelper.adminGet("${getProjectUrl(project)}/performedSkills/${userId}?query=${query}&limit=10&ascending=0&page=1&byColumn=0&orderBy=performedOn".toString())
     }
 
@@ -608,18 +647,21 @@ class SkillsService {
     }
 
     def getRank(String userId, String projectId, String subjectId = null){
+        userId = getUserId(userId)
         String endpoint = subjectId ? "/projects/${projectId}/subjects/${subjectId}/rank" : "/projects/${projectId}/rank"
         endpoint = "${endpoint}?userId=${userId}"
         return wsHelper.apiGet(endpoint)
     }
 
     def getRankDistribution(String userId, String projectId, String subjectId = null){
+        userId = getUserId(userId)
         String endpoint = subjectId ? "/projects/${projectId}/subjects/${subjectId}/rankDistribution" : "/projects/${projectId}/rankDistribution"
         endpoint = "${endpoint}?userId=${userId}"
         return wsHelper.apiGet(endpoint)
     }
 
     def getPointHistory(String userId, String projectId, String subjectId=null, Integer version = -1){
+        userId = getUserId(userId)
         String endpointStart = subjectId ? getSubjectUrl(projectId, subjectId) : getProjectUrl(projectId)
         String url = "${endpointStart}/pointHistory?userId=${userId}"
         if (version >= 0) {
@@ -637,6 +679,7 @@ class SkillsService {
     }
 
     def getUserStats(String projectId, String userId) {
+//        userId = getUserIdEncoded(userId)
         return wsHelper.adminGet("/projects/${projectId}/users/${userId}/stats".toString())
     }
 
@@ -653,10 +696,12 @@ class SkillsService {
     }
 
     def adminGetUserLevelForProject(String projectId, String userId){
+        userId = getUserId(userId)
         return wsHelper.apiGet(getUserLevelForProjectUrl(projectId, userId))
     }
 
     def apiGetUserLevelForProject(String projectId, String userId){
+        userId = getUserId(userId)
         return wsHelper.apiGet(getUserLevelForProjectUrl(projectId, userId))
     }
 
@@ -739,6 +784,7 @@ class SkillsService {
     }
 
     def addRootRole(String userId) {
+        userId = getUserId(userId, false)
         return wsHelper.rootPut("/addRoot/${userId}")
     }
 
@@ -756,6 +802,7 @@ class SkillsService {
     }
 
     def removeRootRole(String userId) {
+//        userId = getUserId(userId)
         return wsHelper.delete("/deleteRoot/${userId}", 'root', null)
     }
 
@@ -768,10 +815,12 @@ class SkillsService {
     }
 
     def grantSupervisorRole(String userId) {
+        userId = getUserId(userId)
         return wsHelper.rootPut("/users/${userId}/roles/ROLE_SUPERVISOR")
     }
 
     def removeSupervisorRole(String userId) {
+        userId = getUserId(userId)
         return wsHelper.rootDelete("/users/${userId}/roles/ROLE_SUPERVISOR")
     }
 
@@ -800,10 +849,12 @@ class SkillsService {
     }
 
     def addProjectAdmin(String projectId, String userId) {
+        userId = getUserId(userId)
         return wsHelper.adminPut(getAddProjectAdminUrl(projectId, userId))
     }
 
-    boolean doesUserExist(String username) {
+    boolean doesUserExist(String username, boolean validateCert=true) {
+        username = getUserId(username, validateCert)
         return wsHelper.rootContextGet("/userExists/${username}")
     }
 
@@ -849,6 +900,7 @@ class SkillsService {
     }
 
     def saveEmailSettings(String host, String protocol, Integer port, boolean tlsEnabled, boolean authEnabled, String username, String password) {
+//        username = getUserId(username)
         return wsHelper.rootPost("/saveEmailSettings", [
               host: host,
                 protocol: protocol,
@@ -965,6 +1017,35 @@ class SkillsService {
 
     private String getAddProjectAdminUrl(String project, String userId) {
         return "/projects/${project}/users/${userId}/roles/ROLE_PROJECT_ADMIN"
+    }
+
+    String getUserId(String userId, boolean validateCert=true) {
+        if (!userId ) {
+            return userId
+        }
+
+        if (!certificateRegistry) {
+            return userId
+        } else {
+            Resource cert = certificateRegistry.getCertificate(userId)
+            if (validateCert) {
+                assert cert, "no certificate found for ${userId}"
+            }
+            String dn = certificateRegistry.loadDNFromCert(cert)
+//            dn = StringHelpers.slugify.apply(dn, handlebarOptions)
+            return dn
+        }
+    }
+
+    String getUsername(String userId) {
+        // any specs that interact directly with the database as opposed to going through this test service layer
+        // or interact with endpoints that internally don't lookup the provided username against the user-info-service when in pki mode
+        // need to ensure that the userId is in the same format and has the same value as the username returned by the mock user info service
+        if (!certificateRegistry) {
+            return userId
+        } else {
+            return DnUsernameHelper.getUsername(getUserId(userId))
+        }
     }
 
 }

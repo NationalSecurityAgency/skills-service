@@ -17,16 +17,19 @@ package skills.intTests.utils
 
 
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Conditional
 import org.springframework.core.io.Resource
 import org.springframework.core.io.ResourceLoader
 import org.springframework.core.io.support.ResourcePatternUtils
 import org.springframework.stereotype.Component
+import skills.auth.SecurityMode
 
 import javax.annotation.PostConstruct
 import java.security.KeyStore
 import java.security.Principal
 import java.security.cert.X509Certificate
 
+@Conditional(SecurityMode.PkiAuth)
 @Component
 class CertificateRegistry {
 
@@ -35,26 +38,52 @@ class CertificateRegistry {
 
     Map<String, Resource> certs = [:]
 
+    private List<String> idsOnly = []
+
+    private Random random = new Random()
+
     @PostConstruct
     public void init() {
         Resource[] intTestCerts = getCertificates()
         intTestCerts?.each{
             String username = loadCNFromCert(it)
-            certs.put(username.trim(), it)
+            username = username.trim().toLowerCase()
+            certs.put(username, it)
+            idsOnly.add(username)
         }
     }
 
     public Resource getCertificate(String username) {
-        return certs.get(username.trim())
+        return certs.get(username.trim().toLowerCase())
     }
 
     private Resource[] getCertificates() {
-        return ResourcePatternUtils.getResourcePatternResolver(resourceLoader).getResources("/certs/test.skilltree.*");
+        return ResourcePatternUtils.getResourcePatternResolver(resourceLoader).getResources("classpath:/certs/test.skilltree.*p12");
     }
 
-    String loadCNFromCert(Resource certificate) {
+    public String getRandomUser(){
+        return idsOnly.get(random.nextInt(idsOnly.size()))
+    }
+
+    public List<String> getRandomUsers(int num) {
+        List<String> copy = new ArrayList<>(idsOnly)
+        List<String> res = []
+        (0..num).each {
+            if (copy.size() == 0) {
+                throw new IllegalStateException("no more certificate users left to satisfy getRandomUsers request")
+            }
+            String user = copy.remove(random.nextInt(copy.size()))
+            res.add(user)
+        }
+
+        return res
+    }
+
+    public String loadCNFromCert(Resource certificate) {
         KeyStore p12 = KeyStore.getInstance("pkcs12");
-        try(InputStream inputStream = certificate.getInputStream()) {
+
+
+        certificate.getInputStream().withCloseable { InputStream inputStream ->
             p12.load(inputStream, "skillspass".toCharArray());
             Enumeration<String> e = p12.aliases();
             String cn = ""
@@ -64,10 +93,30 @@ class CertificateRegistry {
                 X509Certificate c = (X509Certificate) p12.getCertificate(alias);
                 Principal subject = c.getSubjectDN();
                 String[] subjectArray = subject.toString().split(",");
-                cn = subjectArray.split(",")[0].split("=")[1]
+                cn = subjectArray[0].split("=")[1]
             }
 
             return cn
+        }
+    }
+
+    public String loadDNFromCert(Resource certificate){
+        KeyStore p12 = KeyStore.getInstance("pkcs12");
+
+
+        certificate?.getInputStream()?.withCloseable { InputStream inputStream ->
+            p12.load(inputStream, "skillspass".toCharArray());
+            Enumeration<String> e = p12.aliases();
+            String dn = ""
+
+            if (e.hasMoreElements()) {
+                String alias = e.nextElement();
+                X509Certificate c = (X509Certificate) p12.getCertificate(alias);
+                Principal subject = c.getSubjectDN();
+                dn = subject.toString()
+            }
+
+            return dn
         }
     }
 }

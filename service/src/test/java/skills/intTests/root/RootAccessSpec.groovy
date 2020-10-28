@@ -21,6 +21,8 @@ import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
+import spock.lang.IgnoreIf
+import spock.lang.Requires
 
 class RootAccessSpec extends DefaultIntSpec {
 
@@ -41,8 +43,6 @@ class RootAccessSpec extends DefaultIntSpec {
             assert !nonRootSkillsService.isRoot()
         }
     }
-
-
 
     def 'prevent a user being created with root privileges if a root account already exists'() {
         setup:
@@ -141,6 +141,7 @@ class RootAccessSpec extends DefaultIntSpec {
         rootSkillsService.removeRootRole(nonRootUserId)
     }
 
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def 'verify the server sends a failure when a root user tries to add root privileges to a user that does not exist'() {
         when:
         rootSkillsService.addRootRole(RandomStringUtils.randomAlphanumeric(14))
@@ -149,6 +150,18 @@ class RootAccessSpec extends DefaultIntSpec {
         SkillsClientException exception = thrown()
         exception.httpStatus == HttpStatus.BAD_REQUEST
         exception.message.contains('does not exist')
+    }
+
+
+    @Requires({env["SPRING_PROFILES_ACTIVE"] == "pki" })
+    def 'verify the server sends a failure when a root user tries to add root privileges to a user that does not exist - 2-way ssl'() {
+        when:
+        rootSkillsService.addRootRole(RandomStringUtils.randomAlphanumeric(14))
+
+        then:
+        // because 2-way ssl uses a user-info-service, a non-existant user can result in different error messages than
+        // the form based version
+        thrown(Exception)
     }
 
     def 'verify non-root users cannot add root users'() {
@@ -342,6 +355,7 @@ class RootAccessSpec extends DefaultIntSpec {
         projects.find { it.projectId ==  proj3.projectId }
     }
 
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def 'get users without role'() {
         expect:
 //        this won't work until #145 is implemented and user clean up is added to the DefaultIntSpec

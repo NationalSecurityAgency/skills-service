@@ -27,6 +27,8 @@ import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.UserAttrsRepo
 import spock.lang.Specification
 
+import javax.annotation.PostConstruct
+
 @Slf4j
 @SpringBootTest(webEnvironment= SpringBootTest.WebEnvironment.RANDOM_PORT, classes = SpringBootApp)
 class DefaultIntSpec extends Specification {
@@ -58,13 +60,21 @@ class DefaultIntSpec extends Specification {
     @Autowired(required=false)
     MockUserInfoService mockUserInfoService
 
-    @Autowired
+    @Autowired(required=false)
     CertificateRegistry certificateRegistry
+
+    private UserUtil userUtil
+
+    @PostConstruct
+    def init(){
+        userUtil = new UserUtil(certificateRegistry: certificateRegistry)
+    }
 
     def setup() {
         // allows for over-ridding the setup method
         doSetup();
     }
+
     def doSetup() {
         String msg = "\n-------------------------------------------------------------\n" +
                 "START: [${specificationContext.currentIteration.name}]\n" +
@@ -100,7 +110,13 @@ class DefaultIntSpec extends Specification {
             String firstName = "Skills",
             String lastName = "Test",
             String url = "http://localhost:${localPort}".toString()){
-        new SkillsService(username, password, firstName, lastName, url)
+
+        boolean pkiEnabled = mockUserInfoService != null
+        if (pkiEnabled) {
+            url = url.replace("http://", "https://")
+        }
+
+        new SkillsService(username, password, firstName, lastName, url, pkiEnabled != null ? certificateRegistry : null)
     }
 
     SkillsService createSupervisor(){
@@ -111,5 +127,18 @@ class DefaultIntSpec extends Specification {
         SkillsService supervisorService = createService(supervisorUserId)
         rootSkillsService.grantSupervisorRole(supervisorUserId)
         return supervisorService
+    }
+
+    /*
+     * Returns N number of random users. NOTE - if tests are run in pki mode,
+     * N must be less than or equal to the number of test p12 certificates available,
+     * otherwise an exception will occur.
+     *
+     * @param numUsers number of random users - must be less than or equal to the number
+     * of test p12 certificates available if in pki mode
+     * @return
+     */
+    List<String> getRandomUsers(int numUsers) {
+        return userUtil.getUsers(numUsers)
     }
 }

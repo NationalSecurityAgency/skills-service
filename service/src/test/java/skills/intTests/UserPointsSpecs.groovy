@@ -22,6 +22,8 @@ import org.joda.time.format.DateTimeFormatter
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
+import spock.lang.IgnoreIf
+import spock.lang.Requires
 import spock.lang.Specification
 
 class UserPointsSpecs extends DefaultIntSpec {
@@ -57,9 +59,9 @@ class UserPointsSpecs extends DefaultIntSpec {
         results.count == 2
         results.totalCount == 2
         results.data.size() == 2
-        results.data.get(0).userId == sampleUserIds.get(0)?.toLowerCase()
+        results.data.get(0).userId.contains(sampleUserIds.get(0)?.toLowerCase())
         results.data.get(0).totalPoints == 70
-        results.data.get(1).userId == sampleUserIds.get(1)?.toLowerCase()
+        results.data.get(1).userId.contains(sampleUserIds.get(1)?.toLowerCase())
         results.data.get(1).totalPoints == 35
     }
 
@@ -73,13 +75,13 @@ class UserPointsSpecs extends DefaultIntSpec {
         results1.count == 2
         results1.totalCount == 2
         results1.data.size() == 1
-        results1.data.get(0).userId == sampleUserIds.get(0)?.toLowerCase()
+        results1.data.get(0).userId.contains(sampleUserIds.get(0)?.toLowerCase())
         results1.data.get(0).totalPoints == 70
         results2
         results2.count == 2
         results2.totalCount == 2
         results2.data.size() == 1
-        results2.data.get(0).userId == sampleUserIds.get(1)?.toLowerCase()
+        results2.data.get(0).userId.contains(sampleUserIds.get(1)?.toLowerCase())
         results2.data.get(0).totalPoints == 35
     }
 
@@ -93,13 +95,13 @@ class UserPointsSpecs extends DefaultIntSpec {
         results1.count == 2 // result count
         results1.totalCount == 2  // total user count
         results1.data.size() == 1
-        results1.data.get(0).userId == sampleUserIds.get(0)?.toLowerCase()
+        results1.data.get(0).userId.contains(sampleUserIds.get(0)?.toLowerCase())
         results1.data.get(0).totalPoints == 70
         results2
         results2.count == 2
         results2.totalCount == 2
         results2.data.size() == 1
-        results2.data.get(0).userId == sampleUserIds.get(1)?.toLowerCase()
+        results2.data.get(0).userId.contains(sampleUserIds.get(1)?.toLowerCase())
         results2.data.get(0).totalPoints == 35
     }
 
@@ -114,16 +116,16 @@ class UserPointsSpecs extends DefaultIntSpec {
         results1.count == 1
         results1.totalCount == 1
         results1.data.size() == 1
-        results1.data.get(0).userId == sampleUserIds.get(0)?.toLowerCase()
+        results1.data.get(0).userId.contains(sampleUserIds.get(0)?.toLowerCase())
         results1.data.get(0).totalPoints == 35
 
         results2
         results2.count == 2
         results2.totalCount == 2
         results2.data.size() == 2
-        results2.data.get(0).userId == sampleUserIds.get(0)?.toLowerCase()
+        results2.data.get(0).userId.contains(sampleUserIds.get(0)?.toLowerCase())
         results2.data.get(0).totalPoints == 35
-        results2.data.get(1).userId == sampleUserIds.get(1)?.toLowerCase()
+        results2.data.get(1).userId.contains(sampleUserIds.get(1)?.toLowerCase())
         results2.data.get(1).totalPoints == 35
 
         results3
@@ -143,16 +145,16 @@ class UserPointsSpecs extends DefaultIntSpec {
         results1.count == 1
         results1.totalCount == 1
         results1.data.size() == 1
-        results1.data.get(0).userId == sampleUserIds.get(0)?.toLowerCase()
+        results1.data.get(0).userId.contains(sampleUserIds.get(0)?.toLowerCase())
         results1.data.get(0).totalPoints == 35
 
         results2
         results2.count == 2
         results2.totalCount == 2
         results2.data.size() == 2
-        results2.data.get(0).userId == sampleUserIds.get(0)?.toLowerCase()
+        results2.data.get(0).userId.contains(sampleUserIds.get(0)?.toLowerCase())
         results2.data.get(0).totalPoints == 35
-        results2.data.get(1).userId == sampleUserIds.get(1)?.toLowerCase()
+        results2.data.get(1).userId.contains(sampleUserIds.get(1)?.toLowerCase())
         results2.data.get(1).totalPoints == 35
 
         results3
@@ -172,14 +174,14 @@ class UserPointsSpecs extends DefaultIntSpec {
         results1.count == 1
         results1.totalCount == 1
         results1.data.size() == 1
-        results1.data.get(0).userId == sampleUserIds.get(0)?.toLowerCase()
+        results1.data.get(0).userId.contains(sampleUserIds.get(0)?.toLowerCase())
         results1.data.get(0).totalPoints == 35
 
         results2
         results2.count == 2
         results2.totalCount == 2
         results2.data.size() == 1
-        results2.data.get(0).userId == sampleUserIds.get(0)?.toLowerCase()
+        results2.data.get(0).userId.contains(sampleUserIds.get(0)?.toLowerCase())
         results2.data.get(0).totalPoints == 35
 
         results3
@@ -197,7 +199,7 @@ class UserPointsSpecs extends DefaultIntSpec {
         results1.count == 1
         results1.totalCount == 1
         results1.data.size() == 1
-        results1.data.get(0).userId == sampleUserIds.get(0)?.toLowerCase()
+        results1.data.get(0).userId.contains(sampleUserIds.get(0)?.toLowerCase())
         results1.data.get(0).totalPoints == 35
     }
 
@@ -209,7 +211,7 @@ class UserPointsSpecs extends DefaultIntSpec {
         when:
         def users = skillsService.getProjectUsers(projId, 100).data
 
-        def userBeforeSkillAdd = users.find() {it.userId == uid}
+        def userBeforeSkillAdd = users.find() {it.userId.contains(uid)}
         DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
 
         def res = skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(1)], uid, new DateTime().toDate())
@@ -217,7 +219,7 @@ class UserPointsSpecs extends DefaultIntSpec {
 
         def users2 = skillsService.getProjectUsers(projId, 100).data
 
-        def userAfterSkillAdd = users2.find() {it.userId == uid}
+        def userAfterSkillAdd = users2.find() {it.userId.contains(uid)}
 
 
         then:
@@ -225,7 +227,7 @@ class UserPointsSpecs extends DefaultIntSpec {
 
     }
 
-    def "filter users by name"(){
+   def "filter users by name"(){
 
         SkillsService createAcctService = createService()
         createAcctService.createUser([firstName: "John", lastName: "Doe", email: "jdoe@email.foo", password: "password"])
@@ -248,14 +250,14 @@ class UserPointsSpecs extends DefaultIntSpec {
         control.data.size() == 5
 
         result1.data.size() == 1
-        result1.data.find{it.userId == 'jadoe@email.foo'}
+        result1.data.find{it.userId.contains('jadoe@email.foo')}
 
         result2.data.size() == 1
-        result2.data.find{it.userId == 'jadoe@email.foo'}
+        result2.data.find{it.userId.contains('jadoe@email.foo')}
 
         result3.data.size() == 2
-        result3.data.find{it.userId == 'jadoe@email.foo'}
-        result3.data.find{it.userId == 'jdoe@email.foo'}
+        result3.data.find{it.userId.contains('jadoe@email.foo')}
+        result3.data.find{it.userId.contains('jdoe@email.foo')}
     }
 
     def "sort users" () {
@@ -277,26 +279,26 @@ class UserPointsSpecs extends DefaultIntSpec {
 
         then:
         allUsers.data.size() == 5
-        allUsers.data[0].userId == 'fbar@email.foo'
-        allUsers.data[1].userId == 'hanson'
-        allUsers.data[2].userId == 'harry'
-        allUsers.data[3].userId == 'jadoe@email.foo'
-        allUsers.data[4].userId == 'jdoe@email.foo'
+        allUsers.data[0].userId.contains('fbar@email.foo')
+        allUsers.data[1].userId.contains('hanson')
+        allUsers.data[2].userId.contains('harry')
+        allUsers.data[3].userId.contains('jadoe@email.foo')
+        allUsers.data[4].userId.contains('jdoe@email.foo')
 
         fooUsers.data.size() == 3
-        fooUsers.data[0].userId == 'fbar@email.foo'
-        fooUsers.data[1].userId == 'jadoe@email.foo'
-        fooUsers.data[2].userId == 'jdoe@email.foo'
+        fooUsers.data[0].userId.contains('fbar@email.foo')
+        fooUsers.data[1].userId.contains('jadoe@email.foo')
+        fooUsers.data[2].userId.contains('jdoe@email.foo')
 
         fooUsersDesc.data.size() == 3
-        fooUsersDesc.data[2].userId == 'fbar@email.foo'
-        fooUsersDesc.data[1].userId == 'jadoe@email.foo'
-        fooUsersDesc.data[0].userId == 'jdoe@email.foo'
+        fooUsersDesc.data[2].userId.contains('fbar@email.foo')
+        fooUsersDesc.data[1].userId.contains('jadoe@email.foo')
+        fooUsersDesc.data[0].userId.contains('jdoe@email.foo')
 
         fooUsersSortByFirstName.data.size() == 3
-        fooUsersSortByFirstName.data[0].userId == 'fbar@email.foo'
-        fooUsersSortByFirstName.data[1].userId == 'jadoe@email.foo'
-        fooUsersSortByFirstName.data[2].userId == 'jdoe@email.foo'
+        fooUsersSortByFirstName.data[0].userId.contains('fbar@email.foo')
+        fooUsersSortByFirstName.data[1].userId.contains('jadoe@email.foo')
+        fooUsersSortByFirstName.data[2].userId.contains('jdoe@email.foo')
 
         fooUsersSortByLastName.data.size() == 3
         fooUsersSortByLastName.data[0].lastName == 'Bar'
@@ -330,16 +332,16 @@ class UserPointsSpecs extends DefaultIntSpec {
 
         then:
         firstPage.data.size() == 5
-        firstPage.data[0].userId == 'aaa@email.foo'
-        firstPage.data[1].userId == 'bbb@email.foo'
-        firstPage.data[2].userId == 'ccc@email.foo'
-        firstPage.data[3].userId == 'ddd@email.foo'
-        firstPage.data[4].userId == 'eee@email.foo'
+        firstPage.data[0].userId.contains('aaa@email.foo')
+        firstPage.data[1].userId.contains('bbb@email.foo')
+        firstPage.data[2].userId.contains('ccc@email.foo')
+        firstPage.data[3].userId.contains('ddd@email.foo')
+        firstPage.data[4].userId.contains('eee@email.foo')
 
         secondPage.data.size() == 3
-        secondPage.data[0].userId == 'fff@email.foo'
-        secondPage.data[1].userId == 'ggg@email.foo'
-        secondPage.data[2].userId == 'hhh@email.foo'
+        secondPage.data[0].userId.contains('fff@email.foo')
+        secondPage.data[1].userId.contains('ggg@email.foo')
+        secondPage.data[2].userId.contains('hhh@email.foo')
     }
 
 

@@ -19,12 +19,23 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import groovy.util.logging.Slf4j
+import org.apache.http.client.HttpClient
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory
+import org.apache.http.conn.ssl.TrustAllStrategy
+import org.apache.http.impl.client.HttpClients
+import org.apache.http.ssl.SSLContextBuilder
+import org.apache.http.ssl.TrustStrategy
+import org.springframework.core.io.ClassPathResource
 import org.springframework.core.io.FileSystemResource
+import org.springframework.core.io.Resource
 import org.springframework.http.*
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory
 import org.springframework.http.client.support.BasicAuthenticationInterceptor
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.util.MultiValueMap
 import org.springframework.web.client.RestTemplate
+
+import java.security.KeyStore
 
 @Slf4j
 class WSHelper {
@@ -40,9 +51,35 @@ class WSHelper {
     String firstName = 'Skills'
     String lastName = 'Test'
 
-    WSHelper init() {
-        restTemplateWrapper = new RestTemplateWrapper()
-        oAuthRestTemplate = new RestTemplate()
+    CertificateRegistry certificateRegistry
+
+    WSHelper init(boolean pkiAuth=false) {
+
+        RestTemplate restTemplate
+
+        if (pkiAuth) {
+            Resource resource = certificateRegistry.getCertificate(username)
+            assert resource != null : "No certificate found for ${username}"
+            KeyStore keyStore = KeyStore.getInstance("PKCS12")
+            keyStore.load(resource.getInputStream(), "skillspass".toCharArray())
+
+            KeyStore trustStore = KeyStore.getInstance("JKS")
+            trustStore.load(new ClassPathResource("/certs/truststore.jks").getInputStream(), "skillspass".toCharArray())
+
+            SSLConnectionSocketFactory socketFactory = new SSLConnectionSocketFactory(new SSLContextBuilder()
+                    .loadTrustMaterial(trustStore, TrustAllStrategy.INSTANCE)
+                    .loadKeyMaterial(keyStore, "skillspass".toCharArray()).build())
+
+            HttpClient client = HttpClients.custom().setSSLSocketFactory(socketFactory).build()
+            HttpComponentsClientHttpRequestFactory requestFactory = new  HttpComponentsClientHttpRequestFactory(client)
+
+            restTemplate = new RestTemplate(requestFactory)
+        } else {
+            restTemplate = new RestTemplate()
+        }
+
+        restTemplateWrapper = new RestTemplateWrapper(restTemplate, pkiAuth)
+        oAuthRestTemplate = restTemplate
         restTemplateWrapper.auth(skillsService, username, password, firstName, lastName)
         return this
     }

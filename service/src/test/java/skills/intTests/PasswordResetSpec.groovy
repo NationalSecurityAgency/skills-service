@@ -27,9 +27,11 @@ import org.springframework.web.client.RestTemplate
 import org.springframework.web.client.HttpClientErrorException
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsService
+import spock.lang.IgnoreIf
 
 import javax.mail.internet.MimeMessage
 import java.time.Duration
+
 
 class PasswordResetSpec extends DefaultIntSpec {
 
@@ -64,6 +66,7 @@ class PasswordResetSpec extends DefaultIntSpec {
         greenMail.stop()
     }
 
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def "password reset request sends email"() {
         SkillsService aUser = createService("randomuser@skills.org", "somepassword",)
 
@@ -89,6 +92,7 @@ class PasswordResetSpec extends DefaultIntSpec {
         msg.getFrom()[0].toString() == "resetspec@skilltreetests"
     }
 
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def "reset password with token from email"() {
         SkillsService aUser = createService("randomuser@skills.org", "somepassword")
         //post request with an unauthenticated client to ensure that the url is publicly available
@@ -124,6 +128,7 @@ class PasswordResetSpec extends DefaultIntSpec {
         createService("randomuser@skills.org", "newpassword")
     }
 
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def "reset password with invalid token fails"() {
         SkillsService aUser = createService("randomuser@skills.org", "somepassword")
         //post request with an unauthenticated client to ensure that the url is publicly available
@@ -152,6 +157,7 @@ class PasswordResetSpec extends DefaultIntSpec {
         thrown(HttpClientErrorException)
     }
 
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def "reset with expired token fails"(){
         rootSkillsService.addOrUpdateGlobalSetting("password_reset_token_expiration",
                 ["setting": "password_reset_token_expiration", "value": "PT0.001S"])

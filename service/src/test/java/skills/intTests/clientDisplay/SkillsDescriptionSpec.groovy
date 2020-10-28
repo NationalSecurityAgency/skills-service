@@ -21,7 +21,7 @@ import skills.intTests.utils.SkillsService
 
 class SkillsDescriptionSpec extends DefaultIntSpec {
 
-    def "result should be empty if there are not descriptions at all"(){
+    void "result should be empty if there are not descriptions at all"(){
         def proj1 = SkillsFactory.createProject(1)
         def proj1_subj1 = SkillsFactory.createSubject(1, 1)
         def proj1_subj2 = SkillsFactory.createSubject(1, 2)
@@ -48,7 +48,7 @@ class SkillsDescriptionSpec extends DefaultIntSpec {
         }
     }
 
-    def "achievedOn is populated for the achieved skills under a subject"() {
+    void "achievedOn is populated for the achieved skills under a subject"() {
         def proj1 = SkillsFactory.createProject(1)
         def proj1_subj1 = SkillsFactory.createSubject(1, 1)
         def proj1_subj2 = SkillsFactory.createSubject(1, 2)
@@ -82,7 +82,7 @@ class SkillsDescriptionSpec extends DefaultIntSpec {
         }
     }
 
-    def "achievedOn is populated for the achieved skills under a badge"() {
+    void "achievedOn is populated for the achieved skills under a badge"() {
         def proj1 = SkillsFactory.createProject(1)
         def proj1_subj1 = SkillsFactory.createSubject(1, 1)
         def proj1_subj2 = SkillsFactory.createSubject(1, 2)
@@ -119,7 +119,7 @@ class SkillsDescriptionSpec extends DefaultIntSpec {
     }
 
 
-    def "achievedOn is populated for the achieved skills under a global badge"() {
+    void "achievedOn is populated for the achieved skills under a global badge"() {
         SkillsService supervisorService = createSupervisor()
         def proj1 = SkillsFactory.createProject(1)
         def proj1_subj1 = SkillsFactory.createSubject(1, 1)
@@ -156,7 +156,7 @@ class SkillsDescriptionSpec extends DefaultIntSpec {
         }
     }
 
-    def "subject has no skills - no descriptions for you!"(){
+    void "subject has no skills - no descriptions for you!"(){
         def proj1 = SkillsFactory.createProject(1)
         def proj1_subj1 = SkillsFactory.createSubject(1, 1)
         def proj1_subj2 = SkillsFactory.createSubject(1, 2)
@@ -173,7 +173,7 @@ class SkillsDescriptionSpec extends DefaultIntSpec {
         !res
     }
 
-    def "get descriptions for a subject"(){
+    void "get descriptions for a subject"(){
         def proj1 = SkillsFactory.createProject(1)
         def proj1_subj1 = SkillsFactory.createSubject(1, 1)
         def proj1_subj2 = SkillsFactory.createSubject(1, 2)
@@ -206,7 +206,7 @@ class SkillsDescriptionSpec extends DefaultIntSpec {
         res[2].href == "http://${proj1_subj2_skills[2].skillId}".toString()
     }
 
-    def "descriptions should respect root url settings"(){
+    void "descriptions should respect root url settings"(){
         def proj1 = SkillsFactory.createProject(1)
         def proj1_subj1 = SkillsFactory.createSubject(1, 1)
         List<Map> proj1_subj1_skills = SkillsFactory.createSkills(3, 1, 1)
@@ -230,7 +230,7 @@ class SkillsDescriptionSpec extends DefaultIntSpec {
         }
     }
 
-    def "badge has no skills - no descriptions for you!"(){
+    void "badge has no skills - no descriptions for you!"(){
         def proj1 = SkillsFactory.createProject(1)
         def proj1_subj1 = SkillsFactory.createSubject(1, 1)
         def proj1_subj2 = SkillsFactory.createSubject(1, 2)
@@ -250,7 +250,7 @@ class SkillsDescriptionSpec extends DefaultIntSpec {
         !res
     }
 
-    def "global badge has no skills - no descriptions for you!"() {
+    void "global badge has no skills - no descriptions for you!"() {
         SkillsService supervisorService = createSupervisor()
 
         def proj1 = SkillsFactory.createProject(1)
@@ -272,7 +272,7 @@ class SkillsDescriptionSpec extends DefaultIntSpec {
         !res
     }
 
-    def "get descriptions for a badge"(){
+    void "get descriptions for a badge"(){
         def proj1 = SkillsFactory.createProject(1)
         def proj1_subj1 = SkillsFactory.createSubject(1, 1)
         def proj1_subj2 = SkillsFactory.createSubject(1, 2)
@@ -319,7 +319,7 @@ class SkillsDescriptionSpec extends DefaultIntSpec {
         res[2].href == "http://${proj1_subj2_skills[2].skillId}".toString()
     }
 
-    def "get descriptions for a global badge"(){
+    void "get descriptions for a global badge"(){
         SkillsService supervisorService = createSupervisor()
 
         def proj1 = SkillsFactory.createProject(1)
@@ -369,7 +369,7 @@ class SkillsDescriptionSpec extends DefaultIntSpec {
     }
 
 
-    def "badge's skills have no descriptions"(){
+    void "badge's skills have no descriptions"(){
         def proj1 = SkillsFactory.createProject(1)
         def proj1_subj1 = SkillsFactory.createSubject(1, 1)
         def proj1_subj2 = SkillsFactory.createSubject(1, 2)
