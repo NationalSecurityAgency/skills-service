@@ -69,6 +69,7 @@ describe('Subjects Tests', () => {
     });
 
     it('Close level dialog', () => {
+        cy.server();
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
             projectId: 'proj1',
             subjectId: 'subj1',
