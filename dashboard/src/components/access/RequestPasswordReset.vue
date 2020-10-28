@@ -14,11 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div class="row justify-content-center text-center">
+  <div class="container-fluid">
+    <div class="row justify-content-center text-center">
     <div class="col col-md-8 col-lg-7 col-xl-4 mt-3" style="min-width: 20rem;">
       <div class="mt-5">
-        <i class="fa fa-users fa-4x text-secondary"></i>
-        <h2 class="mt-4 text-info">Reset Password For SkillTree Dashboard</h2>
+        <logo1 />
+        <h3 class="mt-4 text-primary">Reset Password For SkillTree Dashboard</h3>
       </div>
       <ValidationObserver ref="resetForm" v-slot="{invalid, handleSubmit}" slim>
         <form @submit.prevent="handleSubmit(reset)">
@@ -49,18 +50,21 @@ limitations under the License.
       </ValidationObserver>
     </div>
   </div>
+  </div>
 </template>
 
 <script>
   import { extend } from 'vee-validate';
   import { required, email } from 'vee-validate/dist/rules';
   import AccessService from './AccessService';
+  import Logo1 from '../brand/Logo1';
 
   extend('required', required);
   extend('email', email);
 
   export default {
     name: 'RequestPasswordResetForm',
+    components: { Logo1 },
     data() {
       return {
         username: '',

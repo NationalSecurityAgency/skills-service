@@ -14,11 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div class="row justify-content-center text-center">
+  <div class="container-fluid">
+    <div class="row justify-content-center text-center">
     <div class="col col-md-8 col-lg-7 col-xl-4 mt-3" style="min-width: 20rem;">
       <div class="mt-5">
-        <i class="fa fa-users fa-4x text-secondary"></i>
-        <h2 class="mt-4 text-info">Sign in to SkillTree Dashboard</h2>
+        <logo1 />
       </div>
       <ValidationObserver ref="form" slim v-slot="{invalid, handleSubmit}">
         <form @submit.prevent="handleSubmit(login)">
@@ -32,11 +32,16 @@ limitations under the License.
             <div class="card-body p-4">
 
               <div class="form-group">
-                <label for="username" class="text-secondary font-weight-bold">Email Address</label>
+                <label for="username" class="text-primary">Email Address</label>
                 <ValidationProvider name="Email Address" rules="required|minUsernameLength|email" :debounce=500 v-slot="{errors}">
-                  <input type="text" class="form-control" id="username" tabindex="1" placeholder="Enter email"
-                         aria-describedby="emailHelp"
-                         v-model="loginFields.username">
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text"><i class="far fa-envelope"></i></span>
+                    </div>
+                    <input type="text" class="form-control" id="username" tabindex="1" placeholder="Enter email"
+                           aria-describedby="emailHelp"
+                           v-model="loginFields.username">
+                  </div>
                   <small id="emailHelp" class="form-text text-danger" v-show="errors[0]">{{
                     errors[0]}}
                   </small>
@@ -45,24 +50,33 @@ limitations under the License.
               <div class="form-group">
                 <div class="row">
                   <div class="col">
-                    <label for="inputPassword" class="text-secondary font-weight-bold">Password</label>
+                    <label for="inputPassword" class="text-primary">Password</label>
                   </div>
                   <div class="col text-right">
                     <small class="text-muted"><b-link tabindex="4" @click="forgotPassword" data-cy="forgotPassword">Forgot Password?</b-link></small>
                   </div>
                 </div>
                 <ValidationProvider name="Password" rules="required|minPasswordLength|maxPasswordLength" :debounce=500 v-slot="{errors}">
-                  <input type="password" class="form-control" id="inputPassword" tabindex="2" placeholder="Password"
-                         v-model="loginFields.password" name="password" aria-describedby="passwordHelp"
-                         @animationstart="onAnimationStart">
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text"><i class="fas fa-key"></i></span>
+                    </div>
+                    <input type="password" class="form-control" id="inputPassword" tabindex="2" placeholder="Password"
+                           v-model="loginFields.password" name="password" aria-describedby="passwordHelp"
+                           @animationstart="onAnimationStart">
+                  </div>
                   <small id="passwordHelp" class="form-text text-danger" v-show="errors[0]">{{
                     errors[0]}}
                   </small>
                 </ValidationProvider>
               </div>
-              <button type="submit" class="btn btn-outline-primary" tabindex="3" :disabled="invalid||disabled" data-cy="login">
-                Login <i class="fas fa-arrow-circle-right"/>
-              </button>
+              <div class="row">
+                <div class="col text-right">
+                  <button type="submit" class="btn btn-outline-primary float-right" tabindex="3" :disabled="invalid||disabled" data-cy="login">
+                    Login <i class="fas fa-arrow-circle-right"/>
+                  </button>
+                </div>
+              </div>
 
               <hr/>
               <p class="text-center"><small>Don't have a SkillTree account?
@@ -91,12 +105,14 @@ limitations under the License.
       </ValidationObserver>
     </div>
   </div>
+  </div>
 </template>
 
 <script>
   import { extend } from 'vee-validate';
   import { required, email } from 'vee-validate/dist/rules';
   import AccessService from './AccessService';
+  import Logo1 from '../brand/Logo1';
 
   extend('required', {
     ...required,
@@ -106,6 +122,7 @@ limitations under the License.
 
   export default {
     name: 'LoginForm',
+    components: { Logo1 },
     data() {
       return {
         loginFields: {

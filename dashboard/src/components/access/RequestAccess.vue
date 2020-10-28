@@ -18,64 +18,92 @@ limitations under the License.
     <div class="row justify-content-center">
       <div class="col-md-6 mt-3">
         <div class="text-center mt-5">
-          <i class="fa fa-users fa-4x text-secondary"></i>
-          <h2 class="mt-4 text-info">
-            <span v-if="isRootAccount">New SkillTree Root Account</span>
-            <span v-else>New SkillTree Account</span>
-          </h2>
+          <logo1 />
+          <h3 class="mt-4 text-primary">
+            New <span v-if="isRootAccount">Root </span>Account
+          </h3>
         </div>
         <ValidationObserver ref="observer" v-slot="{invalid, handleSubmit}" slim>
           <form @submit.prevent="handleSubmit(login)">
             <div class="card">
               <div class="card-body p-4">
                 <div class="form-group">
-                  <label for="firstName" class="text-secondary font-weight-bold">* First Name</label>
+                  <label for="firstName" class="text-primary">* First Name</label>
                   <ValidationProvider name="First Name" rules="required|maxFirstNameLength" v-slot="{errors}" :debounce=500>
-                    <input class="form-control" type="text" v-model="loginFields.firstName" id="firstName" :disabled="createInProgress"
+                    <div class="input-group">
+                      <div class="input-group-prepend">
+                        <span class="input-group-text"><i class="fas fa-user"></i></span>
+                      </div>
+                      <input class="form-control" type="text" v-model="loginFields.firstName" id="firstName" :disabled="createInProgress"
                            name="firstName" aria-required="true"/>
+                    </div>
                     <small class="form-text text-danger" v-show="errors[0]">{{ errors[0] }}</small>
                   </ValidationProvider>
                 </div>
                 <div class="form-group">
-                  <label for="lastName" class="text-secondary font-weight-bold">* Last Name</label>
+                  <label for="lastName" class="text-primary">* Last Name</label>
                   <ValidationProvider name="Last Name" rules="required|maxLastNameLength" :debounce=500 v-slot="{errors}">
-                    <input class="form-control" type="text" v-model="loginFields.lastName" id="lastName" :disabled="createInProgress"
+                    <div class="input-group">
+                      <div class="input-group-prepend">
+                        <span class="input-group-text"><i class="fas fa-user-tie"></i></span>
+                      </div>
+                      <input class="form-control" type="text" v-model="loginFields.lastName" id="lastName" :disabled="createInProgress"
                            name="lastName" aria-required="true"/>
+                    </div>
                     <small class="form-text text-danger" v-show="errors[0]">{{ errors[0] }}</small>
                   </ValidationProvider>
                 </div>
                 <div class="form-group">
-                  <label for="email" class="text-secondary font-weight-bold">* Email</label>
+                  <label for="email" class="text-primary">* Email</label>
                   <ValidationProvider name="Email" rules="required|email|uniqueEmail" :debounce=500 v-slot="{errors}">
-                    <input class="form-control" type="text" v-model="loginFields.email" id="email" :disabled="createInProgress"
+                    <div class="input-group">
+                      <div class="input-group-prepend">
+                        <span class="input-group-text"><i class="far fa-envelope"></i></span>
+                      </div>
+                      <input class="form-control" type="text" v-model="loginFields.email" id="email" :disabled="createInProgress"
                            name="email" aria-required="true"/>
+                    </div>
                     <small class="form-text text-danger" v-show="errors[0]">{{ errors[0] }}</small>
                   </ValidationProvider>
                 </div>
                 <div class="form-group">
-                  <label for="password" class="text-secondary font-weight-bold">* Password</label>
+                  <label for="password" class="text-primary">* Password</label>
                   <ValidationProvider vid="password" name="Password" rules="required|minPasswordLength|maxPasswordLength" :debounce=500 v-slot="{errors}">
-                    <input class="form-control" type="password" v-model="loginFields.password" id="password" :disabled="createInProgress"
+                    <div class="input-group">
+                      <div class="input-group-prepend">
+                        <span class="input-group-text"><i class="fas fa-key"></i></span>
+                      </div>
+                      <input class="form-control" type="password" v-model="loginFields.password" id="password" :disabled="createInProgress"
                            name="password" ref="password" aria-required="true"/>
+                    </div>
                     <small class="form-text text-danger" v-show="errors[0]">{{ errors[0] }}</small>
                   </ValidationProvider>
                 </div>
                 <div class="form-group">
-                  <label for="password_confirmation" class="text-secondary font-weight-bold">* Confirm Password</label>
+                  <label for="password_confirmation" class="text-primary">* Confirm Password</label>
                   <ValidationProvider vid="password_confirmation" name="Password" rules="required|confirmed:password" :debounce=500 v-slot="{errors}">
-                    <input class="form-control" type="password" id="password_confirmation" v-model="passwordConfirmation" :disabled="createInProgress"
+                    <div class="input-group">
+                      <div class="input-group-prepend">
+                        <span class="input-group-text"><i class="fas fa-key"></i></span>
+                      </div>
+                      <input class="form-control" type="password" id="password_confirmation" v-model="passwordConfirmation" :disabled="createInProgress"
                            name="password_confirmation" aria-required="true"/>
+                    </div>
                     <small class="form-text text-danger" v-show="errors[0]">{{ errors[0] }}</small>
                   </ValidationProvider>
                 </div>
                 <div class="field is-grouped">
                   <div class="control">
-                    <button type="submit" class="btn btn-outline-primary" :disabled="invalid || missingRequiredValues() || createInProgress">
-                      Create Account <i v-if="!createInProgress" class="fas fa-arrow-circle-right"/>
-                      <b-spinner v-if="createInProgress" label="Loading..." style="width: 1rem; height: 1rem;" variant="primary"/>
-                    </button>
-                    <div v-if="createInProgress && isRootAccount" class="mt-2 text-info">
-                      Bootstrapping! May take a second...
+                    <div class="row">
+                      <div class="col text-right">
+                        <button type="submit" class="btn btn-outline-primary" :disabled="invalid || missingRequiredValues() || createInProgress">
+                          Create Account <i v-if="!createInProgress" class="fas fa-arrow-circle-right"/>
+                          <b-spinner v-if="createInProgress" label="Loading..." style="width: 1rem; height: 1rem;" variant="primary"/>
+                        </button>
+                        <div v-if="createInProgress && isRootAccount" class="mt-2 text-info">
+                          Bootstrapping! May take a second...
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -98,6 +126,7 @@ limitations under the License.
   import { extend } from 'vee-validate';
   import { required, email, confirmed } from 'vee-validate/dist/rules';
   import AccessService from './AccessService';
+  import Logo1 from '../brand/Logo1';
 
   extend('required', {
     ...required,
@@ -114,6 +143,7 @@ limitations under the License.
 
   export default {
     name: 'RequestAccount',
+    components: { Logo1 },
     props: {
       isRootAccount: {
         type: Boolean,

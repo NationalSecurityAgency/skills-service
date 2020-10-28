@@ -15,6 +15,7 @@ limitations under the License.
 */
 <template>
   <div>
+    <h2 class="bg-white m-0" style="height: 1rem;"></h2>
     <navigation :nav-items="navItems" data-cy="navigationmenu">
     </navigation>
   </div>
@@ -30,15 +31,24 @@ limitations under the License.
     },
     data() {
       return {
+        isLoading: true,
         navItems: [
-          { name: 'Projects', iconClass: 'fa-project-diagram', page: 'HomePage' },
-          { name: 'Metrics', iconClass: 'fa-cogs', page: 'GlobalMetrics' },
+          { name: 'Projects', iconClass: 'fa-project-diagram text-orange', page: 'HomePage' },
+          { name: 'Metrics', iconClass: 'fa-cogs text-purple', page: 'GlobalMetrics' },
         ],
       };
     },
     computed: {
       isSupervisor() {
         return this.$store.getters['access/isSupervisor'];
+      },
+      headerOptions() {
+        return {
+          icon: 'fas fa-cubes',
+          title: 'Home',
+          subTitle: '',
+          stats: [],
+        };
       },
     },
     mounted() {
@@ -54,7 +64,7 @@ limitations under the License.
         const globalBadges = this.navItems.find((element) => element.name === 'Badges');
         if (this.isSupervisor) {
           if (!globalBadges) {
-            this.navItems.splice(1, 0, { name: 'Badges', iconClass: 'fa-globe-americas', page: 'GlobalBadges' });
+            this.navItems.splice(1, 0, { name: 'Badges', iconClass: 'fa-globe-americas text-purple', page: 'GlobalBadges' });
           }
         } else if (globalBadges) {
           const idx = this.navItems.indexOf(globalBadges);
@@ -62,6 +72,7 @@ limitations under the License.
             this.navItems.splice(idx, 1);
           }
         }
+        this.isLoading = false;
       },
     },
   };

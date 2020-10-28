@@ -16,21 +16,24 @@ limitations under the License.
 <template>
   <div>
     <customizable-header></customizable-header>
-    <div id="app" class="container-fluid">
-      <new-software-version-component/>
+    <div id="app" class="">
+      <div class="m-0">
+        <new-software-version-component/>
 
-      <div class="overall-container">
-        <pki-app-bootstrap v-if="isPkiAndNeedsToBootstrap"/>
-        <loading-container v-else v-bind:is-loading="isLoading">
-          <div v-if="!isLoading">
-            <header-view v-if="isAuthenticatedUser"/>
-            <div>
-              <router-view/>
+        <div class="overall-container">
+          <pki-app-bootstrap v-if="isPkiAndNeedsToBootstrap"/>
+          <loading-container v-else v-bind:is-loading="isLoading">
+            <div v-if="!isLoading">
+              <header-view v-if="isAuthenticatedUser"/>
+              <div>
+                <router-view/>
+              </div>
             </div>
-          </div>
-        </loading-container>
+          </loading-container>
+        </div>
       </div>
     </div>
+    <dashboard-footer/>
     <customizable-footer></customizable-footer>
   </div>
 </template>
@@ -45,11 +48,13 @@ limitations under the License.
   import InceptionProgressMessagesMixin from './components/inception/InceptionProgressMessagesMixin';
   import NewSoftwareVersionComponent from './components/header/NewSoftwareVersion';
   import PkiAppBootstrap from '@//components/access/PkiAppBootstrap';
+  import DashboardFooter from './components/header/DashboardFooter';
 
   export default {
     name: 'App',
     mixins: [InceptionProgressMessagesMixin],
     components: {
+      DashboardFooter,
       NewSoftwareVersionComponent,
       CustomizableFooter,
       CustomizableHeader,
@@ -119,8 +124,13 @@ limitations under the License.
 </script>
 
 <style lang="scss">
-  @import "~bootstrap/scss/bootstrap";
-  @import '~bootstrap-vue/src/index.scss';
+// Import custom SASS variable overrides, or alternatively
+// define your variable overrides here instead
+@import './assets/custom.scss';
+
+// Import Bootstrap and BootstrapVue source SCSS files
+@import "~bootstrap/scss/bootstrap";
+@import '~bootstrap-vue/src/index.scss';
 </style>
 
 <style>
@@ -131,12 +141,21 @@ limitations under the License.
   @import './styles/utils.css';
 
   #app {
-    background-color: #f1f1f1;
+    background-color: #f8f9fe;
   }
 
   .overall-container {
     min-height: calc(100vh - 50px);
   }
+
+  .container-fluid{
+    /*overflow: hidden;*/
+    /*padding: 0px !important;*/
+  }
+
+  /*.noPadding {*/
+  /*  padding: 0 !important;*/
+  /*}*/
 
   /* vue-table-2s bug? - "Filter:" label is not left aligned, this is a workaround */
   .vue-table-2 .form-inline label {

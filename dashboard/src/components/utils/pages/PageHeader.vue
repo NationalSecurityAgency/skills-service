@@ -14,24 +14,34 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div class="card mb-3 mx-0 py-0">
-    <div class="card-body">
+  <div class="mx-0 py-0 bg-white">
+    <div class="card-body px-1">
       <loading-container :is-loading="loading">
-        <div class="row">
-          <div class="col-lg-5 text-center text-lg-left">
-            <h3><i v-if="options.icon" class="has-text-link" :class="options.icon"/> {{ options.title }}<slot name="right-of-header"></slot></h3>
-            <h5 class="text-muted">{{ options.subTitle }}</h5>
-          </div>
-          <div class="col-lg-7">
-            <div class="row text-center mt-4 mt-lg-0 justify-content-center justify-content-lg-end">
-              <div v-for="(stat) in options.stats" :key="stat.label" class="col-6 col-sm-3">
-                <div>
-                  <p class="h6 text-uppercase text-muted">{{stat.label}}</p>
-                  <p class="h2">{{ stat.count | number}}
-                    <span v-if="stat.warnMsg">
-                      <i class="fa fa-exclamation-circle text-warning" v-b-tooltip.hover="stat.warnMsg"/>
-                    </span>
-                  </p>
+        <div class="container-fluid">
+          <div class="row">
+            <div class="col-lg-5 text-center text-lg-left">
+              <h3><i v-if="options.icon" class="has-text-link" :class="options.icon"/> {{ options.title }}<slot name="right-of-header"></slot></h3>
+              <h5 class="text-muted">{{ options.subTitle }}</h5>
+            </div>
+            <div class="col-lg-7">
+              <div class="row text-center mt-4 mt-lg-0 justify-content-center justify-content-lg-end">
+                <div v-for="(stat) in options.stats" :key="stat.label" class="col-md-6 col-xl-auto mt-2">
+                  <div class="card h-100" >
+                    <div class="card-body">
+                      <div class="row">
+                        <div class="col text-left">
+                          <h5 class="card-title text-uppercase text-muted mb-0 small">{{stat.label}}</h5>
+                          <span class="h5 font-weight-bold mb-0">{{ stat.count | number}}</span>
+                          <span v-if="stat.warnMsg" class="ml-1">
+                            <i class="fa fa-exclamation-circle text-warning" v-b-tooltip.hover="stat.warnMsg"/>
+                          </span>
+                        </div>
+                        <div class="col-auto">
+                          <i :class="stat.icon" style="font-size: 2.2rem;"></i>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -75,5 +85,4 @@ limitations under the License.
 </script>
 
 <style scoped>
-
 </style>

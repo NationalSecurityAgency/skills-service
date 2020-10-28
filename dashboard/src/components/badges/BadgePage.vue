@@ -22,9 +22,9 @@ limitations under the License.
     </page-header>
 
     <navigation :nav-items="[
-          {name: 'Skills', iconClass: 'fa-graduation-cap', page: 'BadgeSkills'},
-          {name: 'Users', iconClass: 'fa-users', page: 'BadgeUsers'},
-          {name: 'Metrics', iconClass: 'fa-chart-bar', page: 'BadgeMetrics'},
+          {name: 'Skills', iconClass: 'fa-graduation-cap text-teal', page: 'BadgeSkills'},
+          {name: 'Users', iconClass: 'fa-users text-blue', page: 'BadgeUsers'},
+          {name: 'Metrics', iconClass: 'fa-chart-bar text-purple', page: 'BadgeMetrics'},
         ]">
     </navigation>
   </div>
@@ -67,15 +67,17 @@ limitations under the License.
           return {};
         }
         return {
-          icon: 'fas fa-award',
+          icon: 'fas fa-award text-purple',
           title: `BADGE: ${this.badge.name}`,
           subTitle: `ID: ${this.badge.badgeId}`,
           stats: [{
             label: 'Skills',
             count: this.badge.numSkills,
+            icon: 'fas fa-graduation-cap text-teal',
           }, {
             label: 'Points',
             count: this.badge.totalPoints,
+            icon: 'far fa-arrow-alt-circle-up text-blue',
           }],
         };
       },

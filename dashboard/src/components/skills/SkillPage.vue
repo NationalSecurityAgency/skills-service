@@ -56,15 +56,15 @@ limitations under the License.
           return [];
         }
         const items = [];
-        items.push({ name: 'Overview', iconClass: 'fa-info-circle', page: 'SkillOverview' });
-        items.push({ name: 'Dependencies', iconClass: 'fa-vector-square', page: 'SkillDependencies' });
-        items.push({ name: 'Users', iconClass: 'fa-users', page: 'SkillUsers' });
+        items.push({ name: 'Overview', iconClass: 'fa-info-circle text-teal', page: 'SkillOverview' });
+        items.push({ name: 'Dependencies', iconClass: 'fa-vector-square text-orange', page: 'SkillDependencies' });
+        items.push({ name: 'Users', iconClass: 'fa-users text-blue', page: 'SkillUsers' });
         const addEventDisabled = this.subject.totalPoints < this.$store.getters.config.minimumSubjectPoints;
         const msg = addEventDisabled ? `Subject needs at least ${this.$store.getters.config.minimumSubjectPoints} points before events can be added` : '';
         items.push({
-          name: 'Add Event', iconClass: 'fa-user-plus', page: 'AddSkillEvent', isDisabled: addEventDisabled, msg,
+          name: 'Add Event', iconClass: 'fa-user-plus text-success', page: 'AddSkillEvent', isDisabled: addEventDisabled, msg,
         });
-        items.push({ name: 'Metrics', iconClass: 'fa-chart-bar', page: 'SkillMetrics' });
+        items.push({ name: 'Metrics', iconClass: 'fa-chart-bar text-purple', page: 'SkillMetrics' });
         return items;
       },
     },
@@ -104,12 +104,13 @@ limitations under the License.
       },
       buildHeaderOptions(skill) {
         return {
-          icon: 'fas fa-graduation-cap',
+          icon: 'fas fa-graduation-cap text-teal',
           title: `SKILL: ${skill.name}`,
           subTitle: `ID: ${skill.skillId}`,
           stats: [{
             label: 'Points',
             count: skill.totalPoints,
+            icon: 'far fa-arrow-alt-circle-up text-blue',
           }],
         };
       },

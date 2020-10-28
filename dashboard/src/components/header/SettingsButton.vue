@@ -14,16 +14,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <b-dropdown right variant="outline-info">
+  <b-dropdown right variant="link" no-caret>
     <template slot="button-content">
-      <i class="fas fa-user-astronaut pr-1 d-none d-sm-inlin" />
-      <span class="d-inline-block text-truncate userName">{{ displayName }}</span>
+      <b-avatar variant="primary" :text="avatarTxt" size="sm"></b-avatar>
+      <span class="d-inline-block text-truncate userName ml-1 font-weight-bold">{{ displayName }}</span>
     </template>
     <b-dropdown-item href="#"  @click="gotoSettings">
-      <span class="text-info"> <i class="fas fa-cog" style="width: 1.5rem;"/>Settings</span>
+      <span class="text-gray-700"> <i class="fas fa-cog"/><span class="link-name">Settings</span></span>
     </b-dropdown-item>
+    <b-dropdown-divider />
     <b-dropdown-item v-if="isFormAuthenticatedUser" href="#" @click="signOut">
-      <span class="text-info"> <i class="fas fa-sign-out-alt" style="width: 1.5rem;"/>Log Out</span>
+      <span class="text-gray-700"> <i class="fas fa-sign-out-alt"/><span class="link-name">Log Out</span></span>
     </b-dropdown-item>
   </b-dropdown>
 </template>
@@ -45,6 +46,10 @@ limitations under the License.
       },
       isFormAuthenticatedUser() {
         return this.isAuthenticatedUser && !this.$store.getters.isPkiAuthenticated;
+      },
+      avatarTxt() {
+        const { userInfo } = this.$store.getters;
+        return `${userInfo.first[0]}${userInfo.last[0]}`.toUpperCase();
       },
       displayName() {
         const { userInfo } = this.$store.getters;
@@ -82,6 +87,10 @@ limitations under the License.
     .userName {
       max-width: 12rem;
     }
+  }
+
+  .text-gray-700 > i {
+    width: 1.6rem;
   }
 
 </style>

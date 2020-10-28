@@ -413,8 +413,8 @@ describe('Settings Tests', () => {
         cy.get('body').then( () => {
             cy.get('#customHeader').invoke('width').should('equal', bodyWidth);
             cy.get('#customFooter').invoke('width').should('equal', bodyWidth);
-            cy.get('#customHeader').invoke('width').should('be.gt', appWidth);
-            cy.get('#customFooter').invoke('width').should('be.gt', appWidth);
+            cy.get('#customHeader').invoke('width').should('equal', appWidth);
+            cy.get('#customFooter').invoke('width').should('equal', appWidth);
         });
     });
 

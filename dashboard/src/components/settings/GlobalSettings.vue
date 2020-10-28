@@ -16,7 +16,7 @@ limitations under the License.
 <template>
   <div>
     <page-header :loading="isLoading"
-                 :options="{title: 'Settings', icon: 'fas fa-cog', subTitle: 'Dashboard settings'}"/>
+                 :options="{title: 'Settings', icon: 'fas fa-cog text-cyan', subTitle: 'Dashboard settings'}"/>
 
     <navigation :nav-items="navItems"/>
   </div>
@@ -37,7 +37,7 @@ limitations under the License.
       return {
         isLoading: true,
         isRoot: false,
-        navItems: [{ name: 'Profile', iconClass: 'fa-address-card', page: 'GeneralSettings' }],
+        navItems: [{ name: 'Profile', iconClass: 'fa-address-card text-success', page: 'GeneralSettings' }],
       };
     },
     mounted() {
@@ -50,9 +50,9 @@ limitations under the License.
             this.isRoot = response;
             if (this.isRoot) {
               this.navItems.push(
-                { name: 'Security', iconClass: 'fa-lock', page: 'SecuritySettings' },
-                { name: 'Email', iconClass: 'fa-at', page: 'EmailSettings' },
-                { name: 'System', iconClass: 'fa-wrench', page: 'SystemSettings' },
+                { name: 'Security', iconClass: 'fa-lock text-warning', page: 'SecuritySettings' },
+                { name: 'Email', iconClass: 'fa-at text-blue', page: 'EmailSettings' },
+                { name: 'System', iconClass: 'fa-wrench text-secondary', page: 'SystemSettings' },
               );
             }
           })

@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div>
+  <div class="inception-container">
     <skills-display
       :options="options"
       :version="skillsVersion"/>
@@ -65,5 +65,7 @@ limitations under the License.
 </script>
 
 <style scoped>
-
+.inception-container {
+  min-height: calc(100vh - 80px);;
+}
 </style>

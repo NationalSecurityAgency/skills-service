@@ -14,11 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div class="row justify-content-center text-center" data-cy="resetRequestConfirmation">
+  <div class="container-fluid">
+    <div class="row justify-content-center text-center" data-cy="resetRequestConfirmation">
     <div class="col col-md-8 col-lg-7 col-xl-4 mt-3" style="min-width: 20rem;">
       <div class="mt-5">
-        <i class="fa fa-users fa-4x text-secondary"></i>
-        <h2 class="mt-4 text-info">Password Reset Sent!</h2>
+        <logo1 />
+        <h3 class="mt-4 text-primary">Password Reset Sent!</h3>
       </div>
         <div class="card text-left">
           <div class="card-body p-4">
@@ -28,12 +29,15 @@ limitations under the License.
 
     </div>
   </div>
+  </div>
 </template>
 
 <script>
+  import Logo1 from '../brand/Logo1';
 
   export default {
     name: 'RequestRestConfirmation',
+    components: { Logo1 },
     props: {
       email: String,
       countDown: Number,

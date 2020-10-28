@@ -16,7 +16,7 @@
     "cy:open:dev:postgres": "cypress open --config baseUrl=http://localhost:8082 --env db=postgres",
     "cy:run": "npm run licenseCheck && cypress run",
     "cy:run:postgres": "npm run licenseCheck && cypress run --env db=postgres",
-    "cy:run:dev": "cypress run --config baseUrl=http://localhost:8082 --spec cypress/integration/client-display/client-display_point_history_chart_spec.js",
+    "cy:run:dev": "cypress run --config baseUrl=http://localhost:8082",
     "cy:run:dev:postgres": "cypress run --config baseUrl=http://localhost:8082 --env db=postgres",
     "cy:verify": "cypress verify",
     "backend:start": "java -Dspring.config.location=classpath:/application.yml,file:serverConfigs/backend_application.properties -jar ../service/target/skills-service-*.jar",

@@ -25,16 +25,16 @@ limitations under the License.
  meta: { breadcrumb: 'Add Skill Event' },
 -->
 <template>
-  <nav aria-label="breadcrumb">
+  <nav aria-label="breadcrumb" class="border-bottom">
     <ol class="breadcrumb">
       <li v-for="(item, index) of items" :key="item.label" class="breadcrumb-item">
-         <span v-if="index === items.length-1">
+         <span v-if="index === items.length-1" style="color: #e7e7e7">
            <span v-if="item.label" class="breadcrumb-item-label text-uppercase">{{ item.label }}: </span><span>{{ item.value }}</span>
          </span>
          <span v-else>
-           <router-link :to="item.url">
+           <router-link :to="item.url" class="text-white">
              <span v-if="item.label" class="breadcrumb-item-label text-uppercase">{{ item.label }}: </span>
-             <span>{{ item.value }}</span>
+             <span class="">{{ item.value }}</span>
            </router-link>
          </span>
       </li>
@@ -130,6 +130,14 @@ limitations under the License.
 </script>
 
 <style scoped>
+  .breadcrumb {
+    background: linear-gradient(87deg, #2a9d8fff, #59c6b8);
+    /*background: linear-gradient(87deg, #2a9d8fff, #d2fdf6) !important;*/
+    border-radius: 0px;
+    /*background: unset;*/
+    margin: 0px;
+    padding-left: 1.5rem;
+  }
   .breadcrumb-item-label {
     font-size: 0.9rem;
   }

@@ -18,15 +18,15 @@ limitations under the License.
     <page-header :loading="isLoading" :options="headerOptions"/>
 
     <navigation v-if="!isLoading" :nav-items="[
-          {name: 'Subjects', iconClass: 'fa-cubes', page: 'Subjects'},
-          {name: 'Badges', iconClass: 'fa-award', page: 'Badges'},
-          {name: 'Dependencies', iconClass: 'fa-vector-square', page: 'FullDependencyGraph'},
-          {name: 'Cross Projects', iconClass: 'fa-handshake', page: 'CrossProjectsSkills'},
-          {name: 'Levels', iconClass: 'fa-trophy', page: 'ProjectLevels'},
-          {name: 'Users', iconClass: 'fa-users', page: 'ProjectUsers'},
-          {name: 'Metrics', iconClass: 'fa-chart-bar', page: 'ProjectMetrics'},
-          {name: 'Access', iconClass: 'fa-shield-alt', page: 'ProjectAccess'},
-          {name: 'Settings', iconClass: 'fa-cogs', page: 'ProjectSettings'}
+          {name: 'Subjects', iconClass: 'fa-cubes text-success', page: 'Subjects'},
+          {name: 'Badges', iconClass: 'fa-award text-purple', page: 'Badges'},
+          {name: 'Dependencies', iconClass: 'fa-vector-square text-teal', page: 'FullDependencyGraph'},
+          {name: 'Cross Projects', iconClass: 'fa-handshake text-orange', page: 'CrossProjectsSkills'},
+          {name: 'Levels', iconClass: 'fa-trophy text-cyan', page: 'ProjectLevels'},
+          {name: 'Users', iconClass: 'fa-users text-blue', page: 'ProjectUsers'},
+          {name: 'Metrics', iconClass: 'fa-chart-bar text-indigo', page: 'ProjectMetrics'},
+          {name: 'Access', iconClass: 'fa-shield-alt text-warning', page: 'ProjectAccess'},
+          {name: 'Settings', iconClass: 'fa-cogs text-secondary', page: 'ProjectSettings'}
         ]">
     </navigation>
   </div>
@@ -64,22 +64,26 @@ limitations under the License.
           return {};
         }
         return {
-          icon: 'fas fa-list-alt',
+          icon: 'fas fa-list-alt text-orange',
           title: `PROJECT: ${this.project.name}`,
           subTitle: `ID: ${this.project.projectId}`,
           stats: [{
             label: 'Subjects',
             count: this.project.numSubjects,
+            icon: 'fas fa-cubes text-success',
           }, {
             label: 'Skills',
             count: this.project.numSkills,
+            icon: 'fas fa-graduation-cap text-teal',
           }, {
             label: 'Points',
             count: this.project.totalPoints,
             warnMsg: this.project.totalPoints < this.minimumPoints ? 'Project has insufficient points assigned. Skills cannot be achieved until project has at least 100 points.' : null,
+            icon: 'far fa-arrow-alt-circle-up text-blue',
           }, {
             label: 'Badges',
             count: this.project.numBadges,
+            icon: 'fas fa-award text-purple',
           }],
         };
       },

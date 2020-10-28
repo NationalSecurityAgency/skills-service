@@ -14,16 +14,20 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div>
-    <div class="row p-3">
-      <div class="col-12 col-md text-center text-md-left">
-        <router-link class="h2 text-primary" to="/"><i class="fas fa-users"/> SkillTree <span class="d-none d-sm-inline">Dashboard</span></router-link>
-      </div>
+  <div class="bg-white">
+    <div class="container-fluid py-3">
+      <div class="row">
+        <div class="col-sm text-center text-sm-left">
+          <router-link class="h2 text-primary ml-2" to="/">
+            <img src="/img/skilltree_logo1.png" style="height: 45px;"/>
+          </router-link>
+        </div>
 
-      <div class="col-12 col-md text-center text-md-right">
-        <inception-button class="mr-2 mt-3 mt-md-0"></inception-button>
-        <settings-button class="mr-2 mt-3 mt-md-0"/>
-        <help-button class="mt-3 mt-md-0"/>
+        <div class="col-sm text-center text-sm-right pt-2 mt-3 mt-sm-0">
+          <inception-button class="mr-2"></inception-button>
+          <settings-button class="mr-2"/>
+          <help-button class=""/>
+        </div>
       </div>
     </div>
     <breadcrumb></breadcrumb>

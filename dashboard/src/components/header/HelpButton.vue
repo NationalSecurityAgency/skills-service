@@ -14,16 +14,25 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <b-dropdown right variant="outline-info" :no-caret="true">
+  <b-dropdown right variant="link">
     <template slot="button-content">
-      <i class="fas fa-question"/>
+      <i class="far fa-question-circle"></i>
     </template>
-    <b-dropdown-item :href="dashboardGuideUrl" target="_blank" rel="noopener">
-      <span class="text-info"> <i class="fas fa-info-circle" style="width: 1.5rem;"/>Dashboard Guide <i class="fas fa-external-link-alt" style="font-size: 0.8rem;"></i></span>
+    <b-dropdown-item :href="officialGuide" target="_blank" style="min-width: 12.5rem;">
+      <span class="text-gray-700"> <i class="fas fa-book"></i>Official Docs</span>
+      <span class="float-right"><i class="fas fa-external-link-alt text-secondary"></i></span>
     </b-dropdown-item>
-    <b-dropdown-item :href="integrationGuideUrl" target="_blank" rel="noopener">
-      <span class="text-info"> <i class="fas fa-hands-helping" style="width: 1.5rem;"></i>Integration Guide <i class="fas fa-external-link-alt" style="font-size: 0.8rem;"></i></span>
-    </b-dropdown-item>
+    <b-dropdown-divider />
+    <b-dropdown-group id="dropdown-group-1" header="Guides">
+      <b-dropdown-item :href="dashboardGuideUrl" target="_blank">
+        <span class="text-gray-700"> <i class="fas fa-info-circle"/><span class="link-name">Dashboard</span></span>
+        <span class="float-right"><i class="fas fa-external-link-alt text-secondary"></i></span>
+      </b-dropdown-item>
+      <b-dropdown-item :href="integrationGuideUrl" target="_blank">
+        <span class="text-gray-700"> <i class="fas fa-hands-helping"></i>Integration</span>
+        <span class="float-right"><i class="fas fa-external-link-alt text-secondary"></i></span>
+      </b-dropdown-item>
+    </b-dropdown-group>
   </b-dropdown>
 </template>
 
@@ -31,6 +40,9 @@ limitations under the License.
   export default {
     name: 'HelpButton',
     computed: {
+      officialGuide() {
+        return `${this.$store.getters.config.docsHost}`;
+      },
       dashboardGuideUrl() {
         return `${this.$store.getters.config.docsHost}/dashboard/user-guide/`;
       },
@@ -42,5 +54,16 @@ limitations under the License.
 </script>
 
 <style scoped>
-
+.fa-external-link-alt {
+  font-size: 0.6rem;
+}
+.link-name {
+  padding-right: 2rem;
+}
+.text-gray-700 {
+  width: 40rem !important;
+}
+.text-gray-700 > i {
+  width: 1.6rem;
+}
 </style>

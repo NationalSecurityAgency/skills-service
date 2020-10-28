@@ -1,0 +1,39 @@
+// Your variable overrides
+$theme-colors: (
+        "info": #2a9d8fff,
+        "primary": #264653ff,
+        "warning": #ffc42b,
+);
+
+// Bootstrap and its default variables
+@import '../../node_modules/bootstrap/scss/bootstrap';
+// BootstrapVue and its default variables
+@import '../../node_modules/bootstrap-vue/src/index.scss';
+
+.text-purple {
+  color: $purple;
+}
+
+.text-indigo {
+  color: $indigo;
+}
+
+.text-cyan {
+  color: $cyan;
+}
+
+.text-teal {
+  color: $teal;
+}
+
+.text-orange {
+  color: #f4a261ff;
+}
+
+.text-blue {
+  color: $blue;
+}
+
+.text-gray-700 {
+  color: $gray-700
+}

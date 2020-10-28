@@ -18,9 +18,9 @@ limitations under the License.
     <page-header :loading="isLoading" :options="headerOptions"/>
 
     <navigation v-if="userIdForDisplay" :nav-items="[
-          {name: 'Client Display', iconClass: 'fa-user', page: 'ClientDisplayPreview'},
-          {name: 'Performed Skills', iconClass: 'fa-award', page: 'UserSkillEvents'},
-          {name: 'Metrics', iconClass: 'fa-chart-bar', page: 'UserMetrics'},
+          {name: 'Client Display', iconClass: 'fa-user text-success', page: 'ClientDisplayPreview'},
+          {name: 'Performed Skills', iconClass: 'fa-award text-orange', page: 'UserSkillEvents'},
+          {name: 'Metrics', iconClass: 'fa-chart-bar text-purple', page: 'UserMetrics'},
         ]">
     </navigation>
   </div>
@@ -70,15 +70,17 @@ limitations under the License.
       ]),
       headerOptions() {
         return {
-          icon: 'fas fa-user',
+          icon: 'fas fa-user text-blue',
           title: `USER: ${this.userTitle}`,
           subTitle: `ID: ${this.userIdForDisplay}`,
           stats: [{
             label: 'Skills',
             count: this.numSkills,
+            icon: 'fas fa-graduation-cap text-teal',
           }, {
             label: 'Points',
             count: this.userTotalPoints,
+            icon: 'far fa-arrow-alt-circle-up text-blue',
           }],
         };
       },
