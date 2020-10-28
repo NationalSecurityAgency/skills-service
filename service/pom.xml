@@ -556,7 +556,7 @@
                         <exclude>**/*.xml</exclude>
                         <exclude>**/*.jks</exclude>
                         <exclude>**/*.ftl</exclude>
-                        <exclude>src/test/resource/certs/**</exclude>
+                        <exclude>src/test/resource/certs/*.*</exclude>
                         <exclude>src/main/resources/public/**</exclude>
                         <exclude>src/main/resources/templates/**</exclude>
                         <exclude>**/license/*.properties</exclude>
