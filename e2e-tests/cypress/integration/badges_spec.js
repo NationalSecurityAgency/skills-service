@@ -74,6 +74,20 @@ describe('Badges Tests', () => {
         cy.contains('ID: Lotsofspecial')
     });
 
+    if('Close badge dialog', () => {
+        cy.route('GET', '/admin/projects/proj1/badges').as('loadBadges');
+
+        cy.get('@createProject').should((response) => {
+            expect(response.status).to.eql(200)
+        });
+
+        cy.visit('/projects/proj1/badges');
+        cy.wait('@loadBadges');
+        cy.clickButton('Badge');
+        cy.get('[data-cy=closeBadgeButton]').click();
+        cy.get('[data-cy=closeBadgeButton]').should('not.be.visible');
+    });
+
     it('inactive badge displays warning', () => {
         const expectedId = 'InactiveBadge';
         const providedName = 'Inactive';

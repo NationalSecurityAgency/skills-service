@@ -98,7 +98,7 @@ limitations under the License.
                     data-cy="saveBadgeButton">
             Save
           </b-button>
-          <b-button variant="secondary" size="sm" class="float-right mr-2" @click="closeMe">
+          <b-button variant="secondary" size="sm" class="float-right mr-2" @click="closeMe" data-cy="closeBadgeButton">
             Cancel
           </b-button>
         </div>

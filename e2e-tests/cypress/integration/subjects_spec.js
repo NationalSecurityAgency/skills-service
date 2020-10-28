@@ -68,6 +68,25 @@ describe('Subjects Tests', () => {
         cy.get('[data-cy=saveLevelButton]').should('be.disabled');
     });
 
+    it('Close level dialog', () => {
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            name: "Subject 1"
+        });
+        cy.route({
+            method: 'GET',
+            url: '/admin/projects/proj1/subjects/subj1'
+        }).as('loadSubject');
+
+        cy.visit('/projects/proj1/subjects/subj1');
+        cy.wait('@loadSubject');
+
+        cy.contains('Levels').click();
+        cy.get('[data-cy=cancelLevel]').click();
+        cy.get('[data-cy=cancelLevel]').should('not.be.visible');
+    });
+
     it('create subject with special chars', () => {
         const expectedId = 'LotsofspecialPcharsSubject';
         const providedName = "!L@o#t$s of %s^p&e*c(i)/?#a_l++_|}{P c'ha'rs";
@@ -88,6 +107,17 @@ describe('Subjects Tests', () => {
         cy.wait('@postNewSubject');
 
         cy.contains('ID: Lotsofspecial')
+    });
+
+    it('close subject dialog', () => {
+        cy.server();
+        cy.route('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
+
+        cy.visit('/projects/proj1');
+        cy.wait('@loadSubjects');
+        cy.clickButton('Subject');
+        cy.get('[data-cy=closeSubjectButton]').click();
+        cy.get('[data-cy=closeSubjectButton]').should('not.be.visible');
     });
 
     it('name causes id to fail validation', () => {

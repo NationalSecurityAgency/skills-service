@@ -49,7 +49,7 @@ limitations under the License.
                   data-cy="saveProjectButton">
           Save
         </b-button>
-        <b-button variant="secondary" size="sm" class="float-right mr-2" @click="close">
+        <b-button variant="secondary" size="sm" class="float-right mr-2" @click="close" data-cy="closeProjectButton">
           Cancel
         </b-button>
       </div>

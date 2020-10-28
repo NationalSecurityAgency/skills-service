@@ -51,6 +51,21 @@ describe('Skills Tests', () => {
       cy.get('[data-cy=saveSkillButton]').should('be.enabled');
     });
 
+    it('close skill dialog', () => {
+      cy.server();
+      cy.route({
+        method: 'GET',
+        url: '/admin/projects/proj1/subjects/subj1'
+      }).as('loadSubject');
+
+      cy.visit('/projects/proj1/subjects/subj1');
+      cy.wait('@loadSubject');
+
+      cy.clickButton('Skill');
+      cy.get('[data-cy=closeSkillButton]').click();
+      cy.get('[data-cy=closeSkillButton]').should('not.be.visible');
+    });
+
     it('validation', () => {
       cy.server()
       cy.route('POST', `/admin/projects/proj1/subjects/subj1/skills/Skill1Skill`).as('postNewSkill');
