@@ -178,7 +178,7 @@ limitations under the License.
                   data-cy="saveSkillButton">
           Save
         </b-button>
-        <b-button variant="secondary" size="sm" class="float-right mr-2" @click="close">
+        <b-button variant="secondary" size="sm" class="float-right mr-2" @click="close" data-cy="closeSkillButton">
           Cancel
         </b-button>
       </div>
