@@ -14,21 +14,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div class="">
-    <div class="row bg-white border-bottom py-2 mb-3">
-      <div class="col-6 col-md-7">
-        <span class="h4 text-uppercase">{{ title }}</span>
-      </div>
-      <div class="col-6 col-md-5 pt-0 text-right">
-        <slot>
-          <b-button v-if="action" type="button" size="sm" variant="outline-primary" pill
-                  :class="{'btn':true, 'btn-outline-primary':true, 'disabled':disabled}"
-                  v-on:click="addClicked">
-            <span class="d-none d-sm-inline">{{ action }} </span> <i class="fas fa-plus-circle"/>
-          </b-button>
-          <i v-if="disabled" class="fas fa-exclamation-circle text-warning ml-1" style="pointer-events: all; font-size: 1.5rem;" v-b-tooltip.hover="disabledMsg"/>
-        </slot>
-      </div>
+  <div class="row bg-white border-bottom py-2 mb-3" data-cy="subPageHeader">
+    <div class="col-6 col-md-7">
+      <span class="h4 text-uppercase">{{ title }}</span>
+    </div>
+    <div class="col-6 col-md-5 pt-0 text-right" data-cy="subPageHeaderControls">
+      <slot>
+        <b-button v-if="action" type="button" size="sm" variant="outline-primary" pill
+                :class="{'btn':true, 'btn-outline-primary':true, 'disabled':disabled}"
+                v-on:click="addClicked">
+          <span class="d-none d-sm-inline">{{ action }} </span> <i class="fas fa-plus-circle"/>
+        </b-button>
+        <i v-if="disabled" class="fas fa-exclamation-circle text-warning ml-1" style="pointer-events: all; font-size: 1.5rem;" v-b-tooltip.hover="disabledMsg"/>
+      </slot>
     </div>
   </div>
 </template>

@@ -67,8 +67,8 @@ class ProjectController {
 
     @RequestMapping(value = "/projects", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
-    List<ProjectResult> getProjects(@RequestParam(required = false, defaultValue = "", name = "search") String search) {
-        return projAdminService.getProjects(search)
+    List<ProjectResult> getProjects() {
+        return projAdminService.getProjects()
     }
 
     @RequestMapping(value = "/projects/{id}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")

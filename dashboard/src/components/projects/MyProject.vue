@@ -17,7 +17,10 @@ limitations under the License.
   <div data-cy="projectCard">
     <page-preview-card :options="cardOptions">
       <div slot="header-top-right">
-        <span class="pr-2" v-if="isRootUser"><a href="#0" @click.stop="togglePin" class="btn btn-outline-primary btn-sm" data-cy="pin">{{ pinnedText }}<span data-cy="pinIcon" :class="['ml-1', 'fas', 'fa-thumbtack', pinned ? 'pinned' : 'notpinned']"></span></a></span>
+        <b-button v-if="isRootUser" class="mr-2" @click="unpin" data-cy="unpin" size="sm"
+                  variant="outline-primary">
+          <span class="d-none d-sm-inline">Unpin</span> <i class="fas fa-ban" style="font-size: 1rem;"></i>
+        </b-button>
         <edit-and-delete-dropdown v-on:deleted="deleteProject" v-on:edited="editProject" v-on:move-up="moveUp"
                                   v-on:move-down="moveDown"
                                   :is-first="projectInternal.isFirst" :is-last="projectInternal.isLast"
@@ -71,12 +74,6 @@ limitations under the License.
       },
       isRootUser() {
         return this.$store.getters['access/isRoot'];
-      },
-      pinnedText() {
-        if (this.pinned) {
-          return 'Unpin';
-        }
-        return 'Pin';
       },
     },
     watch: {
@@ -156,18 +153,13 @@ limitations under the License.
       moveDown() {
         this.$emit('move-project-down', this.projectInternal);
       },
-      togglePin() {
-        if (this.projectInternal.pinned) {
-          SettingsService.unpinProject(this.projectInternal.projectId).then(() => {
+      unpin() {
+        SettingsService.unpinProject(this.projectInternal.projectId)
+          .then(() => {
             this.projectInternal.pinned = false;
             this.pinned = false;
+            this.$emit('pin-removed', this.projectInternal);
           });
-        } else {
-          SettingsService.pinProject(this.projectInternal.projectId).then(() => {
-            this.projectInternal.pinned = true;
-            this.pinned = true;
-          });
-        }
       },
     },
   };
@@ -178,8 +170,5 @@ limitations under the License.
     position: relative;
     display: inline-block;
     float: right;
-  }
-  .notpinned {
-    opacity: 0.3;
   }
 </style>

@@ -16,12 +16,18 @@
 import axios from 'axios';
 
 export default {
-  getProjects(search) {
-    let url = '/app/projects';
-    if (search) {
-      url += `?search=${search}`;
-    }
+  getProjects() {
+    const url = '/app/projects';
     return axios.get(url)
+      .then((response) => response.data);
+  },
+  searchProjects(search) {
+    const url = `/root/searchProjects?name=${search}`;
+    return axios.get(url)
+      .then((response) => response.data);
+  },
+  loadAllProjects() {
+    return axios.get('/root/projects')
       .then((response) => response.data);
   },
   getProject(projectId) {

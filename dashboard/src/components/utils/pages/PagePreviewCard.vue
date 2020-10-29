@@ -17,7 +17,7 @@ limitations under the License.
   <div class="card h-100">
     <div class="card-body">
       <div class="row mb-2">
-        <div class="col-10">
+        <div class="col">
           <div class="media">
             <div v-if="options.icon" class="d-inline-block mr-2 border rounded text-info text-center" style="min-width: 3.2rem;">
               <i :class="[`${options.icon}`]" class="m-1"/>
@@ -31,7 +31,7 @@ limitations under the License.
           </div>
         </div>
 
-        <div class="col-2 text-right">
+        <div class="col-auto text-center text-sm-right">
           <slot name="header-top-right"></slot>
         </div>
       </div>

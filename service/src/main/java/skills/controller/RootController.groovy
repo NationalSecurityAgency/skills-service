@@ -29,6 +29,7 @@ import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.GlobalSettingsRequest
 import skills.controller.request.model.SuggestRequest
+import skills.controller.result.model.ProjectResult
 import skills.controller.result.model.RequestResult
 import skills.controller.result.model.SettingsResult
 import skills.controller.result.model.UserInfoRes
@@ -213,6 +214,16 @@ class RootController {
 
         settingsService.saveSetting(settingRequest)
         return new RequestResult(success: true)
+    }
+
+    @GetMapping('/projects')
+    List<ProjectResult> getAllProjects() {
+        return projAdminService.getAllProjects()
+    }
+
+    @GetMapping('/searchProjects')
+    List<ProjectResult> searchProjects(@RequestParam(required = true, name = "name") String nameSearch) {
+        return projAdminService.searchByProjectName(nameSearch)
     }
 
     @PostMapping('/pin/{projectId}')

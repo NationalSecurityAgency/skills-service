@@ -19,7 +19,7 @@ limitations under the License.
       <div class="row">
         <div class="col-sm text-center text-sm-left">
           <router-link class="h2 text-primary ml-2" to="/">
-            <img src="/img/skilltree_logo1.png" style="height: 45px;"/>
+            <img src="/img/skilltree_logo.svg" style="height: 70px; position: fixed; top:5px; left:15px;"/>
           </router-link>
         </div>
 

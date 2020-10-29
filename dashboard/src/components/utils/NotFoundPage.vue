@@ -25,14 +25,16 @@ limitations under the License.
       <h4 class="">Resource Not Found</h4>
     </div>
 
-    <div class="row justify-content-center text-danger mt-3">
-      <div class="col col-sm-8 col-md-6 col-lg-4 text-center" data-cy="notFoundExplanation">
-        <p v-if="explanation">
-          {{ explanation }}
-        </p>
-        <p v-else>
-          The resource you requested cannot be located.
-        </p>
+    <div class="container-fluid">
+      <div class="row justify-content-center text-danger mt-3">
+        <div class="col col-sm-8 col-md-6 col-lg-4 text-center" data-cy="notFoundExplanation">
+          <p v-if="explanation">
+            {{ explanation }}
+          </p>
+          <p v-else>
+            The resource you requested cannot be located.
+          </p>
+        </div>
       </div>
     </div>
 

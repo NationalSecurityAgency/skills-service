@@ -15,16 +15,21 @@ limitations under the License.
 */
 <template>
   <div>
-    <sub-page-header title="My Projects" action="Project"
-                     @add-action="newProject.show=true"
-                     :disabled="addProjectDisabled" :disabled-msg="addProjectsDisabledMsg"/>
+    <sub-page-header title="Projects" action="Project"
+                     :disabled="addProjectDisabled" :disabled-msg="addProjectsDisabledMsg">
+          <b-button v-if="isRootUser" variant="outline-primary" @click="showSearchProjectModal=true" pill size="sm"
+class="mr-2">
+            <span class="d-none d-sm-inline">Pin</span> <i class="fas fa-thumbtack"/>
+          </b-button>
+          <b-button @click="newProject.show=true" variant="outline-primary" pill size="sm">
+            <span class="d-none d-sm-inline">Project</span> <i class="fas fa-plus-circle" />
+          </b-button>
+    </sub-page-header>
 
     <loading-container v-bind:is-loading="isLoading">
-      <b-input class="mb-3 w-25" v-if="isRootUser" placeholder="Search all project names" debounce="500" type="search"
-               v-model="search" data-cy="projectSearch"/>
       <div v-for="project of projects" :key="project.projectId" class="mb-3">
         <my-project :project="project" v-on:project-deleted="projectRemoved" v-on:move-project-up="moveProjectUp"
-                    v-on:move-project-down="moveProjectDown"/>
+                    v-on:move-project-down="moveProjectDown" v-on:pin-removed="loadProjects" />
       </div>
 
       <no-content2 v-if="!projects || projects.length==0" icon="fas fa-hand-spock" class="mt-4"
@@ -33,6 +38,7 @@ limitations under the License.
 
     <edit-project v-if="newProject.show" v-model="newProject.show" :project="newProject.project"
                   @project-saved="projectAdded"/>
+    <pin-projects :show="showSearchProjectModal" v-on:done="pinModalClosed"/>
 
   </div>
 
@@ -46,22 +52,24 @@ limitations under the License.
   import ProjectService from './ProjectService';
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import NoContent2 from '../utils/NoContent2';
+  import PinProjects from './PinProjects';
+  import SettingsService from '../settings/SettingsService';
 
   export default {
     name: 'MyProjects',
     data() {
       return {
-        search: '',
         isLoading: true,
         projects: [],
-        enableSearch: false,
         newProject: {
           show: false,
           project: { name: '', projectId: '' },
         },
+        showSearchProjectModal: false,
       };
     },
     components: {
+      PinProjects,
       NoContent2,
       SubPageHeader,
       LoadingContainer,
@@ -69,7 +77,6 @@ limitations under the License.
       EditProject,
     },
     mounted() {
-      this.search = this.$store.state.projectSearch;
       this.loadProjects();
     },
     computed: {
@@ -86,20 +93,14 @@ limitations under the License.
         return this.$store.getters['access/isRoot'];
       },
     },
-    watch: {
-      isRootUser(newVal) {
-        if (newVal) {
-          this.enableSearch = true;
-        }
-      },
-      search(newVal) {
-        this.$store.commit('projectSearch', newVal);
+    methods: {
+      pinModalClosed() {
+        this.showSearchProjectModal = false;
         this.loadProjects();
       },
-    },
-    methods: {
       loadProjects() {
-        ProjectService.getProjects(this.search)
+        this.isLoading = true;
+        ProjectService.getProjects()
           .then((response) => {
             this.projects = response;
           })
@@ -118,8 +119,16 @@ limitations under the License.
         this.isLoading = true;
         ProjectService.saveProject(project)
           .then(() => {
-            this.loadProjects();
-            SkillsReporter.reportSkill('CreateProject');
+            if (this.isRootUser) {
+              SettingsService.pinProject(project.projectId)
+                .then(() => {
+                  this.loadProjects();
+                  SkillsReporter.reportSkill('CreateProject');
+                });
+            } else {
+              this.loadProjects();
+              SkillsReporter.reportSkill('CreateProject');
+            }
           });
       },
       moveProjectDown(project) {

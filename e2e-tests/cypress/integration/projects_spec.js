@@ -429,7 +429,7 @@ describe('Projects Tests', () => {
     cy.wait('@suggest');
   });
 
-  it('Root User Project Display', () => {
+  it('Root User - Pin and Unpin projects', () => {
 
     cy.request('POST', '/app/projects/proj1', {
       projectId: 'proj1',
@@ -463,53 +463,144 @@ describe('Projects Tests', () => {
       //confirm that default project loading returns no projects for root user
       cy.wait('@default');
       cy.contains('No Projects Yet...').should('be.visible');
-      cy.get('[data-cy=projectSearch]').should('be.visible');
 
-      //search should return matching project based on name
-      cy.get('[data-cy=projectSearch]').type('one');
-      cy.wait('@searchOne');
-      cy.contains('ID: proj1').should('be.visible');
+      cy.get('[data-cy=subPageHeaderControls]').contains('Pin').click();
+      cy.contains('Pin Projects');
+      cy.contains('Search Project Catalog');
 
-      //pin project resulting from search
-      cy.get('[data-cy=pin]').click();
-      cy.wait('@pinOne');
-      cy.get('[data-cy=pinIcon]').should('have.class', 'pinned').and('not.have.class', 'notpinned');
+      cy.get('[data-cy=pinProjectsSearchInput]').type('t');
+      cy.get('[data-cy=pinProjectsSearchResultsNumRows]').contains('Rows: 3');
+      cy.get('[data-cy=pinProjectsSearchResults]').contains('Inception');
+      cy.get('[data-cy=pinProjectsSearchResults]').contains('two');
+      cy.get('[data-cy=pinProjectsSearchResults]').contains('three');
 
-      //make sure that the root user can view a pinned project belonging to another user
-      cy.contains('Manage').click();
-      cy.wait('@loadSubjects');
+      cy.get('[data-cy=pinProjectsSearchInput]').type('wo');
+      cy.get('[data-cy=pinProjectsSearchResultsNumRows]').contains('Rows: 1');
+      cy.get('[data-cy=pinProjectsSearchResults]').contains('Inception').should('not.exist');
+      cy.get('[data-cy=pinProjectsSearchResults]').contains('two');
 
-      cy.contains('Home').click();
-      //project search should retain the last searched value until it's cleared or the page is refreshed
-      cy.get('[data-cy=projectSearch]').should('have.value', 'one');
-      cy.wait('@searchOne');
-      cy.contains('ID: proj1').should('be.visible');
+      cy.get('[data-cy=pinProjectsSearchInput]').type('1');
+      cy.get('[data-cy=pinProjects]').contains('No Results');
 
-      //clearing the search should result in the default load projects being called
-      cy.get('[data-cy=projectSearch]').click().clear();
-      cy.wait('@default');
-      //root user should only have pinned projects returned by default
-      cy.contains('ID: proj1').should('be.visible');
+      cy.get('[data-cy=pinProjectsClearSearch]').click();
+      cy.get('[data-cy=pinProjects]').contains('Search Project Catalog');
 
-      //search results should contain already pinned projects
-      cy.get('[data-cy=projectSearch]').click().type('o');
-      cy.contains('ID: proj1').should('be.visible');
-      cy.contains('ID: proj2').should('be.visible');
-      cy.contains('ID: proj4').should('be.visible');
+      cy.get('[data-cy=pinProjectsLoadAllButton]').click();
+      cy.get('[data-cy=pinProjectsSearchResultsNumRows]').contains('Rows: 5');
+      cy.get('[data-cy=pinProjectsSearchResults]').contains('Inception');
+      cy.get('[data-cy=pinProjectsSearchResults]').contains('two');
+      cy.get('[data-cy=pinProjectsSearchResults]').contains('three');
 
-      cy.get('[data-cy=projectSearch]').click().clear();
-      cy.wait('@default');
-      //unpin a project
-      cy.get('[data-cy=pin]').click();
-      cy.wait('@unpinOne');
-      cy.get('[data-cy=pinIcon]').should('have.class', 'notpinned').and('not.have.class', 'pinned')
-      cy.get('[data-cy=nav-Metrics]').click();
-      cy.get('[data-cy=nav-Projects]').click();
-      cy.wait('@default');
-      //after removing all pinned projects, default load projects should return no results for root user
-      cy.contains('No Projects Yet...').should('be.visible');
+      // pin 1 project
+      const rowSelector = '[data-cy=pinProjectsSearchResults] tbody tr'
+      cy.get(rowSelector).should('have.length', 5).as('cyRows');
+      cy.get('@cyRows').eq(0).find('td').as('row1');
+      cy.get('@row1').eq(0).contains('Inception');
+      cy.get('@row1').eq(3).find('[data-cy=pinedButtonIndicator]').should('not.exist');
+      cy.get('@row1').eq(3).find('[data-cy=pinButton]').click();
+      cy.get('@row1').eq(3).find('[data-cy=pinButton]').should('not.exist');
+      cy.get('@row1').eq(3).find('[data-cy=pinedButtonIndicator]').should('exist');
+      cy.get('[data-cy=modalDoneButton]').click();
+
+      const projectsSelector = '[data-cy=projectCard]';
+      cy.get(projectsSelector).should('have.length', 1).as('projects');
+      cy.get('@projects').eq(0).contains('Inception');
+
+      // make sure the pinned project is filtered
+      cy.get('[data-cy=subPageHeaderControls]').contains('Pin').click();
+      cy.get('[data-cy=pinProjectsLoadAllButton]').click();
+      cy.get(rowSelector).should('have.length', 4).as('cyRows');
+      cy.get('@cyRows').eq(0).find('td').as('row1');
+      cy.get('@row1').eq(0).contains('one');
+      cy.get('[data-cy=modalDoneButton]').click();
+
+      // unpin that project
+      cy.get('@projects').eq(0).contains('Unpin').click();
+      cy.contains('No Projects Yet');
+
+      // pin all projects
+      cy.get('[data-cy=subPageHeaderControls]').contains('Pin').click();
+      cy.contains('Search Project Catalog');
+      cy.get('[data-cy=pinProjectsLoadAllButton]').click();
+      cy.get(rowSelector).should('have.length', 5).as('cyRows');
+
+      for (let i = 0; i < 5; i += 1) {
+        cy.get('@cyRows')
+            .eq(i)
+            .find('td')
+            .as('row1');
+        cy.get('@row1')
+            .eq(3)
+            .find('[data-cy=pinButton]')
+            .click();
+        cy.get('@row1').eq(3).find('[data-cy=pinedButtonIndicator]').should('exist');
+      }
+      cy.get('[data-cy=modalDoneButton]').click();
+
+      cy.get(projectsSelector).should('have.length', 5).as('projects');
+      cy.get('@projects').eq(0).contains('Inception');
+      cy.get('@projects').eq(1).contains('one');
+      cy.get('@projects').eq(2).contains('two');
+      cy.get('@projects').eq(3).contains('three');
+      cy.get('@projects').eq(4).contains('four');
     });
   });
 
+  it('Root User - Pin and Unpin projects - many projects', () => {
 
+    for (let i = 0; i < 12; i += 1) {
+      cy.request('POST', `/app/projects/proj${i}`, {
+        projectId: `proj${i}`,
+        name: `Good project ${i}`
+      });
+    }
+
+    cy.logout();
+    cy.fixture('vars.json').then((vars) => {
+      cy.login(vars.rootUser, vars.defaultPass);
+      cy.route('GET', '/app/projects').as('default');
+      cy.route('GET', '/app/projects?search=one').as('searchOne');
+      cy.route('POST', '/root/pin/proj1').as('pinOne');
+      cy.route('DELETE', '/root/pin/proj1').as('unpinOne');
+      cy.route('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
+
+      cy.visit('/');
+      //confirm that default project loading returns no projects for root user
+      cy.wait('@default');
+      cy.contains('No Projects Yet...').should('be.visible');
+
+      cy.get('[data-cy=subPageHeaderControls]').contains('Pin').click();
+      cy.contains('Pin Projects');
+      cy.contains('Search Project Catalog');
+
+      cy.get('[data-cy=pinProjectsLoadAllButton]').click();
+      cy.get('[data-cy=pinProjectsSearchResultsNumRows]').contains('Rows: 13');
+
+      const rowSelector = '[data-cy=pinProjectsSearchResults] tbody tr'
+      cy.get(rowSelector).should('have.length', 5).as('cyRows');
+
+      cy.get('@cyRows').eq(0).find('td').as('row1');
+      cy.get('@row1').eq(0).contains('Inception');
+
+      for (let i = 1; i <= 4; i += 1) {
+        cy.get('@cyRows').eq(i).find('td').as('row1');
+        cy.get('@row1').eq(0).contains(`Good project ${i-1}`);
+      }
+
+      cy.get('[data-cy=pinedResultsPaging]').contains('2').click();
+      cy.get(rowSelector).should('have.length', 5).as('cyRows');
+      for (let i = 0; i < 5; i += 1) {
+        cy.get('@cyRows').eq(i).find('td').as('row1');
+        cy.get('@row1').eq(0).contains(`Good project ${i+4}`);
+      }
+
+      cy.get('[data-cy=pinedResultsPaging]').contains('3').click();
+      cy.get(rowSelector).should('have.length', 3).as('cyRows');
+      for (let i = 0; i < 3; i += 1) {
+        cy.get('@cyRows').eq(i).find('td').as('row1');
+        cy.get('@row1').eq(0).contains(`Good project ${i+9}`);
+      }
+    });
+  });
 });
+
