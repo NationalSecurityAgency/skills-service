@@ -44,6 +44,7 @@
         <springboot.version>2.3.3.RELEASE</springboot.version>
 
         <greenmail.version>1.6.0</greenmail.version>
+        <wiremock.version>2.27.2</wiremock.version>
     </properties>
 
     <parent>

@@ -16,6 +16,8 @@
 package skills.intTests
 
 import skills.intTests.utils.DefaultIntSpec
+import spock.lang.IgnoreIf
+import spock.lang.Requires
 
 class PublicConfigSpecs extends DefaultIntSpec {
 
@@ -27,12 +29,22 @@ class PublicConfigSpecs extends DefaultIntSpec {
         config.descriptionMaxLength == "2000"
     }
 
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def "public configs should return install mode"() {
         when:
         def config = skillsService.getPublicConfigs()
         then:
         config
         config.authMode == "FORM"
+    }
+
+    @Requires({env["SPRING_PROFILES_ACTIVE"] == "pki" })
+    def "public configs should return install mode - pki"() {
+        when:
+        def config = skillsService.getPublicConfigs()
+        then:
+        config
+        config.authMode == "PKI"
     }
 
     def "needToBootstrap should be true if root user doesn't exist"() {

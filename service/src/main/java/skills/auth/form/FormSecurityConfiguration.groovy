@@ -36,6 +36,8 @@ import org.springframework.security.web.authentication.AuthenticationFailureHand
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler
 import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler
+import org.springframework.session.web.http.CookieSerializer
+import org.springframework.session.web.http.DefaultCookieSerializer
 import org.springframework.stereotype.Component
 import skills.auth.PortalWebSecurityHelper
 import skills.auth.SecurityConfiguration
@@ -152,6 +154,11 @@ class FormSecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Bean
     AuthenticationFailureHandler authenticationFailureHandler() {
         return new SimpleUrlAuthenticationFailureHandler()
+    }
+
+    @Bean
+    CookieSerializer cookieSerializer() {
+        return new DefaultCookieSerializer(sameSite: 'None')
     }
 
     @Component

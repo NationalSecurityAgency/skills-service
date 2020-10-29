@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 echo "Starting Skills Service"
 JAVA_OPTS="${JAVA_OPTS} -Dlogging.file=/logs/webapp.log"

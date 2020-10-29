@@ -42,11 +42,14 @@ class RestTemplateWrapper extends RestTemplate {
     private boolean authenticated = false
     String authenticationToken
 
+    private pkiAuth = false
+
     RestTemplateWrapper() {
         this(new RestTemplate())
     }
 
-    RestTemplateWrapper(RestTemplate restTemplate) {
+    RestTemplateWrapper(RestTemplate restTemplate, boolean pkiAuth=false) {
+        this.pkiAuth = pkiAuth
         this.restTemplate = restTemplate
         setupRestTemplate()
         List<ClientHttpRequestInterceptor> interceptors = [new StatefulRestTemplateInterceptor()]
@@ -75,8 +78,10 @@ class RestTemplateWrapper extends RestTemplate {
     }
 
     private void setupRestTemplate() {
-        def requestFactory = getHttpRequestFactory()
-        restTemplate.setRequestFactory(requestFactory)
+        if(!this.pkiAuth) {
+            def requestFactory = getHttpRequestFactory()
+            restTemplate.setRequestFactory(requestFactory)
+        }
 
         restTemplate.setErrorHandler(new ResponseErrorHandler() {
             @Override
@@ -103,21 +108,23 @@ class RestTemplateWrapper extends RestTemplate {
     }
 
     void auth(String skillsServiceUrl, String username, String password, String firstName, lastName) {
-        boolean  accountCreated = createAccount(skillsServiceUrl, username, password, firstName, lastName)
-        if (!accountCreated) {
-            HttpHeaders headers = new HttpHeaders()
-            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED)
-            MultiValueMap<String, String> params = new LinkedMultiValueMap<>()
-            params.add('username', username)
-            params.add('password', password)
+        if(!this.pkiAuth) {
+            boolean accountCreated = createAccount(skillsServiceUrl, username, password, firstName, lastName)
+            if (!accountCreated) {
+                HttpHeaders headers = new HttpHeaders()
+                headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED)
+                MultiValueMap<String, String> params = new LinkedMultiValueMap<>()
+                params.add('username', username)
+                params.add('password', password)
 
-            HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers)
-            ResponseEntity<String> response = restTemplate.postForEntity(skillsServiceUrl + '/performLogin', request, String.class)
+                HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers)
+                ResponseEntity<String> response = restTemplate.postForEntity(skillsServiceUrl + '/performLogin', request, String.class)
 
-            assert response.statusCode == HttpStatus.OK, 'authentication failed: ' + response.statusCode
+                assert response.statusCode == HttpStatus.OK, 'authentication failed: ' + response.statusCode
 
-            authenticationToken = response.getHeaders().getFirst(AUTH_HEADER)
+                authenticationToken = response.getHeaders().getFirst(AUTH_HEADER)
 //        assert authenticationToken, 'no authentication token was provided!'
+            }
         }
         authenticated = true
     }

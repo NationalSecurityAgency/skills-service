@@ -52,6 +52,32 @@ describe('Global Badges Tests', () => {
         cy.contains(`ID: ${expectedId}`);
     });
 
+    it('name causes id to fail validation', () => {
+        cy.server();
+        cy.route('GET', `/supervisor/badges`).as('getGlobalBadges');
+        cy.route('POST', '/supervisor/badges/name/exists').as('nameExists');
+        cy.route('GET', '/app/userInfo/hasRole/ROLE_SUPERVISOR').as('checkSupervisorRole');
+
+        cy.visit('/globalBadges');
+        cy.wait('@getGlobalBadges');
+        cy.wait('@checkSupervisorRole');
+
+        cy.clickButton('Badge');
+
+        // name causes id to be too long
+        const msg = 'Badge ID cannot exceed 50 characters';
+        const validNameButInvalidId = Array(46).fill('a').join('');
+        cy.get('[data-cy=badgeName]').click();
+        cy.get('[data-cy=badgeName]').invoke('val', validNameButInvalidId).trigger('input');
+        cy.get('[data-cy=idError]').contains(msg).should('be.visible');
+        cy.get('[data-cy=saveBadgeButton]').should('be.disabled');
+        cy.get('[data-cy=badgeName]').type('{backspace}');
+        cy.get('[data-cy=idError]').contains(msg).should('not.be.visible');
+        cy.get('[data-cy=saveBadgeButton]').should('be.enabled');
+    });
+
+
+
     it('Delete badge', () => {
         const expectedId = 'JustABadgeBadge';
         const providedName = "JustABadge";

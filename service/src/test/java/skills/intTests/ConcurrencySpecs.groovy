@@ -29,6 +29,7 @@ import skills.storage.repos.LevelDefRepo
 import skills.storage.repos.ProjDefRepo
 import skills.storage.repos.SettingRepo
 import skills.storage.repos.SkillDefRepo
+import spock.lang.IgnoreIf
 
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -624,6 +625,7 @@ class ConcurrencySpecs extends DefaultIntSpec {
         skills.collect({ it.displayOrder}).sort() == skills.collect({ it.displayOrder}).unique().sort()
     }
 
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def "/api endpoints for non-existent users create UserAttr rows, concurrent requests should not cause errors"() {
         def proj = SkillsFactory.createProject()
         def subject = SkillsFactory.createSubject()

@@ -88,7 +88,8 @@ class RootController {
 
     @PostMapping('/users/')
     @ResponseBody
-    List<UserInfoRes> getNonRootUsers(@RequestBody SuggestRequest suggestRequest) {
+    List<UserInfoRes> getNonRootUsers(@RequestBody SuggestRequest suggestRequest,
+                                      @RequestParam(required = false, value = "userSuggestOption") String userSuggestOption) {
         String query = suggestRequest.suggestQuery.toLowerCase()
         if (authMode == AuthMode.FORM) {
             boolean emptyQuery = StringUtils.isBlank(query)
@@ -99,7 +100,7 @@ class RootController {
             }.unique()
         } else {
             List<String> rootUsers = accessSettingsStorageService.rootUsers.collect { it.userId.toLowerCase() }
-            return pkiUserLookup?.suggestUsers(query)?.findAll {
+            return pkiUserLookup?.suggestUsers(query, userSuggestOption)?.findAll {
                 !rootUsers.contains(it.username.toLowerCase())
             }?.unique()?.take(5)?.collect { new UserInfoRes(it) }
         }
@@ -173,6 +174,7 @@ class RootController {
         if (roleName == RoleName.ROLE_SUPER_DUPER_USER) {
             deleteRoot(userId)
         } else {
+            userId = getUserId(userId)
             accessSettingsStorageService.deleteUserRole(userId, null, roleName)
         }
     }

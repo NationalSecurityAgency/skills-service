@@ -29,6 +29,7 @@ import skills.storage.model.UserPoints
 import skills.storage.repos.UserAchievedLevelRepo
 import skills.storage.repos.UserPerformedSkillRepo
 import skills.storage.repos.UserPointsRepo
+import spock.lang.IgnoreIf
 
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -53,16 +54,16 @@ class ReportSkillsTransactionSpecs extends DefaultIntSpec {
     def "multi threaded insert of the same skill"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
-        def skills = SkillsFactory.createSkills(1, )
-        skills[0].numPerformToCompletion=1000
-        skills[0].pointIncrementInterval=0 // disable
+        def skills = SkillsFactory.createSkills(1,)
+        skills[0].numPerformToCompletion = 1000
+        skills[0].pointIncrementInterval = 0 // disable
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
         skillsService.createSkills(skills)
 
         AtomicInteger atomicInteger = new AtomicInteger()
         int numThreads = 8
-        int expectedCount = numThreads*200
+        int expectedCount = numThreads * 200
         CountDownLatch countDownLatch = new CountDownLatch(expectedCount)
         when:
         numThreads.times {
@@ -71,7 +72,7 @@ class ReportSkillsTransactionSpecs extends DefaultIntSpec {
                     skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId])
                     int addedSkills = atomicInteger.incrementAndGet()
                     countDownLatch.countDown()
-                    if ( addedSkills% 25 == 0 || addedSkills == expectedCount) {
+                    if (addedSkills % 25 == 0 || addedSkills == expectedCount) {
                         log.info("Reported {}/{} skills", atomicInteger.get(), expectedCount)
                     }
                 }
@@ -91,30 +92,32 @@ class ReportSkillsTransactionSpecs extends DefaultIntSpec {
             assert it.points == skills[0].numPerformToCompletion * skills[0].pointIncrement
         }
 
-        List<String> userPointsAsStrs = userPoints.collect {"${it.projectId}-${it.userId}-${it.skillId}-${it.day}".toString()}
+        List<String> userPointsAsStrs = userPoints.collect { "${it.projectId}-${it.userId}-${it.skillId}-${it.day}".toString() }
         userPointsAsStrs.sort() == userPointsAsStrs.unique().sort()
 
         // validate that duplicate skills events were not inserted
         userPerformedSkills.size() == skills[0].numPerformToCompletion
         // validate that duplicate achievements were not iserted
-        achievements.collect({it.level}).sort() == achievements.collect({it.level}).unique().sort()
+        achievements.collect({ it.level }).sort() == achievements.collect({ it.level }).unique().sort()
     }
 
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def "multi threaded insert skill for many different users"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
-        def skills = SkillsFactory.createSkills(1, )
-        skills[0].numPerformToCompletion=1
-        skills[0].pointIncrementInterval=0 // disable
-        skills[0].pointIncrement=1000
+        def skills = SkillsFactory.createSkills(1,)
+        skills[0].numPerformToCompletion = 1
+        skills[0].pointIncrementInterval = 0 // disable
+        skills[0].pointIncrement = 1000
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
         skillsService.createSkills(skills)
 
         AtomicInteger atomicInteger = new AtomicInteger()
         int numThreads = 8
-        int expectedCount = numThreads*200
+        int expectedCount = numThreads * 200
         CountDownLatch countDownLatch = new CountDownLatch(expectedCount)
+        List<String> ussrAttrsBefore = userAttrsRepo.findAll()
         when:
         numThreads.times {
             Thread.start {
@@ -122,7 +125,7 @@ class ReportSkillsTransactionSpecs extends DefaultIntSpec {
                     skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "ConcSkillInsertTest${it}", new Date())
                     int addedSkills = atomicInteger.incrementAndGet()
                     countDownLatch.countDown()
-                    if ( addedSkills% 25 == 0 || addedSkills == expectedCount) {
+                    if (addedSkills % 25 == 0 || addedSkills == expectedCount) {
                         log.info("Reported {}/{} skills", atomicInteger.get(), expectedCount)
                     }
                 }
@@ -133,7 +136,7 @@ class ReportSkillsTransactionSpecs extends DefaultIntSpec {
         then:
         atomicInteger.get() == expectedCount
 
-        List<String> ussrAttrs = userAttrsRepo.findAll().findAll({it.userId.toLowerCase().startsWith("ConcSkillInsertTest".toLowerCase())}).collect({ it.userId })
+        List<String> ussrAttrs = userAttrsRepo.findAll().findAll({ it.userId.toLowerCase().startsWith("ConcSkillInsertTest".toLowerCase()) }).collect({ it.userId })
         ussrAttrs.size() == 200
         ussrAttrs.sort() == ussrAttrs.unique().sort()
     }
@@ -141,9 +144,9 @@ class ReportSkillsTransactionSpecs extends DefaultIntSpec {
     def "test transaction when reporting skill - no rollback"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
-        def skills = SkillsFactory.createSkills(1, )
-        skills[0].numPerformToCompletion=1
-        skills[0].pointIncrement=500
+        def skills = SkillsFactory.createSkills(1,)
+        skills[0].numPerformToCompletion = 1
+        skills[0].pointIncrement = 500
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
         skillsService.createSkills(skills)
@@ -163,9 +166,9 @@ class ReportSkillsTransactionSpecs extends DefaultIntSpec {
     def "test transaction when reporting skill - rollback"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
-        def skills = SkillsFactory.createSkills(1, )
-        skills[0].numPerformToCompletion=1
-        skills[0].pointIncrement=500
+        def skills = SkillsFactory.createSkills(1,)
+        skills[0].numPerformToCompletion = 1
+        skills[0].pointIncrement = 500
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
         skillsService.createSkills(skills)

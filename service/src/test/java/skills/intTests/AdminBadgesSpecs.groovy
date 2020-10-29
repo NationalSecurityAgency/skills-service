@@ -21,7 +21,7 @@ import skills.intTests.utils.SkillsFactory
 
 class AdminBadgesSpecs extends DefaultIntSpec {
 
-    def "get badge that have skills assigned"() {
+    void "get badge that have skills assigned"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
         def skills = SkillsFactory.createSkills(4)
@@ -51,7 +51,7 @@ class AdminBadgesSpecs extends DefaultIntSpec {
         res.projectId == proj.projectId
     }
 
-    def "assign skills to inactive badge"() {
+    void "assign skills to inactive badge"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
         def skills = SkillsFactory.createSkills(4)
@@ -83,7 +83,7 @@ class AdminBadgesSpecs extends DefaultIntSpec {
         res.enabled == 'false'
     }
 
-    def "remove skills from a badge"() {
+    void "remove skills from a badge"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
         def skills = SkillsFactory.createSkills(4)
@@ -112,7 +112,7 @@ class AdminBadgesSpecs extends DefaultIntSpec {
         resAfterDeletion.requiredSkills.collect { it.skillId }.sort() == ["skill1"]
     }
 
-    def "remove badge"() {
+    void "remove badge"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
         def skills = SkillsFactory.createSkills(4)
@@ -138,7 +138,7 @@ class AdminBadgesSpecs extends DefaultIntSpec {
         resAfterDeletion.collect { it.badgeId } == [badge.badgeId]
     }
 
-    def "cannot disable a badge after it has been enabled"(){
+    void "cannot disable a badge after it has been enabled"(){
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
         def skills = SkillsFactory.createSkills(4)
@@ -157,7 +157,7 @@ class AdminBadgesSpecs extends DefaultIntSpec {
         skillsService.createBadge(badge)
 
         then:
-        SkillsClientException ex = thrown()
+        Exception ex = thrown()
         ex.getMessage().contains("Once a Badge has been published, the only allowable value for enabled is [true]")
     }
 }

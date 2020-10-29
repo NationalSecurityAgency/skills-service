@@ -373,7 +373,7 @@ class ClientDisplayRankDistributionSpec extends DefaultIntSpec {
     }
 
     def "rank distribution - users in all levels"() {
-        List<String> users = (1..20).collect({ "user${it}".toString() })
+        List<String> users = getRandomUsers(20)
 
         def proj1 = SkillsFactory.createProject(1)
         def proj1_subj = SkillsFactory.createSubject(1, 1)
@@ -542,7 +542,7 @@ class ClientDisplayRankDistributionSpec extends DefaultIntSpec {
     }
 
     def "rank distribution - multiple subjects"() {
-        List<String> users = (1..10).collect({ "user${it}".toString() })
+        List<String> users = getRandomUsers(10)
 
         def proj1 = SkillsFactory.createProject(1)
         def proj1_subj1 = SkillsFactory.createSubject(1, 1)

@@ -20,7 +20,7 @@ import BootstrapVue from 'bootstrap-vue';
 import { ClientTable, ServerTable } from 'vue-tables-2';
 import { SkillsConfiguration, SkillsDirective, SkillsReporter } from '@skilltree/skills-client-vue';
 import {
-  localize, ValidationProvider, ValidationObserver,
+  localize, ValidationProvider, ValidationObserver, setInteractionMode,
 } from 'vee-validate';
 import en from 'vee-validate/dist/locale/en.json';
 import VueApexCharts from 'vue-apexcharts';
@@ -51,6 +51,8 @@ Vue.use(SkillsDirective);
 localize({
   en,
 });
+
+setInteractionMode('custom', () => ({ on: ['input', 'change'] }));
 
 Vue.component('apexchart', VueApexCharts);
 

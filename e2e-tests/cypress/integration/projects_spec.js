@@ -42,6 +42,21 @@ describe('Projects Tests', () => {
     cy.contains('ID: MyNewtestProject')
   });
 
+  it('Close new project dialog', () => {
+    cy.route('GET', '/app/projects').as('loadProjects');
+    cy.route('GET', '/app/userInfo').as('loadUserInfo');
+
+    cy.route('POST', '/app/projects/MyNewtestProject').as('postNewProject');
+
+    cy.visit('/');
+    cy.wait('@loadUserInfo');
+    cy.wait('@loadProjects');
+
+    cy.clickButton('Project');
+    cy.get('[data-cy=closeProjectButton]').click();
+    cy.get('[data-cy="projectName"]').should('not.be.visible');
+  });
+
   it('Duplicate project names are not allowed', () => {
     cy.request('POST', '/app/projects/MyNewtestProject', {
       projectId: 'MyNewtestProject',
