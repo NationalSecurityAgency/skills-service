@@ -27,5 +27,6 @@ enum ErrorCode {
     SkillNotFound,
     BadgeNotFound,
     SubjectNotFound,
-    ProjectNotFound
+    ProjectNotFound,
+    EmptyBadgeNotAllowed,
 }

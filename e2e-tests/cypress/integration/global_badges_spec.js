@@ -190,7 +190,7 @@ describe('Global Badges Tests', () => {
         cy.wait('@getGlobalBadges');
     });
 
-    it('Global Badge is disabled when created, can only be enabled once', () => {
+    it('Cannot publish Global Badge with no Skills and no Levels', () => {
         const expectedId = 'TestBadgeBadge';
         cy.route('GET', `/supervisor/badges`).as('getGlobalBadges');
         cy.route('PUT', `/supervisor/badges/${expectedId}`).as('postGlobalBadge');
@@ -210,6 +210,64 @@ describe('Global Badges Tests', () => {
         cy.clickSave();
         cy.wait('@postGlobalBadge');
 
+        cy.clickNav('Badges');
+
+        cy.contains('Test Badge').should('exist');
+        cy.get('[data-cy=badgeStatus]').contains('Status: Disabled').should('exist');
+        cy.get('[data-cy=goLive]').click();
+        cy.contains('This Global Badge has no assigned Skills or Project Levels. A Global Badge cannot be published without at least one Skill or Project Level.').should('exist');
+        cy.get('[data-cy=badgeStatus]').contains('Status: Disabled').should('exist');
+    });
+
+    it('Global Badge is disabled when created, can only be enabled once', () => {
+        cy.request('POST', '/app/projects/proj1', {
+            projectId: 'proj1',
+            name: "proj1"
+        });
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            name: "Subject 1"
+        });
+        cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill1`, {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            skillId: 'skill1',
+            name: `This is 1`,
+            type: 'Skill',
+            pointIncrement: 100,
+            numPerformToCompletion: 5,
+            pointIncrementInterval: 0,
+            numMaxOccurrencesIncrementInterval: -1,
+            version: 0,
+        });
+
+        const expectedId = 'TestBadgeBadge';
+        cy.route('GET', `/supervisor/badges`).as('getGlobalBadges');
+        cy.route('PUT', `/supervisor/badges/${expectedId}`).as('postGlobalBadge');
+        cy.route('GET', `/supervisor/badges/id/${expectedId}/exists`).as('idExists');
+        cy.route('POST', '/supervisor/badges/name/exists').as('nameExists');
+        cy.route('GET', '/app/userInfo/hasRole/ROLE_SUPERVISOR').as('checkSupervisorRole');
+        cy.route('GET', `/supervisor/badges/${expectedId}`).as('getExpectedBadge');
+
+        cy.visit('/globalBadges');
+        cy.wait('@getGlobalBadges');
+        cy.wait('@checkSupervisorRole');
+
+        cy.clickButton('Badge');
+
+        cy.get('#badgeName').type('Test Badge');
+        cy.wait('@nameExists');
+        cy.clickSave();
+        cy.wait('@postGlobalBadge');
+
+        cy.clickNav('Badges');
+        cy.contains('Manage').click();
+        cy.get('.multiselect__tags').click();
+        cy.get('.multiselect__tags input').type('{enter}');
+        cy.get('div.table-responsive').should('be.visible');
+        cy.contains('GlobalBadges').click();
+
         cy.contains('Test Badge').should('exist');
         cy.get('[data-cy=badgeStatus]').contains('Status: Disabled').should('exist');
         cy.get('[data-cy=goLive]').click();
@@ -224,6 +282,28 @@ describe('Global Badges Tests', () => {
     });
 
     it('Canceling go live dialog should leave global badge disabled', () => {
+        cy.request('POST', '/app/projects/proj1', {
+            projectId: 'proj1',
+            name: "proj1"
+        });
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            name: "Subject 1"
+        });
+        cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill1`, {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            skillId: 'skill1',
+            name: `This is 1`,
+            type: 'Skill',
+            pointIncrement: 100,
+            numPerformToCompletion: 5,
+            pointIncrementInterval: 0,
+            numMaxOccurrencesIncrementInterval: -1,
+            version: 0,
+        });
+
         const expectedId = 'TestBadgeBadge';
         cy.route('GET', `/supervisor/badges`).as('getGlobalBadges');
         cy.route('PUT', `/supervisor/badges/${expectedId}`).as('postGlobalBadge');
@@ -241,6 +321,15 @@ describe('Global Badges Tests', () => {
         cy.wait('@nameExists');
         cy.clickSave();
         cy.wait('@postGlobalBadge');
+
+        cy.contains('Test Badge').should('exist');
+        cy.contains('Manage').click();
+        cy.get('.multiselect__tags').click();
+        cy.get('.multiselect__tags input').type('{enter}');
+        cy.get('div.table-responsive').should('be.visible');
+
+        cy.contains('GlobalBadges').click();
+        cy.wait('@getGlobalBadges');
 
         cy.contains('Test Badge').should('exist');
         cy.get('[data-cy=badgeStatus]').contains('Status: Disabled').should('exist');

@@ -160,4 +160,24 @@ class AdminBadgesSpecs extends DefaultIntSpec {
         Exception ex = thrown()
         ex.getMessage().contains("Once a Badge has been published, the only allowable value for enabled is [true]")
     }
+
+    def "cannot enable badge with no skills"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(4)
+        def badge = SkillsFactory.createBadge()
+        badge.enabled = 'false'
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        when:
+        skillsService.createBadge(badge)
+        badge.enabled = 'true'
+        skillsService.createBadge(badge)
+
+        then:
+        def ex = thrown(Exception)
+    }
 }

@@ -115,4 +115,25 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
         SkillsClientException ex = thrown()
         ex.getMessage().contains("Once a Badge has been published, the only allowable value for enabled is [true]")
     }
+
+    def "cannot enable global badge with no skills and no levels"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(4)
+        def badge = SkillsFactory.createBadge()
+        badge.enabled = 'false'
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+        supervisorService.createGlobalBadge(badge)
+
+        when:
+        badge = supervisorService.getGlobalBadge(badge.badgeId)
+        badge.enabled = 'true'
+        supervisorService.createGlobalBadge(badge)
+
+        then:
+        def ex = thrown(Exception)
+    }
 }

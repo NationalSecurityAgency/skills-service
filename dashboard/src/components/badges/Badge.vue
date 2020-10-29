@@ -73,7 +73,7 @@ limitations under the License.
     },
     computed: {
       live() {
-        return this.badgeInternal.enabled !== 'false';
+        return this.badgeInternal.enabled !== 'false' && this.badgeInternal.numSkills > 0;
       },
     },
     watch: {
@@ -144,22 +144,41 @@ limitations under the License.
       moveDown() {
         this.$emit('move-badge-down', this.badgeInternal);
       },
+      canPublish() {
+        if (this.global) {
+          return this.badgeInternal.numSkills > 0 || this.badgeInternal.requiredProjectLevels.length > 0;
+        }
+
+        return this.badgeInternal.numSkills > 0;
+      },
+      getNoPublishMsg() {
+        let msg = 'This Badge has no assigned Skills. A Badge cannot be published without at least one assigned Skill.';
+        if (this.global) {
+          msg = 'This Global Badge has no assigned Skills or Project Levels. A Global Badge cannot be published without at least one Skill or Project Level.';
+        }
+
+        return msg;
+      },
       handlePublish() {
-        const msg = `While this Badge is disabled, user's cannot see the Badge or achieve it. Once the Badge is live, it will be visible to users.
+        if (this.canPublish()) {
+          const msg = `While this Badge is disabled, user's cannot see the Badge or achieve it. Once the Badge is live, it will be visible to users.
         Please note that once the badge is live, it cannot be disabled.`;
-        this.msgConfirm(msg, 'Please Confirm!', 'Yes, Go Live!')
-          .then((res) => {
-            if (res) {
-              this.badgeInternal.enabled = 'true';
-              const toSave = { ...this.badgeInternal };
-              if (!toSave.originalBadgeId) {
-                toSave.originalBadgeId = toSave.badgeId;
+          this.msgConfirm(msg, 'Please Confirm!', 'Yes, Go Live!')
+            .then((res) => {
+              if (res) {
+                this.badgeInternal.enabled = 'true';
+                const toSave = { ...this.badgeInternal };
+                if (!toSave.originalBadgeId) {
+                  toSave.originalBadgeId = toSave.badgeId;
+                }
+                toSave.startDate = this.toDate(toSave.startDate);
+                toSave.endDate = this.toDate(toSave.endDate);
+                this.badgeEdited(toSave);
               }
-              toSave.startDate = this.toDate(toSave.startDate);
-              toSave.endDate = this.toDate(toSave.endDate);
-              this.badgeEdited(toSave);
-            }
-          });
+            });
+        } else {
+          this.msgOk(this.getNoPublishMsg(), 'Empty Badge!');
+        }
       },
       toDate(value) {
         let dateVal = value;

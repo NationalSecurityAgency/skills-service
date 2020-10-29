@@ -88,6 +88,33 @@ describe('Badges Tests', () => {
         cy.get('[data-cy=closeBadgeButton]').should('not.be.visible');
     });
 
+    it('cannot publish badge with no skills', () => {
+        cy.route('POST', `/admin/projects/proj1/badges/anameBadge`).as('postNewBadge');
+        cy.route('POST', '/admin/projects/proj1/badgeNameExists').as('nameExistsCheck');
+        cy.route('GET', '/admin/projects/proj1/badges').as('loadBadges');
+
+        cy.get('@createProject').should((response) => {
+            expect(response.status).to.eql(200)
+        });
+
+        cy.visit('/projects/proj1/badges');
+        cy.wait('@loadBadges');
+        cy.clickButton('Badge');
+
+        cy.get('#badgeName').type('a name');
+
+        cy.wait('@nameExistsCheck');
+
+        cy.getIdField().should('have.value', 'anameBadge');
+
+        cy.clickSave();
+        cy.wait('@postNewBadge');
+        cy.get('[data-cy=badgeStatus]').contains('Status: Disabled').should('exist');
+        cy.get('[data-cy=goLive]').click();
+        cy.contains('This Badge has no assigned Skills. A Badge cannot be published without at least one assigned Skill.').should('be.visible');
+        cy.get('[data-cy=badgeStatus]').contains('Status: Disabled').should('exist');
+    });
+
     it('inactive badge displays warning', () => {
         const expectedId = 'InactiveBadge';
         const providedName = 'Inactive';
@@ -142,7 +169,7 @@ describe('Badges Tests', () => {
         cy.get('[data-cy=saveBadgeButton]').should('be.enabled');
     });
 
-    it.only('badge validation', () => {
+    it('badge validation', () => {
         // create existing badge
         cy.request('POST', '/admin/projects/proj1/badges/badgeExist', {
             projectId: 'proj1',
@@ -296,12 +323,32 @@ describe('Badges Tests', () => {
     });
 
     it('Badge is disabled when created, can only be enabled once', () => {
+
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            name: "Subject 1"
+        });
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1', {
+            projectId: 'proj1',
+            subjectId: "subj1",
+            skillId: "skill1",
+            name: "Skill 1",
+            pointIncrement: '50',
+            numPerformToCompletion: '5'
+        });
+
         cy.visit('/projects/proj1/badges');
         cy.clickButton('Badge');
         cy.contains('New Badge');
         cy.get('#badgeName').type('Test Badge');
         cy.clickSave();
         cy.wait('@loadBadges');
+
+        cy.get('[data-cy=manageBadge]').click();
+        cy.get('#skills-selector').click();
+        cy.get('#skills-selector input[type=text]').type('{enter}');
+        cy.contains('.router-link-active', 'Badges').click();
 
         cy.contains('Test Badge');
         cy.get('[data-cy=badgeStatus]').contains('Status: Disabled').should('exist');
@@ -316,12 +363,32 @@ describe('Badges Tests', () => {
     });
 
     it('Badge is disabled when created, canceling confirm dialog leaves badge disabled', () => {
+
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            name: "Subject 1"
+        });
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1', {
+            projectId: 'proj1',
+            subjectId: "subj1",
+            skillId: "skill1",
+            name: "Skill 1",
+            pointIncrement: '50',
+            numPerformToCompletion: '5'
+        });
+
         cy.visit('/projects/proj1/badges');
         cy.clickButton('Badge');
         cy.contains('New Badge');
         cy.get('#badgeName').type('Test Badge');
         cy.clickSave();
         cy.wait('@loadBadges');
+
+        cy.get('[data-cy=manageBadge]').click();
+        cy.get('#skills-selector').click();
+        cy.get('#skills-selector input[type=text]').type('{enter}');
+        cy.contains('.router-link-active', 'Badges').click();
 
         cy.contains('Test Badge');
         cy.get('[data-cy=badgeStatus]').contains('Status: Disabled').should('exist');
