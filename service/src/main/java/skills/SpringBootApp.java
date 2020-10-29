@@ -33,7 +33,7 @@ import java.util.TimeZone;
 @EnableAsync
 @EnableScheduling
 @EnableWebSecurity
-@SpringBootApplication(exclude = { RedisRepositoriesAutoConfiguration.class })
+@SpringBootApplication(exclude = { RedisRepositoriesAutoConfiguration.class, RedisAutoConfiguration.class})
 @EnableJpaRepositories(basePackages = {"skills.storage.repos"})
 public class SpringBootApp {
 
