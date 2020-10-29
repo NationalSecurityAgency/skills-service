@@ -16,6 +16,8 @@
 package skills.intTests
 
 import groovy.util.logging.Slf4j
+import org.apache.http.ssl.SSLContextBuilder
+import org.springframework.core.io.ClassPathResource
 import org.springframework.lang.Nullable
 import org.springframework.messaging.converter.MappingJackson2MessageConverter
 import org.springframework.messaging.simp.stomp.StompHeaders
@@ -64,7 +66,7 @@ class WebsocketSpecs extends DefaultIntSpec {
         stompSession?.disconnect()
     }
 
-    def "achieve subject's level - validate via websocket"(){
+   def "achieve subject's level - validate via websocket"(){
         given:
         List subjSummaryRes = []
         List<SkillEventResult> wsResults = []
@@ -201,7 +203,7 @@ class WebsocketSpecs extends DefaultIntSpec {
         wsResults[0].completed?.findAll { it.type == CompletionItem.CompletionItemType.Subject }.size() == 3
     }
 
-    def "achieve subject's level - validate via xhr streaming"(){
+   def "achieve subject's level - validate via xhr streaming"(){
         given:
         List subjSummaryRes = []
         List<SkillEventResult> wsResults = []
@@ -256,12 +258,22 @@ class WebsocketSpecs extends DefaultIntSpec {
     private CountDownLatch setupWebsocketConnection(List<SkillEventResult> wsResults, boolean xhr=false, boolean xhrPolling=false, int count=5, String userId=null) {
         CountDownLatch messagesReceived = new CountDownLatch(count)
         List<Transport> transports = []
+
+        // setup websocket connection for sampleUserIds[0]
+        if(userId == null) {
+            userId = sampleUserIds.get(0)
+        }
+
         if (xhr) {
             RestTemplateXhrTransport xhrTransport = new RestTemplateXhrTransport()
             xhrTransport.xhrStreamingDisabled = xhrPolling
             transports.add(xhrTransport)
         } else {
-            transports.add(new WebSocketTransport(new StandardWebSocketClient()))
+            def client = new StandardWebSocketClient()
+            if (certificateRegistry) {
+                configureSsl(client, userId)
+            }
+            transports.add(new WebSocketTransport(client))
         }
         SockJsClient sockJsClient = new SockJsClient(transports)
         WebSocketStompClient stompClient = new WebSocketStompClient(sockJsClient)
@@ -285,16 +297,17 @@ class WebsocketSpecs extends DefaultIntSpec {
             }
         }
 
-        // setup websocket connection for sampleUserIds[0]
-        if(userId == null) {
-            userId = sampleUserIds.get(0)
-        }
-        String secret = skillsService.getClientSecret(projId)
-        skillsService.setProxyCredentials(projId, secret)
-        String token = skillsService.wsHelper.getTokenForUser(userId)
         WebSocketHttpHeaders headers = new WebSocketHttpHeaders()
-        headers.add('Authorization', "Bearer ${token}")
+        if(!certificateRegistry) {
+            String secret = skillsService.getClientSecret(projId)
+            skillsService.setProxyCredentials(projId, secret)
+            String token = skillsService.wsHelper.getTokenForUser(userId)
+            headers.add('Authorization', "Bearer ${token}")
+        }
         String protocol = xhr ? 'http' : 'ws'
+        if (certificateRegistry) {
+            protocol+="s"
+        }
         stompSession = stompClient.connect("${protocol}://localhost:${localPort}/skills-websocket", headers, sessionHandler).get()
         return messagesReceived
     }
@@ -353,5 +366,18 @@ class WebsocketSpecs extends DefaultIntSpec {
         subjSummaryRes.get(4).points == 50
         subjSummaryRes.get(4).todaysPoints == 10
         subjSummaryRes.get(4).levelPoints == 0
+    }
+
+    def void configureSsl(StandardWebSocketClient standardWebSocketClient, String user) {
+        SSLContextBuilder builder = new SSLContextBuilder()
+        def keyStore = certificateRegistry.getCertificate(user)
+        builder.loadKeyMaterial(keyStore.getURL(), "skillspass".toCharArray(), "skillspass".toCharArray())
+        ClassPathResource trustResource = new ClassPathResource("/certs/truststore.jks")
+        assert trustResource.exists(), "could not find truststore ${trustResource.getPath()} on the classpath"
+        builder.loadTrustMaterial(trustResource.getURL(), "skillspass".toCharArray())
+
+        def userProps = [:]
+        userProps.put("org.apache.tomcat.websocket.SSL_CONTEXT", builder.build())
+        standardWebSocketClient.setUserProperties(userProps)
     }
 }

@@ -17,6 +17,7 @@ package skills.intTests.utils
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.web.server.LocalServerPort
 import skills.SpringBootApp
@@ -26,9 +27,12 @@ import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.UserAttrsRepo
 import spock.lang.Specification
 
+import javax.annotation.PostConstruct
+
 @Slf4j
 @SpringBootTest(webEnvironment= SpringBootTest.WebEnvironment.RANDOM_PORT, classes = SpringBootApp)
 class DefaultIntSpec extends Specification {
+
 
     static {
         // must call in the main method and not in @PostConstruct method as H2 jdbc driver will cache timezone prior @PostConstruct method is called
@@ -53,10 +57,24 @@ class DefaultIntSpec extends Specification {
     @Autowired
     SettingRepo settingRepo
 
+    @Autowired(required=false)
+    MockUserInfoService mockUserInfoService
+
+    @Autowired(required=false)
+    CertificateRegistry certificateRegistry
+
+    private UserUtil userUtil
+
+    @PostConstruct
+    def init(){
+        userUtil = new UserUtil(certificateRegistry: certificateRegistry)
+    }
+
     def setup() {
         // allows for over-ridding the setup method
         doSetup();
     }
+
     def doSetup() {
         String msg = "\n-------------------------------------------------------------\n" +
                 "START: [${specificationContext.currentIteration.name}]\n" +
@@ -65,13 +83,13 @@ class DefaultIntSpec extends Specification {
         /**
          * deleting projects and users will wipe the entire db clean due to cascading
          */
-            projDefRepo.deleteAll()
-            userAttrsRepo.deleteAll()
-            // global badges don't have references to a project so must delete those manually
-            skillDefRepo.deleteAll()
+        projDefRepo.deleteAll()
+        userAttrsRepo.deleteAll()
+        // global badges don't have references to a project so must delete those manually
+        skillDefRepo.deleteAll()
 
         settingRepo.findAll().each {
-            if (!it.settingGroup?.startsWith("public_")){
+            if (!it.settingGroup?.startsWith("public_")) {
                 settingRepo.delete(it)
             }
         }
@@ -92,7 +110,13 @@ class DefaultIntSpec extends Specification {
             String firstName = "Skills",
             String lastName = "Test",
             String url = "http://localhost:${localPort}".toString()){
-        new SkillsService(username, password, firstName, lastName, url)
+
+        boolean pkiEnabled = mockUserInfoService != null
+        if (pkiEnabled) {
+            url = url.replace("http://", "https://")
+        }
+
+        new SkillsService(username, password, firstName, lastName, url, pkiEnabled != null ? certificateRegistry : null)
     }
 
     SkillsService createSupervisor(){
@@ -103,5 +127,18 @@ class DefaultIntSpec extends Specification {
         SkillsService supervisorService = createService(supervisorUserId)
         rootSkillsService.grantSupervisorRole(supervisorUserId)
         return supervisorService
+    }
+
+    /*
+     * Returns N number of random users. NOTE - if tests are run in pki mode,
+     * N must be less than or equal to the number of test p12 certificates available,
+     * otherwise an exception will occur.
+     *
+     * @param numUsers number of random users - must be less than or equal to the number
+     * of test p12 certificates available if in pki mode
+     * @return
+     */
+    List<String> getRandomUsers(int numUsers) {
+        return userUtil.getUsers(numUsers)
     }
 }

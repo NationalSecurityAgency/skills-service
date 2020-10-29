@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import skills.intTests.utils.*
 import skills.storage.model.UserAchievement
 import skills.storage.repos.UserAchievedLevelRepo
+import spock.lang.IgnoreIf
 
 @Slf4j
 class ReportSkillsSpecs extends DefaultIntSpec {
@@ -1017,6 +1018,7 @@ class ReportSkillsSpecs extends DefaultIntSpec {
         ex.message.contains("Skill Events may not be in the future")
     }
 
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def "Skill Events - user ids cannot have spaces"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
@@ -1047,7 +1049,7 @@ class ReportSkillsSpecs extends DefaultIntSpec {
         otherUser.createSkills(skills)
 
         when:
-        skillsService.addSkill([projectId: projId, skillId: skills[0].skillId], "user", new Date())
+        skillsService.addSkill([projectId: projId, skillId: skills[0].skillId], "u123", new Date())
 
         then:
         SkillsClientException ex = thrown()

@@ -19,6 +19,7 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import skills.controller.exceptions.SkillException
 import skills.controller.request.model.ActionPatchRequest
 import skills.storage.model.SkillDef
 import skills.storage.repos.SkillDefRepo
@@ -67,7 +68,7 @@ class DisplayOrderService {
         }
 
         if (!switchWith) {
-            assert switchWith, "Failed to find definition to switch with [${toUpdate?.skillId}] for action [$patchRequest.action]"
+            throw new SkillException("Failed to find definition to switch with [${toUpdate?.skillId}] for action [$patchRequest.action]", SkillException.NA, skillId)
         }
         assert switchWith.skillId != toUpdate.skillId
 

@@ -301,14 +301,10 @@ class RuleSetDeletionsSpecs  extends DefaultIntSpec {
         skillsService.addSkill([projectId: projId, skillId: subj2.get(0).skillId], user1Id, new Date()) //3+2+1+1 // 60 + 30 + 10 + 10
         skillsService.addSkill([projectId: projId, skillId: subj2.get(0).skillId], user2Id, new Date()) //2+1+1 // 20 + 10 + 10 + 5
 
-
-
         def user1OverallSummary = skillsService.getSkillSummary(user1Id, projId)
         def user1Subj1Summary = skillsService.getSkillSummary(user1Id, projId, subj1.get(0).subjectId)
         def user1Subj2Summary = skillsService.getSkillSummary(user1Id, projId, subj2.get(0).subjectId)
         def user1PerformedSkills = skillsService.getPerformedSkills(user1Id, projId)
-
-
 
         def user2OverallSummary = skillsService.getSkillSummary(user2Id, projId)
         def user2Subj1Summary = skillsService.getSkillSummary(user2Id, projId, subj1.get(0).subjectId)
@@ -328,7 +324,6 @@ class RuleSetDeletionsSpecs  extends DefaultIntSpec {
         def afterDeletionUser2Subj1Summary = skillsService.getSkillSummary(user2Id, projId, subj1.get(0).subjectId)
         def afterDeletionUser2Subj2Summary = skillsService.getSkillSummary(user2Id, projId, subj2.get(0).subjectId)
         def afterDeletionUser2PerformedSkills = skillsService.getPerformedSkills(user2Id, projId)
-
 
         then:
 
@@ -408,7 +403,6 @@ class RuleSetDeletionsSpecs  extends DefaultIntSpec {
         user2OverallSummary.subjects.find { it.subjectId == "subj2" }.levelTotalPoints == 15
         user2OverallSummary.subjects.find { it.subjectId == "subj2" }.levelPoints == 0
         user2OverallSummary.subjects.find { it.subjectId == "subj2" }.todaysPoints == 10
-
 
         user2Subj1Summary.skillsLevel == 2
         user2Subj1Summary.points == 40

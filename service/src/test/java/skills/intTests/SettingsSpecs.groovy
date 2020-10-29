@@ -210,7 +210,7 @@ class SettingsSpecs extends DefaultIntSpec {
         emailSettings.port == 1026
         emailSettings.tlsEnabled == false
         emailSettings.authEnabled == true
-        emailSettings.username == "fakeuser"
+        emailSettings.username  == "fakeuser"
         emailSettings.password == "fakepassword"
     }
 

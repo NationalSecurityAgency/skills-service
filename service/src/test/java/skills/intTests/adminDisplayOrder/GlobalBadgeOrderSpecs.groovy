@@ -56,7 +56,8 @@ class GlobalBadgeOrderSpecs extends DefaultIntSpec {
         def beforeMove = supervisorSkillsService.getAllGlobalBadges()
         supervisorSkillsService.moveGlobalBadgeDown(badges.last())
         then:
-        thrown(SkillsClientException)
+        def ex = thrown(Exception)
+        ex.message.contains("Failed to find definition to switch with [badge5] for action [DisplayOrderDown]")
         beforeMove.collect({it.badgeId}) == ["badge1", "badge2", "badge3", "badge4", "badge5"]
         supervisorSkillsService.getAllGlobalBadges().collect({it.badgeId}) == ["badge1", "badge2", "badge3", "badge4", "badge5"]
     }
@@ -74,9 +75,10 @@ class GlobalBadgeOrderSpecs extends DefaultIntSpec {
     def "should not be able to move up the first badge"() {
         when:
         def beforeMove = supervisorSkillsService.getAllGlobalBadges()
-        skillsService.moveGlobalBadgeUp(badges.first())
+        supervisorSkillsService.moveGlobalBadgeUp(badges.first())
         then:
-        thrown(SkillsClientException)
+        def ex = thrown(Exception)
+        ex.message.contains("Failed to find definition to switch with [badge1] for action [DisplayOrderUp]")
         beforeMove.collect({it.badgeId}) == ["badge1", "badge2", "badge3", "badge4", "badge5"]
         supervisorSkillsService.getAllGlobalBadges().collect({it.badgeId}) == ["badge1", "badge2", "badge3", "badge4", "badge5"]
     }

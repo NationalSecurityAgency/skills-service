@@ -21,6 +21,7 @@ import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
+import spock.lang.IgnoreIf
 import spock.lang.Specification
 
 class AuthorizationSpecs extends DefaultIntSpec {
@@ -113,6 +114,7 @@ class AuthorizationSpecs extends DefaultIntSpec {
         ex.httpStatus == HttpStatus.BAD_REQUEST
     }
 
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def 'use proxy to add skill for multiple users and then get summaries and verify admin user is still logged in via http session'() {
         when:
 
@@ -154,6 +156,7 @@ class AuthorizationSpecs extends DefaultIntSpec {
         summary2.subjects.find {it.subject == subj2.name && it.skillsLevel == 5 && it.totalPoints == 200 && it.todaysPoints == 200}
     }
 
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def "reset client secret"() {
         when:
         List<String> sampleUserIds = ['jim@email.com', 'bob@email.com']
@@ -197,6 +200,7 @@ class AuthorizationSpecs extends DefaultIntSpec {
         summary2.subjects.find {it.subject == subj2.name && it.skillsLevel == 5 && it.totalPoints == 200 && it.todaysPoints == 200}
     }
 
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def "a proxied user from project A cannot use their token for a request to project B"() {
         when:
         String secret = skillsService.getClientSecret(projId)
@@ -208,6 +212,7 @@ class AuthorizationSpecs extends DefaultIntSpec {
         ex.httpStatus == HttpStatus.FORBIDDEN
     }
 
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def "requesting a token without a proxy_user attribute will return an error"() {
         when:
         String secret = skillsService.getClientSecret(projId)
@@ -218,11 +223,11 @@ class AuthorizationSpecs extends DefaultIntSpec {
         skillsService.addSkillAsProxy([projectId: projId, skillId: subj1.skillId], 'bob', true, false)
 
         then:
-        HttpClientErrorException.BadRequest ex = thrown()
-        ex.getStatusCode() == HttpStatus.BAD_REQUEST
-        ex.responseBodyAsString.contains('client_credentials grant_type must specify proxy_user field')
+        SkillsClientException ex = thrown()
+        ex.getMessage().contains('error_description:Invalid access token')
     }
 
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def "requesting a token without a grant_type attribute will return an error"() {
         when:
         String secret = skillsService.getClientSecret(projId)
@@ -233,16 +238,15 @@ class AuthorizationSpecs extends DefaultIntSpec {
         skillsService.addSkillAsProxy([projectId: projId, skillId: subj1.skillId], 'bob', false, true)
 
         then:
-        HttpClientErrorException.BadRequest ex = thrown()
-        ex.getStatusCode() == HttpStatus.BAD_REQUEST
-        ex.responseBodyAsString.contains('Missing grant type')
+        SkillsClientException ex = thrown()
+        ex.getMessage().contains('error_description:Invalid access token')
     }
 
     def 'admin - user cannot get another user\'s project level if they are not an admin for said project'() {
         when:
 
         SkillsService skillsServiceUser2 = createService("newUser")
-        skillsServiceUser2.adminGetUserLevelForProject(projId, 'otherUser')
+        skillsServiceUser2.adminGetUserLevelForProject(projId, 'aUser')
 
         then:
         SkillsClientException ex = thrown()
@@ -253,7 +257,7 @@ class AuthorizationSpecs extends DefaultIntSpec {
         when:
 
         SkillsService skillsServiceUser2 = createService("newUser")
-        skillsServiceUser2.apiGetUserLevelForProject(projId, 'otherUser')
+        skillsServiceUser2.apiGetUserLevelForProject(projId, 'aUser')
 
         then:
         SkillsClientException ex = thrown()
