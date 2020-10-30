@@ -153,9 +153,13 @@ class BadgeAdminService {
 
         if (identifyEligibleUsers) {
             // validate that badge has skills, if not, throw an exception. Can't enable an empty badge
-            List<SkillDef> badgeSkills = getRequiredBadgeSkills(savedSkill.id)
-            if (badgeSkills?.size() < 1) {
-                throw new SkillException("Badge must have Skills before it can be published", projectId, savedSkill.skillId, ErrorCode.EmptyBadgeNotAllowed)
+            boolean canEnable = allowEnablingBadge(savedSkill)
+            if (!canEnable) {
+                String msg = "Badge must have Skills before it can be published"
+                if (SkillDef.ContainerType.GlobalBadge == savedSkill.type) {
+                    msg = "Badge must have Skills or Project Levels before it can be published"
+                }
+                throw new SkillException(msg, projectId, savedSkill.skillId, ErrorCode.EmptyBadgeNotAllowed)
             }
             awardBadgeToUsersMeetingRequirements(savedSkill)
         }
@@ -316,5 +320,23 @@ class BadgeAdminService {
     private Integer countNumberOfRequiredLevels(String badgeId){
         Integer badgeLevelCount =  globalBadgeLevelDefRepo.countByBadgeId(badgeId)
         return badgeLevelCount
+    }
+
+    private boolean allowEnablingBadge(SkillDefWithExtra badge) {
+        boolean valid = false;
+
+        boolean hasSKills = false
+        List<SkillDef> badgeSkills = getRequiredBadgeSkills(badge.id)
+        if (badgeSkills?.size() > 0) {
+            hasSKills = true
+            valid = hasSKills
+        }
+
+        if (SkillDef.ContainerType.GlobalBadge == badge.type) {
+            List<GlobalBadgeLevelDef> projectLevels = globalBadgeLevelDefRepo.findAllByBadgeId(badge.skillId)
+            valid = hasSKills || projectLevels?.size() > 0
+        }
+
+        return valid
     }
 }
