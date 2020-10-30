@@ -14,9 +14,10 @@
 
 // Variable overrides
 $theme-colors: (
-        "info": #2a9d8fff,
+        "info": #2d8779,
         "primary": #264653ff,
         "warning": #ffc42b,
+        //"success": #54b986,
 );
 
 // Bootstrap and its default variables
@@ -43,23 +44,23 @@ $theme-colors: (
 }
 
 .skills-color-skills {
-  color: $cyan;
+  color: #3cbcad;
 }
 
 .skills-color-levels {
-  color: $indigo;
+  color: #7f6c7f;
 }
 
 .skills-color-metrics {
-  color: $purple;
+  color: #764e76;
 }
 
 .skills-color-points {
-  color: $blue;
+  color: #00c3ff;
 }
 
 .skills-color-users {
-  color: $teal;
+  color: #39b27a;
 }
 
 .skills-color-access {
@@ -99,7 +100,7 @@ $theme-colors: (
 }
 
 .skills-color-events {
-  color: #e9c369ff;
+  color: #8f7158;
 }
 
 

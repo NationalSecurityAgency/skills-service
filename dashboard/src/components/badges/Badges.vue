@@ -30,7 +30,9 @@ limitations under the License.
             </div>
           </div>
 
-          <no-content3 v-else title="No Badges Yet" sub-title="Start creating badges today!"/>
+          <no-content2 v-else title="No Badges Yet"
+                       message="Badges add another facet to the overall gamification profile and allows you to further reward your users by providing these prestigious symbols. Badges are a collection of skills and when all of the skills are accomplished that badge is earned."
+                       class="mt-4"/>
         </div>
       </transition>
     </loading-container>
@@ -47,16 +49,16 @@ limitations under the License.
   import Badge from './Badge';
   import EditBadge from './EditBadge';
   import LoadingContainer from '../utils/LoadingContainer';
-  import NoContent3 from '../utils/NoContent3';
   import SubPageHeader from '../utils/pages/SubPageHeader';
+  import NoContent2 from '../utils/NoContent2';
 
   const { mapActions } = createNamespacedHelpers('projects');
 
   export default {
     name: 'Badges',
     components: {
+      NoContent2,
       SubPageHeader,
-      NoContent3,
       LoadingContainer,
       Badge,
       EditBadge,

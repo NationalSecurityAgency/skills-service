@@ -30,7 +30,8 @@ limitations under the License.
             </div>
           </div>
 
-          <no-content3 v-else title="No Badges Yet" sub-title="Start creating badges today!"/>
+          <no-content2 v-else title="No Badges Yet" class="mt-4"
+                       message="Global Badges are a special kind of badge that is made up of a collection of skills and/or levels that span across project boundaries."/>
         </div>
       </transition>
     </loading-container>
@@ -44,14 +45,14 @@ limitations under the License.
   import Badge from '../Badge';
   import EditBadge from '../EditBadge';
   import LoadingContainer from '../../utils/LoadingContainer';
-  import NoContent3 from '../../utils/NoContent3';
   import SubPageHeader from '../../utils/pages/SubPageHeader';
+  import NoContent2 from '../../utils/NoContent2';
 
   export default {
     name: 'GlobalBadges',
     components: {
+      NoContent2,
       SubPageHeader,
-      NoContent3,
       LoadingContainer,
       Badge,
       EditBadge,

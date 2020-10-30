@@ -19,11 +19,11 @@ limitations under the License.
     <sub-page-header title="Skills" action="Skill" @add-action="newSkill" :disabled="addSkillDisabled" :disabled-msg="addSkillsDisabledMsg"/>
 
     <loading-container v-bind:is-loading="isLoading">
-      <div class="card">
+      <div v-if="this.skills && this.skills.length" class="card">
         <div class="card-body" style="min-height: 400px;">
 
           <v-client-table class="vue-table-2" :data="skills" :columns="skillsColumns"
-                          :options="options" v-if="this.skills && this.skills.length" v-on:sorted="handleColumnSort" ref="table">
+                          :options="options" v-on:sorted="handleColumnSort" ref="table">
 
             <div slot="name" slot-scope="props" class="field has-addons">
               <div>
@@ -70,10 +70,11 @@ limitations under the License.
                                      class="mr-3 ml-5 mb-3"></ChildRowSkillsDisplay>
             </div>
           </v-client-table>
-
-          <no-content2 v-else title="No Skills Yet" message="Start creating skills today!"/>
         </div>
       </div>
+
+      <no-content2 v-else title="No Skills Yet" class="mt-4"
+                   message="Projects are composed of Subjects which are made of Skills and a single skill defines a training unit within the gamification framework."/>
     </loading-container>
 
     <edit-skill v-if="editSkillInfo.show" v-model="editSkillInfo.show" :skillId="editSkillInfo.skill.skillId" :is-edit="editSkillInfo.isEdit"

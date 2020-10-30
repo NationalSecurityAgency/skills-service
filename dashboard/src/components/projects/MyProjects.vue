@@ -33,7 +33,7 @@ class="mr-2">
       </div>
 
       <no-content2 v-if="!projects || projects.length==0" icon="fas fa-hand-spock" class="mt-4"
-                   title="No Projects Yet..." message="Welcome!! Start by creating a new project."/>
+                   title="No Projects Yet..." message="A Project is an overall container that represents the skills ruleset for a single application with gamified training."/>
     </loading-container>
 
     <edit-project v-if="newProject.show" v-model="newProject.show" :project="newProject.project"

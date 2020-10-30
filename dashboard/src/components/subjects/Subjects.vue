@@ -25,8 +25,8 @@ limitations under the License.
         </div>
       </div>
 
-      <no-content3 v-else
-                   title="No Subjects Yet" sub-title="Create a project to get started!"></no-content3>
+      <no-content2 v-else class="mt-4"
+                   title="No Subjects Yet" message="Subjects are a way to group and organize skill definitions within a gameified training profile."></no-content2>
     </loading-container>
 
     <edit-subject v-if="displayNewSubjectModal" v-model="displayNewSubjectModal" :subject="emptyNewSubject" @subject-saved="subjectAdded"/>
@@ -40,17 +40,17 @@ limitations under the License.
   import EditSubject from './EditSubject';
   import LoadingContainer from '../utils/LoadingContainer';
   import SubjectsService from './SubjectsService';
-  import NoContent3 from '../utils/NoContent3';
   import SubPageHeader from '../utils/pages/SubPageHeader';
+  import NoContent2 from '../utils/NoContent2';
 
   const { mapActions } = createNamespacedHelpers('projects');
 
   export default {
     name: 'Subjects',
     components: {
+      NoContent2,
       EditSubject,
       SubPageHeader,
-      NoContent3,
       LoadingContainer,
       Subject,
     },

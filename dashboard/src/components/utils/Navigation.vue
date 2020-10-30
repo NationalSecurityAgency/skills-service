@@ -47,7 +47,8 @@ limitations under the License.
                 @click.native="navigate(`${navItem.name}`)"
                 :class="{'bg-primary': menuSelections.get(navItem.name), 'text-light': menuSelections.get(navItem.name), 'select-cursor': !menuSelections.get(navItem.name), 'disabled': navItem.isDisabled}">
               <div class="text-truncate ml-3" :class="{'mr-4': !collapsed}">
-                  <i v-bind:class="navItem.iconClass" class="fas" style="min-width: 1.7rem;"/> <span v-if="!collapsed || smallScreenMode">{{ navItem.name }}</span>
+                  <i :class="navItem.iconClass" class="fas"
+                     style="min-width: 1.7rem;"/> <span v-if="!collapsed || smallScreenMode">{{ navItem.name }}</span>
                   <i v-if="navItem.isDisabled" class="fas fa-exclamation-circle text-warning ml-1" style="pointer-events: all;" v-b-tooltip.hover="navItem.msg"/>
               </div>
             </router-link>

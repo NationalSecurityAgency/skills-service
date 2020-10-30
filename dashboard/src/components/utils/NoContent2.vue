@@ -43,7 +43,7 @@ limitations under the License.
       message: String,
       icon: {
         type: String,
-        default: 'fas fa-heart-broken',
+        default: 'fas fa-dragon',
       },
     },
   };
