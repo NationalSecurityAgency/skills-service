@@ -14,9 +14,23 @@
 
 name: Run integration tests using two way ssl
 
+#on:
+#  schedule:
+#    - cron: '0 5 * * *'
 on:
-  schedule:
-    - cron: '0 5 * * *'
+  push:
+    paths-ignore:
+      - 'README.md'
+      - '.github/workflows/build-and-test-postgres.yml'
+      - '.github/workflows/build-and-test-redis.yml'
+      - '.gitlab-ci.yml'
+  pull_request:
+    paths-ignore:
+      - 'README.md'
+      - '.github/workflows/build-and-test-postgres.yml'
+      - '.github/workflows/build-and-test-redis.yml'
+      - '.gitlab-ci.yml'
+
 
 jobs:
   service-tests-against-h2:
