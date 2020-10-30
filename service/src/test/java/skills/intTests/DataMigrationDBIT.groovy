@@ -45,7 +45,7 @@ import javax.annotation.PostConstruct
 import javax.sql.DataSource
 
 @Slf4j
-@SpringBootTest(properties = ['skills.db.startup=false', 'spring.liquibase.enabled=false', 'skills.authorization.authMode=form'], webEnvironment=SpringBootTest.WebEnvironment.RANDOM_PORT, classes = SpringBootApp)
+@SpringBootTest(properties = ['skills.db.startup=false', 'spring.liquibase.enabled=false'], webEnvironment=SpringBootTest.WebEnvironment.RANDOM_PORT, classes = SpringBootApp)
 class DataMigrationDBIT extends DefaultIntSpec {
 
     @Autowired
