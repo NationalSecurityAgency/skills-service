@@ -68,7 +68,7 @@ describe('Subjects Tests', () => {
         cy.get('[data-cy=saveLevelButton]').should('be.disabled');
     });
 
-    it.only('Close level dialog', () => {
+    it('Close level dialog', () => {
         cy.server();
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
             projectId: 'proj1',
