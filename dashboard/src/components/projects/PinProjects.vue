@@ -18,7 +18,7 @@ limitations under the License.
            @close="done" header-bg-variant="info" header-text-variant="light" no-fade body-class="px-0 mx-0">
       <b-container fluid class="px-0" data-cy="pinProjects">
         <b-row class="px-3">
-          <b-col class="mx-0 pr-0">
+          <b-col class="mx-0 mb-2">
             <b-input-group>
               <template #append>
                 <b-button variant="outline-secondary" @click="searchValue=''" data-cy="pinProjectsClearSearch"><i class="fas fa-times"></i></b-button>
@@ -26,7 +26,7 @@ limitations under the License.
               <b-input type="search" v-model="searchValue" placeholder="Search projects to pin" data-cy="pinProjectsSearchInput"></b-input>
             </b-input-group>
           </b-col>
-          <b-col md="auto">
+          <b-col cols="12" sm="auto">
             <span class="text-secondary">OR</span> <b-button variant="outline-primary" @click="loadAll"  data-cy="pinProjectsLoadAllButton">Load All <i class="fas fa-weight-hanging text-muted"></i></b-button>
           </b-col>
         </b-row>
@@ -34,18 +34,29 @@ limitations under the License.
           <skills-spinner :is-loading="isLoading" />
           <div v-if="!isLoading" class="mt-4">
             <div v-if="hasResults">
-              <b-table striped hover :items="result.values" :fields="result.fields"
+              <b-table striped hover
+                       stacked="sm"
+                       :items="result.values"
+                       :fields="result.fields"
                        :per-page="result.paging.perPage"
                        :current-page="result.paging.currentPage"
                        data-cy="pinProjectsSearchResults">
-                <template #cell(controls)="data">
-                  <b-button v-if="!data.item.pinned" @click="pinProject(data.item)" variant="outline-primary" size="sm"
-                            data-cy="pinButton">
-                    <i class="fas fa-thumbtack"/>
-                  </b-button>
-                  <b-button v-if="data.item.pinned" variant="outline-success" size="sm" disabled data-cy="pinedButtonIndicator">
-                    <i class="fas fa-check"/>
-                  </b-button>
+
+                <template #cell(name)="data">
+                  <b-row>
+                    <b-col>{{ data.value }}</b-col>
+                    <b-col cols="auto">
+                      <b-button v-if="!data.item.pinned" @click="pinProject(data.item)" variant="outline-primary"
+                                size="sm"
+                                data-cy="pinButton">
+                        <i class="fas fa-thumbtack"/>
+                      </b-button>
+                      <b-button v-if="data.item.pinned" variant="outline-success" size="sm" disabled
+                                data-cy="pinedButtonIndicator">
+                        <i class="fas fa-check"/>
+                      </b-button>
+                    </b-col>
+                  </b-row>
                 </template>
                 <template #cell(totalPoints)="data">
                   {{ data.value | number }}
@@ -55,7 +66,7 @@ limitations under the License.
                 <b-col>
 
                 </b-col>
-                <b-col cols="6">
+                <b-col cols="12" sm="6">
                   <b-pagination
                   v-model="result.paging.currentPage"
                   :total-rows="result.values.length"
@@ -140,10 +151,6 @@ limitations under the License.
                      key: 'totalPoints',
                      label: 'Points',
                      sortable: false,
-                   }, {
-                     key: 'controls',
-                     sortable: false,
-                     label: '',
                    }],
         },
       };

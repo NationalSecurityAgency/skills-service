@@ -496,10 +496,10 @@ describe('Projects Tests', () => {
       cy.get(rowSelector).should('have.length', 5).as('cyRows');
       cy.get('@cyRows').eq(0).find('td').as('row1');
       cy.get('@row1').eq(0).contains('Inception');
-      cy.get('@row1').eq(3).find('[data-cy=pinedButtonIndicator]').should('not.exist');
-      cy.get('@row1').eq(3).find('[data-cy=pinButton]').click();
-      cy.get('@row1').eq(3).find('[data-cy=pinButton]').should('not.exist');
-      cy.get('@row1').eq(3).find('[data-cy=pinedButtonIndicator]').should('exist');
+      cy.get('@row1').eq(0).find('[data-cy=pinedButtonIndicator]').should('not.exist');
+      cy.get('@row1').eq(0).find('[data-cy=pinButton]').click();
+      cy.get('@row1').eq(0).find('[data-cy=pinButton]').should('not.exist');
+      cy.get('@row1').eq(0).find('[data-cy=pinedButtonIndicator]').should('exist');
       cy.get('[data-cy=modalDoneButton]').click();
 
       const projectsSelector = '[data-cy=projectCard]';
@@ -530,10 +530,10 @@ describe('Projects Tests', () => {
             .find('td')
             .as('row1');
         cy.get('@row1')
-            .eq(3)
+            .eq(0)
             .find('[data-cy=pinButton]')
             .click();
-        cy.get('@row1').eq(3).find('[data-cy=pinedButtonIndicator]').should('exist');
+        cy.get('@row1').eq(0).find('[data-cy=pinedButtonIndicator]').should('exist');
       }
       cy.get('[data-cy=modalDoneButton]').click();
 
@@ -546,7 +546,7 @@ describe('Projects Tests', () => {
     });
   });
 
-  it('Root User - Pin and Unpin projects - many projects', () => {
+  it('Root User - Pinned projects catalog - many projects', () => {
 
     for (let i = 0; i < 12; i += 1) {
       cy.request('POST', `/app/projects/proj${i}`, {
