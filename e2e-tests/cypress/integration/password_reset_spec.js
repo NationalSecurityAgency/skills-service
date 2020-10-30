@@ -84,7 +84,7 @@ describe('Password Reset Tests', () => {
       cy.wait('@getUserInfo');
 
       cy.contains('Project');
-      cy.contains('My Projects');
+      cy.get('[data-cy=subPageHeader]').contains('Projects');
     });
 
   });

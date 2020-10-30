@@ -32,7 +32,7 @@ limitations under the License.
            <span v-if="item.label" class="breadcrumb-item-label text-uppercase">{{ item.label }}: </span><span>{{ item.value }}</span>
          </span>
          <span v-else>
-           <router-link :to="item.url" class="text-white">
+           <router-link :to="item.url" class="text-white" :data-cy="`breadcrumb-${item.value}`">
              <span v-if="item.label" class="breadcrumb-item-label text-uppercase">{{ item.label }}: </span>
              <span class="">{{ item.value }}</span>
            </router-link>

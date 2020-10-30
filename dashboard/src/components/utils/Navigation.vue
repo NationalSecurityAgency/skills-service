@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div class="container-fluid px-0">
+  <div class="container-fluid px-0" data-cy="nav">
     <div class="row skills-nav no-gutters">
       <div class="col-md-auto border rounded pt-3 pr-0 bg-light">
         <div class="mb-3 ml-3 text-secondary">
@@ -25,7 +25,7 @@ limitations under the License.
             <b-col :class="{ 'text-right' : !collapsed }">
               <div v-if="!smallScreenMode" :class="{ 'pr-2 pl-3' : !collapsed }">
                 <b-button v-if="!smallScreenMode" size="sm" variant="outline-secondary" @click="flipCollapsed"
-                          class="py-0 text-primary" style="border-color: #d8d8d9;">
+                          class="py-0 text-primary" style="border-color: #d8d8d9;" data-cy="navCollapseOrExpand">
                   <i v-if="!collapsed" class="fas fa-compress-alt"/><i v-else class="fas fa-expand-alt"/>
                 </b-button>
               </div>
@@ -36,18 +36,6 @@ limitations under the License.
               </div>
             </b-col>
           </b-row>
-<!--          <span class="h6 text-uppercase" v-if="!collapsed || smallScreenMode">Navigation</span>-->
-<!--          <span :class="{'float-right': !collapsed, 'mx-3': !collapsed}" class="">-->
-<!--            <b-button v-if="!smallScreenMode" size="sm" variant="outline-secondary" @click="flipCollapsed"-->
-<!--                      class="py-0 text-primary" style="border-color: #d8d8d9;">-->
-<!--              <i v-if="!collapsed" class="fas fa-compress-alt"/><i v-else class="fas fa-expand-alt"/>-->
-<!--            </b-button>-->
-<!--          </span>-->
-<!--          <span v-if="smallScreenMode" class="float-right pr-2">-->
-<!--            <b-button v-b-toggle.menu-collapse-control variant="outline-secondary" size="sm" class="mb-1">-->
-<!--              <i class="fas fa-bars"/>-->
-<!--            </b-button>-->
-<!--          </span>-->
         </div>
 
         <!-- bootstrap didn't handle vertical menus well so rolling out our own-->

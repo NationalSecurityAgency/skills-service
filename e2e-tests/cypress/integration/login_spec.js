@@ -37,7 +37,7 @@ describe('Login Tests', () => {
       .wait('@getUserInfo').its('status').should('equal', 200);
 
     cy.contains('Project');
-    cy.contains('My Projects');
+    cy.get('[data-cy=subPageHeader]').contains('Projects');
     cy.get('[data-cy=projectSearch]').should('be.visible');
   });
 

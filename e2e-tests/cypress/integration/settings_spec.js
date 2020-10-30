@@ -33,7 +33,7 @@ describe('Settings Tests', () => {
         cy.route({method: 'GET', url: '/root/isRoot'}).as('checkRoot');
 
         cy.visit('/');
-        cy.contains('My Projects');
+        cy.get('[data-cy=subPageHeader]').contains('Projects');
         cy.get('button.dropdown-toggle').first().click({force: true});
         cy.contains('Settings').click();
         cy.wait('@checkRoot');
@@ -65,7 +65,7 @@ describe('Settings Tests', () => {
         cy.wait('@loadUserInfo');
         cy.wait('@loadProjects');
         cy.wait('@isSupervisor');
-        cy.contains('My Projects');
+        cy.get('[data-cy=subPageHeader]').contains('Projects');
         cy.get('button.dropdown-toggle').first().click({force: true});
         cy.contains('Settings').click();
         cy.wait('@checkRoot');
@@ -109,7 +109,7 @@ describe('Settings Tests', () => {
         cy.route({method: 'GET', url: '/root/isRoot'}).as('checkRoot');
 
         cy.visit('/');
-        cy.contains('My Projects');
+        cy.get('[data-cy=subPageHeader]').contains('Projects');
 
         cy.get('li').contains('Badges').should('not.exist');
         cy.vuex().its('state.access.isSupervisor').should('equal', false);
@@ -139,7 +139,7 @@ describe('Settings Tests', () => {
         cy.route({method: 'GET', url: '/root/isRoot'}).as('checkRoot');
 
         cy.visit('/');
-        cy.contains('My Projects');
+        cy.get('[data-cy=subPageHeader]').contains('Projects');
 
         cy.get('li').contains('Badges').should('not.exist');
         cy.vuex().its('state.access.isSupervisor').should('equal', false);

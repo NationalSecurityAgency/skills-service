@@ -34,7 +34,7 @@ describe('App Features Tests', () => {
             },
         }).as('getSubjects');
         cy.visit('/');
-        cy.contains('My Projects')
+        cy.get('[data-cy=subPageHeader]').contains('Projects');
         cy.contains('New Software Version is Available').should('not.exist')
         cy.get('[data-cy=projectCard]').last().contains('Manage').click()
         cy.wait('@getSubjects')
@@ -55,7 +55,7 @@ describe('App Features Tests', () => {
             },
         }).as('getSubjects');
         cy.visit('/');
-        cy.contains('My Projects')
+        cy.get('[data-cy=subPageHeader]').contains('Projects');
         cy.get('[data-cy=projectCard]').last().contains('Manage').click()
         cy.wait('@getSubjects')
 

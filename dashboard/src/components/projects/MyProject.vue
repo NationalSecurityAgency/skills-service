@@ -28,7 +28,8 @@ limitations under the License.
                                   class="project-settings"></edit-and-delete-dropdown>
       </div>
       <div slot="footer">
-        <b-button :to="{ name:'Subjects', params: { projectId: this.projectInternal.projectId, project: this.projectInternal }}" variant="outline-primary">
+        <b-button :to="{ name:'Subjects', params: { projectId: this.projectInternal.projectId, project: this.projectInternal }}"
+                  variant="outline-primary" :data-cy="`projCard_${this.projectInternal.projectId}_manageBtn`">
           Manage <i class="fas fa-arrow-circle-right"/>
         </b-button>
       </div>
