@@ -32,14 +32,12 @@ describe('Register Root Users', () => {
 
   it('register root user', () => {
     cy.visit('/');
-    cy.contains('New SkillTree Root Account')
+    cy.contains('New Root Account')
     cy.get('#firstName').type("Robert")
     cy.get('#lastName').type("Smith")
     cy.get('#email').type("rob.smith@madeup.org")
     cy.get('#password').type("password")
     cy.get('#password_confirmation').type("password")
     cy.contains('Create Account').click()
-
-    cy.get('[data-cy=projectSearch]').should('be.visible');
   });
 });

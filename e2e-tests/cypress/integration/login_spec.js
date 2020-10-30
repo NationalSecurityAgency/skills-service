@@ -38,7 +38,6 @@ describe('Login Tests', () => {
 
     cy.contains('Project');
     cy.get('[data-cy=subPageHeader]').contains('Projects');
-    cy.get('[data-cy=projectSearch]').should('be.visible');
   });
 
   it('form: bad password', () => {

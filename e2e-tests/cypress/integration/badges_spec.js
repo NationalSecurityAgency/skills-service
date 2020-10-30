@@ -142,7 +142,7 @@ describe('Badges Tests', () => {
         cy.get('[data-cy=saveBadgeButton]').should('be.enabled');
     });
 
-    it.only('badge validation', () => {
+    it('badge validation', () => {
         // create existing badge
         cy.request('POST', '/admin/projects/proj1/badges/badgeExist', {
             projectId: 'proj1',
