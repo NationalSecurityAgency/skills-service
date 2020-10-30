@@ -18,9 +18,9 @@ limitations under the License.
     <page-header :loading="isLoading" :options="headerOptions"/>
 
     <navigation v-if="userIdForDisplay" :nav-items="[
-          {name: 'Client Display', iconClass: 'fa-user text-success', page: 'ClientDisplayPreview'},
-          {name: 'Performed Skills', iconClass: 'fa-award text-orange', page: 'UserSkillEvents'},
-          {name: 'Metrics', iconClass: 'fa-chart-bar text-purple', page: 'UserMetrics'},
+          {name: 'Client Display', iconClass: 'fa-user skills-color-skills', page: 'ClientDisplayPreview'},
+          {name: 'Performed Skills', iconClass: 'fa-award skills-color-events', page: 'UserSkillEvents'},
+          {name: 'Metrics', iconClass: 'fa-chart-bar skills-color-metrics', page: 'UserMetrics'},
         ]">
     </navigation>
   </div>
@@ -70,17 +70,17 @@ limitations under the License.
       ]),
       headerOptions() {
         return {
-          icon: 'fas fa-user text-blue',
+          icon: 'fas fa-user skills-color-users',
           title: `USER: ${this.userTitle}`,
           subTitle: `ID: ${this.userIdForDisplay}`,
           stats: [{
             label: 'Skills',
             count: this.numSkills,
-            icon: 'fas fa-graduation-cap text-teal',
+            icon: 'fas fa-graduation-cap skills-color-skills',
           }, {
             label: 'Points',
             count: this.userTotalPoints,
-            icon: 'far fa-arrow-alt-circle-up text-blue',
+            icon: 'far fa-arrow-alt-circle-up skills-color-points',
           }],
         };
       },

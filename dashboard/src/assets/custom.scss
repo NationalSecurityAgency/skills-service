@@ -11,7 +11,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-// Your variable overrides
+
+// Variable overrides
 $theme-colors: (
         "info": #2a9d8fff,
         "primary": #264653ff,
@@ -23,30 +24,83 @@ $theme-colors: (
 // BootstrapVue and its default variables
 @import '../../node_modules/bootstrap-vue/src/index.scss';
 
-.text-purple {
-  color: $purple;
-}
-
-.text-indigo {
-  color: $indigo;
-}
-
-.text-cyan {
-  color: $cyan;
-}
-
-.text-teal {
-  color: $teal;
-}
-
-.text-orange {
-  color: #f4a261ff;
-}
-
-.text-blue {
-  color: $blue;
-}
 
 .text-gray-700 {
   color: $gray-700
 }
+
+// domain specific concerts in order to keep color assignment consistent
+.skills-color-projects {
+  color: #f4a261ff;
+}
+
+.skills-color-subjects {
+  color: #2a9d8fff;
+}
+
+.skills-color-badges {
+  color: #e76f51fc;
+}
+
+.skills-color-skills {
+  color: $cyan;
+}
+
+.skills-color-levels {
+  color: $indigo;
+}
+
+.skills-color-metrics {
+  color: $purple;
+}
+
+.skills-color-points {
+  color: $blue;
+}
+
+.skills-color-users {
+  color: $teal;
+}
+
+.skills-color-access {
+  color: $yellow;
+}
+
+.skills-color-settings {
+  color: $secondary;
+}
+
+.skills-color-dependencies {
+  color: $pink;
+}
+
+.skills-color-crossProjects {
+  color: $green;
+}
+
+.skills-color-profile {
+  color: $success;
+}
+
+.skills-color-security {
+  color: $yellow;
+}
+
+.skills-color-email {
+  color: $blue;
+}
+
+.skills-color-system {
+  color: $secondary;
+}
+
+.skills-color-overview {
+  color: $success;
+}
+
+.skills-color-events {
+  color: #e9c369ff;
+}
+
+
+

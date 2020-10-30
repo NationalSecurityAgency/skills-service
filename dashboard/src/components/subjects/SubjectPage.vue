@@ -18,10 +18,10 @@ limitations under the License.
     <page-header :loading="isLoading" :options="headerOptions"/>
 
     <navigation v-if="!isLoading" :nav-items="[
-          {name: 'Skills', iconClass: 'fa-graduation-cap text-teal', page: 'SubjectSkills'},
-          {name: 'Levels', iconClass: 'fa-trophy  text-cyan', page: 'SubjectLevels'},
-          {name: 'Users', iconClass: 'fa-users text-blue', page: 'SubjectUsers'},
-          {name: 'Metrics', iconClass: 'fa-chart-bar text-purple', page: 'SubjectMetrics'},
+          {name: 'Skills', iconClass: 'fa-graduation-cap skills-color-skills', page: 'SubjectSkills'},
+          {name: 'Levels', iconClass: 'fa-trophy skills-color-levels', page: 'SubjectLevels'},
+          {name: 'Users', iconClass: 'fa-users skills-color-users', page: 'SubjectUsers'},
+          {name: 'Metrics', iconClass: 'fa-chart-bar skills-color-metrics', page: 'SubjectMetrics'},
         ]">
     </navigation>
   </div>
@@ -64,19 +64,19 @@ limitations under the License.
           return {};
         }
         return {
-          icon: 'fas fa-cubes text-success',
+          icon: 'fas fa-cubes skills-color-subjects',
           title: `SUBJECT: ${this.subject.name}`,
           subTitle: `ID: ${this.subjectId}`,
           stats: [{
             label: 'Skills',
             count: this.subject.numSkills,
-            icon: 'fas fa-graduation-cap text-teal',
+            icon: 'fas fa-graduation-cap skills-color-skills',
           }, {
             label: 'Points',
             count: this.subject.totalPoints,
             warn: this.subject.totalPoints < this.minimumPoints,
             warnMsg: this.subject.totalPoints < this.minimumPoints ? `Subject has insufficient points assigned. Skills cannot be achieved until subject has at least ${this.minimumPoints} points.` : null,
-            icon: 'far fa-arrow-alt-circle-up text-blue',
+            icon: 'far fa-arrow-alt-circle-up skills-color-points',
           }],
         };
       },

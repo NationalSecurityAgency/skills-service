@@ -33,8 +33,8 @@ limitations under the License.
       return {
         isLoading: true,
         navItems: [
-          { name: 'Projects', iconClass: 'fa-project-diagram text-orange', page: 'HomePage' },
-          { name: 'Metrics', iconClass: 'fa-cogs text-purple', page: 'GlobalMetrics' },
+          { name: 'Projects', iconClass: 'fa-project-diagram skills-color-projects', page: 'HomePage' },
+          { name: 'Metrics', iconClass: 'fa-cogs skills-color-metrics', page: 'GlobalMetrics' },
         ],
       };
     },
@@ -64,7 +64,7 @@ limitations under the License.
         const globalBadges = this.navItems.find((element) => element.name === 'Badges');
         if (this.isSupervisor) {
           if (!globalBadges) {
-            this.navItems.splice(1, 0, { name: 'Badges', iconClass: 'fa-globe-americas text-purple', page: 'GlobalBadges' });
+            this.navItems.splice(1, 0, { name: 'Badges', iconClass: 'fa-globe-americas skills-color-badges', page: 'GlobalBadges' });
           }
         } else if (globalBadges) {
           const idx = this.navItems.indexOf(globalBadges);

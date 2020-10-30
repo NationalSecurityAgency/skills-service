@@ -190,10 +190,20 @@ class SkillsService {
         wsHelper.appPost("/projectExist", [name: name])?.body
     }
 
-    def getProjects(String search="") {
+    def getProjects() {
         //note that search is only used if the requesting user is a root user
         //otherwise whatever value is supplied for the parameter is ignored by the service
-        wsHelper.appGet("/projects?search=${search}")
+        wsHelper.appGet("/projects")
+    }
+
+    def searchProjects(String search) {
+        wsHelper.rootGet("/searchProjects?name=${search}")
+    }
+
+    def getAllProjects() {
+        //note that search is only used if the requesting user is a root user
+        //otherwise whatever value is supplied for the parameter is ignored by the service
+        wsHelper.rootGet("/projects")
     }
 
     def getProject(String projectId) {

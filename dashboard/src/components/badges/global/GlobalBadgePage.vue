@@ -22,10 +22,8 @@ limitations under the License.
     </page-header>
 
     <navigation :nav-items="[
-          {name: 'Skills', iconClass: 'fa-graduation-cap', page: 'GlobalBadgeSkills'},
-          {name: 'Levels', iconClass: 'fa-trophy', page: 'GlobalBadgeLevels'},
-          // {name: 'Users', iconClass: 'fa-users', page: 'GlobalBadgeUsers'},
-          // {name: 'Metrics', iconClass: 'fa-chart-bar', page: 'GlobalBadgeMetrics'},
+          {name: 'Skills', iconClass: 'fa-graduation-cap skills-color-skills', page: 'GlobalBadgeSkills'},
+          {name: 'Levels', iconClass: 'fa-trophy skills-color-levels', page: 'GlobalBadgeLevels'},
         ]">
     </navigation>
   </div>
@@ -66,18 +64,21 @@ limitations under the License.
           return {};
         }
         return {
-          icon: 'fas fa-globe-americas',
+          icon: 'fas fa-globe-americas skills-color-badges',
           title: `BADGE: ${this.badge.name}`,
           subTitle: `ID: ${this.badge.badgeId}`,
           stats: [{
             label: 'Skills',
             count: this.badge.numSkills,
+            icon: 'fas fa-graduation-cap skills-color-skills',
           }, {
             label: 'Levels',
             count: this.badge.requiredProjectLevels.length,
+            icon: 'fas fa-trophy skills-color-levels',
           }, {
             label: 'Projects',
             count: this.badge.uniqueProjectCount,
+            icon: 'fas fa-project-diagram skills-color-projects',
           }],
         };
       },
