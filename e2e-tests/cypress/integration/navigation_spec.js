@@ -72,5 +72,37 @@ describe('Navigation Tests', () => {
     cy.get('[data-cy=nav-Metrics]').contains('Metrics');
   });
 
+  it('selected menu item should be highlighted', function () {
+    cy.visit('/');
+    cy.contains('My New test Project');
+    cy.get('[data-cy=nav-Projects]').should('have.class', 'bg-primary');
+    cy.get('[data-cy=nav-Metrics]').should('not.have.class', 'bg-primary');
+
+    cy.get('[data-cy=nav-Metrics]').click();
+    cy.contains('No Metrics Yet');
+    cy.get('[data-cy=nav-Projects]').should('not.have.class', 'bg-primary');
+    cy.get('[data-cy=nav-Metrics]').should('have.class', 'bg-primary');
+  });
+
+  it('navigation on a small screen', function () {
+    cy.viewport('iphone-6')
+    cy.visit('/');
+    cy.contains('My New test Project');
+    cy.get('[data-cy=navCollapseOrExpand]').should('not.exist');
+    cy.get('[data-cy=nav-Projects]').should('not.visible');
+    cy.get('[data-cy=nav-Metrics]').should('not.visible');
+
+    // expand menu
+    cy.get('[data-cy=navSmallScreenExpandMenu]').click()
+    cy.get('[data-cy=nav-Projects]').contains('Projects');
+    cy.get('[data-cy=nav-Metrics]').contains('Metrics');
+
+    // navigate and make sure menu is collapsed again
+    cy.get('[data-cy=nav-Metrics]').click();
+    cy.contains('No Metrics Yet');
+    cy.get('[data-cy=nav-Projects]').should('not.visible');
+    cy.get('[data-cy=nav-Metrics]').should('not.visible');
+  });
+
 });
 

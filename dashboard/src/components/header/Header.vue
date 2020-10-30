@@ -14,16 +14,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div class="bg-white">
+  <div class="bg-white header">
     <div class="container-fluid py-3">
       <div class="row">
         <div class="col-sm text-center text-sm-left">
           <router-link class="h2 text-primary ml-2" to="/">
-            <img src="/img/skilltree_logo.svg" style="height: 70px; position: absolute; top:-15px; left:15px;"/>
+            <img src="/img/skilltree_logo.svg" />
           </router-link>
         </div>
 
-        <div class="col-sm text-center text-sm-right pt-2 mt-3 mt-sm-0">
+        <hr class="w-75 mb-0 d-sm-none"/>
+
+        <div class="col-sm-auto text-center text-sm-right pt-sm-2 mt-3 mt-sm-0">
           <inception-button class="mr-2"></inception-button>
           <settings-button class="mr-2"/>
           <help-button class=""/>
@@ -52,5 +54,18 @@ limitations under the License.
 </script>
 
 <style scoped>
-
+.header img {
+  height: 70px;
+  position: absolute;
+  top: -15px;
+  left: 15px;
+}
+@media (max-width: 576px) {
+  .header img {
+    position: unset !important;
+    top: unset !important;
+    left: unset !important;
+    height: 100px !important;
+  }
+}
 </style>

@@ -30,7 +30,8 @@ limitations under the License.
                 </b-button>
               </div>
               <div v-if="smallScreenMode" class="pr-2">
-                <b-button v-b-toggle.menu-collapse-control variant="outline-secondary" size="sm" class="mb-1">
+                <b-button v-b-toggle.menu-collapse-control variant="outline-secondary" size="sm" class="mb-1"
+                          data-cy="navSmallScreenExpandMenu">
                   <i class="fas fa-bars"/>
                 </b-button>
               </div>
@@ -56,7 +57,7 @@ limitations under the License.
       <div class="col-md">
         <div v-for="(navItem) of navItems" :key="navItem.name">
           <div v-if="menuSelections.get(navItem.name)">
-            <div class="container-fluid">
+            <div class="container-fluid pb-4">
               <router-view></router-view>
             </div>
           </div>

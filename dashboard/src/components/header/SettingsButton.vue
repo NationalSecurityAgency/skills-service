@@ -73,7 +73,7 @@ limitations under the License.
 
 <style scoped>
   .userName {
-    max-width: 4rem;
+    max-width: 5rem;
     vertical-align: top
   }
 
