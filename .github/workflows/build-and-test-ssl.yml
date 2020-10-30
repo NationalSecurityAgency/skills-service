@@ -67,7 +67,8 @@ jobs:
 
       - name: Build skills-service
         run: mvn --batch-mode install
-        env: SPRING_PROFILES_ACTIVE=pki
+        env:
+          SPRING_PROFILES_ACTIVE: pki
 
       - name: upload result artifacts
         if: ${{ always() }}
@@ -129,7 +130,8 @@ jobs:
 
       - name: Build skills-service
         run: mvn --batch-mode test -Dspring.datasource.url=jdbc:postgresql://localhost:5432/skills -Dspring.datasource.username=postgres -Dspring.datasource.password=skillsPassword
-        env: SPRING_PROFILES_ACTIVE=pki
+        env:
+          SPRING_PROFILES_ACTIVE: pki
 
       - name: upload result artifacts
         if: ${{ always() }}
