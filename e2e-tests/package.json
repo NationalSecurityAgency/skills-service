@@ -62,14 +62,14 @@
   },
   "devDependencies": {
     "@bahmutov/print-env": "2.1.2",
-    "cypress": "5.2.0",
+    "cypress": "5.5.0",
     "cypress-file-upload": "4.1.1",
     "cypress-image-snapshot": "3.1.1",
     "eslint": "7.9.0",
     "fake-smtp-server": "0.8.0",
     "license-check-and-add": "3.0.4",
     "license-checker": "25.0.1",
-    "moment": "2.29.0",
+    "moment": "2.29.1",
     "moment-timezone": "0.5.31",
     "wait-on": "5.2.0"
   },
