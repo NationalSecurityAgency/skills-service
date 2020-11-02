@@ -29,7 +29,7 @@ limitations under the License.
           <div class="col-auto">
             <ValidationProvider name="Event Date" rules="required">
               <datepicker input-class="border-0" wrapper-class="form-control" v-model="dateAdded" name="Event Date"
-                          :use-utc="true" :disabled-dates="datePickerState.disabledDates" aria-required="true"/>
+                          :use-utc="true" :disabled-dates="datePickerState.disabledDates" aria-required="true" aria-label="event date"/>
             </ValidationProvider>
           </div>
           <div class="col-auto">

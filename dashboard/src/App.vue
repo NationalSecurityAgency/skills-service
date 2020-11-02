@@ -24,8 +24,8 @@ limitations under the License.
           <pki-app-bootstrap v-if="isPkiAndNeedsToBootstrap"/>
           <loading-container v-else v-bind:is-loading="isLoading">
             <div v-if="!isLoading">
-              <header-view v-if="isAuthenticatedUser"/>
-              <div>
+              <header-view v-if="isAuthenticatedUser" role="banner"/>
+              <div role="main">
                 <router-view/>
               </div>
             </div>
@@ -33,7 +33,7 @@ limitations under the License.
         </div>
       </div>
     </div>
-    <dashboard-footer/>
+    <dashboard-footer role="contentinfo"/>
     <customizable-footer></customizable-footer>
   </div>
 </template>

@@ -18,11 +18,11 @@ limitations under the License.
     <b-tabs class="h-100">
       <b-tab active>
         <template slot="title">
-          <i class="fa fa-edit mr-1"></i> <span>Write</span>
+          <i class="fa fa-edit mr-1"></i> <span id="markdownEditLabel">Write</span>
         </template>
         <div class="mt-2 content-height">
           <b-form-textarea rows="5" max-rows="5" v-model="valueInternal" @input="dataChanged"
-                           data-cy="markdownEditorInput" no-resize/>
+                           data-cy="markdownEditorInput" no-resize aria-labelledby="markdownEditLabel"/>
         </div>
       </b-tab>
       <b-tab>

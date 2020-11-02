@@ -43,11 +43,11 @@ limitations under the License.
 
           <div slot="edit" slot-scope="props" class="field has-addons">
             <b-button v-if="notCurrentUser(props.row.userId)" @click="deleteUserRoleConfirm(props.row)"
-                      variant="outline-primary">
+                      variant="outline-primary" :aria-label="'remove access role from user '+props.row.userId">
               <i class="fas fa-trash"/>
             </b-button>
             <span v-else v-b-tooltip.hover="'Can not remove myself. Sorry!!'">
-              <b-button variant="outline-primary" disabled><i class="fas fa-trash"/></b-button>
+              <b-button variant="outline-primary" disabled aria-label="cannot remove access role from yourself"><i class="fas fa-trash"/></b-button>
             </span>
           </div>
         </v-client-table>

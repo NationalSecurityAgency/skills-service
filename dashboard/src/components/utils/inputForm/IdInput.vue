@@ -23,7 +23,7 @@ limitations under the License.
         <div class="col text-right">
           <i class="fas fa-question-circle mr-1 text-secondary"
              v-b-tooltip.hover.left="'Enable to override auto-generated value.'"/>
-          <b-link v-if="!canEdit" @click="toggle">Enable</b-link>
+          <b-link v-if="!canEdit" @click="toggle" aria-label="enable manual ID override">Enable</b-link>
           <span v-else>Enabled <i class="fa fa-check fa-sm text-muted"/></span>
         </div>
       </div>

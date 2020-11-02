@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <b-dropdown right variant="link">
+  <b-dropdown right variant="link" aria-label="Help Menu Dropdown">
     <template slot="button-content">
       <i class="far fa-question-circle"></i>
     </template>

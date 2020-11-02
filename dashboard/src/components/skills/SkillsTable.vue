@@ -38,11 +38,12 @@ limitations under the License.
               <b-button-group size="sm" class="ml-1"
                               v-b-popover.hover="'Sorting controls are enabled only when Display Order column is sorted in the ascending order.'">
                 <b-button @click="moveDisplayOrderDown(props.row)" variant="outline-info" :class="{disabled:props.row.disabledDownButton}"
-                          :disabled="!sortButtonEnabled || props.row.disabledDownButton">
+                          :disabled="!sortButtonEnabled || props.row.disabledDownButton" :aria-label="'move '+props.row.name+' down in the display order'">
                   <i class="fas fa-arrow-circle-down"/>
                 </b-button>
                 <b-button @click="moveDisplayOrderUp(props.row)" variant="outline-info" :class="{disabled: props.row.disabledUpButton}"
-                          :disabled="!sortButtonEnabled || props.row.disabledUpButton">
+                          :disabled="!sortButtonEnabled || props.row.disabledUpButton"
+                          :aria-label="'move '+props.row.name+' up in the display order'">
                   <i class="fas fa-arrow-circle-up"/>
                 </b-button>
               </b-button-group>
@@ -54,8 +55,16 @@ limitations under the License.
 
             <div slot="edit" slot-scope="props">
               <b-button-group size="sm" class="mr-1">
-                <b-button @click="editSkill(props.row)" variant="outline-primary" data-cy="editSkillButton"><i class="fas fa-edit"/></b-button>
-                <b-button @click="deleteSkill(props.row)" variant="outline-primary" data-cy="deleteSkillButton"><i class="fas fa-trash"/></b-button>
+                <b-button @click="editSkill(props.row)"
+                          variant="outline-primary" data-cy="editSkillButton"
+                          :aria-label="'edit Skill '+props.row.name">
+                  <i class="fas fa-edit"/>
+                </b-button>
+                <b-button @click="deleteSkill(props.row)" variant="outline-primary"
+                          data-cy="deleteSkillButton"
+                          :aria-label="'delete Skill '+props.row.name">
+                  <i class="fas fa-trash"/>
+                </b-button>
               </b-button-group>
               <router-link :to="{ name:'SkillOverview',
                               params: { projectId: props.row.projectId, subjectId: props.row.subjectId, skillId: props.row.skillId }}"
