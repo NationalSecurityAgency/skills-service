@@ -26,8 +26,11 @@ limitations under the License.
               <b-input v-model="searchValue" placeholder="Search projects to pin" data-cy="pinProjectsSearchInput"></b-input>
             </b-input-group>
           </b-col>
-          <b-col cols="12" sm="auto">
-            <span class="text-secondary">OR</span> <b-button variant="outline-primary" @click="loadAll"  data-cy="pinProjectsLoadAllButton">Load All <i class="fas fa-weight-hanging text-muted"></i></b-button>
+          <b-col cols="12" sm="auto" class="pt-sm-2 text-center">
+            <span class="text-secondary">OR</span>
+          </b-col>
+          <b-col cols="12" sm="auto" class="text-center">
+            <b-button variant="outline-primary" @click="loadAll"  data-cy="pinProjectsLoadAllButton">Load All <i class="fas fa-weight-hanging text-muted"></i></b-button>
           </b-col>
         </b-row>
         <div style="min-height: 6rem;">
@@ -40,6 +43,8 @@ limitations under the License.
                        :fields="result.fields"
                        :per-page="result.paging.perPage"
                        :current-page="result.paging.currentPage"
+                       :sort-by.sync="result.fields[0].key"
+                       :sort-desc="false"
                        data-cy="pinProjectsSearchResults">
 
                 <template #cell(name)="data">
@@ -56,7 +61,7 @@ limitations under the License.
                         <b-button v-if="data.item.pinned" variant="outline-warning" @click="unpinProject(data.item)"
                                   size="sm"
                                   v-b-tooltip.hover="'Unpin'"
-                                  data-cy="pinedButtonIndicator">
+                                  data-cy="unpinButton">
                           <i class="fas fa-ban" style="font-size: 1rem;"></i>
                         </b-button>
 
@@ -64,7 +69,7 @@ limitations under the License.
                                   :to="`/projects/${data.item.projectId}`" target="_blank"
                                   size="sm"
                                   v-b-tooltip.hover="'View Project'"
-                                  data-cy="pinedButtonIndicator">
+                                  data-cy="viewProjectButton">
                           <i class="fas fa-eye" style="font-size: 1rem;"></i>
                         </b-button>
                       </b-button-group>
@@ -104,7 +109,7 @@ limitations under the License.
                 Search Project Catalog
               </div>
               <p class="small">
-                Only projects that have not been pinned are returned.
+                Search and browse projects to pin and unpin for the default view.
               </p>
             </div>
             <div v-if="!hasResults && hasSearch" class="text-center">
@@ -113,7 +118,7 @@ limitations under the License.
                 No Results
               </div>
               <p class="small">
-                Only projects that have not been pinned are returned.
+                Modify your search string or use 'Load All' feature.
               </p>
             </div>
           </div>

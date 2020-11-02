@@ -20,7 +20,7 @@ limitations under the License.
     <simple-card>
       <loading-container :is-loading="!isLoading">
         <div v-if="!this.graph.nodes || this.graph.nodes.length === 0" class="mt-5">
-            <no-content2 icon="fa fa-vector-square" title="No Dependencies Yet..."
+            <no-content2 icon="fa fa-project-diagram" title="No Dependencies Yet..."
                          message="Here you can visualize skill's dependencies for the entire project. However, please navigate to a single skill to add dependencies."></no-content2>
         </div>
         <div v-else class="row">

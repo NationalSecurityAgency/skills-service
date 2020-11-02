@@ -20,7 +20,7 @@ limitations under the License.
     <navigation v-if="!isLoading" :nav-items="[
           {name: 'Subjects', iconClass: 'fa-cubes skills-color-subjects', page: 'Subjects'},
           {name: 'Badges', iconClass: 'fa-award skills-color-badges', page: 'Badges'},
-          {name: 'Dependencies', iconClass: 'fa-vector-square skills-color-dependencies', page: 'FullDependencyGraph'},
+          {name: 'Dependencies', iconClass: 'fa-project-diagram skills-color-dependencies', page: 'FullDependencyGraph'},
           {name: 'Cross Projects', iconClass: 'fa-handshake skills-color-crossProjects', page: 'CrossProjectsSkills'},
           {name: 'Levels', iconClass: 'fa-trophy skills-color-levels', page: 'ProjectLevels'},
           {name: 'Users', iconClass: 'fa-users skills-color-users', page: 'ProjectUsers'},

@@ -33,7 +33,7 @@ limitations under the License.
       return {
         isLoading: true,
         navItems: [
-          { name: 'Projects', iconClass: 'fa-project-diagram skills-color-projects', page: 'HomePage' },
+          { name: 'Projects', iconClass: 'fa-tasks skills-color-projects', page: 'HomePage' },
           { name: 'Metrics', iconClass: 'fa-cogs skills-color-metrics', page: 'GlobalMetrics' },
         ],
       };
