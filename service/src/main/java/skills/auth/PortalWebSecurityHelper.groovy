@@ -27,7 +27,7 @@ class PortalWebSecurityHelper {
             .authorizeRequests()
             .antMatchers("/", "/favicon.ico",
                     "/icons/**", "/static/**",
-                    "/skills.ico", "/skills.jpeg",
+                    "/skilltree.ico",
                     "/error", "/oauth/**",
                     "/app/oAuthProviders", "/login*", "/login/**",
                     "/performLogin", "/createAccount",
@@ -36,7 +36,7 @@ class PortalWebSecurityHelper {
                     "/app/users/validExistingDashboardUserId/*", "/app/oAuthProviders",
                     "index.html", "/public/**",
                     "/skills-websocket/**", "/requestPasswordReset",
-                    "/resetPassword/**", "/performPasswordReset").permitAll()
+                    "/resetPassword/**", "/performPasswordReset", "/**").permitAll()
             .antMatchers('/admin/**').hasAnyAuthority(RoleName.ROLE_PROJECT_ADMIN.name(), RoleName.ROLE_SUPER_DUPER_USER.name())
             .antMatchers('/supervisor/**').hasAnyAuthority(RoleName.ROLE_SUPERVISOR.name(), RoleName.ROLE_SUPER_DUPER_USER.name())
             .antMatchers('/root/isRoot').hasAnyAuthority(RoleName.values().collect {it.name()}.toArray(new String[0]))
