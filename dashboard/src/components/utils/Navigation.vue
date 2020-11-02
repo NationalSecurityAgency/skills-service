@@ -25,7 +25,7 @@ limitations under the License.
             <b-col :class="{ 'text-right' : !collapsed }">
               <div v-if="!smallScreenMode" :class="{ 'pr-2 pl-3' : !collapsed }">
                 <b-button v-if="!smallScreenMode" size="sm" variant="outline-secondary" @click="flipCollapsed"
-                          class="py-0 text-primary" style="border-color: #d8d8d9;" data-cy="navCollapseOrExpand">
+                          class="py-0 text-primary" style="border-color: #d8d8d9;" data-cy="navCollapseOrExpand" v-b-tooltip.hover :title="collapsed ? 'Expand Navigation' : 'Collapse Navigation'">
                   <i v-if="!collapsed" class="fas fa-compress-alt"/><i v-else class="fas fa-expand-alt"/>
                 </b-button>
               </div>
@@ -45,6 +45,7 @@ limitations under the License.
             <router-link :to="{ name: navItem.page }" tag="li" class="mb-1 p-2 text-primary" v-for="(navItem) of navItems" :key="navItem.name"
                 :data-cy="`nav-${navItem.name}`"
                 @click.native="navigate(`${navItem.name}`)"
+                v-b-tooltip="{ title: navItem.name, placement: 'right', variant: 'primary', disabled: !collapsed }"
                 :class="{'bg-primary': menuSelections.get(navItem.name), 'text-light': menuSelections.get(navItem.name), 'select-cursor': !menuSelections.get(navItem.name), 'disabled': navItem.isDisabled}">
               <div class="text-truncate ml-3" :class="{'mr-4': !collapsed}">
                   <i :class="navItem.iconClass" class="fas"

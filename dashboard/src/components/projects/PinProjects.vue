@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-    <b-modal id="searchProjectsModal" title="Pin Projects" v-model="show" :no-close-on-backdrop="true"
+    <b-modal id="searchProjectsModal" title="Pin Projects" v-model="show" :no-close-on-backdrop="true" size="lg"
            @close="done" header-bg-variant="info" header-text-variant="light" no-fade body-class="px-0 mx-0">
       <b-container fluid class="px-0" data-cy="pinProjects">
         <b-row class="px-3">
@@ -23,7 +23,7 @@ limitations under the License.
               <template #append>
                 <b-button variant="outline-secondary" @click="searchValue=''" data-cy="pinProjectsClearSearch"><i class="fas fa-times"></i></b-button>
               </template>
-              <b-input type="search" v-model="searchValue" placeholder="Search projects to pin" data-cy="pinProjectsSearchInput"></b-input>
+              <b-input v-model="searchValue" placeholder="Search projects to pin" data-cy="pinProjectsSearchInput"></b-input>
             </b-input-group>
           </b-col>
           <b-col cols="12" sm="auto">
@@ -46,19 +46,35 @@ limitations under the License.
                   <b-row>
                     <b-col>{{ data.value }}</b-col>
                     <b-col cols="auto">
-                      <b-button v-if="!data.item.pinned" @click="pinProject(data.item)" variant="outline-primary"
-                                size="sm"
-                                data-cy="pinButton">
-                        <i class="fas fa-thumbtack"/>
-                      </b-button>
-                      <b-button v-if="data.item.pinned" variant="outline-success" size="sm" disabled
-                                data-cy="pinedButtonIndicator">
-                        <i class="fas fa-check"/>
-                      </b-button>
+                      <b-button-group>
+                        <b-button v-if="!data.item.pinned" @click="pinProject(data.item)" variant="outline-success"
+                                  size="sm"
+                                  v-b-tooltip.hover="'Pin'"
+                                  data-cy="pinButton">
+                          <i class="fas fa-thumbtack" style="width: 1rem;"/>
+                        </b-button>
+                        <b-button v-if="data.item.pinned" variant="outline-warning" @click="unpinProject(data.item)"
+                                  size="sm"
+                                  v-b-tooltip.hover="'Unpin'"
+                                  data-cy="pinedButtonIndicator">
+                          <i class="fas fa-ban" style="font-size: 1rem;"></i>
+                        </b-button>
+
+                        <b-button variant="outline-primary"
+                                  :to="`/projects/${data.item.projectId}`" target="_blank"
+                                  size="sm"
+                                  v-b-tooltip.hover="'View Project'"
+                                  data-cy="pinedButtonIndicator">
+                          <i class="fas fa-eye" style="font-size: 1rem;"></i>
+                        </b-button>
+                      </b-button-group>
                     </b-col>
                   </b-row>
                 </template>
                 <template #cell(totalPoints)="data">
+                  {{ data.value | number }}
+                </template>
+                <template #cell(numSkills)="data">
                   {{ data.value | number }}
                 </template>
               </b-table>
@@ -143,8 +159,18 @@ limitations under the License.
                      sortable: true,
                    },
                    {
+                     key: 'numSubjects',
+                     label: 'Subjects',
+                     sortable: false,
+                   },
+                   {
                      key: 'numSkills',
                      label: 'Skills',
+                     sortable: false,
+                   },
+                   {
+                     key: 'numBadges',
+                     label: 'Badges',
                      sortable: false,
                    },
                    {
@@ -181,7 +207,7 @@ limitations under the License.
           this.isLoading = true;
           ProjectService.searchProjects(searchValue)
             .then((response) => {
-              this.result.values = response.filter((item) => !item.pinned);
+              this.result.values = response;
             })
             .finally(() => {
               this.isLoading = false;
@@ -193,7 +219,7 @@ limitations under the License.
         this.isLoading = true;
         ProjectService.loadAllProjects()
           .then((response) => {
-            this.result.values = response.filter((item) => !item.pinned);
+            this.result.values = response;
           })
           .finally(() => {
             this.isLoading = false;
@@ -204,6 +230,13 @@ limitations under the License.
         SettingsService.pinProject(item.projectId)
           .then(() => {
             itemRef.pinned = true;
+          });
+      },
+      unpinProject(item) {
+        const itemRef = item;
+        SettingsService.unpinProject(item.projectId)
+          .then(() => {
+            itemRef.pinned = false;
           });
       },
     },

@@ -20,13 +20,13 @@ limitations under the License.
         <div class="col">
           <b-tooltip target="remove-button" title="You must retain at least one level." :disabled="!onlyOneLevelLeft"></b-tooltip>
           <span id="remove-button" class="mr-2">
-            <b-button variant="outline-primary" @click="removeLastItem" :disabled="onlyOneLevelLeft" pill size="sm">
+            <b-button variant="outline-primary" @click="removeLastItem" :disabled="onlyOneLevelLeft" size="sm">
               <span class="d-none d-sm-inline">Remove</span> Highest <i class="fas fa-trash-alt"/>
             </b-button>
           </span>
           <b-tooltip target="add-button" title="Reached maximum limit of levels." :disabled="!reachedMaxLevels"></b-tooltip>
           <span id="add-button">
-            <b-button @click="editLevel()" variant="outline-primary" :disabled="reachedMaxLevels" pill size="sm">
+            <b-button @click="editLevel()" variant="outline-primary" :disabled="reachedMaxLevels" size="sm">
               <span class="d-none d-sm-inline">Add</span> Next <i class="fas fa-plus-circle" />
             </b-button>
           </span>
