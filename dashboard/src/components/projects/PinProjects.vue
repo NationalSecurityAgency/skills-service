@@ -23,7 +23,7 @@ limitations under the License.
               <template #append>
                 <b-button variant="outline-secondary" @click="searchValue=''" data-cy="pinProjectsClearSearch"><i class="fas fa-times"></i></b-button>
               </template>
-              <b-input v-model="searchValue" placeholder="Search projects to pin" data-cy="pinProjectsSearchInput"></b-input>
+              <b-input v-model="searchValue" placeholder="Search projects to pin" data-cy="pinProjectsSearchInput" aria-label="search for projects to pin"></b-input>
             </b-input-group>
           </b-col>
           <b-col cols="12" sm="auto" class="pt-sm-2 text-center">

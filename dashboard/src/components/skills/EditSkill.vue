@@ -30,6 +30,7 @@ limitations under the License.
                          v-on:keyup.enter="handleSubmit(saveSkill)"
                          data-cy="skillName"
                          aria-describedby="skillNameError"
+                         aria-errormessage="skillNameError"
                          :aria-invalid="errors && errors.length > 0">
                   <small class="form-text text-danger" data-cy="skillNameError" id="skillNameError">{{ errors[0] }}</small>
                 </ValidationProvider>
@@ -51,6 +52,7 @@ limitations under the License.
                          v-model="skillInternal.version" :disabled="isEdit"
                         data-cy="skillVersion" v-on:keyup.enter="handleSubmit(saveSkill)"
                          aria-describedby="skillVersionError"
+                         aria-errormessage="skillVersionError"
                          :aria-invalid="errors && errors.length > 0"/>
                   <small class="form-text text-danger" data-cy="skillVersionError" id="skillVersionError">{{ errors[0] }}</small>
                 </ValidationProvider>
@@ -70,6 +72,7 @@ limitations under the License.
                          data-cy="skillPointIncrement" v-on:keyup.enter="handleSubmit(saveSkill)"
                          id="pointIncrement"
                          aria-describedby="skillPointIncrementError"
+                         aria-errormessage="skillPointIncrementError"
                          :aria-invalid="errors && errors.length > 0"/>
                   <small class="form-text text-danger" data-cy="skillPointIncrementError" id="skillPointIncrementError">{{ errors[0] }}</small>
                 </ValidationProvider>
@@ -83,6 +86,7 @@ limitations under the License.
                          data-cy="numPerformToCompletion" aria-required="true" v-on:keyup.enter="handleSubmit(saveSkill)"
                          id="numPerformToCompletion"
                          aria-describedby="skillOccurrencesError"
+                         aria-errormessage="skillOccurrencesError"
                          :aria-invalid="errors && errors.length > 0"/>
                   <small class="form-text text-danger" data-cy="skillOccurrencesError" id="skillOccurrencesError">{{ errors[0] }}</small>
                 </ValidationProvider>
@@ -122,7 +126,8 @@ limitations under the License.
                                ref="timeWindowHours" data-cy="timeWindowHours"
                                v-on:keyup.enter="handleSubmit(saveSkill)"
                                id="timeWindowHours" aria-label="time window hours"
-                               aria-describedby="skillHoursError" :aria-invalid="errors && errors.length > 0"/>
+                               aria-describedby="skillHoursError" :aria-invalid="errors && errors.length > 0"
+                               aria-errormessage="skillHoursError"/>
                         <div class="input-group-append">
                           <span class="input-group-text" id="hours-append">Hours</span>
                         </div>
@@ -137,7 +142,9 @@ limitations under the License.
                                value="0" :disabled="!skillInternal.timeWindowEnabled" ref="timeWindowMinutes" data-cy="timeWindowMinutes"
                                v-on:keyup.enter="handleSubmit(saveSkill)"
                                aria-label="time window minutes"
-                               aria-describedby="skillMinutesError" :aria-invalid="errors && errors.length > 0"/>
+                               aria-describedby="skillMinutesError"
+                               aria-errormessage="skillMinutesError"
+                               :aria-invalid="errors && errors.length > 0"/>
                         <div class="input-group-append">
                           <span class="input-group-text" id="minutes-append">Minutes</span>
                         </div>
@@ -161,7 +168,9 @@ limitations under the License.
                            :disabled="!skillInternal.timeWindowEnabled" data-cy="maxOccurrences"
                            v-on:keyup.enter="handleSubmit(saveSkill)"
                            id="maxOccurrences"
-                           aria-describedby="skillMaxOccurrencesError" :aria-invalid="errors && errors.length > 0"/>
+                           aria-describedby="skillMaxOccurrencesError"
+                           aria-errormessage="skillMaxOccurrencesError"
+                           :aria-invalid="errors && errors.length > 0"/>
                     <small class="form-text text-danger" data-cy="skillMaxOccurrencesError" id="skillMaxOccurrencesError">{{ errors[0] }}</small>
                 </div>
               </ValidationProvider>

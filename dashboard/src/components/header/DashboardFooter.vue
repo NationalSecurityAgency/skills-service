@@ -23,10 +23,10 @@ limitations under the License.
         <i class="fas fa-angle-up fa-stack-1x third"></i>
         <i class="fas fa-angle-up fa-stack-1x fourth"></i>
       </span>
-      <span class="small">SkillTree Dashboard</span>
+      <span class="small footer-text">SkillTree Dashboard</span>
     </div>
     <div class="col-sm text-right">
-      <span class="small mr-2">v{{ $store.getters.config.dashboardVersion }}</span>
+      <span class="small mr-2 footer-text">v{{ $store.getters.config.dashboardVersion }}</span>
       <i class="fas fa-code-branch"></i>
     </div>
   </div>
@@ -56,4 +56,8 @@ limitations under the License.
   top: -10px;
   color: #e76f51ff;
 }
+  .footer-text {
+    color: lightgrey;
+  }
+
 </style>

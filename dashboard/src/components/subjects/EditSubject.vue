@@ -29,8 +29,10 @@ limitations under the License.
                       <input type="text" class="form-control" id="subjName" @input="updateSubjectId"
                              v-model="subjectInternal.name" v-on:input="updateSubjectId"
                              v-on:keyup.enter="handleSubmit(updateSubject)"
-                             v-focus aria-required="true">
-                      <small class="form-text text-danger">{{ errors[0] }}</small>
+                             v-focus aria-required="true"
+                             :aria-invalid="errors && errors.length > 0"
+                             aria-errormessage="subjectNameError">
+                      <small class="form-text text-danger" id="subjectNameError">{{ errors[0] }}</small>
                     </ValidationProvider>
                   </div>
                 </div>
@@ -48,14 +50,15 @@ limitations under the License.
               </div>
 
               <div>
-                <label>Help URL/Path
+                <label for="subjectHelpUrl">Help URL/Path
                   <inline-help
                     msg="If project level 'Root Help Url' is specified then this path will be relative to 'Root Help Url'"/>
                 </label>
-                <input class="form-control" type="text" v-model="subjectInternal.helpUrl" v-on:keyup.enter="handleSubmit(updateSubject)" />
+                <input class="form-control" type="text" v-model="subjectInternal.helpUrl" v-on:keyup.enter="handleSubmit(updateSubject)"
+                       id="subjectHelpUrl"/>
               </div>
 
-              <p v-if="invalid && overallErrMsg" class="text-center text-danger">***{{ overallErrMsg }}***</p>
+              <p v-if="invalid && overallErrMsg" class="text-center text-danger" role="alert">***{{ overallErrMsg }}***</p>
           </div>
           <div v-else>
               <icon-manager @selected-icon="onSelectedIcon"></icon-manager>

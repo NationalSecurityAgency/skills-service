@@ -17,27 +17,36 @@ limitations under the License.
   <ValidationObserver ref="observer" v-slot="{invalid, pristine}" slim>
     <div>
       <div class="form-group">
-        <label class="label">* Host</label>
+        <label class="label" for="emailHost">* Host</label>
         <ValidationProvider name="Host" :debounce=500 v-slot="{errors}" rules="required">
-        <input class="form-control" type="text" v-model="emailInfo.host" name="host"
-               data-cy="hostInput" aria-required="true"/>
-        <p class="text-danger" v-show="errors[0]" data-cy="hostError">{{errors[0]}}</p>
+          <input class="form-control" type="text" v-model="emailInfo.host" name="host"
+                 data-cy="hostInput" aria-required="true"
+                  :aria-invalid="errors && errors.length > 0"
+                  aria-errormessage="hostError"
+                  id="emailHost"/>
+          <p class="text-danger" v-show="errors[0]" data-cy="hostError" id="hostError">{{errors[0]}}</p>
         </ValidationProvider>
       </div>
       <div class="form-group">
-        <label class="label">* Port</label>
+        <label class="label" for="emailPort">* Port</label>
         <ValidationProvider name="Port" :debounce=500 v-slot="{errors}" rules="required|min_value:1|max_value:65535">
           <input class="form-control" type="text" v-model="emailInfo.port" name="port"
-                 data-cy="portInput" aria-required="true"/>
-          <p class="text-danger" v-show="errors[0]" data-cy="portError">{{errors[0] }}</p>
+                 data-cy="portInput" aria-required="true"
+                  :aria-invalid="errors && errors.length > 0"
+                  aria-errormessage="portError"
+                  id="emailPort"/>
+          <p class="text-danger" v-show="errors[0]" data-cy="portError" id="portError">{{errors[0] }}</p>
         </ValidationProvider>
       </div>
       <div class="form-group">
-        <label class="label">* Protocol</label>
+        <label class="label" for="emailProtocol">* Protocol</label>
         <ValidationProvider name="Protocol" :debounce=500 v-slot="{errors}" rules="required">
           <input class="form-control" type="text" v-model="emailInfo.protocol" name="protocol"
-                 data-cy="protocolInput" aria-required="true"/>
-          <p class="text-danger" v-show="errors[0]" data-cy="protocolError">{{
+                 data-cy="protocolInput" aria-required="true"
+                  :aria-invalid="errors && errors.length > 0"
+                  aria-errormessage="protocolError"
+                  id="emailProtocol"/>
+          <p class="text-danger" v-show="errors[0]" data-cy="protocolError" id="protocolError">{{
             errors[0] }}</p>
         </ValidationProvider>
       </div>
@@ -53,29 +62,38 @@ limitations under the License.
       </div>
       <div id="auth-div" v-if="emailInfo.authEnabled">
         <div class="form-group">
-          <label class="label">* Username</label>
+          <label class="label" for="emailUsername">* Username</label>
           <ValidationProvider name="Username" :debounce=500 v-slot="{errors}" rules="required">
             <input class="form-control" type="text" v-model="emailInfo.username" name="username"
-                   data-cy="emailUsername" aria-required="true"/>
-            <p class="text-danger" v-show="errors[0]" data-cy="emailUsernameError">{{errors[0]}}</p>
+                   data-cy="emailUsername" aria-required="true"
+                   :aria-invalid="errors && errors.length > 0"
+                    aria-errormessage="emailUsernameError"
+                    id="emailUsername"/>
+            <p class="text-danger" v-show="errors[0]" data-cy="emailUsernameError" id="emailUsernameError">{{errors[0]}}</p>
           </ValidationProvider>
         </div>
         <div class="form-group">
-          <label class="label">* Password</label>
+          <label class="label" for="emailPassword">* Password</label>
           <ValidationProvider name="Password" :debounce=500 v-slot="{errors}" rules="required">
             <input class="form-control" type="text" v-model="emailInfo.password" name="password"
-                   data-cy="emailPassword" aria-required="true"/>
-            <p class="text-danger" v-show="errors[0]" data-cy="emailPasswordError">{{errors[0]}}</p>
+                   data-cy="emailPassword" aria-required="true"
+                    :aria-invalid="errors && errors.length > 0"
+                    aria-errormessage="emailPasswordError"
+                    id="emailPassword"/>
+            <p class="text-danger" v-show="errors[0]" data-cy="emailPasswordError" id="emailPasswordError">{{errors[0]}}</p>
           </ValidationProvider>
         </div>
       </div>
 
-      <p v-if="connectionError" class="text-danger" data-cy="connectionError">
+      <p v-if="connectionError" class="text-danger" data-cy="connectionError" role="alert">
         Connection to Email server failed due to: {{connectionError}}
       </p>
 
       <div>
-        <button class="btn btn-outline-primary mr-1" type="button" v-on:click="testConnection" :disabled="invalid || missingRequiredValues() || isTesting || isSaving" data-cy="emailSettingsTest">
+        <button class="btn btn-outline-primary mr-1" type="button"
+                v-on:click="testConnection" :disabled="invalid || missingRequiredValues() || isTesting || isSaving"
+                data-cy="emailSettingsTest"
+                aria-roledescription="test email server settings button">
           Test
           <i :class="testButtonClass"></i>
         </button>

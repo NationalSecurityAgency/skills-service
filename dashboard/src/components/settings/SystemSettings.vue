@@ -22,50 +22,65 @@ limitations under the License.
       <ValidationObserver ref="observer" v-slot="{invalid, pristine}" slim>
         <div class="card-body">
           <div class="form-group">
-            <label class="label">* Public URL <InlineHelp msg="Because it is possible for the SkillTree dashboard
+            <label class="label" for="publicUrl">* Public URL <InlineHelp msg="Because it is possible for the SkillTree dashboard
             to be deployed behind a load balancer or proxy, it is necessary to configure the public url so that email
             based communications from the system can provide valid links back to the SkillTree dashboard."/></label>
             <ValidationProvider rules="required" name="Public URL" v-slot="{ errors }" :debounce=500>
               <input class="form-control" type="text" v-model="publicUrl" name="publicUrl"
-                     data-cy="publicUrl" aria-required="true"/>
-              <p class="text-danger" v-show="errors[0]">{{errors[0]}}</p>
+                     data-cy="publicUrl" aria-required="true"
+                    id="publicUrl"
+                    :aria-invalid="errors && errors.length > 0"
+                    aria-errormessage="publicUrlError"/>
+              <p class="text-danger" v-show="errors[0]" id="publicUrlError">{{errors[0]}}</p>
             </ValidationProvider>
           </div>
           <div class="form-group">
-            <label class="label">* Password Reset Token Expiration <InlineHelp msg="How long password reset tokens remain valid before they expire"/></label>
+            <label class="label" for="resetTokenExpiration">* Password Reset Token Expiration <InlineHelp msg="How long password reset tokens remain valid before they expire"/></label>
             <ValidationProvider rules="required|iso8601" name="Password Reset Token Expiration" v-slot="{ errors }" :debounce=500>
               <input class="form-control" type="text" v-model="resetTokenExpiration" name="resetTokenExpiration"
-                     data-cy="resetTokenExpiration" aria-required="true"/>
-              <small class="text-info">supports ISO 8601 time duration format, e.g., 2H, 30M, 1H30M, 1M42S, etc</small>
-              <p class="text-danger" v-show="errors[0]" data-cy="resetTokenExpirationError">{{errors[0]}}</p>
+                     data-cy="resetTokenExpiration" aria-required="true"
+                      id="resetTokenExpiration"
+                      :aria-invalid="errors && errors.length > 0"
+                      aria-errormessage="resetTokenExpirationError"
+                      aria-describedby="resetTokenExpirationFormat"/>
+              <small class="text-info" id="resetTokenExpirationFormat">supports ISO 8601 time duration format, e.g., 2H, 30M, 1H30M, 1M42S, etc</small>
+              <p class="text-danger" v-show="errors[0]" data-cy="resetTokenExpirationError" id="resetTokenExpirationError">{{errors[0]}}</p>
             </ValidationProvider>
           </div>
           <div class="form-group">
-            <label class="label">From Email <InlineHelp msg="The From email address used in all email originating from the SkillTree application"/></label>
+            <label class="label" for="fromEmail">From Email <InlineHelp msg="The From email address used in all email originating from the SkillTree application"/></label>
             <ValidationProvider :rules="{email:{require_tld:false,allow_ip_domain:true}}" name="From Email" v-slot="{ errors }" :debounce=500>
               <input class="form-control" type="text" v-model="fromEmail" name="fromEmail"
-                     data-cy="fromEmail"/>
-              <p class="text-danger" v-show="errors[0]" data-cy="fromEmailError">{{errors[0]}}</p>
+                     data-cy="fromEmail" id="fromEmail"
+                    :aria-invalid="errors && errors.length  > 0"
+                    aria-errormessage="fromEmailError"/>
+              <p class="text-danger" v-show="errors[0]" data-cy="fromEmailError" id="fromEmailError">{{errors[0]}}</p>
             </ValidationProvider>
           </div>
 
           <div class="form-group">
-            <label class="label">Custom Header <InlineHelp msg="HTML (and in-line css) to display as a header for the dashboard application"/></label>
+            <label class="label" for="customHeader">Custom Header <InlineHelp msg="HTML (and in-line css) to display as a header for the dashboard application"/></label>
             <ValidationProvider rules="noscript|max:3000" name="Custom Header" v-slot="{ errors }">
-              <textarea class="form-control" name="customHeader" data-cy="customHeader" rows="3" v-model="customHeader"/>
-              <p class="text-danger" v-show="errors[0]" data-cy="customHeaderError">{{errors[0]}}</p>
+              <textarea class="form-control" name="customHeader" data-cy="customHeader" rows="3" v-model="customHeader"
+                  id="customHeader"
+                  :aria-invalid="errors && errors.length > 0"
+                  aria-errormessage="customHeaderError"/>
+              <p class="text-danger" v-show="errors[0]" data-cy="customHeaderError" id="customHeaderError">{{errors[0]}}</p>
             </ValidationProvider>
           </div>
 
           <div class="form-group">
-            <label class="label">Custom Footer <InlineHelp msg="HTML (and in-line css) to display as a footer for the dashboard application"/></label>
+            <label class="label" for="customFooter">Custom Footer <InlineHelp msg="HTML (and in-line css) to display as a footer for the dashboard application"/></label>
             <ValidationProvider rules="noscript|max:3000" name="Custom Footer" v-slot="{ errors }">
-              <textarea class="form-control" name="customFooter" data-cy="customFooter" v-model="customFooter" rows="3"/>
-              <p class="text-danger" v-show="errors[0]" data-cy="customFooterError">{{errors[0]}}</p>
+              <textarea class="form-control" name="customFooter" data-cy="customFooter" v-model="customFooter" rows="3"
+                        id="customFooter"
+                        :aria-invalid="errors && errors.length > 0"
+                        aria-errormessage="customFooterError"/>
+              <p class="text-danger" v-show="errors[0]" data-cy="customFooterError" id="customFooterError">{{errors[0]}}</p>
             </ValidationProvider>
           </div>
 
-          <p v-if="invalid && overallErrMsg" class="text-center text-danger">***{{ overallErrMsg }}***</p>
+          <p v-if="invalid && overallErrMsg" class="text-center text-danger" role="alert">***{{ overallErrMsg }}***</p>
           <div>
             <button class="btn btn-outline-primary" type="button" v-on:click="saveSystemSettings" :disabled="invalid || (pristine===true)"
                     data-cy="saveSystemSettings">

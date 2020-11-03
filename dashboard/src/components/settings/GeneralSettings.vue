@@ -22,29 +22,38 @@ limitations under the License.
         <div class="card">
           <div class="card-body">
             <div v-if="!pkiAuthenticated">
-              <label>* First Name</label>
+              <label for="profileFirstName">* First Name</label>
               <ValidationProvider name="First Name" :debounce=500 v-slot="{errors}" rules="required|maxFirstNameLength">
                 <div class="input-group">
-                  <input id="first-name" aria-describedby="basic-addon1" class="form-control"
-                         type="text" v-model="loginFields.first" name="first" aria-required="true"/>
+                  <input aria-describedby="basic-addon1" class="form-control"
+                         type="text" v-model="loginFields.first" name="first" aria-required="true"
+                          id="profileFirstName"
+                          :aria-invalid="errors && errors.length > 0"
+                          aria-errormessage="firstnameError"/>
                 </div>
-                <p class="text-danger" v-show="errors[0]">{{ errors[0]}}</p>
+                <p class="text-danger" v-show="errors[0]" id="firstnameError">{{ errors[0]}}</p>
               </ValidationProvider>
 
-              <label class="mt-2">* Last Name</label>
+              <label class="mt-2" for="profileLastName">* Last Name</label>
               <ValidationProvider name="Last Name" :debounce=500 v-slot="{errors}" rules="required|maxLastNameLength">
                 <div class="input-group">
-                  <input class="form-control" type="text" v-model="loginFields.last" name="last" aria-required="true"/>
+                  <input class="form-control" type="text" v-model="loginFields.last" name="last" aria-required="true"
+                      id="profileLastName"
+                      :aria-invalid="errors && errors.length > 0"
+                      aria-errormessage="lastnameError"/>
                 </div>
-                <p class="text-danger" v-show="errors[0]">{{ errors[0]}}</p>
+                <p class="text-danger" v-show="errors[0]" id="lastnameError">{{ errors[0]}}</p>
               </ValidationProvider>
             </div>
-            <label class="mt-2">Nickname</label>
+            <label class="mt-2" for="profileNickname">Nickname</label>
             <ValidationProvider name="Nickname" :debounce=500 v-slot="{errors}" rules="maxNicknameLength">
               <div class="input-group">
-                <input class="form-control" type="text" v-model="loginFields.nickname" name="nickname"/>
+                <input class="form-control" type="text" v-model="loginFields.nickname" name="nickname"
+                    id="profileNickname"
+                    :aria-invalid="errors && errors.length > 0"
+                    aria-errormessage="nicknameError"/>
               </div>
-              <p class="text-danger" v-show="errors[0]">{{ errors[0]}}</p>
+              <p class="text-danger" v-show="errors[0]" id="nicknameError">{{ errors[0]}}</p>
             </ValidationProvider>
 
             <div class="mt-2">

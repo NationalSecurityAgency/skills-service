@@ -30,14 +30,15 @@ limitations under the License.
                 <label for="username" class="text-secondary font-weight-bold">* Email Address</label>
                 <ValidationProvider name="Email Address" rules="required|minUsernameLength|email" :debounce=300 v-slot="{errors}">
                   <input type="text" class="form-control" id="username" tabindex="1" placeholder="Enter email"
-                         aria-describedby="emailHelp"
+                         aria-errormessage="emailHelp"
+                         :aria-invalid="errors && errors.length > 0"
                          v-model="username"
                          data-cy="forgotPasswordEmail"
                         aria-required="true">
                     <small id="emailHelp" class="form-text text-danger" v-show="errors[0]">{{
                       errors[0] }}
                     </small>
-                    <small class="text-danger" v-if="serverError" data-cy="resetFailedError">{{ serverError }}</small>
+                    <small class="text-danger" v-if="serverError" data-cy="resetFailedError" role="alert">{{ serverError }}</small>
                 </ValidationProvider>
               </div>
               <button type="submit" class="btn btn-outline-primary" tabindex="3" :disabled="invalid || (disabled === true)" data-cy="resetPassword">

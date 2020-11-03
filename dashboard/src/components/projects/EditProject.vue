@@ -21,7 +21,7 @@ limitations under the License.
         <div class="row">
           <div class="col-12">
             <div class="form-group">
-              <label>* Project Name</label>
+              <label for="projectIdInput">* Project Name</label>
               <ValidationProvider rules="required|minNameLength|maxProjectNameLength|uniqueName|customNameValidator"
                                   v-slot="{errors}"
                                   name="Project Name">
@@ -29,8 +29,11 @@ limitations under the License.
                        v-on:input="updateProjectId"
                        v-on:keyup.enter="handleSubmit(updateProject)"
                        v-focus
-                       data-cy="projectName"/>
-                <small class="form-text text-danger" data-cy="projectNameError">{{ errors[0] }}</small>
+                       data-cy="projectName"
+                        id="projectIdInput"
+                      :aria-invalid="errors && errors.length > 0"
+                      aria-errormessage="projectNameError"/>
+                <small class="form-text text-danger" data-cy="projectNameError" id="projectNameError">{{ errors[0] }}</small>
               </ValidationProvider>
             </div>
           </div>
@@ -42,7 +45,7 @@ limitations under the License.
           </div>
         </div>
 
-        <p v-if="invalid && overallErrMsg" class="text-center text-danger mt-2"><small>***{{ overallErrMsg }}***</small></p>
+        <p v-if="invalid && overallErrMsg" class="text-center text-danger mt-2" aria-live="polite"><small>***{{ overallErrMsg }}***</small></p>
       </b-container>
 
       <div slot="modal-footer" class="w-100">

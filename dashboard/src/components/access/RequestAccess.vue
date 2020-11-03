@@ -35,9 +35,11 @@ limitations under the License.
                         <span class="input-group-text"><i class="fas fa-user"></i></span>
                       </div>
                       <input class="form-control" type="text" v-model="loginFields.firstName" id="firstName" :disabled="createInProgress"
-                           name="firstName" aria-required="true"/>
+                           name="firstName" aria-required="true"
+                          :aria-invalid="errors && errors.length > 0"
+                          aria-errormessage="firstnameError"/>
                     </div>
-                    <small class="form-text text-danger" v-show="errors[0]">{{ errors[0] }}</small>
+                    <small class="form-text text-danger" v-show="errors[0]" id="firstnameError">{{ errors[0] }}</small>
                   </ValidationProvider>
                 </div>
                 <div class="form-group">
@@ -48,9 +50,9 @@ limitations under the License.
                         <span class="input-group-text"><i class="fas fa-user-tie"></i></span>
                       </div>
                       <input class="form-control" type="text" v-model="loginFields.lastName" id="lastName" :disabled="createInProgress"
-                           name="lastName" aria-required="true"/>
+                           name="lastName" aria-required="true" :aria-invalid="errors && errors.length > 0" aria-errormessage="lastnameError"/>
                     </div>
-                    <small class="form-text text-danger" v-show="errors[0]">{{ errors[0] }}</small>
+                    <small class="form-text text-danger" v-show="errors[0]" id="lastnameError">{{ errors[0] }}</small>
                   </ValidationProvider>
                 </div>
                 <div class="form-group">
@@ -61,9 +63,9 @@ limitations under the License.
                         <span class="input-group-text"><i class="far fa-envelope"></i></span>
                       </div>
                       <input class="form-control" type="text" v-model="loginFields.email" id="email" :disabled="createInProgress"
-                           name="email" aria-required="true"/>
+                           name="email" aria-required="true" :aria-invalid="errors && errors.length > 0" aria-errormessage="emailErrors"/>
                     </div>
-                    <small class="form-text text-danger" v-show="errors[0]">{{ errors[0] }}</small>
+                    <small class="form-text text-danger" v-show="errors[0]" id="emailErrors">{{ errors[0] }}</small>
                   </ValidationProvider>
                 </div>
                 <div class="form-group">
@@ -74,9 +76,9 @@ limitations under the License.
                         <span class="input-group-text"><i class="fas fa-key"></i></span>
                       </div>
                       <input class="form-control" type="password" v-model="loginFields.password" id="password" :disabled="createInProgress"
-                           name="password" ref="password" aria-required="true"/>
+                           name="password" ref="password" aria-required="true" :aria-invalid="errors && errors.length > 0" aria-errormessage="passwordError"/>
                     </div>
-                    <small class="form-text text-danger" v-show="errors[0]">{{ errors[0] }}</small>
+                    <small class="form-text text-danger" v-show="errors[0]" id="passwordError">{{ errors[0] }}</small>
                   </ValidationProvider>
                 </div>
                 <div class="form-group">
@@ -87,9 +89,9 @@ limitations under the License.
                         <span class="input-group-text"><i class="fas fa-key"></i></span>
                       </div>
                       <input class="form-control" type="password" id="password_confirmation" v-model="passwordConfirmation" :disabled="createInProgress"
-                           name="password_confirmation" aria-required="true"/>
+                           name="password_confirmation" aria-required="true" :aria-invalid="errors && errors.length" aria-errormessage="passwordConfirmationError"/>
                     </div>
-                    <small class="form-text text-danger" v-show="errors[0]">{{ errors[0] }}</small>
+                    <small class="form-text text-danger" v-show="errors[0]" id="passwordConfirmationError">{{ errors[0] }}</small>
                   </ValidationProvider>
                 </div>
                 <div class="field is-grouped">

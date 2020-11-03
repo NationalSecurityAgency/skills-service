@@ -33,7 +33,7 @@ limitations under the License.
         </div>
       </div>
     </div>
-    <dashboard-footer role="contentinfo"/>
+    <dashboard-footer/>
     <customizable-footer></customizable-footer>
   </div>
 </template>

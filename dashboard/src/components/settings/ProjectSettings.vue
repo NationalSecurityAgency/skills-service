@@ -45,7 +45,7 @@ limitations under the License.
 
         <hr/>
 
-        <p v-if="errMsg" class="text-center text-danger mt-3">***{{ errMsg }}***</p>
+        <p v-if="errMsg" class="text-center text-danger mt-3" role="alert">***{{ errMsg }}***</p>
 
         <div class="row">
           <div class="col">
