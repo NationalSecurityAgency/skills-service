@@ -18,6 +18,7 @@ limitations under the License.
     <template slot="button-content">
       <b-avatar variant="primary" :text="avatarTxt" size="sm"></b-avatar>
       <span class="d-inline-block text-truncate userName ml-1 font-weight-bold">{{ displayName }}</span>
+      <span class="sr-only">settings menu</span>
     </template>
     <b-dropdown-item href="#"  @click="gotoSettings">
       <span class="text-gray-700"> <i class="fas fa-cog"/><span class="link-name">Settings</span></span>
@@ -91,6 +92,17 @@ limitations under the License.
 
   .text-gray-700 > i {
     width: 1.6rem;
+  }
+
+  .sr-only {
+    border: 0;
+    clip: rect(0, 0, 0, 0);
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    width: 1px;
   }
 
 </style>

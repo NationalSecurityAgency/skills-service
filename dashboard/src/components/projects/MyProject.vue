@@ -18,7 +18,7 @@ limitations under the License.
     <page-preview-card :options="cardOptions">
       <div slot="header-top-right">
         <b-button v-if="isRootUser" class="mr-2" @click="unpin" data-cy="unpin" size="sm"
-                  variant="outline-primary" :aria-label="'Pin Project '+ projectInternal.name"
+                  variant="outline-primary" :aria-label="'remove pin for project '+ projectInternal.name"
                   :aria-pressed="pinned">
           <span class="d-none d-sm-inline">Unpin</span> <i class="fas fa-ban" style="font-size: 1rem;"></i>
         </b-button>

@@ -22,7 +22,7 @@ limitations under the License.
       <slot>
         <b-button v-if="action" type="button" size="sm" variant="outline-primary"
                 :class="{'btn':true, 'btn-outline-primary':true, 'disabled':disabled}"
-                v-on:click="addClicked">
+                v-on:click="addClicked" :aria-label="ariaLabel ? ariaLabel : action">
           <span class="d-none d-sm-inline">{{ action }} </span> <i class="fas fa-plus-circle"/>
         </b-button>
         <i v-if="disabled" class="fas fa-exclamation-circle text-warning ml-1" style="pointer-events: all; font-size: 1.5rem;" v-b-tooltip.hover="disabledMsg"/>
@@ -49,6 +49,10 @@ limitations under the License.
         default: false,
       },
       disabledMsg: {
+        type: String,
+        required: false,
+      },
+      ariaLabel: {
         type: String,
         required: false,
       },

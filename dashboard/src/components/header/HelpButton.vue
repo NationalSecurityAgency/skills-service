@@ -14,9 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <b-dropdown right variant="link" aria-label="Help Menu Dropdown">
+  <b-dropdown right variant="link" aria-label="Help Menu Dropdown" id="helpMenu">
     <template slot="button-content">
-      <i class="far fa-question-circle"></i>
+      <i class="far fa-question-circle" aria-label="help menu button"></i><span class="sr-only">help menu button</span>
     </template>
     <b-dropdown-item :href="officialGuide" target="_blank" style="min-width: 12.5rem;">
       <span class="text-gray-700"> <i class="fas fa-book"></i>Official Docs</span>
@@ -65,5 +65,13 @@ limitations under the License.
 }
 .text-gray-700 > i {
   width: 1.6rem;
+}
+.sr-only {
+  position:absolute;
+  left:-10000px;
+  top:auto;
+  width:1px;
+  height:1px;
+  overflow:hidden;
 }
 </style>

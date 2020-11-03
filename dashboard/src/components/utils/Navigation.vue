@@ -22,9 +22,11 @@ limitations under the License.
             <b-col v-if="smallScreenMode || !collapsed">
               <span class="h6 text-uppercase mr-2 nav-title" v-if="!collapsed || smallScreenMode">Navigation</span>
             </b-col>
+            <b-col :class="{ 'text-right' : !collapsed }">
               <div v-if="!smallScreenMode" :class="{ 'pr-2 pl-3' : !collapsed }">
                 <b-button v-if="!smallScreenMode" size="sm" variant="outline-secondary" @click="flipCollapsed"
-                          class="py-0 text-primary" style="border-color: #d8d8d9;" data-cy="navCollapseOrExpand" v-b-tooltip.hover :title="collapsed ? 'Expand Navigation' : 'Collapse Navigation'" aria-label="navigation toggle">
+                          class="py-0 text-primary" style="border-color: #d8d8d9;" data-cy="navCollapseOrExpand" v-b-tooltip.hover
+                          :title="collapsed ? 'Expand Navigation' : 'Collapse Navigation'" aria-label="navigation toggle">
                   <i v-if="!collapsed" class="fas fa-compress-alt"/><i v-else class="fas fa-expand-alt"/>
                 </b-button>
               </div>
@@ -161,6 +163,10 @@ limitations under the License.
     .skills-nav {
       min-height: calc(100vh - 10rem);
     }
+  }
+
+  .nav-title {
+    color: darkslategray;
   }
 
   .skills-menu-content {

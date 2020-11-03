@@ -15,13 +15,14 @@ limitations under the License.
 */
 <template>
     <b-modal id="searchProjectsModal" title="Pin Projects" v-model="isShown" :no-close-on-backdrop="true" size="lg"
-           @close="done" header-bg-variant="info" header-text-variant="light" no-fade body-class="px-0 mx-0">
+           @close="done" header-bg-variant="info" header-text-variant="light" no-fade body-class="px-0 mx-0"
+             header-class="header-text" role="dialog">
       <b-container fluid class="px-0" data-cy="pinProjects">
         <b-row class="px-3">
           <b-col class="mx-0 mb-2">
             <b-input-group>
               <template #append>
-                <b-button variant="outline-secondary" @click="searchValue=''" data-cy="pinProjectsClearSearch"><i class="fas fa-times"></i></b-button>
+                <b-button variant="outline-secondary" @click="searchValue=''" data-cy="pinProjectsClearSearch" aria-label="clear search button"><i class="fas fa-times"></i></b-button>
               </template>
               <b-input v-model="searchValue" placeholder="Search projects to pin" data-cy="pinProjectsSearchInput" aria-label="search for projects to pin"></b-input>
             </b-input-group>
@@ -262,5 +263,7 @@ limitations under the License.
 </script>
 
 <style lang="scss" scoped>
-
+  /deep/ .header-text {
+    color: #3E5461;
+  }
 </style>

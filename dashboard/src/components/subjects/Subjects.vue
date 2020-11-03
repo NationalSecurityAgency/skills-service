@@ -15,7 +15,9 @@ limitations under the License.
 */
 <template>
   <div>
-    <sub-page-header title="Subjects" action="Subject" @add-action="openNewSubjectModal" :disabled="addSubjectDisabled" :disabled-msg="addSubjectsDisabledMsg"/>
+    <sub-page-header title="Subjects" action="Subject" @add-action="openNewSubjectModal"
+                     :disabled="addSubjectDisabled" :disabled-msg="addSubjectsDisabledMsg"
+                     :aria-label="'new subject'"/>
     <loading-container v-bind:is-loading="isLoading">
       <div v-if="subjects && subjects.length" class="row justify-content-center">
         <div v-for="(subject) of subjects" :key="subject.subjectId" :id="subject.subjectId" class="col-lg-4 mb-3"

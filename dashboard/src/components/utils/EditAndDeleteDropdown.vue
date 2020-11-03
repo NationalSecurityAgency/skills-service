@@ -15,7 +15,7 @@ limitations under the License.
 */
 <template>
   <b-dropdown variant="outline-secondary" size="sm" right no-caret>
-    <template slot="button-content"><i class="fas fa-bars"/></template>
+    <template slot="button-content"><i class="fas fa-bars"/><span class="sr-only">edit menu button</span></template>
 
     <b-dropdown-item v-on:click="emit('edited')" class="mb-1">
       <span class="text-primary"> <i class="fas fa-edit pr-1"/>Edit</span>
@@ -59,5 +59,12 @@ limitations under the License.
 </script>
 
 <style scoped>
-
+.sr-only {
+  position:absolute;
+  left:-10000px;
+  top:auto;
+  width:1px;
+  height:1px;
+  overflow:hidden;
+}
 </style>
