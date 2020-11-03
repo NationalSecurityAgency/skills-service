@@ -16,6 +16,7 @@ limitations under the License.
 <template>
   <b-button-group>
     <b-button :to="{ name: navItem.pathName }" v-for="navItem in navCards" :key="navItem.title"
+              class="skill-nav-button"
               :class="{'bg-primary' : $route.name === navItem.pathName, 'skills-white-text' : $route.name === navItem.pathName}"
               variant="outline-info"> <i :class="navItem.icon"/></b-button>
   </b-button-group>
@@ -35,6 +36,10 @@ limitations under the License.
 
 <style scoped>
 .skills-white-text i {
+  color: white !important;
+}
+
+.skill-nav-button:hover i {
   color: white !important;
 }
 </style>

@@ -21,7 +21,7 @@ limitations under the License.
           <b-input v-model="filters.name" data-cy="skillsNavigator-skillNameFilter"/>
         </b-form-group>
       </div>
-      <div class="col-md border-right" data-cy="skillsNavigator-filters">
+      <div class="col-md" data-cy="skillsNavigator-filters">
         <b-form-group label="Tag Filters"  label-class="text-muted">
           <b-form-checkbox v-model="filters.overlookedTag" inline>
             <b-badge variant="danger" class="ml-2">Overlooked Skill</b-badge>

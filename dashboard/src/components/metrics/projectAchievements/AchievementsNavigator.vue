@@ -26,7 +26,7 @@ limitations under the License.
             <b-form-datepicker id="from-date-filter" v-model="fromDateFilter" class="mb-2" data-cy="achievementsNavigator-fromDateInput"></b-form-datepicker>
           </b-form-group>
         </div>
-        <div class="col-6 col-md border-right">
+        <div class="col-6 col-md">
           <b-form-group label="To Date:" label-for="input-1" label-class="text-muted">
             <b-form-datepicker id="to-date-filter" v-model="toDateFilter" class="mb-2" data-cy="achievementsNavigator-toDateInput"></b-form-datepicker>
           </b-form-group>

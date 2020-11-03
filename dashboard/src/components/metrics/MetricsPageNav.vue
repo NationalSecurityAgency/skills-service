@@ -19,8 +19,11 @@ limitations under the License.
       <project-metrics-small-nav :nav-cards="navCards" />
     </sub-page-header>
 
-    <router-view></router-view>
-    <project-metrics-nav-cards :nav-cards="navCards"/>
+    <!-- on FF charts end up pushing column to the next row; this is a workaround -->
+    <div style="width: 99%;">
+      <router-view></router-view>
+      <project-metrics-nav-cards :nav-cards="navCards"/>
+    </div>
   </div>
 </template>
 
@@ -38,19 +41,19 @@ limitations under the License.
           title: 'Achievements',
           subtitle: 'Explore users\' achievements',
           description: 'Browse users\' achieved overall levels, subject level achievements as well as earned badges',
-          icon: 'fa fa-trophy text-warning',
+          icon: 'fa fa-trophy skills-color-achievements',
           pathName: 'UsersAndLevelsMetrics',
         }, {
           title: 'Subjects',
           subtitle: 'Achievements by Subjects',
           description: 'Detailed breakdown how users are earning skills under each subject',
-          icon: 'fa fa-cubes text-primary',
+          icon: 'fa fa-cubes skills-color-subjects',
           pathName: 'SubjectMetricsPage',
         }, {
           title: 'Skills',
           subtitle: 'Understand Skills Usage',
           description: 'Find top-achieved skills and overlooked skills. Learn how much each skill is utilized within your applicaiton.',
-          icon: 'fa fa-graduation-cap text-info',
+          icon: 'fa fa-graduation-cap skills-color-skills',
           pathName: 'SkillsMetricsPage',
         }],
       };

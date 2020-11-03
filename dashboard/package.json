@@ -20,7 +20,7 @@
     "@fortawesome/fontawesome-free": "5.15.1",
     "@skilltree/skills-client-vue": "3.0.1",
     "animate.css": "4.1.1",
-    "apexcharts": "3.22.0",
+    "apexcharts": "3.22.1",
     "axios": "0.20.0",
     "babel-polyfill": "6.26.0",
     "bootstrap": "4.5.3",

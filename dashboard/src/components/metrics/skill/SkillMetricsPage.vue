@@ -17,7 +17,9 @@ limitations under the License.
   <div>
     <sub-page-header title="Metrics"/>
     <skills-spinner :is-loading="loading" />
-    <div v-if="!loading">
+
+    <!-- on FF charts end up pushing column to the next row; this is a workaround -->
+    <div v-if="!loading" style="width: 99%;">
       <div class="row mb-2">
         <div class="col">
           <stats-card title="Achieved" :statNum="numUsersAchieved" icon="fa fa-trophy text-info" data-cy="numUserAchievedStatCard">
