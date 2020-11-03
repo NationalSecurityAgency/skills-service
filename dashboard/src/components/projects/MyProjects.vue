@@ -17,11 +17,11 @@ limitations under the License.
   <div>
     <sub-page-header title="Projects" action="Project"
                      :disabled="addProjectDisabled" :disabled-msg="addProjectsDisabledMsg">
-          <b-button v-if="isRootUser" variant="outline-primary" @click="showSearchProjectModal=true" pill size="sm"
+          <b-button v-if="isRootUser" variant="outline-primary" @click="showSearchProjectModal=true" size="sm"
 class="mr-2">
             <span class="d-none d-sm-inline">Pin</span> <i class="fas fa-thumbtack"/>
           </b-button>
-          <b-button @click="newProject.show=true" variant="outline-primary" pill size="sm">
+          <b-button @click="newProject.show=true" variant="outline-primary" size="sm">
             <span class="d-none d-sm-inline">Project</span> <i class="fas fa-plus-circle" />
           </b-button>
     </sub-page-header>

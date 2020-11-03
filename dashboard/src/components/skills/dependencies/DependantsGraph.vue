@@ -17,7 +17,7 @@ limitations under the License.
   <simple-card id="dependent-skills-graph">
     <div v-if="!this.dependentSkills || this.dependentSkills.length === 0">
       <div class="column is-half has-text-centered">
-        <no-content2 icon="fa fa-vector-square" title="No Dependencies Yet..."
+        <no-content2 icon="fa fa-project-diagram" title="No Dependencies Yet..."
                      message="You can manage and visualize skill's dependencies on this page. Please use the dropdown above to start adding dependent skills."></no-content2>
       </div>
 
