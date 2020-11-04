@@ -166,8 +166,8 @@ describe('Client Display Features Tests', () => {
           helpUrl: 'http://doHelpOnThisSkill.com'
         });
 
-        cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'user0', timestamp: new Date().getTime()})
-        cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'user0', timestamp: new Date().getTime() - 1000*60*60*24})
+        cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: Cypress.env('proxyUser'), timestamp: new Date().getTime()})
+        cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: Cypress.env('proxyUser'), timestamp: new Date().getTime() - 1000*60*60*24})
 
         cy.cdVisit('/');
 
@@ -201,7 +201,7 @@ describe('Client Display Features Tests', () => {
 
     it('deps are added to partially achieved skill', () => {
         cy.createSkill(1);
-        cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'user0', timestamp: new Date().getTime()})
+        cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: Cypress.env('proxyUser'), timestamp: new Date().getTime()})
         cy.createSkill(2);
         cy.createSkill(3);
         cy.request('POST', `/admin/projects/proj1/skills/skill1/dependency/skill2`)
@@ -238,11 +238,11 @@ describe('Client Display Features Tests', () => {
     it('deps are added to fully achieved skill', () => {
         cy.createSkill(1);
         cy.request('POST', `/api/projects/proj1/skills/skill1`, {
-            userId: 'user0',
+            userId: Cypress.env('proxyUser'),
             timestamp: new Date().getTime()
         })
         cy.request('POST', `/api/projects/proj1/skills/skill1`, {
-            userId: 'user0',
+            userId: Cypress.env('proxyUser'),
             timestamp: new Date().getTime() - 1000 * 60 * 24
         })
         cy.createSkill(2);
@@ -268,11 +268,11 @@ describe('Client Display Features Tests', () => {
 
         // now let's achieve the dependent skill
         cy.request('POST', `/api/projects/proj1/skills/skill2`, {
-            userId: 'user0',
+            userId: Cypress.env('proxyUser'),
             timestamp: new Date().getTime()
         })
         cy.request('POST', `/api/projects/proj1/skills/skill2`, {
-            userId: 'user0',
+            userId: Cypress.env('proxyUser'),
             timestamp: new Date().getTime() - 1000 * 60 * 24
         })
         cy.cdBack('Subject 1');

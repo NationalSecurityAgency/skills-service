@@ -91,6 +91,8 @@ class UserTokenController {
             String userId = authentication.name
             log.debug("Creating self-proxy OAUth Token for [{}] or project [{}], authenticated via [{}] OAuth provider", userId, projectId, oauthProvider)
             return createSkillsProxyToken(projectId, userId)
+        } else {
+            log.error("Unexpected authentication object [{}] with credentials [{}]", authentication, authentication.credentials)
         }
     }
 

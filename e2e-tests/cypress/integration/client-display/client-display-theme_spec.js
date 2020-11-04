@@ -143,11 +143,11 @@ describe('Client Display Tests', () => {
 
             cy.request('POST', '/admin/projects/proj1/badge/badge2/skills/skill3')
 
-            cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'user0', timestamp: new Date().getTime()})
-            cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'user0', timestamp: new Date().getTime() - 1000*60*60*24})
+            cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: Cypress.env('proxyUser'), timestamp: new Date().getTime()})
+            cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: Cypress.env('proxyUser'), timestamp: new Date().getTime() - 1000*60*60*24})
 
-            cy.request('POST', `/api/projects/proj1/skills/skill3`, {userId: 'user0', timestamp: new Date().getTime()})
-            cy.request('POST', `/api/projects/proj1/skills/skill3`, {userId: 'user0', timestamp: new Date().getTime() - 1000*60*60*24})
+            cy.request('POST', `/api/projects/proj1/skills/skill3`, {userId: Cypress.env('proxyUser'), timestamp: new Date().getTime()})
+            cy.request('POST', `/api/projects/proj1/skills/skill3`, {userId: Cypress.env('proxyUser'), timestamp: new Date().getTime() - 1000*60*60*24})
         });
 
 

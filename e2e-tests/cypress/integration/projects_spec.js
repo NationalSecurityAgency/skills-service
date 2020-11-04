@@ -281,7 +281,7 @@ describe('Projects Tests', () => {
 
     cy.route({
       method: 'PUT',
-      url: '/admin/projects/proj1/users/foo/roles/ROLE_PROJECT_ADMIN',
+      url: '/admin/projects/proj1/users/bar/roles/ROLE_PROJECT_ADMIN',
       status: 400,
       response: {errorCode: 'UserNotFound', explanation: 'User was not found'}
     }).as('addAdmin');
@@ -290,7 +290,7 @@ describe('Projects Tests', () => {
       method: 'POST',
       url: '/app/users/suggest*',
       status: 200,
-      response: [{userId:'foo', userIdForDisplay: 'foo', first: 'foo', last: 'foo', dn: 'foo'}]
+      response: [{userId:'bar', userIdForDisplay: 'bar', first: 'bar', last: 'bar', dn: 'bar'}]
     }).as('suggest');
     cy.route('GET', '/app/userInfo').as('loadUserInfo');
     cy.route('GET', '/admin/projects/proj1').as('loadProject');
@@ -299,7 +299,7 @@ describe('Projects Tests', () => {
     cy.wait('@loadUserInfo');
     cy.wait('@loadProject');
 
-    cy.contains('Enter user id').type('foo');
+    cy.contains('Enter user id').type('bar');
     cy.wait('@suggest');
     cy.get('.multiselect__input').type('{enter}');
     cy.clickButton('Add');
@@ -315,7 +315,7 @@ describe('Projects Tests', () => {
 
     cy.route({
       method: 'PUT',
-      url: '/admin/projects/proj1/users/foo/roles/ROLE_PROJECT_ADMIN',
+      url: '/admin/projects/proj1/users/bar/roles/ROLE_PROJECT_ADMIN',
       status: 400,
       response: {errorCode: 'InternalError', explanation: 'Some Error Occurred'}
     }).as('addAdmin');
@@ -324,7 +324,7 @@ describe('Projects Tests', () => {
       method: 'POST',
       url: '/app/users/suggest*',
       status: 200,
-      response: [{userId:'foo', userIdForDisplay: 'foo', first: 'foo', last: 'foo', dn: 'foo'}]
+      response: [{userId:'bar', userIdForDisplay: 'bar', first: 'bar', last: 'bar', dn: 'bar'}]
     }).as('suggest');
     cy.route('GET', '/app/userInfo').as('loadUserInfo');
     cy.route('GET', '/admin/projects/proj1').as('loadProject');
@@ -333,7 +333,7 @@ describe('Projects Tests', () => {
     cy.wait('@loadUserInfo');
     cy.wait('@loadProject');
 
-    cy.contains('Enter user id').type('foo');
+    cy.contains('Enter user id').type('bar');
     cy.wait('@suggest');
     cy.get('.multiselect__input').type('{enter}');
     cy.clickButton('Add');
@@ -425,7 +425,7 @@ describe('Projects Tests', () => {
     cy.wait('@loadUserInfo');
     cy.wait('@loadProject');
 
-    cy.contains('Enter user id').type('root/foo{enter}');
+    cy.contains('Enter user id').type('root/bar{enter}');
     cy.wait('@suggest');
   });
 

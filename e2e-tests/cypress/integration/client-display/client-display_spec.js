@@ -110,11 +110,11 @@ describe('Client Display Tests', () => {
         });
         cy.request('POST', `/admin/projects/proj1/skills/skill4/dependency/skill2`)
 
-        cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'user0', timestamp: new Date().getTime()})
-        cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'user0', timestamp: new Date().getTime() - 1000*60*60*24})
+        cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: Cypress.env('proxyUser'), timestamp: new Date().getTime()})
+        cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: Cypress.env('proxyUser'), timestamp: new Date().getTime() - 1000*60*60*24})
 
-        cy.request('POST', `/api/projects/proj1/skills/skill3`, {userId: 'user0', timestamp: new Date().getTime()})
-        cy.request('POST', `/api/projects/proj1/skills/skill3`, {userId: 'user0', timestamp: new Date().getTime() - 1000*60*60*24})
+        cy.request('POST', `/api/projects/proj1/skills/skill3`, {userId: Cypress.env('proxyUser'), timestamp: new Date().getTime()})
+        cy.request('POST', `/api/projects/proj1/skills/skill3`, {userId: Cypress.env('proxyUser'), timestamp: new Date().getTime() - 1000*60*60*24})
 
         cy.request('POST', '/admin/projects/proj1/badges/badge1', {
             projectId: 'proj1',
@@ -213,7 +213,7 @@ describe('Client Display Tests', () => {
         });
         cy.cdVisit('/?isSummaryOnly=true');
 
-        cy.get('[data-cy=myRank]').contains("1")
+        // cy.get('[data-cy=myRank]').contains("1")
         cy.get('[data-cy=myBadges]').contains("0 Badges")
 
         // make sure click doesn't take us anywhere
@@ -234,11 +234,11 @@ describe('Client Display Tests', () => {
     it('display achieved date on skill overview page', () => {
         const m = moment('2020-09-12 11', 'YYYY-MM-DD HH');
         const orig = m.clone()
-        cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: 'user0', timestamp: m.format('x')})
-        cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: 'user0', timestamp: m.subtract(4, 'day').format('x')})
-        cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: 'user0', timestamp: m.subtract(3, 'day').format('x')})
-        cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: 'user0', timestamp: m.subtract(2, 'day').format('x')})
-        cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: 'user0', timestamp: m.subtract(1, 'day').format('x')})
+        cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: Cypress.env('proxyUser'), timestamp: m.format('x')})
+        cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: Cypress.env('proxyUser'), timestamp: m.subtract(4, 'day').format('x')})
+        cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: Cypress.env('proxyUser'), timestamp: m.subtract(3, 'day').format('x')})
+        cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: Cypress.env('proxyUser'), timestamp: m.subtract(2, 'day').format('x')})
+        cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: Cypress.env('proxyUser'), timestamp: m.subtract(1, 'day').format('x')})
         cy.cdVisit('/');
         cy.cdClickSubj(0);
         cy.cdClickSkill(1);
@@ -284,11 +284,11 @@ describe('Client Display Tests', () => {
     it('display achieved date on subject page when skill details are expanded', () => {
         const m = moment('2020-09-12 11', 'YYYY-MM-DD HH');
         const orig = m.clone()
-        cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: 'user0', timestamp: m.format('x')})
-        cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: 'user0', timestamp: m.subtract(4, 'day').format('x')})
-        cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: 'user0', timestamp: m.subtract(3, 'day').format('x')})
-        cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: 'user0', timestamp: m.subtract(2, 'day').format('x')})
-        cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: 'user0', timestamp: m.subtract(1, 'day').format('x')})
+        cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: Cypress.env('proxyUser'), timestamp: m.format('x')})
+        cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: Cypress.env('proxyUser'), timestamp: m.subtract(4, 'day').format('x')})
+        cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: Cypress.env('proxyUser'), timestamp: m.subtract(3, 'day').format('x')})
+        cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: Cypress.env('proxyUser'), timestamp: m.subtract(2, 'day').format('x')})
+        cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: Cypress.env('proxyUser'), timestamp: m.subtract(1, 'day').format('x')})
         cy.cdVisit('/');
         cy.cdClickSubj(0);
 
