@@ -65,14 +65,6 @@ jobs:
     - name: Build skills-service
       run: mvn --batch-mode install -DskipTests
 
-    - name: Start services for Cypress tests
-      run: |
-        cd e2e-tests
-        npm install
-        npm run cyServices:start:skills-service:oauth
-        npm run cyServices:start:client-display:oauth
-        cd ..
-
     - name: run hyrda oauth service
       run: ./.github/workflows/scripts/runHydra.sh
 
@@ -98,6 +90,14 @@ jobs:
             --response-types code \
             --scope openid \
             --callbacks http://localhost:8080/login/oauth2/code/hydra
+
+    - name: Start services for Cypress tests
+      run: |
+        cd e2e-tests
+        npm install
+        npm run cyServices:start:skills-service:oauth
+        npm run cyServices:start:client-display:oauth
+        cd ..
 
     - name: Run Cypress tests
       uses: cypress-io/github-action@v2
