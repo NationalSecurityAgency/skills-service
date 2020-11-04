@@ -264,26 +264,26 @@ describe('Settings Tests', () => {
         cy.get$('[data-cy=publicUrl]').type('{selectall}http://localhost:8082');
         cy.get$('[data-cy=resetTokenExpiration]').type('{selectall}2H25M22S');
         cy.get$('[data-cy=fromEmail]').type('{selectall}foo@skilltree.madeup');
-        cy.get$('[data-cy=customHeader').type('{selectall}<div id="customHeader" style="font-size:3em;color:red">HEADER</div>');
-        cy.get$('[data-cy=customFooter').type('{selectall}<div id="customFooter" style="font-size:3em;color:red">FOOTER</div>');
+        cy.get$('[data-cy=customHeader').type('{selectall}<div id="customHeaderDiv" style="font-size:3em;color:red">HEADER</div>');
+        cy.get$('[data-cy=customFooter').type('{selectall}<div id="customFooterDiv" style="font-size:3em;color:red">FOOTER</div>');
         cy.get$('[data-cy=saveSystemSettings]').click();
         cy.wait('@loadConfig');
-        cy.get('#customHeader').contains('HEADER');
-        cy.get('#customFooter').contains('FOOTER');
+        cy.get('#customHeaderDiv').contains('HEADER');
+        cy.get('#customFooterDiv').contains('FOOTER');
         cy.visit('/settings/system');
         cy.wait('@loadSystemSettings');
         cy.get('[data-cy=publicUrl]').should('have.value', 'http://localhost:8082');
         cy.get('[data-cy=resetTokenExpiration]').should('have.value', '2H25M22S');
         cy.get('[data-cy=fromEmail]').should('have.value', 'foo@skilltree.madeup');
-        cy.get('[data-cy=customHeader').should('have.value','<div id="customHeader" style="font-size:3em;color:red">HEADER</div>');
-        cy.get('[data-cy=customFooter').should('have.value','<div id="customFooter" style="font-size:3em;color:red">FOOTER</div>');
+        cy.get('[data-cy=customHeader').should('have.value','<div id="customHeaderDiv" style="font-size:3em;color:red">HEADER</div>');
+        cy.get('[data-cy=customFooter').should('have.value','<div id="customFooterDiv" style="font-size:3em;color:red">FOOTER</div>');
 
         //confirm that header/footer persist after logging out
         cy.logout();
         cy.visit('/');
         cy.wait('@loadConfig');
-        cy.get('#customHeader').contains('HEADER');
-        cy.get('#customFooter').contains('FOOTER');
+        cy.get('#customHeaderDiv').contains('HEADER');
+        cy.get('#customFooterDiv').contains('FOOTER');
     });
 
     it('System Settings - script tags not allowed in footer/header', () => {
@@ -302,8 +302,8 @@ describe('Settings Tests', () => {
         cy.get$('[data-cy=publicUrl]').type('{selectall}http://localhost:8082');
         cy.get$('[data-cy=resetTokenExpiration]').type('{selectall}2H25M22S');
         cy.get$('[data-cy=fromEmail]').type('{selectall}foo@skilltree.madeup');
-        cy.get$('[data-cy=customHeader]').type('{selectall}<div id="customHeader" style="font-size:3em;color:red"><script src="somewhere"/>HEADER</div>');
-        cy.get$('[data-cy=customFooter]').type('{selectall}<div id="customFooter" style="font-size:3em;color:red"><script type="text/javascript">alert("foo");</script>FOOTER</div>');
+        cy.get$('[data-cy=customHeader]').type('{selectall}<div id="customHeaderDiv" style="font-size:3em;color:red"><script src="somewhere"/>HEADER</div>');
+        cy.get$('[data-cy=customFooter]').type('{selectall}<div id="customFooterDiv" style="font-size:3em;color:red"><script type="text/javascript">alert("foo");</script>FOOTER</div>');
         cy.get('[data-cy=customHeaderError]').should('be.visible');
         cy.get('[data-cy=customHeaderError]').contains('<script> tags are not allowed');
         cy.get('[data-cy=customFooterError]').should('be.visible');
@@ -385,12 +385,14 @@ describe('Settings Tests', () => {
 
         cy.wait('@loadSystemSettings');
         cy.get$('[data-cy=publicUrl]').type('{selectall}http://localhost:8082');
-        cy.get$('[data-cy=customHeader').type('{selectall}<div id="customHeader" style="font-size:3em;color:red">HEADER</div>');
-        cy.get$('[data-cy=customFooter').type('{selectall}<div id="customFooter" style="font-size:3em;color:red">FOOTER</div>');
+        cy.get$('[data-cy=customHeader').type('{selectall}<div id="customHeaderDiv" style="font-size:3em;color:red">HEADER</div>');
+        cy.get$('[data-cy=customFooter').type('{selectall}<div id="customFooterDiv" style="font-size:3em;color:red">FOOTER</div>');
         cy.get$('[data-cy=saveSystemSettings]').click();
         cy.wait('@loadConfig');
-        cy.get('#customHeader').contains('HEADER');
-        cy.get('#customFooter').contains('FOOTER');
+        cy.get('#customHeaderDiv').should('be.visible')
+        cy.get('#customHeaderDiv').contains('HEADER');
+        cy.get('#customFooterDiv').should('be.visible');
+        cy.get('#customFooterDiv').contains('FOOTER');
 
         let bodyWidth;
         cy.get('body').invoke('width').then((width) => {
@@ -402,19 +404,19 @@ describe('Settings Tests', () => {
         }); //should be smaller due to padding applied to left and right of app
 
         let headerWidth;
-        cy.get('#customHeader').invoke('width').then((width) => {
+        cy.get('#customHeaderDiv').invoke('width').then((width) => {
             headerWidth = width;
         });
         let footerWidth;
-        cy.get('#customFooter').invoke('width').then((width) => {
+        cy.get('#customFooterDiv').invoke('width').then((width) => {
             footerWidth = width;
         });
 
         cy.get('body').then( () => {
-            cy.get('#customHeader').invoke('width').should('equal', bodyWidth);
-            cy.get('#customFooter').invoke('width').should('equal', bodyWidth);
-            cy.get('#customHeader').invoke('width').should('equal', appWidth);
-            cy.get('#customFooter').invoke('width').should('equal', appWidth);
+            cy.get('#customHeaderDiv').invoke('width').should('equal', bodyWidth);
+            cy.get('#customFooterDiv').invoke('width').should('equal', bodyWidth);
+            cy.get('#customHeaderDiv').invoke('width').should('equal', appWidth);
+            cy.get('#customFooterDiv').invoke('width').should('equal', appWidth);
         });
     });
 
