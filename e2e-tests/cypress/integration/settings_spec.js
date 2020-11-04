@@ -433,36 +433,36 @@ describe('Settings Tests', () => {
 
         cy.wait('@loadSystemSettings');
         cy.get$('[data-cy=publicUrl]').type('{selectall}http://localhost:8082');
-        cy.get$('[data-cy=customHeader').type('<div id="customHeader"><span id="chVersion">{{release.version}}</span> <span id="chBuildDate">{{build.date}}</span></div>', {parseSpecialCharSequences: false});
-        cy.get$('[data-cy=customFooter').type('<div id="customFooter"><span id="cfVersion">{{release.version}}</span> <span id="cfBuildDate">{{build.date}}</span></div>', {parseSpecialCharSequences: false});
+        cy.get$('[data-cy=customHeader').type('<div id="customHeaderDiv"><span id="chVersion">{{release.version}}</span> <span id="chBuildDate">{{build.date}}</span></div>', {parseSpecialCharSequences: false});
+        cy.get$('[data-cy=customFooter').type('<div id="customFooterDiv"><span id="cfVersion">{{release.version}}</span> <span id="cfBuildDate">{{build.date}}</span></div>', {parseSpecialCharSequences: false});
         cy.get$('[data-cy=saveSystemSettings]').click();
         cy.wait('@loadConfig');
-        cy.get('#customHeader').contains(/\w{3} \d{1,2}, \d{4}/).should('be.visible');
-        cy.get('#customHeader').contains(/\d{1,3}\.\d{1,3}\.\d{1,3}(-SNAPSHOT)?/).should('be.visible');
-        cy.get('#customFooter').contains(/\w{3} \d{1,2}, \d{4}/).should('be.visible');
-        cy.get('#customFooter').contains(/\d{1,3}\.\d{1,3}\.\d{1,3}(-SNAPSHOT)?/).should('be.visible');
+        cy.get('#customHeaderDiv').contains(/\w{3} \d{1,2}, \d{4}/).should('be.visible');
+        cy.get('#customHeaderDiv').contains(/\d{1,3}\.\d{1,3}\.\d{1,3}(-SNAPSHOT)?/).should('be.visible');
+        cy.get('#customFooterDiv').contains(/\w{3} \d{1,2}, \d{4}/).should('be.visible');
+        cy.get('#customFooterDiv').contains(/\d{1,3}\.\d{1,3}\.\d{1,3}(-SNAPSHOT)?/).should('be.visible');
 
         cy.get$('[data-cy=customHeader').type('{selectall}{backspace}');
         cy.get$('[data-cy=customFooter').type('{selectall}{backspace}');
-        cy.get$('[data-cy=customHeader').type('<div id="customHeader"><span id="chVersion">{{ release.version }}</span> <span id="chBuildDate">{{ build.date }}</span></div>', {parseSpecialCharSequences: false});
-        cy.get$('[data-cy=customFooter').type('<div id="customFooter"><span id="cfVersion">{{ release.version }}</span> <span id="cfBuildDate">{{ build.date }}</span></div>', {parseSpecialCharSequences: false});
+        cy.get$('[data-cy=customHeader').type('<div id="customHeaderDiv"><span id="chVersion">{{ release.version }}</span> <span id="chBuildDate">{{ build.date }}</span></div>', {parseSpecialCharSequences: false});
+        cy.get$('[data-cy=customFooter').type('<div id="customFooterDiv"><span id="cfVersion">{{ release.version }}</span> <span id="cfBuildDate">{{ build.date }}</span></div>', {parseSpecialCharSequences: false});
         cy.get$('[data-cy=saveSystemSettings]').click();
         cy.wait('@loadConfig');
-        cy.get('#customHeader').contains(/\w{3} \d{1,2}, \d{4}/).should('be.visible');
-        cy.get('#customHeader').contains(/\d{1,3}\.\d{1,3}\.\d{1,3}(-SNAPSHOT)?/).should('be.visible');
-        cy.get('#customFooter').contains(/\w{3} \d{1,2}, \d{4}/).should('be.visible');
-        cy.get('#customFooter').contains(/\d{1,3}\.\d{1,3}\.\d{1,3}(-SNAPSHOT)?/).should('be.visible');
+        cy.get('#customHeaderDiv').contains(/\w{3} \d{1,2}, \d{4}/).should('be.visible');
+        cy.get('#customHeaderDiv').contains(/\d{1,3}\.\d{1,3}\.\d{1,3}(-SNAPSHOT)?/).should('be.visible');
+        cy.get('#customFooterDiv').contains(/\w{3} \d{1,2}, \d{4}/).should('be.visible');
+        cy.get('#customFooterDiv').contains(/\d{1,3}\.\d{1,3}\.\d{1,3}(-SNAPSHOT)?/).should('be.visible');
 
         cy.get$('[data-cy=customHeader').type('{selectall}{backspace}');
         cy.get$('[data-cy=customFooter').type('{selectall}{backspace}');
-        cy.get$('[data-cy=customHeader').type('<div id="customHeader"><span id="chVersion">{{ ReLeASe.VerSion}}</span> <span id="chBuildDate">{{BUild.daTE }}</span></div>', {parseSpecialCharSequences: false});
-        cy.get$('[data-cy=customFooter').type('<div id="customFooter"><span id="cfVersion">{{RELease.VERsion }}</span> <span id="cfBuildDate">{{ build.DATE}}</span></div>', {parseSpecialCharSequences: false});
+        cy.get$('[data-cy=customHeader').type('<div id="customHeaderDiv"><span id="chVersion">{{ ReLeASe.VerSion}}</span> <span id="chBuildDate">{{BUild.daTE }}</span></div>', {parseSpecialCharSequences: false});
+        cy.get$('[data-cy=customFooter').type('<div id="customFooterDiv"><span id="cfVersion">{{RELease.VERsion }}</span> <span id="cfBuildDate">{{ build.DATE}}</span></div>', {parseSpecialCharSequences: false});
         cy.get$('[data-cy=saveSystemSettings]').click();
         cy.wait('@loadConfig');
-        cy.get('#customHeader').contains(/\w{3} \d{1,2}, \d{4}/).should('be.visible');
-        cy.get('#customHeader').contains(/\d{1,3}\.\d{1,3}\.\d{1,3}(-SNAPSHOT)?/).should('be.visible');
-        cy.get('#customFooter').contains(/\w{3} \d{1,2}, \d{4}/).should('be.visible');
-        cy.get('#customFooter').contains(/\d{1,3}\.\d{1,3}\.\d{1,3}(-SNAPSHOT)?/).should('be.visible');
+        cy.get('#customHeaderDiv').contains(/\w{3} \d{1,2}, \d{4}/).should('be.visible');
+        cy.get('#customHeaderDiv').contains(/\d{1,3}\.\d{1,3}\.\d{1,3}(-SNAPSHOT)?/).should('be.visible');
+        cy.get('#customFooterDiv').contains(/\w{3} \d{1,2}, \d{4}/).should('be.visible');
+        cy.get('#customFooterDiv').contains(/\d{1,3}\.\d{1,3}\.\d{1,3}(-SNAPSHOT)?/).should('be.visible');
     });
 
 });
