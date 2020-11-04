@@ -113,7 +113,7 @@ describe('Root Pin and Unpin Tests', () => {
     });
   });
 
-  it.only('Pin all projects then unpin 1', () => {
+  it('Pin all projects then unpin 1', () => {
     cy.request('POST', '/app/projects/proj1', {
       projectId: 'proj1',
       name: "one"
