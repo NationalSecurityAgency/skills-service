@@ -170,11 +170,11 @@ describe('Root Pin and Unpin Tests', () => {
       cy.get('[data-cy=modalDoneButton]').click();
 
       cy.get(projectsSelector).should('have.length', 5).as('projects');
-      cy.get('@projects').eq(0).contains('Inception');
-      cy.get('@projects').eq(1).contains('one');
-      cy.get('@projects').eq(2).contains('two');
-      cy.get('@projects').eq(3).contains('three');
-      cy.get('@projects').eq(4).contains('four');
+      cy.contains('ID: Inception');
+      cy.contains('one');
+      cy.contains('two');
+      cy.contains('three');
+      cy.contains('four');
 
       // unpin from the component
       cy.get('[data-cy=subPageHeaderControls]').contains('Pin').click();
@@ -192,8 +192,9 @@ describe('Root Pin and Unpin Tests', () => {
       cy.get('[data-cy=modalDoneButton]').click();
 
       cy.get(projectsSelector).should('have.length', 4).as('projects');
-      cy.get('@projects').eq(0).contains('Inception');
-      cy.get('@projects').eq(1).contains('two');
+      cy.contains('Inception');
+      cy.contains('two');
+      cy.contains('one').should('not.exist');
     });
   });
 
