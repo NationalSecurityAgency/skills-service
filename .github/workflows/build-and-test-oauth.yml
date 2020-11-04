@@ -73,6 +73,32 @@ jobs:
         npm run cyServices:start:client-display:oauth
         cd ..
 
+    - name: run hyrda oauth service
+      run: ./.github/workflows/scripts/runHydra.sh
+
+    - name: Check running containers
+      run: docker ps -a
+
+    - name: Caputre Hydra Oauth Service logs
+      run: |
+        mkdir -p ./skills-client-integration/skills-int-e2e-test/target/logs
+        docker logs hydra > ./skills-client-integration/skills-int-e2e-test/target/logs/hydra.out &
+        docker container logs -f hydra_consent > ./skills-client-integration/skills-int-e2e-test/target/logs/hydra_consent.out &
+        docker container logs -f hydra_postgres > ./skills-client-integration/skills-int-e2e-test/target/logs/hydra_postgres.out &
+
+    - name: Register hydra client
+      run: |
+        cd skills-client-integration/skills-int-e2e-test/hydra
+        docker-compose -f quickstart.yml exec -T hydra \
+        	hydra clients create \
+            --endpoint http://localhost:4445/ \
+            --id skilltree-test \
+            --secret client-secret \
+            --grant-types authorization_code,refresh_token \
+            --response-types code \
+            --scope openid \
+            --callbacks http://localhost:8080/login/oauth2/code/hydra
+
     - name: Run Cypress tests
       uses: cypress-io/github-action@v2
       with:
