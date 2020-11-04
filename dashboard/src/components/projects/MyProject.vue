@@ -30,7 +30,7 @@ limitations under the License.
       </div>
       <div slot="footer">
         <b-button :to="{ name:'Subjects', params: { projectId: this.projectInternal.projectId, project: this.projectInternal }}"
-                  variant="outline-primary" :data-cy="`projCard_${this.projectInternal.projectId}_manageBtn`">
+                  variant="outline-primary" :data-cy="`projCard_${this.projectInternal.projectId}_manageBtn`" :aria-label="`manage project ${this.projectInternal.name}`">
           Manage <i class="fas fa-arrow-circle-right"/>
         </b-button>
       </div>
