@@ -34,13 +34,15 @@ limitations under the License.
         isLoading: true,
         navItems: [
           { name: 'Projects', iconClass: 'fa-tasks skills-color-projects', page: 'HomePage' },
-          { name: 'Metrics', iconClass: 'fa-cogs skills-color-metrics', page: 'MultipleProjectsMetricsPage' },
         ],
       };
     },
     computed: {
       isSupervisor() {
         return this.$store.getters['access/isSupervisor'];
+      },
+      isRootUser() {
+        return this.$store.getters['access/isRoot'];
       },
       headerOptions() {
         return {
@@ -58,21 +60,32 @@ limitations under the License.
       isSupervisor() {
         this.loadNavItems();
       },
+      isRootUser() {
+        this.loadNavItems();
+      },
     },
     methods: {
       loadNavItems() {
-        const globalBadges = this.navItems.find((element) => element.name === 'Badges');
-        if (this.isSupervisor) {
-          if (!globalBadges) {
-            this.navItems.splice(1, 0, { name: 'Badges', iconClass: 'fa-globe-americas skills-color-badges', page: 'GlobalBadges' });
+        const metricsNavItem = { name: 'Metrics', iconClass: 'fa-cogs skills-color-metrics', page: 'MultipleProjectsMetricsPage' };
+        this.handleNavItem(metricsNavItem, this.isSupervisor || this.isRootUser);
+
+        const globalBadgeNav = { name: 'Badges', iconClass: 'fa-globe-americas skills-color-badges', page: 'GlobalBadges' };
+        this.handleNavItem(globalBadgeNav, this.isSupervisor || this.isRootUser);
+
+        this.isLoading = false;
+      },
+      handleNavItem(newItem, isRole) {
+        const existingItem = this.navItems.find((element) => element.name === newItem.name);
+        if (isRole) {
+          if (!existingItem) {
+            this.navItems.splice(1, 0, newItem);
           }
-        } else if (globalBadges) {
-          const idx = this.navItems.indexOf(globalBadges);
+        } else if (existingItem) {
+          const idx = this.navItems.indexOf(existingItem);
           if (idx >= 0) {
             this.navItems.splice(idx, 1);
           }
         }
-        this.isLoading = false;
       },
     },
   };
