@@ -152,6 +152,15 @@ class BadgeAdminService {
         }
 
         if (identifyEligibleUsers) {
+            // validate that badge has skills, if not, throw an exception. Can't enable an empty badge
+            boolean canEnable = allowEnablingBadge(savedSkill)
+            if (!canEnable) {
+                String msg = "Badge must have Skills before it can be published"
+                if (SkillDef.ContainerType.GlobalBadge == savedSkill.type) {
+                    msg = "Badge must have Skills or Project Levels before it can be published"
+                }
+                throw new SkillException(msg, projectId, savedSkill.skillId, ErrorCode.EmptyBadgeNotAllowed)
+            }
             awardBadgeToUsersMeetingRequirements(savedSkill)
         }
 
@@ -228,6 +237,21 @@ class BadgeAdminService {
 
     @Transactional()
     void removeSkillFromBadge(String projectId, String badgeId, String skillid) {
+        //validate that removing this skill would not result in an empty badge
+        SkillDefWithExtra badge = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, badgeId, SkillDef.ContainerType.Badge)
+
+        if (!badge) {
+            throw new SkillException("Badge [${badgeId}] does not exist", projectId, badgeId, ErrorCode.BadgeNotFound)
+        }
+
+        //this is only relevant for enabled badges
+        if (StringUtils.equals(badge.enabled, Boolean.TRUE.toString())) {
+            List<SkillDef> badgeSkills = getRequiredBadgeSkills(badge.id)
+            if (!badgeSkills || (badgeSkills.size() == 1 && badgeSkills.find { it.skillId == skillid })) {
+                throw new SkillException("Cannot remove all skills from a Badge", projectId, badgeId, ErrorCode.EmptyBadgeNotAllowed)
+            }
+        }
+
         ruleSetDefGraphService.removeGraphRelationship(projectId, badgeId, SkillDef.ContainerType.Badge,
                 projectId, skillid, SkillRelDef.RelationshipType.BadgeRequirement)
     }
@@ -253,7 +277,7 @@ class BadgeAdminService {
         )
 
         if (loadRequiredSkills) {
-            List<SkillDef> dependentSkills = skillDefRepo.findChildSkillsByIdAndRelationshipType(skillDef.id, SkillRelDef.RelationshipType.BadgeRequirement)
+            List<SkillDef> dependentSkills = getRequiredBadgeSkills(skillDef.id)
             res.requiredSkills = dependentSkills?.collect { skillsAdminService.convertToSkillDefRes(it) }
             res.numSkills = dependentSkills ? dependentSkills.size() : 0
             res.totalPoints = dependentSkills ? dependentSkills?.collect({ it.totalPoints })?.sum() : 0
@@ -266,6 +290,10 @@ class BadgeAdminService {
             }
         }
         return res
+    }
+
+    private List<SkillDef> getRequiredBadgeSkills(Integer badgeId) {
+        return skillDefRepo.findChildSkillsByIdAndRelationshipType(badgeId, SkillRelDef.RelationshipType.BadgeRequirement)
     }
 
     private Integer getBadgeDisplayOrder(ProjDef projDef, SkillDef.ContainerType type) {
@@ -292,5 +320,23 @@ class BadgeAdminService {
     private Integer countNumberOfRequiredLevels(String badgeId){
         Integer badgeLevelCount =  globalBadgeLevelDefRepo.countByBadgeId(badgeId)
         return badgeLevelCount
+    }
+
+    private boolean allowEnablingBadge(SkillDefWithExtra badge) {
+        boolean valid = false;
+
+        boolean hasSKills = false
+        List<SkillDef> badgeSkills = getRequiredBadgeSkills(badge.id)
+        if (badgeSkills?.size() > 0) {
+            hasSKills = true
+            valid = hasSKills
+        }
+
+        if (SkillDef.ContainerType.GlobalBadge == badge.type) {
+            List<GlobalBadgeLevelDef> projectLevels = globalBadgeLevelDefRepo.findAllByBadgeId(badge.skillId)
+            valid = hasSKills || projectLevels?.size() > 0
+        }
+
+        return valid
     }
 }
