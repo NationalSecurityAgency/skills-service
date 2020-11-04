@@ -17,7 +17,13 @@ describe('Global Badges Tests', () => {
 
     beforeEach(() => {
         cy.server();
-        .
+        cy.logout();
+        const supervisorUser = 'supervisor@skills.org';
+        cy.register(supervisorUser, 'password');
+        cy.login('root@skills.org', 'password');
+        cy.request('PUT', `/root/users/${supervisorUser}/roles/ROLE_SUPERVISOR`);
+        cy.logout();
+        cy.login(supervisorUser, 'password');
     });
 
     it('Create badge with special chars', () => {
