@@ -20,7 +20,6 @@ limitations under the License.
     <navigation v-if="userIdForDisplay" :nav-items="[
           {name: 'Client Display', iconClass: 'fa-user skills-color-skills', page: 'ClientDisplayPreview'},
           {name: 'Performed Skills', iconClass: 'fa-award skills-color-events', page: 'UserSkillEvents'},
-          {name: 'Metrics', iconClass: 'fa-chart-bar skills-color-metrics', page: 'UserMetrics'},
         ]">
     </navigation>
   </div>

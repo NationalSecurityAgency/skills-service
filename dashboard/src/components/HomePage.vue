@@ -34,7 +34,7 @@ limitations under the License.
         isLoading: true,
         navItems: [
           { name: 'Projects', iconClass: 'fa-tasks skills-color-projects', page: 'HomePage' },
-          { name: 'Metrics', iconClass: 'fa-cogs skills-color-metrics', page: 'GlobalMetrics' },
+          { name: 'Metrics', iconClass: 'fa-cogs skills-color-metrics', page: 'MultipleProjectsMetricsPage' },
         ],
       };
     },

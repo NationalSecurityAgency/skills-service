@@ -65,6 +65,7 @@ import SubjectMetricsPage from '@//components/metrics/projectSubjects/SubjectMet
 import SkillsMetricsPage from '@//components/metrics/projectSkills/SkillsMetricsPage';
 import SkillMetricsPage from '@//components/metrics/skill/SkillMetricsPage';
 import MetricsOnSubjectPage from '@//components/metrics/subject/MetricsOnSubjectPage';
+import MultipleProjectsMetricsPage from '@//components/metrics/multipleProjects/MultipleProjectsMetricsPage';
 
 Vue.use(Router);
 
@@ -84,6 +85,11 @@ const router = new Router({
         name: 'GlobalBadges',
         path: 'globalBadges',
         component: GlobalBadges,
+        meta: { requiresAuth: true },
+      }, {
+        name: 'MultipleProjectsMetricsPage',
+        path: 'metrics',
+        component: MultipleProjectsMetricsPage,
         meta: { requiresAuth: true },
       }],
     },
