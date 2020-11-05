@@ -89,7 +89,6 @@ jobs:
 
     - name: Register hydra client
       run: |
-        cd skills-client-integration/skills-int-e2e-test/hydra
         docker-compose -f ./skills-client/skills-client-integration/skills-int-e2e-test/hydra/quickstart.yml exec -T hydra \
         	hydra clients create \
             --endpoint http://localhost:4445/ \
