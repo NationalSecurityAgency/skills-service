@@ -36,6 +36,12 @@ jobs:
 
     - uses: actions/checkout@v2
 
+    - name: Checkout skills-client
+      uses: actions/checkout@v2
+      with:
+        repository: NationalSecurityAgency/skills-client
+        path: skills-client
+
     - uses: actions/setup-node@v2-beta
       with:
         node-version: '12'
@@ -66,22 +72,25 @@ jobs:
       run: mvn --batch-mode install -DskipTests
 
     - name: run hyrda oauth service
-      run: ./.github/workflows/scripts/runHydra.sh
+      run: |
+        cd skills-client/
+        ./.github/workflows/scripts/runHydra.sh
+        cd ../
 
     - name: Check running containers
       run: docker ps -a
 
     - name: Caputre Hydra Oauth Service logs
       run: |
-        mkdir -p ./skills-client-integration/skills-int-e2e-test/target/logs
-        docker logs hydra > ./skills-client-integration/skills-int-e2e-test/target/logs/hydra.out &
-        docker container logs -f hydra_consent > ./skills-client-integration/skills-int-e2e-test/target/logs/hydra_consent.out &
-        docker container logs -f hydra_postgres > ./skills-client-integration/skills-int-e2e-test/target/logs/hydra_postgres.out &
+        mkdir -p ./e2e-tests/logs
+        docker logs hydra > ./e2e-tests/logs/hydra.out &
+        docker container logs -f hydra_consent > ./e2e-tests/logs/hydra_consent.out &
+        docker container logs -f hydra_postgres > ./e2e-tests/logs/hydra_postgres.out &
 
     - name: Register hydra client
       run: |
         cd skills-client-integration/skills-int-e2e-test/hydra
-        docker-compose -f quickstart.yml exec -T hydra \
+        docker-compose -f ./skills-client/skills-client-integration/skills-int-e2e-test/hydra/quickstart.yml exec -T hydra \
         	hydra clients create \
             --endpoint http://localhost:4445/ \
             --id skilltree-test \
