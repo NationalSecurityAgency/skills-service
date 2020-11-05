@@ -20,7 +20,7 @@ limitations under the License.
     name: 'DevModeMixin',
     methods: {
       isDevelopmentMode() {
-        return process.env.NODE_ENV === 'development' && process.env.VUE_APP_AUTHENTICATION_URL !== 'hydra';
+        return process.env.NODE_ENV === 'development';
       },
       configureDevelopmentMode() {
         if (!this.isValidDevelopmentMode()) {
