@@ -150,4 +150,8 @@ limitations under the License.
 
 <style scoped>
 
+  .no-subjects {
+    color: darkslategray;
+  }
+
 </style>

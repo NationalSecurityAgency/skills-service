@@ -95,8 +95,8 @@ limitations under the License.
               <div class="row">
                 <div v-for="oAuthProvider in oAuthProviders" :key="oAuthProvider.registrationId" class="col-12 mb-3">
                   <button type="button" class="btn btn-outline-primary w-100"
-                          @click="oAuth2Login(oAuthProvider.registrationId)">
-                    <i :class="oAuthProvider.iconClass" aria-hidden="true" class="mr-1" />
+                          @click="oAuth2Login(oAuthProvider.registrationId)" aria-label="oAuth authentication link">
+                    <i :class="oAuthProvider.iconClass" aria-hidden="true" class="mr-1 text-info" />
                     Login via {{ oAuthProvider.clientName }}
                   </button>
                 </div>

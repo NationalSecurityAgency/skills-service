@@ -18,7 +18,7 @@ limitations under the License.
     <b-tabs class="h-100">
       <b-tab active>
         <template slot="title">
-          <i class="fa fa-edit mr-1"></i> <span id="markdownEditLabel">Write</span>
+          <i class="fa fa-edit mr-1" aria-hidden="true"/> <span id="markdownEditLabel">Write</span>
         </template>
         <div class="mt-2 content-height">
           <b-form-textarea rows="5" max-rows="5" v-model="valueInternal" @input="dataChanged"
@@ -27,7 +27,7 @@ limitations under the License.
       </b-tab>
       <b-tab>
         <template slot="title">
-          <i class="fa fa-eye mr-1"></i> <span>Preview</span>
+          <i class="fa fa-eye mr-1" aria-hidden="true"/> <span>Preview</span>
         </template>
         <div class="mt-2 content-height border rounded p-3" style="overflow-y: scroll;">
           <markdown-text v-if="valueInternal" :text="valueInternal"/>

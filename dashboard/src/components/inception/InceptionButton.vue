@@ -15,7 +15,7 @@ limitations under the License.
 */
 <template>
   <b-button v-if="isConfigurationInitialized" to="/skills" variant="outline-primary" size="sm" aria-label="inception rank button">
-    <i class="fas fa-trophy mr-1"></i>
+    <i class="fas fa-trophy mr-1" aria-hidden="true"></i>
     <skills-level project-id="Inception" />
   </b-button>
 </template>

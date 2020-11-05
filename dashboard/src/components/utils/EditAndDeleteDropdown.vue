@@ -15,26 +15,26 @@ limitations under the License.
 */
 <template>
   <b-dropdown variant="outline-secondary" size="sm" right no-caret>
-    <template slot="button-content"><i class="fas fa-bars"/><span class="sr-only">edit menu button</span></template>
+    <template slot="button-content"><i class="fas fa-bars" aria-hidden="true"/><span class="sr-only">edit menu button</span></template>
 
     <b-dropdown-item v-on:click="emit('edited')" class="mb-1">
-      <span class="text-primary"> <i class="fas fa-edit pr-1"/>Edit</span>
+      <span class="text-primary"> <i class="fas fa-edit pr-1" aria-hidden="true"/>Edit</span>
     </b-dropdown-item>
 
     <span v-b-tooltip.hover="deleteDisabledText">
       <b-dropdown-item v-on:click="emit('deleted')" :disabled="isDeleteDisabled" >
-          <span class="text-danger"> <i class="fas fa-trash pr-1"/> Delete</span>
+          <span class="text-danger"> <i class="fas fa-trash pr-1" aria-hidden="true"/> Delete</span>
       </b-dropdown-item>
     </span>
 
     <hr class="my-2"/>
 
     <b-dropdown-item v-on:click="emit('move-up')" :disabled="isFirst" :class="'{mb-1: true, disabled: isFirst}'">
-      <span class="text-info"> <i class="fas fa-arrow-circle-up pr-1"/> Move Up</span>
+      <span class="text-info"> <i class="fas fa-arrow-circle-up pr-1" aria-hidden="true"/> Move Up</span>
     </b-dropdown-item>
 
     <b-dropdown-item v-on:click="emit('move-down')" :disabled="isLast" :class="'{disabled: isLast}'">
-      <span class="text-info"> <i class="fas fa-arrow-circle-down pr-1"/> Move Down</span>
+      <span class="text-info"> <i class="fas fa-arrow-circle-down pr-1" aria-hidden="true"/> Move Down</span>
     </b-dropdown-item>
 
   </b-dropdown>

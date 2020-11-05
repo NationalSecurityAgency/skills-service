@@ -22,7 +22,7 @@ limitations under the License.
           <b-col class="mx-0 mb-2">
             <b-input-group>
               <template #append>
-                <b-button variant="outline-secondary" @click="searchValue=''" data-cy="pinProjectsClearSearch" aria-label="clear search button"><i class="fas fa-times"></i></b-button>
+                <b-button variant="outline-secondary" @click="searchValue=''" data-cy="pinProjectsClearSearch" aria-label="clear search button"><i class="fas fa-times" aria-hidden="true"/></b-button>
               </template>
               <b-input v-focus v-model="searchValue" placeholder="Search projects to pin" data-cy="pinProjectsSearchInput" aria-label="search for projects to pin"></b-input>
             </b-input-group>
@@ -31,7 +31,7 @@ limitations under the License.
             <span class="text-secondary">OR</span>
           </b-col>
           <b-col cols="12" sm="auto" class="text-center">
-            <b-button variant="outline-primary" @click="loadAll"  data-cy="pinProjectsLoadAllButton">Load All <i class="fas fa-weight-hanging text-muted"></i></b-button>
+            <b-button variant="outline-primary" @click="loadAll"  data-cy="pinProjectsLoadAllButton">Load All <i class="fas fa-weight-hanging text-muted" aria-hidden="true"/></b-button>
           </b-col>
         </b-row>
         <div style="min-height: 6rem;">
@@ -57,22 +57,24 @@ limitations under the License.
                         <b-button v-if="!data.item.pinned" @click="pinProject(data.item)" variant="outline-success"
                                   size="sm"
                                   v-b-tooltip.hover="'Pin'"
-                                  data-cy="pinButton">
-                          <i class="fas fa-thumbtack" style="width: 1rem;"/>
+                                  data-cy="pinButton"
+                                  :aria-label="`pin project ${data.item.projectId}`">
+                          <i class="fas fa-thumbtack" style="width: 1rem;" aria-hidden="true"/>
                         </b-button>
                         <b-button v-if="data.item.pinned" variant="outline-warning" @click="unpinProject(data.item)"
                                   size="sm"
                                   v-b-tooltip.hover="'Unpin'"
-                                  data-cy="unpinButton">
-                          <i class="fas fa-ban" style="font-size: 1rem;"></i>
+                                  data-cy="unpinButton"
+                                  :aria-label="`remove pin from project ${data.item.projectId`">
+                          <i class="fas fa-ban" style="font-size: 1rem;" aria-hidden="true"/>
                         </b-button>
-
                         <b-button variant="outline-primary"
                                   :to="`/projects/${data.item.projectId}`" target="_blank"
                                   size="sm"
                                   v-b-tooltip.hover="'View Project'"
-                                  data-cy="viewProjectButton">
-                          <i class="fas fa-eye" style="font-size: 1rem;"></i>
+                                  data-cy="viewProjectButton"
+                                  :aria-label="`view project ${data.item.projectId}`">
+                          <i class="fas fa-eye" style="font-size: 1rem;"aria-hidden="true"/>
                         </b-button>
                       </b-button-group>
                     </b-col>

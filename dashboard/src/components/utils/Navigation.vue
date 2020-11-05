@@ -33,7 +33,7 @@ limitations under the License.
               <div v-if="smallScreenMode" class="pr-2">
                 <b-button v-b-toggle.menu-collapse-control variant="outline-secondary" size="sm" class="mb-1"
                           data-cy="navSmallScreenExpandMenu">
-                  <i class="fas fa-bars"/>
+                  <i class="fas fa-bars" aria-hidden="true"/>
                 </b-button>
               </div>
             </b-col>
@@ -50,7 +50,7 @@ limitations under the License.
                 :class="{'bg-primary': menuSelections.get(navItem.name), 'text-light': menuSelections.get(navItem.name), 'select-cursor': !menuSelections.get(navItem.name), 'disabled': navItem.isDisabled}">
               <div class="text-truncate ml-3" :class="{'mr-4': !collapsed}">
                   <i :class="navItem.iconClass" class="fas"
-                     style="min-width: 1.7rem;"/> <span v-if="!collapsed || smallScreenMode">{{ navItem.name }}</span>
+                     style="min-width: 1.7rem;" aria-hidden="true"/> <span v-if="!collapsed || smallScreenMode">{{ navItem.name }}</span>
                   <i v-if="navItem.isDisabled" class="fas fa-exclamation-circle text-warning ml-1" style="pointer-events: all;" v-b-tooltip.hover="navItem.msg"/>
               </div>
             </router-link>

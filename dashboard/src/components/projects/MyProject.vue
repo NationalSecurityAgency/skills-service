@@ -20,7 +20,7 @@ limitations under the License.
         <b-button v-if="isRootUser" class="mr-2" @click="unpin" data-cy="unpin" size="sm"
                   variant="outline-primary" :aria-label="'remove pin for project '+ projectInternal.name"
                   :aria-pressed="pinned">
-          <span class="d-none d-sm-inline">Unpin</span> <i class="fas fa-ban" style="font-size: 1rem;"></i>
+          <span class="d-none d-sm-inline">Unpin</span> <i class="fas fa-ban" style="font-size: 1rem;" aria-hidden="true"/>
         </b-button>
         <edit-and-delete-dropdown v-on:deleted="deleteProject" v-on:edited="editProject" v-on:move-up="moveUp"
                                   v-on:move-down="moveDown"
@@ -31,7 +31,7 @@ limitations under the License.
       <div slot="footer">
         <b-button :to="{ name:'Subjects', params: { projectId: this.projectInternal.projectId, project: this.projectInternal }}"
                   variant="outline-primary" :data-cy="`projCard_${this.projectInternal.projectId}_manageBtn`" :aria-label="`manage project ${this.projectInternal.name}`">
-          Manage <i class="fas fa-arrow-circle-right"/>
+          Manage <i class="fas fa-arrow-circle-right" aria-hidden="true"/>
         </b-button>
       </div>
     </page-preview-card>

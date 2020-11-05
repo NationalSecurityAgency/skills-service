@@ -16,7 +16,7 @@ limitations under the License.
 <template xmlns:v-if="http://www.w3.org/1999/xlink">
     <div>
       <input type="text" class="form-control mb-3" :placeholder="searchPlaceholder"
-             @keyup="filter($event.target.value)" ref="iconFilterInput" data-cy="icon-search">
+             @keyup="filter($event.target.value)" ref="iconFilterInput" data-cy="icon-search" aria-label="search by icon name">
       <b-card no-body>
       <b-tabs content-class="mt-3" @input="onChange($event)" card>
         <b-tab>

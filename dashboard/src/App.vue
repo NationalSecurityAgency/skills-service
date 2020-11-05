@@ -14,15 +14,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div>
-    <customizable-header></customizable-header>
+  <div role="presentation">
+    <customizable-header role="region" aria-label="dynamic customizable header"></customizable-header>
     <div id="app" class="">
       <div class="m-0">
-        <new-software-version-component/>
+        <new-software-version-component role="alert"/>
 
         <div class="overall-container">
-          <pki-app-bootstrap v-if="isPkiAndNeedsToBootstrap"/>
-          <loading-container v-else v-bind:is-loading="isLoading">
+          <pki-app-bootstrap v-if="isPkiAndNeedsToBootstrap" role="alert"/>
+          <loading-container v-else v-bind:is-loading="isLoading" role="presentation">
             <div v-if="!isLoading">
               <header-view v-if="isAuthenticatedUser" role="banner"/>
               <div role="main">
@@ -34,7 +34,7 @@ limitations under the License.
       </div>
     </div>
     <dashboard-footer/>
-    <customizable-footer></customizable-footer>
+    <customizable-footer role="region" aria-label="dynamic customizable footer"></customizable-footer>
   </div>
 </template>
 

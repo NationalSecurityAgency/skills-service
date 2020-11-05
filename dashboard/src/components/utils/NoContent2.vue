@@ -24,11 +24,11 @@ limitations under the License.
       </div>
       <div class="w-100"></div>
       <div class="col pt-2">
-        <h3 class="h3">{{ title }}</h3>
+        <h6 class="h3 no-content">{{ title }}</h6>
       </div>
     </div>
     <div class="row justify-content-center ">
-      <div class="col col-md-8 col-lg-7 col-xl-5">
+      <div class="col col-md-8 col-lg-7 col-xl-5 no-content">
         {{ message }}
       </div>
     </div>
@@ -57,5 +57,9 @@ limitations under the License.
 
   .icon-container {
     background: #ededed;
+  }
+
+  .no-content {
+    color: darkslategray;
   }
 </style>

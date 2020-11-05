@@ -19,7 +19,7 @@ limitations under the License.
     <div class="row">
       <div class="col-12 col-md-12 col-xl mb-md-3 mb-xl-0">
         <media-info-card :title="`${totalPoints} Points`" icon-class="fas fa-calculator text-success">
-          <strong>{{ skillInfo.pointIncrement | number }}</strong> points <i class="fa fa-times text-muted"/>
+          <strong>{{ skillInfo.pointIncrement | number }}</strong> points <i class="fa fa-times text-muted" aria-hidden="true"/>
           <strong> {{ skillInfo.numPerformToCompletion | number }}</strong> repetition<span v-if="skillInfo.numPerformToCompletion>1">s</span> to Completion
         </media-info-card>
       </div>

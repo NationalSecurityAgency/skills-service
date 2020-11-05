@@ -23,14 +23,14 @@ limitations under the License.
       <div class="col-auto">
         <b-button variant="outline-primary" @click="addUserRole" :disabled="!selectedUser"
                   class="h-100" v-skills="'AddAdmin'">
-          Add <i :class="[isSaving ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-arrow-circle-right']"></i>
+          Add <i :class="[isSaving ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-arrow-circle-right']" aria-hidden="true"></i>
         </b-button>
       </div>
     </div>
 
     <b-alert v-if="errNotification.enable" data-cy="error-msg" variant="danger" class="mt-2" show
              dismissible>
-      <i class="fa fa-exclamation-circle mr-1"></i> <strong>Error!</strong> Request could not be completed! <strong>{{
+      <i class="fa fa-exclamation-circle mr-1" aria-hidden="true"></i> <strong>Error!</strong> Request could not be completed! <strong>{{
       errNotification.msg }}</strong>
     </b-alert>
 
@@ -44,10 +44,10 @@ limitations under the License.
           <div slot="edit" slot-scope="props" class="field has-addons">
             <b-button v-if="notCurrentUser(props.row.userId)" @click="deleteUserRoleConfirm(props.row)"
                       variant="outline-primary" :aria-label="'remove access role from user '+props.row.userId">
-              <i class="fas fa-trash"/>
+              <i class="fas fa-trash" aria-hidden="true"/>
             </b-button>
             <span v-else v-b-tooltip.hover="'Can not remove myself. Sorry!!'">
-              <b-button variant="outline-primary" disabled aria-label="cannot remove access role from yourself"><i class="fas fa-trash"/></b-button>
+              <b-button variant="outline-primary" disabled aria-label="cannot remove access role from yourself"><i class="fas fa-trash" aria-hidden="true"/></b-button>
             </span>
           </div>
         </v-client-table>

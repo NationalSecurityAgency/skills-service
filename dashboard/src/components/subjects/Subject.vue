@@ -30,7 +30,7 @@ limitations under the License.
           :to="{ name:'SubjectSkills', params: { projectId: this.subjectInternal.projectId, subjectId: this.subjectInternal.subjectId, subject: this.subjectInternal}}"
           class="btn btn-outline-primary btn-sm"
           :data-cy="`subjCard_${subjectInternal.subjectId}_manageBtn`">
-          Manage <i class="fas fa-arrow-circle-right"/>
+          Manage <i class="fas fa-arrow-circle-right" aria-hidden="true"/>
         </router-link>
       </div>
     </page-preview-card>

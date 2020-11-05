@@ -58,18 +58,18 @@ limitations under the License.
                 <b-button @click="editSkill(props.row)"
                           variant="outline-primary" data-cy="editSkillButton"
                           :aria-label="'edit Skill '+props.row.name">
-                  <i class="fas fa-edit"/>
+                  <i class="fas fa-edit" aria-hidden="true"/>
                 </b-button>
                 <b-button @click="deleteSkill(props.row)" variant="outline-primary"
                           data-cy="deleteSkillButton"
                           :aria-label="'delete Skill '+props.row.name">
-                  <i class="fas fa-trash"/>
+                  <i class="fas fa-trash" aria-hidden="true"/>
                 </b-button>
               </b-button-group>
               <router-link :to="{ name:'SkillOverview',
                               params: { projectId: props.row.projectId, subjectId: props.row.subjectId, skillId: props.row.skillId }}"
                            class="btn btn-outline-primary btn-sm">
-                <span class="d-none d-sm-inline">Manage </span> <i class="fas fa-arrow-circle-right"/>
+                <span class="d-none d-sm-inline">Manage </span> <i class="fas fa-arrow-circle-right" aria-hidden="true"/>
               </router-link>
             </div>
 

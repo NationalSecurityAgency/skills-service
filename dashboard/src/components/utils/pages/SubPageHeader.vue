@@ -16,7 +16,7 @@ limitations under the License.
 <template>
   <div class="row bg-white border-bottom py-2 mb-3" data-cy="subPageHeader">
     <div class="col-6 col-md-7">
-      <span class="h4 text-uppercase">{{ title }}</span>
+      <h1 class="h4 text-uppercase">{{ title }}</h1>
     </div>
     <div class="col-6 col-md-5 pt-0 text-right" data-cy="subPageHeaderControls">
       <slot>

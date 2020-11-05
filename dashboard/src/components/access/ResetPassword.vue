@@ -55,7 +55,7 @@ limitations under the License.
                 <div class="field is-grouped">
                   <div class="control">
                     <button type="submit" class="btn btn-outline-primary" :disabled="invalid || missingRequiredValues() || resetInProgress || remoteError" data-cy="resetPasswordSubmit">
-                      Reset Password <i v-if="!resetInProgress" class="fas fa-arrow-circle-right"/>
+                      Reset Password <i v-if="!resetInProgress" class="fas fa-arrow-circle-right" aria-hidden="true"/>
                       <b-spinner v-if="resetInProgress" label="Loading..." style="width: 1rem; height: 1rem;" variant="primary"/>
                     </button>
                   </div>

@@ -42,7 +42,7 @@ limitations under the License.
                 </ValidationProvider>
               </div>
               <button type="submit" class="btn btn-outline-primary" tabindex="3" :disabled="invalid || (disabled === true)" data-cy="resetPassword">
-                Reset Password <i class="fas fa-arrow-circle-right"/>
+                Reset Password <i class="fas fa-arrow-circle-right" aria-hidden="true"/>
               </button>
             </div>
           </div>

@@ -19,10 +19,10 @@ limitations under the License.
                      :disabled="addProjectDisabled" :disabled-msg="addProjectsDisabledMsg">
           <b-button v-if="isRootUser" variant="outline-primary" @click="showSearchProjectModal=true" size="sm"
 class="mr-2">
-            <span class="d-none d-sm-inline">Pin</span> <i class="fas fa-thumbtack"/>
+            <span class="d-none d-sm-inline">Pin</span> <i class="fas fa-thumbtack" aria-hidden="true"/>
           </b-button>
           <b-button @click="newProject.show=true" variant="outline-primary" size="sm">
-            <span class="d-none d-sm-inline">Project</span> <i class="fas fa-plus-circle" />
+            <span class="d-none d-sm-inline">Project</span> <i class="fas fa-plus-circle" aria-hidden="true"/>
           </b-button>
     </sub-page-header>
 

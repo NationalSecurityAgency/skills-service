@@ -19,18 +19,18 @@ limitations under the License.
       <i class="far fa-question-circle" aria-label="help menu button"></i><span class="sr-only">help menu button</span>
     </template>
     <b-dropdown-item :href="officialGuide" target="_blank" style="min-width: 12.5rem;">
-      <span class="text-gray-700"> <i class="fas fa-book"></i>Official Docs</span>
-      <span class="float-right"><i class="fas fa-external-link-alt text-secondary"></i></span>
+      <span class="text-gray-700"> <i class="fas fa-book" aria-hidden="true"></i>Official Docs</span>
+      <span class="float-right" aria-hidden="true"><i class="fas fa-external-link-alt text-secondary"></i></span>
     </b-dropdown-item>
     <b-dropdown-divider />
     <b-dropdown-group id="dropdown-group-1" header="Guides">
       <b-dropdown-item :href="dashboardGuideUrl" target="_blank">
-        <span class="text-gray-700"> <i class="fas fa-info-circle"/><span class="link-name">Dashboard</span></span>
-        <span class="float-right"><i class="fas fa-external-link-alt text-secondary"></i></span>
+        <span class="text-gray-700"> <i class="fas fa-info-circle" aria-hidden="true"/><span class="link-name">Dashboard</span></span>
+        <span class="float-right" aria-hidden="true"><i class="fas fa-external-link-alt text-secondary"></i></span>
       </b-dropdown-item>
       <b-dropdown-item :href="integrationGuideUrl" target="_blank">
-        <span class="text-gray-700"> <i class="fas fa-hands-helping"></i>Integration</span>
-        <span class="float-right"><i class="fas fa-external-link-alt text-secondary"></i></span>
+        <span class="text-gray-700"> <i class="fas fa-hands-helping" aria-hidden="true"></i>Integration</span>
+        <span class="float-right" aria-hidden="true"><i class="fas fa-external-link-alt text-secondary"></i></span>
       </b-dropdown-item>
     </b-dropdown-group>
   </b-dropdown>

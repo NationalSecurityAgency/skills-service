@@ -19,8 +19,8 @@ limitations under the License.
       <div slot="edit" slot-scope="props">
         <div class="field text-right">
           <span class="field">
-              <button v-on:click="onDeleteEvent(props.row)" class="btn btn-sm btn-outline-primary">
-                      <i class="fas fa-trash"/>
+              <button v-on:click="onDeleteEvent(props.row)" class="btn btn-sm btn-outline-primary" aria-label="delete level">
+                      <i class="fas fa-trash" aria-hidden="true"/>
               </button>
           </span>
         </div>

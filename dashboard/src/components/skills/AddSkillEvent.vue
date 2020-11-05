@@ -46,7 +46,7 @@ limitations under the License.
       <div class="row mt-2" v-for="(user) in reversedUsersAdded" v-bind:key="user.key">
         <div class="col">
           <span :class="[user.success ? 'text-success' : 'text-danger']" style="font-weight: bolder">
-            <i :class="[user.success ? 'fa fa-check' : 'fa fa-info-circle']"></i>
+            <i :class="[user.success ? 'fa fa-check' : 'fa fa-info-circle']" aria-hidden="true"/>
             <span v-if="user.success">
               Added points for
             </span>

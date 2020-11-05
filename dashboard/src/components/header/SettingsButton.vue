@@ -16,16 +16,16 @@ limitations under the License.
 <template>
   <b-dropdown right variant="link" no-caret>
     <template slot="button-content">
-      <b-avatar variant="primary" :text="avatarTxt" size="sm"></b-avatar>
-      <span class="d-inline-block text-truncate userName ml-1 font-weight-bold">{{ displayName }}</span>
+      <b-avatar variant="primary" :text="avatarTxt" size="sm" aria-hidden="true"></b-avatar>
+      <span class="d-inline-block text-truncate userName ml-1 font-weight-bold" aria-hidden="true">{{ displayName }}</span>
       <span class="sr-only">settings menu</span>
     </template>
     <b-dropdown-item href="#"  @click="gotoSettings">
-      <span class="text-gray-700"> <i class="fas fa-cog"/><span class="link-name">Settings</span></span>
+      <span class="text-gray-700"> <i class="fas fa-cog" aria-hidden="true"/><span class="link-name">Settings</span></span>
     </b-dropdown-item>
     <b-dropdown-divider />
     <b-dropdown-item v-if="isFormAuthenticatedUser" href="#" @click="signOut">
-      <span class="text-gray-700"> <i class="fas fa-sign-out-alt"/><span class="link-name">Log Out</span></span>
+      <span class="text-gray-700"> <i class="fas fa-sign-out-alt" aria-hidden="true"/><span class="link-name">Log Out</span></span>
     </b-dropdown-item>
   </b-dropdown>
 </template>

@@ -25,7 +25,7 @@ limitations under the License.
                 <router-link v-if="props.row.subjectId" :id="props.row.skillId" :to="{ name:'SkillOverview',
                 params: { projectId: props.row.projectId, subjectId: props.row.subjectId, skillId: props.row.skillId }}"
                              class="btn btn-sm btn-outline-primary ml-2">
-                  Manage <i class="fas fa-arrow-circle-right"/>
+                  Manage <i class="fas fa-arrow-circle-right" aria-hidden="true"/>
                 </router-link>
           </span>
         </div>

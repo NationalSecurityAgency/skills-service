@@ -22,21 +22,21 @@ limitations under the License.
                                 class="badge-settings"></edit-and-delete-dropdown>
     </div>
     <div slot="footer">
-      <i v-if="badgeInternal.endDate" class="fas fa-gem position-absolute" style="font-size: 1rem; top: 1rem; left: 1rem; color: purple"></i>
+      <i v-if="badgeInternal.endDate" class="fas fa-gem position-absolute" style="font-size: 1rem; top: 1rem; left: 1rem; color: purple" aria-hidden="true"/>
       <div>
         <router-link :to="buildManageLink()"
                      class="btn btn-outline-primary btn-sm" data-cy="manageBadge">
-          Manage <i class="fas fa-arrow-circle-right"/>
+          Manage <i class="fas fa-arrow-circle-right" aria-hidden="true"/>
         </router-link>
       </div>
       <hr/>
       <div class="float-md-right" style="font-size: 0.8rem;">
         <span v-if="!this.live" data-cy="badgeStatus">
           <span class="text-secondary">Status: </span>
-          <span class="text-uppercase">Disabled <span class="far fa-stop-circle text-warning"></span></span> | <a href="#0" @click.stop="handlePublish" class="btn btn-outline-primary btn-sm" data-cy="goLive">Go Live</a>
+          <span class="text-uppercase">Disabled <span class="far fa-stop-circle text-warning" aria-hidden="true"/></span> | <a href="#0" @click.stop="handlePublish" class="btn btn-outline-primary btn-sm" data-cy="goLive">Go Live</a>
         </span>
         <span v-else data-cy="badgeStatus">
-          <span class="text-secondary">Status: </span> <span class="text-uppercase">Live <span class="far fa-check-circle text-success"></span></span>
+          <span class="text-secondary">Status: </span> <span class="text-uppercase">Live <span class="far fa-check-circle text-success" aria-hidden="true"/></span>
         </span>
       </div>
 
