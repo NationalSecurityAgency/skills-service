@@ -65,7 +65,7 @@ limitations under the License.
                                   size="sm"
                                   v-b-tooltip.hover="'Unpin'"
                                   data-cy="unpinButton"
-                                  :aria-label="`remove pin from project ${data.item.projectId`">
+                                  :aria-label="`remove pin from project ${data.item.projectId}`">
                           <i class="fas fa-ban" style="font-size: 1rem;" aria-hidden="true"/>
                         </b-button>
                         <b-button variant="outline-primary"
@@ -74,7 +74,7 @@ limitations under the License.
                                   v-b-tooltip.hover="'View Project'"
                                   data-cy="viewProjectButton"
                                   :aria-label="`view project ${data.item.projectId}`">
-                          <i class="fas fa-eye" style="font-size: 1rem;"aria-hidden="true"/>
+                          <i class="fas fa-eye" style="font-size: 1rem;" aria-hidden="true"/>
                         </b-button>
                       </b-button-group>
                     </b-col>
