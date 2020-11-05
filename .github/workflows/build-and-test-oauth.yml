@@ -114,7 +114,7 @@ jobs:
         record: true
         parallel: false
         group: 'skills-service with OAuth'
-        env: db=postgres
+        env: oauthMode=true
       env:
         # pass the Dashboard record key as an environment variable
         CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
