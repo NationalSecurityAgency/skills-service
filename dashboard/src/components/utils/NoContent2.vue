@@ -60,6 +60,6 @@ limitations under the License.
   }
 
   .no-content {
-    color: darkslategray;
+    color: #3f5971;
   }
 </style>

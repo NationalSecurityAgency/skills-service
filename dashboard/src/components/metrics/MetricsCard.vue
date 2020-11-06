@@ -36,7 +36,7 @@ limitations under the License.
     </div>
 
     <div class="card-footer text-center">
-      <b-button @click="loadChart" variant="outline-primary">Add <i class="fas fa-plus-circle"/></b-button>
+      <b-button @click="loadChart" variant="outline-hc">Add <i class="fas fa-plus-circle"/></b-button>
     </div>
   </div>
 </template>

@@ -49,7 +49,7 @@ limitations under the License.
 
         <div class="row">
           <div class="col">
-            <b-button variant="outline-info" @click="save" :disabled="!isDirty">
+            <b-button variant="outline-success" @click="save" :disabled="!isDirty">
               Save <i class="fas fa-arrow-circle-right"/>
             </b-button>
 

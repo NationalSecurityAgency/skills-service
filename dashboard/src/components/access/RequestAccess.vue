@@ -37,7 +37,8 @@ limitations under the License.
                       <input class="form-control" type="text" v-model="loginFields.firstName" id="firstName" :disabled="createInProgress"
                            name="firstName" aria-required="true"
                           :aria-invalid="errors && errors.length > 0"
-                          aria-errormessage="firstnameError"/>
+                          aria-errormessage="firstnameError"
+                         aria-describedby="firstnameError"/>
                     </div>
                     <small class="form-text text-danger" v-show="errors[0]" id="firstnameError">{{ errors[0] }}</small>
                   </ValidationProvider>
@@ -50,7 +51,10 @@ limitations under the License.
                         <span class="input-group-text"><i class="fas fa-user-tie"></i></span>
                       </div>
                       <input class="form-control" type="text" v-model="loginFields.lastName" id="lastName" :disabled="createInProgress"
-                           name="lastName" aria-required="true" :aria-invalid="errors && errors.length > 0" aria-errormessage="lastnameError"/>
+                           name="lastName" aria-required="true"
+                             :aria-invalid="errors && errors.length > 0"
+                             aria-errormessage="lastnameError"
+                              aria-describedby="lastnameError"/>
                     </div>
                     <small class="form-text text-danger" v-show="errors[0]" id="lastnameError">{{ errors[0] }}</small>
                   </ValidationProvider>
@@ -63,7 +67,10 @@ limitations under the License.
                         <span class="input-group-text"><i class="far fa-envelope"></i></span>
                       </div>
                       <input class="form-control" type="text" v-model="loginFields.email" id="email" :disabled="createInProgress"
-                           name="email" aria-required="true" :aria-invalid="errors && errors.length > 0" aria-errormessage="emailErrors"/>
+                           name="email" aria-required="true"
+                             :aria-invalid="errors && errors.length > 0"
+                             aria-errormessage="emailErrors"
+                              aria-describedby="emailErrors"/>
                     </div>
                     <small class="form-text text-danger" v-show="errors[0]" id="emailErrors">{{ errors[0] }}</small>
                   </ValidationProvider>
@@ -76,7 +83,10 @@ limitations under the License.
                         <span class="input-group-text"><i class="fas fa-key"></i></span>
                       </div>
                       <input class="form-control" type="password" v-model="loginFields.password" id="password" :disabled="createInProgress"
-                           name="password" ref="password" aria-required="true" :aria-invalid="errors && errors.length > 0" aria-errormessage="passwordError"/>
+                           name="password" ref="password" aria-required="true"
+                             :aria-invalid="errors && errors.length > 0"
+                             aria-errormessage="passwordError"
+                              aria-describedby="passwordError"/>
                     </div>
                     <small class="form-text text-danger" v-show="errors[0]" id="passwordError">{{ errors[0] }}</small>
                   </ValidationProvider>
@@ -89,7 +99,10 @@ limitations under the License.
                         <span class="input-group-text"><i class="fas fa-key"></i></span>
                       </div>
                       <input class="form-control" type="password" id="password_confirmation" v-model="passwordConfirmation" :disabled="createInProgress"
-                           name="password_confirmation" aria-required="true" :aria-invalid="errors && errors.length" aria-errormessage="passwordConfirmationError"/>
+                           name="password_confirmation" aria-required="true"
+                             :aria-invalid="errors && errors.length"
+                             aria-errormessage="passwordConfirmationError"
+                              aria-describedby="passwordConfirmationError"/>
                     </div>
                     <small class="form-text text-danger" v-show="errors[0]" id="passwordConfirmationError">{{ errors[0] }}</small>
                   </ValidationProvider>
@@ -98,9 +111,9 @@ limitations under the License.
                   <div class="control">
                     <div class="row">
                       <div class="col text-right">
-                        <button type="submit" class="btn btn-outline-primary" :disabled="invalid || missingRequiredValues() || createInProgress">
+                        <button type="submit" class="btn btn-outline-hc" :disabled="invalid || missingRequiredValues() || createInProgress">
                           Create Account <i v-if="!createInProgress" class="fas fa-arrow-circle-right"/>
-                          <b-spinner v-if="createInProgress" label="Loading..." style="width: 1rem; height: 1rem;" variant="primary"/>
+                          <b-spinner v-if="createInProgress" label="Loading..." style="width: 1rem; height: 1rem;" variant="hc"/>
                         </button>
                         <div v-if="createInProgress && isRootAccount" class="mt-2 text-info">
                           Bootstrapping! May take a second...
@@ -123,7 +136,7 @@ limitations under the License.
     </div>
   </div>
 </template>
-
+aria-describedby=
 <script>
   import { extend } from 'vee-validate';
   import { required, email, confirmed } from 'vee-validate/dist/rules';

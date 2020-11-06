@@ -54,7 +54,7 @@ limitations under the License.
                     <b-col>{{ data.value }}</b-col>
                     <b-col cols="auto">
                       <b-button-group>
-                        <b-button v-if="!data.item.pinned" @click="pinProject(data.item)" variant="outline-success"
+                        <b-button v-if="!data.item.pinned" @click="pinProject(data.item)" variant="outline-primary"
                                   size="sm"
                                   v-b-tooltip.hover="'Pin'"
                                   data-cy="pinButton"

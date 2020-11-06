@@ -21,7 +21,7 @@ limitations under the License.
                              v-model="selectedUser"/>
       </div>
       <div class="col-auto">
-        <b-button variant="outline-primary" @click="addUserRole" :disabled="!selectedUser"
+        <b-button variant="outline-hc" @click="addUserRole" :disabled="!selectedUser"
                   class="h-100" v-skills="'AddAdmin'">
           Add <i :class="[isSaving ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-arrow-circle-right']" aria-hidden="true"></i>
         </b-button>
@@ -44,10 +44,10 @@ limitations under the License.
           <div slot="edit" slot-scope="props" class="field has-addons">
             <b-button v-if="notCurrentUser(props.row.userId)" @click="deleteUserRoleConfirm(props.row)"
                       variant="outline-primary" :aria-label="'remove access role from user '+props.row.userId">
-              <i class="fas fa-trash" aria-hidden="true"/>
+              <i class="text-warning fas fa-trash" aria-hidden="true"/>
             </b-button>
             <span v-else v-b-tooltip.hover="'Can not remove myself. Sorry!!'">
-              <b-button variant="outline-primary" disabled aria-label="cannot remove access role from yourself"><i class="fas fa-trash" aria-hidden="true"/></b-button>
+              <b-button variant="outline-primary" disabled aria-label="cannot remove access role from yourself"><i class="text-warning fas fa-trash" aria-hidden="true"/></b-button>
             </span>
           </div>
         </v-client-table>

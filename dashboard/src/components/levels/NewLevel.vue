@@ -29,7 +29,8 @@ limitations under the License.
                     <b-form-input v-focus id="editLevel-level" v-model="levelInternal.level" name="level" :disabled="isEdit"
                     aria-required="true" data-cy="levelId" v-on:keyup.enter="handleSubmit(saveLevel)"
                                   :aria-invalid="errors && errors.length > 0"
-                                  aria-errormessage="levelIdError"></b-form-input>
+                                  aria-errormessage="levelIdError"
+                                  aria-describedby="levelIdError"></b-form-input>
                     <small class="form-text text-danger" v-show="errors[0]" data-cy="levelIdError" id="levelIdError">{{ errors[0] }}</small>
                   </ValidationProvider>
                   <template v-if="!levelAsPoints">
@@ -38,7 +39,8 @@ limitations under the License.
                       <b-form-input id="editLevel-percent" v-model="levelInternal.percent" name="percent" aria-required="true" data-cy="levelPercent"
                                     v-on:keyup.enter="handleSubmit(saveLevel)"
                                     :aria-invalid="errors && errors.length > 0"
-                                    aria-errormessage="levelPercentError">
+                                    aria-errormessage="levelPercentError"
+                                    aria-describedby="levelPercentError">
                       </b-form-input>
                       <small class="form-text text-danger" v-show="errors[0]" data-cy="levelPercentError" id="levelPercentError">{{ errors[0] }}</small>
                     </ValidationProvider>
@@ -49,9 +51,8 @@ limitations under the License.
                       <b-form-input id="editlevel-pointsFrom" v-model="levelInternal.pointsFrom" name="pointsFrom" aria-required="true"
                                     v-on:keyup.enter="handleSubmit(saveLevel)"
                                     :aria-invalid="errors && errors.length > 0"
-                                    aria-errormessage="levelPointsFromError">
-                      </b-form-input>
-                      <small class="form-text text-danger" v-show="errors[0]">{{ errors[0] }}</small>
+                                    aria-errormessage="levelPointsFromError" aria-describedby="levelPointsFromError"></b-form-input>
+                      <small class="form-text text-danger" v-show="errors[0]" id="levelPointsFromError">{{ errors[0] }}</small>
                     </ValidationProvider>
                     <div v-if="!levelInternal.isLast">
                       <label for="editLevel-pointsTo" class="mt-3">* Points To</label>
@@ -59,9 +60,8 @@ limitations under the License.
                         <b-form-input id="editLevel-pointsTo" v-model="levelInternal.pointsTo" name="pointsTo" aria-required="true"
                                       v-on:keyup.enter="handleSubmit(saveLevel)"
                                       :aria-invalid="errors && errors.length > 0"
-                                      aria-errormessage="levelPointsToError">
-                        </b-form-input>
-                        <small class="form-text text-danger" v-show="errors[0]">{{ errors[0] }}</small>
+                                      aria-errormessage="levelPointsToError" aria-describedby="levelPointsToError"></b-form-input>
+                        <small class="form-text text-danger" v-show="errors[0]" id="levelPointsToError">{{ errors[0] }}</small>
                       </ValidationProvider>
                     </div>
                   </template>
@@ -71,10 +71,8 @@ limitations under the License.
                     <b-form-input id="editLevel-name" v-model="levelInternal.name" name="name" data-cy="levelName"
                                   v-on:keyup.enter="handleSubmit(saveLevel)"
                                   :aria-invalid="errors && errors.length > 0"
-                                  aria-errormessage="levelNameError">
-
-                    </b-form-input>
-                    <small class="form-text text-danger" v-show="errors[0]" data-cy="levelNameError">{{ errors[0] }}</small>
+                                  aria-errormessage="levelNameError" aria-describedby="levelNameError"></b-form-input>
+                    <small class="form-text text-danger" v-show="errors[0]" data-cy="levelNameError" id="levelNameError">{{ errors[0] }}</small>
                   </ValidationProvider>
                 </template>
                 <template v-else>
@@ -85,9 +83,8 @@ limitations under the License.
                                     name="percent" aria-required="true" data-cy="levelPercent"
                                     v-on:keyup.enter="handleSubmit(saveLevel)"
                                     :aria-invalid="errors && errors.length > 0"
-                                    aria-errormessage="levelPercentError">
-                      </b-form-input>
-                      <small class="form-text text-danger" v-show="errors[0]" data-cy="levelPercentError">{{ errors[0] }}</small>
+                                    aria-errormessage="levelPercentError" aria-describedby="levelPercentError"></b-form-input>
+                      <small class="form-text text-danger" v-show="errors[0]" data-cy="levelPercentError" id="levelPercentError">{{ errors[0] }}</small>
                     </ValidationProvider>
                   </template>
                   <template v-else>
@@ -96,9 +93,8 @@ limitations under the License.
                       <b-form-input id="newlevel-points" v-model="levelInternal.points" name="points" aria-required="true"
                                     v-on:keyup.enter="handleSubmit(saveLevel)"
                                     :aria-invalid="errors && errors.length > 0"
-                                    aria-errormessage="levelPointsError">
-                      </b-form-input>
-                      <small class="form-text text-danger" v-show="errors[0]">{{ errors[0] }}</small>
+                                    aria-errormessage="levelPointsError" aria-describedby="levelPointsError"></b-form-input>
+                      <small class="form-text text-danger" v-show="errors[0]" id="levelPointsError">{{ errors[0] }}</small>
                     </ValidationProvider>
                   </template>
                   <label for="newLevel-name" class="mt-3">Name <span class="text-muted">(optional)</span></label>
@@ -106,9 +102,8 @@ limitations under the License.
                     <b-form-input id="newLevel-name" v-model="levelInternal.name" name="name" data-cy="levelName"
                                   v-on:keyup.enter="handleSubmit(saveLevel)"
                                   :aria-invalid="errors && errors.length"
-                                  aria-errormessage="levelNameError">
-                    </b-form-input>
-                    <small class="form-text text-danger" v-show="errors[0]" data-cy="levelNameError">{{ errors[0] }}</small>
+                                  aria-errormessage="levelNameError" aria-describedby="levelNameError"></b-form-input>
+                    <small class="form-text text-danger" v-show="errors[0]" data-cy="levelNameError" id="levelNameError">{{ errors[0] }}</small>
                   </ValidationProvider>
                 </template>
             </div>

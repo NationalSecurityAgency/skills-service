@@ -14,13 +14,16 @@
 
 // Variable overrides
 $theme-colors: (
-        "info": #2d8779,
+        //"info": #2d8779,
+        "info":#146c75,
         "primary": #264653ff,
         "warning": #ffc42b,
         "header": #f8e9cb,
-        "success": #2b9c8e,
+        "success": #007c49,
+        "hc": #146c75
         //"success": #54b986,
 );
+// secondary: #6d8d9c
 
 // Bootstrap and its default variables
 @import '../../node_modules/bootstrap/scss/bootstrap';

@@ -29,7 +29,8 @@ limitations under the License.
                          @input="updateBadgeId" aria-required="true" data-cy="badgeName"
                          v-on:keyup.enter="handleSubmit(updateBadge)"
                          :aria-invalid="errors && errors.length > 0"
-                         aria-errormessage="badgeNameError"/>
+                         aria-errormessage="badgeNameError"
+                         aria-describedby="badgeNameError"/>
                   <small class="form-text text-danger" v-show="errors[0]" data-cy="badgeNameError" id="badgeNameError">{{ errors[0] }}
                   </small>
                 </ValidationProvider>

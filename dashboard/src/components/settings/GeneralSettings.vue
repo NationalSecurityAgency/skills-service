@@ -25,11 +25,11 @@ limitations under the License.
               <label for="profileFirstName">* First Name</label>
               <ValidationProvider name="First Name" :debounce=500 v-slot="{errors}" rules="required|maxFirstNameLength">
                 <div class="input-group">
-                  <input aria-describedby="basic-addon1" class="form-control"
+                  <input class="form-control"
                          type="text" v-model="loginFields.first" name="first" aria-required="true"
                           id="profileFirstName"
                           :aria-invalid="errors && errors.length > 0"
-                          aria-errormessage="firstnameError"/>
+                          aria-errormessage="firstnameError" aria-describedby="firstnameError"/>
                 </div>
                 <p class="text-danger" v-show="errors[0]" id="firstnameError">{{ errors[0]}}</p>
               </ValidationProvider>
@@ -40,7 +40,7 @@ limitations under the License.
                   <input class="form-control" type="text" v-model="loginFields.last" name="last" aria-required="true"
                       id="profileLastName"
                       :aria-invalid="errors && errors.length > 0"
-                      aria-errormessage="lastnameError"/>
+                      aria-errormessage="lastnameError" aria-describedby="lastnameError"/>
                 </div>
                 <p class="text-danger" v-show="errors[0]" id="lastnameError">{{ errors[0]}}</p>
               </ValidationProvider>
@@ -51,13 +51,13 @@ limitations under the License.
                 <input class="form-control" type="text" v-model="loginFields.nickname" name="nickname"
                     id="profileNickname"
                     :aria-invalid="errors && errors.length > 0"
-                    aria-errormessage="nicknameError"/>
+                    aria-errormessage="nicknameError" aria-describedby="nicknameError"/>
               </div>
               <p class="text-danger" v-show="errors[0]" id="nicknameError">{{ errors[0]}}</p>
             </ValidationProvider>
 
             <div class="mt-2">
-              <button class="btn btn-outline-primary" @click="updateUserInfo" :disabled="invalid || !hasChangedValues()">
+              <button class="btn btn-outline-success" @click="updateUserInfo" :disabled="invalid || !hasChangedValues()">
                 Save
                 <i :class="[isSaving ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-arrow-circle-right']"></i>
               </button>

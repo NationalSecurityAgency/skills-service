@@ -42,7 +42,7 @@ limitations under the License.
 
         <div class="row">
           <div class="col-sm-2 text-center text-sm-left">
-            <button class="btn btn-sm btn-outline-primary h-100" v-on:click="shareSkill"
+            <button class="btn btn-sm btn-outline-hc h-100" v-on:click="shareSkill"
                     :disabled="!shareButtonEnabled">
               <i class="fas fa-share-alt mr-1"></i><span class="text-truncate">Share</span>
             </button>

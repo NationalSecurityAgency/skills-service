@@ -34,7 +34,7 @@ limitations under the License.
           </div>
           <div class="col-auto">
             <div v-b-tooltip.hover :title="minPointsTooltip">
-              <b-button variant="outline-primary" @click="addSkill" :disabled="invalid || disable" v-skills="'ManuallyAddSkillEvent'" data-cy="addSkillEventButton">
+              <b-button variant="outline-hc" @click="addSkill" :disabled="invalid || disable" v-skills="'ManuallyAddSkillEvent'" data-cy="addSkillEventButton">
                 Add <i v-if="projectTotalPoints >= minimumPoints" :class="[isSaving ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-arrow-circle-right']"></i>
                 <i v-else class="icon-warning fa fa-exclamation-circle text-warning"></i>
               </b-button>

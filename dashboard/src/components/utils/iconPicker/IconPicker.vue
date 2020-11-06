@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div class="card" @click="selectIcon" role="button" aria-roledescription="icon selector button">
-    <div class="card-body text-info" style="min-height: 4rem;">
+  <div class="card" @click="selectIcon" role="button" aria-roledescription="icon selector button" aria-label="icon selector">
+    <div class="card-body text-primary" style="min-height: 4rem;">
       <i
         :class="[selectedIconClass]" />
     </div>

@@ -42,6 +42,7 @@ limitations under the License.
                     <input type="text" class="form-control" id="username" tabindex="0" placeholder="Enter email"
                            :aria-invalid="errors && errors.length > 0"
                            aria-errormessage="emailHelp"
+                           aria-describedby="emailHelp"
                            v-model="loginFields.username">
                   </div>
                   <small id="emailHelp" class="form-text text-danger" v-show="errors[0]">{{
@@ -67,6 +68,7 @@ limitations under the License.
                            v-model="loginFields.password" name="password"
                            :aria-invalid="errors && errors.length > 0"
                            aria-errormessage="passwordHelp"
+                           aria-describedby="passwordHelp"
                            @animationstart="onAnimationStart">
                   </div>
                   <small id="passwordHelp" class="form-text text-danger" v-show="errors[0]">{{

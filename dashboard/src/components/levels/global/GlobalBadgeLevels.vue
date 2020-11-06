@@ -28,7 +28,7 @@ limitations under the License.
           </div>
           <div class="col-12 col-sm mt-2 mt-sm-0">
             <span v-b-tooltip.hover="'Add Project and Level to Global Badge.'">
-              <button :disabled="!(selectedProject && selectedLevel)" type="button" class="btn btn-outline-primary" @click="addLevel">
+              <button :disabled="!(selectedProject && selectedLevel)" type="button" class="btn btn-outline-hc" @click="addLevel">
                 <span class="d-none d-sm-inline"></span>Add <i class="fas fa-plus-circle" aria-hidden="true"/>
               </button>
             </span>

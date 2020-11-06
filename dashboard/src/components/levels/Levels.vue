@@ -21,7 +21,7 @@ limitations under the License.
           <b-tooltip target="remove-button" title="You must retain at least one level." :disabled="!onlyOneLevelLeft"></b-tooltip>
           <span id="remove-button" class="mr-2">
             <b-button variant="outline-primary" @click="removeLastItem" :disabled="onlyOneLevelLeft" size="sm">
-              <span class="d-none d-sm-inline">Remove</span> Highest <i class="fas fa-trash-alt" aria-hidden="true"/>
+              <span class="d-none d-sm-inline">Remove</span> Highest <i class="text-warning fas fa-trash-alt" aria-hidden="true"/>
             </b-button>
           </span>
           <b-tooltip target="add-button" title="Reached maximum limit of levels." :disabled="!reachedMaxLevels"></b-tooltip>
@@ -39,7 +39,7 @@ limitations under the License.
         <v-client-table v-if="levels && levels.length && !isLoading" :data="levels" :columns="levelsColumns"
                         :options="options" data-cy="levelsTable">
         <span slot="iconClass" slot-scope="props">
-              <i class="text-info level-icon" v-bind:class="`${props.row.iconClass}`"></i>
+              <i class="text-primary level-icon" v-bind:class="`${props.row.iconClass}`"></i>
                 <i v-if="props.row.achievable === false" class="icon-warning fa fa-exclamation-circle text-warning"
                    v-b-tooltip.hover="'Level is unachievable. Insufficient available points in project.'"/>
         </span>
@@ -54,7 +54,7 @@ limitations under the License.
         </span>
 
           <div slot="edit" slot-scope="props" class="">
-            <b-button @click="editLevel(props.row)" variant="outline-info" style="width: 5rem;" data-cy="editLevelButton">
+            <b-button @click="editLevel(props.row)" variant="outline-primary" style="width: 5rem;" data-cy="editLevelButton">
                       <i class="fas fa-edit"/> Edit
             </b-button>
           </div>

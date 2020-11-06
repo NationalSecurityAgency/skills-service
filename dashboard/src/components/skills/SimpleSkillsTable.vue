@@ -19,12 +19,13 @@ limitations under the License.
       <div slot="edit" slot-scope="props">
         <div class="field text-right">
           <span class="field">
-              <button v-on:click="onDeleteEvent(props.row)" class="btn btn-sm btn-outline-primary" data-cy="deleteSkill">
-                      <i class="fas fa-trash"/>
+              <button v-on:click="onDeleteEvent(props.row)" class="btn btn-sm btn-outline-primary" data-cy="deleteSkill"
+                      :aria-label="`remove dependency on ${props.row.skillId}`">
+                      <i class="text-warning fas fa-trash" aria-hidden="true"/>
               </button>
                 <router-link v-if="props.row.subjectId" :id="props.row.skillId" :to="{ name:'SkillOverview',
                 params: { projectId: props.row.projectId, subjectId: props.row.subjectId, skillId: props.row.skillId }}"
-                             class="btn btn-sm btn-outline-primary ml-2">
+                             class="btn btn-sm btn-outline-hc ml-2">
                   Manage <i class="fas fa-arrow-circle-right" aria-hidden="true"/>
                 </router-link>
           </span>

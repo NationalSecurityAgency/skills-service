@@ -28,8 +28,11 @@ limitations under the License.
         </div>
       </div>
       <input type="text" class="form-control" id="idInput" v-model="internalValue" :disabled="!canEdit"
-              @input="dataChanged" aria-required="true">
-      <small class="form-text text-danger" data-cy="idError">{{ errors[0]}}</small>
+              @input="dataChanged" aria-required="true"
+              :aria-invalid="errors && errors.length > 0"
+              aria-errormessage="idError"
+              aria-describedby="idError">
+      <small class="form-text text-danger" data-cy="idError" id="idError">{{ errors[0]}}</small>
     </div>
   </ValidationProvider>
 </template>

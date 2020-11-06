@@ -151,7 +151,7 @@ limitations under the License.
 <style scoped>
 
   .no-subjects {
-    color: darkslategray;
+    color: #3f5971;
   }
 
 </style>

@@ -22,7 +22,7 @@ limitations under the License.
           <input class="form-control" type="text" v-model="emailInfo.host" name="host"
                  data-cy="hostInput" aria-required="true"
                   :aria-invalid="errors && errors.length > 0"
-                  aria-errormessage="hostError"
+                  aria-errormessage="hostError" aria-describedby="hostError"
                   id="emailHost"/>
           <p class="text-danger" v-show="errors[0]" data-cy="hostError" id="hostError">{{errors[0]}}</p>
         </ValidationProvider>
@@ -33,7 +33,7 @@ limitations under the License.
           <input class="form-control" type="text" v-model="emailInfo.port" name="port"
                  data-cy="portInput" aria-required="true"
                   :aria-invalid="errors && errors.length > 0"
-                  aria-errormessage="portError"
+                  aria-errormessage="portError" aria-describedby="portError"
                   id="emailPort"/>
           <p class="text-danger" v-show="errors[0]" data-cy="portError" id="portError">{{errors[0] }}</p>
         </ValidationProvider>
@@ -44,7 +44,7 @@ limitations under the License.
           <input class="form-control" type="text" v-model="emailInfo.protocol" name="protocol"
                  data-cy="protocolInput" aria-required="true"
                   :aria-invalid="errors && errors.length > 0"
-                  aria-errormessage="protocolError"
+                  aria-errormessage="protocolError" aria-describedby="protocolError"
                   id="emailProtocol"/>
           <p class="text-danger" v-show="errors[0]" data-cy="protocolError" id="protocolError">{{
             errors[0] }}</p>
@@ -67,7 +67,7 @@ limitations under the License.
             <input class="form-control" type="text" v-model="emailInfo.username" name="username"
                    data-cy="emailUsername" aria-required="true"
                    :aria-invalid="errors && errors.length > 0"
-                    aria-errormessage="emailUsernameError"
+                    aria-errormessage="emailUsernameError" aria-describedby="emailUsernameError"
                     id="emailUsername"/>
             <p class="text-danger" v-show="errors[0]" data-cy="emailUsernameError" id="emailUsernameError">{{errors[0]}}</p>
           </ValidationProvider>
@@ -78,7 +78,7 @@ limitations under the License.
             <input class="form-control" type="text" v-model="emailInfo.password" name="password"
                    data-cy="emailPassword" aria-required="true"
                     :aria-invalid="errors && errors.length > 0"
-                    aria-errormessage="emailPasswordError"
+                    aria-errormessage="emailPasswordError" aria-describedby="emailPasswordError"
                     id="emailPassword"/>
             <p class="text-danger" v-show="errors[0]" data-cy="emailPasswordError" id="emailPasswordError">{{errors[0]}}</p>
           </ValidationProvider>
@@ -90,14 +90,14 @@ limitations under the License.
       </p>
 
       <div>
-        <button class="btn btn-outline-primary mr-1" type="button"
+        <button class="btn btn-outline-info mr-1" type="button"
                 v-on:click="testConnection" :disabled="invalid || missingRequiredValues() || isTesting || isSaving"
                 data-cy="emailSettingsTest"
                 aria-roledescription="test email server settings button">
           Test
           <i :class="testButtonClass"></i>
         </button>
-        <button class="btn btn-outline-primary" type="button" v-on:click="saveEmailSettings" :disabled="invalid || pristine || missingRequiredValues() || isSaving || isTesting" data-cy="emailSettingsSave">
+        <button class="btn btn-outline-success" type="button" v-on:click="saveEmailSettings" :disabled="invalid || pristine || missingRequiredValues() || isSaving || isTesting" data-cy="emailSettingsSave">
           Save
           <i :class="[isSaving ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-arrow-circle-right']"></i>
         </button>

@@ -23,7 +23,7 @@ limitations under the License.
 
     <span v-b-tooltip.hover="deleteDisabledText">
       <b-dropdown-item v-on:click="emit('deleted')" :disabled="isDeleteDisabled" >
-          <span class="text-danger"> <i class="fas fa-trash pr-1" aria-hidden="true"/> Delete</span>
+          <span class="text-primary"> <i class="text-warning fas fa-trash pr-1" aria-hidden="true"/> Delete</span>
       </b-dropdown-item>
     </span>
 

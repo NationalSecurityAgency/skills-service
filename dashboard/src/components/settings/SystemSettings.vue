@@ -30,7 +30,7 @@ limitations under the License.
                      data-cy="publicUrl" aria-required="true"
                     id="publicUrl"
                     :aria-invalid="errors && errors.length > 0"
-                    aria-errormessage="publicUrlError"/>
+                    aria-errormessage="publicUrlError" aria-describedby="publicUrlError"/>
               <p class="text-danger" v-show="errors[0]" id="publicUrlError">{{errors[0]}}</p>
             </ValidationProvider>
           </div>
@@ -41,8 +41,7 @@ limitations under the License.
                      data-cy="resetTokenExpiration" aria-required="true"
                       id="resetTokenExpiration"
                       :aria-invalid="errors && errors.length > 0"
-                      aria-errormessage="resetTokenExpirationError"
-                      aria-describedby="resetTokenExpirationFormat"/>
+                      aria-errormessage="resetTokenExpirationError" aria-describedby="resetTokenExpirationError"/>
               <small class="text-info" id="resetTokenExpirationFormat">supports ISO 8601 time duration format, e.g., 2H, 30M, 1H30M, 1M42S, etc</small>
               <p class="text-danger" v-show="errors[0]" data-cy="resetTokenExpirationError" id="resetTokenExpirationError">{{errors[0]}}</p>
             </ValidationProvider>
@@ -53,7 +52,7 @@ limitations under the License.
               <input class="form-control" type="text" v-model="fromEmail" name="fromEmail"
                      data-cy="fromEmail" id="fromEmail"
                     :aria-invalid="errors && errors.length  > 0"
-                    aria-errormessage="fromEmailError"/>
+                    aria-errormessage="fromEmailError" aria-describedby="fromEmailError"/>
               <p class="text-danger" v-show="errors[0]" data-cy="fromEmailError" id="fromEmailError">{{errors[0]}}</p>
             </ValidationProvider>
           </div>
@@ -64,7 +63,7 @@ limitations under the License.
               <textarea class="form-control" name="customHeader" data-cy="customHeader" rows="3" v-model="customHeader"
                   id="customHeader"
                   :aria-invalid="errors && errors.length > 0"
-                  aria-errormessage="customHeaderError"/>
+                  aria-errormessage="customHeaderError" aria-describedby="customHeaderError"/>
               <p class="text-danger" v-show="errors[0]" data-cy="customHeaderError" id="customHeaderError">{{errors[0]}}</p>
             </ValidationProvider>
           </div>
@@ -75,14 +74,14 @@ limitations under the License.
               <textarea class="form-control" name="customFooter" data-cy="customFooter" v-model="customFooter" rows="3"
                         id="customFooter"
                         :aria-invalid="errors && errors.length > 0"
-                        aria-errormessage="customFooterError"/>
+                        aria-errormessage="customFooterError" aria-describedby="customFooterError"/>
               <p class="text-danger" v-show="errors[0]" data-cy="customFooterError" id="customFooterError">{{errors[0]}}</p>
             </ValidationProvider>
           </div>
 
           <p v-if="invalid && overallErrMsg" class="text-center text-danger" role="alert">***{{ overallErrMsg }}***</p>
           <div>
-            <button class="btn btn-outline-primary" type="button" v-on:click="saveSystemSettings" :disabled="invalid || (pristine===true)"
+            <button class="btn btn-outline-success" type="button" v-on:click="saveSystemSettings" :disabled="invalid || (pristine===true)"
                     data-cy="saveSystemSettings">
               Save
               <i :class="[isSaving ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-arrow-circle-right']"></i>

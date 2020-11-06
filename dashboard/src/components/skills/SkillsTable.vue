@@ -63,7 +63,7 @@ limitations under the License.
                 <b-button @click="deleteSkill(props.row)" variant="outline-primary"
                           data-cy="deleteSkillButton"
                           :aria-label="'delete Skill '+props.row.name">
-                  <i class="fas fa-trash" aria-hidden="true"/>
+                  <i class="text-warning fas fa-trash" aria-hidden="true"/>
                 </b-button>
               </b-button-group>
               <router-link :to="{ name:'SkillOverview',
