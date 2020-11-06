@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: Test storing HttpSession in Redis
+name: Continuous Integration with OAuth
 
 #on:
 #  push:
@@ -30,24 +30,17 @@ jobs:
   ci:
     runs-on: ubuntu-latest
 
-    services:
-      redis:
-        image: redis
-        # Set health checks to wait until redis has started
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          # Maps port 6379 on service container to the host
-          - 6379:6379
-
     steps:
     - name: Install Emoji Support
       run: sudo apt-get install fonts-noto-color-emoji
 
     - uses: actions/checkout@v2
+
+    - name: Checkout skills-client
+      uses: actions/checkout@v2
+      with:
+        repository: NationalSecurityAgency/skills-client
+        path: skills-client
 
     - uses: actions/setup-node@v2-beta
       with:
@@ -78,12 +71,40 @@ jobs:
     - name: Build skills-service
       run: mvn --batch-mode install -DskipTests
 
+    - name: run hyrda oauth service
+      run: |
+        cd skills-client/
+        ./.github/workflows/scripts/runHydra.sh
+        cd ../
+
+    - name: Check running containers
+      run: docker ps -a
+
+    - name: Caputre Hydra Oauth Service logs
+      run: |
+        mkdir -p ./e2e-tests/logs
+        docker logs hydra > ./e2e-tests/logs/hydra.out &
+        docker container logs -f hydra_consent > ./e2e-tests/logs/hydra_consent.out &
+        docker container logs -f hydra_postgres > ./e2e-tests/logs/hydra_postgres.out &
+
+    - name: Register hydra client
+      run: |
+        docker-compose -f ./skills-client/skills-client-integration/skills-int-e2e-test/hydra/quickstart.yml exec -T hydra \
+        	hydra clients create \
+            --endpoint http://localhost:4445/ \
+            --id skilltree-test \
+            --secret client-secret \
+            --grant-types authorization_code,refresh_token \
+            --response-types code \
+            --scope openid \
+            --callbacks http://localhost:8080/login/oauth2/code/hydra
+
     - name: Start services for Cypress tests
       run: |
         cd e2e-tests
         npm install
-        npm run cyServices:start:skills-service:redis
-        npm run cyServices:start:client-display
+        npm run cyServices:start:skills-service:oauth
+        npm run cyServices:start:client-display:oauth
         cd ..
 
     - name: Run Cypress tests
@@ -92,7 +113,8 @@ jobs:
         working-directory: e2e-tests
         record: true
         parallel: false
-        group: 'skills-service with Redis'
+        group: 'skills-service with OAuth'
+        env: oauthMode=true
       env:
         # pass the Dashboard record key as an environment variable
         CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}

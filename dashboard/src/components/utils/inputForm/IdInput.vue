@@ -73,10 +73,14 @@ limitations under the License.
         this.$emit('input', this.internalValue);
       },
       validateOnChange: debounce(function validate(val) {
-        this.$refs.idVp.syncValue(val);
-        this.$refs.idVp.validate().then((validationResult) => {
-          this.$refs.idVp.applyResult(validationResult);
-        });
+        if (this.$refs.idVp) {
+          this.$refs.idVp.syncValue(val);
+          this.$refs.idVp.validate().then((validationResult) => {
+            if (this.$refs.idVp) {
+              this.$refs.idVp.applyResult(validationResult);
+            }
+          });
+        }
       }, 200),
     },
     watch: {

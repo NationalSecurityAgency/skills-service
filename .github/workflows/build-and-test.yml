@@ -37,7 +37,7 @@ jobs:
 
       - uses: actions/setup-node@v2-beta
         with:
-          node-version: '12'
+          node-version: '14'
 
       - name: Set up Maven
         uses: stCarolas/setup-maven@v3
@@ -80,7 +80,7 @@ jobs:
 
       - uses: actions/setup-node@v2-beta
         with:
-          node-version: '12'
+          node-version: '14'
 
       - name: Set up Maven
         uses: stCarolas/setup-maven@v3
@@ -134,7 +134,7 @@ jobs:
 
     - uses: actions/setup-node@v2-beta
       with:
-        node-version: '12'
+        node-version: '14'
 
     - name: Set up Maven
       uses: stCarolas/setup-maven@v3
@@ -209,7 +209,7 @@ jobs:
 
       - uses: actions/setup-node@v2-beta
         with:
-          node-version: '12'
+          node-version: '14'
 
       - name: Set up Maven
         uses: stCarolas/setup-maven@v3

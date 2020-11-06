@@ -137,11 +137,13 @@ describe('Login Tests', () => {
     cy.contains(expectedText).should('not.exist');
   })
 
-  it('OAuth login is not enabled', () => {
-    cy.visit('/');
-    cy.contains('Login').should('be.disabled');
+  if (!Cypress.env('oauthMode')) {
+    it('OAuth login is not enabled', () => {
+      cy.visit('/');
+      cy.contains('Login').should('be.disabled');
 
-    cy.wait('@getOAuthProviders').its('status').should('equal', 200)
-    cy.get('[data-cy=oAuthProviders]').should('not.exist');
-  })
+      cy.wait('@getOAuthProviders').its('status').should('equal', 200)
+      cy.get('[data-cy=oAuthProviders]').should('not.exist');
+    })
+  }
 });

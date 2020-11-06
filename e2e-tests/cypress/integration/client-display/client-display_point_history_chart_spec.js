@@ -175,11 +175,11 @@ describe('Client Display Tests', () => {
 
         const m = moment('2020-09-12 11', 'YYYY-MM-DD HH');
         const orig = m.clone()
-        cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: 'user0', timestamp: m.format('x')})
-        cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: 'user0', timestamp: m.subtract(4, 'day').format('x')})
-        cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: 'user0', timestamp: m.subtract(3, 'day').format('x')})
-        cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: 'user0', timestamp: m.subtract(2, 'day').format('x')})
-        cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: 'user0', timestamp: m.subtract(1, 'day').format('x')})
+        cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: Cypress.env('proxyUser'), timestamp: m.format('x')})
+        cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: Cypress.env('proxyUser'), timestamp: m.subtract(4, 'day').format('x')})
+        cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: Cypress.env('proxyUser'), timestamp: m.subtract(3, 'day').format('x')})
+        cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: Cypress.env('proxyUser'), timestamp: m.subtract(2, 'day').format('x')})
+        cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: Cypress.env('proxyUser'), timestamp: m.subtract(1, 'day').format('x')})
 
         cy.server().route('/api/projects/proj1/pointHistory').as('getPointHistory');
 

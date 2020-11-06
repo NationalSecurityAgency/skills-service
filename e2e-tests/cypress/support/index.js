@@ -45,7 +45,17 @@ beforeEach(function () {
     cy.resetDb();
 
     cy.fixture('vars.json').then((vars) => {
-        cy.login(vars.defaultUser, vars.defaultPass);
+        cy.logout()
+
+        if (!Cypress.env('oauthMode')) {
+            cy.log('NOT in oauthMode, using form login')
+            Cypress.env('proxyUser', 'user0')
+            cy.login(vars.defaultUser, vars.defaultPass);
+        } else {
+            cy.log('oauthMode, using loginBySingleSignOn')
+            Cypress.env('proxyUser', 'foo-hydra')
+            cy.loginBySingleSignOn()
+        }
     });
 });
 

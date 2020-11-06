@@ -83,7 +83,7 @@ service = {
     if (!store.state.isAuthenticating) {
       store.commit('isAuthenticating', true);
       if (process.env.NODE_ENV === 'development') {
-        this.authenticatingPromise = axios.get(store.state.authenticator);
+          this.authenticatingPromise = axios.get(store.state.authenticator);
       } else {
         store.state.parentFrame.emit('needs-authentication');
         this.authenticatingPromise = new Promise((resolve) => {

@@ -40,7 +40,13 @@ limitations under the License.
         } else {
           this.$store.commit('projectId', process.env.VUE_APP_PROJECT_ID);
           this.$store.commit('serviceUrl', process.env.VUE_APP_SERVICE_URL);
-          this.$store.commit('authenticator', process.env.VUE_APP_AUTHENTICATION_URL);
+          if (process.env.VUE_APP_AUTHENTICATION_URL !== 'hydra') {
+            this.$store.commit('authenticator', process.env.VUE_APP_AUTHENTICATION_URL);
+          } else {
+            this.$store.commit('authenticator', `${this.$store.state.serviceUrl}/api/projects/${this.$store.state.projectId}/token`);
+            // eslint-disable-next-line
+            console.log(`Authenticator set to hydra, setting new authenticator to [${this.$store.state.authenticator}]`);
+          }
           this.storeAuthToken();
 
           const isSummaryOnly = this.$route.query.isSummaryOnly ? this.$route.query.isSummaryOnly : false;
