@@ -19,27 +19,31 @@ limitations under the License.
     <simple-card>
       <loading-container :is-loading="isLoading">
         <div class="row">
-          <div class="col col-md-3 text-secondary">
+          <div class="col col-md-3 text-secondary" id="pointsForLevelsLabel">
             Use Points For Levels:
             <inline-help
               msg="Change to true to calculate levels based on explicit point values instead of percentages."/>
           </div>
           <div class="col">
-            <b-form-checkbox v-model="settings.levelPointsEnabled.value" name="check-button" v-on:input="levelPointsEnabledChanged" switch>
+            <b-form-checkbox v-model="settings.levelPointsEnabled.value"
+                             name="check-button"
+                             v-on:input="levelPointsEnabledChanged"
+                             aria-labelledby="pointsForLevelsLabel"
+                             switch>
               {{ settings.levelPointsEnabled.value }}
             </b-form-checkbox>
           </div>
         </div>
 
         <div class="row mt-3">
-          <div class="col col-md-3 text-secondary">
+          <div class="col col-md-3 text-secondary" id="rootHelpUrlLabel">
             Root Help Url:
             <inline-help
               msg="Optional root for Skills' 'Help Url' parameter. When configured 'Help Url' can use relative path to this root."/>
           </div>
           <div class="col">
             <b-form-input v-model="settings.helpUrlHost.value" placeholder="http://www.HelpArticlesHost.com"
-                          v-on:input="helpUrlHostChanged"></b-form-input>
+                          v-on:input="helpUrlHostChanged" aria-labelledby="rootHelpUrlLabel"></b-form-input>
           </div>
         </div>
 

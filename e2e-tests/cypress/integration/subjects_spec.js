@@ -231,7 +231,7 @@ describe('Subjects Tests', () => {
         cy.visit('/projects/proj1/');
         cy.get('.subject-settings .dropdown-toggle').click();
         cy.get('a.dropdown-item').contains('Edit').click({force:true});
-        cy.get('div.modal-content .text-info i.fa-question-circle').click();
+        cy.get('div.modal-content .text-primary i.fa-question-circle').click();
         cy.get('a.nav-link').contains('Font Awesome Free').click();
         cy.wait(1500);
         cy.get('[role=tabpanel][aria-hidden=false]').should('be.visible');
@@ -259,7 +259,7 @@ describe('Subjects Tests', () => {
         cy.visit('/projects/proj1/');
         cy.get('.subject-settings .dropdown-toggle').click();
         cy.get('a.dropdown-item').contains('Edit').click();
-        cy.get('div.modal-content .text-info i.fa-question-circle').click();
+        cy.get('div.modal-content .text-primary i.fa-question-circle').click();
         cy.get('a.nav-link').contains('Material').click();
         cy.wait(2500);
         cy.get('[role=tabpanel][aria-hidden=false]').should('be.visible');
@@ -287,7 +287,7 @@ describe('Subjects Tests', () => {
         cy.visit('/projects/proj1/');
         cy.get('.subject-settings .dropdown-toggle').click();
         cy.get('a.dropdown-item').contains('Edit').click();
-        cy.get('div.modal-content .text-info i.fa-question-circle').click();
+        cy.get('div.modal-content .text-primary i.fa-question-circle').click();
         cy.get('[data-cy=icon-search]').type('run');
         cy.get('.fas.fa-running').should('be.visible');
         //filter should persist between tab changes
@@ -299,7 +299,7 @@ describe('Subjects Tests', () => {
 
         //filter should not persist when icon manager is re-opened
         cy.contains('Cancel Icon Selection').click();
-        cy.get('div.modal-content .text-info i.fa-question-circle').click();
+        cy.get('div.modal-content .text-primary i.fa-question-circle').click();
         cy.get('[data-cy=icon-search]').should('have.value', '');
         cy.get('i.fas.fa-ad').should('be.visible');
         cy.get('a.nav-link').contains('Material').click();
@@ -325,7 +325,7 @@ describe('Subjects Tests', () => {
 
         cy.get('a.dropdown-item').contains('Edit').click();
 
-        cy.get('div.modal-content .text-info i.fa-question-circle').click();
+        cy.get('div.modal-content .text-primary i.fa-question-circle').click();
 
         cy.get('a.nav-link').contains('Custom').click();
 
@@ -350,7 +350,7 @@ describe('Subjects Tests', () => {
 
         cy.get('a.dropdown-item').contains('Edit').click();
 
-        cy.get('div.modal-content .text-info i.fa-question-circle').click();
+        cy.get('div.modal-content .text-primary i.fa-question-circle').click();
 
         cy.get('a.nav-link').contains('Custom').click();
 
@@ -382,7 +382,7 @@ describe('Subjects Tests', () => {
 
         cy.get('a.dropdown-item').contains('Edit').click();
 
-        cy.get('div.modal-content .text-info i.fa-question-circle').click();
+        cy.get('div.modal-content .text-primary i.fa-question-circle').click();
 
         cy.get('a.nav-link').contains('Custom').click();
 
