@@ -19,10 +19,7 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
 import skills.services.AdminUsersService
-import skills.metrics.ChartParams
 import skills.metrics.MetricsService
-import skills.metrics.model.MetricsChart
-import skills.metrics.model.Section
 import skills.profile.EnableCallStackProf
 
 @RestController
@@ -53,7 +50,7 @@ class AdminMetricsController {
     def getChartData(@PathVariable("projectId") String projectId,
                                                   @PathVariable("chartId") String chartId,
                                                   @RequestParam Map<String,String> chartProps) {
-        return metricsServiceNew.loadChart(projectId, chartId, chartProps)
+        return metricsServiceNew.loadProjectMetrics(projectId, chartId, chartProps)
     }
 
 //    @RequestMapping(value = "/projects/{projectId}/{section}/{sectionId}/metrics/{chartBuilderId}", method =  RequestMethod.GET, produces = "application/json")

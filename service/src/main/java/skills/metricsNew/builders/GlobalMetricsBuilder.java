@@ -17,8 +17,8 @@ package skills.metricsNew.builders;
 
 import java.util.Map;
 
-public interface MetricsChartBuilder {
+public interface GlobalMetricsBuilder {
 
     String getId();
-    Object build(String projectId, String chartId, Map<String, String> props);
+    Object build(Map<String, String> props);
 }

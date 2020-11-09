@@ -15,18 +15,26 @@
  */
 import axios from 'axios';
 
-export default {
-
-  loadChart(projectId, chartId, params = {}) {
-    let url = `/admin/projects/${projectId}/charts/${chartId}`;
-    if (params) {
-      const paramsEntries = Object.entries(params);
-      if (paramsEntries && paramsEntries.length > 0) {
-        const paramsStr = paramsEntries.map((entry) => `${entry[0]}=${entry[1]}`)
-          .join('&');
-        url = `${url}?${paramsStr}`;
-      }
+function buildUrl(url, params = {}) {
+  let res = url;
+  if (params) {
+    const paramsEntries = Object.entries(params);
+    if (paramsEntries && paramsEntries.length > 0) {
+      const paramsStr = paramsEntries.map((entry) => `${entry[0]}=${entry[1]}`)
+        .join('&');
+      res = `${res}?${paramsStr}`;
     }
+  }
+  return res;
+}
+
+export default {
+  loadChart(projectId, chartId, params = {}) {
+    const url = buildUrl(`/admin/projects/${projectId}/charts/${chartId}`, params);
+    return axios.get(url).then((response) => response.data);
+  },
+  loadGlobalMetrics(metricsId, params = {}) {
+    const url = buildUrl(`/supervisor/metrics/${metricsId}`, params);
     return axios.get(url).then((response) => response.data);
   },
   getChartsForSection(sectionParams) {

@@ -16,15 +16,19 @@ limitations under the License.
 <template>
   <div>
     <sub-page-header title="Metrics"/>
+
+    <multiple-proj-users-in-common />
   </div>
 </template>
 
 <script>
   import SubPageHeader from '@//components/utils/pages/SubPageHeader';
+  import MultipleProjUsersInCommon from './MultipleProjUsersInCommon';
 
   export default {
     name: 'SkillMetricsPage',
     components: {
+      MultipleProjUsersInCommon,
       SubPageHeader,
     },
     data() {

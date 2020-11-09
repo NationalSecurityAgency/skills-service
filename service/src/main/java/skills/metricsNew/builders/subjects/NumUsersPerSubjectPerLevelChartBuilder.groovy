@@ -18,14 +18,14 @@ package skills.metricsNew.builders.subjects
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
-import skills.metricsNew.builders.MetricsChartBuilder
+import skills.metricsNew.builders.ProjectMetricsBuilder
 import skills.storage.model.SkillDef
 import skills.storage.repos.LevelDefRepo
 import skills.storage.repos.UserAchievedLevelRepo
 
 @Component
 @Slf4j
-class NumUsersPerSubjectPerLevelChartBuilder implements MetricsChartBuilder {
+class NumUsersPerSubjectPerLevelChartBuilder implements ProjectMetricsBuilder {
 
     @Autowired
     UserAchievedLevelRepo userAchievedRepo

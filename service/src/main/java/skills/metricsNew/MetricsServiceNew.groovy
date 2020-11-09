@@ -21,7 +21,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Service
 import skills.controller.exceptions.SkillException
-import skills.metricsNew.builders.MetricsChartBuilder
+import skills.metricsNew.builders.GlobalMetricsBuilder
+import skills.metricsNew.builders.ProjectMetricsBuilder
 
 import javax.annotation.PostConstruct
 
@@ -33,25 +34,49 @@ class MetricsServiceNew {
     @Autowired
     ApplicationContext appContext
 
-    final Map<String, MetricsChartBuilder> chartBuildersMap = [:]
+    private final Map<String, ProjectMetricsBuilder> projectBuildersMap = [:]
+    private final Map<String, GlobalMetricsBuilder> globalBuildersMap = [:]
 
     @PostConstruct
     void init() {
-        Collection<MetricsChartBuilder> loadedBuilders = appContext.getBeansOfType(MetricsChartBuilder).values()
-        loadedBuilders.each { MetricsChartBuilder builder ->
-            assert !chartBuildersMap.get(builder.getId()), "Found more than 1 chart with id [${builder.id}]"
-            chartBuildersMap.put(builder.getId(), builder)
-        }
-        log.info("Loaded [${chartBuildersMap.size()}] builders: ${chartBuildersMap.keySet().toList()}")
+        loadProjectBuilders()
+        loadGlobalBuilders()
     }
 
-    def loadChart(String projectId, String chartId, Map<String, String> props) {
-        MetricsChartBuilder metricsChartBuilder = chartBuildersMap.get(chartId)
+    private void loadProjectBuilders() {
+        Collection<ProjectMetricsBuilder> loadedBuilders = appContext.getBeansOfType(ProjectMetricsBuilder).values()
+        loadedBuilders.each { ProjectMetricsBuilder builder ->
+            assert !projectBuildersMap.get(builder.getId()), "Found more than 1 chart with id [${builder.id}]"
+            projectBuildersMap.put(builder.getId(), builder)
+        }
+        log.info("Loaded [${projectBuildersMap.size()}] builders: ${projectBuildersMap.keySet().toList()}")
+    }
+
+    private void loadGlobalBuilders() {
+        Collection<GlobalMetricsBuilder> loadedBuilders = appContext.getBeansOfType(GlobalMetricsBuilder).values()
+        loadedBuilders.each { GlobalMetricsBuilder builder ->
+            assert !globalBuildersMap.get(builder.getId()), "Found more than 1 chart with id [${builder.id}]"
+            globalBuildersMap.put(builder.getId(), builder)
+        }
+        log.info("Loaded [${globalBuildersMap.size()}] builders: ${globalBuildersMap.keySet().toList()}")
+    }
+
+    def loadProjectMetrics(String projectId, String metricsId, Map<String, String> props) {
+        ProjectMetricsBuilder metricsChartBuilder = projectBuildersMap.get(metricsId)
         if (!metricsChartBuilder) {
-            throw new SkillException("Failed to find chart with id [${chartId}]", projectId)
+            throw new SkillException("Failed to find metric with id [${metricsId}]", projectId)
         }
 
-        return metricsChartBuilder.build(projectId, chartId, props)
+        return metricsChartBuilder.build(projectId, metricsId, props)
+    }
+
+    def loadGlobalMetrics(String metricsId, Map<String, String> props) {
+        GlobalMetricsBuilder globalMetricsBuilder = globalBuildersMap.get(metricsId)
+        if (!globalMetricsBuilder) {
+            throw new SkillException("Failed to find global builder with id [${metricsId}]")
+        }
+
+        return globalMetricsBuilder.build(props)
     }
 
 }

@@ -20,11 +20,11 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import skills.controller.result.model.TimestampCountItem
 import skills.metrics.ChartParams
-import skills.metricsNew.builders.MetricsChartBuilder
+import skills.metricsNew.builders.ProjectMetricsBuilder
 import skills.storage.repos.UserAchievedLevelRepo
 
 @Component
-class UsersByLevelForSubjectOverTimeChartBuilder implements MetricsChartBuilder {
+class UsersByLevelForSubjectOverTimeChartBuilder implements ProjectMetricsBuilder {
 
     @Autowired
     UserAchievedLevelRepo userAchievedRepo

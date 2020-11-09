@@ -742,6 +742,11 @@ class SkillsService {
         wsHelper.adminGet(endpoint, props)
     }
 
+    def getGlobalMetricsData(String metricsId, Map props=null) {
+        String endpoint = "/metrics/${metricsId}"
+        wsHelper.supervisorGet(endpoint, props)
+    }
+
     def getAllMetricsChartsForSection(String projectId, String section, String sectionId, Map props=null) {
         String endpoint = "/projects/${projectId}/${section}/${sectionId}/metrics/"
         wsHelper.adminGet(endpoint, props)

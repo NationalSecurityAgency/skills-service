@@ -18,12 +18,12 @@ package skills.metricsNew.builders.project
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import skills.controller.result.model.LabelCountItem
-import skills.metricsNew.builders.MetricsChartBuilder
+import skills.metricsNew.builders.ProjectMetricsBuilder
 import skills.metricsNew.builders.MetricsParams
 import skills.services.AdminUsersService
 
 @Component
-class NumberUsersPerLevelChartBuilderNew implements MetricsChartBuilder {
+class NumberUsersPerLevelChartBuilderNew implements ProjectMetricsBuilder {
 
     @Autowired
     AdminUsersService adminUsersService

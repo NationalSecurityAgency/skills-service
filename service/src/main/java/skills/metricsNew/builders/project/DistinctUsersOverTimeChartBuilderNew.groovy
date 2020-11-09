@@ -19,13 +19,12 @@ package skills.metricsNew.builders.project
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import skills.controller.result.model.CountItem
-import skills.metrics.ChartParams
-import skills.metricsNew.builders.MetricsChartBuilder
+import skills.metricsNew.builders.ProjectMetricsBuilder
 import skills.metricsNew.builders.MetricsParams
 import skills.services.AdminUsersService
 
 @Component
-class DistinctUsersOverTimeChartBuilderNew implements MetricsChartBuilder {
+class DistinctUsersOverTimeChartBuilderNew implements ProjectMetricsBuilder {
 
     @Autowired
     AdminUsersService adminUsersService

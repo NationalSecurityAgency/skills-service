@@ -15,9 +15,10 @@
  */
 package skills.metricsNew.builders
 
-
+import groovy.transform.CompileStatic
 import skills.controller.exceptions.SkillException
 
+@CompileStatic
 class MetricsPagingParamsHelper {
     static String PROP_PAGE_SIZE = "pageSize"
     static String PROP_CURRENT_PAGE = "currentPage"
@@ -34,7 +35,8 @@ class MetricsPagingParamsHelper {
     }
 
     int getPageSize() {
-        int pageSize = props[PROP_PAGE_SIZE] ? Integer.valueOf(props[PROP_PAGE_SIZE]) : 10
+        String strPage = MetricsParams.getParam(props, PROP_PAGE_SIZE, chartId, projectId)
+        int pageSize = Integer.valueOf(strPage)
         if (pageSize > 100) {
             throw new SkillException("Chart[${chartId}]: page size must not exceed 100. Provided [${pageSize}]", projectId)
         }
@@ -46,8 +48,9 @@ class MetricsPagingParamsHelper {
     }
 
     int getCurrentPage() {
+        String strPage = MetricsParams.getParam(props, PROP_CURRENT_PAGE, chartId, projectId)
         // client's page starts 1, dbs at 0
-        int currentPage = props[PROP_CURRENT_PAGE] ? Integer.valueOf(props[PROP_CURRENT_PAGE]) - 1 : 0
+        int currentPage = Integer.valueOf(strPage) - 1
         if (currentPage < 0) {
             throw new SkillException("Chart[${chartId}]: current page must not be less than 0. Provided [${currentPage}]", projectId)
         }

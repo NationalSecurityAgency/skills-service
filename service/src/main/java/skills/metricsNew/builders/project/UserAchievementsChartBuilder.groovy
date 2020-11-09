@@ -21,7 +21,7 @@ import org.springframework.data.domain.Sort
 import org.springframework.data.jpa.domain.JpaSort
 import org.springframework.stereotype.Component
 import skills.controller.exceptions.SkillException
-import skills.metricsNew.builders.MetricsChartBuilder
+import skills.metricsNew.builders.ProjectMetricsBuilder
 import skills.metricsNew.builders.MetricsPagingParamsHelper
 import skills.storage.model.SkillDef
 import skills.storage.model.UserAchievement
@@ -31,12 +31,10 @@ import java.text.DateFormat
 import java.text.SimpleDateFormat
 
 import static org.springframework.data.domain.Sort.Direction.ASC
-import static org.springframework.data.domain.Sort.Direction.ASC
-import static org.springframework.data.domain.Sort.Direction.DESC
 import static org.springframework.data.domain.Sort.Direction.DESC
 
 @Component
-class UserAchievementsChartBuilder implements MetricsChartBuilder {
+class UserAchievementsChartBuilder implements ProjectMetricsBuilder {
 
     @Autowired
     UserAchievedLevelRepo userAchievedRepo

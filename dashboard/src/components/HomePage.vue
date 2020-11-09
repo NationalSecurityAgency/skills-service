@@ -33,16 +33,17 @@ limitations under the License.
       return {
         isLoading: true,
         navItems: [
-          { name: 'Projects', iconClass: 'fa-tasks skills-color-projects', page: 'HomePage' },
+          {
+            name: 'Projects',
+            iconClass: 'fa-tasks skills-color-projects',
+            page: 'HomePage',
+          },
         ],
       };
     },
     computed: {
       isSupervisor() {
         return this.$store.getters['access/isSupervisor'];
-      },
-      isRootUser() {
-        return this.$store.getters['access/isRoot'];
       },
       headerOptions() {
         return {
@@ -60,17 +61,22 @@ limitations under the License.
       isSupervisor() {
         this.loadNavItems();
       },
-      isRootUser() {
-        this.loadNavItems();
-      },
     },
     methods: {
       loadNavItems() {
-        const metricsNavItem = { name: 'Metrics', iconClass: 'fa-cogs skills-color-metrics', page: 'MultipleProjectsMetricsPage' };
-        this.handleNavItem(metricsNavItem, this.isSupervisor || this.isRootUser);
+        const metricsNavItem = {
+          name: 'Metrics',
+          iconClass: 'fa-cogs skills-color-metrics',
+          page: 'MultipleProjectsMetricsPage',
+        };
+        this.handleNavItem(metricsNavItem, this.isSupervisor);
 
-        const globalBadgeNav = { name: 'Badges', iconClass: 'fa-globe-americas skills-color-badges', page: 'GlobalBadges' };
-        this.handleNavItem(globalBadgeNav, this.isSupervisor || this.isRootUser);
+        const globalBadgeNav = {
+          name: 'Badges',
+          iconClass: 'fa-globe-americas skills-color-badges',
+          page: 'GlobalBadges',
+        };
+        this.handleNavItem(globalBadgeNav, this.isSupervisor);
 
         this.isLoading = false;
       },

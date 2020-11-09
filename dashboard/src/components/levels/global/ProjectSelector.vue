@@ -85,8 +85,8 @@ limitations under the License.
         this.$emit('removed', removedItem);
       },
       added(addedItem) {
-        this.$emit('added', addedItem);
         this.$emit('input', addedItem);
+        this.$emit('added', addedItem);
       },
       searchChanged(query) {
         this.$emit('search-change', query);
