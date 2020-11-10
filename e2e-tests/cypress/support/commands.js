@@ -116,6 +116,13 @@ Cypress.Commands.add("clickButton", (label) => {
     cy.get(`button:contains('${label}')`).click();
 });
 
+Cypress.Commands.add("clickManageSubject", (subjId) => {
+    cy.get(`[data-cy=subjCard_${subjId}_manageBtn]`).click();
+});
+
+
+
+
 Cypress.Commands.add("getIdField", () => {
     return cy.get("#idInput");
 });
