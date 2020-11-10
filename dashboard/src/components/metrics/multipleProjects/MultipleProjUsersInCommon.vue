@@ -31,7 +31,7 @@ limitations under the License.
       </div>
       <div class="my-3">
       <no-content2 v-if="!atLeast1Proj" title="No Projects Selected"
-                   message="Please select at least 2 projects using search above and click 'Locate Users In Common' button below"></no-content2>
+                   message="Please select at least 2 projects using search above then click 'Find Users' button below"></no-content2>
 
         <b-table v-if="atLeast1Proj" striped :items="projects.selected" :fields="fields" stacked="md">
           <template v-slot:cell(minLevel)="data">
