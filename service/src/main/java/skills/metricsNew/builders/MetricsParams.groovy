@@ -16,15 +16,12 @@
 package skills.metricsNew.builders
 
 import groovy.time.TimeCategory
+import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
 import org.springframework.data.domain.PageRequest
-import org.springframework.data.domain.Sort
-import org.springframework.data.jpa.domain.JpaSort
 import skills.controller.exceptions.SkillException
 
 import static org.springframework.data.domain.Sort.Direction.ASC
-import static org.springframework.data.domain.Sort.Direction.ASC
-import static org.springframework.data.domain.Sort.Direction.DESC
 import static org.springframework.data.domain.Sort.Direction.DESC
 
 @CompileStatic
@@ -51,12 +48,20 @@ class MetricsParams {
     static Date getStart(String projectId, String chartId, Map<String, String> props) {
         String tStr = getParam(props, P_START_TIMESTAMP, chartId, projectId)
         Long timestamp = Long.valueOf(tStr)
-        Date threeYearsAgo = new Date(System.currentTimeMillis() - (1000 * 60 * 60 * 24 * 365 * 3))
+        int numYears = 3
+        Date threeYearsAgo = getYearsAgo(numYears)
         Date date = new Date(timestamp)
         if (date.before(threeYearsAgo)) {
-            throw new SkillException("Chart[${chartId}]: ${P_START_TIMESTAMP} param timestamp must be within last 4 years", projectId)
+            throw new SkillException("Chart[${chartId}]: ${P_START_TIMESTAMP} param timestamp must be within last ${numYears} years. Provided: [${date}]", projectId)
         }
         return date
+    }
+
+    @CompileDynamic
+    private static Date getYearsAgo(int numYears){
+        use(TimeCategory) {
+            return numYears.years.ago;
+        }
     }
 
     static String getParam(Map<String, String> props, String paramId, String chartId, String projectId = null) {
