@@ -28,7 +28,8 @@ limitations under the License.
       <div slot="footer">
         <router-link
           :to="{ name:'SubjectSkills', params: { projectId: this.subjectInternal.projectId, subjectId: this.subjectInternal.subjectId, subject: this.subjectInternal}}"
-          class="btn btn-outline-primary btn-sm">
+          class="btn btn-outline-primary btn-sm"
+          :data-cy="`subjCard_${subjectInternal.subjectId}_manageBtn`">
           Manage <i class="fas fa-arrow-circle-right"/>
         </router-link>
       </div>
