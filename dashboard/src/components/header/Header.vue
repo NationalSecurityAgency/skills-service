@@ -54,18 +54,5 @@ limitations under the License.
 </script>
 
 <style scoped>
-/*.header img {*/
-/*  height: 70px;*/
-/*  position: absolute;*/
-/*  top: -15px;*/
-/*  left: 15px;*/
-/*}*/
-/*@media (max-width: 576px) {*/
-/*  .header img {*/
-/*    position: unset !important;*/
-/*    top: unset !important;*/
-/*    left: unset !important;*/
-/*    height: 100px !important;*/
-/*  }*/
-/*}*/
+
 </style>
