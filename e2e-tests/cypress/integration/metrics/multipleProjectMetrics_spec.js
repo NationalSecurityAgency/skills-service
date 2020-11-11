@@ -17,12 +17,22 @@ var moment = require('moment-timezone');
 
 describe('Multiple Project Metrics', () => {
     const waitForSnap = 4000;
+    const multiProjSel = '[data-cy=multiProjectUsersInCommon]';
+    const trainingProfSel = '[data-cy=trainingProfileComparator]';
+
 
     after(() => {
         Cypress.env('disableResetDb', false);
     });
 
     before(() => {
+        Cypress.Commands.add("usrsInCommon", (optionalSelector = null) => {
+            return cy.get(`${multiProjSel}${optionalSelector ? (' ' + optionalSelector) : ''}`);
+        });
+        Cypress.Commands.add("trainingProf", (optionalSelector = null) => {
+            return cy.get(`${trainingProfSel}${optionalSelector ? (' ' + optionalSelector) : ''}`);
+        });
+
         Cypress.env('disableResetDb', true);
 
         cy.resetDb();
@@ -72,6 +82,15 @@ describe('Multiple Project Metrics', () => {
                         numPerformToCompletion: 1,
                     });
                 };
+
+                for (let badgeCount = 0; badgeCount <= i; badgeCount += 1) {
+                    cy.request('POST', `/admin/projects/${projId}/badges/badge${badgeCount}`, {
+                        projectId: projId,
+                        badgeId: `badge${badgeCount}`,
+                        name: `Badge ${badgeCount}`,
+                        "iconClass": "fas fa-ghost",
+                    });
+                }
 
                 const numUsers = 9;
                 for (let usersCounter = 1; usersCounter <= numUsers; usersCounter += 1) {
@@ -135,46 +154,172 @@ describe('Multiple Project Metrics', () => {
         });
     });
 
+    it('Project definitions comparison chart loads 4 projects by default', () => {
+        cy.visit('/');
+        cy.clickNav('Metrics');
+
+        cy.trainingProf('[data-cy=trainingProfileComparatorProjectSelector] .multiselect__tag').should('have.length', 4).as('selected');
+        cy.get('@selected').eq(0).contains('Inception');
+
+        // validate x axis
+        cy.trainingProf('[data-cy=numOfSkillsChart]').contains('Inception');
+        cy.trainingProf('[data-cy=numOfSkillsChart]').contains('Grand Project 0');
+        cy.trainingProf('[data-cy=numOfSkillsChart]').contains('Grand Project 1');
+        cy.trainingProf('[data-cy=numOfSkillsChart]').contains('Grand Project 2');
+
+        cy.trainingProf('[data-cy=totalAvailablePointsChart]').contains('Inception');
+        cy.trainingProf('[data-cy=totalAvailablePointsChart]').contains('Grand Project 0');
+        cy.trainingProf('[data-cy=totalAvailablePointsChart').contains('Grand Project 1');
+        cy.trainingProf('[data-cy=totalAvailablePointsChart]').contains('Grand Project 2');
+
+        cy.trainingProf('[data-cy=numOfSubjChart]').contains('Inception');
+        cy.trainingProf('[data-cy=numOfSubjChart]').contains('Grand Project 0');
+        cy.trainingProf('[data-cy=numOfSubjChart]').contains('Grand Project 1');
+        cy.trainingProf('[data-cy=numOfSubjChart]').contains('Grand Project 2');
+
+        cy.trainingProf('[data-cy=numOfBadgesChart]').contains('Inception');
+        cy.trainingProf('[data-cy=numOfBadgesChart]').contains('Grand Project 0');
+        cy.trainingProf('[data-cy=numOfBadgesChart]').contains('Grand Project 1');
+        cy.trainingProf('[data-cy=numOfBadgesChart]').contains('Grand Project 2');
+
+        cy.wait(waitForSnap);
+        cy.get(`${trainingProfSel} [data-cy=numOfSkillsChart]`).matchImageSnapshot('Project definitions comparison - Number of Skills chart');
+        cy.get(`${trainingProfSel} [data-cy=totalAvailablePointsChart]`).matchImageSnapshot('Project definitions comparison - Total Available Points');
+        cy.get(`${trainingProfSel} [data-cy=numOfSubjChart]`).matchImageSnapshot('Project definitions comparison - Number of Subjects chart');
+        cy.get(`${trainingProfSel} [data-cy=numOfBadgesChart]`).matchImageSnapshot('Project definitions comparison - Number of Badges chart');
+    });
+
+    it('Project definitions comparison generates charts only after 2 projects are selected', () => {
+        cy.viewport('macbook-11');
+        cy.visit('/');
+        cy.clickNav('Metrics');
+
+        cy.trainingProf('[data-cy=trainingProfileComparatorProjectSelector]  .multiselect__tag-icon').should('have.length', 4).as('removeBtns');
+        cy.get('@removeBtns').eq(1).click()
+        cy.get('@removeBtns').eq(1).click()
+        cy.get('@removeBtns').eq(1).click()
+
+        cy.trainingProf().contains('Need more projects');
+    });
+
+    it('Project definitions comparison allows up to 5 projects', () => {
+        cy.viewport('macbook-11');
+        cy.visit('/');
+        cy.clickNav('Metrics');
+
+        cy.trainingProf('[data-cy=trainingProfileComparatorProjectSelector]').click()
+        cy.trainingProf().contains('Grand Project 4').click()
+        cy.trainingProf('[data-cy=trainingProfileComparatorProjectSelector]').click()
+
+        cy.trainingProf().contains('Maximum of 5 options selected');
+    });
+
+    it('Project definitions comparison - remove project', () => {
+        cy.visit('/');
+        cy.clickNav('Metrics');
+
+        cy.trainingProf('[data-cy=trainingProfileComparatorProjectSelector]  .multiselect__tag-icon').should('have.length', 4).as('removeBtns');
+        cy.get('@removeBtns').eq(2).click()
+
+        // validate x axis
+        cy.trainingProf('[data-cy=numOfSkillsChart]').contains('Inception');
+        cy.trainingProf('[data-cy=numOfSkillsChart]').contains('Grand Project 0');
+        cy.trainingProf('[data-cy=numOfSkillsChart]').contains('Grand Project 1').should('not.exist');
+        cy.trainingProf('[data-cy=numOfSkillsChart]').contains('Grand Project 2');
+
+        cy.trainingProf('[data-cy=totalAvailablePointsChart]').contains('Inception');
+        cy.trainingProf('[data-cy=totalAvailablePointsChart]').contains('Grand Project 0');
+        cy.trainingProf('[data-cy=totalAvailablePointsChart').contains('Grand Project 1').should('not.exist');
+        cy.trainingProf('[data-cy=totalAvailablePointsChart]').contains('Grand Project 2');
+
+        cy.trainingProf('[data-cy=numOfSubjChart]').contains('Inception');
+        cy.trainingProf('[data-cy=numOfSubjChart]').contains('Grand Project 0');
+        cy.trainingProf('[data-cy=numOfSubjChart]').contains('Grand Project 1').should('not.exist');
+        cy.trainingProf('[data-cy=numOfSubjChart]').contains('Grand Project 2');
+
+        cy.trainingProf('[data-cy=numOfBadgesChart]').contains('Inception');
+        cy.trainingProf('[data-cy=numOfBadgesChart]').contains('Grand Project 0');
+        cy.trainingProf('[data-cy=numOfBadgesChart]').contains('Grand Project 1').should('not.exist');
+        cy.trainingProf('[data-cy=numOfBadgesChart]').contains('Grand Project 2');
+    });
+
+    it('Project definitions comparison - add project', () => {
+        cy.viewport('macbook-11');
+        cy.visit('/');
+        cy.clickNav('Metrics');
+
+        cy.trainingProf('[data-cy=numOfSkillsChart]').contains('Grand Project 5').should('not.exist');
+
+        cy.trainingProf('[data-cy=trainingProfileComparatorProjectSelector]').click()
+        cy.trainingProf().contains('Grand Project 5').click()
+
+        // validate x axis
+        cy.trainingProf('[data-cy=numOfSkillsChart]').contains('Inception');
+        cy.trainingProf('[data-cy=numOfSkillsChart]').contains('Grand Project 0');
+        cy.trainingProf('[data-cy=numOfSkillsChart]').contains('Grand Project 1');
+        cy.trainingProf('[data-cy=numOfSkillsChart]').contains('Grand Project 2');
+        cy.trainingProf('[data-cy=numOfSkillsChart]').contains('Grand Project 5');
+
+        cy.trainingProf('[data-cy=totalAvailablePointsChart]').contains('Inception');
+        cy.trainingProf('[data-cy=totalAvailablePointsChart]').contains('Grand Project 0');
+        cy.trainingProf('[data-cy=totalAvailablePointsChart').contains('Grand Project 1');
+        cy.trainingProf('[data-cy=totalAvailablePointsChart]').contains('Grand Project 2');
+        cy.trainingProf('[data-cy=totalAvailablePointsChart]').contains('Grand Project 5');
+
+        cy.trainingProf('[data-cy=numOfSubjChart]').contains('Inception');
+        cy.trainingProf('[data-cy=numOfSubjChart]').contains('Grand Project 0');
+        cy.trainingProf('[data-cy=numOfSubjChart]').contains('Grand Project 1');
+        cy.trainingProf('[data-cy=numOfSubjChart]').contains('Grand Project 2');
+        cy.trainingProf('[data-cy=numOfSubjChart]').contains('Grand Project 5');
+
+        cy.trainingProf('[data-cy=numOfBadgesChart]').contains('Inception');
+        cy.trainingProf('[data-cy=numOfBadgesChart]').contains('Grand Project 0');
+        cy.trainingProf('[data-cy=numOfBadgesChart]').contains('Grand Project 1');
+        cy.trainingProf('[data-cy=numOfBadgesChart]').contains('Grand Project 2');
+        cy.trainingProf('[data-cy=numOfBadgesChart]').contains('Grand Project 5');
+    });
+
+
     it('find button should be disabled until 2 projects are selected', () => {
         cy.visit('/');
         cy.clickNav('Metrics');
-        cy.contains('No Projects Selected');
+        cy.usrsInCommon().contains('No Projects Selected');
 
-        cy.get('[data-cy=projectSelector]').click();
-        cy.contains('Grand Project 0').click();
-        cy.get('[data-cy=findUsersBtn]').should('be.disabled');
+        cy.usrsInCommon('[data-cy=projectSelector]').click();
+        cy.usrsInCommon().contains('Grand Project 0').click();
+        cy.usrsInCommon('[data-cy=findUsersBtn]').should('be.disabled');
 
-        cy.get('[data-cy=projectSelector]').click();
-        cy.contains('Grand Project 3').click();
-        cy.get('[data-cy=findUsersBtn]').should('be.enabled');
+        cy.usrsInCommon('[data-cy=projectSelector]').click();
+        cy.usrsInCommon().contains('Grand Project 3').click();
+        cy.usrsInCommon('[data-cy=findUsersBtn]').should('be.enabled');
     });
 
     it('only support up to five projects', () => {
         cy.visit('/');
         cy.clickNav('Metrics');
-        cy.contains('No Projects Selected');
+        cy.usrsInCommon().contains('No Projects Selected');
 
         for (let i=0; i<5; i+= 1) {
-            cy.get('[data-cy=projectSelector]').click();
-            cy.contains(`Grand Project ${i}`).click();
+            cy.usrsInCommon('[data-cy=projectSelector]').click();
+            cy.usrsInCommon().contains(`Grand Project ${i}`).click();
         }
 
-        cy.get('[data-cy=projectSelector]').click();
-        cy.contains("Maximum of 5 options selected")
-        cy.contains(`Grand Project 5`).should('not.exist')
+        cy.usrsInCommon('[data-cy=projectSelector]').click();
+        cy.usrsInCommon().contains("Maximum of 5 options selected")
+        cy.usrsInCommon().contains(`Grand Project 5`).should('not.exist')
     });
 
     it('sync levels', () => {
         cy.visit('/');
         cy.clickNav('Metrics');
-        cy.contains('No Projects Selected');
+        cy.usrsInCommon().contains('No Projects Selected');
 
         for (let i=0; i<5; i+= 1) {
-            cy.get('[data-cy=projectSelector]').click();
-            cy.contains(`Grand Project ${i}`).click();
+            cy.usrsInCommon('[data-cy=projectSelector]').click();
+            cy.usrsInCommon().contains(`Grand Project ${i}`).click();
         }
 
-        const tableSelector = '[data-cy=multiProjectUsersInCommon] tbody tr'
+        const tableSelector = `${multiProjSel} tbody tr`
         cy.get(tableSelector).should('have.length', 5).as('cyRows');
         cy.get('@cyRows').eq(0).find('td').as('row1');
 
@@ -195,16 +340,14 @@ describe('Multiple Project Metrics', () => {
     it('if sync level higher than max level then just use max level', () => {
         cy.visit('/');
         cy.clickNav('Metrics');
-        cy.contains('No Projects Selected');
+        cy.usrsInCommon().contains('No Projects Selected');
 
         for (let i = 0; i < 5; i += 1) {
-            cy.get('[data-cy=projectSelector]')
-                .click();
-            cy.contains(`Grand Project ${i}`)
-                .click();
+            cy.usrsInCommon('[data-cy=projectSelector]').click();
+            cy.usrsInCommon().contains(`Grand Project ${i}`).click();
         }
 
-        const tableSelector = '[data-cy=multiProjectUsersInCommon] tbody tr'
+        const tableSelector = `${multiProjSel} tbody tr`
         cy.get(tableSelector)
             .should('have.length', 5)
             .as('cyRows');
@@ -238,16 +381,14 @@ describe('Multiple Project Metrics', () => {
     it('sort and page through the result table', () => {
         cy.visit('/');
         cy.clickNav('Metrics');
-        cy.contains('No Projects Selected');
+        cy.usrsInCommon().contains('No Projects Selected');
 
         for (let i = 0; i < 2; i += 1) {
-            cy.get('[data-cy=projectSelector]')
-                .click();
-            cy.contains(`Grand Project ${i}`)
-                .click();
+            cy.usrsInCommon('[data-cy=projectSelector]').click();
+            cy.usrsInCommon().contains(`Grand Project ${i}`).click();
         }
 
-        const tableSelector = '[data-cy=multiProjectUsersInCommon] tbody tr'
+        const tableSelector = `${multiProjSel} tbody tr`
         cy.get(tableSelector).should('have.length', 2);
 
         cy.get('[data-cy=findUsersBtn]').click();
@@ -285,21 +426,19 @@ describe('Multiple Project Metrics', () => {
     it('adjust page size of the result table', () => {
         cy.visit('/');
         cy.clickNav('Metrics');
-        cy.contains('No Projects Selected');
+        cy.usrsInCommon().contains('No Projects Selected');
 
         for (let i = 0; i < 2; i += 1) {
-            cy.get('[data-cy=projectSelector]')
-                .click();
-            cy.contains(`Grand Project ${i}`)
-                .click();
+            cy.usrsInCommon('[data-cy=projectSelector]').click();
+            cy.usrsInCommon().contains(`Grand Project ${i}`).click();
         }
 
-        const tableSelector = '[data-cy=multiProjectUsersInCommon] tbody tr'
+        const tableSelector = `${multiProjSel} tbody tr`
         cy.get(tableSelector).should('have.length', 2);
 
         cy.get('[data-cy=findUsersBtn]').click();
 
-        cy.get(`[data-cy=multiProjectUsersInCommon] [data-cy=skillsBTablePageSize]`).select('10');
+        cy.get(`${multiProjSel} [data-cy=skillsBTablePageSize]`).select('10');
 
         const resTable = '[data-cy=usersInCommonResultTable]'
         const expected = [
@@ -319,14 +458,14 @@ describe('Multiple Project Metrics', () => {
     it('filter by level', () => {
         cy.visit('/');
         cy.clickNav('Metrics');
-        cy.contains('No Projects Selected');
+        cy.usrsInCommon().contains('No Projects Selected');
 
-        cy.get('[data-cy=projectSelector]').click();
-        cy.contains(`Grand Project 0`).click();
-        cy.get('[data-cy=projectSelector]').click();
-        cy.contains(`Grand Project 5`).click();
+        cy.usrsInCommon('[data-cy=projectSelector]').click();
+        cy.usrsInCommon().contains(`Grand Project 0`).click();
+        cy.usrsInCommon('[data-cy=projectSelector]').click();
+        cy.usrsInCommon().contains(`Grand Project 5`).click();
 
-        const tableSelector = '[data-cy=multiProjectUsersInCommon] tbody tr'
+        const tableSelector = `${multiProjSel} tbody tr`
         cy.get(tableSelector).should('have.length', 2).as('inputRows');
 
         cy.get('[data-cy=findUsersBtn]').click();
@@ -399,14 +538,14 @@ describe('Multiple Project Metrics', () => {
     it('number of results columns are derived from input projects', () => {
         cy.visit('/');
         cy.clickNav('Metrics');
-        cy.contains('No Projects Selected');
+        cy.usrsInCommon().contains('No Projects Selected');
 
-        cy.get('[data-cy=projectSelector]').click();
-        cy.contains(`Grand Project 0`).click();
-        cy.get('[data-cy=projectSelector]').click();
-        cy.contains(`Grand Project 5`).click();
+        cy.usrsInCommon('[data-cy=projectSelector]').click();
+        cy.usrsInCommon().contains(`Grand Project 0`).click();
+        cy.usrsInCommon('[data-cy=projectSelector]').click();
+        cy.usrsInCommon().contains(`Grand Project 5`).click();
 
-        const tableSelector = '[data-cy=multiProjectUsersInCommon] tbody tr'
+        const tableSelector = `${multiProjSel} tbody tr`
         cy.get(tableSelector).should('have.length', 2).as('inputRows');
 
         cy.get('[data-cy=findUsersBtn]').click();
@@ -418,8 +557,8 @@ describe('Multiple Project Metrics', () => {
         cy.get('@headers').eq(1).contains('Grand Project 0');
         cy.get('@headers').eq(2).contains('Grand Project 5');
 
-        cy.get('[data-cy=projectSelector]').click();
-        cy.contains(`Grand Project 4`).click();
+        cy.usrsInCommon('[data-cy=projectSelector]').click();
+        cy.usrsInCommon().contains(`Grand Project 4`).click();
 
         cy.get('[data-cy=findUsersBtn]').click();
         cy.get(`${resTable} th`).should('have.length', 4).as('headers');
@@ -428,7 +567,7 @@ describe('Multiple Project Metrics', () => {
         cy.get('@headers').eq(2).contains('Grand Project 5')
         cy.get('@headers').eq(3).contains('Grand Project 4')
 
-        cy.get('[data-cy=projectSelector] .multiselect__tag-icon').should('have.length', 3).as('removeBtns');
+        cy.usrsInCommon('[data-cy=projectSelector] .multiselect__tag-icon').should('have.length', 3).as('removeBtns');
         cy.get('@removeBtns').eq(1).click()
 
         cy.get('[data-cy=findUsersBtn]').click();
@@ -441,28 +580,28 @@ describe('Multiple Project Metrics', () => {
     it('removing project from input should clear the result', () => {
         cy.visit('/');
         cy.clickNav('Metrics');
-        cy.contains('No Projects Selected');
+        cy.usrsInCommon().contains('No Projects Selected');
 
-        cy.get('[data-cy=projectSelector]').click();
-        cy.contains(`Grand Project 0`).click();
-        cy.get('[data-cy=projectSelector]').click();
-        cy.contains(`Grand Project 5`).click();
-        cy.get('[data-cy=projectSelector]').click();
-        cy.contains(`Grand Project 4`).click();
+        cy.usrsInCommon('[data-cy=projectSelector]').click();
+        cy.usrsInCommon().contains(`Grand Project 0`).click();
+        cy.usrsInCommon('[data-cy=projectSelector]').click();
+        cy.usrsInCommon().contains(`Grand Project 5`).click();
+        cy.usrsInCommon('[data-cy=projectSelector]').click();
+        cy.usrsInCommon().contains(`Grand Project 4`).click();
 
-        const tableSelector = '[data-cy=multiProjectUsersInCommon] tbody tr'
+        const tableSelector = `${multiProjSel} [data-cy=multiProjectUsersInCommon-inputProjs] tbody tr`
         cy.get(tableSelector).should('have.length', 3).as('inputRows');
 
         cy.get('[data-cy=findUsersBtn]').click();
 
-        const resTable = '[data-cy=usersInCommonResultTable]'
+        const resTable = `${multiProjSel} [data-cy=usersInCommonResultTable]`
         cy.get(`${resTable} th`).should('have.length', 4).as('headers');
         cy.get('@headers').eq(0).contains('User');
         cy.get('@headers').eq(1).contains('Grand Project 0');
         cy.get('@headers').eq(2).contains('Grand Project 5')
         cy.get('@headers').eq(3).contains('Grand Project 4')
 
-        cy.get('[data-cy=projectSelector] .multiselect__tag-icon').should('have.length', 3).as('removeBtns');
+        cy.get(`${multiProjSel} [data-cy=projectSelector] .multiselect__tag-icon`).should('have.length', 3).as('removeBtns');
         cy.get('@removeBtns').eq(1).click()
         cy.get(resTable).should('not.exist')
     });

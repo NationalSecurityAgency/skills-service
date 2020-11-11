@@ -16,8 +16,8 @@ limitations under the License.
 <template>
   <metrics-card title="Find users across multiple projects" data-cy="multiProjectUsersInCommon" :no-padding="true">
     <skills-spinner :is-loading="projects.loading" class="mb-5"/>
-    <div v-if="!projects.loading">
-      <div class="p-2">
+    <div v-if="enoughOverallProjects && !projects.loading">
+      <div class="p-2 px-4">
         <multiselect v-model="projects.selected"
                    :options="projects.available"
                    label="name"
@@ -33,7 +33,8 @@ limitations under the License.
       <no-content2 v-if="!atLeast1Proj" title="No Projects Selected"
                    message="Please select at least 2 projects using search above then click 'Find Users' button below"></no-content2>
 
-        <b-table v-if="atLeast1Proj" striped :items="projects.selected" :fields="fields" stacked="md">
+        <b-table v-if="atLeast1Proj" striped :items="projects.selected" :fields="fields" stacked="md"
+                 data-cy="multiProjectUsersInCommon-inputProjs">
           <template v-slot:cell(minLevel)="data">
             <b-row>
               <b-col>
@@ -92,6 +93,11 @@ limitations under the License.
         </template>
       </skills-b-table>
     </div>
+    <no-content2 v-if="!enoughOverallProjects"
+                 class="my-5"
+                 title="Feature is disabled"
+                 icon="fas fa-poo"
+                 message="At least 2 projects must exist for this feature to work. Please create more projects to enable this feature."/>
   </metrics-card>
 </template>
 
@@ -115,6 +121,7 @@ limitations under the License.
       NoContent2,
       MetricsCard,
     },
+    props: ['availableProjects'],
     data() {
       return {
         fields: ['name', 'numSubjects', 'numBadges', 'numSkills', 'totalPoints', 'minLevel'],
@@ -160,6 +167,9 @@ limitations under the License.
       },
       hasResults() {
         return this.results && this.results.length > 0;
+      },
+      enoughOverallProjects() {
+        return this.projects.available && this.projects.available.length >= 2;
       },
     },
     mounted() {
@@ -242,12 +252,12 @@ limitations under the License.
           });
       },
       loadProjects() {
-        SupervisorService.getAllProjects()
-          .then((res) => {
-            this.projects.available = res.map((proj) => ({ loadingLevels: true, minLevel: 1, ...proj }));
-          }).finally(() => {
-            this.projects.loading = false;
-          });
+        this.projects.available = this.availableProjects.map((proj) => ({
+          loadingLevels: true,
+          minLevel: 1,
+          ...proj,
+        }));
+        this.projects.loading = false;
       },
       syncOtherLevels(level) {
         for (let i = 0; i < this.projects.selected.length; i += 1) {

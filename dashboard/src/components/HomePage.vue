@@ -66,7 +66,7 @@ limitations under the License.
       loadNavItems() {
         const metricsNavItem = {
           name: 'Metrics',
-          iconClass: 'fa-cogs skills-color-metrics',
+          iconClass: 'fa-chart-bar skills-color-metrics',
           page: 'MultipleProjectsMetricsPage',
         };
         this.handleNavItem(metricsNavItem, this.isSupervisor);

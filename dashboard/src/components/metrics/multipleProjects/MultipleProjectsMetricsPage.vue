@@ -17,26 +17,47 @@ limitations under the License.
   <div>
     <sub-page-header title="Metrics"/>
 
-    <multiple-proj-users-in-common />
+    <skills-spinner :is-loading="loading" />
+    <div v-if="!loading">
+      <training-profile-comparator class="mb-3" :available-projects="projects"/>
+      <multiple-proj-users-in-common :available-projects="projects"/>
+    </div>
   </div>
 </template>
 
 <script>
   import SubPageHeader from '@//components/utils/pages/SubPageHeader';
   import MultipleProjUsersInCommon from './MultipleProjUsersInCommon';
+  import TrainingProfileComparator from './TrainingProfileComparator';
+  import SupervisorService from '../../utils/SupervisorService';
+  import SkillsSpinner from '../../utils/SkillsSpinner';
 
   export default {
     name: 'SkillMetricsPage',
     components: {
+      SkillsSpinner,
+      TrainingProfileComparator,
       MultipleProjUsersInCommon,
       SubPageHeader,
     },
     data() {
       return {
         loading: true,
+        projects: [],
       };
     },
     mounted() {
+      this.loadProjects();
+    },
+    methods: {
+      loadProjects() {
+        SupervisorService.getAllProjects()
+          .then((res) => {
+            this.projects = res;
+          }).finally(() => {
+            this.loading = false;
+          });
+      },
     },
   };
 </script>
