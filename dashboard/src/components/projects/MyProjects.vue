@@ -23,7 +23,7 @@ limitations under the License.
                     class="mr-2">
             <span class="d-none d-sm-inline">Pin</span> <i class="fas fa-thumbtack" aria-hidden="true"/>
           </b-button>
-          <b-button ref="newProjButton" @click="newProject.show=true" variant="outline-primary" size="sm">
+          <b-button ref="newProjButton" @click="newProject.show=true" variant="outline-primary" size="sm" data-cy="newProjectButton">
             <span class="d-none d-sm-inline">Project</span> <i class="fas fa-plus-circle" aria-hidden="true"/>
           </b-button>
     </sub-page-header>

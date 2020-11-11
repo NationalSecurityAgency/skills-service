@@ -450,6 +450,82 @@ describe('Projects Tests', () => {
     cy.wait('@suggest');
   });
 
+  it('focus should be returned to new project button', ()=> {
+    cy.visit("/");
+    cy.get('[data-cy=newProjectButton]').click();
+    cy.get('body').type('{esc}');
+    cy.get('[data-cy=newProjectButton]').should('have.focus');
+
+    cy.get('[data-cy=newProjectButton]').click();
+    cy.get('[data-cy=closeProjectButton]').click();
+    cy.get('[data-cy=newProjectButton]').should('have.focus');
+
+    cy.get('[data-cy=newProjectButton]').click();
+    cy.get('[data-cy=projectName]').type('test 123');
+    cy.get('[data-cy=saveProjectButton]').click();
+    cy.get('[data-cy=newProjectButton]').should('have.focus');
+
+    cy.get('[data-cy=newProjectButton]').click();
+    cy.get('[aria-label=Close]').click();
+    cy.get('[data-cy=newProjectButton]').should('have.focus');
+  });
+
+  it('focus should be returned to project edit button', () => {
+    cy.request('POST', '/app/projects/proj1', {
+      projectId: 'proj1',
+      name: "proj1"
+    });
+    cy.request('POST', '/app/projects/proj2', {
+      projectId: 'proj2',
+      name: "proj2"
+    });
+    cy.visit('/');
+    cy.get('div.project-settings').first().click();
+    cy.get('[data-cy=editMenuEditBtn]').first().click();
+    cy.get('[data-cy=projectName]').should('be.visible');
+    cy.get('body').type('{esc}{esc}');
+    cy.get('div.project-settings').children().first().should('have.focus');
+
+    cy.get('div.project-settings').first().click();
+    cy.get('[data-cy=editMenuEditBtn]').first().click();
+    cy.get('[data-cy=closeProjectButton]').click();
+    cy.get('div.project-settings').children().first().should('have.focus');
+
+    cy.get('div.project-settings').first().click();
+    cy.get('[data-cy=editMenuEditBtn]').first().click();
+    cy.get('[data-cy=projectName]').type('test 123');
+    cy.get('[data-cy=saveProjectButton]').click();
+    cy.get('div.project-settings').children().first().should('have.focus');
+
+    cy.get('div.project-settings').first().click();
+    cy.get('[data-cy=editMenuEditBtn]').first().click();
+    cy.get('[aria-label=Close]').click();
+    cy.get('div.project-settings').children().first().should('have.focus');
+
+    //project 2
+    cy.get('div.project-settings').eq(1).click();
+    cy.get('[data-cy=editMenuEditBtn]').eq(1).click();
+    cy.get('[data-cy=projectName]').should('be.visible');
+    cy.get('body').type('{esc}{esc}');
+    cy.get('div.project-settings').eq(1).children().first().should('have.focus');
+
+    cy.get('div.project-settings').eq(1).click();
+    cy.get('[data-cy=editMenuEditBtn]').eq(1).click();
+    cy.get('[data-cy=closeProjectButton]').click();
+    cy.get('div.project-settings').eq(1).children().first().should('have.focus');
+
+    cy.get('div.project-settings').eq(1).click();
+    cy.get('[data-cy=editMenuEditBtn]').eq(1).click();
+    cy.get('[data-cy=projectName]').type('test 123');
+    cy.get('[data-cy=saveProjectButton]').click();
+    cy.get('div.project-settings').eq(1).children().first().should('have.focus');
+
+    cy.get('div.project-settings').eq(1).click();
+    cy.get('[data-cy=editMenuEditBtn]').eq(1).click();
+    cy.get('[aria-label=Close]').click();
+    cy.get('div.project-settings').eq(1).children().first().should('have.focus');
+  });
+
   it('Trusted client should not shown when oAuthOnly=true', () => {
     cy.server()
     cy.route('GET', '/public/config', {oAuthOnly: true, authMode: 'FORM'}).as('loadConfig');
