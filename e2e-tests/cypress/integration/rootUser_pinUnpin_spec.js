@@ -255,5 +255,49 @@ describe('Root Pin and Unpin Tests', () => {
     });
   });
 
+  it('Close Pin Projects modal using escape and then reopen', () => {
+    cy.logout();
+    cy.fixture('vars.json').then((vars) => {
+      cy.login(vars.rootUser, vars.defaultPass);
+      cy.route('GET', '/app/projects').as('default');
+      cy.route('GET', '/app/projects?search=one').as('searchOne');
+      cy.route('POST', '/root/pin/proj1').as('pinOne');
+      cy.route('DELETE', '/root/pin/proj1').as('unpinOne');
+      cy.route('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
+
+      cy.visit('/');
+      //confirm that default project loading returns no projects for root user
+      cy.wait('@default');
+      cy.contains('No Projects Yet...').should('be.visible');
+
+      // open the pin projects modal
+      cy.get('[data-cy=subPageHeaderControls]').contains('Pin').click();
+      cy.get('[data-cy=pinProjects').should('exist') // dialog exists
+      cy.contains('Pin Projects');
+      cy.contains('Search Project Catalog');
+
+      // close with escape
+      cy.get('[data-cy=pinProjectsSearchInput]').type('{esc}', {force: true});
+      cy.get('[data-cy=pinProjects').should('not.exist') // dialog does not exists
+
+      // can re-open the pin modal
+      cy.get('[data-cy=subPageHeaderControls]').contains('Pin').click();
+      cy.get('[data-cy=pinProjects').should('exist') // dialog exists
+      cy.contains('Pin Projects');
+      cy.contains('Search Project Catalog');
+
+      // close with escape
+      cy.get('[data-cy=pinProjectsSearchInput]').type('{esc}', {force: true});
+      cy.get('[data-cy=pinProjects').should('not.exist') // dialog does not exists
+
+      // open the new project modal
+      cy.clickButton('Project');
+      cy.contains('New Project'); // new project dialog does exist
+      cy.get('[data-cy=pinProjects').should('not.exist') // pin project dialog does not exists
+    });
+
+  });
+
+
 });
 

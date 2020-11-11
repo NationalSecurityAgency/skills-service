@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-    <b-modal id="searchProjectsModal" title="Pin Projects" v-model="show" :no-close-on-backdrop="true" size="lg"
+    <b-modal id="searchProjectsModal" title="Pin Projects" v-model="isShown" :no-close-on-backdrop="true" size="lg"
            @close="done" header-bg-variant="info" header-text-variant="light" no-fade body-class="px-0 mx-0">
       <b-container fluid class="px-0" data-cy="pinProjects">
         <b-row class="px-3">
@@ -197,6 +197,16 @@ limitations under the License.
       },
       hasSearch() {
         return this.searchValue && this.searchValue.length > 0;
+      },
+      isShown: {
+        get() {
+          return this.show;
+        },
+        set(newValue) {
+          if (!newValue) {
+            this.done();
+          }
+        },
       },
     },
     methods: {
