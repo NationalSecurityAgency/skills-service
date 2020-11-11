@@ -15,7 +15,9 @@ limitations under the License.
 */
 <template>
   <div>
-    <sub-page-header title="Badges" action="Badge" @add-action="newBadge" :disabled="addBadgeDisabled" :disabled-msg="addBadgesDisabledMsg"/>
+    <sub-page-header ref="subPageHeader" title="Badges" action="Badge" @add-action="newBadge"
+                     :disabled="addBadgeDisabled"
+                     :disabled-msg="addBadgesDisabledMsg"/>
     <loading-container v-bind:is-loading="isLoading">
       <transition name="projectContainer" enter-active-class="animated fadeIn">
         <div>
@@ -23,6 +25,7 @@ limitations under the License.
             <div v-for="(badge) of badges"
                  :key="badge.badgeId" class="col-lg-4 mb-3"  style="min-width: 23rem;">
               <badge :badge="badge"
+                     :ref="'badge_'+badge.badgeId"
                      @badge-updated="saveBadge"
                      @badge-deleted="deleteBadge"
                      @move-badge-up="moveBadgeUp"
@@ -37,7 +40,10 @@ limitations under the License.
       </transition>
     </loading-container>
 
-    <edit-badge v-if="displayNewBadgeModal" v-model="displayNewBadgeModal" :badge="emptyNewBadge" @badge-updated="saveBadge"></edit-badge>
+    <edit-badge v-if="displayNewBadgeModal" v-model="displayNewBadgeModal"
+                :badge="emptyNewBadge"
+                @badge-updated="saveBadge"
+                @hidden="handleHidden"></edit-badge>
   </div>
 </template>
 
@@ -100,7 +106,7 @@ limitations under the License.
       ...mapActions([
         'loadProjectDetailsState',
       ]),
-      loadBadges() {
+      loadBadges(afterLoad) {
         BadgesService.getBadges(this.projectId)
           .then((badgesResponse) => {
             this.isLoading = false;
@@ -108,6 +114,11 @@ limitations under the License.
             if (this.badges && this.badges.length) {
               this.badges[0].isFirst = true;
               this.badges[this.badges.length - 1].isLast = true;
+            }
+            if (afterLoad) {
+              this.$nextTick(() => {
+                afterLoad();
+              });
             }
           })
           .finally(() => {
@@ -131,9 +142,22 @@ limitations under the License.
         this.isLoading = true;
         const requiredIds = badge.requiredSkills.map((item) => item.skillId);
         const badgeReq = { requiredSkillsIds: requiredIds, ...badge };
+        const { isEdit } = badge;
+        // eslint-disable-next-line
+        delete badge.isEdit;
         BadgesService.saveBadge(badgeReq)
           .then(() => {
-            this.loadBadges();
+            let afterLoad = null;
+            if (isEdit) {
+              afterLoad = () => {
+                const refKey = `badge_${badgeReq.badgeId}`;
+                const ref = this.$refs[refKey];
+                if (ref) {
+                  ref[0].handleFocus();
+                }
+              };
+            }
+            this.loadBadges(afterLoad);
             this.loadProjectDetailsState({ projectId: this.projectId });
             this.$emit('badges-changed', badge.badgeId);
           });
@@ -158,6 +182,16 @@ limitations under the License.
           .then(() => {
             this.loadBadges();
           });
+      },
+      handleHidden(e) {
+        if (!e || !e.update) {
+          this.handleFocus();
+        }
+      },
+      handleFocus() {
+        this.$nextTick(() => {
+          this.$refs.subPageHeader.$refs.actionButton.focus();
+        });
       },
 
     },

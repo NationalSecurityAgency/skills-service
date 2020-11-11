@@ -16,7 +16,8 @@ limitations under the License.
 <template>
   <div id="skillsTable">
 
-    <sub-page-header title="Skills" action="Skill" @add-action="newSkill" :disabled="addSkillDisabled" :disabled-msg="addSkillsDisabledMsg"/>
+    <sub-page-header ref="subPageHeader" title="Skills" action="Skill" @add-action="newSkill"
+                     :disabled="addSkillDisabled" :disabled-msg="addSkillsDisabledMsg"/>
 
     <loading-container v-bind:is-loading="isLoading">
       <div v-if="this.skills && this.skills.length" class="card">
@@ -57,7 +58,7 @@ limitations under the License.
               <b-button-group size="sm" class="mr-1">
                 <b-button @click="editSkill(props.row)"
                           variant="outline-primary" data-cy="editSkillButton"
-                          :aria-label="'edit Skill '+props.row.name">
+                          :aria-label="'edit Skill '+props.row.name" :ref="'edit_'+props.row.skillId">
                   <i class="fas fa-edit" aria-hidden="true"/>
                 </b-button>
                 <b-button @click="deleteSkill(props.row)" variant="outline-primary"
@@ -87,7 +88,7 @@ limitations under the License.
     </loading-container>
 
     <edit-skill v-if="editSkillInfo.show" v-model="editSkillInfo.show" :skillId="editSkillInfo.skill.skillId" :is-edit="editSkillInfo.isEdit"
-                :project-id="projectId" :subject-id="subjectId" @skill-saved="skillCreatedOrUpdated"/>
+                :project-id="projectId" :subject-id="subjectId" @skill-saved="skillCreatedOrUpdated" @hidden="handleHide"/>
   </div>
 </template>
 
@@ -116,6 +117,7 @@ limitations under the License.
     data() {
       return {
         isLoading: false,
+        currentlyFocusedSkillId: '',
         editSkillInfo: {
           isEdit: false,
           show: false,
@@ -180,12 +182,18 @@ limitations under the License.
         };
       },
       editSkill(skillToEdit) {
+        this.currentlyFocusedSkillId = skillToEdit.skillId;
         this.editSkillInfo = { skill: skillToEdit, show: true, isEdit: true };
       },
 
       skillCreatedOrUpdated(skill) {
         this.isLoading = true;
         const item1Index = this.skills.findIndex((item) => item.skillId === skill.originalSkillId);
+
+        const { isEdit } = skill;
+        // eslint-disable-next-line
+        delete skill.isEdit;
+
         SkillsService.saveSkill(skill)
           .then((skillRes) => {
             let createdSkill = skillRes;
@@ -207,6 +215,12 @@ limitations under the License.
 
             this.$emit('skills-change', skill.skillId);
             this.successToast('Skill Saved', `Saved '${skill.name}' skill.`);
+
+            if (isEdit) {
+              setTimeout(() => {
+                this.handleFocus({ updated: true });
+              }, 0);
+            }
           })
           .finally(() => {
             this.isLoading = false;
@@ -305,6 +319,24 @@ limitations under the License.
           tableData[0].disabledUpButton = true;
           tableData[tableData.length - 1].disabledDownButton = true;
         }
+      },
+      handleHide(e) {
+        if (!e || !e.saved || (e.saved && !e.updated)) {
+          this.handleFocus(e);
+        }
+      },
+      handleFocus(e) {
+        let ref = this.$refs.subPageHeader.$refs.actionButton;
+        if (e && e.updated && this.currentlyFocusedSkillId) {
+          const refName = `edit_${this.currentlyFocusedSkillId}`;
+          ref = this.$refs[refName];
+        }
+        this.currentlyFocusedSkillId = '';
+        this.$nextTick(() => {
+          if (ref) {
+            ref.focus();
+          }
+        });
       },
     },
   };

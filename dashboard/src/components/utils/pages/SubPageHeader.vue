@@ -20,7 +20,7 @@ limitations under the License.
     </div>
     <div class="col-6 col-md-5 pt-0 text-right" data-cy="subPageHeaderControls">
       <slot>
-        <b-button v-if="action" type="button" size="sm" variant="outline-primary"
+        <b-button ref="actionButton" v-if="action" type="button" size="sm" variant="outline-primary"
                 :class="{'btn':true, 'btn-outline-primary':true, 'disabled':disabled}"
                 v-on:click="addClicked" :aria-label="ariaLabel ? ariaLabel : action">
           <span class="d-none d-sm-inline">{{ action }} </span> <i class="fas fa-plus-circle"/>

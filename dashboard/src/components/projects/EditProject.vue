@@ -15,8 +15,14 @@ limitations under the License.
 */
 <template>
   <ValidationObserver ref="observer" v-slot="{invalid, handleSubmit}" slim>
-    <b-modal :id="internalProject.projectId" :title="title" v-model="show" :no-close-on-backdrop="true"
-           header-bg-variant="info" header-text-variant="light" no-fade>
+    <b-modal :id="internalProject.projectId"
+              :title="title"
+              @hide="publishHidden"
+              v-model="show"
+              :no-close-on-backdrop="true"
+              header-bg-variant="info"
+              header-text-variant="light" no-fade>
+
       <b-container fluid>
         <div class="row">
           <div class="col-12">
@@ -110,6 +116,7 @@ limitations under the License.
       },
       close() {
         this.show = false;
+        this.publishHidden({});
       },
       updateProject() {
         this.close();
@@ -121,6 +128,9 @@ limitations under the License.
         if (!this.isEdit && !this.canEditProjectId) {
           this.internalProject.projectId = InputSanitizer.removeSpecialChars(this.internalProject.name);
         }
+      },
+      publishHidden(e) {
+        this.$emit('hidden', e);
       },
       registerValidation() {
         const self = this;

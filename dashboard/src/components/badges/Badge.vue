@@ -16,7 +16,9 @@ limitations under the License.
 <template>
   <page-preview-card :options="cardOptions">
     <div slot="header-top-right">
-      <edit-and-delete-dropdown v-on:deleted="deleteBadge" v-on:edited="showEditBadge=true" v-on:move-up="moveUp"
+      <edit-and-delete-dropdown ref="editAndDeleteBadge" v-on:deleted="deleteBadge"
+                                v-on:edited="showEditBadge=true"
+                                v-on:move-up="moveUp"
                                 v-on:move-down="moveDown"
                                 :isFirst="badgeInternal.isFirst" :isLast="badgeInternal.isLast" :isLoading="isLoading"
                                 class="badge-settings"></edit-and-delete-dropdown>
@@ -41,7 +43,7 @@ limitations under the License.
       </div>
 
       <edit-badge v-if="showEditBadge" v-model="showEditBadge" :id="badge.badgeId" :badge="badge" :is-edit="true"
-                  :global="global" @badge-updated="badgeEdited"></edit-badge>
+                  :global="global" @badge-updated="badgeEdited" @hidden="handleHidden"></edit-badge>
     </div>
   </page-preview-card>
 </template>
@@ -186,6 +188,16 @@ limitations under the License.
           dateVal = new Date(Date.parse(value.replace(/-/g, '/')));
         }
         return dateVal;
+      },
+      handleHidden(e) {
+        if (!e || !e.updated) {
+          this.handleFocus();
+        }
+      },
+      handleFocus() {
+        this.$nextTick(() => {
+          this.$refs.editAndDeleteBadge.focus();
+        });
       },
     },
   };

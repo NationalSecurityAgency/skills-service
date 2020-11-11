@@ -16,7 +16,8 @@ limitations under the License.
 <template>
   <ValidationObserver ref="observer" v-slot="{ invalid, handleSubmit }" slim>
     <b-modal :id="levelId" size="xl" :title="title" v-model="show" :no-close-on-backdrop="true"
-             header-bg-variant="info" header-text-variant="light" no-fade >
+             header-bg-variant="info" header-text-variant="light" no-fade
+             @hide="publishHidden">
       <b-container fluid>
         <div v-if="displayIconManager === false">
           <div class="media">
@@ -101,7 +102,7 @@ limitations under the License.
                   <ValidationProvider name="Name" :debounce=500 v-slot="{errors}" rules="maxLevelNameLength|uniqueName">
                     <b-form-input id="newLevel-name" v-model="levelInternal.name" name="name" data-cy="levelName"
                                   v-on:keyup.enter="handleSubmit(saveLevel)"
-                                  :aria-invalid="errors && errors.length"
+                                  :aria-invalid="errors && errors.length > 0"
                                   aria-errormessage="levelNameError" aria-describedby="levelNameError"></b-form-input>
                     <small class="form-text text-danger" v-show="errors[0]" data-cy="levelNameError" id="levelNameError">{{ errors[0] }}</small>
                   </ValidationProvider>
@@ -240,12 +241,15 @@ limitations under the License.
       },
     },
     methods: {
-      closeMe() {
+      closeMe(e) {
         this.show = false;
+        this.publishHidden(e);
       },
       saveLevel() {
         this.levelInternal.name = InputSanitizer.sanitize(this.levelInternal.name);
+        const closeArg = {};
         if (this.isEdit === true) {
+          closeArg.saved = true;
           this.$emit('edited-level', {
             percent: this.levelInternal.percent,
             pointsFrom: this.levelInternal.pointsFrom,
@@ -263,7 +267,7 @@ limitations under the License.
             iconClass: this.levelInternal.iconClass,
           });
         }
-        this.closeMe();
+        this.closeMe(closeArg);
       },
       toggleIconDisplay(shouldDisplay) {
         this.displayIconManager = shouldDisplay;
@@ -271,6 +275,9 @@ limitations under the License.
       onSelectedIcon(selectedIcon) {
         this.levelInternal.iconClass = `${selectedIcon.css}`;
         this.displayIconManager = false;
+      },
+      publishHidden(e) {
+        this.$emit('hidden', { edit: this.isEdit, ...e });
       },
     },
   };

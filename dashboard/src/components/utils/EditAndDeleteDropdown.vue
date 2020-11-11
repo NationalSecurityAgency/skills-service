@@ -54,6 +54,10 @@ limitations under the License.
       emit(eventName) {
         this.$emit(eventName);
       },
+      focus() {
+        // focuses on the drop-down button icon
+        this.$el.children[0].focus();
+      },
     },
   };
 </script>

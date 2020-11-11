@@ -14,9 +14,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-    <b-modal id="searchProjectsModal" title="Pin Projects" v-model="isShown" :no-close-on-backdrop="true" size="lg"
-           @close="done" header-bg-variant="info" header-text-variant="light" no-fade body-class="px-0 mx-0"
-             header-class="header-text" role="dialog" aria-modal="true">
+    <b-modal id="searchProjectsModal"
+             title="Pin Projects"
+             v-model="isShown"
+             size="lg"
+             :no-close-on-backdrop="true"
+             @close="done"
+             header-bg-variant="info"
+             header-text-variant="light"
+             no-fade body-class="px-0 mx-0"
+             header-class="header-text"
+             role="dialog"
+             aria-modal="true"
+             @hide="done">
       <b-container fluid class="px-0" data-cy="pinProjects">
         <b-row class="px-3">
           <b-col class="mx-0 mb-2">
@@ -146,13 +156,14 @@ limitations under the License.
     name: 'PinProjects',
     components: { SkillsSpinner },
     props: {
-      show: {
+      value: {
         type: Boolean,
         required: true,
       },
     },
     data() {
       return {
+        show: this.value,
         isLoading: false,
         searchValue: '',
         sortBy: 'name',
@@ -195,6 +206,9 @@ limitations under the License.
     watch: {
       searchValue(newValue) {
         this.searchData(newValue);
+      },
+      show(newValue) {
+        this.$emit('input', newValue);
       },
     },
     computed: {

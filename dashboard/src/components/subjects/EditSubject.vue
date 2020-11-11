@@ -15,8 +15,12 @@ limitations under the License.
 */
 <template>
   <ValidationObserver ref="observer" v-slot="{invalid, handleSubmit}" slim>
-    <b-modal :id="subjectInternal.subjectId" size="xl" :title="title" v-model="show" :no-close-on-backdrop="true"
-             header-bg-variant="hc" header-text-variant="light" no-fade>
+    <b-modal :id="subjectInternal.subjectId" size="xl" :title="title" v-model="show"
+             :no-close-on-backdrop="true"
+             header-bg-variant="primary"
+             header-text-variant="light"
+             @hide="publishHidden"
+             no-fade>
         <b-container fluid>
           <div v-if="displayIconManager === false">
               <div class="media mb-3">
@@ -135,8 +139,12 @@ limitations under the License.
       },
     },
     methods: {
-      close() {
+      publishHidden(e) {
+        this.$emit('hidden', e);
+      },
+      close(e) {
         this.show = false;
+        this.publishHidden(e);
       },
       updateSubject() {
         this.$refs.observer.validate()
@@ -144,7 +152,7 @@ limitations under the License.
             if (!res) {
               this.overallErrMsg = 'Form did NOT pass validation, please fix and try to Save again';
             } else {
-              this.close();
+              this.close({ update: true });
               this.subjectInternal.subjectName = InputSanitizer.sanitize(this.subjectInternal.subjectName);
               this.subjectInternal.subjectId = InputSanitizer.sanitize(this.subjectInternal.subjectId);
               this.$emit('subject-saved', this.subjectInternal);
