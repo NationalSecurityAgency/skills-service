@@ -392,6 +392,116 @@ describe('Subjects Tests', () => {
         cy.get('.toast-body').contains('Encountered error when uploading');
     });
 
+    it('new subject button should retain focus after dialog closes', () => {
+        cy.server();
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            name: "Subject 1"
+        });
+
+        cy.visit('/projects/proj1');
+        cy.contains('Subjects').click();
+        cy.get('[aria-label="new subject"]').click();
+        cy.get('[data-cy=closeSubjectButton]').click();
+        cy.get('[aria-label="new subject"]').should('have.focus');
+
+        cy.get('[aria-label="new subject"]').click();
+        cy.get('body').type('{esc}');
+        cy.get('[aria-label="new subject"]').should('have.focus');
+
+        cy.get('[aria-label="new subject"]').click();
+        cy.get('[aria-label=Close]').click();
+        cy.get('[aria-label="new subject"]').should('have.focus');
+
+        cy.get('[aria-label="new subject"]').click();
+        cy.get('[data-cy=subjectNameInput]').type('foobarbaz');
+        cy.get('[data-cy=saveSubjectButton]').click();
+        cy.get('[aria-label="new subject"]').should('have.focus');
+    });
+
+    it.only('focus should be returned to subject edit button', () => {
+        cy.server();
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            name: "Subject 1"
+        });
+
+        cy.request('POST', '/admin/projects/proj1/subjects/subj2', {
+            projectId: 'proj1',
+            subjectId: 'subj2',
+            name: "Subject 2"
+        });
+        cy.route({
+            method: 'POST',
+            url: '/admin/projects/proj1/subjects/subj1'
+        }).as('saveSubject');
+        cy.route({
+            method: 'POST',
+            url: '/admin/projects/proj1/subjects/subj2'
+        }).as('saveSubject2');
+
+        cy.route({
+            method: 'GET',
+            url: '/admin/projects/proj1/subjects/subj1'
+        }).as('loadSubject');
+        cy.route({
+            method: 'GET',
+            url: '/admin/projects/proj1/subjects/subj2'
+        }).as('loadSubject2');
+
+        cy.visit('/projects/proj1');
+        cy.get('div.subject-settings').first().click();
+        cy.get('[data-cy=editMenuEditBtn]').first().click();
+        cy.get('[data-cy=subjectNameInput]').should('be.visible');
+        cy.get('body').type('{esc}{esc}');
+        cy.get('div.subject-settings').eq(0).children().first().should('have.focus');
+
+        cy.get('div.subject-settings').first().click();
+        cy.get('[data-cy=editMenuEditBtn]').first().click();
+        cy.get('[data-cy=closeSubjectButton]').click();
+        cy.get('div.subject-settings').eq(0).children().first().should('have.focus');
+
+        cy.get('div.subject-settings').first().click();
+        cy.get('[data-cy=editMenuEditBtn]').first().click();
+        cy.get('[data-cy=subjectNameInput]').type('test 123');
+        cy.get('[data-cy=saveSubjectButton]').click();
+        cy.wait('@saveSubject');
+        cy.wait('@loadSubject');
+        cy.get('div.subject-settings').eq(0).children().first().should('have.focus');
+
+        cy.get('div.subject-settings').first().click();
+        cy.get('[data-cy=editMenuEditBtn]').first().click();
+        cy.get('[aria-label=Close]').click();
+        cy.get('div.subject-settings').eq(0).children().first().should('have.focus');
+
+        //subject 2
+        cy.get('div.subject-settings').eq(1).click();
+        cy.get('[data-cy=editMenuEditBtn]').eq(1).click();
+        cy.get('[data-cy=subjectNameInput]').should('be.visible');
+        cy.get('body').type('{esc}{esc}');
+        cy.get('div.subject-settings').eq(1).children().first().should('have.focus');
+
+        cy.get('div.subject-settings').eq(1).click();
+        cy.get('[data-cy=editMenuEditBtn]').eq(1).click();
+        cy.get('[data-cy=closeSubjectButton]').click();
+        cy.get('div.subject-settings').eq(1).children().first().should('have.focus');
+
+        cy.get('div.subject-settings').eq(1).click();
+        cy.get('[data-cy=editMenuEditBtn]').eq(1).click();
+        cy.get('[data-cy=subjectNameInput]').type('test 123');
+        cy.get('[data-cy=saveSubjectButton]').click();
+        cy.wait('@saveSubject2');
+        cy.wait('@loadSubject2');
+        cy.get('div.subject-settings').eq(1).children().first().should('have.focus');
+
+        cy.get('div.subject-settings').eq(1).click();
+        cy.get('[data-cy=editMenuEditBtn]').eq(1).click();
+        cy.get('[aria-label=Close]').click();
+        cy.get('div.subject-settings').eq(1).children().first().should('have.focus');
+    });
+
     it('viewing subject user details does not break breadcrumb navigation', () => {
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
             projectId: 'proj1',

@@ -49,7 +49,7 @@ describe('App Features Tests', () => {
         cy.contains('New Software Version is Available').should('not.exist')
     });
 
-    it.only('do not display new version banner if lib version in headers is older than lib version in local storage', () => {
+    it('do not display new version banner if lib version in headers is older than lib version in local storage', () => {
         cy.server().route({
             url: '/admin/projects/proj1/subjects',
             status: 200,

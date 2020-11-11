@@ -34,9 +34,10 @@ limitations under the License.
                              v-model="subjectInternal.name" v-on:input="updateSubjectId"
                              v-on:keyup.enter="handleSubmit(updateSubject)"
                              v-focus aria-required="true"
-                             :aria-invalid="errors && errors.length > 0"
-                             aria-errormessage="subjectNameError"
-                             aria-describedby="subjectNameError">
+                              :aria-invalid="errors && errors.length > 0"
+                              aria-errormessage="subjectNameError"
+                              aria-describedby="subjectNameError"
+                              data-cy="subjectNameInput">
                       <small class="form-text text-danger" id="subjectNameError">{{ errors[0] }}</small>
                     </ValidationProvider>
                   </div>
