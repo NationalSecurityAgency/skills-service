@@ -52,7 +52,7 @@ class MetricsParams {
         Date threeYearsAgo = getYearsAgo(numYears)
         Date date = new Date(timestamp)
         if (date.before(threeYearsAgo)) {
-            throw new SkillException("Chart[${chartId}]: ${P_START_TIMESTAMP} param timestamp must be within last ${numYears} years. Provided: [${date}]", projectId)
+            throw new SkillException("Metrics[${chartId}]: ${P_START_TIMESTAMP} param timestamp must be within last ${numYears} years. Provided: [${date}]", projectId)
         }
         return date
     }
@@ -67,14 +67,14 @@ class MetricsParams {
     static String getParam(Map<String, String> props, String paramId, String chartId, String projectId = null) {
         String sortBy = props[paramId]
         if (!sortBy) {
-            throw new SkillException("Chart[${chartId}]: Must supply ${paramId} param", projectId)
+            throw new SkillException("Metrics[${chartId}]: Must supply ${paramId} param", projectId)
         }
         return sortBy
     }
 
     static PageRequest getPageRequest(String projectId, String chartId, Map<String, String> props, List<String> supportedSortFields) {
         if (!supportedSortFields.contains(props[MetricsPagingParamsHelper.PROP_SORT_BY])) {
-            throw new SkillException("Chart[${chartId}]: Invalid value [${props[MetricsPagingParamsHelper.PROP_SORT_BY]}] for [${MetricsPagingParamsHelper.PROP_SORT_BY}] property. Suppored values are ${supportedSortFields}", projectId)
+            throw new SkillException("Metrics[${chartId}]: Invalid value [${props[MetricsPagingParamsHelper.PROP_SORT_BY]}] for [${MetricsPagingParamsHelper.PROP_SORT_BY}] property. Suppored values are ${supportedSortFields}", projectId)
         }
 
         MetricsPagingParamsHelper metricsPagingParamsHelper = new MetricsPagingParamsHelper(projectId, chartId, props)

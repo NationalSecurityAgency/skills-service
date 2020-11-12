@@ -49,13 +49,6 @@ class FindExpertsForMultipleProjectsMetricsBuilder implements GlobalMetricsBuild
         int pageSize = metricsPagingParamsHelper.pageSize
         Boolean sortDesc = metricsPagingParamsHelper.sortDesc
 
-        if(params.size() < 2) {
-            throw new SkillException("Chart[${id}]: must provide at least 2 projects but recieved [${params.size()}]")
-        }
-        if(params.size() > 5) {
-            throw new SkillException("Chart[${id}]: only supports up to 5 projects but recieved [${params.size()}]")
-        }
-
         Integer totalNum = userAchievedCustomRepo.countUsersWithMaxLevelForMultipleProjects(params)
         List<UserAchievedCustomRepo.UserAndLevel> data = userAchievedCustomRepo.findUsersWithMaxLevelForMultipleProjects(params, currentPage*pageSize, pageSize, !sortDesc)
 
@@ -65,18 +58,27 @@ class FindExpertsForMultipleProjectsMetricsBuilder implements GlobalMetricsBuild
     private List<UserAchievedCustomRepo.ProjectAndLevel> getParams(Map<String, String> props) {
         String paramVal = MetricsParams.getParam(props, MetricsParams.P_PROJECT_IDS_AND_LEVEL, id)
 
-        List<UserAchievedCustomRepo.ProjectAndLevel> params = paramVal.split(",").collect({
+        String [] split = paramVal.split(",")
+        if(split.size() < 2) {
+            throw new SkillException("Metrics[${id}]: must provide at least 2 projects but recieved [${split.size()}]")
+        }
+        if(split.size() > 5) {
+            throw new SkillException("Metrics[${id}]: only supports up to 5 projects but recieved [${split.size()}]")
+        }
+
+        List<UserAchievedCustomRepo.ProjectAndLevel> params = split.collect({
             Integer lastIndex = it.lastIndexOf(PARAM_SEP)
             if (lastIndex < 0){
-                throw new SkillException("Chart[${id}]: projectId and level must be separted by '${PARAM_SEP}', full param=[${paramVal}]")
+                throw new SkillException("Metrics[${id}]: projectId and level must be separted by '${PARAM_SEP}', full param=[${paramVal}]")
             }
             String id = it.substring(0, lastIndex)
             Integer level = Integer.valueOf(it.substring(lastIndex + PARAM_SEP.size()))
             if (level <= 0) {
-                throw new SkillException("Chart[${id}]: level must be more than 0 in [${paramVal}]")
+                throw new SkillException("Metrics[${id}]: level must be more than 0 in [${paramVal}]")
             }
             new UserAchievedCustomRepo.ProjectAndLevel(projectId: id, level: level)
         })
+
         return params
     }
 }

@@ -333,7 +333,9 @@ class WSHelper {
         if(!resBody || responseEntity.statusCode != HttpStatus.OK){
             String msg = "Bad request for [$url] code=${responseEntity.statusCode}"
             log.error(msg)
-             throw new SkillsClientException(msg, url, responseEntity.statusCode)
+            SkillsClientException e = new SkillsClientException(msg, url, responseEntity.statusCode)
+            e.resBody = resBody
+            throw e
         }
         def res = resBody
         if (isResJson) {

@@ -38,10 +38,10 @@ class MetricsPagingParamsHelper {
         String strPage = MetricsParams.getParam(props, PROP_PAGE_SIZE, chartId, projectId)
         int pageSize = Integer.valueOf(strPage)
         if (pageSize > 100) {
-            throw new SkillException("Chart[${chartId}]: page size must not exceed 100. Provided [${pageSize}]", projectId)
+            throw new SkillException("Metrics[${chartId}]: page size must not exceed 100. Provided [${pageSize}]", projectId)
         }
         if (pageSize < 1) {
-            throw new SkillException("Chart[${chartId}]: page size must not be less than 1. Provided [${pageSize}]", projectId)
+            throw new SkillException("Metrics[${chartId}]: page size must not be less than 1. Provided [${pageSize}]", projectId)
         }
 
         return pageSize
@@ -52,7 +52,7 @@ class MetricsPagingParamsHelper {
         // client's page starts 1, dbs at 0
         int currentPage = Integer.valueOf(strPage) - 1
         if (currentPage < 0) {
-            throw new SkillException("Chart[${chartId}]: current page must not be less than 0. Provided [${currentPage}]", projectId)
+            throw new SkillException("Metrics[${chartId}]: current page must not be less than 0. Provided [${currentPage}]", projectId)
         }
 
         return currentPage
@@ -61,7 +61,7 @@ class MetricsPagingParamsHelper {
     String getSortBy() {
         String sortBy = props[PROP_SORT_BY]
         if (!sortBy) {
-            throw new SkillException("Chart[${chartId}]: Must supply ${PROP_SORT_BY} param", projectId)
+            throw new SkillException("Metrics[${chartId}]: Must supply ${PROP_SORT_BY} param", projectId)
         }
 
         return sortBy
@@ -70,7 +70,7 @@ class MetricsPagingParamsHelper {
     Boolean getSortDesc() {
         String sortDescStr = props[PROP_SORT_DESC]
         if (!sortDescStr || !(sortDescStr.equals("true") || sortDescStr.equals("false"))) {
-            throw new SkillException("Chart[${chartId}]: Must supply ${PROP_SORT_DESC} param with either 'true' or 'false' value", projectId)
+            throw new SkillException("Metrics[${chartId}]: Must supply ${PROP_SORT_DESC} param with either 'true' or 'false' value", projectId)
         }
 
         Boolean sortDesc = Boolean.valueOf(sortDescStr)

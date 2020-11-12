@@ -23,6 +23,8 @@ class SkillsClientException extends RuntimeException {
 
     HttpStatus httpStatus
 
+    String resBody
+
     SkillsClientException(String message, String url, HttpStatus httpStatus) {
         super(message)
         this.url = url

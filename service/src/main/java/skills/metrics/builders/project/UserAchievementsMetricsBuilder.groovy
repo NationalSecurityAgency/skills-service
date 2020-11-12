@@ -100,7 +100,7 @@ class UserAchievementsMetricsBuilder implements ProjectMetricsBuilder {
 
     private PageRequest getPageRequest(String projectId, String chartId, Map<String, String> props) {
         if (!supportedSortBy.contains(props[MetricsPagingParamsHelper.PROP_SORT_BY])) {
-            throw new SkillException("Chart[${chartId}]: Invalid value [${props[MetricsPagingParamsHelper.PROP_SORT_BY]}] for [${MetricsPagingParamsHelper.PROP_SORT_BY}] property. Suppored values are ${supportedSortBy}", projectId)
+            throw new SkillException("Metrics[${chartId}]: Invalid value [${props[MetricsPagingParamsHelper.PROP_SORT_BY]}] for [${MetricsPagingParamsHelper.PROP_SORT_BY}] property. Suppored values are ${supportedSortBy}", projectId)
         }
 
         MetricsPagingParamsHelper metricsPagingParamsHelper = new MetricsPagingParamsHelper(projectId, chartId, props)

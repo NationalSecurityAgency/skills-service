@@ -13,15 +13,169 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.intTests.metrics
+package skills.intTests.metrics.multipleProj
 
+import groovy.json.JsonSlurper
+import skills.controller.exceptions.ErrorCode
 import skills.intTests.utils.DefaultIntSpec
+import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
 import skills.metrics.builders.MetricsPagingParamsHelper
 import skills.metrics.builders.MetricsParams
 
 class FindExpertsForMultipleProjectsMetricsBuilderSpec extends DefaultIntSpec {
+
+    String metricsId = "findExpertsForMultipleProjectsChartBuilder"
+
+    def "must provide at least 2 project ids"() {
+        SkillsService supervisor = createSupervisor();
+
+        Map props = [:]
+        props[MetricsParams.P_PROJECT_IDS_AND_LEVEL] = "proj1AndLevel1"
+        props[MetricsPagingParamsHelper.PROP_SORT_DESC] = true
+        props[MetricsPagingParamsHelper.PROP_CURRENT_PAGE] = 1
+        props[MetricsPagingParamsHelper.PROP_PAGE_SIZE] = 5
+
+        when:
+        supervisor.getGlobalMetricsData(metricsId, props)
+        then:
+        SkillsClientException e = thrown()
+        def body = new JsonSlurper().parseText(e.resBody)
+        body.explanation == "Metrics[${metricsId}]: must provide at least 2 projects but recieved [1]"
+    }
+
+    def "will only accept up to 5 projects"() {
+        SkillsService supervisor = createSupervisor();
+
+        Map props = [:]
+        props[MetricsParams.P_PROJECT_IDS_AND_LEVEL] = "proj1AndLevel1,proj1AndLevel1,proj1AndLevel1,proj1AndLevel1,proj1AndLevel1,proj1AndLevel1"
+        props[MetricsPagingParamsHelper.PROP_SORT_DESC] = true
+        props[MetricsPagingParamsHelper.PROP_CURRENT_PAGE] = 1
+        props[MetricsPagingParamsHelper.PROP_PAGE_SIZE] = 5
+
+        when:
+        supervisor.getGlobalMetricsData(metricsId, props)
+        then:
+        SkillsClientException e = thrown()
+        def body = new JsonSlurper().parseText(e.resBody)
+        body.explanation == "Metrics[${metricsId}]: only supports up to 5 projects but recieved [6]"
+    }
+
+    def "bad id format"() {
+        SkillsService supervisor = createSupervisor();
+
+        Map props = [:]
+        props[MetricsParams.P_PROJECT_IDS_AND_LEVEL] = "proj1AndLevel1,proj1A,proj1AndLevel1,proj1AndLevel1"
+        props[MetricsPagingParamsHelper.PROP_SORT_DESC] = true
+        props[MetricsPagingParamsHelper.PROP_CURRENT_PAGE] = 1
+        props[MetricsPagingParamsHelper.PROP_PAGE_SIZE] = 5
+
+        when:
+        supervisor.getGlobalMetricsData(metricsId, props)
+        then:
+        SkillsClientException e = thrown()
+        def body = new JsonSlurper().parseText(e.resBody)
+        body.explanation == "Metrics[${metricsId}]: projectId and level must be separted by 'AndLevel', full param=[proj1AndLevel1,proj1A,proj1AndLevel1,proj1AndLevel1]"
+    }
+
+    def "missing id param"() {
+        SkillsService supervisor = createSupervisor();
+
+        Map props = [:]
+        props[MetricsPagingParamsHelper.PROP_SORT_DESC] = true
+        props[MetricsPagingParamsHelper.PROP_CURRENT_PAGE] = 1
+        props[MetricsPagingParamsHelper.PROP_PAGE_SIZE] = 5
+
+        when:
+        supervisor.getGlobalMetricsData(metricsId, props)
+        then:
+        SkillsClientException e = thrown()
+        def body = new JsonSlurper().parseText(e.resBody)
+        body.explanation == "Metrics[${metricsId}]: Must supply projIdsAndLevel param"
+    }
+
+    def "missing sort param"() {
+        SkillsService supervisor = createSupervisor();
+
+        Map props = [:]
+        props[MetricsParams.P_PROJECT_IDS_AND_LEVEL] = "proj1AndLevel1,proj2AndLevel1,proj2AndLevel1"
+        props[MetricsPagingParamsHelper.PROP_CURRENT_PAGE] = 1
+        props[MetricsPagingParamsHelper.PROP_PAGE_SIZE] = 5
+
+        when:
+        supervisor.getGlobalMetricsData(metricsId, props)
+        then:
+        SkillsClientException e = thrown()
+        def body = new JsonSlurper().parseText(e.resBody)
+        body.explanation == "Metrics[${metricsId}]: Must supply sortDesc param with either 'true' or 'false' value"
+    }
+
+    def "missing current page param"() {
+        SkillsService supervisor = createSupervisor();
+
+        Map props = [:]
+        props[MetricsParams.P_PROJECT_IDS_AND_LEVEL] = "proj1AndLevel1,proj2AndLevel1,proj2AndLevel1"
+        props[MetricsPagingParamsHelper.PROP_SORT_DESC] = true
+        props[MetricsPagingParamsHelper.PROP_PAGE_SIZE] = 5
+
+        when:
+        supervisor.getGlobalMetricsData(metricsId, props)
+        then:
+        SkillsClientException e = thrown()
+        def body = new JsonSlurper().parseText(e.resBody)
+        body.explanation == "Metrics[${metricsId}]: Must supply currentPage param"
+    }
+
+    def "current page should not be negative"() {
+        SkillsService supervisor = createSupervisor();
+
+        Map props = [:]
+        props[MetricsParams.P_PROJECT_IDS_AND_LEVEL] = "proj1AndLevel1,proj1AndLevel1,proj1AndLevel1"
+        props[MetricsPagingParamsHelper.PROP_SORT_DESC] = true
+        props[MetricsPagingParamsHelper.PROP_CURRENT_PAGE] = -1
+        props[MetricsPagingParamsHelper.PROP_PAGE_SIZE] = 5
+
+        when:
+        supervisor.getGlobalMetricsData(metricsId, props)
+        then:
+        SkillsClientException e = thrown()
+        def body = new JsonSlurper().parseText(e.resBody)
+        body.explanation == "Metrics[${metricsId}]: current page must not be less than 0. Provided [-2]"
+    }
+
+    def "page size should not be negative"() {
+        SkillsService supervisor = createSupervisor();
+
+        Map props = [:]
+        props[MetricsParams.P_PROJECT_IDS_AND_LEVEL] = "proj1AndLevel1,proj1AndLevel1,proj1AndLevel1"
+        props[MetricsPagingParamsHelper.PROP_SORT_DESC] = true
+        props[MetricsPagingParamsHelper.PROP_CURRENT_PAGE] = 1
+        props[MetricsPagingParamsHelper.PROP_PAGE_SIZE] = 0
+
+        when:
+        supervisor.getGlobalMetricsData(metricsId, props)
+        then:
+        SkillsClientException e = thrown()
+        def body = new JsonSlurper().parseText(e.resBody)
+        body.explanation == "Metrics[${metricsId}]: page size must not be less than 1. Provided [0]"
+    }
+
+    def "missing page size param"() {
+        SkillsService supervisor = createSupervisor();
+
+        Map props = [:]
+        props[MetricsParams.P_PROJECT_IDS_AND_LEVEL] = "proj1AndLevel1,proj2AndLevel1,proj2AndLevel1"
+        props[MetricsPagingParamsHelper.PROP_SORT_DESC] = true
+        props[MetricsPagingParamsHelper.PROP_CURRENT_PAGE] = 1
+
+        when:
+        supervisor.getGlobalMetricsData(metricsId, props)
+        then:
+        SkillsClientException e = thrown()
+        def body = new JsonSlurper().parseText(e.resBody)
+        body.explanation == "Metrics[${metricsId}]: Must supply pageSize param"
+    }
 
     def "find users within multiple projects"() {
         SkillsService supervisor = createSupervisor();
