@@ -68,6 +68,61 @@ describe('Subjects Tests', () => {
         cy.get('[data-cy=saveLevelButton]').should('be.disabled');
     });
 
+    it('add new level without name, then add name', () => {
+        cy.server();
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            name: "Subject 1"
+        });
+        cy.route({
+            method: 'GET',
+            url: '/admin/projects/proj1/subjects/subj1'
+        }).as('loadSubject');
+
+        cy.visit('/projects/proj1/subjects/subj1');
+        cy.wait('@loadSubject');
+
+        cy.contains('Levels').click();
+
+        const rowSelector = '[data-cy=levelsTable] tbody tr'
+        cy.get(rowSelector).should('have.length', 5).as('cyRows');
+
+        cy.get('[data-cy=addLevelButton]').first().click();
+
+        // add a level with no name initially
+        cy.get('[data-cy=levelPercent]').type('95');
+        cy.get('[data-cy=levelPercentError]').should('not.be.visible');
+        cy.get('[data-cy=levelNameError]').should('not.be.visible');
+        cy.get('[data-cy=saveLevelButton]').should('not.be.disabled');
+        cy.get('[data-cy=saveLevelButton]').click();
+
+        // verify the new row was added as expected
+        cy.get(rowSelector).should('have.length', 6).as('cyRows');
+        cy.get('@cyRows')
+          .eq(5)
+          .find('td')
+          .eq(2)
+          .as('row6NameCol')
+        cy.get('@cyRows')
+          .eq(5)
+          .find('td')
+          .eq(3)
+          .as('row6PercentCol')
+        cy.get('@row6NameCol').should('be.empty')
+        cy.get('@row6PercentCol').contains('95')
+
+        // now give the level a name
+        cy.get('[data-cy=editLevelButton]').eq(5).click();
+        cy.get('[data-cy=levelName]').type('{selectall}Coral Belt');
+        cy.get('[data-cy=levelNameError]').should('not.be.visible');
+        cy.get('[data-cy=saveLevelButton]').should('not.be.disabled');
+        cy.get('[data-cy=saveLevelButton]').click();
+
+        // verify that the new name is present
+        cy.get('@row6NameCol').contains('Coral Belt')
+    });
+
     it('Close level dialog', () => {
         cy.server();
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
