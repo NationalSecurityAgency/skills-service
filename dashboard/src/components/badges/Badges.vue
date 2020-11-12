@@ -143,8 +143,6 @@ limitations under the License.
         const requiredIds = badge.requiredSkills.map((item) => item.skillId);
         const badgeReq = { requiredSkillsIds: requiredIds, ...badge };
         const { isEdit } = badge;
-        // eslint-disable-next-line
-        delete badge.isEdit;
         BadgesService.saveBadge(badgeReq)
           .then(() => {
             let afterLoad = null;

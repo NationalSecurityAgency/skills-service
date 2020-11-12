@@ -189,10 +189,7 @@ limitations under the License.
       skillCreatedOrUpdated(skill) {
         this.isLoading = true;
         const item1Index = this.skills.findIndex((item) => item.skillId === skill.originalSkillId);
-
         const { isEdit } = skill;
-        // eslint-disable-next-line
-        delete skill.isEdit;
 
         SkillsService.saveSkill(skill)
           .then((skillRes) => {
