@@ -541,4 +541,74 @@ describe('Badges Tests', () => {
         cy.get('[data-cy=breadcrumb-Users]').should('be.visible');
     })
 
+    it('new badge button should retain focus after dialog is closed', () => {
+        cy.visit('/projects/proj1');
+        cy.get('[data-cy=nav-Badges]').click();
+
+        cy.get('[aria-label="new badge"]').click();
+        cy.get('[data-cy=closeBadgeButton]').click();
+        cy.get('[aria-label="new badge"]').should('have.focus');
+
+        cy.get('[aria-label="new badge"]').click();
+        cy.get('[data-cy=badgeName]').type('{esc}');
+        cy.get('[aria-label="new badge"]').should('have.focus');
+
+        cy.get('[aria-label="new badge"]').click();
+        cy.get('[aria-label=Close]').filter('.text-light').click();
+        cy.get('[aria-label="new badge"]').should('have.focus');
+
+        cy.get('[aria-label="new badge"]').click();
+        cy.get('[data-cy=badgeName]').type('test 123');
+        cy.get('[data-cy=saveBadgeButton]').click();
+        cy.get('[aria-label="new badge"]').should('have.focus');
+    });
+
+    it('edit badge button should retain focus after dialog is closed', () => {
+        cy.request('POST', '/admin/projects/proj1/badges/badge1', {
+            projectId: 'proj1',
+            badgeId: 'badge1',
+            name: "Badge 1"
+        });
+
+        cy.request('POST', '/admin/projects/proj1/badges/badge2', {
+            projectId: 'proj1',
+            badgeId: 'badge2',
+            name: "Badge 2"
+        });
+
+        cy.visit('/projects/proj1');
+        cy.get('[data-cy=nav-Badges]').click();
+
+        cy.get('div.badge-settings').eq(0).click();
+        cy.get('[data-cy=editMenuEditBtn]').eq(0).click();
+        cy.get('[data-cy=closeBadgeButton]').click();
+        cy.get('div.badge-settings').eq(0).children().first().should('have.focus');
+
+        cy.get('div.badge-settings').eq(0).click();
+        cy.get('[data-cy=editMenuEditBtn]').eq(0).click();
+        cy.get('[aria-label=Close]').filter('.text-light').click();
+        cy.get('div.badge-settings').eq(0).children().first().should('have.focus');
+
+        cy.get('div.badge-settings').eq(0).click();
+        cy.get('[data-cy=editMenuEditBtn]').eq(0).click();
+        cy.get('[data-cy=badgeName]').type('{esc}');
+        cy.get('div.badge-settings').eq(0).children().first().should('have.focus');
+
+
+        cy.get('div.badge-settings').eq(1).click();
+        cy.get('[data-cy=editMenuEditBtn]').eq(1).click();
+        cy.get('[data-cy=closeBadgeButton]').click();
+        cy.get('div.badge-settings').eq(1).children().first().should('have.focus');
+
+        cy.get('div.badge-settings').eq(1).click();
+        cy.get('[data-cy=editMenuEditBtn]').eq(1).click();
+        cy.get('[aria-label=Close]').filter('.text-light').click();
+        cy.get('div.badge-settings').eq(1).children().first().should('have.focus');
+
+        cy.get('div.badge-settings').eq(1).click();
+        cy.get('[data-cy=editMenuEditBtn]').eq(1).click();
+        cy.get('[data-cy=badgeName]').type('{esc}');
+        cy.get('div.badge-settings').eq(1).children().first().should('have.focus');
+    });
+
 });

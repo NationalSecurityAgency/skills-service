@@ -17,7 +17,7 @@ limitations under the License.
   <div>
     <sub-page-header ref="subPageHeader" title="Badges" action="Badge" @add-action="newBadge"
                      :disabled="addBadgeDisabled"
-                     :disabled-msg="addBadgesDisabledMsg"/>
+                     :disabled-msg="addBadgesDisabledMsg" aria-label="new badge"/>
     <loading-container v-bind:is-loading="isLoading">
       <transition name="projectContainer" enter-active-class="animated fadeIn">
         <div>
@@ -191,7 +191,6 @@ limitations under the License.
           this.$refs.subPageHeader.$refs.actionButton.focus();
         });
       },
-
     },
   };
 </script>
