@@ -22,6 +22,7 @@ import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
 import spock.lang.IgnoreIf
+import spock.lang.IgnoreRest
 import spock.lang.Requires
 
 class RootAccessSpec extends DefaultIntSpec {
@@ -406,7 +407,96 @@ class RootAccessSpec extends DefaultIntSpec {
         'ROLE_SUPER_DUPER_USER' | 'bar'         | 1
         'ROLE_SUPER_DUPER_USER' | 'bar'         | 1
         'ROLE_SUPERVISOR'       | ''            | 2
-        'ROLE_SUPERVISOR'       | 'dojo'        | 1
         'ROLE_SUPERVISOR'       | 'foo'         | 1
+    }
+
+    def 'verify root user also gets supervisor role'() {
+        when:
+        def result = rootSkillsService.getUsersWithRole('ROLE_SUPERVISOR')
+
+        then:
+        result
+        result.find { it.userId == ultimateRoot }
+    }
+
+    def 'verify when adding root user that user also gets supervisor role'() {
+        setup:
+        def originalRootUsers = rootSkillsService.getRootUsers()
+        assert !originalRootUsers.find {it.userId == nonRootUserId}
+
+        def originalSupervisorUsers = rootSkillsService.getUsersWithRole('ROLE_SUPERVISOR')
+        assert !originalSupervisorUsers.find {it.userId == nonRootUserId}
+
+        when:
+        rootSkillsService.addRootRole(nonRootUserId)
+        def rootUsers = rootSkillsService.getRootUsers()
+        def supervisorUsers = rootSkillsService.getUsersWithRole('ROLE_SUPERVISOR')
+
+        then:
+        rootUsers
+        rootUsers.find { it.userId == nonRootUserId }
+        supervisorUsers
+        supervisorUsers.find { it.userId == nonRootUserId }
+    }
+
+    def 'verify root user loses supervisor role when root is removed'() {
+
+        setup:
+        def originalRootUsers = rootSkillsService.getRootUsers()
+        assert !originalRootUsers.find {it.userId == nonRootUserId}
+
+        def originalSupervisorUsers = rootSkillsService.getUsersWithRole('ROLE_SUPERVISOR')
+        assert !originalSupervisorUsers.find {it.userId == nonRootUserId}
+
+        rootSkillsService.addRootRole(nonRootUserId)
+        def rootUsers = rootSkillsService.getRootUsers()
+        def supervisorUsers = rootSkillsService.getUsersWithRole('ROLE_SUPERVISOR')
+
+        assert rootUsers.find { it.userId == nonRootUserId }
+        assert supervisorUsers.find { it.userId == nonRootUserId }
+
+        when:
+        rootSkillsService.removeRootRole(nonRootUserId)
+        rootUsers = rootSkillsService.getRootUsers()
+        supervisorUsers = rootSkillsService.getUsersWithRole('ROLE_SUPERVISOR')
+
+        then:
+        rootUsers
+        !rootUsers.find { it.userId == nonRootUserId }
+        supervisorUsers
+        !supervisorUsers.find { it.userId == nonRootUserId }
+    }
+
+    def 'verify root user loses supervisor role, and then can have root is removed'() {
+
+        setup:
+        def originalRootUsers = rootSkillsService.getRootUsers()
+        assert !originalRootUsers.find {it.userId == nonRootUserId}
+
+        def originalSupervisorUsers = rootSkillsService.getUsersWithRole('ROLE_SUPERVISOR')
+        assert !originalSupervisorUsers.find {it.userId == nonRootUserId}
+
+        rootSkillsService.addRootRole(nonRootUserId)
+        def rootUsers = rootSkillsService.getRootUsers()
+        def supervisorUsers = rootSkillsService.getUsersWithRole('ROLE_SUPERVISOR')
+
+        assert rootUsers.find { it.userId == nonRootUserId }
+        assert supervisorUsers.find { it.userId == nonRootUserId }
+
+        when:
+        rootSkillsService.removeSupervisorRole(nonRootUserId)
+
+        // this was causing an assertion error since it also tries to remove supervisor role,
+        // but it had already been removed previously
+        rootSkillsService.removeRootRole(nonRootUserId)
+
+        rootUsers = rootSkillsService.getRootUsers()
+        supervisorUsers = rootSkillsService.getUsersWithRole('ROLE_SUPERVISOR')
+
+        then:
+        rootUsers
+        !rootUsers.find { it.userId == nonRootUserId }
+        supervisorUsers
+        !supervisorUsers.find { it.userId == nonRootUserId }
     }
 }

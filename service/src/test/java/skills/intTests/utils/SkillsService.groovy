@@ -811,6 +811,10 @@ class SkillsService {
         return wsHelper.rootPost(url, [suggestQuery: usernameQuery])?.body
     }
 
+    def getUsersWithRole(String role) {
+        return wsHelper.rootGet("/users/roles/${role}")
+    }
+
     def removeRootRole(String userId) {
 //        userId = getUserId(userId)
         return wsHelper.delete("/deleteRoot/${userId}", 'root', null)
