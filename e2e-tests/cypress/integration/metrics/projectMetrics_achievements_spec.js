@@ -51,7 +51,7 @@ describe('Metrics Tests - Achievements', () => {
         }
     }, () => {
         cy.server().route({
-            url: '/admin/projects/proj1/charts/numUsersPerLevelChartBuilder',
+            url: '/admin/projects/proj1/metrics/numUsersPerLevelChartBuilder',
             status: 200,
             response: [{
                 'value': 'Level 1',
@@ -92,7 +92,7 @@ describe('Metrics Tests - Achievements', () => {
 
     it('achievements table - few rows', () => {
         cy.server()
-            .route('/admin/projects/proj1/charts/userAchievementsChartBuilder?**')
+            .route('/admin/projects/proj1/metrics/userAchievementsChartBuilder?**')
             .as('userAchievementsChartBuilder');
 
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
@@ -164,7 +164,7 @@ describe('Metrics Tests - Achievements', () => {
 
     it('achievements table - sorting', () => {
         cy.server()
-            .route('/admin/projects/proj1/charts/userAchievementsChartBuilder?**')
+            .route('/admin/projects/proj1/metrics/userAchievementsChartBuilder?**')
             .as('userAchievementsChartBuilder');
 
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
@@ -238,7 +238,7 @@ describe('Metrics Tests - Achievements', () => {
 
     it('achievements table - filtering', () => {
         cy.server()
-            .route('/admin/projects/proj1/charts/userAchievementsChartBuilder?**')
+            .route('/admin/projects/proj1/metrics/userAchievementsChartBuilder?**')
             .as('userAchievementsChartBuilder');
 
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {

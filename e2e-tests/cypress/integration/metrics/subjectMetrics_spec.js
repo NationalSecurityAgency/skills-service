@@ -34,11 +34,11 @@ describe('Metrics Tests - Subject', () => {
         }
     },() => {
         cy.server()
-            .route('/admin/projects/proj1/charts/numUsersPerLevelChartBuilder?subjectId=subj1')
+            .route('/admin/projects/proj1/metrics/numUsersPerLevelChartBuilder?subjectId=subj1')
             .as('numUsersPerLevelChartBuilderSubj1');
 
         cy.server()
-            .route('/admin/projects/proj1/charts/numUsersPerLevelChartBuilder?subjectId=subj2')
+            .route('/admin/projects/proj1/metrics/numUsersPerLevelChartBuilder?subjectId=subj2')
             .as('numUsersPerLevelChartBuilderSubj2');
 
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
@@ -102,7 +102,7 @@ describe('Metrics Tests - Subject', () => {
         }
     },() => {
         cy.server()
-            .route('/admin/projects/proj1/charts/distinctUsersOverTimeForProject**')
+            .route('/admin/projects/proj1/metrics/distinctUsersOverTimeForProject**')
             .as('distinctUsersOverTimeForProject');
 
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
@@ -178,7 +178,7 @@ describe('Metrics Tests - Subject', () => {
         }
     },() => {
         cy.server()
-            .route('/admin/projects/proj1/charts/distinctUsersOverTimeForProject**')
+            .route('/admin/projects/proj1/metrics/distinctUsersOverTimeForProject**')
             .as('distinctUsersOverTimeForProject');
 
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
@@ -209,7 +209,7 @@ describe('Metrics Tests - Subject', () => {
     },() => {
         cy.server()
             .route({
-                url: '/admin/projects/proj1/charts/distinctUsersOverTimeForProject**',
+                url: '/admin/projects/proj1/metrics/distinctUsersOverTimeForProject**',
                 response: [{
                     'value': 1600819200000,
                     'count': 35

@@ -193,8 +193,8 @@ class SupervisorController {
     }
 
     @RequestMapping(value = "/metrics/{metricId}", method =  RequestMethod.GET, produces = "application/json")
-    def getMetricsData(@PathVariable("metricId") String metricId, @RequestParam Map<String,String> chartProps) {
-        return metricsService.loadGlobalMetrics(metricId, chartProps)
+    def getMetricsData(@PathVariable("metricId") String metricId, @RequestParam Map<String,String> metricsProps) {
+        return metricsService.loadGlobalMetrics(metricId, metricsProps)
     }
 
     @RequestMapping(value = "/badges/{badgeId}/projects/available", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)

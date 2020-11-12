@@ -34,11 +34,11 @@ class AdminMetricsController {
     @Autowired
     MetricsService metricsServiceNew
 
-    @RequestMapping(value = "/projects/{projectId}/charts/{chartId}", method =  RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value = "/projects/{projectId}/metrics/{metricsId}", method =  RequestMethod.GET, produces = "application/json")
     def getChartData(@PathVariable("projectId") String projectId,
-                                                  @PathVariable("chartId") String chartId,
-                                                  @RequestParam Map<String,String> chartProps) {
-        return metricsServiceNew.loadProjectMetrics(projectId, chartId, chartProps)
+                                                  @PathVariable("metricsId") String metricsId,
+                                                  @RequestParam Map<String,String> metricsProps) {
+        return metricsServiceNew.loadProjectMetrics(projectId, metricsId, metricsProps)
     }
 
 }

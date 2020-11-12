@@ -29,8 +29,8 @@ function buildUrl(url, params = {}) {
 }
 
 export default {
-  loadChart(projectId, chartId, params = {}) {
-    const url = buildUrl(`/admin/projects/${projectId}/charts/${chartId}`, params);
+  loadChart(projectId, metricsId, params = {}) {
+    const url = buildUrl(`/admin/projects/${projectId}/metrics/${metricsId}`, params);
     return axios.get(url).then((response) => response.data);
   },
   loadGlobalMetrics(metricsId, params = {}) {

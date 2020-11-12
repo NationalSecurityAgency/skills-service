@@ -79,7 +79,7 @@ describe('Metrics Tests', () => {
         }
     },() => {
         cy.server()
-            .route('/admin/projects/proj1/charts/usersByLevelForSubjectOverTimeChartBuilder?subjectId=subj1')
+            .route('/admin/projects/proj1/metrics/usersByLevelForSubjectOverTimeChartBuilder?subjectId=subj1')
             .as('getLevelsOverTimeData');
 
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
@@ -156,7 +156,7 @@ describe('Metrics Tests', () => {
         }).as('getSubjects');
 
         cy.server().route({
-            url: '/admin/projects/proj1/charts/usersByLevelForSubjectOverTimeChartBuilder?subjectId=subj1',
+            url: '/admin/projects/proj1/metrics/usersByLevelForSubjectOverTimeChartBuilder?subjectId=subj1',
             status: 200,
             response: [{
                 'level': 1,
@@ -205,7 +205,7 @@ describe('Metrics Tests', () => {
 
 
         cy.server().route({
-            url: '/admin/projects/proj1/charts/usersByLevelForSubjectOverTimeChartBuilder?subjectId=subj1',
+            url: '/admin/projects/proj1/metrics/usersByLevelForSubjectOverTimeChartBuilder?subjectId=subj1',
             status: 200,
             response: [{
                 'level': 1,
@@ -270,7 +270,7 @@ describe('Metrics Tests', () => {
         }
 
         cy.server().route({
-            url: '/admin/projects/proj1/charts/usersByLevelForSubjectOverTimeChartBuilder?subjectId=subj1',
+            url: '/admin/projects/proj1/metrics/usersByLevelForSubjectOverTimeChartBuilder?subjectId=subj1',
             status: 200,
             response,
         }).as('getLevelsOverTimeData');
@@ -320,7 +320,7 @@ describe('Metrics Tests', () => {
         }
 
         cy.server().route({
-            url: '/admin/projects/proj1/charts/usersByLevelForSubjectOverTimeChartBuilder?subjectId=subj1',
+            url: '/admin/projects/proj1/metrics/usersByLevelForSubjectOverTimeChartBuilder?subjectId=subj1',
             status: 200,
             response,
         }).as('getLevelsOverTimeData');
@@ -349,7 +349,7 @@ describe('Metrics Tests', () => {
         }
     },() => {
         cy.server().route({
-            url: '/admin/projects/proj1/charts/numUsersPerSubjectPerLevelChartBuilder',
+            url: '/admin/projects/proj1/metrics/numUsersPerSubjectPerLevelChartBuilder',
             status: 200,
         }).as('getChartData');
 
@@ -433,7 +433,7 @@ describe('Metrics Tests', () => {
         }
     },() => {
         cy.server().route({
-            url: '/admin/projects/proj1/charts/numUsersPerSubjectPerLevelChartBuilder',
+            url: '/admin/projects/proj1/metrics/numUsersPerSubjectPerLevelChartBuilder',
             status: 200,
             response: [
                 createSubjectObj('First Cool Subject', [23,293,493,625,293]),
@@ -466,7 +466,7 @@ describe('Metrics Tests', () => {
         }
 
         cy.server().route({
-            url: '/admin/projects/proj1/charts/numUsersPerSubjectPerLevelChartBuilder',
+            url: '/admin/projects/proj1/metrics/numUsersPerSubjectPerLevelChartBuilder',
             status: 200,
             response,
         }).as('getChartData');
@@ -492,7 +492,7 @@ describe('Metrics Tests', () => {
         }
 
         cy.server().route({
-            url: '/admin/projects/proj1/charts/numUsersPerSubjectPerLevelChartBuilder',
+            url: '/admin/projects/proj1/metrics/numUsersPerSubjectPerLevelChartBuilder',
             status: 200,
             response,
         }).as('getChartData');
@@ -515,7 +515,7 @@ describe('Metrics Tests', () => {
     },() => {
         const response = [];
         cy.server().route({
-            url: '/admin/projects/proj1/charts/numUsersPerSubjectPerLevelChartBuilder',
+            url: '/admin/projects/proj1/metrics/numUsersPerSubjectPerLevelChartBuilder',
             status: 200,
             response,
         }).as('getChartData');

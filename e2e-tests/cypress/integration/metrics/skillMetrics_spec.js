@@ -28,7 +28,7 @@ describe('Metrics Tests - Skills', () => {
 
     it ('stat cards with zero activity', () => {
         cy.server()
-            .route('/admin/projects/proj1/charts/singleSkillCountsChartBuilder?skillId=skill1')
+            .route('/admin/projects/proj1/metrics/singleSkillCountsChartBuilder?skillId=skill1')
             .as('singleSkillCountsChartBuilder');
 
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
@@ -60,7 +60,7 @@ describe('Metrics Tests - Skills', () => {
 
     it('stat cards have data', () => {
         cy.server()
-            .route('/admin/projects/proj1/charts/singleSkillCountsChartBuilder**')
+            .route('/admin/projects/proj1/metrics/singleSkillCountsChartBuilder**')
             .as('singleSkillCountsChartBuilder');
 
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
@@ -127,7 +127,7 @@ describe('Metrics Tests - Skills', () => {
         cy.log(timestamp);
         cy.server()
             .route({
-                url: '/admin/projects/proj1/charts/singleSkillCountsChartBuilder**',
+                url: '/admin/projects/proj1/metrics/singleSkillCountsChartBuilder**',
                 status: 200,
                 response: {
                     'numUsersAchieved': 3828283,
@@ -176,7 +176,7 @@ describe('Metrics Tests - Skills', () => {
         }
     },() => {
         cy.server()
-            .route('/admin/projects/proj1/charts/numUserAchievedOverTimeChartBuilder**')
+            .route('/admin/projects/proj1/metrics/numUserAchievedOverTimeChartBuilder**')
             .as('singleSkillCountsChartBuilder');
 
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
@@ -222,7 +222,7 @@ describe('Metrics Tests - Skills', () => {
 
     it('skill metrics - empty', () => {
         cy.server()
-            .route('/admin/projects/proj1/charts/numUserAchievedOverTimeChartBuilder?skillId=skill1')
+            .route('/admin/projects/proj1/metrics/numUserAchievedOverTimeChartBuilder?skillId=skill1')
             .as('singleSkillCountsChartBuilder');
 
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
@@ -260,7 +260,7 @@ describe('Metrics Tests - Skills', () => {
     },() => {
         cy.server()
             .route({
-                url: '/admin/projects/proj1/charts/numUserAchievedOverTimeChartBuilder?skillId=skill1',
+                url: '/admin/projects/proj1/metrics/numUserAchievedOverTimeChartBuilder?skillId=skill1',
                 response: {
                     'achievementCounts': [{
                         'num': 1,
@@ -303,7 +303,7 @@ describe('Metrics Tests - Skills', () => {
         }
     },() => {
         cy.server()
-            .route('/admin/projects/proj1/charts/numUserAchievedOverTimeChartBuilder**')
+            .route('/admin/projects/proj1/metrics/numUserAchievedOverTimeChartBuilder**')
             .as('skillEventsOverTimeChartBuilder');
 
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
@@ -349,7 +349,7 @@ describe('Metrics Tests - Skills', () => {
 
     it('applied skill events over time - 1 skill', () => {
         cy.server()
-            .route('/admin/projects/proj1/charts/skillEventsOverTimeChartBuilder**')
+            .route('/admin/projects/proj1/metrics/skillEventsOverTimeChartBuilder**')
             .as('skillEventsOverTimeChartBuilder');
 
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {

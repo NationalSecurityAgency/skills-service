@@ -26,7 +26,7 @@ describe('Metrics Tests - Skills', () => {
 
     it('skills table - empty table', () => {
         cy.server()
-            .route('/admin/projects/proj1/charts/skillUsageNavigatorChartBuilder')
+            .route('/admin/projects/proj1/metrics/skillUsageNavigatorChartBuilder')
             .as('skillUsageNavigatorChartBuilder');
         cy.visit('/projects/proj1/');
         cy.clickNav('Metrics');
@@ -38,7 +38,7 @@ describe('Metrics Tests - Skills', () => {
 
     it('skills table - paging', () => {
         cy.server()
-            .route('/admin/projects/proj1/charts/skillUsageNavigatorChartBuilder')
+            .route('/admin/projects/proj1/metrics/skillUsageNavigatorChartBuilder')
             .as('skillUsageNavigatorChartBuilder');
 
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
@@ -102,7 +102,7 @@ describe('Metrics Tests - Skills', () => {
 
     it('skills table - sorting', () => {
         cy.server()
-            .route('/admin/projects/proj1/charts/skillUsageNavigatorChartBuilder')
+            .route('/admin/projects/proj1/metrics/skillUsageNavigatorChartBuilder')
             .as('skillUsageNavigatorChartBuilder');
 
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
@@ -233,7 +233,7 @@ describe('Metrics Tests - Skills', () => {
         // if it's pushed to the 2nd line
         cy.viewport(2048, 1024);
         cy.server()
-            .route('/admin/projects/proj1/charts/skillUsageNavigatorChartBuilder')
+            .route('/admin/projects/proj1/metrics/skillUsageNavigatorChartBuilder')
             .as('skillUsageNavigatorChartBuilder');
 
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
