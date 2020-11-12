@@ -43,8 +43,8 @@ limitations under the License.
                        :fields="result.fields"
                        :per-page="result.paging.perPage"
                        :current-page="result.paging.currentPage"
-                       :sort-by.sync="result.fields[0].key"
-                       :sort-desc="false"
+                       :sort-by.sync="sortBy"
+                       :sort-desc.sync="sortDesc"
                        data-cy="pinProjectsSearchResults">
 
                 <template #cell(name)="data">
@@ -151,6 +151,8 @@ limitations under the License.
       return {
         isLoading: false,
         searchValue: '',
+        sortBy: 'name',
+        sortDesc: false,
         result: {
           values: [],
           paging: {
