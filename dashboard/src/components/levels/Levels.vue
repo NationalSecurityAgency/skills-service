@@ -26,7 +26,7 @@ limitations under the License.
           </span>
           <b-tooltip target="add-button" title="Reached maximum limit of levels." :disabled="!reachedMaxLevels"></b-tooltip>
           <span id="add-button">
-            <b-button @click="editLevel()" variant="outline-primary" :disabled="reachedMaxLevels" size="sm">
+            <b-button @click="editLevel()" variant="outline-primary" :disabled="reachedMaxLevels" size="sm" data-cy="addLevelButton">
               <span class="d-none d-sm-inline">Add</span> Next <i class="fas fa-plus-circle" />
             </b-button>
           </span>
@@ -37,7 +37,7 @@ limitations under the License.
     <loading-container :is-loading="isLoading">
       <simple-card>
         <v-client-table v-if="levels && levels.length && !isLoading" :data="levels" :columns="levelsColumns"
-                        :options="options">
+                        :options="options" data-cy="levelsTable">
         <span slot="iconClass" slot-scope="props">
               <i class="text-info level-icon" v-bind:class="`${props.row.iconClass}`"></i>
                 <i v-if="props.row.achievable === false" class="icon-warning fa fa-exclamation-circle text-warning"

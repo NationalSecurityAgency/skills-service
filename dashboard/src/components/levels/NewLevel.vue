@@ -196,7 +196,7 @@ limitations under the License.
           let valid = true;
           if (self.allLevels && value && value.localeCompare(self.level.name, 'en', { sensitivity: 'base' }) !== 0) {
             const lcVal = value.toLowerCase();
-            const existingLevelWithName = self.allLevels.find((elem) => elem.name.toLowerCase() === lcVal);
+            const existingLevelWithName = self.allLevels.find((elem) => elem.name && elem.name.toLowerCase() === lcVal);
             if (existingLevelWithName) {
               valid = false;
             }

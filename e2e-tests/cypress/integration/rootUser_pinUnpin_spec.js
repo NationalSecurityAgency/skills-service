@@ -255,5 +255,125 @@ describe('Root Pin and Unpin Tests', () => {
     });
   });
 
+  it('Close Pin Projects modal using escape and then reopen', () => {
+    cy.logout();
+    cy.fixture('vars.json').then((vars) => {
+      cy.login(vars.rootUser, vars.defaultPass);
+      cy.route('GET', '/app/projects').as('default');
+      cy.route('GET', '/app/projects?search=one').as('searchOne');
+      cy.route('POST', '/root/pin/proj1').as('pinOne');
+      cy.route('DELETE', '/root/pin/proj1').as('unpinOne');
+      cy.route('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
+
+      cy.visit('/');
+      //confirm that default project loading returns no projects for root user
+      cy.wait('@default');
+      cy.contains('No Projects Yet...').should('be.visible');
+
+      // open the pin projects modal
+      cy.get('[data-cy=subPageHeaderControls]').contains('Pin').click();
+      cy.get('[data-cy=pinProjects').should('exist') // dialog exists
+      cy.contains('Pin Projects');
+      cy.contains('Search Project Catalog');
+
+      // close with escape
+      cy.get('[data-cy=pinProjectsSearchInput]').type('{esc}', {force: true});
+      cy.get('[data-cy=pinProjects').should('not.exist') // dialog does not exists
+
+      // can re-open the pin modal
+      cy.get('[data-cy=subPageHeaderControls]').contains('Pin').click();
+      cy.get('[data-cy=pinProjects').should('exist') // dialog exists
+      cy.contains('Pin Projects');
+      cy.contains('Search Project Catalog');
+
+      // close with escape
+      cy.get('[data-cy=pinProjectsSearchInput]').type('{esc}', {force: true});
+      cy.get('[data-cy=pinProjects').should('not.exist') // dialog does not exists
+
+      // open the new project modal
+      cy.clickButton('Project');
+      cy.contains('New Project'); // new project dialog does exist
+      cy.get('[data-cy=pinProjects').should('not.exist') // pin project dialog does not exists
+    });
+
+  });
+
+  it('Sort and then un-sort projects', () => {
+    cy.request('POST', '/app/projects/proj1', {
+      projectId: 'proj1',
+      name: "000"
+    });
+
+    cy.request('POST', '/app/projects/proj2', {
+      projectId: 'proj2',
+      name: "100"
+    });
+
+    cy.request('POST', '/app/projects/proj3', {
+      projectId: 'proj3',
+      name: "200"
+    });
+
+    cy.request('POST', '/app/projects/proj4', {
+      projectId: 'proj4',
+      name: "300"
+    });
+    cy.logout();
+    cy.fixture('vars.json').then((vars) => {
+      cy.login(vars.rootUser, vars.defaultPass);
+      cy.route('GET', '/app/projects').as('default');
+      cy.route('GET', '/app/projects?search=one').as('searchOne');
+      cy.route('POST', '/root/pin/proj1').as('pinOne');
+      cy.route('DELETE', '/root/pin/proj1').as('unpinOne');
+      cy.route('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
+
+      cy.visit('/');
+      //confirm that default project loading returns no projects for root user
+      cy.wait('@default');
+      cy.contains('No Projects Yet...').should('be.visible');
+
+      const rowSelector = '[data-cy=pinProjectsSearchResults] tbody tr'
+      const headerSelector = '[data-cy=pinProjectsSearchResults] thead tr th'
+
+      // load all projects in default (ASC) order
+      cy.get('[data-cy=subPageHeaderControls]').contains('Pin').click();
+      cy.contains('Search Project Catalog');
+      cy.get('[data-cy=pinProjectsLoadAllButton]').click();
+      cy.get(rowSelector).should('have.length', 5).as('cyRows');
+
+      // verify rows are in ASC order based on project name
+      const rowNamesAsc = ['000', '100', '200', '300', 'Inception']
+      for (let i = 0; i < 5; i += 1) {
+        cy.get('@cyRows')
+          .eq(i)
+          .find('td')
+          .as('row-i');
+        cy.get('@row-i').contains(rowNamesAsc[i])
+      }
+
+      // now click the 'Name' header to sort in DESC order
+      cy.get(headerSelector).contains('Name').click()
+
+      // verify rows are in DESC order based on project name
+      const rowNameDesc = rowNamesAsc.reverse()
+      for (let i = 0; i < 5; i += 1) {
+        cy.get('@cyRows')
+          .eq(i)
+          .find('td')
+          .as('row-i');
+        cy.get('@row-i').contains(rowNameDesc[i])
+      }
+
+      // finally click a non-sortable column and sort order is reset and 'Name' column should still be visible
+      cy.get(headerSelector).contains('Subjects').click()
+      cy.get(headerSelector).contains('Name').should('be.visible')
+
+      cy.get('[data-cy=modalDoneButton]').click();
+
+    });
+  });
+
+
+
 });
 
