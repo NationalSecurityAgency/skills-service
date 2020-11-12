@@ -29,7 +29,7 @@ import javax.annotation.PostConstruct
 @Service
 @Slf4j
 @CompileStatic
-class MetricsServiceNew {
+class MetricsService {
 
     @Autowired
     ApplicationContext appContext

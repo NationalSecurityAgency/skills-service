@@ -34,7 +34,7 @@ import static org.springframework.data.domain.Sort.Direction.ASC
 import static org.springframework.data.domain.Sort.Direction.DESC
 
 @Component
-class UserAchievementsChartBuilder implements ProjectMetricsBuilder {
+class UserAchievementsMetricsBuilder implements ProjectMetricsBuilder {
 
     @Autowired
     UserAchievedLevelRepo userAchievedRepo

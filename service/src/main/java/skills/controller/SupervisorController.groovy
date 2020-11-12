@@ -32,7 +32,7 @@ import skills.controller.request.model.NameExistsRequest
 import skills.controller.result.model.*
 import skills.icons.CustomIconFacade
 import skills.icons.UploadedIcon
-import skills.metrics.MetricsServiceNew
+import skills.metrics.MetricsService
 import skills.services.*
 import skills.services.admin.ProjAdminService
 import skills.utils.InputSanitizer
@@ -69,7 +69,7 @@ class SupervisorController {
     ProjAdminService projAdminService
 
     @Autowired
-    MetricsServiceNew metricsService
+    MetricsService metricsService
 
     @RequestMapping(value = "/badges/name/exists", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody

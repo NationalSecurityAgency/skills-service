@@ -23,7 +23,7 @@ import skills.storage.repos.UserAchievedLevelRepo
 
 @Component
 @Slf4j
-class SkillUsageNavigatorChartBuilder implements ProjectMetricsBuilder {
+class SkillUsageNavigatorMetricsBuilder implements ProjectMetricsBuilder {
 
     @Autowired
     UserAchievedLevelRepo userAchievedRepo

@@ -23,7 +23,7 @@ import skills.metrics.builders.ProjectMetricsBuilder
 import skills.storage.repos.UserAchievedLevelRepo
 
 @Component
-class UsersByLevelForSubjectOverTimeChartBuilder implements ProjectMetricsBuilder {
+class UsersByLevelForSubjectOverTimeMetricsBuilder implements ProjectMetricsBuilder {
 
     @Autowired
     UserAchievedLevelRepo userAchievedRepo

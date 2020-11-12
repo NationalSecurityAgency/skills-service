@@ -18,7 +18,7 @@ package skills.intTests.metrics
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
 
-class SkillUsageNavigatorChartBuilderSpec extends DefaultIntSpec {
+class SkillUsageNavigatorMetricsBuilderSpec extends DefaultIntSpec {
 
     def "skill usage navigator"() {
         String userId = "user1"

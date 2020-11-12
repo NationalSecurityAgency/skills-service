@@ -25,7 +25,7 @@ import skills.storage.repos.UserAchievedLevelRepo
 
 @Component
 @Slf4j
-class NumUsersPerSubjectPerLevelChartBuilder implements ProjectMetricsBuilder {
+class NumUsersPerSubjectPerLevelMetricsBuilder implements ProjectMetricsBuilder {
 
     @Autowired
     UserAchievedLevelRepo userAchievedRepo

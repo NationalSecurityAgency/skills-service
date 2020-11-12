@@ -21,7 +21,7 @@ import skills.intTests.utils.SkillsService
 import skills.metrics.builders.MetricsPagingParamsHelper
 import skills.metrics.builders.MetricsParams
 
-class FindExpertsForMultipleProjectsChartBuilderSpec extends DefaultIntSpec {
+class FindExpertsForMultipleProjectsMetricsBuilderSpec extends DefaultIntSpec {
 
 //    def "find users within multiple projects"() {
 //        SkillsService supervisor = createSupervisor();

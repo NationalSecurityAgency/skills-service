@@ -18,7 +18,7 @@ package skills.controller
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
-import skills.metrics.MetricsServiceNew
+import skills.metrics.MetricsService
 import skills.profile.EnableCallStackProf
 import skills.services.AdminUsersService
 
@@ -32,7 +32,7 @@ class AdminMetricsController {
     AdminUsersService adminUsersService
 
     @Autowired
-    MetricsServiceNew metricsServiceNew
+    MetricsService metricsServiceNew
 
     @RequestMapping(value = "/projects/{projectId}/charts/{chartId}", method =  RequestMethod.GET, produces = "application/json")
     def getChartData(@PathVariable("projectId") String projectId,

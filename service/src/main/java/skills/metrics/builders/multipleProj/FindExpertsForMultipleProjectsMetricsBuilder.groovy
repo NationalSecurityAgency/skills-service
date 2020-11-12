@@ -24,7 +24,7 @@ import skills.metrics.builders.MetricsParams
 import skills.storage.repos.UserAchievedCustomRepo
 
 @Component
-class FindExpertsForMultipleProjectsChartBuilder implements GlobalMetricsBuilder {
+class FindExpertsForMultipleProjectsMetricsBuilder implements GlobalMetricsBuilder {
 
     @Autowired
     UserAchievedCustomRepo userAchievedCustomRepo

@@ -25,7 +25,7 @@ import skills.storage.repos.UserPerformedSkillRepo
 
 @Component
 @Slf4j
-class SkillEventsOverTimeChartBuilder implements ProjectMetricsBuilder {
+class SkillEventsOverTimeMetricsBuilder implements ProjectMetricsBuilder {
 
     @Autowired
     UserPerformedSkillRepo userPerformedSkillRepo

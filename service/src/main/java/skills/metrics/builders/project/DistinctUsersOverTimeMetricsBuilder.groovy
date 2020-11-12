@@ -15,31 +15,31 @@
  */
 package skills.metrics.builders.project
 
+
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
-import skills.controller.result.model.LabelCountItem
+import skills.controller.result.model.CountItem
 import skills.metrics.builders.MetricsParams
 import skills.metrics.builders.ProjectMetricsBuilder
 import skills.services.AdminUsersService
 
 @Component
-class NumberUsersPerLevelChartBuilderNew implements ProjectMetricsBuilder {
+class DistinctUsersOverTimeMetricsBuilder implements ProjectMetricsBuilder {
 
     @Autowired
     AdminUsersService adminUsersService
 
     @Override
     String getId() {
-        return "numUsersPerLevelChartBuilder"
+        return "distinctUsersOverTimeForProject"
     }
 
     @Override
     def build(String projectId, String chartId, Map<String, String> props) {
-        String subjectId
-        if (props.containsKey(MetricsParams.P_SUBJECT_ID)) {
-            subjectId = MetricsParams.getSubjectId(projectId, chartId, props);
-        }
-        List<LabelCountItem> dataItems = adminUsersService.getUserCountsPerLevel(projectId, subjectId)
-        return dataItems
+        Date start = MetricsParams.getStart(projectId, chartId, props)
+        String skillId = props.containsKey(MetricsParams.P_SKILL_ID) ? MetricsParams.getSkillId(projectId, chartId, props) : null
+        List<CountItem> dataItems = adminUsersService.getUsage(projectId, skillId, start)
+
+        return dataItems;
     }
 }

@@ -25,7 +25,7 @@ import skills.storage.repos.UserAchievedLevelRepo
 
 @Component
 @Slf4j
-class NumUserAchievedOverTimeChartBuilder implements ProjectMetricsBuilder {
+class NumUserAchievedOverTimeMetricsBuilder implements ProjectMetricsBuilder {
 
     @Autowired
     UserAchievedLevelRepo userAchievedRepo
