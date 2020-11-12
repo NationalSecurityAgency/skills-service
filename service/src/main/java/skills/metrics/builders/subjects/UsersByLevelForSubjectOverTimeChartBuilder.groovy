@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.metricsNew.builders.subjects
+package skills.metrics.builders.subjects
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import skills.controller.result.model.TimestampCountItem
-import skills.metricsNew.builders.MetricsParams
-import skills.metricsNew.builders.ProjectMetricsBuilder
+import skills.metrics.builders.MetricsParams
+import skills.metrics.builders.ProjectMetricsBuilder
 import skills.storage.repos.UserAchievedLevelRepo
 
 @Component

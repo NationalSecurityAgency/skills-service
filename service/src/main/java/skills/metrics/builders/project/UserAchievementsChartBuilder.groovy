@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.metricsNew.builders.project
+package skills.metrics.builders.project
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
@@ -21,8 +21,8 @@ import org.springframework.data.domain.Sort
 import org.springframework.data.jpa.domain.JpaSort
 import org.springframework.stereotype.Component
 import skills.controller.exceptions.SkillException
-import skills.metricsNew.builders.ProjectMetricsBuilder
-import skills.metricsNew.builders.MetricsPagingParamsHelper
+import skills.metrics.builders.MetricsPagingParamsHelper
+import skills.metrics.builders.ProjectMetricsBuilder
 import skills.storage.model.SkillDef
 import skills.storage.model.UserAchievement
 import skills.storage.repos.UserAchievedLevelRepo

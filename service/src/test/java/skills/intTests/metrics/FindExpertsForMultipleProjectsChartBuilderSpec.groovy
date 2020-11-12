@@ -18,8 +18,8 @@ package skills.intTests.metrics
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
-import skills.metricsNew.builders.MetricsPagingParamsHelper
-import skills.metricsNew.builders.MetricsParams
+import skills.metrics.builders.MetricsPagingParamsHelper
+import skills.metrics.builders.MetricsParams
 
 class FindExpertsForMultipleProjectsChartBuilderSpec extends DefaultIntSpec {
 

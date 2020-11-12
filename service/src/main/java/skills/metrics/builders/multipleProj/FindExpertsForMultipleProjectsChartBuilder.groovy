@@ -13,15 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.metricsNew.builders.multipleProj
+package skills.metrics.builders.multipleProj
 
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Component
 import skills.controller.exceptions.SkillException
-import skills.metricsNew.builders.GlobalMetricsBuilder
-import skills.metricsNew.builders.MetricsPagingParamsHelper
-import skills.metricsNew.builders.MetricsParams
+import skills.metrics.builders.GlobalMetricsBuilder
+import skills.metrics.builders.MetricsPagingParamsHelper
+import skills.metrics.builders.MetricsParams
 import skills.storage.repos.UserAchievedCustomRepo
 
 @Component

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.metricsNew
+package skills.metrics
 
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
@@ -21,8 +21,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Service
 import skills.controller.exceptions.SkillException
-import skills.metricsNew.builders.GlobalMetricsBuilder
-import skills.metricsNew.builders.ProjectMetricsBuilder
+import skills.metrics.builders.GlobalMetricsBuilder
+import skills.metrics.builders.ProjectMetricsBuilder
 
 import javax.annotation.PostConstruct
 

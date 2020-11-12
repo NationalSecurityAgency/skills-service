@@ -32,7 +32,7 @@ import skills.controller.request.model.NameExistsRequest
 import skills.controller.result.model.*
 import skills.icons.CustomIconFacade
 import skills.icons.UploadedIcon
-import skills.metricsNew.MetricsServiceNew
+import skills.metrics.MetricsServiceNew
 import skills.services.*
 import skills.services.admin.ProjAdminService
 import skills.utils.InputSanitizer

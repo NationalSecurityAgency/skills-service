@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.metricsNew.builders.skill
+package skills.metrics.builders.skill
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
-import skills.metricsNew.builders.ProjectMetricsBuilder
-import skills.metricsNew.builders.MetricsParams
+import skills.metrics.builders.MetricsParams
+import skills.metrics.builders.ProjectMetricsBuilder
 import skills.storage.model.DayCountItem
 import skills.storage.repos.UserPerformedSkillRepo
 

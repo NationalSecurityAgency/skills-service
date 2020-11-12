@@ -18,7 +18,7 @@ package skills.controller
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
-import skills.metricsNew.MetricsServiceNew
+import skills.metrics.MetricsServiceNew
 import skills.profile.EnableCallStackProf
 import skills.services.AdminUsersService
 

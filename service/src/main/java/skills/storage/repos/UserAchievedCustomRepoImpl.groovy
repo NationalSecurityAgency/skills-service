@@ -81,7 +81,6 @@ class UserAchievedCustomRepoImpl implements UserAchievedCustomRepo {
                                 )
                         );
         log.debug("findUsersWithMaxLevelForMultipleProjects jpql=[{}]", jpql)
-        println jpql
         return jpql
     }
 }
