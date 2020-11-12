@@ -18,9 +18,9 @@ package skills.controller
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
-import skills.services.AdminUsersService
-import skills.metrics.MetricsService
+import skills.metricsNew.MetricsServiceNew
 import skills.profile.EnableCallStackProf
+import skills.services.AdminUsersService
 
 @RestController
 @RequestMapping("/admin")
@@ -32,19 +32,7 @@ class AdminMetricsController {
     AdminUsersService adminUsersService
 
     @Autowired
-    MetricsService metricsService
-
-    @Autowired
-    skills.metricsNew.MetricsServiceNew metricsServiceNew
-
-//    @RequestMapping(value = "/projects/{projectId}/{section}/{sectionId}/metrics", method =  RequestMethod.GET, produces = "application/json")
-//    List<MetricsChart> getAllSectionMetricsCharts(@PathVariable("projectId") String projectId,
-//                                                  @PathVariable("section") Section section,
-//                                                  @PathVariable(ChartParams.SECTION_ID) String sectionId,
-//                                                  @RequestParam Map<String,String> chartProps) {
-//        chartProps.put(ChartParams.SECTION_ID, sectionId)
-//        return metricsService.loadChartsForSection(section, projectId, chartProps)
-//    }
+    MetricsServiceNew metricsServiceNew
 
     @RequestMapping(value = "/projects/{projectId}/charts/{chartId}", method =  RequestMethod.GET, produces = "application/json")
     def getChartData(@PathVariable("projectId") String projectId,
@@ -52,15 +40,5 @@ class AdminMetricsController {
                                                   @RequestParam Map<String,String> chartProps) {
         return metricsServiceNew.loadProjectMetrics(projectId, chartId, chartProps)
     }
-
-//    @RequestMapping(value = "/projects/{projectId}/{section}/{sectionId}/metrics/{chartBuilderId}", method =  RequestMethod.GET, produces = "application/json")
-//    MetricsChart getSectionMetricsChart(@PathVariable("projectId") String projectId,
-//                                        @PathVariable("section") Section section,
-//                                        @PathVariable(ChartParams.SECTION_ID) String sectionId,
-//                                        @PathVariable(ChartParams.CHART_BUILDER_ID) String chartBuilderId,
-//                                        @RequestParam Map<String,String> chartProps) {
-//        chartProps.put(ChartParams.SECTION_ID, sectionId)
-//        return metricsService.loadChartForSection(chartBuilderId, section, projectId, chartProps)
-//    }
 
 }

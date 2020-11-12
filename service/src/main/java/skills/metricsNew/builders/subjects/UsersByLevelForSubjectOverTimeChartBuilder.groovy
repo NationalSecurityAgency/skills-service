@@ -15,11 +15,10 @@
  */
 package skills.metricsNew.builders.subjects
 
-
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import skills.controller.result.model.TimestampCountItem
-import skills.metrics.ChartParams
+import skills.metricsNew.builders.MetricsParams
 import skills.metricsNew.builders.ProjectMetricsBuilder
 import skills.storage.repos.UserAchievedLevelRepo
 
@@ -41,8 +40,7 @@ class UsersByLevelForSubjectOverTimeChartBuilder implements ProjectMetricsBuilde
 
     @Override
     List<UserCountsByLevel> build(String projectId, String chartId, Map<String, String> props) {
-        String subjectId = ChartParams.getValue(props, ChartParams.SUBJECT_ID)
-        assert subjectId, "Property [${ChartParams.SUBJECT_ID}] was not provided"
+        String subjectId = MetricsParams.getSubjectId(projectId, id, props)
 
         List<UserAchievedLevelRepo.SkillLevelDayUserCount> counts =
                 userAchievedRepo.countNumUsersOverTimeAndLevelByProjectIdAndSkillId(projectId, subjectId)
