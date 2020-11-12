@@ -420,7 +420,7 @@ describe('Subjects Tests', () => {
         cy.get('[aria-label="new subject"]').should('have.focus');
     });
 
-    it.only('focus should be returned to subject edit button', () => {
+    it('focus should be returned to subject edit button', () => {
         cy.server();
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
             projectId: 'proj1',
@@ -500,6 +500,83 @@ describe('Subjects Tests', () => {
         cy.get('[data-cy=editMenuEditBtn]').eq(1).click();
         cy.get('[aria-label=Close]').click();
         cy.get('div.subject-settings').eq(1).children().first().should('have.focus');
+    });
+
+    it('new level dialog should return focus to new level button', () => {
+        cy.server();
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            name: "Subject 1"
+        });
+        cy.route({
+            method: 'GET',
+            url: '/admin/projects/proj1/subjects/subj1'
+        }).as('loadSubject');
+
+        cy.route({
+            method: 'PUT',
+            url: '/admin/projects/proj1/subjects/subj1/levels/edit/*'
+        }).as('saveLevel');
+
+        cy.route({
+            method: 'GET',
+            url: '/admin/projects/proj1/subjects/subj1/levels'
+        }).as('loadLevels');
+
+        cy.visit('/projects/proj1/subjects/subj1');
+        cy.wait('@loadSubject');
+
+        cy.contains('Levels').click();
+        cy.get('[data-cy=addLevel]').click();
+        cy.get('[data-cy=cancelLevel]').click();
+        cy.get('[data-cy=addLevel]').should('have.focus');
+
+        cy.get('[data-cy=addLevel]').click();
+        cy.get('[data-cy=levelName]').type('{esc}');
+        cy.get('[data-cy=addLevel]').should('have.focus');
+
+        cy.get('[data-cy=addLevel]').click();
+        cy.get('[aria-label=Close]').filter('.text-light').click();
+        cy.get('[data-cy=addLevel]').should('have.focus');
+
+        cy.get('[data-cy=editLevelButton]').eq(0).click();
+        cy.get('[data-cy=cancelLevel]').click();
+        cy.get('[data-cy=editLevelButton]').eq(0).should('have.focus');
+
+        cy.get('[data-cy=editLevelButton]').eq(0).click();
+        cy.get('[data-cy=levelName]').type('{esc}');
+        cy.get('[data-cy=editLevelButton]').eq(0).should('have.focus');
+
+        cy.get('[data-cy=editLevelButton]').eq(0).click();
+        cy.get('[aria-label=Close]').filter('.text-light').click();
+        cy.get('[data-cy=editLevelButton]').eq(0).should('have.focus');
+
+        cy.get('[data-cy=editLevelButton]').eq(0).click();
+        cy.get('[data-cy=levelName]').type('{selectall}Fooooooo');
+        cy.get('[data-cy=saveLevelButton]').click();
+        cy.wait('@saveLevel');
+        cy.wait('@loadLevels');
+        cy.get('[data-cy=editLevelButton]').eq(0).should('have.focus');
+
+        cy.get('[data-cy=editLevelButton]').eq(3).click();
+        cy.get('[data-cy=cancelLevel]').click();
+        cy.get('[data-cy=editLevelButton]').eq(3).should('have.focus');
+
+        cy.get('[data-cy=editLevelButton]').eq(3).click();
+        cy.get('[data-cy=levelName]').type('{esc}');
+        cy.get('[data-cy=editLevelButton]').eq(3).should('have.focus');
+
+        cy.get('[data-cy=editLevelButton]').eq(3).click();
+        cy.get('[aria-label=Close]').filter('.text-light').click();
+        cy.get('[data-cy=editLevelButton]').eq(3).should('have.focus');
+
+        cy.get('[data-cy=editLevelButton]').eq(3).click();
+        cy.get('[data-cy=levelName]').type('{selectall}Baaaaar');
+        cy.get('[data-cy=saveLevelButton]').click();
+        cy.wait('@saveLevel');
+        cy.wait('@loadLevels');
+        cy.get('[data-cy=editLevelButton]').eq(3).should('have.focus');
     });
 
     it('viewing subject user details does not break breadcrumb navigation', () => {

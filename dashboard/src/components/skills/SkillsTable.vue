@@ -17,7 +17,7 @@ limitations under the License.
   <div id="skillsTable">
 
     <sub-page-header ref="subPageHeader" title="Skills" action="Skill" @add-action="newSkill"
-                     :disabled="addSkillDisabled" :disabled-msg="addSkillsDisabledMsg"/>
+                     :disabled="addSkillDisabled" :disabled-msg="addSkillsDisabledMsg" aria-label="new skill"/>
 
     <loading-container v-bind:is-loading="isLoading">
       <div v-if="this.skills && this.skills.length" class="card">

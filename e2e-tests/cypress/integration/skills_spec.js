@@ -535,6 +535,121 @@ describe('Skills Tests', () => {
       cy.contains(`ID: ${newId}`)
   });
 
+  it('new skill button should retain focus after dialog closes', () => {
+    cy.server();
+    cy.route({
+      method: 'GET',
+      url: '/admin/projects/proj1/subjects/subj1'
+    }).as('loadSubject');
+
+    cy.visit('/projects/proj1/subjects/subj1');
+    cy.wait('@loadSubject');
+
+    cy.get('[aria-label="new skill"]').click();
+    cy.get('[data-cy=closeSkillButton]').click();
+    cy.get('[aria-label="new skill"]').should('have.focus');
+
+    cy.get('[aria-label="new skill"]').click();
+    cy.get('[data-cy=skillName]').type('{esc}');
+    cy.get('[aria-label="new skill"]').should('have.focus');
+
+    cy.get('[aria-label="new skill"]').click();
+    cy.get('[aria-label=Close]').click();
+    cy.get('[aria-label="new skill"]').should('have.focus');
+
+    cy.get('[aria-label="new skill"]').click();
+    cy.get('[data-cy=skillName]').type('foobarbaz');
+    cy.get('[data-cy=saveSkillButton]').click();
+    cy.get('[aria-label="new skill"]').should('have.focus');
+  });
+
+  it('focus should be returned to subject edit button', () => {
+    cy.server();
+    cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1', {
+      projectId: 'proj1',
+      subjectId: "subj1",
+      skillId: "skill1",
+      name: "Skill 1",
+      pointIncrement: '50',
+      numPerformToCompletion: '5'
+    });
+
+    cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill2', {
+      projectId: 'proj1',
+      subjectId: "subj1",
+      skillId: "skill2",
+      name: "Skill 2",
+      pointIncrement: '50',
+      numPerformToCompletion: '5'
+    });
+
+    cy.route({
+      method: 'POST',
+      url: '/admin/projects/proj1/subjects/subj1/skills/skill1'
+    }).as('saveSkill');
+    cy.route({
+      method: 'POST',
+      url: '/admin/projects/proj1/subjects/subj1/skills/skill2'
+    }).as('saveSkill2');
+
+    cy.route({
+      method: 'GET',
+      url: '/admin/projects/proj1/subjects/subj1/skills/skill1'
+    }).as('loadSkill');
+    cy.route({
+      method: 'GET',
+      url: '/admin/projects/proj1/subjects/subj1/skills/skill2'
+    }).as('loadSkill2');
+    cy.route({
+      method: 'GET',
+      url: '/admin/projects/proj1/subjects/subj1'
+    }).as('loadSubject');
+
+    cy.visit('/projects/proj1/subjects/subj1');
+    cy.wait('@loadSubject');
+    //skill 2
+    cy.get('[data-cy=editSkillButton]').eq(0).click();
+    cy.get('[data-cy=skillName]').should('be.visible');
+    cy.get('[data-cy=skillName]').type('{esc}');
+    cy.get('[data-cy=editSkillButton]').first().should('have.focus');
+
+    cy.get('[data-cy=editSkillButton]').eq(0).click();
+    cy.get('[data-cy=closeSkillButton]').click();
+    cy.get('[data-cy=editSkillButton]').eq(0).should('have.focus');
+
+    cy.get('[data-cy=editSkillButton]').eq(0).click();
+    cy.get('[data-cy=skillName]').type('test 123');
+    cy.get('[data-cy=saveSkillButton]').click();
+    cy.wait('@saveSkill2');
+    cy.wait('@loadSkill2');
+    cy.get('[data-cy=editSkillButton]').eq(0).should('have.focus');
+
+    cy.get('[data-cy=editSkillButton]').eq(0).click();
+    cy.get('[aria-label=Close]').filter('.text-light').click();
+    cy.get('[data-cy=editSkillButton]').eq(0).should('have.focus');
+
+    //skill 1
+    cy.get('[data-cy=editSkillButton]').eq(1).click();
+    cy.get('[data-cy=skillName]').should('be.visible');
+    cy.get('[data-cy=skillName]').type('{esc}');
+    cy.get('[data-cy=editSkillButton]').eq(1).should('have.focus');
+
+    cy.get('[data-cy=editSkillButton]').eq(1).click();
+    cy.get('[data-cy=closeSkillButton]').click();
+    cy.get('[data-cy=editSkillButton]').eq(1).should('have.focus');
+
+    cy.get('[data-cy=editSkillButton]').eq(1).click();
+    cy.get('[data-cy=skillName]').type('test 123');
+    cy.get('[data-cy=saveSkillButton]').click();
+    cy.wait('@saveSkill');
+    cy.wait('@loadSkill');
+    cy.get('[data-cy=editSkillButton]').eq(1).should('have.focus');
+
+    cy.get('[data-cy=editSkillButton]').eq(1).click();
+    cy.get('[aria-label=Close]').filter('.text-light').click();
+    cy.get('[data-cy=editSkillButton]').eq(1).should('have.focus');
+  });
+
   it('skill user details does not break breadcrumb bar', () => {
     cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1', {
       projectId: 'proj1',

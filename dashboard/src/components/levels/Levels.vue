@@ -26,7 +26,9 @@ limitations under the License.
           </span>
           <b-tooltip target="add-button" title="Reached maximum limit of levels." :disabled="!reachedMaxLevels"></b-tooltip>
           <span id="add-button">
-            <b-button @click="editLevel()" ref="addLevel" variant="outline-primary" :disabled="reachedMaxLevels" size="sm" data-cy="addLevelButton">
+            <b-button @click="editLevel()" ref="addLevel" variant="outline-primary" :disabled="reachedMaxLevels"
+            <b-button @click="editLevel()" ref="addLevel" variant="outline-primary" :disabled="reachedMaxLevels"
+                      size="sm" data-cy="addLevel">
               <span class="d-none d-sm-inline">Add</span> Next <i class="fas fa-plus-circle" aria-hidden="true"/>
             </b-button>
           </span>
