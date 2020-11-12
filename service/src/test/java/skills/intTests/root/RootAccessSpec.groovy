@@ -439,6 +439,30 @@ class RootAccessSpec extends DefaultIntSpec {
         supervisorUsers.find { it.userId == nonRootUserId }
     }
 
+    def 'verify when adding root user that already has supervisor role'() {
+        setup:
+        def originalRootUsers = rootSkillsService.getRootUsers()
+        assert !originalRootUsers.find {it.userId == nonRootUserId}
+
+        def originalSupervisorUsers = rootSkillsService.getUsersWithRole('ROLE_SUPERVISOR')
+        assert !originalSupervisorUsers.find {it.userId == nonRootUserId}
+
+        rootSkillsService.grantSupervisorRole(nonRootUserId)
+        originalSupervisorUsers = rootSkillsService.getUsersWithRole('ROLE_SUPERVISOR')
+        assert originalSupervisorUsers.find {it.userId == nonRootUserId}
+
+        when:
+        rootSkillsService.addRootRole(nonRootUserId)
+        def rootUsers = rootSkillsService.getRootUsers()
+        def supervisorUsers = rootSkillsService.getUsersWithRole('ROLE_SUPERVISOR')
+
+        then:
+        rootUsers
+        rootUsers.find { it.userId == nonRootUserId }
+        supervisorUsers
+        supervisorUsers.find { it.userId == nonRootUserId }
+    }
+
     def 'verify root user loses supervisor role when root is removed'() {
 
         setup:

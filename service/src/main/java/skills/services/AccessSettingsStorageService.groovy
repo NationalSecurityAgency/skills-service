@@ -123,7 +123,10 @@ class AccessSettingsStorageService {
     @Transactional
     UserRoleRes addRoot(String userId) {
         UserRole userRole = addUserRoleInternal(userId, null, RoleName.ROLE_SUPER_DUPER_USER)
-        addUserRoleInternal(userId, null, RoleName.ROLE_SUPERVISOR)
+        User user = userRepository.findByUserId(userId)
+        if (!(user?.roles?.find {it.projectId == null && it.roleName == RoleName.ROLE_SUPERVISOR})) {
+            addUserRoleInternal(userId, null, RoleName.ROLE_SUPERVISOR)
+        }
         inceptionProjectService.createInceptionAndAssignUser(userId)
         return convert(userRole)
     }
