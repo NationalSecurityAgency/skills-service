@@ -444,7 +444,7 @@ class SkillsService {
     }
 
     @Profile
-    def addSkill(Map props, String userId = null, Date date = null) {
+    def addSkill(Map props, String userId = null, Date date = new Date()) {
         if (userId) {
             userId = getUserId(userId)
             assert date
