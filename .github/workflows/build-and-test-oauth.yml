@@ -114,6 +114,7 @@ jobs:
         record: true
         parallel: false
         group: 'skills-service with OAuth'
+        tag: "${{ github.workflow }}"
         env: oauthMode=true
       env:
         # pass the Dashboard record key as an environment variable
