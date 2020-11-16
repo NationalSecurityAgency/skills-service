@@ -246,6 +246,33 @@ describe('Skills Tests', () => {
         cy.contains('ID: Lotsofspecial')
     });
 
+    it.only('create skill using enter key', () => {
+      const expectedId = 'LotsofspecialPcharsSkill';
+      const providedName = "!L@o#t$s of %s^p&e*c(i)/#?a_l++_|}{P c'ha'rs";
+      cy.server();
+      cy.route('POST', `/admin/projects/proj1/subjects/subj1/skills/${expectedId}`).as('postNewSkill');
+      cy.route('POST', `/admin/projects/proj1/skillNameExists`).as('nameExists');
+
+      cy.route({
+        method: 'GET',
+        url: '/admin/projects/proj1/subjects/subj1'
+      }).as('loadSubject');
+
+      cy.visit('/projects/proj1/subjects/subj1');
+      cy.wait('@loadSubject');
+      cy.clickButton('Skill');
+
+      cy.get('#skillName').type(providedName);
+
+      cy.getIdField().should('have.value', expectedId);
+      cy.wait('@nameExists');
+
+      cy.get('#skillName').type('{enter}');
+      cy.wait('@postNewSkill');
+
+      cy.contains('ID: Lotsofspecial')
+    });
+
     it('Add Skill Event', () => {
         cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1', {
             projectId: 'proj1',

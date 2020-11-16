@@ -27,6 +27,7 @@ limitations under the License.
                                   name="Project Name">
                 <input class="form-control" type="text" v-model="internalProject.name"
                        v-on:input="updateProjectId"
+                       v-on:keyup.enter="handleSubmit(updateProject)"
                        v-focus
                        data-cy="projectName"/>
                 <small class="form-text text-danger" data-cy="projectNameError">{{ errors[0] }}</small>
@@ -36,7 +37,8 @@ limitations under the License.
 
           <div class="col-12">
             <id-input type="text" label="Project ID" v-model="internalProject.projectId"
-                      additional-validation-rules="uniqueId" @can-edit="canEditProjectId=$event"/>
+                      additional-validation-rules="uniqueId" @can-edit="canEditProjectId=$event"
+                      v-on:keyup.enter.native="handleSubmit(updateProject)"/>
           </div>
         </div>
 

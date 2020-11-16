@@ -26,7 +26,8 @@ limitations under the License.
                 <label for="badgeName">* Badge Name</label>
                 <ValidationProvider rules="required|minNameLength|maxBadgeNameLength|uniqueName|customNameValidator" v-slot="{errors}" name="Badge Name">
                   <input v-focus class="form-control" id="badgeName" type="text" v-model="badgeInternal.name"
-                         @input="updateBadgeId" aria-required="true" data-cy="badgeName"/>
+                         @input="updateBadgeId" aria-required="true" data-cy="badgeName"
+                         v-on:keyup.enter="handleSubmit(updateBadge)" />
                   <small class="form-text text-danger" v-show="errors[0]" data-cy="badgeNameError">{{ errors[0] }}
                   </small>
                 </ValidationProvider>
@@ -35,7 +36,7 @@ limitations under the License.
           </div>
 
           <id-input type="text" label="Badge ID" v-model="badgeInternal.badgeId" @input="canAutoGenerateId=false"
-                    additional-validation-rules="uniqueId"/>
+                    additional-validation-rules="uniqueId" v-on:keyup.enter.native="handleSubmit(updateBadge)"/>
 
           <div class="mt-2">
             <label>Description</label>
@@ -50,7 +51,8 @@ limitations under the License.
               <inline-help
                 msg="If project level 'Root Help Url' is specified then this path will be relative to 'Root Help Url'"/>
             </label>
-            <input class="form-control" type="text" v-model="badgeInternal.helpUrl" data-vv-name="helpUrl"/>
+            <input class="form-control" type="text" v-model="badgeInternal.helpUrl" data-vv-name="helpUrl"
+                   v-on:keyup.enter="handleSubmit(updateBadge)"/>
           </div>
 
           <div v-if="!global" data-cy="gemEditContainer">

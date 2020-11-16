@@ -74,6 +74,34 @@ describe('Badges Tests', () => {
         cy.contains('ID: Lotsofspecial')
     });
 
+    it('create badge with enter key', () => {
+        const expectedId = 'LotsofspecialPcharsBadge';
+        const providedName = "!L@o#t$s of %s^p&e*c(i)a_l++_|}{P/ c'ha'rs";
+
+        cy.route('POST', `/admin/projects/proj1/badges/${expectedId}`).as('postNewBadge');
+        cy.route('POST', '/admin/projects/proj1/badgeNameExists').as('nameExistsCheck');
+        cy.route('GET', '/admin/projects/proj1/badges').as('loadBadges');
+
+        cy.get('@createProject').should((response) => {
+            expect(response.status).to.eql(200)
+        });
+
+        cy.visit('/projects/proj1/badges');
+        cy.wait('@loadBadges');
+        cy.clickButton('Badge');
+
+        cy.get('#badgeName').type(providedName);
+
+        cy.wait('@nameExistsCheck');
+
+        cy.getIdField().should('have.value', expectedId);
+
+        cy.get('#badgeName').type('{enter}');
+        cy.wait('@postNewBadge');
+
+        cy.contains('ID: Lotsofspecial')
+    });
+
     if('Close badge dialog', () => {
         cy.route('GET', '/admin/projects/proj1/badges').as('loadBadges');
 
