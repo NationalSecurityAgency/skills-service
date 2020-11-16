@@ -99,6 +99,7 @@ jobs:
         record: true
         parallel: false
         group: 'skills-service against postgres'
+        tag: "${{ github.workflow }}"
         env: db=postgres
       env:
         # pass the Dashboard record key as an environment variable
