@@ -73,7 +73,7 @@ limitations under the License.
     },
     computed: {
       live() {
-        return this.badgeInternal.enabled !== 'false' && this.badgeInternal.numSkills > 0;
+        return this.badgeInternal.enabled !== 'false';
       },
     },
     watch: {
