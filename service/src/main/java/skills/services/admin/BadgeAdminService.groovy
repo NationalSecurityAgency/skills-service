@@ -244,14 +244,6 @@ class BadgeAdminService {
             throw new SkillException("Badge [${badgeId}] does not exist", projectId, badgeId, ErrorCode.BadgeNotFound)
         }
 
-        //this is only relevant for enabled badges
-        if (StringUtils.equals(badge.enabled, Boolean.TRUE.toString())) {
-            List<SkillDef> badgeSkills = getRequiredBadgeSkills(badge.id)
-            if (!badgeSkills || (badgeSkills.size() == 1 && badgeSkills.find { it.skillId == skillid })) {
-                throw new SkillException("Cannot remove all skills from a Badge", projectId, badgeId, ErrorCode.EmptyBadgeNotAllowed)
-            }
-        }
-
         ruleSetDefGraphService.removeGraphRelationship(projectId, badgeId, SkillDef.ContainerType.Badge,
                 projectId, skillid, SkillRelDef.RelationshipType.BadgeRequirement)
     }
