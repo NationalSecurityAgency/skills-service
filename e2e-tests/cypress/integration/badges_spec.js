@@ -437,4 +437,45 @@ describe('Badges Tests', () => {
         cy.get('[data-cy=badgeStatus]').contains('Status: Live').should('exist');
     });
 
+    it('removing last skill from enabled badge does not disable badge', () => {
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            name: "Subject 1"
+        });
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1', {
+            projectId: 'proj1',
+            subjectId: "subj1",
+            skillId: "skill1",
+            name: "Skill 1",
+            pointIncrement: '50',
+            numPerformToCompletion: '5'
+        });
+
+        cy.visit('/projects/proj1/badges');
+        cy.clickButton('Badge');
+        cy.contains('New Badge');
+        cy.get('#badgeName').type('Test Badge');
+        cy.clickSave();
+        cy.wait('@loadBadges');
+        cy.get('[data-cy=manageBadge]').click();
+        cy.get('#skills-selector').click();
+        cy.get('#skills-selector input[type=text]').type('{enter}');
+        cy.contains('.router-link-active', 'Badges').click();
+        cy.contains('Test Badge').should('exist');
+        cy.get('[data-cy=badgeStatus]').contains('Status: Disabled').should('exist');
+        cy.get('[data-cy=goLive]').click();
+        cy.contains('Please Confirm!').should('exist');
+        cy.contains('Yes, Go Live!').click();
+        cy.wait('@loadBadges');
+        cy.contains('Test Badge');
+        cy.get('[data-cy=badgeStatus]').contains('Status: Live').should('exist');
+        cy.get('[data-cy=manageBadge]').click();
+        cy.get('[data-cy=deleteSkill]').click();
+        cy.contains('YES, Delete It!').click();
+        cy.contains('.router-link-active', 'Badges').click();
+        cy.contains('Test Badge').should('exist');
+        cy.get('[data-cy=badgeStatus]').contains('Status: Live').should('exist');
+    });
+
 });
