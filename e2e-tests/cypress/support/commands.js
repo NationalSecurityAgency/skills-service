@@ -40,6 +40,7 @@
 // Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
 
 import { addMatchImageSnapshotCommand } from 'cypress-image-snapshot/command';
+import "cypress-audit/commands";
 import './cliend-display-commands';
 import 'cypress-file-upload';
 import LookupUtil from "./LookupUtil.js";
@@ -103,6 +104,33 @@ Cypress.Commands.add("getResetLink", () => {
         }
     });
 });
+
+Cypress.Commands.add('customLighthouse', () => {
+    const lighthouseOptions = {
+        extends: 'lighthouse:default',
+        settings: {
+            emulatedFormFactor:'desktop',
+            maxWaitForFcp: 15 * 1000,
+            maxWaitForLoad: 35 * 1000,
+        },
+    }
+    cy.lighthouse({
+        "performance": 0,
+        "accessibility": 90,
+        "best-practices": 85,
+        "seo": 0,
+        "pwa": 0
+    }, {}, lighthouseOptions);
+})
+
+Cypress.Commands.add('customPa11y', () => {
+    cy.pa11y({
+        standard: 'Section508',
+        threshold: '2',
+        hideElements: '#SvgjsSvg1001'
+    });
+})
+
 
 Cypress.Commands.add("logout", () => {
     cy.request('POST', '/logout');

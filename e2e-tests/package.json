@@ -73,8 +73,7 @@
     "moment": "2.29.1",
     "moment-timezone": "0.5.31",
     "wait-on": "5.2.0",
-    "axe-core": "4.0.2",
-    "cypress-axe": "0.10.0"
+    "cypress-audit": "^0.2.3"
   },
   "dependencies": {}
 }

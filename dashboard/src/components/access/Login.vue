@@ -21,7 +21,7 @@ limitations under the License.
         <logo1 />
       </div>
       <ValidationObserver ref="form" slim v-slot="{invalid, handleSubmit}">
-        <form @submit.prevent="handleSubmit(login)" aria-labelledby="loginTitle">
+        <form @submit.prevent="handleSubmit(login)">
           <transition name="fade" mode="out-in">
             <b-alert :aria-live="loginFailed ? 'assertive' : 'off'" v-if="loginFailed"
                      variant="danger" @dismissed="loginFailed=false" show dismissible>Invalid Username

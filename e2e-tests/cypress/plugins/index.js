@@ -26,6 +26,8 @@
 // This function is called when a project is opened or re-opened (e.g. due to
 // the project's config changing)
 
+const { lighthouse, pa11y, prepareAudit } = require("cypress-audit");
+
 const {
     addMatchImageSnapshotPlugin,
 } = require('cypress-image-snapshot/plugin');
@@ -35,7 +37,16 @@ module.exports = (on, config) => {
   // `config` is the resolved Cypress config
     addMatchImageSnapshotPlugin(on, config);
 
-    on('task', {
+    on("before:browser:launch", (browser = {}, launchOptions) => {
+        prepareAudit(launchOptions);
+    });
+
+    on("task", {
+        lighthouse: lighthouse(),
+        pa11y: pa11y(),
+    });
+
+    /*on('task', {
         log(message) {
             console.log(message)
 
@@ -46,5 +57,5 @@ module.exports = (on, config) => {
 
             return null
         }
-    })
+    })*/
 };

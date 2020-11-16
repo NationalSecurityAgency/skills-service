@@ -11,7 +11,7 @@
     "licenseHeaderAdd": "license-check-and-add add -f ../license-add/license-add-config.json",
     "licenseCheck": "npm run licenseHeaderCheck && npm run licenseDepCheck",
     "build": "npm run licenseCheck && npm run test:unit && vue-cli-service build",
-    "deploy": "npm run build && rm -rf ../skills-service/src/main/resources/public/static/js && cp -rT dist ../skills-service/src/main/resources/public/ && cp -rT dist ../skills-service/target/classes/public/",
+    "deploy": "npm run build && rm -rf ../service/src/main/resources/public/static/js && cp -rT dist ../service/src/main/resources/public/ && cp -rT dist ../service/target/classes/public/",
     "lint": "vue-cli-service lint",
     "test:e2e": "vue-cli-service test:e2e",
     "test:unit": "vue-cli-service test:unit"

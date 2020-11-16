@@ -33,7 +33,7 @@ limitations under the License.
               <div v-if="smallScreenMode" class="pr-2">
                 <b-button v-b-toggle.menu-collapse-control variant="outline-secondary" size="sm" class="mb-1"
                           data-cy="navSmallScreenExpandMenu">
-                  <i class="fas fa-bars" aria-hidden="true"/>
+                  <i class="fas fa-bars" aria-hidden="true"/><span class="sr-only">navigation menu toggle</span>
                 </b-button>
               </div>
             </b-col>
@@ -175,6 +175,17 @@ limitations under the License.
 
   .nav-title {
     color: #3f5971;
+  }
+
+  .sr-only {
+    border: 0;
+    clip: rect(0, 0, 0, 0);
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    width: 1px;
   }
 
   .skills-menu-content {
