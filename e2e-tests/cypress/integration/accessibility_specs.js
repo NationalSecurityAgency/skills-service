@@ -11,7 +11,7 @@ describe('Accessibility Tests', () => {
     cy.customPa11y();
   });
 
-  it.only('project', () => {
+  it('project', () => {
     cy.request('POST', '/app/projects/MyNewtestProject', {
       projectId: 'MyNewtestProject',
       name: "My New test Project"
