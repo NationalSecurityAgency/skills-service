@@ -124,10 +124,13 @@ Cypress.Commands.add('customLighthouse', () => {
 })
 
 Cypress.Commands.add('customPa11y', () => {
+    // ignore heading-order for now
+    // ignore multi-select plugin elements, there are a11y improvements pending for the library
+    // ignore visualizations for now as those come from a 3rd party library
     cy.pa11y({
         standard: 'Section508',
         threshold: '2',
-        hideElements: '#SvgjsSvg1001',
+        hideElements: '#SvgjsSvg1001, .multiselect__placeholder, .multiselect__input, .vis-network',
         ignore: [
           'heading-order'
         ]
