@@ -14,12 +14,12 @@
 
 name: Run integration tests using two way ssl
 
-#on:
-#  schedule:
-#    - cron: '0 7 * * *'
 on:
-  push:
-    paths-ignore:
+  schedule:
+    - cron: '0 7 * * *'
+#on:
+#  push:
+#    paths-ignore:
       - 'README.md'
       - '.github/workflows/build-and-test-postgres.yml'
       - '.github/workflows/build-and-test-redis.yml'
