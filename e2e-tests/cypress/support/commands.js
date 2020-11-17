@@ -127,7 +127,10 @@ Cypress.Commands.add('customPa11y', () => {
     cy.pa11y({
         standard: 'Section508',
         threshold: '2',
-        hideElements: '#SvgjsSvg1001'
+        hideElements: '#SvgjsSvg1001',
+        ignore: [
+          'heading-order'
+        ]
     });
 })
 
