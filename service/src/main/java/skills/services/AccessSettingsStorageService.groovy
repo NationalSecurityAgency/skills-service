@@ -123,6 +123,10 @@ class AccessSettingsStorageService {
     @Transactional
     UserRoleRes addRoot(String userId) {
         UserRole userRole = addUserRoleInternal(userId, null, RoleName.ROLE_SUPER_DUPER_USER)
+        User user = userRepository.findByUserId(userId)
+        if (!(user?.roles?.find {it.projectId == null && it.roleName == RoleName.ROLE_SUPERVISOR})) {
+            addUserRoleInternal(userId, null, RoleName.ROLE_SUPERVISOR)
+        }
         inceptionProjectService.createInceptionAndAssignUser(userId)
         return convert(userRole)
     }
@@ -131,6 +135,11 @@ class AccessSettingsStorageService {
     void deleteRoot(String userId) {
         userId = userId?.toLowerCase()
         deleteUserRoleInternal(userId, null, RoleName.ROLE_SUPER_DUPER_USER)
+
+        User user = userRepository.findByUserId(userId)
+        if (user?.roles?.find {it.projectId == null && it.roleName == RoleName.ROLE_SUPERVISOR}) {
+            deleteUserRoleInternal(userId, null, RoleName.ROLE_SUPERVISOR)
+        }
         inceptionProjectService.removeUser(userId)
     }
 
@@ -238,8 +247,13 @@ class AccessSettingsStorageService {
                 userId: userId,
                 roleName: RoleName.ROLE_SUPER_DUPER_USER
         )
+        UserRole supervisorRole = new UserRole(
+                userId: userId,
+                roleName: RoleName.ROLE_SUPERVISOR
+        )
 
         user.roles.add(role)
+        user.roles.add(supervisorRole)
         userRepository.save(user)
         return convert(role)
     }
