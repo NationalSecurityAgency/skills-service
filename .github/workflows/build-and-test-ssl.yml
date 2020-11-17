@@ -14,16 +14,16 @@
 
 name: Run integration tests using two way ssl
 
-on:
-  schedule:
-    - cron: '0 7 * * *'
 #on:
-#  push:
-#    paths-ignore:
-#      - 'README.md'
-#      - '.github/workflows/build-and-test-postgres.yml'
-#      - '.github/workflows/build-and-test-redis.yml'
-#      - '.gitlab-ci.yml'
+#  schedule:
+#    - cron: '0 7 * * *'
+on:
+  push:
+    paths-ignore:
+      - 'README.md'
+      - '.github/workflows/build-and-test-postgres.yml'
+      - '.github/workflows/build-and-test-redis.yml'
+      - '.gitlab-ci.yml'
 #  pull_request:
 #    paths-ignore:
 #      - 'README.md'
@@ -42,11 +42,6 @@ jobs:
       - uses: actions/setup-node@v2-beta
         with:
           node-version: '14'
-
-      - name: Set up Maven
-        uses: stCarolas/setup-maven@v3
-        with:
-          maven-version: 3.6.3
 
       - uses: actions/setup-java@v1
         with:
@@ -105,11 +100,6 @@ jobs:
       - uses: actions/setup-node@v2-beta
         with:
           node-version: '14'
-
-      - name: Set up Maven
-        uses: stCarolas/setup-maven@v3
-        with:
-          maven-version: 3.6.3
 
       - uses: actions/setup-java@v1
         with:
