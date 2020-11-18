@@ -52,7 +52,7 @@ class MetricsPagingParamsHelper {
         // client's page starts 1, dbs at 0
         int currentPage = Integer.valueOf(strPage) - 1
         if (currentPage < 0) {
-            throw new SkillException("Metrics[${chartId}]: current page must not be less than 0. Provided [${currentPage}]", projectId)
+            throw new SkillException("Metrics[${chartId}]: current page must be >= 1. Provided [${strPage}]", projectId)
         }
 
         return currentPage

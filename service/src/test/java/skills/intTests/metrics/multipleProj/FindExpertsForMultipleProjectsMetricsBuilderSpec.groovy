@@ -141,7 +141,7 @@ class FindExpertsForMultipleProjectsMetricsBuilderSpec extends DefaultIntSpec {
         then:
         SkillsClientException e = thrown()
         def body = new JsonSlurper().parseText(e.resBody)
-        body.explanation == "Metrics[${metricsId}]: current page must not be less than 0. Provided [-2]"
+        body.explanation == "Metrics[${metricsId}]: current page must be >= 1. Provided [-1]"
     }
 
     def "page size should not be negative"() {

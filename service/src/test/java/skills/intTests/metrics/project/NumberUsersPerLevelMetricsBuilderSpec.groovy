@@ -15,12 +15,11 @@
  */
 package skills.intTests.metrics.project
 
-import com.github.tomakehurst.wiremock.common.Json
+
 import groovy.json.JsonOutput
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
 import skills.metrics.builders.MetricsParams
-import spock.lang.IgnoreRest
 
 class NumberUsersPerLevelMetricsBuilderSpec extends DefaultIntSpec {
 
@@ -278,11 +277,11 @@ class NumberUsersPerLevelMetricsBuilderSpec extends DefaultIntSpec {
     private void achieveLevel(List<Map> skills, String user, int level, String type = "Overall") {
         boolean found = false
         int skillIndex = 0
-        do {
+        while (!found) {
             def res = skillsService.addSkill([projectId: skills[skillIndex].projectId, skillId: skills[skillIndex].skillId], user)
             println "${user} for [${level}] ${res}"
             found = res.body.completed.findAll({ it.type == type })?.find { it.level == level }
             skillIndex++
-        } while (!found)
+        }
     }
 }

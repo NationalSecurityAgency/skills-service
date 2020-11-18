@@ -99,15 +99,18 @@ class UserAchievementsMetricsBuilder implements ProjectMetricsBuilder {
     }
 
     private PageRequest getPageRequest(String projectId, String chartId, Map<String, String> props) {
-        if (!supportedSortBy.contains(props[MetricsPagingParamsHelper.PROP_SORT_BY])) {
-            throw new SkillException("Metrics[${chartId}]: Invalid value [${props[MetricsPagingParamsHelper.PROP_SORT_BY]}] for [${MetricsPagingParamsHelper.PROP_SORT_BY}] property. Suppored values are ${supportedSortBy}", projectId)
-        }
+
 
         MetricsPagingParamsHelper metricsPagingParamsHelper = new MetricsPagingParamsHelper(projectId, chartId, props)
         int currentPage = metricsPagingParamsHelper.currentPage
         int pageSize = metricsPagingParamsHelper.pageSize
         Boolean sortDesc = metricsPagingParamsHelper.sortDesc
         String sortBy = metricsPagingParamsHelper.sortBy
+
+        if (!supportedSortBy.contains(sortBy)) {
+            throw new SkillException("Metrics[${chartId}]: Invalid value [${props[MetricsPagingParamsHelper.PROP_SORT_BY]}] for [${MetricsPagingParamsHelper.PROP_SORT_BY}] property. Suppored values are ${supportedSortBy}", projectId)
+        }
+
         if (sortBy == "userName") {
             // looks like there is a bug in the Spring Data's
             //  org.springframework.data.jpa.repository.query.QueryUtils.java

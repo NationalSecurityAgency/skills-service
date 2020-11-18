@@ -42,4 +42,13 @@ class SkillsClientException extends RuntimeException {
         this.url = url
         this.httpStatus = httpStatus
     }
+
+    @Override
+    String toString() {
+        String res = super.toString()
+        if (resBody){
+            res += " resBody=[${resBody}]"
+        }
+        return res
+    }
 }
