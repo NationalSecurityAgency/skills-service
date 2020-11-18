@@ -19,7 +19,7 @@ limitations under the License.
       <div slot="edit" slot-scope="props">
         <div class="field text-right">
           <span class="field">
-              <button v-on:click="onDeleteEvent(props.row)" class="btn btn-sm btn-outline-primary">
+              <button v-on:click="onDeleteEvent(props.row)" class="btn btn-sm btn-outline-primary" data-cy="deleteSkill">
                       <i class="fas fa-trash"/>
               </button>
                 <router-link v-if="props.row.subjectId" :id="props.row.skillId" :to="{ name:'SkillOverview',

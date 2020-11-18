@@ -45,6 +45,7 @@ limitations under the License.
                        :current-page="result.paging.currentPage"
                        :sort-by.sync="sortBy"
                        :sort-desc.sync="sortDesc"
+                       :no-sort-reset="true"
                        data-cy="pinProjectsSearchResults">
 
                 <template #cell(name)="data">

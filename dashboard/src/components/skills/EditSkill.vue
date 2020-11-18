@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <ValidationObserver ref="observer" v-slot="{invalid}" slim>
+  <ValidationObserver ref="observer" v-slot="{invalid, handleSubmit}" slim>
     <b-modal :id="skillInternal.skillId" size="xl" :title="title" v-model="show" :no-close-on-backdrop="true"
              header-bg-variant="info" header-text-variant="light" no-fade>
         <b-container fluid>
@@ -26,15 +26,17 @@ limitations under the License.
                 <ValidationProvider rules="required|minNameLength|maxSkillNameLength|uniqueName" v-slot="{errors}" name="Skill Name">
                   <input type="text" class="form-control" id="skillName" @input="updateSkillId"
                          v-model="skillInternal.name" v-focus
-                          aria-required="true"
-                          data-cy="skillName">
+                         aria-required="true"
+                         v-on:keyup.enter="handleSubmit(saveSkill)"
+                         data-cy="skillName">
                   <small class="form-text text-danger" data-cy="skillNameError">{{ errors[0] }}</small>
                 </ValidationProvider>
               </div>
             </div>
             <div class="col-12 col-lg">
               <id-input type="text" label="Skill ID" additional-validation-rules="uniqueId"
-                        v-model="skillInternal.skillId" @can-edit="canEditSkillId=$event"/>
+                        v-model="skillInternal.skillId" @can-edit="canEditSkillId=$event"
+                        v-on:keyup.enter.native="handleSubmit(saveSkill)"/>
             </div>
             <div class="col-12 col-lg-2 mt-2 mt-lg-0">
               <div class="form-group">
@@ -45,7 +47,7 @@ limitations under the License.
                 <ValidationProvider rules="optionalNumeric|min_value:0|maxSkillVersion|maxVersion" v-slot="{errors}" name="Version">
                   <input class="form-control" type="text"
                          v-model="skillInternal.version" :disabled="isEdit"
-                        data-cy="skillVersion"/>
+                        data-cy="skillVersion" v-on:keyup.enter="handleSubmit(saveSkill)"/>
                   <small class="form-text text-danger" data-cy="skillVersionError">{{ errors[0] }}</small>
                 </ValidationProvider>
               </div>
@@ -61,7 +63,7 @@ limitations under the License.
                 <ValidationProvider rules="optionalNumeric|required|min_value:1|maxPointIncrement" v-slot="{errors}" name="Point Increment">
                   <input class="form-control" type="text"  v-model="skillInternal.pointIncrement"
                          aria-required="true"
-                          data-cy="skillPointIncrement"/>
+                         data-cy="skillPointIncrement" v-on:keyup.enter="handleSubmit(saveSkill)"/>
                   <small class="form-text text-danger" data-cy="skillPointIncrementError">{{ errors[0] }}</small>
                 </ValidationProvider>
               </div>
@@ -71,7 +73,7 @@ limitations under the License.
                 <label>* Occurrences to Completion</label>
                 <ValidationProvider vid="totalOccurrences" rules="optionalNumeric|required|min_value:1|maxNumPerformToCompletion|moreThanMaxWindowOccurrences:@windowMaxOccurrence" v-slot="{errors}" name="Occurrences to Completion" tag="div">
                   <input class="form-control" type="text" v-model="skillInternal.numPerformToCompletion"
-                         data-cy="numPerformToCompletion" aria-required="true"/>
+                         data-cy="numPerformToCompletion" aria-required="true" v-on:keyup.enter="handleSubmit(saveSkill)"/>
                   <small class="form-text text-danger" data-cy="skillOccurrencesError">{{ errors[0] }}</small>
                 </ValidationProvider>
               </div>
@@ -107,7 +109,8 @@ limitations under the License.
                       <div class="input-group">
                         <input class="form-control d-inline" type="text" v-model="skillInternal.pointIncrementIntervalHrs"
                                value="8" :disabled="!skillInternal.timeWindowEnabled"
-                               ref="timeWindowHours" data-cy="timeWindowHours"/>
+                               ref="timeWindowHours" data-cy="timeWindowHours"
+                               v-on:keyup.enter="handleSubmit(saveSkill)"/>
                         <div class="input-group-append">
                           <span class="input-group-text" id="hours-append">Hours</span>
                         </div>
@@ -119,7 +122,8 @@ limitations under the License.
                     <ValidationProvider rules="optionalNumeric|required|min_value:0|max_value:59|minutesMaxTimeWindow:@timeWindowHours|cantBe0IfHours0" vid="timeWindowMinutes" v-slot="{errors}" name="Minutes">
                       <div class="input-group">
                         <input class="form-control d-inline"  type="text" v-model="skillInternal.pointIncrementIntervalMins"
-                               value="0" :disabled="!skillInternal.timeWindowEnabled" ref="timeWindowMinutes" data-cy="timeWindowMinutes"/>
+                               value="0" :disabled="!skillInternal.timeWindowEnabled" ref="timeWindowMinutes" data-cy="timeWindowMinutes"
+                               v-on:keyup.enter="handleSubmit(saveSkill)"/>
                         <div class="input-group-append">
                           <span class="input-group-text" id="minutes-append">Minutes</span>
                         </div>
@@ -140,7 +144,8 @@ limitations under the License.
                   </label>
 
                     <input class="form-control" type="text" v-model="skillInternal.numPointIncrementMaxOccurrences"
-                           :disabled="!skillInternal.timeWindowEnabled" data-cy="maxOccurrences"/>
+                           :disabled="!skillInternal.timeWindowEnabled" data-cy="maxOccurrences"
+                           v-on:keyup.enter="handleSubmit(saveSkill)" />
                     <small class="form-text text-danger" data-cy="skillMaxOccurrencesError">{{ errors[0] }}</small>
                 </div>
               </ValidationProvider>
@@ -165,7 +170,8 @@ limitations under the License.
               <inline-help
                 msg="If project level 'Root Help Url' is specified then this path will be relative to 'Root Help Url'"/>
             </label>
-            <input class="form-control" type="text" v-model="skillInternal.helpUrl"/>
+            <input class="form-control" type="text" v-model="skillInternal.helpUrl"
+                   v-on:keyup.enter="handleSubmit(saveSkill)"/>
           </div>
 
           <p v-if="invalid && overallErrMsg" class="text-center text-danger">***{{ overallErrMsg }}***</p>
@@ -173,7 +179,7 @@ limitations under the License.
         </b-container>
 
       <div slot="modal-footer" class="w-100">
-        <b-button variant="success" size="sm" class="float-right" @click="saveSkill"
+        <b-button variant="success" size="sm" class="float-right" @click="handleSubmit(saveSkill)"
                   :disabled="invalid || isLoading"
                   data-cy="saveSkillButton">
           Save

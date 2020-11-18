@@ -28,11 +28,10 @@ limitations under the License.
               </div>
               <div class="text-truncate text-secondary preview-card-subTitle">{{ options.subTitle }}</div>
             </div>
+            <div class="col-auto text-center text-sm-right p-0">
+              <slot name="header-top-right"></slot>
+            </div>
           </div>
-        </div>
-
-        <div class="col-auto text-center text-sm-right">
-          <slot name="header-top-right"></slot>
         </div>
       </div>
 

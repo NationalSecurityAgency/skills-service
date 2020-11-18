@@ -435,4 +435,105 @@ describe('Global Badges Tests', () => {
         cy.get('[data-cy=goLive]').should('not.exist');
     });
 
+    it('Removing all skills should not cause published Global Badge to become disabled', () => {
+        cy.route('GET', `/supervisor/badges`).as('getGlobalBadges');
+        cy.route('PUT', `/supervisor/badges/ABadgeBadge`).as('postGlobalBadge');
+        cy.route('GET', `/supervisor/badges/id/ABadgeBadge/exists`).as('idExists');
+        cy.route('POST', '/supervisor/badges/name/exists').as('nameExists');
+        //proj/subj/skill1
+        cy.request('POST', '/app/projects/proj1', {
+            projectId: 'proj1',
+            name: "proj1"
+        });
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            name: "Subject 1"
+        });
+        cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill1`, {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            skillId: 'skill1',
+            name: `This is 1`,
+            type: 'Skill',
+            pointIncrement: 100,
+            numPerformToCompletion: 5,
+            pointIncrementInterval: 0,
+            numMaxOccurrencesIncrementInterval: -1,
+            version: 0,
+        });
+        //proj/subj/skill2
+        cy.request('POST', '/app/projects/proj2', {
+            projectId: 'proj2',
+            name: "proj2"
+        });
+        cy.request('POST', '/admin/projects/proj2/subjects/subj1', {
+            projectId: 'proj2',
+            subjectId: 'subj1',
+            name: "Subject 1"
+        });
+        cy.request('POST', `/admin/projects/proj2/subjects/subj1/skills/skill1`, {
+            projectId: 'proj2',
+            subjectId: 'subj1',
+            skillId: 'skill1',
+            name: `This is 1`,
+            type: 'Skill',
+            pointIncrement: 100,
+            numPerformToCompletion: 5,
+            pointIncrementInterval: 0,
+            numMaxOccurrencesIncrementInterval: -1,
+            version: 0,
+        });
+
+        cy.visit('/');
+
+        cy.clickNav('Badges');
+        cy.wait('@getGlobalBadges');
+
+        cy.clickButton('Badge');
+
+        cy.get('#badgeName').type('A Badge');
+        cy.wait('@nameExists');
+        cy.clickSave();
+        cy.wait('@idExists');
+        cy.wait('@postGlobalBadge');
+
+        cy.contains('A Badge').should('exist');
+        cy.contains('Manage').click();
+        cy.get('.multiselect__tags').click();
+        cy.get('.multiselect__tags input').type('{enter}');
+        cy.get('div.table-responsive').should('be.visible');
+        cy.clickNav('Levels');
+
+        cy.get('.multiselect__tags').first().click();
+        cy.get('.multiselect__tags input').first().type('proj2{enter}');
+
+        cy.get('.multiselect__tags').last().click();
+        cy.get('.multiselect__tags input').last().type('5{enter}');
+
+        cy.contains('Add').click();
+        cy.get('#simple-levels-table').should('be.visible');
+
+        cy.contains('.router-link-active', 'Badges').click();
+        cy.wait('@getGlobalBadges');
+
+        cy.contains('A Badge').should('exist');
+
+        cy.get('[data-cy=badgeStatus]').contains('Status: Disabled').should('exist');
+        cy.get('[data-cy=goLive]').click();
+        cy.contains('Please Confirm!').should('exist');
+        cy.contains('Yes, Go Live!').click();
+        cy.wait('@getGlobalBadges');
+        cy.contains('A Badge').should('exist');
+        cy.get('[data-cy=badgeStatus]').contains('Status: Live').should('exist');
+        cy.get('[data-cy=goLive]').should('not.exist');
+
+        cy.contains('Manage').click();
+        cy.get('[data-cy=deleteSkill]').click();
+        cy.contains('YES, Delete It!').click();
+        cy.contains('.router-link-active', 'Badges').click();
+        cy.get('[data-cy=badgeStatus]').contains('Status: Live').should('exist');
+        cy.get('[data-cy=goLive]').should('not.exist');
+    });
+
 });

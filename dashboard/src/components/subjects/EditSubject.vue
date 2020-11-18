@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <ValidationObserver ref="observer" v-slot="{invalid}" slim>
+  <ValidationObserver ref="observer" v-slot="{invalid, handleSubmit}" slim>
     <b-modal :id="subjectInternal.subjectId" size="xl" :title="title" v-model="show" :no-close-on-backdrop="true"
              header-bg-variant="info" header-text-variant="light" no-fade>
         <b-container fluid>
@@ -24,10 +24,11 @@ limitations under the License.
                              class="mr-3"></icon-picker>
                 <div class="media-body">
                   <div class="form-group">
-                    <label for="subjName">* Subject Name</label>
+                    <label for="subjName">Subject Name</label>
                     <ValidationProvider rules="required|minNameLength|maxSubjectNameLength|uniqueName" v-slot="{ errors }" name="Subject Name">
                       <input type="text" class="form-control" id="subjName" @input="updateSubjectId"
                              v-model="subjectInternal.name" v-on:input="updateSubjectId"
+                             v-on:keyup.enter="handleSubmit(updateSubject)"
                              v-focus aria-required="true">
                       <small class="form-text text-danger">{{ errors[0] }}</small>
                     </ValidationProvider>
@@ -35,8 +36,8 @@ limitations under the License.
                 </div>
               </div>
 
-              <id-input type="text" label="* Subject ID" v-model="subjectInternal.subjectId" @can-edit="canAutoGenerateId=!$event"
-                        additional-validation-rules="uniqueId"/>
+              <id-input type="text" label="Subject ID" v-model="subjectInternal.subjectId" @can-edit="canAutoGenerateId=!$event"
+                        v-on:keyup.enter.native="handleSubmit(updateSubject)" additional-validation-rules="uniqueId"/>
 
               <div class="mt-2">
                 <label>Description</label>
@@ -51,7 +52,7 @@ limitations under the License.
                   <inline-help
                     msg="If project level 'Root Help Url' is specified then this path will be relative to 'Root Help Url'"/>
                 </label>
-                <input class="form-control" type="text" v-model="subjectInternal.helpUrl" />
+                <input class="form-control" type="text" v-model="subjectInternal.helpUrl" v-on:keyup.enter="handleSubmit(updateSubject)" />
               </div>
 
               <p v-if="invalid && overallErrMsg" class="text-center text-danger">***{{ overallErrMsg }}***</p>
@@ -69,7 +70,7 @@ limitations under the License.
           <b-button variant="success"
                     size="sm"
                     class="float-right"
-                    @click="updateSubject"
+                    @click="handleSubmit(updateSubject)"
                     :disabled="invalid"
                     data-cy="saveSubjectButton">
             Save

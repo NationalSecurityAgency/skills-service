@@ -117,7 +117,7 @@ describe('Subjects Tests', () => {
         cy.get('[data-cy=levelName]').type('{selectall}Coral Belt');
         cy.get('[data-cy=levelNameError]').should('not.be.visible');
         cy.get('[data-cy=saveLevelButton]').should('not.be.disabled');
-        cy.get('[data-cy=saveLevelButton]').click();
+        cy.get('[data-cy=levelName]').type('{enter}');
 
         // verify that the new name is present
         cy.get('@row6NameCol').contains('Coral Belt')
@@ -161,6 +161,28 @@ describe('Subjects Tests', () => {
         cy.getIdField().should('have.value', expectedId);
 
         cy.clickSave();
+        cy.wait('@postNewSubject');
+
+        cy.contains('ID: Lotsofspecial')
+    });
+
+    it('create subject using enter key', () => {
+        const expectedId = 'LotsofspecialPcharsSubject';
+        const providedName = "!L@o#t$s of %s^p&e*c(i)/?#a_l++_|}{P c'ha'rs";
+        cy.server();
+        cy.route('POST', `/admin/projects/proj1/subjects/${expectedId}`).as('postNewSubject');
+        cy.route('POST', '/admin/projects/proj1/subjectNameExists').as('nameExists');
+        cy.route('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
+
+        cy.visit('/projects/proj1');
+        cy.wait('@loadSubjects');
+        cy.clickButton('Subject');
+
+        cy.get('#subjName').type(providedName);
+        cy.wait('@nameExists');
+        cy.getIdField().should('have.value', expectedId);
+
+        cy.get('#subjName').type('{enter}');
         cy.wait('@postNewSubject');
 
         cy.contains('ID: Lotsofspecial')

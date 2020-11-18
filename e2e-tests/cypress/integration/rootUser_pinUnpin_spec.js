@@ -298,7 +298,7 @@ describe('Root Pin and Unpin Tests', () => {
 
   });
 
-  it('Sort and then un-sort projects', () => {
+  it.only('Sort and then un-sort projects', () => {
     cy.request('POST', '/app/projects/proj1', {
       projectId: 'proj1',
       name: "000"
@@ -367,6 +367,15 @@ describe('Root Pin and Unpin Tests', () => {
       // finally click a non-sortable column and sort order is reset and 'Name' column should still be visible
       cy.get(headerSelector).contains('Subjects').click()
       cy.get(headerSelector).contains('Name').should('be.visible')
+
+      // verify the order did not change
+      for (let i = 0; i < 5; i += 1) {
+        cy.get('@cyRows')
+          .eq(i)
+          .find('td')
+          .as('row-i');
+        cy.get('@row-i').contains(rowNameDesc[i])
+      }
 
       cy.get('[data-cy=modalDoneButton]').click();
 

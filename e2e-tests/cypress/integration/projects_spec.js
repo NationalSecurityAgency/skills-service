@@ -42,6 +42,27 @@ describe('Projects Tests', () => {
     cy.contains('ID: MyNewtestProject')
   });
 
+
+  it('Create new project using enter key', function () {
+    cy.route('GET', '/app/projects').as('loadProjects');
+    cy.route('GET', '/app/userInfo').as('loadUserInfo');
+
+    cy.route('POST', '/app/projects/MyNewtestProject').as('postNewProject');
+
+    cy.visit('/');
+    cy.wait('@loadUserInfo');
+    cy.wait('@loadProjects');
+
+    cy.clickButton('Project');
+    cy.get('[data-cy="projectName"]').type("My New test Project")
+    cy.get('[data-cy="projectName"]').type('{enter}')
+
+    cy.wait('@postNewProject');
+
+    cy.contains('My New test Project')
+    cy.contains('ID: MyNewtestProject')
+  });
+
   it('Close new project dialog', () => {
     cy.route('GET', '/app/projects').as('loadProjects');
     cy.route('GET', '/app/userInfo').as('loadUserInfo');
