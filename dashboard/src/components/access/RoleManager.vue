@@ -15,7 +15,7 @@ limitations under the License.
 */
 <template>
   <div class="role-manager">
-    <div id="add-user-div" class="row mt-2 mb-5">
+    <div :id="id" class="row mt-2 mb-5">
       <div class="col-12 col-md-10 col-xlg-11 pb-2 pb-md-0">
         <existing-user-input :suggest="true" :validate="true" :user-type="userType" :excluded-suggestions="userIds"
                              v-model="selectedUser"/>
@@ -89,6 +89,10 @@ limitations under the License.
       userType: {
         type: String,
         default: 'DASHBOARD',
+      },
+      id: {
+        type: String,
+        default: 'add-user-div',
       },
     },
     data() {

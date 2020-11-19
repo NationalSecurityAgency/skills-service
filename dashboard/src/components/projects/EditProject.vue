@@ -39,7 +39,7 @@ limitations under the License.
                         id="projectIdInput"
                       :aria-invalid="errors && errors.length > 0"
                       aria-errormessage="projectNameError"
-                      aria-describedby="projectNameERror"/>
+                      aria-describedby="projectNameError"/>
                 <small class="form-text text-danger" data-cy="projectNameError" id="projectNameError">{{ errors[0] }}</small>
               </ValidationProvider>
             </div>

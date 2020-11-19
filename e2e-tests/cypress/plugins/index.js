@@ -44,18 +44,15 @@ module.exports = (on, config) => {
     on("task", {
         lighthouse: lighthouse(),
         pa11y: pa11y(),
-    });
-
-    /*on('task', {
         log(message) {
             console.log(message)
 
-            return null
+            return null;
         },
         table(message) {
             console.table(message)
 
-            return null
+            return null;
         }
-    })*/
+    });
 };

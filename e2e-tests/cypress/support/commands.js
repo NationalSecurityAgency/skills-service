@@ -45,6 +45,31 @@ import './cliend-display-commands';
 import 'cypress-file-upload';
 import LookupUtil from "./LookupUtil.js";
 
+function terminalLog(violations) {
+    violations = violations || { length: 0 };
+    const { length } = violations;
+
+    cy.task(
+      'log',
+      `${length} accessibility violation${
+        length === 1 ? '' : 's'
+      } ${length === 1 ? 'was' : 'were'} detected`
+    )
+    if (length > 0 ) {
+        // pluck specific keys to keep the table readable
+        const violationData = violations.map(
+          ({ id, impact, description, nodes }) => ({
+              id,
+              impact,
+              description,
+              nodes: nodes.length
+          })
+        )
+
+        cy.task('table', violationData)
+    }
+}
+
 addMatchImageSnapshotCommand();
 
 Cypress.Commands.add("register", (user, pass, grantRoot) => {
@@ -123,19 +148,51 @@ Cypress.Commands.add('customLighthouse', () => {
     }, {}, lighthouseOptions);
 })
 
-Cypress.Commands.add('customPa11y', () => {
+Cypress.Commands.add('customPa11y', (optsObj) => {
     // ignore heading-order for now
     // ignore multi-select plugin elements, there are a11y improvements pending for the library
     // ignore visualizations for now as those come from a 3rd party library
-    cy.pa11y({
+    // ignore datepicker a11y issues until we can identify a different library
+    // ignore vue-pagination, doesn't label nav element which causes non-unique landmark regions
+
+    let opts = {
         standard: 'Section508',
         threshold: '2',
-        hideElements: '#SvgjsSvg1001, .multiselect__placeholder, .multiselect__input, .vis-network',
+        hideElements: '#SvgjsSvg1001, .multiselect__placeholder, .multiselect__input, .vis-network, .vdp-datepicker input, .VuePagination',
         ignore: [
-          'heading-order'
+            'heading-order'
         ]
-    });
+    };
+
+    if (optsObj) {
+        opts = {...opts, ...optsObj};
+    }
+
+    cy.pa11y(opts);
 })
+
+Cypress.Commands.add('customA11y', ()=> {
+    // ignore heading-order for now
+    // ignore multi-select plugin elements, there are a11y improvements pending for the library
+    // ignore visualizations for now as those come from a 3rd party library
+    // ignore datepicker a11y issues until we can identify a different library
+    cy.checkA11y({
+        exclude:[
+            ['#SvgjsSvg1001'],
+            ['.multiselect__placeholder'],
+            ['.multiselect__input'],
+            ['.vis-network'],
+            ['.vdp-datepicker'],
+            ['.VuePagination']
+        ]}, {
+            rules:{
+                "landmark-no-duplicate-banner": {enabled:false},
+                'landmark-no-duplicate-contentinfo': {enabled:false},
+                'heading-order': {enabled:false},
+                'landmark-unique': {enabled:false}
+            }
+    }, terminalLog);
+});
 
 
 Cypress.Commands.add("logout", () => {

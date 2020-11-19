@@ -67,7 +67,7 @@ limitations under the License.
                   <i class="text-warning fas fa-trash" aria-hidden="true"/>
                 </b-button>
               </b-button-group>
-              <router-link :to="{ name:'SkillOverview',
+              <router-link data-cy="manageSkillBtn" :to="{ name:'SkillOverview',
                               params: { projectId: props.row.projectId, subjectId: props.row.subjectId, skillId: props.row.skillId }}"
                            class="btn btn-outline-primary btn-sm">
                 <span class="d-none d-sm-inline">Manage </span> <i class="fas fa-arrow-circle-right" aria-hidden="true"/>

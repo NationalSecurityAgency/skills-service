@@ -1,20 +1,16 @@
 var moment = require('moment-timezone');
 
 describe('Accessibility Tests', () => {
-  it('home page', () => {
-    cy.visit('/');
-    cy.customLighthouse();
-    cy.customPa11y();
 
-    cy.contains('Metrics').click();
-    cy.customLighthouse();
-    cy.customPa11y();
-  });
-
-  it('project', () => {
+  beforeEach(() => {
     cy.request('POST', '/app/projects/MyNewtestProject', {
       projectId: 'MyNewtestProject',
       name: "My New test Project"
+    });
+
+    cy.request('POST', '/app/projects/MyNewtestProject2', {
+      projectId: 'MyNewtestProject2',
+      name: "My New test Project2"
     });
 
     cy.request('POST', '/admin/projects/MyNewtestProject/subjects/subj1', {
@@ -59,6 +55,8 @@ describe('Accessibility Tests', () => {
       helpUrl: 'http://doHelpOnThisSkill.com'
     });
 
+    cy.request('POST', '/admin/projects/MyNewtestProject/badge/badge1/skills/skill2')
+
     cy.request('POST', `/admin/projects/MyNewtestProject/skills/skill2/dependency/skill1`)
 
     const m = moment('2020-09-12 11', 'YYYY-MM-DD HH');
@@ -67,44 +65,231 @@ describe('Accessibility Tests', () => {
     cy.request('POST', `/api/projects/MyNewtestProject/skills/skill1`, {userId: 'u3', timestamp: m.subtract(3, 'day').format('x')})
     cy.request('POST', `/api/projects/MyNewtestProject/skills/skill1`, {userId: 'u4', timestamp: m.subtract(2, 'day').format('x')})
     cy.request('POST', `/api/projects/MyNewtestProject/skills/skill1`, {userId: 'u5', timestamp: m.subtract(1, 'day').format('x')})
+  });
 
+  it('home page', () => {
     cy.visit('/');
+    cy.customLighthouse();
+    cy.injectAxe()
+    cy.get('[data-cy=nav-Projects]').click();
+    cy.get('[data-cy=newProjectButton]').click();
+    cy.get('[data-cy=projectName]').type('a');
+    cy.customA11y();
+  });
+
+  it('project', () => {
+    cy.visit('/');
+    cy.injectAxe()
     //view project
     cy.contains('Manage').click();
     cy.customLighthouse();
-    cy.customPa11y();
+    cy.get('[aria-label="new subject"]').click();
+    cy.get('[data-cy=subjectNameInput]').type('a')
+    cy.customA11y();
+    cy.get('[data-cy=closeSubjectButton]').click();
 
     cy.get('[data-cy=nav-Badges]').click();
     cy.customLighthouse();
-    cy.customPa11y();
+    cy.get('[aria-label="new badge"]').click();
+    cy.get('[data-cy=badgeName').type('a');
+    cy.customA11y();
+    cy.get('[data-cy=closeBadgeButton]').click();
 
     cy.get('[data-cy=nav-Dependencies]').click();
     cy.customLighthouse();
-    cy.customPa11y();
+    cy.customA11y();
 
     //levels
     cy.get('[data-cy=nav-Levels').click();
     cy.customLighthouse();
-    cy.customPa11y();
+    cy.get('[data-cy=addLevel]').click();
+    cy.get('[data-cy=levelPercent]').type('1100')
+    cy.customA11y();
+    cy.get('[data-cy=cancelLevel]').click();
 
     //users
     cy.get('[data-cy=nav-Users').click();
     cy.customLighthouse();
-    cy.customPa11y();
+    cy.customA11y();
 
     //metrics
     cy.get('[data-cy=nav-Metrics').click();
     cy.customLighthouse();
-    cy.customPa11y();
+    cy.customA11y();
 
     cy.get('[data-cy=nav-Access').click();
     cy.customLighthouse();
-    cy.customPa11y();
+    cy.customA11y();
 
     cy.get('[data-cy=nav-Settings]').click();
     cy.customLighthouse();
-    cy.customPa11y();
-
-
+    cy.customA11y();
   })
+
+  it('subject', () => {
+    cy.visit('/');
+    cy.injectAxe()
+    //view project
+    cy.contains('Manage').click();
+    //view subject
+    cy.contains('Manage').click();
+    cy.customLighthouse();
+    cy.customA11y();
+
+    //edit skill
+    cy.get('[aria-label="new skill"]').click();
+    cy.get('[data-cy=skillName]').type('1');
+    cy.customA11y();
+    cy.get('[data-cy=closeSkillButton]').click();
+
+    cy.get('[data-cy=nav-Levels]').click();
+    cy.customLighthouse();
+    cy.customA11y();
+    cy.get('[data-cy=addLevel]').click();
+    cy.get('[data-cy=levelPercent]').type('105');
+    cy.customA11y();
+    cy.get('[data-cy=cancelLevel]').click();
+    cy.get('[data-cy=editLevelButton]').eq(0).click();
+    cy.get('[data-cy=levelPercent]').type('ddddddddd');
+    cy.customA11y();
+    cy.get('[data-cy=cancelLevel]').click();
+
+    cy.get('[data-cy=nav-Users]').click();
+    cy.customLighthouse();
+    cy.customA11y();
+    cy.contains('Details').eq(0).click();
+    cy.customLighthouse();
+    // enable once a11y issues with client display are addressed, needs an H1 initially
+    // also has contrast issues
+    // cy.customA11y();
+    cy.get('[data-cy="nav-Performed Skills"]').click()
+    cy.customLighthouse();
+    cy.customA11y();
+    cy.get('[data-cy=nav-Metrics]').click();
+    cy.customLighthouse();
+    cy.customA11y();
+    /*
+    re-enable once skills-service#179 is resolved
+    cy.get('[data-cy=breadcrumb-subj1]').click();
+    cy.get('[data-cy=nav-Metrics]').click();
+    cy.customLighthouse();
+    cy.customA11y();*/
+  })
+
+  it('skills', () => {
+    cy.visit('/');
+    cy.injectAxe()
+    //view project
+    cy.contains('Manage').click();
+    //view subject
+    cy.contains('Manage').click();
+    //view skill
+    cy.get('[data-cy=manageSkillBtn]').eq(1).click();
+    cy.customLighthouse();
+    cy.customA11y();
+
+
+    cy.get('[data-cy=nav-Dependencies]').click();
+    cy.customLighthouse();
+    cy.customA11y();
+
+    cy.get('[data-cy=nav-Users]').click();
+    cy.customLighthouse();
+    cy.customA11y();
+
+    cy.get('[data-cy="nav-Add Event"]').click();
+    cy.customLighthouse();
+    cy.customA11y();
+    cy.get('.multiselect__select').click();
+    cy.get('.multiselect__element').eq(0).click();
+    cy.get('[data-cy=addSkillEventButton]').click();
+    cy.customA11y();
+
+    cy.get('[data-cy=nav-Metrics]').click();
+    cy.customLighthouse();
+    cy.customA11y();
+  })
+
+  it('badges', ()=>{
+    cy.visit('/');
+    cy.injectAxe()
+    cy.contains('Manage').click();
+    cy.get('[data-cy=nav-Badges]').click();
+
+    cy.get('[aria-label="new badge"]').click();
+    cy.get('[data-cy=badgeName]').type('a');
+    cy.customA11y();
+    cy.get('[data-cy=closeBadgeButton]').click();
+
+    cy.contains('Manage').click();
+    cy.customLighthouse();
+    cy.customA11y();
+
+    cy.get('[data-cy=nav-Users]').click();
+    cy.customLighthouse();
+    cy.customA11y();
+
+    cy.get('[data-cy=nav-Metrics]').click();
+    cy.customLighthouse();
+    cy.customA11y();
+  });
+
+  it('settings', ()=> {
+    cy.logout();
+    cy.login('root@skills.org', 'password');
+    cy.visit('/settings')
+    cy.injectAxe()
+    cy.customLighthouse();
+    cy.customA11y();
+
+    cy.get('[data-cy=nav-Security]').click();
+    cy.customLighthouse();
+    cy.customA11y();
+
+    cy.get('[data-cy=nav-Email]').click();
+    cy.customLighthouse();
+    cy.customA11y();
+
+    cy.get('[data-cy=nav-System]').click();
+    cy.customLighthouse();
+    cy.customA11y();
+  });
+
+  it.only('global badges', ()=>{
+    cy.logout();
+    cy.login('root@skills.org', 'password');
+    cy.server();
+    cy.route('POST', ' /supervisor/badges/globalbadgeBadge/projects/MyNewtestProject/level/1').as('saveGlobalBadgeLevel');
+    cy.request('PUT', `/root/users/root@skills.org/roles/ROLE_SUPERVISOR`);
+    cy.visit("/");
+    cy.injectAxe()
+    cy.get('[data-cy=nav-Badges]').click();
+    cy.customLighthouse();
+    cy.customA11y();
+
+    cy.get('[aria-label="new global badge"]').click();
+    cy.get('[data-cy=badgeName]').type('global badge');
+    cy.get('[data-cy=saveBadgeButton]').click();
+    cy.contains('Manage').click();
+    cy.customLighthouse();
+    cy.customA11y();
+
+    cy.get('.multiselect__select').click();
+    cy.get('.multiselect__element').eq(0).click();
+    cy.customA11y();
+    cy.get('[data-cy=nav-Levels]').click();
+    cy.customLighthouse();
+
+    cy.get('.multiselect__select').eq(0).click();
+    cy.get('.multiselect__element').eq(0).click();
+    cy.get('.multiselect__select').eq(1).click();
+    cy.get('.multiselect__element').eq(1).click();
+
+    cy.get('[data-cy=addGlobalBadgeLevel]').click();
+    cy.customA11y();
+
+
+  });
+
+
 });
