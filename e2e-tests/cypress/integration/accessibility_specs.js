@@ -255,7 +255,7 @@ describe('Accessibility Tests', () => {
     cy.customA11y();
   });
 
-  it.only('global badges', ()=>{
+  it('global badges', ()=>{
     cy.logout();
     cy.login('root@skills.org', 'password');
     cy.server();
