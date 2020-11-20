@@ -88,7 +88,7 @@ describe('Subjects Tests', () => {
         const rowSelector = '[data-cy=levelsTable] tbody tr'
         cy.get(rowSelector).should('have.length', 5).as('cyRows');
 
-        cy.get('[data-cy=addLevelButton]').first().click();
+        cy.get('[data-cy=addLevel]').first().click();
 
         // add a level with no name initially
         cy.get('[data-cy=levelPercent]').type('95');
