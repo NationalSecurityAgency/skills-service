@@ -465,8 +465,10 @@ class UserAchievementsMetricsBuilderSpec extends DefaultIntSpec {
         // with min level
         props.remove(MetricsParams.P_NAME_FILTER)
         props[MetricsParams.P_MIN_LEVEL] = "1"
+        props[MetricsPagingParamsHelper.PROP_PAGE_SIZE] = 6
         def user1PlusMinLevelRes = skillsService.getMetricsData(proj.projectId, metricsId, props)
 
+        props[MetricsPagingParamsHelper.PROP_PAGE_SIZE] = 5
         props.remove(MetricsParams.P_MIN_LEVEL)
         props[MetricsParams.P_FROM_DAY_FILTER] = MetricsParams.DAY_FORMAT.format(dates[2])
         props[MetricsPagingParamsHelper.PROP_PAGE_SIZE] = 25
@@ -504,10 +506,10 @@ class UserAchievementsMetricsBuilderSpec extends DefaultIntSpec {
         user1PlusNameFilterRes.items.collect { it.name }.sort() == ['Test Skill 1', 'Test Skill 1', 'Test Skill 1 Subject2']
 
         user1PlusMinLevelRes.totalNumItems == 6
-        user1PlusMinLevelRes.items.collect { it.level }.sort() == [1, 1, 1, 1, 2]
+        user1PlusMinLevelRes.items.collect { it.level }.sort() == [1, 1, 1, 1, 1, 2]
 
         user1PlusMinLevelRes.totalNumItems == 6
-        user1PlusMinLevelRes.items.collect { it.level }.sort() == [1, 1, 1, 1, 2]
+        user1PlusMinLevelRes.items.collect { it.level }.sort() == [1, 1, 1, 1, 1, 2]
 
         user1PlusFromDayRes.totalNumItems == 5
         user1PlusFromDayRes.items.collect {it.achievedOn}.unique() == [dates[2].time]
@@ -605,6 +607,171 @@ class UserAchievementsMetricsBuilderSpec extends DefaultIntSpec {
         level3ResSubj.items.collect { it.type }.unique().sort() == ['Subject']
         level4ResSubj.items.collect { it.type }.unique().sort() == ['Subject']
         level5ResSubj.items.collect { it.type }.unique().sort() == ['Subject']
+    }
+
+    def "get achievements - filtering by type"() {
+        def proj = SkillsFactory.createProject()
+        List<Map> skills = SkillsFactory.createSkills(5)
+        skills.each { it.pointIncrement = 200; it.numPerformToCompletion = 1 }
+
+        def subj = SkillsFactory.createSubject()
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        def subj1 = SkillsFactory.createSubject(1, 2)
+        List<Map> skillsSubj1 = SkillsFactory.createSkills(5, 1, 2)
+        skillsSubj1.each { it.pointIncrement = 200; it.numPerformToCompletion = 1 }
+
+        skillsService.createSubject(subj1)
+        skillsService.createSkills(skillsSubj1)
+
+        achieveLevelForUsers(skills, 2, 1, "Subject")
+        achieveLevelForUsers(skills, 1, 2, "Subject")
+        achieveLevelForUsers(skills, 3, 3, "Subject")
+        achieveLevelForUsers(skills, 2, 4, "Subject")
+        achieveLevelForUsers(skills, 1, 5, "Subject")
+        achieveLevelForUsers(skillsSubj1, 1, 1, "Subject")
+
+        Map props = [:]
+        props[MetricsPagingParamsHelper.PROP_CURRENT_PAGE] = 1
+        props[MetricsPagingParamsHelper.PROP_PAGE_SIZE] = 50
+        props[MetricsPagingParamsHelper.PROP_SORT_DESC] = false
+        props[MetricsPagingParamsHelper.PROP_SORT_BY] = "userName"
+
+
+        when:
+        props[MetricsParams.P_ACHIEVEMENT_TYPES] = allAchievementTypes
+        def allTypes = skillsService.getMetricsData(proj.projectId, metricsId, props)
+
+        props[MetricsParams.P_ACHIEVEMENT_TYPES] = "${MetricsParams.ACHIEVEMENT_TYPE_OVERALL}"
+        def justOverall = skillsService.getMetricsData(proj.projectId, metricsId, props)
+
+        props[MetricsParams.P_ACHIEVEMENT_TYPES] = "${SkillDef.ContainerType.Subject}"
+        def justSubject = skillsService.getMetricsData(proj.projectId, metricsId, props)
+
+        props[MetricsParams.P_ACHIEVEMENT_TYPES] = "${SkillDef.ContainerType.Skill}"
+        def justSkills = skillsService.getMetricsData(proj.projectId, metricsId, props)
+
+        props[MetricsParams.P_ACHIEVEMENT_TYPES] = "${SkillDef.ContainerType.Subject},${SkillDef.ContainerType.Skill}"
+        def subjectAndSkill = skillsService.getMetricsData(proj.projectId, metricsId, props)
+
+        props[MetricsParams.P_ACHIEVEMENT_TYPES] = "${MetricsParams.ACHIEVEMENT_TYPE_OVERALL},${SkillDef.ContainerType.Subject},${SkillDef.ContainerType.Skill}"
+        def overallAndSubjectAndSkill = skillsService.getMetricsData(proj.projectId, metricsId, props)
+
+        then:
+        allTypes.totalNumItems == 70
+        allTypes.items.collect { it.type }.unique().sort() == ['Overall', 'Skill', 'Subject',]
+
+        justOverall.totalNumItems == 16
+        justOverall.items.collect { it.type }.unique().sort() == ['Overall']
+
+        justSubject.totalNumItems == 27
+        justSubject.items.collect { it.type }.unique().sort() == ['Subject']
+
+        justSkills.totalNumItems == 27
+        justSkills.items.collect { it.type }.unique().sort() == ['Skill']
+
+        subjectAndSkill.totalNumItems == justSubject.totalNumItems + justSkills.totalNumItems
+        subjectAndSkill.items.collect { it.type }.unique().sort() == ['Skill', 'Subject']
+
+        overallAndSubjectAndSkill.totalNumItems == justSubject.totalNumItems + justSkills.totalNumItems + justOverall.totalNumItems
+        overallAndSubjectAndSkill.items.collect { it.type }.unique().sort() == ['Overall', 'Skill', 'Subject',]
+    }
+
+    def "get achievements - filtering by name"() {
+        def proj = SkillsFactory.createProject()
+        List<Map> skills = SkillsFactory.createSkills(5)
+        skills.each { it.pointIncrement = 200; it.numPerformToCompletion = 1 }
+
+        def subj = SkillsFactory.createSubject()
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        def subj1 = SkillsFactory.createSubject(1, 2)
+        List<Map> skillsSubj1 = SkillsFactory.createSkills(5, 1, 2)
+        skillsSubj1.each { it.pointIncrement = 200; it.numPerformToCompletion = 1 }
+
+        skillsService.createSubject(subj1)
+        skillsService.createSkills(skillsSubj1)
+
+        achieveLevelForUsers(skills, 2, 1, "Subject")
+        achieveLevelForUsers(skills, 1, 2, "Subject")
+        achieveLevelForUsers(skills, 3, 3, "Subject")
+        achieveLevelForUsers(skills, 2, 4, "Subject")
+        achieveLevelForUsers(skills, 1, 5, "Subject")
+        achieveLevelForUsers(skillsSubj1, 1, 1, "Subject")
+
+        Map props = [:]
+        props[MetricsPagingParamsHelper.PROP_CURRENT_PAGE] = 1
+        props[MetricsPagingParamsHelper.PROP_PAGE_SIZE] = 50
+        props[MetricsPagingParamsHelper.PROP_SORT_DESC] = false
+        props[MetricsPagingParamsHelper.PROP_SORT_BY] = "userName"
+        props[MetricsParams.P_ACHIEVEMENT_TYPES] = allAchievementTypes
+
+        when:
+        props[MetricsParams.P_NAME_FILTER] = "skill 1"
+        def skill1Res = skillsService.getMetricsData(proj.projectId, metricsId, props)
+        println JsonOutput.prettyPrint(JsonOutput.toJson(skill1Res))
+        then:
+        skill1Res.items.collect { it.name }.unique().sort() == ['Test Skill 1', 'Test Skill 1 Subject2',]
+        skill1Res.totalNumItems == 10
+    }
+
+    def "get achievements - filtering by date"() {
+        def proj = SkillsFactory.createProject()
+        List<Map> skills = SkillsFactory.createSkills(5)
+        skills.each { it.pointIncrement = 200; it.numPerformToCompletion = 1 }
+
+        def subj = SkillsFactory.createSubject()
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        def subj1 = SkillsFactory.createSubject(1, 2)
+        List<Map> skillsSubj1 = SkillsFactory.createSkills(5, 1, 2)
+        skillsSubj1.each { it.pointIncrement = 200; it.numPerformToCompletion = 1 }
+
+        skillsService.createSubject(subj1)
+        skillsService.createSkills(skillsSubj1)
+
+        achieveLevelForUsers(skills, 2, 1, "Subject")
+        achieveLevelForUsers(skills, 1, 2, "Subject")
+        achieveLevelForUsers(skills, 3, 3, "Subject")
+        achieveLevelForUsers(skills, 2, 4, "Subject")
+        achieveLevelForUsers(skills, 1, 5, "Subject")
+        achieveLevelForUsers(skillsSubj1, 1, 1, "Subject")
+
+        Map props = [:]
+        props[MetricsPagingParamsHelper.PROP_CURRENT_PAGE] = 1
+        props[MetricsPagingParamsHelper.PROP_PAGE_SIZE] = 50
+        props[MetricsPagingParamsHelper.PROP_SORT_DESC] = false
+        props[MetricsPagingParamsHelper.PROP_SORT_BY] = "userName"
+        props[MetricsParams.P_ACHIEVEMENT_TYPES] = allAchievementTypes
+
+        when:
+        props[MetricsParams.P_FROM_DAY_FILTER] = MetricsParams.DAY_FORMAT.format(dates[1])
+        def fromDate1Res = skillsService.getMetricsData(proj.projectId, metricsId, props)
+
+        props[MetricsParams.P_TO_DAY_FILTER] = MetricsParams.DAY_FORMAT.format(dates[4])
+        def fromDate1AndToDate1Res = skillsService.getMetricsData(proj.projectId, metricsId, props)
+
+        props[MetricsParams.P_FROM_DAY_FILTER] = MetricsParams.DAY_FORMAT.format(dates[3])
+        def fromDate2AndToDate1Res = skillsService.getMetricsData(proj.projectId, metricsId, props)
+
+        props[MetricsParams.P_TO_DAY_FILTER] = MetricsParams.DAY_FORMAT.format(dates[3])
+        def fromDate2AndToDate2Res = skillsService.getMetricsData(proj.projectId, metricsId, props)
+
+        then:
+        fromDate1Res.items.collect { new Date(it.achievedOn) }.unique().sort() == [dates[1], dates[2], dates[3], dates[4], dates[5]]
+        fromDate1AndToDate1Res.items.collect { new Date(it.achievedOn) }.unique().sort() == [dates[1], dates[2], dates[3], dates[4]]
+        fromDate2AndToDate1Res.items.collect { new Date(it.achievedOn) }.unique().sort() == [dates[3], dates[4]]
+        fromDate2AndToDate2Res.items.collect { new Date(it.achievedOn) }.unique().sort() == [dates[3]]
+
     }
 
     private void achieveLevelForUsers(List<Map> skills, int numUsers, int level, String type = "Overall") {
