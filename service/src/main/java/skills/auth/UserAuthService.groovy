@@ -97,14 +97,8 @@ class UserAuthService {
     }
 
     @Transactional
-    UserInfo createUser(UserInfo userInfo, boolean isSuperUser = false) {
+    UserInfo createUser(UserInfo userInfo) {
         accessSettingsStorageService.createAppUser(userInfo, false)
-
-        if (isSuperUser) {
-            // super user gets assigned to Inception project
-            inceptionProjectService.createInceptionAndAssignUser(userInfo)
-        }
-
         return loadByUserId(userInfo.username)
     }
 
