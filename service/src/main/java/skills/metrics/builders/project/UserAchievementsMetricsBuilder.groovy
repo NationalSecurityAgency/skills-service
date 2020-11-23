@@ -22,6 +22,7 @@ import org.springframework.data.jpa.domain.JpaSort
 import org.springframework.stereotype.Component
 import skills.controller.exceptions.SkillException
 import skills.metrics.builders.MetricsPagingParamsHelper
+import skills.metrics.builders.MetricsParams
 import skills.metrics.builders.ProjectMetricsBuilder
 import skills.storage.model.SkillDef
 import skills.storage.model.UserAchievement
@@ -59,36 +60,32 @@ class UserAchievementsMetricsBuilder implements ProjectMetricsBuilder {
         Integer level
     }
 
-    DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd")
-    static String OverallType = "Overall"
-    private static long oneDay = 1000 * 60 * 60 * 24
-    private static long oneDayMinusASecond = oneDay - 1000
-    private static long thirtyDays = 30 * oneDay
-
     private final static String PROP_SORT_BY_USER_ID = "userName"
     private final static List<String> supportedSortBy = ["achievedOn", PROP_SORT_BY_USER_ID]
+
     @Override
     UserAchievementsRes build(String projectId, String chartId, Map<String, String> props) {
-
         PageRequest pageRequest = getPageRequest(projectId, chartId, props)
 
-        String usernameFilter = props["usernameFilter"] ?: ""
-        Date fromDate = props["fromDateFilter"] ? dateFormat.parse(props["fromDateFilter"]) : new Date(1)
-        Date toDate = props["toDateFilter"] ? new Date(dateFormat.parse(props["toDateFilter"]).time + oneDayMinusASecond) : new Date(new Date().time + 30 * thirtyDays)
+        String usernameFilter = MetricsParams.getUsernameFilter(projectId, chartId, props, true)
+        Date from = MetricsParams.getFromDayFilter(projectId, chartId, props)
+        Date to = MetricsParams.getToDayFilter(projectId, chartId, props)
 
-        String skillNameFilter = props["nameFilter"] ?: "ALL"
-        Integer minLevel = props["minLevel"] ? Integer.parseInt(props["minLevel"]) : -1
+        String skillNameFilter = MetricsParams.getNameFilter(projectId, chartId, props)
+        Integer minLevel = MetricsParams.getMinLevel(projectId, chartId, props)
 
-        List<String> achievementTypes = props["achievementTypes"] ? props["achievementTypes"].split(",").toList() : []
-        List<SkillDef.ContainerType> achievementTypesWithoutOverall = achievementTypes.findAll({ !it.equalsIgnoreCase(OverallType) }).collect { SkillDef.ContainerType.valueOf(it) }
+        List<String> achievementTypes = MetricsParams.getAchievementTypes(projectId, chartId, props)
+        List<SkillDef.ContainerType> achievementTypesWithoutOverall = achievementTypes.findAll({ !it.equalsIgnoreCase(MetricsParams.ACHIEVEMENT_TYPE_OVERALL) }).collect { SkillDef.ContainerType.valueOf(it) }
         String allNonOverallTypes = achievementTypesWithoutOverall.size() < 3 ? "false" : true
-        String includeOverallType = achievementTypes.contains(OverallType) ? "true" : "false"
+        String includeOverallType = achievementTypes.contains(MetricsParams.ACHIEVEMENT_TYPE_OVERALL) ? "true" : "false"
 
-
-        List<Object[]> achievements = userAchievedRepo.findAllForAchievementNavigator(
-                projectId, usernameFilter, fromDate, toDate, skillNameFilter, minLevel, achievementTypesWithoutOverall, allNonOverallTypes, includeOverallType, pageRequest)
         int totalNumItems = userAchievedRepo.countForAchievementNavigator(
-                projectId, usernameFilter, fromDate, toDate, skillNameFilter, minLevel, achievementTypesWithoutOverall, allNonOverallTypes, includeOverallType)
+                projectId, usernameFilter, from, to, skillNameFilter, minLevel, achievementTypesWithoutOverall, allNonOverallTypes, includeOverallType)
+        if (totalNumItems == 0) {
+            return new UserAchievementsRes(totalNumItems: 0, items: [])
+        }
+        List<Object[]> achievements = userAchievedRepo.findAllForAchievementNavigator(
+                projectId, usernameFilter, from, to, skillNameFilter, minLevel, achievementTypesWithoutOverall, allNonOverallTypes, includeOverallType, pageRequest)
 
         List items = achievements.collect {
             UserAchievement userAchievement = it[0]

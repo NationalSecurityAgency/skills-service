@@ -23,12 +23,12 @@ limitations under the License.
         </div>
         <div class="col-6 col-md border-right">
           <b-form-group label="From Date:" label-for="input-1" label-class="text-muted">
-            <b-form-datepicker id="from-date-filter" v-model="fromDateFilter" class="mb-2" data-cy="achievementsNavigator-fromDateInput"></b-form-datepicker>
+            <b-form-datepicker id="from-date-filter" v-model="fromDayFilter" class="mb-2" data-cy="achievementsNavigator-fromDateInput"></b-form-datepicker>
           </b-form-group>
         </div>
         <div class="col-6 col-md">
           <b-form-group label="To Date:" label-for="input-1" label-class="text-muted">
-            <b-form-datepicker id="to-date-filter" v-model="toDateFilter" class="mb-2" data-cy="achievementsNavigator-toDateInput"></b-form-datepicker>
+            <b-form-datepicker id="to-date-filter" v-model="toDayFilter" class="mb-2" data-cy="achievementsNavigator-toDateInput"></b-form-datepicker>
           </b-form-group>
         </div>
       </div>
@@ -125,8 +125,8 @@ limitations under the License.
         isLoading: true,
         projectId: this.$route.params.projectId,
         usernameFilter: '',
-        fromDateFilter: '',
-        toDateFilter: '',
+        fromDayFilter: '',
+        toDayFilter: '',
         nameFilter: '',
         levels: {
           selected: '',
@@ -206,8 +206,8 @@ limitations under the License.
       reset() {
         this.usernameFilter = '';
         this.tableOptions.pagination.currentPage = 1;
-        this.fromDateFilter = '';
-        this.toDateFilter = '';
+        this.fromDayFilter = '';
+        this.toDayFilter = '';
         this.nameFilter = '';
         this.levels.selected = '';
         this.achievementTypes.selected = this.achievementTypes.available;
@@ -219,8 +219,8 @@ limitations under the License.
           pageSize: this.tableOptions.pagination.pageSize,
           currentPage: this.tableOptions.pagination.currentPage,
           usernameFilter: this.usernameFilter,
-          fromDateFilter: this.fromDateFilter,
-          toDateFilter: this.toDateFilter,
+          fromDayFilter: this.fromDayFilter,
+          toDayFilter: this.toDayFilter,
           nameFilter: this.nameFilter,
           minLevel: this.levels.selected,
           achievementTypes: this.achievementTypes.selected,

@@ -203,8 +203,8 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
             where 
                 ua.userId = uAttrs.userId and
                 ua.projectId = :projectId and
-                ua.achievedOn > :fromDate and
-                ua.achievedOn < :toDate and 
+                ua.achievedOn >= :fromDate and
+                ua.achievedOn <= :toDate and 
                 upper(uAttrs.userId) like UPPER(CONCAT('%', :userNameFilter, '%')) and
                 (upper(sd.name) like UPPER(CONCAT('%', :skillNameFilter, '%')) OR (:skillNameFilter = 'ALL')) and
                 (ua.level >= :level OR (:level = -1)) and
@@ -223,15 +223,15 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
             @Param("includeOverallType") String includeOverallType,
             @Param("pageable") Pageable pageable)
 
-    @Query('''select count(ua) from UserAchievement ua, UserAttrs uAttrs left join SkillDef sd on ua.skillId = sd.skillId 
+    @Query('''select count(uAttrs) from UserAchievement ua, UserAttrs uAttrs left join SkillDef sd on ua.skillId = sd.skillId 
             where 
                 ua.userId = uAttrs.userId and
                 ua.projectId = :projectId and
-                ua.achievedOn > :fromDate and
-                ua.achievedOn < :toDate and 
+                ua.achievedOn >= :fromDate and
+                ua.achievedOn <= :toDate and 
                 upper(uAttrs.userId) like UPPER(CONCAT('%', :userNameFilter, '%')) and
                 (upper(sd.name) like UPPER(CONCAT('%', :skillNameFilter, '%')) OR (:skillNameFilter = 'ALL')) and
-                (ua.level >= :level OR (:level = -1)) and 
+                (ua.level >= :level OR (:level = -1)) and
                 (sd.type in (:types) OR (:disableTypes = 'true') OR (ua.skillId is null AND (:includeOverallType = 'true'))) and 
                 (ua.skillId is not null OR (:includeOverallType = 'true'))
                 ''')
@@ -243,8 +243,8 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
             @Param("skillNameFilter") String skillNameFilter,
             @Param("level") Integer level,
             @Param("types") List<SkillDef.ContainerType> types,
-            @Param("includeOverallType") String includeOverallType,
-            @Param("disableTypes") String disableTypes)
+            @Param("disableTypes") String disableTypes,
+            @Param("includeOverallType") String includeOverallType)
 
 
     static interface SkillAndLevelUserCount {
