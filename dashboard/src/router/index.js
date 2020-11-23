@@ -336,6 +336,69 @@ const router = new Router({
       }],
     },
     {
+      path: '/projects/:projectId/subjects/:subjectId/users/:userId',
+      component: UserPage,
+      meta: { requiresAuth: true },
+      children: [{
+        name: 'ClientDisplayPreviewSubject',
+        path: '',
+        component: ClientDisplayPreview,
+        meta: { requiresAuth: true, reportSkillId: 'VisitClientDisplay' },
+      }, {
+        name: 'UserSkillEventsSubject',
+        path: 'skillEvents',
+        component: UserSkillsPerformed,
+        meta: { requiresAuth: true, reportSkillId: 'VisitUserPerformedSkills' },
+      }, {
+        name: 'UserMetricsSubject',
+        path: 'metrics',
+        component: SectionMetrics,
+        meta: { requiresAuth: true, reportSkillId: 'VisitUserStats', metricsSection: SECTION.USERS },
+      }],
+    },
+    {
+      path: '/projects/:projectId/subjects/:subjectId/skills/:skillId/users/:userId',
+      component: UserPage,
+      meta: { requiresAuth: true },
+      children: [{
+        name: 'ClientDisplayPreviewSkill',
+        path: '',
+        component: ClientDisplayPreview,
+        meta: { requiresAuth: true, reportSkillId: 'VisitClientDisplay' },
+      }, {
+        name: 'UserSkillEventsSkill',
+        path: 'skillEvents',
+        component: UserSkillsPerformed,
+        meta: { requiresAuth: true, reportSkillId: 'VisitUserPerformedSkills' },
+      }, {
+        name: 'UserMetricsSkill',
+        path: 'metrics',
+        component: SectionMetrics,
+        meta: { requiresAuth: true, reportSkillId: 'VisitUserStats', metricsSection: SECTION.USERS },
+      }],
+    },
+    {
+      path: '/projects/:projectId/badges/:badgeId/users/:userId',
+      component: UserPage,
+      meta: { requiresAuth: true },
+      children: [{
+        name: 'ClientDisplayPreviewBadge',
+        path: '',
+        component: ClientDisplayPreview,
+        meta: { requiresAuth: true, reportSkillId: 'VisitClientDisplay' },
+      }, {
+        name: 'UserSkillEventsBadge',
+        path: 'skillEvents',
+        component: UserSkillsPerformed,
+        meta: { requiresAuth: true, reportSkillId: 'VisitUserPerformedSkills' },
+      }, {
+        name: 'UserMetricsBadge',
+        path: 'metrics',
+        component: SectionMetrics,
+        meta: { requiresAuth: true, reportSkillId: 'VisitUserStats', metricsSection: SECTION.USERS },
+      }],
+    },
+    {
       path: '/settings',
       component: GlobalSettings,
       meta: {
