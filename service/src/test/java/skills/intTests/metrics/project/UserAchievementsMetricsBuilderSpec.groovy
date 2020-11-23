@@ -501,7 +501,7 @@ class UserAchievementsMetricsBuilderSpec extends DefaultIntSpec {
         user1_level2PlusAchievementTypesFilterRes1.items.collect { it.type }.sort() == ['Skill', 'Skill']
 
         user1PlusNameFilterRes.totalNumItems == 3
-        user1PlusNameFilterRes.items.collect { it.name } == ['Test Skill 1 Subject2', 'Test Skill 1', 'Test Skill 1']
+        user1PlusNameFilterRes.items.collect { it.name }.sort() == ['Test Skill 1', 'Test Skill 1', 'Test Skill 1 Subject2']
 
         user1PlusMinLevelRes.totalNumItems == 6
         user1PlusMinLevelRes.items.collect { it.level }.sort() == [1, 1, 1, 1, 2]
