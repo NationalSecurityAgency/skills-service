@@ -17,11 +17,7 @@ limitations under the License.
   <div>
     <page-header :loading="isLoading" :options="headerOptions"/>
 
-    <navigation v-if="userIdForDisplay" :nav-items="[
-          {name: 'Client Display', iconClass: 'fa-user skills-color-skills', page: 'ClientDisplayPreview'},
-          {name: 'Performed Skills', iconClass: 'fa-award skills-color-events', page: 'UserSkillEvents'},
-          {name: 'Metrics', iconClass: 'fa-chart-bar skills-color-metrics', page: 'UserMetrics'},
-        ]">
+    <navigation v-if="userIdForDisplay" :nav-items="getNavItems()">
     </navigation>
   </div>
 </template>
@@ -95,6 +91,35 @@ limitations under the License.
           .finally(() => {
             this.isLoading = false;
           });
+      },
+      getNavItems() {
+        const hasSubject = this.$route.params.subjectId || false;
+        const hasSkill = this.$route.params.skillId || false;
+        const hasBadge = this.$route.params.badgeId || false;
+
+        let displayPage = 'ClientDisplayPreview';
+        let skillsPage = 'UserSkillEvents';
+        let metricsPage = 'UserMetrics';
+
+        if (hasSkill) {
+          displayPage = `${displayPage}Skill`;
+          skillsPage = `${skillsPage}Skill`;
+          metricsPage = `${metricsPage}Skill`;
+        } else if (hasSubject) {
+          displayPage = `${displayPage}Subject`;
+          skillsPage = `${skillsPage}Subject`;
+          metricsPage = `${metricsPage}Subject`;
+        } else if (hasBadge) {
+          displayPage = `${displayPage}Badge`;
+          skillsPage = `${skillsPage}Badge`;
+          metricsPage = `${metricsPage}Badge`;
+        }
+
+        return [
+          { name: 'Client Display', iconClass: 'fa-user skills-color-skills', page: `${displayPage}` },
+          { name: 'Performed Skills', iconClass: 'fa-award skills-color-events', page: `${skillsPage}` },
+          { name: 'Metrics', iconClass: 'fa-chart-bar skills-color-metrics', page: `${metricsPage}` },
+        ];
       },
     },
   };

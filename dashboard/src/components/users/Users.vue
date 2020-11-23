@@ -46,8 +46,7 @@ limitations under the License.
             </div>
 
             <div slot="viewDetail" slot-scope="props" class="">
-              <router-link :to="{ name:'ClientDisplayPreview',
-                      params: { projectId: $route.params.projectId, userId: props.row.userId, dn: props.row.dn }}"
+              <router-link :to="calculateClientDisplayRoute(props)"
                            tag="button" class="btn btn-outline-primary">
                 <span class="d-none d-sm-inline">Details</span><i class="fas fa-arrow-circle-right ml-sm-1"/>
               </router-link>
@@ -122,6 +121,55 @@ limitations under the License.
     mounted() {
     },
     methods: {
+      calculateClientDisplayRoute(props) {
+        const hasSubject = this.$route.params.subjectId || false;
+        const hasSkill = this.$route.params.skillId || false;
+        const hasBadge = this.$route.params.badgeId || false;
+
+        let routeObj = {
+          name: 'ClientDisplayPreview',
+          params: {
+            projectId: this.$route.params.projectId,
+            userId: props.row.userId,
+            dn: props.row.dn,
+          },
+        };
+
+        if (hasSkill) {
+          routeObj = {
+            name: 'ClientDisplayPreviewSkill',
+            params: {
+              projectId: this.$route.params.projectId,
+              subjectId: this.$route.params.subjectId,
+              skillId: this.$route.params.skillId,
+              userId: props.row.userId,
+              dn: props.row.dn,
+            },
+          };
+        } else if (hasSubject) {
+          routeObj = {
+            name: 'ClientDisplayPreviewSubject',
+            params: {
+              projectId: this.$route.params.projectId,
+              subjectId: this.$route.params.subjectId,
+              userId: props.row.userId,
+              dn: props.row.dn,
+            },
+          };
+        } else if (hasBadge) {
+          routeObj = {
+            name: 'ClientDisplayPreviewBadge',
+            params: {
+              projectId: this.$route.params.projectId,
+              badgeId: this.$route.params.badgeId,
+              userId: props.row.userId,
+              dn: props.row.dn,
+            },
+          };
+        }
+
+        return routeObj;
+      },
       onLoading() {
         this.loading = true;
       },
