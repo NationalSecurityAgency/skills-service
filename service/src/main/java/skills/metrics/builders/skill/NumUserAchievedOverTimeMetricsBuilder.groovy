@@ -57,7 +57,6 @@ class NumUserAchievedOverTimeMetricsBuilder implements ProjectMetricsBuilder {
             count += it.num
             it.num = count
         }
-        return new AchievementCountRes(achievementCounts: achievementCounts
-        )
+        return new AchievementCountRes(achievementCounts: achievementCounts)
     }
 }
