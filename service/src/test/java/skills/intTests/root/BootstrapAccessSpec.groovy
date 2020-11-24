@@ -33,8 +33,13 @@ class BootstrapAccessSpec extends DefaultIntSpec {
 
         // root user does not yet exist
         assert !rootSkillsService.isRoot()
+        // need to call DefaultIntSpec.getRandomUsers so that tests will work in ssl mode
+        String userId = getRandomUsers(1)[0]
 
-        String userId = RandomStringUtils.randomAlphanumeric(14)
+        //we need a different userId from the default root user for this test
+        while (userId.contains("jh@dojo")) {
+            userId = getRandomUsers(1)[0]
+        }
         Map<String, String> userInfo = [
                 firstName: 'A',
                 lastName : 'B',
