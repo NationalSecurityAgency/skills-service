@@ -16,7 +16,30 @@
 // The Vue build version to load with the `import` command
 // (runtime-only or standalone) has been set in webpack.base.conf with an alias.
 import Vue from 'vue';
-import BootstrapVue from 'bootstrap-vue';
+import {
+  ButtonPlugin,
+  ToastPlugin,
+  ButtonGroupPlugin,
+  TooltipPlugin,
+  ModalPlugin,
+  LayoutPlugin,
+  FormRadioPlugin,
+  AlertPlugin,
+  FormSelectPlugin,
+  SpinnerPlugin,
+  TabsPlugin,
+  FormTextareaPlugin,
+  LinkPlugin,
+  DropdownPlugin,
+  AvatarPlugin,
+  BTable,
+  FormInputPlugin,
+  FormCheckboxPlugin,
+  BCard,
+  PaginationPlugin,
+  CollapsePlugin,
+} from 'bootstrap-vue';
+
 import { ClientTable, ServerTable } from 'vue-tables-2';
 import { SkillsConfiguration, SkillsDirective, SkillsReporter } from '@skilltree/skills-client-vue';
 import {
@@ -46,7 +69,29 @@ Vue.component('ValidationProvider', ValidationProvider);
 Vue.component('ValidationObserver', ValidationObserver);
 Vue.use(Vuex);
 Vue.use(VueApexCharts);
-Vue.use(BootstrapVue);
+
+Vue.use(ButtonPlugin);
+Vue.use(ToastPlugin);
+Vue.use(TooltipPlugin);
+Vue.use(LayoutPlugin);
+Vue.use(FormRadioPlugin);
+Vue.use(AlertPlugin);
+Vue.use(FormSelectPlugin);
+Vue.use(ModalPlugin);
+Vue.use(SpinnerPlugin);
+Vue.use(TabsPlugin);
+Vue.use(FormTextareaPlugin);
+Vue.use(LinkPlugin);
+Vue.use(DropdownPlugin);
+Vue.use(AvatarPlugin);
+Vue.use(ButtonGroupPlugin);
+Vue.use(BTable);
+Vue.use(FormInputPlugin);
+Vue.use(FormCheckboxPlugin);
+Vue.use(BCard);
+Vue.use(PaginationPlugin);
+Vue.use(CollapsePlugin);
+
 Vue.use(SkillsDirective);
 
 localize({

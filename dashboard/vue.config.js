@@ -51,7 +51,22 @@ const findLinkedModules = (nodeModulesPath) => {
   return modules
 };
 
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+
+let plugins = [];
+let optimization = {
+  //minimize: false
+};
+
+// comment to disable analyzer
+plugins.push(new BundleAnalyzerPlugin());
+
 module.exports = {
+  pluginOptions: {
+    webpackBundleAnalyzer: {
+      openAnalyzer: false
+    }
+  },
   devServer: {
     host: 'localhost',
     port: 8082,
@@ -82,6 +97,8 @@ module.exports = {
     },
   },
   configureWebpack: {
+    plugins,
+    optimization,
     resolve: {
       alias: {
         '@$': resolve('src'),

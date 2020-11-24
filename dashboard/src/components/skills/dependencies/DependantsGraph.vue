@@ -42,13 +42,15 @@ limitations under the License.
 </template>
 
 <script>
-  import vis from 'vis';
   import 'vis/dist/vis.css';
+  import vis from 'vis';
   import GraphLegend from './GraphLegend';
   import GraphNodeSortMethodSelector from './GraphNodeSortMethodSelector';
   import NoContent2 from '../../utils/NoContent2';
   import GraphUtils from './GraphUtils';
   import SimpleCard from '../../utils/cards/SimpleCard';
+
+  // const vis = () => import(/* webpackMode: "lazy-once", webpackChunkName: "vis", webpackPrefetch: true */'vis');
 
   export default {
     name: 'DependantsGraph',

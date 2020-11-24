@@ -38,8 +38,8 @@ limitations under the License.
 </template>
 
 <script>
-  import vis from 'vis';
   import 'vis/dist/vis.css';
+  import vis from 'vis';
   import SkillsService from '../SkillsService';
   import LoadingContainer from '../../utils/LoadingContainer';
   import GraphNodeSortMethodSelector from './GraphNodeSortMethodSelector';
@@ -48,6 +48,8 @@ limitations under the License.
   import GraphLegend from './GraphLegend';
   import SubPageHeader from '../../utils/pages/SubPageHeader';
   import SimpleCard from '../../utils/cards/SimpleCard';
+
+  // const vis = () => import(/* webpackMode: "lazy-once", webpackChunkName: "vis", webpackPrefetch: true */'vis');
 
   export default {
     name: 'FullDependencyGraph',
