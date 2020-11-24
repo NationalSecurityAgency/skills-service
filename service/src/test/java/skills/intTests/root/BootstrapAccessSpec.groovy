@@ -18,6 +18,7 @@ package skills.intTests.root
 import org.apache.commons.lang3.RandomStringUtils
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsService
+import spock.lang.IgnoreIf
 
 class BootstrapAccessSpec extends DefaultIntSpec {
 
@@ -28,6 +29,7 @@ class BootstrapAccessSpec extends DefaultIntSpec {
         rootSkillsService = createService(ultimateRoot, 'aaaaaaaa')
     }
 
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def 'bootstrap root user also get SUPERVISOR role'() {
         setup:
 
