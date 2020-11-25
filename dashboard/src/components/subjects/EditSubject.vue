@@ -90,7 +90,7 @@ limitations under the License.
   import IconPicker from '../utils/iconPicker/IconPicker';
   import MarkdownEditor from '../utils/MarkdownEditor';
   import IdInput from '../utils/inputForm/IdInput';
-  import IconManager from '../utils/iconPicker/IconManager';
+  // import IconManager from '../utils/iconPicker/IconManager';
   import InputSanitizer from '../utils/InputSanitizer';
   import InlineHelp from '../utils/InlineHelp';
 
@@ -100,8 +100,8 @@ limitations under the License.
       IdInput,
       IconPicker,
       MarkdownEditor,
-      IconManager,
       InlineHelp,
+      'icon-manager': () => import(/* webpackChunkName: 'iconManager' */'../utils/iconPicker/IconManager'),
     },
     props: {
       subject: Object,

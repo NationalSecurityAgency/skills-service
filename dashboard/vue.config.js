@@ -55,11 +55,26 @@ const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPl
 
 let plugins = [];
 let optimization = {
-  //minimize: false
+  runtimeChunk: 'single',
+  splitChunks: {
+    chunks: 'all',
+    maxInitialRequests: 10,
+    minSize: 30,
+    cacheGroups: {
+      vendor: {
+        test: /[\\/]node_modules[\\/]/,
+        name(module) {
+          const packageName = module.context.match(/[\\/]node_modules[\\/](.*?)([\\/]|$)/)[1];
+          return `npm.${packageName.replace('@', '')}`;
+        },
+      },
+    },
+  },
+  // minimize: false
 };
 
 // comment to disable analyzer
-plugins.push(new BundleAnalyzerPlugin());
+// plugins.push(new BundleAnalyzerPlugin());
 
 module.exports = {
   pluginOptions: {

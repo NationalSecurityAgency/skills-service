@@ -114,7 +114,7 @@ limitations under the License.
   import Datepicker from 'vuejs-datepicker';
   import MarkdownEditor from '../utils/MarkdownEditor';
   import IconPicker from '../utils/iconPicker/IconPicker';
-  import IconManager from '../utils/iconPicker/IconManager';
+  // import IconManager from '../utils/iconPicker/IconManager';
   import IdInput from '../utils/inputForm/IdInput';
   import InlineHelp from '../utils/InlineHelp';
   import BadgesService from './BadgesService';
@@ -128,8 +128,8 @@ limitations under the License.
       IconPicker,
       MarkdownEditor,
       Datepicker,
-      IconManager,
       IdInput,
+      'icon-manager': () => import(/* webpackChunkName: 'iconManager' */'../utils/iconPicker/IconManager'),
     },
     props: {
       badge: Object,

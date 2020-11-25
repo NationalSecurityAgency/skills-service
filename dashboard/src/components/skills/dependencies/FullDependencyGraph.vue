@@ -39,7 +39,6 @@ limitations under the License.
 
 <script>
   import 'vis/dist/vis.css';
-  import vis from 'vis';
   import SkillsService from '../SkillsService';
   import LoadingContainer from '../../utils/LoadingContainer';
   import GraphNodeSortMethodSelector from './GraphNodeSortMethodSelector';
@@ -49,7 +48,10 @@ limitations under the License.
   import SubPageHeader from '../../utils/pages/SubPageHeader';
   import SimpleCard from '../../utils/cards/SimpleCard';
 
-  // const vis = () => import(/* webpackMode: "lazy-once", webpackChunkName: "vis", webpackPrefetch: true */'vis');
+  const getVis = import(
+    /* webpackChunkName: "vis" */
+    'vis'
+  );
 
   export default {
     name: 'FullDependencyGraph',
@@ -66,8 +68,8 @@ limitations under the License.
         isLoading: false,
         graph: {},
         network: null,
-        nodes: new vis.DataSet(),
-        edges: new vis.DataSet(),
+        nodes: {},
+        edges: {},
         legendItems: [
           { label: 'Skill Dependencies', color: 'lightgreen' },
           { label: 'Cross Project Skill Dependencies', color: '#ffb87f' },
@@ -100,7 +102,11 @@ limitations under the License.
       };
     },
     mounted() {
-      this.loadGraphDataAndCreateGraph();
+      getVis.then((vis) => {
+        this.nodes = new vis.DataSet();
+        this.edges = new vis.DataSet();
+        this.loadGraphDataAndCreateGraph(vis);
+      });
     },
     beforeDestroy() {
       if (this.network) {
@@ -134,7 +140,9 @@ limitations under the License.
 
         const data = this.buildData();
         const container = document.getElementById('dependency-graph');
-        this.network = new vis.Network(container, data, this.displayOptions);
+        getVis.then((vis) => {
+          this.network = new vis.Network(container, data, this.displayOptions);
+        });
       },
       buildData() {
         this.graph.nodes.forEach((node) => {

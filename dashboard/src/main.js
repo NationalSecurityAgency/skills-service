@@ -32,10 +32,10 @@ import {
   LinkPlugin,
   DropdownPlugin,
   AvatarPlugin,
-  BTable,
+  TablePlugin,
   FormInputPlugin,
   FormCheckboxPlugin,
-  BCard,
+  CardPlugin,
   PaginationPlugin,
   CollapsePlugin,
 } from 'bootstrap-vue';
@@ -46,7 +46,6 @@ import {
   localize, ValidationProvider, ValidationObserver, setInteractionMode,
 } from 'vee-validate';
 import en from 'vee-validate/dist/locale/en.json';
-import VueApexCharts from 'vue-apexcharts';
 import Vuex from 'vuex';
 import InceptionConfigurer from './InceptionConfigurer';
 import 'babel-polyfill';
@@ -63,12 +62,21 @@ import App from './App';
 import router from './router';
 import store from './store/store';
 
+const getApex = () => import(
+  /* webpackChunkName: "apexCharts" */
+  'vue-apexcharts'
+);
+
+const getMoment = () => import(
+  /* webpackChunkName: "moment" */
+  'moment'
+);
+
 Vue.use(ClientTable, {}, false, 'bootstrap4', 'default');
 Vue.use(ServerTable, {}, false, 'bootstrap4', 'default');
 Vue.component('ValidationProvider', ValidationProvider);
 Vue.component('ValidationObserver', ValidationObserver);
 Vue.use(Vuex);
-Vue.use(VueApexCharts);
 
 Vue.use(ButtonPlugin);
 Vue.use(ToastPlugin);
@@ -85,10 +93,10 @@ Vue.use(LinkPlugin);
 Vue.use(DropdownPlugin);
 Vue.use(AvatarPlugin);
 Vue.use(ButtonGroupPlugin);
-Vue.use(BTable);
+Vue.use(TablePlugin);
 Vue.use(FormInputPlugin);
 Vue.use(FormCheckboxPlugin);
-Vue.use(BCard);
+Vue.use(CardPlugin);
 Vue.use(PaginationPlugin);
 Vue.use(CollapsePlugin);
 
@@ -100,11 +108,8 @@ localize({
 
 setInteractionMode('custom', () => ({ on: ['input', 'change'] }));
 
-Vue.component('apexchart', VueApexCharts);
-
 Vue.config.productionTip = false;
 
-window.moment = require('moment');
 window.axios = require('axios');
 
 require('./interceptors/errorHandler');
@@ -170,5 +175,12 @@ store.dispatch('loadConfigState').finally(() => {
       store,
     });
     window.vm = vm;
+    getApex().then((VueApexCharts) => {
+      Vue.component('apexchart', VueApexCharts.default);
+      Vue.use(VueApexCharts.default);
+    });
+    getMoment().then((moment) => {
+      window.moment = moment.default;
+    });
   });
 });
