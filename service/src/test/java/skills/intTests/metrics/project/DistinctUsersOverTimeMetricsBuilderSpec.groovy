@@ -100,7 +100,7 @@ class DistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
     }
 
     def "number of users growing over few days"() {
-        List<String> users = (1..10).collect { "user$it" }
+        List<String> users = getRandomUsers(10)
         def proj = SkillsFactory.createProject()
         List<Map> skills = SkillsFactory.createSkills(10)
         skills.each { it.pointIncrement = 100; it.numPerformToCompletion = 10 }
@@ -146,7 +146,7 @@ class DistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
     }
 
     def "number of users growing over few days - specific skill"() {
-        List<String> users = (1..10).collect { "user$it" }
+        List<String> users = getRandomUsers(10)
         def proj = SkillsFactory.createProject()
         List<Map> skills = SkillsFactory.createSkills(10)
         skills.each { it.pointIncrement = 100; it.numPerformToCompletion = 10 }

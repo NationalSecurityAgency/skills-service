@@ -179,9 +179,10 @@ class FindExpertsForMultipleProjectsMetricsBuilderSpec extends DefaultIntSpec {
 
     def "find users within multiple projects"() {
         SkillsService supervisor = createSupervisor();
-        String userId = "user1"
-        String userId2 = "user2"
-        String userId3 = "user3"
+        List<String> users = getRandomUsers(3)
+        String userId = users[0]
+        String userId2 = users[1]
+        String userId3 = users[2]
 
         int numProjects = 5;
         List projSkills = []
@@ -334,7 +335,7 @@ class FindExpertsForMultipleProjectsMetricsBuilderSpec extends DefaultIntSpec {
         }
 
         int numUsers = 9
-        List<String> users = (1..numUsers).collect({ "user${it}" })
+        List<String> users = getRandomUsers(numUsers)
         List<String> copy = users.toList()
         copy.shuffle()
         (projSkills).each {

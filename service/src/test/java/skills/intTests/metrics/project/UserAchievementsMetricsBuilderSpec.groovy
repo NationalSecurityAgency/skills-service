@@ -24,6 +24,7 @@ import skills.intTests.utils.SkillsFactory
 import skills.metrics.builders.MetricsPagingParamsHelper
 import skills.metrics.builders.MetricsParams
 import skills.storage.model.SkillDef
+import spock.lang.IgnoreIf
 import spock.lang.IgnoreRest
 import spock.lang.Shared
 
@@ -235,9 +236,11 @@ class UserAchievementsMetricsBuilderSpec extends DefaultIntSpec {
         skillsService.createSubject(subj1)
         skillsService.createSkills(skillsSubj1)
 
-        achieveLevelForUsers(skills, 2, 1, "Subject")
-        achieveLevelForUsers(skills, 1, 2, "Subject")
-        achieveLevelForUsers(skillsSubj1, 1, 1, "Subject")
+        List<String> users = new ArrayList<>(getRandomUsers(4))
+        List<String> usersCopy = new ArrayList<>(users)
+        achieveLevelForUsers(usersCopy, skills, 2, 1, "Subject")
+        achieveLevelForUsers(usersCopy, skills, 1, 2, "Subject")
+        achieveLevelForUsers(usersCopy, skillsSubj1, 1, 1, "Subject")
 
         Map props = [:]
         props[MetricsPagingParamsHelper.PROP_CURRENT_PAGE] = 1
@@ -258,40 +261,44 @@ class UserAchievementsMetricsBuilderSpec extends DefaultIntSpec {
         def resPage3 = skillsService.getMetricsData(proj.projectId, metricsId, props)
 
         then:
-        res.totalNumItems == 13
+        res.totalNumItems == 14
         def items = res.items
-        items.collect { it.userId } == ["user1_level1",
-                                        "user1_level1",
-                                        "user1_level1",
-                                        "user1_level1",
-                                        "user1_level1",
-                                        "user1_level2",
-                                        "user1_level2",
-                                        "user1_level2",
-                                        "user1_level2",
-                                        "user1_level2",
-                                        "user2_level1",
-                                        "user2_level1",
-                                        "user2_level1"]
+        items.collect { it.userId } == [users[0],
+                                        users[0],
+                                        users[0],
+                                        users[1],
+                                        users[1],
+
+                                        users[1],
+                                        users[2],
+                                        users[2],
+                                        users[2],
+                                        users[2],
+
+                                        users[2],
+                                        users[3],
+                                        users[3],
+                                        users[3],]
 
         resPage1.items.collect { it.userId } == [
-                "user1_level1",
-                "user1_level1",
-                "user1_level1",
-                "user1_level1",
-                "user1_level1"]
+                users[0],
+                users[0],
+                users[0],
+                users[1],
+                users[1],]
 
         resPage2.items.collect { it.userId } == [
-                "user1_level2",
-                "user1_level2",
-                "user1_level2",
-                "user1_level2",
-                "user1_level2",
+                users[1],
+                users[2],
+                users[2],
+                users[2],
+                users[2],
         ]
         resPage3.items.collect { it.userId } == [
-                "user2_level1",
-                "user2_level1",
-                "user2_level1"]
+                users[2],
+                users[3],
+                users[3],
+                users[3],]
 
     }
 
@@ -313,9 +320,11 @@ class UserAchievementsMetricsBuilderSpec extends DefaultIntSpec {
         skillsService.createSubject(subj1)
         skillsService.createSkills(skillsSubj1)
 
-        achieveLevelForUsers(skills, 2, 1, "Subject")
-        achieveLevelForUsers(skills, 1, 2, "Subject")
-        achieveLevelForUsers(skillsSubj1, 1, 1, "Subject")
+        List<String> users = new ArrayList<>(getRandomUsers(4))
+        List<String> usersCopy = new ArrayList<>(users)
+        achieveLevelForUsers(usersCopy, skills, 2, 1, "Subject")
+        achieveLevelForUsers(usersCopy, skills, 1, 2, "Subject")
+        achieveLevelForUsers(usersCopy, skillsSubj1, 1, 1, "Subject")
 
         Map props = [:]
         props[MetricsPagingParamsHelper.PROP_CURRENT_PAGE] = 1
@@ -341,9 +350,9 @@ class UserAchievementsMetricsBuilderSpec extends DefaultIntSpec {
 
         Closure getAchievedOnArr = { def resA ->
             List<Long> aOn = []
-            aOn.addAll( resA[0].items.collect { it.achievedOn })
-            aOn.addAll( resA[1].items.collect { it.achievedOn })
-            aOn.addAll( resA[2].items.collect { it.achievedOn })
+            aOn.addAll(resA[0].items.collect { it.achievedOn })
+            aOn.addAll(resA[1].items.collect { it.achievedOn })
+            aOn.addAll(resA[2].items.collect { it.achievedOn })
             return aOn
         }
 
@@ -362,51 +371,56 @@ class UserAchievementsMetricsBuilderSpec extends DefaultIntSpec {
         !getAchievedOnArr(achievedOnAsc).find { !it }
         !getAchievedOnArr(achievedOnDesc).find { !it }
 
-        defaultSort[0].totalNumItems == 13
-        defaultSort[1].totalNumItems == 13
-        defaultSort[2].totalNumItems == 13
+        defaultSort[0].totalNumItems == 14
+        defaultSort[1].totalNumItems == 14
+        defaultSort[2].totalNumItems == 14
+
         defaultSort[0].items.collect { it.userId } == [
-                "user1_level1",
-                "user1_level1",
-                "user1_level1",
-                "user1_level1",
-                "user1_level1"]
+                users[0],
+                users[0],
+                users[0],
+                users[1],
+                users[1],]
+
         defaultSort[1].items.collect { it.userId } == [
-                "user1_level2",
-                "user1_level2",
-                "user1_level2",
-                "user1_level2",
-                "user1_level2",
+                users[1],
+                users[2],
+                users[2],
+                users[2],
+                users[2],
         ]
         defaultSort[2].items.collect { it.userId } == [
-                "user2_level1",
-                "user2_level1",
-                "user2_level1"]
+                users[2],
+                users[3],
+                users[3],
+                users[3],]
 
-        usernameReversed[0].totalNumItems == 13
-        usernameReversed[1].totalNumItems == 13
-        usernameReversed[2].totalNumItems == 13
+        usernameReversed[0].totalNumItems == 14
+        usernameReversed[1].totalNumItems == 14
+        usernameReversed[2].totalNumItems == 14
         usernameReversed[0].items.collect { it.userId } == [
-                "user2_level1",
-                "user2_level1",
-                "user2_level1",
-                "user1_level2",
-                "user1_level2",
+                users[3],
+                users[3],
+                users[3],
+                users[2],
+                users[2]
         ]
         usernameReversed[1].items.collect { it.userId } == [
-                "user1_level2",
-                "user1_level2",
-                "user1_level2",
-                "user1_level1",
-                "user1_level1",
+                users[2],
+                users[2],
+                users[2],
+                users[1],
+                users[1],
         ]
         usernameReversed[2].items.collect { it.userId } == [
-                "user1_level1",
-                "user1_level1",
-                "user1_level1"
+                users[1],
+                users[0],
+                users[0],
+                users[0],
         ]
     }
 
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def "get achievements - filtering by userName"() {
         def proj = SkillsFactory.createProject()
         List<Map> skills = SkillsFactory.createSkills(5)
@@ -425,9 +439,13 @@ class UserAchievementsMetricsBuilderSpec extends DefaultIntSpec {
         skillsService.createSubject(subj1)
         skillsService.createSkills(skillsSubj1)
 
-        achieveLevelForUsers(skills, 2, 1, "Subject")
-        achieveLevelForUsers(skills, 1, 2, "Subject")
-        achieveLevelForUsers(skillsSubj1, 1, 1, "Subject")
+        Closure<List<String>> createUsers = { int num, int level ->
+            return (1..num).collect({ "user${it}_level${level}"})
+        }
+
+        achieveLevelForUsers(createUsers(2, 1), skills, 2, 1, "Subject")
+        achieveLevelForUsers(createUsers(1, 2), skills, 1, 2, "Subject")
+        achieveLevelForUsers(createUsers(1, 1), skillsSubj1, 1, 1, "Subject")
 
         Map props = [:]
         props[MetricsPagingParamsHelper.PROP_CURRENT_PAGE] = 1
@@ -478,12 +496,6 @@ class UserAchievementsMetricsBuilderSpec extends DefaultIntSpec {
         props.remove(MetricsParams.P_FROM_DAY_FILTER)
         props[MetricsParams.P_TO_DAY_FILTER] = MetricsParams.DAY_FORMAT.format(dates[1])
         def user1PlusToDayRes = skillsService.getMetricsData(proj.projectId, metricsId, props)
-
-//        println JsonOutput.prettyPrint(JsonOutput.toJson(user1PlusFromDayRes))
-//        user1PlusFromDayRes.items.each {
-//            println new Date(it.achievedOn)
-//        }
-
         then:
         user2FilterRes.totalNumItems == 3
         user2FilterRes.items.collect { it.userId } == ['user2_level1', 'user2_level1', 'user2_level1']
@@ -519,6 +531,7 @@ class UserAchievementsMetricsBuilderSpec extends DefaultIntSpec {
     }
 
     def "get achievements - filtering by level"() {
+
         def proj = SkillsFactory.createProject()
         List<Map> skills = SkillsFactory.createSkills(5)
         skills.each { it.pointIncrement = 200; it.numPerformToCompletion = 1 }
@@ -536,12 +549,15 @@ class UserAchievementsMetricsBuilderSpec extends DefaultIntSpec {
         skillsService.createSubject(subj1)
         skillsService.createSkills(skillsSubj1)
 
-        achieveLevelForUsers(skills, 2, 1, "Subject")
-        achieveLevelForUsers(skills, 1, 2, "Subject")
-        achieveLevelForUsers(skills, 3, 3, "Subject")
-        achieveLevelForUsers(skills, 2, 4, "Subject")
-        achieveLevelForUsers(skills, 1, 5, "Subject")
-        achieveLevelForUsers(skillsSubj1, 1, 1, "Subject")
+        List<String> users = new ArrayList<>(getRandomUsers(16))
+        List<String> usersCopy = new ArrayList<>(users)
+
+        achieveLevelForUsers(usersCopy, skills, 2, 1, "Subject")
+        achieveLevelForUsers(usersCopy, skills, 1, 2, "Subject")
+        achieveLevelForUsers(usersCopy, skills, 3, 3, "Subject")
+        achieveLevelForUsers(usersCopy, skills, 2, 4, "Subject")
+        achieveLevelForUsers(usersCopy, skills, 1, 5, "Subject")
+        achieveLevelForUsers(usersCopy, skillsSubj1, 1, 1, "Subject")
 
         Map props = [:]
         props[MetricsPagingParamsHelper.PROP_CURRENT_PAGE] = 1
@@ -627,12 +643,15 @@ class UserAchievementsMetricsBuilderSpec extends DefaultIntSpec {
         skillsService.createSubject(subj1)
         skillsService.createSkills(skillsSubj1)
 
-        achieveLevelForUsers(skills, 2, 1, "Subject")
-        achieveLevelForUsers(skills, 1, 2, "Subject")
-        achieveLevelForUsers(skills, 3, 3, "Subject")
-        achieveLevelForUsers(skills, 2, 4, "Subject")
-        achieveLevelForUsers(skills, 1, 5, "Subject")
-        achieveLevelForUsers(skillsSubj1, 1, 1, "Subject")
+        List<String> users = new ArrayList<>(getRandomUsers(16))
+        List<String> usersCopy = new ArrayList<>(users)
+
+        achieveLevelForUsers(usersCopy, skills, 2, 1, "Subject")
+        achieveLevelForUsers(usersCopy, skills, 1, 2, "Subject")
+        achieveLevelForUsers(usersCopy, skills, 3, 3, "Subject")
+        achieveLevelForUsers(usersCopy, skills, 2, 4, "Subject")
+        achieveLevelForUsers(usersCopy, skills, 1, 5, "Subject")
+        achieveLevelForUsers(usersCopy, skillsSubj1, 1, 1, "Subject")
 
         Map props = [:]
         props[MetricsPagingParamsHelper.PROP_CURRENT_PAGE] = 1
@@ -661,10 +680,10 @@ class UserAchievementsMetricsBuilderSpec extends DefaultIntSpec {
         def overallAndSubjectAndSkill = skillsService.getMetricsData(proj.projectId, metricsId, props)
 
         then:
-        allTypes.totalNumItems == 70
+        allTypes.totalNumItems == 71
         allTypes.items.collect { it.type }.unique().sort() == ['Overall', 'Skill', 'Subject',]
 
-        justOverall.totalNumItems == 16
+        justOverall.totalNumItems == 17
         justOverall.items.collect { it.type }.unique().sort() == ['Overall']
 
         justSubject.totalNumItems == 27
@@ -698,12 +717,15 @@ class UserAchievementsMetricsBuilderSpec extends DefaultIntSpec {
         skillsService.createSubject(subj1)
         skillsService.createSkills(skillsSubj1)
 
-        achieveLevelForUsers(skills, 2, 1, "Subject")
-        achieveLevelForUsers(skills, 1, 2, "Subject")
-        achieveLevelForUsers(skills, 3, 3, "Subject")
-        achieveLevelForUsers(skills, 2, 4, "Subject")
-        achieveLevelForUsers(skills, 1, 5, "Subject")
-        achieveLevelForUsers(skillsSubj1, 1, 1, "Subject")
+        List<String> users = new ArrayList<>(getRandomUsers(16))
+        List<String> usersCopy = new ArrayList<>(users)
+
+        achieveLevelForUsers(usersCopy, skills, 2, 1, "Subject")
+        achieveLevelForUsers(usersCopy, skills, 1, 2, "Subject")
+        achieveLevelForUsers(usersCopy, skills, 3, 3, "Subject")
+        achieveLevelForUsers(usersCopy, skills, 2, 4, "Subject")
+        achieveLevelForUsers(usersCopy, skills, 1, 5, "Subject")
+        achieveLevelForUsers(usersCopy, skillsSubj1, 1, 1, "Subject")
 
         Map props = [:]
         props[MetricsPagingParamsHelper.PROP_CURRENT_PAGE] = 1
@@ -739,12 +761,15 @@ class UserAchievementsMetricsBuilderSpec extends DefaultIntSpec {
         skillsService.createSubject(subj1)
         skillsService.createSkills(skillsSubj1)
 
-        achieveLevelForUsers(skills, 2, 1, "Subject")
-        achieveLevelForUsers(skills, 1, 2, "Subject")
-        achieveLevelForUsers(skills, 3, 3, "Subject")
-        achieveLevelForUsers(skills, 2, 4, "Subject")
-        achieveLevelForUsers(skills, 1, 5, "Subject")
-        achieveLevelForUsers(skillsSubj1, 1, 1, "Subject")
+        List<String> users = new ArrayList<>(getRandomUsers(16))
+        List<String> usersCopy = new ArrayList<>(users)
+
+        achieveLevelForUsers(usersCopy, skills, 2, 1, "Subject")
+        achieveLevelForUsers(usersCopy, skills, 1, 2, "Subject")
+        achieveLevelForUsers(usersCopy, skills, 3, 3, "Subject")
+        achieveLevelForUsers(usersCopy, skills, 2, 4, "Subject")
+        achieveLevelForUsers(usersCopy, skills, 1, 5, "Subject")
+        achieveLevelForUsers(usersCopy, skillsSubj1, 1, 1, "Subject")
 
         Map props = [:]
         props[MetricsPagingParamsHelper.PROP_CURRENT_PAGE] = 1
@@ -757,32 +782,32 @@ class UserAchievementsMetricsBuilderSpec extends DefaultIntSpec {
         props[MetricsParams.P_FROM_DAY_FILTER] = MetricsParams.DAY_FORMAT.format(dates[1])
         def fromDate1Res = skillsService.getMetricsData(proj.projectId, metricsId, props)
 
-        props[MetricsParams.P_TO_DAY_FILTER] = MetricsParams.DAY_FORMAT.format(dates[4])
+        props[MetricsParams.P_TO_DAY_FILTER] = MetricsParams.DAY_FORMAT.format(dates[3])
         def fromDate1AndToDate1Res = skillsService.getMetricsData(proj.projectId, metricsId, props)
 
         props[MetricsParams.P_FROM_DAY_FILTER] = MetricsParams.DAY_FORMAT.format(dates[3])
         def fromDate2AndToDate1Res = skillsService.getMetricsData(proj.projectId, metricsId, props)
 
-        props[MetricsParams.P_TO_DAY_FILTER] = MetricsParams.DAY_FORMAT.format(dates[3])
-        def fromDate2AndToDate2Res = skillsService.getMetricsData(proj.projectId, metricsId, props)
-
         then:
-        fromDate1Res.items.collect { new Date(it.achievedOn) }.unique().sort() == [dates[1], dates[2], dates[3], dates[4], dates[5]]
-        fromDate1AndToDate1Res.items.collect { new Date(it.achievedOn) }.unique().sort() == [dates[1], dates[2], dates[3], dates[4]]
-        fromDate2AndToDate1Res.items.collect { new Date(it.achievedOn) }.unique().sort() == [dates[3], dates[4]]
-        fromDate2AndToDate2Res.items.collect { new Date(it.achievedOn) }.unique().sort() == [dates[3]]
-
+        fromDate1Res.items.collect { new Date(it.achievedOn) }.unique().sort() == [dates[1], dates[2], dates[3], dates[4]]
+        fromDate1AndToDate1Res.items.collect { new Date(it.achievedOn) }.unique().sort() == [dates[1], dates[2], dates[3]]
+        fromDate2AndToDate1Res.items.collect { new Date(it.achievedOn) }.unique().sort() == [dates[3]]
     }
 
-    private void achieveLevelForUsers(List<Map> skills, int numUsers, int level, String type = "Overall") {
-        (1..numUsers).each {
-            String user = "user${it}_level${level}"
-            achieveLevel(skills, user, level, type)
+    private void achieveLevelForUsers(List<String> users, List<Map> skills, int numUsers, int level, String type = "Overall") {
+        List<String> usersToUse = (1..numUsers).collect({
+            String user = users.pop()
+            assert user
+            return user
+        })
+
+        usersToUse.each {
+            achieveLevel(skills, it, level, type)
         }
     }
 
     private void achieveLevel(List<Map> skills, String user, int level, String type = "Overall") {
-        use (TimeCategory) {
+        use(TimeCategory) {
             boolean found = false
             int skillIndex = 0
             while (!found) {

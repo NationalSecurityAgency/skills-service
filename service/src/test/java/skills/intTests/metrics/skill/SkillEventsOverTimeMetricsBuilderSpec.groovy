@@ -46,7 +46,7 @@ class SkillEventsOverTimeMetricsBuilderSpec  extends DefaultIntSpec {
     }
 
     def "number events over time"() {
-        List<String> users = (1..10).collect { "user$it" }
+        List<String> users = getRandomUsers(10)
         def proj = SkillsFactory.createProject()
         List<Map> skills = SkillsFactory.createSkills(10)
         skills.each { it.pointIncrement = 100; it.numPerformToCompletion = 5 }
