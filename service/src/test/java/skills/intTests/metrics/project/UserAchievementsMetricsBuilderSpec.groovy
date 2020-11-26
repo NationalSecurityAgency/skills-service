@@ -737,7 +737,6 @@ class UserAchievementsMetricsBuilderSpec extends DefaultIntSpec {
         when:
         props[MetricsParams.P_NAME_FILTER] = "skill 1"
         def skill1Res = skillsService.getMetricsData(proj.projectId, metricsId, props)
-        println JsonOutput.prettyPrint(JsonOutput.toJson(skill1Res))
         then:
         skill1Res.items.collect { it.name }.unique().sort() == ['Test Skill 1', 'Test Skill 1 Subject2',]
         skill1Res.totalNumItems == 10

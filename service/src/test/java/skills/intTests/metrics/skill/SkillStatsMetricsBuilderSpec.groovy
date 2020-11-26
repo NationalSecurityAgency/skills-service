@@ -80,9 +80,6 @@ class SkillStatsMetricsBuilderSpec extends DefaultIntSpec {
             return skillsService.getMetricsData(proj.projectId, metricsId, props)
         }
 
-        res.each {
-            println JsonOutput.toJson(it)
-        }
         then:
         res[0].numUsersAchieved == 4
         new Date(res[0].lastAchieved) == days[4]

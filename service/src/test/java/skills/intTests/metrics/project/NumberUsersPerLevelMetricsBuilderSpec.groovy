@@ -95,7 +95,6 @@ class NumberUsersPerLevelMetricsBuilderSpec extends DefaultIntSpec {
         props[MetricsParams.P_SUBJECT_ID] = subj.subjectId
         def res1 = skillsService.getMetricsData(proj.projectId, metricsId, props)
 
-//        println JsonOutput.toJson(res1)
         then:
         res.size() == 5
         res[0].value == "Level 1"
@@ -293,7 +292,6 @@ class NumberUsersPerLevelMetricsBuilderSpec extends DefaultIntSpec {
         int skillIndex = 0
         while (!found) {
             def res = skillsService.addSkill([projectId: skills[skillIndex].projectId, skillId: skills[skillIndex].skillId], user)
-            println "${user} for [${level}] ${res}"
             found = res.body.completed.findAll({ it.type == type })?.find { it.level == level }
             skillIndex++
         }

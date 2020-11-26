@@ -23,7 +23,7 @@ import skills.intTests.utils.SkillsFactory
 import skills.metrics.builders.MetricsParams
 import spock.lang.IgnoreRest
 
-class SkillUsageNavigatorMetricsBuilderSpec  extends DefaultIntSpec {
+class SkillUsageNavigatorMetricsBuilderSpec extends DefaultIntSpec {
 
     String metricsId = "skillUsageNavigatorChartBuilder"
 
@@ -53,7 +53,6 @@ class SkillUsageNavigatorMetricsBuilderSpec  extends DefaultIntSpec {
 
         when:
         def res = skillsService.getMetricsData(proj.projectId, metricsId, props)
-        println JsonOutput.toJson(res)
         then:
         res.size() == 1
         res[0].skillId == 'skill1'
