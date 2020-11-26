@@ -14,9 +14,9 @@
 
 name: Run integration tests using two way ssl
 
-on:
-  schedule:
-    - cron: '0 7 * * *'
+#on:
+#  schedule:
+#    - cron: '0 7 * * *'
 on:
   push:
     paths-ignore:
