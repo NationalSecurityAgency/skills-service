@@ -66,13 +66,13 @@ describe('Global Badges Tests', () => {
 
         // name causes id to be too long
         const msg = 'Badge ID cannot exceed 50 characters';
-        const validNameButInvalidId = Array(46).fill('a').join('');
+        const validNameButInvalidId = Array(47).fill('a').join('');
         cy.get('[data-cy=badgeName]').click();
         cy.get('[data-cy=badgeName]').invoke('val', validNameButInvalidId).trigger('input');
         cy.get('[data-cy=idError]').contains(msg).should('be.visible');
         cy.get('[data-cy=saveBadgeButton]').should('be.disabled');
-        cy.get('[data-cy=badgeName]').type('{backspace}');
-        cy.get('[data-cy=idError]').should('not.contain', msg)
+        cy.get('[data-cy=badgeName]').type('{backspace}{backspace}');
+        cy.get('[data-cy=idError]').should('not.be.visible');
         cy.get('[data-cy=saveBadgeButton]').should('be.enabled');
     });
 

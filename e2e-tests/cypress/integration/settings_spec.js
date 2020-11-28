@@ -248,7 +248,7 @@ describe('Settings Tests', () => {
         cy.get('[data-cy=connectionError]').should('be.visible');
     });
 
-    it('System Settings', () => {
+    it.only('System Settings', () => {
         cy.server();
         cy.route('GET', '/root/getSystemSettings').as('loadSystemSettings');
         cy.route('GET', '/app/userInfo').as('loadUserInfo');
@@ -330,15 +330,15 @@ describe('Settings Tests', () => {
         cy.get$('[data-cy=publicUrl]').type('{selectall}http://localhost:8082');
         cy.get$('[data-cy=resetTokenExpiration]').type('{selectall}2H25M22S');
         cy.get$('[data-cy=fromEmail]').type('{selectall}foo@skilltree.madeup');
-        cy.get$('[data-cy=customHeader]').clear().invoke('val', _3001).trigger('input');
-        cy.get$('[data-cy=customFooter]').clear().invoke('val',_3001).trigger('input');
+        cy.get$('[data-cy=customHeader]').clear().fill(_3001);
+        cy.get$('[data-cy=customFooter]').clear().fill(_3001);
         cy.get('[data-cy=customHeaderError]').should('be.visible');
         cy.get('[data-cy=customHeaderError]').contains('Custom Header may not be greater than 3000 characters');
         cy.get('[data-cy=customFooterError]').should('be.visible');
         cy.get('[data-cy=customFooterError]').contains('Custom Footer may not be greater than 3000 characters');
         cy.get('[data-cy=saveSystemSettings]').should('be.disabled');
-        cy.get$('[data-cy=customHeader]').clear().invoke('val', _3000).trigger('change');
-        cy.get$('[data-cy=customFooter]').clear().invoke('val',_3000).trigger('change');
+        cy.get$('[data-cy=customHeader]').clear().fill(_3000);
+        cy.get$('[data-cy=customFooter]').clear().fill(_3000);
         cy.get('[data-cy=customFooterError]').should('not.be.visible');
         cy.get('[data-cy=customHeaderError]').should('not.be.visible');
         cy.get('[data-cy=saveSystemSettings]').should('not.be.disabled');

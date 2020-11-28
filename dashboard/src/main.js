@@ -35,6 +35,7 @@ import {
   TablePlugin,
   FormInputPlugin,
   FormCheckboxPlugin,
+  InputGroupPlugin,
   CardPlugin,
   PaginationPlugin,
   CollapsePlugin,
@@ -95,6 +96,7 @@ Vue.use(AvatarPlugin);
 Vue.use(ButtonGroupPlugin);
 Vue.use(TablePlugin);
 Vue.use(FormInputPlugin);
+Vue.use(InputGroupPlugin);
 Vue.use(FormCheckboxPlugin);
 Vue.use(CardPlugin);
 Vue.use(PaginationPlugin);
