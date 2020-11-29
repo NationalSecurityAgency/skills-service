@@ -26,10 +26,11 @@ interface LevelDefRepo extends CrudRepository<LevelDef, Integer>{
 
     static interface SubjectLevelCount {
         String getSubject()
+        String getSkillId()
         Long getNumberLevels()
     }
 
-    @Query('''select sd.name as subject,  count(ld.id) as numberLevels 
+    @Query('''select sd.skillId as skillId, max(sd.name) as subject,  count(ld.id) as numberLevels 
             from LevelDef as ld, SkillDef as sd 
             where 
                 ld.skillRefId = sd.id and

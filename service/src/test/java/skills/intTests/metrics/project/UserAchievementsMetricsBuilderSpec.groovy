@@ -302,6 +302,7 @@ class UserAchievementsMetricsBuilderSpec extends DefaultIntSpec {
 
     }
 
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def "get achievements - sorting"() {
         def proj = SkillsFactory.createProject()
         List<Map> skills = SkillsFactory.createSkills(5)

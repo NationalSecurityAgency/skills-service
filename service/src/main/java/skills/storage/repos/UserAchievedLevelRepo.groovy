@@ -253,7 +253,7 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
         Long getNumberUsers()
     }
 
-    @Query('''select sd.name as skillId, ua.level as level, count(ua.id) as numberUsers 
+    @Query('''select ua.skillId as skillId, ua.level as level, count(ua.id) as numberUsers 
             from UserAchievement as ua, SkillDef as sd 
             where 
                 ua.skillId = sd.skillId and

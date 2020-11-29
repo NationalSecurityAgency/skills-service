@@ -55,7 +55,7 @@ class NumUsersPerSubjectPerLevelMetricsBuilder implements ProjectMetricsBuilder 
         List<LevelDefRepo.SubjectLevelCount> subjectLevel = levelDefRepo.countNumLevelsPerSubject(projectId)
         return subjectLevel.collect{
             int numberLevels = it.getNumberLevels()
-            List<UserAchievedLevelRepo.SkillAndLevelUserCount> userCountsForLevels = bySubjectId.get(it.getSubject())
+            List<UserAchievedLevelRepo.SkillAndLevelUserCount> userCountsForLevels = bySubjectId.get(it.getSkillId())
             List<NumUsersPerLevel> numUsersPerLevels = (1..numberLevels).collect {Integer level ->
                 UserAchievedLevelRepo.SkillAndLevelUserCount found = userCountsForLevels.find({it.level == level})
                 new NumUsersPerLevel(level: level, numberUsers: found?.getNumberUsers() ?: 0)

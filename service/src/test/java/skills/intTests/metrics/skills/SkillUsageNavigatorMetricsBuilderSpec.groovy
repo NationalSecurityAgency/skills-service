@@ -94,41 +94,41 @@ class SkillUsageNavigatorMetricsBuilderSpec extends DefaultIntSpec {
 
         then:
         res.size() == 10
-        res[0].skillId == 'skill1'
-        res[0].numUserAchieved == 1
-        res[0].numUsersInProgress == 4
-        new Date(res[0].lastReportedTimestamp) == days[5]
-        new Date(res[0].lastAchievedTimestamp) == days[5]
+        def skill1 = res.find { it.skillId == 'skill1' }
+        skill1.numUserAchieved == 1
+        skill1.numUsersInProgress == 4
+        new Date(skill1.lastReportedTimestamp) == days[5]
+        new Date(skill1.lastAchievedTimestamp) == days[5]
 
-        res[1].skillId == 'skill2'
-        res[1].numUserAchieved == 0
-        res[1].numUsersInProgress == 5
-        new Date(res[1].lastReportedTimestamp) == days[5]
-        !res[1].lastAchievedTimestamp
+        def skill2 = res.find { it.skillId == 'skill2' }
+        skill2.numUserAchieved == 0
+        skill2.numUsersInProgress == 5
+        new Date(skill2.lastReportedTimestamp) == days[5]
+        !skill2.lastAchievedTimestamp
 
-        res[2].skillId == 'skill3'
-        res[2].numUserAchieved == 0
-        res[2].numUsersInProgress == 5
-        new Date(res[2].lastReportedTimestamp) == days[5]
-        !res[2].lastAchievedTimestamp
+        def skill3 = res.find { it.skillId == 'skill3' }
+        skill3.numUserAchieved == 0
+        skill3.numUsersInProgress == 5
+        new Date(skill3.lastReportedTimestamp) == days[5]
+        !skill3.lastAchievedTimestamp
 
-        res[3].skillId == 'skill4'
-        res[3].numUserAchieved == 0
-        res[3].numUsersInProgress == 5
-        new Date(res[3].lastReportedTimestamp) == days[5]
-        !res[3].lastAchievedTimestamp
+        def skill4 = res.find { it.skillId == 'skill4' }
+        skill4.numUserAchieved == 0
+        skill4.numUsersInProgress == 5
+        new Date(skill4.lastReportedTimestamp) == days[5]
+        !skill4.lastAchievedTimestamp
 
-        res[4].skillId == 'skill5'
-        res[4].numUserAchieved == 0
-        res[4].numUsersInProgress == 5
-        new Date(res[4].lastReportedTimestamp) == days[5]
-        !res[4].lastAchievedTimestamp
+        def skill5 = res.find { it.skillId == 'skill5' }
+        skill5.numUserAchieved == 0
+        skill5.numUsersInProgress == 5
+        new Date(skill5.lastReportedTimestamp) == days[5]
+        !skill5.lastAchievedTimestamp
 
-        res[5].skillId == 'skill6'
-        res[5].numUserAchieved == 0
-        res[5].numUsersInProgress == 0
-        !res[5].lastReportedTimestamp
-        !res[5].lastAchievedTimestamp
+        def skill6 = res.find { it.skillId == 'skill6' }
+        skill6.numUserAchieved == 0
+        skill6.numUsersInProgress == 0
+        !skill6.lastReportedTimestamp
+        !skill6.lastAchievedTimestamp
     }
 
     def "last reported is later than last achieved"() {
