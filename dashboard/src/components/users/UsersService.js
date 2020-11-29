@@ -32,7 +32,7 @@ export default {
   },
 
   deleteSkillEvent(projectId, skill, userId) {
-    const timestamp = window.moment(skill.performedOn).valueOf();
+    const timestamp = window.dayjs(skill.performedOn).valueOf();
     return axios.delete(`/admin/projects/${projectId}/skills/${skill.skillId}/users/${userId}/events/${timestamp}`)
       .then((res) => res.data);
   },

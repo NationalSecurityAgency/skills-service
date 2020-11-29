@@ -248,7 +248,7 @@ describe('Settings Tests', () => {
         cy.get('[data-cy=connectionError]').should('be.visible');
     });
 
-    it.only('System Settings', () => {
+    it('System Settings', () => {
         cy.server();
         cy.route('GET', '/root/getSystemSettings').as('loadSystemSettings');
         cy.route('GET', '/app/userInfo').as('loadUserInfo');

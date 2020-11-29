@@ -55,7 +55,7 @@ limitations under the License.
             const loadedSkills = skills;
             this.skills = loadedSkills.map((loadedSkill) => {
               const copy = { ...loadedSkill };
-              copy.created = window.moment(loadedSkill.created);
+              copy.created = window.dayjs(loadedSkill.created);
               return copy;
             });
           })

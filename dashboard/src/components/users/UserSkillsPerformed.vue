@@ -109,7 +109,7 @@ limitations under the License.
         this.$refs.table.count = 0;
       },
       getDate(row) {
-        return window.moment(row.performedOn)
+        return window.dayjs(row.performedOn)
           .format('LLL');
       },
       deleteSkill(row) {

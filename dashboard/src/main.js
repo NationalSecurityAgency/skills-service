@@ -68,11 +68,6 @@ const getApex = () => import(
   'vue-apexcharts'
 );
 
-const getMoment = () => import(
-  /* webpackChunkName: "moment" */
-  'moment'
-);
-
 Vue.use(ClientTable, {}, false, 'bootstrap4', 'default');
 Vue.use(ServerTable, {}, false, 'bootstrap4', 'default');
 Vue.component('ValidationProvider', ValidationProvider);
@@ -113,11 +108,13 @@ setInteractionMode('custom', () => ({ on: ['input', 'change'] }));
 Vue.config.productionTip = false;
 
 window.axios = require('axios');
-
+window.dayjs = require('dayjs');
+const localizedFormatPlugin = require('dayjs/plugin/localizedFormat');
 require('./interceptors/errorHandler');
 require('./interceptors/clientVersionInterceptor');
-
 require('vue-multiselect/dist/vue-multiselect.min.css');
+
+window.dayjs.extend(localizedFormatPlugin);
 
 const isActiveProjectIdChange = (to, from) => to.params.projectId !== from.params.projectId;
 const isLoggedIn = () => store.getters.isAuthenticated;
@@ -180,9 +177,6 @@ store.dispatch('loadConfigState').finally(() => {
     getApex().then((VueApexCharts) => {
       Vue.component('apexchart', VueApexCharts.default);
       Vue.use(VueApexCharts.default);
-    });
-    getMoment().then((moment) => {
-      window.moment = moment.default;
     });
   });
 });

@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 import Vue from 'vue';
-import moment from 'moment';
 
-const dateFormatter = (value) => moment(value).format('YYYY-MM-DD HH:mm');
+const dateFormatter = (value) => window.dayjs(value).format('YYYY-MM-DD HH:mm');
 Vue.filter('date', dateFormatter);
 
 // this allows to call this function from an js code; to learn more about that read about javascript modules
