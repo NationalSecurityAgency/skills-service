@@ -31,9 +31,11 @@ import org.springframework.stereotype.Component
 import org.springframework.web.bind.annotation.*
 import skills.PublicProps
 import skills.auth.SecurityMode
+import skills.auth.UserAuthService
+import skills.auth.UserInfo
 import skills.controller.PublicPropsBasedValidator
-import skills.storage.model.auth.RoleName
-import skills.storage.model.auth.UserRole
+import skills.controller.exceptions.SkillsValidator
+import skills.controller.result.model.OAuth2Provider
 
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
@@ -45,7 +47,7 @@ import javax.servlet.http.HttpServletResponse
 class CreateAccountController {
 
     @Autowired
-    skills.auth.UserAuthService userAuthService
+    UserAuthService userAuthService
 
     @Autowired
     PasswordEncoder passwordEncoder
@@ -61,27 +63,23 @@ class CreateAccountController {
 
     @Conditional(SecurityMode.FormAuth)
     @PutMapping("createAccount")
-    void createAppUser(@RequestBody skills.auth.UserInfo userInfo, HttpServletResponse response) {
+    void createAppUser(@RequestBody UserInfo userInfo, HttpServletResponse response) {
         String password = userInfo.password
-        propsBasedValidator.validateMinStrLength(PublicProps.UiProp.minPasswordLength, "password", password)
-        propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxPasswordLength, "password", password)
-
-        userInfo.password = passwordEncoder.encode(password)
-        if (!userInfo.username) {
-            userInfo.username = userInfo.email
-        }
-        if (!userInfo.nickname) {
-            userInfo.nickname = "${userInfo.firstName} ${userInfo.lastName}"
-        }
-        userInfo.usernameForDisplay = userInfo.username
-        userInfo = userAuthService.createUser(userInfo)
+        userInfo = createUser(userInfo)
         userAuthService.autologin(userInfo, password)
     }
 
     @Conditional(SecurityMode.FormAuth)
     @PutMapping("createRootAccount")
-    void createRootUser(@RequestBody skills.auth.UserInfo userInfo, HttpServletResponse response) {
-        skills.controller.exceptions.SkillsValidator.isTrue(!userAuthService.rootExists(), 'A root user already exists! Granting additional root privileges requires a root user to grant them!')
+    void createRootUser(@RequestBody UserInfo userInfo, HttpServletResponse response) {
+        SkillsValidator.isTrue(!userAuthService.rootExists(), 'A root user already exists! Granting additional root privileges requires a root user to grant them!')
+        String password = userInfo.password
+        userInfo = createUser(userInfo)
+        userAuthService.grantRoot(userInfo.username)
+        userAuthService.autologin(userInfo, password)
+    }
+
+    private UserInfo createUser(UserInfo userInfo) {
         String password = userInfo.password
         propsBasedValidator.validateMinStrLength(PublicProps.UiProp.minPasswordLength, "password", password)
         propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxPasswordLength, "password", password)
@@ -96,18 +94,14 @@ class CreateAccountController {
         if (!userInfo.usernameForDisplay) {
             userInfo.usernameForDisplay = userInfo.username
         }
-        userInfo.authorities = [new skills.auth.UserSkillsGrantedAuthority(new UserRole(
-                roleName: RoleName.ROLE_SUPER_DUPER_USER
-        ))]
-        userAuthService.createUser(userInfo, true)
-        userAuthService.autologin(userInfo, password)
+        return userAuthService.createUser(userInfo)
     }
 
     @Conditional(SecurityMode.PkiAuth)
     @RequestMapping(value = "/grantFirstRoot", method = [RequestMethod.POST, RequestMethod.PUT])
     void grantFirstRoot(HttpServletRequest request) {
-        skills.controller.exceptions.SkillsValidator.isTrue(!userAuthService.rootExists(), 'A root user already exists! Granting additional root privileges requires a root user to grant them!')
-        skills.controller.exceptions.SkillsValidator.isNotNull(request.getUserPrincipal(), 'Granting the first root user is only available in PKI mode, but it looks like the request was not made by an authenticated account!')
+        SkillsValidator.isTrue(!userAuthService.rootExists(), 'A root user already exists! Granting additional root privileges requires a root user to grant them!')
+        SkillsValidator.isNotNull(request.getUserPrincipal(), 'Granting the first root user is only available in PKI mode, but it looks like the request was not made by an authenticated account!')
         userAuthService.grantRoot(request.getUserPrincipal().name)
     }
 
@@ -119,11 +113,11 @@ class CreateAccountController {
 
     @Conditional(SecurityMode.FormAuth)
     @GetMapping("/app/oAuthProviders")
-    List<skills.controller.result.model.OAuth2Provider> getOAuthProviders() {
-        List<skills.controller.result.model.OAuth2Provider> providers = []
+    List<OAuth2Provider> getOAuthProviders() {
+        List<OAuth2Provider> providers = []
         if (clientRegistrationRepository && oAuth2ProviderProperties?.registration) {
             clientRegistrationRepository.iterator().each { ClientRegistration clientRegistration ->
-                skills.controller.result.model.OAuth2Provider oAuth2Provider = oAuth2ProviderProperties.registration.get(clientRegistration.registrationId)
+                OAuth2Provider oAuth2Provider = oAuth2ProviderProperties.registration.get(clientRegistration.registrationId)
                 oAuth2Provider.registrationId = oAuth2Provider.registrationId ?: clientRegistration.registrationId
                 oAuth2Provider.clientName = oAuth2Provider.clientName ?: clientRegistration.clientName
                 providers.add(oAuth2Provider)
@@ -137,7 +131,7 @@ class CreateAccountController {
     @ConfigurationProperties(prefix = "spring.security.oauth2.client")
     @Conditional(SecurityMode.FormAuth)
     static class OAuth2ProviderProperties {
-        final Map<String, skills.controller.result.model.OAuth2Provider> registration = new HashMap<>()
+        final Map<String, OAuth2Provider> registration = new HashMap<>()
     }
 
     @Component

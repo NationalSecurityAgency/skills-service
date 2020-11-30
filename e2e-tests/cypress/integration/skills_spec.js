@@ -246,7 +246,7 @@ describe('Skills Tests', () => {
         cy.contains('ID: Lotsofspecial')
     });
 
-    it.only('create skill using enter key', () => {
+    it('create skill using enter key', () => {
       const expectedId = 'LotsofspecialPcharsSkill';
       const providedName = "!L@o#t$s of %s^p&e*c(i)/#?a_l++_|}{P c'ha'rs";
       cy.server();
@@ -534,5 +534,24 @@ describe('Skills Tests', () => {
 
       cy.contains(`ID: ${newId}`)
   });
+
+  it('skill user details does not break breadcrumb bar', () => {
+    cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1', {
+      projectId: 'proj1',
+      subjectId: "subj1",
+      skillId: "skill1",
+      name: "Skill 1",
+      pointIncrement: '50',
+      numPerformToCompletion: '5'
+    });
+
+    cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'someuser', timestamp: new Date().getTime()})
+    cy.visit('/projects/proj1/subjects/subj1/skills/skill1/');
+    cy.get('[data-cy=nav-Users]').click();
+    cy.contains('Details').click();
+    cy.get('[data-cy=breadcrumb-subj1]').should('be.visible');
+    cy.get('[data-cy=breadcrumb-skill1]').should('be.visible');
+    cy.get('[data-cy=breadcrumb-Users]').should('be.visible');
+  })
 
 });
