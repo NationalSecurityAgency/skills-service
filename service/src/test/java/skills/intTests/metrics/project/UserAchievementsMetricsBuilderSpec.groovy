@@ -302,7 +302,6 @@ class UserAchievementsMetricsBuilderSpec extends DefaultIntSpec {
 
     }
 
-    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def "get achievements - sorting"() {
         def proj = SkillsFactory.createProject()
         List<Map> skills = SkillsFactory.createSkills(5)
@@ -773,14 +772,19 @@ class UserAchievementsMetricsBuilderSpec extends DefaultIntSpec {
 
         Map props = [:]
         props[MetricsPagingParamsHelper.PROP_CURRENT_PAGE] = 1
-        props[MetricsPagingParamsHelper.PROP_PAGE_SIZE] = 50
+        props[MetricsPagingParamsHelper.PROP_PAGE_SIZE] = 100
         props[MetricsPagingParamsHelper.PROP_SORT_DESC] = false
         props[MetricsPagingParamsHelper.PROP_SORT_BY] = "userName"
         props[MetricsParams.P_ACHIEVEMENT_TYPES] = allAchievementTypes
 
         when:
+        def fromDate0Res = skillsService.getMetricsData(proj.projectId, metricsId, props)
+
         props[MetricsParams.P_FROM_DAY_FILTER] = MetricsParams.DAY_FORMAT.format(dates[1])
         def fromDate1Res = skillsService.getMetricsData(proj.projectId, metricsId, props)
+
+        props[MetricsParams.P_FROM_DAY_FILTER] = MetricsParams.DAY_FORMAT.format(dates[2])
+        def fromDate2Res = skillsService.getMetricsData(proj.projectId, metricsId, props)
 
         props[MetricsParams.P_TO_DAY_FILTER] = MetricsParams.DAY_FORMAT.format(dates[3])
         def fromDate1AndToDate1Res = skillsService.getMetricsData(proj.projectId, metricsId, props)
@@ -789,8 +793,19 @@ class UserAchievementsMetricsBuilderSpec extends DefaultIntSpec {
         def fromDate2AndToDate1Res = skillsService.getMetricsData(proj.projectId, metricsId, props)
 
         then:
-        fromDate1Res.items.collect { new Date(it.achievedOn) }.unique().sort() == [dates[1], dates[2], dates[3], dates[4]]
-        fromDate1AndToDate1Res.items.collect { new Date(it.achievedOn) }.unique().sort() == [dates[1], dates[2], dates[3]]
+        fromDate0Res.totalNumItems == 71
+        fromDate0Res.items.collect { new Date(it.achievedOn) }.unique().sort() == [dates[1], dates[2], dates[3], dates[4], dates[5]]
+
+        fromDate1Res.totalNumItems == 71
+        fromDate1Res.items.collect { new Date(it.achievedOn) }.unique().sort() == [dates[1], dates[2], dates[3], dates[4], dates[5]]
+
+        fromDate2Res.totalNumItems == 62
+        fromDate2Res.items.collect { new Date(it.achievedOn) }.unique().sort() == [dates[2], dates[3], dates[4], dates[5]]
+
+        fromDate1AndToDate1Res.totalNumItems == 29
+        fromDate1AndToDate1Res.items.collect { new Date(it.achievedOn) }.unique().sort() == [dates[2], dates[3]]
+
+        fromDate2AndToDate1Res.totalNumItems == 24
         fromDate2AndToDate1Res.items.collect { new Date(it.achievedOn) }.unique().sort() == [dates[3]]
     }
 

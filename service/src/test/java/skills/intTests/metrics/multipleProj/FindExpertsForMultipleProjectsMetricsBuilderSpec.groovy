@@ -363,21 +363,22 @@ class FindExpertsForMultipleProjectsMetricsBuilderSpec extends DefaultIntSpec {
         props[MetricsPagingParamsHelper.PROP_CURRENT_PAGE] = 2
         def res4 = supervisor.getGlobalMetricsData("findExpertsForMultipleProjectsChartBuilder", props)
 
+        List<String> usersSorted = users.sort()
         List<String> usersReversed = users.reverse()
         then:
-        res1.totalNum == users.size()
+        res1.totalNum == usersSorted.size()
         res1.data.size() == 5
-        res1.data[0].userId == users[0]
-        res1.data[1].userId == users[1]
-        res1.data[2].userId == users[2]
-        res1.data[3].userId == users[3]
-        res1.data[4].userId == users[4]
+        res1.data[0].userId == usersSorted[0]
+        res1.data[1].userId == usersSorted[1]
+        res1.data[2].userId == usersSorted[2]
+        res1.data[3].userId == usersSorted[3]
+        res1.data[4].userId == usersSorted[4]
 
         res2.data.size() == 4
-        res2.data[0].userId == users[5]
-        res2.data[1].userId == users[6]
-        res2.data[2].userId == users[7]
-        res2.data[3].userId == users[8]
+        res2.data[0].userId == usersSorted[5]
+        res2.data[1].userId == usersSorted[6]
+        res2.data[2].userId == usersSorted[7]
+        res2.data[3].userId == usersSorted[8]
 
 
         res3.totalNum == usersReversed.size()
