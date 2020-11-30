@@ -99,26 +99,21 @@ limitations under the License.
 
         let displayPage = 'ClientDisplayPreview';
         let skillsPage = 'UserSkillEvents';
-        let metricsPage = 'UserMetrics';
 
         if (hasSkill) {
           displayPage = `${displayPage}Skill`;
           skillsPage = `${skillsPage}Skill`;
-          metricsPage = `${metricsPage}Skill`;
         } else if (hasSubject) {
           displayPage = `${displayPage}Subject`;
           skillsPage = `${skillsPage}Subject`;
-          metricsPage = `${metricsPage}Subject`;
         } else if (hasBadge) {
           displayPage = `${displayPage}Badge`;
           skillsPage = `${skillsPage}Badge`;
-          metricsPage = `${metricsPage}Badge`;
         }
 
         return [
           { name: 'Client Display', iconClass: 'fa-user skills-color-skills', page: `${displayPage}` },
           { name: 'Performed Skills', iconClass: 'fa-award skills-color-events', page: `${skillsPage}` },
-          { name: 'Metrics', iconClass: 'fa-chart-bar skills-color-metrics', page: `${metricsPage}` },
         ];
       },
     },

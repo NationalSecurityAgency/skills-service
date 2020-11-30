@@ -82,9 +82,9 @@ limitations under the License.
         <b-form-select v-model="pageSizeInternal" :options="options.pagination.possiblePageSizes"
                        size="sm" class="mx-2" style="width: 4rem;" :disabled="disabledPaging"
                        data-cy="skillsBTablePageSize"/>
-        <b-button size="sm" v-b-tooltip.hover title="Download CSV" variant="outline-info" :disabled="disabled">
-          <i class="fas fa-download"></i>
-        </b-button>
+<!--        <b-button size="sm" v-b-tooltip.hover title="Download CSV" variant="outline-info" :disabled="disabled">-->
+<!--          <i class="fas fa-download"></i>-->
+<!--        </b-button>-->
       </div>
     </div>
   </div>

@@ -365,11 +365,6 @@ const router = new Router({
         path: 'skillEvents',
         component: UserSkillsPerformed,
         meta: { requiresAuth: true, reportSkillId: 'VisitUserPerformedSkills' },
-      }, {
-        name: 'UserMetricsSubject',
-        path: 'metrics',
-        component: SectionMetrics,
-        meta: { requiresAuth: true, reportSkillId: 'VisitUserStats', metricsSection: SECTION.USERS },
       }],
     },
     {
@@ -386,11 +381,6 @@ const router = new Router({
         path: 'skillEvents',
         component: UserSkillsPerformed,
         meta: { requiresAuth: true, reportSkillId: 'VisitUserPerformedSkills' },
-      }, {
-        name: 'UserMetricsSkill',
-        path: 'metrics',
-        component: SectionMetrics,
-        meta: { requiresAuth: true, reportSkillId: 'VisitUserStats', metricsSection: SECTION.USERS },
       }],
     },
     {
@@ -407,11 +397,6 @@ const router = new Router({
         path: 'skillEvents',
         component: UserSkillsPerformed,
         meta: { requiresAuth: true, reportSkillId: 'VisitUserPerformedSkills' },
-      }, {
-        name: 'UserMetricsBadge',
-        path: 'metrics',
-        component: SectionMetrics,
-        meta: { requiresAuth: true, reportSkillId: 'VisitUserStats', metricsSection: SECTION.USERS },
       }],
     },
     {
