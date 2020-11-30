@@ -218,6 +218,7 @@ class UserAchievementsMetricsBuilderSpec extends DefaultIntSpec {
         body.explanation == "Metrics[${metricsId}]: Invalid value [userId] for [sortBy] property. Suppored values are [achievedOn, userName]"
     }
 
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def "get achievements"() {
         def proj = SkillsFactory.createProject()
         List<Map> skills = SkillsFactory.createSkills(5)
@@ -263,7 +264,7 @@ class UserAchievementsMetricsBuilderSpec extends DefaultIntSpec {
         then:
         res.totalNumItems == 14
         def items = res.items
-        items.collect { it.userId }.sort() == [users[0],
+        items.collect { it.userId } == [users[0],
                                         users[0],
                                         users[0],
                                         users[1],
@@ -278,28 +279,28 @@ class UserAchievementsMetricsBuilderSpec extends DefaultIntSpec {
                                         users[2],
                                         users[3],
                                         users[3],
-                                        users[3],].sort()
+                                        users[3],]
 
-        resPage1.items.collect { it.userId }.sort() == [
+        resPage1.items.collect { it.userId } == [
                 users[0],
                 users[0],
                 users[0],
                 users[1],
-                users[1],].sort()
+                users[1],]
 
-        resPage2.items.collect { it.userId }.sort() == [
+        resPage2.items.collect { it.userId } == [
                 users[1],
                 users[2],
                 users[2],
                 users[2],
                 users[2],
-        ].sort()
-        resPage3.items.collect { it.userId }.sort() == [
+        ]
+        resPage3.items.collect { it.userId } == [
                 users[2],
                 users[3],
                 users[3],
                 users[3],
-        ].sort()
+        ]
     }
 
     @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
