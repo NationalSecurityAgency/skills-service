@@ -23,6 +23,7 @@ import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
 import skills.metrics.builders.MetricsPagingParamsHelper
 import skills.metrics.builders.MetricsParams
+import spock.lang.IgnoreIf
 
 class FindExpertsForMultipleProjectsMetricsBuilderSpec extends DefaultIntSpec {
 
@@ -315,6 +316,7 @@ class FindExpertsForMultipleProjectsMetricsBuilderSpec extends DefaultIntSpec {
         res5.totalNum == 0
     }
 
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def "find users within multiple projects - page through results - verify sorting"() {
         SkillsService supervisor = createSupervisor();
         int numProjects = 2;

@@ -263,7 +263,7 @@ class UserAchievementsMetricsBuilderSpec extends DefaultIntSpec {
         then:
         res.totalNumItems == 14
         def items = res.items
-        items.collect { it.userId } == [users[0],
+        items.collect { it.userId }.sort() == [users[0],
                                         users[0],
                                         users[0],
                                         users[1],
@@ -278,30 +278,31 @@ class UserAchievementsMetricsBuilderSpec extends DefaultIntSpec {
                                         users[2],
                                         users[3],
                                         users[3],
-                                        users[3],]
+                                        users[3],].sort()
 
-        resPage1.items.collect { it.userId } == [
+        resPage1.items.collect { it.userId }.sort() == [
                 users[0],
                 users[0],
                 users[0],
                 users[1],
-                users[1],]
+                users[1],].sort()
 
-        resPage2.items.collect { it.userId } == [
+        resPage2.items.collect { it.userId }.sort() == [
                 users[1],
                 users[2],
                 users[2],
                 users[2],
                 users[2],
-        ]
-        resPage3.items.collect { it.userId } == [
+        ].sort()
+        resPage3.items.collect { it.userId }.sort() == [
                 users[2],
                 users[3],
                 users[3],
-                users[3],]
-
+                users[3],
+        ].sort()
     }
 
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def "get achievements - sorting"() {
         def proj = SkillsFactory.createProject()
         List<Map> skills = SkillsFactory.createSkills(5)
