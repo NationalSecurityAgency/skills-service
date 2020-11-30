@@ -163,18 +163,25 @@ describe('Global Badges Tests', () => {
             originalBadgeId: ''
         });
 
+        cy.route('GET', '/supervisor/badges').as('getBadges');
+        cy.route('GET', '/supervisor/projects/proj2/levels').as('getLevels');
+        cy.route('GET', '/supervisor/badges/a_badge/projects/available').as('getAvailableLevels');
+
         cy.visit('/');
         cy.clickNav('Badges');
-        cy.contains('Manage').click();
+        cy.wait('@getBadges');
+        cy.contains('Manage').click({force:true});
         cy.get('.multiselect__tags').click();
         cy.get('.multiselect__tags input').type('{enter}');
         cy.get('div.table-responsive').should('be.visible');
         cy.clickNav('Levels');
+        cy.wait('@getAvailableLevels');
 
-        cy.get('.multiselect__tags').first().click();
+        cy.get('#skills-selector').first().click();
         cy.get('.multiselect__tags input').first().type('proj2{enter}');
 
-        cy.get('.multiselect__tags').last().click();
+        cy.get('#level-selector').last().click();
+        cy.wait('@getLevels');
         cy.get('.multiselect__tags input').last().type('5{enter}');
 
         cy.contains('Add').click();
@@ -411,7 +418,7 @@ describe('Global Badges Tests', () => {
         cy.get('div.table-responsive').should('be.visible');
         cy.clickNav('Levels');
 
-        cy.get('.multiselect__tags').first().click();
+        cy.get('.multiselect__tags').first().click({force:true});
         cy.get('.multiselect__tags input').first().type('proj2{enter}');
 
         cy.get('.multiselect__tags').last().click();
@@ -485,6 +492,9 @@ describe('Global Badges Tests', () => {
             version: 0,
         });
 
+        cy.route('GET', '/supervisor/projects/proj2/levels').as('getLevels');
+        cy.route('GET', '/supervisor/badges/ABadgeBadge/projects/available').as('getAvailableLevels');
+
         cy.visit('/');
 
         cy.clickNav('Badges');
@@ -500,12 +510,14 @@ describe('Global Badges Tests', () => {
 
         cy.contains('A Badge').should('exist');
         cy.contains('Manage').click();
+        //wahat to wait on....
         cy.get('.multiselect__tags').click();
         cy.get('.multiselect__tags input').type('{enter}');
         cy.get('div.table-responsive').should('be.visible');
         cy.clickNav('Levels');
+        cy.wait('@getAvailableLevels');
 
-        cy.get('.multiselect__tags').first().click();
+        cy.get('.multiselect__tags').first().click({force: true});
         cy.get('.multiselect__tags input').first().type('proj2{enter}');
 
         cy.get('.multiselect__tags').last().click();

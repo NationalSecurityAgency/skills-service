@@ -189,11 +189,11 @@ describe('Badges Tests', () => {
         const msg = 'Badge ID cannot exceed 50 characters';
         const validNameButInvalidId = Array(46).fill('a').join('');
         cy.get('[data-cy=badgeName]').click();
-        cy.get('[data-cy=badgeName]').invoke('val', validNameButInvalidId).trigger('input');
-        cy.get('[data-cy=idError]').contains(msg).should('be.visible');
+        cy.get('[data-cy=badgeName]').fill( validNameButInvalidId);
+        cy.get('[data-cy=idError]').should('be.visible');
         cy.get('[data-cy=saveBadgeButton]').should('be.disabled');
         cy.get('[data-cy=badgeName]').type('{backspace}');
-        cy.get('[data-cy=idError]').should('not.contain', msg)
+        cy.get('[data-cy=idError]').should('not.be.visible');
         cy.get('[data-cy=saveBadgeButton]').should('be.enabled');
     });
 
@@ -263,7 +263,7 @@ describe('Badges Tests', () => {
             cy.getIdField().type(element);
             cy.get('[data-cy=idError]').contains(msg).should('be.visible');
             cy.getIdField().type('{backspace}');
-            cy.get('[data-cy=idError]').should('not.contain', msg)
+            cy.get('[data-cy=idError]').should('not.be.visible');
         })
 
         // badge name must not be already taken
@@ -284,7 +284,7 @@ describe('Badges Tests', () => {
         msg='Badge Description cannot exceed 2000 characters';
         const invalidDescription = Array(2000).fill('a').join('');
         // it takes way too long using .type method
-        cy.get('#markdown-editor textarea').invoke('val', invalidDescription).trigger('change');
+        cy.get('#markdown-editor textarea').fill(invalidDescription);
         cy.get('#markdown-editor').type('a');
         cy.get('[data-cy=badgeDescriptionError]').contains(msg).should('be.visible');
         cy.get('#markdown-editor').type('{backspace}');
