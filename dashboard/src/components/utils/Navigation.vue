@@ -56,13 +56,9 @@ limitations under the License.
           </ul>
         </b-collapse>
       </div>
-      <div class="col-md">
-        <div v-for="(navItem) of navItems" :key="navItem.name">
-          <div v-if="menuSelections.get(navItem.name)">
-            <div class="container-fluid pb-4">
-              <router-view></router-view>
-            </div>
-          </div>
+      <div class="col-md skills-menu-content">
+        <div class="container-fluid pb-4">
+          <router-view></router-view>
         </div>
       </div>
     </div>
@@ -166,6 +162,12 @@ limitations under the License.
     .skills-nav {
       min-height: calc(100vh - 10rem);
     }
+  }
+
+  .skills-menu-content {
+    /* this little hack is required to prevent apexcharts from wrapping onto a new line;
+    the gist is that they calculate width dynamically and do not work properly with the width of 0*/
+    min-width: 1rem;
   }
 
 </style>
