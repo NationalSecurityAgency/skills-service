@@ -14,11 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-<div class="card mt-2"  data-cy="subjectNumUsersPerLevelOverTime">
-  <div class="card-header">
-    <h5>Number of users for each level over time</h5>
-  </div>
-  <div class="card-body">
+  <metrics-card title="Number of users for each level over time" data-cy="subjectNumUsersPerLevelOverTime">
     <b-form inline class="mb-4">
       <b-overlay :show="loading.subjects" rounded="sm" opacity="0.5"
                  spinner-variant="info" spinner-type="grow" spinner-small>
@@ -48,17 +44,18 @@ limitations under the License.
         </div>
       </template>
     </b-overlay>
-  </div>
-</div>
+  </metrics-card >
 </template>
 
 <script>
   import numberFormatter from '@/filters/NumberFilter';
   import MetricsService from '../MetricsService';
   import SubjectsService from '../../subjects/SubjectsService';
+  import MetricsCard from '../utils/MetricsCard';
 
   export default {
     name: 'SubjectLevelsOverTime',
+    components: { MetricsCard },
     data() {
       return {
         loading: {

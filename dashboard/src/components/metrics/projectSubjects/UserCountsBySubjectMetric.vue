@@ -14,11 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div class="card" data-cy="userCountsBySubjectMetric">
-    <div class="card-header">
-      <h5>Number of users for each level for each subject</h5>
-    </div>
-    <div class="card-body">
+  <metrics-card title="Number of users for each level for each subject" data-cy="userCountsBySubjectMetric">
       <b-overlay v-if="loading" :show="loading" opacity=".5">
         <apexchart v-if="loading" type="bar" height="350" :options="{}" :series="[]"></apexchart>
       </b-overlay>
@@ -29,15 +25,16 @@ limitations under the License.
             <i class="fas fa-user-clock"></i> Users have not achieved any levels, yet...</div>
         </template>
       </b-overlay>
-    </div>
-  </div>
+  </metrics-card>
 </template>
 
 <script>
   import MetricsService from '../MetricsService';
+  import MetricsCard from '../utils/MetricsCard';
 
   export default {
     name: 'UserCountsBySubjectMetric',
+    components: { MetricsCard },
     data() {
       return {
         loading: true,

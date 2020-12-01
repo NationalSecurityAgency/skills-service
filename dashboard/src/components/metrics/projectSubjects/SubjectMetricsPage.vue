@@ -16,7 +16,7 @@ limitations under the License.
 <template>
 <div>
   <user-counts-by-subject-metric />
-  <subject-levels-over-time />
+  <subject-levels-over-time class="my-3"/>
 </div>
 </template>
 
