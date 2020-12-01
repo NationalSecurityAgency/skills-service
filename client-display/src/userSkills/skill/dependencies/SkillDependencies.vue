@@ -37,10 +37,14 @@ limitations under the License.
 </template>
 
 <script>
-  import vis from 'vis';
   import 'vis/dist/vis.css';
   import GraphLegend from '@/userSkills/skill/dependencies/GraphLegend';
   import SkillDependencySummary from '@/userSkills/skill/dependencies/SkillDependencySummary';
+
+  const getVis = () => import(
+  /* webpackChunkName: "vis" */
+  'vis'
+  );
 
   export default {
     name: 'SkillDependencies',
@@ -92,7 +96,9 @@ limitations under the License.
       };
     },
     mounted() {
-      this.createGraph();
+      getVis().then((vis) => {
+        this.createGraph(vis);
+      });
     },
     beforeDestroy() {
       this.cleanUp();
@@ -108,10 +114,10 @@ limitations under the License.
         const width = window.innerWidth;
         return width <= 768;
       },
-      createGraph() {
+      createGraph(vis) {
         this.cleanUp();
 
-        const data = this.buildData();
+        const data = this.buildData(vis);
         const container = document.getElementById('dependent-skills-network');
         this.network = new vis.Network(container, data, this.displayOptions);
         // const self = this;
@@ -177,7 +183,7 @@ limitations under the License.
 
         return { ...skillItem, ...{ isCrossProject: crossProj } };
       },
-      buildData() {
+      buildData(vis) {
         const nodes = new vis.DataSet();
         const edges = new vis.DataSet();
         const createdSkillIds = [];

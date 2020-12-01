@@ -13,29 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import VueApexCharts from 'vue-apexcharts';
-
 import Vue from 'vue';
-import App from '@/App';
-import router from '@/router';
-import store from '@/store';
-import 'apexcharts';
-import '@/common/filter/DayJsFilters';
 
-Vue.config.productionTip = false;
-
-Vue.use(VueApexCharts);
-
-let dayjs = require('dayjs');
-const relativeTimePlugin = require('dayjs/plugin/relativeTime');
-
-dayjs = dayjs.extend(relativeTimePlugin);
-Vue.prototype.$dayjs = dayjs;
-
-require('@/common/softwareVersion/softwareVersionInterceptor');
-
-new Vue({
-  router,
-  store,
-  render: (h) => h(App),
-}).$mount('#app');
+Vue.filter('dayjs', (dateStr, format) => {
+  if (!dateStr) return '';
+  return this.$dayjs(dateStr, format);
+});
+Vue.filter('relativeTime', (date) => this.$dayjs(date).fromNow());
