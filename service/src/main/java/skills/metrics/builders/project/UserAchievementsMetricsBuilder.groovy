@@ -76,7 +76,7 @@ class UserAchievementsMetricsBuilder implements ProjectMetricsBuilder {
 
         List<String> achievementTypes = MetricsParams.getAchievementTypes(projectId, chartId, props)
         List<SkillDef.ContainerType> achievementTypesWithoutOverall = achievementTypes.findAll({ !it.equalsIgnoreCase(MetricsParams.ACHIEVEMENT_TYPE_OVERALL) }).collect { SkillDef.ContainerType.valueOf(it) }
-        String allNonOverallTypes = achievementTypesWithoutOverall.size() < 3 ? "false" : true
+        String allNonOverallTypes = achievementTypesWithoutOverall.size() < 3 ? "false" : "true"
         String includeOverallType = achievementTypes.contains(MetricsParams.ACHIEVEMENT_TYPE_OVERALL) ? "true" : "false"
 
         int totalNumItems = userAchievedRepo.countForAchievementNavigator(
@@ -127,13 +127,13 @@ class UserAchievementsMetricsBuilder implements ProjectMetricsBuilder {
         MetricUserAchievement res = new MetricUserAchievement(
                 achievedOn: achievement.achievedOn.time,
                 userId: achievement.userId,
-                userName: achievement.userId)
+                userName: achievement.userId,
+                name: "Overall",
+                type: "Overall",
+                level: achievement.level,
+        )
 
-        if (!achievement.skillId) {
-            res.name = "Overall"
-            res.type = "Overall"
-            res.level = achievement.level
-        } else {
+        if (achievement.skillId) {
             res.skillId = skillDef.skillId
             res.name = skillDef.name
             res.type = skillDef.type.toString()

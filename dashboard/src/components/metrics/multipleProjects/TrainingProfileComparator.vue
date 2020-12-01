@@ -119,15 +119,11 @@ limitations under the License.
     },
     watch: {
       'projects.selected': function rebuild() {
-        // console.log('now works');
         this.genDataForCharts();
       },
     },
     methods: {
       genDataForCharts() {
-        // console.log('ik here');
-        // this.loading = true;
-
         this.numSkillsChart.labels = this.projects.selected.map((proj) => proj.name);
         this.numSkillsChart.series = this.projects.selected.map((proj) => proj.numSkills);
 

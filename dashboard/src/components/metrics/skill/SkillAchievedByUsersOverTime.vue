@@ -121,7 +121,6 @@ limitations under the License.
           series.push([x, y]);
 
           baseXVal += 86400000;
-          // console.log(`${xValStartGrowing} <> ${x}`);
           const randomValue = Math.floor(Math.random() * (yrange.max - yrange.min + 1)) + yrange.min;
           baseYVal += randomValue;
           i += 1;

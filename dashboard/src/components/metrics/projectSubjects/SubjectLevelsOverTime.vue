@@ -103,7 +103,6 @@ limitations under the License.
     },
     mounted() {
       this.loadSubjects();
-      // this.loadChart('subj1');
     },
     computed: {
       isSeriesEmpty() {
