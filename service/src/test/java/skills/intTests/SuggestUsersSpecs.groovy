@@ -77,7 +77,7 @@ class SuggestUsersSpecs extends DefaultIntSpec {
 
         then:
         results1
-        results1 == [users.get(4)]
+        results1.contains(users.get(4))
         results2
         results2.unique().size() == results2.size()
         users.containsAll(results2)
