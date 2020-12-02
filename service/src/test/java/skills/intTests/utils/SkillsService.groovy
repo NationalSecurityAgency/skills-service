@@ -444,7 +444,7 @@ class SkillsService {
     }
 
     @Profile
-    def addSkill(Map props, String userId = null, Date date = null) {
+    def addSkill(Map props, String userId = null, Date date = new Date()) {
         if (userId) {
             userId = getUserId(userId)
             assert date
@@ -731,9 +731,20 @@ class SkillsService {
         return wsHelper.adminDelete(getDeleteLevelUrl(projectId, subjectId))
     }
 
-    def getMetricsChart(String projectId, chartBuilderId, String section, String sectionId, Map props=null) {
+    @Deprecated
+    def getMetricsChart(String projectId, String chartBuilderId, String section, String sectionId, Map props=null) {
         String endpoint = "/projects/${projectId}/${section}/${sectionId}/metrics/${chartBuilderId}"
         wsHelper.adminGet(endpoint, props)
+    }
+
+    def getMetricsData(String projectId, String metricsId, Map props=null) {
+        String endpoint = "/projects/${projectId}/metrics/${metricsId}"
+        wsHelper.adminGet(endpoint, props)
+    }
+
+    def getGlobalMetricsData(String metricsId, Map props=null) {
+        String endpoint = "/metrics/${metricsId}"
+        wsHelper.supervisorGet(endpoint, props)
     }
 
     def getAllMetricsChartsForSection(String projectId, String section, String sectionId, Map props=null) {

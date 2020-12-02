@@ -56,37 +56,18 @@ class AdminUsersService {
     @Autowired
     AccessSettingsStorageService accessSettingsStorageService
 
-    List<TimestampCountItem> getProjectUsage(String projectId, Integer numDays) {
-        Date startDate
-        use (TimeCategory) {
-            startDate = (numDays-1).days.ago
-            startDate.clearTime()
-        }
-
-        List<DayCountItem> res = userPointsRepo.findDistinctUserCountsByProject(projectId, startDate)
+    List<TimestampCountItem> getUsage(String projectId, String skillId, Date start) {
+        Date startDate = new Date(start.time).clearTime()
+        List<DayCountItem> res = skillId ?
+                userPointsRepo.findDistinctUserCountsBySkillId(projectId, skillId, startDate) :
+                userPointsRepo.findDistinctUserCountsByProject(projectId, startDate)
 
         List<TimestampCountItem> countsPerDay = []
-        startDate.upto(new Date().clearTime()) { Date theDate ->
-            DayCountItem found = res.find({it.day.clearTime() == theDate})
-            countsPerDay << new TimestampCountItem(value: theDate.time, count: found?.count ?: 0)
-        }
-
-        return countsPerDay
-    }
-
-    List<TimestampCountItem> getSubjectUsage(String projectId, String subjectId, Integer numDays) {
-        Date startDate
-        use (TimeCategory) {
-            startDate = (numDays-1).days.ago
-            startDate.clearTime()
-        }
-
-        List<DayCountItem> res = userPointsRepo.findDistinctUserCountsBySkillId(projectId, subjectId, startDate)
-
-        List<TimestampCountItem> countsPerDay = []
-        startDate.upto(new Date().clearTime()) { Date theDate ->
-            DayCountItem found = res.find({it.day.clearTime() == theDate})
-            countsPerDay << new TimestampCountItem(value: theDate.time, count: found?.count ?: 0)
+        if (res) {
+            startDate.upto(new Date().clearTime()) { Date theDate ->
+                DayCountItem found = res.find({ it.day.clearTime() == theDate })
+                countsPerDay << new TimestampCountItem(value: theDate.time, count: found?.count ?: 0)
+            }
         }
 
         return countsPerDay

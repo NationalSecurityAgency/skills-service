@@ -20,12 +20,9 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Service
-import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
-import skills.metrics.model.ChartOption
-import skills.metrics.model.MetricsChart
-import skills.metrics.builders.MetricsChartBuilder
-import skills.metrics.model.Section
+import skills.metrics.builders.GlobalMetricsBuilder
+import skills.metrics.builders.ProjectMetricsBuilder
 
 import javax.annotation.PostConstruct
 
@@ -37,55 +34,49 @@ class MetricsService {
     @Autowired
     ApplicationContext appContext
 
-    Map<Section, List<MetricsChartBuilder>> chartBuildersMap
+    private final Map<String, ProjectMetricsBuilder> projectBuildersMap = [:]
+    private final Map<String, GlobalMetricsBuilder> globalBuildersMap = [:]
 
     @PostConstruct
     void init() {
-        chartBuildersMap = appContext.getBeansOfType(MetricsChartBuilder).values().groupBy { it.section }
-        chartBuildersMap.each { section, builders ->
-            assert builders.size() == builders.collect { it.displayOrder }.unique().size()
-            builders.sort { it.displayOrder }
-        }
+        loadProjectBuilders()
+        loadGlobalBuilders()
     }
 
-    List<MetricsChart> loadChartsForSection(Section section, String projectId, Map<String, String> props) {
-        int loadFirst = ChartParams.getIntValue(props, ChartParams.LOAD_DATA_FOR_FIRST, -1)
-        int i = 0
-        return chartBuildersMap.get(section)?.collect { builder ->
-            boolean loadData = loadFirst < 0 || ++i <= loadFirst
-            MetricsChart chart = builder.build(projectId, props, loadData)
-            if(chart != null) {
-                chart.dataLoaded = loadData
-                if (loadData) {
-                    clearDataItemsIfAllValuesZero(chart)
-                }
-                chart.chartOptions.put(ChartOption.chartBuilderId, builder.class.name)
-            }
-            return chart
-        }?.findAll { it != null }
+    private void loadProjectBuilders() {
+        Collection<ProjectMetricsBuilder> loadedBuilders = appContext.getBeansOfType(ProjectMetricsBuilder).values()
+        loadedBuilders.each { ProjectMetricsBuilder builder ->
+            assert !projectBuildersMap.get(builder.getId()), "Found more than 1 chart with id [${builder.id}]"
+            projectBuildersMap.put(builder.getId(), builder)
+        }
+        log.info("Loaded [${projectBuildersMap.size()}] builders: ${projectBuildersMap.keySet().toList()}")
     }
 
-    MetricsChart loadChartForSection(String builderId, Section section, String projectId, Map<String, String> props) {
-        MetricsChartBuilder chartBuilder = chartBuildersMap.get(section).find { it.class.name == builderId}
-        if (!chartBuilder) {
-            SkillException ex = new SkillException("Unknown chart builder id [$builderId]")
-            ex.errorCode = ErrorCode.BadParam
-            throw ex
+    private void loadGlobalBuilders() {
+        Collection<GlobalMetricsBuilder> loadedBuilders = appContext.getBeansOfType(GlobalMetricsBuilder).values()
+        loadedBuilders.each { GlobalMetricsBuilder builder ->
+            assert !globalBuildersMap.get(builder.getId()), "Found more than 1 chart with id [${builder.id}]"
+            globalBuildersMap.put(builder.getId(), builder)
         }
-        MetricsChart chart = chartBuilder.build(projectId, props, true)
-        if (chart != null) {
-            chart.chartOptions.put(ChartOption.chartBuilderId, chartBuilder.class.name)
-            chart.dataLoaded = true
-            clearDataItemsIfAllValuesZero(chart)
-        }
-        return chart
+        log.info("Loaded [${globalBuildersMap.size()}] builders: ${globalBuildersMap.keySet().toList()}")
     }
 
-    private void clearDataItemsIfAllValuesZero(MetricsChart chart) {
-        if (chart.dataItems) {
-            if (chart.dataItems?.collect({ it.count })?.unique() == [0]) {
-                chart.dataItems.clear()
-            }
+    def loadProjectMetrics(String projectId, String metricsId, Map<String, String> props) {
+        ProjectMetricsBuilder metricsChartBuilder = projectBuildersMap.get(metricsId)
+        if (!metricsChartBuilder) {
+            throw new SkillException("Failed to find metric with id [${metricsId}]", projectId)
         }
+
+        return metricsChartBuilder.build(projectId, metricsId, props)
     }
+
+    def loadGlobalMetrics(String metricsId, Map<String, String> props) {
+        GlobalMetricsBuilder globalMetricsBuilder = globalBuildersMap.get(metricsId)
+        if (!globalMetricsBuilder) {
+            throw new SkillException("Failed to find global builder with id [${metricsId}]")
+        }
+
+        return globalMetricsBuilder.build(props)
+    }
+
 }

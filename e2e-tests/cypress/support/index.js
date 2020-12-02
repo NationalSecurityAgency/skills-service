@@ -42,7 +42,13 @@ before(function () {
 });
 
 beforeEach(function () {
-    cy.resetDb();
+    let disable = Cypress.env('disableResetDb');
+
+    if (!disable) {
+        cy.resetDb();
+    } else {
+        cy.log('Disabled [cy.resetDb()] in beforeEach')
+    }
 
     cy.fixture('vars.json').then((vars) => {
         cy.logout()

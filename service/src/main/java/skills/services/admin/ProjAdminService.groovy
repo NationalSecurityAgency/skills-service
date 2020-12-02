@@ -229,7 +229,8 @@ class ProjAdminService {
     private validateRootUser(){
         UserInfo userInfo = userInfoService.getCurrentUser()
         boolean isRoot = userInfo.authorities?.find() {
-            it instanceof UserSkillsGrantedAuthority && RoleName.ROLE_SUPER_DUPER_USER == it.role?.roleName
+            it instanceof UserSkillsGrantedAuthority &&
+                    (RoleName.ROLE_SUPER_DUPER_USER == it.role?.roleName || RoleName.ROLE_SUPERVISOR == it.role?.roleName)
         }
         assert isRoot
     }

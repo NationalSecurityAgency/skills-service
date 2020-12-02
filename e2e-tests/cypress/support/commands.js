@@ -255,3 +255,63 @@ Cypress.Commands.add('loginBySingleSignOn', (projId = 'proj1') => {
 });
 
 
+Cypress.Commands.add('reportHistoryOfEvents', (projId, user, numDays=10, skipWeeDays = [5,6], availableSkillIds=['skill1', 'skill2', 'skill3']) => {
+    let skipDays = [...skipWeeDays];
+    for(let daysCounter=0; daysCounter < numDays; daysCounter++) {
+        cy.log(`user: ${user}, day: ${daysCounter}, skipDays=${skipDays}, skills=${availableSkillIds}`)
+        let toSkip = false;
+        skipDays.forEach((skipNum, index) => {
+            if(daysCounter === skipNum) {
+                toSkip = true;
+                skipDays[index] += 7;
+            }
+        });
+        if(toSkip) {
+            cy.log(`skipping: ${skipDays}`);
+            continue;
+        }
+
+        const time = new Date().getTime() - (daysCounter)*1000*60*60*24;
+        const numSkillsToReport = Math.random() * (availableSkillIds.length);
+        cy.log(numSkillsToReport);
+        for(let skillsCounter=0; skillsCounter < numSkillsToReport; skillsCounter++) {
+            const skillId = availableSkillIds[skillsCounter];
+            cy.log(user);
+            cy.request('POST', `/api/projects/${projId}/skills/${skillId}`, {userId: user, timestamp: time})
+        }
+    }
+});
+
+
+Cypress.Commands.add('validateTable', (tableSelector, expected, pageSize = 5, onlyVisiblePage = false, numRowsParam = null) => {
+    cy.get(tableSelector).contains('Loading...').should('not.exist')
+    const rowSelector = `${tableSelector} tbody tr`
+    const numRows =  numRowsParam ? numRowsParam : expected.length;
+
+    cy.get('[data-cy=skillsBTableTotalRows]').contains(numRows);
+
+    cy.get(rowSelector).should('have.length', Math.min(pageSize, numRows)).as('cyRows');
+
+    const numIterations = onlyVisiblePage ? Math.min(pageSize, numRows) : numRows
+    for (let i = 0; i < numIterations; i += 1) {
+        let rowIndex = i;
+        if (i + 1 >= pageSize) {
+            rowIndex = i - (pageSize * (Math.trunc(i / pageSize)));
+        }
+        if (i > 0 && i % pageSize === 0) {
+            const nextPage = (i / pageSize) + 1;
+            const nextPageSize = (i + pageSize <= numRows) ? pageSize : (numRows % pageSize);
+            cy.log(`Going to the next page #${nextPage}, next page size is [${nextPageSize}]`);
+            cy.get(tableSelector).get('[data-cy=skillsBTablePaging]').contains(nextPage).click();
+            cy.get(tableSelector).contains('Loading...').should('not.exist')
+            cy.get(rowSelector).should('have.length', nextPageSize).as('cyRows');
+        }
+
+        cy.get('@cyRows').eq(rowIndex).find('td').as('row1');
+        const toValidate = expected[i];
+        toValidate.forEach((item) => {
+            cy.get('@row1').eq(item.colIndex).should('contain', item.value);
+        })
+    }
+});
+

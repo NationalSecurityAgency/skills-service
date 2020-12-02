@@ -24,7 +24,6 @@ limitations under the License.
     <navigation :nav-items="[
           {name: 'Skills', iconClass: 'fa-graduation-cap skills-color-skills', page: 'BadgeSkills'},
           {name: 'Users', iconClass: 'fa-users skills-color-users', page: 'BadgeUsers'},
-          {name: 'Metrics', iconClass: 'fa-chart-bar skills-color-metrics', page: 'BadgeMetrics'},
         ]">
     </navigation>
   </div>

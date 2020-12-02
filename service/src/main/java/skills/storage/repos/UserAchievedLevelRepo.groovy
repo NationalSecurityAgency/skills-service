@@ -198,4 +198,147 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
                                                                             @Param('skillRefId') Integer skillRefId,
                                                                             @Param('numOfOccurrences') int numOfOccurrences,
                                                                             @Param('notified') String notified)
+
+    @Query('''select ua, sd, uAttrs from UserAchievement ua, UserAttrs uAttrs left join SkillDef sd on ua.skillId = sd.skillId 
+            where 
+                ua.userId = uAttrs.userId and
+                ua.projectId = :projectId and
+                ua.achievedOn >= :fromDate and
+                ua.achievedOn <= :toDate and 
+                upper(uAttrs.userId) like UPPER(CONCAT('%', :userNameFilter, '%')) and
+                (upper(sd.name) like UPPER(CONCAT('%', :skillNameFilter, '%')) OR (:skillNameFilter = 'ALL')) and
+                (ua.level >= :level OR (:level = -1)) and
+                (sd.type in (:types) OR (:disableTypes = 'true') OR (ua.skillId is null AND (:includeOverallType = 'true'))) and 
+                (ua.skillId is not null OR (:includeOverallType = 'true'))
+                ''')
+    List<Object[]> findAllForAchievementNavigator(
+            @Param("projectId") String projectId,
+            @Param("userNameFilter") String userNameFilter,
+            @Param("fromDate") Date fromDate,
+            @Param("toDate") Date toDate,
+            @Param("skillNameFilter") String skillNameFilter,
+            @Param("level") Integer level,
+            @Param("types") List<SkillDef.ContainerType> types,
+            @Param("disableTypes") String disableTypes,
+            @Param("includeOverallType") String includeOverallType,
+            @Param("pageable") Pageable pageable)
+
+    @Query('''select count(uAttrs) from UserAchievement ua, UserAttrs uAttrs left join SkillDef sd on ua.skillId = sd.skillId 
+            where 
+                ua.userId = uAttrs.userId and
+                ua.projectId = :projectId and
+                ua.achievedOn >= :fromDate and
+                ua.achievedOn <= :toDate and 
+                upper(uAttrs.userId) like UPPER(CONCAT('%', :userNameFilter, '%')) and
+                (upper(sd.name) like UPPER(CONCAT('%', :skillNameFilter, '%')) OR (:skillNameFilter = 'ALL')) and
+                (ua.level >= :level OR (:level = -1)) and
+                (sd.type in (:types) OR (:disableTypes = 'true') OR (ua.skillId is null AND (:includeOverallType = 'true'))) and 
+                (ua.skillId is not null OR (:includeOverallType = 'true'))
+                ''')
+    Integer countForAchievementNavigator(
+            @Param("projectId") String projectId,
+            @Param("userNameFilter") String userNameFilter,
+            @Param("fromDate") Date fromDate,
+            @Param("toDate") Date toDate,
+            @Param("skillNameFilter") String skillNameFilter,
+            @Param("level") Integer level,
+            @Param("types") List<SkillDef.ContainerType> types,
+            @Param("disableTypes") String disableTypes,
+            @Param("includeOverallType") String includeOverallType)
+
+
+    static interface SkillAndLevelUserCount {
+        String getSkillId()
+        Integer getLevel()
+        Long getNumberUsers()
+    }
+
+    @Query('''select ua.skillId as skillId, ua.level as level, count(ua.id) as numberUsers 
+            from UserAchievement as ua, SkillDef as sd 
+            where 
+                ua.skillId = sd.skillId and
+                ua.projectId = :projectId and
+                sd.type = :containerType
+            group by ua.skillId, ua.level    
+           ''')
+    List<SkillAndLevelUserCount> countNumUsersPerContainerTypeAndLevel(
+            @Param("projectId") String projectId,
+            @Param("containerType") SkillDef.ContainerType containerType
+    )
+
+
+    static interface SkillDayUserCount {
+        Date getDay()
+        Long getNumberUsers()
+    }
+
+    static interface SkillLevelDayUserCount extends SkillDayUserCount {
+        Integer getLevel()
+    }
+
+    @Query('''select ua.achievedOn as day, ua.level as level, count(ua.id) as numberUsers 
+            from UserAchievement as ua 
+            where 
+                ua.skillId = :skillId and
+                ua.projectId = :projectId
+            group by ua.achievedOn, ua.level     
+           ''')
+    List<SkillLevelDayUserCount> countNumUsersOverTimeAndLevelByProjectIdAndSkillId(
+            @Param("projectId") String projectId,
+            @Param("skillId") String skillId
+    )
+
+    @Query('''select ua.achievedOn as day, count(ua.id) as count 
+            from UserAchievement as ua 
+            where 
+                ua.skillId = :skillId and
+                ua.projectId = :projectId
+            group by ua.achievedOn     
+           ''')
+    List<DayCountItem> countNumUsersOverTimeByProjectIdAndSkillId(
+            @Param("projectId") String projectId,
+            @Param("skillId") String skillId
+    )
+
+    static interface SkillUsageItem {
+        String getSkillId()
+        String getSkillName()
+        Integer getNumUserAchieved()
+        Integer getNumUsersInProgress()
+        Date getLastReported()
+        Date getLastAchieved()
+    }
+
+    @Query(value = '''select 
+                sd.skill_id as skillId, 
+                sd.name as skillName, 
+                achievements.usersAchieved as numUserAchieved, 
+                performedSkills.userInProgress as numUsersInProgress, 
+                achievements.lastAchieved as lastAchieved, 
+                performedSkills.lastPerformed as lastReported
+            from (select skill_id, name from skill_definition where project_id = :projectId and type='Skill') sd
+            left join (
+                select skill_id, count(distinct user_id) as usersAchieved, max(achieved_on) as lastAchieved from user_achievement where project_id = :projectId group by skill_id
+            ) achievements
+                on achievements.skill_id = sd.skill_id
+            left join (
+                select skill_id, count(distinct user_id) as userInProgress, max(performed_on) as lastPerformed from user_performed_skill
+                where project_id = :projectId
+                group by skill_id
+            ) performedSkills
+                on sd.skill_id = performedSkills.skill_id
+           ''', nativeQuery = true)
+    List<SkillUsageItem> findAllForSkillsNavigator(@Param("projectId") String projectId)
+
+    static interface SkillStatsItem {
+        Integer getNumUsersAchieved()
+        Date getLastAchieved()
+    }
+
+    @Query(value = '''
+select count(distinct ua) as numUsersAchieved, max(ua.achievedOn) as lastAchieved
+from UserAchievement ua
+where ua.projectId = :projectId and ua.skillId = :skillId
+''')
+    SkillStatsItem calculateNumAchievedAndLastAchieved(@Param("projectId") String projectId, @Param("skillId") String skillId)
 }

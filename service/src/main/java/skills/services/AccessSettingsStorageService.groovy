@@ -177,22 +177,23 @@ class AccessSettingsStorageService {
 
     private UserRole addUserRoleInternal(String userId, String projectId, RoleName roleName) {
         log.debug('Creating user-role for ID [{}] and role [{}] on project [{}]', userId, roleName, projectId)
-        User user = userRepository.findByUserId(userId?.toLowerCase())
+        String userIdLower = userId?.toLowerCase()
+        User user = userRepository.findByUserId(userIdLower)
         if (user) {
             // check that the new user role does not already exist
             UserRole existingUserRole = user?.roles?.find {it.projectId == projectId && it.roleName == roleName}
-            assert !existingUserRole, "CREATE FAILED -> user-role with project id [$projectId], userId [$userId] and roleName [$roleName] already exists"
+            assert !existingUserRole, "CREATE FAILED -> user-role with project id [$projectId], userIdLower [$userIdLower] and roleName [$roleName] already exists"
         } else {
-            throw new SkillException("User [$userId]  does not exist", (String) projectId ?: SkillException.NA, SkillException.NA, ErrorCode.UserNotFound)
+            throw new SkillException("User [$userIdLower]  does not exist", (String) projectId ?: SkillException.NA, SkillException.NA, ErrorCode.UserNotFound)
         }
 
-        UserRole userRole = new UserRole(userId: userId, roleName: roleName, projectId: projectId)
+        UserRole userRole = new UserRole(userId: userIdLower, roleName: roleName, projectId: projectId)
         user.roles.add(userRole)
         userRepository.save(user)
         log.debug("Created userRole [{}]", userRole)
 
-        log.debug("setting sort order for user [{}] on project [{}]", userId, projectId)
-        sortingService.setNewProjectDisplayOrder(projectId, userId)
+        log.debug("setting sort order for user [{}] on project [{}]", userIdLower, projectId)
+        sortingService.setNewProjectDisplayOrder(projectId, userIdLower)
         return userRole
     }
 

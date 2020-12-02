@@ -56,13 +56,9 @@ limitations under the License.
           </ul>
         </b-collapse>
       </div>
-      <div class="col-md">
-        <div v-for="(navItem) of navItems" :key="navItem.name">
-          <div v-if="menuSelections.get(navItem.name)">
-            <div class="container-fluid pb-4">
-              <router-view></router-view>
-            </div>
-          </div>
+      <div class="col-md skills-menu-content">
+        <div class="container-fluid pb-4">
+          <router-view></router-view>
         </div>
       </div>
     </div>
@@ -112,6 +108,7 @@ limitations under the License.
       },
       navigate(selectedKey) {
         if (this.smallScreenMode) {
+          // eslint-disable-next-line no-use-before-define
           this.$root.$emit('bv::toggle::collapse', 'menu-collapse-control');
         }
         const menuSelectionsTemp = this.buildNewMenuMap(selectedKey);
@@ -120,7 +117,17 @@ limitations under the License.
       buildNewMenuMapWhenPropsChange(navigationItems) {
         const routeName = this.$route.name;
         if (navigationItems && navigationItems.length > 0) {
-          const navItem = navigationItems.find((item) => item.page === routeName);
+          let navItem = navigationItems.find((item) => item.page === routeName);
+          if (!navItem) {
+            // Backup strategy:
+            // try parent by comparing path to the router item's name
+            const splitPath = this.$route.path.split('/');
+            if (splitPath.length > 2) {
+              const parentRouteName = splitPath[splitPath.length - 2];
+              navItem = navigationItems.find((item) => item.name.toLowerCase() === parentRouteName.toLowerCase());
+            }
+          }
+
           this.menuSelections = this.buildNewMenuMap(navItem ? navItem.name : navigationItems[0].name);
         }
       },
@@ -155,6 +162,12 @@ limitations under the License.
     .skills-nav {
       min-height: calc(100vh - 10rem);
     }
+  }
+
+  .skills-menu-content {
+    /* this little hack is required to prevent apexcharts from wrapping onto a new line;
+    the gist is that they calculate width dynamically and do not work properly with the width of 0*/
+    min-width: 1rem;
   }
 
 </style>

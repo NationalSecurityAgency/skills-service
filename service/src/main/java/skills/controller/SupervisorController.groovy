@@ -32,7 +32,9 @@ import skills.controller.request.model.NameExistsRequest
 import skills.controller.result.model.*
 import skills.icons.CustomIconFacade
 import skills.icons.UploadedIcon
+import skills.metrics.MetricsService
 import skills.services.*
+import skills.services.admin.ProjAdminService
 import skills.utils.InputSanitizer
 
 import java.nio.charset.StandardCharsets
@@ -62,6 +64,12 @@ class SupervisorController {
 
     @Autowired
     PublicPropsBasedValidator propsBasedValidator
+
+    @Autowired
+    ProjAdminService projAdminService
+
+    @Autowired
+    MetricsService metricsService
 
     @RequestMapping(value = "/badges/name/exists", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
@@ -178,9 +186,20 @@ class SupervisorController {
         return globalBadgesService.getAvailableSkillsForGlobalBadge(badgeId, query)
     }
 
+    @RequestMapping(value = "/projects", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    List<ProjectResult> getAllProjects() {
+        return projAdminService.getAllProjects()
+    }
+
+    @RequestMapping(value = "/metrics/{metricId}", method =  RequestMethod.GET, produces = "application/json")
+    def getMetricsData(@PathVariable("metricId") String metricId, @RequestParam Map<String,String> metricsProps) {
+        return metricsService.loadGlobalMetrics(metricId, metricsProps)
+    }
+
     @RequestMapping(value = "/badges/{badgeId}/projects/available", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    List<ProjectResult> getAllProjects(@PathVariable("badgeId") String badgeId) {
+    List<ProjectResult> getAllProjectsForBadgeId(@PathVariable("badgeId") String badgeId) {
         return globalBadgesService.getAllProjectsForBadge(badgeId)
     }
 

@@ -33,8 +33,11 @@ limitations under the License.
       return {
         isLoading: true,
         navItems: [
-          { name: 'Projects', iconClass: 'fa-tasks skills-color-projects', page: 'HomePage' },
-          { name: 'Metrics', iconClass: 'fa-cogs skills-color-metrics', page: 'GlobalMetrics' },
+          {
+            name: 'Projects',
+            iconClass: 'fa-tasks skills-color-projects',
+            page: 'HomePage',
+          },
         ],
       };
     },
@@ -61,18 +64,34 @@ limitations under the License.
     },
     methods: {
       loadNavItems() {
-        const globalBadges = this.navItems.find((element) => element.name === 'Badges');
-        if (this.isSupervisor) {
-          if (!globalBadges) {
-            this.navItems.splice(1, 0, { name: 'Badges', iconClass: 'fa-globe-americas skills-color-badges', page: 'GlobalBadges' });
+        const metricsNavItem = {
+          name: 'Metrics',
+          iconClass: 'fa-chart-bar skills-color-metrics',
+          page: 'MultipleProjectsMetricsPage',
+        };
+        this.handleNavItem(metricsNavItem, this.isSupervisor);
+
+        const globalBadgeNav = {
+          name: 'Badges',
+          iconClass: 'fa-globe-americas skills-color-badges',
+          page: 'GlobalBadges',
+        };
+        this.handleNavItem(globalBadgeNav, this.isSupervisor);
+
+        this.isLoading = false;
+      },
+      handleNavItem(newItem, isRole) {
+        const existingItem = this.navItems.find((element) => element.name === newItem.name);
+        if (isRole) {
+          if (!existingItem) {
+            this.navItems.splice(1, 0, newItem);
           }
-        } else if (globalBadges) {
-          const idx = this.navItems.indexOf(globalBadges);
+        } else if (existingItem) {
+          const idx = this.navItems.indexOf(existingItem);
           if (idx >= 0) {
             this.navItems.splice(idx, 1);
           }
         }
-        this.isLoading = false;
       },
     },
   };

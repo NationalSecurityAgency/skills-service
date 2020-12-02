@@ -32,6 +32,7 @@ import 'matchmedia-polyfill/matchMedia.addListener';
 import './filters/NumberFilter';
 import './filters/TruncateFilter';
 import './filters/DateFilter';
+import './filters/TimeFromNowFilter';
 import './directives/SkillsOnMountDirective';
 import RegisterValidators from './validators/RegisterValidators';
 import './directives/FocusDirective';
