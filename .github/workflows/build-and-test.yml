@@ -20,12 +20,14 @@ on:
       - 'README.md'
       - '.github/workflows/build-and-test-postgres.yml'
       - '.github/workflows/build-and-test-redis.yml'
+      - '.github/workflows/publish-image-snapshot.yml'
       - '.gitlab-ci.yml'
   pull_request:
     paths-ignore:
       - 'README.md'
       - '.github/workflows/build-and-test-postgres.yml'
       - '.github/workflows/build-and-test-redis.yml'
+      - '.github/workflows/publish-image-snapshot.yml'
       - '.gitlab-ci.yml'
 
 jobs:
@@ -244,25 +246,3 @@ jobs:
           path: |
             ./service/target/*.log
             ./e2e-tests/logs
-
-  publish-snapshot-docker-image:
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-    needs: [ui-tests-against-h2, service-against-postgresql]
-    steps:
-      - uses: actions/checkout@v2
-
-      - uses: actions/download-artifact@v2
-        with:
-          name: service jar
-          path: ./service/target/
-
-      - name: Build image
-        env:
-          docker_username: ${{ secrets.DOCKERUSERNAME }}
-          docker_password: ${{ secrets.DOCKERPASSWORD }}
-        run: |
-          cd docker
-          bash build-and-push.sh "skilltree/skills-service-ci"
-
-

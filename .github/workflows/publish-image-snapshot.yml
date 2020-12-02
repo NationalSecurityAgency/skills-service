@@ -1,0 +1,63 @@
+# Copyright 2020 SkillTree
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: Publish Docker Image Snapshot
+
+on:
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - 'README.md'
+      - '.github/workflows/build-and-test-postgres.yml'
+      - '.github/workflows/build-and-test-redis.yml'
+      - '.gitlab-ci.yml'
+
+jobs:
+  publish-snapshot-docker-image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-node@v2-beta
+          with:
+            node-version: '14'
+
+      - uses: actions/setup-java@v1
+        with:
+          java-version: '11.X.X' # The JDK version to make available on the path.
+
+      - name: Print Versions
+        run: |
+          mvn --version
+          java -version
+
+      - name: Cache local Maven repository
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Build skills-service
+        run: mvn --batch-mode install -DskipTests
+
+      - name: Build image
+        env:
+          docker_username: ${{ secrets.DOCKERUSERNAME }}
+          docker_password: ${{ secrets.DOCKERPASSWORD }}
+        run: |
+          cd docker
+          bash build-and-push.sh "skilltree/skills-service-ci"
