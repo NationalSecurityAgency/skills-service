@@ -29,7 +29,6 @@ limitations under the License.
 
 <script>
   import UserSkillsService from '@/userSkills/service/UserSkillsService';
-  import SkillDependencies from '@/userSkills/skill/dependencies/SkillDependencies';
   import SkillOverview from '@/userSkills/skill/SkillOverview';
   import SkillsSpinner from '@/common/utilities/SkillsSpinner';
   import SkillsTitle from '@/common/utilities/SkillsTitle';
@@ -39,7 +38,7 @@ limitations under the License.
     components: {
       SkillsTitle,
       SkillOverview,
-      SkillDependencies,
+      'skill-dependencies': () => import(/* webpackChunkName: 'skillDependencies' */'@/userSkills/skill/dependencies/SkillDependencies'),
       SkillsSpinner,
     },
     data() {
