@@ -67,6 +67,16 @@ limitations under the License.
           },
           xaxis: {
             categories: [],
+            axisTicks: {
+              height: 300,
+              offsetY: -300,
+            },
+            labels: {
+              style: {
+                fontSize: '13px',
+                fontWeight: 600,
+              },
+            },
           },
           yaxis: {
             title: {
@@ -82,6 +92,9 @@ limitations under the License.
                 return `${val}`;
               },
             },
+          },
+          legend: {
+            offsetY: 5,
           },
         },
       };

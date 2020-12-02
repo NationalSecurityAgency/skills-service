@@ -302,6 +302,7 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
 
     static interface SkillUsageItem {
         String getSkillId()
+        String getSubjectId()
         String getSkillName()
         Integer getNumUserAchieved()
         Integer getNumUsersInProgress()
@@ -310,23 +311,31 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
     }
 
     @Query(value = '''select 
-                sd.skill_id as skillId, 
+                sd.skillId as skillId, 
                 sd.name as skillName, 
+                sd.subjId as subjectId,
                 achievements.usersAchieved as numUserAchieved, 
                 performedSkills.userInProgress as numUsersInProgress, 
                 achievements.lastAchieved as lastAchieved, 
                 performedSkills.lastPerformed as lastReported
-            from (select skill_id, name from skill_definition where project_id = :projectId and type='Skill') sd
+            from (
+                select skill.skill_id as skillId, skill.name as name, subj.skill_id as subjId
+                from skill_definition skill, skill_definition subj, skill_relationship_definition rel
+                where
+                      subj.id = rel.parent_ref_id and skill.id = rel.child_ref_id and rel.type = 'RuleSetDefinition' and
+                      subj.project_id = :projectId and subj.type = 'Subject' and
+                      skill.project_id = :projectId and skill.type = 'Skill'
+                ) sd
             left join (
                 select skill_id, count(distinct user_id) as usersAchieved, max(achieved_on) as lastAchieved from user_achievement where project_id = :projectId group by skill_id
             ) achievements
-                on achievements.skill_id = sd.skill_id
+                on achievements.skill_id = sd.skillId
             left join (
                 select skill_id, count(distinct user_id) as userInProgress, max(performed_on) as lastPerformed from user_performed_skill
                 where project_id = :projectId
                 group by skill_id
             ) performedSkills
-                on sd.skill_id = performedSkills.skill_id
+                on sd.skillId = performedSkills.skill_id
            ''', nativeQuery = true)
     List<SkillUsageItem> findAllForSkillsNavigator(@Param("projectId") String projectId)
 
