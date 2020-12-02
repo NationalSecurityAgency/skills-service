@@ -22,7 +22,6 @@ dayjs.extend(relativeTimePlugin);
 dayjs.extend(advancedFormatPlugin);
 
 Vue.filter('formatDate', (dateStr, format) => {
-  console.log(`formatting dateStr [${dateStr}] using format [${format}]`);
   if (!dateStr) return '';
   return dayjs(dateStr).format(format);
 });
