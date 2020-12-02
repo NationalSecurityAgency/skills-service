@@ -48,11 +48,11 @@ import {
 } from 'vee-validate';
 import en from 'vee-validate/dist/locale/en.json';
 import Vuex from 'vuex';
+import dayjs from 'dayjs';
 import InceptionConfigurer from './InceptionConfigurer';
 import 'babel-polyfill';
 import 'matchmedia-polyfill';
 import 'matchmedia-polyfill/matchMedia.addListener';
-import dayjs from 'dayjs';
 import localizedFormatPlugin from 'dayjs/plugin/localizedFormat';
 import './filters/NumberFilter';
 import './filters/TruncateFilter';
