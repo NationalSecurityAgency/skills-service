@@ -26,12 +26,6 @@ Vue.config.productionTip = false;
 
 Vue.use(VueApexCharts);
 
-let dayjs = require('dayjs');
-const relativeTimePlugin = require('dayjs/plugin/relativeTime');
-
-dayjs = dayjs.extend(relativeTimePlugin);
-Vue.prototype.$dayjs = dayjs;
-
 require('@/common/softwareVersion/softwareVersionInterceptor');
 
 new Vue({

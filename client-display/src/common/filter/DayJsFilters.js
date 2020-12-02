@@ -14,9 +14,16 @@
  * limitations under the License.
  */
 import Vue from 'vue';
+import dayjs from 'dayjs';
+import relativeTimePlugin from 'dayjs/plugin/relativeTime';
+import advancedFormatPlugin from 'dayjs/plugin/advancedFormat';
 
-Vue.filter('dayjs', (dateStr, format) => {
+dayjs.extend(relativeTimePlugin);
+dayjs.extend(advancedFormatPlugin);
+
+Vue.filter('formatDate', (dateStr, format) => {
+  console.log(`formatting dateStr [${dateStr}] using format [${format}]`);
   if (!dateStr) return '';
-  return this.$dayjs(dateStr, format);
+  return dayjs(dateStr).format(format);
 });
-Vue.filter('relativeTime', (date) => this.$dayjs(date).fromNow());
+Vue.filter('relativeTime', (date) => dayjs(date).fromNow());

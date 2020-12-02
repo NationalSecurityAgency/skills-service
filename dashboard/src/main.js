@@ -52,6 +52,8 @@ import InceptionConfigurer from './InceptionConfigurer';
 import 'babel-polyfill';
 import 'matchmedia-polyfill';
 import 'matchmedia-polyfill/matchMedia.addListener';
+import dayjs from 'dayjs';
+import localizedFormatPlugin from 'dayjs/plugin/localizedFormat';
 import './filters/NumberFilter';
 import './filters/TruncateFilter';
 import './filters/DateFilter';
@@ -107,14 +109,13 @@ setInteractionMode('custom', () => ({ on: ['input', 'change'] }));
 
 Vue.config.productionTip = false;
 
+dayjs.extend(localizedFormatPlugin);
+window.dayjs = dayjs;
+
 window.axios = require('axios');
-window.dayjs = require('dayjs');
-const localizedFormatPlugin = require('dayjs/plugin/localizedFormat');
 require('./interceptors/errorHandler');
 require('./interceptors/clientVersionInterceptor');
 require('vue-multiselect/dist/vue-multiselect.min.css');
-
-window.dayjs.extend(localizedFormatPlugin);
 
 const isActiveProjectIdChange = (to, from) => to.params.projectId !== from.params.projectId;
 const isLoggedIn = () => store.getters.isAuthenticated;
