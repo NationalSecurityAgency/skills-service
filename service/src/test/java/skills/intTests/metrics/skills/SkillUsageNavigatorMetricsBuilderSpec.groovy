@@ -157,7 +157,7 @@ class SkillUsageNavigatorMetricsBuilderSpec extends DefaultIntSpec {
         props[MetricsParams.P_SKILL_ID] = skills[0].skillId
 
         when:
-        def res = skillsService.getMetricsData(proj.projectId, metricsId, props)
+        def res = skillsService.getMetricsData(proj.projectId, metricsId, props).sort { it.skillId }
 
         then:
         res.size() == 5
