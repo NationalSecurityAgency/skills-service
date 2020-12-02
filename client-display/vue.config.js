@@ -1,5 +1,11 @@
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+const plugins = [];
+// uncomment to add bundle analysis of production build
+// plugins.push(new BundleAnalyzerPlugin());
+
 const exportObject = {
   configureWebpack: {
+    plugins,
   },
 };
 
