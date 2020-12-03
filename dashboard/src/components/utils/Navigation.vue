@@ -177,17 +177,6 @@ limitations under the License.
     color: #3f5971;
   }
 
-  .sr-only {
-    border: 0;
-    clip: rect(0, 0, 0, 0);
-    height: 1px;
-    margin: -1px;
-    overflow: hidden;
-    padding: 0;
-    position: absolute;
-    width: 1px;
-  }
-
   .skills-menu-content {
     /* this little hack is required to prevent apexcharts from wrapping onto a new line;
     the gist is that they calculate width dynamically and do not work properly with the width of 0*/

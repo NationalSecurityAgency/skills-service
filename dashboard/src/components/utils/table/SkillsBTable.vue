@@ -75,14 +75,14 @@ limitations under the License.
         <b-pagination v-model="currentPageInternal" :total-rows="totalRows"
                       :per-page="pageSizeInternal" slot-scope=""
                       pills align="center" size="sm" variant="info" class="customPagination m-0 p-0"
-                      :disabled="disabled" data-cy="skillsBTablePaging">
+                      :disabled="disabled" data-cy="skillsBTablePaging" aria-label="table pagination">
         </b-pagination>
       </div>
       <div class="col-md text-center text-md-right">
-        <span class="text-muted">Per page:</span>
-        <b-form-select v-model="pageSizeInternal" :options="options.pagination.possiblePageSizes"
+        <label :for="`pagination_select_${uid}`" class="text-muted">Per page:</label>
+        <b-form-select :id="`pagination_select_${uid}`" v-model="pageSizeInternal" :options="options.pagination.possiblePageSizes"
                        size="sm" class="mx-2" style="width: 4rem;" :disabled="disabledPaging"
-                       data-cy="skillsBTablePageSize"/>
+                       data-cy="skillsBTablePageSize" />
 <!--        <b-button size="sm" v-b-tooltip.hover title="Download CSV" variant="outline-info" :disabled="disabled">-->
 <!--          <i class="fas fa-download"></i>-->
 <!--        </b-button>-->
@@ -92,9 +92,15 @@ limitations under the License.
 </template>
 
 <script>
+  let uid = 0;
+
   export default {
     name: 'SkillsBTable',
     props: ['items', 'options'],
+    beforeCreate() {
+      this.uid = uid.toString();
+      uid += 1;
+    },
     mounted() {
       this.fieldsInternal = [];
       if (this.options.rowDetailsControls) {

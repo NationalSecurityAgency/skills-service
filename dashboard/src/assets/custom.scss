@@ -25,6 +25,8 @@ $theme-colors: (
 );
 // secondary: #6d8d9c
 
+$text-muted: #6b6b6b;
+
 // Bootstrap and its default variables
 @import '../../node_modules/bootstrap/scss/bootstrap';
 // BootstrapVue and its default variables
@@ -110,6 +112,17 @@ $theme-colors: (
 
 .skills-color-achievements {
   color: #8f7158;
+}
+
+.sr-only {
+  border: 0;
+  clip: rect(0, 0, 0, 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
 }
 
 
