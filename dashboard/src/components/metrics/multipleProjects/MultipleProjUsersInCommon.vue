@@ -34,7 +34,7 @@ limitations under the License.
                    message="Please select at least 2 projects using search above then click 'Find Users' button below"></no-content2>
 
         <b-table v-if="atLeast1Proj" striped :items="projects.selected" :fields="fields" stacked="md"
-                 data-cy="multiProjectUsersInCommon-inputProjs">
+                 :no-sort-reset="true" data-cy="multiProjectUsersInCommon-inputProjs">
           <template v-slot:cell(minLevel)="data">
             <b-row>
               <b-col>

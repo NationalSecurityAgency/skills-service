@@ -28,6 +28,7 @@ limitations under the License.
              :current-page="options.pagination.server ? null : currentPageInternal"
              :hide-goto-end-buttons="options.pagination.server ? true : false"
              @sort-changed="sortingChanged"
+             :no-sort-reset="true"
              show-empty>
       <colgroup v-if="options.rowDetailsControls"><col style="width: 2rem;"><col></colgroup>
       <template v-if="options.rowDetailsControls" v-slot:cell(b_table_controls)="data">
