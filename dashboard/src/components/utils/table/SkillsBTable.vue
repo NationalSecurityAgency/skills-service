@@ -29,6 +29,7 @@ limitations under the License.
              :hide-goto-end-buttons="options.pagination.server ? true : false"
              @sort-changed="sortingChanged"
              :no-sort-reset="true"
+             thead-class="accessible"
              show-empty>
       <colgroup v-if="options.rowDetailsControls"><col style="width: 2rem;"><col></colgroup>
       <template v-if="options.rowDetailsControls" v-slot:cell(b_table_controls)="data">
@@ -43,7 +44,7 @@ limitations under the License.
           <div>
             <b-spinner class="align-middle"></b-spinner>
           </div>
-          <div class="mt-1">
+          <div class="mt-1" style="color:darkslategray">
             <strong>Loading...</strong>
           </div>
         </div>
@@ -161,5 +162,9 @@ limitations under the License.
 <style scoped>
 .skills-b-table /deep/ .control-column {
   max-width: 3rem !important;
+}
+
+.skills-b-table /deep/ .accessible th {
+  color: darkslategray !important;
 }
 </style>

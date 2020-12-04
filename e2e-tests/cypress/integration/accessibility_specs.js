@@ -77,7 +77,7 @@ describe('Accessibility Tests', () => {
     cy.customA11y();
   });
 
-  it('project', () => {
+  it.only('project', () => {
     cy.visit('/');
     cy.injectAxe()
     //view project
@@ -115,6 +115,13 @@ describe('Accessibility Tests', () => {
     //metrics
     cy.get('[data-cy=nav-Metrics').click();
     cy.customLighthouse();
+    cy.customA11y();
+
+    cy.get('[data-cy="Achievements-metrics-link"]').click();
+    cy.customA11y();
+    cy.get('[data-cy="Subjects-metrics-link"]').click();
+    cy.customA11y();
+    cy.get('[data-cy="Skills-metrics-link"]').click();
     cy.customA11y();
 
     cy.get('[data-cy=nav-Access').click();
@@ -163,9 +170,6 @@ describe('Accessibility Tests', () => {
     // also has contrast issues
     // cy.customA11y();
     cy.get('[data-cy="nav-Performed Skills"]').click()
-    cy.customLighthouse();
-    cy.customA11y();
-    cy.get('[data-cy=nav-Metrics]').click();
     cy.customLighthouse();
     cy.customA11y();
     /*
@@ -228,10 +232,6 @@ describe('Accessibility Tests', () => {
     cy.get('[data-cy=nav-Users]').click();
     cy.customLighthouse();
     cy.customA11y();
-
-    cy.get('[data-cy=nav-Metrics]').click();
-    cy.customLighthouse();
-    cy.customA11y();
   });
 
   it('settings', ()=> {
@@ -287,8 +287,6 @@ describe('Accessibility Tests', () => {
 
     cy.get('[data-cy=addGlobalBadgeLevel]').click();
     cy.customA11y();
-
-
   });
 
 
