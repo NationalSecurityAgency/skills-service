@@ -251,27 +251,36 @@ class SkillsLoader {
         List<UserAchievement> userAchievements = achievedLevelRepo.findAllByUserIdAndProjectIdAndSkillIdAndLevelNotNull(userId, projectId, skillId)
         if (userAchievements) {
             Map<Date, List<SkillHistoryPoints>> ptsByDay = historyPoints?.groupBy { it.dayPerformed }
-            Map<Date, Achievement> achievementsByDay = [:]
+            Map<Date, AggregateAchievement> achievementsByDay = [:]
             userAchievements.each {
                 Date dayOfAchievement = new Date(it.achievedOn.time).clearTime()
                 List<SkillHistoryPoints> foundPts = ptsByDay.get(dayOfAchievement)
                 if (!foundPts) {
                     log.warn("Failed to locate pts on [${it.achievedOn}] for userId=[${userId}], projecdtId=[${projectId}], skillId=[${skillId}]. This is likely a bug!")
                 } else {
-                    Achievement achievement = achievementsByDay[dayOfAchievement]
+                    AggregateAchievement achievement = achievementsByDay[dayOfAchievement]
                     if (achievement) {
-                        achievement.name += ", ${it.level}"
+                        achievement.levels.add(it.level);
+//                        achievement.name += ", ${it.level}"
                     } else {
-                        achievementsByDay[dayOfAchievement] = new Achievement(achievedOn: dayOfAchievement, points: foundPts.first().points, name: "${it.level}")
+                        achievementsByDay[dayOfAchievement] = new AggregateAchievement(achievedOn: dayOfAchievement, points: foundPts.first().points, levels: [it.level])
                     }
                 }
             }
             achievements = achievementsByDay.values().collect {
-                it.name = "Level${it.name.contains(",") ? "s" : ""} ${it.name}"
-                return it
+                Achievement combined = new Achievement(achievedOn: it.achievedOn, points: it.points)
+                String name = it.levels?.sort()?.join(", ")
+                combined.name = "Level${name.contains(",") ? "s" : ""} ${name}"
+                return combined
             }
         }
         return achievements
+    }
+
+    private static class AggregateAchievement {
+        List<Integer> levels = []
+        Date achievedOn
+        Integer points
     }
 
     @Transactional(readOnly = true)
