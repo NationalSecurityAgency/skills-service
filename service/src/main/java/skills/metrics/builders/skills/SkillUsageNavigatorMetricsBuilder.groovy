@@ -36,6 +36,7 @@ class SkillUsageNavigatorMetricsBuilder implements ProjectMetricsBuilder {
     static class SkillUsageNavigatorItem {
         String skillId
         String skillName
+        String subjectId
         Integer numUserAchieved
         Integer numUsersInProgress
         Long lastReportedTimestamp
@@ -50,6 +51,7 @@ class SkillUsageNavigatorMetricsBuilder implements ProjectMetricsBuilder {
             new SkillUsageNavigatorItem(
                     skillId: it.getSkillId(),
                     skillName: it.getSkillName(),
+                    subjectId: it.getSubjectId(),
                     numUserAchieved: numAchieved,
                     numUsersInProgress: numProgress - numAchieved,
                     lastReportedTimestamp: it.getLastReported()?.time,

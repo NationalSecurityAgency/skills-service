@@ -45,6 +45,13 @@ class UsersByLevelForSubjectOverTimeMetricsBuilder implements ProjectMetricsBuil
         List<UserAchievedLevelRepo.SkillLevelDayUserCount> counts =
                 userAchievedRepo.countNumUsersOverTimeAndLevelByProjectIdAndSkillId(projectId, subjectId)
 
+        Date maxDay
+        counts.each {
+            if (!maxDay || maxDay.before(it.getDay())) {
+                maxDay = it.getDay()
+            }
+        }
+
         Map<Integer, List<UserAchievedLevelRepo.SkillLevelDayUserCount>> byLevel =
                 counts.groupBy { it.getLevel() }
 
@@ -62,7 +69,18 @@ class UsersByLevelForSubjectOverTimeMetricsBuilder implements ProjectMetricsBuil
 
             // artificially add 0 count the day before the earliest day
             if (numUsersTimeline) {
-                numUsersTimeline.add(0, new TimestampCountItem(value:  (minDate -1).time, count: 0))
+                numUsersTimeline.add(0, new TimestampCountItem(value: (minDate - 1).time, count: 0))
+            }
+
+            /////////////////////
+            // artificially extends timeline to the max day
+            TimestampCountItem lastItem = numUsersTimeline.last()
+            Date startDay = new Date(lastItem.getValue() + 1000 * 60 * 60 * 24)
+            int lastCount = lastItem.getCount()
+            if (startDay.before(maxDay)) {
+                startDay.upto(maxDay) { Date dayToAdd ->
+                    numUsersTimeline.add( new TimestampCountItem(value: dayToAdd.time, count: lastCount))
+                }
             }
 
             new UserCountsByLevel(level: it.key, counts: numUsersTimeline)

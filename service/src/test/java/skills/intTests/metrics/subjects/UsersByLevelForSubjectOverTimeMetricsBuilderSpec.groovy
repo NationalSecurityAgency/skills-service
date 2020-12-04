@@ -22,6 +22,7 @@ import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.metrics.builders.MetricsParams
+import spock.lang.IgnoreRest
 import spock.lang.Shared
 
 class UsersByLevelForSubjectOverTimeMetricsBuilderSpec extends DefaultIntSpec {
@@ -101,7 +102,6 @@ class UsersByLevelForSubjectOverTimeMetricsBuilderSpec extends DefaultIntSpec {
 
         when:
         def res = skillsService.getMetricsData(proj.projectId, metricsId, props)
-        println JsonOutput.prettyPrint(JsonOutput.toJson(res))
 
         then:
         res
@@ -113,5 +113,52 @@ class UsersByLevelForSubjectOverTimeMetricsBuilderSpec extends DefaultIntSpec {
 
         res[2].counts.collect { it.count } == [0, 5]
         res[2].counts.collect { new Date(it.value) } == [days[4], days[5]]
+    }
+
+
+    def "each level achievement must get extended to the max date"() {
+        List<String> users = getRandomUsers(10)
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        List<Map> skills = SkillsFactory.createSkills(5)
+        skills.each { it.pointIncrement = 100; it.numPerformToCompletion = 1 }
+
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        List<Date> days
+
+        use(TimeCategory) {
+            skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[0], dates[1])
+            skillsService.addSkill([projectId: proj.projectId, skillId: skills[1].skillId], users[0], dates[4])
+            skillsService.addSkill([projectId: proj.projectId, skillId: skills[2].skillId], users[0], dates[6])
+        }
+
+        Map props = [:]
+        props[MetricsParams.P_SUBJECT_ID] = subj.subjectId
+
+        when:
+        def res = skillsService.getMetricsData(proj.projectId, metricsId, props)
+        println JsonOutput.prettyPrint(JsonOutput.toJson(res))
+
+        res.each {
+            println "Level ${it.level}"
+            it.counts.each {
+                println "  ${new Date(it.value)} => ${it.count}"
+            }
+        }
+
+        then:
+        res
+        res[0].counts.collect { it.count } == [0, 1, 1, 1, 1, 1, 1]
+        res[0].counts.collect { new Date(it.value) } == dates[0..6]
+
+        res[1].counts.collect { it.count } == [0, 1, 1, 1]
+        res[1].counts.collect { new Date(it.value) } ==  dates[3..6]
+
+        res[2].counts.collect { it.count } == [0, 1]
+        res[2].counts.collect { new Date(it.value) } == dates[5..6]
     }
 }

@@ -250,6 +250,8 @@ class SkillsLoader {
         List<Achievement> achievements
         List<UserAchievement> userAchievements = achievedLevelRepo.findAllByUserIdAndProjectIdAndSkillIdAndLevelNotNull(userId, projectId, skillId)
         if (userAchievements) {
+            // must sort levels in tje ascending order since multiple level achievements are joined in the name attribute
+            userAchievements = userAchievements.sort({it.level})
             Map<Date, List<SkillHistoryPoints>> ptsByDay = historyPoints?.groupBy { it.dayPerformed }
             Map<Date, AggregateAchievement> achievementsByDay = [:]
             userAchievements.each {

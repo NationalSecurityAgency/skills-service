@@ -119,6 +119,8 @@ limitations under the License.
         const params = { subjectId: this.subjects.selected };
         MetricsService.loadChart(this.$route.params.projectId, 'usersByLevelForSubjectOverTimeChartBuilder', params)
           .then((res) => {
+            // sort by level to force order in the legend's display
+            res.sort((a, b) => a.level - b.level);
             this.series = res.map((resItem) => {
               const data = resItem.counts.map((dayCount) => [dayCount.value, dayCount.count]);
               return {

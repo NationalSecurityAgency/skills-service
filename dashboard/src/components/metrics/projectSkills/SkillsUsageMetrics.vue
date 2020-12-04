@@ -54,10 +54,10 @@ limitations under the License.
         <span class="ml-2">{{ data.value }}</span>
 
         <b-button-group class="float-right">
-          <b-button target="_blank" :to="{ name: 'SkillOverview', params: { projectId: projectId, subjectId: 'subj1', skillId: 'skill1' } }"
+          <b-button target="_blank" :to="{ name: 'SkillOverview', params: { projectId: projectId, subjectId: data.item.subjectId, skillId: data.item.skillId } }"
                     variant="outline-info" size="sm" class="text-secondary"
                     v-b-tooltip.hover="'View Skill Configuration'"><i class="fa fa-wrench"/></b-button>
-          <b-button id="b-skill-metrics" target="_blank" :to="{ name: 'SkillMetrics', params: { projectId: projectId, subjectId: 'subj1', skillId: 'skill1' } }"
+          <b-button id="b-skill-metrics" target="_blank" :to="{ name: 'SkillMetrics', params: { projectId: projectId, subjectId: data.item.subjectId, skillId: data.item.skillId } }"
                     variant="outline-info" size="sm" class="text-secondary"
                     v-b-tooltip.hover="'View Skill Metrics'"><i class="fa fa-chart-bar"/></b-button>
         </b-button-group>

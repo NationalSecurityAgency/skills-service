@@ -16,12 +16,10 @@
 package skills.intTests.metrics.skills
 
 
-import groovy.json.JsonOutput
 import groovy.time.TimeCategory
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
 import skills.metrics.builders.MetricsParams
-import spock.lang.IgnoreRest
 
 class SkillUsageNavigatorMetricsBuilderSpec extends DefaultIntSpec {
 
@@ -66,11 +64,12 @@ class SkillUsageNavigatorMetricsBuilderSpec extends DefaultIntSpec {
     def "skills with usage and achievements"() {
         List<String> users = getRandomUsers(10)
         def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
         List<Map> skills = SkillsFactory.createSkills(10)
         skills.each { it.pointIncrement = 100; it.numPerformToCompletion = 5 }
 
         skillsService.createProject(proj)
-        skillsService.createSubject(SkillsFactory.createSubject())
+        skillsService.createSubject(subj)
         skillsService.createSkills(skills)
 
         List<Date> days
@@ -95,6 +94,7 @@ class SkillUsageNavigatorMetricsBuilderSpec extends DefaultIntSpec {
         then:
         res.size() == 10
         def skill1 = res.find { it.skillId == 'skill1' }
+        skill1.subjectId == subj.subjectId
         skill1.numUserAchieved == 1
         skill1.numUsersInProgress == 4
         new Date(skill1.lastReportedTimestamp) == days[5]
