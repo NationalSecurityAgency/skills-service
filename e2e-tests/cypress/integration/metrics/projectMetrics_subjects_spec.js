@@ -187,6 +187,68 @@ describe('Metrics Tests', () => {
         cy.get('[data-cy=subjectNumUsersPerLevelOverTime]').matchImageSnapshot();
     });
 
+
+    it('subjects - num users per level over time - multiple levels with same # of users for all the achieved levels', {
+        retries: {
+            runMode: 0,
+            openMode: 0
+        }
+    },() => {
+        cy.server()
+            .route('/admin/projects/proj1/metrics/usersByLevelForSubjectOverTimeChartBuilder?subjectId=subj1')
+            .as('getLevelsOverTimeData');
+
+        cy.server().route({
+            url: '/admin/projects/proj1/subjects',
+            status: 200,
+            response: [{
+                'subjectId': 'subj1',
+                'projectId': 'proj1',
+                'name': 'Subject 1',
+            }],
+        }).as('getSubjects');
+
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            name: "Subject 1",
+        });
+        const numSkills = 6;
+        for (let skillsCounter = 1; skillsCounter <= numSkills; skillsCounter += 1) {
+            cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill${skillsCounter}`, {
+                projectId: 'proj1',
+                subjectId: 'subj1',
+                skillId: `skill${skillsCounter}`,
+                name: `Skill ${skillsCounter}`,
+                pointIncrement: '50',
+                numPerformToCompletion: '1',
+            });
+        };
+
+        const m = moment.utc('2020-09-02 11', 'YYYY-MM-DD HH');
+        cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'user0Good@skills.org', timestamp: m.clone().subtract(10, 'day').format('x')})
+        cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: 'user0Good@skills.org', timestamp: m.clone().subtract(5, 'day').format('x')})
+        cy.request('POST', `/api/projects/proj1/skills/skill3`, {userId: 'user0Good@skills.org', timestamp: m.clone().subtract(3, 'day').format('x')})
+        cy.request('POST', `/api/projects/proj1/skills/skill4`, {userId: 'user0Good@skills.org', timestamp: m.clone().subtract(3, 'day').format('x')})
+
+
+        cy.visit('/projects/proj1/');
+        cy.clickNav('Metrics');
+        cy.get('[data-cy=metricsNav-Subjects]').click();
+        cy.wait('@getSubjects');
+
+        cy.get('[data-cy=subjectNumUsersPerLevelOverTime]').contains('Generate the chart using controls above!');
+
+        cy.get('[data-cy=subjectNumUsersPerLevelOverTime-subjectSelector]').select('Subject 1');
+        cy.get('[data-cy=subjectNumUsersPerLevelOverTime]').contains('Generate').click();
+
+        cy.wait('@getLevelsOverTimeData');
+        cy.get('[data-cy=subjectNumUsersPerLevelOverTime]').contains('Level 1');
+
+        cy.wait(waitForSnap);
+        cy.get('[data-cy=subjectNumUsersPerLevelOverTime]').matchImageSnapshot();
+    });
+
     it('subjects - num users per level over time - long history', {
         retries: {
             runMode: 0,
