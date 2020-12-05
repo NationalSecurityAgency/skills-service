@@ -27,7 +27,7 @@ describe('Metrics Tests - Subject', () => {
     });
 
 
-    it.only('level breakdown', {
+    it('level breakdown', {
         retries: {
             runMode: 0,
             openMode: 0
