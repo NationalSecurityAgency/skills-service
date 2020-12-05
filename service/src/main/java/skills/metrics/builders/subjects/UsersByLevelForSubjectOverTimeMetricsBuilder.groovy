@@ -45,13 +45,7 @@ class UsersByLevelForSubjectOverTimeMetricsBuilder implements ProjectMetricsBuil
         List<UserAchievedLevelRepo.SkillLevelDayUserCount> counts =
                 userAchievedRepo.countNumUsersOverTimeAndLevelByProjectIdAndSkillId(projectId, subjectId)
 
-        Date maxDay
-        counts.each {
-            if (!maxDay || maxDay.before(it.getDay())) {
-                maxDay = it.getDay()
-            }
-        }
-
+        Date maxDay = getMaxDay(counts)
         Map<Integer, List<UserAchievedLevelRepo.SkillLevelDayUserCount>> byLevel =
                 counts.groupBy { it.getLevel() }
 
@@ -62,7 +56,8 @@ class UsersByLevelForSubjectOverTimeMetricsBuilder implements ProjectMetricsBuil
             Date minDate
             List<TimestampCountItem> numUsersTimeline = countsByDay.collect {
                 currentNumUsers += it.getNumberUsers()
-                Date day = it.getDay()
+                // depending on db can come back as java.sql.Timestamp
+                Date day = new Date(it.getDay().getTime())
                 minDate = (!minDate || day.before(minDate)) ? day : minDate
                 new TimestampCountItem(value: day.time, count: currentNumUsers)
             }
@@ -86,6 +81,19 @@ class UsersByLevelForSubjectOverTimeMetricsBuilder implements ProjectMetricsBuil
             new UserCountsByLevel(level: it.key, counts: numUsersTimeline)
         }
 
-        return res;
+        return res?.sort({ it.level });
+    }
+
+    private Date getMaxDay(List<UserAchievedLevelRepo.SkillLevelDayUserCount> counts) {
+        Date maxDay
+        counts.each {
+            // depending on db can come back as java.sql.Timestamp
+            Date currentDay = new Date(it.getDay().getTime())
+            if (!maxDay || maxDay.before(currentDay)) {
+                maxDay = currentDay
+            }
+        }
+
+        return maxDay
     }
 }

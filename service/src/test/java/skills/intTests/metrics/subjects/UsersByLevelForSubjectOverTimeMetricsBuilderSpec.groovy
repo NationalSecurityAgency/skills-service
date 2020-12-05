@@ -141,15 +141,6 @@ class UsersByLevelForSubjectOverTimeMetricsBuilderSpec extends DefaultIntSpec {
 
         when:
         def res = skillsService.getMetricsData(proj.projectId, metricsId, props)
-        println JsonOutput.prettyPrint(JsonOutput.toJson(res))
-
-        res.each {
-            println "Level ${it.level}"
-            it.counts.each {
-                println "  ${new Date(it.value)} => ${it.count}"
-            }
-        }
-
         then:
         res
         res[0].counts.collect { it.count } == [0, 1, 1, 1, 1, 1, 1]
