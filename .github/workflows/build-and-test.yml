@@ -246,3 +246,4 @@ jobs:
           path: |
             ./service/target/*.log
             ./e2e-tests/logs
+            ./e2e-tests/cypress/snapshots/*.js/__diff_output__/**
