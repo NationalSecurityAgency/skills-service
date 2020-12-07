@@ -15,7 +15,7 @@ limitations under the License.
 */
 <template>
   <b-card>
-    <div class="text-center" style="width: 100%">
+    <div class="text-center">
       <span class="font-weight-bold"><i :class="titleIcon" class="mr-2 text-secondary"></i>{{ title }}</span>
       <metrics-overlay :loading="loading" :has-data="hasData" no-data-msg="Selected projects don't have any data">
         <apexchart v-if="!loading"

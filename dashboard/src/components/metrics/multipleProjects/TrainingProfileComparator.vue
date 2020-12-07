@@ -27,11 +27,11 @@ limitations under the License.
                  data-cy="trainingProfileComparatorProjectSelector"/>
       <div class="mt-4">
       <b-row>
-        <b-col xl>
+        <b-col xl class="charts-content">
           <training-profile-comparison-chart :series="numSkillsChart.series" :labels="numSkillsChart.labels"
             title="Number of Skills" title-icon="fas fa-graduation-cap" data-cy="numOfSkillsChart"/>
         </b-col>
-        <b-col xl class="mt-3 mt-xl-0">
+        <b-col xl class="mt-3 mt-xl-0 charts-content">
           <training-profile-comparison-chart :series="numPointsChart.series" :labels="numPointsChart.labels"
                                              :horizontal="true"
                                              title-icon="far fa-arrow-alt-circle-up"
@@ -40,11 +40,11 @@ limitations under the License.
         </b-col>
       </b-row>
       <b-row class="mt-3">
-        <b-col xl>
+        <b-col xl class="charts-content">
           <training-profile-comparison-chart :series="numSubjectsChart.series" :labels="numSubjectsChart.labels"
                                              title="Number of Subjects" title-icon="fas fa-cubes" data-cy="numOfSubjChart"/>
         </b-col>
-        <b-col xl class="mt-3 mt-xl-0">
+        <b-col xl class="mt-3 mt-xl-0 charts-content">
           <training-profile-comparison-chart :series="numBadgesChart.series" :labels="numBadgesChart.labels"
                                              title="Number of Badges" title-icon="fas fa-award" data-cy="numOfBadgesChart"/>
         </b-col>
@@ -143,5 +143,9 @@ limitations under the License.
 </script>
 
 <style scoped>
-
+.charts-content {
+  /* this little hack is required to prevent apexcharts from wrapping onto a new line;
+  the gist is that they calculate width dynamically and do not work properly with the width of 0*/
+  min-width: 1rem !important;
+}
 </style>
