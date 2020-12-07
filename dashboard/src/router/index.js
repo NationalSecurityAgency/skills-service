@@ -45,14 +45,6 @@ import RequestPasswordReset from '@//components/access/RequestPasswordReset';
 import RequestResetConfirmation from '@//components/access/RequestResetConfirmation';
 import ResetConfirmation from '@//components/access/ResetConfirmation';
 import ResetNotSupportedPage from '@//components/access/ResetNotSupportedPage';
-import MetricsPageNav from '@//components/metrics/MetricsPageNav';
-import ProjectMetrics from '@//components/metrics/ProjectMetrics';
-import UsersAchievementsMetricPage from '@//components/metrics/projectAchievements/UsersAchievementsMetricPage';
-import SubjectMetricsPage from '@//components/metrics/projectSubjects/SubjectMetricsPage';
-import SkillsMetricsPage from '@//components/metrics/projectSkills/SkillsMetricsPage';
-import SkillMetricsPage from '@//components/metrics/skill/SkillMetricsPage';
-import MetricsOnSubjectPage from '@//components/metrics/subject/MetricsOnSubjectPage';
-import MultipleProjectsMetricsPage from '@//components/metrics/multipleProjects/MultipleProjectsMetricsPage';
 
 const GlobalBadgePage = () => import(/* webpackChunkName: 'globalBadgePage' */'@/components/badges/global/GlobalBadgePage');
 const GlobalBadgeSkills = () => import(/* webpackChunkName: 'globalBadgeSkills' */'@//components/badges/global/GlobalBadgeSkills');
@@ -65,8 +57,16 @@ const SystemSettings = () => import(/* webpackChunkName: 'systemSettings' */'@//
 const SkillDependencies = () => import(/* webpackChunkName: 'skillDependencies' */'@//components/skills/dependencies/SkillDependencies');
 const AddSkillEvent = () => import(/* webpackChunkName: 'addSKillEvent' */'@//components/skills/AddSkillEvent');
 const InceptionSkills = () => import(/* webpackChunkName: 'inceptionSkills' */'@//components/inception/InceptionSkills');
-const CrossProjectsSkills = () => import(/* webpackChunkName: 'inceptionSkills' */'@//components/skills/crossProjects/CrossProjectsSkills');
-const ClientDisplayPreview = () => import(/* webpackChunkName: 'inceptionSkills' */'@//components/users/ClientDisplayPreview');
+const CrossProjectsSkills = () => import(/* webpackChunkName: 'crossProjectsSkills' */'@//components/skills/crossProjects/CrossProjectsSkills');
+const ClientDisplayPreview = () => import(/* webpackChunkName: 'clientDisplayPreview' */'@//components/users/ClientDisplayPreview');
+const MultipleProjectsMetricsPage = () => import(/* webpackChunkName: 'multipleProjectsMetricsPage' */'@//components/metrics/multipleProjects/MultipleProjectsMetricsPage');
+const MetricsOnSubjectPage = () => import(/* webpackChunkName: 'MetricsOnSubjectPage' */ '@//components/metrics/subject/MetricsOnSubjectPage');
+const SkillMetricsPage = () => import(/* webpackChunkName: 'SkillMetricsPage' */'@//components/metrics/skill/SkillMetricsPage');
+const SkillsMetricsPage = () => import(/* webpackChunkName: 'SkillsMetricsPage' */'@//components/metrics/projectSkills/SkillsMetricsPage');
+const SubjectMetricsPage = () => import(/* webpackChunkName: 'SubjectMetricsPage' */'@//components/metrics/projectSubjects/SubjectMetricsPage');
+const UsersAchievementsMetricPage = () => import(/* webpackChunkName: 'UsersAchievementsMetricPage' */'@//components/metrics/projectAchievements/UsersAchievementsMetricPage');
+const ProjectMetrics = () => import(/* webpackChunkName: 'ProjectMetrics' */'@//components/metrics/ProjectMetrics');
+const MetricsPageNav = () => import(/* webpackChunkName: 'MetricsPageNav' */'@//components/metrics/MetricsPageNav');
 
 Vue.use(Router);
 

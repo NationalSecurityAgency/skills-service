@@ -104,7 +104,6 @@ limitations under the License.
 </template>
 
 <script>
-  import moment from 'moment';
   import SkillsBTable from '../../utils/table/SkillsBTable';
   import MetricsService from '../MetricsService';
   import AchievementType from './AchievementType';
@@ -233,7 +232,7 @@ limitations under the License.
           });
       },
       isToday(timestamp) {
-        return moment(timestamp)
+        return window.dayjs(timestamp)
           .isSame(new Date(), 'day');
       },
     },

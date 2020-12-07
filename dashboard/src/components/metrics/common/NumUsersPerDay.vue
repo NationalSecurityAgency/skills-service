@@ -26,7 +26,6 @@ limitations under the License.
 </template>
 
 <script>
-  import moment from 'moment';
   import MetricsService from '../MetricsService';
   import numberFormatter from '@//filters/NumberFilter';
   import MetricsOverlay from '../utils/MetricsOverlay';
@@ -49,7 +48,7 @@ limitations under the License.
         distinctUsersOverTime: [],
         hasDataEnoughData: false,
         props: {
-          start: moment().clone().subtract(1, 'month').valueOf(),
+          start: window.dayjs().subtract(1, 'month').valueOf(),
         },
         timeSelectorOptions: [
           {

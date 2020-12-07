@@ -35,7 +35,7 @@
     "material-icons": "0.3.1",
     "dayjs": "1.9.6",
     "node-emoji": "1.10.0",
-    "numeral": "2.0.6",
+    "number-format.js": "2.0.9",
     "sockjs-client": "1.5.0",
     "vee-validate": "3.4.2",
     "vis": "4.21.0",

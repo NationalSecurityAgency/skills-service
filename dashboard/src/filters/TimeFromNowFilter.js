@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 import Vue from 'vue';
-import moment from 'moment';
 
-const timeFromNowFormatter = (value) => moment(value).startOf('hour').fromNow();
+const timeFromNowFormatter = (value) => window.dayjs(value).startOf('hour').fromNow();
 Vue.filter('timeFromNow', timeFromNowFormatter);
 
 // this allows to call this function from an js code; to learn more about that read about javascript modules

@@ -73,8 +73,16 @@ let optimization = {
   // minimize: false
 };
 
+const prodMode = process.env.NODE_ENV === 'production';
+
 // comment to disable analyzer
-// plugins.push(new BundleAnalyzerPlugin());
+plugins.push(new BundleAnalyzerPlugin({
+  "reportFilename": "client.report.html",
+  "statsFilename": "client.stats.json",
+  "generateStatsFile": prodMode, // only enable for prod because it is REALLY costly
+  "openAnalyzer": false,
+  "analyzerMode": "static"
+}));
 
 module.exports = {
   pluginOptions: {
