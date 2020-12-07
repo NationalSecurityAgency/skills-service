@@ -450,5 +450,68 @@ describe('Projects Tests', () => {
     cy.wait('@suggest');
   });
 
+  it('Trusted client should not shown when oAuthOnly=true', () => {
+    cy.server()
+    cy.route('GET', '/public/config', {oAuthOnly: true}).as('loadConfig');
+
+    cy.request('POST', '/app/projects/proj1', {
+      projectId: 'proj1',
+      name: "proj1"
+    });
+
+    cy.route({
+      method: 'PUT',
+      url: '/admin/projects/proj1/users/root@skills.org/roles/ROLE_PROJECT_ADMIN',
+    }).as('addAdmin');
+
+    cy.route({
+      method: 'POST',
+      url: '/app/users/suggestDashboardUsers*',
+    }).as('suggest');
+    cy.route('GET', '/app/userInfo').as('loadUserInfo');
+    cy.route('GET', '/admin/projects/proj1').as('loadProject');
+    cy.route('GET', '/admin/projects/proj1/userRoles').as('loadUserRoles');
+
+    cy.visit('/projects/proj1/access');
+    cy.wait('@loadConfig');
+    cy.wait('@loadUserInfo');
+    cy.wait('@loadProject');
+    cy.wait('@loadUserRoles');
+
+    cy.contains('Firstname LastName (skills@skills.org)').should('exist');
+    cy.get('[data-cy="trusted-client-props-panel"]').should('not.exist')
+  });
+
+  it('Trusted client should be shown when oAuthOnly!=true', () => {
+    cy.server()
+    cy.route('GET', '/public/config').as('loadConfig');
+
+    cy.request('POST', '/app/projects/proj1', {
+      projectId: 'proj1',
+      name: "proj1"
+    });
+
+    cy.route({
+      method: 'PUT',
+      url: '/admin/projects/proj1/users/root@skills.org/roles/ROLE_PROJECT_ADMIN',
+    }).as('addAdmin');
+
+    cy.route({
+      method: 'POST',
+      url: '/app/users/suggestDashboardUsers*',
+    }).as('suggest');
+    cy.route('GET', '/app/userInfo').as('loadUserInfo');
+    cy.route('GET', '/admin/projects/proj1').as('loadProject');
+    cy.route('GET', '/admin/projects/proj1/userRoles').as('loadUserRoles');
+
+    cy.visit('/projects/proj1/access');
+    cy.wait('@loadConfig');
+    cy.wait('@loadUserInfo');
+    cy.wait('@loadProject');
+    cy.wait('@loadUserRoles');
+
+    cy.contains('Firstname LastName (skills@skills.org)').should('exist');
+    cy.get('[data-cy="trusted-client-props-panel"]').should('exist')
+  });
 });
 

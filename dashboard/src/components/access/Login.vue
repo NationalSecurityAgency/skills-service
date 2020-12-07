@@ -28,7 +28,7 @@ limitations under the License.
             </b-alert>
           </transition>
 
-          <div class="card text-left">
+          <div v-if="!oAuthOnly" class="card text-left">
             <div class="card-body p-4">
 
               <div class="form-group">
@@ -180,6 +180,9 @@ limitations under the License.
     computed: {
       disabled() {
         return (!this.isAutoFilled && (!this.loginFields.username || !this.loginFields.password));
+      },
+      oAuthOnly() {
+        return this.$store.getters.config.oAuthOnly && this.$route.query.showForm !== 'true';
       },
     },
     created() {

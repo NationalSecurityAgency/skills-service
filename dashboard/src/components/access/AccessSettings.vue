@@ -25,7 +25,7 @@ limitations under the License.
       </div>
     </div>
 
-    <trusted-client-props v-if="!$store.getters.isPkiAuthenticated" :project="project" class="my-4"/>
+    <trusted-client-props v-if="showTrustedClientProps" :project="project" class="my-4"/>
   </loading-container>
 </template>
 
@@ -49,6 +49,11 @@ limitations under the License.
         isLoading: true,
         project: {},
       };
+    },
+    computed: {
+      showTrustedClientProps() {
+        return (!this.$store.getters.isPkiAuthenticated && !this.$store.getters.config.oAuthOnly);
+      },
     },
     mounted() {
       ProjectService.getProjectDetails(this.$route.params.projectId)

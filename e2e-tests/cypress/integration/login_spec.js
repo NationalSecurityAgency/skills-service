@@ -145,5 +145,40 @@ describe('Login Tests', () => {
       cy.wait('@getOAuthProviders').its('status').should('equal', 200)
       cy.get('[data-cy=oAuthProviders]').should('not.exist');
     })
+
+    it('no login form for oAuthOnly mode', () => {
+      cy.server()
+      cy.route('GET', '/public/config', {oAuthOnly: true}).as('loadConfig');
+      cy.route('GET', '/app/oAuthProviders', [{"registrationId":"gitlab","clientName":"GitLab","iconClass":"fab fa-gitlab"}]).as('getOauthProviders')
+
+      cy.visit('/');
+
+      cy.wait('@loadConfig');
+      cy.wait('@getOauthProviders');
+      cy.get('#username').should('not.exist')
+      cy.get('#inputPassword').should('not.exist')
+      cy.get('[data-cy=oAuthProviders]').should('exist');
+      cy.contains('Continue with GitLab')
+    });
+
+    it('login form is present for oAuthOnly mode when showForm=true', () => {
+      cy.server()
+      cy.route('GET', '/public/config', {oAuthOnly: true}).as('loadConfig');
+      cy.route('GET', '/app/oAuthProviders', [{"registrationId":"gitlab","clientName":"GitLab","iconClass":"fab fa-gitlab"}]).as('getOauthProviders')
+
+      cy.visit('/skills-login', {
+        qs: {
+          showForm: 'true',
+        }
+      });
+
+      cy.wait('@loadConfig');
+      cy.wait('@getOauthProviders');
+      cy.get('#username').should('exist')
+      cy.get('#inputPassword').should('exist')
+      cy.get('[data-cy=oAuthProviders]').should('exist');
+      cy.contains('Continue with GitLab')
+    });
   }
+
 });
