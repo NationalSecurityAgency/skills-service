@@ -13,13 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import Vue from 'vue';
-import dayjs from '../DayJsCustomizer';
+import dayjs from 'dayjs';
+import localizedFormatPlugin from 'dayjs/plugin/localizedFormat';
+import relativeTimePlugin from 'dayjs/plugin/relativeTime';
 
-const timeFromNowFormatter = (value) => dayjs(value).startOf('hour').fromNow();
-Vue.filter('timeFromNow', timeFromNowFormatter);
+dayjs.extend(localizedFormatPlugin);
+dayjs.extend(relativeTimePlugin);
 
-// this allows to call this function from an js code; to learn more about that read about javascript modules
-// import TimeFromNowFilter from 'src/TimeFromNowFilter.js'
-//    TimeFromNowFilter(dateStrValue)
-export default timeFromNowFormatter;
+export default dayjs;

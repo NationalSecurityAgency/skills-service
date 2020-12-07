@@ -39,6 +39,12 @@ import {
   CardPlugin,
   PaginationPlugin,
   CollapsePlugin,
+  OverlayPlugin,
+  BadgePlugin,
+  PopoverPlugin,
+  FormPlugin,
+  FormGroupPlugin,
+  FormDatepickerPlugin,
 } from 'bootstrap-vue';
 
 import { ClientTable, ServerTable } from 'vue-tables-2';
@@ -48,12 +54,11 @@ import {
 } from 'vee-validate';
 import en from 'vee-validate/dist/locale/en.json';
 import Vuex from 'vuex';
-import dayjs from 'dayjs';
-import localizedFormatPlugin from 'dayjs/plugin/localizedFormat';
 import InceptionConfigurer from './InceptionConfigurer';
 import 'babel-polyfill';
 import 'matchmedia-polyfill';
 import 'matchmedia-polyfill/matchMedia.addListener';
+import dayjs from './DayJsCustomizer';
 import './filters/NumberFilter';
 import './filters/TruncateFilter';
 import './filters/DateFilter';
@@ -98,6 +103,12 @@ Vue.use(FormCheckboxPlugin);
 Vue.use(CardPlugin);
 Vue.use(PaginationPlugin);
 Vue.use(CollapsePlugin);
+Vue.use(OverlayPlugin);
+Vue.use(BadgePlugin);
+Vue.use(PopoverPlugin);
+Vue.use(FormPlugin);
+Vue.use(FormGroupPlugin);
+Vue.use(FormDatepickerPlugin);
 
 Vue.use(SkillsDirective);
 
@@ -106,10 +117,7 @@ localize({
 });
 
 setInteractionMode('custom', () => ({ on: ['input', 'change'] }));
-
 Vue.config.productionTip = false;
-
-dayjs.extend(localizedFormatPlugin);
 window.dayjs = dayjs;
 
 window.axios = require('axios');
