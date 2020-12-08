@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div class="card" id="trusted-client-props-panel">
+  <div class="card" id="trusted-client-props-panel" data-cy="trusted-client-props-panel">
     <div class="card-header">
       Trusted Client Properties
     </div>

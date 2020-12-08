@@ -48,6 +48,9 @@ class PublicConfigController {
     @Value('${skills.authorization.authMode:#{T(skills.auth.AuthMode).DEFAULT_AUTH_MODE}}')
     AuthMode authMode
 
+    @Value('#{"${skills.authorization.oAuthOnly:false}"}')
+    Boolean oAuthOnly
+
     @Autowired
     SettingsService settingsService
 
@@ -60,6 +63,7 @@ class PublicConfigController {
         Map<String,String> res = new HashMap<>(uiConfigProperties.ui)
         res["authMode"] = authMode.name()
         res["needToBootstrap"] = !accessSettingsStorageService.rootAdminExists()
+        res["oAuthOnly"] = authMode == AuthMode.FORM && oAuthOnly
         List<SettingsResult> customizationSettings = settingsService.getGlobalSettingsByGroup(SystemSettingsService.CUSTOMIZATION)
         customizationSettings?.each {
             if (Settings.GLOBAL_CUSTOM_HEADER.settingName == it.setting) {
