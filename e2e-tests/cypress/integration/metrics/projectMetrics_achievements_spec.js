@@ -247,31 +247,59 @@ describe('Metrics Tests - Achievements', () => {
             name: "Interesting Subject 1",
         })
 
-        const numSkills = 1;
+        cy.request('POST', '/admin/projects/proj1/subjects/subj2', {
+            projectId: 'proj1',
+            subjectId: 'subj2',
+            name: "Other Subject 2",
+        })
+
+        cy.request('POST', '/admin/projects/proj1/subjects/subj3', {
+            projectId: 'proj1',
+            subjectId: 'subj3',
+            name: "Other Subject 3",
+        })
+
+        const numSkills = 3;
         for (let skillsCounter = 1; skillsCounter <= numSkills; skillsCounter += 1) {
-            cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill${skillsCounter}`, {
+            cy.request('POST', `/admin/projects/proj1/subjects/subj${skillsCounter}/skills/skill${skillsCounter}`, {
                 projectId: 'proj1',
-                subjectId: 'subj1',
+                subjectId: `subj${skillsCounter}`,
                 skillId: `skill${skillsCounter}`,
                 name: `Very Great Skill # ${skillsCounter}`,
                 pointIncrement: '150',
-                numPerformToCompletion: '15',
+                numPerformToCompletion: 25,
             });
         };
 
         const m = moment.utc('2020-09-12 11', 'YYYY-MM-DD HH');
 
-        cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'user0Good@skills.org', timestamp: m.clone().subtract(1, 'day').format('x')})
-        cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'user0Good@skills.org', timestamp: m.clone().subtract(2, 'day').format('x')})
-        cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'user0Good@skills.org', timestamp: m.clone().subtract(3, 'day').format('x')})
-        cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'user0Good@skills.org', timestamp: m.clone().subtract(4, 'day').format('x')})
-        cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'user0Good@skills.org', timestamp: m.clone().subtract(5, 'day').format('x')})
-        cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'another@skills.org', timestamp: m.clone().subtract(3, 'day').format('x')})
-        cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'another@skills.org', timestamp: m.clone().subtract(4, 'day').format('x')})
-        cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'another@skills.org', timestamp: m.clone().subtract(5, 'day').format('x')})
-        cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'thereYouGo@skills.org', timestamp: m.clone().subtract(6, 'day').format('x')})
-        cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'thereYouGo@skills.org', timestamp: m.clone().subtract(7, 'day').format('x')})
-        cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'thereYouGo@skills.org', timestamp: m.clone().subtract(8, 'day').format('x')})
+        cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'user0Good@skills.org', timestamp: m.clone().add(1, 'day').format('x')})
+        cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'user0Good@skills.org', timestamp: m.clone().add(2, 'day').format('x')})
+        cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'user0Good@skills.org', timestamp: m.clone().add(3, 'day').format('x')})
+        cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'user0Good@skills.org', timestamp: m.clone().add(4, 'day').format('x')})
+        cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'user0Good@skills.org', timestamp: m.clone().add(5, 'day').format('x')})
+        cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'user0Good@skills.org', timestamp: m.clone().add(6, 'day').format('x')})
+        cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'user0Good@skills.org', timestamp: m.clone().add(7, 'day').format('x')})
+        cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'user0Good@skills.org', timestamp: m.clone().add(8, 'day').format('x')})
+        cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'user0Good@skills.org', timestamp: m.clone().add(5, 'day').format('x')})
+        for (let i = 1; i <= 10; i += 1) {
+            cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: 'user0Good@skills.org', timestamp: m.clone().add(i, 'day').format('x')})
+            cy.request('POST', `/api/projects/proj1/skills/skill3`, {userId: 'user0Good@skills.org', timestamp: m.clone().add(i, 'day').format('x')})
+        }
+
+        cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'another@skills.org', timestamp: m.clone().add(3, 'day').format('x')})
+        cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: 'another@skills.org', timestamp: m.clone().add(4, 'day').format('x')})
+        cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'another@skills.org', timestamp: m.clone().add(5, 'day').format('x')})
+        cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: 'another@skills.org', timestamp: m.clone().add(6, 'day').format('x')})
+        cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'another@skills.org', timestamp: m.clone().add(7, 'day').format('x')})
+        cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: 'another@skills.org', timestamp: m.clone().add(8, 'day').format('x')})
+        cy.request('POST', `/api/projects/proj1/skills/skill3`, {userId: 'another@skills.org', timestamp: m.clone().add(15, 'day').format('x')})
+        cy.request('POST', `/api/projects/proj1/skills/skill3`, {userId: 'another@skills.org', timestamp: m.clone().add(16, 'day').format('x')})
+
+
+        cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'thereYouGo@skills.org', timestamp: m.clone().add(6, 'day').format('x')})
+        cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'thereYouGo@skills.org', timestamp: m.clone().add(7, 'day').format('x')})
+        cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'thereYouGo@skills.org', timestamp: m.clone().add(8, 'day').format('x')})
 
         cy.visit('/projects/proj1/');
         cy.clickNav('Metrics');
@@ -286,7 +314,8 @@ describe('Metrics Tests - Achievements', () => {
         cy.wait('@userAchievementsChartBuilder');
         cy.validateTable(tableSelector, [
             [{ colIndex: 0,  value: 'another@skills.org' }, { colIndex: 1,  value: 'Overall' }],
-            [{ colIndex: 0,  value: 'another@skills.org' }, { colIndex: 1,  value: 'Subject' }],
+            [{ colIndex: 0,  value: 'another@skills.org' }, { colIndex: 2,  value: 'Other Subject 2' }],
+            [{ colIndex: 0,  value: 'another@skills.org' }, { colIndex: 2,  value: 'Interesting Subject 1' }],
         ]);
 
         cy.get('[data-cy=achievementsNavigator-nameInput]').type('in');
@@ -315,6 +344,8 @@ describe('Metrics Tests - Achievements', () => {
         cy.get('[data-cy=achievementsNavigator-filterBtn]').click();
         cy.wait('@userAchievementsChartBuilder');
         cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'user0good@skills.org' }, { colIndex: 3,  value: 2 }],
+            [{ colIndex: 0,  value: 'user0good@skills.org' }, { colIndex: 3,  value: 2 }],
             [{ colIndex: 0,  value: 'user0good@skills.org' }, { colIndex: 3,  value: 2 }],
             [{ colIndex: 0,  value: 'user0good@skills.org' }, { colIndex: 3,  value: 2 }],
         ]);
@@ -353,6 +384,11 @@ describe('Metrics Tests - Achievements', () => {
             [{ colIndex: 1,  value: 'Subject' }],
             [{ colIndex: 1,  value: 'Subject' }],
             [{ colIndex: 1,  value: 'Subject' }],
+            [{ colIndex: 1,  value: 'Subject' }],
+            [{ colIndex: 1,  value: 'Subject' }],
+            [{ colIndex: 1,  value: 'Subject' }],
+            [{ colIndex: 1,  value: 'Subject' }],
+            [{ colIndex: 1,  value: 'Subject' }],
         ]);
 
         cy.get('[data-cy=achievementsNavigator-typeInput]').contains('Subject').click();
@@ -360,7 +396,6 @@ describe('Metrics Tests - Achievements', () => {
         cy.get('[data-cy=achievementsNavigator-filterBtn]').click();
         cy.wait('@userAchievementsChartBuilder');
         cy.validateTable(tableSelector, [
-            [{ colIndex: 1,  value: 'Overall' }],
             [{ colIndex: 1,  value: 'Overall' }],
             [{ colIndex: 1,  value: 'Overall' }],
             [{ colIndex: 1,  value: 'Overall' }],
@@ -372,26 +407,31 @@ describe('Metrics Tests - Achievements', () => {
         const now = new Date(2020, 8, 12).getTime()
         cy.clock(now)
         cy.get('[data-cy=achievementsNavigator-fromDateInput]').click();
-        cy.get('.b-calendar-grid-body').contains('9').click();
+        cy.get('.b-calendar-grid-body').contains('18').click();
 
         cy.get('[data-cy=achievementsNavigator-filterBtn]').click();
         cy.wait('@userAchievementsChartBuilder');
         cy.validateTable(tableSelector, [
-            [{ colIndex: 4,  value: '2020-09-11 11:00' }],
-            [{ colIndex: 4,  value: '2020-09-11 11:00' }],
-            [{ colIndex: 4,  value: '2020-09-11 11:00' }],
-            [{ colIndex: 4,  value: '2020-09-11 11:00' }],
-            [{ colIndex: 4,  value: '2020-09-09 11:00' }],
-            [{ colIndex: 4,  value: '2020-09-09 11:00' }],
+            [{ colIndex: 4,  value: '2020-09-28 11:00' }],
+            [{ colIndex: 4,  value: '2020-09-20 11:00' }],
+            [{ colIndex: 4,  value: '2020-09-20 11:00' }],
+            [{ colIndex: 4,  value: '2020-09-20 11:00' }],
+            [{ colIndex: 4,  value: '2020-09-20 11:00' }],
+            [{ colIndex: 4,  value: '2020-09-19 11:00' }],
+            [{ colIndex: 4,  value: '2020-09-19 11:00' }],
+            [{ colIndex: 4,  value: '2020-09-19 11:00' }],
+            [{ colIndex: 4,  value: '2020-09-19 11:00' }],
         ]);
 
         cy.get('[data-cy=achievementsNavigator-toDateInput]').click();
-        cy.get('.b-calendar-grid-body').contains('10').click();
+        cy.get('.b-calendar-grid-body').contains('19').click();
         cy.get('[data-cy=achievementsNavigator-filterBtn]').click();
         cy.wait('@userAchievementsChartBuilder');
         cy.validateTable(tableSelector, [
-            [{ colIndex: 4,  value: '2020-09-09 11:00' }],
-            [{ colIndex: 4,  value: '2020-09-09 11:00' }],
+            [{ colIndex: 4,  value: '2020-09-19 11:00' }],
+            [{ colIndex: 4,  value: '2020-09-19 11:00' }],
+            [{ colIndex: 4,  value: '2020-09-19 11:00' }],
+            [{ colIndex: 4,  value: '2020-09-19 11:00' }],
         ]);
 
         //////////////////////////////
@@ -405,7 +445,7 @@ describe('Metrics Tests - Achievements', () => {
         cy.get('[data-cy=achievementsNavigator-filterBtn]').click();
         cy.wait('@userAchievementsChartBuilder');
         cy.validateTable(tableSelector, [
-            [{ colIndex: 2,  value: 'Interesting Subject 1' }, { colIndex: 4,  value: '2020-09-09 11:00' }],
+            [{ colIndex: 2,  value: 'Interesting Subject 1' }, { colIndex: 4,  value: '2020-09-19 11:00' }],
         ]);
     });
 

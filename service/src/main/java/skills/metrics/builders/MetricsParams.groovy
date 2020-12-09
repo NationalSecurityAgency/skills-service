@@ -67,7 +67,13 @@ class MetricsParams {
 
     static Date getToDayFilter(String projectId, String chartId, Map<String, String> props) {
         String fromStr = getParam(props, P_TO_DAY_FILTER, chartId, projectId, true)
-        return fromStr ? DAY_FORMAT.parse(fromStr) : new Date(new Date().time + 30 * thirtyDays)
+        Date res
+        if (fromStr) {
+            res = new Date(DAY_FORMAT.parse(fromStr).time + (1000 * 60 * 60 * 24) - 1)
+        } else {
+            res = new Date(new Date().time + 30 * thirtyDays)
+        }
+        return res
     }
 
 
