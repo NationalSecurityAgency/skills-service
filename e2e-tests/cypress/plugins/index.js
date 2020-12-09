@@ -28,6 +28,8 @@
 
 const { lighthouse, pa11y, prepareAudit } = require("cypress-audit");
 
+const objectScan = require('object-scan');
+
 const {
     addMatchImageSnapshotPlugin,
 } = require('cypress-image-snapshot/plugin');
@@ -42,7 +44,21 @@ module.exports = (on, config) => {
     });
 
     on("task", {
-        lighthouse: lighthouse(),
+        lighthouse: lighthouse((lighthouseReport) => {
+            if (lighthouseReport && lighthouseReport.artifacts
+              && lighthouseReport.artifacts.Accessibility
+              && lighthouseReport.artifacts.Accessibility.violations) {
+                console.log('----------------------Lighthouse Violations----------------------');
+                console.table(lighthouseReport.artifacts.Accessibility.violations, ['id', 'impact', 'description', 'help',]);
+                lighthouseReport.artifacts.Accessibility.violations.forEach((viol) => {
+                    if (viol.nodes) {
+                        console.table(viol.nodes, ['impact', 'html', 'target', 'failureSummary', 'selector']);
+                    }
+                });
+            }
+
+            return null;
+        }),
         pa11y: pa11y(),
         log(message) {
             console.log(message)

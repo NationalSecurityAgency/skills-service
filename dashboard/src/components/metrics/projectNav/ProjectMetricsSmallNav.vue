@@ -20,7 +20,7 @@ limitations under the License.
               :aria-label="`${navItem.title} metrics`"
               :data-cy="`${navItem.title}-metrics-link`"
               :class="{'bg-primary' : $route.name === navItem.pathName, 'skills-white-text' : $route.name === navItem.pathName}"
-              variant="outline-info"> <i :class="navItem.icon"/></b-button>
+              variant="outline-info"> <i :class="navItem.icon"/><span class="sr-only">{{navItem.title}}</span></b-button>
   </b-button-group>
 </template>
 

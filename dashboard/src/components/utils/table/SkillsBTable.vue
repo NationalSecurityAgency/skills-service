@@ -165,6 +165,6 @@ limitations under the License.
 }
 
 .skills-b-table /deep/ .accessible th {
-  color: darkslategray !important;
+  color: #264653 !important;
 }
 </style>

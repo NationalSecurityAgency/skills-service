@@ -74,7 +74,8 @@
     "moment-timezone": "0.5.31",
     "wait-on": "5.2.0",
     "cypress-audit": "^0.2.3",
-    "cypress-axe": "^0.10.0"
+    "cypress-axe": "^0.10.0",
+    "object-scan": "13.6.7"
   },
   "dependencies": {}
 }
