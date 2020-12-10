@@ -81,12 +81,15 @@ describe('Client Display Features Tests', () => {
             },
         }).as('getSubjectSummary');
         cy.cdVisit('/');
+        cy.injectAxe();
         cy.contains('Overall Points');
         cy.contains('New Skills Software Version is Available').should('not.exist')
         cy.cdClickSubj(0, 'Subject 1');
+
         cy.wait('@getSubjectSummary')
 
         cy.contains('New Skills Software Version is Available')
+        cy.customA11y();
 
         cy.cdVisit('/');
         cy.contains('New Skills Software Version is Available').should('not.exist')
@@ -170,6 +173,7 @@ describe('Client Display Features Tests', () => {
         cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: Cypress.env('proxyUser'), timestamp: new Date().getTime() - 1000*60*60*24})
 
         cy.cdVisit('/');
+        cy.injectAxe();
 
         cy.contains('Overall Points');
 
@@ -191,6 +195,7 @@ describe('Client Display Features Tests', () => {
           helpUrl: 'http://doHelpOnThisSkill.com'
         });
 
+        cy.custtomA11y();
         cy.cdVisit('/');
 
         cy.contains('Overall Points');

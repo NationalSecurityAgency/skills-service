@@ -130,25 +130,29 @@ describe('Client Display Tests', () => {
             name: 'Badge 1'
         });
         cy.cdVisit('/');
+        cy.injectAxe();
         cy.contains('Overall Points');
 
         // some basic default theme validation
         cy.get("#app").should('have.css', 'background-color')
             .and('equal', 'rgba(0, 0, 0, 0)');
+        cy.customA11y();
     });
 
     it('ability to expand skill details from subject page', () => {
         cy.cdVisit('/')
+        cy.injectAxe();
         cy.cdClickSubj(0);
         cy.get('[data-cy=toggleSkillDetails]').click()
         cy.contains('Lorem ipsum dolor sit amet')
         // 1 skill is locked
         cy.contains('Skill has 1 direct dependent(s).')
-
+        cy.customA11y();
     });
 
     it('back button', () => {
         cy.cdVisit('/');
+        cy.injectAxe();
         cy.contains('User Skills');
         cy.get('[data-cy=back]').should('not.exist');
 
@@ -165,6 +169,7 @@ describe('Client Display Tests', () => {
         cy.cdClickSkill(0);
         cy.cdBack('Subject 1');
         cy.cdBack();
+        cy.customA11y();
     });
 
     it('clearly represent navigable components', () => {
@@ -212,6 +217,7 @@ describe('Client Display Tests', () => {
             name: 'Badge 1'
         });
         cy.cdVisit('/?isSummaryOnly=true');
+        cy.injectAxe();
 
         // cy.get('[data-cy=myRank]').contains("1")
         cy.get('[data-cy=myBadges]').contains("0 Badges")
@@ -229,6 +235,7 @@ describe('Client Display Tests', () => {
 
         // summaries should not be displayed at all
         cy.get('[data-cy=subjectTile]').should('not.exist');
+        cy.customA11y();
     });
 
     it('display achieved date on skill overview page', () => {

@@ -110,12 +110,14 @@ describe('Client Display Tests', () => {
         }).as('getPointHistory');
 
         cy.cdVisit('/');
+        cy.injectAxe();
         cy.wait('@getPointHistory');
 
         // let's wait for animation to complete
         cy.wait(waitForAnimation);
 
         cy.get('[data-cy=pointHistoryChart]').matchImageSnapshot();
+        cy.customA11y();
     });
 
 
@@ -490,12 +492,14 @@ describe('Client Display Tests', () => {
         }).as('getPointHistory');
 
         cy.cdVisit('/');
+        cy.injectAxe();
         cy.wait('@getPointHistory');
 
         // let's wait for animation to complete
         cy.wait(waitForAnimation);
 
         cy.get('[data-cy=pointHistoryChart]').matchImageSnapshot();
+        cy.customA11y();
     });
 
 

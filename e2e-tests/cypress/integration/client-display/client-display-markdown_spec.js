@@ -119,26 +119,31 @@ describe('Client Display Markdown Tests', () => {
         });
 
         cy.cdVisit('/');
+        cy.cy.injectAxe();
         cy.contains('Overall Points');
 
         // check subject
         cy.cdClickSubj(0, 'Subject 1');
         cy.contains('Emphasis');
         cy.matchImageSnapshot(`Markdown-subject`, snapshotOptions);
+        cy.customA11y();
 
         // check skill
         cy.cdClickSkill(0);
         cy.contains('This is 1');
         cy.contains('Emphasis');
         cy.matchImageSnapshot(`Markdown-skill`, snapshotOptions);
+        cy.customA11y();
 
         // check expanded skill
         cy.cdBack('Subject 1');
         cy.get('[data-cy=toggleSkillDetails]').click()
         cy.contains('Overall Points Earned');
         cy.matchImageSnapshot(`Markdown-Skill-Preview`, snapshotOptions);
+        cy.customA11y();
 
         cy.cdVisit('/');
+        cy.injectAxe();
         cy.contains('Overall Points');
 
         // check badge
@@ -146,5 +151,6 @@ describe('Client Display Markdown Tests', () => {
         cy.contains('Badges');
         cy.contains('Emphasis');
         cy.matchImageSnapshot(`Markdown-Badge`, snapshotOptions);
+        cy.customA11y();
     });
 });
