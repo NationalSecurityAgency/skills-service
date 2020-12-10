@@ -195,7 +195,7 @@ describe('Client Display Features Tests', () => {
           helpUrl: 'http://doHelpOnThisSkill.com'
         });
 
-        cy.custtomA11y();
+        cy.customA11y();
         cy.cdVisit('/');
 
         cy.contains('Overall Points');
