@@ -247,7 +247,7 @@ describe('Metrics Tests - Skills', () => {
         cy.clickNav('Metrics');
         cy.wait('@singleSkillCountsChartBuilder');
 
-        cy.get('[data-cy=numUsersAchievedOverTimeMetric]').contains('This chart needs at least 1 day of user activity');
+        cy.get('[data-cy=numUsersAchievedOverTimeMetric]').contains('No achievements yet for this skill');
 
         cy.get('[data-cy=appliedSkillEventsOverTimeMetric]').contains('This chart needs at least 2 days of user activity');
     });

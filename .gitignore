@@ -47,3 +47,5 @@ service/src/main/resources/public/**
 /e2e-tests/cypress/snapshots/**/__diff_output__
 
 /dashboard/build/
+
+.run

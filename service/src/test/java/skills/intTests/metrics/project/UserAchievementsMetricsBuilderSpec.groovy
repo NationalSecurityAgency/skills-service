@@ -303,6 +303,36 @@ class UserAchievementsMetricsBuilderSpec extends DefaultIntSpec {
         ]
     }
 
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] != "pki" })
+    def "get achievement in pki mode - username is different from userid"() {
+        def proj = SkillsFactory.createProject()
+        List<Map> skills = SkillsFactory.createSkills(5)
+        skills.each { it.pointIncrement = 200; it.numPerformToCompletion = 1 }
+
+        def subj = SkillsFactory.createSubject()
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        Map props = [:]
+        props[MetricsPagingParamsHelper.PROP_CURRENT_PAGE] = 1
+        props[MetricsPagingParamsHelper.PROP_PAGE_SIZE] = 15
+        props[MetricsPagingParamsHelper.PROP_SORT_DESC] = false
+        props[MetricsPagingParamsHelper.PROP_SORT_BY] = "userName"
+        props[MetricsParams.P_ACHIEVEMENT_TYPES] = allAchievementTypes
+
+        List<String> users = getRandomUsers(4)
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[0], new Date())
+
+        when:
+        def res = skillsService.getMetricsData(proj.projectId, metricsId, props)
+        then:
+        res.items.each {
+            assert "${it.userId} for display" == it.userName
+        }
+    }
+
     @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def "get achievements - sorting"() {
         def proj = SkillsFactory.createProject()

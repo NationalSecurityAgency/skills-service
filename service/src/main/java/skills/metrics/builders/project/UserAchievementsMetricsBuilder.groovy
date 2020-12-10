@@ -26,6 +26,7 @@ import skills.metrics.builders.MetricsParams
 import skills.metrics.builders.ProjectMetricsBuilder
 import skills.storage.model.SkillDef
 import skills.storage.model.UserAchievement
+import skills.storage.model.UserAttrs
 import skills.storage.repos.UserAchievedLevelRepo
 
 import java.text.DateFormat
@@ -90,7 +91,8 @@ class UserAchievementsMetricsBuilder implements ProjectMetricsBuilder {
         List items = achievements.collect {
             UserAchievement userAchievement = it[0]
             SkillDef skillDef = it[1]
-            return buildMetricUserAchievement(userAchievement, skillDef)
+            UserAttrs userAttrs = it[2]
+            return buildMetricUserAchievement(userAchievement, skillDef, userAttrs)
         }
         return new UserAchievementsRes(totalNumItems: totalNumItems, items: items)
     }
@@ -122,12 +124,12 @@ class UserAchievementsMetricsBuilder implements ProjectMetricsBuilder {
         }
         return PageRequest.of(currentPage, pageSize, sortDesc ?  DESC : ASC, sortBy)
     }
-    private MetricUserAchievement buildMetricUserAchievement(UserAchievement achievement, SkillDef skillDef) {
+    private MetricUserAchievement buildMetricUserAchievement(UserAchievement achievement, SkillDef skillDef, UserAttrs userAttrs) {
 
         MetricUserAchievement res = new MetricUserAchievement(
                 achievedOn: achievement.achievedOn.time,
                 userId: achievement.userId,
-                userName: achievement.userId,
+                userName: userAttrs.userIdForDisplay,
                 name: "Overall",
                 type: "Overall",
                 level: achievement.level,

@@ -15,7 +15,7 @@ limitations under the License.
 */
 <template>
   <metrics-card title="Achievements over time" data-cy="numUsersAchievedOverTimeMetric">
-    <metrics-overlay :loading="loading" :has-data="hasData" no-data-msg="This chart needs at least 1 day of user activity.">
+    <metrics-overlay :loading="loading" :has-data="hasData" no-data-msg="No achievements yet for this skill.">
       <apexchart type="area" height="350" :options="chartOptions" :series="series"></apexchart>
     </metrics-overlay>
   </metrics-card>
