@@ -57,7 +57,7 @@ limitations under the License.
           <b-button target="_blank" :to="{ name: 'SkillOverview', params: { projectId: projectId, subjectId: data.item.subjectId, skillId: data.item.skillId } }"
                     variant="outline-info" size="sm" class="text-secondary"
                     v-b-tooltip.hover="'View Skill Configuration'"><i class="fa fa-wrench"/><span class="sr-only">view skill configuration</span></b-button>
-          <b-button id="b-skill-metrics" target="_blank" :to="{ name: 'SkillMetrics', params: { projectId: projectId, subjectId: data.item.subjectId, skillId: data.item.skillId } }"
+          <b-button :id="`b-skill-metrics_${data.item.skillId}`" target="_blank" :to="{ name: 'SkillMetrics', params: { projectId: projectId, subjectId: data.item.subjectId, skillId: data.item.skillId } }"
                     variant="outline-info" size="sm" class="text-secondary"
                     v-b-tooltip.hover="'View Skill Metrics'"><i class="fa fa-chart-bar"/><span class="sr-only">view skill metrics</span></b-button>
         </b-button-group>

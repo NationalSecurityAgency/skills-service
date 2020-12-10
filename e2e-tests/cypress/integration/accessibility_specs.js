@@ -77,7 +77,14 @@ describe('Accessibility Tests', () => {
     cy.customA11y();
   });
 
-  it.only('project', () => {
+  it('project', () => {
+    cy.server();
+    cy.route(
+      'GET',
+      '/admin/projects/MyNewtestProject/metrics/userAchievementsChartBuilder?pageSize=5&currentPage=1&usernameFilter=&fromDayFilter=&toDayFilter=&nameFilter=&minLevel=&achievementTypes=Overall,Subject,Skill,Badge&sortBy=achievedOn&sortDesc=true'
+    ).as('userAchievementMetrics');
+    cy.route('GET', '/admin/projects/MyNewtestProject/metrics/skillUsageNavigatorChartBuilder').as('skillUsageMetrics');
+    cy.route('GET', '/admin/projects/MyNewtestProject/metrics/numUsersPerSubjectPerLevelChartBuilder').as('subjectMetrics');
     cy.visit('/');
     cy.injectAxe()
     //view project
@@ -118,10 +125,14 @@ describe('Accessibility Tests', () => {
     cy.customA11y();
 
     cy.get('[data-cy="Achievements-metrics-link"]').click();
+    cy.wait('@userAchievementMetrics');
+    cy.wait(250);//just because
     cy.customA11y();
     cy.get('[data-cy="Subjects-metrics-link"]').click();
+    cy.wait('@subjectMetrics');
     cy.customA11y();
     cy.get('[data-cy="Skills-metrics-link"]').click();
+    cy.wait('@skillUsageMetrics');
     cy.customA11y();
 
     cy.get('[data-cy=nav-Access').click();
