@@ -169,7 +169,7 @@ class UserAttrsServiceSpec extends DefaultIntSpec {
         !userInfo.usernameForDisplay
         UserAttrs userAttrs = userAttrsService.findByUserId(userId)
         userAttrs.userId == userInfo.username.toLowerCase()
-        userAttrs.userIdForDisplay == userInfo.username.toLowerCase()
+        userAttrs.userIdForDisplay == userId
         userAttrs.firstName == userInfo.firstName
         userAttrs.lastName == userInfo.lastName
         userAttrs.firstName == userInfo.firstName
