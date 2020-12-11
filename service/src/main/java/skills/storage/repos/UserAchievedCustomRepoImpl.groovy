@@ -77,8 +77,8 @@ class UserAchievedCustomRepoImpl implements UserAchievedCustomRepo {
                         "${(1..(projIdsWithIndex.size() - 1)).collect({ index -> "ua0.userId = ua${index}.userId" }).join(" and\n")}\n" +
                         (isCount ? "" :
                                 (
-                                    "group by ua0.userId\n" +
-                                    "order by ua0.userId " + (userIdSortAsc ? "asc" : "desc")
+                                    "group by userAttrs.userIdForDisplay\n" +
+                                    "order by userAttrs.userIdForDisplay " + (userIdSortAsc ? "asc" : "desc")
                                 )
                         );
         log.debug("findUsersWithMaxLevelForMultipleProjects jpql=[{}]", jpql)
