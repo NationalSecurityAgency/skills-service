@@ -17,6 +17,7 @@ package skills.services
 
 import org.springframework.beans.factory.annotation.Autowired
 import skills.auth.UserInfo
+import skills.auth.UserInfoService
 import skills.intTests.utils.DefaultIntSpec
 import skills.storage.model.UserAttrs
 
@@ -24,6 +25,9 @@ class UserAttrsServiceSpec extends DefaultIntSpec {
 
     @Autowired
     UserAttrsService userAttrsService
+
+    @Autowired
+    UserInfoService userInfoService;
 
     def "do not override existing user attributes with null values"() {
         String userId = "${UserAttrsServiceSpec.getSimpleName()}User1"
@@ -115,5 +119,90 @@ class UserAttrsServiceSpec extends DefaultIntSpec {
         userAttrs.nickname == "nickNew"
         userAttrs.dn == "dnNew"
         userAttrs.email == "emailNew"
+    }
+
+    def "userInfoService.getUserName() does not override userNameForDisplay"() {
+        String userId = "${UserAttrsServiceSpec.getSimpleName()}User1"
+        UserInfo userInfo = new UserInfo(
+                firstName: "first",
+                lastName: "last",
+                nickname: "nick",
+                userDn: "dn",
+                email: "email",
+                username: userId.toLowerCase(),
+                usernameForDisplay: "${userId}-Display"
+        )
+        userAttrsService.saveUserAttrs(userId, userInfo)
+
+        when:
+        String res = userInfoService.getUserName(userId)
+
+        then:
+        res
+        res == userInfo.username.toLowerCase()
+        UserAttrs userAttrs = userAttrsService.findByUserId(userId)
+        userAttrs.userId == userInfo.username.toLowerCase()
+        userAttrs.userIdForDisplay == userInfo.usernameForDisplay
+        userAttrs.firstName == userInfo.firstName
+        userAttrs.lastName == userInfo.lastName
+        userAttrs.firstName == userInfo.firstName
+        userAttrs.nickname == userInfo.nickname
+        userAttrs.dn == userInfo.userDn
+        userAttrs.email == userInfo.email
+    }
+
+    def "userNameForDisplay will use userId if not in userInfo"() {
+        String userId = "${UserAttrsServiceSpec.getSimpleName()}User1"
+        UserInfo userInfo = new UserInfo(
+                firstName: "first",
+                lastName: "last",
+                nickname: "nick",
+                userDn: "dn",
+                email: "email",
+                username: userId.toLowerCase(),
+        )
+
+        when:
+        userAttrsService.saveUserAttrs(userId, userInfo)
+
+        then:
+        !userInfo.usernameForDisplay
+        UserAttrs userAttrs = userAttrsService.findByUserId(userId)
+        userAttrs.userId == userInfo.username.toLowerCase()
+        userAttrs.userIdForDisplay == userId
+        userAttrs.firstName == userInfo.firstName
+        userAttrs.lastName == userInfo.lastName
+        userAttrs.firstName == userInfo.firstName
+        userAttrs.nickname == userInfo.nickname
+        userAttrs.dn == userInfo.userDn
+        userAttrs.email == userInfo.email
+    }
+
+    def "userNameForDisplay will use userNameForDisplay if in userInfo"() {
+        String userId = "${UserAttrsServiceSpec.getSimpleName()}User1"
+        UserInfo userInfo = new UserInfo(
+                firstName: "first",
+                lastName: "last",
+                nickname: "nick",
+                userDn: "dn",
+                email: "email",
+                username: userId.toLowerCase(),
+                usernameForDisplay: "${userId}-Display"
+        )
+
+        when:
+        userAttrsService.saveUserAttrs(userId, userInfo)
+
+        then:
+        userInfo.usernameForDisplay
+        UserAttrs userAttrs = userAttrsService.findByUserId(userId)
+        userAttrs.userId == userInfo.username.toLowerCase()
+        userAttrs.userIdForDisplay == userInfo.usernameForDisplay
+        userAttrs.firstName == userInfo.firstName
+        userAttrs.lastName == userInfo.lastName
+        userAttrs.firstName == userInfo.firstName
+        userAttrs.nickname == userInfo.nickname
+        userAttrs.dn == userInfo.userDn
+        userAttrs.email == userInfo.email
     }
 }
