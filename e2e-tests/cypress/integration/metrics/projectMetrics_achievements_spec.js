@@ -91,6 +91,8 @@ describe('Metrics Tests - Achievements', () => {
     });
 
     it('achievements table - few rows', () => {
+        cy.viewport(1500, 750);
+
         cy.server()
             .route('/admin/projects/proj1/metrics/userAchievementsChartBuilder?**')
             .as('userAchievementsChartBuilder');
@@ -126,7 +128,7 @@ describe('Metrics Tests - Achievements', () => {
         cy.validateTable(tableSelector, [
             [{
                 colIndex: 0,
-                value: 'user0good@skills.org'
+                value: 'user0Good@skills.org'
             }, {
                 colIndex: 1,
                 value: 'Skill'
@@ -142,7 +144,7 @@ describe('Metrics Tests - Achievements', () => {
             }],
             [{
                 colIndex: 0,
-                value: 'user0good@skills.org'
+                value: 'user0Good@skills.org'
             }, {
                 colIndex: 1,
                 value: 'Skill'
@@ -224,10 +226,10 @@ describe('Metrics Tests - Achievements', () => {
         const expectedUsers = [
             [{ colIndex: 0,  value: 'another@skills.org' }],
             [{ colIndex: 0,  value: 'another@skills.org' }],
-            [{ colIndex: 0,  value: 'thereyougo@skills.org' }],
-            [{ colIndex: 0,  value: 'thereyougo@skills.org' }],
-            [{ colIndex: 0,  value: 'user0good@skills.org' }],
-            [{ colIndex: 0,  value: 'user0good@skills.org' }],
+            [{ colIndex: 0,  value: 'thereYouGo@skills.org' }],
+            [{ colIndex: 0,  value: 'thereYouGo@skills.org' }],
+            [{ colIndex: 0,  value: 'user0Good@skills.org' }],
+            [{ colIndex: 0,  value: 'user0Good@skills.org' }],
         ]
         cy.validateTable(tableSelector, expectedUsers);
 
@@ -344,10 +346,10 @@ describe('Metrics Tests - Achievements', () => {
         cy.get('[data-cy=achievementsNavigator-filterBtn]').click();
         cy.wait('@userAchievementsChartBuilder');
         cy.validateTable(tableSelector, [
-            [{ colIndex: 0,  value: 'user0good@skills.org' }, { colIndex: 3,  value: 2 }],
-            [{ colIndex: 0,  value: 'user0good@skills.org' }, { colIndex: 3,  value: 2 }],
-            [{ colIndex: 0,  value: 'user0good@skills.org' }, { colIndex: 3,  value: 2 }],
-            [{ colIndex: 0,  value: 'user0good@skills.org' }, { colIndex: 3,  value: 2 }],
+            [{ colIndex: 0,  value: 'user0Good@skills.org' }, { colIndex: 3,  value: 2 }],
+            [{ colIndex: 0,  value: 'user0Good@skills.org' }, { colIndex: 3,  value: 2 }],
+            [{ colIndex: 0,  value: 'user0Good@skills.org' }, { colIndex: 3,  value: 2 }],
+            [{ colIndex: 0,  value: 'user0Good@skills.org' }, { colIndex: 3,  value: 2 }],
         ]);
 
         cy.get('[data-cy=achievementsNavigator-nameInput]').type('in');
@@ -495,30 +497,30 @@ describe('Metrics Tests - Achievements', () => {
 
         const tableSelector = '[data-cy=achievementsNavigator-table]'
         cy.validateTable(tableSelector, [
-            [{ colIndex: 0,  value: 'user0good@skills.org' }],
-            [{ colIndex: 0,  value: 'user0good@skills.org' }],
-            [{ colIndex: 0,  value: 'user0good@skills.org' }],
-            [{ colIndex: 0,  value: 'user0good@skills.org' }],
-            [{ colIndex: 0,  value: 'user0good@skills.org' }],
+            [{ colIndex: 0,  value: 'user0Good@skills.org' }],
+            [{ colIndex: 0,  value: 'user0Good@skills.org' }],
+            [{ colIndex: 0,  value: 'user0Good@skills.org' }],
+            [{ colIndex: 0,  value: 'user0Good@skills.org' }],
+            [{ colIndex: 0,  value: 'user0Good@skills.org' }],
         ], 5, true, 35);
 
         cy.get('[data-cy=skillsBTablePageSize]').select('15');
         cy.validateTable(tableSelector, [
-            [{ colIndex: 0,  value: 'user0good@skills.org' }],
-            [{ colIndex: 0,  value: 'user0good@skills.org' }],
-            [{ colIndex: 0,  value: 'user0good@skills.org' }],
-            [{ colIndex: 0,  value: 'user0good@skills.org' }],
-            [{ colIndex: 0,  value: 'user0good@skills.org' }],
-            [{ colIndex: 0,  value: 'user0good@skills.org' }],
-            [{ colIndex: 0,  value: 'user0good@skills.org' }],
-            [{ colIndex: 0,  value: 'user0good@skills.org' }],
-            [{ colIndex: 0,  value: 'user0good@skills.org' }],
-            [{ colIndex: 0,  value: 'user0good@skills.org' }],
-            [{ colIndex: 0,  value: 'user0good@skills.org' }],
-            [{ colIndex: 0,  value: 'user0good@skills.org' }],
-            [{ colIndex: 0,  value: 'user0good@skills.org' }],
-            [{ colIndex: 0,  value: 'user0good@skills.org' }],
-            [{ colIndex: 0,  value: 'user1long0@skills.org' }],
+            [{ colIndex: 0,  value: 'user0Good@skills.org' }],
+            [{ colIndex: 0,  value: 'user0Good@skills.org' }],
+            [{ colIndex: 0,  value: 'user0Good@skills.org' }],
+            [{ colIndex: 0,  value: 'user0Good@skills.org' }],
+            [{ colIndex: 0,  value: 'user0Good@skills.org' }],
+            [{ colIndex: 0,  value: 'user0Good@skills.org' }],
+            [{ colIndex: 0,  value: 'user0Good@skills.org' }],
+            [{ colIndex: 0,  value: 'user0Good@skills.org' }],
+            [{ colIndex: 0,  value: 'user0Good@skills.org' }],
+            [{ colIndex: 0,  value: 'user0Good@skills.org' }],
+            [{ colIndex: 0,  value: 'user0Good@skills.org' }],
+            [{ colIndex: 0,  value: 'user0Good@skills.org' }],
+            [{ colIndex: 0,  value: 'user0Good@skills.org' }],
+            [{ colIndex: 0,  value: 'user0Good@skills.org' }],
+            [{ colIndex: 0,  value: 'user1Long0@skills.org' }],
         ], 15, true, 35);
     })
 

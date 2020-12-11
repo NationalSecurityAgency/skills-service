@@ -121,6 +121,7 @@ public class MockUserInfoService {
             String lname = "Fake"
 
             String usernamified = DnUsernameHelper.getUsername(dnQuery)
+            String usernamifiedForDisplay = "${usernamified} for display"
 //            String usernamified = dnQuery.replaceAll(" ", "_").replaceAll(",","").replaceAll("=","-")
 
             log.info("looking up firstname/lastname for ${dnQuery}")
@@ -140,7 +141,7 @@ public class MockUserInfoService {
                         "nickname": "Fake",
                         "email": "fake@fakeplace",
                         "username": "${usernamified}",
-                        "usernameForDisplay": "${usernamified}",
+                        "usernameForDisplay": "${usernamifiedForDisplay}",
                         "userDn": "${dnQuery}"
                     }
                     """).build()
