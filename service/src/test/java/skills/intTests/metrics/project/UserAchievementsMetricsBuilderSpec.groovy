@@ -562,6 +562,52 @@ class UserAchievementsMetricsBuilderSpec extends DefaultIntSpec {
         user1PlusToDayRes.items.collect {it.achievedOn}.unique() == [dates[1].time]
     }
 
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] != "pki" })
+    def "get achievements - filtering by userName in pki mode"() {
+        def proj = SkillsFactory.createProject()
+        List<Map> skills = SkillsFactory.createSkills(5)
+        skills.each { it.pointIncrement = 200; it.numPerformToCompletion = 1 }
+
+        def subj = SkillsFactory.createSubject()
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        def subj1 = SkillsFactory.createSubject(1, 2)
+        List<Map> skillsSubj1 = SkillsFactory.createSkills(5, 1, 2)
+        skillsSubj1.each { it.pointIncrement = 200; it.numPerformToCompletion = 1 }
+
+        skillsService.createSubject(subj1)
+        skillsService.createSkills(skillsSubj1)
+
+        List<String> users = getRandomUsers(2)
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills.get(0).skillId], users[0], new Date())
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills.get(0).skillId], users[1], new Date())
+
+        Map props = [:]
+        props[MetricsPagingParamsHelper.PROP_CURRENT_PAGE] = 1
+        props[MetricsPagingParamsHelper.PROP_PAGE_SIZE] = 50
+        props[MetricsPagingParamsHelper.PROP_SORT_DESC] = false
+        props[MetricsPagingParamsHelper.PROP_SORT_BY] = "userName"
+        props[MetricsParams.P_ACHIEVEMENT_TYPES] = allAchievementTypes
+
+        when:
+        def res = skillsService.getMetricsData(proj.projectId, metricsId, props)
+
+        props[MetricsParams.P_USERNAME_FILTER] = "${users[0]} for display"
+        def res1 = skillsService.getMetricsData(proj.projectId, metricsId, props)
+
+        then:
+        res.items.size() > 0
+        res1.items.size() > 0
+
+        res.items.size() > res1.items.size()
+        res.items.collect { it.userId }.unique().sort() == [users[0], users[1]]
+
+        res1.items.collect { it.userId }.unique() == [users[0]]
+    }
+
     def "get achievements - filtering by level"() {
 
         def proj = SkillsFactory.createProject()
