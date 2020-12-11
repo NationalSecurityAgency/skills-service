@@ -20,12 +20,12 @@ limitations under the License.
         <i
           :class="iconClass"
           class="watermark-icon"/>
-        <div>
+        <div class="rank-detail-card">
           <div style="height: 3rem;">
             <vue-simple-spinner v-if="loading" line-bg-color="#333" line-fg-color="#17a2b8"/>
             <span v-else><h1>{{ value | number }}</h1></span>
           </div>
-          <h5>{{ label }}</h5>
+          <h2 class="h5">{{ label }}</h2>
         </div>
       </div>
     </div>

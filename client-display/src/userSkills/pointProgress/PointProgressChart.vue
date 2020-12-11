@@ -28,7 +28,7 @@ limitations under the License.
         </div>
     </div>
     <div class="card-header">
-      <h6 class="card-title mb-0 float-left">Point History</h6>
+      <h3 class="h6 card-title mb-0 float-left">Point History</h3>
     </div>
     <div class="card-body m-0 mr-1 p-0 apex-chart-container">
       <apexchart ref="ptChart" id="points-chart" v-if="!loading.inProgress && hasData" :options="chartOptions"

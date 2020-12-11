@@ -16,7 +16,7 @@ limitations under the License.
 <template>
     <div @click="progressBarClicked">
         <vertical-progress v-if="progress.total === 100"
-                           total-progress-bar-color="#59ad52" before-today-bar-color="#59ad52"
+                           total-progress-bar-color="#28a745" before-today-bar-color="#28a745"
                            :total-progress="progress.total"
                            :total-progress-before-today="progress.totalBeforeToday"/>
         <vertical-progress v-if="skill.points !== skill.totalPoints && progress.total !== 100"

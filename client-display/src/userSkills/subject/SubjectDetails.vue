@@ -27,7 +27,7 @@ limitations under the License.
 
             <div v-if="displayData.userSkills.description" class="card mt-2">
                 <div class="card-header">
-                    <h6 class="card-title mb-0 float-left">Description</h6>
+                    <h3 class=" h6 card-title mb-0 float-left">Description</h3>
                 </div>
                 <div class="card-body">
                     <markdown-text :text="displayData.userSkills.description" class="d-block text-left"/>

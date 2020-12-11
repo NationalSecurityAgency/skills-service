@@ -188,8 +188,9 @@ Cypress.Commands.add('customA11y', ()=> {
             ['.vdp-datepicker'],
             ['.VuePagination'],
             ['.b-form-datepicker'],
-            ['.thead-light div']
-            ['.skillsBTableTotalRows']
+            ['.thead-light div'],
+            ['.skillsBTableTotalRows'],
+            ['.rank-detail-card']
         ]}, {
             rules:{
                 "landmark-no-duplicate-banner": {enabled:false},

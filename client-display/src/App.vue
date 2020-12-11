@@ -162,5 +162,5 @@ limitations under the License.
 
 <style lang="scss">
   @import "./assets/_common.scss";
-  @import "~bootstrap/scss/bootstrap";
+  @import "./assets/custom.scss";
 </style>

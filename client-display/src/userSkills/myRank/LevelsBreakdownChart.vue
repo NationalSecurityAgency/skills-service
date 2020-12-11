@@ -29,7 +29,7 @@ limitations under the License.
     </div>
 
     <div class="card-header">
-      <h6 class="card-title mb-0 float-left">Level Breakdown</h6>
+      <h3 class="h6 card-title mb-0 float-left">Level Breakdown</h3>
     </div>
     <div class="card-body m-0 p-0 pl-2 mr-1 mt-1">
       <apexchart
