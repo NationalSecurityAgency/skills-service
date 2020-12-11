@@ -43,7 +43,7 @@ class UserAttrsService {
         UserAttrs userAttrs = loadUserAttrsFromLocalDb(userId)
         boolean doSave = true
         if (!userAttrs) {
-            userAttrs = new UserAttrs(userId: userId?.toLowerCase())
+            userAttrs = new UserAttrs(userId: userId?.toLowerCase(), userIdForDisplay: userId?.toLowerCase())
         } else {
             doSave = (userInfo.firstName && userAttrs.firstName != userInfo.firstName) ||
                     (userInfo.lastName && userAttrs.lastName != userInfo.lastName) ||

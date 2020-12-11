@@ -129,7 +129,7 @@ class UserInfoService {
          * remove users
          */
         if (!(authMode == AuthMode.PKI)) {
-            userAttrsService.saveUserAttrs(userNameRes, new UserInfo(username: userNameRes, usernameForDisplay: userNameRes))
+            userAttrsService.saveUserAttrs(userNameRes, new UserInfo(username: userNameRes))
         }
 
         return userNameRes?.toLowerCase()
