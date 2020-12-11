@@ -179,6 +179,7 @@ Cypress.Commands.add('customA11y', ()=> {
     // ignore bootstrap vue datepicker for now, doesn't meet accessibility requirements (icon creates button with no text and can't configure an aria-label)
     // have validated .accessible and .skillsBTableTotalRows with numerous a11y browser plugins, not sure why cypress axe is complaining about it
     //      but color contrast for those classes has been verified using 3rd party contrast tools
+    // we can't really do anything about the apex chart a11y issues
     cy.checkA11y({
         exclude:[
             ['#SvgjsSvg1001'],
@@ -190,7 +191,8 @@ Cypress.Commands.add('customA11y', ()=> {
             ['.b-form-datepicker'],
             ['.thead-light div'],
             ['.skillsBTableTotalRows'],
-            ['.rank-detail-card']
+            ['.rank-detail-card'],
+            ['.apex-chart-container'],
         ]}, {
             rules:{
                 "landmark-no-duplicate-banner": {enabled:false},

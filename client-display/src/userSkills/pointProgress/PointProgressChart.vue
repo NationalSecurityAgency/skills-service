@@ -21,8 +21,8 @@ limitations under the License.
           <div class="col-5 text-center border rounded bg-light p-2">
             <vue-simple-spinner v-if="loading.inProgress" line-bg-color="#333" line-fg-color="#17a2b8" size="small" message="Loading Chart ..."/>
             <div v-else>
-              <div style="font-size: 1rem;" class="text-uppercase"><i class="fa fa-lock"></i> Locked</div>
-              <small class="text-black-50">*** <b>2 days</b> of usage will unlock this chart! ***</small>
+              <div style="font-size: 1rem;" class="text-uppercase text-danger"><i class="fa fa-lock"></i> Locked</div>
+              <small class="text-body">*** <b>2 days</b> of usage will unlock this chart! ***</small>
             </div>
           </div>
         </div>

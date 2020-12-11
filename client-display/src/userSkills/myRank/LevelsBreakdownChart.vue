@@ -22,7 +22,7 @@ limitations under the License.
         <div class="col-5 text-center border rounded bg-light p-2 text-dark">
           <vue-simple-spinner v-if="loading" line-bg-color="#333" line-fg-color="#17a2b8" message="Loading Chart ..."/>
           <div v-else>
-            No one achieved <span class="text-info">Level 1</span> yet... You could be the <i><strong>first one</strong></i>!
+            No one achieved <span class="text-hc-info">Level 1</span> yet... You could be the <i><strong>first one</strong></i>!
           </div>
         </div>
       </div>
