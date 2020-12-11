@@ -68,10 +68,11 @@ class UserAchievedCustomRepoImpl implements UserAchievedCustomRepo {
                         (isCount ?
                                 "count(distinct ua0.userId) as count\n"
                                 :
-                                "  ua0.userId as user, ${projIdsWithIndex.collect({ proj, index -> "max(ua${index}.level) as ${proj.projectId}Level" }).join(", ")} \n"
+                                "  userAttrs.userIdForDisplay as user, ${projIdsWithIndex.collect({ proj, index -> "max(ua${index}.level) as ${proj.projectId}Level" }).join(", ")} \n"
                         ) +
-                        "from  ${projIdsWithIndex.collect({ proj, index -> "UserAchievement as ua${index}" }).join(", ")} \n" +
+                        "from  ${projIdsWithIndex.collect({ proj, index -> "UserAchievement as ua${index}" }).join(", ")}${isCount ? "" : ", UserAttrs userAttrs"}\n" +
                         "where \n" +
+                        (isCount ? "" : "userAttrs.userId = ua0.userId and\n") +
                         "${projIdsWithIndex.collect({ proj, index -> "ua${index}.projectId = '${proj.projectId}' and\nua${index}.skillId is null and\nua${index}.level >= ${proj.level} and\n" }).join("")}" +
                         "${(1..(projIdsWithIndex.size() - 1)).collect({ index -> "ua0.userId = ua${index}.userId" }).join(" and\n")}\n" +
                         (isCount ? "" :

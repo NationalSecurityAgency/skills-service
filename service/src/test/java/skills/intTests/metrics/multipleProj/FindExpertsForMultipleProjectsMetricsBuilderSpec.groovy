@@ -15,6 +15,7 @@
  */
 package skills.intTests.metrics.multipleProj
 
+import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import skills.controller.exceptions.ErrorCode
 import skills.intTests.utils.DefaultIntSpec
@@ -24,6 +25,7 @@ import skills.intTests.utils.SkillsService
 import skills.metrics.builders.MetricsPagingParamsHelper
 import skills.metrics.builders.MetricsParams
 import spock.lang.IgnoreIf
+import spock.lang.IgnoreRest
 
 class FindExpertsForMultipleProjectsMetricsBuilderSpec extends DefaultIntSpec {
 
@@ -178,6 +180,7 @@ class FindExpertsForMultipleProjectsMetricsBuilderSpec extends DefaultIntSpec {
         body.explanation == "Metrics[${metricsId}]: Must supply pageSize param"
     }
 
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def "find users within multiple projects"() {
         SkillsService supervisor = createSupervisor();
         List<String> users = getRandomUsers(3)
@@ -315,6 +318,68 @@ class FindExpertsForMultipleProjectsMetricsBuilderSpec extends DefaultIntSpec {
         !res5.data
         res5.totalNum == 0
     }
+
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] != "pki" })
+    def "find users within multiple projects - username is different from userid"() {
+        SkillsService supervisor = createSupervisor();
+        List<String> users = getRandomUsers(3)
+        String userId = users[0]
+        String userId2 = users[1]
+        String userId3 = users[2]
+
+        int numProjects = 5;
+        List projSkills = []
+        List projects = []
+        (1..numProjects).each {
+            def proj = SkillsFactory.createProject(it)
+            def subj = SkillsFactory.createSubject(it, 1)
+            def skills = SkillsFactory.createSkills(3, it, 1)
+            skills.each { it.numPerformToCompletion = 1; it.pointIncrement=100 }
+
+            skillsService.createProject(proj)
+            skillsService.createSubject(subj)
+            skillsService.createSkills(skills)
+
+            projects.add(proj)
+            projSkills.add(skills)
+        }
+
+        (projSkills).each {
+            skillsService.addSkill([projectId: it[0].projectId, skillId: it[0].skillId], userId, new Date())
+            if (it[0].projectId.endsWith('2')){
+                skillsService.addSkill([projectId: it[0].projectId, skillId: it[1].skillId], userId, new Date())
+            } else {
+                // user doesn't belong to all projects
+                skillsService.addSkill([projectId: it[0].projectId, skillId: it[1].skillId], userId3, new Date())
+            }
+            if (it[0].projectId.endsWith('4')){
+                skillsService.addSkill([projectId: it[0].projectId, skillId: it[1].skillId], userId, new Date())
+                skillsService.addSkill([projectId: it[0].projectId, skillId: it[2].skillId], userId, new Date())
+            }
+
+            skillsService.addSkill([projectId: it[0].projectId, skillId: it[1].skillId], userId2, new Date())
+            skillsService.addSkill([projectId: it[0].projectId, skillId: it[2].skillId], userId2, new Date())
+            if (it[0].projectId.endsWith('5')){
+                skillsService.addSkill([projectId: it[0].projectId, skillId: it[0].skillId], userId2, new Date())
+            }
+        }
+
+        when:
+        Map props = [:]
+        props[MetricsParams.P_PROJECT_IDS_AND_LEVEL] = projects.collect({"${it.projectId}AndLevel1"}).join(",")
+        props[MetricsPagingParamsHelper.PROP_SORT_DESC] = true
+        props[MetricsPagingParamsHelper.PROP_CURRENT_PAGE] = 1
+        props[MetricsPagingParamsHelper.PROP_PAGE_SIZE] = 5
+
+        def res1 = supervisor.getGlobalMetricsData(metricsId, props)
+
+        then:
+        res1.totalNum == 2
+        res1.data.size() == 2
+        !res1.data.find { it.userId == userId }
+        res1.data.find { it.userId == "${userId} for display" }
+    }
+
 
     @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def "find users within multiple projects - page through results - verify sorting"() {

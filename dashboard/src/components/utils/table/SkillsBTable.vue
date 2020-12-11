@@ -69,7 +69,7 @@ limitations under the License.
     </b-table>
     <div v-if="!options.busy" class="row m-1 p-0 align-items-center">
       <div class="col-md text-center text-md-left">
-        <span class="text-muted">Total Rows:</span> <strong data-cy="skillsBTableTotalRows">{{totalRows}}</strong>
+        <span class="text-muted">Total Rows:</span> <strong data-cy="skillsBTableTotalRows">{{ totalRows | number }}</strong>
       </div>
       <div class="col-md my-3 my-md-0">
         <b-pagination v-model="currentPageInternal" :total-rows="totalRows"
