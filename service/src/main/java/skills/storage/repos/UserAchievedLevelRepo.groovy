@@ -205,7 +205,7 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
                 ua.projectId = :projectId and
                 ua.achievedOn >= :fromDate and
                 ua.achievedOn <= :toDate and 
-                upper(uAttrs.userId) like UPPER(CONCAT('%', :userNameFilter, '%')) and
+                upper(uAttrs.userIdForDisplay) like UPPER(CONCAT('%', :userNameFilter, '%')) and
                 (upper(sd.name) like UPPER(CONCAT('%', :skillNameFilter, '%')) OR (:skillNameFilter = 'ALL')) and
                 (ua.level >= :level OR (:level = -1)) and
                 (sd.type in (:types) OR (:disableTypes = 'true') OR (ua.skillId is null AND (:includeOverallType = 'true'))) and 
@@ -229,7 +229,7 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
                 ua.projectId = :projectId and
                 ua.achievedOn >= :fromDate and
                 ua.achievedOn <= :toDate and 
-                upper(uAttrs.userId) like UPPER(CONCAT('%', :userNameFilter, '%')) and
+                upper(uAttrs.userIdForDisplay) like UPPER(CONCAT('%', :userNameFilter, '%')) and
                 (upper(sd.name) like UPPER(CONCAT('%', :skillNameFilter, '%')) OR (:skillNameFilter = 'ALL')) and
                 (ua.level >= :level OR (:level = -1)) and
                 (sd.type in (:types) OR (:disableTypes = 'true') OR (ua.skillId is null AND (:includeOverallType = 'true'))) and 
