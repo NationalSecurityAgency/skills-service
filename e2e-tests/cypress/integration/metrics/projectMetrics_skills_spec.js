@@ -36,6 +36,45 @@ describe('Metrics Tests - Skills', () => {
         cy.get('[data-cy=skillsNavigator]').contains('There are no records to show');
     });
 
+    it('skills table - format column with numbers', () => {
+
+        const res = [{
+            'skillId': 'skill1',
+            'skillName': 'Very Great Skill # 1',
+            'subjectId': 'subj1',
+            'numUserAchieved': 8574,
+            'numUsersInProgress': 2834,
+            'lastReportedTimestamp': null,
+            'lastAchievedTimestamp': null
+        }, {
+            'skillId': 'skill2',
+            'skillName': 'Very Great Skill # 2',
+            'subjectId': 'subj1',
+            'numUserAchieved': 9383,
+            'numUsersInProgress': 2783,
+            'lastReportedTimestamp': null,
+            'lastAchievedTimestamp': null
+        }];
+
+        cy.server()
+            .route({
+                url: '/admin/projects/proj1/metrics/skillUsageNavigatorChartBuilder**',
+                status: 200,
+                response: res,
+            }).as('skillUsageNavigatorChartBuilder');
+        cy.visit('/projects/proj1/');
+        cy.clickNav('Metrics');
+        cy.get('[data-cy=metricsNav-Skills]').click();
+        cy.wait('@skillUsageNavigatorChartBuilder')
+
+        const tableSelector = '[data-cy=skillsNavigator-table]'
+        const expected = [
+            [{ colIndex: 0,  value: 'Very Great Skill # 1' }, { colIndex: 1,  value: '8,574' }, { colIndex: 2,  value: '2,834' }],
+            [{ colIndex: 0,  value: 'Very Great Skill # 2' }],
+        ]
+        cy.validateTable(tableSelector, expected);
+    });
+
     it('skills table - paging', () => {
         cy.server()
             .route('/admin/projects/proj1/metrics/skillUsageNavigatorChartBuilder')
