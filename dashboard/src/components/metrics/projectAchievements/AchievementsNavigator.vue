@@ -71,9 +71,9 @@ limitations under the License.
               <span>{{ data.value }}</span>
             </div>
             <div class="col-12 col-md-4 text-md-right">
-              <b-button :to="{ name: 'ClientDisplayPreview', params: { projectId: projectId, userId: data.value } }"
+              <b-button :to="{ name: 'ClientDisplayPreview', params: { projectId: projectId, userId: data.item.userId } }"
                         variant="outline-info" size="sm" class="text-secondary"
-                        v-b-tooltip.hover title="View User's Client Display"><i class="fa fa-eye"/></b-button>
+                        v-b-tooltip.hover title="View User's Client Display" data-cy="achievementsNavigator-clientDisplayBtn"><i class="fa fa-eye"/></b-button>
             </div>
           </div>
         </template>

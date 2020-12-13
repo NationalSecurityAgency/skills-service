@@ -164,6 +164,84 @@ describe('Metrics Tests - Achievements', () => {
 
     });
 
+    it('achievements table - validate the link to user client display', () => {
+        cy.server()
+            .route('/admin/projects/proj1/metrics/userAchievementsChartBuilder?**')
+            .as('userAchievementsChartBuilder');
+
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            name: "Interesting Subject 1",
+        })
+
+        const numSkills = 5;
+        for (let skillsCounter = 1; skillsCounter <= numSkills; skillsCounter += 1) {
+            cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill${skillsCounter}`, {
+                projectId: 'proj1',
+                subjectId: 'subj1',
+                skillId: `skill${skillsCounter}`,
+                name: `Very Great Skill # ${skillsCounter}`,
+                pointIncrement: '150',
+                numPerformToCompletion: skillsCounter < 3 ? '1' : '200',
+            });
+        };
+
+        const m = moment.utc('2020-09-12 11', 'YYYY-MM-DD HH');
+        cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'user0Good@skills.org', timestamp: m.clone().subtract(1, 'day').format('x')})
+        cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: 'user0Good@skills.org', timestamp: m.clone().subtract(4, 'day').format('x')})
+
+        cy.visit('/projects/proj1/');
+        cy.clickNav('Metrics');
+        cy.get('[data-cy=metricsNav-Achievements]').click();
+        cy.wait('@userAchievementsChartBuilder')
+
+        const tableSelector = '[data-cy=achievementsNavigator-table]'
+        cy.validateTable(tableSelector, [
+            [{
+                colIndex: 0,
+                value: 'user0Good@skills.org'
+            }, {
+                colIndex: 1,
+                value: 'Skill'
+            }, {
+                colIndex: 2,
+                value: 'Very Great Skill # 1'
+            }, {
+                colIndex: 3,
+                value: 'N/A'
+            }, {
+                colIndex: 4,
+                value: '2020-09-11 11:00'
+            }],
+            [{
+                colIndex: 0,
+                value: 'user0Good@skills.org'
+            }, {
+                colIndex: 1,
+                value: 'Skill'
+            }, {
+                colIndex: 2,
+                value: 'Very Great Skill # 2'
+            }, {
+                colIndex: 3,
+                value: 'N/A'
+            }, {
+                colIndex: 4,
+                value: '2020-09-08 11:00'
+            }],
+        ]);
+
+        cy.get(`${tableSelector} tbody tr`).should('have.length', 2).as('cyRows');
+        cy.get('@cyRows').eq(0).find('td').as('row');
+        cy.get('@row').eq(0).find('[data-cy=achievementsNavigator-clientDisplayBtn]').click();
+
+        cy.get('[data-cy=subPageHeader]').contains('Client Display');
+        // userId has lowercase "g" while userIdForDisplay has uppercase "G"; this must be userId
+        cy.get('[data-cy=pageHeader]').contains('user0good@skills.org');
+    });
+
+
     it('achievements table - sorting', () => {
         cy.server()
             .route('/admin/projects/proj1/metrics/userAchievementsChartBuilder?**')

@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div class="mx-0 py-0 bg-white">
+  <div class="mx-0 py-0 bg-white" data-cy="pageHeader">
     <div class="card-body px-1">
       <loading-container :is-loading="loading">
         <div class="container-fluid">
