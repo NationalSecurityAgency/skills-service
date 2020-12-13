@@ -64,13 +64,13 @@ limitations under the License.
       </template>
 
       <template v-slot:cell(numUserAchieved)="data">
-        <span class="ml-2">{{ data.value }}</span>
+        <span class="ml-2">{{ data.value | number}}</span>
         <b-badge v-if="data.item.isOverlookedTag" variant="danger" class="ml-2">Overlooked Skill</b-badge>
         <b-badge v-if="data.item.isTopSkillTag" variant="info" class="ml-2">Top Skill</b-badge>
       </template>
 
       <template v-slot:cell(numUsersInProgress)="data">
-        <span class="ml-2">{{ data.value }}</span>
+        <span class="ml-2">{{ data.value | number }}</span>
         <b-badge v-if="data.item.isHighActivityTag" variant="success" class="ml-2">High Activity</b-badge>
       </template>
 
