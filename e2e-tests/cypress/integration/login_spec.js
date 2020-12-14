@@ -158,7 +158,7 @@ describe('Login Tests', () => {
       cy.get('#username').should('not.exist')
       cy.get('#inputPassword').should('not.exist')
       cy.get('[data-cy=oAuthProviders]').should('exist');
-      cy.contains('Continue with GitLab')
+      cy.contains('Login via GitLab')
     });
 
     it('login form is present for oAuthOnly mode when showForm=true', () => {
@@ -177,7 +177,7 @@ describe('Login Tests', () => {
       cy.get('#username').should('exist')
       cy.get('#inputPassword').should('exist')
       cy.get('[data-cy=oAuthProviders]').should('exist');
-      cy.contains('Continue with GitLab')
+      cy.contains('Login via GitLab')
     });
   }
 
