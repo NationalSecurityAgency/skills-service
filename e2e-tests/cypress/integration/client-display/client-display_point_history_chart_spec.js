@@ -731,6 +731,69 @@ describe('Client Display Tests', () => {
         cy.get('[data-cy=pointHistoryChart]').matchImageSnapshot();
     });
 
+    it('achievement after initial rapid growth and then flat-line', () => {
+        const data = {
+            'pointsHistory': [{
+                'dayPerformed': '2020-12-01T00:00:00.000+00:00',
+                'points': 10
+            }, {
+                'dayPerformed': '2020-12-02T00:00:00.000+00:00',
+                'points': 20
+            }, {
+                'dayPerformed': '2020-12-03T00:00:00.000+00:00',
+                'points': 20
+            }, {
+                'dayPerformed': '2020-12-04T00:00:00.000+00:00',
+                'points': 20
+            }, {
+                'dayPerformed': '2020-12-05T00:00:00.000+00:00',
+                'points': 20
+            }, {
+                'dayPerformed': '2020-12-06T00:00:00.000+00:00',
+                'points': 20
+            }, {
+                'dayPerformed': '2020-12-07T00:00:00.000+00:00',
+                'points': 20
+            }, {
+                'dayPerformed': '2020-12-08T00:00:00.000+00:00',
+                'points': 20
+            }, {
+                'dayPerformed': '2020-12-09T00:00:00.000+00:00',
+                'points': 20
+            }, {
+                'dayPerformed': '2020-12-10T00:00:00.000+00:00',
+                'points': 20
+            }, {
+                'dayPerformed': '2020-12-11T00:00:00.000+00:00',
+                'points': 20
+            }, {
+                'dayPerformed': '2020-12-12T00:00:00.000+00:00',
+                'points': 20
+            }, {
+                'dayPerformed': '2020-12-13T00:00:00.000+00:00',
+                'points': 20
+            }],
+            'achievements': [{
+                'achievedOn': '2020-12-02T00:00:00.000+00:00',
+                'points': 20,
+                'name': 'Level 1'
+            }]
+        };
+
+        cy.server().route({
+            url: '/api/projects/proj1/pointHistory',
+            status: 200,
+            response: data,
+        }).as('getPointHistory');
+
+        cy.cdVisit('/');
+        cy.wait('@getPointHistory');
+
+        // let's wait for animation to complete
+        cy.wait(waitForAnimation);
+        cy.get('[data-cy=pointHistoryChart]').matchImageSnapshot();
+    });
+
 
 });
 

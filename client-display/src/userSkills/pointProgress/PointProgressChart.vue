@@ -173,6 +173,7 @@ limitations under the License.
                   label: {
                     borderColor: 'rgb(68, 114, 186)',
                     offsetX: this.getOffsetX(item.name, firstDay, lastDay, timestamp),
+                    offsetY: 2,
                     style: {
                       color: '#fff',
                       background: 'rgb(89, 173, 82)',
@@ -220,6 +221,7 @@ limitations under the License.
 </script>
 
 <style>
+
 </style>
 
 <style scoped>
