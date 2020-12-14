@@ -124,11 +124,13 @@ describe('Client Display Tests', () => {
     });
 
     it('visit home page', () => {
+        cy.server();
         cy.request('POST', '/admin/projects/proj1/badges/badge1', {
             projectId: 'proj1',
             badgeId: 'badge1',
             name: 'Badge 1'
         });
+        cy.route('GET', '/api/projects/proj1/pointHistory').as('pointHistoryChart');
         cy.cdVisit('/');
         cy.injectAxe();
         cy.contains('Overall Points');
@@ -136,6 +138,7 @@ describe('Client Display Tests', () => {
         // some basic default theme validation
         cy.get("#app").should('have.css', 'background-color')
             .and('equal', 'rgba(0, 0, 0, 0)');
+        cy.wait('@pointHistoryChart');
         cy.customA11y();
     });
 
@@ -151,6 +154,9 @@ describe('Client Display Tests', () => {
     });
 
     it('back button', () => {
+        cy.server();
+        cy.route('GET', '/api/projects/proj1/pointHistory').as('pointHistoryChart');
+
         cy.cdVisit('/');
         cy.injectAxe();
         cy.contains('User Skills');
@@ -169,6 +175,8 @@ describe('Client Display Tests', () => {
         cy.cdClickSkill(0);
         cy.cdBack('Subject 1');
         cy.cdBack();
+        cy.wait('@pointHistoryChart');
+        cy.wait(500); //we have to wait for the chart to load before doing accessibility tests
         cy.customA11y();
     });
 

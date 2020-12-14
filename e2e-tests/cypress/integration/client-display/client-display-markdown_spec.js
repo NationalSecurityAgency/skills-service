@@ -119,7 +119,7 @@ describe('Client Display Markdown Tests', () => {
         });
 
         cy.cdVisit('/');
-        cy.cy.injectAxe();
+        cy.injectAxe();
         cy.contains('Overall Points');
 
         // check subject
