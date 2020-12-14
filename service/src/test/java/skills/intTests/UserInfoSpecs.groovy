@@ -39,7 +39,7 @@ class UserInfoSpecs extends DefaultIntSpec {
         then:
         userInfo
         userInfo.userId == user.toLowerCase()
-        userInfo.userIdForDisplay == user
+        userInfo.userIdForDisplay == "$user for display"
     }
 
 }

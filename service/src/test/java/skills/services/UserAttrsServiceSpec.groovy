@@ -124,13 +124,13 @@ class UserAttrsServiceSpec extends DefaultIntSpec {
     def "userInfoService.getUserName() does not override userNameForDisplay"() {
         String userId = "${UserAttrsServiceSpec.getSimpleName()}User1"
         UserInfo userInfo = new UserInfo(
-                firstName: "first",
-                lastName: "last",
-                nickname: "nick",
-                userDn: "dn",
-                email: "email",
+                firstName: "Fake",
+                lastName: "Fake",
+                nickname: "Fake",
+                userDn: "UserAttrsServiceSpecUser1",
+                email: "fake@fakeplace",
                 username: userId.toLowerCase(),
-                usernameForDisplay: "${userId}-Display"
+                usernameForDisplay: "${userId} for display"
         )
         userAttrsService.saveUserAttrs(userId, userInfo)
 

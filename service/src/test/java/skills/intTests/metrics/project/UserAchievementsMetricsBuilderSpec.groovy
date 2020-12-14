@@ -329,7 +329,7 @@ class UserAchievementsMetricsBuilderSpec extends DefaultIntSpec {
         def res = skillsService.getMetricsData(proj.projectId, metricsId, props)
         then:
         res.items.each {
-            assert "${it.userId} for display" == it.userName
+            assert "${it.userId} for display".toLowerCase() == it.userName.toLowerCase()
         }
     }
 
@@ -603,7 +603,7 @@ class UserAchievementsMetricsBuilderSpec extends DefaultIntSpec {
         res1.items.size() > 0
 
         res.items.size() > res1.items.size()
-        res.items.collect { it.userId }.unique().sort() == [users[0], users[1]]
+        res.items.collect { it.userId }.unique().sort() == [users[0], users[1]].sort()
 
         res1.items.collect { it.userId }.unique() == [users[0]]
     }

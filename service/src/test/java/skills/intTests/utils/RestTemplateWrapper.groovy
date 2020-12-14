@@ -138,6 +138,7 @@ class RestTemplateWrapper extends RestTemplate {
                     lastName : lastName,
                     email    : username,
                     password : password,
+                    usernameForDisplay: "$username for display".toString()
             ]
             ResponseEntity response = putForEntity(skillsServiceUrl + '/createAccount', userInfo)
             if ( response.statusCode != HttpStatus.OK) {
