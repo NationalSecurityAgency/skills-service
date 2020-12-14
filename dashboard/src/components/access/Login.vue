@@ -89,12 +89,11 @@ limitations under the License.
           <div v-if="oAuthProviders && oAuthProviders.length > 0" class="card mt-3" data-cy="oAuthProviders">
             <div class="card-body">
               <div class="row">
-                <div v-for="oAuthProvider in oAuthProviders" :key="oAuthProvider.registrationId" class="col">
-                  <button type="button" class="btn btn-outline-secondary w-100 h-100 text-dark"
+                <div v-for="oAuthProvider in oAuthProviders" :key="oAuthProvider.registrationId" class="col-12 mb-3">
+                  <button type="button" class="btn btn-outline-primary w-100"
                           @click="oAuth2Login(oAuthProvider.registrationId)">
-                    <small><i :class="oAuthProvider.iconClass" aria-hidden="true" class="text-info"/>
-                    Continue with {{ oAuthProvider.clientName }}
-                    </small>
+                    <i :class="oAuthProvider.iconClass" aria-hidden="true" class="mr-1" />
+                    Login via {{ oAuthProvider.clientName }}
                   </button>
                 </div>
               </div>
