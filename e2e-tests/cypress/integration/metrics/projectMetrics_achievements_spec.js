@@ -602,4 +602,89 @@ describe('Metrics Tests - Achievements', () => {
         ], 15, true, 35);
     })
 
+
+    it('achievements table - global badge', () => {
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            name: "Interesting Subject 1",
+        })
+
+        const numSkills = 3;
+        for (let skillsCounter = 1; skillsCounter <= numSkills; skillsCounter += 1) {
+            cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill${skillsCounter}`, {
+                projectId: 'proj1',
+                subjectId: 'subj1',
+                skillId: `skill${skillsCounter}`,
+                name: `Very Great Skill # ${skillsCounter}`,
+                pointIncrement: '50',
+                numPerformToCompletion: '1',
+            });
+        };
+
+        cy.request('POST', '/admin/projects/proj1/badges/badge1', {
+            projectId: 'proj1',
+            badgeId: 'badge1',
+            name: 'This is a cool badge',
+            "iconClass":"fas fa-jedi",
+        });
+        cy.request('POST', '/admin/projects/proj1/badge/badge1/skills/skill1')
+
+        cy.fixture('vars.json').then((vars) => {
+            cy.logout();
+            const supervisorUser = 'supervisor@skills.org';
+            cy.register(supervisorUser, 'password');
+            cy.login(vars.rootUser,  vars.defaultPass);
+
+            cy.request('PUT', `/root/users/${supervisorUser}/roles/ROLE_SUPERVISOR`);
+            cy.logout();
+            cy.login(supervisorUser, 'password');
+
+            const badgeId = 'a_badge';
+            cy.request('PUT', `/supervisor/badges/${badgeId}`, {
+                badgeId: badgeId,
+                description: "",
+                iconClass: 'fas fa-award',
+                isEdit: false,
+                name: 'A Badge',
+                originalBadgeId: ''
+            });
+            cy.request('POST', `/supervisor/badges/${badgeId}/projects/proj1/skills/skill1`)
+                .then((response)=>{
+                    cy.log(response.body)
+                })
+            cy.logout();
+            cy.login(vars.defaultUser,  vars.defaultPass);
+        });
+
+        const m = moment.utc('2020-09-12 11', 'YYYY-MM-DD HH');
+
+        cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'user0Good@skills.org', timestamp: m.clone().format('x')})
+        cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: 'user0Good@skills.org', timestamp: m.clone().subtract(1, 'day').format('x')})
+        cy.request('POST', `/api/projects/proj1/skills/skill3`, {userId: 'user0Good@skills.org', timestamp: m.clone().subtract(2, 'day').format('x')})
+
+        cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'user1Long0@skills.org', timestamp: m.clone().subtract(3, 'day').format('x')})
+        cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: 'user1Long0@skills.org', timestamp: m.clone().subtract(4, 'day').format('x')})
+
+        cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: 'user2Smith0@skills.org', timestamp: m.clone().subtract(5, 'day').format('x')})
+        cy.request('POST', `/api/projects/proj1/skills/skill3`, {userId: 'user2Smith0@skills.org', timestamp: m.clone().subtract(6, 'day').format('x')})
+
+        cy.visit('/projects/proj1/');
+        cy.clickNav('Metrics');
+        cy.get('[data-cy=metricsNav-Achievements]').click();
+
+        cy.get('[data-cy=achievementsNavigator-typeInput]').contains('Overall').click();
+        cy.get('[data-cy=achievementsNavigator-typeInput]').contains('Subject').click();
+        cy.get('[data-cy=achievementsNavigator-typeInput]').contains('Skill').click();
+        cy.get('[data-cy=achievementsNavigator-filterBtn]').click();
+
+        const tableSelector = '[data-cy=achievementsNavigator-table]'
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 1,  value: 'Global Badge' }],
+            [{ colIndex: 1,  value: 'Global Badge' }],
+            [{ colIndex: 1,  value: 'Badge' }],
+            [{ colIndex: 1,  value: 'Badge' }],
+        ]);
+    })
+
 })
