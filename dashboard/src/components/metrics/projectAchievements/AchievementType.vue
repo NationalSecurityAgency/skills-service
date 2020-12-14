@@ -28,12 +28,15 @@ limitations under the License.
       <span v-if="type === types[3]">
             <i class="fa fa-award "/>
       </span>
+      <span v-if="type === types[4]">
+            <i class="fas fa-globe-americas"/>
+      </span>
       <span v-if="isUnknownType">
             <i class="fa fa-award "/>
       </span>
     </span>
     <span style="vertical-align: text-top !important;">
-      {{ type }}
+      {{ formattedType }}
     </span>
   </div>
 </template>
@@ -49,12 +52,20 @@ limitations under the License.
           'Subject',
           'Skill',
           'Badge',
+          'GlobalBadge',
         ],
       };
     },
     computed: {
       isUnknownType() {
         return this.types.find((item) => item === this.type) === undefined;
+      },
+      formattedType() {
+        if (this.type === 'GlobalBadge') {
+          return 'Global Badge';
+        }
+
+        return this.type;
       },
     },
   };
