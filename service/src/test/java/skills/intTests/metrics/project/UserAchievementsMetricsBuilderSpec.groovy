@@ -21,7 +21,6 @@ import groovy.time.TimeCategory
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
-import skills.intTests.utils.SkillsService
 import skills.metrics.builders.MetricsPagingParamsHelper
 import skills.metrics.builders.MetricsParams
 import skills.storage.model.SkillDef
@@ -32,7 +31,7 @@ import spock.lang.Shared
 class UserAchievementsMetricsBuilderSpec extends DefaultIntSpec {
 
     String metricsId = "userAchievementsChartBuilder"
-    String allAchievementTypes = "${MetricsParams.ACHIEVEMENT_TYPE_OVERALL},${SkillDef.ContainerType.Subject},${SkillDef.ContainerType.Skill},${SkillDef.ContainerType.Badge}"
+    String allAchievementTypes = "${MetricsParams.ACHIEVEMENT_TYPE_OVERALL},${SkillDef.ContainerType.Subject},${SkillDef.ContainerType.Skill},${SkillDef.ContainerType.Badge},${SkillDef.ContainerType.GlobalBadge}"
 
     @Shared
     List<Date> dates
@@ -302,64 +301,6 @@ class UserAchievementsMetricsBuilderSpec extends DefaultIntSpec {
                 users[3],
                 users[3],
         ]
-    }
-
-    def "get achievements with a global badge"() {
-        def proj = SkillsFactory.createProject()
-        List<Map> skills = SkillsFactory.createSkills(5)
-        skills.each { it.pointIncrement = 200; it.numPerformToCompletion = 1 }
-
-        def subj = SkillsFactory.createSubject()
-
-        skillsService.createProject(proj)
-        skillsService.createSubject(subj)
-        skillsService.createSkills(skills)
-
-        def subj1 = SkillsFactory.createSubject(1, 2)
-        List<Map> skillsSubj1 = SkillsFactory.createSkills(5, 1, 2)
-        skillsSubj1.each { it.pointIncrement = 200; it.numPerformToCompletion = 1 }
-
-        skillsService.createSubject(subj1)
-        skillsService.createSkills(skillsSubj1)
-
-        def badge = SkillsFactory.createBadge()
-        SkillsService supervisor = createSupervisor()
-        supervisor.createGlobalBadge([projectId: proj.projectId, badgeId: badge.badgeId, enabled: true, name: badge.name], badge.badgeId)
-        supervisor.assignSkillToGlobalBadge([projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills.get(0).skillId])
-
-        List<String> users = new ArrayList<>(getRandomUsers(4))
-        List<String> usersCopy = new ArrayList<>(users)
-        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], usersCopy[0])
-
-        Map props = [:]
-        props[MetricsPagingParamsHelper.PROP_CURRENT_PAGE] = 1
-        props[MetricsPagingParamsHelper.PROP_PAGE_SIZE] = 15
-        props[MetricsPagingParamsHelper.PROP_SORT_DESC] = false
-        props[MetricsPagingParamsHelper.PROP_SORT_BY] = "userName"
-        props[MetricsParams.P_ACHIEVEMENT_TYPES] = allAchievementTypes
-
-        when:
-        def res = skillsService.getMetricsData(proj.projectId, metricsId, props)
-
-        props[MetricsParams.P_ACHIEVEMENT_TYPES] = "${MetricsParams.ACHIEVEMENT_TYPE_OVERALL},${SkillDef.ContainerType.Subject},${SkillDef.ContainerType.Skill}"
-        def res1 = skillsService.getMetricsData(proj.projectId, metricsId, props)
-
-        props[MetricsParams.P_ACHIEVEMENT_TYPES] = "${SkillDef.ContainerType.Badge}"
-        def res2 = skillsService.getMetricsData(proj.projectId, metricsId, props)
-
-        then:
-        res.items.size() == 4
-        res.totalNumItems == 4
-        def items = res.items
-        items.find({it.type == "GlobalBadge"}).name == "Test Badge 1"
-
-        res1.items.size() == 3
-        res1.totalNumItems == 3
-        !res1.items.find({it.type == "GlobalBadge"})
-
-        res2.items.size() == 1
-        res2.totalNumItems == 1
-        res2.items.find({it.type == "GlobalBadge"}).name == "Test Badge 1"
     }
 
     @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] != "pki" })

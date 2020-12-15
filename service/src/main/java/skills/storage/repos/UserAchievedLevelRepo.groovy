@@ -202,13 +202,13 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
     @Query('''select ua, sd, uAttrs from UserAchievement ua, UserAttrs uAttrs left join SkillDef sd on ua.skillId = sd.skillId 
             where 
                 ua.userId = uAttrs.userId and
-                (ua.projectId = :projectId OR (ua.projectId is null and :includeGlobalBadge = 'true')) and
+                ua.projectId = :projectId and
                 ua.achievedOn >= :fromDate and
                 ua.achievedOn <= :toDate and 
                 upper(uAttrs.userIdForDisplay) like UPPER(CONCAT('%', :userNameFilter, '%')) and
                 (upper(sd.name) like UPPER(CONCAT('%', :skillNameFilter, '%')) OR (:skillNameFilter = 'ALL')) and
                 (ua.level >= :level OR (:level = -1)) and
-                (sd.type in (:types) OR (:disableTypes = 'true') OR (ua.projectId is null and :includeGlobalBadge = 'true') OR (ua.skillId is null AND (:includeOverallType = 'true'))) and 
+                (sd.type in (:types) OR (:disableTypes = 'true') OR (ua.skillId is null AND (:includeOverallType = 'true'))) and 
                 (ua.skillId is not null OR (:includeOverallType = 'true'))
                 ''')
     List<Object[]> findAllForAchievementNavigator(
@@ -221,19 +221,18 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
             @Param("types") List<SkillDef.ContainerType> types,
             @Param("disableTypes") String disableTypes,
             @Param("includeOverallType") String includeOverallType,
-            @Param("includeGlobalBadge") String includeGlobalBadge,
             @Param("pageable") Pageable pageable)
 
-    @Query('''select count(uAttrs) from UserAchievement ua, UserAttrs uAttrs left join SkillDef sd on ua.skillRefId = sd.id 
+    @Query('''select count(uAttrs) from UserAchievement ua, UserAttrs uAttrs left join SkillDef sd on ua.skillId = sd.skillId 
             where 
                 ua.userId = uAttrs.userId and
-                (ua.projectId = :projectId OR (ua.projectId is null and :includeGlobalBadge = 'true')) and
+                ua.projectId = :projectId and
                 ua.achievedOn >= :fromDate and
                 ua.achievedOn <= :toDate and 
                 upper(uAttrs.userIdForDisplay) like UPPER(CONCAT('%', :userNameFilter, '%')) and
                 (upper(sd.name) like UPPER(CONCAT('%', :skillNameFilter, '%')) OR (:skillNameFilter = 'ALL')) and
                 (ua.level >= :level OR (:level = -1)) and
-                (sd.type in (:types) OR (:disableTypes = 'true') OR (ua.projectId is null and :includeGlobalBadge = 'true') OR (ua.skillId is null AND (:includeOverallType = 'true'))) and 
+                (sd.type in (:types) OR (:disableTypes = 'true') OR (ua.skillId is null AND (:includeOverallType = 'true'))) and 
                 (ua.skillId is not null OR (:includeOverallType = 'true'))
                 ''')
     Integer countForAchievementNavigator(
@@ -245,8 +244,7 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
             @Param("level") Integer level,
             @Param("types") List<SkillDef.ContainerType> types,
             @Param("disableTypes") String disableTypes,
-            @Param("includeOverallType") String includeOverallType,
-            @Param("includeGlobalBadge") String includeGlobalBadge)
+            @Param("includeOverallType") String includeOverallType)
 
 
     static interface SkillAndLevelUserCount {
