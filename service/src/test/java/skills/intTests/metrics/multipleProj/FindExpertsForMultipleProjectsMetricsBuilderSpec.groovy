@@ -373,11 +373,13 @@ class FindExpertsForMultipleProjectsMetricsBuilderSpec extends DefaultIntSpec {
 
         def res1 = supervisor.getGlobalMetricsData(metricsId, props)
 
+        String userIdForDisplay = "${userId} for display"
+        println "userIdForDisplay: [${userIdForDisplay}]"
         then:
         res1.totalNum == 2
         res1.data.size() == 2
-        !res1.data.find { it.userId == userId }
-        res1.data.find { it.userId == "${userId} for display" }
+        !res1.data.find { it.userId.toString().equalsIgnoreCase(userId) }
+        res1.data.find { it.userId.toString().equalsIgnoreCase(userIdForDisplay) }
     }
 
 
