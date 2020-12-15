@@ -523,4 +523,42 @@ class RootAccessSpec extends DefaultIntSpec {
         supervisorUsers
         !supervisorUsers.find { it.userId == nonRootUserId }
     }
+
+    @IgnoreRest
+    def 'root user can manually report skill for a project they are not an admin of' () {
+
+//        Map proj = SkillsFactory.createProject()
+//        Map subject = SkillsFactory.createSubject()
+//        Map skill = SkillsFactory.createSkill()
+//        skillsService.createProject(proj)
+//        skillsService.createSubject(subject)
+//        skillsService.createSkill(skill)
+
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(10, )
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        when:
+        def res = rootSkillsService.addSkill([projectId: SkillsFactory.defaultProjId, skillId: skills[0].skillId], 'user@skills.org')
+
+        then:
+        res.body.skillApplied
+        res.body.explanation == "Skill event was applied"
+
+        res.body.completed.size() == 3
+        res.body.completed.find({ it.type == "Skill" }).id == skills[0].skillId
+        res.body.completed.find({ it.type == "Skill" }).name == skills[0].name
+
+        res.body.completed.find({ it.type == "Overall" }).id == "OVERALL"
+        res.body.completed.find({ it.type == "Overall" }).name == "OVERALL"
+        res.body.completed.find({ it.type == "Overall" }).level == 1
+
+        res.body.completed.find({ it.type == "Subject" }).id == subj.subjectId
+        res.body.completed.find({ it.type == "Subject" }).name == subj.name
+        res.body.completed.find({ it.type == "Subject" }).level == 1
+    }
 }
