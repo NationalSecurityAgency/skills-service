@@ -28,7 +28,7 @@
     "backend:start:postgresql": "java -Dspring.config.location=classpath:/application.yml,file:serverConfigs/backend_application.properties -Dspring.datasource.url=jdbc:postgresql://localhost:5432/skills -Dspring.datasource.username=postgres -Dspring.datasource.password=skillsPassword -jar ../service/target/skills-service-*.jar",
     "backend:start:redis": "java -Dspring.config.location=classpath:/application.yml,file:serverConfigs/backend_application.properties -Dspring.session.store-type=redis -jar ../service/target/skills-service-*.jar ",
     "backend:start:rabbitmq": "java -Dspring.config.location=classpath:/application.yml,file:serverConfigs/backend_application.properties -Dskills.websocket.enableStompBrokerRelay=true -Dskills.websocket.relayHost=localhost -Dlogging.level.org.springframework.web.socket=TRACE -jar ../service/target/skills-service-*.jar ",
-    "backend:start:oauth": "java -Dspring.config.location=classpath:/application.yml,file:serverConfigs/backend_application.properties,file:serverConfigs/backend_oauth_application.properties -jar ../service/target/skills-service-*.jar ",
+    "backend:start:oauth": "java -Xmx2048m -Xms2048m -Dspring.config.location=classpath:/application.yml,file:serverConfigs/backend_application.properties,file:serverConfigs/backend_oauth_application.properties -jar ../service/target/skills-service-*.jar ",
     "backend:start:ci": "mkdir -p ./logs && npm run backend:start > ./logs/skills-service.out &",
     "backend:start:postgresql:ci": "mkdir -p ./logs && npm run backend:start:postgresql > ./logs/skills-service.out &",
     "backend:start:redis:ci": "mkdir -p ./logs && npm run backend:start:redis > ./logs/skills-service.out &",
