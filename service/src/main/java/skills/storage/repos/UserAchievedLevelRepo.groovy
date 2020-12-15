@@ -199,7 +199,19 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
                                                                             @Param('numOfOccurrences') int numOfOccurrences,
                                                                             @Param('notified') String notified)
 
-    @Query('''select ua, sd, uAttrs from UserAchievement ua, UserAttrs uAttrs left join SkillDef sd on ua.skillId = sd.skillId 
+    static interface AchievementItem {
+        Date getAchievedOn()
+        String getUserId()
+        Integer getLevel()
+        String getSkillId()
+        String getName()
+        SkillDef.ContainerType getType()
+        String getUserIdForDisplay()
+    }
+
+    @Query('''select ua.achievedOn as achievedOn, ua.userId as userId, ua.level as level, ua.skillId as skillId,
+            sd.name as name, sd.type as type, uAttrs.userIdForDisplay as userIdForDisplay
+            from UserAchievement ua, UserAttrs uAttrs left join SkillDef sd on ua.skillId = sd.skillId 
             where 
                 ua.userId = uAttrs.userId and
                 ua.projectId = :projectId and
@@ -211,7 +223,7 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
                 (sd.type in (:types) OR (:disableTypes = 'true') OR (ua.skillId is null AND (:includeOverallType = 'true'))) and 
                 (ua.skillId is not null OR (:includeOverallType = 'true'))
                 ''')
-    List<Object[]> findAllForAchievementNavigator(
+    List<AchievementItem> findAllForAchievementNavigator(
             @Param("projectId") String projectId,
             @Param("userNameFilter") String userNameFilter,
             @Param("fromDate") Date fromDate,
