@@ -378,8 +378,8 @@ class FindExpertsForMultipleProjectsMetricsBuilderSpec extends DefaultIntSpec {
         then:
         res1.totalNum == 2
         res1.data.size() == 2
-        !res1.data.find { it.userId == userId }
-        res1.data.collect { it.userId }.contains(userIdForDisplay)
+        !res1.data.find { it.userId.toString().equalsIgnoreCase(userId) }
+        res1.data.find { it.userId.toString().equalsIgnoreCase(userIdForDisplay) }
     }
 
 
