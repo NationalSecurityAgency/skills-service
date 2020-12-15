@@ -153,41 +153,41 @@ describe('Multiple Project Metrics', () => {
             cy.contains('No Projects Selected')
         });
     });
-
-    it('Project definitions comparison chart loads 4 projects by default', () => {
-        cy.visit('/');
-        cy.clickNav('Metrics');
-
-        cy.trainingProf('[data-cy=trainingProfileComparatorProjectSelector] .multiselect__tag').should('have.length', 4).as('selected');
-        cy.get('@selected').eq(0).contains('Inception');
-
-        // validate x axis
-        cy.trainingProf('[data-cy=numOfSkillsChart]').contains('Inception');
-        cy.trainingProf('[data-cy=numOfSkillsChart]').contains('Grand Project 0');
-        cy.trainingProf('[data-cy=numOfSkillsChart]').contains('Grand Project 1');
-        cy.trainingProf('[data-cy=numOfSkillsChart]').contains('Grand Project 2');
-
-        cy.trainingProf('[data-cy=totalAvailablePointsChart]').contains('Inception');
-        cy.trainingProf('[data-cy=totalAvailablePointsChart]').contains('Grand Project 0');
-        cy.trainingProf('[data-cy=totalAvailablePointsChart').contains('Grand Project 1');
-        cy.trainingProf('[data-cy=totalAvailablePointsChart]').contains('Grand Project 2');
-
-        cy.trainingProf('[data-cy=numOfSubjChart]').contains('Inception');
-        cy.trainingProf('[data-cy=numOfSubjChart]').contains('Grand Project 0');
-        cy.trainingProf('[data-cy=numOfSubjChart]').contains('Grand Project 1');
-        cy.trainingProf('[data-cy=numOfSubjChart]').contains('Grand Project 2');
-
-        cy.trainingProf('[data-cy=numOfBadgesChart]').contains('Inception');
-        cy.trainingProf('[data-cy=numOfBadgesChart]').contains('Grand Project 0');
-        cy.trainingProf('[data-cy=numOfBadgesChart]').contains('Grand Project 1');
-        cy.trainingProf('[data-cy=numOfBadgesChart]').contains('Grand Project 2');
-
-        cy.wait(waitForSnap);
-        cy.get(`${trainingProfSel} [data-cy=numOfSkillsChart]`).matchImageSnapshot('Project definitions comparison - Number of Skills chart');
-        cy.get(`${trainingProfSel} [data-cy=totalAvailablePointsChart]`).matchImageSnapshot('Project definitions comparison - Total Available Points');
-        cy.get(`${trainingProfSel} [data-cy=numOfSubjChart]`).matchImageSnapshot('Project definitions comparison - Number of Subjects chart');
-        cy.get(`${trainingProfSel} [data-cy=numOfBadgesChart]`).matchImageSnapshot('Project definitions comparison - Number of Badges chart');
-    });
+    //
+    // it('Project definitions comparison chart loads 4 projects by default', () => {
+    //     cy.visit('/');
+    //     cy.clickNav('Metrics');
+    //
+    //     cy.trainingProf('[data-cy=trainingProfileComparatorProjectSelector] .multiselect__tag').should('have.length', 4).as('selected');
+    //     cy.get('@selected').eq(0).contains('Inception');
+    //
+    //     // validate x axis
+    //     cy.trainingProf('[data-cy=numOfSkillsChart]').contains('Inception');
+    //     cy.trainingProf('[data-cy=numOfSkillsChart]').contains('Grand Project 0');
+    //     cy.trainingProf('[data-cy=numOfSkillsChart]').contains('Grand Project 1');
+    //     cy.trainingProf('[data-cy=numOfSkillsChart]').contains('Grand Project 2');
+    //
+    //     cy.trainingProf('[data-cy=totalAvailablePointsChart]').contains('Inception');
+    //     cy.trainingProf('[data-cy=totalAvailablePointsChart]').contains('Grand Project 0');
+    //     cy.trainingProf('[data-cy=totalAvailablePointsChart').contains('Grand Project 1');
+    //     cy.trainingProf('[data-cy=totalAvailablePointsChart]').contains('Grand Project 2');
+    //
+    //     cy.trainingProf('[data-cy=numOfSubjChart]').contains('Inception');
+    //     cy.trainingProf('[data-cy=numOfSubjChart]').contains('Grand Project 0');
+    //     cy.trainingProf('[data-cy=numOfSubjChart]').contains('Grand Project 1');
+    //     cy.trainingProf('[data-cy=numOfSubjChart]').contains('Grand Project 2');
+    //
+    //     cy.trainingProf('[data-cy=numOfBadgesChart]').contains('Inception');
+    //     cy.trainingProf('[data-cy=numOfBadgesChart]').contains('Grand Project 0');
+    //     cy.trainingProf('[data-cy=numOfBadgesChart]').contains('Grand Project 1');
+    //     cy.trainingProf('[data-cy=numOfBadgesChart]').contains('Grand Project 2');
+    //
+    //     cy.wait(waitForSnap);
+    //     cy.get(`${trainingProfSel} [data-cy=numOfSkillsChart]`).matchImageSnapshot('Project definitions comparison - Number of Skills chart');
+    //     cy.get(`${trainingProfSel} [data-cy=totalAvailablePointsChart]`).matchImageSnapshot('Project definitions comparison - Total Available Points');
+    //     cy.get(`${trainingProfSel} [data-cy=numOfSubjChart]`).matchImageSnapshot('Project definitions comparison - Number of Subjects chart');
+    //     cy.get(`${trainingProfSel} [data-cy=numOfBadgesChart]`).matchImageSnapshot('Project definitions comparison - Number of Badges chart');
+    // });
 
     it('Project definitions comparison generates charts only after 2 projects are selected', () => {
         cy.viewport('macbook-11');
