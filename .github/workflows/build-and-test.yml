@@ -15,23 +15,20 @@
 name: Continuous Integration
 
 on:
-  schedule:
-    - cron: '0 7 * * *'
-#on:
-#  push:
-#    paths-ignore:
-#      - 'README.md'
-#      - '.github/workflows/build-and-test-postgres.yml'
-#      - '.github/workflows/build-and-test-redis.yml'
-#      - '.github/workflows/publish-image-snapshot.yml'
-#      - '.gitlab-ci.yml'
-#  pull_request:
-#    paths-ignore:
-#      - 'README.md'
-#      - '.github/workflows/build-and-test-postgres.yml'
-#      - '.github/workflows/build-and-test-redis.yml'
-#      - '.github/workflows/publish-image-snapshot.yml'
-#      - '.gitlab-ci.yml'
+  push:
+    paths-ignore:
+      - 'README.md'
+      - '.github/workflows/build-and-test-postgres.yml'
+      - '.github/workflows/build-and-test-redis.yml'
+      - '.github/workflows/publish-image-snapshot.yml'
+      - '.gitlab-ci.yml'
+  pull_request:
+    paths-ignore:
+      - 'README.md'
+      - '.github/workflows/build-and-test-postgres.yml'
+      - '.github/workflows/build-and-test-redis.yml'
+      - '.github/workflows/publish-image-snapshot.yml'
+      - '.gitlab-ci.yml'
 
 jobs:
   pre_job:
