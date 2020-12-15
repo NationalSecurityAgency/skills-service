@@ -79,17 +79,14 @@ class UserAchievementsMetricsBuilder implements ProjectMetricsBuilder {
         List<SkillDef.ContainerType> achievementTypesWithoutOverall = achievementTypes.findAll({ !it.equalsIgnoreCase(MetricsParams.ACHIEVEMENT_TYPE_OVERALL) }).collect { SkillDef.ContainerType.valueOf(it) }
         String allNonOverallTypes = achievementTypesWithoutOverall.size() < 3 ? "false" : "true"
         String includeOverallType = achievementTypes.contains(MetricsParams.ACHIEVEMENT_TYPE_OVERALL) ? "true" : "false"
-        String includeGlobalBadge = achievementTypesWithoutOverall.contains(SkillDef.ContainerType.Badge).toString()
 
         int totalNumItems = userAchievedRepo.countForAchievementNavigator(
-                projectId, usernameFilter, from, to, skillNameFilter, minLevel, achievementTypesWithoutOverall,
-                allNonOverallTypes, includeOverallType, includeGlobalBadge)
+                projectId, usernameFilter, from, to, skillNameFilter, minLevel, achievementTypesWithoutOverall, allNonOverallTypes, includeOverallType)
         if (totalNumItems == 0) {
             return new UserAchievementsRes(totalNumItems: 0, items: [])
         }
         List<Object[]> achievements = userAchievedRepo.findAllForAchievementNavigator(
-                projectId, usernameFilter, from, to, skillNameFilter, minLevel, achievementTypesWithoutOverall,
-                allNonOverallTypes, includeOverallType, includeGlobalBadge, pageRequest)
+                projectId, usernameFilter, from, to, skillNameFilter, minLevel, achievementTypesWithoutOverall, allNonOverallTypes, includeOverallType, pageRequest)
 
         List items = achievements.collect {
             UserAchievement userAchievement = it[0]
