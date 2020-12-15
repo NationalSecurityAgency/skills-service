@@ -85,21 +85,16 @@ class UserAchievementsMetricsBuilder implements ProjectMetricsBuilder {
         if (totalNumItems == 0) {
             return new UserAchievementsRes(totalNumItems: 0, items: [])
         }
-        List<Object[]> achievements = userAchievedRepo.findAllForAchievementNavigator(
+        List<UserAchievedLevelRepo.AchievementItem> achievements = userAchievedRepo.findAllForAchievementNavigator(
                 projectId, usernameFilter, from, to, skillNameFilter, minLevel, achievementTypesWithoutOverall, allNonOverallTypes, includeOverallType, pageRequest)
 
         List items = achievements.collect {
-            UserAchievement userAchievement = it[0]
-            SkillDef skillDef = it[1]
-            UserAttrs userAttrs = it[2]
-            return buildMetricUserAchievement(userAchievement, skillDef, userAttrs)
+            return buildMetricUserAchievement(it)
         }
         return new UserAchievementsRes(totalNumItems: totalNumItems, items: items)
     }
 
     private PageRequest getPageRequest(String projectId, String chartId, Map<String, String> props) {
-
-
         MetricsPagingParamsHelper metricsPagingParamsHelper = new MetricsPagingParamsHelper(projectId, chartId, props)
         int currentPage = metricsPagingParamsHelper.currentPage
         int pageSize = metricsPagingParamsHelper.pageSize
@@ -124,22 +119,22 @@ class UserAchievementsMetricsBuilder implements ProjectMetricsBuilder {
         }
         return PageRequest.of(currentPage, pageSize, sortDesc ?  DESC : ASC, sortBy)
     }
-    private MetricUserAchievement buildMetricUserAchievement(UserAchievement achievement, SkillDef skillDef, UserAttrs userAttrs) {
+    private MetricUserAchievement buildMetricUserAchievement(UserAchievedLevelRepo.AchievementItem achievementItem) {
 
         MetricUserAchievement res = new MetricUserAchievement(
-                achievedOn: achievement.achievedOn.time,
-                userId: achievement.userId,
-                userName: userAttrs.userIdForDisplay,
+                achievedOn: achievementItem.achievedOn.time,
+                userId: achievementItem.userId,
+                userName: achievementItem.userIdForDisplay,
                 name: "Overall",
                 type: "Overall",
-                level: achievement.level,
+                level: achievementItem.level,
+                skillId: achievementItem.skillId,
         )
 
-        if (achievement.skillId) {
-            res.skillId = skillDef.skillId
-            res.name = skillDef.name
-            res.type = skillDef.type.toString()
-            res.level = achievement.level
+        if (achievementItem.skillId) {
+            res.name = achievementItem.name
+            res.type = achievementItem.type.toString()
+            res.level = achievementItem.level
         }
 
         return res
