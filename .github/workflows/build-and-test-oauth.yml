@@ -116,6 +116,7 @@ jobs:
         CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
         # pass GitHub token to allow accurately detecting a build vs a re-run build
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        NODE_OPTIONS: --max_old_space_size=4096
 
     - name: upload result artifacts
       if: ${{ always() }}
