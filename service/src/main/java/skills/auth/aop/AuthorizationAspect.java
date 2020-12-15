@@ -69,7 +69,8 @@ class AuthorizationAspect {
         boolean foundAdmin = false;
         for (GrantedAuthority grantedAuthority : authorities) {
             UserSkillsGrantedAuthority userSkillsGrantedAuthority = (UserSkillsGrantedAuthority) grantedAuthority;
-            if (userSkillsGrantedAuthority.getRole().getRoleName().equals(RoleName.ROLE_PROJECT_ADMIN)) {
+            RoleName roleName = userSkillsGrantedAuthority.getRole().getRoleName();
+            if (roleName.equals(RoleName.ROLE_PROJECT_ADMIN) || roleName.equals(RoleName.ROLE_SUPER_DUPER_USER)) {
                 foundAdmin = true;
                 break;
             }
