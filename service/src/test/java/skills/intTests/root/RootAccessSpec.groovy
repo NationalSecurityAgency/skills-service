@@ -524,16 +524,7 @@ class RootAccessSpec extends DefaultIntSpec {
         !supervisorUsers.find { it.userId == nonRootUserId }
     }
 
-    @IgnoreRest
     def 'root user can manually report skill for a project they are not an admin of' () {
-
-//        Map proj = SkillsFactory.createProject()
-//        Map subject = SkillsFactory.createSubject()
-//        Map skill = SkillsFactory.createSkill()
-//        skillsService.createProject(proj)
-//        skillsService.createSubject(subject)
-//        skillsService.createSkill(skill)
-
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
         def skills = SkillsFactory.createSkills(10, )
