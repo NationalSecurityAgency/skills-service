@@ -38,6 +38,12 @@ before(function () {
     cy.fixture('vars.json').then((vars) => {
         cy.register(vars.rootUser, vars.defaultPass, true);
         cy.register(vars.defaultUser, vars.defaultPass);
+        if (!Cypress.env('oauthMode')) {
+            Cypress.env('proxyUser', 'user0')
+        } else {
+            Cypress.env('proxyUser', 'foo-hydra')
+            Cypress.env('hydraAuthenticated', false)
+        }
     });
 });
 
@@ -55,13 +61,16 @@ beforeEach(function () {
 
         if (!Cypress.env('oauthMode')) {
             cy.log('NOT in oauthMode, using form login')
-            Cypress.env('proxyUser', 'user0')
             cy.login(vars.defaultUser, vars.defaultPass);
         } else {
             cy.log('oauthMode, using loginBySingleSignOn')
-            Cypress.env('proxyUser', 'foo-hydra')
             cy.loginBySingleSignOn()
         }
     });
+});
+
+
+afterEach(function () {
+    Cypress.env('hydraAuthenticated', false)
 });
 

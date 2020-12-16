@@ -38,7 +38,11 @@ describe('Multiple Project Metrics', () => {
         cy.resetDb();
 
         cy.fixture('vars.json').then((vars) => {
-            cy.login(vars.defaultUser, vars.defaultPass);
+            if (!Cypress.env('oauthMode')) {
+                cy.login(vars.defaultUser, vars.defaultPass);
+            } else {
+                cy.loginBySingleSignOn()
+            }
 
             const numProj = 6;
             for (let i =0; i < numProj; i+=1) {
@@ -123,10 +127,14 @@ describe('Multiple Project Metrics', () => {
 
             cy.login(vars.rootUser, vars.defaultPass);
             // cy.request('PUT', `/root/users/${vars.rootUser}/roles/ROLE_SUPERVISOR`);
-            cy.request('PUT', `/root/users/${vars.defaultUser}/roles/ROLE_SUPERVISOR`);
+            cy.request('PUT', `/root/users/${Cypress.env('proxyUser')}/roles/ROLE_SUPERVISOR`);
 
             cy.logout();
-            cy.login(vars.defaultUser, vars.defaultPass);
+            if (!Cypress.env('oauthMode')) {
+                cy.login(vars.defaultUser, vars.defaultPass);
+            } else {
+                cy.loginBySingleSignOn()
+            }
         });
     });
 
@@ -181,12 +189,12 @@ describe('Multiple Project Metrics', () => {
         cy.trainingProf('[data-cy=numOfBadgesChart]').contains('Grand Project 0');
         cy.trainingProf('[data-cy=numOfBadgesChart]').contains('Grand Project 1');
         cy.trainingProf('[data-cy=numOfBadgesChart]').contains('Grand Project 2');
-        //
-        // cy.wait(waitForSnap);
-        // cy.get(`${trainingProfSel} [data-cy=numOfSkillsChart]`).matchImageSnapshot('Project definitions comparison - Number of Skills chart');
-        // cy.get(`${trainingProfSel} [data-cy=totalAvailablePointsChart]`).matchImageSnapshot('Project definitions comparison - Total Available Points');
-        // cy.get(`${trainingProfSel} [data-cy=numOfSubjChart]`).matchImageSnapshot('Project definitions comparison - Number of Subjects chart');
-        // cy.get(`${trainingProfSel} [data-cy=numOfBadgesChart]`).matchImageSnapshot('Project definitions comparison - Number of Badges chart');
+
+        cy.wait(waitForSnap);
+        cy.get(`${trainingProfSel} [data-cy=numOfSkillsChart]`).matchImageSnapshot('Project definitions comparison - Number of Skills chart');
+        cy.get(`${trainingProfSel} [data-cy=totalAvailablePointsChart]`).matchImageSnapshot('Project definitions comparison - Total Available Points');
+        cy.get(`${trainingProfSel} [data-cy=numOfSubjChart]`).matchImageSnapshot('Project definitions comparison - Number of Subjects chart');
+        cy.get(`${trainingProfSel} [data-cy=numOfBadgesChart]`).matchImageSnapshot('Project definitions comparison - Number of Badges chart');
     });
 
     it('Project definitions comparison generates charts only after 2 projects are selected', () => {
