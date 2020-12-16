@@ -118,6 +118,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         NODE_OPTIONS: --max_old_space_size=5120
         CYPRESS_NODE_OPTIONS: --max_old_space_size=5120
+        DEBUG: cypress:server:util:process_profiler
+        CYPRESS_DEBUG: cypress:server:util:process_profiler
 
     - name: upload result artifacts
       if: ${{ always() }}
