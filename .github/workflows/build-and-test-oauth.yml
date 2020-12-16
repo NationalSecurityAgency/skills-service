@@ -116,8 +116,8 @@ jobs:
         CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
         # pass GitHub token to allow accurately detecting a build vs a re-run build
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        NODE_OPTIONS: --max_old_space_size=5120
-        CYPRESS_NODE_OPTIONS: --max_old_space_size=5120
+        NODE_OPTIONS: --max_old_space_size=5120 --heap-prof --diagnostic-dir=./logs
+        CYPRESS_NODE_OPTIONS: --max_old_space_size=5120 --heap-prof --diagnostic-dir=./logs
         DEBUG: cypress:server:util:process_profiler
         CYPRESS_DEBUG: cypress:server:util:process_profiler
 
