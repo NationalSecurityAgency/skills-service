@@ -63,7 +63,7 @@
   },
   "devDependencies": {
     "@bahmutov/print-env": "2.1.2",
-    "cypress": "6.1.0",
+    "cypress": "5.6.0",
     "cypress-file-upload": "4.1.1",
     "cypress-image-snapshot": "3.1.1",
     "eslint": "7.9.0",
