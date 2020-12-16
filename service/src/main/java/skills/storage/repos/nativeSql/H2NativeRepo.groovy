@@ -15,6 +15,7 @@
  */
 package skills.storage.repos.nativeSql
 
+import groovy.util.logging.Slf4j
 import org.springframework.context.annotation.Conditional
 import org.springframework.stereotype.Service
 import skills.storage.model.SkillDef
@@ -25,6 +26,7 @@ import javax.persistence.Query
 
 @Conditional(DBConditions.H2)
 @Service
+@Slf4j
 class H2NativeRepo implements NativeQueriesRepo {
 
     @PersistenceContext

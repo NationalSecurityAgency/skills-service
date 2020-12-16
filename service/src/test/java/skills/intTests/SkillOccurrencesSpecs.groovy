@@ -1081,6 +1081,33 @@ class SkillOccurrencesSpecs extends DefaultIntSpec {
         afterEditAchievementsU2.size() == 0
     }
 
+    def "decrease in occurrences does not cause any achievements"() {
+        def project = SkillsFactory.createProject()
+        skillsService.createProject(project)
+        def subject = SkillsFactory.createSubject(1)
+        skillsService.createSubject(subject)
+        def subject2 = SkillsFactory.createSubject(1, 2)
+        skillsService.createSubject(subject2)
+
+
+        def skill1_1 = SkillsFactory.createSkill(1, 1, 1, 0, 10, 0, 100)
+        skillsService.createSkill(skill1_1)
+        def skill1_2 = SkillsFactory.createSkill(1, 1, 2, 0, 10, 0, 10)
+        skillsService.createSkill(skill1_2)
+        def skill2_1 = SkillsFactory.createSkill(1, 2, 1, 0, 1, 0, 100)
+        skillsService.createSkill(skill2_1)
+
+        when:
+        def beforeEditAchievements = userAchievementRepo.findAllByUserAndProjectIds("user1", [project.projectId])
+        skill1_1.numPerformToCompletion = 1
+        skillsService.updateSkill(skill1_1, skill1_1.skillId)
+        def afterEditAchievements = userAchievementRepo.findAllByUserAndProjectIds("user1", [project.projectId])
+
+        then:
+        beforeEditAchievements.size() == 0
+        afterEditAchievements.size() == 0
+    }
+
     def "decrease in occurrences causes project and subject level achievements for points based levels"() {
         def project = SkillsFactory.createProject()
         skillsService.createProject(project)
