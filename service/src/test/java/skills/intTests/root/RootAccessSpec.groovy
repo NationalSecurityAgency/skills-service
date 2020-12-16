@@ -525,6 +525,14 @@ class RootAccessSpec extends DefaultIntSpec {
     }
 
     def 'root user can manually report skill for a project they are not an admin of' () {
+        // need to call DefaultIntSpec.getRandomUsers so that tests will work in ssl mode
+        String userId = getRandomUsers(1)[0]
+
+        //we need a different userId from the default root user for this test
+        while (userId.contains("jh@dojo")) {
+            userId = getRandomUsers(1)[0]
+        }
+
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
         def skills = SkillsFactory.createSkills(10, )
@@ -534,7 +542,7 @@ class RootAccessSpec extends DefaultIntSpec {
         skillsService.createSkills(skills)
 
         when:
-        def res = rootSkillsService.addSkill([projectId: SkillsFactory.defaultProjId, skillId: skills[0].skillId], 'user@skills.org')
+        def res = rootSkillsService.addSkill([projectId: SkillsFactory.defaultProjId, skillId: skills[0].skillId], userId)
 
         then:
         res.body.skillApplied
