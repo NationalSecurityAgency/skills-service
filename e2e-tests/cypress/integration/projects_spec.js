@@ -452,7 +452,7 @@ describe('Projects Tests', () => {
 
   it('Trusted client should not shown when oAuthOnly=true', () => {
     cy.server()
-    cy.route('GET', '/public/config', {oAuthOnly: true}).as('loadConfig');
+    cy.route('GET', '/public/config', {oAuthOnly: true, authMode: 'FORM'}).as('loadConfig');
 
     cy.request('POST', '/app/projects/proj1', {
       projectId: 'proj1',
@@ -478,13 +478,13 @@ describe('Projects Tests', () => {
     cy.wait('@loadProject');
     cy.wait('@loadUserRoles');
 
-    cy.contains('Firstname LastName (skills@skills.org)').should('exist');
+    cy.contains('Project Administrators').should('exist');
     cy.get('[data-cy="trusted-client-props-panel"]').should('not.exist')
   });
 
   it('Trusted client should be shown when oAuthOnly!=true', () => {
     cy.server()
-    cy.route('GET', '/public/config').as('loadConfig');
+    cy.route('GET', '/public/config', {oAuthOnly: false, authMode: 'FORM'}).as('loadConfig');
 
     cy.request('POST', '/app/projects/proj1', {
       projectId: 'proj1',
@@ -510,7 +510,7 @@ describe('Projects Tests', () => {
     cy.wait('@loadProject');
     cy.wait('@loadUserRoles');
 
-    cy.contains('Firstname LastName (skills@skills.org)').should('exist');
+    cy.contains('Project Administrators').should('exist');
     cy.get('[data-cy="trusted-client-props-panel"]').should('exist')
   });
 });
