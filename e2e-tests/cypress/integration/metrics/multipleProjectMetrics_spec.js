@@ -38,7 +38,10 @@ describe('Multiple Project Metrics', () => {
         cy.resetDb();
 
         cy.fixture('vars.json').then((vars) => {
-            if (!Cypress.env('oauthMode')) {
+            const oauthMode = Cypress.env('oauthMode');
+            const projectOwner = oauthMode ? Cypress.env('proxyUser') : vars.defaultUser;
+            cy.log(`oauthMode: [${oauthMode}], projectOwner[${projectOwner}]`);
+            if (!oauthMode) {
                 cy.login(vars.defaultUser, vars.defaultPass);
             } else {
                 cy.loginBySingleSignOn()
@@ -127,10 +130,10 @@ describe('Multiple Project Metrics', () => {
 
             cy.login(vars.rootUser, vars.defaultPass);
             // cy.request('PUT', `/root/users/${vars.rootUser}/roles/ROLE_SUPERVISOR`);
-            cy.request('PUT', `/root/users/${Cypress.env('proxyUser')}/roles/ROLE_SUPERVISOR`);
+            cy.request('PUT', `/root/users/${projectOwner}/roles/ROLE_SUPERVISOR`);
 
             cy.logout();
-            if (!Cypress.env('oauthMode')) {
+            if (!oauthMode) {
                 cy.login(vars.defaultUser, vars.defaultPass);
             } else {
                 cy.loginBySingleSignOn()
