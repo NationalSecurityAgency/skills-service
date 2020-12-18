@@ -145,12 +145,19 @@ describe('Accessibility Tests', () => {
   })
 
   it('subject', () => {
+    cy.server();
+    cy.route('GET', '/admin/projects/MyNewtestProject/subjects').as('getSubjects');
+    cy.route('GET', '/admin/projects/MyNewtestProject/subjects/subj1/skills').as('getSkills');
+    cy.route('GET', '/admin/projects/MyNewtestProject/subjects/subj1/levels').as('getLevels');
+    cy.route('GET', '/admin/projects/MyNewtestProject/subjects/subj1/users?query=&limit=10&ascending=1&page=1&byColumn=0&orderBy=userId').as('getUsers');
     cy.visit('/');
     cy.injectAxe()
     //view project
     cy.contains('Manage').click();
+    cy.wait('@getSubjects');
     //view subject
     cy.contains('Manage').click();
+    cy.wait('@getSkills');
     cy.customLighthouse();
     cy.customA11y();
 
@@ -161,6 +168,7 @@ describe('Accessibility Tests', () => {
     cy.get('[data-cy=closeSkillButton]').click();
 
     cy.get('[data-cy=nav-Levels]').click();
+    cy.wait('@getLevels');
     cy.customLighthouse();
     cy.customA11y();
     cy.get('[data-cy=addLevel]').click();
@@ -174,6 +182,7 @@ describe('Accessibility Tests', () => {
 
     cy.get('[data-cy=nav-Users]').click();
     cy.customLighthouse();
+    cy.wait('@getUsers');
     cy.customA11y();
     cy.contains('Details').eq(0).click();
     cy.customLighthouse();
