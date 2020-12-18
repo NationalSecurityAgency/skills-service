@@ -47,7 +47,7 @@ describe('Skills Tests', () => {
       cy.get('[data-cy=idError]').contains(msg).should('be.visible');
       cy.get('[data-cy=saveSkillButton]').should('be.disabled');
       cy.get('[data-cy=skillName]').type('{backspace}');
-      cy.get('[data-cy=idError]').contains(msg).should('not.be.visible');
+      cy.get('[data-cy=idError]').contains(msg).should('not.exist');
       cy.get('[data-cy=saveSkillButton]').should('be.enabled');
     });
 
@@ -63,7 +63,7 @@ describe('Skills Tests', () => {
 
       cy.clickButton('Skill');
       cy.get('[data-cy=closeSkillButton]').click();
-      cy.get('[data-cy=closeSkillButton]').should('not.be.visible');
+      cy.get('[data-cy=closeSkillButton]').should('not.exist');
     });
 
     it('validation', () => {

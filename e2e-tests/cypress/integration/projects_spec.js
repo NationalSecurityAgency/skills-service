@@ -75,7 +75,7 @@ describe('Projects Tests', () => {
 
     cy.clickButton('Project');
     cy.get('[data-cy=closeProjectButton]').click();
-    cy.get('[data-cy="projectName"]').should('not.be.visible');
+    cy.get('[data-cy="projectName"]').should('not.exist');
   });
 
   it('Duplicate project names are not allowed', () => {

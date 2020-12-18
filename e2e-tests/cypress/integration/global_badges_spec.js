@@ -72,7 +72,7 @@ describe('Global Badges Tests', () => {
         cy.get('[data-cy=idError]').contains(msg).should('be.visible');
         cy.get('[data-cy=saveBadgeButton]').should('be.disabled');
         cy.get('[data-cy=badgeName]').type('{backspace}');
-        cy.get('[data-cy=idError]').contains(msg).should('not.be.visible');
+        cy.get('[data-cy=idError]').should('not.contain', msg)
         cy.get('[data-cy=saveBadgeButton]').should('be.enabled');
     });
 
