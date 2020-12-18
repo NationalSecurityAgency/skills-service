@@ -144,12 +144,13 @@ describe('Accessibility Tests', () => {
     cy.customA11y();
   })
 
-  it('subject', () => {
+  it.only('subject', () => {
     cy.server();
     cy.route('GET', '/admin/projects/MyNewtestProject/subjects').as('getSubjects');
     cy.route('GET', '/admin/projects/MyNewtestProject/subjects/subj1/skills').as('getSkills');
     cy.route('GET', '/admin/projects/MyNewtestProject/subjects/subj1/levels').as('getLevels');
     cy.route('GET', '/admin/projects/MyNewtestProject/subjects/subj1/users?query=&limit=10&ascending=1&page=1&byColumn=0&orderBy=userId').as('getUsers');
+    cy.route('GET', '/admin/projects/MyNewtestProject/performedSkills/u1?query=&limit=10&ascending=0&page=1&byColumn=0&orderBy=performedOn').as('getPerformedSkills');
     cy.visit('/');
     cy.injectAxe()
     //view project
@@ -190,6 +191,7 @@ describe('Accessibility Tests', () => {
     // also has contrast issues
     // cy.customA11y();
     cy.get('[data-cy="nav-Performed Skills"]').click()
+    cy.wait('@getPerformedSkills');
     cy.customLighthouse();
     cy.customA11y();
     /*

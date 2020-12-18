@@ -156,14 +156,14 @@ describe('Markdown Tests', () => {
 
         cy.contains('Description');
         cy.wait('@inceptionLevel');
-        cy.contains('Level 1');
+        cy.contains('Level');
         cy.contains('Emojis')
         cy.contains('⭐ ⭐ ⭐ ⭐');
         cy.matchImageSnapshot('Markdown-SkillsPage-Overview', snapshotOptions);
 
         cy.visit('/projects/proj1/subjects/subj1');
         cy.wait('@inceptionLevel');
-        cy.contains('Level 1');
+        cy.contains('Level');
         const selectorSkillsRowToggle = 'table .VueTables__child-row-toggler';
         cy.get(selectorSkillsRowToggle).click();
         cy.contains('Description');
