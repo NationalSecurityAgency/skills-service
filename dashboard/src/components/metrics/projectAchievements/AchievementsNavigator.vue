@@ -108,6 +108,7 @@ limitations under the License.
   import MetricsService from '../MetricsService';
   import AchievementType from './AchievementType';
   import MetricsCard from '../utils/MetricsCard';
+  import dayjs from '../../../DayJsCustomizer';
 
   export default {
     name: 'AchievementsNavigator',
@@ -232,7 +233,7 @@ limitations under the License.
           });
       },
       isToday(timestamp) {
-        return window.dayjs(timestamp)
+        return dayjs(timestamp)
           .isSame(new Date(), 'day');
       },
     },

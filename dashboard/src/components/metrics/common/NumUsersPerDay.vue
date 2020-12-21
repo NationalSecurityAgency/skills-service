@@ -31,6 +31,7 @@ limitations under the License.
   import MetricsOverlay from '../utils/MetricsOverlay';
   import MetricsCard from '../utils/MetricsCard';
   import TimeLengthSelector from './TimeLengthSelector';
+  import dayjs from '../../../DayJsCustomizer';
 
   export default {
     name: 'NumUsersPerDay',
@@ -48,7 +49,7 @@ limitations under the License.
         distinctUsersOverTime: [],
         hasDataEnoughData: false,
         props: {
-          start: window.dayjs().subtract(1, 'month').valueOf(),
+          start: dayjs().subtract(1, 'month').valueOf(),
         },
         timeSelectorOptions: [
           {

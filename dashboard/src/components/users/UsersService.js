@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import axios from 'axios';
+import dayjs from '../../DayJsCustomizer';
 
 export default {
   getUserSkillsMetrics(projectId, userId) {
@@ -32,7 +33,7 @@ export default {
   },
 
   deleteSkillEvent(projectId, skill, userId) {
-    const timestamp = window.dayjs(skill.performedOn).valueOf();
+    const timestamp = dayjs(skill.performedOn).valueOf();
     return axios.delete(`/admin/projects/${projectId}/skills/${skill.skillId}/users/${userId}/events/${timestamp}`)
       .then((res) => res.data);
   },
