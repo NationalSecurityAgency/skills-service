@@ -13,7 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-var moment = require('moment-timezone');
+const dayjs = require('dayjs');
+const utc = require('dayjs/plugin/utc');
+const timezone = require('dayjs/plugin/timezone')
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
 import PointProgressHelper from '@/userSkills/pointProgress/PointProgressHelper';
 
 describe('PointProgressHelper', () => {
@@ -55,7 +60,7 @@ describe('PointProgressHelper', () => {
     });
 
     it('do not go before max achievement date', () => {
-        const m = moment('2020-09-12 11', 'YYYY-MM-DD HH');
+        const m = dayjs('2020-09-12 11', 'YYYY-MM-DD HH');
         const pointsHistoryList = [];
         for (let i = 0; i < 120; i += 1) {
             const day = m.clone().add(i, 'day').tz('UTC').format();
@@ -89,7 +94,7 @@ describe('PointProgressHelper', () => {
     });
 
     it('find the max date by comparing points', () => {
-        const m = moment('2020-09-12 11', 'YYYY-MM-DD HH');
+        const m = dayjs('2020-09-12 11', 'YYYY-MM-DD HH');
         const pointsHistoryList = [];
         for (let i = 0; i < 120; i += 1) {
             const day = m.clone()
@@ -112,11 +117,10 @@ describe('PointProgressHelper', () => {
     });
 
     it('tolerate up to 2% difference in points', () => {
-        const m = moment.utc('2020-09-12 11', 'YYYY-MM-DD HH');
+        const m = dayjs.utc('2020-09-12 11', 'YYYY-MM-DD HH');
         const pointsHistoryList = [];
         for (let i = 0; i < 120; i += 1) {
-            const day = m.clone()
-                .add(i, 'day')
+            const day = m.add(i, 'day')
                 .tz('UTC')
                 .format();
             let points = 100;

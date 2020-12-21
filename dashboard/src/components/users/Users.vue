@@ -63,6 +63,7 @@ limitations under the License.
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import SimpleCard from '../utils/cards/SimpleCard';
   import ServerTableLoadingMask from '../utils/ServerTableLoadingMask';
+  import dayjs from '../../DayJsCustomizer';
 
   export default {
     name: 'Users',
@@ -198,7 +199,7 @@ limitations under the License.
         this.$refs.table.count = 0;
       },
       getDate(props) {
-        return window.moment(props.row.lastUpdated).format('LLL');
+        return dayjs(props.row.lastUpdated).format('LLL');
       },
       getUserDisplay(props) {
         return props.row.lastName && props.row.firstName ? `${props.row.firstName} ${props.row.lastName} (${props.row.userIdForDisplay})` : props.row.userIdForDisplay;

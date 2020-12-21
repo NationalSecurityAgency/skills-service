@@ -33,9 +33,9 @@
     "marked": "1.2.0",
     "matchmedia-polyfill": "0.3.2",
     "material-icons": "0.3.1",
-    "moment": "2.29.1",
+    "dayjs": "1.9.6",
     "node-emoji": "1.10.0",
-    "numeral": "2.0.6",
+    "number-format.js": "2.0.9",
     "sockjs-client": "1.5.0",
     "vee-validate": "3.4.2",
     "vis": "4.21.0",
@@ -68,6 +68,7 @@
     "moment-timezone": "0.5.31",
     "node-sass": "4.14.1",
     "sass-loader": "10.0.3",
+    "vue-cli-plugin-webpack-bundle-analyzer": "~2.0.0",
     "vue-template-compiler": "2.6.12"
   }
 }

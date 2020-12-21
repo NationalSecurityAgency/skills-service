@@ -106,11 +106,11 @@ limitations under the License.
 </template>
 
 <script>
-  import moment from 'moment';
   import SkillsBTable from '../../utils/table/SkillsBTable';
   import MetricsService from '../MetricsService';
   import AchievementType from './AchievementType';
   import MetricsCard from '../utils/MetricsCard';
+  import dayjs from '../../../DayJsCustomizer';
 
   export default {
     name: 'AchievementsNavigator',
@@ -235,7 +235,7 @@ limitations under the License.
           });
       },
       isToday(timestamp) {
-        return moment(timestamp)
+        return dayjs(timestamp)
           .isSame(new Date(), 'day');
       },
     },

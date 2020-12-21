@@ -42,6 +42,7 @@ limitations under the License.
   import ToastSupport from '../utils/ToastSupport';
   import UsersService from './UsersService';
   import ServerTableLoadingMask from '../utils/ServerTableLoadingMask';
+  import dayjs from '../../DayJsCustomizer';
 
   const { mapActions } = createNamespacedHelpers('users');
 
@@ -109,7 +110,7 @@ limitations under the License.
         this.$refs.table.count = 0;
       },
       getDate(row) {
-        return window.moment(row.performedOn)
+        return dayjs(row.performedOn)
           .format('LLL');
       },
       deleteSkill(row) {

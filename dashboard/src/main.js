@@ -16,19 +16,49 @@
 // The Vue build version to load with the `import` command
 // (runtime-only or standalone) has been set in webpack.base.conf with an alias.
 import Vue from 'vue';
-import BootstrapVue from 'bootstrap-vue';
+import {
+  ButtonPlugin,
+  ToastPlugin,
+  ButtonGroupPlugin,
+  TooltipPlugin,
+  ModalPlugin,
+  LayoutPlugin,
+  FormRadioPlugin,
+  AlertPlugin,
+  FormSelectPlugin,
+  SpinnerPlugin,
+  TabsPlugin,
+  FormTextareaPlugin,
+  LinkPlugin,
+  DropdownPlugin,
+  AvatarPlugin,
+  TablePlugin,
+  FormInputPlugin,
+  FormCheckboxPlugin,
+  InputGroupPlugin,
+  CardPlugin,
+  PaginationPlugin,
+  CollapsePlugin,
+  OverlayPlugin,
+  BadgePlugin,
+  PopoverPlugin,
+  FormPlugin,
+  FormGroupPlugin,
+  FormDatepickerPlugin,
+} from 'bootstrap-vue';
+
 import { ClientTable, ServerTable } from 'vue-tables-2';
 import { SkillsConfiguration, SkillsDirective, SkillsReporter } from '@skilltree/skills-client-vue';
 import {
   localize, ValidationProvider, ValidationObserver, setInteractionMode,
 } from 'vee-validate';
 import en from 'vee-validate/dist/locale/en.json';
-import VueApexCharts from 'vue-apexcharts';
 import Vuex from 'vuex';
 import InceptionConfigurer from './InceptionConfigurer';
 import 'babel-polyfill';
 import 'matchmedia-polyfill';
 import 'matchmedia-polyfill/matchMedia.addListener';
+import dayjs from './DayJsCustomizer';
 import './filters/NumberFilter';
 import './filters/TruncateFilter';
 import './filters/DateFilter';
@@ -40,13 +70,46 @@ import App from './App';
 import router from './router';
 import store from './store/store';
 
+const getApex = () => import(
+  /* webpackChunkName: "apexCharts" */
+  'vue-apexcharts'
+);
+
 Vue.use(ClientTable, {}, false, 'bootstrap4', 'default');
 Vue.use(ServerTable, {}, false, 'bootstrap4', 'default');
 Vue.component('ValidationProvider', ValidationProvider);
 Vue.component('ValidationObserver', ValidationObserver);
 Vue.use(Vuex);
-Vue.use(VueApexCharts);
-Vue.use(BootstrapVue);
+
+Vue.use(ButtonPlugin);
+Vue.use(ToastPlugin);
+Vue.use(TooltipPlugin);
+Vue.use(LayoutPlugin);
+Vue.use(FormRadioPlugin);
+Vue.use(AlertPlugin);
+Vue.use(FormSelectPlugin);
+Vue.use(ModalPlugin);
+Vue.use(SpinnerPlugin);
+Vue.use(TabsPlugin);
+Vue.use(FormTextareaPlugin);
+Vue.use(LinkPlugin);
+Vue.use(DropdownPlugin);
+Vue.use(AvatarPlugin);
+Vue.use(ButtonGroupPlugin);
+Vue.use(TablePlugin);
+Vue.use(FormInputPlugin);
+Vue.use(InputGroupPlugin);
+Vue.use(FormCheckboxPlugin);
+Vue.use(CardPlugin);
+Vue.use(PaginationPlugin);
+Vue.use(CollapsePlugin);
+Vue.use(OverlayPlugin);
+Vue.use(BadgePlugin);
+Vue.use(PopoverPlugin);
+Vue.use(FormPlugin);
+Vue.use(FormGroupPlugin);
+Vue.use(FormDatepickerPlugin);
+
 Vue.use(SkillsDirective);
 
 localize({
@@ -54,17 +117,12 @@ localize({
 });
 
 setInteractionMode('custom', () => ({ on: ['input', 'change'] }));
-
-Vue.component('apexchart', VueApexCharts);
-
 Vue.config.productionTip = false;
+window.dayjs = dayjs;
 
-window.moment = require('moment');
 window.axios = require('axios');
-
 require('./interceptors/errorHandler');
 require('./interceptors/clientVersionInterceptor');
-
 require('vue-multiselect/dist/vue-multiselect.min.css');
 
 const isActiveProjectIdChange = (to, from) => to.params.projectId !== from.params.projectId;
@@ -125,5 +183,9 @@ store.dispatch('loadConfigState').finally(() => {
       store,
     });
     window.vm = vm;
+    getApex().then((VueApexCharts) => {
+      Vue.component('apexchart', VueApexCharts.default);
+      Vue.use(VueApexCharts.default);
+    });
   });
 });

@@ -26,6 +26,7 @@ limitations under the License.
   import LoadingContainer from '../utils/LoadingContainer';
   import SkillsTable from './SkillsTable';
   import SkillsService from './SkillsService';
+  import dayjs from '../../DayJsCustomizer';
 
   const { mapActions } = createNamespacedHelpers('subjects');
 
@@ -55,7 +56,7 @@ limitations under the License.
             const loadedSkills = skills;
             this.skills = loadedSkills.map((loadedSkill) => {
               const copy = { ...loadedSkill };
-              copy.created = window.moment(loadedSkill.created);
+              copy.created = dayjs(loadedSkill.created);
               return copy;
             });
           })

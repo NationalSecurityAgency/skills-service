@@ -43,11 +43,11 @@ describe('Skills Tests', () => {
       const msg = 'Skill ID cannot exceed 50 characters.';
       const validNameButInvalidId = Array(46).fill('a').join('');
       cy.get('[data-cy=skillName]').click();
-      cy.get('[data-cy=skillName]').invoke('val', validNameButInvalidId).trigger('input');
-      cy.get('[data-cy=idError]').contains(msg).should('be.visible');
+      cy.get('[data-cy=skillName]').fill(validNameButInvalidId);
+      cy.get('[data-cy=idError]').should('be.visible');
       cy.get('[data-cy=saveSkillButton]').should('be.disabled');
       cy.get('[data-cy=skillName]').type('{backspace}');
-      cy.get('[data-cy=idError]').contains(msg).should('not.exist');
+      cy.get('[data-cy=idError]').should('not.be.visible');
       cy.get('[data-cy=saveSkillButton]').should('be.enabled');
     });
 
@@ -95,7 +95,7 @@ describe('Skills Tests', () => {
       cy.get('[data-cy=skillNameError]').contains('Skill Name cannot be less than 3 characters.').should('be.visible');
       cy.get('[data-cy=saveSkillButton]').should('be.disabled');
       const invalidName = Array(101).fill('a').join('');
-      cy.get('[data-cy=skillName]').invoke('val', invalidName).trigger('input');
+      cy.get('[data-cy=skillName]').fill(invalidName);
       cy.get('[data-cy=skillNameError]').contains('Skill Name cannot exceed 100 characters.').should('be.visible');
       cy.get('[data-cy=saveSkillButton]').should('be.disabled');
       cy.get('[data-cy=skillName]').type('{selectall}Duplicate');

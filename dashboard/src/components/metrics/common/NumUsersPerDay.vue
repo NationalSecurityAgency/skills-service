@@ -26,12 +26,12 @@ limitations under the License.
 </template>
 
 <script>
-  import moment from 'moment';
   import MetricsService from '../MetricsService';
   import numberFormatter from '@//filters/NumberFilter';
   import MetricsOverlay from '../utils/MetricsOverlay';
   import MetricsCard from '../utils/MetricsCard';
   import TimeLengthSelector from './TimeLengthSelector';
+  import dayjs from '../../../DayJsCustomizer';
 
   export default {
     name: 'NumUsersPerDay',
@@ -49,7 +49,7 @@ limitations under the License.
         distinctUsersOverTime: [],
         hasDataEnoughData: false,
         props: {
-          start: moment().clone().subtract(1, 'month').valueOf(),
+          start: dayjs().subtract(1, 'month').valueOf(),
         },
         timeSelectorOptions: [
           {

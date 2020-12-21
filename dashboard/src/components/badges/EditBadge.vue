@@ -129,12 +129,12 @@ limitations under the License.
   import Datepicker from 'vuejs-datepicker';
   import MarkdownEditor from '../utils/MarkdownEditor';
   import IconPicker from '../utils/iconPicker/IconPicker';
-  import IconManager from '../utils/iconPicker/IconManager';
   import IdInput from '../utils/inputForm/IdInput';
   import InlineHelp from '../utils/InlineHelp';
   import BadgesService from './BadgesService';
   import GlobalBadgeService from './global/GlobalBadgeService';
   import InputSanitizer from '../utils/InputSanitizer';
+  import dayjs from '../../DayJsCustomizer';
 
   export default {
     name: 'EditBadge',
@@ -143,8 +143,8 @@ limitations under the License.
       IconPicker,
       MarkdownEditor,
       Datepicker,
-      IconManager,
       IdInput,
+      'icon-manager': () => import(/* webpackChunkName: 'iconManager' */'../utils/iconPicker/IconManager'),
     },
     props: {
       badge: Object,
@@ -295,7 +295,7 @@ limitations under the License.
           validate() {
             let valid = true;
             if (self.limitTimeframe && self.badgeInternal.startDate && self.badgeInternal.endDate) {
-              valid = window.moment(self.badgeInternal.startDate).isBefore(self.badgeInternal.endDate);
+              valid = dayjs(self.badgeInternal.startDate).isBefore(dayjs(self.badgeInternal.endDate));
               if (valid) {
                 // manually clear errors in case the orig error occurred when setting startDate,
                 // but was fixed by updating endDate (or vise-versa)
@@ -313,7 +313,7 @@ limitations under the License.
             let valid = true;
             // only trigger this validation on new badge entry, not edits
             if (self.limitTimeframe && self.badgeInternal.endDate && !self.badge.badgeId) {
-              valid = window.moment(self.badgeInternal.endDate).isAfter(new Date());
+              valid = dayjs(self.badgeInternal.endDate).isAfter(dayjs());
             }
             return valid;
           },

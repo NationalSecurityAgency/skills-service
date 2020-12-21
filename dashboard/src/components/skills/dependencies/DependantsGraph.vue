@@ -42,13 +42,17 @@ limitations under the License.
 </template>
 
 <script>
-  import vis from 'vis';
   import 'vis/dist/vis.css';
   import GraphLegend from './GraphLegend';
   import GraphNodeSortMethodSelector from './GraphNodeSortMethodSelector';
   import NoContent2 from '../../utils/NoContent2';
   import GraphUtils from './GraphUtils';
   import SimpleCard from '../../utils/cards/SimpleCard';
+
+  const getVis = import(
+    /* webpackChunkName: "vis" */
+    'vis'
+  );
 
   export default {
     name: 'DependantsGraph',
@@ -62,8 +66,8 @@ limitations under the License.
     data() {
       return {
         network: null,
-        nodes: new vis.DataSet(),
-        edges: new vis.DataSet(),
+        nodes: {},
+        edges: {},
         displayOptions: {
           layout: {
             randomSeed: 419465,
@@ -100,9 +104,14 @@ limitations under the License.
       };
     },
     mounted() {
-      if (this.graph && this.graph.nodes && this.graph.nodes.length > 0) {
-        this.createGraph();
-      }
+      getVis.then((vis) => {
+        this.nodes = new vis.DataSet();
+        this.edges = new vis.DataSet();
+
+        if (this.graph && this.graph.nodes && this.graph.nodes.length > 0) {
+          this.createGraph();
+        }
+      });
     },
     beforeDestroy() {
       if (this.network) {
@@ -143,17 +152,19 @@ limitations under the License.
         this.createGraph();
       },
       createGraph() {
-        if (this.network) {
-          this.network.destroy();
-          this.network = null;
+        getVis.then((vis) => {
+          if (this.network) {
+            this.network.destroy();
+            this.network = null;
 
-          this.nodes.clear();
-          this.edges.clear();
-        }
+            this.nodes.clear();
+            this.edges.clear();
+          }
 
-        const data = this.buildData();
-        const container = document.getElementById('dependent-skills-network');
-        this.network = new vis.Network(container, data, this.displayOptions);
+          const data = this.buildData();
+          const container = document.getElementById('dependent-skills-network');
+          this.network = new vis.Network(container, data, this.displayOptions);
+        });
       },
       buildData() {
         this.graph.nodes.forEach((node) => {

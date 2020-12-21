@@ -382,6 +382,14 @@ Cypress.Commands.add('loginBySingleSignOn', (projId = 'proj1') => {
     })
 });
 
+Cypress.Commands.add('fill', {
+    prevSubject: 'element',
+}, ($subject, value) => {
+    const el = $subject[0];
+    el.value = value;
+    return cy.wrap($subject).type('t{backspace}');
+});
+
 
 Cypress.Commands.add('reportHistoryOfEvents', (projId, user, numDays=10, skipWeeDays = [5,6], availableSkillIds=['skill1', 'skill2', 'skill3']) => {
     let skipDays = [...skipWeeDays];

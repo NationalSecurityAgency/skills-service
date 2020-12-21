@@ -142,7 +142,7 @@ limitations under the License.
   // eslint-disable-next-line camelcase
   import { min_value, max_value } from 'vee-validate/dist/rules';
   import IconPicker from '../utils/iconPicker/IconPicker';
-  import IconManager from '../utils/iconPicker/IconManager';
+  // import IconManager from '../utils/iconPicker/IconManager';
   import InputSanitizer from '../utils/InputSanitizer';
 
   extend('min_value', {
@@ -158,7 +158,10 @@ limitations under the License.
 
   export default {
     name: 'NewLevel',
-    components: { IconPicker, IconManager },
+    components: {
+      IconPicker,
+      'icon-manager': () => import(/* webpackChunkName: 'iconManager' */'../utils/iconPicker/IconManager'),
+    },
     props: {
       levelAsPoints: Boolean,
       iconClass: String,
