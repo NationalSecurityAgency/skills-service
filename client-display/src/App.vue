@@ -16,7 +16,7 @@ limitations under the License.
 <template>
   <div
     id="app"
-    :style="appStyleObject">
+    :style="appStyleObject" role="main" aria-label="SkillTree Client Display">
     <new-software-version-component/>
     <router-view />
   </div>
@@ -162,5 +162,5 @@ limitations under the License.
 
 <style lang="scss">
   @import "./assets/_common.scss";
-  @import "~bootstrap/scss/bootstrap";
+  @import "./assets/custom.scss";
 </style>

@@ -40,9 +40,35 @@
 // Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
 
 import { addMatchImageSnapshotCommand } from 'cypress-image-snapshot/command';
+import "cypress-audit/commands";
 import './cliend-display-commands';
 import 'cypress-file-upload';
 import LookupUtil from "./LookupUtil.js";
+
+function terminalLog(violations) {
+    violations = violations || { length: 0 };
+    const { length } = violations;
+
+    cy.task(
+      'log',
+      `${length} accessibility violation${
+        length === 1 ? '' : 's'
+      } ${length === 1 ? 'was' : 'were'} detected`
+    )
+    if (length > 0 ) {
+        // pluck specific keys to keep the table readable
+        const violationData = violations.map(
+          ({ id, impact, description, nodes }) => ({
+              id,
+              impact,
+              description,
+              nodes: nodes.length
+          })
+        )
+
+        cy.task('table', violationData)
+    }
+}
 
 addMatchImageSnapshotCommand();
 
@@ -103,6 +129,80 @@ Cypress.Commands.add("getResetLink", () => {
         }
     });
 });
+
+Cypress.Commands.add('customLighthouse', () => {
+    const lighthouseOptions = {
+        extends: 'lighthouse:default',
+        settings: {
+            emulatedFormFactor:'desktop',
+            maxWaitForFcp: 15 * 1000,
+            maxWaitForLoad: 35 * 1000,
+        },
+    }
+    cy.lighthouse({
+        "performance": 0,
+        "accessibility": 90,
+        "best-practices": 85,
+        "seo": 0,
+        "pwa": 0
+    }, {}, lighthouseOptions);
+})
+
+Cypress.Commands.add('customPa11y', (optsObj) => {
+    // ignore heading-order for now
+    // ignore multi-select plugin elements, there are a11y improvements pending for the library
+    // ignore visualizations for now as those come from a 3rd party library
+    // ignore datepicker a11y issues until we can identify a different library
+    // ignore vue-pagination, doesn't label nav element which causes non-unique landmark regions
+
+    let opts = {
+        standard: 'Section508',
+        threshold: '2',
+        hideElements: '#SvgjsSvg1001, .multiselect__placeholder, .multiselect__input, .vis-network, .vdp-datepicker input, .VuePagination',
+        ignore: [
+            'heading-order'
+        ]
+    };
+
+    if (optsObj) {
+        opts = {...opts, ...optsObj};
+    }
+
+    cy.pa11y(opts);
+})
+
+Cypress.Commands.add('customA11y', ()=> {
+    // ignore heading-order for now
+    // ignore multi-select plugin elements, there are a11y improvements pending for the library
+    // ignore visualizations for now as those come from a 3rd party library
+    // ignore datepicker a11y issues until we can identify a different library
+    // ignore bootstrap vue datepicker for now, doesn't meet accessibility requirements (icon creates button with no text and can't configure an aria-label)
+    // have validated .accessible and .skillsBTableTotalRows with numerous a11y browser plugins, not sure why cypress axe is complaining about it
+    //      but color contrast for those classes has been verified using 3rd party contrast tools
+    // we can't really do anything about the apex chart a11y issues
+    cy.checkA11y({
+        exclude:[
+            ['#SvgjsSvg1001'],
+            ['.multiselect__placeholder'],
+            ['.multiselect__input'],
+            ['.vis-network'],
+            ['.vdp-datepicker'],
+            ['.VuePagination'],
+            ['.b-form-datepicker'],
+            ['.thead-light div'],
+            ['.skillsBTableTotalRows'],
+            ['.rank-detail-card'],
+            ['.apex-chart-container'],
+        ]}, {
+            rules:{
+                "landmark-no-duplicate-banner": {enabled:false},
+                'landmark-no-duplicate-contentinfo': {enabled:false},
+                'heading-order': {enabled:false},
+                'landmark-unique': {enabled:false}
+            }
+    }, terminalLog);
+});
+
 
 Cypress.Commands.add("logout", () => {
     cy.request('POST', '/logout');
@@ -176,6 +276,28 @@ Cypress.Commands.add('clearDb', () => {
 
 Cypress.Commands.add('clickNav', (navName) => {
     cy.get(`[data-cy=nav-${navName}]`).click()
+});
+
+Cypress.Commands.add('violationLoggingFunction', () => {
+    return (violations) => {
+        cy.task(
+          'log',
+          `${violations.length} accessibility violation${
+            violations.length === 1 ? '' : 's'
+          } ${violations.length === 1 ? 'was' : 'were'} detected`
+        )
+        // pluck specific keys to keep the table readable
+        const violationData = violations.map(
+          ({ id, impact, description, nodes }) => ({
+              id,
+              impact,
+              description,
+              nodes: nodes.length
+          })
+        )
+
+        cy.task('table', violationData)
+    };
 });
 
 

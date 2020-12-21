@@ -37,7 +37,7 @@ limitations under the License.
         </div>
       </div>
     </div>
-    <div id="dependent-skills-network" style="height: 500px"></div>
+    <div id="dependent-skills-network" style="height: 500px" aria-label="skills dependency graph"></div>
   </simple-card>
 </template>
 

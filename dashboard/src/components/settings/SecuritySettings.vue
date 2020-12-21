@@ -20,14 +20,14 @@ limitations under the License.
     <div class="card">
       <div class="card-header">Root Users Management</div>
       <div class="card-body">
-        <role-manager data-cy="rootrm" :role="root.role" :user-type="root.userType" :role-description="root.roleDescription" />
+        <role-manager id="add-root-user" data-cy="rootrm" :role="root.role" :user-type="root.userType" :role-description="root.roleDescription" />
       </div>
     </div>
 
     <div class="card mt-2">
       <div class="card-header">Supervisor Users Management</div>
       <div class="card-body">
-        <role-manager data-cy="supervisorrm" :role="supervisor.role"
+        <role-manager id="add-supervisor-user" data-cy="supervisorrm" :role="supervisor.role"
                       :user-type="supervisor.userType"
                       :role-description="supervisor.roleDescription"
                       @role-added="handleRoleAdded"

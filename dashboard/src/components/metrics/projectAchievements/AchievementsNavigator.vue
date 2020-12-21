@@ -17,18 +17,20 @@ limitations under the License.
   <metrics-card title="Achievements" :no-padding="true" data-cy="achievementsNavigator">
       <div class="row p-3">
         <div class="col-md border-right">
-          <b-form-group label="User Name Filter:" label-for="input-1" label-class="text-muted">
+          <b-form-group label="User Name Filter:" label-for="user-name-filter" label-class="text-muted">
             <b-form-input id="user-name-filter" v-model="usernameFilter" v-on:keydown.enter="reloadTable" data-cy="achievementsNavigator-usernameInput"/>
           </b-form-group>
         </div>
         <div class="col-6 col-md border-right">
-          <b-form-group label="From Date:" label-for="input-1" label-class="text-muted">
-            <b-form-datepicker id="from-date-filter" v-model="fromDayFilter" class="mb-2" data-cy="achievementsNavigator-fromDateInput"></b-form-datepicker>
+          <b-form-group label="From Date:" label-for="from-date-filter" label-class="text-muted">
+            <b-form-datepicker aria-label="from date filter" id="from-date-filter" v-model="fromDayFilter" class="mb-2" data-cy="achievementsNavigator-fromDateInput">
+            </b-form-datepicker>
           </b-form-group>
         </div>
         <div class="col-6 col-md">
-          <b-form-group label="To Date:" label-for="input-1" label-class="text-muted">
-            <b-form-datepicker id="to-date-filter" v-model="toDayFilter" class="mb-2" data-cy="achievementsNavigator-toDateInput"></b-form-datepicker>
+          <b-form-group label="To Date:" label-for="to-date-filter" label-class="text-muted">
+            <b-form-datepicker aria-label="to date filter" id="to-date-filter" v-model="toDayFilter" class="mb-2" data-cy="achievementsNavigator-toDateInput">
+            </b-form-datepicker>
           </b-form-group>
         </div>
       </div>
@@ -50,15 +52,15 @@ limitations under the License.
           </b-form-group>
         </div>
         <div class="col-12 col-md-6 col-xl">
-          <b-form-group label="Name (Subject, Skill and Badge Only):" label-for="input-3" label-class="text-muted">
+          <b-form-group label="Name (Subject, Skill and Badge Only):" label-for="name-filter" label-class="text-muted">
             <b-form-input id="name-filter" v-model="nameFilter" v-on:keydown.enter="reloadTable" data-cy="achievementsNavigator-nameInput"/>
           </b-form-group>
         </div>
       </div>
       <div class="row pl-3 mb-2">
         <div class="col">
-          <b-button variant="outline-info" @click="reloadTable" data-cy="achievementsNavigator-filterBtn"><i class="fa fa-filter"/> Filter</b-button>
-          <b-button variant="outline-info" @click="reset" class="ml-1" data-cy="achievementsNavigator-resetBtn"><i class="fa fa-times"/> Reset</b-button>
+          <b-button variant="outline-primary" @click="reloadTable" data-cy="achievementsNavigator-filterBtn"><i class="fa fa-filter"/> Filter</b-button>
+          <b-button variant="outline-primary" @click="reset" class="ml-1" data-cy="achievementsNavigator-resetBtn"><i class="fa fa-times"/> Reset</b-button>
         </div>
       </div>
 
@@ -251,7 +253,7 @@ limitations under the License.
 </script>
 
 <style lang="scss" scoped>
-@import "node_modules/bootstrap/scss/bootstrap";
+@import "../../../assets/custom";
 
 .customPagination /deep/ button {
   color: $info !important;

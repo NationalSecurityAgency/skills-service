@@ -26,7 +26,7 @@ limitations under the License.
         </div>
 
         <div slot="delete" slot-scope="props">
-          <b-button @click="deleteSkill(props.row)" variant="outline-primary"><i class="fas fa-trash"/></b-button>
+          <b-button @click="deleteSkill(props.row)" variant="outline-primary" :aria-label="`remove skill ${props.skillId} from user`"><i class="fas fa-trash" aria-hidden="true"/></b-button>
         </div>
       </v-server-table>
     </simple-card>

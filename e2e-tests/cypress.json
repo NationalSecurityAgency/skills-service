@@ -6,5 +6,12 @@
   "retries": {
     "runMode": 2,
     "openMode": 0
+  },
+  "lighthouse": {
+    "performance": 85,
+    "accessibility": 90,
+    "best-practices": 85,
+    "seo": 50,
+    "pwa": 50
   }
 }

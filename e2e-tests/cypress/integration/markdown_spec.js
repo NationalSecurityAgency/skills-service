@@ -89,6 +89,7 @@ describe('Markdown Tests', () => {
     });
 
     it('on skills pages', () => {
+        cy.server();
         const markdown = "# Title1\n## Title2\n### Title 3\n#### Title 4\n##### Title 5\nTitle 6\n\n" +
             "---\n" +
             "# Emphasis\n" +
@@ -150,16 +151,19 @@ describe('Markdown Tests', () => {
             numPerformToCompletion: '5',
             description: markdown
         });
+        cy.route('GET', '/api/projects/Inception/level').as('inceptionLevel');
         cy.visit('/projects/proj1/subjects/subj1/skills/skill1');
 
         cy.contains('Description');
-        cy.contains('Level 0');
+        cy.wait('@inceptionLevel');
+        cy.contains('Level');
         cy.contains('Emojis')
         cy.contains('⭐ ⭐ ⭐ ⭐');
         cy.matchImageSnapshot('Markdown-SkillsPage-Overview', snapshotOptions);
 
         cy.visit('/projects/proj1/subjects/subj1');
-        cy.contains('Level 0');
+        cy.wait('@inceptionLevel');
+        cy.contains('Level');
         const selectorSkillsRowToggle = 'table .VueTables__child-row-toggler';
         cy.get(selectorSkillsRowToggle).click();
         cy.contains('Description');

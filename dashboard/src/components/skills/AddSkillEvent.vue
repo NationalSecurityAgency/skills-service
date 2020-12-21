@@ -29,12 +29,12 @@ limitations under the License.
           <div class="col-auto">
             <ValidationProvider name="Event Date" rules="required">
               <datepicker input-class="border-0" wrapper-class="form-control" v-model="dateAdded" name="Event Date"
-                          :use-utc="true" :disabled-dates="datePickerState.disabledDates" aria-required="true"/>
+                          :use-utc="true" :disabled-dates="datePickerState.disabledDates" aria-required="true" aria-label="event date"/>
             </ValidationProvider>
           </div>
           <div class="col-auto">
             <div v-b-tooltip.hover :title="minPointsTooltip">
-              <b-button variant="outline-primary" @click="addSkill" :disabled="invalid || disable" v-skills="'ManuallyAddSkillEvent'" data-cy="addSkillEventButton">
+              <b-button variant="outline-hc" @click="addSkill" :disabled="invalid || disable" v-skills="'ManuallyAddSkillEvent'" data-cy="addSkillEventButton">
                 Add <i v-if="projectTotalPoints >= minimumPoints" :class="[isSaving ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-arrow-circle-right']"></i>
                 <i v-else class="icon-warning fa fa-exclamation-circle text-warning"></i>
               </b-button>
@@ -46,7 +46,7 @@ limitations under the License.
       <div class="row mt-2" v-for="(user) in reversedUsersAdded" v-bind:key="user.key">
         <div class="col">
           <span :class="[user.success ? 'text-success' : 'text-danger']" style="font-weight: bolder">
-            <i :class="[user.success ? 'fa fa-check' : 'fa fa-info-circle']"></i>
+            <i :class="[user.success ? 'fa fa-check' : 'fa fa-info-circle']" aria-hidden="true"/>
             <span v-if="user.success">
               Added points for
             </span>

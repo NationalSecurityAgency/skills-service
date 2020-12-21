@@ -19,7 +19,7 @@ limitations under the License.
     Search All Skills
     <b-tooltip label="By default only skills under current subject will be considered."
                position="is-left" animanted="true" type="is-light">
-      <span><i class="fas fa-question-circle"></i></span>
+      <span aria-hidden="true"><i class="fas fa-question-circle"/></span>
     </b-tooltip>
   </label>
 </template>

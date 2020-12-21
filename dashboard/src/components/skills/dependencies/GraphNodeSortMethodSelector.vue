@@ -16,7 +16,7 @@ limitations under the License.
 <template>
   <div>
       <b-form-radio-group id="radio-group-2" v-model="sortMethod"
-                          name="graph-sort-method" button-variant="outline-info" stacked buttons>
+                          name="graph-sort-method" button-variant="outline-hc" stacked buttons>
         <b-form-radio value="directed" v-b-tooltip.hover="msg.directed"><span><i class="fas fa-vector-square"></i> Directed</span></b-form-radio>
         <b-form-radio value="hubsize" v-b-tooltip.hover="msg.hubsize"><span><i class="fas fa-bezier-curve"></i> Hubsize</span></b-form-radio>
       </b-form-radio-group>

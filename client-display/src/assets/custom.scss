@@ -20,8 +20,10 @@ $theme-colors: (
         "warning": #ffc42b,
         "header": #f8e9cb,
         "success": #007c49,
-        "hc": #146c75,
+        "hc": #264653ff,
         "accessible": darkslategray,
+        "hc-info": #00a4e8,
+        "danger": #290000,
         //"success": #54b986,
 );
 // secondary: #6d8d9c
@@ -29,90 +31,10 @@ $theme-colors: (
 $text-muted: #6b6b6b;
 
 // Bootstrap and its default variables
-@import '../../node_modules/bootstrap/scss/bootstrap';
-// BootstrapVue and its default variables
-@import '../../node_modules/bootstrap-vue/src/index.scss';
-
+@import "~bootstrap/scss/bootstrap";
 
 .text-gray-700 {
   color: $gray-700
-}
-
-// domain specific concerts in order to keep color assignment consistent
-.skills-color-projects {
-  color: #f4a261ff;
-}
-
-.skills-color-subjects {
-  color: #2a9d8fff;
-}
-
-.skills-color-badges {
-  color: #e76f51fc;
-}
-
-.skills-color-skills {
-  color: #3cbcad;
-}
-
-.skills-color-levels {
-  color: #7f6c7f;
-}
-
-.skills-color-metrics {
-  color: #764e76;
-}
-
-.skills-color-points {
-  color: #00c3ff;
-}
-
-.skills-color-users {
-  color: #39b27a;
-}
-
-.skills-color-access {
-  color: $yellow;
-}
-
-.skills-color-settings {
-  color: $secondary;
-}
-
-.skills-color-dependencies {
-  color: $pink;
-}
-
-.skills-color-crossProjects {
-  color: $green;
-}
-
-.skills-color-profile {
-  color: $success;
-}
-
-.skills-color-security {
-  color: $yellow;
-}
-
-.skills-color-email {
-  color: $blue;
-}
-
-.skills-color-system {
-  color: $secondary;
-}
-
-.skills-color-overview {
-  color: $success;
-}
-
-.skills-color-events {
-  color: #8f7158;
-}
-
-.skills-color-achievements {
-  color: #8f7158;
 }
 
 .sr-only {
