@@ -41,7 +41,7 @@ limitations under the License.
                 <b-form-select v-if="!data.item.loadingLevels"
                                v-model="data.item.minLevel"
                                :options="data.item.availableLevels"
-                               data-cy="minLevelSelector"></b-form-select>
+                               data-cy="minLevelSelector" aria-label="minimum level select"></b-form-select>
               </b-col>
               <b-col cols="auto">
                 <b-button variant="outline-info"

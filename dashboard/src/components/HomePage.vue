@@ -15,8 +15,8 @@ limitations under the License.
 */
 <template>
   <div>
-    <h2 class="bg-white m-0" style="height: 1rem;"></h2>
-    <navigation :nav-items="navItems" data-cy="navigationmenu">
+    <div class="bg-white m-0" style="height: 1rem;width:100%;"></div>
+    <navigation :nav-items="navItems" data-cy="navigationmenu" role="navigation">
     </navigation>
   </div>
 </template>

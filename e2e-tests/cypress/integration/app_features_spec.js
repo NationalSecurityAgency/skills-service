@@ -34,6 +34,10 @@ describe('App Features Tests', () => {
             },
         }).as('getSubjects');
         cy.visit('/');
+       /* cy.injectAxe();
+        cy.violationLoggingFunction().then((loggingFunc) => {
+            cy.checkA11y(null, null, loggingFunc);
+        });*/
         cy.get('[data-cy=subPageHeader]').contains('Projects');
         cy.contains('New Software Version is Available').should('not.exist')
         cy.get('[data-cy=projectCard]').last().contains('Manage').click()
@@ -58,6 +62,10 @@ describe('App Features Tests', () => {
         cy.get('[data-cy=subPageHeader]').contains('Projects');
         cy.get('[data-cy=projectCard]').last().contains('Manage').click()
         cy.wait('@getSubjects')
+        /*cy.injectAxe();
+        cy.violationLoggingFunction().then((loggingFunc) => {
+            cy.checkA11y(null, null, loggingFunc);
+        });*/
 
         cy.contains('New Software Version is Available').should('not.exist')
     });
@@ -72,9 +80,13 @@ describe('App Features Tests', () => {
         }).as('loadSubject');
 
         cy.visit('/projects/proj1/subjects/subj1');
+        /*cy.injectAxe();*/
         cy.wait('@loadSubject');
         cy.url().should('include', '/not-authorized');
         cy.contains('User Not Authorized').should('be.visible')
+        /*cy.violationLoggingFunction().then((loggingFunc) => {
+            cy.checkA11y(null, null, loggingFunc);
+        });*/
     });
 
 })

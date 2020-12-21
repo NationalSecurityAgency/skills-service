@@ -21,6 +21,7 @@
     "cy:run:oauth": "TZ=UTC npm run licenseCheck && cypress run --env oauthMode=true",
     "cy:run:dev": "TZ=UTC cypress run --config baseUrl=http://localhost:8082",
     "cy:run:dev:metrics": "TZ=UTC cypress run --config baseUrl=http://localhost:8082 --spec cypress/integration/metrics/*.js",
+    "cy:run:dev:accessibility": "TZ=UTC cypress run --config baseUrl=http://localhost:8082 --spec cypress/integration/accessibility*.js",
     "cy:run:dev:postgres": "TZ=UTC cypress run --config baseUrl=http://localhost:8082 --env db=postgres",
     "cy:run:dev:oauth": "TZ=UTC cypress run --config baseUrl=http://localhost:8082 --env oauthMode=true",
     "cy:verify": "cypress verify",
@@ -34,7 +35,7 @@
     "backend:start:redis:ci": "mkdir -p ./logs && npm run backend:start:redis > ./logs/skills-service.out &",
     "backend:start:oauth:ci": "mkdir -p ./logs && npm run backend:start:oauth > ./logs/skills-service.out &",
     "backend:start:rabbitmq:ci": "mkdir -p ./logs && npm run backend:start:rabbitmq > ./logs/skills-service.out &",
-    "backend:waitToStart": "npx wait-on -t 80000 http://localhost:8080",
+    "backend:waitToStart": "npx wait-on -t 100000 http://localhost:8080",
     "backend:resetDb": "java -cp ./cypress/db/h2-1.4.200.jar org.h2.tools.RunScript -url jdbc:h2:tcp://localhost:9090/mem:skills -user sa -script ./cypress/db/reset.sql",
     "backend:clearDb": "java -cp ./cypress/db/h2-1.4.200.jar org.h2.tools.RunScript -url jdbc:h2:tcp://localhost:9090/mem:skills -user sa -script ./cypress/db/clear.sql",
     "backend:resetDb:postgres": "export PGPASSWORD=skillsPassword && psql -U postgres -h localhost -d skills -f ./cypress/db/reset.sql",
@@ -72,7 +73,10 @@
     "license-checker": "25.0.1",
     "moment": "2.29.1",
     "moment-timezone": "0.5.31",
-    "wait-on": "5.2.0"
+    "wait-on": "5.2.0",
+    "cypress-audit": "^0.2.3",
+    "cypress-axe": "^0.10.0",
+    "object-scan": "13.6.7"
   },
   "dependencies": {}
 }

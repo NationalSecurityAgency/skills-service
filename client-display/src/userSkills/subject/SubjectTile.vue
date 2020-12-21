@@ -98,7 +98,7 @@ limitations under the License.
     },
     data() {
       return {
-        ribbonColor: ['#4472ba', '#c74a41', '#59ad52', '#f7a35c', '#ba89b6', '#32b697'][index % 6],
+        ribbonColor: ['#4472ba', '#c74a41', '#44843E', '#BE5A09', '#A15E9A', '#23806A'][index % 6],
       };
     },
     computed: {

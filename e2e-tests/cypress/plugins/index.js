@@ -26,6 +26,10 @@
 // This function is called when a project is opened or re-opened (e.g. due to
 // the project's config changing)
 
+const { lighthouse, pa11y, prepareAudit } = require("cypress-audit");
+
+const objectScan = require('object-scan');
+
 const {
     addMatchImageSnapshotPlugin,
 } = require('cypress-image-snapshot/plugin');
@@ -34,4 +38,37 @@ module.exports = (on, config) => {
   // `on` is used to hook into various events Cypress emits
   // `config` is the resolved Cypress config
     addMatchImageSnapshotPlugin(on, config);
-}
+
+    on("before:browser:launch", (browser = {}, launchOptions) => {
+        prepareAudit(launchOptions);
+    });
+
+    on("task", {
+        lighthouse: lighthouse((lighthouseReport) => {
+            if (lighthouseReport && lighthouseReport.artifacts
+              && lighthouseReport.artifacts.Accessibility
+              && lighthouseReport.artifacts.Accessibility.violations) {
+                console.log('----------------------Lighthouse Violations----------------------');
+                console.table(lighthouseReport.artifacts.Accessibility.violations, ['id', 'impact', 'description', 'help',]);
+                lighthouseReport.artifacts.Accessibility.violations.forEach((viol) => {
+                    if (viol.nodes) {
+                        console.table(viol.nodes, ['impact', 'html', 'target', 'failureSummary', 'selector']);
+                    }
+                });
+            }
+
+            return null;
+        }),
+        pa11y: pa11y(),
+        log(message) {
+            console.log(message)
+
+            return null;
+        },
+        table(message) {
+            console.table(message)
+
+            return null;
+        }
+    });
+};

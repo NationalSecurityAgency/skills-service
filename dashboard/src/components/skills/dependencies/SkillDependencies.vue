@@ -23,7 +23,7 @@ limitations under the License.
           <template slot="dropdown-item" slot-scope="{ props }">
             <div class="media">
               <div class="d-inline-block mt-1 mr-3">
-                <i v-if="props.option.otherProjectId" class="fas fa-w-16 fa-handshake text-primary"></i>
+                <i v-if="props.option.otherProjectId" class="fas fa-w-16 fa-handshake text-hc"></i>
                 <i v-else class="fas fa-w-16 fa-list-alt text-info"></i>
               </div>
               <div class="media-body">
@@ -47,7 +47,7 @@ limitations under the License.
           </template>
 
           <template slot="selected-item" slot-scope="{ props }">
-            <span class="mt-2 mr-2 border-primary rounded px-1" style="padding-top: 2px; padding-bottom: 2px;"
+            <span class="mt-2 mr-2 border-hc rounded px-1" style="padding-top: 2px; padding-bottom: 2px;"
                   v-bind:style="{'background-color': props.option.isFromAnotherProject ? '#ffb87f' : 'lightblue'}">
               <span class="skills-handle-overflow" style="width: 15rem;"
                     :title="props.option.isFromAnotherProject ? props.option.projectId + ' : ' + props.option.name : props.option.name">
@@ -70,7 +70,7 @@ limitations under the License.
         <simple-skills-table :skills="skills" v-on:skill-removed="deleteSkill">
             <span slot="name-cell" slot-scope="row">
               <i v-if="row.props.isFromAnotherProject" class="fas fa-w-16 fa-handshake text-primary mr-1"></i>
-              <i v-else class="fas fa-w-16 fa-list-alt text-info mr-1"></i>
+              <i v-else class="fas fa-w-16 fa-list-alt text-hc mr-1"></i>
               {{ row.props.name }}
                <div v-if="row.props.isFromAnotherProject" class="">
                 Cross Project Dependency from project [{{row.props.projectId}}]

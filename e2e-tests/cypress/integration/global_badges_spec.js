@@ -548,4 +548,80 @@ describe('Global Badges Tests', () => {
         cy.get('[data-cy=goLive]').should('not.exist');
     });
 
+    it('new badge button should retain focus after dialog is closed', () => {
+        cy.route('GET', `/supervisor/badges`).as('getGlobalBadges');
+
+        cy.visit('/');
+        cy.clickNav('Badges');
+        cy.wait('@getGlobalBadges');
+
+        cy.get('[aria-label="new global badge"]').click();
+        cy.get('[data-cy=closeBadgeButton]').click();
+        cy.get('[aria-label="new global badge"]').should('have.focus');
+
+        cy.get('[aria-label="new global badge"]').click();
+        cy.get('[data-cy=badgeName]').type('{esc}');
+        cy.get('[aria-label="new global badge"]').should('have.focus');
+
+        cy.get('[aria-label="new global badge"]').click();
+        cy.get('[aria-label=Close]').filter('.text-light').click();
+        cy.get('[aria-label="new global badge"]').should('have.focus');
+
+        cy.get('[aria-label="new global badge"]').click();
+        cy.get('[data-cy=badgeName]').type('test 123');
+        cy.get('[data-cy=saveBadgeButton]').click();
+        cy.get('[aria-label="new global badge"]').should('have.focus');
+    });
+
+    it('edit badge button should retain focus after dialog is closed', () => {
+        cy.request('POST', '/supervisor/badges/badge1', {
+            projectId: 'proj1',
+            badgeId: 'badge1',
+            name: "Badge 1"
+        });
+
+        cy.request('POST', '/supervisor/badges/badge2', {
+            projectId: 'proj1',
+            badgeId: 'badge2',
+            name: "Badge 2"
+        });
+
+        cy.route('GET', `/supervisor/badges`).as('getGlobalBadges');
+
+        cy.visit('/');
+        cy.clickNav('Badges');
+        cy.wait('@getGlobalBadges');
+
+        cy.get('div.badge-settings').eq(0).click();
+        cy.get('[data-cy=editMenuEditBtn]').eq(0).click();
+        cy.get('[data-cy=closeBadgeButton]').click();
+        cy.get('div.badge-settings').eq(0).children().first().should('have.focus');
+
+        cy.get('div.badge-settings').eq(0).click();
+        cy.get('[data-cy=editMenuEditBtn]').eq(0).click();
+        cy.get('[aria-label=Close]').filter('.text-light').click();
+        cy.get('div.badge-settings').eq(0).children().first().should('have.focus');
+
+        cy.get('div.badge-settings').eq(0).click();
+        cy.get('[data-cy=editMenuEditBtn]').eq(0).click();
+        cy.get('[data-cy=badgeName]').type('{esc}');
+        cy.get('div.badge-settings').eq(0).children().first().should('have.focus');
+
+
+        cy.get('div.badge-settings').eq(1).click();
+        cy.get('[data-cy=editMenuEditBtn]').eq(1).click();
+        cy.get('[data-cy=closeBadgeButton]').click();
+        cy.get('div.badge-settings').eq(1).children().first().should('have.focus');
+
+        cy.get('div.badge-settings').eq(1).click();
+        cy.get('[data-cy=editMenuEditBtn]').eq(1).click();
+        cy.get('[aria-label=Close]').filter('.text-light').click();
+        cy.get('div.badge-settings').eq(1).children().first().should('have.focus');
+
+        cy.get('div.badge-settings').eq(1).click();
+        cy.get('[data-cy=editMenuEditBtn]').eq(1).click();
+        cy.get('[data-cy=badgeName]').type('{esc}');
+        cy.get('div.badge-settings').eq(1).children().first().should('have.focus');
+    });
+
 });

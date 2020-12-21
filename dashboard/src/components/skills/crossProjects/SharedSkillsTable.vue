@@ -18,7 +18,7 @@ limitations under the License.
     <v-client-table :data="sharedSkills" :columns="columns" :options="options">
       <div slot="edit" slot-scope="props">
         <div v-if="isDeleteEnabled">
-          <b-button variant="outline-primary" @click="onDeleteEvent(props.row)">
+          <b-button variant="outline-hc" @click="onDeleteEvent(props.row)">
             <i class="fas fa-trash"/>
           </b-button>
         </div>

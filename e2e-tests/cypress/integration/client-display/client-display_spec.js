@@ -124,31 +124,41 @@ describe('Client Display Tests', () => {
     });
 
     it('visit home page', () => {
+        cy.server();
         cy.request('POST', '/admin/projects/proj1/badges/badge1', {
             projectId: 'proj1',
             badgeId: 'badge1',
             name: 'Badge 1'
         });
+        cy.route('GET', '/api/projects/proj1/pointHistory').as('pointHistoryChart');
         cy.cdVisit('/');
+        cy.injectAxe();
         cy.contains('Overall Points');
 
         // some basic default theme validation
         cy.get("#app").should('have.css', 'background-color')
             .and('equal', 'rgba(0, 0, 0, 0)');
+        cy.wait('@pointHistoryChart');
+        cy.customA11y();
     });
 
     it('ability to expand skill details from subject page', () => {
         cy.cdVisit('/')
+        cy.injectAxe();
         cy.cdClickSubj(0);
         cy.get('[data-cy=toggleSkillDetails]').click()
         cy.contains('Lorem ipsum dolor sit amet')
         // 1 skill is locked
         cy.contains('Skill has 1 direct dependent(s).')
-
+        cy.customA11y();
     });
 
     it('back button', () => {
+        cy.server();
+        cy.route('GET', '/api/projects/proj1/pointHistory').as('pointHistoryChart');
+
         cy.cdVisit('/');
+        cy.injectAxe();
         cy.contains('User Skills');
         cy.get('[data-cy=back]').should('not.exist');
 
@@ -165,6 +175,9 @@ describe('Client Display Tests', () => {
         cy.cdClickSkill(0);
         cy.cdBack('Subject 1');
         cy.cdBack();
+        cy.wait('@pointHistoryChart');
+        cy.wait(500); //we have to wait for the chart to load before doing accessibility tests
+        cy.customA11y();
     });
 
     it('clearly represent navigable components', () => {
@@ -212,6 +225,7 @@ describe('Client Display Tests', () => {
             name: 'Badge 1'
         });
         cy.cdVisit('/?isSummaryOnly=true');
+        cy.injectAxe();
 
         // cy.get('[data-cy=myRank]').contains("1")
         cy.get('[data-cy=myBadges]').contains("0 Badges")
@@ -229,6 +243,7 @@ describe('Client Display Tests', () => {
 
         // summaries should not be displayed at all
         cy.get('[data-cy=subjectTile]').should('not.exist');
+        cy.customA11y();
     });
 
     it('display achieved date on skill overview page', () => {

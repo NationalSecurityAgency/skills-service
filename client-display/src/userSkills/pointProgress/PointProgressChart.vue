@@ -21,14 +21,14 @@ limitations under the License.
           <div class="col-5 text-center border rounded bg-light p-2">
             <vue-simple-spinner v-if="loading.inProgress" line-bg-color="#333" line-fg-color="#17a2b8" size="small" message="Loading Chart ..."/>
             <div v-else>
-              <div style="font-size: 1rem;" class="text-uppercase"><i class="fa fa-lock"></i> Locked</div>
-              <small class="text-black-50">*** <b>2 days</b> of usage will unlock this chart! ***</small>
+              <div style="font-size: 1rem;" class="text-uppercase text-danger"><i class="fa fa-lock"></i> Locked</div>
+              <small class="text-body">*** <b>2 days</b> of usage will unlock this chart! ***</small>
             </div>
           </div>
         </div>
     </div>
     <div class="card-header">
-      <h6 class="card-title mb-0 float-left">Point History</h6>
+      <h3 class="h6 card-title mb-0 float-left">Point History</h3>
     </div>
     <div class="card-body m-0 mr-1 p-0 apex-chart-container">
       <apexchart ref="ptChart" id="points-chart" v-if="!loading.inProgress && hasData" :options="chartOptions"

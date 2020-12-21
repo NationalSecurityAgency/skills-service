@@ -16,7 +16,7 @@ limitations under the License.
 <template>
     <div class="card">
         <div class="card-header">
-            <h6 class="card-title mb-0 float-left">Dependencies</h6>
+            <h5 class="h6 card-title mb-0 float-left">Dependencies</h5>
         </div>
         <div class="card-body">
             <div class="row legend-row">

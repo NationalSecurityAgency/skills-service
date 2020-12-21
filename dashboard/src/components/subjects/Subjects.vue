@@ -15,7 +15,9 @@ limitations under the License.
 */
 <template>
   <div>
-    <sub-page-header title="Subjects" action="Subject" @add-action="openNewSubjectModal" :disabled="addSubjectDisabled" :disabled-msg="addSubjectsDisabledMsg"/>
+    <sub-page-header ref="subPageHeader" title="Subjects" action="Subject" @add-action="openNewSubjectModal"
+                     :disabled="addSubjectDisabled" :disabled-msg="addSubjectsDisabledMsg"
+                     :aria-label="'new subject'"/>
     <loading-container v-bind:is-loading="isLoading">
       <div v-if="subjects && subjects.length" class="row justify-content-center">
         <div v-for="(subject) of subjects" :key="subject.subjectId" :id="subject.subjectId" class="col-lg-4 mb-3"
@@ -29,7 +31,9 @@ limitations under the License.
                    title="No Subjects Yet" message="Subjects are a way to group and organize skill definitions within a gameified training profile."></no-content2>
     </loading-container>
 
-    <edit-subject v-if="displayNewSubjectModal" v-model="displayNewSubjectModal" :subject="emptyNewSubject" @subject-saved="subjectAdded"/>
+    <edit-subject v-if="displayNewSubjectModal" v-model="displayNewSubjectModal"
+                  :subject="emptyNewSubject" @subject-saved="subjectAdded"
+                  @hidden="handleHide"/>
   </div>
 </template>
 
@@ -107,6 +111,7 @@ limitations under the License.
             this.loadProjectDetailsState({ projectId: this.projectId });
             this.$emit('subjects-changed', subject.subjectId);
             SkillsReporter.reportSkill('CreateSubject');
+            this.handleFocus();
           });
       },
       moveSubjectDown(subject) {
@@ -121,6 +126,16 @@ limitations under the License.
           .then(() => {
             this.loadSubjects();
           });
+      },
+      handleHide(e) {
+        if (!e || !e.update) {
+          this.handleFocus();
+        }
+      },
+      handleFocus() {
+        this.$nextTick(() => {
+          this.$refs.subPageHeader.$refs.actionButton.focus();
+        });
       },
     },
     computed: {
@@ -147,5 +162,9 @@ limitations under the License.
 </script>
 
 <style scoped>
+
+  .no-subjects {
+    color: #3f5971;
+  }
 
 </style>

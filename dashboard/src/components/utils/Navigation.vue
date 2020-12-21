@@ -20,19 +20,20 @@ limitations under the License.
         <div class="mb-3 ml-3 text-secondary">
           <b-row no-gutters>
             <b-col v-if="smallScreenMode || !collapsed">
-              <span class="h6 text-uppercase mr-2" v-if="!collapsed || smallScreenMode">Navigation</span>
+              <span class="h6 text-uppercase mr-2 nav-title" v-if="!collapsed || smallScreenMode">Navigation</span>
             </b-col>
             <b-col :class="{ 'text-right' : !collapsed }">
               <div v-if="!smallScreenMode" :class="{ 'pr-2 pl-3' : !collapsed }">
                 <b-button v-if="!smallScreenMode" size="sm" variant="outline-secondary" @click="flipCollapsed"
-                          class="py-0 text-primary" style="border-color: #d8d8d9;" data-cy="navCollapseOrExpand" v-b-tooltip.hover :title="collapsed ? 'Expand Navigation' : 'Collapse Navigation'">
+                          class="py-0 text-primary" style="border-color: #d8d8d9;" data-cy="navCollapseOrExpand" v-b-tooltip.hover
+                          :title="collapsed ? 'Expand Navigation' : 'Collapse Navigation'" aria-label="navigation toggle">
                   <i v-if="!collapsed" class="fas fa-compress-alt"/><i v-else class="fas fa-expand-alt"/>
                 </b-button>
               </div>
               <div v-if="smallScreenMode" class="pr-2">
                 <b-button v-b-toggle.menu-collapse-control variant="outline-secondary" size="sm" class="mb-1"
                           data-cy="navSmallScreenExpandMenu">
-                  <i class="fas fa-bars"/>
+                  <i class="fas fa-bars" aria-hidden="true"/><span class="sr-only">navigation menu toggle</span>
                 </b-button>
               </div>
             </b-col>
@@ -42,17 +43,25 @@ limitations under the License.
         <!-- bootstrap didn't handle vertical menus well so rolling out our own-->
         <b-collapse id="menu-collapse-control" :visible="!smallScreenMode">
           <ul class="p-0" style="list-style: none;">
-            <router-link :to="{ name: navItem.page }" tag="li" class="mb-1 p-2 text-primary" v-for="(navItem) of navItems" :key="navItem.name"
+            <li class="mb-1 p-2 text-primary"
+                v-for="(navItem) of navItems"
+                :key="navItem.name"
                 :data-cy="`nav-${navItem.name}`"
-                @click.native="navigate(`${navItem.name}`)"
                 v-b-tooltip="{ title: navItem.name, placement: 'right', variant: 'primary', disabled: !collapsed }"
-                :class="{'bg-primary': menuSelections.get(navItem.name), 'text-light': menuSelections.get(navItem.name), 'select-cursor': !menuSelections.get(navItem.name), 'disabled': navItem.isDisabled}">
-              <div class="text-truncate ml-3" :class="{'mr-4': !collapsed}">
-                  <i :class="navItem.iconClass" class="fas"
-                     style="min-width: 1.7rem;"/> <span v-if="!collapsed || smallScreenMode">{{ navItem.name }}</span>
-                  <i v-if="navItem.isDisabled" class="fas fa-exclamation-circle text-warning ml-1" style="pointer-events: all;" v-b-tooltip.hover="navItem.msg"/>
-              </div>
+                :class="{'bg-primary': menuSelections.get(navItem.name)}">
+            <router-link :to="{ name: navItem.page }"
+                         @click.native="()=>{navigate(navItem.name)}"
+                         @keypress.enter="()=>{navigate(navItem.name)}"
+                         tag="a"
+                         :class="{'text-light': menuSelections.get(navItem.name), 'select-cursor': !menuSelections.get(navItem.name), 'disabled': navItem.isDisabled}"
+                         aria-current-value="page">
+                <div class="text-truncate ml-3" :class="{'mr-4': !collapsed}">
+                    <i :class="navItem.iconClass" class="fas"
+                       style="min-width: 1.7rem;" aria-hidden="true"/> <span v-if="!collapsed || smallScreenMode">{{ navItem.name }}</span>
+                    <i v-if="navItem.isDisabled" class="fas fa-exclamation-circle text-warning ml-1" style="pointer-events: all;" v-b-tooltip.hover="navItem.msg"/>
+                </div>
             </router-link>
+            </li>
           </ul>
         </b-collapse>
       </div>
@@ -162,6 +171,10 @@ limitations under the License.
     .skills-nav {
       min-height: calc(100vh - 10rem);
     }
+  }
+
+  .nav-title {
+    color: #3f5971;
   }
 
   .skills-menu-content {
