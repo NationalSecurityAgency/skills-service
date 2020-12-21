@@ -141,7 +141,7 @@ describe('Subjects Tests', () => {
         cy.contains('Levels').click();
         cy.contains('Add Next').click();
         cy.get('[data-cy=cancelLevel]').click();
-        cy.get('[data-cy=cancelLevel]').should('not.be.visible');
+        cy.get('[data-cy=cancelLevel]').should('not.exist');
     });
 
     it('create subject with special chars', () => {
@@ -196,7 +196,7 @@ describe('Subjects Tests', () => {
         cy.wait('@loadSubjects');
         cy.clickButton('Subject');
         cy.get('[data-cy=closeSubjectButton]').click();
-        cy.get('[data-cy=closeSubjectButton]').should('not.be.visible');
+        cy.get('[data-cy=closeSubjectButton]').should('not.exist');
     });
 
     it('name causes id to fail validation', () => {
@@ -216,7 +216,7 @@ describe('Subjects Tests', () => {
         cy.get('[data-cy=idError]').contains(msg).should('be.visible');
         cy.get('[data-cy=saveSubjectButton]').should('be.disabled');
         cy.get('#subjName').type('{backspace}');
-        cy.get('[data-cy=idError]').contains(msg).should('not.be.visible');
+        cy.get('[data-cy=idError]').contains(msg).should('not.exist');
         cy.get('[data-cy=saveSubjectButton]').should('be.enabled');
     });
 

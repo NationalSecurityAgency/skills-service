@@ -193,7 +193,7 @@ describe('Badges Tests', () => {
         cy.get('[data-cy=idError]').contains(msg).should('be.visible');
         cy.get('[data-cy=saveBadgeButton]').should('be.disabled');
         cy.get('[data-cy=badgeName]').type('{backspace}');
-        cy.get('[data-cy=idError]').contains(msg).should('not.be.visible');
+        cy.get('[data-cy=idError]').should('not.contain', msg)
         cy.get('[data-cy=saveBadgeButton]').should('be.enabled');
     });
 
@@ -223,9 +223,10 @@ describe('Badges Tests', () => {
         msg = 'Badge Name cannot exceed 50 characters';
         cy.contains('Enable').click();
         cy.getIdField().clear().type("badgeId");
-        const invalidName = Array(51).fill('a').join('');
+        const invalidName = Array(50).fill('a').join('');
         cy.get('#badgeName').clear();
-        cy.get('#badgeName').invoke('val', invalidName).trigger('input');
+        cy.get('#badgeName').type(invalidName);
+        cy.get('#badgeName').type('b');
         cy.get('[data-cy=badgeNameError]').contains(msg).should('be.visible');
         cy.get('[data-cy=saveBadgeButton]').should('be.disabled');
         cy.get('#badgeName').type('{backspace}');
@@ -262,7 +263,7 @@ describe('Badges Tests', () => {
             cy.getIdField().type(element);
             cy.get('[data-cy=idError]').contains(msg).should('be.visible');
             cy.getIdField().type('{backspace}');
-            cy.contains(msg).should('not.be.visible');
+            cy.get('[data-cy=idError]').should('not.contain', msg)
         })
 
         // badge name must not be already taken
