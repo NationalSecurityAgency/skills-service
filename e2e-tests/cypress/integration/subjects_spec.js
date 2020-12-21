@@ -83,7 +83,7 @@ describe('Subjects Tests', () => {
         cy.visit('/projects/proj1/subjects/subj1');
         cy.wait('@loadSubject');
 
-        cy.contains('Levels').click();
+        cy.clickNav('Levels');
 
         const rowSelector = '[data-cy=levelsTable] tbody tr'
         cy.get(rowSelector).should('have.length', 5).as('cyRows');
@@ -101,13 +101,12 @@ describe('Subjects Tests', () => {
         cy.get(rowSelector).should('have.length', 6).as('cyRows');
         cy.get('@cyRows')
           .eq(5)
-          .find('td')
-          .eq(2)
+          .find('[data-cy=levelsTable_name]')
           .as('row6NameCol')
         cy.get('@cyRows')
           .eq(5)
           .find('td')
-          .eq(3)
+          .eq(2)
           .as('row6PercentCol')
         cy.get('@row6NameCol').should('be.empty')
         cy.get('@row6PercentCol').contains('95')

@@ -76,20 +76,18 @@ limitations under the License.
 </template>
 
 <script>
+  import SkillsBTable from '@/components/utils/table/SkillsBTable';
   import NewLevel from './NewLevel';
   import SettingService from '../settings/SettingsService';
   import LevelService from './LevelService';
   import SubPageHeader from '../utils/pages/SubPageHeader';
-  import LoadingContainer from '../utils/LoadingContainer';
-  import SimpleCard from '../utils/cards/SimpleCard';
   import MsgBoxMixin from '../utils/modal/MsgBoxMixin';
 
   export default {
     name: 'Levels',
     components: {
+      SkillsBTable,
       NewLevel,
-      SimpleCard,
-      LoadingContainer,
       SubPageHeader,
     },
     props: {
@@ -105,30 +103,46 @@ limitations under the License.
         displayLevelModal: false,
         isEdit: false,
         levelsAsPoints: false,
-        isLoading: true,
         levelToEdit: { iconClass: 'fas fa-user-ninja' },
         levels: [],
-        levelsColumns: ['iconClass', 'level', 'name', 'percent', 'pointsFrom', 'pointsTo', 'edit'],
-        options: {
-          filterable: false,
-          footerHeadings: false,
-          headings: {
-            level: 'Level',
-            name: 'Name',
-            percent: 'Percent %',
-            pointsFrom: 'From Points (>)',
-            pointsTo: 'To Points (<=)',
-            edit: '',
-            iconClass: '',
+        table: {
+          options: {
+            busy: true,
+            bordered: false,
+            outlined: true,
+            stacked: 'md',
+            fields: [
+              {
+                key: 'level',
+                label: 'Level',
+                sortable: false,
+              },
+              {
+                key: 'name',
+                label: 'Name',
+                sortable: false,
+              },
+              {
+                key: 'percent',
+                label: 'Percent %',
+                sortable: false,
+              },
+              {
+                key: 'points',
+                label: 'Points (> to <=)',
+                sortable: false,
+              },
+              {
+                key: 'edit',
+                label: 'Modify',
+                sortable: false,
+                headerTitle: 'Edit Level',
+              },
+            ],
+            pagination: {
+              remove: true,
+            },
           },
-          columnsClasses: {
-            edit: 'control-column',
-          },
-          sortable: [],
-          sortIcon: {
-            base: 'fa fa-sort', up: 'fa fa-sort-up', down: 'fa fa-sort-down', is: 'fa fa-sort',
-          },
-          skin: 'table is-striped is-fullwidth',
         },
       };
     },
@@ -214,17 +228,18 @@ limitations under the License.
     },
     methods: {
       loadLevels() {
+        this.table.options.busy = true;
         if (this.$route.params.subjectId) {
           LevelService.getLevelsForSubject(this.$route.params.projectId, this.$route.params.subjectId)
             .then((response) => {
-              this.isLoading = false;
               this.levels = response;
+              this.table.options.busy = false;
             });
         } else {
           LevelService.getLevelsForProject(this.$route.params.projectId)
             .then((response) => {
-              this.isLoading = false;
               this.levels = response;
+              this.table.options.busy = false;
             });
         }
         if (this.currentlyFocusedLevelId) {
@@ -259,17 +274,15 @@ limitations under the License.
         });
       },
       doRemoveLastItem() {
-        this.isLoading = true;
+        this.table.options.busy = true;
         if (this.$route.params.subjectId) {
           LevelService.deleteLastLevelForSubject(this.$route.params.projectId, this.$route.params.subjectId)
             .then(() => {
-              this.isLoading = false;
               this.loadLevels();
             });
         } else {
           LevelService.deleteLastLevelForProject(this.$route.params.projectId)
             .then(() => {
-              this.isLoading = false;
               this.loadLevels();
             });
         }
@@ -302,33 +315,29 @@ limitations under the License.
         this.displayLevelModal = true;
       },
       doCreateNewLevel(nextLevelObj) {
-        this.loading = true;
+        this.table.options.busy = true;
         if (this.$route.params.subjectId) {
           LevelService.createNewLevelForSubject(this.$route.params.projectId, this.$route.params.subjectId, nextLevelObj)
             .then(() => {
-              this.isLoading = false;
               this.loadLevels();
             });
         } else {
           LevelService.createNewLevelForProject(this.$route.params.projectId, nextLevelObj)
             .then(() => {
-              this.isLoading = false;
               this.loadLevels();
             });
         }
       },
       doEditLevel(editedLevelObj) {
-        this.loading = true;
+        this.table.options.busy = true;
         if (this.$route.params.subjectId) {
           LevelService.editLevelForSubject(this.$route.params.projectId, this.$route.params.subjectId, editedLevelObj)
             .then(() => {
-              this.isLoading = false;
               this.loadLevels();
             });
         } else {
           LevelService.editLevelForProject(this.$route.params.projectId, editedLevelObj)
             .then(() => {
-              this.isLoading = false;
               this.loadLevels();
             });
         }
