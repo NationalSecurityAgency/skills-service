@@ -29,7 +29,7 @@ describe('Skills Tests', () => {
 
     it('name causes id to fail validation', () => {
       cy.server();
-      cy.route({
+      cy.intercept({
         method: 'GET',
         url: '/admin/projects/proj1/subjects/subj1'
       }).as('loadSubject');
@@ -53,7 +53,7 @@ describe('Skills Tests', () => {
 
     it('close skill dialog', () => {
       cy.server();
-      cy.route({
+      cy.intercept({
         method: 'GET',
         url: '/admin/projects/proj1/subjects/subj1'
       }).as('loadSubject');
@@ -68,9 +68,9 @@ describe('Skills Tests', () => {
 
     it('validation', () => {
       cy.server()
-      cy.route('POST', `/admin/projects/proj1/subjects/subj1/skills/Skill1Skill`).as('postNewSkill');
-      cy.route('GET', `/admin/projects/proj1/subjects/subj1/skills/Skill1Skill`).as('getSkill');
-      cy.route({
+      cy.intercept('POST', `/admin/projects/proj1/subjects/subj1/skills/Skill1Skill`).as('postNewSkill');
+      cy.intercept('GET', `/admin/projects/proj1/subjects/subj1/skills/Skill1Skill`).as('getSkill');
+      cy.intercept({
         method: 'GET',
         url: '/admin/projects/proj1/subjects/subj1'
       }).as('loadSubject');
@@ -179,9 +179,9 @@ describe('Skills Tests', () => {
 
     it('edit number of occurrences', () => {
         cy.server()
-        cy.route('POST', `/admin/projects/proj1/subjects/subj1/skills/Skill1Skill`).as('postNewSkill');
-        cy.route('GET', `/admin/projects/proj1/subjects/subj1/skills/Skill1Skill`).as('getSkill');
-        cy.route({
+        cy.intercept('POST', `/admin/projects/proj1/subjects/subj1/skills/Skill1Skill`).as('postNewSkill');
+        cy.intercept('GET', `/admin/projects/proj1/subjects/subj1/skills/Skill1Skill`).as('getSkill');
+        cy.intercept({
             method: 'GET',
             url: '/admin/projects/proj1/subjects/subj1'
         }).as('loadSubject');
@@ -223,10 +223,10 @@ describe('Skills Tests', () => {
         const expectedId = 'LotsofspecialPcharsSkill';
         const providedName = "!L@o#t$s of %s^p&e*c(i)/#?a_l++_|}{P c'ha'rs";
         cy.server();
-        cy.route('POST', `/admin/projects/proj1/subjects/subj1/skills/${expectedId}`).as('postNewSkill');
-        cy.route('POST', `/admin/projects/proj1/skillNameExists`).as('nameExists');
+        cy.intercept('POST', `/admin/projects/proj1/subjects/subj1/skills/${expectedId}`).as('postNewSkill');
+        cy.intercept('POST', `/admin/projects/proj1/skillNameExists`).as('nameExists');
 
-        cy.route({
+        cy.intercept({
             method: 'GET',
             url: '/admin/projects/proj1/subjects/subj1'
         }).as('loadSubject');
@@ -250,10 +250,10 @@ describe('Skills Tests', () => {
       const expectedId = 'LotsofspecialPcharsSkill';
       const providedName = "!L@o#t$s of %s^p&e*c(i)/#?a_l++_|}{P c'ha'rs";
       cy.server();
-      cy.route('POST', `/admin/projects/proj1/subjects/subj1/skills/${expectedId}`).as('postNewSkill');
-      cy.route('POST', `/admin/projects/proj1/skillNameExists`).as('nameExists');
+      cy.intercept('POST', `/admin/projects/proj1/subjects/subj1/skills/${expectedId}`).as('postNewSkill');
+      cy.intercept('POST', `/admin/projects/proj1/skillNameExists`).as('nameExists');
 
-      cy.route({
+      cy.intercept({
         method: 'GET',
         url: '/admin/projects/proj1/subjects/subj1'
       }).as('loadSubject');
@@ -284,15 +284,15 @@ describe('Skills Tests', () => {
         });
 
         cy.server();
-        cy.route({
+        cy.intercept({
             method: 'POST',
             url: '/app/users/projects/proj1/suggestClientUsers?userSuggestOption=TWO'
         }).as('suggestUsers');
-        cy.route({
+        cy.intercept({
             method: 'GET',
             url: '/admin/projects/proj1/subjects/subj1/skills/skill1'
         }).as('loadSkill');
-        cy.route({
+        cy.intercept({
             method: 'POST',
             url: '/api/projects/Inception/skills/ManuallyAddSkillEvent'
         }).as('addSkillEvent');
@@ -342,11 +342,11 @@ describe('Skills Tests', () => {
         });
 
         cy.server();
-        cy.route({
+        cy.intercept({
             method: 'POST',
             url: '/app/users/projects/proj1/suggestClientUsers?userSuggestOption=TWO'
         }).as('suggestUsers');
-        cy.route({
+        cy.intercept({
             method: 'GET',
             url: '/admin/projects/proj1/subjects/subj1/skills/skill1'
         }).as('loadSkill');
@@ -365,7 +365,7 @@ describe('Skills Tests', () => {
 
     it('Add Skill Event User Not Found', () => {
        cy.server();
-       cy.route({
+       cy.intercept({
            method: 'PUT',
            url: '/api/projects/*/skills/*',
            status: 400,
@@ -381,7 +381,7 @@ describe('Skills Tests', () => {
             numPerformToCompletion: '5'
         });
 
-        cy.route({
+        cy.intercept({
             method: 'GET',
             url: '/admin/projects/proj1/subjects/subj1/skills/skill1'
         }).as('loadSkill')
@@ -409,7 +409,7 @@ describe('Skills Tests', () => {
             numPerformToCompletion: '5'
         });
         cy.server();
-        cy.route({
+        cy.intercept({
             method: 'GET',
             url: '/admin/projects/proj1/subjects/subj1/skills/skill1'
         }).as('loadSkill');
@@ -468,14 +468,14 @@ describe('Skills Tests', () => {
 
         cy.server();
 
-        cy.route({
+        cy.intercept({
             method: 'POST',
             status: 400,
             url: '/admin/projects/proj1/skills/skill1/dependency/*',
             response: {errorCode: 'FailedToAssignDependency', explanation: 'Error Adding Dependency'}
         });
 
-        cy.route({
+        cy.intercept({
             method: 'GET',
             url: '/admin/projects/proj1/subjects/subj1/skills/skill1'
         }).as('loadSkill');
@@ -497,12 +497,12 @@ describe('Skills Tests', () => {
       const newId = 'MyId1Skill';
       const providedName = "my id 1";
       cy.server();
-      cy.route('POST', `/admin/projects/proj1/subjects/subj1/skills/${initialId}`).as('postNewSkill');
-      cy.route('POST', `/admin/projects/proj1/skillNameExists`).as('nameExists');
-      cy.route('GET', `/admin/projects/proj1/entityIdExists?id=*`).as('skillIdExists');
+      cy.intercept('POST', `/admin/projects/proj1/subjects/subj1/skills/${initialId}`).as('postNewSkill');
+      cy.intercept('POST', `/admin/projects/proj1/skillNameExists`).as('nameExists');
+      cy.intercept('GET', `/admin/projects/proj1/entityIdExists?id=*`).as('skillIdExists');
 
 
-      cy.route({
+      cy.intercept({
           method: 'GET',
           url: '/admin/projects/proj1/subjects/subj1'
       }).as('loadSubject');
@@ -537,7 +537,7 @@ describe('Skills Tests', () => {
 
   it('new skill button should retain focus after dialog closes', () => {
     cy.server();
-    cy.route({
+    cy.intercept({
       method: 'GET',
       url: '/admin/projects/proj1/subjects/subj1'
     }).as('loadSubject');
@@ -583,24 +583,24 @@ describe('Skills Tests', () => {
       numPerformToCompletion: '5'
     });
 
-    cy.route({
+    cy.intercept({
       method: 'POST',
       url: '/admin/projects/proj1/subjects/subj1/skills/skill1'
     }).as('saveSkill');
-    cy.route({
+    cy.intercept({
       method: 'POST',
       url: '/admin/projects/proj1/subjects/subj1/skills/skill2'
     }).as('saveSkill2');
 
-    cy.route({
+    cy.intercept({
       method: 'GET',
       url: '/admin/projects/proj1/subjects/subj1/skills/skill1'
     }).as('loadSkill');
-    cy.route({
+    cy.intercept({
       method: 'GET',
       url: '/admin/projects/proj1/subjects/subj1/skills/skill2'
     }).as('loadSkill2');
-    cy.route({
+    cy.intercept({
       method: 'GET',
       url: '/admin/projects/proj1/subjects/subj1'
     }).as('loadSubject');

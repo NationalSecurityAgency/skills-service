@@ -145,7 +145,7 @@ describe('Metrics Tests', () => {
             openMode: 0
         }
     },() => {
-        cy.server().route({
+        cy.intercept({
             url: '/admin/projects/proj1/subjects',
             status: 200,
             response: [{
@@ -155,7 +155,7 @@ describe('Metrics Tests', () => {
             }],
         }).as('getSubjects');
 
-        cy.server().route({
+        cy.intercept({
             url: '/admin/projects/proj1/metrics/usersByLevelForSubjectOverTimeChartBuilder?subjectId=subj1',
             status: 200,
             response: [{
@@ -198,7 +198,7 @@ describe('Metrics Tests', () => {
             .route('/admin/projects/proj1/metrics/usersByLevelForSubjectOverTimeChartBuilder?subjectId=subj1')
             .as('getLevelsOverTimeData');
 
-        cy.server().route({
+        cy.intercept({
             url: '/admin/projects/proj1/subjects',
             status: 200,
             response: [{
@@ -255,7 +255,7 @@ describe('Metrics Tests', () => {
             openMode: 0
         }
     },() => {
-        cy.server().route({
+        cy.intercept({
             url: '/admin/projects/proj1/subjects',
             status: 200,
             response: [{
@@ -266,7 +266,7 @@ describe('Metrics Tests', () => {
         }).as('getSubjects');
 
 
-        cy.server().route({
+        cy.intercept({
             url: '/admin/projects/proj1/metrics/usersByLevelForSubjectOverTimeChartBuilder?subjectId=subj1',
             status: 200,
             response: [{
@@ -310,7 +310,7 @@ describe('Metrics Tests', () => {
             openMode: 0
         }
     },() => {
-        cy.server().route({
+        cy.intercept({
             url: '/admin/projects/proj1/subjects',
             status: 200,
             response: [{
@@ -331,7 +331,7 @@ describe('Metrics Tests', () => {
             )
         }
 
-        cy.server().route({
+        cy.intercept({
             url: '/admin/projects/proj1/metrics/usersByLevelForSubjectOverTimeChartBuilder?subjectId=subj1',
             status: 200,
             response,
@@ -360,7 +360,7 @@ describe('Metrics Tests', () => {
             openMode: 0
         }
     },() => {
-        cy.server().route({
+        cy.intercept({
             url: '/admin/projects/proj1/subjects',
             status: 200,
             response: [{
@@ -381,7 +381,7 @@ describe('Metrics Tests', () => {
             )
         }
 
-        cy.server().route({
+        cy.intercept({
             url: '/admin/projects/proj1/metrics/usersByLevelForSubjectOverTimeChartBuilder?subjectId=subj1',
             status: 200,
             response,
@@ -410,7 +410,7 @@ describe('Metrics Tests', () => {
             openMode: 0
         }
     },() => {
-        cy.server().route({
+        cy.intercept({
             url: '/admin/projects/proj1/metrics/numUsersPerSubjectPerLevelChartBuilder',
             status: 200,
         }).as('getChartData');
@@ -494,7 +494,7 @@ describe('Metrics Tests', () => {
             openMode: 0
         }
     },() => {
-        cy.server().route({
+        cy.intercept({
             url: '/admin/projects/proj1/metrics/numUsersPerSubjectPerLevelChartBuilder',
             status: 200,
             response: [
@@ -527,7 +527,7 @@ describe('Metrics Tests', () => {
             response.push(createSubjectObj(`Subject # ${i}`, [1265,852,493,625,293]))
         }
 
-        cy.server().route({
+        cy.intercept({
             url: '/admin/projects/proj1/metrics/numUsersPerSubjectPerLevelChartBuilder',
             status: 200,
             response,
@@ -553,7 +553,7 @@ describe('Metrics Tests', () => {
             response.push(createSubjectObj(`Subject # ${i}`, [1265,852,493,625,293,392,293,983,1923,1209]))
         }
 
-        cy.server().route({
+        cy.intercept({
             url: '/admin/projects/proj1/metrics/numUsersPerSubjectPerLevelChartBuilder',
             status: 200,
             response,
@@ -576,7 +576,7 @@ describe('Metrics Tests', () => {
         }
     },() => {
         const response = [];
-        cy.server().route({
+        cy.intercept({
             url: '/admin/projects/proj1/metrics/numUsersPerSubjectPerLevelChartBuilder',
             status: 200,
             response,

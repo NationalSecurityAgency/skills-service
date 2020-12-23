@@ -45,11 +45,11 @@ describe('Root Pin and Unpin Tests', () => {
     cy.logout();
     cy.fixture('vars.json').then((vars) => {
       cy.login(vars.rootUser, vars.defaultPass);
-      cy.route('GET', '/app/projects').as('default');
-      cy.route('GET', '/app/projects?search=one').as('searchOne');
-      cy.route('POST', '/root/pin/proj1').as('pinOne');
-      cy.route('DELETE', '/root/pin/proj1').as('unpinOne');
-      cy.route('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
+      cy.intercept('GET', '/app/projects').as('default');
+      cy.intercept('GET', '/app/projects?search=one').as('searchOne');
+      cy.intercept('POST', '/root/pin/proj1').as('pinOne');
+      cy.intercept('DELETE', '/root/pin/proj1').as('unpinOne');
+      cy.intercept('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
 
       cy.visit('/');
       //confirm that default project loading returns no projects for root user
@@ -136,11 +136,11 @@ describe('Root Pin and Unpin Tests', () => {
     cy.logout();
     cy.fixture('vars.json').then((vars) => {
       cy.login(vars.rootUser, vars.defaultPass);
-      cy.route('GET', '/app/projects').as('default');
-      cy.route('GET', '/app/projects?search=one').as('searchOne');
-      cy.route('POST', '/root/pin/proj1').as('pinOne');
-      cy.route('DELETE', '/root/pin/proj1').as('unpinOne');
-      cy.route('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
+      cy.intercept('GET', '/app/projects').as('default');
+      cy.intercept('GET', '/app/projects?search=one').as('searchOne');
+      cy.intercept('POST', '/root/pin/proj1').as('pinOne');
+      cy.intercept('DELETE', '/root/pin/proj1').as('unpinOne');
+      cy.intercept('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
 
       cy.visit('/');
       //confirm that default project loading returns no projects for root user
@@ -210,11 +210,11 @@ describe('Root Pin and Unpin Tests', () => {
     cy.logout();
     cy.fixture('vars.json').then((vars) => {
       cy.login(vars.rootUser, vars.defaultPass);
-      cy.route('GET', '/app/projects').as('default');
-      cy.route('GET', '/app/projects?search=one').as('searchOne');
-      cy.route('POST', '/root/pin/proj1').as('pinOne');
-      cy.route('DELETE', '/root/pin/proj1').as('unpinOne');
-      cy.route('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
+      cy.intercept('GET', '/app/projects').as('default');
+      cy.intercept('GET', '/app/projects?search=one').as('searchOne');
+      cy.intercept('POST', '/root/pin/proj1').as('pinOne');
+      cy.intercept('DELETE', '/root/pin/proj1').as('unpinOne');
+      cy.intercept('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
 
       cy.visit('/');
       //confirm that default project loading returns no projects for root user
@@ -259,11 +259,11 @@ describe('Root Pin and Unpin Tests', () => {
     cy.logout();
     cy.fixture('vars.json').then((vars) => {
       cy.login(vars.rootUser, vars.defaultPass);
-      cy.route('GET', '/app/projects').as('default');
-      cy.route('GET', '/app/projects?search=one').as('searchOne');
-      cy.route('POST', '/root/pin/proj1').as('pinOne');
-      cy.route('DELETE', '/root/pin/proj1').as('unpinOne');
-      cy.route('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
+      cy.intercept('GET', '/app/projects').as('default');
+      cy.intercept('GET', '/app/projects?search=one').as('searchOne');
+      cy.intercept('POST', '/root/pin/proj1').as('pinOne');
+      cy.intercept('DELETE', '/root/pin/proj1').as('unpinOne');
+      cy.intercept('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
 
       cy.visit('/');
       //confirm that default project loading returns no projects for root user
@@ -321,11 +321,11 @@ describe('Root Pin and Unpin Tests', () => {
     cy.logout();
     cy.fixture('vars.json').then((vars) => {
       cy.login(vars.rootUser, vars.defaultPass);
-      cy.route('GET', '/app/projects').as('default');
-      cy.route('GET', '/app/projects?search=one').as('searchOne');
-      cy.route('POST', '/root/pin/proj1').as('pinOne');
-      cy.route('DELETE', '/root/pin/proj1').as('unpinOne');
-      cy.route('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
+      cy.intercept('GET', '/app/projects').as('default');
+      cy.intercept('GET', '/app/projects?search=one').as('searchOne');
+      cy.intercept('POST', '/root/pin/proj1').as('pinOne');
+      cy.intercept('DELETE', '/root/pin/proj1').as('unpinOne');
+      cy.intercept('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
 
       cy.visit('/');
       //confirm that default project loading returns no projects for root user
@@ -387,11 +387,11 @@ describe('Root Pin and Unpin Tests', () => {
     cy.logout();
     cy.fixture('vars.json').then((vars) => {
       cy.login(vars.rootUser, vars.defaultPass);
-      cy.route('GET', '/app/projects').as('default');
-      cy.route('GET', '/app/projects?search=one').as('searchOne');
-      cy.route('POST', '/root/pin/proj1').as('pinOne');
-      cy.route('DELETE', '/root/pin/proj1').as('unpinOne');
-      cy.route('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
+      cy.intercept('GET', '/app/projects').as('default');
+      cy.intercept('GET', '/app/projects?search=one').as('searchOne');
+      cy.intercept('POST', '/root/pin/proj1').as('pinOne');
+      cy.intercept('DELETE', '/root/pin/proj1').as('unpinOne');
+      cy.intercept('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
 
       cy.visit('/');
       //confirm that default project loading returns no projects for root user

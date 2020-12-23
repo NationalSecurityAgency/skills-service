@@ -32,7 +32,7 @@ describe('Metrics Tests', () => {
             openMode: 0
         }
     },() => {
-        cy.server().route({
+        cy.intercept({
             url: '/admin/projects/proj1/metrics/distinctUsersOverTimeForProject**',
             status: 200,
             response: [{
@@ -127,7 +127,7 @@ describe('Metrics Tests', () => {
             openMode: 0
         }
     },() => {
-        cy.server().route('/admin/projects/proj1/metrics/distinctUsersOverTimeForProject**').as('distinctUsersOverTimeForProject');
+        cy.intercept('/admin/projects/proj1/metrics/distinctUsersOverTimeForProject**').as('distinctUsersOverTimeForProject');
 
         cy.visit('/projects/proj1/');
         cy.clickNav('Metrics');
@@ -141,7 +141,7 @@ describe('Metrics Tests', () => {
     })
 
     it('projects - Distinct number of users over time - two days with real data', () => {
-        cy.server().route('/admin/projects/proj1/metrics/distinctUsersOverTimeForProject**').as('distinctUsersOverTimeForProject');
+        cy.intercept('/admin/projects/proj1/metrics/distinctUsersOverTimeForProject**').as('distinctUsersOverTimeForProject');
 
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
             projectId: 'proj1',
@@ -182,7 +182,7 @@ describe('Metrics Tests', () => {
             openMode: 0
         }
     },() => {
-        cy.server().route({
+        cy.intercept({
             url: '/admin/projects/proj1/metrics/distinctUsersOverTimeForProject**',
             status: 200,
             response: [ {
@@ -208,7 +208,7 @@ describe('Metrics Tests', () => {
             openMode: 0
         }
     },() => {
-        cy.server().route({
+        cy.intercept({
             url: '/admin/projects/proj1/metrics/distinctUsersOverTimeForProject**',
             status: 200,
             response: [ {

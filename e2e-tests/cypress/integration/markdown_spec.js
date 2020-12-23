@@ -151,7 +151,7 @@ describe('Markdown Tests', () => {
             numPerformToCompletion: '5',
             description: markdown
         });
-        cy.route('GET', '/api/projects/Inception/level').as('inceptionLevel');
+        cy.intercept('GET', '/api/projects/Inception/level').as('inceptionLevel');
         cy.visit('/projects/proj1/subjects/subj1/skills/skill1');
 
         cy.contains('Description');

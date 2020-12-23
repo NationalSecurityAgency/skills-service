@@ -50,7 +50,7 @@ describe('Metrics Tests - Achievements', () => {
             openMode: 0
         }
     }, () => {
-        cy.server().route({
+        cy.intercept({
             url: '/admin/projects/proj1/metrics/numUsersPerLevelChartBuilder',
             status: 200,
             response: [{

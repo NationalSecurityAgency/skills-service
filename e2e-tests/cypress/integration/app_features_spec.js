@@ -25,7 +25,7 @@ describe('App Features Tests', () => {
     });
 
     it('display new version banner when software is updated', () => {
-        cy.server().route({
+        cy.intercept({
             url: '/admin/projects/proj1/subjects',
             status: 200,
             response: [],
@@ -50,7 +50,7 @@ describe('App Features Tests', () => {
     });
 
     it('do not display new version banner if lib version in headers is older than lib version in local storage', () => {
-        cy.server().route({
+        cy.intercept({
             url: '/admin/projects/proj1/subjects',
             status: 200,
             response: [],
@@ -72,7 +72,7 @@ describe('App Features Tests', () => {
 
     it('access denied should show authorization failure page not error page', () => {
         cy.server();
-        cy.route({
+        cy.intercept({
             method: 'GET',
             url: '/admin/projects/proj1/subjects/subj1',
             status: 403,

@@ -24,14 +24,110 @@ describe('Subjects Tests', () => {
         })
     });
 
-    it('Close level dialog', () => {
-        cy.server();
+    it('subject levels validation', () => {
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
             projectId: 'proj1',
             subjectId: 'subj1',
             name: "Subject 1"
         });
-        cy.route({
+        cy.intercept({
+            method: 'GET',
+            url: '/admin/projects/proj1/subjects/subj1'
+        }).as('loadSubject');
+
+        cy.visit('/projects/proj1/subjects/subj1');
+        cy.wait('@loadSubject');
+
+        cy.contains('Levels').click();
+        cy.get('[data-cy=editLevelButton]').first().click();
+        cy.get('[data-cy=levelPercent]').type('{selectall}1000');
+        cy.get('[data-cy=levelPercentError]').contains('Percent must be 100 or less');
+        cy.get('[data-cy=saveLevelButton]').should('be.disabled');
+        cy.get('[data-cy=levelPercent]').type('{selectall}-1000');
+        cy.get('[data-cy=levelPercentError]').contains('Percent may only contain numeric characters.');
+        cy.get('[data-cy=saveLevelButton]').should('be.disabled');
+        cy.get('[data-cy=levelPercent').type('{selectall}50')
+        cy.get('[data-cy=levelPercentError').contains('Percent must not overlap with other levels');
+        cy.get('[data-cy=saveLevelButton]').should('be.disabled');
+        cy.get('[data-cy=cancelLevel]').click();
+
+        cy.contains('Add Next').click();
+        cy.get('[data-cy=levelName]').type('Black Belt');
+        cy.get('[data-cy=levelNameError').contains('Name is already taken.');
+        cy.get('[data-cy=saveLevelButton]').should('be.disabled');
+        const invalidName = Array(1000).fill('a').join('');
+        cy.get('[data-cy=levelName]').invoke('val', invalidName).trigger('input');
+        cy.get('[data-cy=levelNameError').contains('Name cannot exceed 50 characters.');
+        cy.get('[data-cy=saveLevelButton]').should('be.disabled');
+
+        cy.get('[data-cy=levelName]').type('{selectall}Coral Belt');
+        cy.get('[data-cy=levelNameError]').should('not.be.visible');
+        cy.get('[data-cy=levelPercent]').type('{selectall}5');
+        cy.get('[data-cy=levelPercentError]').contains('Percent % must not overlap with other levels');
+        cy.get('[data-cy=saveLevelButton]').should('be.disabled');
+    });
+
+    it('add new level without name, then add name', () => {
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            name: "Subject 1"
+        });
+        cy.intercept({
+            method: 'GET',
+            url: '/admin/projects/proj1/subjects/subj1'
+        }).as('loadSubject');
+
+        cy.visit('/projects/proj1/subjects/subj1');
+        cy.wait('@loadSubject');
+
+        cy.contains('Levels').click();
+
+        const rowSelector = '[data-cy=levelsTable] tbody tr'
+        cy.get(rowSelector).should('have.length', 5).as('cyRows');
+
+        cy.get('[data-cy=addLevel]').first().click();
+
+        // add a level with no name initially
+        cy.get('[data-cy=levelPercent]').type('95');
+        cy.get('[data-cy=levelPercentError]').should('not.be.visible');
+        cy.get('[data-cy=levelNameError]').should('not.be.visible');
+        cy.get('[data-cy=saveLevelButton]').should('not.be.disabled');
+        cy.get('[data-cy=saveLevelButton]').click();
+
+        // verify the new row was added as expected
+        cy.get(rowSelector).should('have.length', 6).as('cyRows');
+        cy.get('@cyRows')
+          .eq(5)
+          .find('td')
+          .eq(2)
+          .as('row6NameCol')
+        cy.get('@cyRows')
+          .eq(5)
+          .find('td')
+          .eq(3)
+          .as('row6PercentCol')
+        cy.get('@row6NameCol').should('be.empty')
+        cy.get('@row6PercentCol').contains('95')
+
+        // now give the level a name
+        cy.get('[data-cy=editLevelButton]').eq(5).click();
+        cy.get('[data-cy=levelName]').type('{selectall}Coral Belt');
+        cy.get('[data-cy=levelNameError]').should('not.be.visible');
+        cy.get('[data-cy=saveLevelButton]').should('not.be.disabled');
+        cy.get('[data-cy=levelName]').type('{enter}');
+
+        // verify that the new name is present
+        cy.get('@row6NameCol').contains('Coral Belt')
+    });
+
+    it('Close level dialog', () => {
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            name: "Subject 1"
+        });
+        cy.intercept({
             method: 'GET',
             url: '/admin/projects/proj1/subjects/subj1'
         }).as('loadSubject');
@@ -48,10 +144,9 @@ describe('Subjects Tests', () => {
     it('create subject with special chars', () => {
         const expectedId = 'LotsofspecialPcharsSubject';
         const providedName = "!L@o#t$s of %s^p&e*c(i)/?#a_l++_|}{P c'ha'rs";
-        cy.server();
-        cy.route('POST', `/admin/projects/proj1/subjects/${expectedId}`).as('postNewSubject');
-        cy.route('POST', '/admin/projects/proj1/subjectNameExists').as('nameExists');
-        cy.route('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
+        cy.intercept('POST', `/admin/projects/proj1/subjects/${expectedId}`).as('postNewSubject');
+        cy.intercept('POST', '/admin/projects/proj1/subjectNameExists').as('nameExists');
+        cy.intercept('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
 
         cy.visit('/projects/proj1');
         cy.wait('@loadSubjects');
@@ -70,10 +165,9 @@ describe('Subjects Tests', () => {
     it('create subject using enter key', () => {
         const expectedId = 'LotsofspecialPcharsSubject';
         const providedName = "!L@o#t$s of %s^p&e*c(i)/?#a_l++_|}{P c'ha'rs";
-        cy.server();
-        cy.route('POST', `/admin/projects/proj1/subjects/${expectedId}`).as('postNewSubject');
-        cy.route('POST', '/admin/projects/proj1/subjectNameExists').as('nameExists');
-        cy.route('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
+        cy.intercept('POST', `/admin/projects/proj1/subjects/${expectedId}`).as('postNewSubject');
+        cy.intercept('POST', '/admin/projects/proj1/subjectNameExists').as('nameExists');
+        cy.intercept('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
 
         cy.visit('/projects/proj1');
         cy.wait('@loadSubjects');
@@ -90,8 +184,7 @@ describe('Subjects Tests', () => {
     });
 
     it('close subject dialog', () => {
-        cy.server();
-        cy.route('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
+        cy.intercept('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
 
         cy.visit('/projects/proj1');
         cy.wait('@loadSubjects');
@@ -101,9 +194,8 @@ describe('Subjects Tests', () => {
     });
 
     it('name causes id to fail validation', () => {
-        cy.server();
-        cy.route('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
-        cy.route('POST', '/admin/projects/proj1/subjectNameExists').as('nameExists');
+        cy.intercept('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
+        cy.intercept('POST', '/admin/projects/proj1/subjectNameExists').as('nameExists');
 
         cy.visit('/projects/proj1');
         cy.wait('@loadSubjects');
@@ -127,7 +219,6 @@ describe('Subjects Tests', () => {
             subjectId: 'subj1',
             name: "Subject 1"
         });
-        cy.server();
 
         cy.visit('/projects/proj1/');
         cy.get('.subject-settings .dropdown-toggle').click();
@@ -155,7 +246,6 @@ describe('Subjects Tests', () => {
             subjectId: 'subj1',
             name: "Subject 1"
         });
-        cy.server();
 
         cy.visit('/projects/proj1/');
         cy.get('.subject-settings .dropdown-toggle').click();
@@ -183,7 +273,6 @@ describe('Subjects Tests', () => {
             subjectId: 'subj1',
             name: "Subject 1"
         });
-        cy.server();
 
         cy.visit('/projects/proj1/');
         cy.get('.subject-settings .dropdown-toggle').click();
@@ -213,9 +302,8 @@ describe('Subjects Tests', () => {
             subjectId: 'subj1',
             name: "Subject 1"
         });
-        cy.server();
 
-        cy.route({
+        cy.intercept({
             method: 'POST',
             url: '/admin/projects/proj1/icons/upload',
         }).as('uploadIcon');
@@ -268,9 +356,7 @@ describe('Subjects Tests', () => {
             name: "Subject 1"
         });
 
-        cy.server();
-
-        cy.route({
+        cy.intercept({
             method: 'POST',
             url: '/admin/projects/proj1/icons/upload',
             status: 400,
@@ -294,7 +380,6 @@ describe('Subjects Tests', () => {
     });
 
     it('new subject button should retain focus after dialog closes', () => {
-        cy.server();
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
             projectId: 'proj1',
             subjectId: 'subj1',
@@ -322,7 +407,6 @@ describe('Subjects Tests', () => {
     });
 
     it('focus should be returned to subject edit button', () => {
-        cy.server();
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
             projectId: 'proj1',
             subjectId: 'subj1',
@@ -334,20 +418,20 @@ describe('Subjects Tests', () => {
             subjectId: 'subj2',
             name: "Subject 2"
         });
-        cy.route({
+        cy.intercept({
             method: 'POST',
             url: '/admin/projects/proj1/subjects/subj1'
         }).as('saveSubject');
-        cy.route({
+        cy.intercept({
             method: 'POST',
             url: '/admin/projects/proj1/subjects/subj2'
         }).as('saveSubject2');
 
-        cy.route({
+        cy.intercept({
             method: 'GET',
             url: '/admin/projects/proj1/subjects/subj1'
         }).as('loadSubject');
-        cy.route({
+        cy.intercept({
             method: 'GET',
             url: '/admin/projects/proj1/subjects/subj2'
         }).as('loadSubject2');
@@ -401,6 +485,82 @@ describe('Subjects Tests', () => {
         cy.get('[data-cy=editMenuEditBtn]').eq(1).click();
         cy.get('[aria-label=Close]').click();
         cy.get('div.subject-settings').eq(1).children().first().should('have.focus');
+    });
+
+    it('new level dialog should return focus to new level button', () => {
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            name: "Subject 1"
+        });
+        cy.intercept({
+            method: 'GET',
+            url: '/admin/projects/proj1/subjects/subj1'
+        }).as('loadSubject');
+
+        cy.intercept({
+            method: 'PUT',
+            url: '/admin/projects/proj1/subjects/subj1/levels/edit/*'
+        }).as('saveLevel');
+
+        cy.intercept({
+            method: 'GET',
+            url: '/admin/projects/proj1/subjects/subj1/levels'
+        }).as('loadLevels');
+
+        cy.visit('/projects/proj1/subjects/subj1');
+        cy.wait('@loadSubject');
+
+        cy.contains('Levels').click();
+        cy.get('[data-cy=addLevel]').click();
+        cy.get('[data-cy=cancelLevel]').click();
+        cy.get('[data-cy=addLevel]').should('have.focus');
+
+        cy.get('[data-cy=addLevel]').click();
+        cy.get('[data-cy=levelName]').type('{esc}');
+        cy.get('[data-cy=addLevel]').should('have.focus');
+
+        cy.get('[data-cy=addLevel]').click();
+        cy.get('[aria-label=Close]').filter('.text-light').click();
+        cy.get('[data-cy=addLevel]').should('have.focus');
+
+        cy.get('[data-cy=editLevelButton]').eq(0).click();
+        cy.get('[data-cy=cancelLevel]').click();
+        cy.get('[data-cy=editLevelButton]').eq(0).should('have.focus');
+
+        cy.get('[data-cy=editLevelButton]').eq(0).click();
+        cy.get('[data-cy=levelName]').type('{esc}');
+        cy.get('[data-cy=editLevelButton]').eq(0).should('have.focus');
+
+        cy.get('[data-cy=editLevelButton]').eq(0).click();
+        cy.get('[aria-label=Close]').filter('.text-light').click();
+        cy.get('[data-cy=editLevelButton]').eq(0).should('have.focus');
+
+        cy.get('[data-cy=editLevelButton]').eq(0).click();
+        cy.get('[data-cy=levelName]').type('{selectall}Fooooooo');
+        cy.get('[data-cy=saveLevelButton]').click();
+        cy.wait('@saveLevel');
+        cy.wait('@loadLevels');
+        cy.get('[data-cy=editLevelButton]').eq(0).should('have.focus');
+
+        cy.get('[data-cy=editLevelButton]').eq(3).click();
+        cy.get('[data-cy=cancelLevel]').click();
+        cy.get('[data-cy=editLevelButton]').eq(3).should('have.focus');
+
+        cy.get('[data-cy=editLevelButton]').eq(3).click();
+        cy.get('[data-cy=levelName]').type('{esc}');
+        cy.get('[data-cy=editLevelButton]').eq(3).should('have.focus');
+
+        cy.get('[data-cy=editLevelButton]').eq(3).click();
+        cy.get('[aria-label=Close]').filter('.text-light').click();
+        cy.get('[data-cy=editLevelButton]').eq(3).should('have.focus');
+
+        cy.get('[data-cy=editLevelButton]').eq(3).click();
+        cy.get('[data-cy=levelName]').type('{selectall}Baaaaar');
+        cy.get('[data-cy=saveLevelButton]').click();
+        cy.wait('@saveLevel');
+        cy.wait('@loadLevels');
+        cy.get('[data-cy=editLevelButton]').eq(3).should('have.focus');
     });
 
     it('viewing subject user details does not break breadcrumb navigation', () => {

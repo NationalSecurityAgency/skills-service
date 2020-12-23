@@ -103,7 +103,7 @@ describe('Client Display Tests', () => {
             }]
         }
 
-        cy.server().route({
+        cy.intercept({
             url: '/api/projects/proj1/pointHistory',
             status: 200,
             response: data,
@@ -183,7 +183,7 @@ describe('Client Display Tests', () => {
         cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: Cypress.env('proxyUser'), timestamp: m.subtract(2, 'day').format('x')})
         cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: Cypress.env('proxyUser'), timestamp: m.subtract(1, 'day').format('x')})
 
-        cy.server().route('/api/projects/proj1/pointHistory').as('getPointHistory');
+        cy.intercept('/api/projects/proj1/pointHistory').as('getPointHistory');
 
         cy.cdVisit('/');
         cy.wait('@getPointHistory');
@@ -236,7 +236,7 @@ describe('Client Display Tests', () => {
             }]
         }
 
-        cy.server().route({
+        cy.intercept({
             url: '/api/projects/proj1/pointHistory',
             status: 200,
             response: data,
@@ -294,7 +294,7 @@ describe('Client Display Tests', () => {
             }]
         }
 
-        cy.server().route({
+        cy.intercept({
             url: '/api/projects/proj1/pointHistory',
             status: 200,
             response: data,
@@ -352,7 +352,7 @@ describe('Client Display Tests', () => {
             }]
         }
 
-        cy.server().route({
+        cy.intercept({
             url: '/api/projects/proj1/pointHistory',
             status: 200,
             response: data,
@@ -410,7 +410,7 @@ describe('Client Display Tests', () => {
             }]
         }
 
-        cy.server().route({
+        cy.intercept({
             url: '/api/projects/proj1/pointHistory',
             status: 200,
             response: data,
@@ -485,7 +485,7 @@ describe('Client Display Tests', () => {
             }]
         }
 
-        cy.server().route({
+        cy.intercept({
             url: '/api/projects/proj1/pointHistory',
             status: 200,
             response: data,
@@ -562,7 +562,7 @@ describe('Client Display Tests', () => {
             }]
         }
 
-        cy.server().route({
+        cy.intercept({
             url: '/api/projects/proj1/pointHistory',
             status: 200,
             response: data,
@@ -612,7 +612,7 @@ describe('Client Display Tests', () => {
             }]
         }
 
-        cy.server().route({
+        cy.intercept({
             url: '/api/projects/proj1/pointHistory',
             status: 200,
             response: data,
@@ -655,7 +655,7 @@ describe('Client Display Tests', () => {
             }]
         }
 
-        cy.server().route({
+        cy.intercept({
             url: '/api/projects/proj1/pointHistory',
             status: 200,
             response: data,
@@ -703,12 +703,12 @@ describe('Client Display Tests', () => {
             }]
         }
 
-        cy.server().route({
+        cy.intercept({
             url: '/api/projects/proj1/pointHistory',
             status: 200,
             response: data,
         }).as('getPointHistory');
-        cy.server().route({
+        cy.intercept({
             url: '/api/projects/proj1/subjects/subj1/pointHistory',
             status: 200,
             response: data,
@@ -727,7 +727,7 @@ describe('Client Display Tests', () => {
 
     it('empty point history', () => {
         cy.cdVisit('/');
-        cy.server().route('/api/projects/proj1/pointHistory').as('getPointHistory');
+        cy.intercept('/api/projects/proj1/pointHistory').as('getPointHistory');
         cy.wait('@getPointHistory')
         // let's wait for animation to complete
         cy.wait(waitForAnimation);
@@ -784,7 +784,7 @@ describe('Client Display Tests', () => {
             }]
         };
 
-        cy.server().route({
+        cy.intercept({
             url: '/api/projects/proj1/pointHistory',
             status: 200,
             response: data,

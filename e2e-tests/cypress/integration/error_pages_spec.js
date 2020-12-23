@@ -20,7 +20,7 @@ describe('Error Pages Tests', () => {
     });
 
     it('Project Does Not Exist', () => {
-        cy.route({
+        cy.intercept({
             method: 'GET',
             url: '/admin/projects/fake'
         }).as('loadProject');
@@ -29,7 +29,7 @@ describe('Error Pages Tests', () => {
         cy.get('[data-cy=notAuthorizedExplanation]').should('be.visible');
         cy.get('[data-cy=notAuthorizedExplanation]').contains('You do not have permission to view/manage this Project OR this Project does not exist');
 
-        cy.route({
+        cy.intercept({
             method: 'GET',
             url: '/admin/projects/fake/subjects/fake'
         }).as('loadSubject');
@@ -38,7 +38,7 @@ describe('Error Pages Tests', () => {
         cy.get('[data-cy=notAuthorizedExplanation]').should('be.visible');
         cy.get('[data-cy=notAuthorizedExplanation]').contains('You do not have permission to view/manage this Project OR this Project does not exist');
 
-        cy.route({
+        cy.intercept({
             method: 'GET',
             url: '/admin/projects/fake/subjects/fake/skills/fake'
         }).as('loadSkill');
@@ -48,7 +48,7 @@ describe('Error Pages Tests', () => {
         cy.get('[data-cy=notAuthorizedExplanation]').should('be.visible');
         cy.get('[data-cy=notAuthorizedExplanation]').contains('You do not have permission to view/manage this Project OR this Project does not exist');
 
-        cy.route({
+        cy.intercept({
             method: 'GET',
             url: '/admin/projects/fake/badges/fake'
         }).as('loadBadge');
@@ -92,7 +92,7 @@ describe('Error Pages Tests', () => {
         });
         cy.logout();
         cy.login('user2', 'password2');
-        cy.route({
+        cy.intercept({
             method: 'GET',
             url: '/admin/projects/proj1'
         }).as('loadProject');
@@ -102,7 +102,7 @@ describe('Error Pages Tests', () => {
         cy.get('[data-cy=notAuthorizedExplanation]').should('be.visible');
         cy.get('[data-cy=notAuthorizedExplanation]').contains('You do not have permission to view/manage this Project OR this Project does not exist');
 
-        cy.route({
+        cy.intercept({
             method: 'GET',
             url: '/admin/projects/proj1/subjects/subj1'
         }).as('loadSubject');
@@ -111,7 +111,7 @@ describe('Error Pages Tests', () => {
         cy.get('[data-cy=notAuthorizedExplanation]').should('be.visible');
         cy.get('[data-cy=notAuthorizedExplanation]').contains('You do not have permission to view/manage this Project OR this Project does not exist');
 
-        cy.route({
+        cy.intercept({
             method: 'GET',
             url: '/admin/projects/proj1/subjects/subj1/skills/skill1'
         }).as('loadSkill');
@@ -120,7 +120,7 @@ describe('Error Pages Tests', () => {
         cy.get('[data-cy=notAuthorizedExplanation]').should('be.visible');
         cy.get('[data-cy=notAuthorizedExplanation]').contains('You do not have permission to view/manage this Project OR this Project does not exist');
 
-        cy.route({
+        cy.intercept({
             method: 'GET',
             url: '/admin/projects/proj1/badges/badge1'
         }).as('loadBadge');
@@ -135,7 +135,7 @@ describe('Error Pages Tests', () => {
             projectId: 'proj1',
             name: "proj1"
         });
-        cy.route({
+        cy.intercept({
             method: 'GET',
             url: '/admin/projects/proj1/subjects/fake'
         }).as('loadSubject');
@@ -159,7 +159,7 @@ describe('Error Pages Tests', () => {
             name: "Subject 1"
         });
 
-        cy.route({
+        cy.intercept({
             method: 'GET',
             url: '/admin/projects/proj1/subjects/subj1/skills/skill1'
         }).as('loadSkill');
@@ -175,7 +175,7 @@ describe('Error Pages Tests', () => {
             projectId: 'proj1',
             name: "proj1"
         });
-        cy.route({
+        cy.intercept({
             method: 'GET',
             url: '/admin/projects/proj1/badges/fake'
         }).as('loadBadge');
@@ -195,7 +195,7 @@ describe('Error Pages Tests', () => {
         cy.logout();
         cy.login(supervisorUser, 'password');
 
-        cy.route({
+        cy.intercept({
             method: 'GET',
             url: '/supervisor/badges/fake'
         }).as('loadGlobalBadge');
@@ -225,7 +225,7 @@ describe('Error Pages Tests', () => {
         cy.logout();
         cy.login('user1', 'password1');
 
-        cy.route('GET', '/supervisor/badges/globalBadge1').as('loadGlobalBadge');
+        cy.intercept('GET', '/supervisor/badges/globalBadge1').as('loadGlobalBadge');
         cy.visit('/globalBadges/globalBadge1');
         cy.wait('@loadGlobalBadge');
 

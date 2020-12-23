@@ -79,12 +79,12 @@ describe('Accessibility Tests', () => {
 
   it('project', () => {
     cy.server();
-    cy.route(
+    cy.intercept(
       'GET',
       '/admin/projects/MyNewtestProject/metrics/userAchievementsChartBuilder?pageSize=5&currentPage=1&usernameFilter=&fromDayFilter=&toDayFilter=&nameFilter=&minLevel=&achievementTypes=Overall,Subject,Skill,Badge&sortBy=achievedOn&sortDesc=true'
     ).as('userAchievementMetrics');
-    cy.route('GET', '/admin/projects/MyNewtestProject/metrics/skillUsageNavigatorChartBuilder').as('skillUsageMetrics');
-    cy.route('GET', '/admin/projects/MyNewtestProject/metrics/numUsersPerSubjectPerLevelChartBuilder').as('subjectMetrics');
+    cy.intercept('GET', '/admin/projects/MyNewtestProject/metrics/skillUsageNavigatorChartBuilder').as('skillUsageMetrics');
+    cy.intercept('GET', '/admin/projects/MyNewtestProject/metrics/numUsersPerSubjectPerLevelChartBuilder').as('subjectMetrics');
     cy.visit('/');
     cy.injectAxe()
     //view project
@@ -146,11 +146,11 @@ describe('Accessibility Tests', () => {
 
   it('subject', () => {
     cy.server();
-    cy.route('GET', '/admin/projects/MyNewtestProject/subjects').as('getSubjects');
-    cy.route('GET', '/admin/projects/MyNewtestProject/subjects/subj1/skills').as('getSkills');
-    cy.route('GET', '/admin/projects/MyNewtestProject/subjects/subj1/levels').as('getLevels');
-    cy.route('GET', '/admin/projects/MyNewtestProject/subjects/subj1/users?query=&limit=10&ascending=1&page=1&byColumn=0&orderBy=userId').as('getUsers');
-    cy.route('GET', '/admin/projects/MyNewtestProject/performedSkills/u1?query=&limit=10&ascending=0&page=1&byColumn=0&orderBy=performedOn').as('getPerformedSkills');
+    cy.intercept('GET', '/admin/projects/MyNewtestProject/subjects').as('getSubjects');
+    cy.intercept('GET', '/admin/projects/MyNewtestProject/subjects/subj1/skills').as('getSkills');
+    cy.intercept('GET', '/admin/projects/MyNewtestProject/subjects/subj1/levels').as('getLevels');
+    cy.intercept('GET', '/admin/projects/MyNewtestProject/subjects/subj1/users?query=&limit=10&ascending=1&page=1&byColumn=0&orderBy=userId').as('getUsers');
+    cy.intercept('GET', '/admin/projects/MyNewtestProject/performedSkills/u1?query=&limit=10&ascending=0&page=1&byColumn=0&orderBy=performedOn').as('getPerformedSkills');
     cy.visit('/');
     cy.injectAxe()
     //view project
@@ -284,7 +284,7 @@ describe('Accessibility Tests', () => {
     cy.logout();
     cy.login('root@skills.org', 'password');
     cy.server();
-    cy.route('POST', ' /supervisor/badges/globalbadgeBadge/projects/MyNewtestProject/level/1').as('saveGlobalBadgeLevel');
+    cy.intercept('POST', ' /supervisor/badges/globalbadgeBadge/projects/MyNewtestProject/level/1').as('saveGlobalBadgeLevel');
     cy.request('PUT', `/root/users/root@skills.org/roles/ROLE_SUPERVISOR`);
     cy.visit("/");
     cy.injectAxe()

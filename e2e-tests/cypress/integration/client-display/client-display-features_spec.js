@@ -60,7 +60,7 @@ describe('Client Display Features Tests', () => {
 
   it('display new version banner when software is updated', () => {
     cy.server()
-    cy.route({
+    cy.intercept({
       url: '/api/projects/proj1/subjects/subj1/summary',
       status: 200,
       response: {
@@ -82,7 +82,7 @@ describe('Client Display Features Tests', () => {
         'skills-client-lib-version': dateFormatter(new Date())
       },
     }).as('getSubjectSummary');
-    cy.route('GET', '/api/projects/proj1/pointHistory').as('pointHistoryChart');
+    cy.intercept('GET', '/api/projects/proj1/pointHistory').as('pointHistoryChart');
 
     cy.cdVisit('/');
     cy.injectAxe();
@@ -104,7 +104,7 @@ describe('Client Display Features Tests', () => {
 
   it('do not display new version banner if lib version in headers is older than lib version in local storage', () => {
     const mockedLibVersion = dateFormatter(new Date() - 1000 * 60 * 60 * 24 * 5);
-    cy.server().route({
+    cy.intercept({
       url: '/api/projects/proj1/subjects/subj1/summary',
       status: 200,
       response: {
@@ -127,7 +127,7 @@ describe('Client Display Features Tests', () => {
       },
     }).as('getSubjectSummary');
 
-    cy.server().route({
+    cy.intercept({
       url: '/api/projects/proj1/subjects/subj1/rank',
       status: 200,
       response: {
@@ -139,7 +139,7 @@ describe('Client Display Features Tests', () => {
       },
     }).as('getRank');
 
-    cy.server().route({
+    cy.intercept({
       url: '/api/projects/proj1/subjects/subj1/pointHistory',
       status: 200,
       response: { 'pointsHistory': [] },
@@ -185,7 +185,7 @@ describe('Client Display Features Tests', () => {
       userId: Cypress.env('proxyUser'),
       timestamp: new Date().getTime() - 1000 * 60 * 60 * 24
     })
-    cy.route('GET', '/api/projects/proj1/pointHistory').as('pointHistoryChart');
+    cy.intercept('GET', '/api/projects/proj1/pointHistory').as('pointHistoryChart');
 
     cy.cdVisit('/');
     cy.injectAxe();

@@ -148,8 +148,8 @@ describe('Login Tests', () => {
 
     it('no login form for oAuthOnly mode', () => {
       cy.server()
-      cy.route('GET', '/public/config', {oAuthOnly: true}).as('loadConfig');
-      cy.route('GET', '/app/oAuthProviders', [{"registrationId":"gitlab","clientName":"GitLab","iconClass":"fab fa-gitlab"}]).as('getOauthProviders')
+      cy.intercept('GET', '/public/config', {oAuthOnly: true}).as('loadConfig');
+      cy.intercept('GET', '/app/oAuthProviders', [{"registrationId":"gitlab","clientName":"GitLab","iconClass":"fab fa-gitlab"}]).as('getOauthProviders')
 
       cy.visit('/');
 
@@ -163,8 +163,8 @@ describe('Login Tests', () => {
 
     it('login form is present for oAuthOnly mode when showForm=true', () => {
       cy.server()
-      cy.route('GET', '/public/config', {oAuthOnly: true}).as('loadConfig');
-      cy.route('GET', '/app/oAuthProviders', [{"registrationId":"gitlab","clientName":"GitLab","iconClass":"fab fa-gitlab"}]).as('getOauthProviders')
+      cy.intercept('GET', '/public/config', {oAuthOnly: true}).as('loadConfig');
+      cy.intercept('GET', '/app/oAuthProviders', [{"registrationId":"gitlab","clientName":"GitLab","iconClass":"fab fa-gitlab"}]).as('getOauthProviders')
 
       cy.visit('/skills-login', {
         qs: {
