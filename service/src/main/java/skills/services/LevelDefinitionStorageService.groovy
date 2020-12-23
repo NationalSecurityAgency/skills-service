@@ -382,9 +382,15 @@ class LevelDefinitionStorageService {
         }
 
         if(asPoints) {
-            assert existingDefinitions.levels.collect({ it.pointsTo }).max() < nextLevelRequest.points
+            int max = existingDefinitions.levels.collect({ it.pointsTo }).max()
+            if (max >= nextLevelRequest.points) {
+                throw new SkillException("Provided [${nextLevelRequest.points}] points must be > than existing [${max}] points", projectId, skillId)
+            }
         }else{
-            assert existingDefinitions.levels.collect({ it.percent }).max() < nextLevelRequest.percent
+            int max =existingDefinitions.levels.collect({ it.percent }).max()
+            if (max >= nextLevelRequest.percent) {
+                throw new SkillException("Provided [${nextLevelRequest.percent}] % must be > than existing [${max}] %", projectId, skillId)
+            }
         }
 
         if (existingDefinitions) {

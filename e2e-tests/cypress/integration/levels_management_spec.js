@@ -50,6 +50,9 @@ describe('Levels Management Tests', () => {
     })
 
     it('once max levels are reached add level button should be disabled', () => {
+        cy.server();
+        cy.route('POST', '/admin/projects/proj1/settings').as('setSettings')
+
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
             projectId: 'proj1',
             subjectId: 'subj1',
@@ -85,6 +88,8 @@ describe('Levels Management Tests', () => {
         cy.clickNav('Settings');
         cy.get('[data-cy="usePointsForLevelsSwitch"]').check({force: true});
         cy.get('[data-cy="saveSettingsBtn"]').click();
+        cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled');
+        cy.wait('@setSettings');
 
         for (let i = 1; i < 20; i = i + 1) {
             cy.request('POST', '/admin/projects/proj1/levels/next', {
@@ -174,6 +179,9 @@ describe('Levels Management Tests', () => {
     });
 
     it('subject: once max levels are reached add level button should be disabled', () => {
+        cy.server();
+        cy.route('POST', '/admin/projects/proj1/settings').as('setSettings')
+
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
             projectId: 'proj1',
             subjectId: 'subj1',
@@ -209,6 +217,8 @@ describe('Levels Management Tests', () => {
         cy.clickNav('Settings');
         cy.get('[data-cy="usePointsForLevelsSwitch"]').check({force: true});
         cy.get('[data-cy="saveSettingsBtn"]').click();
+        cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled');
+        cy.wait('@setSettings');
 
         for (let i = 1; i < 20; i = i + 1) {
             cy.request('POST', '/admin/projects/proj1/subjects/subj1/levels/next', {
