@@ -355,7 +355,6 @@ limitations under the License.
         if (e && e.edit) {
           const refName = `edit_${this.currentlyFocusedLevelId}`;
           ref = this.$refs[refName];
-          console.log(`Focusing on ${refName}, ref is ${JSON.stringify(ref)}`);
         }
         this.currentlyFocusedLevelId = '';
         this.$nextTick(() => {
