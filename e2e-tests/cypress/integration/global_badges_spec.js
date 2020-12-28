@@ -353,6 +353,10 @@ describe('Global Badges Tests', () => {
         cy.route('PUT', `/supervisor/badges/ABadgeBadge`).as('postGlobalBadge');
         cy.route('GET', `/supervisor/badges/id/ABadgeBadge/exists`).as('idExists');
         cy.route('POST', '/supervisor/badges/name/exists').as('nameExists');
+        cy.route('GET', '/supervisor/badges/ABadgeBadge/projects/available').as('availableProjects')
+        cy.route('GET', '/supervisor/badges/ABadgeBadge/skills/available?query=').as('availableSkills')
+        cy.route('GET', '/supervisor/badges/ABadgeBadge').as('badgeInfo')
+        cy.route('GET', '/supervisor/projects/proj2/levels').as('proj2Levels');
         //proj/subj/skill1
         cy.request('POST', '/app/projects/proj1', {
             projectId: 'proj1',
@@ -413,15 +417,22 @@ describe('Global Badges Tests', () => {
 
         cy.contains('A Badge').should('exist');
         cy.contains('Manage').click();
+
+        cy.wait('@availableSkills');
         cy.get('.multiselect__tags').click();
         cy.get('.multiselect__tags input').type('{enter}');
         cy.get('div.table-responsive').should('be.visible');
         cy.clickNav('Levels');
 
+        cy.wait('@availableProjects');
+        cy.wait('@badgeInfo');
+
         cy.get('.multiselect__tags').first().click({force:true});
         cy.get('.multiselect__tags input').first().type('proj2{enter}');
 
-        cy.get('.multiselect__tags').last().click();
+        cy.wait('@proj2Levels');
+
+        cy.get('.multiselect__tags').last().click({force: true});
         cy.get('.multiselect__tags input').last().type('5{enter}');
 
         cy.contains('Add').click();
