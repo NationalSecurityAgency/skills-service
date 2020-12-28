@@ -154,10 +154,10 @@ describe('Accessibility Tests', () => {
     cy.visit('/');
     cy.injectAxe()
     //view project
-    cy.contains('Manage').click();
+    cy.get('[data-cy=projCard_MyNewtestProject_manageBtn]').click();
     cy.wait('@getSubjects');
     //view subject
-    cy.contains('Manage').click();
+    cy.get('[data-cy=subjCard_subj1_manageBtn]').click();
     cy.wait('@getSkills');
     cy.customLighthouse();
     cy.customA11y();

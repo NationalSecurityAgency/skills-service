@@ -29,6 +29,7 @@ limitations under the License.
                              name="check-button"
                              v-on:input="levelPointsEnabledChanged"
                              aria-labelledby="pointsForLevelsLabel"
+                             data-cy="usePointsForLevelsSwitch"
                              switch>
               {{ settings.levelPointsEnabled.value }}
             </b-form-checkbox>
@@ -53,7 +54,7 @@ limitations under the License.
 
         <div class="row">
           <div class="col">
-            <b-button variant="outline-success" @click="save" :disabled="!isDirty">
+            <b-button variant="outline-success" @click="save" :disabled="!isDirty" data-cy="saveSettingsBtn">
               Save <i class="fas fa-arrow-circle-right"/>
             </b-button>
 

@@ -419,12 +419,15 @@ Cypress.Commands.add('reportHistoryOfEvents', (projId, user, numDays=10, skipWee
 });
 
 
-Cypress.Commands.add('validateTable', (tableSelector, expected, pageSize = 5, onlyVisiblePage = false, numRowsParam = null) => {
+Cypress.Commands.add('validateTable', (tableSelector, expected, pageSize = 5, onlyVisiblePage = false, numRowsParam = null, validateTotalRows = true) => {
     cy.get(tableSelector).contains('Loading...').should('not.exist')
     const rowSelector = `${tableSelector} tbody tr`
     const numRows =  numRowsParam ? numRowsParam : expected.length;
 
-    cy.get('[data-cy=skillsBTableTotalRows]').contains(numRows);
+    if (validateTotalRows) {
+        cy.get('[data-cy=skillsBTableTotalRows]')
+            .contains(numRows);
+    }
 
     cy.get(rowSelector).should('have.length', Math.min(pageSize, numRows)).as('cyRows');
 

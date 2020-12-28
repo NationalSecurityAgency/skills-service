@@ -50,7 +50,7 @@ limitations under the License.
                     <label for="editLevel-pointsFrom" class="mt-3">* Points From</label>
                     <ValidationProvider name="Points From" :debounce=500 v-slot="{errors}" rules="optionalNumeric|required|min_value:0|overlap">
                       <b-form-input id="editlevel-pointsFrom" v-model="levelInternal.pointsFrom" name="pointsFrom" aria-required="true"
-                                    v-on:keyup.enter="handleSubmit(saveLevel)"
+                                    v-on:keyup.enter="handleSubmit(saveLevel)" data-cy="editLevelPoints"
                                     :aria-invalid="errors && errors.length > 0"
                                     aria-errormessage="levelPointsFromError" aria-describedby="levelPointsFromError"></b-form-input>
                       <small class="form-text text-danger" v-show="errors[0]" id="levelPointsFromError">{{ errors[0] }}</small>
@@ -92,7 +92,7 @@ limitations under the License.
                     <label for="newLevel-points" class="mt-3">* Points</label>
                     <ValidationProvider name="Points" :debounce=500 v-slot="{errors}" rules="optionalNumeric|required|min_value:0|overlap">
                       <b-form-input id="newlevel-points" v-model="levelInternal.points" name="points" aria-required="true"
-                                    v-on:keyup.enter="handleSubmit(saveLevel)"
+                                    v-on:keyup.enter="handleSubmit(saveLevel)" data-cy="newLevelPoints"
                                     :aria-invalid="errors && errors.length > 0"
                                     aria-errormessage="levelPointsError" aria-describedby="levelPointsError"></b-form-input>
                       <small class="form-text text-danger" v-show="errors[0]" id="levelPointsError">{{ errors[0] }}</small>
