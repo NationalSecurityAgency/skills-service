@@ -15,10 +15,6 @@
  */
 describe('Error Pages Tests', () => {
 
-    beforeEach(() => {
-        cy.server();
-    });
-
     it('Project Does Not Exist', () => {
         cy.intercept({
             method: 'GET',

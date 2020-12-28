@@ -18,12 +18,11 @@ describe('Login Tests', () => {
   beforeEach(() => {
     cy.logout();
 
-    cy.server()
-      .route('GET', '/app/projects').as('getProjects')
-      .route('GET', '/api/icons/customIconCss').as('getProjectsCustomIcons')
-      .route('GET', '/app/userInfo').as('getUserInfo')
-      .route('GET', '/app/oAuthProviders').as('getOAuthProviders')
-      .route('POST', '/performLogin').as('postPerformLogin');
+    cy.intercept('GET', '/app/projects').as('getProjects')
+      .intercept('GET', '/api/icons/customIconCss').as('getProjectsCustomIcons')
+      .intercept('GET', '/app/userInfo').as('getUserInfo')
+      .intercept('GET', '/app/oAuthProviders').as('getOAuthProviders')
+      .intercept('POST', '/performLogin').as('postPerformLogin');
   });
 
   it('form: successful dashboard login', () => {
@@ -147,7 +146,6 @@ describe('Login Tests', () => {
     })
 
     it('no login form for oAuthOnly mode', () => {
-      cy.server()
       cy.intercept('GET', '/public/config', {oAuthOnly: true}).as('loadConfig');
       cy.intercept('GET', '/app/oAuthProviders', [{"registrationId":"gitlab","clientName":"GitLab","iconClass":"fab fa-gitlab"}]).as('getOauthProviders')
 
@@ -162,7 +160,6 @@ describe('Login Tests', () => {
     });
 
     it('login form is present for oAuthOnly mode when showForm=true', () => {
-      cy.server()
       cy.intercept('GET', '/public/config', {oAuthOnly: true}).as('loadConfig');
       cy.intercept('GET', '/app/oAuthProviders', [{"registrationId":"gitlab","clientName":"GitLab","iconClass":"fab fa-gitlab"}]).as('getOauthProviders')
 

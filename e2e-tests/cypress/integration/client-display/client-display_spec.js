@@ -124,7 +124,7 @@ describe('Client Display Tests', () => {
     });
 
     it('visit home page', () => {
-        cy.server();
+
         cy.request('POST', '/admin/projects/proj1/badges/badge1', {
             projectId: 'proj1',
             badgeId: 'badge1',
@@ -154,7 +154,7 @@ describe('Client Display Tests', () => {
     });
 
     it('back button', () => {
-        cy.server();
+
         cy.intercept('GET', '/api/projects/proj1/pointHistory').as('pointHistoryChart');
 
         cy.cdVisit('/');

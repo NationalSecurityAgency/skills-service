@@ -93,8 +93,7 @@ describe('Metrics Tests - Achievements', () => {
     it('achievements table - few rows', () => {
         cy.viewport(1500, 750);
 
-        cy.server()
-            .route('/admin/projects/proj1/metrics/userAchievementsChartBuilder?**')
+        cy.intercept('/admin/projects/proj1/metrics/userAchievementsChartBuilder?**')
             .as('userAchievementsChartBuilder');
 
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
@@ -165,8 +164,7 @@ describe('Metrics Tests - Achievements', () => {
     });
 
     it('achievements table - validate the link to user client display', () => {
-        cy.server()
-            .route('/admin/projects/proj1/metrics/userAchievementsChartBuilder?**')
+        cy.intercept('/admin/projects/proj1/metrics/userAchievementsChartBuilder?**')
             .as('userAchievementsChartBuilder');
 
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
@@ -243,8 +241,7 @@ describe('Metrics Tests - Achievements', () => {
 
 
     it('achievements table - sorting', () => {
-        cy.server()
-            .route('/admin/projects/proj1/metrics/userAchievementsChartBuilder?**')
+        cy.intercept('/admin/projects/proj1/metrics/userAchievementsChartBuilder?**')
             .as('userAchievementsChartBuilder');
 
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
@@ -317,8 +314,7 @@ describe('Metrics Tests - Achievements', () => {
     });
 
     it('achievements table - filtering', () => {
-        cy.server()
-            .route('/admin/projects/proj1/metrics/userAchievementsChartBuilder?**')
+        cy.intercept('/admin/projects/proj1/metrics/userAchievementsChartBuilder?**')
             .as('userAchievementsChartBuilder');
 
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {

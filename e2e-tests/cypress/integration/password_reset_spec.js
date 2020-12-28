@@ -46,7 +46,7 @@ describe('Password Reset Tests', () => {
 
     cy.logout();
 
-    cy.server();
+
     cy.intercept({
       method: 'POST',
       url: '/performPasswordReset'

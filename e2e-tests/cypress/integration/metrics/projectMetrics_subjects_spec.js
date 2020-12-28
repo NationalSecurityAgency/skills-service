@@ -78,8 +78,7 @@ describe('Metrics Tests', () => {
             openMode: 0
         }
     },() => {
-        cy.server()
-            .route('/admin/projects/proj1/metrics/usersByLevelForSubjectOverTimeChartBuilder?subjectId=subj1')
+        cy.intercept('/admin/projects/proj1/metrics/usersByLevelForSubjectOverTimeChartBuilder?subjectId=subj1')
             .as('getLevelsOverTimeData');
 
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
@@ -194,8 +193,7 @@ describe('Metrics Tests', () => {
             openMode: 0
         }
     },() => {
-        cy.server()
-            .route('/admin/projects/proj1/metrics/usersByLevelForSubjectOverTimeChartBuilder?subjectId=subj1')
+        cy.intercept('/admin/projects/proj1/metrics/usersByLevelForSubjectOverTimeChartBuilder?subjectId=subj1')
             .as('getLevelsOverTimeData');
 
         cy.intercept({

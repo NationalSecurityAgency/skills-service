@@ -16,6 +16,7 @@
 describe('Global Badges Tests', () => {
 
     beforeEach(() => {
+
         cy.logout();
         const supervisorUser = 'supervisor@skills.org';
         cy.register(supervisorUser, 'password');
@@ -29,6 +30,7 @@ describe('Global Badges Tests', () => {
 
         const expectedId = 'LotsofspecialPcharsBadge';
         const providedName = "!L@o#t$s of %s^p&e*c/?#(i)a_l++_|}{P c'ha'rs";
+
         cy.intercept('GET', `/supervisor/badges`).as('getGlobalBadges');
         cy.intercept('PUT', `/supervisor/badges/${expectedId}`).as('postGlobalBadge');
         cy.intercept('GET', `/supervisor/badges/id/${expectedId}/exists`).as('idExists');
@@ -51,6 +53,7 @@ describe('Global Badges Tests', () => {
     });
 
     it('name causes id to fail validation', () => {
+
         cy.intercept('GET', `/supervisor/badges`).as('getGlobalBadges');
         cy.intercept('POST', '/supervisor/badges/name/exists').as('nameExists');
         cy.intercept('GET', '/app/userInfo/hasRole/ROLE_SUPERVISOR').as('checkSupervisorRole');
@@ -87,6 +90,7 @@ describe('Global Badges Tests', () => {
             name: providedName,
             originalBadgeId: ''
         });
+
 
         cy.intercept('GET', `/supervisor/badges`).as('getGlobalBadges');
         cy.intercept('GET', '/app/userInfo/hasRole/ROLE_SUPERVISOR').as('checkSupervisorRole')
@@ -185,6 +189,7 @@ describe('Global Badges Tests', () => {
     });
 
     it('Navigate to global badges menu entry', () => {
+
         cy.intercept('GET', `/supervisor/badges`).as('getGlobalBadges');
 
         cy.visit('/');

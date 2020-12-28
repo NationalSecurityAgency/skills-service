@@ -59,11 +59,12 @@ describe('Client Display Features Tests', () => {
   })
 
   it('display new version banner when software is updated', () => {
-    cy.server()
     cy.intercept({
-      url: '/api/projects/proj1/subjects/subj1/summary',
-      status: 200,
-      response: {
+      method: '*',
+      path: '/api/projects/proj1/subjects/subj1/summary',
+    }, {
+      // statusCode: 200,
+      body: {
         'subject': 'Subject 1',
         'subjectId': 'subj1',
         'description': 'Description',
@@ -79,7 +80,8 @@ describe('Client Display Features Tests', () => {
         'helpUrl': 'http://doHelpOnThisSubject.com'
       },
       headers: {
-        'skills-client-lib-version': dateFormatter(new Date())
+        'skills-client-lib-version': dateFormatter(new Date()),
+        'skills-client-lib-version-2': dateFormatter(new Date())
       },
     }).as('getSubjectSummary');
     cy.intercept('GET', '/api/projects/proj1/pointHistory').as('pointHistoryChart');
@@ -105,9 +107,10 @@ describe('Client Display Features Tests', () => {
   it('do not display new version banner if lib version in headers is older than lib version in local storage', () => {
     const mockedLibVersion = dateFormatter(new Date() - 1000 * 60 * 60 * 24 * 5);
     cy.intercept({
-      url: '/api/projects/proj1/subjects/subj1/summary',
-      status: 200,
-      response: {
+      path: '/api/projects/proj1/subjects/subj1/summary',
+      statusCode: 200,
+    }, {
+      body: {
         'subject': 'Subject 1',
         'subjectId': 'subj1',
         'description': 'Description',
@@ -123,14 +126,15 @@ describe('Client Display Features Tests', () => {
         'helpUrl': 'http://doHelpOnThisSubject.com'
       },
       headers: {
-        'skills-client-lib-version': mockedLibVersion
+        'skills-client-lib-version': mockedLibVersion,
       },
     }).as('getSubjectSummary');
 
     cy.intercept({
-      url: '/api/projects/proj1/subjects/subj1/rank',
-      status: 200,
-      response: {
+      path: '/api/projects/proj1/subjects/subj1/rank',
+    }, {
+      statusCode: 200,
+      body: {
         'numUsers': 1,
         'position': 1
       },
@@ -141,8 +145,9 @@ describe('Client Display Features Tests', () => {
 
     cy.intercept({
       url: '/api/projects/proj1/subjects/subj1/pointHistory',
-      status: 200,
-      response: { 'pointsHistory': [] },
+    }, {
+      statusCode: 200,
+      body: { 'pointsHistory': [] },
       headers: {
         'skills-client-lib-version': mockedLibVersion
       },
@@ -161,7 +166,6 @@ describe('Client Display Features Tests', () => {
   });
 
   it('achieve level 5, then add new skill', () => {
-    cy.server();
     cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill1`, {
       projectId: 'proj1',
       subjectId: 'subj1',

@@ -28,7 +28,7 @@ describe('Skills Tests', () => {
     });
 
     it('name causes id to fail validation', () => {
-      cy.server();
+
       cy.intercept({
         method: 'GET',
         url: '/admin/projects/proj1/subjects/subj1'
@@ -52,7 +52,7 @@ describe('Skills Tests', () => {
     });
 
     it('close skill dialog', () => {
-      cy.server();
+
       cy.intercept({
         method: 'GET',
         url: '/admin/projects/proj1/subjects/subj1'
@@ -67,7 +67,6 @@ describe('Skills Tests', () => {
     });
 
     it('validation', () => {
-      cy.server()
       cy.intercept('POST', `/admin/projects/proj1/subjects/subj1/skills/Skill1Skill`).as('postNewSkill');
       cy.intercept('GET', `/admin/projects/proj1/subjects/subj1/skills/Skill1Skill`).as('getSkill');
       cy.intercept({
@@ -178,7 +177,6 @@ describe('Skills Tests', () => {
     });
 
     it('edit number of occurrences', () => {
-        cy.server()
         cy.intercept('POST', `/admin/projects/proj1/subjects/subj1/skills/Skill1Skill`).as('postNewSkill');
         cy.intercept('GET', `/admin/projects/proj1/subjects/subj1/skills/Skill1Skill`).as('getSkill');
         cy.intercept({
@@ -222,7 +220,7 @@ describe('Skills Tests', () => {
     it('create skill with special chars', () => {
         const expectedId = 'LotsofspecialPcharsSkill';
         const providedName = "!L@o#t$s of %s^p&e*c(i)/#?a_l++_|}{P c'ha'rs";
-        cy.server();
+
         cy.intercept('POST', `/admin/projects/proj1/subjects/subj1/skills/${expectedId}`).as('postNewSkill');
         cy.intercept('POST', `/admin/projects/proj1/skillNameExists`).as('nameExists');
 
@@ -249,7 +247,7 @@ describe('Skills Tests', () => {
     it('create skill using enter key', () => {
       const expectedId = 'LotsofspecialPcharsSkill';
       const providedName = "!L@o#t$s of %s^p&e*c(i)/#?a_l++_|}{P c'ha'rs";
-      cy.server();
+
       cy.intercept('POST', `/admin/projects/proj1/subjects/subj1/skills/${expectedId}`).as('postNewSkill');
       cy.intercept('POST', `/admin/projects/proj1/skillNameExists`).as('nameExists');
 
@@ -283,7 +281,7 @@ describe('Skills Tests', () => {
             numPerformToCompletion: '5'
         });
 
-        cy.server();
+
         cy.intercept({
             method: 'POST',
             url: '/app/users/projects/proj1/suggestClientUsers?userSuggestOption=TWO'
@@ -341,7 +339,7 @@ describe('Skills Tests', () => {
             numPerformToCompletion: '5'
         });
 
-        cy.server();
+
         cy.intercept({
             method: 'POST',
             url: '/app/users/projects/proj1/suggestClientUsers?userSuggestOption=TWO'
@@ -364,12 +362,12 @@ describe('Skills Tests', () => {
     });
 
     it('Add Skill Event User Not Found', () => {
-       cy.server();
        cy.intercept({
-           method: 'PUT',
-           url: '/api/projects/*/skills/*',
-           status: 400,
-           response: {errorCode: 'UserNotFound', explanation: 'Some Error Occurred'}
+         method: 'PUT',
+         path: '/api/projects/*/skills/*',
+       }, {
+         statusCode: 400,
+         body: {errorCode: 'UserNotFound', explanation: 'Some Error Occurred'}
        }).as('addUser');
 
         cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1', {
@@ -408,7 +406,7 @@ describe('Skills Tests', () => {
             pointIncrement: '50',
             numPerformToCompletion: '5'
         });
-        cy.server();
+
         cy.intercept({
             method: 'GET',
             url: '/admin/projects/proj1/subjects/subj1/skills/skill1'
@@ -466,18 +464,17 @@ describe('Skills Tests', () => {
             numPerformToCompletion: '5'
         });
 
-        cy.server();
-
         cy.intercept({
-            method: 'POST',
-            status: 400,
-            url: '/admin/projects/proj1/skills/skill1/dependency/*',
-            response: {errorCode: 'FailedToAssignDependency', explanation: 'Error Adding Dependency'}
-        });
+          method: 'POST',
+          path: '/admin/projects/proj1/skills/skill1/dependency/*',
+        }, {
+          statusCode: 400,
+          body: {errorCode: 'FailedToAssignDependency', explanation: 'Error Adding Dependency'}
+        }).as('addDependencyError');
 
         cy.intercept({
             method: 'GET',
-            url: '/admin/projects/proj1/subjects/subj1/skills/skill1'
+            path: '/admin/projects/proj1/subjects/subj1/skills/skill1'
         }).as('loadSkill');
 
         cy.visit('/projects/proj1/subjects/subj1/skills/skill1');
@@ -488,15 +485,15 @@ describe('Skills Tests', () => {
         cy.get('.multiselect__tags').click();
         cy.get('.multiselect__tags input').type('{enter}')
 
+        cy.wait('@addDependencyError')
         cy.get('div .alert').contains('Error! Request could not be completed! Error Adding Dependency');
-
     })
 
     it('create skill and then update skillId', () => {
       const initialId = 'myid1Skill';
       const newId = 'MyId1Skill';
       const providedName = "my id 1";
-      cy.server();
+
       cy.intercept('POST', `/admin/projects/proj1/subjects/subj1/skills/${initialId}`).as('postNewSkill');
       cy.intercept('POST', `/admin/projects/proj1/skillNameExists`).as('nameExists');
       cy.intercept('GET', `/admin/projects/proj1/entityIdExists?id=*`).as('skillIdExists');
@@ -536,7 +533,7 @@ describe('Skills Tests', () => {
   });
 
   it('new skill button should retain focus after dialog closes', () => {
-    cy.server();
+
     cy.intercept({
       method: 'GET',
       url: '/admin/projects/proj1/subjects/subj1'
@@ -564,7 +561,7 @@ describe('Skills Tests', () => {
   });
 
   it('focus should be returned to subject edit button', () => {
-    cy.server();
+
     cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1', {
       projectId: 'proj1',
       subjectId: "subj1",

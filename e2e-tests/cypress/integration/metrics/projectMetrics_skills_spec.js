@@ -25,8 +25,7 @@ describe('Metrics Tests - Skills', () => {
     });
 
     it('skills table - empty table', () => {
-        cy.server()
-            .route('/admin/projects/proj1/metrics/skillUsageNavigatorChartBuilder')
+        cy.intercept('/admin/projects/proj1/metrics/skillUsageNavigatorChartBuilder')
             .as('skillUsageNavigatorChartBuilder');
         cy.visit('/projects/proj1/');
         cy.clickNav('Metrics');
@@ -56,10 +55,10 @@ describe('Metrics Tests - Skills', () => {
             'lastAchievedTimestamp': null
         }];
 
-        cy.server()
-            .route({
-                url: '/admin/projects/proj1/metrics/skillUsageNavigatorChartBuilder**',
-                status: 200,
+        cy.intercept({
+            path: '/admin/projects/proj1/metrics/skillUsageNavigatorChartBuilder**',
+        }, {
+                statusCode: 200,
                 response: res,
             }).as('skillUsageNavigatorChartBuilder');
         cy.visit('/projects/proj1/');
@@ -76,8 +75,7 @@ describe('Metrics Tests - Skills', () => {
     });
 
     it('skills table - paging', () => {
-        cy.server()
-            .route('/admin/projects/proj1/metrics/skillUsageNavigatorChartBuilder')
+        cy.intercept('/admin/projects/proj1/metrics/skillUsageNavigatorChartBuilder')
             .as('skillUsageNavigatorChartBuilder');
 
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
@@ -140,8 +138,7 @@ describe('Metrics Tests - Skills', () => {
     });
 
     it('skills table - sorting', () => {
-        cy.server()
-            .route('/admin/projects/proj1/metrics/skillUsageNavigatorChartBuilder')
+        cy.intercept('/admin/projects/proj1/metrics/skillUsageNavigatorChartBuilder')
             .as('skillUsageNavigatorChartBuilder');
 
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
@@ -271,8 +268,7 @@ describe('Metrics Tests - Skills', () => {
         // looks like there is an issue with cypress not being able to click on a tag
         // if it's pushed to the 2nd line
         cy.viewport(2048, 1024);
-        cy.server()
-            .route('/admin/projects/proj1/metrics/skillUsageNavigatorChartBuilder')
+        cy.intercept('/admin/projects/proj1/metrics/skillUsageNavigatorChartBuilder')
             .as('skillUsageNavigatorChartBuilder');
 
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {

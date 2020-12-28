@@ -89,7 +89,7 @@ describe('Markdown Tests', () => {
     });
 
     it('on skills pages', () => {
-        cy.server();
+
         const markdown = "# Title1\n## Title2\n### Title 3\n#### Title 4\n##### Title 5\nTitle 6\n\n" +
             "---\n" +
             "# Emphasis\n" +

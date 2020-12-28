@@ -15,11 +15,10 @@
  */
 describe('Root Pin and Unpin Tests', () => {
   beforeEach(() => {
-    cy.server()
-      .route('GET', '/app/projects').as('getProjects')
-      .route('GET', '/api/icons/customIconCss').as('getProjectsCustomIcons')
-      .route('GET', '/app/userInfo').as('getUserInfo')
-      .route('/admin/projects/proj1/users/root@skills.org/roles').as('getRolesForRoot');
+      cy.intercept('GET', '/app/projects').as('getProjects')
+      .intercept('GET', '/api/icons/customIconCss').as('getProjectsCustomIcons')
+      .intercept('GET', '/app/userInfo').as('getUserInfo')
+      .intercept('/admin/projects/proj1/users/root@skills.org/roles').as('getRolesForRoot');
   });
 
   it('Pin and Unpin projects', () => {

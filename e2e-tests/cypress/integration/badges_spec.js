@@ -40,7 +40,7 @@ describe('Badges Tests', () => {
             cy.get('[data-cy="endDatePicker"] .day').contains(dayNum).click()
         });
 
-        cy.server();
+
         cy.intercept('POST', '/admin/projects/proj1/badgeNameExists').as('nameExistsCheck');
         cy.intercept('GET', '/admin/projects/proj1/badges').as('loadBadges');
 
@@ -146,7 +146,7 @@ describe('Badges Tests', () => {
     it('inactive badge displays warning', () => {
         const expectedId = 'InactiveBadge';
         const providedName = 'Inactive';
-        cy.server();
+
         cy.intercept('GET', '/app/userInfo').as('getUserInfo');
         cy.intercept('GET', '/app/userInfo/hasRole/ROLE_SUPERVISOR').as('hasSupervisor');
         cy.intercept('POST', `/admin/projects/proj1/badges/${expectedId}`).as('postNewBadge');
