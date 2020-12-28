@@ -17,6 +17,11 @@ import axios from 'axios';
 import dayjs from '../../DayJsCustomizer';
 
 export default {
+  ajaxCall(url, params) {
+    return axios.get(url, { params })
+      .then((response) => response.data);
+  },
+
   getUserSkillsMetrics(projectId, userId) {
     return axios.get(`/admin/projects/${projectId}/users/${userId}/stats`)
       .then((response) => response.data);
