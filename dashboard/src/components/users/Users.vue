@@ -213,7 +213,6 @@ limitations under the License.
           this.table.items = res.data;
           this.table.options.pagination.totalRows = res.count;
           this.table.options.busy = false;
-          console.log(`${JSON.stringify(this.table.options.pagination)}`);
         });
       },
       calculateClientDisplayRoute(props) {
