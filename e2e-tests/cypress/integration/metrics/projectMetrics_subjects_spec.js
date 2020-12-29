@@ -144,20 +144,20 @@ describe('Metrics Tests', () => {
             openMode: 0
         }
     },() => {
-        cy.intercept({
-            url: '/admin/projects/proj1/subjects',
-            status: 200,
-            response: [{
+        cy.intercept('/admin/projects/proj1/subjects',
+          {
+            statusCode: 200,
+            body: [{
                 'subjectId': 'subj1',
                 'projectId': 'proj1',
                 'name': 'Subject 1',
             }],
         }).as('getSubjects');
 
-        cy.intercept({
-            url: '/admin/projects/proj1/metrics/usersByLevelForSubjectOverTimeChartBuilder?subjectId=subj1',
-            status: 200,
-            response: [{
+        cy.intercept('/admin/projects/proj1/metrics/usersByLevelForSubjectOverTimeChartBuilder?subjectId=subj1',
+          {
+            statusCode: 200,
+            body: [{
                 'level': 1,
                 'counts': generateDayWiseTimeSeries(moment.utc('11 Mar 2020', 'DD MMM YYY').valueOf(), 30, 10),
             }, {
@@ -196,10 +196,10 @@ describe('Metrics Tests', () => {
         cy.intercept('/admin/projects/proj1/metrics/usersByLevelForSubjectOverTimeChartBuilder?subjectId=subj1')
             .as('getLevelsOverTimeData');
 
-        cy.intercept({
-            url: '/admin/projects/proj1/subjects',
-            status: 200,
-            response: [{
+        cy.intercept('/admin/projects/proj1/subjects',
+          {
+            statusCode: 200,
+            body: [{
                 'subjectId': 'subj1',
                 'projectId': 'proj1',
                 'name': 'Subject 1',
@@ -253,10 +253,10 @@ describe('Metrics Tests', () => {
             openMode: 0
         }
     },() => {
-        cy.intercept({
-            url: '/admin/projects/proj1/subjects',
-            status: 200,
-            response: [{
+        cy.intercept('/admin/projects/proj1/subjects',
+          {
+            statusCode: 200,
+            body: [{
                 'subjectId': 'subj1',
                 'projectId': 'proj1',
                 'name': 'Subject 1',
@@ -264,10 +264,10 @@ describe('Metrics Tests', () => {
         }).as('getSubjects');
 
 
-        cy.intercept({
-            url: '/admin/projects/proj1/metrics/usersByLevelForSubjectOverTimeChartBuilder?subjectId=subj1',
-            status: 200,
-            response: [{
+        cy.intercept('/admin/projects/proj1/metrics/usersByLevelForSubjectOverTimeChartBuilder?subjectId=subj1',
+          {
+            statusCode: 200,
+            body: [{
                 'level': 1,
                 'counts': generateDayWiseTimeSeries(moment.utc('11 Mar 2020', 'DD MMM YYY').valueOf(), 126, 15),
             }, {
@@ -308,10 +308,10 @@ describe('Metrics Tests', () => {
             openMode: 0
         }
     },() => {
-        cy.intercept({
-            url: '/admin/projects/proj1/subjects',
-            status: 200,
-            response: [{
+        cy.intercept('/admin/projects/proj1/subjects',
+          {
+            statusCode: 200,
+            body: [{
                 'subjectId': 'subj1',
                 'projectId': 'proj1',
                 'name': 'Subject 1',
@@ -329,10 +329,10 @@ describe('Metrics Tests', () => {
             )
         }
 
-        cy.intercept({
-            url: '/admin/projects/proj1/metrics/usersByLevelForSubjectOverTimeChartBuilder?subjectId=subj1',
-            status: 200,
-            response,
+        cy.intercept('/admin/projects/proj1/metrics/usersByLevelForSubjectOverTimeChartBuilder?subjectId=subj1',
+          {
+            statusCode: 200,
+            body: response,
         }).as('getLevelsOverTimeData');
 
         cy.visit('/projects/proj1/');
@@ -358,10 +358,10 @@ describe('Metrics Tests', () => {
             openMode: 0
         }
     },() => {
-        cy.intercept({
-            url: '/admin/projects/proj1/subjects',
-            status: 200,
-            response: [{
+        cy.intercept('/admin/projects/proj1/subjects',
+          {
+            statusCode: 200,
+            body: [{
                 'subjectId': 'subj1',
                 'projectId': 'proj1',
                 'name': 'Subject 1',
@@ -379,10 +379,10 @@ describe('Metrics Tests', () => {
             )
         }
 
-        cy.intercept({
-            url: '/admin/projects/proj1/metrics/usersByLevelForSubjectOverTimeChartBuilder?subjectId=subj1',
-            status: 200,
-            response,
+        cy.intercept('/admin/projects/proj1/metrics/usersByLevelForSubjectOverTimeChartBuilder?subjectId=subj1',
+          {
+            statusCode: 200,
+            body: response,
         }).as('getLevelsOverTimeData');
 
         cy.visit('/projects/proj1/');
@@ -408,10 +408,7 @@ describe('Metrics Tests', () => {
             openMode: 0
         }
     },() => {
-        cy.intercept({
-            url: '/admin/projects/proj1/metrics/numUsersPerSubjectPerLevelChartBuilder',
-            status: 200,
-        }).as('getChartData');
+        cy.intercept('/admin/projects/proj1/metrics/numUsersPerSubjectPerLevelChartBuilder').as('getChartData');
 
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
             projectId: 'proj1',
@@ -492,10 +489,10 @@ describe('Metrics Tests', () => {
             openMode: 0
         }
     },() => {
-        cy.intercept({
-            url: '/admin/projects/proj1/metrics/numUsersPerSubjectPerLevelChartBuilder',
-            status: 200,
-            response: [
+        cy.intercept('/admin/projects/proj1/metrics/numUsersPerSubjectPerLevelChartBuilder',
+          {
+            statusCode: 200,
+            body: [
                 createSubjectObj('First Cool Subject', [23,293,493,625,293]),
                 createSubjectObj('Awesome Subject', [1265,2352,493,625,293]),
                 createSubjectObj('Other Subject', [1254,1000,852,625,293]),
@@ -525,10 +522,10 @@ describe('Metrics Tests', () => {
             response.push(createSubjectObj(`Subject # ${i}`, [1265,852,493,625,293]))
         }
 
-        cy.intercept({
-            url: '/admin/projects/proj1/metrics/numUsersPerSubjectPerLevelChartBuilder',
-            status: 200,
-            response,
+        cy.intercept('/admin/projects/proj1/metrics/numUsersPerSubjectPerLevelChartBuilder',
+          {
+            statusCode: 200,
+            body: response,
         }).as('getChartData');
 
         cy.visit('/projects/proj1/');
@@ -551,10 +548,10 @@ describe('Metrics Tests', () => {
             response.push(createSubjectObj(`Subject # ${i}`, [1265,852,493,625,293,392,293,983,1923,1209]))
         }
 
-        cy.intercept({
-            url: '/admin/projects/proj1/metrics/numUsersPerSubjectPerLevelChartBuilder',
-            status: 200,
-            response,
+        cy.intercept('/admin/projects/proj1/metrics/numUsersPerSubjectPerLevelChartBuilder',
+          {
+            statusCode: 200,
+            body: response,
         }).as('getChartData');
 
         cy.visit('/projects/proj1/');
@@ -573,11 +570,11 @@ describe('Metrics Tests', () => {
             openMode: 0
         }
     },() => {
-        const response = [];
-        cy.intercept({
-            url: '/admin/projects/proj1/metrics/numUsersPerSubjectPerLevelChartBuilder',
-            status: 200,
-            response,
+        const body = [];
+        cy.intercept('/admin/projects/proj1/metrics/numUsersPerSubjectPerLevelChartBuilder',
+          {
+            statusCode: 200,
+            body,
         }).as('getChartData');
 
         cy.visit('/projects/proj1/');
