@@ -89,6 +89,9 @@ describe('Accessibility Tests', () => {
     cy.injectAxe()
     //view project
     cy.contains('Manage').click();
+    // wait on subjects
+    cy.get('[data-cy=subjCard_subj1_manageBtn]')
+
     cy.customLighthouse();
     cy.get('[aria-label="new subject"]').click();
     cy.get('[data-cy=subjectNameInput]').type('a')
@@ -96,6 +99,8 @@ describe('Accessibility Tests', () => {
     cy.get('[data-cy=closeSubjectButton]').click();
 
     cy.get('[data-cy=nav-Badges]').click();
+    cy.contains('Badge 1');
+
     cy.customLighthouse();
     cy.get('[aria-label="new badge"]').click();
     cy.get('[data-cy=badgeName').type('a');
@@ -103,11 +108,13 @@ describe('Accessibility Tests', () => {
     cy.get('[data-cy=closeBadgeButton]').click();
 
     cy.get('[data-cy=nav-Dependencies]').click();
+    cy.contains('Color Legend');
     cy.customLighthouse();
     cy.customA11y();
 
     //levels
     cy.get('[data-cy=nav-Levels').click();
+    cy.contains('White Belt');
     cy.customLighthouse();
     cy.get('[data-cy=addLevel]').click();
     cy.get('[data-cy=levelPercent]').type('1100')
@@ -116,11 +123,15 @@ describe('Accessibility Tests', () => {
 
     //users
     cy.get('[data-cy=nav-Users').click();
+    cy.contains('ID: MyNewtestProject');
+    cy.get('[data-cy="usersTable"]');
+    cy.contains('User Id Filter');
     cy.customLighthouse();
     cy.customA11y();
 
     //metrics
     cy.get('[data-cy=nav-Metrics').click();
+    cy.contains('Users per day');
     cy.customLighthouse();
     cy.customA11y();
 
@@ -136,10 +147,13 @@ describe('Accessibility Tests', () => {
     cy.customA11y();
 
     cy.get('[data-cy=nav-Access').click();
+    cy.contains('Trusted Client Properties');
+    cy.contains('ID: MyNewtestProject');
     cy.customLighthouse();
     cy.customA11y();
 
     cy.get('[data-cy=nav-Settings]').click();
+    cy.contains('Root Help Url');
     cy.customLighthouse();
     cy.customA11y();
   })
@@ -215,19 +229,22 @@ describe('Accessibility Tests', () => {
     cy.contains('Manage').click();
     //view skill
     cy.get('[data-cy=manageSkillBtn]').eq(1).click();
+    cy.contains('Help URL');
     cy.customLighthouse();
     cy.customA11y();
 
-
-    cy.get('[data-cy=nav-Dependencies]').click();
+    cy.clickNav('Dependencies');
+    cy.contains('No Dependencies Yet');
     cy.customLighthouse();
     cy.customA11y();
 
     cy.get('[data-cy=nav-Users]').click();
+    cy.contains('u1');
     cy.customLighthouse();
     cy.customA11y();
 
     cy.get('[data-cy="nav-Add Event"]').click();
+    cy.contains('Enter user id');
     cy.customLighthouse();
     cy.customA11y();
     cy.get('.multiselect__select').click();
@@ -236,6 +253,7 @@ describe('Accessibility Tests', () => {
     cy.customA11y();
 
     cy.get('[data-cy=nav-Metrics]').click();
+    cy.contains('Achievements over time');
     cy.customLighthouse();
     cy.customA11y();
   })
@@ -252,10 +270,12 @@ describe('Accessibility Tests', () => {
     cy.get('[data-cy=closeBadgeButton]').click();
 
     cy.contains('Manage').click();
+    cy.contains('This is 2')
     cy.customLighthouse();
     cy.customA11y();
 
     cy.get('[data-cy=nav-Users]').click();
+    cy.contains('There are no records to show');
     cy.customLighthouse();
     cy.customA11y();
   });
@@ -264,19 +284,23 @@ describe('Accessibility Tests', () => {
     cy.logout();
     cy.login('root@skills.org', 'password');
     cy.visit('/settings')
+    cy.contains('First Name')
     cy.injectAxe()
     cy.customLighthouse();
     cy.customA11y();
 
     cy.get('[data-cy=nav-Security]').click();
+    cy.contains('Root Users Management');
     cy.customLighthouse();
     cy.customA11y();
 
     cy.get('[data-cy=nav-Email]').click();
+    cy.contains('Email Connection Settings');
     cy.customLighthouse();
     cy.customA11y();
 
     cy.get('[data-cy=nav-System]').click();
+    cy.contains('Public URL');
     cy.customLighthouse();
     cy.customA11y();
   });
@@ -297,6 +321,7 @@ describe('Accessibility Tests', () => {
     cy.get('[data-cy=badgeName]').type('global badge');
     cy.get('[data-cy=saveBadgeButton]').click();
     cy.contains('Manage').click();
+    cy.contains('This is 1');
     cy.customLighthouse();
     cy.customA11y();
 
@@ -304,6 +329,7 @@ describe('Accessibility Tests', () => {
     cy.get('.multiselect__element').eq(0).click();
     cy.customA11y();
     cy.get('[data-cy=nav-Levels]').click();
+    cy.contains('No Levels Added Yet');
     cy.customLighthouse();
 
     cy.get('.multiselect__select').eq(0).click();

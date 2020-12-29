@@ -57,7 +57,7 @@ limitations under the License.
         <template v-slot:cell(lastUpdated)="data">
           <div>
             <span>{{ data.value | date }}</span>
-            <b-badge v-if="isToday(data.value)" variant="info" class="ml-2">Today</b-badge>
+<!--            <b-badge v-if="isToday(data.value)" variant="info" class="ml-2">Today</b-badge>-->
           </div>
           <div class="text-muted small">
             {{ data.value | timeFromNow }}
