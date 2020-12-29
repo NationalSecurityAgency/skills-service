@@ -163,9 +163,7 @@ describe('Users Tests', () => {
     });
 
     it('filter by user id', () => {
-        cy.server()
-            .route('/admin/projects/proj1/users?**')
-            .as('getUsers');
+        cy.intercept('users').as('getUsers');
 
         for (let i = 0; i < 7; i += 1) {
             cy.request('POST', `/api/projects/proj1/skills/skill1`, {
