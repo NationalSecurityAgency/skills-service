@@ -300,16 +300,18 @@ describe('Projects Tests', () => {
 
     cy.intercept({
       method: 'PUT',
-      url: '/admin/projects/proj1/users/bar/roles/ROLE_PROJECT_ADMIN',
-      status: 400,
-      response: {errorCode: 'UserNotFound', explanation: 'User was not found'}
+      path: '/admin/projects/proj1/users/bar/roles/ROLE_PROJECT_ADMIN',
+    }, {
+      statusCode: 400,
+      body: {errorCode: 'UserNotFound', explanation: 'User was not found'}
     }).as('addAdmin');
 
     cy.intercept({
       method: 'POST',
-      url: '/app/users/suggest*',
-      status: 200,
-      response: [{userId:'bar', userIdForDisplay: 'bar', first: 'bar', last: 'bar', dn: 'bar'}]
+      path: '/app/users/suggest*',
+    }, {
+      statusCode: 200,
+      body: [{userId:'bar', userIdForDisplay: 'bar', first: 'bar', last: 'bar', dn: 'bar'}]
     }).as('suggest');
     cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
     cy.intercept('GET', '/admin/projects/proj1').as('loadProject');
@@ -334,16 +336,18 @@ describe('Projects Tests', () => {
 
     cy.intercept({
       method: 'PUT',
-      url: '/admin/projects/proj1/users/bar/roles/ROLE_PROJECT_ADMIN',
-      status: 400,
-      response: {errorCode: 'InternalError', explanation: 'Some Error Occurred'}
+      path: '/admin/projects/proj1/users/bar/roles/ROLE_PROJECT_ADMIN',
+    }, {
+      statusCode: 400,
+      body: {errorCode: 'InternalError', explanation: 'Some Error Occurred'}
     }).as('addAdmin');
 
     cy.intercept({
       method: 'POST',
-      url: '/app/users/suggest*',
-      status: 200,
-      response: [{userId:'bar', userIdForDisplay: 'bar', first: 'bar', last: 'bar', dn: 'bar'}]
+      path: '/app/users/suggest*',
+    }, {
+      statusCode: 200,
+      body: [{userId:'bar', userIdForDisplay: 'bar', first: 'bar', last: 'bar', dn: 'bar'}]
     }).as('suggest');
     cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
     cy.intercept('GET', '/admin/projects/proj1').as('loadProject');
@@ -366,15 +370,9 @@ describe('Projects Tests', () => {
       name: "proj1"
     });
 
-    cy.intercept({
-      method: 'PUT',
-      url: '/admin/projects/proj1/users/root@skills.org/roles/ROLE_PROJECT_ADMIN',
-    }).as('addAdmin');
+    cy.intercept('PUT', '/admin/projects/proj1/users/root@skills.org/roles/ROLE_PROJECT_ADMIN').as('addAdmin');
 
-    cy.intercept({
-      method: 'POST',
-      url: '/app/users/suggestDashboardUsers*',
-    }).as('suggest');
+    cy.intercept('POST',  '/app/users/suggestDashboardUsers*').as('suggest');
     cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
     cy.intercept('GET', '/admin/projects/proj1').as('loadProject');
 
@@ -397,15 +395,10 @@ describe('Projects Tests', () => {
       name: "proj1"
     });
 
-    cy.intercept({
-      method: 'PUT',
-      url: '/admin/projects/proj1/users/root@skills.org/roles/ROLE_PROJECT_ADMIN',
-    }).as('addAdmin');
 
-    cy.intercept({
-      method: 'POST',
-      url: '/app/users/suggestDashboardUsers*',
-    }).as('suggest');
+    cy.intercept('PUT', '/admin/projects/proj1/users/root@skills.org/roles/ROLE_PROJECT_ADMIN').as('addAdmin');
+
+    cy.intercept('POST',  '/app/users/suggestDashboardUsers*').as('suggest');
     cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
     cy.intercept('GET', '/admin/projects/proj1').as('loadProject');
 
@@ -428,15 +421,10 @@ describe('Projects Tests', () => {
       name: "proj1"
     });
 
-    cy.intercept({
-      method: 'PUT',
-      url: '/admin/projects/proj1/users/root@skills.org/roles/ROLE_PROJECT_ADMIN',
-    }).as('addAdmin');
 
-    cy.intercept({
-      method: 'POST',
-      url: '/app/users/suggestDashboardUsers*',
-    }).as('suggest');
+    cy.intercept('PUT', '/admin/projects/proj1/users/root@skills.org/roles/ROLE_PROJECT_ADMIN').as('addAdmin');
+
+    cy.intercept('POST',  '/app/users/suggestDashboardUsers*').as('suggest');
     cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
     cy.intercept('GET', '/admin/projects/proj1').as('loadProject');
 
@@ -525,20 +513,12 @@ describe('Projects Tests', () => {
   });
 
   it('new level dialog should return focus to new level button', () => {
-    cy.intercept({
-      method: 'GET',
-      url: '/admin/projects/MyNewtestProject'
-    }).as('loadProject');
 
-    cy.intercept({
-      method: 'PUT',
-      url: '/admin/projects/MyNewtestProject/levels/edit/**'
-    }).as('saveLevel');
+    cy.intercept('GET', '/admin/projects/MyNewtestProject').as('loadProject');
 
-    cy.intercept({
-      method: 'GET',
-      url: '/admin/projects/MyNewtestProject/levels'
-    }).as('loadLevels');
+    cy.intercept('PUT', '/admin/projects/MyNewtestProject/levels/edit/**').as('saveLevel');
+
+    cy.intercept('GET', '/admin/projects/MyNewtestProject/levels').as('loadLevels');
 
     cy.request('POST', '/app/projects/MyNewtestProject', {
       projectId: 'MyNewtestProject',
