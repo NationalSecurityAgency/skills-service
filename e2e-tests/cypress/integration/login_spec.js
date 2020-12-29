@@ -32,8 +32,14 @@ describe('Login Tests', () => {
     cy.get('#inputPassword').type('password');
     cy.contains('Login').click();
 
-    cy.wait('@getProjects').its('status').should('equal', 200)
-      .wait('@getUserInfo').its('status').should('equal', 200);
+    cy.wait('@getProjects')
+      .then(({ request, response}) => {
+        expect(response.statusCode).to.eq(200)
+    })
+    cy.wait('@getUserInfo')
+      .then(({ request, response}) => {
+      expect(response.statusCode).to.eq(200)
+    })
 
     cy.contains('Project');
     cy.get('[data-cy=subPageHeader]').contains('Projects');
@@ -141,7 +147,10 @@ describe('Login Tests', () => {
       cy.visit('/');
       cy.contains('Login').should('be.disabled');
 
-      cy.wait('@getOAuthProviders').its('status').should('equal', 200)
+      cy.wait('@getOAuthProviders')
+        .then(({request, response}) => {
+          expect(response.statusCode).to.eq(200)
+        })
       cy.get('[data-cy=oAuthProviders]').should('not.exist');
     })
 

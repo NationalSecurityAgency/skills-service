@@ -185,7 +185,7 @@ describe('Metrics Tests', () => {
         cy.intercept('/admin/projects/proj1/metrics/distinctUsersOverTimeForProject**',
           {
             statusCode: 200,
-            boody: [ {
+            body: [ {
                 'value': 1602115200000,
                 'count': 52
             }, {

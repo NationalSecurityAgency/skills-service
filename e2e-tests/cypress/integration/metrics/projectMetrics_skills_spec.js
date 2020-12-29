@@ -59,7 +59,7 @@ describe('Metrics Tests - Skills', () => {
             path: '/admin/projects/proj1/metrics/skillUsageNavigatorChartBuilder**',
         }, {
                 statusCode: 200,
-                response: res,
+                body: res,
             }).as('skillUsageNavigatorChartBuilder');
         cy.visit('/projects/proj1/');
         cy.clickNav('Metrics');

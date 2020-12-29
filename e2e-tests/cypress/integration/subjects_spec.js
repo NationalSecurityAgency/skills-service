@@ -73,10 +73,7 @@ describe('Subjects Tests', () => {
             subjectId: 'subj1',
             name: "Subject 1"
         });
-        cy.intercept({
-            method: 'GET',
-            url: '/admin/projects/proj1/subjects/subj1'
-        }).as('loadSubject');
+        cy.intercept('/admin/projects/proj1/subjects/subj1').as('loadSubject');
 
         cy.visit('/projects/proj1/subjects/subj1');
         cy.wait('@loadSubject');
