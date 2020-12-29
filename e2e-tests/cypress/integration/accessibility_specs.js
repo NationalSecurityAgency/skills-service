@@ -144,7 +144,7 @@ describe('Accessibility Tests', () => {
     cy.customA11y();
   })
 
-  it.only('subject', () => {
+  it('subject', () => {
     cy.server();
     cy.route('GET', '/admin/projects/MyNewtestProject/subjects').as('getSubjects');
     cy.route('GET', '/admin/projects/MyNewtestProject/subjects/subj1/skills').as('getSkills');
