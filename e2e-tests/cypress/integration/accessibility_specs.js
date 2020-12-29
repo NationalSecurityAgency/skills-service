@@ -80,8 +80,10 @@ describe('Accessibility Tests', () => {
   it('project', () => {
 
     cy.intercept(
-      'GET',
-      '/admin/projects/MyNewtestProject/metrics/userAchievementsChartBuilder?pageSize=5&currentPage=1&usernameFilter=&fromDayFilter=&toDayFilter=&nameFilter=&minLevel=&achievementTypes=Overall,Subject,Skill,Badge&sortBy=achievedOn&sortDesc=true'
+      {
+        path:
+          '/admin/projects/MyNewtestProject/metrics/userAchievementsChartBuilder?pageSize=5&currentPage=1&usernameFilter=&fromDayFilter=&toDayFilter=&nameFilter=&minLevel=&achievementTypes=Overall,Subject,Skill,Badge&sortBy=achievedOn&sortDesc=true'
+      }
     ).as('userAchievementMetrics');
     cy.intercept('GET', '/admin/projects/MyNewtestProject/metrics/skillUsageNavigatorChartBuilder').as('skillUsageMetrics');
     cy.intercept('GET', '/admin/projects/MyNewtestProject/metrics/numUsersPerSubjectPerLevelChartBuilder').as('subjectMetrics');

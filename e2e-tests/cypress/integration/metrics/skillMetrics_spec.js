@@ -123,10 +123,10 @@ describe('Metrics Tests - Skills', () => {
         const m = moment.utc().subtract(5, 'years');
         const timestamp =  m.format('x');
         cy.log(timestamp);
-        cy.intercept({
-                url: '/admin/projects/proj1/metrics/singleSkillCountsChartBuilder**',
-                status: 200,
-                response: {
+        cy.intercept( '/admin/projects/proj1/metrics/singleSkillCountsChartBuilder**',
+          {
+                statusCode: 200,
+                body: {
                     'numUsersAchieved': 3828283,
                     'lastAchieved': parseInt(timestamp),
                     'numUsersInProgress': 5817714
@@ -256,9 +256,9 @@ describe('Metrics Tests - Skills', () => {
         }
     },() => {
         cy
-            .intercept({
-                url: '/admin/projects/proj1/metrics/numUserAchievedOverTimeChartBuilder?skillId=skill1',
-                response: {
+            .intercept('/admin/projects/proj1/metrics/numUserAchievedOverTimeChartBuilder?skillId=skill1',
+              {
+                body: {
                     'achievementCounts': [{
                         'num': 1,
                         'timestamp': 1599130800000

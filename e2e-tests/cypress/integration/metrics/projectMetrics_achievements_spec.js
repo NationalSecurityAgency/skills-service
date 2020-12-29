@@ -50,10 +50,10 @@ describe('Metrics Tests - Achievements', () => {
             openMode: 0
         }
     }, () => {
-        cy.intercept({
-            url: '/admin/projects/proj1/metrics/numUsersPerLevelChartBuilder',
-            status: 200,
-            response: [{
+        cy.intercept('/admin/projects/proj1/metrics/numUsersPerLevelChartBuilder',
+          {
+            statusCode: 200,
+            body: [{
                 'value': 'Level 1',
                 'count': 6251
             }, {

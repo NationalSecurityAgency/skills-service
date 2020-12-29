@@ -208,9 +208,9 @@ describe('Metrics Tests - Subject', () => {
         }
     },() => {
         cy
-            .intercept({
-                url: '/admin/projects/proj1/metrics/distinctUsersOverTimeForProject**',
-                response: [{
+            .intercept('/admin/projects/proj1/metrics/distinctUsersOverTimeForProject**',
+              {
+                body: [{
                     'value': 1600819200000,
                     'count': 35
                 }, {

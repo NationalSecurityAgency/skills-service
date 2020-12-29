@@ -32,10 +32,10 @@ describe('Metrics Tests', () => {
             openMode: 0
         }
     },() => {
-        cy.intercept({
-            url: '/admin/projects/proj1/metrics/distinctUsersOverTimeForProject**',
-            status: 200,
-            response: [{
+        cy.intercept('/admin/projects/proj1/metrics/distinctUsersOverTimeForProject**',
+          {
+            statusCode: 200,
+            body: [{
                 'value': 1600128000000,
                 'count': 2
             }, {
@@ -182,10 +182,10 @@ describe('Metrics Tests', () => {
             openMode: 0
         }
     },() => {
-        cy.intercept({
-            url: '/admin/projects/proj1/metrics/distinctUsersOverTimeForProject**',
-            status: 200,
-            response: [ {
+        cy.intercept('/admin/projects/proj1/metrics/distinctUsersOverTimeForProject**',
+          {
+            statusCode: 200,
+            boody: [ {
                 'value': 1602115200000,
                 'count': 52
             }, {
@@ -208,10 +208,10 @@ describe('Metrics Tests', () => {
             openMode: 0
         }
     },() => {
-        cy.intercept({
-            url: '/admin/projects/proj1/metrics/distinctUsersOverTimeForProject**',
-            status: 200,
-            response: [ {
+        cy.intercept('/admin/projects/proj1/metrics/distinctUsersOverTimeForProject**',
+          {
+            statusCode: 200,
+            body: [ {
                 'value': 1602115200000,
                 'count': 52
             }],
