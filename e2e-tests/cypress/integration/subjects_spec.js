@@ -303,7 +303,12 @@ describe('Subjects Tests', () => {
             name: "Subject 1"
         });
 
-        cy.intercept({
+
+        // TODO - not working w/ intercept - revisit
+        // cy.intercept('POST', '/admin/projects/proj1/icons/upload').as('uploadIcon');
+        cy.server();
+
+        cy.route({
             method: 'POST',
             url: '/admin/projects/proj1/icons/upload',
         }).as('uploadIcon');
@@ -493,20 +498,11 @@ describe('Subjects Tests', () => {
             subjectId: 'subj1',
             name: "Subject 1"
         });
-        cy.intercept({
-            method: 'GET',
-            url: '/admin/projects/proj1/subjects/subj1'
-        }).as('loadSubject');
+        cy.intercept('GET', '/admin/projects/proj1/subjects/subj1').as('loadSubject');
 
-        cy.intercept({
-            method: 'PUT',
-            url: '/admin/projects/proj1/subjects/subj1/levels/edit/*'
-        }).as('saveLevel');
+        cy.intercept('PUT', '/admin/projects/proj1/subjects/subj1/levels/edit/*').as('saveLevel');
 
-        cy.intercept({
-            method: 'GET',
-            url: '/admin/projects/proj1/subjects/subj1/levels'
-        }).as('loadLevels');
+        cy.intercept('GET', '/admin/projects/proj1/subjects/subj1/levels').as('loadLevels');
 
         cy.visit('/projects/proj1/subjects/subj1');
         cy.wait('@loadSubject');
