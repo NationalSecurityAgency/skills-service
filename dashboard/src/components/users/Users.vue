@@ -44,9 +44,11 @@ limitations under the License.
           {{ data.value }}
 
           <b-button-group class="float-right">
-            <b-button target="_blank" :to="calculateClientDisplayRoute(data.item)"
-                    variant="outline-info" size="sm" class="text-secondary"
-                    v-b-tooltip.hover="'View User Details'"><i class="fa fa-user-alt"/><span class="sr-only">view user details</span></b-button>
+            <b-button :to="calculateClientDisplayRoute(data.item)"
+                      variant="outline-info" size="sm" class="text-secondary"
+                      v-b-tooltip.hover="'View User Details'"
+                      data-cy="usersTable_viewDetailsBtn"><i class="fa fa-user-alt"/><span class="sr-only">view user details</span>
+            </b-button>
           </b-button-group>
         </template>
         <template v-slot:cell(totalPoints)="data">

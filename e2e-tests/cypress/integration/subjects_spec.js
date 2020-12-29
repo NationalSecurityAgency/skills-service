@@ -421,8 +421,8 @@ describe('Subjects Tests', () => {
 
         cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'someuser', timestamp: new Date().getTime()})
         cy.visit('/projects/proj1/subjects/subj1');
-        cy.get('[data-cy=nav-Users]').click();
-        cy.contains('Details').click();
+        cy.clickNav('Users').click();
+        cy.get('[data-cy="usersTable"]').contains('someuser').click();
         cy.get('[data-cy=breadcrumb-subj1]').should('be.visible');
         cy.get('[data-cy=breadcrumb-Users]').should('be.visible');
     })

@@ -149,7 +149,7 @@ describe('Accessibility Tests', () => {
     cy.route('GET', '/admin/projects/MyNewtestProject/subjects').as('getSubjects');
     cy.route('GET', '/admin/projects/MyNewtestProject/subjects/subj1/skills').as('getSkills');
     cy.route('GET', '/admin/projects/MyNewtestProject/subjects/subj1/levels').as('getLevels');
-    cy.route('GET', '/admin/projects/MyNewtestProject/subjects/subj1/users?query=&limit=10&ascending=1&page=1&byColumn=0&orderBy=userId').as('getUsers');
+    cy.route('GET', '/admin/projects/MyNewtestProject/subjects/subj1/users?**').as('getUsers');
     cy.route('GET', '/admin/projects/MyNewtestProject/performedSkills/u1?query=&limit=10&ascending=0&page=1&byColumn=0&orderBy=performedOn').as('getPerformedSkills');
     cy.visit('/');
     cy.injectAxe()
@@ -184,15 +184,16 @@ describe('Accessibility Tests', () => {
     cy.customA11y();
     cy.get('[data-cy=cancelLevel]').click();
 
-    cy.get('[data-cy=nav-Users]').click();
+    cy.clickNav('Users').click();
     cy.customLighthouse();
     cy.wait('@getUsers');
     cy.customA11y();
-    cy.contains('Details').eq(0).click();
+    cy.get('[data-cy="usersTable"] [data-cy="usersTable_viewDetailsBtn"]').first().click();
     cy.customLighthouse();
     // enable once a11y issues with client display are addressed, needs an H1 initially
     // also has contrast issues
     // cy.customA11y();
+    cy.contains('Client Display');
     cy.get('[data-cy="nav-Performed Skills"]').click()
     cy.wait('@getPerformedSkills');
     cy.customLighthouse();

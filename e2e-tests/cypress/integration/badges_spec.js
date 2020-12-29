@@ -536,8 +536,8 @@ describe('Badges Tests', () => {
 
 
         cy.visit('/projects/proj1/badges/badge1');
-        cy.get('[data-cy=nav-Users]').click();
-        cy.contains('Details').click();
+        cy.clickNav('Users').click();
+        cy.get('[data-cy="usersTable"]').contains('someuser').click();
         cy.get('[data-cy=breadcrumb-badge1]').should('be.visible');
         cy.get('[data-cy=breadcrumb-Users]').should('be.visible');
     })
