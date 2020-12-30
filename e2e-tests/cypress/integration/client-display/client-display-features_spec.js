@@ -59,53 +59,24 @@ describe('Client Display Features Tests', () => {
   })
 
   it('display new version banner when software is updated', () => {
-    // TODO - not working w/ intercept - revisit
-    // cy.intercept('GET',
-    //   '/api/projects/proj1/subjects/subj1/summary',
-    //   {
-    //   statusCode: 200,
-    //   body: {
-    //     'subject': 'Subject 1',
-    //     'subjectId': 'subj1',
-    //     'description': 'Description',
-    //     'skillsLevel': 0,
-    //     'totalLevels': 5,
-    //     'points': 0,
-    //     'totalPoints': 0,
-    //     'todaysPoints': 0,
-    //     'levelPoints': 0,
-    //     'levelTotalPoints': 0,
-    //     'skills': [],
-    //     'iconClass': 'fa fa-question-circle',
-    //     'helpUrl': 'http://doHelpOnThisSubject.com'
-    //   },
-    //   headers: {
-    //     'skills-client-lib-version': dateFormatter(new Date()),
-    //   },
-    // }).as('getSubjectSummary');
-
-    cy.server()
-    cy.route({
-      url: '/api/projects/proj1/subjects/subj1/summary',
-      status: 200,
-      response: {
-        'subject': 'Subject 1',
-        'subjectId': 'subj1',
-        'description': 'Description',
-        'skillsLevel': 0,
-        'totalLevels': 5,
-        'points': 0,
-        'totalPoints': 0,
-        'todaysPoints': 0,
-        'levelPoints': 0,
-        'levelTotalPoints': 0,
-        'skills': [],
-        'iconClass': 'fa fa-question-circle',
-        'helpUrl': 'http://doHelpOnThisSubject.com'
-      },
-      headers: {
-        'skills-client-lib-version': dateFormatter(new Date())
-      },
+    cy.intercept('/api/projects/proj1/subjects/subj1/summary', (req) => {
+      req.reply((res) => {
+        res.send(200, {
+          'subject': 'Subject 1',
+          'subjectId': 'subj1',
+          'description': 'Description',
+          'skillsLevel': 0,
+          'totalLevels': 5,
+          'points': 0,
+          'totalPoints': 0,
+          'todaysPoints': 0,
+          'levelPoints': 0,
+          'levelTotalPoints': 0,
+          'skills': [],
+          'iconClass': 'fa fa-question-circle',
+          'helpUrl': 'http://doHelpOnThisSubject.com'
+        }, { 'skills-client-lib-version': dateFormatter(new Date()) })
+      })
     }).as('getSubjectSummary');
     cy.intercept('GET', '/api/projects/proj1/pointHistory').as('pointHistoryChart');
 

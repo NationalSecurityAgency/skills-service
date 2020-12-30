@@ -199,7 +199,7 @@ describe('Subjects Tests', () => {
         cy.get('i.mi.mi-3d-rotation').should('be.visible');
     });
 
-    it('upload custom icon', () => {
+    it.only('upload custom icon', () => {
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
             projectId: 'proj1',
             subjectId: 'subj1',
@@ -207,10 +207,10 @@ describe('Subjects Tests', () => {
         });
 
 
-        // TODO - not working w/ intercept - revisit
-        // cy.intercept('POST', '/admin/projects/proj1/icons/upload').as('uploadIcon');
-        cy.server();
+        // TODO - waiting on https://github.com/cypress-io/cypress/issues/1647
+        // cy.intercept('/admin/projects/proj1/icons/upload').as('uploadIcon');
 
+        cy.server();
         cy.route({
             method: 'POST',
             url: '/admin/projects/proj1/icons/upload',
