@@ -14,11 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div class="card" id="trusted-client-props-panel" data-cy="trusted-client-props-panel">
-    <div class="card-header">
-      Trusted Client Properties
-    </div>
-    <div class="card-body">
+  <metrics-card id="trusted-client-props-panel" title="Trusted Client Properties" data-cy="trusted-client-props-panel">
       <div class="row">
         <div class="col-12 col-md-3 text-secondary">
           <span>Client ID:</span>
@@ -39,16 +35,17 @@ limitations under the License.
       <b-button @click="confirmResetClientSecret" variant="outline-info" class="mt-3">
         <i class="fas fa-sync-alt"/> Reset Client Secret
       </b-button>
-    </div>
-  </div>
+  </metrics-card>
 </template>
 
 <script>
+  import MetricsCard from '@/components/metrics/utils/MetricsCard';
   import AccessService from './AccessService';
   import MsgBoxMixin from '../utils/modal/MsgBoxMixin';
 
   export default {
     name: 'TrustedClientProps',
+    components: { MetricsCard },
     mixins: [MsgBoxMixin],
     props: ['project'],
     data() {

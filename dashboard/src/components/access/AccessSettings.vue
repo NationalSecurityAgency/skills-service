@@ -16,20 +16,16 @@ limitations under the License.
 <template>
   <loading-container v-bind:is-loading="isLoading">
     <sub-page-header title="Access Management"/>
-    <div class="card">
-      <div class="card-header">
-        Project Administrators
-      </div>
-      <div class="card-body">
-        <role-manager :project="project"/>
-      </div>
-    </div>
+    <metrics-card title="Project Administrators" data-cy="projectAdmins" :no-padding="true">
+      <role-manager :project="project"/>
+    </metrics-card>
 
     <trusted-client-props v-if="showTrustedClientProps" :project="project" class="my-4"/>
   </loading-container>
 </template>
 
 <script>
+  import MetricsCard from '../metrics/utils/MetricsCard';
   import RoleManager from './RoleManager';
   import TrustedClientProps from './TrustedClientProps';
   import SubPageHeader from '../utils/pages/SubPageHeader';
@@ -39,6 +35,7 @@ limitations under the License.
   export default {
     name: 'AccessSettings',
     components: {
+      MetricsCard,
       LoadingContainer,
       SubPageHeader,
       RoleManager,
