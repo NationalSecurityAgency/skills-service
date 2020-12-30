@@ -28,7 +28,7 @@ limitations under the License.
 
             <div slot="name" slot-scope="props" class="field has-addons">
               <div>
-                <h5>{{ props.row.name }}</h5>
+                <div class="h5">{{ props.row.name }}</div>
                 <div class="text-muted" style="font-size: 0.9rem;">ID: {{ props.row.skillId }}</div>
               </div>
             </div>
@@ -69,6 +69,7 @@ limitations under the License.
               </b-button-group>
               <router-link data-cy="manageSkillBtn" :to="{ name:'SkillOverview',
                               params: { projectId: props.row.projectId, subjectId: props.row.subjectId, skillId: props.row.skillId }}"
+                           :aria-label="`Manage skill ${props.row.name}`"
                            class="btn btn-outline-primary btn-sm">
                 <span class="d-none d-sm-inline">Manage </span> <i class="fas fa-arrow-circle-right" aria-hidden="true"/>
               </router-link>

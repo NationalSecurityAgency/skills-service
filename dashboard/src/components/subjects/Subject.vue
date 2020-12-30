@@ -29,6 +29,7 @@ limitations under the License.
         <router-link
           :to="{ name:'SubjectSkills', params: { projectId: this.subjectInternal.projectId, subjectId: this.subjectInternal.subjectId, subject: this.subjectInternal}}"
           class="btn btn-outline-primary btn-sm"
+          :aria-label="`Manage subject ${subjectInternal.name}`"
           :data-cy="`subjCard_${subjectInternal.subjectId}_manageBtn`">
           Manage <i class="fas fa-arrow-circle-right" aria-hidden="true"/>
         </router-link>

@@ -24,7 +24,7 @@ limitations under the License.
       </div>
       <div class="w-100"></div>
       <div class="col pt-2">
-        <h6 class="h3 no-content">{{ title }}</h6>
+        <div class="h3 no-content">{{ title }}</div>
       </div>
     </div>
     <div class="row justify-content-center ">
