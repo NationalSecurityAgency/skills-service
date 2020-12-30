@@ -27,6 +27,7 @@ limitations under the License.
       <i v-if="badgeInternal.endDate" class="fas fa-gem position-absolute" style="font-size: 1rem; top: 1rem; left: 1rem; color: purple" aria-hidden="true"/>
       <div>
         <router-link :to="buildManageLink()"
+                     :aria-label="`Manage badge ${badgeInternal.name}`"
                      class="btn btn-outline-primary btn-sm" data-cy="manageBadge">
           Manage <i class="fas fa-arrow-circle-right" aria-hidden="true"/>
         </router-link>
