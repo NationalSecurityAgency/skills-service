@@ -28,7 +28,7 @@ limitations under the License.
 
             <div slot="name" slot-scope="props" class="field has-addons">
               <div>
-                <div style="font-size: 1.2rem;">{{ props.row.name }}</div>
+                <div class="h5">{{ props.row.name }}</div>
                 <div class="text-muted" style="font-size: 0.9rem;">ID: {{ props.row.skillId }}</div>
               </div>
             </div>
