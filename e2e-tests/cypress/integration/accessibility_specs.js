@@ -109,7 +109,7 @@ describe('Accessibility Tests', () => {
     cy.visit('/');
     cy.injectAxe()
     //view project
-    cy.contains('Manage').click();
+    cy.get('[data-cy=projCard_MyNewtestProject_manageBtn]').click();
     // wait on subjects
     cy.get('[data-cy=subjCard_subj1_manageBtn]')
 
@@ -145,7 +145,7 @@ describe('Accessibility Tests', () => {
     //users
     cy.get('[data-cy=nav-Users').click();
     cy.contains('ID: MyNewtestProject');
-    cy.get('[data-cy="usersTable"]');
+    cy.get('[data-cy="usersTable"]').contains('u1');
     cy.contains('User Id Filter');
     cy.customLighthouse();
     cy.customA11y();
@@ -170,6 +170,9 @@ describe('Accessibility Tests', () => {
     cy.get('[data-cy=nav-Access').click();
     cy.contains('Trusted Client Properties');
     cy.contains('ID: MyNewtestProject');
+    cy.validateTable('[data-cy="roleManagerTable"]', [
+      [{ colIndex: 0,  value: 'Firstname LastName (skills@skills.org)' }],
+    ], 5, true, null, false);
     cy.customLighthouse();
     cy.customA11y();
 
