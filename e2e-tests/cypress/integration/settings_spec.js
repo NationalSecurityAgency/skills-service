@@ -22,6 +22,9 @@ describe('Settings Tests', () => {
         });
     });
 
+    const rootUsrTableSelector = '[data-cy="rootrm"] [data-cy="roleManagerTable"]';
+    const supervisorTableSelector = '[data-cy="supervisorrm"] [data-cy="roleManagerTable"]';
+
     it('Add Root User', () => {
 
         cy.intercept('POST', '/root/users/without/role/ROLE_SUPER_DUPER_USER?userSuggestOption=ONE').as('getEligibleForRoot');
@@ -37,13 +40,21 @@ describe('Settings Tests', () => {
         cy.get('button.dropdown-toggle').first().click({force: true});
         cy.contains('Settings').click();
         cy.wait('@checkRoot');
-        cy.contains('Security').click();
+        cy.clickNav('Security');
+        cy.validateTable(rootUsrTableSelector, [
+            [{ colIndex: 0,  value: 'Firstname LastName (root@skills.org)' }],
+        ], 5, true, null, false);
+
         cy.contains('Enter user id').first().type('sk{enter}');
         cy.wait('@getEligibleForRoot');
         cy.contains('skills@skills.org').click();
         cy.contains('Add').first().click();
         cy.wait('@addRoot');
-        cy.get('div.table-responsive').contains('Firstname LastName (skills@skills.org)');
+
+        cy.validateTable(rootUsrTableSelector, [
+            [{ colIndex: 0,  value: 'Firstname LastName (root@skills.org)' }],
+            [{ colIndex: 0,  value: 'Firstname LastName (skills@skills.org)' }],
+        ], 5, true, null, false);
     });
 
     it('Add Root User - forward slash character does not cause error', () => {
@@ -69,7 +80,11 @@ describe('Settings Tests', () => {
         cy.get('button.dropdown-toggle').first().click({force: true});
         cy.contains('Settings').click();
         cy.wait('@checkRoot');
-        cy.contains('Security').click();
+        cy.clickNav('Security');
+        cy.validateTable(rootUsrTableSelector, [
+            [{ colIndex: 0,  value: 'Firstname LastName (root@skills.org)' }],
+        ], 5, true, null, false);
+
         cy.contains('Enter user id').first().type('sk/foo{enter}');
         cy.wait('@getEligibleForRoot');
     });
@@ -89,13 +104,21 @@ describe('Settings Tests', () => {
         cy.get('button.dropdown-toggle').first().click({force: true});
         cy.contains('Settings').click();
         cy.wait('@checkRoot');
-        cy.contains('Security').click();
+        cy.clickNav('Security');
+        cy.validateTable(rootUsrTableSelector, [
+            [{ colIndex: 0,  value: 'Firstname LastName (root@skills.org)' }],
+        ], 5, true, null, false);
+
         cy.contains('Enter user id').first().type('{enter}');
         cy.wait('@getEligibleForRoot');
         cy.contains('skills@skills.org').click();
         cy.contains('Add').first().click();
         cy.wait('@addRoot');
-        cy.get('div.table-responsive').contains('Firstname LastName (skills@skills.org)');
+
+        cy.validateTable(rootUsrTableSelector, [
+            [{ colIndex: 0,  value: 'Firstname LastName (root@skills.org)' }],
+            [{ colIndex: 0,  value: 'Firstname LastName (skills@skills.org)' }],
+        ], 5, true, null, false);;
     });
 
     it('Add Supervisor User', () => {
@@ -116,13 +139,17 @@ describe('Settings Tests', () => {
         cy.get('button.dropdown-toggle').first().click({force: true});
         cy.contains('Settings').click();
         cy.wait('@checkRoot');
-        cy.contains('Security').click();
+        cy.clickNav('Security');
+
         cy.get('[data-cy=supervisorrm]  div.multiselect__tags').type('root');
         cy.wait('@getEligibleForSupervisor');
         cy.get('[data-cy=supervisorrm]').contains('root@skills.org').click();
         cy.get('[data-cy=supervisorrm]').contains('Add').click();
         cy.wait('@addSupervisor');
-        cy.get('div.table-responsive').contains('Firstname LastName (root@skills.org)');
+        cy.validateTable(supervisorTableSelector, [
+            [{ colIndex: 0,  value: 'Firstname LastName (root@skills.org)' }],
+        ], 5, true, null, false);
+
         cy.vuex().its('state.access.isSupervisor').should('equal', true);
         cy.contains('Home').click();
         cy.get('[data-cy=navigationmenu]').contains('Badges', {timeout: 5000}).should('be.visible');
@@ -146,7 +173,7 @@ describe('Settings Tests', () => {
         cy.get('button.dropdown-toggle').first().click({force: true});
         cy.contains('Settings').click();
         cy.wait('@checkRoot');
-        cy.contains('Security').click();
+        cy.clickNav('Security');
         cy.get('[data-cy=supervisorrm]  div.multiselect__tags').type('root');
         cy.wait('@getEligibleForSupervisor');
         cy.get('[data-cy=supervisorrm]').contains('blah@skills.org').click();

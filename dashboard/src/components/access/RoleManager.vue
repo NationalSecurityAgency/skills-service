@@ -21,17 +21,17 @@ limitations under the License.
                              v-model="selectedUser"/>
       </div>
       <div class="col-12 pt-3">
-        <b-alert v-if="errNotification.enable" data-cy="error-msg" variant="danger" class="mt-2" show
-                 dismissible>
-          <i class="fa fa-exclamation-circle mr-1" aria-hidden="true"></i> <strong>Error!</strong>
-          Request could not be completed! <strong>{{ errNotification.msg }}</strong>
-        </b-alert>
-
         <b-button variant="outline-hc" @click="addUserRole" :disabled="!selectedUser"
                   class="h-100" v-skills="'AddAdmin'">
           Add User <i :class="[isSaving ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-arrow-circle-right']"
                  aria-hidden="true"></i>
         </b-button>
+      </div>
+      <div class="col-12" v-if="errNotification.enable">
+        <b-alert data-cy="error-msg" variant="danger" class="mt-2" show dismissible>
+          <i class="fa fa-exclamation-circle mr-1" aria-hidden="true"></i> <strong>Error!</strong>
+          Request could not be completed! <strong>{{ errNotification.msg }}</strong>
+        </b-alert>
       </div>
     </div>
 
