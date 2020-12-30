@@ -199,7 +199,7 @@ describe('Subjects Tests', () => {
         cy.get('i.mi.mi-3d-rotation').should('be.visible');
     });
 
-    it.only('upload custom icon', () => {
+    it('upload custom icon', () => {
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
             projectId: 'proj1',
             subjectId: 'subj1',
