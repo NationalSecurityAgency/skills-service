@@ -41,12 +41,16 @@ limitations under the License.
 
         <b-button-group class="float-right">
           <b-button v-if="notCurrentUser(data.value)" @click="deleteUserRoleConfirm(data.item)"
-                    variant="outline-primary" :aria-label="`remove access role from user ${data.value}`">
+                    variant="outline-primary" :aria-label="`remove access role from user ${data.value}`"
+                    data-cy="removeUserBtn">
             <i class="text-warning fas fa-trash" aria-hidden="true"/>
           </b-button>
           <span v-else v-b-tooltip.hover="'Can not remove myself. Sorry!!'">
-                <b-button variant="outline-primary" disabled aria-label="cannot remove access role from yourself"><i
-                  class="text-warning fas fa-trash" aria-hidden="true"/></b-button>
+                <b-button variant="outline-primary" disabled
+                          data-cy="removeUserBtn"
+                          aria-label="cannot remove access role from yourself">
+                  <i class="text-warning fas fa-trash" aria-hidden="true"/>
+                </b-button>
           </span>
         </b-button-group>
       </template>

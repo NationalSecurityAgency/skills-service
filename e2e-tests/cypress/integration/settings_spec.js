@@ -25,7 +25,7 @@ describe('Settings Tests', () => {
     const rootUsrTableSelector = '[data-cy="rootrm"] [data-cy="roleManagerTable"]';
     const supervisorTableSelector = '[data-cy="supervisorrm"] [data-cy="roleManagerTable"]';
 
-    it('Add Root User', () => {
+    it('Add and remove Root User', () => {
 
         cy.intercept('POST', '/root/users/without/role/ROLE_SUPER_DUPER_USER?userSuggestOption=ONE').as('getEligibleForRoot');
         cy.intercept('PUT', '/root/users/skills@skills.org/roles/ROLE_SUPER_DUPER_USER').as('addRoot');
@@ -54,6 +54,24 @@ describe('Settings Tests', () => {
         cy.validateTable(rootUsrTableSelector, [
             [{ colIndex: 0,  value: 'Firstname LastName (root@skills.org)' }],
             [{ colIndex: 0,  value: 'Firstname LastName (skills@skills.org)' }],
+        ], 5, true, null, false);
+
+        // attempt to remove myself - no go
+        cy.get(`${rootUsrTableSelector} [data-cy="removeUserBtn"]`).eq(0).should('be.disabled');
+        cy.get(`${rootUsrTableSelector} [data-cy="removeUserBtn"]`).eq(0).click({ force: true });
+        cy.contains('Can not remove myself');
+        // click away to remove tooltip
+        cy.contains('Firstname LastName').click();
+        cy.validateTable(rootUsrTableSelector, [
+            [{ colIndex: 0,  value: 'Firstname LastName (root@skills.org)' }],
+            [{ colIndex: 0,  value: 'Firstname LastName (skills@skills.org)' }],
+        ], 5, true, null, false);
+
+        // remove the other user now
+        cy.get(`${rootUsrTableSelector} [data-cy="removeUserBtn"]`).eq(1).click();
+        cy.contains('YES, Delete It').click();
+        cy.validateTable(rootUsrTableSelector, [
+            [{ colIndex: 0,  value: 'Firstname LastName (root@skills.org)' }],
         ], 5, true, null, false);
     });
 
@@ -122,7 +140,6 @@ describe('Settings Tests', () => {
     });
 
     it('Add Supervisor User', () => {
-
         cy.intercept('PUT', '/root/users/root@skills.org/roles/ROLE_SUPERVISOR').as('addSupervisor');
         cy.intercept('POST', 'root/users/without/role/ROLE_SUPERVISOR?userSuggestOption=ONE').as('getEligibleForSupervisor');
         cy.intercept({
@@ -153,6 +170,44 @@ describe('Settings Tests', () => {
         cy.vuex().its('state.access.isSupervisor').should('equal', true);
         cy.contains('Home').click();
         cy.get('[data-cy=navigationmenu]').contains('Badges', {timeout: 5000}).should('be.visible');
+    });
+
+    it('Remove Supervisor User', () => {
+        cy.intercept('PUT', '**/roles/ROLE_SUPERVISOR').as('addSupervisor');
+        cy.intercept('POST', 'root/users/without/role/ROLE_SUPERVISOR?userSuggestOption=ONE').as('getEligibleForSupervisor');
+
+        cy.visit('/settings/security');
+
+        cy.get('[data-cy=supervisorrm]  div.multiselect__tags').type('root');
+        cy.wait('@getEligibleForSupervisor');
+        cy.get('[data-cy=supervisorrm]').contains('root@skills.org').click();
+        cy.get('[data-cy=supervisorrm]').contains('Add').click();
+        cy.wait('@addSupervisor');
+
+        cy.get('[data-cy=supervisorrm]  div.multiselect__tags').type('root');
+        cy.wait('@getEligibleForSupervisor');
+        cy.get('[data-cy=supervisorrm]').contains('skills@skills.org').click();
+        cy.get('[data-cy=supervisorrm]').contains('Add').click();
+        cy.wait('@addSupervisor');
+
+        // attempt to remove myself - no go
+        cy.get(`${supervisorTableSelector} [data-cy="removeUserBtn"]`).eq(0).should('be.disabled');
+        cy.get(`${supervisorTableSelector} [data-cy="removeUserBtn"]`).eq(0).click({ force: true });
+        cy.contains('Can not remove myself');
+        // click away to remove tooltip
+        cy.contains('Firstname LastName').click();
+        cy.validateTable(supervisorTableSelector, [
+            [{ colIndex: 0,  value: 'Firstname LastName (root@skills.org)' }],
+            [{ colIndex: 0,  value: 'Firstname LastName (skills@skills.org)' }],
+        ], 5, true, null, false);
+
+        // remove the other user now
+        cy.get(`${supervisorTableSelector} [data-cy="removeUserBtn"]`).eq(1).click();
+        cy.contains('YES, Delete It').click();
+        cy.validateTable(supervisorTableSelector, [
+            [{ colIndex: 0,  value: 'Firstname LastName (root@skills.org)' }],
+        ], 5, true, null, false);
+
     });
 
     it('Add Supervisor User Not Found', () => {
