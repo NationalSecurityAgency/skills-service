@@ -15,18 +15,17 @@
  */
 describe('Projects Tests', () => {
   beforeEach(() => {
-    cy.server()
-      .route('GET', '/app/projects').as('getProjects')
-      .route('GET', '/api/icons/customIconCss').as('getProjectsCustomIcons')
-      .route('GET', '/app/userInfo').as('getUserInfo')
-      .route('/admin/projects/proj1/users/root@skills.org/roles').as('getRolesForRoot');
+    cy.intercept('GET', '/app/projects').as('getProjects')
+    cy.intercept('GET', '/api/icons/customIconCss').as('getProjectsCustomIcons')
+    cy.intercept('GET', '/app/userInfo').as('getUserInfo')
+    cy.intercept('/admin/projects/proj1/users/root@skills.org/roles').as('getRolesForRoot');
   });
 
   it('Create new projects', function () {
-    cy.route('GET', '/app/projects').as('loadProjects');
-    cy.route('GET', '/app/userInfo').as('loadUserInfo');
+    cy.intercept('GET', '/app/projects').as('loadProjects');
+    cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
 
-    cy.route('POST', '/app/projects/MyNewtestProject').as('postNewProject');
+    cy.intercept('POST', '/app/projects/MyNewtestProject').as('postNewProject');
 
     cy.visit('/');
     cy.wait('@loadUserInfo');
@@ -44,10 +43,10 @@ describe('Projects Tests', () => {
 
 
   it('Create new project using enter key', function () {
-    cy.route('GET', '/app/projects').as('loadProjects');
-    cy.route('GET', '/app/userInfo').as('loadUserInfo');
+    cy.intercept('GET', '/app/projects').as('loadProjects');
+    cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
 
-    cy.route('POST', '/app/projects/MyNewtestProject').as('postNewProject');
+    cy.intercept('POST', '/app/projects/MyNewtestProject').as('postNewProject');
 
     cy.visit('/');
     cy.wait('@loadUserInfo');
@@ -64,10 +63,10 @@ describe('Projects Tests', () => {
   });
 
   it('Close new project dialog', () => {
-    cy.route('GET', '/app/projects').as('loadProjects');
-    cy.route('GET', '/app/userInfo').as('loadUserInfo');
+    cy.intercept('GET', '/app/projects').as('loadProjects');
+    cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
 
-    cy.route('POST', '/app/projects/MyNewtestProject').as('postNewProject');
+    cy.intercept('POST', '/app/projects/MyNewtestProject').as('postNewProject');
 
     cy.visit('/');
     cy.wait('@loadUserInfo');
@@ -83,8 +82,8 @@ describe('Projects Tests', () => {
       projectId: 'MyNewtestProject',
       name: "My New test Project"
     })
-    cy.route('GET', '/app/projects').as('loadProjects');
-    cy.route('GET', '/app/userInfo').as('loadUserInfo');
+    cy.intercept('GET', '/app/projects').as('loadProjects');
+    cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
 
     cy.visit('/');
     cy.wait('@loadUserInfo');
@@ -102,8 +101,8 @@ describe('Projects Tests', () => {
       projectId: 'MyNewtestProject',
       name: "My New test Project"
     })
-    cy.route('GET', '/app/projects').as('loadProjects');
-    cy.route('GET', '/app/userInfo').as('loadUserInfo');
+    cy.intercept('GET', '/app/projects').as('loadProjects');
+    cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
 
     cy.visit('/');
     cy.wait('@loadUserInfo');
@@ -121,10 +120,10 @@ describe('Projects Tests', () => {
     const expectedId = 'LotsofspecialPchars';
     const providedName = "!L@o#t$s of %s^p&e*c(i)a_l++_|}/[]#?{P c'ha'rs";
 
-    cy.route('POST', `/app/projects/${expectedId}`).as('postNewProject');
-    cy.route('POST', '/app/projectExist').as('projectExists');
-    cy.route('GET', '/app/projects').as('loadProjects');
-    cy.route('GET', '/app/userInfo').as('loadUserInfo');
+    cy.intercept('POST', `/app/projects/${expectedId}`).as('postNewProject');
+    cy.intercept('POST', '/app/projectExist').as('projectExists');
+    cy.intercept('GET', '/app/projects').as('loadProjects');
+    cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
 
     cy.visit('/');
     cy.wait('@loadUserInfo');
@@ -144,11 +143,11 @@ describe('Projects Tests', () => {
     const expectedId = 'TestProject1';
     const providedName = "Test Project #1";
 
-    cy.route('POST', `/app/projects/${expectedId}`)
+    cy.intercept('POST', `/app/projects/${expectedId}`)
         .as('postNewProject');
 
-    cy.route('GET', '/app/projects').as('loadProjects');
-    cy.route('GET', '/app/userInfo').as('loadUserInfo');
+    cy.intercept('GET', '/app/projects').as('loadProjects');
+    cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
 
     cy.visit('/');
     cy.wait('@loadUserInfo');
@@ -169,8 +168,8 @@ describe('Projects Tests', () => {
   });
 
   it('Once project id is enabled name-to-id autofill should be turned off', () => {
-    cy.route('GET', '/app/projects').as('loadProjects');
-    cy.route('GET', '/app/userInfo').as('loadUserInfo');
+    cy.intercept('GET', '/app/projects').as('loadProjects');
+    cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
 
     cy.visit('/');
     cy.wait('@loadUserInfo');
@@ -191,9 +190,8 @@ describe('Projects Tests', () => {
   });
 
   it('Project name is required', () => {
-    cy.server();
-    cy.route('GET', '/app/projects').as('loadProjects');
-    cy.route('GET', '/app/userInfo').as('loadUserInfo');
+    cy.intercept('GET', '/app/projects').as('loadProjects');
+    cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
 
     cy.visit('/');
     cy.wait('@loadUserInfo');
@@ -206,8 +204,8 @@ describe('Projects Tests', () => {
   })
 
   it('Project id is required', () => {
-    cy.route('GET', '/app/projects').as('loadProjects');
-    cy.route('GET', '/app/userInfo').as('loadUserInfo');
+    cy.intercept('GET', '/app/projects').as('loadProjects');
+    cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
 
     cy.visit('/');
     cy.wait('@loadUserInfo');
@@ -225,9 +223,9 @@ describe('Projects Tests', () => {
     const minLenMsg = 'Project Name cannot be less than 3 characters';
     const maxLenMsg = 'Project Name cannot exceed 50 characters';
     const projId = 'ProjectId'
-    cy.route('POST', `/app/projects/${projId}`).as('postNewProject');
-    cy.route('GET', '/app/projects').as('loadProjects');
-    cy.route('GET', '/app/userInfo').as('loadUserInfo');
+    cy.intercept('POST', `/app/projects/${projId}`).as('postNewProject');
+    cy.intercept('GET', '/app/projects').as('loadProjects');
+    cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
 
     cy.visit('/');
     cy.wait('@loadUserInfo');
@@ -265,9 +263,9 @@ describe('Projects Tests', () => {
 
     const longInvalid = Array(51).fill('a').join('');
     const longValid = Array(50).fill('a').join('');
-    cy.route('POST', `/app/projects/${longValid}`).as('postNewProject');
-    cy.route('GET', '/app/projects').as('loadProjects');
-    cy.route('GET', '/app/userInfo').as('loadUserInfo');
+    cy.intercept('POST', `/app/projects/${longValid}`).as('postNewProject');
+    cy.intercept('GET', '/app/projects').as('loadProjects');
+    cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
 
     cy.visit('/');
     cy.wait('@loadUserInfo');
@@ -300,21 +298,23 @@ describe('Projects Tests', () => {
       name: "proj1"
     });
 
-    cy.route({
+    cy.intercept({
       method: 'PUT',
-      url: '/admin/projects/proj1/users/bar/roles/ROLE_PROJECT_ADMIN',
-      status: 400,
-      response: {errorCode: 'UserNotFound', explanation: 'User was not found'}
+      path: '/admin/projects/proj1/users/bar/roles/ROLE_PROJECT_ADMIN',
+    }, {
+      statusCode: 400,
+      body: {errorCode: 'UserNotFound', explanation: 'User was not found'}
     }).as('addAdmin');
 
-    cy.route({
+    cy.intercept({
       method: 'POST',
-      url: '/app/users/suggest*',
-      status: 200,
-      response: [{userId:'bar', userIdForDisplay: 'bar', first: 'bar', last: 'bar', dn: 'bar'}]
+      path: '/app/users/suggest*',
+    }, {
+      statusCode: 200,
+      body: [{userId:'bar', userIdForDisplay: 'bar', first: 'bar', last: 'bar', dn: 'bar'}]
     }).as('suggest');
-    cy.route('GET', '/app/userInfo').as('loadUserInfo');
-    cy.route('GET', '/admin/projects/proj1').as('loadProject');
+    cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
+    cy.intercept('GET', '/admin/projects/proj1').as('loadProject');
 
     cy.visit('/projects/proj1/access');
     cy.wait('@loadUserInfo');
@@ -334,21 +334,23 @@ describe('Projects Tests', () => {
       name: "proj1"
     });
 
-    cy.route({
+    cy.intercept({
       method: 'PUT',
-      url: '/admin/projects/proj1/users/bar/roles/ROLE_PROJECT_ADMIN',
-      status: 400,
-      response: {errorCode: 'InternalError', explanation: 'Some Error Occurred'}
+      path: '/admin/projects/proj1/users/bar/roles/ROLE_PROJECT_ADMIN',
+    }, {
+      statusCode: 400,
+      body: {errorCode: 'InternalError', explanation: 'Some Error Occurred'}
     }).as('addAdmin');
 
-    cy.route({
+    cy.intercept({
       method: 'POST',
-      url: '/app/users/suggest*',
-      status: 200,
-      response: [{userId:'bar', userIdForDisplay: 'bar', first: 'bar', last: 'bar', dn: 'bar'}]
+      path: '/app/users/suggest*',
+    }, {
+      statusCode: 200,
+      body: [{userId:'bar', userIdForDisplay: 'bar', first: 'bar', last: 'bar', dn: 'bar'}]
     }).as('suggest');
-    cy.route('GET', '/app/userInfo').as('loadUserInfo');
-    cy.route('GET', '/admin/projects/proj1').as('loadProject');
+    cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
+    cy.intercept('GET', '/admin/projects/proj1').as('loadProject');
 
     cy.visit('/projects/proj1/access');
     cy.wait('@loadUserInfo');
@@ -368,17 +370,11 @@ describe('Projects Tests', () => {
       name: "proj1"
     });
 
-    cy.route({
-      method: 'PUT',
-      url: '/admin/projects/proj1/users/root@skills.org/roles/ROLE_PROJECT_ADMIN',
-    }).as('addAdmin');
+    cy.intercept('PUT', '/admin/projects/proj1/users/root@skills.org/roles/ROLE_PROJECT_ADMIN').as('addAdmin');
 
-    cy.route({
-      method: 'POST',
-      url: '/app/users/suggestDashboardUsers*',
-    }).as('suggest');
-    cy.route('GET', '/app/userInfo').as('loadUserInfo');
-    cy.route('GET', '/admin/projects/proj1').as('loadProject');
+    cy.intercept('POST',  '/app/users/suggestDashboardUsers*').as('suggest');
+    cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
+    cy.intercept('GET', '/admin/projects/proj1').as('loadProject');
 
     cy.visit('/projects/proj1/access');
     cy.wait('@loadUserInfo');
@@ -399,17 +395,12 @@ describe('Projects Tests', () => {
       name: "proj1"
     });
 
-    cy.route({
-      method: 'PUT',
-      url: '/admin/projects/proj1/users/root@skills.org/roles/ROLE_PROJECT_ADMIN',
-    }).as('addAdmin');
 
-    cy.route({
-      method: 'POST',
-      url: '/app/users/suggestDashboardUsers*',
-    }).as('suggest');
-    cy.route('GET', '/app/userInfo').as('loadUserInfo');
-    cy.route('GET', '/admin/projects/proj1').as('loadProject');
+    cy.intercept('PUT', '/admin/projects/proj1/users/root@skills.org/roles/ROLE_PROJECT_ADMIN').as('addAdmin');
+
+    cy.intercept('POST',  '/app/users/suggestDashboardUsers*').as('suggest');
+    cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
+    cy.intercept('GET', '/admin/projects/proj1').as('loadProject');
 
     cy.visit('/projects/proj1/access');
     cy.wait('@loadUserInfo');
@@ -430,17 +421,12 @@ describe('Projects Tests', () => {
       name: "proj1"
     });
 
-    cy.route({
-      method: 'PUT',
-      url: '/admin/projects/proj1/users/root@skills.org/roles/ROLE_PROJECT_ADMIN',
-    }).as('addAdmin');
 
-    cy.route({
-      method: 'POST',
-      url: '/app/users/suggestDashboardUsers*',
-    }).as('suggest');
-    cy.route('GET', '/app/userInfo').as('loadUserInfo');
-    cy.route('GET', '/admin/projects/proj1').as('loadProject');
+    cy.intercept('PUT', '/admin/projects/proj1/users/root@skills.org/roles/ROLE_PROJECT_ADMIN').as('addAdmin');
+
+    cy.intercept('POST',  '/app/users/suggestDashboardUsers*').as('suggest');
+    cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
+    cy.intercept('GET', '/admin/projects/proj1').as('loadProject');
 
     cy.visit('/projects/proj1/access');
     cy.wait('@loadUserInfo');
@@ -526,27 +512,94 @@ describe('Projects Tests', () => {
     cy.get('div.project-settings').eq(1).children().first().should('have.focus');
   });
 
+  it('new level dialog should return focus to new level button', () => {
+
+    cy.intercept('GET', '/admin/projects/MyNewtestProject').as('loadProject');
+
+    cy.intercept('PUT', '/admin/projects/MyNewtestProject/levels/edit/**').as('saveLevel');
+
+    cy.intercept('GET', '/admin/projects/MyNewtestProject/levels').as('loadLevels');
+
+    cy.request('POST', '/app/projects/MyNewtestProject', {
+      projectId: 'MyNewtestProject',
+      name: "My New test Project"
+    })
+
+    cy.visit('/projects/MyNewtestProject/');
+    cy.wait('@loadProject');
+
+    cy.contains('Levels').click();
+    cy.get('[data-cy=addLevel]').click();
+    cy.get('[data-cy=cancelLevel]').click();
+    cy.get('[data-cy=addLevel]').should('have.focus');
+
+    cy.get('[data-cy=addLevel]').click();
+    cy.get('[data-cy=levelName]').type('{esc}');
+    cy.get('[data-cy=addLevel]').should('have.focus');
+
+    cy.get('[data-cy=addLevel]').click();
+    cy.get('[aria-label=Close]').filter('.text-light').click();
+    cy.get('[data-cy=addLevel]').should('have.focus');
+
+    cy.get('[data-cy=editLevelButton]').eq(0).click();
+    cy.get('[data-cy=cancelLevel]').click();
+    cy.get('[data-cy=editLevelButton]').eq(0).should('have.focus');
+
+    cy.get('[data-cy=editLevelButton]').eq(0).click();
+    cy.get('[data-cy=levelName]').type('{esc}');
+    cy.get('[data-cy=editLevelButton]').eq(0).should('have.focus');
+
+    cy.get('[data-cy=editLevelButton]').eq(0).click();
+    cy.get('[aria-label=Close]').filter('.text-light').click();
+    cy.get('[data-cy=editLevelButton]').eq(0).should('have.focus');
+
+    cy.get('[data-cy=editLevelButton]').eq(0).click();
+    cy.get('[data-cy=levelName]').type('{selectall}Fooooooo');
+    cy.get('[data-cy=saveLevelButton]').click();
+    cy.wait('@saveLevel');
+    cy.wait('@loadLevels');
+    cy.get('[data-cy=editLevelButton]').eq(0).should('have.focus');
+
+    cy.get('[data-cy=editLevelButton]').eq(3).click();
+    cy.get('[data-cy=cancelLevel]').click();
+    cy.get('[data-cy=editLevelButton]').eq(3).should('have.focus');
+
+    cy.get('[data-cy=editLevelButton]').eq(3).click();
+    cy.get('[data-cy=levelName]').type('{esc}');
+    cy.get('[data-cy=editLevelButton]').eq(3).should('have.focus');
+
+    cy.get('[data-cy=editLevelButton]').eq(3).click();
+    cy.get('[aria-label=Close]').filter('.text-light').click();
+    cy.get('[data-cy=editLevelButton]').eq(3).should('have.focus');
+
+    cy.get('[data-cy=editLevelButton]').eq(3).click();
+    cy.get('[data-cy=levelName]').type('{selectall}Baaaaar');
+    cy.get('[data-cy=saveLevelButton]').click();
+    cy.wait('@saveLevel');
+    cy.wait('@loadLevels');
+    cy.get('[data-cy=editLevelButton]').eq(3).should('have.focus');
+  });
+
   it('Trusted client should not shown when oAuthOnly=true', () => {
-    cy.server()
-    cy.route('GET', '/public/config', {oAuthOnly: true, authMode: 'FORM'}).as('loadConfig');
+    cy.intercept('GET', '/public/config', {oAuthOnly: true, authMode: 'FORM'}).as('loadConfig');
 
     cy.request('POST', '/app/projects/proj1', {
       projectId: 'proj1',
       name: "proj1"
     });
 
-    cy.route({
+    cy.intercept({
       method: 'PUT',
       url: '/admin/projects/proj1/users/root@skills.org/roles/ROLE_PROJECT_ADMIN',
     }).as('addAdmin');
 
-    cy.route({
+    cy.intercept({
       method: 'POST',
       url: '/app/users/suggestDashboardUsers*',
     }).as('suggest');
-    cy.route('GET', '/app/userInfo').as('loadUserInfo');
-    cy.route('GET', '/admin/projects/proj1').as('loadProject');
-    cy.route('GET', '/admin/projects/proj1/userRoles').as('loadUserRoles');
+    cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
+    cy.intercept('GET', '/admin/projects/proj1').as('loadProject');
+    cy.intercept('GET', '/admin/projects/proj1/userRoles').as('loadUserRoles');
 
     cy.visit('/projects/proj1/access');
     cy.wait('@loadConfig');
@@ -559,26 +612,25 @@ describe('Projects Tests', () => {
   });
 
   it('Trusted client should be shown when oAuthOnly!=true', () => {
-    cy.server()
-    cy.route('GET', '/public/config', {oAuthOnly: false, authMode: 'FORM'}).as('loadConfig');
+    cy.intercept('GET', '/public/config', {oAuthOnly: false, authMode: 'FORM'}).as('loadConfig');
 
     cy.request('POST', '/app/projects/proj1', {
       projectId: 'proj1',
       name: "proj1"
     });
 
-    cy.route({
+    cy.intercept({
       method: 'PUT',
       url: '/admin/projects/proj1/users/root@skills.org/roles/ROLE_PROJECT_ADMIN',
     }).as('addAdmin');
 
-    cy.route({
+    cy.intercept({
       method: 'POST',
       url: '/app/users/suggestDashboardUsers*',
     }).as('suggest');
-    cy.route('GET', '/app/userInfo').as('loadUserInfo');
-    cy.route('GET', '/admin/projects/proj1').as('loadProject');
-    cy.route('GET', '/admin/projects/proj1/userRoles').as('loadUserRoles');
+    cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
+    cy.intercept('GET', '/admin/projects/proj1').as('loadProject');
+    cy.intercept('GET', '/admin/projects/proj1/userRoles').as('loadUserRoles');
 
     cy.visit('/projects/proj1/access');
     cy.wait('@loadConfig');

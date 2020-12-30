@@ -238,10 +238,10 @@ describe('Client Display Tests', () => {
 
         it(`test theming - new version notification  - ${size}`, () => {
             cy.setResolution(size);
-            cy.server().route({
-                url: '/api/projects/proj1/rank',
-                status: 200,
-                response: {
+            cy.intercept('/api/projects/proj1/rank',
+              {
+                statusCode: 200,
+                body: {
                     'numUsers': 1,
                     'position': 1
                 },

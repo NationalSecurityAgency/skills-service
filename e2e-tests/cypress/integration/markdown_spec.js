@@ -89,7 +89,7 @@ describe('Markdown Tests', () => {
     });
 
     it('on skills pages', () => {
-        cy.server();
+
         const markdown = "# Title1\n## Title2\n### Title 3\n#### Title 4\n##### Title 5\nTitle 6\n\n" +
             "---\n" +
             "# Emphasis\n" +
@@ -151,7 +151,7 @@ describe('Markdown Tests', () => {
             numPerformToCompletion: '5',
             description: markdown
         });
-        cy.route('GET', '/api/projects/Inception/level').as('inceptionLevel');
+        cy.intercept('GET', '/api/projects/Inception/level').as('inceptionLevel');
         cy.visit('/projects/proj1/subjects/subj1/skills/skill1');
 
         cy.contains('Description');

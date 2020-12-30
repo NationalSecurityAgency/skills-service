@@ -16,7 +16,7 @@
 describe('Global Badges Tests', () => {
 
     beforeEach(() => {
-        cy.server();
+
         cy.logout();
         const supervisorUser = 'supervisor@skills.org';
         cy.register(supervisorUser, 'password');
@@ -30,12 +30,12 @@ describe('Global Badges Tests', () => {
 
         const expectedId = 'LotsofspecialPcharsBadge';
         const providedName = "!L@o#t$s of %s^p&e*c/?#(i)a_l++_|}{P c'ha'rs";
-        cy.server();
-        cy.route('GET', `/supervisor/badges`).as('getGlobalBadges');
-        cy.route('PUT', `/supervisor/badges/${expectedId}`).as('postGlobalBadge');
-        cy.route('GET', `/supervisor/badges/id/${expectedId}/exists`).as('idExists');
-        cy.route('POST', '/supervisor/badges/name/exists').as('nameExists');
-        cy.route('GET', '/app/userInfo/hasRole/ROLE_SUPERVISOR').as('checkSupervisorRole')
+
+        cy.intercept('GET', `/supervisor/badges`).as('getGlobalBadges');
+        cy.intercept('PUT', `/supervisor/badges/${expectedId}`).as('postGlobalBadge');
+        cy.intercept('GET', `/supervisor/badges/id/${expectedId}/exists`).as('idExists');
+        cy.intercept('POST', '/supervisor/badges/name/exists').as('nameExists');
+        cy.intercept('GET', '/app/userInfo/hasRole/ROLE_SUPERVISOR').as('checkSupervisorRole')
 
         cy.visit('/globalBadges');
         cy.wait('@getGlobalBadges');
@@ -53,10 +53,10 @@ describe('Global Badges Tests', () => {
     });
 
     it('name causes id to fail validation', () => {
-        cy.server();
-        cy.route('GET', `/supervisor/badges`).as('getGlobalBadges');
-        cy.route('POST', '/supervisor/badges/name/exists').as('nameExists');
-        cy.route('GET', '/app/userInfo/hasRole/ROLE_SUPERVISOR').as('checkSupervisorRole');
+
+        cy.intercept('GET', `/supervisor/badges`).as('getGlobalBadges');
+        cy.intercept('POST', '/supervisor/badges/name/exists').as('nameExists');
+        cy.intercept('GET', '/app/userInfo/hasRole/ROLE_SUPERVISOR').as('checkSupervisorRole');
 
         cy.visit('/globalBadges');
         cy.wait('@getGlobalBadges');
@@ -91,10 +91,10 @@ describe('Global Badges Tests', () => {
             originalBadgeId: ''
         });
 
-        cy.server();
-        cy.route('GET', `/supervisor/badges`).as('getGlobalBadges');
-        cy.route('GET', '/app/userInfo/hasRole/ROLE_SUPERVISOR').as('checkSupervisorRole')
-        cy.route('DELETE', `/supervisor/badges/${expectedId}`).as('deleteGlobalBadge');
+
+        cy.intercept('GET', `/supervisor/badges`).as('getGlobalBadges');
+        cy.intercept('GET', '/app/userInfo/hasRole/ROLE_SUPERVISOR').as('checkSupervisorRole')
+        cy.intercept('DELETE', `/supervisor/badges/${expectedId}`).as('deleteGlobalBadge');
 
         cy.visit('/globalBadges');
         cy.wait('@getGlobalBadges');
@@ -163,9 +163,9 @@ describe('Global Badges Tests', () => {
             originalBadgeId: ''
         });
 
-        cy.route('GET', '/supervisor/badges').as('getBadges');
-        cy.route('GET', '/supervisor/projects/proj2/levels').as('getLevels');
-        cy.route('GET', '/supervisor/badges/a_badge/projects/available').as('getAvailableLevels');
+        cy.intercept('GET', '/supervisor/badges').as('getBadges');
+        cy.intercept('GET', '/supervisor/projects/proj2/levels').as('getLevels');
+        cy.intercept('GET', '/supervisor/badges/a_badge/projects/available').as('getAvailableLevels');
 
         cy.visit('/');
         cy.clickNav('Badges');
@@ -189,8 +189,8 @@ describe('Global Badges Tests', () => {
     });
 
     it('Navigate to global badges menu entry', () => {
-        cy.server();
-        cy.route('GET', `/supervisor/badges`).as('getGlobalBadges');
+
+        cy.intercept('GET', `/supervisor/badges`).as('getGlobalBadges');
 
         cy.visit('/');
         cy.clickNav('Badges');
@@ -199,12 +199,12 @@ describe('Global Badges Tests', () => {
 
     it('Cannot publish Global Badge with no Skills and no Levels', () => {
         const expectedId = 'TestBadgeBadge';
-        cy.route('GET', `/supervisor/badges`).as('getGlobalBadges');
-        cy.route('PUT', `/supervisor/badges/${expectedId}`).as('postGlobalBadge');
-        cy.route('GET', `/supervisor/badges/id/${expectedId}/exists`).as('idExists');
-        cy.route('POST', '/supervisor/badges/name/exists').as('nameExists');
-        cy.route('GET', '/app/userInfo/hasRole/ROLE_SUPERVISOR').as('checkSupervisorRole');
-        cy.route('GET', `/supervisor/badges/${expectedId}`).as('getExpectedBadge');
+        cy.intercept('GET', `/supervisor/badges`).as('getGlobalBadges');
+        cy.intercept('PUT', `/supervisor/badges/${expectedId}`).as('postGlobalBadge');
+        cy.intercept('GET', `/supervisor/badges/id/${expectedId}/exists`).as('idExists');
+        cy.intercept('POST', '/supervisor/badges/name/exists').as('nameExists');
+        cy.intercept('GET', '/app/userInfo/hasRole/ROLE_SUPERVISOR').as('checkSupervisorRole');
+        cy.intercept('GET', `/supervisor/badges/${expectedId}`).as('getExpectedBadge');
 
         cy.visit('/globalBadges');
         cy.wait('@getGlobalBadges');
@@ -250,12 +250,12 @@ describe('Global Badges Tests', () => {
         });
 
         const expectedId = 'TestBadgeBadge';
-        cy.route('GET', `/supervisor/badges`).as('getGlobalBadges');
-        cy.route('PUT', `/supervisor/badges/${expectedId}`).as('postGlobalBadge');
-        cy.route('GET', `/supervisor/badges/id/${expectedId}/exists`).as('idExists');
-        cy.route('POST', '/supervisor/badges/name/exists').as('nameExists');
-        cy.route('GET', '/app/userInfo/hasRole/ROLE_SUPERVISOR').as('checkSupervisorRole');
-        cy.route('GET', `/supervisor/badges/${expectedId}`).as('getExpectedBadge');
+        cy.intercept('GET', `/supervisor/badges`).as('getGlobalBadges');
+        cy.intercept('PUT', `/supervisor/badges/${expectedId}`).as('postGlobalBadge');
+        cy.intercept('GET', `/supervisor/badges/id/${expectedId}/exists`).as('idExists');
+        cy.intercept('POST', '/supervisor/badges/name/exists').as('nameExists');
+        cy.intercept('GET', '/app/userInfo/hasRole/ROLE_SUPERVISOR').as('checkSupervisorRole');
+        cy.intercept('GET', `/supervisor/badges/${expectedId}`).as('getExpectedBadge');
 
         cy.visit('/globalBadges');
         cy.wait('@getGlobalBadges');
@@ -312,11 +312,11 @@ describe('Global Badges Tests', () => {
         });
 
         const expectedId = 'TestBadgeBadge';
-        cy.route('GET', `/supervisor/badges`).as('getGlobalBadges');
-        cy.route('PUT', `/supervisor/badges/${expectedId}`).as('postGlobalBadge');
-        cy.route('GET', `/supervisor/badges/id/${expectedId}/exists`).as('idExists');
-        cy.route('POST', '/supervisor/badges/name/exists').as('nameExists');
-        cy.route('GET', '/app/userInfo/hasRole/ROLE_SUPERVISOR').as('checkSupervisorRole');
+        cy.intercept('GET', `/supervisor/badges`).as('getGlobalBadges');
+        cy.intercept('PUT', `/supervisor/badges/${expectedId}`).as('postGlobalBadge');
+        cy.intercept('GET', `/supervisor/badges/id/${expectedId}/exists`).as('idExists');
+        cy.intercept('POST', '/supervisor/badges/name/exists').as('nameExists');
+        cy.intercept('GET', '/app/userInfo/hasRole/ROLE_SUPERVISOR').as('checkSupervisorRole');
 
         cy.visit('/globalBadges');
         cy.wait('@getGlobalBadges');
@@ -349,14 +349,14 @@ describe('Global Badges Tests', () => {
     });
 
     it('Can add Skill and Level requirements to disabled Global Badge', () => {
-        cy.route('GET', `/supervisor/badges`).as('getGlobalBadges');
-        cy.route('PUT', `/supervisor/badges/ABadgeBadge`).as('postGlobalBadge');
-        cy.route('GET', `/supervisor/badges/id/ABadgeBadge/exists`).as('idExists');
-        cy.route('POST', '/supervisor/badges/name/exists').as('nameExists');
-        cy.route('GET', '/supervisor/badges/ABadgeBadge/projects/available').as('availableProjects')
-        cy.route('GET', '/supervisor/badges/ABadgeBadge/skills/available?query=').as('availableSkills')
-        cy.route('GET', '/supervisor/badges/ABadgeBadge').as('badgeInfo')
-        cy.route('GET', '/supervisor/projects/proj2/levels').as('proj2Levels');
+        cy.intercept('GET', `/supervisor/badges`).as('getGlobalBadges');
+        cy.intercept('PUT', `/supervisor/badges/ABadgeBadge`).as('postGlobalBadge');
+        cy.intercept('GET', `/supervisor/badges/id/ABadgeBadge/exists`).as('idExists');
+        cy.intercept('POST', '/supervisor/badges/name/exists').as('nameExists');
+        cy.intercept('GET', '/supervisor/badges/ABadgeBadge/projects/available').as('availableProjects')
+        cy.intercept('GET', '/supervisor/badges/ABadgeBadge/skills/available?query=').as('availableSkills')
+        cy.intercept('GET', '/supervisor/badges/ABadgeBadge').as('badgeInfo')
+        cy.intercept('GET', '/supervisor/projects/proj2/levels').as('proj2Levels');
         //proj/subj/skill1
         cy.request('POST', '/app/projects/proj1', {
             projectId: 'proj1',
@@ -454,10 +454,10 @@ describe('Global Badges Tests', () => {
     });
 
     it('Removing all skills should not cause published Global Badge to become disabled', () => {
-        cy.route('GET', `/supervisor/badges`).as('getGlobalBadges');
-        cy.route('PUT', `/supervisor/badges/ABadgeBadge`).as('postGlobalBadge');
-        cy.route('GET', `/supervisor/badges/id/ABadgeBadge/exists`).as('idExists');
-        cy.route('POST', '/supervisor/badges/name/exists').as('nameExists');
+        cy.intercept('GET', `/supervisor/badges`).as('getGlobalBadges');
+        cy.intercept('PUT', `/supervisor/badges/ABadgeBadge`).as('postGlobalBadge');
+        cy.intercept('GET', `/supervisor/badges/id/ABadgeBadge/exists`).as('idExists');
+        cy.intercept('POST', '/supervisor/badges/name/exists').as('nameExists');
         //proj/subj/skill1
         cy.request('POST', '/app/projects/proj1', {
             projectId: 'proj1',
@@ -503,8 +503,8 @@ describe('Global Badges Tests', () => {
             version: 0,
         });
 
-        cy.route('GET', '/supervisor/projects/proj2/levels').as('getLevels');
-        cy.route('GET', '/supervisor/badges/ABadgeBadge/projects/available').as('getAvailableLevels');
+        cy.intercept('GET', '/supervisor/projects/proj2/levels').as('getLevels');
+        cy.intercept('GET', '/supervisor/badges/ABadgeBadge/projects/available').as('getAvailableLevels');
 
         cy.visit('/');
 
@@ -560,7 +560,7 @@ describe('Global Badges Tests', () => {
     });
 
     it('new badge button should retain focus after dialog is closed', () => {
-        cy.route('GET', `/supervisor/badges`).as('getGlobalBadges');
+        cy.intercept('GET', `/supervisor/badges`).as('getGlobalBadges');
 
         cy.visit('/');
         cy.clickNav('Badges');
@@ -597,7 +597,7 @@ describe('Global Badges Tests', () => {
             name: "Badge 2"
         });
 
-        cy.route('GET', `/supervisor/badges`).as('getGlobalBadges');
+        cy.intercept('GET', `/supervisor/badges`).as('getGlobalBadges');
 
         cy.visit('/');
         cy.clickNav('Badges');

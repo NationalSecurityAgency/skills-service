@@ -40,9 +40,9 @@ describe('Badges Tests', () => {
             cy.get('[data-cy="endDatePicker"] .day').contains(dayNum).click()
         });
 
-        cy.server();
-        cy.route('POST', '/admin/projects/proj1/badgeNameExists').as('nameExistsCheck');
-        cy.route('GET', '/admin/projects/proj1/badges').as('loadBadges');
+
+        cy.intercept('POST', '/admin/projects/proj1/badgeNameExists').as('nameExistsCheck');
+        cy.intercept('GET', '/admin/projects/proj1/badges').as('loadBadges');
 
     });
 
@@ -50,9 +50,9 @@ describe('Badges Tests', () => {
         const expectedId = 'LotsofspecialPcharsBadge';
         const providedName = "!L@o#t$s of %s^p&e*c(i)a_l++_|}{P/ c'ha'rs";
 
-        cy.route('POST', `/admin/projects/proj1/badges/${expectedId}`).as('postNewBadge');
-        cy.route('POST', '/admin/projects/proj1/badgeNameExists').as('nameExistsCheck');
-        cy.route('GET', '/admin/projects/proj1/badges').as('loadBadges');
+        cy.intercept('POST', `/admin/projects/proj1/badges/${expectedId}`).as('postNewBadge');
+        cy.intercept('POST', '/admin/projects/proj1/badgeNameExists').as('nameExistsCheck');
+        cy.intercept('GET', '/admin/projects/proj1/badges').as('loadBadges');
 
         cy.get('@createProject').should((response) => {
             expect(response.status).to.eql(200)
@@ -78,9 +78,9 @@ describe('Badges Tests', () => {
         const expectedId = 'LotsofspecialPcharsBadge';
         const providedName = "!L@o#t$s of %s^p&e*c(i)a_l++_|}{P/ c'ha'rs";
 
-        cy.route('POST', `/admin/projects/proj1/badges/${expectedId}`).as('postNewBadge');
-        cy.route('POST', '/admin/projects/proj1/badgeNameExists').as('nameExistsCheck');
-        cy.route('GET', '/admin/projects/proj1/badges').as('loadBadges');
+        cy.intercept('POST', `/admin/projects/proj1/badges/${expectedId}`).as('postNewBadge');
+        cy.intercept('POST', '/admin/projects/proj1/badgeNameExists').as('nameExistsCheck');
+        cy.intercept('GET', '/admin/projects/proj1/badges').as('loadBadges');
 
         cy.get('@createProject').should((response) => {
             expect(response.status).to.eql(200)
@@ -103,7 +103,7 @@ describe('Badges Tests', () => {
     });
 
     if('Close badge dialog', () => {
-        cy.route('GET', '/admin/projects/proj1/badges').as('loadBadges');
+        cy.intercept('GET', '/admin/projects/proj1/badges').as('loadBadges');
 
         cy.get('@createProject').should((response) => {
             expect(response.status).to.eql(200)
@@ -117,9 +117,9 @@ describe('Badges Tests', () => {
     });
 
     it('cannot publish badge with no skills', () => {
-        cy.route('POST', `/admin/projects/proj1/badges/anameBadge`).as('postNewBadge');
-        cy.route('POST', '/admin/projects/proj1/badgeNameExists').as('nameExistsCheck');
-        cy.route('GET', '/admin/projects/proj1/badges').as('loadBadges');
+        cy.intercept('POST', `/admin/projects/proj1/badges/anameBadge`).as('postNewBadge');
+        cy.intercept('POST', '/admin/projects/proj1/badgeNameExists').as('nameExistsCheck');
+        cy.intercept('GET', '/admin/projects/proj1/badges').as('loadBadges');
 
         cy.get('@createProject').should((response) => {
             expect(response.status).to.eql(200)
@@ -146,12 +146,12 @@ describe('Badges Tests', () => {
     it('inactive badge displays warning', () => {
         const expectedId = 'InactiveBadge';
         const providedName = 'Inactive';
-        cy.server();
-        cy.route('GET', '/app/userInfo').as('getUserInfo');
-        cy.route('GET', '/app/userInfo/hasRole/ROLE_SUPERVISOR').as('hasSupervisor');
-        cy.route('POST', `/admin/projects/proj1/badges/${expectedId}`).as('postNewBadge');
-        cy.route('POST', '/admin/projects/proj1/badgeNameExists').as('nameExistsCheck');
-        cy.route('GET', '/admin/projects/proj1/badges').as('loadBadges');
+
+        cy.intercept('GET', '/app/userInfo').as('getUserInfo');
+        cy.intercept('GET', '/app/userInfo/hasRole/ROLE_SUPERVISOR').as('hasSupervisor');
+        cy.intercept('POST', `/admin/projects/proj1/badges/${expectedId}`).as('postNewBadge');
+        cy.intercept('POST', '/admin/projects/proj1/badgeNameExists').as('nameExistsCheck');
+        cy.intercept('GET', '/admin/projects/proj1/badges').as('loadBadges');
 
         cy.get('@createProject').should((response) => {
             expect(response.status).to.eql(200)

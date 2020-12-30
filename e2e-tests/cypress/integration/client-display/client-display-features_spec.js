@@ -59,30 +59,26 @@ describe('Client Display Features Tests', () => {
   })
 
   it('display new version banner when software is updated', () => {
-    cy.server()
-    cy.route({
-      url: '/api/projects/proj1/subjects/subj1/summary',
-      status: 200,
-      response: {
-        'subject': 'Subject 1',
-        'subjectId': 'subj1',
-        'description': 'Description',
-        'skillsLevel': 0,
-        'totalLevels': 5,
-        'points': 0,
-        'totalPoints': 0,
-        'todaysPoints': 0,
-        'levelPoints': 0,
-        'levelTotalPoints': 0,
-        'skills': [],
-        'iconClass': 'fa fa-question-circle',
-        'helpUrl': 'http://doHelpOnThisSubject.com'
-      },
-      headers: {
-        'skills-client-lib-version': dateFormatter(new Date())
-      },
+    cy.intercept('/api/projects/proj1/subjects/subj1/summary', (req) => {
+      req.reply((res) => {
+        res.send(200, {
+          'subject': 'Subject 1',
+          'subjectId': 'subj1',
+          'description': 'Description',
+          'skillsLevel': 0,
+          'totalLevels': 5,
+          'points': 0,
+          'totalPoints': 0,
+          'todaysPoints': 0,
+          'levelPoints': 0,
+          'levelTotalPoints': 0,
+          'skills': [],
+          'iconClass': 'fa fa-question-circle',
+          'helpUrl': 'http://doHelpOnThisSubject.com'
+        }, { 'skills-client-lib-version': dateFormatter(new Date()) })
+      })
     }).as('getSubjectSummary');
-    cy.route('GET', '/api/projects/proj1/pointHistory').as('pointHistoryChart');
+    cy.intercept('GET', '/api/projects/proj1/pointHistory').as('pointHistoryChart');
 
     cy.cdVisit('/');
     cy.injectAxe();
@@ -104,10 +100,11 @@ describe('Client Display Features Tests', () => {
 
   it('do not display new version banner if lib version in headers is older than lib version in local storage', () => {
     const mockedLibVersion = dateFormatter(new Date() - 1000 * 60 * 60 * 24 * 5);
-    cy.server().route({
-      url: '/api/projects/proj1/subjects/subj1/summary',
-      status: 200,
-      response: {
+    cy.intercept({
+      path: '/api/projects/proj1/subjects/subj1/summary',
+      statusCode: 200,
+    }, {
+      body: {
         'subject': 'Subject 1',
         'subjectId': 'subj1',
         'description': 'Description',
@@ -123,14 +120,15 @@ describe('Client Display Features Tests', () => {
         'helpUrl': 'http://doHelpOnThisSubject.com'
       },
       headers: {
-        'skills-client-lib-version': mockedLibVersion
+        'skills-client-lib-version': mockedLibVersion,
       },
     }).as('getSubjectSummary');
 
-    cy.server().route({
-      url: '/api/projects/proj1/subjects/subj1/rank',
-      status: 200,
-      response: {
+    cy.intercept({
+      path: '/api/projects/proj1/subjects/subj1/rank',
+    }, {
+      statusCode: 200,
+      body: {
         'numUsers': 1,
         'position': 1
       },
@@ -139,10 +137,11 @@ describe('Client Display Features Tests', () => {
       },
     }).as('getRank');
 
-    cy.server().route({
+    cy.intercept({
       url: '/api/projects/proj1/subjects/subj1/pointHistory',
-      status: 200,
-      response: { 'pointsHistory': [] },
+    }, {
+      statusCode: 200,
+      body: { 'pointsHistory': [] },
       headers: {
         'skills-client-lib-version': mockedLibVersion
       },
@@ -161,7 +160,6 @@ describe('Client Display Features Tests', () => {
   });
 
   it('achieve level 5, then add new skill', () => {
-    cy.server();
     cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill1`, {
       projectId: 'proj1',
       subjectId: 'subj1',
@@ -185,7 +183,7 @@ describe('Client Display Features Tests', () => {
       userId: Cypress.env('proxyUser'),
       timestamp: new Date().getTime() - 1000 * 60 * 60 * 24
     })
-    cy.route('GET', '/api/projects/proj1/pointHistory').as('pointHistoryChart');
+    cy.intercept('GET', '/api/projects/proj1/pointHistory').as('pointHistoryChart');
 
     cy.cdVisit('/');
     cy.injectAxe();

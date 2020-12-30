@@ -23,14 +23,14 @@ describe('Settings Tests', () => {
     });
 
     it('Add Root User', () => {
-        cy.server();
-        cy.route('POST', '/root/users/without/role/ROLE_SUPER_DUPER_USER?userSuggestOption=ONE').as('getEligibleForRoot');
-        cy.route('PUT', '/root/users/skills@skills.org/roles/ROLE_SUPER_DUPER_USER').as('addRoot');
-        cy.route({
+
+        cy.intercept('POST', '/root/users/without/role/ROLE_SUPER_DUPER_USER?userSuggestOption=ONE').as('getEligibleForRoot');
+        cy.intercept('PUT', '/root/users/skills@skills.org/roles/ROLE_SUPER_DUPER_USER').as('addRoot');
+        cy.intercept({
             method: 'GET',
             url: '/app/projects'
         }).as('loadProjects');
-        cy.route({method: 'GET', url: '/root/isRoot'}).as('checkRoot');
+        cy.intercept({method: 'GET', url: '/root/isRoot'}).as('checkRoot');
 
         cy.visit('/');
         cy.get('[data-cy=subPageHeader]').contains('Projects');
@@ -47,18 +47,18 @@ describe('Settings Tests', () => {
     });
 
     it('Add Root User - forward slash character does not cause error', () => {
-        cy.server();
-        cy.route('POST', '/root/users/without/role/ROLE_SUPER_DUPER_USER?userSuggestOption=ONE').as('getEligibleForRoot');
-        cy.route('PUT', '/root/users/skills@skills.org/roles/ROLE_SUPER_DUPER_USER').as('addRoot');
-        cy.route('GET', '/app/projects').as('loadProjects');
-        cy.route('GET', '/app/userInfo/hasRole/ROLE_SUPERVISOR').as('isSupervisor');
-        cy.route('GET', '/app/userInfo').as('loadUserInfo');
-        cy.route('GET', '/public/config').as('loadConfig');
-        cy.route({
+
+        cy.intercept('POST', '/root/users/without/role/ROLE_SUPER_DUPER_USER?userSuggestOption=ONE').as('getEligibleForRoot');
+        cy.intercept('PUT', '/root/users/skills@skills.org/roles/ROLE_SUPER_DUPER_USER').as('addRoot');
+        cy.intercept('GET', '/app/projects').as('loadProjects');
+        cy.intercept('GET', '/app/userInfo/hasRole/ROLE_SUPERVISOR').as('isSupervisor');
+        cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
+        cy.intercept('GET', '/public/config').as('loadConfig');
+        cy.intercept({
             method: 'GET',
             url: '/app/projects'
         }).as('loadProjects');
-        cy.route({method: 'GET', url: '/root/isRoot'}).as('checkRoot');
+        cy.intercept({method: 'GET', url: '/root/isRoot'}).as('checkRoot');
 
         cy.visit('/');
         cy.wait('@loadConfig');
@@ -76,14 +76,14 @@ describe('Settings Tests', () => {
 
 
     it('Add Root User With No Query', () => {
-        cy.server();
-        cy.route('POST', '/root/users/without/role/ROLE_SUPER_DUPER_USER?userSuggestOption=ONE').as('getEligibleForRoot');
-        cy.route('PUT', '/root/users/skills@skills.org/roles/ROLE_SUPER_DUPER_USER').as('addRoot');
-        cy.route({
+
+        cy.intercept('POST', '/root/users/without/role/ROLE_SUPER_DUPER_USER?userSuggestOption=ONE').as('getEligibleForRoot');
+        cy.intercept('PUT', '/root/users/skills@skills.org/roles/ROLE_SUPER_DUPER_USER').as('addRoot');
+        cy.intercept({
             method: 'GET',
             url: '/app/projects'
         }).as('loadProjects');
-        cy.route({method: 'GET', url: '/root/isRoot'}).as('checkRoot');
+        cy.intercept({method: 'GET', url: '/root/isRoot'}).as('checkRoot');
 
         cy.visit('/');
         cy.get('button.dropdown-toggle').first().click({force: true});
@@ -99,14 +99,14 @@ describe('Settings Tests', () => {
     });
 
     it('Add Supervisor User', () => {
-        cy.server();
-        cy.route('PUT', '/root/users/root@skills.org/roles/ROLE_SUPERVISOR').as('addSupervisor');
-        cy.route('POST', 'root/users/without/role/ROLE_SUPERVISOR?userSuggestOption=ONE').as('getEligibleForSupervisor');
-        cy.route({
+
+        cy.intercept('PUT', '/root/users/root@skills.org/roles/ROLE_SUPERVISOR').as('addSupervisor');
+        cy.intercept('POST', 'root/users/without/role/ROLE_SUPERVISOR?userSuggestOption=ONE').as('getEligibleForSupervisor');
+        cy.intercept({
             method: 'GET',
             url: '/app/projects'
         }).as('loadProjects');
-        cy.route({method: 'GET', url: '/root/isRoot'}).as('checkRoot');
+        cy.intercept({method: 'GET', url: '/root/isRoot'}).as('checkRoot');
 
         cy.visit('/');
         cy.get('[data-cy=subPageHeader]').contains('Projects');
@@ -129,14 +129,14 @@ describe('Settings Tests', () => {
     });
 
     it('Add Supervisor User Not Found', () => {
-        cy.server();
-        // cy.route('PUT', '/root/users/root@skills.org/roles/ROLE_SUPERVISOR').as('addSupervisor');
-        cy.route('POST', 'root/users/without/role/ROLE_SUPERVISOR?userSuggestOption=ONE', [{"userId":"blah@skills.org","userIdForDisplay":"blah@skills.org","first":"Firstname","last":"LastName","nickname":"Firstname LastName","dn":null}]).as('getEligibleForSupervisor');
-        cy.route({
+
+        // cy.intercept('PUT', '/root/users/root@skills.org/roles/ROLE_SUPERVISOR').as('addSupervisor');
+        cy.intercept('POST', 'root/users/without/role/ROLE_SUPERVISOR?userSuggestOption=ONE', [{"userId":"blah@skills.org","userIdForDisplay":"blah@skills.org","first":"Firstname","last":"LastName","nickname":"Firstname LastName","dn":null}]).as('getEligibleForSupervisor');
+        cy.intercept({
             method: 'GET',
             url: '/app/projects'
         }).as('loadProjects');
-        cy.route({method: 'GET', url: '/root/isRoot'}).as('checkRoot');
+        cy.intercept({method: 'GET', url: '/root/isRoot'}).as('checkRoot');
 
         cy.visit('/');
         cy.get('[data-cy=subPageHeader]').contains('Projects');
@@ -157,15 +157,15 @@ describe('Settings Tests', () => {
 
     it('Add Supervisor User No Query', () => {
 
-        cy.server();
-        cy.route('PUT', '/root/users/root@skills.org/roles/ROLE_SUPERVISOR').as('addSupervisor');
-        cy.route('POST', 'root/users/without/role/ROLE_SUPERVISOR?userSuggestOption=ONE').as('getEligibleForSupervisor');
-        cy.route({
+
+        cy.intercept('PUT', '/root/users/root@skills.org/roles/ROLE_SUPERVISOR').as('addSupervisor');
+        cy.intercept('POST', 'root/users/without/role/ROLE_SUPERVISOR?userSuggestOption=ONE').as('getEligibleForSupervisor');
+        cy.intercept({
             method: 'GET',
             url: '/app/projects'
         }).as('loadProjects');
 
-        cy.route({method: 'GET', url: '/root/isRoot'}).as('checkRoot');
+        cy.intercept({method: 'GET', url: '/root/isRoot'}).as('checkRoot');
 
         cy.visit('/');
 
@@ -180,9 +180,9 @@ describe('Settings Tests', () => {
     });
 
     it('Email Server Settings', () => {
-        cy.server();
-        cy.route('GET', '/root/getEmailSettings').as('loadEmailSettings');
-        cy.route('GET', '/app/userInfo').as('loadUserInfo');
+
+        cy.intercept('GET', '/root/getEmailSettings').as('loadEmailSettings');
+        cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
         cy.visit('/');
         cy.wait('@loadUserInfo');
         cy.get('.userName').parent().click();
@@ -229,9 +229,9 @@ describe('Settings Tests', () => {
     });
 
     it('Email Settings reasonable timeout', () => {
-        cy.server();
-        cy.route('GET', '/root/getEmailSettings').as('loadEmailSettings');
-        cy.route('GET', '/app/userInfo').as('loadUserInfo');
+
+        cy.intercept('GET', '/root/getEmailSettings').as('loadEmailSettings');
+        cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
         cy.visit('/');
         cy.wait('@loadUserInfo');
         cy.get('.userName').parent().click();
@@ -249,10 +249,10 @@ describe('Settings Tests', () => {
     });
 
     it('System Settings', () => {
-        cy.server();
-        cy.route('GET', '/root/getSystemSettings').as('loadSystemSettings');
-        cy.route('GET', '/app/userInfo').as('loadUserInfo');
-        cy.route('GET', '/public/config').as('loadConfig');
+
+        cy.intercept('GET', '/root/getSystemSettings').as('loadSystemSettings');
+        cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
+        cy.intercept('GET', '/public/config').as('loadConfig');
         cy.visit('/');
         cy.wait('@loadUserInfo');
         cy.get('.userName').parent().click();
@@ -287,10 +287,10 @@ describe('Settings Tests', () => {
     });
 
     it('System Settings - script tags not allowed in footer/header', () => {
-        cy.server();
-        cy.route('GET', '/root/getSystemSettings').as('loadSystemSettings');
-        cy.route('GET', '/app/userInfo').as('loadUserInfo');
-        cy.route('GET', '/public/config').as('loadConfig');
+
+        cy.intercept('GET', '/root/getSystemSettings').as('loadSystemSettings');
+        cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
+        cy.intercept('GET', '/public/config').as('loadConfig');
         cy.visit('/');
         cy.wait('@loadUserInfo');
         cy.get('.userName').parent().click();
@@ -315,10 +315,10 @@ describe('Settings Tests', () => {
        const _3001 = 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
        const _3000 = 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
 
-        cy.server();
-        cy.route('GET', '/root/getSystemSettings').as('loadSystemSettings');
-        cy.route('GET', '/app/userInfo').as('loadUserInfo');
-        cy.route('GET', '/public/config').as('loadConfig');
+
+        cy.intercept('GET', '/root/getSystemSettings').as('loadSystemSettings');
+        cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
+        cy.intercept('GET', '/public/config').as('loadConfig');
         cy.visit('/');
         cy.wait('@loadUserInfo');
         cy.get('.userName').parent().click();
@@ -345,10 +345,10 @@ describe('Settings Tests', () => {
     });
 
     it('from email validation', () => {
-        cy.server();
-        cy.route('GET', '/root/getSystemSettings').as('loadSystemSettings');
-        cy.route('GET', '/app/userInfo').as('loadUserInfo');
-        cy.route('GET', '/public/config').as('loadConfig');
+
+        cy.intercept('GET', '/root/getSystemSettings').as('loadSystemSettings');
+        cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
+        cy.intercept('GET', '/public/config').as('loadConfig');
         cy.visit('/');
         cy.wait('@loadUserInfo');
         cy.get('.userName').parent().click();
@@ -373,10 +373,10 @@ describe('Settings Tests', () => {
     });
 
     it('custom header/footer should be full width', () => {
-        cy.server();
-        cy.route('GET', '/root/getSystemSettings').as('loadSystemSettings');
-        cy.route('GET', '/app/userInfo').as('loadUserInfo');
-        cy.route('GET', '/public/config').as('loadConfig');
+
+        cy.intercept('GET', '/root/getSystemSettings').as('loadSystemSettings');
+        cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
+        cy.intercept('GET', '/public/config').as('loadConfig');
         cy.visit('/');
         cy.wait('@loadUserInfo');
         cy.get('.userName').parent().click();
@@ -421,10 +421,10 @@ describe('Settings Tests', () => {
     });
 
     it('custom header/footer dynamic variable replacement', () => {
-        cy.server();
-        cy.route('GET', '/root/getSystemSettings').as('loadSystemSettings');
-        cy.route('GET', '/app/userInfo').as('loadUserInfo');
-        cy.route('GET', '/public/config').as('loadConfig');
+
+        cy.intercept('GET', '/root/getSystemSettings').as('loadSystemSettings');
+        cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
+        cy.intercept('GET', '/public/config').as('loadConfig');
         cy.visit('/');
         cy.wait('@loadUserInfo');
         cy.get('.userName').parent().click();
