@@ -41,12 +41,13 @@ limitations under the License.
                       @sort-changed="sortTable"
                       data-cy="usersTable">
         <template v-slot:cell(userId)="data">
-          {{ data.value }}
+          {{ getUserDisplay(data.item) }}
 
           <b-button-group class="float-right">
             <b-button :to="calculateClientDisplayRoute(data.item)"
                       variant="outline-info" size="sm" class="text-secondary"
                       v-b-tooltip.hover="'View User Details'"
+                      :aria-label="`View details for user ${getUserDisplay(data.item)}`"
                       data-cy="usersTable_viewDetailsBtn"><i class="fa fa-user-alt"/><span class="sr-only">view user details</span>
             </b-button>
           </b-button-group>
@@ -69,7 +70,6 @@ limitations under the License.
 </template>
 
 <script>
-  import axios from 'axios';
   import SkillsBTable from '@/components/utils/table/SkillsBTable';
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import dayjs from '../../DayJsCustomizer';
@@ -82,12 +82,10 @@ limitations under the License.
       SubPageHeader,
     },
     data() {
-      const self = this;
       return {
         loading: true,
         initialLoad: true,
         data: [],
-        totalNumUsers: '...',
         filters: {
           userId: '',
         },
@@ -125,46 +123,6 @@ limitations under the License.
               possiblePageSizes: [5, 10, 15, 20],
             },
           },
-        },
-        columns: ['userId', 'totalPoints', 'lastUpdated', 'viewDetail'],
-        options: {
-          headings: {
-            userId: 'User',
-            totalPoints: 'Total Points',
-            lastUpdated: 'Last Reported Skill',
-            viewDetail: '',
-          },
-          columnsClasses: {
-            viewDetail: 'control-column',
-          },
-          sortable: ['userId', 'totalPoints', 'lastUpdated'],
-          orderBy: {
-            column: 'userId',
-            ascending: true,
-          },
-          dateColumns: ['lastUpdated'],
-          dateFormat: 'YYYY-MM-DD HH:mm',
-          sortIcon: {
-            base: 'fa fa-sort', up: 'fa fa-sort-up', down: 'fa fa-sort-down', is: 'fa fa-sort',
-          },
-          filterable: true,
-          highlightMatches: true,
-          skin: 'table is-striped is-fullwidth',
-          /* eslint-disable */
-          requestFunction: function (data) {
-            return axios.get(this.url, {
-              params: data
-            }).then((res) => {
-              self.loading = false;
-              self.totalNumUsers = res.data.totalCount;
-              return res;
-            }).catch(function (e) {
-              self.loading = false;
-              self.totalNumUsers = 0;
-              this.dispatch('error', e);
-            }.bind(this));
-          },
-          /* eslint-enable */
         },
       };
     },
@@ -266,14 +224,6 @@ limitations under the License.
 
         return routeObj;
       },
-      onLoading() {
-        this.loading = true;
-      },
-      onLoaded(event) {
-        this.loading = false;
-        this.initialLoad = false;
-        this.$emit('loaded', event);
-      },
       getUrl() {
         let url = `/admin/projects/${this.$route.params.projectId}`;
         if (this.$route.params.skillId) {
@@ -286,37 +236,13 @@ limitations under the License.
         url += '/users';
         return url;
       },
-      emit(name, event) {
-        this.$emit(name, event, this);
-      },
-      clear() {
-        this.$refs.table.data = [];
-        this.$refs.table.count = 0;
-      },
-      getDate(props) {
-        return dayjs(props.row.lastUpdated).format('LLL');
-      },
       getUserDisplay(props) {
-        return props.row.lastName && props.row.firstName ? `${props.row.firstName} ${props.row.lastName} (${props.row.userIdForDisplay})` : props.row.userIdForDisplay;
+        return props.lastName && props.firstName ? `${props.firstName} ${props.lastName} (${props.userIdForDisplay})` : props.userIdForDisplay;
       },
     },
   };
 </script>
 
 <style>
-  .usersTable .control-column{
-    width: 8rem;
-  }
-  /* on the mobile platform some of the columns will be removed
-   so let's allow the table to size on its own*/
-  @media (max-width: 576px) {
-    .usersTable .control-column {
-      width: unset;
-    }
-  }
 
-  .usersTable table {
-    width: 100%;
-    position: relative;
-  }
 </style>

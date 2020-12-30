@@ -229,4 +229,279 @@ describe('Users Tests', () => {
         ], 5);
     });
 
+    it('apply today tag', () => {
+        cy.intercept('users')
+            .as('getUsers');
+
+        cy.request('POST', `/api/projects/proj1/skills/skill1`, {
+            userId: `usera@skills.org`,
+            timestamp: m.clone()
+                .format('x')
+        });
+        cy.request('POST', `/api/projects/proj1/skills/skill1`, {
+            userId: `userb@skills.org`,
+            timestamp: moment.utc()
+                .format('x')
+        });
+
+        cy.visit('/projects/proj1/');
+        cy.clickNav('Users');
+        cy.wait('@getUsers')
+
+        const rowSelector = `${tableSelector} tbody tr`
+        cy.get(rowSelector).should('have.length', 2).as('cyRows');
+
+        cy.get('@cyRows').eq(0).find('td').as('row1');
+        cy.get('@row1').eq(2).should('not.contain', 'Today');
+
+        cy.get('@cyRows').eq(1).find('td').as('row2');
+        cy.get('@row2').eq(2).should('contain', 'Today');
+    });
+
+    it('use first and last name in the display if available', () => {
+        cy.intercept('users')
+            .as('getUsers');
+
+        cy.request('POST', `/api/projects/proj1/skills/skill1`);
+
+        cy.visit('/projects/proj1/');
+        cy.clickNav('Users');
+        cy.wait('@getUsers')
+
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'Firstname LastName (skills@skills.org)' }],
+        ], 5);
+
+        // make sure filter still works when username is formatted like that
+        cy.get('[data-cy="users-skillIdFilter"]').type('last');
+        cy.get('[data-cy="users-filterBtn"]').click();
+        cy.wait('@getUsers')
+
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'Firstname LastName (skills@skills.org)' }],
+        ], 5);
+    });
+
+
+    it('reset should reset paging', () => {
+        cy.intercept('users')
+            .as('getUsers');
+
+        for (let i = 0; i < 6; i += 1) {
+            const charToAdd = String.fromCharCode(97 + i);
+            cy.request('POST', `/api/projects/proj1/skills/skill1`, {
+                userId: `user${charToAdd}@skills.org`,
+                timestamp: m.clone().format('x')
+            });
+        }
+        cy.visit('/projects/proj1/users');
+        cy.wait('@getUsers')
+
+        cy.get('[data-cy="skillsBTablePaging"]').contains('2').click();
+        cy.wait('@getUsers')
+
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'userf@skills.org' }],
+        ], 1, true, 6);
+
+        cy.get('[data-cy="users-resetBtn"]').click();
+        cy.wait('@getUsers')
+
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'usera@skills.org' }],
+            [{ colIndex: 0,  value: 'userb@skills.org' }],
+            [{ colIndex: 0,  value: 'userc@skills.org' }],
+            [{ colIndex: 0,  value: 'userd@skills.org' }],
+            [{ colIndex: 0,  value: 'usere@skills.org' }],
+        ], 5, true, 6);
+    });
+
+    it('navigate to user details', () => {
+        cy.intercept('users')
+            .as('getUsers');
+
+        for (let i = 0; i < 2; i += 1) {
+            const charToAdd = String.fromCharCode(97 + i);
+            cy.request('POST', `/api/projects/proj1/skills/skill1`, {
+                userId: `user${charToAdd}@skills.org`,
+                timestamp: m.clone().format('x')
+            });
+        }
+
+        cy.request('POST', '/admin/projects/proj1/badges/badge1', {
+            projectId: 'proj1',
+            badgeId: 'badge1',
+            name: 'Badge 1',
+            "iconClass":"fas fa-ghost",
+            description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+        });
+
+        cy.request('POST', '/admin/projects/proj1/badge/badge1/skills/skill1')
+
+        cy.visit('/projects/proj1/users');
+        cy.wait('@getUsers')
+
+        cy.get(`${tableSelector} [data-cy="usersTable_viewDetailsBtn"]`).first().click();
+        cy.contains("Client Display");
+        cy.contains("ID: usera@skills.org");
+
+        // validate from subject
+
+        cy.visit('/projects/proj1/subjects/subj1/users');
+        cy.wait('@getUsers')
+        cy.contains('usera@skills.org');
+
+        cy.get(`${tableSelector} [data-cy="usersTable_viewDetailsBtn"]`).first().click();
+        cy.contains("Client Display");
+        cy.contains("ID: usera@skills.org");
+
+        // validate from skill
+
+        cy.visit('/projects/proj1/subjects/subj1/skills/skill1/users');
+        cy.wait('@getUsers')
+        cy.contains('usera@skills.org');
+
+        cy.get(`${tableSelector} [data-cy="usersTable_viewDetailsBtn"]`).first().click();
+        cy.contains("Client Display");
+        cy.contains("ID: usera@skills.org");
+
+        // validate from badge
+
+        cy.visit('/projects/proj1/badges/badge1/users');
+        cy.wait('@getUsers')
+        cy.contains('usera@skills.org');
+
+        cy.get(`${tableSelector} [data-cy="usersTable_viewDetailsBtn"]`).first().click();
+        cy.contains("Client Display");
+        cy.contains("ID: usera@skills.org");
+    });
+
+    it('view users from badge and skill', () => {
+        cy.intercept('users')
+            .as('getUsers');
+
+
+        cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill2`, {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            skillId: `skill2`,
+            name: `Very Great Skill # 2`,
+            pointIncrement: '1500',
+            numPerformToCompletion: '10',
+        });
+
+        cy.request('POST', '/admin/projects/proj1/badges/badge1', {
+            projectId: 'proj1',
+            badgeId: 'badge1',
+            name: 'Badge 1',
+            "iconClass":"fas fa-ghost",
+            description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+        });
+
+        cy.request('POST', '/admin/projects/proj1/badge/badge1/skills/skill1')
+
+        for (let i = 0; i < 2; i += 1) {
+            const charToAdd = String.fromCharCode(97 + i);
+            cy.request('POST', `/api/projects/proj1/skills/skill1`, {
+                userId: `user${charToAdd}@skills.org`,
+                timestamp: m.clone()
+                    .format('x')
+            });
+        }
+
+        // these users don't belong to the badge
+        for (let i = 3; i < 5; i += 1) {
+            const charToAdd = String.fromCharCode(97 + i);
+            cy.request('POST', `/api/projects/proj1/skills/skill2`, {
+                userId: `user${charToAdd}@skills.org`,
+                timestamp: m.clone()
+                    .format('x')
+            });
+        }
+
+        cy.visit('/projects/proj1/badges/badge1/users');
+        cy.wait('@getUsers')
+
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'usera@skills.org' }],
+            [{ colIndex: 0,  value: 'userb@skills.org' }],
+        ], 5);
+
+
+        // now check both skills
+        cy.visit('/projects/proj1/subjects/subj1/skills/skill1/users');
+        cy.wait('@getUsers')
+
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'usera@skills.org' }],
+            [{ colIndex: 0,  value: 'userb@skills.org' }],
+        ], 5);
+
+        cy.visit('/projects/proj1/subjects/subj1/skills/skill2/users');
+        cy.wait('@getUsers')
+
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'userd@skills.org' }],
+            [{ colIndex: 0,  value: 'usere@skills.org' }],
+        ], 5);
+    });
+
+
+    it('view users from subject', () => {
+        cy.intercept('users')
+            .as('getUsers');
+
+
+        cy.request('POST', '/admin/projects/proj1/subjects/subj2', {
+            projectId: 'proj1',
+            subjectId: 'subj2',
+            name: "Interesting Subject 2",
+        })
+
+        cy.request('POST', `/admin/projects/proj1/subjects/subj2/skills/skill2`, {
+            projectId: 'proj1',
+            subjectId: 'subj2',
+            skillId: `skill2`,
+            name: `Very Great Skill # 2`,
+            pointIncrement: '1500',
+            numPerformToCompletion: '10',
+        });
+
+        for (let i = 0; i < 2; i += 1) {
+            const charToAdd = String.fromCharCode(97 + i);
+            cy.request('POST', `/api/projects/proj1/skills/skill1`, {
+                userId: `user${charToAdd}@skills.org`,
+                timestamp: m.clone()
+                    .format('x')
+            });
+        }
+
+        // these users don't belong to the badge
+        for (let i = 3; i < 5; i += 1) {
+            const charToAdd = String.fromCharCode(97 + i);
+            cy.request('POST', `/api/projects/proj1/skills/skill2`, {
+                userId: `user${charToAdd}@skills.org`,
+                timestamp: m.clone()
+                    .format('x')
+            });
+        }
+
+        // now check both subjects
+        cy.visit('/projects/proj1/subjects/subj1/users');
+        cy.wait('@getUsers')
+
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'usera@skills.org' }],
+            [{ colIndex: 0,  value: 'userb@skills.org' }],
+        ], 5);
+
+        cy.visit('/projects/proj1/subjects/subj2/users');
+        cy.wait('@getUsers')
+
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'userd@skills.org' }],
+            [{ colIndex: 0,  value: 'usere@skills.org' }],
+        ], 5);
+    });
+
 })
