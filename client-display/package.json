@@ -25,7 +25,7 @@
     "axios-auth-refresh": "3.0.0",
     "bootstrap": "4.5.2",
     "dayjs": "1.9.6",
-    "dompurify": "2.0.15",
+    "dompurify": "2.2.6",
     "lodash": "4.17.20",
     "marked": "1.1.1",
     "material-icons": "0.3.1",
