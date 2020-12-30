@@ -28,7 +28,7 @@ limitations under the License.
   <nav aria-label="breadcrumb" class="border-bottom" role="navigation">
     <ol class="breadcrumb">
       <li v-for="(item, index) of items" :key="item.label" class="breadcrumb-item">
-         <span v-if="index === items.length-1" style="color: #e7e7e7">
+         <span v-if="index === items.length-1" style="color: #e7e7e7" :data-cy="`breadcrumb-${item.value}`">
            <span v-if="item.label" class="breadcrumb-item-label text-uppercase" aria-current="page">{{ item.label }}: </span><span>{{ item.value }}</span>
          </span>
          <span v-else>

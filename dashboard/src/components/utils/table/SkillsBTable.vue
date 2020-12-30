@@ -29,6 +29,7 @@ limitations under the License.
              :hide-goto-end-buttons="options.pagination.server ? true : false"
              @sort-changed="sortingChanged"
              :no-sort-reset="true"
+             :no-local-sorting="options.pagination.server"
              thead-class="accessible"
              show-empty>
       <colgroup v-if="options.rowDetailsControls"><col style="width: 2rem;"><col></colgroup>
