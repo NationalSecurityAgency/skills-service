@@ -15,7 +15,7 @@ limitations under the License.
 */
 <template>
   <div class="existingUserInput row no-gutters">
-    <b-dropdown v-if="userSuggestOptions && userSuggestOptions.length > 0" variant="split" :text="selectedSuggestOption" class="col-md-auto">
+    <b-dropdown v-if="userSuggestOptions && userSuggestOptions.length > 0" variant="split" :text="selectedSuggestOption" class="col-auto">
       <b-dropdown-item-button v-for="opt in userSuggestOptions" :key="opt.value" :active="opt.value === selectedSuggestOption" @click="selectedSuggestOption=opt.value">{{opt.value}}</b-dropdown-item-button>
     </b-dropdown>
 
@@ -23,7 +23,7 @@ limitations under the License.
                  :options="suggestions" :multiple="allowMultipleSelections" :taggable="canEnterNewUser" @tag="addTag"
                  :hide-selected="true" track-by="userId" label="label"
                  @search-change="suggestUsers" @open="suggestUsers" :loading="isFetching" :internal-search="false"
-                 :clear-on-select="true" :class="{'col-9': (userSuggestOptions && userSuggestOptions.length > 0)}">
+                 :clear-on-select="true" :class="{'col': (userSuggestOptions && userSuggestOptions.length > 0)}">
     </multiselect>
 
     <p class="text-danger" v-show="validate && theError">{{ theError }}</p>

@@ -15,49 +15,67 @@ limitations under the License.
 */
 <template>
   <div class="role-manager">
-    <div :id="id" class="row mt-2 mb-5">
-      <div class="col-12 col-md-10 col-xlg-11 pb-2 pb-md-0">
+    <div class="row p-3">
+      <div class="col-12">
         <existing-user-input :suggest="true" :validate="true" :user-type="userType" :excluded-suggestions="userIds"
                              v-model="selectedUser"/>
       </div>
-      <div class="col-auto">
+      <div class="col-12 pt-3">
+        <b-alert v-if="errNotification.enable" data-cy="error-msg" variant="danger" class="mt-2" show
+                 dismissible>
+          <i class="fa fa-exclamation-circle mr-1" aria-hidden="true"></i> <strong>Error!</strong>
+          Request could not be completed! <strong>{{ errNotification.msg }}</strong>
+        </b-alert>
+
         <b-button variant="outline-hc" @click="addUserRole" :disabled="!selectedUser"
                   class="h-100" v-skills="'AddAdmin'">
-          Add <i :class="[isSaving ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-arrow-circle-right']" aria-hidden="true"></i>
+          Add User <i :class="[isSaving ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-arrow-circle-right']"
+                 aria-hidden="true"></i>
         </b-button>
       </div>
     </div>
 
-    <b-alert v-if="errNotification.enable" data-cy="error-msg" variant="danger" class="mt-2" show
-             dismissible>
-      <i class="fa fa-exclamation-circle mr-1" aria-hidden="true"></i> <strong>Error!</strong> Request could not be completed! <strong>{{
-      errNotification.msg }}</strong>
-    </b-alert>
+    <skills-b-table :options="table.options" :items="data" data-cy="roleManagerTable">
+      <template v-slot:cell(userId)="data">
+        {{ getUserDisplay(data.item) }}
 
-    <loading-container v-bind:is-loading="isLoading">
-      <transition name="userRolesContainer" enter-active-class="animated fadeIn">
-        <v-client-table :data="data" :columns="columns" :options="options">
-          <div slot="userId" slot-scope="props">
-            {{ getUserDisplay(props.row) }}
-          </div>
+        <b-button-group class="float-right">
+          <b-button v-if="notCurrentUser(data.value)" @click="deleteUserRoleConfirm(data.item)"
+                    variant="outline-primary" :aria-label="`remove access role from user ${data.value}`">
+            <i class="text-warning fas fa-trash" aria-hidden="true"/>
+          </b-button>
+          <span v-else v-b-tooltip.hover="'Can not remove myself. Sorry!!'">
+                <b-button variant="outline-primary" disabled aria-label="cannot remove access role from yourself"><i
+                  class="text-warning fas fa-trash" aria-hidden="true"/></b-button>
+          </span>
+        </b-button-group>
+      </template>
+    </skills-b-table>
 
-          <div slot="edit" slot-scope="props" class="field has-addons">
-            <b-button v-if="notCurrentUser(props.row.userId)" @click="deleteUserRoleConfirm(props.row)"
-                      variant="outline-primary" :aria-label="'remove access role from user '+props.row.userId">
-              <i class="text-warning fas fa-trash" aria-hidden="true"/>
-            </b-button>
-            <span v-else v-b-tooltip.hover="'Can not remove myself. Sorry!!'">
-              <b-button variant="outline-primary" disabled aria-label="cannot remove access role from yourself"><i class="text-warning fas fa-trash" aria-hidden="true"/></b-button>
-            </span>
-          </div>
-        </v-client-table>
-      </transition>
-    </loading-container>
+<!--    <loading-container v-bind:is-loading="isLoading" class="mt-4">-->
+<!--      <transition name="userRolesContainer" enter-active-class="animated fadeIn">-->
+<!--        <v-client-table :data="data" :columns="columns" :options="options">-->
+<!--          <div slot="userId" slot-scope="props">-->
+<!--            {{ getUserDisplay(props.row) }}-->
+<!--          </div>-->
+
+<!--          <div slot="edit" slot-scope="props" class="field has-addons">-->
+<!--            <b-button v-if="notCurrentUser(props.row.userId)" @click="deleteUserRoleConfirm(props.row)"-->
+<!--                      variant="outline-primary" :aria-label="'remove access role from user '+props.row.userId">-->
+<!--              <i class="text-warning fas fa-trash" aria-hidden="true"/>-->
+<!--            </b-button>-->
+<!--            <span v-else v-b-tooltip.hover="'Can not remove myself. Sorry!!'">-->
+<!--              <b-button variant="outline-primary" disabled aria-label="cannot remove access role from yourself"><i class="text-warning fas fa-trash" aria-hidden="true"/></b-button>-->
+<!--            </span>-->
+<!--          </div>-->
+<!--        </v-client-table>-->
+<!--      </transition>-->
+<!--    </loading-container>-->
   </div>
 </template>
 
 <script>
-  import LoadingContainer from '../utils/LoadingContainer';
+  import SkillsBTable from '@/components/utils/table/SkillsBTable';
   import AccessService from './AccessService';
   import ExistingUserInput from '../utils/ExistingUserInput';
   import MsgBoxMixin from '../utils/modal/MsgBoxMixin';
@@ -71,7 +89,7 @@ limitations under the License.
   export default {
     name: 'RoleManager',
     mixins: [MsgBoxMixin],
-    components: { ExistingUserInput, LoadingContainer },
+    components: { SkillsBTable, ExistingUserInput },
     props: {
       project: {
         type: Object,
@@ -123,12 +141,31 @@ limitations under the License.
           filterable: false,
           skin: 'table is-striped is-fullwidth',
         },
+        table: {
+          options: {
+            busy: true,
+            bordered: false,
+            outlined: true,
+            stacked: 'md',
+            fields: [
+              {
+                key: 'userId',
+                label: this.roleDescription,
+                sortable: true,
+              },
+            ],
+            pagination: {
+              remove: true,
+            },
+          },
+        },
       };
     },
     mounted() {
       AccessService.getUserRoles(this.project.projectId, this.role)
         .then((result) => {
           this.isLoading = false;
+          this.table.options.busy = false;
           this.data = result;
           this.userIds = result.map(({ userIdForDisplay }) => userIdForDisplay);
         });
