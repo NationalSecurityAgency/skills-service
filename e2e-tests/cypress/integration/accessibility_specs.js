@@ -77,7 +77,7 @@ describe('Accessibility Tests', () => {
     cy.customA11y();
   });
 
-  it('project', () => {
+  it.only('project', () => {
 
     cy.intercept(
       {
@@ -151,9 +151,10 @@ describe('Accessibility Tests', () => {
     cy.get('[data-cy=nav-Access').click();
     cy.contains('Trusted Client Properties');
     cy.contains('ID: MyNewtestProject');
-    cy.validateTable('[data-cy="roleManagerTable"]', [
-      [{ colIndex: 0,  value: 'Firstname LastName (skills@skills.org)' }],
-    ], 5, true, null, false);
+    const tableSelector = '[data-cy="roleManagerTable"]'
+    cy.get(tableSelector).contains('Loading...').should('not.exist')
+    cy.get(tableSelector).contains('There are no records to show').should('not.exist')
+    cy.get(`${tableSelector} tbody tr`).should('have.length', 1)
     cy.customLighthouse();
     cy.customA11y();
 

@@ -395,9 +395,6 @@ describe('Projects Tests', () => {
 
     const rowSelector = '[data-cy=roleManagerTable] tbody tr'
     cy.get(rowSelector).should('have.length', 2).as('cyRows');
-    cy.get('@cyRows').eq(0).find('td').as('row1');
-    cy.get('@row1').eq(0).contains('skills@skills.org');
-
     cy.get('@cyRows').eq(1).find('td').as('row2');
     cy.get('@row2').eq(0).contains('root@skills.org');
   });
@@ -429,9 +426,6 @@ describe('Projects Tests', () => {
     const tableSelector = '[data-cy=roleManagerTable]'
     const rowSelector = `${tableSelector} tbody tr`
     cy.get(rowSelector).should('have.length', 2).as('cyRows');
-    cy.get('@cyRows').eq(0).find('td').as('row1');
-    cy.get('@row1').eq(0).contains('skills@skills.org');
-
     cy.get('@cyRows').eq(1).find('td').as('row2');
     cy.get('@row2').eq(0).contains('root@skills.org');
 
@@ -441,7 +435,7 @@ describe('Projects Tests', () => {
 
     cy.get(rowSelector).should('have.length', 1).as('cyRows1');
     cy.get('@cyRows1').eq(0).find('td').as('rowA');
-    cy.get('@rowA').eq(0).contains('skills@skills.org');
+    cy.get('@rowA').eq(0).contains('root@skills.org').should('not.exist');
   });
 
   it('Add Admin - forward slash character does not cause error', () => {
