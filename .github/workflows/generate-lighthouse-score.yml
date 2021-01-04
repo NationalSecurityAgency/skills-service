@@ -114,10 +114,13 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
+          echo "making branch directory ${BRANCH}"
           mkdir -p "${BRANCH}"
           ls -l
-          mv average_accessibility_score.svg "${BRANCH}"
+          mv average_accessibility_score.svg/* "${BRANCH}"
+          echo "Adding score badge ${BRANCH}/average_accessibility_score.svg"
           git add "${BRANCH}/average_accessibility_score.svg"
+          git status
           git commit -m "Add/Update badge"
 
       - name: Push badge commit

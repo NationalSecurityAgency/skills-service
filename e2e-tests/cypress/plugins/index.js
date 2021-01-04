@@ -83,7 +83,7 @@ module.exports = (on, config) => {
 
                     const format = {
                         label: 'Avg Lighthouse Accessibility Score',
-                        message: `${score}`,
+                        message: `${score}/100`,
                         color: color,
                     };
 
