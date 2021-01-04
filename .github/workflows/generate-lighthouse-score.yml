@@ -80,6 +80,14 @@ jobs:
           npm run cyServices:start
           npm run cy:run:accessibility
           cd ..
+          ls -l
+
+      - name: Archive accessibility score
+        uses: actions/upload-artifact@v2
+        with:
+          name: accessibility_score
+          path: average_accessibility_score.svg
+
 
       - name: Extract branch name
         shell: bash
