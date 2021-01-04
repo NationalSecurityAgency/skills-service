@@ -16,6 +16,8 @@ name: Generate Lighthouse Accessibility Score
 
 on:
   push:
+    branches:
+      - ticket#261/lighthouse_badge
     paths-ignore:
       - 'README.md'
       - '.github/workflows/build-and-test-postgres.yml'
