@@ -96,7 +96,7 @@ describe('Accessibility Tests', () => {
     cy.customA11y();
   });
 
-  it.only('project', () => {
+  it('project', () => {
 
     cy.intercept(
       {
