@@ -83,6 +83,7 @@ jobs:
           ls -l
 
       - name: Archive accessibility score
+        id: 'archive-avg-score'
         uses: actions/upload-artifact@v2
         with:
           name: accessibility_score
@@ -99,6 +100,9 @@ jobs:
 
       - name: Commit badge
         id: 'commit-badge'
+        uses: actions/download-artifact@v2
+        with:
+          name: accessibility_score
         env:
           BRANCH: ${{ steps.extract_branch.outputs.branch }}
         run: |
@@ -106,7 +110,7 @@ jobs:
           git config --local user.name "GitHub Action"
           mkdir -p "${BRANCH}"
           ls -l
-          mv ./average_accessibility_score.svg "${BRANCH}"
+          mv average_accessibility_score.svg "${BRANCH}"
           git add "${BRANCH}/average_accessibility_score.svg"
           git commit -m "Add/Update badge"
 
