@@ -94,9 +94,9 @@ jobs:
         shell: bash
         run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
         id: extract_branch
-        - uses: actions/checkout@v1
-          with:
-            ref: 'badges'
+      - uses: actions/checkout@v1
+        with:
+          ref: 'badges'
 
       - name: Commit badge
         id: 'commit-badge'
