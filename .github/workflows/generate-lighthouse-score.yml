@@ -94,15 +94,18 @@ jobs:
         shell: bash
         run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
         id: extract_branch
-      - uses: actions/checkout@v1
+        uses: actions/checkout@v1
         with:
           ref: 'badges'
 
+      - name: Download avg score
+        id: 'download archived score'
+        uses: actions/download-artifact@v2
+          with:
+            name: accessibility_score
+
       - name: Commit badge
         id: 'commit-badge'
-        uses: actions/download-artifact@v2
-        with:
-          name: accessibility_score
         env:
           BRANCH: ${{ steps.extract_branch.outputs.branch }}
         run: |
