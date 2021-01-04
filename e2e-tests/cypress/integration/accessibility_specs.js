@@ -1,6 +1,10 @@
-var moment = require('moment-timezone');
+const moment = require('moment-timezone');
 
 describe('Accessibility Tests', () => {
+
+  after(() => {
+    cy.task('createAverageAccessibilityScore');
+  });
 
   beforeEach(() => {
     cy.request('POST', '/app/projects/MyNewtestProject', {
@@ -67,7 +71,7 @@ describe('Accessibility Tests', () => {
     cy.request('POST', `/api/projects/MyNewtestProject/skills/skill1`, {userId: 'u5', timestamp: m.subtract(1, 'day').format('x')})
   });
 
-  it('home page', () => {
+  it.only('home page', () => {
     cy.visit('/');
     cy.customLighthouse();
     cy.injectAxe()
