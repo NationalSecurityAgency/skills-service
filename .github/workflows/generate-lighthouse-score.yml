@@ -73,12 +73,12 @@ jobs:
         run: mvn --batch-mode install -DskipTests=true
 
       - name: Run Cypress tests
-            run: |
-              cd e2e-tests
-              npm install
-              npm run cyServices:start
-              npm run cy:run:dev:accessibility
-              cd ..
+          run: |
+            cd e2e-tests
+            npm install
+            npm run cyServices:start
+            npm run cy:run:dev:accessibility
+            cd ..
 
       - name: Extract branch name
           shell: bash
