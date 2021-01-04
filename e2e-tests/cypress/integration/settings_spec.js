@@ -42,7 +42,7 @@ describe('Settings Tests', () => {
         cy.wait('@checkRoot');
         cy.clickNav('Security');
         cy.validateTable(rootUsrTableSelector, [
-            [{ colIndex: 0,  value: 'Firstname LastName (root@skills.org)' }],
+            [{ colIndex: 0,  value: '(root@skills.org)' }],
         ], 5, true, null, false);
 
         cy.contains('Enter user id').first().type('sk{enter}');
@@ -52,8 +52,8 @@ describe('Settings Tests', () => {
         cy.wait('@addRoot');
 
         cy.validateTable(rootUsrTableSelector, [
-            [{ colIndex: 0,  value: 'Firstname LastName (root@skills.org)' }],
-            [{ colIndex: 0,  value: 'Firstname LastName (skills@skills.org)' }],
+            [{ colIndex: 0,  value: '(root@skills.org)' }],
+            [{ colIndex: 0,  value: '(skills@skills.org)' }],
         ], 5, true, null, false);
 
         // attempt to remove myself - no go
@@ -61,17 +61,17 @@ describe('Settings Tests', () => {
         cy.get(`${rootUsrTableSelector} [data-cy="removeUserBtn"]`).eq(0).click({ force: true });
         cy.contains('Can not remove myself');
         // click away to remove tooltip
-        cy.contains('Firstname LastName').click();
+        cy.contains('root@skills.org').click();
         cy.validateTable(rootUsrTableSelector, [
-            [{ colIndex: 0,  value: 'Firstname LastName (root@skills.org)' }],
-            [{ colIndex: 0,  value: 'Firstname LastName (skills@skills.org)' }],
+            [{ colIndex: 0,  value: '(root@skills.org)' }],
+            [{ colIndex: 0,  value: '(skills@skills.org)' }],
         ], 5, true, null, false);
 
         // remove the other user now
         cy.get(`${rootUsrTableSelector} [data-cy="removeUserBtn"]`).eq(1).click();
         cy.contains('YES, Delete It').click();
         cy.validateTable(rootUsrTableSelector, [
-            [{ colIndex: 0,  value: 'Firstname LastName (root@skills.org)' }],
+            [{ colIndex: 0,  value: '(root@skills.org)' }],
         ], 5, true, null, false);
     });
 
@@ -100,7 +100,7 @@ describe('Settings Tests', () => {
         cy.wait('@checkRoot');
         cy.clickNav('Security');
         cy.validateTable(rootUsrTableSelector, [
-            [{ colIndex: 0,  value: 'Firstname LastName (root@skills.org)' }],
+            [{ colIndex: 0,  value: '(root@skills.org)' }],
         ], 5, true, null, false);
 
         cy.contains('Enter user id').first().type('sk/foo{enter}');
@@ -124,7 +124,7 @@ describe('Settings Tests', () => {
         cy.wait('@checkRoot');
         cy.clickNav('Security');
         cy.validateTable(rootUsrTableSelector, [
-            [{ colIndex: 0,  value: 'Firstname LastName (root@skills.org)' }],
+            [{ colIndex: 0,  value: '(root@skills.org)' }],
         ], 5, true, null, false);
 
         cy.contains('Enter user id').first().type('{enter}');
@@ -134,8 +134,8 @@ describe('Settings Tests', () => {
         cy.wait('@addRoot');
 
         cy.validateTable(rootUsrTableSelector, [
-            [{ colIndex: 0,  value: 'Firstname LastName (root@skills.org)' }],
-            [{ colIndex: 0,  value: 'Firstname LastName (skills@skills.org)' }],
+            [{ colIndex: 0,  value: '(root@skills.org)' }],
+            [{ colIndex: 0,  value: '(skills@skills.org)' }],
         ], 5, true, null, false);;
     });
 
@@ -164,7 +164,7 @@ describe('Settings Tests', () => {
         cy.get('[data-cy=supervisorrm]').contains('Add').click();
         cy.wait('@addSupervisor');
         cy.validateTable(supervisorTableSelector, [
-            [{ colIndex: 0,  value: 'Firstname LastName (root@skills.org)' }],
+            [{ colIndex: 0,  value: '(root@skills.org)' }],
         ], 5, true, null, false);
 
         cy.vuex().its('state.access.isSupervisor').should('equal', true);
@@ -197,15 +197,15 @@ describe('Settings Tests', () => {
         // click away to remove tooltip
         cy.contains('Firstname LastName').click();
         cy.validateTable(supervisorTableSelector, [
-            [{ colIndex: 0,  value: 'Firstname LastName (root@skills.org)' }],
-            [{ colIndex: 0,  value: 'Firstname LastName (skills@skills.org)' }],
+            [{ colIndex: 0,  value: '(root@skills.org)' }],
+            [{ colIndex: 0,  value: '(skills@skills.org)' }],
         ], 5, true, null, false);
 
         // remove the other user now
         cy.get(`${supervisorTableSelector} [data-cy="removeUserBtn"]`).eq(1).click();
         cy.contains('YES, Delete It').click();
         cy.validateTable(supervisorTableSelector, [
-            [{ colIndex: 0,  value: 'Firstname LastName (root@skills.org)' }],
+            [{ colIndex: 0,  value: '(root@skills.org)' }],
         ], 5, true, null, false);
 
     });
