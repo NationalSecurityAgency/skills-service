@@ -101,8 +101,8 @@ jobs:
       - name: Download avg score
         id: 'download archived score'
         uses: actions/download-artifact@v2
-          with:
-            name: accessibility_score
+        with:
+          name: accessibility_score
 
       - name: Commit badge
         id: 'commit-badge'
