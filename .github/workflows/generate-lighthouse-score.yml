@@ -73,6 +73,7 @@ jobs:
         run: mvn --batch-mode install -DskipTests=true
 
       - name: Run Cypress tests
+        id: 'run-accessibility-test'
         run: |
           cd e2e-tests
           npm install
@@ -89,17 +90,20 @@ jobs:
           ref: 'badges'
 
       - name: Commit badge
+        id: 'commit-badge'
         env:
           BRANCH: ${{ steps.extract_branch.outputs.branch }}
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           mkdir -p "${BRANCH}"
-          mv average_accessibility_score.svg "${BRANCH}"
+          ls -l
+          mv ./average_accessibility_score.svg "${BRANCH}"
           git add "${BRANCH}/average_accessibility_score.svg"
           git commit -m "Add/Update badge"
 
       - name: Push badge commit
+        id: 'push-commit'
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
