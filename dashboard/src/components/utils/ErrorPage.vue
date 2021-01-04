@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div class="mt-5 container-fluid">
+  <div class="mt-5 container-fluid" data-cy="errorPage">
     <div class="text-center text-secondary">
       <span class="fa-stack fa-3x " style="vertical-align: top;">
                       <i class="fas fa-circle fa-stack-2x"></i>

@@ -18,7 +18,7 @@ limitations under the License.
     <div class="row p-3">
       <div class="col-12">
         <existing-user-input :suggest="true" :validate="true" :user-type="userType" :excluded-suggestions="userIds"
-                             v-model="selectedUser"/>
+                             v-model="selectedUser" data-cy="existingUserInput"/>
       </div>
       <div class="col-12 pt-3">
         <b-button variant="outline-hc" @click="addUserRole" :disabled="!selectedUser"

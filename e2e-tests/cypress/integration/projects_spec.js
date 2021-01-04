@@ -259,6 +259,7 @@ describe('Projects Tests', () => {
   it('Project ID must be > 3 chars < 50 chars', () => {
     const minLenMsg = 'Project ID cannot be less than 3 characters';
     const maxLenMsg = 'Project ID cannot exceed 50 characters';
+    const requiredMsg = 'Project ID is required';
     const projName = 'Project Name'
 
     const longInvalid = Array(51).fill('a').join('');
@@ -279,12 +280,17 @@ describe('Projects Tests', () => {
     cy.getIdField().type('3');
     cy.contains(minLenMsg).should('not.exist')
 
-    cy.getIdField().clear().click()
+    cy.getIdField().clear();
+    cy.contains(requiredMsg);
+    cy.getIdField().click()
     cy.getIdField().invoke('val', longInvalid).trigger('input');
     cy.contains(maxLenMsg)
 
-    cy.getIdField().clear().click().invoke('val', longValid).trigger('input');
+    cy.getIdField().clear();
+    cy.contains(requiredMsg);
+    cy.getIdField().click().invoke('val', longValid).trigger('input');
     cy.contains(maxLenMsg).should('not.exist')
+    cy.contains(requiredMsg).should('not.exist')
 
     cy.clickSave();
     cy.wait('@postNewProject');
@@ -361,7 +367,7 @@ describe('Projects Tests', () => {
     cy.get('.multiselect__input').type('{enter}');
     cy.clickButton('Add');
     cy.wait('@addAdmin');
-    cy.get('h4').contains('Tiny-bit of an error!');
+    cy.get('[data-cy="errorPage"]').contains('Tiny-bit of an error!');
   });
 
   it('Add Admin No Query', () => {
@@ -372,7 +378,7 @@ describe('Projects Tests', () => {
 
     cy.intercept('PUT', '/admin/projects/proj1/users/root@skills.org/roles/ROLE_PROJECT_ADMIN').as('addAdmin');
 
-    cy.intercept('POST',  '/app/users/suggestDashboardUsers*').as('suggest');
+    cy.intercept('POST',  'suggestDashboardUsers').as('suggest');
     cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
     cy.intercept('GET', '/admin/projects/proj1').as('loadProject');
 
@@ -386,10 +392,17 @@ describe('Projects Tests', () => {
     cy.clickButton('Add');
     cy.wait('@addAdmin');
     cy.wait('@getRolesForRoot');
-    cy.contains('Firstname LastName (root@skills.org)').should('exist');
+
+    const rowSelector = '[data-cy=roleManagerTable] tbody tr'
+    cy.get(rowSelector).should('have.length', 2).as('cyRows');
+    cy.get('@cyRows').eq(0).find('td').as('row1');
+    cy.get('@row1').eq(0).contains('skills@skills.org');
+
+    cy.get('@cyRows').eq(1).find('td').as('row2');
+    cy.get('@row2').eq(0).contains('root@skills.org');
   });
 
-  it('Add Admin', () => {
+  it('Add and Remove Admin', () => {
     cy.request('POST', '/app/projects/proj1', {
       projectId: 'proj1',
       name: "proj1"
@@ -398,7 +411,7 @@ describe('Projects Tests', () => {
 
     cy.intercept('PUT', '/admin/projects/proj1/users/root@skills.org/roles/ROLE_PROJECT_ADMIN').as('addAdmin');
 
-    cy.intercept('POST',  '/app/users/suggestDashboardUsers*').as('suggest');
+    cy.intercept('POST',  'suggestDashboardUsers').as('suggest');
     cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
     cy.intercept('GET', '/admin/projects/proj1').as('loadProject');
 
@@ -406,13 +419,29 @@ describe('Projects Tests', () => {
     cy.wait('@loadUserInfo');
     cy.wait('@loadProject');
 
-    cy.contains('Enter user id').type('root{enter}');
+    cy.get('[data-cy="existingUserInput"]').type('root');
     cy.wait('@suggest');
     cy.contains('root@skills.org').click();
     cy.clickButton('Add');
     cy.wait('@addAdmin');
     cy.wait('@getRolesForRoot');
-    cy.contains('Firstname LastName (root@skills.org)')
+
+    const tableSelector = '[data-cy=roleManagerTable]'
+    const rowSelector = `${tableSelector} tbody tr`
+    cy.get(rowSelector).should('have.length', 2).as('cyRows');
+    cy.get('@cyRows').eq(0).find('td').as('row1');
+    cy.get('@row1').eq(0).contains('skills@skills.org');
+
+    cy.get('@cyRows').eq(1).find('td').as('row2');
+    cy.get('@row2').eq(0).contains('root@skills.org');
+
+    // remove the other user now
+    cy.get(`${tableSelector} [data-cy="removeUserBtn"]`).eq(1).click();
+    cy.contains('YES, Delete It').click();
+
+    cy.get(rowSelector).should('have.length', 1).as('cyRows1');
+    cy.get('@cyRows1').eq(0).find('td').as('rowA');
+    cy.get('@rowA').eq(0).contains('skills@skills.org');
   });
 
   it('Add Admin - forward slash character does not cause error', () => {
@@ -424,7 +453,7 @@ describe('Projects Tests', () => {
 
     cy.intercept('PUT', '/admin/projects/proj1/users/root@skills.org/roles/ROLE_PROJECT_ADMIN').as('addAdmin');
 
-    cy.intercept('POST',  '/app/users/suggestDashboardUsers*').as('suggest');
+    cy.intercept('POST',  'suggestDashboardUsers').as('suggest');
     cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
     cy.intercept('GET', '/admin/projects/proj1').as('loadProject');
 
