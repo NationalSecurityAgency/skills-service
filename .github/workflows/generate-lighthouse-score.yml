@@ -100,9 +100,6 @@ jobs:
 
       - name: Commit badge
         id: 'commit-badge'
-        with:
-          name: accessibility_score
-          path: average_accessibility_score.svg
         env:
           BRANCH: ${{ steps.extract_branch.outputs.branch }}
         run: |
