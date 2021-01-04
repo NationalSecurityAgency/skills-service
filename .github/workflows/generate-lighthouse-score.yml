@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: Continuous Integration
+name: Generate Lighthouse Accessibility Score
 
 on:
   push:
@@ -98,14 +98,11 @@ jobs:
         with:
           ref: 'badges'
 
-      - name: Download avg score
-        id: 'download archived score'
-        uses: actions/download-artifact@v2
-        with:
-          name: accessibility_score
-
       - name: Commit badge
         id: 'commit-badge'
+        with:
+          name: accessibility_score
+          path: average_accessibility_score.svg
         env:
           BRANCH: ${{ steps.extract_branch.outputs.branch }}
         run: |
