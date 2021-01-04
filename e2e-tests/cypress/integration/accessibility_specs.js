@@ -268,20 +268,21 @@ describe('Accessibility Tests', () => {
   it('badges', ()=>{
     cy.visit('/');
     cy.injectAxe()
-    cy.contains('Manage').click();
-    cy.get('[data-cy=nav-Badges]').click();
+
+    cy.get('[data-cy="projCard_MyNewtestProject_manageBtn"]').click();
+    cy.clickNav('Badges').click();
 
     cy.get('[aria-label="new badge"]').click();
     cy.get('[data-cy=badgeName]').type('a');
     cy.customA11y();
     cy.get('[data-cy=closeBadgeButton]').click();
 
-    cy.contains('Manage').click();
+    cy.get('[data-cy=manageBadge]').click();
     cy.contains('This is 2')
     cy.customLighthouse();
     cy.customA11y();
 
-    cy.get('[data-cy=nav-Users]').click();
+    cy.clickNav('Users').click();
     cy.contains('There are no records to show');
     cy.customLighthouse();
     cy.customA11y();
@@ -298,11 +299,13 @@ describe('Accessibility Tests', () => {
 
     cy.get('[data-cy=nav-Security]').click();
     cy.contains('Root Users Management');
+    cy.get('[data-cy="supervisorrm"]').contains('There are no records to show');
     cy.customLighthouse();
     cy.customA11y();
 
     cy.get('[data-cy=nav-Email]').click();
     cy.contains('Email Connection Settings');
+    cy.contains('TLS Disabled');
     cy.customLighthouse();
     cy.customA11y();
 
