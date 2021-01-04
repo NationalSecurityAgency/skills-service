@@ -98,6 +98,13 @@ jobs:
         with:
           ref: 'badges'
 
+      - name: Download accessibility score
+          id: 'archive-avg-score'
+          uses: actions/download-artifact@v2
+          with:
+            name: accessibility_score
+            path: average_accessibility_score.svg
+
       - name: Commit badge
         id: 'commit-badge'
         env:
