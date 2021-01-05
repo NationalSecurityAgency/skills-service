@@ -51,6 +51,39 @@ const deleteFolderRecursive = function(path) {
 
 const a11yScoresDir = 'a11y_scores';
 
+const generateAvgLighthouseScore = () => {
+    if (fs.existsSync(a11yScoresDir)) {
+        const files = fs.readdirSync(a11yScoresDir)
+        if (files) {
+            let numScores = 0;
+            let totalScore = 0;
+            files.forEach((filename) => {
+                const score = JSON.parse(fs.readFileSync(`${a11yScoresDir}/${filename}`, 'utf-8'))
+                numScores++;
+                totalScore+=score.score;
+            });
+
+            const score = Math.floor((totalScore/numScores)*100);
+            let color = 'green';
+            if (score < 90 && score > 75) {
+                color = 'yellow';
+            } else if (score <= 75) {
+                color = 'red';
+            }
+
+            const format = {
+                label: 'Avg Lighthouse Accessibility Score',
+                message: `${score}/100`,
+                color: color,
+            };
+
+            const svg = makeBadge(format)
+            deleteFolderRecursive(a11yScoresDir);
+            fs.writeFileSync('../average_accessibility_score.svg', svg);
+        }
+    }
+};
+
 module.exports = (on, config) => {
   // `on` is used to hook into various events Cypress emits
   // `config` is the resolved Cypress config
@@ -60,38 +93,15 @@ module.exports = (on, config) => {
         prepareAudit(launchOptions);
     });
 
+    if (config.experimentalRunEvents) {
+        on("after:run", () => {
+            generateAvgLighthouseScore();
+        });
+    }
+
     on("task", {
         createAverageAccessibilityScore: ()=> {
-            if (fs.existsSync(a11yScoresDir)) {
-                const files = fs.readdirSync(a11yScoresDir)
-                if (files) {
-                    let numScores = 0;
-                    let totalScore = 0;
-                    files.forEach((filename) => {
-                        const score = JSON.parse(fs.readFileSync(`${a11yScoresDir}/${filename}`, 'utf-8'))
-                        numScores++;
-                        totalScore+=score.score;
-                    });
-
-                    const score = Math.floor((totalScore/numScores)*100);
-                    let color = 'green';
-                    if (score < 90 && score > 75) {
-                        color = 'yellow';
-                    } else if (score <= 75) {
-                        color = 'red';
-                    }
-
-                    const format = {
-                        label: 'Avg Lighthouse Accessibility Score',
-                        message: `${score}/100`,
-                        color: color,
-                    };
-
-                    const svg = makeBadge(format)
-                    deleteFolderRecursive(a11yScoresDir);
-                    fs.writeFileSync('../average_accessibility_score.svg', svg);
-                }
-            }
+            generateAvgLighthouseScore();
             return null;
         },
         lighthouse: lighthouse((lighthouseReport) => {
@@ -101,7 +111,9 @@ module.exports = (on, config) => {
 
             if(lighthouseReport.lhr.categories.accessibility.score) {
                 const timestamp = Date.now();
-                const score = { score: lighthouseReport.lhr.categories.accessibility.score }
+                const url = new URL(lighthouseReport.lhr.requestedUrl);
+                const pathStr = url.pathname+url.search+url.hash;
+                const score = { score: lighthouseReport.lhr.categories.accessibility.score, url: pathStr }
                 const json = JSON.stringify(score);
                 fs.writeFileSync(`${a11yScoresDir}/${timestamp}.score`, json);
             }

@@ -17,9 +17,9 @@ const moment = require('moment-timezone');
 
 describe('Accessibility Tests', () => {
 
-  after(() => {
+  /*after(() => {
     cy.task('createAverageAccessibilityScore');
-  });
+  });*/
 
   beforeEach(() => {
     cy.request('POST', '/app/projects/MyNewtestProject', {
