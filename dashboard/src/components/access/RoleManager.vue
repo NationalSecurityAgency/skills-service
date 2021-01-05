@@ -56,25 +56,6 @@ limitations under the License.
       </template>
     </skills-b-table>
 
-<!--    <loading-container v-bind:is-loading="isLoading" class="mt-4">-->
-<!--      <transition name="userRolesContainer" enter-active-class="animated fadeIn">-->
-<!--        <v-client-table :data="data" :columns="columns" :options="options">-->
-<!--          <div slot="userId" slot-scope="props">-->
-<!--            {{ getUserDisplay(props.row) }}-->
-<!--          </div>-->
-
-<!--          <div slot="edit" slot-scope="props" class="field has-addons">-->
-<!--            <b-button v-if="notCurrentUser(props.row.userId)" @click="deleteUserRoleConfirm(props.row)"-->
-<!--                      variant="outline-primary" :aria-label="'remove access role from user '+props.row.userId">-->
-<!--              <i class="text-warning fas fa-trash" aria-hidden="true"/>-->
-<!--            </b-button>-->
-<!--            <span v-else v-b-tooltip.hover="'Can not remove myself. Sorry!!'">-->
-<!--              <b-button variant="outline-primary" disabled aria-label="cannot remove access role from yourself"><i class="text-warning fas fa-trash" aria-hidden="true"/></b-button>-->
-<!--            </span>-->
-<!--          </div>-->
-<!--        </v-client-table>-->
-<!--      </transition>-->
-<!--    </loading-container>-->
   </div>
 </template>
 
@@ -120,30 +101,13 @@ limitations under the License.
     data() {
       return {
         // user roles table properties
-        isLoading: true,
         data: [],
         userIds: [],
-        columns: ['userId', 'edit'],
         selectedUser: null,
         isSaving: false,
         errNotification: {
           enable: false,
           msg: '',
-        },
-        options: {
-          headings: {
-            userId: this.roleDescription,
-            edit: '',
-          },
-          columnsClasses: {
-            edit: 'control-column',
-          },
-          sortable: ['userId', 'roleName'],
-          sortIcon: {
-            base: 'fa fa-sort', up: 'fa fa-sort-up', down: 'fa fa-sort-down', is: 'fa fa-sort',
-          },
-          filterable: false,
-          skin: 'table is-striped is-fullwidth',
         },
         table: {
           options: {
@@ -168,7 +132,6 @@ limitations under the License.
     mounted() {
       AccessService.getUserRoles(this.project.projectId, this.role)
         .then((result) => {
-          this.isLoading = false;
           this.table.options.busy = false;
           this.data = result;
           this.userIds = result.map(({ userIdForDisplay }) => userIdForDisplay);
@@ -189,11 +152,13 @@ limitations under the License.
           });
       },
       deleteUserRole(row) {
+        this.table.options.busy = true;
         AccessService.deleteUserRole(row.projectId, row.userId, row.roleName)
           .then(() => {
             this.data = this.data.filter((item) => item.userId !== row.userId);
             this.userIds = this.userIds.filter((userId) => userId !== row.userIdForDisplay);
             this.$emit('role-deleted', { userId: row.userId, role: row.roleName });
+            this.table.options.busy = false;
           });
       },
       notCurrentUser(userId) {
@@ -232,11 +197,4 @@ limitations under the License.
 </style>
 
 <style>
-  .role-manager .control-column {
-    max-width: 2rem;
-  }
-
-  .role-manager .VuePagination__count {
-    display: none;
-  }
 </style>
