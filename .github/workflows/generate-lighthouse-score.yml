@@ -121,7 +121,7 @@ jobs:
           echo "Adding score badge ${BRANCH}/average_accessibility_score.svg"
           git add "${BRANCH}/average_accessibility_score.svg"
           git status
-          git commit -m "Add/Update badge"
+          git diff-index --quiet HEAD || git commit -m "Add/Update badge"
 
       - name: Push badge commit
         id: 'push-commit'
