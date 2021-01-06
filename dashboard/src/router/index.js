@@ -189,6 +189,12 @@ const router = new Router({
       },
     },
     {
+    name: 'MySkillsPage',
+    path: '/my-skills',
+    component: MultipleProjectsMetricsPage,
+    meta: { requiresAuth: true },
+    },
+    {
       path: '/projects/:projectId',
       component: ProjectPage,
       meta: { requiresAuth: true },
