@@ -14,31 +14,67 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div>
-    <sub-page-header title="My Skills"/>
+  <div class="container-fluid mt-2" >
+    <h2 class="text-center">My Skills</h2>
+    <b-row class="my-4">
+      <b-col>
+        <metrics-card title="card">
+          1 of 3
+        </metrics-card>
+      </b-col>
+      <b-col>
+        <metrics-card title="card">
+          2 of 3
+        </metrics-card>
+      </b-col>
+      <b-col>
+        <metrics-card title="card">
+          2 of 3
+        </metrics-card>
+      </b-col>
+    </b-row>
 
-    <skills-spinner :is-loading="loading" />
-    <div v-if="!loading">
-      <training-profile-comparator class="mb-3" :available-projects="projects"/>
-      <multiple-proj-users-in-common :available-projects="projects"/>
-    </div>
+    <metrics-card title="Chart" class="mt-3">
+      Chart
+    </metrics-card>
+
+    <metrics-card title="Chart" class="mt-3">
+      Chart
+    </metrics-card>
+
+    <b-row class="my-4">
+      <b-col>
+        <metrics-card title="proj">
+          Proj
+        </metrics-card>
+      </b-col>
+      <b-col>
+        <metrics-card title="proj">
+          Proj
+        </metrics-card>
+      </b-col>
+      <b-col>
+        <metrics-card title="proj">
+          Proj
+        </metrics-card>
+      </b-col>
+      <b-col>
+        <metrics-card title="proj">
+          Proj
+        </metrics-card>
+      </b-col>
+    </b-row>
+
   </div>
 </template>
 
 <script>
-  import SubPageHeader from './utils/pages/SubPageHeader';
-  import MultipleProjUsersInCommon from './metrics/multipleProjects/MultipleProjUsersInCommon';
-  import TrainingProfileComparator from './metrics/multipleProjects/TrainingProfileComparator';
-  import SupervisorService from './utils/SupervisorService';
-  import SkillsSpinner from './utils/SkillsSpinner';
+  import MetricsCard from './metrics/utils/MetricsCard';
 
   export default {
     name: 'MySkillsPage',
     components: {
-      SkillsSpinner,
-      TrainingProfileComparator,
-      MultipleProjUsersInCommon,
-      SubPageHeader,
+      MetricsCard,
     },
     data() {
       return {
@@ -47,17 +83,8 @@ limitations under the License.
       };
     },
     mounted() {
-      this.loadProjects();
     },
     methods: {
-      loadProjects() {
-        SupervisorService.getAllProjects()
-          .then((res) => {
-            this.projects = res;
-          }).finally(() => {
-            this.loading = false;
-          });
-      },
     },
   };
 </script>
