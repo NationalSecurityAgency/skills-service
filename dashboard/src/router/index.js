@@ -67,6 +67,7 @@ const SubjectMetricsPage = () => import(/* webpackChunkName: 'SubjectMetricsPage
 const UsersAchievementsMetricPage = () => import(/* webpackChunkName: 'UsersAchievementsMetricPage' */'@//components/metrics/projectAchievements/UsersAchievementsMetricPage');
 const ProjectMetrics = () => import(/* webpackChunkName: 'ProjectMetrics' */'@//components/metrics/ProjectMetrics');
 const MetricsPageNav = () => import(/* webpackChunkName: 'MetricsPageNav' */'@//components/metrics/MetricsPageNav');
+const MySkillsPage = () => import(/* webpackChunkName: 'mySkillsPage' */'@//components/MySkillsPage');
 
 Vue.use(Router);
 
@@ -191,7 +192,7 @@ const router = new Router({
     {
     name: 'MySkillsPage',
     path: '/my-skills',
-    component: MultipleProjectsMetricsPage,
+    component: MySkillsPage,
     meta: { requiresAuth: true },
     },
     {
