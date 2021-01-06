@@ -21,7 +21,7 @@
     "@skilltree/skills-client-vue": "3.1.0",
     "animate.css": "4.1.1",
     "apexcharts": "3.22.2",
-    "axios": "0.20.0",
+    "axios": "0.21.1",
     "babel-polyfill": "6.26.0",
     "bootstrap": "4.5.3",
     "bootstrap-vue": "2.21.2",
