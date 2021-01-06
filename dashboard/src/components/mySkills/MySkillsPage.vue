@@ -69,7 +69,7 @@ limitations under the License.
 </template>
 
 <script>
-  import MetricsCard from './metrics/utils/MetricsCard';
+  import MetricsCard from '../metrics/utils/MetricsCard';
 
   export default {
     name: 'MySkillsPage',
