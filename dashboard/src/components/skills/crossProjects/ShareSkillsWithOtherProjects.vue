@@ -14,35 +14,30 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div id="shared-skills-with-others-panel" class="card">
-    <div class="card-header">
-      Share Skills <strong>With</strong> Other Projects
-    </div>
-    <div class="card-body">
+  <metrics-card id="shared-skills-with-others-panel" title="Share Skills With Other Projects" :no-padding="true">
       <loading-container :is-loading="loading.sharedSkillsInit || loading.allSkills">
-        <div class="row mb-2">
-          <div class="col-md-12 col-lg-10 col-xl-8">
+        <div class="row px-3 py-1">
+          <div class="col-lg mt-2">
             <skills-selector2 :options="allSkills" v-on:added="onSelectedSkill" v-on:removed="onDeselectedSkill"
-                              :selected="selectedSkills"></skills-selector2>
+                              :selected="selectedSkills" :onlySingleSelectedValue="true"></skills-selector2>
           </div>
-        </div>
-        <b-form-checkbox v-model="shareWithAllProjects" @change="onShareWithAllProjects " class="mt-2">
-          <small>Share With All Projects </small><inline-help msg="Select this checkbox to share the skill with ALL projects."/>
-        </b-form-checkbox>
-        <div class="row mb-2">
-          <div class="col-md-12 col-lg-10 col-xl-8">
+          <div class="col-lg mt-2">
             <project-selector :project-id="projectId" :selected="selectedProject"
                               v-on:selected="onSelectedProject"
                               v-on:unselected="onUnSelectedProject"
+                              :only-single-selected-value="true"
                               :disabled="shareWithAllProjects">
 
             </project-selector>
+            <b-form-checkbox v-model="shareWithAllProjects" @change="onShareWithAllProjects " class="mt-2">
+              <small>Share With All Projects </small><inline-help msg="Select this checkbox to share the skill with ALL projects."/>
+            </b-form-checkbox>
           </div>
         </div>
 
-        <div class="row">
-          <div class="col-sm-2 text-center text-sm-left">
-            <button class="btn btn-sm btn-outline-hc h-100" v-on:click="shareSkill"
+        <div class="row px-3">
+          <div class="col text-center text-sm-left">
+            <button class="btn btn-outline-hc h-100" v-on:click="shareSkill"
                     :disabled="!shareButtonEnabled">
               <i class="fas fa-share-alt mr-1"></i><span class="text-truncate">Share</span>
             </button>
@@ -65,8 +60,7 @@ limitations under the License.
         </loading-container>
 
       </loading-container>
-    </div>
-  </div>
+  </metrics-card>
 </template>
 
 <script>
@@ -78,11 +72,13 @@ limitations under the License.
   import SkillsShareService from './SkillsShareService';
   import NoContent2 from '../../utils/NoContent2';
   import InlineHelp from '../../utils/InlineHelp';
+  import MetricsCard from '../../metrics/utils/MetricsCard';
 
   export default {
     name: 'ShareSkillsWithOtherProjects',
     props: ['projectId'],
     components: {
+      MetricsCard,
       NoContent2,
       SharedSkillsTable,
       ProjectSelector,
@@ -205,17 +201,6 @@ limitations under the License.
   };
 </script>
 
-<style scoped>
-  #shared-skills-with-others-panel .button {
-    min-height: 40px;
-  }
+<style>
 
-  #shared-skills-with-others-panel .title {
-    color: #3273dc;
-    font-weight: normal;
-  }
-
-  #shared-skills-with-others-panel .title strong {
-    font-weight: bold;
-  }
 </style>

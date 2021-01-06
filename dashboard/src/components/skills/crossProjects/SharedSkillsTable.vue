@@ -14,62 +14,71 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div id="shared-skills-table" v-if="this.sharedSkills && this.sharedSkills.length">
-    <v-client-table :data="sharedSkills" :columns="columns" :options="options">
-      <div slot="edit" slot-scope="props">
-        <div v-if="isDeleteEnabled">
-          <b-button variant="outline-hc" @click="onDeleteEvent(props.row)">
-            <i class="fas fa-trash"/>
-          </b-button>
-        </div>
-      </div>
+  <div id="shared-skills-table" v-if="sharedSkills && sharedSkills.length">
+    <skills-b-table v-if="loaded" :options="table.options" :items="sharedSkills" data-cy="sharedSkillsTable">
+      <template v-slot:cell(skillName)="data">
+        <div>{{ data.value }}</div>
+        <div class="text-secondary" style="font-size: 0.9rem;">ID: {{ data.item.skillId }}</div>
+      </template>
 
-      <div slot="skill" slot-scope="props">
-        <div>{{ props.row.skillName }}</div>
-        <div class="text-secondary" style="font-size: 0.9rem;">ID: {{ props.row.skillId }}</div>
-      </div>
-      <div slot="project" slot-scope="props">
-        <div>{{ getProjectName(props.row) }}</div>
-        <div class="text-secondary" style="font-size: 0.9rem;">ID: {{ getProjectId(props.row) }}</div>
-      </div>
-
-    </v-client-table>
+      <template v-slot:cell(projectName)="data">
+        <div><i v-if="data.item.sharedWithAllProjects" class="fas fa-globe text-secondary" /> {{ getProjectName(data.item) }}</div>
+        <div v-if="data.item.projectName" class="text-secondary" style="font-size: 0.9rem;">ID: {{ getProjectId(data.item) }}</div>
+      </template>
+      <template v-slot:cell(edit)="data">
+            <b-button @click="onDeleteEvent(data.item)"
+                      variant="outline-info" size="sm" class="text-info"
+                      :aria-label="`Remove shared skill ${data.item.skillName}`"
+                      data-cy="sharedSkillsTable-removeBtn"><i class="fa fa-trash"/></b-button>
+      </template>
+    </skills-b-table>
   </div>
 </template>
 
 <script>
+  import SkillsBTable from '../../utils/table/SkillsBTable';
+
   export default {
     name: 'SharedSkillsTable',
+    components: { SkillsBTable },
     props: ['sharedSkills', 'disableDelete'],
     data() {
       return {
-        columns: ['skill', 'project', 'edit'],
-        options: {
-          headings: {
-            skill: 'Shared Skill',
-            project: 'Project',
-            edit: '',
+        loaded: false,
+        table: {
+          options: {
+            busy: false,
+            bordered: false,
+            outlined: true,
+            stacked: 'md',
+            fields: [
+              {
+                key: 'skillName',
+                label: 'Shared Skill',
+                sortable: true,
+              },
+              {
+                key: 'projectName',
+                label: 'Project',
+                sortable: true,
+              },
+            ],
+            pagination: {
+              remove: true,
+            },
           },
-          perPage: 15,
-          columnsClasses: {
-            edit: 'control-column',
-          },
-          pagination: { dropdown: false, edge: false },
-          sortable: ['skillName', 'projectName'],
-          sortIcon: {
-            base: 'fa fa-sort', up: 'fa fa-sort-up', down: 'fa fa-sort-down', is: 'fa fa-sort',
-          },
-          // highlightMatches: true,
-          skin: 'table is-striped is-fullwidth',
-          filterable: false,
         },
-        isDeleteEnabled: true,
       };
     },
     mounted() {
-      if (this.disableDelete) {
-        this.isDeleteEnabled = false;
+      if (!this.disableDelete) {
+        this.table.options.fields.push({
+          key: 'edit',
+          label: 'Remove',
+          sortable: false,
+        });
       }
+      this.loaded = true;
     },
     methods: {
       onDeleteEvent(skill) {
@@ -91,17 +100,6 @@ limitations under the License.
   };
 </script>
 
-<style>
-  #shared-skills-table .VueTables__limit-field {
-    display: none;
-  }
-
-  #shared-skills-table .VuePagination__count {
-    display: none;
-  }
-
-  #shared-skills-table .control-column {
-    width: 3rem;
-  }
+<style scoped>
 
 </style>

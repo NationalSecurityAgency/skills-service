@@ -14,11 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div id="shared-skills-from-others-panel" class="card">
-    <div class="card-header">
-      Skills Shared <strong>From</strong> Other Projects
-    </div>
-    <div class="card-body">
+  <metrics-card id="shared-skills-from-others-panel"
+    title="Skills Shared From Other Projects" :no-padding="true">
       <loading-container :is-loading="loading">
         <div v-if="sharedSkills && sharedSkills.length > 0" class="my-4">
           <shared-skills-table :shared-skills="sharedSkills" :disable-delete="true"></shared-skills-table>
@@ -29,8 +26,7 @@ limitations under the License.
         </div>
 
       </loading-container>
-    </div>
-  </div>
+  </metrics-card>
 </template>
 
 <script>
@@ -38,10 +34,12 @@ limitations under the License.
   import SkillsShareService from './SkillsShareService';
   import LoadingContainer from '../../utils/LoadingContainer';
   import SharedSkillsTable from './SharedSkillsTable';
+  import MetricsCard from '../../metrics/utils/MetricsCard';
 
   export default {
     name: 'SharedSkillsFromOtherProjects',
     components: {
+      MetricsCard,
       SharedSkillsTable,
       LoadingContainer,
       NoContent2,
