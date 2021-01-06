@@ -5,7 +5,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-https://www.apache.org/licenses/LICENSE-2.0
+    https://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -47,25 +47,10 @@ limitations under the License.
     </metrics-card>
 
     <b-row class="my-4">
-      <b-col>
-        <metrics-card title="proj">
-          Proj
-        </metrics-card>
-      </b-col>
-      <b-col>
-        <metrics-card title="proj">
-          Proj
-        </metrics-card>
-      </b-col>
-      <b-col>
-        <metrics-card title="proj">
-          Proj
-        </metrics-card>
-      </b-col>
-      <b-col>
-        <metrics-card title="proj">
-          Proj
-        </metrics-card>
+      <b-col v-for="proj in projects" :key="proj.name"
+             cols="4"
+            class="mb-2">
+        <project-link-card :proj="proj"/>
       </b-col>
     </b-row>
 
@@ -74,16 +59,38 @@ limitations under the License.
 
 <script>
   import MetricsCard from '../metrics/utils/MetricsCard';
+  import ProjectLinkCard from './ProjectLinkCard';
 
   export default {
     name: 'MySkillsPage',
     components: {
+      ProjectLinkCard,
       MetricsCard,
     },
     data() {
       return {
         loading: true,
-        projects: [],
+        projects: [{
+          name: 'DolphinCommute',
+          level: 1,
+          totalPts: 34000,
+          currentPts: 15000,
+        }, {
+          name: 'DonkeySquirrel',
+          level: 0,
+          totalPts: 12560,
+          currentPts: 15,
+        }, {
+          name: 'MonkeyPlop',
+          level: 3,
+          totalPts: 19000,
+          currentPts: 16022,
+        }, {
+          name: 'Boatfall',
+          level: 2,
+          totalPts: 8525,
+          currentPts: 856,
+        }],
         series: [66],
         chartOptions: {
           chart: {
