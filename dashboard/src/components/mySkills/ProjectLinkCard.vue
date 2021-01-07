@@ -18,7 +18,7 @@ limitations under the License.
     <b-card>
       <b-row class="m-0 p-0">
         <b-col cols="5">
-          <apexchart type="radialBar" height="200" :options="chartOptions" :series="series"></apexchart>
+          <apexchart :name="proj.projectId" type="radialBar" height="200" :options="chartOptions" :series="series"></apexchart>
         </b-col>
         <b-col class="text-right">
           <div class="h4 text-uppercase">{{ proj.name }}</div>
@@ -98,7 +98,6 @@ limitations under the License.
       }
       if (this.proj.totalUsers > 0) {
         const rankPercent = Math.trunc((this.proj.rank / this.proj.totalUsers) * 100);
-        console.log(`${rankPercent}`);
         this.rankVariant = this.getVariant(rankPercent);
       }
     },

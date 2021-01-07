@@ -75,7 +75,7 @@ limitations under the License.
         this.$router.push({ name: 'HomePage' });
       },
       gotoMySkills() {
-        this.$router.push({ name: 'MySkillsPage' });
+        this.$router.push({ name: 'MySkills' });
       },
       signOut() {
         this.$store.dispatch('logout');

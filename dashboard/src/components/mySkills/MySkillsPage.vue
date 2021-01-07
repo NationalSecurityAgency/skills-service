@@ -48,7 +48,7 @@ limitations under the License.
 
     <b-row class="my-4">
       <b-col v-for="proj in projects" :key="proj.name"
-             cols="4"
+             cols="12" lg="6" xl="4"
             class="mb-2">
         <project-link-card :proj="proj"/>
       </b-col>
@@ -72,6 +72,7 @@ limitations under the License.
         loading: true,
         projects: [{
           name: 'DolphinCommute',
+          projectId: 'DolphinCommute',
           level: 1,
           totalPts: 34000,
           currentPts: 15000,
@@ -79,6 +80,7 @@ limitations under the License.
           rank: 38,
         }, {
           name: 'DonkeySquirrel',
+          projectId: 'DonkeySquirrel',
           level: 0,
           totalPts: 12560,
           currentPts: 15,
@@ -86,6 +88,7 @@ limitations under the License.
           rank: 3,
         }, {
           name: 'MonkeyPlop',
+          projectId: 'MonkeyPlop',
           level: 3,
           totalPts: 19000,
           currentPts: 16022,
@@ -93,6 +96,15 @@ limitations under the License.
           rank: 38,
         }, {
           name: 'Boatfall',
+          projectId: 'Boatfall',
+          level: 2,
+          totalPts: 8525,
+          currentPts: 856,
+          totalUsers: 379,
+          rank: 78,
+        }, {
+          name: 'SkillTree Dashboard',
+          projectId: 'Inception',
           level: 2,
           totalPts: 8525,
           currentPts: 856,
