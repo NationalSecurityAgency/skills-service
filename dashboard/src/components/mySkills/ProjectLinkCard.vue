@@ -1,3 +1,18 @@
+/*
+Copyright 2020 SkillTree
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 <template>
   <div>
     <b-card>
@@ -9,7 +24,7 @@
           <div class="h4 text-uppercase">{{ proj.name }}</div>
           <div class="h5 text-secondary">Level {{ proj.level }}</div>
           <div>
-            <b-badge>Rank: 25 / 4,303 </b-badge>
+            <b-badge :variant="rankVariant">Rank: {{ proj.rank }} / {{ proj.totalUsers | number}} </b-badge>
           </div>
         </b-col>
       </b-row>
@@ -28,7 +43,7 @@
     props: ['proj'],
     data() {
       return {
-        series: [67],
+        series: [0],
         chartOptions: {
           chart: {
             height: 150,
@@ -56,7 +71,8 @@
             },
           },
           fill: {
-            type: 'gradient',
+            colors: ['#de0f0f'],
+            type: 'solid',
             gradient: {
               shade: 'dark',
               shadeIntensity: 0.15,
@@ -71,7 +87,42 @@
           },
           labels: ['Median Ratio'],
         },
+        rankVariant: 'secondary',
       };
+    },
+    created() {
+      if (this.proj.totalPts > 0) {
+        const pointsPercent = Math.trunc((this.proj.currentPts / this.proj.totalPts) * 100);
+        this.series = [pointsPercent];
+        this.chartOptions.fill.colors = [this.getColor(pointsPercent)];
+      }
+      if (this.proj.totalUsers > 0) {
+        const rankPercent = Math.trunc((this.proj.rank / this.proj.totalUsers) * 100);
+        console.log(`${rankPercent}`);
+        this.rankVariant = this.getVariant(rankPercent);
+      }
+    },
+    methods: {
+      getColor(percent) {
+        let res = '#007c49';
+        if (percent < 15) {
+          res = '#e83e8c';
+        } else if (percent < 50) {
+          res = '#00c3ff';
+        }
+        return res;
+      },
+      getVariant(percent) {
+        let res = 'secondary';
+        if (percent < 15) {
+          res = 'secondary';
+        } else if (percent < 50) {
+          res = 'warning';
+        } else if (percent >= 50) {
+          res = 'success';
+        }
+        return res;
+      },
     },
   };
 </script>
