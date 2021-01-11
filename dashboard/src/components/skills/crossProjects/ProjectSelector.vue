@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div id="project-selector">
+  <div id="project-selector" data-cy="projectSelector">
     <!-- see https://github.com/shentao/vue-multiselect/issues/421 for explanation of :blockKeys-->
     <multiselect v-model="selectedValue" placeholder="Search for a project..."
                  :options="projects" :multiple="!onlySingleSelectedValue" :taggable="false" :blockKeys="['Delete']"

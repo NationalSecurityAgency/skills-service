@@ -14,12 +14,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <metrics-card id="shared-skills-with-others-panel" title="Share Skills With Other Projects" :no-padding="true">
+  <metrics-card id="shared-skills-with-others-panel" title="Share Skills With Other Projects"
+                :no-padding="true" data-cy="shareSkillsWithOtherProjectsCard">
       <loading-container :is-loading="loading.sharedSkillsInit || loading.allSkills">
         <div class="row px-3 py-1">
           <div class="col-lg mt-2">
             <skills-selector2 :options="allSkills" v-on:added="onSelectedSkill" v-on:removed="onDeselectedSkill"
-                              :selected="selectedSkills" :onlySingleSelectedValue="true"></skills-selector2>
+                              :selected="selectedSkills" :onlySingleSelectedValue="true"
+                              data-cy="skillSelector"></skills-selector2>
           </div>
           <div class="col-lg mt-2">
             <project-selector :project-id="projectId" :selected="selectedProject"
@@ -29,7 +31,8 @@ limitations under the License.
                               :disabled="shareWithAllProjects">
 
             </project-selector>
-            <b-form-checkbox v-model="shareWithAllProjects" @change="onShareWithAllProjects " class="mt-2">
+            <b-form-checkbox v-model="shareWithAllProjects" @change="onShareWithAllProjects " class="mt-2"
+                             data-cy="shareWithAllProjectsCheckbox">
               <small>Share With All Projects </small><inline-help msg="Select this checkbox to share the skill with ALL projects."/>
             </b-form-checkbox>
           </div>
@@ -38,7 +41,7 @@ limitations under the License.
         <div class="row px-3">
           <div class="col text-center text-sm-left">
             <button class="btn btn-outline-hc h-100" v-on:click="shareSkill"
-                    :disabled="!shareButtonEnabled">
+                    :disabled="!shareButtonEnabled" data-cy="shareButton">
               <i class="fas fa-share-alt mr-1"></i><span class="text-truncate">Share</span>
             </button>
           </div>

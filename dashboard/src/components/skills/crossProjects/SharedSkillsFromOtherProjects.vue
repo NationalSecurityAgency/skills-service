@@ -15,7 +15,8 @@ limitations under the License.
 */
 <template>
   <metrics-card id="shared-skills-from-others-panel"
-    title="Skills Shared From Other Projects" :no-padding="true">
+    title="Skills Shared From Other Projects" :no-padding="true"
+                data-cy="skillsSharedWithMeCard">
       <loading-container :is-loading="loading">
         <div v-if="sharedSkills && sharedSkills.length > 0" class="my-4">
           <shared-skills-table :shared-skills="sharedSkills" :disable-delete="true"></shared-skills-table>
