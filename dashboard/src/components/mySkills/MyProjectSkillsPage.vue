@@ -17,7 +17,8 @@ limitations under the License.
 <div>
   <skills-display
     :options="options"
-    :version="skillsVersion"/>
+    :version="skillsVersion"
+    :theme="theme"/>
 </div>
 </template>
 
@@ -35,6 +36,9 @@ limitations under the License.
       return {
         projectId: this.$route.params.projectId,
         skillsVersion: 0,
+        theme: {
+          pageTitleTextColor: '#264653ff',
+        },
       };
     },
   };
