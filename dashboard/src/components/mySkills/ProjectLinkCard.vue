@@ -17,7 +17,7 @@ limitations under the License.
   <div class="proj-link-container">
     <b-card class="proj-link-card">
       <b-row class="m-0 p-0">
-        <b-col cols="5">
+        <b-col cols="4">
           <apexchart :name="proj.projectId" type="radialBar" height="200" :options="chartOptions" :series="series"></apexchart>
         </b-col>
         <b-col class="text-right">

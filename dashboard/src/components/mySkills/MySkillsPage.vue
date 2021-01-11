@@ -15,22 +15,18 @@ limitations under the License.
 */
 <template>
   <div class="container-fluid mt-2" >
-    <h2 class="text-center">My Skills</h2>
     <b-row class="my-4">
       <b-col>
-        <metrics-card title="card">
-          1 of 3
-        </metrics-card>
+        <info-snapshot-card />
       </b-col>
       <b-col>
-        <metrics-card title="card">
-          2 of 3
-        </metrics-card>
+        <num-skills />
       </b-col>
       <b-col>
-        <metrics-card title="card">
-          2 of 3
-        </metrics-card>
+        <last-earned-card />
+      </b-col>
+      <b-col>
+        <badges-num-card />
       </b-col>
     </b-row>
 
@@ -82,10 +78,18 @@ limitations under the License.
 <script>
   import MetricsCard from '../metrics/utils/MetricsCard';
   import ProjectLinkCard from './ProjectLinkCard';
+  import InfoSnapshotCard from './InfoSnapshotCard';
+  import NumSkills from './NumSkills';
+  import BadgesNumCard from './BadgesNumCard';
+  import LastEarnedCard from './LastEarnedCard';
 
   export default {
     name: 'MySkillsPage',
     components: {
+      LastEarnedCard,
+      BadgesNumCard,
+      NumSkills,
+      InfoSnapshotCard,
       ProjectLinkCard,
       MetricsCard,
     },
