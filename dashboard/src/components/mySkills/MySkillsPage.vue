@@ -113,86 +113,6 @@ limitations under the License.
           totalUsers: 379,
           rank: 78,
         }],
-        series1: [66],
-        chartOptions1: {
-          chart: {
-            height: 350,
-            type: 'radialBar',
-            toolbar: {
-              show: true,
-            },
-          },
-          plotOptions: {
-            radialBar: {
-              startAngle: -135,
-              endAngle: 225,
-              hollow: {
-                margin: 0,
-                size: '70%',
-                background: '#fff',
-                image: undefined,
-                imageOffsetX: 0,
-                imageOffsetY: 0,
-                position: 'front',
-                dropShadow: {
-                  enabled: true,
-                  top: 3,
-                  left: 0,
-                  blur: 4,
-                  opacity: 0.24,
-                },
-              },
-              track: {
-                background: '#fff',
-                strokeWidth: '67%',
-                margin: 0, // margin is in pixels
-                dropShadow: {
-                  enabled: true,
-                  top: -3,
-                  left: 0,
-                  blur: 4,
-                  opacity: 0.35,
-                },
-              },
-
-              dataLabels: {
-                show: true,
-                name: {
-                  offsetY: -10,
-                  show: true,
-                  color: '#888',
-                  fontSize: '16px',
-                },
-                value: {
-                  formatter(val) {
-                    return `${val} %`;
-                  },
-                  offsetY: 0,
-                  color: '#888',
-                  fontSize: '22px',
-                  show: true,
-                },
-              },
-            },
-          },
-          fill: {
-            type: 'gradient',
-            gradient: {
-              shade: 'dark',
-              type: 'horizontal',
-              shadeIntensity: 0.5,
-              gradientToColors: ['#7ED6F3'],
-              inverseColors: true,
-              opacityFrom: 1,
-              opacityTo: 1,
-              stops: [0, 100],
-            },
-          },
-          stroke: {
-            lineCap: 'round',
-          },
-          labels: ['Percent'],
-        },
         series2: [{
                     name: 'DolphinCommute',
                     // data: [45, 52, 38, 24, 33, 26, 21, 20, 6, 8, 15, 10],
@@ -223,11 +143,11 @@ limitations under the License.
           dataLabels: {
             enabled: false,
           },
-          stroke: {
-            width: [5, 7, 5],
-            curve: 'straight',
-            dashArray: [0, 8, 5],
-          },
+          // stroke: {
+          //   width: [5, 7, 5],
+          //   curve: 'straight',
+          //   dashArray: [0, 8, 5],
+          // },
           // title: {
           //   text: 'Page Statistics',
           //   align: 'left',
