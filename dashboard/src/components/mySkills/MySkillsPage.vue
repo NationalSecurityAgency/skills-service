@@ -50,7 +50,9 @@ limitations under the License.
       <b-col v-for="proj in projects" :key="proj.name"
              cols="12" lg="6" xl="4"
             class="mb-2">
-        <project-link-card :proj="proj"/>
+        <router-link :to="{ name:'MyProjectSkills', params: { projectId: proj.projectId } }" tag="div" class="project-link">
+          <project-link-card :proj="proj"/>
+        </router-link>
       </b-col>
     </b-row>
 
@@ -204,5 +206,7 @@ limitations under the License.
 </script>
 
 <style scoped>
-
+.project-link :hover {
+  cursor: pointer;
+}
 </style>
