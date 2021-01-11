@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div>
-    <b-card>
+  <div class="proj-link-container">
+    <b-card class="proj-link-card">
       <b-row class="m-0 p-0">
         <b-col cols="5">
           <apexchart :name="proj.projectId" type="radialBar" height="200" :options="chartOptions" :series="series"></apexchart>
@@ -33,6 +33,7 @@ limitations under the License.
       <div class="text-center">
         <span class="small text-center">{{ proj.currentPts | number }} / {{ proj.totalPts | number }}</span>
       </div>
+      <div class="position-absolute text-muted d-none small click-indicator" style="right: 15px; bottom: 10px;">Click to View</div>
     </b-card>
   </div>
 </template>
@@ -134,4 +135,18 @@ limitations under the License.
   border-color: $info !important;
 }
 
+</style>
+
+<style scoped>
+.proj-link-container .proj-link-card:hover {
+  box-shadow: 0 2px 2px #146c75, 0 4px 8px rgba(10,16,20,.12);
+}
+.proj-link-container .proj-link-card:hover .click-indicator {
+  display: block !important;
+  color: #146c75 !important;
+}
+
+.click-indicator {
+  z-index: 1000000;
+}
 </style>
