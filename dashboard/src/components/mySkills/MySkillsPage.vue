@@ -30,37 +30,15 @@ limitations under the License.
       </b-col>
     </b-row>
 
-    <metrics-card title="SkillTree Progress" class="mt-3 bg-info">
-      <b-row class="my-4">
-        <b-col class="charts-content d-flex">
-          <b-card class="flex-grow-1">
-            <div class="text-center">
-              <span class="font-weight-bold"><i class="fas fa-tasks mr-2 text-secondary"></i>Project Participation</span>
-              <apexchart type="radialBar" height="350"
-                         :options="chartOptions1"
-                         :series="series1">
-              </apexchart>
-              <span>Participating in 3 or 5 Projects</span>
-            </div>
-          </b-card>
-        </b-col>
-        <b-col class="charts-content">
-          <b-card>
-            <div class="text-center">
-              <span class="font-weight-bold"><i class="fas fa-chart-bar mr-2 text-secondary"></i>Project Point History</span>
-              <apexchart type="line" height="350"
-                         :options="chartOptions2"
-                         :series="series2">
-              </apexchart>
-            </div>
-          </b-card>
-        </b-col>
-      </b-row>
-    </metrics-card>
-
-<!--    <metrics-card title="Chart" class="mt-3">-->
-<!--      Chart-->
-<!--    </metrics-card>-->
+      <b-card>
+        <div class="text-center">
+          <span class="font-weight-bold"><i class="fas fa-chart-bar mr-2 text-secondary"></i>Project Point History</span>
+          <apexchart type="line" height="350"
+                     :options="chartOptions2"
+                     :series="series2">
+          </apexchart>
+        </div>
+      </b-card>
 
     <b-row class="my-4">
       <b-col v-for="proj in projects" :key="proj.name"
@@ -76,7 +54,6 @@ limitations under the License.
 </template>
 
 <script>
-  import MetricsCard from '../metrics/utils/MetricsCard';
   import ProjectLinkCard from './ProjectLinkCard';
   import InfoSnapshotCard from './InfoSnapshotCard';
   import NumSkills from './NumSkills';
@@ -91,7 +68,6 @@ limitations under the License.
       NumSkills,
       InfoSnapshotCard,
       ProjectLinkCard,
-      MetricsCard,
     },
     data() {
       return {

@@ -193,7 +193,6 @@ const router = new Router({
     },
     {
       path: '/my-skills',
-      name: 'MySkills',
       component: MySkills,
       meta: { requiresAuth: true },
       children: [{
