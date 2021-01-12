@@ -84,6 +84,17 @@ describe('Cross-project Skills Tests', () => {
             pointIncrement: '1500',
             numPerformToCompletion: '10',
         });
+
+        Cypress.Commands.add('shareSkill', (skillText, projText) => {
+            cy.get('[data-cy="shareButton"').should('be.disabled');
+            cy.get('[data-cy="skillSelector"]').click().type(`${skillText}{enter}`);
+            cy.get('[data-cy="shareButton"').should('be.disabled');
+
+            cy.get('[data-cy="projectSelector"]').click().type(`${projText}{enter}`);
+            cy.get('[data-cy="shareButton"').should('be.enabled');
+
+            cy.get('[data-cy="shareButton"').click();
+        });
     });
 
     it('share skill with another project', () => {
@@ -93,14 +104,7 @@ describe('Cross-project Skills Tests', () => {
         cy.get('[data-cy="shareSkillsWithOtherProjectsCard"]').contains('Share Skills With Other Projects');
         cy.get('[data-cy="skillsSharedWithMeCard"]').contains('No Shared Skills Yet');
 
-        cy.get('[data-cy="shareButton"').should('be.disabled');
-        cy.get('[data-cy="skillSelector"]').click().type('1{enter}');
-        cy.get('[data-cy="shareButton"').should('be.disabled');
-
-        cy.get('[data-cy="projectSelector"]').click().type('2{enter}');
-        cy.get('[data-cy="shareButton"').should('be.enabled');
-
-        cy.get('[data-cy="shareButton"').click();
+        cy.shareSkill('1', '2');
 
         cy.validateTable(sharedWithOtherTableSelector, [
             [{ colIndex: 0,  value: 'Very Great Skill # 1' }, { colIndex: 1,  value: 'Project 2' }],
@@ -138,4 +142,99 @@ describe('Cross-project Skills Tests', () => {
         cy.contains('Project 1 : Very Great Skill # 1').should('not.exist');
     });
 
+    it('share with all projects', () => {
+        cy.visit('/projects/proj1');
+        cy.clickNav('Cross Projects');
+
+        cy.get('[data-cy="shareSkillsWithOtherProjectsCard"]').contains('Share Skills With Other Projects');
+        cy.get('[data-cy="skillsSharedWithMeCard"]').contains('No Shared Skills Yet');
+
+        cy.get('[data-cy="shareButton"').should('be.disabled');
+        cy.get('[data-cy="skillSelector"]').click().type('1{enter}');
+        cy.get('[data-cy="shareButton"').should('be.disabled');
+
+        cy.get('[data-cy="shareWithAllProjectsCheckbox"]').check({force:true});
+
+        cy.get('[data-cy="shareButton"').click();
+
+        cy.validateTable(sharedWithOtherTableSelector, [
+            [{ colIndex: 0,  value: 'Very Great Skill # 1' }, { colIndex: 1,  value: 'All Projects' }],
+        ], 5, true, null, false);
+
+        cy.get('[data-cy="skillsSharedWithMeCard"]').contains('No Shared Skills Yet');
+
+        // -------------------------
+        // Project 2 should see the skill
+        cy.visit('/projects/proj2');
+        cy.clickNav('Cross Projects');
+        cy.get('[data-cy="shareSkillsWithOtherProjectsCard"]').contains('Share Skills With Other Projects');
+
+        cy.validateTable(sharedWithMeTableSelector, [
+            [{ colIndex: 0,  value: 'Very Great Skill # 1' }, { colIndex: 1,  value: 'Project 1' }],
+        ], 5, true, null, false);
+
+        cy.visit('/projects/proj2/subjects/subj2/skills/skill3/dependencies');
+        cy.contains('No Dependencies Yet');
+
+        cy.get('[data-cy="depsSelector"]').click();
+        cy.contains('Project 1 : Very Great Skill # 1');
+
+        // -------------------------
+        // Project 3 should see the shared skill
+        cy.visit('/projects/proj3');
+        cy.clickNav('Cross Projects');
+        cy.get('[data-cy="shareSkillsWithOtherProjectsCard"]').contains('Share Skills With Other Projects');
+
+        cy.validateTable(sharedWithMeTableSelector, [
+            [{ colIndex: 0,  value: 'Very Great Skill # 1' }, { colIndex: 1,  value: 'Project 1' }],
+        ], 5, true, null, false);
+
+        cy.visit('/projects/proj3/subjects/subj3/skills/skill4/dependencies');
+        cy.contains('No Dependencies Yet');
+
+        cy.get('[data-cy="depsSelector"]').click();
+        cy.contains('Project 1 : Very Great Skill # 1');
+    });
+
+    it('remove share', () => {
+        cy.visit('/projects/proj1');
+        cy.clickNav('Cross Projects');
+
+        cy.get('[data-cy="shareSkillsWithOtherProjectsCard"]').contains('Share Skills With Other Projects');
+        cy.get('[data-cy="skillsSharedWithMeCard"]').contains('No Shared Skills Yet');
+
+        cy.shareSkill('1', '2');
+        cy.validateTable(sharedWithOtherTableSelector, [
+            [{ colIndex: 0,  value: 'Very Great Skill # 1' }, { colIndex: 1,  value: 'Project 2' }],
+        ], 5, true, null, false);
+
+        cy.shareSkill('2', '2');
+        cy.validateTable(sharedWithOtherTableSelector, [
+            [{ colIndex: 0,  value: 'Very Great Skill # 1' }, { colIndex: 1,  value: 'Project 2' }],
+            [{ colIndex: 0,  value: 'Very Great Skill # 2' }, { colIndex: 1,  value: 'Project 2' }],
+        ], 5, true, null, false);
+
+        cy.get(`${sharedWithOtherTableSelector} [data-cy="sharedSkillsTable-removeBtn"]`).first().click();
+        cy.validateTable(sharedWithOtherTableSelector, [
+            [{ colIndex: 0,  value: 'Very Great Skill # 2' }, { colIndex: 1,  value: 'Project 2' }],
+        ], 5, true, null, false);
+
+
+        // -------------------------
+        // Project 2 should see the skill2 but not skill1
+        cy.visit('/projects/proj2');
+        cy.clickNav('Cross Projects');
+        cy.get('[data-cy="shareSkillsWithOtherProjectsCard"]').contains('Share Skills With Other Projects');
+
+        cy.validateTable(sharedWithMeTableSelector, [
+            [{ colIndex: 0,  value: 'Very Great Skill # 2' }, { colIndex: 1,  value: 'Project 1' }],
+        ], 5, true, null, false);
+
+        cy.visit('/projects/proj2/subjects/subj2/skills/skill3/dependencies');
+        cy.contains('No Dependencies Yet');
+
+        cy.get('[data-cy="depsSelector"]').click();
+        cy.contains('Project 1 : Very Great Skill # 2');
+        cy.contains('Project 1 : Very Great Skill # 1').should('not.exist');
+    });
 })
