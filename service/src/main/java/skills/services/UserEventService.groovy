@@ -89,7 +89,7 @@ class UserEventService {
         sw.start()
 
         Stream<UserEvent> stream = userEventsRepo.findAllByEventTypeAndStartLessThan(UserEvent.EventType.DAILY, dateTime.toDate())
-        stream.forEach(userEvent -> {
+        stream.forEach({UserEvent userEvent ->
             totalProcessed++
             recordEvent(userEvent.skillRefId, userEvent.userId, userEvent.start, userEvent.count, UserEvent.EventType.WEEKLY)
             entityManager.detach(userEvent)
