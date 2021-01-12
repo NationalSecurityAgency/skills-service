@@ -199,6 +199,7 @@ describe('Accessibility Tests', () => {
     //view subject
     cy.get('[data-cy=subjCard_subj1_manageBtn]').click();
     cy.wait('@getSkills');
+    cy.contains('Skill Name');
     cy.customLighthouse();
     cy.customA11y();
 
@@ -213,6 +214,7 @@ describe('Accessibility Tests', () => {
 
     cy.get('[data-cy=nav-Levels]').click();
     cy.wait('@getLevels');
+    cy.contains('White Belt');
     cy.customLighthouse();
     cy.customA11y();
     cy.get('[data-cy=addLevel]').click();
@@ -227,6 +229,8 @@ describe('Accessibility Tests', () => {
     cy.clickNav('Users').click();
     cy.customLighthouse();
     cy.wait('@getUsers');
+    cy.contains('u1');
+    //what are our users
     cy.customA11y();
     cy.get('[data-cy="usersTable"] [data-cy="usersTable_viewDetailsBtn"]').first().click();
     cy.customLighthouse();
