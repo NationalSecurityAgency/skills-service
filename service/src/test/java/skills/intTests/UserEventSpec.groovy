@@ -49,6 +49,7 @@ class UserEventSpec extends DefaultIntSpec {
     int maxDailyDays
 
 
+    //transactional necessary to handle stream
     @Transactional
     def "make sure daily events are compacted into weekly events"() {
         Map proj = SkillsFactory.createProject()
@@ -78,11 +79,11 @@ class UserEventSpec extends DefaultIntSpec {
         int preCompactDailyCount = 0
         int preCompactWeeklyCount = 0
         int maxCount = 0
-        preCompactionDailyEvents.forEach(event -> {
+        preCompactionDailyEvents.forEach( { UserEvent event ->
             preCompactDailyCount++
             maxCount = Math.max(maxCount, event.count)
         })
-        preCompactioWeeklyEvents.forEach(event -> {
+        preCompactioWeeklyEvents.forEach({UserEvent event ->
             preCompactioWeeklyEvents++
         })
 
@@ -92,13 +93,13 @@ class UserEventSpec extends DefaultIntSpec {
         int postCompactionWeeklyCount = 0
         LocalDateTime oldest = LocalDateTime.now().minusDays(maxDailyDays)
         Stream<UserEvent> postCompactionDailyEvents = userEventsRepo.findAllBySkillRefIdAndEventType(skillRefId, UserEvent.EventType.DAILY)
-        postCompactionDailyEvents.forEach(event -> {
+        postCompactionDailyEvents.forEach( {UserEvent event ->
             assert oldest.isBefore(event.start.toLocalDateTime())
             postCompactDailyCount++
         })
         Stream<UserEvent> postCompactionWeeklyEvents = userEventsRepo.findAllBySkillRefIdAndEventType(skillRefId, UserEvent.EventType.WEEKLY)
         def compactedEvents = []
-        postCompactionWeeklyEvents.forEach(event -> {
+        postCompactionWeeklyEvents.forEach({UserEvent event ->
             postCompactionWeeklyCount++
             assert oldest.isAfter(event.stop.toLocalDateTime())
         })
