@@ -79,7 +79,7 @@ class H2NativeRepo implements NativeQueriesRepo {
     }
 
     @Override
-    List<GraphRelWithAchievement> getDependencyGraphWithAchievedIndicator(String projectId, String skillId, String userId){
+    List<GraphRelWithAchievement> getDependencyGraphWithAchievedIndicator(String projectId, String skillId, String userId) {
         String q = '''
             WITH RECURSIVE skill_deps_path(parentProjectId, parentSkillId, parentId, parentName, childProjectId, childSkillId, childId, childName) AS (
               select sd.project_id as parentProjectId, sd.skill_id as parentSkillId, sd.id as parentId, sd.name as parentName,
@@ -136,7 +136,7 @@ class H2NativeRepo implements NativeQueriesRepo {
         return resList
     }
 
-    void updatePointTotalsForSkill(String projectId, String subjectId, String skillId, int incrementDelta){
+    void updatePointTotalsForSkill(String projectId, String subjectId, String skillId, int incrementDelta) {
         String eventCountSql = '''
             SELECT 
                 user_id, COUNT(id) eventCount
@@ -152,7 +152,7 @@ class H2NativeRepo implements NativeQueriesRepo {
         Query query = entityManager.createNativeQuery(eventCountSql);
         query.setParameter("projectId", projectId);
         query.setParameter("skillId", skillId)
-        List<PerformedSkillEventCount> eventCounts = query.getResultList().collect{
+        List<PerformedSkillEventCount> eventCounts = query.getResultList().collect {
             new PerformedSkillEventCount(userId: it[0], eventCount: it[1])
         }
 
@@ -180,7 +180,7 @@ class H2NativeRepo implements NativeQueriesRepo {
         }
     }
 
-    void updatePointHistoryForSkill(String projectId, String subjectId, String skillId, int incrementDelta){
+    void updatePointHistoryForSkill(String projectId, String subjectId, String skillId, int incrementDelta) {
         List<PerformedSkillEventCount> eventCounts = getGroupedEventCountsByUserIdAndDate(projectId, skillId)
 
         String updateSql = '''
@@ -194,7 +194,7 @@ class H2NativeRepo implements NativeQueriesRepo {
                 AND points.project_id = :projectId
                 AND (points.skill_id = :subjectId OR points.skill_id = :skillId OR points.skill_id IS NULL)
         '''
-        eventCounts?.each{
+        eventCounts?.each {
             Query updateQ = entityManager.createNativeQuery(updateSql)
             updateQ.setParameter("eventCount", it.eventCount)
             updateQ.setParameter("userId", it.userId)
@@ -229,7 +229,7 @@ class H2NativeRepo implements NativeQueriesRepo {
         eventCounts
     }
 
-    private static class PerformedSkillEventCount{
+    private static class PerformedSkillEventCount {
         String userId
         int eventCount
         String performedOn
@@ -238,7 +238,7 @@ class H2NativeRepo implements NativeQueriesRepo {
     @Override
     void updatePointTotalWhenOccurrencesAreDecreased(String projectId, String subjectId, String skillId, int pointIncrement, int numOccurrences) {
         List<PerformedSkillEventCount> eventCounts = getGroupedEventCountsByUserId(projectId, skillId)
-        List<PerformedSkillEventCount> eventsCountsToEdit = eventCounts.findAll({it.eventCount > numOccurrences})
+        List<PerformedSkillEventCount> eventsCountsToEdit = eventCounts.findAll({ it.eventCount > numOccurrences })
 
         String updateSql = '''
             UPDATE
@@ -251,7 +251,7 @@ class H2NativeRepo implements NativeQueriesRepo {
                 AND points.project_id=:projectId
                 AND (points.skill_id = :subjectId OR points.skill_id = :skillId OR points.skill_id IS NULL)
         '''
-        eventsCountsToEdit?.each{
+        eventsCountsToEdit?.each {
             Query updateQ = entityManager.createNativeQuery(updateSql)
             updateQ.setParameter("userId", it.userId)
             updateQ.setParameter("projectId", projectId)
@@ -287,7 +287,7 @@ class H2NativeRepo implements NativeQueriesRepo {
     void updatePointHistoryWhenOccurrencesAreDecreased(String projectId, String subjectId, String skillId, int pointIncrement, int numOccurrences) {
 
         List<PerformedSkillEventCount> eventCounts = getGroupedEventCountsByUserId(projectId, skillId)
-        List<PerformedSkillEventCount> eventsCountsToEdit = eventCounts.findAll({it.eventCount > numOccurrences})
+        List<PerformedSkillEventCount> eventsCountsToEdit = eventCounts.findAll({ it.eventCount > numOccurrences })
 
         String getRowsToRemoveSql = '''SELECT id, FORMATDATETIME(performed_on,'yyyy-MM-dd') FROM user_performed_skill 
                 WHERE 
@@ -330,9 +330,9 @@ class H2NativeRepo implements NativeQueriesRepo {
     }
 
     @Override
-    void removeExtraEntriesOfUserPerformedSkillByUser(String projectId, String skillId, int numEventsToKeep){
+    void removeExtraEntriesOfUserPerformedSkillByUser(String projectId, String skillId, int numEventsToKeep) {
         List<PerformedSkillEventCount> eventCounts = getGroupedEventCountsByUserId(projectId, skillId)
-        List<PerformedSkillEventCount> eventsCountsToEdit = eventCounts.findAll({it.eventCount > numEventsToKeep})
+        List<PerformedSkillEventCount> eventsCountsToEdit = eventCounts.findAll({ it.eventCount > numEventsToKeep })
 
         String q = '''
             DELETE 
@@ -361,7 +361,7 @@ class H2NativeRepo implements NativeQueriesRepo {
     @Override
     void removeUserAchievementsThatDoNotMeetNewNumberOfOccurrences(String projectId, String skillId, int numOfOccurrences) {
         List<PerformedSkillEventCount> eventCounts = getGroupedEventCountsByUserId(projectId, skillId)
-        List<PerformedSkillEventCount> eventsCountsToEdit = eventCounts.findAll({it.eventCount < numOfOccurrences})
+        List<PerformedSkillEventCount> eventsCountsToEdit = eventCounts.findAll({ it.eventCount < numOfOccurrences })
 
         String updateSql = '''
             DELETE 
@@ -371,7 +371,7 @@ class H2NativeRepo implements NativeQueriesRepo {
                 ua.skill_id = :skillId and 
                 ua.user_id = :userId
         '''
-        eventsCountsToEdit?.each{
+        eventsCountsToEdit?.each {
             Query updateQ = entityManager.createNativeQuery(updateSql)
             updateQ.setParameter("userId", it.userId)
             updateQ.setParameter("projectId", projectId)
@@ -420,9 +420,9 @@ class H2NativeRepo implements NativeQueriesRepo {
         '''
 
         List<String> results = []
-        if(badgeSkillIds) {
+        if (badgeSkillIds) {
             boolean dateCheck = start != null && end != null
-            if(dateCheck) {
+            if (dateCheck) {
                 selectUsersQ += dateFrag
             }
 
@@ -431,19 +431,19 @@ class H2NativeRepo implements NativeQueriesRepo {
             getUsers.setParameter('projectId', projectId)
             getUsers.setParameter('badgeId', badgeId)
             getUsers.setParameter('numBadgeSkills', badgeSkillIds.size())
-            if(dateCheck) {
+            if (dateCheck) {
                 getUsers.setParameter('start', start)
                 getUsers.setParameter('end', end)
             }
             List<String> r = getUsers.getResultList()
 
-            if(r) {
+            if (r) {
                 results.addAll(r)
             }
         }
 
-        int updated=0
-        results?.each{
+        int updated = 0
+        results?.each {
             String insert = '''
             INSERT INTO user_achievement (user_id, project_id, skill_id, skill_ref_id, notified, points_when_achieved)
             VALUES (:userId, :projectId, :skillId, :skillRefId, :notified, :pointsWhenAchieved )
@@ -549,8 +549,8 @@ class H2NativeRepo implements NativeQueriesRepo {
             users = usersWithRequiredSkills.intersect(usersWithRequiredLevel)
         }
 
-        int updated=0
-        users?.each{
+        int updated = 0
+        users?.each {
             String insert = '''
             INSERT INTO user_achievement (user_id, project_id, skill_id, skill_ref_id, notified, points_when_achieved)
             VALUES (:userId, :projectId, :skillId, :skillRefId, :notified, :pointsWhenAchieved )
@@ -584,21 +584,21 @@ class H2NativeRepo implements NativeQueriesRepo {
         String skillId = score[1]
         Number totalSubjectPoints = score[2]
 
-        String pointsRequiredFragment = '((CAST(ld.percent AS FLOAT)/100)*'+totalSubjectPoints+')'
+        String pointsRequiredFragment = '((CAST(ld.percent AS FLOAT)/100)*' + totalSubjectPoints + ')'
         if (pointsBasedLevels) {
             pointsRequiredFragment = 'points_from'
         }
 
         Query subjectLevelsQ = entityManager.createNativeQuery(
-            '''
-            SELECT ld.id, ld.level, '''+pointsRequiredFragment+''' AS pointsRequired
+                '''
+            SELECT ld.id, ld.level, ''' + pointsRequiredFragment + ''' AS pointsRequired
             FROM level_definition ld
             WHERE ld.skill_ref_id = :subjectId
             '''
         )
         subjectLevelsQ.setParameter("subjectId", id)
         List<Object[]> subjectLevels = subjectLevelsQ.getResultList() //0: id, 1: level, 2: pointsRequired
-        if(!subjectLevels) {
+        if (!subjectLevels) {
             log.warn("unable to retrieve subject levels for [${projectId} - ${subjectId}]")
             return
         }
@@ -638,7 +638,7 @@ class H2NativeRepo implements NativeQueriesRepo {
                     alreadyExists.setParameter("level", levelValue)
                     def exists = alreadyExists.getResultList()
 
-                    if(exists.isEmpty() || exists[0] < 1) {
+                    if (exists.isEmpty() || exists[0] < 1) {
                         Query insertAchievement = entityManager.createNativeQuery('''
                              INSERT INTO user_achievement (user_id, skill_id, level, points_when_achieved, project_id, notified)
                              VALUES (:userId, :skillId, :level, :userPoints, :projectId, 'false')
@@ -673,7 +673,7 @@ class H2NativeRepo implements NativeQueriesRepo {
             return
         }
 
-        String pointsRequiredFragment = '((CAST(percent AS FLOAT)/100)*'+totalPoints+')'
+        String pointsRequiredFragment = '((CAST(percent AS FLOAT)/100)*' + totalPoints + ')'
         if (pointsBasedLevels) {
             pointsRequiredFragment = 'points_from'
         }
@@ -691,7 +691,7 @@ class H2NativeRepo implements NativeQueriesRepo {
         }
 
         Query projectLevels = entityManager.createNativeQuery(
-                '''SELECT id, level, '''+pointsRequiredFragment+''' AS pointsRequired
+                '''SELECT id, level, ''' + pointsRequiredFragment + ''' AS pointsRequired
                 FROM level_definition
                 WHERE project_ref_id=:projRefId
                 ''')
@@ -730,7 +730,7 @@ class H2NativeRepo implements NativeQueriesRepo {
                     alreadyExists.setParameter("level", levelValue)
                     List exists = alreadyExists.getResultList()
 
-                    if(exists.isEmpty() || exists[0] < 1) {
+                    if (exists.isEmpty() || exists[0] < 1) {
                         Query insertAchievement = entityManager.createNativeQuery('''
                         INSERT INTO user_achievement (user_id, level, points_when_achieved, project_id, notified)
                         VALUES (:userId, :level, :userPoints, :projectId, 'false')
@@ -743,6 +743,58 @@ class H2NativeRepo implements NativeQueriesRepo {
                     }
                 }
             }
+        }
+    }
+
+    @Override
+    void createOrUpdateUserEvent(Integer skillRefId, String userId, Date start, Date end, String type, Integer count) {
+        // find existing event
+        String exists = '''
+        SELECT id FROM user_events WHERE skill_ref_id = :skillRefId AND user_id = :userId AND start = :start AND stop = :end AND event_type = :type
+        '''
+        Query existsQuery = entityManager.createNativeQuery(exists)
+        existsQuery.setParameter("skillRefId", skillRefId)
+        existsQuery.setParameter("userId", userId)
+        existsQuery.setParameter("start", start)
+        existsQuery.setParameter("end", end)
+        existsQuery.setParameter("type", type)
+        List<Integer> existing = existsQuery.getResultList()
+        if (existing) {
+            String existingId = existing.first()
+            String update = '''
+                UPDATE user_events SET count = count+:count WHERE id = :id
+            '''
+            Query updateQuery = entityManager.createNativeQuery(update)
+            updateQuery.setParameter("id", existingId)
+            updateQuery.setParameter("count", count)
+            updateQuery.executeUpdate()
+        } else {
+            String insertSql = '''
+            INSERT INTO user_events (
+                skill_ref_id, 
+                user_id, 
+                start, 
+                stop, 
+                count,
+                event_type
+            ) 
+            VALUES (
+                :skillRefId, 
+                :userId, 
+                :start, 
+                :end, 
+                :count,
+                :type
+            )
+            '''
+            Query query = entityManager.createNativeQuery(insertSql)
+            query.setParameter("skillRefId", skillRefId)
+            query.setParameter("userId", userId)
+            query.setParameter("start", start)
+            query.setParameter("end", end)
+            query.setParameter("count", count)
+            query.setParameter("type", type)
+            query.executeUpdate()
         }
     }
 }

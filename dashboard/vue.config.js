@@ -91,13 +91,15 @@ plugins.push(new BundleAnalyzerPlugin({
   "statsFilename": "client.stats.json",
   "generateStatsFile": prodMode, // only enable for prod because it is REALLY costly
   "openAnalyzer": false,
-  "analyzerMode": "static"
+  "analyzerMode": "static",
+  "analyzerPort": 8889,
 }));
 
 module.exports = {
   pluginOptions: {
     webpackBundleAnalyzer: {
-      openAnalyzer: false
+      openAnalyzer: false,
+      analyzerPort: 8889,
     }
   },
   devServer: {
