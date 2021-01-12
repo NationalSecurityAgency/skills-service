@@ -14,10 +14,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div id="project-selector">
+  <div id="project-selector" data-cy="projectSelector">
     <!-- see https://github.com/shentao/vue-multiselect/issues/421 for explanation of :blockKeys-->
     <multiselect v-model="selectedValue" placeholder="Search for a project..."
-                 :options="projects" :multiple="true" :taggable="false" :blockKeys="['Delete']"
+                 :options="projects" :multiple="!onlySingleSelectedValue" :taggable="false" :blockKeys="['Delete']"
                  :hide-selected="true" label="name" track-by="id" v-on:select="onSelected" v-on:remove="onRemoved"
                  @search-change="search" :loading="isLoading" :internal-search="false"
                  :clear-on-select="false" :disabled="disabled">
@@ -40,6 +40,10 @@ limitations under the License.
       projectId: String,
       selected: Object,
       disabled: {
+        type: Boolean,
+        default: false,
+      },
+      onlySingleSelectedValue: {
         type: Boolean,
         default: false,
       },

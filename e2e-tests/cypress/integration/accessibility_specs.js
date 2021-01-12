@@ -199,12 +199,14 @@ describe('Accessibility Tests', () => {
     //view subject
     cy.get('[data-cy=subjCard_subj1_manageBtn]').click();
     cy.wait('@getSkills');
+    cy.contains('This is 2');
     cy.customLighthouse();
     cy.customA11y();
 
     //edit skill
     cy.get('[aria-label="new skill"]').click();
     cy.get('[data-cy=skillName]').type('1');
+    cy.contains('Skill Name cannot be less than 3 characters.');
     // it seems like bootstrap vue has a bug where it assigns the dialog role to the outer_modal div with no aria-label
     // or aria-labelledby and then assigns the role="dialog" to the inner div along with the required aria attributes
     // there isn't anything we can do to fix that so we have to skip this check at this time
@@ -213,49 +215,57 @@ describe('Accessibility Tests', () => {
 
     cy.get('[data-cy=nav-Levels]').click();
     cy.wait('@getLevels');
+    cy.contains('Black Belt');
     cy.customLighthouse();
     cy.customA11y();
     cy.get('[data-cy=addLevel]').click();
     cy.get('[data-cy=levelPercent]').type('105');
+    cy.contains('Percent % must be 100 or less');
     cy.customA11y();
     cy.get('[data-cy=cancelLevel]').click();
     cy.get('[data-cy=editLevelButton]').eq(0).click();
     cy.get('[data-cy=levelPercent]').type('ddddddddd');
+    cy.contains('Percent may only contain numeric characters');
     cy.customA11y();
     cy.get('[data-cy=cancelLevel]').click();
 
     cy.clickNav('Users').click();
-    cy.customLighthouse();
+    cy.contains('u1');
     cy.wait('@getUsers');
+    cy.customLighthouse();
     cy.customA11y();
     cy.get('[data-cy="usersTable"] [data-cy="usersTable_viewDetailsBtn"]').first().click();
+    cy.wait(4000);
+    cy.contains('Client Display');
     cy.customLighthouse();
     // enable once a11y issues with client display are addressed, needs an H1 initially
     // also has contrast issues
     // cy.customA11y();
-    cy.contains('Client Display');
     cy.get('[data-cy="nav-Performed Skills"]').click()
     cy.wait('@getPerformedSkills');
+    cy.contains('skill1');
     cy.customLighthouse();
     cy.customA11y();
-    /*
-    re-enable once skills-service#179 is resolved
+
     cy.get('[data-cy=breadcrumb-subj1]').click();
     cy.get('[data-cy=nav-Metrics]').click();
+    cy.contains('This chart needs at least 2 days of user activity.');
+    cy.contains('Level 1: 5 users');
     cy.customLighthouse();
-    cy.customA11y();*/
+    cy.customA11y();
   })
 
   it('skills', () => {
     cy.visit('/');
     cy.injectAxe()
     //view project
-    cy.contains('Manage').click();
+    cy.get('[data-cy="projCard_MyNewtestProject_manageBtn"]').click();
     //view subject
-    cy.contains('Manage').click();
+    cy.get('[data-cy="subjCard_subj1_manageBtn"]').click();
     //view skill
     cy.get('[data-cy=manageSkillBtn]').eq(1).click();
     cy.contains('Help URL');
+    cy.contains('500 Points');
     cy.customLighthouse();
     cy.customA11y();
 
@@ -280,6 +290,7 @@ describe('Accessibility Tests', () => {
 
     cy.get('[data-cy=nav-Metrics]').click();
     cy.contains('Achievements over time');
+    cy.contains('No achievements yet for this skill.');
     cy.customLighthouse();
     cy.customA11y();
   })
