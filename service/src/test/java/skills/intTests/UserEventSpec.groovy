@@ -15,8 +15,11 @@
  */
 package skills.intTests
 
+import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.transaction.PlatformTransactionManager
+import org.springframework.transaction.support.TransactionTemplate
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
 import skills.services.UserEventService
@@ -29,11 +32,13 @@ import skills.storage.repos.ProjDefRepo
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.SkillRelDefRepo
 import skills.storage.repos.UserEventsRepo
+import spock.lang.Shared
 
 import javax.transaction.Transactional
 import java.time.LocalDateTime
 import java.util.stream.Stream
 
+@Slf4j
 class UserEventSpec extends DefaultIntSpec {
 
     @Autowired
@@ -48,14 +53,16 @@ class UserEventSpec extends DefaultIntSpec {
     @Value('#{"${skills.config.compactDailyEventsOlderThan}"}')
     int maxDailyDays
 
+    @Autowired
+    private PlatformTransactionManager transactionManager;
 
-    //transactional necessary to handle stream
-    @Transactional
     def "make sure daily events are compacted into weekly events"() {
-        Map proj = SkillsFactory.createProject()
-        Map subject = SkillsFactory.createSubject()
-        Map skill = SkillsFactory.createSkill(1,1,1,0,40, 0)
+        TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager)
+        Map proj = SkillsFactory.createProject(42)
+        Map subject = SkillsFactory.createSubject(42)
+        Map skill = SkillsFactory.createSkill(42,1,1,0,40, 0)
 
+        log.info('creating project/subject/skill')
         skillsService.createProject(proj)
         skillsService.createSubject(subject)
         skillsService.createSkill(skill)
@@ -63,6 +70,7 @@ class UserEventSpec extends DefaultIntSpec {
         when:
         LocalDateTime now = LocalDateTime.now()
         String userId = getRandomUsers(1)[0]
+        log.info('adding skills')
         skillsService.addSkill(skill, userId)
         skillsService.addSkill(skill, userId)
         skillsService.addSkill(skill, userId, now.minusDays(1).toDate())
@@ -72,19 +80,25 @@ class UserEventSpec extends DefaultIntSpec {
             skillsService.addSkill(skill, userId, aWeekAgo.minusDays(it).toDate())
         }
 
+        log.info("finding skill")
         SkillDef skillDef = skillDefRepo.findByProjectIdAndSkillIdAndType(proj.projectId, skill.skillId, SkillDef.ContainerType.Skill)
         Integer skillRefId = skillDef.id
-        Stream<UserEvent> preCompactionDailyEvents = userEventsRepo.findAllBySkillRefIdAndEventType(skillRefId, UserEvent.EventType.DAILY)
-        Stream<UserEvent> preCompactioWeeklyEvents = userEventsRepo.findAllBySkillRefIdAndEventType(skillRefId, UserEvent.EventType.WEEKLY)
+        log.info('getting daily user events')
         int preCompactDailyCount = 0
         int preCompactWeeklyCount = 0
         int maxCount = 0
-        preCompactionDailyEvents.forEach( { UserEvent event ->
-            preCompactDailyCount++
-            maxCount = Math.max(maxCount, event.count)
-        })
-        preCompactioWeeklyEvents.forEach({UserEvent event ->
-            preCompactioWeeklyEvents++
+
+        transactionTemplate.execute({
+            Stream<UserEvent> preCompactionDailyEvents = userEventsRepo.findAllBySkillRefIdAndEventType(skillRefId, UserEvent.EventType.DAILY)
+            Stream<UserEvent> preCompactioWeeklyEvents = userEventsRepo.findAllBySkillRefIdAndEventType(skillRefId, UserEvent.EventType.WEEKLY)
+
+            preCompactionDailyEvents.forEach( { UserEvent event ->
+                preCompactDailyCount++
+                maxCount = Math.max(maxCount, event.count)
+            })
+            preCompactioWeeklyEvents.forEach({UserEvent event ->
+                preCompactioWeeklyEvents++
+            })
         })
 
         eventService.compactDailyEvents()
@@ -92,16 +106,17 @@ class UserEventSpec extends DefaultIntSpec {
         int postCompactDailyCount = 0
         int postCompactionWeeklyCount = 0
         LocalDateTime oldest = LocalDateTime.now().minusDays(maxDailyDays)
-        Stream<UserEvent> postCompactionDailyEvents = userEventsRepo.findAllBySkillRefIdAndEventType(skillRefId, UserEvent.EventType.DAILY)
-        postCompactionDailyEvents.forEach( {UserEvent event ->
-            assert oldest.isBefore(event.start.toLocalDateTime())
-            postCompactDailyCount++
-        })
-        Stream<UserEvent> postCompactionWeeklyEvents = userEventsRepo.findAllBySkillRefIdAndEventType(skillRefId, UserEvent.EventType.WEEKLY)
-        def compactedEvents = []
-        postCompactionWeeklyEvents.forEach({UserEvent event ->
-            postCompactionWeeklyCount++
-            assert oldest.isAfter(event.stop.toLocalDateTime())
+        transactionTemplate.execute({
+            Stream<UserEvent> postCompactionDailyEvents = userEventsRepo.findAllBySkillRefIdAndEventType(skillRefId, UserEvent.EventType.DAILY)
+            postCompactionDailyEvents.forEach( {UserEvent event ->
+                assert oldest.isBefore(event.start.toLocalDateTime())
+                postCompactDailyCount++
+            })
+            Stream<UserEvent> postCompactionWeeklyEvents = userEventsRepo.findAllBySkillRefIdAndEventType(skillRefId, UserEvent.EventType.WEEKLY)
+            postCompactionWeeklyEvents.forEach({UserEvent event ->
+                postCompactionWeeklyCount++
+                assert oldest.isAfter(event.stop.toLocalDateTime())
+            })
         })
 
 

@@ -584,7 +584,7 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
             :end, 
             :count,
             :type
-          ) ON CONFLICT ON CONSTRAINT user_events_unique_row DO UPDATE SET count = user_events.count+exported.count;
+          ) ON CONFLICT ON CONSTRAINT user_events_unique_row DO UPDATE SET count = user_events.count+excluded.count;
         '''
 
         Query query = entityManager.createNativeQuery(sql)
