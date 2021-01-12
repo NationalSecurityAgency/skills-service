@@ -280,6 +280,7 @@ describe('Accessibility Tests', () => {
     cy.get('.multiselect__select').click();
     cy.get('.multiselect__element').eq(0).click();
     cy.get('[data-cy=addSkillEventButton]').click();
+    cy.contains('Added points');
     cy.customA11y();
 
     cy.get('[data-cy=nav-Metrics]').click();
