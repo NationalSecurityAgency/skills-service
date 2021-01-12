@@ -15,7 +15,7 @@
  */
 package skills.intTests
 
-import groovy.util.logging.Slf4j
+
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.transaction.PlatformTransactionManager
@@ -23,22 +23,14 @@ import org.springframework.transaction.support.TransactionTemplate
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
 import skills.services.UserEventService
-import skills.storage.model.ProjDef
 import skills.storage.model.SkillDef
-import skills.storage.model.SkillRelDef
 import skills.storage.model.UserEvent
-import skills.storage.repos.LevelDefRepo
-import skills.storage.repos.ProjDefRepo
 import skills.storage.repos.SkillDefRepo
-import skills.storage.repos.SkillRelDefRepo
 import skills.storage.repos.UserEventsRepo
-import spock.lang.Shared
 
-import javax.transaction.Transactional
 import java.time.LocalDateTime
 import java.util.stream.Stream
 
-@Slf4j
 class UserEventSpec extends DefaultIntSpec {
 
     @Autowired
@@ -62,7 +54,6 @@ class UserEventSpec extends DefaultIntSpec {
         Map subject = SkillsFactory.createSubject(42)
         Map skill = SkillsFactory.createSkill(42,1,1,0,40, 0)
 
-        log.info('creating project/subject/skill')
         skillsService.createProject(proj)
         skillsService.createSubject(subject)
         skillsService.createSkill(skill)
@@ -70,7 +61,6 @@ class UserEventSpec extends DefaultIntSpec {
         when:
         LocalDateTime now = LocalDateTime.now()
         String userId = getRandomUsers(1)[0]
-        log.info('adding skills')
         skillsService.addSkill(skill, userId)
         skillsService.addSkill(skill, userId)
         skillsService.addSkill(skill, userId, now.minusDays(1).toDate())
@@ -80,10 +70,8 @@ class UserEventSpec extends DefaultIntSpec {
             skillsService.addSkill(skill, userId, aWeekAgo.minusDays(it).toDate())
         }
 
-        log.info("finding skill")
         SkillDef skillDef = skillDefRepo.findByProjectIdAndSkillIdAndType(proj.projectId, skill.skillId, SkillDef.ContainerType.Skill)
         Integer skillRefId = skillDef.id
-        log.info('getting daily user events')
         int preCompactDailyCount = 0
         int preCompactWeeklyCount = 0
         int maxCount = 0
