@@ -14,18 +14,20 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <b-card body-class="p-0">
-    <b-row class="justify-content-between no-gutters px-3 pt-3 pb-0">
-      <b-col cols="5">
-        <div class="text-uppercase text-secondary">Projects</div>
-        <div class="mt-2 ml-1 text-dark">
-          <span style="font-size: 2.5rem;">3</span> <span class="text-secondary" style="font-size: 1.2rem;">/ 5</span>
-        </div>
-      </b-col>
-      <b-col cols="7">
-        <apexchart type="radialBar" height="200" :options="chartOptions" :series="series"></apexchart>
-      </b-col>
-    </b-row>
+  <b-card body-class="p-0 d-flex flex-column">
+    <div class="flex-grow-1">
+      <b-row class="justify-content-between no-gutters px-3 pt-3 pb-0" >
+        <b-col cols="5">
+          <div class="text-uppercase text-secondary">Projects</div>
+          <div class="mt-2 ml-1 text-dark">
+            <span style="font-size: 2.5rem;">3</span> <span class="text-secondary" style="font-size: 1.2rem;">/ 5</span>
+          </div>
+        </b-col>
+        <b-col cols="7">
+          <apexchart type="radialBar" height="200" :options="chartOptions" :series="series"></apexchart>
+        </b-col>
+      </b-row>
+    </div>
     <b-row class="justify-content-between no-gutters border-top text-muted small">
       <b-col class="p-2">
         It's fun to learn! You still have <b-badge variant="info">2</b-badge> project to explore.

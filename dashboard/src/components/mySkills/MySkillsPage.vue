@@ -16,17 +16,17 @@ limitations under the License.
 <template>
   <div class="container-fluid mt-2">
     <b-row class="my-4">
-      <b-col cols="12" lg="6" xl="3" class="d-flex mb-2">
-        <info-snapshot-card class="flex-grow-1" />
+      <b-col cols="12" lg="6" class="d-flex mb-2">
+        <info-snapshot-card class="flex-grow-1 my-skills-card" />
       </b-col>
-      <b-col cols="12" lg="6" xl="3" class="d-flex mb mb-2">
-        <num-skills class="flex-grow-1" />
+      <b-col cols="12" lg="6" class="d-flex mb mb-2">
+        <num-skills class="flex-grow-1 my-skills-card" />
       </b-col>
-      <b-col cols="12" lg="6" xl="3" class="d-flex mb-2">
-        <last-earned-card class="flex-grow-1" />
+      <b-col cols="12" lg="6" class="d-flex mb-2">
+        <last-earned-card class="flex-grow-1 my-skills-card" />
       </b-col>
-      <b-col cols="12" lg="6" xl="3" class="d-flex mb mb-2">
-        <badges-num-card class="flex-grow-1" />
+      <b-col cols="12" lg="6" class="d-flex mb mb-2">
+        <badges-num-card class="flex-grow-1 my-skills-card" />
       </b-col>
     </b-row>
 
@@ -126,5 +126,8 @@ limitations under the License.
   /* this little hack is required to prevent apexcharts from wrapping onto a new line;
   the gist is that they calculate width dynamically and do not work properly with the width of 0*/
   min-width: 1rem !important;
+}
+.my-skills-card {
+  min-width: 20rem !important;
 }
 </style>
