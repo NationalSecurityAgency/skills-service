@@ -45,7 +45,6 @@
 
         <greenmail.version>1.6.0</greenmail.version>
         <wiremock.version>2.27.2</wiremock.version>
-        <redisson.version>3.14.1</redisson.version>
     </properties>
 
     <parent>
