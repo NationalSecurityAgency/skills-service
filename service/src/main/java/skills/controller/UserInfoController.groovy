@@ -65,6 +65,7 @@ class UserInfoController {
 
     @RequestMapping(value = "/userInfo", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
+    @CrossOrigin(allowCredentials = 'true')
     def getUserInfo() {
         def res = 'null'
         UserInfo currentUser = userInfoService.getCurrentUser()
