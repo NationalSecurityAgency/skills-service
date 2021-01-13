@@ -30,7 +30,7 @@ limitations under the License.
     </div>
     <b-row class="justify-content-between no-gutters border-top text-muted small">
       <b-col class="p-2">
-        It's fun to learn! You still have <b-badge variant="info">2</b-badge> project to explore.
+        It's fun to learn! You still have <b-badge variant="info">2</b-badge> projects to explore.
       </b-col>
     </b-row>
   </b-card>

@@ -14,24 +14,26 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <b-card body-class="p-0">
-    <b-row class="justify-content-between no-gutters px-3 pt-3 pb-1">
-      <b-col cols="5">
-        <div class="text-uppercase text-secondary">Skills</div>
-        <div class="mt-2 ml-1 text-dark">
-          <span style="font-size: 2.5rem;">50</span>
-        </div>
-        <div><b-badge variant="info">Total: 1,023</b-badge></div>
-      </b-col>
-      <b-col cols="7">
-        <apexchart type="line" height="158" :options="chartOptions" :series="series"></apexchart>
-      </b-col>
-    </b-row>
-    <b-row class="justify-content-between no-gutters border-top text-muted small">
-      <b-col class="p-2">
-        So many skills... so little time! Good luck!
-      </b-col>
-    </b-row>
+  <b-card body-class="p-0 d-flex flex-column">
+    <div class="flex-grow-1">
+      <b-row class="justify-content-between no-gutters px-3 pt-3 pb-1">
+        <b-col cols="5">
+          <div class="text-uppercase text-secondary">Skills</div>
+          <div class="mt-2 ml-1 text-dark">
+            <span style="font-size: 2.5rem;">50</span>
+          </div>
+          <div><b-badge variant="info">Total: 1,023</b-badge></div>
+        </b-col>
+        <b-col cols="7">
+          <apexchart type="line" height="158" :options="chartOptions" :series="series"></apexchart>
+        </b-col>
+      </b-row>
+      </div>
+      <b-row class="justify-content-between no-gutters border-top text-muted small">
+        <b-col class="p-2">
+          So many skills... so little time! Good luck!
+        </b-col>
+      </b-row>
   </b-card>
 </template>
 

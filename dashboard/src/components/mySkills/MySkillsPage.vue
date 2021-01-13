@@ -16,16 +16,16 @@ limitations under the License.
 <template>
   <div class="container-fluid mt-2">
     <b-row class="my-4">
-      <b-col cols="12" lg="6" class="d-flex mb-2">
+      <b-col cols="12" lg="6" xl="3" class="d-flex mb-2">
         <info-snapshot-card class="flex-grow-1 my-skills-card" />
       </b-col>
-      <b-col cols="12" lg="6" class="d-flex mb-2">
+      <b-col cols="12" lg="6" xl="3" class="d-flex mb-2">
         <num-skills class="flex-grow-1 my-skills-card" />
       </b-col>
-      <b-col cols="12" lg="6" class="d-flex mb-2">
+      <b-col cols="12" lg="6" xl="3" class="d-flex mb-2">
         <last-earned-card class="flex-grow-1 my-skills-card" />
       </b-col>
-      <b-col cols="12" lg="6" class="d-flex mb-2">
+      <b-col cols="12" lg="6" xl="3" class="d-flex mb-2">
         <badges-num-card class="flex-grow-1 my-skills-card" />
       </b-col>
     </b-row>

@@ -14,27 +14,26 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <b-card body-class="p-0">
-    <b-row class="justify-content-between no-gutters px-3 pt-3 pb-1">
-      <b-col cols="5">
-        <div class="text-uppercase text-secondary">Badges</div>
-        <div class="mt-2 ml-1 text-dark">
-          <span style="font-size: 2.5rem;" class="text-warning">0</span> <span class="text-secondary" style="font-size: 1.2rem;">/ 22</span>
-        </div>
-        <div><b-badge variant="info">Gems: 0</b-badge></div>
-      </b-col>
-      <b-col cols="7" style="font-size: 4.6rem;" class="text-right mb-4">
-<!--        <i class="fas fa-trophy"/>-->
-
-        <span class="fa-stack">
-          <i class="fas fa-circle fa-stack-2x text-header"></i>
-          <i class="fas fa-trophy fa-stack-1x skills-color-points"></i>
-        </span>
-
-      </b-col>
-    </b-row>
-    <b-row class="justify-content-between no-gutters border-top
-text-muted small">
+  <b-card body-class="p-0 d-flex flex-column">
+    <div class="flex-grow-1">
+      <b-row class="justify-content-between no-gutters px-3 pt-3 pb-1">
+        <b-col cols="5">
+          <div class="text-uppercase text-secondary">Badges</div>
+          <div class="mt-2 ml-1 text-dark">
+            <span style="font-size: 2.5rem;" class="text-warning">0</span> <span class="text-secondary" style="font-size: 1.2rem;">/ 22</span>
+          </div>
+          <div><b-badge variant="info">Gems: 0</b-badge></div>
+        </b-col>
+        <b-col cols="7" style="font-size: 4.6rem;" class="text-right mb-4">
+  <!--        <i class="fas fa-trophy"/>-->
+          <span class="fa-stack">
+            <i class="fas fa-circle fa-stack-2x text-header"></i>
+            <i class="fas fa-trophy fa-stack-1x skills-color-points"></i>
+          </span>
+        </b-col>
+      </b-row>
+    </div>
+    <b-row class="justify-content-between no-gutters border-top text-muted small">
       <b-col class="p-2">
         Be proud to earn those badges!!
       </b-col>
