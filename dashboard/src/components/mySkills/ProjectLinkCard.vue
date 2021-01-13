@@ -17,7 +17,7 @@ limitations under the License.
   <div class="proj-link-container">
     <b-card class="proj-link-card">
       <b-row class="m-0 p-0">
-        <b-col cols="4">
+        <b-col cols="4" class="proj-progress-chart">
           <apexchart :name="proj.projectId" type="radialBar" height="200" :options="chartOptions" :series="series"></apexchart>
         </b-col>
         <b-col class="text-right">
@@ -145,8 +145,10 @@ limitations under the License.
   display: block !important;
   color: #146c75 !important;
 }
-
 .click-indicator {
   z-index: 1000000;
+}
+.proj-progress-chart {
+  min-width: 150px;
 }
 </style>

@@ -19,13 +19,13 @@ limitations under the License.
       <b-col cols="12" lg="6" class="d-flex mb-2">
         <info-snapshot-card class="flex-grow-1 my-skills-card" />
       </b-col>
-      <b-col cols="12" lg="6" class="d-flex mb mb-2">
+      <b-col cols="12" lg="6" class="d-flex mb-2">
         <num-skills class="flex-grow-1 my-skills-card" />
       </b-col>
       <b-col cols="12" lg="6" class="d-flex mb-2">
         <last-earned-card class="flex-grow-1 my-skills-card" />
       </b-col>
-      <b-col cols="12" lg="6" class="d-flex mb mb-2">
+      <b-col cols="12" lg="6" class="d-flex mb-2">
         <badges-num-card class="flex-grow-1 my-skills-card" />
       </b-col>
     </b-row>
@@ -40,7 +40,7 @@ limitations under the License.
              cols="12" lg="6" xl="4"
             class="mb-2">
         <router-link :to="{ name:'MyProjectSkills', params: { projectId: proj.projectId } }" tag="div" class="project-link">
-          <project-link-card :proj="proj"/>
+          <project-link-card :proj="proj" class="my-skills-card"/>
         </router-link>
       </b-col>
     </b-row>
@@ -128,6 +128,6 @@ limitations under the License.
   min-width: 1rem !important;
 }
 .my-skills-card {
-  min-width: 20rem !important;
+  min-width: 17rem !important;
 }
 </style>
