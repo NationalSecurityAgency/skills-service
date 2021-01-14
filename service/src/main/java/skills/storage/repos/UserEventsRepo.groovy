@@ -36,15 +36,6 @@ import java.util.stream.Stream
 interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
 
     @Nullable
-    List<UserEvent> findAllBySkillRefIdAndUserIdAndEventType(Integer skillRefId, String userId, UserEvent.EventType type)
-
-    @Nullable
-    UserEvent findBySkillRefIdAndUserIdAndStartAndStopAndEventType(Integer skillRefId, String userId, Date start, Date stop, UserEvent.EventType type)
-
-    @Nullable
-    List<UserEvent> findAllBySkillRefId(Integer skillRefId)
-
-    @Nullable
     Stream<UserEvent> findAllBySkillRefIdAndEventType(Integer skillRefId, UserEvent.EventType type)
 
     @QueryHints(value = [
