@@ -164,7 +164,7 @@ describe('Markdown Tests', () => {
         cy.visit('/projects/proj1/subjects/subj1');
         cy.wait('@inceptionLevel');
         cy.contains('Level');
-        const selectorSkillsRowToggle = 'table .VueTables__child-row-toggler';
+        const selectorSkillsRowToggle = '[data-cy="expandDetailsBtn"]';
         cy.get(selectorSkillsRowToggle).click();
         cy.contains('Description');
         cy.contains('Emojis')

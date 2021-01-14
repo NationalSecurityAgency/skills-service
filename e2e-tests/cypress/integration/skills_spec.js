@@ -185,7 +185,7 @@ describe('Skills Tests', () => {
         }).as('loadSubject');
 
         const selectorOccurrencesToCompletion = '[data-cy="numPerformToCompletion"]';
-        const selectorSkillsRowToggle = 'table .VueTables__child-row-toggler';
+        const selectorSkillsRowToggle = '[data-cy="expandDetailsBtn"]';
         cy.visit('/projects/proj1/subjects/subj1');
 
         cy.wait('@loadSubject');
@@ -199,13 +199,11 @@ describe('Skills Tests', () => {
 
 
         cy.get(selectorSkillsRowToggle).click()
-        cy.contains('50 Points')
+        cy.get('[ data-cy="childRowDisplay"]').contains('50 Points');
 
-        cy.get('table .control-column .fa-edit').click()
+        cy.get('[data-cy="editSkillButton"]').click()
         cy.wait('@getSkill')
 
-        // close toast
-        cy.get('.toast-header button').click({ multiple: true })
         cy.get(selectorOccurrencesToCompletion).should('have.value', '5')
         cy.get(selectorOccurrencesToCompletion).type('{backspace}10')
         cy.get(selectorOccurrencesToCompletion).should('have.value', '10')
@@ -214,7 +212,7 @@ describe('Skills Tests', () => {
         cy.wait('@postNewSkill');
 
         cy.get(selectorSkillsRowToggle).click()
-        cy.contains('100 Points')
+        cy.get('[ data-cy="childRowDisplay"]').contains('100 Points')
     });
 
     it('create skill with special chars', () => {

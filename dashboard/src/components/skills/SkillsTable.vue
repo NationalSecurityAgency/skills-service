@@ -59,7 +59,9 @@ limitations under the License.
         <template v-slot:cell(name)="data">
           <div class="row">
             <div class="col-auto pr-0">
-              <b-button size="sm" @click="data.toggleDetails" class="mr-2 py-0 px-1 btn btn-info" :aria-label="`Expand details`">
+              <b-button size="sm" @click="data.toggleDetails" class="mr-2 py-0 px-1 btn btn-info"
+                        data-cy="expandDetailsBtn"
+                        :aria-label="`Expand details`">
                 <i v-if="data.detailsShowing" class="fa fa-minus-square" />
                 <i v-else class="fa fa-plus-square" />
               </b-button>
@@ -74,7 +76,7 @@ limitations under the License.
               <div class="text-muted" style="font-size: 0.9rem;">ID: {{ data.item.skillId }}</div>
             </div>
             <div class="col-auto">
-              <router-link data-cy="manageSkillBtn" :to="{ name:'SkillOverview',
+              <router-link :data-cy="`manageSkillBtn_${data.item.skillId}`" :to="{ name:'SkillOverview',
                                   params: { projectId: data.item.projectId, subjectId: data.item.subjectId, skillId: data.item.skillId }}"
                            :aria-label="`Manage skill ${data.item.name}`"
                            class="btn btn-outline-primary btn-sm">
