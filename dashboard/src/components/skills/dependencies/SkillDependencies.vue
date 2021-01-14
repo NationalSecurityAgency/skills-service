@@ -19,7 +19,8 @@ limitations under the License.
 
     <simple-card class="dependencies-container">
       <loading-container :is-loading="!loading.finishedAllSkills || !loading.finishedDependents">
-        <skills-selector2 :options="allSkills" :selected="skills" v-on:added="skillAdded" v-on:removed="skillDeleted">
+        <skills-selector2 :options="allSkills" :selected="skills" v-on:added="skillAdded" v-on:removed="skillDeleted"
+          data-cy="depsSelector">
           <template slot="dropdown-item" slot-scope="{ props }">
             <div class="media">
               <div class="d-inline-block mt-1 mr-3">
