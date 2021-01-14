@@ -18,6 +18,7 @@ package skills.storage.repos
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.PagingAndSortingRepository
+import org.springframework.data.repository.query.Param
 import org.springframework.lang.Nullable
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillDefWithExtra
@@ -118,6 +119,11 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
     List<SkillDef> findPreviousSkillDefs(String projectId, String skillId, int beforeDisplayOrder, RelationshipType relationshipType, Pageable pageable)
 
     long countByProjectIdAndType(@Nullable String projectId, SkillDef.ContainerType type)
+
+    @Query('''select count(s) from SkillDef s 
+            where (:projectId is null or s.projectId=:projectId) and s.type=:type and (s.enabled is null or s.enabled = 'true')  
+        ''')
+    long countByProjectIdAndTypeWhereEnabled(@Nullable @Param('projectId') String projectId, @Param('type') SkillDef.ContainerType type)
 
     @Query(value='''select count(c) 
         from SkillRelDef r, SkillDef c 
