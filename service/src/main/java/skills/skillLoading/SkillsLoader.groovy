@@ -162,12 +162,13 @@ class SkillsLoader {
             skillLevel = 0
         }
 
+        //these probably need to exclude badges where enabled = FALSE
         int numBadgesAchieved = achievedLevelRepository.countAchievedForUser(userId, projectId, SkillDef.ContainerType.Badge)
-        long numTotalBadges = skillDefRepo.countByProjectIdAndType(projectId, SkillDef.ContainerType.Badge)
+        long numTotalBadges = skillDefRepo.countByProjectIdAndTypeWhereEnabled(projectId, SkillDef.ContainerType.Badge)
 
         // add in global badge counts
         numBadgesAchieved += achievedLevelRepository.countAchievedGlobalForUser(userId, SkillDef.ContainerType.GlobalBadge)
-        numTotalBadges += skillDefRepo.countByProjectIdAndType(null, SkillDef.ContainerType.GlobalBadge)
+        numTotalBadges += skillDefRepo.countByProjectIdAndTypeWhereEnabled(null, SkillDef.ContainerType.GlobalBadge)
 
 
         OverallSkillSummary res = new OverallSkillSummary(

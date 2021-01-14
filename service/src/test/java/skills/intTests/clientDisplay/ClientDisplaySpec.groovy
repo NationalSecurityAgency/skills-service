@@ -55,4 +55,94 @@ class ClientDisplaySpec extends DefaultIntSpec {
         SkillsClientException exception = thrown(SkillsClientException)
         exception.httpStatus == HttpStatus.BAD_REQUEST
     }
+
+    def "disabled project badge should not result in summary badges enabled being true"() {
+        def proj1 = SkillsFactory.createProject()
+        def subj1 = SkillsFactory.createSubject()
+        def skill1 = SkillsFactory.createSkill()
+        def badge = SkillsFactory.createBadge()
+        badge.enabled = 'false'
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(subj1)
+        skillsService.createSkill(skill1)
+        skillsService.createBadge(badge)
+
+        when:
+        def summaryOneDisabledBadge = skillsService.getSkillSummary("user1", proj1.projectId)
+
+        skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badge.badgeId, skillId: skill1.skillId])
+        badge.enabled = 'true'
+        skillsService.createBadge(badge)
+        def summaryOneEnabledBadge = skillsService.getSkillSummary("user1", proj1.projectId)
+
+        then:
+        !summaryOneDisabledBadge.badges.enabled
+        summaryOneEnabledBadge.badges.enabled
+    }
+
+    def "disabled global badge should not result in summary badges enabled being true"() {
+        def proj1 = SkillsFactory.createProject()
+        def subj1 = SkillsFactory.createSubject()
+        def skill1 = SkillsFactory.createSkill()
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(subj1)
+        skillsService.createSkill(skill1)
+
+        def supervisorService = createSupervisor()
+        def globalBadge = [badgeId: "globalBadge", name: 'Test Global Badge 1', enabled: 'false']
+        supervisorService.createGlobalBadge(globalBadge)
+
+        when:
+        def summaryOneDisabledBadge = skillsService.getSkillSummary("user1", proj1.projectId)
+
+        supervisorService.assignSkillToGlobalBadge(projectId: proj1.projectId, badgeId: globalBadge.badgeId, skillId: skill1.skillId)
+        globalBadge.enabled = 'true'
+        supervisorService.createGlobalBadge(globalBadge)
+        def summaryOneEnabledBadge = skillsService.getSkillSummary("user1", proj1.projectId)
+
+        then:
+        !summaryOneDisabledBadge.badges.enabled
+        summaryOneEnabledBadge.badges.enabled
+    }
+
+    def "Disabled badges should not result in summary badges enabled being true"() {
+        def proj1 = SkillsFactory.createProject()
+        def subj1 = SkillsFactory.createSubject()
+        def skill1 = SkillsFactory.createSkill()
+        def badge = SkillsFactory.createBadge()
+        badge.enabled = 'false'
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(subj1)
+        skillsService.createSkill(skill1)
+        skillsService.createBadge(badge)
+
+        when:
+        def summaryOneDisabledBadge = skillsService.getSkillSummary("user1", proj1.projectId)
+
+        def service = createSupervisor()
+        def globalBadge = [badgeId: "globalBadge", name: 'Test Global Badge 1', enabled: 'false']
+        service.createGlobalBadge(globalBadge)
+
+        def summaryOneDisabledBadgeOneDisabledGlobalBadge = skillsService.getSkillSummary("user1", proj1.projectId)
+        service.assignSkillToGlobalBadge(projectId: proj1.projectId, badgeId: globalBadge.badgeId, skillId: skill1.skillId)
+        globalBadge.enabled = 'true'
+        service.createGlobalBadge(globalBadge)
+
+        def summaryOneDisabledBadgeOneEnabledGlobalBadge = skillsService.getSkillSummary("user1", proj1.projectId)
+
+        skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badge.badgeId, skillId: skill1.skillId])
+        badge.enabled = 'true'
+        skillsService.createBadge(badge)
+
+        def summaryBothBadgesEnabled = skillsService.getSkillSummary("user1", proj1.projectId)
+
+        then:
+        !summaryOneDisabledBadge.badges.enabled
+        !summaryOneDisabledBadgeOneDisabledGlobalBadge.badges.enabled
+        summaryOneDisabledBadgeOneEnabledGlobalBadge.badges.enabled
+        summaryBothBadgesEnabled.badges.enabled
+    }
 }
