@@ -19,11 +19,13 @@ limitations under the License.
     <sub-page-header ref="subPageHeader" title="Skills" action="Skill" @add-action="newSkill"
                      :disabled="addSkillDisabled" :disabled-msg="addSkillsDisabledMsg" aria-label="new skill"/>
 
-    <b-card body-class="p-0">
+    <loading-container v-bind:is-loading="isLoading">
+      <b-card v-if="this.skills && this.skills.length" body-class="p-0">
       <div class="row px-3 pt-3">
         <div class="col-12">
           <b-form-group label="Skill Filter" label-class="text-muted">
-            <b-input v-model="table.filter.name" data-cy="users-skillIdFilter" aria-label="skill id filter"/>
+            <b-input v-model="table.filter.name" v-on:keyup.enter="applyFilters"
+                     data-cy="users-skillIdFilter" aria-label="skill id filter"/>
           </b-form-group>
         </div>
         <div class="col-md">
@@ -135,75 +137,8 @@ limitations under the License.
 
     </b-card>
 
-    <hr class="my-5"/>
-
-    <loading-container v-bind:is-loading="isLoading">
-      <div v-if="this.skills && this.skills.length" class="card">
-        <div class="card-body" style="min-height: 400px;">
-
-          <v-client-table class="vue-table-2" :data="skills" :columns="skillsColumns"
-                          :options="options" v-on:sorted="handleColumnSort" ref="table">
-
-            <div slot="name" slot-scope="props" class="field has-addons">
-              <div>
-                <div class="h5">{{ props.row.name }}</div>
-                <div class="text-muted" style="font-size: 0.9rem;">ID: {{ props.row.skillId }}</div>
-              </div>
-            </div>
-
-            <div slot="displayOrder" slot-scope="props">
-              <span>{{props.row.displayOrder}}</span>
-
-              <b-button-group size="sm" class="ml-1"
-                              v-b-popover.hover="'Sorting controls are enabled only when Display Order column is sorted in the ascending order.'">
-                <b-button @click="moveDisplayOrderDown(props.row)" variant="outline-info" :class="{disabled:props.row.disabledDownButton}"
-                          :disabled="!sortButtonEnabled || props.row.disabledDownButton" :aria-label="'move '+props.row.name+' down in the display order'">
-                  <i class="fas fa-arrow-circle-down"/>
-                </b-button>
-                <b-button @click="moveDisplayOrderUp(props.row)" variant="outline-info" :class="{disabled: props.row.disabledUpButton}"
-                          :disabled="!sortButtonEnabled || props.row.disabledUpButton"
-                          :aria-label="'move '+props.row.name+' up in the display order'">
-                  <i class="fas fa-arrow-circle-up"/>
-                </b-button>
-              </b-button-group>
-            </div>
-
-            <div slot="created" slot-scope="props" class="field has-addons" data-cy="skillTableCellCreatedDate">
-              {{ props.row.created | date }}
-            </div>
-
-            <div slot="edit" slot-scope="props">
-              <b-button-group size="sm" class="mr-1">
-                <b-button @click="editSkill(props.row)"
-                          variant="outline-primary" data-cy="editSkillButton"
-                          :aria-label="'edit Skill '+props.row.name" :ref="'edit_'+props.row.skillId">
-                  <i class="fas fa-edit" aria-hidden="true"/>
-                </b-button>
-                <b-button @click="deleteSkill(props.row)" variant="outline-primary"
-                          data-cy="deleteSkillButton"
-                          :aria-label="'delete Skill '+props.row.name">
-                  <i class="text-warning fas fa-trash" aria-hidden="true"/>
-                </b-button>
-              </b-button-group>
-              <router-link data-cy="manageSkillBtn" :to="{ name:'SkillOverview',
-                              params: { projectId: props.row.projectId, subjectId: props.row.subjectId, skillId: props.row.skillId }}"
-                           :aria-label="`Manage skill ${props.row.name}`"
-                           class="btn btn-outline-primary btn-sm">
-                <span class="d-none d-sm-inline">Manage </span> <i class="fas fa-arrow-circle-right" aria-hidden="true"/>
-              </router-link>
-            </div>
-
-            <div slot="child_row" slot-scope="props">
-              <ChildRowSkillsDisplay :project-id="projectId" :subject-id="subjectId" v-skills-onMount="'ExpandSkillDetailsSkillsPage'"
-                                     :parent-skill-id="props.row.skillId" :refresh-counter="props.row.refreshCounter"
-                                     class="mr-3 ml-5 mb-3"></ChildRowSkillsDisplay>
-            </div>
-          </v-client-table>
-        </div>
-      </div>
-
       <no-content2 v-else title="No Skills Yet" class="mt-4"
-                   message="Projects are composed of Subjects which are made of Skills and a single skill defines a training unit within the gamification framework."/>
+                 message="Projects are composed of Subjects which are made of Skills and a single skill defines a training unit within the gamification framework."/>
     </loading-container>
 
     <edit-skill v-if="editSkillInfo.show" v-model="editSkillInfo.show" :skillId="editSkillInfo.skill.skillId" :is-edit="editSkillInfo.isEdit"
@@ -246,6 +181,7 @@ limitations under the License.
           show: false,
           skill: {},
         },
+        skillsOriginal: [],
         skills: [],
         table: {
           extraColumns: {
@@ -366,6 +302,7 @@ limitations under the License.
         const withSubjId = { subjectId: this.subjectId, refreshCounter: 0, ...item };
         return SkillsService.enhanceWithTimeWindow(withSubjId);
       });
+      this.skillsOriginal = this.skills.map((item) => item);
       this.disableFirstAndLastButtons();
       this.table.options.pagination.totalRows = this.skills.length;
     },
@@ -382,10 +319,20 @@ limitations under the License.
     },
     methods: {
       applyFilters() {
-
+        if (this.table.filter.name && this.table.filter.name.length > 0) {
+          this.skills = this.skillsOriginal.filter((item) => {
+            const filter = this.table.filter.name.trim().toLowerCase();
+            if (item.name.trim().toLowerCase().indexOf(filter) !== -1
+              || item.skillId.trim().toLowerCase().indexOf(filter) !== -1) {
+              return true;
+            }
+            return false;
+          });
+        }
       },
       reset() {
-
+        this.table.filter.name = '';
+        this.skills = this.skillsOriginal.map((item) => item);
       },
       isToday(timestamp) {
         return dayjs(timestamp)
