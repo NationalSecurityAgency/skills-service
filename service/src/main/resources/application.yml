@@ -78,6 +78,7 @@ skills:
     enabled: false
   clientLibVersion: @maven.build.timestamp@
   config:
+    compactDailyEventsOlderThan: 60
     ui:
       dashboardVersion: @pom.version@
       buildTimestamp: @maven.build.timestamp@

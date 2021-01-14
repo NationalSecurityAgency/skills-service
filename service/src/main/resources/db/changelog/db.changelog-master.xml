@@ -1001,4 +1001,66 @@
         </createIndex>
     </changeSet>
 
+    <changeSet id="4" author="skills team" context="migration3">
+        <createTable tableName="user_events">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="skill_ref_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="start" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="stop" type="DATETIME" >
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="event_type" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="count" type="int" />
+        </createTable>
+
+        <createIndex indexName="index_user_events_user_id"
+                     tableName="user_events">
+            <column name="user_id" type="varchar(255)"/>
+        </createIndex>
+
+        <createIndex indexName="index_user_events_skill_ref_id"
+                     tableName="user_events">
+            <column name="skill_ref_id" type="int"/>
+        </createIndex>
+
+        <createIndex indexName="index_user_events_event_type" tableName="user_events">
+            <column name="event_type" type="varchar(255)"/>
+        </createIndex>
+
+        <addForeignKeyConstraint baseColumnNames="user_id"
+                                 baseTableName="user_events"
+                                 constraintName="fk_user_events_user_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="user_id"
+                                 referencedTableName="user_attrs"/>
+
+        <addForeignKeyConstraint baseColumnNames="skill_ref_id"
+                                 baseTableName="user_events"
+                                 constraintName="fk_user_events_skill_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="skill_definition"/>
+
+        <addUniqueConstraint
+                columnNames="user_id, skill_ref_id, start, stop, event_type"
+                constraintName="user_events_unique_row"
+                tableName="user_events"/>
+    </changeSet>
+
 </databaseChangeLog>

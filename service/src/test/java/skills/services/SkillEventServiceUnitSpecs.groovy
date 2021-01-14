@@ -42,6 +42,7 @@ class SkillEventServiceUnitSpecs extends Specification {
         UserAchievedLevelRepo mockAchievedLevelRepo = Mock()
         AchievedBadgeHandler mockAchievedBadgeHandler = Mock()
         AchievedGlobalBadgeHandler mockAchievedGlobalBadgeHandler = Mock()
+        UserEventService mockUserEventService = Mock()
 
         SkillEventsService skillEventsService = new SkillEventsService(
                 skillEventPublisher: mockSkillEventPublisher,
@@ -54,6 +55,7 @@ class SkillEventServiceUnitSpecs extends Specification {
                 achievedLevelRepo: mockAchievedLevelRepo,
                 achievedBadgeHandler: mockAchievedBadgeHandler,
                 achievedGlobalBadgeHandler: mockAchievedGlobalBadgeHandler,
+                userEventService: mockUserEventService
         )
 
         // make it so skill has NOT already reached it's max points, is withing the time window, and has achieved any dependencies
@@ -75,17 +77,20 @@ class SkillEventServiceUnitSpecs extends Specification {
         then:
         true
         1 * mockSkillEventPublisher.publishSkillUpdate(_, userId)
+        1 * mockUserEventService.recordEvent(_, userId, _)
     }
 
     def "test reportSkill will NOT notify when skills is NOT applied"() {
         SkillEventPublisher mockSkillEventPublisher = Mock()
         SkillEventsSupportRepo mockSkillEventsSupportRepo = Mock()
         UserPerformedSkillRepo mockPerformedSkillRepository = Mock()
+        UserEventService mockUserEventService = Mock()
 
         SkillEventsService skillEventsService = new SkillEventsService(
                 skillEventPublisher: mockSkillEventPublisher,
                 skillEventsSupportRepo: mockSkillEventsSupportRepo,
                 performedSkillRepository: mockPerformedSkillRepository,
+                userEventService: mockUserEventService
         )
 
         // make it so skill has already reached it's max points so result.skillApplied will be false
@@ -101,17 +106,21 @@ class SkillEventServiceUnitSpecs extends Specification {
 
         then:
         0 * mockSkillEventPublisher.publishSkillUpdate(_, userId)
+        1 * mockUserEventService.recordEvent(_, userId, _)
+
     }
 
     def "test reportSkill will notify when skills is NOT applied, but notifyIfNotApplied is true "() {
         SkillEventPublisher mockSkillEventPublisher = Mock()
         SkillEventsSupportRepo mockSkillEventsSupportRepo = Mock()
         UserPerformedSkillRepo mockPerformedSkillRepository = Mock()
+        UserEventService mockUserEventService = Mock()
 
         SkillEventsService skillEventsService = new SkillEventsService(
                 skillEventPublisher: mockSkillEventPublisher,
                 skillEventsSupportRepo: mockSkillEventsSupportRepo,
                 performedSkillRepository: mockPerformedSkillRepository,
+                userEventService: mockUserEventService
         )
 
         // make it so skill has already reached it's max points so result.skillApplied will be false
@@ -127,5 +136,6 @@ class SkillEventServiceUnitSpecs extends Specification {
 
         then:
         1 * mockSkillEventPublisher.publishSkillUpdate(_, userId)
+        1 * mockUserEventService.recordEvent(_, userId, _)
     }
 }
