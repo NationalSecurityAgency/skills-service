@@ -25,7 +25,7 @@ limitations under the License.
         <div class="col-12">
           <b-form-group label="Skill Filter" label-class="text-muted">
             <b-input v-model="table.filter.name" v-on:keyup.enter="applyFilters"
-                     data-cy="users-skillIdFilter" aria-label="skill id filter"/>
+                     data-cy="users-skillIdFilter" aria-label="skill name filter"/>
           </b-form-group>
         </div>
         <div class="col-md">
@@ -58,12 +58,19 @@ limitations under the License.
 
         <template v-slot:cell(name)="data">
           <div class="row">
-            <div class="col">
+            <div class="col-auto pr-0">
+              <b-button size="sm" @click="data.toggleDetails" class="mr-2 py-0 px-1 btn btn-info" :aria-label="`Expand details`">
+                <i v-if="data.detailsShowing" class="fa fa-minus-square" />
+                <i v-else class="fa fa-plus-square" />
+              </b-button>
+            </div>
+            <div class="col pl-0">
               <router-link data-cy="manageSkillBtn" tag="a" :to="{ name:'SkillOverview',
                                   params: { projectId: data.item.projectId, subjectId: data.item.subjectId, skillId: data.item.skillId }}"
                            :aria-label="`Manage skill ${data.item.name}  via link`">
                 <div class="h5">{{ data.item.name }}</div>
               </router-link>
+
               <div class="text-muted" style="font-size: 0.9rem;">ID: {{ data.item.skillId }}</div>
             </div>
             <div class="col-auto">
@@ -201,7 +208,7 @@ limitations under the License.
             name: '',
           },
           options: {
-            rowDetailsControls: true,
+            rowDetailsControls: false,
             busy: false,
             bordered: true,
             outlined: true,
@@ -446,7 +453,6 @@ limitations under the License.
       },
 
       handleColumnSort(param) {
-        console.log(param);
         if (param.sortBy === 'displayOrder' && !param.sortDesc) {
           this.sortButtonEnabled = true;
         } else {

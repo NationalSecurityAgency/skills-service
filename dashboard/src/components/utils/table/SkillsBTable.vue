@@ -34,7 +34,7 @@ limitations under the License.
              show-empty>
       <colgroup v-if="options.rowDetailsControls"><col style="width: 2rem;"><col></colgroup>
       <template v-if="options.rowDetailsControls" v-slot:cell(b_table_controls)="data">
-        <b-button size="sm" @click="data.toggleDetails" class="mr-2">
+        <b-button size="sm" @click="data.toggleDetails" class="mr-2" :aria-label="`Expand details`">
           <i v-if="data.detailsShowing" class="fa fa-minus-square" />
           <i v-else class="fa fa-plus-square" />
         </b-button>
@@ -147,6 +147,7 @@ limitations under the License.
             sortable: false,
             label: '',
             class: 'control-column',
+            headerTitle: 'Expand for additional details',
           });
         }
 
