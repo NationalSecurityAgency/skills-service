@@ -108,19 +108,7 @@ limitations under the License.
       uid += 1;
     },
     mounted() {
-      this.fieldsInternal = [];
-      if (this.options.rowDetailsControls) {
-        this.fieldsInternal.push({
-          key: 'b_table_controls',
-          sortable: false,
-          label: '',
-          class: 'control-column',
-        });
-      }
-
-      this.options.fields.forEach((item) => {
-        this.fieldsInternal.push(item);
-      });
+      this.updateColumns();
     },
     data() {
       return {
@@ -151,6 +139,22 @@ limitations under the License.
         this.currentPageInternal = 1;
         this.$emit('sort-changed', ctx);
       },
+      updateColumns() {
+        const newFields = [];
+        if (this.options.rowDetailsControls) {
+          newFields.push({
+            key: 'b_table_controls',
+            sortable: false,
+            label: '',
+            class: 'control-column',
+          });
+        }
+
+        this.options.fields.forEach((item) => {
+          newFields.push(item);
+        });
+        this.fieldsInternal = newFields;
+      },
     },
     watch: {
       currentPageInternal() {
@@ -159,6 +163,9 @@ limitations under the License.
       pageSizeInternal() {
         this.currentPageInternal = 1;
         this.$emit('page-size-changed', this.pageSizeInternal);
+      },
+      'options.fields': function updateColumns() {
+        this.updateColumns();
       },
     },
   };

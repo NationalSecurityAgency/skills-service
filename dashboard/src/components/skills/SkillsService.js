@@ -20,21 +20,24 @@ export default {
     return axios.get(`/admin/projects/${projectId}/subjects/${subjectId}/skills/${skillId}`)
       .then((response) => {
         const skill = response.data;
-        const copy = { ...skill };
-
-        copy.timeWindowEnabled = skill.pointIncrementInterval > 0;
-        if (!copy.timeWindowEnabled) {
-          // set to default if window is disabled
-          copy.pointIncrementIntervalHrs = 8;
-          copy.pointIncrementIntervalMins = 0;
-        } else {
-          copy.pointIncrementIntervalHrs = Math.floor(skill.pointIncrementInterval / 60);
-          copy.pointIncrementIntervalMins = skill.pointIncrementInterval % 60;
-        }
-        copy.numPointIncrementMaxOccurrences = skill.numMaxOccurrencesIncrementInterval;
-
-        return copy;
+        return this.enhanceWithTimeWindow(skill);
       });
+  },
+  enhanceWithTimeWindow(skill) {
+    const copy = { ...skill };
+
+    copy.timeWindowEnabled = skill.pointIncrementInterval > 0;
+    if (!copy.timeWindowEnabled) {
+      // set to default if window is disabled
+      copy.pointIncrementIntervalHrs = 8;
+      copy.pointIncrementIntervalMins = 0;
+    } else {
+      copy.pointIncrementIntervalHrs = Math.floor(skill.pointIncrementInterval / 60);
+      copy.pointIncrementIntervalMins = skill.pointIncrementInterval % 60;
+    }
+    copy.numPointIncrementMaxOccurrences = skill.numMaxOccurrencesIncrementInterval;
+
+    return copy;
   },
   getSubjectSkills(projectId, subjectId) {
     return axios.get(`/admin/projects/${projectId}/subjects/${subjectId}/skills`)

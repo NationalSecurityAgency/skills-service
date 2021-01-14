@@ -19,6 +19,124 @@ limitations under the License.
     <sub-page-header ref="subPageHeader" title="Skills" action="Skill" @add-action="newSkill"
                      :disabled="addSkillDisabled" :disabled-msg="addSkillsDisabledMsg" aria-label="new skill"/>
 
+    <b-card body-class="p-0">
+      <div class="row px-3 pt-3">
+        <div class="col-12">
+          <b-form-group label="Skill Filter" label-class="text-muted">
+            <b-input v-model="table.filter.name" data-cy="users-skillIdFilter" aria-label="skill id filter"/>
+          </b-form-group>
+        </div>
+        <div class="col-md">
+        </div>
+      </div>
+
+      <div class="row pl-3 mb-3">
+        <div class="col">
+          <b-button variant="outline-info" @click="applyFilters" data-cy="users-filterBtn"><i class="fa fa-filter"/> Filter</b-button>
+          <b-button variant="outline-info" @click="reset" class="ml-1" data-cy="users-resetBtn"><i class="fa fa-times"/> Reset</b-button>
+        </div>
+      </div>
+
+      <div class="row mb-2">
+        <div class="col"></div>
+        <div class="col-auto text-right">
+            <span class="text-secondary mr-2">Additional Columns:</span>
+            <b-form-checkbox-group class="d-inline"
+              id="skillsAdditionalColumns"
+              v-model="table.extraColumns.selected"
+              :options="table.extraColumns.options"
+              name="Skills Table Additional Columns"
+            ></b-form-checkbox-group>
+        </div>
+      </div>
+
+      <skills-b-table ref="skillsTable" table-id="skillsTable"
+                      :options="table.options" :items="skills" data-cy="skillsTable"
+                      @sort-changed="handleColumnSort">
+
+        <template v-slot:cell(name)="data">
+          <div class="row">
+            <div class="col">
+              <router-link data-cy="manageSkillBtn" tag="a" :to="{ name:'SkillOverview',
+                                  params: { projectId: data.item.projectId, subjectId: data.item.subjectId, skillId: data.item.skillId }}"
+                           :aria-label="`Manage skill ${data.item.name}  via link`">
+                <div class="h5">{{ data.item.name }}</div>
+              </router-link>
+              <div class="text-muted" style="font-size: 0.9rem;">ID: {{ data.item.skillId }}</div>
+            </div>
+            <div class="col-auto">
+              <router-link data-cy="manageSkillBtn" :to="{ name:'SkillOverview',
+                                  params: { projectId: data.item.projectId, subjectId: data.item.subjectId, skillId: data.item.skillId }}"
+                           :aria-label="`Manage skill ${data.item.name}`"
+                           class="btn btn-outline-primary btn-sm">
+                <span class="d-none d-sm-inline">Manage </span> <i class="fas fa-arrow-circle-right" aria-hidden="true"/>
+              </router-link>
+              <b-button-group size="sm" class="ml-1">
+                <b-button @click="editSkill(data.item)"
+                          variant="outline-primary" data-cy="editSkillButton"
+                          :aria-label="'edit Skill '+data.item.name" :ref="'edit_'+data.item.skillId">
+                  <i class="fas fa-edit" aria-hidden="true"/>
+                </b-button>
+                <b-button @click="deleteSkill(data.item)" variant="outline-primary"
+                          data-cy="deleteSkillButton"
+                          :aria-label="'delete Skill '+data.item.name">
+                  <i class="text-warning fas fa-trash" aria-hidden="true"/>
+                </b-button>
+              </b-button-group>
+            </div>
+          </div>
+        </template>
+
+        <template v-slot:cell(totalPoints)="data">
+          <div>{{ data.value }}</div>
+          <div class="small text-secondary">{{ data.item.pointIncrement | number }} pts x {{ data.item.numPerformToCompletion | number }} repetitions</div>
+        </template>
+
+        <template v-slot:cell(timeWindow)="data">
+          <div>{{ timeWindowTitle(data.item) }}</div>
+        </template>
+
+        <template v-slot:cell(displayOrder)="data">
+          <div class="row">
+            <div class="col">
+              <span>{{data.value}}</span>
+            </div>
+            <div class="col-auto">
+              <b-button-group size="sm" class="ml-1"
+                              v-b-popover.hover="'Sorting controls are enabled only when Display Order column is sorted in the ascending order.'">
+                <b-button @click="moveDisplayOrderDown(data.item)" variant="outline-info" :class="{disabled:data.item.disabledDownButton}"
+                          :disabled="!sortButtonEnabled || data.item.disabledDownButton" :aria-label="'move '+data.item.name+' down in the display order'">
+                  <i class="fas fa-arrow-circle-down"/>
+                </b-button>
+                <b-button @click="moveDisplayOrderUp(data.item)" variant="outline-info" :class="{disabled: data.item.disabledUpButton}"
+                          :disabled="!sortButtonEnabled || data.item.disabledUpButton"
+                          :aria-label="'move '+data.item.name+' up in the display order'">
+                  <i class="fas fa-arrow-circle-up"/>
+                </b-button>
+              </b-button-group>
+            </div>
+          </div>
+        </template>
+        <template v-slot:cell(created)="data">
+          <div>
+            <span>{{ data.value | date }}</span>
+            <b-badge v-if="isToday(data.value)" variant="info" class="ml-2">Today</b-badge>
+          </div>
+          <div class="text-muted small">
+            {{ data.value | timeFromNow }}
+          </div>
+        </template>
+        <template #row-details="row">
+            <ChildRowSkillsDisplay :project-id="projectId" :subject-id="subjectId" v-skills-onMount="'ExpandSkillDetailsSkillsPage'"
+                                   :parent-skill-id="row.item.skillId" :refresh-counter="row.item.refreshCounter"
+                                   class="mr-3 ml-5 mb-3"></ChildRowSkillsDisplay>
+        </template>
+      </skills-b-table>
+
+    </b-card>
+
+    <hr class="my-5"/>
+
     <loading-container v-bind:is-loading="isLoading">
       <div v-if="this.skills && this.skills.length" class="card">
         <div class="card-body" style="min-height: 400px;">
@@ -103,12 +221,16 @@ limitations under the License.
   import MsgBoxMixin from '../utils/modal/MsgBoxMixin';
   import ToastSupport from '../utils/ToastSupport';
   import LoadingContainer from '../utils/LoadingContainer';
+  import SkillsBTable from '../utils/table/SkillsBTable';
+  import dayjs from '../../DayJsCustomizer';
+  import TimeWindowMixin from './TimeWindowMixin';
 
   export default {
     name: 'SkillsTable',
-    mixins: [MsgBoxMixin, ToastSupport],
+    mixins: [MsgBoxMixin, ToastSupport, TimeWindowMixin],
     props: ['projectId', 'subjectId', 'skillsProp'],
     components: {
+      SkillsBTable,
       EditSkill,
       SubPageHeader,
       ChildRowSkillsDisplay,
@@ -125,6 +247,57 @@ limitations under the License.
           skill: {},
         },
         skills: [],
+        table: {
+          extraColumns: {
+            options: [{
+              value: 'totalPoints',
+              text: 'Points',
+            }, {
+              value: 'timeWindow',
+              text: 'Time Window',
+            }, {
+              value: 'version',
+              text: 'Version',
+            }],
+            selected: [],
+          },
+          filter: {
+            name: '',
+          },
+          options: {
+            rowDetailsControls: true,
+            busy: false,
+            bordered: true,
+            outlined: true,
+            stacked: 'md',
+            sortBy: 'created',
+            sortDesc: true,
+            fields: [
+              {
+                key: 'name',
+                label: 'Skill Name',
+                sortable: true,
+              },
+              {
+                key: 'displayOrder',
+                label: 'Display Order',
+                sortable: true,
+              },
+              {
+                key: 'created',
+                label: 'Created',
+                sortable: true,
+              },
+
+            ],
+            pagination: {
+              currentPage: 1,
+              totalRows: 1,
+              pageSize: 10,
+              possiblePageSizes: [10, 15, 25],
+            },
+          },
+        },
         skillsColumns: ['name', 'displayOrder', 'created', 'edit'],
         sortButtonEnabled: false,
         options: {
@@ -159,9 +332,42 @@ limitations under the License.
         },
       };
     },
+    watch: {
+      'table.extraColumns.selected': function updateColumns(newList) {
+        const extraColLookup = {
+          totalPoints: {
+            key: 'totalPoints',
+            label: 'Points',
+            sortable: true,
+          },
+          version: {
+            key: 'version',
+            label: 'Version',
+            sortable: true,
+          },
+          timeWindow: {
+            key: 'timeWindow',
+            label: 'Time Window',
+            sortable: false,
+          },
+        };
+
+        Object.keys(extraColLookup).forEach((key) => {
+          if (newList.includes(key)) {
+            this.table.options.fields.push(extraColLookup[key]);
+          } else {
+            this.table.options.fields = this.table.options.fields.filter((item) => item.key !== key);
+          }
+        });
+      },
+    },
     mounted() {
-      this.skills = this.skillsProp.map((item) => ({ subjectId: this.subjectId, refreshCounter: 0, ...item }));
+      this.skills = this.skillsProp.map((item) => {
+        const withSubjId = { subjectId: this.subjectId, refreshCounter: 0, ...item };
+        return SkillsService.enhanceWithTimeWindow(withSubjId);
+      });
       this.disableFirstAndLastButtons();
+      this.table.options.pagination.totalRows = this.skills.length;
     },
     computed: {
       addSkillDisabled() {
@@ -175,6 +381,16 @@ limitations under the License.
       },
     },
     methods: {
+      applyFilters() {
+
+      },
+      reset() {
+
+      },
+      isToday(timestamp) {
+        return dayjs(timestamp)
+          .isSame(new Date(), 'day');
+      },
       newSkill() {
         this.editSkillInfo = {
           skill: {},
@@ -283,7 +499,8 @@ limitations under the License.
       },
 
       handleColumnSort(param) {
-        if (param.column === 'displayOrder' && param.ascending) {
+        console.log(param);
+        if (param.sortBy === 'displayOrder' && !param.sortDesc) {
           this.sortButtonEnabled = true;
         } else {
           this.sortButtonEnabled = false;
@@ -341,55 +558,55 @@ limitations under the License.
 </script>
 
 <style>
-  #skillsTable .type-column {
-    width: 8rem;
-  }
+  /*#skillsTable .type-column {*/
+  /*  width: 8rem;*/
+  /*}*/
 
-  #skillsTable .control-column {
-    width: 12rem;
-  }
+  /*#skillsTable .control-column {*/
+  /*  width: 12rem;*/
+  /*}*/
 
-  #skillsTable .display-order-column {
-    width: 9rem;
-  }
+  /*#skillsTable .display-order-column {*/
+  /*  width: 9rem;*/
+  /*}*/
 
-  #skillsTable .date-column {
-    width: 11rem;
-  }
+  /*#skillsTable .date-column {*/
+  /*  width: 11rem;*/
+  /*}*/
 
-  .VueTables__child-row-toggler {
-    width: 16px;
-    height: 16px;
-    line-height: 16px;
-    display: block;
-    margin: auto;
-    text-align: center;
-  }
+  /*.VueTables__child-row-toggler {*/
+  /*  width: 16px;*/
+  /*  height: 16px;*/
+  /*  line-height: 16px;*/
+  /*  display: block;*/
+  /*  margin: auto;*/
+  /*  text-align: center;*/
+  /*}*/
 
-  .VueTables__child-row-toggler--closed::before {
-    font-family: "Font Awesome 5 Free";
-    content: "\f0fe";
-  }
+  /*.VueTables__child-row-toggler--closed::before {*/
+  /*  font-family: "Font Awesome 5 Free";*/
+  /*  content: "\f0fe";*/
+  /*}*/
 
-  .VueTables__child-row-toggler--open::before {
-    font-family: "Font Awesome 5 Free";
-    content: "\f146";
-  }
+  /*.VueTables__child-row-toggler--open::before {*/
+  /*  font-family: "Font Awesome 5 Free";*/
+  /*  content: "\f146";*/
+  /*}*/
 
-  /*remove count on the bottom of the table*/
-  #skillsTable .VuePagination__count {
-    display: none;
-  }
+  /*!*remove count on the bottom of the table*!*/
+  /*#skillsTable .VuePagination__count {*/
+  /*  display: none;*/
+  /*}*/
 
-  /* reduce the width of first column that hosts expand control*/
-  #skillsTable tbody > tr > td:first-child {
-    padding: 1rem 0rem;
-    width: 2rem;
-  }
+  /*!* reduce the width of first column that hosts expand control*!*/
+  /*#skillsTable tbody > tr > td:first-child {*/
+  /*  padding: 1rem 0rem;*/
+  /*  width: 2rem;*/
+  /*}*/
 
-  /* Work around - "Filter:" label is not left aligned */
-  #skillsTable .form-inline label {
-    justify-content: left !important;
-  }
+  /*!* Work around - "Filter:" label is not left aligned *!*/
+  /*#skillsTable .form-inline label {*/
+  /*  justify-content: left !important;*/
+  /*}*/
 
 </style>
