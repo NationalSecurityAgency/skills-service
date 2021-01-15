@@ -201,7 +201,7 @@ describe('Skills Tests', () => {
         cy.get(selectorSkillsRowToggle).click()
         cy.get('[ data-cy="childRowDisplay"]').contains('50 Points');
 
-        cy.get('[data-cy="editSkillButton"]').click()
+        cy.get('[data-cy="editSkillButton_Skill1Skill"]').click()
         cy.wait('@getSkill')
 
         cy.get(selectorOccurrencesToCompletion).should('have.value', '5')
@@ -517,7 +517,7 @@ describe('Skills Tests', () => {
 
       cy.contains(`ID: ${initialId}`)
 
-      const editButtonSelector = '[data-cy=editSkillButton]';
+      const editButtonSelector = `[data-cy=editSkillButton_${initialId}]`;
       cy.get(editButtonSelector).click()
 
       cy.contains("Enable").click()
@@ -603,46 +603,47 @@ describe('Skills Tests', () => {
     cy.visit('/projects/proj1/subjects/subj1');
     cy.wait('@loadSubject');
     //skill 2
-    cy.get('[data-cy=editSkillButton]').eq(0).click();
+    cy.get('[data-cy=editSkillButton_skill2]').click();
     cy.get('[data-cy=skillName]').should('be.visible');
     cy.get('[data-cy=skillName]').type('{esc}');
-    cy.get('[data-cy=editSkillButton]').first().should('have.focus');
+    cy.get('[data-cy=editSkillButton_skill2]').first().should('have.focus');
 
-    cy.get('[data-cy=editSkillButton]').eq(0).click();
+    cy.get('[data-cy=editSkillButton_skill2]').click();
     cy.get('[data-cy=closeSkillButton]').click();
-    cy.get('[data-cy=editSkillButton]').eq(0).should('have.focus');
+    cy.get('[data-cy=editSkillButton_skill2]').should('have.focus');
 
-    cy.get('[data-cy=editSkillButton]').eq(0).click();
+    cy.get('[data-cy=editSkillButton_skill2]').click();
     cy.get('[data-cy=skillName]').type('test 123');
     cy.get('[data-cy=saveSkillButton]').click();
     cy.wait('@saveSkill2');
     cy.wait('@loadSkill2');
-    cy.get('[data-cy=editSkillButton]').eq(0).should('have.focus');
+    cy.get('[data-cy=editSkillButton_skill2]').should('have.focus');
 
-    cy.get('[data-cy=editSkillButton]').eq(0).click();
+    cy.get('[data-cy=editSkillButton_skill2]').click();
     cy.get('[aria-label=Close]').filter('.text-light').click();
-    cy.get('[data-cy=editSkillButton]').eq(0).should('have.focus');
+    cy.get('[data-cy=editSkillButton_skill2]').should('have.focus');
+    cy.contains('Skill 2test 123');
 
     //skill 1
-    cy.get('[data-cy=editSkillButton]').eq(1).click();
+    cy.get('[data-cy=editSkillButton_skill1]').click();
     cy.get('[data-cy=skillName]').should('be.visible');
     cy.get('[data-cy=skillName]').type('{esc}');
-    cy.get('[data-cy=editSkillButton]').eq(1).should('have.focus');
+    cy.get('[data-cy=editSkillButton_skill1]').should('have.focus');
 
-    cy.get('[data-cy=editSkillButton]').eq(1).click();
+    cy.get('[data-cy=editSkillButton_skill1]').click();
     cy.get('[data-cy=closeSkillButton]').click();
-    cy.get('[data-cy=editSkillButton]').eq(1).should('have.focus');
+    cy.get('[data-cy=editSkillButton_skill1]').should('have.focus');
 
-    cy.get('[data-cy=editSkillButton]').eq(1).click();
+    cy.get('[data-cy=editSkillButton_skill1]').click();
     cy.get('[data-cy=skillName]').type('test 123');
     cy.get('[data-cy=saveSkillButton]').click();
     cy.wait('@saveSkill');
     cy.wait('@loadSkill');
-    cy.get('[data-cy=editSkillButton]').eq(1).should('have.focus');
+    cy.get('[data-cy=editSkillButton_skill1]').should('have.focus');
 
-    cy.get('[data-cy=editSkillButton]').eq(1).click();
+    cy.get('[data-cy=editSkillButton_skill1]').click();
     cy.get('[aria-label=Close]').filter('.text-light').click();
-    cy.get('[data-cy=editSkillButton]').eq(1).should('have.focus');
+    cy.get('[data-cy=editSkillButton_skill1]').should('have.focus');
   });
 
   it('skill user details does not break breadcrumb bar', () => {

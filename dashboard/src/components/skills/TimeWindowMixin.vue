@@ -23,6 +23,9 @@ limitations under the License.
   export default {
     name: 'TimeWindowMixin',
     methods: {
+      timeWindowHasLength(skill) {
+        return skill.timeWindowEnabled && skill.numPerformToCompletion > 1;
+      },
       timeWindowTitle(skill) {
         let title = '';
         if (!skill.timeWindowEnabled) {

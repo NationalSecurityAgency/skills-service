@@ -25,7 +25,7 @@ limitations under the License.
         <div class="col-12">
           <b-form-group label="Skill Filter" label-class="text-muted">
             <b-input v-model="table.filter.name" v-on:keyup.enter="applyFilters"
-                     data-cy="users-skillIdFilter" aria-label="skill name filter"/>
+                     data-cy="skillsTable-skillFilter" aria-label="skill name filter"/>
           </b-form-group>
         </div>
         <div class="col-md">
@@ -41,7 +41,7 @@ limitations under the License.
 
       <div class="row mb-2">
         <div class="col"></div>
-        <div class="col-auto text-right">
+        <div class="col-auto text-right" data-cy="skillsTable-additionalColumns">
             <span class="text-secondary mr-2">Additional Columns:</span>
             <b-form-checkbox-group class="d-inline"
               id="skillsAdditionalColumns"
@@ -52,8 +52,8 @@ limitations under the License.
         </div>
       </div>
 
-      <skills-b-table ref="skillsTable" table-id="skillsTable"
-                      :options="table.options" :items="skills" data-cy="skillsTable"
+      <skills-b-table :options="table.options" :items="skills"
+                      data-cy="skillsTable"
                       @sort-changed="handleColumnSort">
 
         <template v-slot:cell(name)="data">
@@ -84,12 +84,12 @@ limitations under the License.
               </router-link>
               <b-button-group size="sm" class="ml-1">
                 <b-button @click="editSkill(data.item)"
-                          variant="outline-primary" data-cy="editSkillButton"
+                          variant="outline-primary" :data-cy="`editSkillButton_${data.item.skillId}`"
                           :aria-label="'edit Skill '+data.item.name" :ref="'edit_'+data.item.skillId">
                   <i class="fas fa-edit" aria-hidden="true"/>
                 </b-button>
                 <b-button @click="deleteSkill(data.item)" variant="outline-primary"
-                          data-cy="deleteSkillButton"
+                          :data-cy="`deleteSkillButton_${data.item.skillId}`"
                           :aria-label="'delete Skill '+data.item.name">
                   <i class="text-warning fas fa-trash" aria-hidden="true"/>
                 </b-button>
@@ -104,7 +104,9 @@ limitations under the License.
         </template>
 
         <template v-slot:cell(timeWindow)="data">
-          <div>{{ timeWindowTitle(data.item) }}</div>
+          <div>{{ timeWindowTitle(data.item) }}
+            <i v-if="!timeWindowHasLength(data.item)" class="fas fa-question-circle text-muted" v-b-tooltip.hover="`${timeWindowDescription(data.item)}`"></i>
+          </div>
         </template>
 
         <template v-slot:cell(displayOrder)="data">
@@ -116,12 +118,14 @@ limitations under the License.
               <b-button-group size="sm" class="ml-1"
                               v-b-popover.hover="'Sorting controls are enabled only when Display Order column is sorted in the ascending order.'">
                 <b-button @click="moveDisplayOrderDown(data.item)" variant="outline-info" :class="{disabled:data.item.disabledDownButton}"
-                          :disabled="!sortButtonEnabled || data.item.disabledDownButton" :aria-label="'move '+data.item.name+' down in the display order'">
+                          :disabled="!sortButtonEnabled || data.item.disabledDownButton" :aria-label="'move '+data.item.name+' down in the display order'"
+                          :data-cy="`orderMoveDown_${data.item.skillId}`">
                   <i class="fas fa-arrow-circle-down"/>
                 </b-button>
                 <b-button @click="moveDisplayOrderUp(data.item)" variant="outline-info" :class="{disabled: data.item.disabledUpButton}"
                           :disabled="!sortButtonEnabled || data.item.disabledUpButton"
-                          :aria-label="'move '+data.item.name+' up in the display order'">
+                          :aria-label="'move '+data.item.name+' up in the display order'"
+                          :data-cy="`orderMoveUp_${data.item.skillId}`">
                   <i class="fas fa-arrow-circle-up"/>
                 </b-button>
               </b-button-group>
@@ -220,7 +224,7 @@ limitations under the License.
             fields: [
               {
                 key: 'name',
-                label: 'Skill Name',
+                label: 'Skill',
                 sortable: true,
               },
               {
