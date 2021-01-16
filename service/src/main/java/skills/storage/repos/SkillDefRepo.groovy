@@ -125,7 +125,7 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
     @Query('''select count(s) from SkillDef s 
             where (:projectId is null or s.projectId=:projectId) and s.type=:type and (s.enabled is null or s.enabled = 'true')  
         ''')
-    long countByProjectIdAndTypeWhereEnabled(@Nullable @Param('projectId') String projectId, @Param('type') SkillDef.ContainerType type)
+    int countByProjectIdAndTypeWhereEnabled(@Nullable @Param('projectId') String projectId, @Param('type') SkillDef.ContainerType type)
 
     @Query(value='''select count(c) 
         from SkillRelDef r, SkillDef c 
