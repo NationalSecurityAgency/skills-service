@@ -20,7 +20,7 @@ limitations under the License.
         <b-col cols="5">
           <div class="text-uppercase text-secondary">Projects</div>
           <div class="mt-2 ml-1 text-dark">
-            <span style="font-size: 2.5rem;">3</span> <span class="text-secondary" style="font-size: 1.2rem;">/ 5</span>
+            <span style="font-size: 2.5rem;">{{ numProjectsContributed }}</span> <span class="text-secondary" style="font-size: 1.2rem;">/ {{ totalProjects }}</span>
           </div>
         </b-col>
         <b-col cols="7">
@@ -39,9 +39,18 @@ limitations under the License.
 <script>
   export default {
     name: 'InfoSnapshotCard',
+    props: {
+      totalProjects: {
+        type: Number,
+        required: true,
+      },
+      numProjectsContributed: {
+        type: Number,
+        required: true,
+      },
+    },
     data() {
       return {
-        series: [66],
         chartOptions: {
           chart: {
             height: 200,
@@ -128,6 +137,11 @@ limitations under the License.
           labels: ['Percent'],
         },
       };
+    },
+    computed: {
+      series() {
+        return [(this.numProjectsContributed / this.totalProjects) * 100];
+      },
     },
   };
 </script>

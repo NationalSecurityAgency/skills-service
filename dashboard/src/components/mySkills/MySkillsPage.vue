@@ -14,25 +14,25 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div class="container-fluid mt-2">
+  <div v-if="!loading" class="container-fluid mt-2">
     <b-row class="my-4">
       <b-col cols="12" lg="6" xl="3" class="d-flex mb-2">
-        <info-snapshot-card class="flex-grow-1 my-skills-card" />
+        <info-snapshot-card :total-projects="mySkillsSummary.totalProjects" :num-projects-contributed="mySkillsSummary.numProjectsContributed" class="flex-grow-1 my-skills-card" />
       </b-col>
       <b-col cols="12" lg="6" xl="3" class="d-flex mb-2">
-        <num-skills class="flex-grow-1 my-skills-card" />
+        <num-skills :total-skills="mySkillsSummary.totalSkills" :num-achieved-skills="mySkillsSummary.numAchievedSkills" class="flex-grow-1 my-skills-card" />
       </b-col>
       <b-col cols="12" lg="6" xl="3" class="d-flex mb-2">
         <last-earned-card class="flex-grow-1 my-skills-card" />
       </b-col>
       <b-col cols="12" lg="6" xl="3" class="d-flex mb-2">
-        <badges-num-card class="flex-grow-1 my-skills-card" />
+        <badges-num-card :total-badges="mySkillsSummary.totalBadges" :num-achieved-badges="mySkillsSummary.numAchievedBadges" :num-achieved-gem-badges="mySkillsSummary.numAchievedGemBadges" :num-achieved-global-badges="mySkillsSummary.numAchievedGlobalBadges" class="flex-grow-1 my-skills-card" />
       </b-col>
     </b-row>
 
     <b-row class="my-4">
       <b-col class="charts-content">
-        <event-history-chart :projects="projects"></event-history-chart>
+        <event-history-chart  v-if="!loading" :projects="projects"></event-history-chart>
       </b-col>
     </b-row>
     <b-row class="my-4">
@@ -55,6 +55,7 @@ limitations under the License.
   import BadgesNumCard from './BadgesNumCard';
   import LastEarnedCard from './LastEarnedCard';
   import EventHistoryChart from './EventHistoryChart';
+  import MySkillsService from './MySkillsService';
 
   export default {
     name: 'MySkillsPage',
@@ -69,51 +70,31 @@ limitations under the License.
     data() {
       return {
         loading: true,
-        projects: [{
-          name: 'DolphinCommute',
-          projectId: 'DolphinCommute',
-          level: 1,
-          totalPts: 34000,
-          currentPts: 15000,
-          totalUsers: 28399,
-          rank: 38,
-        }, {
-          name: 'DonkeySquirrel',
-          projectId: 'DonkeySquirrel',
-          level: 0,
-          totalPts: 12560,
-          currentPts: 15,
-          totalUsers: 10,
-          rank: 3,
-        }, {
-          name: 'MonkeyPlop',
-          projectId: 'MonkeyPlop',
-          level: 3,
-          totalPts: 19000,
-          currentPts: 16022,
-          totalUsers: 59,
-          rank: 38,
-        }, {
-          name: 'Boatfall',
-          projectId: 'Boatfall',
-          level: 2,
-          totalPts: 8525,
-          currentPts: 856,
-          totalUsers: 379,
-          rank: 78,
-        }, {
-          name: 'SkillTree Dashboard',
-          projectId: 'Inception',
-          level: 2,
-          totalPts: 8525,
-          currentPts: 856,
-          totalUsers: 379,
-          rank: 78,
-        }],
+        mySkillsSummary: null,
+        projects: [],
       };
     },
     mounted() {
-      this.loading = false;
+      this.loadProjects();
+    },
+    methods: {
+      loadProjects() {
+        MySkillsService.loadMySkillsSummary()
+          .then((res) => {
+            this.mySkillsSummary = res;
+            this.projects = this.mySkillsSummary.projectSummaries;
+          }).finally(() => {
+            this.loading = false;
+          });
+      },
+    },
+    watch: {
+      series() {
+        this.seriesInternal = [{
+          name: this.title,
+          data: this.series,
+        }];
+      },
     },
   };
 </script>

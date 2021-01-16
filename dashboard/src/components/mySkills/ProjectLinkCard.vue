@@ -18,20 +18,20 @@ limitations under the License.
     <b-card class="proj-link-card">
       <b-row class="m-0 p-0">
         <b-col cols="4" class="proj-progress-chart">
-          <apexchart :name="proj.projectId" type="radialBar" height="200" :options="chartOptions" :series="series"></apexchart>
+          <apexchart :name="proj.projectName" type="radialBar" height="200" :options="chartOptions" :series="series"></apexchart>
         </b-col>
         <b-col class="text-right">
-          <div class="h4 text-uppercase">{{ proj.name }}</div>
-          <div class="h5 text-secondary">Level {{ proj.level }}</div>
+          <div class="h4 text-uppercase">{{ proj.projectName }}</div>
+          <div class="h5 text-secondary">Level {{ proj.skillsLevel }}</div>
           <div>
             <b-badge :variant="rankVariant">Rank: {{ proj.rank }} / {{ proj.totalUsers | number}} </b-badge>
           </div>
         </b-col>
       </b-row>
-      <b-progress :max="proj.totalPts" :value="proj.currentPts" height="5px" variant="info" class="proj-progress">
+      <b-progress :max="proj.totalPoints" :value="proj.points" height="5px" variant="info" class="proj-progress">
       </b-progress>
       <div class="text-center">
-        <span class="small text-center">{{ proj.currentPts | number }} / {{ proj.totalPts | number }}</span>
+        <span class="small text-center">{{ proj.points | number }} / {{ proj.totalPoints | number }}</span>
       </div>
       <div class="position-absolute text-muted d-none small click-indicator" style="right: 15px; bottom: 10px;">Click to View</div>
     </b-card>
@@ -92,8 +92,8 @@ limitations under the License.
       };
     },
     created() {
-      if (this.proj.totalPts > 0) {
-        const pointsPercent = Math.trunc((this.proj.currentPts / this.proj.totalPts) * 100);
+      if (this.proj.totalPoints > 0) {
+        const pointsPercent = Math.trunc((this.proj.points / this.proj.totalPoints) * 100);
         this.series = [pointsPercent];
         this.chartOptions.fill.colors = [this.getColor(pointsPercent)];
       }

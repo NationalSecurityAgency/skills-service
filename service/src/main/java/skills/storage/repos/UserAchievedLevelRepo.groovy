@@ -22,6 +22,7 @@ import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param
 import org.springframework.lang.Nullable
+import skills.storage.model.AchievedBadgeCount
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillRelDef
 import skills.storage.model.DayCountItem
@@ -163,6 +164,18 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
         ua.created >= :date 
         group by ua.created''')
     List<DayCountItem> countAchievementsForProjectPerDay(@Param('projectId') String projectId, @Param('badgeId') String badgeId, @Param('type') SkillDef.ContainerType containerType, @Param('date') Date mustBeAfterThisDate)
+
+    @Query(value = '''select count(ua) as totalCount,
+                      sum(case when skillDef.startDate is not null and skillDef.endDate is not null then 1 end) as gemCount,
+                      sum(case when skillDef.type='GlobalBadge' then 1 end) as globalCount
+        from SkillDef skillDef, UserAchievement ua
+        where
+            ua.level is null and
+            ua.userId= :userId and
+            skillDef.skillId = ua.skillId and
+            (skillDef.projectId = ua.projectId OR (skillDef.projectId is null and ua.projectId is null)) and
+            (skillDef.type='Badge' OR skillDef.type='GlobalBadge')''')
+    AchievedBadgeCount countAchievedBadgesForUser(@Param('userId') String userId)
 
     @Query(value = '''select EXTRACT(MONTH FROM ua.created) as label, count(*) countRes
       from skill_definition skillDef, user_achievement ua 
@@ -362,4 +375,13 @@ from UserAchievement ua
 where ua.projectId = :projectId and ua.skillId = :skillId
 ''')
     SkillStatsItem calculateNumAchievedAndLastAchieved(@Param("projectId") String projectId, @Param("skillId") String skillId)
+
+    @Query('''select count(ua)
+      from SkillDef skillDef, UserAchievement ua 
+      where 
+        ua.level is null and ua.userId=?1 and 
+        skillDef.skillId = ua.skillId and skillDef.projectId = ua.projectId and
+        skillDef.type='Skill' ''')
+    int countAchievedSkillsForUser(String userId)
+
 }

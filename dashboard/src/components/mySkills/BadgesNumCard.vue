@@ -20,9 +20,10 @@ limitations under the License.
         <b-col cols="5">
           <div class="text-uppercase text-secondary">Badges</div>
           <div class="mt-2 ml-1 text-dark">
-            <span style="font-size: 2.5rem;" class="text-warning">0</span> <span class="text-secondary" style="font-size: 1.2rem;">/ 22</span>
+            <span style="font-size: 2.5rem;" class="text-warning">{{ numAchievedBadges }}</span> <span class="text-secondary" style="font-size: 1.2rem;">/ {{ totalBadges }}</span>
           </div>
-          <div><b-badge variant="info">Gems: 0</b-badge></div>
+          <div><b-badge variant="info">Global Badges: {{ numAchievedGlobalBadges }}</b-badge></div>
+          <div><b-badge variant="info">Gems: {{ numAchievedGemBadges }}</b-badge></div>
         </b-col>
         <b-col cols="7" style="font-size: 4.6rem;" class="text-right mb-4">
   <!--        <i class="fas fa-trophy"/>-->
@@ -44,6 +45,24 @@ limitations under the License.
 <script>
   export default {
     name: 'BadgesNumCard',
+    props: {
+      totalBadges: {
+        type: Number,
+        required: true,
+      },
+      numAchievedBadges: {
+        type: Number,
+        required: true,
+      },
+      numAchievedGemBadges: {
+        type: Number,
+        required: true,
+      },
+      numAchievedGlobalBadges: {
+        type: Number,
+        required: true,
+      },
+    },
     data() {
       return {
       };

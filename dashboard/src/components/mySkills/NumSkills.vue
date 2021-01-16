@@ -20,9 +20,9 @@ limitations under the License.
         <b-col cols="5">
           <div class="text-uppercase text-secondary">Skills</div>
           <div class="mt-2 ml-1 text-dark">
-            <span style="font-size: 2.5rem;">50</span>
+            <span style="font-size: 2.5rem;">{{ numAchievedSkills }}</span>
           </div>
-          <div><b-badge variant="info">Total: 1,023</b-badge></div>
+          <div><b-badge variant="info">Total: {{ totalSkills }}</b-badge></div>
         </b-col>
         <b-col cols="7">
           <apexchart type="line" height="158" :options="chartOptions" :series="series"></apexchart>
@@ -40,10 +40,19 @@ limitations under the License.
 <script>
   export default {
     name: 'NumSkills',
+    props: {
+      totalSkills: {
+        type: Number,
+        required: true,
+      },
+      numAchievedSkills: {
+        type: Number,
+        required: true,
+      },
+    },
     data() {
       return {
         series: [{
-          name: 'Desktops',
           data: [10, 41, 35, 51, 49, 62, 69, 91, 148],
         }],
         chartOptions: {
@@ -82,6 +91,9 @@ limitations under the License.
             labels: {
               show: false,
             },
+          },
+          tooltip: {
+            enabled: false,
           },
         },
       };

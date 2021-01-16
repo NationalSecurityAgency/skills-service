@@ -15,7 +15,8 @@ limitations under the License.
 */
 <template>
     <b-card>
-      <div class="text-center">
+      <skills-spinner :is-loading="loading" />
+      <div v-if="!loading" class="text-center">
         <span class="font-weight-bold"><i class="fas fa-chart-bar mr-2 text-secondary"></i>{{ title }}</span>
         <metrics-overlay :loading="loading" :has-data="hasData" no-data-msg="There are no projects">
           <apexchart type="line" height="350"
@@ -29,12 +30,12 @@ limitations under the License.
 </template>
 
 <script>
-
+  import SkillsSpinner from '../utils/SkillsSpinner';
   import MetricsOverlay from '../metrics/utils/MetricsOverlay';
 
   export default {
     name: 'EventHistoryChart',
-    components: { MetricsOverlay },
+    components: { SkillsSpinner, MetricsOverlay },
     props: {
       projects: {
         type: Array,

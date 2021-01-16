@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2020 SkillTree
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,22 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.storage.model
+import axios from 'axios';
 
-import groovy.transform.CompileStatic
-import org.springframework.data.jpa.domain.support.AuditingEntityListener
-
-import javax.persistence.Entity
-import javax.persistence.EntityListeners
-import javax.persistence.Table
-
-@Entity()
-@Table(name = 'skill_definition')
-@EntityListeners(AuditingEntityListener)
-@CompileStatic
-class SkillDef extends SkillDefParent {
-    static enum ContainerType {
-        Subject, Skill, Badge, GlobalBadge
-    }
-
-}
+export default {
+  loadMySkillsSummary() {
+    return axios.get('/api/projects/summaries').then((response) => response.data);
+  },
+};
