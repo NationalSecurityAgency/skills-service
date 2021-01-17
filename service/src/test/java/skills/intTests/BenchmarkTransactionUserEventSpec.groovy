@@ -24,10 +24,14 @@ import org.apache.commons.lang3.time.StopWatch
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.transaction.PlatformTransactionManager
+import org.springframework.transaction.TransactionStatus
+import org.springframework.transaction.support.TransactionCallback
+import org.springframework.transaction.support.TransactionTemplate
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
 import skills.services.UserEventService
 import skills.services.events.SkillEventsService
+import skills.storage.model.SkillDef
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.UserEventsRepo
 import spock.lang.Ignore
@@ -60,6 +64,8 @@ class BenchmarkTransactionUserEventSpec extends DefaultIntSpec {
     @Value('#{"${skills.config.compactDailyEventsOlderThan}"}')
     int maxDailyDays
 
+    Map<String, Integer> skillIdCache = [:]
+
     @Autowired
     private PlatformTransactionManager transactionManager;
 
@@ -70,12 +76,19 @@ class BenchmarkTransactionUserEventSpec extends DefaultIntSpec {
     }
 
     private addEvent(String projectId, String skillId, String userId, Date date){
-        skillsManagementFacade.reportSkill(projectId, skillId, userId, false, date);
+//        skillsManagementFacade.reportSkill(projectId, skillId, userId, false, date);
+//        too slow to go through the reportSkill junk and we're only interested in timing metrics for the user_events table
+        Integer rawId = skillIdCache.get(skillId)
+        if (rawId == null) {
+            rawId = skillDefRepo.findByProjectIdAndSkillIdAndType(projectId, skillId, SkillDef.ContainerType.Skill).id
+            skillIdCache.put(skillId, rawId)
+        }
+        eventService.recordEvent(rawId, userId, date, 1)
     }
 
     List<ProjectContainer> populateData(){
         def containers = []
-        (42..49).each {
+        (42..48).each {
             ProjectContainer container = new ProjectContainer()
             Map proj = SkillsFactory.createProject(it)
             container.projectId = proj.projectId
@@ -106,17 +119,23 @@ class BenchmarkTransactionUserEventSpec extends DefaultIntSpec {
             skillsService.addSkill(projects[0].skills[0], it, new Date())
         }
 
-        Executor executor = Executors.newFixedThreadPool(2)
+//        Executor executor = Executors.newFixedThreadPool(2)
         List<Integer> daysBack = [4,5,6,7]
 
-        int eventsToAdd = 3000000
+        TransactionTemplate singleTransaction = new TransactionTemplate(transactionManager)
+
+        int eventsToAdd = 3500000
         log.info("adding events")
-        for (int i = 0; i < eventsToAdd; i++) {
-            final int idx = i;
-            executor.submit(new Callable<Boolean>() {
-                @Override
-                Boolean call() throws Exception {
-                    Date date = LocalDateTime.now().minusDays(RandomUtils.nextInt(0, daysBack.size())).toDate()
+
+        singleTransaction.execute(new TransactionCallback<Boolean>() {
+            @Override
+            Boolean doInTransaction(TransactionStatus transactionStatus) {
+                for (int i = 0; i < eventsToAdd; i++) {
+                    final int idx = i;
+                    /*executor.submit(new Callable<Boolean>() {
+                        @Override
+                        Boolean call() throws Exception {*/
+                    Date date = LocalDateTime.now().minusDays(daysBack.get(RandomUtils.nextInt(0, daysBack.size()))).toDate()
                     ProjectContainer container = projects.get(RandomUtils.nextInt(0, projects.size()))
                     String user = randos.get(RandomUtils.nextInt(0, randos.size()))
                     def skill = container.skills.get(RandomUtils.nextInt(0, container.skills.size()))
@@ -124,20 +143,40 @@ class BenchmarkTransactionUserEventSpec extends DefaultIntSpec {
                     if (idx > 0 && idx % 20000 == 0) {
                         log.info("added $idx of $eventsToAdd")
                     }
-                    return true
+                    /* }
+                 })*/
+                }
+                return true
+            }
+        })
+        /*for (int i = 0; i < eventsToAdd; i++) {
+            final int idx = i;
+            executor.submit(new Callable<Boolean>() {
+                @Override
+                Boolean call() throws Exception {
+                Date date = LocalDateTime.now().minusDays(RandomUtils.nextInt(0, daysBack.size())).toDate()
+                ProjectContainer container = projects.get(RandomUtils.nextInt(0, projects.size()))
+                String user = randos.get(RandomUtils.nextInt(0, randos.size()))
+                def skill = container.skills.get(RandomUtils.nextInt(0, container.skills.size()))
+                addEvent(container.projectId, skill.skillId, user, date)
+                if (idx > 0 && idx % 20000 == 0) {
+                    log.info("added $idx of $eventsToAdd")
+                }
+                return true
                 }
             })
         }
 
         executor.shutdown()
         executor.awaitTermination(3, TimeUnit.HOURS)
+         */
 
         when:
         Runtime.getRuntime().gc()
         long memoryInUseBeforeCompaction = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()
 
-        ThreadPoolExecutor dockerStats = new ScheduledThreadPoolExecutor(1)
-        dockerStats.scheduleAtFixedRate(new Runnable() {
+        ThreadPoolExecutor stats = new ScheduledThreadPoolExecutor(1)
+        stats.scheduleAtFixedRate(new Runnable() {
             @Override
             void run() {
                 /*
@@ -146,9 +185,13 @@ class BenchmarkTransactionUserEventSpec extends DefaultIntSpec {
                 def proc = "docker stats pg_int_test --no-stream".execute()
                 log.info("\n"+proc.text)
                 */
+                long memoryBeforeGc = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()
                 Runtime.getRuntime().gc()
+                long memoryAfterGc = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()
+                log.info("memory before gc during compaction [${FileUtils.byteCountToDisplaySize(memoryBeforeGc)}]")
+                log.info("memory after gc during compaction [${FileUtils.byteCountToDisplaySize(memoryAfterGc)}]")
             }
-        }, 0, 30, TimeUnit.SECONDS)
+        }, 0, 45, TimeUnit.SECONDS)
 
         StopWatch sw = new StopWatch()
         sw.start()
@@ -161,8 +204,8 @@ class BenchmarkTransactionUserEventSpec extends DefaultIntSpec {
         println "took ${duration.toString()} time to compact $eventsToAdd events for ${projects.size()} projects and ${randos.size()} users"
         println "memory in use before compaction [${FileUtils.byteCountToDisplaySize(memoryInUseBeforeCompaction)}], " +
                 "memory in use after compaction [${FileUtils.byteCountToDisplaySize(memoryInUseAfterCompaction)}]"
-        dockerStats.shutdownNow()
-        dockerStats.awaitTermination(2, TimeUnit.MINUTES)
+        stats.shutdownNow()
+        stats.awaitTermination(2, TimeUnit.MINUTES)
 
         then:
         true
