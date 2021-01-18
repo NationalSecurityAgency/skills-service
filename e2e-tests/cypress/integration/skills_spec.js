@@ -185,7 +185,7 @@ describe('Skills Tests', () => {
         }).as('loadSubject');
 
         const selectorOccurrencesToCompletion = '[data-cy="numPerformToCompletion"]';
-        const selectorSkillsRowToggle = '[data-cy="expandDetailsBtn"]';
+        const selectorSkillsRowToggle = '[data-cy="expandDetailsBtn_Skill1Skill"]';
         cy.visit('/projects/proj1/subjects/subj1');
 
         cy.wait('@loadSubject');
@@ -199,7 +199,7 @@ describe('Skills Tests', () => {
 
 
         cy.get(selectorSkillsRowToggle).click()
-        cy.get('[ data-cy="childRowDisplay"]').contains('50 Points');
+        cy.get('[data-cy="childRowDisplay_Skill1Skill"]').contains('50 Points');
 
         cy.get('[data-cy="editSkillButton_Skill1Skill"]').click()
         cy.wait('@getSkill')
@@ -212,7 +212,7 @@ describe('Skills Tests', () => {
         cy.wait('@postNewSkill');
 
         cy.get(selectorSkillsRowToggle).click()
-        cy.get('[ data-cy="childRowDisplay"]').contains('100 Points')
+        cy.get('[ data-cy="childRowDisplay_Skill1Skill"]').contains('100 Points')
     });
 
     it('create skill with special chars', () => {
