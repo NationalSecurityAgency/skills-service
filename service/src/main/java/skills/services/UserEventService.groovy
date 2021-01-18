@@ -56,8 +56,8 @@ class UserEventService {
     @PersistenceContext
     EntityManager entityManager;
 
-    @Value('#{"${skills.config.compactDailyEventsOlderThan}"}')
-    int maxDailyDays = 60
+    @Value('#{"${skills.config.compactDailyEventsOlderThan:30}"}')
+    int maxDailyDays = 30
 
     public void recordEvent(Integer skillRefId, String userId, Date date, Integer eventCount=1, UserEvent.EventType type=UserEvent.EventType.DAILY) {
 
@@ -79,8 +79,6 @@ class UserEventService {
 
     @Transactional
     public void compactDailyEvents(){
-        //TODO: will the transaction require flushing periodically? Could it run out of memory
-        //putting everything into the same transaction?
         LocalDateTime dateTime = LocalDateTime.now().minusDays(maxDailyDays)
         log.info("beginning compaction of daily events older than [${dateTime}] into weekly events")
 
@@ -93,6 +91,9 @@ class UserEventService {
             totalProcessed++
             recordEvent(userEvent.skillRefId, userEvent.userId, userEvent.start, userEvent.count, UserEvent.EventType.WEEKLY)
             entityManager.detach(userEvent)
+            if(totalProcessed % 50000 == 0) {
+                log.info("compacted $totalProcessed daily user events so far")
+            }
         })
         sw.stop()
         Duration duration = Duration.of(sw.getTime(), ChronoUnit.MILLIS)
@@ -106,9 +107,4 @@ class UserEventService {
         log.info("Deleted compacted input events in [${duration}]")
     }
 
-    @Scheduled(cron="* 2 0 * * *")
-    public void runCompactDailyEvents(){
-        log.info("running scheduled compaction of daily user events")
-        compactDailyEvents()
-    }
 }
