@@ -140,7 +140,14 @@ limitations under the License.
     },
     computed: {
       series() {
-        return [(this.numProjectsContributed / this.totalProjects) * 100];
+        const percent = (this.numProjectsContributed / this.totalProjects) * 100;
+        if (percent > 0) {
+          if (percent < 1) {
+            return [1];
+          }
+          return [Math.round(percent)];
+        }
+        return [0];
       },
     },
   };

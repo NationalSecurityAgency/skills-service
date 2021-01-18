@@ -151,8 +151,8 @@ class SkillsLoader {
         mySkillsSummary.totalSkills = skillDefRepo.countTotalSkills()
         AchievedSkillsCount achievedSkillsCount = achievedLevelRepository.countAchievedSkillsForUserByDayWeekMonth(userId)
         mySkillsSummary.numAchievedSkills = achievedSkillsCount.totalCount
-        mySkillsSummary.numAchievedSkillsLastMonth = achievedSkillsCount.monthCount
-        mySkillsSummary.numAchievedSkillsLastWeek = achievedSkillsCount.weekCount
+        mySkillsSummary.numAchievedSkillsLastMonth = achievedSkillsCount.monthCount ?: 0
+        mySkillsSummary.numAchievedSkillsLastWeek = achievedSkillsCount.weekCount ?: 0
         mySkillsSummary.mostRecentAchievedSkill = achievedSkillsCount.lastAchieved
         return mySkillsSummary
     }

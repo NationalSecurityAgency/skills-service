@@ -22,7 +22,7 @@ limitations under the License.
           <i class="fas fa-calendar-alt mt-3 ml-2 mb-2 skills-color-events" style="font-size: 5rem;" />
         </b-col>
         <b-col cols="8" class="mb-4 pt-4 pl-2 small">
-          <div>
+          <div v-if="mostRecentAchievedSkill !== null">
             <span>Last Achieved skill</span> <b-badge variant="success" style="font-size: 1rem;">{{ mostRecentAchievedSkill | timeFromNow }}</b-badge>
           </div>
           <div class="my-2">
@@ -58,7 +58,7 @@ limitations under the License.
       },
       mostRecentAchievedSkill: {
         type: String,
-        required: true,
+        required: false, // will be null id no skills have been earned yet
       },
     },
     data() {
@@ -70,10 +70,13 @@ limitations under the License.
         return dayjs(timestamp).isAfter(dayjs().subtract(7, 'day'));
       },
       getFooterText() {
-        if (this.isWithinOneWeek(this.mostRecentAchievedSkill)) {
-          return 'Keep up the good work!!';
+        if (this.mostRecentAchievedSkill !== null) {
+          if (this.isWithinOneWeek(this.mostRecentAchievedSkill)) {
+            return 'Keep up the good work!!';
+          }
+          return 'It\'s been a while, perhaps earn another skill?';
         }
-        return 'It\'s been a while, perhaps earn another skill?';
+        return 'You have not achieved any skills yet, time to get started!';
       },
     },
   };
