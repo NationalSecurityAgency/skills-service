@@ -247,38 +247,7 @@ limitations under the License.
             },
           },
         },
-        skillsColumns: ['name', 'displayOrder', 'created', 'edit'],
         sortButtonEnabled: false,
-        options: {
-          uniqueKey: 'skillId',
-          headings: {
-            created: 'Created',
-            name: 'Skill Name',
-            edit: '',
-            displayOrder: 'Display Order',
-          },
-          dateColumns: ['created'],
-          dateFormat: 'YYYY-MM-DD HH:mm',
-          descOrderColumns: ['created'],
-          orderBy: { column: 'created', ascending: false },
-          columnsDisplay: {
-            displayOrder: 'not_mobile',
-            created: 'not_mobile',
-          },
-          columnsClasses: {
-            edit: 'control-column',
-            displayOrder: 'display-order-column',
-            created: 'date-column',
-            name: 'skills-table-skill-name',
-          },
-          sortable: ['displayOrder', 'created', 'name'],
-          sortIcon: {
-            base: 'fa fa-sort', up: 'fa fa-sort-up', down: 'fa fa-sort-down', is: 'fa fa-sort',
-          },
-          highlightMatches: true,
-          skin: 'table is-striped is-fullwidth',
-          filterable: true,
-        },
       };
     },
     watch: {
@@ -535,55 +504,5 @@ limitations under the License.
 </script>
 
 <style>
-  /*#skillsTable .type-column {*/
-  /*  width: 8rem;*/
-  /*}*/
-
-  /*#skillsTable .control-column {*/
-  /*  width: 12rem;*/
-  /*}*/
-
-  /*#skillsTable .display-order-column {*/
-  /*  width: 9rem;*/
-  /*}*/
-
-  /*#skillsTable .date-column {*/
-  /*  width: 11rem;*/
-  /*}*/
-
-  /*.VueTables__child-row-toggler {*/
-  /*  width: 16px;*/
-  /*  height: 16px;*/
-  /*  line-height: 16px;*/
-  /*  display: block;*/
-  /*  margin: auto;*/
-  /*  text-align: center;*/
-  /*}*/
-
-  /*.VueTables__child-row-toggler--closed::before {*/
-  /*  font-family: "Font Awesome 5 Free";*/
-  /*  content: "\f0fe";*/
-  /*}*/
-
-  /*.VueTables__child-row-toggler--open::before {*/
-  /*  font-family: "Font Awesome 5 Free";*/
-  /*  content: "\f146";*/
-  /*}*/
-
-  /*!*remove count on the bottom of the table*!*/
-  /*#skillsTable .VuePagination__count {*/
-  /*  display: none;*/
-  /*}*/
-
-  /*!* reduce the width of first column that hosts expand control*!*/
-  /*#skillsTable tbody > tr > td:first-child {*/
-  /*  padding: 1rem 0rem;*/
-  /*  width: 2rem;*/
-  /*}*/
-
-  /*!* Work around - "Filter:" label is not left aligned *!*/
-  /*#skillsTable .form-inline label {*/
-  /*  justify-content: left !important;*/
-  /*}*/
 
 </style>
