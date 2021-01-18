@@ -21,7 +21,7 @@ limitations under the License.
       <div class="row px-3 pt-3">
         <div class="col-12">
           <b-form-group label="User Id Filter" label-class="text-muted">
-            <b-input v-model="filters.userId" data-cy="users-skillIdFilter" aria-label="skill id filter"/>
+            <b-input v-model="filters.userId" data-cy="users-skillIdFilter" aria-label="user id filter"/>
           </b-form-group>
         </div>
         <div class="col-md">
@@ -56,13 +56,7 @@ limitations under the License.
           {{ data.value | number }}
         </template>
         <template v-slot:cell(lastUpdated)="data">
-          <div>
-            <span>{{ data.value | date }}</span>
-            <b-badge v-if="isToday(data.value)" variant="info" class="ml-2">Today</b-badge>
-          </div>
-          <div class="text-muted small">
-            {{ data.value | timeFromNow }}
-          </div>
+          <date-cell :value="data.value" />
         </template>
       </skills-b-table>
     </b-card>
@@ -72,12 +66,13 @@ limitations under the License.
 <script>
   import SkillsBTable from '@/components/utils/table/SkillsBTable';
   import SubPageHeader from '../utils/pages/SubPageHeader';
-  import dayjs from '../../DayJsCustomizer';
   import UsersService from './UsersService';
+  import DateCell from '../utils/table/DateCell';
 
   export default {
     name: 'Users',
     components: {
+      DateCell,
       SkillsBTable,
       SubPageHeader,
     },
@@ -130,10 +125,6 @@ limitations under the License.
       this.loadData();
     },
     methods: {
-      isToday(timestamp) {
-        return dayjs(timestamp)
-          .isSame(new Date(), 'day');
-      },
       pageChanged(pageNum) {
         this.table.options.pagination.currentPage = pageNum;
         this.loadData();
