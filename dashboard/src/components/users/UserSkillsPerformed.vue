@@ -17,19 +17,39 @@ limitations under the License.
   <div>
     <sub-page-header title="Performed Skills"/>
 
-    <simple-card>
-      <v-server-table class="vue-table-2" ref="table" :columns="columns" :url="getUrl()" :options="options"
-                      @loaded="onLoaded" @loading="onLoading" v-on:error="emit('error', $event)">
-        <server-table-loading-mask v-if="isLoading" slot="afterBody" />
-        <div slot="performedOn" slot-scope="props">
-          {{ getDate(props.row) }}
+    <b-card body-class="p-0">
+      <div class="row px-3 pt-3">
+        <div class="col-12">
+          <b-form-group label="Skill Id Filter" label-class="text-muted">
+            <b-input v-model="filters.skillId" data-cy="performedSkills-skillIdFilter" aria-label="skill id filter"/>
+          </b-form-group>
         </div>
+        <div class="col-md">
+        </div>
+      </div>
 
-        <div slot="delete" slot-scope="props">
-          <b-button @click="deleteSkill(props.row)" variant="outline-primary" :aria-label="`remove skill ${props.skillId} from user`"><i class="fas fa-trash" aria-hidden="true"/></b-button>
+      <div class="row pl-3 mb-3">
+        <div class="col">
+          <b-button variant="outline-info" @click="applyFilters" data-cy="performedSkills-filterBtn"><i class="fa fa-filter"/> Filter</b-button>
+          <b-button variant="outline-info" @click="reset" class="ml-1" data-cy="performedSkills-resetBtn"><i class="fa fa-times"/> Reset</b-button>
         </div>
-      </v-server-table>
-    </simple-card>
+      </div>
+
+      <skills-b-table :options="table.options" :items="table.items"
+                      @page-changed="pageChanged"
+                      @page-size-changed="pageSizeChanged"
+                      @sort-changed="sortTable"
+                      data-cy="performedSkillsTable">
+
+        <template v-slot:cell(performedOn)="data">
+          <date-cell :value="data.value" />
+        </template>
+        <template v-slot:cell(control)="data">
+          <b-button @click="deleteSkill(data.item)" variant="outline-info" size="sm" :aria-label="`remove skill ${data.item.skillId} from user`"><i class="fas fa-trash" aria-hidden="true"/></b-button>
+        </template>
+      </skills-b-table>
+
+    </b-card>
   </div>
 </template>
 
@@ -37,12 +57,12 @@ limitations under the License.
   import { createNamespacedHelpers } from 'vuex';
 
   import SubPageHeader from '../utils/pages/SubPageHeader';
-  import SimpleCard from '../utils/cards/SimpleCard';
   import MsgBoxMixin from '../utils/modal/MsgBoxMixin';
   import ToastSupport from '../utils/ToastSupport';
   import UsersService from './UsersService';
-  import ServerTableLoadingMask from '../utils/ServerTableLoadingMask';
   import dayjs from '../../DayJsCustomizer';
+  import SkillsBTable from '../utils/table/SkillsBTable';
+  import DateCell from '../utils/table/DateCell';
 
   const { mapActions } = createNamespacedHelpers('users');
 
@@ -50,9 +70,9 @@ limitations under the License.
     name: 'UserSkillsPerformed',
     mixins: [MsgBoxMixin, ToastSupport],
     components: {
-      SimpleCard,
+      DateCell,
+      SkillsBTable,
       SubPageHeader,
-      ServerTableLoadingMask,
     },
     data() {
       return {
@@ -60,6 +80,44 @@ limitations under the License.
         isLoading: true,
         data: [],
         columns: ['skillId', 'performedOn', 'delete'],
+        filters: {
+          skillId: '',
+        },
+        table: {
+          items: [],
+          options: {
+            busy: true,
+            bordered: true,
+            outlined: true,
+            stacked: 'md',
+            sortBy: 'performedOn',
+            sortDesc: true,
+            fields: [
+              {
+                key: 'skillId',
+                label: 'Skill Id',
+                sortable: true,
+              },
+              {
+                key: 'performedOn',
+                label: 'Performed ON',
+                sortable: true,
+              },
+              {
+                key: 'control',
+                label: 'Delete',
+                sortable: false,
+              },
+            ],
+            pagination: {
+              server: true,
+              currentPage: 1,
+              totalRows: 1,
+              pageSize: 5,
+              possiblePageSizes: [5, 10, 15, 20],
+            },
+          },
+        },
         options: {
           headings: {
             skillId: 'Skill ID',
@@ -88,10 +146,54 @@ limitations under the License.
       this.projectId = this.$route.params.projectId;
       this.userId = this.$route.params.userId;
     },
+    mounted() {
+      this.loadData();
+    },
     methods: {
       ...mapActions([
         'loadUserDetailsState',
       ]),
+      applyFilters() {
+        this.table.options.pagination.currentPage = 1;
+        this.loadData();
+      },
+      reset() {
+        this.filters.skillId = '';
+        this.table.options.pagination.currentPage = 1;
+        this.loadData();
+      },
+      pageChanged(pageNum) {
+        this.table.options.pagination.currentPage = pageNum;
+        this.loadData();
+      },
+      pageSizeChanged(newSize) {
+        this.table.options.pagination.pageSize = newSize;
+        this.loadData();
+      },
+      sortTable(sortContext) {
+        this.table.options.sortBy = sortContext.sortBy;
+        this.table.options.sortDesc = sortContext.sortDesc;
+
+        // set to the first page
+        this.table.options.pagination.currentPage = 1;
+        this.loadData();
+      },
+      loadData() {
+        this.table.options.busy = true;
+        const url = this.getUrl();
+        UsersService.ajaxCall(url, {
+          query: this.filters.skillId,
+          limit: this.table.options.pagination.pageSize,
+          ascending: !this.table.options.sortDesc,
+          page: this.table.options.pagination.currentPage,
+          byColumn: 0,
+          orderBy: this.table.options.sortBy,
+        }).then((res) => {
+          this.table.items = res.data;
+          this.table.options.pagination.totalRows = res.count;
+          this.table.options.busy = false;
+        });
+      },
       onLoading() {
         this.isLoading = true;
       },
