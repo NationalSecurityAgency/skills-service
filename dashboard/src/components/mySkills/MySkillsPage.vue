@@ -23,7 +23,7 @@ limitations under the License.
         <num-skills :total-skills="mySkillsSummary.totalSkills" :num-achieved-skills="mySkillsSummary.numAchievedSkills" class="flex-grow-1 my-skills-card" />
       </b-col>
       <b-col cols="12" lg="6" xl="3" class="d-flex mb-2">
-        <last-earned-card class="flex-grow-1 my-skills-card" />
+        <last-earned-card :num-achieved-skills-last-month="mySkillsSummary.numAchievedSkillsLastMonth" :num-achieved-skills-last-week="mySkillsSummary.numAchievedSkillsLastWeek" :most-recent-achieved-skill="mySkillsSummary.mostRecentAchievedSkill | date" class="flex-grow-1 my-skills-card" />
       </b-col>
       <b-col cols="12" lg="6" xl="3" class="d-flex mb-2">
         <badges-num-card :total-badges="mySkillsSummary.totalBadges" :num-achieved-badges="mySkillsSummary.numAchievedBadges" :num-achieved-gem-badges="mySkillsSummary.numAchievedGemBadges" :num-achieved-global-badges="mySkillsSummary.numAchievedGlobalBadges" class="flex-grow-1 my-skills-card" />

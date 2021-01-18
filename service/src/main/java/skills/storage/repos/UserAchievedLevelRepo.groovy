@@ -23,6 +23,7 @@ import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param
 import org.springframework.lang.Nullable
 import skills.storage.model.AchievedBadgeCount
+import skills.storage.model.AchievedSkillsCount
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillRelDef
 import skills.storage.model.DayCountItem
@@ -384,4 +385,17 @@ where ua.projectId = :projectId and ua.skillId = :skillId
         skillDef.type='Skill' ''')
     int countAchievedSkillsForUser(String userId)
 
+    @Query(value = '''select count(ua) as totalCount,
+                      sum(case when ua.achievedOn >= (current_date - 30) then 1 end) as monthCount,
+                      sum(case when ua.achievedOn >= (current_date - 7) then 1 end) as weekCount,
+                      sum(case when ua.achievedOn >= (current_date - 1) then 1 end) as todayCount,
+                      max(ua.achievedOn) as lastAchieved
+        from SkillDef skillDef, UserAchievement ua
+        where
+            ua.level is null and
+            ua.userId= :userId and
+            skillDef.skillId = ua.skillId and
+            skillDef.projectId = ua.projectId and
+            skillDef.type='Skill' ''')
+    AchievedSkillsCount countAchievedSkillsForUserByDayWeekMonth(@Param('userId') String userId)
 }

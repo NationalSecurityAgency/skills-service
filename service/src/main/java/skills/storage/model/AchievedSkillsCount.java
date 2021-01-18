@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2020 SkillTree
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,10 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import axios from 'axios';
+package skills.storage.model;
 
-export default {
-  loadMySkillsSummary() {
-    return axios.get('/api/projects/mySkillsSummary').then((response) => response.data);
-  },
-};
+import java.util.Date;
+
+public interface AchievedSkillsCount {
+    Integer getTotalCount();
+    Integer getMonthCount();
+    Integer getWeekCount();
+    Integer getTodayCount();
+    Date getLastAchieved();
+}

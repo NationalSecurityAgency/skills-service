@@ -26,6 +26,9 @@ class MySkillsSummary {
 
     Integer totalSkills = 0
     Integer numAchievedSkills = 0
+    Integer numAchievedSkillsLastMonth = 0
+    Integer numAchievedSkillsLastWeek = 0
+    Date mostRecentAchievedSkill
 
     Integer totalBadges = 0
     Integer numAchievedBadges = 0

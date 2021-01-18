@@ -127,7 +127,7 @@ class UserSkillsController {
         return skillsLoader.loadOverallSummary(projectId, userId, getProvidedVersionOrReturnDefault(version));
     }
 
-    @RequestMapping(value = "/projects/summaries", method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value = "/projects/mySkillsSummary", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     @CompileStatic
     @Profile
@@ -138,7 +138,7 @@ class UserSkillsController {
         String userId = userInfoService.getUserName(userIdParam, true, idType);
 
         log.debug("userId is {} and userIdParam is {}", userId, userIdParam);
-        return skillsLoader.loadOverallSummaries(userId, getProvidedVersionOrReturnDefault(version));
+        return skillsLoader.loadMySkillsSummary(userId, getProvidedVersionOrReturnDefault(version));
     }
 
     private boolean isRequestFromDashboard(HttpServletRequest request) throws UnknownHostException{

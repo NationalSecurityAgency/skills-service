@@ -128,7 +128,7 @@ class SkillsLoader {
 
     @Profile
     @Transactional(readOnly = true)
-    MySkillsSummary loadOverallSummaries(String userId, Integer version = -1) {
+    MySkillsSummary loadMySkillsSummary(String userId, Integer version = -1) {
         MySkillsSummary mySkillsSummary = new MySkillsSummary()
 //        List<String> projectIdsWithPointsFromUser = userPerformedSkillRepo.findDistinctProjectIdsWithUserPoints(userId)
         List<ProjDef> allProjectDefs =  projDefRepo.findAll()
@@ -149,8 +149,11 @@ class SkillsLoader {
         mySkillsSummary.numAchievedGlobalBadges = achievedBadgeCounts.globalCount ?: 0
 
         mySkillsSummary.totalSkills = skillDefRepo.countTotalSkills()
-        mySkillsSummary.numAchievedSkills = achievedLevelRepository.countAchievedSkillsForUser(userId)
-
+        AchievedSkillsCount achievedSkillsCount = achievedLevelRepository.countAchievedSkillsForUserByDayWeekMonth(userId)
+        mySkillsSummary.numAchievedSkills = achievedSkillsCount.totalCount
+        mySkillsSummary.numAchievedSkillsLastMonth = achievedSkillsCount.monthCount
+        mySkillsSummary.numAchievedSkillsLastWeek = achievedSkillsCount.weekCount
+        mySkillsSummary.mostRecentAchievedSkill = achievedSkillsCount.lastAchieved
         return mySkillsSummary
     }
 

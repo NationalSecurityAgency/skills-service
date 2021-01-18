@@ -23,36 +23,58 @@ limitations under the License.
         </b-col>
         <b-col cols="8" class="mb-4 pt-4 pl-2 small">
           <div>
-            <span>Achieved skill</span> <b-badge variant="success" style="font-size: 1rem;">2 days</b-badge> ago
+            <span>Last Achieved skill</span> <b-badge variant="success" style="font-size: 1rem;">{{ mostRecentAchievedSkill | timeFromNow }}</b-badge>
           </div>
           <div class="my-2">
-            <b-badge variant="info" style="font-size: 1rem;">0 skills</b-badge>  in the last week
+            <b-badge variant="info" style="font-size: 1rem;">{{ numAchievedSkillsLastWeek }} skills</b-badge> in the last week
           </div>
           <div class="my-2">
-            <b-badge variant="info" style="font-size: 1rem;">12 skills</b-badge>  in the last month
+            <b-badge variant="info" style="font-size: 1rem;">{{ numAchievedSkillsLastMonth }} skills</b-badge> in the last month
           </div>
-                    <!--        <div><b-badge variant="info">Gems: 0</b-badge></div> -->
-  <!--        <span class="fa-stack">-->
-  <!--          <i class="fas fa-circle fa-stack-2x text-header"></i>-->
-  <!--          <i class="fas fa-trophy fa-stack-1x text-info"></i>-->
-  <!--        </span>-->
         </b-col>
       </b-row>
     </div>
     <b-row class="justify-content-between no-gutters border-top text-muted small mt-4">
       <b-col class="p-2">
-        It's been a while, perhaps earn another skill?
+        {{ getFooterText() }}
       </b-col>
     </b-row>
   </b-card>
 </template>
 
 <script>
+  import dayjs from '../../DayJsCustomizer';
+
   export default {
     name: 'LastEarnedCard',
+    props: {
+      numAchievedSkillsLastMonth: {
+        type: Number,
+        required: true,
+      },
+      numAchievedSkillsLastWeek: {
+        type: Number,
+        required: true,
+      },
+      mostRecentAchievedSkill: {
+        type: String,
+        required: true,
+      },
+    },
     data() {
       return {
       };
+    },
+    methods: {
+      isWithinOneWeek(timestamp) {
+        return dayjs(timestamp).isAfter(dayjs().subtract(7, 'day'));
+      },
+      getFooterText() {
+        if (this.isWithinOneWeek(this.mostRecentAchievedSkill)) {
+          return 'Keep up the good work!!';
+        }
+        return 'It\'s been a while, perhaps earn another skill?';
+      },
     },
   };
 </script>
