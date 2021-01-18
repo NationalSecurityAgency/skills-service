@@ -45,7 +45,11 @@ limitations under the License.
           <date-cell :value="data.value" />
         </template>
         <template v-slot:cell(control)="data">
-          <b-button @click="deleteSkill(data.item)" variant="outline-info" size="sm" :aria-label="`remove skill ${data.item.skillId} from user`"><i class="fas fa-trash" aria-hidden="true"/></b-button>
+          <b-button @click="deleteSkill(data.item)" variant="outline-info" size="sm"
+                    data-cy="deleteEventBtn"
+                    :aria-label="`remove skill ${data.item.skillId} from user`">
+            <i class="fas fa-trash" aria-hidden="true"/>
+          </b-button>
         </template>
       </skills-b-table>
 
@@ -79,7 +83,6 @@ limitations under the License.
         displayName: 'Skills Performed Table',
         isLoading: true,
         data: [],
-        columns: ['skillId', 'performedOn', 'delete'],
         filters: {
           skillId: '',
         },
@@ -100,7 +103,7 @@ limitations under the License.
               },
               {
                 key: 'performedOn',
-                label: 'Performed ON',
+                label: 'Performed On',
                 sortable: true,
               },
               {
@@ -117,26 +120,6 @@ limitations under the License.
               possiblePageSizes: [5, 10, 15, 20],
             },
           },
-        },
-        options: {
-          headings: {
-            skillId: 'Skill ID',
-            performedOn: 'Performed On',
-            delete: '',
-          },
-          sortable: ['skillId', 'performedOn'],
-          orderBy: {
-            column: 'performedOn',
-            ascending: false,
-          },
-          dateColumns: ['performedOn'],
-          dateFormat: 'YYYY-MM-DD HH:mm',
-          sortIcon: {
-            base: 'fa fa-sort', up: 'fa fa-sort-up', down: 'fa fa-sort-down', is: 'fa fa-sort',
-          },
-          filterable: true,
-          highlightMatches: true,
-          skin: 'table is-striped is-fullwidth',
         },
         projectId: null,
         userId: null,
@@ -228,10 +211,8 @@ limitations under the License.
         UsersService.deleteSkillEvent(this.projectId, skill, this.userId)
           .then((data) => {
             if (data.success) {
-              // server table must not manually remove items but rather refresh the table
-              this.$refs.table.refresh();
+              this.loadData();
               this.loadUserDetailsState({ projectId: this.projectId, userId: this.userId });
-              this.successToast('Removed Skill', `Skill '${skill.skillId}' was removed.`);
             } else {
               this.errorToast('Unable to Remove Skill', `Skill '${skill.skillId}' was not removed.  ${data.explanation}`);
             }
