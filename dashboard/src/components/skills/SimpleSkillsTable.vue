@@ -15,36 +15,57 @@ limitations under the License.
 */
 <template>
   <div id="simple-skills-table" v-if="this.skills && this.skills.length">
-    <v-client-table :data="skills" :columns="columns" :options="options">
-      <div slot="edit" slot-scope="props">
-        <div class="field text-right">
-          <span class="field">
-              <button v-on:click="onDeleteEvent(props.row)" class="btn btn-sm btn-outline-primary" data-cy="deleteSkill"
-                      :aria-label="`remove dependency on ${props.row.skillId}`">
-                      <i class="text-warning fas fa-trash" aria-hidden="true"/>
-              </button>
-                <router-link v-if="props.row.subjectId" :id="props.row.skillId" :to="{ name:'SkillOverview',
-                params: { projectId: props.row.projectId, subjectId: props.row.subjectId, skillId: props.row.skillId }}"
-                             class="btn btn-sm btn-outline-hc ml-2">
-                  Manage <i class="fas fa-arrow-circle-right" aria-hidden="true"/>
-                </router-link>
-          </span>
-        </div>
-      </div>
+    <skills-b-table :options="table.options" :items="skills" data-cy="simpleSkillsTable">
+      <template #cell(controls)="data">
+        <button v-on:click="onDeleteEvent(data.item)" class="btn btn-sm btn-outline-primary" data-cy="deleteSkill"
+                :aria-label="`remove dependency on ${data.item.skillId}`">
+          <i class="text-warning fas fa-trash" aria-hidden="true"/>
+        </button>
+        <router-link v-if="data.item.subjectId" :id="data.item.skillId" :to="{ name:'SkillOverview',
+                params: { projectId: data.item.projectId, subjectId: data.item.subjectId, skillId: data.item.skillId }}"
+                     class="btn btn-sm btn-outline-hc ml-2">
+          Manage <i class="fas fa-arrow-circle-right" aria-hidden="true"/>
+        </router-link>
+      </template>
 
-      <div slot="name" slot-scope="props">
-        <!-- allow to override how name field is rendered-->
-        <slot name="name-cell" v-bind:props="props.row">
-          {{ props.row.name }}
-        </slot>
-      </div>
-    </v-client-table>
+      <template #cell(totalPoints)="data">
+        {{ data.value | number }}
+      </template>
+    </skills-b-table>
+
+<!--    <v-client-table :data="skills" :columns="columns" :options="options" class="mt-5">-->
+<!--      <div slot="edit" slot-scope="props">-->
+<!--        <div class="field text-right">-->
+<!--          <span class="field">-->
+<!--              <button v-on:click="onDeleteEvent(props.row)" class="btn btn-sm btn-outline-primary" data-cy="deleteSkill"-->
+<!--                      :aria-label="`remove dependency on ${props.row.skillId}`">-->
+<!--                      <i class="text-warning fas fa-trash" aria-hidden="true"/>-->
+<!--              </button>-->
+<!--                <router-link v-if="props.row.subjectId" :id="props.row.skillId" :to="{ name:'SkillOverview',-->
+<!--                params: { projectId: props.row.projectId, subjectId: props.row.subjectId, skillId: props.row.skillId }}"-->
+<!--                             class="btn btn-sm btn-outline-hc ml-2">-->
+<!--                  Manage <i class="fas fa-arrow-circle-right" aria-hidden="true"/>-->
+<!--                </router-link>-->
+<!--          </span>-->
+<!--        </div>-->
+<!--      </div>-->
+
+<!--      <div slot="name" slot-scope="props">-->
+<!--        &lt;!&ndash; allow to override how name field is rendered&ndash;&gt;-->
+<!--        <slot name="name-cell" v-bind:props="props.row">-->
+<!--          {{ props.row.name }}-->
+<!--        </slot>-->
+<!--      </div>-->
+<!--    </v-client-table>-->
   </div>
 </template>
 
 <script>
+  import SkillsBTable from '../utils/table/SkillsBTable';
+
   export default {
     name: 'SimpleSkillsTable',
+    components: { SkillsBTable },
     props: {
       skills: {
         type: Array,
@@ -79,8 +100,55 @@ limitations under the License.
         };
         sortable = ['name', 'skillId', 'totalPoints'];
       }
+
+      const fields = [
+        {
+          key: 'name',
+          label: 'Skill Name',
+          sortable: true,
+        },
+        {
+          key: 'skillId',
+          label: 'Skill ID',
+          sortable: true,
+        },
+        {
+          key: 'controls',
+          label: 'Delete',
+          sortable: false,
+        },
+      ];
+
+      if (this.showProject) {
+        fields.splice(0, 0, {
+          key: 'projectId',
+          label: 'Project Id',
+          sortable: true,
+        });
+      } else {
+        fields.splice(2, 0, {
+          key: 'totalPoints',
+          label: 'Total Points',
+          sortable: true,
+        });
+      }
       return {
         columns,
+        table: {
+          options: {
+            busy: false,
+            bordered: false,
+            outlined: true,
+            stacked: 'md',
+            fields,
+            pagination: {
+              currentPage: 1,
+              totalRows: 1,
+              pageSize: 5,
+              possiblePageSizes: [5, 10, 15, 20],
+            },
+          },
+        },
         options: {
           headings,
           perPage: 15,
@@ -112,28 +180,5 @@ limitations under the License.
 </script>
 
 <style>
-  #simple-skills-table .VueTables__limit-field {
-    display: none;
-  }
-
-  #simple-skills-table .control-column {
-    width: 10rem;
-  }
-
-  /* on the mobile platform some of the columns will be removed
-     so let's allow the table to size on its own*/
-  @media (max-width: 576px) {
-    #simple-skills-table .control-column {
-      width: unset;
-    }
-  }
-
-  #simple-skills-table .notactive {
-    cursor: not-allowed;
-    pointer-events: none;
-    color: #c0c0c0;
-    background-color: #ffffff;
-    border-color: gray;
-  }
 
 </style>

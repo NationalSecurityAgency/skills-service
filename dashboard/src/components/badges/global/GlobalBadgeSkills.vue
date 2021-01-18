@@ -17,9 +17,9 @@ limitations under the License.
   <div>
     <sub-page-header title="Skills"/>
 
-    <simple-card>
+    <b-card body-class="p-0">
       <loading-container v-bind:is-loading="loading.availableSkills || loading.badgeSkills || loading.skillOp">
-        <skills-selector2 :options="availableSkills" class="mb-4"
+        <skills-selector2 :options="availableSkills" class="mb-4 m-3"
                           v-on:added="skillAdded" v-on:search-change="searchChanged"
                           :onlySingleSelectedValue="true" :internal-search="false" :show-project="true"
                           :after-list-slot-text="afterListSlotText"></skills-selector2>
@@ -32,7 +32,7 @@ limitations under the License.
         <no-content2 v-else title="No Skills Added Yet..." icon="fas fa-award"
                      message="Please use drop-down above to start adding skills to this badge!"></no-content2>
       </loading-container>
-    </simple-card>
+    </b-card>
   </div>
 </template>
 
@@ -45,7 +45,6 @@ limitations under the License.
   import SimpleSkillsTable from '../../skills/SimpleSkillsTable';
   import NoContent2 from '../../utils/NoContent2';
   import SubPageHeader from '../../utils/pages/SubPageHeader';
-  import SimpleCard from '../../utils/cards/SimpleCard';
   import MsgBoxMixin from '../../utils/modal/MsgBoxMixin';
 
   const { mapActions } = createNamespacedHelpers('badges');
@@ -53,7 +52,6 @@ limitations under the License.
   export default {
     name: 'GlobalBadgeSkills',
     components: {
-      SimpleCard,
       SubPageHeader,
       NoContent2,
       SimpleSkillsTable,
