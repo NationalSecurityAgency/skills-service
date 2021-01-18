@@ -177,22 +177,8 @@ limitations under the License.
           this.table.options.busy = false;
         });
       },
-      onLoading() {
-        this.isLoading = true;
-      },
-      onLoaded(event) {
-        this.isLoading = false;
-        this.$emit('loaded', event);
-      },
       getUrl() {
         return `/admin/projects/${this.projectId}/performedSkills/${this.userId}`;
-      },
-      emit(name, event) {
-        this.$emit(name, event, this);
-      },
-      clear() {
-        this.$refs.table.data = [];
-        this.$refs.table.count = 0;
       },
       getDate(row) {
         return dayjs(row.performedOn)
@@ -226,8 +212,5 @@ limitations under the License.
 </script>
 
 <style scoped>
-  .vue-table-2 table {
-    width: 100%;
-    position: relative;
-  }
+
 </style>
