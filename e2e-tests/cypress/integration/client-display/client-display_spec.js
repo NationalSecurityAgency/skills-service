@@ -312,5 +312,13 @@ describe('Client Display Tests', () => {
         cy.get('[data-cy=skillProgress]:nth-child(2) [data-cy=achievementDate]').contains(`${orig.fromNow()}`);
     });
 
+    it('skill with dependency renders dependency graph', () => {
+        cy.cdVisit('/');
+        cy.cdClickSubj(0);
+        cy.get('[data-cy=toggleSkillDetails]').click()
+        cy.get('.locked-background').click();
+        cy.matchImageSnapshot('Skill-Dependency', snapshotOptions);
+    });
+
 });
 

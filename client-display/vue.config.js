@@ -16,7 +16,7 @@ const proxyConf = {
 
 if (process.env.NODE_ENV === 'production') {
   console.log('production mode detected');
-  exportObject.publicPath = '.';
+  exportObject.publicPath = '/static/clientPortal/';
 }
 
 exportObject.devServer = {
