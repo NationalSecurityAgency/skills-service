@@ -236,7 +236,6 @@ describe('Skills Table Tests', () => {
       });
 
     it('change display order', () => {
-
         const numSkills = 4;
         for (let skillsCounter = 1; skillsCounter <= numSkills; skillsCounter += 1) {
             const skillName = `Skill # ${skillsCounter}`;
@@ -273,6 +272,196 @@ describe('Skills Table Tests', () => {
         cy.get('[data-cy="orderMoveDown_skill3"]').should('be.enabled');
         cy.get('[data-cy="orderMoveDown_skill4"]').should('be.disabled');
 
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'Skill # 1' }, { colIndex: 1,  value: 1 }],
+            [{ colIndex: 0,  value: 'Skill # 2' }, { colIndex: 1,  value: 2 }],
+            [{ colIndex: 0,  value: 'Skill # 3' }, { colIndex: 1,  value: 3 }],
+            [{ colIndex: 0,  value: 'Skill # 4' }, { colIndex: 1,  value: 4 }],
+        ], 10);
+
+        cy.get('[data-cy="orderMoveUp_skill3"]').click();
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'Skill # 1' }, { colIndex: 1,  value: 1 }],
+            [{ colIndex: 0,  value: 'Skill # 3' }, { colIndex: 1,  value: 2 }],
+            [{ colIndex: 0,  value: 'Skill # 2' }, { colIndex: 1,  value: 3 }],
+            [{ colIndex: 0,  value: 'Skill # 4' }, { colIndex: 1,  value: 4 }],
+        ], 10);
+
+        cy.get('[data-cy="orderMoveDown_skill1"]').click();
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'Skill # 3' }, { colIndex: 1,  value: 1 }],
+            [{ colIndex: 0,  value: 'Skill # 1' }, { colIndex: 1,  value: 2 }],
+            [{ colIndex: 0,  value: 'Skill # 2' }, { colIndex: 1,  value: 3 }],
+            [{ colIndex: 0,  value: 'Skill # 4' }, { colIndex: 1,  value: 4 }],
+        ], 10);
+        cy.get('[data-cy="orderMoveUp_skill1"]').should('be.enabled');
+        cy.get('[data-cy="orderMoveUp_skill2"]').should('be.enabled');
+        cy.get('[data-cy="orderMoveUp_skill3"]').should('be.disabled');
+        cy.get('[data-cy="orderMoveUp_skill4"]').should('be.enabled');
+        cy.get('[data-cy="orderMoveDown_skill1"]').should('be.enabled');
+        cy.get('[data-cy="orderMoveDown_skill2"]').should('be.enabled');
+        cy.get('[data-cy="orderMoveDown_skill3"]').should('be.enabled');
+        cy.get('[data-cy="orderMoveDown_skill4"]').should('be.disabled');
     })
 
+    it('change display order with the last item on the current page', () => {
+        const numSkills = 12;
+        for (let skillsCounter = 1; skillsCounter <= numSkills; skillsCounter += 1) {
+            const skillName = `Skill # ${skillsCounter}`;
+            cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill${skillsCounter}`, {
+                projectId: 'proj1',
+                subjectId: 'subj1',
+                skillId: `skill${skillsCounter}`,
+                name: skillName,
+                pointIncrement: '150',
+                numPerformToCompletion: skillsCounter,
+                version: skillsCounter,
+            });
+        };
+
+        cy.visit('/projects/proj1/subjects/subj1');
+
+        cy.get(`${tableSelector} th`).contains('Display Order').click();
+        cy.get('[data-cy="orderMoveDown_skill10"]').click();
+
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'Skill # 1' }, { colIndex: 1,  value: 1 }],
+            [{ colIndex: 0,  value: 'Skill # 2' }, { colIndex: 1,  value: 2 }],
+            [{ colIndex: 0,  value: 'Skill # 3' }, { colIndex: 1,  value: 3 }],
+            [{ colIndex: 0,  value: 'Skill # 4' }, { colIndex: 1,  value: 4 }],
+            [{ colIndex: 0,  value: 'Skill # 5' }, { colIndex: 1,  value: 5 }],
+            [{ colIndex: 0,  value: 'Skill # 6' }, { colIndex: 1,  value: 6 }],
+            [{ colIndex: 0,  value: 'Skill # 7' }, { colIndex: 1,  value: 7 }],
+            [{ colIndex: 0,  value: 'Skill # 8' }, { colIndex: 1,  value: 8 }],
+            [{ colIndex: 0,  value: 'Skill # 9' }, { colIndex: 1,  value: 9 }],
+            [{ colIndex: 0,  value: 'Skill # 11' }, { colIndex: 1,  value: 10 }],
+            [{ colIndex: 0,  value: 'Skill # 10' }, { colIndex: 1,  value: 11 }],
+            [{ colIndex: 0,  value: 'Skill # 12' }, { colIndex: 1,  value: 12 }],
+        ], 10);
+    })
+
+    it('filter by skill name and skill id', () => {
+        const numSkills = 12;
+        for (let skillsCounter = 1; skillsCounter <= numSkills; skillsCounter += 1) {
+            const skillName = `Skill # ${skillsCounter}`;
+            cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill${skillsCounter}`, {
+                projectId: 'proj1',
+                subjectId: 'subj1',
+                skillId: `skill${skillsCounter}`,
+                name: skillName,
+                pointIncrement: '150',
+                numPerformToCompletion: skillsCounter,
+                version: skillsCounter,
+            });
+        };
+
+        cy.visit('/projects/proj1/subjects/subj1');
+
+        cy.get(`${tableSelector} th`).contains('Display Order').click();
+
+        // look for the name
+        cy.get('[data-cy="skillsTable-skillFilter"]').type('# 1')
+        cy.get('[data-cy="users-filterBtn"]').click();
+
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'Skill # 1' }, { colIndex: 1,  value: 1 }],
+            [{ colIndex: 0,  value: 'Skill # 10' }, { colIndex: 1,  value: 10 }],
+            [{ colIndex: 0,  value: 'Skill # 11' }, { colIndex: 1,  value: 11 }],
+            [{ colIndex: 0,  value: 'Skill # 12' }, { colIndex: 1,  value: 12 }],
+        ], 10);
+
+        cy.get('[data-cy="skillsTable-skillFilter"]').type('2')
+        cy.get('[data-cy="users-filterBtn"]').click();
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'Skill # 12' }, { colIndex: 1,  value: 12 }],
+        ], 10);
+
+        cy.get('[data-cy="users-resetBtn"]').click();
+        cy.get('[data-cy=skillsBTableTotalRows]').contains(12);
+
+        // should be case insensitive
+        cy.get('[data-cy="skillsTable-skillFilter"]').type('sKiLl # 5')
+        cy.get('[data-cy="users-filterBtn"]').click();
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'Skill # 5' }, { colIndex: 1,  value: 5 }],
+        ], 10);
+
+        // filter all records
+        cy.get('[data-cy="skillsTable-skillFilter"]').type('a')
+        cy.get('[data-cy="users-filterBtn"]').click();
+        cy.contains('There are no records to show')
+
+        // reset list by clearing filter
+        cy.get('[data-cy="skillsTable-skillFilter"]').clear()
+        cy.get('[data-cy="users-filterBtn"]').click();
+        cy.get('[data-cy=skillsBTableTotalRows]').contains(12);
+
+        // filter by skill id
+        cy.get('[data-cy="skillsTable-skillFilter"]').type('SkIlL6')
+        cy.get('[data-cy="users-filterBtn"]').click();
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'Skill # 6' }, { colIndex: 1,  value: 6 }],
+        ], 10);
+    });
+
+    it('expand details', () => {
+        const numSkills = 3;
+        for (let skillsCounter = 1; skillsCounter <= numSkills; skillsCounter += 1) {
+            const skillName = `Skill # ${skillsCounter}`;
+            cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill${skillsCounter}`, {
+                projectId: 'proj1',
+                subjectId: 'subj1',
+                skillId: `skill${skillsCounter}`,
+                name: skillName,
+                pointIncrement: '150',
+                numPerformToCompletion: skillsCounter,
+                version: skillsCounter,
+            });
+        };
+
+        cy.visit('/projects/proj1/subjects/subj1');
+        cy.get('[data-cy="expandDetailsBtn_skill2"]').click();
+        cy.get('[data-cy="childRowDisplay_skill2"]').contains('Minimum Time Window between occurrences');
+        cy.get('[data-cy="childRowDisplay_skill2"]').contains('300 Points');
+
+        cy.get('[data-cy="expandDetailsBtn_skill1"]').click();
+        cy.get('[data-cy="childRowDisplay_skill1"]').contains('150 Points');
+        cy.get('[data-cy="childRowDisplay_skill1"]').contains('Time Window N/A');
+
+        cy.get('[data-cy="expandDetailsBtn_skill2"]').click();
+        cy.get('[data-cy="childRowDisplay_skill2"]').should('not.exist');
+
+        cy.get('[data-cy="childRowDisplay_skill1"]').contains('150 Points');
+        cy.get('[data-cy="expandDetailsBtn_skill1"]').click();
+        cy.get('[data-cy="childRowDisplay_skill1"]').should('not.exist');
+    });
+
+    it('navigate to skill details page', () => {
+        const numSkills = 3;
+        for (let skillsCounter = 1; skillsCounter <= numSkills; skillsCounter += 1) {
+            const skillName = `Skill # ${skillsCounter}`;
+            cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill${skillsCounter}`, {
+                projectId: 'proj1',
+                subjectId: 'subj1',
+                skillId: `skill${skillsCounter}`,
+                name: skillName,
+                pointIncrement: '150',
+                numPerformToCompletion: skillsCounter,
+                version: skillsCounter,
+            });
+        };
+        cy.visit('/projects/proj1/subjects/subj1');
+        cy.get('[data-cy=manageSkillBtn_skill2]').click();
+        cy.contains('ID: skill2');
+        cy.contains('Overview');
+        cy.contains('300 Points');
+
+        cy.visit('/projects/proj1/subjects/subj1');
+        cy.get('[data-cy=manageSkillLink_skill3]').click();
+        cy.contains('ID: skill3');
+        cy.contains('Overview');
+        cy.contains('450 Points');
+
+    });
 });
+

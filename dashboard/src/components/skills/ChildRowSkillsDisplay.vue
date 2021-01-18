@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <loading-container class="child-row" v-bind:is-loading="isLoading" data-cy="childRowDisplay">
+  <loading-container class="child-row" v-bind:is-loading="isLoading" :data-cy="`childRowDisplay_${skillInfo.skillId}`">
 
     <div class="row">
       <div class="col-12 col-md-12 col-xl mb-md-3 mb-xl-0">

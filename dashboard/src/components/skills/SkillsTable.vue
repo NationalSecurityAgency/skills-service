@@ -20,7 +20,7 @@ limitations under the License.
                      :disabled="addSkillDisabled" :disabled-msg="addSkillsDisabledMsg" aria-label="new skill"/>
 
     <loading-container v-bind:is-loading="isLoading">
-      <b-card v-if="this.skills && this.skills.length" body-class="p-0">
+      <b-card v-if="this.skillsOriginal && this.skillsOriginal.length" body-class="p-0">
       <div class="row px-3 pt-3">
         <div class="col-12">
           <b-form-group label="Skill Filter" label-class="text-muted">
@@ -60,14 +60,14 @@ limitations under the License.
           <div class="row">
             <div class="col-auto pr-0">
               <b-button size="sm" @click="data.toggleDetails" class="mr-2 py-0 px-1 btn btn-info"
-                        data-cy="expandDetailsBtn"
-                        :aria-label="`Expand details`">
+                        :aria-label="`Expand details for ${data.item.name}`"
+                        :data-cy="`expandDetailsBtn_${data.item.skillId}`">
                 <i v-if="data.detailsShowing" class="fa fa-minus-square" />
                 <i v-else class="fa fa-plus-square" />
               </b-button>
             </div>
             <div class="col pl-0">
-              <router-link data-cy="manageSkillBtn" tag="a" :to="{ name:'SkillOverview',
+              <router-link :data-cy="`manageSkillLink_${data.item.skillId}`" tag="a" :to="{ name:'SkillOverview',
                                   params: { projectId: data.item.projectId, subjectId: data.item.subjectId, skillId: data.item.skillId }}"
                            :aria-label="`Manage skill ${data.item.name}  via link`">
                 <div class="h5">{{ data.item.name }}</div>
@@ -341,6 +341,8 @@ limitations under the License.
             }
             return false;
           });
+        } else {
+          this.reset();
         }
       },
       reset() {
@@ -362,9 +364,17 @@ limitations under the License.
         this.currentlyFocusedSkillId = skillToEdit.skillId;
         this.editSkillInfo = { skill: skillToEdit, show: true, isEdit: true };
       },
-
+      doneShowingLoading() {
+        this.isLoading = false;
+        this.table.options.busy = false;
+      },
       skillCreatedOrUpdated(skill) {
-        this.isLoading = true;
+        if (this.skillsOriginal.length === 0) {
+          this.isLoading = true;
+        } else {
+          this.table.options.busy = true;
+        }
+
         const item1Index = this.skills.findIndex((item) => item.skillId === skill.originalSkillId);
         const { isEdit } = skill;
 
@@ -378,6 +388,7 @@ limitations under the License.
             } else {
               createdSkill.refreshCounter = 0;
               this.skills.push(createdSkill);
+              this.skillsOriginal.push(createdSkill);
               // report CreateSkill on when new skill is created
               SkillsReporter.reportSkill('CreateSkill');
             }
@@ -397,7 +408,7 @@ limitations under the License.
             }
           })
           .finally(() => {
-            this.isLoading = false;
+            this.doneShowingLoading();
           });
       },
 
@@ -432,11 +443,18 @@ limitations under the License.
           });
       },
       doDeleteSkill(skill) {
-        this.isLoading = true;
+        if (this.skillsOriginal.length === 1) {
+          this.isLoading = true;
+        } else {
+          this.table.options.busy = true;
+        }
         SkillsService.deleteSkill(skill)
           .then(() => {
             const index = this.skills.findIndex((item) => item.skillId === skill.skillId);
             this.skills.splice(index, 1);
+
+            const skillsOriginalIndex = this.skillsOriginal.findIndex((item) => item.skillId === skill.skillId);
+            this.skillsOriginal.splice(skillsOriginalIndex, 1);
 
             this.rebuildDisplayOrder();
             this.disableFirstAndLastButtons();
@@ -445,7 +463,7 @@ limitations under the License.
             this.successToast('Removed Skill', `Skill '${skill.name}' was removed.`);
           })
           .finally(() => {
-            this.isLoading = false;
+            this.doneShowingLoading();
           });
       },
       rebuildDisplayOrder() {
