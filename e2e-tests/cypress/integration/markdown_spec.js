@@ -88,7 +88,7 @@ describe('Markdown Tests', () => {
         validateMarkdown(':star: :star: :star: :star:', 'Markdown-emoji', '⭐ ⭐ ⭐ ⭐')
     });
 
-    it('on skills pages', () => {
+    it.only('on skills pages', () => {
 
         const markdown = "# Title1\n## Title2\n### Title 3\n#### Title 4\n##### Title 5\nTitle 6\n\n" +
             "---\n" +
@@ -164,7 +164,7 @@ describe('Markdown Tests', () => {
         cy.visit('/projects/proj1/subjects/subj1');
         cy.wait('@inceptionLevel');
         cy.contains('Level');
-        const selectorSkillsRowToggle = 'table .VueTables__child-row-toggler';
+        const selectorSkillsRowToggle = '[data-cy="expandDetailsBtn_skill1"]';
         cy.get(selectorSkillsRowToggle).click();
         cy.contains('Description');
         cy.contains('Emojis')
