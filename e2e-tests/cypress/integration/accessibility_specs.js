@@ -189,7 +189,7 @@ describe('Accessibility Tests', () => {
     cy.route('GET', '/admin/projects/MyNewtestProject/subjects/subj1/skills').as('getSkills');
     cy.route('GET', '/admin/projects/MyNewtestProject/subjects/subj1/levels').as('getLevels');
     cy.route('GET', '/admin/projects/MyNewtestProject/subjects/subj1/users?**').as('getUsers');
-    cy.route('GET', '/admin/projects/MyNewtestProject/performedSkills/u1?query=&limit=10&ascending=0&page=1&byColumn=0&orderBy=performedOn').as('getPerformedSkills');
+    cy.route('GET', '/admin/projects/MyNewtestProject/performedSkills/u1?**').as('getPerformedSkills');
 
     cy.visit('/');
     cy.injectAxe()
