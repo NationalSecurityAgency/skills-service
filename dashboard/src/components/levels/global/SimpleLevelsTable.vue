@@ -15,33 +15,61 @@ limitations under the License.
 */
 <template>
   <div id="simple-levels-table" v-if="this.levels && this.levels">
-    <v-client-table :data="levels" :columns="columns" :options="options">
-      <div slot="edit" slot-scope="props">
-        <div class="field text-right">
-          <span class="field">
-              <button v-on:click="onDeleteEvent(props.row)" class="btn btn-sm btn-outline-hc" aria-label="delete level">
-                      <i class="fas fa-trash" aria-hidden="true"/>
-              </button>
-          </span>
-        </div>
-      </div>
-      <div slot="name" slot-scope="props">
-        <!-- allow to override how name field is rendered-->
-        <slot name="name-cell" v-bind:props="props.row">
-          {{ props.row.name }}
-        </slot>
-      </div>
-    </v-client-table>
+
+    <skills-b-table :options="table.options" :items="levels" data-cy="simpleLevelsTable">
+      <template #cell(edit)="data">
+        <button v-on:click="onDeleteEvent(data.item)" class="btn btn-sm btn-outline-primary"
+                :aria-label="`delete level ${data.item.level} from ${data.item.projectId}`"
+                :data-cy="`deleteLevelBtn_${data.item.projectId}-${data.item.level}`">
+          <i class="fas fa-trash text-warning" aria-hidden="true"/>
+        </button>
+      </template>
+
+    </skills-b-table>
   </div>
 </template>
 
 <script>
+  import SkillsBTable from '../../utils/table/SkillsBTable';
+
   export default {
     name: 'SimpleLevelsTable',
+    components: { SkillsBTable },
     props: ['levels'],
     data() {
       return {
         columns: ['projectName', 'level', 'edit'],
+        table: {
+          options: {
+            busy: false,
+            bordered: false,
+            outlined: true,
+            stacked: 'md',
+            fields: [
+              {
+                key: 'projectName',
+                label: 'Project Name',
+                sortable: true,
+              },
+              {
+                key: 'level',
+                label: 'Level',
+                sortable: true,
+              },
+              {
+                key: 'edit',
+                label: 'Delete',
+                sortable: false,
+              },
+            ],
+            pagination: {
+              currentPage: 1,
+              totalRows: 1,
+              pageSize: 5,
+              possiblePageSizes: [5, 10, 15, 20],
+            },
+          },
+        },
         options: {
           headings: {
             projectName: 'Project Name',

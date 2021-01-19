@@ -29,7 +29,7 @@ limitations under the License.
                              :show-project="true"
         ></simple-skills-table>
 
-        <no-content2 v-else title="No Skills Added Yet..." icon="fas fa-award"
+        <no-content2 v-else title="No Skills Added Yet..." icon="fas fa-award" class="mb-5"
                      message="Please use drop-down above to start adding skills to this badge!"></no-content2>
       </loading-container>
     </b-card>

@@ -17,7 +17,8 @@ limitations under the License.
   <div id="simple-skills-table" v-if="this.skills && this.skills.length">
     <skills-b-table :options="table.options" :items="skills" data-cy="simpleSkillsTable">
       <template #cell(controls)="data">
-        <button v-on:click="onDeleteEvent(data.item)" class="btn btn-sm btn-outline-primary" data-cy="deleteSkill"
+        <button v-on:click="onDeleteEvent(data.item)" class="btn btn-sm btn-outline-primary"
+                :data-cy="`deleteSkill_${data.item.skillId}`"
                 :aria-label="`remove dependency on ${data.item.skillId}`">
           <i class="text-warning fas fa-trash" aria-hidden="true"/>
         </button>
@@ -122,7 +123,7 @@ limitations under the License.
       if (this.showProject) {
         fields.splice(0, 0, {
           key: 'projectId',
-          label: 'Project Id',
+          label: 'Project ID',
           sortable: true,
         });
       } else {
