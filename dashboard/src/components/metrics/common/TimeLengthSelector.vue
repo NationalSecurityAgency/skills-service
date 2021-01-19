@@ -43,7 +43,12 @@ limitations under the License.
         const selectedItem = this.options[index];
         const start = dayjs()
           .subtract(selectedItem.length, selectedItem.unit);
-        this.$emit('time-selected', start);
+        const event = {
+          durationLength: selectedItem.length,
+          durationUnit: selectedItem.unit,
+          startTime: start,
+        };
+        this.$emit('time-selected', event);
       },
     },
   };

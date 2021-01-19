@@ -87,6 +87,8 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
     SkillDef findByProjectIdAndSkillIdAndType(String id, String skillId, SkillDef.ContainerType type)
     @Nullable
     SkillDef findByProjectIdAndNameIgnoreCaseAndType(@Nullable String id, String name, SkillDef.ContainerType type)
+    @Nullable
+    SkillDef findByProjectIdAndSkillId(String projectId, String skillId)
 
     @Query(value = '''SELECT max(sdChild.displayOrder) from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
       where srd.parent=sdParent.id and srd.child=sdChild.id and 

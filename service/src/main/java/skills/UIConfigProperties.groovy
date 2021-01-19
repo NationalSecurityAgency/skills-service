@@ -28,6 +28,13 @@ class UIConfigProperties {
     Map<String,String> ui = [:]
     Map<String,String> client = [:]
 
+    String compactDailyEventsOlderThan
+
+    @PostConstruct
+    public void copyConfigToUi() {
+        ui.put("maxDailyUserEvents", compactDailyEventsOlderThan)
+    }
+
     @PostConstruct
     void init() {
         if(client['loggingEnabled']) {
