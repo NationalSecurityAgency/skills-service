@@ -17,19 +17,19 @@ limitations under the License.
   <div>
     <sub-page-header title="Skills"/>
 
-    <simple-card>
-      <loading-container v-bind:is-loading="loading.availableSkills || loading.badgeSkills || loading.skillOp">
-        <skills-selector2 :options="availableSkills" class="mb-4"
+    <b-card body-class="p-0">
+      <loading-container v-bind:is-loading="loading.availableSkills || loading.badgeSkills || loading.skillOp || loading.badgeInfo">
+        <skills-selector2 :options="availableSkills" class="mb-4 m-3"
                           v-on:added="skillAdded"
                           :onlySingleSelectedValue="true"></skills-selector2>
 
         <simple-skills-table v-if="badgeSkills && badgeSkills.length > 0"
                              :skills="badgeSkills" v-on:skill-removed="deleteSkill"></simple-skills-table>
 
-        <no-content2 v-else title="No Skills Selected Yet..." icon="fas fa-award"
+        <no-content2 v-else title="No Skills Selected Yet..." icon="fas fa-award" class="mb-5"
                      message="Please use drop-down above to start adding skills to this badge!"></no-content2>
       </loading-container>
-    </simple-card>
+    </b-card>
   </div>
 </template>
 
@@ -43,15 +43,14 @@ limitations under the License.
   import SimpleSkillsTable from '../skills/SimpleSkillsTable';
   import NoContent2 from '../utils/NoContent2';
   import SubPageHeader from '../utils/pages/SubPageHeader';
-  import SimpleCard from '../utils/cards/SimpleCard';
   import MsgBoxMixin from '../utils/modal/MsgBoxMixin';
+  import BadgesService from './BadgesService';
 
   const { mapActions } = createNamespacedHelpers('badges');
 
   export default {
     name: 'BadgeSkills',
     components: {
-      SimpleCard,
       SubPageHeader,
       NoContent2,
       SimpleSkillsTable,
@@ -65,18 +64,23 @@ limitations under the License.
           availableSkills: true,
           badgeSkills: true,
           skillOp: false,
+          badgeInfo: false,
         },
         badgeSkills: [],
         availableSkills: [],
         projectId: null,
         badgeId: null,
         badge: null,
+        self: null,
       };
     },
     mounted() {
       this.projectId = this.$route.params.projectId;
       this.badgeId = this.$route.params.badgeId;
       this.badge = this.$route.params.badge;
+      if (!this.badge) {
+        this.loadBadgeInfo();
+      }
       this.loadAssignedBadgeSkills();
     },
     methods: {
@@ -97,6 +101,13 @@ limitations under the License.
             const badgeSkillIds = this.badgeSkills.map((item) => item.skillId);
             this.availableSkills = loadedSkills.filter((item) => !badgeSkillIds.includes(item.skillId));
             this.loading.availableSkills = false;
+          });
+      },
+      loadBadgeInfo() {
+        BadgesService.getBadge(this.projectId, this.badgeId)
+          .then((badge) => {
+            this.badge = badge;
+            this.loading.badgeInfo = false;
           });
       },
       deleteSkill(skill) {

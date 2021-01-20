@@ -17,32 +17,33 @@ limitations under the License.
   <div>
     <sub-page-header title="Levels"/>
 
-    <simple-card>
+    <b-card body-class="p-0">
       <loading-container v-model="isLoading">
-        <div class="row mb-4">
-          <div class="col-12 col-sm-6">
-            <project-selector ref="projectSelectorRef" v-model="selectedProject" @added="projectAdded" @removed="projectRemoved"></project-selector>
-          </div>
-          <div class="col-12 col-sm-4">
-            <level-selector v-model="selectedLevel" :project-id="selectedProjectId" :disabled="!selectedProject" :placeholder="levelPlaceholder"></level-selector>
-          </div>
-          <div class="col-12 col-sm mt-2 mt-sm-0">
-            <span>
-              <button :disabled="!(selectedProject && selectedLevel)" type="button" class="btn btn-outline-primary"
-                      @click="addLevel" data-cy="addGlobalBadgeLevel" aria-label="add project level requirement to global badge">
-                <span class="d-none d-sm-inline"></span>Add <i class="fas fa-plus-circle" aria-hidden="true"/>
-              </button>
-            </span>
+        <div class="mb-4 m-3">
+          <div class="row p-0">
+            <div class="col-md">
+              <project-selector ref="projectSelectorRef" v-model="selectedProject" @added="projectAdded" @removed="projectRemoved"></project-selector>
+            </div>
+            <div class="col-md my-3 m-md-0">
+              <level-selector v-model="selectedLevel" :project-id="selectedProjectId" :disabled="!selectedProject" :placeholder="levelPlaceholder"></level-selector>
+            </div>
+            <div class="col-md-auto">
+              <span>
+                <button :disabled="!(selectedProject && selectedLevel)" type="button" class="btn btn-outline-primary"
+                        @click="addLevel" data-cy="addGlobalBadgeLevel" aria-label="add project level requirement to global badge">
+                  <span class="d-none d-sm-inline"></span>Add <i class="fas fa-plus-circle" aria-hidden="true"/>
+                </button>
+              </span>
+            </div>
           </div>
         </div>
-
         <simple-levels-table v-if="badgeLevels && badgeLevels.length > 0"
                              :levels="badgeLevels" @level-removed="deleteLevel"></simple-levels-table>
-        <no-content2 v-else title="No Levels Added Yet..." icon="fas fa-trophy"
+        <no-content2 v-else title="No Levels Added Yet..." icon="fas fa-trophy" class="mb-5"
                      message="Please select a project and level from drop-down menus above to start adding levels to this badge!"></no-content2>
 
       </loading-container>
-    </simple-card>
+    </b-card>
 
   </div>
 </template>
@@ -57,7 +58,6 @@ limitations under the License.
   import NoContent2 from '../../utils/NoContent2';
   import SubPageHeader from '../../utils/pages/SubPageHeader';
   import LoadingContainer from '../../utils/LoadingContainer';
-  import SimpleCard from '../../utils/cards/SimpleCard';
   import MsgBoxMixin from '../../utils/modal/MsgBoxMixin';
 
   const { mapActions } = createNamespacedHelpers('badges');
@@ -68,7 +68,6 @@ limitations under the License.
       ProjectSelector,
       LevelSelector,
       SimpleLevelsTable,
-      SimpleCard,
       LoadingContainer,
       SubPageHeader,
       NoContent2,

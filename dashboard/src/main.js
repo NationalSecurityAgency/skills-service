@@ -47,7 +47,6 @@ import {
   FormDatepickerPlugin,
 } from 'bootstrap-vue';
 
-import { ClientTable, ServerTable } from 'vue-tables-2';
 import { SkillsConfiguration, SkillsDirective, SkillsReporter } from '@skilltree/skills-client-vue';
 import {
   localize, ValidationProvider, ValidationObserver, setInteractionMode,
@@ -75,8 +74,6 @@ const getApex = () => import(
   'vue-apexcharts'
 );
 
-Vue.use(ClientTable, {}, false, 'bootstrap4', 'default');
-Vue.use(ServerTable, {}, false, 'bootstrap4', 'default');
 Vue.component('ValidationProvider', ValidationProvider);
 Vue.component('ValidationObserver', ValidationObserver);
 Vue.use(Vuex);

@@ -15,6 +15,8 @@
  */
 describe('Badges Tests', () => {
 
+    const tableSelector = '[data-cy="simpleSkillsTable"]';
+
     beforeEach(() => {
         cy.request('POST', '/app/projects/proj1', {
             projectId: 'proj1',
@@ -374,7 +376,7 @@ describe('Badges Tests', () => {
         cy.clickSave();
         cy.wait('@loadBadges');
 
-        cy.get('[data-cy=manageBadge]').click();
+        cy.get('[data-cy=manageBadge_TestBadgeBadge]').click();
         cy.get('#skills-selector').click();
         cy.get('#skills-selector input[type=text]').type('{enter}');
         cy.contains('.router-link-active', 'Badges').click();
@@ -414,7 +416,7 @@ describe('Badges Tests', () => {
         cy.clickSave();
         cy.wait('@loadBadges');
 
-        cy.get('[data-cy=manageBadge]').click();
+        cy.get('[data-cy=manageBadge_TestBadgeBadge]').click();
         cy.get('#skills-selector').click();
         cy.get('#skills-selector input[type=text]').type('{enter}');
         cy.contains('.router-link-active', 'Badges').click();
@@ -452,7 +454,7 @@ describe('Badges Tests', () => {
         cy.get('#badgeName').type('Test Badge');
         cy.clickSave();
         cy.wait('@loadBadges');
-        cy.get('[data-cy=manageBadge]').click();
+        cy.get('[data-cy=manageBadge_TestBadgeBadge]').click();
         cy.get('#skills-selector').click();
         cy.get('#skills-selector input[type=text]').type('{enter}');
         cy.contains('.router-link-active', 'Badges').click();
@@ -487,9 +489,13 @@ describe('Badges Tests', () => {
         cy.get('#badgeName').type('Test Badge');
         cy.clickSave();
         cy.wait('@loadBadges');
-        cy.get('[data-cy=manageBadge]').click();
+        cy.get('[data-cy=manageBadge_TestBadgeBadge]').click();
         cy.get('#skills-selector').click();
         cy.get('#skills-selector input[type=text]').type('{enter}');
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'Skill 1' }, { colIndex: 1,  value: 'skill1' }],
+        ], 5);
+
         cy.contains('.router-link-active', 'Badges').click();
         cy.contains('Test Badge').should('exist');
         cy.get('[data-cy=badgeStatus]').contains('Status: Disabled').should('exist');
@@ -499,9 +505,11 @@ describe('Badges Tests', () => {
         cy.wait('@loadBadges');
         cy.contains('Test Badge');
         cy.get('[data-cy=badgeStatus]').contains('Status: Live').should('exist');
-        cy.get('[data-cy=manageBadge]').click();
-        cy.get('[data-cy=deleteSkill]').click();
+        cy.get('[data-cy=manageBadge_TestBadgeBadge]').click();
+        cy.get('[data-cy=deleteSkill_skill1]').click();
         cy.contains('YES, Delete It!').click();
+        cy.contains('No Skills Selected Yet');
+
         cy.contains('.router-link-active', 'Badges').click();
         cy.contains('Test Badge').should('exist');
         cy.get('[data-cy=badgeStatus]').contains('Status: Live').should('exist');
@@ -612,4 +620,146 @@ describe('Badges Tests', () => {
         cy.get('div.badge-settings').eq(1).children().first().should('have.focus');
     });
 
+
+    it('remove skill after navigating to the link directly', () => {
+        cy.request('POST', '/admin/projects/proj1/badges/badge1', {
+            projectId: 'proj1',
+            badgeId: 'badge1',
+            name: "Badge 1"
+        });
+
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            name: "Subject 1"
+        });
+
+        const numSkills = 4;
+        for (let i = 0; i < numSkills; i+=1){
+            cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill${i}`, {
+                projectId: 'proj1',
+                subjectId: "subj1",
+                skillId: `skill${i}`,
+                name: `Skill ${i}`,
+                pointIncrement: '50',
+                numPerformToCompletion: '5'
+            });
+
+            cy.request('POST', `/admin/projects/proj1/badge/badge1/skills/skill${i}`);
+        }
+
+        cy.visit('/projects/proj1/badges/badge1');
+        cy.get(`${tableSelector} th`).contains('Skill ID').click();
+
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 1,  value: 'skill0' }],
+            [{ colIndex: 1,  value: 'skill1' }],
+            [{ colIndex: 1,  value: 'skill2' }],
+            [{ colIndex: 1,  value: 'skill3' }],
+        ], 5);
+
+        cy.get('[data-cy="deleteSkill_skill2"]').click();
+        cy.contains('YES, Delete It').click();
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 1,  value: 'skill0' }],
+            [{ colIndex: 1,  value: 'skill1' }],
+            [{ colIndex: 1,  value: 'skill3' }],
+        ], 5);
+    });
+
+    it('skills table sorting', () => {
+        cy.request('POST', '/admin/projects/proj1/badges/badge1', {
+            projectId: 'proj1',
+            badgeId: 'badge1',
+            name: "Badge 1"
+        });
+
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            name: "Subject 1"
+        });
+
+        const numSkills = 7;
+        for (let i = 0; i < numSkills; i+=1){
+            cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill${i}`, {
+                projectId: 'proj1',
+                subjectId: "subj1",
+                skillId: `skill${i}`,
+                name: `Skill ${10 - i}`,
+                pointIncrement: '50',
+                numPerformToCompletion: (i + 1)
+            });
+
+            cy.request('POST', `/admin/projects/proj1/badge/badge1/skills/skill${i}`);
+        }
+
+        cy.visit('/projects/proj1/badges/badge1');
+        cy.get(`${tableSelector} th`).contains('Skill ID').click();
+
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'Skill 10' }, { colIndex: 1,  value: 'skill0' }, { colIndex: 2,  value: '50' }],
+            [{ colIndex: 0,  value: 'Skill 9' }, { colIndex: 1,  value: 'skill1' }, { colIndex: 2,  value: '100' }],
+            [{ colIndex: 0,  value: 'Skill 8' }, { colIndex: 1,  value: 'skill2' }, { colIndex: 2,  value: '150' }],
+            [{ colIndex: 0,  value: 'Skill 7' }, { colIndex: 1,  value: 'skill3' }, { colIndex: 2,  value: '200' }],
+            [{ colIndex: 0,  value: 'Skill 6' }, { colIndex: 1,  value: 'skill4' }, { colIndex: 2,  value: '250' }],
+            [{ colIndex: 0,  value: 'Skill 5' }, { colIndex: 1,  value: 'skill5' }, { colIndex: 2,  value: '300' }],
+            [{ colIndex: 0,  value: 'Skill 4' }, { colIndex: 1,  value: 'skill6' }, { colIndex: 2,  value: '350' }],
+        ], 5);
+
+        cy.get(`${tableSelector} th`).contains('Skill ID').click();
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'Skill 4' }, { colIndex: 1,  value: 'skill6' }, { colIndex: 2,  value: '350' }],
+            [{ colIndex: 0,  value: 'Skill 5' }, { colIndex: 1,  value: 'skill5' }, { colIndex: 2,  value: '300' }],
+            [{ colIndex: 0,  value: 'Skill 6' }, { colIndex: 1,  value: 'skill4' }, { colIndex: 2,  value: '250' }],
+            [{ colIndex: 0,  value: 'Skill 7' }, { colIndex: 1,  value: 'skill3' }, { colIndex: 2,  value: '200' }],
+            [{ colIndex: 0,  value: 'Skill 8' }, { colIndex: 1,  value: 'skill2' }, { colIndex: 2,  value: '150' }],
+            [{ colIndex: 0,  value: 'Skill 9' }, { colIndex: 1,  value: 'skill1' }, { colIndex: 2,  value: '100' }],
+            [{ colIndex: 0,  value: 'Skill 10' }, { colIndex: 1,  value: 'skill0' }, { colIndex: 2,  value: '50' }],
+        ], 5);
+
+        cy.get(`${tableSelector} th`).contains('Skill Name').click();
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'Skill 4' }, { colIndex: 1,  value: 'skill6' }, { colIndex: 2,  value: '350' }],
+            [{ colIndex: 0,  value: 'Skill 5' }, { colIndex: 1,  value: 'skill5' }, { colIndex: 2,  value: '300' }],
+            [{ colIndex: 0,  value: 'Skill 6' }, { colIndex: 1,  value: 'skill4' }, { colIndex: 2,  value: '250' }],
+            [{ colIndex: 0,  value: 'Skill 7' }, { colIndex: 1,  value: 'skill3' }, { colIndex: 2,  value: '200' }],
+            [{ colIndex: 0,  value: 'Skill 8' }, { colIndex: 1,  value: 'skill2' }, { colIndex: 2,  value: '150' }],
+            [{ colIndex: 0,  value: 'Skill 9' }, { colIndex: 1,  value: 'skill1' }, { colIndex: 2,  value: '100' }],
+            [{ colIndex: 0,  value: 'Skill 10' }, { colIndex: 1,  value: 'skill0' }, { colIndex: 2,  value: '50' }],
+        ], 5);
+
+        cy.get(`${tableSelector} th`).contains('Skill Name').click();
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'Skill 10' }, { colIndex: 1,  value: 'skill0' }, { colIndex: 2,  value: '50' }],
+            [{ colIndex: 0,  value: 'Skill 9' }, { colIndex: 1,  value: 'skill1' }, { colIndex: 2,  value: '100' }],
+            [{ colIndex: 0,  value: 'Skill 8' }, { colIndex: 1,  value: 'skill2' }, { colIndex: 2,  value: '150' }],
+            [{ colIndex: 0,  value: 'Skill 7' }, { colIndex: 1,  value: 'skill3' }, { colIndex: 2,  value: '200' }],
+            [{ colIndex: 0,  value: 'Skill 6' }, { colIndex: 1,  value: 'skill4' }, { colIndex: 2,  value: '250' }],
+            [{ colIndex: 0,  value: 'Skill 5' }, { colIndex: 1,  value: 'skill5' }, { colIndex: 2,  value: '300' }],
+            [{ colIndex: 0,  value: 'Skill 4' }, { colIndex: 1,  value: 'skill6' }, { colIndex: 2,  value: '350' }],
+        ], 5);
+
+        cy.get(`${tableSelector} th`).contains('Total Points').click();
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'Skill 10' }, { colIndex: 1,  value: 'skill0' }, { colIndex: 2,  value: '50' }],
+            [{ colIndex: 0,  value: 'Skill 9' }, { colIndex: 1,  value: 'skill1' }, { colIndex: 2,  value: '100' }],
+            [{ colIndex: 0,  value: 'Skill 8' }, { colIndex: 1,  value: 'skill2' }, { colIndex: 2,  value: '150' }],
+            [{ colIndex: 0,  value: 'Skill 7' }, { colIndex: 1,  value: 'skill3' }, { colIndex: 2,  value: '200' }],
+            [{ colIndex: 0,  value: 'Skill 6' }, { colIndex: 1,  value: 'skill4' }, { colIndex: 2,  value: '250' }],
+            [{ colIndex: 0,  value: 'Skill 5' }, { colIndex: 1,  value: 'skill5' }, { colIndex: 2,  value: '300' }],
+            [{ colIndex: 0,  value: 'Skill 4' }, { colIndex: 1,  value: 'skill6' }, { colIndex: 2,  value: '350' }],
+        ], 5);
+
+        cy.get(`${tableSelector} th`).contains('Total Points').click();
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'Skill 4' }, { colIndex: 1,  value: 'skill6' }, { colIndex: 2,  value: '350' }],
+            [{ colIndex: 0,  value: 'Skill 5' }, { colIndex: 1,  value: 'skill5' }, { colIndex: 2,  value: '300' }],
+            [{ colIndex: 0,  value: 'Skill 6' }, { colIndex: 1,  value: 'skill4' }, { colIndex: 2,  value: '250' }],
+            [{ colIndex: 0,  value: 'Skill 7' }, { colIndex: 1,  value: 'skill3' }, { colIndex: 2,  value: '200' }],
+            [{ colIndex: 0,  value: 'Skill 8' }, { colIndex: 1,  value: 'skill2' }, { colIndex: 2,  value: '150' }],
+            [{ colIndex: 0,  value: 'Skill 9' }, { colIndex: 1,  value: 'skill1' }, { colIndex: 2,  value: '100' }],
+            [{ colIndex: 0,  value: 'Skill 10' }, { colIndex: 1,  value: 'skill0' }, { colIndex: 2,  value: '50' }],
+        ], 5);
+    });
 });

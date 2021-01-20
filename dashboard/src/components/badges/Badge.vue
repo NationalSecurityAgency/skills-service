@@ -28,7 +28,7 @@ limitations under the License.
       <div>
         <router-link :to="buildManageLink()"
                      :aria-label="`Manage badge ${badgeInternal.name}`"
-                     class="btn btn-outline-primary btn-sm" data-cy="manageBadge">
+                     class="btn btn-outline-primary btn-sm" :data-cy="`manageBadge_${badgeInternal.badgeId}`">
           Manage <i class="fas fa-arrow-circle-right" aria-hidden="true"/>
         </router-link>
       </div>

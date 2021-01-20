@@ -443,50 +443,6 @@ describe('Skills Tests', () => {
         cy.contains('user@#$&*');
     });
 
-    it('Add Dependency failure', () => {
-        cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1', {
-            projectId: 'proj1',
-            subjectId: "subj1",
-            skillId: "skill1",
-            name: "Skill 1",
-            pointIncrement: '50',
-            numPerformToCompletion: '5'
-        });
-
-        cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill2', {
-            projectId: 'proj1',
-            subjectId: "subj1",
-            skillId: "skill2",
-            name: "Skill 2",
-            pointIncrement: '50',
-            numPerformToCompletion: '5'
-        });
-
-        cy.intercept({
-          method: 'POST',
-          path: '/admin/projects/proj1/skills/skill1/dependency/*',
-        }, {
-          statusCode: 400,
-          body: {errorCode: 'FailedToAssignDependency', explanation: 'Error Adding Dependency'}
-        }).as('addDependencyError');
-
-        cy.intercept({
-            method: 'GET',
-            path: '/admin/projects/proj1/subjects/subj1/skills/skill1'
-        }).as('loadSkill');
-
-        cy.visit('/projects/proj1/subjects/subj1/skills/skill1');
-        cy.wait('@loadSkill')
-
-        cy.get('div#menu-collapse-control li').contains('Dependencies').click();
-
-        cy.get('.multiselect__tags').click();
-        cy.get('.multiselect__tags input').type('{enter}')
-
-        cy.wait('@addDependencyError')
-        cy.get('div .alert').contains('Error! Request could not be completed! Error Adding Dependency');
-    })
-
     it('create skill and then update skillId', () => {
       const initialId = 'myid1Skill';
       const newId = 'MyId1Skill';
