@@ -308,7 +308,7 @@ describe('Accessibility Tests', () => {
     cy.customA11y();
     cy.get('[data-cy=closeBadgeButton]').click();
 
-    cy.get('[data-cy=manageBadge]').click();
+    cy.get('[data-cy=manageBadge_badge1]').click();
     cy.contains('This is 2')
     cy.customLighthouse();
     cy.customA11y();

@@ -762,7 +762,7 @@ describe('Global Badges Tests', () => {
     });
 
 
-    it('remove skill after navigating to the link directory', () => {
+    it('remove skill after navigating to the link directly', () => {
         cy.request('POST', '/app/projects/proj1', {
             projectId: 'proj1',
             name: "proj1"
