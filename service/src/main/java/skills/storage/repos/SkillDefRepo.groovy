@@ -106,6 +106,13 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
     @Nullable
     Integer calculateTotalPointsForSkill(String projectId, String skillId, RelationshipType relationshipType, Integer version)
 
+
+    @Query(value = '''SELECT sum(sdChild.totalPoints) from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
+      where srd.parent=sdParent.id and srd.child=sdChild.id and 
+      sdParent.projectId=?1 and srd.type=?2 and sdChild.version<=?3 ''' )
+    @Nullable
+    Integer calculateTotalPointsForProject(String projectId, RelationshipType relationshipType, Integer version)
+
     @Query(value='''SELECT c 
         from SkillDef s, SkillRelDef r, SkillDef c 
         where s.id=r.parent and c.id = r.child and 
@@ -178,4 +185,8 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
         where sd.type='Skill' ''')
     Integer countTotalSkills()
 
+    @Query(value='''SELECT count(sd)
+        from SkillDef sd 
+        where (sd.type='Badge' OR sd.type='GlobalBadge') and (sd.enabled  = 'true' OR sd.enabled is null)''')
+    Integer countTotalBadges()
 }

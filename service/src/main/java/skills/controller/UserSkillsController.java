@@ -132,12 +132,8 @@ class UserSkillsController {
     @CompileStatic
     @Profile
     public MySkillsSummary getMySkillsSummary(HttpServletRequest request,
-                                                @RequestParam(name = "userId", required = false) String userIdParam,
-                                                @RequestParam(name = "version", required = false) Integer version,
-                                                @RequestParam(name = "idType", required = false) String idType) {
-        String userId = userInfoService.getUserName(userIdParam, true, idType);
-
-        log.debug("userId is {} and userIdParam is {}", userId, userIdParam);
+                                              @RequestParam(name = "version", required = false) Integer version) {
+        String userId = userInfoService.getCurrentUserId();
         return skillsLoader.loadMySkillsSummary(userId, getProvidedVersionOrReturnDefault(version));
     }
 

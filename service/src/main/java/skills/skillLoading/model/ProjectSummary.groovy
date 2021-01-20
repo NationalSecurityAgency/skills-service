@@ -18,22 +18,13 @@ package skills.skillLoading.model
 import groovy.transform.Canonical
 
 @Canonical
-class MySkillsSummary {
-    List<ProjectSummary> projectSummaries = []
-
-    Integer totalProjects = 0
-    Integer numProjectsContributed = 0
-
-    Integer totalSkills = 0
-    Integer numAchievedSkills = 0
-    Integer numAchievedSkillsLastMonth = 0
-    Integer numAchievedSkillsLastWeek = 0
-    Date mostRecentAchievedSkill
-
-    Integer totalBadges = 0
-    Integer numAchievedBadges = 0
-    Integer numAchievedGemBadges = 0
-    Integer numAchievedGlobalBadges = 0
-
+class ProjectSummary {
+    String projectId
+    String projectName
+    int points
+    int totalPoints
+    int level
+    int totalUsers
+    int rank
 }
 

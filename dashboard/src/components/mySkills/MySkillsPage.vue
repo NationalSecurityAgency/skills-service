@@ -36,7 +36,7 @@ limitations under the License.
       </b-col>
     </b-row>
     <b-row class="my-4">
-      <b-col v-for="proj in projects" :key="proj.name"
+      <b-col v-for="proj in projects" :key="proj.projectName"
              cols="12" lg="6" xl="4"
             class="mb-2">
         <router-link :to="{ name:'MyProjectSkills', params: { projectId: proj.projectId } }" tag="div" class="project-link">
