@@ -22,7 +22,7 @@ limitations under the License.
         </b-col>
         <b-col class="text-right">
           <div class="h4 text-uppercase">{{ proj.projectName }}</div>
-          <div class="h5 text-secondary">Level {{ proj.skillsLevel }}</div>
+          <div class="h5 text-secondary">Level {{ proj.level }}</div>
           <div>
             <b-badge :variant="rankVariant">Rank: {{ proj.rank }} / {{ proj.totalUsers | number}} </b-badge>
           </div>
@@ -93,16 +93,25 @@ limitations under the License.
     },
     created() {
       if (this.proj.totalPoints > 0) {
-        const pointsPercent = Math.trunc((this.proj.points / this.proj.totalPoints) * 100);
+        const pointsPercent = this.getPercent((this.proj.points / this.proj.totalPoints) * 100);
         this.series = [pointsPercent];
         this.chartOptions.fill.colors = [this.getColor(pointsPercent)];
       }
       if (this.proj.totalUsers > 0) {
-        const rankPercent = Math.trunc((this.proj.rank / this.proj.totalUsers) * 100);
+        const rankPercent = this.getPercent((this.proj.rank / this.proj.totalUsers) * 100);
         this.rankVariant = this.getVariant(rankPercent);
       }
     },
     methods: {
+      getPercent(percent) {
+        if (percent > 0) {
+          if (percent < 1) {
+            return 1;
+          }
+          return [Math.round(percent)];
+        }
+        return 0;
+      },
       getColor(percent) {
         let res = '#007c49';
         if (percent < 15) {
