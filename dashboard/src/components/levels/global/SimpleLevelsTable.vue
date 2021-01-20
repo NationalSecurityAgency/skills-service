@@ -38,7 +38,6 @@ limitations under the License.
     props: ['levels'],
     data() {
       return {
-        columns: ['projectName', 'level', 'edit'],
         table: {
           options: {
             busy: false,
@@ -69,30 +68,6 @@ limitations under the License.
               possiblePageSizes: [5, 10, 15, 20],
             },
           },
-        },
-        options: {
-          headings: {
-            projectName: 'Project Name',
-            level: 'Level',
-            edit: '',
-          },
-          perPage: 15,
-          columnsClasses: {
-            edit: 'control-column',
-          },
-          columnsDisplay: {
-            skillId: 'not_mobile',
-            pointIncrement: 'not_mobile',
-            totalPoints: 'not_mobile',
-          },
-          pagination: { dropdown: false, edge: false },
-          sortable: ['projectName', 'level'],
-          sortIcon: {
-            base: 'fa fa-sort', up: 'fa fa-sort-up', down: 'fa fa-sort-down', is: 'fa fa-sort',
-          },
-          // highlightMatches: true,
-          skin: 'table is-striped is-fullwidth',
-          filterable: false,
         },
       };
     },

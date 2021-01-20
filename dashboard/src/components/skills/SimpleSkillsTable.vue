@@ -34,31 +34,6 @@ limitations under the License.
         {{ data.value | number }}
       </template>
     </skills-b-table>
-
-<!--    <v-client-table :data="skills" :columns="columns" :options="options" class="mt-5">-->
-<!--      <div slot="edit" slot-scope="props">-->
-<!--        <div class="field text-right">-->
-<!--          <span class="field">-->
-<!--              <button v-on:click="onDeleteEvent(props.row)" class="btn btn-sm btn-outline-primary" data-cy="deleteSkill"-->
-<!--                      :aria-label="`remove dependency on ${props.row.skillId}`">-->
-<!--                      <i class="text-warning fas fa-trash" aria-hidden="true"/>-->
-<!--              </button>-->
-<!--                <router-link v-if="props.row.subjectId" :id="props.row.skillId" :to="{ name:'SkillOverview',-->
-<!--                params: { projectId: props.row.projectId, subjectId: props.row.subjectId, skillId: props.row.skillId }}"-->
-<!--                             class="btn btn-sm btn-outline-hc ml-2">-->
-<!--                  Manage <i class="fas fa-arrow-circle-right" aria-hidden="true"/>-->
-<!--                </router-link>-->
-<!--          </span>-->
-<!--        </div>-->
-<!--      </div>-->
-
-<!--      <div slot="name" slot-scope="props">-->
-<!--        &lt;!&ndash; allow to override how name field is rendered&ndash;&gt;-->
-<!--        <slot name="name-cell" v-bind:props="props.row">-->
-<!--          {{ props.row.name }}-->
-<!--        </slot>-->
-<!--      </div>-->
-<!--    </v-client-table>-->
   </div>
 </template>
 
@@ -79,30 +54,6 @@ limitations under the License.
       },
     },
     data() {
-      let columns;
-      let headings;
-      // let columnsDisplay;
-      let sortable;
-      if (this.showProject) {
-        columns = ['name', 'skillId', 'projectId', 'edit'];
-        headings = {
-          name: 'Skill Name',
-          skillId: 'Skill ID',
-          projectId: 'Project ID',
-          edit: '',
-        };
-        sortable = ['name', 'skillId', 'projectId'];
-      } else {
-        columns = ['name', 'skillId', 'totalPoints', 'edit'];
-        headings = {
-          name: 'Skill Name',
-          skillId: 'Skill ID',
-          totalPoints: 'Total Points',
-          edit: '',
-        };
-        sortable = ['name', 'skillId', 'totalPoints'];
-      }
-
       const fields = [
         {
           key: 'name',
@@ -135,7 +86,6 @@ limitations under the License.
         });
       }
       return {
-        columns,
         table: {
           options: {
             busy: false,
@@ -150,26 +100,6 @@ limitations under the License.
               possiblePageSizes: [5, 10, 15, 20],
             },
           },
-        },
-        options: {
-          headings,
-          perPage: 15,
-          columnsClasses: {
-            edit: 'control-column',
-          },
-          columnsDisplay: {
-            skillId: 'not_mobile',
-            pointIncrement: 'not_mobile',
-            totalPoints: 'not_mobile',
-          },
-          pagination: { dropdown: false, edge: false },
-          sortable,
-          sortIcon: {
-            base: 'fa fa-sort', up: 'fa fa-sort-up', down: 'fa fa-sort-down', is: 'fa fa-sort',
-          },
-          // highlightMatches: true,
-          skin: 'table is-striped is-fullwidth',
-          filterable: false,
         },
       };
     },
