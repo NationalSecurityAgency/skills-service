@@ -24,7 +24,8 @@ limitations under the License.
         </button>
         <router-link v-if="data.item.subjectId" :id="data.item.skillId" :to="{ name:'SkillOverview',
                 params: { projectId: data.item.projectId, subjectId: data.item.subjectId, skillId: data.item.skillId }}"
-                     class="btn btn-sm btn-outline-hc ml-2">
+                     class="btn btn-sm btn-outline-hc ml-2"
+                     :data-cy="`manage_${data.item.skillId}`">
           Manage <i class="fas fa-arrow-circle-right" aria-hidden="true"/>
         </router-link>
       </template>

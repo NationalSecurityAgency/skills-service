@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <simple-card id="dependent-skills-graph">
+  <simple-card id="dependent-skills-graph" data-cy="dependenciesGraph">
     <div v-if="!this.dependentSkills || this.dependentSkills.length === 0">
       <div class="column is-half has-text-centered">
         <no-content2 icon="fa fa-project-diagram" title="No Dependencies Yet..."

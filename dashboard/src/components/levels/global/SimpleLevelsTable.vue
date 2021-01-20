@@ -105,28 +105,4 @@ limitations under the License.
 </script>
 
 <style>
-  #simple-skills-table .VueTables__limit-field {
-    display: none;
-  }
-
-  #simple-skills-table .control-column {
-    width: 10rem;
-  }
-
-  /* on the mobile platform some of the columns will be removed
-     so let's allow the table to size on its own*/
-  @media (max-width: 576px) {
-    #simple-skills-table .control-column {
-      width: unset;
-    }
-  }
-
-  #simple-skills-table .notactive {
-    cursor: not-allowed;
-    pointer-events: none;
-    color: #c0c0c0;
-    background-color: #ffffff;
-    border-color: gray;
-  }
-
 </style>

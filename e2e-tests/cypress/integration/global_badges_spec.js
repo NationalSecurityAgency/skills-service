@@ -573,7 +573,7 @@ describe('Global Badges Tests', () => {
         cy.get('[data-cy=goLive]').should('not.exist');
 
         cy.contains('Manage').click();
-        cy.get('[data-cy=deleteSkill]').click();
+        cy.get('[data-cy=deleteSkill_skill1]').click();
         cy.contains('YES, Delete It!').click();
         cy.contains('No Skills Added Yet');
         cy.contains('.router-link-active', 'Badges').click();
