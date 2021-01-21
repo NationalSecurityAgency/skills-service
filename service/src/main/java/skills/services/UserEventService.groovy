@@ -219,11 +219,11 @@ class UserEventService {
      */
     @Transactional
     public void recordEvent(Integer skillRefId, String userId, Date date, Integer eventCount = 1, EventType type = EventType.DAILY) {
-        Date[] startEnd = formatStartAndEnd(date, type)
+        StartStopDate startEnd = formatStartAndEnd(date, type)
         if (EventType.DAILY == type) {
-            nativeQueriesRepo.createOrUpdateUserEvent(skillRefId, userId, startEnd[0], startEnd[1], type.toString(), 1)
+            nativeQueriesRepo.createOrUpdateUserEvent(skillRefId, userId, startEnd.start, startEnd.stop, type.toString(), 1)
         } else if (EventType.WEEKLY == type) {
-            nativeQueriesRepo.createOrUpdateUserEvent(skillRefId, userId, startEnd[0], startEnd[1], type.toString(), eventCount)
+            nativeQueriesRepo.createOrUpdateUserEvent(skillRefId, userId, startEnd.start, startEnd.stop, type.toString(), eventCount)
         } else {
             throw new UnsupportedOperationException("Unsupported UserEvent.EventType [${type}]")
         }
@@ -265,17 +265,17 @@ class UserEventService {
 
     @CompileStatic
     private List<DayCountItem> handleMixedEventTypes(Stream<EventCount> mixedTypes, EventType targetEventType) {
-        Map<WeekKey, DayCountItem> dailyAccumulator = [:]
+        Map<StartStopDate, DayCountItem> dailyAccumulator = [:]
         List<DayCountItem> allCounts = []
         // take any daily event counts and manually convert them into weekly counts
         mixedTypes.forEach({
             if (EventType.DAILY == it.eventType) {
-                Date[] startStopOfWeek = formatStartAndEnd(it.start, EventType.WEEKLY)
-                WeekKey weekKey = new WeekKey(start: startStopOfWeek[0], stop: startStopOfWeek[1])
+                StartStopDate startStopOfWeek = formatStartAndEnd(it.start, EventType.WEEKLY)
+                StartStopDate weekKey = new StartStopDate(start: startStopOfWeek.start, stop: startStopOfWeek.stop)
 
                 DayCountItem aggregation
                 if ((aggregation = dailyAccumulator.get(weekKey)) == null) {
-                    aggregation = new DayCountItem(startStopOfWeek[0], 0)
+                    aggregation = new DayCountItem(startStopOfWeek.start, 0)
                     dailyAccumulator.put(weekKey, aggregation)
                 }
                 aggregation.count += it.count
@@ -303,18 +303,18 @@ class UserEventService {
         return allCounts
     }
 
-    private static Date[] formatStartAndEnd(Date date, EventType type) {
+    private static StartStopDate formatStartAndEnd(Date date, EventType type) {
         if (EventType.DAILY == type) {
             LocalDate localDate = date.toLocalDate()
             LocalDateTime start = LocalDateTime.of(localDate, LocalTime.MIN)
             LocalDateTime end = LocalDateTime.of(localDate, LocalTime.MAX)
-            return new Date[]{start.toDate(), end.toDate()}
+            return new StartStopDate(start: start.toDate(), stop: end.toDate())
         } else if (EventType.WEEKLY == type) {
             TemporalField temporalField = WeekFields.of(Locale.US).dayOfWeek()
             LocalDate eventDate = date.toLocalDate()
             LocalDateTime startOfWeek = LocalDateTime.of(eventDate.with(temporalField, 1), LocalTime.MIN)
             LocalDateTime endOfWeek = LocalDateTime.of(eventDate.with(temporalField, 7), LocalTime.MAX)
-            return new Date[]{startOfWeek.toDate(), endOfWeek.toDate()}
+            return new StartStopDate(start: startOfWeek.toDate(), stop: endOfWeek.toDate())
         } else {
             throw new SkillException("unrecognized EventType [${type}]")
         }
@@ -323,7 +323,7 @@ class UserEventService {
     @CompileStatic
     private List<DayCountItem> convertResults(Stream<DayCountItem> stream, EventType eventType) {
         List<DayCountItem> results = []
-        Date last = formatStartAndEnd(new Date(), eventType)[0]
+        Date last = formatStartAndEnd(new Date(), eventType).start
         int count = 0;
 
         stream.forEach({
@@ -340,7 +340,7 @@ class UserEventService {
 
     @CompileStatic
     private List<DayCountItem> fillGaps(List<DayCountItem> items, EventType eventType) {
-        Date last = formatStartAndEnd(new Date(), eventType)[0]
+        Date last = formatStartAndEnd(new Date(), eventType).start
         List<DayCountItem> zeroFilled = []
 
         items.eachWithIndex{ DayCountItem entry, int i ->
@@ -374,7 +374,7 @@ class UserEventService {
     }
 
     @EqualsAndHashCode
-    private static class WeekKey {
+    private static class StartStopDate {
         Date start
         Date stop
     }
