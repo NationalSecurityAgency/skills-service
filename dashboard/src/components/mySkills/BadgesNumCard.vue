@@ -20,10 +20,10 @@ limitations under the License.
         <b-col cols="5">
           <div class="text-uppercase text-secondary">Badges</div>
           <div class="mt-2 ml-1 text-dark">
-            <span style="font-size: 2.5rem;" class="text-warning">{{ numAchievedBadges }}</span> <span class="text-secondary" style="font-size: 1.2rem;">/ {{ totalBadges }}</span>
+            <span style="font-size: 2.5rem;" class="text-warning" data-cy="numAchievedBadges">{{ numAchievedBadges }}</span> <span class="text-secondary" style="font-size: 1.2rem;" data-cy="numBadgesAvailable">/ {{ totalBadges }}</span>
           </div>
-          <div><b-badge variant="info">Global Badges: {{ numAchievedGlobalBadges }}</b-badge></div>
-          <div><b-badge variant="info">Gems: {{ numAchievedGemBadges }}</b-badge></div>
+          <div><b-badge variant="info" data-cy="numAchievedGlobalBadges">Global Badges: {{ numAchievedGlobalBadges }}</b-badge></div>
+          <div><b-badge variant="info" data-cy="numAchievedGemBadges">Gems: {{ numAchievedGemBadges }}</b-badge></div>
         </b-col>
         <b-col cols="7" style="font-size: 4.6rem;" class="text-right mb-4">
   <!--        <i class="fas fa-trophy"/>-->
@@ -36,7 +36,7 @@ limitations under the License.
     </div>
     <b-row class="justify-content-between no-gutters border-top text-muted small">
       <b-col class="p-2">
-        Be proud to earn those badges!!
+        <span data-cy="badges-num-footer">Be proud to earn those badges!!</span>
       </b-col>
     </b-row>
   </b-card>

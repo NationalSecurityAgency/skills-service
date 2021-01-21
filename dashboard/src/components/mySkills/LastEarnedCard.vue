@@ -22,13 +22,13 @@ limitations under the License.
           <i class="fas fa-calendar-alt mt-3 ml-2 mb-2 skills-color-events" style="font-size: 5rem;" />
         </b-col>
         <b-col cols="8" class="mb-4 pt-4 pl-2 small">
-          <div v-if="mostRecentAchievedSkill !== null">
+          <div v-if="mostRecentAchievedSkill !== null" data-cy="mostRecentAchievedSkill">
             <span>Last Achieved skill</span> <b-badge variant="success" style="font-size: 1rem;">{{ mostRecentAchievedSkill | timeFromNow }}</b-badge>
           </div>
-          <div class="my-2">
+          <div class="my-2" data-cy="numAchievedSkillsLastWeek">
             <b-badge variant="info" style="font-size: 1rem;">{{ numAchievedSkillsLastWeek }} skills</b-badge> in the last week
           </div>
-          <div class="my-2">
+          <div class="my-2" data-cy="numAchievedSkillsLastMonth">
             <b-badge variant="info" style="font-size: 1rem;">{{ numAchievedSkillsLastMonth }} skills</b-badge> in the last month
           </div>
         </b-col>
@@ -36,7 +36,7 @@ limitations under the License.
     </div>
     <b-row class="justify-content-between no-gutters border-top text-muted small mt-4">
       <b-col class="p-2">
-        {{ getFooterText() }}
+        <span data-cy="last-earned-footer">{{ getFooterText() }}</span>
       </b-col>
     </b-row>
   </b-card>

@@ -21,17 +21,17 @@ limitations under the License.
           <apexchart :name="proj.projectName" type="radialBar" height="200" :options="chartOptions" :series="series"></apexchart>
         </b-col>
         <b-col class="text-right">
-          <div class="h4 text-uppercase">{{ proj.projectName }}</div>
-          <div class="h5 text-secondary">Level {{ proj.level }}</div>
-          <div>
-            <b-badge :variant="rankVariant">Rank: {{ proj.rank }} / {{ proj.totalUsers | number}} </b-badge>
+          <div class="h4 text-uppercase" data-cy="project-card-project-name">{{ proj.projectName }}</div>
+          <div class="h5 text-secondary" data-cy="project-card-project-level">Level {{ proj.level }}</div>
+          <div data-cy="project-card-project-rank">
+            <b-badge :variant="rankVariant">Rank: {{ proj.rank }} / {{ proj.totalUsers | number}}</b-badge>
           </div>
         </b-col>
       </b-row>
       <b-progress :max="proj.totalPoints" :value="proj.points" height="5px" variant="info" class="proj-progress">
       </b-progress>
       <div class="text-center">
-        <span class="small text-center">{{ proj.points | number }} / {{ proj.totalPoints | number }}</span>
+        <span class="small text-center" data-cy="project-card-project-points">{{ proj.points | number }} / {{ proj.totalPoints | number }}</span>
       </div>
       <div class="position-absolute text-muted d-none small click-indicator" style="right: 15px; bottom: 10px;">Click to View</div>
     </b-card>

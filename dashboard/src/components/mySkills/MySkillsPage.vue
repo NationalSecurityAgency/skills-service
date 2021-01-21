@@ -29,17 +29,16 @@ limitations under the License.
         <badges-num-card :total-badges="mySkillsSummary.totalBadges" :num-achieved-badges="mySkillsSummary.numAchievedBadges" :num-achieved-gem-badges="mySkillsSummary.numAchievedGemBadges" :num-achieved-global-badges="mySkillsSummary.numAchievedGlobalBadges" class="flex-grow-1 my-skills-card" />
       </b-col>
     </b-row>
-
     <b-row class="my-4">
       <b-col class="charts-content">
-        <event-history-chart  v-if="!loading" :projects="projects"></event-history-chart>
+        <event-history-chart v-if="!loading" :projects="projects"></event-history-chart>
       </b-col>
     </b-row>
     <b-row class="my-4">
       <b-col v-for="proj in projects" :key="proj.projectName"
              cols="12" lg="6" xl="4"
             class="mb-2">
-        <router-link :to="{ name:'MyProjectSkills', params: { projectId: proj.projectId } }" tag="div" class="project-link">
+        <router-link :to="{ name:'MyProjectSkills', params: { projectId: proj.projectId } }" tag="div" class="project-link" :data-cy="`project-link-${proj.projectId}`">
           <project-link-card :proj="proj" class="my-skills-card"/>
         </router-link>
       </b-col>

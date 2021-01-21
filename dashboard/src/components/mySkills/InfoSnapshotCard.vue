@@ -20,7 +20,7 @@ limitations under the License.
         <b-col cols="5">
           <div class="text-uppercase text-secondary">Projects</div>
           <div class="mt-2 ml-1 text-dark">
-            <span style="font-size: 2.5rem;">{{ numProjectsContributed }}</span> <span class="text-secondary" style="font-size: 1.2rem;">/ {{ totalProjects }}</span>
+            <span style="font-size: 2.5rem;" data-cy="numProjectsContributed">{{ numProjectsContributed }}</span> <span class="text-secondary" style="font-size: 1.2rem;" data-cy="numProjectsAvailable">/ {{ totalProjects }}</span>
           </div>
         </b-col>
         <b-col cols="7">
@@ -30,7 +30,7 @@ limitations under the License.
     </div>
     <b-row class="justify-content-between no-gutters border-top text-muted small">
       <b-col class="p-2">
-        It's fun to learn! You still have <b-badge variant="info">2</b-badge> projects to explore.
+        <span data-cy="info-snap-footer">It's fun to learn! You still have <b-badge variant="info">2</b-badge> projects to explore.</span>
       </b-col>
     </b-row>
   </b-card>

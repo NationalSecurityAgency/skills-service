@@ -16,7 +16,7 @@ limitations under the License.
 <template>
     <b-card>
       <skills-spinner :is-loading="loading" />
-      <div v-if="!loading" class="text-center">
+      <div v-if="!loading" class="text-center" data-cy="event-history-chart">
         <span class="font-weight-bold"><i class="fas fa-chart-bar mr-2 text-secondary"></i>{{ title }}</span>
         <metrics-overlay :loading="loading" :has-data="hasData" no-data-msg="There are no projects">
           <apexchart type="line" height="350"

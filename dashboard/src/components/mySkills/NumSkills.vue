@@ -20,9 +20,9 @@ limitations under the License.
         <b-col cols="5">
           <div class="text-uppercase text-secondary">Skills</div>
           <div class="mt-2 ml-1 text-dark">
-            <span style="font-size: 2.5rem;">{{ numAchievedSkills }}</span>
+            <span style="font-size: 2.5rem;" data-cy="numAchievedSkills">{{ numAchievedSkills }}</span>
           </div>
-          <div><b-badge variant="info">Total: {{ totalSkills }}</b-badge></div>
+          <div><b-badge variant="info" data-cy="numSkillsAvailable">Total: {{ totalSkills }}</b-badge></div>
         </b-col>
         <b-col cols="7">
           <apexchart type="line" height="158" :options="chartOptions" :series="series"></apexchart>
@@ -31,7 +31,7 @@ limitations under the License.
       </div>
       <b-row class="justify-content-between no-gutters border-top text-muted small">
         <b-col class="p-2">
-          So many skills... so little time! Good luck!
+          <span data-cy="num-skills-footer">So many skills... so little time! Good luck!</span>
         </b-col>
       </b-row>
   </b-card>
