@@ -13,33 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.storage.model
+package skills.storage.model;
 
-import groovy.transform.ToString
+import java.util.Date;
 
-import javax.persistence.*
+public class DayCountItem {
+    Date day
+    Long count
 
-@Entity
-@Table(name="user_events")
-@ToString(includeNames = true)
-class UserEvent {
+    public DayCountItem(Date day, Long count){
+        this.day = day
+        this.count = count
+    }
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Integer id
-
-    // fk to users
-    String userId
-
-    // fk to SkillDef
-    Integer skillRefId
-
-    Date start
-
-    Date stop
-
-    Integer count
-
-    @Enumerated(EnumType.STRING)
-    EventType eventType
 }

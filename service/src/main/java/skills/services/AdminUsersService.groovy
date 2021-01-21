@@ -66,8 +66,8 @@ class AdminUsersService {
         Date startDate = LocalDateTime.of(start.toLocalDate(), LocalTime.MIN).toDate()
 
         List<DayCountItem> res = skillId ?
-                userEventService.getUserEventCountsForSkillId(projectId, skillId, startDate) :
-                userEventService.getUserEventCountsForProject(projectId, startDate)
+                userEventService.getDistinctUserCountForSkillId(projectId, skillId, startDate) :
+                userEventService.getDistinctUserCountsForProject(projectId, startDate)
 
         List<TimestampCountItem> countsPerDay = []
         res?.each {

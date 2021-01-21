@@ -16,19 +16,15 @@
 package skills.storage.repos
 
 import groovy.transform.CompileStatic
-import org.apache.commons.lang3.ObjectUtils
-import org.springframework.data.domain.PageRequest
-import org.springframework.data.domain.Pageable
-import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.jpa.repository.QueryHints
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param
 import org.springframework.lang.Nullable
 import skills.storage.model.DayCountItem
-import skills.storage.model.SkillDef
+import skills.storage.model.EventCount
+import skills.storage.model.EventType
 import skills.storage.model.UserEvent
-import skills.storage.model.UserPerformedSkill
 
 import javax.persistence.QueryHint
 import java.util.stream.Stream
@@ -38,43 +34,124 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
 
     @Nullable
     @Query(value="""
-        select start as day, sum(count) as count from user_events
-        where start > :start AND skill_ref_id = :skillRefId AND event_type = :type 
-        group by start
-        order by start desc
-    """, nativeQuery = true)
-    Stream<DayCountItem> getCountForSkill(@Param("skillRefId") Integer skillRefId, @Param("start") Date start, @Param("type") UserEvent.EventType type)
+        select new skills.storage.model.EventCount(ue.start, ue.stop, sum(ue.count), ue.eventType) from UserEvent ue
+        where ue.start > :start AND ue.skillRefId = :skillRefId
+        group by ue.start, ue.stop, ue.eventType
+        order by ue.start desc
+    """)
+    Stream<EventCount> getEventCountForSkill(@Param("skillRefId") Integer skillRefId, @Param("start") Date start)
 
     @Nullable
     @Query(value="""
-        select start as day, sum(count) as count from user_events
-        where start > :start AND event_type = :type AND 
-        skill_ref_id in (SELECT child_ref_id FROM skill_relationship_definition where parent_ref_id = :skillRefId)
-        group by start
-        order by start desc
-    """, nativeQuery = true)
-    Stream<DayCountItem> getCountForSubject(@Param("skillRefId") Integer skillRefId, @Param("start") Date start, @Param("type") UserEvent.EventType type)
-
-    @Query(value="""
-        select start as day, sum(count) as count from user_events
-        where start > :start AND event_type = :type AND 
-        skill_ref_id in (SELECT id FROM skill_definition WHERE project_id = :projectId AND type = 'Skill')   
-        group by start 
-        order by start desc
-    """, nativeQuery = true)
-    Stream<DayCountItem> getCountForProject(@Param("projectId") String projectId, @Param("start") Date start, @Param("type") UserEvent.EventType type)
+        select new skills.storage.model.DayCountItem(ue.start, sum(ue.count)) from UserEvent ue
+        where ue.start > :start AND ue.skillRefId = :skillRefId AND ue.eventType = :type 
+        group by ue.start
+        order by ue.start desc
+    """)
+    Stream<DayCountItem> getEventCountForSkill(@Param("skillRefId") Integer skillRefId, @Param("start") Date start, @Param("type") EventType type)
 
     @Nullable
-    Stream<UserEvent> findAllBySkillRefIdAndEventType(Integer skillRefId, UserEvent.EventType type)
+    @Query(value="""
+        select ue.start as day, count(ue.userId) as count from UserEvent ue
+        where ue.start > :start AND ue.skillRefId = :skillRefId AND ue.eventType = :type 
+        group by ue.start
+        order by ue.start desc
+    """)
+    Stream<DayCountItem> getDistinctUserCountForSkill(@Param("skillRefId") Integer skillRefId, @Param("start") Date start, @Param("type") EventType type)
+
+    @Nullable
+    @Query(value="""
+        select new skills.storage.model.EventCount(ue.start, ue.stop, count(ue.userId), ue.eventType) from UserEvent ue
+        where ue.start > :start AND ue.skillRefId = :skillRefId
+        group by ue.start, ue.stop, ue.eventType
+        order by ue.start desc
+    """)
+    Stream<EventCount> getDistinctUserCountForSkill(@Param("skillRefId") Integer skillRefId, @Param("start") Date start)
+
+    @Query(value="""
+        select new skills.storage.model.DayCountItem(ue.start, sum(ue.count)) from UserEvent ue
+        where ue.start > :start AND ue.eventType = :type AND 
+        ue.skillRefId in (SELECT child.id FROM SkillRelDef where parent.id = :skillRefId)
+        group by ue.start
+        order by ue.start desc
+    """)
+    Stream<DayCountItem> getEventCountForSubject(@Param("skillRefId") Integer skillRefId, @Param("start") Date start, @Param("type") EventType type)
+
+    @Nullable
+    @Query(value="""
+        select new skills.storage.model.EventCount(ue.start, ue.stop, sum(ue.count), ue.eventType) from UserEvent ue
+        where ue.start > :start AND ue.skillRefId in (SELECT child.id FROM SkillRelDef where parent.id = :skillRefId)
+        group by ue.start, ue.stop, ue.eventType, ue.skillRefId
+        order by ue.start desc
+    """)
+    Stream<EventCount> getEventCountForSubject(@Param("skillRefId") Integer skillRefId, @Param("start") Date start)
+
+    @Query(value="""
+        select new skills.storage.model.EventCount(ue.start, ue.stop, count(distinct ue.userId), ue.eventType) from UserEvent ue
+        where ue.start > :start AND
+        ue.skillRefId in (SELECT child.id FROM SkillRelDef where parent.id = :skillRefId)
+        group by ue.start, ue.stop, ue.eventType
+        order by ue.start desc
+    """)
+    Stream<EventCount> getDistinctUserCountForSubject(@Param("skillRefId") Integer skillRefId, @Param("start") Date start)
+
+    @Query(value="""
+        select new skills.storage.model.DayCountItem(ue.start, count(distinct ue.userId)) from UserEvent ue
+        where ue.start > :start AND ue.eventType = :type AND 
+        ue.skillRefId in (SELECT child.id FROM SkillRelDef where parent.id = :skillRefId)
+        group by ue.start
+        order by ue.start desc
+    """)
+    Stream<DayCountItem> getDistinctUserCountForSubject(@Param("skillRefId") Integer skillRefId, @Param("start") Date start, @Param("type") EventType type)
+
+
+    @Query(value="""
+        select new skills.storage.model.DayCountItem(ue.start, sum(ue.count)) from UserEvent ue
+        where ue.start > :start AND ue.eventType = :type AND 
+        ue.skillRefId in (SELECT sd.id FROM SkillDef sd WHERE sd.projectId = :projectId AND sd.type = 'Skill')   
+        group by ue.start 
+        order by ue.start desc
+    """)
+    Stream<DayCountItem> getEventCountForProject(@Param("projectId") String projectId, @Param("start") Date start, @Param("type") EventType type)
+
+    @Query(value="""
+        select new skills.storage.model.EventCount(ue.start, ue.stop, sum(ue.count), ue.eventType) from UserEvent ue
+        where ue.start > :start AND
+        ue.skillRefId in (SELECT sd.id FROM SkillDef sd WHERE sd.projectId = :projectId AND sd.type = 'Skill')   
+        group by ue.start , ue.stop, ue.eventType
+        order by ue.start desc
+    """)
+    Stream<EventCount> getEventCountForProject(@Param("projectId") String projectId, @Param("start") Date start)
+
+    @Query(value="""
+        select new skills.storage.model.DayCountItem(ue.start, count(distinct ue.userId)) from UserEvent ue
+        where ue.start > :start AND ue.eventType = :type AND 
+        ue.skillRefId in (SELECT sd.id FROM SkillDef sd WHERE sd.projectId = :projectId AND sd.type = 'Skill')   
+        group by ue.start 
+        order by ue.start desc
+    """)
+    Stream<DayCountItem> getDistinctUserCountForProject(@Param("projectId") String projectId, @Param("start") Date start, @Param("type") EventType type)
+
+    @Query(value="""
+        select new skills.storage.model.EventCount(ue.start, ue.stop, count(distinct ue.userId), ue.eventType) from UserEvent ue
+        where ue.start > :start AND
+        ue.skillRefId in (SELECT sd.id FROM SkillDef sd WHERE sd.projectId = :projectId AND sd.type = 'Skill')   
+        group by ue.start, ue.stop, ue.eventType
+        order by ue.start desc
+    """)
+    Stream<EventCount> getDistinctUserCountForProject(@Param("projectId") String projectId, @Param("start") Date start)
+
+    @Nullable
+    Stream<UserEvent> findAllBySkillRefIdAndEventType(Integer skillRefId, EventType type)
 
     @QueryHints(value = [
         @QueryHint(name = "org.hibernate.cacheable", value = "false"),
         @QueryHint(name = "org.hibernate.readOnly", value = "true")
     ])
     @Nullable
-    Stream<UserEvent> findAllByEventTypeAndStartLessThan(UserEvent.EventType type, Date start)
+    Stream<UserEvent> findAllByEventTypeAndStartLessThan(EventType type, Date start)
 
-    void deleteByEventTypeAndStartLessThan(UserEvent.EventType type, Date start)
+    void deleteByEventTypeAndStartLessThan(EventType type, Date start)
 
 
 }

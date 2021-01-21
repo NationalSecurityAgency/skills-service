@@ -23,15 +23,16 @@ import java.time.temporal.ChronoUnit
 class ZeroFillDayCountItemUtil {
 
     /**
-     * Produces DayCountItems zero filled for the gaps between n and nMinusOne, exclusive of both
-     * n and nMinusOne
+     * Produces DayCountItems zero filled for the gaps between n and nMinusOne, optionally
+     * inclusive of n
      *
      * @param n the most recent date in the data set
      * @param nMinusOne a date semantically before n
+     * @param nInclusive if true, n will be potentially included as a zero filled date
      * @return
      */
-    public static List<DayCountItem> zeroFillDailyGaps(Date n, Date nMinusOne) {
-        return zeroFillGaps(true, n, nMinusOne)
+    public static List<DayCountItem> zeroFillDailyGaps(Date n, Date nMinusOne, boolean nInclusive) {
+        return zeroFillGaps(true, n, nMinusOne, nInclusive)
     }
 
     /**
@@ -46,40 +47,39 @@ class ZeroFillDayCountItemUtil {
      *
      * @param n
      * @param nMinusOne
+     * @param nInclusive if true, n will be potentially included as a zero filled date
      * @return
      */
-    public static List<DayCountItem> zeroFillWeeklyGaps(Date n, Date nMinusOne) {
-        return zeroFillGaps(false, n, nMinusOne)
+    public static List<DayCountItem> zeroFillWeeklyGaps(Date n, Date nMinusOne, boolean nInclusive) {
+        return zeroFillGaps(false, n, nMinusOne, nInclusive)
     }
 
-    private static List<DayCountItem> zeroFillGaps(boolean daily, Date n, Date nMinusOne) {
+    private static List<DayCountItem> zeroFillGaps(boolean daily, Date n, Date nMinusOne, boolean nInclusive) {
         def nMinusOneLd = nMinusOne.toLocalDate()
         def nLd = n.toLocalDate()
         long daysBetween = ChronoUnit.DAYS.between(nMinusOneLd, nLd)
         List<DayCountItem> fills = null
+        int startAt = nInclusive ? 0 : 1
+
         if (daily && daysBetween > 1) {
             fills = []
             LocalDateTime ldt = n.toLocalDateTime()
-            for (int i = 1; i < daysBetween; i++) {
+            for (int i = startAt; i < daysBetween; i++) {
                 Date fill = ldt.minusDays(i).toDate()
-                fills.add(new ZeroFillDayCountItem(day:fill))
+                fills.add(new DayCountItem(fill, 0))
             }
         } else if (!daily && daysBetween > 7){
             // since we force the start date to be based on start of week this should work cleanly
             long fillWeeks = ChronoUnit.WEEKS.between(nMinusOneLd, nLd)
             fills = []
             LocalDateTime ldt = n.toLocalDateTime()
-            for (int i = 1; i < fillWeeks; i++) {
+            for (int i = startAt; i < fillWeeks; i++) {
                 Date fill = ldt.minusWeeks(i).toDate()
-                fills.add(new ZeroFillDayCountItem(day: fill))
+                fills.add(new DayCountItem(fill, 0))
             }
         }
 
         return fills
     }
 
-    public static class ZeroFillDayCountItem implements DayCountItem {
-        Date day
-        Integer count = 0;
-    }
 }

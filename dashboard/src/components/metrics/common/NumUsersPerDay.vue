@@ -48,7 +48,7 @@ limitations under the License.
         loading: true,
         distinctUsersOverTime: [],
         hasDataEnoughData: false,
-        mutableTitle: title,
+        mutableTitle: this.title,
         props: {
           start: dayjs().subtract(30, 'day').valueOf(),
         },
