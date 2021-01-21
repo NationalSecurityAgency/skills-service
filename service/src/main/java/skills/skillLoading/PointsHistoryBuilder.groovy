@@ -88,7 +88,7 @@ class PointsHistoryBuilder {
             }
         }
         List<SkillHistoryPoints> historyPoints = pointsByDay.collect {
-            new SkillHistoryPoints(dayPerformed: it.key, points: it.value)
+            new SkillHistoryPoints(dayPerformed: it.key, points: it.value.toInteger())
         }.sort({ it.dayPerformed })
 
         historyPoints.first().points = (historyPoints.first().points + toAddForFirstDay).toInteger()
