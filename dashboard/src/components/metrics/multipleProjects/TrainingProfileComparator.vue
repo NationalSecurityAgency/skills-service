@@ -104,7 +104,7 @@ limitations under the License.
     mounted() {
       this.projects.available = this.availableProjects.map((proj) => ({ ...proj }));
       const numProjectsToSelect = Math.min(this.availableProjects.length, 4);
-      const availableSortedByMostSkills = this.projects.available.sort((a, b) => b.numSkills - a.numSkills);
+      const availableSortedByMostSkills = this.projects.available.sort((a, b) => a.projectId.localeCompare(b.projectId));
       const projs = availableSortedByMostSkills.slice(0, numProjectsToSelect);
       this.projects.selected = projs;
       this.genDataForCharts();
