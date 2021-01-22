@@ -13,25 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-describe('Navigation Tests', () => {
-  // beforeEach(() => {
-  //   cy.request('POST', '/app/projects/proj1', {
-  //     projectId: 'proj1',
-  //     name: "My New test Project"
-  //   })
-  //   cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
-  //     projectId: 'proj1', subjectId: 'subj1', name: 'Subject 1',
-  //   });
-  // });
-  const snapshotOptions = {
-    blackout: ['[data-cy=pointHistoryChart]', '[data-cy=timePassed]'],
-    failureThreshold: 0.03, // threshold for entire image
-    failureThresholdType: 'percent', // percent of image or number of pixels
-    customDiffConfig: { threshold: 0.01 }, // threshold for each pixel
-    capture: 'fullPage', // When fullPage, the application under test is captured in its entirety from top to bottom.
-  };
+import moment from 'moment';
+import dayjs from 'dayjs';
+// import localizedFormatPlugin from 'dayjs/plugin/localizedFormat';
+import relativeTimePlugin from 'dayjs/plugin/relativeTime';
+//
+// dayjs.extend(localizedFormatPlugin);
+dayjs.extend(relativeTimePlugin);
 
-  const cssAttachedToNavigableCards = 'skills-navigable-item';
+const dateFormatter = value => moment.utc(value).format('YYYY-MM-DD[T]HH:mm:ss[Z]');
+const timeFromNowFormatter = (value) => dayjs(value).startOf('hour').fromNow();
+
+
+const now = new Date().getTime()
+const yesterday = new Date().getTime() - (1000*60*60*24)
+
+  describe('Navigation Tests', () => {
+  // const snapshotOptions = {
+  //   blackout: ['[data-cy=pointHistoryChart]', '[data-cy=timePassed]'],
+  //   failureThreshold: 0.03, // threshold for entire image
+  //   failureThresholdType: 'percent', // percent of image or number of pixels
+  //   customDiffConfig: { threshold: 0.01 }, // threshold for each pixel
+  //   capture: 'fullPage', // When fullPage, the application under test is captured in its entirety from top to bottom.
+  // };
 
   beforeEach(() => {
     // Cypress.env('disabledUILoginProp', true);
@@ -128,6 +132,14 @@ describe('Navigation Tests', () => {
       name: 'Badge 1'
     });
 
+    cy.request('POST', '/admin/projects/proj1/badges/gemBadge', {
+      projectId: 'proj1',
+      badgeId: 'gemBadge',
+      name: 'Gem Badge',
+      startDate: dateFormatter(new Date() - 1000 * 60 * 60 * 24 * 7),
+      endDate: dateFormatter(new Date() + 1000 * 60 * 60 * 24 * 5),
+    });
+
     cy.fixture('vars.json').then((vars) => {
       cy.request('POST', '/logout');
       cy.register(Cypress.env('proxyUser'), vars.defaultPass, false);
@@ -152,14 +164,15 @@ describe('Navigation Tests', () => {
     cy.get('[data-cy=numSkillsAvailable]').contains(new RegExp(/^Total: 48$/));
     cy.get('[data-cy=num-skills-footer]').contains('So many skills... so little time! Good luck!');
 
-    cy.get('[data-cy=mostRecentAchievedSkill]').contains(new RegExp(/^Last Achieved skill \d+ minute[s]? ago$/));
+    // cy.get('[data-cy=mostRecentAchievedSkill]').contains(new RegExp(/^Last Achieved skill \d+ minute[s]? ago$/));
+    cy.get('[data-cy=mostRecentAchievedSkill]').contains(`Last Achieved skill ${timeFromNowFormatter(now)}`);
     cy.get('[data-cy=numAchievedSkillsLastWeek]').contains('1 skills in the last week');
     cy.get('[data-cy=numAchievedSkillsLastMonth]').contains('1 skills in the last month');
     cy.get('[data-cy=last-earned-footer]').contains('Keep up the good work!!');
 
     cy.get('[data-cy=badges-num-footer]').contains('Be proud to earn those badges!!');
     cy.get('[data-cy=numAchievedBadges]').contains(new RegExp(/^0$/));
-    cy.get('[data-cy=numBadgesAvailable]').contains(new RegExp(/^\/ 1$/));
+    cy.get('[data-cy=numBadgesAvailable]').contains(new RegExp(/^\/ 2$/));
     cy.get('[data-cy=numAchievedGlobalBadges]').contains('Global Badges: 0');
     cy.get('[data-cy=numAchievedGemBadges]').contains('Gems: 0');
 
@@ -173,7 +186,10 @@ describe('Navigation Tests', () => {
     cy.get('[data-cy=project-link-proj1]').find('[data-cy=project-card-project-points]').contains(new RegExp(/^400 \/ 1,400$/));
 
     cy.get('[data-cy=project-link-proj1]').click()
-    cy.contains('Overall Points');
+
+    cy.intercept('GET', '/api/projects/proj1/pointHistory').as('pointHistoryChart');
+    cy.wait('@pointHistoryChart');
+    cy.wrapIframe().contains('Overall Points');
   });
 
 });
