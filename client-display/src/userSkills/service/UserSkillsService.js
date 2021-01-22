@@ -120,10 +120,10 @@ export default {
     return response;
   },
 
-  addUserSkill(userSkillId) {
+  reportSkill(skillId) {
     let response = null;
-    response = axios.get(`${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/addSkill/${userSkillId}`, {
-      params: this.getUserIdParams(),
+    response = axios.post(`${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/skills/${skillId}`, {
+      params: this.getUserIdAndVersionParams(),
     }).then((result) => result.data);
     return response;
   },

@@ -31,7 +31,7 @@ limitations under the License.
             </div>
         </div>
 
-        <div class="text-sm-left text-secondary text-center skills-text-description col-lg-10">
+        <div class="text-sm-left text-center skills-text-description col-lg-10">
             <div class="row">
                 <h4 class="mb-1 col-md-8">{{ badge.badge }}</h4>
                 <div class="col-md-4 text-right">

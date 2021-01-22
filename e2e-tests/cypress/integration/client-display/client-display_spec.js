@@ -197,10 +197,10 @@ describe('Client Display Tests', () => {
         cy.cdClickSubj(0);
 
         // make sure progress bars have proper css attached
-        cy.get('[data-cy=skillProgress]:nth-child(1) [data-cy=skillProgressBar]').should('have.class', cssAttachedToNavigableCards);
-        cy.get('[data-cy=skillProgress]:nth-child(2) [data-cy=skillProgressBar]').should('have.class', cssAttachedToNavigableCards);
-        cy.get('[data-cy=skillProgress]:nth-child(3) [data-cy=skillProgressBar]').should('have.class', cssAttachedToNavigableCards);
-        cy.get('[data-cy=skillProgress]:nth-child(4) [data-cy=skillProgressBar]').should('have.class', cssAttachedToNavigableCards);
+        cy.get('[data-cy="skillProgress_index-0"] [data-cy=skillProgressBar]').should('have.class', cssAttachedToNavigableCards);
+        cy.get('[data-cy="skillProgress_index-1"] [data-cy=skillProgressBar]').should('have.class', cssAttachedToNavigableCards);
+        cy.get('[data-cy="skillProgress_index-2"] [data-cy=skillProgressBar]').should('have.class', cssAttachedToNavigableCards);
+        cy.get('[data-cy="skillProgress_index-3"] [data-cy=skillProgressBar]').should('have.class', cssAttachedToNavigableCards);
 
         // make sure it can navigate into each skill via title
         cy.cdClickSkill(0, false);
@@ -314,8 +314,8 @@ describe('Client Display Tests', () => {
         cy.cdClickSubj(0);
 
         cy.get('[data-cy=toggleSkillDetails]').click();
-        cy.get('[data-cy=skillProgress]:nth-child(2) [data-cy=achievementDate]').contains(`Achieved on ${orig.format("MMMM Do YYYY")}`);
-        cy.get('[data-cy=skillProgress]:nth-child(2) [data-cy=achievementDate]').contains(`${orig.fromNow()}`);
+        cy.get('[data-cy=skillProgress_index-1] [data-cy=achievementDate]').contains(`Achieved on ${orig.format("MMMM Do YYYY")}`);
+        cy.get('[data-cy=skillProgress_index-1] [data-cy=achievementDate]').contains(`${orig.fromNow()}`);
     });
 
     it('skill with dependency renders dependency graph', () => {
@@ -323,6 +323,8 @@ describe('Client Display Tests', () => {
         cy.cdClickSubj(0);
         cy.get('[data-cy=toggleSkillDetails]').click()
         cy.get('.locked-background').click();
+
+        cy.wait(4000);
         cy.matchImageSnapshot('Skill-Dependency', snapshotOptions);
     });
 

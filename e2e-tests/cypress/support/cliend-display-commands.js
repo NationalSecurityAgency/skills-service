@@ -37,9 +37,9 @@ Cypress.Commands.add("cdClickSubj", (subjIndex, expectedTitle) => {
 
 Cypress.Commands.add("cdClickSkill", (skillIndex, useProgressBar = true) => {
     if (useProgressBar) {
-        cy.get(`[data-cy=skillProgress]:nth-child(${skillIndex+1}) [data-cy=skillProgressBar]`).click();
+        cy.get(`[data-cy="skillProgress_index-${skillIndex}"] [data-cy="skillProgressBar"]`).click();
     } else {
-        cy.get(`[data-cy=skillProgress]:nth-child(${skillIndex+1}) [data-cy=skillProgressTitle]`).click();
+        cy.get(`[data-cy="skillProgress_index-${skillIndex}"] [data-cy="skillProgressTitle"]`).click();
     }
     cy.contains('Skill Overview')
 });

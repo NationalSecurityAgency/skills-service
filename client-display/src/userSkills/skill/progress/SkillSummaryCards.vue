@@ -26,7 +26,7 @@ limitations under the License.
 
         <div class="mb-2 my-lg-0 px-1" :class="{'col-lg-3': !isTimeWindowDisabled, 'col-lg-4': isTimeWindowDisabled}">
             <progress-info-card :title="skill.pointIncrement" label="Points per occurrence" :sub-title="occurrenceSubTitle"
-                                icon="fas fa-flag-checkered text-info"/>
+                                icon="fas fa-flag-checkered text-info" :animated="false"/>
         </div>
 
         <div v-if="!isTimeWindowDisabled" class="col-lg-3 m-b2 my-lg-0 px-1">

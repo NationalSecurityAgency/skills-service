@@ -103,11 +103,7 @@ describe('Client Display Tests', () => {
             }]
         }
 
-        cy.intercept({
-            url: '/api/projects/proj1/pointHistory',
-            status: 200,
-            response: data,
-        }).as('getPointHistory');
+        cy.intercept('/api/projects/proj1/pointHistory', data).as('getPointHistory');
 
         cy.cdVisit('/');
         cy.injectAxe();
@@ -236,11 +232,7 @@ describe('Client Display Tests', () => {
             }]
         }
 
-        cy.intercept({
-            url: '/api/projects/proj1/pointHistory',
-            status: 200,
-            response: data,
-        }).as('getPointHistory');
+        cy.intercept('/api/projects/proj1/pointHistory', data).as('getPointHistory');
 
         cy.cdVisit('/');
         cy.wait('@getPointHistory');
@@ -294,11 +286,7 @@ describe('Client Display Tests', () => {
             }]
         }
 
-        cy.intercept({
-            url: '/api/projects/proj1/pointHistory',
-            status: 200,
-            response: data,
-        }).as('getPointHistory');
+        cy.intercept('/api/projects/proj1/pointHistory', data).as('getPointHistory');
 
         cy.cdVisit('/');
         cy.wait('@getPointHistory');
@@ -352,11 +340,7 @@ describe('Client Display Tests', () => {
             }]
         }
 
-        cy.intercept({
-            url: '/api/projects/proj1/pointHistory',
-            status: 200,
-            response: data,
-        }).as('getPointHistory');
+        cy.intercept('/api/projects/proj1/pointHistory', data).as('getPointHistory');
 
         cy.cdVisit('/');
         cy.wait('@getPointHistory');
@@ -410,11 +394,7 @@ describe('Client Display Tests', () => {
             }]
         }
 
-        cy.intercept({
-            url: '/api/projects/proj1/pointHistory',
-            status: 200,
-            response: data,
-        }).as('getPointHistory');
+        cy.intercept('/api/projects/proj1/pointHistory', data).as('getPointHistory');
 
         cy.cdVisit('/');
         cy.wait('@getPointHistory');
@@ -485,11 +465,7 @@ describe('Client Display Tests', () => {
             }]
         }
 
-        cy.intercept({
-            url: '/api/projects/proj1/pointHistory',
-            status: 200,
-            response: data,
-        }).as('getPointHistory');
+        cy.intercept('/api/projects/proj1/pointHistory', data).as('getPointHistory');
 
         cy.cdVisit('/');
         cy.injectAxe();
@@ -561,12 +537,7 @@ describe('Client Display Tests', () => {
                 'name': 'Level 5'
             }]
         }
-
-        cy.intercept({
-            url: '/api/projects/proj1/pointHistory',
-            status: 200,
-            response: data,
-        }).as('getPointHistory');
+        cy.intercept('/api/projects/proj1/pointHistory', data).as('getPointHistory');
 
         cy.cdVisit('/');
         cy.wait('@getPointHistory');
@@ -611,12 +582,7 @@ describe('Client Display Tests', () => {
                 'name': 'Level 2'
             }]
         }
-
-        cy.intercept({
-            url: '/api/projects/proj1/pointHistory',
-            status: 200,
-            response: data,
-        }).as('getPointHistory');
+        cy.intercept('/api/projects/proj1/pointHistory', data).as('getPointHistory');
 
         cy.cdVisit('/');
         cy.wait('@getPointHistory');
@@ -655,11 +621,7 @@ describe('Client Display Tests', () => {
             }]
         }
 
-        cy.intercept('/api/projects/proj1/pointHistory',
-          {
-              statusCode: 200,
-              body: data,
-          }).as('getPointHistory');
+        cy.intercept('/api/projects/proj1/pointHistory', data).as('getPointHistory');
 
         cy.cdVisit('/');
         cy.wait('@getPointHistory');
@@ -702,17 +664,8 @@ describe('Client Display Tests', () => {
                 'name': 'Level 5'
             }]
         }
-
-        cy.intercept({
-            url: '/api/projects/proj1/pointHistory',
-            status: 200,
-            response: data,
-        }).as('getPointHistory');
-        cy.intercept({
-            url: '/api/projects/proj1/subjects/subj1/pointHistory',
-            status: 200,
-            response: data,
-        }).as('getPointHistorySubject');
+        cy.intercept('/api/projects/proj1/pointHistory', data).as('getPointHistory');
+        cy.intercept('/api/projects/proj1/subjects/subj1/pointHistory',data).as('getPointHistorySubject');
 
 
         cy.cdVisit('/');
@@ -784,11 +737,7 @@ describe('Client Display Tests', () => {
             }]
         };
 
-        cy.intercept({
-            url: '/api/projects/proj1/pointHistory',
-            status: 200,
-            response: data,
-        }).as('getPointHistory');
+        cy.intercept( '/api/projects/proj1/pointHistory', data).as('getPointHistory');
 
         cy.cdVisit('/');
         cy.wait('@getPointHistory');

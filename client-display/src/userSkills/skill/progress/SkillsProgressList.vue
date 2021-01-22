@@ -28,12 +28,26 @@ limitations under the License.
                 </div>
             </div>
         </div>
-        <div class="card-body">
+        <div class="card-body p-0">
             <skills-spinner :loading="loading"/>
             <div v-if="!loading">
                 <div v-if="skillsInternal && skillsInternal.length > 0">
-                    <skills-subject-skill-row v-for="(skill, index) in skillsInternal" :key="`unique-skill-${index}`"
-                                          :skill="skill" :show-description="showDescriptionsInternal"/>
+                  <div v-for="(skill, index) in skillsInternal"
+                       :key="`unique-skill-old-${index}`"
+                       :class="{
+                         'separator-border-thick' : showDescriptionsInternal,
+                         'border-bottom' : (index + 1) !== skillsInternal.length
+                       }"
+                  >
+                    <div class="p-3 pt-4">
+                      <skill-progress2
+                          :skill="skill"
+                          :enable-drill-down="true"
+                          :show-description="showDescriptionsInternal"
+                          :data-cy="`skillProgress_index-${index}`"
+                      />
+                    </div>
+                  </div>
                 </div>
                 <no-data-yet v-if="!(skillsInternal && skillsInternal.length > 0)" class="my-2"
                         title="Skills have not been added yet." sub-title="Please contact this project's administrator."/>
@@ -56,14 +70,14 @@ limitations under the License.
   import ToggleButton from 'vue-js-toggle-button/src/Button';
 
   import UserSkillsService from '@/userSkills/service/UserSkillsService';
-  import SkillsSubjectSkillRow from '@/userSkills/skill/progress/SkillsRow';
   import NoDataYet from '@/common/utilities/NoDataYet';
   import SkillsSpinner from '@/common/utilities/SkillsSpinner';
+  import SkillProgress2 from './SkillProgress2';
 
   export default {
     components: {
+      SkillProgress2,
       NoDataYet,
-      SkillsSubjectSkillRow,
       ToggleButton,
       SkillsSpinner,
     },
@@ -124,4 +138,8 @@ limitations under the License.
 </script>
 
 <style scoped>
+.separator-border-thick {
+  border-bottom-color: #f7f7f7 !important;
+  border-bottom-width: 12px !important;
+}
 </style>
