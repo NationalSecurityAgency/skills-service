@@ -747,7 +747,7 @@ class H2NativeRepo implements NativeQueriesRepo {
     }
 
     @Override
-    void createOrUpdateUserEvent(Integer skillRefId, String userId, Date start, Date end, String type, Integer count) {
+    void createOrUpdateUserEvent(Integer skillRefId, String userId, Date start, Date end, String type, Integer count, Integer weekNumber) {
         // find existing event
         String exists = '''
         SELECT id FROM user_events WHERE skill_ref_id = :skillRefId AND user_id = :userId AND start = :start AND stop = :end AND event_type = :type
@@ -776,7 +776,8 @@ class H2NativeRepo implements NativeQueriesRepo {
                 start, 
                 stop, 
                 count,
-                event_type
+                event_type,
+                week_number
             ) 
             VALUES (
                 :skillRefId, 
@@ -784,7 +785,8 @@ class H2NativeRepo implements NativeQueriesRepo {
                 :start, 
                 :end, 
                 :count,
-                :type
+                :type,
+                :weekNumber
             )
             '''
             Query query = entityManager.createNativeQuery(insertSql)
@@ -794,6 +796,7 @@ class H2NativeRepo implements NativeQueriesRepo {
             query.setParameter("end", end)
             query.setParameter("count", count)
             query.setParameter("type", type)
+            query.setParameter("weekNumber", weekNumber)
             query.executeUpdate()
         }
     }

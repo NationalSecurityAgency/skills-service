@@ -1025,6 +1025,8 @@
             </column>
 
             <column name="count" type="int" />
+
+            <column name="week_number" type="int" />
         </createTable>
 
         <createIndex indexName="index_user_events_user_id"
@@ -1035,6 +1037,10 @@
         <createIndex indexName="index_user_events_skill_ref_id"
                      tableName="user_events">
             <column name="skill_ref_id" type="int"/>
+        </createIndex>
+
+        <createIndex tableName="user_events" indexName="index_user_events_week_number">
+            <column name="week_number"></column>
         </createIndex>
 
         <createIndex indexName="index_user_events_event_type" tableName="user_events">

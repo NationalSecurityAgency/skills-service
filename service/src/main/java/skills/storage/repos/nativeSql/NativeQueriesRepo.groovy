@@ -50,6 +50,6 @@ interface NativeQueriesRepo {
 
     void identifyAndAddProjectLevelAchievements(String projectId, boolean pointsBasedLevels);
 
-    void createOrUpdateUserEvent(Integer skillRefId, String userId, Date start, Date end, String type, Integer count)
+    void createOrUpdateUserEvent(Integer skillRefId, String userId, Date start, Date end, String type, Integer count, Integer weekNumber)
 }
 

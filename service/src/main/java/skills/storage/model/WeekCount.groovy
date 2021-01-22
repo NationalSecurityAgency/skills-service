@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 SkillTree
+ * Copyright 2021 SkillTree
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,33 +15,12 @@
  */
 package skills.storage.model
 
-import groovy.transform.ToString
-
-import javax.persistence.*
-
-@Entity
-@Table(name="user_events")
-@ToString(includeNames = true)
-class UserEvent {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Integer id
-
-    // fk to users
-    String userId
-
-    // fk to SkillDef
-    Integer skillRefId
-
-    Date start
-
-    Date stop
-
-    Integer count
-
-    @Enumerated(EnumType.STRING)
-    EventType eventType
-
+class WeekCount {
     Integer weekNumber
+    Long count
+
+    WeekCount(Integer weekNumber, Long count) {
+        this.weekNumber = weekNumber
+        this.count = count
+    }
 }
