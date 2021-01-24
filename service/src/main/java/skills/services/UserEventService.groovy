@@ -15,7 +15,7 @@
  */
 package skills.services
 
-import antlr.debug.Event
+
 import groovy.transform.CompileStatic
 import groovy.transform.EqualsAndHashCode
 import groovy.util.logging.Slf4j
@@ -34,11 +34,7 @@ import skills.storage.repos.nativeSql.NativeQueriesRepo
 
 import javax.persistence.EntityManager
 import javax.persistence.PersistenceContext
-import java.time.DayOfWeek
-import java.time.Duration
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.LocalTime
+import java.time.*
 import java.time.temporal.ChronoUnit
 import java.time.temporal.TemporalField
 import java.time.temporal.WeekFields
@@ -259,47 +255,7 @@ class UserEventService {
         log.info("Deleted compacted input events in [${duration}]")
     }
 
-    @Deprecated
     @CompileStatic
-    private List<DayCountItem> handleMixedEventTypes(Stream<EventCount> mixedTypes, EventType targetEventType) {
-        Map<StartStopDate, DayCountItem> dailyAccumulator = [:]
-        List<DayCountItem> allCounts = []
-        // take any daily event counts and manually convert them into weekly counts
-        mixedTypes.forEach({
-            if (EventType.DAILY == it.eventType) {
-                StartStopDate startStopOfWeek = formatStartAndEnd(it.start, EventType.WEEKLY)
-                StartStopDate weekKey = new StartStopDate(start: startStopOfWeek.start, stop: startStopOfWeek.stop)
-
-                DayCountItem aggregation
-                if ((aggregation = dailyAccumulator.get(weekKey)) == null) {
-                    aggregation = new DayCountItem(startStopOfWeek.start, 0)
-                    dailyAccumulator.put(weekKey, aggregation)
-                }
-                aggregation.count += it.count
-            } else {
-                allCounts += new DayCountItem(it.start, it.count.toInteger())
-            }
-        })
-
-        if (!dailyAccumulator.isEmpty()) {
-            List<DayCountItem> compactedDaily = dailyAccumulator.values().toList()
-            compactedDaily = compactedDaily.sort() { it.day }.reverse()
-            //compare oldest manually compacted to most recent in allCounts, if there's overlap it will be between the most recent Weekly
-            //and the oldest manually compacted daily
-            // allCounts.day is a Timestamp. Need to convert it to a date for comparison
-            if (compactedDaily.last().day == new Date(allCounts.first().day.time)) {
-                DayCountItem overlapping = compactedDaily.removeLast()
-                allCounts[0].count += overlapping.count
-            }
-            allCounts.addAll(0, compactedDaily)
-        }
-
-        allCounts = fillGaps(allCounts, targetEventType)
-
-
-        return allCounts
-    }
-
     private static StartStopDate formatStartAndEnd(Date date, EventType type) {
         if (EventType.DAILY == type) {
             LocalDate localDate = date.toLocalDate()

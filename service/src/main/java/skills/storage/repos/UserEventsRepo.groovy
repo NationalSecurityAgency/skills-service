@@ -53,7 +53,7 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
 
     @Nullable
     @Query(value="""
-        select ue.start as day, count(ue.userId) as count from UserEvent ue
+        select new skills.storage.model.DayCountItem(ue.start, count(ue.userId)) from UserEvent ue
         where ue.start > :start AND ue.skillRefId = :skillRefId AND ue.eventType = :type 
         group by ue.start
         order by ue.start desc
