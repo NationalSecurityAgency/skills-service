@@ -66,7 +66,7 @@ class UserEventService {
      *
      * Note that if the start date exceeds the configured compactDailyEventsOlderThan, the DayCountItems are returned
      * aggregated by week (the day attributes will be separated by week with the daily count aggregated under that week)
-     * where DayCountItem.start refers to the start of that week's compacted metrics (Sunday).
+     * where DayCountItem.start refers to the start of that week's compacted metrics (Sunday). Missing days/weeks are zero filled.
      *
      * @param projectId
      * @param skillId
@@ -110,7 +110,7 @@ class UserEventService {
     /**
      * Returns the distinct user count for the specified project by day, unless start is older than the compactDailyEventsOlderThan
      * setting, in which case results are grouped by week where DayCountItem.start refers to the start-of-week (Sunday) for that week's
-     * distinct user counts.
+     * distinct user counts. Missing days/weeks are zero-filled.
      *
      * @param projectId
      * @param skillId
