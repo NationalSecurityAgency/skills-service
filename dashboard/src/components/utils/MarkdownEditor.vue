@@ -29,7 +29,7 @@ limitations under the License.
         <template slot="title">
           <i class="fa fa-eye mr-1" aria-hidden="true"/> <span>Preview</span>
         </template>
-        <div class="mt-2 content-height border rounded p-3" style="overflow-y: scroll;">
+        <div class="mt-2 content-height border rounded p-3" style="overflow-y: scroll;" data-cy="markdownEditor-preview">
           <markdown-text v-if="valueInternal" :text="valueInternal"/>
         </div>
       </b-tab>
