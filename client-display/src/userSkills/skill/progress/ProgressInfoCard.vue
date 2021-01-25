@@ -22,7 +22,7 @@ limitations under the License.
                     </div>
                     <div class="media-body text-truncate text-primary">
                         <h4 class="mb-0 text-truncate">
-                            <span :title="title | number">
+                            <span :title="title | number" data-cy="progressInfoCardTitle">
                               <animated-number v-if="animated" :num="title" />
                               <span v-else>{{ title | number }}</span>
                             </span>

@@ -49,7 +49,9 @@ limitations under the License.
       <div class="col text-md-left">
         <h4 @click="skillClicked" :class="{ 'skill-name-url' : enableDrillDown }" data-cy="skillProgressTitle">{{ skillInternal.skill }}</h4>
       </div>
-      <div class="col-auto text-right" :class="{ 'text-success' : isSkillComplete, 'text-primary': !isSkillComplete }">
+      <div class="col-auto text-right"
+           :class="{ 'text-success' : isSkillComplete, 'text-primary': !isSkillComplete }"
+           data-cy="skillProgress-ptsOverProgressBard">
         <span v-if="isSkillComplete" class="pr-1"><i class="fa fa-check"/></span>
         <animated-number :num="skillInternal.points"/>
         / {{ skillInternal.totalPoints | number }} Points

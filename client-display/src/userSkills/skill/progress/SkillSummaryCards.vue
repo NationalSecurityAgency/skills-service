@@ -16,17 +16,21 @@ limitations under the License.
 <template>
     <div class="row mt-0 px-3 justify-content-center">
         <div class="mb-2 my-lg-0 px-1" :class="{'col-lg-3': !isTimeWindowDisabled, 'col-lg-4': isTimeWindowDisabled}">
-            <progress-info-card :title="skill.points" label="Overall Points Earned" :sub-title="overallPtsSubTitle" icon="fa fa-running text-success"/>
+          <progress-info-card :title="skill.points" label="Overall Points Earned" :sub-title="overallPtsSubTitle"
+                              icon="fa fa-running text-success"
+                              data-cy="overallPointsEarnedCard"/>
         </div>
 
         <div class="mb-2 my-lg-0 px-1" :class="{'col-lg-3': !isTimeWindowDisabled, 'col-lg-4': isTimeWindowDisabled}">
-            <progress-info-card :title="skill.todaysPoints" label="Points Achieved Today" :sub-title="todayPtsSubTitle"
-                                icon="fa fa-clock text-warning"/>
+          <progress-info-card :title="skill.todaysPoints" label="Points Achieved Today" :sub-title="todayPtsSubTitle"
+                              icon="fa fa-clock text-warning"
+                              data-cy="pointsAchievedTodayCard"/>
         </div>
 
         <div class="mb-2 my-lg-0 px-1" :class="{'col-lg-3': !isTimeWindowDisabled, 'col-lg-4': isTimeWindowDisabled}">
             <progress-info-card :title="skill.pointIncrement" label="Points per occurrence" :sub-title="occurrenceSubTitle"
-                                icon="fas fa-flag-checkered text-info" :animated="false"/>
+                                icon="fas fa-flag-checkered text-info" :animated="false"
+                                data-cy="pointsPerOccurrenceCard"/>
         </div>
 
         <div v-if="!isTimeWindowDisabled" class="col-lg-3 m-b2 my-lg-0 px-1">

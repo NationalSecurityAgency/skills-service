@@ -20,12 +20,20 @@ limitations under the License.
         <a :href="skill.description.href" target="_blank" rel="noopener" class="btn btn-outline-info ">
           <i class="fas fa-question-circle"></i> Learn More <i class="fas fa-external-link-alt"></i>
         </a>
-        <button v-if="selfReport.available" class="btn btn-outline-info" @click="reportSkill"><i class="fas fa-check-square"></i> I did it</button>
+        <button v-if="selfReport.available" class="btn btn-outline-info"
+                :disabled="selfReportDisabled"
+                @click="reportSkill"
+                data-cy="selfReportBtn">
+          <i class="fas fa-check-square"></i> I did it
+        </button>
       </div>
     </div>
     <div class="col-12">
-      <div v-if="isPointsEarned && !selfReport.msgHidden" class="alert alert-success mt-2" role="alert">
+      <div v-if="isPointsEarned && !selfReport.msgHidden" class="alert alert-success mt-2" role="alert" data-cy="selfReportAlert">
         <i class="far fa-thumbs-up"></i> Congrats! You just earned <span class="text-success font-weight-bold">{{ selfReport.res.pointsEarned }}</span> points!
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close" @click="selfReport.msgHidden = true">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
     </div>
   </div>
@@ -53,6 +61,9 @@ limitations under the License.
       isPointsEarned() {
         return this.selfReport && this.selfReport.res && this.selfReport.res.skillApplied;
       },
+      selfReportDisabled() {
+        return this.isCompleted();
+      },
     },
     methods: {
       isCompleted() {
@@ -70,16 +81,7 @@ limitations under the License.
             this.selfReport.msgHidden = false;
             this.selfReport.res = res;
             this.$emit('points-earned', res.pointsEarned);
-            this.hideMsgAfterTimeout();
           });
-      },
-      hideMsgAfterTimeout() {
-        setTimeout(() => {
-          this.selfReport.msgHidden = true;
-          if (this.skill.points === this.skill.totalPoints) {
-            this.selfReport.available = false;
-          }
-        }, 500000);
       },
     },
   };
