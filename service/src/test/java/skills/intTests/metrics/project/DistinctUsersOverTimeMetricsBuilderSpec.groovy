@@ -15,15 +15,34 @@
  */
 package skills.intTests.metrics.project
 
-
 import groovy.json.JsonSlurper
 import groovy.time.TimeCategory
+import org.apache.commons.lang3.RandomUtils
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.metrics.builders.MetricsParams
+import skills.services.StartStopDateUtil
+import skills.services.UserEventService
+import skills.storage.model.EventType
+
+import java.time.DayOfWeek
+import java.time.Duration
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.temporal.TemporalAdjusters
+import java.time.temporal.TemporalField
+import java.time.temporal.WeekFields
 
 class DistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
+
+    @Autowired
+    UserEventService userEventService
+
+    @Value('#{"${skills.config.compactDailyEventsOlderThan}"}')
+    int maxDailyDays
 
     String metricsId = "distinctUsersOverTimeForProject"
 
@@ -112,8 +131,18 @@ class DistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
 
         List<Date> days
 
+        TestDates testDates = new TestDates()
+
+        days = [
+                testDates.getDateInPreviousWeek().minusDays(28).toDate(),
+                testDates.getDateInPreviousWeek().minusDays(21).toDate(),
+                testDates.getDateInPreviousWeek().minusDays(14).toDate(),
+                testDates.getDateInPreviousWeek().minusDays(7).toDate(),
+                testDates.getDateInPreviousWeek().toDate(),
+                testDates.getDateWithinCurrentWeek().toDate(),
+        ]
+
         use(TimeCategory) {
-            days = (5..0).collect { int day -> day.days.ago }
             days.eachWithIndex { Date date, int index ->
                 users.subList(0, index).each { String user ->
                     skills.subList(0, index).each { skill ->
@@ -123,26 +152,24 @@ class DistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
             }
         }
 
+        assert maxDailyDays == 3, "test data constructed with the assumption that skills.config.compactDailyEventsOlderThan is set to 3"
+        userEventService.compactDailyEvents()
+
+        Duration duration = Duration.between(testDates.getDateInPreviousWeek().minusDays(28), LocalDateTime.now())
+
         when:
-        def res5Days = skillsService.getMetricsData(proj.projectId, metricsId, getProps(5))
-        def res6Days = skillsService.getMetricsData(proj.projectId, metricsId, getProps(6))
-        def res4Days = skillsService.getMetricsData(proj.projectId, metricsId, getProps(4))
-        def res3Days = skillsService.getMetricsData(proj.projectId, metricsId, getProps(3))
+        def res30days = skillsService.getMetricsData(proj.projectId, metricsId, getProps(duration.toDays().toInteger()))
+        def resOver30days = skillsService.getMetricsData(proj.projectId, metricsId, getProps(duration.toDays().toInteger()+14))
+
         then:
-        res5Days.size() == 6
-        res5Days.collect({ it.count }) == [0, 1, 2, 3, 4, 5,]
-        res5Days.collect({ it.value }) == days.collect({ it.time })
 
-        res6Days.size() == 7
-        res6Days.collect({ it.count }) == [0, 0, 1, 2, 3, 4, 5,]
+        res30days.size() == 5
+        res30days.collect {it.count} == [1, 2, 3, 4, 5]
+        res30days.collect {it.value} == days.subList(1, days.size()).collect { StartStopDateUtil.computeStartAndStopDates(it, EventType.WEEKLY).start.time}
 
-        res4Days.size() == 5
-        res4Days.collect({ it.count }) == [1, 2, 3, 4, 5,]
-        res4Days.collect({ it.value }) == days.subList(1, days.size()).collect({ it.time })
-
-        res3Days.size() == 4
-        res3Days.collect({ it.count }) == [2, 3, 4, 5,]
-        res3Days.collect({ it.value }) == days.subList(2, days.size()).collect({ it.time })
+        resOver30days.size() == 7
+        resOver30days.collect {it.count} == [0, 0, 1, 2, 3, 4, 5]
+        resOver30days.collect {it.value} == [days[0].minus(7), *days].collect { StartStopDateUtil.computeStartAndStopDates(it, EventType.WEEKLY).start.time}
     }
 
     def "number of users growing over few days - specific skill"() {
@@ -157,8 +184,18 @@ class DistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
 
         List<Date> days
 
+        TestDates testDates = new TestDates()
+
+        days = [
+                testDates.getDateInPreviousWeek().minusDays(28).toDate(),
+                testDates.getDateInPreviousWeek().minusDays(21).toDate(),
+                testDates.getDateInPreviousWeek().minusDays(14).toDate(),
+                testDates.getDateInPreviousWeek().minusDays(7).toDate(),
+                testDates.getDateInPreviousWeek().toDate(),
+                testDates.getDateWithinCurrentWeek().toDate(),
+        ]
+
         use(TimeCategory) {
-            days = (5..0).collect { int day -> day.days.ago }
             days.eachWithIndex { Date date, int index ->
                 users.subList(0, index).each { String user ->
                     skills.subList(0, index).each { skill ->
@@ -168,28 +205,31 @@ class DistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
             }
         }
 
+        assert maxDailyDays == 3, "test data constructed with the assumption that skills.config.compactDailyEventsOlderThan is set to 3"
+        userEventService.compactDailyEvents()
+
+        Duration duration = Duration.between(testDates.getDateInPreviousWeek().minusDays(28), LocalDateTime.now())
+
         when:
-        def res5Days = skillsService.getMetricsData(proj.projectId, metricsId, getProps(5, skills[1].skillId))
-        def res6Days = skillsService.getMetricsData(proj.projectId, metricsId, getProps(6, skills[1].skillId))
-        def res4Days = skillsService.getMetricsData(proj.projectId, metricsId, getProps(4, skills[1].skillId))
-        def skill3FiveDays = skillsService.getMetricsData(proj.projectId, metricsId, getProps(5, skills[2].skillId))
+        def res30days = skillsService.getMetricsData(proj.projectId, metricsId, getProps(duration.toDays().toInteger(), skills[1].skillId))
+        def resOver30days = skillsService.getMetricsData(proj.projectId, metricsId, getProps(duration.toDays().toInteger()+14, skills[1].skillId))
+        def skill3res30days = skillsService.getMetricsData(proj.projectId, metricsId, getProps(duration.toDays().toInteger(), skills[2].skillId))
+
         then:
-        res5Days.size() == 6
-        res5Days.collect({ it.count }) == [0, 0, 2, 3, 4, 5]
-        res5Days.collect({ it.value }) == days.collect({ it.time })
+        res30days.size() == 5
+        res30days.collect {it.count} == [0, 2, 3, 4, 5]
+        res30days.collect {it.value} == days.subList(1, days.size()).collect { StartStopDateUtil.computeStartAndStopDates(it, EventType.WEEKLY).start.time}
 
-        res6Days.size() == 7
-        res6Days.collect({ it.count }) == [0, 0, 0, 2, 3, 4, 5]
+        resOver30days.size() == 7
+        resOver30days.collect {it.count} == [0, 0, 0, 2, 3, 4, 5]
+        resOver30days.collect {it.value} == [days[0].minus(7), *days].collect { StartStopDateUtil.computeStartAndStopDates(it, EventType.WEEKLY).start.time}
 
-        res4Days.size() == 5
-        res4Days.collect({ it.count }) == [0, 2, 3, 4, 5]
-        res4Days.collect({ it.value }) == days.subList(1, days.size()).collect({ it.time })
+        skill3res30days.size() == 5
+        skill3res30days.collect {it.count} == [0, 0, 3, 4, 5]
+        skill3res30days.collect {it.value} == days.subList(1, days.size()).collect { StartStopDateUtil.computeStartAndStopDates(it, EventType.WEEKLY).start.time}
 
-        skill3FiveDays.size() == 6
-        skill3FiveDays.collect({ it.count }) == [0, 0, 0, 3, 4, 5]
-        skill3FiveDays.collect({ it.value }) == days.collect({ it.time })
+
     }
-
 
     private Map getProps(int numDaysAgo, String skillId = null) {
         Map props = [:]
@@ -200,5 +240,53 @@ class DistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
             }
         }
         return props
+    }
+
+    private static class TestDates {
+        LocalDateTime now;
+        LocalDateTime startOfCurrentWeek;
+        LocalDateTime startOfTwoWeeksAgo;
+
+        public TestDates() {
+            now = LocalDateTime.now()
+            startOfCurrentWeek = LocalDateTime.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY))
+            startOfTwoWeeksAgo = startOfCurrentWeek.minusWeeks(1)
+        }
+
+        LocalDateTime getDateWithinCurrentWeek(boolean allowFutureDate=false) {
+            if(now.getDayOfWeek() == DayOfWeek.SUNDAY) {
+                if (allowFutureDate) {
+                    return now.plusDays(RandomUtils.nextInt(1, 6))
+                }
+                return now//nothing we can do
+            } else {
+                //us days of week are sun-saturday as 1-7
+                TemporalField dayOfWeekField = WeekFields.of(Locale.US).dayOfWeek()
+                int currentDayOfWeek = now.get(dayOfWeekField)
+
+                if (allowFutureDate) {
+                    int randomDay = -1
+                    while ((randomDay = RandomUtils.nextInt(1, 7)) == currentDayOfWeek) {
+                        //
+                    }
+                    return now.with(dayOfWeekField, randomDay)
+                }
+
+                return now.with(dayOfWeekField, RandomUtils.nextInt(1,currentDayOfWeek))
+            }
+        }
+
+        LocalDateTime getDateInPreviousWeek(Date olderThan=null){
+            TemporalField dayOfWeekField = WeekFields.of(Locale.US).dayOfWeek()
+            if (olderThan) {
+                LocalDateTime retVal
+                while((retVal = startOfTwoWeeksAgo.with(dayOfWeekField, RandomUtils.nextInt(1,7))).isAfter(olderThan.toLocalDateTime())){
+                    //loop until we get a date that is before the target
+                }
+                return retVal
+            } else {
+                return startOfTwoWeeksAgo.with(dayOfWeekField, RandomUtils.nextInt(1, 7))
+            }
+        }
     }
 }

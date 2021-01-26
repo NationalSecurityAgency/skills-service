@@ -23,28 +23,27 @@ import skills.controller.exceptions.SkillException
 
 import java.text.DateFormat
 import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
 
 import static org.springframework.data.domain.Sort.Direction.ASC
 import static org.springframework.data.domain.Sort.Direction.DESC
 
 @CompileStatic
 class MetricsParams {
-    final static String P_SKILL_ID = "skillId"
-    final static String P_SUBJECT_ID = "subjectId"
-    final static String P_PROJECT_IDS = "projIds"
-    final static String P_PROJECT_IDS_AND_LEVEL = "projIdsAndLevel"
-    final static String P_START_TIMESTAMP = "start"
-    final static String P_ACHIEVEMENT_TYPES = "achievementTypes"
-    final static String P_USERNAME_FILTER = "usernameFilter"
-    final static String P_NAME_FILTER = "nameFilter"
-    final static String P_MIN_LEVEL = "minLevel"
-    final static String P_FROM_DAY_FILTER = "fromDayFilter"
-    final static String P_TO_DAY_FILTER = "toDayFilter"
-    final static DateFormat DAY_FORMAT = new SimpleDateFormat("yyyy-MM-dd")
-
-    private final static long oneDay = 1000 * 60 * 60 * 24
-    private final static long oneDayMinusASecond = oneDay - 1000
-    private final static long thirtyDays = 30 * oneDay
+    public static final String P_SKILL_ID = "skillId"
+    public static final String P_SUBJECT_ID = "subjectId"
+    public static final String P_PROJECT_IDS = "projIds"
+    public static final String P_PROJECT_IDS_AND_LEVEL = "projIdsAndLevel"
+    public static final String P_START_TIMESTAMP = "start"
+    public static final String P_ACHIEVEMENT_TYPES = "achievementTypes"
+    public static final String P_USERNAME_FILTER = "usernameFilter"
+    public static final String P_NAME_FILTER = "nameFilter"
+    public static final String P_MIN_LEVEL = "minLevel"
+    public static final String P_FROM_DAY_FILTER = "fromDayFilter"
+    public static final String P_TO_DAY_FILTER = "toDayFilter"
+    public static final DateFormat DAY_FORMAT = new SimpleDateFormat("yyyy-MM-dd")
 
     static String ACHIEVEMENT_TYPE_OVERALL = "Overall"
 
@@ -62,20 +61,19 @@ class MetricsParams {
 
     static Date getFromDayFilter(String projectId, String chartId, Map<String, String> props) {
         String fromStr = getParam(props, P_FROM_DAY_FILTER, chartId, projectId, true)
-        return fromStr ? DAY_FORMAT.parse(fromStr) : new Date(1)
+        return fromStr ? LocalDate.parse(fromStr).toDate() : new Date(1)
     }
 
     static Date getToDayFilter(String projectId, String chartId, Map<String, String> props) {
         String fromStr = getParam(props, P_TO_DAY_FILTER, chartId, projectId, true)
         Date res
         if (fromStr) {
-            res = new Date(DAY_FORMAT.parse(fromStr).time + (1000 * 60 * 60 * 24) - 1)
+            res = LocalDate.parse(fromStr).atTime(LocalTime.MAX).toDate()
         } else {
-            res = new Date(new Date().time + 30 * thirtyDays)
+            res = LocalDate.now().plusDays(900).toDate()
         }
         return res
     }
-
 
     static String getNameFilter(String projectId, String chartId, Map<String, String> props) {
         return getParam(props, P_NAME_FILTER, chartId, projectId, true) ?: "ALL"
@@ -103,19 +101,12 @@ class MetricsParams {
         String tStr = getParam(props, P_START_TIMESTAMP, chartId, projectId)
         Long timestamp = Long.valueOf(tStr)
         int numYears = 3
-        Date threeYearsAgo = getYearsAgo(numYears)
+        Date threeYearsAgo = LocalDateTime.now().minusYears(3).toDate()
         Date date = new Date(timestamp)
         if (date.before(threeYearsAgo)) {
             throw new SkillException("Metrics[${chartId}]: ${P_START_TIMESTAMP} param timestamp must be within last ${numYears} years. Provided: [${date}]", projectId)
         }
         return date
-    }
-
-    @CompileDynamic
-    private static Date getYearsAgo(int numYears) {
-        use(TimeCategory) {
-            return numYears.years.ago;
-        }
     }
 
     static String getParam(Map<String, String> props, String paramId, String chartId, String projectId = null, boolean isOptional = false) {

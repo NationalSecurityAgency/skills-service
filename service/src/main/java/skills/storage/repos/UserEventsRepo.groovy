@@ -36,7 +36,7 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
     @Nullable
     @Query(value="""
         select new skills.storage.model.WeekCount(ue.weekNumber, sum(ue.count)) from UserEvent ue
-        where ue.start > :start AND ue.skillRefId = :skillRefId
+        where ue.start >= :start AND ue.skillRefId = :skillRefId
         group by ue.weekNumber
         order by ue.weekNumber desc
     """)
@@ -45,7 +45,7 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
     @Nullable
     @Query(value="""
         select new skills.storage.model.DayCountItem(ue.start, sum(ue.count)) from UserEvent ue
-        where ue.start > :start AND ue.skillRefId = :skillRefId AND ue.eventType = :type 
+        where ue.start >= :start AND ue.skillRefId = :skillRefId AND ue.eventType = :type 
         group by ue.start
         order by ue.start desc
     """)
@@ -63,7 +63,7 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
     @Nullable
     @Query(value="""
         select new skills.storage.model.WeekCount(ue.weekNumber, count(distinct ue.userId)) from UserEvent ue
-        where ue.start > :start AND ue.skillRefId = :skillRefId
+        where ue.start >= :start AND ue.skillRefId = :skillRefId
         group by ue.weekNumber
         order by ue.weekNumber desc
     """)
@@ -81,7 +81,7 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
     @Nullable
     @Query(value="""
         select new skills.storage.model.WeekCount(ue.weekNumber, sum(ue.count)) from UserEvent ue
-        where ue.start > :start AND ue.skillRefId in (SELECT child.id FROM SkillRelDef where parent.id = :skillRefId)
+        where ue.start >= :start AND ue.skillRefId in (SELECT child.id FROM SkillRelDef where parent.id = :skillRefId)
         group by ue.weekNumber
         order by ue.weekNumber desc
     """)
@@ -90,7 +90,7 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
 
     @Query(value="""
         select new skills.storage.model.WeekCount(ue.weekNumber, count(distinct ue.userId)) from UserEvent ue
-        where ue.start > :start AND
+        where ue.start >= :start AND
         ue.skillRefId in (SELECT child.id FROM SkillRelDef where parent.id = :skillRefId)
         group by ue.weekNumber
         order by ue.weekNumber desc
@@ -127,7 +127,7 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
 
     @Query(value="""
         select new skills.storage.model.WeekCount(ue.weekNumber, sum(ue.count)) from UserEvent ue
-        where ue.start > :start AND
+        where ue.start >= :start AND
         ue.skillRefId in (SELECT sd.id FROM SkillDef sd WHERE sd.projectId = :projectId AND sd.type = 'Skill')   
         group by ue.weekNumber
         order by ue.weekNumber desc
@@ -154,7 +154,7 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
 
     @Query(value="""
         select new skills.storage.model.WeekCount(ue.weekNumber, count(distinct ue.userId)) from UserEvent ue
-        where ue.start > :start AND
+        where ue.start >= :start AND
         ue.skillRefId in (SELECT sd.id FROM SkillDef sd WHERE sd.projectId = :projectId AND sd.type = 'Skill')   
         group by ue.weekNumber
         order by ue.weekNumber desc
