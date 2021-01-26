@@ -60,8 +60,9 @@ limitations under the License.
               </div>
             </div>
           </div>
-          <hr class="mb-0 pb-1 mt-4 mt-lg-0"/>
-          <hr class="my-0 py-0"/>
+<!--          <hr class="mb-0 pb-1 mt-4 mt-lg-0"/>-->
+<!--          <hr class="my-0 py-0"/>-->
+            <skills-hr />
 
           <div class="row mt-3">
             <div class="col-12 col-lg">
@@ -108,8 +109,9 @@ limitations under the License.
             </div>
           </div>
 
-          <hr class="my-0 pb-1"/>
-          <hr class="mt-0 pt-0"/>
+<!--          <hr class="my-0 pb-1"/>-->
+<!--          <hr class="mt-0 pt-0"/>-->
+          <skills-hr />
 
           <div class="row">
             <div class="col-12 col-lg">
@@ -178,10 +180,32 @@ limitations under the License.
             </div>
           </div>
 
-            <hr class="my-0 pb-1"/>
-            <hr class="mt-0 pt-0"/>
+            <hr class="mt-0"/>
 
-          <div class="">
+            <div class="row mb-2">
+              <div class="col-12 col-lg-auto">
+                  <b-form-checkbox data-cy="selfReportEnableCheckbox" id="self-report-checkbox"
+                                   class="d-inline" v-model="selfReport.enabled"
+                                   v-on:input="updatedSelfReportingStatus"/>
+                Self Reporting <inline-help msg="Check to enable ability for users to self report this skill."/>:
+              </div>
+              <div class="col-12 col-lg">
+                <b-form-group v-slot="{ ariaDescribedby }">
+                  <b-form-radio-group
+                    id="self-reporting-type"
+                    v-model="selfReport.selected"
+                    :options="selfReport.options"
+                    :aria-describedby="ariaDescribedby"
+                    name="Self Reporting Options"
+                    data-cy="selfReportTypeSelector"
+                  ></b-form-radio-group>
+                </b-form-group>
+              </div>
+            </div>
+
+            <hr class="mt-0"/>
+
+            <div class="">
             <label class="label">Description</label>
             <div class="control">
               <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" v-slot="{errors}" name="Skill Description">
@@ -287,12 +311,21 @@ limitations under the License.
           numPointIncrementMaxOccurrences: 1,
           description: null,
           helpUrl: null,
+          selfReportType: null,
         },
         canEditSkillId: false,
         initial: {
           skillId: '',
           skillName: '',
           latestVersion: 0,
+        },
+        selfReport: {
+          enabled: false,
+          selected: 'approve',
+          options: [
+            { text: 'Approval Queue', value: 'approve', disabled: true },
+            { text: 'Honor System', value: 'honor', disabled: true },
+          ],
         },
         overallErrMsg: '',
         show: this.value,
@@ -448,6 +481,11 @@ limitations under the License.
               this.skillInternal.skillId = InputSanitizer.sanitize(this.skillInternal.skillId);
               this.skillInternal.helpUrl = InputSanitizer.sanitize(this.skillInternal.helpUrl);
               this.skillInternal = { subjectId: this.subjectId, ...this.skillInternal };
+              if (this.selfReport.enabled) {
+                this.skillInternal.selfReportType = this.selfReport.selected;
+              } else {
+                this.skillInternal.selfReportType = null;
+              }
               this.$emit('skill-saved', { isEdit: this.isEdit, ...this.skillInternal });
               this.close({ saved: true });
             }
@@ -492,6 +530,13 @@ limitations under the License.
           this.skillInternal.pointIncrementIntervalMins = 0;
           this.skillInternal.numPointIncrementMaxOccurrences = 1;
         }
+      },
+      updatedSelfReportingStatus(checked) {
+        this.selfReport.options = this.selfReport.options.map((item) => {
+          const copy = { ...item };
+          copy.disabled = !checked;
+          return copy;
+        });
       },
     },
   };

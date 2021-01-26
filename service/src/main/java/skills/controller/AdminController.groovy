@@ -17,6 +17,7 @@ package skills.controller
 
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
+import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.PageRequest
@@ -810,7 +811,11 @@ class AdminController {
         SkillsValidator.isTrue(projectId == value.projectId, "Project Id must equal", projectId)
         SkillsValidator.isTrue(setting == value.setting, "Setting Id must equal", projectId)
 
-        settingsService.saveSetting(value)
+        if (StringUtils.isBlank(value)) {
+            settingsService.deleteProjectSetting(setting)
+        } else {
+            settingsService.saveSetting(value)
+        }
         return new RequestResult(success: true)
     }
 
@@ -832,7 +837,16 @@ class AdminController {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotNull(values, "Settings")
 
-        settingsService.saveSettings(values)
+        List<ProjectSettingsRequest> toDelete = values.findAll { StringUtils.isBlank(it.value)}
+        if (toDelete) {
+            settingsService.deleteProjectSettings(toDelete)
+        }
+
+        List<ProjectSettingsRequest> toSave = values.findAll { !StringUtils.isBlank(it.value)}
+        if (toSave) {
+            settingsService.saveSettings(toSave)
+        }
+
         return new RequestResult(success: true)
     }
 
