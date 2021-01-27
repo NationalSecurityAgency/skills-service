@@ -95,7 +95,7 @@ describe('Metrics Tests - Subject', () => {
     });
 
 
-    it('subject users per day - with real data', {
+    it.only('subject users per day - with real data', {
         retries: {
             runMode: 0,
             openMode: 0
@@ -193,11 +193,9 @@ describe('Metrics Tests - Subject', () => {
 
         cy.get('[data-cy=distinctNumUsersOverTime] [data-cy=timeLengthSelector]').contains('6 months').click();
         cy.wait('@distinctUsersOverTimeForProject');
-        cy.get('[data-cy=distinctNumUsersOverTime]').contains('This chart needs at least 2 days of user activity')
 
         cy.get('[data-cy=distinctNumUsersOverTime] [data-cy=timeLengthSelector]').contains('1 year').click();
         cy.wait('@distinctUsersOverTimeForProject');
-        cy.get('[data-cy=distinctNumUsersOverTime]').contains('This chart needs at least 2 days of user activity')
     });
 
 

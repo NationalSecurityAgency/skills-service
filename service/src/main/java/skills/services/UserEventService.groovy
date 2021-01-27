@@ -279,9 +279,11 @@ class UserEventService {
             results.add(it)
         })
 
-        List<DayCountItem> zeroFillFromStart = zeroFillGaps(EventType.WEEKLY, last, startOfQueryRange, false)
-        if (zeroFillFromStart) {
-            results.addAll(zeroFillFromStart)
+        if (results) {
+            List<DayCountItem> zeroFillFromStart = zeroFillGaps(EventType.WEEKLY, last, startOfQueryRange, false)
+            if (zeroFillFromStart) {
+                results.addAll(zeroFillFromStart)
+            }
         }
 
         return results
@@ -305,9 +307,11 @@ class UserEventService {
             results.add(dci)
         })
 
-        List<DayCountItem> zeroFillFromStart = zeroFillGaps(EventType.WEEKLY, last, startOfQueryRange, false)
-        if (zeroFillFromStart) {
-            results.addAll(zeroFillFromStart)
+        if (results) {
+            List<DayCountItem> zeroFillFromStart = zeroFillGaps(EventType.WEEKLY, last, startOfQueryRange, false)
+            if (zeroFillFromStart) {
+                results.addAll(zeroFillFromStart)
+            }
         }
 
         return results
