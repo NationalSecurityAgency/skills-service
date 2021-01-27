@@ -60,9 +60,6 @@ limitations under the License.
               </div>
             </div>
           </div>
-<!--          <hr class="mb-0 pb-1 mt-4 mt-lg-0"/>-->
-<!--          <hr class="my-0 py-0"/>-->
-            <skills-hr />
 
           <div class="row mt-3">
             <div class="col-12 col-lg">
@@ -109,11 +106,7 @@ limitations under the License.
             </div>
           </div>
 
-<!--          <hr class="my-0 pb-1"/>-->
-<!--          <hr class="mt-0 pt-0"/>-->
-          <skills-hr />
-
-          <div class="row">
+          <div class="row mt-3">
             <div class="col-12 col-lg">
               <div class="form-group">
                 <label><b-form-checkbox data-cy="timeWindowCheckbox" id="checkbox-1" class="d-inline" v-model="skillInternal.timeWindowEnabled" v-on:input="resetTimeWindow"/>Time Window
@@ -190,7 +183,7 @@ limitations under the License.
                 Self Reporting <inline-help msg="Check to enable ability for users to self report this skill."/>:
               </div>
               <div class="col-12 col-lg">
-                <b-form-group v-slot="{ ariaDescribedby }">
+                <b-form-group v-slot="{ ariaDescribedby }" class="m-0 p-0">
                   <b-form-radio-group
                     id="self-reporting-type"
                     v-model="selfReport.selected"
@@ -252,6 +245,7 @@ limitations under the License.
   import InlineHelp from '../utils/InlineHelp';
   import LoadingContainer from '../utils/LoadingContainer';
   import InputSanitizer from '../utils/InputSanitizer';
+  import SettingsService from '../settings/SettingsService';
 
   extend('min_value', {
     // eslint-disable-next-line camelcase
@@ -320,11 +314,12 @@ limitations under the License.
           latestVersion: 0,
         },
         selfReport: {
+          loading: true,
           enabled: false,
-          selected: 'approve',
+          selected: 'Approval',
           options: [
-            { text: 'Approval Queue', value: 'approve', disabled: true },
-            { text: 'Honor System', value: 'honor', disabled: true },
+            { text: 'Approval Queue', value: 'Approval', disabled: true },
+            { text: 'Honor System', value: 'HonorSystem', disabled: true },
           ],
         },
         overallErrMsg: '',
@@ -334,15 +329,17 @@ limitations under the License.
     mounted() {
       if (this.isEdit) {
         this.loadSkillDetails();
+        this.selfReport.loading = false;
       } else {
         this.skillInternal = { version: 0, ...this.skillInternal };
         this.findLatestSkillVersion();
+        this.loadSelfReportProjectSetting();
       }
       this.setupValidation();
     },
     computed: {
       isLoading() {
-        return this.isLoadingSkillDetails;
+        return this.isLoadingSkillDetails || this.selfReport.loading;
       },
       totalPoints() {
         if (this.skillInternal.pointIncrement && this.skillInternal.numPerformToCompletion) {
@@ -497,9 +494,24 @@ limitations under the License.
             this.skillInternal = { originalSkillId: loadedSkill.skillId, isEdit: this.isEdit, ...loadedSkill };
             this.initial.skillId = this.skillInternal.skillId;
             this.initial.skillName = this.skillInternal.name;
+
+            if (loadedSkill.selfReportingType) {
+              this.selfReport.selected = loadedSkill.selfReportingType;
+              this.updatedSelfReportingStatus(true);
+            }
           })
           .finally(() => {
             this.isLoadingSkillDetails = false;
+          });
+      },
+      loadSelfReportProjectSetting() {
+        SettingsService.getProjectSetting(this.projectId, 'selfReport.type')
+          .then((res) => {
+            if (res) {
+              this.updatedSelfReportingStatus(true);
+              this.selfReport.selected = res.value;
+            }
+            this.selfReport.loading = false;
           });
       },
       findLatestSkillVersion() {
@@ -532,6 +544,7 @@ limitations under the License.
         }
       },
       updatedSelfReportingStatus(checked) {
+        this.selfReport.enabled = checked;
         this.selfReport.options = this.selfReport.options.map((item) => {
           const copy = { ...item };
           copy.disabled = !checked;

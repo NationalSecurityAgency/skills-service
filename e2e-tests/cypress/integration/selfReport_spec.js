@@ -38,12 +38,12 @@ describe('Self Report Skills Management Tests', () => {
         cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled');
         cy.get('[data-cy="unsavedChangesAlert"]').contains('Unsaved Changes');
 
-        cy.get('[data-cy="selfReportTypeSelector"] [value="approve"]').should('be.checked');
-        cy.get('[data-cy="selfReportTypeSelector"] [value="honor"]').should('not.be.checked');
+        cy.get('[data-cy="selfReportTypeSelector"] [value="Approval"]').should('be.checked');
+        cy.get('[data-cy="selfReportTypeSelector"] [value="HonorSystem"]').should('not.be.checked');
 
-        cy.get('[data-cy="selfReportTypeSelector"] [value="honor"]').click({force:true})
-        cy.get('[data-cy="selfReportTypeSelector"] [value="approve"]').should('not.be.checked');
-        cy.get('[data-cy="selfReportTypeSelector"] [value="honor"]').should('be.checked');
+        cy.get('[data-cy="selfReportTypeSelector"] [value="HonorSystem"]').click({force:true})
+        cy.get('[data-cy="selfReportTypeSelector"] [value="Approval"]').should('not.be.checked');
+        cy.get('[data-cy="selfReportTypeSelector"] [value="HonorSystem"]').should('be.checked');
 
         cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled');
         cy.get('[data-cy="unsavedChangesAlert"]').contains('Unsaved Changes');
@@ -56,8 +56,8 @@ describe('Self Report Skills Management Tests', () => {
         // refresh and check that the values persisted
         cy.visit('/projects/proj1/settings');
         cy.get('[data-cy="selfReportSwitch"]').should('be.checked');
-        cy.get('[data-cy="selfReportTypeSelector"] [value="approve"]').should('not.be.checked');
-        cy.get('[data-cy="selfReportTypeSelector"] [value="honor"]').should('be.checked');
+        cy.get('[data-cy="selfReportTypeSelector"] [value="Approval"]').should('not.be.checked');
+        cy.get('[data-cy="selfReportTypeSelector"] [value="HonorSystem"]').should('be.checked');
         cy.get('[data-cy="unsavedChangesAlert"]').should('not.exist')
         cy.get('[data-cy="settingsSavedAlert"]').should('not.exist')
 
@@ -66,16 +66,16 @@ describe('Self Report Skills Management Tests', () => {
         cy.get('[data-cy="unsavedChangesAlert"]').contains('Unsaved Changes')
         cy.get('[data-cy="settingsSavedAlert"]').should('not.exist');
         cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled');
-        cy.get('[data-cy="selfReportTypeSelector"] [value="approve"]').should('be.disabled');
-        cy.get('[data-cy="selfReportTypeSelector"] [value="honor"]').should('be.disabled');
+        cy.get('[data-cy="selfReportTypeSelector"] [value="Approval"]').should('be.disabled');
+        cy.get('[data-cy="selfReportTypeSelector"] [value="HonorSystem"]').should('be.disabled');
         cy.get('[data-cy="saveSettingsBtn"]').click();
 
         cy.visit('/projects/proj1/settings');
         cy.get('[data-cy="selfReportSwitch"]').should('not.be.checked');
-        cy.get('[data-cy="selfReportTypeSelector"] [value="approve"]').should('be.disabled');
-        cy.get('[data-cy="selfReportTypeSelector"] [value="honor"]').should('be.disabled');
-        cy.get('[data-cy="selfReportTypeSelector"] [value="approve"]').should('be.checked');
-        cy.get('[data-cy="selfReportTypeSelector"] [value="honor"]').should('not.be.checked');
+        cy.get('[data-cy="selfReportTypeSelector"] [value="Approval"]').should('be.disabled');
+        cy.get('[data-cy="selfReportTypeSelector"] [value="HonorSystem"]').should('be.disabled');
+        cy.get('[data-cy="selfReportTypeSelector"] [value="Approval"]').should('be.checked');
+        cy.get('[data-cy="selfReportTypeSelector"] [value="HonorSystem"]').should('not.be.checked');
         cy.get('[data-cy="unsavedChangesAlert"]').should('not.exist');
         cy.get('[data-cy="settingsSavedAlert"]').should('not.exist');
         cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled');
@@ -94,9 +94,9 @@ describe('Self Report Skills Management Tests', () => {
         cy.get('[data-cy="settingsSavedAlert"]').contains('Settings Updated');
 
         cy.get('[data-cy="unsavedChangesAlert"]').should('not.exist');
-        cy.get('[data-cy="selfReportTypeSelector"] [value="honor"]').click({force:true});
+        cy.get('[data-cy="selfReportTypeSelector"] [value="HonorSystem"]').click({force:true});
         cy.get('[data-cy="unsavedChangesAlert"]').contains('Unsaved Changes');
-        cy.get('[data-cy="selfReportTypeSelector"] [value="approve"]').click({force:true});
+        cy.get('[data-cy="selfReportTypeSelector"] [value="Approval"]').click({force:true});
         cy.get('[data-cy="unsavedChangesAlert"]').should('not.exist');
 
         cy.get('[data-cy="selfReportSwitch"]').uncheck({force: true});
@@ -104,6 +104,111 @@ describe('Self Report Skills Management Tests', () => {
         cy.get('[data-cy="selfReportSwitch"]').check({force: true});
         cy.get('[data-cy="unsavedChangesAlert"]').should('not.exist');
     });
+
+    it('create skills - self reporting disabled - no project level default', () => {
+        cy.visit('/projects/proj1/subjects/subj1');
+        cy.get('[data-cy="btn_Skills"]').click();
+        cy.get('[data-cy="selfReportEnableCheckbox"]').should('not.be.checked');
+        cy.get('[data-cy="selfReportTypeSelector"] [value="Approval"]').should('be.disabled');
+        cy.get('[data-cy="selfReportTypeSelector"] [value="HonorSystem"]').should('be.disabled');
+        cy.get('[data-cy="selfReportTypeSelector"] [value="Approval"]').should('be.checked');
+        cy.get('[data-cy="selfReportTypeSelector"] [value="HonorSystem"]').should('not.be.checked');
+
+        cy.get('[data-cy=skillName]').type('skill1');
+        cy.clickSave();
+        cy.get('[data-cy="editSkillButton_skill1Skill"]').click();
+        cy.get('[data-cy="selfReportEnableCheckbox"]').should('not.be.checked');
+        cy.get('[data-cy="selfReportTypeSelector"] [value="Approval"]').should('be.disabled');
+        cy.get('[data-cy="selfReportTypeSelector"] [value="HonorSystem"]').should('be.disabled');
+        cy.get('[data-cy="selfReportTypeSelector"] [value="Approval"]').should('be.checked');
+        cy.get('[data-cy="selfReportTypeSelector"] [value="HonorSystem"]').should('not.be.checked');
+    });
+
+    it('create skills - self reporting with approval - no project level default', () => {
+        cy.visit('/projects/proj1/subjects/subj1');
+        cy.get('[data-cy="btn_Skills"]').click();
+        cy.get('[data-cy="selfReportEnableCheckbox"]').should('not.be.checked');
+        cy.get('[data-cy="selfReportTypeSelector"] [value="Approval"]').should('be.disabled');
+        cy.get('[data-cy="selfReportTypeSelector"] [value="HonorSystem"]').should('be.disabled');
+        cy.get('[data-cy="selfReportTypeSelector"] [value="Approval"]').should('be.checked');
+        cy.get('[data-cy="selfReportTypeSelector"] [value="HonorSystem"]').should('not.be.checked');
+
+        cy.get('[data-cy="selfReportEnableCheckbox"]').check({force: true})
+        cy.get('[data-cy="selfReportTypeSelector"] [value="Approval"]').should('be.enabled');
+        cy.get('[data-cy="selfReportTypeSelector"] [value="HonorSystem"]').should('be.enabled');
+        cy.get('[data-cy="selfReportTypeSelector"] [value="Approval"]').should('be.checked');
+        cy.get('[data-cy="selfReportTypeSelector"] [value="HonorSystem"]').should('not.be.checked');
+
+        cy.get('[data-cy=skillName]').type('skill1');
+        cy.clickSave();
+        cy.get('[data-cy="editSkillButton_skill1Skill"]').click();
+        cy.get('[data-cy="selfReportEnableCheckbox"]').should('be.checked');
+        cy.get('[data-cy="selfReportTypeSelector"] [value="Approval"]').should('be.enabled');
+        cy.get('[data-cy="selfReportTypeSelector"] [value="HonorSystem"]').should('be.enabled');
+        cy.get('[data-cy="selfReportTypeSelector"] [value="Approval"]').should('be.checked');
+        cy.get('[data-cy="selfReportTypeSelector"] [value="HonorSystem"]').should('not.be.checked');
+    });
+
+    it('create skills - self reporting with Honor System - no project level default', () => {
+        cy.visit('/projects/proj1/subjects/subj1');
+        cy.get('[data-cy="btn_Skills"]').click();
+        cy.get('[data-cy="selfReportEnableCheckbox"]').should('not.be.checked');
+        cy.get('[data-cy="selfReportTypeSelector"] [value="Approval"]').should('be.disabled');
+        cy.get('[data-cy="selfReportTypeSelector"] [value="HonorSystem"]').should('be.disabled');
+        cy.get('[data-cy="selfReportTypeSelector"] [value="Approval"]').should('be.checked');
+        cy.get('[data-cy="selfReportTypeSelector"] [value="HonorSystem"]').should('not.be.checked');
+
+        cy.get('[data-cy="selfReportEnableCheckbox"]').check({force: true})
+        cy.get('[data-cy="selfReportTypeSelector"] [value="Approval"]').should('be.enabled');
+        cy.get('[data-cy="selfReportTypeSelector"] [value="HonorSystem"]').should('be.enabled');
+        cy.get('[data-cy="selfReportTypeSelector"] [value="Approval"]').should('be.checked');
+        cy.get('[data-cy="selfReportTypeSelector"] [value="HonorSystem"]').should('not.be.checked');
+
+        cy.get('[data-cy="selfReportTypeSelector"] [value="HonorSystem"]').click({force: true});
+        cy.get('[data-cy="selfReportTypeSelector"] [value="Approval"]').should('not.be.checked');
+        cy.get('[data-cy="selfReportTypeSelector"] [value="HonorSystem"]').should('be.checked');
+
+        cy.get('[data-cy=skillName]').type('skill1');
+        cy.clickSave();
+        cy.get('[data-cy="editSkillButton_skill1Skill"]').click();
+        cy.get('[data-cy="selfReportEnableCheckbox"]').should('be.checked');
+        cy.get('[data-cy="selfReportTypeSelector"] [value="Approval"]').should('be.enabled');
+        cy.get('[data-cy="selfReportTypeSelector"] [value="HonorSystem"]').should('be.enabled');
+        cy.get('[data-cy="selfReportTypeSelector"] [value="Approval"]').should('not.be.checked');
+        cy.get('[data-cy="selfReportTypeSelector"] [value="HonorSystem"]').should('be.checked');
+    });
+
+    it('create skill - project level default of Honor System', () => {
+        cy.visit('/projects/proj1/settings');
+        cy.get('[data-cy="selfReportSwitch"]').check({force: true});
+        cy.get('[data-cy="selfReportTypeSelector"] [value="HonorSystem"]').click({force:true})
+        cy.get('[data-cy="saveSettingsBtn"]').click();
+        cy.get('[data-cy="settingsSavedAlert"]').contains('Settings Updated');
+
+        cy.visit('/projects/proj1/subjects/subj1');
+        cy.get('[data-cy="btn_Skills"]').click();
+        cy.get('[data-cy="selfReportEnableCheckbox"]').should('be.checked');
+        cy.get('[data-cy="selfReportTypeSelector"] [value="Approval"]').should('be.enabled');
+        cy.get('[data-cy="selfReportTypeSelector"] [value="HonorSystem"]').should('be.enabled');
+        cy.get('[data-cy="selfReportTypeSelector"] [value="Approval"]').should('not.be.checked');
+        cy.get('[data-cy="selfReportTypeSelector"] [value="HonorSystem"]').should('be.checked');
+    });
+
+    it('create skill - project level default of Approval', () => {
+        cy.visit('/projects/proj1/settings');
+        cy.get('[data-cy="selfReportSwitch"]').check({force: true});
+        cy.get('[data-cy="saveSettingsBtn"]').click();
+        cy.get('[data-cy="settingsSavedAlert"]').contains('Settings Updated');
+
+        cy.visit('/projects/proj1/subjects/subj1');
+        cy.get('[data-cy="btn_Skills"]').click();
+        cy.get('[data-cy="selfReportEnableCheckbox"]').should('be.checked');
+        cy.get('[data-cy="selfReportTypeSelector"] [value="Approval"]').should('be.enabled');
+        cy.get('[data-cy="selfReportTypeSelector"] [value="HonorSystem"]').should('be.enabled');
+        cy.get('[data-cy="selfReportTypeSelector"] [value="Approval"]').should('be.checked');
+        cy.get('[data-cy="selfReportTypeSelector"] [value="HonorSystem"]').should('not.be.checked');
+    });
+
 
 
 });

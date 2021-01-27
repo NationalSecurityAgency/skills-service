@@ -50,6 +50,9 @@ class SkillDefParent {
 
     int displayOrder
 
+    @Enumerated(EnumType.STRING)
+    SkillDef.SelfReportingType selfReportingType
+
     @Temporal(TemporalType.TIMESTAMP)
     Date startDate // optional, used for "gem" badges only currently
 

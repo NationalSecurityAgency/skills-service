@@ -1086,4 +1086,10 @@
                 tableName="user_events"/>
     </changeSet>
 
+    <changeSet id="5" author="skills team" context="migration4">
+        <addColumn tableName="skill_definition">
+            <column name="self_reporting_type" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>
