@@ -811,7 +811,7 @@ class AdminController {
         SkillsValidator.isTrue(projectId == value.projectId, "Project Id must equal", projectId)
         SkillsValidator.isTrue(setting == value.setting, "Setting Id must equal", projectId)
 
-        if (StringUtils.isBlank(value)) {
+        if (StringUtils.isBlank(value?.value)) {
             settingsService.deleteProjectSetting(setting)
         } else {
             settingsService.saveSetting(value)
