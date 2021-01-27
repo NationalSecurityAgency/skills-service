@@ -95,7 +95,7 @@ describe('Metrics Tests - Subject', () => {
     });
 
 
-    it.only('subject users per day - with real data', {
+    it('subject users per day - with real data', {
         retries: {
             runMode: 0,
             openMode: 0
