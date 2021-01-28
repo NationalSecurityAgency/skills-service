@@ -747,16 +747,16 @@ class H2NativeRepo implements NativeQueriesRepo {
     }
 
     @Override
-    void createOrUpdateUserEvent(Integer skillRefId, String userId, Date start, Date end, String type, Integer count, Integer weekNumber) {
+    void createOrUpdateUserEvent(Integer skillRefId, String userId, Date start, String type, Integer count, Integer weekNumber) {
         // find existing event
         String exists = '''
-        SELECT id FROM user_events WHERE skill_ref_id = :skillRefId AND user_id = :userId AND start = :start AND stop = :end AND event_type = :type
+        SELECT id FROM user_events WHERE skill_ref_id = :skillRefId AND user_id = :userId AND event_Time = :start AND week_number = :weekNumber AND event_type = :type
         '''
         Query existsQuery = entityManager.createNativeQuery(exists)
         existsQuery.setParameter("skillRefId", skillRefId)
         existsQuery.setParameter("userId", userId)
         existsQuery.setParameter("start", start)
-        existsQuery.setParameter("end", end)
+        existsQuery.setParameter("weekNumber", weekNumber)
         existsQuery.setParameter("type", type)
         List<Integer> existing = existsQuery.getResultList()
         if (existing) {
@@ -773,8 +773,7 @@ class H2NativeRepo implements NativeQueriesRepo {
             INSERT INTO user_events (
                 skill_ref_id, 
                 user_id, 
-                start, 
-                stop, 
+                event_time, 
                 count,
                 event_type,
                 week_number
@@ -783,7 +782,6 @@ class H2NativeRepo implements NativeQueriesRepo {
                 :skillRefId, 
                 :userId, 
                 :start, 
-                :end, 
                 :count,
                 :type,
                 :weekNumber
@@ -793,7 +791,6 @@ class H2NativeRepo implements NativeQueriesRepo {
             query.setParameter("skillRefId", skillRefId)
             query.setParameter("userId", userId)
             query.setParameter("start", start)
-            query.setParameter("end", end)
             query.setParameter("count", count)
             query.setParameter("type", type)
             query.setParameter("weekNumber", weekNumber)

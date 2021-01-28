@@ -1013,10 +1013,7 @@
                 <constraints nullable="false"/>
             </column>
 
-            <column name="start" type="DATETIME">
-                <constraints nullable="false"/>
-            </column>
-            <column name="stop" type="DATETIME" >
+            <column name="event_time" type="DATETIME">
                 <constraints nullable="false"/>
             </column>
 
@@ -1040,7 +1037,11 @@
         </createIndex>
 
         <createIndex tableName="user_events" indexName="index_user_events_week_number">
-            <column name="week_number"></column>
+            <column name="week_number"/>
+        </createIndex>
+
+        <createIndex tableName="user_events" indexName="index_user_events_event_time">
+            <column name="event_time"/>
         </createIndex>
 
         <createIndex indexName="index_user_events_event_type" tableName="user_events">
@@ -1064,7 +1065,7 @@
                                  referencedTableName="skill_definition"/>
 
         <addUniqueConstraint
-                columnNames="user_id, skill_ref_id, start, stop, event_type"
+                columnNames="user_id, skill_ref_id, event_time, event_type"
                 constraintName="user_events_unique_row"
                 tableName="user_events"/>
     </changeSet>

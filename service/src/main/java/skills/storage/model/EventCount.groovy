@@ -18,20 +18,17 @@ package skills.storage.model
 class EventCount {
 
     Date start
-    Date stop
     Long count
     EventType eventType
 
-    EventCount(Date start, Date stop, Long count, EventType eventType) {
+    EventCount(Date start, Long count, EventType eventType) {
         this.start = start
-        this.stop = stop
         this.count = count
         this.eventType = eventType
     }
 
-    EventCount(Date start, Date stop, Long count, String eventType) {
+    EventCount(Date start, Long count, String eventType) {
         this.start = start
-        this.stop = stop
         this.count = count
         this.eventType = EventType.valueOf(eventType)
     }

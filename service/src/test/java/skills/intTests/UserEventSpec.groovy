@@ -104,16 +104,15 @@ class UserEventSpec extends DefaultIntSpec {
         transactionTemplate.execute({
             Stream<UserEvent> postCompactionDailyEvents = userEventsRepo.findAllBySkillRefIdAndEventType(skillRefId, EventType.DAILY)
             postCompactionDailyEvents.forEach( {UserEvent event ->
-                assert oldest.isBefore(event.start.toLocalDateTime())
+                assert oldest.isBefore(event.eventTime.toLocalDateTime())
                 postCompactDailyCount++
             })
             Stream<UserEvent> postCompactionWeeklyEvents = userEventsRepo.findAllBySkillRefIdAndEventType(skillRefId, EventType.WEEKLY)
             postCompactionWeeklyEvents.forEach({UserEvent event ->
                 postCompactionWeeklyCount++
-                assert oldest.isAfter(event.stop.toLocalDateTime())
+                assert oldest.isAfter(event.eventTime.toLocalDateTime())
             })
         })
-
 
         then:
         preCompactDailyCount == 17

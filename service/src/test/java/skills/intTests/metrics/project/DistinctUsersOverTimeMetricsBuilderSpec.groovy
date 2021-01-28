@@ -24,13 +24,12 @@ import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.metrics.builders.MetricsParams
-import skills.services.StartStopDateUtil
+import skills.services.StartDateUtil
 import skills.services.UserEventService
 import skills.storage.model.EventType
 
 import java.time.DayOfWeek
 import java.time.Duration
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.TemporalAdjusters
 import java.time.temporal.TemporalField
@@ -165,11 +164,11 @@ class DistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
 
         res30days.size() == 5
         res30days.collect {it.count} == [1, 2, 3, 4, 5]
-        res30days.collect {it.value} == days.subList(1, days.size()).collect { StartStopDateUtil.computeStartAndStopDates(it, EventType.WEEKLY).start.time}
+        res30days.collect {it.value} == days.subList(1, days.size()).collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
 
         resOver30days.size() == 7
         resOver30days.collect {it.count} == [0, 0, 1, 2, 3, 4, 5]
-        resOver30days.collect {it.value} == [days[0].minus(7), *days].collect { StartStopDateUtil.computeStartAndStopDates(it, EventType.WEEKLY).start.time}
+        resOver30days.collect {it.value} == [days[0].minus(7), *days].collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
     }
 
     def "number of users growing over few days - specific skill"() {
@@ -218,15 +217,15 @@ class DistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
         then:
         res30days.size() == 5
         res30days.collect {it.count} == [0, 2, 3, 4, 5]
-        res30days.collect {it.value} == days.subList(1, days.size()).collect { StartStopDateUtil.computeStartAndStopDates(it, EventType.WEEKLY).start.time}
+        res30days.collect {it.value} == days.subList(1, days.size()).collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
 
         resOver30days.size() == 7
         resOver30days.collect {it.count} == [0, 0, 0, 2, 3, 4, 5]
-        resOver30days.collect {it.value} == [days[0].minus(7), *days].collect { StartStopDateUtil.computeStartAndStopDates(it, EventType.WEEKLY).start.time}
+        resOver30days.collect {it.value} == [days[0].minus(7), *days].collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
 
         skill3res30days.size() == 5
         skill3res30days.collect {it.count} == [0, 0, 3, 4, 5]
-        skill3res30days.collect {it.value} == days.subList(1, days.size()).collect { StartStopDateUtil.computeStartAndStopDates(it, EventType.WEEKLY).start.time}
+        skill3res30days.collect {it.value} == days.subList(1, days.size()).collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
 
 
     }

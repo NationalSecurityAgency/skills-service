@@ -18,7 +18,6 @@ package skills.services
 import groovy.transform.EqualsAndHashCode
 
 @EqualsAndHashCode
-class StartStopDate {
+class StartDate {
     Date start
-    Date stop
 }

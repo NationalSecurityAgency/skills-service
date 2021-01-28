@@ -25,21 +25,19 @@ import java.time.LocalTime
 import java.time.temporal.TemporalField
 import java.time.temporal.WeekFields
 
-class StartStopDateUtil {
+class StartDateUtil {
 
     @CompileStatic
-    public static StartStopDate computeStartAndStopDates(Date date, EventType type) {
+    public static Date computeStartDate(Date date, EventType type) {
         if (EventType.DAILY == type) {
             LocalDate localDate = date.toLocalDate()
             LocalDateTime start = LocalDateTime.of(localDate, LocalTime.MIN)
-            LocalDateTime end = LocalDateTime.of(localDate, LocalTime.MAX)
-            return new StartStopDate(start: start.toDate(), stop: end.toDate())
+            return start.toDate()
         } else if (EventType.WEEKLY == type) {
             TemporalField temporalField = WeekFields.of(Locale.US).dayOfWeek()
             LocalDate eventDate = date.toLocalDate()
             LocalDateTime startOfWeek = LocalDateTime.of(eventDate.with(temporalField, 1), LocalTime.MIN)
-            LocalDateTime endOfWeek = LocalDateTime.of(eventDate.with(temporalField, 7), LocalTime.MAX)
-            return new StartStopDate(start: startOfWeek.toDate(), stop: endOfWeek.toDate())
+            return startOfWeek.toDate()
         } else {
             throw new SkillException("unrecognized EventType [${type}]")
         }

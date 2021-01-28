@@ -34,9 +34,7 @@ class UserEvent {
     // fk to SkillDef
     Integer skillRefId
 
-    Date start
-
-    Date stop
+    Date eventTime
 
     Integer count
 
