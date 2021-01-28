@@ -29,7 +29,6 @@ import skills.storage.model.SkillDef
 import skills.storage.model.UserEvent
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.UserEventsRepo
-import spock.lang.Ignore
 
 import java.text.DateFormat
 import java.time.DayOfWeek
@@ -518,9 +517,9 @@ class UserEventSpec extends DefaultIntSpec {
         eventService.recordEvent(rawId, userIds[0], testDates.now.toDate(), 1, EventType.DAILY)
         eventService.recordEvent(rawId, userIds[1], testDates.now.toDate(), 1, EventType.DAILY)
 
-        Date dayWithinCurrentWeek = testDates.getDateWithinCurrentWeek().toDate()
-        eventService.recordEvent(rawId, userIds[1], dayWithinCurrentWeek, 1, EventType.DAILY)
-        eventService.recordEvent(rawId, userIds[2], dayWithinCurrentWeek, 2, EventType.DAILY)
+        Date dayBefore = testDates.now.minusDays(1).toDate()
+        eventService.recordEvent(rawId, userIds[1], dayBefore, 1, EventType.DAILY)
+        eventService.recordEvent(rawId, userIds[2], dayBefore, 2, EventType.DAILY)
 
         // should not be included in metric
         eventService.recordEvent(rawId2, userIds[0], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
@@ -537,7 +536,7 @@ class UserEventSpec extends DefaultIntSpec {
         results[0].count == 3
         results[0].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.now.toDate())
         results[1].count == 2
-        results[1].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(dayWithinCurrentWeek)
+        results[1].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(dayBefore)
     }
 
     def "subject distinct user counts spanning compactDailyEventsOlderThan produces accurate results"() {
