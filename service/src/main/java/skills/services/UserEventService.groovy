@@ -15,32 +15,27 @@
  */
 package skills.services
 
+import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
+import org.apache.commons.lang3.Validate
 import org.apache.commons.lang3.time.StopWatch
-import org.joda.time.DateTimeUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.data.domain.PageRequest
-import org.springframework.data.domain.Sort
-import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
-import skills.storage.model.UserEvent
+import skills.controller.exceptions.ErrorCode
+import skills.controller.exceptions.SkillException
+import skills.storage.model.*
+import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.UserEventsRepo
 import skills.storage.repos.nativeSql.NativeQueriesRepo
 
 import javax.persistence.EntityManager
 import javax.persistence.PersistenceContext
+import java.time.DayOfWeek
 import java.time.Duration
-import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.LocalTime
 import java.time.temporal.ChronoUnit
-import java.time.temporal.TemporalField
-import java.time.temporal.TemporalUnit
-import java.time.temporal.WeekFields
-import java.util.concurrent.TimeUnit
-import java.util.function.Consumer
 import java.util.stream.Stream
 
 @Component
@@ -59,26 +54,181 @@ class UserEventService {
     @Value('#{"${skills.config.compactDailyEventsOlderThan:30}"}')
     int maxDailyDays = 30
 
-    public void recordEvent(Integer skillRefId, String userId, Date date, Integer eventCount=1, UserEvent.EventType type=UserEvent.EventType.DAILY) {
+    @Autowired
+    SkillDefRepo skillDefRepo
 
-        if (UserEvent.EventType.DAILY == type) {
-            LocalDate localDate = date.toLocalDate()
-            LocalDateTime start = LocalDateTime.of(localDate, LocalTime.MIN)
-            LocalDateTime end = LocalDateTime.of(localDate, LocalTime.MAX)
-            nativeQueriesRepo.createOrUpdateUserEvent(skillRefId, userId, start.toDate(), end.toDate(), type.toString(), 1)
-        } else if (UserEvent.EventType.WEEKLY == type){
-            TemporalField temporalField = WeekFields.of(Locale.US).dayOfWeek()
-            LocalDate eventDate = date.toLocalDate()
-            LocalDateTime startOfWeek = LocalDateTime.of(eventDate.with(temporalField, 1), LocalTime.MIN)
-            LocalDateTime endOfWeek = LocalDateTime.of(eventDate.with(temporalField, 7), LocalTime.MAX)
-            nativeQueriesRepo.createOrUpdateUserEvent(skillRefId, userId, startOfWeek.toDate(), endOfWeek.toDate(), type.toString(), eventCount)
-        } else {
-            throw new UnsupportedOperationException("Unsupported UserEvent.EventType [${type}]")
+    private static final List<SkillDef.ContainerType> ALLOWABLE_CONTAINER_TYPES = [SkillDef.ContainerType.Skill, SkillDef.ContainerType.Subject]
+
+    /**
+     * Returns the daily user interaction counts for a skill or subject whether the skill was applied or not.
+     *
+     * Note that if the start date exceeds the configured compactDailyEventsOlderThan, the DayCountItems are returned
+     * aggregated by week (the day attributes will be separated by week with the daily count aggregated under that week)
+     * where DayCountItem.start refers to the start of that week's compacted metrics (Sunday). Missing days/weeks are zero filled.
+     *
+     * @param projectId
+     * @param skillId
+     * @param start
+     * @return
+     */
+    @Transactional(readOnly = true)
+    List<DayCountItem> getUserEventCountsForSkillId(String projectId, String skillId, Date start) {
+        EventType eventType = determineAppropriateEventType(start)
+
+        SkillDef skillDef = skillDefRepo.findByProjectIdAndSkillId(projectId, skillId)
+        if (!skillDef) {
+            throw new SkillException("Skill does not exist", projectId, skillId, ErrorCode.SkillNotFound)
         }
+
+        Validate.isTrue(ALLOWABLE_CONTAINER_TYPES.contains(skillDef.type), "Unsupported ContainerType [${skillDef.type}]")
+
+        List<DayCountItem> results
+        Integer rawId = skillDef.id
+        if (EventType.DAILY == eventType) {
+            Stream<DayCountItem> stream
+            if (SkillDef.ContainerType.Skill == skillDef.type) {
+                stream = userEventsRepo.getEventCountForSkill(rawId, start, eventType)
+            } else {
+                stream = userEventsRepo.getEventCountForSubject(rawId, start, eventType)
+            }
+            results = convertResults(stream, eventType, start)
+        } else {
+            start = StartDateUtil.computeStartDate(start, EventType.WEEKLY)
+            Stream<WeekCount> stream
+            if (SkillDef.ContainerType.Skill == skillDef.type) {
+                stream = userEventsRepo.getEventCountForSkillGroupedByWeek(rawId, start)
+            } else {
+                stream = userEventsRepo.getEventCountForSubjectGroupedByWeek(rawId, start)
+            }
+            results = convertResults(stream, start)
+        }
+
+        return results
     }
 
+    /**
+     * Returns the distinct user count for the specified project by day, unless start is older than the compactDailyEventsOlderThan
+     * setting, in which case results are grouped by week where DayCountItem.start refers to the start-of-week (Sunday) for that week's
+     * distinct user counts. Missing days/weeks are zero-filled.
+     *
+     * @param projectId
+     * @param skillId
+     * @param start
+     * @return
+     */
+    @Transactional(readOnly = true)
+    List<DayCountItem> getDistinctUserCountForSkillId(String projectId, String skillId, Date start) {
+        EventType eventType = determineAppropriateEventType(start)
+
+        SkillDef skillDef = skillDefRepo.findByProjectIdAndSkillId(projectId, skillId)
+        if (!skillDef) {
+            throw new SkillException("Skill does not exist", projectId, skillId, ErrorCode.SkillNotFound)
+        }
+
+        Validate.isTrue(ALLOWABLE_CONTAINER_TYPES.contains(skillDef.type), "Unsupported ContainerType [${skillDef.type}]")
+
+        List<DayCountItem> results
+        Integer rawId = skillDef.id
+
+        if (EventType.DAILY == eventType) {
+            Stream<DayCountItem> stream
+            if (SkillDef.ContainerType.Skill == skillDef.type) {
+                stream = userEventsRepo.getDistinctUserCountForSkill(rawId, start, eventType)
+            } else {
+                stream = userEventsRepo.getDistinctUserCountForSubject(rawId, start, eventType)
+            }
+            results = convertResults(stream, eventType, start)
+        } else {
+            start = StartDateUtil.computeStartDate(start, EventType.WEEKLY)
+            Stream<WeekCount> stream
+            if (SkillDef.ContainerType.Skill == skillDef.type) {
+                stream = userEventsRepo.getDistinctUserCountForSkillGroupedByWeek(rawId, start)
+            } else {
+                stream = userEventsRepo.getDistinctUserCountForSubjectGroupedByWeek(rawId, start)
+            }
+            results = convertResults(stream, start)
+        }
+        return results
+    }
+
+    /**
+     * Returns the total number of user events for a given project id occurring since the
+     * specified start date. Event counts are returned grouped by day with missing days zero filled.
+     *
+     * If start results in a date older than the compactDailyEventsOlderThan, then results will be
+     * compacted into weekly results with each DayCountItem.start being the start of week date for that
+     * weekly rollup (Sunday).
+     *
+     * @param projectId
+     * @param start
+     * @return
+     */
+    @Transactional(readOnly = true)
+    List<DayCountItem> getUserEventCountsForProject(String projectId, Date start) {
+        EventType eventType = determineAppropriateEventType(start)
+
+        List<DayCountItem> results
+        if (EventType.DAILY == eventType) {
+            Stream<DayCountItem> stream = userEventsRepo.getEventCountForProject(projectId, start, eventType)
+            results = convertResults(stream, eventType, start)
+        } else {
+            start = StartDateUtil.computeStartDate(start, EventType.WEEKLY)
+            Stream<WeekCount> stream = userEventsRepo.getEventCountForProjectGroupedByWeek(projectId, start)
+            results = convertResults(stream, start)
+        }
+
+        return results
+    }
+
+    /**
+     * Returns the distinct user count for the specified project by day, unless start is older than the compactDailyEventsOlderThan
+     * setting, in which case results are grouped by week where DayCountItem.start refers to the start-of-week (Sunday) for that week's
+     * distinct user counts.
+     *
+     * @param projectId
+     * @param start
+     * @return
+     */
+    @Transactional(readOnly = true)
+    List<DayCountItem> getDistinctUserCountsForProject(String projectId, Date start) {
+        EventType eventType = determineAppropriateEventType(start)
+
+        List<DayCountItem> results
+        if (EventType.DAILY == eventType) {
+            Stream<DayCountItem> stream = userEventsRepo.getDistinctUserCountForProject(projectId, start, eventType)
+            results = convertResults(stream, eventType, start)
+        } else {
+            start = StartDateUtil.computeStartDate(start, EventType.WEEKLY)
+            Stream<WeekCount> stream = userEventsRepo.getDistinctUserCountForProjectGroupedByWeek(projectId, start)
+
+            results = convertResults(stream, start)
+        }
+        return results
+    }
+
+    /**
+     * Records a SkillEvent for the specified user. Note that these events are separate from any achievement or point tracking events and
+     * are recorded regardless of whether or not the reported SkillEvent was applied.
+     *
+     * @param skillRefId
+     * @param userId
+     * @param date
+     * @param eventCount
+     * @param type
+     */
     @Transactional
-    public void compactDailyEvents(){
+    public void recordEvent(Integer skillRefId, String userId, Date date, Integer eventCount = 1, EventType type = EventType.DAILY) {
+        Date start = StartDateUtil.computeStartDate(date, type)
+        Integer weekNumber = WeekNumberUtil.getWeekNumber(start)
+        nativeQueriesRepo.createOrUpdateUserEvent(skillRefId, userId, start, type.toString(), eventCount,  weekNumber)
+    }
+
+    /**
+     * Compacts daily events older than compactDailyEventsOlderThan into weekly events.
+     */
+    @CompileStatic
+    @Transactional
+    public void compactDailyEvents() {
         LocalDateTime dateTime = LocalDateTime.now().minusDays(maxDailyDays)
         log.info("beginning compaction of daily events older than [${dateTime}] into weekly events")
 
@@ -86,12 +236,12 @@ class UserEventService {
         StopWatch sw = new StopWatch()
         sw.start()
 
-        Stream<UserEvent> stream = userEventsRepo.findAllByEventTypeAndStartLessThan(UserEvent.EventType.DAILY, dateTime.toDate())
-        stream.forEach({UserEvent userEvent ->
+        Stream<UserEvent> stream = userEventsRepo.findAllByEventTypeAndEventTimeLessThan(EventType.DAILY, dateTime.toDate())
+        stream.forEach({ UserEvent userEvent ->
             totalProcessed++
-            recordEvent(userEvent.skillRefId, userEvent.userId, userEvent.start, userEvent.count, UserEvent.EventType.WEEKLY)
+            recordEvent(userEvent.skillRefId, userEvent.userId, userEvent.eventTime, userEvent.count, EventType.WEEKLY)
             entityManager.detach(userEvent)
-            if(totalProcessed % 50000 == 0) {
+            if (totalProcessed % 50000 == 0) {
                 log.info("compacted $totalProcessed daily user events so far")
             }
         })
@@ -101,10 +251,105 @@ class UserEventService {
         log.info("Compacted [${totalProcessed}] rows in [${duration}], deleting input events now")
         sw.reset()
         sw.start()
-        userEventsRepo.deleteByEventTypeAndStartLessThan(UserEvent.EventType.DAILY, dateTime.toDate())
+        userEventsRepo.deleteByEventTypeAndEventTimeLessThan(EventType.DAILY, dateTime.toDate())
         sw.stop()
         duration = Duration.of(sw.getTime(), ChronoUnit.MILLIS)
         log.info("Deleted compacted input events in [${duration}]")
+    }
+
+    @CompileStatic
+    private List<DayCountItem> convertResults(Stream<DayCountItem> stream, EventType eventType, Date startOfQueryRange) {
+        List<DayCountItem> results = []
+        Date last = StartDateUtil.computeStartDate(new Date(), eventType)
+        int count = 0;
+
+        stream.forEach({
+            if (EventType.WEEKLY == eventType) {
+                if (it.day.toLocalDate().getDayOfWeek() != DayOfWeek.SUNDAY) {
+                    //we have to fix the day to align with the start of the week as there can be gaps in the daily data
+                    //this happens when daily metrics are grouped into weekly in the query
+                    it.day = StartDateUtil.computeStartDate(it.day, EventType.WEEKLY)
+                }
+            }
+            List<DayCountItem> zeroFills = zeroFillGaps(eventType, last, it.day, count == 0)
+            if (zeroFills) {
+                results.addAll(zeroFills)
+            }
+            last = it.day
+            results.add(it)
+        })
+
+        if (results) {
+            List<DayCountItem> zeroFillFromStart = zeroFillGaps(EventType.WEEKLY, last, startOfQueryRange, false)
+            if (zeroFillFromStart) {
+                results.addAll(zeroFillFromStart)
+            }
+        }
+
+        return results
+    }
+
+    @CompileStatic
+    private List<DayCountItem> convertResults(Stream<WeekCount> stream, Date startOfQueryRange) {
+        List<DayCountItem> results = []
+        Date last = StartDateUtil.computeStartDate(new Date(), EventType.WEEKLY)
+        int count = 0;
+
+        stream.forEach({
+            Date day = WeekNumberUtil.getStartOfWeekFromWeekNumber(it.weekNumber).atStartOfDay().toDate()
+            DayCountItem dci = new DayCountItem(day, it.count)
+
+            List<DayCountItem> zeroFills = zeroFillGaps(EventType.WEEKLY, last, dci.day, count == 0)
+            if (zeroFills) {
+                results.addAll(zeroFills)
+            }
+            last = dci.day
+            results.add(dci)
+        })
+
+        if (results) {
+            List<DayCountItem> zeroFillFromStart = zeroFillGaps(EventType.WEEKLY, last, startOfQueryRange, false)
+            if (zeroFillFromStart) {
+                results.addAll(zeroFillFromStart)
+            }
+        }
+
+        return results
+    }
+
+    @CompileStatic
+    private List<DayCountItem> fillGaps(List<DayCountItem> items, EventType eventType) {
+        Date last = StartDateUtil.computeStartDate(new Date(), eventType)
+        List<DayCountItem> zeroFilled = []
+
+        items.eachWithIndex{ DayCountItem entry, int i ->
+            List<DayCountItem> zeroFills = zeroFillGaps(eventType, last, entry.day, i == 0)
+            if (zeroFills) {
+                zeroFilled.addAll(zeroFills)
+            }
+            last = entry.day
+            zeroFilled.add(entry)
+        }
+    }
+
+    private static List<DayCountItem> zeroFillGaps(EventType eventType, Date n, Date nMinusOne, boolean inclusive) {
+        if (EventType.DAILY == eventType) {
+            return ZeroFillDayCountItemUtil.zeroFillDailyGaps(n, nMinusOne, inclusive)
+        } else if (EventType.WEEKLY == eventType) {
+            return ZeroFillDayCountItemUtil.zeroFillWeeklyGaps(n, nMinusOne, inclusive)
+        } else {
+            throw new SkillException("Unrecognized EventType [${eventType}]")
+        }
+    }
+
+    private EventType determineAppropriateEventType(Date start) {
+        EventType eventType = EventType.DAILY
+
+        if (start.toLocalDateTime().isBefore(LocalDateTime.now().minusDays(maxDailyDays))) {
+            eventType = EventType.WEEKLY
+        }
+
+        return eventType
     }
 
 }

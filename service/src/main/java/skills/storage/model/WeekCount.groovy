@@ -15,31 +15,12 @@
  */
 package skills.storage.model
 
-import groovy.transform.ToString
-
-import javax.persistence.*
-
-@Entity
-@Table(name="user_events")
-@ToString(includeNames = true)
-class UserEvent {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Integer id
-
-    // fk to users
-    String userId
-
-    // fk to SkillDef
-    Integer skillRefId
-
-    Date eventTime
-
-    Integer count
-
-    @Enumerated(EnumType.STRING)
-    EventType eventType
-
+class WeekCount {
     Integer weekNumber
+    Long count
+
+    WeekCount(Integer weekNumber, Long count) {
+        this.weekNumber = weekNumber
+        this.count = count
+    }
 }

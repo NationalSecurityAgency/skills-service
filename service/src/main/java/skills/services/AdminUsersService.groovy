@@ -37,8 +37,11 @@ import skills.storage.repos.UserAchievedLevelRepo
 import skills.storage.repos.UserPointsRepo
 
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
 import java.time.Month
 import java.time.format.TextStyle
+import java.time.temporal.TemporalField
 
 @Service
 @Slf4j
@@ -56,18 +59,19 @@ class AdminUsersService {
     @Autowired
     AccessSettingsStorageService accessSettingsStorageService
 
+    @Autowired
+    UserEventService userEventService
+
     List<TimestampCountItem> getUsage(String projectId, String skillId, Date start) {
-        Date startDate = new Date(start.time).clearTime()
+        Date startDate = LocalDateTime.of(start.toLocalDate(), LocalTime.MIN).toDate()
+
         List<DayCountItem> res = skillId ?
-                userPointsRepo.findDistinctUserCountsBySkillId(projectId, skillId, startDate) :
-                userPointsRepo.findDistinctUserCountsByProject(projectId, startDate)
+                userEventService.getDistinctUserCountForSkillId(projectId, skillId, startDate) :
+                userEventService.getDistinctUserCountsForProject(projectId, startDate)
 
         List<TimestampCountItem> countsPerDay = []
-        if (res) {
-            startDate.upto(new Date().clearTime()) { Date theDate ->
-                DayCountItem found = res.find({ it.day.clearTime() == theDate })
-                countsPerDay << new TimestampCountItem(value: theDate.time, count: found?.count ?: 0)
-            }
+        res?.each {
+            countsPerDay << new TimestampCountItem(value: it.day.time, count: it.count)
         }
 
         return countsPerDay

@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.storage.model;
+package skills.services
 
-import java.util.Date;
+import groovy.transform.EqualsAndHashCode
 
-public interface DayCountItem {
-    Date getDay();
-    Integer getCount();
+@EqualsAndHashCode
+class StartDate {
+    Date start
 }

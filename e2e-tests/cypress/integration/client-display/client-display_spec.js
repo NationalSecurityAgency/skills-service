@@ -13,7 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import moment from 'moment';
+import dayjs from 'dayjs';
+import relativeTimePlugin from 'dayjs/plugin/relativeTime';
+import advancedFormatPlugin from 'dayjs/plugin/advancedFormat';
+
+dayjs.extend(relativeTimePlugin);
+dayjs.extend(advancedFormatPlugin);
 
 describe('Client Display Tests', () => {
 
@@ -247,8 +252,9 @@ describe('Client Display Tests', () => {
     });
 
     it('display achieved date on skill overview page', () => {
-        const m = moment('2020-09-12 11', 'YYYY-MM-DD HH');
+        const m = dayjs('2020-09-12 11', 'YYYY-MM-DD HH');
         const orig = m.clone()
+
         cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: Cypress.env('proxyUser'), timestamp: m.format('x')})
         cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: Cypress.env('proxyUser'), timestamp: m.subtract(4, 'day').format('x')})
         cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: Cypress.env('proxyUser'), timestamp: m.subtract(3, 'day').format('x')})
@@ -297,7 +303,7 @@ describe('Client Display Tests', () => {
     });
 
     it('display achieved date on subject page when skill details are expanded', () => {
-        const m = moment('2020-09-12 11', 'YYYY-MM-DD HH');
+        const m = dayjs('2020-09-12 11', 'YYYY-MM-DD HH');
         const orig = m.clone()
         cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: Cypress.env('proxyUser'), timestamp: m.format('x')})
         cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: Cypress.env('proxyUser'), timestamp: m.subtract(4, 'day').format('x')})

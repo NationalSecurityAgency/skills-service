@@ -566,24 +566,24 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
     }
 
     @Override
-    void createOrUpdateUserEvent(Integer skillRefId, String userId, Date start, Date end, String type, Integer count) {
+    void createOrUpdateUserEvent(Integer skillRefId, String userId, Date start, String type, Integer count, Integer weekNumber) {
         //start and end date should be consistently formatted for updates to work
         String sql = '''
            INSERT INTO user_events (
             skill_ref_id, 
             user_id, 
-            start, 
-            stop, 
+            event_time, 
             count,
-            event_type
+            event_type,
+            week_number
            ) 
            VALUES (
             :skillRefId, 
             :userId, 
             :start, 
-            :end, 
             :count,
-            :type
+            :type,
+            :weekNumber
           ) ON CONFLICT ON CONSTRAINT user_events_unique_row DO UPDATE SET count = user_events.count+excluded.count;
         '''
 
@@ -591,9 +591,9 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
         query.setParameter("skillRefId", skillRefId)
         query.setParameter("userId", userId)
         query.setParameter("start", start)
-        query.setParameter("end", end)
         query.setParameter("type", type)
         query.setParameter("count", count)
+        query.setParameter("weekNumber", weekNumber)
         query.executeUpdate()
     }
 }
