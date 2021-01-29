@@ -17,12 +17,12 @@ limitations under the License.
   <div class="card h-100">
     <div class="card-body">
       <div class="media">
-        <div class="d-inline-block mt-1 mr-3">
+        <div class="d-inline-block mt-1 mr-3 text-center" style="min-width: 4rem;">
           <i class="fa-3x" :class="iconClass"/>
         </div>
         <div class="media-body">
-          <div class="h4 mb-2 text-uppercase">{{ title }}</div>
-          <div style="font-size: 0.95rem;" class="text-secondary">
+          <div class="h4 mb-2 text-uppercase" data-cy="mediaInfoCardTitle">{{ title }}</div>
+          <div style="font-size: 0.95rem;" class="text-secondary" data-cy="mediaInfoCardSubTitle">
             <slot>
               {{ subTitle }}
             </slot>

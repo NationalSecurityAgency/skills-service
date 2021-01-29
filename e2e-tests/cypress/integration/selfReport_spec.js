@@ -209,6 +209,48 @@ describe('Self Report Skills Management Tests', () => {
         cy.get('[data-cy="selfReportTypeSelector"] [value="HonorSystem"]').should('not.be.checked');
     });
 
+    it('skill overview - display self reporting card', () => {
+        cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill1`, {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            skillId: `skill1`,
+            name: `Very Great Skill # 1`,
+            pointIncrement: '1500',
+            numPerformToCompletion: '10',
+            selfReportType:	'Approval'
+        });
+
+        cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill2`, {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            skillId: `skill2`,
+            name: `Very Great Skill # 2`,
+            pointIncrement: '1500',
+            numPerformToCompletion: '10',
+            selfReportType:	'HonorSystem'
+        });
+
+        cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill3`, {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            skillId: `skill3`,
+            name: `Very Great Skill # 3`,
+            pointIncrement: '1500',
+            numPerformToCompletion: '10',
+        });
+
+        cy.visit('/projects/proj1/subjects/subj1/skills/skill1');
+        cy.get('[data-cy="selfReportMediaCard"] [data-cy="mediaInfoCardTitle"]').contains('Self Report: Approval');
+        cy.get('[data-cy="selfReportMediaCard"] [data-cy="mediaInfoCardSubTitle"]').contains('Users can self report this skill and will go into an approval queue');
+
+        cy.visit('/projects/proj1/subjects/subj1/skills/skill2');
+        cy.get('[data-cy="selfReportMediaCard"] [data-cy="mediaInfoCardTitle"]').contains('Self Report: Honor System');
+        cy.get('[data-cy="selfReportMediaCard"] [data-cy="mediaInfoCardSubTitle"]').contains('Users can self report this skill and will apply immediately');
+
+        cy.visit('/projects/proj1/subjects/subj1/skills/skill3');
+        cy.get('[data-cy="selfReportMediaCard"] [data-cy="mediaInfoCardTitle"]').contains('Self Report: Disabled');
+        cy.get('[data-cy="selfReportMediaCard"] [data-cy="mediaInfoCardSubTitle"]').contains('Self reporting is disabled for this skill');
+    });
 
 
 });
