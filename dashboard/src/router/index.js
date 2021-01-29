@@ -45,6 +45,7 @@ import RequestPasswordReset from '@//components/access/RequestPasswordReset';
 import RequestResetConfirmation from '@//components/access/RequestResetConfirmation';
 import ResetConfirmation from '@//components/access/ResetConfirmation';
 import ResetNotSupportedPage from '@//components/access/ResetNotSupportedPage';
+import SelfReportStatusPage from '@//components/skills/selfReport/SelfReportStatusPage';
 
 const GlobalBadgePage = () => import(/* webpackChunkName: 'globalBadgePage' */'@/components/badges/global/GlobalBadgePage');
 const GlobalBadgeSkills = () => import(/* webpackChunkName: 'globalBadgeSkills' */'@//components/badges/global/GlobalBadgeSkills');
@@ -248,6 +249,11 @@ const router = new Router({
         path: 'users',
         component: Users,
         meta: { requiresAuth: true, reportSkillId: 'VisitProjectUsers' },
+      }, {
+        name: 'SelfReport',
+        path: 'self-report',
+        component: SelfReportStatusPage,
+        meta: { requiresAuth: true },
       }, {
         name: 'ProjectAccess',
         path: 'access',
