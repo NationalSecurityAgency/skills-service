@@ -77,7 +77,7 @@ class SkillEventServiceUnitSpecs extends Specification {
         then:
         true
         1 * mockSkillEventPublisher.publishSkillUpdate(_, userId)
-        1 * mockUserEventService.recordEvent(_, userId, _)
+        1 * mockUserEventService.recordEvent(projId, _, userId, _)
     }
 
     def "test reportSkill will NOT notify when skills is NOT applied"() {
@@ -106,7 +106,7 @@ class SkillEventServiceUnitSpecs extends Specification {
 
         then:
         0 * mockSkillEventPublisher.publishSkillUpdate(_, userId)
-        1 * mockUserEventService.recordEvent(_, userId, _)
+        1 * mockUserEventService.recordEvent(projId, _, userId, _)
 
     }
 
@@ -136,6 +136,6 @@ class SkillEventServiceUnitSpecs extends Specification {
 
         then:
         1 * mockSkillEventPublisher.publishSkillUpdate(_, userId)
-        1 * mockUserEventService.recordEvent(_, userId, _)
+        1 * mockUserEventService.recordEvent(projId, _, userId, _)
     }
 }

@@ -167,7 +167,7 @@ class SkillEventsService {
 
         SkillEventResult res = new SkillEventResult(projectId: projectId, skillId: skillId, name: skillDefinition.name)
 
-        userEventService.recordEvent(skillDefinition.id, userId, skillDate.date)
+        userEventService.recordEvent(projectId, skillDefinition.id, userId, skillDate.date)
 
         long numExistingSkills = getNumExistingSkills(userId, projectId, skillId)
         AppliedCheckRes checkRes = checkIfSkillApplied(userId, numExistingSkills, skillDate.date, skillDefinition)

@@ -142,14 +142,14 @@ class UserEventSpec extends DefaultIntSpec {
         skillsService.addSkill(skill, userIds[0], testDates.now.toDate())
         skillsService.addSkill(skill, userIds[1], testDates.now.toDate())
 
-        eventService.recordEvent(rawId, userIds[0], testDates.getDateWithinCurrentWeek().toDate(), 1, EventType.DAILY)
-        eventService.recordEvent(rawId, userIds[0], testDates.getDateWithinCurrentWeek().toDate(), 1, EventType.DAILY)
+        eventService.recordEvent(proj.projectId, rawId, userIds[0], testDates.getDateWithinCurrentWeek().toDate(), 1, EventType.DAILY)
+        eventService.recordEvent(proj.projectId, rawId, userIds[0], testDates.getDateWithinCurrentWeek().toDate(), 1, EventType.DAILY)
 
         //the above DAILY events should get merged with this weekly event due to overlapping start/end
-        eventService.recordEvent(rawId, userIds[0], testDates.startOfCurrentWeek.toDate(), 1, EventType.WEEKLY)
+        eventService.recordEvent(proj.projectId, rawId, userIds[0], testDates.startOfCurrentWeek.toDate(), 1, EventType.WEEKLY)
 
-        eventService.recordEvent(rawId, userIds[1], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
-        eventService.recordEvent(rawId, userIds[0], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
+        eventService.recordEvent(proj.projectId, rawId, userIds[1], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
+        eventService.recordEvent(proj.projectId, rawId, userIds[0], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
 
         when:
 
@@ -184,14 +184,14 @@ class UserEventSpec extends DefaultIntSpec {
         skillsService.addSkill(skill, userIds[0], testDates.now.toDate())
         skillsService.addSkill(skill, userIds[1], testDates.now.toDate())
 
-        eventService.recordEvent(rawId, userIds[0], testDates.now.minusDays(1).toDate(), 1, EventType.DAILY)
-        eventService.recordEvent(rawId, userIds[0], testDates.now.minusDays(1).toDate(), 3, EventType.DAILY)
+        eventService.recordEvent(proj.projectId, rawId, userIds[0], testDates.now.minusDays(1).toDate(), 1, EventType.DAILY)
+        eventService.recordEvent(proj.projectId, rawId, userIds[0], testDates.now.minusDays(1).toDate(), 3, EventType.DAILY)
 
         //the below counts should not be included in the results
-        eventService.recordEvent(rawId, userIds[0], testDates.startOfCurrentWeek.toDate(), 1, EventType.WEEKLY)
+        eventService.recordEvent(proj.projectId, rawId, userIds[0], testDates.startOfCurrentWeek.toDate(), 1, EventType.WEEKLY)
 
-        eventService.recordEvent(rawId, userIds[1], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
-        eventService.recordEvent(rawId, userIds[0], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
+        eventService.recordEvent(proj.projectId, rawId, userIds[1], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
+        eventService.recordEvent(proj.projectId, rawId, userIds[0], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
 
         when:
 
@@ -232,19 +232,19 @@ class UserEventSpec extends DefaultIntSpec {
         skillsService.addSkill(skill, userIds[0], testDates.now.toDate())
         skillsService.addSkill(skill, userIds[1], testDates.now.toDate())
 
-        eventService.recordEvent(rawId, userIds[0], testDates.getDateWithinCurrentWeek().toDate(), 1, EventType.DAILY)
-        eventService.recordEvent(rawId, userIds[0], testDates.getDateWithinCurrentWeek().toDate(), 1, EventType.DAILY)
+        eventService.recordEvent(proj.projectId, rawId, userIds[0], testDates.getDateWithinCurrentWeek().toDate(), 1, EventType.DAILY)
+        eventService.recordEvent(proj.projectId, rawId, userIds[0], testDates.getDateWithinCurrentWeek().toDate(), 1, EventType.DAILY)
 
         //the above DAILY events should get merged with this weekly event due to overlapping start/end
-        eventService.recordEvent(rawId, userIds[0], testDates.startOfCurrentWeek.toDate(), 1, EventType.WEEKLY)
+        eventService.recordEvent(proj.projectId, rawId, userIds[0], testDates.startOfCurrentWeek.toDate(), 1, EventType.WEEKLY)
 
-        eventService.recordEvent(rawId, userIds[1], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
-        eventService.recordEvent(rawId, userIds[0], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
+        eventService.recordEvent(proj.projectId, rawId, userIds[1], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
+        eventService.recordEvent(proj.projectId, rawId, userIds[0], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
 
         // should not be included in metric
-        eventService.recordEvent(rawId2, userIds[0], testDates.getDateWithinCurrentWeek().toDate(), 1, EventType.DAILY)
-        eventService.recordEvent(rawId2, userIds[0], testDates.getDateWithinCurrentWeek().toDate(), 1, EventType.DAILY)
-        eventService.recordEvent(rawId2, userIds[0], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
+        eventService.recordEvent(proj.projectId, rawId2, userIds[0], testDates.getDateWithinCurrentWeek().toDate(), 1, EventType.DAILY)
+        eventService.recordEvent(proj.projectId, rawId2, userIds[0], testDates.getDateWithinCurrentWeek().toDate(), 1, EventType.DAILY)
+        eventService.recordEvent(proj.projectId, rawId2, userIds[0], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
 
         when:
 
@@ -288,17 +288,17 @@ class UserEventSpec extends DefaultIntSpec {
         skillsService.addSkill(skill, userIds[4], testDates.now.minusDays(10).toDate())
         skillsService.addSkill(skill, userIds[5], testDates.now.minusDays(10).toDate())
 
-        eventService.recordEvent(rawId, userIds[2], testDates.now.minusDays(1).toDate(), 5000, EventType.DAILY)
-        eventService.recordEvent(rawId, userIds[3], testDates.now.minusDays(1).toDate(), 100, EventType.DAILY)
-        eventService.recordEvent(rawId, userIds[4], testDates.now.minusDays(1).toDate(), 100, EventType.DAILY)
+        eventService.recordEvent(proj.projectId, rawId, userIds[2], testDates.now.minusDays(1).toDate(), 5000, EventType.DAILY)
+        eventService.recordEvent(proj.projectId, rawId, userIds[3], testDates.now.minusDays(1).toDate(), 100, EventType.DAILY)
+        eventService.recordEvent(proj.projectId, rawId, userIds[4], testDates.now.minusDays(1).toDate(), 100, EventType.DAILY)
 
         // should not be included in metric
-        eventService.recordEvent(rawId, userIds[0], testDates.now.minusDays(6).toDate(), 1, EventType.WEEKLY)
-        eventService.recordEvent(rawId, userIds[1], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
-        eventService.recordEvent(rawId, userIds[0], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
-        eventService.recordEvent(rawId2, userIds[5], testDates.now.minusDays(6).toDate(), 1, EventType.DAILY)
-        eventService.recordEvent(rawId2, userIds[1], testDates.now.minusDays(5).toDate(), 1, EventType.DAILY)
-        eventService.recordEvent(rawId2, userIds[0], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
+        eventService.recordEvent(proj.projectId, rawId, userIds[0], testDates.now.minusDays(6).toDate(), 1, EventType.WEEKLY)
+        eventService.recordEvent(proj.projectId, rawId, userIds[1], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
+        eventService.recordEvent(proj.projectId, rawId, userIds[0], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
+        eventService.recordEvent(proj.projectId, rawId2, userIds[5], testDates.now.minusDays(6).toDate(), 1, EventType.DAILY)
+        eventService.recordEvent(proj.projectId, rawId2, userIds[1], testDates.now.minusDays(5).toDate(), 1, EventType.DAILY)
+        eventService.recordEvent(proj.projectId, rawId2, userIds[0], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
 
         when:
 
@@ -342,19 +342,19 @@ class UserEventSpec extends DefaultIntSpec {
         skillsService.addSkill(skill, userIds[0], testDates.now.toDate())
         skillsService.addSkill(skill, userIds[1], testDates.now.toDate())
 
-        eventService.recordEvent(rawId, userIds[0], testDates.getDateWithinCurrentWeek().toDate(), 1, EventType.DAILY)
-        eventService.recordEvent(rawId, userIds[0], testDates.getDateWithinCurrentWeek().toDate(), 1, EventType.DAILY)
+        eventService.recordEvent(proj.projectId, rawId, userIds[0], testDates.getDateWithinCurrentWeek().toDate(), 1, EventType.DAILY)
+        eventService.recordEvent(proj.projectId, rawId, userIds[0], testDates.getDateWithinCurrentWeek().toDate(), 1, EventType.DAILY)
 
         //the above DAILY events should get merged with this weekly event due to overlapping start/end
-        eventService.recordEvent(rawId, userIds[0], testDates.startOfCurrentWeek.toDate(), 1, EventType.WEEKLY)
+        eventService.recordEvent(proj.projectId, rawId, userIds[0], testDates.startOfCurrentWeek.toDate(), 1, EventType.WEEKLY)
 
-        eventService.recordEvent(rawId, userIds[1], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
-        eventService.recordEvent(rawId, userIds[0], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
+        eventService.recordEvent(proj.projectId, rawId, userIds[1], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
+        eventService.recordEvent(proj.projectId, rawId, userIds[0], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
 
         // should not be included in metric
-        eventService.recordEvent(rawId2, userIds[0], testDates.startOfCurrentWeek.toDate(), 1, EventType.DAILY)
-        eventService.recordEvent(rawId2, userIds[0], testDates.startOfCurrentWeek.toDate(), 1, EventType.DAILY)
-        eventService.recordEvent(rawId2, userIds[0], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
+        eventService.recordEvent(proj.projectId, rawId2, userIds[0], testDates.startOfCurrentWeek.toDate(), 1, EventType.DAILY)
+        eventService.recordEvent(proj.projectId, rawId2, userIds[0], testDates.startOfCurrentWeek.toDate(), 1, EventType.DAILY)
+        eventService.recordEvent(proj.projectId, rawId2, userIds[0], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
 
         when:
 
@@ -399,22 +399,22 @@ class UserEventSpec extends DefaultIntSpec {
         skillsService.addSkill(skill, userIds[3], testDates.now.toDate())
         skillsService.addSkill(skill, userIds[4], testDates.now.toDate())
 
-        eventService.recordEvent(rawId, userIds[0], testDates.now.toDate(), 99, EventType.DAILY)
-        eventService.recordEvent(rawId, userIds[1], testDates.now.toDate(), 49, EventType.DAILY) //153
+        eventService.recordEvent(proj.projectId, rawId, userIds[0], testDates.now.toDate(), 99, EventType.DAILY)
+        eventService.recordEvent(proj.projectId, rawId, userIds[1], testDates.now.toDate(), 49, EventType.DAILY) //153
 
-        eventService.recordEvent(rawId, userIds[2], testDates.now.minusDays(1).toDate(), 10, EventType.DAILY)
-        eventService.recordEvent(rawId, userIds[0], testDates.now.minusDays(1).toDate(), 10, EventType.DAILY)
-        eventService.recordEvent(rawId, userIds[3], testDates.now.minusDays(1).toDate(), 5, EventType.DAILY)
-        eventService.recordEvent(rawId, userIds[4], testDates.now.minusDays(1).toDate(), 5, EventType.DAILY)
+        eventService.recordEvent(proj.projectId, rawId, userIds[2], testDates.now.minusDays(1).toDate(), 10, EventType.DAILY)
+        eventService.recordEvent(proj.projectId, rawId, userIds[0], testDates.now.minusDays(1).toDate(), 10, EventType.DAILY)
+        eventService.recordEvent(proj.projectId, rawId, userIds[3], testDates.now.minusDays(1).toDate(), 5, EventType.DAILY)
+        eventService.recordEvent(proj.projectId, rawId, userIds[4], testDates.now.minusDays(1).toDate(), 5, EventType.DAILY)
 
         // should not be included in metric
-        eventService.recordEvent(rawId, userIds[0], testDates.startOfCurrentWeek.toDate(), 500000, EventType.WEEKLY)
-        eventService.recordEvent(rawId2, userIds[0], testDates.now.minusDays(5).toDate(), 1, EventType.DAILY)
-        eventService.recordEvent(rawId2, userIds[0], testDates.now.minusDays(5).toDate(), 1, EventType.DAILY)
-        eventService.recordEvent(rawId2, userIds[0], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
-        eventService.recordEvent(rawId, userIds[0], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
-        eventService.recordEvent(rawId, userIds[1], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
-        eventService.recordEvent(rawId, userIds[0], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
+        eventService.recordEvent(proj.projectId, rawId, userIds[0], testDates.startOfCurrentWeek.toDate(), 500000, EventType.WEEKLY)
+        eventService.recordEvent(proj.projectId, rawId2, userIds[0], testDates.now.minusDays(5).toDate(), 1, EventType.DAILY)
+        eventService.recordEvent(proj.projectId, rawId2, userIds[0], testDates.now.minusDays(5).toDate(), 1, EventType.DAILY)
+        eventService.recordEvent(proj.projectId, rawId2, userIds[0], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
+        eventService.recordEvent(proj.projectId, rawId, userIds[0], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
+        eventService.recordEvent(proj.projectId, rawId, userIds[1], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
+        eventService.recordEvent(proj.projectId, rawId, userIds[0], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
 
         when:
 
@@ -459,19 +459,19 @@ class UserEventSpec extends DefaultIntSpec {
         skillsService.addSkill(skill, userIds[1], testDates.now.toDate())
         skillsService.addSkill(skill, userIds[2], testDates.now.minusYears(3).toDate())
 
-        eventService.recordEvent(rawId, userIds[0], testDates.startOfCurrentWeek.toDate(), 1, EventType.DAILY)
-        eventService.recordEvent(rawId, userIds[0], testDates.startOfCurrentWeek.toDate(), 1, EventType.DAILY)
+        eventService.recordEvent(proj.projectId, rawId, userIds[0], testDates.startOfCurrentWeek.toDate(), 1, EventType.DAILY)
+        eventService.recordEvent(proj.projectId, rawId, userIds[0], testDates.startOfCurrentWeek.toDate(), 1, EventType.DAILY)
 
         //the above DAILY events should get merged with this weekly event due to overlapping start/end
-        eventService.recordEvent(rawId, userIds[0], testDates.startOfCurrentWeek.toDate(), 1, EventType.WEEKLY)
+        eventService.recordEvent(proj.projectId, rawId, userIds[0], testDates.startOfCurrentWeek.toDate(), 1, EventType.WEEKLY)
 
-        eventService.recordEvent(rawId, userIds[1], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
-        eventService.recordEvent(rawId, userIds[0], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
+        eventService.recordEvent(proj.projectId, rawId, userIds[1], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
+        eventService.recordEvent(proj.projectId, rawId, userIds[0], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
 
         // should not be included in metric
-        eventService.recordEvent(rawId2, userIds[0], testDates.getDateWithinCurrentWeek().toDate(), 1, EventType.DAILY)
-        eventService.recordEvent(rawId2, userIds[0], testDates.getDateWithinCurrentWeek().toDate(), 1, EventType.DAILY)
-        eventService.recordEvent(rawId2, userIds[0], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
+        eventService.recordEvent(proj.projectId, rawId2, userIds[0], testDates.getDateWithinCurrentWeek().toDate(), 1, EventType.DAILY)
+        eventService.recordEvent(proj.projectId, rawId2, userIds[0], testDates.getDateWithinCurrentWeek().toDate(), 1, EventType.DAILY)
+        eventService.recordEvent(proj.projectId, rawId2, userIds[0], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
 
         when:
 
@@ -516,18 +516,18 @@ class UserEventSpec extends DefaultIntSpec {
         skillsService.addSkill(skill, userIds[3], testDates.now.minusYears(3).toDate())
         skillsService.addSkill(skill, userIds[4], testDates.now.minusYears(3).toDate())
 
-        eventService.recordEvent(rawId, userIds[0], testDates.now.toDate(), 1, EventType.DAILY)
-        eventService.recordEvent(rawId, userIds[1], testDates.now.toDate(), 1, EventType.DAILY)
+        eventService.recordEvent(proj.projectId, rawId, userIds[0], testDates.now.toDate(), 1, EventType.DAILY)
+        eventService.recordEvent(proj.projectId, rawId, userIds[1], testDates.now.toDate(), 1, EventType.DAILY)
 
         Date dayBefore = testDates.now.minusDays(1).toDate()
-        eventService.recordEvent(rawId, userIds[1], dayBefore, 1, EventType.DAILY)
-        eventService.recordEvent(rawId, userIds[2], dayBefore, 2, EventType.DAILY)
+        eventService.recordEvent(proj.projectId, rawId, userIds[1], dayBefore, 1, EventType.DAILY)
+        eventService.recordEvent(proj.projectId, rawId, userIds[2], dayBefore, 2, EventType.DAILY)
 
         // should not be included in metric
-        eventService.recordEvent(rawId2, userIds[0], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
-        eventService.recordEvent(rawId, userIds[0], testDates.startOfCurrentWeek.toDate(), 1, EventType.WEEKLY)
-        eventService.recordEvent(rawId, userIds[1], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
-        eventService.recordEvent(rawId, userIds[0], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
+        eventService.recordEvent(proj.projectId, rawId2, userIds[0], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
+        eventService.recordEvent(proj.projectId, rawId, userIds[0], testDates.startOfCurrentWeek.toDate(), 1, EventType.WEEKLY)
+        eventService.recordEvent(proj.projectId, rawId, userIds[1], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
+        eventService.recordEvent(proj.projectId, rawId, userIds[0], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
 
         when:
 
@@ -579,19 +579,19 @@ class UserEventSpec extends DefaultIntSpec {
         skillsService.addSkill(subj1_skill1, userIds[2], testDates.now.minusYears(3).toDate())
         skillsService.addSkill(subj1_skill2, userIds[3], testDates.getDateWithinCurrentWeek().toDate())
 
-        eventService.recordEvent(subj1_skill1_rawId, userIds[0], testDates.getDateWithinCurrentWeek().toDate(), 1, EventType.DAILY)
-        eventService.recordEvent(subj1_skill1_rawId, userIds[0], testDates.getDateWithinCurrentWeek().toDate(), 1, EventType.DAILY)
+        eventService.recordEvent(proj.projectId, subj1_skill1_rawId, userIds[0], testDates.getDateWithinCurrentWeek().toDate(), 1, EventType.DAILY)
+        eventService.recordEvent(proj.projectId, subj1_skill1_rawId, userIds[0], testDates.getDateWithinCurrentWeek().toDate(), 1, EventType.DAILY)
 
         //the above DAILY events should get merged with this weekly event due to overlapping start/end
-        eventService.recordEvent(subj1_skill1_rawId, userIds[0], testDates.startOfCurrentWeek.toDate(), 1, EventType.WEEKLY)
+        eventService.recordEvent(proj.projectId, subj1_skill1_rawId, userIds[0], testDates.startOfCurrentWeek.toDate(), 1, EventType.WEEKLY)
 
-        eventService.recordEvent(subj1_skill1_rawId, userIds[1], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
-        eventService.recordEvent(subj1_skill1_rawId, userIds[0], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
+        eventService.recordEvent(proj.projectId, subj1_skill1_rawId, userIds[1], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
+        eventService.recordEvent(proj.projectId, subj1_skill1_rawId, userIds[0], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
 
         // should not be included in metric
-        eventService.recordEvent(subj2_skill1_rawId, userIds[0], testDates.getDateWithinCurrentWeek().toDate(), 1, EventType.DAILY)
-        eventService.recordEvent(subj2_skill1_rawId, userIds[0], testDates.getDateWithinCurrentWeek().toDate(), 1, EventType.DAILY)
-        eventService.recordEvent(subj2_skill1_rawId, userIds[0], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
+        eventService.recordEvent(proj.projectId, subj2_skill1_rawId, userIds[0], testDates.getDateWithinCurrentWeek().toDate(), 1, EventType.DAILY)
+        eventService.recordEvent(proj.projectId, subj2_skill1_rawId, userIds[0], testDates.getDateWithinCurrentWeek().toDate(), 1, EventType.DAILY)
+        eventService.recordEvent(proj.projectId, subj2_skill1_rawId, userIds[0], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
 
         when:
 
@@ -641,19 +641,19 @@ class UserEventSpec extends DefaultIntSpec {
         skillsService.addSkill(subj1_skill1, userIds[2], testDates.now.minusYears(3).toDate())
         skillsService.addSkill(subj1_skill2, userIds[3], testDates.now.minusDays(10).toDate())
 
-        eventService.recordEvent(subj1_skill1_rawId, userIds[0], testDates.now.toDate(), 1, EventType.DAILY)
-        eventService.recordEvent(subj1_skill1_rawId, userIds[0], testDates.now.toDate(), 1, EventType.DAILY)
-        eventService.recordEvent(subj1_skill1_rawId, userIds[1], testDates.now.toDate(), 1, EventType.DAILY)
-        eventService.recordEvent(subj1_skill1_rawId, userIds[2], testDates.now.minusDays(1).toDate(), 5, EventType.DAILY)
-        eventService.recordEvent(subj1_skill1_rawId, userIds[3], testDates.now.minusDays(1).toDate(), 5000, EventType.DAILY)
+        eventService.recordEvent(proj.projectId, subj1_skill1_rawId, userIds[0], testDates.now.toDate(), 1, EventType.DAILY)
+        eventService.recordEvent(proj.projectId, subj1_skill1_rawId, userIds[0], testDates.now.toDate(), 1, EventType.DAILY)
+        eventService.recordEvent(proj.projectId, subj1_skill1_rawId, userIds[1], testDates.now.toDate(), 1, EventType.DAILY)
+        eventService.recordEvent(proj.projectId, subj1_skill1_rawId, userIds[2], testDates.now.minusDays(1).toDate(), 5, EventType.DAILY)
+        eventService.recordEvent(proj.projectId, subj1_skill1_rawId, userIds[3], testDates.now.minusDays(1).toDate(), 5000, EventType.DAILY)
 
         // should not be included in metric
-        eventService.recordEvent(subj1_skill1_rawId, userIds[0], testDates.startOfCurrentWeek.toDate(), 1, EventType.WEEKLY)
-        eventService.recordEvent(subj1_skill1_rawId, userIds[1], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
-        eventService.recordEvent(subj1_skill1_rawId, userIds[0], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
-        eventService.recordEvent(subj2_skill1_rawId, userIds[0], testDates.getDateWithinCurrentWeek().toDate(), 1, EventType.DAILY)
-        eventService.recordEvent(subj2_skill1_rawId, userIds[0], testDates.getDateWithinCurrentWeek().toDate(), 1, EventType.DAILY)
-        eventService.recordEvent(subj2_skill1_rawId, userIds[0], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
+        eventService.recordEvent(proj.projectId, subj1_skill1_rawId, userIds[0], testDates.startOfCurrentWeek.toDate(), 1, EventType.WEEKLY)
+        eventService.recordEvent(proj.projectId, subj1_skill1_rawId, userIds[1], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
+        eventService.recordEvent(proj.projectId, subj1_skill1_rawId, userIds[0], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
+        eventService.recordEvent(proj.projectId, subj2_skill1_rawId, userIds[0], testDates.getDateWithinCurrentWeek().toDate(), 1, EventType.DAILY)
+        eventService.recordEvent(proj.projectId, subj2_skill1_rawId, userIds[0], testDates.getDateWithinCurrentWeek().toDate(), 1, EventType.DAILY)
+        eventService.recordEvent(proj.projectId, subj2_skill1_rawId, userIds[0], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
 
         when:
 
@@ -705,19 +705,19 @@ class UserEventSpec extends DefaultIntSpec {
         skillsService.addSkill(subj1_skill1, userIds[2], testDates.now.minusYears(3).toDate())
         skillsService.addSkill(subj1_skill2, userIds[3], testDates.getDateWithinCurrentWeek().toDate())
 
-        eventService.recordEvent(subj1_skill1_rawId, userIds[0], testDates.getDateWithinCurrentWeek().toDate(), 1, EventType.DAILY)
-        eventService.recordEvent(subj1_skill1_rawId, userIds[0], testDates.getDateWithinCurrentWeek().toDate(), 1, EventType.DAILY)
+        eventService.recordEvent(proj.projectId, subj1_skill1_rawId, userIds[0], testDates.getDateWithinCurrentWeek().toDate(), 1, EventType.DAILY)
+        eventService.recordEvent(proj.projectId, subj1_skill1_rawId, userIds[0], testDates.getDateWithinCurrentWeek().toDate(), 1, EventType.DAILY)
 
         //the above DAILY events should get merged with this weekly event due to overlapping start/end
-        eventService.recordEvent(subj1_skill1_rawId, userIds[0], testDates.startOfCurrentWeek.toDate(), 1, EventType.WEEKLY)
+        eventService.recordEvent(proj.projectId, subj1_skill1_rawId, userIds[0], testDates.startOfCurrentWeek.toDate(), 1, EventType.WEEKLY)
 
-        eventService.recordEvent(subj1_skill1_rawId, userIds[1], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
-        eventService.recordEvent(subj1_skill1_rawId, userIds[1], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
+        eventService.recordEvent(proj.projectId, subj1_skill1_rawId, userIds[1], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
+        eventService.recordEvent(proj.projectId, subj1_skill1_rawId, userIds[1], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
 
         // should not be included in metric
-        eventService.recordEvent(subj2_skill1_rawId, userIds[0], testDates.getDateWithinCurrentWeek().toDate(), 1, EventType.DAILY)
-        eventService.recordEvent(subj2_skill1_rawId, userIds[0], testDates.getDateWithinCurrentWeek().toDate(), 1, EventType.DAILY)
-        eventService.recordEvent(subj2_skill1_rawId, userIds[0], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
+        eventService.recordEvent(proj.projectId, subj2_skill1_rawId, userIds[0], testDates.getDateWithinCurrentWeek().toDate(), 1, EventType.DAILY)
+        eventService.recordEvent(proj.projectId, subj2_skill1_rawId, userIds[0], testDates.getDateWithinCurrentWeek().toDate(), 1, EventType.DAILY)
+        eventService.recordEvent(proj.projectId, subj2_skill1_rawId, userIds[0], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
 
         when:
 
@@ -768,16 +768,16 @@ class UserEventSpec extends DefaultIntSpec {
         skillsService.addSkill(subj1_skill1, userIds[2], testDates.now.minusYears(3).toDate())
         skillsService.addSkill(subj1_skill2, userIds[3], testDates.now.minusDays(4).toDate())
 
-        eventService.recordEvent(subj1_skill1_rawId, userIds[0], testDates.now.minusDays(1).toDate(), 1, EventType.DAILY)
-        eventService.recordEvent(subj1_skill1_rawId, userIds[1], testDates.now.minusDays(1).toDate(), 1, EventType.DAILY)
-        eventService.recordEvent(subj1_skill1_rawId, userIds[2], testDates.now.minusDays(1).toDate(), 1, EventType.DAILY)
+        eventService.recordEvent(proj.projectId, subj1_skill1_rawId, userIds[0], testDates.now.minusDays(1).toDate(), 1, EventType.DAILY)
+        eventService.recordEvent(proj.projectId, subj1_skill1_rawId, userIds[1], testDates.now.minusDays(1).toDate(), 1, EventType.DAILY)
+        eventService.recordEvent(proj.projectId, subj1_skill1_rawId, userIds[2], testDates.now.minusDays(1).toDate(), 1, EventType.DAILY)
 
         // should not be included in metric results
-        eventService.recordEvent(subj1_skill1_rawId, userIds[1], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
-        eventService.recordEvent(subj1_skill1_rawId, userIds[1], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
-        eventService.recordEvent(subj2_skill1_rawId, userIds[0], testDates.getDateWithinCurrentWeek().toDate(), 1, EventType.DAILY)
-        eventService.recordEvent(subj2_skill1_rawId, userIds[0], testDates.getDateWithinCurrentWeek().toDate(), 1, EventType.DAILY)
-        eventService.recordEvent(subj2_skill1_rawId, userIds[0], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
+        eventService.recordEvent(proj.projectId, subj1_skill1_rawId, userIds[1], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
+        eventService.recordEvent(proj.projectId, subj1_skill1_rawId, userIds[1], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
+        eventService.recordEvent(proj.projectId, subj2_skill1_rawId, userIds[0], testDates.getDateWithinCurrentWeek().toDate(), 1, EventType.DAILY)
+        eventService.recordEvent(proj.projectId, subj2_skill1_rawId, userIds[0], testDates.getDateWithinCurrentWeek().toDate(), 1, EventType.DAILY)
+        eventService.recordEvent(proj.projectId, subj2_skill1_rawId, userIds[0], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
 
         when:
 

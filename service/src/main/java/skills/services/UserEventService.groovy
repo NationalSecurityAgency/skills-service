@@ -219,10 +219,10 @@ class UserEventService {
      * @param type
      */
     @Transactional
-    public void recordEvent(Integer skillRefId, String userId, Date date, Integer eventCount = 1, EventType type = EventType.DAILY) {
+    public void recordEvent(String projectId, Integer skillRefId, String userId, Date date, Integer eventCount = 1, EventType type = EventType.DAILY) {
         Date start = StartDateUtil.computeStartDate(date, type)
         Integer weekNumber = WeekNumberUtil.getWeekNumber(start)
-        nativeQueriesRepo.createOrUpdateUserEvent(skillRefId, userId, start, type.toString(), eventCount,  weekNumber)
+        nativeQueriesRepo.createOrUpdateUserEvent(projectId, skillRefId, userId, start, type.toString(), eventCount,  weekNumber)
     }
 
     /**
@@ -241,7 +241,7 @@ class UserEventService {
         Stream<UserEvent> stream = userEventsRepo.findAllByEventTypeAndEventTimeLessThan(EventType.DAILY, dateTime.toDate())
         stream.forEach({ UserEvent userEvent ->
             totalProcessed++
-            recordEvent(userEvent.skillRefId, userEvent.userId, userEvent.eventTime, userEvent.count, EventType.WEEKLY)
+            recordEvent(userEvent.projectId,  userEvent.skillRefId, userEvent.userId, userEvent.eventTime, userEvent.count, EventType.WEEKLY)
             entityManager.detach(userEvent)
             if (totalProcessed % 50000 == 0) {
                 log.info("compacted $totalProcessed daily user events so far")

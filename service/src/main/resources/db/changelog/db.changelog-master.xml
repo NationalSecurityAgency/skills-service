@@ -1009,6 +1009,9 @@
             <column name="user_id" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>
+            <column name="project_id" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
             <column name="skill_ref_id" type="int">
                 <constraints nullable="false"/>
             </column>
@@ -1029,6 +1032,11 @@
         <createIndex indexName="index_user_events_user_id"
                      tableName="user_events">
             <column name="user_id" type="varchar(255)"/>
+        </createIndex>
+
+        <createIndex indexName="index_user_events_project_id"
+                     tableName="user_events">
+            <column name="project_id" type="varchar(255)"/>
         </createIndex>
 
         <createIndex indexName="index_user_events_skill_ref_id"
@@ -1055,6 +1063,14 @@
                                  onUpdate="CASCADE"
                                  referencedColumnNames="user_id"
                                  referencedTableName="user_attrs"/>
+
+        <addForeignKeyConstraint baseColumnNames="project_id"
+                                 baseTableName="user_events"
+                                 constraintName="fk_user_events_project_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="project_id"
+                                 referencedTableName="project_definition"/>
 
         <addForeignKeyConstraint baseColumnNames="skill_ref_id"
                                  baseTableName="user_events"
