@@ -195,7 +195,8 @@ class UserEventSpec extends DefaultIntSpec {
 
         when:
 
-        List<DayCountItem> results = eventService.getUserEventCountsForProject(proj.projectId, testDates.now.minusDays(2).toDate())
+        Date queryFrom = testDates.now.toLocalDate().atStartOfDay().minusDays(maxDailyDays).toDate()
+        List<DayCountItem> results = eventService.getUserEventCountsForProject(proj.projectId, queryFrom)
 
         then:
         results.size() == 2
@@ -301,7 +302,8 @@ class UserEventSpec extends DefaultIntSpec {
 
         when:
 
-        List<DayCountItem> results = eventService.getUserEventCountsForSkillId(proj.projectId, skill.skillId, testDates.now.minusDays(2).toDate())
+        Date queryFrom = testDates.now.toLocalDate().atStartOfDay().minusDays(maxDailyDays).toDate()
+        List<DayCountItem> results = eventService.getUserEventCountsForSkillId(proj.projectId, skill.skillId, queryFrom)
 
         then:
         results.size() == 2
@@ -416,7 +418,8 @@ class UserEventSpec extends DefaultIntSpec {
 
         when:
 
-        List<DayCountItem> results = eventService.getUserEventCountsForSkillId(proj.projectId, subject.subjectId, testDates.now.minusDays(2).toDate())
+        Date queryFrom = testDates.now.toLocalDate().atStartOfDay().minusDays(maxDailyDays).toDate()
+        List<DayCountItem> results = eventService.getUserEventCountsForSkillId(proj.projectId, subject.subjectId, queryFrom)
 
         then:
         results.size() == 2
@@ -528,7 +531,8 @@ class UserEventSpec extends DefaultIntSpec {
 
         when:
 
-        List<DayCountItem> results = eventService.getDistinctUserCountsForProject(proj.projectId, testDates.now.minusDays(2).toDate())
+        Date queryFrom = testDates.now.toLocalDate().atStartOfDay().minusDays(maxDailyDays).toDate()
+        List<DayCountItem> results = eventService.getDistinctUserCountsForProject(proj.projectId, queryFrom)
 
         then:
         results.size() == 2
@@ -653,7 +657,8 @@ class UserEventSpec extends DefaultIntSpec {
 
         when:
 
-        List<DayCountItem> results = eventService.getDistinctUserCountForSkillId(proj.projectId, subject.subjectId, testDates.now.minusDays(2).toDate())
+        Date queryFrom = testDates.now.toLocalDate().atStartOfDay().minusDays(maxDailyDays).toDate()
+        List<DayCountItem> results = eventService.getDistinctUserCountForSkillId(proj.projectId, subject.subjectId, queryFrom)
 
         then:
         results.size() == 2
@@ -776,7 +781,8 @@ class UserEventSpec extends DefaultIntSpec {
 
         when:
 
-        List<DayCountItem> results = eventService.getDistinctUserCountForSkillId(proj.projectId, subj1_skill1.skillId, testDates.now.minusDays(2).toDate())
+        Date queryFrom = testDates.now.toLocalDate().atStartOfDay().minusDays(maxDailyDays).toDate()
+        List<DayCountItem> results = eventService.getDistinctUserCountForSkillId(proj.projectId, subj1_skill1.skillId, queryFrom)
 
         then:
         results.size() == 2

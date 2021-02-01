@@ -34,8 +34,10 @@ import javax.persistence.EntityManager
 import javax.persistence.PersistenceContext
 import java.time.DayOfWeek
 import java.time.Duration
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
+import java.time.temporal.TemporalAdjusters
 import java.util.stream.Stream
 
 @Component
@@ -345,7 +347,7 @@ class UserEventService {
     private EventType determineAppropriateEventType(Date start) {
         EventType eventType = EventType.DAILY
 
-        if (start.toLocalDateTime().isBefore(LocalDateTime.now().minusDays(maxDailyDays))) {
+        if (start.toLocalDateTime().isBefore(LocalDate.now().atStartOfDay().minusDays(maxDailyDays))) {
             eventType = EventType.WEEKLY
         }
 
