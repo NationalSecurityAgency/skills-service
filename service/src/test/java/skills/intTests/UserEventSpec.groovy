@@ -341,8 +341,9 @@ class UserEventSpec extends DefaultIntSpec {
 
         when:
 
-        List<DayCountItem> user0Results = eventService.getUserEventCountsForUser(userIds[0], testDates.now.minusDays(2).toDate())
-        List<DayCountItem> user1Results = eventService.getUserEventCountsForUser(userIds[1], testDates.now.minusDays(2).toDate())
+        Date queryFrom = testDates.now.toLocalDate().atStartOfDay().minusDays(maxDailyDays).toDate()
+        List<DayCountItem> user0Results = eventService.getUserEventCountsForUser(userIds[0], queryFrom)
+        List<DayCountItem> user1Results = eventService.getUserEventCountsForUser(userIds[1], queryFrom)
 
         then:
         user0Results.size() == 4
