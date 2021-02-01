@@ -35,7 +35,7 @@ import javax.annotation.PostConstruct
 
 @Component
 @Slf4j
-class ToolMetricsLogger {
+class MetricsLogger {
 
     @Value('#{"${skills.external.metrics.enabled:false}"}')
     Boolean enabled
@@ -60,7 +60,7 @@ class ToolMetricsLogger {
         if (enabled) {
             log.info("Enabling external tool reporting to endpoint [{}]", endpointUrl)
             restTemplate = new RestTemplate();
-            pool = new CachedThreadPool('tool-metrics', minNumOfThreads, maxNumOfThreads)
+            pool = new CachedThreadPool('metrics-logger', minNumOfThreads, maxNumOfThreads)
         }
     }
 
@@ -72,10 +72,10 @@ class ToolMetricsLogger {
 
             // report to external service in a separate thread
             pool.submit([ThreadPoolUtils.callable {
-                TMMessage message = new TMMessage(group, attributes)
+                MetricsMessage message = new MetricsMessage(group, attributes)
                 HttpHeaders headers = new HttpHeaders();
                 headers.setContentType(MediaType.APPLICATION_JSON);
-                HttpEntity<TMMessage> entity = new HttpEntity<>(message, headers);
+                HttpEntity<MetricsMessage> entity = new HttpEntity<>(message, headers);
                 try {
                     restTemplate.put(endpointUrl, entity);
                 } catch(Exception ex) {
@@ -99,7 +99,7 @@ class ToolMetricsLogger {
     }
 
     @Canonical
-    static class TMMessage {
+    static class MetricsMessage {
         String group
         Map<String, String> attributes = [:]
     }
