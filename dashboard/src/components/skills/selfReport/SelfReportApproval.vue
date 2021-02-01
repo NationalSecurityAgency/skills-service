@@ -138,9 +138,7 @@ limitations under the License.
     },
     mounted() {
       this.table.options.busy = false;
-      console.log(this.table.items);
       this.table.items = this.table.items.map((item) => ({ selected: false, ...item }));
-      console.log(this.table.items);
     },
     methods: {
       changeSelectionForAll(selectedValue) {
