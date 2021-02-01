@@ -444,11 +444,11 @@ class SkillsService {
     }
 
     @Profile
-    def addSkill(Map props, String userId = null, Date date = new Date()) {
+    def addSkill(Map props, String userId = null, Date date = new Date(), String approvalRequestedMsg = null) {
         if (userId) {
             userId = getUserId(userId)
             assert date
-            return wsHelper.apiPost("/projects/${props.projectId}/skills/${props.skillId}", [ userId : userId, timestamp:date.time])
+            return wsHelper.apiPost("/projects/${props.projectId}/skills/${props.skillId}", [ userId : userId, timestamp:date.time, approvalRequestedMsg: approvalRequestedMsg])
         } else {
             return wsHelper.apiPut("/projects/${props.projectId}/skills/${props.skillId}", null)
         }

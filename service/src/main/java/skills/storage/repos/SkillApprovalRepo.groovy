@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.controller.request.model
+package skills.storage.repos
 
-class SkillEventRequest {
-    String userId
-    Long timestamp
-    Boolean notifyIfSkillNotApplied = false
+import groovy.transform.CompileStatic
+import org.springframework.data.repository.CrudRepository
+import skills.storage.model.SkillApproval
 
-    // this is an optional approval message
-    // Note: only applicable in case of self reporting with approval
-    String approvalRequestedMsg
+@CompileStatic
+interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
+
+
 }
