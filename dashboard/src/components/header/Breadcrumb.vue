@@ -101,7 +101,7 @@ limitations under the License.
         const decodedItem = decodeURIComponent(item);
         return {
           label: key ? this.prepKey(key) : null,
-          value: !key ? this.capitalize(decodedItem) : decodedItem,
+          value: !key ? this.capitalize(this.hyphenToCamelCase(decodedItem)) : decodedItem,
           url: this.getUrl(res, index + 1),
         };
       },
@@ -118,6 +118,9 @@ limitations under the License.
       prepKey(key) {
         const res = key.endsWith('s') ? key.substring(0, key.length - 1) : key;
         return this.capitalize(res);
+      },
+      hyphenToCamelCase(value) {
+        return value.replace(/-([a-z])/g, (g) => g[1].toUpperCase());
       },
       capitalize(value) {
         return value.charAt(0).toUpperCase() + value.slice(1);
