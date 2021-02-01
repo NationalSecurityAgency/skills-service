@@ -328,24 +328,26 @@ class UserEventService {
     private List<DayCountItem> convertResults(Stream<WeekCount> stream, Date startOfQueryRange) {
         List<DayCountItem> results = []
         Set<String> uniqueProjectIds = []
-        Date last = StartDateUtil.computeStartDate(new Date(), EventType.WEEKLY)
+        Map<String, Date> lastDates = [:]
         int count = 0;
 
         stream.forEach({
             Date day = WeekNumberUtil.getStartOfWeekFromWeekNumber(it.weekNumber).atStartOfDay().toDate()
             DayCountItem dci = new DayCountItem(it.projectId, day, it.count)
 
+            Date last = lastDates.get(it.projectId) ?: StartDateUtil.computeStartDate(new Date(), EventType.WEEKLY)
             List<DayCountItem> zeroFills = zeroFillGaps(EventType.WEEKLY, last, dci.day, count == 0, it.projectId)
             if (zeroFills) {
                 results.addAll(zeroFills)
             }
-            last = dci.day
-            results.add(dci)
+            lastDates.put(it.projectId, dci.day)
             uniqueProjectIds.add(it.projectId)
+            results.add(dci)
         })
 
         if (results) {
             for (String projectId : uniqueProjectIds) {
+                Date last = lastDates.get(projectId)
                 List<DayCountItem> zeroFillFromStart = zeroFillGaps(EventType.WEEKLY, last, startOfQueryRange, false, projectId)
                 if (zeroFillFromStart) {
                     results.addAll(zeroFillFromStart)
@@ -358,9 +360,9 @@ class UserEventService {
 
     private static List<DayCountItem> zeroFillGaps(EventType eventType, Date n, Date nMinusOne, boolean inclusive, String projectId) {
         if (EventType.DAILY == eventType) {
-            return ZeroFillDayCountItemUtil.zeroFillDailyGaps(n, nMinusOne, inclusive)
+            return ZeroFillDayCountItemUtil.zeroFillDailyGaps(n, nMinusOne, inclusive, projectId)
         } else if (EventType.WEEKLY == eventType) {
-            return ZeroFillDayCountItemUtil.zeroFillWeeklyGaps(n, nMinusOne, inclusive)
+            return ZeroFillDayCountItemUtil.zeroFillWeeklyGaps(n, nMinusOne, inclusive, projectId)
         } else {
             throw new SkillException("Unrecognized EventType [${eventType}]")
         }

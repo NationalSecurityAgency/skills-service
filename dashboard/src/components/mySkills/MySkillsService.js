@@ -17,6 +17,6 @@ import axios from 'axios';
 
 export default {
   loadMySkillsSummary() {
-    return axios.get('/api/projects/mySkillsSummary').then((response) => response.data);
+    return axios.get('/api/mySkillsSummary').then((response) => response.data);
   },
 };

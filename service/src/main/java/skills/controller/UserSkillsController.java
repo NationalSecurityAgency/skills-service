@@ -127,16 +127,6 @@ class UserSkillsController {
         return skillsLoader.loadOverallSummary(projectId, userId, getProvidedVersionOrReturnDefault(version));
     }
 
-    @RequestMapping(value = "/projects/mySkillsSummary", method = RequestMethod.GET, produces = "application/json")
-    @ResponseBody
-    @CompileStatic
-    @Profile
-    public MySkillsSummary getMySkillsSummary(HttpServletRequest request,
-                                              @RequestParam(name = "version", required = false) Integer version) {
-        String userId = userInfoService.getCurrentUserId();
-        return skillsLoader.loadMySkillsSummary(userId, getProvidedVersionOrReturnDefault(version));
-    }
-
     private boolean isRequestFromDashboard(HttpServletRequest request) throws UnknownHostException{
             InetAddress requestorIp = InetAddress.getByName(request.getRemoteAddr());
             log.debug("remote port: [{}], local port: [{}]", request.getRemotePort(), request.getLocalPort());

@@ -555,7 +555,7 @@ class SkillsService {
     }
 
     def getMySkillSummary(int version = -1) {
-        String url = "/projects/mySkillsSummary"
+        String url = "/mySkillsSummary"
         if (version >= 0) {
             url += "?version=${version}"
         }
