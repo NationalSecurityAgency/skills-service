@@ -369,7 +369,8 @@ class SkillsLoader {
                         href: getHelpUrl(helpUrlRootSetting, skillDef.helpUrl)),
                 dependencyInfo: skillDependencySummary,
                 crossProject: crossProjectId != null,
-                achievedOn: achievedOn
+                achievedOn: achievedOn,
+                selfReportingType: skillDef.selfReportingType,
         )
     }
 
@@ -704,7 +705,8 @@ class SkillsLoader {
                     pointIncrement: skillDef.pointIncrement, pointIncrementInterval: skillDef.pointIncrementInterval,
                     maxOccurrencesWithinIncrementInterval: skillDef.numMaxOccurrencesIncrementInterval,
                     totalPoints: skillDef.totalPoints,
-                    dependencyInfo: skillDefAndUserPoints.dependencyInfo
+                    dependencyInfo: skillDefAndUserPoints.dependencyInfo,
+                    selfReportingType: skillDef.selfReportingType,
             )
         }
 

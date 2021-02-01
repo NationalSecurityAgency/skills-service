@@ -15,28 +15,29 @@ limitations under the License.
 */
 <template>
     <div class="row mt-0 px-3 justify-content-center">
-        <div class="mb-2 my-lg-0 px-1" :class="{'col-lg-3': !isTimeWindowDisabled, 'col-lg-4': isTimeWindowDisabled}">
+        <div class="mb-2 px-1 col-md-6 col-lg">
           <progress-info-card :title="skill.points" label="Overall Points Earned" :sub-title="overallPtsSubTitle"
                               icon="fa fa-running text-success"
                               data-cy="overallPointsEarnedCard"/>
         </div>
 
-        <div class="mb-2 my-lg-0 px-1" :class="{'col-lg-3': !isTimeWindowDisabled, 'col-lg-4': isTimeWindowDisabled}">
+        <div class="mb-2 px-1 col-md-6 col-lg">
           <progress-info-card :title="skill.todaysPoints" label="Points Achieved Today" :sub-title="todayPtsSubTitle"
                               icon="fa fa-clock text-warning"
                               data-cy="pointsAchievedTodayCard"/>
         </div>
 
-        <div class="mb-2 my-lg-0 px-1" :class="{'col-lg-3': !isTimeWindowDisabled, 'col-lg-4': isTimeWindowDisabled}">
+        <div class="mb-2 px-1 col-md">
             <progress-info-card :title="skill.pointIncrement" label="Points per occurrence" :sub-title="occurrenceSubTitle"
                                 icon="fas fa-flag-checkered text-info" :animated="false"
                                 data-cy="pointsPerOccurrenceCard"/>
         </div>
 
-        <div v-if="!isTimeWindowDisabled" class="col-lg-3 m-b2 my-lg-0 px-1">
+        <div v-if="!isTimeWindowDisabled" class="col-md mb-2 px-1">
             <progress-info-card :title="timeWindowTitle" :sub-title="timeWindowSubTitle" :label="timeWindowLabel"
-                                icon="fas fa-hourglass-half text-danger"/>
+                                icon="fas fa-hourglass-half text-danger" :animated="false"/>
         </div>
+
     </div>
 </template>
 

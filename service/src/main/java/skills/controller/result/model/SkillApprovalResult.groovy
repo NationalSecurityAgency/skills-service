@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2020 SkillTree
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,28 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import VueApexCharts from 'vue-apexcharts';
+package skills.controller.result.model
 
-import Vue from 'vue';
-import App from '@/App';
-import router from '@/router';
-import store from '@/store';
-import 'apexcharts';
-import '@/common/filter/DayJsFilters';
+class SkillApprovalResult {
 
-import {
-  ModalPlugin,
-} from 'bootstrap-vue';
-
-Vue.config.productionTip = false;
-
-Vue.use(VueApexCharts);
-Vue.use(ModalPlugin);
-
-require('@/common/softwareVersion/softwareVersionInterceptor');
-
-new Vue({
-  router,
-  store,
-  render: (h) => h(App),
-}).$mount('#app');
+    Integer id
+    String userId
+    String skillId
+    String skillName
+    Long requestedOn
+    String requestMsg
+}

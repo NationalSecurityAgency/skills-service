@@ -77,7 +77,7 @@ limitations under the License.
       <skill-summary-cards v-if="!locked" :skill="skillInternal" class="mt-3"></skill-summary-cards>
 
       <p class="skills-text-description text-primary mt-3">
-        <markdown-text :text="skill.description.description"/>
+        <markdown-text v-if="skill.description && skill.description.description" :text="skill.description.description"/>
       </p>
 
       <div>

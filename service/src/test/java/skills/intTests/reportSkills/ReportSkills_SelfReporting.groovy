@@ -47,6 +47,8 @@ class ReportSkills_SelfReporting extends DefaultIntSpec {
         Date date = new Date() - 60
         when:
         def res = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "user0", date, "Please approve this!")
+        List approvalsEndpointRes = skillsService.getApprovals(proj.projectId)
+
         then:
         !res.body.skillApplied
         res.body.pointsEarned == 0
@@ -65,6 +67,13 @@ class ReportSkills_SelfReporting extends DefaultIntSpec {
         approvals.get(0).skillRefId == skillDefRepo.findAll().find({it.skillId == skills[0].skillId}).id
         approvals.get(0).userId == "user0"
         approvals.get(0).requestedOn == date
+
+        approvalsEndpointRes.size() == 1
+        approvalsEndpointRes.get(0).userId == "user0"
+        approvalsEndpointRes.get(0).skillId == "skill1"
+        approvalsEndpointRes.get(0).skillName == "Test Skill 1"
+        approvalsEndpointRes.get(0).requestedOn == date.time
+        approvalsEndpointRes.get(0).requestMsg == "Please approve this!"
     }
 
     def "self report skill with honor system"() {
@@ -81,12 +90,47 @@ class ReportSkills_SelfReporting extends DefaultIntSpec {
         Date date = new Date() - 60
         when:
         def res = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "user0", date, "Please approve this!")
+        List approvalsEndpointRes = skillsService.getApprovals(proj.projectId)
+
         then:
         res.body.skillApplied
         res.body.pointsEarned == 200
         res.body.explanation == "Skill event was applied"
 
         !skillApprovalRepo.findAll().collect {it}
+        !approvalsEndpointRes
+    }
+
+    def "report via approval"() {
+        String user = "user0"
+
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(1,)
+        skills[0].pointIncrement = 200
+        skills[0].selfReportType = SkillDef.SelfReportingType.Approval
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        Date date = new Date() - 60
+        when:
+        def res = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], user, date, "Please approve this!")
+        List approvalsEndpointRes = skillsService.getApprovals(proj.projectId)
+        List<Integer> ids = approvalsEndpointRes.collect { it.id }
+        skillsService.approve(proj.projectId, ids)
+
+        List approvalsEndpointResAfter = skillsService.getApprovals(proj.projectId)
+        def skillEvents = skillsService.getPerformedSkills(user, proj.projectId)
+        println skillEvents
+
+        then:
+        !res.body.skillApplied
+        approvalsEndpointRes.size() == 1
+        skillEvents.data.size() == 1
+        skillEvents.data.get(0).skillId == skills[0].skillId
+        approvalsEndpointResAfter.size() == 0
     }
 
 }

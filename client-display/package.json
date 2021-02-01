@@ -24,6 +24,7 @@
     "axios": "0.21.1",
     "axios-auth-refresh": "3.0.0",
     "bootstrap": "4.5.2",
+    "bootstrap-vue": "2.21.2",
     "dayjs": "1.9.6",
     "dompurify": "2.2.6",
     "lodash": "4.17.20",

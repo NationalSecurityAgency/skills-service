@@ -90,10 +90,22 @@ class SkillEventsService {
     @Autowired
     SelfReportingService selfReportingService
 
+    static class SkillApprovalParams {
+        boolean disableChecks = false
+        String approvalRequestedMsg
+
+        SkillApprovalParams(){}
+
+        SkillApprovalParams(String approvalRequestedMsg) {
+            this.approvalRequestedMsg = approvalRequestedMsg
+        }
+    }
+    static SkillApprovalParams defaultSkillApprovalParams = new SkillApprovalParams()
+
     @Transactional
     @Profile
-    SkillEventResult reportSkill(String projectId, String skillId, String userId, Boolean notifyIfNotApplied, Date incomingSkillDate, String approvalRequestedMsg) {
-        SkillEventResult result = reportSkillInternal(projectId, skillId, userId, incomingSkillDate, approvalRequestedMsg)
+    SkillEventResult reportSkill(String projectId, String skillId, String userId, Boolean notifyIfNotApplied, Date incomingSkillDate, SkillApprovalParams skillApprovalParams = defaultSkillApprovalParams) {
+        SkillEventResult result = reportSkillInternal(projectId, skillId, userId, incomingSkillDate, skillApprovalParams)
         if (notifyIfNotApplied || result.skillApplied) {
             skillEventPublisher.publishSkillUpdate(result, userId)
         }
@@ -165,7 +177,7 @@ class SkillEventsService {
         notifyUserOfAchievements(userId)
     }
 
-    private SkillEventResult reportSkillInternal(String projectId, String skillId, String userId, Date incomingSkillDateParam, String approvalRequestedMsg) {
+    private SkillEventResult reportSkillInternal(String projectId, String skillId, String userId, Date incomingSkillDateParam, SkillApprovalParams approvalParams) {
         assert projectId
         assert skillId
 
@@ -198,8 +210,9 @@ class SkillEventsService {
             return res
         }
 
-        if (skillDefinition.getSelfReportingType() == SkillDef.SelfReportingType.Approval) {
-            selfReportingService.requestApproval(userId, skillDefinition, skillDate.date, approvalRequestedMsg)
+        if (approvalParams && !approvalParams.disableChecks &&
+            skillDefinition.getSelfReportingType() == SkillDef.SelfReportingType.Approval) {
+            selfReportingService.requestApproval(userId, skillDefinition, skillDate.date, approvalParams?.approvalRequestedMsg)
             res.skillApplied = false
             res.explanation = "Skill was submitted for approval"
             return res

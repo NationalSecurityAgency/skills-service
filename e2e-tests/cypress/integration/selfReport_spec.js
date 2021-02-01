@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+var moment = require('moment-timezone');
+
 describe('Self Report Skills Management Tests', () => {
 
     beforeEach(() => {
@@ -250,6 +252,45 @@ describe('Self Report Skills Management Tests', () => {
         cy.visit('/projects/proj1/subjects/subj1/skills/skill3');
         cy.get('[data-cy="selfReportMediaCard"] [data-cy="mediaInfoCardTitle"]').contains('Self Report: Disabled');
         cy.get('[data-cy="selfReportMediaCard"] [data-cy="mediaInfoCardSubTitle"]').contains('Self reporting is disabled for this skill');
+    });
+
+    it.only('approve requests', () => {
+        cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill1`, {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            skillId: `skill1`,
+            name: `Very Great Skill # 1`,
+            pointIncrement: '1500',
+            numPerformToCompletion: '10',
+            selfReportType:	'Approval'
+        });
+
+        cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill2`, {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            skillId: `skill2`,
+            name: `Very Great Skill # 2`,
+            pointIncrement: '1500',
+            numPerformToCompletion: '10',
+            selfReportType:	'Approval'
+        });
+
+        cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill3`, {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            skillId: `skill3`,
+            name: `Very Great Skill # 3`,
+            pointIncrement: '1500',
+            numPerformToCompletion: '10',
+            selfReportType:	'Approval'
+        });
+
+        const m = moment.utc('2020-09-12 11', 'YYYY-MM-DD HH');
+        cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'user0Good@skills.org', timestamp: m.clone().subtract(1, 'day').format('x')})
+        cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: 'user0Good@skills.org', timestamp: m.clone().subtract(4, 'day').format('x')})
+        cy.request('POST', `/api/projects/proj1/skills/skill3`, {userId: 'user0Good@skills.org', timestamp: m.clone().subtract(5, 'day').format('x')})
+
+        cy.visit('/projects/proj1/self-report');
     });
 
 

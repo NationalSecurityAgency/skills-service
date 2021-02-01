@@ -306,7 +306,9 @@ class UserSkillsController {
             Closure<SkillEventResult> closure = new Closure<SkillEventResult>(null) {
                 @Override
                 public SkillEventResult call() {
-                    return skillsManagementFacade.reportSkill(projectId, skillId, userId, notifyIfSkillNotApplied, dataParam, skillEventRequest.getApprovalRequestedMsg());
+                    SkillEventsService.SkillApprovalParams skillApprovalParams = skillEventRequest.getApprovalRequestedMsg() != null ?
+                            new SkillEventsService.SkillApprovalParams(skillEventRequest.getApprovalRequestedMsg()) : SkillEventsService.getDefaultSkillApprovalParams();
+                    return skillsManagementFacade.reportSkill(projectId, skillId, userId, notifyIfSkillNotApplied, dataParam, skillApprovalParams);
                 }
             };
             result = (SkillEventResult) RetryUtil.withRetry(3, false, closure);

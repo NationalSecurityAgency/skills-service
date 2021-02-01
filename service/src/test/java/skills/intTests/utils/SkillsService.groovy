@@ -454,6 +454,18 @@ class SkillsService {
         }
     }
 
+    def getApprovals(String projectId) {
+        return wsHelper.adminGet("/projects/${projectId}/approvals")
+    }
+
+    def approve(String projectId, List<Integer> approvalId) {
+        return wsHelper.adminPost("/projects/${projectId}/approvals/approve", [skillApprovalIds: approvalId])
+    }
+
+    def rejectSkillApprovals(String projectId, List<Integer> approvalId, String msg) {
+        return wsHelper.adminPost("/projects/${projectId}/approvals/reject", [skillApprovalIds: approvalId, rejectionMessage: msg])
+    }
+
     def addSkillAndOptionallyThrowExceptionAtTheEnd(Map props, String userId, Date date, boolean throwException) {
         userId = getUserId(userId)
         return wsHelper.apiPost("/projects/${props.projectId}/skills/${props.skillId}/throwException/${throwException}".toString(),

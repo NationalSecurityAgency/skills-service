@@ -120,10 +120,11 @@ export default {
     return response;
   },
 
-  reportSkill(skillId) {
+  reportSkill(skillId, approvalRequestedMsg) {
     let response = null;
     response = axios.post(`${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/skills/${skillId}`, {
       params: this.getUserIdAndVersionParams(),
+      approvalRequestedMsg,
     }).then((result) => result.data);
     return response;
   },

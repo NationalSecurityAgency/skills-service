@@ -17,12 +17,13 @@ limitations under the License.
   <b-card body-class="p-0 mt-3">
     <div class="row px-3 mb-3">
       <div class="col">
+        <b-button variant="outline-info" @click="loadApprovals" data-cy="users-filterBtn" class="mr-2 mt-1"><i class="fas fa-sync-alt"></i></b-button>
         <b-button variant="outline-info" @click="changeSelectionForAll(true)" data-cy="users-filterBtn" class="mr-2 mt-1"><i class="fa fa-check-square"/> Select All</b-button>
         <b-button variant="outline-info" @click="changeSelectionForAll(false)" data-cy="users-filterBtn" class="mt-1"><i class="far fa-square"></i> Clear All</b-button>
       </div>
       <div class="col text-right">
-        <b-button variant="outline-danger" @click="changeSelectionForAll(false)" data-cy="users-filterBtn" class="mt-1" :disabled="actionsDisabled"><i class="fa fa-times-circle"/> Reject</b-button>
-        <b-button variant="outline-success" @click="changeSelectionForAll(false)" data-cy="users-filterBtn" class="mt-1 ml-2" :disabled="actionsDisabled"><i class="fa fa-check"/> Approve</b-button>
+        <b-button variant="outline-danger" @click="reject.showModal=true" data-cy="users-filterBtn" class="mt-1" :disabled="actionsDisabled"><i class="fa fa-times-circle"/> Reject</b-button>
+        <b-button variant="outline-success" @click="approve" data-cy="users-filterBtn" class="mt-1 ml-2" :disabled="actionsDisabled"><i class="fa fa-check"/> Approve</b-button>
       </div>
     </div>
 
@@ -50,57 +51,61 @@ limitations under the License.
         <div>{{ data.item.skillName }}</div>
         <div class="small text-secondary">ID: {{ data.item.skillId }}</div>
         <div class="mt-2" style="font-size: 0.9rem;"><span class="text-secondary">Note:</span>
-          <span v-if="data.item.note && data.item.note.length > 0"> {{ data.item.note }}</span>
-          <span class="text-muted"> Not supplied</span>
+          <span v-if="data.item.requestMsg && data.item.requestMsg.length > 0"> {{ data.item.requestMsg }}</span>
+          <span v-else class="text-muted"> Not supplied</span>
         </div>
       </template>
 
-      <template v-slot:cell(reportedOn)="data">
+      <template v-slot:cell(requestedOn)="data">
         <date-cell :value="data.value" />
       </template>
 
     </skills-b-table>
+
+    <b-modal id="rejectSkillsModal"
+             title="REJECT SKILLS"
+             :no-close-on-backdrop="true"
+             v-model="reject.showModal">
+      <div class="row p-2">
+        <div class="col-auto text-center">
+          <i class="far fa-thumbs-down text-warning" style="font-size: 3rem"/>
+        </div>
+        <div class="col">
+          <p class="h6">This will <b class="text-warning">permanently</b> reject user requests to get points. Users will be notified and you can provide an optional message below.</p>
+        </div>
+      </div>
+      <input type="text" id="approvalRequiredMsg" v-model="reject.rejectMsg"
+             class="form-control" placeholder="Message (optional)">
+      <template #modal-footer>
+        <button type="button" class="btn btn-outline-danger text-uppercase" @click="reject.showModal=false">
+          <i class="fas fa-times-circle"></i> Cancel
+        </button>
+        <button type="button" class="btn btn-outline-success text-uppercase" @click="doReject(); reject.showModal=false;">
+          <i class="fas fa-arrow-alt-circle-right"></i> Reject
+        </button>
+      </template>
+    </b-modal>
   </b-card>
 </template>
 
 <script>
   import SkillsBTable from '../../utils/table/SkillsBTable';
   import DateCell from '../../utils/table/DateCell';
+  import SelfReportService from './SelfReportService';
 
   export default {
     name: 'SelfReportApproval',
     components: { DateCell, SkillsBTable },
     data() {
       return {
+        projectId: this.$route.params.projectId,
         actionsDisabled: true,
+        reject: {
+          showModal: false,
+          rejectMsg: '',
+        },
         table: {
-          items: [{
-            userId: 'flyingGoon',
-            skillId: 'InterestingSkill',
-            skillName: 'What a skill',
-            reportedOn: new Date().getTime(),
-            note: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec sodales faucibus justo non scelerisque. '
-              + 'Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Fusce et laoreet massa, '
-              + 'in condimentum augue. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi molestie venenatis nisi id '
-              + 'venenatis. Sed aliquet erat purus, sed interdum ipsum aliquet et. '
-              + 'Pellentesque venenatis felis nisl, ac feugiat neque commodo quis. Nulla ut tellus sit amet odio aliquet consectetur aliquet quis mauris. Nunc imperdiet id turpis nec tincidunt. ',
-          }, {
-            userId: 'flyingGoon',
-            skillId: 'InterestingSkill1',
-            skillName: 'What a skill',
-            reportedOn: new Date().getTime(),
-            note: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec sodales faucibus justo non scelerisque. '
-              + 'Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Fusce et laoreet massa, '
-              + 'in condimentum augue. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi molestie venenatis nisi id '
-              + 'venenatis. Sed aliquet erat purus, sed interdum ipsum aliquet et. '
-              + 'Pellentesque venenatis felis nisl, ac feugiat neque commodo quis. Nulla ut tellus sit amet odio aliquet consectetur aliquet quis mauris. Nunc imperdiet id turpis nec tincidunt. ',
-          }, {
-            userId: 'flyingGoon',
-            skillId: 'InterestingSkill2',
-            skillName: 'What a skill',
-            reportedOn: new Date().getTime(),
-            note: '',
-          }],
+          items: [],
           options: {
             busy: true,
             bordered: true,
@@ -120,8 +125,8 @@ limitations under the License.
                 sortable: true,
               },
               {
-                key: 'reportedOn',
-                label: 'Reported On',
+                key: 'requestedOn',
+                label: 'Requested On',
                 sortable: true,
               },
             ],
@@ -137,10 +142,17 @@ limitations under the License.
       };
     },
     mounted() {
-      this.table.options.busy = false;
-      this.table.items = this.table.items.map((item) => ({ selected: false, ...item }));
+      this.loadApprovals();
     },
     methods: {
+      loadApprovals() {
+        this.table.options.busy = true;
+        SelfReportService.getApprovals(this.projectId)
+          .then((res) => {
+            this.table.items = res.map((item) => ({ selected: false, ...item }));
+            this.table.options.busy = false;
+          });
+      },
       changeSelectionForAll(selectedValue) {
         this.table.items.forEach((item) => {
           // eslint-disable-next-line no-param-reassign
@@ -154,6 +166,22 @@ limitations under the License.
         } else {
           this.actionsDisabled = true;
         }
+      },
+      approve() {
+        this.table.options.busy = true;
+        const idsToApprove = this.table.items.filter((item) => item.selected).map((item) => item.id);
+        SelfReportService.approve(this.projectId, idsToApprove)
+          .then(() => {
+            this.loadApprovals();
+          });
+      },
+      doReject() {
+        this.table.options.busy = true;
+        const ids = this.table.items.filter((item) => item.selected).map((item) => item.id);
+        SelfReportService.reject(this.projectId, ids, this.reject.rejectMsg)
+          .then(() => {
+            this.loadApprovals();
+          });
       },
     },
   };

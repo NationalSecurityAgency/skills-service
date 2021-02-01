@@ -15,6 +15,8 @@
  */
 package skills.skillLoading.model
 
+import skills.storage.model.SkillDef
+
 class SkillSummary  {
 
     String projectId
@@ -39,4 +41,6 @@ class SkillSummary  {
 
     // null if the skill is NOT achieved
     Date achievedOn
+
+    SkillDef.SelfReportingType selfReportingType
 }
