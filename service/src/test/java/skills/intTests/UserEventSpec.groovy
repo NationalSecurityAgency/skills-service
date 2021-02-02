@@ -22,6 +22,7 @@ import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.support.TransactionTemplate
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
+import skills.services.LockingService
 import skills.services.UserEventService
 import skills.storage.model.DayCountItem
 import skills.storage.model.EventType
@@ -54,6 +55,11 @@ class UserEventSpec extends DefaultIntSpec {
 
     @Autowired
     private PlatformTransactionManager transactionManager;
+
+    def setup() {
+        LockingService mockLock = Mock()
+        eventService.lockingService = mockLock;
+    }
 
     def "make sure daily events are compacted into weekly events"() {
         TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager)

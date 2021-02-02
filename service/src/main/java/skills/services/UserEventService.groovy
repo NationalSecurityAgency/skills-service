@@ -59,6 +59,9 @@ class UserEventService {
     @Autowired
     SkillDefRepo skillDefRepo
 
+    @Autowired
+    LockingService lockingService
+
     private static final List<SkillDef.ContainerType> ALLOWABLE_CONTAINER_TYPES = [SkillDef.ContainerType.Skill, SkillDef.ContainerType.Subject]
 
     /**
@@ -260,6 +263,8 @@ class UserEventService {
     @CompileStatic
     @Transactional
     public void compactDailyEvents() {
+        lockingService.lockEventCompaction()
+
         LocalDateTime dateTime = LocalDateTime.now().minusDays(maxDailyDays)
         log.info("beginning compaction of daily events older than [${dateTime}] into weekly events")
 
