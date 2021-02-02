@@ -33,10 +33,23 @@ class SelfReportingService {
     SkillEventsService.AppliedCheckRes requestApproval(String userId, SkillEventsSupportRepo.SkillDefMin skillDefinition, Date performedOn, String requestMsg) {
 
         SkillEventsService.AppliedCheckRes res
-        if (skillApprovalRepo.existsByProjectIdAndSkillId(skillDefinition.projectId, skillDefinition.skillId)) {
+        SkillApproval existing = skillApprovalRepo.findByUserIdProjectIdAndSkillId(userId, skillDefinition.projectId, skillDefinition.skillId)
+        if (existing && !existing.rejectedOn) {
             res = new SkillEventsService.AppliedCheckRes(
                     skillApplied: false,
                     explanation: "This skill was already submitted for approval and still pending approval"
+            )
+        } else if (existing && existing.rejectedOn) {
+            // override rejection with new submission
+            existing.rejectedOn = null
+            existing.rejectionMsg = null
+            existing.requestedOn = performedOn
+            existing.requestMsg = requestMsg
+            skillApprovalRepo.save(existing)
+
+            res = new SkillEventsService.AppliedCheckRes(
+                    skillApplied: false,
+                    explanation: "Skill was submitted for approval"
             )
         } else {
             SkillApproval skillApproval = new SkillApproval(
@@ -54,7 +67,6 @@ class SelfReportingService {
                     explanation: "Skill was submitted for approval"
             )
         }
-
 
         return res
     }

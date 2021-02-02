@@ -20,6 +20,8 @@ import org.joda.time.format.DateTimeFormat
 import org.joda.time.format.DateTimeFormatter
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
+import skills.storage.model.SkillDef
+import spock.lang.IgnoreRest
 
 class SingleSkillSummarySpec extends DefaultIntSpec {
 
@@ -187,6 +189,67 @@ class SingleSkillSummarySpec extends DefaultIntSpec {
         !summary1.achievedOn
         !summary2.achievedOn
     }
+
+    def "load with different self-reporting types and status"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def subj = SkillsFactory.createSubject(1, 1)
+        List<Map> skills = SkillsFactory.createSkills(5, 1, 1, 100)
+        skills[0].selfReportType = SkillDef.SelfReportingType.Approval
+        skills[1].selfReportType = SkillDef.SelfReportingType.HonorSystem
+        skills[2].selfReportType = SkillDef.SelfReportingType.Approval
+        skills[3].selfReportType = SkillDef.SelfReportingType.Approval
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        String userId = "user0"
+        Date date = new Date()
+        skillsService.addSkill([projectId: proj1.projectId, skillId: skills.get(1).skillId], userId, date)
+        skillsService.addSkill([projectId: proj1.projectId, skillId: skills.get(2).skillId], userId, date)
+        skillsService.addSkill([projectId: proj1.projectId, skillId: skills.get(3).skillId], userId, date)
+        Integer approvalIdToReject = skillsService.getApprovals(proj1.projectId).find { it.skillId == skills.get(3).skillId }.id
+        skillsService.rejectSkillApprovals(proj1.projectId, [approvalIdToReject], 'Good rejection message')
+
+        when:
+        def summary1 = skillsService.getSingleSkillSummary(userId, proj1.projectId, skills.get(0).skillId)
+        def summary2 = skillsService.getSingleSkillSummary(userId, proj1.projectId, skills.get(1).skillId)
+        def summary3 = skillsService.getSingleSkillSummary(userId, proj1.projectId, skills.get(2).skillId)
+        def summary4 = skillsService.getSingleSkillSummary(userId, proj1.projectId, skills.get(3).skillId)
+        def summary5 = skillsService.getSingleSkillSummary(userId, proj1.projectId, skills.get(4).skillId)
+
+        then:
+        summary1.selfReporting.enabled
+        summary1.selfReporting.type == SkillDef.SelfReportingType.Approval.toString()
+        !summary1.selfReporting.requestedOn
+        !summary1.selfReporting.rejectedOn
+        !summary1.selfReporting.rejectionMsg
+
+        summary2.selfReporting.enabled
+        summary2.selfReporting.type == SkillDef.SelfReportingType.HonorSystem.toString()
+        !summary2.selfReporting.requestedOn
+        !summary2.selfReporting.rejectedOn
+        !summary2.selfReporting.rejectionMsg
+
+        summary3.selfReporting.enabled
+        summary3.selfReporting.type == SkillDef.SelfReportingType.Approval.toString()
+        summary3.selfReporting.requestedOn == date.time
+        !summary3.selfReporting.rejectedOn
+        !summary3.selfReporting.rejectionMsg
+
+        summary4.selfReporting.enabled
+        summary4.selfReporting.type == SkillDef.SelfReportingType.Approval.toString()
+        summary4.selfReporting.requestedOn == date.time
+        new Date(summary4.selfReporting.rejectedOn).format('yyyy-MM-dd') == date.format('yyyy-MM-dd')
+        summary4.selfReporting.rejectionMsg == 'Good rejection message'
+
+        !summary5.selfReporting.enabled
+        !summary5.selfReporting.type
+        !summary5.selfReporting.requestedOn
+        !summary5.selfReporting.rejectedOn
+        !summary5.selfReporting.rejectionMsg
+    }
+
 
 
 }

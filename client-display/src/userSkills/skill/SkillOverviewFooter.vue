@@ -18,7 +18,7 @@ limitations under the License.
     <div class="row pt-2">
       <div class="col-auto text-left">
         <div class="btn-group" role="group" aria-label="Basic example">
-          <a v-if="skill.description && skill.description.href" :href="skill.description.href" target="_blank" rel="noopener" class="btn btn-outline-info ">
+          <a v-if="skillInternal.description && skillInternal.description.href" :href="skillInternal.description.href" target="_blank" rel="noopener" class="btn btn-outline-info ">
             <i class="fas fa-question-circle"></i> Learn More <i class="fas fa-external-link-alt"></i>
           </a>
           <button v-if="selfReport.available" class="btn btn-outline-info"
@@ -29,6 +29,35 @@ limitations under the License.
           </button>
         </div>
       </div>
+      <div v-if="isPendingApproval()" class="col text-right">
+        <div>
+          <i class="far fa-clock"></i> Pending Approval
+        </div>
+        <div>
+          Submitted <span class="text-info">{{ skillInternal.selfReporting.requestedOn | relativeTime}}</span>
+        </div>
+      </div>
+      <div v-if="isRejected" class="col text-right">
+        <div class="text-danger">
+          <i class="fas fa-ban"></i> Approval Rejected
+        </div>
+        <div>
+          Rejected <span class="text-info">{{ skillInternal.selfReporting.rejectedOn | relativeTime}}</span>
+        </div>
+      </div>
+    </div>
+    <div v-if="isRejected" class="alert alert-danger mt-2">
+      <div class="row">
+        <div class="col-auto">
+          <i class="fas fa-heart-broken" style="font-size: 1.5rem;"></i>
+        </div>
+        <div class="col">
+          <div>
+            Unfortunately your request from <b>{{ skillInternal.selfReporting.requestedOn | formatDate('MM/DD/YYYY') }}</b> was rejected. The reason is:
+            <b>"{{ skillInternal.selfReporting.rejectionMsg }}"</b>
+          </div>
+        </div>
+      </div>
     </div>
     <div v-if="!selfReport.msgHidden" class="alert alert-success mt-2" role="alert" data-cy="selfReportAlert">
       <div class="row">
@@ -37,12 +66,12 @@ limitations under the License.
             <i class="fas fa-birthday-cake text-success mr-2" style="font-size: 1.5rem"></i> Congrats! You just earned <span
               class="text-success font-weight-bold">{{ selfReport.res.pointsEarned }}</span> points!
           </div>
-          <div v-if="!isPointsEarned && !isApprovalRequired">
+          <div v-if="!isPointsEarned && (this.isAlreadyPerformed() || !isApprovalRequired)">
             <i class="fas fa-cloud-sun-rain mr-2 text-info" style="font-size: 1.5rem"></i> <span> <b class="text-info">Unfortunately</b> no points.</span>
             {{ this.selfReport.res.explanation }}
           </div>
 
-          <div v-if="isApprovalRequired">
+          <div v-if="!this.isAlreadyPerformed() && isApprovalRequired">
             <i class="fas fa-user-clock mr-2 text-info" style="font-size: 1.5rem"></i> This skills requires project administrator's approval. <b class="text-info">Submitted successfully!</b> Now let's play the waiting game!
           </div>
         </div>
@@ -66,7 +95,7 @@ limitations under the License.
           <i v-if="isApprovalRequired" class="fas fa-thumbs-up text-info" style="font-size: 3rem"></i>
         </div>
         <div class="col">
-          <p class="h5" v-if="isHonorSystem">This skill can submitted under the <b class="text-success">Honor System</b> and <b class="text-success">{{ skill.pointIncrement}}</b> points will apply right away!</p>
+          <p class="h5" v-if="isHonorSystem">This skill can submitted under the <b class="text-success">Honor System</b> and <b class="text-success">{{ skillInternal.pointIncrement}}</b> points will apply right away!</p>
           <p class="h5" v-if="isApprovalRequired">This skill requires <b class="text-info">approval</b>. Submit with an <span class="text-muted">optional</span> message and it will enter an approval queue.</p>
         </div>
       </div>
@@ -93,6 +122,7 @@ limitations under the License.
     props: ['skill'],
     data() {
       return {
+        skillInternal: {},
         modalVisible: false,
         approvalRequestedMsg: '',
         selfReport: {
@@ -103,6 +133,7 @@ limitations under the License.
       };
     },
     mounted() {
+      this.skillInternal = { ...this.skill };
       this.selfReport.available = this.selfReportConfigured() && !this.isCompleted() && !this.isLocked() && !this.isCrossProject();
     },
     computed: {
@@ -110,34 +141,55 @@ limitations under the License.
         return this.selfReport && this.selfReport.res && this.selfReport.res.skillApplied;
       },
       selfReportDisabled() {
-        return this.isCompleted();
+        return this.isCompleted() || this.isPendingApproval();
       },
       isHonorSystem() {
-        return this.skill.selfReportingType === 'HonorSystem';
+        return this.skillInternal.selfReporting && this.skillInternal.selfReporting.type === 'HonorSystem';
       },
       isApprovalRequired() {
-        return this.skill.selfReportingType === 'Approval';
+        return this.skillInternal.selfReporting && this.skillInternal.selfReporting.type === 'Approval';
+      },
+      isRejected() {
+        const res = this.skillInternal.selfReporting && this.skillInternal.selfReporting.rejectedOn !== null && this.skillInternal.selfReporting.rejectedOn !== undefined;
+        return res;
       },
     },
     methods: {
+      isPendingApproval() {
+        const res = this.skillInternal.selfReporting && this.skillInternal.selfReporting.requestedOn !== null && this.skillInternal.selfReporting.requestedOn !== undefined && !this.isRejected;
+        return res;
+      },
       selfReportConfigured() {
-        return this.skill.selfReportingType && this.skill.selfReportingType.length > 0;
+        return this.skillInternal.selfReporting && this.skillInternal.selfReporting && this.skillInternal.selfReporting.enabled;
       },
       isCompleted() {
-        return this.skill.points === this.skill.totalPoints;
+        return this.skillInternal.points === this.skillInternal.totalPoints;
       },
       isLocked() {
-        return this.skill.dependencyInfo && !this.skill.dependencyInfo.achieved;
+        return this.skillInternal.dependencyInfo && !this.skillInternal.dependencyInfo.achieved;
       },
       isCrossProject() {
-        return this.skill.crossProject;
+        return this.skillInternal.crossProject;
+      },
+      isAlreadyPerformed() {
+        return this.selfReport.res && this.selfReport.res.explanation.includes('was already performed');
       },
       reportSkill() {
-        UserSkillsService.reportSkill(this.skill.skillId, this.approvalRequestedMsg)
+        UserSkillsService.reportSkill(this.skillInternal.skillId, this.approvalRequestedMsg)
           .then((res) => {
+            if (this.skillInternal.selfReporting) {
+              this.skillInternal.selfReporting.rejectedOn = null;
+              this.skillInternal.selfReporting.rejectionMsg = null;
+            }
+
             this.selfReport.msgHidden = false;
             this.selfReport.res = res;
-            this.$emit('points-earned', res.pointsEarned);
+            if (!this.isAlreadyPerformed() && this.isApprovalRequired) {
+              this.skillInternal.selfReporting.requestedOn = new Date();
+            }
+            if (res.pointsEarned > 0) {
+              this.$emit('points-earned', res.pointsEarned);
+            }
           });
       },
     },
@@ -145,5 +197,4 @@ limitations under the License.
 </script>
 
 <style scoped>
-
 </style>

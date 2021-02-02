@@ -42,5 +42,5 @@ class SkillSummary  {
     // null if the skill is NOT achieved
     Date achievedOn
 
-    SkillDef.SelfReportingType selfReportingType
+    SelfReportingInfo selfReporting
 }

@@ -18,6 +18,7 @@ package skills.storage.repos
 import groovy.transform.CompileStatic
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
+import org.springframework.lang.Nullable
 import skills.storage.model.SkillApproval
 
 @CompileStatic
@@ -44,10 +45,13 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
     List<SimpleSkillApproval> findToApproveByProjectId(String projectId)
 
 
-    @Query('''select case when count(s) > 0 then true else false end  
+    @Nullable
+    @Query('''select s 
         from SkillApproval s, SkillDef sd 
-        where s.projectId = ?1 and s.skillRefId = sd.id and sd.skillId = ?2''')
-    boolean existsByProjectIdAndSkillId(String projectId, String skillId)
+        where s.userId = ?1 and s.projectId = ?2 and s.skillRefId = sd.id and sd.skillId = ?3''')
+    SkillApproval findByUserIdProjectIdAndSkillId(String userId, String projectId, String skillId)
 
+    @Nullable
+    SkillApproval findByUserIdAndProjectIdAndSkillRefId(String userId, String projectId, Integer skillRefId)
 
 }

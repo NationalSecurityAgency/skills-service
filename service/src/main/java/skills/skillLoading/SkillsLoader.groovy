@@ -111,6 +111,9 @@ class SkillsLoader {
     @Autowired
     RankingLoader rankingLoader
 
+    @Autowired
+    SkillApprovalRepo skillApprovalRepo
+
     private static String PROP_HELP_URL_ROOT = CommonSettings.HELP_URL_ROOT
 
     @Transactional(readOnly = true)
@@ -370,8 +373,24 @@ class SkillsLoader {
                 dependencyInfo: skillDependencySummary,
                 crossProject: crossProjectId != null,
                 achievedOn: achievedOn,
-                selfReportingType: skillDef.selfReportingType,
+                selfReporting: loadSelfReporting(userId, skillDef),
         )
+    }
+
+    @Profile
+    private SelfReportingInfo loadSelfReporting(String userId, SkillDefWithExtra skillDef){
+        boolean enabled = skillDef.selfReportingType != null
+        SkillApproval skillApproval = skillApprovalRepo.findByUserIdAndProjectIdAndSkillRefId(userId, skillDef.projectId, skillDef.id)
+
+        SelfReportingInfo selfReportingInfo = new SelfReportingInfo(
+                enabled: enabled,
+                type: skillDef.selfReportingType,
+                requestedOn: skillApproval?.requestedOn?.time,
+                rejectedOn: skillApproval?.rejectedOn?.time,
+                rejectionMsg: skillApproval?.rejectionMsg
+        )
+
+        return selfReportingInfo
     }
 
     @Transactional(readOnly = true)
@@ -706,7 +725,6 @@ class SkillsLoader {
                     maxOccurrencesWithinIncrementInterval: skillDef.numMaxOccurrencesIncrementInterval,
                     totalPoints: skillDef.totalPoints,
                     dependencyInfo: skillDefAndUserPoints.dependencyInfo,
-                    selfReportingType: skillDef.selfReportingType,
             )
         }
 

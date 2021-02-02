@@ -136,6 +136,7 @@ class ReportSkills_SelfReporting extends DefaultIntSpec {
 
     def "requesting approval for the same skill more than one time"() {
         String user = "user0"
+        String user1 = "user1"
 
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
@@ -151,6 +152,7 @@ class ReportSkills_SelfReporting extends DefaultIntSpec {
         when:
         def res = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], user, date, "Please approve this!")
         def res1 = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], user, date, "Please approve this!")
+        def res2 = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], user1, date, "Please approve this!")
 
         then:
         !res.body.skillApplied
@@ -160,6 +162,54 @@ class ReportSkills_SelfReporting extends DefaultIntSpec {
         !res1.body.skillApplied
         res1.body.pointsEarned == 0
         res1.body.explanation == "This skill was already submitted for approval and still pending approval"
+
+        !res2.body.skillApplied
+        res2.body.pointsEarned == 0
+        res2.body.explanation == "Skill was submitted for approval"
     }
 
+    def "ability to override submission for a rejected approval"() {
+        String user = "user0"
+
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(1,)
+        skills[0].pointIncrement = 200
+        skills[0].selfReportType = SkillDef.SelfReportingType.Approval
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        Date date = new Date() - 60
+        Date date1 = new Date() - 30
+        when:
+        def res = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], user, date, "Please approve this!")
+        List approvalsEndpointRes = skillsService.getApprovals(proj.projectId)
+
+        List<Integer> ids = approvalsEndpointRes.collect { it.id }
+        skillsService.rejectSkillApprovals(proj.projectId, ids, 'Just felt like it')
+
+        def res1 = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], user, date1, "Please approve this again!")
+        List approvalsEndpointResAfter = skillsService.getApprovals(proj.projectId)
+
+        then:
+        !res.body.skillApplied
+        res.body.pointsEarned == 0
+        res.body.explanation == "Skill was submitted for approval"
+
+        !res1.body.skillApplied
+        res1.body.pointsEarned == 0
+        res1.body.explanation == "Skill was submitted for approval"
+
+        approvalsEndpointRes.size() == 1
+        approvalsEndpointRes.get(0).requestMsg == "Please approve this!"
+
+        approvalsEndpointResAfter.size() == 1
+        approvalsEndpointResAfter.get(0).requestMsg == "Please approve this again!"
+        approvalsEndpointResAfter.get(0).userId == user
+        approvalsEndpointResAfter.get(0).skillId == skills[0].skillId
+        approvalsEndpointResAfter.get(0).skillName == skills[0].name
+        approvalsEndpointResAfter.get(0).requestedOn == date1.time
+    }
 }

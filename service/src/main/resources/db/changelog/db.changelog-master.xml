@@ -1124,6 +1124,11 @@
             </column>
         </createTable>
 
+        <createIndex indexName="index_skill_approval_user_id"
+                     tableName="skill_approval">
+            <column name="user_id" type="varchar(255)"/>
+        </createIndex>
+
         <createIndex indexName="index_skill_approval_project_id"
                      tableName="skill_approval">
             <column name="project_id" type="varchar(255)"/>
