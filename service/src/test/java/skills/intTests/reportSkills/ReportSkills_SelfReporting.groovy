@@ -23,6 +23,7 @@ import skills.storage.model.SkillApproval
 import skills.storage.model.SkillDef
 import skills.storage.repos.SkillApprovalRepo
 import skills.storage.repos.SkillDefRepo
+import spock.lang.IgnoreRest
 
 @Slf4j
 class ReportSkills_SelfReporting extends DefaultIntSpec {
@@ -131,6 +132,34 @@ class ReportSkills_SelfReporting extends DefaultIntSpec {
         skillEvents.data.size() == 1
         skillEvents.data.get(0).skillId == skills[0].skillId
         approvalsEndpointResAfter.size() == 0
+    }
+
+    def "requesting approval for the same skill more than one time"() {
+        String user = "user0"
+
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(1,)
+        skills[0].pointIncrement = 200
+        skills[0].selfReportType = SkillDef.SelfReportingType.Approval
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        Date date = new Date() - 60
+        when:
+        def res = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], user, date, "Please approve this!")
+        def res1 = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], user, date, "Please approve this!")
+
+        then:
+        !res.body.skillApplied
+        res.body.pointsEarned == 0
+        res.body.explanation == "Skill was submitted for approval"
+
+        !res1.body.skillApplied
+        res1.body.pointsEarned == 0
+        res1.body.explanation == "This skill was already submitted for approval and still pending approval"
     }
 
 }

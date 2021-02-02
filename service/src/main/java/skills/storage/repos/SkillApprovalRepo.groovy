@@ -44,4 +44,10 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
     List<SimpleSkillApproval> findToApproveByProjectId(String projectId)
 
 
+    @Query('''select case when count(s) > 0 then true else false end  
+        from SkillApproval s, SkillDef sd 
+        where s.projectId = ?1 and s.skillRefId = sd.id and sd.skillId = ?2''')
+    boolean existsByProjectIdAndSkillId(String projectId, String skillId)
+
+
 }

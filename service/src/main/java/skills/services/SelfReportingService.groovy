@@ -17,6 +17,7 @@ package skills.services
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import skills.services.events.SkillEventsService
 import skills.storage.model.SkillApproval
 import skills.storage.repos.SkillApprovalRepo
 import skills.storage.repos.SkillEventsSupportRepo
@@ -29,16 +30,32 @@ class SelfReportingService {
     @Autowired
     SkillApprovalRepo skillApprovalRepo
 
-    void requestApproval(String userId, SkillEventsSupportRepo.SkillDefMin skillDefinition, Date performedOn, String requestMsg) {
+    SkillEventsService.AppliedCheckRes requestApproval(String userId, SkillEventsSupportRepo.SkillDefMin skillDefinition, Date performedOn, String requestMsg) {
 
-        SkillApproval skillApproval = new SkillApproval(
-                projectId: skillDefinition.projectId,
-                userId: userId,
-                skillRefId: skillDefinition.id,
-                requestedOn: performedOn,
-                requestMsg: requestMsg
-        )
+        SkillEventsService.AppliedCheckRes res
+        if (skillApprovalRepo.existsByProjectIdAndSkillId(skillDefinition.projectId, skillDefinition.skillId)) {
+            res = new SkillEventsService.AppliedCheckRes(
+                    skillApplied: false,
+                    explanation: "This skill was already submitted for approval and still pending approval"
+            )
+        } else {
+            SkillApproval skillApproval = new SkillApproval(
+                    projectId: skillDefinition.projectId,
+                    userId: userId,
+                    skillRefId: skillDefinition.id,
+                    requestedOn: performedOn,
+                    requestMsg: requestMsg
+            )
 
-        skillApprovalRepo.save(skillApproval)
+            skillApprovalRepo.save(skillApproval)
+
+            res = new SkillEventsService.AppliedCheckRes(
+                    skillApplied: false,
+                    explanation: "Skill was submitted for approval"
+            )
+        }
+
+
+        return res
     }
 }

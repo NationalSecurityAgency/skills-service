@@ -16,33 +16,44 @@ limitations under the License.
 <template>
   <div>
     <div class="row pt-2">
-    <div class="col text-left">
-      <div class="btn-group" role="group" aria-label="Basic example">
-        <a v-if="skill.description && skill.description.href" :href="skill.description.href" target="_blank" rel="noopener" class="btn btn-outline-info ">
-          <i class="fas fa-question-circle"></i> Learn More <i class="fas fa-external-link-alt"></i>
-        </a>
-        <button v-if="selfReport.available" class="btn btn-outline-info"
-                :disabled="selfReportDisabled"
-                @click="modalVisible = true;"
-                data-cy="selfReportBtn">
-          <i class="fas fa-check-square"></i> I did it
-        </button>
-      </div>
-    </div>
-    <div class="col-12">
-      <div v-if="!selfReport.msgHidden" class="alert alert-success mt-2" role="alert" data-cy="selfReportAlert">
-        <div v-if="isPointsEarned">
-          <i class="far fa-thumbs-up"></i> Congrats! You just earned <span class="text-success font-weight-bold">{{ selfReport.res.pointsEarned }}</span> points!
-          <button type="button" class="close" data-dismiss="alert" aria-label="Close" @click="selfReport.msgHidden = true">
-            <span aria-hidden="true">&times;</span>
+      <div class="col-auto text-left">
+        <div class="btn-group" role="group" aria-label="Basic example">
+          <a v-if="skill.description && skill.description.href" :href="skill.description.href" target="_blank" rel="noopener" class="btn btn-outline-info ">
+            <i class="fas fa-question-circle"></i> Learn More <i class="fas fa-external-link-alt"></i>
+          </a>
+          <button v-if="selfReport.available" class="btn btn-outline-info"
+                  :disabled="selfReportDisabled"
+                  @click="modalVisible = true;"
+                  data-cy="selfReportBtn">
+            <i class="fas fa-check-square"></i> I did it
           </button>
         </div>
-        <div v-if="selfReportConfigured && isApprovalRequired">
-          This skills requires project administrator approval. Submitted successfully! Now let's play the waiting game!
+      </div>
+    </div>
+    <div v-if="!selfReport.msgHidden" class="alert alert-success mt-2" role="alert" data-cy="selfReportAlert">
+      <div class="row">
+        <div class="col">
+          <div v-if="isPointsEarned">
+            <i class="fas fa-birthday-cake text-success mr-2" style="font-size: 1.5rem"></i> Congrats! You just earned <span
+              class="text-success font-weight-bold">{{ selfReport.res.pointsEarned }}</span> points!
+          </div>
+          <div v-if="!isPointsEarned && !isApprovalRequired">
+            <i class="fas fa-cloud-sun-rain mr-2 text-info" style="font-size: 1.5rem"></i> <span> <b class="text-info">Unfortunately</b> no points.</span>
+            {{ this.selfReport.res.explanation }}
+          </div>
+
+          <div v-if="isApprovalRequired">
+            <i class="fas fa-user-clock mr-2 text-info" style="font-size: 1.5rem"></i> This skills requires project administrator's approval. <b class="text-info">Submitted successfully!</b> Now let's play the waiting game!
+          </div>
+        </div>
+        <div class="col-auto">
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close"
+                  @click="selfReport.msgHidden = true">
+            <i class="fas fa-times-circle"></i>
+          </button>
         </div>
       </div>
     </div>
-  </div>
 
     <b-modal id="reportSkillModal"
              title="REPORT SKILL"

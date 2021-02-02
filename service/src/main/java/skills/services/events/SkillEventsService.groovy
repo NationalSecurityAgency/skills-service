@@ -212,9 +212,9 @@ class SkillEventsService {
 
         if (approvalParams && !approvalParams.disableChecks &&
             skillDefinition.getSelfReportingType() == SkillDef.SelfReportingType.Approval) {
-            selfReportingService.requestApproval(userId, skillDefinition, skillDate.date, approvalParams?.approvalRequestedMsg)
-            res.skillApplied = false
-            res.explanation = "Skill was submitted for approval"
+            checkRes = selfReportingService.requestApproval(userId, skillDefinition, skillDate.date, approvalParams?.approvalRequestedMsg)
+            res.skillApplied = checkRes.skillApplied
+            res.explanation = checkRes.explanation
             return res
         }
 
@@ -251,7 +251,7 @@ class SkillEventsService {
         }
     }
 
-    class AppliedCheckRes {
+    static class AppliedCheckRes {
         boolean skillApplied = true
         String explanation
     }

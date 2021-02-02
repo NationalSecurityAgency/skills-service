@@ -1167,7 +1167,7 @@
         <addUniqueConstraint
                 columnNames="user_id, skill_ref_id"
                 constraintName="skill_approval_unique_row"
-                tableName="user_events"/>
+                tableName="skill_approval"/>
     </changeSet>
 
 </databaseChangeLog>
