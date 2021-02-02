@@ -306,7 +306,7 @@ class UserSkillsController {
             Closure<SkillEventResult> closure = new Closure<SkillEventResult>(null) {
                 @Override
                 public SkillEventResult call() {
-                    SkillEventsService.SkillApprovalParams skillApprovalParams = skillEventRequest.getApprovalRequestedMsg() != null ?
+                    SkillEventsService.SkillApprovalParams skillApprovalParams = (skillEventRequest !=null && skillEventRequest.getApprovalRequestedMsg() != null) ?
                             new SkillEventsService.SkillApprovalParams(skillEventRequest.getApprovalRequestedMsg()) : SkillEventsService.getDefaultSkillApprovalParams();
                     return skillsManagementFacade.reportSkill(projectId, skillId, userId, notifyIfSkillNotApplied, dataParam, skillApprovalParams);
                 }
