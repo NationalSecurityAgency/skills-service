@@ -42,7 +42,7 @@ limitations under the License.
       </div>
 
       <skill-achieved-by-users-over-time class="mb-3"/>
-      <applied-skill-events-over-time />
+      <skill-events-over-time />
     </div>
   </div>
 </template>
@@ -50,7 +50,7 @@ limitations under the License.
 <script>
   import SubPageHeader from '@//components/utils/pages/SubPageHeader';
   import SkillAchievedByUsersOverTime from './SkillAchievedByUsersOverTime';
-  import AppliedSkillEventsOverTime from './AppliedSkillEventsOverTime';
+  import SkillEventsOverTime from './SkillEventsOverTime';
   import StatsCard from '../utils/StatsCard';
   import MetricsService from '../MetricsService';
   import SkillsSpinner from '../../utils/SkillsSpinner';
@@ -60,7 +60,7 @@ limitations under the License.
     components: {
       SkillsSpinner,
       StatsCard,
-      AppliedSkillEventsOverTime,
+      SkillEventsOverTime,
       SkillAchievedByUsersOverTime,
       SubPageHeader,
     },
