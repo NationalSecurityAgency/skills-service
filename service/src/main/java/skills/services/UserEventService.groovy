@@ -292,7 +292,7 @@ class UserEventService {
     private List<DayCountItem> convertResults(Stream<DayCountItem> stream, EventType eventType, Date startOfQueryRange) {
         List<DayCountItem> results = []
         Set<String> uniqueProjectIds = []
-        Date last = StartDateUtil.computeStartDate(new Date(), eventType)
+        Map<String, Date> lastDates = [:]
         int count = 0;
 
         stream.forEach({
@@ -303,17 +303,19 @@ class UserEventService {
                     it.day = StartDateUtil.computeStartDate(it.day, EventType.WEEKLY)
                 }
             }
+            Date last = lastDates.get(it.projectId) ?: StartDateUtil.computeStartDate(new Date(), eventType)
             List<DayCountItem> zeroFills = zeroFillGaps(eventType, last, it.day, count == 0, it.projectId)
             if (zeroFills) {
                 results.addAll(zeroFills)
             }
-            last = it.day
-            results.add(it)
+            lastDates.put(it.projectId, it.day)
             uniqueProjectIds.add(it.projectId)
+            results.add(it)
         })
 
         if (results) {
             for (String projectId : uniqueProjectIds) {
+                Date last = lastDates.get(projectId)
                 List<DayCountItem> zeroFillFromStart = zeroFillGaps(EventType.WEEKLY, last, startOfQueryRange, false, projectId)
                 if (zeroFillFromStart) {
                     results.addAll(zeroFillFromStart)
