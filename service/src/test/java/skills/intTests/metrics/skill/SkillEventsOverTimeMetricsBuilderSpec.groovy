@@ -164,9 +164,7 @@ class SkillEventsOverTimeMetricsBuilderSpec  extends DefaultIntSpec {
         then:
         res[0].countsByDay.collect { it.num } == [10, 10]
         res[0].countsByDay.collect { new Date(it.timestamp) } == [days[0], days[1]]
-        res[0].allEvents.collect { it.num } == [40, 20]
-
-
+        res[0].allEvents.collect { it.num }.sum() == 60
     }
 
 }
