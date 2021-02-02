@@ -27,7 +27,6 @@ import skills.controller.exceptions.SkillExceptionBuilder
 import skills.services.LockingService
 import skills.services.events.pointsAndAchievements.PointsAndAchievementsHandler
 import skills.storage.model.SkillDef
-import skills.storage.model.SkillRelDef
 import skills.storage.model.UserAchievement
 import skills.storage.model.UserPerformedSkill
 import skills.storage.model.UserPoints
@@ -35,6 +34,7 @@ import skills.storage.repos.SkillEventsSupportRepo
 import skills.storage.repos.UserAchievedLevelRepo
 import skills.storage.repos.UserPerformedSkillRepo
 import skills.storage.repos.UserPointsRepo
+import skills.utils.MetricsLogger
 
 import static skills.services.events.CompletionItem.CompletionItemType
 
@@ -79,6 +79,9 @@ class SkillEventsService {
     @Autowired
     UserPointsRepo userPointsRepo
 
+    @Autowired
+    MetricsLogger metricsLogger;
+
     @Transactional
     @Profile
     SkillEventResult reportSkill(String projectId, String skillId, String userId, Boolean notifyIfNotApplied, Date incomingSkillDate) {
@@ -86,6 +89,7 @@ class SkillEventsService {
         if (notifyIfNotApplied || result.skillApplied) {
             skillEventPublisher.publishSkillUpdate(result, userId)
         }
+        metricsLogger.log("Reported Skills [${projectId}]", ['skillId': skillId]);
         return result
     }
 
