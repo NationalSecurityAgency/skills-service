@@ -1,0 +1,39 @@
+/**
+ * Copyright 2020 SkillTree
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package skills.skillLoading.model
+
+import groovy.transform.Canonical
+
+@Canonical
+class MySkillsSummary {
+    List<ProjectSummary> projectSummaries = []
+
+    Integer totalProjects = 0
+    Integer numProjectsContributed = 0
+
+    Integer totalSkills = 0
+    Integer numAchievedSkills = 0
+    Integer numAchievedSkillsLastMonth = 0
+    Integer numAchievedSkillsLastWeek = 0
+    Date mostRecentAchievedSkill
+
+    Integer totalBadges = 0
+    Integer numAchievedBadges = 0
+    Integer numAchievedGemBadges = 0
+    Integer numAchievedGlobalBadges = 0
+
+}
+

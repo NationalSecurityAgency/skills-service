@@ -14,18 +14,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <loading-container class="child-row" v-bind:is-loading="isLoading">
+  <loading-container class="child-row" v-bind:is-loading="isLoading" :data-cy="`childRowDisplay_${skillInfo.skillId}`">
 
     <div class="row">
       <div class="col-12 col-md-12 col-xl mb-md-3 mb-xl-0">
         <media-info-card :title="`${totalPoints} Points`" icon-class="fas fa-calculator text-success">
-          <strong>{{ skillInfo.pointIncrement | number }}</strong> points <i class="fa fa-times text-muted"/>
+          <strong>{{ skillInfo.pointIncrement | number }}</strong> points <i class="fa fa-times text-muted" aria-hidden="true"/>
           <strong> {{ skillInfo.numPerformToCompletion | number }}</strong> repetition<span v-if="skillInfo.numPerformToCompletion>1">s</span> to Completion
         </media-info-card>
       </div>
       <div class="col-12  col-md-6 col-xl my-3 my-md-0">
-        <media-info-card :title="timeWindowTitle" icon-class="fas fa-hourglass-half text-info">
-          {{ timeWindowDescription }}
+        <media-info-card :title="timeWindowTitle(skillInfo)" icon-class="fas fa-hourglass-half text-info">
+          {{ timeWindowDescription(skillInfo) }}
         </media-info-card>
       </div>
       <div class="col-12 col-md-6 col-xl">
@@ -68,9 +68,11 @@ limitations under the License.
   import MediaInfoCard from '../utils/cards/MediaInfoCard';
   import NumberFilter from '../../filters/NumberFilter';
   import MarkdownText from '../utils/MarkdownText';
+  import TimeWindowMixin from './TimeWindowMixin';
 
   export default {
     name: 'ChildRowSkillsDisplay',
+    mixins: [TimeWindowMixin],
     components: { MarkdownText, MediaInfoCard, LoadingContainer },
     props: {
       projectId: {
@@ -108,38 +110,6 @@ limitations under the License.
     computed: {
       totalPoints() {
         return NumberFilter(this.skillInfo.totalPoints);
-      },
-      timeWindowTitle() {
-        let title = '';
-        if (!this.skillInfo.timeWindowEnabled) {
-          title = 'Time Window Disabled';
-        } else if (this.skillInfo.numPerformToCompletion === 1) {
-          title = 'Time Window N/A';
-        } else {
-          title = `${this.skillInfo.pointIncrementIntervalHrs} Hour`;
-          if (this.skillInfo.pointIncrementIntervalHrs === 0 || this.skillInfo.pointIncrementIntervalHrs > 1) {
-            title = `${title}s`;
-          }
-          if (this.skillInfo.pointIncrementIntervalMins > 0) {
-            title = `${title} ${this.skillInfo.pointIncrementIntervalMins} Minute`;
-            if (this.skillInfo.pointIncrementIntervalMins > 1) {
-              title = `${title}s`;
-            }
-          }
-        }
-        return title;
-      },
-      timeWindowDescription() {
-        const numOccur = this.skillInfo.numPointIncrementMaxOccurrences;
-        let desc = 'Minimum Time Window between occurrences to receive points';
-        if (!this.skillInfo.timeWindowEnabled) {
-          desc = 'Each occurrence will receive points immediately';
-        } else if (numOccur > 1) {
-          desc = `Up to ${numOccur} occurrences within this time window to receive points`;
-        } else if (this.skillInfo.numPerformToCompletion === 1) {
-          desc = 'Only one event is required to complete this skill.';
-        }
-        return desc;
       },
       description: function markDownDescription() {
         if (this.skillInfo && this.skillInfo.description) {

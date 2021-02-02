@@ -18,11 +18,12 @@ limitations under the License.
         <div class="card-header float-left">
             <div class="row">
                 <div class="col">
-                    <h6 class="card-title mb-0 float-left">Skills</h6>
+                    <h3 class="h6 card-title mb-0 float-left">Skills</h3>
                 </div>
                 <div class="col text-right" v-if="skillsInternal && skillsInternal.length > 0">
                     <span class="text-muted pr-1">Skill Details:</span>
                     <toggle-button class="" v-model="showDescriptionsInternal" @change="onDetailsToggle"
+                                   :color="{ checked: '#007c49', unchecked: '#6b6b6b' }"
                                    :labels="{ checked: 'On', unchecked: 'Off' }" data-cy="toggleSkillDetails"/>
                 </div>
             </div>

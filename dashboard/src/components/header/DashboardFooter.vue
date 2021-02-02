@@ -16,17 +16,17 @@ limitations under the License.
 <template>
 <footer class="bg-primary page-footer font-small text-white-50 p-3 px-4 border-top border-info">
   <div class="row">
-    <div class="col-sm">
+    <div class="col-sm" role="presentation">
       <span class="fa-stack">
         <i class="fas fa-angle-up fa-stack-1x first"></i>
         <i class="fas fa-angle-up fa-stack-1x second"></i>
         <i class="fas fa-angle-up fa-stack-1x third"></i>
         <i class="fas fa-angle-up fa-stack-1x fourth"></i>
       </span>
-      <span class="small">SkillTree Dashboard</span>
+      <span class="small footer-text">SkillTree Dashboard</span>
     </div>
     <div class="col-sm text-right">
-      <span class="small mr-2">v{{ $store.getters.config.dashboardVersion }}</span>
+      <span class="small mr-2 footer-text" aria-label="dashboard software version">v{{ $store.getters.config.dashboardVersion }}</span>
       <i class="fas fa-code-branch"></i>
     </div>
   </div>
@@ -56,4 +56,8 @@ limitations under the License.
   top: -10px;
   color: #e76f51ff;
 }
+  .footer-text {
+    color: lightgrey;
+  }
+
 </style>

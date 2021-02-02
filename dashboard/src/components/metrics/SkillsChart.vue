@@ -16,7 +16,7 @@ limitations under the License.
 <template>
   <div ref="chartContainer">
     <div v-if="!chart.hasData" class="disabled-overlay"/>
-    <div v-if="!chart.hasData" class="text-center user-skills-no-data-icon-text text-danger">
+    <div v-if="!chart.hasData" class="text-center user-skills-no-data-icon-text">
       <div class="row justify-content-center">
         <div class="col-5 text-center border rounded bg-light p-2">
           <div style="font-size: 1rem;"><i class="fa fa-ban"></i> No Data Available</div>
@@ -116,6 +116,7 @@ limitations under the License.
     text-align: center;
     width: 100%;
     transform: translateY(-50%);
+    color: #a31523;
   }
 
   .user-skills-no-data-icon-subtext {
@@ -123,4 +124,5 @@ limitations under the License.
     color: grey;
     display: block;
   }
+
 </style>

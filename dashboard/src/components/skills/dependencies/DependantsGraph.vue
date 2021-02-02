@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <simple-card id="dependent-skills-graph">
+  <simple-card id="dependent-skills-graph" data-cy="dependenciesGraph">
     <div v-if="!this.dependentSkills || this.dependentSkills.length === 0">
       <div class="column is-half has-text-centered">
         <no-content2 icon="fa fa-project-diagram" title="No Dependencies Yet..."
@@ -37,18 +37,22 @@ limitations under the License.
         </div>
       </div>
     </div>
-    <div id="dependent-skills-network" style="height: 500px"></div>
+    <div id="dependent-skills-network" style="height: 500px" aria-label="skills dependency graph"></div>
   </simple-card>
 </template>
 
 <script>
-  import vis from 'vis';
   import 'vis/dist/vis.css';
   import GraphLegend from './GraphLegend';
   import GraphNodeSortMethodSelector from './GraphNodeSortMethodSelector';
   import NoContent2 from '../../utils/NoContent2';
   import GraphUtils from './GraphUtils';
   import SimpleCard from '../../utils/cards/SimpleCard';
+
+  const getVis = import(
+    /* webpackChunkName: "vis" */
+    'vis'
+  );
 
   export default {
     name: 'DependantsGraph',
@@ -62,8 +66,8 @@ limitations under the License.
     data() {
       return {
         network: null,
-        nodes: new vis.DataSet(),
-        edges: new vis.DataSet(),
+        nodes: {},
+        edges: {},
         displayOptions: {
           layout: {
             randomSeed: 419465,
@@ -100,9 +104,14 @@ limitations under the License.
       };
     },
     mounted() {
-      if (this.graph && this.graph.nodes && this.graph.nodes.length > 0) {
-        this.createGraph();
-      }
+      getVis.then((vis) => {
+        this.nodes = new vis.DataSet();
+        this.edges = new vis.DataSet();
+
+        if (this.graph && this.graph.nodes && this.graph.nodes.length > 0) {
+          this.createGraph();
+        }
+      });
     },
     beforeDestroy() {
       if (this.network) {
@@ -143,17 +152,19 @@ limitations under the License.
         this.createGraph();
       },
       createGraph() {
-        if (this.network) {
-          this.network.destroy();
-          this.network = null;
+        getVis.then((vis) => {
+          if (this.network) {
+            this.network.destroy();
+            this.network = null;
 
-          this.nodes.clear();
-          this.edges.clear();
-        }
+            this.nodes.clear();
+            this.edges.clear();
+          }
 
-        const data = this.buildData();
-        const container = document.getElementById('dependent-skills-network');
-        this.network = new vis.Network(container, data, this.displayOptions);
+          const data = this.buildData();
+          const container = document.getElementById('dependent-skills-network');
+          this.network = new vis.Network(container, data, this.displayOptions);
+        });
       },
       buildData() {
         this.graph.nodes.forEach((node) => {

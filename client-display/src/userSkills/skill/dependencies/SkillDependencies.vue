@@ -16,7 +16,7 @@ limitations under the License.
 <template>
     <div class="card">
         <div class="card-header">
-            <h6 class="card-title mb-0 float-left">Dependencies</h6>
+            <h5 class="h6 card-title mb-0 float-left">Dependencies</h5>
         </div>
         <div class="card-body">
             <div class="row legend-row">
@@ -37,10 +37,14 @@ limitations under the License.
 </template>
 
 <script>
-  import vis from 'vis';
   import 'vis/dist/vis.css';
   import GraphLegend from '@/userSkills/skill/dependencies/GraphLegend';
   import SkillDependencySummary from '@/userSkills/skill/dependencies/SkillDependencySummary';
+
+  const getVis = () => import(
+  /* webpackChunkName: "vis" */
+  'vis'
+  );
 
   export default {
     name: 'SkillDependencies',
@@ -92,7 +96,9 @@ limitations under the License.
       };
     },
     mounted() {
-      this.createGraph();
+      getVis().then((vis) => {
+        this.createGraph(vis);
+      });
     },
     beforeDestroy() {
       this.cleanUp();
@@ -108,10 +114,10 @@ limitations under the License.
         const width = window.innerWidth;
         return width <= 768;
       },
-      createGraph() {
+      createGraph(vis) {
         this.cleanUp();
 
-        const data = this.buildData();
+        const data = this.buildData(vis);
         const container = document.getElementById('dependent-skills-network');
         this.network = new vis.Network(container, data, this.displayOptions);
         // const self = this;
@@ -177,7 +183,7 @@ limitations under the License.
 
         return { ...skillItem, ...{ isCrossProject: crossProj } };
       },
-      buildData() {
+      buildData(vis) {
         const nodes = new vis.DataSet();
         const edges = new vis.DataSet();
         const createdSkillIds = [];

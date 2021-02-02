@@ -15,13 +15,19 @@ limitations under the License.
 */
 <template>
   <ValidationObserver ref="observer" v-slot="{invalid, handleSubmit}" slim>
-    <b-modal :id="internalProject.projectId" :title="title" v-model="show" :no-close-on-backdrop="true"
-           header-bg-variant="info" header-text-variant="light" no-fade>
+    <b-modal :id="internalProject.projectId"
+              :title="title"
+              @hide="publishHidden"
+              v-model="show"
+              :no-close-on-backdrop="true"
+              header-bg-variant="info"
+              header-text-variant="light" no-fade>
+
       <b-container fluid>
         <div class="row">
           <div class="col-12">
             <div class="form-group">
-              <label>* Project Name</label>
+              <label for="projectIdInput">* Project Name</label>
               <ValidationProvider rules="required|minNameLength|maxProjectNameLength|uniqueName|customNameValidator"
                                   v-slot="{errors}"
                                   name="Project Name">
@@ -29,8 +35,12 @@ limitations under the License.
                        v-on:input="updateProjectId"
                        v-on:keyup.enter="handleSubmit(updateProject)"
                        v-focus
-                       data-cy="projectName"/>
-                <small class="form-text text-danger" data-cy="projectNameError">{{ errors[0] }}</small>
+                       data-cy="projectName"
+                        id="projectIdInput"
+                      :aria-invalid="errors && errors.length > 0"
+                      aria-errormessage="projectNameError"
+                      aria-describedby="projectNameError"/>
+                <small class="form-text text-danger" data-cy="projectNameError" id="projectNameError">{{ errors[0] }}</small>
               </ValidationProvider>
             </div>
           </div>
@@ -42,7 +52,7 @@ limitations under the License.
           </div>
         </div>
 
-        <p v-if="invalid && overallErrMsg" class="text-center text-danger mt-2"><small>***{{ overallErrMsg }}***</small></p>
+        <p v-if="invalid && overallErrMsg" class="text-center text-danger mt-2" aria-live="polite"><small>***{{ overallErrMsg }}***</small></p>
       </b-container>
 
       <div slot="modal-footer" class="w-100">
@@ -106,6 +116,7 @@ limitations under the License.
       },
       close() {
         this.show = false;
+        this.publishHidden({});
       },
       updateProject() {
         this.close();
@@ -117,6 +128,9 @@ limitations under the License.
         if (!this.isEdit && !this.canEditProjectId) {
           this.internalProject.projectId = InputSanitizer.removeSpecialChars(this.internalProject.name);
         }
+      },
+      publishHidden(e) {
+        this.$emit('hidden', e);
       },
       registerValidation() {
         const self = this;

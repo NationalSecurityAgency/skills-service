@@ -46,13 +46,13 @@ describe('Password Reset Tests', () => {
 
     cy.logout();
 
-    cy.server();
-    cy.route({
+
+    cy.intercept({
       method: 'POST',
       url: '/performPasswordReset'
     }).as('performReset');
-    cy.route('GET', '/app/projects').as('getProjects')
-    cy.route('GET', '/app/userInfo').as('getUserInfo')
+    cy.intercept('GET', '/app/projects').as('getProjects')
+    cy.intercept('GET', '/app/userInfo').as('getUserInfo')
   });
 
   it('reset password', () => {
@@ -190,7 +190,7 @@ describe('Password Reset Tests', () => {
       }
     });
     cy.logout();
-    cy.route('GET', '/public/isFeatureSupported?feature=passwordreset').as('isEnabled');
+    cy.intercept('GET', '/public/isFeatureSupported?feature=passwordreset').as('isEnabled');
     cy.visit('/');
     cy.get('[data-cy=forgotPassword]').click();
     cy.wait('@isEnabled');

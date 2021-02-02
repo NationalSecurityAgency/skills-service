@@ -15,8 +15,12 @@ limitations under the License.
 */
 <template>
   <ValidationObserver ref="observer" v-slot="{invalid, handleSubmit}" slim>
-    <b-modal :id="subjectInternal.subjectId" size="xl" :title="title" v-model="show" :no-close-on-backdrop="true"
-             header-bg-variant="info" header-text-variant="light" no-fade>
+    <b-modal :id="subjectInternal.subjectId" size="xl" :title="title" v-model="show"
+             :no-close-on-backdrop="true"
+             header-bg-variant="primary"
+             header-text-variant="light"
+             @hide="publishHidden"
+             no-fade>
         <b-container fluid>
           <div v-if="displayIconManager === false">
               <div class="media mb-3">
@@ -29,8 +33,12 @@ limitations under the License.
                       <input type="text" class="form-control" id="subjName" @input="updateSubjectId"
                              v-model="subjectInternal.name" v-on:input="updateSubjectId"
                              v-on:keyup.enter="handleSubmit(updateSubject)"
-                             v-focus aria-required="true">
-                      <small class="form-text text-danger">{{ errors[0] }}</small>
+                             v-focus aria-required="true"
+                              :aria-invalid="errors && errors.length > 0"
+                              aria-errormessage="subjectNameError"
+                              aria-describedby="subjectNameError"
+                              data-cy="subjectNameInput">
+                      <small class="form-text text-danger" id="subjectNameError">{{ errors[0] }}</small>
                     </ValidationProvider>
                   </div>
                 </div>
@@ -48,14 +56,15 @@ limitations under the License.
               </div>
 
               <div>
-                <label>Help URL/Path
+                <label for="subjectHelpUrl">Help URL/Path
                   <inline-help
                     msg="If project level 'Root Help Url' is specified then this path will be relative to 'Root Help Url'"/>
                 </label>
-                <input class="form-control" type="text" v-model="subjectInternal.helpUrl" v-on:keyup.enter="handleSubmit(updateSubject)" />
+                <input class="form-control" type="text" v-model="subjectInternal.helpUrl" v-on:keyup.enter="handleSubmit(updateSubject)"
+                       id="subjectHelpUrl"/>
               </div>
 
-              <p v-if="invalid && overallErrMsg" class="text-center text-danger">***{{ overallErrMsg }}***</p>
+              <p v-if="invalid && overallErrMsg" class="text-center text-danger" role="alert">***{{ overallErrMsg }}***</p>
           </div>
           <div v-else>
               <icon-manager @selected-icon="onSelectedIcon"></icon-manager>
@@ -90,7 +99,7 @@ limitations under the License.
   import IconPicker from '../utils/iconPicker/IconPicker';
   import MarkdownEditor from '../utils/MarkdownEditor';
   import IdInput from '../utils/inputForm/IdInput';
-  import IconManager from '../utils/iconPicker/IconManager';
+  // import IconManager from '../utils/iconPicker/IconManager';
   import InputSanitizer from '../utils/InputSanitizer';
   import InlineHelp from '../utils/InlineHelp';
 
@@ -100,8 +109,8 @@ limitations under the License.
       IdInput,
       IconPicker,
       MarkdownEditor,
-      IconManager,
       InlineHelp,
+      'icon-manager': () => import(/* webpackChunkName: 'iconManager' */'../utils/iconPicker/IconManager'),
     },
     props: {
       subject: Object,
@@ -131,8 +140,12 @@ limitations under the License.
       },
     },
     methods: {
-      close() {
+      publishHidden(e) {
+        this.$emit('hidden', e);
+      },
+      close(e) {
         this.show = false;
+        this.publishHidden(e);
       },
       updateSubject() {
         this.$refs.observer.validate()
@@ -140,7 +153,7 @@ limitations under the License.
             if (!res) {
               this.overallErrMsg = 'Form did NOT pass validation, please fix and try to Save again';
             } else {
-              this.close();
+              this.close({ update: true });
               this.subjectInternal.subjectName = InputSanitizer.sanitize(this.subjectInternal.subjectName);
               this.subjectInternal.subjectId = InputSanitizer.sanitize(this.subjectInternal.subjectId);
               this.$emit('subject-saved', this.subjectInternal);

@@ -14,23 +14,34 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-    <b-modal id="searchProjectsModal" title="Pin Projects" v-model="isShown" :no-close-on-backdrop="true" size="lg"
-           @close="done" header-bg-variant="info" header-text-variant="light" no-fade body-class="px-0 mx-0">
+    <b-modal id="searchProjectsModal"
+             title="Pin Projects"
+             v-model="isShown"
+             size="lg"
+             :no-close-on-backdrop="true"
+             @close="done"
+             header-bg-variant="info"
+             header-text-variant="light"
+             no-fade body-class="px-0 mx-0"
+             header-class="header-text"
+             role="dialog"
+             aria-modal="true"
+             @hide="done">
       <b-container fluid class="px-0" data-cy="pinProjects">
         <b-row class="px-3">
           <b-col class="mx-0 mb-2">
             <b-input-group>
               <template #append>
-                <b-button variant="outline-secondary" @click="searchValue=''" data-cy="pinProjectsClearSearch"><i class="fas fa-times"></i></b-button>
+                <b-button variant="outline-secondary" @click="searchValue=''" data-cy="pinProjectsClearSearch" aria-label="clear search button"><i class="fas fa-times" aria-hidden="true"/></b-button>
               </template>
-              <b-input v-model="searchValue" placeholder="Search projects to pin" data-cy="pinProjectsSearchInput"></b-input>
+              <b-input v-focus v-model="searchValue" placeholder="Search projects to pin" data-cy="pinProjectsSearchInput" aria-label="search for projects to pin"></b-input>
             </b-input-group>
           </b-col>
           <b-col cols="12" sm="auto" class="pt-sm-2 text-center">
             <span class="text-secondary">OR</span>
           </b-col>
           <b-col cols="12" sm="auto" class="text-center">
-            <b-button variant="outline-primary" @click="loadAll"  data-cy="pinProjectsLoadAllButton">Load All <i class="fas fa-weight-hanging text-muted"></i></b-button>
+            <b-button variant="outline-primary" @click="loadAll"  data-cy="pinProjectsLoadAllButton">Load All <i class="fas fa-weight-hanging text-muted" aria-hidden="true"/></b-button>
           </b-col>
         </b-row>
         <div style="min-height: 6rem;">
@@ -53,25 +64,27 @@ limitations under the License.
                     <b-col>{{ data.value }}</b-col>
                     <b-col cols="auto">
                       <b-button-group>
-                        <b-button v-if="!data.item.pinned" @click="pinProject(data.item)" variant="outline-success"
+                        <b-button v-if="!data.item.pinned" @click="pinProject(data.item)" variant="outline-primary"
                                   size="sm"
                                   v-b-tooltip.hover="'Pin'"
-                                  data-cy="pinButton">
-                          <i class="fas fa-thumbtack" style="width: 1rem;"/>
+                                  data-cy="pinButton"
+                                  :aria-label="`pin project ${data.item.projectId}`">
+                          <i class="fas fa-thumbtack" style="width: 1rem;" aria-hidden="true"/>
                         </b-button>
                         <b-button v-if="data.item.pinned" variant="outline-warning" @click="unpinProject(data.item)"
                                   size="sm"
                                   v-b-tooltip.hover="'Unpin'"
-                                  data-cy="unpinButton">
-                          <i class="fas fa-ban" style="font-size: 1rem;"></i>
+                                  data-cy="unpinButton"
+                                  :aria-label="`remove pin from project ${data.item.projectId}`">
+                          <i class="fas fa-ban" style="font-size: 1rem;" aria-hidden="true"/>
                         </b-button>
-
                         <b-button variant="outline-primary"
                                   :to="`/projects/${data.item.projectId}`" target="_blank"
                                   size="sm"
                                   v-b-tooltip.hover="'View Project'"
-                                  data-cy="viewProjectButton">
-                          <i class="fas fa-eye" style="font-size: 1rem;"></i>
+                                  data-cy="viewProjectButton"
+                                  :aria-label="`view project ${data.item.projectId}`">
+                          <i class="fas fa-eye" style="font-size: 1rem;" aria-hidden="true"/>
                         </b-button>
                       </b-button-group>
                     </b-col>
@@ -143,13 +156,14 @@ limitations under the License.
     name: 'PinProjects',
     components: { SkillsSpinner },
     props: {
-      show: {
+      value: {
         type: Boolean,
         required: true,
       },
     },
     data() {
       return {
+        show: this.value,
         isLoading: false,
         searchValue: '',
         sortBy: 'name',
@@ -192,6 +206,9 @@ limitations under the License.
     watch: {
       searchValue(newValue) {
         this.searchData(newValue);
+      },
+      show(newValue) {
+        this.$emit('input', newValue);
       },
     },
     computed: {
@@ -262,5 +279,7 @@ limitations under the License.
 </script>
 
 <style lang="scss" scoped>
-
+  /deep/ .header-text {
+    color: #3E5461;
+  }
 </style>

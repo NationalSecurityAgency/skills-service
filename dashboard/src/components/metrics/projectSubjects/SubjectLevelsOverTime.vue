@@ -18,7 +18,7 @@ limitations under the License.
     <b-form inline class="mb-4">
       <b-overlay :show="loading.subjects" rounded="sm" opacity="0.5"
                  spinner-variant="info" spinner-type="grow" spinner-small>
-        <b-form-select v-model="subjects.selected" :options="subjects.available"
+        <b-form-select v-model="subjects.selected" :options="subjects.available" aria-label="Select a Subject to plot"
                        data-cy="subjectNumUsersPerLevelOverTime-subjectSelector" required>
           <template v-slot:first>
             <b-form-select-option :value="null" disabled>-- Please select a subject --</b-form-select-option>

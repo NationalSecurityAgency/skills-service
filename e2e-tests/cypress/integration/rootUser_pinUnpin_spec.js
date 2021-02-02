@@ -15,11 +15,10 @@
  */
 describe('Root Pin and Unpin Tests', () => {
   beforeEach(() => {
-    cy.server()
-      .route('GET', '/app/projects').as('getProjects')
-      .route('GET', '/api/icons/customIconCss').as('getProjectsCustomIcons')
-      .route('GET', '/app/userInfo').as('getUserInfo')
-      .route('/admin/projects/proj1/users/root@skills.org/roles').as('getRolesForRoot');
+      cy.intercept('GET', '/app/projects').as('getProjects')
+      .intercept('GET', '/api/icons/customIconCss').as('getProjectsCustomIcons')
+      .intercept('GET', '/app/userInfo').as('getUserInfo')
+      .intercept('/admin/projects/proj1/users/root@skills.org/roles').as('getRolesForRoot');
   });
 
   it('Pin and Unpin projects', () => {
@@ -45,11 +44,11 @@ describe('Root Pin and Unpin Tests', () => {
     cy.logout();
     cy.fixture('vars.json').then((vars) => {
       cy.login(vars.rootUser, vars.defaultPass);
-      cy.route('GET', '/app/projects').as('default');
-      cy.route('GET', '/app/projects?search=one').as('searchOne');
-      cy.route('POST', '/root/pin/proj1').as('pinOne');
-      cy.route('DELETE', '/root/pin/proj1').as('unpinOne');
-      cy.route('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
+      cy.intercept('GET', '/app/projects').as('default');
+      cy.intercept('GET', '/app/projects?search=one').as('searchOne');
+      cy.intercept('POST', '/root/pin/proj1').as('pinOne');
+      cy.intercept('DELETE', '/root/pin/proj1').as('unpinOne');
+      cy.intercept('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
 
       cy.visit('/');
       //confirm that default project loading returns no projects for root user
@@ -136,11 +135,11 @@ describe('Root Pin and Unpin Tests', () => {
     cy.logout();
     cy.fixture('vars.json').then((vars) => {
       cy.login(vars.rootUser, vars.defaultPass);
-      cy.route('GET', '/app/projects').as('default');
-      cy.route('GET', '/app/projects?search=one').as('searchOne');
-      cy.route('POST', '/root/pin/proj1').as('pinOne');
-      cy.route('DELETE', '/root/pin/proj1').as('unpinOne');
-      cy.route('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
+      cy.intercept('GET', '/app/projects').as('default');
+      cy.intercept('GET', '/app/projects?search=one').as('searchOne');
+      cy.intercept('POST', '/root/pin/proj1').as('pinOne');
+      cy.intercept('DELETE', '/root/pin/proj1').as('unpinOne');
+      cy.intercept('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
 
       cy.visit('/');
       //confirm that default project loading returns no projects for root user
@@ -210,11 +209,11 @@ describe('Root Pin and Unpin Tests', () => {
     cy.logout();
     cy.fixture('vars.json').then((vars) => {
       cy.login(vars.rootUser, vars.defaultPass);
-      cy.route('GET', '/app/projects').as('default');
-      cy.route('GET', '/app/projects?search=one').as('searchOne');
-      cy.route('POST', '/root/pin/proj1').as('pinOne');
-      cy.route('DELETE', '/root/pin/proj1').as('unpinOne');
-      cy.route('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
+      cy.intercept('GET', '/app/projects').as('default');
+      cy.intercept('GET', '/app/projects?search=one').as('searchOne');
+      cy.intercept('POST', '/root/pin/proj1').as('pinOne');
+      cy.intercept('DELETE', '/root/pin/proj1').as('unpinOne');
+      cy.intercept('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
 
       cy.visit('/');
       //confirm that default project loading returns no projects for root user
@@ -259,11 +258,11 @@ describe('Root Pin and Unpin Tests', () => {
     cy.logout();
     cy.fixture('vars.json').then((vars) => {
       cy.login(vars.rootUser, vars.defaultPass);
-      cy.route('GET', '/app/projects').as('default');
-      cy.route('GET', '/app/projects?search=one').as('searchOne');
-      cy.route('POST', '/root/pin/proj1').as('pinOne');
-      cy.route('DELETE', '/root/pin/proj1').as('unpinOne');
-      cy.route('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
+      cy.intercept('GET', '/app/projects').as('default');
+      cy.intercept('GET', '/app/projects?search=one').as('searchOne');
+      cy.intercept('POST', '/root/pin/proj1').as('pinOne');
+      cy.intercept('DELETE', '/root/pin/proj1').as('unpinOne');
+      cy.intercept('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
 
       cy.visit('/');
       //confirm that default project loading returns no projects for root user
@@ -321,11 +320,11 @@ describe('Root Pin and Unpin Tests', () => {
     cy.logout();
     cy.fixture('vars.json').then((vars) => {
       cy.login(vars.rootUser, vars.defaultPass);
-      cy.route('GET', '/app/projects').as('default');
-      cy.route('GET', '/app/projects?search=one').as('searchOne');
-      cy.route('POST', '/root/pin/proj1').as('pinOne');
-      cy.route('DELETE', '/root/pin/proj1').as('unpinOne');
-      cy.route('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
+      cy.intercept('GET', '/app/projects').as('default');
+      cy.intercept('GET', '/app/projects?search=one').as('searchOne');
+      cy.intercept('POST', '/root/pin/proj1').as('pinOne');
+      cy.intercept('DELETE', '/root/pin/proj1').as('unpinOne');
+      cy.intercept('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
 
       cy.visit('/');
       //confirm that default project loading returns no projects for root user
@@ -383,6 +382,48 @@ describe('Root Pin and Unpin Tests', () => {
   });
 
 
+  it('Pin Projects button should retain focus after dialog is closed', () => {
+    cy.logout();
+    cy.fixture('vars.json').then((vars) => {
+      cy.login(vars.rootUser, vars.defaultPass);
+      cy.intercept('GET', '/app/projects').as('default');
+      cy.intercept('GET', '/app/projects?search=one').as('searchOne');
+      cy.intercept('POST', '/root/pin/proj1').as('pinOne');
+      cy.intercept('DELETE', '/root/pin/proj1').as('unpinOne');
+      cy.intercept('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
+
+      cy.visit('/');
+      //confirm that default project loading returns no projects for root user
+      cy.wait('@default');
+      cy.contains('No Projects Yet...').should('be.visible');
+
+      // open the pin projects modal
+      cy.get('[data-cy=subPageHeaderControls]').contains('Pin').click();
+      cy.get('[data-cy=pinProjects').should('exist') // dialog exists
+      cy.contains('Pin Projects');
+      cy.contains('Search Project Catalog');
+
+      // close with escape
+      cy.get('[data-cy=pinProjectsSearchInput]').type('{esc}', {force: true});
+      cy.get('[data-cy=pinProjects').should('not.exist') // dialog does not exists
+      cy.get('[data-cy=subPageHeaderControls]').contains('Pin').should('have.focus');
+
+      // can re-open the pin modal
+      cy.get('[data-cy=subPageHeaderControls]').contains('Pin').click();
+      cy.get('[data-cy=pinProjects').should('exist') // dialog exists
+      cy.contains('Pin Projects');
+      cy.contains('Search Project Catalog');
+      cy.get('[data-cy=modalDoneButton]').click();
+      cy.get('[data-cy=subPageHeaderControls]').contains('Pin').should('have.focus');
+
+      cy.get('[data-cy=subPageHeaderControls]').contains('Pin').click();
+      cy.contains('Pin Projects');
+      cy.contains('Search Project Catalog');
+      cy.get('[aria-label=Close]').click();
+      cy.get('[data-cy=subPageHeaderControls]').contains('Pin').should('have.focus');
+    });
+
+  });
 
 });
 

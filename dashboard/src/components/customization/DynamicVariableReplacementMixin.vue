@@ -28,7 +28,7 @@ limitations under the License.
           }
           const timestamp = this.$store.getters.config.buildTimestamp;
           if (timestamp) {
-            const dateString = window.moment(timestamp).format('ll');
+            const dateString = window.dayjs(timestamp).format('ll');
             result = result.replace(buildDate, dateString);
           }
         }

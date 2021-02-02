@@ -1,5 +1,11 @@
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+const plugins = [];
+// uncomment to add bundle analysis of production build
+// plugins.push(new BundleAnalyzerPlugin());
+
 const exportObject = {
   configureWebpack: {
+    plugins,
   },
 };
 
@@ -10,7 +16,7 @@ const proxyConf = {
 
 if (process.env.NODE_ENV === 'production') {
   console.log('production mode detected');
-  exportObject.publicPath = '.';
+  exportObject.publicPath = '/static/clientPortal/';
 }
 
 exportObject.devServer = {

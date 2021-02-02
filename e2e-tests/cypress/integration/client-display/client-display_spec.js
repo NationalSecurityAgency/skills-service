@@ -13,7 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import moment from 'moment';
+import dayjs from 'dayjs';
+import relativeTimePlugin from 'dayjs/plugin/relativeTime';
+import advancedFormatPlugin from 'dayjs/plugin/advancedFormat';
+
+dayjs.extend(relativeTimePlugin);
+dayjs.extend(advancedFormatPlugin);
 
 describe('Client Display Tests', () => {
 
@@ -124,31 +129,41 @@ describe('Client Display Tests', () => {
     });
 
     it('visit home page', () => {
+
         cy.request('POST', '/admin/projects/proj1/badges/badge1', {
             projectId: 'proj1',
             badgeId: 'badge1',
             name: 'Badge 1'
         });
+        cy.intercept('GET', '/api/projects/proj1/pointHistory').as('pointHistoryChart');
         cy.cdVisit('/');
+        cy.injectAxe();
         cy.contains('Overall Points');
 
         // some basic default theme validation
         cy.get("#app").should('have.css', 'background-color')
             .and('equal', 'rgba(0, 0, 0, 0)');
+        cy.wait('@pointHistoryChart');
+        cy.customA11y();
     });
 
     it('ability to expand skill details from subject page', () => {
         cy.cdVisit('/')
+        cy.injectAxe();
         cy.cdClickSubj(0);
         cy.get('[data-cy=toggleSkillDetails]').click()
         cy.contains('Lorem ipsum dolor sit amet')
         // 1 skill is locked
         cy.contains('Skill has 1 direct dependent(s).')
-
+        cy.customA11y();
     });
 
     it('back button', () => {
+
+        cy.intercept('GET', '/api/projects/proj1/pointHistory').as('pointHistoryChart');
+
         cy.cdVisit('/');
+        cy.injectAxe();
         cy.contains('User Skills');
         cy.get('[data-cy=back]').should('not.exist');
 
@@ -165,6 +180,9 @@ describe('Client Display Tests', () => {
         cy.cdClickSkill(0);
         cy.cdBack('Subject 1');
         cy.cdBack();
+        cy.wait('@pointHistoryChart');
+        cy.wait(500); //we have to wait for the chart to load before doing accessibility tests
+        cy.customA11y();
     });
 
     it('clearly represent navigable components', () => {
@@ -212,6 +230,7 @@ describe('Client Display Tests', () => {
             name: 'Badge 1'
         });
         cy.cdVisit('/?isSummaryOnly=true');
+        cy.injectAxe();
 
         // cy.get('[data-cy=myRank]').contains("1")
         cy.get('[data-cy=myBadges]').contains("0 Badges")
@@ -229,11 +248,13 @@ describe('Client Display Tests', () => {
 
         // summaries should not be displayed at all
         cy.get('[data-cy=subjectTile]').should('not.exist');
+        cy.customA11y();
     });
 
     it('display achieved date on skill overview page', () => {
-        const m = moment('2020-09-12 11', 'YYYY-MM-DD HH');
+        const m = dayjs('2020-09-12 11', 'YYYY-MM-DD HH');
         const orig = m.clone()
+
         cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: Cypress.env('proxyUser'), timestamp: m.format('x')})
         cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: Cypress.env('proxyUser'), timestamp: m.subtract(4, 'day').format('x')})
         cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: Cypress.env('proxyUser'), timestamp: m.subtract(3, 'day').format('x')})
@@ -282,7 +303,7 @@ describe('Client Display Tests', () => {
     });
 
     it('display achieved date on subject page when skill details are expanded', () => {
-        const m = moment('2020-09-12 11', 'YYYY-MM-DD HH');
+        const m = dayjs('2020-09-12 11', 'YYYY-MM-DD HH');
         const orig = m.clone()
         cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: Cypress.env('proxyUser'), timestamp: m.format('x')})
         cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: Cypress.env('proxyUser'), timestamp: m.subtract(4, 'day').format('x')})
@@ -295,6 +316,14 @@ describe('Client Display Tests', () => {
         cy.get('[data-cy=toggleSkillDetails]').click();
         cy.get('[data-cy=skillProgress]:nth-child(2) [data-cy=achievementDate]').contains(`Achieved on ${orig.format("MMMM Do YYYY")}`);
         cy.get('[data-cy=skillProgress]:nth-child(2) [data-cy=achievementDate]').contains(`${orig.fromNow()}`);
+    });
+
+    it('skill with dependency renders dependency graph', () => {
+        cy.cdVisit('/');
+        cy.cdClickSubj(0);
+        cy.get('[data-cy=toggleSkillDetails]').click()
+        cy.get('.locked-background').click();
+        cy.matchImageSnapshot('Skill-Dependency', snapshotOptions);
     });
 
 });

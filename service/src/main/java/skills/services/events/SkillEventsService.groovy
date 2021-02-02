@@ -25,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional
 import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillExceptionBuilder
 import skills.services.LockingService
+import skills.services.UserEventService
 import skills.services.events.pointsAndAchievements.PointsAndAchievementsHandler
 import skills.storage.model.SkillDef
 import skills.storage.model.UserAchievement
@@ -81,6 +82,9 @@ class SkillEventsService {
 
     @Autowired
     MetricsLogger metricsLogger;
+  
+    @Autowired
+    UserEventService userEventService
 
     @Transactional
     @Profile
@@ -166,6 +170,8 @@ class SkillEventsService {
         SkillEventsSupportRepo.SkillDefMin skillDefinition = getSkillDef(userId, projectId, skillId)
 
         SkillEventResult res = new SkillEventResult(projectId: projectId, skillId: skillId, name: skillDefinition.name)
+
+        userEventService.recordEvent(projectId, skillDefinition.id, userId, skillDate.date)
 
         long numExistingSkills = getNumExistingSkills(userId, projectId, skillId)
         AppliedCheckRes checkRes = checkIfSkillApplied(userId, numExistingSkills, skillDate.date, skillDefinition)

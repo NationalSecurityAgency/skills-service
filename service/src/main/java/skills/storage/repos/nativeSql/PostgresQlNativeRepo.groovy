@@ -565,4 +565,38 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
         query.executeUpdate()
     }
 
+    @Override
+    void createOrUpdateUserEvent(String projectId, Integer skillRefId, String userId, Date start, String type, Integer count, Integer weekNumber) {
+        //start and end date should be consistently formatted for updates to work
+        String sql = '''
+           INSERT INTO user_events (
+            project_id,
+            skill_ref_id, 
+            user_id, 
+            event_time, 
+            count,
+            event_type,
+            week_number
+           ) 
+           VALUES (
+            :projectId,
+            :skillRefId, 
+            :userId, 
+            :start, 
+            :count,
+            :type,
+            :weekNumber
+          ) ON CONFLICT ON CONSTRAINT user_events_unique_row DO UPDATE SET count = user_events.count+excluded.count;
+        '''
+
+        Query query = entityManager.createNativeQuery(sql)
+        query.setParameter("projectId", projectId)
+        query.setParameter("skillRefId", skillRefId)
+        query.setParameter("userId", userId)
+        query.setParameter("start", start)
+        query.setParameter("type", type)
+        query.setParameter("count", count)
+        query.setParameter("weekNumber", weekNumber)
+        query.executeUpdate()
+    }
 }

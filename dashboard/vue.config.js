@@ -51,7 +51,57 @@ const findLinkedModules = (nodeModulesPath) => {
   return modules
 };
 
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+
+let plugins = [];
+let optimization = {
+  runtimeChunk: 'single',
+  splitChunks: {
+    chunks: 'all',
+    maxInitialRequests: 10,
+    minSize: 30,
+    cacheGroups: {
+      vendor: {
+        chunks: 'all',
+        test: /[\\/]node_modules[\\/]/,
+        priority: 20,
+        name(module) {
+          const packageName = module.context.match(/[\\/]node_modules[\\/](.*?)([\\/]|$)/)[1];
+          return `npm.${packageName.replace('@', '')}`;
+        },
+      },
+      common: {
+        name: 'common',
+        minChunks: 2,
+        chunks: 'async',
+        priority: 10,
+        reuseExistingChunk: true,
+        enforce: true
+      },
+    },
+  },
+  // minimize: false
+};
+
+const prodMode = process.env.NODE_ENV === 'production';
+
+// comment to disable analyzer
+plugins.push(new BundleAnalyzerPlugin({
+  "reportFilename": "client.report.html",
+  "statsFilename": "client.stats.json",
+  "generateStatsFile": prodMode, // only enable for prod because it is REALLY costly
+  "openAnalyzer": false,
+  "analyzerMode": "static",
+  "analyzerPort": 8889,
+}));
+
 module.exports = {
+  pluginOptions: {
+    webpackBundleAnalyzer: {
+      openAnalyzer: false,
+      analyzerPort: 8889,
+    }
+  },
   devServer: {
     host: 'localhost',
     port: 8082,
@@ -82,6 +132,8 @@ module.exports = {
     },
   },
   configureWebpack: {
+    plugins,
+    optimization,
     resolve: {
       alias: {
         '@$': resolve('src'),

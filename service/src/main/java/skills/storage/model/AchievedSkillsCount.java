@@ -17,7 +17,10 @@ package skills.storage.model;
 
 import java.util.Date;
 
-public interface DayCountItem {
-    Date getDay();
-    Integer getCount();
+public interface AchievedSkillsCount {
+    Integer getTotalCount();
+    Integer getMonthCount();
+    Integer getWeekCount();
+    Integer getTodayCount();
+    Date getLastAchieved();
 }

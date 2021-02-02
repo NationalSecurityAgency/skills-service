@@ -260,7 +260,7 @@ class WSHelper {
 
     private def post(String endpoint, String type, def params, HttpStatus expectedStatus = HttpStatus.OK, boolean throwExceptionOnFailure = true) {
         String url = "${skillsService}/${type}${endpoint}".toString()
-        log.info("POST: {}, params={}", url, params)
+//        log.info("POST: {}, params={}", url, params)
         ResponseEntity<String> responseEntity = restTemplateWrapper.postForEntity(url, params, String)
         return getResultFromEntity(url, responseEntity, expectedStatus, throwExceptionOnFailure)
     }

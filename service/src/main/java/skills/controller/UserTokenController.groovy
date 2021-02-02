@@ -21,18 +21,16 @@ import org.springframework.context.annotation.Conditional
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
-import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.oauth2.client.InMemoryOAuth2AuthorizedClientService
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken
 import org.springframework.security.oauth2.common.OAuth2AccessToken
-import org.springframework.security.oauth2.provider.OAuth2Authentication
-import org.springframework.security.oauth2.provider.OAuth2Request
 import org.springframework.security.oauth2.provider.endpoint.TokenEndpoint
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter
 import org.springframework.web.bind.annotation.*
 import skills.auth.SecurityMode
+import skills.auth.UserInfoService
 import skills.auth.form.jwt.JwtHelper
 import skills.services.InceptionProjectService
 
@@ -57,12 +55,8 @@ class UserTokenController {
     @Autowired
     private DefaultTokenServices tokenServices
 
-//    @PostConstruct
-//    void afterPropertiesSet() {
-//        tokenServices = new DefaultTokenServices()
-//        tokenServices.setTokenStore(jwtAccessTokenConverter)
-//        tokenServices.setTokenEnhancer(jwtAccessTokenConverter)
-//    }
+    @Autowired
+    private UserInfoService userInfoService
 
     /**
      * token for inception
@@ -76,29 +70,27 @@ class UserTokenController {
     }
 
     /**
-     * token for current user already authenticated via third party OAuth2 provider (eg, google, gitlab, etc.)
+     * token for current user already authenticated FORM auth (via third party OAuth2 provider (eg, google, gitlab, etc.),
+     * or username/password)
      * @param projectId
      * @return
      */
     @RequestMapping(value = "/api/projects/{projectId}/token", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @CrossOrigin(allowCredentials = 'true')
-    ResponseEntity getOAuth2UserToken(@PathVariable("projectId") String projectId) {
+    ResponseEntity getSelfUserToken(@PathVariable("projectId") String projectId) {
         Object authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userId
         if (authentication.credentials instanceof OAuth2AuthenticationToken && authentication.isAuthenticated()) {
             OAuth2AuthenticationToken oAuth2AuthenticationToken = authentication.credentials
             String oauthProvider = oAuth2AuthenticationToken.authorizedClientRegistrationId
-            String userId = authentication.name
-            log.debug("Creating self-proxy OAUth Token for [{}] or project [{}], authenticated via [{}] OAuth provider", userId, projectId, oauthProvider)
-            return createSkillsProxyToken(projectId, userId)
+            userId = authentication.name
+            log.debug("Creating self-proxy OAuth Token for current user [{}] and project [{}], authenticated via [{}] OAuth provider", userId, projectId, oauthProvider)
         } else {
-            log.error("Unexpected authentication object [{}] with credentials [{}]", authentication, authentication.credentials)
+            userId = userInfoService.currentUserId
+            log.debug("Creating self-proxy OAuth Token for current user [{}] and project [{}]", userId, projectId)
         }
-    }
-
-    private OAuth2Authentication convertAuthentication(Authentication authentication, String clientId) {
-        OAuth2Request request = new OAuth2Request(null, clientId, null, true, null, null, null, null, null)
-        return new OAuth2Authentication(request, authentication)
+        return createSkillsProxyToken(projectId, userId)
     }
 
     /**

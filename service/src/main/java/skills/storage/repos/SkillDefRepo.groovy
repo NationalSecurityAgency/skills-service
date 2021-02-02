@@ -18,6 +18,7 @@ package skills.storage.repos
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.PagingAndSortingRepository
+import org.springframework.data.repository.query.Param
 import org.springframework.lang.Nullable
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillDefWithExtra
@@ -86,6 +87,8 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
     SkillDef findByProjectIdAndSkillIdAndType(String id, String skillId, SkillDef.ContainerType type)
     @Nullable
     SkillDef findByProjectIdAndNameIgnoreCaseAndType(@Nullable String id, String name, SkillDef.ContainerType type)
+    @Nullable
+    SkillDef findByProjectIdAndSkillId(String projectId, String skillId)
 
     @Query(value = '''SELECT max(sdChild.displayOrder) from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
       where srd.parent=sdParent.id and srd.child=sdChild.id and 
@@ -103,6 +106,13 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
     @Nullable
     Integer calculateTotalPointsForSkill(String projectId, String skillId, RelationshipType relationshipType, Integer version)
 
+
+    @Query(value = '''SELECT sum(sdChild.totalPoints) from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
+      where srd.parent=sdParent.id and srd.child=sdChild.id and 
+      sdParent.projectId=?1 and srd.type=?2 and sdChild.version<=?3 ''' )
+    @Nullable
+    Integer calculateTotalPointsForProject(String projectId, RelationshipType relationshipType, Integer version)
+
     @Query(value='''SELECT c 
         from SkillDef s, SkillRelDef r, SkillDef c 
         where s.id=r.parent and c.id = r.child and 
@@ -117,7 +127,12 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
              order by c.displayOrder desc''')
     List<SkillDef> findPreviousSkillDefs(String projectId, String skillId, int beforeDisplayOrder, RelationshipType relationshipType, Pageable pageable)
 
-    long countByProjectIdAndType(@Nullable String projectId, SkillDef.ContainerType type)
+    int countByProjectIdAndType(@Nullable String projectId, SkillDef.ContainerType type)
+
+    @Query('''select count(s) from SkillDef s 
+            where (:projectId is null or s.projectId=:projectId) and s.type=:type and (s.enabled is null or s.enabled = 'true')  
+        ''')
+    int countByProjectIdAndTypeWhereEnabled(@Nullable @Param('projectId') String projectId, @Param('type') SkillDef.ContainerType type)
 
     @Query(value='''select count(c) 
         from SkillRelDef r, SkillDef c 
@@ -164,4 +179,14 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
 
     @Query("SELECT DISTINCT s.version from SkillDef s where s.projectId=?1 ORDER BY s.version ASC")
     List<Integer> getUniqueVersionList(String projectId)
+
+    @Query(value='''SELECT count(sd)
+        from SkillDef sd 
+        where sd.type='Skill' ''')
+    Integer countTotalSkills()
+
+    @Query(value='''SELECT count(sd)
+        from SkillDef sd 
+        where (sd.type='Badge' OR sd.type='GlobalBadge') and (sd.enabled  = 'true' OR sd.enabled is null)''')
+    Integer countTotalBadges()
 }

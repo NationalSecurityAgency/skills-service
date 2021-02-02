@@ -15,49 +15,52 @@ limitations under the License.
 */
 <template>
   <div class="role-manager">
-    <div id="add-user-div" class="row mt-2 mb-5">
-      <div class="col-12 col-md-10 col-xlg-11 pb-2 pb-md-0">
+    <div class="row p-3">
+      <div class="col-12">
         <existing-user-input :suggest="true" :validate="true" :user-type="userType" :excluded-suggestions="userIds"
-                             v-model="selectedUser"/>
+                             v-model="selectedUser" data-cy="existingUserInput"/>
       </div>
-      <div class="col-auto">
-        <b-button variant="outline-primary" @click="addUserRole" :disabled="!selectedUser"
+      <div class="col-12 pt-3">
+        <b-button variant="outline-hc" @click="addUserRole" :disabled="!selectedUser"
                   class="h-100" v-skills="'AddAdmin'">
-          Add <i :class="[isSaving ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-arrow-circle-right']"></i>
+          Add User <i :class="[isSaving ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-arrow-circle-right']"
+                 aria-hidden="true"></i>
         </b-button>
+      </div>
+      <div class="col-12" v-if="errNotification.enable">
+        <b-alert data-cy="error-msg" variant="danger" class="mt-2" show dismissible>
+          <i class="fa fa-exclamation-circle mr-1" aria-hidden="true"></i> <strong>Error!</strong>
+          Request could not be completed! <strong>{{ errNotification.msg }}</strong>
+        </b-alert>
       </div>
     </div>
 
-    <b-alert v-if="errNotification.enable" data-cy="error-msg" variant="danger" class="mt-2" show
-             dismissible>
-      <i class="fa fa-exclamation-circle mr-1"></i> <strong>Error!</strong> Request could not be completed! <strong>{{
-      errNotification.msg }}</strong>
-    </b-alert>
+    <skills-b-table :options="table.options" :items="data" data-cy="roleManagerTable">
+      <template v-slot:cell(userId)="data">
+        {{ getUserDisplay(data.item) }}
 
-    <loading-container v-bind:is-loading="isLoading">
-      <transition name="userRolesContainer" enter-active-class="animated fadeIn">
-        <v-client-table :data="data" :columns="columns" :options="options">
-          <div slot="userId" slot-scope="props">
-            {{ getUserDisplay(props.row) }}
-          </div>
+        <b-button-group class="float-right">
+          <b-button v-if="notCurrentUser(data.value)" @click="deleteUserRoleConfirm(data.item)"
+                    variant="outline-primary" :aria-label="`remove access role from user ${data.value}`"
+                    data-cy="removeUserBtn">
+            <i class="text-warning fas fa-trash" aria-hidden="true"/>
+          </b-button>
+          <span v-else v-b-tooltip.hover="'Can not remove myself. Sorry!!'">
+                <b-button variant="outline-primary" disabled
+                          data-cy="removeUserBtn"
+                          aria-label="cannot remove access role from yourself">
+                  <i class="text-warning fas fa-trash" aria-hidden="true"/>
+                </b-button>
+          </span>
+        </b-button-group>
+      </template>
+    </skills-b-table>
 
-          <div slot="edit" slot-scope="props" class="field has-addons">
-            <b-button v-if="notCurrentUser(props.row.userId)" @click="deleteUserRoleConfirm(props.row)"
-                      variant="outline-primary">
-              <i class="fas fa-trash"/>
-            </b-button>
-            <span v-else v-b-tooltip.hover="'Can not remove myself. Sorry!!'">
-              <b-button variant="outline-primary" disabled><i class="fas fa-trash"/></b-button>
-            </span>
-          </div>
-        </v-client-table>
-      </transition>
-    </loading-container>
   </div>
 </template>
 
 <script>
-  import LoadingContainer from '../utils/LoadingContainer';
+  import SkillsBTable from '@/components/utils/table/SkillsBTable';
   import AccessService from './AccessService';
   import ExistingUserInput from '../utils/ExistingUserInput';
   import MsgBoxMixin from '../utils/modal/MsgBoxMixin';
@@ -71,7 +74,7 @@ limitations under the License.
   export default {
     name: 'RoleManager',
     mixins: [MsgBoxMixin],
-    components: { ExistingUserInput, LoadingContainer },
+    components: { SkillsBTable, ExistingUserInput },
     props: {
       project: {
         type: Object,
@@ -90,41 +93,46 @@ limitations under the License.
         type: String,
         default: 'DASHBOARD',
       },
+      id: {
+        type: String,
+        default: 'add-user-div',
+      },
     },
     data() {
       return {
         // user roles table properties
-        isLoading: true,
         data: [],
         userIds: [],
-        columns: ['userId', 'edit'],
         selectedUser: null,
         isSaving: false,
         errNotification: {
           enable: false,
           msg: '',
         },
-        options: {
-          headings: {
-            userId: this.roleDescription,
-            edit: '',
+        table: {
+          options: {
+            busy: true,
+            bordered: false,
+            outlined: true,
+            stacked: 'md',
+            fields: [
+              {
+                key: 'userId',
+                label: this.roleDescription,
+                sortable: true,
+              },
+            ],
+            pagination: {
+              remove: true,
+            },
           },
-          columnsClasses: {
-            edit: 'control-column',
-          },
-          sortable: ['userId', 'roleName'],
-          sortIcon: {
-            base: 'fa fa-sort', up: 'fa fa-sort-up', down: 'fa fa-sort-down', is: 'fa fa-sort',
-          },
-          filterable: false,
-          skin: 'table is-striped is-fullwidth',
         },
       };
     },
     mounted() {
       AccessService.getUserRoles(this.project.projectId, this.role)
         .then((result) => {
-          this.isLoading = false;
+          this.table.options.busy = false;
           this.data = result;
           this.userIds = result.map(({ userIdForDisplay }) => userIdForDisplay);
         });
@@ -144,11 +152,13 @@ limitations under the License.
           });
       },
       deleteUserRole(row) {
+        this.table.options.busy = true;
         AccessService.deleteUserRole(row.projectId, row.userId, row.roleName)
           .then(() => {
             this.data = this.data.filter((item) => item.userId !== row.userId);
             this.userIds = this.userIds.filter((userId) => userId !== row.userIdForDisplay);
             this.$emit('role-deleted', { userId: row.userId, role: row.roleName });
+            this.table.options.busy = false;
           });
       },
       notCurrentUser(userId) {
@@ -187,11 +197,4 @@ limitations under the License.
 </style>
 
 <style>
-  .role-manager .control-column {
-    max-width: 2rem;
-  }
-
-  .role-manager .VuePagination__count {
-    display: none;
-  }
 </style>

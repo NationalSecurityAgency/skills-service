@@ -18,12 +18,11 @@ describe('Login Tests', () => {
   beforeEach(() => {
     cy.logout();
 
-    cy.server()
-      .route('GET', '/app/projects').as('getProjects')
-      .route('GET', '/api/icons/customIconCss').as('getProjectsCustomIcons')
-      .route('GET', '/app/userInfo').as('getUserInfo')
-      .route('GET', '/app/oAuthProviders').as('getOAuthProviders')
-      .route('POST', '/performLogin').as('postPerformLogin');
+    cy.intercept('GET', '/app/projects').as('getProjects')
+      .intercept('GET', '/api/icons/customIconCss').as('getProjectsCustomIcons')
+      .intercept('GET', '/app/userInfo').as('getUserInfo')
+      .intercept('GET', '/app/oAuthProviders').as('getOAuthProviders')
+      .intercept('POST', '/performLogin').as('postPerformLogin');
   });
 
   it('form: successful dashboard login', () => {
@@ -33,8 +32,14 @@ describe('Login Tests', () => {
     cy.get('#inputPassword').type('password');
     cy.contains('Login').click();
 
-    cy.wait('@getProjects').its('status').should('equal', 200)
-      .wait('@getUserInfo').its('status').should('equal', 200);
+    cy.wait('@getProjects')
+      .then(({ request, response}) => {
+        expect(response.statusCode).to.eq(200)
+    })
+    cy.wait('@getUserInfo')
+      .then(({ request, response}) => {
+      expect(response.statusCode).to.eq(200)
+    })
 
     cy.contains('Project');
     cy.get('[data-cy=subPageHeader]').contains('Projects');
@@ -142,14 +147,16 @@ describe('Login Tests', () => {
       cy.visit('/');
       cy.contains('Login').should('be.disabled');
 
-      cy.wait('@getOAuthProviders').its('status').should('equal', 200)
+      cy.wait('@getOAuthProviders')
+        .then(({request, response}) => {
+          expect(response.statusCode).to.eq(200)
+        })
       cy.get('[data-cy=oAuthProviders]').should('not.exist');
     })
 
     it('no login form for oAuthOnly mode', () => {
-      cy.server()
-      cy.route('GET', '/public/config', {oAuthOnly: true}).as('loadConfig');
-      cy.route('GET', '/app/oAuthProviders', [{"registrationId":"gitlab","clientName":"GitLab","iconClass":"fab fa-gitlab"}]).as('getOauthProviders')
+      cy.intercept('GET', '/public/config', {oAuthOnly: true}).as('loadConfig');
+      cy.intercept('GET', '/app/oAuthProviders', [{"registrationId":"gitlab","clientName":"GitLab","iconClass":"fab fa-gitlab"}]).as('getOauthProviders')
 
       cy.visit('/');
 
@@ -162,9 +169,8 @@ describe('Login Tests', () => {
     });
 
     it('login form is present for oAuthOnly mode when showForm=true', () => {
-      cy.server()
-      cy.route('GET', '/public/config', {oAuthOnly: true}).as('loadConfig');
-      cy.route('GET', '/app/oAuthProviders', [{"registrationId":"gitlab","clientName":"GitLab","iconClass":"fab fa-gitlab"}]).as('getOauthProviders')
+      cy.intercept('GET', '/public/config', {oAuthOnly: true}).as('loadConfig');
+      cy.intercept('GET', '/app/oAuthProviders', [{"registrationId":"gitlab","clientName":"GitLab","iconClass":"fab fa-gitlab"}]).as('getOauthProviders')
 
       cy.visit('/skills-login', {
         qs: {

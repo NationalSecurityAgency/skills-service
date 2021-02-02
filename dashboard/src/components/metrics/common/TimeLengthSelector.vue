@@ -24,7 +24,7 @@ limitations under the License.
 </template>
 
 <script>
-  import moment from 'moment';
+  import dayjs from '../../../DayJsCustomizer';
 
   export default {
     name: 'TimeLengthSelector',
@@ -41,9 +41,14 @@ limitations under the License.
       handleClick(index) {
         this.selectedIndex = index;
         const selectedItem = this.options[index];
-        const start = moment()
+        const start = dayjs()
           .subtract(selectedItem.length, selectedItem.unit);
-        this.$emit('time-selected', start);
+        const event = {
+          durationLength: selectedItem.length,
+          durationUnit: selectedItem.unit,
+          startTime: start,
+        };
+        this.$emit('time-selected', event);
       },
     },
   };

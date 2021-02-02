@@ -21,7 +21,7 @@ limitations under the License.
           <div class="row">
             <div class="col-lg-5 text-center text-lg-left">
               <h3><i v-if="options.icon" class="has-text-link" :class="options.icon"/> {{ options.title }}<slot name="right-of-header"></slot></h3>
-              <h5 class="text-muted">{{ options.subTitle }}</h5>
+              <div class="h5 text-muted">{{ options.subTitle }}</div>
             </div>
             <div class="col-lg-7">
               <div class="row text-center mt-4 mt-lg-0 justify-content-center justify-content-lg-end">
@@ -30,7 +30,7 @@ limitations under the License.
                     <div class="card-body">
                       <div class="row">
                         <div class="col text-left">
-                          <h5 class="card-title text-uppercase text-muted mb-0 small">{{stat.label}}</h5>
+                          <div class="h5 card-title text-uppercase text-muted mb-0 small">{{stat.label}}</div>
                           <span class="h5 font-weight-bold mb-0">{{ stat.count | number}}</span>
                           <span v-if="stat.warnMsg" class="ml-1">
                             <i class="fa fa-exclamation-circle text-warning" v-b-tooltip.hover="stat.warnMsg"/>

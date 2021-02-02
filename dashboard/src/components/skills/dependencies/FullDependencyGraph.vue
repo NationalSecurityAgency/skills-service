@@ -38,7 +38,6 @@ limitations under the License.
 </template>
 
 <script>
-  import vis from 'vis';
   import 'vis/dist/vis.css';
   import SkillsService from '../SkillsService';
   import LoadingContainer from '../../utils/LoadingContainer';
@@ -48,6 +47,11 @@ limitations under the License.
   import GraphLegend from './GraphLegend';
   import SubPageHeader from '../../utils/pages/SubPageHeader';
   import SimpleCard from '../../utils/cards/SimpleCard';
+
+  const getVis = import(
+    /* webpackChunkName: "vis" */
+    'vis'
+  );
 
   export default {
     name: 'FullDependencyGraph',
@@ -64,8 +68,8 @@ limitations under the License.
         isLoading: false,
         graph: {},
         network: null,
-        nodes: new vis.DataSet(),
-        edges: new vis.DataSet(),
+        nodes: {},
+        edges: {},
         legendItems: [
           { label: 'Skill Dependencies', color: 'lightgreen' },
           { label: 'Cross Project Skill Dependencies', color: '#ffb87f' },
@@ -98,7 +102,11 @@ limitations under the License.
       };
     },
     mounted() {
-      this.loadGraphDataAndCreateGraph();
+      getVis.then((vis) => {
+        this.nodes = new vis.DataSet();
+        this.edges = new vis.DataSet();
+        this.loadGraphDataAndCreateGraph(vis);
+      });
     },
     beforeDestroy() {
       if (this.network) {
@@ -132,7 +140,9 @@ limitations under the License.
 
         const data = this.buildData();
         const container = document.getElementById('dependency-graph');
-        this.network = new vis.Network(container, data, this.displayOptions);
+        getVis.then((vis) => {
+          this.network = new vis.Network(container, data, this.displayOptions);
+        });
       },
       buildData() {
         this.graph.nodes.forEach((node) => {
