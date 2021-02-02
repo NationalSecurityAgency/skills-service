@@ -120,22 +120,26 @@ limitations under the License.
             }
 
             const s = [];
-            if (appliedEvents) {
+            let hasAppliedSkillEvents = false;
+            if (appliedEvents && appliedEvents.length > 0) {
               s.push({
                 name: 'Applied Skill Events',
                 data: appliedEvents,
               });
-              this.hasData = true;
+              hasAppliedSkillEvents = true;
             }
 
-            if (allEvents) {
+            let hasAllEvents = false;
+            if (allEvents && allEvents.length > 0) {
               s.push({
                 name: 'All Skill Events',
                 data: allEvents,
               });
-              this.hasData = true;
+              hasAllEvents = true;
             }
 
+            // eslint-disable-next-line
+            this.hasData = Boolean(hasAllEvents | hasAppliedSkillEvents);
             this.series = s;
             this.loading = false;
           });
