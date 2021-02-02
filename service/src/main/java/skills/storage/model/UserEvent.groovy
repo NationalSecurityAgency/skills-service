@@ -28,6 +28,9 @@ class UserEvent {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id
 
+    // fk to project_definition
+    String projectId
+
     // fk to users
     String userId
 

@@ -13,22 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.storage.model
+package skills.skillLoading.model
 
-import groovy.transform.CompileStatic
-import org.springframework.data.jpa.domain.support.AuditingEntityListener
+import groovy.transform.Canonical
 
-import javax.persistence.Entity
-import javax.persistence.EntityListeners
-import javax.persistence.Table
+@Canonical
+class MySkillsSummary {
+    List<ProjectSummary> projectSummaries = []
 
-@Entity()
-@Table(name = 'skill_definition')
-@EntityListeners(AuditingEntityListener)
-@CompileStatic
-class SkillDef extends SkillDefParent {
-    static enum ContainerType {
-        Subject, Skill, Badge, GlobalBadge
-    }
+    Integer totalProjects = 0
+    Integer numProjectsContributed = 0
+
+    Integer totalSkills = 0
+    Integer numAchievedSkills = 0
+    Integer numAchievedSkillsLastMonth = 0
+    Integer numAchievedSkillsLastWeek = 0
+    Date mostRecentAchievedSkill
+
+    Integer totalBadges = 0
+    Integer numAchievedBadges = 0
+    Integer numAchievedGemBadges = 0
+    Integer numAchievedGlobalBadges = 0
 
 }
+

@@ -418,7 +418,6 @@ Cypress.Commands.add('reportHistoryOfEvents', (projId, user, numDays=10, skipWee
     }
 });
 
-
 Cypress.Commands.add('validateTable', (tableSelector, expected, pageSize = 5, onlyVisiblePage = false, numRowsParam = null, validateTotalRows = true) => {
     cy.get(tableSelector).contains('Loading...').should('not.exist')
     cy.get(tableSelector).contains('There are no records to show').should('not.exist')
@@ -453,5 +452,12 @@ Cypress.Commands.add('validateTable', (tableSelector, expected, pageSize = 5, on
             cy.get('@row1').eq(item.colIndex).should('contain', item.value);
         })
     }
+
+});
+
+Cypress.Commands.add('wrapIframe', () => {
+    return cy.get('iframe')
+      .its('0.contentDocument.body').should('not.be.empty')
+      .then(cy.wrap)
 });
 

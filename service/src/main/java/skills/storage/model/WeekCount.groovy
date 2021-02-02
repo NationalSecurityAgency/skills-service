@@ -18,8 +18,15 @@ package skills.storage.model
 class WeekCount {
     Integer weekNumber
     Long count
+    String projectId // optional, used when counting items for multiple projects in the same query
 
     WeekCount(Integer weekNumber, Long count) {
+        this.weekNumber = weekNumber
+        this.count = count
+    }
+
+    WeekCount(String projectId, Integer weekNumber, Long count) {
+        this.projectId = projectId
         this.weekNumber = weekNumber
         this.count = count
     }

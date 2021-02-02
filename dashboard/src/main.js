@@ -45,6 +45,7 @@ import {
   FormPlugin,
   FormGroupPlugin,
   FormDatepickerPlugin,
+  ProgressPlugin,
 } from 'bootstrap-vue';
 
 import { SkillsConfiguration, SkillsDirective, SkillsReporter } from '@skilltree/skills-client-vue';
@@ -106,6 +107,7 @@ Vue.use(PopoverPlugin);
 Vue.use(FormPlugin);
 Vue.use(FormGroupPlugin);
 Vue.use(FormDatepickerPlugin);
+Vue.use(ProgressPlugin);
 
 Vue.use(SkillsDirective);
 

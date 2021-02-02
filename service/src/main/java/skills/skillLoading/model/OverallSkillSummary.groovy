@@ -33,11 +33,17 @@ class OverallSkillSummary {
 
     int todaysPoints
 
+    // for My Skills page
+    String projectId
+    int totalUsers
+    int rank
+
     List<SkillSubjectSummary> subjects
 
     BadgeStats badges
 
-    public static class BadgeStats {
+    static class BadgeStats {
+        int numTotalBadges = 0
         int numBadgesCompleted = 0
         boolean enabled = false
     }

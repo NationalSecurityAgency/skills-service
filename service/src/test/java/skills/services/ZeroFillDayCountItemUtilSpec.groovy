@@ -137,9 +137,10 @@ class ZeroFillDayCountItemUtilSpec extends Specification {
         res.find() { it.day == startOfWeek.toDate() }
     }
 
-    def validateDaily(List<DayCountItem> daily, LocalDateTime n) {
+    def validateDaily(List<DayCountItem> daily, LocalDateTime n, String projectId=null) {
         LocalDateTime mostRecent = n
         daily.each {
+            assert it.projectId == projectId
             Period diff = Period.between(it.day.toLocalDate(), mostRecent.toLocalDate())
             assert diff.getDays() == 1
             mostRecent = it.day.toLocalDateTime()
@@ -147,13 +148,56 @@ class ZeroFillDayCountItemUtilSpec extends Specification {
         return true
     }
 
-    def validateWeekly(List<DayCountItem> daily, LocalDateTime n) {
+    def validateWeekly(List<DayCountItem> daily, LocalDateTime n, String projectId=null) {
         LocalDateTime mostRecent = n
         daily.each {
+            assert it.projectId == projectId
             Period diff = Period.between(it.day.toLocalDate(), mostRecent.toLocalDate())
             assert diff.getDays() == 7
             mostRecent = it.day.toLocalDateTime()
         }
         return true
+    }
+
+    def "produces accurate zero fills for DAILY gaps with projectId"() {
+        String projectId = 'myProjectId'
+        LocalDateTime n = LocalDateTime.now()
+        LocalDateTime nMinus = n.minusDays(7);
+
+        println "n: ${n}, nMinus: ${nMinus}"
+
+        when:
+        List<DayCountItem> res = ZeroFillDayCountItemUtil.zeroFillDailyGaps(n.toDate(), nMinus.toDate(), false, projectId)
+        res.each {
+            println it.day
+        }
+
+        then:
+        res.size() == 6
+        !res.find() { it.day == n.toDate() }
+        !res.find() { it.day == nMinus.toDate() }
+        validateDaily(res, n, projectId)
+    }
+
+    def "produces accurate zero fills for WEEKLY gaps with projectId"() {
+        String projectId = 'myProjectId'
+        TemporalField temporalField = WeekFields.of(Locale.US).dayOfWeek()
+        LocalDate eventDate = LocalDate.now()
+        LocalDateTime startOfWeek = LocalDateTime.of(eventDate.with(temporalField, 1), LocalTime.MIN)
+        LocalDateTime nMinus = startOfWeek.minusWeeks(7).with(temporalField, 1);
+
+        println "n: ${startOfWeek}, nMinus: ${nMinus}"
+
+        when:
+        List<DayCountItem> res = ZeroFillDayCountItemUtil.zeroFillWeeklyGaps(startOfWeek.toDate(), nMinus.toDate(), false, projectId)
+        res.each {
+            println it.day
+        }
+
+        then:
+        res.size() == 6
+        !res.find() { it.day == startOfWeek.toDate() }
+        !res.find() { it.day == nMinus.toDate() }
+        validateWeekly(res, startOfWeek, projectId)
     }
 }
