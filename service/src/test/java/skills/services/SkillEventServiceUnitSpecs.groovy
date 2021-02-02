@@ -21,6 +21,7 @@ import skills.storage.model.SkillDef
 import skills.storage.repos.SkillEventsSupportRepo
 import skills.storage.repos.UserAchievedLevelRepo
 import skills.storage.repos.UserPerformedSkillRepo
+import skills.utils.MetricsLogger
 import spock.lang.Specification
 
 import static skills.storage.repos.SkillEventsSupportRepo.SkillDefMin
@@ -42,6 +43,7 @@ class SkillEventServiceUnitSpecs extends Specification {
         UserAchievedLevelRepo mockAchievedLevelRepo = Mock()
         AchievedBadgeHandler mockAchievedBadgeHandler = Mock()
         AchievedGlobalBadgeHandler mockAchievedGlobalBadgeHandler = Mock()
+        MetricsLogger mockMetricsLogger = Mock()
         UserEventService mockUserEventService = Mock()
 
         SkillEventsService skillEventsService = new SkillEventsService(
@@ -55,6 +57,7 @@ class SkillEventServiceUnitSpecs extends Specification {
                 achievedLevelRepo: mockAchievedLevelRepo,
                 achievedBadgeHandler: mockAchievedBadgeHandler,
                 achievedGlobalBadgeHandler: mockAchievedGlobalBadgeHandler,
+                metricsLogger: mockMetricsLogger,
                 userEventService: mockUserEventService
         )
 
@@ -84,12 +87,14 @@ class SkillEventServiceUnitSpecs extends Specification {
         SkillEventPublisher mockSkillEventPublisher = Mock()
         SkillEventsSupportRepo mockSkillEventsSupportRepo = Mock()
         UserPerformedSkillRepo mockPerformedSkillRepository = Mock()
+        MetricsLogger mockMetricsLogger = Mock()
         UserEventService mockUserEventService = Mock()
 
         SkillEventsService skillEventsService = new SkillEventsService(
                 skillEventPublisher: mockSkillEventPublisher,
                 skillEventsSupportRepo: mockSkillEventsSupportRepo,
                 performedSkillRepository: mockPerformedSkillRepository,
+                metricsLogger: mockMetricsLogger,
                 userEventService: mockUserEventService
         )
 
@@ -114,12 +119,14 @@ class SkillEventServiceUnitSpecs extends Specification {
         SkillEventPublisher mockSkillEventPublisher = Mock()
         SkillEventsSupportRepo mockSkillEventsSupportRepo = Mock()
         UserPerformedSkillRepo mockPerformedSkillRepository = Mock()
+        MetricsLogger mockMetricsLogger = Mock()
         UserEventService mockUserEventService = Mock()
 
         SkillEventsService skillEventsService = new SkillEventsService(
                 skillEventPublisher: mockSkillEventPublisher,
                 skillEventsSupportRepo: mockSkillEventsSupportRepo,
                 performedSkillRepository: mockPerformedSkillRepository,
+                metricsLogger: mockMetricsLogger,
                 userEventService: mockUserEventService
         )
 
