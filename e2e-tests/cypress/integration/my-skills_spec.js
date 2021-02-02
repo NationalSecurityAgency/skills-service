@@ -15,10 +15,7 @@
  */
 import moment from 'moment';
 import dayjs from 'dayjs';
-// import localizedFormatPlugin from 'dayjs/plugin/localizedFormat';
 import relativeTimePlugin from 'dayjs/plugin/relativeTime';
-//
-// dayjs.extend(localizedFormatPlugin);
 dayjs.extend(relativeTimePlugin);
 
 const dateFormatter = value => moment.utc(value).format('YYYY-MM-DD[T]HH:mm:ss[Z]');
@@ -26,9 +23,9 @@ const timeFromNowFormatter = (value) => dayjs(value).startOf('hour').fromNow();
 
 
 const now = new Date().getTime()
-const yesterday = new Date().getTime() - (1000*60*60*24)
+const yesterday = new Date().getTime() - (1000 * 60 * 60 * 24)
 
-  describe('Navigation Tests', () => {
+describe('Navigation Tests', () => {
   // const snapshotOptions = {
   //   blackout: ['[data-cy=pointHistoryChart]', '[data-cy=timePassed]'],
   //   failureThreshold: 0.03, // threshold for entire image
@@ -38,7 +35,6 @@ const yesterday = new Date().getTime() - (1000*60*60*24)
   // };
 
   beforeEach(() => {
-    // Cypress.env('disabledUILoginProp', true);
     cy.request('POST', '/app/projects/proj1', {
       projectId: 'proj1',
       name: 'Project 1'
@@ -120,11 +116,23 @@ const yesterday = new Date().getTime() - (1000*60*60*24)
     });
     cy.request('POST', `/admin/projects/proj1/skills/skill4/dependency/skill2`)
 
-    cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: Cypress.env('proxyUser'), timestamp: new Date().getTime()})
-    cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: Cypress.env('proxyUser'), timestamp: new Date().getTime() - 1000*60*60*24})
+    cy.request('POST', `/api/projects/proj1/skills/skill1`, {
+      userId: Cypress.env('proxyUser'),
+      timestamp: new Date().getTime()
+    })
+    cy.request('POST', `/api/projects/proj1/skills/skill1`, {
+      userId: Cypress.env('proxyUser'),
+      timestamp: new Date().getTime() - 1000 * 60 * 60 * 24
+    })
 
-    cy.request('POST', `/api/projects/proj1/skills/skill3`, {userId: Cypress.env('proxyUser'), timestamp: new Date().getTime()})
-    cy.request('POST', `/api/projects/proj1/skills/skill3`, {userId: Cypress.env('proxyUser'), timestamp: new Date().getTime() - 1000*60*60*24})
+    cy.request('POST', `/api/projects/proj1/skills/skill3`, {
+      userId: Cypress.env('proxyUser'),
+      timestamp: new Date().getTime()
+    })
+    cy.request('POST', `/api/projects/proj1/skills/skill3`, {
+      userId: Cypress.env('proxyUser'),
+      timestamp: new Date().getTime() - 1000 * 60 * 60 * 24
+    })
 
     cy.request('POST', '/admin/projects/proj1/badges/badge1', {
       projectId: 'proj1',
@@ -143,6 +151,27 @@ const yesterday = new Date().getTime() - (1000*60*60*24)
     cy.fixture('vars.json').then((vars) => {
       cy.request('POST', '/logout');
       cy.register(Cypress.env('proxyUser'), vars.defaultPass, false);
+      cy.loginAsProxyUser()
+    });
+  });
+
+  Cypress.Commands.add("loginAsRootUser", (u) => {
+    cy.fixture('vars.json').then((vars) => {
+      cy.request('POST', '/logout');
+      cy.login(vars.rootUser, vars.defaultPass);
+    });
+  })
+
+  Cypress.Commands.add("loginAsDefaultUser", (u) => {
+    cy.fixture('vars.json').then((vars) => {
+      cy.request('POST', '/logout');
+      cy.login(vars.defaultUser, vars.defaultPass);
+    });
+  })
+
+  Cypress.Commands.add("loginAsProxyUser", (u) => {
+    cy.fixture('vars.json').then((vars) => {
+      cy.request('POST', '/logout');
       if (!Cypress.env('oauthMode')) {
         cy.log('NOT in oauthMode, using form login')
         cy.login(Cypress.env('proxyUser'), vars.defaultPass);
@@ -151,14 +180,17 @@ const yesterday = new Date().getTime() - (1000*60*60*24)
         cy.loginBySingleSignOn()
       }
     });
-  });
+  })
 
-  it.only('visit mySkills page', function () {
+  it('visit mySkills page', function () {
     cy.visit('/my-skills');
+
+    // data-cy="breadcrumb-MySkills"
+    cy.get('[data-cy=breadcrumb-MySkills]').contains('MySkills').should('be.visible');
 
     cy.get('[data-cy=numProjectsContributed]').contains(new RegExp(/^1$/));
     cy.get('[data-cy=numProjectsAvailable]').contains(new RegExp(/^\/ 2$/));
-    cy.get('[data-cy=info-snap-footer]').contains('It\'s fun to learn! You still have 2 projects to explore.');
+    cy.get('[data-cy=info-snap-footer]').contains('It\'s fun to learn! You still have 1 project to explore.');
 
     cy.get('[data-cy=numAchievedSkills]').contains(new RegExp(/^1$/));
     cy.get('[data-cy=numSkillsAvailable]').contains(new RegExp(/^Total: 48$/));
@@ -178,7 +210,7 @@ const yesterday = new Date().getTime() - (1000*60*60*24)
 
     cy.get('[data-cy=project-link-Inception]').should('be.visible');
     cy.get('[data-cy=project-link-Inception]').find('[data-cy=project-card-project-name]').contains('Inception');
-    
+
     cy.get('[data-cy=project-link-proj1]').should('be.visible');
     cy.get('[data-cy=project-link-proj1]').find('[data-cy=project-card-project-name]').contains('Project 1');
     cy.get('[data-cy=project-link-proj1]').find('[data-cy=project-card-project-level]').contains('2');
@@ -190,6 +222,36 @@ const yesterday = new Date().getTime() - (1000*60*60*24)
     cy.intercept('GET', '/api/projects/proj1/pointHistory').as('pointHistoryChart');
     cy.wait('@pointHistoryChart');
     cy.wrapIframe().contains('Overall Points');
+  });
+
+  it('visit mySkills page all projects contributed', function () {
+    // add a skill to Inception to have contributed to all projects
+    cy.loginAsRootUser();
+    cy.request('POST', `/api/projects/Inception/skills/VisitUserSettings`, {
+      userId: Cypress.env('proxyUser'),
+      timestamp: new Date().getTime()
+    })
+
+    cy.loginAsProxyUser();
+    cy.visit('/my-skills');
+
+    cy.get('[data-cy=numProjectsContributed]').contains(new RegExp(/^2$/));
+    cy.get('[data-cy=numProjectsAvailable]').contains(new RegExp(/^\/ 2$/));
+    cy.get('[data-cy=info-snap-footer]').contains('Congratulations, you have contributed to all available projects!');
+  });
+
+  it('visit mySkills page more than one project not contributed', function () {
+    cy.request('POST', '/app/projects/proj2', {
+      projectId: 'proj2',
+      name: 'Project 2'
+    });
+
+    cy.loginAsProxyUser();
+    cy.visit('/my-skills');
+
+    cy.get('[data-cy=numProjectsContributed]').contains(new RegExp(/^1$/));
+    cy.get('[data-cy=numProjectsAvailable]').contains(new RegExp(/^\/ 3$/));
+    cy.get('[data-cy=info-snap-footer]').contains('It\'s fun to learn! You still have 2 projects to explore.');
   });
 
 });

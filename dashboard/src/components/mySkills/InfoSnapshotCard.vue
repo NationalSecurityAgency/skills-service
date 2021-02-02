@@ -30,7 +30,8 @@ limitations under the License.
     </div>
     <b-row class="justify-content-between no-gutters border-top text-muted small">
       <b-col class="p-2">
-        <span data-cy="info-snap-footer">It's fun to learn! You still have <b-badge variant="info">2</b-badge> projects to explore.</span>
+        <span v-if="projectsNotContributedToYet > 0" data-cy="info-snap-footer">It's fun to learn! You still have <b-badge variant="info">{{ projectsNotContributedToYet }}</b-badge> project{{ projectsNotContributedToYet > 1 ? 's' : ''}} to explore.</span>
+        <span v-else data-cy="info-snap-footer">Congratulations, you have contributed to all available projects!</span>
       </b-col>
     </b-row>
   </b-card>
@@ -148,6 +149,9 @@ limitations under the License.
           return [Math.round(percent)];
         }
         return [0];
+      },
+      projectsNotContributedToYet() {
+        return this.totalProjects - this.numProjectsContributed;
       },
     },
   };
