@@ -15,6 +15,9 @@
  */
 package skills.storage.model
 
+import groovy.transform.ToString
+
+@ToString
 class DayCountItem {
     Date day
     Long count
