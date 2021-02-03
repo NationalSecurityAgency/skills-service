@@ -117,6 +117,16 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
     ''')
     List<DayCountItem> countsByDay(@Param('projectId') String projectId, @Param('skillId') String skillId)
 
+    @Query('''select new skills.storage.model.DayCountItem(CAST(ups.performedOn as date), count(ups.id))
+        from UserPerformedSkill ups
+        where
+        ups.projectId = :projectId and
+        ups.skillId=:skillId and
+        ups.performedOn > :from
+        group by CAST(ups.performedOn as date)
+    ''')
+    List<DayCountItem> countsByDay(@Param('projectId') String projectId, @Param('skillId') String skillId, @Param("from") Date from)
+
     @Query("SELECT DISTINCT(p.projectId) from UserPerformedSkill p where p.userId=?1 order by p.projectId asc" )
     List<String> findDistinctProjectIdsWithUserPoints(String userId)
 

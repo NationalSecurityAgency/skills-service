@@ -20,8 +20,11 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import skills.metrics.builders.MetricsParams
 import skills.metrics.builders.ProjectMetricsBuilder
+import skills.services.UserEventService
 import skills.storage.model.DayCountItem
 import skills.storage.repos.UserPerformedSkillRepo
+
+import java.time.LocalDate
 
 @Component
 @Slf4j
@@ -30,6 +33,9 @@ class SkillEventsOverTimeMetricsBuilder implements ProjectMetricsBuilder {
     @Autowired
     UserPerformedSkillRepo userPerformedSkillRepo
 
+    @Autowired
+    UserEventService eventService
+
     static class ResCount {
         Integer num
         Long timestamp
@@ -37,6 +43,7 @@ class SkillEventsOverTimeMetricsBuilder implements ProjectMetricsBuilder {
 
     static class FinalRes {
         List<ResCount> countsByDay
+        List<ResCount> allEvents
     }
 
     @Override
@@ -46,13 +53,18 @@ class SkillEventsOverTimeMetricsBuilder implements ProjectMetricsBuilder {
 
     FinalRes build(String projectId, String chartId, Map<String, String> props) {
         String skillId = MetricsParams.getSkillId(projectId, chartId, props);
-        List<DayCountItem> counts = userPerformedSkillRepo.countsByDay(projectId, skillId)
+        Date start = MetricsParams.getStart(projectId, chartId, props)
+        List<DayCountItem> counts = userPerformedSkillRepo.countsByDay(projectId, skillId, start)
+        List<DayCountItem> allCounts = eventService.getUserEventCountsForSkillId(projectId, skillId, start)
 
         List<ResCount> countsByDay = counts.collect {
             new ResCount(num: it.getCount(), timestamp: it.getDay().time)
         }
         countsByDay = countsByDay?.sort({it.timestamp})
 
-        return new FinalRes(countsByDay: countsByDay)
+        List<ResCount> allCountsByDay = allCounts.collect { new ResCount(num: it.getCount(), timestamp: it.getDay().time)}
+        allCountsByDay = allCountsByDay.sort({it.timestamp})
+
+        return new FinalRes(countsByDay: countsByDay, allEvents: allCountsByDay)
     }
 }
