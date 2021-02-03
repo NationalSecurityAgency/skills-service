@@ -59,7 +59,8 @@ class AllProjectsSkillEventsOverTimeMetricsBuilder implements GlobalMetricsBuild
     List<ProjResCount> build(Map<String, String> props) {
         String userId = userInfoService.getCurrentUserId();
         Date startDate = MetricsParams.getStart(null, BUILDER_ID, props)
-        log.debug("Retrieving event counts for user [{}], start date [{}]", userId, startDate)
+        List<String> projectIds = MetricsParams.getProjectIds(BUILDER_ID, props)
+        log.debug("Retrieving event counts for user [{}], start date [{}], projectIds [{}]", userId, startDate, projectIds)
 
         List<ProjResCount> projResCounts = []
         List<DayCountItem> counts = userEventService.getUserEventCountsForUser(userId, startDate)

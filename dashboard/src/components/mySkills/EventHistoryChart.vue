@@ -14,22 +14,33 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <metrics-card :title="mutableTitle" data-cy="event-history-chart">
-    <template v-slot:afterTitle>
-      <span class="text-muted ml-2">|</span>
-      <time-length-selector :options="timeSelectorOptions" @time-selected="updateTimeRange"/>
-    </template>
-    <metrics-overlay :loading="loading" :has-data="hasData" no-data-msg="There are no projects selected">
-      <apexchart type="line" height="350"
-                 :ref="chartId"
-                 :options="chartOptions"
-                 :series="series">
-      </apexchart>
-    </metrics-overlay>
-  </metrics-card>
+  <div>
+    <multiselect v-model="projects.selected"
+                :options="projects.available"
+                label="projectName"
+                :multiple="true"
+                track-by="projectId"
+                :hide-selected="true"
+                :max="5"
+                data-cy="eventHistoryChartProjectSelector"/>
+    <metrics-card class="mt-4" :title="mutableTitle" data-cy="eventHistoryChart">
+      <template v-slot:afterTitle>
+        <span class="text-muted ml-2">|</span>
+        <time-length-selector :options="timeSelectorOptions" @time-selected="updateTimeRange"/>
+      </template>
+      <metrics-overlay :loading="loading" :has-data="hasData" no-data-msg="There are no projects selected">
+        <apexchart type="line" height="350"
+                  :ref="chartId"
+                  :options="chartOptions"
+                  :series="series">
+        </apexchart>
+      </metrics-overlay>
+    </metrics-card>
+  </div>
 </template>
 
 <script>
+  import Multiselect from 'vue-multiselect';
   import MetricsCard from '../metrics/utils/MetricsCard';
   import MetricsOverlay from '../metrics/utils/MetricsOverlay';
   import numberFormatter from '@//filters/NumberFilter';
@@ -39,9 +50,11 @@ limitations under the License.
 
   export default {
     name: 'EventHistoryChart',
-    components: { MetricsCard, MetricsOverlay, TimeLengthSelector },
+    components: {
+      MetricsCard, MetricsOverlay, TimeLengthSelector, Multiselect,
+    },
     props: {
-      projects: {
+      availableProjects: {
         type: Array,
         required: true,
       },
@@ -57,6 +70,10 @@ limitations under the License.
         loading: true,
         hasData: false,
         mutableTitle: this.title,
+        projects: {
+          selected: [],
+          available: [],
+        },
         props: {
           start: dayjs().subtract(30, 'day').valueOf(),
         },
@@ -129,9 +146,25 @@ limitations under the License.
       };
     },
     mounted() {
-      const hasProjects = this.projects && this.projects.length > 0;
-      this.hasData = hasProjects;
-      this.loadData();
+      this.projects.available = this.availableProjects.map((proj) => ({ ...proj }));
+      const numProjectsToSelect = Math.min(this.availableProjects.length, 4);
+      const availableSortedByMostPoints = this.projects.available.sort((a, b) => b.points - a.points);
+      this.projects.selected = availableSortedByMostPoints.slice(0, numProjectsToSelect);
+      // this.loadData();
+    },
+    computed: {
+      enoughOverallProjects() {
+        return this.projects.available && this.projects.available.length >= 2;
+      },
+      enoughProjectsSelected() {
+        return this.projects.selected && this.projects.selected.length >= 2;
+      },
+    },
+    watch: {
+      'projects.selected': function rebuild() {
+        this.props.projIds = this.projects.selected.map((project) => project.projectId);
+        this.loadData();
+      },
     },
     methods: {
       updateTimeRange(timeEvent) {
@@ -154,7 +187,7 @@ limitations under the License.
               this.hasData = true;
               this.series = response.map((item) => {
                 const ret = {};
-                ret.name = this.projects.find(({ projectId }) => projectId === item.project).projectName;
+                ret.name = this.projects.available.find(({ projectId }) => projectId === item.project).projectName;
                 ret.data = item.countsByDay.map((it) => [it.timestamp, it.num]);
                 return ret;
               });
