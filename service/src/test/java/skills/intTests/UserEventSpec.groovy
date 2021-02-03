@@ -199,11 +199,13 @@ class UserEventSpec extends DefaultIntSpec {
         List<DayCountItem> results = eventService.getUserEventCountsForProject(proj.projectId, queryFrom)
 
         then:
-        results.size() == 2
+        results.size() == 3
         results[0].count == 2
         results[0].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.now.toDate())
         results[1].count == 4
         results[1].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.now.minusDays(1).toDate())
+        results[2].count == 0
+        results[2].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.now.minusDays(2).toDate())
     }
 
     def "user event counts spanning compactDailyEventsOlderThan produces accurate results"() {
@@ -239,22 +241,26 @@ class UserEventSpec extends DefaultIntSpec {
         skillsService.addSkill(skill, userIds[1], testDates.now.toDate())
         skillsService.addSkill(skill2, userIds[0], testDates.now.toDate())
         skillsService.addSkill(skill2, userIds[1], testDates.now.toDate())
-
+        //1 per user per project after this
 
         eventService.recordEvent(proj.projectId, rawId, userIds[0], testDates.getDateWithinCurrentWeek().toDate(), 1, EventType.DAILY)
         eventService.recordEvent(proj.projectId, rawId, userIds[0], testDates.getDateWithinCurrentWeek().toDate(), 1, EventType.DAILY)
+        //user[0] should be at 3 total events for proj1 in current week now
         eventService.recordEvent(proj2.projectId, rawId2, userIds[0], testDates.getDateWithinCurrentWeek().toDate(), 1, EventType.DAILY)
         eventService.recordEvent(proj2.projectId, rawId2, userIds[0], testDates.getDateWithinCurrentWeek().toDate(), 1, EventType.DAILY)
+        //user[0] should be at 3 total events for proj2 in current week now
 
         // the above DAILY events should get merged with this weekly event due to overlapping start/end
         eventService.recordEvent(proj.projectId, rawId, userIds[0], testDates.startOfCurrentWeek.toDate(), 1, EventType.WEEKLY)
         eventService.recordEvent(proj2.projectId, rawId2, userIds[0], testDates.startOfCurrentWeek.toDate(), 1, EventType.WEEKLY)
-
+        //user[0] should be at 4 total events per project now for current week
 
         eventService.recordEvent(proj.projectId, rawId, userIds[1], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
         eventService.recordEvent(proj.projectId, rawId, userIds[0], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
+        //user[0] and user[1] should have 1 event each for project 1 for two weeks ago
         eventService.recordEvent(proj2.projectId, rawId2, userIds[1], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
         eventService.recordEvent(proj2.projectId, rawId2, userIds[0], testDates.startOfTwoWeeksAgo.toDate(), 1, EventType.WEEKLY)
+        //user[0] and user[1] should have 1 event each for project 2 for two weeks ago
 
         when:
 
@@ -266,12 +272,12 @@ class UserEventSpec extends DefaultIntSpec {
         user0Results[0].count == 4
         user0Results[0].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.startOfCurrentWeek.toDate())
         user0Results[0].projectId == proj.projectId
-        user0Results[1].count == 4
-        user0Results[1].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.startOfCurrentWeek.toDate())
-        user0Results[1].projectId == proj2.projectId
-        user0Results[2].count == 1
-        user0Results[2].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.startOfTwoWeeksAgo.toDate())
-        user0Results[2].projectId == proj.projectId
+        user0Results[1].count == 1
+        user0Results[1].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.startOfTwoWeeksAgo.toDate())
+        user0Results[1].projectId == proj.projectId
+        user0Results[2].count == 4
+        user0Results[2].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.startOfCurrentWeek.toDate())
+        user0Results[2].projectId == proj2.projectId
         user0Results[3].count == 1
         user0Results[3].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.startOfTwoWeeksAgo.toDate())
         user0Results[3].projectId == proj2.projectId
@@ -281,11 +287,11 @@ class UserEventSpec extends DefaultIntSpec {
         user1Results[0].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.startOfCurrentWeek.toDate())
         user1Results[0].projectId == proj.projectId
         user1Results[1].count == 1
-        user1Results[1].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.startOfCurrentWeek.toDate())
-        user1Results[1].projectId == proj2.projectId
+        user1Results[1].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.startOfTwoWeeksAgo.toDate())
+        user1Results[1].projectId == proj.projectId
         user1Results[2].count == 1
-        user1Results[2].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.startOfTwoWeeksAgo.toDate())
-        user1Results[2].projectId == proj.projectId
+        user1Results[2].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.startOfCurrentWeek.toDate())
+        user1Results[2].projectId == proj2.projectId
         user1Results[3].count == 1
         user1Results[3].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.startOfTwoWeeksAgo.toDate())
         user1Results[3].projectId == proj2.projectId
@@ -346,27 +352,46 @@ class UserEventSpec extends DefaultIntSpec {
         List<DayCountItem> user1Results = eventService.getUserEventCountsForUser(userIds[1], queryFrom)
 
         then:
-        user0Results.size() == 4
+        user0Results.size() == 6
         user0Results[0].count == 1
         user0Results[0].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.now.toDate())
         user0Results[0].projectId == proj.projectId
-        user0Results[1].count == 1
-        user0Results[1].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.now.toDate())
-        user0Results[1].projectId == proj2.projectId
-        user0Results[2].count == 4
-        user0Results[2].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.now.minusDays(1).toDate())
+        user0Results[1].count == 4
+        user0Results[1].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.now.minusDays(1).toDate())
+        user0Results[1].projectId == proj.projectId
+        user0Results[2].count == 0
+        user0Results[2].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.now.minusDays(2).toDate())
         user0Results[2].projectId == proj.projectId
-        user0Results[3].count == 4
-        user0Results[3].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.now.minusDays(1).toDate())
+        user0Results[3].count == 1
+        user0Results[3].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.now.toDate())
         user0Results[3].projectId == proj2.projectId
+        user0Results[4].count == 4
+        user0Results[4].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.now.minusDays(1).toDate())
+        user0Results[4].projectId == proj2.projectId
+        user0Results[5].count == 0
+        user0Results[5].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.now.minusDays(2).toDate())
+        user0Results[5].projectId == proj2.projectId
 
-        user1Results.size() == 2
+        user1Results.size() == 6
         user1Results[0].count == 1
         user1Results[0].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.now.toDate())
         user1Results[0].projectId == proj.projectId
-        user1Results[1].count == 1
-        user1Results[1].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.now.toDate())
-        user1Results[1].projectId == proj2.projectId
+        user1Results[1].count == 0
+        user1Results[1].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.now.minusDays(1).toDate())
+        user1Results[1].projectId == proj.projectId
+        user1Results[2].count == 0
+        user1Results[2].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.now.minusDays(2).toDate())
+        user1Results[2].projectId == proj.projectId
+
+        user1Results[3].count == 1
+        user1Results[3].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.now.toDate())
+        user1Results[3].projectId == proj2.projectId
+        user1Results[4].count == 0
+        user1Results[4].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.now.minusDays(1).toDate())
+        user1Results[4].projectId == proj2.projectId
+        user1Results[5].count == 0
+        user1Results[5].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.now.minusDays(2).toDate())
+        user1Results[5].projectId == proj2.projectId
     }
 
     def "skill event counts spanning compactDailyEventsOlderThan produces accurate results"() {
@@ -469,12 +494,13 @@ class UserEventSpec extends DefaultIntSpec {
         List<DayCountItem> results = eventService.getUserEventCountsForSkillId(proj.projectId, skill.skillId, queryFrom)
 
         then:
-        results.size() == 2
+        results.size() == 3
         results[0].count == 2
         results[0].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.now.toDate())
         results[1].count == 5200
         results[1].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.now.minusDays(1).toDate())
-
+        results[2].count == 0
+        results[2].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.now.minusDays(2).toDate())
     }
 
     def "subject event counts spanning compactDailyEventsOlderThan produces accurate results"() {
@@ -585,11 +611,13 @@ class UserEventSpec extends DefaultIntSpec {
         List<DayCountItem> results = eventService.getUserEventCountsForSkillId(proj.projectId, subject.subjectId, queryFrom)
 
         then:
-        results.size() == 2
+        results.size() == 3
         results[0].count == 153
         results[0].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.now.toDate())
         results[1].count == 30
         results[1].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.now.minusDays(1).toDate())
+        results[2].count == 0
+        results[2].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.now.minusDays(2).toDate())
     }
 
     def "project distinct user counts spanning compactDailyEventsOlderThan produces accurate results"() {
@@ -698,11 +726,13 @@ class UserEventSpec extends DefaultIntSpec {
         List<DayCountItem> results = eventService.getDistinctUserCountsForProject(proj.projectId, queryFrom)
 
         then:
-        results.size() == 2
+        results.size() == 3
         results[0].count == 3
         results[0].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.now.toDate())
         results[1].count == 2
         results[1].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(dayBefore)
+        results[2].count == 0
+        results[2].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.now.minusDays(2).toDate())
     }
 
     def "subject distinct user counts spanning compactDailyEventsOlderThan produces accurate results"() {
@@ -824,11 +854,13 @@ class UserEventSpec extends DefaultIntSpec {
         List<DayCountItem> results = eventService.getDistinctUserCountForSkillId(proj.projectId, subject.subjectId, queryFrom)
 
         then:
-        results.size() == 2
+        results.size() == 3
         results[0].count == 2
         results[0].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.now.toDate())
         results[1].count == 2
         results[1].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.now.minusDays(1).toDate())
+        results[2].count == 0
+        results[2].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.now.minusDays(2).toDate())
     }
 
     def "skill distinct user counts spanning compactDailyEventsOlderThan produces accurate results"() {
@@ -948,11 +980,13 @@ class UserEventSpec extends DefaultIntSpec {
         List<DayCountItem> results = eventService.getDistinctUserCountForSkillId(proj.projectId, subj1_skill1.skillId, queryFrom)
 
         then:
-        results.size() == 2
+        results.size() == 3
         results[0].count == 2
         results[0].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.now.toDate())
         results[1].count == 3
         results[1].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.now.minusDays(1).toDate())
+        results[2].count == 0
+        results[2].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.now.minusDays(2).toDate())
     }
 
     private static class TestDates {
