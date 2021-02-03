@@ -15,20 +15,20 @@ limitations under the License.
 */
 <template>
   <div>
-    <multiselect v-model="projects.selected"
-                :options="projects.available"
-                label="projectName"
-                :multiple="true"
-                track-by="projectId"
-                :hide-selected="true"
-                :max="5"
-                data-cy="eventHistoryChartProjectSelector"/>
-    <metrics-card class="mt-4" :title="mutableTitle" data-cy="eventHistoryChart">
+    <metrics-card :title="mutableTitle" data-cy="eventHistoryChart">
       <template v-slot:afterTitle>
         <span class="text-muted ml-2">|</span>
         <time-length-selector :options="timeSelectorOptions" @time-selected="updateTimeRange"/>
       </template>
-      <metrics-overlay :loading="loading" :has-data="hasData" no-data-msg="There are no projects selected">
+      <multiselect v-model="projects.selected"
+                  :options="projects.available"
+                  label="projectName"
+                  :multiple="true"
+                  track-by="projectId"
+                  :hide-selected="true"
+                  :max="5"
+                  data-cy="eventHistoryChartProjectSelector"/>
+      <metrics-overlay :loading="loading" :has-data="hasData" :no-data-msg="noDataMessage">
         <apexchart type="line" height="350"
                   :ref="chartId"
                   :options="chartOptions"
@@ -103,7 +103,7 @@ limitations under the License.
             },
             toolbar: {
               autoSelected: 'zoom',
-              offsetY: -52,
+              offsetY: -102,
             },
           },
           dataLabels: {
@@ -146,18 +146,34 @@ limitations under the License.
       };
     },
     mounted() {
-      this.projects.available = this.availableProjects.map((proj) => ({ ...proj }));
+      // assign consistent color and dash array options so they don't change when selecting different projects
+      const colorOptions = ['#2E93fA', '#66DA26', '#546E7A', '#FF9800'];
+      this.projects.available = this.availableProjects.map((proj, idx) => (
+        {
+          ...proj,
+          dashArray: (idx % 4) * 3, // alternate dashArray between 0, 3, 6, 9
+          color: colorOptions[(idx % 4)],
+        }));
       const numProjectsToSelect = Math.min(this.availableProjects.length, 4);
       const availableSortedByMostPoints = this.projects.available.sort((a, b) => b.points - a.points);
       this.projects.selected = availableSortedByMostPoints.slice(0, numProjectsToSelect);
-      // this.loadData();
+      // loadData() is called here because of the watch on `projects.selected`, which is triggered by the assignment above
     },
     computed: {
       enoughOverallProjects() {
         return this.projects.available && this.projects.available.length >= 2;
       },
       enoughProjectsSelected() {
-        return this.projects.selected && this.projects.selected.length >= 2;
+        return this.projects.selected && this.projects.selected.length > 0;
+      },
+      noDataMessage() {
+        if (!this.enoughProjectsSelected) {
+          return 'Please select at least one project from the list above.';
+        }
+        if (this.enoughOverallProjects) {
+          return `No events reported for the selected project${this.projects.selected.length > 1 ? 's' : ''}.`;
+        }
+        return 'There are no projects available.';
       },
     },
     watch: {
@@ -181,28 +197,37 @@ limitations under the License.
       },
       loadData() {
         this.loading = true;
-        MetricsService.loadMyMetrics('allProjectsSkillEventsOverTimeMetricsBuilder', this.props)
-          .then((response) => {
-            if (response && response.length > 0) {
-              this.hasData = true;
-              this.series = response.map((item) => {
-                const ret = {};
-                ret.name = this.projects.available.find(({ projectId }) => projectId === item.project).projectName;
-                ret.data = item.countsByDay.map((it) => [it.timestamp, it.num]);
-                return ret;
-              });
-              // alternate dashArray between 0, 3, 6, 9
-              this.$refs[this.chartId].updateOptions({
-                stroke: {
-                  dashArray: Array(this.series.length).fill().map((_, idx) => (idx % 4) * 3),
-                },
-              });
-            } else {
-              this.series = [];
-              this.hasData = false;
-            }
-            this.loading = false;
-          });
+        if (this.enoughOverallProjects && this.enoughProjectsSelected) {
+          MetricsService.loadMyMetrics('allProjectsSkillEventsOverTimeMetricsBuilder', this.props)
+            .then((response) => {
+              if (response && response.length > 0) {
+                this.hasData = true;
+                this.series = response.map((item) => {
+                  const ret = {};
+                  ret.project = this.projects.available.find(({ projectId }) => projectId === item.project);
+                  ret.name = ret.project.projectName;
+                  ret.data = item.countsByDay.map((it) => [it.timestamp, it.num]);
+                  return ret;
+                });
+                const dashArray = this.series.map((item) => item.project.dashArray);
+                const colors = this.series.map((item) => item.project.color);
+                this.$refs[this.chartId].updateOptions({
+                  stroke: {
+                    dashArray,
+                    colors,
+                  },
+                  colors,
+                });
+              } else {
+                this.series = [];
+                this.hasData = false;
+              }
+              this.loading = false;
+            });
+        } else {
+          this.hasData = false;
+          this.loading = false;
+        }
       },
     },
   };

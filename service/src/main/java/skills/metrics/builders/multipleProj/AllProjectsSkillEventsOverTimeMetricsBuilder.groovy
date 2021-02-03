@@ -63,7 +63,7 @@ class AllProjectsSkillEventsOverTimeMetricsBuilder implements GlobalMetricsBuild
         log.debug("Retrieving event counts for user [{}], start date [{}], projectIds [{}]", userId, startDate, projectIds)
 
         List<ProjResCount> projResCounts = []
-        List<DayCountItem> counts = userEventService.getUserEventCountsForUser(userId, startDate)
+        List<DayCountItem> counts = userEventService.getUserEventCountsForUser(userId, startDate, projectIds)
 
         Map<String, DayCountItem> byProject = counts.groupBy {it.projectId }
         byProject.each {projectId, countsForProject ->

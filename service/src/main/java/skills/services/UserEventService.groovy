@@ -195,16 +195,16 @@ class UserEventService {
      * @return
      */
     @Transactional(readOnly = true)
-    List<DayCountItem> getUserEventCountsForUser(String userId, Date start) {
+    List<DayCountItem> getUserEventCountsForUser(String userId, Date start, List<String> projectIds) {
         EventType eventType = determineAppropriateEventType(start)
 
         List<DayCountItem> results
         if (EventType.DAILY == eventType) {
-            Stream<DayCountItem> stream = userEventsRepo.getEventCountForUser(userId, start, eventType)
+            Stream<DayCountItem> stream = userEventsRepo.getEventCountForUser(userId, start, eventType, projectIds)
             results = convertResults(stream, eventType, start)
         } else {
             start = StartDateUtil.computeStartDate(start, EventType.WEEKLY)
-            Stream<WeekCount> stream = userEventsRepo.getEventCountForUserGroupedByWeek(userId, start)
+            Stream<WeekCount> stream = userEventsRepo.getEventCountForUserGroupedByWeek(userId, start, projectIds)
             results = convertResults(stream, start)
         }
 
