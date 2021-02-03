@@ -566,10 +566,11 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
     }
 
     @Override
-    void createOrUpdateUserEvent(Integer skillRefId, String userId, Date start, String type, Integer count, Integer weekNumber) {
+    void createOrUpdateUserEvent(String projectId, Integer skillRefId, String userId, Date start, String type, Integer count, Integer weekNumber) {
         //start and end date should be consistently formatted for updates to work
         String sql = '''
            INSERT INTO user_events (
+            project_id,
             skill_ref_id, 
             user_id, 
             event_time, 
@@ -578,6 +579,7 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
             week_number
            ) 
            VALUES (
+            :projectId,
             :skillRefId, 
             :userId, 
             :start, 
@@ -588,6 +590,7 @@ where sum.sumUserId = points.user_id and (sum.sumDay = points.day OR (sum.sumDay
         '''
 
         Query query = entityManager.createNativeQuery(sql)
+        query.setParameter("projectId", projectId)
         query.setParameter("skillRefId", skillRefId)
         query.setParameter("userId", userId)
         query.setParameter("start", start)

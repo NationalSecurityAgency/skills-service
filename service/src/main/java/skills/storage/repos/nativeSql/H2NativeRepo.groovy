@@ -747,12 +747,13 @@ class H2NativeRepo implements NativeQueriesRepo {
     }
 
     @Override
-    void createOrUpdateUserEvent(Integer skillRefId, String userId, Date start, String type, Integer count, Integer weekNumber) {
+    void createOrUpdateUserEvent(String projectId, Integer skillRefId, String userId, Date start, String type, Integer count, Integer weekNumber) {
         // find existing event
         String exists = '''
-        SELECT id FROM user_events WHERE skill_ref_id = :skillRefId AND user_id = :userId AND event_Time = :start AND week_number = :weekNumber AND event_type = :type
+        SELECT id FROM user_events WHERE project_id = :projectId AND skill_ref_id = :skillRefId AND user_id = :userId AND event_Time = :start AND week_number = :weekNumber AND event_type = :type
         '''
         Query existsQuery = entityManager.createNativeQuery(exists)
+        existsQuery.setParameter("projectId", projectId)
         existsQuery.setParameter("skillRefId", skillRefId)
         existsQuery.setParameter("userId", userId)
         existsQuery.setParameter("start", start)
@@ -771,6 +772,7 @@ class H2NativeRepo implements NativeQueriesRepo {
         } else {
             String insertSql = '''
             INSERT INTO user_events (
+                project_id,
                 skill_ref_id, 
                 user_id, 
                 event_time, 
@@ -779,6 +781,7 @@ class H2NativeRepo implements NativeQueriesRepo {
                 week_number
             ) 
             VALUES (
+                :projectId,
                 :skillRefId, 
                 :userId, 
                 :start, 
@@ -788,6 +791,7 @@ class H2NativeRepo implements NativeQueriesRepo {
             )
             '''
             Query query = entityManager.createNativeQuery(insertSql)
+            query.setParameter("projectId", projectId)
             query.setParameter("skillRefId", skillRefId)
             query.setParameter("userId", userId)
             query.setParameter("start", start)

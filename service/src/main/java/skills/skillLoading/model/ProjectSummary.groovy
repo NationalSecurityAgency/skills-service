@@ -13,22 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.storage.model
+package skills.skillLoading.model
 
-import groovy.transform.CompileStatic
-import org.springframework.data.jpa.domain.support.AuditingEntityListener
+import groovy.transform.Canonical
 
-import javax.persistence.Entity
-import javax.persistence.EntityListeners
-import javax.persistence.Table
-
-@Entity()
-@Table(name = 'skill_definition')
-@EntityListeners(AuditingEntityListener)
-@CompileStatic
-class SkillDef extends SkillDefParent {
-    static enum ContainerType {
-        Subject, Skill, Badge, GlobalBadge
-    }
-
+@Canonical
+class ProjectSummary {
+    String projectId
+    String projectName
+    int points
+    int totalPoints
+    int level
+    int totalUsers
+    int rank
 }
+

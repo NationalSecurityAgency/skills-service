@@ -29,6 +29,8 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
     @Nullable
     List<ProjDef> findAllByProjectIdIn(List<String> projectIds)
 
+    List<ProjDef> findAll()
+
     void deleteByProjectIdIgnoreCase(String projectId)
 
     @Nullable

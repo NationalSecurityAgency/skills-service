@@ -34,8 +34,10 @@ import javax.persistence.EntityManager
 import javax.persistence.PersistenceContext
 import java.time.DayOfWeek
 import java.time.Duration
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
+import java.time.temporal.TemporalAdjusters
 import java.util.stream.Stream
 
 @Component
@@ -181,6 +183,35 @@ class UserEventService {
     }
 
     /**
+     * Returns the total number of user events for a given user id occurring since the
+     * specified start date. Event counts are returned grouped by day with missing days zero filled.
+     *
+     * If start results in a date older than the compactDailyEventsOlderThan, then results will be
+     * compacted into weekly results with each DayCountItem.start being the start of week date for that
+     * weekly rollup (Sunday).
+     *
+     * @param userId
+     * @param start
+     * @return
+     */
+    @Transactional(readOnly = true)
+    List<DayCountItem> getUserEventCountsForUser(String userId, Date start) {
+        EventType eventType = determineAppropriateEventType(start)
+
+        List<DayCountItem> results
+        if (EventType.DAILY == eventType) {
+            Stream<DayCountItem> stream = userEventsRepo.getEventCountForUser(userId, start, eventType)
+            results = convertResults(stream, eventType, start)
+        } else {
+            start = StartDateUtil.computeStartDate(start, EventType.WEEKLY)
+            Stream<WeekCount> stream = userEventsRepo.getEventCountForUserGroupedByWeek(userId, start)
+            results = convertResults(stream, start)
+        }
+
+        return results
+    }
+
+    /**
      * Returns the distinct user count for the specified project by day, unless start is older than the compactDailyEventsOlderThan
      * setting, in which case results are grouped by week where DayCountItem.start refers to the start-of-week (Sunday) for that week's
      * distinct user counts.
@@ -217,10 +248,10 @@ class UserEventService {
      * @param type
      */
     @Transactional
-    public void recordEvent(Integer skillRefId, String userId, Date date, Integer eventCount = 1, EventType type = EventType.DAILY) {
+    public void recordEvent(String projectId, Integer skillRefId, String userId, Date date, Integer eventCount = 1, EventType type = EventType.DAILY) {
         Date start = StartDateUtil.computeStartDate(date, type)
         Integer weekNumber = WeekNumberUtil.getWeekNumber(start)
-        nativeQueriesRepo.createOrUpdateUserEvent(skillRefId, userId, start, type.toString(), eventCount,  weekNumber)
+        nativeQueriesRepo.createOrUpdateUserEvent(projectId, skillRefId, userId, start, type.toString(), eventCount,  weekNumber)
     }
 
     /**
@@ -239,7 +270,7 @@ class UserEventService {
         Stream<UserEvent> stream = userEventsRepo.findAllByEventTypeAndEventTimeLessThan(EventType.DAILY, dateTime.toDate())
         stream.forEach({ UserEvent userEvent ->
             totalProcessed++
-            recordEvent(userEvent.skillRefId, userEvent.userId, userEvent.eventTime, userEvent.count, EventType.WEEKLY)
+            recordEvent(userEvent.projectId,  userEvent.skillRefId, userEvent.userId, userEvent.eventTime, userEvent.count, EventType.WEEKLY)
             entityManager.detach(userEvent)
             if (totalProcessed % 50000 == 0) {
                 log.info("compacted $totalProcessed daily user events so far")
@@ -260,7 +291,8 @@ class UserEventService {
     @CompileStatic
     private List<DayCountItem> convertResults(Stream<DayCountItem> stream, EventType eventType, Date startOfQueryRange) {
         List<DayCountItem> results = []
-        Date last = StartDateUtil.computeStartDate(new Date(), eventType)
+        Set<String> uniqueProjectIds = []
+        Map<String, Date> lastDates = [:]
         int count = 0;
 
         stream.forEach({
@@ -271,18 +303,23 @@ class UserEventService {
                     it.day = StartDateUtil.computeStartDate(it.day, EventType.WEEKLY)
                 }
             }
-            List<DayCountItem> zeroFills = zeroFillGaps(eventType, last, it.day, count == 0)
+            Date last = lastDates.get(it.projectId) ?: StartDateUtil.computeStartDate(new Date(), eventType)
+            List<DayCountItem> zeroFills = zeroFillGaps(eventType, last, it.day, count == 0, it.projectId)
             if (zeroFills) {
                 results.addAll(zeroFills)
             }
-            last = it.day
+            lastDates.put(it.projectId, it.day)
+            uniqueProjectIds.add(it.projectId)
             results.add(it)
         })
 
         if (results) {
-            List<DayCountItem> zeroFillFromStart = zeroFillGaps(EventType.WEEKLY, last, startOfQueryRange, false)
-            if (zeroFillFromStart) {
-                results.addAll(zeroFillFromStart)
+            for (String projectId : uniqueProjectIds) {
+                Date last = lastDates.get(projectId)
+                List<DayCountItem> zeroFillFromStart = zeroFillGaps(EventType.WEEKLY, last, startOfQueryRange, false, projectId)
+                if (zeroFillFromStart) {
+                    results.addAll(zeroFillFromStart)
+                }
             }
         }
 
@@ -292,51 +329,42 @@ class UserEventService {
     @CompileStatic
     private List<DayCountItem> convertResults(Stream<WeekCount> stream, Date startOfQueryRange) {
         List<DayCountItem> results = []
-        Date last = StartDateUtil.computeStartDate(new Date(), EventType.WEEKLY)
+        Set<String> uniqueProjectIds = []
+        Map<String, Date> lastDates = [:]
         int count = 0;
 
         stream.forEach({
             Date day = WeekNumberUtil.getStartOfWeekFromWeekNumber(it.weekNumber).atStartOfDay().toDate()
-            DayCountItem dci = new DayCountItem(day, it.count)
+            DayCountItem dci = new DayCountItem(it.projectId, day, it.count)
 
-            List<DayCountItem> zeroFills = zeroFillGaps(EventType.WEEKLY, last, dci.day, count == 0)
+            Date last = lastDates.get(it.projectId) ?: StartDateUtil.computeStartDate(new Date(), EventType.WEEKLY)
+            List<DayCountItem> zeroFills = zeroFillGaps(EventType.WEEKLY, last, dci.day, count == 0, it.projectId)
             if (zeroFills) {
                 results.addAll(zeroFills)
             }
-            last = dci.day
+            lastDates.put(it.projectId, dci.day)
+            uniqueProjectIds.add(it.projectId)
             results.add(dci)
         })
 
         if (results) {
-            List<DayCountItem> zeroFillFromStart = zeroFillGaps(EventType.WEEKLY, last, startOfQueryRange, false)
-            if (zeroFillFromStart) {
-                results.addAll(zeroFillFromStart)
+            for (String projectId : uniqueProjectIds) {
+                Date last = lastDates.get(projectId)
+                List<DayCountItem> zeroFillFromStart = zeroFillGaps(EventType.WEEKLY, last, startOfQueryRange, false, projectId)
+                if (zeroFillFromStart) {
+                    results.addAll(zeroFillFromStart)
+                }
             }
         }
 
         return results
     }
 
-    @CompileStatic
-    private List<DayCountItem> fillGaps(List<DayCountItem> items, EventType eventType) {
-        Date last = StartDateUtil.computeStartDate(new Date(), eventType)
-        List<DayCountItem> zeroFilled = []
-
-        items.eachWithIndex{ DayCountItem entry, int i ->
-            List<DayCountItem> zeroFills = zeroFillGaps(eventType, last, entry.day, i == 0)
-            if (zeroFills) {
-                zeroFilled.addAll(zeroFills)
-            }
-            last = entry.day
-            zeroFilled.add(entry)
-        }
-    }
-
-    private static List<DayCountItem> zeroFillGaps(EventType eventType, Date n, Date nMinusOne, boolean inclusive) {
+    private static List<DayCountItem> zeroFillGaps(EventType eventType, Date n, Date nMinusOne, boolean inclusive, String projectId) {
         if (EventType.DAILY == eventType) {
-            return ZeroFillDayCountItemUtil.zeroFillDailyGaps(n, nMinusOne, inclusive)
+            return ZeroFillDayCountItemUtil.zeroFillDailyGaps(n, nMinusOne, inclusive, projectId)
         } else if (EventType.WEEKLY == eventType) {
-            return ZeroFillDayCountItemUtil.zeroFillWeeklyGaps(n, nMinusOne, inclusive)
+            return ZeroFillDayCountItemUtil.zeroFillWeeklyGaps(n, nMinusOne, inclusive, projectId)
         } else {
             throw new SkillException("Unrecognized EventType [${eventType}]")
         }
@@ -345,7 +373,7 @@ class UserEventService {
     private EventType determineAppropriateEventType(Date start) {
         EventType eventType = EventType.DAILY
 
-        if (start.toLocalDateTime().isBefore(LocalDateTime.now().minusDays(maxDailyDays))) {
+        if (start.toLocalDateTime().isBefore(LocalDate.now().atStartOfDay().minusDays(maxDailyDays))) {
             eventType = EventType.WEEKLY
         }
 

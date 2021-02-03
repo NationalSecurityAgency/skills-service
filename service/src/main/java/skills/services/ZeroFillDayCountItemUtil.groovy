@@ -31,8 +31,8 @@ class ZeroFillDayCountItemUtil {
      * @param nInclusive if true, n will be potentially included as a zero filled date
      * @return
      */
-    public static List<DayCountItem> zeroFillDailyGaps(Date n, Date nMinusOne, boolean nInclusive) {
-        return zeroFillGaps(true, n, nMinusOne, nInclusive)
+    public static List<DayCountItem> zeroFillDailyGaps(Date n, Date nMinusOne, boolean nInclusive, String projectId=null) {
+        return zeroFillGaps(true, n, nMinusOne, nInclusive, projectId)
     }
 
     /**
@@ -50,11 +50,11 @@ class ZeroFillDayCountItemUtil {
      * @param nInclusive if true, n will be potentially included as a zero filled date
      * @return
      */
-    public static List<DayCountItem> zeroFillWeeklyGaps(Date n, Date nMinusOne, boolean nInclusive) {
-        return zeroFillGaps(false, n, nMinusOne, nInclusive)
+    public static List<DayCountItem> zeroFillWeeklyGaps(Date n, Date nMinusOne, boolean nInclusive, String projectId=null) {
+        return zeroFillGaps(false, n, nMinusOne, nInclusive, projectId)
     }
 
-    private static List<DayCountItem> zeroFillGaps(boolean daily, Date n, Date nMinusOne, boolean nInclusive) {
+    private static List<DayCountItem> zeroFillGaps(boolean daily, Date n, Date nMinusOne, boolean nInclusive, String projectId=null) {
         def nMinusOneLd = nMinusOne.toLocalDate()
         def nLd = n.toLocalDate()
         long daysBetween = ChronoUnit.DAYS.between(nMinusOneLd, nLd)
@@ -66,7 +66,7 @@ class ZeroFillDayCountItemUtil {
             LocalDateTime ldt = n.toLocalDateTime()
             for (int i = startAt; i < daysBetween; i++) {
                 Date fill = ldt.minusDays(i).toDate()
-                fills.add(new DayCountItem(fill, 0))
+                fills.add(new DayCountItem(projectId, fill, 0))
             }
         } else if (!daily && daysBetween > 7){
             // since we force the start date to be based on start of week this should work cleanly
@@ -75,7 +75,7 @@ class ZeroFillDayCountItemUtil {
             LocalDateTime ldt = n.toLocalDateTime()
             for (int i = startAt; i < fillWeeks; i++) {
                 Date fill = ldt.minusWeeks(i).toDate()
-                fills.add(new DayCountItem(fill, 0))
+                fills.add(new DayCountItem(projectId, fill, 0))
             }
         }
 

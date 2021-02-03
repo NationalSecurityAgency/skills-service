@@ -83,7 +83,7 @@ class BenchmarkTransactionUserEventSpec extends DefaultIntSpec {
             rawId = skillDefRepo.findByProjectIdAndSkillIdAndType(projectId, skillId, SkillDef.ContainerType.Skill).id
             skillIdCache.put(skillId, rawId)
         }
-        eventService.recordEvent(rawId, userId, date, 1)
+        eventService.recordEvent(projectId, rawId, userId, date, 1)
     }
 
     List<ProjectContainer> populateData(){

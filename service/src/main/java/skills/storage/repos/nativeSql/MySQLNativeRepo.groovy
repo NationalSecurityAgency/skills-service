@@ -182,7 +182,7 @@ class MySQLNativeRepo implements NativeQueriesRepo {
     }
 
     @Override
-    void createOrUpdateUserEvent(Integer skillRefId, String userId, Date start, String type, Integer count, Integer weekNumber) {
+    void createOrUpdateUserEvent(String projectId, Integer skillRefId, String userId, Date start, String type, Integer count, Integer weekNumber) {
         throw new UnsupportedOperationException("Sorry!")
     }
 }

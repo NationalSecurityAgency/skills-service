@@ -13,15 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.storage.model;
+package skills.storage.model
 
-import java.util.Date;
-
-public class DayCountItem {
+class DayCountItem {
     Date day
     Long count
+    String projectId // optional, used when counting items for multiple projects in the same query
 
-    public DayCountItem(Date day, Long count){
+    DayCountItem(Date day, Long count){
+        this.day = day
+        this.count = count
+    }
+
+    DayCountItem(String projectId, Date day, Long count){
+        this.projectId = projectId
         this.day = day
         this.count = count
     }

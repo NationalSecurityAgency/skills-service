@@ -14,34 +14,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div class="inception-container">
-    <skills-display
-      :options="options"
-      :version="skillsVersion"/>
+  <div>
+    <router-view/>
   </div>
 </template>
 
 <script>
-  import { SkillsDisplay } from '@skilltree/skills-client-vue';
-  import SkillsDisplayOptionsMixin from '../mySkills/SkillsDisplayOptionsMixin';
-
   export default {
-    name: 'InceptionSkills',
-    mixins: [SkillsDisplayOptionsMixin],
-    components: {
-      SkillsDisplay,
-    },
-    data() {
-      return {
-        projectId: 'Inception',
-        skillsVersion: 0,
-      };
-    },
+    name: 'MySkills',
   };
 </script>
 
 <style scoped>
-.inception-container {
-  min-height: calc(100vh - 80px);;
-}
+
 </style>

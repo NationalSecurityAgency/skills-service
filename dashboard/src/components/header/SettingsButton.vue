@@ -20,6 +20,12 @@ limitations under the License.
       <span class="d-inline-block text-truncate userName ml-1 font-weight-bold" aria-hidden="true">{{ displayName }}</span>
       <span class="sr-only">settings menu</span>
     </template>
+    <b-dropdown-item href="#"  @click="gotoMySkills">
+      <span class="text-gray-700"> <i class="fas fa-chart-bar" aria-hidden="true"/><span class="link-name">My Skills</span></span>
+    </b-dropdown-item>
+    <b-dropdown-item href="#"  @click="gotoAdmin">
+      <span class="text-gray-700"> <i class="fas fa-tasks" aria-hidden="true"/><span class="link-name">Admin</span></span>
+    </b-dropdown-item>
     <b-dropdown-item href="#"  @click="gotoSettings">
       <span class="text-gray-700"> <i class="fas fa-cog" aria-hidden="true"/><span class="link-name">Settings</span></span>
     </b-dropdown-item>
@@ -64,6 +70,12 @@ limitations under the License.
     methods: {
       gotoSettings() {
         this.$router.push({ name: 'GeneralSettings' });
+      },
+      gotoAdmin() {
+        this.$router.push({ name: 'HomePage' });
+      },
+      gotoMySkills() {
+        this.$router.push({ name: 'MySkillsPage' });
       },
       signOut() {
         this.$store.dispatch('logout');
