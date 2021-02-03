@@ -525,18 +525,27 @@ class UserEventSpec extends DefaultIntSpec {
         List<DayCountItem> user1Results = eventService.getUserEventCountsForUser(userIds[1], queryFrom, projectIds)
 
         then:
-        user0Results.size() == 2
+        user0Results.size() == 3
         user0Results[0].count == 1
         user0Results[0].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.now.toDate())
         user0Results[0].projectId == proj.projectId
         user0Results[1].count == 4
         user0Results[1].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.now.minusDays(1).toDate())
         user0Results[1].projectId == proj.projectId
+        user0Results[2].count == 0
+        user0Results[2].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.now.minusDays(2).toDate())
+        user0Results[2].projectId == proj.projectId
 
-        user1Results.size() == 1
+        user1Results.size() == 3
         user1Results[0].count == 1
         user1Results[0].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.now.toDate())
         user1Results[0].projectId == proj.projectId
+        user1Results[1].count == 0
+        user1Results[1].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.now.minusDays(1).toDate())
+        user1Results[1].projectId == proj.projectId
+        user1Results[2].count == 0
+        user1Results[2].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.now.minusDays(2).toDate())
+        user1Results[2].projectId == proj.projectId
     }
 
     def "skill event counts spanning compactDailyEventsOlderThan produces accurate results"() {
