@@ -180,10 +180,14 @@ describe('Navigation Tests', () => {
         cy.loginBySingleSignOn()
       }
     });
+
+    cy.intercept('/api/metrics/allProjectsSkillEventsOverTimeMetricsBuilder**').as('allSkillEventsForUser');
   })
+
 
   it('visit mySkills page', function () {
     cy.visit('/my-skills');
+    cy.wait('@allSkillEventsForUser');
 
     // data-cy="breadcrumb-MySkills"
     cy.get('[data-cy=breadcrumb-MySkills]').contains('MySkills').should('be.visible');
@@ -234,6 +238,7 @@ describe('Navigation Tests', () => {
 
     cy.loginAsProxyUser();
     cy.visit('/my-skills');
+    cy.wait('@allSkillEventsForUser');
 
     cy.get('[data-cy=numProjectsContributed]').contains(new RegExp(/^2$/));
     cy.get('[data-cy=numProjectsAvailable]').contains(new RegExp(/^\/ 2$/));
@@ -248,6 +253,7 @@ describe('Navigation Tests', () => {
 
     cy.loginAsProxyUser();
     cy.visit('/my-skills');
+    cy.wait('@allSkillEventsForUser');
 
     cy.get('[data-cy=numProjectsContributed]').contains(new RegExp(/^1$/));
     cy.get('[data-cy=numProjectsAvailable]').contains(new RegExp(/^\/ 3$/));
@@ -255,18 +261,15 @@ describe('Navigation Tests', () => {
   });
 
   it('mySkills page - time controls call out to the server',() => {
-    cy
-      .intercept('/api/metrics/allProjectsSkillEventsOverTimeMetricsBuilder**')
-      .as('allskillEventsForUSer');
 
     cy.visit('/my-skills');
-    cy.wait('@allskillEventsForUSer');
+    cy.wait('@allSkillEventsForUser');
 
     cy.get('[data-cy=eventHistoryChart] [data-cy=timeLengthSelector]').contains('6 months').click();
-    cy.wait('@allskillEventsForUSer');
+    cy.wait('@allSkillEventsForUser');
 
     cy.get('[data-cy=eventHistoryChart] [data-cy=timeLengthSelector]').contains('1 year').click();
-    cy.wait('@allskillEventsForUSer');
+    cy.wait('@allSkillEventsForUser');
   });
 
   it('mySkills page - add/remove projects in event history chart',() => {
@@ -286,6 +289,7 @@ describe('Navigation Tests', () => {
 
     cy.loginAsProxyUser();
     cy.visit('/my-skills');
+    cy.wait('@allSkillEventsForUser');
 
     // validate 4 projects are loaded by default
     cy.get('[data-cy=eventHistoryChart]').contains('Inception').should('be.visible');
