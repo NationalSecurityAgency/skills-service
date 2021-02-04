@@ -224,7 +224,7 @@ describe('Navigation Tests', () => {
     cy.wrapIframe().contains('Overall Points');
   });
 
-  it('visit mySkills page all projects contributed', function () {
+  it('mySkills page - contributed to all projects', function () {
     // add a skill to Inception to have contributed to all projects
     cy.loginAsRootUser();
     cy.request('POST', `/api/projects/Inception/skills/VisitUserSettings`, {
@@ -240,7 +240,7 @@ describe('Navigation Tests', () => {
     cy.get('[data-cy=info-snap-footer]').contains('Congratulations, you have contributed to all available projects!');
   });
 
-  it('visit mySkills page more than one project not contributed', function () {
+  it('mySkills page - not contributed to more than one project', function () {
     cy.request('POST', '/app/projects/proj2', {
       projectId: 'proj2',
       name: 'Project 2'
@@ -252,6 +252,82 @@ describe('Navigation Tests', () => {
     cy.get('[data-cy=numProjectsContributed]').contains(new RegExp(/^1$/));
     cy.get('[data-cy=numProjectsAvailable]').contains(new RegExp(/^\/ 3$/));
     cy.get('[data-cy=info-snap-footer]').contains('It\'s fun to learn! You still have 2 projects to explore.');
+  });
+
+  it('mySkills page - time controls call out to the server',() => {
+    cy
+      .intercept('/api/metrics/allProjectsSkillEventsOverTimeMetricsBuilder**')
+      .as('allskillEventsForUSer');
+
+    cy.visit('/my-skills');
+    cy.wait('@allskillEventsForUSer');
+
+    cy.get('[data-cy=eventHistoryChart] [data-cy=timeLengthSelector]').contains('6 months').click();
+    cy.wait('@allskillEventsForUSer');
+
+    cy.get('[data-cy=eventHistoryChart] [data-cy=timeLengthSelector]').contains('1 year').click();
+    cy.wait('@allskillEventsForUSer');
+  });
+
+  it('mySkills page - add/remove projects in event history chart',() => {
+    // create 5 projects total (including Inception)
+    cy.request('POST', '/app/projects/proj2', {
+      projectId: 'proj2',
+      name: 'Project 2'
+    });
+    cy.request('POST', '/app/projects/proj3', {
+      projectId: 'proj3',
+      name: 'Project 3'
+    });
+    cy.request('POST', '/app/projects/proj4', {
+      projectId: 'proj4',
+      name: 'Project 4'
+    });
+
+    cy.loginAsProxyUser();
+    cy.visit('/my-skills');
+
+    // validate 4 projects are loaded by default
+    cy.get('[data-cy=eventHistoryChart]').contains('Inception').should('be.visible');
+    cy.get('[data-cy=eventHistoryChart]').contains('Project 1').should('be.visible');
+    cy.get('[data-cy=eventHistoryChart]').contains('Project 2').should('be.visible');
+    cy.get('[data-cy=eventHistoryChart]').contains('Project 3').should('be.visible');
+    cy.get('[data-cy=eventHistoryChart]').contains('Project 4').should('not.be.visible');
+
+    // remove a project
+    cy.get('[data-cy=eventHistoryChartProjectSelector]  .multiselect__tag-icon').should('have.length', 4).as('removeBtns');
+    cy.get('@removeBtns').eq(2).click()
+    cy.get('[data-cy=eventHistoryChart]').contains('Inception').should('be.visible');
+    cy.get('[data-cy=eventHistoryChart]').contains('Project 1').should('be.visible');
+    cy.get('[data-cy=eventHistoryChart]').contains('Project 2').should('not.be.visible');
+    cy.get('[data-cy=eventHistoryChart]').contains('Project 3').should('be.visible');
+    cy.get('[data-cy=eventHistoryChart]').contains('Project 4').should('not.be.visible');
+
+    // add a project
+    cy.get('[data-cy=eventHistoryChartProjectSelector]').click()
+    cy.get('[data-cy=eventHistoryChartProjectSelector]').contains('Project 4').click()
+    cy.get('[data-cy=eventHistoryChart]').contains('Inception').should('be.visible');
+    cy.get('[data-cy=eventHistoryChart]').contains('Project 1').should('be.visible');
+    cy.get('[data-cy=eventHistoryChart]').contains('Project 2').should('not.be.visible');
+    cy.get('[data-cy=eventHistoryChart]').contains('Project 3').should('be.visible');
+    cy.get('[data-cy=eventHistoryChart]').contains('Project 4').should('be.visible');
+
+    // allows up to 5 projects
+    cy.get('[data-cy=eventHistoryChartProjectSelector]').click()
+    cy.get('[data-cy=eventHistoryChartProjectSelector]').contains('Project 2').click()
+    cy.get('[data-cy=eventHistoryChart]').contains('Inception').should('be.visible');
+    cy.get('[data-cy=eventHistoryChart]').contains('Project 1').should('be.visible');
+    cy.get('[data-cy=eventHistoryChart]').contains('Project 2').should('be.visible');
+    cy.get('[data-cy=eventHistoryChart]').contains('Project 3').should('be.visible');
+    cy.get('[data-cy=eventHistoryChart]').contains('Project 4').should('be.visible');
+    cy.get('[data-cy=eventHistoryChartProjectSelector]').click()
+    cy.get('[data-cy=eventHistoryChartProjectSelector]').contains('Maximum of 5 options selected');
+
+    // remove all 5 projects
+    for (let i=0; i<5; i+= 1) {
+      cy.get('@removeBtns').eq(0).click()
+    }
+    cy.get('[data-cy=eventHistoryChart]').contains('Please select at least one project from the list above.');
   });
 
 });
