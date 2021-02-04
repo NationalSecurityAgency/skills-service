@@ -195,17 +195,17 @@ class UserEventService {
      * @return
      */
     @Transactional(readOnly = true)
-    List<DayCountItem> getUserEventCountsForUser(String userId, Date start) {
+    List<DayCountItem> getUserEventCountsForUser(String userId, Date start, List<String> projectIds) {
         EventType eventType = determineAppropriateEventType(start)
 
         List<DayCountItem> results
         if (EventType.DAILY == eventType) {
-            Stream<DayCountItem> stream = userEventsRepo.getEventCountForUser(userId, start, eventType)
-            results = convertResults(stream, eventType, start)
+            Stream<DayCountItem> stream = userEventsRepo.getEventCountForUser(userId, start, eventType, projectIds)
+            results = convertResults(stream, eventType, start, projectIds)
         } else {
             start = StartDateUtil.computeStartDate(start, EventType.WEEKLY)
-            Stream<WeekCount> stream = userEventsRepo.getEventCountForUserGroupedByWeek(userId, start)
-            results = convertResults(stream, start)
+            Stream<WeekCount> stream = userEventsRepo.getEventCountForUserGroupedByWeek(userId, start, projectIds)
+            results = convertResults(stream, start, projectIds)
         }
 
         return results
@@ -289,8 +289,11 @@ class UserEventService {
     }
 
     @CompileStatic
-    private List<DayCountItem> convertResults(Stream<DayCountItem> stream, EventType eventType, Date startOfQueryRange) {
-        Map<String, PerProjectCounts> perProjectCounts = [:]
+    private List<DayCountItem> convertResults(Stream<DayCountItem> stream, EventType eventType, Date startOfQueryRange, List<String> projectIds=[]) {
+        // initialize counts for all passed in project id's so there will be zero counts added for projects with no events yet
+        Map<String, PerProjectCounts> perProjectCounts = projectIds.collectEntries {projectId ->
+            [projectId, new PerProjectCounts(lastDate: StartDateUtil.computeStartDate(new Date(), eventType))]
+        }
 
         stream.forEach({
             PerProjectCounts perProject = perProjectCounts.get(it.projectId)
@@ -329,8 +332,11 @@ class UserEventService {
     }
 
     @CompileStatic
-    private List<DayCountItem> convertResults(Stream<WeekCount> stream, Date startOfQueryRange) {
-        Map<String, PerProjectCounts> perProjectCounts = [:]
+    private List<DayCountItem> convertResults(Stream<WeekCount> stream, Date startOfQueryRange, List<String> projectIds=[]) {
+        // initialize counts for all passed in project id's so there will be zero counts added for projects with no events yet
+        Map<String, PerProjectCounts> perProjectCounts = projectIds.collectEntries {projectId ->
+            [projectId, new PerProjectCounts(lastDate: StartDateUtil.computeStartDate(new Date(), EventType.WEEKLY))]
+        }
 
         stream.forEach({
             Date day = WeekNumberUtil.getStartOfWeekFromWeekNumber(it.weekNumber).atStartOfDay().toDate()

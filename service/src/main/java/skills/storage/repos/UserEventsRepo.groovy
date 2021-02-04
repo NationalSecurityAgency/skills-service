@@ -136,19 +136,19 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
 
     @Query(value="""
         select new skills.storage.model.DayCountItem(ue.projectId, ue.eventTime, sum(ue.count)) from UserEvent ue
-        where ue.eventTime > :start AND ue.eventType = :type AND ue.userId = :userId
+        where ue.eventTime > :start AND ue.eventType = :type AND ue.userId = :userId AND ue.projectId in (:projectIds)
         group by ue.projectId, ue.eventTime 
         order by ue.eventTime desc
     """)
-    Stream<DayCountItem> getEventCountForUser(@Param("userId") String userId, @Param("start") Date start, @Param("type") EventType type)
+    Stream<DayCountItem> getEventCountForUser(@Param("userId") String userId, @Param("start") Date start, @Param("type") EventType type, @Param("projectIds") List<String> projectIds)
 
     @Query(value="""
         select new skills.storage.model.WeekCount(ue.projectId, ue.weekNumber, sum(ue.count)) from UserEvent ue
-        where ue.eventTime >= :start AND ue.userId = :userId
+        where ue.eventTime >= :start AND ue.userId = :userId AND ue.projectId in (:projectIds)
         group by ue.projectId, ue.weekNumber
         order by ue.weekNumber desc
     """)
-    Stream<WeekCount> getEventCountForUserGroupedByWeek(@Param("userId") String userId, @Param("start") Date start)
+    Stream<WeekCount> getEventCountForUserGroupedByWeek(@Param("userId") String userId, @Param("start") Date start, @Param("projectIds") List<String> projectIds)
 
 
     @Query(value="""

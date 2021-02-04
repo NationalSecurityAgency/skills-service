@@ -31,7 +31,7 @@ limitations under the License.
     </b-row>
     <b-row class="my-4">
       <b-col class="charts-content">
-        <event-history-chart v-if="!loading" :projects="projects"></event-history-chart>
+        <event-history-chart v-if="!loading" :availableProjects="projects"></event-history-chart>
       </b-col>
     </b-row>
     <b-row class="my-4">
