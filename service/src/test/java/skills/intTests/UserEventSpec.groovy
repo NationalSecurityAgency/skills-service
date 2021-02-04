@@ -400,7 +400,7 @@ class UserEventSpec extends DefaultIntSpec {
 
         TestDates testDates = new TestDates()
 
-        skillsService.addSkill(skill, userIds[0], testDates.now.toDate())
+        skillsService.addSkill(skill, userIds[0], testDates.now.minusDays(1).toDate())
         skillsService.addSkill(skill, userIds[1], testDates.now.toDate())
         skillsService.addSkill(skill2, userIds[0], testDates.now.toDate())
         skillsService.addSkill(skill2, userIds[1], testDates.now.toDate())
@@ -424,14 +424,16 @@ class UserEventSpec extends DefaultIntSpec {
         List<String> projectIds = [proj.projectId, proj2.projectId]
         Date queryFrom = testDates.now.toLocalDate().atStartOfDay().minusDays(maxDailyDays).toDate()
         List<DayCountItem> user0Results = eventService.getUserEventCountsForUser(userIds[0], queryFrom, projectIds)
+        user0Results = user0Results.sort{it.projectId+(Long.MAX_VALUE-it.day.time)}
         List<DayCountItem> user1Results = eventService.getUserEventCountsForUser(userIds[1], queryFrom, projectIds)
+        user1Results = user1Results.sort {it.projectId +(Long.MAX_VALUE-it.day.time)}
 
         then:
         user0Results.size() == 6
-        user0Results[0].count == 1
+        user0Results[0].count == 0
         user0Results[0].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.now.toDate())
         user0Results[0].projectId == proj.projectId
-        user0Results[1].count == 4
+        user0Results[1].count == 5
         user0Results[1].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.now.minusDays(1).toDate())
         user0Results[1].projectId == proj.projectId
         user0Results[2].count == 0
