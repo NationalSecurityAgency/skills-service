@@ -205,7 +205,7 @@ class UserEventService {
         } else {
             start = StartDateUtil.computeStartDate(start, EventType.WEEKLY)
             Stream<WeekCount> stream = userEventsRepo.getEventCountForUserGroupedByWeek(userId, start, projectIds)
-            results = convertResults(stream, start)
+            results = convertResults(stream, start, projectIds)
         }
 
         return results
