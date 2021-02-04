@@ -16,7 +16,7 @@ limitations under the License.
 <template>
   <div>
     <div class="row pt-2">
-      <div class="col-auto text-left">
+      <div class="col-auto text-left skills-page-title-text-color">
         <div class="btn-group" role="group" aria-label="Basic example">
           <a v-if="skillInternal.description && skillInternal.description.href" :href="skillInternal.description.href" target="_blank" rel="noopener" class="btn btn-outline-info ">
             <i class="fas fa-question-circle"></i> Learn More <i class="fas fa-external-link-alt"></i>

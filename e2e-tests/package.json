@@ -22,7 +22,7 @@
     "cy:run:accessibility": "TZ=UTC npm run licenseCheck && cypress run --config experimentalRunEvents=true --browser chrome --headless --spec \"cypress/integration/accessibility*.js,cypress/integration/client-display/client-display_accessibility.js\"",
     "cy:run:dev": "TZ=UTC cypress run --config baseUrl=http://localhost:8082",
     "cy:run:dev:metrics": "TZ=UTC cypress run --config baseUrl=http://localhost:8082 --spec \"cypress/integration/metris/*.js\"",
-    "cy:run:dev:clientDisplay": "TZ=UTC cypress run --config baseUrl=http://localhost:8082 --spec \"cypress/integration/client-display/client-display-self_report_skills_spec.js\"",
+    "cy:run:dev:clientDisplay": "TZ=UTC cypress run --config baseUrl=http://localhost:8082 --spec \"cypress/integration/client-display/client-display-theme*.js\"",
     "cy:run:dev:accessibility": "TZ=UTC cypress run --browser chrome --headless --config baseUrl=http://localhost:8082 --spec cypress/integration/accessibility*.js",
     "cy:run:dev:postgres": "TZ=UTC cypress run --config baseUrl=http://localhost:8082 --env db=postgres",
     "cy:run:dev:oauth": "TZ=UTC cypress run --config baseUrl=http://localhost:8082 --env oauthMode=true",
@@ -66,7 +66,7 @@
   },
   "devDependencies": {
     "@bahmutov/print-env": "2.1.2",
-    "cypress": "6.2.0",
+    "cypress": "6.4.0",
     "cypress-file-upload": "4.1.1",
     "cypress-image-snapshot": "4.0.1",
     "dayjs": "1.9.6",

@@ -266,6 +266,7 @@ describe('Client Display Tests', () => {
 
         cy.get('[data-cy=achievementDate]').contains(`Achieved on ${orig.format("MMMM Do YYYY")}`);
         cy.get('[data-cy=achievementDate]').contains(`${orig.fromNow()}`);
+        cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]').contains('500');
 
         cy.matchImageSnapshot(`Skill-Overview-Achieved`, snapshotOptions);
 
@@ -275,6 +276,7 @@ describe('Client Display Tests', () => {
 
         cy.get('[data-cy=achievementDate]').contains(`Achieved on ${orig.format("MMMM Do YYYY")}`);
         cy.get('[data-cy=achievementDate]').contains(`${orig.fromNow()}`);
+        cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]').contains('500');
 
         cy.matchImageSnapshot(`Skill-Overview-Achieved-Themed`, snapshotOptions);
 
@@ -286,6 +288,7 @@ describe('Client Display Tests', () => {
 
         cy.get('[data-cy=achievementDate]').contains(`Achieved on ${orig.format("MMMM Do YYYY")}`);
         cy.get('[data-cy=achievementDate]').contains(`${orig.fromNow()}`);
+        cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]').contains('500');
 
         cy.matchImageSnapshot(`Skill-Overview-Achieved-iphone6`, snapshotOptions);
 
@@ -297,6 +300,7 @@ describe('Client Display Tests', () => {
 
         cy.get('[data-cy=achievementDate]').contains(`Achieved on ${orig.format("MMMM Do YYYY")}`);
         cy.get('[data-cy=achievementDate]').contains(`${orig.fromNow()}`);
+        cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]').contains('500');
 
         cy.matchImageSnapshot(`Skill-Overview-Achieved-ipad2`, snapshotOptions);
 

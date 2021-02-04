@@ -34,6 +34,7 @@ limitations under the License.
                 <div v-if="skillsInternal && skillsInternal.length > 0">
                   <div v-for="(skill, index) in skillsInternal"
                        :key="`unique-skill-old-${index}`"
+                       class="skills-theme-bottom-border-with-background-color"
                        :class="{
                          'separator-border-thick' : showDescriptionsInternal,
                          'border-bottom' : (index + 1) !== skillsInternal.length
@@ -54,12 +55,15 @@ limitations under the License.
             </div>
         </div>
 
-        <div v-if="skillsInternal && skillsInternal.length > 0" class="card-footer">
+        <div v-if="skillsInternal && skillsInternal.length > 0" class="card-footer skills-page-title-text-color">
             <div class="row">
-                <div class="col">
-                        <span v-if="helpTipHref" class="float-left text-muted">
-                            Need help? <a :href="helpTipHref" target="_blank" rel="noopener">Click here!</a>
-                        </span>
+                <div class="col text-right">
+                  <span v-if="helpTipHref">
+                    Need Help?
+                    <a :href="helpTipHref" target="_blank" rel="noopener" class="">
+                      Click here <i class="fas fa-external-link-alt"></i>
+                    </a>
+                  </span>
                 </div>
             </div>
         </div>
@@ -139,7 +143,7 @@ limitations under the License.
 
 <style scoped>
 .separator-border-thick {
-  border-bottom-color: #f7f7f7 !important;
+  /*border-bottom-color: #f7f7f7 !important;*/
   border-bottom-width: 12px !important;
 }
 </style>
