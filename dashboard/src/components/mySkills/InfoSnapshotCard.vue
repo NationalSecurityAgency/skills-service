@@ -16,7 +16,7 @@ limitations under the License.
 <template>
   <b-card body-class="p-0 d-flex flex-column">
     <div class="flex-grow-1">
-      <b-row class="justify-content-between no-gutters px-3 pt-3 pb-0" >
+      <b-row class="justify-content-between no-gutters pl-3 mr-2 pt-3 pb-0">
         <b-col cols="5">
           <div class="text-uppercase text-secondary">Projects</div>
           <div class="mt-2 ml-1 text-dark">
@@ -30,8 +30,8 @@ limitations under the License.
     </div>
     <b-row class="justify-content-between no-gutters border-top text-muted small">
       <b-col class="p-2">
-        <span v-if="projectsNotContributedToYet > 0" data-cy="info-snap-footer">It's fun to learn! You still have <b-badge variant="info">{{ projectsNotContributedToYet }}</b-badge> project{{ projectsNotContributedToYet > 1 ? 's' : ''}} to explore.</span>
-        <span v-else data-cy="info-snap-footer">Congratulations, you have contributed to all available projects!</span>
+        <span v-if="projectsNotContributedToYet > 0" data-cy="info-snap-footer">You still have <b-badge variant="info">{{ projectsNotContributedToYet }}</b-badge> project{{ projectsNotContributedToYet > 1 ? 's' : ''}} to explore.</span>
+        <span v-else data-cy="info-snap-footer" class="text-nowrap">Great job, you have contributed to all projects!</span>
       </b-col>
     </b-row>
   </b-card>

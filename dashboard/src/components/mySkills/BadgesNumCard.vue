@@ -16,7 +16,7 @@ limitations under the License.
 <template>
   <b-card body-class="p-0 d-flex flex-column">
     <div class="flex-grow-1">
-      <b-row class="justify-content-between no-gutters px-3 pt-3 pb-1">
+      <b-row class="justify-content-between no-gutters px-3 pt-3 pb-1 mr-3">
         <b-col cols="5">
           <div class="text-uppercase text-secondary">Badges</div>
           <div class="mt-2 ml-1 text-dark">
@@ -25,7 +25,7 @@ limitations under the License.
           <div><b-badge variant="info" data-cy="numAchievedGlobalBadges">Global Badges: {{ numAchievedGlobalBadges }}</b-badge></div>
           <div><b-badge variant="info" data-cy="numAchievedGemBadges">Gems: {{ numAchievedGemBadges }}</b-badge></div>
         </b-col>
-        <b-col cols="7" style="font-size: 4.6rem;" class="text-right mb-4">
+        <b-col cols="7" style="font-size: 4.4rem;" class="text-right mb-4">
   <!--        <i class="fas fa-trophy"/>-->
           <span class="fa-stack">
             <i class="fas fa-circle fa-stack-2x text-header"></i>
