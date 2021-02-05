@@ -49,6 +49,7 @@ limitations under the License.
       return {
         items: [],
         idsToExcludeFromPath: ['subjects', 'skills', 'projects'],
+        keysToExcludeFromPath: ['my-skills'],
       };
     },
     mounted() {
@@ -77,7 +78,9 @@ limitations under the License.
             }
 
             if (key) {
-              newItems.push(this.buildResItem(key, value, res, index));
+              if (!this.shouldExcludeKey(key)) {
+                newItems.push(this.buildResItem(key, value, res, index));
+              }
               key = null;
             } else {
               // must exclude items in the path because each page with navigation
@@ -87,7 +90,7 @@ limitations under the License.
               // '/projects/projectId/subjects/subjectId/stats we must end up with:
               //    'projects / project:projectId / subject:subjectId / stats'
               // notice that 'subjects' is missing
-              if (!this.shouldExclude(value)) {
+              if (!this.shouldExcludeValue(value)) {
                 newItems.push(this.buildResItem(key, value, res, index));
               }
               key = value;
@@ -125,8 +128,11 @@ limitations under the License.
       capitalize(value) {
         return value.charAt(0).toUpperCase() + value.slice(1);
       },
-      shouldExclude(item) {
+      shouldExcludeValue(item) {
         return this.idsToExcludeFromPath.some((searchForMe) => item.toUpperCase() === searchForMe.toUpperCase());
+      },
+      shouldExcludeKey(key) {
+        return this.keysToExcludeFromPath.some((searchForMe) => key.toUpperCase() === searchForMe.toUpperCase());
       },
     },
   };
