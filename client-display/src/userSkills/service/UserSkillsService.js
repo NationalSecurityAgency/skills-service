@@ -129,6 +129,14 @@ export default {
     return response;
   },
 
+  removeApprovalRejection(rejectionId) {
+    let response = null;
+    response = axios.delete(`${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/rejections/${rejectionId}`, {
+      params: this.getUserIdAndVersionParams(),
+    }).then((result) => result.data);
+    return response;
+  },
+
   getUserSkillsRanking(subjectId) {
     let response = null;
     let url = `${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/subjects/${subjectId}/rank`;

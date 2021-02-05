@@ -466,6 +466,10 @@ class SkillsService {
         return wsHelper.adminPost("/projects/${projectId}/approvals/reject", [skillApprovalIds: approvalId, rejectionMessage: msg])
     }
 
+    def removeApproval(String projectId, Integer approvalId) {
+        wsHelper.apiDelete("/projects/${projectId}/rejections/${approvalId}")
+    }
+
     def addSkillAndOptionallyThrowExceptionAtTheEnd(Map props, String userId, Date date, boolean throwException) {
         userId = getUserId(userId)
         return wsHelper.apiPost("/projects/${props.projectId}/skills/${props.skillId}/throwException/${throwException}".toString(),

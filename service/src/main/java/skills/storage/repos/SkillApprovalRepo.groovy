@@ -54,4 +54,21 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
     @Nullable
     SkillApproval findByUserIdAndProjectIdAndSkillRefId(String userId, String projectId, Integer skillRefId)
 
+    interface SkillApprovalPlusSkillId {
+        SkillApproval getSkillApproval()
+        String getSkillId()
+    }
+
+    @Query('''SELECT s as skillApproval, sd.skillId as skillId
+        from SkillApproval s, SkillDef subject, SkillRelDef  srd, SkillDef sd 
+        where
+            subject = srd.parent and 
+            sd = srd.child and
+            s.userId = ?1 and
+            s.projectId = ?2 and
+            subject.skillId = ?3 and
+            srd.type = 'RuleSetDefinition' and
+            s.skillRefId = sd.id''')
+    List<SkillApprovalPlusSkillId> findSkillApprovalsByProjectIdAndSubjectId(String userId, String projectId, String subjectId)
+
 }

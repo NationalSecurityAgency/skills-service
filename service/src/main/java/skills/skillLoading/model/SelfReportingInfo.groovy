@@ -19,6 +19,8 @@ import skills.storage.model.SkillDef
 
 class SelfReportingInfo {
 
+    Integer approvalId
+
     boolean enabled
     SkillDef.SelfReportingType type
 

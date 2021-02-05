@@ -17,6 +17,7 @@ package skills.services
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import skills.controller.exceptions.SkillException
 import skills.services.events.SkillEventsService
 import skills.storage.model.SkillApproval
 import skills.storage.repos.SkillApprovalRepo
@@ -69,5 +70,27 @@ class SelfReportingService {
         }
 
         return res
+    }
+
+    void removeRejection(String projectId, String userId, Integer approvalId) {
+
+        Optional<SkillApproval> existing = skillApprovalRepo.findById(approvalId)
+        if (existing.isPresent()) {
+            SkillApproval approval = existing.get();
+            if (approval.userId != userId) {
+                throw new SkillException("SkillApproval record for id [${approvalId}] has userId that does not match provided userId. Provided userId=[${userId}]", projectId);
+            }
+            if (approval.projectId != projectId) {
+                throw new SkillException("SkillApproval record for id [${approvalId}] has projectId that does not match provided projectId. Provided projectId=[${projectId}]", projectId);
+            }
+            if (!approval.rejectedOn) {
+                throw new SkillException("SkillApproval with id [${approvalId}] was not rejected, user can only remove rejected SkillApproval record! projectId=[${projectId}], userId=[${userId}], approvalId=[${approvalId}]", projectId);
+            }
+
+            skillApprovalRepo.delete(approval);
+        } else {
+            log.warn("Failed to find existing approval with id of [${approvalId}]. Could be a bug OR could be that it was removed by another admin or in a different tab:" +
+                    " projectId=[${projectId}], userId=[${userId}], approvalId=[${approvalId}]")
+        }
     }
 }

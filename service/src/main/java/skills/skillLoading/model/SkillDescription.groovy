@@ -20,4 +20,6 @@ class SkillDescription {
     String description
     String href
     Date achievedOn
+
+    SelfReportingInfo selfReporting
 }
