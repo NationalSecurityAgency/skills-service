@@ -63,6 +63,18 @@ class ZeroFillDayCountItemUtilSpec extends Specification {
         res.find() { it.day == n.toDate() }
     }
 
+    def "produces accurate zero fills for DAILY gaps when nInclusive is true and dates are separated by one day"() {
+        LocalDateTime n = LocalDateTime.now()
+        LocalDateTime nMinus = n.minusDays(1)
+
+        when:
+        List<DayCountItem> res = ZeroFillDayCountItemUtil.zeroFillDailyGaps(n.toDate(), nMinus.toDate(), true)
+
+        then:
+        res.size() == 1
+        res[0].day == n.toDate()
+    }
+
     def "produces no DAILY zero fills when dates are separated by one day"() {
         LocalDateTime n = LocalDateTime.now()
         LocalDateTime nMinus = n.minusDays(1);
@@ -116,6 +128,26 @@ class ZeroFillDayCountItemUtilSpec extends Specification {
 
         then:
         !res
+    }
+
+    def "produces one WEEKLY zero fill when dates are separated by one week and nInclusive is true"() {
+        TemporalField temporalField = WeekFields.of(Locale.US).dayOfWeek()
+        LocalDate eventDate = LocalDate.now()
+        LocalDateTime startOfWeek = LocalDateTime.of(eventDate.with(temporalField, 1), LocalTime.MIN)
+        LocalDateTime nMinus = startOfWeek.minusWeeks(1).with(temporalField, 1);
+
+        println "n: ${startOfWeek}, nMinus: ${nMinus}"
+
+        when:
+        List<DayCountItem> res = ZeroFillDayCountItemUtil.zeroFillWeeklyGaps(startOfWeek.toDate(), nMinus.toDate(), true)
+        res.each {
+            println it.day
+        }
+
+        then:
+        res
+        res.size() == 1
+        res[0].day == startOfWeek.toDate()
     }
 
     def "produces accurate zero fills for WEEKLY gaps when nInclusive set to true"() {

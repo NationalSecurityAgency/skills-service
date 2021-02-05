@@ -314,8 +314,9 @@ class UserEventService {
                 }
             }
 
-            Date last = perProject.lastDate ?: StartDateUtil.computeStartDate(new Date(), eventType)
-            List<DayCountItem> zeroFills = zeroFillGaps(eventType, last, it.day, perProject.count == 0, it.projectId)
+            Date last = perProject.lastDate
+            boolean first = perProject.count == 0
+            List<DayCountItem> zeroFills = zeroFillGaps(eventType, last, it.day, (first && it.day != perProject.lastDate), it.projectId)
             if (zeroFills) {
                 perProject.results.addAll(zeroFills)
             }
@@ -353,7 +354,8 @@ class UserEventService {
                 perProjectCounts.put(it.projectId, perProject)
             }
 
-            List<DayCountItem> zeroFills = zeroFillGaps(EventType.WEEKLY, perProject.lastDate, dci.day, perProject.count == 0, it.projectId)
+            boolean first=perProject.count == 0
+            List<DayCountItem> zeroFills = zeroFillGaps(EventType.WEEKLY, perProject.lastDate, dci.day, (first && day != perProject.lastDate), it.projectId)
             if (zeroFills) {
                 perProject.results.addAll(zeroFills)
             }

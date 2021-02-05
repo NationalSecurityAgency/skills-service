@@ -61,14 +61,14 @@ class ZeroFillDayCountItemUtil {
         List<DayCountItem> fills = null
         int startAt = nInclusive ? 0 : 1
 
-        if (daily && daysBetween > 1) {
+        if (daily && ((daysBetween > 1) || nInclusive)) {
             fills = []
             LocalDateTime ldt = n.toLocalDateTime()
             for (int i = startAt; i < daysBetween; i++) {
                 Date fill = ldt.minusDays(i).toDate()
                 fills.add(new DayCountItem(projectId, fill, 0))
             }
-        } else if (!daily && daysBetween > 7){
+        } else if (!daily && (daysBetween > 7 || nInclusive)){
             // since we force the start date to be based on start of week this should work cleanly
             long fillWeeks = ChronoUnit.WEEKS.between(nMinusOneLd, nLd)
             fills = []
