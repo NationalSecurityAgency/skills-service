@@ -52,7 +52,7 @@ limitations under the License.
         <div class="input-group-text"><i class="fas fa-link mr-1"></i> Help URL: </div>
       </div>
       <span class="form-control">
-        <a v-if="skillInfo.helpUrl" :href="skillInfo.helpUrl" target="_blank" rel="noopener">{{ skillInfo.helpUrl }}</a>
+        <a v-if="skillInfo.helpUrl" :href="skillInfo.helpUrl" target="_blank" rel="noopener" class="skill-url">{{ skillInfo.helpUrl }}</a>
         <span v-else class="text-muted">
           Not Specified
         </span>
@@ -167,6 +167,14 @@ limitations under the License.
     font-size: 85%;
     border-radius: 6px;
     background-color: #f6f8fa;
+  }
+
+  .skill-url {
+    /*white-space: pre-line;*/
+    /*word-break: break-word;*/
+    height: 1.5em;
+    overflow: hidden;
+    display: block;
   }
 
 </style>
