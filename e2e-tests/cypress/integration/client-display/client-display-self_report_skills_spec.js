@@ -272,7 +272,7 @@ describe('Client Display Self Report Skills Tests', () => {
     cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]').contains('0');
     cy.get('[data-cy="approvalRejectedStatus"]').contains('Approval Rejected')
     cy.get('[data-cy="approvalRejectedStatus"]').contains('Rejected a few seconds ago')
-    cy.get('[data-cy="selfReportRejectedAlert"]').contains('Unfortunately your request from 01/31/2021 was rejected. The reason is: "Skill was rejected"')
+    cy.get('[data-cy="selfReportRejectedAlert"]').contains('The reason is: "Skill was rejected"')
   });
 
 
@@ -291,7 +291,7 @@ describe('Client Display Self Report Skills Tests', () => {
     cy.get('[data-cy="skillProgress_index-1"] [data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]').contains('0');
     cy.get('[data-cy="skillProgress_index-1"] [data-cy="approvalRejectedStatus"]').contains('Approval Rejected')
     cy.get('[data-cy="skillProgress_index-1"] [data-cy="approvalRejectedStatus"]').contains('Rejected a few seconds ago')
-    cy.get('[data-cy="skillProgress_index-1"] [data-cy="selfReportRejectedAlert"]').contains('Unfortunately your request from 01/31/2021 was rejected. The reason is: "Skill was rejected"')
+    cy.get('[data-cy="skillProgress_index-1"] [data-cy="selfReportRejectedAlert"]').contains('The reason is: "Skill was rejected"')
   });
 
   it('self report - resubmit rejected skill', () => {
@@ -371,7 +371,7 @@ describe('Client Display Self Report Skills Tests', () => {
     cy.get('[data-cy="approvalRejectedStatus"]').contains('Approval Rejected')
 
     cy.get('[data-cy="approvalRejectedStatus"]').contains('Approval Rejected')
-    cy.get('[data-cy="selfReportRejectedAlert"]').contains('Unfortunately your request from 01/31/2021 was rejected. The reason is: "Skill was rejected"')
+    cy.get('[data-cy="selfReportRejectedAlert"]').contains('The reason is: "Skill was rejected"')
 
     cy.get('[data-cy="clearRejectionMsgBtn"]').click();
     cy.get('[data-cy="clearRejectionMsgDialog"]').contains('This action will permanently remove the rejection and its message. Are you sure?');
@@ -403,7 +403,7 @@ describe('Client Display Self Report Skills Tests', () => {
     cy.get('[data-cy="approvalRejectedStatus"]').contains('Approval Rejected')
 
     cy.get('[data-cy="approvalRejectedStatus"]').contains('Approval Rejected')
-    cy.get('[data-cy="selfReportRejectedAlert"]').contains('Unfortunately your request from 01/31/2021 was rejected. The reason is: "Skill was rejected"')
+    cy.get('[data-cy="selfReportRejectedAlert"]').contains('The reason is: "Skill was rejected"')
 
     cy.get('[data-cy="clearRejectionMsgBtn"]').click();
     cy.get('[data-cy="clearRejectionMsgDialog"]').contains('This action will permanently remove the rejection and its message. Are you sure?');
