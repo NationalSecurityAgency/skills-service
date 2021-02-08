@@ -185,11 +185,10 @@ describe('Navigation Tests', () => {
   })
 
 
-  it('visit mySkills page', function () {
+  it.only('visit mySkills page', function () {
     cy.visit('/my-skills');
     cy.wait('@allSkillEventsForUser');
 
-    // data-cy="breadcrumb-MySkills"
     cy.get('[data-cy=breadcrumb-MySkills]').contains('MySkills').should('be.visible');
 
     cy.get('[data-cy=numProjectsContributed]').contains(new RegExp(/^1$/));
@@ -226,6 +225,9 @@ describe('Navigation Tests', () => {
     cy.intercept('GET', '/api/projects/proj1/pointHistory').as('pointHistoryChart');
     cy.wait('@pointHistoryChart');
     cy.wrapIframe().contains('Overall Points');
+    cy.get('[data-cy=breadcrumb-MySkills]').should('be.visible');
+    cy.get('[data-cy=breadcrumb-Proj1]').should('be.visible');
+    cy.get('[data-cy=breadcrumb-projects]').should('not.exist');
   });
 
   it('mySkills page - contributed to all projects', function () {
