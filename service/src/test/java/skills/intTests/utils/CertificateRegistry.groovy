@@ -68,7 +68,7 @@ class CertificateRegistry {
     public List<String> getRandomUsers(int num) {
         List<String> copy = new ArrayList<>(idsOnly)
         List<String> res = []
-        (0..num).each {
+        (0..num-1).each {
             if (copy.size() == 0) {
                 throw new IllegalStateException("no more certificate users left to satisfy getRandomUsers request")
             }
