@@ -17,6 +17,7 @@ name: Run integration tests using two way ssl
 on:
   schedule:
     - cron: '0 7 * * *'
+  workflow_dispatch:
 #on:
 #  push:
 #    paths-ignore:

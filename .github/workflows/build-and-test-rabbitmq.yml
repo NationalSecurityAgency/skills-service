@@ -24,6 +24,7 @@ name: Test Web Sockets over STOMP using RabbitMQ
 on:
   schedule:
    - cron: '0 6 * * *'
+  workflow_dispatch:
 
 
 jobs:
