@@ -16,12 +16,12 @@ limitations under the License.
 <template>
   <div class="proj-link-container">
     <b-card class="proj-link-card">
-      <b-row class="m-0 p-0">
+      <b-row class="m-0 p-0 flex-nowrap">
         <b-col cols="4" class="proj-progress-chart">
           <apexchart :name="proj.projectName" type="radialBar" height="200" :options="chartOptions" :series="series"></apexchart>
         </b-col>
-        <b-col class="text-right">
-          <div class="h4 text-uppercase" data-cy="project-card-project-name">{{ proj.projectName }}</div>
+        <b-col cols="8" class="text-right pr-md-5">
+          <div class="h4 text-uppercase text-truncate" data-cy="project-card-project-name">{{ proj.projectName }}</div>
           <div class="h5 text-secondary" data-cy="project-card-project-level">Level {{ proj.level }}</div>
           <div data-cy="project-card-project-rank">
             <b-badge :variant="rankVariant">Rank: {{ proj.rank }} / {{ proj.totalUsers | number}}</b-badge>
@@ -158,6 +158,6 @@ limitations under the License.
   z-index: 1000000;
 }
 .proj-progress-chart {
-  min-width: 150px;
+  min-width: 152px;
 }
 </style>

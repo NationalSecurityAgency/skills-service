@@ -193,7 +193,7 @@ describe('Navigation Tests', () => {
 
     cy.get('[data-cy=numProjectsContributed]').contains(new RegExp(/^1$/));
     cy.get('[data-cy=numProjectsAvailable]').contains(new RegExp(/^\/ 2$/));
-    cy.get('[data-cy=info-snap-footer]').contains('It\'s fun to learn! You still have 1 project to explore.');
+    cy.get('[data-cy=info-snap-footer]').contains('You still have 1 project to explore.');
 
     cy.get('[data-cy=numAchievedSkills]').contains(new RegExp(/^1$/));
     cy.get('[data-cy=numSkillsAvailable]').contains(new RegExp(/^Total: 48$/));
@@ -244,7 +244,7 @@ describe('Navigation Tests', () => {
 
     cy.get('[data-cy=numProjectsContributed]').contains(new RegExp(/^2$/));
     cy.get('[data-cy=numProjectsAvailable]').contains(new RegExp(/^\/ 2$/));
-    cy.get('[data-cy=info-snap-footer]').contains('Congratulations, you have contributed to all available projects!');
+    cy.get('[data-cy=info-snap-footer]').contains('Great job, you have contributed to all projects!');
   });
 
   it('mySkills page - not contributed to more than one project', function () {
@@ -259,7 +259,7 @@ describe('Navigation Tests', () => {
 
     cy.get('[data-cy=numProjectsContributed]').contains(new RegExp(/^1$/));
     cy.get('[data-cy=numProjectsAvailable]').contains(new RegExp(/^\/ 3$/));
-    cy.get('[data-cy=info-snap-footer]').contains('It\'s fun to learn! You still have 2 projects to explore.');
+    cy.get('[data-cy=info-snap-footer]').contains('You still have 2 projects to explore.');
   });
 
   it('mySkills page - time controls call out to the server',() => {
