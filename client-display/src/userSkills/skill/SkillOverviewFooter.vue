@@ -203,7 +203,6 @@ limitations under the License.
         return this.selfReport.res && this.selfReport.res.explanation.includes('was already performed');
       },
       removeRejection() {
-        console.log('remove rejection');
         UserSkillsService.removeApprovalRejection(this.skillInternal.selfReporting.approvalId)
           .then(() => {
             this.skillInternal.selfReporting.rejectedOn = null;
