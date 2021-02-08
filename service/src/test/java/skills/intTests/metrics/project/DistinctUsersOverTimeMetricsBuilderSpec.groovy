@@ -24,6 +24,7 @@ import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.metrics.builders.MetricsParams
+import skills.services.LockingService
 import skills.services.StartDateUtil
 import skills.services.UserEventService
 import skills.storage.model.EventType
@@ -44,6 +45,12 @@ class DistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
     int maxDailyDays
 
     String metricsId = "distinctUsersOverTimeForProject"
+
+    LockingService mockLock = Mock()
+
+    def setup() {
+        userEventService.lockingService = mockLock;
+    }
 
     def "must supply start param"() {
         def proj = SkillsFactory.createProject()
