@@ -24,6 +24,7 @@ name: Continuous Integration with OAuth
 on:
   schedule:
    - cron: '0 6 * * *'
+  workflow_dispatch:
 
 
 jobs:
