@@ -444,8 +444,8 @@ class SkillsDescriptionSpec extends DefaultIntSpec {
         def addSkillRes = skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_subj1_skills[0].skillId], user, date)
         def addSkillRes1 = skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_subj1_skills[1].skillId], user, date)
         def addSkillRes2 = skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_subj1_skills[3].skillId], user, date)
-        List approvalsEndpointRes = skillsService.getApprovals(proj1.projectId)
-        List<Integer> ids = approvalsEndpointRes.findAll { it.skillId == proj1_subj1_skills[3].skillId }.collect { it.id }
+        def approvalsEndpointRes = skillsService.getApprovals(proj1.projectId, 5, 1, 'requestedOn', false)
+        List<Integer> ids = approvalsEndpointRes.data.findAll { it.skillId == proj1_subj1_skills[3].skillId }.collect { it.id }
         skillsService.rejectSkillApprovals(proj1.projectId, ids, "rejection message")
 
         println JsonOutput.toJson(addSkillRes2)

@@ -16,9 +16,9 @@
 import axios from 'axios';
 
 export default {
-  getApprovals(projectId) {
+  getApprovals(projectId, params) {
     const url = `/admin/projects/${projectId}/approvals`;
-    return axios.get(url)
+    return axios.get(url, { params })
       .then((response) => response.data);
   },
   approve(projectId, approvalIds) {

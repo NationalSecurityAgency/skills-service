@@ -21,6 +21,7 @@ import com.github.jknack.handlebars.helper.StringHelpers
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
 import org.springframework.core.io.Resource
+import org.springframework.web.bind.annotation.RequestParam
 import spock.lang.Retry
 
 import java.nio.charset.StandardCharsets
@@ -454,8 +455,8 @@ class SkillsService {
         }
     }
 
-    def getApprovals(String projectId) {
-        return wsHelper.adminGet("/projects/${projectId}/approvals")
+    def getApprovals(String projectId, int limit, int page, String orderBy, Boolean ascending) {
+        return wsHelper.adminGet("/projects/${projectId}/approvals?limit=${limit}&page=${page}&orderBy=${orderBy}&ascending=${ascending}")
     }
 
     def approve(String projectId, List<Integer> approvalId) {

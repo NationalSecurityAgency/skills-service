@@ -48,7 +48,7 @@ class ReportSkills_SelfReporting extends DefaultIntSpec {
         Date date = new Date() - 60
         when:
         def res = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "user0", date, "Please approve this!")
-        List approvalsEndpointRes = skillsService.getApprovals(proj.projectId)
+        def approvalsEndpointRes = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false)
 
         then:
         !res.body.skillApplied
@@ -69,12 +69,12 @@ class ReportSkills_SelfReporting extends DefaultIntSpec {
         approvals.get(0).userId == "user0"
         approvals.get(0).requestedOn == date
 
-        approvalsEndpointRes.size() == 1
-        approvalsEndpointRes.get(0).userId == "user0"
-        approvalsEndpointRes.get(0).skillId == "skill1"
-        approvalsEndpointRes.get(0).skillName == "Test Skill 1"
-        approvalsEndpointRes.get(0).requestedOn == date.time
-        approvalsEndpointRes.get(0).requestMsg == "Please approve this!"
+        approvalsEndpointRes.data.size() == 1
+        approvalsEndpointRes.data.get(0).userId == "user0"
+        approvalsEndpointRes.data.get(0).skillId == "skill1"
+        approvalsEndpointRes.data.get(0).skillName == "Test Skill 1"
+        approvalsEndpointRes.data.get(0).requestedOn == date.time
+        approvalsEndpointRes.data.get(0).requestMsg == "Please approve this!"
     }
 
     def "self report skill with honor system"() {
@@ -91,7 +91,7 @@ class ReportSkills_SelfReporting extends DefaultIntSpec {
         Date date = new Date() - 60
         when:
         def res = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "user0", date, "Please approve this!")
-        List approvalsEndpointRes = skillsService.getApprovals(proj.projectId)
+        def approvalsEndpointRes = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false)
 
         then:
         res.body.skillApplied
@@ -99,7 +99,8 @@ class ReportSkills_SelfReporting extends DefaultIntSpec {
         res.body.explanation == "Skill event was applied"
 
         !skillApprovalRepo.findAll().collect {it}
-        !approvalsEndpointRes
+        !approvalsEndpointRes.data
+        approvalsEndpointRes.count == 0
     }
 
     def "report via approval"() {
@@ -118,20 +119,22 @@ class ReportSkills_SelfReporting extends DefaultIntSpec {
         Date date = new Date() - 60
         when:
         def res = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], user, date, "Please approve this!")
-        List approvalsEndpointRes = skillsService.getApprovals(proj.projectId)
-        List<Integer> ids = approvalsEndpointRes.collect { it.id }
+        def approvalsEndpointRes = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false)
+        List<Integer> ids = approvalsEndpointRes.data.collect { it.id }
         skillsService.approve(proj.projectId, ids)
 
-        List approvalsEndpointResAfter = skillsService.getApprovals(proj.projectId)
+        def approvalsEndpointResAfter = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false)
         def skillEvents = skillsService.getPerformedSkills(user, proj.projectId)
         println skillEvents
 
         then:
         !res.body.skillApplied
-        approvalsEndpointRes.size() == 1
+        approvalsEndpointRes.count == 1
+        approvalsEndpointRes.data.size() == 1
         skillEvents.data.size() == 1
         skillEvents.data.get(0).skillId == skills[0].skillId
-        approvalsEndpointResAfter.size() == 0
+        approvalsEndpointResAfter.data.size() == 0
+        approvalsEndpointResAfter.count == 0
     }
 
     def "requesting approval for the same skill more than one time"() {
@@ -185,13 +188,13 @@ class ReportSkills_SelfReporting extends DefaultIntSpec {
         Date date1 = new Date() - 30
         when:
         def res = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], user, date, "Please approve this!")
-        List approvalsEndpointRes = skillsService.getApprovals(proj.projectId)
+        def approvalsEndpointRes = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false)
 
-        List<Integer> ids = approvalsEndpointRes.collect { it.id }
+        List<Integer> ids = approvalsEndpointRes.data.collect { it.id }
         skillsService.rejectSkillApprovals(proj.projectId, ids, 'Just felt like it')
 
         def res1 = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], user, date1, "Please approve this again!")
-        List approvalsEndpointResAfter = skillsService.getApprovals(proj.projectId)
+        def approvalsEndpointResAfter = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false)
 
         then:
         !res.body.skillApplied
@@ -202,14 +205,15 @@ class ReportSkills_SelfReporting extends DefaultIntSpec {
         res1.body.pointsEarned == 0
         res1.body.explanation == "Skill was submitted for approval"
 
-        approvalsEndpointRes.size() == 1
-        approvalsEndpointRes.get(0).requestMsg == "Please approve this!"
+        approvalsEndpointRes.count == 1
+        approvalsEndpointRes.data.size() == 1
+        approvalsEndpointRes.data[0].requestMsg == "Please approve this!"
 
-        approvalsEndpointResAfter.size() == 1
-        approvalsEndpointResAfter.get(0).requestMsg == "Please approve this again!"
-        approvalsEndpointResAfter.get(0).userId == user
-        approvalsEndpointResAfter.get(0).skillId == skills[0].skillId
-        approvalsEndpointResAfter.get(0).skillName == skills[0].name
-        approvalsEndpointResAfter.get(0).requestedOn == date1.time
+        approvalsEndpointResAfter.data.size() == 1
+        approvalsEndpointResAfter.data.get(0).requestMsg == "Please approve this again!"
+        approvalsEndpointResAfter.data.get(0).userId == user
+        approvalsEndpointResAfter.data.get(0).skillId == skills[0].skillId
+        approvalsEndpointResAfter.data.get(0).skillName == skills[0].name
+        approvalsEndpointResAfter.data.get(0).requestedOn == date1.time
     }
 }

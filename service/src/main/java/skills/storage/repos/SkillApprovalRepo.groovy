@@ -16,6 +16,7 @@
 package skills.storage.repos
 
 import groovy.transform.CompileStatic
+import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.lang.Nullable
@@ -42,7 +43,9 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
         s.requestMsg as requestMsg
         from SkillApproval s, SkillDef sd 
         where s.projectId = ?1 and s.skillRefId = sd.id and s.rejectedOn is null''')
-    List<SimpleSkillApproval> findToApproveByProjectId(String projectId)
+    List<SimpleSkillApproval> findToApproveByProjectIdAndNotRejected(String projectId, Pageable pageable)
+
+    long countByProjectIdAndRejectedOnIsNull(String projectId)
 
 
     @Nullable

@@ -220,7 +220,7 @@ class SingleSkillSummarySpec extends DefaultIntSpec {
         skillsService.addSkill([projectId: proj1.projectId, skillId: skills.get(1).skillId], userId, date)
         skillsService.addSkill([projectId: proj1.projectId, skillId: skills.get(2).skillId], userId, date)
         skillsService.addSkill([projectId: proj1.projectId, skillId: skills.get(3).skillId], userId, date)
-        Integer approvalIdToReject = skillsService.getApprovals(proj1.projectId).find { it.skillId == skills.get(3).skillId }.id
+        Integer approvalIdToReject = skillsService.getApprovals(proj1.projectId, 5, 1, 'requestedOn', false).data.find { it.skillId == skills.get(3).skillId }.id
         skillsService.rejectSkillApprovals(proj1.projectId, [approvalIdToReject], 'Good rejection message')
 
         when:

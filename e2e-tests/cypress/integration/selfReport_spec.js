@@ -254,44 +254,260 @@ describe('Self Report Skills Management Tests', () => {
         cy.get('[data-cy="selfReportMediaCard"] [data-cy="mediaInfoCardSubTitle"]').contains('Self reporting is disabled for this skill');
     });
 
-    it.only('approve requests', () => {
-        cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill1`, {
-            projectId: 'proj1',
-            subjectId: 'subj1',
-            skillId: `skill1`,
-            name: `Very Great Skill # 1`,
-            pointIncrement: '1500',
-            numPerformToCompletion: '10',
-            selfReportType:	'Approval'
-        });
-
-        cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill2`, {
-            projectId: 'proj1',
-            subjectId: 'subj1',
-            skillId: `skill2`,
-            name: `Very Great Skill # 2`,
-            pointIncrement: '1500',
-            numPerformToCompletion: '10',
-            selfReportType:	'Approval'
-        });
-
-        cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill3`, {
-            projectId: 'proj1',
-            subjectId: 'subj1',
-            skillId: `skill3`,
-            name: `Very Great Skill # 3`,
-            pointIncrement: '1500',
-            numPerformToCompletion: '10',
-            selfReportType:	'Approval'
-        });
-
-        const m = moment.utc('2020-09-12 11', 'YYYY-MM-DD HH');
-        cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'user0Good@skills.org', timestamp: m.clone().subtract(1, 'day').format('x')})
-        cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: 'user0Good@skills.org', timestamp: m.clone().subtract(4, 'day').format('x')})
-        cy.request('POST', `/api/projects/proj1/skills/skill3`, {userId: 'user0Good@skills.org', timestamp: m.clone().subtract(5, 'day').format('x')})
+    it('sorting and paging of the approval table', () => {
+        cy.createSkill(1, 1, 1, { selfReportType: 'Approval' });
+        cy.createSkill(1, 1, 2, { selfReportType: 'Approval' });
+        cy.createSkill(1, 1, 3, { selfReportType: 'Approval' });
+        cy.reportSkill(1, 1, 'user6Good@skills.org', '2020-09-12 11:00')
+        cy.reportSkill(1, 2, 'user5Good@skills.org', '2020-09-13 11:00')
+        cy.reportSkill(1, 3, 'user4Good@skills.org', '2020-09-14 11:00')
+        cy.reportSkill(1, 1, 'user3Good@skills.org', '2020-09-15 11:00')
+        cy.reportSkill(1, 2, 'user2Good@skills.org', '2020-09-16 11:00')
+        cy.reportSkill(1, 3, 'user1Good@skills.org', '2020-09-17 11:00')
+        cy.reportSkill(1, 1, 'user0Good@skills.org', '2020-09-18 11:00')
 
         cy.visit('/projects/proj1/self-report');
+
+        const tableSelector = '[data-cy="skillsReportApprovalTable"]';
+        const expected = [
+            [{ colIndex: 0,  value: 'user0good@skills.org ' }, { colIndex: 2,  value: '2020-09-18 11:00' }],
+            [{ colIndex: 0,  value: 'user1good@skills.org ' }, { colIndex: 2,  value: '2020-09-17 11:00' }],
+            [{ colIndex: 0,  value: 'user2good@skills.org ' }, { colIndex: 2,  value: '2020-09-16 11:00' }],
+            [{ colIndex: 0,  value: 'user3good@skills.org ' }, { colIndex: 2,  value: '2020-09-15 11:00' }],
+            [{ colIndex: 0,  value: 'user4good@skills.org ' }, { colIndex: 2,  value: '2020-09-14 11:00' }],
+            [{ colIndex: 0,  value: 'user5good@skills.org ' }, { colIndex: 2,  value: '2020-09-13 11:00' }],
+            [{ colIndex: 0,  value: 'user6good@skills.org ' }, { colIndex: 2,  value: '2020-09-12 11:00' }],
+        ]
+        const expectedReversed = [...expected].reverse();
+
+        cy.validateTable(tableSelector, expected);
+
+        cy.get(`${tableSelector} th`).contains('Requested On').click();
+        cy.validateTable(tableSelector, expectedReversed);
+
+        cy.get(`${tableSelector} th`).contains('User Id').click();
+        cy.validateTable(tableSelector, expected);
+        cy.get(`${tableSelector} th`).contains('User Id').click();
+        cy.validateTable(tableSelector, expectedReversed);
     });
+
+    it('change page size of the approval table', () => {
+        cy.createSkill(1, 1, 1, { selfReportType: 'Approval' });
+        cy.createSkill(1, 1, 2, { selfReportType: 'Approval' });
+        cy.createSkill(1, 1, 3, { selfReportType: 'Approval' });
+        cy.reportSkill(1, 1, 'user6Good@skills.org', '2020-09-12 11:00')
+        cy.reportSkill(1, 2, 'user5Good@skills.org', '2020-09-13 11:00')
+        cy.reportSkill(1, 3, 'user4Good@skills.org', '2020-09-14 11:00')
+        cy.reportSkill(1, 1, 'user3Good@skills.org', '2020-09-15 11:00')
+        cy.reportSkill(1, 2, 'user2Good@skills.org', '2020-09-16 11:00')
+        cy.reportSkill(1, 3, 'user1Good@skills.org', '2020-09-17 11:00')
+        cy.reportSkill(1, 1, 'user0Good@skills.org', '2020-09-18 11:00')
+
+        cy.visit('/projects/proj1/self-report');
+        const rowSelector = '[data-cy="skillsReportApprovalTable"] tbody tr';
+        cy.get(rowSelector).should('have.length', 5)
+
+        cy.get('[data-cy="skillsBTablePageSize"]').select('10');
+        cy.get(rowSelector).should('have.length', 7)
+    });
+
+    it('approve one', () => {
+        cy.createSkill(1, 1, 1, { selfReportType: 'Approval' });
+        cy.createSkill(1, 1, 2, { selfReportType: 'Approval' });
+        cy.createSkill(1, 1, 3, { selfReportType: 'Approval' });
+        cy.reportSkill(1, 2, 'user2', '2020-09-16 11:00')
+        cy.reportSkill(1, 3, 'user1', '2020-09-17 11:00')
+        cy.reportSkill(1, 1, 'user0', '2020-09-18 11:00')
+
+        cy.visit('/projects/proj1/self-report');
+
+        const tableSelector = '[data-cy="skillsReportApprovalTable"]';
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'user0' }],
+            [{ colIndex: 0,  value: 'user1' }],
+            [{ colIndex: 0,  value: 'user2' }],
+        ]);
+
+        cy.get('[data-cy="approveBtn"]').should('be.disabled');
+        cy.get('[data-cy="rejectBtn"]').should('be.disabled');
+        cy.get('[data-cy="approvalSelect_user1-skill3"]').click({force: true});
+        cy.get('[data-cy="approveBtn"]').should('be.enabled');
+        cy.get('[data-cy="rejectBtn"]').should('be.enabled');
+
+        cy.get('[data-cy="approveBtn"]').click();
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'user0' }],
+            [{ colIndex: 0,  value: 'user2' }],
+        ]);
+
+        cy.visit('/projects/proj1/users/user1/skillEvents');
+        cy.validateTable('[data-cy="performedSkillsTable"]', [
+            [{ colIndex: 0,  value: 'skill3' }],
+        ]);
+    });
+
+    it('reject one', () => {
+        cy.intercept({
+            method: 'POST',
+            url: '/admin/projects/proj1/approvals/reject',
+        }).as('reject');
+
+        cy.createSkill(1, 1, 1, { selfReportType: 'Approval' });
+        cy.createSkill(1, 1, 2, { selfReportType: 'Approval' });
+        cy.createSkill(1, 1, 3, { selfReportType: 'Approval' });
+        cy.reportSkill(1, 2, 'user2', '2020-09-16 11:00')
+        cy.reportSkill(1, 3, 'user1', '2020-09-17 11:00')
+        cy.reportSkill(1, 1, 'user0', '2020-09-18 11:00')
+
+        cy.visit('/projects/proj1/self-report');
+
+        const tableSelector = '[data-cy="skillsReportApprovalTable"]';
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'user0' }],
+            [{ colIndex: 0,  value: 'user1' }],
+            [{ colIndex: 0,  value: 'user2' }],
+        ]);
+
+        cy.get('[data-cy="approveBtn"]').should('be.disabled');
+        cy.get('[data-cy="rejectBtn"]').should('be.disabled');
+        cy.get('[data-cy="approvalSelect_user1-skill3"]').click({force: true});
+        cy.get('[data-cy="approveBtn"]').should('be.enabled');
+        cy.get('[data-cy="rejectBtn"]').should('be.enabled');
+
+        cy.get('[data-cy="rejectBtn"]').click();
+        cy.get('[data-cy="rejectionTitle"]').contains('This will permanently reject user requests to get points')
+        cy.get('[data-cy="rejectionInputMsg"]').type('Rejection message!');
+        cy.get('[data-cy="confirmRejectionBtn"]').click();
+
+        cy.wait('@reject')
+
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'user0' }],
+            [{ colIndex: 0,  value: 'user2' }],
+        ]);
+
+        cy.visit('/projects/proj1/users/user1/skillEvents');
+        cy.get('[data-cy="performedSkillsTable"] tbody tr').should('have.length', 0)
+    });
+
+    it('approve 1 page worth of records', () => {
+        cy.createSkill(1, 1, 1, { selfReportType: 'Approval' });
+        cy.createSkill(1, 1, 2, { selfReportType: 'Approval' });
+        cy.createSkill(1, 1, 3, { selfReportType: 'Approval' });
+        cy.reportSkill(1, 2, 'user6', '2020-09-11 11:00')
+        cy.reportSkill(1, 2, 'user5', '2020-09-12 11:00')
+        cy.reportSkill(1, 2, 'user4', '2020-09-13 11:00')
+        cy.reportSkill(1, 2, 'user3', '2020-09-14 11:00')
+        cy.reportSkill(1, 2, 'user2', '2020-09-16 11:00')
+        cy.reportSkill(1, 3, 'user1', '2020-09-17 11:00')
+        cy.reportSkill(1, 1, 'user0', '2020-09-18 11:00')
+
+        cy.visit('/projects/proj1/self-report');
+
+        cy.get('[data-cy="selectPageOfApprovalsBtn"]').click();
+        cy.get('[data-cy="approveBtn"]').click();
+
+        const tableSelector = '[data-cy="skillsReportApprovalTable"]';
+
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'user5' }],
+            [{ colIndex: 0,  value: 'user6' }],
+        ]);
+
+        cy.get('[data-cy="approveBtn"]').should('be.disabled');
+        cy.get('[data-cy="rejectBtn"]').should('be.disabled');
+
+        cy.visit('/projects/proj1/users');
+        cy.validateTable('[data-cy="usersTable"]',  [
+            [{ colIndex: 0,  value: 'user0' }, { colIndex: 1,  value: '100' }],
+            [{ colIndex: 0,  value: 'user1' }, { colIndex: 1,  value: '100' }],
+            [{ colIndex: 0,  value: 'user2' }, { colIndex: 1,  value: '100' }],
+            [{ colIndex: 0,  value: 'user3' }, { colIndex: 1,  value: '100' }],
+            [{ colIndex: 0,  value: 'user4' }, { colIndex: 1,  value: '100' }],
+        ]);
+    });
+
+    it('reject 1 page worth of records', () => {
+        cy.intercept({
+            method: 'POST',
+            url: '/admin/projects/proj1/approvals/reject',
+        }).as('reject');
+
+        cy.createSkill(1, 1, 1, { selfReportType: 'Approval' });
+        cy.createSkill(1, 1, 2, { selfReportType: 'Approval' });
+        cy.createSkill(1, 1, 3, { selfReportType: 'Approval' });
+        cy.reportSkill(1, 2, 'user6', '2020-09-11 11:00')
+        cy.reportSkill(1, 2, 'user5', '2020-09-12 11:00')
+        cy.reportSkill(1, 2, 'user4', '2020-09-13 11:00')
+        cy.reportSkill(1, 2, 'user3', '2020-09-14 11:00')
+        cy.reportSkill(1, 2, 'user2', '2020-09-16 11:00')
+        cy.reportSkill(1, 3, 'user1', '2020-09-17 11:00')
+        cy.reportSkill(1, 1, 'user0', '2020-09-18 11:00')
+
+        cy.visit('/projects/proj1/self-report');
+
+        cy.get('[data-cy="selectPageOfApprovalsBtn"]').click();
+
+        cy.get('[data-cy="rejectBtn"]').click();
+        cy.get('[data-cy="rejectionTitle"]').contains('This will permanently reject user requests to get points')
+        cy.get('[data-cy="rejectionInputMsg"]').type('Rejection message!');
+        cy.get('[data-cy="confirmRejectionBtn"]').click();
+
+        const tableSelector = '[data-cy="skillsReportApprovalTable"]';
+
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'user5' }],
+            [{ colIndex: 0,  value: 'user6' }],
+        ]);
+
+        cy.get('[data-cy="approveBtn"]').should('be.disabled');
+        cy.get('[data-cy="rejectBtn"]').should('be.disabled');
+
+        cy.visit('/projects/proj1/users');
+        cy.get('[data-cy="usersTable"] tbody tr').should('have.length', 0)
+    });
+
+    it('select page and then clear', () => {
+        cy.createSkill(1, 1, 1, { selfReportType: 'Approval' });
+        cy.createSkill(1, 1, 2, { selfReportType: 'Approval' });
+        cy.createSkill(1, 1, 3, { selfReportType: 'Approval' });
+        cy.reportSkill(1, 2, 'user6', '2020-09-11 11:00');
+        cy.reportSkill(1, 2, 'user5', '2020-09-12 11:00');
+        cy.reportSkill(1, 2, 'user4', '2020-09-13 11:00');
+
+        cy.visit('/projects/proj1/self-report');
+
+        cy.get('[data-cy="selectPageOfApprovalsBtn"]').click();
+        cy.get('[data-cy="approveBtn"]').should('be.enabled');
+        cy.get('[data-cy="rejectBtn"]').should('be.enabled');
+
+        cy.get('[data-cy="clearSelectedApprovalsBtn"]').click();
+        cy.get('[data-cy="approveBtn"]').should('be.disabled');
+        cy.get('[data-cy="rejectBtn"]').should('be.disabled');
+    });
+
+    it('refresh button should pull from server', () => {
+        cy.createSkill(1, 1, 1, { selfReportType: 'Approval' });
+        cy.createSkill(1, 1, 2, { selfReportType: 'Approval' });
+        cy.createSkill(1, 1, 3, { selfReportType: 'Approval' });
+        cy.reportSkill(1, 2, 'user1', '2020-09-12 11:00');
+
+        cy.visit('/projects/proj1/self-report');
+
+        const tableSelector = '[data-cy="skillsReportApprovalTable"]';
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'user1' }],
+        ]);
+
+        cy.reportSkill(1, 2, 'user2', '2020-09-11 11:00');
+
+        cy.get('[data-cy="syncApprovalsBtn"]').click();
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'user1' }],
+            [{ colIndex: 0,  value: 'user2' }],
+        ]);
+    });
+
 
 
 });

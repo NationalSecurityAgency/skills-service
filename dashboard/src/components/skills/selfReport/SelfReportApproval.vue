@@ -17,13 +17,13 @@ limitations under the License.
   <b-card body-class="p-0 mt-3">
     <div class="row px-3 mb-3">
       <div class="col">
-        <b-button variant="outline-info" @click="loadApprovals" data-cy="users-filterBtn" class="mr-2 mt-1"><i class="fas fa-sync-alt"></i></b-button>
-        <b-button variant="outline-info" @click="changeSelectionForAll(true)" data-cy="users-filterBtn" class="mr-2 mt-1"><i class="fa fa-check-square"/> Select All</b-button>
-        <b-button variant="outline-info" @click="changeSelectionForAll(false)" data-cy="users-filterBtn" class="mt-1"><i class="far fa-square"></i> Clear All</b-button>
+        <b-button variant="outline-info" @click="loadApprovals" data-cy="syncApprovalsBtn" class="mr-2 mt-1"><i class="fas fa-sync-alt"></i></b-button>
+        <b-button variant="outline-info" @click="changeSelectionForAll(true)" data-cy="selectPageOfApprovalsBtn" class="mr-2 mt-1"><i class="fa fa-check-square"/> Select Page</b-button>
+        <b-button variant="outline-info" @click="changeSelectionForAll(false)" data-cy="clearSelectedApprovalsBtn" class="mt-1"><i class="far fa-square"></i> Clear</b-button>
       </div>
       <div class="col text-right">
-        <b-button variant="outline-danger" @click="reject.showModal=true" data-cy="users-filterBtn" class="mt-1" :disabled="actionsDisabled"><i class="fa fa-times-circle"/> Reject</b-button>
-        <b-button variant="outline-success" @click="approve" data-cy="users-filterBtn" class="mt-1 ml-2" :disabled="actionsDisabled"><i class="fa fa-check"/> Approve</b-button>
+        <b-button variant="outline-danger" @click="reject.showModal=true" data-cy="rejectBtn" class="mt-1" :disabled="actionsDisabled"><i class="fa fa-times-circle"/> Reject</b-button>
+        <b-button variant="outline-success" @click="approve" data-cy="approveBtn" class="mt-1 ml-2" :disabled="actionsDisabled"><i class="fa fa-check"/> Approve</b-button>
       </div>
     </div>
 
@@ -31,7 +31,7 @@ limitations under the License.
                     @page-changed="pageChanged"
                     @page-size-changed="pageSizeChanged"
                     @sort-changed="sortTable"
-                    data-cy="usersTable">
+                    data-cy="skillsReportApprovalTable">
 
       <template v-slot:cell(userId)="data">
         <b-form-checkbox
@@ -42,6 +42,7 @@ limitations under the License.
           :unchecked-value="false"
           :inline="true"
           v-on:input="updateActionsDisableStatus"
+          :data-cy="`approvalSelect_${data.item.userId}-${data.item.skillId}`"
         >
           {{ data.value }}
         </b-form-checkbox>
@@ -66,7 +67,7 @@ limitations under the License.
              title="REJECT SKILLS"
              :no-close-on-backdrop="true"
              v-model="reject.showModal">
-      <div class="row p-2">
+      <div class="row p-2" data-cy="rejectionTitle">
         <div class="col-auto text-center">
           <i class="far fa-thumbs-down text-warning" style="font-size: 3rem"/>
         </div>
@@ -75,12 +76,12 @@ limitations under the License.
         </div>
       </div>
       <input type="text" id="approvalRequiredMsg" v-model="reject.rejectMsg"
-             class="form-control" placeholder="Message (optional)">
+             class="form-control" placeholder="Message (optional)" data-cy="rejectionInputMsg">
       <template #modal-footer>
         <button type="button" class="btn btn-outline-danger text-uppercase" @click="reject.showModal=false">
           <i class="fas fa-times-circle"></i> Cancel
         </button>
-        <button type="button" class="btn btn-outline-success text-uppercase" @click="doReject(); reject.showModal=false;">
+        <button type="button" class="btn btn-outline-success text-uppercase" @click="doReject(); reject.showModal=false;" data-cy="confirmRejectionBtn">
           <i class="fas fa-arrow-alt-circle-right"></i> Reject
         </button>
       </template>
@@ -111,8 +112,8 @@ limitations under the License.
             bordered: true,
             outlined: true,
             stacked: 'md',
-            sortBy: 'userId',
-            sortDesc: false,
+            sortBy: 'requestedOn',
+            sortDesc: true,
             fields: [
               {
                 key: 'userId',
@@ -122,7 +123,7 @@ limitations under the License.
               {
                 key: 'request',
                 label: 'Requested',
-                sortable: true,
+                sortable: false,
               },
               {
                 key: 'requestedOn',
@@ -145,12 +146,36 @@ limitations under the License.
       this.loadApprovals();
     },
     methods: {
+      pageChanged(pageNum) {
+        this.table.options.pagination.currentPage = pageNum;
+        this.loadApprovals();
+      },
+      pageSizeChanged(newSize) {
+        this.table.options.pagination.pageSize = newSize;
+        this.loadApprovals();
+      },
+      sortTable(sortContext) {
+        this.table.options.sortBy = sortContext.sortBy;
+        this.table.options.sortDesc = sortContext.sortDesc;
+
+        // set to the first page
+        this.table.options.pagination.currentPage = 1;
+        this.loadApprovals();
+      },
       loadApprovals() {
         this.table.options.busy = true;
-        SelfReportService.getApprovals(this.projectId)
+        const pageParams = {
+          limit: this.table.options.pagination.pageSize,
+          ascending: !this.table.options.sortDesc,
+          page: this.table.options.pagination.currentPage,
+          orderBy: this.table.options.sortBy,
+        };
+        SelfReportService.getApprovals(this.projectId, pageParams)
           .then((res) => {
-            this.table.items = res.map((item) => ({ selected: false, ...item }));
+            this.table.items = res.data.map((item) => ({ selected: false, ...item }));
+            this.table.options.pagination.totalRows = res.count;
             this.table.options.busy = false;
+            this.updateActionsDisableStatus();
           });
       },
       changeSelectionForAll(selectedValue) {

@@ -17,10 +17,12 @@ package skills.services
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.result.model.SkillApprovalResult
+import skills.controller.result.model.TableResult
 import skills.services.events.SkillEventResult
 import skills.services.events.SkillEventsService
 import skills.storage.model.SkillApproval
@@ -41,8 +43,9 @@ class SkillApprovalService {
     @Autowired
     SkillDefRepo skillDefRepo
 
-    List<SkillApprovalResult> getApprovals(String projectId) {
-        List<SkillApprovalResult> res = skillApprovalRepo.findToApproveByProjectId(projectId).collect { SkillApprovalRepo.SimpleSkillApproval simpleSkillApproval ->
+    TableResult getApprovals(String projectId, PageRequest pageRequest) {
+        List<SkillApprovalRepo.SimpleSkillApproval> approvalsFromDB = skillApprovalRepo.findToApproveByProjectIdAndNotRejected(projectId, pageRequest)
+         List<SkillApprovalResult> approvals = approvalsFromDB.collect { SkillApprovalRepo.SimpleSkillApproval simpleSkillApproval ->
             new SkillApprovalResult(
                     id: simpleSkillApproval.getApprovalId(),
                     userId: simpleSkillApproval.getUserId(),
@@ -53,7 +56,21 @@ class SkillApprovalService {
             )
         }
 
-        return res
+        Integer count = approvals.size()
+        Integer totalCount = approvals.size()
+        if (totalCount >= pageRequest.pageSize || pageRequest.pageSize > 1) {
+            totalCount = skillApprovalRepo.countByProjectIdAndRejectedOnIsNull(projectId)
+            // alwasy the same since filter is never provided
+            count = totalCount
+        }
+
+        TableResult tableResult = new TableResult(
+                data: approvals,
+                count: count,
+                totalCount: totalCount
+        )
+
+        return tableResult
     }
 
     void approve(String projectId, List<Integer> approvalRequestIds) {

@@ -15,17 +15,116 @@
  */
 package skills.intTests
 
+import groovy.json.JsonOutput
 import org.springframework.beans.factory.annotation.Autowired
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
 import skills.storage.model.SkillApproval
 import skills.storage.model.SkillDef
 import skills.storage.repos.SkillApprovalRepo
+import spock.lang.IgnoreRest
 
 class SkillApprovalSpecs extends DefaultIntSpec {
 
     @Autowired
     SkillApprovalRepo skillApprovalRepo
+
+    void "getApprovals paging"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(1,)
+        skills[0].pointIncrement = 200
+        skills[0].numPerformToCompletion = 200
+        skills[0].selfReportType = SkillDef.SelfReportingType.Approval
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        List<Date> dates = []
+        7.times {
+            Date date = new Date() - it
+            dates << date
+            def res = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "user${it}", date, "Please approve this ${it}!")
+            assert res.body.explanation == "Skill was submitted for approval"
+        }
+
+        when:
+        def tableResultPg1 = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false)
+        def tableResultPg2 = skillsService.getApprovals(proj.projectId, 5, 2, 'requestedOn', false)
+
+        then:
+        tableResultPg1.totalCount == 7
+        tableResultPg1.count == 7
+        tableResultPg1.data.size() == 5
+        (0..4).each {Integer index ->
+            assert tableResultPg1.data[index].id
+            assert tableResultPg1.data[index].userId == "user${index}"
+            assert tableResultPg1.data[index].skillId == "skill1"
+            assert tableResultPg1.data[index].skillName == "Test Skill 1"
+            assert tableResultPg1.data[index].requestedOn == dates[index].time
+            assert tableResultPg1.data[index].requestMsg == "Please approve this ${index}!"
+        }
+
+        tableResultPg2.totalCount == 7
+        tableResultPg2.count == 7
+        tableResultPg2.data.size() == 2
+        (0..1).each {Integer index ->
+            assert tableResultPg2.data[index].id
+            assert tableResultPg2.data[index].userId == "user${index+5}"
+            assert tableResultPg2.data[index].skillId == "skill1"
+            assert tableResultPg2.data[index].skillName == "Test Skill 1"
+            assert tableResultPg2.data[index].requestedOn == dates[index+5].time
+            assert tableResultPg2.data[index].requestMsg == "Please approve this ${index+5}!"
+        }
+    }
+
+    void "getApprovals sorting"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(1,)
+        skills[0].pointIncrement = 200
+        skills[0].numPerformToCompletion = 200
+        skills[0].selfReportType = SkillDef.SelfReportingType.Approval
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        List<Date> dates = []
+        7.times {
+            Date date = new Date() - it
+            dates << date
+            def res = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "user${10 - it}", date, "Please approve this ${it}!")
+            assert res.body.explanation == "Skill was submitted for approval"
+        }
+
+        when:
+        def requestedOnDescPg1 = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false)
+        def requestedOnDescPg2 = skillsService.getApprovals(proj.projectId, 5, 2, 'requestedOn', false)
+
+        def requestedOnAscPg1 = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', true)
+        def requestedOnAscPg2 = skillsService.getApprovals(proj.projectId, 5, 2, 'requestedOn', true)
+
+        def userIdDescPg1 = skillsService.getApprovals(proj.projectId, 5, 1, 'userId', false)
+        def userIdDescPg2 = skillsService.getApprovals(proj.projectId, 5, 2, 'userId', false)
+
+        def userIdAscPg1 = skillsService.getApprovals(proj.projectId, 5, 1, 'userId', true)
+        def userIdAscPg2 = skillsService.getApprovals(proj.projectId, 5, 2, 'userId', true)
+
+        then:
+        requestedOnDescPg1.data.collect { it.userId } == ["user10", "user9", "user8", "user7", "user6"]
+        requestedOnDescPg2.data.collect { it.userId } == ["user5", "user4"]
+
+        requestedOnAscPg1.data.collect { it.userId } == ["user4", "user5", "user6", "user7", "user8"]
+        requestedOnAscPg2.data.collect { it.userId } == ["user9", "user10"]
+
+        userIdAscPg1.data.collect { it.userId } == ["user10", "user4", "user5", "user6", "user7"]
+        userIdAscPg2.data.collect { it.userId } == ["user8", "user9" ]
+
+        userIdDescPg1.data.collect { it.userId } == ["user9", "user8", "user7", "user6", "user5"]
+        userIdDescPg2.data.collect { it.userId } == ["user4", "user10"]
+    }
 
     void "reject approval requests"() {
         String user = "user0"
@@ -43,23 +142,21 @@ class SkillApprovalSpecs extends DefaultIntSpec {
         Date date = new Date() - 60
         when:
         def res = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], user, date, "Please approve this!")
-        List approvalsEndpointRes = skillsService.getApprovals(proj.projectId)
-        List<Integer> ids = approvalsEndpointRes.collect { it.id }
+        def approvalsEndpointRes = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false)
+        List<Integer> ids = approvalsEndpointRes.data.collect { it.id }
         skillsService.rejectSkillApprovals(proj.projectId, ids, 'Just felt like it')
 
         List<SkillApproval> approvalsAfterRejection = skillApprovalRepo.findAll()
         println approvalsAfterRejection
 
-        List approvalsEndpointResAfter = skillsService.getApprovals(proj.projectId)
+        def approvalsEndpointResAfter = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false)
         def skillEvents = skillsService.getPerformedSkills(user, proj.projectId)
-
-
 
         then:
         !res.body.skillApplied
-        approvalsEndpointRes.size() == 1
+        approvalsEndpointRes.data.size() == 1
         !skillEvents.data
-        approvalsEndpointResAfter.size() == 0
+        approvalsEndpointResAfter.data.size() == 0
 
         approvalsAfterRejection.size() == 1
         approvalsAfterRejection.get(0).requestMsg == "Please approve this!"
@@ -70,5 +167,71 @@ class SkillApprovalSpecs extends DefaultIntSpec {
         approvalsAfterRejection.get(0).skillRefId == skillDefRepo.findAll().find({it.skillId == skills[0].skillId}).id
         approvalsAfterRejection.get(0).userId == "user0"
         approvalsAfterRejection.get(0).requestedOn == date
+    }
+
+    void "getApprovals paging for different projects"() {
+
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(1,)
+        skills[0].pointIncrement = 200
+        skills[0].numPerformToCompletion = 200
+        skills[0].selfReportType = SkillDef.SelfReportingType.Approval
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        def proj1 = SkillsFactory.createProject(2)
+        def subj1 = SkillsFactory.createSubject(2)
+        def skills1 = SkillsFactory.createSkills(2,2)
+        skills1[1].pointIncrement = 200
+        skills1[1].numPerformToCompletion = 200
+        skills1[1].selfReportType = SkillDef.SelfReportingType.Approval
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(subj1)
+        skillsService.createSkills(skills1)
+
+        7.times {
+            Date date = new Date() - it
+            def res = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "user${it}", date, "Please approve this ${it}!")
+            assert res.body.explanation == "Skill was submitted for approval"
+        }
+
+        3.times {
+            Date date = new Date() - it
+            def res = skillsService.addSkill([projectId: proj1.projectId, skillId: skills1[1].skillId], "user${it}", date, "Other reason ${it}!")
+            assert res.body.explanation == "Skill was submitted for approval"
+        }
+
+        when:
+        def proj1Res = skillsService.getApprovals(proj.projectId, 10, 1, 'requestedOn', false)
+        def proj2Res = skillsService.getApprovals(proj1.projectId, 10, 1, 'requestedOn', false)
+
+        then:
+        proj1Res.totalCount == 7
+        proj1Res.count == 7
+
+        proj2Res.totalCount == 3
+        proj2Res.count == 3
+
+        proj1Res.data.size() == 7
+        (0..6).each {Integer index ->
+            assert proj1Res.data[index].id
+            assert proj1Res.data[index].userId == "user${index}"
+            assert proj1Res.data[index].skillId == "skill1"
+            assert proj1Res.data[index].skillName == "Test Skill 1"
+            assert proj1Res.data[index].requestMsg == "Please approve this ${index}!"
+        }
+
+        proj2Res.data.size() == 3
+        (0..2).each {Integer index ->
+            assert proj2Res.data[index].id
+            assert proj2Res.data[index].userId == "user${index}"
+            assert proj2Res.data[index].skillId == "skill2"
+            assert proj2Res.data[index].skillName == "Test Skill 2"
+            assert proj2Res.data[index].requestMsg == "Other reason ${index}!"
+        }
     }
 }
