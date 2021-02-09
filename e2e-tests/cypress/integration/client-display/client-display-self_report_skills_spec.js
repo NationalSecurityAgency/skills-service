@@ -52,19 +52,19 @@ describe('Client Display Self Report Skills Tests', () => {
     });
 
     Cypress.Commands.add("approveRequest", (requestNum=0) => {
-      cy.request('/admin/projects/proj1/approvals')
+      cy.request('/admin/projects/proj1/approvals?limit=10&ascending=true&page=1&orderBy=userId')
           .then((response) => {
             cy.request('POST', '/admin/projects/proj1/approvals/approve', {
-              skillApprovalIds: [response.body[requestNum].id],
+              skillApprovalIds: [response.body.data[requestNum].id],
             });
           });
     });
 
     Cypress.Commands.add("rejectRequest", (requestNum=0, rejectionMsg='Skill was rejected') => {
-      cy.request('/admin/projects/proj1/approvals')
+      cy.request('/admin/projects/proj1/approvals?limit=10&ascending=true&page=1&orderBy=userId')
           .then((response) => {
             cy.request('POST', '/admin/projects/proj1/approvals/reject', {
-              skillApprovalIds: [response.body[requestNum].id],
+              skillApprovalIds: [response.body.data[requestNum].id],
               rejectionMessage: rejectionMsg,
             });
           });

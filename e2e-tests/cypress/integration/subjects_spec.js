@@ -257,17 +257,15 @@ describe('Subjects Tests', () => {
         cy.get('.alert-danger').contains('File is not an image format');
     });
 
-    it('upload custom icon - server side error', () => {
+    it.only('upload custom icon - server side error', () => {
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
             projectId: 'proj1',
             subjectId: 'subj1',
             name: "Subject 1"
         });
 
-        cy.intercept({
-            method: 'POST',
-            url: '/admin/projects/proj1/icons/upload',
-            status: 400,
+        cy.intercept('POST', '/admin/projects/proj1/icons/upload', {
+            statusCode: 400,
             response: {explanation: 'Something bad'}
         }).as('addAdmin');
 
