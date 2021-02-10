@@ -171,7 +171,7 @@ describe('Client Display Self Report Skills Tests', () => {
     cy.get('[data-cy="skillProgress_index-1"] [data-cy="pointsPerOccurrenceCard"] [data-cy="progressInfoCardTitle"]').contains('50');
     cy.get('[data-cy="skillProgress_index-1"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('50 / 100 Points')
 
-    cy.get('[data-cy="skillProgress_index-1"] [data-cy="skillProgressBar"]').matchImageSnapshot('Halfway_Progress');
+    cy.get('[data-cy="skillProgress_index-1"] [data-cy="skillProgressBar"]').matchImageSnapshot('Halfway_Progress_On_Subj_Page');
 
     cy.get('[data-cy="skillProgress_index-1"] [data-cy="selfReportBtn"]').click();
     cy.get('[data-cy="selfReportSkillMsg"]').contains('This skill can be submitted under the Honor System and 50 points will apply right away')
@@ -184,7 +184,7 @@ describe('Client Display Self Report Skills Tests', () => {
     cy.get('[data-cy="skillProgress_index-1"] [data-cy="pointsPerOccurrenceCard"] [data-cy="progressInfoCardTitle"]').contains('50');
     cy.get('[data-cy="skillProgress_index-1"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('100 / 100 Points')
 
-    cy.get('[data-cy="skillProgress_index-1"] [data-cy="skillProgressBar"]').matchImageSnapshot('Full_Progress');
+    cy.get('[data-cy="skillProgress_index-1"] [data-cy="skillProgressBar"]').matchImageSnapshot('Full_Progress_On_Subj_Page');
 
     cy.get('[data-cy="skillProgress_index-1"]').contains('Achieved on ')
   });
