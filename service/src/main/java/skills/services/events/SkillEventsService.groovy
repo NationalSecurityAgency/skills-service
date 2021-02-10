@@ -83,7 +83,7 @@ class SkillEventsService {
 
     @Autowired
     MetricsLogger metricsLogger;
-  
+
     @Autowired
     UserEventService userEventService
 
@@ -210,7 +210,6 @@ class SkillEventsService {
             return res
         }
 
-        SkillDef.SelfReportingType selfReportingType = skillDefinition.getSelfReportingType()
         if (approvalParams && !approvalParams.disableChecks &&
             skillDefinition.getSelfReportingType() == SkillDef.SelfReportingType.Approval) {
             checkRes = selfReportingService.requestApproval(userId, skillDefinition, skillDate.date, approvalParams?.approvalRequestedMsg)

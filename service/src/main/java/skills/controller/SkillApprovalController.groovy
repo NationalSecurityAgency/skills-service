@@ -16,6 +16,7 @@
 package skills.controller
 
 import groovy.util.logging.Slf4j
+import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.http.MediaType
@@ -26,6 +27,8 @@ import org.springframework.web.bind.annotation.RequestMethod
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.bind.annotation.RestController
+import skills.controller.exceptions.ErrorCode
+import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.SkillApprovalRejection
 import skills.controller.request.model.SkillApprovalRequest
@@ -33,6 +36,8 @@ import skills.controller.result.model.BadgeResult
 import skills.controller.result.model.RequestResult
 import skills.controller.result.model.SkillApprovalResult
 import skills.controller.result.model.TableResult
+import skills.services.CustomValidationResult
+import skills.services.CustomValidator
 import skills.services.SkillApprovalService
 
 import static org.springframework.data.domain.Sort.Direction.ASC
@@ -47,6 +52,9 @@ class SkillApprovalController {
 
     @Autowired
     SkillApprovalService skillApprovalService
+
+    @Autowired
+    CustomValidator customValidator
 
     @RequestMapping(value = "/projects/{projectId}/approvals", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
@@ -77,6 +85,14 @@ class SkillApprovalController {
                             @RequestBody SkillApprovalRejection rejectRequest) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isTrue(rejectRequest?.skillApprovalIds?.size() > 0, "Must supply [skillApprovalIds]", projectId)
+
+        if (StringUtils.isNoneBlank(rejectRequest.rejectionMessage)) {
+            CustomValidationResult customValidationResult = customValidator.validateDescription(rejectRequest.rejectionMessage)
+            if (!customValidationResult.valid) {
+                String msg = "Custom validation failed: msg=[${customValidationResult.msg}], type=[skillApprovalRejection], rejectionMsg=[${rejectRequest.rejectionMessage}], skillApprovalIds=${rejectRequest.skillApprovalIds}]"
+                throw new SkillException(msg, projectId, null, ErrorCode.BadParam)
+            }
+        }
 
         skillApprovalService.reject(projectId, rejectRequest.skillApprovalIds, rejectRequest.rejectionMessage)
         return new RequestResult(success: true)

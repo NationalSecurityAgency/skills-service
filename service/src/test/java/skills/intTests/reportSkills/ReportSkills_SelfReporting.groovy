@@ -17,7 +17,9 @@ package skills.intTests.reportSkills
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpStatus
 import skills.intTests.utils.DefaultIntSpec
+import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.storage.model.SkillApproval
 import skills.storage.model.SkillDef
@@ -125,7 +127,6 @@ class ReportSkills_SelfReporting extends DefaultIntSpec {
 
         def approvalsEndpointResAfter = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false)
         def skillEvents = skillsService.getPerformedSkills(user, proj.projectId)
-        println skillEvents
 
         then:
         !res.body.skillApplied
@@ -215,5 +216,28 @@ class ReportSkills_SelfReporting extends DefaultIntSpec {
         approvalsEndpointResAfter.data.get(0).skillId == skills[0].skillId
         approvalsEndpointResAfter.data.get(0).skillName == skills[0].name
         approvalsEndpointResAfter.data.get(0).requestedOn == date1.time
+    }
+
+    def "report via approval should validate approval message if 'paragraphValidationRegex' property is configurede"() {
+        String user = "user0"
+
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(1,)
+        skills[0].pointIncrement = 200
+        skills[0].selfReportType = SkillDef.SelfReportingType.Approval
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        Date date = new Date() - 60
+        when:
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], user, date, "Please approve jabberwocky this!")
+
+        then:
+        SkillsClientException e = thrown()
+        e.httpStatus == HttpStatus.BAD_REQUEST
+        e.message.contains("Custom validation failed: msg=[paragraphs may not contain jabberwocky], type=[selfReportApprovalMsg], requestMsg=[Please approve jabberwocky this!], userId=user0")
     }
 }

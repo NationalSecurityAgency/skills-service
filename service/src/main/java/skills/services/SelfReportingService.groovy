@@ -15,8 +15,10 @@
  */
 package skills.services
 
+import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.services.events.SkillEventsService
 import skills.storage.model.SkillApproval
@@ -31,7 +33,18 @@ class SelfReportingService {
     @Autowired
     SkillApprovalRepo skillApprovalRepo
 
+    @Autowired
+    CustomValidator customValidator
+
     SkillEventsService.AppliedCheckRes requestApproval(String userId, SkillEventsSupportRepo.SkillDefMin skillDefinition, Date performedOn, String requestMsg) {
+
+        if (StringUtils.isNoneBlank(requestMsg)) {
+            CustomValidationResult customValidationResult = customValidator.validateDescription(requestMsg)
+            if (!customValidationResult.valid) {
+                String msg = "Custom validation failed: msg=[${customValidationResult.msg}], type=[selfReportApprovalMsg], requestMsg=[${requestMsg}], userId=${userId}, performedOn=[${performedOn}]]"
+                throw new SkillException(msg, skillDefinition.projectId, skillDefinition.skillId, ErrorCode.BadParam)
+            }
+        }
 
         SkillEventsService.AppliedCheckRes res
         SkillApproval existing = skillApprovalRepo.findByUserIdProjectIdAndSkillId(userId, skillDefinition.projectId, skillDefinition.skillId)

@@ -441,9 +441,11 @@ class SkillsDescriptionSpec extends DefaultIntSpec {
 
         String user = "user1"
         Date date = new Date()
+        Date date1 = new Date() - 1
+        Date date2 = new Date() - 2
         def addSkillRes = skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_subj1_skills[0].skillId], user, date)
-        def addSkillRes1 = skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_subj1_skills[1].skillId], user, date)
-        def addSkillRes2 = skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_subj1_skills[3].skillId], user, date)
+        def addSkillRes1 = skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_subj1_skills[1].skillId], user, date1)
+        def addSkillRes2 = skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_subj1_skills[3].skillId], user, date2)
         def approvalsEndpointRes = skillsService.getApprovals(proj1.projectId, 5, 1, 'requestedOn', false)
         List<Integer> ids = approvalsEndpointRes.data.findAll { it.skillId == proj1_subj1_skills[3].skillId }.collect { it.id }
         skillsService.rejectSkillApprovals(proj1.projectId, ids, "rejection message")
@@ -471,7 +473,7 @@ class SkillsDescriptionSpec extends DefaultIntSpec {
         res1.get(1).skillId == proj1_subj1_skills[1].skillId
         res1.get(1).selfReporting.enabled
         res1.get(1).selfReporting.type == SkillDef.SelfReportingType.Approval.toString()
-        res1.get(1).selfReporting.requestedOn == date.time
+        res1.get(1).selfReporting.requestedOn == date1.time
         !res1.get(1).selfReporting.rejectedOn
         !res1.get(1).selfReporting.rejectionMsg
 
@@ -485,7 +487,7 @@ class SkillsDescriptionSpec extends DefaultIntSpec {
         res1.get(3).skillId == proj1_subj1_skills[3].skillId
         res1.get(3).selfReporting.enabled
         res1.get(3).selfReporting.type == SkillDef.SelfReportingType.Approval.toString()
-        res1.get(3).selfReporting.requestedOn == date.time
+        res1.get(3).selfReporting.requestedOn == date2.time
         new Date(res1.get(3).selfReporting.rejectedOn).format('yyyy-MM-dd') == new Date().format('yyyy-MM-dd')
         res1.get(3).selfReporting.rejectionMsg == "rejection message"
 

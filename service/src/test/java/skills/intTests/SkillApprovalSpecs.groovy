@@ -16,8 +16,11 @@
 package skills.intTests
 
 import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpStatus
 import skills.intTests.utils.DefaultIntSpec
+import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.storage.model.SkillApproval
 import skills.storage.model.SkillDef
@@ -322,5 +325,34 @@ class SkillApprovalSpecs extends DefaultIntSpec {
         then:
         // no error
         true
+    }
+
+    void "validate rejection message if 'paragraphValidationRegex' property is configured"() {
+        String user = "user0"
+        String user1 = "user1"
+
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(1,)
+        skills[0].pointIncrement = 200
+        skills[0].selfReportType = SkillDef.SelfReportingType.Approval
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        Date date = new Date() - 60
+
+        when:
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], user, date, "Please approve this!")
+        def approvalsEndpointRes = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false)
+
+        List approvals = approvalsEndpointRes.data.sort({ it.userId })
+
+        skillsService.rejectSkillApprovals(proj.projectId, [approvals[0].id], 'Just jabberwocky felt like it')
+        then:
+        SkillsClientException e = thrown()
+        e.httpStatus == HttpStatus.BAD_REQUEST
+        e.message.contains("Custom validation failed: msg=[paragraphs may not contain jabberwocky], type=[skillApprovalRejection], rejectionMsg=[Just jabberwocky felt like it]")
     }
 }
