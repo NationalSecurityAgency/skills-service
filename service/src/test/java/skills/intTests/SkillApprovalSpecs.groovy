@@ -147,7 +147,6 @@ class SkillApprovalSpecs extends DefaultIntSpec {
         skillsService.rejectSkillApprovals(proj.projectId, ids, 'Just felt like it')
 
         List<SkillApproval> approvalsAfterRejection = skillApprovalRepo.findAll()
-        println approvalsAfterRejection
 
         def approvalsEndpointResAfter = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false)
         def skillEvents = skillsService.getPerformedSkills(user, proj.projectId)
@@ -233,5 +232,95 @@ class SkillApprovalSpecs extends DefaultIntSpec {
             assert proj2Res.data[index].skillName == "Test Skill 2"
             assert proj2Res.data[index].requestMsg == "Other reason ${index}!"
         }
+    }
+
+    void "approval message is optional"() {
+        String user = "user0"
+        String user1 = "user1"
+
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(1,)
+        skills[0].pointIncrement = 200
+        skills[0].selfReportType = SkillDef.SelfReportingType.Approval
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        Date date = new Date() - 60
+        when:
+        def res = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], user, date, "Please approve this!")
+        def res1 = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], user1, date)
+        def approvalsEndpointRes = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false)
+
+        List approvals = approvalsEndpointRes.data.sort({ it.userId })
+        then:
+        !res.body.skillApplied
+        !res1.body.skillApplied
+
+        approvals.size() == 2
+        approvals[0].userId == "user0"
+        approvals[0].requestMsg == "Please approve this!"
+
+        approvals[1].userId == "user1"
+        !approvals[1].requestMsg
+    }
+
+    void "rejection message is optional"() {
+        String user = "user0"
+        String user1 = "user1"
+
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(1,)
+        skills[0].pointIncrement = 200
+        skills[0].selfReportType = SkillDef.SelfReportingType.Approval
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        Date date = new Date() - 60
+
+        def res = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], user, date, "Please approve this!")
+        def res1 = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], user1, date)
+        def approvalsEndpointRes = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false)
+
+        List approvals = approvalsEndpointRes.data.sort({ it.userId })
+
+        when:
+        skillsService.rejectSkillApprovals(proj.projectId, [approvals[0].id], 'Just felt like it')
+        skillsService.rejectSkillApprovals(proj.projectId, [approvals[1].id])
+
+        List<SkillApproval> approvalsAfterRejection = skillApprovalRepo.findAll().sort { it.userId}
+        then:
+        approvalsAfterRejection.get(0).rejectionMsg == "Just felt like it"
+        !approvalsAfterRejection.get(1).rejectionMsg
+    }
+
+    void "ignore ids that do not exist during approval or rejection"() {
+        String user = "user0"
+        String user1 = "user1"
+
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(1,)
+        skills[0].pointIncrement = 200
+        skills[0].selfReportType = SkillDef.SelfReportingType.Approval
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        Date date = new Date() - 60
+
+        when:
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], user, date, "Please approve this!")
+        skillsService.approve(proj.projectId, [-2])
+        skillsService.rejectSkillApprovals(proj.projectId, [-3])
+        then:
+        // no error
+        true
     }
 }
