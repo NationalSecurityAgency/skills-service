@@ -257,7 +257,7 @@ describe('Subjects Tests', () => {
         cy.get('.alert-danger').contains('File is not an image format');
     });
 
-    it.only('upload custom icon - server side error', () => {
+    it('upload custom icon - server side error', () => {
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
             projectId: 'proj1',
             subjectId: 'subj1',

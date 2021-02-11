@@ -422,7 +422,7 @@ describe('Client Display Self Report Skills Tests', () => {
     cy.get('[data-cy="pendingApprovalStatus"]').should('not.exist');
   });
 
-  it.only('validate approval message if custom validator is configured', () => {
+  it('validate approval message if custom validator is configured', () => {
 
     cy.intercept('POST', '/api/projects/proj1/skills/skill1', (req) => {
       expect(req.body.approvalRequestedMsg).to.include('some val jabberwock')

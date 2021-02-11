@@ -347,9 +347,8 @@ describe('Self Report Skills Management Tests', () => {
     });
 
     it('reject one', () => {
-        cy.intercept({
-            method: 'POST',
-            url: '/admin/projects/proj1/approvals/reject',
+        cy.intercept('POST', '/admin/projects/proj1/approvals/reject', (req) => {
+            expect(req.body.rejectionMessage).to.include('Rejection message!')
         }).as('reject');
 
         cy.createSkill(1, 1, 1, { selfReportType: 'Approval' });
@@ -388,6 +387,57 @@ describe('Self Report Skills Management Tests', () => {
 
         cy.visit('/projects/proj1/users/user1/skillEvents');
         cy.get('[data-cy="performedSkillsTable"] tbody tr').should('have.length', 0)
+    });
+
+
+    it('custom validation for rejection message', () => {
+        cy.intercept('POST', '/admin/projects/proj1/approvals/reject', (req) => {
+            expect(req.body.rejectionMessage).to.include('Rejection jabberwoc')
+        }).as('reject');
+
+        cy.createSkill(1, 1, 1, { selfReportType: 'Approval' });
+        cy.createSkill(1, 1, 2, { selfReportType: 'Approval' });
+        cy.createSkill(1, 1, 3, { selfReportType: 'Approval' });
+        cy.reportSkill(1, 2, 'user2', '2020-09-16 11:00')
+        cy.reportSkill(1, 3, 'user1', '2020-09-17 11:00')
+        cy.reportSkill(1, 1, 'user0', '2020-09-18 11:00')
+
+        cy.visit('/projects/proj1/self-report');
+
+        cy.get('[data-cy="approvalSelect_user1-skill3"]').click({force: true});
+        cy.get('[data-cy="rejectBtn"]').click();
+        cy.get('[data-cy="rejectionTitle"]').contains('This will permanently reject user requests to get points')
+
+        cy.get('[data-cy="rejectionInputMsgError"]').contains('Rejection Message - paragraphs may not contain jabberwocky.').should('not.exist');
+        cy.get('[data-cy="confirmRejectionBtn"]').should('be.enabled');
+
+        cy.get('[data-cy="rejectionInputMsg"]').type('Rejection jabber');
+        cy.get('[data-cy="rejectionInputMsgError"]').contains('Rejection Message - paragraphs may not contain jabberwocky.').should('not.exist');
+        cy.get('[data-cy="confirmRejectionBtn"]').should('be.enabled');
+
+        cy.get('[data-cy="rejectionInputMsg"]').type('wock');
+        cy.get('[data-cy="rejectionInputMsgError"]').contains('Rejection Message - paragraphs may not contain jabberwocky.').should('not.exist');
+        cy.get('[data-cy="confirmRejectionBtn"]').should('be.enabled');
+
+        cy.get('[data-cy="rejectionInputMsg"]').type('y');
+        cy.get('[data-cy="rejectionInputMsgError"]').contains('Rejection Message - paragraphs may not contain jabberwocky.');
+        cy.get('[data-cy="confirmRejectionBtn"]').should('be.disabled');
+
+        cy.get('[data-cy="rejectionInputMsg"]').type(' ok');
+        cy.get('[data-cy="rejectionInputMsgError"]').contains('Rejection Message - paragraphs may not contain jabberwocky.');
+        cy.get('[data-cy="confirmRejectionBtn"]').should('be.disabled');
+
+        cy.get('[data-cy="rejectionInputMsg"]').type('{backspace}{backspace}{backspace}');
+        cy.get('[data-cy="rejectionInputMsgError"]').contains('Rejection Message - paragraphs may not contain jabberwocky.');
+        cy.get('[data-cy="confirmRejectionBtn"]').should('be.disabled');
+
+        cy.get('[data-cy="rejectionInputMsg"]').type('{backspace}{backspace}');
+        cy.get('[data-cy="rejectionInputMsgError"]').contains('Rejection Message - paragraphs may not contain jabberwocky.').should('not.exist');
+        cy.get('[data-cy="confirmRejectionBtn"]').should('be.enabled');
+
+
+        cy.get('[data-cy="confirmRejectionBtn"]').click();
+        cy.wait('@reject')
     });
 
     it('approve 1 page worth of records', () => {

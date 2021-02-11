@@ -15,7 +15,7 @@
  */
 var moment = require('moment-timezone');
 
-describe('Multiple Project Metrics', () => {
+describe('Multiple Project With no Results', () => {
     const multiProjSel = '[data-cy=multiProjectUsersInCommon]';
     const trainingProfSel = '[data-cy=trainingProfileComparator]';
 

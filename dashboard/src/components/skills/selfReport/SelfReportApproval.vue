@@ -63,29 +63,37 @@ limitations under the License.
 
     </skills-b-table>
 
+    <ValidationObserver v-slot="{invalid}" slim>
     <b-modal id="rejectSkillsModal"
              title="REJECT SKILLS"
              :no-close-on-backdrop="true"
              v-model="reject.showModal">
-      <div class="row p-2" data-cy="rejectionTitle">
-        <div class="col-auto text-center">
-          <i class="far fa-thumbs-down text-warning" style="font-size: 3rem"/>
+        <div class="row p-2" data-cy="rejectionTitle">
+          <div class="col-auto text-center">
+            <i class="far fa-thumbs-down text-warning" style="font-size: 3rem"/>
+          </div>
+          <div class="col">
+            <p class="h6">This will <b class="text-warning">permanently</b> reject user requests to get points. Users will be notified and you can provide an optional message below.</p>
+          </div>
         </div>
-        <div class="col">
-          <p class="h6">This will <b class="text-warning">permanently</b> reject user requests to get points. Users will be notified and you can provide an optional message below.</p>
-        </div>
-      </div>
-      <input type="text" id="approvalRequiredMsg" v-model="reject.rejectMsg"
-             class="form-control" placeholder="Message (optional)" data-cy="rejectionInputMsg">
-      <template #modal-footer>
-        <button type="button" class="btn btn-outline-danger text-uppercase" @click="reject.showModal=false">
-          <i class="fas fa-times-circle"></i> Cancel
-        </button>
-        <button type="button" class="btn btn-outline-success text-uppercase" @click="doReject(); reject.showModal=false;" data-cy="confirmRejectionBtn">
-          <i class="fas fa-arrow-alt-circle-right"></i> Reject
-        </button>
-      </template>
+        <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" v-slot="{invalid, errors}"
+                            name="Rejection Message">
+          <input type="text" id="approvalRequiredMsg" v-model="reject.rejectMsg"
+               class="form-control" placeholder="Message (optional)" data-cy="rejectionInputMsg">
+          <small class="form-text text-danger mb-3" data-cy="rejectionInputMsgError">{{ errors[0] }}</small>
+        </ValidationProvider>
+        <template #modal-footer>
+          <button type="button" class="btn btn-outline-danger text-uppercase" @click="reject.showModal=false">
+            <i class="fas fa-times-circle"></i> Cancel
+          </button>
+          <button type="button" class="btn btn-outline-success text-uppercase"
+                  :disabled="invalid"
+                  @click="doReject(); reject.showModal=false;" data-cy="confirmRejectionBtn">
+            <i class="fas fa-arrow-alt-circle-right"></i> Reject
+          </button>
+        </template>
     </b-modal>
+    </ValidationObserver>
   </b-card>
 </template>
 

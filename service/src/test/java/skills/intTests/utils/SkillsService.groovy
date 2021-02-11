@@ -891,11 +891,11 @@ class SkillsService {
     }
 
     def checkCustomDescriptionValidation(String description){
-        return wsHelper.appPost("/validation/description", [value: description])
+        return wsHelper.apiPost("/validation/description", [value: description])
     }
 
     def checkCustomNameValidation(String description){
-        return wsHelper.appPost("/validation/name", [value: description])
+        return wsHelper.apiPost("/validation/name", [value: description])
     }
 
     def addProjectAdmin(String projectId, String userId) {
