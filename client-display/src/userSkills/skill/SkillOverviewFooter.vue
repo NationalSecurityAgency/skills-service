@@ -23,7 +23,7 @@ limitations under the License.
           </a>
           <button v-if="selfReport.available" class="btn btn-outline-info"
                   :disabled="selfReportDisabled"
-                  @click="modalVisible = true;"
+                  @click="selfReportModalVisible = true;"
                   data-cy="selfReportBtn">
             <i class="fas fa-check-square"></i> I did it
           </button>
@@ -89,33 +89,10 @@ limitations under the License.
       </div>
     </div>
 
-    <b-modal id="reportSkillModal"
-             title="REPORT SKILL"
-             ok-title="Submit"
-             :no-close-on-backdrop="true"
-             v-model="modalVisible">
-      <div class="row p-2" data-cy="selfReportSkillMsg">
-        <div class="col-auto text-center">
-          <i v-if="isHonorSystem" class="fas fa-chess-knight text-success" style="font-size: 3rem"></i>
-          <i v-if="isApprovalRequired" class="fas fa-thumbs-up text-info" style="font-size: 3rem"></i>
-        </div>
-        <div class="col">
-          <p class="h5" v-if="isHonorSystem">This skill can be submitted under the <b class="text-success">Honor System</b> and <b class="text-success">{{ skillInternal.pointIncrement}}</b> points will apply right away!</p>
-          <p class="h5" v-if="isApprovalRequired">This skill requires <b class="text-info">approval</b>. Submit with an <span class="text-muted">optional</span> message and it will enter an approval queue.</p>
-        </div>
-      </div>
-      <input type="text" id="approvalRequiredMsg"
-             v-if="isApprovalRequired" v-model="approvalRequestedMsg"
-             class="form-control" placeholder="Message (optional)">
-      <template #modal-footer>
-        <button type="button" class="btn btn-outline-danger text-uppercase" @click="modalVisible=false">
-          <i class="fas fa-times-circle"></i> Cancel
-        </button>
-        <button type="button" class="btn btn-outline-success text-uppercase" @click="reportSkill(); modalVisible=false;" data-cy="selfReportSubmitBtn">
-          <i class="fas fa-arrow-alt-circle-right"></i> Submit
-        </button>
-      </template>
-    </b-modal>
+    <self-report-skill-modal v-if="selfReportModalVisible" @report-skill="reportSkill" @cancel="selfReportModalVisible = false"
+        :skill="skillInternal"
+        :is-approval-required="isApprovalRequired"
+        :is-honor-system="isHonorSystem" />
 
     <b-modal id="clearRejectionMsgDialog"
              title="CLEAR APPROVAL REJECTION"
@@ -143,14 +120,16 @@ limitations under the License.
 
 <script>
   import UserSkillsService from '../service/UserSkillsService';
+  import SelfReportSkillModal from './SelfReportSkillModal';
 
   export default {
     name: 'SkillOverviewFooter',
+    components: { SelfReportSkillModal },
     props: ['skill'],
     data() {
       return {
         skillInternal: {},
-        modalVisible: false,
+        selfReportModalVisible: false,
         clearRejectionModalVisible: false,
         approvalRequestedMsg: '',
         selfReport: {
@@ -210,8 +189,8 @@ limitations under the License.
             this.skillInternal.selfReporting.requestedOn = null;
           });
       },
-      reportSkill() {
-        UserSkillsService.reportSkill(this.skillInternal.skillId, this.approvalRequestedMsg)
+      reportSkill(approvalRequestedMsg) {
+        UserSkillsService.reportSkill(this.skillInternal.skillId, approvalRequestedMsg)
           .then((res) => {
             if (this.skillInternal.selfReporting) {
               this.skillInternal.selfReporting.rejectedOn = null;
@@ -227,6 +206,8 @@ limitations under the License.
               this.skillInternal.points += res.pointsEarned;
               this.$emit('points-earned', res.pointsEarned);
             }
+
+            this.selfReportModalVisible = false;
           });
       },
     },

@@ -421,4 +421,39 @@ describe('Client Display Self Report Skills Tests', () => {
     cy.get('[data-cy="selfReportRejectedAlert"]').should('not.exist')
     cy.get('[data-cy="pendingApprovalStatus"]').should('not.exist');
   });
+
+  it.only('validate approval message if custom validator is configured', () => {
+
+    cy.intercept('POST', '/api/projects/proj1/skills/skill1', (req) => {
+      expect(req.body.approvalRequestedMsg).to.include('some val jabberwock')
+    }).as('reportSkill');
+
+
+    cy.createSkill(1, 'Approval');
+    cy.cdVisit('/');
+    cy.cdClickSubj(0);
+    cy.cdClickSkill(0);
+
+    cy.get('[data-cy="selfReportBtn"]').click();
+    cy.get('[data-cy="selfReportSkillMsg"]').contains('This skill requires approval. Submit with an optional message and it will enter an approval queue.')
+
+    cy.get('[data-cy="selfReportMsgInput"]').type('some val');
+    cy.get('[data-cy="selfReportSubmitBtn"]').should('be.enabled');
+    cy.get('[data-cy="selfReportMsgInput_errMsg"]').should('not.exist');
+
+    cy.get('[data-cy="selfReportMsgInput"]').type(' jabberwocky ok');
+    cy.get('[data-cy="selfReportSubmitBtn"]').should('be.disabled');
+    cy.get('[data-cy="selfReportMsgInput_errMsg"]').contains('paragraphs may not contain jabberwocky')
+
+    cy.get('[data-cy="selfReportMsgInput"]').type('{backspace}{backspace}{backspace}');
+    cy.get('[data-cy="selfReportSubmitBtn"]').should('be.disabled');
+    cy.get('[data-cy="selfReportMsgInput_errMsg"]').contains('paragraphs may not contain jabberwocky')
+
+    cy.get('[data-cy="selfReportMsgInput"]').type('{backspace}');
+    cy.get('[data-cy="selfReportSubmitBtn"]').should('be.enabled');
+    cy.get('[data-cy="selfReportMsgInput_errMsg"]').should('not.exist');
+
+    cy.get('[data-cy="selfReportSubmitBtn"]').click();
+    cy.wait('@reportSkill');
+  });
 })

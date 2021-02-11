@@ -191,6 +191,13 @@ export default {
     return response;
   },
 
+  validateDescription(description) {
+    const body = {
+      value: description,
+    };
+    return axios.post(`${store.state.serviceUrl}/api/validation/description`, body).then((result) => result.data);
+  },
+
   getServicePath() {
     return '/api/projects';
   },
