@@ -18,7 +18,7 @@ limitations under the License.
     <metrics-card :title="mutableTitle" data-cy="eventHistoryChart">
       <template v-slot:afterTitle>
         <span class="text-muted ml-2">|</span>
-        <time-length-selector :options="timeSelectorOptions" @time-selected="updateTimeRange"/>
+        <time-length-selector ref="timeLengthSelector" :options="timeSelectorOptions" @time-selected="updateTimeRange"/>
       </template>
       <multiselect v-model="projects.selected"
                   :options="projects.available"
@@ -92,6 +92,7 @@ limitations under the License.
           },
         ],
         series: [],
+        toolbarOffset: 0,
         chartOptions: {
           chart: {
             height: 350,
@@ -103,7 +104,6 @@ limitations under the License.
             },
             toolbar: {
               autoSelected: 'zoom',
-              offsetY: -102,
             },
           },
           dataLabels: {
@@ -158,6 +158,14 @@ limitations under the License.
       const availableSortedByMostPoints = this.projects.available.sort((a, b) => b.points - a.points);
       this.projects.selected = availableSortedByMostPoints.slice(0, numProjectsToSelect);
       // loadData() is called here because of the watch on `projects.selected`, which is triggered by the assignment above
+
+      // add listener for window resize events
+      window.addEventListener('resize', this.updateToolbarOffset);
+    },
+    updated() {
+      this.$nextTick(() => {
+        this.updateToolbarOffset();
+      });
     },
     computed: {
       enoughOverallProjects() {
@@ -229,14 +237,31 @@ limitations under the License.
           this.loading = false;
         }
       },
+      updateToolbarOffset() {
+        const toolbarElem = document.getElementsByClassName('apexcharts-toolbar')[0];
+        const timeLengthSelectorElem = this.$refs.timeLengthSelector;
+        if (toolbarElem && timeLengthSelectorElem) {
+          const toolbarBottom = toolbarElem.getBoundingClientRect().bottom;
+          const timeLengthSelectorBottom = timeLengthSelectorElem.$el.getBoundingClientRect().bottom;
+          const diff = timeLengthSelectorBottom - toolbarBottom;
+          if (diff !== 0) {
+            this.toolbarOffset += diff;
+            this.$refs[this.chartId].updateOptions({
+              chart: {
+                toolbar: {
+                  offsetY: this.toolbarOffset,
+                },
+              },
+            });
+          }
+        }
+      },
+    },
+    beforeDestroy() {
+      window.removeEventListener('resize', this.updateToolbarOffset);
     },
   };
 </script>
 
 <style scoped>
-.charts-content {
-  /* this little hack is required to prevent apexcharts from wrapping onto a new line;
-  the gist is that they calculate width dynamically and do not work properly with the width of 0*/
-  min-width: 1rem !important;
-}
 </style>

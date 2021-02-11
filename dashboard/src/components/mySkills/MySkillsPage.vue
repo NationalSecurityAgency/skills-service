@@ -30,7 +30,7 @@ limitations under the License.
       </b-col>
     </b-row>
     <b-row class="my-4">
-      <b-col class="charts-content">
+      <b-col class="my-skills-card">
         <event-history-chart v-if="!loading" :availableProjects="projects"></event-history-chart>
       </b-col>
     </b-row>
@@ -130,11 +130,6 @@ limitations under the License.
 <style scoped>
 .project-link :hover {
   cursor: pointer;
-}
-.charts-content {
-  /* this little hack is required to prevent apexcharts from wrapping onto a new line;
-  the gist is that they calculate width dynamically and do not work properly with the width of 0*/
-  min-width: 1rem !important;
 }
 .my-skills-card {
   min-width: 17rem !important;
