@@ -484,5 +484,22 @@ describe('Subjects Tests', () => {
         cy.get('[data-cy=breadcrumb-Users]').should('be.visible');
     })
 
+    it('description is validated against custom validators', () => {
+        cy.intercept('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
+
+        cy.visit('/projects/proj1');
+        cy.wait('@loadSubjects');
+        cy.clickButton('Subject');
+
+        cy.get('[data-cy="subjectNameInput"]').type('Great Name');
+        cy.get('[data-cy="saveSubjectButton"]').should('be.enabled');
+        //
+        cy.get('[data-cy="markdownEditorInput"]').type('ldkj aljdl aj\n\njabberwocky');
+        cy.get('[data-cy="subjectDescError"]').contains('Subject Description - paragraphs may not contain jabberwocky');
+        cy.get('[data-cy="saveSubjectButton"]').should('be.disabled');
+
+        cy.get('[data-cy="markdownEditorInput"]').type('{backspace}');
+        cy.get('[data-cy="saveSubjectButton"]').should('be.enabled');
+    });
 
 });

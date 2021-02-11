@@ -762,4 +762,22 @@ describe('Badges Tests', () => {
             [{ colIndex: 0,  value: 'Skill 10' }, { colIndex: 1,  value: 'skill0' }, { colIndex: 2,  value: '50' }],
         ], 5);
     });
+
+    it('description is validated against custom validators', () => {
+        cy.visit('/projects/proj1/badges');
+        cy.wait('@loadBadges');
+        cy.clickButton('Badge');
+
+        cy.get('#badgeName').type('Great Name');
+
+        cy.get('[data-cy="saveBadgeButton"]').should('be.enabled');
+
+        cy.get('[data-cy="markdownEditorInput"]').type('ldkj aljdl aj\n\njabberwocky');
+        cy.get('[data-cy="badgeDescriptionError"]').contains('Badge Description - paragraphs may not contain jabberwocky');
+        cy.get('[data-cy="saveBadgeButton"]').should('be.disabled');
+
+        cy.get('[data-cy="markdownEditorInput"]').type('{backspace}');
+        cy.get('[data-cy="saveBadgeButton"]').should('be.enabled');
+        cy.get('[data-cy="badgeDescriptionError"]').contains('Subject Description - paragraphs may not contain jabberwocky').should('not.exist');
+    });
 });
