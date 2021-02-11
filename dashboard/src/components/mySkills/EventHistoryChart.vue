@@ -169,7 +169,7 @@ limitations under the License.
     },
     computed: {
       enoughOverallProjects() {
-        return this.projects.available && this.projects.available.length >= 2;
+        return this.projects.available && this.projects.available.length > 0;
       },
       enoughProjectsSelected() {
         return this.projects.selected && this.projects.selected.length > 0;
