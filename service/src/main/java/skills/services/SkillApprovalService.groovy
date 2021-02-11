@@ -21,6 +21,7 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
+import skills.controller.result.model.LabelCountItem
 import skills.controller.result.model.SkillApprovalResult
 import skills.controller.result.model.TableResult
 import skills.services.events.SkillEventResult
@@ -100,6 +101,16 @@ class SkillApprovalService {
             it.rejectedOn = new Date()
 
             skillApprovalRepo.save(it)
+        }
+    }
+
+    List<LabelCountItem> getSelfReportStats(String projectId) {
+        List<SkillApprovalRepo.SkillReportingTypeAndCount> drRes = skillApprovalRepo.skillCountsGroupedByApprovalType(projectId)
+        return drRes.collect {
+            new LabelCountItem(
+                    value: it.getType() ?: 'Disabled',
+                    count: it.getCount()
+            )
         }
     }
 

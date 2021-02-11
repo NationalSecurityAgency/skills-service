@@ -355,4 +355,46 @@ class SkillApprovalSpecs extends DefaultIntSpec {
         e.httpStatus == HttpStatus.BAD_REQUEST
         e.message.contains("Custom validation failed: msg=[paragraphs may not contain jabberwocky], type=[skillApprovalRejection], rejectionMsg=[Just jabberwocky felt like it]")
     }
+
+    void "get self reporting stats - all skills disabled"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(4,)
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        when:
+        def res = skillsService.getSelfReportStats(proj.projectId)
+        println JsonOutput.prettyPrint(JsonOutput.toJson(res))
+        then:
+        res.size() == 1
+        res[0].value == "Disabled"
+        res[0].count == 4
+    }
+
+    void "get self reporting stats"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(10,)
+        skills[0].selfReportType = SkillDef.SelfReportingType.Approval
+        skills[1].selfReportType = SkillDef.SelfReportingType.Approval
+        skills[2].selfReportType = SkillDef.SelfReportingType.HonorSystem
+        skills[3].selfReportType = SkillDef.SelfReportingType.HonorSystem
+        skills[4].selfReportType = SkillDef.SelfReportingType.HonorSystem
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        when:
+        def res = skillsService.getSelfReportStats(proj.projectId)
+        println JsonOutput.prettyPrint(JsonOutput.toJson(res))
+        then:
+        res.size() == 3
+        res.find { it.value == "Disabled"}.count == 5
+        res.find { it.value == "HonorSystem"}.count == 3
+        res.find { it.value == "Approval"}.count == 2
+    }
 }

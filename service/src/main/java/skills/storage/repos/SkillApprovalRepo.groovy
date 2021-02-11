@@ -21,6 +21,7 @@ import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.lang.Nullable
 import skills.storage.model.SkillApproval
+import skills.storage.model.SkillDef
 
 @CompileStatic
 interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
@@ -73,5 +74,13 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
             srd.type = 'RuleSetDefinition' and
             s.skillRefId = sd.id''')
     List<SkillApprovalPlusSkillId> findSkillApprovalsByProjectIdAndSubjectId(String userId, String projectId, String subjectId)
+
+    interface SkillReportingTypeAndCount {
+        SkillDef.SelfReportingType getType()
+        Integer getCount()
+    }
+
+    @Query('''SELECT sd.selfReportingType as type, count(sd) as count from SkillDef sd where sd.projectId = ?1 and sd.type = 'Skill' group by sd.selfReportingType''')
+    List<SkillReportingTypeAndCount> skillCountsGroupedByApprovalType(String projectId)
 
 }

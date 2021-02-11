@@ -33,6 +33,7 @@ import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.SkillApprovalRejection
 import skills.controller.request.model.SkillApprovalRequest
 import skills.controller.result.model.BadgeResult
+import skills.controller.result.model.LabelCountItem
 import skills.controller.result.model.RequestResult
 import skills.controller.result.model.SkillApprovalResult
 import skills.controller.result.model.TableResult
@@ -97,4 +98,14 @@ class SkillApprovalController {
         skillApprovalService.reject(projectId, rejectRequest.skillApprovalIds, rejectRequest.rejectionMessage)
         return new RequestResult(success: true)
     }
+
+
+
+    @RequestMapping(value = "/projects/{projectId}/selfReport/stats", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    List<LabelCountItem> getSelfReportDefStats(@PathVariable("projectId") String projectId) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        return skillApprovalService.getSelfReportStats(projectId)
+    }
+
 }

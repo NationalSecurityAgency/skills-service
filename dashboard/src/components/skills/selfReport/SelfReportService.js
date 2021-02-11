@@ -31,4 +31,9 @@ export default {
     return axios.post(url, { skillApprovalIds: approvalIds, rejectionMessage: rejectMsg })
       .then((response) => response.data);
   },
+  getSelfReportStats(projectId) {
+    const url = `/admin/projects/${projectId}/selfReport/stats`;
+    return axios.get(url)
+      .then((response) => response.data);
+  },
 };

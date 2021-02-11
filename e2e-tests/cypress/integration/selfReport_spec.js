@@ -558,7 +558,35 @@ describe('Self Report Skills Management Tests', () => {
         ]);
     });
 
+    it('self report stats', () => {
+        cy.createSkill(1, 1, 1, { selfReportType: 'Approval' });
+        cy.createSkill(1, 1, 2, { selfReportType: 'Approval' });
+        cy.createSkill(1, 1, 3, { selfReportType: 'Approval' });
+        cy.createSkill(1, 1, 4, { selfReportType: 'HonorSystem' });
+        cy.createSkill(1, 1, 5, { selfReportType: 'HonorSystem' });
+        cy.createSkill(1, 1, 6);
 
+        cy.visit('/projects/proj1/self-report');
+
+        cy.get('[data-cy="selfReportInfoCardCount_Disabled"]').contains('1');
+        cy.get('[data-cy="selfReportInfoCardCount_Approval"]').contains('3');
+        cy.get('[data-cy="selfReportInfoCardCount_HonorSystem"]').contains('2');
+    });
+
+    it('do not display approval table if no approval configured', () => {
+        cy.createSkill(1, 1, 4, { selfReportType: 'HonorSystem' });
+        cy.createSkill(1, 1, 5, { selfReportType: 'HonorSystem' });
+        cy.createSkill(1, 1, 6);
+
+        cy.visit('/projects/proj1/self-report');
+
+        cy.get('[data-cy="selfReportInfoCardCount_Disabled"]').contains('1');
+        cy.get('[data-cy="selfReportInfoCardCount_Approval"]').contains('0');
+        cy.get('[data-cy="selfReportInfoCardCount_HonorSystem"]').contains('2');
+
+        cy.get('[data-cy="noApprovalTableMsg"]').contains('No Skills With Approval');
+        cy.get( '[data-cy="skillsReportApprovalTable"]').should('not.exist');
+    });
 
 });
 

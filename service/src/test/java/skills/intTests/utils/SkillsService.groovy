@@ -471,6 +471,10 @@ class SkillsService {
         wsHelper.apiDelete("/projects/${projectId}/rejections/${approvalId}")
     }
 
+    def getSelfReportStats(String projectId) {
+        return wsHelper.adminGet("/projects/${projectId}/selfReport/stats")
+    }
+
     def addSkillAndOptionallyThrowExceptionAtTheEnd(Map props, String userId, Date date, boolean throwException) {
         userId = getUserId(userId)
         return wsHelper.apiPost("/projects/${props.projectId}/skills/${props.skillId}/throwException/${throwException}".toString(),

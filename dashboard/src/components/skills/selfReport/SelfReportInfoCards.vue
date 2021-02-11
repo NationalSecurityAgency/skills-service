@@ -21,7 +21,7 @@ limitations under the License.
           <div class="row">
             <div class="col text-left">
               <div class="h5 card-title text-uppercase text-muted mb-0 small">{{card.label}}</div>
-              <span class="h5 font-weight-bold mb-0">{{ card.count | number}}</span>
+              <span class="h5 font-weight-bold mb-0" :data-cy="`selfReportInfoCardCount_${card.id}`">{{ card.count | number}}</span> skills
             </div>
             <div class="col-auto text-secondary">
               <i :class="card.icon" style="font-size: 2.2rem;"></i>
@@ -36,20 +36,36 @@ limitations under the License.
 <script>
   export default {
     name: 'SelfReportInfoCards',
+    props: {
+      selfReportStats: Array,
+    },
+    mounted() {
+      this.cards = this.cards.map((c) => {
+        const found = this.selfReportStats.find((s) => c.id === s.value);
+        if (found) {
+          // eslint-disable-next-line
+          c.count = found.count;
+        }
+        return c;
+      });
+    },
     data() {
       return {
         cards: [{
-          label: 'Disabled',
-          count: 10,
-          icon: 'far fa-times-circle',
-        }, {
+          id: 'Approval',
           label: 'Approval Required',
-          count: 5,
+          count: 0,
           icon: 'far fa-thumbs-up',
         }, {
+          id: 'HonorSystem',
           label: 'Honor System',
           count: 0,
           icon: 'far fa-meh-rolling-eyes',
+        }, {
+          id: 'Disabled',
+          label: 'Disabled',
+          count: 0,
+          icon: 'far fa-times-circle',
         }],
       };
     },
