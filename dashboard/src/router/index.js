@@ -67,9 +67,9 @@ const SubjectMetricsPage = () => import(/* webpackChunkName: 'SubjectMetricsPage
 const UsersAchievementsMetricPage = () => import(/* webpackChunkName: 'UsersAchievementsMetricPage' */'@//components/metrics/projectAchievements/UsersAchievementsMetricPage');
 const ProjectMetrics = () => import(/* webpackChunkName: 'ProjectMetrics' */'@//components/metrics/ProjectMetrics');
 const MetricsPageNav = () => import(/* webpackChunkName: 'MetricsPageNav' */'@//components/metrics/MetricsPageNav');
-const MySkillsPage = () => import(/* webpackChunkName: 'mySkillsPage' */'@//components/mySkills/MySkillsPage');
-const MySkills = () => import(/* webpackChunkName: 'mySkillsPage' */'@//components/mySkills/MySkills');
-const MyProjectSkillsPage = () => import(/* webpackChunkName: 'mySkillsPage' */'@//components/mySkills/MyProjectSkillsPage');
+const MyProgressPage = () => import(/* webpackChunkName: 'myProgressPage' */'@//components/myProgress/MyProgressPage');
+const MyProgress = () => import(/* webpackChunkName: 'myProgress' */'@//components/myProgress/MyProgress');
+const MyProjectSkillsPage = () => import(/* webpackChunkName: 'myProjectSkillsPage' */'@//components/myProgress/MyProjectSkillsPage');
 
 Vue.use(Router);
 
@@ -192,13 +192,13 @@ const router = new Router({
       },
     },
     {
-      path: '/my-skills',
-      component: MySkills,
+      path: '/my-progress',
+      component: MyProgress,
       meta: { requiresAuth: true },
       children: [{
-        name: 'MySkillsPage',
+        name: 'MyProgressPage',
         path: '',
-        component: MySkillsPage,
+        component: MyProgressPage,
         meta: {
           requiresAuth: true,
         },

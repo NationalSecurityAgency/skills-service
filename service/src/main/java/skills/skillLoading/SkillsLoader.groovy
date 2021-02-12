@@ -130,36 +130,36 @@ class SkillsLoader {
 
     @Profile
     @Transactional(readOnly = true)
-    MySkillsSummary loadMySkillsSummary(String userId, Integer version = -1) {
-        MySkillsSummary mySkillsSummary = new MySkillsSummary()
+    MyProgressSummary loadMyProgressSummary(String userId, Integer version = -1) {
+        MyProgressSummary myProgressSummary = new MyProgressSummary()
 //        List<String> projectIdsWithPointsFromUser = userPerformedSkillRepo.findDistinctProjectIdsWithUserPoints(userId)
         List<ProjDef> allProjectDefs =  projDefRepo.findAll()
-        mySkillsSummary.totalProjects = allProjectDefs.size()
+        myProgressSummary.totalProjects = allProjectDefs.size()
         for (ProjDef projDef : allProjectDefs) {
             ProjectSummary summary = new ProjectSummary(projectId: projDef.projectId, projectName: projDef.name)
             SkillsRanking ranking = rankingLoader.getUserSkillsRanking(projDef.projectId, userId);
             summary.totalUsers = ranking.numUsers
             summary.rank = ranking.position
-            mySkillsSummary.projectSummaries << summary
+            myProgressSummary.projectSummaries << summary
             summary.totalPoints = calculateTotalPointsForProject(projDef, version)
             summary.points = calculatePointsForProject(projDef, userId, version)
             summary.level = getRealLevelInfo(projDef, userId, summary.points, summary.totalPoints).level
-            mySkillsSummary.numProjectsContributed += summary.points > 0 ? 1 : 0
+            myProgressSummary.numProjectsContributed += summary.points > 0 ? 1 : 0
         }
 
-        mySkillsSummary.totalBadges = skillDefRepo.countTotalBadges()
+        myProgressSummary.totalBadges = skillDefRepo.countTotalBadges()
         AchievedBadgeCount achievedBadgeCounts = achievedLevelRepository.countAchievedBadgesForUser(userId)
-        mySkillsSummary.numAchievedBadges = achievedBadgeCounts.totalCount ?: 0
-        mySkillsSummary.numAchievedGemBadges = achievedBadgeCounts.gemCount ?: 0
-        mySkillsSummary.numAchievedGlobalBadges = achievedBadgeCounts.globalCount ?: 0
+        myProgressSummary.numAchievedBadges = achievedBadgeCounts.totalCount ?: 0
+        myProgressSummary.numAchievedGemBadges = achievedBadgeCounts.gemCount ?: 0
+        myProgressSummary.numAchievedGlobalBadges = achievedBadgeCounts.globalCount ?: 0
 
-        mySkillsSummary.totalSkills = skillDefRepo.countTotalSkills()
+        myProgressSummary.totalSkills = skillDefRepo.countTotalSkills()
         AchievedSkillsCount achievedSkillsCount = achievedLevelRepository.countAchievedSkillsForUserByDayWeekMonth(userId)
-        mySkillsSummary.numAchievedSkills = achievedSkillsCount.totalCount
-        mySkillsSummary.numAchievedSkillsLastMonth = achievedSkillsCount.monthCount ?: 0
-        mySkillsSummary.numAchievedSkillsLastWeek = achievedSkillsCount.weekCount ?: 0
-        mySkillsSummary.mostRecentAchievedSkill = achievedSkillsCount.lastAchieved
-        return mySkillsSummary
+        myProgressSummary.numAchievedSkills = achievedSkillsCount.totalCount
+        myProgressSummary.numAchievedSkillsLastMonth = achievedSkillsCount.monthCount ?: 0
+        myProgressSummary.numAchievedSkillsLastWeek = achievedSkillsCount.weekCount ?: 0
+        myProgressSummary.mostRecentAchievedSkill = achievedSkillsCount.lastAchieved
+        return myProgressSummary
     }
 
     @Profile

@@ -17,20 +17,24 @@ limitations under the License.
   <div v-if="!loading" class="container-fluid mt-2">
     <b-row class="my-4">
       <b-col cols="12" md="6" xl="3" class="d-flex mb-2 pl-md-3 pr-md-1">
-        <info-snapshot-card :total-projects="mySkillsSummary.totalProjects" :num-projects-contributed="mySkillsSummary.numProjectsContributed" class="flex-grow-1 my-skills-card" />
+        <info-snapshot-card :total-projects="myProgressSummary.totalProjects" :num-projects-contributed="myProgressSummary.numProjectsContributed" class="flex-grow-1 my-summary-card" />
       </b-col>
       <b-col cols="12" md="6" xl="3" class="d-flex mb-2 pr-md-3 pl-md-1 pr-xl-1">
-        <num-skills :total-skills="mySkillsSummary.totalSkills" :num-achieved-skills="mySkillsSummary.numAchievedSkills" class="flex-grow-1 my-skills-card" />
+        <num-skills :total-skills="myProgressSummary.totalSkills" :num-achieved-skills="myProgressSummary.numAchievedSkills" class="flex-grow-1 my-summary-card" />
       </b-col>
       <b-col cols="12" md="6" xl="3" class="d-flex mb-2 pl-md-3 pr-md-1 pl-xl-1">
-        <last-earned-card :num-achieved-skills-last-month="mySkillsSummary.numAchievedSkillsLastMonth" :num-achieved-skills-last-week="mySkillsSummary.numAchievedSkillsLastWeek" :most-recent-achieved-skill="mySkillsSummary.mostRecentAchievedSkill" class="flex-grow-1 my-skills-card" />
+        <last-earned-card :num-achieved-skills-last-month="myProgressSummary.numAchievedSkillsLastMonth" :num-achieved-skills-last-week="myProgressSummary.numAchievedSkillsLastWeek" :most-recent-achieved-skill="myProgressSummary.mostRecentAchievedSkill" class="flex-grow-1 my-summary-card" />
       </b-col>
       <b-col cols="12" md="6" xl="3" class="d-flex mb-2 pr-md-3 pl-md-1">
-        <badges-num-card :total-badges="mySkillsSummary.totalBadges" :num-achieved-badges="mySkillsSummary.numAchievedBadges" :num-achieved-gem-badges="mySkillsSummary.numAchievedGemBadges" :num-achieved-global-badges="mySkillsSummary.numAchievedGlobalBadges" class="flex-grow-1 my-skills-card" />
+        <badges-num-card :total-badges="myProgressSummary.totalBadges"
+                         :num-achieved-badges="myProgressSummary.numAchievedBadges"
+                         :num-achieved-gem-badges="myProgressSummary.numAchievedGemBadges"
+                         :num-achieved-global-badges="myProgressSummary.numAchievedGlobalBadges"
+                         class="flex-grow-1 my-summary-card"/>
       </b-col>
     </b-row>
     <b-row class="my-4">
-      <b-col class="my-skills-card">
+      <b-col class="my-summary-card">
         <event-history-chart v-if="!loading" :availableProjects="projects"></event-history-chart>
       </b-col>
     </b-row>
@@ -39,7 +43,7 @@ limitations under the License.
              cols="12" md="6" xl="4"
             class="mb-2 px-0">
         <router-link :to="{ name:'MyProjectSkills', params: { projectId: proj.projectId } }" tag="div" class="project-link" :data-cy="`project-link-${proj.projectId}`">
-          <project-link-card :proj="proj" class="my-skills-card px-3" :class="projectLinkClass(index)"/>
+          <project-link-card :proj="proj" class="my-summary-card px-3" :class="projectLinkClass(index)"/>
         </router-link>
       </b-col>
     </b-row>
@@ -54,10 +58,10 @@ limitations under the License.
   import BadgesNumCard from './BadgesNumCard';
   import LastEarnedCard from './LastEarnedCard';
   import EventHistoryChart from './EventHistoryChart';
-  import MySkillsService from './MySkillsService';
+  import MyProgressService from './MyProgressService';
 
   export default {
-    name: 'MySkillsPage',
+    name: 'MyProgressPage',
     components: {
       LastEarnedCard,
       BadgesNumCard,
@@ -69,7 +73,7 @@ limitations under the License.
     data() {
       return {
         loading: true,
-        mySkillsSummary: null,
+        myProgressSummary: null,
         projects: [],
       };
     },
@@ -78,10 +82,10 @@ limitations under the License.
     },
     methods: {
       loadProjects() {
-        MySkillsService.loadMySkillsSummary()
+        MyProgressService.loadMyProgressSummary()
           .then((res) => {
-            this.mySkillsSummary = res;
-            this.projects = this.mySkillsSummary.projectSummaries;
+            this.myProgressSummary = res;
+            this.projects = this.myProgressSummary.projectSummaries;
           }).finally(() => {
             this.loading = false;
           });
@@ -131,7 +135,7 @@ limitations under the License.
 .project-link :hover {
   cursor: pointer;
 }
-.my-skills-card {
+.my-summary-card {
   min-width: 17rem !important;
 }
 </style>

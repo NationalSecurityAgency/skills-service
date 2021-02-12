@@ -23,7 +23,7 @@ limitations under the License.
 
 <script>
   import { SkillsDisplay } from '@skilltree/skills-client-vue';
-  import SkillsDisplayOptionsMixin from '../mySkills/SkillsDisplayOptionsMixin';
+  import SkillsDisplayOptionsMixin from '../myProgress/SkillsDisplayOptionsMixin';
 
   export default {
     name: 'InceptionSkills',

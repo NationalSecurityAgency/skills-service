@@ -21,7 +21,7 @@ limitations under the License.
 
 <script>
   export default {
-    name: 'MySkills',
+    name: 'MyProgress',
   };
 </script>
 

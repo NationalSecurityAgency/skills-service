@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.intTests.mySkills
+package skills.intTests.myProgress
 
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
@@ -23,7 +23,7 @@ import skills.intTests.utils.SkillsService
 import skills.intTests.utils.TestUtils
 
 @Slf4j
-class MySkillsSpec extends DefaultIntSpec {
+class MyProgressSpec extends DefaultIntSpec {
     TestUtils testUtils = new TestUtils()
     SkillsService rootSkillsService
     SkillsService supervisorService
@@ -42,7 +42,7 @@ class MySkillsSpec extends DefaultIntSpec {
         rootSkillsService.deleteProject('Inception')
     }
 
-    def "my skills summary - no skills have been created"() {
+    def "my progress summary - no skills have been created"() {
         def proj1 = SkillsFactory.createProject()
         def subj1 = SkillsFactory.createSubject()
 
@@ -50,7 +50,7 @@ class MySkillsSpec extends DefaultIntSpec {
         skillsService.createSubject(subj1)
 
         when:
-        def res = skillsService.getMySkillSummary()
+        def res = skillsService.getMyProgressSummary()
         then:
         res
         res.projectSummaries
@@ -72,7 +72,7 @@ class MySkillsSpec extends DefaultIntSpec {
         res.numAchievedGlobalBadges == 0
     }
 
-    def "my skills summary - skills have been created"() {
+    def "my progress summary - skills have been created"() {
         def proj1 = SkillsFactory.createProject()
         def subj1 = SkillsFactory.createSubject()
         def skill1 = SkillsFactory.createSkill()
@@ -93,7 +93,7 @@ class MySkillsSpec extends DefaultIntSpec {
         supervisorService.createGlobalBadge(globalBadge)
 
         when:
-        def res = skillsService.getMySkillSummary()
+        def res = skillsService.getMyProgressSummary()
         then:
         res
         res.projectSummaries
@@ -116,7 +116,7 @@ class MySkillsSpec extends DefaultIntSpec {
         res.numAchievedGlobalBadges == 0
     }
 
-    def "my skills summary - incrementally achieve a single skill"() {
+    def "my progress summary - incrementally achieve a single skill"() {
         String projId = SkillsFactory.defaultProjId
         List<Map> subj1 = (1..2).collect { [projectId: projId, subjectId: "subj1", skillId: "s1${it}".toString(), name: "subj1 ${it}".toString(), type: "Skill", pointIncrement: 10, numPerformToCompletion: 5, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1] }
         String skillId = subj1.get(1).skillId
@@ -141,7 +141,7 @@ class MySkillsSpec extends DefaultIntSpec {
         (0..4).each {
             log.info("Adding ${subj1.get(1).skillId} on ${dates.get(it)}")
             addSkillRes << skillsService.addSkill([projectId: projId, skillId: subj1.get(1).skillId], userId, dates.get(it))
-            mySummaryRes << skillsService.getMySkillSummary()
+            mySummaryRes << skillsService.getMyProgressSummary()
         }
 
         then:
@@ -187,7 +187,7 @@ class MySkillsSpec extends DefaultIntSpec {
         }
     }
 
-    def "my skills summary - incrementally achieve a single skill, multiple projects"() {
+    def "my progress summary - incrementally achieve a single skill, multiple projects"() {
         String projId = SkillsFactory.defaultProjId
         List<Map> subj1 = (1..2).collect { [projectId: projId, subjectId: "subj1", skillId: "s1${it}".toString(), name: "subj1 ${it}".toString(), type: "Skill", pointIncrement: 10, numPerformToCompletion: 5, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1] }
         String skillId = subj1.get(1).skillId
@@ -230,7 +230,7 @@ class MySkillsSpec extends DefaultIntSpec {
         (0..4).each {
             log.info("Adding ${subj1.get(1).skillId} on ${dates.get(it)}")
             addSkillRes << skillsService.addSkill([projectId: projId, skillId: subj1.get(1).skillId], userId, dates.get(it))
-            mySummaryRes << skillsService.getMySkillSummary()
+            mySummaryRes << skillsService.getMyProgressSummary()
         }
 
         then:
@@ -276,7 +276,7 @@ class MySkillsSpec extends DefaultIntSpec {
         }
     }
 
-    def "my skills summary - create skills with different versions; only the correct skills are returned when filtered by version 1"() {
+    def "my progress summary - create skills with different versions; only the correct skills are returned when filtered by version 1"() {
         String projId = SkillsFactory.defaultProjId
         List<Map> skills = SkillsFactory.createSkillsWithDifferentVersions([0, 0, 1, 1, 1, 2])
         skills.each{
@@ -292,9 +292,9 @@ class MySkillsSpec extends DefaultIntSpec {
         skillsService.addSkill([projectId: projId, skillId: skills.get(0).skillId], userId, new Date())
 
         when:
-        def mySummary0 = skillsService.getMySkillSummary(0)
-        def mySummary1 = skillsService.getMySkillSummary(1)
-        def mySummary2 = skillsService.getMySkillSummary(2)
+        def mySummary0 = skillsService.getMyProgressSummary(0)
+        def mySummary1 = skillsService.getMyProgressSummary(1)
+        def mySummary2 = skillsService.getMyProgressSummary(2)
 
         then:
 
@@ -320,7 +320,7 @@ class MySkillsSpec extends DefaultIntSpec {
         mySummary2.projectSummaries.find{ it.projectId == projId }.totalPoints == 120
     }
 
-    def "my skills summary - user points DO NOT respect the version - if user earns those points they are proudly displayed in all versions"() {
+    def "my progress summary - user points DO NOT respect the version - if user earns those points they are proudly displayed in all versions"() {
         String projId = SkillsFactory.defaultProjId
         List<Map> skills = SkillsFactory.createSkillsWithDifferentVersions([0, 0, 1, 1, 1, 2])
         skills.each{
@@ -340,9 +340,9 @@ class MySkillsSpec extends DefaultIntSpec {
         skillsService.addSkill([projectId: projId, skillId: skills.get(5).skillId], userId, new Date() - 2)
 
         when:
-        def mySummary0 = skillsService.getMySkillSummary(0)
-        def mySummary1 = skillsService.getMySkillSummary(1)
-        def mySummary2 = skillsService.getMySkillSummary(2)
+        def mySummary0 = skillsService.getMyProgressSummary(0)
+        def mySummary1 = skillsService.getMyProgressSummary(1)
+        def mySummary2 = skillsService.getMyProgressSummary(2)
 
         then:
 
@@ -368,7 +368,7 @@ class MySkillsSpec extends DefaultIntSpec {
         mySummary2.projectSummaries.find{ it.projectId == projId }.totalPoints == 120
     }
 
-    def "my skills summary - user points to NOT respect the version (skills with numPerformToCompletion > 1) - if user ends those points they are proudly displayed in all versions"() {
+    def "my progress summary - user points to NOT respect the version (skills with numPerformToCompletion > 1) - if user ends those points they are proudly displayed in all versions"() {
         String projId = SkillsFactory.defaultProjId
         List<Map> skills = SkillsFactory.createSkillsWithDifferentVersions([0, 0, 1, 1, 1, 2])
         skills.each {
@@ -391,9 +391,9 @@ class MySkillsSpec extends DefaultIntSpec {
         skillsService.addSkill([projectId: projId, skillId: skills.get(5).skillId], userId, new Date())
 
         when:
-        def mySummary0 = skillsService.getMySkillSummary(0)
-        def mySummary1 = skillsService.getMySkillSummary(1)
-        def mySummary2 = skillsService.getMySkillSummary(2)
+        def mySummary0 = skillsService.getMyProgressSummary(0)
+        def mySummary1 = skillsService.getMyProgressSummary(1)
+        def mySummary2 = skillsService.getMyProgressSummary(2)
 
         then:
 
