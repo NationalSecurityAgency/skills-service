@@ -175,13 +175,10 @@ limitations under the License.
         return this.projects.selected && this.projects.selected.length > 0;
       },
       noDataMessage() {
-        if (!this.enoughProjectsSelected) {
-          return 'Please select at least one project from the list above.';
+        if (!this.enoughOverallProjects) {
+          return 'There are no projects available.';
         }
-        if (this.enoughOverallProjects) {
-          return `No events reported for the selected project${this.projects.selected.length > 1 ? 's' : ''}.`;
-        }
-        return 'There are no projects available.';
+        return 'Please select at least one project from the list above.';
       },
     },
     watch: {

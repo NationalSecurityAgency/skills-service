@@ -39,6 +39,11 @@ describe('Navigation Tests', () => {
       projectId: 'proj1',
       name: 'Project 1'
     });
+    cy.request('POST', '/admin/projects/proj1/settings/production.mode.enabled', {
+      projectId: 'proj1',
+      setting: 'production.mode.enabled',
+      value: 'true'
+    });
     cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
       projectId: 'proj1',
       subjectId: 'subj1',
@@ -148,6 +153,13 @@ describe('Navigation Tests', () => {
       endDate: dateFormatter(new Date() + 1000 * 60 * 60 * 24 * 5),
     });
 
+    cy.loginAsRootUser();
+    cy.request('POST', '/admin/projects/Inception/settings/production.mode.enabled', {
+      projectId: 'Inception',
+      setting: 'production.mode.enabled',
+      value: 'true'
+    });
+
     cy.fixture('vars.json').then((vars) => {
       cy.request('POST', '/logout');
       cy.register(Cypress.env('proxyUser'), vars.defaultPass, false);
@@ -185,7 +197,7 @@ describe('Navigation Tests', () => {
   })
 
 
-  it.only('visit mySkills page', function () {
+  it('visit mySkills page', function () {
     cy.visit('/my-skills');
     cy.wait('@allSkillEventsForUser');
 
@@ -252,6 +264,11 @@ describe('Navigation Tests', () => {
       projectId: 'proj2',
       name: 'Project 2'
     });
+    cy.request('POST', '/admin/projects/proj2/settings/production.mode.enabled', {
+      projectId: 'proj2',
+      setting: 'production.mode.enabled',
+      value: 'true'
+    });
 
     cy.loginAsProxyUser();
     cy.visit('/my-skills');
@@ -280,13 +297,28 @@ describe('Navigation Tests', () => {
       projectId: 'proj2',
       name: 'Project 2'
     });
+    cy.request('POST', '/admin/projects/proj2/settings/production.mode.enabled', {
+      projectId: 'proj2',
+      setting: 'production.mode.enabled',
+      value: 'true'
+    });
     cy.request('POST', '/app/projects/proj3', {
       projectId: 'proj3',
       name: 'Project 3'
     });
+    cy.request('POST', '/admin/projects/proj3/settings/production.mode.enabled', {
+      projectId: 'proj3',
+      setting: 'production.mode.enabled',
+      value: 'true'
+    });
     cy.request('POST', '/app/projects/proj4', {
       projectId: 'proj4',
       name: 'Project 4'
+    });
+    cy.request('POST', '/admin/projects/proj4/settings/production.mode.enabled', {
+      projectId: 'proj4',
+      setting: 'production.mode.enabled',
+      value: 'true'
     });
 
     cy.loginAsProxyUser();
@@ -334,6 +366,31 @@ describe('Navigation Tests', () => {
       cy.get('@removeBtns').eq(0).click()
     }
     cy.get('[data-cy=eventHistoryChart]').contains('Please select at least one project from the list above.');
+  });
+
+  it('mySkills page - projects that do not have "production mode" enabled are not included', function () {
+    cy.request('POST', '/app/projects/proj2', {
+      projectId: 'proj2',
+      name: 'Project 2'
+    });
+
+    cy.loginAsProxyUser();
+    cy.visit('/my-skills');
+    cy.wait('@allSkillEventsForUser');
+
+    cy.get('[data-cy=numProjectsContributed]').contains(new RegExp(/^1$/));
+    cy.get('[data-cy=numProjectsAvailable]').contains(new RegExp(/^\/ 2$/));
+    cy.get('[data-cy=info-snap-footer]').contains('You still have 1 project to explore.');
+
+    cy.get('[data-cy=project-link-Inception]').should('be.visible');
+    cy.get('[data-cy=project-link-Inception]').find('[data-cy=project-card-project-name]').contains('Inception');
+
+    cy.get('[data-cy=project-link-proj1]').should('be.visible');
+    cy.get('[data-cy=project-link-proj1]').find('[data-cy=project-card-project-name]').contains('Project 1');
+
+
+    cy.get('[data-cy=project-link-proj2]').should('not.exist');
+    cy.get('[data-cy=project-link-proj1]').find('[data-cy=project-card-project-name]').contains('Project 2').should('not.exist');
   });
 
 });
