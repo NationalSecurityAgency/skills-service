@@ -22,7 +22,6 @@ import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
 import skills.intTests.utils.TestUtils
 import skills.services.settings.Settings
-import spock.lang.IgnoreRest
 
 @Slf4j
 class MySkillsSpec extends DefaultIntSpec {
