@@ -32,10 +32,10 @@ limitations under the License.
   <div class="text-left" data-cy="skillProgress">
     <div v-if="skillInternal.crossProject" class="row border-bottom mb-3 text-primary text-center">
       <div class="col-md-6 text-md-left">
-        <h4><span class="text-muted">Project:</span> {{ skillInternal.projectName }}</h4>
+        <div class="h4"><span class="text-muted">Project:</span> {{ skillInternal.projectName }}</div>
       </div>
       <div class="col-md-6 text-md-right text-success text-uppercase">
-        <h5><i class="fa fa-vector-square"/> Cross-project Skill</h5>
+        <div class="h5"><i class="fa fa-vector-square"/> Cross-project Skill</div>
       </div>
     </div>
 
@@ -47,7 +47,7 @@ limitations under the License.
 
     <div class="row">
       <div class="col text-md-left">
-        <h4 @click="skillClicked" :class="{ 'skill-name-url' : enableDrillDown }" data-cy="skillProgressTitle">{{ skillInternal.skill }}</h4>
+        <div class="h4" @click="skillClicked" :class="{ 'skill-name-url' : enableDrillDown }" data-cy="skillProgressTitle">{{ skillInternal.skill }}</div>
       </div>
       <div class="col-auto text-right"
            :class="{ 'text-success' : isSkillComplete, 'text-primary': !isSkillComplete }"

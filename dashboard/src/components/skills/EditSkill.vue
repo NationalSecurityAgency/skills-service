@@ -180,7 +180,7 @@ limitations under the License.
                   <b-form-checkbox data-cy="selfReportEnableCheckbox" id="self-report-checkbox"
                                    class="d-inline" v-model="selfReport.enabled"
                                    v-on:input="updatedSelfReportingStatus"/>
-                Self Reporting <inline-help msg="Check to enable ability for users to self report this skill."/>:
+                Self Reporting <inline-help msg="Check to enable self-reporting of this skill by users"/>:
               </div>
               <div class="col-12 col-lg">
                 <b-form-group v-slot="{ ariaDescribedby }" class="m-0 p-0">

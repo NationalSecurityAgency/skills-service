@@ -51,7 +51,7 @@ class SelfReportingService {
         if (existing && !existing.rejectedOn) {
             res = new SkillEventsService.AppliedCheckRes(
                     skillApplied: false,
-                    explanation: "This skill was already submitted for approval and still pending approval"
+                    explanation: "This skill was already submitted for approval and is still pending approval"
             )
         } else if (existing && existing.rejectedOn) {
             // override rejection with new submission

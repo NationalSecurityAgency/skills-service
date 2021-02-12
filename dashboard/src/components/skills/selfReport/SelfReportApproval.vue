@@ -20,7 +20,10 @@ limitations under the License.
     </template>
     <div class="row px-3 mb-3 mt-2">
       <div class="col">
-        <b-button variant="outline-info" @click="loadApprovals" data-cy="syncApprovalsBtn" class="mr-2 mt-1"><i class="fas fa-sync-alt"></i></b-button>
+        <b-button variant="outline-info" @click="loadApprovals" aria-label="Sync Records"
+                  data-cy="syncApprovalsBtn" class="mr-2 mt-1">
+          <i class="fas fa-sync-alt"></i>
+        </b-button>
         <b-button variant="outline-info" @click="changeSelectionForAll(true)" data-cy="selectPageOfApprovalsBtn" class="mr-2 mt-1"><i class="fa fa-check-square"/> Select Page</b-button>
         <b-button variant="outline-info" @click="changeSelectionForAll(false)" data-cy="clearSelectedApprovalsBtn" class="mt-1"><i class="far fa-square"></i> Clear</b-button>
       </div>
@@ -68,33 +71,36 @@ limitations under the License.
 
     <ValidationObserver v-slot="{invalid}" slim>
     <b-modal id="rejectSkillsModal"
-             title="REJECT SKILLS"
              :no-close-on-backdrop="true"
              v-model="reject.showModal">
-        <div class="row p-2" data-cy="rejectionTitle">
-          <div class="col-auto text-center">
-            <i class="far fa-thumbs-down text-warning" style="font-size: 3rem"/>
-          </div>
-          <div class="col">
-            <p class="h6">This will <b class="text-warning">permanently</b> reject user requests to get points. Users will be notified and you can provide an optional message below.</p>
-          </div>
+      <template #modal-title>
+        <div class="h5 text-uppercase">Reject Skills</div>
+      </template>
+      <div id="rejectionTitleInModal" class="row p-2" data-cy="rejectionTitle">
+        <div class="col-auto text-center">
+          <i class="far fa-thumbs-down text-warning" style="font-size: 3rem"/>
         </div>
-        <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" v-slot="{invalid, errors}"
-                            name="Rejection Message">
-          <input type="text" id="approvalRequiredMsg" v-model="reject.rejectMsg"
-               class="form-control" placeholder="Message (optional)" data-cy="rejectionInputMsg">
-          <small class="form-text text-danger mb-3" data-cy="rejectionInputMsgError">{{ errors[0] }}</small>
-        </ValidationProvider>
-        <template #modal-footer>
-          <button type="button" class="btn btn-outline-danger text-uppercase" @click="reject.showModal=false">
-            <i class="fas fa-times-circle"></i> Cancel
-          </button>
-          <button type="button" class="btn btn-outline-success text-uppercase"
-                  :disabled="invalid"
-                  @click="doReject(); reject.showModal=false;" data-cy="confirmRejectionBtn">
-            <i class="fas fa-arrow-alt-circle-right"></i> Reject
-          </button>
-        </template>
+        <div class="col">
+          <p class="h6">This will <b class="font-weight-bold">permanently</b> reject user's request(s) to get points. Users will be notified and you can provide an optional message below.</p>
+        </div>
+      </div>
+      <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" v-slot="{invalid, errors}"
+                          name="Rejection Message">
+        <input type="text" id="approvalRequiredMsg" v-model="reject.rejectMsg"
+               aria-describedby="rejectionTitleInModal" aria-label="Optional Rejection Message"
+              class="form-control" placeholder="Message (optional)" data-cy="rejectionInputMsg">
+        <small class="form-text text-danger mb-3" data-cy="rejectionInputMsgError">{{ errors[0] }}</small>
+      </ValidationProvider>
+      <template #modal-footer>
+        <button type="button" class="btn btn-outline-danger text-uppercase" @click="reject.showModal=false">
+          <i class="fas fa-times-circle"></i> Cancel
+        </button>
+        <button type="button" class="btn btn-outline-success text-uppercase"
+                :disabled="invalid"
+                @click="doReject(); reject.showModal=false;" data-cy="confirmRejectionBtn">
+          <i class="fas fa-arrow-alt-circle-right"></i> Reject
+        </button>
+      </template>
     </b-modal>
     </ValidationObserver>
   </b-card>

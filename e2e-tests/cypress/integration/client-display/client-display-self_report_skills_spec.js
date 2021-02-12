@@ -124,7 +124,7 @@ describe('Client Display Self Report Skills Tests', () => {
     cy.cdClickSkill(0);
 
     cy.get('[data-cy="selfReportBtn"]').click();
-    cy.get('[data-cy="selfReportSkillMsg"]').contains('This skill can be submitted under the Honor System and 50 points will apply right away')
+    cy.get('[data-cy="selfReportSkillMsg"]').contains('This skill can be submitted under the Honor System and 50 points will be awarded right away')
     cy.get('[data-cy="selfReportSubmitBtn"]').click();
 
     cy.get('[data-cy="selfReportAlert"]').contains("You just earned 50 points!")
@@ -136,7 +136,7 @@ describe('Client Display Self Report Skills Tests', () => {
     cy.get('[data-cy="skillProgressBar"]').matchImageSnapshot('Halfway_Progress');
 
     cy.get('[data-cy="selfReportBtn"]').click();
-    cy.get('[data-cy="selfReportSkillMsg"]').contains('This skill can be submitted under the Honor System and 50 points will apply right away')
+    cy.get('[data-cy="selfReportSkillMsg"]').contains('This skill can be submitted under the Honor System and 50 points will be awarded right away')
     cy.get('[data-cy="selfReportSubmitBtn"]').click();
 
     cy.get('[data-cy="selfReportAlert"]').contains("You just earned 50 points and completed the skill!")
@@ -162,7 +162,7 @@ describe('Client Display Self Report Skills Tests', () => {
     cy.get('[data-cy=toggleSkillDetails]').click()
 
     cy.get('[data-cy="skillProgress_index-1"] [data-cy="selfReportBtn"]').click();
-    cy.get('[data-cy="selfReportSkillMsg"]').contains('This skill can be submitted under the Honor System and 50 points will apply right away')
+    cy.get('[data-cy="selfReportSkillMsg"]').contains('This skill can be submitted under the Honor System and 50 points will be awarded right away')
     cy.get('[data-cy="selfReportSubmitBtn"]').click();
 
     cy.get('[data-cy="skillProgress_index-1"] [data-cy="selfReportAlert"]').contains("You just earned 50 points!")
@@ -174,7 +174,7 @@ describe('Client Display Self Report Skills Tests', () => {
     cy.get('[data-cy="skillProgress_index-1"] [data-cy="skillProgressBar"]').matchImageSnapshot('Halfway_Progress_On_Subj_Page');
 
     cy.get('[data-cy="skillProgress_index-1"] [data-cy="selfReportBtn"]').click();
-    cy.get('[data-cy="selfReportSkillMsg"]').contains('This skill can be submitted under the Honor System and 50 points will apply right away')
+    cy.get('[data-cy="selfReportSkillMsg"]').contains('This skill can be submitted under the Honor System and 50 points will be awarded right away')
     cy.get('[data-cy="selfReportSubmitBtn"]').click();
 
     cy.get('[data-cy="skillProgress_index-1"] [data-cy="selfReportAlert"]').contains("You just earned 50 points and completed the skill!")

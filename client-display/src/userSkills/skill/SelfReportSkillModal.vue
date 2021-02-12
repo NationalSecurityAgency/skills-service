@@ -19,14 +19,14 @@ limitations under the License.
            ok-title="Submit"
            :no-close-on-backdrop="true"
            v-model="modalVisible">
-    <div class="row p-2" data-cy="selfReportSkillMsg">
+    <div id="reportSkillMsg" class="row p-2" data-cy="selfReportSkillMsg">
       <div class="col-auto text-center">
         <i v-if="isHonorSystem" class="fas fa-chess-knight text-success" style="font-size: 3rem"></i>
         <i v-if="isApprovalRequired" class="fas fa-thumbs-up text-info" style="font-size: 3rem"></i>
       </div>
       <div class="col">
         <p class="h5" v-if="isHonorSystem">This skill can be submitted under the <b class="text-success">Honor
-          System</b> and <b class="text-success">{{ skill.pointIncrement }}</b> points will apply right away!
+          System</b> and <b class="text-success">{{ skill.pointIncrement }}</b> points will be awarded right away!
         </p>
         <p class="h5" v-if="isApprovalRequired">This skill requires <b class="text-info">approval</b>. Submit with an
           <span class="text-muted">optional</span> message and it will enter an approval queue.</p>
@@ -35,6 +35,8 @@ limitations under the License.
     <input type="text" id="approvalRequiredMsg" @input="validate"
            v-if="isApprovalRequired" v-model="approvalRequestedMsg"
            data-cy="selfReportMsgInput"
+           aria-describedby="reportSkillMsg"
+           aria-label="Optional request approval message"
            class="form-control" placeholder="Message (optional)">
     <span v-if="inputInvalid" class="text-small text-danger" data-cy="selfReportMsgInput_errMsg"><i class="fas fa-exclamation-circle"/> {{ inputInvalidExplanation }}</span>
     <template #modal-footer>

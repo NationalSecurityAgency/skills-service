@@ -165,7 +165,7 @@ class ReportSkills_SelfReporting extends DefaultIntSpec {
 
         !res1.body.skillApplied
         res1.body.pointsEarned == 0
-        res1.body.explanation == "This skill was already submitted for approval and still pending approval"
+        res1.body.explanation == "This skill was already submitted for approval and is still pending approval"
 
         !res2.body.skillApplied
         res2.body.pointsEarned == 0

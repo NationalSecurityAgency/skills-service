@@ -58,7 +58,7 @@ limitations under the License.
           </div>
         </div>
         <div class="col-auto text-right">
-          <button class="btn btn-outline-info" data-cy="clearRejectionMsgBtn" @click="clearRejectionModalVisible=true">
+          <button class="btn btn-info" data-cy="clearRejectionMsgBtn" @click="clearRejectionModalVisible=true">
             <i class="fas fa-check"></i> I got it!
           </button>
         </div>

@@ -21,12 +21,12 @@ limitations under the License.
                         <i class="fa-3x" :class="icon"/>
                     </div>
                     <div class="media-body text-truncate text-primary">
-                        <h4 class="mb-0 text-truncate">
-                            <span :title="title | number" data-cy="progressInfoCardTitle">
+                        <div class="h4 mb-0 text-truncate">
+                            <span data-cy="progressInfoCardTitle">
                               <animated-number v-if="animated" :num="title" />
                               <span v-else>{{ title | number }}</span>
                             </span>
-                        </h4>
+                        </div>
                         <div class="mt-0 pt-0">{{subTitle}}</div>
                     </div>
                 </div>
