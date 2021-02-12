@@ -428,6 +428,7 @@ class SkillsAdminService {
                 displayOrder: partial.displayOrder,
                 created: partial.created,
                 updated: partial.updated,
+                selfReportingType: partial.getSelfReportingType()
         )
 
         res.numPerformToCompletion = (Integer)(res.totalPoints / res.pointIncrement)

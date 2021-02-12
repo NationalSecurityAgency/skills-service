@@ -20,9 +20,9 @@ limitations under the License.
     <div v-if="!loading">
       <self-report-info-cards :self-report-stats="selfReportStats"/>
       <self-report-approval  v-if="hasSkillsWithApprovals()" class="mt-3"/>
-      <no-content2 v-else title="No Skills With Approval" data-cy="noApprovalTableMsg"
-                   message="There are no skills created currently that would require approval. Self Reporting type of 'Approval' can be configured when creating or editing a skill."
-                   class="mt-5"/>
+      <no-content2 v-else title="No Skills Require Approval" data-cy="noApprovalTableMsg"
+                   message="Currently there are no skills that require approval. Self Reporting type of 'Approval' can be configured when creating or editing a skill."
+                   class="no-skills-msg"/>
 
     </div>
   </div>
@@ -73,5 +73,7 @@ limitations under the License.
 </script>
 
 <style scoped>
-
+.no-skills-msg {
+  margin-top: 4rem;
+}
 </style>

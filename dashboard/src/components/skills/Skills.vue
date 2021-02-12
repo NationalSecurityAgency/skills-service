@@ -57,6 +57,7 @@ limitations under the License.
             this.skills = loadedSkills.map((loadedSkill) => {
               const copy = { ...loadedSkill };
               copy.created = dayjs(loadedSkill.created);
+              copy.selfReportingType = loadedSkill.selfReportingType ? loadedSkill.selfReportingType : 'Disabled';
               return copy;
             });
           })

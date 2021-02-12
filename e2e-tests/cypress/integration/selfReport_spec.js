@@ -584,7 +584,7 @@ describe('Self Report Skills Management Tests', () => {
         cy.get('[data-cy="selfReportInfoCardCount_Approval"]').contains('0');
         cy.get('[data-cy="selfReportInfoCardCount_HonorSystem"]').contains('2');
 
-        cy.get('[data-cy="noApprovalTableMsg"]').contains('No Skills With Approval');
+        cy.get('[data-cy="noApprovalTableMsg"]').contains('No Skills Require Approval');
         cy.get( '[data-cy="skillsReportApprovalTable"]').should('not.exist');
     });
 

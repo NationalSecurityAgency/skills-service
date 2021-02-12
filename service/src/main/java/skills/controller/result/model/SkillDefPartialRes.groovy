@@ -33,4 +33,6 @@ class SkillDefPartialRes extends SkillDefSkinnyRes{
     Date updated
 
     int numUsers
+
+    SkillDef.SelfReportingType selfReportingType
 }

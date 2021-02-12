@@ -15,7 +15,10 @@ limitations under the License.
 */
 <template>
   <b-card body-class="p-0 mt-3">
-    <div class="row px-3 mb-3">
+    <template #header>
+      <div class="h6 mb-0 font-weight-bold">Self Reported Skills Required Approval</div>
+    </template>
+    <div class="row px-3 mb-3 mt-2">
       <div class="col">
         <b-button variant="outline-info" @click="loadApprovals" data-cy="syncApprovalsBtn" class="mr-2 mt-1"><i class="fas fa-sync-alt"></i></b-button>
         <b-button variant="outline-info" @click="changeSelectionForAll(true)" data-cy="selectPageOfApprovalsBtn" class="mr-2 mt-1"><i class="fa fa-check-square"/> Select Page</b-button>
@@ -122,6 +125,7 @@ limitations under the License.
             stacked: 'md',
             sortBy: 'requestedOn',
             sortDesc: true,
+            emptyText: 'Nothing to approve',
             fields: [
               {
                 key: 'userId',
