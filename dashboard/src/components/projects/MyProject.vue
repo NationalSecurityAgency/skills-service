@@ -26,6 +26,7 @@ limitations under the License.
                                   v-on:move-down="moveDown"
                                   :is-first="projectInternal.isFirst" :is-last="projectInternal.isLast"
                                   :is-loading="isLoading" :is-delete-disabled="deleteProjectDisabled" :delete-disabled-text="deleteProjectToolTip"
+                                  :data-cy="`projOptions_${projectInternal.projectId}`"
                                   class="project-settings"></edit-and-delete-dropdown>
       </div>
       <div slot="footer">
