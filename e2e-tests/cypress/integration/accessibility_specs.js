@@ -74,6 +74,23 @@ describe('Accessibility Tests', () => {
       helpUrl: 'http://doHelpOnThisSkill.com'
     });
 
+    cy.request('POST', `/admin/projects/MyNewtestProject/subjects/subj1/skills/skill3`, {
+      projectId: 'MyNewtestProject',
+      subjectId: 'subj1',
+      skillId: 'skill3',
+      name: `This is 3`,
+      type: 'Skill',
+      pointIncrement: 100,
+      numPerformToCompletion: 5,
+      pointIncrementInterval: 0,
+      numMaxOccurrencesIncrementInterval: -1,
+      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+      version: 0,
+      helpUrl: 'http://doHelpOnThisSkill.com',
+      selfReportType: 'Approval'
+    });
+
+
     cy.request('POST', '/admin/projects/MyNewtestProject/badge/badge1/skills/skill2')
 
     cy.request('POST', `/admin/projects/MyNewtestProject/skills/skill2/dependency/skill1`)
@@ -84,6 +101,10 @@ describe('Accessibility Tests', () => {
     cy.request('POST', `/api/projects/MyNewtestProject/skills/skill1`, {userId: 'u3', timestamp: m.subtract(3, 'day').format('x')})
     cy.request('POST', `/api/projects/MyNewtestProject/skills/skill1`, {userId: 'u4', timestamp: m.subtract(2, 'day').format('x')})
     cy.request('POST', `/api/projects/MyNewtestProject/skills/skill1`, {userId: 'u5', timestamp: m.subtract(1, 'day').format('x')})
+    cy.request('POST', `/api/projects/MyNewtestProject/skills/skill3`, {userId: 'u5', timestamp: m.subtract(1, 'day').format('x')})
+    cy.request('POST', `/api/projects/MyNewtestProject/skills/skill3`, {userId: 'u6', timestamp: m.subtract(1, 'day').format('x')})
+    cy.request('POST', `/api/projects/MyNewtestProject/skills/skill3`, {userId: 'u7', timestamp: m.subtract(1, 'day').format('x')})
+    cy.request('POST', `/api/projects/MyNewtestProject/skills/skill3`, {userId: 'u8', timestamp: m.subtract(1, 'day').format('x')})
   });
 
   it('home page', () => {
@@ -128,6 +149,19 @@ describe('Accessibility Tests', () => {
     cy.customA11y();
     cy.get('[data-cy=closeBadgeButton]').click();
 
+    // --- Self Report Page ----
+    cy.get('[data-cy="nav-Self Report"]').click();
+    cy.get('[data-cy="skillsReportApprovalTable"] tbody tr').should('have.length', 4);
+    cy.customLighthouse();
+    cy.customA11y();
+
+    cy.get('[data-cy="selectPageOfApprovalsBtn"]').click();
+    cy.get('[data-cy="rejectBtn"]').click();
+    cy.get('[data-cy="rejectionTitle"]').contains('This will permanently reject user\'s request(s) to get points')
+    cy.customA11y();
+    cy.get('[data-cy="cancelRejectionBtn"]').click();
+
+    // --- Deps Page ----
     cy.get('[data-cy=nav-Dependencies]').click();
     cy.contains('Color Legend');
     cy.customLighthouse();
@@ -182,6 +216,7 @@ describe('Accessibility Tests', () => {
     cy.customLighthouse();
     cy.customA11y();
   })
+
 
   it('subject', () => {
     cy.server();

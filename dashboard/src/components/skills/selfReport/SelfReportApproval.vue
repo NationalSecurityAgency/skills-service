@@ -56,8 +56,8 @@ limitations under the License.
 
       <template v-slot:cell(request)="data">
         <div>{{ data.item.skillName }}</div>
-        <div class="small text-secondary">ID: {{ data.item.skillId }}</div>
-        <div class="mt-2" style="font-size: 0.9rem;"><span class="text-secondary">Note:</span>
+        <div class="small text-muted">ID: {{ data.item.skillId }}</div>
+        <div class="mt-2" style="font-size: 0.9rem;"><span class="text-muted">Note:</span>
           <span v-if="data.item.requestMsg && data.item.requestMsg.length > 0"> {{ data.item.requestMsg }}</span>
           <span v-else class="text-muted"> Not supplied</span>
         </div>
@@ -92,7 +92,8 @@ limitations under the License.
         <small class="form-text text-danger mb-3" data-cy="rejectionInputMsgError">{{ errors[0] }}</small>
       </ValidationProvider>
       <template #modal-footer>
-        <button type="button" class="btn btn-outline-danger text-uppercase" @click="reject.showModal=false">
+        <button type="button" class="btn btn-outline-danger text-uppercase" @click="reject.showModal=false"
+                data-cy="cancelRejectionBtn">
           <i class="fas fa-times-circle"></i> Cancel
         </button>
         <button type="button" class="btn btn-outline-success text-uppercase"
