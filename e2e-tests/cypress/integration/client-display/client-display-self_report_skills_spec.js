@@ -116,6 +116,25 @@ describe('Client Display Self Report Skills Tests', () => {
     cy.get('[data-cy="selfReportBtn"]').should('not.exist');
   })
 
+  it('do not show report if skill has uncompleted dependencies', () => {
+    cy.createSkill(1, 'HonorSystem');
+    cy.createSkill(2, 'HonorSystem');
+    cy.request('POST', `/admin/projects/proj1/skills/skill1/dependency/skill2`)
+    cy.cdVisit('/');
+    cy.cdClickSubj(0);
+    cy.cdClickSkill(0);
+
+    cy.get('[data-cy="selfReportBtn"]').should('not.exist');
+
+    const m = moment.utc('2020-09-12 11', 'YYYY-MM-DD HH');
+    cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: Cypress.env('proxyUser'), timestamp: m.clone().add(1, 'day').format('x')})
+    cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: Cypress.env('proxyUser'), timestamp: m.clone().add(2, 'day').format('x')})
+
+    cy.cdBack('Subject 1')
+    cy.cdClickSkill(0);
+    cy.get('[data-cy="selfReportBtn"]').should('be.enabled');
+  })
+
 
   it('self report honor skill', () => {
     cy.createSkill(1, 'HonorSystem');
