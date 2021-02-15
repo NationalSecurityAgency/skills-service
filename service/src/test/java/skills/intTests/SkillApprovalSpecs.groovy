@@ -444,15 +444,6 @@ class SkillApprovalSpecs extends DefaultIntSpec {
             assert res.body.explanation == "Skill was submitted for approval"
         }
 
-        when:
-        List<SkillApproval> approvalBefore = skillApprovalRepo.findAll()
-        List<UserPerformedSkill> performedBefore = userPerformedSkillRepo.findAll()
-
-        skills[1].selfReportType = null
-        skillsService.createSkills([skills[1]])
-        List<SkillApproval> approvalAfter1Delete = skillApprovalRepo.findAll()
-        List<UserPerformedSkill> performedAfter = userPerformedSkillRepo.findAll()
-
         Closure<List<String>> getIds = { approvals->
             return approvals.collect {
                 SkillDef skillDef = skillDefRepo.findById(it.skillRefId).get()
@@ -461,9 +452,17 @@ class SkillApprovalSpecs extends DefaultIntSpec {
             }.sort()
         }
 
+        when:
+        List<String> approvalBefore = getIds(skillApprovalRepo.findAll())
+        List<String> performedBefore = userPerformedSkillRepo.findAll().collect { it.id }
+
+        skills[1].selfReportType = null
+        skillsService.createSkills([skills[1]])
+        List<String> approvalAfter1Delete = getIds(skillApprovalRepo.findAll())
+        List<String> performedAfter = userPerformedSkillRepo.findAll().collect { it.id }
+
         then:
-        approvalBefore.collect {it.id }.size() == 13
-        getIds.call(approvalBefore) == [
+        approvalBefore == [
                 "TestProject1-skill1_user0",
                 "TestProject1-skill1_user1",
                 "TestProject1-skill2_user1",
@@ -479,8 +478,7 @@ class SkillApprovalSpecs extends DefaultIntSpec {
                 "TestProject2-skill2_user1",
                 "TestProject2-skill3_user2"]
 
-        approvalAfter1Delete.collect {it.id }.size() == 11
-        getIds.call(approvalAfter1Delete) == [
+        approvalAfter1Delete == [
                 "TestProject1-skill1_user0",
                 "TestProject1-skill1_user1",
                 "TestProject1-skill3_user2",
@@ -494,8 +492,98 @@ class SkillApprovalSpecs extends DefaultIntSpec {
                 "TestProject2-skill2_user1",
                 "TestProject2-skill3_user2"]
 
-        performedBefore.collect { it.id }.size() == 0
-        performedAfter.collect { it.id }.size() == 0
+        !performedBefore
+        !performedAfter
+    }
+
+    void "remove existing approval requests if the skill is removed"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(5,)
+        skills.each {
+            it.pointIncrement = 200
+            it.selfReportType = SkillDef.SelfReportingType.Approval
+        }
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        def proj1 = SkillsFactory.createProject(2)
+        def subj1 = SkillsFactory.createSubject(2)
+        def skills1 = SkillsFactory.createSkills(3,2)
+        skills1.each {
+            it.pointIncrement = 200
+            it.selfReportType = SkillDef.SelfReportingType.Approval
+        }
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(subj1)
+        skillsService.createSkills(skills1)
+
+        5.times {
+            Date date = new Date() - it
+            def res = skillsService.addSkill([projectId: proj.projectId, skillId: skills[it].skillId], "user${it}", date, "Please approve this ${it}!")
+            assert res.body.explanation == "Skill was submitted for approval"
+            def res1 = skillsService.addSkill([projectId: proj.projectId, skillId: skills[it].skillId], "user${it+1}", date, "Please approve this ${it}!")
+            assert res1.body.explanation == "Skill was submitted for approval"
+        }
+
+        3.times {
+            Date date = new Date() - it
+            def res = skillsService.addSkill([projectId: proj1.projectId, skillId: skills1[it].skillId], "user${it}", date, "Other reason ${it}!")
+            assert res.body.explanation == "Skill was submitted for approval"
+        }
+
+        Closure<List<String>> getIds = { approvals->
+            return approvals.collect {
+                SkillDef skillDef = skillDefRepo.findById(it.skillRefId).get()
+                assert skillDef
+                return "${skillDef.projectId}-${skillDef.skillId}_${it.userId}"
+            }.sort()
+        }
+
+        when:
+        List<String> approvalBefore = getIds.call(skillApprovalRepo.findAll())
+        List<Integer> performedBefore = userPerformedSkillRepo.findAll().collect { it.id }
+
+        skillsService.deleteSkill([skills[1]])
+        List<String> approvalAfter1Delete = getIds.call(skillApprovalRepo.findAll())
+        List<Integer> performedAfter = userPerformedSkillRepo.findAll().collect { it.id }
+
+        then:
+        approvalBefore == [
+                "TestProject1-skill1_user0",
+                "TestProject1-skill1_user1",
+                "TestProject1-skill2_user1",
+                "TestProject1-skill2_user2",
+                "TestProject1-skill3_user2",
+                "TestProject1-skill3_user3",
+                "TestProject1-skill4_user3",
+                "TestProject1-skill4_user4",
+                "TestProject1-skill5_user4",
+                "TestProject1-skill5_user5",
+
+                "TestProject2-skill1_user0",
+                "TestProject2-skill2_user1",
+                "TestProject2-skill3_user2"]
+
+        approvalAfter1Delete == [
+                "TestProject1-skill1_user0",
+                "TestProject1-skill1_user1",
+                "TestProject1-skill3_user2",
+                "TestProject1-skill3_user3",
+                "TestProject1-skill4_user3",
+                "TestProject1-skill4_user4",
+                "TestProject1-skill5_user4",
+                "TestProject1-skill5_user5",
+
+                "TestProject2-skill1_user0",
+                "TestProject2-skill2_user1",
+                "TestProject2-skill3_user2"]
+
+        !performedBefore
+        !performedAfter
     }
 
     void "apply existing approval requests if the skill's self approval type to be 'HonorSystem'"() {
@@ -536,16 +624,6 @@ class SkillApprovalSpecs extends DefaultIntSpec {
             def res = skillsService.addSkill([projectId: proj1.projectId, skillId: skills1[it].skillId], "user${it}", date, "Other reason ${it}!")
             assert res.body.explanation == "Skill was submitted for approval"
         }
-
-        when:
-        List<SkillApproval> approvalBefore = skillApprovalRepo.findAll()
-        List<UserPerformedSkill> performedBefore = userPerformedSkillRepo.findAll()
-
-        skills[1].selfReportType = SkillDef.SelfReportingType.HonorSystem
-        skillsService.createSkills([skills[1]])
-        List<SkillApproval> approvalAfter1Delete = skillApprovalRepo.findAll()
-        List<UserPerformedSkill> performedAfter = userPerformedSkillRepo.findAll()
-
         Closure<List<String>> getIds = { approvals->
             return approvals.collect {
                 SkillDef skillDef = skillDefRepo.findById(it.skillRefId).get()
@@ -554,9 +632,17 @@ class SkillApprovalSpecs extends DefaultIntSpec {
             }.sort()
         }
 
+        when:
+        List<String> approvalBefore = getIds(skillApprovalRepo.findAll())
+        List<String> performedBefore = userPerformedSkillRepo.findAll().collect { "${it.projectId}-${it.skillId}_${it.userId}" }
+
+        skills[1].selfReportType = SkillDef.SelfReportingType.HonorSystem
+        skillsService.createSkills([skills[1]])
+        List<String> approvalAfter1Delete = getIds(skillApprovalRepo.findAll())
+        List<UserPerformedSkill> performedAfter = userPerformedSkillRepo.findAll().collect { "${it.projectId}-${it.skillId}_${it.userId}" }
+
         then:
-        approvalBefore.collect {it.id }.size() == 13
-        getIds.call(approvalBefore) == [
+        approvalBefore == [
                 "TestProject1-skill1_user0",
                 "TestProject1-skill1_user1",
                 "TestProject1-skill2_user1",
@@ -572,8 +658,7 @@ class SkillApprovalSpecs extends DefaultIntSpec {
                 "TestProject2-skill2_user1",
                 "TestProject2-skill3_user2"]
 
-        approvalAfter1Delete.collect {it.id }.size() == 11
-        getIds.call(approvalAfter1Delete) == [
+        approvalAfter1Delete == [
                 "TestProject1-skill1_user0",
                 "TestProject1-skill1_user1",
                 "TestProject1-skill3_user2",
@@ -587,8 +672,8 @@ class SkillApprovalSpecs extends DefaultIntSpec {
                 "TestProject2-skill2_user1",
                 "TestProject2-skill3_user2"]
 
-        performedBefore.collect { it.id }.size() == 0
-        performedAfter.collect { "${it.projectId}-${it.skillId}_${it.userId}" } == [
+        !performedBefore
+        performedAfter == [
                 "TestProject1-skill2_user1",
                 "TestProject1-skill2_user2",
         ]
@@ -620,15 +705,6 @@ class SkillApprovalSpecs extends DefaultIntSpec {
         skillsService.rejectSkillApprovals(proj.projectId, [approvalItems[1].id], 'Just felt like it')
         skillsService.rejectSkillApprovals(proj.projectId, [approvalItems[2].id], 'Just felt like it')
 
-        when:
-        List<SkillApproval> approvalBefore = skillApprovalRepo.findAll()
-        List<UserPerformedSkill> performedBefore = userPerformedSkillRepo.findAll()
-
-        skills[0].selfReportType = SkillDef.SelfReportingType.HonorSystem
-        skillsService.createSkills([skills[0]])
-        List<SkillApproval> approvalAfter1Delete = skillApprovalRepo.findAll()
-        List<UserPerformedSkill> performedAfter = userPerformedSkillRepo.findAll()
-
         Closure<List<String>> getIds = { approvals->
             return approvals.collect {
                 SkillDef skillDef = skillDefRepo.findById(it.skillRefId).get()
@@ -637,8 +713,18 @@ class SkillApprovalSpecs extends DefaultIntSpec {
             }.sort()
         }
 
+        when:
+        List<String> approvalBefore = getIds(skillApprovalRepo.findAll())
+        List<String> performedBefore = userPerformedSkillRepo.findAll().collect { "${it.projectId}-${it.skillId}_${it.userId}" }
+
+        skills[0].selfReportType = SkillDef.SelfReportingType.HonorSystem
+        skillsService.createSkills([skills[0]])
+        List<String> approvalAfter1Delete = getIds(skillApprovalRepo.findAll())
+        List<String> performedAfter = userPerformedSkillRepo.findAll().collect { "${it.projectId}-${it.skillId}_${it.userId}" }
+
+
         then:
-        getIds.call(approvalBefore) == [
+        approvalBefore == [
                 "TestProject1-skill1_user1",
                 "TestProject1-skill1_user2",
                 "TestProject1-skill1_user3",
@@ -647,10 +733,10 @@ class SkillApprovalSpecs extends DefaultIntSpec {
                 "TestProject1-skill1_user6",
                 ]
 
-        !getIds.call(approvalAfter1Delete)
+        !approvalAfter1Delete
 
-        performedBefore.collect { it.id }.size() == 0
-        performedAfter.collect { "${it.projectId}-${it.skillId}_${it.userId}" } == [
+        !performedBefore
+        performedAfter == [
                 "TestProject1-skill1_user1",
                 "TestProject1-skill1_user4",
                 "TestProject1-skill1_user5",
