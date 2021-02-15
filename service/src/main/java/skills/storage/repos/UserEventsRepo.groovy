@@ -24,6 +24,7 @@ import org.springframework.lang.Nullable
 import skills.storage.model.DayCountItem
 import skills.storage.model.EventCount
 import skills.storage.model.EventType
+import skills.storage.model.LabeledCount
 import skills.storage.model.UserEvent
 import skills.storage.model.WeekCount
 
@@ -190,5 +191,39 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
 
     void deleteByEventTypeAndEventTimeLessThan(EventType type, Date start)
 
+    @Nullable
+    @Query(value='''
+        SELECT COUNT(ue.user_id) OVER() 
+        FROM user_events ue, (
+            SELECT user_id, achieved_on FROM user_achievement WHERE skill_ref_id = :skillRefId
+        ) AS achievements 
+        WHERE 
+            ue.skill_ref_id = :skillRefId 
+            AND ue.user_id = achievements.user_id 
+            AND ue.event_time > achievements.achieved_on 
+        GROUP BY ue.user_id HAVING SUM(ue.count) > :minEventCountThreshold LIMIT 1;
+    ''', nativeQuery = true)
+    public Long countOfUsersUsingSkillAfterAchievement(@Param("skillRefId") Integer skillRefId, @Param("minEventCountThreshold") Integer minEventCountThreshold)
 
+    @Query(value='''
+    SELECT COUNT(counts.user_id) AS count, counts.countBucket AS label 
+        FROM 
+        (
+            SELECT ue.user_id as user_id, 
+            CASE 
+                WHEN SUM(ue.count) < 5 THEN '<5' 
+                WHEN SUM(ue.count) >= 5 AND SUM(ue.count) < 20 THEN '>=5 <20' 
+                WHEN SUM(ue.count) >= 20 AND SUM(ue.count) < 50 THEN '>=20 <50' 
+                WHEN SUM(ue.count) >= 50 THEN '>=50' 
+            END AS countBucket 
+            FROM user_events ue, user_achievement achievements 
+            WHERE 
+                achievements.skill_ref_id = :skillRefId
+                AND ue.skill_ref_id = :skillRefId 
+                AND ue.user_id = achievements.user_id
+                AND ue.event_time > achievements.achieved_on 
+            GROUP BY ue.user_id
+        )  AS counts GROUP BY counts.countBucket;
+    ''', nativeQuery = true)
+    public List<LabeledCount> binnedUserCountsForSkillUsagePostAchievement(@Param("skillRefId") Integer skillRefId)
 }
