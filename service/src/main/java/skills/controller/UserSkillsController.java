@@ -78,9 +78,6 @@ class UserSkillsController {
     @Autowired
     SelfReportingService selfReportingService;
 
-    @Autowired
-    private SkillEventsService skillEventsService;
-
     private int getProvidedVersionOrReturnDefault(Integer versionParam) {
         if (versionParam != null) {
             return versionParam;

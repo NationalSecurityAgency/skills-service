@@ -28,8 +28,11 @@ import skills.services.events.SkillEventResult
 import skills.services.events.SkillEventsService
 import skills.storage.model.SkillApproval
 import skills.storage.model.SkillDef
+import skills.storage.model.SkillDefWithExtra
 import skills.storage.repos.SkillApprovalRepo
 import skills.storage.repos.SkillDefRepo
+
+import java.util.stream.Stream
 
 @Service
 @Slf4j
@@ -111,6 +114,26 @@ class SkillApprovalService {
                     value: it.getType() ?: 'Disabled',
                     count: it.getCount()
             )
+        }
+    }
+
+    void modifyApprovalsWhenSelfReportingTypeChanged(SkillDefWithExtra existing, SkillDef.SelfReportingType incomingType) {
+        if (existing.selfReportingType == incomingType) {
+            return;
+        }
+
+        if (existing.selfReportingType == SkillDef.SelfReportingType.Approval && !incomingType) {
+            skillApprovalRepo.deleteByProjectIdAndSkillRefId(existing.projectId, existing.id)
+        } else if (existing.selfReportingType == SkillDef.SelfReportingType.Approval && incomingType == SkillDef.SelfReportingType.HonorSystem) {
+            Stream<SkillApproval> existingApprovals = skillApprovalRepo.findAllBySkillRefIdAndRejectedOnIsNull(existing.id)
+            existingApprovals.forEach({ SkillApproval skillApproval ->
+                SkillEventResult res = skillEventsService.reportSkill(existing.projectId, existing.skillId, skillApproval.userId, false,
+                        skillApproval.requestedOn, new SkillEventsService.SkillApprovalParams(disableChecks: true))
+                if (log.isDebugEnabled()){
+                    log.debug("Approval for ${skillApproval} yielded:\n${res}")
+                }
+            })
+            skillApprovalRepo.deleteByProjectIdAndSkillRefId(existing.projectId, existing.id)
         }
     }
 

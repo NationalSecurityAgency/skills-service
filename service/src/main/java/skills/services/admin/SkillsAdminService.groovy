@@ -19,6 +19,7 @@ import callStack.profiler.Profile
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -28,24 +29,15 @@ import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.request.model.ActionPatchRequest
 import skills.controller.request.model.SkillRequest
-import skills.controller.result.model.SettingsResult
 import skills.controller.result.model.SkillDefPartialRes
 import skills.controller.result.model.SkillDefRes
 import skills.controller.result.model.SkillDefSkinnyRes
-import skills.services.CreatedResourceLimitsValidator
-import skills.services.CustomValidationResult
-import skills.services.CustomValidator
-import skills.services.GlobalBadgesService
-import skills.services.LockingService
-import skills.services.RuleSetDefGraphService
-import skills.services.RuleSetDefinitionScoreUpdater
-import skills.services.UserAchievementsAndPointsManagement
-import skills.services.settings.SettingsService
+import skills.services.*
+import skills.storage.accessors.SkillDefAccessor
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillDef.SelfReportingType
 import skills.storage.model.SkillDefWithExtra
 import skills.storage.model.SkillRelDef
-import skills.storage.accessors.SkillDefAccessor
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.SkillDefWithExtraRepo
 import skills.storage.repos.SkillRelDefRepo
@@ -99,6 +91,10 @@ class SkillsAdminService {
     @Autowired
     BadgeAdminService badgeAdminService
 
+    @Autowired
+    @Lazy
+    SkillApprovalService skillApprovalService
+
     @Transactional()
     void saveSkill(String originalSkillId, SkillRequest skillRequest, boolean performCustomValidation=true) {
         lockingService.lockProject(skillRequest.projectId)
@@ -146,11 +142,14 @@ class SkillsAdminService {
             pointIncrementDelta = incrementRequested - skillDefinition.pointIncrement
 
             Props.copy(skillRequest, skillDefinition, "childSkills", 'version', 'selfReportType')
+
+            skillApprovalService.modifyApprovalsWhenSelfReportingTypeChanged(skillDefinition, selfReportingType)
             skillDefinition.selfReportingType = selfReportingType;
 
             //totalPoints is not a prop on skillRequest, it is a calculated value so we
             //need to manually update it in the case of edits.
             skillDefinition.totalPoints = totalPointsRequested
+
         } else {
             String parentSkillId = skillRequest.subjectId
             subject = skillDefRepo.findByProjectIdAndSkillIdAndType(skillRequest.projectId, parentSkillId, SkillDef.ContainerType.Subject)

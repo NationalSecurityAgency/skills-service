@@ -23,6 +23,8 @@ import org.springframework.lang.Nullable
 import skills.storage.model.SkillApproval
 import skills.storage.model.SkillDef
 
+import java.util.stream.Stream
+
 @CompileStatic
 interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
 
@@ -48,6 +50,9 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
 
     long countByProjectIdAndRejectedOnIsNull(String projectId)
 
+    long deleteByProjectIdAndSkillRefId(String projectId, Integer skillRefId)
+
+    Stream<SkillApproval> findAllBySkillRefIdAndRejectedOnIsNull(Integer skillRefId)
 
     @Nullable
     @Query('''select s 

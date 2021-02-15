@@ -16,6 +16,7 @@
 package skills.intTests
 
 import groovy.json.JsonOutput
+import groovy.lang.Closure
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import skills.intTests.utils.DefaultIntSpec
@@ -23,13 +24,17 @@ import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.storage.model.SkillApproval
 import skills.storage.model.SkillDef
+import skills.storage.model.UserPerformedSkill
 import skills.storage.repos.SkillApprovalRepo
-import spock.lang.IgnoreIf
+import skills.storage.repos.UserPerformedSkillRepo
 
 class SkillApprovalSpecs extends DefaultIntSpec {
 
     @Autowired
     SkillApprovalRepo skillApprovalRepo
+
+    @Autowired
+    UserPerformedSkillRepo userPerformedSkillRepo
 
     void "getApprovals paging"() {
         def proj = SkillsFactory.createProject()
@@ -398,5 +403,258 @@ class SkillApprovalSpecs extends DefaultIntSpec {
         res.find { it.value == "Disabled"}.count == 5
         res.find { it.value == "HonorSystem"}.count == 3
         res.find { it.value == "Approval"}.count == 2
+    }
+
+    void "remove existing approval requests if the skill's self approval type to be 'disabled'"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(5,)
+        skills.each {
+            it.pointIncrement = 200
+            it.selfReportType = SkillDef.SelfReportingType.Approval
+        }
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        def proj1 = SkillsFactory.createProject(2)
+        def subj1 = SkillsFactory.createSubject(2)
+        def skills1 = SkillsFactory.createSkills(3,2)
+        skills1.each {
+            it.pointIncrement = 200
+            it.selfReportType = SkillDef.SelfReportingType.Approval
+        }
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(subj1)
+        skillsService.createSkills(skills1)
+
+        5.times {
+            Date date = new Date() - it
+            def res = skillsService.addSkill([projectId: proj.projectId, skillId: skills[it].skillId], "user${it}", date, "Please approve this ${it}!")
+            assert res.body.explanation == "Skill was submitted for approval"
+            def res1 = skillsService.addSkill([projectId: proj.projectId, skillId: skills[it].skillId], "user${it+1}", date, "Please approve this ${it}!")
+            assert res1.body.explanation == "Skill was submitted for approval"
+        }
+
+        3.times {
+            Date date = new Date() - it
+            def res = skillsService.addSkill([projectId: proj1.projectId, skillId: skills1[it].skillId], "user${it}", date, "Other reason ${it}!")
+            assert res.body.explanation == "Skill was submitted for approval"
+        }
+
+        when:
+        List<SkillApproval> approvalBefore = skillApprovalRepo.findAll()
+        List<UserPerformedSkill> performedBefore = userPerformedSkillRepo.findAll()
+
+        skills[1].selfReportType = null
+        skillsService.createSkills([skills[1]])
+        List<SkillApproval> approvalAfter1Delete = skillApprovalRepo.findAll()
+        List<UserPerformedSkill> performedAfter = userPerformedSkillRepo.findAll()
+
+        Closure<List<String>> getIds = { approvals->
+            return approvals.collect {
+                SkillDef skillDef = skillDefRepo.findById(it.skillRefId).get()
+                assert skillDef
+                return "${skillDef.projectId}-${skillDef.skillId}_${it.userId}"
+            }.sort()
+        }
+
+        then:
+        approvalBefore.collect {it.id }.size() == 13
+        getIds.call(approvalBefore) == [
+                "TestProject1-skill1_user0",
+                "TestProject1-skill1_user1",
+                "TestProject1-skill2_user1",
+                "TestProject1-skill2_user2",
+                "TestProject1-skill3_user2",
+                "TestProject1-skill3_user3",
+                "TestProject1-skill4_user3",
+                "TestProject1-skill4_user4",
+                "TestProject1-skill5_user4",
+                "TestProject1-skill5_user5",
+
+                "TestProject2-skill1_user0",
+                "TestProject2-skill2_user1",
+                "TestProject2-skill3_user2"]
+
+        approvalAfter1Delete.collect {it.id }.size() == 11
+        getIds.call(approvalAfter1Delete) == [
+                "TestProject1-skill1_user0",
+                "TestProject1-skill1_user1",
+                "TestProject1-skill3_user2",
+                "TestProject1-skill3_user3",
+                "TestProject1-skill4_user3",
+                "TestProject1-skill4_user4",
+                "TestProject1-skill5_user4",
+                "TestProject1-skill5_user5",
+
+                "TestProject2-skill1_user0",
+                "TestProject2-skill2_user1",
+                "TestProject2-skill3_user2"]
+
+        performedBefore.collect { it.id }.size() == 0
+        performedAfter.collect { it.id }.size() == 0
+    }
+
+    void "apply existing approval requests if the skill's self approval type to be 'HonorSystem'"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(5,)
+        skills.each {
+            it.pointIncrement = 200
+            it.selfReportType = SkillDef.SelfReportingType.Approval
+        }
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        def proj1 = SkillsFactory.createProject(2)
+        def subj1 = SkillsFactory.createSubject(2)
+        def skills1 = SkillsFactory.createSkills(3,2)
+        skills1.each {
+            it.pointIncrement = 200
+            it.selfReportType = SkillDef.SelfReportingType.Approval
+        }
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(subj1)
+        skillsService.createSkills(skills1)
+
+        5.times {
+            Date date = new Date() - it
+            def res = skillsService.addSkill([projectId: proj.projectId, skillId: skills[it].skillId], "user${it}", date, "Please approve this ${it}!")
+            assert res.body.explanation == "Skill was submitted for approval"
+            def res1 = skillsService.addSkill([projectId: proj.projectId, skillId: skills[it].skillId], "user${it+1}", date, "Please approve this ${it}!")
+            assert res1.body.explanation == "Skill was submitted for approval"
+        }
+
+        3.times {
+            Date date = new Date() - it
+            def res = skillsService.addSkill([projectId: proj1.projectId, skillId: skills1[it].skillId], "user${it}", date, "Other reason ${it}!")
+            assert res.body.explanation == "Skill was submitted for approval"
+        }
+
+        when:
+        List<SkillApproval> approvalBefore = skillApprovalRepo.findAll()
+        List<UserPerformedSkill> performedBefore = userPerformedSkillRepo.findAll()
+
+        skills[1].selfReportType = SkillDef.SelfReportingType.HonorSystem
+        skillsService.createSkills([skills[1]])
+        List<SkillApproval> approvalAfter1Delete = skillApprovalRepo.findAll()
+        List<UserPerformedSkill> performedAfter = userPerformedSkillRepo.findAll()
+
+        Closure<List<String>> getIds = { approvals->
+            return approvals.collect {
+                SkillDef skillDef = skillDefRepo.findById(it.skillRefId).get()
+                assert skillDef
+                return "${skillDef.projectId}-${skillDef.skillId}_${it.userId}"
+            }.sort()
+        }
+
+        then:
+        approvalBefore.collect {it.id }.size() == 13
+        getIds.call(approvalBefore) == [
+                "TestProject1-skill1_user0",
+                "TestProject1-skill1_user1",
+                "TestProject1-skill2_user1",
+                "TestProject1-skill2_user2",
+                "TestProject1-skill3_user2",
+                "TestProject1-skill3_user3",
+                "TestProject1-skill4_user3",
+                "TestProject1-skill4_user4",
+                "TestProject1-skill5_user4",
+                "TestProject1-skill5_user5",
+
+                "TestProject2-skill1_user0",
+                "TestProject2-skill2_user1",
+                "TestProject2-skill3_user2"]
+
+        approvalAfter1Delete.collect {it.id }.size() == 11
+        getIds.call(approvalAfter1Delete) == [
+                "TestProject1-skill1_user0",
+                "TestProject1-skill1_user1",
+                "TestProject1-skill3_user2",
+                "TestProject1-skill3_user3",
+                "TestProject1-skill4_user3",
+                "TestProject1-skill4_user4",
+                "TestProject1-skill5_user4",
+                "TestProject1-skill5_user5",
+
+                "TestProject2-skill1_user0",
+                "TestProject2-skill2_user1",
+                "TestProject2-skill3_user2"]
+
+        performedBefore.collect { it.id }.size() == 0
+        performedAfter.collect { "${it.projectId}-${it.skillId}_${it.userId}" } == [
+                "TestProject1-skill2_user1",
+                "TestProject1-skill2_user2",
+        ]
+    }
+
+    void "apply existing approval requests if the skill's self approval type to be 'HonorSystem' - only apply if request was NOT rejected"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(5,)
+        skills.each {
+            it.pointIncrement = 200
+            it.selfReportType = SkillDef.SelfReportingType.Approval
+        }
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        Date date = new Date()
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "user1", date, "Please approve this")
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "user2", date, "Please approve this")
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "user3", date, "Please approve this")
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "user4", date, "Please approve this")
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "user5", date, "Please approve this")
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "user6", date, "Please approve this")
+
+        def approvalsEndpointRes = skillsService.getApprovals(proj.projectId, 50, 1, 'requestedOn', false)
+        List approvalItems = approvalsEndpointRes.data.sort({ it.userId })
+        skillsService.rejectSkillApprovals(proj.projectId, [approvalItems[1].id], 'Just felt like it')
+        skillsService.rejectSkillApprovals(proj.projectId, [approvalItems[2].id], 'Just felt like it')
+
+        when:
+        List<SkillApproval> approvalBefore = skillApprovalRepo.findAll()
+        List<UserPerformedSkill> performedBefore = userPerformedSkillRepo.findAll()
+
+        skills[0].selfReportType = SkillDef.SelfReportingType.HonorSystem
+        skillsService.createSkills([skills[0]])
+        List<SkillApproval> approvalAfter1Delete = skillApprovalRepo.findAll()
+        List<UserPerformedSkill> performedAfter = userPerformedSkillRepo.findAll()
+
+        Closure<List<String>> getIds = { approvals->
+            return approvals.collect {
+                SkillDef skillDef = skillDefRepo.findById(it.skillRefId).get()
+                assert skillDef
+                return "${skillDef.projectId}-${skillDef.skillId}_${it.userId}"
+            }.sort()
+        }
+
+        then:
+        getIds.call(approvalBefore) == [
+                "TestProject1-skill1_user1",
+                "TestProject1-skill1_user2",
+                "TestProject1-skill1_user3",
+                "TestProject1-skill1_user4",
+                "TestProject1-skill1_user5",
+                "TestProject1-skill1_user6",
+                ]
+
+        !getIds.call(approvalAfter1Delete)
+
+        performedBefore.collect { it.id }.size() == 0
+        performedAfter.collect { "${it.projectId}-${it.skillId}_${it.userId}" } == [
+                "TestProject1-skill1_user1",
+                "TestProject1-skill1_user4",
+                "TestProject1-skill1_user5",
+                "TestProject1-skill1_user6",
+        ]
     }
 }
