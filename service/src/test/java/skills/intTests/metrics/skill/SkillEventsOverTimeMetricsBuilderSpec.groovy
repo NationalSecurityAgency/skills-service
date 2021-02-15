@@ -15,15 +15,22 @@
  */
 package skills.intTests.metrics.skill
 
-import groovy.json.JsonOutput
+
 import groovy.json.JsonSlurper
 import groovy.time.TimeCategory
+import org.apache.commons.lang3.RandomUtils
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.metrics.builders.MetricsParams
+import skills.services.StartDateUtil
+import skills.storage.model.EventType
 
+import java.time.DayOfWeek
 import java.time.LocalDateTime
+import java.time.temporal.TemporalAdjusters
+import java.time.temporal.TemporalField
+import java.time.temporal.WeekFields
 
 class SkillEventsOverTimeMetricsBuilderSpec  extends DefaultIntSpec {
 
@@ -76,15 +83,19 @@ class SkillEventsOverTimeMetricsBuilderSpec  extends DefaultIntSpec {
         skillsService.createSubject(SkillsFactory.createSubject())
         skillsService.createSkills(skills)
 
-        List<Date> days
+        TestDates testDates = new TestDates()
 
-        use(TimeCategory) {
-            days = (5..0).collect { int day -> day.days.ago }
-            days.eachWithIndex { Date date, int index ->
-                users.subList(0, index).each { String user ->
-                    skills.subList(0, index).each { skill ->
-                        skillsService.addSkill([projectId: proj.projectId, skillId: skill.skillId], user, date)
-                    }
+        List<Date> days = [
+                testDates.startOfTwoWeeksAgo.toDate(),
+                testDates.startOfTwoWeeksAgo.plusDays(2).toDate(),
+                testDates.startOfTwoWeeksAgo.plusDays(4).toDate(),
+                testDates.startOfTwoWeeksAgo.plusDays(6).toDate(),
+                testDates.startOfCurrentWeek.toDate()]
+
+        days.eachWithIndex { Date date, int index ->
+            users.subList(0, index).each { String user ->
+                skills.subList(0, index).each { skill ->
+                    skillsService.addSkill([projectId: proj.projectId, skillId: skill.skillId], user, date)
                 }
             }
         }
@@ -100,31 +111,77 @@ class SkillEventsOverTimeMetricsBuilderSpec  extends DefaultIntSpec {
         }
 
         then:
-        res[0].countsByDay.collect { it.num } == [1, 2, 3, 4, 5]
-        res[0].countsByDay.collect { new Date(it.timestamp) } == [days[1], days[2], days[3], days[4], days[5]]
+        res[0].countsByDay.collect { it.num } == [5, 4]
+        res[0].countsByDay.collect { new Date(it.timestamp) } == [testDates.startOfTwoWeeksAgo.toDate(), testDates.startOfCurrentWeek.toDate()]
         res[0].allEvents
 
-        res[1].countsByDay.collect { it.num } == [2, 3, 4, 5]
-        res[1].countsByDay.collect { new Date(it.timestamp) } == [days[2], days[3], days[4], days[5]]
+        res[1].countsByDay.collect { it.num } == [5, 4]
+        res[1].countsByDay.collect { new Date(it.timestamp) } == [testDates.startOfTwoWeeksAgo.toDate(), testDates.startOfCurrentWeek.toDate()]
         res[1].allEvents
 
-        res[2].countsByDay.collect { it.num } == [3, 4, 5]
-        res[2].countsByDay.collect { new Date(it.timestamp) } == [days[3], days[4], days[5]]
+        res[2].countsByDay.collect { it.num } == [3, 4]
+        res[2].countsByDay.collect { new Date(it.timestamp) } == [testDates.startOfTwoWeeksAgo.toDate(), testDates.startOfCurrentWeek.toDate()]
         res[2].allEvents
 
-        res[3].countsByDay.collect { it.num } == [4, 5]
-        res[3].countsByDay.collect { new Date(it.timestamp) } == [days[4], days[5]]
+        res[3].countsByDay.collect { it.num } == [4]
+        res[3].countsByDay.collect { new Date(it.timestamp) } == [testDates.startOfCurrentWeek.toDate()]
         res[3].allEvents
 
-        res[4].countsByDay.collect { it.num } == [5]
-        res[4].countsByDay.collect { new Date(it.timestamp) } == [days[5]]
-        res[4].allEvents
+        res[4].countsByDay.collect { it.num } == []
 
         res[5].countsByDay.collect { it.num } == []
         res[6].countsByDay.collect { it.num } == []
         res[7].countsByDay.collect { it.num } == []
         res[8].countsByDay.collect { it.num } == []
         res[9].countsByDay.collect { it.num } == []
+    }
+
+    def "number events over time - daily metrics"() {
+        List<String> users = getRandomUsers(3)
+        def proj = SkillsFactory.createProject()
+        List<Map> skills = SkillsFactory.createSkills(3)
+        skills.each { it.pointIncrement = 100; it.numPerformToCompletion = 2 }
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(SkillsFactory.createSubject())
+        skillsService.createSkills(skills)
+
+        TestDates testDates = new TestDates()
+
+        List<Date> days = [
+            testDates.now.minusDays(2).toDate(),
+            testDates.now.minusDays(1).toDate(),
+            testDates.now.toDate(),
+        ]
+
+        days.eachWithIndex { Date date, int index ->
+            users.subList(0, index).each { String user ->
+                skills.subList(0, index).each { skill ->
+                    skillsService.addSkill([projectId: proj.projectId, skillId: skill.skillId], user, date)
+                }
+            }
+        }
+
+        Map props = [:]
+        props[MetricsParams.P_SKILL_ID] = skills[0].skillId
+        props[MetricsParams.P_START_TIMESTAMP] = LocalDateTime.now().minusDays(2).toDate().time
+
+        when:
+        List res = skills.collect {
+            props[MetricsParams.P_SKILL_ID] = it.skillId
+            return skillsService.getMetricsData(proj.projectId, metricsId, props)
+        }
+
+        then:
+        res[0].countsByDay.collect { it.num } == [1, 2]
+        res[0].countsByDay.collect { new Date(it.timestamp) } == [StartDateUtil.computeStartDate(days[1], EventType.DAILY), StartDateUtil.computeStartDate(days[2], EventType.DAILY)]
+        res[0].allEvents
+
+        res[1].countsByDay.collect { it.num } == [0, 2]
+        res[1].countsByDay.collect { new Date(it.timestamp) } == [StartDateUtil.computeStartDate(days[1], EventType.DAILY), StartDateUtil.computeStartDate(days[2], EventType.DAILY)]
+        res[1].allEvents
+
+        res[2].countsByDay == []
 
     }
 
@@ -162,9 +219,44 @@ class SkillEventsOverTimeMetricsBuilderSpec  extends DefaultIntSpec {
         }
 
         then:
-        res[0].countsByDay.collect { it.num } == [10, 10]
-        res[0].countsByDay.collect { new Date(it.timestamp) } == [days[0], days[1]]
+        res[0].countsByDay.collect { it.num } == [20]
         res[0].allEvents.collect { it.num }.sum() == 60
+    }
+
+    private static class TestDates {
+        LocalDateTime now;
+        LocalDateTime startOfCurrentWeek;
+        LocalDateTime startOfTwoWeeksAgo;
+
+        public TestDates() {
+            now = LocalDateTime.now()
+            startOfCurrentWeek = StartDateUtil.computeStartDate(now.toDate(), EventType.DAILY).toLocalDateTime().with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY))
+            startOfTwoWeeksAgo = startOfCurrentWeek.minusWeeks(1)
+        }
+
+        LocalDateTime getDateWithinCurrentWeek(boolean allowFutureDate=false) {
+            if(now.getDayOfWeek() == DayOfWeek.SUNDAY) {
+                if (allowFutureDate) {
+                    return now.plusDays(RandomUtils.nextInt(1, 6))
+                }
+                return now//nothing we can do
+            } else {
+                //us days of week are sun-saturday as 1-7
+                TemporalField dayOfWeekField = WeekFields.of(Locale.US).dayOfWeek()
+                int currentDayOfWeek = now.get(dayOfWeekField)
+
+                if (allowFutureDate) {
+                    int randomDay = -1
+                    while ((randomDay = RandomUtils.nextInt(1, 7)) == currentDayOfWeek) {
+                        //
+                    }
+                    return now.with(dayOfWeekField, randomDay)
+                }
+
+                return now.with(dayOfWeekField, RandomUtils.nextInt(1,currentDayOfWeek))
+            }
+        }
+
     }
 
 }

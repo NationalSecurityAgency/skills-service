@@ -386,7 +386,7 @@ class UserEventService {
         }
     }
 
-    private EventType determineAppropriateEventType(Date start) {
+    public EventType determineAppropriateEventType(Date start) {
         EventType eventType = EventType.DAILY
 
         if (start.toLocalDateTime().isBefore(LocalDate.now().atStartOfDay().minusDays(maxDailyDays))) {
