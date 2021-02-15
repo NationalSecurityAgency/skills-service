@@ -22,7 +22,7 @@ limitations under the License.
           <i class="fa-3x" :class="icon"/>
         </div>
         <div class="media-body">
-          <h4 class="mb-2 text-uppercase">{{ title }}</h4>
+          <div class="h4 mb-2 text-uppercase">{{ title }}</div>
           <div style="font-size: 0.95rem;" class="text-secondary">
             <slot>
               {{ subtitle }}
