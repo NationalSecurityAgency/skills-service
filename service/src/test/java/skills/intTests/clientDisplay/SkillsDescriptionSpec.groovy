@@ -20,7 +20,6 @@ import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
 import skills.storage.model.SkillDef
-import spock.lang.IgnoreRest
 
 class SkillsDescriptionSpec extends DefaultIntSpec {
 
@@ -452,8 +451,8 @@ class SkillsDescriptionSpec extends DefaultIntSpec {
 
         println JsonOutput.toJson(addSkillRes2)
         when:
-        def res1 = skillsService.getSubjectDescriptions(proj1.projectId, proj1_subj1.subjectId, user)
-        def res2 = skillsService.getSubjectDescriptions(proj1.projectId, proj1_subj2.subjectId, user)
+        def res1 = skillsService.getSubjectDescriptions(proj1.projectId, proj1_subj1.subjectId, user).sort { it.skillId }
+        def res2 = skillsService.getSubjectDescriptions(proj1.projectId, proj1_subj2.subjectId, user).sort { it.skillId }
 
         println JsonOutput.prettyPrint(JsonOutput.toJson(res1))
         println JsonOutput.prettyPrint(JsonOutput.toJson(res2))
