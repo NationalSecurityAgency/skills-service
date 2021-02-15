@@ -79,8 +79,7 @@
     "cypress-audit": "^0.2.3",
     "cypress-axe": "^0.10.0",
     "object-scan": "13.6.7",
-    "badge-maker": "^3.3.0",
-    "dayjs": "1.9.6"
+    "badge-maker": "^3.3.0"
   },
   "dependencies": {}
 }

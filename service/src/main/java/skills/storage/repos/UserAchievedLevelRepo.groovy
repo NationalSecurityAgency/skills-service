@@ -173,10 +173,18 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
         where
             ua.level is null and
             ua.userId= :userId and
-            skillDef.skillId = ua.skillId and
-            (skillDef.projectId = ua.projectId OR (skillDef.projectId is null and ua.projectId is null)) and
+            skillDef.skillId = ua.skillId and (
+                (skillDef.projectId = ua.projectId and skillDef.projectId IN (
+                    select s.projectId
+                    from Setting s
+                    where s.projectId = skillDef.projectId
+                      and s.setting = 'production.mode.enabled'
+                      and s.value = 'true')
+                ) OR 
+                (skillDef.projectId is null and ua.projectId is null)
+            ) and
             (skillDef.type='Badge' OR skillDef.type='GlobalBadge')''')
-    AchievedBadgeCount countAchievedBadgesForUser(@Param('userId') String userId)
+    AchievedBadgeCount countAchievedProductionBadgesForUser(@Param('userId') String userId)
 
     @Query(value = '''select EXTRACT(MONTH FROM ua.created) as label, count(*) countRes
       from skill_definition skillDef, user_achievement ua 
@@ -396,6 +404,11 @@ where ua.projectId = :projectId and ua.skillId = :skillId
             ua.userId= :userId and
             skillDef.skillId = ua.skillId and
             skillDef.projectId = ua.projectId and
-            skillDef.type='Skill' ''')
-    AchievedSkillsCount countAchievedSkillsForUserByDayWeekMonth(@Param('userId') String userId)
+            skillDef.type='Skill' and skillDef.projectId IN (
+                select s.projectId
+                from Setting s
+                where s.projectId = skillDef.projectId
+                  and s.setting = 'production.mode.enabled'
+                  and s.value = 'true')''')
+    AchievedSkillsCount countAchievedProductionSkillsForUserByDayWeekMonth(@Param('userId') String userId)
 }

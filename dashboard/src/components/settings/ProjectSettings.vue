@@ -19,6 +19,24 @@ limitations under the License.
     <simple-card>
       <loading-container :is-loading="isLoading">
         <div class="row">
+          <div class="col col-md-3 text-secondary" id="productionModeEnabledLabel">
+            Production Mode:
+            <inline-help
+              msg="Change to true for this project to be visible in the 'Progress and Ranking' page for all SkillTree users."/>
+          </div>
+          <div class="col">
+            <b-form-checkbox v-model="settings.productionModeEnabled.value"
+                             name="check-button"
+                             v-on:input="productionModeEnabledChanged"
+                             aria-labelledby="productionModeEnabledLabel"
+                             data-cy="productionModeEnabledSwitch"
+                             switch>
+              {{ settings.productionModeEnabled.value }}
+            </b-form-checkbox>
+          </div>
+        </div>
+
+        <div class="row mt-3">
           <div class="col col-md-3 text-secondary" id="pointsForLevelsLabel">
             Use Points For Levels:
             <inline-help
@@ -92,6 +110,13 @@ limitations under the License.
       return {
         isLoading: true,
         settings: {
+          productionModeEnabled: {
+            value: 'false',
+            setting: 'production.mode.enabled',
+            lastLoadedValue: 'false',
+            dirty: false,
+            projectId: this.$route.params.projectId,
+          },
           levelPointsEnabled: {
             value: 'false',
             setting: 'level.points.enabled',
@@ -120,6 +145,9 @@ limitations under the License.
       },
     },
     methods: {
+      productionModeEnabledChanged(value) {
+        this.settings.productionModeEnabled.dirty = `${value}` !== `${this.settings.productionModeEnabled.lastLoadedValue}`;
+      },
       levelPointsEnabledChanged(value) {
         this.settings.levelPointsEnabled.dirty = `${value}` !== `${this.settings.levelPointsEnabled.lastLoadedValue}`;
       },

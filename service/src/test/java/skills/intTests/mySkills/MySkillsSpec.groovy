@@ -21,6 +21,7 @@ import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
 import skills.intTests.utils.TestUtils
+import skills.services.settings.Settings
 
 @Slf4j
 class MySkillsSpec extends DefaultIntSpec {
@@ -28,6 +29,7 @@ class MySkillsSpec extends DefaultIntSpec {
     SkillsService rootSkillsService
     SkillsService supervisorService
     String userId
+    String PROD_MODE = Settings.PRODUCTION_MODE.settingName
 
     def setup() {
         userId = skillsService.wsHelper.username//"user1"
@@ -48,6 +50,9 @@ class MySkillsSpec extends DefaultIntSpec {
 
         skillsService.createProject(proj1)
         skillsService.createSubject(subj1)
+
+        // enable "production mode"
+        skillsService.changeSetting(proj1.projectId, PROD_MODE, [projectId: proj1.projectId, setting: PROD_MODE, value: "true"])
 
         when:
         def res = skillsService.getMySkillSummary()
@@ -92,6 +97,9 @@ class MySkillsSpec extends DefaultIntSpec {
         globalBadge.enabled = 'true'
         supervisorService.createGlobalBadge(globalBadge)
 
+        // enable "production mode"
+        skillsService.changeSetting(proj1.projectId, PROD_MODE, [projectId: proj1.projectId, setting: PROD_MODE, value: "true"])
+
         when:
         def res = skillsService.getMySkillSummary()
         then:
@@ -121,6 +129,9 @@ class MySkillsSpec extends DefaultIntSpec {
         List<Map> subj1 = (1..2).collect { [projectId: projId, subjectId: "subj1", skillId: "s1${it}".toString(), name: "subj1 ${it}".toString(), type: "Skill", pointIncrement: 10, numPerformToCompletion: 5, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1] }
         String skillId = subj1.get(1).skillId
         skillsService.createSchema([subj1])
+
+        // enable "production mode"
+        skillsService.changeSetting(projId, PROD_MODE, [projectId: projId, setting: PROD_MODE, value: "true"])
 
         def badge = SkillsFactory.createBadge()
         skillsService.createBadge(badge)
@@ -193,6 +204,9 @@ class MySkillsSpec extends DefaultIntSpec {
         String skillId = subj1.get(1).skillId
         skillsService.createSchema([subj1])
 
+        // enable "production mode"
+        skillsService.changeSetting(projId, PROD_MODE, [projectId: projId, setting: PROD_MODE, value: "true"])
+
         def badge = SkillsFactory.createBadge()
         skillsService.createBadge(badge)
         skillsService.assignSkillToBadge([projectId: projId, badgeId: badge.badgeId, skillId: skillId])
@@ -210,6 +224,9 @@ class MySkillsSpec extends DefaultIntSpec {
         List<Map> subj2 = (1..2).collect { [projectId: projId2, subjectId: "subj1", skillId: "s1${it}".toString(), name: "subj1 ${it}".toString(), type: "Skill", pointIncrement: 10, numPerformToCompletion: 5, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1] }
         String skillId2 = subj2.get(1).skillId
         skillsService.createSchema([subj2])
+
+        // enable "production mode"
+        skillsService.changeSetting(projId2, PROD_MODE, [projectId: projId2, setting: PROD_MODE, value: "true"])
 
         def badge2 = SkillsFactory.createBadge(2)
         skillsService.createBadge(badge2)
@@ -291,6 +308,9 @@ class MySkillsSpec extends DefaultIntSpec {
         skillsService.assignDependency([projectId: projId, skillId: skills.get(2).skillId, dependentSkillId: skills.get(1).skillId])
         skillsService.addSkill([projectId: projId, skillId: skills.get(0).skillId], userId, new Date())
 
+        // enable "production mode"
+        skillsService.changeSetting(projId, PROD_MODE, [projectId: projId, setting: PROD_MODE, value: "true"])
+
         when:
         def mySummary0 = skillsService.getMySkillSummary(0)
         def mySummary1 = skillsService.getMySkillSummary(1)
@@ -339,6 +359,9 @@ class MySkillsSpec extends DefaultIntSpec {
         skillsService.addSkill([projectId: projId, skillId: skills.get(4).skillId], userId, new Date())
         skillsService.addSkill([projectId: projId, skillId: skills.get(5).skillId], userId, new Date() - 2)
 
+        // enable "production mode"
+        skillsService.changeSetting(projId, PROD_MODE, [projectId: projId, setting: PROD_MODE, value: "true"])
+
         when:
         def mySummary0 = skillsService.getMySkillSummary(0)
         def mySummary1 = skillsService.getMySkillSummary(1)
@@ -368,7 +391,7 @@ class MySkillsSpec extends DefaultIntSpec {
         mySummary2.projectSummaries.find{ it.projectId == projId }.totalPoints == 120
     }
 
-    def "my skills summary - user points to NOT respect the version (skills with numPerformToCompletion > 1) - if user ends those points they are proudly displayed in all versions"() {
+    def "my skills summary - user points DO NOT respect the version (skills with numPerformToCompletion > 1) - if user ends those points they are proudly displayed in all versions"() {
         String projId = SkillsFactory.defaultProjId
         List<Map> skills = SkillsFactory.createSkillsWithDifferentVersions([0, 0, 1, 1, 1, 2])
         skills.each {
@@ -389,6 +412,9 @@ class MySkillsSpec extends DefaultIntSpec {
         skillsService.addSkill([projectId: projId, skillId: skills.get(5).skillId], userId, new Date() - 2)
         skillsService.addSkill([projectId: projId, skillId: skills.get(5).skillId], userId, new Date() - 1)
         skillsService.addSkill([projectId: projId, skillId: skills.get(5).skillId], userId, new Date())
+
+        // enable "production mode"
+        skillsService.changeSetting(projId, PROD_MODE, [projectId: projId, setting: PROD_MODE, value: "true"])
 
         when:
         def mySummary0 = skillsService.getMySkillSummary(0)
@@ -417,5 +443,44 @@ class MySkillsSpec extends DefaultIntSpec {
         mySummary2.projectSummaries.find{ it.projectId == projId }
         mySummary2.projectSummaries.find{ it.projectId == projId }.points == 80
         mySummary2.projectSummaries.find{ it.projectId == projId }.totalPoints == 300
+    }
+
+    def "my skills summary - skills have been created and achieved, but 'production mode' is not enabled"() {
+        def proj1 = SkillsFactory.createProject()
+        def subj1 = SkillsFactory.createSubject()
+        def skill1 = SkillsFactory.createSkill()
+        def badge = SkillsFactory.createBadge()
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(subj1)
+        skillsService.createSkill(skill1)
+        skillsService.createBadge(badge)
+        skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badge.badgeId, skillId: skill1.skillId])
+        badge.enabled = 'true'
+        skillsService.createBadge(badge)
+
+        def globalBadge = [badgeId: "globalBadge", name: 'Test Global Badge 1', enabled: 'false']
+        supervisorService.createGlobalBadge(globalBadge)
+        supervisorService.assignSkillToGlobalBadge(projectId: proj1.projectId, badgeId: globalBadge.badgeId, skillId: skill1.skillId)
+        globalBadge.enabled = 'true'
+        supervisorService.createGlobalBadge(globalBadge)
+
+        when:
+        def res = skillsService.getMySkillSummary()
+        then:
+
+        // "production mode" is not enabled, so proj1 should not be included in the results
+        res
+        res.projectSummaries.isEmpty()
+        res.totalProjects == 0
+        res.numProjectsContributed == 0
+        res.totalSkills == 0
+        res.numAchievedSkills == 0
+        res.numAchievedSkillsLastMonth == 0
+        res.numAchievedSkillsLastWeek == 0
+        res.mostRecentAchievedSkill == null
+        res.totalBadges == 1 // global badge is still included
+        res.numAchievedGemBadges == 0
+        res.numAchievedGlobalBadges == 0
     }
 }

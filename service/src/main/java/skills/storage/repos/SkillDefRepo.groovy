@@ -182,11 +182,25 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
 
     @Query(value='''SELECT count(sd)
         from SkillDef sd 
-        where sd.type='Skill' ''')
-    Integer countTotalSkills()
+        where sd.type='Skill' and sd.projectId IN (
+            select s.projectId
+            from Setting s
+            where s.projectId = sd.projectId
+              and s.setting = 'production.mode.enabled'
+              and s.value = 'true')''')
+    Integer countTotalProductionSkills()
 
     @Query(value='''SELECT count(sd)
         from SkillDef sd 
-        where (sd.type='Badge' OR sd.type='GlobalBadge') and (sd.enabled  = 'true' OR sd.enabled is null)''')
-    Integer countTotalBadges()
+        where (
+        (sd.type = 'Badge' and sd.projectId IN (
+            select s.projectId
+            from Setting s
+            where s.projectId = sd.projectId
+              and s.setting = 'production.mode.enabled'
+              and s.value = 'true')
+        ) OR 
+        sd.type='GlobalBadge') and
+      (sd.enabled  = 'true' OR sd.enabled is null)''')
+    Integer countTotalProductionBadges()
 }

@@ -31,6 +31,7 @@ import skills.services.BadgeUtils
 import skills.services.DependencyValidator
 import skills.services.GlobalBadgesService
 import skills.services.LevelDefinitionStorageService
+import skills.services.settings.Settings
 import skills.services.settings.SettingsService
 import skills.settings.CommonSettings
 import skills.skillLoading.model.*
@@ -132,8 +133,9 @@ class SkillsLoader {
     @Transactional(readOnly = true)
     MySkillsSummary loadMySkillsSummary(String userId, Integer version = -1) {
         MySkillsSummary mySkillsSummary = new MySkillsSummary()
-//        List<String> projectIdsWithPointsFromUser = userPerformedSkillRepo.findDistinctProjectIdsWithUserPoints(userId)
-        List<ProjDef> allProjectDefs =  projDefRepo.findAll()
+        List<ProjDef> allProjectDefs =  projDefRepo.findAll().grep({ProjDef projDef ->
+            settingsService.getProjectSetting(projDef.projectId, Settings.PRODUCTION_MODE.settingName)?.value == 'true'
+        })
         mySkillsSummary.totalProjects = allProjectDefs.size()
         for (ProjDef projDef : allProjectDefs) {
             ProjectSummary summary = new ProjectSummary(projectId: projDef.projectId, projectName: projDef.name)
@@ -147,14 +149,14 @@ class SkillsLoader {
             mySkillsSummary.numProjectsContributed += summary.points > 0 ? 1 : 0
         }
 
-        mySkillsSummary.totalBadges = skillDefRepo.countTotalBadges()
-        AchievedBadgeCount achievedBadgeCounts = achievedLevelRepository.countAchievedBadgesForUser(userId)
+        mySkillsSummary.totalBadges = skillDefRepo.countTotalProductionBadges()
+        AchievedBadgeCount achievedBadgeCounts = achievedLevelRepository.countAchievedProductionBadgesForUser(userId)
         mySkillsSummary.numAchievedBadges = achievedBadgeCounts.totalCount ?: 0
         mySkillsSummary.numAchievedGemBadges = achievedBadgeCounts.gemCount ?: 0
         mySkillsSummary.numAchievedGlobalBadges = achievedBadgeCounts.globalCount ?: 0
 
-        mySkillsSummary.totalSkills = skillDefRepo.countTotalSkills()
-        AchievedSkillsCount achievedSkillsCount = achievedLevelRepository.countAchievedSkillsForUserByDayWeekMonth(userId)
+        mySkillsSummary.totalSkills = skillDefRepo.countTotalProductionSkills()
+        AchievedSkillsCount achievedSkillsCount = achievedLevelRepository.countAchievedProductionSkillsForUserByDayWeekMonth(userId)
         mySkillsSummary.numAchievedSkills = achievedSkillsCount.totalCount
         mySkillsSummary.numAchievedSkillsLastMonth = achievedSkillsCount.monthCount ?: 0
         mySkillsSummary.numAchievedSkillsLastWeek = achievedSkillsCount.weekCount ?: 0
