@@ -111,6 +111,9 @@ class SkillsLoader {
     @Autowired
     RankingLoader rankingLoader
 
+    @Autowired
+    SkillApprovalRepo skillApprovalRepo
+
     private static String PROP_HELP_URL_ROOT = CommonSettings.HELP_URL_ROOT
 
     @Transactional(readOnly = true)
@@ -369,8 +372,26 @@ class SkillsLoader {
                         href: getHelpUrl(helpUrlRootSetting, skillDef.helpUrl)),
                 dependencyInfo: skillDependencySummary,
                 crossProject: crossProjectId != null,
-                achievedOn: achievedOn
+                achievedOn: achievedOn,
+                selfReporting: loadSelfReporting(userId, skillDef),
         )
+    }
+
+    @Profile
+    private SelfReportingInfo loadSelfReporting(String userId, SkillDefWithExtra skillDef){
+        boolean enabled = skillDef.selfReportingType != null
+        SkillApproval skillApproval = skillApprovalRepo.findByUserIdAndProjectIdAndSkillRefId(userId, skillDef.projectId, skillDef.id)
+
+        SelfReportingInfo selfReportingInfo = new SelfReportingInfo(
+                approvalId: skillApproval?.getId(),
+                enabled: enabled,
+                type: skillDef.selfReportingType,
+                requestedOn: skillApproval?.requestedOn?.time,
+                rejectedOn: skillApproval?.rejectedOn?.time,
+                rejectionMsg: skillApproval?.rejectionMsg
+        )
+
+        return selfReportingInfo
     }
 
     @Transactional(readOnly = true)
@@ -402,17 +423,29 @@ class SkillsLoader {
         SettingsResult helpUrlRootSetting = settingsService.getProjectSetting(projectId, PROP_HELP_URL_ROOT)
 
         List<SkillDefWithExtraRepo.SkillDescDBRes> dbRes
+        Map<String, List<SkillApprovalRepo.SkillApprovalPlusSkillId>> approvalLookup
         if (projectId) {
             dbRes = skillDefWithExtraRepo.findAllChildSkillsDescriptions(projectId, subjectId, relationshipType, version, userId)
+            List<SkillApprovalRepo.SkillApprovalPlusSkillId> approvals = skillApprovalRepo.findSkillApprovalsByProjectIdAndSubjectId(userId, projectId, subjectId)
+            approvalLookup = approvals.groupBy { it.getSkillId() }
         } else {
             dbRes = skillDefWithExtraRepo.findAllGlobalChildSkillsDescriptions(subjectId, relationshipType, version, userId)
         }
         List<SkillDescription> res = dbRes.collect {
+            SkillApprovalRepo.SkillApprovalPlusSkillId skillApproval = approvalLookup?.get(it.getSkillId())?.get(0)
             new SkillDescription(
                     skillId: it.getSkillId(),
                     description: InputSanitizer.unsanitizeForMarkdown(it.getDescription()),
                     href: getHelpUrl(helpUrlRootSetting, it.getHelpUrl()),
                     achievedOn: it.getAchievedOn(),
+                    selfReporting: new SelfReportingInfo(
+                            approvalId: skillApproval?.getSkillApproval()?.getId(),
+                            type: it.getSelfReportingType(),
+                            enabled: it.getSelfReportingType() != null,
+                            requestedOn: skillApproval?.getSkillApproval()?.getRequestedOn()?.time,
+                            rejectedOn: skillApproval?.getSkillApproval()?.getRejectedOn()?.time,
+                            rejectionMsg: skillApproval?.getSkillApproval()?.getRejectionMsg()
+                    )
             )
         }
         return res;
@@ -704,7 +737,7 @@ class SkillsLoader {
                     pointIncrement: skillDef.pointIncrement, pointIncrementInterval: skillDef.pointIncrementInterval,
                     maxOccurrencesWithinIncrementInterval: skillDef.numMaxOccurrencesIncrementInterval,
                     totalPoints: skillDef.totalPoints,
-                    dependencyInfo: skillDefAndUserPoints.dependencyInfo
+                    dependencyInfo: skillDefAndUserPoints.dependencyInfo,
             )
         }
 

@@ -28,6 +28,9 @@ $theme-colors: (
 
 $text-muted: #6b6b6b;
 
+//** Background color used for table stripping
+$table-accent-bg: #f9fafa;
+
 // Bootstrap and its default variables
 @import '../../node_modules/bootstrap/scss/bootstrap';
 // BootstrapVue and its default variables
@@ -113,6 +116,10 @@ $text-muted: #6b6b6b;
 
 .skills-color-achievements {
   color: #8f7158;
+}
+
+.skills-color-selfreport {
+  color: #007c49;
 }
 
 .sr-only {

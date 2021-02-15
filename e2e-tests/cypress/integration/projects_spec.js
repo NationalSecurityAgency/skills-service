@@ -489,50 +489,50 @@ describe('Projects Tests', () => {
       name: "proj2"
     });
     cy.visit('/');
-    cy.get('div.project-settings').first().click();
-    cy.get('[data-cy=editMenuEditBtn]').first().click();
+    cy.get('[data-cy="projOptions_proj1"]').click();
+    cy.get('[data-cy="projOptions_proj1"] [data-cy=editMenuEditBtn]').click();
     cy.get('[data-cy=projectName]').should('be.visible');
     cy.get('body').type('{esc}{esc}');
-    cy.get('div.project-settings').children().first().should('have.focus');
+    cy.get('[data-cy="projectCard_proj1"] div.project-settings .dropdown-toggle').should('have.focus');
 
-    cy.get('div.project-settings').first().click();
-    cy.get('[data-cy=editMenuEditBtn]').first().click();
+    cy.get('[data-cy="projOptions_proj1"]').click();
+    cy.get('[data-cy="projOptions_proj1"] [data-cy=editMenuEditBtn]').click();
     cy.get('[data-cy=closeProjectButton]').click();
-    cy.get('div.project-settings').children().first().should('have.focus');
+    cy.get('[data-cy="projectCard_proj1"] div.project-settings .dropdown-toggle').should('have.focus');
 
-    cy.get('div.project-settings').first().click();
-    cy.get('[data-cy=editMenuEditBtn]').first().click();
+    cy.get('[data-cy="projOptions_proj1"]').click();
+    cy.get('[data-cy="projOptions_proj1"] [data-cy=editMenuEditBtn]').click();
     cy.get('[data-cy=projectName]').type('test 123');
     cy.get('[data-cy=saveProjectButton]').click();
-    cy.get('div.project-settings').children().first().should('have.focus');
+    cy.get('[data-cy="projectCard_proj1"] div.project-settings .dropdown-toggle').should('have.focus');
 
-    cy.get('div.project-settings').first().click();
-    cy.get('[data-cy=editMenuEditBtn]').first().click();
+    cy.get('[data-cy="projOptions_proj1"]').click();
+    cy.get('[data-cy="projOptions_proj1"] [data-cy=editMenuEditBtn]').click();
     cy.get('[aria-label=Close]').click();
-    cy.get('div.project-settings').children().first().should('have.focus');
+    cy.get('[data-cy="projectCard_proj1"] div.project-settings .dropdown-toggle').should('have.focus');
 
     //project 2
-    cy.get('div.project-settings').eq(1).click();
-    cy.get('[data-cy=editMenuEditBtn]').eq(1).click();
+    cy.get('[data-cy="projOptions_proj2"]').click();
+    cy.get('[data-cy="projOptions_proj2"] [data-cy=editMenuEditBtn]').click();
     cy.get('[data-cy=projectName]').should('be.visible');
     cy.get('body').type('{esc}{esc}');
-    cy.get('div.project-settings').eq(1).children().first().should('have.focus');
+    cy.get('[data-cy="projectCard_proj2"] div.project-settings .dropdown-toggle').should('have.focus');
 
-    cy.get('div.project-settings').eq(1).click();
-    cy.get('[data-cy=editMenuEditBtn]').eq(1).click();
+    cy.get('[data-cy="projOptions_proj2"]').click();
+    cy.get('[data-cy="projOptions_proj2"] [data-cy=editMenuEditBtn]').click();
     cy.get('[data-cy=closeProjectButton]').click();
-    cy.get('div.project-settings').eq(1).children().first().should('have.focus');
+    cy.get('[data-cy="projectCard_proj2"] div.project-settings .dropdown-toggle').should('have.focus');
 
-    cy.get('div.project-settings').eq(1).click();
-    cy.get('[data-cy=editMenuEditBtn]').eq(1).click();
+    cy.get('[data-cy="projOptions_proj2"]').click();
+    cy.get('[data-cy="projOptions_proj2"] [data-cy=editMenuEditBtn]').click();
     cy.get('[data-cy=projectName]').type('test 123');
     cy.get('[data-cy=saveProjectButton]').click();
-    cy.get('div.project-settings').eq(1).children().first().should('have.focus');
+    cy.get('[data-cy="projectCard_proj2"] div.project-settings .dropdown-toggle').should('have.focus');
 
-    cy.get('div.project-settings').eq(1).click();
-    cy.get('[data-cy=editMenuEditBtn]').eq(1).click();
+    cy.get('[data-cy="projOptions_proj2"]').click();
+    cy.get('[data-cy="projOptions_proj2"] [data-cy=editMenuEditBtn]').click();
     cy.get('[aria-label=Close]').click();
-    cy.get('div.project-settings').eq(1).children().first().should('have.focus');
+    cy.get('[data-cy="projectCard_proj2"] div.project-settings .dropdown-toggle').should('have.focus');
   });
 
   it('new level dialog should return focus to new level button', () => {

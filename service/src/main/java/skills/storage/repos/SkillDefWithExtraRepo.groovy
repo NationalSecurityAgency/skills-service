@@ -38,9 +38,10 @@ interface SkillDefWithExtraRepo extends PagingAndSortingRepository<SkillDefWithE
         String getDescription()
         String getHelpUrl()
         Date getAchievedOn()
+        SkillDef.SelfReportingType getSelfReportingType()
     }
 
-    @Query(value='''SELECT c.skillId as skillId, c.description as description, c.helpUrl as helpUrl, ua.achievedOn as achievedOn
+    @Query(value='''SELECT c.skillId as skillId, c.description as description, c.helpUrl as helpUrl, ua.achievedOn as achievedOn, c.selfReportingType as selfReportingType
         from SkillDefWithExtra s, SkillRelDef r, SkillDefWithExtra c
         left join UserAchievement ua on c.skillId = ua.skillId and c.projectId = ua.projectId and ua.userId=?5
         where 

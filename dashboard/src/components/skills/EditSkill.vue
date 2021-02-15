@@ -60,8 +60,6 @@ limitations under the License.
               </div>
             </div>
           </div>
-          <hr class="mb-0 pb-1 mt-4 mt-lg-0"/>
-          <hr class="my-0 py-0"/>
 
           <div class="row mt-3">
             <div class="col-12 col-lg">
@@ -108,10 +106,7 @@ limitations under the License.
             </div>
           </div>
 
-          <hr class="my-0 pb-1"/>
-          <hr class="mt-0 pt-0"/>
-
-          <div class="row">
+          <div class="row mt-3">
             <div class="col-12 col-lg">
               <div class="form-group">
                 <label><b-form-checkbox data-cy="timeWindowCheckbox" id="checkbox-1" class="d-inline" v-model="skillInternal.timeWindowEnabled" v-on:input="resetTimeWindow"/>Time Window
@@ -178,10 +173,32 @@ limitations under the License.
             </div>
           </div>
 
-            <hr class="my-0 pb-1"/>
-            <hr class="mt-0 pt-0"/>
+            <hr class="mt-0"/>
 
-          <div class="">
+            <div class="row mb-2">
+              <div class="col-12 col-lg-auto">
+                  <b-form-checkbox data-cy="selfReportEnableCheckbox" id="self-report-checkbox"
+                                   class="d-inline" v-model="selfReport.enabled"
+                                   v-on:input="updatedSelfReportingStatus"/>
+                Self Reporting <inline-help msg="Check to enable self-reporting of this skill by users"/>:
+              </div>
+              <div class="col-12 col-lg">
+                <b-form-group v-slot="{ ariaDescribedby }" class="m-0 p-0">
+                  <b-form-radio-group
+                    id="self-reporting-type"
+                    v-model="selfReport.selected"
+                    :options="selfReport.options"
+                    :aria-describedby="ariaDescribedby"
+                    name="Self Reporting Options"
+                    data-cy="selfReportTypeSelector"
+                  ></b-form-radio-group>
+                </b-form-group>
+              </div>
+            </div>
+
+            <hr class="mt-0"/>
+
+            <div class="">
             <label class="label">Description</label>
             <div class="control">
               <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" v-slot="{errors}" name="Skill Description">
@@ -228,6 +245,7 @@ limitations under the License.
   import InlineHelp from '../utils/InlineHelp';
   import LoadingContainer from '../utils/LoadingContainer';
   import InputSanitizer from '../utils/InputSanitizer';
+  import SettingsService from '../settings/SettingsService';
 
   extend('min_value', {
     // eslint-disable-next-line camelcase
@@ -287,12 +305,22 @@ limitations under the License.
           numPointIncrementMaxOccurrences: 1,
           description: null,
           helpUrl: null,
+          selfReportType: null,
         },
         canEditSkillId: false,
         initial: {
           skillId: '',
           skillName: '',
           latestVersion: 0,
+        },
+        selfReport: {
+          loading: true,
+          enabled: false,
+          selected: 'Approval',
+          options: [
+            { text: 'Approval Queue', value: 'Approval', disabled: true },
+            { text: 'Honor System', value: 'HonorSystem', disabled: true },
+          ],
         },
         overallErrMsg: '',
         show: this.value,
@@ -301,15 +329,17 @@ limitations under the License.
     mounted() {
       if (this.isEdit) {
         this.loadSkillDetails();
+        this.selfReport.loading = false;
       } else {
         this.skillInternal = { version: 0, ...this.skillInternal };
         this.findLatestSkillVersion();
+        this.loadSelfReportProjectSetting();
       }
       this.setupValidation();
     },
     computed: {
       isLoading() {
-        return this.isLoadingSkillDetails;
+        return this.isLoadingSkillDetails || this.selfReport.loading;
       },
       totalPoints() {
         if (this.skillInternal.pointIncrement && this.skillInternal.numPerformToCompletion) {
@@ -448,6 +478,11 @@ limitations under the License.
               this.skillInternal.skillId = InputSanitizer.sanitize(this.skillInternal.skillId);
               this.skillInternal.helpUrl = InputSanitizer.sanitize(this.skillInternal.helpUrl);
               this.skillInternal = { subjectId: this.subjectId, ...this.skillInternal };
+              if (this.selfReport.enabled) {
+                this.skillInternal.selfReportType = this.selfReport.selected;
+              } else {
+                this.skillInternal.selfReportType = null;
+              }
               this.$emit('skill-saved', { isEdit: this.isEdit, ...this.skillInternal });
               this.close({ saved: true });
             }
@@ -459,9 +494,24 @@ limitations under the License.
             this.skillInternal = { originalSkillId: loadedSkill.skillId, isEdit: this.isEdit, ...loadedSkill };
             this.initial.skillId = this.skillInternal.skillId;
             this.initial.skillName = this.skillInternal.name;
+
+            if (loadedSkill.selfReportingType) {
+              this.selfReport.selected = loadedSkill.selfReportingType;
+              this.updatedSelfReportingStatus(true);
+            }
           })
           .finally(() => {
             this.isLoadingSkillDetails = false;
+          });
+      },
+      loadSelfReportProjectSetting() {
+        SettingsService.getProjectSetting(this.projectId, 'selfReport.type')
+          .then((res) => {
+            if (res) {
+              this.updatedSelfReportingStatus(true);
+              this.selfReport.selected = res.value;
+            }
+            this.selfReport.loading = false;
           });
       },
       findLatestSkillVersion() {
@@ -492,6 +542,14 @@ limitations under the License.
           this.skillInternal.pointIncrementIntervalMins = 0;
           this.skillInternal.numPointIncrementMaxOccurrences = 1;
         }
+      },
+      updatedSelfReportingStatus(checked) {
+        this.selfReport.enabled = checked;
+        this.selfReport.options = this.selfReport.options.map((item) => {
+          const copy = { ...item };
+          copy.disabled = !checked;
+          return copy;
+        });
       },
     },
   };

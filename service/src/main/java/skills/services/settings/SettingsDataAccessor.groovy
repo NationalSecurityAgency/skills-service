@@ -27,6 +27,7 @@ import skills.controller.request.model.SettingsRequest
 import skills.controller.request.model.UserProjectSettingsRequest
 import skills.controller.request.model.UserSettingsRequest
 import skills.storage.model.Setting
+import skills.storage.model.Setting.SettingType
 import skills.storage.model.auth.User
 import skills.storage.repos.SettingRepo
 import skills.storage.repos.UserRepo
@@ -107,6 +108,10 @@ class SettingsDataAccessor {
 
     void saveAll(Iterable<Setting> settings){
         settingRepo.saveAll(settings)
+    }
+
+    void deleteSetting(String setting, SettingType type) {
+        settingRepo.deleteBySettingAndType(setting, type)
     }
 
     void deleteGlobalSetting(String setting) {

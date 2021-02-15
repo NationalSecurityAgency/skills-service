@@ -40,10 +40,13 @@ import skills.storage.repos.LevelDefRepo
 import skills.storage.repos.ProjDefRepo
 import skills.storage.repos.SkillRelDefRepo
 import skills.storage.repos.nativeSql.DBConditions
+import spock.lang.Ignore
 
 import javax.annotation.PostConstruct
 import javax.sql.DataSource
 
+@Deprecated
+@Ignore
 @Slf4j
 @SpringBootTest(properties = ['skills.db.startup=false', 'spring.liquibase.enabled=false'], webEnvironment=SpringBootTest.WebEnvironment.RANDOM_PORT, classes = SpringBootApp)
 class DataMigrationDBIT extends DefaultIntSpec {

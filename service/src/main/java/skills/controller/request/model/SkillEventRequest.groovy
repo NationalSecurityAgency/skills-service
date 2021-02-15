@@ -19,4 +19,8 @@ class SkillEventRequest {
     String userId
     Long timestamp
     Boolean notifyIfSkillNotApplied = false
+
+    // this is an optional approval message
+    // Note: only applicable in case of self reporting with approval
+    String approvalRequestedMsg
 }

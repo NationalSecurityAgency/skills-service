@@ -233,6 +233,7 @@ describe('Client Display Features Tests', () => {
 
     cy.cdClickSubj(0, 'Subject 1');
 
+    cy.wait(4000);
     cy.matchImageSnapshot(`Subject-WithLockedSkills-ThatWerePartiallyAchieved`, snapshotOptions);
 
     cy.cdClickSkill(0);
@@ -242,6 +243,7 @@ describe('Client Display Features Tests', () => {
     // should render dependencies section
     cy.contains('Dependencies');
 
+    cy.wait(4000);
     cy.matchImageSnapshot(`LockedSkill-ThatWasPartiallyAchieved`, snapshotOptions);
 
     // make sure the other locked skill doesn't contain the same message
@@ -280,6 +282,7 @@ describe('Client Display Features Tests', () => {
     const msg = "Congrats! You completed this skill before the dependencies were added";
     cy.contains(msg);
 
+    cy.wait(4000);
     cy.matchImageSnapshot(`LockedSkill-ThatWasFullyAchieved`, snapshotOptions);
 
     // other skill should not have the message

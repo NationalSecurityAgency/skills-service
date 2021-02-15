@@ -21,9 +21,12 @@ limitations under the License.
                         <i class="fa-3x" :class="icon"/>
                     </div>
                     <div class="media-body text-truncate text-primary">
-                        <h4 class="mb-0 text-truncate">
-                            <span :title="title | number">{{title | number}}</span>
-                        </h4>
+                        <div class="h4 mb-0 text-truncate">
+                            <span data-cy="progressInfoCardTitle">
+                              <animated-number v-if="animated" :num="title" />
+                              <span v-else>{{ title | number }}</span>
+                            </span>
+                        </div>
                         <div class="mt-0 pt-0">{{subTitle}}</div>
                     </div>
                 </div>
@@ -33,8 +36,11 @@ limitations under the License.
 </template>
 
 <script>
+  import AnimatedNumber from './AnimatedNumber';
+
   export default {
     name: 'ProgressInfoCard',
+    components: { AnimatedNumber },
     props: {
       title: Number,
       label: String,
@@ -42,6 +48,10 @@ limitations under the License.
       subTitle: {
         type: String,
         default: 'Points',
+      },
+      animated: {
+        type: Boolean,
+        default: true,
       },
     },
   };

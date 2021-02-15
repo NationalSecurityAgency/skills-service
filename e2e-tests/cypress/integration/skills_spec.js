@@ -621,4 +621,23 @@ describe('Skills Tests', () => {
     cy.get('[data-cy=breadcrumb-Users]').should('be.visible');
   })
 
+    it('description is validated against custom validators', () => {
+        cy.intercept('GET', '/admin/projects/proj1/subjects/subj1').as('loadSubject');
+
+        cy.visit('/projects/proj1/subjects/subj1');
+        cy.wait('@loadSubject');
+        cy.clickButton('Skill')
+
+        cy.get('[data-cy="skillName"]').type('Great Name');
+        cy.get('[data-cy="saveSkillButton"]').should('be.enabled');
+
+        cy.get('[data-cy="skillDescription"]').type('ldkj aljdl aj\n\njabberwocky');
+        cy.get('[data-cy="skillDescriptionError"]').contains('Skill Description - paragraphs may not contain jabberwocky');
+        cy.get('[data-cy="saveSkillButton"]').should('be.disabled');
+
+        cy.get('[data-cy="skillDescription"]').type('{backspace}');
+        cy.get('[data-cy="saveSkillButton"]').should('be.enabled');
+    });
+
+
 });

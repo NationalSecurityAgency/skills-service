@@ -66,6 +66,38 @@ limitations under the License.
           </div>
         </div>
 
+        <div class="row mt-3">
+          <div class="col col-md-3 text-secondary" id="selfReportLabel">
+            Self Report Default:
+          </div>
+          <div class="col">
+            <b-form-checkbox v-model="selfReport.enabled"
+                             name="check-button"
+                             v-on:input="selfReportingControl"
+                             aria-labelledby="pointsForLevelsLabel"
+                             data-cy="selfReportSwitch"
+                             switch>
+              Disable/Enable <inline-help
+              msg="Will serve as a default when creating new skills."/>
+            </b-form-checkbox>
+
+            <b-card class="mt-1">
+              <b-form-group  label="Approval Type:" v-slot="{ ariaDescribedby }">
+                <b-form-radio-group
+                  id="self-reporting-type"
+                  v-model="selfReport.selected"
+                  :options="selfReport.options"
+                  v-on:input="selfReportingTypeChanged"
+                  :aria-describedby="ariaDescribedby"
+                  name="Self Reporting Options"
+                  data-cy="selfReportTypeSelector"
+                  stacked
+                ></b-form-radio-group>
+              </b-form-group>
+            </b-card>
+          </div>
+        </div>
+
         <hr/>
 
         <p v-if="errMsg" class="text-center text-danger mt-3" role="alert">***{{ errMsg }}***</p>
@@ -76,10 +108,14 @@ limitations under the License.
               Save <i class="fas fa-arrow-circle-right"/>
             </b-button>
 
-            <span v-if="isDirty" class="text-warning ml-2">
-          <i class="fa fa-exclamation-circle"
-             v-b-tooltip.hover="'Settings have been changed, don not forget to save'"/> Unsaved Changes
-        </span>
+            <span v-if="isDirty" class="text-warning ml-2" data-cy="unsavedChangesAlert">
+              <i class="fa fa-exclamation-circle"
+                 v-b-tooltip.hover="'Settings have been changed, don not forget to save'"/> Unsaved Changes
+            </span>
+            <span v-if="!isDirty && showSavedMsg" class="text-success ml-2" data-cy="settingsSavedAlert">
+              <i class="fa fa-check" />
+              Settings Updated!
+            </span>
           </div>
         </div>
       </loading-container>
@@ -109,6 +145,14 @@ limitations under the License.
     data() {
       return {
         isLoading: true,
+        selfReport: {
+          enabled: false,
+          selected: 'Approval',
+          options: [
+            { text: 'Approval Queue (reviewed by project admins first)', value: 'Approval', disabled: true },
+            { text: 'Honor System (applied right away)', value: 'HonorSystem', disabled: true },
+          ],
+        },
         settings: {
           productionModeEnabled: {
             value: 'false',
@@ -124,6 +168,13 @@ limitations under the License.
             dirty: false,
             projectId: this.$route.params.projectId,
           },
+          selfReportType: {
+            value: '',
+            setting: 'selfReport.type',
+            lastLoadedValue: '',
+            dirty: false,
+            projectId: this.$route.params.projectId,
+          },
           helpUrlHost: {
             value: '',
             setting: 'help.url.root',
@@ -133,6 +184,7 @@ limitations under the License.
           },
         },
         errMsg: null,
+        showSavedMsg: false,
       };
     },
     mounted() {
@@ -145,8 +197,28 @@ limitations under the License.
       },
     },
     methods: {
+      updateApprovalType(disabled) {
+        this.selfReport.options = this.selfReport.options.map((item) => {
+          const copy = { ...item };
+          copy.disabled = disabled;
+          return copy;
+        });
+      },
+      selfReportingControl(checked) {
+        this.updateApprovalType(!checked);
+        if (checked) {
+          this.settings.selfReportType.value = this.selfReport.selected;
+        } else {
+          this.settings.selfReportType.value = '';
+        }
+        this.settings.selfReportType.dirty = `${this.settings.selfReportType.value}` !== `${this.settings.selfReportType.lastLoadedValue}`;
+      },
       productionModeEnabledChanged(value) {
         this.settings.productionModeEnabled.dirty = `${value}` !== `${this.settings.productionModeEnabled.lastLoadedValue}`;
+      },
+      selfReportingTypeChanged(value) {
+        this.settings.selfReportType.value = value;
+        this.settings.selfReportType.dirty = `${this.settings.selfReportType.value}` !== `${this.settings.selfReportType.lastLoadedValue}`;
       },
       levelPointsEnabledChanged(value) {
         this.settings.levelPointsEnabled.dirty = `${value}` !== `${this.settings.levelPointsEnabled.lastLoadedValue}`;
@@ -164,6 +236,13 @@ limitations under the License.
                 const found = response.find((item) => item.setting === value.setting);
                 if (found) {
                   this.settings[key] = { dirty: false, lastLoadedValue: found.value, ...found };
+
+                  // special handling of self reporting as it's not just a simple key-value prop control
+                  if (found.setting === this.settings.selfReportType.setting) {
+                    this.selfReport.enabled = true;
+                    this.selfReport.selected = this.settings.selfReportType.value;
+                    this.updateApprovalType(false);
+                  }
                 }
               });
             }
@@ -190,7 +269,8 @@ limitations under the License.
       saveSettings(dirtyChanges) {
         SettingService.saveSettings(this.$route.params.projectId, dirtyChanges)
           .then(() => {
-            this.successToast('Settings Updated', 'Successfully saved settings!');
+            this.showSavedMsg = true;
+            setTimeout(() => { this.showSavedMsg = false; }, 4000);
             const entries = Object.entries(this.settings);
             entries.forEach((entry) => {
               const [key, value] = entry;

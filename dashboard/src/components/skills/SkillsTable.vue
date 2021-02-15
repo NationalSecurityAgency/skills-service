@@ -141,6 +141,9 @@ limitations under the License.
             {{ data.value | timeFromNow }}
           </div>
         </template>
+        <template v-slot:cell(selfReportingType)="data">
+         {{ getSelfReportingTypePretty(data.item.selfReportingType) }}
+        </template>
         <template #row-details="row">
             <ChildRowSkillsDisplay :project-id="projectId" :subject-id="subjectId" v-skills-onMount="'ExpandSkillDetailsSkillsPage'"
                                    :parent-skill-id="row.item.skillId" :refresh-counter="row.item.refreshCounter"
@@ -201,6 +204,9 @@ limitations under the License.
             options: [{
               value: 'totalPoints',
               text: 'Points',
+            }, {
+              value: 'selfReportingType',
+              text: 'Self Report',
             }, {
               value: 'timeWindow',
               text: 'Time Window',
@@ -267,6 +273,11 @@ limitations under the License.
             key: 'timeWindow',
             label: 'Time Window',
             sortable: false,
+          },
+          selfReportingType: {
+            key: 'selfReportingType',
+            label: 'Self Report Type',
+            sortable: true,
           },
         };
 
@@ -498,6 +509,9 @@ limitations under the License.
             ref.focus();
           }
         });
+      },
+      getSelfReportingTypePretty(selfReportingType) {
+        return (selfReportingType === 'HonorSystem') ? 'Honor System' : selfReportingType;
       },
     },
   };

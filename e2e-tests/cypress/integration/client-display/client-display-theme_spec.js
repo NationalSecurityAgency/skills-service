@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import moment from 'moment';
+import moment from 'moment-timezone';
 const dateFormatter = value => moment.utc(value).format('YYYY-MM-DD[T]HH:mm:ss[Z]');
 
 describe('Client Display Tests', () => {
@@ -143,11 +143,13 @@ describe('Client Display Tests', () => {
 
             cy.request('POST', '/admin/projects/proj1/badge/badge2/skills/skill3')
 
-            cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: Cypress.env('proxyUser'), timestamp: new Date().getTime()})
-            cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: Cypress.env('proxyUser'), timestamp: new Date().getTime() - 1000*60*60*24})
+            const m = moment.utc('2020-09-12 11', 'YYYY-MM-DD HH');
 
-            cy.request('POST', `/api/projects/proj1/skills/skill3`, {userId: Cypress.env('proxyUser'), timestamp: new Date().getTime()})
-            cy.request('POST', `/api/projects/proj1/skills/skill3`, {userId: Cypress.env('proxyUser'), timestamp: new Date().getTime() - 1000*60*60*24})
+            cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: Cypress.env('proxyUser'), timestamp: m.clone().add(1, 'day').format('x')})
+            cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: Cypress.env('proxyUser'), timestamp: m.clone().add(2, 'day').format('x')})
+
+            cy.request('POST', `/api/projects/proj1/skills/skill3`, {userId: Cypress.env('proxyUser'), timestamp: m.clone().add(1, 'day').format('x')})
+            cy.request('POST', `/api/projects/proj1/skills/skill3`, {userId: Cypress.env('proxyUser'), timestamp: m.clone().add(2, 'day').format('x')})
         });
 
 
@@ -162,7 +164,8 @@ describe('Client Display Tests', () => {
     });
 
     sizes.forEach((size) => {
-        it(`test theming - ${size}`, () => {
+
+        it(`test theming - project overview - ${size}`, () => {
             cy.setResolution(size);
 
             cy.cdInitProjWithSkills();
@@ -178,7 +181,15 @@ describe('Client Display Tests', () => {
             cy.get('.user-skill-subject-tile:nth-child(1)').contains('Subject 1');
             cy.get('[data-cy=myRank]').contains('1');
             cy.get('[data-cy=myBadges]').contains('1 Badge')
-            cy.matchImageSnapshot(`Project-Overview_${size}`, snapshotOptions);
+            cy.matchImageSnapshot(snapshotOptions);
+        });
+
+        it(`test theming - project rank - ${size}`, () => {
+            cy.setResolution(size);
+
+            cy.cdInitProjWithSkills();
+
+            cy.cdVisit('/?enableTheme=true')
 
             // back button - border color
             cy.cdClickRank();
@@ -191,49 +202,110 @@ describe('Client Display Tests', () => {
             // wait for the bar (on the bar chart) to render
             cy.wait(1000);
             cy.contains('You are Level 2!');
-            cy.matchImageSnapshot(`Project-Rank_${size}`, snapshotOptions);
+            cy.matchImageSnapshot(snapshotOptions);
+        });
 
-            cy.cdBack();
+        it(`test theming - badge - ${size}`, () => {
+            cy.setResolution(size);
+
+            cy.cdInitProjWithSkills();
+
+            cy.cdVisit('/?enableTheme=true')
+
             cy.cdClickBadges();
             cy.contains('Badge 3')
-            cy.contains('a few seconds ago')
-            cy.matchImageSnapshot(`Badges_${size}`, snapshotOptions);
+            cy.matchImageSnapshot(snapshotOptions);
+
+        });
+
+        it(`test theming - badge details- ${size}`, () => {
+            cy.setResolution(size);
+
+            cy.cdInitProjWithSkills();
+
+            cy.cdVisit('/?enableTheme=true')
+
+            cy.cdClickBadges();
+            cy.contains('Badge 3')
 
             cy.contains('View Details').click()
             cy.contains('Badge 1');
             cy.contains('This is 3');
-            cy.matchImageSnapshot(`Badge-Details_${size}`, snapshotOptions);
+            cy.matchImageSnapshot(snapshotOptions);
+        });
 
-            cy.cdBack('Badges');
-            cy.cdBack();
+        it(`test theming - subject overview - ${size}`, () => {
+            cy.setResolution(size);
+
+            cy.cdInitProjWithSkills();
+
+            cy.cdVisit('/?enableTheme=true')
+
             cy.cdClickSubj(0);
             cy.contains('Subject 1')
             cy.get('[data-cy=myRank]').contains('1');
             cy.contains('This is 4');
-            cy.contains('200 Points earned Today');
-            cy.matchImageSnapshot(`Subject0-Overview_${size}`, snapshotOptions);
+            cy.contains('Earn up to 1,400 points');
+            cy.matchImageSnapshot(snapshotOptions);
+        });
+
+        it(`test theming - subject overview with skill details - ${size}`, () => {
+            cy.setResolution(size);
+
+            cy.cdInitProjWithSkills();
+
+            cy.cdVisit('/?enableTheme=true')
+
+            cy.cdClickSubj(0);
+            cy.contains('Subject 1')
+            cy.get('[data-cy=myRank]').contains('1');
+            cy.contains('This is 4');
+            cy.contains('Earn up to 1,400 points');
 
             cy.get('[data-cy=toggleSkillDetails]').click();
             cy.get('[data-cy=myRank]').contains('1');
             cy.contains('Lorem ipsum dolor sit amet');
             cy.contains('Skill has 1 direct dependent(s).');
-            cy.contains('200 Points earned Today');
+            cy.contains('Earn up to 1,400 points');
             cy.contains('Description');
-            cy.matchImageSnapshot(`Subject0-Overview-WithSkillDetails_${size}`, snapshotOptions);
+
+            cy.matchImageSnapshot(snapshotOptions);
+        });
+
+        it(`test theming - skill details - ${size}`, () => {
+            cy.setResolution(size);
+
+            cy.cdInitProjWithSkills();
+
+            cy.cdVisit('/?enableTheme=true')
+
+            cy.cdClickSubj(0);
+            cy.contains('Subject 1')
 
             cy.cdClickSkill(0);
             cy.contains('Skill Overview')
             cy.contains('This is 1');
             cy.contains('Lorem ipsum dolor sit amet');
-            cy.matchImageSnapshot(`Subject0-Skill0-Details_${size}`, snapshotOptions);
+            cy.matchImageSnapshot(snapshotOptions);
+        });
 
-            cy.cdBack('Subject 1');
+        it(`test theming - skill details with deps - ${size}`, () => {
+            cy.setResolution(size);
+
+            cy.cdInitProjWithSkills();
+
+            cy.cdVisit('/?enableTheme=true')
+
+            cy.cdClickSubj(0);
+            cy.contains('Subject 1')
+
             cy.cdClickSkill(3);
             cy.contains('Skill Overview')
             cy.contains('This is 4');
             cy.contains('Lorem ipsum dolor sit amet');
             cy.contains('Achieved Dependencies');
-            cy.matchImageSnapshot(`Subject0-Skill3-Details_${size}`, snapshotOptions);
+            cy.wait(4000);
+            cy.matchImageSnapshot(snapshotOptions);
         });
 
         it(`test theming - new version notification  - ${size}`, () => {
@@ -256,7 +328,7 @@ describe('Client Display Tests', () => {
             cy.cdClickRank();
             cy.wait('@getRank');
 
-            cy.matchImageSnapshot(`Subject0-NewVersionNotification_${size}`, snapshotOptions);
+            cy.matchImageSnapshot(snapshotOptions);
         });
 
     });
@@ -267,7 +339,7 @@ describe('Client Display Tests', () => {
         cy.get('[data-cy=myRank]').contains('1');
         cy.contains('0 Points earned Today');
         cy.contains('Subjects have not been added yet.');
-        cy.matchImageSnapshot(`Project-Overview-No_Subjects`, snapshotOptions);
+        cy.matchImageSnapshot(snapshotOptions);
     });
 
 
@@ -291,7 +363,7 @@ describe('Client Display Tests', () => {
         cy.get('[data-cy=myRank]').contains('1');
         cy.contains('0 Points earned Today');
         cy.contains('Description');
-        cy.matchImageSnapshot('Project-Overview-Empty_Subject', snapshotOptions);
+        cy.matchImageSnapshot(snapshotOptions);
     });
 
 

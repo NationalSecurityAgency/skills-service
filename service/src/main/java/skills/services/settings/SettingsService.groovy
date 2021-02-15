@@ -53,6 +53,13 @@ class SettingsService {
     }
 
     @Transactional
+    void deleteProjectSettings(List<SettingsRequest> request) {
+        request.each {
+            deleteProjectSetting(it.setting)
+        }
+    }
+
+    @Transactional
     SettingsResult saveSetting(SettingsRequest request) {
         lockTransaction(request)
         Setting setting = settingsDataAccessor.loadSetting(request)
@@ -184,6 +191,11 @@ class SettingsService {
     List<SettingsResult> getRootUserSettingsForGroup(String settingGroup) {
         List<Setting> settings = settingsDataAccessor.getRootUserSettingsByGroup(settingGroup)
         return convertToResList(settings)
+    }
+
+    @Transactional()
+    void deleteProjectSetting(String setting) {
+        settingsDataAccessor.deleteSetting(setting, Setting.SettingType.Project)
     }
 
     @Transactional()

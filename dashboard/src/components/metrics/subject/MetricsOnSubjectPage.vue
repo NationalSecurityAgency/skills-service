@@ -17,7 +17,7 @@ limitations under the License.
   <div>
     <sub-page-header title="Metrics"/>
     <level-breakdown-metric title="Subject Levels"/>
-    <num-users-per-day class="my-3" title="Subject's users per day"/>
+    <num-users-per-day class="my-3" title="Subject's users per day" role="figure"/>
   </div>
 </template>
 

@@ -16,10 +16,13 @@
 export default {
   nonCSSConfig: ['progressIndicators', 'charts'],
   selectorKey: {
-    backgroundColor: {
+    backgroundColor: [{
       selector: 'body #app',
       styleName: 'background-color',
-    },
+    }, {
+      selector: 'body #app .skills-theme-bottom-border-with-background-color',
+      styleName: 'border-bottom-color',
+    }],
     trophyIconColor: {
       selector: 'body #app .fa.fa-trophy',
       styleName: 'color',
@@ -29,13 +32,13 @@ export default {
       styleName: 'color',
     },
     pageTitleTextColor: [{
-      selector: 'body #app .skills-page-title-text-color, body #app .skills-page-title-text-color button',
+      selector: 'body #app .skills-page-title-text-color, body #app .skills-page-title-text-color button, body #app .skills-page-title-text-color a',
       styleName: 'color',
     }, {
-      selector: 'body #app .skills-page-title-text-color button, body #app .skills-badge .skills-badge-icon, body #app .skills-progress-info-card, body #app .skills-card-theme-border',
+      selector: 'body #app .skills-page-title-text-color button, body #app .skills-page-title-text-color a, body #app .skills-badge .skills-badge-icon, body #app .skills-progress-info-card, body #app .skills-card-theme-border',
       styleName: 'border-color',
     }, {
-      selector: 'body #app .skills-page-title-text-color button:hover',
+      selector: 'body #app .skills-page-title-text-color button:hover, body #app .skills-page-title-text-color a:hover',
       styleName: 'background-color',
     }],
     circleProgressInteriorTextColor: {
@@ -51,7 +54,7 @@ export default {
       styleName: 'color',
     },
     textSecondaryColor: {
-      selector: 'body #app .text-muted, body #app .text-secondary',
+      selector: 'body #app .text-muted, body #app .text-secondary, body #app .text-secondary a',
       styleName: 'color',
     },
     tiles: {
@@ -59,7 +62,7 @@ export default {
         selector: 'body #app .card, body #app .card-header, body #app .card-body, body #app .card-footer',
         styleName: 'background-color',
       }, {
-        selector: 'body #app .skills-page-title-text-color button:hover, body #app .skills-no-data-yet .fa-inverse',
+        selector: 'body #app .skills-page-title-text-color button:hover, body #app .skills-page-title-text-color a:hover, body #app .skills-no-data-yet .fa-inverse',
         styleName: 'color',
       }],
       watermarkIconColor: {

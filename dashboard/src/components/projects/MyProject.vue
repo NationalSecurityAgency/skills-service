@@ -15,7 +15,7 @@ limitations under the License.
 */
 <template>
   <div data-cy="projectCard">
-    <page-preview-card :options="cardOptions">
+    <page-preview-card :options="cardOptions" :data-cy="`projectCard_${projectInternal.projectId}`">
       <div slot="header-top-right">
         <b-button v-if="isRootUser" class="mr-2" @click="unpin" data-cy="unpin" size="sm"
                   variant="outline-primary" :aria-label="'remove pin for project '+ projectInternal.name"
@@ -26,6 +26,7 @@ limitations under the License.
                                   v-on:move-down="moveDown"
                                   :is-first="projectInternal.isFirst" :is-last="projectInternal.isLast"
                                   :is-loading="isLoading" :is-delete-disabled="deleteProjectDisabled" :delete-disabled-text="deleteProjectToolTip"
+                                  :data-cy="`projOptions_${projectInternal.projectId}`"
                                   class="project-settings"></edit-and-delete-dropdown>
       </div>
       <div slot="footer">

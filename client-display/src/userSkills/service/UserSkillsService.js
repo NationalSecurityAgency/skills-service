@@ -120,10 +120,19 @@ export default {
     return response;
   },
 
-  addUserSkill(userSkillId) {
+  reportSkill(skillId, approvalRequestedMsg) {
     let response = null;
-    response = axios.get(`${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/addSkill/${userSkillId}`, {
-      params: this.getUserIdParams(),
+    response = axios.post(`${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/skills/${skillId}`, {
+      params: this.getUserIdAndVersionParams(),
+      approvalRequestedMsg,
+    }).then((result) => result.data);
+    return response;
+  },
+
+  removeApprovalRejection(rejectionId) {
+    let response = null;
+    response = axios.delete(`${store.state.serviceUrl}${this.getServicePath()}/${store.state.projectId}/rejections/${rejectionId}`, {
+      params: this.getUserIdAndVersionParams(),
     }).then((result) => result.data);
     return response;
   },
@@ -180,6 +189,13 @@ export default {
       },
     }).then((result) => result.data);
     return response;
+  },
+
+  validateDescription(description) {
+    const body = {
+      value: description,
+    };
+    return axios.post(`${store.state.serviceUrl}/api/validation/description`, body).then((result) => result.data);
   },
 
   getServicePath() {

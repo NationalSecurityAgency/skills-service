@@ -32,6 +32,8 @@ $text-muted: #6b6b6b;
 
 // Bootstrap and its default variables
 @import "~bootstrap/scss/bootstrap";
+// BootstrapVue and its default variables
+@import '../../node_modules/bootstrap-vue/src/index.scss';
 
 .text-gray-700 {
   color: $gray-700

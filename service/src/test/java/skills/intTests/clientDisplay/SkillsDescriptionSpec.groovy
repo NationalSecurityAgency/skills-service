@@ -15,9 +15,11 @@
  */
 package skills.intTests.clientDisplay
 
+import groovy.json.JsonOutput
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
+import skills.storage.model.SkillDef
 
 class SkillsDescriptionSpec extends DefaultIntSpec {
 
@@ -117,7 +119,6 @@ class SkillsDescriptionSpec extends DefaultIntSpec {
             assert !it.achievedOn
         }
     }
-
 
     void "achievedOn is populated for the achieved skills under a global badge"() {
         SkillsService supervisorService = createSupervisor()
@@ -410,5 +411,105 @@ class SkillsDescriptionSpec extends DefaultIntSpec {
             assert !it.description
             assert !it.href
         }
+    }
+
+    void "self reporting info"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj1 = SkillsFactory.createSubject(1, 1)
+        def proj1_subj2 = SkillsFactory.createSubject(1, 2)
+        List<Map> proj1_subj1_skills = SkillsFactory.createSkills(4, 1, 1, 100)
+        List<Map> proj1_subj2_skills = SkillsFactory.createSkills(3, 1, 2)
+
+        proj1_subj1_skills[0].selfReportType = 'HonorSystem'
+        proj1_subj1_skills[1].selfReportType = 'Approval'
+        proj1_subj1_skills[3].selfReportType = 'Approval'
+
+        proj1_subj2_skills[1].selfReportType = 'HonorSystem'
+        proj1_subj2_skills[2].selfReportType = 'Approval'
+
+        proj1_subj2_skills.each {
+            it.description = null
+            it.helpUrl = null
+        }
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj1)
+        skillsService.createSkills(proj1_subj1_skills)
+        skillsService.createSubject(proj1_subj2)
+        skillsService.createSkills(proj1_subj2_skills)
+
+        String user = "user1"
+        Date date = new Date()
+        Date date1 = new Date() - 1
+        Date date2 = new Date() - 2
+        def addSkillRes = skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_subj1_skills[0].skillId], user, date)
+        def addSkillRes1 = skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_subj1_skills[1].skillId], user, date1)
+        def addSkillRes2 = skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_subj1_skills[3].skillId], user, date2)
+        def approvalsEndpointRes = skillsService.getApprovals(proj1.projectId, 5, 1, 'requestedOn', false)
+        List<Integer> ids = approvalsEndpointRes.data.findAll { it.skillId == proj1_subj1_skills[3].skillId }.collect { it.id }
+        skillsService.rejectSkillApprovals(proj1.projectId, ids, "rejection message")
+
+        println JsonOutput.toJson(addSkillRes2)
+        when:
+        def res1 = skillsService.getSubjectDescriptions(proj1.projectId, proj1_subj1.subjectId, user).sort { it.skillId }
+        def res2 = skillsService.getSubjectDescriptions(proj1.projectId, proj1_subj2.subjectId, user).sort { it.skillId }
+
+        println JsonOutput.prettyPrint(JsonOutput.toJson(res1))
+        println JsonOutput.prettyPrint(JsonOutput.toJson(res2))
+        then:
+        addSkillRes.body.skillApplied
+        !addSkillRes1.body.skillApplied
+        !addSkillRes2.body.skillApplied
+
+        res1.size() == 4
+        res1.get(0).skillId == proj1_subj1_skills[0].skillId
+        res1.get(0).selfReporting.enabled
+        res1.get(0).selfReporting.type == SkillDef.SelfReportingType.HonorSystem.toString()
+        !res1.get(0).selfReporting.requestedOn
+        !res1.get(0).selfReporting.rejectedOn
+        !res1.get(0).selfReporting.rejectionMsg
+
+        res1.get(1).skillId == proj1_subj1_skills[1].skillId
+        res1.get(1).selfReporting.enabled
+        res1.get(1).selfReporting.type == SkillDef.SelfReportingType.Approval.toString()
+        res1.get(1).selfReporting.requestedOn == date1.time
+        !res1.get(1).selfReporting.rejectedOn
+        !res1.get(1).selfReporting.rejectionMsg
+
+        res1.get(2).skillId == proj1_subj1_skills[2].skillId
+        !res1.get(2).selfReporting.enabled
+        !res1.get(2).selfReporting.type
+        !res1.get(2).selfReporting.requestedOn
+        !res1.get(2).selfReporting.rejectedOn
+        !res1.get(2).selfReporting.rejectionMsg
+
+        res1.get(3).skillId == proj1_subj1_skills[3].skillId
+        res1.get(3).selfReporting.enabled
+        res1.get(3).selfReporting.type == SkillDef.SelfReportingType.Approval.toString()
+        res1.get(3).selfReporting.requestedOn == date2.time
+        new Date(res1.get(3).selfReporting.rejectedOn).format('yyyy-MM-dd') == new Date().format('yyyy-MM-dd')
+        res1.get(3).selfReporting.rejectionMsg == "rejection message"
+
+        res2.size() == 3
+        res2.get(0).skillId == proj1_subj2_skills[0].skillId
+        !res2.get(0).selfReporting.enabled
+        !res2.get(0).selfReporting.type
+        !res2.get(0).selfReporting.requestedOn
+        !res2.get(0).selfReporting.rejectedOn
+        !res2.get(0).selfReporting.rejectionMsg
+
+        res2.get(1).skillId == proj1_subj2_skills[1].skillId
+        res2.get(1).selfReporting.enabled
+        res2.get(1).selfReporting.type == SkillDef.SelfReportingType.HonorSystem.toString()
+        !res2.get(1).selfReporting.requestedOn
+        !res2.get(1).selfReporting.rejectedOn
+        !res2.get(1).selfReporting.rejectionMsg
+
+        res2.get(2).skillId == proj1_subj2_skills[2].skillId
+        res2.get(2).selfReporting.enabled
+        res2.get(2).selfReporting.type == SkillDef.SelfReportingType.Approval.toString()
+        !res2.get(2).selfReporting.requestedOn
+        !res2.get(2).selfReporting.rejectedOn
+        !res2.get(2).selfReporting.rejectionMsg
     }
 }

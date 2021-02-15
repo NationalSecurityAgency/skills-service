@@ -44,6 +44,7 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
         String getIconClass()
         SkillDef.ContainerType getSkillType()
         Date getUpdated()
+        SkillDef.SelfReportingType getSelfReportingType()
     }
 
     /**

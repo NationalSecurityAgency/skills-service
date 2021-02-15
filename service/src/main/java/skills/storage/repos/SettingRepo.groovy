@@ -47,4 +47,7 @@ interface SettingRepo extends CrudRepository<Setting, Integer> {
     @Query("delete from Setting  s where s.setting = ?1 AND s.value = ?2 AND s.type = 'RootUser' ")
     void deleteRootUserSetting(String setting, String value)
 
+    @Modifying
+    void deleteBySettingAndType(String setting, Setting.SettingType type)
+
 }

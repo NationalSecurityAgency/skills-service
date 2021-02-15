@@ -235,6 +235,27 @@ describe('Skills Table Tests', () => {
         ], 10);
       });
 
+    it('Self Reporting Type additional field', () => {
+        cy.createSkill(1, 1, 1, { selfReportType: 'HonorSystem' });
+        cy.createSkill(1, 1, 2, { selfReportType: 'HonorSystem' });
+        cy.createSkill(1, 1, 3);
+        cy.createSkill(1, 1, 4, { selfReportType: 'Approval' });
+        cy.createSkill(1, 1, 5, { selfReportType: 'Approval' });
+
+        cy.visit('/projects/proj1/subjects/subj1');
+
+        cy.get('[data-cy="skillsTable-additionalColumns"]').contains('Self Report').click();
+        cy.get(`${tableSelector} th`).contains('Self Report Type').click();
+
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 3,  value: 'Approval' }],
+            [{ colIndex: 3,  value: 'Approval' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 3' }, { colIndex: 3,  value: 'Disabled' }],
+            [{ colIndex: 3,  value: 'Honor System' }],
+            [{ colIndex: 3,  value: 'Honor System' }],
+        ], 10);
+    });
+
     it('change display order', () => {
         const numSkills = 4;
         for (let skillsCounter = 1; skillsCounter <= numSkills; skillsCounter += 1) {

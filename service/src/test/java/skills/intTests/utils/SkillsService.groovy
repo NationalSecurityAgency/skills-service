@@ -21,6 +21,7 @@ import com.github.jknack.handlebars.helper.StringHelpers
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
 import org.springframework.core.io.Resource
+import org.springframework.web.bind.annotation.RequestParam
 import spock.lang.Retry
 
 import java.nio.charset.StandardCharsets
@@ -444,14 +445,34 @@ class SkillsService {
     }
 
     @Profile
-    def addSkill(Map props, String userId = null, Date date = new Date()) {
+    def addSkill(Map props, String userId = null, Date date = new Date(), String approvalRequestedMsg = null) {
         if (userId) {
             userId = getUserId(userId)
             assert date
-            return wsHelper.apiPost("/projects/${props.projectId}/skills/${props.skillId}", [ userId : userId, timestamp:date.time])
+            return wsHelper.apiPost("/projects/${props.projectId}/skills/${props.skillId}", [ userId : userId, timestamp:date.time, approvalRequestedMsg: approvalRequestedMsg])
         } else {
             return wsHelper.apiPut("/projects/${props.projectId}/skills/${props.skillId}", null)
         }
+    }
+
+    def getApprovals(String projectId, int limit, int page, String orderBy, Boolean ascending) {
+        return wsHelper.adminGet("/projects/${projectId}/approvals?limit=${limit}&page=${page}&orderBy=${orderBy}&ascending=${ascending}")
+    }
+
+    def approve(String projectId, List<Integer> approvalId) {
+        return wsHelper.adminPost("/projects/${projectId}/approvals/approve", [skillApprovalIds: approvalId])
+    }
+
+    def rejectSkillApprovals(String projectId, List<Integer> approvalId, String msg = null) {
+        return wsHelper.adminPost("/projects/${projectId}/approvals/reject", [skillApprovalIds: approvalId, rejectionMessage: msg])
+    }
+
+    def removeApproval(String projectId, Integer approvalId) {
+        wsHelper.apiDelete("/projects/${projectId}/rejections/${approvalId}")
+    }
+
+    def getSelfReportStats(String projectId) {
+        return wsHelper.adminGet("/projects/${projectId}/selfReport/stats")
     }
 
     def addSkillAndOptionallyThrowExceptionAtTheEnd(Map props, String userId, Date date, boolean throwException) {
@@ -874,11 +895,11 @@ class SkillsService {
     }
 
     def checkCustomDescriptionValidation(String description){
-        return wsHelper.appPost("/validation/description", [value: description])
+        return wsHelper.apiPost("/validation/description", [value: description])
     }
 
     def checkCustomNameValidation(String description){
-        return wsHelper.appPost("/validation/name", [value: description])
+        return wsHelper.apiPost("/validation/name", [value: description])
     }
 
     def addProjectAdmin(String projectId, String userId) {

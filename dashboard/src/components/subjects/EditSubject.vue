@@ -51,7 +51,7 @@ limitations under the License.
                 <label>Description</label>
                 <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" v-slot="{ errors }" name="Subject Description">
                   <markdown-editor v-model="subjectInternal.description"/>
-                  <small class="form-text text-danger">{{ errors[0] }}</small>
+                  <small class="form-text text-danger" data-cy="subjectDescError">{{ errors[0] }}</small>
                 </ValidationProvider>
               </div>
 

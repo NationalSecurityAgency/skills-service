@@ -133,6 +133,11 @@ class WSHelper {
         delete(endpoint, "admin", params)
     }
 
+    def apiDelete(String endpoint, def params = null) {
+        String url = "${skillsService}/admin${endpoint}${getUrlFromParams(params)}"
+        delete(endpoint, "api", params)
+    }
+
     def adminGet(String endpoint, Map params = null) {
         return get(endpoint, "admin", params)
     }

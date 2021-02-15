@@ -22,9 +22,14 @@ import store from '@/store';
 import 'apexcharts';
 import '@/common/filter/DayJsFilters';
 
+import {
+  ModalPlugin,
+} from 'bootstrap-vue';
+
 Vue.config.productionTip = false;
 
 Vue.use(VueApexCharts);
+Vue.use(ModalPlugin);
 
 require('@/common/softwareVersion/softwareVersionInterceptor');
 

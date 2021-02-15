@@ -53,7 +53,7 @@ describe('Markdown Tests', () => {
             if (expectedText) {
                 cy.contains(expectedText);
             }
-            cy.matchImageSnapshot(snapshotName);
+            cy.get('[data-cy="markdownEditor-preview"]').matchImageSnapshot(snapshotName);
         }
         validateMarkdown('# Title1\n## Title2\n### Title 3\n#### Title 4\n##### Title 5\nTitle 6\n\n', 'Markdown-Titles',  null,false);
 
@@ -88,7 +88,7 @@ describe('Markdown Tests', () => {
         validateMarkdown(':star: :star: :star: :star:', 'Markdown-emoji', '⭐ ⭐ ⭐ ⭐')
     });
 
-    it.only('on skills pages', () => {
+    it('on skills pages', () => {
 
         const markdown = "# Title1\n## Title2\n### Title 3\n#### Title 4\n##### Title 5\nTitle 6\n\n" +
             "---\n" +

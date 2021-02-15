@@ -17,20 +17,33 @@ limitations under the License.
   <loading-container class="child-row" v-bind:is-loading="isLoading" :data-cy="`childRowDisplay_${skillInfo.skillId}`">
 
     <div class="row">
-      <div class="col-12 col-md-12 col-xl mb-md-3 mb-xl-0">
+      <div class="col-12 col-md-6 mt-2">
         <media-info-card :title="`${totalPoints} Points`" icon-class="fas fa-calculator text-success">
           <strong>{{ skillInfo.pointIncrement | number }}</strong> points <i class="fa fa-times text-muted" aria-hidden="true"/>
           <strong> {{ skillInfo.numPerformToCompletion | number }}</strong> repetition<span v-if="skillInfo.numPerformToCompletion>1">s</span> to Completion
         </media-info-card>
       </div>
-      <div class="col-12  col-md-6 col-xl my-3 my-md-0">
+      <div class="col-12 col-md-6 mt-2">
         <media-info-card :title="timeWindowTitle(skillInfo)" icon-class="fas fa-hourglass-half text-info">
           {{ timeWindowDescription(skillInfo) }}
         </media-info-card>
       </div>
-      <div class="col-12 col-md-6 col-xl">
+      <div class="col-12 col-md-6 mt-2">
         <media-info-card :title="`Version # ${skillInfo.version}`" icon-class="fas fa-code-branch text-warning">
-          Version of this Skill
+          Mechanism of adding new skills without affecting existing software running.
+        </media-info-card>
+      </div>
+      <div class="col-12 col-md-6 mt-2">
+        <media-info-card :title="`Self Report: ${selfReportingTitle}`"
+                         icon-class="fas fa-laptop skills-color-selfreport"
+                         data-cy="selfReportMediaCard">
+          <div v-if="skillInfo.selfReportingType">Users can <i>self report</i> this skill
+            <span v-if="skillInfo.selfReportingType === 'Approval'">and will go into an <b class="text-primary">approval</b> queue.</span>
+            <span v-if="skillInfo.selfReportingType === 'HonorSystem'">and will apply <b class="text-primary">immediately</b>.</span>
+          </div>
+          <div v-else>
+            Self reporting is <b class="text-primary">disabled</b> for this skill.
+          </div>
         </media-info-card>
       </div>
     </div>
@@ -116,6 +129,17 @@ limitations under the License.
           return marked(this.skillInfo.description, { sanitize: true, smartLists: true });
         }
         return null;
+      },
+      selfReportingTitle() {
+        if (!this.skillInfo.selfReportingType) {
+          return 'Disabled';
+        }
+
+        if (this.skillInfo.selfReportingType === 'HonorSystem') {
+          return 'Honor System';
+        }
+
+        return this.skillInfo.selfReportingType;
       },
     },
     methods: {

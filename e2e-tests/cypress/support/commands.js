@@ -44,6 +44,7 @@ import "cypress-audit/commands";
 import './cliend-display-commands';
 import 'cypress-file-upload';
 import LookupUtil from "./LookupUtil.js";
+var moment = require('moment-timezone');
 
 function terminalLog(violations) {
     violations = violations || { length: 0 };
@@ -111,6 +112,40 @@ Cypress.Commands.add("resetEmail", () => {
        url: "http://localhost:1081/api/emails"
     });
 });
+
+
+Cypress.Commands.add("createProject", (projNum = 1, overrideProps = {}) => {
+    cy.request('POST', `/admin/projects/proj${projNum}/`, Object.assign({
+        projectId: `proj${projNum}`,
+        name: `This is project ${projNum}`
+    }, overrideProps));
+});
+
+Cypress.Commands.add("createSubject", (projNum = 1, subjNum = 1, overrideProps = {}) => {
+    cy.request('POST', `/admin/projects/proj${projNum}/subjects/subj${subjNum}`, Object.assign({
+        projectId: `proj${projNum}`,
+        subjectId: `subj${subjNum}`,
+        name: `Subject ${subjNum}`
+    }, overrideProps));
+});
+
+Cypress.Commands.add("createSkill", (projNum = 1, subjNum = 1, skillNum = 1, overrideProps = {}) => {
+    cy.request('POST', `/admin/projects/proj${projNum}/subjects/subj${subjNum}/skills/skill${skillNum}`, Object.assign({
+        projectId: `proj${projNum}`,
+        subjectId: `subj${subjNum}`,
+        skillId: `skill${skillNum}`,
+        name: `Very Great Skill ${skillNum}`,
+        pointIncrement: '100',
+        numPerformToCompletion: '2',
+    }, overrideProps));
+});
+
+Cypress.Commands.add("reportSkill", (projNum = 1, skillNum = 1, userId = 'user@skills.org', date = '2020-09-12 11:00') => {
+    const m = moment.utc(date, 'YYYY-MM-DD HH:mm');
+    cy.request('POST', `/api/projects/proj${projNum}/skills/skill${skillNum}`, {userId, timestamp: m.clone().format('x')})
+});
+
+
 
 Cypress.Commands.add("getResetLink", () => {
     cy.request({

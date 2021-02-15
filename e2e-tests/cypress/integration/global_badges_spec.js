@@ -896,4 +896,25 @@ describe('Global Badges Tests', () => {
         cy.get('div.badge-settings').eq(1).children().first().should('have.focus');
     });
 
+    it('description is validated against custom validators', () => {
+        cy.intercept('GET', `/supervisor/badges`).as('getGlobalBadges');
+
+        cy.visit('/globalBadges');
+        cy.wait('@getGlobalBadges');
+
+        cy.get('[data-cy="btn_Global Badges"]').click();
+
+        cy.get('[data-cy="badgeName"]').type('Great Name');
+
+        cy.get('[data-cy="saveBadgeButton"]').should('be.enabled');
+
+        cy.get('[data-cy="markdownEditorInput"]').type('ldkj aljdl aj\n\njabberwocky');
+        cy.get('[data-cy="badgeDescriptionError"]').contains('Badge Description - paragraphs may not contain jabberwocky');
+        cy.get('[data-cy="saveBadgeButton"]').should('be.disabled');
+
+        cy.get('[data-cy="markdownEditorInput"]').type('{backspace}');
+        cy.get('[data-cy="saveBadgeButton"]').should('be.enabled');
+        cy.get('[data-cy="badgeDescriptionError"]').contains('Subject Description - paragraphs may not contain jabberwocky').should('not.exist');
+    });
+
 });

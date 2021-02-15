@@ -74,16 +74,55 @@ describe('Accessibility Tests', () => {
       helpUrl: 'http://doHelpOnThisSkill.com'
     });
 
+    cy.request('POST', `/admin/projects/MyNewtestProject/subjects/subj1/skills/skill3`, {
+      projectId: 'MyNewtestProject',
+      subjectId: 'subj1',
+      skillId: 'skill3',
+      name: `This is 3`,
+      type: 'Skill',
+      pointIncrement: 100,
+      numPerformToCompletion: 5,
+      pointIncrementInterval: 0,
+      numMaxOccurrencesIncrementInterval: -1,
+      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+      version: 0,
+      helpUrl: 'http://doHelpOnThisSkill.com',
+      selfReportType: 'Approval'
+    });
+    cy.request('POST', `/admin/projects/MyNewtestProject/subjects/subj1/skills/skill4`, {
+      projectId: 'MyNewtestProject',
+      subjectId: 'subj1',
+      skillId: 'skill4',
+      name: `This is 4`,
+      type: 'Skill',
+      pointIncrement: 100,
+      numPerformToCompletion: 5,
+      pointIncrementInterval: 0,
+      numMaxOccurrencesIncrementInterval: -1,
+      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+      version: 0,
+      helpUrl: 'http://doHelpOnThisSkill.com',
+    });
+
     cy.request('POST', '/admin/projects/MyNewtestProject/badge/badge1/skills/skill2')
 
     cy.request('POST', `/admin/projects/MyNewtestProject/skills/skill2/dependency/skill1`)
 
-    const m = moment('2020-09-12 11', 'YYYY-MM-DD HH');
+    const m = moment('2020-05-12 11', 'YYYY-MM-DD HH');
     cy.request('POST', `/api/projects/MyNewtestProject/skills/skill1`, {userId: 'u1', timestamp: m.format('x')})
     cy.request('POST', `/api/projects/MyNewtestProject/skills/skill1`, {userId: 'u2', timestamp: m.subtract(4, 'day').format('x')})
     cy.request('POST', `/api/projects/MyNewtestProject/skills/skill1`, {userId: 'u3', timestamp: m.subtract(3, 'day').format('x')})
     cy.request('POST', `/api/projects/MyNewtestProject/skills/skill1`, {userId: 'u4', timestamp: m.subtract(2, 'day').format('x')})
     cy.request('POST', `/api/projects/MyNewtestProject/skills/skill1`, {userId: 'u5', timestamp: m.subtract(1, 'day').format('x')})
+    cy.request('POST', `/api/projects/MyNewtestProject/skills/skill3`, {userId: 'u5', timestamp: m.subtract(1, 'day').format('x')})
+    cy.request('POST', `/api/projects/MyNewtestProject/skills/skill3`, {userId: 'u6', timestamp: m.subtract(1, 'day').format('x')})
+    cy.request('POST', `/api/projects/MyNewtestProject/skills/skill3`, {userId: 'u7', timestamp: m.subtract(1, 'day').format('x')})
+
+    cy.request('POST', `/api/projects/MyNewtestProject/skills/skill4`, {userId: 'u8', timestamp: m.subtract(1, 'day').format('x')})
+    cy.request('POST', `/api/projects/MyNewtestProject/skills/skill4`, {userId: 'u8', timestamp: m.subtract(2, 'day').format('x')})
+    cy.request('POST', `/api/projects/MyNewtestProject/skills/skill4`, {userId: 'u8', timestamp: m.subtract(3, 'day').format('x')})
+    cy.request('POST', `/api/projects/MyNewtestProject/skills/skill4`, {userId: 'u8', timestamp: m.subtract(4, 'day').format('x')})
+    cy.request('POST', `/api/projects/MyNewtestProject/skills/skill4`, {userId: 'u8', timestamp: m.subtract(5, 'day').format('x')})
   });
 
   it('home page', () => {
@@ -97,15 +136,6 @@ describe('Accessibility Tests', () => {
   });
 
   it('project', () => {
-
-    cy.intercept(
-      {
-        path:
-          '/admin/projects/MyNewtestProject/metrics/userAchievementsChartBuilder?pageSize=5&currentPage=1&usernameFilter=&fromDayFilter=&toDayFilter=&nameFilter=&minLevel=&achievementTypes=Overall,Subject,Skill,Badge&sortBy=achievedOn&sortDesc=true'
-      }
-    ).as('userAchievementMetrics');
-    cy.intercept('GET', '/admin/projects/MyNewtestProject/metrics/skillUsageNavigatorChartBuilder').as('skillUsageMetrics');
-    cy.intercept('GET', '/admin/projects/MyNewtestProject/metrics/numUsersPerSubjectPerLevelChartBuilder').as('subjectMetrics');
     cy.visit('/');
     cy.injectAxe()
     //view project
@@ -128,6 +158,20 @@ describe('Accessibility Tests', () => {
     cy.customA11y();
     cy.get('[data-cy=closeBadgeButton]').click();
 
+    // --- Self Report Page ----
+    cy.get('[data-cy="nav-Self Report"]').click();
+    cy.get('[data-cy="skillsReportApprovalTable"] tbody tr').should('have.length', 3);
+    cy.customLighthouse();
+    cy.customA11y();
+
+    cy.get('[data-cy="selectPageOfApprovalsBtn"]').click();
+    cy.get('[data-cy="rejectBtn"]').click();
+    cy.get('[data-cy="rejectionTitle"]').contains('This will permanently reject user\'s request(s) to get points')
+    cy.wait(500); // wait for modal to continue loading, if background doesn't load the contract checks will fail
+    cy.customA11y();
+    cy.get('[data-cy="cancelRejectionBtn"]').click();
+
+    // --- Deps Page ----
     cy.get('[data-cy=nav-Dependencies]').click();
     cy.contains('Color Legend');
     cy.customLighthouse();
@@ -150,23 +194,29 @@ describe('Accessibility Tests', () => {
     cy.customLighthouse();
     cy.customA11y();
 
-    //metrics
-    cy.get('[data-cy=nav-Metrics').click();
+    // --- metrics ----
+    cy.get('[data-cy=nav-Metrics]').click();
     cy.contains('Users per day');
+    cy.contains('This chart needs at least 2 days of user activity.')
     cy.customLighthouse();
     cy.customA11y();
 
     cy.get('[data-cy="Achievements-metrics-link"]').click();
-    cy.wait('@userAchievementMetrics');
-    cy.wait(250);//just because
-    cy.customA11y();
-    cy.get('[data-cy="Subjects-metrics-link"]').click();
-    cy.wait('@subjectMetrics');
-    cy.customA11y();
-    cy.get('[data-cy="Skills-metrics-link"]').click();
-    cy.wait('@skillUsageMetrics');
+    cy.get('[data-cy=achievementsNavigator-table]').contains('u8');
+    cy.customLighthouse();
     cy.customA11y();
 
+    cy.get('[data-cy="Subjects-metrics-link"]').click();
+    cy.contains('Number of users for each level over time')
+    cy.customLighthouse();
+    cy.customA11y();
+
+    cy.get('[data-cy="Skills-metrics-link"]').click();
+    cy.get('[data-cy=skillsNavigator-table]').contains('This is 1')
+    cy.customLighthouse();
+    cy.customA11y();
+
+    // --- access page ----
     cy.get('[data-cy=nav-Access').click();
     cy.contains('Trusted Client Properties');
     cy.contains('ID: MyNewtestProject');
@@ -182,6 +232,7 @@ describe('Accessibility Tests', () => {
     cy.customLighthouse();
     cy.customA11y();
   })
+
 
   it('subject', () => {
     cy.server();
@@ -250,7 +301,7 @@ describe('Accessibility Tests', () => {
     cy.get('[data-cy=breadcrumb-subj1]').click();
     cy.get('[data-cy=nav-Metrics]').click();
     cy.contains('This chart needs at least 2 days of user activity.');
-    cy.contains('Level 1: 5 users');
+    cy.contains('Level 2: 1 users');
     cy.customLighthouse();
     cy.customA11y();
   })
@@ -264,7 +315,6 @@ describe('Accessibility Tests', () => {
     cy.get('[data-cy="subjCard_subj1_manageBtn"]').click();
     //view skill
     cy.get('[data-cy=manageSkillBtn_skill1]').click();
-    // data-cy="manageSkillBtn"
     cy.contains('Help URL');
     cy.contains('500 Points');
     cy.customLighthouse();
@@ -286,12 +336,22 @@ describe('Accessibility Tests', () => {
     cy.customA11y();
     cy.get('.multiselect__select').click();
     cy.get('.multiselect__element').eq(0).click();
+    cy.get('[data-cy="eventDatePicker"]').click()
+    cy.get('.vdp-datepicker__calendar .prev').first().click()
+    cy.get('.vdp-datepicker__calendar .prev').first().click()
+    cy.get('.vdp-datepicker__calendar .prev').first().click()
+    cy.get('.vdp-datepicker__calendar .prev').first().click()
+    cy.get('.vdp-datepicker__calendar .prev').first().click()
+    cy.get('.vdp-datepicker__calendar .prev').first().click()
+    cy.get('.vdp-datepicker__calendar').contains('10').click()
     cy.get('[data-cy=addSkillEventButton]').click();
+    cy.contains('Added points')
     cy.customA11y();
 
     cy.get('[data-cy=nav-Metrics]').click();
     cy.contains('Achievements over time');
     cy.contains('No achievements yet for this skill.');
+    cy.contains('This chart needs at least 2 days of user activity.');
     cy.customLighthouse();
     cy.customA11y();
   })
