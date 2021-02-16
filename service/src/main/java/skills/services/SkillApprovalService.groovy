@@ -117,6 +117,15 @@ class SkillApprovalService {
         }
     }
 
+    List<LabelCountItem> getSkillApprovalsStats(String projectId, String skillId) {
+        int countNotRejected = skillApprovalRepo.countByProjectIdSkillIdAndRejectedOnIsNull(projectId, skillId)
+        int countRejected = skillApprovalRepo.countByProjectIdSkillIdAndRejectedOnIsNotNull(projectId, skillId)
+        return [
+                new LabelCountItem(value: 'SkillApprovalsRequests', count: countNotRejected),
+                new LabelCountItem(value: 'SkillApprovalsRejected', count: countRejected),
+        ]
+    }
+
     void modifyApprovalsWhenSelfReportingTypeChanged(SkillDefWithExtra existing, SkillDef.SelfReportingType incomingType) {
         if (existing.selfReportingType == incomingType) {
             return;

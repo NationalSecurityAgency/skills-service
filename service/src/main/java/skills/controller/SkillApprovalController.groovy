@@ -20,22 +20,14 @@ import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.http.MediaType
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestMethod
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.ResponseBody
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.SkillApprovalRejection
 import skills.controller.request.model.SkillApprovalRequest
-import skills.controller.result.model.BadgeResult
 import skills.controller.result.model.LabelCountItem
 import skills.controller.result.model.RequestResult
-import skills.controller.result.model.SkillApprovalResult
 import skills.controller.result.model.TableResult
 import skills.services.CustomValidationResult
 import skills.services.CustomValidator
@@ -43,7 +35,6 @@ import skills.services.SkillApprovalService
 
 import static org.springframework.data.domain.Sort.Direction.ASC
 import static org.springframework.data.domain.Sort.Direction.DESC
-
 
 @RestController
 @RequestMapping("/admin")
@@ -106,6 +97,16 @@ class SkillApprovalController {
     List<LabelCountItem> getSelfReportDefStats(@PathVariable("projectId") String projectId) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         return skillApprovalService.getSelfReportStats(projectId)
+    }
+
+
+    @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/approvals/stats", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    List<LabelCountItem> getSkillApprovalsStats(@PathVariable("projectId") String projectId, @PathVariable("skillId") String skillId) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(skillId, "Skill Id")
+
+        return skillApprovalService.getSkillApprovalsStats(projectId, skillId)
     }
 
 }
