@@ -16,7 +16,6 @@
 package skills.intTests
 
 import groovy.json.JsonOutput
-import groovy.json.JsonSlurper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import skills.intTests.utils.DefaultIntSpec
@@ -25,7 +24,7 @@ import skills.intTests.utils.SkillsFactory
 import skills.storage.model.SkillApproval
 import skills.storage.model.SkillDef
 import skills.storage.repos.SkillApprovalRepo
-import spock.lang.IgnoreRest
+import spock.lang.IgnoreIf
 
 class SkillApprovalSpecs extends DefaultIntSpec {
 
@@ -45,10 +44,11 @@ class SkillApprovalSpecs extends DefaultIntSpec {
         skillsService.createSkills(skills)
 
         List<Date> dates = []
+        List<String> users = getRandomUsers(7)
         7.times {
             Date date = new Date() - it
             dates << date
-            def res = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "user${it}", date, "Please approve this ${it}!")
+            def res = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[it], date, "Please approve this ${it}!")
             assert res.body.explanation == "Skill was submitted for approval"
         }
 
@@ -62,7 +62,7 @@ class SkillApprovalSpecs extends DefaultIntSpec {
         tableResultPg1.data.size() == 5
         (0..4).each {Integer index ->
             assert tableResultPg1.data[index].id
-            assert tableResultPg1.data[index].userId == "user${index}"
+            assert tableResultPg1.data[index].userId == users[index]
             assert tableResultPg1.data[index].skillId == "skill1"
             assert tableResultPg1.data[index].skillName == "Test Skill 1"
             assert tableResultPg1.data[index].requestedOn == dates[index].time
@@ -74,7 +74,7 @@ class SkillApprovalSpecs extends DefaultIntSpec {
         tableResultPg2.data.size() == 2
         (0..1).each {Integer index ->
             assert tableResultPg2.data[index].id
-            assert tableResultPg2.data[index].userId == "user${index+5}"
+            assert tableResultPg2.data[index].userId == users[index+5]
             assert tableResultPg2.data[index].skillId == "skill1"
             assert tableResultPg2.data[index].skillName == "Test Skill 1"
             assert tableResultPg2.data[index].requestedOn == dates[index+5].time
@@ -82,6 +82,7 @@ class SkillApprovalSpecs extends DefaultIntSpec {
         }
     }
 
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     void "getApprovals sorting"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
@@ -195,15 +196,16 @@ class SkillApprovalSpecs extends DefaultIntSpec {
         skillsService.createSubject(subj1)
         skillsService.createSkills(skills1)
 
+        List<String> users = getRandomUsers(7)
         7.times {
             Date date = new Date() - it
-            def res = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "user${it}", date, "Please approve this ${it}!")
+            def res = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[it], date, "Please approve this ${it}!")
             assert res.body.explanation == "Skill was submitted for approval"
         }
 
         3.times {
             Date date = new Date() - it
-            def res = skillsService.addSkill([projectId: proj1.projectId, skillId: skills1[1].skillId], "user${it}", date, "Other reason ${it}!")
+            def res = skillsService.addSkill([projectId: proj1.projectId, skillId: skills1[1].skillId], users[it], date, "Other reason ${it}!")
             assert res.body.explanation == "Skill was submitted for approval"
         }
 
@@ -221,7 +223,7 @@ class SkillApprovalSpecs extends DefaultIntSpec {
         proj1Res.data.size() == 7
         (0..6).each {Integer index ->
             assert proj1Res.data[index].id
-            assert proj1Res.data[index].userId == "user${index}"
+            assert proj1Res.data[index].userId == users[index]
             assert proj1Res.data[index].skillId == "skill1"
             assert proj1Res.data[index].skillName == "Test Skill 1"
             assert proj1Res.data[index].requestMsg == "Please approve this ${index}!"
@@ -230,7 +232,7 @@ class SkillApprovalSpecs extends DefaultIntSpec {
         proj2Res.data.size() == 3
         (0..2).each {Integer index ->
             assert proj2Res.data[index].id
-            assert proj2Res.data[index].userId == "user${index}"
+            assert proj2Res.data[index].userId == users[index]
             assert proj2Res.data[index].skillId == "skill2"
             assert proj2Res.data[index].skillName == "Test Skill 2"
             assert proj2Res.data[index].requestMsg == "Other reason ${index}!"
