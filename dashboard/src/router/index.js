@@ -195,20 +195,20 @@ const router = new Router({
     {
       path: '/my-progress',
       component: MyProgress,
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: true, nonAdmin: true },
       children: [{
         name: 'MyProgressPage',
         path: '',
         component: MyProgressPage,
         meta: {
-          requiresAuth: true,
+          requiresAuth: true, nonAdmin: true,
         },
       }, {
         name: 'MyProjectSkills',
         path: 'projects/:projectId',
         component: MyProjectSkillsPage,
         meta: {
-          requiresAuth: true,
+          requiresAuth: true, nonAdmin: true,
         },
       }],
     },
