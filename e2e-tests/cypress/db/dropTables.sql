@@ -36,14 +36,18 @@ drop table global_badge_level_definition;
 
 drop table level_definition;
 
+drop table password_reset_token;
+
+drop table users;
+
+drop table user_events;
+
 drop table skill_definition;
 
 drop table custom_icons;
 
 drop table project_definition;
 
-drop table password_reset_token;
-
-drop table users;
-
 drop table user_attrs;
+
+
