@@ -420,9 +420,11 @@ describe('Metrics Tests - Skills', () => {
         const numDays = 20;
         const users = ['user1', 'user2', 'user3', 'user4', 'user5']
         for (let dayCounter = 1; dayCounter <= numDays; dayCounter += 1) {
-            let numUsers = (numDays+1-dayCounter)%4;
+            let numUsers = (numDays+1-dayCounter)/4;
             numUsers = numUsers == 0 ? 1 : numUsers;
             for (let userCounter = 0; userCounter <= numUsers; userCounter += 1) {
+                console.log(`adding skillEvent for user ${users[userCounter]} for day ${m.clone()
+                  .add(dayCounter, 'day')}`);
                 cy.request('POST', `/api/projects/proj1/skills/skill1`,
                   {
                       userId: `${users[userCounter]}_achieved@skills.org`,
@@ -438,6 +440,7 @@ describe('Metrics Tests - Skills', () => {
         cy.wait('@binnedUsagePostAchievementMetricsBuilder');
         cy.wait('@usagePostAchievementMetricsBuilder');
 
+        cy.wait(waitForSnap);
         cy.get('[data-cy=numUsersPostAchievement]').matchImageSnapshot('numUsersPostAchievement');
         cy.get('[data-cy=binnedNumUsersPostAchievement]').matchImageSnapshot('binnedNumUsersPostAchievement');
     });
