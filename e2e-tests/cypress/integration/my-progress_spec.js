@@ -375,7 +375,7 @@ describe('Navigation Tests', () => {
     });
 
     cy.loginAsProxyUser();
-    cy.visit('/my-skills');
+    cy.visit('/my-progress');
     cy.wait('@allSkillEventsForUser');
 
     cy.get('[data-cy=numProjectsContributed]').contains(new RegExp(/^1$/));
