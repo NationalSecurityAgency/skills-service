@@ -18,7 +18,7 @@ package skills.skillLoading.model
 import groovy.transform.Canonical
 
 @Canonical
-class MySkillsSummary {
+class MyProgressSummary {
     List<ProjectSummary> projectSummaries = []
 
     Integer totalProjects = 0

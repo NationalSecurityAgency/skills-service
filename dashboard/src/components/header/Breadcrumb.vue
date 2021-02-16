@@ -49,7 +49,7 @@ limitations under the License.
       return {
         items: [],
         idsToExcludeFromPath: ['subjects', 'skills', 'projects'],
-        keysToExcludeFromPath: ['my-skills'],
+        keysToExcludeFromPath: ['my-progress'],
       };
     },
     mounted() {

@@ -20,8 +20,8 @@ limitations under the License.
       <span class="d-inline-block text-truncate userName ml-1 font-weight-bold" aria-hidden="true">{{ displayName }}</span>
       <span class="sr-only">settings menu</span>
     </template>
-    <b-dropdown-item href="#"  @click="gotoMySkills">
-      <span class="text-gray-700"> <i class="fas fa-chart-bar" aria-hidden="true"/><span class="link-name">My Skills</span></span>
+    <b-dropdown-item href="#"  @click="gotoMyProgress">
+      <span class="text-gray-700"> <i class="fas fa-chart-bar" aria-hidden="true"/><span class="link-name">My Progress</span></span>
     </b-dropdown-item>
     <b-dropdown-item href="#"  @click="gotoAdmin">
       <span class="text-gray-700"> <i class="fas fa-tasks" aria-hidden="true"/><span class="link-name">Admin</span></span>
@@ -74,8 +74,8 @@ limitations under the License.
       gotoAdmin() {
         this.$router.push({ name: 'HomePage' });
       },
-      gotoMySkills() {
-        this.$router.push({ name: 'MySkillsPage' });
+      gotoMyProgress() {
+        this.$router.push({ name: 'MyProgressPage' });
       },
       signOut() {
         this.$store.dispatch('logout');

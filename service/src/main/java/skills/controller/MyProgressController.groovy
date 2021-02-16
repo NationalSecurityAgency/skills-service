@@ -26,7 +26,7 @@ import skills.metrics.MetricsService
 import skills.profile.EnableCallStackProf
 import skills.services.AdminUsersService
 import skills.skillLoading.SkillsLoader
-import skills.skillLoading.model.MySkillsSummary
+import skills.skillLoading.model.MyProgressSummary
 
 import javax.servlet.http.HttpServletRequest
 
@@ -34,7 +34,7 @@ import javax.servlet.http.HttpServletRequest
 @RequestMapping("/api")
 @Slf4j
 @EnableCallStackProf
-class MySkillsController {
+class MyProgressController {
 
     @Autowired
     AdminUsersService adminUsersService
@@ -57,14 +57,14 @@ class MySkillsController {
         return metricsServiceNew.loadGlobalMetrics(metricsId, metricsProps)
     }
 
-    @RequestMapping(value = "/mySkillsSummary", method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value = "/myProgressSummary", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     @CompileStatic
     @Profile
-    MySkillsSummary getMySkillsSummary(HttpServletRequest request,
-                                       @RequestParam(name = "version", required = false) Integer version) {
+    MyProgressSummary getMyProgressSummary(HttpServletRequest request,
+                                           @RequestParam(name = "version", required = false) Integer version) {
         String userId = userInfoService.getCurrentUserId();
-        return skillsLoader.loadMySkillsSummary(userId, getProvidedVersionOrReturnDefault(version));
+        return skillsLoader.loadMyProgressSummary(userId, getProvidedVersionOrReturnDefault(version));
     }
 
     private int getProvidedVersionOrReturnDefault(Integer versionParam) {

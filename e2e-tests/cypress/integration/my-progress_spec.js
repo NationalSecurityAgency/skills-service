@@ -197,11 +197,11 @@ describe('Navigation Tests', () => {
   })
 
 
-  it('visit mySkills page', function () {
-    cy.visit('/my-skills');
+  it('visit My Progress page', function () {
+    cy.visit('/my-progress');
     cy.wait('@allSkillEventsForUser');
 
-    cy.get('[data-cy=breadcrumb-MySkills]').contains('MySkills').should('be.visible');
+    cy.get('[data-cy=breadcrumb-MyProgress]').contains('MyProgress').should('be.visible');
 
     cy.get('[data-cy=numProjectsContributed]').contains(new RegExp(/^1$/));
     cy.get('[data-cy=numProjectsAvailable]').contains(new RegExp(/^\/ 2$/));
@@ -237,12 +237,12 @@ describe('Navigation Tests', () => {
     cy.intercept('GET', '/api/projects/proj1/pointHistory').as('pointHistoryChart');
     cy.wait('@pointHistoryChart');
     cy.wrapIframe().contains('Overall Points');
-    cy.get('[data-cy=breadcrumb-MySkills]').should('be.visible');
+    cy.get('[data-cy=breadcrumb-MyProgress]').should('be.visible');
     cy.get('[data-cy=breadcrumb-Proj1]').should('be.visible');
     cy.get('[data-cy=breadcrumb-projects]').should('not.exist');
   });
 
-  it('mySkills page - contributed to all projects', function () {
+  it('My Progress page - contributed to all projects', function () {
     // add a skill to Inception to have contributed to all projects
     cy.loginAsRootUser();
     cy.request('POST', `/api/projects/Inception/skills/VisitUserSettings`, {
@@ -251,7 +251,7 @@ describe('Navigation Tests', () => {
     })
 
     cy.loginAsProxyUser();
-    cy.visit('/my-skills');
+    cy.visit('/my-progress');
     cy.wait('@allSkillEventsForUser');
 
     cy.get('[data-cy=numProjectsContributed]').contains(new RegExp(/^2$/));
@@ -259,7 +259,7 @@ describe('Navigation Tests', () => {
     cy.get('[data-cy=info-snap-footer]').contains('Great job, you have contributed to all projects!');
   });
 
-  it('mySkills page - not contributed to more than one project', function () {
+  it('My Progress page - not contributed to more than one project', function () {
     cy.request('POST', '/app/projects/proj2', {
       projectId: 'proj2',
       name: 'Project 2'
@@ -271,7 +271,7 @@ describe('Navigation Tests', () => {
     });
 
     cy.loginAsProxyUser();
-    cy.visit('/my-skills');
+    cy.visit('/my-progress');
     cy.wait('@allSkillEventsForUser');
 
     cy.get('[data-cy=numProjectsContributed]').contains(new RegExp(/^1$/));
@@ -279,9 +279,9 @@ describe('Navigation Tests', () => {
     cy.get('[data-cy=info-snap-footer]').contains('You still have 2 projects to explore.');
   });
 
-  it('mySkills page - time controls call out to the server',() => {
+  it('My Progress page - time controls call out to the server',() => {
 
-    cy.visit('/my-skills');
+    cy.visit('/my-progress');
     cy.wait('@allSkillEventsForUser');
 
     cy.get('[data-cy=eventHistoryChart] [data-cy=timeLengthSelector]').contains('6 months').click();
@@ -291,7 +291,7 @@ describe('Navigation Tests', () => {
     cy.wait('@allSkillEventsForUser');
   });
 
-  it('mySkills page - add/remove projects in event history chart',() => {
+  it('My Progress page - add/remove projects in event history chart',() => {
     // create 5 projects total (including Inception)
     cy.request('POST', '/app/projects/proj2', {
       projectId: 'proj2',
@@ -322,7 +322,7 @@ describe('Navigation Tests', () => {
     });
 
     cy.loginAsProxyUser();
-    cy.visit('/my-skills');
+    cy.visit('/my-progress');
     cy.wait('@allSkillEventsForUser');
 
     // validate 4 projects are loaded by default

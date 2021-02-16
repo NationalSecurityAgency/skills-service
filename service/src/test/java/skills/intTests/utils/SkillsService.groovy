@@ -575,8 +575,8 @@ class SkillsService {
         wsHelper.apiGet(url)
     }
 
-    def getMySkillSummary(int version = -1) {
-        String url = "/mySkillsSummary"
+    def getMyProgressSummary(int version = -1) {
+        String url = "/myProgressSummary"
         if (version >= 0) {
             url += "?version=${version}"
         }
