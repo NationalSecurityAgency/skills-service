@@ -17,15 +17,11 @@ package skills.intTests.metrics.skill
 
 import groovy.time.TimeCategory
 import org.springframework.beans.factory.annotation.Autowired
-import skills.intTests.TestDates
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
 import skills.metrics.builders.skill.BinnedUsagePostAchievementMetricsBuilder
-import skills.metrics.builders.skill.UsagePostAchievementMetricsBuilder
-import skills.services.LockingService
 import skills.services.UserEventService
 import skills.storage.repos.UserAchievedLevelRepo
-import spock.lang.Ignore
 
 class BinnedUsagePostAchievementMetricsBuilderSpec extends DefaultIntSpec {
 
