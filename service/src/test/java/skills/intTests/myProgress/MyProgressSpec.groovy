@@ -466,7 +466,7 @@ class MyProgressSpec extends DefaultIntSpec {
         supervisorService.createGlobalBadge(globalBadge)
 
         when:
-        def res = skillsService.getMySkillSummary()
+        def res = skillsService.getMyProgressSummary()
         then:
 
         // "production mode" is not enabled, so proj1 should not be included in the results
