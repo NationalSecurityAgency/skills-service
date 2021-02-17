@@ -15,7 +15,7 @@
  */
 import Vue from 'vue';
 import Router from 'vue-router';
-import HomePage from '@/components/HomePage';
+import AdminHomePage from '@/components/AdminHomePage';
 import MyProjects from '@/components/projects/MyProjects';
 import LoginForm from '@/components/access/Login';
 import RequestAccountForm from '@/components/access/RequestAccess';
@@ -79,10 +79,10 @@ const router = new Router({
   routes: [
     {
       path: '/ProjectAdministrator',
-      component: HomePage,
+      component: AdminHomePage,
       meta: { requiresAuth: false },
       children: [{
-        name: 'HomePage',
+        name: 'AdminHomePage',
         path: '',
         component: MyProjects,
         meta: { requiresAuth: true },
@@ -197,7 +197,7 @@ const router = new Router({
       component: MyProgress,
       meta: { requiresAuth: true, nonAdmin: true },
       children: [{
-        name: 'MyProgressPage',
+        name: 'LandingPage',
         path: '',
         component: MyProgressPage,
         meta: {
@@ -430,7 +430,7 @@ const router = new Router({
       }],
     },
     {
-      path: '/ProjectAdministrator/settings',
+      path: '/settings',
       component: GlobalSettings,
       meta: {
         requiresAuth: true,
@@ -439,7 +439,7 @@ const router = new Router({
         name: 'GeneralSettings',
         path: '',
         component: GeneralSettings,
-        meta: { requiresAuth: true, reportSkillId: 'VisitUserSettings' },
+        meta: { requiresAuth: true, nonAdmin: true, reportSkillId: 'VisitUserSettings' },
       }, {
         name: 'SecuritySettings',
         path: 'security',

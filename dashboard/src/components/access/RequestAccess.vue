@@ -181,7 +181,7 @@ aria-describedby=
       login() {
         this.createInProgress = true;
         this.$store.dispatch('signup', { isRootAccount: this.isRootAccount, ...this.loginFields }).then(() => {
-          this.$router.push({ name: 'HomePage' });
+          this.$router.push({ name: 'LandingPage' });
         });
       },
       missingRequiredValues() {

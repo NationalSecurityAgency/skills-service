@@ -20,13 +20,10 @@ limitations under the License.
       <span class="d-inline-block text-truncate userName ml-1 font-weight-bold" aria-hidden="true">{{ displayName }}</span>
       <span class="sr-only">settings menu</span>
     </template>
-    <b-dropdown-item href="#"  @click="gotoMyProgress">
-      <span class="text-gray-700"> <i class="fas fa-chart-bar" aria-hidden="true"/><span class="link-name">My Progress</span></span>
-    </b-dropdown-item>
-    <b-dropdown-item href="#"  @click="gotoAdmin">
+    <b-dropdown-item href="#" :disabled="adminLinkDisabled"  @click="gotoAdmin">
       <span class="text-gray-700"> <i class="fas fa-tasks" aria-hidden="true"/><span class="link-name">Admin</span></span>
     </b-dropdown-item>
-    <b-dropdown-item href="#"  @click="gotoSettings">
+    <b-dropdown-item href="#" :disabled="settingsLinkDisabled" @click="gotoSettings">
       <span class="text-gray-700"> <i class="fas fa-cog" aria-hidden="true"/><span class="link-name">Settings</span></span>
     </b-dropdown-item>
     <b-dropdown-divider />
@@ -66,16 +63,19 @@ limitations under the License.
         }
         return displayName;
       },
+      settingsLinkDisabled() {
+        return this.$route.path && this.$route.name === 'GeneralSettings';
+      },
+      adminLinkDisabled() {
+        return this.$route.path && this.$route.name === 'AdminHomePage';
+      },
     },
     methods: {
       gotoSettings() {
         this.$router.push({ name: 'GeneralSettings' });
       },
       gotoAdmin() {
-        this.$router.push({ name: 'HomePage' });
-      },
-      gotoMyProgress() {
-        this.$router.push({ name: 'MyProgressPage' });
+        this.$router.push({ name: 'AdminHomePage' });
       },
       signOut() {
         this.$store.dispatch('logout');

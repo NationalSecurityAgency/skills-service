@@ -146,7 +146,7 @@ router.beforeEach((to, from, next) => {
       if (!isLoggedIn()) {
         const newRoute = { query: { redirect: to.fullPath } };
         if (isPki()) {
-          newRoute.name = 'HomePage';
+          newRoute.name = 'LandingPage';
         } else {
           newRoute.name = 'Login';
         }
