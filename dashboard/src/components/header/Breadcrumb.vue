@@ -49,7 +49,7 @@ limitations under the License.
       return {
         items: [],
         idsToExcludeFromPath: ['subjects', 'skills', 'projects'],
-        keysToExcludeFromPath: ['my-progress'],
+        keysToExcludeFromPath: [],
       };
     },
     mounted() {
@@ -70,7 +70,7 @@ limitations under the License.
         const lastItemInPathCustomName = this.$route.meta.breadcrumb;
 
         res.forEach((item, index) => {
-          let value = item;
+          let value = item === 'ProjectAdministrator' ? 'Admin' : item;
           if (value) {
             if (index === res.length - 1 && lastItemInPathCustomName) {
               key = null;
@@ -93,7 +93,9 @@ limitations under the License.
               if (!this.shouldExcludeValue(value)) {
                 newItems.push(this.buildResItem(key, value, res, index));
               }
-              key = value;
+              if (value !== 'Admin') {
+                key = value;
+              }
             }
           }
         });

@@ -56,13 +56,7 @@ limitations under the License.
     },
     computed: {
       showAdminStamp() {
-        const showAdminStamp = this.$route && this.$route.meta && this.$route.meta.requiresAuth && !this.$route.meta.nonAdmin;
-        if (showAdminStamp) {
-          console.log('Showing admin stamp!');
-        } else {
-          console.log('NOT showing admin stamp');
-        }
-        return showAdminStamp;
+        return this.$route && this.$route.meta && this.$route.meta.requiresAuth && !this.$route.meta.nonAdmin;
       },
     },
   };

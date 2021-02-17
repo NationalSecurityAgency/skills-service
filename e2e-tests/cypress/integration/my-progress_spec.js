@@ -198,10 +198,10 @@ describe('Navigation Tests', () => {
 
 
   it('visit My Progress page', function () {
-    cy.visit('/my-progress');
+    cy.visit('/');
     cy.wait('@allSkillEventsForUser');
 
-    cy.get('[data-cy=breadcrumb-MyProgress]').contains('MyProgress').should('be.visible');
+    cy.get('[data-cy=breadcrumb-Home]').contains('Home').should('be.visible');
 
     cy.get('[data-cy=numProjectsContributed]').contains(new RegExp(/^1$/));
     cy.get('[data-cy=numProjectsAvailable]').contains(new RegExp(/^\/ 2$/));
@@ -237,8 +237,8 @@ describe('Navigation Tests', () => {
     cy.intercept('GET', '/api/projects/proj1/pointHistory').as('pointHistoryChart');
     cy.wait('@pointHistoryChart');
     cy.wrapIframe().contains('Overall Points');
-    cy.get('[data-cy=breadcrumb-MyProgress]').should('be.visible');
-    cy.get('[data-cy=breadcrumb-Proj1]').should('be.visible');
+    cy.get('[data-cy=breadcrumb-Home]').should('be.visible');
+    cy.get('[data-cy=breadcrumb-proj1]').should('be.visible');
     cy.get('[data-cy=breadcrumb-projects]').should('not.exist');
   });
 
@@ -251,7 +251,7 @@ describe('Navigation Tests', () => {
     })
 
     cy.loginAsProxyUser();
-    cy.visit('/my-progress');
+    cy.visit('/');
     cy.wait('@allSkillEventsForUser');
 
     cy.get('[data-cy=numProjectsContributed]').contains(new RegExp(/^2$/));
@@ -271,7 +271,7 @@ describe('Navigation Tests', () => {
     });
 
     cy.loginAsProxyUser();
-    cy.visit('/my-progress');
+    cy.visit('/');
     cy.wait('@allSkillEventsForUser');
 
     cy.get('[data-cy=numProjectsContributed]').contains(new RegExp(/^1$/));
@@ -281,7 +281,7 @@ describe('Navigation Tests', () => {
 
   it('My Progress page - time controls call out to the server',() => {
 
-    cy.visit('/my-progress');
+    cy.visit('/');
     cy.wait('@allSkillEventsForUser');
 
     cy.get('[data-cy=eventHistoryChart] [data-cy=timeLengthSelector]').contains('6 months').click();
@@ -322,7 +322,7 @@ describe('Navigation Tests', () => {
     });
 
     cy.loginAsProxyUser();
-    cy.visit('/my-progress');
+    cy.visit('/');
     cy.wait('@allSkillEventsForUser');
 
     // validate 4 projects are loaded by default
@@ -375,7 +375,7 @@ describe('Navigation Tests', () => {
     });
 
     cy.loginAsProxyUser();
-    cy.visit('/my-progress');
+    cy.visit('/');
     cy.wait('@allSkillEventsForUser');
 
     cy.get('[data-cy=numProjectsContributed]').contains(new RegExp(/^1$/));
