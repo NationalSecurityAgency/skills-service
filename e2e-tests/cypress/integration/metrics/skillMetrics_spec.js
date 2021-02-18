@@ -435,7 +435,7 @@ describe('Metrics Tests - Skills', () => {
             }
         }
 
-        cy.visit('/projects/proj1/subjects/subj1/skills/skill1');
+        cy.visit('/ProjectAdministrator/projects/proj1/subjects/subj1/skills/skill1');
         cy.clickNav('Metrics');
         cy.wait('@binnedUsagePostAchievementMetricsBuilder');
         cy.wait('@usagePostAchievementMetricsBuilder');
