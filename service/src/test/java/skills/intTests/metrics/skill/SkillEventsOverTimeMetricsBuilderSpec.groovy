@@ -26,7 +26,6 @@ import skills.intTests.utils.SkillsFactory
 import skills.metrics.builders.MetricsParams
 import skills.services.StartDateUtil
 import skills.storage.model.EventType
-import spock.lang.Ignore
 
 import java.time.DayOfWeek
 import java.time.LocalDateTime
