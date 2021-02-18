@@ -172,7 +172,7 @@ describe('Login Tests', () => {
       cy.intercept('GET', '/public/config', {oAuthOnly: true}).as('loadConfig');
       cy.intercept('GET', '/app/oAuthProviders', [{"registrationId":"gitlab","clientName":"GitLab","iconClass":"fab fa-gitlab"}]).as('getOauthProviders')
 
-      cy.visit('/ProjectAdministrator/skills-login', {
+      cy.visit('/skills-login', {
         qs: {
           showForm: 'true',
         }
