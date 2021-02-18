@@ -15,7 +15,8 @@
  */
 package skills.intTests.metrics.skill
 
-
+import com.google.common.collect.HashMultimap
+import com.google.common.collect.Multimap
 import groovy.json.JsonSlurper
 import groovy.time.TimeCategory
 import org.apache.commons.lang3.RandomUtils
@@ -25,6 +26,7 @@ import skills.intTests.utils.SkillsFactory
 import skills.metrics.builders.MetricsParams
 import skills.services.StartDateUtil
 import skills.storage.model.EventType
+import spock.lang.Ignore
 
 import java.time.DayOfWeek
 import java.time.LocalDateTime
@@ -77,7 +79,7 @@ class SkillEventsOverTimeMetricsBuilderSpec  extends DefaultIntSpec {
         List<String> users = getRandomUsers(10)
         def proj = SkillsFactory.createProject()
         List<Map> skills = SkillsFactory.createSkills(10)
-        skills.each { it.pointIncrement = 100; it.numPerformToCompletion = 5 }
+        skills.each { it.pointIncrement = 100; it.numPerformToCompletion = 1 }
 
         skillsService.createProject(proj)
         skillsService.createSubject(SkillsFactory.createSubject())
@@ -92,12 +94,19 @@ class SkillEventsOverTimeMetricsBuilderSpec  extends DefaultIntSpec {
                 testDates.startOfTwoWeeksAgo.plusDays(6).toDate(),
                 testDates.startOfCurrentWeek.toDate()]
 
+        Multimap<String, String> projToEvent = HashMultimap.create()
         days.eachWithIndex { Date date, int index ->
             users.subList(0, index).each { String user ->
                 skills.subList(0, index).each { skill ->
+                    projToEvent.put(skill.skillId, "${date}_${user}_${skill.skillId}".toString())
                     skillsService.addSkill([projectId: proj.projectId, skillId: skill.skillId], user, date)
                 }
             }
+        }
+
+        println "------skill1 events-------"
+        projToEvent.get("skill1").sort().each{
+            println it
         }
 
         Map props = [:]
@@ -106,20 +115,21 @@ class SkillEventsOverTimeMetricsBuilderSpec  extends DefaultIntSpec {
 
         when:
         List res = skills.collect {
+            println "getting metrics data for ${it.skillId} using start: ${new Date(props.start)}"
             props[MetricsParams.P_SKILL_ID] = it.skillId
             return skillsService.getMetricsData(proj.projectId, metricsId, props)
         }
 
         then:
-        res[0].countsByDay.collect { it.num } == [5, 4]
+        res[0].countsByDay.collect { it.num } == [3, 1]
         res[0].countsByDay.collect { new Date(it.timestamp) } == [testDates.startOfTwoWeeksAgo.toDate(), testDates.startOfCurrentWeek.toDate()]
         res[0].allEvents
 
-        res[1].countsByDay.collect { it.num } == [5, 4]
+        res[1].countsByDay.collect { it.num } == [3, 1]
         res[1].countsByDay.collect { new Date(it.timestamp) } == [testDates.startOfTwoWeeksAgo.toDate(), testDates.startOfCurrentWeek.toDate()]
         res[1].allEvents
 
-        res[2].countsByDay.collect { it.num } == [3, 4]
+        res[2].countsByDay.collect { it.num } == [3, 1]
         res[2].countsByDay.collect { new Date(it.timestamp) } == [testDates.startOfTwoWeeksAgo.toDate(), testDates.startOfCurrentWeek.toDate()]
         res[2].allEvents
 
@@ -219,7 +229,7 @@ class SkillEventsOverTimeMetricsBuilderSpec  extends DefaultIntSpec {
         }
 
         then:
-        res[0].countsByDay.collect { it.num } == [20]
+        res[0].countsByDay.collect { it.num }.sum() == 20
         res[0].allEvents.collect { it.num }.sum() == 60
     }
 

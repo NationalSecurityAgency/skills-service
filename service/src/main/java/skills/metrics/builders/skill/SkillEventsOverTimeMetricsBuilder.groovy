@@ -60,11 +60,24 @@ class SkillEventsOverTimeMetricsBuilder implements ProjectMetricsBuilder {
     FinalRes build(String projectId, String chartId, Map<String, String> props) {
         String skillId = MetricsParams.getSkillId(projectId, chartId, props);
         Date start = MetricsParams.getStart(projectId, chartId, props)
-        List<DayCountItem> counts = userPerformedSkillRepo.countsByDay(projectId, skillId, start)
+        EventType eventType = eventService.determineAppropriateEventType(start)
+
+        //applied skill events
+        List<DayCountItem> counts
+        if (EventType.WEEKLY == eventType) {
+            start = StartDateUtil.computeStartDate(start, EventType.WEEKLY)
+            counts = userPerformedSkillRepo.countsByDay(projectId, skillId, start)
+            //we need to coerce the applied skill events into the same granularity as the all skill events
+            counts = MetricCompactionUtil.manuallyCompactDaily(counts)
+        } else {
+            counts = userPerformedSkillRepo.countsByDay(projectId, skillId, start)
+        }
         counts = counts.sort{it.day}
+
+        //all skill events
         List<DayCountItem> allCounts = eventService.getUserEventCountsForSkillId(projectId, skillId, start)
 
-        EventType eventType = eventService.determineAppropriateEventType(start)
+
         if (EventType.WEEKLY == eventType) {
             //we need to coerce the applied skill events into the same granularity as the all skill events
             counts = MetricCompactionUtil.manuallyCompactDaily(counts)
