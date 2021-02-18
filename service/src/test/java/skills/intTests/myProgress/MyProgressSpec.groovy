@@ -472,7 +472,7 @@ class MyProgressSpec extends DefaultIntSpec {
         // "production mode" is not enabled, so proj1 should not be included in the results
         res
         res.projectSummaries.isEmpty()
-        res.totalProjects == 0
+        res.totalProjects == 1
         res.numProjectsContributed == 0
         res.totalSkills == 0
         res.numAchievedSkills == 0
