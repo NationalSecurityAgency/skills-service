@@ -21,7 +21,7 @@ limitations under the License.
       <span class="sr-only">settings menu</span>
     </template>
     <b-dropdown-item href="#" :disabled="adminLinkDisabled"  @click="gotoAdmin">
-      <span class="text-gray-700"> <i class="fas fa-tasks" aria-hidden="true"/><span class="link-name">Admin</span></span>
+      <span class="text-gray-700"> <i class="fas fa-tasks" aria-hidden="true"/><span class="link-name">Project Admin</span></span>
     </b-dropdown-item>
     <b-dropdown-item href="#" :disabled="settingsLinkDisabled" @click="gotoSettings">
       <span class="text-gray-700"> <i class="fas fa-cog" aria-hidden="true"/><span class="link-name">Settings</span></span>

@@ -1,4 +1,4 @@
-/*
+    /*
  * Copyright 2020 SkillTree
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -168,7 +168,9 @@ describe('Settings Tests', () => {
         ], 5, true, null, false);
 
         cy.vuex().its('state.access.isSupervisor').should('equal', true);
-        cy.contains('Home').click();
+        // cy.contains('Home').click();
+        cy.get('[data-cy=settings-button]').click();
+        cy.contains('Project Admin').click();
         cy.get('[data-cy=navigationmenu]').contains('Badges', {timeout: 5000}).should('be.visible');
     });
 
@@ -176,7 +178,7 @@ describe('Settings Tests', () => {
         cy.intercept('PUT', '**/roles/ROLE_SUPERVISOR').as('addSupervisor');
         cy.intercept('POST', 'root/users/without/role/ROLE_SUPERVISOR?userSuggestOption=ONE').as('getEligibleForSupervisor');
 
-        cy.visit('/ProjectAdministrator/settings/security');
+        cy.visit('/settings/security');
 
         cy.get('[data-cy=supervisorrm]  div.multiselect__tags').type('root');
         cy.wait('@getEligibleForSupervisor');
@@ -299,7 +301,7 @@ describe('Settings Tests', () => {
         cy.get$('[data-cy=emailSettingsSave]').click();
         //verify that appropriate saved data is loaded when form is loaded again
         cy.contains('System').click();
-        cy.visit('/ProjectAdministrator/settings/email');
+        cy.visit('/settings/email');
         cy.wait('@loadEmailSettings');
         cy.get('[data-cy=hostInput]').should('have.value', 'localhost');
         cy.get('[data-cy=portInput]').should('have.value', '1026');
@@ -352,7 +354,7 @@ describe('Settings Tests', () => {
         cy.wait('@loadConfig');
         cy.get('#customHeaderDiv').contains('HEADER');
         cy.get('#customFooterDiv').contains('FOOTER');
-        cy.visit('/ProjectAdministrator/settings/system');
+        cy.visit('/settings/system');
         cy.wait('@loadSystemSettings');
         cy.get('[data-cy=publicUrl]').should('have.value', 'http://localhost:8082');
         cy.get('[data-cy=resetTokenExpiration]').should('have.value', '2H25M22S');

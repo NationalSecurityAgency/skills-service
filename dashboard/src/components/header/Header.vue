@@ -31,7 +31,7 @@ limitations under the License.
 
         <div class="col-sm-auto text-center text-sm-right pt-sm-2 mt-3 mt-sm-0">
           <inception-button class="mr-2"></inception-button>
-          <settings-button class="mr-2"/>
+          <settings-button data-cy="settings-button" class="mr-2"/>
           <help-button class=""/>
         </div>
       </div>
