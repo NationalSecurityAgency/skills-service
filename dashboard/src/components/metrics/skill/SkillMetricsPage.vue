@@ -20,7 +20,7 @@ limitations under the License.
 
     <!-- on FF charts end up pushing column to the next row; this is a workaround -->
     <div v-if="!loading" style="width: 99%;">
-      <div class="row mb-2">
+      <div class="row mb-3">
         <div class="col">
           <stats-card title="Achieved" :statNum="numUsersAchieved" icon="fa fa-trophy text-info" data-cy="numUserAchievedStatCard">
             Number of users that achieved this skill
@@ -42,7 +42,15 @@ limitations under the License.
       </div>
 
       <skill-achieved-by-users-over-time class="mb-3"/>
-      <skill-events-over-time />
+      <skill-events-over-time class="mb-3"/>
+      <div class="row">
+          <div class="col-lg-3 col-md-4 col-sm-12">
+            <post-achievement-users-pie-chart class="mb-3  h-100"/>
+          </div>
+          <div class="col-lg-9 col-md-12 col-sm-12">
+            <binned-post-achievement-usage class="mb-3  h-100"/>
+          </div>
+      </div>
     </div>
   </div>
 </template>
@@ -54,6 +62,8 @@ limitations under the License.
   import StatsCard from '../utils/StatsCard';
   import MetricsService from '../MetricsService';
   import SkillsSpinner from '../../utils/SkillsSpinner';
+  import PostAchievementUsersPieChart from './PostAchievementUsersPieChart';
+  import BinnedPostAchievementUsage from './BinnedPostAchievementUsage';
 
   export default {
     name: 'SkillMetricsPage',
@@ -63,6 +73,8 @@ limitations under the License.
       SkillEventsOverTime,
       SkillAchievedByUsersOverTime,
       SubPageHeader,
+      PostAchievementUsersPieChart,
+      BinnedPostAchievementUsage,
     },
     data() {
       return {
