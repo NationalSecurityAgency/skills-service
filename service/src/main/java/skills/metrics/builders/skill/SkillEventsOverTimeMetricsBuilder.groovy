@@ -77,12 +77,6 @@ class SkillEventsOverTimeMetricsBuilder implements ProjectMetricsBuilder {
         //all skill events
         List<DayCountItem> allCounts = eventService.getUserEventCountsForSkillId(projectId, skillId, start)
 
-
-        if (EventType.WEEKLY == eventType) {
-            //we need to coerce the applied skill events into the same granularity as the all skill events
-            counts = MetricCompactionUtil.manuallyCompactDaily(counts)
-        }
-
         start = StartDateUtil.computeStartDate(start, eventType)
         Date nMinus = start
         List<DayCountItem> filled = []

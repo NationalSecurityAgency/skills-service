@@ -94,20 +94,14 @@ class SkillEventsOverTimeMetricsBuilderSpec  extends DefaultIntSpec {
                 testDates.startOfTwoWeeksAgo.plusDays(6).toDate(),
                 testDates.startOfCurrentWeek.toDate()]
 
-        Multimap<String, String> projToEvent = HashMultimap.create()
         days.eachWithIndex { Date date, int index ->
             users.subList(0, index).each { String user ->
                 skills.subList(0, index).each { skill ->
-                    projToEvent.put(skill.skillId, "${date}_${user}_${skill.skillId}".toString())
                     skillsService.addSkill([projectId: proj.projectId, skillId: skill.skillId], user, date)
                 }
             }
         }
 
-        println "------skill1 events-------"
-        projToEvent.get("skill1").sort().each{
-            println it
-        }
 
         Map props = [:]
         props[MetricsParams.P_SKILL_ID] = skills[0].skillId
@@ -115,7 +109,6 @@ class SkillEventsOverTimeMetricsBuilderSpec  extends DefaultIntSpec {
 
         when:
         List res = skills.collect {
-            println "getting metrics data for ${it.skillId} using start: ${new Date(props.start)}"
             props[MetricsParams.P_SKILL_ID] = it.skillId
             return skillsService.getMetricsData(proj.projectId, metricsId, props)
         }
