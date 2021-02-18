@@ -20,7 +20,7 @@ describe('Register Dashboard Users', () => {
   });
 
   it('navigate between login and sign up page', () => {
-    cy.visit('/ProjectAdministrator/');
+    cy.visit('/');
     cy.contains('Don\'t have a SkillTree account')
     cy.contains('Sign up').click()
     cy.contains('New Account')
@@ -29,7 +29,7 @@ describe('Register Dashboard Users', () => {
   });
 
   it('register dashboard user', () => {
-    cy.visit('/ProjectAdministrator/request-account');
+    cy.visit('/request-account');
     cy.contains('New Account')
     cy.get('#firstName').type("Robert")
     cy.get('#lastName').type("Smith")
@@ -38,11 +38,11 @@ describe('Register Dashboard Users', () => {
     cy.get('#password_confirmation').type("password")
     cy.contains('Create Account').click()
 
-    cy.contains('No Projects Yet')
+    cy.get('[data-cy=breadcrumb-Home]').should('be.visible');
   });
 
   it('register dashboard validation', () => {
-    cy.visit('/ProjectAdministrator/request-account');
+    cy.visit('/request-account');
     cy.contains('New Account')
     cy.get('#firstName').type("Robert")
     cy.get('#lastName').type("Smith")
