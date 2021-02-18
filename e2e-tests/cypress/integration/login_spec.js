@@ -26,7 +26,7 @@ describe('Login Tests', () => {
   });
 
   it('form: successful dashboard login', () => {
-    cy.visit('/');
+    cy.visit('/ProjectAdministrator/');
 
     cy.get('#username').type('root@skills.org');
     cy.get('#inputPassword').type('password');
@@ -46,7 +46,7 @@ describe('Login Tests', () => {
   });
 
   it('form: bad password', () => {
-    cy.visit('/');
+    cy.visit('/ProjectAdministrator/');
 
     cy.get('#username').type('root@skills.org');
     cy.get('#inputPassword').type('password1');
@@ -57,7 +57,7 @@ describe('Login Tests', () => {
   });
 
   it('form: bad user', () => {
-    cy.visit('/');
+    cy.visit('/ProjectAdministrator/');
 
     cy.get('#username').type('root1@skills.org');
     cy.get('#inputPassword').type('password');
@@ -68,7 +68,7 @@ describe('Login Tests', () => {
   });
 
   it('disabled login - password must be at least 8 characters', () => {
-    cy.visit('/');
+    cy.visit('/ProjectAdministrator/');
     cy.contains('Login').should('be.disabled');
 
     const expectedText = 'Password cannot be less than 8 characters.';
@@ -85,7 +85,7 @@ describe('Login Tests', () => {
   })
 
   it('disabled login - password must not exceed 40 characters', () => {
-    cy.visit('/');
+    cy.visit('/ProjectAdministrator/');
     cy.contains('Login').should('be.disabled');
 
     const expectedText = 'Password cannot exceed 40 characters';
@@ -104,7 +104,7 @@ describe('Login Tests', () => {
   })
 
   it('disabled login - email must be at least 5 chars', () => {
-    cy.visit('/');
+    cy.visit('/ProjectAdministrator/');
     cy.contains('Login').should('be.disabled');
 
     const expectedText = 'Email Address cannot be less than 5 characters.';
@@ -121,7 +121,7 @@ describe('Login Tests', () => {
   })
 
   it('disabled login - valid email format', () => {
-    cy.visit('/');
+    cy.visit('/ProjectAdministrator/');
     cy.contains('Login').should('be.disabled');
 
     const expectedText = 'Email Address must be a valid email';
@@ -144,7 +144,7 @@ describe('Login Tests', () => {
 
   if (!Cypress.env('oauthMode')) {
     it('OAuth login is not enabled', () => {
-      cy.visit('/');
+      cy.visit('/ProjectAdministrator/');
       cy.contains('Login').should('be.disabled');
 
       cy.wait('@getOAuthProviders')
@@ -158,7 +158,7 @@ describe('Login Tests', () => {
       cy.intercept('GET', '/public/config', {oAuthOnly: true}).as('loadConfig');
       cy.intercept('GET', '/app/oAuthProviders', [{"registrationId":"gitlab","clientName":"GitLab","iconClass":"fab fa-gitlab"}]).as('getOauthProviders')
 
-      cy.visit('/');
+      cy.visit('/ProjectAdministrator/');
 
       cy.wait('@loadConfig');
       cy.wait('@getOauthProviders');
@@ -172,7 +172,7 @@ describe('Login Tests', () => {
       cy.intercept('GET', '/public/config', {oAuthOnly: true}).as('loadConfig');
       cy.intercept('GET', '/app/oAuthProviders', [{"registrationId":"gitlab","clientName":"GitLab","iconClass":"fab fa-gitlab"}]).as('getOauthProviders')
 
-      cy.visit('/skills-login', {
+      cy.visit('/ProjectAdministrator/skills-login', {
         qs: {
           showForm: 'true',
         }

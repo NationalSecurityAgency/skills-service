@@ -59,7 +59,7 @@ describe('Skills Tests', () => {
             path: '/admin/projects/proj1/subjects/subj1/skills/skill1'
         }).as('loadSkill');
 
-        cy.visit('/projects/proj1/subjects/subj1/skills/skill1');
+        cy.visit('/ProjectAdministrator/projects/proj1/subjects/subj1/skills/skill1');
         cy.wait('@loadSkill')
 
         cy.get('div#menu-collapse-control li').contains('Dependencies').click();
@@ -92,7 +92,7 @@ describe('Skills Tests', () => {
 
         cy.request('POST', '/admin/projects/proj1/skills/skill1/dependency/skill2')
 
-        cy.visit('/projects/proj1/subjects/subj1/skills/skill2/dependencies');
+        cy.visit('/ProjectAdministrator/projects/proj1/subjects/subj1/skills/skill2/dependencies');
         cy.contains('No Dependencies Yet');
 
         cy.get('.multiselect__tags').click();
@@ -114,7 +114,7 @@ describe('Skills Tests', () => {
             });
         }
 
-        cy.visit('/projects/proj1/subjects/subj1/skills/skill1/dependencies');
+        cy.visit('/ProjectAdministrator/projects/proj1/subjects/subj1/skills/skill1/dependencies');
         cy.contains('No Dependencies Yet');
 
         cy.get('.multiselect__tags').click();
@@ -164,7 +164,7 @@ describe('Skills Tests', () => {
         cy.request('POST', '/admin/projects/proj1/skills/skill1/dependency/skill3')
         cy.request('POST', '/admin/projects/proj1/skills/skill1/dependency/skill4')
 
-        cy.visit('/projects/proj1/subjects/subj1/skills/skill1/dependencies');
+        cy.visit('/ProjectAdministrator/projects/proj1/subjects/subj1/skills/skill1/dependencies');
         cy.get(`${tableSelector} th`).contains('Skill ID').click();
         cy.validateTable(tableSelector, [
             [{ colIndex: 1,  value: 'skill2' }],
@@ -199,7 +199,7 @@ describe('Skills Tests', () => {
         cy.request('POST', '/admin/projects/proj1/skills/skill1/dependency/skill3')
         cy.request('POST', '/admin/projects/proj1/skills/skill1/dependency/skill4')
 
-        cy.visit('/projects/proj1/subjects/subj1/skills/skill1/dependencies');
+        cy.visit('/ProjectAdministrator/projects/proj1/subjects/subj1/skills/skill1/dependencies');
         cy.get('[data-cy="manage_skill3"]').click();
         cy.get('[data-cy="pageHeader"]').contains('ID: skill3');
     });

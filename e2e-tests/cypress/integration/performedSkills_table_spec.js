@@ -53,7 +53,7 @@ describe('Performed Skills Table Tests', () => {
     it('sort by date', () => {
         cy.createSkills(1);
         cy.report(7);
-        cy.visit('/projects/proj1/subjects/subj1/users/user1@skills.org/skillEvents');
+        cy.visit('/ProjectAdministrator/projects/proj1/subjects/subj1/users/user1@skills.org/skillEvents');
         // default sort by date desc
         cy.validateTable(tableSelector, [
             [{ colIndex: 0,  value: 'skill1' }, { colIndex: 1,  value: '2020-09-18' }],
@@ -81,7 +81,7 @@ describe('Performed Skills Table Tests', () => {
     it('sort by skill id', () => {
         cy.createSkills(7);
         cy.report(7, false);
-        cy.visit('/projects/proj1/subjects/subj1/users/user1@skills.org/skillEvents');
+        cy.visit('/ProjectAdministrator/projects/proj1/subjects/subj1/users/user1@skills.org/skillEvents');
 
         cy.get(`${tableSelector}`).contains('Skill Id').click();
         cy.validateTable(tableSelector, [
@@ -110,7 +110,7 @@ describe('Performed Skills Table Tests', () => {
     it('filter by skill id', () => {
         cy.createSkills(12);
         cy.report(12, false);
-        cy.visit('/projects/proj1/subjects/subj1/users/user1@skills.org/skillEvents');
+        cy.visit('/ProjectAdministrator/projects/proj1/subjects/subj1/users/user1@skills.org/skillEvents');
 
         cy.get('[data-cy="performedSkills-skillIdFilter"]').type('sKiLl1');
         cy.get('[data-cy="performedSkills-filterBtn"]').click();
@@ -142,7 +142,7 @@ describe('Performed Skills Table Tests', () => {
     it('delete skill event', () => {
         cy.createSkills(3);
         cy.report(3, false);
-        cy.visit('/projects/proj1/subjects/subj1/users/user1@skills.org/skillEvents');
+        cy.visit('/ProjectAdministrator/projects/proj1/subjects/subj1/users/user1@skills.org/skillEvents');
 
         cy.validateTable(tableSelector, [
             [{ colIndex: 0,  value: 'skill3' }],

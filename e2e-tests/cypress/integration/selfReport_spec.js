@@ -30,7 +30,7 @@ describe('Self Report Skills Management Tests', () => {
     });
 
     it('manage self reporting settings at project level', () => {
-        cy.visit('/projects/proj1/settings');
+        cy.visit('/ProjectAdministrator/projects/proj1/settings');
 
         cy.get('[data-cy="selfReportSwitch"]').should('not.be.checked');
         cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled');
@@ -56,7 +56,7 @@ describe('Self Report Skills Management Tests', () => {
         cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled');
 
         // refresh and check that the values persisted
-        cy.visit('/projects/proj1/settings');
+        cy.visit('/ProjectAdministrator/projects/proj1/settings');
         cy.get('[data-cy="selfReportSwitch"]').should('be.checked');
         cy.get('[data-cy="selfReportTypeSelector"] [value="Approval"]').should('not.be.checked');
         cy.get('[data-cy="selfReportTypeSelector"] [value="HonorSystem"]').should('be.checked');
@@ -72,7 +72,7 @@ describe('Self Report Skills Management Tests', () => {
         cy.get('[data-cy="selfReportTypeSelector"] [value="HonorSystem"]').should('be.disabled');
         cy.get('[data-cy="saveSettingsBtn"]').click();
 
-        cy.visit('/projects/proj1/settings');
+        cy.visit('/ProjectAdministrator/projects/proj1/settings');
         cy.get('[data-cy="selfReportSwitch"]').should('not.be.checked');
         cy.get('[data-cy="selfReportTypeSelector"] [value="Approval"]').should('be.disabled');
         cy.get('[data-cy="selfReportTypeSelector"] [value="HonorSystem"]').should('be.disabled');
@@ -108,7 +108,7 @@ describe('Self Report Skills Management Tests', () => {
     });
 
     it('create skills - self reporting disabled - no project level default', () => {
-        cy.visit('/projects/proj1/subjects/subj1');
+        cy.visit('/ProjectAdministrator/projects/proj1/subjects/subj1');
         cy.get('[data-cy="btn_Skills"]').click();
         cy.get('[data-cy="selfReportEnableCheckbox"]').should('not.be.checked');
         cy.get('[data-cy="selfReportTypeSelector"] [value="Approval"]').should('be.disabled');
@@ -127,7 +127,7 @@ describe('Self Report Skills Management Tests', () => {
     });
 
     it('create skills - self reporting with approval - no project level default', () => {
-        cy.visit('/projects/proj1/subjects/subj1');
+        cy.visit('/ProjectAdministrator/projects/proj1/subjects/subj1');
         cy.get('[data-cy="btn_Skills"]').click();
         cy.get('[data-cy="selfReportEnableCheckbox"]').should('not.be.checked');
         cy.get('[data-cy="selfReportTypeSelector"] [value="Approval"]').should('be.disabled');
@@ -152,7 +152,7 @@ describe('Self Report Skills Management Tests', () => {
     });
 
     it('create skills - self reporting with Honor System - no project level default', () => {
-        cy.visit('/projects/proj1/subjects/subj1');
+        cy.visit('/ProjectAdministrator/projects/proj1/subjects/subj1');
         cy.get('[data-cy="btn_Skills"]').click();
         cy.get('[data-cy="selfReportEnableCheckbox"]').should('not.be.checked');
         cy.get('[data-cy="selfReportTypeSelector"] [value="Approval"]').should('be.disabled');
@@ -181,13 +181,13 @@ describe('Self Report Skills Management Tests', () => {
     });
 
     it('create skill - project level default of Honor System', () => {
-        cy.visit('/projects/proj1/settings');
+        cy.visit('/ProjectAdministrator/projects/proj1/settings');
         cy.get('[data-cy="selfReportSwitch"]').check({force: true});
         cy.get('[data-cy="selfReportTypeSelector"] [value="HonorSystem"]').click({force:true})
         cy.get('[data-cy="saveSettingsBtn"]').click();
         cy.get('[data-cy="settingsSavedAlert"]').contains('Settings Updated');
 
-        cy.visit('/projects/proj1/subjects/subj1');
+        cy.visit('/ProjectAdministrator/projects/proj1/subjects/subj1');
         cy.get('[data-cy="btn_Skills"]').click();
         cy.get('[data-cy="selfReportEnableCheckbox"]').should('be.checked');
         cy.get('[data-cy="selfReportTypeSelector"] [value="Approval"]').should('be.enabled');
@@ -197,12 +197,12 @@ describe('Self Report Skills Management Tests', () => {
     });
 
     it('create skill - project level default of Approval', () => {
-        cy.visit('/projects/proj1/settings');
+        cy.visit('/ProjectAdministrator/projects/proj1/settings');
         cy.get('[data-cy="selfReportSwitch"]').check({force: true});
         cy.get('[data-cy="saveSettingsBtn"]').click();
         cy.get('[data-cy="settingsSavedAlert"]').contains('Settings Updated');
 
-        cy.visit('/projects/proj1/subjects/subj1');
+        cy.visit('/ProjectAdministrator/projects/proj1/subjects/subj1');
         cy.get('[data-cy="btn_Skills"]').click();
         cy.get('[data-cy="selfReportEnableCheckbox"]').should('be.checked');
         cy.get('[data-cy="selfReportTypeSelector"] [value="Approval"]').should('be.enabled');
@@ -241,15 +241,15 @@ describe('Self Report Skills Management Tests', () => {
             numPerformToCompletion: '10',
         });
 
-        cy.visit('/projects/proj1/subjects/subj1/skills/skill1');
+        cy.visit('/ProjectAdministrator/projects/proj1/subjects/subj1/skills/skill1');
         cy.get('[data-cy="selfReportMediaCard"] [data-cy="mediaInfoCardTitle"]').contains('Self Report: Approval');
         cy.get('[data-cy="selfReportMediaCard"] [data-cy="mediaInfoCardSubTitle"]').contains('Users can self report this skill and will go into an approval queue');
 
-        cy.visit('/projects/proj1/subjects/subj1/skills/skill2');
+        cy.visit('/ProjectAdministrator/projects/proj1/subjects/subj1/skills/skill2');
         cy.get('[data-cy="selfReportMediaCard"] [data-cy="mediaInfoCardTitle"]').contains('Self Report: Honor System');
         cy.get('[data-cy="selfReportMediaCard"] [data-cy="mediaInfoCardSubTitle"]').contains('Users can self report this skill and will apply immediately');
 
-        cy.visit('/projects/proj1/subjects/subj1/skills/skill3');
+        cy.visit('/ProjectAdministrator/projects/proj1/subjects/subj1/skills/skill3');
         cy.get('[data-cy="selfReportMediaCard"] [data-cy="mediaInfoCardTitle"]').contains('Self Report: Disabled');
         cy.get('[data-cy="selfReportMediaCard"] [data-cy="mediaInfoCardSubTitle"]').contains('Self reporting is disabled for this skill');
     });
@@ -266,7 +266,7 @@ describe('Self Report Skills Management Tests', () => {
         cy.reportSkill(1, 3, 'user1Good@skills.org', '2020-09-17 11:00')
         cy.reportSkill(1, 1, 'user0Good@skills.org', '2020-09-18 11:00')
 
-        cy.visit('/projects/proj1/self-report');
+        cy.visit('/ProjectAdministrator/projects/proj1/self-report');
 
         const tableSelector = '[data-cy="skillsReportApprovalTable"]';
         const expected = [
@@ -303,7 +303,7 @@ describe('Self Report Skills Management Tests', () => {
         cy.reportSkill(1, 3, 'user1Good@skills.org', '2020-09-17 11:00')
         cy.reportSkill(1, 1, 'user0Good@skills.org', '2020-09-18 11:00')
 
-        cy.visit('/projects/proj1/self-report');
+        cy.visit('/ProjectAdministrator/projects/proj1/self-report');
         const rowSelector = '[data-cy="skillsReportApprovalTable"] tbody tr';
         cy.get(rowSelector).should('have.length', 5)
 
@@ -319,7 +319,7 @@ describe('Self Report Skills Management Tests', () => {
         cy.reportSkill(1, 3, 'user1', '2020-09-17 11:00')
         cy.reportSkill(1, 1, 'user0', '2020-09-18 11:00')
 
-        cy.visit('/projects/proj1/self-report');
+        cy.visit('/ProjectAdministrator/projects/proj1/self-report');
 
         const tableSelector = '[data-cy="skillsReportApprovalTable"]';
         cy.validateTable(tableSelector, [
@@ -340,7 +340,7 @@ describe('Self Report Skills Management Tests', () => {
             [{ colIndex: 0,  value: 'user2' }],
         ]);
 
-        cy.visit('/projects/proj1/users/user1/skillEvents');
+        cy.visit('/ProjectAdministrator/projects/proj1/users/user1/skillEvents');
         cy.validateTable('[data-cy="performedSkillsTable"]', [
             [{ colIndex: 0,  value: 'skill3' }],
         ]);
@@ -358,7 +358,7 @@ describe('Self Report Skills Management Tests', () => {
         cy.reportSkill(1, 3, 'user1', '2020-09-17 11:00')
         cy.reportSkill(1, 1, 'user0', '2020-09-18 11:00')
 
-        cy.visit('/projects/proj1/self-report');
+        cy.visit('/ProjectAdministrator/projects/proj1/self-report');
 
         const tableSelector = '[data-cy="skillsReportApprovalTable"]';
         cy.validateTable(tableSelector, [
@@ -385,7 +385,7 @@ describe('Self Report Skills Management Tests', () => {
             [{ colIndex: 0,  value: 'user2' }],
         ]);
 
-        cy.visit('/projects/proj1/users/user1/skillEvents');
+        cy.visit('/ProjectAdministrator/projects/proj1/users/user1/skillEvents');
         cy.get('[data-cy="performedSkillsTable"] tbody tr').should('have.length', 0)
     });
 
@@ -402,7 +402,7 @@ describe('Self Report Skills Management Tests', () => {
         cy.reportSkill(1, 3, 'user1', '2020-09-17 11:00')
         cy.reportSkill(1, 1, 'user0', '2020-09-18 11:00')
 
-        cy.visit('/projects/proj1/self-report');
+        cy.visit('/ProjectAdministrator/projects/proj1/self-report');
 
         cy.get('[data-cy="approvalSelect_user1-skill3"]').click({force: true});
         cy.get('[data-cy="rejectBtn"]').click();
@@ -452,7 +452,7 @@ describe('Self Report Skills Management Tests', () => {
         cy.reportSkill(1, 3, 'user1', '2020-09-17 11:00')
         cy.reportSkill(1, 1, 'user0', '2020-09-18 11:00')
 
-        cy.visit('/projects/proj1/self-report');
+        cy.visit('/ProjectAdministrator/projects/proj1/self-report');
 
         cy.get('[data-cy="selectPageOfApprovalsBtn"]').click();
         cy.get('[data-cy="approveBtn"]').click();
@@ -467,7 +467,7 @@ describe('Self Report Skills Management Tests', () => {
         cy.get('[data-cy="approveBtn"]').should('be.disabled');
         cy.get('[data-cy="rejectBtn"]').should('be.disabled');
 
-        cy.visit('/projects/proj1/users');
+        cy.visit('/ProjectAdministrator/projects/proj1/users');
         cy.validateTable('[data-cy="usersTable"]',  [
             [{ colIndex: 0,  value: 'user0' }, { colIndex: 1,  value: '100' }],
             [{ colIndex: 0,  value: 'user1' }, { colIndex: 1,  value: '100' }],
@@ -494,7 +494,7 @@ describe('Self Report Skills Management Tests', () => {
         cy.reportSkill(1, 3, 'user1', '2020-09-17 11:00')
         cy.reportSkill(1, 1, 'user0', '2020-09-18 11:00')
 
-        cy.visit('/projects/proj1/self-report');
+        cy.visit('/ProjectAdministrator/projects/proj1/self-report');
 
         cy.get('[data-cy="selectPageOfApprovalsBtn"]').click();
 
@@ -513,7 +513,7 @@ describe('Self Report Skills Management Tests', () => {
         cy.get('[data-cy="approveBtn"]').should('be.disabled');
         cy.get('[data-cy="rejectBtn"]').should('be.disabled');
 
-        cy.visit('/projects/proj1/users');
+        cy.visit('/ProjectAdministrator/projects/proj1/users');
         cy.get('[data-cy="usersTable"] tbody tr').should('have.length', 0)
     });
 
@@ -525,7 +525,7 @@ describe('Self Report Skills Management Tests', () => {
         cy.reportSkill(1, 2, 'user5', '2020-09-12 11:00');
         cy.reportSkill(1, 2, 'user4', '2020-09-13 11:00');
 
-        cy.visit('/projects/proj1/self-report');
+        cy.visit('/ProjectAdministrator/projects/proj1/self-report');
 
         cy.get('[data-cy="selectPageOfApprovalsBtn"]').click();
         cy.get('[data-cy="approveBtn"]').should('be.enabled');
@@ -542,7 +542,7 @@ describe('Self Report Skills Management Tests', () => {
         cy.createSkill(1, 1, 3, { selfReportType: 'Approval' });
         cy.reportSkill(1, 2, 'user1', '2020-09-12 11:00');
 
-        cy.visit('/projects/proj1/self-report');
+        cy.visit('/ProjectAdministrator/projects/proj1/self-report');
 
         const tableSelector = '[data-cy="skillsReportApprovalTable"]';
         cy.validateTable(tableSelector, [
@@ -566,7 +566,7 @@ describe('Self Report Skills Management Tests', () => {
         cy.createSkill(1, 1, 5, { selfReportType: 'HonorSystem' });
         cy.createSkill(1, 1, 6);
 
-        cy.visit('/projects/proj1/self-report');
+        cy.visit('/ProjectAdministrator/projects/proj1/self-report');
 
         cy.get('[data-cy="selfReportInfoCardCount_Disabled"]').contains('1');
         cy.get('[data-cy="selfReportInfoCardCount_Approval"]').contains('3');
@@ -578,7 +578,7 @@ describe('Self Report Skills Management Tests', () => {
         cy.createSkill(1, 1, 5, { selfReportType: 'HonorSystem' });
         cy.createSkill(1, 1, 6);
 
-        cy.visit('/projects/proj1/self-report');
+        cy.visit('/ProjectAdministrator/projects/proj1/self-report');
 
         cy.get('[data-cy="selfReportInfoCardCount_Disabled"]').contains('1');
         cy.get('[data-cy="selfReportInfoCardCount_Approval"]').contains('0');

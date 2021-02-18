@@ -27,7 +27,7 @@ describe('Projects Tests', () => {
 
     cy.intercept('POST', '/app/projects/MyNewtestProject').as('postNewProject');
 
-    cy.visit('/');
+    cy.visit('/ProjectAdministrator/');
     cy.wait('@loadUserInfo');
     cy.wait('@loadProjects');
 
@@ -48,7 +48,7 @@ describe('Projects Tests', () => {
 
     cy.intercept('POST', '/app/projects/MyNewtestProject').as('postNewProject');
 
-    cy.visit('/');
+    cy.visit('/ProjectAdministrator/');
     cy.wait('@loadUserInfo');
     cy.wait('@loadProjects');
 
@@ -68,7 +68,7 @@ describe('Projects Tests', () => {
 
     cy.intercept('POST', '/app/projects/MyNewtestProject').as('postNewProject');
 
-    cy.visit('/');
+    cy.visit('/ProjectAdministrator/');
     cy.wait('@loadUserInfo');
     cy.wait('@loadProjects');
 
@@ -85,7 +85,7 @@ describe('Projects Tests', () => {
     cy.intercept('GET', '/app/projects').as('loadProjects');
     cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
 
-    cy.visit('/');
+    cy.visit('/ProjectAdministrator/');
     cy.wait('@loadUserInfo');
     cy.wait('@loadProjects');
 
@@ -104,7 +104,7 @@ describe('Projects Tests', () => {
     cy.intercept('GET', '/app/projects').as('loadProjects');
     cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
 
-    cy.visit('/');
+    cy.visit('/ProjectAdministrator/');
     cy.wait('@loadUserInfo');
     cy.wait('@loadProjects');
     cy.clickButton('Project');
@@ -125,7 +125,7 @@ describe('Projects Tests', () => {
     cy.intercept('GET', '/app/projects').as('loadProjects');
     cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
 
-    cy.visit('/');
+    cy.visit('/ProjectAdministrator/');
     cy.wait('@loadUserInfo');
     cy.wait('@loadProjects');
     cy.clickButton('Project');
@@ -149,7 +149,7 @@ describe('Projects Tests', () => {
     cy.intercept('GET', '/app/projects').as('loadProjects');
     cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
 
-    cy.visit('/');
+    cy.visit('/ProjectAdministrator/');
     cy.wait('@loadUserInfo');
     cy.wait('@loadProjects');
     cy.clickButton('Project');
@@ -171,7 +171,7 @@ describe('Projects Tests', () => {
     cy.intercept('GET', '/app/projects').as('loadProjects');
     cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
 
-    cy.visit('/');
+    cy.visit('/ProjectAdministrator/');
     cy.wait('@loadUserInfo');
     cy.wait('@loadProjects');
 
@@ -193,7 +193,7 @@ describe('Projects Tests', () => {
     cy.intercept('GET', '/app/projects').as('loadProjects');
     cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
 
-    cy.visit('/');
+    cy.visit('/ProjectAdministrator/');
     cy.wait('@loadUserInfo');
     cy.wait('@loadProjects');
     cy.clickButton('Project');
@@ -207,7 +207,7 @@ describe('Projects Tests', () => {
     cy.intercept('GET', '/app/projects').as('loadProjects');
     cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
 
-    cy.visit('/');
+    cy.visit('/ProjectAdministrator/');
     cy.wait('@loadUserInfo');
     cy.wait('@loadProjects');
     cy.clickButton('Project');;
@@ -227,7 +227,7 @@ describe('Projects Tests', () => {
     cy.intercept('GET', '/app/projects').as('loadProjects');
     cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
 
-    cy.visit('/');
+    cy.visit('/ProjectAdministrator/');
     cy.wait('@loadUserInfo');
     cy.wait('@loadProjects');
 
@@ -268,7 +268,7 @@ describe('Projects Tests', () => {
     cy.intercept('GET', '/app/projects').as('loadProjects');
     cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
 
-    cy.visit('/');
+    cy.visit('/ProjectAdministrator/');
     cy.wait('@loadUserInfo');
     cy.wait('@loadProjects');
     cy.clickButton('Project');;
@@ -322,7 +322,7 @@ describe('Projects Tests', () => {
     cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
     cy.intercept('GET', '/admin/projects/proj1').as('loadProject');
 
-    cy.visit('/projects/proj1/access');
+    cy.visit('/ProjectAdministrator/projects/proj1/access');
     cy.wait('@loadUserInfo');
     cy.wait('@loadProject');
 
@@ -358,7 +358,7 @@ describe('Projects Tests', () => {
     cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
     cy.intercept('GET', '/admin/projects/proj1').as('loadProject');
 
-    cy.visit('/projects/proj1/access');
+    cy.visit('/ProjectAdministrator/projects/proj1/access');
     cy.wait('@loadUserInfo');
     cy.wait('@loadProject');
 
@@ -382,7 +382,7 @@ describe('Projects Tests', () => {
     cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
     cy.intercept('GET', '/admin/projects/proj1').as('loadProject');
 
-    cy.visit('/projects/proj1/access');
+    cy.visit('/ProjectAdministrator/projects/proj1/access');
     cy.wait('@loadUserInfo');
     cy.wait('@loadProject');
 
@@ -412,7 +412,7 @@ describe('Projects Tests', () => {
     cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
     cy.intercept('GET', '/admin/projects/proj1').as('loadProject');
 
-    cy.visit('/projects/proj1/access');
+    cy.visit('/ProjectAdministrator/projects/proj1/access');
     cy.wait('@loadUserInfo');
     cy.wait('@loadProject');
 
@@ -451,7 +451,7 @@ describe('Projects Tests', () => {
     cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
     cy.intercept('GET', '/admin/projects/proj1').as('loadProject');
 
-    cy.visit('/projects/proj1/access');
+    cy.visit('/ProjectAdministrator/projects/proj1/access');
     cy.wait('@loadUserInfo');
     cy.wait('@loadProject');
 
@@ -460,7 +460,7 @@ describe('Projects Tests', () => {
   });
 
   it('focus should be returned to new project button', ()=> {
-    cy.visit("/");
+    cy.visit('/ProjectAdministrator');
     cy.get('[data-cy=newProjectButton]').click();
     cy.get('body').type('{esc}');
     cy.get('[data-cy=newProjectButton]').should('have.focus');
@@ -488,7 +488,7 @@ describe('Projects Tests', () => {
       projectId: 'proj2',
       name: "proj2"
     });
-    cy.visit('/');
+    cy.visit('/ProjectAdministrator/');
     cy.get('[data-cy="projOptions_proj1"]').click();
     cy.get('[data-cy="projOptions_proj1"] [data-cy=editMenuEditBtn]').click();
     cy.get('[data-cy=projectName]').should('be.visible');
@@ -548,7 +548,7 @@ describe('Projects Tests', () => {
       name: "My New test Project"
     })
 
-    cy.visit('/projects/MyNewtestProject/');
+    cy.visit('/ProjectAdministrator/projects/MyNewtestProject/');
     cy.wait('@loadProject');
 
     cy.contains('Levels').click();
@@ -624,7 +624,7 @@ describe('Projects Tests', () => {
     cy.intercept('GET', '/admin/projects/proj1').as('loadProject');
     cy.intercept('GET', '/admin/projects/proj1/userRoles').as('loadUserRoles');
 
-    cy.visit('/projects/proj1/access');
+    cy.visit('/ProjectAdministrator/projects/proj1/access');
     cy.wait('@loadConfig');
     cy.wait('@loadUserInfo');
     cy.wait('@loadProject');
@@ -655,7 +655,7 @@ describe('Projects Tests', () => {
     cy.intercept('GET', '/admin/projects/proj1').as('loadProject');
     cy.intercept('GET', '/admin/projects/proj1/userRoles').as('loadUserRoles');
 
-    cy.visit('/projects/proj1/access');
+    cy.visit('/ProjectAdministrator/projects/proj1/access');
     cy.wait('@loadConfig');
     cy.wait('@loadUserInfo');
     cy.wait('@loadProject');

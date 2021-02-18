@@ -29,7 +29,7 @@ describe('Skills Table Tests', () => {
     });
 
     it('create first skill then remove it', () => {
-        cy.visit('/projects/proj1/subjects/subj1');
+        cy.visit('/ProjectAdministrator/projects/proj1/subjects/subj1');
         cy.contains('No Skills Yet');
 
         const skillName = 'This is a Skill'
@@ -62,7 +62,7 @@ describe('Skills Table Tests', () => {
             });
         };
 
-        cy.visit('/projects/proj1/subjects/subj1');
+        cy.visit('/ProjectAdministrator/projects/proj1/subjects/subj1');
 
         // force the order
         cy.contains('Display Order').click();
@@ -103,7 +103,7 @@ describe('Skills Table Tests', () => {
             });
         };
 
-        cy.visit('/projects/proj1/subjects/subj1');
+        cy.visit('/ProjectAdministrator/projects/proj1/subjects/subj1');
 
         // test skill name sorting
         cy.get(`${tableSelector} th`).contains('Skill').click();
@@ -138,7 +138,7 @@ describe('Skills Table Tests', () => {
             cy.wait(1001);
         };
 
-        cy.visit('/projects/proj1/subjects/subj1');
+        cy.visit('/ProjectAdministrator/projects/proj1/subjects/subj1');
 
         // test created column
         cy.get(`${tableSelector} th`).contains('Created').click();
@@ -166,7 +166,7 @@ describe('Skills Table Tests', () => {
             });
         };
 
-        cy.visit('/projects/proj1/subjects/subj1');
+        cy.visit('/ProjectAdministrator/projects/proj1/subjects/subj1');
 
         // test points column
         cy.get('[data-cy="skillsTable-additionalColumns"]').contains('Points').click();
@@ -221,7 +221,7 @@ describe('Skills Table Tests', () => {
             });
         };
 
-        cy.visit('/projects/proj1/subjects/subj1');
+        cy.visit('/ProjectAdministrator/projects/proj1/subjects/subj1');
 
         // test points column
         cy.get('[data-cy="skillsTable-additionalColumns"]').contains('Time Window').click();
@@ -242,7 +242,7 @@ describe('Skills Table Tests', () => {
         cy.createSkill(1, 1, 4, { selfReportType: 'Approval' });
         cy.createSkill(1, 1, 5, { selfReportType: 'Approval' });
 
-        cy.visit('/projects/proj1/subjects/subj1');
+        cy.visit('/ProjectAdministrator/projects/proj1/subjects/subj1');
 
         cy.get('[data-cy="skillsTable-additionalColumns"]').contains('Self Report').click();
         cy.get(`${tableSelector} th`).contains('Self Report Type').click();
@@ -271,7 +271,7 @@ describe('Skills Table Tests', () => {
             });
         };
 
-        cy.visit('/projects/proj1/subjects/subj1');
+        cy.visit('/ProjectAdministrator/projects/proj1/subjects/subj1');
 
         // sort is enabled when sorted by display order column
         cy.get('[data-cy="orderMoveUp_skill1"]').should('be.disabled');
@@ -340,7 +340,7 @@ describe('Skills Table Tests', () => {
             });
         };
 
-        cy.visit('/projects/proj1/subjects/subj1');
+        cy.visit('/ProjectAdministrator/projects/proj1/subjects/subj1');
 
         cy.get(`${tableSelector} th`).contains('Display Order').click();
         cy.get('[data-cy="orderMoveDown_skill10"]').click();
@@ -376,7 +376,7 @@ describe('Skills Table Tests', () => {
             });
         };
 
-        cy.visit('/projects/proj1/subjects/subj1');
+        cy.visit('/ProjectAdministrator/projects/proj1/subjects/subj1');
 
         cy.get(`${tableSelector} th`).contains('Display Order').click();
 
@@ -440,7 +440,7 @@ describe('Skills Table Tests', () => {
             });
         };
 
-        cy.visit('/projects/proj1/subjects/subj1');
+        cy.visit('/ProjectAdministrator/projects/proj1/subjects/subj1');
         cy.get('[data-cy="expandDetailsBtn_skill2"]').click();
         cy.get('[data-cy="childRowDisplay_skill2"]').contains('Minimum Time Window between occurrences');
         cy.get('[data-cy="childRowDisplay_skill2"]').contains('300 Points');
@@ -471,13 +471,13 @@ describe('Skills Table Tests', () => {
                 version: skillsCounter,
             });
         };
-        cy.visit('/projects/proj1/subjects/subj1');
+        cy.visit('/ProjectAdministrator/projects/proj1/subjects/subj1');
         cy.get('[data-cy=manageSkillBtn_skill2]').click();
         cy.contains('ID: skill2');
         cy.contains('Overview');
         cy.contains('300 Points');
 
-        cy.visit('/projects/proj1/subjects/subj1');
+        cy.visit('/ProjectAdministrator/projects/proj1/subjects/subj1');
         cy.get('[data-cy=manageSkillLink_skill3]').click();
         cy.contains('ID: skill3');
         cy.contains('Overview');

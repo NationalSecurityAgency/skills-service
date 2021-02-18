@@ -57,7 +57,7 @@ describe('Password Reset Tests', () => {
 
   it('reset password', () => {
     cy.register("test@skills.org", "apassword", false);
-    cy.visit('/');
+    cy.visit('/ProjectAdministrator/');
     cy.get('[data-cy=forgotPassword]').click();
     cy.get('[data-cy=forgotPasswordEmail]').should('exist');
     cy.get('[data-cy=forgotPasswordEmail]').type('test@skills.org');
@@ -91,7 +91,7 @@ describe('Password Reset Tests', () => {
 
   it('reset password - wrong user', () => {
     cy.register("test@skills.org", "apassword", false);
-    cy.visit('/');
+    cy.visit('/ProjectAdministrator/');
     cy.get('[data-cy=forgotPassword]').click();
     cy.get('[data-cy=forgotPasswordEmail]').should('exist');
     cy.get('[data-cy=forgotPasswordEmail]').type('test@skills.org');
@@ -115,7 +115,7 @@ describe('Password Reset Tests', () => {
 
   it('reset password - password confirmation mismatch', () => {
     cy.register("test@skills.org", "apassword", false);
-    cy.visit('/');
+    cy.visit('/ProjectAdministrator/');
     cy.get('[data-cy=forgotPassword]').click();
     cy.get('[data-cy=forgotPasswordEmail]').should('exist');
     cy.get('[data-cy=forgotPasswordEmail]').type('test@skills.org');
@@ -135,7 +135,7 @@ describe('Password Reset Tests', () => {
 
   it('reset password - user does not exist', () => {
     cy.register("test@skills.org", "apassword", false);
-    cy.visit('/');
+    cy.visit('/ProjectAdministrator/');
     cy.get('[data-cy=forgotPassword]').click();
     cy.get('[data-cy=forgotPasswordEmail]').should('exist');
     cy.get('[data-cy=forgotPasswordEmail]').type('fake@skills.org');
@@ -145,7 +145,7 @@ describe('Password Reset Tests', () => {
 
   it('cannot use reset link twice', () => {
     cy.register("test@skills.org", "apassword", false);
-    cy.visit('/');
+    cy.visit('/ProjectAdministrator/');
     cy.get('[data-cy=forgotPassword]').click();
     cy.get('[data-cy=forgotPasswordEmail]').should('exist');
     cy.get('[data-cy=forgotPasswordEmail]').type('test@skills.org');
@@ -191,7 +191,7 @@ describe('Password Reset Tests', () => {
     });
     cy.logout();
     cy.intercept('GET', '/public/isFeatureSupported?feature=passwordreset').as('isEnabled');
-    cy.visit('/');
+    cy.visit('/ProjectAdministrator/');
     cy.get('[data-cy=forgotPassword]').click();
     cy.wait('@isEnabled');
     cy.get('[data-cy=resetNotSupported]').should('be.visible');

@@ -34,7 +34,7 @@ describe('App Features Tests', () => {
                 'skills-client-lib-version': dateFormatter(new Date())
             },
         }).as('getSubjects');
-        cy.visit('/');
+        cy.visit('/ProjectAdministrator/');
        /* cy.injectAxe();
         cy.violationLoggingFunction().then((loggingFunc) => {
             cy.checkA11y(null, null, loggingFunc);
@@ -60,7 +60,7 @@ describe('App Features Tests', () => {
                 'skills-client-lib-version': dateFormatter(new Date() - 1000 * 60 * 60 * 24 * 30)
             },
         }).as('getSubjects');
-        cy.visit('/');
+        cy.visit('/ProjectAdministrator/');
         cy.get('[data-cy=subPageHeader]').contains('Projects');
         cy.get('[data-cy=projectCard]').last().contains('Manage').click()
             cy.wait('@getSubjects')
@@ -82,7 +82,7 @@ describe('App Features Tests', () => {
             body: {errorCode: 'NotAuthorized', explanation: 'Not authorized to view this resource'}
         }).as('loadSubject');
 
-        cy.visit('/projects/proj1/subjects/subj1');
+        cy.visit('/ProjectAdministrator/projects/proj1/subjects/subj1');
         /*cy.injectAxe();*/
         cy.wait('@loadSubject');
         cy.url().should('include', '/not-authorized');

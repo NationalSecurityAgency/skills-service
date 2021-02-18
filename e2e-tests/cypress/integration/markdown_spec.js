@@ -36,7 +36,7 @@ describe('Markdown Tests', () => {
     });
 
     it('markdown features', () => {
-        cy.visit('/projects/proj1/');
+        cy.visit('/ProjectAdministrator/projects/proj1/');
 
         const markdownInput = '[data-cy=markdownEditorInput]';
         cy.get('[data-cy=cardSettingsButton]').click();
@@ -152,7 +152,7 @@ describe('Markdown Tests', () => {
             description: markdown
         });
         cy.intercept('GET', '/api/projects/Inception/level').as('inceptionLevel');
-        cy.visit('/projects/proj1/subjects/subj1/skills/skill1');
+        cy.visit('/ProjectAdministrator/projects/proj1/subjects/subj1/skills/skill1');
 
         cy.contains('Description');
         cy.wait('@inceptionLevel');
@@ -161,7 +161,7 @@ describe('Markdown Tests', () => {
         cy.contains('⭐ ⭐ ⭐ ⭐');
         cy.matchImageSnapshot('Markdown-SkillsPage-Overview', snapshotOptions);
 
-        cy.visit('/projects/proj1/subjects/subj1');
+        cy.visit('/ProjectAdministrator/projects/proj1/subjects/subj1');
         cy.wait('@inceptionLevel');
         cy.contains('Level');
         const selectorSkillsRowToggle = '[data-cy="expandDetailsBtn_skill1"]';
