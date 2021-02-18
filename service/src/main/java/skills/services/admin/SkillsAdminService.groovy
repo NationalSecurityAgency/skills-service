@@ -132,7 +132,7 @@ class SkillsAdminService {
         final int totalPointsRequested = skillRequest.pointIncrement * skillRequest.numPerformToCompletion
         final int incrementRequested = skillRequest.pointIncrement
         final int currentOccurrences = isEdit ? (skillDefinition.totalPoints / skillDefinition.pointIncrement) : -1
-        final SelfReportingType selfReportingType =  skillRequest.selfReportType ? SkillDef.SelfReportingType.valueOf(skillRequest.selfReportType) : null;
+        final SelfReportingType selfReportingType =  skillRequest.selfReportingType ? SkillDef.SelfReportingType.valueOf(skillRequest.selfReportingType) : null;
 
         SkillDef subject = null
         if (isEdit) {

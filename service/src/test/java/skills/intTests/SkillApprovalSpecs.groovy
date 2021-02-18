@@ -43,7 +43,7 @@ class SkillApprovalSpecs extends DefaultIntSpec {
         def skills = SkillsFactory.createSkills(1,)
         skills[0].pointIncrement = 200
         skills[0].numPerformToCompletion = 200
-        skills[0].selfReportType = SkillDef.SelfReportingType.Approval
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
 
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
@@ -95,7 +95,7 @@ class SkillApprovalSpecs extends DefaultIntSpec {
         def skills = SkillsFactory.createSkills(1,)
         skills[0].pointIncrement = 200
         skills[0].numPerformToCompletion = 200
-        skills[0].selfReportType = SkillDef.SelfReportingType.Approval
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
 
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
@@ -143,7 +143,7 @@ class SkillApprovalSpecs extends DefaultIntSpec {
         def subj = SkillsFactory.createSubject()
         def skills = SkillsFactory.createSkills(1,)
         skills[0].pointIncrement = 200
-        skills[0].selfReportType = SkillDef.SelfReportingType.Approval
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
 
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
@@ -185,7 +185,7 @@ class SkillApprovalSpecs extends DefaultIntSpec {
         def skills = SkillsFactory.createSkills(1,)
         skills[0].pointIncrement = 200
         skills[0].numPerformToCompletion = 200
-        skills[0].selfReportType = SkillDef.SelfReportingType.Approval
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
 
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
@@ -196,7 +196,7 @@ class SkillApprovalSpecs extends DefaultIntSpec {
         def skills1 = SkillsFactory.createSkills(2,2)
         skills1[1].pointIncrement = 200
         skills1[1].numPerformToCompletion = 200
-        skills1[1].selfReportType = SkillDef.SelfReportingType.Approval
+        skills1[1].selfReportingType = SkillDef.SelfReportingType.Approval
 
         skillsService.createProject(proj1)
         skillsService.createSubject(subj1)
@@ -253,7 +253,7 @@ class SkillApprovalSpecs extends DefaultIntSpec {
         def subj = SkillsFactory.createSubject()
         def skills = SkillsFactory.createSkills(1,)
         skills[0].pointIncrement = 200
-        skills[0].selfReportType = SkillDef.SelfReportingType.Approval
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
 
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
@@ -286,7 +286,7 @@ class SkillApprovalSpecs extends DefaultIntSpec {
         def subj = SkillsFactory.createSubject()
         def skills = SkillsFactory.createSkills(1,)
         skills[0].pointIncrement = 200
-        skills[0].selfReportType = SkillDef.SelfReportingType.Approval
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
 
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
@@ -318,7 +318,7 @@ class SkillApprovalSpecs extends DefaultIntSpec {
         def subj = SkillsFactory.createSubject()
         def skills = SkillsFactory.createSkills(1,)
         skills[0].pointIncrement = 200
-        skills[0].selfReportType = SkillDef.SelfReportingType.Approval
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
 
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
@@ -343,7 +343,7 @@ class SkillApprovalSpecs extends DefaultIntSpec {
         def subj = SkillsFactory.createSubject()
         def skills = SkillsFactory.createSkills(1,)
         skills[0].pointIncrement = 200
-        skills[0].selfReportType = SkillDef.SelfReportingType.Approval
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
 
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
@@ -386,11 +386,11 @@ class SkillApprovalSpecs extends DefaultIntSpec {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
         def skills = SkillsFactory.createSkills(10,)
-        skills[0].selfReportType = SkillDef.SelfReportingType.Approval
-        skills[1].selfReportType = SkillDef.SelfReportingType.Approval
-        skills[2].selfReportType = SkillDef.SelfReportingType.HonorSystem
-        skills[3].selfReportType = SkillDef.SelfReportingType.HonorSystem
-        skills[4].selfReportType = SkillDef.SelfReportingType.HonorSystem
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
+        skills[1].selfReportingType = SkillDef.SelfReportingType.Approval
+        skills[2].selfReportingType = SkillDef.SelfReportingType.HonorSystem
+        skills[3].selfReportingType = SkillDef.SelfReportingType.HonorSystem
+        skills[4].selfReportingType = SkillDef.SelfReportingType.HonorSystem
 
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
@@ -412,7 +412,7 @@ class SkillApprovalSpecs extends DefaultIntSpec {
         def skills = SkillsFactory.createSkills(5,)
         skills.each {
             it.pointIncrement = 200
-            it.selfReportType = SkillDef.SelfReportingType.Approval
+            it.selfReportingType = SkillDef.SelfReportingType.Approval
         }
 
         skillsService.createProject(proj)
@@ -424,7 +424,7 @@ class SkillApprovalSpecs extends DefaultIntSpec {
         def skills1 = SkillsFactory.createSkills(3,2)
         skills1.each {
             it.pointIncrement = 200
-            it.selfReportType = SkillDef.SelfReportingType.Approval
+            it.selfReportingType = SkillDef.SelfReportingType.Approval
         }
 
         skillsService.createProject(proj1)
@@ -457,7 +457,7 @@ class SkillApprovalSpecs extends DefaultIntSpec {
         List<String> approvalBefore = getIds(skillApprovalRepo.findAll())
         List<String> performedBefore = userPerformedSkillRepo.findAll().collect { it.id }
 
-        skills[1].selfReportType = null
+        skills[1].selfReportingType = null
         skillsService.createSkills([skills[1]])
         List<String> approvalAfter1Delete = getIds(skillApprovalRepo.findAll())
         List<String> performedAfter = userPerformedSkillRepo.findAll().collect { it.id }
@@ -503,7 +503,7 @@ class SkillApprovalSpecs extends DefaultIntSpec {
         def skills = SkillsFactory.createSkills(5,)
         skills.each {
             it.pointIncrement = 200
-            it.selfReportType = SkillDef.SelfReportingType.Approval
+            it.selfReportingType = SkillDef.SelfReportingType.Approval
         }
 
         skillsService.createProject(proj)
@@ -515,7 +515,7 @@ class SkillApprovalSpecs extends DefaultIntSpec {
         def skills1 = SkillsFactory.createSkills(3,2)
         skills1.each {
             it.pointIncrement = 200
-            it.selfReportType = SkillDef.SelfReportingType.Approval
+            it.selfReportingType = SkillDef.SelfReportingType.Approval
         }
 
         skillsService.createProject(proj1)
@@ -593,7 +593,7 @@ class SkillApprovalSpecs extends DefaultIntSpec {
         def skills = SkillsFactory.createSkills(5,)
         skills.each {
             it.pointIncrement = 200
-            it.selfReportType = SkillDef.SelfReportingType.Approval
+            it.selfReportingType = SkillDef.SelfReportingType.Approval
         }
 
         skillsService.createProject(proj)
@@ -605,7 +605,7 @@ class SkillApprovalSpecs extends DefaultIntSpec {
         def skills1 = SkillsFactory.createSkills(3,2)
         skills1.each {
             it.pointIncrement = 200
-            it.selfReportType = SkillDef.SelfReportingType.Approval
+            it.selfReportingType = SkillDef.SelfReportingType.Approval
         }
 
         skillsService.createProject(proj1)
@@ -637,7 +637,7 @@ class SkillApprovalSpecs extends DefaultIntSpec {
         List<String> approvalBefore = getIds(skillApprovalRepo.findAll())
         List<String> performedBefore = userPerformedSkillRepo.findAll().collect { "${it.projectId}-${it.skillId}_${it.userId}" }
 
-        skills[1].selfReportType = SkillDef.SelfReportingType.HonorSystem
+        skills[1].selfReportingType = SkillDef.SelfReportingType.HonorSystem
         skillsService.createSkills([skills[1]])
         List<String> approvalAfter1Delete = getIds(skillApprovalRepo.findAll())
         List<UserPerformedSkill> performedAfter = userPerformedSkillRepo.findAll().collect { "${it.projectId}-${it.skillId}_${it.userId}" }
@@ -686,7 +686,7 @@ class SkillApprovalSpecs extends DefaultIntSpec {
         def skills = SkillsFactory.createSkills(5,)
         skills.each {
             it.pointIncrement = 200
-            it.selfReportType = SkillDef.SelfReportingType.Approval
+            it.selfReportingType = SkillDef.SelfReportingType.Approval
         }
 
         skillsService.createProject(proj)
@@ -720,7 +720,7 @@ class SkillApprovalSpecs extends DefaultIntSpec {
         List<String> approvalBefore = getIds(skillApprovalRepo.findAll())
         List<String> performedBefore = userPerformedSkillRepo.findAll().collect { "${it.projectId}-${it.skillId}_${it.userId}" }
 
-        skills[0].selfReportType = SkillDef.SelfReportingType.HonorSystem
+        skills[0].selfReportingType = SkillDef.SelfReportingType.HonorSystem
         skillsService.createSkills([skills[0]])
         List<String> approvalAfter1Delete = getIds(skillApprovalRepo.findAll())
         List<String> performedAfter = userPerformedSkillRepo.findAll().collect { "${it.projectId}-${it.skillId}_${it.userId}" }
@@ -755,10 +755,10 @@ class SkillApprovalSpecs extends DefaultIntSpec {
         def skills = SkillsFactory.createSkills(2,)
         skills[0].pointIncrement = 200
         skills[0].numPerformToCompletion = 200
-        skills[0].selfReportType = SkillDef.SelfReportingType.Approval
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
         skills[1].pointIncrement = 200
         skills[1].numPerformToCompletion = 200
-        skills[1].selfReportType = SkillDef.SelfReportingType.Approval
+        skills[1].selfReportingType = SkillDef.SelfReportingType.Approval
 
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
@@ -769,7 +769,7 @@ class SkillApprovalSpecs extends DefaultIntSpec {
         def skills1 = SkillsFactory.createSkills(2,2)
         skills1[1].pointIncrement = 200
         skills1[1].numPerformToCompletion = 200
-        skills1[1].selfReportType = SkillDef.SelfReportingType.Approval
+        skills1[1].selfReportingType = SkillDef.SelfReportingType.Approval
 
         skillsService.createProject(proj1)
         skillsService.createSubject(subj1)

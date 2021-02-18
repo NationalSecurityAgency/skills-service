@@ -36,4 +36,9 @@ export default {
     return axios.get(url)
       .then((response) => response.data);
   },
+  getSkillApprovalsStats(projectId, skillId) {
+    const url = `/admin/projects/${projectId}/skills/${skillId}/approvals/stats`;
+    return axios.get(url)
+      .then((response) => response.data);
+  },
 };

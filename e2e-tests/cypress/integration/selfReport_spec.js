@@ -27,6 +27,16 @@ describe('Self Report Skills Management Tests', () => {
             subjectId: 'subj1',
             name: "Subject 1"
         })
+
+        Cypress.Commands.add("rejectRequest", (requestNum=0, rejectionMsg='Skill was rejected') => {
+            cy.request('/admin/projects/proj1/approvals?limit=10&ascending=true&page=1&orderBy=userId')
+                .then((response) => {
+                    cy.request('POST', '/admin/projects/proj1/approvals/reject', {
+                        skillApprovalIds: [response.body.data[requestNum].id],
+                        rejectionMessage: rejectionMsg,
+                    });
+                });
+        });
     });
 
     it('manage self reporting settings at project level', () => {
@@ -211,6 +221,96 @@ describe('Self Report Skills Management Tests', () => {
         cy.get('[data-cy="selfReportTypeSelector"] [value="HonorSystem"]').should('not.be.checked');
     });
 
+
+    it('edit skills - approval -> warnings', () => {
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Approval', name: 'Approval 1' });
+        cy.createSkill(1, 1, 2, { selfReportingType: 'Approval', name: 'Approval 2' });
+        cy.createSkill(1, 1, 3, { selfReportingType: 'Approval', name: 'Approval 3' });
+        cy.createSkill(1, 1, 4, { selfReportingType: 'HonorSystem', name: 'Honor System 1' });
+        cy.createSkill(1, 1, 5, { name: 'Disabled 1'});
+        cy.reportSkill(1, 1, 'user6Good@skills.org', '2020-09-12 11:00')
+        cy.reportSkill(1, 1, 'user5Good@skills.org', '2020-09-13 11:00')
+        cy.reportSkill(1, 1, 'user4Good@skills.org', '2020-09-14 11:00')
+        cy.reportSkill(1, 1, 'user3Good@skills.org', '2020-09-15 11:00')
+        cy.rejectRequest(3)
+
+        cy.visit('/projects/proj1/subjects/subj1');
+
+        // approval -> honor
+        cy.get('[data-cy="editSkillButton_skill1"]').click();
+        cy.get('[data-cy="selfReportingTypeWarning"]').should('not.exist')
+        cy.get('[data-cy="selfReportTypeSelector"] [value="HonorSystem"]').click({force: true});
+
+        cy.get('[data-cy="selfReportingTypeWarning"]').contains('Switching this skill to the Honor System will automatically:')
+        cy.get('[data-cy="selfReportingTypeWarning"]').contains('Approve 3 pending requests')
+        cy.get('[data-cy="selfReportingTypeWarning"]').contains('Remove 1 rejected request')
+
+        // honor -> disabled
+        cy.get('[data-cy="selfReportEnableCheckbox"]').uncheck({force: true})
+        cy.get('[data-cy="selfReportingTypeWarning"]').contains('Disabling Self Reporting will automatically:')
+        cy.get('[data-cy="selfReportingTypeWarning"]').contains('Remove 3 pending requests')
+        cy.get('[data-cy="selfReportingTypeWarning"]').contains('Remove 1 rejected request')
+
+        // disabled -> honor
+        cy.get('[data-cy="selfReportEnableCheckbox"]').check({force: true})
+        cy.get('[data-cy="selfReportingTypeWarning"]').contains('Switching this skill to the Honor System will automatically:')
+        cy.get('[data-cy="selfReportingTypeWarning"]').contains('Approve 3 pending requests')
+        cy.get('[data-cy="selfReportingTypeWarning"]').contains('Remove 1 rejected request')
+
+        // honor -> approval
+        cy.get('[data-cy="selfReportTypeSelector"] [value="Approval"]').click({force: true});
+        cy.get('[data-cy="selfReportingTypeWarning"]').should('not.exist')
+
+        // approval -> disable
+        cy.get('[data-cy="selfReportEnableCheckbox"]').uncheck({force: true})
+        cy.get('[data-cy="selfReportingTypeWarning"]').contains('Disabling Self Reporting will automatically:')
+        cy.get('[data-cy="selfReportingTypeWarning"]').contains('Remove 3 pending requests')
+        cy.get('[data-cy="selfReportingTypeWarning"]').contains('Remove 1 rejected request')
+
+        // disable -> approval
+        cy.get('[data-cy="selfReportEnableCheckbox"]').check({force: true})
+        cy.get('[data-cy="selfReportingTypeWarning"]').should('not.exist')
+    });
+
+    it('edit skills - approval -> no pending requests then no warning', () => {
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Approval', name: 'Approval 1' });
+        cy.createSkill(1, 1, 2, { selfReportingType: 'Approval', name: 'Approval 2' });
+        cy.createSkill(1, 1, 3, { selfReportingType: 'Approval', name: 'Approval 3' });
+        cy.createSkill(1, 1, 4, { selfReportingType: 'HonorSystem', name: 'Honor System 1' });
+        cy.createSkill(1, 1, 5, { name: 'Disabled 1'});
+        cy.reportSkill(1, 1, 'user6Good@skills.org', '2020-09-12 11:00')
+        cy.reportSkill(1, 1, 'user5Good@skills.org', '2020-09-13 11:00')
+        cy.reportSkill(1, 1, 'user4Good@skills.org', '2020-09-14 11:00')
+        cy.reportSkill(1, 1, 'user3Good@skills.org', '2020-09-15 11:00')
+        cy.rejectRequest(3)
+
+        cy.visit('/projects/proj1/subjects/subj1');
+
+        // approval -> honor
+        cy.get('[data-cy="editSkillButton_skill2"]').click();
+        cy.get('[data-cy="selfReportingTypeWarning"]').should('not.exist')
+
+        // honor -> disabled
+        cy.get('[data-cy="selfReportEnableCheckbox"]').uncheck({force: true})
+        cy.get('[data-cy="selfReportingTypeWarning"]').should('not.exist')
+
+        // disabled -> honor
+        cy.get('[data-cy="selfReportEnableCheckbox"]').check({force: true})
+        cy.get('[data-cy="selfReportingTypeWarning"]').should('not.exist')
+
+        // honor -> approval
+        cy.get('[data-cy="selfReportTypeSelector"] [value="Approval"]').click({force: true});
+        cy.get('[data-cy="selfReportingTypeWarning"]').should('not.exist')
+
+        // approval -> disable
+        cy.get('[data-cy="selfReportEnableCheckbox"]').uncheck({force: true})
+        cy.get('[data-cy="selfReportingTypeWarning"]').should('not.exist')
+
+        // disable -> approval
+        cy.get('[data-cy="selfReportEnableCheckbox"]').check({force: true})
+        cy.get('[data-cy="selfReportingTypeWarning"]').should('not.exist')
+    });
+
     it('skill overview - display self reporting card', () => {
         cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill1`, {
             projectId: 'proj1',
@@ -219,7 +319,7 @@ describe('Self Report Skills Management Tests', () => {
             name: `Very Great Skill # 1`,
             pointIncrement: '1500',
             numPerformToCompletion: '10',
-            selfReportType:	'Approval'
+            selfReportingType:	'Approval'
         });
 
         cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill2`, {
@@ -229,7 +329,7 @@ describe('Self Report Skills Management Tests', () => {
             name: `Very Great Skill # 2`,
             pointIncrement: '1500',
             numPerformToCompletion: '10',
-            selfReportType:	'HonorSystem'
+            selfReportingType:	'HonorSystem'
         });
 
         cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill3`, {
@@ -255,9 +355,9 @@ describe('Self Report Skills Management Tests', () => {
     });
 
     it('sorting and paging of the approval table', () => {
-        cy.createSkill(1, 1, 1, { selfReportType: 'Approval' });
-        cy.createSkill(1, 1, 2, { selfReportType: 'Approval' });
-        cy.createSkill(1, 1, 3, { selfReportType: 'Approval' });
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Approval' });
+        cy.createSkill(1, 1, 2, { selfReportingType: 'Approval' });
+        cy.createSkill(1, 1, 3, { selfReportingType: 'Approval' });
         cy.reportSkill(1, 1, 'user6Good@skills.org', '2020-09-12 11:00')
         cy.reportSkill(1, 2, 'user5Good@skills.org', '2020-09-13 11:00')
         cy.reportSkill(1, 3, 'user4Good@skills.org', '2020-09-14 11:00')
@@ -292,9 +392,9 @@ describe('Self Report Skills Management Tests', () => {
     });
 
     it('change page size of the approval table', () => {
-        cy.createSkill(1, 1, 1, { selfReportType: 'Approval' });
-        cy.createSkill(1, 1, 2, { selfReportType: 'Approval' });
-        cy.createSkill(1, 1, 3, { selfReportType: 'Approval' });
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Approval' });
+        cy.createSkill(1, 1, 2, { selfReportingType: 'Approval' });
+        cy.createSkill(1, 1, 3, { selfReportingType: 'Approval' });
         cy.reportSkill(1, 1, 'user6Good@skills.org', '2020-09-12 11:00')
         cy.reportSkill(1, 2, 'user5Good@skills.org', '2020-09-13 11:00')
         cy.reportSkill(1, 3, 'user4Good@skills.org', '2020-09-14 11:00')
@@ -312,9 +412,9 @@ describe('Self Report Skills Management Tests', () => {
     });
 
     it('approve one', () => {
-        cy.createSkill(1, 1, 1, { selfReportType: 'Approval' });
-        cy.createSkill(1, 1, 2, { selfReportType: 'Approval' });
-        cy.createSkill(1, 1, 3, { selfReportType: 'Approval' });
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Approval' });
+        cy.createSkill(1, 1, 2, { selfReportingType: 'Approval' });
+        cy.createSkill(1, 1, 3, { selfReportingType: 'Approval' });
         cy.reportSkill(1, 2, 'user2', '2020-09-16 11:00')
         cy.reportSkill(1, 3, 'user1', '2020-09-17 11:00')
         cy.reportSkill(1, 1, 'user0', '2020-09-18 11:00')
@@ -351,9 +451,9 @@ describe('Self Report Skills Management Tests', () => {
             expect(req.body.rejectionMessage).to.include('Rejection message!')
         }).as('reject');
 
-        cy.createSkill(1, 1, 1, { selfReportType: 'Approval' });
-        cy.createSkill(1, 1, 2, { selfReportType: 'Approval' });
-        cy.createSkill(1, 1, 3, { selfReportType: 'Approval' });
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Approval' });
+        cy.createSkill(1, 1, 2, { selfReportingType: 'Approval' });
+        cy.createSkill(1, 1, 3, { selfReportingType: 'Approval' });
         cy.reportSkill(1, 2, 'user2', '2020-09-16 11:00')
         cy.reportSkill(1, 3, 'user1', '2020-09-17 11:00')
         cy.reportSkill(1, 1, 'user0', '2020-09-18 11:00')
@@ -395,9 +495,9 @@ describe('Self Report Skills Management Tests', () => {
             expect(req.body.rejectionMessage).to.include('Rejection jabberwoc')
         }).as('reject');
 
-        cy.createSkill(1, 1, 1, { selfReportType: 'Approval' });
-        cy.createSkill(1, 1, 2, { selfReportType: 'Approval' });
-        cy.createSkill(1, 1, 3, { selfReportType: 'Approval' });
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Approval' });
+        cy.createSkill(1, 1, 2, { selfReportingType: 'Approval' });
+        cy.createSkill(1, 1, 3, { selfReportingType: 'Approval' });
         cy.reportSkill(1, 2, 'user2', '2020-09-16 11:00')
         cy.reportSkill(1, 3, 'user1', '2020-09-17 11:00')
         cy.reportSkill(1, 1, 'user0', '2020-09-18 11:00')
@@ -441,9 +541,9 @@ describe('Self Report Skills Management Tests', () => {
     });
 
     it('approve 1 page worth of records', () => {
-        cy.createSkill(1, 1, 1, { selfReportType: 'Approval' });
-        cy.createSkill(1, 1, 2, { selfReportType: 'Approval' });
-        cy.createSkill(1, 1, 3, { selfReportType: 'Approval' });
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Approval' });
+        cy.createSkill(1, 1, 2, { selfReportingType: 'Approval' });
+        cy.createSkill(1, 1, 3, { selfReportingType: 'Approval' });
         cy.reportSkill(1, 2, 'user6', '2020-09-11 11:00')
         cy.reportSkill(1, 2, 'user5', '2020-09-12 11:00')
         cy.reportSkill(1, 2, 'user4', '2020-09-13 11:00')
@@ -483,9 +583,9 @@ describe('Self Report Skills Management Tests', () => {
             url: '/admin/projects/proj1/approvals/reject',
         }).as('reject');
 
-        cy.createSkill(1, 1, 1, { selfReportType: 'Approval' });
-        cy.createSkill(1, 1, 2, { selfReportType: 'Approval' });
-        cy.createSkill(1, 1, 3, { selfReportType: 'Approval' });
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Approval' });
+        cy.createSkill(1, 1, 2, { selfReportingType: 'Approval' });
+        cy.createSkill(1, 1, 3, { selfReportingType: 'Approval' });
         cy.reportSkill(1, 2, 'user6', '2020-09-11 11:00')
         cy.reportSkill(1, 2, 'user5', '2020-09-12 11:00')
         cy.reportSkill(1, 2, 'user4', '2020-09-13 11:00')
@@ -518,9 +618,9 @@ describe('Self Report Skills Management Tests', () => {
     });
 
     it('select page and then clear', () => {
-        cy.createSkill(1, 1, 1, { selfReportType: 'Approval' });
-        cy.createSkill(1, 1, 2, { selfReportType: 'Approval' });
-        cy.createSkill(1, 1, 3, { selfReportType: 'Approval' });
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Approval' });
+        cy.createSkill(1, 1, 2, { selfReportingType: 'Approval' });
+        cy.createSkill(1, 1, 3, { selfReportingType: 'Approval' });
         cy.reportSkill(1, 2, 'user6', '2020-09-11 11:00');
         cy.reportSkill(1, 2, 'user5', '2020-09-12 11:00');
         cy.reportSkill(1, 2, 'user4', '2020-09-13 11:00');
@@ -537,9 +637,9 @@ describe('Self Report Skills Management Tests', () => {
     });
 
     it('refresh button should pull from server', () => {
-        cy.createSkill(1, 1, 1, { selfReportType: 'Approval' });
-        cy.createSkill(1, 1, 2, { selfReportType: 'Approval' });
-        cy.createSkill(1, 1, 3, { selfReportType: 'Approval' });
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Approval' });
+        cy.createSkill(1, 1, 2, { selfReportingType: 'Approval' });
+        cy.createSkill(1, 1, 3, { selfReportingType: 'Approval' });
         cy.reportSkill(1, 2, 'user1', '2020-09-12 11:00');
 
         cy.visit('/projects/proj1/self-report');
@@ -559,11 +659,11 @@ describe('Self Report Skills Management Tests', () => {
     });
 
     it('self report stats', () => {
-        cy.createSkill(1, 1, 1, { selfReportType: 'Approval' });
-        cy.createSkill(1, 1, 2, { selfReportType: 'Approval' });
-        cy.createSkill(1, 1, 3, { selfReportType: 'Approval' });
-        cy.createSkill(1, 1, 4, { selfReportType: 'HonorSystem' });
-        cy.createSkill(1, 1, 5, { selfReportType: 'HonorSystem' });
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Approval' });
+        cy.createSkill(1, 1, 2, { selfReportingType: 'Approval' });
+        cy.createSkill(1, 1, 3, { selfReportingType: 'Approval' });
+        cy.createSkill(1, 1, 4, { selfReportingType: 'HonorSystem' });
+        cy.createSkill(1, 1, 5, { selfReportingType: 'HonorSystem' });
         cy.createSkill(1, 1, 6);
 
         cy.visit('/projects/proj1/self-report');
@@ -574,8 +674,8 @@ describe('Self Report Skills Management Tests', () => {
     });
 
     it('do not display approval table if no approval configured', () => {
-        cy.createSkill(1, 1, 4, { selfReportType: 'HonorSystem' });
-        cy.createSkill(1, 1, 5, { selfReportType: 'HonorSystem' });
+        cy.createSkill(1, 1, 4, { selfReportingType: 'HonorSystem' });
+        cy.createSkill(1, 1, 5, { selfReportingType: 'HonorSystem' });
         cy.createSkill(1, 1, 6);
 
         cy.visit('/projects/proj1/self-report');

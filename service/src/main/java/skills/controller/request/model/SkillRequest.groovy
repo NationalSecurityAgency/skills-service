@@ -42,5 +42,5 @@ class SkillRequest {
 
     String helpUrl
 
-    String selfReportType
+    String selfReportingType
 }

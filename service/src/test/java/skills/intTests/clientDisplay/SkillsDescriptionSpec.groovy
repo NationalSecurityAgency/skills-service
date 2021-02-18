@@ -420,12 +420,12 @@ class SkillsDescriptionSpec extends DefaultIntSpec {
         List<Map> proj1_subj1_skills = SkillsFactory.createSkills(4, 1, 1, 100)
         List<Map> proj1_subj2_skills = SkillsFactory.createSkills(3, 1, 2)
 
-        proj1_subj1_skills[0].selfReportType = 'HonorSystem'
-        proj1_subj1_skills[1].selfReportType = 'Approval'
-        proj1_subj1_skills[3].selfReportType = 'Approval'
+        proj1_subj1_skills[0].selfReportingType = 'HonorSystem'
+        proj1_subj1_skills[1].selfReportingType = 'Approval'
+        proj1_subj1_skills[3].selfReportingType = 'Approval'
 
-        proj1_subj2_skills[1].selfReportType = 'HonorSystem'
-        proj1_subj2_skills[2].selfReportType = 'Approval'
+        proj1_subj2_skills[1].selfReportingType = 'HonorSystem'
+        proj1_subj2_skills[2].selfReportingType = 'Approval'
 
         proj1_subj2_skills.each {
             it.description = null

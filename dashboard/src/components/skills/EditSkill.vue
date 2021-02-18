@@ -18,8 +18,8 @@ limitations under the License.
     <b-modal :id="skillInternal.skillId" size="xl" :title="title" v-model="show" :no-close-on-backdrop="true"
              header-bg-variant="info" header-text-variant="light" no-fade role="dialog" @hide="publishHidden"
              :aria-label="isEdit?'Edit Skill':'New Skill'">
-        <b-container fluid>
-          <loading-container :is-loading="isLoading">
+      <skills-spinner :is-loading="isLoading" />
+      <b-container v-if="!isLoading" fluid>
           <div class="row">
             <div class="col-12 col-lg">
               <div class="form-group">
@@ -175,26 +175,7 @@ limitations under the License.
 
             <hr class="mt-0"/>
 
-            <div class="row mb-2">
-              <div class="col-12 col-lg-auto">
-                  <b-form-checkbox data-cy="selfReportEnableCheckbox" id="self-report-checkbox"
-                                   class="d-inline" v-model="selfReport.enabled"
-                                   v-on:input="updatedSelfReportingStatus"/>
-                Self Reporting <inline-help msg="Check to enable self-reporting of this skill by users"/>:
-              </div>
-              <div class="col-12 col-lg">
-                <b-form-group v-slot="{ ariaDescribedby }" class="m-0 p-0">
-                  <b-form-radio-group
-                    id="self-reporting-type"
-                    v-model="selfReport.selected"
-                    :options="selfReport.options"
-                    :aria-describedby="ariaDescribedby"
-                    name="Self Reporting Options"
-                    data-cy="selfReportTypeSelector"
-                  ></b-form-radio-group>
-                </b-form-group>
-              </div>
-            </div>
+            <self-reporting-type-input v-model="skillInternal.selfReportingType" :skill="skillInternal" :is-edit="isEdit"/>
 
             <hr class="mt-0"/>
 
@@ -218,7 +199,6 @@ limitations under the License.
           </div>
 
           <p v-if="invalid && overallErrMsg" class="text-center text-danger">***{{ overallErrMsg }}***</p>
-        </loading-container>
         </b-container>
 
       <div slot="modal-footer" class="w-100">
@@ -238,12 +218,13 @@ limitations under the License.
 <script>
   import { extend } from 'vee-validate';
   // eslint-disable-next-line camelcase
-  import { min_value, max_value } from 'vee-validate/dist/rules';
+  import { max_value, min_value } from 'vee-validate/dist/rules';
+  import SelfReportingTypeInput from '@/components/skills/selfReport/SelfReportingTypeInput';
+  import SkillsSpinner from '@/components/utils/SkillsSpinner';
   import SkillsService from './SkillsService';
   import MarkdownEditor from '../utils/MarkdownEditor';
   import IdInput from '../utils/inputForm/IdInput';
   import InlineHelp from '../utils/InlineHelp';
-  import LoadingContainer from '../utils/LoadingContainer';
   import InputSanitizer from '../utils/InputSanitizer';
   import SettingsService from '../settings/SettingsService';
 
@@ -261,7 +242,8 @@ limitations under the License.
   export default {
     name: 'EditSkill',
     components: {
-      LoadingContainer,
+      SkillsSpinner,
+      SelfReportingTypeInput,
       InlineHelp,
       IdInput,
       MarkdownEditor,
@@ -305,7 +287,7 @@ limitations under the License.
           numPointIncrementMaxOccurrences: 1,
           description: null,
           helpUrl: null,
-          selfReportType: null,
+          selfReportingType: null,
         },
         canEditSkillId: false,
         initial: {
@@ -315,12 +297,6 @@ limitations under the License.
         },
         selfReport: {
           loading: true,
-          enabled: false,
-          selected: 'Approval',
-          options: [
-            { text: 'Approval Queue', value: 'Approval', disabled: true },
-            { text: 'Honor System', value: 'HonorSystem', disabled: true },
-          ],
         },
         overallErrMsg: '',
         show: this.value,
@@ -478,11 +454,6 @@ limitations under the License.
               this.skillInternal.skillId = InputSanitizer.sanitize(this.skillInternal.skillId);
               this.skillInternal.helpUrl = InputSanitizer.sanitize(this.skillInternal.helpUrl);
               this.skillInternal = { subjectId: this.subjectId, ...this.skillInternal };
-              if (this.selfReport.enabled) {
-                this.skillInternal.selfReportType = this.selfReport.selected;
-              } else {
-                this.skillInternal.selfReportType = null;
-              }
               this.$emit('skill-saved', { isEdit: this.isEdit, ...this.skillInternal });
               this.close({ saved: true });
             }
@@ -494,11 +465,6 @@ limitations under the License.
             this.skillInternal = { originalSkillId: loadedSkill.skillId, isEdit: this.isEdit, ...loadedSkill };
             this.initial.skillId = this.skillInternal.skillId;
             this.initial.skillName = this.skillInternal.name;
-
-            if (loadedSkill.selfReportingType) {
-              this.selfReport.selected = loadedSkill.selfReportingType;
-              this.updatedSelfReportingStatus(true);
-            }
           })
           .finally(() => {
             this.isLoadingSkillDetails = false;
@@ -508,8 +474,7 @@ limitations under the License.
         SettingsService.getProjectSetting(this.projectId, 'selfReport.type')
           .then((res) => {
             if (res) {
-              this.updatedSelfReportingStatus(true);
-              this.selfReport.selected = res.value;
+              this.skillInternal.selfReportingType = res.value;
             }
             this.selfReport.loading = false;
           });
@@ -542,14 +507,6 @@ limitations under the License.
           this.skillInternal.pointIncrementIntervalMins = 0;
           this.skillInternal.numPointIncrementMaxOccurrences = 1;
         }
-      },
-      updatedSelfReportingStatus(checked) {
-        this.selfReport.enabled = checked;
-        this.selfReport.options = this.selfReport.options.map((item) => {
-          const copy = { ...item };
-          copy.disabled = !checked;
-          return copy;
-        });
       },
     },
   };
