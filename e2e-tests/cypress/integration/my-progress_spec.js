@@ -395,5 +395,40 @@ describe('Navigation Tests', () => {
     cy.get('[data-cy=project-link-proj1]').find('[data-cy=project-card-project-name]').contains('Project 2').should('not.exist');
   });
 
+  it('My Progress page - no projects created', function () {
+    cy.intercept({
+      method: 'GET',
+      path: '/api/myProgressSummary',
+    }, {
+      statusCode: 200,
+      body: {"projectSummaries":[],"totalProjects":0,"numProjectsContributed":0,"totalSkills":0,"numAchievedSkills":0,"numAchievedSkillsLastMonth":0,"numAchievedSkillsLastWeek":0,"mostRecentAchievedSkill":null,"totalBadges":0,"numAchievedBadges":0,"numAchievedGemBadges":0,"numAchievedGlobalBadges":0}
+    }).as('getMyProgress');
+
+    cy.visit('/');
+    cy.wait('@getMyProgress');
+
+    cy.contains('Projects can be created from the "Project Admin" view, accessible by clicking on your name at the top-right of the screen.')
+  });
+
+  it('My Progress page - no projects with production mode enabled', function () {
+    // remove production mode from all projects
+    cy.loginAsRootUser();
+    cy.request('POST', '/admin/projects/proj1/settings/production.mode.enabled', {
+      projectId: 'proj1',
+      setting: 'production.mode.enabled',
+      value: 'false'
+    });
+    cy.request('POST', '/admin/projects/Inception/settings/production.mode.enabled', {
+      projectId: 'Inception',
+      setting: 'production.mode.enabled',
+      value: 'false'
+    });
+
+    cy.loginAsProxyUser();
+    cy.visit('/');
+
+    cy.contains('You will see your SkillTree progress and rankings on this page when project(s) have their production mode enabled.')
+  });
+
 });
 
