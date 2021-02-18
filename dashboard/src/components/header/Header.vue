@@ -23,14 +23,14 @@ limitations under the License.
             <router-link class="h2 text-primary ml-2" to="/">
               <img src="/static/img/skilltree_logo_v1.png" alt="skilltree logo"/>
             </router-link>
-            <span v-if="showAdminStamp" class="skills-stamp">ADMIN</span>
+            <span v-if="isAdminPage" class="skills-stamp">ADMIN</span>
           </div>
         </div>
 
         <hr class="w-75 mb-0 d-sm-none"/>
 
         <div class="col-sm-auto text-center text-sm-right pt-sm-2 mt-3 mt-sm-0">
-          <inception-button class="mr-2"></inception-button>
+          <inception-button v-if="isAdminPage" class="mr-2" data-cy="inception-button"></inception-button>
           <settings-button data-cy="settings-button" class="mr-2"/>
           <help-button class=""/>
         </div>
@@ -55,7 +55,7 @@ limitations under the License.
       SettingsButton,
     },
     computed: {
-      showAdminStamp() {
+      isAdminPage() {
         return this.$route && this.$route.meta && this.$route.meta.requiresAuth && !this.$route.meta.nonAdmin;
       },
     },

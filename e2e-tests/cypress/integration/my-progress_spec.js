@@ -232,6 +232,8 @@ describe('Navigation Tests', () => {
     cy.get('[data-cy=project-link-proj1]').find('[data-cy=project-card-project-rank]').contains(new RegExp(/^Rank: 1 \/ 1$/));
     cy.get('[data-cy=project-link-proj1]').find('[data-cy=project-card-project-points]').contains(new RegExp(/^400 \/ 1,400$/));
 
+    cy.get('[data-cy=inception-button]').should('not.exist');
+
     cy.get('[data-cy=project-link-proj1]').click()
 
     cy.intercept('GET', '/api/projects/proj1/pointHistory').as('pointHistoryChart');
