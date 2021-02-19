@@ -40,7 +40,7 @@ describe('Multiple Project With no Results', () => {
 
 
     it('2 projects required for training profile comparator to work', () => {
-        cy.visit('/ProjectAdministrator/');
+        cy.visit('/Administrator/');
         cy.clickNav('Metrics');
         cy.trainingProf().contains('Feature is disabled');
 
@@ -62,7 +62,7 @@ describe('Multiple Project With no Results', () => {
     });
 
     it('2 projects needed to enable users in common chart', () => {
-        cy.visit('/ProjectAdministrator/');
+        cy.visit('/Administrator/');
         cy.clickNav('Metrics');
         cy.usrsInCommon().contains('No Projects Selected').should('not.exist');
 

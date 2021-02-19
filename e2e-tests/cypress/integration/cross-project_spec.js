@@ -98,7 +98,7 @@ describe('Cross-project Skills Tests', () => {
     });
 
     it('share skill with another project', () => {
-        cy.visit('/ProjectAdministrator/projects/proj1');
+        cy.visit('/Administrator/projects/proj1');
         cy.clickNav('Cross Projects');
 
         cy.get('[data-cy="shareSkillsWithOtherProjectsCard"]').contains('Share Skills With Other Projects');
@@ -114,7 +114,7 @@ describe('Cross-project Skills Tests', () => {
 
         // -------------------------
         // Project 2 should see the skill
-        cy.visit('/ProjectAdministrator/projects/proj2');
+        cy.visit('/Administrator/projects/proj2');
         cy.clickNav('Cross Projects');
         cy.get('[data-cy="shareSkillsWithOtherProjectsCard"]').contains('Share Skills With Other Projects');
 
@@ -122,7 +122,7 @@ describe('Cross-project Skills Tests', () => {
             [{ colIndex: 0,  value: 'Very Great Skill # 1' }, { colIndex: 1,  value: 'Project 1' }],
         ], 5, true, null, false);
 
-        cy.visit('/ProjectAdministrator/projects/proj2/subjects/subj2/skills/skill3/dependencies');
+        cy.visit('/Administrator/projects/proj2/subjects/subj2/skills/skill3/dependencies');
         cy.contains('No Dependencies Yet');
 
         cy.get('[data-cy="depsSelector"]').click();
@@ -130,12 +130,12 @@ describe('Cross-project Skills Tests', () => {
 
         // -------------------------
         // Project 3 should not see the shared skill
-        cy.visit('/ProjectAdministrator/projects/proj3');
+        cy.visit('/Administrator/projects/proj3');
         cy.clickNav('Cross Projects');
         cy.get('[data-cy="shareSkillsWithOtherProjectsCard"]').contains('Share Skills With Other Projects');
         cy.get('[data-cy="skillsSharedWithMeCard"]').contains('No Shared Skills Yet');
 
-        cy.visit('/ProjectAdministrator/projects/proj3/subjects/subj3/skills/skill4/dependencies');
+        cy.visit('/Administrator/projects/proj3/subjects/subj3/skills/skill4/dependencies');
         cy.contains('No Dependencies Yet');
 
         cy.get('[data-cy="depsSelector"]').click();
@@ -143,7 +143,7 @@ describe('Cross-project Skills Tests', () => {
     });
 
     it('share with all projects', () => {
-        cy.visit('/ProjectAdministrator/projects/proj1');
+        cy.visit('/Administrator/projects/proj1');
         cy.clickNav('Cross Projects');
 
         cy.get('[data-cy="shareSkillsWithOtherProjectsCard"]').contains('Share Skills With Other Projects');
@@ -165,7 +165,7 @@ describe('Cross-project Skills Tests', () => {
 
         // -------------------------
         // Project 2 should see the skill
-        cy.visit('/ProjectAdministrator/projects/proj2');
+        cy.visit('/Administrator/projects/proj2');
         cy.clickNav('Cross Projects');
         cy.get('[data-cy="shareSkillsWithOtherProjectsCard"]').contains('Share Skills With Other Projects');
 
@@ -173,7 +173,7 @@ describe('Cross-project Skills Tests', () => {
             [{ colIndex: 0,  value: 'Very Great Skill # 1' }, { colIndex: 1,  value: 'Project 1' }],
         ], 5, true, null, false);
 
-        cy.visit('/ProjectAdministrator/projects/proj2/subjects/subj2/skills/skill3/dependencies');
+        cy.visit('/Administrator/projects/proj2/subjects/subj2/skills/skill3/dependencies');
         cy.contains('No Dependencies Yet');
 
         cy.get('[data-cy="depsSelector"]').click();
@@ -181,7 +181,7 @@ describe('Cross-project Skills Tests', () => {
 
         // -------------------------
         // Project 3 should see the shared skill
-        cy.visit('/ProjectAdministrator/projects/proj3');
+        cy.visit('/Administrator/projects/proj3');
         cy.clickNav('Cross Projects');
         cy.get('[data-cy="shareSkillsWithOtherProjectsCard"]').contains('Share Skills With Other Projects');
 
@@ -189,7 +189,7 @@ describe('Cross-project Skills Tests', () => {
             [{ colIndex: 0,  value: 'Very Great Skill # 1' }, { colIndex: 1,  value: 'Project 1' }],
         ], 5, true, null, false);
 
-        cy.visit('/ProjectAdministrator/projects/proj3/subjects/subj3/skills/skill4/dependencies');
+        cy.visit('/Administrator/projects/proj3/subjects/subj3/skills/skill4/dependencies');
         cy.contains('No Dependencies Yet');
 
         cy.get('[data-cy="depsSelector"]').click();
@@ -197,7 +197,7 @@ describe('Cross-project Skills Tests', () => {
     });
 
     it('remove share', () => {
-        cy.visit('/ProjectAdministrator/projects/proj1');
+        cy.visit('/Administrator/projects/proj1');
         cy.clickNav('Cross Projects');
 
         cy.get('[data-cy="shareSkillsWithOtherProjectsCard"]').contains('Share Skills With Other Projects');
@@ -222,7 +222,7 @@ describe('Cross-project Skills Tests', () => {
 
         // -------------------------
         // Project 2 should see the skill2 but not skill1
-        cy.visit('/ProjectAdministrator/projects/proj2');
+        cy.visit('/Administrator/projects/proj2');
         cy.clickNav('Cross Projects');
         cy.get('[data-cy="shareSkillsWithOtherProjectsCard"]').contains('Share Skills With Other Projects');
 
@@ -230,7 +230,7 @@ describe('Cross-project Skills Tests', () => {
             [{ colIndex: 0,  value: 'Very Great Skill # 2' }, { colIndex: 1,  value: 'Project 1' }],
         ], 5, true, null, false);
 
-        cy.visit('/ProjectAdministrator/projects/proj2/subjects/subj2/skills/skill3/dependencies');
+        cy.visit('/Administrator/projects/proj2/subjects/subj2/skills/skill3/dependencies');
         cy.contains('No Dependencies Yet');
 
         cy.get('[data-cy="depsSelector"]').click();

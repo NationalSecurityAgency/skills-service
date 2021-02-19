@@ -35,7 +35,7 @@ describe('Subjects Tests', () => {
             url: '/admin/projects/proj1/subjects/subj1'
         }).as('loadSubject');
 
-        cy.visit('/ProjectAdministrator/projects/proj1/subjects/subj1');
+        cy.visit('/Administrator/projects/proj1/subjects/subj1');
         cy.wait('@loadSubject');
 
         cy.contains('Levels').click();
@@ -51,7 +51,7 @@ describe('Subjects Tests', () => {
         cy.intercept('POST', '/admin/projects/proj1/subjectNameExists').as('nameExists');
         cy.intercept('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
 
-        cy.visit('/ProjectAdministrator/projects/proj1');
+        cy.visit('/Administrator/projects/proj1');
         cy.wait('@loadSubjects');
         cy.clickButton('Subject');
 
@@ -72,7 +72,7 @@ describe('Subjects Tests', () => {
         cy.intercept('POST', '/admin/projects/proj1/subjectNameExists').as('nameExists');
         cy.intercept('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
 
-        cy.visit('/ProjectAdministrator/projects/proj1');
+        cy.visit('/Administrator/projects/proj1');
         cy.wait('@loadSubjects');
         cy.clickButton('Subject');
 
@@ -89,7 +89,7 @@ describe('Subjects Tests', () => {
     it('close subject dialog', () => {
         cy.intercept('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
 
-        cy.visit('/ProjectAdministrator/projects/proj1');
+        cy.visit('/Administrator/projects/proj1');
         cy.wait('@loadSubjects');
         cy.clickButton('Subject');
         cy.get('[data-cy=closeSubjectButton]').click();
@@ -100,7 +100,7 @@ describe('Subjects Tests', () => {
         cy.intercept('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
         cy.intercept('POST', '/admin/projects/proj1/subjectNameExists').as('nameExists');
 
-        cy.visit('/ProjectAdministrator/projects/proj1');
+        cy.visit('/Administrator/projects/proj1');
         cy.wait('@loadSubjects');
         cy.clickButton('Subject');
 
@@ -123,7 +123,7 @@ describe('Subjects Tests', () => {
             name: "Subject 1"
         });
 
-        cy.visit('/ProjectAdministrator/projects/proj1/');
+        cy.visit('/Administrator/projects/proj1/');
         cy.get('.subject-settings .dropdown-toggle').click();
         cy.get('a.dropdown-item').contains('Edit').click({force:true});
         cy.get('div.modal-content .text-primary i.fa-question-circle').click();
@@ -150,7 +150,7 @@ describe('Subjects Tests', () => {
             name: "Subject 1"
         });
 
-        cy.visit('/ProjectAdministrator/projects/proj1/');
+        cy.visit('/Administrator/projects/proj1/');
         cy.get('.subject-settings .dropdown-toggle').click();
         cy.get('a.dropdown-item').contains('Edit').click();
         cy.get('div.modal-content .text-primary i.fa-question-circle').click();
@@ -177,7 +177,7 @@ describe('Subjects Tests', () => {
             name: "Subject 1"
         });
 
-        cy.visit('/ProjectAdministrator/projects/proj1/');
+        cy.visit('/Administrator/projects/proj1/');
         cy.get('.subject-settings .dropdown-toggle').click();
         cy.get('a.dropdown-item').contains('Edit').click();
         cy.get('div.modal-content .text-primary i.fa-question-circle').click();
@@ -216,7 +216,7 @@ describe('Subjects Tests', () => {
             url: '/admin/projects/proj1/icons/upload',
         }).as('uploadIcon');
 
-        cy.visit('/ProjectAdministrator/projects/proj1/');
+        cy.visit('/Administrator/projects/proj1/');
 
         cy.get('.subject-settings .dropdown-toggle').click();
 
@@ -241,7 +241,7 @@ describe('Subjects Tests', () => {
             name: "Subject 1"
         });
 
-        cy.visit('/ProjectAdministrator/projects/proj1/');
+        cy.visit('/Administrator/projects/proj1/');
 
         cy.get('.subject-settings .dropdown-toggle').click();
 
@@ -269,7 +269,7 @@ describe('Subjects Tests', () => {
             response: {explanation: 'Something bad'}
         }).as('addAdmin');
 
-        cy.visit('/ProjectAdministrator/projects/proj1/');
+        cy.visit('/Administrator/projects/proj1/');
 
         cy.get('.subject-settings .dropdown-toggle').click();
 
@@ -292,7 +292,7 @@ describe('Subjects Tests', () => {
             name: "Subject 1"
         });
 
-        cy.visit('/ProjectAdministrator/projects/proj1');
+        cy.visit('/Administrator/projects/proj1');
         cy.contains('Subjects').click();
         cy.get('[aria-label="new subject"]').click();
         cy.get('[data-cy=closeSubjectButton]').click();
@@ -342,7 +342,7 @@ describe('Subjects Tests', () => {
             url: '/admin/projects/proj1/subjects/subj2'
         }).as('loadSubject2');
 
-        cy.visit('/ProjectAdministrator/projects/proj1');
+        cy.visit('/Administrator/projects/proj1');
         cy.get('div.subject-settings').first().click();
         cy.get('[data-cy=editMenuEditBtn]').first().click();
         cy.get('[data-cy=subjectNameInput]').should('be.visible');
@@ -405,7 +405,7 @@ describe('Subjects Tests', () => {
 
         cy.intercept('GET', '/admin/projects/proj1/subjects/subj1/levels').as('loadLevels');
 
-        cy.visit('/ProjectAdministrator/projects/proj1/subjects/subj1');
+        cy.visit('/Administrator/projects/proj1/subjects/subj1');
         cy.wait('@loadSubject');
 
         cy.contains('Levels').click();
@@ -477,7 +477,7 @@ describe('Subjects Tests', () => {
         });
 
         cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'someuser', timestamp: new Date().getTime()})
-        cy.visit('/ProjectAdministrator/projects/proj1/subjects/subj1');
+        cy.visit('/Administrator/projects/proj1/subjects/subj1');
         cy.clickNav('Users').click();
         cy.get('[data-cy="usersTable"]').contains('someuser').click();
         cy.get('[data-cy=breadcrumb-subj1]').should('be.visible');
@@ -487,7 +487,7 @@ describe('Subjects Tests', () => {
     it('description is validated against custom validators', () => {
         cy.intercept('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
 
-        cy.visit('/ProjectAdministrator/projects/proj1');
+        cy.visit('/Administrator/projects/proj1');
         cy.wait('@loadSubjects');
         cy.clickButton('Subject');
 

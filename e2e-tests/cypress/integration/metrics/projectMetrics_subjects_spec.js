@@ -33,7 +33,7 @@ describe('Metrics Tests', () => {
             openMode: 0
         }
     },() => {
-        cy.visit('/ProjectAdministrator/projects/proj1/');
+        cy.visit('/Administrator/projects/proj1/');
         cy.clickNav('Metrics');
         cy.get('[data-cy=metricsNav-Subjects]').click();
         cy.get('[data-cy=subjectNumUsersPerLevelOverTime]').contains('Generate the chart using controls above!');
@@ -55,7 +55,7 @@ describe('Metrics Tests', () => {
             subjectId: 'subj1',
             name: "Subject 1",
         });
-        cy.visit('/ProjectAdministrator/projects/proj1/');
+        cy.visit('/Administrator/projects/proj1/');
         cy.clickNav('Metrics');
         cy.get('[data-cy=metricsNav-Subjects]').click();
         cy.get('[data-cy=subjectNumUsersPerLevelOverTime]').contains('Generate the chart using controls above!');
@@ -103,7 +103,7 @@ describe('Metrics Tests', () => {
         cy.request('POST', `/api/projects/proj1/skills/skill3`, {userId: 'user0Good@skills.org', timestamp: m.clone().subtract(2, 'day').format('x')})
         // cy.reportHistoryOfEvents('proj1', 'user0Good@skills.org', 1, [], ['skill1', 'skill2', 'skill3']);
 
-        cy.visit('/ProjectAdministrator/projects/proj1/');
+        cy.visit('/Administrator/projects/proj1/');
         cy.clickNav('Metrics');
         cy.get('[data-cy=metricsNav-Subjects]').click();
         cy.get('[data-cy=subjectNumUsersPerLevelOverTime]').contains('Generate the chart using controls above!');
@@ -169,7 +169,7 @@ describe('Metrics Tests', () => {
             }],
         }).as('getLevelsOverTimeData');
 
-        cy.visit('/ProjectAdministrator/projects/proj1/');
+        cy.visit('/Administrator/projects/proj1/');
         cy.clickNav('Metrics');
         cy.get('[data-cy=metricsNav-Subjects]').click();
         cy.wait('@getSubjects');
@@ -230,7 +230,7 @@ describe('Metrics Tests', () => {
         cy.request('POST', `/api/projects/proj1/skills/skill4`, {userId: 'user0Good@skills.org', timestamp: m.clone().subtract(3, 'day').format('x')})
 
 
-        cy.visit('/ProjectAdministrator/projects/proj1/');
+        cy.visit('/Administrator/projects/proj1/');
         cy.clickNav('Metrics');
         cy.get('[data-cy=metricsNav-Subjects]').click();
         cy.wait('@getSubjects');
@@ -285,7 +285,7 @@ describe('Metrics Tests', () => {
             }],
         }).as('getLevelsOverTimeData');
 
-        cy.visit('/ProjectAdministrator/projects/proj1/');
+        cy.visit('/Administrator/projects/proj1/');
         cy.clickNav('Metrics');
         cy.get('[data-cy=metricsNav-Subjects]').click();
         cy.wait('@getSubjects');
@@ -335,7 +335,7 @@ describe('Metrics Tests', () => {
             body: response,
         }).as('getLevelsOverTimeData');
 
-        cy.visit('/ProjectAdministrator/projects/proj1/');
+        cy.visit('/Administrator/projects/proj1/');
         cy.clickNav('Metrics');
         cy.get('[data-cy=metricsNav-Subjects]').click();
         cy.wait('@getSubjects');
@@ -385,7 +385,7 @@ describe('Metrics Tests', () => {
             body: response,
         }).as('getLevelsOverTimeData');
 
-        cy.visit('/ProjectAdministrator/projects/proj1/');
+        cy.visit('/Administrator/projects/proj1/');
         cy.clickNav('Metrics');
         cy.get('[data-cy=metricsNav-Subjects]').click();
         cy.wait('@getSubjects');
@@ -460,7 +460,7 @@ describe('Metrics Tests', () => {
         cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: 'user2Smith0@skills.org', timestamp: m.clone().subtract(5, 'day').format('x')})
         cy.request('POST', `/api/projects/proj1/skills/skill3`, {userId: 'user2Smith0@skills.org', timestamp: m.clone().subtract(6, 'day').format('x')})
 
-        cy.visit('/ProjectAdministrator/projects/proj1/');
+        cy.visit('/Administrator/projects/proj1/');
         cy.clickNav('Metrics');
         cy.get('[data-cy=metricsNav-Subjects]').click();
         cy.wait('@getChartData');
@@ -502,7 +502,7 @@ describe('Metrics Tests', () => {
             ],
         }).as('getChartData');
 
-        cy.visit('/ProjectAdministrator/projects/proj1/');
+        cy.visit('/Administrator/projects/proj1/');
         cy.clickNav('Metrics');
         cy.get('[data-cy=metricsNav-Subjects]').click();
         cy.wait('@getChartData');
@@ -528,7 +528,7 @@ describe('Metrics Tests', () => {
             body: response,
         }).as('getChartData');
 
-        cy.visit('/ProjectAdministrator/projects/proj1/');
+        cy.visit('/Administrator/projects/proj1/');
         cy.clickNav('Metrics');
         cy.get('[data-cy=metricsNav-Subjects]').click();
         cy.wait('@getChartData');
@@ -554,7 +554,7 @@ describe('Metrics Tests', () => {
             body: response,
         }).as('getChartData');
 
-        cy.visit('/ProjectAdministrator/projects/proj1/');
+        cy.visit('/Administrator/projects/proj1/');
         cy.clickNav('Metrics');
         cy.get('[data-cy=metricsNav-Subjects]').click();
         cy.wait('@getChartData');
@@ -577,7 +577,7 @@ describe('Metrics Tests', () => {
             body,
         }).as('getChartData');
 
-        cy.visit('/ProjectAdministrator/projects/proj1/');
+        cy.visit('/Administrator/projects/proj1/');
         cy.clickNav('Metrics');
         cy.get('[data-cy=metricsNav-Subjects]').click();
         cy.wait('@getChartData');

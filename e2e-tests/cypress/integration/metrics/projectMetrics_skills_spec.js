@@ -27,7 +27,7 @@ describe('Metrics Tests - Skills', () => {
     it('skills table - empty table', () => {
         cy.intercept('/admin/projects/proj1/metrics/skillUsageNavigatorChartBuilder')
             .as('skillUsageNavigatorChartBuilder');
-        cy.visit('/ProjectAdministrator/projects/proj1/');
+        cy.visit('/Administrator/projects/proj1/');
         cy.clickNav('Metrics');
         cy.get('[data-cy=metricsNav-Skills]').click();
         cy.wait('@skillUsageNavigatorChartBuilder')
@@ -61,7 +61,7 @@ describe('Metrics Tests - Skills', () => {
                 statusCode: 200,
                 body: res,
             }).as('skillUsageNavigatorChartBuilder');
-        cy.visit('/ProjectAdministrator/projects/proj1/');
+        cy.visit('/Administrator/projects/proj1/');
         cy.clickNav('Metrics');
         cy.get('[data-cy=metricsNav-Skills]').click();
         cy.wait('@skillUsageNavigatorChartBuilder')
@@ -96,7 +96,7 @@ describe('Metrics Tests - Skills', () => {
             });
         };
 
-        cy.visit('/ProjectAdministrator/projects/proj1/');
+        cy.visit('/Administrator/projects/proj1/');
         cy.clickNav('Metrics');
         cy.get('[data-cy=metricsNav-Skills]').click();
         cy.wait('@skillUsageNavigatorChartBuilder');
@@ -189,7 +189,7 @@ describe('Metrics Tests - Skills', () => {
                     });
             }
         }
-        cy.visit('/ProjectAdministrator/projects/proj1/');
+        cy.visit('/Administrator/projects/proj1/');
         cy.clickNav('Metrics');
         cy.get('[data-cy=metricsNav-Skills]')
             .click();
@@ -306,7 +306,7 @@ describe('Metrics Tests - Skills', () => {
         }
 
 
-        cy.visit('/ProjectAdministrator/projects/proj1/');
+        cy.visit('/Administrator/projects/proj1/');
         cy.clickNav('Metrics');
         cy.get('[data-cy=metricsNav-Skills]').click();
         cy.wait('@skillUsageNavigatorChartBuilder');

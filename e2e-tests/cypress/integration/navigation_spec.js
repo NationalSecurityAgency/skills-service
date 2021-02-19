@@ -25,7 +25,7 @@ describe('Navigation Tests', () => {
   });
 
   it('ability to expand and collapse navigation', function () {
-    cy.visit('/ProjectAdministrator/projects/proj1');
+    cy.visit('/Administrator/projects/proj1');
     cy.contains('ID: subj1');
 
     // validate nav i expanded by default
@@ -38,7 +38,7 @@ describe('Navigation Tests', () => {
     cy.get('[data-cy=nav-Badges]').contains('Metrics').should('not.exist');
 
     // refresh and validate that nav is still collapsed
-    cy.visit('/ProjectAdministrator/projects/proj1');
+    cy.visit('/Administrator/projects/proj1');
     cy.contains('ID: subj1');
     cy.get('[data-cy=nav-Subjects]').contains('Subjects').should('not.exist');
     cy.get('[data-cy=nav-Badges]').contains('Badges').should('not.exist');
@@ -58,7 +58,7 @@ describe('Navigation Tests', () => {
     cy.get('[data-cy=nav-Levels]').contains('Levels').should('not.exist');
 
     // refresh and make sure that nav is still collapsed
-    cy.visit('/ProjectAdministrator/projects/proj1/subjects/subj1');
+    cy.visit('/Administrator/projects/proj1/subjects/subj1');
     cy.contains('No Skills Yet');
     cy.get('[data-cy=nav-Skills]').contains('Skills').should('not.exist');
     cy.get('[data-cy=nav-Levels]').contains('Levels').should('not.exist');
@@ -76,7 +76,7 @@ describe('Navigation Tests', () => {
   });
 
   it('selected menu item should be highlighted', function () {
-    cy.visit('/ProjectAdministrator/projects/proj1');
+    cy.visit('/Administrator/projects/proj1');
     cy.contains('ID: subj1');
     cy.get('[data-cy=nav-Subjects]').should('have.class', 'bg-primary');
     cy.get('[data-cy=nav-Badges]').should('not.have.class', 'bg-primary');
@@ -89,7 +89,7 @@ describe('Navigation Tests', () => {
 
   it('navigation on a small screen', function () {
     cy.viewport('iphone-6')
-    cy.visit('/ProjectAdministrator/projects/proj1');
+    cy.visit('/Administrator/projects/proj1');
     cy.contains('ID: subj1');
     cy.get('[data-cy=navCollapseOrExpand]').should('not.exist');
     cy.get('[data-cy=nav-Subjects]').should('not.visible');

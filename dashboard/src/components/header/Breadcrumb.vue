@@ -70,7 +70,7 @@ limitations under the License.
         const lastItemInPathCustomName = this.$route.meta.breadcrumb;
 
         res.forEach((item, index) => {
-          let value = item === 'ProjectAdministrator' ? 'Admin' : item;
+          let value = item === 'Administrator' ? 'Admin' : item;
           if (value) {
             if (index === res.length - 1 && lastItemInPathCustomName) {
               key = null;
