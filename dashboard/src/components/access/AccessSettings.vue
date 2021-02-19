@@ -52,7 +52,7 @@ limitations under the License.
     },
     computed: {
       showTrustedClientProps() {
-        return (!this.$store.getters.isPkiAuthenticated && !this.$store.getters.config.oAuthOnly);
+        return (!this.$store.getters.isPkiAuthenticated);
       },
     },
     mounted() {
