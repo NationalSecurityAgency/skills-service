@@ -444,17 +444,17 @@ const router = new Router({
         name: 'SecuritySettings',
         path: 'security',
         component: SecuritySettings,
-        meta: { requiresAuth: true },
+        meta: { requiresAuth: true, nonAdmin: true },
       }, {
         name: 'EmailSettings',
         path: 'email',
         component: EmailSettings,
-        meta: { requiresAuth: true },
+        meta: { requiresAuth: true, nonAdmin: true },
       }, {
         name: 'SystemSettings',
         path: 'system',
         component: SystemSettings,
-        meta: { requiresAuth: true },
+        meta: { requiresAuth: true, nonAdmin: true },
       }],
     },
     {
