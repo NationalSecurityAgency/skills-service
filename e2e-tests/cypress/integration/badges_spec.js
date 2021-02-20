@@ -60,7 +60,7 @@ describe('Badges Tests', () => {
             expect(response.status).to.eql(200)
         });
 
-        cy.visit('/Administrator/projects/proj1/badges');
+        cy.visit('/administrator/projects/proj1/badges');
         cy.wait('@loadBadges');
         cy.clickButton('Badge');
 
@@ -88,7 +88,7 @@ describe('Badges Tests', () => {
             expect(response.status).to.eql(200)
         });
 
-        cy.visit('/Administrator/projects/proj1/badges');
+        cy.visit('/administrator/projects/proj1/badges');
         cy.wait('@loadBadges');
         cy.clickButton('Badge');
 
@@ -111,7 +111,7 @@ describe('Badges Tests', () => {
             expect(response.status).to.eql(200)
         });
 
-        cy.visit('/Administrator/projects/proj1/badges');
+        cy.visit('/administrator/projects/proj1/badges');
         cy.wait('@loadBadges');
         cy.clickButton('Badge');
         cy.get('[data-cy=closeBadgeButton]').click();
@@ -127,7 +127,7 @@ describe('Badges Tests', () => {
             expect(response.status).to.eql(200)
         });
 
-        cy.visit('/Administrator/projects/proj1/badges');
+        cy.visit('/administrator/projects/proj1/badges');
         cy.wait('@loadBadges');
         cy.clickButton('Badge');
 
@@ -159,7 +159,7 @@ describe('Badges Tests', () => {
             expect(response.status).to.eql(200)
         });
 
-        cy.visit('/Administrator/projects/proj1/badges');
+        cy.visit('/administrator/projects/proj1/badges');
 
         cy.wait('@loadBadges');
         cy.wait('@getUserInfo');
@@ -183,7 +183,7 @@ describe('Badges Tests', () => {
             badgeId: 'badgeExist'
         })
 
-        cy.visit('/Administrator/projects/proj1/badges');
+        cy.visit('/administrator/projects/proj1/badges');
         cy.clickButton('Badge');
         cy.contains('New Badge');
 
@@ -207,7 +207,7 @@ describe('Badges Tests', () => {
             badgeId: 'badgeExist'
         })
 
-        cy.visit('/Administrator/projects/proj1/badges');
+        cy.visit('/administrator/projects/proj1/badges');
         cy.clickButton('Badge');
         cy.contains('New Badge');
 
@@ -299,7 +299,7 @@ describe('Badges Tests', () => {
     });
 
     it('gem start and end time validation', () => {
-        cy.visit('/Administrator/projects/proj1/badges');
+        cy.visit('/administrator/projects/proj1/badges');
         cy.clickButton('Badge');
         cy.contains('New Badge');
         cy.get('[data-cy="gemEditContainer"]').click()
@@ -369,7 +369,7 @@ describe('Badges Tests', () => {
             numPerformToCompletion: '5'
         });
 
-        cy.visit('/Administrator/projects/proj1/badges');
+        cy.visit('/administrator/projects/proj1/badges');
         cy.clickButton('Badge');
         cy.contains('New Badge');
         cy.get('#badgeName').type('Test Badge');
@@ -409,7 +409,7 @@ describe('Badges Tests', () => {
             numPerformToCompletion: '5'
         });
 
-        cy.visit('/Administrator/projects/proj1/badges');
+        cy.visit('/administrator/projects/proj1/badges');
         cy.clickButton('Badge');
         cy.contains('New Badge');
         cy.get('#badgeName').type('Test Badge');
@@ -448,7 +448,7 @@ describe('Badges Tests', () => {
             numPerformToCompletion: '5'
         });
 
-        cy.visit('/Administrator/projects/proj1/badges');
+        cy.visit('/administrator/projects/proj1/badges');
         cy.clickButton('Badge');
         cy.contains('New Badge');
         cy.get('#badgeName').type('Test Badge');
@@ -483,7 +483,7 @@ describe('Badges Tests', () => {
             numPerformToCompletion: '5'
         });
 
-        cy.visit('/Administrator/projects/proj1/badges');
+        cy.visit('/administrator/projects/proj1/badges');
         cy.clickButton('Badge');
         cy.contains('New Badge');
         cy.get('#badgeName').type('Test Badge');
@@ -543,7 +543,7 @@ describe('Badges Tests', () => {
         cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'someuser', timestamp: new Date().getTime()})
 
 
-        cy.visit('/Administrator/projects/proj1/badges/badge1');
+        cy.visit('/administrator/projects/proj1/badges/badge1');
         cy.clickNav('Users').click();
         cy.get('[data-cy="usersTable"]').contains('someuser').click();
         cy.get('[data-cy=breadcrumb-badge1]').should('be.visible');
@@ -551,7 +551,7 @@ describe('Badges Tests', () => {
     })
 
     it('new badge button should retain focus after dialog is closed', () => {
-        cy.visit('/Administrator/projects/proj1');
+        cy.visit('/administrator/projects/proj1');
         cy.get('[data-cy=nav-Badges]').click();
 
         cy.get('[aria-label="new badge"]').click();
@@ -585,7 +585,7 @@ describe('Badges Tests', () => {
             name: "Badge 2"
         });
 
-        cy.visit('/Administrator/projects/proj1');
+        cy.visit('/administrator/projects/proj1');
         cy.get('[data-cy=nav-Badges]').click();
 
         cy.get('div.badge-settings').eq(0).click();
@@ -648,7 +648,7 @@ describe('Badges Tests', () => {
             cy.request('POST', `/admin/projects/proj1/badge/badge1/skills/skill${i}`);
         }
 
-        cy.visit('/Administrator/projects/proj1/badges/badge1');
+        cy.visit('/administrator/projects/proj1/badges/badge1');
         cy.get(`${tableSelector} th`).contains('Skill ID').click();
 
         cy.validateTable(tableSelector, [
@@ -694,7 +694,7 @@ describe('Badges Tests', () => {
             cy.request('POST', `/admin/projects/proj1/badge/badge1/skills/skill${i}`);
         }
 
-        cy.visit('/Administrator/projects/proj1/badges/badge1');
+        cy.visit('/administrator/projects/proj1/badges/badge1');
         cy.get(`${tableSelector} th`).contains('Skill ID').click();
 
         cy.validateTable(tableSelector, [
@@ -764,7 +764,7 @@ describe('Badges Tests', () => {
     });
 
     it('description is validated against custom validators', () => {
-        cy.visit('/Administrator/projects/proj1/badges');
+        cy.visit('/administrator/projects/proj1/badges');
         cy.wait('@loadBadges');
         cy.clickButton('Badge');
 

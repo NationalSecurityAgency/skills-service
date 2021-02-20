@@ -40,7 +40,7 @@ describe('Global Badges Tests', () => {
         cy.intercept('POST', '/supervisor/badges/name/exists').as('nameExists');
         cy.intercept('GET', '/app/userInfo/hasRole/ROLE_SUPERVISOR').as('checkSupervisorRole')
 
-        cy.visit('/Administrator/globalBadges');
+        cy.visit('/administrator/globalBadges');
         cy.wait('@getGlobalBadges');
         cy.wait('@checkSupervisorRole');
 
@@ -61,7 +61,7 @@ describe('Global Badges Tests', () => {
         cy.intercept('POST', '/supervisor/badges/name/exists').as('nameExists');
         cy.intercept('GET', '/app/userInfo/hasRole/ROLE_SUPERVISOR').as('checkSupervisorRole');
 
-        cy.visit('/Administrator/globalBadges');
+        cy.visit('/administrator/globalBadges');
         cy.wait('@getGlobalBadges');
         cy.wait('@checkSupervisorRole');
 
@@ -99,7 +99,7 @@ describe('Global Badges Tests', () => {
         cy.intercept('GET', '/app/userInfo/hasRole/ROLE_SUPERVISOR').as('checkSupervisorRole')
         cy.intercept('DELETE', `/supervisor/badges/${expectedId}`).as('deleteGlobalBadge');
 
-        cy.visit('/Administrator/globalBadges');
+        cy.visit('/administrator/globalBadges');
         cy.wait('@getGlobalBadges');
         cy.wait('@checkSupervisorRole');
 
@@ -170,7 +170,7 @@ describe('Global Badges Tests', () => {
         cy.intercept('GET', '/supervisor/projects/proj2/levels').as('getLevels');
         cy.intercept('GET', '/supervisor/badges/a_badge/projects/available').as('getAvailableLevels');
 
-        cy.visit('/Administrator/');
+        cy.visit('/administrator/');
         cy.clickNav('Badges');
         cy.wait('@getBadges');
         cy.get('[data-cy="manageBadge_a_badge"]').click({force:true});
@@ -200,7 +200,7 @@ describe('Global Badges Tests', () => {
 
         cy.intercept('GET', `/supervisor/badges`).as('getGlobalBadges');
 
-        cy.visit('/Administrator/');
+        cy.visit('/administrator/');
         cy.clickNav('Badges');
         cy.wait('@getGlobalBadges');
         cy.contains('No Badges Yet');
@@ -215,7 +215,7 @@ describe('Global Badges Tests', () => {
         cy.intercept('GET', '/app/userInfo/hasRole/ROLE_SUPERVISOR').as('checkSupervisorRole');
         cy.intercept('GET', `/supervisor/badges/${expectedId}`).as('getExpectedBadge');
 
-        cy.visit('/Administrator/globalBadges');
+        cy.visit('/administrator/globalBadges');
         cy.wait('@getGlobalBadges');
         cy.wait('@checkSupervisorRole');
 
@@ -266,7 +266,7 @@ describe('Global Badges Tests', () => {
         cy.intercept('GET', '/app/userInfo/hasRole/ROLE_SUPERVISOR').as('checkSupervisorRole');
         cy.intercept('GET', `/supervisor/badges/${expectedId}`).as('getExpectedBadge');
 
-        cy.visit('/Administrator/globalBadges');
+        cy.visit('/administrator/globalBadges');
         cy.wait('@getGlobalBadges');
         cy.wait('@checkSupervisorRole');
 
@@ -329,7 +329,7 @@ describe('Global Badges Tests', () => {
         cy.intercept('POST', '/supervisor/badges/name/exists').as('nameExists');
         cy.intercept('GET', '/app/userInfo/hasRole/ROLE_SUPERVISOR').as('checkSupervisorRole');
 
-        cy.visit('/Administrator/globalBadges');
+        cy.visit('/administrator/globalBadges');
         cy.wait('@getGlobalBadges');
         cy.wait('@checkSupervisorRole');
 
@@ -415,7 +415,7 @@ describe('Global Badges Tests', () => {
             version: 0,
         });
 
-        cy.visit('/Administrator/');
+        cy.visit('/administrator/');
 
         cy.clickNav('Badges');
         cy.wait('@getGlobalBadges');
@@ -522,7 +522,7 @@ describe('Global Badges Tests', () => {
         cy.intercept('GET', '/supervisor/projects/proj2/levels').as('getLevels');
         cy.intercept('GET', '/supervisor/badges/ABadgeBadge/projects/available').as('getAvailableLevels');
 
-        cy.visit('/Administrator/');
+        cy.visit('/administrator/');
 
         cy.clickNav('Badges');
         cy.wait('@getGlobalBadges');
@@ -584,7 +584,7 @@ describe('Global Badges Tests', () => {
     it('new badge button should retain focus after dialog is closed', () => {
         cy.intercept('GET', `/supervisor/badges`).as('getGlobalBadges');
 
-        cy.visit('/Administrator/');
+        cy.visit('/administrator/');
         cy.clickNav('Badges');
         cy.wait('@getGlobalBadges');
 
@@ -641,7 +641,7 @@ describe('Global Badges Tests', () => {
             cy.request('POST', `/supervisor/badges/badge1/projects/proj1/skills/skill${i}`);
         }
 
-        cy.visit('/Administrator/globalBadges/badge1');
+        cy.visit('/administrator/globalBadges/badge1');
         cy.get(`${tableSelector} th`).contains('Skill Name').click();
         cy.validateTable(tableSelector, [
             [{ colIndex: 1,  value: 'This is 93' }, { colIndex: 2,  value: 'skill7' }],
@@ -711,7 +711,7 @@ describe('Global Badges Tests', () => {
             cy.request('POST', `/supervisor/badges/badge1/projects/proj${i}/level/${i < 5 ? i+1 : '1'}`);
         }
 
-        cy.visit('/Administrator/globalBadges/badge1/levels');
+        cy.visit('/administrator/globalBadges/badge1/levels');
         cy.get(`${levelsTableSelector} th`).contains('Level').click();
         cy.validateTable(levelsTableSelector, [
             [{ colIndex: 1,  value: '1' }],
@@ -797,7 +797,7 @@ describe('Global Badges Tests', () => {
             cy.request('POST', `/supervisor/badges/badge1/projects/proj1/skills/skill${i}`);
         }
 
-        cy.visit('/Administrator/globalBadges/badge1');
+        cy.visit('/administrator/globalBadges/badge1');
         cy.get(`${tableSelector} th`).contains('Skill ID').click();
         cy.validateTable(tableSelector, [
             [{ colIndex: 1,  value: 'This is 100' }, { colIndex: 2,  value: 'skill0' }],
@@ -831,7 +831,7 @@ describe('Global Badges Tests', () => {
             cy.request('POST', `/supervisor/badges/badge1/projects/proj${i}/level/${i < 5 ? i+1 : '1'}`);
         }
 
-        cy.visit('/Administrator/globalBadges/badge1/levels');
+        cy.visit('/administrator/globalBadges/badge1/levels');
         cy.get(`${levelsTableSelector} th`).contains('Level').click();
         cy.validateTable(levelsTableSelector, [
             [{ colIndex: 0,  value: 'proj10' }, { colIndex: 1,  value: '1' }],
@@ -860,7 +860,7 @@ describe('Global Badges Tests', () => {
 
         cy.intercept('GET', `/supervisor/badges`).as('getGlobalBadges');
 
-        cy.visit('/Administrator/');
+        cy.visit('/administrator/');
         cy.clickNav('Badges');
         cy.wait('@getGlobalBadges');
 
@@ -899,7 +899,7 @@ describe('Global Badges Tests', () => {
     it('description is validated against custom validators', () => {
         cy.intercept('GET', `/supervisor/badges`).as('getGlobalBadges');
 
-        cy.visit('/Administrator/globalBadges');
+        cy.visit('/administrator/globalBadges');
         cy.wait('@getGlobalBadges');
 
         cy.get('[data-cy="btn_Global Badges"]').click();

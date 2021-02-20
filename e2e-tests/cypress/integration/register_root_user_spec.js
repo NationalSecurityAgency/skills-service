@@ -31,7 +31,7 @@ describe('Register Root Users', () => {
   });
 
   it('register root user', () => {
-    cy.visit('/Administrator/');
+    cy.visit('/administrator/');
     cy.contains('New Root Account')
     cy.get('#firstName').type("Robert")
     cy.get('#lastName').type("Smith")

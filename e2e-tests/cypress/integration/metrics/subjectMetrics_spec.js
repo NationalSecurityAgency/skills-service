@@ -80,14 +80,14 @@ describe('Metrics Tests - Subject', () => {
             }
         }
 
-        cy.visit('/Administrator/projects/proj1/subjects/subj1');
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.clickNav('Metrics');
         cy.wait('@numUsersPerLevelChartBuilderSubj1');
 
         cy.wait(waitForSnap);
         cy.get('[data-cy=levelsChart]').matchImageSnapshot();
 
-        cy.visit('/Administrator/projects/proj1/subjects/subj2');
+        cy.visit('/administrator/projects/proj1/subjects/subj2');
         cy.clickNav('Metrics');
         cy.wait('@numUsersPerLevelChartBuilderSubj2');
 
@@ -153,7 +153,7 @@ describe('Metrics Tests - Subject', () => {
 
         const noDataMsg = 'This chart needs at least 2 days of user activity';
 
-        cy.visit('/Administrator/projects/proj1/subjects/subj1');
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.clickNav('Metrics');
         cy.wait('@distinctUsersOverTimeForProject');
         cy.get('[data-cy=distinctNumUsersOverTime]').contains(noDataMsg).should('not.exist');
@@ -165,7 +165,7 @@ describe('Metrics Tests - Subject', () => {
                 expect(chart.height()).to.be.greaterThan(350)
             })
 
-        cy.visit('/Administrator/projects/proj1/subjects/subj2');
+        cy.visit('/administrator/projects/proj1/subjects/subj2');
         cy.clickNav('Metrics');
         cy.wait('@distinctUsersOverTimeForProject');
         cy.get('[data-cy=distinctNumUsersOverTime]').contains(noDataMsg)
@@ -187,7 +187,7 @@ describe('Metrics Tests - Subject', () => {
             name: 'Interesting Subject 1',
         });
 
-        cy.visit('/Administrator/projects/proj1/subjects/subj1');
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.clickNav('Metrics');
         cy.wait('@distinctUsersOverTimeForProject');
 
@@ -311,7 +311,7 @@ describe('Metrics Tests - Subject', () => {
             name: 'Interesting Subject 1',
         });
 
-        cy.visit('/Administrator/projects/proj1/subjects/subj1');
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.clickNav('Metrics');
         cy.wait('@distinctUsersOverTimeForProject');
 

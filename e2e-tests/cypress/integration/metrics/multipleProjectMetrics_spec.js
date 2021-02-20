@@ -148,7 +148,7 @@ describe('Multiple Project Metrics', () => {
             const newUsers = 'otherUser1@skills.org';
             cy.register(newUsers, vars.defaultPass);
             cy.login(newUsers, vars.defaultPass);
-            cy.visit('/Administrator/');
+            cy.visit('/administrator/');
             // wait for nav to finish loading
             cy.wait(1000);
             cy.get('[data-cy=nav-Metrics]').should('not.exist')
@@ -159,14 +159,14 @@ describe('Multiple Project Metrics', () => {
             cy.request('PUT', `/root/users/${newUsers}/roles/ROLE_SUPERVISOR`);
             cy.logout();
             cy.login(newUsers, vars.defaultPass);
-            cy.visit('/Administrator/');
+            cy.visit('/administrator/');
             cy.clickNav('Metrics');
             cy.contains('No Projects Selected')
         });
     });
 
     it('Project definitions comparison chart loads 4 projects by default', () => {
-        cy.visit('/Administrator/');
+        cy.visit('/administrator/');
         cy.clickNav('Metrics');
 
         cy.trainingProf('[data-cy=trainingProfileComparatorProjectSelector] .multiselect__tag').should('have.length', 4).as('selected');
@@ -202,7 +202,7 @@ describe('Multiple Project Metrics', () => {
 
     it('Project definitions comparison generates charts only after 2 projects are selected', () => {
         cy.viewport('macbook-11');
-        cy.visit('/Administrator/');
+        cy.visit('/administrator/');
         cy.clickNav('Metrics');
 
         cy.trainingProf('[data-cy=trainingProfileComparatorProjectSelector]  .multiselect__tag-icon').should('have.length', 4).as('removeBtns');
@@ -215,7 +215,7 @@ describe('Multiple Project Metrics', () => {
 
     it('Project definitions comparison allows up to 5 projects', () => {
         cy.viewport('macbook-11');
-        cy.visit('/Administrator/');
+        cy.visit('/administrator/');
         cy.clickNav('Metrics');
 
         cy.trainingProf('[data-cy=trainingProfileComparatorProjectSelector]').click()
@@ -226,7 +226,7 @@ describe('Multiple Project Metrics', () => {
     });
 
     it('Project definitions comparison - remove project', () => {
-        cy.visit('/Administrator/');
+        cy.visit('/administrator/');
         cy.clickNav('Metrics');
 
         cy.trainingProf('[data-cy=trainingProfileComparatorProjectSelector]  .multiselect__tag-icon').should('have.length', 4).as('removeBtns');
@@ -256,7 +256,7 @@ describe('Multiple Project Metrics', () => {
 
     it('Project definitions comparison - add project', () => {
         cy.viewport('macbook-11');
-        cy.visit('/Administrator/');
+        cy.visit('/administrator/');
         cy.clickNav('Metrics');
 
         cy.trainingProf('[data-cy=numOfSkillsChart]').contains('Grand Project 5').should('not.exist');
@@ -292,7 +292,7 @@ describe('Multiple Project Metrics', () => {
 
 
     it('find button should be disabled until 2 projects are selected', () => {
-        cy.visit('/Administrator/');
+        cy.visit('/administrator/');
         cy.clickNav('Metrics');
         cy.usrsInCommon().contains('No Projects Selected');
 
@@ -306,7 +306,7 @@ describe('Multiple Project Metrics', () => {
     });
 
     it('only support up to five projects', () => {
-        cy.visit('/Administrator/');
+        cy.visit('/administrator/');
         cy.clickNav('Metrics');
         cy.usrsInCommon().contains('No Projects Selected');
 
@@ -321,7 +321,7 @@ describe('Multiple Project Metrics', () => {
     });
 
     it('sync levels', () => {
-        cy.visit('/Administrator/');
+        cy.visit('/administrator/');
         cy.clickNav('Metrics');
         cy.usrsInCommon().contains('No Projects Selected');
 
@@ -349,7 +349,7 @@ describe('Multiple Project Metrics', () => {
     });
 
     it('if sync level higher than max level then just use max level', () => {
-        cy.visit('/Administrator/');
+        cy.visit('/administrator/');
         cy.clickNav('Metrics');
         cy.usrsInCommon().contains('No Projects Selected');
 
@@ -390,7 +390,7 @@ describe('Multiple Project Metrics', () => {
 
 
     it('sort and page through the result table', () => {
-        cy.visit('/Administrator/');
+        cy.visit('/administrator/');
         cy.clickNav('Metrics');
         cy.usrsInCommon().contains('No Projects Selected');
 
@@ -435,7 +435,7 @@ describe('Multiple Project Metrics', () => {
     })
 
     it('adjust page size of the result table', () => {
-        cy.visit('/Administrator/');
+        cy.visit('/administrator/');
         cy.clickNav('Metrics');
         cy.usrsInCommon().contains('No Projects Selected');
 
@@ -467,7 +467,7 @@ describe('Multiple Project Metrics', () => {
     })
 
     it('filter by level', () => {
-        cy.visit('/Administrator/');
+        cy.visit('/administrator/');
         cy.clickNav('Metrics');
         cy.usrsInCommon().contains('No Projects Selected');
 
@@ -547,7 +547,7 @@ describe('Multiple Project Metrics', () => {
     })
 
     it('number of results columns are derived from input projects', () => {
-        cy.visit('/Administrator/');
+        cy.visit('/administrator/');
         cy.clickNav('Metrics');
         cy.usrsInCommon().contains('No Projects Selected');
 
@@ -589,7 +589,7 @@ describe('Multiple Project Metrics', () => {
     });
 
     it('removing project from input should clear the result', () => {
-        cy.visit('/Administrator/');
+        cy.visit('/administrator/');
         cy.clickNav('Metrics');
         cy.usrsInCommon().contains('No Projects Selected');
 

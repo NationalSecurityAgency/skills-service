@@ -50,7 +50,7 @@ describe('Root Pin and Unpin Tests', () => {
       cy.intercept('DELETE', '/root/pin/proj1').as('unpinOne');
       cy.intercept('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
 
-      cy.visit('/Administrator/');
+      cy.visit('/administrator/');
       //confirm that default project loading returns no projects for root user
       cy.wait('@default');
       cy.contains('No Projects Yet...').should('be.visible');
@@ -141,7 +141,7 @@ describe('Root Pin and Unpin Tests', () => {
       cy.intercept('DELETE', '/root/pin/proj1').as('unpinOne');
       cy.intercept('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
 
-      cy.visit('/Administrator/');
+      cy.visit('/administrator/');
       //confirm that default project loading returns no projects for root user
       cy.wait('@default');
       cy.contains('No Projects Yet...').should('be.visible');
@@ -215,7 +215,7 @@ describe('Root Pin and Unpin Tests', () => {
       cy.intercept('DELETE', '/root/pin/proj1').as('unpinOne');
       cy.intercept('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
 
-      cy.visit('/Administrator/');
+      cy.visit('/administrator/');
       //confirm that default project loading returns no projects for root user
       cy.wait('@default');
       cy.contains('No Projects Yet...').should('be.visible');
@@ -264,7 +264,7 @@ describe('Root Pin and Unpin Tests', () => {
       cy.intercept('DELETE', '/root/pin/proj1').as('unpinOne');
       cy.intercept('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
 
-      cy.visit('/Administrator/');
+      cy.visit('/administrator/');
       //confirm that default project loading returns no projects for root user
       cy.wait('@default');
       cy.contains('No Projects Yet...').should('be.visible');
@@ -326,7 +326,7 @@ describe('Root Pin and Unpin Tests', () => {
       cy.intercept('DELETE', '/root/pin/proj1').as('unpinOne');
       cy.intercept('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
 
-      cy.visit('/Administrator/');
+      cy.visit('/administrator/');
       //confirm that default project loading returns no projects for root user
       cy.wait('@default');
       cy.contains('No Projects Yet...').should('be.visible');
@@ -392,7 +392,7 @@ describe('Root Pin and Unpin Tests', () => {
       cy.intercept('DELETE', '/root/pin/proj1').as('unpinOne');
       cy.intercept('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
 
-      cy.visit('/Administrator/');
+      cy.visit('/administrator/');
       //confirm that default project loading returns no projects for root user
       cy.wait('@default');
       cy.contains('No Projects Yet...').should('be.visible');

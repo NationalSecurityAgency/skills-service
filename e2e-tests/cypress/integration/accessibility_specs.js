@@ -126,7 +126,7 @@ describe('Accessibility Tests', () => {
   });
 
   it('admin home page', () => {
-    cy.visit('/Administrator/');
+    cy.visit('/administrator/');
     cy.customLighthouse();
     cy.injectAxe()
     cy.get('[data-cy=nav-Projects]').click();
@@ -136,7 +136,7 @@ describe('Accessibility Tests', () => {
   });
 
   it('project', () => {
-    cy.visit('/Administrator/');
+    cy.visit('/administrator/');
     cy.injectAxe()
     //view project
     cy.get('[data-cy=projCard_MyNewtestProject_manageBtn]').click();
@@ -242,7 +242,7 @@ describe('Accessibility Tests', () => {
     cy.route('GET', '/admin/projects/MyNewtestProject/subjects/subj1/users?**').as('getUsers');
     cy.route('GET', '/admin/projects/MyNewtestProject/performedSkills/u1?**').as('getPerformedSkills');
 
-    cy.visit('/Administrator/');
+    cy.visit('/administrator/');
     cy.injectAxe()
     //view project
     cy.get('[data-cy=projCard_MyNewtestProject_manageBtn]').click();
@@ -307,7 +307,7 @@ describe('Accessibility Tests', () => {
   })
 
   it('skills', () => {
-    cy.visit('/Administrator/');
+    cy.visit('/administrator/');
     cy.injectAxe()
     //view project
     cy.get('[data-cy="projCard_MyNewtestProject_manageBtn"]').click();
@@ -357,7 +357,7 @@ describe('Accessibility Tests', () => {
   })
 
   it('badges', ()=>{
-    cy.visit('/Administrator/');
+    cy.visit('/administrator/');
     cy.injectAxe()
 
     cy.get('[data-cy="projCard_MyNewtestProject_manageBtn"]').click();
@@ -412,7 +412,7 @@ describe('Accessibility Tests', () => {
 
     cy.intercept('POST', ' /supervisor/badges/globalbadgeBadge/projects/MyNewtestProject/level/1').as('saveGlobalBadgeLevel');
     cy.request('PUT', `/root/users/root@skills.org/roles/ROLE_SUPERVISOR`);
-    cy.visit('/Administrator');
+    cy.visit('/administrator');
     cy.injectAxe()
     cy.get('[data-cy=nav-Badges]').click();
     cy.customLighthouse();
