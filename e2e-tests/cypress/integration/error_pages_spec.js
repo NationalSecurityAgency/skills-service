@@ -20,7 +20,7 @@ describe('Error Pages Tests', () => {
             method: 'GET',
             url: '/admin/projects/fake'
         }).as('loadProject');
-        cy.visit('/projects/fake');
+        cy.visit('/administrator/projects/fake');
         cy.wait('@loadProject');
         cy.get('[data-cy=notAuthorizedExplanation]').should('be.visible');
         cy.get('[data-cy=notAuthorizedExplanation]').contains('You do not have permission to view/manage this Project OR this Project does not exist');
@@ -29,7 +29,7 @@ describe('Error Pages Tests', () => {
             method: 'GET',
             url: '/admin/projects/fake/subjects/fake'
         }).as('loadSubject');
-        cy.visit('/projects/fake/subjects/fake');
+        cy.visit('/administrator/projects/fake/subjects/fake');
         cy.wait('@loadSubject');
         cy.get('[data-cy=notAuthorizedExplanation]').should('be.visible');
         cy.get('[data-cy=notAuthorizedExplanation]').contains('You do not have permission to view/manage this Project OR this Project does not exist');
@@ -39,7 +39,7 @@ describe('Error Pages Tests', () => {
             url: '/admin/projects/fake/subjects/fake/skills/fake'
         }).as('loadSkill');
 
-        cy.visit('/projects/fake/subjects/fake/skills/fake');
+        cy.visit('/administrator/projects/fake/subjects/fake/skills/fake');
         cy.wait('@loadSkill');
         cy.get('[data-cy=notAuthorizedExplanation]').should('be.visible');
         cy.get('[data-cy=notAuthorizedExplanation]').contains('You do not have permission to view/manage this Project OR this Project does not exist');
@@ -49,7 +49,7 @@ describe('Error Pages Tests', () => {
             url: '/admin/projects/fake/badges/fake'
         }).as('loadBadge');
 
-        cy.visit('/projects/fake/badges/fake');
+        cy.visit('/administrator/projects/fake/badges/fake');
         cy.wait('@loadBadge');
         cy.get('[data-cy=notAuthorizedExplanation]').should('be.visible');
         cy.get('[data-cy=notAuthorizedExplanation]').contains('You do not have permission to view/manage this Project OR this Project does not exist');
@@ -92,7 +92,7 @@ describe('Error Pages Tests', () => {
             method: 'GET',
             url: '/admin/projects/proj1'
         }).as('loadProject');
-        cy.visit('/projects/proj1');
+        cy.visit('/administrator/projects/proj1');
         cy.wait('@loadProject');
 
         cy.get('[data-cy=notAuthorizedExplanation]').should('be.visible');
@@ -102,7 +102,7 @@ describe('Error Pages Tests', () => {
             method: 'GET',
             url: '/admin/projects/proj1/subjects/subj1'
         }).as('loadSubject');
-        cy.visit('/projects/proj1/subjects/subj1');
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.wait('@loadSubject');
         cy.get('[data-cy=notAuthorizedExplanation]').should('be.visible');
         cy.get('[data-cy=notAuthorizedExplanation]').contains('You do not have permission to view/manage this Project OR this Project does not exist');
@@ -111,7 +111,7 @@ describe('Error Pages Tests', () => {
             method: 'GET',
             url: '/admin/projects/proj1/subjects/subj1/skills/skill1'
         }).as('loadSkill');
-        cy.visit('/projects/proj1/subjects/subj1/skills/skill1');
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1');
         cy.wait('@loadSkill');
         cy.get('[data-cy=notAuthorizedExplanation]').should('be.visible');
         cy.get('[data-cy=notAuthorizedExplanation]').contains('You do not have permission to view/manage this Project OR this Project does not exist');
@@ -120,7 +120,7 @@ describe('Error Pages Tests', () => {
             method: 'GET',
             url: '/admin/projects/proj1/badges/badge1'
         }).as('loadBadge');
-        cy.visit('/projects/proj1/badges/badge1');
+        cy.visit('/administrator/projects/proj1/badges/badge1');
         cy.wait('@loadBadge');
         cy.get('[data-cy=notAuthorizedExplanation]').should('be.visible');
         cy.get('[data-cy=notAuthorizedExplanation]').contains('You do not have permission to view/manage this Project OR this Project does not exist');
@@ -136,7 +136,7 @@ describe('Error Pages Tests', () => {
             url: '/admin/projects/proj1/subjects/fake'
         }).as('loadSubject');
 
-        cy.visit('/projects/proj1/subjects/fake');
+        cy.visit('/administrator/projects/proj1/subjects/fake');
         cy.wait('@loadSubject');
 
         cy.get('[data-cy=notFoundExplanation]').should('be.visible');
@@ -159,7 +159,7 @@ describe('Error Pages Tests', () => {
             method: 'GET',
             url: '/admin/projects/proj1/subjects/subj1/skills/skill1'
         }).as('loadSkill');
-        cy.visit('/projects/proj1/subjects/subj1/skills/skill1');
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1');
         cy.wait('@loadSkill');
 
         cy.get('[data-cy=notFoundExplanation]').should('be.visible');
@@ -176,7 +176,7 @@ describe('Error Pages Tests', () => {
             url: '/admin/projects/proj1/badges/fake'
         }).as('loadBadge');
 
-        cy.visit('/projects/proj1/badges/fake');
+        cy.visit('/administrator/projects/proj1/badges/fake');
         cy.wait('@loadBadge');
 
         cy.get('[data-cy=notFoundExplanation]').should('be.visible');
@@ -195,7 +195,7 @@ describe('Error Pages Tests', () => {
             method: 'GET',
             url: '/supervisor/badges/fake'
         }).as('loadGlobalBadge');
-        cy.visit('/globalBadges/fake');
+        cy.visit('/administrator/globalBadges/fake');
         cy.wait('@loadGlobalBadge');
 
         cy.get('[data-cy=notFoundExplanation]').should('be.visible');
@@ -222,7 +222,7 @@ describe('Error Pages Tests', () => {
         cy.login('user1', 'password1');
 
         cy.intercept('GET', '/supervisor/badges/globalBadge1').as('loadGlobalBadge');
-        cy.visit('/globalBadges/globalBadge1');
+        cy.visit('/administrator/globalBadges/globalBadge1');
         cy.wait('@loadGlobalBadge');
 
         cy.get('[data-cy=notAuthorizedExplanation]').should('be.visible');

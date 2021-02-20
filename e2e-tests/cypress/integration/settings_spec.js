@@ -1,4 +1,4 @@
-/*
+    /*
  * Copyright 2020 SkillTree
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -35,7 +35,7 @@ describe('Settings Tests', () => {
         }).as('loadProjects');
         cy.intercept({method: 'GET', url: '/root/isRoot'}).as('checkRoot');
 
-        cy.visit('/');
+        cy.visit('/administrator/');
         cy.get('[data-cy=subPageHeader]').contains('Projects');
         cy.get('button.dropdown-toggle').first().click({force: true});
         cy.contains('Settings').click();
@@ -89,7 +89,7 @@ describe('Settings Tests', () => {
         }).as('loadProjects');
         cy.intercept({method: 'GET', url: '/root/isRoot'}).as('checkRoot');
 
-        cy.visit('/');
+        cy.visit('/administrator/');
         cy.wait('@loadConfig');
         cy.wait('@loadUserInfo');
         cy.wait('@loadProjects');
@@ -118,7 +118,7 @@ describe('Settings Tests', () => {
         }).as('loadProjects');
         cy.intercept({method: 'GET', url: '/root/isRoot'}).as('checkRoot');
 
-        cy.visit('/');
+        cy.visit('/administrator/');
         cy.get('button.dropdown-toggle').first().click({force: true});
         cy.contains('Settings').click();
         cy.wait('@checkRoot');
@@ -148,7 +148,7 @@ describe('Settings Tests', () => {
         }).as('loadProjects');
         cy.intercept({method: 'GET', url: '/root/isRoot'}).as('checkRoot');
 
-        cy.visit('/');
+        cy.visit('/administrator/');
         cy.get('[data-cy=subPageHeader]').contains('Projects');
 
         cy.get('li').contains('Badges').should('not.exist');
@@ -168,7 +168,9 @@ describe('Settings Tests', () => {
         ], 5, true, null, false);
 
         cy.vuex().its('state.access.isSupervisor').should('equal', true);
-        cy.contains('Home').click();
+        // cy.contains('Home').click();
+        cy.get('[data-cy=settings-button]').click();
+        cy.contains('Project Admin').click();
         cy.get('[data-cy=navigationmenu]').contains('Badges', {timeout: 5000}).should('be.visible');
     });
 
@@ -220,7 +222,7 @@ describe('Settings Tests', () => {
         }).as('loadProjects');
         cy.intercept({method: 'GET', url: '/root/isRoot'}).as('checkRoot');
 
-        cy.visit('/');
+        cy.visit('/administrator/');
         cy.get('[data-cy=subPageHeader]').contains('Projects');
 
         cy.get('li').contains('Badges').should('not.exist');
@@ -249,7 +251,7 @@ describe('Settings Tests', () => {
 
         cy.intercept({method: 'GET', url: '/root/isRoot'}).as('checkRoot');
 
-        cy.visit('/');
+        cy.visit('/administrator/');
 
         cy.get('li').contains('Badges').should('not.exist');
         cy.vuex().its('state.access.isSupervisor').should('equal', false);
@@ -265,7 +267,7 @@ describe('Settings Tests', () => {
 
         cy.intercept('GET', '/root/getEmailSettings').as('loadEmailSettings');
         cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
-        cy.visit('/');
+        cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
         cy.get('.userName').parent().click();
         cy.contains('Settings').click();
@@ -314,7 +316,7 @@ describe('Settings Tests', () => {
 
         cy.intercept('GET', '/root/getEmailSettings').as('loadEmailSettings');
         cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
-        cy.visit('/');
+        cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
         cy.get('.userName').parent().click();
         cy.contains('Settings').click();
@@ -335,7 +337,7 @@ describe('Settings Tests', () => {
         cy.intercept('GET', '/root/getSystemSettings').as('loadSystemSettings');
         cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
         cy.intercept('GET', '/public/config').as('loadConfig');
-        cy.visit('/');
+        cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
         cy.get('.userName').parent().click();
         cy.contains('Settings').click();
@@ -362,7 +364,7 @@ describe('Settings Tests', () => {
 
         //confirm that header/footer persist after logging out
         cy.logout();
-        cy.visit('/');
+        cy.visit('/administrator/');
         cy.wait('@loadConfig');
         cy.get('#customHeaderDiv').contains('HEADER');
         cy.get('#customFooterDiv').contains('FOOTER');
@@ -373,7 +375,7 @@ describe('Settings Tests', () => {
         cy.intercept('GET', '/root/getSystemSettings').as('loadSystemSettings');
         cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
         cy.intercept('GET', '/public/config').as('loadConfig');
-        cy.visit('/');
+        cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
         cy.get('.userName').parent().click();
         cy.contains('Settings').click();
@@ -401,7 +403,7 @@ describe('Settings Tests', () => {
         cy.intercept('GET', '/root/getSystemSettings').as('loadSystemSettings');
         cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
         cy.intercept('GET', '/public/config').as('loadConfig');
-        cy.visit('/');
+        cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
         cy.get('.userName').parent().click();
         cy.contains('Settings').click();
@@ -431,7 +433,7 @@ describe('Settings Tests', () => {
         cy.intercept('GET', '/root/getSystemSettings').as('loadSystemSettings');
         cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
         cy.intercept('GET', '/public/config').as('loadConfig');
-        cy.visit('/');
+        cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
         cy.get('.userName').parent().click();
         cy.contains('Settings').click();
@@ -459,7 +461,7 @@ describe('Settings Tests', () => {
         cy.intercept('GET', '/root/getSystemSettings').as('loadSystemSettings');
         cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
         cy.intercept('GET', '/public/config').as('loadConfig');
-        cy.visit('/');
+        cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
         cy.get('.userName').parent().click();
         cy.contains('Settings').click();
@@ -507,7 +509,7 @@ describe('Settings Tests', () => {
         cy.intercept('GET', '/root/getSystemSettings').as('loadSystemSettings');
         cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
         cy.intercept('GET', '/public/config').as('loadConfig');
-        cy.visit('/');
+        cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
         cy.get('.userName').parent().click();
         cy.contains('Settings').click();

@@ -48,7 +48,7 @@ describe('Metrics Tests - Skills', () => {
             });
         }
 
-        cy.visit('/projects/proj1/subjects/subj1/skills/skill1');
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1');
         cy.clickNav('Metrics');
         cy.wait('@singleSkillCountsChartBuilder');
 
@@ -110,7 +110,7 @@ describe('Metrics Tests - Skills', () => {
                 });
         }
 
-        cy.visit('/projects/proj1/subjects/subj1/skills/skill1');
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1');
         cy.clickNav('Metrics');
         cy.wait('@singleSkillCountsChartBuilder');
 
@@ -152,7 +152,7 @@ describe('Metrics Tests - Skills', () => {
             });
         }
 
-        cy.visit('/projects/proj1/subjects/subj1/skills/skill1');
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1');
         cy.clickNav('Metrics');
         cy.wait('@singleSkillCountsChartBuilder');
 
@@ -209,7 +209,7 @@ describe('Metrics Tests - Skills', () => {
             }
         }
 
-        cy.visit('/projects/proj1/subjects/subj1/skills/skill1');
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1');
         cy.clickNav('Metrics');
         cy.wait('@singleSkillCountsChartBuilder');
 
@@ -240,7 +240,7 @@ describe('Metrics Tests - Skills', () => {
             });
         }
 
-        cy.visit('/projects/proj1/subjects/subj1/skills/skill1');
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1');
         cy.clickNav('Metrics');
         cy.wait('@singleSkillCountsChartBuilder');
 
@@ -285,7 +285,7 @@ describe('Metrics Tests - Skills', () => {
             });
         }
 
-        cy.visit('/projects/proj1/subjects/subj1/skills/skill1');
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1');
         cy.clickNav('Metrics');
         cy.wait('@singleSkillCountsChartBuilder');
 
@@ -336,7 +336,7 @@ describe('Metrics Tests - Skills', () => {
             }
         }
 
-        cy.visit('/projects/proj1/subjects/subj1/skills/skill1');
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1');
         cy.clickNav('Metrics');
         cy.wait('@skillEventsOverTimeChartBuilder');
 
@@ -382,7 +382,7 @@ describe('Metrics Tests - Skills', () => {
             }
         }
 
-        cy.visit('/projects/proj1/subjects/subj1/skills/skill1');
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1');
         cy.clickNav('Metrics');
         cy.wait('@skillEventsOverTimeChartBuilder');
 
@@ -435,7 +435,7 @@ describe('Metrics Tests - Skills', () => {
             }
         }
 
-        cy.visit('/projects/proj1/subjects/subj1/skills/skill1');
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1');
         cy.clickNav('Metrics');
         cy.wait('@binnedUsagePostAchievementMetricsBuilder');
         cy.wait('@usagePostAchievementMetricsBuilder');

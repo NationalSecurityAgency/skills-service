@@ -25,7 +25,7 @@ limitations under the License.
   import Navigation from './utils/Navigation';
 
   export default {
-    name: 'HomePage',
+    name: 'AdminHomePage',
     components: {
       Navigation,
     },
@@ -36,7 +36,7 @@ limitations under the License.
           {
             name: 'Projects',
             iconClass: 'fa-tasks skills-color-projects',
-            page: 'HomePage',
+            page: 'AdminHomePage',
           },
         ],
       };

@@ -15,7 +15,7 @@
  */
 import Vue from 'vue';
 import Router from 'vue-router';
-import HomePage from '@/components/HomePage';
+import AdminHomePage from '@/components/AdminHomePage';
 import MyProjects from '@/components/projects/MyProjects';
 import LoginForm from '@/components/access/Login';
 import RequestAccountForm from '@/components/access/RequestAccess';
@@ -78,11 +78,11 @@ const router = new Router({
   mode: 'history',
   routes: [
     {
-      path: '/',
-      component: HomePage,
+      path: '/administrator',
+      component: AdminHomePage,
       meta: { requiresAuth: false },
       children: [{
-        name: 'HomePage',
+        name: 'AdminHomePage',
         path: '',
         component: MyProjects,
         meta: { requiresAuth: true },
@@ -193,27 +193,27 @@ const router = new Router({
       },
     },
     {
-      path: '/my-progress',
+      path: '/',
       component: MyProgress,
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: true, nonAdmin: true },
       children: [{
-        name: 'MyProgressPage',
+        name: 'LandingPage',
         path: '',
         component: MyProgressPage,
         meta: {
-          requiresAuth: true,
+          requiresAuth: true, nonAdmin: true,
         },
       }, {
         name: 'MyProjectSkills',
         path: 'projects/:projectId',
         component: MyProjectSkillsPage,
         meta: {
-          requiresAuth: true,
+          requiresAuth: true, nonAdmin: true,
         },
       }],
     },
     {
-      path: '/projects/:projectId',
+      path: '/administrator/projects/:projectId',
       component: ProjectPage,
       meta: { requiresAuth: true },
       children: [{
@@ -292,7 +292,7 @@ const router = new Router({
       }],
     },
     {
-      path: '/projects/:projectId/subjects/:subjectId',
+      path: '/administrator/projects/:projectId/subjects/:subjectId',
       component: SubjectPage,
       meta: { requiresAuth: true },
       children: [{
@@ -318,7 +318,7 @@ const router = new Router({
       }],
     },
     {
-      path: '/projects/:projectId/badges/:badgeId',
+      path: '/administrator/projects/:projectId/badges/:badgeId',
       component: BadgePage,
       meta: { requiresAuth: true },
       children: [{
@@ -334,7 +334,7 @@ const router = new Router({
       }],
     },
     {
-      path: '/projects/:projectId/subjects/:subjectId/skills/:skillId',
+      path: '/administrator/projects/:projectId/subjects/:subjectId/skills/:skillId',
       component: SkillPage,
       meta: { requiresAuth: true },
       children: [{
@@ -366,7 +366,7 @@ const router = new Router({
       }],
     },
     {
-      path: '/projects/:projectId/users/:userId',
+      path: '/administrator/projects/:projectId/users/:userId',
       component: UserPage,
       meta: { requiresAuth: true },
       children: [{
@@ -382,7 +382,7 @@ const router = new Router({
       }],
     },
     {
-      path: '/projects/:projectId/subjects/:subjectId/users/:userId',
+      path: '/administrator/projects/:projectId/subjects/:subjectId/users/:userId',
       component: UserPage,
       meta: { requiresAuth: true },
       children: [{
@@ -398,7 +398,7 @@ const router = new Router({
       }],
     },
     {
-      path: '/projects/:projectId/subjects/:subjectId/skills/:skillId/users/:userId',
+      path: '/administrator/projects/:projectId/subjects/:subjectId/skills/:skillId/users/:userId',
       component: UserPage,
       meta: { requiresAuth: true },
       children: [{
@@ -414,7 +414,7 @@ const router = new Router({
       }],
     },
     {
-      path: '/projects/:projectId/badges/:badgeId/users/:userId',
+      path: '/administrator/projects/:projectId/badges/:badgeId/users/:userId',
       component: UserPage,
       meta: { requiresAuth: true },
       children: [{
@@ -439,22 +439,22 @@ const router = new Router({
         name: 'GeneralSettings',
         path: '',
         component: GeneralSettings,
-        meta: { requiresAuth: true, reportSkillId: 'VisitUserSettings' },
+        meta: { requiresAuth: true, nonAdmin: true, reportSkillId: 'VisitUserSettings' },
       }, {
         name: 'SecuritySettings',
         path: 'security',
         component: SecuritySettings,
-        meta: { requiresAuth: true },
+        meta: { requiresAuth: true, nonAdmin: true },
       }, {
         name: 'EmailSettings',
         path: 'email',
         component: EmailSettings,
-        meta: { requiresAuth: true },
+        meta: { requiresAuth: true, nonAdmin: true },
       }, {
         name: 'SystemSettings',
         path: 'system',
         component: SystemSettings,
-        meta: { requiresAuth: true },
+        meta: { requiresAuth: true, nonAdmin: true },
       }],
     },
     {
@@ -464,13 +464,13 @@ const router = new Router({
       meta: { requiresAuth: true, reportSkillId: 'VisitMarkdownDocs' },
     },
     {
-      path: '/skills',
+      path: '/administrator/skills',
       name: 'InceptionSkills',
       component: InceptionSkills,
       meta: { requiresAuth: true, breadcrumb: 'Dashboard Skills', reportSkillId: 'VisitDashboardSkills' },
     },
     {
-      path: '/globalBadges/:badgeId',
+      path: '/administrator/globalBadges/:badgeId',
       component: GlobalBadgePage,
       meta: { requiresAuth: true },
       children: [{

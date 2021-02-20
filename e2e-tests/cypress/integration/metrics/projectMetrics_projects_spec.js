@@ -113,7 +113,7 @@ describe('Metrics Tests', () => {
             }],
         }).as('distinctUsersOverTimeForProject');
 
-        cy.visit('/projects/proj1/');
+        cy.visit('/administrator/projects/proj1/');
         cy.clickNav('Metrics');
         cy.wait('@distinctUsersOverTimeForProject');
 
@@ -129,7 +129,7 @@ describe('Metrics Tests', () => {
     },() => {
         cy.intercept('/admin/projects/proj1/metrics/distinctUsersOverTimeForProject**').as('distinctUsersOverTimeForProject');
 
-        cy.visit('/projects/proj1/');
+        cy.visit('/administrator/projects/proj1/');
         cy.clickNav('Metrics');
         cy.wait('@distinctUsersOverTimeForProject');
 
@@ -165,7 +165,7 @@ describe('Metrics Tests', () => {
         cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'user0Good@skills.org', timestamp: m.clone().subtract(1, 'day').format('x')})
         cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'user1Good@skills.org', timestamp: m.clone().subtract(1, 'day').format('x')})
 
-        cy.visit('/projects/proj1/');
+        cy.visit('/administrator/projects/proj1/');
         cy.clickNav('Metrics');
         cy.wait('@distinctUsersOverTimeForProject');
         // make sure a line i rendered on a chart
@@ -194,7 +194,7 @@ describe('Metrics Tests', () => {
             }],
         }).as('distinctUsersOverTimeForProject');
 
-        cy.visit('/projects/proj1/');
+        cy.visit('/administrator/projects/proj1/');
         cy.clickNav('Metrics');
         cy.wait('@distinctUsersOverTimeForProject');
 
@@ -217,7 +217,7 @@ describe('Metrics Tests', () => {
             }],
         }).as('distinctUsersOverTimeForProject');
 
-        cy.visit('/projects/proj1/');
+        cy.visit('/administrator/projects/proj1/');
         cy.clickNav('Metrics');
         cy.wait('@distinctUsersOverTimeForProject');
         cy.get('[data-cy=distinctNumUsersOverTime]').contains('This chart needs at least 2 days of user activity.');

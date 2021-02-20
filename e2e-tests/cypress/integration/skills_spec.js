@@ -34,7 +34,7 @@ describe('Skills Tests', () => {
         url: '/admin/projects/proj1/subjects/subj1'
       }).as('loadSubject');
 
-      cy.visit('/projects/proj1/subjects/subj1');
+      cy.visit('/administrator/projects/proj1/subjects/subj1');
       cy.wait('@loadSubject');
 
       cy.clickButton('Skill');
@@ -58,7 +58,7 @@ describe('Skills Tests', () => {
         url: '/admin/projects/proj1/subjects/subj1'
       }).as('loadSubject');
 
-      cy.visit('/projects/proj1/subjects/subj1');
+      cy.visit('/administrator/projects/proj1/subjects/subj1');
       cy.wait('@loadSubject');
 
       cy.clickButton('Skill');
@@ -83,7 +83,7 @@ describe('Skills Tests', () => {
         numPerformToCompletion: '5'
       });
 
-      cy.visit('/projects/proj1/subjects/subj1');
+      cy.visit('/administrator/projects/proj1/subjects/subj1');
       cy.wait('@loadSubject');
 
       cy.clickButton('Skill');
@@ -186,7 +186,7 @@ describe('Skills Tests', () => {
 
         const selectorOccurrencesToCompletion = '[data-cy="numPerformToCompletion"]';
         const selectorSkillsRowToggle = '[data-cy="expandDetailsBtn_Skill1Skill"]';
-        cy.visit('/projects/proj1/subjects/subj1');
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
 
         cy.wait('@loadSubject');
 
@@ -227,7 +227,7 @@ describe('Skills Tests', () => {
             url: '/admin/projects/proj1/subjects/subj1'
         }).as('loadSubject');
 
-        cy.visit('/projects/proj1/subjects/subj1');
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.wait('@loadSubject');
         cy.clickButton('Skill');
 
@@ -254,7 +254,7 @@ describe('Skills Tests', () => {
         url: '/admin/projects/proj1/subjects/subj1'
       }).as('loadSubject');
 
-      cy.visit('/projects/proj1/subjects/subj1');
+      cy.visit('/administrator/projects/proj1/subjects/subj1');
       cy.wait('@loadSubject');
       cy.clickButton('Skill');
 
@@ -293,7 +293,7 @@ describe('Skills Tests', () => {
             url: '/api/projects/Inception/skills/ManuallyAddSkillEvent'
         }).as('addSkillEvent');
 
-       cy.visit('/projects/proj1/subjects/subj1/skills/skill1');
+       cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1');
        cy.wait('@loadSkill');
        cy.contains('Add Event').click();
 
@@ -347,7 +347,7 @@ describe('Skills Tests', () => {
             url: '/admin/projects/proj1/subjects/subj1/skills/skill1'
         }).as('loadSkill');
 
-        cy.visit('/projects/proj1/subjects/subj1/skills/skill1');
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1');
         cy.wait('@loadSkill');
         cy.contains('Add Event').click();
 
@@ -382,7 +382,7 @@ describe('Skills Tests', () => {
             url: '/admin/projects/proj1/subjects/subj1/skills/skill1'
         }).as('loadSkill')
 
-        cy.visit('/projects/proj1/subjects/subj1/skills/skill1');
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1');
         cy.wait('@loadSkill')
 
 
@@ -410,7 +410,7 @@ describe('Skills Tests', () => {
             url: '/admin/projects/proj1/subjects/subj1/skills/skill1'
         }).as('loadSkill');
 
-        cy.visit('/projects/proj1/subjects/subj1/skills/skill1');
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1');
         cy.wait('@loadSkill');
         cy.contains('Add Event').click();
 
@@ -458,7 +458,7 @@ describe('Skills Tests', () => {
           url: '/admin/projects/proj1/subjects/subj1'
       }).as('loadSubject');
 
-      cy.visit('/projects/proj1/subjects/subj1');
+      cy.visit('/administrator/projects/proj1/subjects/subj1');
       cy.wait('@loadSubject');
       cy.clickButton('Skill');
 
@@ -493,7 +493,7 @@ describe('Skills Tests', () => {
       url: '/admin/projects/proj1/subjects/subj1'
     }).as('loadSubject');
 
-    cy.visit('/projects/proj1/subjects/subj1');
+    cy.visit('/administrator/projects/proj1/subjects/subj1');
     cy.wait('@loadSubject');
 
     cy.get('[aria-label="new skill"]').click();
@@ -556,7 +556,7 @@ describe('Skills Tests', () => {
       url: '/admin/projects/proj1/subjects/subj1'
     }).as('loadSubject');
 
-    cy.visit('/projects/proj1/subjects/subj1');
+    cy.visit('/administrator/projects/proj1/subjects/subj1');
     cy.wait('@loadSubject');
     //skill 2
     cy.get('[data-cy=editSkillButton_skill2]').click();
@@ -613,7 +613,7 @@ describe('Skills Tests', () => {
     });
 
     cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'someuser', timestamp: new Date().getTime()})
-    cy.visit('/projects/proj1/subjects/subj1/skills/skill1/');
+    cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/');
     cy.clickNav('Users').click();
     cy.get('[data-cy="usersTable"]').contains('someuser').click();
     cy.get('[data-cy=breadcrumb-subj1]').should('be.visible');
@@ -624,7 +624,7 @@ describe('Skills Tests', () => {
     it('description is validated against custom validators', () => {
         cy.intercept('GET', '/admin/projects/proj1/subjects/subj1').as('loadSubject');
 
-        cy.visit('/projects/proj1/subjects/subj1');
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.wait('@loadSubject');
         cy.clickButton('Skill')
 

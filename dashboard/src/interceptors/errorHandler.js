@@ -30,7 +30,7 @@ function errorResponseHandler(error) {
     if (path !== '/skills-login') {
       let loginRoute = path !== '/' ? { name: 'Login', query: { redirect: path } } : { name: 'Login' };
       if (store.getters.isPkiAuthenticated) {
-        loginRoute = path !== '/' ? { name: 'HomePage', query: { redirect: path } } : { name: 'HomePage' };
+        loginRoute = path !== '/' ? { name: 'LandingPage', query: { redirect: path } } : { name: 'LandingPage' };
       }
       router.push(loginRoute);
     }

@@ -198,10 +198,10 @@ describe('Navigation Tests', () => {
 
 
   it('visit My Progress page', function () {
-    cy.visit('/my-progress');
+    cy.visit('/');
     cy.wait('@allSkillEventsForUser');
 
-    cy.get('[data-cy=breadcrumb-MyProgress]').contains('MyProgress').should('be.visible');
+    cy.get('[data-cy=breadcrumb-Home]').contains('Home').should('be.visible');
 
     cy.get('[data-cy=numProjectsContributed]').contains(new RegExp(/^1$/));
     cy.get('[data-cy=numProjectsAvailable]').contains(new RegExp(/^\/ 2$/));
@@ -232,13 +232,15 @@ describe('Navigation Tests', () => {
     cy.get('[data-cy=project-link-proj1]').find('[data-cy=project-card-project-rank]').contains(new RegExp(/^Rank: 1 \/ 1$/));
     cy.get('[data-cy=project-link-proj1]').find('[data-cy=project-card-project-points]').contains(new RegExp(/^400 \/ 1,400$/));
 
+    cy.get('[data-cy=inception-button]').should('not.exist');
+
     cy.get('[data-cy=project-link-proj1]').click()
 
     cy.intercept('GET', '/api/projects/proj1/pointHistory').as('pointHistoryChart');
     cy.wait('@pointHistoryChart');
     cy.wrapIframe().contains('Overall Points');
-    cy.get('[data-cy=breadcrumb-MyProgress]').should('be.visible');
-    cy.get('[data-cy=breadcrumb-Proj1]').should('be.visible');
+    cy.get('[data-cy=breadcrumb-Home]').should('be.visible');
+    cy.get('[data-cy=breadcrumb-proj1]').should('be.visible');
     cy.get('[data-cy=breadcrumb-projects]').should('not.exist');
   });
 
@@ -251,7 +253,7 @@ describe('Navigation Tests', () => {
     })
 
     cy.loginAsProxyUser();
-    cy.visit('/my-progress');
+    cy.visit('/');
     cy.wait('@allSkillEventsForUser');
 
     cy.get('[data-cy=numProjectsContributed]').contains(new RegExp(/^2$/));
@@ -271,7 +273,7 @@ describe('Navigation Tests', () => {
     });
 
     cy.loginAsProxyUser();
-    cy.visit('/my-progress');
+    cy.visit('/');
     cy.wait('@allSkillEventsForUser');
 
     cy.get('[data-cy=numProjectsContributed]').contains(new RegExp(/^1$/));
@@ -281,7 +283,7 @@ describe('Navigation Tests', () => {
 
   it('My Progress page - time controls call out to the server',() => {
 
-    cy.visit('/my-progress');
+    cy.visit('/');
     cy.wait('@allSkillEventsForUser');
 
     cy.get('[data-cy=eventHistoryChart] [data-cy=timeLengthSelector]').contains('6 months').click();
@@ -322,7 +324,7 @@ describe('Navigation Tests', () => {
     });
 
     cy.loginAsProxyUser();
-    cy.visit('/my-progress');
+    cy.visit('/');
     cy.wait('@allSkillEventsForUser');
 
     // validate 4 projects are loaded by default
@@ -375,7 +377,7 @@ describe('Navigation Tests', () => {
     });
 
     cy.loginAsProxyUser();
-    cy.visit('/my-progress');
+    cy.visit('/');
     cy.wait('@allSkillEventsForUser');
 
     cy.get('[data-cy=numProjectsContributed]').contains(new RegExp(/^1$/));
@@ -391,6 +393,41 @@ describe('Navigation Tests', () => {
 
     cy.get('[data-cy=project-link-proj2]').should('not.exist');
     cy.get('[data-cy=project-link-proj1]').find('[data-cy=project-card-project-name]').contains('Project 2').should('not.exist');
+  });
+
+  it('My Progress page - no projects created', function () {
+    cy.intercept({
+      method: 'GET',
+      path: '/api/myProgressSummary',
+    }, {
+      statusCode: 200,
+      body: {"projectSummaries":[],"totalProjects":0,"numProjectsContributed":0,"totalSkills":0,"numAchievedSkills":0,"numAchievedSkillsLastMonth":0,"numAchievedSkillsLastWeek":0,"mostRecentAchievedSkill":null,"totalBadges":0,"numAchievedBadges":0,"numAchievedGemBadges":0,"numAchievedGlobalBadges":0}
+    }).as('getMyProgress');
+
+    cy.visit('/');
+    cy.wait('@getMyProgress');
+
+    cy.contains('Projects can be created from the "Project Admin" view, accessible by clicking on your name at the top-right of the screen.')
+  });
+
+  it('My Progress page - no projects with production mode enabled', function () {
+    // remove production mode from all projects
+    cy.loginAsRootUser();
+    cy.request('POST', '/admin/projects/proj1/settings/production.mode.enabled', {
+      projectId: 'proj1',
+      setting: 'production.mode.enabled',
+      value: 'false'
+    });
+    cy.request('POST', '/admin/projects/Inception/settings/production.mode.enabled', {
+      projectId: 'Inception',
+      setting: 'production.mode.enabled',
+      value: 'false'
+    });
+
+    cy.loginAsProxyUser();
+    cy.visit('/');
+
+    cy.contains('You will see your SkillTree progress and rankings on this page when project(s) have their production mode enabled.')
   });
 
 });

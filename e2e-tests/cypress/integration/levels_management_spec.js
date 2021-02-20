@@ -31,7 +31,7 @@ describe('Levels Management Tests', () => {
             name: "Subject 1"
         });
 
-        cy.visit('/projects/proj1/');
+        cy.visit('/administrator/projects/proj1/');
         cy.clickNav('Levels');
 
         const tableSelector = '[data-cy=levelsTable]'
@@ -44,7 +44,7 @@ describe('Levels Management Tests', () => {
         ]
         cy.validateTable(tableSelector, expected, 5, true, null, false);
 
-        cy.visit('/projects/proj1/subjects/subj1');
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.clickNav('Levels');
         cy.validateTable(tableSelector, expected, 5, true, null, false);
     })
@@ -83,7 +83,7 @@ describe('Levels Management Tests', () => {
             version: 0,
         });
 
-        cy.visit('/projects/proj1/');
+        cy.visit('/administrator/projects/proj1/');
 
         cy.clickNav('Settings');
         cy.get('[data-cy="usePointsForLevelsSwitch"]').check({force: true});
@@ -138,7 +138,7 @@ describe('Levels Management Tests', () => {
             version: 0,
         });
 
-        cy.visit('/projects/proj1/');
+        cy.visit('/administrator/projects/proj1/');
 
         cy.clickNav('Settings');
         cy.get('[data-cy="usePointsForLevelsSwitch"]').check({force: true});
@@ -161,7 +161,7 @@ describe('Levels Management Tests', () => {
         cy.contains('Level is unachievable. Insufficient available points in project');
 
         // do the same for a subject
-        cy.visit('/projects/proj1/subjects/subj1');
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.clickNav('Levels');
         cy.get('[data-cy="addLevel"]').click();
         cy.get('[data-cy="newLevelPoints"]').type('2000');
@@ -212,7 +212,7 @@ describe('Levels Management Tests', () => {
             version: 0,
         });
 
-        cy.visit('/projects/proj1/');
+        cy.visit('/administrator/projects/proj1/');
 
         cy.clickNav('Settings');
         cy.get('[data-cy="usePointsForLevelsSwitch"]').check({force: true});
@@ -227,7 +227,7 @@ describe('Levels Management Tests', () => {
             });
         }
 
-        cy.visit('/projects/proj1/subjects/subj1');
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.clickNav('Levels');
         cy.get('[data-cy="addLevel"]').click();
         cy.get('[data-cy="newLevelPoints"]').type('20000');
@@ -268,7 +268,7 @@ describe('Levels Management Tests', () => {
             version: 0,
         });
 
-        cy.visit('/projects/proj1/');
+        cy.visit('/administrator/projects/proj1/');
         cy.clickNav('Levels');
 
         const tableSelector = '[data-cy=levelsTable]'
@@ -370,7 +370,7 @@ describe('Levels Management Tests', () => {
             version: 0,
         });
 
-        cy.visit('/projects/proj1/subjects/subj1');
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.clickNav('Levels');
 
         const tableSelector = '[data-cy=levelsTable]'
@@ -402,7 +402,7 @@ describe('Levels Management Tests', () => {
         cy.get('[data-cy=removeLevel]').should('be.disabled');
 
         // make sure subject 2 is not affected
-        cy.visit('/projects/proj1/subjects/subj2');
+        cy.visit('/administrator/projects/proj1/subjects/subj2');
         cy.clickNav('Levels');
         cy.validateTable(tableSelector, expected, 5, true, null, false);
     })
@@ -415,7 +415,7 @@ describe('Levels Management Tests', () => {
             name: "Subject 1"
         });
 
-        cy.visit('/projects/proj1/');
+        cy.visit('/administrator/projects/proj1/');
         cy.clickNav('Levels');
 
         const rowSelector = '[data-cy=levelsTable] tbody tr'
@@ -467,7 +467,7 @@ describe('Levels Management Tests', () => {
             url: '/admin/projects/proj1/subjects/subj1'
         }).as('loadSubject');
 
-        cy.visit('/projects/proj1/subjects/subj1');
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.wait('@loadSubject');
 
         cy.clickNav('Levels');
@@ -521,7 +521,7 @@ describe('Levels Management Tests', () => {
             url: '/admin/projects/proj1/subjects/subj1'
         }).as('loadSubject');
 
-        cy.visit('/projects/proj1/subjects/subj1');
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.wait('@loadSubject');
 
         cy.contains('Levels').click();
@@ -575,7 +575,7 @@ describe('Levels Management Tests', () => {
             name: "My New test Project"
         })
 
-        cy.visit('/projects/MyNewtestProject/');
+        cy.visit('/administrator/projects/MyNewtestProject/');
         cy.wait('@loadProject');
 
         cy.contains('Levels').click();

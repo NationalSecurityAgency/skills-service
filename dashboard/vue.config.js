@@ -107,7 +107,7 @@ module.exports = {
     port: 8082,
     overlay: true,
     proxy: {
-      '/admin': proxyConf,
+      '/admin/': proxyConf,
       '/app': proxyConf,
       '/api': proxyConf,
       '/server': proxyConf,

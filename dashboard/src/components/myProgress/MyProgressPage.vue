@@ -14,41 +14,45 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div v-if="!loading" class="container-fluid mt-2">
-    <b-row class="my-4">
-      <b-col cols="12" md="6" xl="3" class="d-flex mb-2 pl-md-3 pr-md-1">
-        <info-snapshot-card :total-projects="myProgressSummary.totalProjects" :num-projects-contributed="myProgressSummary.numProjectsContributed" class="flex-grow-1 my-summary-card" />
-      </b-col>
-      <b-col cols="12" md="6" xl="3" class="d-flex mb-2 pr-md-3 pl-md-1 pr-xl-1">
-        <num-skills :total-skills="myProgressSummary.totalSkills" :num-achieved-skills="myProgressSummary.numAchievedSkills" class="flex-grow-1 my-summary-card" />
-      </b-col>
-      <b-col cols="12" md="6" xl="3" class="d-flex mb-2 pl-md-3 pr-md-1 pl-xl-1">
-        <last-earned-card :num-achieved-skills-last-month="myProgressSummary.numAchievedSkillsLastMonth" :num-achieved-skills-last-week="myProgressSummary.numAchievedSkillsLastWeek" :most-recent-achieved-skill="myProgressSummary.mostRecentAchievedSkill" class="flex-grow-1 my-summary-card" />
-      </b-col>
-      <b-col cols="12" md="6" xl="3" class="d-flex mb-2 pr-md-3 pl-md-1">
-        <badges-num-card :total-badges="myProgressSummary.totalBadges"
-                         :num-achieved-badges="myProgressSummary.numAchievedBadges"
-                         :num-achieved-gem-badges="myProgressSummary.numAchievedGemBadges"
-                         :num-achieved-global-badges="myProgressSummary.numAchievedGlobalBadges"
-                         class="flex-grow-1 my-summary-card"/>
-      </b-col>
-    </b-row>
-    <b-row class="my-4">
-      <b-col class="my-summary-card">
-        <event-history-chart v-if="!loading" :availableProjects="projects"></event-history-chart>
-      </b-col>
-    </b-row>
-    <b-row class="my-4">
-      <b-col v-for="(proj, index) in projects" :key="proj.projectName"
-             cols="12" md="6" xl="4"
-            class="mb-2 px-0">
-        <router-link :to="{ name:'MyProjectSkills', params: { projectId: proj.projectId } }" tag="div" class="project-link" :data-cy="`project-link-${proj.projectId}`">
-          <project-link-card :proj="proj" class="my-summary-card px-3" :class="projectLinkClass(index)"/>
-        </router-link>
-      </b-col>
-    </b-row>
+  <loading-container :is-loading="loading">
+    <no-content2 v-if="!hasProjects" icon="fas fa-hand-spock" class="mt-4"
+                 title="No Projects Yet..." :message="noProjectsMessage"/>
 
-  </div>
+    <div v-if="!loading && hasProjects" class="container-fluid mt-2">
+      <b-row class="my-4">
+        <b-col cols="12" md="6" xl="3" class="d-flex mb-2 pl-md-3 pr-md-1">
+          <info-snapshot-card :total-projects="projects.length" :num-projects-contributed="myProgressSummary.numProjectsContributed" class="flex-grow-1 my-summary-card" />
+        </b-col>
+        <b-col cols="12" md="6" xl="3" class="d-flex mb-2 pr-md-3 pl-md-1 pr-xl-1">
+          <num-skills :total-skills="myProgressSummary.totalSkills" :num-achieved-skills="myProgressSummary.numAchievedSkills" class="flex-grow-1 my-summary-card" />
+        </b-col>
+        <b-col cols="12" md="6" xl="3" class="d-flex mb-2 pl-md-3 pr-md-1 pl-xl-1">
+          <last-earned-card :num-achieved-skills-last-month="myProgressSummary.numAchievedSkillsLastMonth" :num-achieved-skills-last-week="myProgressSummary.numAchievedSkillsLastWeek" :most-recent-achieved-skill="myProgressSummary.mostRecentAchievedSkill" class="flex-grow-1 my-summary-card" />
+        </b-col>
+        <b-col cols="12" md="6" xl="3" class="d-flex mb-2 pr-md-3 pl-md-1">
+          <badges-num-card :total-badges="myProgressSummary.totalBadges"
+                           :num-achieved-badges="myProgressSummary.numAchievedBadges"
+                           :num-achieved-gem-badges="myProgressSummary.numAchievedGemBadges"
+                           :num-achieved-global-badges="myProgressSummary.numAchievedGlobalBadges"
+                           class="flex-grow-1 my-summary-card"/>
+        </b-col>
+      </b-row>
+      <b-row class="my-4">
+        <b-col class="my-summary-card">
+          <event-history-chart v-if="!loading" :availableProjects="projects"></event-history-chart>
+        </b-col>
+      </b-row>
+      <b-row class="my-4">
+        <b-col v-for="(proj, index) in projects" :key="proj.projectName"
+               cols="12" md="6" xl="4"
+              class="mb-2 px-0">
+          <router-link :to="{ name:'MyProjectSkills', params: { projectId: proj.projectId } }" tag="div" class="project-link" :data-cy="`project-link-${proj.projectId}`">
+            <project-link-card :proj="proj" class="my-summary-card px-3" :class="projectLinkClass(index)"/>
+          </router-link>
+        </b-col>
+      </b-row>
+    </div>
+  </loading-container>
 </template>
 
 <script>
@@ -59,6 +63,8 @@ limitations under the License.
   import LastEarnedCard from './LastEarnedCard';
   import EventHistoryChart from './EventHistoryChart';
   import MyProgressService from './MyProgressService';
+  import LoadingContainer from '../utils/LoadingContainer';
+  import NoContent2 from '../utils/NoContent2';
 
   export default {
     name: 'MyProgressPage',
@@ -69,6 +75,8 @@ limitations under the License.
       InfoSnapshotCard,
       ProjectLinkCard,
       EventHistoryChart,
+      LoadingContainer,
+      NoContent2,
     },
     data() {
       return {
@@ -118,6 +126,17 @@ limitations under the License.
           classes += 'pl-md-3 pr-md-1';
         }
         return classes;
+      },
+    },
+    computed: {
+      hasProjects() {
+        return this.projects && this.projects.length > 0;
+      },
+      noProjectsMessage() {
+        if (this.myProgressSummary && this.myProgressSummary.totalProjects > 0) {
+          return 'You will see your SkillTree progress and rankings on this page when project(s) have their production mode enabled.';
+        }
+        return 'Projects can be created from the "Project Admin" view, accessible by clicking on your name at the top-right of the screen.';
       },
     },
     watch: {

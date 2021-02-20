@@ -48,7 +48,7 @@ describe('Users Tests', () => {
             }
         }
 
-        cy.visit('/projects/proj1/');
+        cy.visit('/administrator/projects/proj1/');
         cy.clickNav('Users');
 
         cy.validateTable(tableSelector, [
@@ -120,7 +120,7 @@ describe('Users Tests', () => {
             });
         }
 
-        cy.visit('/projects/proj1/');
+        cy.visit('/administrator/projects/proj1/');
         cy.clickNav('Users');
 
         cy.validateTable(tableSelector, [
@@ -173,7 +173,7 @@ describe('Users Tests', () => {
             });
         }
 
-        cy.visit('/projects/proj1/');
+        cy.visit('/administrator/projects/proj1/');
         cy.clickNav('Users');
         cy.wait('@getUsers')
 
@@ -244,7 +244,7 @@ describe('Users Tests', () => {
                 .format('x')
         });
 
-        cy.visit('/projects/proj1/');
+        cy.visit('/administrator/projects/proj1/');
         cy.clickNav('Users');
         cy.wait('@getUsers')
 
@@ -265,7 +265,7 @@ describe('Users Tests', () => {
 
             cy.request('POST', `/api/projects/proj1/skills/skill1`);
 
-            cy.visit('/projects/proj1/');
+            cy.visit('/administrator/projects/proj1/');
             cy.clickNav('Users');
             cy.wait('@getUsers')
 
@@ -304,7 +304,7 @@ describe('Users Tests', () => {
                 timestamp: m.clone().format('x')
             });
         }
-        cy.visit('/projects/proj1/users');
+        cy.visit('/administrator/projects/proj1/users');
         cy.wait('@getUsers')
 
         cy.get('[data-cy="skillsBTablePaging"]').contains('2').click();
@@ -348,7 +348,7 @@ describe('Users Tests', () => {
 
         cy.request('POST', '/admin/projects/proj1/badge/badge1/skills/skill1')
 
-        cy.visit('/projects/proj1/users');
+        cy.visit('/administrator/projects/proj1/users');
         cy.wait('@getUsers')
 
         cy.get(`${tableSelector} [data-cy="usersTable_viewDetailsBtn"]`).first().click();
@@ -357,7 +357,7 @@ describe('Users Tests', () => {
 
         // validate from subject
 
-        cy.visit('/projects/proj1/subjects/subj1/users');
+        cy.visit('/administrator/projects/proj1/subjects/subj1/users');
         cy.wait('@getUsers')
         cy.contains('usera@skills.org');
 
@@ -367,7 +367,7 @@ describe('Users Tests', () => {
 
         // validate from skill
 
-        cy.visit('/projects/proj1/subjects/subj1/skills/skill1/users');
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/users');
         cy.wait('@getUsers')
         cy.contains('usera@skills.org');
 
@@ -377,7 +377,7 @@ describe('Users Tests', () => {
 
         // validate from badge
 
-        cy.visit('/projects/proj1/badges/badge1/users');
+        cy.visit('/administrator/projects/proj1/badges/badge1/users');
         cy.wait('@getUsers')
         cy.contains('usera@skills.org');
 
@@ -429,7 +429,7 @@ describe('Users Tests', () => {
             });
         }
 
-        cy.visit('/projects/proj1/badges/badge1/users');
+        cy.visit('/administrator/projects/proj1/badges/badge1/users');
         cy.wait('@getUsers')
 
         cy.validateTable(tableSelector, [
@@ -439,7 +439,7 @@ describe('Users Tests', () => {
 
 
         // now check both skills
-        cy.visit('/projects/proj1/subjects/subj1/skills/skill1/users');
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/users');
         cy.wait('@getUsers')
 
         cy.validateTable(tableSelector, [
@@ -447,7 +447,7 @@ describe('Users Tests', () => {
             [{ colIndex: 0,  value: 'userb@skills.org' }],
         ], 5);
 
-        cy.visit('/projects/proj1/subjects/subj1/skills/skill2/users');
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill2/users');
         cy.wait('@getUsers')
 
         cy.validateTable(tableSelector, [
@@ -497,7 +497,7 @@ describe('Users Tests', () => {
         }
 
         // now check both subjects
-        cy.visit('/projects/proj1/subjects/subj1/users');
+        cy.visit('/administrator/projects/proj1/subjects/subj1/users');
         cy.wait('@getUsers')
 
         cy.validateTable(tableSelector, [
@@ -505,7 +505,7 @@ describe('Users Tests', () => {
             [{ colIndex: 0,  value: 'userb@skills.org' }],
         ], 5);
 
-        cy.visit('/projects/proj1/subjects/subj2/users');
+        cy.visit('/administrator/projects/proj1/subjects/subj2/users');
         cy.wait('@getUsers')
 
         cy.validateTable(tableSelector, [
