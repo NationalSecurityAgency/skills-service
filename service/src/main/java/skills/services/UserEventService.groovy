@@ -53,7 +53,7 @@ class UserEventService {
     EntityManager entityManager;
 
     @Value('#{"${skills.config.compactDailyEventsOlderThan:30}"}')
-    int maxDailyDays = 30
+    int maxDailyDays = 30 //changing this can cause some problems
 
     @Autowired
     SkillDefRepo skillDefRepo
@@ -291,6 +291,29 @@ class UserEventService {
         sw.stop()
         duration = Duration.of(sw.getTime(), ChronoUnit.MILLIS)
         log.info("Deleted compacted input events in [${duration}]")
+    }
+
+    /**
+     * Removes a recorded userEvent, decrementing the event count column. This assumes
+     * that event compaction has been run
+     * @param performedOn
+     * @param userId
+     * @param skillRefId
+     */
+    @Transactional
+    public void removeEvent(Date performedOn, String userId, Integer skillRefId) {
+        Date dailyEventTime = StartDateUtil.computeStartDate(performedOn, EventType.DAILY)
+        Date weeklyEventTime = StartDateUtil.computeStartDate(performedOn, EventType.WEEKLY)
+
+        // to guard against an event being decremented in the window where performedOn < now-maxDailyDays
+        // but compaction has not yet run for that day, we need to first check if a DAILY event type exists for this event
+        UserEvent event = userEventsRepo.findByUserIdAndSkillRefIdAndEventTimeAndEventType(userId, skillRefId, dailyEventTime, EventType.DAILY)
+        if (event) {
+            event.count = Math.max(0, event.count-1)
+            userEventsRepo.save(event)
+        } else {
+            userEventsRepo.decrementEventCount(weeklyEventTime, userId, skillRefId, EventType.WEEKLY)
+        }
     }
 
     @CompileStatic
