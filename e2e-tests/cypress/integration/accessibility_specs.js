@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import dayjs from "dayjs";
+
 const moment = require('moment-timezone');
 
 describe('Accessibility Tests', () => {
@@ -123,6 +125,138 @@ describe('Accessibility Tests', () => {
     cy.request('POST', `/api/projects/MyNewtestProject/skills/skill4`, {userId: 'u8', timestamp: m.subtract(3, 'day').format('x')})
     cy.request('POST', `/api/projects/MyNewtestProject/skills/skill4`, {userId: 'u8', timestamp: m.subtract(4, 'day').format('x')})
     cy.request('POST', `/api/projects/MyNewtestProject/skills/skill4`, {userId: 'u8', timestamp: m.subtract(5, 'day').format('x')})
+  });
+
+  it('"My Progress" landing page', () => {
+    // setup a project for the landing page
+    const dateFormatter = value => moment.utc(value).format('YYYY-MM-DD[T]HH:mm:ss[Z]');
+    const timeFromNowFormatter = (value) => dayjs(value).startOf('hour').fromNow();
+    cy.request('POST', '/app/projects/proj1', {
+      projectId: 'proj1',
+      name: 'Project 1'
+    });
+    cy.request('POST', '/admin/projects/proj1/settings/production.mode.enabled', {
+      projectId: 'proj1',
+      setting: 'production.mode.enabled',
+      value: 'true'
+    });
+    cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
+      projectId: 'proj1',
+      subjectId: 'subj1',
+      name: 'Subject 1',
+      helpUrl: 'http://doHelpOnThisSubject.com',
+      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+    });
+    cy.request('POST', '/admin/projects/proj1/subjects/subj2', {
+      projectId: 'proj1',
+      subjectId: 'subj2',
+      name: 'Subject 2'
+    });
+    cy.request('POST', '/admin/projects/proj1/subjects/subj3', {
+      projectId: 'proj1',
+      subjectId: 'subj3',
+      name: 'Subject 3'
+    });
+    cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill1`, {
+      projectId: 'proj1',
+      subjectId: 'subj1',
+      skillId: 'skill1',
+      name: `This is 1`,
+      type: 'Skill',
+      pointIncrement: 100,
+      numPerformToCompletion: 5,
+      pointIncrementInterval: 0,
+      numMaxOccurrencesIncrementInterval: -1,
+      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+      version: 0,
+      helpUrl: 'http://doHelpOnThisSkill.com'
+    });
+
+    cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill2`, {
+      projectId: 'proj1',
+      subjectId: 'subj1',
+      skillId: 'skill2',
+      name: `This is 2`,
+      type: 'Skill',
+      pointIncrement: 100,
+      numPerformToCompletion: 5,
+      pointIncrementInterval: 0,
+      numMaxOccurrencesIncrementInterval: -1,
+      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+      version: 0,
+      helpUrl: 'http://doHelpOnThisSkill.com'
+    });
+    cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill3`, {
+      projectId: 'proj1',
+      subjectId: 'subj1',
+      skillId: 'skill3',
+      name: `This is 3`,
+      type: 'Skill',
+      pointIncrement: 100,
+      numPerformToCompletion: 2,
+      pointIncrementInterval: 0,
+      numMaxOccurrencesIncrementInterval: -1,
+      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+      version: 0,
+      helpUrl: 'http://doHelpOnThisSkill.com'
+    });
+
+    cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill4`, {
+      projectId: 'proj1',
+      subjectId: 'subj1',
+      skillId: 'skill4',
+      name: `This is 4`,
+      type: 'Skill',
+      pointIncrement: 100,
+      numPerformToCompletion: 2,
+      pointIncrementInterval: 0,
+      numMaxOccurrencesIncrementInterval: -1,
+      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+      version: 0,
+      helpUrl: 'http://doHelpOnThisSkill.com'
+    });
+    cy.request('POST', `/admin/projects/proj1/skills/skill4/dependency/skill2`)
+
+    cy.request('POST', `/api/projects/proj1/skills/skill1`, {
+      userId: Cypress.env('proxyUser'),
+      timestamp: new Date().getTime()
+    })
+    cy.request('POST', `/api/projects/proj1/skills/skill1`, {
+      userId: Cypress.env('proxyUser'),
+      timestamp: new Date().getTime() - 1000 * 60 * 60 * 24
+    })
+
+    cy.request('POST', `/api/projects/proj1/skills/skill3`, {
+      userId: Cypress.env('proxyUser'),
+      timestamp: new Date().getTime()
+    })
+    cy.request('POST', `/api/projects/proj1/skills/skill3`, {
+      userId: Cypress.env('proxyUser'),
+      timestamp: new Date().getTime() - 1000 * 60 * 60 * 24
+    })
+
+    cy.request('POST', '/admin/projects/proj1/badges/badge1', {
+      projectId: 'proj1',
+      badgeId: 'badge1',
+      name: 'Badge 1'
+    });
+
+    cy.request('POST', '/admin/projects/proj1/badges/gemBadge', {
+      projectId: 'proj1',
+      badgeId: 'gemBadge',
+      name: 'Gem Badge',
+      startDate: dateFormatter(new Date() - 1000 * 60 * 60 * 24 * 7),
+      endDate: dateFormatter(new Date() + 1000 * 60 * 60 * 24 * 5),
+    });
+    cy.intercept('/api/metrics/allProjectsSkillEventsOverTimeMetricsBuilder**').as('allSkillEventsForUser');
+
+    cy.visit('/');
+    cy.wait('@allSkillEventsForUser');
+    cy.get('[data-cy=breadcrumb-Home]').contains('Home').should('be.visible');
+
+    cy.customLighthouse();
+    cy.injectAxe()
+    cy.customA11y();
   });
 
   it('admin home page', () => {

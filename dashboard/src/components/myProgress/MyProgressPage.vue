@@ -19,6 +19,15 @@ limitations under the License.
                  title="No Projects Yet..." :message="noProjectsMessage"/>
 
     <div v-if="!loading && hasProjects" class="container-fluid mt-2">
+      <b-row>
+        <b-col>
+          <div class="card p-0 m-0">
+            <div class="card-body mt-2 mb-0 p-0">
+              <h1 class="h4 text-uppercase text-center">Progress and Rankings</h1>
+            </div>
+          </div>
+        </b-col>
+      </b-row>
       <b-row class="my-4">
         <b-col cols="12" md="6" xl="3" class="d-flex mb-2 pl-md-3 pr-md-1">
           <info-snapshot-card :total-projects="projects.length" :num-projects-contributed="myProgressSummary.numProjectsContributed" class="flex-grow-1 my-summary-card" />

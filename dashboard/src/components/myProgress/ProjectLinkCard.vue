@@ -28,10 +28,20 @@ limitations under the License.
           </div>
         </b-col>
       </b-row>
-      <b-progress :max="proj.totalPoints" :value="proj.points" height="5px" variant="info" class="proj-progress">
-      </b-progress>
+
+      <div class="progress proj-progress" style="height: 5px;">
+        <div role="progressbar"
+             aria-valuemin="0"
+             :aria-valuemax="proj.totalPoints"
+             :aria-valuenow="proj.points"
+             aria-labelledby="projectProgressLabel"
+             class="progress-bar bg-info"
+             style="width: 0%;">
+        </div>
+      </div>
+
       <div class="text-center">
-        <span class="small text-center" data-cy="project-card-project-points">{{ proj.points | number }} / {{ proj.totalPoints | number }}</span>
+        <span id="projectProgressLabel" class="small text-center" data-cy="project-card-project-points">{{ proj.points | number }} / {{ proj.totalPoints | number }}</span>
       </div>
       <div class="position-absolute text-muted d-none small click-indicator" style="right: 15px; bottom: 10px;">Click to View</div>
     </b-card>

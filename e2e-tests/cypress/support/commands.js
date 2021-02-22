@@ -218,8 +218,10 @@ Cypress.Commands.add('customA11y', ()=> {
     cy.checkA11y({
         exclude:[
             ['#SvgjsSvg1001'],
+            ['#apexcharts-radialbarTrack-0'],
             ['.multiselect__placeholder'],
             ['.multiselect__input'],
+            ['.multiselect__tags'],
             ['.vis-network'],
             ['.vdp-datepicker'],
             ['.VuePagination'],
