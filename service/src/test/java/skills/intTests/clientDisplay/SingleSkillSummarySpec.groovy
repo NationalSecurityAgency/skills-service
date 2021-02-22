@@ -27,7 +27,6 @@ import skills.storage.model.SkillApproval
 import skills.storage.model.SkillDef
 import skills.storage.repos.SkillApprovalRepo
 import skills.storage.repos.SkillDefRepo
-import spock.lang.IgnoreRest
 
 class SingleSkillSummarySpec extends DefaultIntSpec {
 
@@ -206,10 +205,10 @@ class SingleSkillSummarySpec extends DefaultIntSpec {
         def proj1 = SkillsFactory.createProject(1)
         def subj = SkillsFactory.createSubject(1, 1)
         List<Map> skills = SkillsFactory.createSkills(5, 1, 1, 100)
-        skills[0].selfReportType = SkillDef.SelfReportingType.Approval
-        skills[1].selfReportType = SkillDef.SelfReportingType.HonorSystem
-        skills[2].selfReportType = SkillDef.SelfReportingType.Approval
-        skills[3].selfReportType = SkillDef.SelfReportingType.Approval
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
+        skills[1].selfReportingType = SkillDef.SelfReportingType.HonorSystem
+        skills[2].selfReportingType = SkillDef.SelfReportingType.Approval
+        skills[3].selfReportingType = SkillDef.SelfReportingType.Approval
 
         skillsService.createProject(proj1)
         skillsService.createSubject(subj)
@@ -266,10 +265,10 @@ class SingleSkillSummarySpec extends DefaultIntSpec {
         def proj1 = SkillsFactory.createProject(1)
         def subj = SkillsFactory.createSubject(1, 1)
         List<Map> skills = SkillsFactory.createSkills(5, 1, 1, 100)
-        skills[0].selfReportType = SkillDef.SelfReportingType.Approval
-        skills[1].selfReportType = SkillDef.SelfReportingType.HonorSystem
-        skills[2].selfReportType = SkillDef.SelfReportingType.Approval
-        skills[3].selfReportType = SkillDef.SelfReportingType.Approval
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
+        skills[1].selfReportingType = SkillDef.SelfReportingType.HonorSystem
+        skills[2].selfReportingType = SkillDef.SelfReportingType.Approval
+        skills[3].selfReportingType = SkillDef.SelfReportingType.Approval
 
         skillsService.createProject(proj1)
         skillsService.createSubject(subj)
@@ -301,10 +300,10 @@ class SingleSkillSummarySpec extends DefaultIntSpec {
         def proj1 = SkillsFactory.createProject(1)
         def subj = SkillsFactory.createSubject(1, 1)
         List<Map> skills = SkillsFactory.createSkills(5, 1, 1, 100)
-        skills[0].selfReportType = SkillDef.SelfReportingType.Approval
-        skills[1].selfReportType = SkillDef.SelfReportingType.HonorSystem
-        skills[2].selfReportType = SkillDef.SelfReportingType.Approval
-        skills[3].selfReportType = SkillDef.SelfReportingType.Approval
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
+        skills[1].selfReportingType = SkillDef.SelfReportingType.HonorSystem
+        skills[2].selfReportingType = SkillDef.SelfReportingType.Approval
+        skills[3].selfReportingType = SkillDef.SelfReportingType.Approval
 
         skillsService.createProject(proj1)
         skillsService.createSubject(subj)
@@ -333,10 +332,10 @@ class SingleSkillSummarySpec extends DefaultIntSpec {
         def proj1 = SkillsFactory.createProject(1)
         def subj = SkillsFactory.createSubject(1, 1)
         List<Map> skills = SkillsFactory.createSkills(5, 1, 1, 100)
-        skills[0].selfReportType = SkillDef.SelfReportingType.Approval
-        skills[1].selfReportType = SkillDef.SelfReportingType.HonorSystem
-        skills[2].selfReportType = SkillDef.SelfReportingType.Approval
-        skills[3].selfReportType = SkillDef.SelfReportingType.Approval
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
+        skills[1].selfReportingType = SkillDef.SelfReportingType.HonorSystem
+        skills[2].selfReportingType = SkillDef.SelfReportingType.Approval
+        skills[3].selfReportingType = SkillDef.SelfReportingType.Approval
 
         skillsService.createProject(proj1)
         skillsService.createSubject(subj)
@@ -360,10 +359,10 @@ class SingleSkillSummarySpec extends DefaultIntSpec {
         def proj1 = SkillsFactory.createProject(1)
         def subj = SkillsFactory.createSubject(1, 1)
         List<Map> skills = SkillsFactory.createSkills(5, 1, 1, 100)
-        skills[0].selfReportType = SkillDef.SelfReportingType.Approval
-        skills[1].selfReportType = SkillDef.SelfReportingType.HonorSystem
-        skills[2].selfReportType = SkillDef.SelfReportingType.Approval
-        skills[3].selfReportType = SkillDef.SelfReportingType.Approval
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
+        skills[1].selfReportingType = SkillDef.SelfReportingType.HonorSystem
+        skills[2].selfReportingType = SkillDef.SelfReportingType.Approval
+        skills[3].selfReportingType = SkillDef.SelfReportingType.Approval
 
         def proj2 = SkillsFactory.createProject(2)
 

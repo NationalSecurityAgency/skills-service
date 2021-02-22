@@ -23,6 +23,8 @@ import org.springframework.lang.Nullable
 import skills.storage.model.SkillApproval
 import skills.storage.model.SkillDef
 
+import java.util.stream.Stream
+
 @CompileStatic
 interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
 
@@ -48,6 +50,9 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
 
     long countByProjectIdAndRejectedOnIsNull(String projectId)
 
+    long deleteByProjectIdAndSkillRefId(String projectId, Integer skillRefId)
+
+    Stream<SkillApproval> findAllBySkillRefIdAndRejectedOnIsNull(Integer skillRefId)
 
     @Nullable
     @Query('''select s 
@@ -83,4 +88,21 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
     @Query('''SELECT sd.selfReportingType as type, count(sd) as count from SkillDef sd where sd.projectId = ?1 and sd.type = 'Skill' group by sd.selfReportingType''')
     List<SkillReportingTypeAndCount> skillCountsGroupedByApprovalType(String projectId)
 
+    @Query('''SELECT count(sa) from SkillApproval sa, SkillDef sd  
+            where 
+                sa.skillRefId = sd.id and 
+                sa.projectId = ?1 and
+                sd.projectId = ?1 and
+                sd.skillId = ?2 and
+                sa.rejectedOn is null''')
+    long countByProjectIdSkillIdAndRejectedOnIsNull(String projectId, String skillId)
+
+    @Query('''SELECT count(sa) from SkillApproval sa, SkillDef sd  
+            where 
+                sa.skillRefId = sd.id and 
+                sa.projectId = ?1 and
+                sd.projectId = ?1 and
+                sd.skillId = ?2 and
+                sa.rejectedOn is not null''')
+    long countByProjectIdSkillIdAndRejectedOnIsNotNull(String projectId, String skillId)
 }

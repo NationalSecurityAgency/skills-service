@@ -17,14 +17,8 @@ package skills.intTests.utils
 
 import callStack.profiler.Profile
 import com.github.jknack.handlebars.Options
-import com.github.jknack.handlebars.helper.StringHelpers
 import groovy.util.logging.Slf4j
-import org.apache.commons.lang3.StringUtils
 import org.springframework.core.io.Resource
-import org.springframework.web.bind.annotation.RequestParam
-import spock.lang.Retry
-
-import java.nio.charset.StandardCharsets
 
 @Slf4j
 class SkillsService {
@@ -465,6 +459,10 @@ class SkillsService {
 
     def rejectSkillApprovals(String projectId, List<Integer> approvalId, String msg = null) {
         return wsHelper.adminPost("/projects/${projectId}/approvals/reject", [skillApprovalIds: approvalId, rejectionMessage: msg])
+    }
+
+    def getSkillApprovalsStats(String projectId, String skillId) {
+        return wsHelper.adminGet("/projects/${projectId}/skills/${skillId}/approvals/stats")
     }
 
     def removeApproval(String projectId, Integer approvalId) {

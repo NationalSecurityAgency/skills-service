@@ -25,7 +25,6 @@ import skills.storage.model.SkillApproval
 import skills.storage.model.SkillDef
 import skills.storage.repos.SkillApprovalRepo
 import skills.storage.repos.SkillDefRepo
-import spock.lang.IgnoreRest
 
 @Slf4j
 class ReportSkills_SelfReporting extends DefaultIntSpec {
@@ -41,7 +40,7 @@ class ReportSkills_SelfReporting extends DefaultIntSpec {
         def subj = SkillsFactory.createSubject()
         def skills = SkillsFactory.createSkills(1,)
         skills[0].pointIncrement = 200
-        skills[0].selfReportType = SkillDef.SelfReportingType.Approval
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
 
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
@@ -84,7 +83,7 @@ class ReportSkills_SelfReporting extends DefaultIntSpec {
         def subj = SkillsFactory.createSubject()
         def skills = SkillsFactory.createSkills(1,)
         skills[0].pointIncrement = 200
-        skills[0].selfReportType = SkillDef.SelfReportingType.HonorSystem
+        skills[0].selfReportingType = SkillDef.SelfReportingType.HonorSystem
 
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
@@ -112,7 +111,7 @@ class ReportSkills_SelfReporting extends DefaultIntSpec {
         def subj = SkillsFactory.createSubject()
         def skills = SkillsFactory.createSkills(1,)
         skills[0].pointIncrement = 200
-        skills[0].selfReportType = SkillDef.SelfReportingType.Approval
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
 
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
@@ -146,7 +145,7 @@ class ReportSkills_SelfReporting extends DefaultIntSpec {
         def subj = SkillsFactory.createSubject()
         def skills = SkillsFactory.createSkills(1,)
         skills[0].pointIncrement = 200
-        skills[0].selfReportType = SkillDef.SelfReportingType.Approval
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
 
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
@@ -179,7 +178,7 @@ class ReportSkills_SelfReporting extends DefaultIntSpec {
         def subj = SkillsFactory.createSubject()
         def skills = SkillsFactory.createSkills(1,)
         skills[0].pointIncrement = 200
-        skills[0].selfReportType = SkillDef.SelfReportingType.Approval
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
 
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
@@ -225,7 +224,7 @@ class ReportSkills_SelfReporting extends DefaultIntSpec {
         def subj = SkillsFactory.createSubject()
         def skills = SkillsFactory.createSkills(1,)
         skills[0].pointIncrement = 200
-        skills[0].selfReportType = SkillDef.SelfReportingType.Approval
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
 
         skillsService.createProject(proj)
         skillsService.createSubject(subj)

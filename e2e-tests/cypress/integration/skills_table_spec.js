@@ -236,11 +236,11 @@ describe('Skills Table Tests', () => {
       });
 
     it('Self Reporting Type additional field', () => {
-        cy.createSkill(1, 1, 1, { selfReportType: 'HonorSystem' });
-        cy.createSkill(1, 1, 2, { selfReportType: 'HonorSystem' });
+        cy.createSkill(1, 1, 1, { selfReportingType: 'HonorSystem' });
+        cy.createSkill(1, 1, 2, { selfReportingType: 'HonorSystem' });
         cy.createSkill(1, 1, 3);
-        cy.createSkill(1, 1, 4, { selfReportType: 'Approval' });
-        cy.createSkill(1, 1, 5, { selfReportType: 'Approval' });
+        cy.createSkill(1, 1, 4, { selfReportingType: 'Approval' });
+        cy.createSkill(1, 1, 5, { selfReportingType: 'Approval' });
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
 
