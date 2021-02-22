@@ -198,12 +198,13 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
         set ue.count = ue.count-1 
         where ue.skillRefId = :skillRefId
         and ue.userId = :userId
-        and ue.eventTime = :eventType
+        and ue.eventTime = :eventTime
         and ue.eventType = :eventType
         and ue.count > 0
     ''')
     void decrementEventCount(@Param("eventTime") Date eventDate, @Param("userId") String userId, @Param("skillRefId") Integer skillRefId, @Param("eventType") EventType type)
 
+    @Nullable
     UserEvent findByUserIdAndSkillRefIdAndEventTimeAndEventType(String userId, Integer skillRefId, Date eventTime, EventType type)
 
     @Nullable
