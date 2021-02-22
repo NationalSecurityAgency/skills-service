@@ -234,7 +234,7 @@ describe('Self Report Skills Management Tests', () => {
         cy.reportSkill(1, 1, 'user3Good@skills.org', '2020-09-15 11:00')
         cy.rejectRequest(3)
 
-        cy.visit('/projects/proj1/subjects/subj1');
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
 
         // approval -> honor
         cy.get('[data-cy="editSkillButton_skill1"]').click();
@@ -284,7 +284,7 @@ describe('Self Report Skills Management Tests', () => {
         cy.reportSkill(1, 1, 'user3Good@skills.org', '2020-09-15 11:00')
         cy.rejectRequest(3)
 
-        cy.visit('/projects/proj1/subjects/subj1');
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
 
         // approval -> honor
         cy.get('[data-cy="editSkillButton_skill2"]').click();
