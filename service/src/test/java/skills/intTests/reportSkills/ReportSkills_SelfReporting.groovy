@@ -15,12 +15,15 @@
  */
 package skills.intTests.reportSkills
 
+
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import skills.intTests.utils.DefaultIntSpec
+import skills.intTests.utils.EmailUtils
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
+import skills.services.settings.SettingsService
 import skills.storage.model.SkillApproval
 import skills.storage.model.SkillDef
 import skills.storage.repos.SkillApprovalRepo
@@ -34,6 +37,13 @@ class ReportSkills_SelfReporting extends DefaultIntSpec {
 
     @Autowired
     SkillDefRepo skillDefRepo
+
+    @Autowired
+    SettingsService settingsService
+
+    def setup() {
+        startEmailServer()
+    }
 
     def "self report skill with approval"() {
         def proj = SkillsFactory.createProject()
@@ -52,6 +62,13 @@ class ReportSkills_SelfReporting extends DefaultIntSpec {
         def approvalsEndpointRes = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false)
 
         then:
+        greenMail.getReceivedMessages().length == 1
+        EmailUtils.EmailRes emailRes = EmailUtils.getEmail(greenMail)
+        emailRes.subj == "SkillTree Points Requested"
+        emailRes.recipients == ["skills@skills.org"]
+        emailRes.plainText.contains("User user0 requested 200 points for 'Test Skill 1' skill")
+        emailRes.html.contains("<p>User user0 requested 200 points for 'Test Skill 1' skill.</p>")
+
         !res.body.skillApplied
         res.body.pointsEarned == 0
         res.body.explanation == "Skill was submitted for approval"
@@ -76,6 +93,36 @@ class ReportSkills_SelfReporting extends DefaultIntSpec {
         approvalsEndpointRes.data.get(0).skillName == "Test Skill 1"
         approvalsEndpointRes.data.get(0).requestedOn == date.time
         approvalsEndpointRes.data.get(0).requestMsg == "Please approve this!"
+    }
+
+    def "send email notification to each admin of the project"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(1,)
+        skills[0].pointIncrement = 200
+        skills[0].selfReportType = SkillDef.SelfReportingType.Approval
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        String otherUser = "other@email.com"
+        createService(otherUser)
+        skillsService.addProjectAdmin(proj.projectId, otherUser)
+
+
+        Date date = new Date() - 60
+        when:
+        def res = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "user0", date, "Please approve this!")
+
+        List<EmailUtils.EmailRes> emails = EmailUtils.getEmails(greenMail)
+        then:
+        emails.size() == 2
+        emails.get(0).recipients == ["skills@skills.org", otherUser]
+        emails.get(1).recipients == ["skills@skills.org", otherUser]
+
+        !res.body.skillApplied
+        res.body.explanation == "Skill was submitted for approval"
     }
 
     def "self report skill with honor system"() {

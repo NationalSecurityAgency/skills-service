@@ -40,7 +40,11 @@ class EmailSendingService {
     @Autowired
     SystemSettingsService systemSettingsService
 
-    public void sendEmail(String subject, String to, String htmlBody) {
+    void sendEmail(String subject, String to, String htmlBody, String plainTextBody = null) {
+        sendEmail(subject, [to], htmlBody, plainTextBody)
+    }
+
+    void sendEmail(String subject, List<String> to, String htmlBody, String plainTextBody = null) {
 
         String fromEmail = systemSettingsService.get()?.fromEmail
         if (!fromEmail) {
@@ -48,18 +52,27 @@ class EmailSendingService {
         }
 
         MimeMessage message = emailSettings.mailSender.createMimeMessage()
-        MimeMessageHelper helper = new MimeMessageHelper(message, "UTF-8")
+        MimeMessageHelper helper = plainTextBody ?
+                new MimeMessageHelper(message, true) :
+                new MimeMessageHelper(message, "UTF-8")
         helper.setSubject(subject)
-        helper.setTo(to)
+        String [] toArr = to.toArray()
+        helper.setTo(toArr)
         helper.setFrom(fromEmail)
-        helper.setText(htmlBody, true)
-        log.info("sending email to [${to}]")
+        if (plainTextBody) {
+            helper.setText(plainTextBody, htmlBody)
+        } else {
+            helper.setText(htmlBody, true)
+        }
         emailSettings.mailSender.send(message)
     }
 
-    public void sendEmailWithThymeleafTemplate(String subject, String to, String templateFileName, Context thymeleafContext) {
-        log.info("sending email with thymeleaf template")
+    void sendEmailWithThymeleafTemplate(String subject, String to, String templateFileName, Context thymeleafContext, String plainTextBodyAlt = null) {
+        sendEmailWithThymeleafTemplate(subject, [to], templateFileName, thymeleafContext, plainTextBodyAlt)
+    }
+
+    void sendEmailWithThymeleafTemplate(String subject, List<String> to, String templateFileName, Context thymeleafContext, String plainTextBodyAlt = null) {
         String htmlBody = thymeleafTemplateEngine.process(templateFileName, thymeleafContext)
-        sendEmail(subject, to, htmlBody)
+        sendEmail(subject, to, htmlBody, plainTextBodyAlt)
     }
 }
