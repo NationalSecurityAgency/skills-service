@@ -1179,4 +1179,53 @@
                 tableName="skill_approval"/>
     </changeSet>
 
+    <changeSet id="6" author="skills team" context="migration6">
+        <createTable tableName="project_error">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="project_id" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="reported_skill_id" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="error" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_seen" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="count" type="int">
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseColumnNames="project_id"
+                                 baseTableName="project_error"
+                                 constraintName="fk_project_error_project_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="project_id"
+                                 referencedTableName="project_definition"/>
+
+        <createIndex indexName="index_project_error_project_id"
+                     tableName="project_error">
+            <column name="project_id" type="varchar(255)"/>
+        </createIndex>
+
+        <createIndex indexName="index_project_error_reported_skill_id"
+                     tableName="project_error">
+            <column name="reported_skill_id" type="varchar(255)"/>
+        </createIndex>
+
+        <createIndex indexName="index_project_error_project_id_reported_skill_id"
+                     tableName="project_error">
+            <column name="reported_skill_id" type="varchar(255)"/>
+            <column name="project_id" type="varchar(255)"/>
+        </createIndex>
+    </changeSet>
+
 </databaseChangeLog>

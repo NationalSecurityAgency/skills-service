@@ -93,6 +93,9 @@ class ProjAdminService {
     @Autowired
     SkillDefRepo skillDefRepo
 
+    @Autowired
+    ProjectErrorService errorService
+
     @Transactional()
     void saveProject(String originalProjectId, ProjectRequest projectRequest, String userIdParam = null) {
         assert projectRequest?.projectId
@@ -348,6 +351,7 @@ class ProjAdminService {
         )
         res.numBadges = skillDefRepo.countByProjectIdAndType(definition.projectId, SkillDef.ContainerType.Badge)
         res.numSkills = countNumSkillsForProject(definition)
+        res.numErrors = errorService.countOfErrorsForProject(definition.projectId)
         SettingsResult result = settingsService.getProjectSetting(definition.projectId, Settings.LEVEL_AS_POINTS.settingName)
 
         if (result == null || result.value == "false") {

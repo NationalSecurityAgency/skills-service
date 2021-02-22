@@ -13,24 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.controller.result.model
+package skills.storage
 
-class ProjectResult extends SimpleProjectResult{
+import groovy.transform.ToString
+import org.hibernate.annotations.Where
+import skills.storage.model.CustomIcon
+import skills.storage.model.SkillDef
 
-    int totalPoints
+import javax.persistence.*
 
-    int numSubjects
-    int numSkills
-    int numBadges
+@Entity
+@Table(name = 'project_error')
+@ToString(includeNames = true)
+class ProjectError implements Serializable {
 
-    int displayOrder
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    Integer id
 
-    boolean isFirst
-    boolean isLast
+    String projectId
 
-    boolean levelsArePoints
+    String reportedSkillId
 
-    boolean pinned
+    String error
 
-    int numErrors
+    Date created
+
+    Date lastSeen
+
+    Integer count
 }

@@ -27,11 +27,13 @@ import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.ProjectExistsRequest
 import skills.controller.request.model.ProjectRequest
 import skills.controller.result.model.CustomIconResult
+import skills.controller.result.model.ProjectError
 import skills.controller.result.model.ProjectResult
 import skills.controller.result.model.RequestResult
 import skills.icons.CustomIconFacade
 import skills.profile.EnableCallStackProf
 import skills.services.IdFormatValidator
+import skills.services.ProjectErrorService
 import skills.services.admin.ProjAdminService
 import skills.services.admin.ShareSkillsService
 import skills.services.admin.SkillsAdminService
