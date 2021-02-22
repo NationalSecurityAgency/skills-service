@@ -208,7 +208,7 @@ describe('Client Display Self Report Skills Tests', () => {
     cy.get('[data-cy="skillProgress_index-1"]').contains('Achieved on ')
   });
 
-  it('self report approval-required skill - skill gets approved', () => {
+  it.only('self report approval-required skill - skill gets approved', () => {
     cy.createSkill(1, 'Approval');
     cy.cdVisit('/');
     cy.cdClickSubj(0);
@@ -218,7 +218,7 @@ describe('Client Display Self Report Skills Tests', () => {
     cy.get('[data-cy="selfReportSkillMsg"]').contains('This skill requires approval. Submit with an optional message and it will enter an approval queue.')
     cy.get('[data-cy="selfReportSubmitBtn"]').click();
 
-    cy.get('[data-cy="selfReportAlert"]').contains("This skills requires project administrator's approval. Submitted successfully! Now let's play the waiting game!")
+    cy.get('[data-cy="selfReportAlert"]').contains("This skill requires approval from a project administrator. Now let's play the waiting game! ")
     cy.get('[data-cy="selfReportBtn"]').should('be.disabled');
     cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]').contains('0');
     cy.get('[data-cy="pendingApprovalStatus"]').contains('Pending Approval')
@@ -361,7 +361,7 @@ describe('Client Display Self Report Skills Tests', () => {
     cy.get('[data-cy="selfReportSkillMsg"]').contains('This skill requires approval. Submit with an optional message and it will enter an approval queue.')
     cy.get('[data-cy="selfReportSubmitBtn"]').click();
 
-    cy.get('[data-cy="skillProgress_index-1"] [data-cy="selfReportAlert"]').contains("This skills requires project administrator's approval. Submitted successfully! Now let's play the waiting game!")
+    cy.get('[data-cy="skillProgress_index-1"] [data-cy="selfReportAlert"]').contains("This skill requires approval from a project administrator. Now let's play the waiting game! ")
     cy.get('[data-cy="skillProgress_index-1"] [data-cy="selfReportBtn"]').should('be.disabled');
     cy.get('[data-cy="skillProgress_index-1"] [data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]').contains('0');
     cy.get('[data-cy="pendingApprovalStatus"]').contains('Pending Approval')

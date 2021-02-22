@@ -37,6 +37,9 @@ limitations under the License.
         projectId: this.$route.params.projectId,
         skillsVersion: 0,
         theme: {
+          tiles: {
+            backgroundColor: '#ffffff',
+          },
           pageTitleTextColor: '#264653ff',
         },
       };

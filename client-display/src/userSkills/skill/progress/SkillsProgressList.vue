@@ -54,19 +54,6 @@ limitations under the License.
                         title="Skills have not been added yet." sub-title="Please contact this project's administrator."/>
             </div>
         </div>
-
-        <div v-if="skillsInternal && skillsInternal.length > 0" class="card-footer skills-page-title-text-color">
-            <div class="row">
-                <div class="col text-right">
-                  <span v-if="helpTipHref">
-                    Need Help?
-                    <a :href="helpTipHref" target="_blank" rel="noopener" class="">
-                      Click here <i class="fas fa-external-link-alt"></i>
-                    </a>
-                  </span>
-                </div>
-            </div>
-        </div>
     </div>
 </template>
 
@@ -93,10 +80,6 @@ limitations under the License.
       showDescriptions: {
         type: Boolean,
         default: false,
-      },
-      helpTipHref: {
-        type: String,
-        required: false,
       },
       type: {
         type: String,

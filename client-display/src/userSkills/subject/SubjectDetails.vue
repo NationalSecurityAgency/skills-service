@@ -26,15 +26,21 @@ limitations under the License.
             </div>
 
             <div v-if="displayData.userSkills.description" class="card mt-2">
-                <div class="card-header">
-                    <h3 class=" h6 card-title mb-0 float-left">Description</h3>
-                </div>
-                <div class="card-body">
-                    <markdown-text :text="displayData.userSkills.description" class="d-block text-left"/>
-                </div>
+              <div class="card-header">
+                <h3 class="h6 card-title mb-0 float-left">Description</h3>
+              </div>
+              <div class="card-body">
+                <markdown-text :text="displayData.userSkills.description" class="d-block text-left"/>
+              </div>
+              <div v-if="displayData.userSkills.helpUrl" class="card-footer text-left">
+                    <a :href="displayData.userSkills.helpUrl" target="_blank" rel="noopener"
+                       class="btn btn-sm btn-outline-info skills-theme-btn">
+                      Learn More <i class="fas fa-external-link-alt"></i>
+                    </a>
+              </div>
             </div>
 
-            <skills-progress-list :subject="displayData.userSkills" :helpTipHref="displayData.userSkills.helpUrl"/>
+            <skills-progress-list :subject="displayData.userSkills"/>
         </div>
     </section>
 </template>
@@ -58,11 +64,6 @@ limitations under the License.
     },
     watch: {
       $route: 'fetchData',
-    },
-    computed: {
-      helpTipHref() {
-        return '';
-      },
     },
     mounted() {
       this.fetchData();
