@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 SkillTree
+ * Copyright 2021 SkillTree
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,22 +15,16 @@
  */
 package skills.controller.result.model
 
-class ProjectResult extends SimpleProjectResult{
+class ProjectError {
+    String projectId
 
-    int totalPoints
+    String reportedSkillId
 
-    int numSubjects
-    int numSkills
-    int numBadges
+    String error
 
-    int displayOrder
+    Date created
 
-    boolean isFirst
-    boolean isLast
+    Date lastSeen
 
-    boolean levelsArePoints
-
-    boolean pinned
-
-    int numErrors
+    Integer count
 }

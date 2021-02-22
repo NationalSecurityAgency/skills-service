@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 SkillTree
+ * Copyright 2021 SkillTree
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,24 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.controller.result.model
+package skills.storage.repos
 
-class ProjectResult extends SimpleProjectResult{
+import org.springframework.data.repository.CrudRepository
+import org.springframework.lang.Nullable
+import skills.storage.ProjectError
+import java.util.stream.Stream
 
-    int totalPoints
+interface ProjectErrorRepo extends CrudRepository<ProjectError, Long> {
 
-    int numSubjects
-    int numSkills
-    int numBadges
+    @Nullable
+    Stream<ProjectError> findAllByProjectId(String projectId)
 
-    int displayOrder
+    long countByProjectId(String projectId)
 
-    boolean isFirst
-    boolean isLast
+    void deleteByProjectId(String projectId)
 
-    boolean levelsArePoints
+    @Nullable
+    ProjectError findByProjectIdAndReportedSkillId(String projectId, String reportedSkillId)
 
-    boolean pinned
-
-    int numErrors
 }

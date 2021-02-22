@@ -88,6 +88,9 @@ class AdminController {
     @Value('#{"${skills.config.ui.maxTimeWindowInMinutes}"}')
     int maxTimeWindowInMinutes
 
+    @Autowired
+    ProjectErrorService errorService
+
     @RequestMapping(value = "/projects/{id}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
     @ResponseBody
     RequestResult saveProject(@PathVariable("id") String projectId, @RequestBody skills.controller.request.model.ProjectRequest projectRequest) {
@@ -899,5 +902,25 @@ class AdminController {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotNull(level, "Level")
         return globalBadgesService.isProjectLevelUsedInGlobalBadge(InputSanitizer.sanitize(projectId), level)
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/errors", method = [RequestMethod.GET], produces = "application/json")
+    @ResponseBody
+    List<ProjectError> getErrors(@PathVariable("projectId") String projectId) {
+        return errorService.getAllErrorsForProject(projectId)
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/errors", method = [RequestMethod.DELETE], produces = "application/json")
+    @ResponseBody
+    RequestResult deleteAllErrors(@PathVariable("projectId") String projectId) {
+        errorService.deleteAllErrors(projectId)
+        return RequestResult.success()
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/errors/{reportedSkillId}", method = [RequestMethod.DELETE], produces = "application/json")
+    @ResponseBody
+    RequestResult deleteProjectError(@PathVariable("projectId") String projectId, @PathVariable("reportedSkillId") String reportedSkillId){
+        errorService.deleteError(projectId, reportedSkillId)
+        return RequestResult.success()
     }
 }

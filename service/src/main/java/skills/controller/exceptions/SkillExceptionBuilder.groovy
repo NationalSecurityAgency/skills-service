@@ -60,7 +60,7 @@ class SkillExceptionBuilder {
         this._userId = userId
         return this
     }
-    SkillExceptionBuilder errorCode(String errorCode){
+    SkillExceptionBuilder errorCode(ErrorCode errorCode){
         this._errorCode = errorCode
         return this
     }
