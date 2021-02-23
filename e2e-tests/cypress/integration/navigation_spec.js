@@ -24,6 +24,13 @@ describe('Navigation Tests', () => {
     });
   });
 
+  it.only('navigate to inception client-display', function () {
+    cy.visit('/administrator');
+    cy.get('[data-cy=inception-button]').click();
+    cy.get('[data-cy="breadcrumb-Dashboard Skills"]').contains('Dashboard Skills').should('be.visible');
+    cy.wrapIframe().contains('Overall Points');
+  });
+
   it('ability to expand and collapse navigation', function () {
     cy.visit('/administrator/projects/proj1');
     cy.contains('ID: subj1');
