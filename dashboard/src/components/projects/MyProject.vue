@@ -111,6 +111,11 @@ limitations under the License.
           }, {
             label: 'Badges',
             count: this.projectInternal.numBadges,
+          }, {
+            label: 'Issues',
+            count: this.projectInternal.numErrors,
+            warn: this.projectInternal.numErrors > 0,
+            warnMsg: 'Project has issues that may need to be addressed',
           }],
         };
       },
