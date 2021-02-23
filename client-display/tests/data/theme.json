@@ -20,5 +20,9 @@
     "backgroundColor": "#152E4d",
     "watermarkIconColor": "#a6c5f7"
   },
+  "buttons": {
+    "backgroundColor": "#152E4d",
+    "foregroundColor": "#fdfbfb"
+  },
   "graphLegendBorderColor": "1px solid grey"
 }

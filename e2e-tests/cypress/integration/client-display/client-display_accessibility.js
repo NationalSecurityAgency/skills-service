@@ -169,7 +169,7 @@ describe('Client Display Accessibility tests', () => {
     cy.customLighthouse();
 
     cy.get('[data-cy="selfReportSubmitBtn"]').click();
-    cy.get('[data-cy="selfReportAlert"]').contains("This skills requires project administrator's approval. Submitted successfully! Now let's play the waiting game!")
+    cy.get('[data-cy="selfReportAlert"]').contains("This skill requires approval from a project administrator. Now let's play the waiting game! ")
     cy.customA11y();
     cy.customLighthouse();
   });

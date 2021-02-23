@@ -32,14 +32,11 @@ export default {
       styleName: 'color',
     },
     pageTitleTextColor: [{
-      selector: 'body #app .skills-page-title-text-color, body #app .skills-page-title-text-color button, body #app .skills-page-title-text-color a',
+      selector: 'body #app .skills-page-title-text-color',
       styleName: 'color',
     }, {
-      selector: 'body #app .skills-page-title-text-color button, body #app .skills-page-title-text-color a, body #app .skills-badge .skills-badge-icon, body #app .skills-progress-info-card, body #app .skills-card-theme-border',
+      selector: 'body #app .skills-badge .skills-badge-icon, body #app .skills-progress-info-card, body #app .skills-card-theme-border',
       styleName: 'border-color',
-    }, {
-      selector: 'body #app .skills-page-title-text-color button:hover, body #app .skills-page-title-text-color a:hover',
-      styleName: 'background-color',
     }],
     circleProgressInteriorTextColor: {
       selector: 'body #app .circle-number span',
@@ -62,7 +59,7 @@ export default {
         selector: 'body #app .card, body #app .card-header, body #app .card-body, body #app .card-footer',
         styleName: 'background-color',
       }, {
-        selector: 'body #app .skills-page-title-text-color button:hover, body #app .skills-page-title-text-color a:hover, body #app .skills-no-data-yet .fa-inverse',
+        selector: 'body #app .skills-no-data-yet .fa-inverse',
         styleName: 'color',
       }],
       watermarkIconColor: {
@@ -83,6 +80,28 @@ export default {
     graphLegendBorderColor: {
       selector: 'body #app .graph-legend .card-header, body #app .graph-legend .card-body',
       styleName: 'border',
+    },
+    buttons: {
+      backgroundColor: [{
+        selector: 'body #app .skills-theme-btn',
+        styleName: 'background-color',
+      }, {
+        selector: 'body #app .skills-theme-btn:hover',
+        styleName: 'color',
+      }, {
+        selector: 'body #app .skills-theme-btn:hover',
+        styleName: 'border-color',
+      }],
+      foregroundColor: [{
+        selector: 'body #app .skills-theme-btn',
+        styleName: 'color',
+      }, {
+        selector: 'body #app .skills-theme-btn',
+        styleName: 'border-color',
+      }, {
+        selector: 'body #app .skills-theme-btn:hover',
+        styleName: 'background-color',
+      }],
     },
   },
 

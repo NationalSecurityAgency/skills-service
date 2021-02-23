@@ -24,9 +24,14 @@ limitations under the License.
                 <div class="card-body">
                     <badge-details-overview :badge="badge"></badge-details-overview>
                 </div>
+                <div v-if="badge.helpUrl" class="card-footer text-left">
+                  <a :href="badge.helpUrl" target="_blank" rel="noopener" class="btn btn-sm btn-outline-info skills-theme-btn">
+                    Learn More <i class="fas fa-external-link-alt"></i>
+                  </a>
+                </div>
             </div>
 
-            <skills-progress-list v-if="badge" :subject="badge" :show-descriptions="showDescriptions" :helpTipHref="helpTipHref" type="badge"/>
+            <skills-progress-list v-if="badge" :subject="badge" :show-descriptions="showDescriptions" type="badge"/>
         </div>
     </div>
 </template>
@@ -54,11 +59,6 @@ limitations under the License.
         initialized: false,
         showDescriptions: false,
       };
-    },
-    computed: {
-      helpTipHref() {
-        return this.badge ? this.badge.helpUrl : '';
-      },
     },
     watch: {
       $route: 'fetchData',

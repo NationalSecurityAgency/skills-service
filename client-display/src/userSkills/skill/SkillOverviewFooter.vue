@@ -16,12 +16,12 @@ limitations under the License.
 <template>
   <div>
     <div class="row pt-2">
-      <div class="col-auto text-left skills-page-title-text-color">
+      <div class="col-auto text-left">
         <div class="btn-group" role="group" aria-label="Basic example">
-          <a v-if="skillInternal.description && skillInternal.description.href" :href="skillInternal.description.href" target="_blank" rel="noopener" class="btn btn-outline-info ">
+          <a v-if="skillInternal.description && skillInternal.description.href" :href="skillInternal.description.href" target="_blank" rel="noopener" class="btn btn-outline-info skills-theme-btn">
             <i class="fas fa-question-circle"></i> Learn More <i class="fas fa-external-link-alt"></i>
           </a>
-          <button v-if="selfReport.available" class="btn btn-outline-info"
+          <button v-if="selfReport.available" class="btn btn-outline-info skills-theme-btn"
                   :disabled="selfReportDisabled"
                   @click="selfReportModalVisible = true;"
                   data-cy="selfReportBtn">
@@ -77,7 +77,12 @@ limitations under the License.
           </div>
 
           <div v-if="!this.isAlreadyPerformed() && isApprovalRequired">
-            <i class="fas fa-user-clock mr-2 text-info" style="font-size: 1.5rem"></i> This skills requires project administrator's approval. <b class="text-info">Submitted successfully!</b> Now let's play the waiting game!
+            <div>
+              <i class="fas fa-user-clock mr-2 text-info" style="font-size: 1.5rem"></i> <b>Submitted successfully!</b>
+            </div>
+            <div class="mt-1">
+              This skill <b class="text-info">requires approval</b> from a project administrator. Now let's play the waiting game!
+            </div>
           </div>
         </div>
         <div class="col-auto">
