@@ -328,7 +328,7 @@ describe('Client Display Self Report Skills Tests', () => {
     cy.get('[data-cy="selfReportSkillMsg"]').contains('This skill requires approval. Submit with an optional message and it will enter an approval queue.')
     cy.get('[data-cy="selfReportSubmitBtn"]').click();
 
-    cy.get('[data-cy="selfReportAlert"]').contains("This skills requires project administrator's approval. Submitted successfully! Now let's play the waiting game!")
+    cy.get('[data-cy="selfReportAlert"]').contains("This skill requires approval from a project administrator. Now let's play the waiting game!")
     cy.get('[data-cy="selfReportBtn"]').should('be.disabled');
     cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]').contains('0');
     cy.get('[data-cy="pendingApprovalStatus"]').contains('Pending Approval')

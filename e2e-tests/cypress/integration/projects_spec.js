@@ -603,37 +603,6 @@ describe('Projects Tests', () => {
     cy.get('[data-cy=editLevelButton]').eq(3).should('have.focus');
   });
 
-  it('Trusted client should not shown when oAuthOnly=true', () => {
-    cy.intercept('GET', '/public/config', {oAuthOnly: true, authMode: 'FORM'}).as('loadConfig');
-
-    cy.request('POST', '/app/projects/proj1', {
-      projectId: 'proj1',
-      name: "proj1"
-    });
-
-    cy.intercept({
-      method: 'PUT',
-      url: '/admin/projects/proj1/users/root@skills.org/roles/ROLE_PROJECT_ADMIN',
-    }).as('addAdmin');
-
-    cy.intercept({
-      method: 'POST',
-      url: '/app/users/suggestDashboardUsers*',
-    }).as('suggest');
-    cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
-    cy.intercept('GET', '/admin/projects/proj1').as('loadProject');
-    cy.intercept('GET', '/admin/projects/proj1/userRoles').as('loadUserRoles');
-
-    cy.visit('/administrator/projects/proj1/access');
-    cy.wait('@loadConfig');
-    cy.wait('@loadUserInfo');
-    cy.wait('@loadProject');
-    cy.wait('@loadUserRoles');
-
-    cy.contains('Project Administrators').should('exist');
-    cy.get('[data-cy="trusted-client-props-panel"]').should('not.exist')
-  });
-
   it('Trusted client should be shown when oAuthOnly!=true', () => {
     cy.intercept('GET', '/public/config', {oAuthOnly: false, authMode: 'FORM'}).as('loadConfig');
 
