@@ -208,7 +208,7 @@ describe('Client Display Self Report Skills Tests', () => {
     cy.get('[data-cy="skillProgress_index-1"]').contains('Achieved on ')
   });
 
-  it.only('self report approval-required skill - skill gets approved', () => {
+  it('self report approval-required skill - skill gets approved', () => {
     cy.createSkill(1, 'Approval');
     cy.cdVisit('/');
     cy.cdClickSubj(0);
