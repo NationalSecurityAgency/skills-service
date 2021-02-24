@@ -5,7 +5,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-https://www.apache.org/licenses/LICENSE-2.0
+    https://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -51,8 +51,9 @@ limitations under the License.
 
         <template #cell(edit)="data">
           <b-button :ref="`delete_${data.item.reportedSkillId}`" @click="removeError(data.item)" variant="outline-info" size="sm"
-                    data-cy="deleteErrorButton">
-            <i class="text-warning fas fa-trash-alt"/> Delete
+                    :data-cy="`deleteErrorButton_${encodeURI(data.item.reportedSkillId)}`"
+                    :aria-label="`delete error for reported skill ${data.item.reportedSkilId}`">
+            <i class="text-warning fas fa-trash-alt" aria-hidden="true"/>
           </b-button>
         </template>
 

@@ -29,7 +29,7 @@ limitations under the License.
                   <div class="card h-100" >
                     <div class="card-body">
                       <div class="row">
-                        <div class="col text-left">
+                        <div class="col text-left" :data-cy="`pageHeaderStat_${stat.label}`">
                           <div class="h5 card-title text-uppercase text-muted mb-0 small">{{stat.label}}</div>
                           <span class="h5 font-weight-bold mb-0">{{ stat.count | number}}</span>
                           <span v-if="stat.warnMsg" class="ml-1">
