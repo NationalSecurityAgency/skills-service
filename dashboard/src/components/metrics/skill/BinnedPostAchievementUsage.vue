@@ -14,12 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <metrics-card title="Post Achievement Usage" data-cy="binnedNumUsersPostAchievement">
+  <metrics-card title="Usage" data-cy="binnedNumUsersPostAchievement">
       <b-overlay v-if="!loading" :show="isEmpty" opacity=".5">
         <apexchart v-if="!loading" type="bar" height="350" :options="chartOptions" :series="series"></apexchart>
-        <template v-slot:overlay>
-          <div class="alert alert-info">
-            <i class="fas fa-user-clock"></i> Users have not achieved any skills, yet...</div>
+        <template #overlay>
+          <div v-if="loading">
+            <b-spinner variant="info" label="Spinning"></b-spinner>
+          </div>
+          <div v-if="!loading && isEmpty" class="alert alert-info">
+            <i class="fas fa-dragon mr-1"></i> No achievements yet for this skill.
+          </div>
         </template>
       </b-overlay>
     <div class="text-muted small">Number of times this Skill is performed per user after having fully achieved it.</div>
@@ -105,7 +109,7 @@ limitations under the License.
     methods: {
       updateChart(res) {
         const series = [];
-        if (res) {
+        if (res && res.length > 0) {
           this.isEmpty = false;
           this.chartOptions.xaxis.categories = res.map((labeledCount) => labeledCount.label);
           const data = [];

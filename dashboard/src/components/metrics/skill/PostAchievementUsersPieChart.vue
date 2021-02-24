@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <metrics-card title="Post Achievement User Counts" data-cy="numUsersPostAchievement">
+  <metrics-card title="User Counts" data-cy="numUsersPostAchievement">
     <metrics-overlay :loading="loading" :has-data="hasData" no-data-msg="No achievements yet for this skill.">
       <apexchart type="pie" height="350" :options="chartOptions" :series="series"></apexchart>
     </metrics-overlay>
@@ -45,7 +45,7 @@ limitations under the License.
             },
           },
           colors: ['#17a2b8', '#28a745'],
-          labels: ['Users who stopped after achieving', 'Users who performed Skill at least once after achieving'],
+          labels: ['stopped after achieving', 'performed Skill at least once after achieving'],
           dataLabels: {
             enabled: false,
           },
