@@ -28,8 +28,10 @@ import skills.notify.Notifier
 import skills.services.events.SkillEventsService
 import skills.services.settings.Settings
 import skills.services.settings.SettingsService
+import skills.storage.model.ProjDef
 import skills.storage.model.SkillApproval
 import skills.storage.model.auth.RoleName
+import skills.storage.repos.ProjDefRepo
 import skills.storage.repos.SkillApprovalRepo
 import skills.storage.repos.SkillEventsSupportRepo
 
@@ -48,6 +50,9 @@ class SelfReportingService {
 
     @Autowired
     AccessSettingsStorageService accessSettingsStorageService
+
+    @Autowired
+    ProjDefRepo projDefRepo
 
     @Autowired
     SettingsService settingsService
@@ -111,12 +116,14 @@ class SelfReportingService {
 
         List<UserRoleRes> userRoleRes = accessSettingsStorageService.getUserRolesForProjectId(skillDefinition.projectId)
                 .findAll { it.roleName == RoleName.ROLE_PROJECT_ADMIN }
+        ProjDef projDef = projDefRepo.findByProjectId(skillDefinition.projectId)
         Notifier.NotificationRequest request = new ApprovalNotificationRequestBuilder(
                 userRequesting: userId,
                 requestMsg: requestMsg,
                 userIds: userRoleRes.collect { it.userId },
                 skillDef: skillDefinition,
-                publicUrl: publicUrl
+                publicUrl: publicUrl,
+                projectName: projDef.name
         ).build()
         notifier.sendNotification(request)
     }

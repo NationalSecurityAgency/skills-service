@@ -59,6 +59,7 @@ class EmailSendingService {
         String [] toArr = to.toArray()
         helper.setTo(toArr)
         helper.setFrom(fromEmail)
+        helper.setReplyTo(fromEmail)
         if (plainTextBody) {
             helper.setText(plainTextBody, htmlBody)
         } else {

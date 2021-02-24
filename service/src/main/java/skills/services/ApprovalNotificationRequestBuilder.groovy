@@ -6,17 +6,24 @@ import skills.storage.repos.SkillEventsSupportRepo
 
 class ApprovalNotificationRequestBuilder {
 
+    // inject
     String userRequesting
     String requestMsg
     SkillEventsSupportRepo.SkillDefMin skillDef
     List<String> userIds
     String publicUrl
+    String projectName
 
+
+    // private
+    String approveUrl
     Notifier.NotificationRequest build() {
         assert userRequesting
         assert requestMsg
         assert skillDef
         assert userIds
+
+        approveUrl = "${publicUrl}administrator/projects/${skillDef.projectId}/self-report"
 
         new Notifier.NotificationRequest(
                 userIds: userIds,
@@ -32,23 +39,26 @@ class ApprovalNotificationRequestBuilder {
         templateContext.setVariable("userRequesting", userRequesting)
         templateContext.setVariable("numPoints", numPoints())
         templateContext.setVariable("skillName", skillDef.name)
-        templateContext.setVariable("publicUrl", publicUrl)
+        templateContext.setVariable("approveUrl", approveUrl)
         templateContext.setVariable("skillId", skillDef.skillId)
         templateContext.setVariable("requestMsg", requestMsg)
         templateContext.setVariable("projectId", skillDef.projectId)
+        templateContext.setVariable("publicUrl", publicUrl)
+        templateContext.setVariable("projectName", projectName)
 
         return templateContext
     }
 
     private String buildBody() {
-        return "User ${userRequesting} requested ${numPoints()} points for '${skillDef.name}' skill.\n" +
-                "\n   Approval URL: ${publicUrl}projects/${skillDef.projectId}/self-reporting" +
+        return "User ${userRequesting} requested points.\n" +
+                "\n   Approval URL: ${approveUrl}" +
                 "\n   User Requested: ${userRequesting}" +
+                "\n   Project: ${projectName}" +
                 "\n   Skill: ${skillDef.name} (${skillDef.skillId})" +
                 "\n   Number of Points: ${numPoints()}" +
                 "\n   Request Message: ${requestMsg}" +
                         "\n" +
-                        "\nAs an approver for '${skillDef.projectId}' project you can approve or reject this request." +
+                        "\nAs an approver for the '${skillDef.projectId}' project, you can approve or reject this request." +
                         "\n\n" +
                         "\nAlways yours," +
                         "\nSkillTree Bot"
