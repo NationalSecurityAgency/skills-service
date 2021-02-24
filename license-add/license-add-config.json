@@ -3,7 +3,7 @@
     "pom.xml", "build/**", "**/robots.txt", "**.svg", "**.config.js", "**/**/*.conf.js", "**/**/.*",
     "cypress/videos/**", "**/*.jar", "**.xml", "cypress/fonts/**", "cypress/fixtures/**", "logs/*", "src/fonts/black-ops-one*"
   ],
-  "license": "../license-add/LICENSE-HEADER_regex.txt",
+  "license": "../license-add/LICENSE-HEADER.txt",
   "licenseFormats": {
     "js": {
       "prepend": "/*",
@@ -37,6 +37,5 @@
       }
     }
   },
-  "trailingWhitespace": "TRIM",
-  "regexIdentifier": "##"
+  "trailingWhitespace": "TRIM"
 }
