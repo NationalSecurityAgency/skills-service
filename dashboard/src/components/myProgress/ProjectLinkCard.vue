@@ -101,7 +101,7 @@ limitations under the License.
         rankVariant: 'secondary',
       };
     },
-    created() {
+    mounted() {
       if (this.proj.totalPoints > 0) {
         const pointsPercent = this.getPercent((this.proj.points / this.proj.totalPoints) * 100);
         this.series = [pointsPercent];
