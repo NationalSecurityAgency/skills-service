@@ -109,7 +109,7 @@ class SkillEventsService {
         if (notifyIfNotApplied || result.skillApplied) {
             skillEventPublisher.publishSkillUpdate(result, userId)
         }
-        metricsLogger.log("Reported Skills [${projectId}]", ['skillId': skillId]);
+        metricsLogger.log("Reported Skills [${projectId}], [${skillId}]", ['skillId': skillId, 'projectId': projectId, 'requestedUserId': userId]);
         return result
     }
 
