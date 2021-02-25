@@ -191,7 +191,8 @@ class SkillEventsService {
                 'skillId': skillId,
                 'projectId': projectId,
                 'requestedUserId': userId,
-                'selfReported': (skillDefinition.getSelfReportingType() == SkillDef.SelfReportingType.Approval).toString(),
+                'selfReported': (skillDefinition.getSelfReportingType() !== null).toString(),
+                'selfReportType': skillDefinition.getSelfReportingType()?.toString(),
         ]);
 
         long numExistingSkills = getNumExistingSkills(userId, projectId, skillId)
