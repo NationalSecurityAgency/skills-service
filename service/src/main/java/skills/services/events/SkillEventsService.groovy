@@ -109,7 +109,6 @@ class SkillEventsService {
         if (notifyIfNotApplied || result.skillApplied) {
             skillEventPublisher.publishSkillUpdate(result, userId)
         }
-        metricsLogger.log("Reported Skills [${projectId}], [${skillId}]", ['skillId': skillId, 'projectId': projectId, 'requestedUserId': userId]);
         return result
     }
 
@@ -188,6 +187,12 @@ class SkillEventsService {
         SkillEventResult res = new SkillEventResult(projectId: projectId, skillId: skillId, name: skillDefinition.name)
 
         userEventService.recordEvent(projectId, skillDefinition.id, userId, skillDate.date)
+        metricsLogger.log("Reported Skills [${projectId}], [${skillId}]", [
+                'skillId': skillId,
+                'projectId': projectId,
+                'requestedUserId': userId,
+                'selfReported': (skillDefinition.getSelfReportingType() == SkillDef.SelfReportingType.Approval).toString(),
+        ]);
 
         long numExistingSkills = getNumExistingSkills(userId, projectId, skillId)
         AppliedCheckRes checkRes = checkIfSkillApplied(userId, numExistingSkills, skillDate.date, skillDefinition)
