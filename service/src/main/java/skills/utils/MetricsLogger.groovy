@@ -90,9 +90,9 @@ class MetricsLogger {
         UserInfo userInfo = userInfoService.getCurrentUser()
         if (userInfo) {
             if (StringUtils.isNotBlank(userInfo.userDn)) {
-                userAttributes.put('DN', userInfo.userDn)
+                userAttributes.put('currentUserDn', userInfo.userDn)
             } else if (StringUtils.isNotBlank(userInfo.email)) {
-                userAttributes.put('email', userInfo.email)
+                userAttributes.put('currentUserEmail', userInfo.email)
             }
         }
         return userAttributes
