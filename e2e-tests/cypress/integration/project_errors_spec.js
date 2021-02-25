@@ -107,5 +107,21 @@ describe('Project Errors Tests', () => {
     cy.get('[data-cy=pageHeaderStat_Issues]').contains('2');
   });
 
+  it('issues count on administrator home page is correct', () => {
+    cy.reportSkill(1,42, 'user@skills.org', '2021-02-24 10:00', false);
+    cy.reportSkill(1,75, 'user@skills.org', '2021-02-24 10:00', false);
+    cy.reportSkill(1,75, 'user@skills.org', '2021-02-24 10:00', false);
+    cy.reportSkill(1,75, 'user@skills.org', '2021-02-24 10:00', false);
+    cy.reportSkill(1,13, 'user@skills.org', '2021-02-24 10:00', false);
+
+    cy.intercept('GET', '/admin/projects').as('getProjects');
+
+    cy.visit('/administrator');
+    cy.wait('@getProjects');
+    cy.get('[data-cy=pagePreviewCardStat_Issues]').contains('3');
+  });
+
+
+
 
 });
