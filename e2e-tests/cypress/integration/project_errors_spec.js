@@ -87,7 +87,7 @@ describe('Project Errors Tests', () => {
 
     cy.intercept('GET', '/admin/projects/proj1').as('getProject');
     cy.intercept('GET', '/admin/projects/proj1/errors').as('getErrors');
-    cy.intercept('DELETE', '/admin/projects/proj1/errors/skill42').as('deleteError');
+    cy.intercept('DELETE', '/admin/projects/proj1/errors/SkillNotFound/skill42').as('deleteError');
 
     cy.visit('/administrator/projects/proj1/');
     cy.wait('@getProject');
@@ -99,7 +99,7 @@ describe('Project Errors Tests', () => {
 
     cy.get('[data-cy=deleteErrorButton_skill42]').click();
     cy.contains('Please Confirm!');
-    cy.wait(1000); //have to wait on the fade in animation, otherwise spordaic failures
+    cy.wait(1000); //have to wait on the fade in animation, otherwise sporadic failures
     cy.contains('YES, Delete It!').click();
     cy.wait('@deleteError');
     cy.wait('@getProject');

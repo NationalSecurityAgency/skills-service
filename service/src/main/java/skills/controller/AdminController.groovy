@@ -34,6 +34,7 @@ import skills.services.*
 import skills.services.admin.*
 import skills.services.settings.SettingsService
 import skills.services.settings.listeners.ValidationRes
+import skills.storage.model.ProjectError.ErrorType
 import skills.utils.ClientSecretGenerator
 import skills.utils.InputSanitizer
 
@@ -906,8 +907,15 @@ class AdminController {
 
     @RequestMapping(value = "/projects/{projectId}/errors", method = [RequestMethod.GET], produces = "application/json")
     @ResponseBody
-    List<ProjectError> getErrors(@PathVariable("projectId") String projectId) {
-        return errorService.getAllErrorsForProject(projectId)
+    TableResult getErrors(@PathVariable("projectId") String projectId,
+                                 @RequestParam int limit,
+                                 @RequestParam int page,
+                                 @RequestParam String orderBy,
+                                 @RequestParam Boolean ascending) {
+
+        PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
+
+        return errorService.getAllErrorsForProject(projectId, pageRequest)
     }
 
     @RequestMapping(value = "/projects/{projectId}/errors", method = [RequestMethod.DELETE], produces = "application/json")
@@ -917,10 +925,11 @@ class AdminController {
         return RequestResult.success()
     }
 
-    @RequestMapping(value = "/projects/{projectId}/errors/{reportedSkillId}", method = [RequestMethod.DELETE], produces = "application/json")
+    @RequestMapping(value = "/projects/{projectId}/errors/{errorType}/{error}", method = [RequestMethod.DELETE], produces = "application/json")
     @ResponseBody
-    RequestResult deleteProjectError(@PathVariable("projectId") String projectId, @PathVariable("reportedSkillId") String reportedSkillId){
-        errorService.deleteError(projectId, reportedSkillId)
+    RequestResult deleteProjectError(@PathVariable("projectId") String projectId, @PathVariable("errorType") String errorType, @PathVariable("error") String error){
+
+        errorService.deleteError(projectId, errorType, error)
         return RequestResult.success()
     }
 }

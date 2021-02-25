@@ -39,14 +39,16 @@ class ProjectErrorSpecs extends DefaultIntSpec {
             //expected to fail
         }
 
-        def errors = skillsService.getProjectErrors(proj.projectId)
+        def errors = skillsService.getProjectErrors(proj.projectId, 10, 1, 'lastSeen', false)
 
         then:
         errors
-        errors.size() == 1
-        errors[0].projectId == proj.projectId
-        errors[0].reportedSkillId == "notASkill"
-        errors[0].count == 1
+        errors.totalCount == 1
+        errors.data.size() == 1
+        errors.data[0].projectId == proj.projectId
+        errors.data[0].errorType == "SkillNotFound"
+        errors.data[0].error == "notASkill"
+        errors.data[0].count == 1
     }
 
     def "delete all errors"() {
@@ -73,13 +75,15 @@ class ProjectErrorSpecs extends DefaultIntSpec {
             //expected to fail
         }
 
-        def errorsBeforeDelete = skillsService.getProjectErrors(proj.projectId)
+        def errorsBeforeDelete = skillsService.getProjectErrors(proj.projectId, 10, 1, "lastSeen", false)
         skillsService.deleteAllProjectErrors(proj.projectId)
-        def errorsAfterDelete = skillsService.getProjectErrors(proj.projectId)
+        def errorsAfterDelete = skillsService.getProjectErrors(proj.projectId, 10, 1, "lastSeen", false)
 
         then:
-        errorsBeforeDelete.size() == 2
-        errorsAfterDelete.size() == 0
+        errorsBeforeDelete.totalCount == 2
+        errorsBeforeDelete.data.size() == 2
+        errorsAfterDelete.data.size() == 0
+        errorsAfterDelete.totalCount == 0
     }
 
     def "delete one specific error"() {
@@ -106,13 +110,15 @@ class ProjectErrorSpecs extends DefaultIntSpec {
             //expected to fail
         }
 
-        def errorsBeforeDelete = skillsService.getProjectErrors(proj.projectId)
-        skillsService.deleteSpecificProjectError(proj.projectId, "this is not a skill id")
-        def errorsAfterDelete = skillsService.getProjectErrors(proj.projectId)
+        def errorsBeforeDelete = skillsService.getProjectErrors(proj.projectId, 10, 1, "lastSeen", false)
+        skillsService.deleteSpecificProjectError(proj.projectId, "SkillNotFound", "this is not a skill id")
+        def errorsAfterDelete = skillsService.getProjectErrors(proj.projectId, 10, 1, "lastSeen", false)
 
         then:
-        errorsBeforeDelete.size() == 2
-        errorsAfterDelete.size() == 1
+        errorsBeforeDelete.totalCount == 2
+        errorsBeforeDelete.data.size() == 2
+        errorsAfterDelete.totalCount == 1
+        errorsAfterDelete.data.size() == 1
     }
 
 }

@@ -18,7 +18,7 @@ package skills.controller.result.model
 class ProjectError {
     String projectId
 
-    String reportedSkillId
+    String errorType
 
     String error
 

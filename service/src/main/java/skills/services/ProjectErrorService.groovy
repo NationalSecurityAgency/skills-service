@@ -16,10 +16,15 @@
 package skills.services
 
 import groovy.util.logging.Slf4j
+import org.jsoup.helper.Validate
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
-import skills.storage.ProjectError
+import skills.controller.exceptions.SkillException
+import skills.controller.result.model.TableResult
+import skills.storage.model.ProjectError
 import skills.storage.repos.ProjectErrorRepo
 
 @Slf4j
@@ -31,9 +36,11 @@ class ProjectErrorService {
 
     @Transactional
     public void invalidSkillReported(String projectId, String reportedSkillId) {
-        ProjectError error = errorRepo.findByProjectIdAndReportedSkillId(projectId, reportedSkillId)
+        Validate.notNull(reportedSkillId, "reportedSkillId is required")
+
+        ProjectError error = errorRepo.findByProjectIdAndErrorTypeAndError(projectId, ProjectError.ErrorType.SkillNotFound, reportedSkillId)
         if (!error) {
-            error = new ProjectError(projectId: projectId, reportedSkillId: reportedSkillId, created: new Date(), count: 0)
+            error = new ProjectError(projectId: projectId, errorType: ProjectError.ErrorType.SkillNotFound,  error: reportedSkillId, created: new Date(), count: 0)
         }
         error.count += 1
         error.lastSeen = new Date()
@@ -42,13 +49,20 @@ class ProjectErrorService {
     }
 
     @Transactional
-    public void deleteError(String projectId, String reportedSkillId) {
-        ProjectError error = errorRepo.findByProjectIdAndReportedSkillId(projectId, reportedSkillId)
+    public void deleteError(String projectId, String errorType, String err) {
+        ProjectError.ErrorType type
+        try {
+            type = ProjectError.ErrorType.valueOf(errorType)
+        } catch (IllegalArgumentException illegalArgumentException) {
+            log.error("can't find ErrorType enum value for [${errorType}]", illegalArgumentException)
+            throw new SkillException("unrecognized errorType [${errorType}]")
+        }
+        ProjectError error = errorRepo.findByProjectIdAndErrorTypeAndError(projectId, type, err)
         if (error) {
-            log.info("deleting error for [${projectId}]-[${reportedSkillId}]")
+            log.info("deleting error for [${projectId}]-[${err}]")
             errorRepo.delete(error)
         } else {
-            log.warn("ProjectError does not exists for [${projectId}]-[${reportedSkillId}")
+            log.warn("ProjectError does not exists for [${projectId}]-[${err}")
         }
     }
 
@@ -58,19 +72,24 @@ class ProjectErrorService {
     }
 
     @Transactional(readOnly = true)
-    public List<skills.controller.result.model.ProjectError> getAllErrorsForProject(String projectId) {
+    public TableResult getAllErrorsForProject(String projectId, PageRequest pageRequest) {
         List<skills.controller.result.model.ProjectError> errs = []
-        errorRepo.findAllByProjectId(projectId)?.forEach({
-            errs << new skills.controller.result.model.ProjectError(
-                    projectId: it.projectId,
-                    reportedSkillId: it.reportedSkillId,
-                    error: it.error,
-                    created: it.created,
-                    lastSeen: it.lastSeen,
-                    count: it.count
-            )
-        })
-        return errs
+        Page<ProjectError> res = errorRepo.findAllByProjectId(projectId, pageRequest);
+        if (!res.isEmpty()) {
+            res.forEach({
+                errs << new skills.controller.result.model.ProjectError(
+                        projectId: it.projectId,
+                        errorType: it.errorType.toString(),
+                        error: it.error,
+                        created: it.created,
+                        lastSeen: it.lastSeen,
+                        count: it.count
+                )
+            })
+        }
+
+        TableResult t = new TableResult(data: errs, count: errs?.size(), totalCount: res.getTotalElements())
+        return t
     }
 
     @Transactional(readOnly = true)
