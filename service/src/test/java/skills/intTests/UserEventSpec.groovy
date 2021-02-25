@@ -23,6 +23,7 @@ import org.springframework.transaction.support.TransactionTemplate
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
 import skills.services.LockingService
+import skills.services.StartDateUtil
 import skills.services.UserEventService
 import skills.storage.model.DayCountItem
 import skills.storage.model.EventType
@@ -1198,6 +1199,48 @@ class UserEventSpec extends DefaultIntSpec {
         afterRemove[1].count == 1
     }
 
+    def "remove uncompacted event entirely when count reaches 0"() {
+        Map proj = SkillsFactory.createProject(42)
+        Map subject = SkillsFactory.createSubject(42)
+        Map subj1_skill1 = SkillsFactory.createSkill(42,1,1,0,40, 0)
+        Map subj1_skill2 = SkillsFactory.createSkill(42,1,2,0,40, 0)
+
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subject)
+        skillsService.createSkill(subj1_skill1)
+        skillsService.createSkill(subj1_skill2)
+
+        assert maxDailyDays == 3, "test data is structured around compactDailyEventsOlderThan == 3"
+
+        def userIds = getRandomUsers(2)
+
+        SkillDef skillDef = skillDefRepo.findByProjectIdAndSkillIdAndType(proj.projectId, subj1_skill1.skillId, SkillDef.ContainerType.Skill)
+        Integer subj1_skill1_rawId = skillDef.id
+
+        SkillDef skillDef2 = skillDefRepo.findByProjectIdAndSkillIdAndType(proj.projectId, subj1_skill2.skillId, SkillDef.ContainerType.Skill)
+        Integer subj1_skill2_rawId = skillDef2.id
+
+        TestDates testDates = new TestDates()
+
+        skillsService.addSkill(subj1_skill1, userIds[0], testDates.now.toDate())
+        skillsService.addSkill(subj1_skill1, userIds[0], testDates.now.toDate())
+        skillsService.addSkill(subj1_skill1, userIds[1], testDates.now.minusDays(1).toDate())
+        skillsService.addSkill(subj1_skill2, userIds[1], testDates.now.minusDays(1).toDate())
+        skillsService.addSkill(subj1_skill1, userIds[1], testDates.now.toDate())
+        skillsService.addSkill(subj1_skill1, userIds[1], testDates.now.toDate())
+
+        when:
+        eventService.removeEvent(testDates.now.toDate(), userIds[0], subj1_skill1_rawId)
+        UserEvent eventBefore = userEventsRepo.findByUserIdAndSkillRefIdAndEventTimeAndEventType(userIds[0], subj1_skill1_rawId, StartDateUtil.computeStartDate(testDates.now.toDate(), EventType.DAILY), EventType.DAILY)
+        eventService.removeEvent(testDates.now.toDate(), userIds[0], subj1_skill1_rawId)
+        UserEvent eventAfter = userEventsRepo.findByUserIdAndSkillRefIdAndEventTimeAndEventType(userIds[0], subj1_skill1_rawId, StartDateUtil.computeStartDate(testDates.now.toDate(), EventType.DAILY), EventType.DAILY)
+
+        then:
+        eventBefore.count == 1
+        !eventAfter
+    }
+
     def "remove compacted event"(){
         Map proj = SkillsFactory.createProject(42)
         Map subject = SkillsFactory.createSubject(42)
@@ -1244,6 +1287,49 @@ class UserEventSpec extends DefaultIntSpec {
         afterRemove.size() == 2
         afterRemove[0].count == 3
         afterRemove[1].count == 1
+    }
+
+    def "remove compacted event entirely if count reaches 0"(){
+        Map proj = SkillsFactory.createProject(42)
+        Map subject = SkillsFactory.createSubject(42)
+        Map subj1_skill1 = SkillsFactory.createSkill(42,1,1,0,40, 0)
+        Map subj1_skill2 = SkillsFactory.createSkill(42,1,2,0,40, 0)
+
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subject)
+        skillsService.createSkill(subj1_skill1)
+        skillsService.createSkill(subj1_skill2)
+
+        assert maxDailyDays == 3, "test data is structured around compactDailyEventsOlderThan == 3"
+
+        def userIds = getRandomUsers(2)
+
+        SkillDef skillDef = skillDefRepo.findByProjectIdAndSkillIdAndType(proj.projectId, subj1_skill1.skillId, SkillDef.ContainerType.Skill)
+        Integer subj1_skill1_rawId = skillDef.id
+
+        SkillDef skillDef2 = skillDefRepo.findByProjectIdAndSkillIdAndType(proj.projectId, subj1_skill2.skillId, SkillDef.ContainerType.Skill)
+        Integer subj1_skill2_rawId = skillDef2.id
+
+        TestDates testDates = new TestDates()
+
+        skillsService.addSkill(subj1_skill1, userIds[0], testDates.startOfTwoWeeksAgo.plusDays(3).toDate())
+        skillsService.addSkill(subj1_skill1, userIds[0], testDates.startOfTwoWeeksAgo.toDate())
+        skillsService.addSkill(subj1_skill1, userIds[1], testDates.now.minusDays(1).toDate())
+        skillsService.addSkill(subj1_skill2, userIds[1], testDates.now.minusDays(1).toDate())
+        skillsService.addSkill(subj1_skill1, userIds[1], testDates.startOfTwoWeeksAgo.toDate())
+        skillsService.addSkill(subj1_skill1, userIds[1], testDates.startOfTwoWeeksAgo.toDate())
+
+        when:
+        eventService.compactDailyEvents()
+        eventService.removeEvent(testDates.startOfTwoWeeksAgo.toDate(), userIds[0], subj1_skill1_rawId)
+        UserEvent eventBefore = userEventsRepo.findByUserIdAndSkillRefIdAndEventTimeAndEventType(userIds[0], subj1_skill1_rawId, StartDateUtil.computeStartDate(testDates.startOfTwoWeeksAgo.toDate(), EventType.WEEKLY), EventType.WEEKLY)
+        eventService.removeEvent(testDates.startOfTwoWeeksAgo.toDate(), userIds[0], subj1_skill1_rawId)
+        UserEvent eventAfter = userEventsRepo.findByUserIdAndSkillRefIdAndEventTimeAndEventType(userIds[0], subj1_skill1_rawId, StartDateUtil.computeStartDate(testDates.startOfTwoWeeksAgo.toDate(), EventType.WEEKLY), EventType.WEEKLY)
+
+        then:
+        eventBefore.count == 1
+        !eventAfter
     }
 
 

@@ -309,10 +309,21 @@ class UserEventService {
         // but compaction has not yet run for that day, we need to first check if a DAILY event type exists for this event
         UserEvent event = userEventsRepo.findByUserIdAndSkillRefIdAndEventTimeAndEventType(userId, skillRefId, dailyEventTime, EventType.DAILY)
         if (event) {
-            event.count = Math.max(0, event.count-1)
-            userEventsRepo.save(event)
+            decrementEvent(event)
+        } else if ((event = userEventsRepo.findByUserIdAndSkillRefIdAndEventTimeAndEventType(userId, skillRefId, weeklyEventTime, EventType.WEEKLY)) != null){
+            decrementEvent(event)
         } else {
-            userEventsRepo.decrementEventCount(weeklyEventTime, userId, skillRefId, EventType.WEEKLY)
+            throw new SkillException("Unable to remove event for skillRefId" +
+                    " [${skillRefId}], userId [${userId}], performedOn [${performedOn}], no event exists. This should not happen")
+        }
+    }
+
+    private void decrementEvent(UserEvent event) {
+        event.count = Math.max(0, event.count-1)
+        if (event.count == 0) {
+            userEventsRepo.delete(event)
+        } else {
+            userEventsRepo.save(event)
         }
     }
 
