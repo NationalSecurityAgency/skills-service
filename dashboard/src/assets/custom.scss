@@ -14,11 +14,22 @@
 
 // Variable overrides
 $theme-colors: (
-        "info": #2d8779,
+        //"info": #2d8779,
+        "info":#146c75,
         "primary": #264653ff,
         "warning": #ffc42b,
+        "header": #f8e9cb,
+        "success": #007c49,
+        "hc": #146c75,
+        "accessible": darkslategray,
         //"success": #54b986,
 );
+// secondary: #6d8d9c
+
+$text-muted: #6b6b6b;
+
+//** Background color used for table stripping
+$table-accent-bg: #f9fafa;
 
 // Bootstrap and its default variables
 @import '../../node_modules/bootstrap/scss/bootstrap';
@@ -105,6 +116,21 @@ $theme-colors: (
 
 .skills-color-achievements {
   color: #8f7158;
+}
+
+.skills-color-selfreport {
+  color: #007c49;
+}
+
+.sr-only {
+  border: 0;
+  clip: rect(0, 0, 0, 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
 }
 
 

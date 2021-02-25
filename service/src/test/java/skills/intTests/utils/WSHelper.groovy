@@ -133,6 +133,11 @@ class WSHelper {
         delete(endpoint, "admin", params)
     }
 
+    def apiDelete(String endpoint, def params = null) {
+        String url = "${skillsService}/admin${endpoint}${getUrlFromParams(params)}"
+        delete(endpoint, "api", params)
+    }
+
     def adminGet(String endpoint, Map params = null) {
         return get(endpoint, "admin", params)
     }
@@ -260,7 +265,7 @@ class WSHelper {
 
     private def post(String endpoint, String type, def params, HttpStatus expectedStatus = HttpStatus.OK, boolean throwExceptionOnFailure = true) {
         String url = "${skillsService}/${type}${endpoint}".toString()
-        log.info("POST: {}, params={}", url, params)
+//        log.info("POST: {}, params={}", url, params)
         ResponseEntity<String> responseEntity = restTemplateWrapper.postForEntity(url, params, String)
         return getResultFromEntity(url, responseEntity, expectedStatus, throwExceptionOnFailure)
     }

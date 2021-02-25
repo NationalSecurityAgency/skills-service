@@ -15,6 +15,8 @@
  */
 package skills.controller.result.model
 
+import skills.storage.model.SkillDef
+
 class SkillDefRes extends SkillDefPartialRes {
     // optional: in case of the container, indicate what type of container it is (ex. subject)
     String containerType
@@ -22,4 +24,6 @@ class SkillDefRes extends SkillDefPartialRes {
     String description
 
     String helpUrl
+
+    SkillDef.SelfReportingType selfReportingType
 }

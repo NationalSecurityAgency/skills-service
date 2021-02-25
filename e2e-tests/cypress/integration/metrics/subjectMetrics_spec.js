@@ -33,12 +33,12 @@ describe('Metrics Tests - Subject', () => {
             openMode: 0
         }
     },() => {
-        cy.server()
-            .route('/admin/projects/proj1/metrics/numUsersPerLevelChartBuilder?subjectId=subj1')
+        cy
+            .intercept('/admin/projects/proj1/metrics/numUsersPerLevelChartBuilder?subjectId=subj1')
             .as('numUsersPerLevelChartBuilderSubj1');
 
-        cy.server()
-            .route('/admin/projects/proj1/metrics/numUsersPerLevelChartBuilder?subjectId=subj2')
+        cy
+            .intercept('/admin/projects/proj1/metrics/numUsersPerLevelChartBuilder?subjectId=subj2')
             .as('numUsersPerLevelChartBuilderSubj2');
 
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
@@ -80,14 +80,14 @@ describe('Metrics Tests - Subject', () => {
             }
         }
 
-        cy.visit('/projects/proj1/subjects/subj1');
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.clickNav('Metrics');
         cy.wait('@numUsersPerLevelChartBuilderSubj1');
 
         cy.wait(waitForSnap);
         cy.get('[data-cy=levelsChart]').matchImageSnapshot();
 
-        cy.visit('/projects/proj1/subjects/subj2');
+        cy.visit('/administrator/projects/proj1/subjects/subj2');
         cy.clickNav('Metrics');
         cy.wait('@numUsersPerLevelChartBuilderSubj2');
 
@@ -101,8 +101,8 @@ describe('Metrics Tests - Subject', () => {
             openMode: 0
         }
     },() => {
-        cy.server()
-            .route('/admin/projects/proj1/metrics/distinctUsersOverTimeForProject**')
+        cy
+            .intercept('/admin/projects/proj1/metrics/distinctUsersOverTimeForProject**')
             .as('distinctUsersOverTimeForProject');
 
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
@@ -153,7 +153,7 @@ describe('Metrics Tests - Subject', () => {
 
         const noDataMsg = 'This chart needs at least 2 days of user activity';
 
-        cy.visit('/projects/proj1/subjects/subj1');
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.clickNav('Metrics');
         cy.wait('@distinctUsersOverTimeForProject');
         cy.get('[data-cy=distinctNumUsersOverTime]').contains(noDataMsg).should('not.exist');
@@ -165,7 +165,7 @@ describe('Metrics Tests - Subject', () => {
                 expect(chart.height()).to.be.greaterThan(350)
             })
 
-        cy.visit('/projects/proj1/subjects/subj2');
+        cy.visit('/administrator/projects/proj1/subjects/subj2');
         cy.clickNav('Metrics');
         cy.wait('@distinctUsersOverTimeForProject');
         cy.get('[data-cy=distinctNumUsersOverTime]').contains(noDataMsg)
@@ -177,8 +177,8 @@ describe('Metrics Tests - Subject', () => {
             openMode: 0
         }
     },() => {
-        cy.server()
-            .route('/admin/projects/proj1/metrics/distinctUsersOverTimeForProject**')
+        cy
+            .intercept('/admin/projects/proj1/metrics/distinctUsersOverTimeForProject**')
             .as('distinctUsersOverTimeForProject');
 
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
@@ -187,17 +187,15 @@ describe('Metrics Tests - Subject', () => {
             name: 'Interesting Subject 1',
         });
 
-        cy.visit('/projects/proj1/subjects/subj1');
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.clickNav('Metrics');
         cy.wait('@distinctUsersOverTimeForProject');
 
         cy.get('[data-cy=distinctNumUsersOverTime] [data-cy=timeLengthSelector]').contains('6 months').click();
         cy.wait('@distinctUsersOverTimeForProject');
-        cy.get('[data-cy=distinctNumUsersOverTime]').contains('This chart needs at least 2 days of user activity')
 
         cy.get('[data-cy=distinctNumUsersOverTime] [data-cy=timeLengthSelector]').contains('1 year').click();
         cy.wait('@distinctUsersOverTimeForProject');
-        cy.get('[data-cy=distinctNumUsersOverTime]').contains('This chart needs at least 2 days of user activity')
     });
 
 
@@ -207,10 +205,10 @@ describe('Metrics Tests - Subject', () => {
             openMode: 0
         }
     },() => {
-        cy.server()
-            .route({
-                url: '/admin/projects/proj1/metrics/distinctUsersOverTimeForProject**',
-                response: [{
+        cy
+            .intercept('/admin/projects/proj1/metrics/distinctUsersOverTimeForProject**',
+              {
+                body: [{
                     'value': 1600819200000,
                     'count': 35
                 }, {
@@ -313,7 +311,7 @@ describe('Metrics Tests - Subject', () => {
             name: 'Interesting Subject 1',
         });
 
-        cy.visit('/projects/proj1/subjects/subj1');
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.clickNav('Metrics');
         cy.wait('@distinctUsersOverTimeForProject');
 

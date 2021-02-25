@@ -16,15 +16,17 @@ limitations under the License.
 <template>
     <div class="py-2 mt-2 mb-3 card-body skills-page-title-text-color card rounded bg-white text-info text-uppercase">
         <div v-if="backButton" class="position-absolute">
-            <h2><button @click="navigateBack" type="button" class="btn btn-outline-info" data-cy="back">
-                    <i class="fas fa-arrow-left"></i>
-                </button>
+            <h2>
+              <button @click="navigateBack" type="button" class="h2 btn btn-outline-info skills-theme-btn" data-cy="back" aria-label="navigate back">
+                <i class="fas fa-arrow-left"></i>
+                <span class="sr-only">Navigate back</span>
+              </button>
             </h2>
         </div>
 
-        <h2 :class="{'ml-5': backButton}">
+        <h1 :class="{'ml-5': backButton}" data-cy="title" >
             <slot/>
-        </h2>
+        </h1>
     </div>
 </template>
 

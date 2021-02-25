@@ -14,9 +14,16 @@
  * limitations under the License.
  */
 import Vue from 'vue';
-import numeral from 'numeral';
+import format from 'number-format.js';
 
-const numberFormatter = (value) => numeral(value).format('0,0');
+const numberFormatter = (value, fractionSize) => {
+  let formatString = '#,##0.';
+  if (fractionSize || fractionSize === 0) {
+    formatString = `${formatString}${'0'.repeat(fractionSize)}`;
+  }
+  const fv = parseFloat(value);
+  return format(formatString, fv);
+};
 Vue.filter('number', numberFormatter);
 
 // this allows to call this function from an js code; to learn more about that read about javascript modules

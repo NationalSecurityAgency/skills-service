@@ -98,6 +98,7 @@ interface SkillEventsSupportRepo extends CrudRepository<SkillDef, Long> {
         Date getStartDate()
         Date getEndDate()
         String getEnabled()
+        SkillDef.SelfReportingType getSelfReportingType()
     }
 
     @Query('''SELECT
@@ -110,7 +111,8 @@ interface SkillEventsSupportRepo extends CrudRepository<SkillDef, Long> {
         s.numMaxOccurrencesIncrementInterval as numMaxOccurrencesIncrementInterval,
         s.totalPoints as totalPoints,
         s.type as type,
-        s.enabled as enabled
+        s.enabled as enabled,
+        s.selfReportingType as selfReportingType
         from SkillDef s where s.projectId = ?1 and s.skillId=?2 and s.type = ?3''')
     @Nullable
     SkillDefMin findByProjectIdAndSkillIdAndType(String projectId, String skillId, SkillDef.ContainerType type)
@@ -125,7 +127,8 @@ interface SkillEventsSupportRepo extends CrudRepository<SkillDef, Long> {
         s.numMaxOccurrencesIncrementInterval as numMaxOccurrencesIncrementInterval,
         s.totalPoints as totalPoints,
         s.type as type,
-        s.enabled as enabled
+        s.enabled as enabled,
+        s.selfReportingType as selfReportingType
         from SkillDef s where ( :projectId is null OR s.projectId = :projectId ) and s.skillId=:skillId''')
     @Nullable
     SkillDefMin findByProjectIdAndSkillId(@Param("projectId") String projectId, @Param("skillId") String skillId)
@@ -140,7 +143,8 @@ interface SkillEventsSupportRepo extends CrudRepository<SkillDef, Long> {
         s.numMaxOccurrencesIncrementInterval as numMaxOccurrencesIncrementInterval,
         s.totalPoints as totalPoints,
         s.type as type,
-        s.enabled as enabled
+        s.enabled as enabled,
+        s.selfReportingType as selfReportingType
         from SkillDef s where s.projectId is null and s.skillId=:skillId''')
     @Nullable
     SkillDefMin findBySkillIdWhereProjectIdIsNull(@Param("skillId") String skillId)

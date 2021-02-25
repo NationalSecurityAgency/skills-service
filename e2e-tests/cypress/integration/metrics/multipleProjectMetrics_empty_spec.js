@@ -15,7 +15,7 @@
  */
 var moment = require('moment-timezone');
 
-describe('Multiple Project Metrics', () => {
+describe('Multiple Project With no Results', () => {
     const multiProjSel = '[data-cy=multiProjectUsersInCommon]';
     const trainingProfSel = '[data-cy=trainingProfileComparator]';
 
@@ -40,7 +40,7 @@ describe('Multiple Project Metrics', () => {
 
 
     it('2 projects required for training profile comparator to work', () => {
-        cy.visit('/');
+        cy.visit('/administrator/');
         cy.clickNav('Metrics');
         cy.trainingProf().contains('Feature is disabled');
 
@@ -62,7 +62,7 @@ describe('Multiple Project Metrics', () => {
     });
 
     it('2 projects needed to enable users in common chart', () => {
-        cy.visit('/');
+        cy.visit('/administrator/');
         cy.clickNav('Metrics');
         cy.usrsInCommon().contains('No Projects Selected').should('not.exist');
 

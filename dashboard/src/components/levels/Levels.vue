@@ -20,47 +20,59 @@ limitations under the License.
         <div class="col">
           <b-tooltip target="remove-button" title="You must retain at least one level." :disabled="!onlyOneLevelLeft"></b-tooltip>
           <span id="remove-button" class="mr-2">
-            <b-button variant="outline-primary" @click="removeLastItem" :disabled="onlyOneLevelLeft" size="sm">
-              <span class="d-none d-sm-inline">Remove</span> Highest <i class="fas fa-trash-alt"/>
+            <b-button variant="outline-primary" ref="removeNextLevel" @click="removeLastItem" :disabled="onlyOneLevelLeft" size="sm"
+                      data-cy="removeLevel">
+              <span class="d-none d-sm-inline">Remove</span> Highest <i class="text-warning fas fa-trash-alt" aria-hidden="true"/>
             </b-button>
           </span>
           <b-tooltip target="add-button" title="Reached maximum limit of levels." :disabled="!reachedMaxLevels"></b-tooltip>
           <span id="add-button">
-            <b-button @click="editLevel()" variant="outline-primary" :disabled="reachedMaxLevels" size="sm" data-cy="addLevelButton">
-              <span class="d-none d-sm-inline">Add</span> Next <i class="fas fa-plus-circle" />
+            <b-button @click="editLevel()" ref="addLevel" variant="outline-primary" :disabled="reachedMaxLevels"
+                      size="sm" data-cy="addLevel">
+              <span class="d-none d-sm-inline">Add</span> Next <i class="fas fa-plus-circle" aria-hidden="true"/>
             </b-button>
           </span>
         </div>
       </div>
     </sub-page-header>
 
-    <loading-container :is-loading="isLoading">
-      <simple-card>
-        <v-client-table v-if="levels && levels.length && !isLoading" :data="levels" :columns="levelsColumns"
-                        :options="options" data-cy="levelsTable">
-        <span slot="iconClass" slot-scope="props">
-              <i class="text-info level-icon" v-bind:class="`${props.row.iconClass}`"></i>
-                <i v-if="props.row.achievable === false" class="icon-warning fa fa-exclamation-circle text-warning"
-                   v-b-tooltip.hover="'Level is unachievable. Insufficient available points in project.'"/>
-        </span>
-          <span slot="pointsFrom" slot-scope="props">
-          <span v-if="props.row.pointsFrom !== null">{{ props.row.pointsFrom | number }}</span>
-          <span v-else>N/A - Please create more rules first</span>
-        </span>
-          <span slot="pointsTo" slot-scope="props">
-          <span v-if="props.row.pointsTo">{{props.row.pointsTo | number}}</span>
-          <span v-else-if="!props.row.pointsFrom">N/A - Please create more rules first</span>
-          <span v-else><i class="fas fa-infinity"/></span>
-        </span>
+    <b-card body-class="p-0">
+      <skills-spinner :is-loading="loading" />
+      <skills-b-table v-if="!loading" :options="table.options" :items="levels" data-cy="levelsTable">
+        <template v-slot:cell(level)="data">
+          {{ data.value }}
+          <i v-if="data.item.achievable === false" class="icon-warning fa fa-exclamation-circle text-warning"
+             v-b-tooltip.hover="'Level is unachievable. Insufficient available points in project.'"/>
+        </template>
 
-          <div slot="edit" slot-scope="props" class="">
-            <b-button @click="editLevel(props.row)" variant="outline-info" style="width: 5rem;" data-cy="editLevelButton">
-                      <i class="fas fa-edit"/> Edit
-            </b-button>
-          </div>
-        </v-client-table>
-      </simple-card>
-    </loading-container>
+        <template v-slot:cell(name)="data">
+          <i :class="data.item.iconClass" class="level-icon text-info mr-2" />
+          <span data-cy="levelsTable_name">{{ data.value }}</span>
+        </template>
+
+        <template v-slot:cell(points)="data">
+          <span v-if="data.item.pointsFrom !== null && data.item.pointsFrom !== undefined">
+            <span>
+              {{ data.item.pointsFrom | number }}
+            </span>
+            <span class="text-muted">
+              to
+            </span>
+            <span v-if="data.item.pointsTo">{{data.item.pointsTo | number}}</span>
+            <span v-else><i class="fas fa-infinity"/></span>
+          </span>
+          <span v-else>N/A <span class="text-muted small"><i class="fa fa-exclamation-circle"/> Please create more rules first</span></span>
+        </template>
+
+        <template #cell(edit)="data">
+          <b-button :ref="`edit_${data.item.level}`" @click="editLevel(data.item)" variant="outline-info" size="sm"
+                     data-cy="editLevelButton">
+            <i class="fas fa-edit"/> Edit
+          </b-button>
+        </template>
+
+      </skills-b-table>
+    </b-card>
     <new-level v-if="displayLevelModal"
                v-model="displayLevelModal"
                @new-level="doCreateNewLevel"
@@ -69,25 +81,27 @@ limitations under the License.
                :level="levelToEdit"
                :level-as-points="levelsAsPoints"
                :is-edit="isEdit"
-                :all-levels="levels"></new-level>
+                :all-levels="levels"
+               @hidden="handleHidden"></new-level>
   </div>
 </template>
 
 <script>
+  import SkillsBTable from '@/components/utils/table/SkillsBTable';
+  import SkillsSpinner from '@/components/utils/SkillsSpinner';
+
   import NewLevel from './NewLevel';
   import SettingService from '../settings/SettingsService';
   import LevelService from './LevelService';
   import SubPageHeader from '../utils/pages/SubPageHeader';
-  import LoadingContainer from '../utils/LoadingContainer';
-  import SimpleCard from '../utils/cards/SimpleCard';
   import MsgBoxMixin from '../utils/modal/MsgBoxMixin';
 
   export default {
     name: 'Levels',
     components: {
+      SkillsSpinner,
+      SkillsBTable,
       NewLevel,
-      SimpleCard,
-      LoadingContainer,
       SubPageHeader,
     },
     props: {
@@ -99,65 +113,67 @@ limitations under the License.
     mixins: [MsgBoxMixin],
     data() {
       return {
+        loading: true,
+        currentlyFocusedLevelId: '',
         displayLevelModal: false,
         isEdit: false,
         levelsAsPoints: false,
-        isLoading: true,
         levelToEdit: { iconClass: 'fas fa-user-ninja' },
         levels: [],
-        levelsColumns: ['iconClass', 'level', 'name', 'percent', 'pointsFrom', 'pointsTo', 'edit'],
-        options: {
-          filterable: false,
-          footerHeadings: false,
-          headings: {
-            level: 'Level',
-            name: 'Name',
-            percent: 'Percent %',
-            pointsFrom: 'From Points (>)',
-            pointsTo: 'To Points (<=)',
-            edit: '',
-            iconClass: '',
+        table: {
+          options: {
+            busy: true,
+            bordered: false,
+            outlined: true,
+            stacked: 'md',
+            fields: [],
+            pagination: {
+              remove: true,
+            },
           },
-          columnsClasses: {
-            edit: 'control-column',
-          },
-          sortable: [],
-          sortIcon: {
-            base: 'fa fa-sort', up: 'fa fa-sort-up', down: 'fa fa-sort-down', is: 'fa fa-sort',
-          },
-          skin: 'table is-striped is-fullwidth',
         },
       };
     },
     created() {
       SettingService.getSetting(this.$route.params.projectId, 'level.points.enabled')
         .then((data) => {
-          if (data) {
-            const pointsEnabled = (data.value === true || data.value === 'true');
-            if (pointsEnabled) {
-              this.levelsAsPoints = true;
-              this.levelsColumns = ['iconClass', 'level', 'name', 'pointsFrom', 'pointsTo', 'edit'];
-              this.options.headings = {
-                level: 'Level',
-                name: 'Name',
-                pointsFrom: 'From Points (>)',
-                pointsTo: 'To Points (<=)',
-                edit: '',
-                iconClass: '',
-              };
-            } else {
-              this.levelsColumns = ['iconClass', 'level', 'name', 'percent', 'pointsFrom', 'pointsTo', 'edit'];
-              this.options.headings = {
-                level: 'Level',
-                name: 'Name',
-                percent: 'Percent',
-                pointsFrom: 'From Points (>)',
-                pointsTo: 'To Points (<=)',
-                edit: '',
-                iconClass: '',
-              };
-            }
+          const fields = [
+            {
+              key: 'level',
+              label: 'Level',
+              sortable: false,
+            },
+            {
+              key: 'name',
+              label: 'Name',
+              sortable: false,
+            },
+            {
+              key: 'percent',
+              label: 'Percent %',
+              sortable: false,
+            },
+            {
+              key: 'points',
+              label: 'Points (> to <=)',
+              sortable: false,
+            },
+            {
+              key: 'edit',
+              label: 'Modify',
+              sortable: false,
+              headerTitle: 'Edit Level',
+            },
+          ];
+          this.table.options.fields = fields;
+
+          const pointsEnabled = data && (data.value === true || data.value === 'true');
+          if (pointsEnabled) {
+            this.levelsAsPoints = true;
+            this.table.options.fields = fields.filter((item) => item.key !== 'percent');
           }
+        }).finally(() => {
+          this.loading = false;
         });
     },
     mounted() {
@@ -211,17 +227,20 @@ limitations under the License.
     },
     methods: {
       loadLevels() {
+        this.table.options.busy = true;
         if (this.$route.params.subjectId) {
           LevelService.getLevelsForSubject(this.$route.params.projectId, this.$route.params.subjectId)
             .then((response) => {
-              this.isLoading = false;
               this.levels = response;
+              this.table.options.busy = false;
+              this.handleFocusOnNextTick();
             });
         } else {
           LevelService.getLevelsForProject(this.$route.params.projectId)
             .then((response) => {
-              this.isLoading = false;
               this.levels = response;
+              this.table.options.busy = false;
+              this.handleFocusOnNextTick();
             });
         }
       },
@@ -251,17 +270,15 @@ limitations under the License.
         });
       },
       doRemoveLastItem() {
-        this.isLoading = true;
+        this.table.options.busy = true;
         if (this.$route.params.subjectId) {
           LevelService.deleteLastLevelForSubject(this.$route.params.projectId, this.$route.params.subjectId)
             .then(() => {
-              this.isLoading = false;
               this.loadLevels();
             });
         } else {
           LevelService.deleteLastLevelForProject(this.$route.params.projectId)
             .then(() => {
-              this.isLoading = false;
               this.loadLevels();
             });
         }
@@ -286,6 +303,7 @@ limitations under the License.
           if (this.levels[this.levels.length - 1].level === existingLevel.level) {
             this.levelToEdit.isLast = true;
           }
+          this.currentlyFocusedLevelId = existingLevel.level;
         } else if (!this.reachedMaxLevels) {
           this.levelToEdit = { iconClass: 'fas fa-user-ninja' };
         }
@@ -293,36 +311,57 @@ limitations under the License.
         this.displayLevelModal = true;
       },
       doCreateNewLevel(nextLevelObj) {
-        this.loading = true;
+        this.table.options.busy = true;
         if (this.$route.params.subjectId) {
           LevelService.createNewLevelForSubject(this.$route.params.projectId, this.$route.params.subjectId, nextLevelObj)
             .then(() => {
-              this.isLoading = false;
               this.loadLevels();
             });
         } else {
           LevelService.createNewLevelForProject(this.$route.params.projectId, nextLevelObj)
             .then(() => {
-              this.isLoading = false;
               this.loadLevels();
             });
         }
       },
       doEditLevel(editedLevelObj) {
-        this.loading = true;
+        this.table.options.busy = true;
         if (this.$route.params.subjectId) {
           LevelService.editLevelForSubject(this.$route.params.projectId, this.$route.params.subjectId, editedLevelObj)
             .then(() => {
-              this.isLoading = false;
               this.loadLevels();
             });
         } else {
           LevelService.editLevelForProject(this.$route.params.projectId, editedLevelObj)
             .then(() => {
-              this.isLoading = false;
               this.loadLevels();
             });
         }
+      },
+      handleHidden(e) {
+        if (!e || !e.saved) {
+          this.handleFocus(e);
+        }
+      },
+      handleFocusOnNextTick() {
+        if (this.currentlyFocusedLevelId) {
+          this.$nextTick(() => {
+            this.handleFocus({ edit: true });
+          });
+        }
+      },
+      handleFocus(e) {
+        let ref = this.$refs.addLevel;
+        if (e && e.edit) {
+          const refName = `edit_${this.currentlyFocusedLevelId}`;
+          ref = this.$refs[refName];
+        }
+        this.currentlyFocusedLevelId = '';
+        this.$nextTick(() => {
+          if (ref) {
+            ref.focus();
+          }
+        });
       },
     },
   };

@@ -39,6 +39,7 @@ class DistinctUsersOverTimeMetricsBuilder implements ProjectMetricsBuilder {
         Date start = MetricsParams.getStart(projectId, chartId, props)
         String skillId = props.containsKey(MetricsParams.P_SKILL_ID) ? MetricsParams.getSkillId(projectId, chartId, props) : null
         List<CountItem> dataItems = adminUsersService.getUsage(projectId, skillId, start)
+        dataItems.sort() {it.value }
 
         return dataItems;
     }

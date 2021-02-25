@@ -18,7 +18,7 @@ limitations under the License.
     <loading-card :loading="isLoading"/>
     <page-preview-card v-if="!isLoading" :options="cardOptions">
       <div slot="header-top-right">
-        <edit-and-delete-dropdown v-on:deleted="deleteSubject" v-on:edited="showEditSubject=true"
+        <edit-and-delete-dropdown ref="subjectEditDelete" v-on:deleted="deleteSubject" v-on:edited="showEditSubject=true"
                                   v-on:move-up="moveUp"
                                   v-on:move-down="moveDown"
                                   :isFirst="subjectInternal.isFirst" :isLast="subjectInternal.isLast" :isLoading="isLoading"
@@ -29,14 +29,15 @@ limitations under the License.
         <router-link
           :to="{ name:'SubjectSkills', params: { projectId: this.subjectInternal.projectId, subjectId: this.subjectInternal.subjectId, subject: this.subjectInternal}}"
           class="btn btn-outline-primary btn-sm"
+          :aria-label="`Manage subject ${subjectInternal.name}`"
           :data-cy="`subjCard_${subjectInternal.subjectId}_manageBtn`">
-          Manage <i class="fas fa-arrow-circle-right"/>
+          Manage <i class="fas fa-arrow-circle-right" aria-hidden="true"/>
         </router-link>
       </div>
     </page-preview-card>
 
     <edit-subject v-if="showEditSubject" v-model="showEditSubject" :id="subjectInternal.subjectId"
-                  :subject="subjectInternal" :is-edit="true" @subject-saved="subjectSaved"/>
+                  :subject="subjectInternal" :is-edit="true" @subject-saved="subjectSaved" @hidden="hiddenEventHandler"/>
   </div>
 </template>
 
@@ -128,6 +129,7 @@ limitations under the License.
             this.subjectInternal = subject;
             this.buildCardOptions();
             this.isLoading = false;
+            this.handleFocus();
           })
           .finally(() => {
             this.isLoading = false;
@@ -138,6 +140,16 @@ limitations under the License.
       },
       moveDown() {
         this.$emit('move-subject-down', this.subjectInternal);
+      },
+      hiddenEventHandler(e) {
+        if (!e || !e.update) {
+          this.handleFocus();
+        }
+      },
+      handleFocus() {
+        this.$nextTick(() => {
+          this.$refs.subjectEditDelete.focus();
+        });
       },
     },
   };

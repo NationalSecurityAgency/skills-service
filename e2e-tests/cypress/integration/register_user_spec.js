@@ -38,7 +38,7 @@ describe('Register Dashboard Users', () => {
     cy.get('#password_confirmation').type("password")
     cy.contains('Create Account').click()
 
-    cy.contains('No Projects Yet')
+    cy.get('[data-cy=breadcrumb-Home]').should('be.visible');
   });
 
   it('register dashboard validation', () => {

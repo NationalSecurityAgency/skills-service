@@ -18,7 +18,7 @@ limitations under the License.
     <div class="row px-3 pt-3">
       <div class="col-12 col-md border-right">
         <b-form-group label="Skill Name Filter" label-class="text-muted">
-          <b-input v-model="filters.name" data-cy="skillsNavigator-skillNameFilter"/>
+          <b-input v-model="filters.name" data-cy="skillsNavigator-skillNameFilter" aria-label="skill name filter"/>
         </b-form-group>
       </div>
       <div class="col-md" data-cy="skillsNavigator-filters">
@@ -56,10 +56,10 @@ limitations under the License.
         <b-button-group class="float-right">
           <b-button target="_blank" :to="{ name: 'SkillOverview', params: { projectId: projectId, subjectId: data.item.subjectId, skillId: data.item.skillId } }"
                     variant="outline-info" size="sm" class="text-secondary"
-                    v-b-tooltip.hover="'View Skill Configuration'"><i class="fa fa-wrench"/></b-button>
-          <b-button id="b-skill-metrics" target="_blank" :to="{ name: 'SkillMetrics', params: { projectId: projectId, subjectId: data.item.subjectId, skillId: data.item.skillId } }"
+                    v-b-tooltip.hover="'View Skill Configuration'"><i class="fa fa-wrench"/><span class="sr-only">view skill configuration</span></b-button>
+          <b-button :id="`b-skill-metrics_${data.item.skillId}`" target="_blank" :to="{ name: 'SkillMetrics', params: { projectId: projectId, subjectId: data.item.subjectId, skillId: data.item.skillId } }"
                     variant="outline-info" size="sm" class="text-secondary"
-                    v-b-tooltip.hover="'View Skill Metrics'"><i class="fa fa-chart-bar"/></b-button>
+                    v-b-tooltip.hover="'View Skill Metrics'"><i class="fa fa-chart-bar"/><span class="sr-only">view skill metrics</span></b-button>
         </b-button-group>
       </template>
 

@@ -23,13 +23,16 @@ limitations under the License.
         <div class="col text-right">
           <i class="fas fa-question-circle mr-1 text-secondary"
              v-b-tooltip.hover.left="'Enable to override auto-generated value.'"/>
-          <b-link v-if="!canEdit" @click="toggle">Enable</b-link>
+          <b-link v-if="!canEdit" @click="toggle" aria-label="enable manual ID override">Enable</b-link>
           <span v-else>Enabled <i class="fa fa-check fa-sm text-muted"/></span>
         </div>
       </div>
       <input type="text" class="form-control" id="idInput" v-model="internalValue" :disabled="!canEdit"
-              @input="dataChanged" aria-required="true">
-      <small class="form-text text-danger" data-cy="idError">{{ errors[0]}}</small>
+              @input="dataChanged" aria-required="true"
+              :aria-invalid="errors && errors.length > 0"
+              aria-errormessage="idError"
+              aria-describedby="idError">
+      <small class="form-text text-danger" data-cy="idError" id="idError">{{ errors[0]}}</small>
     </div>
   </ValidationProvider>
 </template>

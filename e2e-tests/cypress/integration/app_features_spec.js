@@ -25,15 +25,20 @@ describe('App Features Tests', () => {
     });
 
     it('display new version banner when software is updated', () => {
-        cy.server().route({
-            url: '/admin/projects/proj1/subjects',
-            status: 200,
-            response: [],
+        cy.intercept({
+            path: '/admin/projects/proj1/subjects',
+            statusCode: 200,
+        }, {
+            body: [],
             headers: {
                 'skills-client-lib-version': dateFormatter(new Date())
             },
         }).as('getSubjects');
-        cy.visit('/');
+        cy.visit('/administrator/');
+       /* cy.injectAxe();
+        cy.violationLoggingFunction().then((loggingFunc) => {
+            cy.checkA11y(null, null, loggingFunc);
+        });*/
         cy.get('[data-cy=subPageHeader]').contains('Projects');
         cy.contains('New Software Version is Available').should('not.exist')
         cy.get('[data-cy=projectCard]').last().contains('Manage').click()
@@ -46,35 +51,45 @@ describe('App Features Tests', () => {
     });
 
     it('do not display new version banner if lib version in headers is older than lib version in local storage', () => {
-        cy.server().route({
-            url: '/admin/projects/proj1/subjects',
-            status: 200,
-            response: [],
+        cy.intercept({
+            path: '/admin/projects/proj1/subjects',
+            statusCode: 200,
+        }, {
+            body: [],
             headers: {
                 'skills-client-lib-version': dateFormatter(new Date() - 1000 * 60 * 60 * 24 * 30)
             },
         }).as('getSubjects');
-        cy.visit('/');
+        cy.visit('/administrator/');
         cy.get('[data-cy=subPageHeader]').contains('Projects');
         cy.get('[data-cy=projectCard]').last().contains('Manage').click()
-        cy.wait('@getSubjects')
+            cy.wait('@getSubjects')
+        /*cy.injectAxe();
+        cy.violationLoggingFunction().then((loggingFunc) => {
+            cy.checkA11y(null, null, loggingFunc);
+        });*/
 
         cy.contains('New Software Version is Available').should('not.exist')
     });
 
     it('access denied should show authorization failure page not error page', () => {
-        cy.server();
-        cy.route({
+
+        cy.intercept({
             method: 'GET',
-            url: '/admin/projects/proj1/subjects/subj1',
-            status: 403,
-            response: {errorCode: 'NotAuthorized', explanation: 'Not authorized to view this resource'}
+            path: '/admin/projects/proj1/subjects/subj1',
+        }, {
+            statusCode: 403,
+            body: {errorCode: 'NotAuthorized', explanation: 'Not authorized to view this resource'}
         }).as('loadSubject');
 
-        cy.visit('/projects/proj1/subjects/subj1');
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        /*cy.injectAxe();*/
         cy.wait('@loadSubject');
         cy.url().should('include', '/not-authorized');
         cy.contains('User Not Authorized').should('be.visible')
+        /*cy.violationLoggingFunction().then((loggingFunc) => {
+            cy.checkA11y(null, null, loggingFunc);
+        });*/
     });
 
 })

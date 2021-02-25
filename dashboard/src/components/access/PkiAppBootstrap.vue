@@ -36,7 +36,7 @@ limitations under the License.
                 created!
               </p>
               <p style="margin-top:2em">Please proceed to the SkillTree Dashboard.</p>
-              <a class="btn btn-outline-primary" href="/">Let's Get Started!</a>
+              <a class="btn btn-outline-hc" href="/">Let's Get Started!</a>
             </div>
           </div>
         </div>

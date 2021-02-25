@@ -17,12 +17,15 @@ limitations under the License.
   <div>
     <sub-page-header title="Projects" action="Project"
                      :disabled="addProjectDisabled" :disabled-msg="addProjectsDisabledMsg">
-          <b-button v-if="isRootUser" variant="outline-primary" @click="showSearchProjectModal=true" size="sm"
-class="mr-2">
-            <span class="d-none d-sm-inline">Pin</span> <i class="fas fa-thumbtack"/>
+          <b-button v-if="isRootUser" variant="outline-primary" ref="pinProjectsButton"
+                    @click="showSearchProjectModal=true"
+                    size="sm"
+                    class="mr-2">
+            <span class="d-none d-sm-inline">Pin</span> <i class="fas fa-thumbtack" aria-hidden="true"/>
           </b-button>
-          <b-button @click="newProject.show=true" variant="outline-primary" size="sm">
-            <span class="d-none d-sm-inline">Project</span> <i class="fas fa-plus-circle" />
+          <b-button id="newProjectBtn" ref="newProjButton" @click="newProject.show=true" variant="outline-primary" size="sm"
+                    data-cy="newProjectButton">
+            <span class="d-none d-sm-inline">Project</span> <i class="fas fa-plus-circle" aria-hidden="true"/>
           </b-button>
     </sub-page-header>
 
@@ -37,8 +40,8 @@ class="mr-2">
     </loading-container>
 
     <edit-project v-if="newProject.show" v-model="newProject.show" :project="newProject.project"
-                  @project-saved="projectAdded"/>
-    <pin-projects :show="showSearchProjectModal" v-on:done="pinModalClosed"/>
+                  @project-saved="projectAdded" @hidden="handleHide"/>
+    <pin-projects v-if="showSearchProjectModal" v-model="showSearchProjectModal" @done="pinModalClosed"/>
 
   </div>
 
@@ -94,9 +97,17 @@ class="mr-2">
       },
     },
     methods: {
+      handleHide() {
+        this.$nextTick(() => {
+          this.$refs.newProjButton.focus();
+        });
+      },
       pinModalClosed() {
         this.showSearchProjectModal = false;
         this.loadProjects();
+        this.$nextTick(() => {
+          this.$refs.pinProjectsButton.focus();
+        });
       },
       loadProjects() {
         this.isLoading = true;

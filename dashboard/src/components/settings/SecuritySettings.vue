@@ -17,33 +17,28 @@ limitations under the License.
   <div>
     <sub-page-header title="Security Settings"/>
 
-    <div class="card">
-      <div class="card-header">Root Users Management</div>
-      <div class="card-body">
-        <role-manager data-cy="rootrm" :role="root.role" :user-type="root.userType" :role-description="root.roleDescription" />
-      </div>
-    </div>
+    <metrics-card title="Root Users Management" :no-padding="true">
+      <role-manager id="add-root-user" data-cy="rootrm" :role="root.role" :user-type="root.userType" :role-description="root.roleDescription" />
+    </metrics-card>
 
-    <div class="card mt-2">
-      <div class="card-header">Supervisor Users Management</div>
-      <div class="card-body">
-        <role-manager data-cy="supervisorrm" :role="supervisor.role"
-                      :user-type="supervisor.userType"
-                      :role-description="supervisor.roleDescription"
-                      @role-added="handleRoleAdded"
-                      @role-deleted="handleRoleDeleted"/>
-      </div>
-    </div>
+    <metrics-card title="Supervisor Users Management" :no-padding="true" class="mt-3">
+      <role-manager id="add-supervisor-user" data-cy="supervisorrm" :role="supervisor.role"
+                    :user-type="supervisor.userType"
+                    :role-description="supervisor.roleDescription"
+                    @role-added="handleRoleAdded"
+                    @role-deleted="handleRoleDeleted"/>
+    </metrics-card>
   </div>
 </template>
 
 <script>
+  import MetricsCard from '@/components/metrics/utils/MetricsCard';
   import RoleManager from '../access/RoleManager';
   import SubPageHeader from '../utils/pages/SubPageHeader';
 
   export default {
     name: 'SecuritySettings',
-    components: { SubPageHeader, RoleManager },
+    components: { MetricsCard, SubPageHeader, RoleManager },
     data() {
       return {
         root: {

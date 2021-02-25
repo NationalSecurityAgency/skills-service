@@ -24,8 +24,15 @@ describe('Navigation Tests', () => {
     });
   });
 
+  it.only('navigate to inception client-display', function () {
+    cy.visit('/administrator');
+    cy.get('[data-cy=inception-button]').click();
+    cy.get('[data-cy="breadcrumb-Dashboard Skills"]').contains('Dashboard Skills').should('be.visible');
+    cy.wrapIframe().contains('Overall Points');
+  });
+
   it('ability to expand and collapse navigation', function () {
-    cy.visit('/projects/proj1');
+    cy.visit('/administrator/projects/proj1');
     cy.contains('ID: subj1');
 
     // validate nav i expanded by default
@@ -38,7 +45,7 @@ describe('Navigation Tests', () => {
     cy.get('[data-cy=nav-Badges]').contains('Metrics').should('not.exist');
 
     // refresh and validate that nav is still collapsed
-    cy.visit('/projects/proj1');
+    cy.visit('/administrator/projects/proj1');
     cy.contains('ID: subj1');
     cy.get('[data-cy=nav-Subjects]').contains('Subjects').should('not.exist');
     cy.get('[data-cy=nav-Badges]').contains('Badges').should('not.exist');
@@ -58,7 +65,7 @@ describe('Navigation Tests', () => {
     cy.get('[data-cy=nav-Levels]').contains('Levels').should('not.exist');
 
     // refresh and make sure that nav is still collapsed
-    cy.visit('/projects/proj1/subjects/subj1');
+    cy.visit('/administrator/projects/proj1/subjects/subj1');
     cy.contains('No Skills Yet');
     cy.get('[data-cy=nav-Skills]').contains('Skills').should('not.exist');
     cy.get('[data-cy=nav-Levels]').contains('Levels').should('not.exist');
@@ -76,7 +83,7 @@ describe('Navigation Tests', () => {
   });
 
   it('selected menu item should be highlighted', function () {
-    cy.visit('/projects/proj1');
+    cy.visit('/administrator/projects/proj1');
     cy.contains('ID: subj1');
     cy.get('[data-cy=nav-Subjects]').should('have.class', 'bg-primary');
     cy.get('[data-cy=nav-Badges]').should('not.have.class', 'bg-primary');
@@ -89,7 +96,7 @@ describe('Navigation Tests', () => {
 
   it('navigation on a small screen', function () {
     cy.viewport('iphone-6')
-    cy.visit('/projects/proj1');
+    cy.visit('/administrator/projects/proj1');
     cy.contains('ID: subj1');
     cy.get('[data-cy=navCollapseOrExpand]').should('not.exist');
     cy.get('[data-cy=nav-Subjects]').should('not.visible');

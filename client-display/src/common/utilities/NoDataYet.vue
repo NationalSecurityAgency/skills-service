@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-    <div class="row text-secondary skills-no-data-yet">
-        <div class="col">
+    <div class="row skills-no-data-yet text-primary">
+        <div class="col text-secondary">
                     <span class="fa-stack fa-3x " style="vertical-align: top;">
                       <i class="fas fa-circle fa-stack-2x"></i>
                       <i class="fas fa-battery-empty fa-stack-1x fa-inverse"></i>

@@ -16,7 +16,7 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
 
-import { debounce } from 'lodash';
+import debounce from 'lodash/debounce';
 
 import SkillsEntry from '@/SkillsEntry';
 import SubjectDetails from '@/userSkills/subject/SubjectDetails';

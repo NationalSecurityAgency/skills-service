@@ -29,10 +29,12 @@ limitations under the License.
              :hide-goto-end-buttons="options.pagination.server ? true : false"
              @sort-changed="sortingChanged"
              :no-sort-reset="true"
+             :no-local-sorting="options.pagination.server"
+             thead-class="accessible"
              show-empty>
       <colgroup v-if="options.rowDetailsControls"><col style="width: 2rem;"><col></colgroup>
       <template v-if="options.rowDetailsControls" v-slot:cell(b_table_controls)="data">
-        <b-button size="sm" @click="data.toggleDetails" class="mr-2">
+        <b-button size="sm" @click="data.toggleDetails" class="mr-2" :aria-label="`Expand details`">
           <i v-if="data.detailsShowing" class="fa fa-minus-square" />
           <i v-else class="fa fa-plus-square" />
         </b-button>
@@ -43,7 +45,7 @@ limitations under the License.
           <div>
             <b-spinner class="align-middle"></b-spinner>
           </div>
-          <div class="mt-1">
+          <div class="mt-1" style="color:darkslategray">
             <strong>Loading...</strong>
           </div>
         </div>
@@ -54,7 +56,7 @@ limitations under the License.
           <div class="mb-2">
             <i class="fas fa-dragon fa-3x border border-info rounded p-4 bg-light text-muted" />
           </div>
-          <h4 class="align-middle">{{ scope.emptyText }}</h4>
+          <h4 class="align-middle">{{ options.emptyText ? options.emptyText : scope.emptyText }}</h4>
         </div>
       </template>
 
@@ -67,48 +69,46 @@ limitations under the License.
       </template>
 
     </b-table>
-    <div v-if="!options.busy" class="row m-1 p-0 align-items-center">
+    <div v-if="!options.busy && !options.pagination.remove" class="row m-1 p-0 align-items-center">
       <div class="col-md text-center text-md-left">
         <span class="text-muted">Total Rows:</span> <strong data-cy="skillsBTableTotalRows">{{ totalRows | number }}</strong>
       </div>
       <div class="col-md my-3 my-md-0">
-        <b-pagination v-model="currentPageInternal" :total-rows="totalRows"
-                      :per-page="pageSizeInternal" slot-scope=""
-                      pills align="center" size="sm" variant="info" class="customPagination m-0 p-0"
-                      :disabled="disabled" data-cy="skillsBTablePaging">
-        </b-pagination>
+        <span v-if="!options.pagination.remove">
+          <b-pagination v-model="currentPageInternal" :total-rows="totalRows"
+                        :per-page="pageSizeInternal" slot-scope=""
+                        pills align="center" size="sm" variant="info" class="customPagination m-0 p-0"
+                        :disabled="disabled" data-cy="skillsBTablePaging" aria-label="table pagination">
+          </b-pagination>
+        </span>
       </div>
       <div class="col-md text-center text-md-right">
-        <span class="text-muted">Per page:</span>
-        <b-form-select v-model="pageSizeInternal" :options="options.pagination.possiblePageSizes"
-                       size="sm" class="mx-2" style="width: 4rem;" :disabled="disabledPaging"
-                       data-cy="skillsBTablePageSize"/>
-<!--        <b-button size="sm" v-b-tooltip.hover title="Download CSV" variant="outline-info" :disabled="disabled">-->
-<!--          <i class="fas fa-download"></i>-->
-<!--        </b-button>-->
+        <span v-if="!options.pagination.remove">
+          <label :for="`pagination_select_${uid}`" class="text-muted">Per page:</label>
+          <b-form-select :id="`pagination_select_${uid}`" v-model="pageSizeInternal" :options="options.pagination.possiblePageSizes"
+                         size="sm" class="mx-2" style="width: 4rem;" :disabled="disabledPaging"
+                         data-cy="skillsBTablePageSize" />
+  <!--        <b-button size="sm" v-b-tooltip.hover title="Download CSV" variant="outline-info" :disabled="disabled">-->
+  <!--          <i class="fas fa-download"></i>-->
+  <!--        </b-button>-->
+        </span>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+  let uid = 0;
+
   export default {
     name: 'SkillsBTable',
     props: ['items', 'options'],
+    beforeCreate() {
+      this.uid = uid.toString();
+      uid += 1;
+    },
     mounted() {
-      this.fieldsInternal = [];
-      if (this.options.rowDetailsControls) {
-        this.fieldsInternal.push({
-          key: 'b_table_controls',
-          sortable: false,
-          label: '',
-          class: 'control-column',
-        });
-      }
-
-      this.options.fields.forEach((item) => {
-        this.fieldsInternal.push(item);
-      });
+      this.updateColumns();
     },
     data() {
       return {
@@ -139,6 +139,23 @@ limitations under the License.
         this.currentPageInternal = 1;
         this.$emit('sort-changed', ctx);
       },
+      updateColumns() {
+        const newFields = [];
+        if (this.options.rowDetailsControls) {
+          newFields.push({
+            key: 'b_table_controls',
+            sortable: false,
+            label: '',
+            class: 'control-column',
+            headerTitle: 'Expand for additional details',
+          });
+        }
+
+        this.options.fields.forEach((item) => {
+          newFields.push(item);
+        });
+        this.fieldsInternal = newFields;
+      },
     },
     watch: {
       currentPageInternal() {
@@ -148,6 +165,9 @@ limitations under the License.
         this.currentPageInternal = 1;
         this.$emit('page-size-changed', this.pageSizeInternal);
       },
+      'options.fields': function updateColumns() {
+        this.updateColumns();
+      },
     },
   };
 </script>
@@ -155,5 +175,9 @@ limitations under the License.
 <style scoped>
 .skills-b-table /deep/ .control-column {
   max-width: 3rem !important;
+}
+
+.skills-b-table /deep/ .accessible th {
+  color: #264653 !important;
 }
 </style>

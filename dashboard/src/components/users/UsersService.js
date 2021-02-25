@@ -14,8 +14,14 @@
  * limitations under the License.
  */
 import axios from 'axios';
+import dayjs from '../../DayJsCustomizer';
 
 export default {
+  ajaxCall(url, params) {
+    return axios.get(url, { params })
+      .then((response) => response.data);
+  },
+
   getUserSkillsMetrics(projectId, userId) {
     return axios.get(`/admin/projects/${projectId}/users/${userId}/stats`)
       .then((response) => response.data);
@@ -32,7 +38,7 @@ export default {
   },
 
   deleteSkillEvent(projectId, skill, userId) {
-    const timestamp = window.moment(skill.performedOn).valueOf();
+    const timestamp = dayjs(skill.performedOn).valueOf();
     return axios.delete(`/admin/projects/${projectId}/skills/${skill.skillId}/users/${userId}/events/${timestamp}`)
       .then((res) => res.data);
   },

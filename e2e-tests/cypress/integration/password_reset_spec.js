@@ -46,18 +46,18 @@ describe('Password Reset Tests', () => {
 
     cy.logout();
 
-    cy.server();
-    cy.route({
+
+    cy.intercept({
       method: 'POST',
       url: '/performPasswordReset'
     }).as('performReset');
-    cy.route('GET', '/app/projects').as('getProjects')
-    cy.route('GET', '/app/userInfo').as('getUserInfo')
+    cy.intercept('GET', '/app/projects').as('getProjects')
+    cy.intercept('GET', '/app/userInfo').as('getUserInfo')
   });
 
   it('reset password', () => {
     cy.register("test@skills.org", "apassword", false);
-    cy.visit('/');
+    cy.visit('/administrator/');
     cy.get('[data-cy=forgotPassword]').click();
     cy.get('[data-cy=forgotPasswordEmail]').should('exist');
     cy.get('[data-cy=forgotPasswordEmail]').type('test@skills.org');
@@ -83,15 +83,14 @@ describe('Password Reset Tests', () => {
       cy.wait('@getProjects');
       cy.wait('@getUserInfo');
 
-      cy.contains('Project');
-      cy.get('[data-cy=subPageHeader]').contains('Projects');
+      cy.get('[data-cy=breadcrumb-Home]').should('be.visible');
     });
 
   });
 
   it('reset password - wrong user', () => {
     cy.register("test@skills.org", "apassword", false);
-    cy.visit('/');
+    cy.visit('/administrator/');
     cy.get('[data-cy=forgotPassword]').click();
     cy.get('[data-cy=forgotPasswordEmail]').should('exist');
     cy.get('[data-cy=forgotPasswordEmail]').type('test@skills.org');
@@ -115,7 +114,7 @@ describe('Password Reset Tests', () => {
 
   it('reset password - password confirmation mismatch', () => {
     cy.register("test@skills.org", "apassword", false);
-    cy.visit('/');
+    cy.visit('/administrator/');
     cy.get('[data-cy=forgotPassword]').click();
     cy.get('[data-cy=forgotPasswordEmail]').should('exist');
     cy.get('[data-cy=forgotPasswordEmail]').type('test@skills.org');
@@ -135,7 +134,7 @@ describe('Password Reset Tests', () => {
 
   it('reset password - user does not exist', () => {
     cy.register("test@skills.org", "apassword", false);
-    cy.visit('/');
+    cy.visit('/administrator/');
     cy.get('[data-cy=forgotPassword]').click();
     cy.get('[data-cy=forgotPasswordEmail]').should('exist');
     cy.get('[data-cy=forgotPasswordEmail]').type('fake@skills.org');
@@ -145,7 +144,7 @@ describe('Password Reset Tests', () => {
 
   it('cannot use reset link twice', () => {
     cy.register("test@skills.org", "apassword", false);
-    cy.visit('/');
+    cy.visit('/administrator/');
     cy.get('[data-cy=forgotPassword]').click();
     cy.get('[data-cy=forgotPasswordEmail]').should('exist');
     cy.get('[data-cy=forgotPasswordEmail]').type('test@skills.org');
@@ -190,8 +189,8 @@ describe('Password Reset Tests', () => {
       }
     });
     cy.logout();
-    cy.route('GET', '/public/isFeatureSupported?feature=passwordreset').as('isEnabled');
-    cy.visit('/');
+    cy.intercept('GET', '/public/isFeatureSupported?feature=passwordreset').as('isEnabled');
+    cy.visit('/administrator/');
     cy.get('[data-cy=forgotPassword]').click();
     cy.wait('@isEnabled');
     cy.get('[data-cy=resetNotSupported]').should('be.visible');

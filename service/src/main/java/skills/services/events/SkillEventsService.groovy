@@ -25,6 +25,8 @@ import org.springframework.transaction.annotation.Transactional
 import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillExceptionBuilder
 import skills.services.LockingService
+import skills.services.SelfReportingService
+import skills.services.UserEventService
 import skills.services.events.pointsAndAchievements.PointsAndAchievementsHandler
 import skills.storage.model.SkillDef
 import skills.storage.model.UserAchievement
@@ -82,10 +84,28 @@ class SkillEventsService {
     @Autowired
     MetricsLogger metricsLogger;
 
+    @Autowired
+    UserEventService userEventService
+
+    @Autowired
+    SelfReportingService selfReportingService
+
+    static class SkillApprovalParams {
+        boolean disableChecks = false
+        String approvalRequestedMsg
+
+        SkillApprovalParams(){}
+
+        SkillApprovalParams(String approvalRequestedMsg) {
+            this.approvalRequestedMsg = approvalRequestedMsg
+        }
+    }
+    static SkillApprovalParams defaultSkillApprovalParams = new SkillApprovalParams()
+
     @Transactional
     @Profile
-    SkillEventResult reportSkill(String projectId, String skillId, String userId, Boolean notifyIfNotApplied, Date incomingSkillDate) {
-        SkillEventResult result = reportSkillInternal(projectId, skillId, userId, incomingSkillDate)
+    SkillEventResult reportSkill(String projectId, String skillId, String userId, Boolean notifyIfNotApplied, Date incomingSkillDate, SkillApprovalParams skillApprovalParams = defaultSkillApprovalParams) {
+        SkillEventResult result = reportSkillInternal(projectId, skillId, userId, incomingSkillDate, skillApprovalParams)
         if (notifyIfNotApplied || result.skillApplied) {
             skillEventPublisher.publishSkillUpdate(result, userId)
         }
@@ -157,7 +177,7 @@ class SkillEventsService {
         notifyUserOfAchievements(userId)
     }
 
-    private SkillEventResult reportSkillInternal(String projectId, String skillId, String userId, Date incomingSkillDateParam) {
+    private SkillEventResult reportSkillInternal(String projectId, String skillId, String userId, Date incomingSkillDateParam, SkillApprovalParams approvalParams) {
         assert projectId
         assert skillId
 
@@ -166,6 +186,8 @@ class SkillEventsService {
         SkillEventsSupportRepo.SkillDefMin skillDefinition = getSkillDef(userId, projectId, skillId)
 
         SkillEventResult res = new SkillEventResult(projectId: projectId, skillId: skillId, name: skillDefinition.name)
+
+        userEventService.recordEvent(projectId, skillDefinition.id, userId, skillDate.date)
 
         long numExistingSkills = getNumExistingSkills(userId, projectId, skillId)
         AppliedCheckRes checkRes = checkIfSkillApplied(userId, numExistingSkills, skillDate.date, skillDefinition)
@@ -183,6 +205,14 @@ class SkillEventsService {
         numExistingSkills = getNumExistingSkills(userId, projectId, skillId)
         checkRes = checkIfSkillApplied(userId, numExistingSkills, skillDate.date, skillDefinition)
         if (!checkRes.skillApplied) {
+            res.skillApplied = checkRes.skillApplied
+            res.explanation = checkRes.explanation
+            return res
+        }
+
+        if (approvalParams && !approvalParams.disableChecks &&
+            skillDefinition.getSelfReportingType() == SkillDef.SelfReportingType.Approval) {
+            checkRes = selfReportingService.requestApproval(userId, skillDefinition, skillDate.date, approvalParams?.approvalRequestedMsg)
             res.skillApplied = checkRes.skillApplied
             res.explanation = checkRes.explanation
             return res
@@ -221,7 +251,7 @@ class SkillEventsService {
         }
     }
 
-    class AppliedCheckRes {
+    static class AppliedCheckRes {
         boolean skillApplied = true
         String explanation
     }

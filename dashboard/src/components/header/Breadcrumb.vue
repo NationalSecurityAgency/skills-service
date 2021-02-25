@@ -25,11 +25,11 @@ limitations under the License.
  meta: { breadcrumb: 'Add Skill Event' },
 -->
 <template>
-  <nav aria-label="breadcrumb" class="border-bottom">
+  <nav aria-label="breadcrumb" class="border-bottom" role="navigation">
     <ol class="breadcrumb">
       <li v-for="(item, index) of items" :key="item.label" class="breadcrumb-item">
-         <span v-if="index === items.length-1" style="color: #e7e7e7">
-           <span v-if="item.label" class="breadcrumb-item-label text-uppercase">{{ item.label }}: </span><span>{{ item.value }}</span>
+         <span v-if="index === items.length-1" style="color: #e7e7e7" :data-cy="`breadcrumb-${item.value}`">
+           <span v-if="item.label" class="breadcrumb-item-label text-uppercase" aria-current="page">{{ item.label }}: </span><span>{{ item.value }}</span>
          </span>
          <span v-else>
            <router-link :to="item.url" class="text-white" :data-cy="`breadcrumb-${item.value}`">
@@ -49,6 +49,7 @@ limitations under the License.
       return {
         items: [],
         idsToExcludeFromPath: ['subjects', 'skills', 'projects'],
+        keysToExcludeFromPath: [],
       };
     },
     mounted() {
@@ -69,7 +70,7 @@ limitations under the License.
         const lastItemInPathCustomName = this.$route.meta.breadcrumb;
 
         res.forEach((item, index) => {
-          let value = item;
+          let value = item === 'administrator' ? 'Admin' : item;
           if (value) {
             if (index === res.length - 1 && lastItemInPathCustomName) {
               key = null;
@@ -77,7 +78,9 @@ limitations under the License.
             }
 
             if (key) {
-              newItems.push(this.buildResItem(key, value, res, index));
+              if (!this.shouldExcludeKey(key)) {
+                newItems.push(this.buildResItem(key, value, res, index));
+              }
               key = null;
             } else {
               // must exclude items in the path because each page with navigation
@@ -87,10 +90,12 @@ limitations under the License.
               // '/projects/projectId/subjects/subjectId/stats we must end up with:
               //    'projects / project:projectId / subject:subjectId / stats'
               // notice that 'subjects' is missing
-              if (!this.shouldExclude(value)) {
+              if (!this.shouldExcludeValue(value)) {
                 newItems.push(this.buildResItem(key, value, res, index));
               }
-              key = value;
+              if (value !== 'Admin') {
+                key = value;
+              }
             }
           }
         });
@@ -101,7 +106,7 @@ limitations under the License.
         const decodedItem = decodeURIComponent(item);
         return {
           label: key ? this.prepKey(key) : null,
-          value: !key ? this.capitalize(decodedItem) : decodedItem,
+          value: !key ? this.capitalize(this.hyphenToCamelCase(decodedItem)) : decodedItem,
           url: this.getUrl(res, index + 1),
         };
       },
@@ -119,11 +124,17 @@ limitations under the License.
         const res = key.endsWith('s') ? key.substring(0, key.length - 1) : key;
         return this.capitalize(res);
       },
+      hyphenToCamelCase(value) {
+        return value.replace(/-([a-z])/g, (g) => g[1].toUpperCase());
+      },
       capitalize(value) {
         return value.charAt(0).toUpperCase() + value.slice(1);
       },
-      shouldExclude(item) {
+      shouldExcludeValue(item) {
         return this.idsToExcludeFromPath.some((searchForMe) => item.toUpperCase() === searchForMe.toUpperCase());
+      },
+      shouldExcludeKey(key) {
+        return this.keysToExcludeFromPath.some((searchForMe) => key.toUpperCase() === searchForMe.toUpperCase());
       },
     },
   };

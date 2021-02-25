@@ -15,7 +15,7 @@
  */
 import Vue from 'vue';
 import Router from 'vue-router';
-import HomePage from '@/components/HomePage';
+import AdminHomePage from '@/components/AdminHomePage';
 import MyProjects from '@/components/projects/MyProjects';
 import LoginForm from '@/components/access/Login';
 import RequestAccountForm from '@/components/access/RequestAccess';
@@ -25,47 +25,52 @@ import NotAuthorizedPage from '@/components/utils/NotAuthorizedPage';
 import NotFoundPage from '@/components/utils/NotFoundPage';
 import SubjectPage from '@/components/subjects/SubjectPage';
 import BadgePage from '@/components/badges/BadgePage';
-import GlobalBadgePage from '@/components/badges/global/GlobalBadgePage';
 import SkillPage from '@/components/skills/SkillPage';
 import UserPage from '@/components/users/UserPage';
 import GlobalSettings from '@/components/settings/GlobalSettings';
 import GFMDescription from '@//components/utils/GFMDescription';
-import InceptionSkills from '@//components/inception/InceptionSkills';
 import Subjects from '@//components/subjects/Subjects';
 import Badges from '@//components/badges/Badges';
-import GlobalBadges from '@//components/badges/global/GlobalBadges';
 import Levels from '@//components/levels/Levels';
-import FullDependencyGraph from '@//components/skills/dependencies/FullDependencyGraph';
-import CrossProjectsSkills from '@//components/skills/crossProjects/CrossProjectsSkills';
 import Users from '@//components/users/Users';
 import AccessSettings from '@//components/access/AccessSettings';
 import ProjectSettings from '@//components/settings/ProjectSettings';
 import Skills from '@//components/skills/Skills';
 import BadgeSkills from '@//components/badges/BadgeSkills';
-import GlobalBadgeSkills from '@//components/badges/global/GlobalBadgeSkills';
-import GlobalBadgeLevels from '@//components/levels/global/GlobalBadgeLevels';
 import SkillOverview from '@//components/skills/SkillOverview';
-import SkillDependencies from '@//components/skills/dependencies/SkillDependencies';
-import AddSkillEvent from '@//components/skills/AddSkillEvent';
-import ClientDisplayPreview from '@//components/users/ClientDisplayPreview';
 import UserSkillsPerformed from '@//components/users/UserSkillsPerformed';
 import GeneralSettings from '@//components/settings/GeneralSettings';
-import SecuritySettings from '@//components/settings/SecuritySettings';
-import EmailSettings from '@//components/settings/EmailSettings';
-import SystemSettings from '@//components/settings/SystemSettings';
 import ResetPassword from '@//components/access/ResetPassword';
 import RequestPasswordReset from '@//components/access/RequestPasswordReset';
 import RequestResetConfirmation from '@//components/access/RequestResetConfirmation';
 import ResetConfirmation from '@//components/access/ResetConfirmation';
 import ResetNotSupportedPage from '@//components/access/ResetNotSupportedPage';
-import MetricsPageNav from '@//components/metrics/MetricsPageNav';
-import ProjectMetrics from '@//components/metrics/ProjectMetrics';
-import UsersAchievementsMetricPage from '@//components/metrics/projectAchievements/UsersAchievementsMetricPage';
-import SubjectMetricsPage from '@//components/metrics/projectSubjects/SubjectMetricsPage';
-import SkillsMetricsPage from '@//components/metrics/projectSkills/SkillsMetricsPage';
-import SkillMetricsPage from '@//components/metrics/skill/SkillMetricsPage';
-import MetricsOnSubjectPage from '@//components/metrics/subject/MetricsOnSubjectPage';
-import MultipleProjectsMetricsPage from '@//components/metrics/multipleProjects/MultipleProjectsMetricsPage';
+import SelfReportStatusPage from '@//components/skills/selfReport/SelfReportStatusPage';
+
+const GlobalBadgePage = () => import(/* webpackChunkName: 'globalBadgePage' */'@/components/badges/global/GlobalBadgePage');
+const GlobalBadgeSkills = () => import(/* webpackChunkName: 'globalBadgeSkills' */'@//components/badges/global/GlobalBadgeSkills');
+const GlobalBadgeLevels = () => import(/* webpackChunkName: 'globalBadgeLevels' */'@//components/levels/global/GlobalBadgeLevels');
+const GlobalBadges = () => import(/* webpackChunkName: 'globalBadges' */'@//components/badges/global/GlobalBadges');
+const FullDependencyGraph = () => import(/* webpackChunkName: 'fullDependencyGraph' */'@//components/skills/dependencies/FullDependencyGraph');
+const SecuritySettings = () => import(/* webpackChunkName: 'securitySettings' */'@//components/settings/SecuritySettings');
+const EmailSettings = () => import(/* webpackChunkName: 'emailSettings' */'@//components/settings/EmailSettings');
+const SystemSettings = () => import(/* webpackChunkName: 'systemSettings' */'@//components/settings/SystemSettings');
+const SkillDependencies = () => import(/* webpackChunkName: 'skillDependencies' */'@//components/skills/dependencies/SkillDependencies');
+const AddSkillEvent = () => import(/* webpackChunkName: 'addSKillEvent' */'@//components/skills/AddSkillEvent');
+const InceptionSkills = () => import(/* webpackChunkName: 'inceptionSkills' */'@//components/inception/InceptionSkills');
+const CrossProjectsSkills = () => import(/* webpackChunkName: 'crossProjectsSkills' */'@//components/skills/crossProjects/CrossProjectsSkills');
+const ClientDisplayPreview = () => import(/* webpackChunkName: 'clientDisplayPreview' */'@//components/users/ClientDisplayPreview');
+const MultipleProjectsMetricsPage = () => import(/* webpackChunkName: 'multipleProjectsMetricsPage' */'@//components/metrics/multipleProjects/MultipleProjectsMetricsPage');
+const MetricsOnSubjectPage = () => import(/* webpackChunkName: 'MetricsOnSubjectPage' */ '@//components/metrics/subject/MetricsOnSubjectPage');
+const SkillMetricsPage = () => import(/* webpackChunkName: 'SkillMetricsPage' */'@//components/metrics/skill/SkillMetricsPage');
+const SkillsMetricsPage = () => import(/* webpackChunkName: 'SkillsMetricsPage' */'@//components/metrics/projectSkills/SkillsMetricsPage');
+const SubjectMetricsPage = () => import(/* webpackChunkName: 'SubjectMetricsPage' */'@//components/metrics/projectSubjects/SubjectMetricsPage');
+const UsersAchievementsMetricPage = () => import(/* webpackChunkName: 'UsersAchievementsMetricPage' */'@//components/metrics/projectAchievements/UsersAchievementsMetricPage');
+const ProjectMetrics = () => import(/* webpackChunkName: 'ProjectMetrics' */'@//components/metrics/ProjectMetrics');
+const MetricsPageNav = () => import(/* webpackChunkName: 'MetricsPageNav' */'@//components/metrics/MetricsPageNav');
+const MyProgressPage = () => import(/* webpackChunkName: 'myProgressPage' */'@//components/myProgress/MyProgressPage');
+const MyProgress = () => import(/* webpackChunkName: 'myProgress' */'@//components/myProgress/MyProgress');
+const MyProjectSkillsPage = () => import(/* webpackChunkName: 'myProjectSkillsPage' */'@//components/myProgress/MyProjectSkillsPage');
 
 Vue.use(Router);
 
@@ -73,11 +78,11 @@ const router = new Router({
   mode: 'history',
   routes: [
     {
-      path: '/',
-      component: HomePage,
+      path: '/administrator',
+      component: AdminHomePage,
       meta: { requiresAuth: false },
       children: [{
-        name: 'HomePage',
+        name: 'AdminHomePage',
         path: '',
         component: MyProjects,
         meta: { requiresAuth: true },
@@ -188,7 +193,27 @@ const router = new Router({
       },
     },
     {
-      path: '/projects/:projectId',
+      path: '/',
+      component: MyProgress,
+      meta: { requiresAuth: true, nonAdmin: true },
+      children: [{
+        name: 'LandingPage',
+        path: '',
+        component: MyProgressPage,
+        meta: {
+          requiresAuth: true, nonAdmin: true,
+        },
+      }, {
+        name: 'MyProjectSkills',
+        path: 'projects/:projectId',
+        component: MyProjectSkillsPage,
+        meta: {
+          requiresAuth: true, nonAdmin: true,
+        },
+      }],
+    },
+    {
+      path: '/administrator/projects/:projectId',
       component: ProjectPage,
       meta: { requiresAuth: true },
       children: [{
@@ -224,6 +249,11 @@ const router = new Router({
         path: 'users',
         component: Users,
         meta: { requiresAuth: true, reportSkillId: 'VisitProjectUsers' },
+      }, {
+        name: 'SelfReport',
+        path: 'self-report',
+        component: SelfReportStatusPage,
+        meta: { requiresAuth: true },
       }, {
         name: 'ProjectAccess',
         path: 'access',
@@ -262,7 +292,7 @@ const router = new Router({
       }],
     },
     {
-      path: '/projects/:projectId/subjects/:subjectId',
+      path: '/administrator/projects/:projectId/subjects/:subjectId',
       component: SubjectPage,
       meta: { requiresAuth: true },
       children: [{
@@ -288,7 +318,7 @@ const router = new Router({
       }],
     },
     {
-      path: '/projects/:projectId/badges/:badgeId',
+      path: '/administrator/projects/:projectId/badges/:badgeId',
       component: BadgePage,
       meta: { requiresAuth: true },
       children: [{
@@ -304,7 +334,7 @@ const router = new Router({
       }],
     },
     {
-      path: '/projects/:projectId/subjects/:subjectId/skills/:skillId',
+      path: '/administrator/projects/:projectId/subjects/:subjectId/skills/:skillId',
       component: SkillPage,
       meta: { requiresAuth: true },
       children: [{
@@ -336,7 +366,7 @@ const router = new Router({
       }],
     },
     {
-      path: '/projects/:projectId/users/:userId',
+      path: '/administrator/projects/:projectId/users/:userId',
       component: UserPage,
       meta: { requiresAuth: true },
       children: [{
@@ -352,7 +382,7 @@ const router = new Router({
       }],
     },
     {
-      path: '/projects/:projectId/subjects/:subjectId/users/:userId',
+      path: '/administrator/projects/:projectId/subjects/:subjectId/users/:userId',
       component: UserPage,
       meta: { requiresAuth: true },
       children: [{
@@ -368,7 +398,7 @@ const router = new Router({
       }],
     },
     {
-      path: '/projects/:projectId/subjects/:subjectId/skills/:skillId/users/:userId',
+      path: '/administrator/projects/:projectId/subjects/:subjectId/skills/:skillId/users/:userId',
       component: UserPage,
       meta: { requiresAuth: true },
       children: [{
@@ -384,7 +414,7 @@ const router = new Router({
       }],
     },
     {
-      path: '/projects/:projectId/badges/:badgeId/users/:userId',
+      path: '/administrator/projects/:projectId/badges/:badgeId/users/:userId',
       component: UserPage,
       meta: { requiresAuth: true },
       children: [{
@@ -409,22 +439,22 @@ const router = new Router({
         name: 'GeneralSettings',
         path: '',
         component: GeneralSettings,
-        meta: { requiresAuth: true, reportSkillId: 'VisitUserSettings' },
+        meta: { requiresAuth: true, nonAdmin: true, reportSkillId: 'VisitUserSettings' },
       }, {
         name: 'SecuritySettings',
         path: 'security',
         component: SecuritySettings,
-        meta: { requiresAuth: true },
+        meta: { requiresAuth: true, nonAdmin: true },
       }, {
         name: 'EmailSettings',
         path: 'email',
         component: EmailSettings,
-        meta: { requiresAuth: true },
+        meta: { requiresAuth: true, nonAdmin: true },
       }, {
         name: 'SystemSettings',
         path: 'system',
         component: SystemSettings,
-        meta: { requiresAuth: true },
+        meta: { requiresAuth: true, nonAdmin: true },
       }],
     },
     {
@@ -434,13 +464,13 @@ const router = new Router({
       meta: { requiresAuth: true, reportSkillId: 'VisitMarkdownDocs' },
     },
     {
-      path: '/skills',
+      path: '/administrator/skills',
       name: 'InceptionSkills',
       component: InceptionSkills,
       meta: { requiresAuth: true, breadcrumb: 'Dashboard Skills', reportSkillId: 'VisitDashboardSkills' },
     },
     {
-      path: '/globalBadges/:badgeId',
+      path: '/administrator/globalBadges/:badgeId',
       component: GlobalBadgePage,
       meta: { requiresAuth: true },
       children: [{

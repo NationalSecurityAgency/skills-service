@@ -31,7 +31,7 @@ describe('Metrics Tests - Achievements', () => {
             openMode: 0
         }
     }, () => {
-        cy.visit('/projects/proj1/');
+        cy.visit('/administrator/projects/proj1/');
         cy.clickNav('Metrics');
         cy.get('[data-cy=metricsNav-Achievements]').click();
 
@@ -50,10 +50,10 @@ describe('Metrics Tests - Achievements', () => {
             openMode: 0
         }
     }, () => {
-        cy.server().route({
-            url: '/admin/projects/proj1/metrics/numUsersPerLevelChartBuilder',
-            status: 200,
-            response: [{
+        cy.intercept('/admin/projects/proj1/metrics/numUsersPerLevelChartBuilder',
+          {
+            statusCode: 200,
+            body: [{
                 'value': 'Level 1',
                 'count': 6251
             }, {
@@ -71,7 +71,7 @@ describe('Metrics Tests - Achievements', () => {
             }],
         }).as('getLevels');
 
-        cy.visit('/projects/proj1/');
+        cy.visit('/administrator/projects/proj1/');
         cy.clickNav('Metrics');
         cy.get('[data-cy=metricsNav-Achievements]').click();
 
@@ -83,7 +83,7 @@ describe('Metrics Tests - Achievements', () => {
     });
 
     it('achievements table - empty table', () => {
-        cy.visit('/projects/proj1/');
+        cy.visit('/administrator/projects/proj1/');
         cy.clickNav('Metrics');
         cy.get('[data-cy=metricsNav-Achievements]').click();
 
@@ -93,8 +93,7 @@ describe('Metrics Tests - Achievements', () => {
     it('achievements table - few rows', () => {
         cy.viewport(1500, 750);
 
-        cy.server()
-            .route('/admin/projects/proj1/metrics/userAchievementsChartBuilder?**')
+        cy.intercept('/admin/projects/proj1/metrics/userAchievementsChartBuilder?**')
             .as('userAchievementsChartBuilder');
 
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
@@ -119,7 +118,7 @@ describe('Metrics Tests - Achievements', () => {
         cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'user0Good@skills.org', timestamp: m.clone().subtract(1, 'day').format('x')})
         cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: 'user0Good@skills.org', timestamp: m.clone().subtract(4, 'day').format('x')})
 
-        cy.visit('/projects/proj1/');
+        cy.visit('/administrator/projects/proj1/');
         cy.clickNav('Metrics');
         cy.get('[data-cy=metricsNav-Achievements]').click();
         cy.wait('@userAchievementsChartBuilder')
@@ -165,8 +164,7 @@ describe('Metrics Tests - Achievements', () => {
     });
 
     it('achievements table - validate the link to user client display', () => {
-        cy.server()
-            .route('/admin/projects/proj1/metrics/userAchievementsChartBuilder?**')
+        cy.intercept('/admin/projects/proj1/metrics/userAchievementsChartBuilder?**')
             .as('userAchievementsChartBuilder');
 
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
@@ -191,7 +189,7 @@ describe('Metrics Tests - Achievements', () => {
         cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'user0Good@skills.org', timestamp: m.clone().subtract(1, 'day').format('x')})
         cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: 'user0Good@skills.org', timestamp: m.clone().subtract(4, 'day').format('x')})
 
-        cy.visit('/projects/proj1/');
+        cy.visit('/administrator/projects/proj1/');
         cy.clickNav('Metrics');
         cy.get('[data-cy=metricsNav-Achievements]').click();
         cy.wait('@userAchievementsChartBuilder')
@@ -243,8 +241,7 @@ describe('Metrics Tests - Achievements', () => {
 
 
     it('achievements table - sorting', () => {
-        cy.server()
-            .route('/admin/projects/proj1/metrics/userAchievementsChartBuilder?**')
+        cy.intercept('/admin/projects/proj1/metrics/userAchievementsChartBuilder?**')
             .as('userAchievementsChartBuilder');
 
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
@@ -276,7 +273,7 @@ describe('Metrics Tests - Achievements', () => {
         cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'thereYouGo@skills.org', timestamp: m.clone().subtract(7, 'day').format('x')})
         cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'thereYouGo@skills.org', timestamp: m.clone().subtract(8, 'day').format('x')})
 
-        cy.visit('/projects/proj1/');
+        cy.visit('/administrator/projects/proj1/');
         cy.clickNav('Metrics');
         cy.get('[data-cy=metricsNav-Achievements]').click();
         cy.wait('@userAchievementsChartBuilder')
@@ -317,8 +314,7 @@ describe('Metrics Tests - Achievements', () => {
     });
 
     it('achievements table - filtering', () => {
-        cy.server()
-            .route('/admin/projects/proj1/metrics/userAchievementsChartBuilder?**')
+        cy.intercept('/admin/projects/proj1/metrics/userAchievementsChartBuilder?**')
             .as('userAchievementsChartBuilder');
 
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
@@ -381,7 +377,7 @@ describe('Metrics Tests - Achievements', () => {
         cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'thereYouGo@skills.org', timestamp: m.clone().add(7, 'day').format('x')})
         cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'thereYouGo@skills.org', timestamp: m.clone().add(8, 'day').format('x')})
 
-        cy.visit('/projects/proj1/');
+        cy.visit('/administrator/projects/proj1/');
         cy.clickNav('Metrics');
         cy.get('[data-cy=metricsNav-Achievements]').click();
         cy.wait('@userAchievementsChartBuilder')
@@ -569,7 +565,7 @@ describe('Metrics Tests - Achievements', () => {
         cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: 'user2Smith0@skills.org', timestamp: m.clone().subtract(5, 'day').format('x')})
         cy.request('POST', `/api/projects/proj1/skills/skill3`, {userId: 'user2Smith0@skills.org', timestamp: m.clone().subtract(6, 'day').format('x')})
 
-        cy.visit('/projects/proj1/');
+        cy.visit('/administrator/projects/proj1/');
         cy.clickNav('Metrics');
         cy.get('[data-cy=metricsNav-Achievements]').click();
 

@@ -47,7 +47,7 @@ class PointsHistoryBuilder {
             userPoints = userPerformedSkillRepo.calculatePointHistoryByProjectIdAndUserIdAndVersion(projectId, userId, null, version)
         }
 
-        Map<Date, Integer> pointsByDay = [:]
+        Map<Date, Long> pointsByDay = [:]
         userPoints.each {
             // it.day is java.sql.Date - bye bye!
             pointsByDay.put(new Date(it.day.time).clearTime(), it.count)
@@ -56,16 +56,16 @@ class PointsHistoryBuilder {
         return doBuildHistory(pointsByDay, showHistoryForNumDays)
     }
 
-    private List<SkillHistoryPoints> doBuildHistory(Map<Date, Integer> pointsByDay, Integer showHistoryForNumDays) {
+    private List<SkillHistoryPoints> doBuildHistory(Map<Date, Long> pointsByDay, Integer showHistoryForNumDays) {
         if (!pointsByDay || pointsByDay.size() < minNumOfDaysBeforeReturningHistory) {
             return Collections.EMPTY_LIST
         }
 
-        int toAddForFirstDay = 0
+        long toAddForFirstDay = 0
         if (showHistoryForNumDays != null) {
             Date startDate = new Date() - showHistoryForNumDays
             startDate = new Date(startDate.time).clearTime()
-            Map<Date, Integer> toRemove = pointsByDay.findAll { it.key.before(startDate) }
+            Map<Date, Long> toRemove = pointsByDay.findAll { it.key.before(startDate) }
             if (toRemove) {
                 toAddForFirstDay = (int) toRemove.collect { it.value }.sum()
                 toRemove.each {
@@ -84,14 +84,14 @@ class PointsHistoryBuilder {
         List<Date> dates = pointsByDay.collect { new Date(it.key.time).clearTime() }
         dates.min().upto(new Date().clearTime()) { Date theDate ->
             if (!pointsByDay.containsKey(theDate)) {
-                pointsByDay[theDate] = 0
+                pointsByDay[theDate] = 0L
             }
         }
         List<SkillHistoryPoints> historyPoints = pointsByDay.collect {
-            new SkillHistoryPoints(dayPerformed: it.key, points: it.value)
+            new SkillHistoryPoints(dayPerformed: it.key, points: it.value.toInteger())
         }.sort({ it.dayPerformed })
 
-        historyPoints.first().points = historyPoints.first().points + toAddForFirstDay
+        historyPoints.first().points = (historyPoints.first().points + toAddForFirstDay).toInteger()
 
         int pointsSoFar = 0
         historyPoints.each {

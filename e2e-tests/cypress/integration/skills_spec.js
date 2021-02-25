@@ -28,13 +28,13 @@ describe('Skills Tests', () => {
     });
 
     it('name causes id to fail validation', () => {
-      cy.server();
-      cy.route({
+
+      cy.intercept({
         method: 'GET',
         url: '/admin/projects/proj1/subjects/subj1'
       }).as('loadSubject');
 
-      cy.visit('/projects/proj1/subjects/subj1');
+      cy.visit('/administrator/projects/proj1/subjects/subj1');
       cy.wait('@loadSubject');
 
       cy.clickButton('Skill');
@@ -43,34 +43,33 @@ describe('Skills Tests', () => {
       const msg = 'Skill ID cannot exceed 50 characters.';
       const validNameButInvalidId = Array(46).fill('a').join('');
       cy.get('[data-cy=skillName]').click();
-      cy.get('[data-cy=skillName]').invoke('val', validNameButInvalidId).trigger('input');
-      cy.get('[data-cy=idError]').contains(msg).should('be.visible');
+      cy.get('[data-cy=skillName]').fill(validNameButInvalidId);
+      cy.get('[data-cy=idError]').should('be.visible');
       cy.get('[data-cy=saveSkillButton]').should('be.disabled');
       cy.get('[data-cy=skillName]').type('{backspace}');
-      cy.get('[data-cy=idError]').contains(msg).should('not.be.visible');
+      cy.get('[data-cy=idError]').should('not.be.visible');
       cy.get('[data-cy=saveSkillButton]').should('be.enabled');
     });
 
     it('close skill dialog', () => {
-      cy.server();
-      cy.route({
+
+      cy.intercept({
         method: 'GET',
         url: '/admin/projects/proj1/subjects/subj1'
       }).as('loadSubject');
 
-      cy.visit('/projects/proj1/subjects/subj1');
+      cy.visit('/administrator/projects/proj1/subjects/subj1');
       cy.wait('@loadSubject');
 
       cy.clickButton('Skill');
       cy.get('[data-cy=closeSkillButton]').click();
-      cy.get('[data-cy=closeSkillButton]').should('not.be.visible');
+      cy.get('[data-cy=closeSkillButton]').should('not.exist');
     });
 
     it('validation', () => {
-      cy.server()
-      cy.route('POST', `/admin/projects/proj1/subjects/subj1/skills/Skill1Skill`).as('postNewSkill');
-      cy.route('GET', `/admin/projects/proj1/subjects/subj1/skills/Skill1Skill`).as('getSkill');
-      cy.route({
+      cy.intercept('POST', `/admin/projects/proj1/subjects/subj1/skills/Skill1Skill`).as('postNewSkill');
+      cy.intercept('GET', `/admin/projects/proj1/subjects/subj1/skills/Skill1Skill`).as('getSkill');
+      cy.intercept({
         method: 'GET',
         url: '/admin/projects/proj1/subjects/subj1'
       }).as('loadSubject');
@@ -84,7 +83,7 @@ describe('Skills Tests', () => {
         numPerformToCompletion: '5'
       });
 
-      cy.visit('/projects/proj1/subjects/subj1');
+      cy.visit('/administrator/projects/proj1/subjects/subj1');
       cy.wait('@loadSubject');
 
       cy.clickButton('Skill');
@@ -95,7 +94,7 @@ describe('Skills Tests', () => {
       cy.get('[data-cy=skillNameError]').contains('Skill Name cannot be less than 3 characters.').should('be.visible');
       cy.get('[data-cy=saveSkillButton]').should('be.disabled');
       const invalidName = Array(101).fill('a').join('');
-      cy.get('[data-cy=skillName]').invoke('val', invalidName).trigger('input');
+      cy.get('[data-cy=skillName]').fill(invalidName);
       cy.get('[data-cy=skillNameError]').contains('Skill Name cannot exceed 100 characters.').should('be.visible');
       cy.get('[data-cy=saveSkillButton]').should('be.disabled');
       cy.get('[data-cy=skillName]').type('{selectall}Duplicate');
@@ -178,17 +177,16 @@ describe('Skills Tests', () => {
     });
 
     it('edit number of occurrences', () => {
-        cy.server()
-        cy.route('POST', `/admin/projects/proj1/subjects/subj1/skills/Skill1Skill`).as('postNewSkill');
-        cy.route('GET', `/admin/projects/proj1/subjects/subj1/skills/Skill1Skill`).as('getSkill');
-        cy.route({
+        cy.intercept('POST', `/admin/projects/proj1/subjects/subj1/skills/Skill1Skill`).as('postNewSkill');
+        cy.intercept('GET', `/admin/projects/proj1/subjects/subj1/skills/Skill1Skill`).as('getSkill');
+        cy.intercept({
             method: 'GET',
             url: '/admin/projects/proj1/subjects/subj1'
         }).as('loadSubject');
 
         const selectorOccurrencesToCompletion = '[data-cy="numPerformToCompletion"]';
-        const selectorSkillsRowToggle = 'table .VueTables__child-row-toggler';
-        cy.visit('/projects/proj1/subjects/subj1');
+        const selectorSkillsRowToggle = '[data-cy="expandDetailsBtn_Skill1Skill"]';
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
 
         cy.wait('@loadSubject');
 
@@ -201,13 +199,11 @@ describe('Skills Tests', () => {
 
 
         cy.get(selectorSkillsRowToggle).click()
-        cy.contains('50 Points')
+        cy.get('[data-cy="childRowDisplay_Skill1Skill"]').contains('50 Points');
 
-        cy.get('table .control-column .fa-edit').click()
+        cy.get('[data-cy="editSkillButton_Skill1Skill"]').click()
         cy.wait('@getSkill')
 
-        // close toast
-        cy.get('.toast-header button').click({ multiple: true })
         cy.get(selectorOccurrencesToCompletion).should('have.value', '5')
         cy.get(selectorOccurrencesToCompletion).type('{backspace}10')
         cy.get(selectorOccurrencesToCompletion).should('have.value', '10')
@@ -216,22 +212,22 @@ describe('Skills Tests', () => {
         cy.wait('@postNewSkill');
 
         cy.get(selectorSkillsRowToggle).click()
-        cy.contains('100 Points')
+        cy.get('[ data-cy="childRowDisplay_Skill1Skill"]').contains('100 Points')
     });
 
     it('create skill with special chars', () => {
         const expectedId = 'LotsofspecialPcharsSkill';
         const providedName = "!L@o#t$s of %s^p&e*c(i)/#?a_l++_|}{P c'ha'rs";
-        cy.server();
-        cy.route('POST', `/admin/projects/proj1/subjects/subj1/skills/${expectedId}`).as('postNewSkill');
-        cy.route('POST', `/admin/projects/proj1/skillNameExists`).as('nameExists');
 
-        cy.route({
+        cy.intercept('POST', `/admin/projects/proj1/subjects/subj1/skills/${expectedId}`).as('postNewSkill');
+        cy.intercept('POST', `/admin/projects/proj1/skillNameExists`).as('nameExists');
+
+        cy.intercept({
             method: 'GET',
             url: '/admin/projects/proj1/subjects/subj1'
         }).as('loadSubject');
 
-        cy.visit('/projects/proj1/subjects/subj1');
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.wait('@loadSubject');
         cy.clickButton('Skill');
 
@@ -249,16 +245,16 @@ describe('Skills Tests', () => {
     it('create skill using enter key', () => {
       const expectedId = 'LotsofspecialPcharsSkill';
       const providedName = "!L@o#t$s of %s^p&e*c(i)/#?a_l++_|}{P c'ha'rs";
-      cy.server();
-      cy.route('POST', `/admin/projects/proj1/subjects/subj1/skills/${expectedId}`).as('postNewSkill');
-      cy.route('POST', `/admin/projects/proj1/skillNameExists`).as('nameExists');
 
-      cy.route({
+      cy.intercept('POST', `/admin/projects/proj1/subjects/subj1/skills/${expectedId}`).as('postNewSkill');
+      cy.intercept('POST', `/admin/projects/proj1/skillNameExists`).as('nameExists');
+
+      cy.intercept({
         method: 'GET',
         url: '/admin/projects/proj1/subjects/subj1'
       }).as('loadSubject');
 
-      cy.visit('/projects/proj1/subjects/subj1');
+      cy.visit('/administrator/projects/proj1/subjects/subj1');
       cy.wait('@loadSubject');
       cy.clickButton('Skill');
 
@@ -283,21 +279,21 @@ describe('Skills Tests', () => {
             numPerformToCompletion: '5'
         });
 
-        cy.server();
-        cy.route({
+
+        cy.intercept({
             method: 'POST',
             url: '/app/users/projects/proj1/suggestClientUsers?userSuggestOption=TWO'
         }).as('suggestUsers');
-        cy.route({
+        cy.intercept({
             method: 'GET',
             url: '/admin/projects/proj1/subjects/subj1/skills/skill1'
         }).as('loadSkill');
-        cy.route({
+        cy.intercept({
             method: 'POST',
             url: '/api/projects/Inception/skills/ManuallyAddSkillEvent'
         }).as('addSkillEvent');
 
-       cy.visit('/projects/proj1/subjects/subj1/skills/skill1');
+       cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1');
        cy.wait('@loadSkill');
        cy.contains('Add Event').click();
 
@@ -341,17 +337,17 @@ describe('Skills Tests', () => {
             numPerformToCompletion: '5'
         });
 
-        cy.server();
-        cy.route({
+
+        cy.intercept({
             method: 'POST',
             url: '/app/users/projects/proj1/suggestClientUsers?userSuggestOption=TWO'
         }).as('suggestUsers');
-        cy.route({
+        cy.intercept({
             method: 'GET',
             url: '/admin/projects/proj1/subjects/subj1/skills/skill1'
         }).as('loadSkill');
 
-        cy.visit('/projects/proj1/subjects/subj1/skills/skill1');
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1');
         cy.wait('@loadSkill');
         cy.contains('Add Event').click();
 
@@ -364,12 +360,12 @@ describe('Skills Tests', () => {
     });
 
     it('Add Skill Event User Not Found', () => {
-       cy.server();
-       cy.route({
-           method: 'PUT',
-           url: '/api/projects/*/skills/*',
-           status: 400,
-           response: {errorCode: 'UserNotFound', explanation: 'Some Error Occurred'}
+       cy.intercept({
+         method: 'PUT',
+         path: '/api/projects/*/skills/*',
+       }, {
+         statusCode: 400,
+         body: {errorCode: 'UserNotFound', explanation: 'Some Error Occurred'}
        }).as('addUser');
 
         cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1', {
@@ -381,12 +377,12 @@ describe('Skills Tests', () => {
             numPerformToCompletion: '5'
         });
 
-        cy.route({
+        cy.intercept({
             method: 'GET',
             url: '/admin/projects/proj1/subjects/subj1/skills/skill1'
         }).as('loadSkill')
 
-        cy.visit('/projects/proj1/subjects/subj1/skills/skill1');
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1');
         cy.wait('@loadSkill')
 
 
@@ -408,13 +404,13 @@ describe('Skills Tests', () => {
             pointIncrement: '50',
             numPerformToCompletion: '5'
         });
-        cy.server();
-        cy.route({
+
+        cy.intercept({
             method: 'GET',
             url: '/admin/projects/proj1/subjects/subj1/skills/skill1'
         }).as('loadSkill');
 
-        cy.visit('/projects/proj1/subjects/subj1/skills/skill1');
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1');
         cy.wait('@loadSkill');
         cy.contains('Add Event').click();
 
@@ -447,67 +443,22 @@ describe('Skills Tests', () => {
         cy.contains('user@#$&*');
     });
 
-    it('Add Dependency failure', () => {
-        cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1', {
-            projectId: 'proj1',
-            subjectId: "subj1",
-            skillId: "skill1",
-            name: "Skill 1",
-            pointIncrement: '50',
-            numPerformToCompletion: '5'
-        });
-
-        cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill2', {
-            projectId: 'proj1',
-            subjectId: "subj1",
-            skillId: "skill2",
-            name: "Skill 2",
-            pointIncrement: '50',
-            numPerformToCompletion: '5'
-        });
-
-        cy.server();
-
-        cy.route({
-            method: 'POST',
-            status: 400,
-            url: '/admin/projects/proj1/skills/skill1/dependency/*',
-            response: {errorCode: 'FailedToAssignDependency', explanation: 'Error Adding Dependency'}
-        });
-
-        cy.route({
-            method: 'GET',
-            url: '/admin/projects/proj1/subjects/subj1/skills/skill1'
-        }).as('loadSkill');
-
-        cy.visit('/projects/proj1/subjects/subj1/skills/skill1');
-        cy.wait('@loadSkill')
-
-        cy.get('div#menu-collapse-control li').contains('Dependencies').click();
-
-        cy.get('.multiselect__tags').click();
-        cy.get('.multiselect__tags input').type('{enter}')
-
-        cy.get('div .alert').contains('Error! Request could not be completed! Error Adding Dependency');
-
-    })
-
     it('create skill and then update skillId', () => {
       const initialId = 'myid1Skill';
       const newId = 'MyId1Skill';
       const providedName = "my id 1";
-      cy.server();
-      cy.route('POST', `/admin/projects/proj1/subjects/subj1/skills/${initialId}`).as('postNewSkill');
-      cy.route('POST', `/admin/projects/proj1/skillNameExists`).as('nameExists');
-      cy.route('GET', `/admin/projects/proj1/entityIdExists?id=*`).as('skillIdExists');
+
+      cy.intercept('POST', `/admin/projects/proj1/subjects/subj1/skills/${initialId}`).as('postNewSkill');
+      cy.intercept('POST', `/admin/projects/proj1/skillNameExists`).as('nameExists');
+      cy.intercept('GET', `/admin/projects/proj1/entityIdExists?id=*`).as('skillIdExists');
 
 
-      cy.route({
+      cy.intercept({
           method: 'GET',
           url: '/admin/projects/proj1/subjects/subj1'
       }).as('loadSubject');
 
-      cy.visit('/projects/proj1/subjects/subj1');
+      cy.visit('/administrator/projects/proj1/subjects/subj1');
       cy.wait('@loadSubject');
       cy.clickButton('Skill');
 
@@ -522,7 +473,7 @@ describe('Skills Tests', () => {
 
       cy.contains(`ID: ${initialId}`)
 
-      const editButtonSelector = '[data-cy=editSkillButton]';
+      const editButtonSelector = `[data-cy=editSkillButton_${initialId}]`;
       cy.get(editButtonSelector).click()
 
       cy.contains("Enable").click()
@@ -533,6 +484,122 @@ describe('Skills Tests', () => {
       cy.wait('@postNewSkill');
 
       cy.contains(`ID: ${newId}`)
+  });
+
+  it('new skill button should retain focus after dialog closes', () => {
+
+    cy.intercept({
+      method: 'GET',
+      url: '/admin/projects/proj1/subjects/subj1'
+    }).as('loadSubject');
+
+    cy.visit('/administrator/projects/proj1/subjects/subj1');
+    cy.wait('@loadSubject');
+
+    cy.get('[aria-label="new skill"]').click();
+    cy.get('[data-cy=closeSkillButton]').click();
+    cy.get('[aria-label="new skill"]').should('have.focus');
+
+    cy.get('[aria-label="new skill"]').click();
+    cy.get('[data-cy=skillName]').type('{esc}');
+    cy.get('[aria-label="new skill"]').should('have.focus');
+
+    cy.get('[aria-label="new skill"]').click();
+    cy.get('[aria-label=Close]').click();
+    cy.get('[aria-label="new skill"]').should('have.focus');
+
+    cy.get('[aria-label="new skill"]').click();
+    cy.get('[data-cy=skillName]').type('foobarbaz');
+    cy.get('[data-cy=saveSkillButton]').click();
+    cy.get('[aria-label="new skill"]').should('have.focus');
+  });
+
+  it('focus should be returned to subject edit button', () => {
+
+    cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1', {
+      projectId: 'proj1',
+      subjectId: "subj1",
+      skillId: "skill1",
+      name: "Skill 1",
+      pointIncrement: '50',
+      numPerformToCompletion: '5'
+    });
+
+    cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill2', {
+      projectId: 'proj1',
+      subjectId: "subj1",
+      skillId: "skill2",
+      name: "Skill 2",
+      pointIncrement: '50',
+      numPerformToCompletion: '5'
+    });
+
+    cy.intercept({
+      method: 'POST',
+      url: '/admin/projects/proj1/subjects/subj1/skills/skill1'
+    }).as('saveSkill');
+    cy.intercept({
+      method: 'POST',
+      url: '/admin/projects/proj1/subjects/subj1/skills/skill2'
+    }).as('saveSkill2');
+
+    cy.intercept({
+      method: 'GET',
+      url: '/admin/projects/proj1/subjects/subj1/skills/skill1'
+    }).as('loadSkill');
+    cy.intercept({
+      method: 'GET',
+      url: '/admin/projects/proj1/subjects/subj1/skills/skill2'
+    }).as('loadSkill2');
+    cy.intercept({
+      method: 'GET',
+      url: '/admin/projects/proj1/subjects/subj1'
+    }).as('loadSubject');
+
+    cy.visit('/administrator/projects/proj1/subjects/subj1');
+    cy.wait('@loadSubject');
+    //skill 2
+    cy.get('[data-cy=editSkillButton_skill2]').click();
+    cy.get('[data-cy=skillName]').should('be.visible');
+    cy.get('[data-cy=skillName]').type('{esc}');
+    cy.get('[data-cy=editSkillButton_skill2]').first().should('have.focus');
+
+    cy.get('[data-cy=editSkillButton_skill2]').click();
+    cy.get('[data-cy=closeSkillButton]').click();
+    cy.get('[data-cy=editSkillButton_skill2]').should('have.focus');
+
+    cy.get('[data-cy=editSkillButton_skill2]').click();
+    cy.get('[data-cy=skillName]').type('test 123');
+    cy.get('[data-cy=saveSkillButton]').click();
+    cy.wait('@saveSkill2');
+    cy.wait('@loadSkill2');
+    cy.get('[data-cy=editSkillButton_skill2]').should('have.focus');
+
+    cy.get('[data-cy=editSkillButton_skill2]').click();
+    cy.get('[aria-label=Close]').filter('.text-light').click();
+    cy.get('[data-cy=editSkillButton_skill2]').should('have.focus');
+    cy.contains('Skill 2test 123');
+
+    //skill 1
+    cy.get('[data-cy=editSkillButton_skill1]').click();
+    cy.get('[data-cy=skillName]').should('be.visible');
+    cy.get('[data-cy=skillName]').type('{esc}');
+    cy.get('[data-cy=editSkillButton_skill1]').should('have.focus');
+
+    cy.get('[data-cy=editSkillButton_skill1]').click();
+    cy.get('[data-cy=closeSkillButton]').click();
+    cy.get('[data-cy=editSkillButton_skill1]').should('have.focus');
+
+    cy.get('[data-cy=editSkillButton_skill1]').click();
+    cy.get('[data-cy=skillName]').type('test 123');
+    cy.get('[data-cy=saveSkillButton]').click();
+    cy.wait('@saveSkill');
+    cy.wait('@loadSkill');
+    cy.get('[data-cy=editSkillButton_skill1]').should('have.focus');
+
+    cy.get('[data-cy=editSkillButton_skill1]').click();
+    cy.get('[aria-label=Close]').filter('.text-light').click();
+    cy.get('[data-cy=editSkillButton_skill1]').should('have.focus');
   });
 
   it('skill user details does not break breadcrumb bar', () => {
@@ -546,12 +613,31 @@ describe('Skills Tests', () => {
     });
 
     cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: 'someuser', timestamp: new Date().getTime()})
-    cy.visit('/projects/proj1/subjects/subj1/skills/skill1/');
-    cy.get('[data-cy=nav-Users]').click();
-    cy.contains('Details').click();
+    cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/');
+    cy.clickNav('Users').click();
+    cy.get('[data-cy="usersTable"]').contains('someuser').click();
     cy.get('[data-cy=breadcrumb-subj1]').should('be.visible');
     cy.get('[data-cy=breadcrumb-skill1]').should('be.visible');
     cy.get('[data-cy=breadcrumb-Users]').should('be.visible');
   })
+
+    it('description is validated against custom validators', () => {
+        cy.intercept('GET', '/admin/projects/proj1/subjects/subj1').as('loadSubject');
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.wait('@loadSubject');
+        cy.clickButton('Skill')
+
+        cy.get('[data-cy="skillName"]').type('Great Name');
+        cy.get('[data-cy="saveSkillButton"]').should('be.enabled');
+
+        cy.get('[data-cy="skillDescription"]').type('ldkj aljdl aj\n\njabberwocky');
+        cy.get('[data-cy="skillDescriptionError"]').contains('Skill Description - paragraphs may not contain jabberwocky');
+        cy.get('[data-cy="saveSkillButton"]').should('be.disabled');
+
+        cy.get('[data-cy="skillDescription"]').type('{backspace}');
+        cy.get('[data-cy="saveSkillButton"]').should('be.enabled');
+    });
+
 
 });

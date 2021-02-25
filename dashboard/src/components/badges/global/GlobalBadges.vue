@@ -15,7 +15,7 @@ limitations under the License.
 */
 <template>
   <div>
-    <sub-page-header title="Global Badges" action="Badge" @add-action="newBadge"/>
+    <sub-page-header ref="subPageHeader" title="Global Badges" action="Badge" @add-action="newBadge" aria-label="new global badge"/>
     <loading-container v-bind:is-loading="isLoading">
       <transition name="projectContainer" enter-active-class="animated fadeIn">
         <div>
@@ -26,7 +26,8 @@ limitations under the License.
                      @badge-updated="saveBadge"
                      @badge-deleted="deleteBadge"
                      @move-badge-up="moveBadgeUp"
-                     @move-badge-down="moveBadgeDown"/>
+                     @move-badge-down="moveBadgeDown"
+                     :ref="`badge_${badge.badgeId}`"/>
             </div>
           </div>
 
@@ -36,7 +37,9 @@ limitations under the License.
       </transition>
     </loading-container>
 
-    <edit-badge v-if="displayNewBadgeModal" v-model="displayNewBadgeModal" :badge="emptyNewBadge" :global="true" @badge-updated="saveBadge"></edit-badge>
+    <edit-badge v-if="displayNewBadgeModal" v-model="displayNewBadgeModal" :badge="emptyNewBadge"
+                :global="true" @badge-updated="saveBadge"
+                @hidden="handleHidden"></edit-badge>
   </div>
 </template>
 
@@ -79,7 +82,7 @@ limitations under the License.
       },
     },
     methods: {
-      loadBadges() {
+      loadBadges(afterLoad) {
         GlobalBadgeService.getBadges()
           .then((badgesResponse) => {
             const badges = badgesResponse;
@@ -89,6 +92,9 @@ limitations under the License.
               this.badges = badges;
             } else {
               this.badges = [];
+            }
+            if (afterLoad) {
+              afterLoad();
             }
           })
           .finally(() => {
@@ -111,9 +117,20 @@ limitations under the License.
         this.isLoading = true;
         const requiredIds = badge.requiredSkills.map((item) => item.skillId);
         const badgeReq = { requiredSkillsIds: requiredIds, ...badge };
+        const { isEdit } = badge;
         GlobalBadgeService.saveBadge(badgeReq)
           .then(() => {
-            this.loadBadges();
+            let afterLoad = null;
+            if (isEdit) {
+              afterLoad = () => {
+                const refKey = `badge_${badgeReq.badgeId}`;
+                const ref = this.$refs[refKey];
+                if (ref) {
+                  ref[0].handleFocus();
+                }
+              };
+            }
+            this.loadBadges(afterLoad);
             this.$emit('global-badges-changed', badge.badgeId);
           });
       },
@@ -133,7 +150,16 @@ limitations under the License.
             this.loadBadges();
           });
       },
-
+      handleHidden(e) {
+        if (!e || !e.update) {
+          this.handleFocus();
+        }
+      },
+      handleFocus() {
+        this.$nextTick(() => {
+          this.$refs.subPageHeader.$refs.actionButton.focus();
+        });
+      },
     },
   };
 </script>

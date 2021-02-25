@@ -90,7 +90,7 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
                                                                        @Param('day') @Nullable Date day)
 
     @Nullable
-    @Query('''select CAST(ups.performedOn as date) as day, SUM(sdChild.pointIncrement) as count
+    @Query('''select new skills.storage.model.DayCountItem(CAST(ups.performedOn as date), SUM(sdChild.pointIncrement))
     from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild, UserPerformedSkill ups
       where
           sdParent.projectId = :projectId and
@@ -108,7 +108,7 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
                                                                            @Nullable @Param('skillId') String skillId,
                                                                            @Param('version') Integer version)
 
-    @Query('''select CAST(ups.performedOn as date) as day, count(ups.id) as count
+    @Query('''select new skills.storage.model.DayCountItem(CAST(ups.performedOn as date), count(ups.id))
         from UserPerformedSkill ups
         where
         ups.projectId = :projectId and
@@ -116,5 +116,18 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
         group by CAST(ups.performedOn as date)
     ''')
     List<DayCountItem> countsByDay(@Param('projectId') String projectId, @Param('skillId') String skillId)
+
+    @Query('''select new skills.storage.model.DayCountItem(CAST(ups.performedOn as date), count(ups.id))
+        from UserPerformedSkill ups
+        where
+        ups.projectId = :projectId and
+        ups.skillId=:skillId and
+        ups.performedOn > :from
+        group by CAST(ups.performedOn as date)
+    ''')
+    List<DayCountItem> countsByDay(@Param('projectId') String projectId, @Param('skillId') String skillId, @Param("from") Date from)
+
+    @Query("SELECT DISTINCT(p.projectId) from UserPerformedSkill p where p.userId=?1 order by p.projectId asc" )
+    List<String> findDistinctProjectIdsWithUserPoints(String userId)
 
 }

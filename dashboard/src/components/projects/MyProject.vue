@@ -15,28 +15,30 @@ limitations under the License.
 */
 <template>
   <div data-cy="projectCard">
-    <page-preview-card :options="cardOptions">
+    <page-preview-card :options="cardOptions" :data-cy="`projectCard_${projectInternal.projectId}`">
       <div slot="header-top-right">
         <b-button v-if="isRootUser" class="mr-2" @click="unpin" data-cy="unpin" size="sm"
-                  variant="outline-primary">
-          <span class="d-none d-sm-inline">Unpin</span> <i class="fas fa-ban" style="font-size: 1rem;"></i>
+                  variant="outline-primary" :aria-label="'remove pin for project '+ projectInternal.name"
+                  :aria-pressed="pinned">
+          <span class="d-none d-sm-inline">Unpin</span> <i class="fas fa-ban" style="font-size: 1rem;" aria-hidden="true"/>
         </b-button>
-        <edit-and-delete-dropdown v-on:deleted="deleteProject" v-on:edited="editProject" v-on:move-up="moveUp"
+        <edit-and-delete-dropdown ref="projectEditDeleteBtn" v-on:deleted="deleteProject" v-on:edited="editProject" v-on:move-up="moveUp"
                                   v-on:move-down="moveDown"
                                   :is-first="projectInternal.isFirst" :is-last="projectInternal.isLast"
                                   :is-loading="isLoading" :is-delete-disabled="deleteProjectDisabled" :delete-disabled-text="deleteProjectToolTip"
+                                  :data-cy="`projOptions_${projectInternal.projectId}`"
                                   class="project-settings"></edit-and-delete-dropdown>
       </div>
       <div slot="footer">
         <b-button :to="{ name:'Subjects', params: { projectId: this.projectInternal.projectId, project: this.projectInternal }}"
-                  variant="outline-primary" :data-cy="`projCard_${this.projectInternal.projectId}_manageBtn`">
-          Manage <i class="fas fa-arrow-circle-right"/>
+                  variant="outline-primary" :data-cy="`projCard_${this.projectInternal.projectId}_manageBtn`" :aria-label="`manage project ${this.projectInternal.name}`">
+          Manage <i class="fas fa-arrow-circle-right" aria-hidden="true"/>
         </b-button>
       </div>
     </page-preview-card>
 
     <edit-project v-if="showEditProjectModal" v-model="showEditProjectModal" :project="projectInternal" :is-edit="true"
-      @project-saved="projectSaved"/>
+      @project-saved="projectSaved" @hidden="handleHidden"/>
   </div>
 </template>
 
@@ -85,6 +87,11 @@ limitations under the License.
       },
     },
     methods: {
+      handleHidden() {
+        this.$nextTick(() => {
+          this.$refs.projectEditDeleteBtn.focus();
+        });
+      },
       createCardOptions() {
         this.cardOptions = {
           // icon: this.project.iconClass,

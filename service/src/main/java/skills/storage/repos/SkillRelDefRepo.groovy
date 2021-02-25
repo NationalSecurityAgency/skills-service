@@ -61,7 +61,8 @@ interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
         sd2.type as skillType,
         sd2.displayOrder as displayOrder,
         sd2.created as created,
-        sd2.updated as updated
+        sd2.updated as updated,
+        sd2.selfReportingType as selfReportingType
         from SkillDef sd1, SkillDef sd2, SkillRelDef srd 
         where sd1 = srd.parent and sd2 = srd.child and srd.type=?3 
               and sd1.projectId=?1 and sd1.skillId=?2''')
@@ -80,7 +81,8 @@ interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
         sd2.type as skillType,
         sd2.displayOrder as displayOrder,
         sd2.created as created,
-        sd2.updated as updated
+        sd2.updated as updated,
+        sd2.selfReportingType as selfReportingType
         from SkillDef sd1, SkillDef sd2, SkillRelDef srd 
         where sd1 = srd.parent and sd2 = srd.child and srd.type=?2 
               and sd1.projectId is null and sd1.skillId=?1''')

@@ -14,23 +14,36 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <loading-container class="child-row" v-bind:is-loading="isLoading">
+  <loading-container class="child-row" v-bind:is-loading="isLoading" :data-cy="`childRowDisplay_${skillInfo.skillId}`">
 
     <div class="row">
-      <div class="col-12 col-md-12 col-xl mb-md-3 mb-xl-0">
+      <div class="col-12 col-md-6 mt-2">
         <media-info-card :title="`${totalPoints} Points`" icon-class="fas fa-calculator text-success">
-          <strong>{{ skillInfo.pointIncrement | number }}</strong> points <i class="fa fa-times text-muted"/>
+          <strong>{{ skillInfo.pointIncrement | number }}</strong> points <i class="fa fa-times text-muted" aria-hidden="true"/>
           <strong> {{ skillInfo.numPerformToCompletion | number }}</strong> repetition<span v-if="skillInfo.numPerformToCompletion>1">s</span> to Completion
         </media-info-card>
       </div>
-      <div class="col-12  col-md-6 col-xl my-3 my-md-0">
-        <media-info-card :title="timeWindowTitle" icon-class="fas fa-hourglass-half text-info">
-          {{ timeWindowDescription }}
+      <div class="col-12 col-md-6 mt-2">
+        <media-info-card :title="timeWindowTitle(skillInfo)" icon-class="fas fa-hourglass-half text-info">
+          {{ timeWindowDescription(skillInfo) }}
         </media-info-card>
       </div>
-      <div class="col-12 col-md-6 col-xl">
+      <div class="col-12 col-md-6 mt-2">
         <media-info-card :title="`Version # ${skillInfo.version}`" icon-class="fas fa-code-branch text-warning">
-          Version of this Skill
+          Mechanism of adding new skills without affecting existing software running.
+        </media-info-card>
+      </div>
+      <div class="col-12 col-md-6 mt-2">
+        <media-info-card :title="`Self Report: ${selfReportingTitle}`"
+                         icon-class="fas fa-laptop skills-color-selfreport"
+                         data-cy="selfReportMediaCard">
+          <div v-if="skillInfo.selfReportingType">Users can <i>self report</i> this skill
+            <span v-if="skillInfo.selfReportingType === 'Approval'">and will go into an <b class="text-primary">approval</b> queue.</span>
+            <span v-if="skillInfo.selfReportingType === 'HonorSystem'">and will apply <b class="text-primary">immediately</b>.</span>
+          </div>
+          <div v-else>
+            Self reporting is <b class="text-primary">disabled</b> for this skill.
+          </div>
         </media-info-card>
       </div>
     </div>
@@ -52,7 +65,7 @@ limitations under the License.
         <div class="input-group-text"><i class="fas fa-link mr-1"></i> Help URL: </div>
       </div>
       <span class="form-control">
-        <a v-if="skillInfo.helpUrl" :href="skillInfo.helpUrl" target="_blank" rel="noopener">{{ skillInfo.helpUrl }}</a>
+        <a v-if="skillInfo.helpUrl" :href="skillInfo.helpUrl" target="_blank" rel="noopener" class="skill-url">{{ skillInfo.helpUrl }}</a>
         <span v-else class="text-muted">
           Not Specified
         </span>
@@ -68,9 +81,11 @@ limitations under the License.
   import MediaInfoCard from '../utils/cards/MediaInfoCard';
   import NumberFilter from '../../filters/NumberFilter';
   import MarkdownText from '../utils/MarkdownText';
+  import TimeWindowMixin from './TimeWindowMixin';
 
   export default {
     name: 'ChildRowSkillsDisplay',
+    mixins: [TimeWindowMixin],
     components: { MarkdownText, MediaInfoCard, LoadingContainer },
     props: {
       projectId: {
@@ -109,43 +124,22 @@ limitations under the License.
       totalPoints() {
         return NumberFilter(this.skillInfo.totalPoints);
       },
-      timeWindowTitle() {
-        let title = '';
-        if (!this.skillInfo.timeWindowEnabled) {
-          title = 'Time Window Disabled';
-        } else if (this.skillInfo.numPerformToCompletion === 1) {
-          title = 'Time Window N/A';
-        } else {
-          title = `${this.skillInfo.pointIncrementIntervalHrs} Hour`;
-          if (this.skillInfo.pointIncrementIntervalHrs === 0 || this.skillInfo.pointIncrementIntervalHrs > 1) {
-            title = `${title}s`;
-          }
-          if (this.skillInfo.pointIncrementIntervalMins > 0) {
-            title = `${title} ${this.skillInfo.pointIncrementIntervalMins} Minute`;
-            if (this.skillInfo.pointIncrementIntervalMins > 1) {
-              title = `${title}s`;
-            }
-          }
-        }
-        return title;
-      },
-      timeWindowDescription() {
-        const numOccur = this.skillInfo.numPointIncrementMaxOccurrences;
-        let desc = 'Minimum Time Window between occurrences to receive points';
-        if (!this.skillInfo.timeWindowEnabled) {
-          desc = 'Each occurrence will receive points immediately';
-        } else if (numOccur > 1) {
-          desc = `Up to ${numOccur} occurrences within this time window to receive points`;
-        } else if (this.skillInfo.numPerformToCompletion === 1) {
-          desc = 'Only one event is required to complete this skill.';
-        }
-        return desc;
-      },
       description: function markDownDescription() {
         if (this.skillInfo && this.skillInfo.description) {
           return marked(this.skillInfo.description, { sanitize: true, smartLists: true });
         }
         return null;
+      },
+      selfReportingTitle() {
+        if (!this.skillInfo.selfReportingType) {
+          return 'Disabled';
+        }
+
+        if (this.skillInfo.selfReportingType === 'HonorSystem') {
+          return 'Honor System';
+        }
+
+        return this.skillInfo.selfReportingType;
       },
     },
     methods: {
@@ -197,6 +191,14 @@ limitations under the License.
     font-size: 85%;
     border-radius: 6px;
     background-color: #f6f8fa;
+  }
+
+  .skill-url {
+    /*white-space: pre-line;*/
+    /*word-break: break-word;*/
+    height: 1.5em;
+    overflow: hidden;
+    display: block;
   }
 
 </style>

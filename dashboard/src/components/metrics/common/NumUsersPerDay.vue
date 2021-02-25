@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <metrics-card :title="title" data-cy="distinctNumUsersOverTime">
+  <metrics-card :title="mutableTitle" data-cy="distinctNumUsersOverTime">
     <template v-slot:afterTitle>
       <span class="text-muted ml-2">|</span>
       <time-length-selector :options="timeSelectorOptions" @time-selected="updateTimeRange"/>
@@ -26,12 +26,12 @@ limitations under the License.
 </template>
 
 <script>
-  import moment from 'moment';
   import MetricsService from '../MetricsService';
   import numberFormatter from '@//filters/NumberFilter';
   import MetricsOverlay from '../utils/MetricsOverlay';
   import MetricsCard from '../utils/MetricsCard';
   import TimeLengthSelector from './TimeLengthSelector';
+  import dayjs from '../../../DayJsCustomizer';
 
   export default {
     name: 'NumUsersPerDay',
@@ -48,13 +48,14 @@ limitations under the License.
         loading: true,
         distinctUsersOverTime: [],
         hasDataEnoughData: false,
+        mutableTitle: this.title,
         props: {
-          start: moment().clone().subtract(1, 'month').valueOf(),
+          start: dayjs().subtract(30, 'day').valueOf(),
         },
         timeSelectorOptions: [
           {
-            length: 1,
-            unit: 'month',
+            length: 30,
+            unit: 'days',
           },
           {
             length: 6,
@@ -130,8 +131,16 @@ limitations under the License.
       this.loadData();
     },
     methods: {
-      updateTimeRange(startDate) {
-        this.props.start = startDate.valueOf();
+      updateTimeRange(timeEvent) {
+        if (this.$store.getters.config) {
+          const oldestDaily = dayjs().subtract(this.$store.getters.config.maxDailyUserEvents, 'day');
+          if (timeEvent.startTime < oldestDaily) {
+            this.mutableTitle = 'Users per week';
+          } else {
+            this.mutableTitle = this.title;
+          }
+        }
+        this.props.start = timeEvent.startTime.valueOf();
         this.loadData();
       },
       loadData() {

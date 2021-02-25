@@ -23,7 +23,8 @@ limitations under the License.
       <ValidationObserver ref="form" slim v-slot="{invalid, handleSubmit}">
         <form @submit.prevent="handleSubmit(login)">
           <transition name="fade" mode="out-in">
-            <b-alert v-if="loginFailed" variant="danger" @dismissed="loginFailed=false" show dismissible>Invalid Username
+            <b-alert :aria-live="loginFailed ? 'assertive' : 'off'" v-if="loginFailed"
+                     variant="danger" @dismissed="loginFailed=false" show dismissible>Invalid Username
               or Password
             </b-alert>
           </transition>
@@ -38,7 +39,9 @@ limitations under the License.
                     <div class="input-group-prepend">
                       <span class="input-group-text"><i class="far fa-envelope"></i></span>
                     </div>
-                    <input type="text" class="form-control" id="username" tabindex="1" placeholder="Enter email"
+                    <input type="text" class="form-control" id="username" tabindex="0" placeholder="Enter email"
+                           :aria-invalid="errors && errors.length > 0"
+                           aria-errormessage="emailHelp"
                            aria-describedby="emailHelp"
                            v-model="loginFields.username">
                   </div>
@@ -53,7 +56,7 @@ limitations under the License.
                     <label for="inputPassword" class="text-primary">Password</label>
                   </div>
                   <div class="col text-right">
-                    <small class="text-muted"><b-link tabindex="4" @click="forgotPassword" data-cy="forgotPassword">Forgot Password?</b-link></small>
+                    <small class="text-muted"><b-link tabindex="0" @click="forgotPassword" data-cy="forgotPassword">Forgot Password?</b-link></small>
                   </div>
                 </div>
                 <ValidationProvider name="Password" rules="required|minPasswordLength|maxPasswordLength" :debounce=500 v-slot="{errors}">
@@ -61,8 +64,11 @@ limitations under the License.
                     <div class="input-group-prepend">
                       <span class="input-group-text"><i class="fas fa-key"></i></span>
                     </div>
-                    <input type="password" class="form-control" id="inputPassword" tabindex="2" placeholder="Password"
-                           v-model="loginFields.password" name="password" aria-describedby="passwordHelp"
+                    <input type="password" class="form-control" id="inputPassword" tabindex="0" placeholder="Password"
+                           v-model="loginFields.password" name="password"
+                           :aria-invalid="errors && errors.length > 0"
+                           aria-errormessage="passwordHelp"
+                           aria-describedby="passwordHelp"
                            @animationstart="onAnimationStart">
                   </div>
                   <small id="passwordHelp" class="form-text text-danger" v-show="errors[0]">{{
@@ -72,7 +78,7 @@ limitations under the License.
               </div>
               <div class="row">
                 <div class="col text-right">
-                  <button type="submit" class="btn btn-outline-primary float-right" tabindex="3" :disabled="invalid||disabled" data-cy="login">
+                  <button type="submit" class="btn btn-outline-primary float-right" tabindex="0" :disabled="invalid||disabled" data-cy="login">
                     Login <i class="fas fa-arrow-circle-right"/>
                   </button>
                 </div>
@@ -91,8 +97,8 @@ limitations under the License.
               <div class="row">
                 <div v-for="oAuthProvider in oAuthProviders" :key="oAuthProvider.registrationId" class="col-12 mb-3">
                   <button type="button" class="btn btn-outline-primary w-100"
-                          @click="oAuth2Login(oAuthProvider.registrationId)">
-                    <i :class="oAuthProvider.iconClass" aria-hidden="true" class="mr-1" />
+                          @click="oAuth2Login(oAuthProvider.registrationId)" aria-label="oAuth authentication link">
+                    <i :class="oAuthProvider.iconClass" aria-hidden="true" class="mr-1 text-info" />
                     Login via {{ oAuthProvider.clientName }}
                   </button>
                 </div>

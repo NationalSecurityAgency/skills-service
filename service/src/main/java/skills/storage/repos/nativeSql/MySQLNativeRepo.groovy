@@ -180,4 +180,9 @@ class MySQLNativeRepo implements NativeQueriesRepo {
     void identifyAndAddProjectLevelAchievements(String projectId, boolean pointsBasedLevels) {
         throw new UnsupportedOperationException("Sorry!")
     }
+
+    @Override
+    void createOrUpdateUserEvent(String projectId, Integer skillRefId, String userId, Date start, String type, Integer count, Integer weekNumber) {
+        throw new UnsupportedOperationException("Sorry!")
+    }
 }

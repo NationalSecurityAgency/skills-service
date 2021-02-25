@@ -22,7 +22,7 @@ limitations under the License.
           <i class="fa-3x" :class="icon"/>
         </div>
         <div class="media-body">
-          <h4 class="mb-2">{{ title }}</h4>
+          <div class="h4 mb-2">{{ title }}</div>
           <div style="font-size: 0.95rem;" class="text-secondary">
             <slot>
               {{ subtitle }}
@@ -37,7 +37,7 @@ limitations under the License.
 
     <div class="card-footer text-center">
       <router-link :to="{ name: pathName }" :data-cy="`metricsNav-${title}`"
-                   class="btn btn-outline-primary">Explore <i class="fas fa-arrow-right"/></router-link>
+                   class="btn btn-outline-primary">Explore <span class="sr-only">{{title}}</span><i class="fas fa-arrow-right"/></router-link>
     </div>
   </div>
 </template>

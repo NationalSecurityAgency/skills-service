@@ -22,7 +22,7 @@ limitations under the License.
                     <i v-if="badge.gem" class="fas fa-gem position-absolute" style="top: 5px; right: 5px; color: purple"></i>
                     <i v-if="badge.global" class="fas fa-globe position-absolute" style="top: 5px; right: 5px; color: blue"></i>
                     <div v-if="badge.gem" class="text-muted">
-                        <small>Expires {{ badge.endDate | moment("from", "now") }}</small>
+                        <small>Expires {{ badge.endDate | relativeTime() }}</small>
                     </div>
                     <div v-if="badge.global" class="text-muted">
                         <small><b>Global Badge</b></small>
@@ -31,7 +31,7 @@ limitations under the License.
             </div>
         </div>
 
-        <div class="text-sm-left text-secondary text-center skills-text-description col-lg-10">
+        <div class="text-sm-left text-center skills-text-description col-lg-10">
             <div class="row">
                 <h4 class="mb-1 col-md-8">{{ badge.badge }}</h4>
                 <div class="col-md-4 text-right">

@@ -36,6 +36,10 @@ drop table global_badge_level_definition;
 
 drop table level_definition;
 
+drop table user_events;
+
+drop table skill_approval;
+
 drop table skill_definition;
 
 drop table custom_icons;

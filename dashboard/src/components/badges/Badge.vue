@@ -16,32 +16,35 @@ limitations under the License.
 <template>
   <page-preview-card :options="cardOptions">
     <div slot="header-top-right">
-      <edit-and-delete-dropdown v-on:deleted="deleteBadge" v-on:edited="showEditBadge=true" v-on:move-up="moveUp"
+      <edit-and-delete-dropdown ref="editAndDeleteBadge" v-on:deleted="deleteBadge"
+                                v-on:edited="showEditBadge=true"
+                                v-on:move-up="moveUp"
                                 v-on:move-down="moveDown"
                                 :isFirst="badgeInternal.isFirst" :isLast="badgeInternal.isLast" :isLoading="isLoading"
                                 class="badge-settings"></edit-and-delete-dropdown>
     </div>
     <div slot="footer">
-      <i v-if="badgeInternal.endDate" class="fas fa-gem position-absolute" style="font-size: 1rem; top: 1rem; left: 1rem; color: purple"></i>
+      <i v-if="badgeInternal.endDate" class="fas fa-gem position-absolute" style="font-size: 1rem; top: 1rem; left: 1rem; color: purple" aria-hidden="true"/>
       <div>
         <router-link :to="buildManageLink()"
-                     class="btn btn-outline-primary btn-sm" data-cy="manageBadge">
-          Manage <i class="fas fa-arrow-circle-right"/>
+                     :aria-label="`Manage badge ${badgeInternal.name}`"
+                     class="btn btn-outline-primary btn-sm" :data-cy="`manageBadge_${badgeInternal.badgeId}`">
+          Manage <i class="fas fa-arrow-circle-right" aria-hidden="true"/>
         </router-link>
       </div>
       <hr/>
       <div class="float-md-right" style="font-size: 0.8rem;">
         <span v-if="!this.live" data-cy="badgeStatus">
           <span class="text-secondary">Status: </span>
-          <span class="text-uppercase">Disabled <span class="far fa-stop-circle text-warning"></span></span> | <a href="#0" @click.stop="handlePublish" class="btn btn-outline-primary btn-sm" data-cy="goLive">Go Live</a>
+          <span class="text-uppercase">Disabled <span class="far fa-stop-circle text-warning" aria-hidden="true"/></span> | <a href="#0" @click.stop="handlePublish" class="btn btn-outline-primary btn-sm" data-cy="goLive">Go Live</a>
         </span>
         <span v-else data-cy="badgeStatus">
-          <span class="text-secondary">Status: </span> <span class="text-uppercase">Live <span class="far fa-check-circle text-success"></span></span>
+          <span class="text-secondary">Status: </span> <span class="text-uppercase">Live <span class="far fa-check-circle text-success" aria-hidden="true"/></span>
         </span>
       </div>
 
       <edit-badge v-if="showEditBadge" v-model="showEditBadge" :id="badge.badgeId" :badge="badge" :is-edit="true"
-                  :global="global" @badge-updated="badgeEdited"></edit-badge>
+                  :global="global" @badge-updated="badgeEdited" @hidden="handleHidden"></edit-badge>
     </div>
   </page-preview-card>
 </template>
@@ -186,6 +189,16 @@ limitations under the License.
           dateVal = new Date(Date.parse(value.replace(/-/g, '/')));
         }
         return dateVal;
+      },
+      handleHidden(e) {
+        if (!e || !e.updated) {
+          this.handleFocus();
+        }
+      },
+      handleFocus() {
+        this.$nextTick(() => {
+          this.$refs.editAndDeleteBadge.focus();
+        });
       },
     },
   };

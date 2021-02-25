@@ -18,8 +18,6 @@ package skills.controller;
 import callStack.profiler.CProf;
 import callStack.profiler.Profile;
 import groovy.lang.Closure;
-import groovy.transform.CompileStatic;
-import groovy.util.logging.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
@@ -34,6 +32,7 @@ import skills.controller.request.model.SkillEventRequest;
 import skills.controller.request.model.SkillsClientVersionRequest;
 import skills.controller.result.model.RequestResult;
 import skills.icons.CustomIconFacade;
+import skills.services.SelfReportingService;
 import skills.services.events.SkillEventResult;
 import skills.services.events.SkillEventsService;
 import skills.skillLoading.RankingLoader;
@@ -51,8 +50,6 @@ import java.util.Locale;
 @CrossOrigin(allowCredentials = "true")
 @RestController
 @RequestMapping("/api")
-@Slf4j
-@CompileStatic
 @skills.auth.aop.AdminUsersOnlyWhenUserIdSupplied
 @skills.profile.EnableCallStackProf
 class UserSkillsController {
@@ -79,7 +76,7 @@ class UserSkillsController {
     private PublicProps publicProps;
 
     @Autowired
-    private SkillEventsService skillEventsService;
+    SelfReportingService selfReportingService;
 
     private int getProvidedVersionOrReturnDefault(Integer versionParam) {
         if (versionParam != null) {
@@ -114,7 +111,6 @@ class UserSkillsController {
 
     @RequestMapping(value = "/projects/{projectId}/summary", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
-    @CompileStatic
     @Profile
     public OverallSkillSummary getSkillsSummary(HttpServletRequest request,
                                                 @PathVariable("projectId") String projectId,
@@ -136,7 +132,6 @@ class UserSkillsController {
 
     @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/summary", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
-    @CompileStatic
     public SkillSubjectSummary getSubjectSummary(@PathVariable("projectId") String projectId,
                                                  @PathVariable("subjectId") String subjectId,
                                                  @RequestParam(name = "userId", required = false) String userIdParam,
@@ -148,7 +143,6 @@ class UserSkillsController {
 
     @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/descriptions", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
-    @CompileStatic
     public List<SkillDescription> getSubjectSkillsDescriptions(@PathVariable("projectId") String projectId,
                                                                @PathVariable("subjectId") String subjectId,
                                                                @RequestParam(name = "userId", required = false) String userIdParam,
@@ -163,7 +157,6 @@ class UserSkillsController {
      */
     @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/summary", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
-    @CompileStatic
     public SkillSummary getSkillSummary(@PathVariable("projectId") String projectId,
                                         @PathVariable("skillId") String skillId,
                                         @RequestParam(name = "userId", required = false) String userIdParam,
@@ -178,7 +171,6 @@ class UserSkillsController {
      */
     @RequestMapping(value = "/projects/{projectId}/projects/{crossProjectId}/skills/{skillId}/summary", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
-    @CompileStatic
     public SkillSummary getCrossProjectSkillSummary(@PathVariable("projectId") String projectId,
                                                     @PathVariable("crossProjectId") String crossProjectId,
                                                     @PathVariable("skillId") String skillId,
@@ -190,7 +182,6 @@ class UserSkillsController {
 
     @RequestMapping(value = "/projects/{projectId}/badges/summary", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
-    @CompileStatic
     public List<SkillBadgeSummary> getAllBadgesSummary(@PathVariable("projectId") String projectId,
                                                        @RequestParam(name = "userId", required = false) String userIdParam,
                                                        @RequestParam(name = "version", required = false) Integer version,
@@ -205,7 +196,6 @@ class UserSkillsController {
 
     @RequestMapping(value = "/projects/{projectId}/badges/{badgeId}/descriptions", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
-    @CompileStatic
     public List<SkillDescription> getBadgeSkillsDescriptions(@PathVariable("projectId") String projectId,
                                                              @PathVariable("badgeId") String badgeId,
                                                              @RequestParam(name = "version", required = false) Integer version,
@@ -221,7 +211,6 @@ class UserSkillsController {
 
     @RequestMapping(value = "/projects/{projectId}/badges/{badgeId}/summary", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
-    @CompileStatic
     public SkillBadgeSummary getBadgeSummary(@PathVariable("projectId") String projectId,
                                              @PathVariable("badgeId") String badgeId,
                                              @RequestParam(name = "userId", required = false) String userIdParam,
@@ -238,7 +227,6 @@ class UserSkillsController {
 
     @RequestMapping(value = "/projects/{projectId}/pointHistory", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
-    @CompileStatic
     public UserPointHistorySummary getProjectsPointHistory(@PathVariable("projectId") String projectId,
                                                            @RequestParam(name = "userId", required = false) String userIdParam,
                                                            @RequestParam(name = "version", required = false) Integer version,
@@ -250,7 +238,6 @@ class UserSkillsController {
 
     @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/pointHistory", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
-    @CompileStatic
     public UserPointHistorySummary getSubjectsPointHistory(@PathVariable("projectId") String projectId,
                                                            @PathVariable("subjectId") String subjectId,
                                                            @RequestParam(name = "userId", required = false) String userIdParam,
@@ -262,7 +249,6 @@ class UserSkillsController {
 
     @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/dependencies", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
-    @CompileStatic
     public SkillDependencyInfo loadSkillDependencyInfo(@PathVariable("projectId") String projectId,
                                                        @PathVariable("skillId") String skillId,
                                                        @RequestParam(name = "userId", required = false) String userIdParam,
@@ -273,7 +259,6 @@ class UserSkillsController {
 
     @RequestMapping(value = "/projects/{projectId}/skills/{skillId}", method = {RequestMethod.PUT, RequestMethod.POST}, produces = "application/json")
     @ResponseBody
-    @CompileStatic
     @Profile
     public SkillEventResult addSkill(@PathVariable("projectId") String projectId,
                                      @PathVariable("skillId") String skillId,
@@ -306,7 +291,9 @@ class UserSkillsController {
             Closure<SkillEventResult> closure = new Closure<SkillEventResult>(null) {
                 @Override
                 public SkillEventResult call() {
-                    return skillsManagementFacade.reportSkill(projectId, skillId, userId, notifyIfSkillNotApplied, dataParam);
+                    SkillEventsService.SkillApprovalParams skillApprovalParams = (skillEventRequest !=null && skillEventRequest.getApprovalRequestedMsg() != null) ?
+                            new SkillEventsService.SkillApprovalParams(skillEventRequest.getApprovalRequestedMsg()) : SkillEventsService.getDefaultSkillApprovalParams();
+                    return skillsManagementFacade.reportSkill(projectId, skillId, userId, notifyIfSkillNotApplied, dataParam, skillApprovalParams);
                 }
             };
             result = (SkillEventResult) RetryUtil.withRetry(3, false, closure);
@@ -318,7 +305,6 @@ class UserSkillsController {
 
     @RequestMapping(value = "/projects/{projectId}/rank", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
-    @CompileStatic
     public SkillsRanking getRanking(@PathVariable("projectId") String projectId,
                                     @RequestParam(name = "userId", required = false) String userIdParam,
                                     @RequestParam(name = "idType", required = false) String idType) {
@@ -328,7 +314,6 @@ class UserSkillsController {
 
     @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/rank", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
-    @CompileStatic
     public SkillsRanking getRankingBySubject(@PathVariable("projectId") String projectId,
                                              @PathVariable("subjectId") String subjectId,
                                              @RequestParam(name = "userId", required = false) String userIdParam,
@@ -339,14 +324,12 @@ class UserSkillsController {
 
     @RequestMapping(value = "/projects/{projectId}/rankDistribution/usersPerLevel", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
-    @CompileStatic
     public List<UsersPerLevel> getUsersPerLevel(@PathVariable("projectId") String projectId) {
         return rankingLoader.getUserCountsPerLevel(projectId);
     }
 
     @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/rankDistribution/usersPerLevel", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
-    @CompileStatic
     public List<UsersPerLevel> getUsersPerLevelForSubject(@PathVariable("projectId") String projectId, @PathVariable("subjectId") String subjectId) {
         return rankingLoader.getUserCountsPerLevel(projectId, false, subjectId);
     }
@@ -354,7 +337,6 @@ class UserSkillsController {
 
     @RequestMapping(value = "/projects/{projectId}/rankDistribution", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
-    @CompileStatic
     public SkillsRankingDistribution getRankingDistribution(@PathVariable("projectId") String projectId,
                                                             @RequestParam(name = "userId", required = false) String userIdParam,
                                                             @RequestParam(name = "idType", required = false) String idType) {
@@ -364,7 +346,6 @@ class UserSkillsController {
 
     @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/rankDistribution", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
-    @CompileStatic
     public SkillsRankingDistribution getRankingDistributionBySubject(@PathVariable("projectId") String projectId,
                                                                      @PathVariable("subjectId") String subjectId,
                                                                      @RequestParam(name = "userId", required = false) String userIdParam,
@@ -391,6 +372,17 @@ class UserSkillsController {
         }
 
         return "";
+    }
+
+
+    @RequestMapping(value = "/projects/{projectId}/rejections/{id}", method = RequestMethod.DELETE, produces = "application/json")
+    @ResponseBody
+    public RequestResult getRankingDistributionBySubject(@PathVariable("projectId") String projectId,
+                                                                     @PathVariable("id") Integer approvalId) {
+        String userId = userInfoService.getCurrentUserId();
+        selfReportingService.removeRejection(projectId, userId, approvalId);
+
+        return RequestResult.success();
     }
 
 }

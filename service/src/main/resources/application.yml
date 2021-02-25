@@ -27,7 +27,7 @@ server:
       timeout: 24h
       persistent: false
   http2:
-    enabled: false
+    enabled: true
   compression:
     enabled: true
     min-response-size: 2048
@@ -78,6 +78,7 @@ skills:
     enabled: false
   clientLibVersion: @maven.build.timestamp@
   config:
+    compactDailyEventsOlderThan: 30
     ui:
       dashboardVersion: @pom.version@
       buildTimestamp: @maven.build.timestamp@

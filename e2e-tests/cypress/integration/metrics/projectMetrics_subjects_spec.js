@@ -33,7 +33,7 @@ describe('Metrics Tests', () => {
             openMode: 0
         }
     },() => {
-        cy.visit('/projects/proj1/');
+        cy.visit('/administrator/projects/proj1/');
         cy.clickNav('Metrics');
         cy.get('[data-cy=metricsNav-Subjects]').click();
         cy.get('[data-cy=subjectNumUsersPerLevelOverTime]').contains('Generate the chart using controls above!');
@@ -55,7 +55,7 @@ describe('Metrics Tests', () => {
             subjectId: 'subj1',
             name: "Subject 1",
         });
-        cy.visit('/projects/proj1/');
+        cy.visit('/administrator/projects/proj1/');
         cy.clickNav('Metrics');
         cy.get('[data-cy=metricsNav-Subjects]').click();
         cy.get('[data-cy=subjectNumUsersPerLevelOverTime]').contains('Generate the chart using controls above!');
@@ -78,8 +78,7 @@ describe('Metrics Tests', () => {
             openMode: 0
         }
     },() => {
-        cy.server()
-            .route('/admin/projects/proj1/metrics/usersByLevelForSubjectOverTimeChartBuilder?subjectId=subj1')
+        cy.intercept('/admin/projects/proj1/metrics/usersByLevelForSubjectOverTimeChartBuilder?subjectId=subj1')
             .as('getLevelsOverTimeData');
 
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
@@ -104,7 +103,7 @@ describe('Metrics Tests', () => {
         cy.request('POST', `/api/projects/proj1/skills/skill3`, {userId: 'user0Good@skills.org', timestamp: m.clone().subtract(2, 'day').format('x')})
         // cy.reportHistoryOfEvents('proj1', 'user0Good@skills.org', 1, [], ['skill1', 'skill2', 'skill3']);
 
-        cy.visit('/projects/proj1/');
+        cy.visit('/administrator/projects/proj1/');
         cy.clickNav('Metrics');
         cy.get('[data-cy=metricsNav-Subjects]').click();
         cy.get('[data-cy=subjectNumUsersPerLevelOverTime]').contains('Generate the chart using controls above!');
@@ -145,20 +144,20 @@ describe('Metrics Tests', () => {
             openMode: 0
         }
     },() => {
-        cy.server().route({
-            url: '/admin/projects/proj1/subjects',
-            status: 200,
-            response: [{
+        cy.intercept('/admin/projects/proj1/subjects',
+          {
+            statusCode: 200,
+            body: [{
                 'subjectId': 'subj1',
                 'projectId': 'proj1',
                 'name': 'Subject 1',
             }],
         }).as('getSubjects');
 
-        cy.server().route({
-            url: '/admin/projects/proj1/metrics/usersByLevelForSubjectOverTimeChartBuilder?subjectId=subj1',
-            status: 200,
-            response: [{
+        cy.intercept('/admin/projects/proj1/metrics/usersByLevelForSubjectOverTimeChartBuilder?subjectId=subj1',
+          {
+            statusCode: 200,
+            body: [{
                 'level': 1,
                 'counts': generateDayWiseTimeSeries(moment.utc('11 Mar 2020', 'DD MMM YYY').valueOf(), 30, 10),
             }, {
@@ -170,7 +169,7 @@ describe('Metrics Tests', () => {
             }],
         }).as('getLevelsOverTimeData');
 
-        cy.visit('/projects/proj1/');
+        cy.visit('/administrator/projects/proj1/');
         cy.clickNav('Metrics');
         cy.get('[data-cy=metricsNav-Subjects]').click();
         cy.wait('@getSubjects');
@@ -194,14 +193,13 @@ describe('Metrics Tests', () => {
             openMode: 0
         }
     },() => {
-        cy.server()
-            .route('/admin/projects/proj1/metrics/usersByLevelForSubjectOverTimeChartBuilder?subjectId=subj1')
+        cy.intercept('/admin/projects/proj1/metrics/usersByLevelForSubjectOverTimeChartBuilder?subjectId=subj1')
             .as('getLevelsOverTimeData');
 
-        cy.server().route({
-            url: '/admin/projects/proj1/subjects',
-            status: 200,
-            response: [{
+        cy.intercept('/admin/projects/proj1/subjects',
+          {
+            statusCode: 200,
+            body: [{
                 'subjectId': 'subj1',
                 'projectId': 'proj1',
                 'name': 'Subject 1',
@@ -232,7 +230,7 @@ describe('Metrics Tests', () => {
         cy.request('POST', `/api/projects/proj1/skills/skill4`, {userId: 'user0Good@skills.org', timestamp: m.clone().subtract(3, 'day').format('x')})
 
 
-        cy.visit('/projects/proj1/');
+        cy.visit('/administrator/projects/proj1/');
         cy.clickNav('Metrics');
         cy.get('[data-cy=metricsNav-Subjects]').click();
         cy.wait('@getSubjects');
@@ -255,10 +253,10 @@ describe('Metrics Tests', () => {
             openMode: 0
         }
     },() => {
-        cy.server().route({
-            url: '/admin/projects/proj1/subjects',
-            status: 200,
-            response: [{
+        cy.intercept('/admin/projects/proj1/subjects',
+          {
+            statusCode: 200,
+            body: [{
                 'subjectId': 'subj1',
                 'projectId': 'proj1',
                 'name': 'Subject 1',
@@ -266,10 +264,10 @@ describe('Metrics Tests', () => {
         }).as('getSubjects');
 
 
-        cy.server().route({
-            url: '/admin/projects/proj1/metrics/usersByLevelForSubjectOverTimeChartBuilder?subjectId=subj1',
-            status: 200,
-            response: [{
+        cy.intercept('/admin/projects/proj1/metrics/usersByLevelForSubjectOverTimeChartBuilder?subjectId=subj1',
+          {
+            statusCode: 200,
+            body: [{
                 'level': 1,
                 'counts': generateDayWiseTimeSeries(moment.utc('11 Mar 2020', 'DD MMM YYY').valueOf(), 126, 15),
             }, {
@@ -287,7 +285,7 @@ describe('Metrics Tests', () => {
             }],
         }).as('getLevelsOverTimeData');
 
-        cy.visit('/projects/proj1/');
+        cy.visit('/administrator/projects/proj1/');
         cy.clickNav('Metrics');
         cy.get('[data-cy=metricsNav-Subjects]').click();
         cy.wait('@getSubjects');
@@ -310,10 +308,10 @@ describe('Metrics Tests', () => {
             openMode: 0
         }
     },() => {
-        cy.server().route({
-            url: '/admin/projects/proj1/subjects',
-            status: 200,
-            response: [{
+        cy.intercept('/admin/projects/proj1/subjects',
+          {
+            statusCode: 200,
+            body: [{
                 'subjectId': 'subj1',
                 'projectId': 'proj1',
                 'name': 'Subject 1',
@@ -331,13 +329,13 @@ describe('Metrics Tests', () => {
             )
         }
 
-        cy.server().route({
-            url: '/admin/projects/proj1/metrics/usersByLevelForSubjectOverTimeChartBuilder?subjectId=subj1',
-            status: 200,
-            response,
+        cy.intercept('/admin/projects/proj1/metrics/usersByLevelForSubjectOverTimeChartBuilder?subjectId=subj1',
+          {
+            statusCode: 200,
+            body: response,
         }).as('getLevelsOverTimeData');
 
-        cy.visit('/projects/proj1/');
+        cy.visit('/administrator/projects/proj1/');
         cy.clickNav('Metrics');
         cy.get('[data-cy=metricsNav-Subjects]').click();
         cy.wait('@getSubjects');
@@ -360,10 +358,10 @@ describe('Metrics Tests', () => {
             openMode: 0
         }
     },() => {
-        cy.server().route({
-            url: '/admin/projects/proj1/subjects',
-            status: 200,
-            response: [{
+        cy.intercept('/admin/projects/proj1/subjects',
+          {
+            statusCode: 200,
+            body: [{
                 'subjectId': 'subj1',
                 'projectId': 'proj1',
                 'name': 'Subject 1',
@@ -381,13 +379,13 @@ describe('Metrics Tests', () => {
             )
         }
 
-        cy.server().route({
-            url: '/admin/projects/proj1/metrics/usersByLevelForSubjectOverTimeChartBuilder?subjectId=subj1',
-            status: 200,
-            response,
+        cy.intercept('/admin/projects/proj1/metrics/usersByLevelForSubjectOverTimeChartBuilder?subjectId=subj1',
+          {
+            statusCode: 200,
+            body: response,
         }).as('getLevelsOverTimeData');
 
-        cy.visit('/projects/proj1/');
+        cy.visit('/administrator/projects/proj1/');
         cy.clickNav('Metrics');
         cy.get('[data-cy=metricsNav-Subjects]').click();
         cy.wait('@getSubjects');
@@ -410,10 +408,7 @@ describe('Metrics Tests', () => {
             openMode: 0
         }
     },() => {
-        cy.server().route({
-            url: '/admin/projects/proj1/metrics/numUsersPerSubjectPerLevelChartBuilder',
-            status: 200,
-        }).as('getChartData');
+        cy.intercept('/admin/projects/proj1/metrics/numUsersPerSubjectPerLevelChartBuilder').as('getChartData');
 
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
             projectId: 'proj1',
@@ -465,7 +460,7 @@ describe('Metrics Tests', () => {
         cy.request('POST', `/api/projects/proj1/skills/skill2`, {userId: 'user2Smith0@skills.org', timestamp: m.clone().subtract(5, 'day').format('x')})
         cy.request('POST', `/api/projects/proj1/skills/skill3`, {userId: 'user2Smith0@skills.org', timestamp: m.clone().subtract(6, 'day').format('x')})
 
-        cy.visit('/projects/proj1/');
+        cy.visit('/administrator/projects/proj1/');
         cy.clickNav('Metrics');
         cy.get('[data-cy=metricsNav-Subjects]').click();
         cy.wait('@getChartData');
@@ -494,10 +489,10 @@ describe('Metrics Tests', () => {
             openMode: 0
         }
     },() => {
-        cy.server().route({
-            url: '/admin/projects/proj1/metrics/numUsersPerSubjectPerLevelChartBuilder',
-            status: 200,
-            response: [
+        cy.intercept('/admin/projects/proj1/metrics/numUsersPerSubjectPerLevelChartBuilder',
+          {
+            statusCode: 200,
+            body: [
                 createSubjectObj('First Cool Subject', [23,293,493,625,293]),
                 createSubjectObj('Awesome Subject', [1265,2352,493,625,293]),
                 createSubjectObj('Other Subject', [1254,1000,852,625,293]),
@@ -507,7 +502,7 @@ describe('Metrics Tests', () => {
             ],
         }).as('getChartData');
 
-        cy.visit('/projects/proj1/');
+        cy.visit('/administrator/projects/proj1/');
         cy.clickNav('Metrics');
         cy.get('[data-cy=metricsNav-Subjects]').click();
         cy.wait('@getChartData');
@@ -527,13 +522,13 @@ describe('Metrics Tests', () => {
             response.push(createSubjectObj(`Subject # ${i}`, [1265,852,493,625,293]))
         }
 
-        cy.server().route({
-            url: '/admin/projects/proj1/metrics/numUsersPerSubjectPerLevelChartBuilder',
-            status: 200,
-            response,
+        cy.intercept('/admin/projects/proj1/metrics/numUsersPerSubjectPerLevelChartBuilder',
+          {
+            statusCode: 200,
+            body: response,
         }).as('getChartData');
 
-        cy.visit('/projects/proj1/');
+        cy.visit('/administrator/projects/proj1/');
         cy.clickNav('Metrics');
         cy.get('[data-cy=metricsNav-Subjects]').click();
         cy.wait('@getChartData');
@@ -553,13 +548,13 @@ describe('Metrics Tests', () => {
             response.push(createSubjectObj(`Subject # ${i}`, [1265,852,493,625,293,392,293,983,1923,1209]))
         }
 
-        cy.server().route({
-            url: '/admin/projects/proj1/metrics/numUsersPerSubjectPerLevelChartBuilder',
-            status: 200,
-            response,
+        cy.intercept('/admin/projects/proj1/metrics/numUsersPerSubjectPerLevelChartBuilder',
+          {
+            statusCode: 200,
+            body: response,
         }).as('getChartData');
 
-        cy.visit('/projects/proj1/');
+        cy.visit('/administrator/projects/proj1/');
         cy.clickNav('Metrics');
         cy.get('[data-cy=metricsNav-Subjects]').click();
         cy.wait('@getChartData');
@@ -575,14 +570,14 @@ describe('Metrics Tests', () => {
             openMode: 0
         }
     },() => {
-        const response = [];
-        cy.server().route({
-            url: '/admin/projects/proj1/metrics/numUsersPerSubjectPerLevelChartBuilder',
-            status: 200,
-            response,
+        const body = [];
+        cy.intercept('/admin/projects/proj1/metrics/numUsersPerSubjectPerLevelChartBuilder',
+          {
+            statusCode: 200,
+            body,
         }).as('getChartData');
 
-        cy.visit('/projects/proj1/');
+        cy.visit('/administrator/projects/proj1/');
         cy.clickNav('Metrics');
         cy.get('[data-cy=metricsNav-Subjects]').click();
         cy.wait('@getChartData');

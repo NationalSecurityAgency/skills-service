@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <span data-cy="timeLengthSelector">
+  <span data-cy="timeLengthSelector" class="time-length-selector">
     <b-badge v-for="(item, index) in options" :key="`${item.length}${item.unit}`"
       class="ml-2" :class="{'can-select' : (index !== selectedIndex) }"
              :variant="getVariant(index)" @click="handleClick(index)">
@@ -24,7 +24,7 @@ limitations under the License.
 </template>
 
 <script>
-  import moment from 'moment';
+  import dayjs from '../../../DayJsCustomizer';
 
   export default {
     name: 'TimeLengthSelector',
@@ -41,9 +41,14 @@ limitations under the License.
       handleClick(index) {
         this.selectedIndex = index;
         const selectedItem = this.options[index];
-        const start = moment()
+        const start = dayjs()
           .subtract(selectedItem.length, selectedItem.unit);
-        this.$emit('time-selected', start);
+        const event = {
+          durationLength: selectedItem.length,
+          durationUnit: selectedItem.unit,
+          startTime: start,
+        };
+        this.$emit('time-selected', event);
       },
     },
   };
@@ -52,6 +57,10 @@ limitations under the License.
 <style scoped>
 .can-select {
   cursor: pointer;
+}
+
+.time-length-selector {
+  padding-right: 8em;
 }
 
 </style>

@@ -22,7 +22,7 @@ limitations under the License.
           <i class="fa-3x" :class="icon"/>
         </div>
         <div class="media-body">
-          <h4 class="mb-2 text-uppercase">{{ title }}</h4>
+          <div class="h4 mb-2 text-uppercase">{{ title }}</div>
           <div style="font-size: 0.95rem;" class="text-secondary">
             <slot>
               {{ subtitle }}
@@ -36,7 +36,7 @@ limitations under the License.
     </div>
 
     <div class="card-footer text-center">
-      <b-button @click="loadChart" variant="outline-primary">Add <i class="fas fa-plus-circle"/></b-button>
+      <b-button @click="loadChart" variant="outline-hc">Add <i class="fas fa-plus-circle"/></b-button>
     </div>
   </div>
 </template>

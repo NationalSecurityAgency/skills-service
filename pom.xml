@@ -7,7 +7,7 @@
     <groupId>skill-tree</groupId>
     <artifactId>skills-service-parent</artifactId>
     <packaging>pom</packaging>
-    <version>1.3.4-SNAPSHOT</version>
+    <version>1.4.0-SNAPSHOT</version>
     <modules>
         <module>call-stack-profiler</module>
         <module>dashboard</module>
@@ -21,11 +21,11 @@
         <java.version>1.11</java.version>
 
         <!-- can NOT name it groovy.version as spock's dependency picks it up-->
-        <groovy.version>3.0.5</groovy.version>
+        <groovy.version>3.0.7</groovy.version>
         <groovy.eclipse.compiler.version>3.6.0-03</groovy.eclipse.compiler.version>
-        <groovy.eclipse.batch.version>3.0.5-01</groovy.eclipse.batch.version>
+        <groovy.eclipse.batch.version>3.0.7-01</groovy.eclipse.batch.version>
 
-        <spock.myVersion>2.0-M3-groovy-3.0</spock.myVersion>
+        <spock.myVersion>2.0-M4-groovy-3.0</spock.myVersion>
         <java.version>11</java.version>
 
         <flywaydb.version>6.5.5</flywaydb.version>

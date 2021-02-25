@@ -1001,4 +1001,182 @@
         </createIndex>
     </changeSet>
 
+    <changeSet id="4" author="skills team" context="migration3">
+        <createTable tableName="user_events">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="project_id" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="skill_ref_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="event_time" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="event_type" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="count" type="int" />
+
+            <column name="week_number" type="int" />
+        </createTable>
+
+        <createIndex indexName="index_user_events_user_id"
+                     tableName="user_events">
+            <column name="user_id" type="varchar(255)"/>
+        </createIndex>
+
+        <createIndex indexName="index_user_events_project_id"
+                     tableName="user_events">
+            <column name="project_id" type="varchar(255)"/>
+        </createIndex>
+
+        <createIndex indexName="index_user_events_skill_ref_id"
+                     tableName="user_events">
+            <column name="skill_ref_id" type="int"/>
+        </createIndex>
+
+        <createIndex tableName="user_events" indexName="index_user_events_week_number">
+            <column name="week_number"/>
+        </createIndex>
+
+        <createIndex tableName="user_events" indexName="index_user_events_event_time">
+            <column name="event_time"/>
+        </createIndex>
+
+        <createIndex indexName="index_user_events_event_type" tableName="user_events">
+            <column name="event_type" type="varchar(255)"/>
+        </createIndex>
+
+        <addForeignKeyConstraint baseColumnNames="user_id"
+                                 baseTableName="user_events"
+                                 constraintName="fk_user_events_user_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="user_id"
+                                 referencedTableName="user_attrs"/>
+
+        <addForeignKeyConstraint baseColumnNames="project_id"
+                                 baseTableName="user_events"
+                                 constraintName="fk_user_events_project_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="project_id"
+                                 referencedTableName="project_definition"/>
+
+        <addForeignKeyConstraint baseColumnNames="skill_ref_id"
+                                 baseTableName="user_events"
+                                 constraintName="fk_user_events_skill_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="skill_definition"/>
+
+        <addUniqueConstraint
+                columnNames="user_id, project_id, skill_ref_id, event_time, event_type"
+                constraintName="user_events_unique_row"
+                tableName="user_events"/>
+    </changeSet>
+
+    <changeSet id="5" author="skills team" context="migration5">
+        <addColumn tableName="skill_definition">
+            <column name="self_reporting_type" type="varchar(255)"/>
+        </addColumn>
+
+        <createTable tableName="skill_approval">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="project_id" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="user_id" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="skill_ref_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="requested_on" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="rejected_on" type="datetime">
+            </column>
+
+            <column name="request_msg" type="text"/>
+            <column name="rejection_msg" type="text"/>
+
+            <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createIndex indexName="index_skill_approval_user_id"
+                     tableName="skill_approval">
+            <column name="user_id" type="varchar(255)"/>
+        </createIndex>
+
+        <createIndex indexName="index_skill_approval_project_id"
+                     tableName="skill_approval">
+            <column name="project_id" type="varchar(255)"/>
+        </createIndex>
+
+        <createIndex indexName="index_skill_approval_skill_ref_id"
+                     tableName="skill_approval">
+            <column name="skill_ref_id" type="int"/>
+        </createIndex>
+
+        <createIndex indexName="index_skill_approval_rejected_on"
+                     tableName="skill_approval">
+            <column name="rejected_on" type="datetime"/>
+        </createIndex>
+
+
+        <addForeignKeyConstraint baseColumnNames="user_id"
+                                 baseTableName="skill_approval"
+                                 constraintName="fk_skill_approval_user_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="user_id"
+                                 referencedTableName="user_attrs"/>
+
+        <addForeignKeyConstraint baseColumnNames="skill_ref_id"
+                                 baseTableName="skill_approval"
+                                 constraintName="fk_skill_approval_skill_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="skill_definition"/>
+
+        <addForeignKeyConstraint baseColumnNames="project_id"
+                                 baseTableName="skill_approval"
+                                 constraintName="fk_skill_approval_project_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="project_id"
+                                 referencedTableName="project_definition"/>
+
+        <addUniqueConstraint
+                columnNames="user_id, skill_ref_id"
+                constraintName="skill_approval_unique_row"
+                tableName="skill_approval"/>
+
+        <insert tableName="skills_db_locks">
+            <column name="lock" type="varchar(255)" value="event_compaction_lock"/>
+        </insert>
+    </changeSet>
+
 </databaseChangeLog>

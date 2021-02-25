@@ -5,7 +5,7 @@
     <parent>
         <artifactId>skills-service-parent</artifactId>
         <groupId>skill-tree</groupId>
-        <version>1.3.4-SNAPSHOT</version>
+        <version>1.4.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -204,12 +204,12 @@
             <scope>test</scope>
         </dependency>
 
-        <dependency>
-            <groupId>org.codehaus.groovy</groupId>
-            <artifactId>groovy</artifactId>
-            <version>${groovy.version}</version>
-            <scope>test</scope>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.codehaus.groovy</groupId>-->
+<!--            <artifactId>groovy</artifactId>-->
+<!--            <version>${groovy.version}</version>-->
+<!--            <scope>test</scope>-->
+<!--        </dependency>-->
 
         <dependency>
             <groupId>skill-tree</groupId>
@@ -552,6 +552,7 @@
                 <version>3.0</version>
                 <configuration>
                     <header>${basedir}/../license-add/LICENSE-HEADER.txt</header>
+                    <validHeaders>${basedir}/../license-add/LICENSE-HEADER_2021.txt</validHeaders>
                     <excludes>
                         <exclude>**/*.xml</exclude>
                         <exclude>**/*.jks</exclude>
