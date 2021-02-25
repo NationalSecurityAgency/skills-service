@@ -32,17 +32,24 @@ limitations under the License.
     <b-card body-class="p-0">
       <skills-spinner :is-loading="loading" />
 
-      <skills-b-table v-if="!loading" :options="table.options" :items="errors" data-cy="projectErrorsTable">
+      <skills-b-table v-if="!loading"
+                      :options="table.options"
+                      :items="errors"
+                      data-cy="projectErrorsTable"
+                      @page-changed="pageChanged"
+                      @page-size-changed="pageSizeChanged"
+                      @sort-changed="sortTable">
+
         <template v-slot:cell(reportedSkillId)="data">
           {{ data.value }}
         </template>
 
         <template v-slot:cell(created)="data">
-          {{ data.value }}
+          <date-cell :value="data.value"/>
         </template>
 
         <template v-slot:cell(lastSeen)="data">
-          {{ data.value }}
+          <date-cell :value="data.value"/>
         </template>
 
         <template v-slot:cell(count)="data">
@@ -50,9 +57,9 @@ limitations under the License.
         </template>
 
         <template #cell(edit)="data">
-          <b-button :ref="`delete_${data.item.reportedSkillId}`" @click="removeError(data.item)" variant="outline-info" size="sm"
-                    :data-cy="`deleteErrorButton_${encodeURI(data.item.reportedSkillId)}`"
-                    :aria-label="`delete error for reported skill ${data.item.reportedSkilId}`">
+          <b-button :ref="`delete_${data.item.error}`" @click="removeError(data.item)" variant="outline-info" size="sm"
+                    :data-cy="`deleteErrorButton_${encodeURI(data.item.error)}`"
+                    :aria-label="`delete error for reported skill ${data.item.error}`">
             <i class="text-warning fas fa-trash-alt" aria-hidden="true"/>
           </b-button>
         </template>
@@ -70,12 +77,18 @@ limitations under the License.
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import MsgBoxMixin from '../utils/modal/MsgBoxMixin';
   import ProjectService from './ProjectService';
+  import DateCell from '../utils/table/DateCell';
 
   const { mapActions } = createNamespacedHelpers('projects');
 
   export default {
     name: 'ProjectErrors',
-    components: { SkillsBTable, SkillsSpinner, SubPageHeader },
+    components: {
+      SkillsBTable,
+      SkillsSpinner,
+      SubPageHeader,
+      DateCell,
+    },
     mixins: [MsgBoxMixin],
     props: [],
     data() {
@@ -84,26 +97,36 @@ limitations under the License.
         errors: [],
         table: {
           options: {
+            sortBy: 'lastSeen',
+            sortDesc: true,
             pagination: {
-              remove: true,
+              server: true,
+              currentPage: 1,
+              totalRows: 1,
+              pageSize: 10,
+              possiblePageSizes: [10, 25, 50],
             },
             fields: [
               {
-                key: 'reportedSkillId',
-                label: 'Non-existent Skill ID',
-                sortable: false,
+                key: 'errorType',
+                label: 'Error Type',
+                sortable: true,
+              }, {
+                key: 'error',
+                label: 'Error',
+                sortable: true,
               }, {
                 key: 'created',
                 label: 'First Seen',
-                sortable: false,
+                sortable: true,
               }, {
                 key: 'lastSeen',
                 label: 'Last Seen',
-                sortable: false,
+                sortable: true,
               }, {
                 key: 'count',
                 label: 'Times Seen',
-                sortable: false,
+                sortable: true,
               }, {
                 key: 'edit',
                 label: 'Delete',
@@ -122,10 +145,33 @@ limitations under the License.
       ...mapActions([
         'loadProjectDetailsState',
       ]),
+      pageChanged(pageNum) {
+        this.table.options.pagination.currentPage = pageNum;
+        this.loadErrors();
+      },
+      pageSizeChanged(newSize) {
+        this.table.options.pagination.pageSize = newSize;
+        this.loadErrors();
+      },
+      sortTable(sortContext) {
+        this.table.options.sortBy = sortContext.sortBy;
+        this.table.options.sortDesc = sortContext.sortDesc;
+
+        // set to the first page
+        this.table.options.pagination.currentPage = 1;
+        this.loadErrors();
+      },
       loadErrors() {
         this.loading = true;
-        ProjectService.getProjectErrors(this.$route.params.projectId).then((res) => {
-          this.errors = res;
+        const pageParams = {
+          limit: this.table.options.pagination.pageSize,
+          ascending: !this.table.options.sortDesc,
+          page: this.table.options.pagination.currentPage,
+          orderBy: this.table.options.sortBy,
+        };
+        ProjectService.getProjectErrors(this.$route.params.projectId, pageParams).then((res) => {
+          this.errors = res.data;
+          this.table.options.pagination.totalRows = res.totalCount;
         }).finally(() => {
           this.loading = false;
         });
@@ -144,12 +190,12 @@ limitations under the License.
           });
       },
       removeError(projectError) {
-        const msg = `Are you absolutely sure you want to remove issue related to ${projectError.reportedSkillId}?`;
+        const msg = `Are you absolutely sure you want to remove issue related to ${projectError.error}?`;
         this.msgConfirm(msg)
           .then((res) => {
             if (res) {
               this.loading = true;
-              ProjectService.deleteProjectError(projectError.projectId, projectError.reportedSkillId).then(() => {
+              ProjectService.deleteProjectError(projectError.projectId, projectError.errorType, projectError.error).then(() => {
                 this.loadErrors();
                 this.loadProjectDetailsState({ projectId: this.$route.params.projectId });
               });

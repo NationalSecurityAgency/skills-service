@@ -33,11 +33,11 @@ export default {
   getProject(projectId) {
     return axios.get(`/admin/projects/${projectId}`).then((response) => response.data);
   },
-  getProjectErrors(projectId) {
-    return axios.get(`/admin/projects/${projectId}/errors`).then((response) => response.data);
+  getProjectErrors(projectId, params) {
+    return axios.get(`/admin/projects/${projectId}/errors`, { params }).then((response) => response.data);
   },
-  deleteProjectError(projectId, reportedSkillid) {
-    return axios.delete(`/admin/projects/${projectId}/errors/${encodeURIComponent(reportedSkillid)}`).then((response) => response.data);
+  deleteProjectError(projectId, errorType, reportedSkillid) {
+    return axios.delete(`/admin/projects/${projectId}/errors/${errorType}/${encodeURIComponent(reportedSkillid)}`).then((response) => response.data);
   },
   deleteAllProjectErrors(projectId) {
     return axios.delete(`/admin/projects/${projectId}/errors`).then((response) => response.data);

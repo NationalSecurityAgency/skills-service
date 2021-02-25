@@ -15,21 +15,22 @@
  */
 package skills.storage.repos
 
-import org.springframework.data.repository.CrudRepository
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
+import org.springframework.data.repository.PagingAndSortingRepository
 import org.springframework.lang.Nullable
-import skills.storage.ProjectError
-import java.util.stream.Stream
+import skills.storage.model.ProjectError
 
-interface ProjectErrorRepo extends CrudRepository<ProjectError, Long> {
+interface ProjectErrorRepo extends PagingAndSortingRepository<ProjectError, Long> {
 
     @Nullable
-    Stream<ProjectError> findAllByProjectId(String projectId)
+    Page<ProjectError> findAllByProjectId(String projectId, Pageable pageRequest)
 
     long countByProjectId(String projectId)
 
     void deleteByProjectId(String projectId)
 
     @Nullable
-    ProjectError findByProjectIdAndReportedSkillId(String projectId, String reportedSkillId)
+    ProjectError findByProjectIdAndErrorTypeAndError(String projectId, ProjectError.ErrorType errorType, String error)
 
 }

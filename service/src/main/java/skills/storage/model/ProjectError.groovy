@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.storage
+package skills.storage.model
 
 import groovy.transform.ToString
 import org.hibernate.annotations.Where
@@ -27,13 +27,19 @@ import javax.persistence.*
 @ToString(includeNames = true)
 class ProjectError implements Serializable {
 
+
+    static enum ErrorType {
+        SkillNotFound
+    };
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id
 
     String projectId
 
-    String reportedSkillId
+    @Enumerated(EnumType.STRING)
+    ErrorType errorType
 
     String error
 

@@ -1187,11 +1187,11 @@
             <column name="project_id" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>
-            <column name="reported_skill_id" type="varchar(255)">
-                <constraints nullable="true"/>
+            <column name="error_type" type="varchar(255)">
+                <constraints nullable="false"/>
             </column>
             <column name="error" type="varchar(255)">
-                <constraints nullable="true"/>
+                <constraints nullable="false"/>
             </column>
             <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
                 <constraints nullable="false"/>
@@ -1216,15 +1216,22 @@
             <column name="project_id" type="varchar(255)"/>
         </createIndex>
 
-        <createIndex indexName="index_project_error_reported_skill_id"
+        <createIndex indexName="index_project_error_error"
                      tableName="project_error">
-            <column name="reported_skill_id" type="varchar(255)"/>
+            <column name="error" type="varchar(255)"/>
         </createIndex>
 
-        <createIndex indexName="index_project_error_project_id_reported_skill_id"
+        <createIndex indexName="index_project_error_project_id_error_type"
                      tableName="project_error">
-            <column name="reported_skill_id" type="varchar(255)"/>
+            <column name="error_type" type="varchar(255)"/>
             <column name="project_id" type="varchar(255)"/>
+        </createIndex>
+
+        <createIndex indexName="index_project_error_project_id_error_type_error"
+                     tableName="project_error">
+            <column name="error_type" type="varchar(255)"/>
+            <column name="project_id" type="varchar(255)"/>
+            <column name="error" type="varchar(255)"/>
         </createIndex>
     </changeSet>
 
