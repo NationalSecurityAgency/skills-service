@@ -15,9 +15,10 @@
  */
 package skills.intTests.utils
 
+import com.icegreen.greenmail.util.GreenMail
+import com.icegreen.greenmail.util.ServerSetupTest
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.web.server.LocalServerPort
 import skills.SpringBootApp
@@ -41,6 +42,8 @@ class DefaultIntSpec extends Specification {
     };
 
     SkillsService skillsService
+
+    GreenMail greenMail
 
     @LocalServerPort
     int localPort
@@ -98,11 +101,39 @@ class DefaultIntSpec extends Specification {
     }
 
     def cleanup() {
+        if (greenMail) {
+            log.info('Stopping email service')
+            greenMail.stop()
+        }
         String msg = "\n-------------------------------------------------------------\n" +
                 "END: [${specificationContext.currentIteration.name}]\n" +
                 "-------------------------------------------------------------"
         log.info(msg)
     }
+
+    def startEmailServer() {
+        greenMail = new GreenMail(ServerSetupTest.SMTP)
+        greenMail.start()
+
+        SkillsService rootSkillsService = createService("rootUser", 'aaaaaaaa')
+        if (!rootSkillsService.isRoot()) {
+            rootSkillsService.grantRoot()
+        }
+
+        rootSkillsService.getWsHelper().rootPost("/saveEmailSettings", [
+                "host"       : "localhost",
+                "port"       : ServerSetupTest.SMTP.port,
+                "protocol"   : "smtp",
+                "authEnabled": false,
+                "tlsEnabled" : false
+        ])
+        rootSkillsService.addOrUpdateGlobalSetting("public_url",
+                ["setting": "public_url", "value": "http://localhost:${localPort}/".toString()])
+        rootSkillsService.addOrUpdateGlobalSetting("from_email",
+                ["setting": "from_email", "value": "resetspec@skilltreetests".toString()])
+    }
+
+
 
     SkillsService createService(
             String username = "skills@skills.org",

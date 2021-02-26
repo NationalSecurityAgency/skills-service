@@ -15,16 +15,25 @@
  */
 package skills.services
 
+import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
+import skills.controller.result.model.SettingsResult
+import skills.controller.result.model.UserRoleRes
+import skills.notify.EmailNotifier
+import skills.notify.Notifier
 import skills.services.events.SkillEventsService
+import skills.services.settings.Settings
+import skills.services.settings.SettingsService
+import skills.storage.model.ProjDef
 import skills.storage.model.SkillApproval
+import skills.storage.model.auth.RoleName
+import skills.storage.repos.ProjDefRepo
 import skills.storage.repos.SkillApprovalRepo
 import skills.storage.repos.SkillEventsSupportRepo
-import groovy.util.logging.Slf4j
 
 @Service
 @Slf4j
@@ -35,6 +44,18 @@ class SelfReportingService {
 
     @Autowired
     CustomValidator customValidator
+
+    @Autowired
+    EmailNotifier notifier
+
+    @Autowired
+    AccessSettingsStorageService accessSettingsStorageService
+
+    @Autowired
+    ProjDefRepo projDefRepo
+
+    @Autowired
+    SettingsService settingsService
 
     SkillEventsService.AppliedCheckRes requestApproval(String userId, SkillEventsSupportRepo.SkillDefMin skillDefinition, Date performedOn, String requestMsg) {
 
@@ -60,6 +81,7 @@ class SelfReportingService {
             existing.requestedOn = performedOn
             existing.requestMsg = requestMsg
             skillApprovalRepo.save(existing)
+            sentNotifications(skillDefinition, userId, requestMsg)
 
             res = new SkillEventsService.AppliedCheckRes(
                     skillApplied: false,
@@ -75,6 +97,7 @@ class SelfReportingService {
             )
 
             skillApprovalRepo.save(skillApproval)
+            sentNotifications(skillDefinition, userId, requestMsg)
 
             res = new SkillEventsService.AppliedCheckRes(
                     skillApplied: false,
@@ -83,6 +106,39 @@ class SelfReportingService {
         }
 
         return res
+    }
+
+    private void sentNotifications(SkillEventsSupportRepo.SkillDefMin skillDefinition, String userId, String requestMsg) {
+        String publicUrl = getPublicUrl()
+        if(!publicUrl) {
+            return
+        }
+
+        List<UserRoleRes> userRoleRes = accessSettingsStorageService.getUserRolesForProjectId(skillDefinition.projectId)
+                .findAll { it.roleName == RoleName.ROLE_PROJECT_ADMIN }
+        ProjDef projDef = projDefRepo.findByProjectId(skillDefinition.projectId)
+        Notifier.NotificationRequest request = new ApprovalNotificationRequestBuilder(
+                userRequesting: userId,
+                requestMsg: requestMsg,
+                userIds: userRoleRes.collect { it.userId },
+                skillDef: skillDefinition,
+                publicUrl: publicUrl,
+                projectName: projDef.name
+        ).build()
+        notifier.sendNotification(request)
+    }
+    private String getPublicUrl() {
+        SettingsResult publicUrlSetting = settingsService.getGlobalSetting(Settings.GLOBAL_PUBLIC_URL.settingName)
+        if (!publicUrlSetting) {
+            log.warn("Skill approval notifications are disabled since global setting [${Settings.GLOBAL_PUBLIC_URL}] is NOT set")
+            return null
+        }
+
+        String publicUrl = publicUrlSetting.value
+        if (!publicUrl.endsWith("/")){
+            publicUrl += "/"
+        }
+        return publicUrl
     }
 
     void removeRejection(String projectId, String userId, Integer approvalId) {

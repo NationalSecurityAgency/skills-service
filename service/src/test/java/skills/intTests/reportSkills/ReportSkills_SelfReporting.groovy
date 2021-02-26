@@ -15,16 +15,21 @@
  */
 package skills.intTests.reportSkills
 
+
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import skills.intTests.utils.DefaultIntSpec
+import skills.intTests.utils.EmailUtils
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
+import skills.services.settings.SettingsService
 import skills.storage.model.SkillApproval
 import skills.storage.model.SkillDef
 import skills.storage.repos.SkillApprovalRepo
 import skills.storage.repos.SkillDefRepo
+import spock.lang.IgnoreIf
+import spock.lang.IgnoreRest
 
 @Slf4j
 class ReportSkills_SelfReporting extends DefaultIntSpec {
@@ -34,6 +39,13 @@ class ReportSkills_SelfReporting extends DefaultIntSpec {
 
     @Autowired
     SkillDefRepo skillDefRepo
+
+    @Autowired
+    SettingsService settingsService
+
+    def setup() {
+        startEmailServer()
+    }
 
     def "self report skill with approval"() {
         def proj = SkillsFactory.createProject()
@@ -51,7 +63,15 @@ class ReportSkills_SelfReporting extends DefaultIntSpec {
         def res = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "user0", date, "Please approve this!")
         def approvalsEndpointRes = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false)
 
+        EmailUtils.EmailRes emailRes = EmailUtils.getEmail(greenMail)
+
         then:
+        greenMail.getReceivedMessages().length == 1
+        emailRes.subj == "SkillTree Points Requested"
+        emailRes.recipients == ["skills@skills.org"]
+        emailRes.plainText.contains("User user0 requested points.")
+        emailRes.html.contains("User <b>user0</b> requested points")
+
         !res.body.skillApplied
         res.body.pointsEarned == 0
         res.body.explanation == "Skill was submitted for approval"
@@ -76,6 +96,152 @@ class ReportSkills_SelfReporting extends DefaultIntSpec {
         approvalsEndpointRes.data.get(0).skillName == "Test Skill 1"
         approvalsEndpointRes.data.get(0).requestedOn == date.time
         approvalsEndpointRes.data.get(0).requestMsg == "Please approve this!"
+    }
+
+    def "send email notification to each admin of the project"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(1,)
+        skills[0].pointIncrement = 200
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        String otherUser = "other@email.com"
+        createService(otherUser)
+        skillsService.addProjectAdmin(proj.projectId, otherUser)
+
+
+        Date date = new Date() - 60
+        when:
+        def res = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "user0", date, "Please approve this!")
+
+        List<EmailUtils.EmailRes> emails = EmailUtils.getEmails(greenMail)
+        then:
+        emails.size() == 2
+        emails.get(0).recipients == ["skills@skills.org", otherUser]
+        emails.get(1).recipients == ["skills@skills.org", otherUser]
+
+        !res.body.skillApplied
+        res.body.explanation == "Skill was submitted for approval"
+    }
+
+    def "self report email notification format"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(1,)
+        skills[0].pointIncrement = 200
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        Date date = new Date() - 60
+        when:
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "user0", date, "Please approve this!")
+
+        EmailUtils.EmailRes emailRes = EmailUtils.getEmail(greenMail)
+        String expectedHtml = '''<!--
+Copyright 2020 SkillTree
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<!DOCTYPE html>
+<html   lang="en"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.thymeleaf.org http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <style>
+        .button {
+            border: 1px solid green;
+            border-radius: 2px;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+        }
+
+        .button:hover {
+            cursor: pointer;
+            background-color: #ecffec;
+        }
+
+        .label {
+            color: #525252;
+        }
+    </style>
+</head>
+<body class="overall-container">
+<h1>SkillTree Points Requested!</h1>
+<p>User <b>user0</b> requested points. As an approver for the <b>Test Project#1</b> project, you can approve or reject this request.</p>
+
+<p style="font-weight: bold">
+    <a href="http://localhost:{{port}}/administrator/projects/TestProject1/self-report" class="button">Approve or Reject</a>
+</p>
+
+<ul>
+    <li><span class="label">Project</span>: Test Project#1</li>
+    <li><span class="label">Skill</span>: Test Skill 1</li>
+    <li><span class="label">Points</span>: 200</li>
+    <li><span class="label">Message</span>: Please approve this!</li>
+</ul>
+
+<p>
+Always yours, <br/> -SkillTree Bot
+</p>
+
+</body>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <title>SkillTree Points Requested</title>
+    <style>
+
+    </style>
+</head>
+</html>'''
+
+        String expectedPlain = '''User user0 requested points.
+   Approval URL: http://localhost:{{port}}/administrator/projects/TestProject1/self-report
+   User Requested: user0
+   Project: Test Project#1
+   Skill: Test Skill 1 (skill1)
+   Number of Points: 200
+   Request Message: Please approve this!
+
+As an approver for the 'TestProject1' project, you can approve or reject this request.
+
+
+Always yours,
+SkillTree Bot'''
+        then:
+        greenMail.getReceivedMessages().length == 1
+        emailRes.subj == "SkillTree Points Requested"
+        emailRes.recipients == ["skills@skills.org"]
+        emailRes.plainText.contains("User user0 requested points.")
+        // ignore new lines
+        prepEmailForComparison(emailRes.html) == prepEmailForComparison(expectedHtml)
+        prepEmailForComparison(emailRes.plainText) == prepEmailForComparison(expectedPlain)
+    }
+
+    private String prepEmailForComparison(String email) {
+        String fixPort = email.toString().replaceAll("\\{\\{port\\}\\}", localPort.toString())
+        String removeNewLines = fixPort.replaceAll("[\r\n]", "")
+        return removeNewLines
     }
 
     def "self report skill with honor system"() {

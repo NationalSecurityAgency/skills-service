@@ -1,0 +1,71 @@
+<!--
+Copyright 2020 SkillTree
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<!DOCTYPE html>
+<html   lang="en"
+        xmlns:th="http://www.thymeleaf.org"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.thymeleaf.org http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <style>
+        .button {
+            border: 1px solid green;
+            border-radius: 2px;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+        }
+
+        .button:hover {
+            cursor: pointer;
+            background-color: #ecffec;
+        }
+
+        .label {
+            color: #525252;
+        }
+    </style>
+</head>
+<body class="overall-container">
+<h1>SkillTree Points Requested!</h1>
+<p>User <b>[[${userRequesting}]]</b> requested points. As an approver for the <b>[[${projectName}]]</b> project, you can approve or reject this request.</p>
+
+<p style="font-weight: bold">
+    <a th:href="@{${approveUrl}}" class="button">Approve or Reject</a>
+</p>
+
+<ul>
+    <li><span class="label">Project</span>: [[${projectName}]]</li>
+    <li><span class="label">Skill</span>: [[${skillName}]]</li>
+    <li><span class="label">Points</span>: [[${numPoints}]]</li>
+    <li><span class="label">Message</span>: [[${requestMsg}]]</li>
+</ul>
+
+<p>
+Always yours, <br/> -SkillTree Bot
+</p>
+
+</body>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <title>SkillTree Points Requested</title>
+    <style>
+
+    </style>
+</head>
+</html>
