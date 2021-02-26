@@ -52,6 +52,11 @@ class UserEventService {
     @PersistenceContext
     EntityManager entityManager;
 
+    // Changing this to a larger value once events have been compacted (so in this case after there are events that
+    // are 30 days old that have been compacted into weekly events) will cause weekly events that are now newer than
+    // compactDailyEventsOlderThan to no longer be visible in the system.
+    // compactDailyEventsOlderThan can be decreased and at any time with the only impact being that the daily events older than the new compactDailyEventsOlderThan
+    // will not be exposed until after compaction next runs.
     @Value('#{"${skills.config.compactDailyEventsOlderThan:30}"}')
     int maxDailyDays = 30
 

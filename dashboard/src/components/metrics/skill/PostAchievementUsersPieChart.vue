@@ -51,6 +51,7 @@ limitations under the License.
           },
           legend: {
             position: 'top',
+            horizontalAlign: 'left',
           },
         },
         loading: true,

@@ -1084,6 +1084,10 @@
                 columnNames="user_id, project_id, skill_ref_id, event_time, event_type"
                 constraintName="user_events_unique_row"
                 tableName="user_events"/>
+
+        <insert tableName="skills_db_locks">
+            <column name="lock" type="varchar(255)" value="event_compaction_lock"/>
+        </insert>
     </changeSet>
 
     <changeSet id="5" author="skills team" context="migration5">
@@ -1173,10 +1177,6 @@
                 columnNames="user_id, skill_ref_id"
                 constraintName="skill_approval_unique_row"
                 tableName="skill_approval"/>
-
-        <insert tableName="skills_db_locks">
-            <column name="lock" type="varchar(255)" value="event_compaction_lock"/>
-        </insert>
     </changeSet>
 
 </databaseChangeLog>
