@@ -46,6 +46,8 @@ import {
   FormGroupPlugin,
   FormDatepickerPlugin,
   ProgressPlugin,
+  BIcon,
+  BIconQuestion,
 } from 'bootstrap-vue';
 
 import { SkillsConfiguration, SkillsDirective, SkillsReporter } from '@skilltree/skills-client-vue';
@@ -108,6 +110,8 @@ Vue.use(FormPlugin);
 Vue.use(FormGroupPlugin);
 Vue.use(FormDatepickerPlugin);
 Vue.use(ProgressPlugin);
+Vue.component('BIcon', BIcon);
+Vue.component('BIconQuestion', BIconQuestion);
 
 Vue.use(SkillsDirective);
 

@@ -14,16 +14,22 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <b-dropdown right variant="link" no-caret>
+  <b-dropdown right variant="link">
     <template slot="button-content">
-      <b-avatar variant="primary" :text="avatarTxt" size="sm" aria-hidden="true"></b-avatar>
-      <span class="d-inline-block text-truncate userName ml-1 font-weight-bold" aria-hidden="true">{{ displayName }}</span>
+      <b-avatar variant="primary" size="sm" aria-hidden="true"></b-avatar>
       <span class="sr-only">settings menu</span>
     </template>
+    <b-dropdown-text style="width: 14rem;">
+      <div class="text-secondary"><i class="fas fa-key" aria-hidden="true"/> Logged in as</div>
+      <div class="text-center text-primary" data-cy="settingsButton-loggedInName">
+        {{ displayName }}
+      </div>
+    </b-dropdown-text>
+    <b-dropdown-divider />
     <b-dropdown-item href="#" :disabled="adminLinkDisabled"  @click="gotoAdmin">
       <span class="text-gray-700"> <i class="fas fa-tasks" aria-hidden="true"/><span class="link-name">Project Admin</span></span>
     </b-dropdown-item>
-    <b-dropdown-item href="#" :disabled="settingsLinkDisabled" @click="gotoSettings">
+    <b-dropdown-item href="#" :disabled="settingsLinkDisabled" @click="gotoSettings" data-cy="settingsButton-navToSettings">
       <span class="text-gray-700"> <i class="fas fa-cog" aria-hidden="true"/><span class="link-name">Settings</span></span>
     </b-dropdown-item>
     <b-dropdown-divider />

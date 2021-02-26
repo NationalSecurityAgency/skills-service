@@ -31,8 +31,8 @@ limitations under the License.
 
         <div class="col-sm-auto text-center text-sm-right pt-sm-2 mt-3 mt-sm-0">
           <inception-button v-if="isAdminPage" class="mr-2" data-cy="inception-button"></inception-button>
-          <settings-button data-cy="settings-button" class="mr-2"/>
-          <help-button class=""/>
+          <settings-button data-cy="settings-button"/>
+          <help-button class="" data-cy="help-button"/>
         </div>
       </div>
     </div>
