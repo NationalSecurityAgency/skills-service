@@ -14,11 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <loading-container :is-loading="loading">
+  <loading-container :is-loading="loading" class="container-fluid ">
     <no-content2 v-if="!hasProjects" icon="fas fa-hand-spock" class="mt-4"
                  title="No Projects Yet..." :message="noProjectsMessage"/>
 
-    <div v-if="!loading && hasProjects" class="container-fluid mt-2">
+    <div v-if="!loading && hasProjects" class="mt-2">
       <b-row>
         <b-col>
           <div class="card p-0 m-0">
