@@ -65,14 +65,14 @@ class MetricsLogger {
     }
 
     @Profile
-    void log(String group, Map<String, String> attributes = [:]) {
+    void log(Map<String, String> attributes = [:]) {
         if (enabled) {
             // user attributes must be obtained from the current thread
             attributes.putAll(getUserAttributes())
 
             // report to external service in a separate thread
             pool.submit([ThreadPoolUtils.callable {
-                MetricsMessage message = new MetricsMessage(group, attributes)
+                MetricsMessage message = new MetricsMessage(attributes)
                 HttpHeaders headers = new HttpHeaders();
                 headers.setContentType(MediaType.APPLICATION_JSON);
                 HttpEntity<MetricsMessage> entity = new HttpEntity<>(message, headers);
@@ -100,7 +100,6 @@ class MetricsLogger {
 
     @Canonical
     static class MetricsMessage {
-        String group
         Map<String, String> attributes = [:]
     }
 }
