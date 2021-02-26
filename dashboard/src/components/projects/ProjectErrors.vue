@@ -40,8 +40,15 @@ limitations under the License.
                       @page-size-changed="pageSizeChanged"
                       @sort-changed="sortTable">
 
-        <template v-slot:cell(reportedSkillId)="data">
-          {{ data.value }}
+        <template v-slot:cell(typeAndError)="data">
+          <div class="pl-3">
+            <div class="row mb-2">
+              {{ data.item.errorType }}
+            </div>
+            <div class="row small">
+              {{ formatErrorMsg(data.item.errorType, data.item.error) }}
+            </div>
+          </div>
         </template>
 
         <template v-slot:cell(created)="data">
@@ -99,22 +106,21 @@ limitations under the License.
           options: {
             sortBy: 'lastSeen',
             sortDesc: true,
+            busy: true,
+            stacked: 'md',
             pagination: {
               server: true,
               currentPage: 1,
               totalRows: 1,
-              pageSize: 10,
-              possiblePageSizes: [10, 25, 50],
+              pageSize: 5,
+              possiblePageSizes: [5, 10, 25],
             },
             fields: [
               {
-                key: 'errorType',
-                label: 'Error Type',
-                sortable: true,
-              }, {
-                key: 'error',
                 label: 'Error',
+                key: 'typeAndError',
                 sortable: true,
+                sortKey: 'errorType',
               }, {
                 key: 'created',
                 label: 'First Seen',
@@ -145,6 +151,12 @@ limitations under the License.
       ...mapActions([
         'loadProjectDetailsState',
       ]),
+      formatErrorMsg(errorType, error) {
+        if (errorType === 'SkillNotFound') {
+          return `Reported Skill Id [${error}] does not exist in this Project`;
+        }
+        return error;
+      },
       pageChanged(pageNum) {
         this.table.options.pagination.currentPage = pageNum;
         this.loadErrors();
@@ -174,6 +186,7 @@ limitations under the License.
           this.table.options.pagination.totalRows = res.totalCount;
         }).finally(() => {
           this.loading = false;
+          this.table.options.busy = false;
         });
       },
       removeAllErrors() {

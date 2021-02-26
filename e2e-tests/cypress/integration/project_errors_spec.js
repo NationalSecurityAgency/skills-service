@@ -121,6 +121,83 @@ describe('Project Errors Tests', () => {
     cy.get('[data-cy=pagePreviewCardStat_Issues]').contains('3');
   });
 
+  it('validate table', () => {
+    cy.reportSkill(1,41, 'user@skills.org', '2021-02-24 10:00', false);
+    cy.reportSkill(1,42, 'user@skills.org', '2021-02-24 10:00', false);
+    cy.reportSkill(1,42, 'user@skills.org', '2021-02-24 10:00', false);
+    cy.reportSkill(1,43, 'user@skills.org', '2021-02-24 10:00', false);
+    cy.reportSkill(1,43, 'user@skills.org', '2021-02-24 10:00', false);
+    cy.reportSkill(1,43, 'user@skills.org', '2021-02-24 10:00', false);
+    cy.reportSkill(1,44, 'user@skills.org', '2021-02-24 10:00', false);
+    cy.reportSkill(1,44, 'user@skills.org', '2021-02-24 10:00', false);
+    cy.reportSkill(1,44, 'user@skills.org', '2021-02-24 10:00', false);
+    cy.reportSkill(1,44, 'user@skills.org', '2021-02-24 10:00', false);
+    cy.reportSkill(1,45, 'user@skills.org', '2021-02-24 10:00', false);
+    cy.reportSkill(1,45, 'user@skills.org', '2021-02-24 10:00', false);
+    cy.reportSkill(1,45, 'user@skills.org', '2021-02-24 10:00', false);
+    cy.reportSkill(1,45, 'user@skills.org', '2021-02-24 10:00', false);
+    cy.reportSkill(1,45, 'user@skills.org', '2021-02-24 10:00', false);
+    cy.reportSkill(1,46, 'user@skills.org', '2021-02-24 10:00', false);
+    cy.reportSkill(1,46, 'user@skills.org', '2021-02-24 10:00', false);
+    cy.reportSkill(1,46, 'user@skills.org', '2021-02-24 10:00', false);
+    cy.reportSkill(1,46, 'user@skills.org', '2021-02-24 10:00', false);
+    cy.reportSkill(1,46, 'user@skills.org', '2021-02-24 10:00', false);
+    cy.reportSkill(1,46, 'user@skills.org', '2021-02-24 10:00', false);
+    cy.reportSkill(1,47, 'user@skills.org', '2021-02-24 10:00', false);
+    cy.reportSkill(1,47, 'user@skills.org', '2021-02-24 10:00', false);
+    cy.reportSkill(1,47, 'user@skills.org', '2021-02-24 10:00', false);
+    cy.reportSkill(1,47, 'user@skills.org', '2021-02-24 10:00', false);
+    cy.reportSkill(1,47, 'user@skills.org', '2021-02-24 10:00', false);
+    cy.reportSkill(1,47, 'user@skills.org', '2021-02-24 10:00', false);
+    cy.reportSkill(1,47, 'user@skills.org', '2021-02-24 10:00', false);
+
+    cy.intercept('GET', '/admin/projects/proj1').as('getProject');
+    cy.intercept('GET', '/admin/projects/proj1/errors').as('getErrors');
+    cy.visit('/administrator/projects/proj1/');
+    cy.wait('@getProject');
+    cy.get('[data-cy=nav-Issues]').click();
+    cy.wait('@getErrors');
+
+    const tableSelector = '[data-cy=projectErrorsTable]';
+
+    const expected = [
+      [{colIndex: 0, value: ' SkillNotFound  Reported Skill Id [skill47] does not exist in this Project '}, {colIndex: 3, value: '7'}],
+      [{colIndex: 0, value: ' SkillNotFound  Reported Skill Id [skill46] does not exist in this Project '}, {colIndex: 3, value: '6'}],
+      [{colIndex: 0, value: ' SkillNotFound  Reported Skill Id [skill45] does not exist in this Project '}, {colIndex: 3, value: '5'}],
+      [{colIndex: 0, value: ' SkillNotFound  Reported Skill Id [skill44] does not exist in this Project '}, {colIndex: 3, value: '4'}],
+      [{colIndex: 0, value: ' SkillNotFound  Reported Skill Id [skill43] does not exist in this Project '}, {colIndex: 3, value: '3'}],
+      [{colIndex: 0, value: ' SkillNotFound  Reported Skill Id [skill42] does not exist in this Project '}, {colIndex: 3, value: '2'}],
+      [{colIndex: 0, value: ' SkillNotFound  Reported Skill Id [skill41] does not exist in this Project '}, {colIndex: 3, value: '1'}],
+    ];
+
+    cy.validateTable(tableSelector, expected);
+
+   cy.get(`${tableSelector} th`).contains('First Seen').click();
+    cy.wait('@getErrors');
+    const sortByFirstSeenExpected = [
+      [{colIndex: 0, value: ' SkillNotFound  Reported Skill Id [skill41] does not exist in this Project '}, {colIndex: 3, value: '1'}],
+      [{colIndex: 0, value: ' SkillNotFound  Reported Skill Id [skill42] does not exist in this Project '}, {colIndex: 3, value: '2'}],
+      [{colIndex: 0, value: ' SkillNotFound  Reported Skill Id [skill43] does not exist in this Project '}, {colIndex: 3, value: '3'}],
+      [{colIndex: 0, value: ' SkillNotFound  Reported Skill Id [skill44] does not exist in this Project '}, {colIndex: 3, value: '4'}],
+      [{colIndex: 0, value: ' SkillNotFound  Reported Skill Id [skill45] does not exist in this Project '}, {colIndex: 3, value: '5'}],
+      [{colIndex: 0, value: ' SkillNotFound  Reported Skill Id [skill46] does not exist in this Project '}, {colIndex: 3, value: '6'}],
+      [{colIndex: 0, value: ' SkillNotFound  Reported Skill Id [skill47] does not exist in this Project '}, {colIndex: 3, value: '7'}],
+    ]
+    cy.validateTable(tableSelector, sortByFirstSeenExpected);
+    cy.get(`${tableSelector} th`).contains('First Seen').click();
+    cy.wait('@getErrors');
+    //should be back to original order
+    cy.validateTable(tableSelector, expected);
+
+    cy.get(`${tableSelector} th`).contains('First Seen').click();
+    cy.wait('@getErrors');
+    cy.validateTable(tableSelector, sortByFirstSeenExpected);
+
+    cy.get(`${tableSelector} th`).contains('First Seen').click();
+    cy.wait('@getErrors');
+    cy.validateTable(tableSelector, expected);
+  });
+
 
 
 
