@@ -187,7 +187,7 @@ class SkillEventsService {
         SkillEventResult res = new SkillEventResult(projectId: projectId, skillId: skillId, name: skillDefinition.name)
 
         userEventService.recordEvent(projectId, skillDefinition.id, userId, skillDate.date)
-        metricsLogger.log("Reported Skills [${projectId}], [${skillId}]", [
+        metricsLogger.log([
                 'skillId': skillId,
                 'projectId': projectId,
                 'requestedUserId': userId,

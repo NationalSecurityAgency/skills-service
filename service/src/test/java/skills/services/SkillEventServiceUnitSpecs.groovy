@@ -81,7 +81,7 @@ class SkillEventServiceUnitSpecs extends Specification {
         true
         1 * mockSkillEventPublisher.publishSkillUpdate(_, userId)
         1 * mockUserEventService.recordEvent(projId, _, userId, _)
-        1 * mockMetricsLogger.log(_, { it['selfReported'] == 'false' && it['selfReportType'] == null })
+        1 * mockMetricsLogger.log({ it['selfReported'] == 'false' && it['selfReportType'] == null })
     }
 
     def "test reportSkill will NOT notify when skills is NOT applied"() {
@@ -114,7 +114,7 @@ class SkillEventServiceUnitSpecs extends Specification {
         then:
         0 * mockSkillEventPublisher.publishSkillUpdate(_, userId)
         1 * mockUserEventService.recordEvent(projId, _, userId, _)
-        1 * mockMetricsLogger.log(_, { it['selfReported'] == 'true' && it['selfReportType'] == 'HonorSystem' })
+        1 * mockMetricsLogger.log({ it['selfReported'] == 'true' && it['selfReportType'] == 'HonorSystem' })
     }
 
     def "test reportSkill will notify when skills is NOT applied, but notifyIfNotApplied is true "() {
@@ -147,6 +147,6 @@ class SkillEventServiceUnitSpecs extends Specification {
         then:
         1 * mockSkillEventPublisher.publishSkillUpdate(_, userId)
         1 * mockUserEventService.recordEvent(projId, _, userId, _)
-        1 * mockMetricsLogger.log(_, { it['selfReported'] == 'true' && it['selfReportType'] == 'Approval' })
+        1 * mockMetricsLogger.log({ it['selfReported'] == 'true' && it['selfReportType'] == 'Approval' })
     }
 }
