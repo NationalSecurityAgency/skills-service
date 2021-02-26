@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <b-dropdown right variant="link">
+  <b-dropdown right variant="link" aria-label="User Settings Dropdown">
     <template slot="button-content">
       <b-avatar variant="primary" size="sm" aria-hidden="true"></b-avatar>
       <span class="sr-only">settings menu</span>
