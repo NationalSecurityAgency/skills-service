@@ -83,6 +83,9 @@ skills:
     # Decreasing this value will temporarily cause any DAILY events older than the new value to not be visible until the next
     # event compaction run.
     compactDailyEventsOlderThan: 30
+    notifications:
+      # run every minute
+      dispatchSchedule: "* * * * * *"
     ui:
       dashboardVersion: @pom.version@
       buildTimestamp: @maven.build.timestamp@

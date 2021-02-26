@@ -13,26 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.notify
+package skills.storage.repos
 
-import org.thymeleaf.context.Context
+import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Query
+import skills.storage.model.Notification
 
-interface Notifier {
+import java.util.stream.Stream
 
-    static class NotificationRequest {
-        List<String> userIds
-        String subject
+interface NotificationsRepo extends JpaRepository<Notification, Integer> {
 
-        // plain text email
-        String plainTextBody
 
-        // HTML
-        String thymeleafTemplate
-        Context thymeleafTemplateContext
-
-        // optional
-        Date requestedOn = new Date()
-    }
-
-    void sendNotification(Notifier.NotificationRequest notificationRequest)
+    @Query("select n from Notification n")
+    Stream<Notification> streamNotifications();
 }
