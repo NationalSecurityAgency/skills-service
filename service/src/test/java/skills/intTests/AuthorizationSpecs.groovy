@@ -158,7 +158,6 @@ class AuthorizationSpecs extends DefaultIntSpec {
     }
 
     @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
-    @IgnoreRest
     def "admin can complete a skill for another user using proxy token"() {
         Map subj1 = [projectId: projId, subjectId: "subj1", skillId: "skill11".toString(), name: "Test Subject 1".toString(), type: "Skill", pointIncrement: 100, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1]
         skillsService.createSubject(subj1)
