@@ -34,6 +34,7 @@ import skills.services.*
 import skills.services.admin.*
 import skills.services.settings.SettingsService
 import skills.services.settings.listeners.ValidationRes
+import skills.storage.model.ProjectError.ErrorType
 import skills.utils.ClientSecretGenerator
 import skills.utils.InputSanitizer
 
@@ -87,6 +88,9 @@ class AdminController {
 
     @Value('#{"${skills.config.ui.maxTimeWindowInMinutes}"}')
     int maxTimeWindowInMinutes
+
+    @Autowired
+    ProjectErrorService errorService
 
     @RequestMapping(value = "/projects/{id}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
     @ResponseBody
@@ -899,5 +903,33 @@ class AdminController {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotNull(level, "Level")
         return globalBadgesService.isProjectLevelUsedInGlobalBadge(InputSanitizer.sanitize(projectId), level)
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/errors", method = [RequestMethod.GET], produces = "application/json")
+    @ResponseBody
+    TableResult getErrors(@PathVariable("projectId") String projectId,
+                                 @RequestParam int limit,
+                                 @RequestParam int page,
+                                 @RequestParam String orderBy,
+                                 @RequestParam Boolean ascending) {
+
+        PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
+
+        return errorService.getAllErrorsForProject(projectId, pageRequest)
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/errors", method = [RequestMethod.DELETE], produces = "application/json")
+    @ResponseBody
+    RequestResult deleteAllErrors(@PathVariable("projectId") String projectId) {
+        errorService.deleteAllErrors(projectId)
+        return RequestResult.success()
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/errors/{errorType}/{error}", method = [RequestMethod.DELETE], produces = "application/json")
+    @ResponseBody
+    RequestResult deleteProjectError(@PathVariable("projectId") String projectId, @PathVariable("errorType") String errorType, @PathVariable("error") String error){
+
+        errorService.deleteError(projectId, errorType, error)
+        return RequestResult.success()
     }
 }

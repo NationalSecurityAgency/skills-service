@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillExceptionBuilder
 import skills.services.LockingService
@@ -308,6 +309,7 @@ class SkillEventsService {
                     .logLevel(SkillException.SkillExceptionLogLevel.WARN)
                     .printStackTrace(false)
                     .doNotRetry(true)
+                    .errorCode(ErrorCode.SkillNotFound)
                     .projectId(projectId).skillId(skillId).userId(userId).build()
         }
         return skillDefinition

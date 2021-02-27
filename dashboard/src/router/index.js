@@ -71,6 +71,7 @@ const MetricsPageNav = () => import(/* webpackChunkName: 'MetricsPageNav' */'@//
 const MyProgressPage = () => import(/* webpackChunkName: 'myProgressPage' */'@//components/myProgress/MyProgressPage');
 const MyProgress = () => import(/* webpackChunkName: 'myProgress' */'@//components/myProgress/MyProgress');
 const MyProjectSkillsPage = () => import(/* webpackChunkName: 'myProjectSkillsPage' */'@//components/myProgress/MyProjectSkillsPage');
+const ProjectErrorsPage = () => import(/* webpackChunkName: 'projectErrorsPage' */'@//components/projects/ProjectErrors');
 
 Vue.use(Router);
 
@@ -264,6 +265,11 @@ const router = new Router({
         path: 'settings',
         component: ProjectSettings,
         meta: { requiresAuth: true, reportSkillId: 'VisitProjectSettings' },
+      }, {
+        name: 'ProjectErrorsPage',
+        path: 'issues',
+        component: ProjectErrorsPage,
+        meta: { requiresAuth: true },
       }, {
         path: '/projects/:projectId/metrics',
         component: MetricsPageNav,

@@ -270,6 +270,14 @@ describe('Accessibility Tests', () => {
   });
 
   it('project', () => {
+    //report skills that dont' exist
+    cy.reportSkill('MyNewtestProject', 42, 'user@skills.org', '2021-02-24 10:00', false);
+    cy.reportSkill('MyNewtestProject', 75, 'user@skills.org', '2021-02-24 10:00', false);
+    cy.reportSkill('MyNewtestProject', 75, 'user@skills.org', '2021-02-24 10:00', false);
+    cy.reportSkill('MyNewtestProject', 75, 'user@skills.org', '2021-02-24 10:00', false);
+    cy.reportSkill('MyNewtestProject', 13, 'user@skills.org', '2021-02-24 10:00', false);
+
+
     cy.visit('/administrator/');
     cy.injectAxe()
     //view project
@@ -363,6 +371,14 @@ describe('Accessibility Tests', () => {
 
     cy.get('[data-cy=nav-Settings]').click();
     cy.contains('Root Help Url');
+    cy.customLighthouse();
+    cy.customA11y();
+
+    // --- Issues page ---
+    cy.intercept('GET', '/admin/projects/MyNewtestProject/errors').as('getErrors');
+    cy.get('[data-cy=nav-Issues]').click();
+    cy.wait('@getErrors');
+    cy.contains('Remove All');
     cy.customLighthouse();
     cy.customA11y();
   })

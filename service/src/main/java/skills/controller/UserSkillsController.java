@@ -27,11 +27,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import skills.PublicProps;
 import skills.auth.UserInfoService;
+import skills.controller.exceptions.ErrorCode;
+import skills.controller.exceptions.SkillException;
 import skills.controller.exceptions.SkillsValidator;
 import skills.controller.request.model.SkillEventRequest;
 import skills.controller.request.model.SkillsClientVersionRequest;
 import skills.controller.result.model.RequestResult;
 import skills.icons.CustomIconFacade;
+import skills.services.ProjectErrorService;
 import skills.services.SelfReportingService;
 import skills.services.events.SkillEventResult;
 import skills.services.events.SkillEventsService;
@@ -77,6 +80,9 @@ class UserSkillsController {
 
     @Autowired
     SelfReportingService selfReportingService;
+
+    @Autowired
+    ProjectErrorService projectErrorService;
 
     private int getProvidedVersionOrReturnDefault(Integer versionParam) {
         if (versionParam != null) {
@@ -297,7 +303,12 @@ class UserSkillsController {
                 }
             };
             result = (SkillEventResult) RetryUtil.withRetry(3, false, closure);
-        } finally {
+        } catch(SkillException ske) {
+            if (ske.getErrorCode() == ErrorCode.SkillNotFound) {
+                projectErrorService.invalidSkillReported(projectId, skillId);
+            }
+            throw ske;
+        }finally {
             CProf.stop(prof);
         }
         return result;

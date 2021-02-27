@@ -217,6 +217,18 @@ class SkillsService {
         wsHelper.adminDelete("/projects/${projectId}")
     }
 
+    def getProjectErrors(String projectId, int limit, int page, String orderBy, Boolean ascending) {
+        wsHelper.adminGet("/projects/${projectId}/errors?limit=${limit}&page=${page}&orderBy=${orderBy}&ascending=${ascending}")
+    }
+
+    def deleteAllProjectErrors(String projectId) {
+        wsHelper.adminDelete("/projects/${projectId}/errors")
+    }
+
+    def deleteSpecificProjectError(String projectId, String errorType, String error) {
+        wsHelper.adminDelete("/projects/${projectId}/errors/${errorType}/${error}")
+    }
+
     def deleteUserRole(String userId, String projectId, String role) {
 //        userId = getUserId(userId)
         wsHelper.adminDelete("/projects/${projectId}/users/${userId}/roles/${role}")

@@ -140,9 +140,19 @@ Cypress.Commands.add("createSkill", (projNum = 1, subjNum = 1, skillNum = 1, ove
     }, overrideProps));
 });
 
-Cypress.Commands.add("reportSkill", (projNum = 1, skillNum = 1, userId = 'user@skills.org', date = '2020-09-12 11:00') => {
+Cypress.Commands.add("reportSkill", (project = 1, skillNum = 1, userId = 'user@skills.org', date = '2020-09-12 11:00', failOnError=true) => {
     const m = moment.utc(date, 'YYYY-MM-DD HH:mm');
-    cy.request('POST', `/api/projects/proj${projNum}/skills/skill${skillNum}`, {userId, timestamp: m.clone().format('x')})
+    let proj = '';
+    if (!isNaN(parseFloat(project))) {
+        proj = `proj${project}`;
+    } else {
+        proj = project;
+    }
+    cy.request({
+        method: 'POST',
+        url: `/api/projects/${proj}/skills/skill${skillNum}`,
+        failOnStatusCode: failOnError,
+        body: {userId, timestamp: m.clone().format('x')}});
 });
 
 
@@ -486,7 +496,8 @@ Cypress.Commands.add('validateTable', (tableSelector, expected, pageSize = 5, on
         cy.get('@cyRows').eq(rowIndex).find('td').as('row1');
         const toValidate = expected[i];
         toValidate.forEach((item) => {
-            cy.get('@row1').eq(item.colIndex).should('contain', item.value);
+            console.log('cell value', cy.get)
+            cy.get('@row1').eq(item.colIndex).should('contain.text', item.value);
         })
     }
 
