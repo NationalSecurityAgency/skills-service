@@ -21,9 +21,9 @@ limitations under the License.
         <div class="col-sm pl-0">
           <div class="text-center text-sm-left">
             <router-link class="h2 text-primary ml-2" to="/">
-              <img src="/static/img/skilltree_logo_v1.png" alt="skilltree logo"/>
+              <img ref="skillTreeLogo" src="/static/img/skilltree_logo_v1.png" alt="skilltree logo"/>
             </router-link>
-            <span v-if="isAdminPage" class="skills-stamp">ADMIN</span>
+            <span v-if="isAdminPage" ref="adminStamp" class="skills-stamp">ADMIN</span>
           </div>
         </div>
 
@@ -54,10 +54,48 @@ limitations under the License.
       Breadcrumb,
       SettingsButton,
     },
+    mounted() {
+      window.addEventListener('resize', this.updateAdminStampSize);
+      this.$nextTick(() => {
+        this.updateAdminStampSize();
+      });
+    },
+    updated() {
+      this.$nextTick(() => {
+        this.updateAdminStampSize();
+      });
+    },
+    methods: {
+      updateAdminStampSize() {
+        const windowWidth = window.innerWidth;
+        if (windowWidth && windowWidth > 0) {
+          const { adminStamp, skillTreeLogo } = this.$refs;
+          if (skillTreeLogo && adminStamp) {
+            const dimensions = skillTreeLogo.getBoundingClientRect();
+            if (dimensions && dimensions.width && dimensions.width > 0) {
+              const left = (dimensions.x + dimensions.width) + 5;
+              adminStamp.style.left = `${left}px`;
+            }
+            if (windowWidth < 675) {
+              adminStamp.style['line-height'] = '12px';
+              adminStamp.style['font-size'] = '14px';
+              adminStamp.style.width = '85px';
+            } else {
+              adminStamp.style['line-height'] = '22px';
+              adminStamp.style['font-size'] = '24px';
+              adminStamp.style.width = '155px';
+            }
+          }
+        }
+      },
+    },
     computed: {
       isAdminPage() {
         return this.$route && this.$route.meta && this.$route.meta.requiresAuth && !this.$route.meta.nonAdmin;
       },
+    },
+    beforeDestroy() {
+      window.removeEventListener('resize', this.updateAdminStampSize);
     },
   };
 </script>
@@ -81,7 +119,7 @@ limitations under the License.
   /* Abs positioning makes it not take up vert space */
   position: absolute;
   bottom:8px;
-  left: 175px;
+  left: 203px;
 
   box-shadow: 0 0 0 3px red, 0 0 0 2px red inset;
   border: 2px solid transparent;
