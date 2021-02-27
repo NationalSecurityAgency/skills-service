@@ -132,6 +132,7 @@ describe('Metrics Tests', () => {
         cy.visit('/administrator/projects/proj1/');
         cy.clickNav('Metrics');
         cy.wait('@distinctUsersOverTimeForProject');
+        cy.wait(6000);
 
         cy.get('[data-cy=distinctNumUsersOverTime]').contains('This chart needs at least 2 days of user activity.');
 

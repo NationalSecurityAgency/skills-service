@@ -143,11 +143,14 @@ limitations under the License.
         this.props.start = timeEvent.startTime.valueOf();
         this.loadData();
       },
+      allZeros(data) {
+        return data.filter((item) => item.count > 0).length === 0;
+      },
       loadData() {
         this.loading = true;
         MetricsService.loadChart(this.$route.params.projectId, 'distinctUsersOverTimeForProject', this.props)
           .then((response) => {
-            if (response && response.length > 1) {
+            if (response && response.length > 1 && !this.allZeros(response)) {
               this.hasDataEnoughData = true;
               this.distinctUsersOverTime = [{
                 data: response.map((item) => [item.value, item.count]),
