@@ -22,7 +22,6 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.CodeSignature;
-import org.jsoup.helper.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +36,7 @@ import skills.auth.UserSkillsGrantedAuthority;
 import skills.controller.request.model.SkillEventRequest;
 import skills.storage.model.auth.RoleName;
 
-import java.util.List;
+import java.util.Collection;
 
 @Aspect
 @Component
@@ -52,10 +51,13 @@ class AuthorizationAspect {
     @Autowired
     private UserInfoService userInfoService;
 
+    @Autowired
+    skills.auth.UserAuthService userAuthService;
+
     @Around(value = "@within(AdminUsersOnlyWhenUserIdSupplied) || @annotation(AdminUsersOnlyWhenUserIdSupplied)")
     Object authorizeAdmin(ProceedingJoinPoint joinPoint) throws Throwable {
         String userIdProvided = getUserIdParam(joinPoint);
-        if (StringUtils.isNoneBlank(userIdProvided)) {
+        if (StringUtils.isNotBlank(userIdProvided)) {
             UserInfo userInfo = userInfoService.getCurrentUser();
             checkAdminAccess(userInfo);
         }
@@ -64,15 +66,16 @@ class AuthorizationAspect {
 
     @Profile
     private void checkAdminAccess(UserInfo userInfo) {
-        List<GrantedAuthority> authorities = userInfo.getAuthorities();
-
+        Collection<GrantedAuthority> authorities = !userInfo.isProxied() ? userInfo.getAuthorities() : userAuthService.loadAuthorities(userInfo.getUsername());
         boolean foundAdmin = false;
-        for (GrantedAuthority grantedAuthority : authorities) {
-            UserSkillsGrantedAuthority userSkillsGrantedAuthority = (UserSkillsGrantedAuthority) grantedAuthority;
-            RoleName roleName = userSkillsGrantedAuthority.getRole().getRoleName();
-            if (roleName.equals(RoleName.ROLE_PROJECT_ADMIN) || roleName.equals(RoleName.ROLE_SUPER_DUPER_USER)) {
-                foundAdmin = true;
-                break;
+        if (authorities != null) {
+            for (GrantedAuthority grantedAuthority : authorities) {
+                UserSkillsGrantedAuthority userSkillsGrantedAuthority = (UserSkillsGrantedAuthority) grantedAuthority;
+                RoleName roleName = userSkillsGrantedAuthority.getRole().getRoleName();
+                if (roleName.equals(RoleName.ROLE_PROJECT_ADMIN) || roleName.equals(RoleName.ROLE_SUPER_DUPER_USER)) {
+                    foundAdmin = true;
+                    break;
+                }
             }
         }
 

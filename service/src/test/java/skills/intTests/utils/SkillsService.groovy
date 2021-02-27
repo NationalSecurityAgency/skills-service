@@ -479,6 +479,12 @@ class SkillsService {
                 [ userId : userId, timestamp:date.time])
     }
 
+    def addSkillAsAdminProxy(Map props, String adminUserId, String userId, Date date = new Date(), String approvalRequestedMsg = null) {
+        userId = getUserId(userId)
+        assert date
+        wsHelper.proxyApiPut(wsHelper.getTokenForUser(adminUserId), "/projects/${props.projectId}/skills/${props.skillId}", [ userId : userId, timestamp:date.time, approvalRequestedMsg: approvalRequestedMsg])
+    }
+
     def addSkillAsProxy(Map props, String userId, boolean includeGrantType=true, boolean includeProxyUser=true) {
 //        userId = getUserId(userId)
         wsHelper.proxyApiPut(wsHelper.getTokenForUser(userId, includeGrantType, includeProxyUser), "/projects/${props.projectId}/skills/${props.skillId}", null)
