@@ -440,7 +440,7 @@ describe('Metrics Tests - Skills', () => {
         cy.wait('@binnedUsagePostAchievementMetricsBuilder');
         cy.wait('@usagePostAchievementMetricsBuilder');
 
-        cy.wait(waitForSnap);
+        cy.wait(8000);
         cy.get('[data-cy=numUsersPostAchievement]').matchImageSnapshot('numUsersPostAchievement');
         cy.get('[data-cy=binnedNumUsersPostAchievement]').matchImageSnapshot('binnedNumUsersPostAchievement');
     });

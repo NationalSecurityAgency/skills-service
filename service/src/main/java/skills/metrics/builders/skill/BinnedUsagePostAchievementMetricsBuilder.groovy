@@ -51,6 +51,9 @@ class BinnedUsagePostAchievementMetricsBuilder implements ProjectMetricsBuilder{
             throw new SkillException("Skill does not exist", projectId, skillId, ErrorCode.SkillNotFound)
         }
         List<LabeledCount> labelCount =  userEventsRepo.binnedUserCountsForSkillUsagePostAchievement(skillDef.id)
+        if (!labelCount) {
+            return []
+        }
         List<LabeledCount> filled = labelCount.clone()
         order.each {ord ->
             if(!labelCount.find {it.label == ord.key}) {

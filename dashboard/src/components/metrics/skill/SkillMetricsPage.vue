@@ -43,14 +43,16 @@ limitations under the License.
 
       <skill-achieved-by-users-over-time class="mb-3"/>
       <skill-events-over-time class="mb-3"/>
-      <div class="row">
-          <div class="col-lg-3 col-md-4 col-sm-12">
-            <post-achievement-users-pie-chart class="mb-3  h-100"/>
-          </div>
-          <div class="col-lg-9 col-md-12 col-sm-12">
-            <binned-post-achievement-usage class="mb-3  h-100"/>
-          </div>
-      </div>
+      <metrics-card title="Post Achievement Metrics" data-cy="postAchievementContainers">
+        <div class="row">
+            <div class="col-xl-4 col-lg-5 col-md-12 col-sm-12 mb-3">
+              <post-achievement-users-pie-chart class="h-100"/>
+            </div>
+            <div class="col-xl-8 col-lg-7 col-md-12 col-sm-12 mb-3">
+              <binned-post-achievement-usage class="h-100"/>
+            </div>
+        </div>
+      </metrics-card>
     </div>
   </div>
 </template>
@@ -64,6 +66,7 @@ limitations under the License.
   import SkillsSpinner from '../../utils/SkillsSpinner';
   import PostAchievementUsersPieChart from './PostAchievementUsersPieChart';
   import BinnedPostAchievementUsage from './BinnedPostAchievementUsage';
+  import MetricsCard from '../utils/MetricsCard';
 
   export default {
     name: 'SkillMetricsPage',
@@ -75,6 +78,7 @@ limitations under the License.
       SubPageHeader,
       PostAchievementUsersPieChart,
       BinnedPostAchievementUsage,
+      MetricsCard,
     },
     data() {
       return {

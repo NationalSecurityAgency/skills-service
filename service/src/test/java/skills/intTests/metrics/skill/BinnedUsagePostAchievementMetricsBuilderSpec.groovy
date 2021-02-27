@@ -81,5 +81,21 @@ class BinnedUsagePostAchievementMetricsBuilderSpec extends DefaultIntSpec {
         result[3].count == 1
     }
 
+    def "produces empty result when no achievement exists"() {
+        def proj = SkillsFactory.createProject()
+        def skill = SkillsFactory.createSkill(1, 1, 1, 0, 10,  )
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(SkillsFactory.createSubject())
+        skillsService.createSkill(skill)
+
+        when:
+        def props = ["skillId": skill.skillId]
+        def result = builder.build(proj.projectId, builder.id, props)
+
+        then:
+        !result
+    }
+
 
 }
