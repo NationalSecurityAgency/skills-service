@@ -53,6 +53,9 @@ class SkillEventAdminService {
     @Autowired
     LevelDefinitionStorageService levelDefService
 
+    @Autowired
+    UserEventService userEventService
+
     @Transactional
     RequestResult deleteSkillEvent(String projectId, String skillId, String userId, Long timestamp) {
         List<UserPerformedSkill> performedSkills = performedSkillRepository.findAllByProjectIdAndSkillIdAndUserIdAndPerformedOn(projectId, skillId, userId, new Date(timestamp))
@@ -92,6 +95,8 @@ class SkillEventAdminService {
         res.explanation = skillEventResult.explanation
         deleteProjectLevelIfNecessary(performedSkill.projectId, userId, numExistingSkills.toInteger())
         performedSkillRepository.delete(performedSkill)
+
+        userEventService.removeEvent(performedSkill.performedOn, performedSkill.userId, performedSkill.skillRefId)
 
         return res
     }

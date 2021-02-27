@@ -58,7 +58,7 @@ class UserEventService {
     // compactDailyEventsOlderThan can be decreased and at any time with the only impact being that the daily events older than the new compactDailyEventsOlderThan
     // will not be exposed until after compaction next runs.
     @Value('#{"${skills.config.compactDailyEventsOlderThan:30}"}')
-    int maxDailyDays = 30
+    int maxDailyDays = 30 //changing this can cause some problems
 
     @Autowired
     SkillDefRepo skillDefRepo
@@ -296,6 +296,40 @@ class UserEventService {
         sw.stop()
         duration = Duration.of(sw.getTime(), ChronoUnit.MILLIS)
         log.info("Deleted compacted input events in [${duration}]")
+    }
+
+    /**
+     * Removes a recorded userEvent, decrementing the event count column. This assumes
+     * that event compaction has been run
+     * @param performedOn
+     * @param userId
+     * @param skillRefId
+     */
+    @Transactional
+    public void removeEvent(Date performedOn, String userId, Integer skillRefId) {
+        Date dailyEventTime = StartDateUtil.computeStartDate(performedOn, EventType.DAILY)
+        Date weeklyEventTime = StartDateUtil.computeStartDate(performedOn, EventType.WEEKLY)
+
+        // to guard against an event being decremented in the window where performedOn < now-maxDailyDays
+        // but compaction has not yet run for that day, we need to first check if a DAILY event type exists for this event
+        UserEvent event = userEventsRepo.findByUserIdAndSkillRefIdAndEventTimeAndEventType(userId, skillRefId, dailyEventTime, EventType.DAILY)
+        if (event) {
+            decrementEvent(event)
+        } else if ((event = userEventsRepo.findByUserIdAndSkillRefIdAndEventTimeAndEventType(userId, skillRefId, weeklyEventTime, EventType.WEEKLY)) != null){
+            decrementEvent(event)
+        } else {
+            throw new SkillException("Unable to remove event for skillRefId" +
+                    " [${skillRefId}], userId [${userId}], performedOn [${performedOn}], no event exists. This should not happen")
+        }
+    }
+
+    private void decrementEvent(UserEvent event) {
+        event.count = Math.max(0, event.count-1)
+        if (event.count == 0) {
+            userEventsRepo.delete(event)
+        } else {
+            userEventsRepo.save(event)
+        }
     }
 
     @CompileStatic

@@ -16,6 +16,7 @@
 package skills.storage.repos
 
 import groovy.transform.CompileStatic
+import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.jpa.repository.QueryHints
 import org.springframework.data.repository.CrudRepository
@@ -190,6 +191,21 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
     Stream<UserEvent> findAllByEventTypeAndEventTimeLessThan(EventType type, Date start)
 
     void deleteByEventTypeAndEventTimeLessThan(EventType type, Date start)
+
+    @Modifying
+    @Query(value='''
+        update UserEvent ue
+        set ue.count = ue.count-1 
+        where ue.skillRefId = :skillRefId
+        and ue.userId = :userId
+        and ue.eventTime = :eventTime
+        and ue.eventType = :eventType
+        and ue.count > 0
+    ''')
+    void decrementEventCount(@Param("eventTime") Date eventDate, @Param("userId") String userId, @Param("skillRefId") Integer skillRefId, @Param("eventType") EventType type)
+
+    @Nullable
+    UserEvent findByUserIdAndSkillRefIdAndEventTimeAndEventType(String userId, Integer skillRefId, Date eventTime, EventType type)
 
     @Nullable
     @Query(value='''
