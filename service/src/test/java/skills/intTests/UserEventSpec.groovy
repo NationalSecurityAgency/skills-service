@@ -31,6 +31,7 @@ import skills.storage.model.SkillDef
 import skills.storage.model.UserEvent
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.UserEventsRepo
+import spock.lang.Ignore
 
 import java.text.DateFormat
 import java.time.DayOfWeek
@@ -305,7 +306,6 @@ class UserEventSpec extends DefaultIntSpec {
         user1Results[3].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.startOfTwoWeeksAgo.toDate())
         user1Results[3].projectId == proj2.projectId
     }
-
 
     def "weekly user event count for metrics filter out projects correctly"() {
         Map proj = SkillsFactory.createProject(42)
@@ -1267,8 +1267,8 @@ class UserEventSpec extends DefaultIntSpec {
 
         skillsService.addSkill(subj1_skill1, userIds[0], testDates.startOfTwoWeeksAgo.plusDays(3).toDate())
         skillsService.addSkill(subj1_skill1, userIds[0], testDates.startOfTwoWeeksAgo.toDate())
-        skillsService.addSkill(subj1_skill1, userIds[1], testDates.now.minusDays(1).toDate())
-        skillsService.addSkill(subj1_skill2, userIds[1], testDates.now.minusDays(1).toDate())
+        skillsService.addSkill(subj1_skill1, userIds[1], testDates.startOfCurrentWeek.toDate())
+        skillsService.addSkill(subj1_skill2, userIds[1], testDates.startOfCurrentWeek.toDate())
         skillsService.addSkill(subj1_skill1, userIds[1], testDates.startOfTwoWeeksAgo.toDate())
         skillsService.addSkill(subj1_skill1, userIds[1], testDates.startOfTwoWeeksAgo.toDate())
 
