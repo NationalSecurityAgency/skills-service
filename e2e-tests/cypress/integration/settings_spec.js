@@ -197,7 +197,7 @@ describe('Settings Tests', () => {
         cy.get(`${supervisorTableSelector} [data-cy="removeUserBtn"]`).eq(0).click({ force: true });
         cy.contains('Can not remove myself');
         // click away to remove tooltip
-        cy.contains('Firstname LastName').click();
+        cy.contains('SkillTree Dashboard').click();
         cy.validateTable(supervisorTableSelector, [
             [{ colIndex: 0,  value: '(root@skills.org)' }],
             [{ colIndex: 0,  value: '(skills@skills.org)' }],
@@ -269,7 +269,7 @@ describe('Settings Tests', () => {
         cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
         cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
-        cy.get('.userName').parent().click();
+         cy.get('[data-cy="settings-button"]').click();
         cy.contains('Settings').click();
         cy.contains('Email').click();
         cy.wait('@loadEmailSettings');
@@ -318,7 +318,7 @@ describe('Settings Tests', () => {
         cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
         cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
-        cy.get('.userName').parent().click();
+         cy.get('[data-cy="settings-button"]').click();
         cy.contains('Settings').click();
         cy.contains('Email').click();
         cy.wait('@loadEmailSettings');
@@ -339,7 +339,7 @@ describe('Settings Tests', () => {
         cy.intercept('GET', '/public/config').as('loadConfig');
         cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
-        cy.get('.userName').parent().click();
+         cy.get('[data-cy="settings-button"]').click();
         cy.contains('Settings').click();
         cy.contains('System').click();
 
@@ -377,7 +377,7 @@ describe('Settings Tests', () => {
         cy.intercept('GET', '/public/config').as('loadConfig');
         cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
-        cy.get('.userName').parent().click();
+         cy.get('[data-cy="settings-button"]').click();
         cy.contains('Settings').click();
         cy.contains('System').click();
 
@@ -405,7 +405,7 @@ describe('Settings Tests', () => {
         cy.intercept('GET', '/public/config').as('loadConfig');
         cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
-        cy.get('.userName').parent().click();
+         cy.get('[data-cy="settings-button"]').click();
         cy.contains('Settings').click();
         cy.contains('System').click();
 
@@ -435,7 +435,7 @@ describe('Settings Tests', () => {
         cy.intercept('GET', '/public/config').as('loadConfig');
         cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
-        cy.get('.userName').parent().click();
+         cy.get('[data-cy="settings-button"]').click();
         cy.contains('Settings').click();
         cy.contains('System').click();
 
@@ -463,7 +463,7 @@ describe('Settings Tests', () => {
         cy.intercept('GET', '/public/config').as('loadConfig');
         cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
-        cy.get('.userName').parent().click();
+         cy.get('[data-cy="settings-button"]').click();
         cy.contains('Settings').click();
         cy.contains('System').click();
 
@@ -511,7 +511,7 @@ describe('Settings Tests', () => {
         cy.intercept('GET', '/public/config').as('loadConfig');
         cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
-        cy.get('.userName').parent().click();
+         cy.get('[data-cy="settings-button"]').click();
         cy.contains('Settings').click();
         cy.contains('System').click();
 
@@ -548,6 +548,27 @@ describe('Settings Tests', () => {
         cy.get('#customFooterDiv').contains(/\w{3} \d{1,2}, \d{4}/).should('be.visible');
         cy.get('#customFooterDiv').contains(/\d{1,3}\.\d{1,3}\.\d{1,3}(-SNAPSHOT)?/).should('be.visible');
     });
+
+    it('display logged in user under user icon', () => {
+        cy.visit('/')
+        cy.get('[data-cy="settings-button"]').click();
+        cy.get('[data-cy="settingsButton-loggedInName"]').contains('Firstname LastName')
+    })
+
+    it('nav to settings', () => {
+        cy.visit('/')
+        cy.get('[data-cy="settings-button"]').click();
+        cy.get('[data-cy="settingsButton-navToSettings"]').should('not.be.disabled');
+        cy.get('[data-cy="settingsButton-navToSettings"]').click();
+
+        cy.contains('* First Name');
+    })
+
+    it('show links to docs', () => {
+        cy.visit('/')
+        cy.get('[data-cy="help-button"]').click();
+        cy.contains('Official Docs');
+    })
 
 });
 

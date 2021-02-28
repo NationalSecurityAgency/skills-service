@@ -16,7 +16,8 @@ limitations under the License.
 <template>
   <b-dropdown right variant="link" aria-label="Help Menu Dropdown" id="helpMenu">
     <template slot="button-content">
-      <i class="far fa-question-circle" aria-label="help menu button"></i><span class="sr-only">help menu button</span>
+      <b-avatar icon="question" size="sm" aria-hidden="true" variant="primary"></b-avatar>
+      <span class="sr-only">help menu</span>
     </template>
     <b-dropdown-item :href="officialGuide" target="_blank" style="min-width: 12.5rem;">
       <span class="text-gray-700"> <i class="fas fa-book" aria-hidden="true"></i>Official Docs</span>
