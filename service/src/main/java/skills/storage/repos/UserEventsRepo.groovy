@@ -45,7 +45,7 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
 
     @Nullable
     @Query(value="""
-        select new skills.storage.model.DayCountItem(ue.projectId, ue.eventTime, sum(ue.count)) from UserEvent ue
+        select new skills.storage.model.DayCountItem(min(ue.projectId), ue.eventTime, sum(ue.count)) from UserEvent ue
         where ue.eventTime >= :start AND ue.skillRefId = :skillRefId AND ue.eventType = :type 
         group by ue.eventTime
         order by ue.eventTime desc
@@ -71,7 +71,7 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
     Stream<WeekCount> getDistinctUserCountForSkillGroupedByWeek(@Param("skillRefId") Integer skillRefId, @Param("start") Date start)
 
     @Query(value="""
-        select new skills.storage.model.DayCountItem(ue.projectId, ue.eventTime, sum(ue.count)) from UserEvent ue
+        select new skills.storage.model.DayCountItem(min(ue.projectId), ue.eventTime, sum(ue.count)) from UserEvent ue
         where ue.eventTime > :start AND ue.eventType = :type AND 
         ue.skillRefId in (SELECT child.id FROM SkillRelDef where parent.id = :skillRefId)
         group by ue.eventTime
@@ -118,7 +118,7 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
 
 
     @Query(value="""
-        select new skills.storage.model.DayCountItem(ue.projectId, ue.eventTime, sum(ue.count)) from UserEvent ue
+        select new skills.storage.model.DayCountItem(min(ue.projectId), ue.eventTime, sum(ue.count)) from UserEvent ue
         where ue.eventTime > :start AND ue.eventType = :type AND 
         ue.skillRefId in (SELECT sd.id FROM SkillDef sd WHERE sd.projectId = :projectId AND sd.type = 'Skill')   
         group by ue.eventTime 
@@ -127,7 +127,7 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
     Stream<DayCountItem> getEventCountForProject(@Param("projectId") String projectId, @Param("start") Date start, @Param("type") EventType type)
 
     @Query(value="""
-        select new skills.storage.model.WeekCount(ue.projectId, ue.weekNumber, sum(ue.count)) from UserEvent ue
+        select new skills.storage.model.WeekCount(min(ue.projectId), ue.weekNumber, sum(ue.count)) from UserEvent ue
         where ue.eventTime >= :start AND
         ue.skillRefId in (SELECT sd.id FROM SkillDef sd WHERE sd.projectId = :projectId AND sd.type = 'Skill')   
         group by ue.weekNumber
@@ -136,7 +136,7 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
     Stream<WeekCount> getEventCountForProjectGroupedByWeek(@Param("projectId") String projectId, @Param("start") Date start)
 
     @Query(value="""
-        select new skills.storage.model.DayCountItem(ue.projectId, ue.eventTime, sum(ue.count)) from UserEvent ue
+        select new skills.storage.model.DayCountItem(min(ue.projectId), ue.eventTime, sum(ue.count)) from UserEvent ue
         where ue.eventTime > :start AND ue.eventType = :type AND ue.userId = :userId AND ue.projectId in (:projectIds)
         group by ue.projectId, ue.eventTime 
         order by ue.eventTime desc
@@ -144,7 +144,7 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
     Stream<DayCountItem> getEventCountForUser(@Param("userId") String userId, @Param("start") Date start, @Param("type") EventType type, @Param("projectIds") List<String> projectIds)
 
     @Query(value="""
-        select new skills.storage.model.WeekCount(ue.projectId, ue.weekNumber, sum(ue.count)) from UserEvent ue
+        select new skills.storage.model.WeekCount(min(ue.projectId), ue.weekNumber, sum(ue.count)) from UserEvent ue
         where ue.eventTime >= :start AND ue.userId = :userId AND ue.projectId in (:projectIds)
         group by ue.projectId, ue.weekNumber
         order by ue.weekNumber desc
@@ -153,7 +153,7 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
 
 
     @Query(value="""
-        select new skills.storage.model.DayCountItem(ue.projectId, ue.eventTime, count(distinct ue.userId)) from UserEvent ue
+        select new skills.storage.model.DayCountItem(min(ue.projectId), ue.eventTime, count(distinct ue.userId)) from UserEvent ue
         where ue.eventTime > :start AND ue.eventType = :type AND 
         ue.skillRefId in (SELECT sd.id FROM SkillDef sd WHERE sd.projectId = :projectId AND sd.type = 'Skill')   
         group by ue.eventTime 
@@ -171,7 +171,7 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
     Stream<EventCount> getDistinctUserCountForProject(@Param("projectId") String projectId, @Param("start") Date start)
 
     @Query(value="""
-        select new skills.storage.model.WeekCount(ue.projectId, ue.weekNumber, count(distinct ue.userId)) from UserEvent ue
+        select new skills.storage.model.WeekCount(min(ue.projectId), ue.weekNumber, count(distinct ue.userId)) from UserEvent ue
         where ue.eventTime >= :start AND
         ue.skillRefId in (SELECT sd.id FROM SkillDef sd WHERE sd.projectId = :projectId AND sd.type = 'Skill')   
         group by ue.weekNumber
