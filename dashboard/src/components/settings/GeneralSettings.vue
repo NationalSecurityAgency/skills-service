@@ -58,12 +58,17 @@ limitations under the License.
 
             <div class="mt-4">
               <hr>
-              <b-form-group label="Default Home Page:" v-slot="{ ariaDescribedby }">
+              <b-form-group label-for="home-page-pref">
+                <template v-slot:label>
+                  Default Home Page:
+                  <inline-help
+                    msg="Select which page you would to be displayed when first visiting the SkillTree dashboard."/>
+                </template>
                 <b-form-radio-group
+                  id="home-page-pref"
                   class="pl-2"
                   v-model="loginFields.landingPage"
                   :options="[{ text: 'Progress and Rankings', value: 'progress'}, {text: 'Project Admin', value: 'admin'}]"
-                  :aria-describedby="ariaDescribedby"
                 ></b-form-radio-group>
               </b-form-group>
             </div>
@@ -86,11 +91,12 @@ limitations under the License.
   import LoadingContainer from '../utils/LoadingContainer';
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import ToastSupport from '../utils/ToastSupport';
+  import InlineHelp from '../utils/InlineHelp';
 
   export default {
     name: 'GeneralSettings',
     mixins: [ToastSupport],
-    components: { SubPageHeader, LoadingContainer },
+    components: { SubPageHeader, LoadingContainer, InlineHelp },
     data() {
       return {
         isLoading: true,
