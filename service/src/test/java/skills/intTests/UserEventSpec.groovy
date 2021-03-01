@@ -194,6 +194,8 @@ class UserEventSpec extends DefaultIntSpec {
         skillsService.addSkill(skill, userIds[0], testDates.now.toDate())
         skillsService.addSkill(skill, userIds[1], testDates.now.toDate())
 
+        assert proj.projectId
+
         eventService.recordEvent(proj.projectId, rawId, userIds[0], testDates.now.minusDays(1).toDate(), 1, EventType.DAILY)
         eventService.recordEvent(proj.projectId, rawId, userIds[0], testDates.now.minusDays(1).toDate(), 3, EventType.DAILY)
 
@@ -213,6 +215,39 @@ class UserEventSpec extends DefaultIntSpec {
         results[0].count == 2
         results[0].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.now.toDate())
         results[1].count == 4
+        results[1].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.now.minusDays(1).toDate())
+        results[2].count == 0
+        results[2].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.now.minusDays(2).toDate())
+    }
+
+    def "project event count for for project with no events produces zero filled count to include current day"() {
+        Map proj = SkillsFactory.createProject(42)
+        Map subject = SkillsFactory.createSubject(42)
+        Map skill = SkillsFactory.createSkill(42,1,1,0,40, 0)
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subject)
+        skillsService.createSkill(skill)
+
+        assert maxDailyDays == 3, "test data is structured around compactDailyEventsOlderThan == 3"
+
+        def userIds = getRandomUsers(2)
+
+        SkillDef skillDef = skillDefRepo.findByProjectIdAndSkillIdAndType(proj.projectId, skill.skillId, SkillDef.ContainerType.Skill)
+        Integer rawId = skillDef.id
+
+        TestDates testDates = new TestDates()
+
+        when:
+
+        Date queryFrom = testDates.now.toLocalDate().atStartOfDay().minusDays(maxDailyDays).toDate()
+        List<DayCountItem> results = eventService.getUserEventCountsForProject(proj.projectId, queryFrom)
+
+        then:
+        results.size() == 3
+        results[0].count == 0
+        results[0].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.now.toDate())
+        results[1].count == 0
         results[1].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.now.minusDays(1).toDate())
         results[2].count == 0
         results[2].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.now.minusDays(2).toDate())

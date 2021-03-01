@@ -179,7 +179,7 @@ class UserEventService {
         List<DayCountItem> results
         if (EventType.DAILY == eventType) {
             Stream<DayCountItem> stream = userEventsRepo.getEventCountForProject(projectId, start, eventType)
-            results = convertResults(stream, eventType, start)
+            results = convertResults(stream, eventType, start, [projectId])
         } else {
             start = StartDateUtil.computeStartDate(start, EventType.WEEKLY)
             Stream<WeekCount> stream = userEventsRepo.getEventCountForProjectGroupedByWeek(projectId, start)
@@ -235,7 +235,7 @@ class UserEventService {
         List<DayCountItem> results
         if (EventType.DAILY == eventType) {
             Stream<DayCountItem> stream = userEventsRepo.getDistinctUserCountForProject(projectId, start, eventType)
-            results = convertResults(stream, eventType, start)
+            results = convertResults(stream, eventType, start, [projectId])
         } else {
             start = StartDateUtil.computeStartDate(start, EventType.WEEKLY)
             Stream<WeekCount> stream = userEventsRepo.getDistinctUserCountForProjectGroupedByWeek(projectId, start)
@@ -355,6 +355,11 @@ class UserEventService {
 
             Date last = perProject.lastDate
             boolean first = perProject.count == 0
+
+            if (first) {
+
+            }
+
             List<DayCountItem> zeroFills = zeroFillGaps(eventType, last, it.day, (first && it.day != perProject.lastDate), it.projectId)
             if (zeroFills) {
                 perProject.results.addAll(zeroFills)
@@ -366,7 +371,8 @@ class UserEventService {
 
         List<DayCountItem> finalResults = []
         perProjectCounts?.each {String projectId , PerProjectCounts value ->
-            List<DayCountItem> zeroFillFromStart = zeroFillGaps(eventType, value.lastDate, startOfQueryRange, false, projectId)
+            boolean inclusive = value.count == 0;
+            List<DayCountItem> zeroFillFromStart = zeroFillGaps(eventType, value.lastDate, startOfQueryRange, inclusive, projectId)
             if (zeroFillFromStart) {
                 value.results.addAll(zeroFillFromStart)
             }
