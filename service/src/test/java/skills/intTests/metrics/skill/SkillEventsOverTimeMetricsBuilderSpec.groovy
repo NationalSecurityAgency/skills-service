@@ -15,8 +15,7 @@
  */
 package skills.intTests.metrics.skill
 
-import com.google.common.collect.HashMultimap
-import com.google.common.collect.Multimap
+
 import groovy.json.JsonSlurper
 import groovy.time.TimeCategory
 import org.apache.commons.lang3.RandomUtils
@@ -26,7 +25,6 @@ import skills.intTests.utils.SkillsFactory
 import skills.metrics.builders.MetricsParams
 import skills.services.StartDateUtil
 import skills.storage.model.EventType
-import spock.lang.Ignore
 
 import java.time.DayOfWeek
 import java.time.LocalDateTime
@@ -38,7 +36,6 @@ class SkillEventsOverTimeMetricsBuilderSpec  extends DefaultIntSpec {
 
     String metricsId = "skillEventsOverTimeChartBuilder"
 
-    @Ignore
     def "must supply skillId param"() {
         def proj = SkillsFactory.createProject()
         List<Map> skills = SkillsFactory.createSkills(1)
@@ -57,7 +54,6 @@ class SkillEventsOverTimeMetricsBuilderSpec  extends DefaultIntSpec {
         body.explanation == "Metrics[${metricsId}]: Must supply skillId param"
     }
 
-    @Ignore
     def "must supply start param"() {
         def proj = SkillsFactory.createProject()
         List<Map> skills = SkillsFactory.createSkills(1)
@@ -77,7 +73,6 @@ class SkillEventsOverTimeMetricsBuilderSpec  extends DefaultIntSpec {
         body.explanation == "Metrics[${metricsId}]: Must supply start param"
     }
 
-    @Ignore
     def "number events over time"() {
         List<String> users = getRandomUsers(10)
         def proj = SkillsFactory.createProject()
@@ -142,7 +137,6 @@ class SkillEventsOverTimeMetricsBuilderSpec  extends DefaultIntSpec {
         res[9].countsByDay.collect { it.num } == []
     }
 
-    @Ignore
     def "number events over time - daily metrics"() {
         List<String> users = getRandomUsers(3)
         def proj = SkillsFactory.createProject()
@@ -192,7 +186,6 @@ class SkillEventsOverTimeMetricsBuilderSpec  extends DefaultIntSpec {
 
     }
 
-    @Ignore
     def "number of applied events and total events over time for project"() {
         List<String> users = getRandomUsers(10)
         def proj = SkillsFactory.createProject()
