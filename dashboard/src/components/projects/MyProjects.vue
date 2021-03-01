@@ -36,7 +36,16 @@ limitations under the License.
       </div>
 
       <no-content2 v-if="!projects || projects.length==0" icon="fas fa-hand-spock" class="mt-4"
-                   title="No Projects Yet..." message="A Project is an overall container that represents the skills ruleset for a single application with gamified training."/>
+                   title="No Projects Yet..." message="A Project is an overall container that represents the skills ruleset for a single application with gamified training.">
+        <div class="mt-3">
+          <span v-if="!isRootUser" class="text-muted" style="font-size: .90em">
+            Note: This section of SkillTree is for <strong>project administrators only</strong>. If you do not plan on creating and integrating a project with SkillTree then please return to the
+            <router-link to="/">
+              <span class="skill-url">Progress and Ranking</span>
+            </router-link> page.
+          </span>
+        </div>
+      </no-content2>
     </loading-container>
 
     <edit-project v-if="newProject.show" v-model="newProject.show" :project="newProject.project"
@@ -160,5 +169,12 @@ limitations under the License.
   };
 </script>
 
-<style scoped>
+<style scoped>  .skill-url {
+  /*white-space: pre-line;*/
+  /*word-break: break-word;*/
+  /*height: 1.5em;*/
+  /*overflow: hidden;*/
+  /*display: inline;*/
+  /*color: blue;*/
+}
 </style>
