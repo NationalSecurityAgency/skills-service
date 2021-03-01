@@ -70,7 +70,7 @@ limitations under the License.
         const lastItemInPathCustomName = this.$route.meta.breadcrumb;
 
         res.forEach((item, index) => {
-          let value = item === 'administrator' ? 'Admin' : item;
+          let value = item === 'administrator' ? 'Project Admin' : item;
           if (value) {
             if (index === res.length - 1 && lastItemInPathCustomName) {
               key = null;
@@ -93,7 +93,7 @@ limitations under the License.
               if (!this.shouldExcludeValue(value)) {
                 newItems.push(this.buildResItem(key, value, res, index));
               }
-              if (value !== 'Admin') {
+              if (value !== 'Project Admin') {
                 key = value;
               }
             }
