@@ -49,7 +49,7 @@ limitations under the License.
       return {
         items: [],
         idsToExcludeFromPath: ['subjects', 'skills', 'projects'],
-        keysToExcludeFromPath: ['progress-and-rankings'],
+        keysToExcludeFromPath: [],
       };
     },
     mounted() {
@@ -70,7 +70,7 @@ limitations under the License.
         const lastItemInPathCustomName = this.$route.meta.breadcrumb;
 
         res.forEach((item, index) => {
-          let value = item === 'administrator' ? 'Project Admin' : item;
+          let value = item === 'administrator' ? 'Projects' : item;
           if (value) {
             if (index === res.length - 1 && lastItemInPathCustomName) {
               key = null;
@@ -93,7 +93,7 @@ limitations under the License.
               if (!this.shouldExcludeValue(value)) {
                 newItems.push(this.buildResItem(key, value, res, index));
               }
-              if (value !== 'Project Admin' && value !== 'progress-and-rankings') {
+              if (value !== 'Projects' && value !== 'progress-and-rankings') {
                 key = value;
               }
             }
@@ -110,13 +110,6 @@ limitations under the License.
           url: this.getUrl(res, index + 1),
         };
       },
-      buildHomeResItem() {
-        return {
-          label: null,
-          value: 'Home',
-          url: '/',
-        };
-      },
       getUrl(arr, endIndex) {
         return `/${arr.slice(0, endIndex).join('/')}`;
       },
@@ -131,10 +124,10 @@ limitations under the License.
         return value.charAt(0).toUpperCase() + value.slice(1);
       },
       shouldExcludeValue(item) {
-        return this.idsToExcludeFromPath.some((searchForMe) => item.toUpperCase() === searchForMe.toUpperCase());
+        return this.idsToExcludeFromPath.some((searchForMe) => item === searchForMe);
       },
       shouldExcludeKey(key) {
-        return this.keysToExcludeFromPath.some((searchForMe) => key.toUpperCase() === searchForMe.toUpperCase());
+        return this.keysToExcludeFromPath.some((searchForMe) => key === searchForMe);
       },
     },
   };
