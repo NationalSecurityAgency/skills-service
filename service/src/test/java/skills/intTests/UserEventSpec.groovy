@@ -58,11 +58,6 @@ class UserEventSpec extends DefaultIntSpec {
     @Autowired
     private PlatformTransactionManager transactionManager;
 
-    LockingService mockLock = Mock()
-
-    def setup() {
-        eventService.lockingService = mockLock;
-    }
 
     def "make sure daily events are compacted into weekly events"() {
         TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager)
@@ -124,7 +119,6 @@ class UserEventSpec extends DefaultIntSpec {
         })
 
         then:
-        1 * mockLock.lockEventCompaction()
         preCompactDailyCount == 17
         preCompactWeeklyCount == 0
         postCompactDailyCount == 2
