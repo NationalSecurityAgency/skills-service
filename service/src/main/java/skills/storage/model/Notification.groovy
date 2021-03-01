@@ -40,6 +40,9 @@ class Notification {
     String body
     String htmlBody
 
+    // this will be incremented if notification fails to run
+    int failedCount
+
     @Temporal(TemporalType.TIMESTAMP)
     @CreatedDate
     Date created

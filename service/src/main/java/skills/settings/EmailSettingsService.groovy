@@ -54,60 +54,33 @@ class EmailSettingsService {
     @Autowired
     SettingsService settingsService
 
-    JavaMailSender mailSender
-
-    @PostConstruct
-    void init() {
-        EmailConnectionInfo emailConnectionInfo = new EmailConnectionInfo(
-                host: settingsService.getGlobalSetting(hostSetting, settingsGroup)?.value,
-                port: settingsService.getGlobalSetting(portSetting, settingsGroup)?.value?.toInteger() ?: -1,
-                protocol: settingsService.getGlobalSetting(protocolSetting, settingsGroup)?.value,
-                username: settingsService.getGlobalSetting(usernameSetting, settingsGroup)?.value,
-                password: settingsService.getGlobalSetting(passwordSetting, settingsGroup)?.value,
-                authEnabled: settingsService.getGlobalSetting(authSetting,settingsGroup)?.value?.toBoolean() ?: false,
-                tlsEnabled: settingsService.getGlobalSetting(tlsEnableSetting, settingsGroup)?.value?.toBoolean() ?: false,
-        )
-
-        try {
-            configureMailSender(emailConnectionInfo, true)
-        } catch (SkillException e) {
-            log.warn('Email connection failed. No email can be sent without updating the configuration', e)
-        }
-    }
-
     EmailConfigurationResult updateConnectionInfo(EmailConnectionInfo emailConnectionInfo) {
         EmailConfigurationResult configurationSuccessful = configureMailSender(emailConnectionInfo)
         storeSettings(emailConnectionInfo)
         return configurationSuccessful;
     }
 
-    EmailConfigurationResult configureMailSender(EmailConnectionInfo emailConnectionInfo, boolean isInit = false) {
+    EmailConfigurationResult configureMailSender(EmailConnectionInfo emailConnectionInfo) {
         log.info('Configuring the email sender with properties [{}]', emailConnectionInfo)
         JavaMailSenderImpl tmpMailSender = createJavaMailSender(emailConnectionInfo)
         try {
             tmpMailSender.testConnection()
 
             log.info('Refreshing the email sender')
-            updateMailSender(tmpMailSender)
             return new EmailConfigurationResult(configurationSuccessful: true)
         } catch (MessagingException e) {
-            if (isInit) {
-                log.info("Email connection failed [${e.message}] . This is normal on start-up if email connection info was not configured!")
-            } else {
-                log.warn('Email connection failed!', e)
-            }
+            log.warn('Email connection failed!', e)
 
             String msg = e.message
             Exception next = e.nextException
             if (next instanceof SocketTimeoutException) {
                 msg = next.message
             }
-//            throw new SkillException('Could not connect with the email settings ' + emailConnectionInfo, e)
             return new EmailConfigurationResult(configurationSuccessful: false, explanation: msg)
         }
     }
 
-    private static JavaMailSenderImpl createJavaMailSender(EmailConnectionInfo emailConnectionInfo) {
+    private JavaMailSenderImpl createJavaMailSender(EmailConnectionInfo emailConnectionInfo) {
         JavaMailSenderImpl tmpMailSender = new JavaMailSenderImpl()
         tmpMailSender.setHost(emailConnectionInfo.host)
         tmpMailSender.setPort(emailConnectionInfo.port)
@@ -142,7 +115,7 @@ class EmailSettingsService {
         }
     }
 
-    void storeSettings(EmailConnectionInfo emailConnectionInfo) {
+    private void storeSettings(EmailConnectionInfo emailConnectionInfo) {
         saveOrUpdateGlobalGroup(settingsGroup, [
                 (hostSetting)     : emailConnectionInfo.host,
                 (portSetting)     : emailConnectionInfo.port?.toString(),
@@ -154,26 +127,26 @@ class EmailSettingsService {
         ])
     }
 
-    EmailConnectionInfo fetchEmailSettings(){
+    EmailConnectionInfo fetchEmailSettings() {
         List<SettingsResult> emailSettings = settingsService.getGlobalSettingsByGroup(settingsGroup)
         EmailConnectionInfo info = new EmailConnectionInfo()
         if (emailSettings) {
             def mappedSettings = emailSettings.collectEntries() {
                 [it.setting, it.value]
             }
-            if(mappedSettings[(hostSetting)]) {
+            if (mappedSettings[(hostSetting)]) {
                 info.host = mappedSettings[(hostSetting)]
             }
-            if(mappedSettings[(portSetting)]) {
+            if (mappedSettings[(portSetting)]) {
                 info.port = Integer.valueOf(mappedSettings[(portSetting)])
             }
-            if(mappedSettings[(protocolSetting)]) {
+            if (mappedSettings[(protocolSetting)]) {
                 info.protocol = mappedSettings[(protocolSetting)]
             }
-            if(mappedSettings[(usernameSetting)]) {
+            if (mappedSettings[(usernameSetting)]) {
                 info.username = mappedSettings[(usernameSetting)]
             }
-            if(mappedSettings[(passwordSetting)]) {
+            if (mappedSettings[(passwordSetting)]) {
                 info.password = mappedSettings[(passwordSetting)]
             }
             if (mappedSettings[(authSetting)]) {
@@ -204,12 +177,9 @@ class EmailSettingsService {
         }
     }
 
-    @WithWriteLock
-    void updateMailSender(JavaMailSender mailSender) {
-        this.mailSender = mailSender
-    }
 
     JavaMailSender getMailSender() {
-        return this.mailSender;
+        EmailConnectionInfo emailConnectionInfo = fetchEmailSettings()
+        return emailConnectionInfo ? createJavaMailSender(emailConnectionInfo) : null
     }
 }

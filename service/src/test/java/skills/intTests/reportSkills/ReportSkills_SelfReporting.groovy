@@ -295,14 +295,8 @@ SkillTree Bot'''
         emailRes.recipients == ["skills@skills.org"]
         emailRes.plainText.contains("User user0 requested points.")
         // ignore new lines
-        prepEmailForComparison(emailRes.html) == prepEmailForComparison(expectedHtml)
-        prepEmailForComparison(emailRes.plainText) == prepEmailForComparison(expectedPlain)
-    }
-
-    private String prepEmailForComparison(String email) {
-        String fixPort = email.toString().replaceAll("\\{\\{port\\}\\}", localPort.toString())
-        String removeNewLines = fixPort.replaceAll("[\r\n]", "")
-        return removeNewLines
+        EmailUtils.prepBodyForComparison(emailRes.html, localPort) == EmailUtils.prepBodyForComparison(expectedHtml, localPort)
+        EmailUtils.prepBodyForComparison(emailRes.plainText, localPort) == EmailUtils.prepBodyForComparison(expectedPlain, localPort)
     }
 
     def "self report skill with honor system"() {

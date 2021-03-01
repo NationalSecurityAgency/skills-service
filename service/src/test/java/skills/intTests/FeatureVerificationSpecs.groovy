@@ -17,8 +17,12 @@ package skills.intTests
 
 import com.icegreen.greenmail.util.GreenMail
 import com.icegreen.greenmail.util.ServerSetupTest
+import org.thymeleaf.context.Context
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsService
+import skills.notify.Notifier
+import skills.services.settings.Settings
+import spock.lang.IgnoreRest
 
 class FeatureVerificationSpecs extends DefaultIntSpec {
 
@@ -47,8 +51,10 @@ class FeatureVerificationSpecs extends DefaultIntSpec {
                 "authEnabled": false,
                 "tlsEnabled" : false
         ])
-        rootSkillsService.addOrUpdateGlobalSetting("public_url",
-                ["setting": "public_url", "value": "http://localhost:${localPort}/".toString()])
+        rootSkillsService.addOrUpdateGlobalSetting(Settings.GLOBAL_PUBLIC_URL.settingName,
+                ["setting": Settings.GLOBAL_PUBLIC_URL.settingName, "value": "http://localhost:${localPort}/".toString()])
+        rootSkillsService.addOrUpdateGlobalSetting(Settings.GLOBAL_FROM_EMAIL.settingName,
+                ["setting": Settings.GLOBAL_FROM_EMAIL.settingName, "value": "noreply@skilltreeemail.com"])
 
         when:
 
@@ -86,5 +92,32 @@ class FeatureVerificationSpecs extends DefaultIntSpec {
 
         then:
         enabled == false
+    }
+
+    def "is email service enabled"() {
+        SkillsService rootSkillsService = createRootSkillService()
+
+        when:
+        assert !skillsService.isFeatureEnabled("emailservice")
+        rootSkillsService.addOrUpdateGlobalSetting("public_url",
+                ["setting": "public_url", "value": "http://localhost:${localPort}/".toString()])
+
+        assert !skillsService.isFeatureEnabled("emailservice")
+
+        rootSkillsService.addOrUpdateGlobalSetting("from_email",
+                ["setting": "from_email", "value": "resetspec@skilltreetests".toString()])
+
+        assert !skillsService.isFeatureEnabled("emailservice")
+
+        rootSkillsService.getWsHelper().rootPost("/saveEmailSettings", [
+                "host"       : "localhost",
+                "port"       : 3923,
+                "protocol"   : "smtp",
+                "authEnabled": false,
+                "tlsEnabled" : false
+        ])
+
+        then:
+        skillsService.isFeatureEnabled("emailservice")
     }
 }

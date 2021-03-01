@@ -24,11 +24,13 @@ import org.thymeleaf.util.StringUtils
 import skills.controller.result.model.SettingsResult
 import skills.services.settings.Settings
 import skills.services.settings.SettingsService
+import skills.settings.EmailConnectionInfo
 import skills.settings.EmailSettingsService
 
 @Slf4j
 @Component
 class FeatureService {
+
     @Autowired
     SettingsService settingsService
 
@@ -36,30 +38,25 @@ class FeatureService {
     EmailSettingsService emailSettingsService
 
     boolean isPasswordResetFeatureEnabled() {
-        JavaMailSender mailSender = emailSettingsService.getMailSender()
-        SettingsResult publicUrl = settingsService.getGlobalSetting(Settings.GLOBAL_PUBLIC_URL.settingName)
-        boolean publicUrlConfigured = true
-        boolean mailSenderConfigured = true
+        return isEmailServiceFeatureEnabled('Password Reset')
+    }
 
-        if (mailSender == null) {
-            log.warn("Email Settings are not configured or are invalid, please configure through Dashboard for Password Reset feature to function")
-            mailSenderConfigured = false;
-        } else {
-            if (mailSender instanceof JavaMailSenderImpl){
-                try {
-                    mailSender.testConnection()
-                } catch (Exception e) {
-                    mailSenderConfigured = false
-                    log.warn('Email Settings are invalid, please configure valid settings through the Dashboard for Password Reset feature to function')
-                }
+    boolean isEmailServiceFeatureEnabled(String featureName = 'Email Service') {
+        List<Settings> expected = [Settings.GLOBAL_PUBLIC_URL, Settings.GLOBAL_FROM_EMAIL]
+        for (Settings setting : expected) {
+            SettingsResult settingRes = settingsService.getGlobalSetting(setting.settingName)
+            if (StringUtils.isEmpty(settingRes?.value)) {
+                log.warn("[${setting.settingName}] setting is not configured, please configure through Dashboard for ${featureName} feature to function")
+                return false
             }
         }
 
-        if (StringUtils.isEmpty(publicUrl?.value)) {
-            log.warn("Public URL setting is not configured, please configure through Dashboard for Password Reset feature to function")
-            publicUrlConfigured = false
+        if (!emailSettingsService.fetchEmailSettings()?.host) {
+            log.warn("Email Settings are not configured or are invalid, please configure through Dashboard for ${featureName} feature to function")
+            return false;
         }
 
-        return mailSenderConfigured && publicUrlConfigured
+        return true
     }
+
 }

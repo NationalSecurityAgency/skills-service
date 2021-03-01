@@ -1256,6 +1256,10 @@
                 <constraints nullable="false"/>
             </column>
 
+            <column name="failed_count" type="int">
+                <constraints nullable="false"/>
+            </column>
+
             <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
                 <constraints nullable="false"/>
             </column>
@@ -1273,6 +1277,12 @@
                      tableName="notifications">
             <column name="requested_on" type="datetime"/>
         </createIndex>
+
+        <createIndex indexName="notifications_retry_count"
+                     tableName="notifications">
+            <column name="failed_count" type="int"/>
+        </createIndex>
+
 
         <addForeignKeyConstraint baseColumnNames="user_id"
                                  baseTableName="notifications"

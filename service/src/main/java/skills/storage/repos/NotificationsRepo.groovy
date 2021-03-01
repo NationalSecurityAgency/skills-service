@@ -24,6 +24,9 @@ import java.util.stream.Stream
 interface NotificationsRepo extends JpaRepository<Notification, Integer> {
 
 
-    @Query("select n from Notification n")
-    Stream<Notification> streamNotifications();
+    @Query("select n from Notification n where n.failedCount = 0")
+    Stream<Notification> streamNewNotifications();
+
+    @Query("select n from Notification n where n.failedCount > 0")
+    Stream<Notification> streamFailedNotifications();
 }

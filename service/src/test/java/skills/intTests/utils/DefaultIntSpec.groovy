@@ -111,15 +111,19 @@ class DefaultIntSpec extends Specification {
         log.info(msg)
     }
 
+    SkillsService createRootSkillService(String username = "rootUser", String password = 'aaaaaaaa') {
+        SkillsService rootSkillsService = createService(username, password)
+        if (!rootSkillsService.isRoot()) {
+            rootSkillsService.grantRoot()
+        }
+        return rootSkillsService
+    }
+
     def startEmailServer() {
         greenMail = new GreenMail(ServerSetupTest.SMTP)
         greenMail.start()
 
-        SkillsService rootSkillsService = createService("rootUser", 'aaaaaaaa')
-        if (!rootSkillsService.isRoot()) {
-            rootSkillsService.grantRoot()
-        }
-
+        SkillsService rootSkillsService = createRootSkillService()
         rootSkillsService.getWsHelper().rootPost("/saveEmailSettings", [
                 "host"       : "localhost",
                 "port"       : ServerSetupTest.SMTP.port,
@@ -132,7 +136,6 @@ class DefaultIntSpec extends Specification {
         rootSkillsService.addOrUpdateGlobalSetting("from_email",
                 ["setting": "from_email", "value": "resetspec@skilltreetests".toString()])
     }
-
 
 
     SkillsService createService(

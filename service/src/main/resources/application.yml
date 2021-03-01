@@ -85,7 +85,9 @@ skills:
     compactDailyEventsOlderThan: 30
     notifications:
       # run every minute
-      dispatchSchedule: "* * * * * *"
+      dispatchSchedule: "* * * * * ?"
+      # run every hour - retries failed notifications
+      dispatchRetrySchedule: "0 0 * * * ?"
     ui:
       dashboardVersion: @pom.version@
       buildTimestamp: @maven.build.timestamp@
