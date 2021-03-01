@@ -34,7 +34,6 @@ class ApprovalNotificationRequestBuilder {
     String approveUrl
     Notifier.NotificationRequest build() {
         assert userRequesting
-        assert requestMsg
         assert skillDef
         assert userIds
 
@@ -56,7 +55,7 @@ class ApprovalNotificationRequestBuilder {
         templateContext.setVariable("skillName", skillDef.name)
         templateContext.setVariable("approveUrl", approveUrl)
         templateContext.setVariable("skillId", skillDef.skillId)
-        templateContext.setVariable("requestMsg", requestMsg)
+        templateContext.setVariable("requestMsg", requestMsg ?: "No message supplied")
         templateContext.setVariable("projectId", skillDef.projectId)
         templateContext.setVariable("publicUrl", publicUrl)
         templateContext.setVariable("projectName", projectName)
