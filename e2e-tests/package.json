@@ -21,7 +21,7 @@
     "cy:run:oauth": "TZ=UTC npm run licenseCheck && cypress run --env oauthMode=true",
     "cy:run:accessibility": "TZ=UTC npm run licenseCheck && cypress run --config experimentalRunEvents=true --browser chrome --headless --spec \"cypress/integration/accessibility*.js,cypress/integration/client-display/client-display_accessibility.js\"",
     "cy:run:dev": "TZ=UTC cypress run --config baseUrl=http://localhost:8082",
-    "cy:run:dev:metrics": "TZ=UTC cypress run --config baseUrl=http://localhost:8082 --spec \"cypress/integration/client-display/client-display_point_history_chart_spec.js \"",
+    "cy:run:dev:metrics": "TZ=UTC cypress run --config baseUrl=http://localhost:8082 --spec \"cypress/integration/client-display/client-display-theme_spec.js \"",
     "cy:run:dev:clientDisplay": "TZ=UTC cypress run --config baseUrl=http://localhost:8082 --spec \"cypress/integration/client-display/client-display-self_report_skills_spec.js\"",
     "cy:run:dev:accessibility": "TZ=UTC cypress run --browser chrome --headless --config baseUrl=http://localhost:8082 --spec cypress/integration/accessibility*.js",
     "cy:run:dev:postgres": "TZ=UTC cypress run --config baseUrl=http://localhost:8082 --env db=postgres",
