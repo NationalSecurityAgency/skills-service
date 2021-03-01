@@ -92,7 +92,8 @@ class UserAuthService {
                 userDn: userAttrs.dn,
                 nickname: userAttrs.nickname,
                 authorities: convertRoles(user.roles),
-                usernameForDisplay: userAttrs.userIdForDisplay
+                usernameForDisplay: userAttrs.userIdForDisplay,
+                landingPage: userAttrs.landingPage,
         )
     }
 

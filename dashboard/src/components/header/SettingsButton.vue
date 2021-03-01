@@ -26,6 +26,9 @@ limitations under the License.
       </div>
     </b-dropdown-text>
     <b-dropdown-divider />
+    <b-dropdown-item href="#" :disabled="myProgressLinkDisabled"  @click="gotoMyProgress">
+      <span class="text-gray-700"> <i class="fas fa-chart-bar" aria-hidden="true"/><span class="link-name">Progress and Rankings</span></span>
+    </b-dropdown-item>
     <b-dropdown-item href="#" :disabled="adminLinkDisabled"  @click="gotoAdmin">
       <span class="text-gray-700"> <i class="fas fa-tasks" aria-hidden="true"/><span class="link-name">Project Admin</span></span>
     </b-dropdown-item>
@@ -69,6 +72,9 @@ limitations under the License.
         }
         return displayName;
       },
+      myProgressLinkDisabled() {
+        return this.$route.path && this.$route.name === 'MyProgressPage';
+      },
       settingsLinkDisabled() {
         return this.$route.path && this.$route.name === 'GeneralSettings';
       },
@@ -82,6 +88,9 @@ limitations under the License.
       },
       gotoAdmin() {
         this.$router.push({ name: 'AdminHomePage' });
+      },
+      gotoMyProgress() {
+        this.$router.push({ name: 'MyProgressPage' });
       },
       signOut() {
         this.$store.dispatch('logout');

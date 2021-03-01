@@ -81,7 +81,7 @@ const router = new Router({
     {
       path: '/administrator',
       component: AdminHomePage,
-      meta: { requiresAuth: false },
+      meta: { requiresAuth: true },
       children: [{
         name: 'AdminHomePage',
         path: '',
@@ -194,11 +194,11 @@ const router = new Router({
       },
     },
     {
-      path: '/',
+      path: '/progress-and-rankings',
       component: MyProgress,
       meta: { requiresAuth: true, nonAdmin: true },
       children: [{
-        name: 'LandingPage',
+        name: 'MyProgressPage',
         path: '',
         component: MyProgressPage,
         meta: {
@@ -212,6 +212,11 @@ const router = new Router({
           requiresAuth: true, nonAdmin: true,
         },
       }],
+    },
+    {
+      path: '/',
+      component: MyProgress,
+      meta: { requiresAuth: true, nonAdmin: true },
     },
     {
       path: '/administrator/projects/:projectId',

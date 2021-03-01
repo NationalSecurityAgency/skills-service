@@ -89,6 +89,7 @@ class UserInfoController {
                 currentUser.lastName = userInfoReq.last
             }
             currentUser.nickname = userInfoReq.nickname
+            currentUser.landingPage = userInfoReq.landingPage
             userAuthService.createOrUpdateUser(currentUser)
         } else if (authMode == AuthMode.PKI) {
             throw new SkillsAuthorizationException('Unauthenticated user while using PKI Authorization Mode')

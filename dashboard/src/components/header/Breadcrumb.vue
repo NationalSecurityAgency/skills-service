@@ -49,7 +49,7 @@ limitations under the License.
       return {
         items: [],
         idsToExcludeFromPath: ['subjects', 'skills', 'projects'],
-        keysToExcludeFromPath: [],
+        keysToExcludeFromPath: ['progress-and-rankings'],
       };
     },
     mounted() {
@@ -62,7 +62,7 @@ limitations under the License.
     },
     methods: {
       build() {
-        const newItems = [this.buildHomeResItem()];
+        const newItems = [];
         let res = this.$route.path.split('/');
         res = res.slice(1, res.length);
         let key = null;
@@ -93,7 +93,7 @@ limitations under the License.
               if (!this.shouldExcludeValue(value)) {
                 newItems.push(this.buildResItem(key, value, res, index));
               }
-              if (value !== 'Project Admin') {
+              if (value !== 'Project Admin' && value !== 'progress-and-rankings') {
                 key = value;
               }
             }
@@ -125,7 +125,7 @@ limitations under the License.
         return this.capitalize(res);
       },
       hyphenToCamelCase(value) {
-        return value.replace(/-([a-z])/g, (g) => g[1].toUpperCase());
+        return value.replace(/-([a-z])/g, (g) => ` ${g[1].toUpperCase()}`);
       },
       capitalize(value) {
         return value.charAt(0).toUpperCase() + value.slice(1);

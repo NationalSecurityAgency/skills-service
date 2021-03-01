@@ -56,6 +56,18 @@ limitations under the License.
               <p class="text-danger" v-show="errors[0]" id="nicknameError">{{ errors[0]}}</p>
             </ValidationProvider>
 
+            <div class="mt-4">
+              <hr>
+              <b-form-group label="Default Home Page:" v-slot="{ ariaDescribedby }">
+                <b-form-radio-group
+                  class="pl-2"
+                  v-model="loginFields.landingPage"
+                  :options="[{ text: 'Progress and Rankings', value: 'progress'}, {text: 'Project Admin', value: 'admin'}]"
+                  :aria-describedby="ariaDescribedby"
+                ></b-form-radio-group>
+              </b-form-group>
+            </div>
+
             <div class="mt-2">
               <button class="btn btn-outline-success" @click="updateUserInfo" :disabled="invalid || !hasChangedValues()">
                 Save
@@ -86,11 +98,13 @@ limitations under the License.
           first: '',
           last: '',
           nickname: '',
+          landingPage: 'progress',
         },
         originalValues: {
           first: '',
           last: '',
           nickname: '',
+          landingPage: 'progress',
         },
         isSaving: false,
         pkiAuthenticated: false,
@@ -107,6 +121,7 @@ limitations under the License.
           this.loginFields.first = userInfo.first;
           this.loginFields.last = userInfo.last;
           this.loginFields.nickname = userInfo.nickname;
+          this.loginFields.landingPage = userInfo.landingPage;
           this.setOriginalValues();
         }
         this.isLoading = false;
@@ -139,6 +154,7 @@ limitations under the License.
         this.originalValues.first = this.loginFields.first;
         this.originalValues.last = this.loginFields.last;
         this.originalValues.nickname = this.loginFields.nickname;
+        this.originalValues.landingPage = this.loginFields.landingPage;
       },
     },
   };
