@@ -92,7 +92,7 @@ class SkillEventsOverTimeMetricsBuilder implements ProjectMetricsBuilder {
         Date now = StartDateUtil.computeStartDate(new Date(), eventType)
         List<DayCountItem> fillToNow = null
         if (filled) {
-            eventType == EventType.DAILY ? zeroFillDailyGaps(now, nMinus, filled?.last()?.day != now) : zeroFillWeeklyGaps(now, nMinus, filled.last().day != now)
+            fillToNow = eventType == EventType.DAILY ? zeroFillDailyGaps(now, nMinus, filled?.last()?.day != now) : zeroFillWeeklyGaps(now, nMinus, filled.last().day != now)
         }
 
         if (fillToNow) {

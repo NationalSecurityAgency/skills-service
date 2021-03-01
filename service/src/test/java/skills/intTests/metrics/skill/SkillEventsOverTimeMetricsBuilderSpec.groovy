@@ -26,6 +26,7 @@ import skills.intTests.utils.SkillsFactory
 import skills.metrics.builders.MetricsParams
 import skills.services.StartDateUtil
 import skills.storage.model.EventType
+import spock.lang.Ignore
 
 import java.time.DayOfWeek
 import java.time.LocalDateTime
@@ -37,6 +38,7 @@ class SkillEventsOverTimeMetricsBuilderSpec  extends DefaultIntSpec {
 
     String metricsId = "skillEventsOverTimeChartBuilder"
 
+    @Ignore
     def "must supply skillId param"() {
         def proj = SkillsFactory.createProject()
         List<Map> skills = SkillsFactory.createSkills(1)
@@ -55,6 +57,7 @@ class SkillEventsOverTimeMetricsBuilderSpec  extends DefaultIntSpec {
         body.explanation == "Metrics[${metricsId}]: Must supply skillId param"
     }
 
+    @Ignore
     def "must supply start param"() {
         def proj = SkillsFactory.createProject()
         List<Map> skills = SkillsFactory.createSkills(1)
@@ -74,6 +77,7 @@ class SkillEventsOverTimeMetricsBuilderSpec  extends DefaultIntSpec {
         body.explanation == "Metrics[${metricsId}]: Must supply start param"
     }
 
+    @Ignore
     def "number events over time"() {
         List<String> users = getRandomUsers(10)
         def proj = SkillsFactory.createProject()
@@ -138,6 +142,7 @@ class SkillEventsOverTimeMetricsBuilderSpec  extends DefaultIntSpec {
         res[9].countsByDay.collect { it.num } == []
     }
 
+    @Ignore
     def "number events over time - daily metrics"() {
         List<String> users = getRandomUsers(3)
         def proj = SkillsFactory.createProject()
@@ -187,6 +192,7 @@ class SkillEventsOverTimeMetricsBuilderSpec  extends DefaultIntSpec {
 
     }
 
+    @Ignore
     def "number of applied events and total events over time for project"() {
         List<String> users = getRandomUsers(10)
         def proj = SkillsFactory.createProject()
@@ -223,6 +229,48 @@ class SkillEventsOverTimeMetricsBuilderSpec  extends DefaultIntSpec {
         then:
         res[0].countsByDay.collect { it.num }.sum() == 20
         res[0].allEvents.collect { it.num }.sum() == 60
+    }
+
+    def "zero fill to current day for applied skill events dataset"() {
+        List<String> users = getRandomUsers(10)
+        def proj = SkillsFactory.createProject()
+        List<Map> skills = SkillsFactory.createSkills(1)
+        skills.each { it.pointIncrement = 100; it.numPerformToCompletion = 2 }
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(SkillsFactory.createSubject())
+        skillsService.createSkills(skills)
+
+        use(TimeCategory) {
+            (10..2).collect { int day ->
+                Date date = day.days.ago
+                def u
+                if ( day < 3) {
+                    u = users.subList(0, 2)
+                } else {
+                    u = users.subList(3, 10)
+                }
+               u.each { String user ->
+                    skills.each { skill ->
+                        skillsService.addSkill([projectId: proj.projectId, skillId: skill.skillId], user, date)
+                    }
+                }
+            }
+        }
+
+        when:
+        Map props = [:]
+        props[MetricsParams.P_SKILL_ID] = skills[0].skillId
+        props[MetricsParams.P_START_TIMESTAMP] = LocalDateTime.now().minusDays(3).toDate().time
+
+        List res = skills.collect {
+            props[MetricsParams.P_SKILL_ID] = it.skillId
+            return skillsService.getMetricsData(proj.projectId, metricsId, props)
+        }
+
+        then:
+        res[0].countsByDay.sort { it.day }.last().num == 0
+        new Date(res[0].countsByDay.sort { it.day }.last().timestamp) == StartDateUtil.computeStartDate(new Date(), EventType.DAILY)
     }
 
     private static class TestDates {
