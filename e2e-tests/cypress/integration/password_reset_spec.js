@@ -83,7 +83,7 @@ describe('Password Reset Tests', () => {
       cy.wait('@getProjects');
       cy.wait('@getUserInfo');
 
-      cy.get('[data-cy=breadcrumb-Home]').should('be.visible');
+      cy.get('[data-cy="breadcrumb-Progress And Rankings"]').should('be.visible');
     });
 
   });
