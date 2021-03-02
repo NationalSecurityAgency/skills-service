@@ -20,7 +20,7 @@
   "dependencies": {
     "@fortawesome/fontawesome-free": "5.14.0",
     "animate.css": "4.1.1",
-    "apexcharts": "3.20.2",
+    "apexcharts": "3.25.0",
     "axios": "0.21.1",
     "axios-auth-refresh": "3.0.0",
     "bootstrap": "4.5.2",
@@ -28,7 +28,7 @@
     "dayjs": "1.9.6",
     "dompurify": "2.2.6",
     "lodash": "4.17.20",
-    "marked": "1.1.1",
+    "marked": "2.0.1",
     "material-icons": "0.3.1",
     "node-emoji": "1.10.0",
     "number-format.js": "2.0.9",
