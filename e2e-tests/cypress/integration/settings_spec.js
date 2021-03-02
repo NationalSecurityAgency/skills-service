@@ -568,12 +568,12 @@ describe('Settings Tests', () => {
     })
 
     it('Landing Page preference', () => {
+        cy.intercept('POST', '/app/userInfo').as('saveUserInfo');
         cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
         cy.intercept('/app/projects').as('loadProjects');
         cy.intercept('/api/myProgressSummary').as('loadMyProgressSummary');
 
         cy.visit('/')
-
         cy.navToSettings();
 
         // verify the default is set to 'Progress and Rankings'
@@ -591,6 +591,7 @@ describe('Settings Tests', () => {
         cy.get('[data-cy="landingPageSelector"] [value="progress"]').should('not.be.checked');
         cy.get('[data-cy="landingPageSelector"] [value="admin"]').should('be.checked');
         cy.get('[data-cy="generalSettingsSave"]').click();
+        cy.wait('@saveUserInfo');
         cy.wait('@loadUserInfo');
 
         // click SkillTree logo and verify we are on the correct page
@@ -604,6 +605,7 @@ describe('Settings Tests', () => {
         cy.get('[data-cy="landingPageSelector"] [value="admin"]').should('not.be.checked');
         cy.get('[data-cy="landingPageSelector"] [value="progress"]').should('be.checked');
         cy.get('[data-cy="generalSettingsSave"]').click();
+        cy.wait('@saveUserInfo');
         cy.wait('@loadUserInfo');
 
         // click SkillTree logo and verify we are on the correct page
