@@ -67,6 +67,7 @@ limitations under the License.
                 <b-form-radio-group
                   id="home-page-pref"
                   class="pl-2"
+                  data-cy="landingPageSelector"
                   v-model="loginFields.landingPage"
                   :options="[{ text: 'Progress and Rankings', value: 'progress'}, {text: 'Project Admin', value: 'admin'}]"
                 ></b-form-radio-group>
@@ -74,7 +75,7 @@ limitations under the License.
             </div>
 
             <div class="mt-2">
-              <button class="btn btn-outline-success" @click="updateUserInfo" :disabled="invalid || !hasChangedValues()">
+              <button class="btn btn-outline-success" @click="updateUserInfo" :disabled="invalid || !hasChangedValues()" data-cy="generalSettingsSave">
                 Save
                 <i :class="[isSaving ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-arrow-circle-right']"></i>
               </button>
