@@ -35,6 +35,11 @@ import 'cypress-axe'
 // Alternatively you can use CommonJS syntax:
 // require('./commands')
 
+Cypress.on('window:before:load', (win) => {
+    cy.spy(win.console, 'error');
+    cy.spy(win.console, 'warn');
+});
+
 before(function () {
     cy.fixture('vars.json').then((vars) => {
         cy.register(vars.rootUser, vars.defaultPass, true);
@@ -72,6 +77,11 @@ beforeEach(function () {
 
 
 afterEach(function () {
-    Cypress.env('hydraAuthenticated', false)
+    Cypress.env('hydraAuthenticated', false);
+
+    cy.window().then((win) => {
+        expect(win.console.error).to.have.callCount(0);
+        expect(win.console.warn).to.have.callCount(0);
+    });
 });
 

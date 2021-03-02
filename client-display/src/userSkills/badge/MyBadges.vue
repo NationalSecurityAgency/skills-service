@@ -31,8 +31,11 @@ limitations under the License.
 </template>
 
 <script>
+  import NavigationErrorMixin from '@/common/utilities/NavigationErrorMixin';
+
   export default {
     name: 'MyBadges',
+    mixins: [NavigationErrorMixin],
     props: {
       numBadgesCompleted: {
         type: Number,
@@ -42,7 +45,7 @@ limitations under the License.
     methods: {
       openMyBadges() {
         if (!this.isSummaryOnly) {
-          this.$router.push('/badges');
+          this.handlePush('/badges');
         }
       },
     },

@@ -57,7 +57,7 @@ limitations under the License.
   });
 
   export default {
-    mixins: [DevModeMixin],
+    mixins: [DevModeMixin,],
     components: { NewSoftwareVersionComponent },
     data() {
       return {

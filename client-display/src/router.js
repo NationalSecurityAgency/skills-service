@@ -98,7 +98,7 @@ router.beforeEach((to, from, next) => {
   if (!to.params.previousRoute && to.meta.setPreviousRoute !== false && !isWildcardMatch(to.matched)) {
     const previousRoute = { ...from };
     const params = { ...to.params, ...{ previousRoute } };
-    const updatedTo = { ...to, ...{ params } };
+    const updatedTo = { ...to, ...{ params }, replace: true };
     next(updatedTo);
   } else {
     next();
