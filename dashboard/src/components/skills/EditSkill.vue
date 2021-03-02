@@ -453,6 +453,9 @@ limitations under the License.
               this.skillInternal.name = InputSanitizer.sanitize(this.skillInternal.name);
               this.skillInternal.skillId = InputSanitizer.sanitize(this.skillInternal.skillId);
               this.skillInternal.helpUrl = InputSanitizer.sanitize(this.skillInternal.helpUrl);
+              if (this.skillInternal.selfReportingType === 'Disabled') {
+                this.skillInternal.selfReportingType = null;
+              }
               this.skillInternal = { subjectId: this.subjectId, ...this.skillInternal };
               this.$emit('skill-saved', { isEdit: this.isEdit, ...this.skillInternal });
               this.close({ saved: true });

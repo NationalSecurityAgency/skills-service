@@ -24,7 +24,7 @@ describe('Navigation Tests', () => {
     });
   });
 
-  it.only('navigate to inception client-display', function () {
+  it('navigate to inception client-display', function () {
     cy.visit('/administrator');
     cy.get('[data-cy=inception-button]').click();
     cy.get('[data-cy="breadcrumb-Dashboard Skills"]').contains('Dashboard Skills').should('be.visible');

@@ -749,6 +749,41 @@ class SkillApprovalSpecs extends DefaultIntSpec {
         ]
     }
 
+    void "remove existing approval requests if the skill's self approval type is disabled"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(5,)
+        skills.each {
+            it.pointIncrement = 200
+            it.selfReportingType = SkillDef.SelfReportingType.Approval
+        }
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        List<String> users = getRandomUsers(10)
+
+        Date date = new Date()
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[0], date, "Please approve this")
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[1], date, "Please approve this")
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[2], date, "Please approve this")
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[3], date, "Please approve this")
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[4], date, "Please approve this")
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[5], date, "Please approve this")
+
+        when:
+        List<SkillApproval> approvalBefore = skillApprovalRepo.findAll()
+
+        skills[0].selfReportingType = null
+        skillsService.createSkills([skills[0]])
+
+        List<SkillApproval> approvalAfter = skillApprovalRepo.findAll()
+        then:
+        approvalBefore.size() == 6
+        !approvalAfter
+    }
+
     def "get approval stats for a skill"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()

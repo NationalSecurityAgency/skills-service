@@ -98,6 +98,57 @@ class ReportSkills_SelfReporting extends DefaultIntSpec {
         approvalsEndpointRes.data.get(0).requestMsg == "Please approve this!"
     }
 
+    def "self report skill with approval but no message"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(1,)
+        skills[0].pointIncrement = 200
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        Date date = new Date() - 60
+        when:
+        def res = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "user0", date)
+        def approvalsEndpointRes = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false)
+
+        EmailUtils.EmailRes emailRes = EmailUtils.getEmail(greenMail)
+
+        then:
+        greenMail.getReceivedMessages().length == 1
+        emailRes.subj == "SkillTree Points Requested"
+        emailRes.recipients == ["skills@skills.org"]
+        emailRes.plainText.contains("User user0 requested points.")
+        emailRes.html.contains("User <b>user0</b> requested points")
+
+        !res.body.skillApplied
+        res.body.pointsEarned == 0
+        res.body.explanation == "Skill was submitted for approval"
+        !res.body.completed
+        res.body.skillId == skills[0].skillId
+
+        List<SkillApproval> approvals = skillApprovalRepo.findAll().collect {it}
+        approvals.size() == 1
+
+        !approvals.get(0).requestMsg
+        !approvals.get(0).rejectedOn
+        !approvals.get(0).rejectionMsg
+
+        approvals.get(0).projectId == proj.projectId
+        approvals.get(0).skillRefId == skillDefRepo.findAll().find({it.skillId == skills[0].skillId}).id
+        approvals.get(0).userId == "user0"
+        approvals.get(0).requestedOn == date
+
+        approvalsEndpointRes.data.size() == 1
+        approvalsEndpointRes.data.get(0).userId == "user0"
+        approvalsEndpointRes.data.get(0).skillId == "skill1"
+        approvalsEndpointRes.data.get(0).skillName == "Test Skill 1"
+        approvalsEndpointRes.data.get(0).requestedOn == date.time
+        !approvalsEndpointRes.data.get(0).requestMsg
+    }
+
     def "send email notification to each admin of the project"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()

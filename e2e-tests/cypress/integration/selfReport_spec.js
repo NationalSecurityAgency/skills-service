@@ -311,6 +311,36 @@ describe('Self Report Skills Management Tests', () => {
         cy.get('[data-cy="selfReportingTypeWarning"]').should('not.exist')
     });
 
+    it('edit skills - disable self reporting -> warnings -> save', () => {
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Approval', name: 'Approval 1' });
+        cy.createSkill(1, 1, 2, { selfReportingType: 'Approval', name: 'Approval 2' });
+        cy.createSkill(1, 1, 3, { selfReportingType: 'Approval', name: 'Approval 3' });
+        cy.createSkill(1, 1, 4, { selfReportingType: 'HonorSystem', name: 'Honor System 1' });
+        cy.createSkill(1, 1, 5, { name: 'Disabled 1'});
+        cy.reportSkill(1, 1, 'user6Good@skills.org', '2020-09-12 11:00')
+        cy.reportSkill(1, 1, 'user5Good@skills.org', '2020-09-13 11:00')
+        cy.reportSkill(1, 1, 'user4Good@skills.org', '2020-09-14 11:00')
+        cy.reportSkill(1, 1, 'user3Good@skills.org', '2020-09-15 11:00')
+        cy.rejectRequest(3)
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+
+        // approval -> disabled
+        cy.get('[data-cy="editSkillButton_skill1"]').click();
+        cy.get('[data-cy="selfReportingTypeWarning"]').should('not.exist')
+
+        // honor -> disabled
+        cy.get('[data-cy="selfReportEnableCheckbox"]').uncheck({force: true})
+        cy.get('[data-cy="selfReportingTypeWarning"]').contains('Disabling Self Reporting will automatically:')
+        cy.get('[data-cy="selfReportingTypeWarning"]').contains('Remove 3 pending requests')
+        cy.get('[data-cy="selfReportingTypeWarning"]').contains('Remove 1 rejected request')
+
+        cy.clickSave()
+        cy.get('[data-cy="editSkillButton_skill1"]').click();
+        cy.get('[data-cy="selfReportingTypeWarning"]').should('not.exist')
+        cy.get('[data-cy="selfReportEnableCheckbox"]').should('not.be.checked');
+    });
+
     it('skill overview - display self reporting card', () => {
         cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill1`, {
             projectId: 'proj1',
