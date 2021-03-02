@@ -152,7 +152,7 @@ describe('Client Display Accessibility tests', () => {
     cy.customLighthouse();
   });
 
-  it.only('skill with self reporting', () => {
+  it('skill with self reporting', () => {
     cy.cdVisit('/');
     cy.injectAxe();
     cy.contains('Overall Points');
