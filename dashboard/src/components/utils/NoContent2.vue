@@ -28,8 +28,9 @@ limitations under the License.
       </div>
     </div>
     <div class="row justify-content-center ">
-      <div class="col col-md-8 col-lg-7 col-xl-5 no-content">
+      <div v-if="message" class="col col-md-8 col-lg-7 col-xl-5 no-content">
         {{ message }}
+        <slot/>
       </div>
     </div>
   </div>
