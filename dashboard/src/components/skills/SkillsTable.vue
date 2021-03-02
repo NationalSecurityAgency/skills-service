@@ -116,7 +116,10 @@ limitations under the License.
             </div>
             <div class="col-auto">
               <b-button-group size="sm" class="ml-1"
-                              v-b-popover.hover="'Sorting controls are enabled only when Display Order column is sorted in the ascending order.'">
+                              :id="`mvBtnGrp_${data.item.skillId}`">
+                <b-popover :target="`mvBtnGrp_${data.item.skillId}`" triggers="hover">
+                  Sorting controls are enabled only when Display Order column is sorted in ascending order.
+                </b-popover>
                 <b-button @click="moveDisplayOrderDown(data.item)" variant="outline-info" :class="{disabled:data.item.disabledDownButton}"
                           :disabled="!sortButtonEnabled || data.item.disabledDownButton" :aria-label="'move '+data.item.name+' down in the display order'"
                           :data-cy="`orderMoveDown_${data.item.skillId}`">
@@ -221,7 +224,7 @@ limitations under the License.
           },
           options: {
             rowDetailsControls: false,
-            busy: false,
+            busy: true,
             bordered: true,
             outlined: true,
             stacked: 'md',
@@ -298,6 +301,7 @@ limitations under the License.
       this.skillsOriginal = this.skills.map((item) => item);
       this.disableFirstAndLastButtons();
       this.table.options.pagination.totalRows = this.skills.length;
+      this.table.options.busy = false;
     },
     computed: {
       addSkillDisabled() {
