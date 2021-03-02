@@ -19,6 +19,7 @@ import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
+import org.springframework.transaction.annotation.Transactional
 import skills.controller.exceptions.SkillException
 import skills.controller.request.model.GlobalSettingsRequest
 import skills.controller.result.model.SettingsResult
@@ -44,7 +45,7 @@ class SystemSettingsService {
     @Autowired
     SettingsService settingsService
 
-    SystemSettings get(){
+    SystemSettings get() {
         SystemSettings settings = new SystemSettings()
         SettingsResult result = settingsService.getGlobalSetting(Settings.GLOBAL_PUBLIC_URL.settingName)
         if (result) {
@@ -71,42 +72,50 @@ class SystemSettingsService {
         return settings
     }
 
+    @Transactional
     void save(SystemSettings settings) {
         List<GlobalSettingsRequest> toSave = []
-        toSave << new GlobalSettingsRequest(setting: Settings.GLOBAL_PUBLIC_URL.settingName, value: settings.publicUrl)
+        saveButRemoveIfEmpty(Settings.GLOBAL_PUBLIC_URL, settings.publicUrl)
 
-        if (settings.resetTokenExpiration) {
+        saveButRemoveIfEmpty(Settings.GLOBAL_FROM_EMAIL, settings.fromEmail)
+        saveFooterButRemoveIfEmpty(Settings.GLOBAL_CUSTOM_HEADER, settings.customHeader, "Custom Header")
+        saveFooterButRemoveIfEmpty(Settings.GLOBAL_CUSTOM_FOOTER, settings.customFooter, "Custom Footer")
+
+        if (StringUtils.isNotBlank(settings.resetTokenExpiration)) {
             try {
                 Duration.parse(settings.resetTokenExpiration);
             } catch (DateTimeParseException dtpe) {
                 throw new SkillException("${settings.resetTokenExpiration} is not a valid duration");
             }
             toSave << new GlobalSettingsRequest(setting: Settings.GLOBAL_RESET_TOKEN_EXPIRATION.settingName, value: settings.resetTokenExpiration)
+        } else {
+            settingsService.deleteGlobalSetting(Settings.GLOBAL_RESET_TOKEN_EXPIRATION.settingName)
         }
-
-        if (settings.fromEmail) {
-            toSave << new GlobalSettingsRequest(setting: Settings.GLOBAL_FROM_EMAIL.settingName, value: settings.fromEmail)
-        }
-
-        if (settings.customHeader ==~ SCRIPT) {
-            throw new SkillException("Script tags are not allowed in custom header")
-        }
-        if (MAX_SETTING_VALUE < settings.customHeader?.length()) {
-            throw new SkillException("Custom Header may not be longer than [${MAX_SETTING_VALUE}]")
-        }
-        if (settings.customFooter ==~ SCRIPT) {
-            throw new SkillException("Script tags are not allowed in custom footer")
-        }
-        if (MAX_SETTING_VALUE < settings.customFooter?.length()) {
-            throw new SkillException("Custom Footer may not be longer than [${MAX_SETTING_VALUE}]")
-        }
-
-        settings.customFooter = StringUtils.defaultString(settings.customFooter)
-        settings.customHeader = StringUtils.defaultString(settings.customHeader)
-        toSave << new GlobalSettingsRequest(setting: Settings.GLOBAL_CUSTOM_HEADER.settingName, value: settings.customHeader, settingGroup: CUSTOMIZATION)
-        toSave << new GlobalSettingsRequest(setting: Settings.GLOBAL_CUSTOM_FOOTER.settingName, value: settings.customFooter, settingGroup: CUSTOMIZATION)
 
         settingsService.saveSettings(toSave)
+    }
+
+    private void saveButRemoveIfEmpty(Settings setting, String value) {
+        if (StringUtils.isNotBlank(value)) {
+            settingsService.saveSetting(new GlobalSettingsRequest(setting: setting.settingName, value: value))
+        } else {
+            settingsService.deleteGlobalSetting(setting.settingName)
+        }
+    }
+
+    private void saveFooterButRemoveIfEmpty(Settings setting, String value, String settingNameForErrors) {
+        if (StringUtils.isNotBlank(value)) {
+            if (value ==~ SCRIPT) {
+                throw new SkillException("Script tags are not allowed in ${settingNameForErrors}")
+            }
+            if (MAX_SETTING_VALUE < value?.length()) {
+                throw new SkillException("${settingNameForErrors} may not be longer than [${MAX_SETTING_VALUE}]")
+            }
+            value = StringUtils.defaultString(value)
+            settingsService.saveSetting(new GlobalSettingsRequest(setting: setting.settingName, value: value, settingGroup: CUSTOMIZATION))
+        } else {
+            settingsService.deleteGlobalSetting(setting.settingName)
+        }
     }
 
 }

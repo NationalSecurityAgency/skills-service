@@ -120,4 +120,26 @@ class FeatureVerificationSpecs extends DefaultIntSpec {
         then:
         skillsService.isFeatureEnabled("emailservice")
     }
+
+    @IgnoreRest
+    def "is email service enabled - from_email must have value"() {
+        SkillsService rootSkillsService = createRootSkillService()
+
+        when:
+        rootSkillsService.addOrUpdateGlobalSetting("public_url",
+                ["setting": "public_url", "value": "http://localhost:${localPort}/".toString()])
+        rootSkillsService.getWsHelper().rootPost("/saveEmailSettings", [
+                "host"       : "localhost",
+                "port"       : 3923,
+                "protocol"   : "smtp",
+                "authEnabled": false,
+                "tlsEnabled" : false
+        ])
+
+        rootSkillsService.addOrUpdateGlobalSetting("from_email",
+                ["setting": "from_email", "value": ""]) // empty string
+
+        then:
+        skillsService.isFeatureEnabled("emailservice")
+    }
 }

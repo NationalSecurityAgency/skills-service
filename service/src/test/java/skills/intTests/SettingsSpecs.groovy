@@ -19,6 +19,7 @@ import org.springframework.http.HttpStatus
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
+import spock.lang.IgnoreRest
 import spock.lang.Timeout
 
 class SettingsSpecs extends DefaultIntSpec {
@@ -350,7 +351,7 @@ class SettingsSpecs extends DefaultIntSpec {
 
         then:
         def ex = thrown(SkillsClientException)
-        ex.message.contains("Script tags are not allowed in custom header")
+        ex.message.contains("Script tags are not allowed in Custom Header")
     }
 
     def "save custom footer setting with script tag"(){
@@ -368,7 +369,7 @@ class SettingsSpecs extends DefaultIntSpec {
 
         then:
         def ex = thrown(SkillsClientException)
-        ex.message.contains("Script tags are not allowed in custom footer")
+        ex.message.contains("Script tags are not allowed in Custom Footer")
     }
 
     def "save custom header setting with value exceeding max"(){
@@ -411,4 +412,33 @@ class SettingsSpecs extends DefaultIntSpec {
         ex.message.contains("Custom Footer may not be longer than [3000]")
     }
 
+    def "remove system setting by providing blank value"() {
+        if (!skillsService.isRoot()) {
+            skillsService.grantRoot()
+        }
+
+        when:
+        skillsService.saveSystemSettings("http://public",
+                "PT1H30M20S",
+                "foo@skilltree", "<div>header</div>", "<div>footer</div>")
+        def systemSettings = skillsService.getSystemSettings()
+
+
+        skillsService.saveSystemSettings("",
+                "",
+                "", "", "")
+        def systemSettingsAfterUpdate = skillsService.getSystemSettings()
+        then:
+        systemSettings.publicUrl == "http://public"
+        systemSettings.resetTokenExpiration == "PT1H30M20S"
+        systemSettings.fromEmail == "foo@skilltree"
+        systemSettings.customHeader == "<div>header</div>"
+        systemSettings.customFooter == "<div>footer</div>"
+
+        !systemSettingsAfterUpdate.fromEmail
+        !systemSettingsAfterUpdate.publicUrl
+        !systemSettingsAfterUpdate.customHeader
+        !systemSettingsAfterUpdate.customFooter
+        !systemSettingsAfterUpdate.resetTokenExpiration
+    }
 }

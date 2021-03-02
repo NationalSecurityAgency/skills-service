@@ -1235,7 +1235,7 @@
         </createIndex>
     </changeSet>
 
-    <changeSet id="6" author="skills team" context="migration6">
+    <changeSet id="7" author="skills team" context="migration7">
         <createTable tableName="notifications">
             <column name="id" type="int" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
