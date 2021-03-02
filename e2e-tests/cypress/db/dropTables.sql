@@ -51,3 +51,5 @@ drop table password_reset_token;
 drop table users;
 
 drop table user_attrs;
+
+drop table project_error;
