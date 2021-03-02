@@ -121,7 +121,6 @@ class FeatureVerificationSpecs extends DefaultIntSpec {
         skillsService.isFeatureEnabled("emailservice")
     }
 
-    @IgnoreRest
     def "is email service enabled - from_email must have value"() {
         SkillsService rootSkillsService = createRootSkillService()
 
