@@ -20,7 +20,7 @@ limitations under the License.
       <div class="row">
         <div class="col-sm pl-0">
           <div class="text-center text-sm-left">
-            <router-link class="h2 text-primary ml-2" to="/">
+            <router-link data-cy="skillTreeLogo" class="h2 text-primary ml-2" to="/">
               <img ref="skillTreeLogo" src="/static/img/skilltree_logo_v1.png" alt="skilltree logo"/>
             </router-link>
             <span v-if="isAdminPage" ref="adminStamp" class="skills-stamp">ADMIN</span>

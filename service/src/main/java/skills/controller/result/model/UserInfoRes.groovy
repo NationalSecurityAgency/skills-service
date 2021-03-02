@@ -29,6 +29,7 @@ class UserInfoRes {
     String last
     String nickname
     String dn
+    String landingPage
 
     UserInfoRes() {}
 
@@ -39,6 +40,7 @@ class UserInfoRes {
         this.nickname = userInfo.nickname
         this.dn = userInfo.userDn
         this.userIdForDisplay = userInfo.usernameForDisplay
+        this.landingPage = userInfo.landingPage
     }
 
     UserInfoRes(UserAttrs userAttrs) {
@@ -48,5 +50,6 @@ class UserInfoRes {
         this.nickname = userAttrs.nickname
         this.userIdForDisplay = userAttrs.userIdForDisplay
         this.dn = userAttrs.dn
+        this.landingPage = userAttrs.landingPage
     }
 }

@@ -19,6 +19,12 @@ describe('Settings Tests', () => {
         cy.logout();
         cy.fixture('vars.json').then((vars) => {
             cy.login(vars.rootUser, vars.defaultPass);
+        })
+
+        Cypress.Commands.add("navToSettings", () => {
+            cy.get('[data-cy="settings-button"]').click();
+            cy.get('[data-cy="settingsButton-navToSettings"]').should('not.be.disabled');
+            cy.get('[data-cy="settingsButton-navToSettings"]').click();
         });
     });
 
@@ -557,11 +563,55 @@ describe('Settings Tests', () => {
 
     it('nav to settings', () => {
         cy.visit('/')
-        cy.get('[data-cy="settings-button"]').click();
-        cy.get('[data-cy="settingsButton-navToSettings"]').should('not.be.disabled');
-        cy.get('[data-cy="settingsButton-navToSettings"]').click();
-
+        cy.navToSettings();
         cy.contains('* First Name');
+    })
+
+    it('Landing Page preference', () => {
+        cy.intercept('POST', '/app/userInfo').as('saveUserInfo');
+        cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
+        cy.intercept('/app/projects').as('loadProjects');
+        cy.intercept('/api/myProgressSummary').as('loadMyProgressSummary');
+
+        cy.visit('/')
+        cy.navToSettings();
+
+        // verify the default is set to 'Progress and Rankings'
+        cy.get('[data-cy="landingPageSelector"] [value="progress"]').should('be.checked');
+        cy.get('[data-cy="landingPageSelector"] [value="admin"]').should('not.be.checked');
+
+        // click SkillTree logo and verify we are on the correct page
+        cy.get('[data-cy="skillTreeLogo"]').click()
+        cy.wait('@loadMyProgressSummary');
+        cy.get('[data-cy="breadcrumb-Progress And Rankings"]').should('be.visible');
+
+        // update home page to 'Project Admin'
+        cy.navToSettings()
+        cy.get('[data-cy="landingPageSelector"] [value="admin"]').click({force:true})
+        cy.get('[data-cy="landingPageSelector"] [value="progress"]').should('not.be.checked');
+        cy.get('[data-cy="landingPageSelector"] [value="admin"]').should('be.checked');
+        cy.get('[data-cy="generalSettingsSave"]').click();
+        cy.wait('@saveUserInfo');
+        cy.wait('@loadUserInfo');
+
+        // click SkillTree logo and verify we are on the correct page
+        cy.get('[data-cy="skillTreeLogo"]').click()
+        cy.wait('@loadProjects');
+        cy.get('[data-cy="breadcrumb-Projects"]').should('be.visible');
+
+        // now update home page back to 'Progress and Rankings'
+        cy.navToSettings()
+        cy.get('[data-cy="landingPageSelector"] [value="progress"]').click({force:true})
+        cy.get('[data-cy="landingPageSelector"] [value="admin"]').should('not.be.checked');
+        cy.get('[data-cy="landingPageSelector"] [value="progress"]').should('be.checked');
+        cy.get('[data-cy="generalSettingsSave"]').click();
+        cy.wait('@saveUserInfo');
+        cy.wait('@loadUserInfo');
+
+        // click SkillTree logo and verify we are on the correct page
+        cy.get('[data-cy="skillTreeLogo"]').click();
+        cy.wait('@loadMyProgressSummary');
+        cy.get('[data-cy="breadcrumb-Progress And Rankings"]').should('be.visible');
     })
 
     it('show links to docs', () => {

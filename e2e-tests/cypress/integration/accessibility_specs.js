@@ -252,7 +252,7 @@ describe('Accessibility Tests', () => {
 
     cy.visit('/');
     cy.wait('@allSkillEventsForUser');
-    cy.get('[data-cy=breadcrumb-Home]').contains('Home').should('be.visible');
+    cy.get('[data-cy="breadcrumb-Progress And Rankings"]').contains('Progress And Rankings').should('be.visible');
 
     cy.customLighthouse();
     cy.injectAxe()

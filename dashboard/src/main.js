@@ -131,14 +131,27 @@ require('vue-multiselect/dist/vue-multiselect.min.css');
 const isActiveProjectIdChange = (to, from) => to.params.projectId !== from.params.projectId;
 const isLoggedIn = () => store.getters.isAuthenticated;
 const isPki = () => store.getters.isPkiAuthenticated;
+const getLandingPage = () => {
+  let landingPage = 'MyProgressPage';
+  if (store.getters.userInfo) {
+    if (store.getters.userInfo.landingPage === 'admin') {
+      landingPage = 'AdminHomePage';
+    }
+  }
+  return landingPage;
+};
 
 router.beforeEach((to, from, next) => {
   const requestAccountPath = '/request-root-account';
   if (!isPki() && !isLoggedIn() && to.path !== requestAccountPath && store.getters.config.needToBootstrap) {
     next({ path: requestAccountPath });
   } else if (!isPki() && to.path === requestAccountPath && !store.getters.config.needToBootstrap) {
-    next({ path: '/' });
+    next({ name: getLandingPage() });
   } else {
+    if (to.path === '/') {
+      const landingPageRoute = { name: getLandingPage() };
+      next(landingPageRoute);
+    }
     if (from.path !== '/error') {
       store.commit('previousUrl', from.fullPath);
     }
@@ -150,7 +163,7 @@ router.beforeEach((to, from, next) => {
       if (!isLoggedIn()) {
         const newRoute = { query: { redirect: to.fullPath } };
         if (isPki()) {
-          newRoute.name = 'LandingPage';
+          newRoute.name = getLandingPage();
         } else {
           newRoute.name = 'Login';
         }

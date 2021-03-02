@@ -34,4 +34,5 @@ class UserAttrs {
     String dn
     String nickname
     String userIdForDisplay
+    String landingPage
 }
