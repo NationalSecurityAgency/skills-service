@@ -1246,13 +1246,10 @@
             <column name="requested_on" type="datetime">
                 <constraints nullable="false"/>
             </column>
-            <column name="subject" type="text">
+            <column name="type" type="text">
                 <constraints nullable="false"/>
             </column>
-            <column name="body" type="text">
-                <constraints nullable="false"/>
-            </column>
-            <column name="html_body" type="text">
+            <column name="encoded_params" type="text">
                 <constraints nullable="false"/>
             </column>
 
@@ -1283,14 +1280,13 @@
             <column name="failed_count" type="int"/>
         </createIndex>
 
-
         <addForeignKeyConstraint baseColumnNames="user_id"
                                  baseTableName="notifications"
                                  constraintName="fk_notifications_user_id"
                                  onDelete="CASCADE"
                                  onUpdate="CASCADE"
                                  referencedColumnNames="user_id"
-                                 referencedTableName="user_attrs"/>
+                                 referencedTableName="user_attrs" />
 
         <insert tableName="skills_db_locks">
             <column name="lock" type="varchar(255)" value="notifier_lock"/>

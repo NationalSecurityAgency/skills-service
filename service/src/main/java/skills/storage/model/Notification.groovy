@@ -28,6 +28,22 @@ import javax.persistence.*
 @EntityListeners(AuditingEntityListener)
 class Notification {
 
+    static enum Type {
+        SkillApprovalRequested,
+    }
+
+    static class KeyValParam {
+        String key
+        Object val
+
+        KeyValParam(String key, Object val) {
+            this.key = key
+            this.val = val
+        }
+        KeyValParam() {
+        }
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id
@@ -36,9 +52,10 @@ class Notification {
 
     Date requestedOn
 
-    String subject
-    String body
-    String htmlBody
+    // notification type
+    String type
+    // Encoded list of List<KeyValParam>
+    String encodedParams
 
     // this will be incremented if notification fails to run
     int failedCount

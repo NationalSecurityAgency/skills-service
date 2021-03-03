@@ -35,33 +35,27 @@ class EmailIsNotConfiguredSpecs extends DefaultIntSpec {
         when:
         emailNotifier.sendNotification(new Notifier.NotificationRequest(
                 userIds: [skillsService.userName],
-                subject: "Test Subject",
-                plainTextBody: "As plain as day",
-                thymeleafTemplate: "test-email-template.html",
-                thymeleafTemplateContext: new Context(Locale.ENGLISH, [simpleParam: 'param value'])
+                type: "ForTestNotificationBuilder",
+                keyValParams: [simpleParam: 'param value']
         ))
+
         assert notificationsRepo.count() == 0
         rootSkillsService.addOrUpdateGlobalSetting("public_url",
                 ["setting": "public_url", "value": "http://localhost:${localPort}/".toString()])
 
         emailNotifier.sendNotification(new Notifier.NotificationRequest(
                 userIds: [skillsService.userName],
-                subject: "Test Subject",
-                plainTextBody: "As plain as day",
-                thymeleafTemplate: "test-email-template.html",
-                thymeleafTemplateContext: new Context(Locale.ENGLISH, [simpleParam: 'param value'])
+                type: "ForTestNotificationBuilder",
+                keyValParams: [simpleParam: 'param value']
         ))
         assert notificationsRepo.count() == 0
 
         rootSkillsService.addOrUpdateGlobalSetting("from_email",
                 ["setting": "from_email", "value": "resetspec@skilltreetests".toString()])
-
         emailNotifier.sendNotification(new Notifier.NotificationRequest(
                 userIds: [skillsService.userName],
-                subject: "Test Subject",
-                plainTextBody: "As plain as day",
-                thymeleafTemplate: "test-email-template.html",
-                thymeleafTemplateContext: new Context(Locale.ENGLISH, [simpleParam: 'param value'])
+                type: "ForTestNotificationBuilder",
+                keyValParams: [simpleParam: 'param value']
         ))
         assert notificationsRepo.count() == 0
 
@@ -74,10 +68,8 @@ class EmailIsNotConfiguredSpecs extends DefaultIntSpec {
         ])
         emailNotifier.sendNotification(new Notifier.NotificationRequest(
                 userIds: [skillsService.userName],
-                subject: "Test Subject",
-                plainTextBody: "As plain as day",
-                thymeleafTemplate: "test-email-template.html",
-                thymeleafTemplateContext: new Context(Locale.ENGLISH, [simpleParam: 'param value'])
+                type: "ForTestNotificationBuilder",
+                keyValParams: [simpleParam: 'param value']
         ))
         then:
         notificationsRepo.count() == 1

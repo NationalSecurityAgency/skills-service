@@ -16,21 +16,21 @@
 package skills.notify
 
 import callStack.profiler.Profile
-import groovy.util.logging.Slf4j
+import groovy.json.JsonOutput
 import groovy.lang.Closure
+import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.time.StopWatch
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import org.thymeleaf.spring5.SpringTemplateEngine
-import skills.controller.result.model.SettingsResult
+import skills.notify.builders.NotificationEmailBuilder
+import skills.notify.builders.NotificationEmailBuilderManager
 import skills.services.EmailSendingService
 import skills.services.FeatureService
 import skills.services.LockingService
-import skills.services.settings.Settings
 import skills.services.settings.SettingsService
-import skills.settings.EmailSettingsService
 import skills.storage.model.Notification
 import skills.storage.model.UserAttrs
 import skills.storage.repos.NotificationsRepo
@@ -55,13 +55,13 @@ class EmailNotifier implements Notifier {
     NotificationsRepo notificationsRepo
 
     @Autowired
-    SpringTemplateEngine thymeleafTemplateEngine;
-
-    @Autowired
     LockingService lockingService
 
     @Autowired
     FeatureService featureService
+
+    @Autowired
+    NotificationEmailBuilderManager notificationEmailBuilderManager
 
     @Transactional
     @Profile
@@ -69,26 +69,21 @@ class EmailNotifier implements Notifier {
 
         assert notificationRequest.userIds
         assert notificationRequest.requestedOn
-        assert notificationRequest.subject
-        assert notificationRequest.plainTextBody
-        assert notificationRequest.thymeleafTemplate
-        assert notificationRequest.thymeleafTemplateContext
+        assert notificationRequest.type
+        assert notificationRequest.keyValParams
 
         if (!featureService.isEmailServiceFeatureEnabled()) {
             return
         }
 
-        String htmlBody = thymeleafTemplateEngine.process(notificationRequest.thymeleafTemplate, notificationRequest.thymeleafTemplateContext)
-        notificationRequest.userIds.each {
-            String userId
-                ->
+        String serParams = JsonOutput.toJson(notificationRequest.keyValParams)
+        notificationRequest.userIds.each { String userId ->
                 Notification notification = new Notification(
-                        body: notificationRequest.plainTextBody,
-                        htmlBody: htmlBody,
                         requestedOn: notificationRequest.requestedOn,
-                        subject: notificationRequest.subject,
                         userId: userId,
                         failedCount: 0,
+                        encodedParams: serParams,
+                        type: notificationRequest.type,
                 )
 
                 notificationsRepo.save(notification)
@@ -99,7 +94,7 @@ class EmailNotifier implements Notifier {
     @Scheduled(cron = '#{"${skills.config.notifications.dispatchSchedule:* * * * * ?}"}')
     @Transactional
     void dispatchNotifications() {
-        doDispatchNotifications {  notificationsRepo.streamNewNotifications() }
+        doDispatchNotifications { notificationsRepo.streamNewNotifications() }
     }
 
     @Scheduled(cron = '#{"${skills.config.notifications.dispatchRetrySchedule:0 0 * * * ?}"}')
@@ -108,7 +103,7 @@ class EmailNotifier implements Notifier {
         doDispatchNotifications("Retry: ") { notificationsRepo.streamFailedNotifications() }
     }
 
-    private void doDispatchNotifications(String prependToLogs="", Closure streamCreator) {
+    private void doDispatchNotifications(String prependToLogs = "", Closure streamCreator) {
         lockingService.lockForNotifying()
         StopWatch stopWatch = new StopWatch()
         stopWatch.start()
@@ -117,14 +112,15 @@ class EmailNotifier implements Notifier {
         int errCount = 0
         String lastErrMsg
         streamCreator.call().forEach({ Notification notification ->
+            NotificationEmailBuilder.Res emailRes = notificationEmailBuilderManager.build(notification)
             UserAttrs userAttrs = userAttrs.findByUserId(notification.userId)
             boolean failed = false;
             try {
-                emailSettings.sendEmail(notification.subject, userAttrs.email, notification.htmlBody, notification.body, notification.requestedOn)
+                emailSettings.sendEmail(emailRes.subject, userAttrs.email, emailRes.html, emailRes.plainText, notification.requestedOn)
             } catch (Throwable t) {
                 // don't print the same message over and over again
                 if (!lastErrMsg?.equalsIgnoreCase(t.message)) {
-                    log.error("${prependToLogs}Failed to sent notification with id [${notification.id}] and subject [${notification.subject}]. Updating notification to retry", t)
+                    log.error("${prependToLogs}Failed to sent notification with id [${notification.id}] and type [${notification.type}]. Updating notification to retry", t)
                     lastErrMsg = t.message
                 }
                 notification.failedCount = notification.failedCount + 1

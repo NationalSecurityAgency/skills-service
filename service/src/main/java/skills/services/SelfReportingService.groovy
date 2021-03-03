@@ -28,6 +28,7 @@ import skills.notify.Notifier
 import skills.services.events.SkillEventsService
 import skills.services.settings.Settings
 import skills.services.settings.SettingsService
+import skills.storage.model.Notification
 import skills.storage.model.ProjDef
 import skills.storage.model.SkillApproval
 import skills.storage.model.auth.RoleName
@@ -117,14 +118,21 @@ class SelfReportingService {
         List<UserRoleRes> userRoleRes = accessSettingsStorageService.getUserRolesForProjectId(skillDefinition.projectId)
                 .findAll { it.roleName == RoleName.ROLE_PROJECT_ADMIN }
         ProjDef projDef = projDefRepo.findByProjectId(skillDefinition.projectId)
-        Notifier.NotificationRequest request = new ApprovalNotificationRequestBuilder(
-                userRequesting: userId,
-                requestMsg: requestMsg,
+        Notifier.NotificationRequest request = new Notifier.NotificationRequest(
                 userIds: userRoleRes.collect { it.userId },
-                skillDef: skillDefinition,
-                publicUrl: publicUrl,
-                projectName: projDef.name
-        ).build()
+                type: Notification.Type.SkillApprovalRequested.toString(),
+                keyValParams: [
+                        userRequesting: userId,
+                        numPoints     : String.format("%,d", skillDefinition.pointIncrement),
+                        skillName     : skillDefinition.name,
+                        approveUrl    : "${publicUrl}administrator/projects/${skillDefinition.projectId}/self-report",
+                        skillId       : skillDefinition.skillId,
+                        requestMsg    : requestMsg,
+                        projectId     : skillDefinition.projectId,
+                        publicUrl     : publicUrl,
+                        projectName   : projDef.name
+                ],
+        )
         notifier.sendNotification(request)
     }
     private String getPublicUrl() {

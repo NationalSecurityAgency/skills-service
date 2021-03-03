@@ -21,6 +21,7 @@ import org.springframework.dao.DataIntegrityViolationException
 import org.thymeleaf.context.Context
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.EmailUtils
+import skills.storage.model.Notification
 import skills.storage.repos.NotificationsRepo
 import skills.utils.LoggerHelper
 import skills.utils.WaitFor
@@ -48,10 +49,8 @@ class EmailNotifierSpecs extends DefaultIntSpec {
         when:
         emailNotifier.sendNotification(new Notifier.NotificationRequest(
                 userIds: [skillsService.userName],
-                subject: "Test Subject",
-                plainTextBody: "As plain as day",
-                thymeleafTemplate: "test-email-template.html",
-                thymeleafTemplateContext: new Context(Locale.ENGLISH, [simpleParam: 'param value'])
+                type: "ForTestNotificationBuilder",
+                keyValParams: [simpleParam: 'param value']
         ))
         assert WaitFor.wait { greenMail.getReceivedMessages().size() > 0 }
 
@@ -62,19 +61,21 @@ class EmailNotifierSpecs extends DefaultIntSpec {
         emailRes.recipients == [skillsService.userName]
         emailRes.plainText == "As plain as day"
         EmailUtils.prepBodyForComparison(emailRes.html) == EmailUtils.prepBodyForComparison('''<!--
-Copyright 2020 SkillTree
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+    Copyright 2020 SkillTree
 
-    https://www.apache.org/licenses/LICENSE-2.0
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+        https://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
 -->
 <!DOCTYPE html>
 <html lang="en"
@@ -87,7 +88,8 @@ limitations under the License.
 <h1>Test Template param value</h1>
 </body>
 </head>
-</html>''')
+</html>
+''')
 
         notificationsRepo.count() == 0
     }
@@ -97,10 +99,8 @@ limitations under the License.
         when:
         emailNotifier.sendNotification(new Notifier.NotificationRequest(
                 userIds: ['doNotExist'],
-                subject: "Test Subject",
-                plainTextBody: "As plain as day",
-                thymeleafTemplate: "test-email-template.html",
-                thymeleafTemplateContext: new Context(Locale.ENGLISH, [simpleParam: 'param value'])
+                type: "ForTestNotificationBuilder",
+                keyValParams: [simpleParam: 'param value']
         ))
         then:
         thrown(DataIntegrityViolationException)
@@ -115,18 +115,14 @@ limitations under the License.
         when:
         emailNotifier.sendNotification(new Notifier.NotificationRequest(
                 userIds: [skillsService.userName],
-                subject: "Test Subject",
-                plainTextBody: "As plain as day",
-                thymeleafTemplate: "test-email-template.html",
-                thymeleafTemplateContext: new Context(Locale.ENGLISH, [simpleParam: 'param value'])
+                type: "ForTestNotificationBuilder",
+                keyValParams: [simpleParam: 'param value']
         ))
 
         emailNotifier.sendNotification(new Notifier.NotificationRequest(
                 userIds: [skillsService.userName],
-                subject: "Test Subject",
-                plainTextBody: "As plain as day",
-                thymeleafTemplate: "test-email-template.html",
-                thymeleafTemplateContext: new Context(Locale.ENGLISH, [simpleParam: 'param value'])
+                type: "ForTestNotificationBuilder",
+                keyValParams: [simpleParam: 'param value']
         ))
 
         WaitFor.wait {  loggerHelper.hasLogMsgStartsWith("Dispatched ") }
@@ -154,19 +150,31 @@ limitations under the License.
         when:
         emailNotifier.sendNotification(new Notifier.NotificationRequest(
                 userIds: [skillsService.userName],
-                subject: "Test Subject",
-                plainTextBody: "As plain as day",
-                thymeleafTemplate: "test-email-template.html",
-                thymeleafTemplateContext: new Context(Locale.ENGLISH, [simpleParam: 'param value'])
+                type: "ForTestNotificationBuilder",
+                keyValParams: [simpleParam: 'param value']
         ))
 
         emailNotifier.sendNotification(new Notifier.NotificationRequest(
                 userIds: [skillsService.userName],
-                subject: "Test Subject",
-                plainTextBody: "As plain as day",
-                thymeleafTemplate: "test-email-template.html",
-                thymeleafTemplateContext: new Context(Locale.ENGLISH, [simpleParam: 'param value'])
+                type: "ForTestNotificationBuilder",
+                keyValParams: [simpleParam: 'param value']
         ))
+
+//        emailNotifier.sendNotification(new Notifier.NotificationRequest(
+//                userIds: [skillsService.userName],
+//                subject: "Test Subject",
+//                plainTextBody: "As plain as day",
+//                thymeleafTemplate: "test-email-template.html",
+//                thymeleafTemplateContext: new Context(Locale.ENGLISH, [simpleParam: 'param value'])
+//        ))
+//
+//        emailNotifier.sendNotification(new Notifier.NotificationRequest(
+//                userIds: [skillsService.userName],
+//                subject: "Test Subject",
+//                plainTextBody: "As plain as day",
+//                thymeleafTemplate: "test-email-template.html",
+//                thymeleafTemplateContext: new Context(Locale.ENGLISH, [simpleParam: 'param value'])
+//        ))
 
         WaitFor.wait {  loggerHelper.hasLogMsgStartsWith("Dispatched ") }
         assert loggerHelper.logEvents.find { it.message.startsWith("Dispatched [0] notification(s) with [2] error(s)") }
