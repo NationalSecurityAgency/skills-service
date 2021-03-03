@@ -51,7 +51,7 @@ limitations under the License.
 
             <div class="row">
               <div class="col">
-                <b-button variant="outline-success" @click="save" :disabled="!isDirty" data-cy="saveSettingsBtn">
+                <b-button variant="outline-success" @click="save" :disabled="!isDirty" data-cy="userPrefsSettingsSave">
                   Save <i class="fas fa-arrow-circle-right"/>
                 </b-button>
 
