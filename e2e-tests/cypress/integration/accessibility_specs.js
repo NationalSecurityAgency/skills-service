@@ -529,12 +529,17 @@ describe('Accessibility Tests', () => {
     cy.customA11y();
   });
 
-  it('settings', ()=> {
+  it.only('settings', ()=> {
     cy.logout();
     cy.login('root@skills.org', 'password');
     cy.visit('/settings')
     cy.contains('First Name')
     cy.injectAxe()
+    cy.customLighthouse();
+    cy.customA11y();
+
+    cy.get('[data-cy="nav-Preferences"]').click();
+    cy.contains('Preferences');
     cy.customLighthouse();
     cy.customA11y();
 

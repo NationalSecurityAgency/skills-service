@@ -589,9 +589,11 @@ describe('Settings Tests', () => {
         // update home page to 'Project Admin'
         cy.navToSettings()
         cy.get('[data-cy="nav-Preferences"]').click();
+        cy.get('[data-cy="userPrefsSettingsSave"]').should('be.disabled');
         cy.get('[data-cy="landingPageSelector"] [value="admin"]').click({force:true})
         cy.get('[data-cy="landingPageSelector"] [value="progress"]').should('not.be.checked');
         cy.get('[data-cy="landingPageSelector"] [value="admin"]').should('be.checked');
+        cy.get('[data-cy="userPrefsSettingsSave"]').should('not.be.disabled');
         cy.get('[data-cy="userPrefsSettingsSave"]').click();
         cy.wait('@saveUserInfo');
         cy.wait('@loadUserInfo');
@@ -604,9 +606,11 @@ describe('Settings Tests', () => {
         // now update home page back to 'Progress and Rankings'
         cy.navToSettings()
         cy.get('[data-cy="nav-Preferences"]').click();
+        cy.get('[data-cy="userPrefsSettingsSave"]').should('be.disabled');
         cy.get('[data-cy="landingPageSelector"] [value="progress"]').click({force:true})
         cy.get('[data-cy="landingPageSelector"] [value="admin"]').should('not.be.checked');
         cy.get('[data-cy="landingPageSelector"] [value="progress"]').should('be.checked');
+        cy.get('[data-cy="userPrefsSettingsSave"]').should('not.be.disabled');
         cy.get('[data-cy="userPrefsSettingsSave"]').click();
         cy.wait('@saveUserInfo');
         cy.wait('@loadUserInfo');
@@ -615,6 +619,27 @@ describe('Settings Tests', () => {
         cy.get('[data-cy="skillTreeLogo"]').click();
         cy.wait('@loadMyProgressSummary');
         cy.get('[data-cy="breadcrumb-Progress And Rankings"]').should('be.visible');
+
+        // verify the unsaved changes alert is visible when values are changed
+        // and not visible when they a the same as when loaded
+        cy.navToSettings()
+        cy.get('[data-cy="nav-Preferences"]').click();
+        cy.get('[data-cy="unsavedChangesAlert"]').should('not.exist');
+        cy.get('[data-cy="userPrefsSettingsSave"]').should('be.disabled');
+        cy.get('[data-cy="landingPageSelector"] [value="admin"]').click({force:true})
+        cy.get('[data-cy="landingPageSelector"] [value="progress"]').should('not.be.checked');
+        cy.get('[data-cy="landingPageSelector"] [value="admin"]').should('be.checked');
+
+        // unsaved changes visible and save button enabled
+        cy.get('[data-cy="unsavedChangesAlert"]').should('be.visible');
+        cy.get('[data-cy="userPrefsSettingsSave"]').should('not.be.disabled');
+
+        // switch values back to original and unsaved changes should not visible and save button disabled
+        cy.get('[data-cy="landingPageSelector"] [value="progress"]').click({force:true})
+        cy.get('[data-cy="landingPageSelector"] [value="admin"]').should('not.be.checked');
+        cy.get('[data-cy="landingPageSelector"] [value="progress"]').should('be.checked');
+        cy.get('[data-cy="unsavedChangesAlert"]').should('not.exist');
+        cy.get('[data-cy="userPrefsSettingsSave"]').should('be.disabled');
     })
 
     it('show links to docs', () => {
