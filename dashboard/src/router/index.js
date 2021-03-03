@@ -40,6 +40,7 @@ import BadgeSkills from '@//components/badges/BadgeSkills';
 import SkillOverview from '@//components/skills/SkillOverview';
 import UserSkillsPerformed from '@//components/users/UserSkillsPerformed';
 import GeneralSettings from '@//components/settings/GeneralSettings';
+import Preferences from '@//components/settings/Preferences';
 import ResetPassword from '@//components/access/ResetPassword';
 import RequestPasswordReset from '@//components/access/RequestPasswordReset';
 import RequestResetConfirmation from '@//components/access/RequestResetConfirmation';
@@ -450,6 +451,11 @@ const router = new Router({
         name: 'GeneralSettings',
         path: '',
         component: GeneralSettings,
+        meta: { requiresAuth: true, nonAdmin: true, reportSkillId: 'VisitUserSettings' },
+      }, {
+        name: 'Preferences',
+        path: '',
+        component: Preferences,
         meta: { requiresAuth: true, nonAdmin: true, reportSkillId: 'VisitUserSettings' },
       }, {
         name: 'SecuritySettings',

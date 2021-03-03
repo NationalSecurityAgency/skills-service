@@ -25,8 +25,10 @@ import org.springframework.transaction.annotation.Transactional
 import skills.auth.UserInfo
 import skills.auth.UserInfoService
 import skills.auth.pki.PkiUserLookup
+import skills.controller.UserInfoController
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
+import skills.controller.request.model.UserSettingsRequest
 import skills.controller.result.model.UserInfoRes
 import skills.controller.result.model.UserRoleRes
 import skills.services.settings.SettingsService
@@ -40,6 +42,9 @@ import skills.storage.repos.UserRoleRepo
 @Service
 @Slf4j
 class AccessSettingsStorageService {
+
+    static final String USER_PREFS_GROUP = UserInfoController.USER_PREFS_GROUP
+    static final String HOME_PAGE_PREF = UserInfoController.HOME_PAGE_PREF
 
     @Autowired
     UserRoleRepo userRoleRepository
@@ -273,6 +278,13 @@ class AccessSettingsStorageService {
                 roles: getRoles(userInfo),
         )
         userRepository.save(user)
+
+        settingsService.saveSetting(new UserSettingsRequest(
+                userId: userInfo.username,
+                settingGroup: USER_PREFS_GROUP,
+                setting: HOME_PAGE_PREF,
+                value: 'progress'
+        ))
         return user
     }
 

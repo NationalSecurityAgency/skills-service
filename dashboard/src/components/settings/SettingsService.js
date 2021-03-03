@@ -34,6 +34,16 @@ export default {
     return axios.get(`/admin/projects/${projectId}/settings/${setting}`)
       .then((remoteRes) => remoteRes.data);
   },
+  getUserSettings() {
+    return axios.get('/app/userInfo/settings')
+      .then((remoteRes) => remoteRes.data);
+  },
+  saveUserSettings(settings) {
+    return axios.post('/app/userInfo/settings', settings).then((response) => response.data);
+  },
+  checkUserSettingsValidity(settings) {
+    return axios.post('/app/userInfo/settings/checkValidity', settings).then((response) => response.data);
+  },
   hasRoot() {
     return axios.get('/root/isRoot').then((response) => response.data);
   },

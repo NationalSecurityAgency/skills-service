@@ -16,22 +16,24 @@
 package skills.controller
 
 import groovy.util.logging.Slf4j
+import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.PageRequest
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
-import skills.auth.AuthMode
-import skills.auth.SkillsAuthorizationException
-import skills.auth.UserAuthService
-import skills.auth.UserInfo
-import skills.auth.UserInfoService
+import skills.auth.*
 import skills.auth.pki.PkiUserLookup
+import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.SuggestRequest
+import skills.controller.request.model.UserSettingsRequest
 import skills.controller.result.model.RequestResult
+import skills.controller.result.model.SettingsResult
 import skills.controller.result.model.UserInfoRes
 import skills.services.AccessSettingsStorageService
 import skills.services.UserAdminService
+import skills.services.settings.SettingsService
+import skills.services.settings.listeners.ValidationRes
 import skills.storage.repos.UserAttrsRepo
 import skills.storage.repos.UserRepo
 
@@ -40,6 +42,9 @@ import skills.storage.repos.UserRepo
 @Slf4j
 @skills.profile.EnableCallStackProf
 class UserInfoController {
+
+    static final String USER_PREFS_GROUP = 'user.prefs'
+    static final String HOME_PAGE_PREF = 'home_page'
 
     @Autowired
     UserInfoService userInfoService
@@ -62,17 +67,18 @@ class UserInfoController {
     @Autowired(required = false)
     PkiUserLookup pkiUserLookup
 
+    @Autowired
+    SettingsService settingsService
 
     @RequestMapping(value = "/userInfo", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     @CrossOrigin(allowCredentials = 'true')
     def getUserInfo() {
         def res = 'null'
-        UserInfo currentUser = userInfoService.getCurrentUser()
+        UserInfo currentUser = loadCurrentUser()
         if (currentUser) {
             res = new UserInfoRes(currentUser)
-        } else if (authMode == AuthMode.PKI) {
-            throw new SkillsAuthorizationException('Unauthenticated user while using PKI Authorization Mode')
+            res.landingPage = settingsService.getUserSetting(currentUser.username, HOME_PAGE_PREF, USER_PREFS_GROUP)?.value
         }
         return res
     }
@@ -80,7 +86,7 @@ class UserInfoController {
     @RequestMapping(value = "/userInfo", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     RequestResult updateUserInfo(@RequestBody UserInfoRes userInfoReq) {
-        UserInfo currentUser = userInfoService.getCurrentUser()
+        UserInfo currentUser = loadCurrentUser(true)
         if (currentUser) {
             if (userInfoReq.first) {
                 currentUser.firstName = userInfoReq.first
@@ -89,12 +95,48 @@ class UserInfoController {
                 currentUser.lastName = userInfoReq.last
             }
             currentUser.nickname = userInfoReq.nickname
-            currentUser.landingPage = userInfoReq.landingPage
             userAuthService.createOrUpdateUser(currentUser)
-        } else if (authMode == AuthMode.PKI) {
-            throw new SkillsAuthorizationException('Unauthenticated user while using PKI Authorization Mode')
         }
         return new RequestResult(success: true)
+    }
+
+    @RequestMapping(value = "/userInfo/settings", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    List<SettingsResult> getUserSettings() {
+        UserInfo currentUser = loadCurrentUser(true)
+        return settingsService.getUserSettingsForGroup(currentUser.username, USER_PREFS_GROUP)
+    }
+
+    @RequestMapping(value = "/userInfo/settings", method = [RequestMethod.PUT, RequestMethod.POST], produces = MediaType.APPLICATION_JSON_VALUE)
+    RequestResult saveUserSettings(@RequestBody List<UserSettingsRequest> values) {
+        SkillsValidator.isNotNull(values, "Settings")
+
+        List<UserSettingsRequest> toDelete = values.findAll { StringUtils.isBlank(it.value)}
+        if (toDelete) {
+            settingsService.deleteUserSettings(toDelete)
+        }
+
+        List<UserSettingsRequest> toSave = values.findAll { !StringUtils.isBlank(it.value)}
+        if (toSave) {
+            settingsService.saveSettings(toSave)
+        }
+
+        return new RequestResult(success: true)
+    }
+
+    @RequestMapping(value = "/userInfo/settings/checkValidity", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    def checkSettingsValidity(@RequestBody List<UserSettingsRequest> values) {
+        UserInfo currentUser = loadCurrentUser(true)
+        SkillsValidator.isNotNull(values, "Settings")
+        UserSettingsRequest invalid = values.find {it.userId != currentUser.username }
+        SkillsValidator.isTrue(invalid == null, "userId [${invalid?.userId}] does not match current user [${currentUser?.username}]")
+        invalid = values.find {it.settingGroup != USER_PREFS_GROUP }
+        SkillsValidator.isTrue(invalid == null, "settingGroup [${invalid?.settingGroup}] does not match expected group [${USER_PREFS_GROUP}]")
+        ValidationRes validationRes = settingsService.isValid(values)
+        return [
+                success: true,
+                valid: validationRes.isValid,
+                explanation: validationRes.explanation
+        ]
     }
 
     @RequestMapping(value = "/userInfo/hasRole/{role}", method = RequestMethod.GET, produces = "application/json")
@@ -159,6 +201,15 @@ class UserInfoController {
             query = "a"
         }
         return pkiUserLookup?.suggestUsers(query, userSuggestOption)?.take(5)?.collect { new UserInfoRes(it) }
+    }
+
+    private UserInfo loadCurrentUser(boolean failIfNoCurrentUser=false) {
+        UserInfo currentUser = userInfoService.getCurrentUser()
+        if (currentUser) {
+        } else if (failIfNoCurrentUser || authMode == AuthMode.PKI) {
+            throw new SkillsAuthorizationException('No current user found')
+        }
+        return currentUser
     }
 
 }

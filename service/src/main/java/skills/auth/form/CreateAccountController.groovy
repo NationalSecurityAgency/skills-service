@@ -94,9 +94,6 @@ class CreateAccountController {
         if (!userInfo.usernameForDisplay) {
             userInfo.usernameForDisplay = userInfo.username
         }
-        if (!userInfo.landingPage) {
-            userInfo.landingPage = 'progress'
-        }
         return userAuthService.createUser(userInfo)
     }
 

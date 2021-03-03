@@ -60,6 +60,13 @@ class SettingsService {
     }
 
     @Transactional
+    void deleteUserSettings(List<UserSettingsRequest> request) {
+        request.each {
+            deleteUserSetting(it.setting, it.userId)
+        }
+    }
+
+    @Transactional
     SettingsResult saveSetting(SettingsRequest request) {
         lockTransaction(request)
         Setting setting = settingsDataAccessor.loadSetting(request)
@@ -164,21 +171,21 @@ class SettingsService {
     }
 
     @Transactional(readOnly = true)
-    SettingsResult getUserSetting(String userId, String projectId, String setting, String settingGroup){
+    SettingsResult getUserProjectSetting(String userId, String projectId, String setting, String settingGroup){
         Setting settingDB = settingsDataAccessor.getUserProjectSetting(userId, projectId, setting, settingGroup)
         return convertToRes(settingDB)
     }
 
     @Transactional(readOnly = true)
-    List<SettingsResult> getUserSettingsForGroup(String userId, String settingGroup){
-        List<Setting> settings = settingsDataAccessor.getUserSettingsForGroup(userId, settingGroup)
-        return convertToResList(settings)
+    SettingsResult getUserSetting(String userId, String setting, String settingGroup){
+        Setting settingDB = settingsDataAccessor.getUserSetting(userId, setting, settingGroup)
+        return convertToRes(settingDB, userId)
     }
 
     @Transactional(readOnly = true)
-    List<SettingsResult> getUserSettingsForGroup(User user, String settingGroup){
-        List<Setting> settings = settingsDataAccessor.getUserSettingsForGroup(user, settingGroup)
-        return convertToResList(settings)
+    List<SettingsResult> getUserSettingsForGroup(String userId, String settingGroup){
+        List<Setting> settings = settingsDataAccessor.getUserSettingsForGroup(userId, settingGroup)
+        return convertToResList(settings, userId)
     }
 
     @Transactional(readOnly = true)
@@ -199,6 +206,11 @@ class SettingsService {
     }
 
     @Transactional()
+    void deleteUserSetting(String setting, String userId) {
+        settingsDataAccessor.deleteUserSetting(setting, userId)
+    }
+
+    @Transactional()
     void deleteGlobalSetting(String setting) {
         settingsDataAccessor.deleteGlobalSetting(setting)
     }
@@ -211,20 +223,21 @@ class SettingsService {
     /**
      * Private helper methods
      */
-    private SettingsResult convertToRes(Setting setting){
+    private SettingsResult convertToRes(Setting setting, String userId=null){
         if (!setting) {
             return null
         }
         SettingsResult res = new SettingsResult()
         Props.copy(setting, res)
+        res.userId = userId
         return res
     }
 
-    private List<SettingsResult> convertToResList(List<Setting> settings) {
+    private List<SettingsResult> convertToResList(List<Setting> settings, String userId=null) {
         if (!settings) {
             return []
         }
-        return settings?.collect { convertToRes(it) }
+        return settings?.collect { convertToRes(it, userId) }
     }
 
     private void applyListeners(Setting previousValue, SettingsRequest incomingValue){
