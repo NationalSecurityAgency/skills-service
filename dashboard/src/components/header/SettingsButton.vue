@@ -43,8 +43,11 @@ limitations under the License.
 </template>
 
 <script>
+  import NavigationErrorMixin from '../utils/NavigationErrorMixin';
+
   export default {
     name: 'SettingsButton',
+    mixins: [NavigationErrorMixin],
     data() {
       return {
         userInfoLoaded: false,
@@ -84,13 +87,13 @@ limitations under the License.
     },
     methods: {
       gotoSettings() {
-        this.$router.push({ name: 'GeneralSettings' });
+        this.handlePush({ name: 'GeneralSettings' });
       },
       gotoAdmin() {
-        this.$router.push({ name: 'AdminHomePage' });
+        this.handlePush({ name: 'AdminHomePage' });
       },
       gotoMyProgress() {
-        this.$router.push({ name: 'MyProgressPage' });
+        this.handlePush({ name: 'MyProgressPage' });
       },
       signOut() {
         this.$store.dispatch('logout');

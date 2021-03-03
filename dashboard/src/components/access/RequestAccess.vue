@@ -142,6 +142,7 @@ aria-describedby=
   import { required, email, confirmed } from 'vee-validate/dist/rules';
   import AccessService from './AccessService';
   import Logo1 from '../brand/Logo1';
+  import NavigationErrorMixin from '../utils/NavigationErrorMixin';
 
   extend('required', {
     ...required,
@@ -159,6 +160,7 @@ aria-describedby=
   export default {
     name: 'RequestAccount',
     components: { Logo1 },
+    mixins: [NavigationErrorMixin],
     props: {
       isRootAccount: {
         type: Boolean,
@@ -181,14 +183,14 @@ aria-describedby=
       login() {
         this.createInProgress = true;
         this.$store.dispatch('signup', { isRootAccount: this.isRootAccount, ...this.loginFields }).then(() => {
-          this.$router.push({ name: 'MyProgressPage' });
+          this.handlePush({ name: 'MyProgressPage' });
         });
       },
       missingRequiredValues() {
         return !this.loginFields.firstName || !this.loginFields.lastName || !this.loginFields.email || !this.loginFields.password;
       },
       loginPage() {
-        this.$router.push({ name: 'Login' });
+        this.handlePush({ name: 'Login' });
       },
     },
   };

@@ -64,6 +64,7 @@ limitations under the License.
   import AccessService from './AccessService';
   import ExistingUserInput from '../utils/ExistingUserInput';
   import MsgBoxMixin from '../utils/modal/MsgBoxMixin';
+  import NavigationErrorMixin from '../utils/NavigationErrorMixin';
 
   // role constants
   const ROLE_APP_USER = 'ROLE_APP_USER';
@@ -73,7 +74,7 @@ limitations under the License.
 
   export default {
     name: 'RoleManager',
-    mixins: [MsgBoxMixin],
+    mixins: [MsgBoxMixin, NavigationErrorMixin],
     components: { SkillsBTable, ExistingUserInput },
     props: {
       project: {
@@ -178,7 +179,7 @@ limitations under the License.
               this.errNotification.enable = true;
             } else {
               const errorMessage = (e.response && e.response.data && e.response.data.message) ? e.response.data.message : undefined;
-              this.$router.push({ name: 'ErrorPage', query: { errorMessage } });
+              this.handlePush({ name: 'ErrorPage', query: { errorMessage } });
             }
           })
           .finally(() => {
