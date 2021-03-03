@@ -567,7 +567,7 @@ describe('Settings Tests', () => {
         cy.contains('* First Name');
     })
 
-    it.only('Landing Page preference', () => {
+    it('Landing Page preference', () => {
         cy.intercept('POST', '/app/userInfo').as('saveUserInfo');
         cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
         cy.intercept('/app/projects').as('loadProjects');
