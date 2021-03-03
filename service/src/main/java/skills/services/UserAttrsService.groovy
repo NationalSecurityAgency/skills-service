@@ -49,7 +49,6 @@ class UserAttrsService {
                     (userInfo.lastName && userAttrs.lastName != userInfo.lastName) ||
                     (userInfo.email && userAttrs.email != userInfo.email) ||
                     (userInfo.userDn && userAttrs.dn != userInfo.userDn) ||
-                    (userInfo.landingPage && userAttrs.landingPage != userInfo.landingPage) ||
                     (userInfo.nickname && userAttrs.nickname != (userInfo.nickname ?: "")) ||
                     (userInfo.usernameForDisplay && userAttrs.userIdForDisplay != userInfo.usernameForDisplay)
 
@@ -60,7 +59,6 @@ class UserAttrsService {
                     userInfo.userDn, userAttrs.dn,
                     userInfo.nickname, userAttrs.nickname,
                     userInfo.usernameForDisplay, userAttrs.userIdForDisplay,
-                    userInfo.landingPage, userAttrs.landingPage,
             )
         }
         if (doSave) {
@@ -69,7 +67,6 @@ class UserAttrsService {
             userAttrs.email = userInfo.email ?: userAttrs.email
             userAttrs.dn = userInfo.userDn ?: userAttrs.dn
             userAttrs.nickname = (userInfo.nickname ?: userAttrs.nickname) ?: ""
-            userAttrs.landingPage = (userInfo.landingPage ?: userAttrs.landingPage) ?: "progress"
             userAttrs.userIdForDisplay = userInfo.usernameForDisplay ?: userAttrs.userIdForDisplay
             saveUserAttrsInLocalDb(userAttrs)
         }

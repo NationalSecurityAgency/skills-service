@@ -50,4 +50,7 @@ interface SettingRepo extends CrudRepository<Setting, Integer> {
     @Modifying
     void deleteBySettingAndType(String setting, Setting.SettingType type)
 
+    @Modifying
+    void deleteBySettingAndTypeAndUserRefId(String setting, Setting.SettingType type, Integer userRefId)
+
 }

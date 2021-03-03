@@ -575,6 +575,7 @@ describe('Settings Tests', () => {
 
         cy.visit('/')
         cy.navToSettings();
+        cy.get('[data-cy="nav-Preferences"]').click();
 
         // verify the default is set to 'Progress and Rankings'
         cy.get('[data-cy="landingPageSelector"] [value="progress"]').should('be.checked');
@@ -587,10 +588,11 @@ describe('Settings Tests', () => {
 
         // update home page to 'Project Admin'
         cy.navToSettings()
+        cy.get('[data-cy="nav-Preferences"]').click();
         cy.get('[data-cy="landingPageSelector"] [value="admin"]').click({force:true})
         cy.get('[data-cy="landingPageSelector"] [value="progress"]').should('not.be.checked');
         cy.get('[data-cy="landingPageSelector"] [value="admin"]').should('be.checked');
-        cy.get('[data-cy="generalSettingsSave"]').click();
+        cy.get('[data-cy="userPrefsSettingsSave"]').click();
         cy.wait('@saveUserInfo');
         cy.wait('@loadUserInfo');
 
@@ -601,10 +603,11 @@ describe('Settings Tests', () => {
 
         // now update home page back to 'Progress and Rankings'
         cy.navToSettings()
+        cy.get('[data-cy="nav-Preferences"]').click();
         cy.get('[data-cy="landingPageSelector"] [value="progress"]').click({force:true})
         cy.get('[data-cy="landingPageSelector"] [value="admin"]').should('not.be.checked');
         cy.get('[data-cy="landingPageSelector"] [value="progress"]').should('be.checked');
-        cy.get('[data-cy="generalSettingsSave"]').click();
+        cy.get('[data-cy="userPrefsSettingsSave"]').click();
         cy.wait('@saveUserInfo');
         cy.wait('@loadUserInfo');
 

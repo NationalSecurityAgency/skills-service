@@ -26,8 +26,6 @@ import static skills.controller.exceptions.SkillException.NA
 @Component
 class UserInfoValidator {
 
-    static final List<String> landingPageOptions = ['progress', 'admin']
-
     @Value('#{"${skills.config.ui.maxFirstNameLength}"}')
     int maxFirstNameLength
 
@@ -47,9 +45,6 @@ class UserInfoValidator {
         // nickname by default is "firstName lastName"
         if (userInfo.nickname && userInfo.nickname.length() > maxNicknameLength) {
             throw new SkillException("Nickname cannot be over ${maxNicknameLength} characters", NA, NA, ErrorCode.BadParam)
-        }
-        if (userInfo.landingPage && !landingPageOptions.contains(userInfo.landingPage)) {
-            throw new SkillException("Invalid Home page preference [${userInfo.landingPage}].  Valid options: ${landingPageOptions}", NA, NA, ErrorCode.BadParam)
         }
     }
 

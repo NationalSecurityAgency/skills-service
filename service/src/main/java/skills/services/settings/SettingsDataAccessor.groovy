@@ -20,12 +20,7 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import skills.controller.exceptions.SkillException
-import skills.controller.request.model.GlobalSettingsRequest
-import skills.controller.request.model.ProjectSettingsRequest
-import skills.controller.request.model.RootUserProjectSettingsRequest
-import skills.controller.request.model.SettingsRequest
-import skills.controller.request.model.UserProjectSettingsRequest
-import skills.controller.request.model.UserSettingsRequest
+import skills.controller.request.model.*
 import skills.storage.model.Setting
 import skills.storage.model.Setting.SettingType
 import skills.storage.model.auth.User
@@ -112,6 +107,11 @@ class SettingsDataAccessor {
 
     void deleteSetting(String setting, SettingType type) {
         settingRepo.deleteBySettingAndType(setting, type)
+    }
+
+    void deleteUserSetting(String setting, String userId) {
+        User user = userId ? userRepo.findByUserId(userId?.toLowerCase()) : null
+        settingRepo.deleteBySettingAndTypeAndUserRefId(setting, SettingType.User, user?.id)
     }
 
     void deleteGlobalSetting(String setting) {

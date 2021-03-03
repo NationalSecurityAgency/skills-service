@@ -37,7 +37,10 @@ limitations under the License.
       return {
         isLoading: true,
         isRoot: false,
-        navItems: [{ name: 'Profile', iconClass: 'fa-address-card skills-color-profile', page: 'GeneralSettings' }],
+        navItems: [
+          { name: 'Profile', iconClass: 'fa-address-card skills-color-profile', page: 'GeneralSettings' },
+          { name: 'Preferences', iconClass: 'fa-user-cog skills-color-preferences', page: 'Preferences' },
+        ],
       };
     },
     mounted() {

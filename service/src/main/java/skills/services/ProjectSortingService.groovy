@@ -26,7 +26,6 @@ import skills.controller.result.model.SettingsResult
 import skills.services.settings.SettingsDataAccessor
 import skills.services.settings.SettingsService
 import skills.storage.model.Setting
-import skills.storage.model.auth.User
 import skills.storage.repos.UserRepo
 
 @Service
@@ -63,7 +62,7 @@ class ProjectSortingService {
     @Transactional(readOnly = true)
     Integer getProjectSortOrder(String projectId, String userId){
 
-        SettingsResult setting = settingsService.getUserSetting(userId, projectId, PROJECT_SORT_SETTING, PROJECT_SORT_GROUP)
+        SettingsResult setting = settingsService.getUserProjectSetting(userId, projectId, PROJECT_SORT_SETTING, PROJECT_SORT_GROUP)
         if(!setting){
             log.debug("no user sort setting exists for user [{}] for project [{}]", userId, projectId)
             return null

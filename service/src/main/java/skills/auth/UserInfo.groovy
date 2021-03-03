@@ -38,5 +38,4 @@ class UserInfo implements UserDetails {
     boolean enabled = true
     boolean proxied = false
     String proxyingSystemId
-    String landingPage
 }

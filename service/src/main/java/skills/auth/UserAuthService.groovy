@@ -93,7 +93,6 @@ class UserAuthService {
                 nickname: userAttrs.nickname,
                 authorities: convertRoles(user.roles),
                 usernameForDisplay: userAttrs.userIdForDisplay,
-                landingPage: userAttrs.landingPage,
         )
     }
 

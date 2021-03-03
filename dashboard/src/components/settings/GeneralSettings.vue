@@ -56,24 +56,6 @@ limitations under the License.
               <p class="text-danger" v-show="errors[0]" id="nicknameError">{{ errors[0]}}</p>
             </ValidationProvider>
 
-            <div class="mt-4">
-              <hr>
-              <b-form-group label-for="home-page-pref">
-                <template v-slot:label>
-                  Default Home Page:
-                  <inline-help
-                    msg="Select which page you would to be displayed when first visiting the SkillTree dashboard."/>
-                </template>
-                <b-form-radio-group
-                  id="home-page-pref"
-                  class="pl-2"
-                  data-cy="landingPageSelector"
-                  v-model="loginFields.landingPage"
-                  :options="[{ text: 'Progress and Rankings', value: 'progress'}, {text: 'Project Admin', value: 'admin'}]"
-                ></b-form-radio-group>
-              </b-form-group>
-            </div>
-
             <div class="mt-2">
               <button class="btn btn-outline-success" @click="updateUserInfo" :disabled="invalid || !hasChangedValues()" data-cy="generalSettingsSave">
                 Save
@@ -92,12 +74,11 @@ limitations under the License.
   import LoadingContainer from '../utils/LoadingContainer';
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import ToastSupport from '../utils/ToastSupport';
-  import InlineHelp from '../utils/InlineHelp';
 
   export default {
     name: 'GeneralSettings',
     mixins: [ToastSupport],
-    components: { SubPageHeader, LoadingContainer, InlineHelp },
+    components: { SubPageHeader, LoadingContainer },
     data() {
       return {
         isLoading: true,
@@ -105,13 +86,11 @@ limitations under the License.
           first: '',
           last: '',
           nickname: '',
-          landingPage: 'progress',
         },
         originalValues: {
           first: '',
           last: '',
           nickname: '',
-          landingPage: 'progress',
         },
         isSaving: false,
         pkiAuthenticated: false,
@@ -128,7 +107,6 @@ limitations under the License.
           this.loginFields.first = userInfo.first;
           this.loginFields.last = userInfo.last;
           this.loginFields.nickname = userInfo.nickname;
-          this.loginFields.landingPage = userInfo.landingPage;
           this.setOriginalValues();
         }
         this.isLoading = false;
@@ -161,7 +139,6 @@ limitations under the License.
         this.originalValues.first = this.loginFields.first;
         this.originalValues.last = this.loginFields.last;
         this.originalValues.nickname = this.loginFields.nickname;
-        this.originalValues.landingPage = this.loginFields.landingPage;
       },
     },
   };
