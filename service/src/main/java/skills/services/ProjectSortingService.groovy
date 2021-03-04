@@ -108,10 +108,9 @@ class ProjectSortingService {
     }
 
     @Transactional
-    void setProjectSortOrder(String projectId, Integer order, String userId){
+    void setProjectSortOrder(String projectId, Integer order){
 
         UserProjectSettingsRequest request = new UserProjectSettingsRequest()
-        request.userId = userId
         request.projectId = projectId
         request.value = order
         request.settingGroup = PROJECT_SORT_GROUP

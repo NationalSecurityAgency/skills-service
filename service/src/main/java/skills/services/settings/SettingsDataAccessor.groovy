@@ -57,28 +57,20 @@ class SettingsDataAccessor {
         settingRepo.findByTypeAndUserRefIdAndProjectIdAndSettingGroupAndSetting(Setting.SettingType.Project, null, projectId, settingGroup, setting)
     }
 
-    Setting getUserProjectSetting(String userId, String projectId, String setting, String settingGroup){
-        User user = userId ? userRepo.findByUserId(userId?.toLowerCase()) : null
-        settingRepo.findByTypeAndUserRefIdAndProjectIdAndSettingGroupAndSetting(Setting.SettingType.User, user?.id, projectId, settingGroup, setting)
+    Setting getUserProjectSetting(Integer userRefId, String projectId, String setting, String settingGroup){
+        settingRepo.findByTypeAndUserRefIdAndProjectIdAndSettingGroupAndSetting(Setting.SettingType.User, userRefId, projectId, settingGroup, setting)
     }
 
-    Setting getUserSetting(String userId, String setting, String settingGroup){
-        User user = userId ? userRepo.findByUserId(userId?.toLowerCase()) : null
-        settingRepo.findByTypeAndUserRefIdAndProjectIdAndSettingGroupAndSetting(Setting.SettingType.User, user?.id, null, settingGroup, setting)
-    }
-
-    List<Setting> getUserSettingsForGroup(String userId, String settingGroup) {
-        User user = userId ? userRepo.findByUserId(userId?.toLowerCase()) : null
-        return getUserSettingsForGroup(user, settingGroup)
+    Setting getUserSetting(Integer userRefId, String setting, String settingGroup){
+        settingRepo.findByTypeAndUserRefIdAndProjectIdAndSettingGroupAndSetting(Setting.SettingType.User, userRefId, null, settingGroup, setting)
     }
 
     List<Setting> getUserSettingsForGroup(User user, String settingGroup) {
         settingRepo.findAllByTypeAndUserRefIdAndSettingGroup(Setting.SettingType.User, user?.id, settingGroup)
     }
 
-    List<Setting> getUserProjectSettingsForGroup(String userId, String settingGroup) {
-        User user = userId ? userRepo.findByUserId(userId?.toLowerCase()) : null
-        settingRepo.findAllByTypeAndUserRefIdAndSettingGroup(Setting.SettingType.UserProject, user?.id, settingGroup)
+    List<Setting> getUserProjectSettingsForGroup(Integer userRefId, String settingGroup) {
+        settingRepo.findAllByTypeAndUserRefIdAndSettingGroup(Setting.SettingType.UserProject, userRefId, settingGroup)
     }
 
     List<Setting> getProjectSettings(String projectId) {
@@ -109,9 +101,8 @@ class SettingsDataAccessor {
         settingRepo.deleteBySettingAndType(setting, type)
     }
 
-    void deleteUserSetting(String setting, String userId) {
-        User user = userId ? userRepo.findByUserId(userId?.toLowerCase()) : null
-        settingRepo.deleteBySettingAndTypeAndUserRefId(setting, SettingType.User, user?.id)
+    void deleteUserSetting(String setting, Integer userRefId) {
+        settingRepo.deleteBySettingAndTypeAndUserRefId(setting, SettingType.User, userRefId)
     }
 
     void deleteGlobalSetting(String setting) {
@@ -122,11 +113,11 @@ class SettingsDataAccessor {
         settingRepo.deleteRootUserSetting(setting, value)
     }
 
-    Setting loadSetting(SettingsRequest request){
+    Setting loadSetting(SettingsRequest request, Integer userRefId=null){
         if(request instanceof UserProjectSettingsRequest){
-            return getUserProjectSetting(request.userId, request.projectId, request.setting, request.settingGroup)
+            return getUserProjectSetting(userRefId, request.projectId, request.setting, request.settingGroup)
         } else if (request instanceof UserSettingsRequest) {
-            return getUserSetting(request.userId, request.setting, request.settingGroup)
+            return getUserSetting(userRefId, request.setting, request.settingGroup)
         } else if(request instanceof GlobalSettingsRequest){
             return getGlobalSetting(request.setting, request.settingGroup)
         } else if(request instanceof RootUserProjectSettingsRequest) {
