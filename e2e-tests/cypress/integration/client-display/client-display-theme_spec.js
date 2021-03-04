@@ -32,6 +32,8 @@ describe('Client Display Tests', () => {
         // [1200, 1080],
     ];
 
+    const renderWait = 4000;
+
     before(() => {
         Cypress.Commands.add("cdInitProjWithSkills", () => {
             cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
@@ -329,6 +331,7 @@ describe('Client Display Tests', () => {
 
             cy.cdClickRank();
             cy.wait('@getRank');
+            cy.wait(renderWait);
 
             cy.matchImageSnapshot(snapshotOptions);
         });
