@@ -529,7 +529,7 @@ describe('Accessibility Tests', () => {
     cy.customA11y();
   });
 
-  it.only('settings', ()=> {
+  it('settings', ()=> {
     cy.logout();
     cy.login('root@skills.org', 'password');
     cy.visit('/settings')
