@@ -26,6 +26,7 @@ import skills.controller.result.model.SettingsResult
 import skills.services.settings.SettingsDataAccessor
 import skills.services.settings.SettingsService
 import skills.storage.model.Setting
+import skills.storage.model.auth.User
 import skills.storage.repos.UserRepo
 
 @Service
@@ -104,11 +105,13 @@ class ProjectSortingService {
         }
         Integer currentHighest = getHighestSortForUserProjects(userId)
 
-        setProjectSortOrder(projectId, currentHighest == null ? 0 : currentHighest+1)
+        setProjectSortOrder(projectId, currentHighest == null ? 0 : currentHighest+1, userId)
     }
 
     @Transactional
-    void setProjectSortOrder(String projectId, Integer order){
+    void setProjectSortOrder(String projectId, Integer order, String userId){
+
+        User user = userRepo.findByUserId(userId.toLowerCase())
 
         UserProjectSettingsRequest request = new UserProjectSettingsRequest()
         request.projectId = projectId
@@ -116,7 +119,7 @@ class ProjectSortingService {
         request.settingGroup = PROJECT_SORT_GROUP
         request.setting = PROJECT_SORT_SETTING
 
-        settingsService.saveSetting(request)
+        settingsService.saveSetting(request, user)
     }
 
     /**
