@@ -41,6 +41,9 @@ class UserInfoSettingsSpecs extends DefaultIntSpec {
         String newLastName = "newLastName-${System.currentTimeMillis()}"
         String newNickname = "newNickname-${System.currentTimeMillis()}"
 
+        // verify that the landing page setting is included in the userInfo
+        currentUser.landingPage == 'progress'
+
         assert currentUser.first != newFirstName
         assert currentUser.last != newLastName
         assert currentUser.nickname != newNickname
@@ -51,6 +54,7 @@ class UserInfoSettingsSpecs extends DefaultIntSpec {
 
         when:
         skillsService.updateUserInfo(currentUser)
+        currentUser = skillsService.getCurrentUser()
 
         then:
 
@@ -71,6 +75,7 @@ class UserInfoSettingsSpecs extends DefaultIntSpec {
 
         when:
         skillsService.updateUserInfo(currentUser)
+        currentUser = skillsService.getCurrentUser()
 
         then:
 

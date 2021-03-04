@@ -38,14 +38,6 @@ limitations under the License.
               </b-form-group>
             </div>
 
-<!--            <p v-if="errMsg" class="text-center text-danger mt-3" role="alert">***{{ errMsg }}***</p>-->
-
-<!--            <div class="mt-2">-->
-<!--              <button class="btn btn-outline-success" @click="save" :disabled="!isDirty" data-cy="userPrefsSettingsSave">-->
-<!--                Save-->
-<!--                <i class="fas fa-arrow-circle-right"></i>-->
-<!--              </button>-->
-<!--            </div>-->
             <hr/>
             <p v-if="errMsg" class="text-center text-danger mt-3" role="alert">***{{ errMsg }}***</p>
 

@@ -16,13 +16,10 @@
 package skills.intTests
 
 import org.springframework.http.HttpStatus
-import org.springframework.web.client.HttpClientErrorException
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import spock.lang.Timeout
-
-import java.util.regex.Pattern
 
 class SettingsSpecs extends DefaultIntSpec {
 
@@ -129,6 +126,83 @@ class SettingsSpecs extends DefaultIntSpec {
         then:
         res.body.success
         res.body.valid
+    }
+
+    def "get user settings - none defined"() {
+        when:
+        def res = skillsService.getUserSettings()
+
+        then:
+        res.size() == 1
+        res.get(0).userId == 'skills@skills.org'
+        res.get(0).setting == 'home_page'
+        res.get(0).value == "progress"
+        res.get(0).settingGroup == "user.prefs"
+        res.get(0).projectId == null
+    }
+
+    def "get user settings - several settings"() {
+        when:
+        skillsService.changeUserSettings([
+                [userId: 'skills@skills.org', settingGroup: 'user.prefs', setting: "set1", value: "true"],
+                [userId: 'skills@skills.org', settingGroup: 'user.prefs', setting: "set2", value: "val2"],
+                [userId: 'skills@skills.org', settingGroup: 'user.prefs', setting: "set3", value: "val3"],
+        ])
+        def res = skillsService.getUserSettings()
+        res = res.sort { it.setting}
+
+        then:
+        res.size() == 4
+        res.get(0).userId == 'skills@skills.org'
+        res.get(0).setting == 'home_page'
+        res.get(0).value == "progress"
+        res.get(0).settingGroup == "user.prefs"
+        res.get(0).projectId == null
+
+        res.get(1).userId == 'skills@skills.org'
+        res.get(1).setting == "set1"
+        res.get(1).settingGroup == "user.prefs"
+        res.get(1).value == "true"
+
+        res.get(2).userId == 'skills@skills.org'
+        res.get(2).setting == "set2"
+        res.get(2).settingGroup == "user.prefs"
+        res.get(2).value == "val2"
+
+        res.get(3).userId == 'skills@skills.org'
+        res.get(3).setting == "set3"
+        res.get(3).settingGroup == "user.prefs"
+        res.get(3).value == "val3"
+    }
+
+    def "update home_page setting and verify the change is reflected in the userInfo result"() {
+
+        def currentUser1 = skillsService.getCurrentUser()
+        def res1 = skillsService.getUserSettings()
+        when:
+
+        skillsService.changeUserSettings([
+                [userId: 'skills@skills.org', settingGroup: 'user.prefs', setting: "home_page", value: "admin"],
+        ])
+        def currentUser2 = skillsService.getCurrentUser()
+        def res2 = skillsService.getUserSettings()
+
+        then:
+        currentUser1.landingPage == 'progress'  // default
+        res1.size() == 1
+        res1.get(0).userId == 'skills@skills.org'
+        res1.get(0).setting == 'home_page'
+        res1.get(0).value == "progress"
+        res1.get(0).settingGroup == "user.prefs"
+        res1.get(0).projectId == null
+
+        currentUser2.landingPage == 'admin'  // updated value
+        res2.size() == 1
+        res2.get(0).userId == 'skills@skills.org'
+        res2.get(0).setting == 'home_page'
+        res2.get(0).value == "admin"
+        res2.get(0).settingGroup == "user.prefs"
+        res2.get(0).projectId == null
     }
 
     def "check validity of settings requests - invalid because there isn't enough points"(){

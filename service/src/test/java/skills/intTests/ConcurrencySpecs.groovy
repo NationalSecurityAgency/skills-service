@@ -17,6 +17,8 @@ package skills.intTests
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.transaction.PlatformTransactionManager
+import org.springframework.transaction.support.TransactionTemplate
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
@@ -31,6 +33,7 @@ import skills.storage.repos.SettingRepo
 import skills.storage.repos.SkillDefRepo
 import spock.lang.IgnoreIf
 
+import javax.transaction.Transactional
 import java.util.concurrent.atomic.AtomicInteger
 
 @Slf4j
@@ -48,6 +51,17 @@ class ConcurrencySpecs extends DefaultIntSpec {
 
     @Autowired
     SkillDefRepo skillDefRepo
+
+    @Autowired
+    private PlatformTransactionManager transactionManager;
+
+    def setup() {
+        // delete default home_page setting so that it does not affect these tests
+        TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager)
+        transactionTemplate.execute({
+            settingRepo.deleteBySettingAndType('home_page', Setting.SettingType.User)
+        })
+    }
 
     def "do not create duplicates when changing project setting concurrently"() {
         assert !settingRepo.findAll().findAll { !it.settingGroup.startsWith("public_") }

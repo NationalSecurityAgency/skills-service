@@ -813,6 +813,10 @@ class SkillsService {
         return wsHelper.adminGet(getSettingsUrl(project))
     }
 
+    def getUserSettings(){
+        return wsHelper.appGet(getUserSettingsUrl())
+    }
+
     def getPublicConfigs() {
         wsHelper.get("/public/config", "", [:])
     }
@@ -904,6 +908,10 @@ class SkillsService {
 
     def changeSettings(String project, List<Map> settings){
         return wsHelper.adminPost(getSettingsUrl(project), settings)
+    }
+
+    def changeUserSettings(List<Map> settings){
+        return wsHelper.appPost(getUserSettingsUrl(), settings)
     }
 
     def checkSettingsValidity(String project, List<Map> settings){
@@ -1083,6 +1091,10 @@ class SkillsService {
 
     private String getSettingUrl(String project, String setting){
         return "${getProjectUrl(project)}/settings/${setting}"
+    }
+
+    private String getUserSettingsUrl(){
+        return "/userInfo/settings"
     }
 
     private String getAddProjectAdminUrl(String project, String userId) {

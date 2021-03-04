@@ -538,6 +538,11 @@ describe('Accessibility Tests', () => {
     cy.customLighthouse();
     cy.customA11y();
 
+    cy.get('[data-cy="nav-Preferences"]').click();
+    cy.contains('Preferences');
+    cy.customLighthouse();
+    cy.customA11y();
+
     cy.get('[data-cy=nav-Security]').click();
     cy.contains('Root Users Management');
     cy.get('[data-cy="supervisorrm"]').contains('There are no records to show');
