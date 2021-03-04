@@ -280,7 +280,6 @@ class AccessSettingsStorageService {
         userRepository.save(user)
 
         settingsService.saveSetting(new UserSettingsRequest(
-                userId: userInfo.username,
                 settingGroup: USER_PREFS_GROUP,
                 setting: HOME_PAGE_PREF,
                 value: 'progress'
