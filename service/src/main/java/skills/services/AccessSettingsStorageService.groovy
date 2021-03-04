@@ -283,7 +283,7 @@ class AccessSettingsStorageService {
                 settingGroup: USER_PREFS_GROUP,
                 setting: HOME_PAGE_PREF,
                 value: 'progress'
-        ))
+        ), user)
         return user
     }
 

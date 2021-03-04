@@ -104,7 +104,7 @@ class ProjectSortingService {
         }
         Integer currentHighest = getHighestSortForUserProjects(userId)
 
-        setProjectSortOrder(projectId, currentHighest == null ? 0 : currentHighest+1, userId)
+        setProjectSortOrder(projectId, currentHighest == null ? 0 : currentHighest+1)
     }
 
     @Transactional

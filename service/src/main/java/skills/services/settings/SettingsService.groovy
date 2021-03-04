@@ -78,9 +78,10 @@ class SettingsService {
     }
 
     @Transactional
-    SettingsResult saveSetting(SettingsRequest request) {
-        Integer userRefId = getUserRefId(request)
-        lockTransaction(request)
+    SettingsResult saveSetting(SettingsRequest request, User user=null) {
+        Integer userRefId = user ? user.id : getUserRefId(request)
+        String userId = user ? user.userId : loadCurrentUser(false)?.username
+        lockTransaction(request, userId)
         Setting setting = settingsDataAccessor.loadSetting(request, userRefId)
         if (setting) {
             applyListeners(setting, request)
@@ -100,11 +101,11 @@ class SettingsService {
         return convertToRes(setting)
     }
 
-    private void lockTransaction(SettingsRequest request) {
+    private void lockTransaction(SettingsRequest request, String userId) {
         if(request instanceof UserProjectSettingsRequest){
-            lockingService.lockUser(getUserRefId(request))
+            lockingService.lockUser(userId)
         } else if (request instanceof UserSettingsRequest) {
-            lockingService.lockUser(getUserRefId(request))
+            lockingService.lockUser(userId)
         } else if(request instanceof GlobalSettingsRequest){
             lockingService.lockGlobalSettings()
         }else if(request instanceof ProjectSettingsRequest){
