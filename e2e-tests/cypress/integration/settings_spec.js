@@ -158,9 +158,11 @@ describe('Settings Tests', () => {
         cy.get('[data-cy=subPageHeader]').contains('Projects');
 
         cy.get('li').contains('Badges').should('not.exist');
-        cy.vuex().its('state.access.isSupervisor').should('equal', false);
+        cy.window().should('have.property','vm').then((vm) => {
+            cy.wrap(vm.$store).its('state.access.isSupervisor').should('equal', false);
+        });
         cy.get('button.dropdown-toggle').first().click({force: true});
-        cy.contains('Settings').click();
+        cy.get('[data-cy=settingsButton-navToSettings]').click();
         cy.wait('@checkRoot');
         cy.clickNav('Security');
 
@@ -173,7 +175,9 @@ describe('Settings Tests', () => {
             [{ colIndex: 0,  value: '(root@skills.org)' }],
         ], 5, true, null, false);
 
-        cy.vuex().its('state.access.isSupervisor').should('equal', true);
+        cy.window().should('have.property','vm').then((vm) => {
+            cy.wrap(vm.$store).its('state.access.isSupervisor').should('equal', true);
+        });
         // cy.contains('Home').click();
         cy.get('[data-cy=settings-button]').click();
         cy.contains('Project Admin').click();
@@ -232,7 +236,9 @@ describe('Settings Tests', () => {
         cy.get('[data-cy=subPageHeader]').contains('Projects');
 
         cy.get('li').contains('Badges').should('not.exist');
-        cy.vuex().its('state.access.isSupervisor').should('equal', false);
+        cy.window().should('have.property','vm').then((vm) => {
+            cy.wrap(vm.$store).its('state.access.isSupervisor').should('equal', false);
+        });
         cy.get('button.dropdown-toggle').first().click({force: true});
         cy.contains('Settings').click();
         cy.wait('@checkRoot');
@@ -242,7 +248,9 @@ describe('Settings Tests', () => {
         cy.get('[data-cy=supervisorrm]').contains('blah@skills.org').click();
         cy.get('[data-cy=supervisorrm]').contains('Add').click();
         cy.get('[data-cy=error-msg]').contains('Error! Request could not be completed! User [blah@skills.org] does not exist')
-        cy.vuex().its('state.access.isSupervisor').should('equal', false);
+        cy.window().should('have.property','vm').then((vm) => {
+            cy.wrap(vm.$store).its('state.access.isSupervisor').should('equal', false);
+        });
     });
 
     it('Add Supervisor User No Query', () => {
@@ -260,7 +268,9 @@ describe('Settings Tests', () => {
         cy.visit('/administrator/');
 
         cy.get('li').contains('Badges').should('not.exist');
-        cy.vuex().its('state.access.isSupervisor').should('equal', false);
+        cy.window().should('have.property','vm').then((vm) => {
+            cy.wrap(vm.$store).its('state.access.isSupervisor').should('equal', false);
+        });
         cy.get('button.dropdown-toggle').first().click({force: true});
         cy.contains('Settings').click();
         cy.wait('@checkRoot');
@@ -576,6 +586,7 @@ describe('Settings Tests', () => {
         cy.visit('/')
         cy.navToSettings();
         cy.get('[data-cy="nav-Preferences"]').click();
+        cy.contains('Default Home Page').should('be.visible');
 
         // verify the default is set to 'Progress and Rankings'
         cy.get('[data-cy="landingPageSelector"] [value="progress"]').should('be.checked');
@@ -589,6 +600,7 @@ describe('Settings Tests', () => {
         // update home page to 'Project Admin'
         cy.navToSettings()
         cy.get('[data-cy="nav-Preferences"]').click();
+        cy.contains('Default Home Page').should('be.visible');
         cy.get('[data-cy="userPrefsSettingsSave"]').should('be.disabled');
         cy.get('[data-cy="landingPageSelector"] [value="admin"]').click({force:true})
         cy.get('[data-cy="landingPageSelector"] [value="progress"]').should('not.be.checked');
@@ -606,6 +618,7 @@ describe('Settings Tests', () => {
         // now update home page back to 'Progress and Rankings'
         cy.navToSettings()
         cy.get('[data-cy="nav-Preferences"]').click();
+        cy.contains('Default Home Page').should('be.visible');
         cy.get('[data-cy="userPrefsSettingsSave"]').should('be.disabled');
         cy.get('[data-cy="landingPageSelector"] [value="progress"]').click({force:true})
         cy.get('[data-cy="landingPageSelector"] [value="admin"]').should('not.be.checked');
@@ -624,6 +637,7 @@ describe('Settings Tests', () => {
         // and not visible when they a the same as when loaded
         cy.navToSettings()
         cy.get('[data-cy="nav-Preferences"]').click();
+        cy.contains('Default Home Page').should('be.visible');
         cy.get('[data-cy="unsavedChangesAlert"]').should('not.exist');
         cy.get('[data-cy="userPrefsSettingsSave"]').should('be.disabled');
         cy.get('[data-cy="landingPageSelector"] [value="admin"]').click({force:true})
