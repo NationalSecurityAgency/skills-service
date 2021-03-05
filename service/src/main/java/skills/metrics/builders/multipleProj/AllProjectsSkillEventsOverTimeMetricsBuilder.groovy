@@ -21,8 +21,10 @@ import org.springframework.stereotype.Component
 import skills.auth.UserInfoService
 import skills.metrics.builders.GlobalMetricsBuilder
 import skills.metrics.builders.MetricsParams
+import skills.services.StartDateUtil
 import skills.services.UserEventService
 import skills.storage.model.DayCountItem
+import skills.storage.model.EventType
 
 @Component
 @Slf4j
@@ -59,6 +61,13 @@ class AllProjectsSkillEventsOverTimeMetricsBuilder implements GlobalMetricsBuild
     List<ProjResCount> build(Map<String, String> props) {
         String userId = userInfoService.getCurrentUserId();
         Date startDate = MetricsParams.getStart(null, BUILDER_ID, props)
+        EventType eventType = userEventService.determineAppropriateEventType(startDate)
+
+        if (EventType.WEEKLY == eventType) {
+            // set the start date to the nearest sunday that encapsulates the provided startDate
+            startDate = StartDateUtil.computeStartDate(startDate, eventType)
+        }
+
         List<String> projectIds = MetricsParams.getProjectIds(BUILDER_ID, props)
         log.debug("Retrieving event counts for user [{}], start date [{}], projectIds [{}]", userId, startDate, projectIds)
 
