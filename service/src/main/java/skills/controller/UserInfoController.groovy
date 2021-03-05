@@ -88,11 +88,14 @@ class UserInfoController {
     RequestResult updateUserInfo(@RequestBody UserInfoRes userInfoReq) {
         UserInfo currentUser = loadCurrentUser(true)
         if (currentUser) {
-            if (userInfoReq.first) {
-                currentUser.firstName = userInfoReq.first
-            }
-            if (userInfoReq.last) {
-                currentUser.lastName = userInfoReq.last
+            // first and last name fields cannot be changed when in PKI mode
+            if (authMode != AuthMode.PKI) {
+                if (userInfoReq.first) {
+                    currentUser.firstName = userInfoReq.first
+                }
+                if (userInfoReq.last) {
+                    currentUser.lastName = userInfoReq.last
+                }
             }
             currentUser.nickname = userInfoReq.nickname
             userAuthService.createOrUpdateUser(currentUser)

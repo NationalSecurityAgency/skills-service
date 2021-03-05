@@ -49,7 +49,7 @@ class UserAttrsService {
                     (userInfo.lastName && userAttrs.lastName != userInfo.lastName) ||
                     (userInfo.email && userAttrs.email != userInfo.email) ||
                     (userInfo.userDn && userAttrs.dn != userInfo.userDn) ||
-                    (userInfo.nickname && userAttrs.nickname != (userInfo.nickname ?: "")) ||
+                    (userAttrs.nickname != (userInfo.nickname ?: "")) ||
                     (userInfo.usernameForDisplay && userAttrs.userIdForDisplay != userInfo.usernameForDisplay)
 
             log.trace('UserInfo/UserAttrs: \n\tfirstName [{}/{}]\n\tlastName [{}]/[{}]\n\temail [{}]/[{}]\n\tuserDn [{}]/[{}]\n\tnickname [{}]/[{}]\n\tusernameForDisplay [{}]/[{}]\n\tlandingPage [{}]/[{}]',
@@ -66,7 +66,7 @@ class UserAttrsService {
             userAttrs.lastName = userInfo.lastName ?: userAttrs.lastName
             userAttrs.email = userInfo.email ?: userAttrs.email
             userAttrs.dn = userInfo.userDn ?: userAttrs.dn
-            userAttrs.nickname = (userInfo.nickname ?: userAttrs.nickname) ?: ""
+            userAttrs.nickname = (userInfo.nickname ?: "")
             userAttrs.userIdForDisplay = userInfo.usernameForDisplay ?: userAttrs.userIdForDisplay
             saveUserAttrsInLocalDb(userAttrs)
         }

@@ -80,7 +80,7 @@ class SettingsService {
     @Transactional
     SettingsResult saveSetting(SettingsRequest request, User user=null) {
         Integer userRefId = user ? user.id : getUserRefId(request)
-        String userId = user ? user.userId : loadCurrentUser(false)?.username
+        String userId = user ? user.userId : loadCurrentUser(isUserSettingRequest(request))?.username
         lockTransaction(request, userId)
         Setting setting = settingsDataAccessor.loadSetting(request, userRefId)
         if (setting) {
@@ -117,18 +117,22 @@ class SettingsService {
     }
 
     private void handlerUserSettingsRequest(SettingsRequest request, Setting setting, Integer userRefId) {
-        if (request instanceof UserSettingsRequest || request instanceof UserProjectSettingsRequest) {
+        if (isUserSettingRequest(request)) {
             setting.userRefId = userRefId
         }
     }
 
     private Integer getUserRefId(SettingsRequest request) {
         Integer userRefId = null
-        if (request instanceof UserSettingsRequest || request instanceof UserProjectSettingsRequest) {
+        if (isUserSettingRequest(request)) {
             UserInfo currentUser = loadCurrentUser()
             userRefId = getUserRefId(currentUser?.username)
         }
         return userRefId
+    }
+
+    private boolean isUserSettingRequest(SettingsRequest request) {
+        return request instanceof UserSettingsRequest || request instanceof UserProjectSettingsRequest
     }
 
     private Integer getUserRefId(String userId) {
@@ -141,8 +145,7 @@ class SettingsService {
 
     private UserInfo loadCurrentUser(boolean failIfNoCurrentUser=true) {
         UserInfo currentUser = userInfoService.getCurrentUser()
-        if (currentUser) {
-        } else if (failIfNoCurrentUser || authMode == AuthMode.PKI) {
+        if (!currentUser && failIfNoCurrentUser) {
             throw new SkillsAuthorizationException('No current user found')
         }
         return currentUser

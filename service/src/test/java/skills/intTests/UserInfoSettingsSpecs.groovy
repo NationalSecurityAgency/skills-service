@@ -18,8 +18,7 @@ package skills.intTests
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsService
-import spock.lang.IgnoreRest
-import spock.lang.Specification
+import spock.lang.IgnoreIf
 
 class UserInfoSettingsSpecs extends DefaultIntSpec {
 
@@ -55,13 +54,16 @@ class UserInfoSettingsSpecs extends DefaultIntSpec {
 
         when:
         skillsService.updateUserInfo(currentUser)
-        currentUser = skillsService.getCurrentUser()
+        def updatedCurrentUser = skillsService.getCurrentUser()
 
         then:
 
-        currentUser.first == newFirstName
-        currentUser.last == newLastName
-        currentUser.nickname == newNickname
+        // cannot change first or last name in PKI mode
+        if (System.getenv("SPRING_PROFILES_ACTIVE") != 'pki') {
+            updatedCurrentUser.first == newFirstName
+            updatedCurrentUser.last == newLastName
+        }
+        updatedCurrentUser.nickname == newNickname
     }
 
     def 'nickname is optional'() {
@@ -76,14 +78,15 @@ class UserInfoSettingsSpecs extends DefaultIntSpec {
 
         when:
         skillsService.updateUserInfo(currentUser)
-        currentUser = skillsService.getCurrentUser()
+        def updatedCurrentUser = skillsService.getCurrentUser()
 
         then:
 
-        currentUser
-        !currentUser.nickname
+        updatedCurrentUser
+        !updatedCurrentUser.nickname
     }
 
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def 'user first name cannot exceed 30 characters'() {
 
         String nameOver30Chars = "1234567890123456789012345678901"
@@ -101,6 +104,7 @@ class UserInfoSettingsSpecs extends DefaultIntSpec {
         exception.message.contains("errorCode:BadParam")
     }
 
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def 'user last name cannot exceed 30 characters'() {
 
         String nameOver30Chars = "1234567890123456789012345678901"
