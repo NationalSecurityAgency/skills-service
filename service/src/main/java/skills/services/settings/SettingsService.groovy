@@ -17,8 +17,13 @@ package skills.services.settings
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import skills.auth.AuthMode
+import skills.auth.SkillsAuthorizationException
+import skills.auth.UserInfo
+import skills.auth.UserInfoService
 import skills.controller.exceptions.SkillException
 import skills.controller.request.model.*
 import skills.controller.result.model.SettingsResult
@@ -32,6 +37,12 @@ import skills.utils.Props
 @Service
 @Slf4j
 class SettingsService {
+
+    @Value('#{securityConfig.authMode}}')
+    AuthMode authMode = AuthMode.DEFAULT_AUTH_MODE
+
+    @Autowired
+    UserInfoService userInfoService
 
     @Autowired
     SettingsDataAccessor settingsDataAccessor
@@ -62,14 +73,16 @@ class SettingsService {
     @Transactional
     void deleteUserSettings(List<UserSettingsRequest> request) {
         request.each {
-            deleteUserSetting(it.setting, it.userId)
+            deleteUserSetting(it.setting, getUserRefId(request))
         }
     }
 
     @Transactional
-    SettingsResult saveSetting(SettingsRequest request) {
-        lockTransaction(request)
-        Setting setting = settingsDataAccessor.loadSetting(request)
+    SettingsResult saveSetting(SettingsRequest request, User user=null) {
+        Integer userRefId = user ? user.id : getUserRefId(request)
+        String userId = user ? user.userId : loadCurrentUser(false)?.username
+        lockTransaction(request, userId)
+        Setting setting = settingsDataAccessor.loadSetting(request, userRefId)
         if (setting) {
             applyListeners(setting, request)
             Props.copy(request, setting)
@@ -78,7 +91,7 @@ class SettingsService {
             setting = new Setting()
             setting.type = SettingTypeUtil.getType(request)
             Props.copy(request, setting)
-            handlerUserSettingsRequest(request, setting)
+            handlerUserSettingsRequest(request, setting, userRefId)
             applyListeners(null, request)
         }
 
@@ -88,11 +101,11 @@ class SettingsService {
         return convertToRes(setting)
     }
 
-    private void lockTransaction(SettingsRequest request) {
+    private void lockTransaction(SettingsRequest request, String userId) {
         if(request instanceof UserProjectSettingsRequest){
-            lockingService.lockUser(request.userId)
+            lockingService.lockUser(userId)
         } else if (request instanceof UserSettingsRequest) {
-            lockingService.lockUser(request.userId)
+            lockingService.lockUser(userId)
         } else if(request instanceof GlobalSettingsRequest){
             lockingService.lockGlobalSettings()
         }else if(request instanceof ProjectSettingsRequest){
@@ -103,15 +116,36 @@ class SettingsService {
         }
     }
 
-
-    private void handlerUserSettingsRequest(SettingsRequest request, Setting setting) {
+    private void handlerUserSettingsRequest(SettingsRequest request, Setting setting, Integer userRefId) {
         if (request instanceof UserSettingsRequest || request instanceof UserProjectSettingsRequest) {
-            User user = userRepo.findByUserId(request.userId?.toLowerCase())
-            if (!user) {
-                throw new SkillException("Failed to find user with id [${request.userId?.toLowerCase()}]")
-            }
-            setting.userRefId = user.id
+            setting.userRefId = userRefId
         }
+    }
+
+    private Integer getUserRefId(SettingsRequest request) {
+        Integer userRefId = null
+        if (request instanceof UserSettingsRequest || request instanceof UserProjectSettingsRequest) {
+            UserInfo currentUser = loadCurrentUser()
+            userRefId = getUserRefId(currentUser?.username)
+        }
+        return userRefId
+    }
+
+    private Integer getUserRefId(String userId) {
+        User user = userRepo.findByUserId(userId.toLowerCase())
+        if (!user) {
+            throw new SkillException("Failed to find user with id [${userId.toLowerCase()}]")
+        }
+        return user.id
+    }
+
+    private UserInfo loadCurrentUser(boolean failIfNoCurrentUser=true) {
+        UserInfo currentUser = userInfoService.getCurrentUser()
+        if (currentUser) {
+        } else if (failIfNoCurrentUser || authMode == AuthMode.PKI) {
+            throw new SkillsAuthorizationException('No current user found')
+        }
+        return currentUser
     }
 
     @Transactional(readOnly = true)
@@ -172,25 +206,25 @@ class SettingsService {
 
     @Transactional(readOnly = true)
     SettingsResult getUserProjectSetting(String userId, String projectId, String setting, String settingGroup){
-        Setting settingDB = settingsDataAccessor.getUserProjectSetting(userId, projectId, setting, settingGroup)
+        Setting settingDB = settingsDataAccessor.getUserProjectSetting(getUserRefId(userId), projectId, setting, settingGroup)
         return convertToRes(settingDB)
     }
 
     @Transactional(readOnly = true)
     SettingsResult getUserSetting(String userId, String setting, String settingGroup){
-        Setting settingDB = settingsDataAccessor.getUserSetting(userId, setting, settingGroup)
+        Setting settingDB = settingsDataAccessor.getUserSetting(getUserRefId(userId), setting, settingGroup)
         return convertToRes(settingDB, userId)
     }
 
     @Transactional(readOnly = true)
     List<SettingsResult> getUserSettingsForGroup(String userId, String settingGroup){
-        List<Setting> settings = settingsDataAccessor.getUserSettingsForGroup(userId, settingGroup)
+        List<Setting> settings = settingsDataAccessor.getUserSettingsForGroup(getUserRefId(userId), settingGroup)
         return convertToResList(settings, userId)
     }
 
     @Transactional(readOnly = true)
     List<SettingsResult> getUserProjectSettingsForGroup(String userId, String settingGroup){
-        List<Setting> settings = settingsDataAccessor.getUserProjectSettingsForGroup(userId, settingGroup)
+        List<Setting> settings = settingsDataAccessor.getUserProjectSettingsForGroup(getUserRefId(userId), settingGroup)
         return convertToResList(settings)
     }
 
@@ -206,8 +240,8 @@ class SettingsService {
     }
 
     @Transactional()
-    void deleteUserSetting(String setting, String userId) {
-        settingsDataAccessor.deleteUserSetting(setting, userId)
+    void deleteUserSetting(String setting, Integer userRefId) {
+        settingsDataAccessor.deleteUserSetting(setting, userRefId)
     }
 
     @Transactional()

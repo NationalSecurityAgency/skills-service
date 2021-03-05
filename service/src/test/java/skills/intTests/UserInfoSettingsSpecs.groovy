@@ -18,6 +18,7 @@ package skills.intTests
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsService
+import spock.lang.IgnoreRest
 import spock.lang.Specification
 
 class UserInfoSettingsSpecs extends DefaultIntSpec {

@@ -125,11 +125,8 @@ class UserInfoController {
 
     @RequestMapping(value = "/userInfo/settings/checkValidity", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     def checkSettingsValidity(@RequestBody List<UserSettingsRequest> values) {
-        UserInfo currentUser = loadCurrentUser(true)
         SkillsValidator.isNotNull(values, "Settings")
-        UserSettingsRequest invalid = values.find {it.userId != currentUser.username }
-        SkillsValidator.isTrue(invalid == null, "userId [${invalid?.userId}] does not match current user [${currentUser?.username}]")
-        invalid = values.find {it.settingGroup != USER_PREFS_GROUP }
+        UserSettingsRequest invalid = values.find {it.settingGroup != USER_PREFS_GROUP }
         SkillsValidator.isTrue(invalid == null, "settingGroup [${invalid?.settingGroup}] does not match expected group [${USER_PREFS_GROUP}]")
         ValidationRes validationRes = settingsService.isValid(values)
         return [

@@ -78,18 +78,6 @@ limitations under the License.
     data() {
       return {
         isLoading: true,
-        loginFields: {
-          // first: '',
-          // last: '',
-          // nickname: '',
-          landingPage: 'progress',
-        },
-        originalValues: {
-          // first: '',
-          // last: '',
-          // nickname: '',
-          landingPage: 'progress',
-        },
         settings: {
           homePage: {
             settingGroup: 'user.prefs',
@@ -97,7 +85,6 @@ limitations under the License.
             setting: 'home_page',
             lastLoadedValue: '',
             dirty: false,
-            userId: this.currentUserId(),
           },
         },
         errMsg: null,
@@ -108,13 +95,6 @@ limitations under the License.
       this.loadSettings();
     },
     methods: {
-      currentUserId() {
-        let id = null;
-        if (this.$store.getters.userInfo) {
-          id = this.$store.getters.userInfo.userId;
-        }
-        return id;
-      },
       homePagePrefChanged(value) {
         this.settings.homePage.dirty = `${value}` !== `${this.settings.homePage.lastLoadedValue}`;
       },
