@@ -760,6 +760,8 @@ class SkillsService {
         return wsHelper.apiGet(getUserLevelForProjectUrl(projectId, userId))
     }
 
+
+
     def editLevel(String projectId, String subjectId, String level, Map props){
         return wsHelper.adminPost(getEditLevelUrl(projectId, subjectId, level), props)
     }
@@ -790,6 +792,11 @@ class SkillsService {
     def getGlobalMetricsData(String metricsId, Map props=null) {
         String endpoint = "/metrics/${metricsId}"
         wsHelper.supervisorGet(endpoint, props)
+    }
+
+    def getApiGlobalMetricsData(String metricsId, Map props = null) {
+        String endpoint = "/metrics/${metricsId}"
+        wsHelper.apiGet(endpoint, props)
     }
 
     def getAllMetricsChartsForSection(String projectId, String section, String sectionId, Map props=null) {
