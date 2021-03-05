@@ -163,7 +163,7 @@ describe('Users Tests', () => {
     });
 
     it('filter by user id', () => {
-        cy.intercept('users').as('getUsers');
+        cy.intercept('/admin/projects/proj1/users?query=*').as('getUsers');
 
         for (let i = 0; i < 7; i += 1) {
             cy.request('POST', `/api/projects/proj1/skills/skill1`, {
@@ -230,7 +230,7 @@ describe('Users Tests', () => {
     });
 
     it('apply today tag', () => {
-        cy.intercept('users')
+        cy.intercept('/admin/projects/proj1/users?query=*')
             .as('getUsers');
 
         cy.request('POST', `/api/projects/proj1/skills/skill1`, {
@@ -260,7 +260,7 @@ describe('Users Tests', () => {
 
     if (!Cypress.env('oauthMode')) {
         it('use first and last name in the display if available', () => {
-            cy.intercept('users')
+            cy.intercept('/admin/projects/proj1/users?query=*')
                 .as('getUsers');
 
             cy.request('POST', `/api/projects/proj1/skills/skill1`);
@@ -292,9 +292,44 @@ describe('Users Tests', () => {
         });
     }
 
+    it('strip the oauth provider from the userId if present', () => {
+        const res = `
+        {"data":
+            [
+                  {"userIdForDisplay":"skills@evoforge.org","firstName":"Skill","lastName":"Tree","email":"skills@evoforge.org","dn":null,"userId":"skills@evoforge.org","totalPoints":492,"lastUpdated":"2021-03-04T19:22:44.714+00:00"},
+                  {"userIdForDisplay":"skills@evo-forge.org","firstName":"Skill","lastName":"Tree","email":"skills@evoforge.org","dn":null,"userId":"skills@evoforge.org","totalPoints":492,"lastUpdated":"2021-03-04T19:22:44.714+00:00"},
+                  {"userIdForDisplay":"foo-hydra","firstName":"Skill","lastName":"Tree","email":"skills@evoforge.org","dn":null,"userId":"skills@evoforge.org","totalPoints":492,"lastUpdated":"2021-03-04T19:22:44.714+00:00"}
+            ],
+        "count":3,"totalCount":3}`;
+        cy.intercept('/admin/projects/proj1/users?query=*', {
+            statusCode: 200,
+            body: res,
+        }).as('getUsers');
+
+        cy.request('POST', `/api/projects/proj1/skills/skill1`);
+
+        cy.visit('/administrator/projects/proj1/');
+        cy.clickNav('Users');
+        cy.wait('@getUsers')
+        if (!Cypress.env('oauthMode')) {
+            console.log(`oauthMode 1 [${Cypress.env('oauthMode')}]`)
+            cy.validateTable(tableSelector, [
+                [{colIndex: 0, value: 'skills@evoforge.org'}],
+                [{colIndex: 0, value: 'skills@evo-forge.org'}],
+                [{colIndex: 0, value: 'foo-hydra'}]
+            ], 5);
+        } else {
+            console.log(`oauthMode 2 [${Cypress.env('oauthMode')}]`)
+            cy.validateTable(tableSelector, [
+                [{colIndex: 0, value: 'skills@evoforge.org'}],
+                [{colIndex: 0, value: 'skills@evo-forge.org'}],
+                [{colIndex: 0, value: 'foo'}]
+            ], 5);
+        }
+    });
 
     it('reset should reset paging', () => {
-        cy.intercept('users')
+        cy.intercept('/admin/projects/proj1/users?query=*')
             .as('getUsers');
 
         for (let i = 0; i < 6; i += 1) {
@@ -327,8 +362,8 @@ describe('Users Tests', () => {
     });
 
     it('navigate to user details', () => {
-        cy.intercept('users')
-            .as('getUsers');
+        cy.intercept('/admin/projects/proj1/users?query=*')
+            .as('getProjectUsers');
 
         for (let i = 0; i < 2; i += 1) {
             const charToAdd = String.fromCharCode(97 + i);
@@ -349,16 +384,17 @@ describe('Users Tests', () => {
         cy.request('POST', '/admin/projects/proj1/badge/badge1/skills/skill1')
 
         cy.visit('/administrator/projects/proj1/users');
-        cy.wait('@getUsers')
+        cy.wait('@getProjectUsers')
 
         cy.get(`${tableSelector} [data-cy="usersTable_viewDetailsBtn"]`).first().click();
         cy.contains("Client Display");
         cy.contains("ID: usera@skills.org");
 
         // validate from subject
-
+        cy.intercept('/admin/projects/proj1/subjects/subj1/users?query=*')
+          .as('getSubjectUsers');
         cy.visit('/administrator/projects/proj1/subjects/subj1/users');
-        cy.wait('@getUsers')
+        cy.wait('@getSubjectUsers')
         cy.contains('usera@skills.org');
 
         cy.get(`${tableSelector} [data-cy="usersTable_viewDetailsBtn"]`).first().click();
@@ -366,9 +402,10 @@ describe('Users Tests', () => {
         cy.contains("ID: usera@skills.org");
 
         // validate from skill
-
+        cy.intercept('/admin/projects/proj1/skills/skill1/users?query=*')
+          .as('getSkillsUsers');
         cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/users');
-        cy.wait('@getUsers')
+        cy.wait('@getSkillsUsers')
         cy.contains('usera@skills.org');
 
         cy.get(`${tableSelector} [data-cy="usersTable_viewDetailsBtn"]`).first().click();
@@ -376,9 +413,10 @@ describe('Users Tests', () => {
         cy.contains("ID: usera@skills.org");
 
         // validate from badge
-
+        cy.intercept('/admin/projects/proj1/badges/badge1/users?query=*')
+          .as('getBadgeUsers');
         cy.visit('/administrator/projects/proj1/badges/badge1/users');
-        cy.wait('@getUsers')
+        cy.wait('@getBadgeUsers')
         cy.contains('usera@skills.org');
 
         cy.get(`${tableSelector} [data-cy="usersTable_viewDetailsBtn"]`).first().click();

@@ -228,7 +228,18 @@ limitations under the License.
         return url;
       },
       getUserDisplay(props) {
-        return props.lastName && props.firstName ? `${props.firstName} ${props.lastName} (${props.userIdForDisplay})` : props.userIdForDisplay;
+        const userDisplay = props.userIdForDisplay ? props.userIdForDisplay : props.userId;
+        const { oAuthProviders } = this.$store.getters.config;
+        if (oAuthProviders) {
+          const indexOfDash = userDisplay.lastIndexOf('-');
+          if (indexOfDash > 0) {
+            const provider = userDisplay.substr(indexOfDash + 1);
+            if (oAuthProviders.includes(provider)) {
+              return userDisplay.substr(0, indexOfDash);
+            }
+          }
+        }
+        return userDisplay;
       },
     },
   };
