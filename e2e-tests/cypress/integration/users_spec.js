@@ -258,40 +258,6 @@ describe('Users Tests', () => {
         cy.get('@row2').eq(2).should('contain', 'Today');
     });
 
-    if (!Cypress.env('oauthMode')) {
-        it('use first and last name in the display if available', () => {
-            cy.intercept('/admin/projects/proj1/users?query=*')
-                .as('getUsers');
-
-            cy.request('POST', `/api/projects/proj1/skills/skill1`);
-
-            cy.visit('/administrator/projects/proj1/');
-            cy.clickNav('Users');
-            cy.wait('@getUsers')
-
-            cy.validateTable(tableSelector, [
-                [{
-                    colIndex: 0,
-                    value: 'Firstname LastName (skills@skills.org)'
-                }],
-            ], 5);
-
-            // make sure filter still works when username is formatted like that
-            cy.get('[data-cy="users-skillIdFilter"]')
-                .type('last');
-            cy.get('[data-cy="users-filterBtn"]')
-                .click();
-            cy.wait('@getUsers')
-
-            cy.validateTable(tableSelector, [
-                [{
-                    colIndex: 0,
-                    value: 'Firstname LastName (skills@skills.org)'
-                }],
-            ], 5);
-        });
-    }
-
     it('strip the oauth provider from the userId if present', () => {
         const res = `
         {"data":
