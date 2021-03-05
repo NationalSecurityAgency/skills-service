@@ -293,7 +293,7 @@ describe('Navigation Tests', () => {
     cy.wait('@allSkillEventsForUser');
   });
 
-  it.only('My Progress page - add/remove projects in event history chart',() => {
+  it('My Progress page - add/remove projects in event history chart',() => {
     // create 5 projects total (including Inception)
     cy.request('POST', '/app/projects/proj2', {
       projectId: 'proj2',
