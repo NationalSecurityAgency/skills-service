@@ -72,6 +72,10 @@ class PublicConfigController {
                 res["customFooter"] = it.value
             }
         }
+        def oAuthProviders = clientRegistrationRepository?.collect {it?.registrationId }
+        if (oAuthProviders) {
+            res['oAuthProviders'] = oAuthProviders
+        }
         return res
     }
 
