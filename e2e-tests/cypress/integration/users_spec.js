@@ -278,14 +278,12 @@ describe('Users Tests', () => {
         cy.clickNav('Users');
         cy.wait('@getUsers')
         if (!Cypress.env('oauthMode')) {
-            console.log(`oauthMode 1 [${Cypress.env('oauthMode')}]`)
             cy.validateTable(tableSelector, [
                 [{colIndex: 0, value: 'skills@evoforge.org'}],
                 [{colIndex: 0, value: 'skills@evo-forge.org'}],
                 [{colIndex: 0, value: 'foo-hydra'}]
             ], 5);
         } else {
-            console.log(`oauthMode 2 [${Cypress.env('oauthMode')}]`)
             cy.validateTable(tableSelector, [
                 [{colIndex: 0, value: 'skills@evoforge.org'}],
                 [{colIndex: 0, value: 'skills@evo-forge.org'}],
