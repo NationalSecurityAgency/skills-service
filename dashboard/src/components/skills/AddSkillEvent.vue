@@ -69,6 +69,7 @@ limitations under the License.
   import SimpleCard from '../utils/cards/SimpleCard';
   import SkillsService from './SkillsService';
   import ProjectService from '../projects/ProjectService';
+  import NavigationErrorMixin from '../utils/NavigationErrorMixin';
 
   const disabledDates = (date) => date > new Date();
 
@@ -86,6 +87,7 @@ limitations under the License.
       SubPageHeader,
       Datepicker,
     },
+    mixins: [NavigationErrorMixin],
     props: {
       projectId: {
         type: String,
@@ -167,7 +169,7 @@ limitations under the License.
               this.currentSelectedUser = null;
             } else {
               const errorMessage = (e.response && e.response.data && e.response.data.message) ? e.response.data.message : undefined;
-              this.$router.push({ name: 'ErrorPage', query: { errorMessage } });
+              this.handlePush({ name: 'ErrorPage', query: { errorMessage } });
             }
           })
           .finally(() => {

@@ -40,6 +40,7 @@ limitations under the License.
   import 'vis/dist/vis.css';
   import GraphLegend from '@/userSkills/skill/dependencies/GraphLegend';
   import SkillDependencySummary from '@/userSkills/skill/dependencies/SkillDependencySummary';
+  import NavigationErrorMixin from '@/common/utilities/NavigationErrorMixin';
 
   const getVis = () => import(
   /* webpackChunkName: "vis" */
@@ -48,6 +49,7 @@ limitations under the License.
 
   export default {
     name: 'SkillDependencies',
+    mixins: [NavigationErrorMixin],
     components: {
       SkillDependencySummary,
       GraphLegend,
@@ -125,7 +127,7 @@ limitations under the License.
           const skillItem = this.locateSelectedSkill(params);
           if (skillItem) {
             if (skillItem.isCrossProject) {
-              this.$router.push({
+              this.handlePush({
                 name: 'crossProjectSkillDetails',
                 params: {
                   crossProjectId: skillItem.projectId,
@@ -133,7 +135,7 @@ limitations under the License.
                 },
               });
             } else {
-              this.$router.push({
+              this.handlePush({
                 name: 'skillDetails',
                 params: {
                   skillId: skillItem.skillId,

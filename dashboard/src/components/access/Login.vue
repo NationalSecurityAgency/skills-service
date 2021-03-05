@@ -118,6 +118,7 @@ limitations under the License.
   import { required, email } from 'vee-validate/dist/rules';
   import AccessService from './AccessService';
   import Logo1 from '../brand/Logo1';
+  import NavigationErrorMixin from '../utils/NavigationErrorMixin';
 
   extend('required', {
     ...required,
@@ -128,6 +129,7 @@ limitations under the License.
   export default {
     name: 'LoginForm',
     components: { Logo1 },
+    mixins: [NavigationErrorMixin],
     data() {
       return {
         loginFields: {
@@ -148,14 +150,14 @@ limitations under the License.
         this.$store.dispatch('login', formData)
           .then(() => {
             this.loginFailed = false;
-            this.$router.push(this.$route.query.redirect || '/');
+            this.handlePush(this.$route.query.redirect || '/');
           })
           .catch((error) => {
             if (error.response.status === 401) {
               this.resetAfterFailedLogin();
             } else {
               const errorMessage = (error.response && error.response.data && error.response.data.message) ? error.response.data.message : undefined;
-              this.$router.push({ name: 'ErrorPage', query: { errorMessage } });
+              this.handlePush({ name: 'ErrorPage', query: { errorMessage } });
             }
           });
       },
@@ -168,10 +170,10 @@ limitations under the License.
         this.errors.clear();
       },
       requestAccountPage() {
-        this.$router.push({ name: 'RequestAccount' });
+        this.handlePush({ name: 'RequestAccount' });
       },
       forgotPassword() {
-        this.$router.push({ name: 'ForgotPassword' });
+        this.handlePush({ name: 'ForgotPassword' });
       },
       onAnimationStart(event) {
         // required to work around chrome auto-fill issue (see see https://stackoverflow.com/a/41530164)

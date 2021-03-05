@@ -35,8 +35,10 @@ limitations under the License.
 
 <script>
   import Spinner from 'vue-simple-spinner';
+  import NavigationErrorMixin from '@/common/utilities/NavigationErrorMixin';
 
   export default {
+    mixins: [NavigationErrorMixin],
     components: {
       'vue-simple-spinner': Spinner,
     },
@@ -46,7 +48,7 @@ limitations under the License.
     methods: {
       openMyRankDetails() {
         if (!this.isSummaryOnly) {
-          this.$router.push({
+          this.handlePush({
             name: 'myRankDetails',
             params: {
               subjectId: this.displayData.userSkills.subjectId,

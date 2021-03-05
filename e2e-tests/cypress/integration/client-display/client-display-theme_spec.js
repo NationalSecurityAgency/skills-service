@@ -32,6 +32,8 @@ describe('Client Display Tests', () => {
         // [1200, 1080],
     ];
 
+    const renderWait = 4000;
+
     before(() => {
         Cypress.Commands.add("cdInitProjWithSkills", () => {
             cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
@@ -166,6 +168,7 @@ describe('Client Display Tests', () => {
     sizes.forEach((size) => {
 
         it(`test theming - project overview - ${size}`, () => {
+            cy.intercept('GET', '/api/projects/proj1/pointHistory').as('getPointHistory');
             cy.setResolution(size);
 
             cy.cdInitProjWithSkills();
@@ -175,6 +178,7 @@ describe('Client Display Tests', () => {
             cy.get("#app").should('have.css', 'background-color')
                 .and('equal', 'rgb(98, 109, 125)');
 
+            cy.wait('@getPointHistory');
             cy.get('[data-cy=pointHistoryChart]')
 
             cy.contains('Subject 3');
@@ -310,7 +314,7 @@ describe('Client Display Tests', () => {
 
         it(`test theming - new version notification  - ${size}`, () => {
             cy.setResolution(size);
-            cy.intercept('/api/projects/proj1/rank',
+            cy.intercept(/\/api\/projects\/proj1\/rank$/,
               {
                 statusCode: 200,
                 body: {
@@ -327,6 +331,7 @@ describe('Client Display Tests', () => {
 
             cy.cdClickRank();
             cy.wait('@getRank');
+            cy.wait(renderWait);
 
             cy.matchImageSnapshot(snapshotOptions);
         });

@@ -60,6 +60,7 @@ limitations under the License.
   import { required, email } from 'vee-validate/dist/rules';
   import AccessService from './AccessService';
   import Logo1 from '../brand/Logo1';
+  import NavigationErrorMixin from '../utils/NavigationErrorMixin';
 
   extend('required', required);
   extend('email', email);
@@ -67,6 +68,7 @@ limitations under the License.
   export default {
     name: 'RequestPasswordResetForm',
     components: { Logo1 },
+    mixins: [NavigationErrorMixin],
     data() {
       return {
         username: '',
@@ -94,7 +96,7 @@ limitations under the License.
         AccessService.requestPasswordReset(this.username).then((response) => {
           this.serverError = '';
           if (response.success) {
-            this.$router.push({ name: 'RequestResetConfirmation', params: { countDown: 10, email: this.username } });
+            this.handlePush({ name: 'RequestResetConfirmation', params: { countDown: 10, email: this.username } });
           }
         }).catch((err) => {
           if (err && err.response && err.response.data && err.response.data.explanation) {

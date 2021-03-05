@@ -93,11 +93,13 @@ limitations under the License.
   import MarkdownText from '@/common/utilities/MarkdownText';
   import PartialPointsAlert from '@/userSkills/skill/PartialPointsAlert';
   import AchievementDate from '@/userSkills/skill/AchievementDate';
+  import NavigationErrorMixin from '@/common/utilities/NavigationErrorMixin';
   import SkillOverviewFooter from '../SkillOverviewFooter';
   import AnimatedNumber from './AnimatedNumber';
 
   export default {
     name: 'SkillProgress2',
+    mixins: [NavigationErrorMixin],
     components: {
       AnimatedNumber,
       SkillOverviewFooter,
@@ -148,7 +150,7 @@ limitations under the License.
           if (this.skill.crossProject && this.skill.projectId) {
             params.crossProjectId = this.skill.projectId;
           }
-          this.$router.push({
+          this.handlePush({
             name: 'skillDetails',
             params,
           });

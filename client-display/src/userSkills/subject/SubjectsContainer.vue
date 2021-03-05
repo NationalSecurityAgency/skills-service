@@ -34,8 +34,10 @@ limitations under the License.
 <script>
   import SubjectTile from '@/userSkills/subject/SubjectTile';
   import NoDataYet from '@/common/utilities/NoDataYet';
+  import NavigationErrorMixin from '@/common/utilities/NavigationErrorMixin';
 
   export default {
+    mixins: [NavigationErrorMixin],
     components: {
       NoDataYet,
       SubjectTile,
@@ -48,7 +50,7 @@ limitations under the License.
     },
     methods: {
       openUserSkillSubject(subject) {
-        this.$router.push({
+        this.handlePush({
           name: 'subjectDetails',
           params: {
             subjectId: subject.subjectId,

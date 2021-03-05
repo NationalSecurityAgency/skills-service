@@ -289,7 +289,8 @@ Cypress.Commands.add("setResolution", (size) => {
 });
 
 Cypress.Commands.add('vuex', () => {
-   return cy.window().its('vm.$store');
+    cy.window().should('have.property','vm');
+    return cy.window().its('vm.$store');
 });
 
 //see cypress-io #7306
