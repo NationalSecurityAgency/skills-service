@@ -293,7 +293,7 @@ describe('Navigation Tests', () => {
     cy.wait('@allSkillEventsForUser');
   });
 
-  it('My Progress page - add/remove projects in event history chart',() => {
+  it.only('My Progress page - add/remove projects in event history chart',() => {
     // create 5 projects total (including Inception)
     cy.request('POST', '/app/projects/proj2', {
       projectId: 'proj2',
@@ -328,38 +328,38 @@ describe('Navigation Tests', () => {
     cy.wait('@allSkillEventsForUser');
 
     // validate 4 projects are loaded by default
-    cy.get('[data-cy=eventHistoryChart]').contains('Inception').should('be.visible');
-    cy.get('[data-cy=eventHistoryChart]').contains('Project 1').should('be.visible');
-    cy.get('[data-cy=eventHistoryChart]').contains('Project 2').should('be.visible');
-    cy.get('[data-cy=eventHistoryChart]').contains('Project 3').should('be.visible');
-    cy.get('[data-cy=eventHistoryChart]').contains('Project 4').should('not.be.visible');
+    cy.get('[data-cy=eventHistoryChartProjectSelector]').contains('Inception').should('be.visible');
+    cy.get('[data-cy=eventHistoryChartProjectSelector]').contains('Project 1').should('be.visible');
+    cy.get('[data-cy=eventHistoryChartProjectSelector]').contains('Project 2').should('be.visible');
+    cy.get('[data-cy=eventHistoryChartProjectSelector]').contains('Project 3').should('be.visible');
+    cy.get('[data-cy=eventHistoryChartProjectSelector]').contains('Project 4').should('not.be.visible');
 
     // remove a project
     cy.get('[data-cy=eventHistoryChartProjectSelector]  .multiselect__tag-icon').should('have.length', 4).as('removeBtns');
     cy.get('@removeBtns').eq(2).click()
-    cy.get('[data-cy=eventHistoryChart]').contains('Inception').should('be.visible');
-    cy.get('[data-cy=eventHistoryChart]').contains('Project 1').should('be.visible');
-    cy.get('[data-cy=eventHistoryChart]').contains('Project 2').should('not.be.visible');
-    cy.get('[data-cy=eventHistoryChart]').contains('Project 3').should('be.visible');
-    cy.get('[data-cy=eventHistoryChart]').contains('Project 4').should('not.be.visible');
+    cy.get('[data-cy=eventHistoryChartProjectSelector]').contains('Inception').should('be.visible');
+    cy.get('[data-cy=eventHistoryChartProjectSelector]').contains('Project 1').should('be.visible');
+    cy.get('[data-cy=eventHistoryChartProjectSelector]').contains('Project 2').should('not.be.visible');
+    cy.get('[data-cy=eventHistoryChartProjectSelector]').contains('Project 3').should('be.visible');
+    cy.get('[data-cy=eventHistoryChartProjectSelector]').contains('Project 4').should('not.be.visible');
 
     // add a project
     cy.get('[data-cy=eventHistoryChartProjectSelector]').click()
     cy.get('[data-cy=eventHistoryChartProjectSelector]').contains('Project 4').click()
-    cy.get('[data-cy=eventHistoryChart]').contains('Inception').should('be.visible');
-    cy.get('[data-cy=eventHistoryChart]').contains('Project 1').should('be.visible');
-    cy.get('[data-cy=eventHistoryChart]').contains('Project 2').should('not.be.visible');
-    cy.get('[data-cy=eventHistoryChart]').contains('Project 3').should('be.visible');
-    cy.get('[data-cy=eventHistoryChart]').contains('Project 4').should('be.visible');
+    cy.get('[data-cy=eventHistoryChartProjectSelector]').contains('Inception').should('be.visible');
+    cy.get('[data-cy=eventHistoryChartProjectSelector]').contains('Project 1').should('be.visible');
+    cy.get('[data-cy=eventHistoryChartProjectSelector]').contains('Project 2').should('not.be.visible');
+    cy.get('[data-cy=eventHistoryChartProjectSelector]').contains('Project 3').should('be.visible');
+    cy.get('[data-cy=eventHistoryChartProjectSelector]').contains('Project 4').should('be.visible');
 
     // allows up to 5 projects
     cy.get('[data-cy=eventHistoryChartProjectSelector]').click()
     cy.get('[data-cy=eventHistoryChartProjectSelector]').contains('Project 2').click()
-    cy.get('[data-cy=eventHistoryChart]').contains('Inception').should('be.visible');
-    cy.get('[data-cy=eventHistoryChart]').contains('Project 1').should('be.visible');
-    cy.get('[data-cy=eventHistoryChart]').contains('Project 2').should('be.visible');
-    cy.get('[data-cy=eventHistoryChart]').contains('Project 3').should('be.visible');
-    cy.get('[data-cy=eventHistoryChart]').contains('Project 4').should('be.visible');
+    cy.get('[data-cy=eventHistoryChartProjectSelector]').contains('Inception').should('be.visible');
+    cy.get('[data-cy=eventHistoryChartProjectSelector]').contains('Project 1').should('be.visible');
+    cy.get('[data-cy=eventHistoryChartProjectSelector]').contains('Project 2').should('be.visible');
+    cy.get('[data-cy=eventHistoryChartProjectSelector]').contains('Project 3').should('be.visible');
+    cy.get('[data-cy=eventHistoryChartProjectSelector]').contains('Project 4').should('be.visible');
     cy.get('[data-cy=eventHistoryChartProjectSelector]').click()
     cy.get('[data-cy=eventHistoryChartProjectSelector]').contains('Maximum of 5 options selected');
 
@@ -368,6 +368,18 @@ describe('Navigation Tests', () => {
       cy.get('@removeBtns').eq(0).click()
     }
     cy.get('[data-cy=eventHistoryChart]').contains('Please select at least one project from the list above.');
+
+
+    // select just Project 2 (which has no user events yet)
+    cy.get('[data-cy=eventHistoryChartProjectSelector]').click()
+    cy.get('[data-cy=eventHistoryChartProjectSelector]').contains('Project 2').click()
+    cy.get('[data-cy=eventHistoryChartProjectSelector]').contains('Inception').should('not.be.visible');
+    cy.get('[data-cy=eventHistoryChartProjectSelector]').contains('Project 1').should('not.be.visible');
+    cy.get('[data-cy=eventHistoryChartProjectSelector]').contains('Project 2').should('be.visible');
+    cy.get('[data-cy=eventHistoryChartProjectSelector]').contains('Project 3').should('not.be.visible');
+    cy.get('[data-cy=eventHistoryChartProjectSelector]').contains('Project 4').should('not.be.visible');
+    // cy.get('[data-cy=eventHistoryChartProjectSelector]').click()
+    cy.get('[data-cy=eventHistoryChart]').contains('There are no events for the selected project(s) and time period.');
   });
 
   it('mySkills page - projects that do not have "production mode" enabled are not included', function () {
