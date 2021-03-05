@@ -74,7 +74,7 @@ class UserInfoSettingsSpecs extends DefaultIntSpec {
         }
 
         assert currentUser.nickname
-        currentUser.nickname = null
+        currentUser.nickname = ""
 
         when:
         skillsService.updateUserInfo(currentUser)
