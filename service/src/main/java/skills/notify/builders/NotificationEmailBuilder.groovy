@@ -14,4 +14,8 @@ interface NotificationEmailBuilder {
     String getId()
 
     Res build(Notification notification)
+
+    Map<String,Object> buildDigestParams(List<Notification> notifications)
+    String buildDigestPlainText(List<Notification> notifications)
+
 }

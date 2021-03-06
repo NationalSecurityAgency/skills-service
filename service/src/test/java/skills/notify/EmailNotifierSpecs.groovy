@@ -23,6 +23,7 @@ import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.EmailUtils
 import skills.storage.model.Notification
 import skills.storage.repos.NotificationsRepo
+import skills.storage.repos.SettingRepo
 import skills.utils.LoggerHelper
 import skills.utils.WaitFor
 import spock.lang.IgnoreRest
@@ -160,22 +161,6 @@ class EmailNotifierSpecs extends DefaultIntSpec {
                 keyValParams: [simpleParam: 'param value']
         ))
 
-//        emailNotifier.sendNotification(new Notifier.NotificationRequest(
-//                userIds: [skillsService.userName],
-//                subject: "Test Subject",
-//                plainTextBody: "As plain as day",
-//                thymeleafTemplate: "test-email-template.html",
-//                thymeleafTemplateContext: new Context(Locale.ENGLISH, [simpleParam: 'param value'])
-//        ))
-//
-//        emailNotifier.sendNotification(new Notifier.NotificationRequest(
-//                userIds: [skillsService.userName],
-//                subject: "Test Subject",
-//                plainTextBody: "As plain as day",
-//                thymeleafTemplate: "test-email-template.html",
-//                thymeleafTemplateContext: new Context(Locale.ENGLISH, [simpleParam: 'param value'])
-//        ))
-
         WaitFor.wait {  loggerHelper.hasLogMsgStartsWith("Dispatched ") }
         assert loggerHelper.logEvents.find { it.message.startsWith("Dispatched [0] notification(s) with [2] error(s)") }
 
@@ -192,5 +177,30 @@ class EmailNotifierSpecs extends DefaultIntSpec {
         loggerHelper.stop()
     }
 
+    def "user preference is digest - send digest email - 1 user with 1 notification"() {
+        LoggerHelper loggerHelper = new LoggerHelper(EmailNotifier.class)
+
+        skillsService.addOrUpdateUserSetting('email_pref', 'dailyDigest')
+
+        when:
+        emailNotifier.sendNotification(new Notifier.NotificationRequest(
+                userIds: [skillsService.userName],
+                type: "ForTestNotificationBuilder",
+                keyValParams: [simpleParam: 'param value', userRequesting: 'user1']
+        ))
+        assert WaitFor.wait { greenMail.getReceivedMessages().size() > 0 }
+
+        List<EmailUtils.EmailRes> emails = EmailUtils.getEmails(greenMail)
+//        println emails.get(0).html
+        then:
+        emails.size() == 1
+        emails.get(0).subj == "SkillTree Daily Digest"
+        emails.get(0).html.contains("<p><b>1</b> user requested points. As an approver you can approve or reject this request.</p>")
+
+        WaitFor.wait {  loggerHelper.hasLogMsgStartsWith("Digest Dispatched count=[1], errCount=[0], numUsers=[1]") }
+
+        cleanup:
+        loggerHelper.stop()
+    }
 
 }

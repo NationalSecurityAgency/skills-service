@@ -39,7 +39,7 @@ class LoggerHelper {
     }
 
     boolean hasLogMsgStartsWith(String str) {
-        return getLogEvents().find { it.message.startsWith("Dispatched ") }
+        return getLogEvents().find { it.message.startsWith(str) }
     }
 
     void stop() {

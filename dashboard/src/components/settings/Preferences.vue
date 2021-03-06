@@ -38,6 +38,34 @@ limitations under the License.
               </b-form-group>
             </div>
 
+            <div class="mt-4">
+              <b-form-group label-for="email-pref">
+                <template v-slot:label>
+                  Email Preference:
+                </template>
+                <b-form-radio-group
+                  id="email-pref"
+                  class="pl-2"
+                  data-cy="landingPageSelector"
+                  v-on:input="emailPrefChanged"
+                  v-model="settings.email.value"
+                  :options="[
+                    { text: 'Send Immediately - I\'d like to be notified as soon as possible!', value: 'immediate' },
+                    { text: 'Daily Digest - Please summarize and email me once a day!', value: 'dailyDigest' }
+                    ]"
+                  stacked
+                ></b-form-radio-group>
+              </b-form-group>
+            </div>
+
+<!--            <p v-if="errMsg" class="text-center text-danger mt-3" role="alert">***{{ errMsg }}***</p>-->
+
+<!--            <div class="mt-2">-->
+<!--              <button class="btn btn-outline-success" @click="save" :disabled="!isDirty" data-cy="userPrefsSettingsSave">-->
+<!--                Save-->
+<!--                <i class="fas fa-arrow-circle-right"></i>-->
+<!--              </button>-->
+<!--            </div>-->
             <hr/>
             <p v-if="errMsg" class="text-center text-danger mt-3" role="alert">***{{ errMsg }}***</p>
 
@@ -86,6 +114,13 @@ limitations under the License.
             lastLoadedValue: '',
             dirty: false,
           },
+          email: {
+            settingGroup: 'user.prefs',
+            value: 'immediate',
+            setting: 'email_pref',
+            lastLoadedValue: '',
+            dirty: false,
+          },
         },
         errMsg: null,
         showSavedMsg: false,
@@ -97,6 +132,9 @@ limitations under the License.
     methods: {
       homePagePrefChanged(value) {
         this.settings.homePage.dirty = `${value}` !== `${this.settings.homePage.lastLoadedValue}`;
+      },
+      emailPrefChanged(value) {
+        this.settings.email.dirty = `${value}` !== `${this.settings.email.lastLoadedValue}`;
       },
       loadSettings() {
         SettingsService.getUserSettings()

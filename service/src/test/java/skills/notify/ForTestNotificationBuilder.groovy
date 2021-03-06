@@ -9,7 +9,7 @@ import skills.notify.builders.NotificationEmailBuilder
 import skills.storage.model.Notification
 
 @Component
-class ForTestNotificationBuilder implements  NotificationEmailBuilder{
+class ForTestNotificationBuilder implements NotificationEmailBuilder {
 
     JsonSlurper jsonSlurper = new JsonSlurper()
 
@@ -42,6 +42,29 @@ class ForTestNotificationBuilder implements  NotificationEmailBuilder{
 
     private String buildPlainText() {
         return "As plain as day"
+    }
+
+    static class Request implements Serializable{
+        String userId
+        Integer numRequests
+    }
+
+    @Override
+    Map<String, Object> buildDigestParams(List<Notification> notifications) {
+        List parsed =  notifications.collect { jsonSlurper.parseText(it.encodedParams) }
+        Map<String, List<Object>> byUser = parsed.groupBy { it.userRequesting }
+
+        return [
+                numUsersRequestedPoints: notifications.size(),
+                numRequestsForPoints: notifications.size(),
+                approveUrl: "http://localhost/approve",
+                requests: byUser.collect { new Request(userId: it.key, numRequests: it.value.size() )}
+        ]
+    }
+
+    @Override
+    String buildDigestPlainText(List<Notification> notifications) {
+        return null
     }
 
 }
