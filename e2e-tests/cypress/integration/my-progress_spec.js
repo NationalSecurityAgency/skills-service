@@ -335,7 +335,7 @@ describe('Navigation Tests', () => {
     cy.get('[data-cy=eventHistoryChart]').contains('Project 4').should('not.be.visible');
 
     // remove a project
-    cy.get('[data-cy=eventHistoryChartProjectSelector]  .multiselect__tag-icon').should('have.length', 4).as('removeBtns');
+    cy.get('[data-cy=eventHistoryChartProjectSelector] .multiselect__tag-icon').should('have.length', 4).as('removeBtns');
     cy.get('@removeBtns').eq(2).click()
     cy.get('[data-cy=eventHistoryChart]').contains('Inception').should('be.visible');
     cy.get('[data-cy=eventHistoryChart]').contains('Project 1').should('be.visible');
@@ -345,7 +345,8 @@ describe('Navigation Tests', () => {
 
     // add a project
     cy.get('[data-cy=eventHistoryChartProjectSelector]').click()
-    cy.get('[data-cy=eventHistoryChartProjectSelector]').contains('Project 4').click()
+    cy.get('[data-cy=eventHistoryChartProjectSelector]').contains('Project 4').should('be.visible').as('project4');
+    cy.get('@project4').click();
     cy.get('[data-cy=eventHistoryChart]').contains('Inception').should('be.visible');
     cy.get('[data-cy=eventHistoryChart]').contains('Project 1').should('be.visible');
     cy.get('[data-cy=eventHistoryChart]').contains('Project 2').should('not.be.visible');
@@ -354,7 +355,8 @@ describe('Navigation Tests', () => {
 
     // allows up to 5 projects
     cy.get('[data-cy=eventHistoryChartProjectSelector]').click()
-    cy.get('[data-cy=eventHistoryChartProjectSelector]').contains('Project 2').click()
+    cy.get('[data-cy=eventHistoryChartProjectSelector]').contains('Project 2').should('be.visible').as('project2');
+    cy.get('@project2').click();
     cy.get('[data-cy=eventHistoryChart]').contains('Inception').should('be.visible');
     cy.get('[data-cy=eventHistoryChart]').contains('Project 1').should('be.visible');
     cy.get('[data-cy=eventHistoryChart]').contains('Project 2').should('be.visible');
