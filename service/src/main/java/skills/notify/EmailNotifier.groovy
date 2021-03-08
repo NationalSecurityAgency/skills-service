@@ -104,14 +104,6 @@ class EmailNotifier implements Notifier {
         doDispatchNotifications("Retry: ") { notificationsRepo.streamFailedNotifications() }
     }
 
-    @Scheduled(cron = '#{"${skills.config.notifications.dispatchDigestSchedule:0 0 6 * * ?}"}')
-    @Transactional
-    void dispatchDigestNotifications() {
-        log.info("Notification Digest: Starting...")
-        doDispatchDigestNotifications()
-        log.info("Notification Digest: Done!")
-    }
-
     private void doDispatchNotifications(String prependToLogs = "", Closure streamCreator) {
         lockingService.lockForNotifying()
         StopWatch stopWatch = new StopWatch()
@@ -151,113 +143,9 @@ class EmailNotifier implements Notifier {
         }
     }
 
-    private void doDispatchDigestNotifications() {
-        lockingService.lockForNotifying()
-        StopWatch stopWatch = new StopWatch()
-        stopWatch.start()
-
-        StatsRes stats = new StatsRes()
-
-        List<Notification> notificationsForAUser = []
-        UserAttrs currentUsr = null
-        notificationsRepo.streamDigestNotifications().forEach({ Notification notification ->
-
-            if (!currentUsr) {
-                currentUsr = userAttrs.findByUserId(notification.userId)
-            }
-            if (currentUsr.userId != notification.userId) {
-                if (notificationsForAUser) {
-                    StatsRes st = sendEmailsForNotifications(notificationsForAUser, userAttrs)
-                    stats += st
-
-                    currentUsr = userAttrs.findByUserId(notification.userId)
-                    notificationsForAUser.clear()
-                }
-            }
-
-            notificationsForAUser.add(notification)
-        })
-
-        if (notificationsForAUser) {
-            stats += sendEmailsForNotifications(notificationsForAUser, currentUsr)
-        }
-
-        stopWatch.stop()
-        if (!stats.isEmpty()) {
-            int seconds = stopWatch.getTime(TimeUnit.SECONDS)
-            log.info("Digest Dispatched ${stats.toString()} in [${seconds}] seconds")
-        }
-    }
-
-    @ToString(includeNames=true, includePackage=false)
-    private static class StatsRes {
-        int count = 0
-        int errCount = 0
-        int numUsers = 0
-
-        def plus(StatsRes other) {
-            return new StatsRes(
-                    count: other.count + count,
-                    errCount: other.errCount + errCount,
-                    numUsers: other.numUsers + numUsers,
-            )
-        }
-
-        boolean isEmpty() {
-            return count == 0 && errCount == 0;
-        }
-
-        @Override
-        String toString() {
-            "count=[${count}], errCount=[${errCount}], numUsers=[${numUsers}]"
-        }
-    }
-
-    private StatsRes sendEmailsForNotifications(List<Notification> notifications, UserAttrs userAttrs) {
-        int count = 0
-        int errCount = 0
-        String lastErrMsg
-
-        boolean failed = false;
-        NotificationEmailBuilder.Res emailRes = notificationEmailBuilderManager.buildDigest(notifications)
-        try {
-            emailSettings.sendEmail(emailRes.subject, userAttrs.email, emailRes.html, emailRes.plainText)
-        } catch (Throwable t) {
-            // don't print the same message over and over again
-            if (!lastErrMsg?.equalsIgnoreCase(t.message)) {
-                log.error("${prependToLogs}Failed to sent notification with id [${notification.id}] and type [${notification.type}]. Updating notification to retry", t)
-                lastErrMsg = t.message
-            }
-            updateNotificationsFailedCount(notifications)
-            failed = true;
-        }
-        if (!failed) {
-            removeNotificationsImmediately(notifications)
-            count++
-        } else {
-            errCount++
-        }
-
-        new StatsRes(count: count, errCount: errCount, numUsers: 1)
-    }
-
     private void removeNotificationImmediately(Integer id) {
         notificationsRepo.deleteById(id)
         notificationsRepo.flush()
-    }
-
-    private void removeNotificationsImmediately(List<Notification> notifications) {
-        for (Notification notification : notifications) {
-            notificationsRepo.deleteById(notification.id)
-        }
-        notificationsRepo.flush()
-    }
-
-    private void updateNotificationsFailedCount(List<Notification> notifications) {
-        for (Notification notification : notifications) {
-            notification.failedCount = notification.failedCount + 1
-        }
-        notificationsRepo.saveAll(notifications)
     }
 
 

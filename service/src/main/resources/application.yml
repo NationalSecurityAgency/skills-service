@@ -88,8 +88,6 @@ skills:
       dispatchSchedule: "* * * * * ?"
       # run every hour - retries failed notifications
       dispatchRetrySchedule: "0 0 * * * ?"
-      # run once a day
-      dispatchDigestSchedule: "0 0 6 * * ?"
     ui:
       dashboardVersion: @pom.version@
       buildTimestamp: @maven.build.timestamp@

@@ -134,7 +134,7 @@ limitations under the License.
   font-family: 'Black Ops One', cursive;
   text-transform: uppercase;
   text-align: center;
-  opacity: 0.4;
+  opacity: 0.7;
   width: 155px;
   transform: rotate(-17deg);
 }

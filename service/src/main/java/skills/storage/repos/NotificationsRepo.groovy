@@ -23,29 +23,8 @@ import java.util.stream.Stream
 
 interface NotificationsRepo extends JpaRepository<Notification, Integer> {
 
-    @Query('''select n from 
-            Notification n, User u 
-                left join Setting s on (s.userRefId = u.id and s.settingGroup = 'user.prefs' and s.setting='email_pref' and s.type='User') 
-            where 
-                n.failedCount = 0 and 
-                n.userId = u.userId and 
-                (s.id is null or s.value = 'immediate')
-        ''')
+    @Query("select n from Notification n where n.failedCount = 0")
     Stream<Notification> streamNewNotifications();
-
-    @Query('''select n from 
-            Notification n, User u, Setting s 
-            where 
-                s.userRefId = u.id and 
-                s.settingGroup = 'user.prefs' and 
-                s.setting='email_pref' and 
-                s.type='User' and
-                n.failedCount = 0 and 
-                n.userId = u.userId and 
-                s.value = 'dailyDigest'
-            order by u.userId
-        ''')
-    Stream<Notification> streamDigestNotifications();
 
     @Query("select n from Notification n where n.failedCount > 0")
     Stream<Notification> streamFailedNotifications();

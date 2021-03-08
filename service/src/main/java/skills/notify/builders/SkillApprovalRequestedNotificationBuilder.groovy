@@ -79,32 +79,4 @@ class SkillApprovalRequestedNotificationBuilder implements NotificationEmailBuil
 
     }
 
-    static class Request implements Serializable{
-        String userId
-        Integer numRequests
-    }
-
-    @Override
-    Map<String,Object> buildDigestParams(List<Notification> notifications) {
-        String approveUrl = jsonSlurper.parseText(notifications.first().encodedParams).userRequesting
-        List parsed =  notifications.collect { jsonSlurper.parseText(it.encodedParams) }
-        Map<String, List<Object>> byUser = parsed.groupBy { it.userRequesting }
-        return [
-                numUsersRequestedPoints: byUser.size(),
-                numRequestsForPoints: notifications.size(),
-                approveUrl: approveUrl,
-                requests: byUser.collect { new Request(userId: it.key, numRequests: it.value.size() )}
-        ]
-    }
-
-    @Override
-    String buildDigestPlainText(List<Notification> notifications) {
-        Map<String,String> params = buildDigestParams(notifications)
-        String res = "SkillTree Points Requested! \n" +
-                "${params['numUsersRequestedPoints']} users requested points with total of ${params['numRequestsForPoints']} requests. As an approver you can approve or reject this request. \n" +
-                "Approval Url: ${approveUrl}\n"
-
-        return res;
-    }
-
 }

@@ -123,6 +123,7 @@ class ReportSkills_SelfReporting extends DefaultIntSpec {
         def res = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "user0", date)
         def approvalsEndpointRes = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false)
 
+        assert WaitFor.wait { greenMail.getReceivedMessages().size() > 0 }
         EmailUtils.EmailRes emailRes = EmailUtils.getEmail(greenMail)
 
         then:
