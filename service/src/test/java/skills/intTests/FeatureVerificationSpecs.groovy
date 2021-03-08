@@ -139,6 +139,6 @@ class FeatureVerificationSpecs extends DefaultIntSpec {
                 ["setting": "from_email", "value": ""]) // empty string
 
         then:
-        skillsService.isFeatureEnabled("emailservice")
+        !skillsService.isFeatureEnabled("emailservice")
     }
 }

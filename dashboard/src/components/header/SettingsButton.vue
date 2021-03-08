@@ -20,24 +20,24 @@ limitations under the License.
       <span class="sr-only">settings menu</span>
     </template>
     <b-dropdown-text style="width: 14rem;">
-      <div class="text-secondary"><i class="fas fa-key text-success" aria-hidden="true"/> Logged in as</div>
+      <div class="text-secondary"><i class="fas fa-key skills-color-loggedIn" aria-hidden="true"/> Logged in as</div>
       <div class="text-left text-primary font-weight-bold" data-cy="settingsButton-loggedInName">
         {{ displayName }}
       </div>
     </b-dropdown-text>
     <b-dropdown-divider />
     <b-dropdown-item href="#" :disabled="myProgressLinkDisabled"  @click="gotoMyProgress">
-      <span class="text-gray-700"> <i class="fas fa-chart-bar skills-color-levels" aria-hidden="true"/><span class="link-name">Progress and Rankings</span></span>
+      <span class="text-gray-700"> <i class="fas fa-chart-bar skills-color-progressAndRanking" aria-hidden="true"/><span class="link-name">Progress and Rankings</span></span>
     </b-dropdown-item>
     <b-dropdown-item href="#" :disabled="adminLinkDisabled"  @click="gotoAdmin">
-      <span class="text-gray-700"> <i class="fas fa-tasks skills-color-badges" aria-hidden="true"/><span class="link-name">Project Admin</span></span>
+      <span class="text-gray-700"> <i class="fas fa-tasks skills-color-projectAdmin" aria-hidden="true"/><span class="link-name">Project Admin</span></span>
     </b-dropdown-item>
     <b-dropdown-item href="#" :disabled="settingsLinkDisabled" @click="gotoSettings" data-cy="settingsButton-navToSettings">
       <span class="text-gray-700"> <i class="fas fa-cog skills-color-settings" aria-hidden="true"/><span class="link-name">Settings</span></span>
     </b-dropdown-item>
     <b-dropdown-divider />
     <b-dropdown-item v-if="isFormAuthenticatedUser" href="#" @click="signOut">
-      <span class="text-gray-700"> <i class="fas fa-sign-out-alt text-warning" aria-hidden="true"/><span class="link-name">Log Out</span></span>
+      <span class="text-gray-700"> <i class="fas fa-sign-out-alt skills-color-loggedOut" aria-hidden="true"/><span class="link-name">Log Out</span></span>
     </b-dropdown-item>
   </b-dropdown>
 </template>

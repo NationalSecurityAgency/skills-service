@@ -289,6 +289,7 @@ describe('Settings Tests', () => {
         cy.contains('Settings').click();
         cy.contains('Email').click();
         cy.wait('@loadEmailSettings');
+        cy.get$('[data-cy=hostInput]').type('hi')
         cy.get$('[data-cy=hostInput]').clear();
         cy.get$('[data-cy=hostError]').contains('Host is required');
         cy.get$('[data-cy=emailSettingsSave]').should('be.disabled');
