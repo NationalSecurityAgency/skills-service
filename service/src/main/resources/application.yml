@@ -119,6 +119,7 @@ skills:
       maxNumPerformToCompletion: 10000
       maxNumPointIncrementMaxOccurrences: 999
       userSuggestOptions:
+      pointHistoryInDays: 1825
     client:
       loggingEnabled: false
       loggingLevel: DEBUG

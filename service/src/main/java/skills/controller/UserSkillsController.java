@@ -24,6 +24,7 @@ import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 import skills.PublicProps;
 import skills.auth.UserInfoService;
@@ -83,6 +84,9 @@ class UserSkillsController {
 
     @Autowired
     ProjectErrorService projectErrorService;
+
+    @Value("${skills.config.ui.pointHistoryInDays:1825}")
+    Integer maxDaysBack;
 
     private int getProvidedVersionOrReturnDefault(Integer versionParam) {
         if (versionParam != null) {
@@ -239,7 +243,7 @@ class UserSkillsController {
                                                            @RequestParam(name = "idType", required = false) String idType
                                                            ) {
         String userId = userInfoService.getUserName(userIdParam, true, idType);
-        return skillsLoader.loadPointHistorySummary(projectId, userId, 365, null, getProvidedVersionOrReturnDefault(version));
+        return skillsLoader.loadPointHistorySummary(projectId, userId, maxDaysBack, null, getProvidedVersionOrReturnDefault(version));
     }
 
     @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/pointHistory", method = RequestMethod.GET, produces = "application/json")
@@ -250,7 +254,7 @@ class UserSkillsController {
                                                            @RequestParam(name = "version", required = false) Integer version,
                                                            @RequestParam(name = "idType", required = false) String idType) {
         String userId = userInfoService.getUserName(userIdParam, true, idType);
-        return skillsLoader.loadPointHistorySummary(projectId, userId, 365, subjectId, getProvidedVersionOrReturnDefault(version));
+        return skillsLoader.loadPointHistorySummary(projectId, userId, maxDaysBack, subjectId, getProvidedVersionOrReturnDefault(version));
     }
 
     @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/dependencies", method = RequestMethod.GET, produces = "application/json")
