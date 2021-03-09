@@ -18,6 +18,7 @@ package skills.services
 import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.auth.UserInfo
@@ -42,6 +43,7 @@ class UserAttrsService {
 
         UserAttrs userAttrs = loadUserAttrsFromLocalDb(userId)
         boolean doSave = true
+
         if (!userAttrs) {
             userAttrs = new UserAttrs(userId: userId?.toLowerCase(), userIdForDisplay: userId)
         } else {
@@ -62,15 +64,30 @@ class UserAttrsService {
             )
         }
         if (doSave) {
-            userAttrs.firstName = userInfo.firstName ?: userAttrs.firstName
-            userAttrs.lastName = userInfo.lastName ?: userAttrs.lastName
-            userAttrs.email = userInfo.email ?: userAttrs.email
-            userAttrs.dn = userInfo.userDn ?: userAttrs.dn
-            userAttrs.nickname = (userInfo.nickname != null ? userInfo.nickname : userAttrs.nickname) ?: ""
-            userAttrs.userIdForDisplay = userInfo.usernameForDisplay ?: userAttrs.userIdForDisplay
-            saveUserAttrsInLocalDb(userAttrs)
+            populate(userAttrs, userInfo)
+            try {
+                saveUserAttrsInLocalDb(userAttrs)
+            } catch (DataIntegrityViolationException dataIntegrityViolationException) {
+                log.warn("${dataIntegrityViolationException.getMessage()} received when trying to save userAttrs for [${userId}], fetching and retrying")
+                userAttrs = loadUserAttrsFromLocalDb(userId)
+                if (!userAttrs) {
+                    log.error(dataIntegrityViolationException.getMessage())
+                    throw new SkillException("Received DataIntegrityViolation when attempting to insert UserAttrs for [${userId}] but entry does not exist")
+                }
+                populate(userAttrs, userInfo)
+                saveUserAttrsInLocalDb(userAttrs)
+            }
         }
         return userAttrs
+    }
+
+    private void populate(UserAttrs userAttrs, UserInfo userInfo) {
+        userAttrs.firstName = userInfo.firstName ?: userAttrs.firstName
+        userAttrs.lastName = userInfo.lastName ?: userAttrs.lastName
+        userAttrs.email = userInfo.email ?: userAttrs.email
+        userAttrs.dn = userInfo.userDn ?: userAttrs.dn
+        userAttrs.nickname = (userInfo.nickname != null ? userInfo.nickname : userAttrs.nickname) ?: ""
+        userAttrs.userIdForDisplay = userInfo.usernameForDisplay ?: userAttrs.userIdForDisplay
     }
 
     private void validateUserId(String userId) {
