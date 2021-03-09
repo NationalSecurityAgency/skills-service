@@ -193,7 +193,7 @@ class ReportSkills_SelfReporting extends DefaultIntSpec {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
         def skills = SkillsFactory.createSkills(1,)
-        skills[0].pointIncrement = 200
+        skills[0].pointIncrement = 2000
         skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
 
         skillsService.createProject(proj)
@@ -259,7 +259,7 @@ limitations under the License.
 <ul>
     <li><span class="label">Project</span>: Test Project#1</li>
     <li><span class="label">Skill</span>: Test Skill 1</li>
-    <li><span class="label">Points</span>: 200</li>
+    <li><span class="label">Points</span>: 2,000</li>
     <li><span class="label">Message</span>: Please approve this!</li>
 </ul>
 
@@ -282,7 +282,7 @@ Always yours, <br/> -SkillTree Bot
    User Requested: user0
    Project: Test Project#1
    Skill: Test Skill 1 (skill1)
-   Number of Points: 200
+   Number of Points: 2,000
    Request Message: Please approve this!
 
 As an approver for the 'TestProject1' project, you can approve or reject this request.

@@ -51,7 +51,7 @@ class SkillApprovalRequestedNotificationBuilder implements NotificationEmailBuil
     private Context buildThymeleafContext(parsed) {
         Context templateContext = new Context()
         templateContext.setVariable("userRequesting", parsed.userRequesting)
-        templateContext.setVariable("numPoints", parsed.numPoints)
+        templateContext.setVariable("numPoints", String.format("%,d", parsed.numPoints))
         templateContext.setVariable("skillName", parsed.skillName)
         templateContext.setVariable("approveUrl", parsed.approveUrl)
         templateContext.setVariable("skillId", parsed.skillId)
@@ -69,7 +69,7 @@ class SkillApprovalRequestedNotificationBuilder implements NotificationEmailBuil
                 "\n   User Requested: ${parsed.userRequesting}" +
                 "\n   Project: ${parsed.projectName}" +
                 "\n   Skill: ${parsed.skillName} (${parsed.skillId})" +
-                "\n   Number of Points: ${parsed.numPoints}" +
+                "\n   Number of Points: ${String.format("%,d", parsed.numPoints)}" +
                 "\n   Request Message: ${parsed.requestMsg}" +
                 "\n" +
                 "\nAs an approver for the '${parsed.projectId}' project, you can approve or reject this request." +

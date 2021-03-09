@@ -66,20 +66,20 @@
   },
   "devDependencies": {
     "@bahmutov/print-env": "2.1.2",
-    "badge-maker": "^3.3.0",
-    "cypress": "6.4.0",
-    "cypress-audit": "^0.2.3",
-    "cypress-axe": "^0.10.0",
-    "cypress-file-upload": "4.1.1",
+    "badge-maker": "3.3.0",
+    "cypress": "6.6.0",
+    "cypress-audit": "0.3.0",
+    "cypress-axe": "0.12.2",
+    "cypress-file-upload": "5.0.2",
     "cypress-image-snapshot": "4.0.1",
-    "dayjs": "1.9.6",
+    "dayjs": "1.10.4",
     "eslint": "7.9.0",
     "fake-smtp-server": "0.8.0",
-    "license-check-and-add": "3.0.4",
+    "license-check-and-add": "4.0.2",
     "license-checker": "25.0.1",
     "moment": "2.29.1",
-    "moment-timezone": "0.5.31",
-    "object-scan": "13.6.7",
-    "wait-on": "5.2.0"
+    "moment-timezone": "0.5.33",
+    "object-scan": "14.0.0",
+    "wait-on": "5.2.1"
   }
 }

@@ -106,6 +106,8 @@ class EmailNotifierSpecs extends DefaultIntSpec {
         ))
         then:
         thrown(DataIntegrityViolationException)
+
+        notificationsRepo.count() == 0
     }
 
     def "send multiple notification when service is down"() {
@@ -139,6 +141,8 @@ class EmailNotifierSpecs extends DefaultIntSpec {
         logsList.findAll { it.message.startsWith("Dispatched ") }.size() == 1
         logsList.find { it.message.startsWith("Dispatched [0] notification(s) with [2] error(s)") }
 
+        notificationsRepo.count() == 2
+
         cleanup:
         loggerHelper.stop()
     }
@@ -167,12 +171,43 @@ class EmailNotifierSpecs extends DefaultIntSpec {
 
         greenMail.start()
 
-        assert WaitFor.wait { greenMail.getReceivedMessages().size() > 0 }
+        assert WaitFor.wait { greenMail.getReceivedMessages().size() > 1 }
 
         then:
         greenMail.getReceivedMessages().length == 2
         EmailUtils.getEmails(greenMail).collect { it.subj } == ["Test Subject", "Test Subject"]
         loggerHelper.logEvents.find { it.message.startsWith("Retry: Dispatched [2] notification(s) with [0] error(s)") }
+
+        notificationsRepo.count() == 0
+
+        cleanup:
+        loggerHelper.stop()
+    }
+
+    def "remove notification if server never returns"() {
+        setup:
+        LoggerHelper loggerHelper = new LoggerHelper(EmailNotifier.class)
+
+        greenMail.stop()
+
+        when:
+        emailNotifier.sendNotification(new Notifier.NotificationRequest(
+                userIds: [skillsService.userName],
+                type: "ForTestNotificationBuilder",
+                keyValParams: [simpleParam: 'param value']
+        ))
+
+        emailNotifier.sendNotification(new Notifier.NotificationRequest(
+                userIds: [skillsService.userName],
+                type: "ForTestNotificationBuilder",
+                keyValParams: [simpleParam: 'param value']
+        ))
+
+        WaitFor.wait { loggerHelper.logEvents.findAll { it.message.startsWith("Removed notification because it failed and exceeded max retention of [30] seconds") }.size() == 2 }
+
+
+        then:
+        notificationsRepo.count() == 0
 
         cleanup:
         loggerHelper.stop()

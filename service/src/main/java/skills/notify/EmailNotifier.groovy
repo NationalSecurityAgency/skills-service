@@ -20,9 +20,11 @@ import com.google.common.math.Stats
 import groovy.json.JsonOutput
 import groovy.lang.Closure
 import groovy.transform.ToString
+import groovy.time.TimeCategory
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.time.StopWatch
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
@@ -42,6 +44,9 @@ import java.util.concurrent.TimeUnit
 @Component
 @Slf4j
 class EmailNotifier implements Notifier {
+
+    @Value('#{"${skills.config.notifications.retainFailedNotificationsForNumSecs}"}')
+    int retainFailedNotificationsForNumSecs
 
     @Autowired
     EmailSendingService emailSettings
@@ -125,7 +130,11 @@ class EmailNotifier implements Notifier {
                     lastErrMsg = t.message
                 }
                 notification.failedCount = notification.failedCount + 1
-                notificationsRepo.save(notification)
+
+                boolean removed = removeIfOlderThanConfiguredRetainPeriod(notification)
+                if (!removed) {
+                    notificationsRepo.save(notification)
+                }
                 failed = true;
             }
             if (!failed) {
@@ -143,7 +152,22 @@ class EmailNotifier implements Notifier {
         }
     }
 
+    private boolean removeIfOlderThanConfiguredRetainPeriod(Notification notification) {
+        boolean removed = false
+        use(TimeCategory) {
+            Date keepAfterDate = retainFailedNotificationsForNumSecs.seconds.ago
+            if (notification.created.before(keepAfterDate)) {
+                removeNotificationImmediately(notification.id)
+                log.error("Removed notification because it failed and exceeded max retention of [${retainFailedNotificationsForNumSecs}] seconds! Notificaiton=[{}]", notification)
+                removed = true
+            }
+        }
+
+        return removed;
+    }
+
     private void removeNotificationImmediately(Integer id) {
+        assert id
         notificationsRepo.deleteById(id)
         notificationsRepo.flush()
     }

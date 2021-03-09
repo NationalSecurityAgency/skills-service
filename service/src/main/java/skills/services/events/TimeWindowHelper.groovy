@@ -22,7 +22,6 @@ import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
-import skills.storage.model.SkillDef
 import skills.storage.repos.SkillEventsSupportRepo
 import skills.storage.repos.UserPerformedSkillRepo
 

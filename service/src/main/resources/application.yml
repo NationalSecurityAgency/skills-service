@@ -88,6 +88,8 @@ skills:
       dispatchSchedule: "* * * * * ?"
       # run every hour - retries failed notifications
       dispatchRetrySchedule: "0 0 * * * ?"
+      # remove failed notifications after 2 days
+      retainFailedNotificationsForNumSecs: 172800
     ui:
       dashboardVersion: @pom.version@
       buildTimestamp: @maven.build.timestamp@

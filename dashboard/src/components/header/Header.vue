@@ -18,7 +18,7 @@ limitations under the License.
   <div class="bg-white header">
     <div class="container-fluid py-3">
       <div class="row">
-        <div class="col-sm pl-0">
+        <div class="col-sm">
           <div class="text-center text-sm-left">
             <router-link data-cy="skillTreeLogo" class="h2 text-primary ml-2" to="/">
               <img ref="skillTreeLogo" src="/static/img/skilltree_logo_v1.png" alt="skilltree logo"/>
@@ -31,7 +31,7 @@ limitations under the License.
 
         <div class="col-sm-auto text-center text-sm-right pt-sm-2 mt-3 mt-sm-0">
           <inception-button v-if="isAdminPage" class="mr-2" data-cy="inception-button"></inception-button>
-<!--          message center is just mocked up for now and will be implmented in its own ticket -->
+<!--          message center is just mocked up for now and will be implemented in its own ticket -->
 <!--          <message-center />-->
           <settings-button data-cy="settings-button"/>
           <help-button class="" data-cy="help-button"/>
@@ -55,41 +55,6 @@ limitations under the License.
       InceptionButton,
       Breadcrumb,
       SettingsButton,
-    },
-    mounted() {
-      window.addEventListener('resize', this.updateAdminStampSize);
-      this.$nextTick(() => {
-        this.updateAdminStampSize();
-      });
-    },
-    updated() {
-      this.$nextTick(() => {
-        this.updateAdminStampSize();
-      });
-    },
-    methods: {
-      updateAdminStampSize() {
-        const windowWidth = window.innerWidth;
-        if (windowWidth && windowWidth > 0) {
-          const { adminStamp, skillTreeLogo } = this.$refs;
-          if (skillTreeLogo && adminStamp) {
-            const dimensions = skillTreeLogo.getBoundingClientRect();
-            if (dimensions && dimensions.width && dimensions.width > 0) {
-              const left = (dimensions.x + dimensions.width) + 5;
-              adminStamp.style.left = `${left}px`;
-            }
-            if (windowWidth < 675) {
-              adminStamp.style['line-height'] = '12px';
-              adminStamp.style['font-size'] = '14px';
-              adminStamp.style.width = '85px';
-            } else {
-              adminStamp.style['line-height'] = '22px';
-              adminStamp.style['font-size'] = '24px';
-              adminStamp.style.width = '155px';
-            }
-          }
-        }
-      },
     },
     computed: {
       isAdminPage() {
@@ -118,24 +83,40 @@ limitations under the License.
 }
 
 .skills-stamp {
-  /* Abs positioning makes it not take up vert space */
-  position: absolute;
-  bottom:8px;
-  left: 203px;
+  margin-left: 0.5rem;
 
-  box-shadow: 0 0 0 3px red, 0 0 0 2px red inset;
+  box-shadow: 0 0 0 3px #8b6d6d, 0 0 0 2px #8b6d6d inset;
+  color: #722b2b;
   border: 2px solid transparent;
   border-radius: 4px;
   display: inline-block;
   padding: 5px 2px;
   line-height: 22px;
-  color: red;
   font-size: 24px;
   font-family: 'Black Ops One', cursive;
   text-transform: uppercase;
   text-align: center;
-  opacity: 0.7;
+  opacity: 0.8;
   width: 155px;
   transform: rotate(-17deg);
 }
+
+@media (max-width: 675px) {
+  .skills-stamp {
+    max-width: 9rem;
+    line-height: 12px;
+    font-size: 14px;
+    width: 85px;
+  }
+}
+
+@media (max-width: 563px) {
+  .skills-stamp {
+    max-width: 9rem;
+    line-height: 12px;
+    font-size: 14px;
+    width: 85px;
+  }
+}
+
 </style>
