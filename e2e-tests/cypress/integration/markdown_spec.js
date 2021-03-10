@@ -159,7 +159,7 @@ describe('Markdown Tests', () => {
         cy.contains('Level');
         cy.contains('Emojis')
         cy.contains('⭐ ⭐ ⭐ ⭐');
-        cy.matchImageSnapshot('Markdown-SkillsPage-Overview', snapshotOptions);
+        cy.get('[data-cy="childRowDisplay_skill1"]').matchImageSnapshot('Markdown-SkillsPage-Overview', snapshotOptions);
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.wait('@inceptionLevel');
@@ -169,7 +169,7 @@ describe('Markdown Tests', () => {
         cy.contains('Description');
         cy.contains('Emojis')
         cy.contains('⭐ ⭐ ⭐ ⭐');
-        cy.matchImageSnapshot('Markdown-SubjectPage-SkillPreview', snapshotOptions);
+        cy.get('[data-cy="childRowDisplay_skill1"]').matchImageSnapshot('Markdown-SubjectPage-SkillPreview', snapshotOptions);
     });
 
 })
