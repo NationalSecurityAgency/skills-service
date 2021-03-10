@@ -23,7 +23,7 @@ limitations under the License.
             <div class="">
               <b-form-group label-for="home-page-pref">
                 <template v-slot:label>
-                  <i class="fas fa-home"></i> Default Home Page:
+                  <i class="fas fa-home" aria-hidden="true"></i> Default Home Page:
                   <inline-help
                     msg="Select which page you would to be displayed when first visiting the SkillTree dashboard."/>
                 </template>

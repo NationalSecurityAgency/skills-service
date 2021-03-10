@@ -20,7 +20,7 @@ limitations under the License.
     <div v-if="!loading">
       <self-report-info-cards :self-report-stats="selfReportStats"/>
       <div v-if="showEmailServiceWarning" class="alert alert-warning mt-2" data-cy="selfReport_emailServiceWarning">
-        <i class="fa fa-exclamation-triangle" /> Please note that email notifications are currently disabled. Email configuration has not been performed on this instance of SkillTree. Please contact the root administrator.
+        <i class="fa fa-exclamation-triangle" aria-hidden="true"/> Please note that email notifications are currently disabled. Email configuration has not been performed on this instance of SkillTree. Please contact the root administrator.
       </div>
       <self-report-approval  v-if="hasSkillsWithApprovals()" class="mt-3"/>
       <no-content2 v-else title="No Skills Require Approval" data-cy="noApprovalTableMsg"

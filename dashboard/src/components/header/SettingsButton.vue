@@ -16,7 +16,7 @@ limitations under the License.
 <template>
   <b-dropdown right variant="link" aria-label="User Settings Dropdown">
     <template slot="button-content">
-      <i class="fas fa-user-circle" style="font-size: 1.55rem"/>
+      <i class="fas fa-user-circle" style="font-size: 1.55rem" aria-hidden="true"/>
       <span class="sr-only">settings menu</span>
     </template>
     <b-dropdown-text style="width: 14rem;">

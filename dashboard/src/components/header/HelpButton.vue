@@ -16,7 +16,7 @@ limitations under the License.
 <template>
   <b-dropdown right variant="link" aria-label="Help Menu Dropdown" id="helpMenu">
     <template slot="button-content">
-      <i class="far fa-question-circle" style="font-size: 1.55rem"></i>
+      <i class="far fa-question-circle" style="font-size: 1.55rem" aria-hidden="true"></i>
       <span class="sr-only">help menu</span>
     </template>
     <b-dropdown-item :href="officialGuide" target="_blank" style="min-width: 12.5rem;">

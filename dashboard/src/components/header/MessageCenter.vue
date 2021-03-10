@@ -16,7 +16,7 @@ limitations under the License.
 <template>
   <span class="mx-3 mr-4 message-center" v-b-tooltip.hover="'You have 3 critical alerts to review'">
     <span class="text-primary msg-container mr-1" data-count="3" style="font-size: 0.8rem">
-      <i class="fas fa-bell" style="font-size: 1.55rem"></i>
+      <i class="fas fa-bell" style="font-size: 1.55rem" aria-hidden="true"></i>
     </span>
   </span>
 </template>
