@@ -997,6 +997,16 @@ class SkillsService {
         ])
     }
 
+    def addOrUpdateUserSetting(String setting, String value) {
+        Map params = [
+                              settingGroup: "user.prefs",
+                              setting: setting,
+                              value: value,
+                              userId: this.userName,
+        ]
+        return wsHelper.appPost("/userInfo/settings", [ params ])
+    }
+
     def getEmailSettings() {
         return wsHelper.rootGet('/getEmailSettings')
     }

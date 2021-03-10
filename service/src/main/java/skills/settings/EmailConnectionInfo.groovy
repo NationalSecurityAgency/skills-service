@@ -21,8 +21,8 @@ import groovy.transform.ToString
 @Canonical
 @ToString(excludes = ['password'])
 class EmailConnectionInfo {
-    String host = 'localhost'
-    int port = 25
+    String host
+    Integer port = 25
     String protocol = 'smtp'
     String username
     String password

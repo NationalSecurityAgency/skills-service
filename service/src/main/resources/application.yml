@@ -83,6 +83,13 @@ skills:
     # Decreasing this value will temporarily cause any DAILY events older than the new value to not be visible until the next
     # event compaction run.
     compactDailyEventsOlderThan: 30
+    notifications:
+      # run every minute
+      dispatchSchedule: "* * * * * ?"
+      # run every hour - retries failed notifications
+      dispatchRetrySchedule: "0 0 * * * ?"
+      # remove failed notifications after 2 days
+      retainFailedNotificationsForNumSecs: 172800
     ui:
       dashboardVersion: @pom.version@
       buildTimestamp: @maven.build.timestamp@

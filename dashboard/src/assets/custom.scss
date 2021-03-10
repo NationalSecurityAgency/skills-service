@@ -62,6 +62,34 @@ $table-accent-bg: #f9fafa;
   color: #7f6c7f;
 }
 
+.skills-color-loggedIn {
+  color: #007c49;
+}
+
+.skills-color-loggedOut {
+  color: $yellow;
+}
+
+.skills-color-progressAndRanking {
+  color: #7f6c7f;
+}
+
+.skills-color-projectAdmin {
+  color: #e76f51fc;
+}
+
+.skills-color-officialDocs {
+  color: #007c49;
+}
+
+.skills-color-dashboardDocs {
+  color: #7f6c7f;
+}
+
+.skills-color-integrationDocs {
+  color: #e76f51fc;
+}
+
 .skills-color-metrics {
   color: #764e76;
 }

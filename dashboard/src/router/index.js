@@ -454,9 +454,9 @@ const router = new Router({
         meta: { requiresAuth: true, nonAdmin: true, reportSkillId: 'VisitUserSettings' },
       }, {
         name: 'Preferences',
-        path: '',
+        path: 'preferences',
         component: Preferences,
-        meta: { requiresAuth: true, nonAdmin: true, reportSkillId: 'VisitUserSettings' },
+        meta: { requiresAuth: true, nonAdmin: true },
       }, {
         name: 'SecuritySettings',
         path: 'security',

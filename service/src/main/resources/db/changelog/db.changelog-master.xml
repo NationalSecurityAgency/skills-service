@@ -1235,4 +1235,62 @@
         </createIndex>
     </changeSet>
 
+    <changeSet id="7" author="skills team" context="migration7">
+        <createTable tableName="notifications">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="requested_on" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type" type="text">
+                <constraints nullable="false"/>
+            </column>
+            <column name="encoded_params" type="text">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="failed_count" type="int">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createIndex indexName="notifications_user_id"
+                     tableName="notifications">
+            <column name="user_id" type="varchar(255)"/>
+        </createIndex>
+
+        <createIndex indexName="notifications_requested_on"
+                     tableName="notifications">
+            <column name="requested_on" type="datetime"/>
+        </createIndex>
+
+        <createIndex indexName="notifications_retry_count"
+                     tableName="notifications">
+            <column name="failed_count" type="int"/>
+        </createIndex>
+
+        <addForeignKeyConstraint baseColumnNames="user_id"
+                                 baseTableName="notifications"
+                                 constraintName="fk_notifications_user_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="user_id"
+                                 referencedTableName="user_attrs" />
+
+        <insert tableName="skills_db_locks">
+            <column name="lock" type="varchar(255)" value="notifier_lock"/>
+        </insert>
+    </changeSet>
+
 </databaseChangeLog>

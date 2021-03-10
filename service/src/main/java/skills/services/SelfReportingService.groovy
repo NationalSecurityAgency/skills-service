@@ -28,12 +28,15 @@ import skills.notify.Notifier
 import skills.services.events.SkillEventsService
 import skills.services.settings.Settings
 import skills.services.settings.SettingsService
+import skills.storage.model.Notification
 import skills.storage.model.ProjDef
 import skills.storage.model.SkillApproval
+import skills.storage.model.UserAttrs
 import skills.storage.model.auth.RoleName
 import skills.storage.repos.ProjDefRepo
 import skills.storage.repos.SkillApprovalRepo
 import skills.storage.repos.SkillEventsSupportRepo
+import skills.storage.repos.UserAttrsRepo
 
 @Service
 @Slf4j
@@ -53,6 +56,9 @@ class SelfReportingService {
 
     @Autowired
     ProjDefRepo projDefRepo
+
+    @Autowired
+    UserAttrsRepo userAttrsRepo
 
     @Autowired
     SettingsService settingsService
@@ -117,14 +123,22 @@ class SelfReportingService {
         List<UserRoleRes> userRoleRes = accessSettingsStorageService.getUserRolesForProjectId(skillDefinition.projectId)
                 .findAll { it.roleName == RoleName.ROLE_PROJECT_ADMIN }
         ProjDef projDef = projDefRepo.findByProjectId(skillDefinition.projectId)
-        Notifier.NotificationRequest request = new ApprovalNotificationRequestBuilder(
-                userRequesting: userId,
-                requestMsg: requestMsg,
+        UserAttrs userAttrs = userAttrsRepo.findByUserId(userId)
+        Notifier.NotificationRequest request = new Notifier.NotificationRequest(
                 userIds: userRoleRes.collect { it.userId },
-                skillDef: skillDefinition,
-                publicUrl: publicUrl,
-                projectName: projDef.name
-        ).build()
+                type: Notification.Type.SkillApprovalRequested.toString(),
+                keyValParams: [
+                        userRequesting: userAttrs.userIdForDisplay,
+                        numPoints     : skillDefinition.pointIncrement,
+                        skillName     : skillDefinition.name,
+                        approveUrl    : "${publicUrl}administrator/projects/${skillDefinition.projectId}/self-report",
+                        skillId       : skillDefinition.skillId,
+                        requestMsg    : requestMsg,
+                        projectId     : skillDefinition.projectId,
+                        publicUrl     : publicUrl,
+                        projectName   : projDef.name
+                ],
+        )
         notifier.sendNotification(request)
     }
     private String getPublicUrl() {

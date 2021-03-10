@@ -17,6 +17,7 @@ package skills.intTests.reportSkills
 
 
 import groovy.util.logging.Slf4j
+import org.apache.commons.lang3.ThreadUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import skills.intTests.utils.DefaultIntSpec
@@ -26,8 +27,10 @@ import skills.intTests.utils.SkillsFactory
 import skills.services.settings.SettingsService
 import skills.storage.model.SkillApproval
 import skills.storage.model.SkillDef
+import skills.storage.repos.NotificationsRepo
 import skills.storage.repos.SkillApprovalRepo
 import skills.storage.repos.SkillDefRepo
+import skills.utils.WaitFor
 import spock.lang.IgnoreIf
 import spock.lang.IgnoreRest
 
@@ -42,6 +45,9 @@ class ReportSkills_SelfReporting extends DefaultIntSpec {
 
     @Autowired
     SettingsService settingsService
+
+    @Autowired
+    NotificationsRepo notificationsRepo
 
     def setup() {
         startEmailServer()
@@ -63,6 +69,7 @@ class ReportSkills_SelfReporting extends DefaultIntSpec {
         def res = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "user0", date, "Please approve this!")
         def approvalsEndpointRes = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false)
 
+        assert WaitFor.wait { greenMail.getReceivedMessages().size() > 0 }
         EmailUtils.EmailRes emailRes = EmailUtils.getEmail(greenMail)
 
         then:
@@ -71,6 +78,8 @@ class ReportSkills_SelfReporting extends DefaultIntSpec {
         emailRes.recipients == ["skills@skills.org"]
         emailRes.plainText.contains("User user0 requested points.")
         emailRes.html.contains("User <b>user0</b> requested points")
+
+        assert WaitFor.wait { notificationsRepo.count() == 0 }
 
         !res.body.skillApplied
         res.body.pointsEarned == 0
@@ -114,6 +123,7 @@ class ReportSkills_SelfReporting extends DefaultIntSpec {
         def res = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "user0", date)
         def approvalsEndpointRes = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false)
 
+        assert WaitFor.wait { greenMail.getReceivedMessages().size() > 0 }
         EmailUtils.EmailRes emailRes = EmailUtils.getEmail(greenMail)
 
         then:
@@ -169,11 +179,11 @@ class ReportSkills_SelfReporting extends DefaultIntSpec {
         when:
         def res = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "user0", date, "Please approve this!")
 
+        assert WaitFor.wait { greenMail.getReceivedMessages().size() > 1 }
         List<EmailUtils.EmailRes> emails = EmailUtils.getEmails(greenMail)
         then:
         emails.size() == 2
-        emails.get(0).recipients == ["skills@skills.org", otherUser]
-        emails.get(1).recipients == ["skills@skills.org", otherUser]
+        emails.collect {it.recipients[0] } == ["skills@skills.org", otherUser]
 
         !res.body.skillApplied
         res.body.explanation == "Skill was submitted for approval"
@@ -183,7 +193,7 @@ class ReportSkills_SelfReporting extends DefaultIntSpec {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
         def skills = SkillsFactory.createSkills(1,)
-        skills[0].pointIncrement = 200
+        skills[0].pointIncrement = 2000
         skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
 
         skillsService.createProject(proj)
@@ -194,6 +204,7 @@ class ReportSkills_SelfReporting extends DefaultIntSpec {
         when:
         skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "user0", date, "Please approve this!")
 
+        assert WaitFor.wait { greenMail.getReceivedMessages().size() > 0 }
         EmailUtils.EmailRes emailRes = EmailUtils.getEmail(greenMail)
         String expectedHtml = '''<!--
 Copyright 2020 SkillTree
@@ -248,7 +259,7 @@ limitations under the License.
 <ul>
     <li><span class="label">Project</span>: Test Project#1</li>
     <li><span class="label">Skill</span>: Test Skill 1</li>
-    <li><span class="label">Points</span>: 200</li>
+    <li><span class="label">Points</span>: 2,000</li>
     <li><span class="label">Message</span>: Please approve this!</li>
 </ul>
 
@@ -271,7 +282,7 @@ Always yours, <br/> -SkillTree Bot
    User Requested: user0
    Project: Test Project#1
    Skill: Test Skill 1 (skill1)
-   Number of Points: 200
+   Number of Points: 2,000
    Request Message: Please approve this!
 
 As an approver for the 'TestProject1' project, you can approve or reject this request.
@@ -285,14 +296,8 @@ SkillTree Bot'''
         emailRes.recipients == ["skills@skills.org"]
         emailRes.plainText.contains("User user0 requested points.")
         // ignore new lines
-        prepEmailForComparison(emailRes.html) == prepEmailForComparison(expectedHtml)
-        prepEmailForComparison(emailRes.plainText) == prepEmailForComparison(expectedPlain)
-    }
-
-    private String prepEmailForComparison(String email) {
-        String fixPort = email.toString().replaceAll("\\{\\{port\\}\\}", localPort.toString())
-        String removeNewLines = fixPort.replaceAll("[\r\n]", "")
-        return removeNewLines
+        EmailUtils.prepBodyForComparison(emailRes.html, localPort) == EmailUtils.prepBodyForComparison(expectedHtml, localPort)
+        EmailUtils.prepBodyForComparison(emailRes.plainText, localPort) == EmailUtils.prepBodyForComparison(expectedPlain, localPort)
     }
 
     def "self report skill with honor system"() {

@@ -13,3 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package skills.storage.repos
+
+import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Query
+import skills.storage.model.Notification
+
+import java.util.stream.Stream
+
+interface NotificationsRepo extends JpaRepository<Notification, Integer> {
+
+    @Query("select n from Notification n where n.failedCount = 0")
+    Stream<Notification> streamNewNotifications();
+
+    @Query("select n from Notification n where n.failedCount > 0")
+    Stream<Notification> streamFailedNotifications();
+}

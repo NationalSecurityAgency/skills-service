@@ -37,6 +37,8 @@ class FeatureVerificationController {
     public boolean isFeatureSupported(@RequestParam("feature") String feature) {
         if ("passwordreset" == feature?.toLowerCase()) {
             return featureService.isPasswordResetFeatureEnabled()
+        } else if ("emailservice" == feature?.toLowerCase()) {
+            return featureService.isEmailServiceFeatureEnabled()
         } else if (feature) {
             log.warn("Unrecognized feature requested [${feature}]")
         }

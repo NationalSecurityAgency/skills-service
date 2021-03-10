@@ -16,21 +16,21 @@ limitations under the License.
 <template>
   <b-dropdown right variant="link" aria-label="Help Menu Dropdown" id="helpMenu">
     <template slot="button-content">
-      <b-avatar icon="question" size="sm" aria-hidden="true" variant="primary"></b-avatar>
+      <i class="far fa-question-circle" style="font-size: 1.55rem" aria-hidden="true"></i>
       <span class="sr-only">help menu</span>
     </template>
     <b-dropdown-item :href="officialGuide" target="_blank" style="min-width: 12.5rem;">
-      <span class="text-gray-700"> <i class="fas fa-book" aria-hidden="true"></i>Official Docs</span>
+      <span class="text-gray-700"> <i class="fas fa-book skills-color-officialDocs" aria-hidden="true"></i>Official Docs</span>
       <span class="float-right" aria-hidden="true"><i class="fas fa-external-link-alt text-secondary"></i></span>
     </b-dropdown-item>
     <b-dropdown-divider />
     <b-dropdown-group id="dropdown-group-1" header="Guides">
       <b-dropdown-item :href="dashboardGuideUrl" target="_blank">
-        <span class="text-gray-700"> <i class="fas fa-info-circle" aria-hidden="true"/><span class="link-name">Dashboard</span></span>
+        <span class="text-gray-700"> <i class="fas fa-info-circle skills-color-dashboardDocs" aria-hidden="true"/><span class="link-name">Dashboard</span></span>
         <span class="float-right" aria-hidden="true"><i class="fas fa-external-link-alt text-secondary"></i></span>
       </b-dropdown-item>
       <b-dropdown-item :href="integrationGuideUrl" target="_blank">
-        <span class="text-gray-700"> <i class="fas fa-hands-helping" aria-hidden="true"></i>Integration</span>
+        <span class="text-gray-700"> <i class="fas fa-hands-helping skills-color-integrationDocs" aria-hidden="true"></i>Integration</span>
         <span class="float-right" aria-hidden="true"><i class="fas fa-external-link-alt text-secondary"></i></span>
       </b-dropdown-item>
     </b-dropdown-group>

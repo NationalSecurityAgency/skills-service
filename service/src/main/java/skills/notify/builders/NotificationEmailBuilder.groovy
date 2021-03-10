@@ -13,3 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package skills.notify.builders
+
+
+import skills.storage.model.Notification
+
+interface NotificationEmailBuilder {
+
+    static class Res {
+        String subject
+        String plainText
+        String html
+    }
+
+    String getId()
+
+    Res build(Notification notification)
+
+
+}

@@ -263,9 +263,8 @@ describe('Accessibility Tests', () => {
     cy.visit('/administrator/');
     cy.customLighthouse();
     cy.injectAxe()
-    cy.get('[data-cy=nav-Projects]').click();
-    cy.get('[data-cy=newProjectButton]').click();
-    cy.get('[data-cy=projectName]').type('a');
+    cy.get('[data-cy=nav-Projects]')
+    cy.contains('My New test Project')
     cy.customA11y();
   });
 

@@ -718,5 +718,65 @@ describe('Self Report Skills Management Tests', () => {
         cy.get( '[data-cy="skillsReportApprovalTable"]').should('not.exist');
     });
 
+    it('warn if email service is not configured', () => {
+        cy.createSkill(1, 1, 4, { selfReportingType: 'Approval' });
+        cy.createSkill(1, 1, 5, { selfReportingType: 'HonorSystem' });
+        cy.createSkill(1, 1, 6);
+
+        cy.visit('/administrator/projects/proj1/self-report');
+
+        cy.get('[data-cy="selfReport_emailServiceWarning"]').contains('Please note that email notifications are currently disabled')
+    });
+
+    it('email service warning should NOT be displayed if there 0 Approval required Self Reporting skills', () => {
+        cy.createSkill(1, 1, 4, { selfReportingType: 'HonorSystem' });
+        cy.createSkill(1, 1, 5, { selfReportingType: 'HonorSystem' });
+        cy.createSkill(1, 1, 6);
+
+        cy.visit('/administrator/projects/proj1/self-report');
+
+        cy.get('[data-cy="selfReport_emailServiceWarning"]').should('not.exist')
+    });
+
+    it('no email warning when email service is configured', () => {
+        cy.createSkill(1, 1, 4, { selfReportingType: 'Approval' });
+        cy.createSkill(1, 1, 5, { selfReportingType: 'HonorSystem' });
+        cy.createSkill(1, 1, 6);
+
+
+        cy.logout();
+        cy.fixture('vars.json').then((vars) => {
+            cy.login(vars.rootUser, vars.defaultPass);
+        });
+        cy.request({
+            method: 'POST',
+            url: '/root/saveEmailSettings',
+            body: {
+                host: 'localhost',
+                port: 1026,
+                'protocol': 'smtp'
+            },
+        });
+
+        cy.request({
+            method: 'POST',
+            url: '/root/saveSystemSettings',
+            body: {
+                publicUrl: 'http://localhost:8082/',
+                resetTokenExpiration: 'PT2H',
+                fromEmail: 'noreploy@skilltreeemail.org',
+            }
+        });
+        cy.logout();
+        cy.fixture('vars.json').then((vars) => {
+            cy.login(vars.defaultUser, vars.defaultPass);
+        });
+
+        cy.visit('/administrator/projects/proj1/self-report');
+
+        cy.get('[data-cy="selfReport_emailServiceWarning"]').should('not.exist')
+    });
+
+
 });
 

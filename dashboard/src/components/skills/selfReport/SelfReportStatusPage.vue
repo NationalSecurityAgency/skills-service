@@ -19,6 +19,9 @@ limitations under the License.
     <skills-spinner :is-loading="loading" />
     <div v-if="!loading">
       <self-report-info-cards :self-report-stats="selfReportStats"/>
+      <div v-if="showEmailServiceWarning" class="alert alert-warning mt-2" data-cy="selfReport_emailServiceWarning">
+        <i class="fa fa-exclamation-triangle" aria-hidden="true"/> Please note that email notifications are currently disabled. Email configuration has not been performed on this instance of SkillTree. Please contact the root administrator.
+      </div>
       <self-report-approval  v-if="hasSkillsWithApprovals()" class="mt-3"/>
       <no-content2 v-else title="No Skills Require Approval" data-cy="noApprovalTableMsg"
                    message="Currently there are no skills that require approval. Self Reporting type of 'Approval' can be configured when creating or editing a skill."
@@ -50,6 +53,7 @@ limitations under the License.
         loading: true,
         projectId: this.$route.params.projectId,
         selfReportStats: [],
+        showEmailServiceWarning: false,
       };
     },
     mounted() {
@@ -61,7 +65,15 @@ limitations under the License.
         SelfReportService.getSelfReportStats(this.projectId)
           .then((res) => {
             this.selfReportStats = res;
-            this.loading = false;
+            if (this.hasSkillsWithApprovals()) {
+              SelfReportService.isEmailServiceSupported()
+                .then((isEmailSupported) => {
+                  this.showEmailServiceWarning = !isEmailSupported;
+                  this.loading = false;
+                });
+            } else {
+              this.loading = false;
+            }
           });
       },
       hasSkillsWithApprovals() {

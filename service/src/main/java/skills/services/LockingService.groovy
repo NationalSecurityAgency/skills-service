@@ -47,6 +47,10 @@ class LockingService {
         return skillsDBLockRepo.findByLock("event_compaction_lock")
     }
 
+    SkillsDBLock lockForNotifying() {
+        return skillsDBLockRepo.findByLock("notifier_lock")
+    }
+
     ProjDef lockProject(String projectId) {
         assert projectId
         return skillsDBLockRepo.findByProjectIdIgnoreCase(projectId)

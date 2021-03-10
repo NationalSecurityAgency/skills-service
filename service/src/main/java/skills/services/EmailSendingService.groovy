@@ -40,11 +40,11 @@ class EmailSendingService {
     @Autowired
     SystemSettingsService systemSettingsService
 
-    void sendEmail(String subject, String to, String htmlBody, String plainTextBody = null) {
-        sendEmail(subject, [to], htmlBody, plainTextBody)
+    void sendEmail(String subject, String to, String htmlBody, String plainTextBody = null, Date sentDate = null) {
+        sendEmail(subject, [to], htmlBody, plainTextBody, sentDate)
     }
 
-    void sendEmail(String subject, List<String> to, String htmlBody, String plainTextBody = null) {
+    void sendEmail(String subject, List<String> to, String htmlBody, String plainTextBody = null, Date sentDate = null) {
 
         String fromEmail = systemSettingsService.get()?.fromEmail
         if (!fromEmail) {
@@ -56,10 +56,13 @@ class EmailSendingService {
                 new MimeMessageHelper(message, true) :
                 new MimeMessageHelper(message, "UTF-8")
         helper.setSubject(subject)
-        String [] toArr = to.toArray()
+        String[] toArr = to.toArray()
         helper.setTo(toArr)
         helper.setFrom(fromEmail)
         helper.setReplyTo(fromEmail)
+        if (sentDate) {
+            helper.setSentDate(sentDate)
+        }
         if (plainTextBody) {
             helper.setText(plainTextBody, htmlBody)
         } else {

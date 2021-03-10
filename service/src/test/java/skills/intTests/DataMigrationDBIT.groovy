@@ -183,16 +183,6 @@ class DataMigrationDBIT extends DefaultIntSpec {
         void checkRequiredServices() { }
     }
 
-    @ConditionalOnProperty(
-            name = "skills.db.startup",
-            havingValue = "false",
-            matchIfMissing = false)
-    @Component
-    static class EmailSettingsService extends skills.settings.EmailSettingsService {
-        @PostConstruct
-        @Override
-        void init() { }
-    }
 
     static interface DbDropper {
         void dropDb()

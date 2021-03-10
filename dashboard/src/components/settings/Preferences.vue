@@ -20,10 +20,10 @@ limitations under the License.
     <loading-container v-bind:is-loading="isLoading">
         <div class="card">
           <div class="card-body">
-            <div class="mt-4">
+            <div class="">
               <b-form-group label-for="home-page-pref">
                 <template v-slot:label>
-                  Default Home Page:
+                  <i class="fas fa-home" aria-hidden="true"></i> Default Home Page:
                   <inline-help
                     msg="Select which page you would to be displayed when first visiting the SkillTree dashboard."/>
                 </template>
@@ -34,6 +34,7 @@ limitations under the License.
                   v-on:input="homePagePrefChanged"
                   v-model="settings.homePage.value"
                   :options="[{ text: 'Progress and Rankings', value: 'progress'}, {text: 'Project Admin', value: 'admin'}]"
+                  stacked
                 ></b-form-radio-group>
               </b-form-group>
             </div>

@@ -15,23 +15,16 @@
  */
 package skills.notify
 
-import org.thymeleaf.context.Context
-
 interface Notifier {
 
     static class NotificationRequest {
         List<String> userIds
-        String subject
 
-        // plain text email
-        String plainTextBody
-
-        // HTML
-        String thymeleafTemplate
-        Context thymeleafTemplateContext
+        String type
+        Map<String, String> keyValParams
 
         // optional
-        Date requestedOn
+        Date requestedOn = new Date()
     }
 
     void sendNotification(Notifier.NotificationRequest notificationRequest)
