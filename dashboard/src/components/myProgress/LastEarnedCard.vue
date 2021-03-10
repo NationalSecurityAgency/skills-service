@@ -76,7 +76,7 @@ limitations under the License.
           }
           return 'It\'s been a while, perhaps earn another skill?';
         }
-        return 'You have not achieved any skills yet, time to get started!';
+        return 'No skills achieved yet, time to get started!';
       },
     },
   };
