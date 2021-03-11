@@ -86,7 +86,7 @@ class EmailNotifier implements Notifier {
         notificationRequest.userIds.each { String userId ->
             Notification notification = new Notification(
                     requestedOn: notificationRequest.requestedOn,
-                    userId: userId,
+                    userId: userId?.toLowerCase(),
                     failedCount: 0,
                     encodedParams: serParams,
                     type: notificationRequest.type,
