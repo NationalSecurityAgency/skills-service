@@ -50,6 +50,8 @@ drop table project_definition;
 
 drop table password_reset_token;
 
+drop table notifications;
+
 drop table users;
 
 drop table user_attrs;

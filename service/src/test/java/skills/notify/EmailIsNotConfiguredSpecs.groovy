@@ -34,7 +34,7 @@ class EmailIsNotConfiguredSpecs extends DefaultIntSpec {
 
         when:
         emailNotifier.sendNotification(new Notifier.NotificationRequest(
-                userIds: [skillsService.userName],
+                userIds: [rootSkillsService.userName],
                 type: "ForTestNotificationBuilder",
                 keyValParams: [simpleParam: 'param value']
         ))
@@ -44,7 +44,7 @@ class EmailIsNotConfiguredSpecs extends DefaultIntSpec {
                 ["setting": "public_url", "value": "http://localhost:${localPort}/".toString()])
 
         emailNotifier.sendNotification(new Notifier.NotificationRequest(
-                userIds: [skillsService.userName],
+                userIds: [rootSkillsService.userName],
                 type: "ForTestNotificationBuilder",
                 keyValParams: [simpleParam: 'param value']
         ))
@@ -53,7 +53,7 @@ class EmailIsNotConfiguredSpecs extends DefaultIntSpec {
         rootSkillsService.addOrUpdateGlobalSetting("from_email",
                 ["setting": "from_email", "value": "resetspec@skilltreetests".toString()])
         emailNotifier.sendNotification(new Notifier.NotificationRequest(
-                userIds: [skillsService.userName],
+                userIds: [rootSkillsService.userName],
                 type: "ForTestNotificationBuilder",
                 keyValParams: [simpleParam: 'param value']
         ))
@@ -67,7 +67,7 @@ class EmailIsNotConfiguredSpecs extends DefaultIntSpec {
                 "tlsEnabled" : false
         ])
         emailNotifier.sendNotification(new Notifier.NotificationRequest(
-                userIds: [skillsService.userName],
+                userIds: [rootSkillsService.userName],
                 type: "ForTestNotificationBuilder",
                 keyValParams: [simpleParam: 'param value']
         ))

@@ -25,6 +25,7 @@ import skills.intTests.utils.EmailUtils
 import skills.storage.model.Notification
 import skills.storage.repos.NotificationsRepo
 import skills.storage.repos.SettingRepo
+import skills.storage.repos.UserAttrsRepo
 import skills.utils.LoggerHelper
 import skills.utils.WaitFor
 import spock.lang.IgnoreRest
@@ -42,9 +43,17 @@ class EmailNotifierSpecs extends DefaultIntSpec {
     @Autowired
     NotificationsRepo notificationsRepo
 
+    @Autowired
+    UserAttrsRepo userAttrsRepo
+
+    String email
     def setup() {
         startEmailServer()
 
+        // little trick to force PKI-based runs to create UserAttrs record
+        skillsService.isRoot()
+        email = userAttrsRepo.findByUserId(skillsService.userName).email
+        assert email
     }
 
     def "send email"() {
@@ -60,7 +69,7 @@ class EmailNotifierSpecs extends DefaultIntSpec {
         greenMail.getReceivedMessages().length == 1
         EmailUtils.EmailRes emailRes = EmailUtils.getEmail(greenMail)
         emailRes.subj == "Test Subject"
-        emailRes.recipients == [skillsService.userName]
+        emailRes.recipients == [email]
         emailRes.plainText == "As plain as day"
         EmailUtils.prepBodyForComparison(emailRes.html) == EmailUtils.prepBodyForComparison('''<!--
 
