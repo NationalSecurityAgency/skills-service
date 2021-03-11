@@ -14,44 +14,75 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <loading-container :is-loading="loading" class="container-fluid ">
-    <no-content2 v-if="!hasProjects" icon="fas fa-hand-spock" class="mt-4"
-                 title="No Projects Yet..." :message="noProjectsMessage"/>
-
-    <div v-if="!loading && hasProjects" class="mt-2">
-      <b-row>
-        <b-col>
-          <div class="card p-0 m-0">
-            <div class="card-body mt-2 mb-0 p-0">
-              <h1 class="h4 text-uppercase text-center">Progress and Rankings</h1>
-            </div>
+  <loading-container :is-loading="loading" class="container-fluid">
+    <b-row class="mt-2">
+      <b-col>
+        <div class="card p-0 m-0">
+          <div class="card-body mt-2 mb-0 p-0">
+            <h1 class="h4 text-uppercase text-center">Progress and Rankings</h1>
           </div>
-        </b-col>
-      </b-row>
-      <b-row class="my-4">
-        <b-col cols="12" md="6" xl="3" class="d-flex mb-2 pl-md-3 pr-md-1">
-          <info-snapshot-card :total-projects="projects.length" :num-projects-contributed="myProgressSummary.numProjectsContributed" class="flex-grow-1 my-summary-card" />
-        </b-col>
-        <b-col cols="12" md="6" xl="3" class="d-flex mb-2 pr-md-3 pl-md-1 pr-xl-1">
-          <num-skills :total-skills="myProgressSummary.totalSkills" :num-achieved-skills="myProgressSummary.numAchievedSkills" class="flex-grow-1 my-summary-card" />
-        </b-col>
-        <b-col cols="12" md="6" xl="3" class="d-flex mb-2 pl-md-3 pr-md-1 pl-xl-1">
-          <last-earned-card :num-achieved-skills-last-month="myProgressSummary.numAchievedSkillsLastMonth" :num-achieved-skills-last-week="myProgressSummary.numAchievedSkillsLastWeek" :most-recent-achieved-skill="myProgressSummary.mostRecentAchievedSkill" class="flex-grow-1 my-summary-card" />
-        </b-col>
-        <b-col cols="12" md="6" xl="3" class="d-flex mb-2 pr-md-3 pl-md-1">
-          <badges-num-card :total-badges="myProgressSummary.totalBadges"
-                           :num-achieved-badges="myProgressSummary.numAchievedBadges"
-                           :num-achieved-gem-badges="myProgressSummary.numAchievedGemBadges"
-                           :num-achieved-global-badges="myProgressSummary.numAchievedGlobalBadges"
-                           class="flex-grow-1 my-summary-card"/>
-        </b-col>
-      </b-row>
-      <b-row class="my-4">
-        <b-col class="my-summary-card">
-          <event-history-chart v-if="!loading" :availableProjects="projects"></event-history-chart>
-        </b-col>
-      </b-row>
-      <b-row class="my-4">
+        </div>
+      </b-col>
+    </b-row>
+
+    <div v-if="!loading">
+      <b-overlay :show="!hasProjects" rounded="sm" opacity="0.6" no-center>
+        <template #overlay>
+          <b-row align-h="center" style="margin-top: 2rem;" class="mx-1">
+            <b-col md="11" lg="8" xlg="6">
+              <b-card class="p-4 text-center">
+
+                <no-content2 title="No Projects in Production" />
+                <p class="text-primary">
+                  {{ noProjectsMessage }}
+                </p>
+
+                <div class="text-left ml-2">
+                  <div class="h5">
+                    Instructions:
+                  </div>
+                  <div>
+                    <b-badge class="mr-1">1.</b-badge> click on the <img src="/static/img/screenshot_settingsButton.png"
+                                     alt="Screenshot Prod Mode settings nav"/> button on the top right and select <img
+                    src="/static/img/screenshot_projAdminNav.png" alt="Screenshot Prod Mode settings nav"/>
+                  </div>
+                  <div class="mt-2">
+                    <b-badge class="mr-1">2.</b-badge> Create or edit a project and then navigate to the <img
+                    src="/static/img/screenshot_settingsTab.png" alt="Screenshot Prod Mode switch"/> tab
+                  </div>
+                  <div class="mt-2">
+                    <b-badge class="mr-1">3.</b-badge> Enable the <img class="border rounded"
+                    src="/static/img/screenshot_prodMode.png" alt="Screenshot Prod Mode switch"/> setting
+                  </div>
+                </div>
+              </b-card>
+            </b-col>
+          </b-row>
+        </template>
+        <b-row class="my-4">
+          <b-col cols="12" md="6" xl="3" class="d-flex mb-2 pl-md-3 pr-md-1">
+            <info-snapshot-card :total-projects="projects.length" :num-projects-contributed="myProgressSummary.numProjectsContributed" class="flex-grow-1 my-summary-card" />
+          </b-col>
+          <b-col cols="12" md="6" xl="3" class="d-flex mb-2 pr-md-3 pl-md-1 pr-xl-1">
+            <num-skills :total-skills="myProgressSummary.totalSkills" :num-achieved-skills="myProgressSummary.numAchievedSkills" class="flex-grow-1 my-summary-card" />
+          </b-col>
+          <b-col cols="12" md="6" xl="3" class="d-flex mb-2 pl-md-3 pr-md-1 pl-xl-1">
+            <last-earned-card :num-achieved-skills-last-month="myProgressSummary.numAchievedSkillsLastMonth" :num-achieved-skills-last-week="myProgressSummary.numAchievedSkillsLastWeek" :most-recent-achieved-skill="myProgressSummary.mostRecentAchievedSkill" class="flex-grow-1 my-summary-card" />
+          </b-col>
+          <b-col cols="12" md="6" xl="3" class="d-flex mb-2 pr-md-3 pl-md-1">
+            <badges-num-card :total-badges="myProgressSummary.totalBadges"
+                             :num-achieved-badges="myProgressSummary.numAchievedBadges"
+                             :num-achieved-gem-badges="myProgressSummary.numAchievedGemBadges"
+                             :num-achieved-global-badges="myProgressSummary.numAchievedGlobalBadges"
+                             class="flex-grow-1 my-summary-card"/>
+          </b-col>
+        </b-row>
+        <b-row class="my-4">
+          <b-col class="my-summary-card">
+            <event-history-chart v-if="!loading" :availableProjects="projects"></event-history-chart>
+          </b-col>
+        </b-row>
+        <b-row class="my-4">
         <b-col v-for="(proj, index) in projects" :key="proj.projectName"
                cols="12" md="6" xl="4"
               class="mb-2 px-0">
@@ -60,11 +91,13 @@ limitations under the License.
           </router-link>
         </b-col>
       </b-row>
+      </b-overlay>
     </div>
   </loading-container>
 </template>
 
 <script>
+  import NoContent2 from '@/components/utils/NoContent2';
   import ProjectLinkCard from './ProjectLinkCard';
   import InfoSnapshotCard from './InfoSnapshotCard';
   import NumSkills from './NumSkills';
@@ -73,11 +106,11 @@ limitations under the License.
   import EventHistoryChart from './EventHistoryChart';
   import MyProgressService from './MyProgressService';
   import LoadingContainer from '../utils/LoadingContainer';
-  import NoContent2 from '../utils/NoContent2';
 
   export default {
     name: 'MyProgressPage',
     components: {
+      NoContent2,
       LastEarnedCard,
       BadgesNumCard,
       NumSkills,
@@ -85,7 +118,6 @@ limitations under the License.
       ProjectLinkCard,
       EventHistoryChart,
       LoadingContainer,
-      NoContent2,
     },
     data() {
       return {
